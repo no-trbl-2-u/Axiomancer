@@ -1,13 +1,11 @@
 /**
- * Hermetic E2E — Hazard-Pattern Combat (Spec 25 + Spec 26b stance-draft redesign).
+ * Hermetic E2E — Hazard-Pattern Combat (Spec 25 + Spec 33 Upgradeable Dice).
  *
- * Covers the new turn model end to end with seeded / stubbed RNG:
- *   - per-turn 3-die draft (`TURN_DICE_COUNT`); each unpicked die → +1 Conviction
- *   - the hidden-stance read (advantage / disadvantage) scales pressure and a
- *     read-win grants bonus Conviction; first draft reveals the phase stance
- *   - cards keep colors → a color-match bonus on an offensive land
+ * Covers the turn model end to end with seeded / stubbed RNG:
+ *   - the per-turn four-die tray (one die per color, each showing a face);
+ *     a PAID play names the die that powers it, gated by the color law
  *   - direct-damage cards still contribute 0 pressure
- *   - the status-combo loop refreshes the drafted die for a chain
+ *   - a landed status lands on the enemy; the powering die is spent
  *   - between-phases fires DoT ticks + ticks durations + draws a fresh hand
  *   - Signature Skills spend Conviction (scout / DoT / pressure) regardless of hand
  *   - victory by HP depletion via status play (card-sourced cards only); post-combat attribution
@@ -28,11 +26,11 @@ import { mockSequentialRng } from '../../test-utils/rng';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveCombatPhase, resolveThreatPhase, processBetweenPhases,
-    resolveRead, getCard, buildCombatSummary,
-    draftStanceDie, getDraftedDie, isPhaseStanceRevealed,
+    resolveRead, getCard, buildCombatSummary, isPhaseStanceRevealed,
     playSignatureSkill, discardCombatCard, projectCardImpact, endTurn,
     startTurn, SCRAP_CONVICTION_CAP_PER_TURN,
 } from '../combat.engine';
+import { UPGRADEABLE_DIE_COLORS, PRESS_FATE_COST } from '../combat.upgradeable-dice';
 import { CONCLUDE_DMG_PER_STACK } from '../combat.signature';
 import { getSignaturesForLoadout, getRelicById } from '../../Items/relic.library';
 import { equipItem } from '../../Character';
@@ -42,7 +40,7 @@ import { getCardById } from '../../Cards/cards.library';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import { simulateHazardPatternCombat } from '../combat.encounter.sim';
 import { getThreatSequence, deriveIntentType } from '../combat.threat';
-import type { CombatDieColor, CombatEncounterState } from '../combat.encounter.types';
+import type { CombatDieColor, CombatEncounterState, CombatEvent, CombatTransition } from '../combat.encounter.types';
 import type { ActiveEffect, Effect } from '../../Effects/types';
 import { effectsLibrary } from '../../Effects/effects.library';
 import { lookupEffect, applyEffect } from '../../Effects';
@@ -104,23 +102,48 @@ function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'heart'): Ene
     return e;
 }
 
-/** Forces this turn's draft pool to known colors (deterministic reads). */
+/** Forces this turn's tray to known colors (deterministic). Spec 33: every
+ *  non-X die shows a MANA face; an X die is a dead miss. */
 function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
     const turn = state.turn || 1;
     const dice = colors.map((c, i) => ({
         id: `t${turn}-d${i}`, color: c,
         state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
+        face: c === 'x' ? ('miss' as const) : ('mana' as const),
     }));
     return { ...state, dice, draftedDieId: null, turn };
 }
 
-/** Drafts dice index 0 and plays `cardId`'s bottom action. */
-function draftAndPlay(state: CombatEncounterState, cardId: string, dieIndex = 0) {
-    let s = draftStanceDie(state, state.dice[dieIndex].id).state;
-    const entry = s.hand.find(h => h.cardId === cardId);
-    if (!entry) return { state: s, played: false } as const;
-    const res = playCombatCard(s, { uid: entry.uid }, true);
-    return { state: res.state, events: res.events, played: res.state !== s } as const;
+const fizzled = (events: readonly CombatEvent[]): boolean => events.some(e => e.kind === 'effect-fizzled');
+
+/** Plays `cardId`'s PAID (bottom) action powered by tray die `dieIndex`. */
+function playWithDie(state: CombatEncounterState, cardId: string, dieIndex = 0) {
+    const dieId = state.dice[dieIndex].id;
+    const entry = state.hand.find(h => h.cardId === cardId);
+    if (!entry) return { state, dieId, played: false } as const;
+    const res = playCombatCard(state, { uid: entry.uid }, true, dieId);
+    return { state: res.state, events: res.events, dieId, played: res.state !== state } as const;
+}
+
+/** Every live die (Reserve, tray, floating) that can power `cardId`'s PAID
+ *  line under spec 33: a non-miss face, color-legal for the card. */
+function poweringDice(state: CombatEncounterState, cardId: string): string[] {
+    const stance = getCard(cardId)?.stance;
+    return [...(state.reserve ?? []), ...state.dice]
+        .filter(d => d.state === 'available' && d.face !== 'miss' && d.color !== 'x'
+            && (stance === 'any' || d.color === 'wild' || d.color === stance))
+        .map(d => d.id);
+}
+
+/** One spec-33 round through the batch entry point: roll the phase's tray (if
+ *  not yet rolled), PAID-play `cardId` once per die that can power it (up to
+ *  `maxPlays`), then resolve the threat. */
+function batchRound(state: CombatEncounterState, cardId: string, maxPlays: number): CombatTransition {
+    let s = state;
+    if (s.phase === 'reveal' || s.phase === 'dice-roll') s = rollEncounterDice(s).state;
+    else if (s.phase === 'phase-play' && !s.turnTakenThisPhase) s = startTurn(s).state;
+    const plays = poweringDice(s, cardId).slice(0, maxPlays).map(dieId => ({ cardId, useBottom: true, dieId }));
+    return resolveCombatPhase(s, plays);
 }
 
 // ── RPS read (§1) — pure, no RNG ─────────────────────────────────────────────
@@ -189,54 +212,20 @@ describe('Spec 25 §6 — card classification', () => {
 
 // ── Initialization + the per-turn draft (§1) ────────────────────────────────────
 
-describe('Spec 26b §1 — initialization + draft', () => {
-    it('opens in reveal, draws 5, then rolls a 3-die turn pool (dice-law 2026-07-09)', () => {
+describe('Spec 33 §1 — initialization + the four-die tray', () => {
+    it('opens in reveal, draws 5, then rolls one die per color, each showing a face', () => {
         mockSequentialRng(0.5);
         let state = initializeCombatEncounter(makePlayer([DOT_BODY, CONTROL_CARD, DAMAGE_BODY]), makeEnemy(30), undefined, 42);
         expect(state.phase).toBe('reveal');
         expect(state.hand.length).toBe(COMBAT_HAND_SIZE);
         state = rollEncounterDice(state).state;
         expect(state.phase).toBe('phase-play');
-        expect(state.dice.length).toBe(3);
-        expect(state.draftedDieId).toBeNull();
-    });
-
-    it('drafting consumes the unpicked die for +1 Conviction and reveals the stance', () => {
-        mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(40, 'mind'), [DOT_BODY], 1);
-        state = rollEncounterDice(state).state;
-        state = setDice(state, ['body', 'heart']); // body beats mind → advantage read
-        expect(isPhaseStanceRevealed(state, 0)).toBe(false);
-        const before = state.conviction;
-        state = draftStanceDie(state, state.dice[0].id).state;
-        expect(getDraftedDie(state)?.color).toBe('body');
-        // +1 from the unpicked die, +1 read-win bonus (advantage) = +2.
-        expect(state.conviction).toBe(before + 2);
-        expect(state.lastRead).toBe('advantage');
-        expect(isPhaseStanceRevealed(state, 0)).toBe(true);
-    });
-
-    it('a neutral/disadvantage draft grants only the unpicked-die Conviction', () => {
-        mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(40, 'mind'), [DOT_BODY], 1);
-        state = rollEncounterDice(state).state;
-        // heart loses to mind → disadvantage. (Unpicked BODY, not wild: a wild
-        // left unused banks 2 tokens under the dice-law rework.)
-        state = setDice(state, ['heart', 'body']);
-        const before = state.conviction;
-        state = draftStanceDie(state, state.dice[0].id).state;
-        expect(state.conviction).toBe(before + 1);
-        expect(state.lastRead).toBe('disadvantage');
-    });
-
-    it('an unused WILD (gold) die banks 2 tokens, a dead X banks none (dice-law 2026-07-09)', () => {
-        mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(40, 'mind'), [DOT_BODY], 1);
-        state = rollEncounterDice(state).state;
-        state = setDice(state, ['heart', 'wild', 'x']); // draft heart → wild +2, x +0
-        const before = state.conviction;
-        state = draftStanceDie(state, state.dice[0].id).state;
-        expect(state.conviction).toBe(before + 2);
+        expect(state.dice.map(d => d.color)).toEqual([...UPGRADEABLE_DIE_COLORS]);
+        for (const d of state.dice) {
+            expect(['mana', 'special', 'miss']).toContain(d.face);
+            expect(d.state).toBe(d.face === 'miss' ? 'locked' : 'available');
+        }
+        expect(state.draftedDieId).toBeNull(); // no draft under spec 33
     });
 
     it('getThreatSequence gives every enemy a telegraphed attack each phase (HP model)', () => {
@@ -265,12 +254,13 @@ describe('HP model — a payoff card bursts only off afflictions and spends the 
             enemy: { ...state.enemy, effects: [{ effectId: 'debuff_poison', intensity: 2, remainingDuration: 3, appliedAt: 1, tier: 2 }] },
         };
         const hpBefore = state.enemy.health;
-        const r = draftAndPlay(state, DAMAGE_BODY);
+        const r = playWithDie(state, DAMAGE_BODY);
         expect(r.played).toBe(true);
+        expect(fizzled(r.events!)).toBe(false);
         expect(r.state.enemy.health).toBeLessThan(hpBefore);
         expect(r.state.directDamageDealt).toBeGreaterThan(0);
-        // No status landed → the drafted die is spent (no chain).
-        expect(getDraftedDie(r.state)?.state).toBe('spent');
+        // No status landed → the powering die is spent (no chain).
+        expect(r.state.dice.find(d => d.id === r.dieId)?.state).toBe('spent');
     });
 
     it('the same RUPTURE on a clean foe bursts 0 — no fuel, no damage (never a raw strike)', () => {
@@ -279,51 +269,32 @@ describe('HP model — a payoff card bursts only off afflictions and spends the 
         state = rollEncounterDice(state).state;
         state = setDice(state, ['body', 'heart']);
         const hpBefore = state.enemy.health;
-        const r = draftAndPlay(state, DAMAGE_BODY);
+        const r = playWithDie(state, DAMAGE_BODY);
         expect(r.played).toBe(true);
+        expect(fizzled(r.events!)).toBe(false); // it LANDED — the 0 is the fuel, not a fizzle
         expect(r.state.enemy.health).toBe(hpBefore);
     });
 });
 
 // ── Status combo loop (§1) ───────────────────────────────────────────────────
 
-describe('Spec 26b §1 — status-combo loop', () => {
-    it('a landed DoT lands on the enemy and refreshes the drafted die for a chain', () => {
+describe('Spec 26b §1 — status landing + the color law', () => {
+    it('a landed DoT lands on the enemy; the powering die is spent (spec 33: no auto-refresh)', () => {
         mockSequentialRng(0.05); // low rolls → enemy fails to resist → effect lands
         let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(60, 'mind'), [DOT_BODY], 3);
         state = rollEncounterDice(state).state;
-        state = setDice(state, ['body', 'heart']); // body vs mind → advantage
-        const r = draftAndPlay(state, DOT_BODY);
+        state = setDice(state, ['body', 'heart']);
+        const r = playWithDie(state, DOT_BODY);
         expect(r.played).toBe(true);
+        expect(fizzled(r.events!)).toBe(false);
         // The DoT effect landed on the enemy (it will tick HP each phase).
         expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_poison')).toBe(true);
         const landed = r.events!.some(e => e.kind === 'effect-landed' && e.target === 'enemy');
         expect(landed).toBe(true);
-        // The drafted die refreshed (still available) so the player can chain.
-        const refreshed = r.events!.some(e => e.kind === 'die-refreshed');
-        expect(refreshed).toBe(true);
-        expect(getDraftedDie(r.state)?.state).toBe('available');
-    });
-
-    it('an advantaged land beats a disadvantaged one in REAL status units (both color-legal)', () => {
-        mockSequentialRng(0.05);
-        // The color law (2026-07-09) outlaws off-color plays entirely, so both
-        // plays match the body card and the READ carries the whole difference:
-        // advantage (+1 intensity) vs disadvantage (-1 duration, floor 1).
-        const base = (enemyStance: 'heart' | 'body' | 'mind') => {
-            const s = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(120, enemyStance), [DOT_BODY], 21);
-            return rollEncounterDice(s).state;
-        };
-        const adv = draftAndPlay(setDice(base('mind'), ['body', 'heart']), DOT_BODY);  // body beats mind
-        const dis = draftAndPlay(setDice(base('heart'), ['body', 'mind']), DOT_BODY);  // heart beats body
-        const advPoison = adv.state.enemy.effects.find(e => e.effectId === 'debuff_poison')!;
-        const disPoison = dis.state.enemy.effects.find(e => e.effectId === 'debuff_poison')!;
-        expect(advPoison.intensity).toBeGreaterThan(disPoison.intensity);
-        expect(advPoison.remainingDuration).toBeGreaterThan(disPoison.remainingDuration);
-        // REPEALED 2026-09-02 (L4, "THE STRIKE IS DEAD"): this used to assert
-        // `directDamageDealt === 0` on both plays. Direct damage is a
-        // first-class verb again and spoiled-poultice prints "Deal 7" beside
-        // its POISON, so a status play moving HP is correct, not a bug.
+        // Spec 33 retired the variety-chain auto-refresh: every die powers its
+        // own play, so the powering die is simply spent.
+        expect(r.events!.some(e => e.kind === 'die-refreshed')).toBe(false);
+        expect(r.state.dice.find(d => d.id === r.dieId)?.state).toBe('spent');
     });
 
     it('an OFF-COLOR die cannot power a card at all — the play fizzles (the color law)', () => {
@@ -331,8 +302,8 @@ describe('Spec 26b §1 — status-combo loop', () => {
         let s = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(120, 'mind'), [DOT_BODY], 21);
         s = rollEncounterDice(s).state;
         s = setDice(s, ['mind', 'heart']);
-        const r = draftAndPlay(s, DOT_BODY); // mind die on a body card
-        expect(r.events!.some(e => e.kind === 'effect-fizzled')).toBe(true);
+        const r = playWithDie(s, DOT_BODY); // mind die on a body card
+        expect(r.events!.some(e => e.kind === 'effect-fizzled' && /colors must match/.test(e.message))).toBe(true);
         expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_poison')).toBe(false);
     });
 });
@@ -349,7 +320,9 @@ describe('Spec 25 §4.5 — between-phases processing', () => {
         let state = initializeCombatEncounter(makePlayer([NETTLE]), makeEnemy(80, 'mind'), [NETTLE], 5);
         state = rollEncounterDice(state).state;
         state = setDice(state, ['body', 'heart']);
-        state = draftAndPlay(state, NETTLE).state;
+        const played = playWithDie(state, NETTLE);
+        expect(fizzled(played.events!)).toBe(false);
+        state = played.state;
         const dotBefore = state.enemy.effects.find(e => e.effectId === 'debuff_nettle_sting');
         expect(dotBefore).toBeDefined();
         const hpBefore = state.enemy.health;
@@ -362,8 +335,7 @@ describe('Spec 25 §4.5 — between-phases processing', () => {
         const dotAfter = after.enemy.effects.find(e => e.effectId === 'debuff_nettle_sting');
         if (dotAfter) expect(dotAfter.remainingDuration).toBeLessThan(durBefore);
         expect(after.hand.length).toBe(COMBAT_HAND_SIZE);
-        // A new phase resets the draft so the next turn rolls fresh.
-        expect(after.draftedDieId).toBeNull();
+        // A new phase clears the tray so the next turn rolls fresh.
         expect(after.dice.length).toBe(0);
     });
 
@@ -376,7 +348,9 @@ describe('Spec 25 §4.5 — between-phases processing', () => {
         expect(state.hand.length).toBe(COMBAT_HAND_SIZE);
         state = setDice(state, ['body', 'heart']);
         // Play ONE card; the other four stay in hand across the boundary.
-        state = draftAndPlay(state, DOT_BODY).state;
+        const played = playWithDie(state, DOT_BODY);
+        expect(fizzled(played.events!)).toBe(false);
+        state = played.state;
         const heldUids = state.hand.map(h => h.uid);
         expect(heldUids.length).toBe(COMBAT_HAND_SIZE - 1);
 
@@ -559,10 +533,8 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
         let guard = 0;
         while (state.phase !== 'complete' && state.phase !== 'mercy-choice' && guard < 40) {
             guard++;
-            const res = resolveCombatPhase(state, [
-                { cardId: DOT_BODY, useBottom: true },
-                { cardId: DOT_BODY, useBottom: true },
-            ]);
+            const res = batchRound(state, DOT_BODY, 2);
+            expect(fizzled(res.events)).toBe(false);
             state = res.state;
             if (state.finalOutcome) break;
         }
@@ -585,48 +557,38 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
         expect(r.events.some(e => e.kind === 'staggered')).toBe(true);
     });
 
-    it('Press Fate re-rolls ONLY spent dice and keeps a still-usable die', () => {
-        mockSequentialRng(0.5); // re-rolled face → floor(0.5*6)=3 → wild
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(60, 'mind'), [DOT_BODY], 2);
-        state = rollEncounterDice(state).state;
-        // A usable heart die (KEEP) + a spent body die (RE-ROLL).
-        state = { ...state, conviction: 6, dice: [
-            { id: 't1-d0', color: 'heart', state: 'available', temporary: false },
-            { id: 't1-d1', color: 'body', state: 'spent', temporary: false },
-        ] };
-        const r = playSignatureSkill(state, 'sig-press-the-point'); // cost 4
-        expect(r.state.conviction).toBe(2); // ◆ spent — work happened
-        // The usable die is untouched (same color + still available).
-        expect(r.state.dice.find(d => d.id === 't1-d0')).toEqual(
-            { id: 't1-d0', color: 'heart', state: 'available', temporary: false });
-        // The spent die was re-rolled back into play (no longer spent).
-        const rerolled = r.state.dice.find(d => d.id === 't1-d1')!;
-        expect(rerolled.state).not.toBe('spent');
-    });
-
-    it('Press Fate re-rolls a dead X die', () => {
-        mockSequentialRng(0.1); // re-rolled face → floor(0.1*6)=0 → heart
-        // No seed: a seed installs its own rng stream (whose position shifted
-        // with the 3-die roll), so the mock must govern the re-rolled face.
+    it('Press Fate re-rolls ONLY miss faces and keeps live and spent dice untouched (spec 33 §4)', () => {
+        mockSequentialRng(0.1); // re-rolled face → floor(0.1*6)=0 → special
+        // No seed: a seed installs its own rng stream, so the mock must
+        // govern the re-rolled face.
         let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(60, 'mind'), [DOT_BODY]);
         state = rollEncounterDice(state).state;
+        // A usable heart die (KEEP) + a spent body die (KEEP) + a dead mind miss (RE-ROLL).
+        const live = { id: 't1-d0', color: 'heart' as const, state: 'available' as const, temporary: false, face: 'mana' as const };
+        const used = { id: 't1-d1', color: 'body' as const, state: 'spent' as const, temporary: false, face: 'mana' as const };
         state = { ...state, conviction: 6, dice: [
-            { id: 't1-d0', color: 'heart', state: 'available', temporary: false },
-            { id: 't1-d1', color: 'x', state: 'locked', temporary: false },
+            live, used,
+            { id: 't1-d2', color: 'mind', state: 'locked', temporary: false, face: 'miss' },
         ] };
         const r = playSignatureSkill(state, 'sig-press-the-point');
-        const x = r.state.dice.find(d => d.id === 't1-d1')!;
-        expect(x.color).not.toBe('x');     // the blocked face is gone
-        expect(x.state).toBe('available'); // and it's now usable
+        expect(r.state.conviction).toBe(6 - PRESS_FATE_COST); // ◆ spent — work happened
+        // Press Fate revives the dead, it never re-rolls the living (or the used).
+        expect(r.state.dice.find(d => d.id === 't1-d0')).toEqual(live);
+        expect(r.state.dice.find(d => d.id === 't1-d1')).toEqual(used);
+        // The miss face was re-rolled back into play.
+        const revived = r.state.dice.find(d => d.id === 't1-d2')!;
+        expect(revived.face).toBe('special');
+        expect(revived.state).toBe('available');
+        expect(r.events.some(e => e.kind === 'press-fate-rerolled')).toBe(true);
     });
 
-    it('Press Fate is a no-op (keeps ◆) when every die is still usable', () => {
+    it('Press Fate is a no-op (keeps ◆) when no die shows a miss face', () => {
         mockSequentialRng(0.5);
         let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(60, 'mind'), [DOT_BODY], 2);
         state = rollEncounterDice(state).state;
         state = { ...state, conviction: 6, dice: [
-            { id: 't1-d0', color: 'heart', state: 'available', temporary: false },
-            { id: 't1-d1', color: 'body', state: 'available', temporary: false },
+            { id: 't1-d0', color: 'heart', state: 'available', temporary: false, face: 'mana' },
+            { id: 't1-d1', color: 'body', state: 'spent', temporary: false, face: 'mana' },
         ] };
         const r = playSignatureSkill(state, 'sig-press-the-point');
         expect(r.state.conviction).toBe(6); // nothing to re-roll → ◆ not burned
@@ -637,52 +599,23 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
 
 // ── Tuning pass 2: anti-spam, control, read-loop (Spec 26b §2/§3) ────────────
 
-describe('Spec 26b tuning — variety-gated combo + projection + carry', () => {
-    it('the combo loop refreshes the die for a NEW status but spends it on a repeat (variety-gated)', () => {
-        mockSequentialRng(0.05); // low rolls → effects land
-        // Repetition: two copies of one DoT. First land refreshes the die; the
-        // second (same effect, already in this chain) SPENDS it — spam can't chain.
-        let spam = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(160, 'mind'), [DOT_BODY, DOT_BODY], 7);
-        spam = rollEncounterDice(spam).state;
-        spam = setDice(spam, ['body', 'heart']);
-        const first = draftAndPlay(spam, DOT_BODY);
-        expect(first.events!.some(e => e.kind === 'die-refreshed')).toBe(true);
-        const repeatEntry = first.state.hand.find(h => h.cardId === DOT_BODY)!;
-        const repeat = playCombatCard(first.state, { uid: repeatEntry.uid }, true);
-        expect(repeat.events.some(e => e.kind === 'die-spent')).toBe(true);
-        expect(repeat.events.some(e => e.kind === 'die-refreshed')).toBe(false);
-
-        // Variety: a DoT then a DISTINCT control status — the new status refreshes
-        // the die for a genuine combo chain (the Mage-Knight "big turn").
-        // WILD draft: wild powers any color (both canon carriers happen to be
-        // body now, but the wild path keeps the test carrier-agnostic).
-        let varied = initializeCombatEncounter(makePlayer([DOT_BODY, CONTROL_CARD]), makeEnemy(160, 'mind'), [DOT_BODY, CONTROL_CARD], 7);
-        varied = rollEncounterDice(varied).state;
-        varied = setDice(varied, ['wild', 'heart']);
-        const dot = draftAndPlay(varied, DOT_BODY);
-        expect(dot.events!.some(e => e.kind === 'die-refreshed')).toBe(true);
-        const ctrlEntry = dot.state.hand.find(h => h.cardId === CONTROL_CARD)!;
-        const ctrl = playCombatCard(dot.state, { uid: ctrlEntry.uid }, true);
-        expect(ctrl.events.some(e => e.kind === 'die-refreshed')).toBe(true);
-    });
-
+describe('Spec 26b tuning — projection + carry', () => {
     it('projectCardImpact advertises NO strike number (spec 32 v3 — the strike is dead)', () => {
         mockSequentialRng(0.5);
         const card = getCard(DOT_BODY)!;
         let s = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(120, 'mind'), [DOT_BODY], 1);
         s = rollEncounterDice(s).state; s = setDice(s, ['body', 'heart']);
-        const impact = projectCardImpact(draftStanceDie(s, s.dice[0].id).state, card);
+        const impact = projectCardImpact(s, card);
         expect(impact.track).toBe('dot');
         expect(impact.amount).toBe(0); // the honest numbers live on the FREE/PAID text
     });
 
-    it('an unspent drafted die BANKS to the visible Reserve at end of turn (Fate Engine R2)', () => {
+    it('an unspent tray die BANKS to the visible Reserve at end of turn (Fate Engine R2 / spec 33 §6)', () => {
         mockSequentialRng(0.5);
         let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(60, 'mind'), [DOT_BODY], 1);
         state = rollEncounterDice(state).state;
-        state = setDice(state, ['heart', 'body']);
-        state = draftStanceDie(state, state.dice[0].id).state; // draft heart, don't spend
-        expect(getDraftedDie(state)?.color).toBe('heart');
+        // One live heart die (unspent) + a dead X: only the live face can bank.
+        state = setDice(state, ['heart', 'x']);
         state = endTurn(state).state;
         // The invisible carriedDie slot-steal is retired; the die is player-owned now.
         expect(state.carriedDie).toBeNull();
@@ -725,24 +658,20 @@ describe('Spec 26b §B/§C/§D — archetype kit, rewards, unlock, difficulty fl
         expect(s2.signatures).not.toContain('sig-overwhelming-argument');
     });
 
-    it('Conclusion (body finisher) deals per-stack damage and refreshes the drafted die', () => {
+    it('Conclusion (body finisher) deals per-stack damage', () => {
         mockSequentialRng(0.5);
         let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(200, 'mind'), [DOT_BODY], 1);
         state = rollEncounterDice(state).state;
-        state = setDice(state, ['body', 'heart']);
-        state = draftStanceDie(state, state.dice[0].id).state;
         // Seed the enemy with two effects: 3 stacks of bleed + 5 stacks of poison = 8 total stacks.
         const bleedDef = lookupEffect('debuff_bleed')!;
         const poisonDef = lookupEffect('debuff_poison')!;
         const { activeEffects: withBleed } = applyEffect([], bleedDef, 1, { intensityDelta: 3, sourceId: 'test' });
         const { activeEffects: withBoth } = applyEffect(withBleed, poisonDef, 1, { intensityDelta: 5, sourceId: 'test' });
-        state = { ...state, conviction: 8, enemy: { ...state.enemy, effects: withBoth },
-            dice: state.dice.map(d => d.id === state.draftedDieId ? { ...d, state: 'spent' as const } : d) };
+        state = { ...state, conviction: 8, enemy: { ...state.enemy, effects: withBoth } };
         const hpBefore = state.enemy.health;
         const r = playSignatureSkill(state, 'sig-rallying-blow');
         // 8 total stacks × CONCLUDE_DMG_PER_STACK(2) = 16 damage
         expect(hpBefore - r.state.enemy.health).toBe(8 * CONCLUDE_DMG_PER_STACK);
-        expect(getDraftedDie(r.state)?.state).toBe('available'); // drafted die refreshed
         expect(r.events.some(e => e.kind === 'conclude-hit')).toBe(true);
     });
 
@@ -815,11 +744,9 @@ describe('Spec 25 §11 — victory by HP depletion via status play, card-sourced
         let guard = 0;
         while (state.phase !== 'complete' && state.phase !== 'mercy-choice' && guard < 40) {
             guard++;
-            // Batch entry auto-manages the per-turn draft for each play.
-            const res = resolveCombatPhase(state, [
-                { cardId: DOT_BODY, useBottom: true },
-                { cardId: DOT_BODY, useBottom: true },
-            ]);
+            // Each play names a die from the rolled tray that can power it.
+            const res = batchRound(state, DOT_BODY, 2);
+            expect(fizzled(res.events)).toBe(false);
             state = res.state;
             if (state.finalOutcome) break;
         }
@@ -841,10 +768,13 @@ describe('Spec 25 §11 — victory by HP depletion via status play, card-sourced
 // ── resolveCombatPhase batch (§9) ────────────────────────────────────────────
 
 describe('Spec 25 §9 — resolveCombatPhase batch entry point', () => {
-    it('applies a batch of plays (auto-drafting) then resolves the phase', () => {
+    it('applies a batch of plays (each naming its die) then resolves the phase', () => {
         mockSequentialRng(0.05);
-        const state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(60, 'mind'), [DOT_BODY, DOT_BODY], 13);
-        const res = resolveCombatPhase(state, [{ cardId: DOT_BODY, useBottom: true }]);
+        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(60, 'mind'), [DOT_BODY, DOT_BODY], 13);
+        state = setDice(rollEncounterDice(state).state, ['body']);
+        const res = resolveCombatPhase(state, [{ cardId: DOT_BODY, useBottom: true, dieId: state.dice[0].id }]);
+        expect(fizzled(res.events)).toBe(false);
+        expect(res.events.some(e => e.kind === 'card-played')).toBe(true);
         expect(res.state.phaseResults.length + (res.state.finalOutcome ? 1 : 0)).toBeGreaterThan(0);
     });
 });

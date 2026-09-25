@@ -30,13 +30,13 @@ import type { Character } from '../../Character/types';
 import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import {
-    dieFacesForUpgrade, MAX_DIE_UPGRADE_LEVEL, rollTurnDice, TURN_DICE_COUNT,
+    dieFacesForUpgrade, MAX_DIE_UPGRADE_LEVEL, rollTurnDice,
 } from '../combat.dice';
 import { initializeCombatEncounter, rollEncounterDice } from '../combat.engine';
 import { buildStagePlayer, COMBAT_STAGE_ORDER, COMBAT_STAGE_PROFILES } from '../combat.stage-profiles';
 import {
-    activeDieGear, DEFAULT_DIE_GEAR, honedDieGear, setUpgradeableDice,
-    UPGRADEABLE_DIE_COLORS,
+    activeDieGear, DEFAULT_DIE_GEAR, honedDieGear, isUpgradeableDiceEnabled,
+    setUpgradeableDice, UPGRADEABLE_DIE_COLORS,
 } from '../combat.upgradeable-dice';
 
 afterEach(() => vi.restoreAllMocks());
@@ -117,19 +117,6 @@ describe('DIE UPGRADES — more mana faces, fewer dead ones', () => {
     });
 });
 
-describe('ACT REWARD DICE — the tray grows with the campaign', () => {
-    it('adds one die to every turn per banked act reward', () => {
-        expect(openWith({}).dice).toHaveLength(TURN_DICE_COUNT);
-        expect(openWith({ bonusTurnDice: 1 }).dice).toHaveLength(TURN_DICE_COUNT + 1);
-        expect(openWith({ bonusTurnDice: 3 }).dice).toHaveLength(TURN_DICE_COUNT + 3);
-    });
-
-    it('never shrinks the tray on a negative or absent value', () => {
-        expect(openWith({ bonusTurnDice: -4 }).dice).toHaveLength(TURN_DICE_COUNT);
-        expect(openWith({}).bonusTurnDice).toBe(0);
-    });
-});
-
 /**
  * THE GAP THIS SUITE ORIGINALLY MISSED (2026-09-03). Everything above tests
  * the LEGACY dice model. The playtest CLI and the app both run the spec-33
@@ -145,8 +132,9 @@ describe('ACT REWARD DICE — the tray grows with the campaign', () => {
  */
 describe('THE PATH under the SHIPPED dice model (spec 33)', () => {
     const flagOn = <T>(fn: () => T): T => {
+        const prev = isUpgradeableDiceEnabled();
         setUpgradeableDice(true);
-        try { return fn(); } finally { setUpgradeableDice(false); }
+        try { return fn(); } finally { setUpgradeableDice(prev); }
     };
 
     it('HONE turns miss faces into mana faces, and saturates honestly', () => {
@@ -177,6 +165,7 @@ describe('THE PATH under the SHIPPED dice model (spec 33)', () => {
             expect(openWith({ bonusTurnDice: 1 }).dice).toHaveLength(UPGRADEABLE_DIE_COLORS.length + 1);
             expect(openWith({ bonusTurnDice: 2 }).dice).toHaveLength(UPGRADEABLE_DIE_COLORS.length + 2);
             expect(openWith({ bonusTurnDice: -3 }).dice).toHaveLength(UPGRADEABLE_DIE_COLORS.length);
+            expect(openWith({}).bonusTurnDice).toBe(0);
         });
     });
 
@@ -287,7 +276,7 @@ describe('the stage profiles carry the campaign, not just the level', () => {
                 initializeCombatEncounter(player, deepClone(GraveLarva), player.knownCards.slice(0, 12), 7),
                 rng,
             ).state;
-            expect(opened.dice, `${id} tray size`).toHaveLength(TURN_DICE_COUNT + stage.bonusBaseDice);
+            expect(opened.dice, `${id} tray size`).toHaveLength(UPGRADEABLE_DIE_COLORS.length + stage.bonusBaseDice);
         }
     });
 });

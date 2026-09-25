@@ -21,7 +21,7 @@ import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { mockSequentialRng } from '../../test-utils/rng';
 import {
-    initializeCombatEncounter, rollEncounterDice, draftStanceDie, playCombatCard,
+    initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveThreatPhase,
 } from '../combat.engine';
 import type {
@@ -52,27 +52,26 @@ function makeEnemy(hp: number): Enemy {
     return e;
 }
 
-/** Forces this turn's draft pool to known colors (deterministic reads). */
+/** Forces this turn's tray to known colors, every die on its mana face. */
 function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
     const turn = state.turn || 1;
     const dice = colors.map((c, i) => ({
-        id: `t${turn}-d${i}`, color: c,
-        state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
+        id: `t${turn}-d${i}`, color: c, state: 'available' as const, temporary: false, face: 'mana' as const,
     }));
-    return { ...state, dice, draftedDieId: null, turn };
+    return { ...state, dice, turn };
 }
 
-function openAndDraft(deck: string[], dieColor: CombatDieColor, seed = 7): CombatEncounterState {
+/** Opens phase-play with a single mana die of `dieColor` in the tray — the
+ *  die `play` names to power the PAID line (spec 33: no implicit default). */
+function openWithDie(deck: string[], dieColor: CombatDieColor, seed = 7): CombatEncounterState {
     let state = initializeCombatEncounter(makePlayer(deck), makeEnemy(400), deck, seed);
     state = rollEncounterDice(state).state;
-    state = setDice(state, [dieColor, 'x']);
-    state = draftStanceDie(state, state.dice[0].id).state;
-    return state;
+    return setDice(state, [dieColor]);
 }
 
 function play(state: CombatEncounterState, cardId: string): CombatTransition {
     const uid = state.hand.find(h => h.cardId === cardId)!.uid;
-    return playCombatCard(state, { uid }, true);
+    return playCombatCard(state, { uid }, true, state.dice[0].id);
 }
 
 const countIn = (ids: readonly string[], id: string): number =>
@@ -82,7 +81,7 @@ describe('IMMOLATE — the pyre must be fed', () => {
     it('burns the lowest-rank other cards from hand and the deck cycle, then fires the rider', () => {
         mockSequentialRng(0.05);
         const deck = [DISTRAINT, POULTICE, POULTICE, POULTICE, POULTICE];
-        const state = openAndDraft(deck, 'body');
+        const state = openWithDie(deck, 'body');
         const handPoultices = countIn(state.hand.map(h => h.cardId), POULTICE);
         expect(handPoultices).toBeGreaterThanOrEqual(IMMOLATE_COUNT);
         const deckPoultices = countIn(state.deck, POULTICE);
@@ -131,7 +130,7 @@ describe('IMMOLATE — the pyre must be fed', () => {
     it('IMMOLATE\'s rider deals its printed damage on the PAID line too', () => {
         mockSequentialRng(0.05);
         const deck = [DISTRAINT, POULTICE, POULTICE, POULTICE, POULTICE];
-        const state = openAndDraft(deck, 'body');
+        const state = openWithDie(deck, 'body');
         const hpBefore = state.enemy.health;
         const res = play(state, DISTRAINT);
         expect(res.events.some(e => e.kind === 'immolated')).toBe(true);
@@ -141,7 +140,7 @@ describe('IMMOLATE — the pyre must be fed', () => {
     it('fizzles the rider when nothing else is in hand to burn', () => {
         mockSequentialRng(0.05);
         const deck = [DISTRAINT];
-        let state = openAndDraft(deck, 'body');
+        let state = openWithDie(deck, 'body');
         // The engine pads a short deck with copies — strip the hand down to
         // the single played card so the pyre genuinely has no fuel.
         state = { ...state, hand: [state.hand.find(h => h.cardId === DISTRAINT)!] };
@@ -160,7 +159,7 @@ describe('PURGE — the curse buys itself out', () => {
     it('playing a curse exiles it from hand, discard, and the deck cycle', () => {
         mockSequentialRng(0.05);
         const deck = [CURSE, POULTICE, POULTICE, POULTICE, POULTICE];
-        const state = openAndDraft(deck, 'body');
+        const state = openWithDie(deck, 'body');
         const res = play(state, CURSE);
         expect(res.events.some(e => e.kind === 'purged')).toBe(true);
         expect(res.state.hand.map(h => h.cardId)).not.toContain(CURSE);
@@ -175,12 +174,12 @@ describe('REQUIEM — the dead remember', () => {
         const deck = [DIRGE, POULTICE, POULTICE, POULTICE, POULTICE];
 
         // Below the gate: no requiem rider.
-        const cold = play(openAndDraft(deck, 'mind'), DIRGE);
+        const cold = play(openWithDie(deck, 'mind'), DIRGE);
         expect(cold.events.some(e => e.kind === 'die-bonus-fired'
             && (e as { riderText?: string }).riderText?.includes('REQUIEM'))).toBe(false);
 
         // At the gate (REQUIEM_GATE in the discard): the rider fires free.
-        let state = openAndDraft(deck, 'mind');
+        let state = openWithDie(deck, 'mind');
         state = { ...state, discard: Array.from({ length: REQUIEM_GATE }, () => POULTICE) };
         const warm = play(state, DIRGE);
         expect(warm.events.some(e => e.kind === 'die-bonus-fired'
@@ -192,7 +191,7 @@ describe('CURSE INJECTION — the enemy hexes your deck', () => {
     it('a landed threat shuffles the curse into deck and draw pile (combat-scoped)', () => {
         mockSequentialRng(0.05);
         const deck = [POULTICE, POULTICE, POULTICE, POULTICE, POULTICE, POULTICE, POULTICE];
-        let state = openAndDraft(deck, 'body');
+        let state = openWithDie(deck, 'body');
         const phase: CombatThreatPhase = {
             ...state.threatPhases[state.currentPhaseIndex],
             threatAction: {

@@ -1,12 +1,8 @@
 /**
  * Hermetic E2E — combat depth epic (combat-depth-epic branch).
  *
- * Two new on-vision levers:
- *   H2 — the stance READ bites a landed STATUS in REAL units (P0-truth): a won
- *        read lands the card's statuses at +1 intensity, a lost read shortens
- *        them by 1 turn (floor 1), a neutral/none read leaves the printed
- *        numbers byte-identical. Deterministic and previewable — the old
- *        ×1.34/×0.75 post-hoc intensity rewrite was a no-op below intensity 3.
+ * H2 (the hidden-stance read biting a landed status) retired with the stance
+ * draft under spec 33 — every paid play lands printed. The live lever:
  *   H3 — THE CLOCK: the enemy's telegraphed hit escalates each round past the
  *        grace window (capped), so a drawn-out fight turns lethal.
  */
@@ -19,13 +15,12 @@ import type { Enemy } from '../../Enemy/types';
 import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import {
-    initializeCombatEncounter, rollEncounterDice, playCombatCard,
-    resolveThreatPhase, draftStanceDie,
-    READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY,
+    initializeCombatEncounter, rollEncounterDice,
+    resolveThreatPhase,
     THREAT_ESCALATION_PER_ROUND, THREAT_ESCALATION_GRACE, THREAT_ESCALATION_MAX,
     THREAT_ESCALATION_BOSS_MULT, THREAT_EFFECT_ESCALATION_STEP,
 } from '../combat.engine';
-import type { CombatDieColor, CombatEncounterState } from '../combat.encounter.types';
+import type { CombatEncounterState } from '../combat.encounter.types';
 
 const DOT_BODY = 'spoiled-poultice'; // body stance, applies a poison DoT
 
@@ -43,50 +38,6 @@ function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind'): Enemy {
     e.baseStats = { heart: stance === 'heart' ? 6 : 2, body: stance === 'body' ? 6 : 2, mind: stance === 'mind' ? 6 : 2 };
     return e;
 }
-function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
-    const turn = state.turn || 1;
-    const dice = colors.map((c, i) => ({
-        id: `t${turn}-d${i}`, color: c,
-        state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
-    }));
-    return { ...state, dice, draftedDieId: null, turn };
-}
-/** Play a DoT card with a body die vs the given enemy stance (body-vs-mind =
- *  advantage, body-vs-body = neutral, body-vs-heart = disadvantage) and return
- *  the landed bleed. */
-function playDotReadAgainst(stance: 'mind' | 'body' | 'heart'): { intensity: number; duration: number } {
-    let s = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(300, stance), [DOT_BODY], 1);
-    s = rollEncounterDice(s).state;
-    s = setDice(s, ['body']);
-    s = draftStanceDie(s, s.dice[0].id).state;
-    const entry = s.hand.find(h => h.cardId === DOT_BODY);
-    if (!entry) throw new Error('DOT card not in hand');
-    const after = playCombatCard(s, { uid: entry.uid }, true).state;
-    const bleed = after.enemy.effects.find(e => /bleed|poison/.test(e.effectId));
-    return { intensity: bleed?.intensity ?? 0, duration: bleed?.remainingDuration ?? 0 };
-}
-
-describe('combat depth epic — H2: the read bites STATUS in real units (P0-truth)', () => {
-    it('the read deltas are real, displayable units', () => {
-        expect(READ_ADVANTAGE_INTENSITY_BONUS).toBe(1);
-        expect(READ_DISADVANTAGE_DURATION_PENALTY).toBe(1);
-    });
-
-    it('winning the read lands the status at +1 intensity over a neutral read', () => {
-        const adv = playDotReadAgainst('mind');     // body beats mind → advantage
-        const neutral = playDotReadAgainst('body'); // body vs body → neutral
-        expect(neutral.intensity).toBeGreaterThan(0);
-        expect(adv.intensity).toBe(neutral.intensity + READ_ADVANTAGE_INTENSITY_BONUS);
-        expect(adv.duration).toBe(neutral.duration); // advantage never shortens
-    });
-
-    it('losing the read shortens the status by 1 turn (floor 1) at printed intensity', () => {
-        const dis = playDotReadAgainst('heart');    // heart beats body → disadvantage
-        const neutral = playDotReadAgainst('body');
-        expect(dis.intensity).toBe(neutral.intensity); // printed intensity still lands
-        expect(dis.duration).toBe(Math.max(1, neutral.duration - READ_DISADVANTAGE_DURATION_PENALTY));
-    });
-});
 
 describe('combat depth epic — H3: the escalation clock', () => {
     function threatDamageAtRound(round: number): number {

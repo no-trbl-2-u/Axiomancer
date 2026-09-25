@@ -76,7 +76,8 @@ function stateFor(cardId: string, overrides: Partial<CombatEncounterState> = {})
 
 function playPaid(state: CombatEncounterState): { events: CombatEvent[]; after: CombatEncounterState } {
     mockSequentialRng(0.5); // neutral d20, no fumble/crit
-    const { state: after, events } = playCombatCard(state, { uid: 'under-test' }, true);
+    // Spec 33: a PAID play must name its powering die — the fixture's wild die.
+    const { state: after, events } = playCombatCard(state, { uid: 'under-test' }, true, 'fx-die');
     return { events, after };
 }
 

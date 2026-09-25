@@ -75,7 +75,8 @@ function stateFor(cardId: string, sway: number, overrides: Partial<CombatEncount
 
 function playPaid(state: CombatEncounterState): { events: CombatEvent[]; after: CombatEncounterState } {
     mockSequentialRng(0.5); // neutral d20, no fumble/crit
-    const { state: after, events } = playCombatCard(state, { uid: 'under-test' }, true);
+    // Spec 33: a PAID play must name its powering die — the fixture's wild die.
+    const { state: after, events } = playCombatCard(state, { uid: 'under-test' }, true, 'fx-die');
     return { events, after };
 }
 
@@ -205,9 +206,13 @@ describe('A shrinking live resolve never re-fires or claws back an already-cross
             ...firstResult.after,
             enemy: shrunkEnemy,
             hand: [{ uid: 'under-test-2', cardId: 'thin-hymn' }],
+            // The first play spent the wild die — ready it again so the
+            // second play actually lands (spec 33: PAID names its die).
+            dice: firstResult.after.dice.map(d => ({ ...d, state: 'available' as const })),
         };
         mockSequentialRng(0.5);
-        const { events, state: after } = playCombatCard(second, { uid: 'under-test-2' }, true);
+        const { events, state: after } = playCombatCard(second, { uid: 'under-test-2' }, true, 'fx-die');
+        expect(events.some(e => e.kind === 'effect-fizzled'), 'unexpected fizzle').toBe(false);
 
         const milestones = findEvents(events, 'sway-milestone');
         expect(milestones.filter(m => m.milestone === 'wavering')).toHaveLength(0); // no re-fire

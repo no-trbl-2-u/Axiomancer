@@ -3,13 +3,16 @@
  *
  * Pins every new dice mechanic to exact engine behavior, in real units:
  *   R1 TOLL — every spent die tallies its color; card THRESHOLDS fire free riders
- *   R2 RESERVE — bank-or-burn at draft; banked dice RIPEN +1 pip per threat phase;
- *      pips cash as +1 intensity per pip (status) or +2 Guard per pip (defend)
- *   R4 FATE — an X die powers a `fate` card (printed rider + recoil) and the
- *      universal once-per-turn X TAP advances the strongest enemy DoT
- *   R5 OMEN — the undrafted die that beats the current stance scouts the NEXT phase
+ *   R2 RESERVE — one unspent tray die banks at end of round; banked dice RIPEN
+ *      +1 pip per threat phase; pips cash as +1 intensity per pip (status) or
+ *      +2 Guard per pip (defend)
  *   R7 COLOR MATCH — a matched die extends the landed status +1 turn
  *   R8 dieId HONORED — a Reserve die id powers the play; a bogus id fizzles
+ *
+ * D7 (the OFF dice path deleted): every play names its powering die under the
+ * shipped spec-33 model. R2's bank-or-burn AT DRAFT, R4 (X dice + the FATE
+ * TAP — the rolled tray has no X dice) and R5 (the undrafted omen die) were
+ * draft-model mechanics and left with it.
  *
  * spec 32 v3 re-pin: REACT is deleted (REAP/RUPTURE absorb the payoff role);
  * riders carry no chipHp (the strike is dead); fixtures carry rank/cardType.
@@ -25,12 +28,11 @@ import { deepClone } from '../../Utils';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
-    draftStanceDie, endTurn, tapFateDie, getCard,
+    endTurn, getCard,
     PIP_INTENSITY_BONUS, PIP_GUARD_BONUS, COLOR_MATCH_STATUS_DURATION_BONUS,
 } from '../combat.engine';
 import { RESERVE_MAX, RESERVE_PIP_CAP } from '../combat.dice';
 import type { ActiveEffect } from '../../Effects/types';
-import { lookupEffect } from '../../Effects';
 import type { CombatDieColor, CombatEncounterState } from '../combat.encounter.types';
 
 afterEach(() => vi.restoreAllMocks());
@@ -44,13 +46,6 @@ registerSandboxCards([
         targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 }],
         threshold: { color: 'body', count: 1, rider: { conviction: 2, guard: 4 } },
-    },
-    {
-        id: 'qa-fate-card', name: 'QA Fate Card',
-        philosophicalAspect: 'mind', description: 'fate fixture', tier: 1,
-        targetType: 'enemy', rank: 1, cardType: 'spell',
-        combatEffects: [{ effectId: 'debuff_curse', appliedTo: 'opponent', duration: 2 }],
-        fate: { rider: { bonusDuration: 2 }, recoilHp: 3 },
     },
     {
         id: 'qa-guard-card', name: 'QA Guard Card',
@@ -76,17 +71,15 @@ function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind', effects: Activ
     return e;
 }
 
-function ae(effectId: string, intensity = 1, duration = 3): ActiveEffect {
-    return { effectId, intensity, remainingDuration: duration, appliedAt: 1, tier: lookupEffect(effectId)!.tier };
-}
-
+/** Pins this turn's tray to known-color MANA faces (each may power a paid
+ *  line of its color). */
 function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
     const turn = state.turn || 1;
     const dice = colors.map((c, i) => ({
-        id: `t${turn}-d${i}`, color: c,
-        state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
+        id: `t${turn}-d${i}`, color: c, face: 'mana' as const,
+        state: 'available' as const, temporary: false,
     }));
-    return { ...state, dice, draftedDieId: null, turn };
+    return { ...state, dice, turn };
 }
 
 function open(cards: string[], enemyStance: 'heart' | 'body' | 'mind' = 'body', enemyEffects: ActiveEffect[] = []): CombatEncounterState {
@@ -99,12 +92,10 @@ describe('R1 TOLL + thresholds', () => {
     it('spent dice tally their color and a met threshold fires its rider FREE, in real units', () => {
         let s = open(['qa-threshold-dot'], 'body');
         s = setDice(s, ['body', 'heart']);
-        s = draftStanceDie(s, s.dice[0].id).state; // burns the heart die → heart resonance
-        expect(s.resonance?.heart).toBe(1);
         const convBefore = s.conviction;
         const guardBefore = s.guard ?? 0;
         const entry = s.hand.find(h => h.cardId === 'qa-threshold-dot')!;
-        const res = playCombatCard(s, { uid: entry.uid }, true);
+        const res = playCombatCard(s, { uid: entry.uid }, true, s.dice[0].id);
         // The powering body die tallies body 1 ≥ count 1 → rider fires:
         // +2 Conviction, +4 Guard (real units — no chip exists in v3).
         expect(res.state.resonance?.body).toBe(1);
@@ -117,17 +108,6 @@ describe('R1 TOLL + thresholds', () => {
 });
 
 describe('R2 RESERVE — bank, ripen, cash', () => {
-    it('bankUnpicked banks the omen die instead of burning it for Conviction', () => {
-        let s = open(['qa-threshold-dot'], 'body');
-        s = setDice(s, ['body', 'heart']);
-        const conv = s.conviction;
-        s = draftStanceDie(s, s.dice[0].id, { bankUnpicked: true }).state;
-        expect(s.reserve?.length).toBe(1);
-        expect(s.reserve?.[0].color).toBe('heart');
-        // banked → NO +1 Conviction (bank-or-burn is a real choice)
-        expect(s.conviction).toBe(conv);
-    });
-
     it('a Reserve die ripens +1 pip per threat phase, capped at RESERVE_PIP_CAP', () => {
         let s = open(['qa-threshold-dot'], 'body');
         s = { ...s, reserve: [{ id: 'bank-1', color: 'body', state: 'available', temporary: false, pips: 0 }] };
@@ -139,28 +119,25 @@ describe('R2 RESERVE — bank, ripen, cash', () => {
     });
 
     it('pips cash as +PIP_INTENSITY_BONUS intensity per pip on a status play (R8: the dieId is honored)', () => {
-        let s = open(['qa-threshold-dot'], 'heart'); // heart stance: body die = disadvantage? body vs heart → heart beats body = disadvantage; draft heart neutral
+        let s = open(['qa-threshold-dot'], 'heart');
         s = setDice(s, ['heart', 'mind']);
-        s = draftStanceDie(s, s.dice[0].id).state;   // neutral read (heart vs heart)
         // BODY reserve die — the color law (2026-07-09) demands the powering die
-        // match the body card; the turn read stays neutral (heart draft vs heart).
+        // match the body card; every spec-33 play lands at read 'none'.
         s = { ...s, reserve: [{ id: 'bank-2', color: 'body', state: 'available', temporary: false, pips: 2 }] };
         const entry = s.hand.find(h => h.cardId === 'qa-threshold-dot')!;
         const res = playCombatCard(s, { uid: entry.uid }, true, 'bank-2');
         const bleed = res.state.enemy.effects.find(e => e.effectId === 'debuff_bleed')!;
-        // authored i1 + 2 pips × PIP_INTENSITY_BONUS (neutral turn read: no read bonus)
+        // authored i1 + 2 pips × PIP_INTENSITY_BONUS (no read bonus)
         expect(bleed.intensity).toBe(1 + 2 * PIP_INTENSITY_BONUS);
         expect(res.events.some(e => e.kind === 'pips-cashed')).toBe(true);
-        // the fresh bleed fired the VARIETY CHAIN (R9) → the reserve die stays
-        // banked, its pips cashed back to 0.
-        expect(res.state.reserve?.length ?? 0).toBe(1);
-        expect(res.state.reserve?.[0].pips).toBe(0);
+        // Spec 33 retired the VARIETY-CHAIN auto-refresh (R9), so the powering
+        // Reserve die is spent and leaves the Reserve with its cashed pips.
+        expect(res.state.reserve ?? []).toEqual([]);
     });
 
     it('pips cash as +PIP_GUARD_BONUS Guard per pip on a defend play', () => {
         let s = open(['qa-guard-card'], 'body');
         s = setDice(s, ['body', 'mind']);
-        s = draftStanceDie(s, s.dice[0].id).state;
         s = { ...s, reserve: [{ id: 'bank-3', color: 'heart', state: 'available', temporary: false, pips: 2 }] };
         const entry = s.hand.find(h => h.cardId === 'qa-guard-card')!;
         const res = playCombatCard(s, { uid: entry.uid }, true, 'bank-3');
@@ -168,80 +145,22 @@ describe('R2 RESERVE — bank, ripen, cash', () => {
         expect(res.state.guard).toBe(10 + 3 + 2 * PIP_GUARD_BONUS);
     });
 
-    it('an unspent drafted die banks at endTurn while the Reserve has room, else burns', () => {
+    it('ONE unspent tray die banks at endTurn while the Reserve has room, else it simply expires', () => {
         let s = open(['qa-threshold-dot'], 'body');
+        s = setDice(s, ['heart', 'mind']);
+        const banked = endTurn(s).state;
+        expect(banked.reserve!.map(d => d.id)).toEqual([s.dice[0].id]); // one die, not both
+        expect(banked.reserve![0].pips).toBe(0);
+
         s = { ...s, reserve: [
             { id: 'r1', color: 'body', state: 'available', temporary: false, pips: 0 },
             { id: 'r2', color: 'mind', state: 'available', temporary: false, pips: 0 },
         ] };
         expect(s.reserve!.length).toBe(RESERVE_MAX);
-        s = setDice(s, ['heart', 'mind']);
-        s = draftStanceDie(s, s.dice[0].id).state;
         const conv = s.conviction;
         s = endTurn(s).state;
-        expect(s.reserve!.length).toBe(RESERVE_MAX);         // full → burned instead
-        expect(s.conviction).toBe(Math.min(12, conv + 1));
-    });
-});
-
-describe('R4 FATE — X dice are never dead', () => {
-    it('an X die powers a `fate` card: printed rider + recoil, read = none', () => {
-        let s = open(['qa-fate-card'], 'mind');
-        s = setDice(s, ['mind', 'x']);
-        s = draftStanceDie(s, s.dice[0].id).state;
-        const xDie = s.dice.find(d => d.color === 'x')!;
-        const entry = s.hand.find(h => h.cardId === 'qa-fate-card')!;
-        const playerHp = s.player.health;
-        const res = playCombatCard(s, { uid: entry.uid }, true, xDie.id);
-        expect(res.events.some(e => e.kind === 'fate-powered')).toBe(true);
-        const confusion = res.state.enemy.effects.find(e => e.effectId === 'debuff_curse')!;
-        // authored d2 + rider bonusDuration 2 (no read/match adjustments on a none-read X play)
-        expect(confusion.remainingDuration).toBe(2 + 2);
-        expect(playerHp - res.state.player.health).toBe(3);  // printed recoil, exact
-    });
-
-    it('a non-fate card refuses an X die with an explicit fizzle', () => {
-        let s = open(['qa-threshold-dot'], 'body');
-        s = setDice(s, ['body', 'x']);
-        s = draftStanceDie(s, s.dice[0].id).state;
-        const xDie = s.dice.find(d => d.color === 'x')!;
-        const entry = s.hand.find(h => h.cardId === 'qa-threshold-dot')!;
-        const res = playCombatCard(s, { uid: entry.uid }, true, xDie.id);
-        expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
-        expect(res.state.enemy.effects.length).toBe(0);
-    });
-
-    it('the universal FATE TAP advances the strongest enemy DoT once per turn', () => {
-        let s = open(['qa-threshold-dot'], 'body', [ae('debuff_bleed', 2, 3)]);
-        s = setDice(s, ['body', 'x']);
-        s = draftStanceDie(s, s.dice[0].id).state;
-        const xDie = s.dice.find(d => d.color === 'x')!;
-        const hp = s.enemy.health;
-        const tap = tapFateDie(s, xDie.id, 'dot-tick');
-        expect(hp - tap.state.enemy.health).toBe(6); // floor(3 × 2) — one exact v3 bleed tick
-        expect(tap.state.fateTappedTurn).toBe(tap.state.turn);
-        // second tap the same turn is a no-op
-        const again = tapFateDie(tap.state, xDie.id, 'conviction');
-        expect(again.state).toBe(tap.state);
-    });
-});
-
-describe('R5 OMEN — the undrafted die scouts forward', () => {
-    it('an omen die that beats the current stance reveals the NEXT phase stance', () => {
-        let s = open(['qa-threshold-dot'], 'mind'); // body beats mind
-        // Ensure a next phase exists to scout.
-        expect(s.threatPhases.length).toBeGreaterThan(1);
-        s = setDice(s, ['heart', 'body']);          // drafting heart leaves BODY as the omen (body beats mind)
-        const res = draftStanceDie(s, s.dice[0].id);
-        expect(res.events.some(e => e.kind === 'omen-revealed')).toBe(true);
-        expect(res.state.revealedStances).toContain(1); // next phase index scouted
-    });
-
-    it('a losing omen die reveals nothing', () => {
-        let s = open(['qa-threshold-dot'], 'body'); // heart loses to nothing here: mind loses to body? body beats mind — omen mind vs body: body beats mind → mind does NOT beat body
-        s = setDice(s, ['body', 'mind']);           // omen = mind, which loses to body
-        const res = draftStanceDie(s, s.dice[0].id);
-        expect(res.events.some(e => e.kind === 'omen-revealed')).toBe(false);
+        expect(s.reserve!.map(d => d.id)).toEqual(['r1', 'r2']); // full → nothing banks
+        expect(s.conviction).toBe(conv);                          // and leftovers earn no ◆
     });
 });
 
@@ -249,9 +168,8 @@ describe('R7 COLOR MATCH — +1 turn on status plays', () => {
     it('a matched die extends the landed status by COLOR_MATCH_STATUS_DURATION_BONUS', () => {
         let s = open(['qa-threshold-dot'], 'body'); // body card, body die, body stance (neutral read)
         s = setDice(s, ['body', 'heart']);
-        s = draftStanceDie(s, s.dice[0].id).state;
         const entry = s.hand.find(h => h.cardId === 'qa-threshold-dot')!;
-        const res = playCombatCard(s, { uid: entry.uid }, true);
+        const res = playCombatCard(s, { uid: entry.uid }, true, s.dice[0].id);
         const bleed = res.state.enemy.effects.find(e => e.effectId === 'debuff_bleed')!;
         expect(bleed.remainingDuration).toBe(2 + COLOR_MATCH_STATUS_DURATION_BONUS);
     });
@@ -261,7 +179,6 @@ describe('R8 — a bogus dieId is an explicit fizzle', () => {
     it('fizzles without touching state', () => {
         let s = open(['qa-threshold-dot'], 'body');
         s = setDice(s, ['body', 'heart']);
-        s = draftStanceDie(s, s.dice[0].id).state;
         const entry = s.hand.find(h => h.cardId === 'qa-threshold-dot')!;
         const res = playCombatCard(s, { uid: entry.uid }, true, 'no-such-die');
         expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(true);

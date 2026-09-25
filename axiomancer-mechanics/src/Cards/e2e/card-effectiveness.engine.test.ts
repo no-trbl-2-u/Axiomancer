@@ -158,7 +158,7 @@ function playPaid(cardId: string): PlayResult {
         ...(patch ? patch(staged) : staged),
         hand: [{ uid: 'under-test', cardId }, ...fodder],
     };
-    const { state: after, events } = playCombatCard(before, { uid: 'under-test' }, true);
+    const { state: after, events } = playCombatCard(before, { uid: 'under-test' }, true, 'fx-die');
     return { events, before, after };
 }
 

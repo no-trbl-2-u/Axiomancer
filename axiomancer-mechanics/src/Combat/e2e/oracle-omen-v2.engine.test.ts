@@ -55,8 +55,7 @@ import { deepClone } from '../../Utils';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import { mockSequentialRng } from '../../test-utils/rng';
 import {
-    initializeCombatEncounter, rollEncounterDice, playCombatCard, draftStanceDie,
-    resolveThreatPhase,
+    initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
 } from '../combat.engine';
 import { runOneEncounter } from '../combat.encounter.sim';
 import { COMBAT_SIM_POLICY_ORDER } from '../combat.sim-policies';
@@ -91,15 +90,16 @@ function makeEnemy(hp: number, stance: Stance = 'mind'): Enemy {
     return e;
 }
 
-/** Forces this turn's draft pool to known colors (deterministic reads). */
+/** Forces this turn's tray to known-color MANA faces (spec 33 — every die
+ *  can power a paid line of its color; no draft). */
 function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
     const turn = state.turn || 1;
     const dice = colors.map((c, i) => ({
-        id: `t${turn}-d${i}`, color: c,
-        state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
+        id: `t${turn}-d${i}`, color: c, face: 'mana' as const,
+        state: 'available' as const, temporary: false,
     }));
     const floating = state.dice.filter(d => d.floating);
-    return { ...state, dice: [...dice, ...floating], draftedDieId: null, turn };
+    return { ...state, dice: [...dice, ...floating], turn };
 }
 
 /** One-shot custom threat phases (controlled stances). */
@@ -119,14 +119,14 @@ function withPhases(state: CombatEncounterState, stances: Stance[]): CombatEncou
     };
 }
 
-/** Builds a fresh combat with `cardId` in hand, powered by a die of `dieColor`. */
+/** Builds a fresh combat with `cardId` in hand; its tray's first die (of
+ *  `dieColor`) powers the paid play. */
 function build(cardId: string, dieColor: CombatDieColor, conviction = 0): CombatEncounterState {
     let state = initializeCombatEncounter(
         makePlayer([cardId]), makeEnemy(300, 'mind'),
         [cardId, cardId, cardId, cardId, cardId], 7);
     state = rollEncounterDice(state).state;
-    state = setDice(state, [dieColor, 'x']);
-    state = draftStanceDie(state, state.dice[0].id).state;
+    state = setDice(state, [dieColor]);
     return { ...state, conviction };
 }
 
@@ -135,7 +135,7 @@ type OmenClaim = { chosenX?: number; reprisalCardId?: string; omenClaim?: { stan
 function playFromHand(state: CombatEncounterState, cardId: string, play?: OmenClaim) {
     const entry = state.hand.find(h => h.cardId === cardId);
     expect(entry, `${cardId} should be in hand`).toBeDefined();
-    return playCombatCard(state, { uid: entry!.uid }, true, undefined, undefined, play);
+    return playCombatCard(state, { uid: entry!.uid }, true, state.dice[0].id, undefined, play);
 }
 
 const SOP = 'qa-signs-and-portents'; // OMEN fixture: window ≤2, ante 2, rider draw 2 (heart)

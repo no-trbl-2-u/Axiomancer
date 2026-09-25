@@ -59,15 +59,17 @@ describe('Phase 104 — the grey office: card shape', () => {
     });
 });
 
+/** The tray die every PAID play names as its powering die (spec 33 — no implicit default). */
+const GREY_DIE = 'fx-grey-die';
+
 /** A CLEAN fixture with `cardId` staged in hand, powered by a single die of `color`. */
 function stateWithDie(cardId: string, color: CombatDieColor): CombatEncounterState {
     const s = buildFixtureState({ clean: true });
-    const die: CombatManaDie = { id: 'fx-grey-die', color, state: 'available', temporary: false };
+    const die: CombatManaDie = { id: GREY_DIE, color, state: 'available', temporary: false, face: 'mana' };
     return {
         ...s,
         hand: [{ uid: 'under-test', cardId }],
         dice: [die],
-        draftedDieId: die.id,
     };
 }
 
@@ -78,7 +80,7 @@ describe('Phase 104 — the grey office: THE COLOUR LAW exception', () => {
         for (const color of COLORS) {
             it(`a ${color} die powers ${id} (never a fizzle)`, () => {
                 mockSequentialRng(0.5);
-                const { events } = playCombatCard(stateWithDie(id, color), { uid: 'under-test' }, true);
+                const { events } = playCombatCard(stateWithDie(id, color), { uid: 'under-test' }, true, GREY_DIE);
                 expect(events.some(e => e.kind === 'effect-fizzled'), JSON.stringify(events)).toBe(false);
                 expect(events.some(e => e.kind === 'card-played')).toBe(true);
             });
@@ -87,7 +89,7 @@ describe('Phase 104 — the grey office: THE COLOUR LAW exception', () => {
 
     it('colour-match is neutral — a wild-powered play banks no on-colour bonus', () => {
         mockSequentialRng(0.5);
-        const { events } = playCombatCard(stateWithDie('grey-strike', 'wild'), { uid: 'under-test' }, true);
+        const { events } = playCombatCard(stateWithDie('grey-strike', 'wild'), { uid: 'under-test' }, true, GREY_DIE);
         const played = events.find(e => e.kind === 'card-played');
         expect(played && 'colorMatch' in played ? played.colorMatch : undefined).toBe(false);
     });
@@ -101,7 +103,7 @@ describe('Phase 104 — the grey office: FREE/PAID ledgers read exactly as print
         expect(freeHit && 'amount' in freeHit ? freeHit.amount : undefined).toBe(2);
 
         mockSequentialRng(0.5);
-        const paid = playCombatCard(stateWithDie('grey-strike', 'wild'), { uid: 'under-test' }, true);
+        const paid = playCombatCard(stateWithDie('grey-strike', 'wild'), { uid: 'under-test' }, true, GREY_DIE);
         const paidHit = paid.events.find(e => e.kind === 'damage-dealt' && e.target === 'enemy');
         expect(paidHit && 'amount' in paidHit ? paidHit.amount : undefined).toBe(5);
     });
@@ -113,7 +115,7 @@ describe('Phase 104 — the grey office: FREE/PAID ledgers read exactly as print
         expect((free.state.guard ?? 0) - (before.guard ?? 0)).toBe(2);
 
         mockSequentialRng(0.5);
-        const paid = playCombatCard(before, { uid: 'under-test' }, true);
+        const paid = playCombatCard(before, { uid: 'under-test' }, true, GREY_DIE);
         expect((paid.state.guard ?? 0) - (before.guard ?? 0)).toBe(5);
     });
 });

@@ -118,7 +118,8 @@ function play(before: CombatEncounterState, paid: boolean): {
     after: CombatEncounterState; events: CombatEvent[];
 } {
     mockSequentialRng(0.5);
-    const { state: after, events } = playCombatCard(before, { uid: 'under-test' }, paid);
+    // Spec 33: a PAID play names its powering die (the fixture's wild die).
+    const { state: after, events } = playCombatCard(before, { uid: 'under-test' }, paid, paid ? 'fx-die' : undefined);
     expect(
         events.find(e => e.kind === 'effect-fizzled'),
         'the play fizzled',
@@ -486,7 +487,7 @@ describe('the-long-ledger (WS4.4) — consume_affliction ×2 (the WS3 payoff clo
         const before = fixtureWith('the-long-ledger', { clean: true });
         const hpBefore = before.enemy.health;
         mockSequentialRng(0.5);
-        const { state: after, events } = playCombatCard(before, { uid: 'under-test' }, true);
+        const { state: after, events } = playCombatCard(before, { uid: 'under-test' }, true, 'fx-die');
 
         expect(events.filter(e => e.kind === 'effect-fizzled')).toHaveLength(2);
         expect(after.enemy.health).toBe(hpBefore);
@@ -530,9 +531,12 @@ describe('seedcorn-sacrifice (WS4.4) — the funded REAP sows next season', () =
         expect(before.souls ?? 0).toBe(0);
         const hpBefore = before.enemy.health;
         mockSequentialRng(0.5);
-        const { state: after, events } = playCombatCard(before, { uid: 'under-test' }, true);
+        const { state: after, events } = playCombatCard(before, { uid: 'under-test' }, true, 'fx-die');
 
-        expect(events.find(e => e.kind === 'effect-fizzled'), 'underfunded REAP must fizzle').toBeDefined();
+        const fizzle = events.find(e => e.kind === 'effect-fizzled') as { message?: string } | undefined;
+        expect(fizzle, 'underfunded REAP must fizzle').toBeDefined();
+        // …and it is the REAP that fizzled, not the powering die (spec 33).
+        expect(fizzle!.message ?? '').not.toMatch(/choose a die|cannot power/);
         expect(after.souls ?? 0).toBe(0);
         expect(enemyEffect(after, 'debuff_bleed')).toBeUndefined();
         expect(findEvent(events, 'hand-drawn')).toBeUndefined();

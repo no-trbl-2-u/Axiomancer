@@ -37,7 +37,7 @@ import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import { getCardById } from '../../Cards/cards.library';
 import * as EffectsLib from '../../Effects/effects.library';
 import {
-    initializeCombatEncounter, rollEncounterDice, playCombatCard, draftStanceDie,
+    initializeCombatEncounter, rollEncounterDice, playCombatCard,
     processBetweenPhases, resolveThreatPhase, crackGlyph, getCard,
 } from '../combat.engine';
 import { THREAT_RUNGS } from '../effects';
@@ -110,22 +110,26 @@ function makeEnemy(hp = 400): Enemy {
 }
 
 /** A hand-built state ready for `playCombatCard`: one card in hand, dice
- *  rolled, ready to draft. Mirrors momentum-wheel's `open()`. */
+ *  rolled. Mirrors momentum-wheel's `open()`. */
 function openWithHand(cardIds: string[]): CombatEncounterState {
     let s = initializeCombatEncounter(makePlayer(cardIds), makeEnemy(), cardIds, 7);
     s = rollEncounterDice(s, rng).state;
     return { ...s, hand: cardIds.map((cardId, i) => ({ uid: `g${i}`, cardId })) };
 }
 
-/** Drafts a mind-colored die (every fixture card above is mind-aligned) and
- *  plays `cardId`'s PAID (bottom) line. */
+/** Pins a fresh mind MANA die into the tray (every fixture card above is
+ *  mind-aligned) and plays `cardId`'s PAID (bottom) line powered by it —
+ *  the rolled faces are left out of it so no play depends on a miss roll. */
 function playPaidMind(s: CombatEncounterState, cardId: string): { state: CombatEncounterState; events: CombatEvent[] } {
-    const die = s.dice.find(d => d.state === 'available' && !d.floating && (d.color === 'mind' || d.color === 'wild'));
-    expect(die).toBeDefined();
-    const drafted = draftStanceDie(s, die!.id).state;
-    const entry = drafted.hand.find(h => h.cardId === cardId);
+    const dieId = `glyph-mind-${s.dice.length}`;
+    const powered: CombatEncounterState = {
+        ...s,
+        dice: [...s.dice, { id: dieId, color: 'mind', face: 'mana', state: 'available', temporary: false }],
+    };
+    const entry = powered.hand.find(h => h.cardId === cardId);
     expect(entry).toBeDefined();
-    const res = playCombatCard(drafted, { uid: entry!.uid }, true, undefined, rng);
+    const res = playCombatCard(powered, { uid: entry!.uid }, true, dieId, rng);
+    expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(false);
     return { state: res.state, events: res.events };
 }
 
@@ -185,12 +189,7 @@ describe('Phase 33d — inscribe (PAID line)', () => {
         let s = openWithHand(['qa-glyph-inscriber-poison', 'qa-glyph-inscriber-poison']);
         const first = playPaidMind(s, 'qa-glyph-inscriber-poison');
         s = first.state;
-        const die = s.dice.find(d => d.state === 'available' && !d.floating && (d.color === 'mind' || d.color === 'wild'));
-        expect(die).toBeDefined();
-        const drafted = draftStanceDie(s, die!.id).state;
-        const entry = drafted.hand.find(h => h.cardId === 'qa-glyph-inscriber-poison');
-        expect(entry).toBeDefined();
-        const second = playCombatCard(drafted, { uid: entry!.uid }, true, undefined, rng);
+        const second = playPaidMind(s, 'qa-glyph-inscriber-poison');
         expect(second.state.glyphs).toHaveLength(2);
         expect(second.state.glyphs![0].id).not.toBe(second.state.glyphs![1].id);
     });

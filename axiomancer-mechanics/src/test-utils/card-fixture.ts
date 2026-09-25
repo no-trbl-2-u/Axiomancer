@@ -81,7 +81,7 @@ export function buildFixtureState(options: { clean?: boolean } = {}): CombatEnco
 
     // A single WILD powering die: payable regardless of a card's own stance
     // color, so no card is starved of a legal play by die-color mismatch.
-    const wildDie: CombatManaDie = { id: 'fx-die', color: 'wild', state: 'available', temporary: false };
+    const wildDie: CombatManaDie = { id: 'fx-die', color: 'wild', state: 'available', temporary: false, face: 'mana' };
 
     return {
         ...base,

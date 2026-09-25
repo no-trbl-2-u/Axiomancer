@@ -5,8 +5,6 @@
  *
  *   - `defenseModifier` → flat armor soak on the incoming telegraph
  *     (buff_damage_reduction / buff_invincibility / buff_phoenix_vigor's guard).
- *   - `advantageModifier.grantAdvantage` → guaranteed player read
- *     (buff_haste and the re-themed precision buffs), via `clampPlayerRead`.
  *   - BACKFIRE lethal-ordering guard — an enemy the backfire drip kills does
  *     not still complete its telegraphed swing that phase.
  *   - POISON ramp reset on reapplication (`escalatesPerTurn` → `appliedAt`
@@ -24,9 +22,9 @@ import { mockSequentialRng } from '../../test-utils/rng';
 import { applyEffect, lookupEffect } from '../../Effects';
 import type { ActiveEffect } from '../../Effects/types';
 import {
-    initializeCombatEncounter, rollEncounterDice, draftStanceDie, resolveThreatPhase,
+    initializeCombatEncounter, rollEncounterDice, resolveThreatPhase,
 } from '../combat.engine';
-import type { CombatDieColor, CombatEncounterState, CombatEvent } from '../combat.encounter.types';
+import type { CombatEvent } from '../combat.encounter.types';
 
 afterEach(() => { vi.restoreAllMocks(); });
 
@@ -47,15 +45,6 @@ function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'mind', effec
     e.health = hp; e.maxHealth = hp; e.effects = effects;
     e.baseStats = { heart: stance === 'heart' ? 6 : 2, body: stance === 'body' ? 6 : 2, mind: stance === 'mind' ? 6 : 2 };
     return e;
-}
-
-function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
-    const turn = state.turn || 1;
-    const dice = colors.map((c, i) => ({
-        id: `t${turn}-d${i}`, color: c,
-        state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
-    }));
-    return { ...state, dice, draftedDieId: null, turn };
 }
 
 const has = (events: readonly CombatEvent[], kind: string): boolean => events.some(e => e.kind === kind);
@@ -93,35 +82,6 @@ describe('ARMOR — defenseModifier soaks the incoming telegraph', () => {
         const armoredLoss = 200 - armored;
         expect(controlLoss).toBeGreaterThan(0);                 // control took a hit
         expect(armoredLoss).toBe(Math.max(0, controlLoss - 5)); // …armor removed 5 of it
-    });
-});
-
-// ── ADVANTAGE (advantageModifier.grantAdvantage) — player read upgrade ────────
-
-describe('ADVANTAGE — grantAdvantage upgrades the player read', () => {
-    const draftLosingDie = (effects: ActiveEffect[]): CombatEncounterState => {
-        let state = initializeCombatEncounter(makePlayer(effects), makeEnemy(300, 'heart'), undefined, 7);
-        state = rollEncounterDice(state).state;
-        // Force the current phase stance to heart; a body die LOSES that read.
-        state = {
-            ...state,
-            threatPhases: state.threatPhases.map((p, i) =>
-                i === state.currentPhaseIndex ? { ...p, enemyStance: 'heart' as const } : p),
-        };
-        state = setDice(state, ['body', 'x']);
-        return draftStanceDie(state, state.dice[0].id).state;
-    };
-
-    it('without a grant, a body die into a heart stance reads disadvantage', () => {
-        expect(draftLosingDie([]).lastRead).toBe('disadvantage');
-    });
-
-    it('buff_haste grants advantage on that same losing read', () => {
-        expect(draftLosingDie([ae('buff_haste', 1, 2, 3)]).lastRead).toBe('advantage');
-    });
-
-    it('the re-themed buff_critical_damage_up grants advantage too', () => {
-        expect(draftLosingDie([ae('buff_critical_damage_up', 1, 3)]).lastRead).toBe('advantage');
     });
 });
 

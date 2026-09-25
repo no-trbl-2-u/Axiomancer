@@ -32,7 +32,7 @@ import type { CardAspect } from '../Cards/types';
 // The flag
 // ---------------------------------------------------------------------------
 
-let upgradeableDiceEnabled = false;
+let upgradeableDiceEnabled = true;
 
 /** Turns the spec-33 model on/off (default OFF — the shipped combat is
  *  untouched until D7 recommends the flip). Tests toggle per-suite. */

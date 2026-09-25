@@ -26,8 +26,9 @@ import { deepClone } from '../../Utils';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
-    draftStanceDie, startTurn, endTurn, resolveThreatPhase, isMomentumDieId,
+    startTurn, endTurn, resolveThreatPhase,
 } from '../combat.engine';
+import { SURGE_DIE_PREFIX } from '../combat.upgradeable-dice';
 import { runHazardCombatAutoEncounter } from '../../test-utils/combat-autoplay';
 import { runOneEncounter } from '../combat.encounter.sim';
 import { COMBAT_SIM_POLICY_ORDER } from '../combat.sim-policies';
@@ -102,19 +103,16 @@ describe('Gate 0 — the round-turn law (one tray roll per threat phase)', () =>
 
     it('kills the Conviction farm: endTurn → startTurn is blocked mid-phase', () => {
         let s = open();
-        const die = s.dice.find(d => d.state === 'available' && !d.floating);
-        expect(die).toBeDefined();
-        s = draftStanceDie(s, die!.id).state;
-        const convictionAfterDraft = s.conviction;
-        s = endTurn(s).state; // banks/burns the drafted die — legal, once
+        s = endTurn(s).state; // banks one unspent die (if any) — legal, once
         expect(s.dice).toHaveLength(0);
+        const convictionAfterEnd = s.conviction;
 
         const farmed = startTurn(s, rng);
         expect(farmed.events.map(e => e.kind)).toEqual(['turn-law-blocked']);
         expect(farmed.state.dice).toHaveLength(0); // no fresh tray
         expect(farmed.state.turn).toBe(s.turn);
-        // No new dice ⇒ no new unpicked-die Conviction income.
-        expect(farmed.state.conviction).toBeLessThanOrEqual(convictionAfterDraft + 1);
+        // No new dice ⇒ no new special-face Conviction income.
+        expect(farmed.state.conviction).toBe(convictionAfterEnd);
     });
 
     it('resolveThreatPhase re-arms the law: the next phase rolls exactly one fresh tray', () => {
@@ -159,13 +157,12 @@ describe('Gate 0 — the round-turn law (one tray roll per threat phase)', () =>
             floatsSpent++;
         }
         expect(floatsSpent).toBe(3);
-        // Phase 31 — the original 3 forged floats are all spent; the sequence
-        // (heart -> body -> mind, in wheel order) also legitimately completes
-        // the engine-native momentum wheel, minting ONE new momentum-prefixed
-        // float that this test never spends. Assert the ORIGINAL pool is
-        // empty, not the whole array (the momentum grant is a real, separate
-        // mechanic this test doesn't exercise further).
-        expect((s.floatingDice ?? []).filter(d => !isMomentumDieId(d.id))).toHaveLength(0);
+        // The original 3 forged floats are all spent; the sequence (heart ->
+        // body -> mind, in chain order) also legitimately completes the spec-33
+        // momentum 3-chain, minting ONE SURGE float that this test never
+        // spends. Assert the ORIGINAL pool is empty, not the whole array (the
+        // surge is a real, separate mechanic this test doesn't exercise further).
+        expect((s.floatingDice ?? []).filter(d => !d.id.startsWith(SURGE_DIE_PREFIX))).toHaveLength(0);
         expect(s.round).toBe(1);                      // still the same round
         expect(s.log.some(e => e.kind === 'turn-law-blocked')).toBe(false);
     });
