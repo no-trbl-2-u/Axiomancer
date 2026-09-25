@@ -79,6 +79,8 @@ model.
 - Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and
   sequencing in `plan/2026-09-25-trim-the-fat.spec.md`. Deletions not
   started; §5 of that spec lists the owner decisions gating Tier 3.
+  Pick-up prompt for the execution session:
+  `plan/2026-09-25-trim-the-fat.prompt.md`.
 - Map re-authoring brief (D2) — needs the region count and target node
   count per map before authoring.
 - Scaling formula (D1 step 3) — D4 settles the direction (per-stat
