@@ -11,7 +11,7 @@
 
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
-| cards | `skills/adjust-cards.md` | 2026-09-25 | pending-self-ref | 19 |
+| cards | `skills/adjust-cards.md` | 2026-09-25 | 08cc633d | 19 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-24 | bdcd4c7e | 18 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-24 | 6f13b2d0 | 18 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-24 | c57a7e73 | 18 |
@@ -20,7 +20,7 @@
 ## Log
 
 ```
-> **[adjust-cards pass 19, 2026-09-25, commit pending-self-ref]** Zero-diff
+> **[adjust-cards pass 19, 2026-09-25, commit 08cc633d]** Zero-diff
 > pass — audit re-confirmed byte-identical to pass 18, no new CREATE/
 > UPDATE/REMOVE, ledger bump only. Dispatched autonomously by `/march`'s
 > content-lifecycle gate (Step 3b): `cards` (`f155b027`
