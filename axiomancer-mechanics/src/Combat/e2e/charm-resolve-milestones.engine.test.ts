@@ -1,6 +1,6 @@
 /**
  * Hermetic E2E — Phase 32 part 4e (Charm — Resolve milestones,
- * plan/phases/phase_32_theme_deep_work.md §Part 4e).
+ * plan/archive/2026-09-25-trim-t4/plan/phases/phase_32_theme_deep_work.md §Part 4e).
  *
  * Scope (see brief's Decisions): PLEA crossing a NAMED FRACTIONAL WAYPOINT
  * of the enemy's LIVE `capitulateThreshold` ("resolve") pays a small

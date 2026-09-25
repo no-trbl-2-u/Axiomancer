@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — Gate 0 §1 (plan/tuning/2026-07-10-turn-law-and-honest-baseline.md):
+ * Hermetic E2E — Gate 0 §1 (plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-turn-law-and-honest-baseline.md):
  * the ROUND-TURN LAW as an engine invariant.
  *
  *   - `startTurn` refuses a SECOND tray roll inside one threat phase: the

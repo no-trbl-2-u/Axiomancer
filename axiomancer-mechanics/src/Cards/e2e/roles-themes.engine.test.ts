@@ -1,6 +1,6 @@
 /**
  * Hermetic E2E — the WS4 theme-role sandbox sets
- * (plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md, WS4.1
+ * (plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md, WS4.1
  * forge + WS4.2 bulwark by the Themes A agent; WS4.3 charm + WS4.4 harvest by
  * the Themes B agent; ratified constraints: spec 32 §12 "Ratified 2026-07-11"
  * items 4-5).

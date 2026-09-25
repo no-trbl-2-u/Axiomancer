@@ -1,6 +1,6 @@
 /**
  * Hermetic E2E — Phase 32 part 4b (Oratory — milestone drip,
- * plan/phases/phase_32_theme_deep_work.md §Part 4b).
+ * plan/archive/2026-09-25-trim-t4/plan/phases/phase_32_theme_deep_work.md §Part 4b).
  *
  * Scope (see brief's Decisions): every {@link PREMISE_MILESTONE_EVERY}rd
  * Premise the player has EVER gained THIS COMBAT — tracked by a new lifetime

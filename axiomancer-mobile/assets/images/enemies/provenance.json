@@ -219,7 +219,7 @@
     "artist": "Pearson Scott Foresman (per openclipart.org attribution)",
     "license": "Public Domain",
     "license_verified": "read from the openclipart.org file page at acquisition (license: Public Domain), not asserted by the operator",
-    "license_note": "Phase 78's top-listed wharf-shrike candidate (OpenGameArt 'Raven 16x18 sprite') was verified this phase to be a mislabeled humanoid JRPG character sheet, not a corvid asset — see plan/phases/phase_88_w5_art_adoption.md Decision 2. This entry is the AUDIT row's second-listed candidate instead.",
+    "license_note": "Phase 78's top-listed wharf-shrike candidate (OpenGameArt 'Raven 16x18 sprite') was verified this phase to be a mislabeled humanoid JRPG character sheet, not a corvid asset — see plan/archive/2026-09-25-trim-t4/plan/phases/phase_88_w5_art_adoption.md Decision 2. This entry is the AUDIT row's second-listed candidate instead.",
     "covers": [
       "wharf-shrike.webp (openclipart Shrike-.svg, recolored)"
     ],

@@ -100,7 +100,7 @@ export function ruptureBurstCap(enemyMaxHealth: number): number {
     return Number.POSITIVE_INFINITY;
 }
 /** REAP (single, `the-gleaners-due`) maxHealth erosion rate — phase 32 part 1
- *  (Harvest — REAP attacks MAXIMUM HP, plan/phases/phase_32_theme_deep_work.md
+ *  (Harvest — REAP attacks MAXIMUM HP, plan/archive/2026-09-25-trim-t4/plan/phases/phase_32_theme_deep_work.md
  *  §Part 1): the small utility REAP has no current-HP burst of its own, but
  *  every REAP that spends Souls now also erodes the enemy's ceiling a little,
  *  so the mechanic reads consistently across both Harvest REAP cards — the
@@ -112,7 +112,7 @@ export function ruptureBurstCap(enemyMaxHealth: number): number {
  *  realistic burst, keeping the utility card's erosion clearly secondary.
  *  Tunable. */
 export const REAP_EROSION_PER_SOUL = 2;
-/** Phase 32 part 3 (Akrasia — DEBT ledger, plan/phases/phase_32_theme_deep_work.md
+/** Phase 32 part 3 (Akrasia — DEBT ledger, plan/archive/2026-09-25-trim-t4/plan/phases/phase_32_theme_deep_work.md
  *  §Part 3): every RECOIL HP the player pays THIS COMBAT (the `recoil` /
  *  `recoil_x` mechanics, the printed `CardRider.recoil` field on both the FREE
  *  and PAID lines, and `fate.recoilHp`) accrues into `CombatEncounterState.
@@ -140,7 +140,7 @@ export function akrasiaDebtTiersCrossed(before: number, after: number): number {
     const a = Math.max(0, Math.floor(after / AKRASIA_DEBT_TIER_HP));
     return Math.max(0, a - b);
 }
-/** Phase 32 part 4b (Oratory — milestone drip, plan/phases/phase_32_theme_deep_work.md
+/** Phase 32 part 4b (Oratory — milestone drip, plan/archive/2026-09-25-trim-t4/plan/phases/phase_32_theme_deep_work.md
  *  §Part 4b): every {@link PREMISE_MILESTONE_EVERY}rd Premise the player has EVER
  *  gained this combat (tracked by `CombatEncounterState.premiseMilestoneTotal`, a
  *  lifetime counter that — unlike the spendable `premises` tally it rides alongside
@@ -162,7 +162,7 @@ export function premiseMilestonesCrossed(before: number, after: number): number 
     const a = Math.max(0, Math.floor(after / PREMISE_MILESTONE_EVERY));
     return Math.max(0, a - b);
 }
-/** CONDEMN Premises required (plan/tuning/2026-07-08-win-path-scaling.md item
+/** CONDEMN Premises required (plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-08-win-path-scaling.md item
  *  1a): `the-closing-word`'s flat 8-Premise `concedeAt` let Oratory land its
  *  alt-win identically against a 100 HP early wolf and a 1,500+ HP late boss
  *  — Battle Lab round 2 clocked it at 100% win rate on EVERY stage. The
@@ -201,8 +201,8 @@ export function concedeFloorFor(difficulty: EnemyDifficulty | undefined): number
         default: return CONCEDE_PREMISES_BASE;
     }
 }
-/** RELENT resolve threshold (Dawncaster Charmed-style rework, plan/
- *  tuning/2026-07-08-win-path-scaling.md item 1a): the old check (PLEA ≥
+/** RELENT resolve threshold (Dawncaster Charmed-style rework, plan/archive/
+ *  2026-09-25-trim-t4/plan/tuning/2026-07-08-win-path-scaling.md item 1a): the old check (PLEA ≥
  *  enemy CURRENT HP) made Grace's alt-win match a boss's ENTIRE HP bar —
  *  unreachable against a 1,000+ HP late pool (0% in Battle Lab round 2).
  *  `resolve` is a per-enemy stat well below max HP:
@@ -220,8 +220,8 @@ export function capitulateThreshold(enemy: Pick<Enemy, 'health' | 'maxHealth'>):
     const resolve = Math.max(CAPITULATE_MIN, Math.round(CAPITULATE_RESOLVE_FRACTION * enemy.maxHealth));
     return Math.min(resolve, enemy.health);
 }
-/** Phase 32 part 4e (Charm — Resolve milestones, plan/phases/
- *  phase_32_theme_deep_work.md §Part 4e, plan/tuning/2026-07-10-theme-
+/** Phase 32 part 4e (Charm — Resolve milestones, plan/archive/
+ *  2026-09-25-trim-t4/plan/phases/phase_32_theme_deep_work.md §Part 4e, plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-theme-
  *  identity.md "Charm / grace" — "Resolve milestones… the track gets rungs
  *  and a face"): PLEA crossing a named fractional waypoint of the enemy's
  *  LIVE `capitulateThreshold` ("resolve") pays a small one-time dividend.
@@ -281,7 +281,7 @@ export const DISRUPT_DENY_AT = 3;
  *  all of them denies the turn. Bosses/uniques carry one more. Tunable. */
 export const THREAT_RUNGS = 2;
 export const THREAT_RUNGS_BOSS = 3;
-/** Boss/unique rung REGROWTH (anti-permalock, plan/tuning/2026-07-08-
+/** Boss/unique rung REGROWTH (anti-permalock, plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-08-
  *  win-path-scaling.md item 1c): a denial deck (Standstill) that reliably
  *  meets THREAT_RUNGS_BOSS every single round previously locked a boss out
  *  of acting for the whole fight, at every stage, regardless of how tough

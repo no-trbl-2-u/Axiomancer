@@ -74,7 +74,7 @@ Three grounded findings (verified against the live library + engine tests,
   this is memory, not a KB citation.
 - **Dawncaster (kb:dawncaster) — persistence via frame keywords, not a
   power-card class:** (receipted 2026-07-10 cache,
-  `plan/tuning/2026-07-10-audit-evidence/cross-prior-art.md`; live KB
+  `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-audit-evidence/cross-prior-art.md`; live KB
   unreachable this session). Persistence lives in *frame keywords* —
   Persistent, Charges, and especially **Lasting** ("extended by 1 turn
   whenever the card is played again", kb:dawncaster/keywords/lasting) —
@@ -218,5 +218,5 @@ before committing to A or C would separate "the arc was unplannable"
   DoTs collide with the expiry-Souls economy [needs-user-call].
 - Live KB was unreachable this session (kb-query MCP not mounted;
   kb-sync rejected at the git proxy — same gap as
-  `plan/tuning/2026-07-11-dawncaster-comparison.md` §Evidence status).
+  `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-dawncaster-comparison.md` §Evidence status).
   Re-file the wish for persistent-card density reception once auth works.

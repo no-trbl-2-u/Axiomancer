@@ -94,7 +94,7 @@ its own cadence.
    `scripts/build-devlog.mjs`):
 
    **The entry is now PUBLISHED** (T, 2026-09-20 — see
-   `plan/2026-09-20-devlog-public-publish.prompt.md`). Write every
+   `plan/archive/2026-09-25-trim-t4/plan/2026-09-20-devlog-public-publish.prompt.md`). Write every
    line for a player who has never opened a terminal, not for the
    maintainer. The same file still renders the private index; the
    public site is `npm run site:public`.

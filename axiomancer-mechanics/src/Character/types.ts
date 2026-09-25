@@ -107,7 +107,7 @@ export interface Character {
      * sparse — absent means 0. No migration needed: a brand-new optional
      * field on an already-permissive save shape, same as `floatingDice`.
      * Milestone-rider design (what a running total unlocks) is deferred —
-     * see `plan/phases/phase_32_theme_deep_work.md` Follow-ups.
+     * see `plan/archive/2026-09-25-trim-t4/plan/phases/phase_32_theme_deep_work.md` Follow-ups.
      */
     bankedSouls?: number;
     /**

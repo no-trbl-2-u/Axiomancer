@@ -593,7 +593,7 @@ const nothingFurtherYourHonour: Card = {
 
 /** The Indictment — 20 cards, rank-ascending (pass 2 added a second CHAIN
  *  carrier and a second OMEN carrier; pass 3 added a second AMBUSH carrier
- *  and a second FINALE carrier; see `plan/CONTENT_LEDGER.md`). */
+ *  and a second FINALE carrier; see `plan/archive/CONTENT_LEDGER_2026.md`). */
 export const TRIAL_CARDS: Card[] = [
     readingOfTheCharges, hueAndCry, benefitOfClergy,
     scoldsBridle, billOfParticulars, theGalleryMurmurs,

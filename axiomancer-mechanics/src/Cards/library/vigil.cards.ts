@@ -19,7 +19,7 @@
  * the new scale ladder. The other ten are new.
  *
  * Shape and voice copied from `src/Cards/library/starters.cards.ts`
- * (`plan/2026-09-02-card-authoring-brief.md` is the spec). This file is
+ * (`plan/archive/2026-09-25-trim-t4/plan/2026-09-02-card-authoring-brief.md` is the spec). This file is
  * data-only: all runtime behaviour lives in `src/Cards/card.engine.ts` and
  * `src/Combat/combat.engine.ts`.
  */

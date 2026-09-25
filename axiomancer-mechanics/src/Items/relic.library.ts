@@ -58,8 +58,8 @@ interface RelicSpec {
 
 /**
  * The 11 relics — the 8 mapping locked in
- * `plan/phases/phase_19_equipment_granted_signatures.md`, extended by 3 in
- * `plan/phases/phase_85_equipment_progression.md`. Names / accessory kinds are
+ * `plan/archive/2026-09-25-trim-t4/plan/phases/phase_19_equipment_granted_signatures.md`, extended by 3 in
+ * `plan/archive/2026-09-25-trim-t4/plan/phases/phase_85_equipment_progression.md`. Names / accessory kinds are
  * copy-tunable; the id → signature mapping is 1:1 and load-bearing.
  */
 const RELIC_SPECS: readonly RelicSpec[] = [

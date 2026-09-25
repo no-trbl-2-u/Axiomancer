@@ -1,6 +1,6 @@
 # UI FRESH-EYES SWARM — 2026-09-12
 
-> Ran against [`plan/2026-09-12-ui-fresh-eyes-swarm.prompt.md`](../../../plan/2026-09-12-ui-fresh-eyes-swarm.prompt.md).
+> Ran against [`plan/archive/2026-09-25-trim-t4/plan/2026-09-12-ui-fresh-eyes-swarm.prompt.md`](../../../plan/archive/2026-09-25-trim-t4/plan/2026-09-12-ui-fresh-eyes-swarm.prompt.md).
 > Input: the 309 unverified candidate rows sweep #301 left behind. Output: a
 > disposition for every one of them, in
 > [`UI_FRESH_EYES_SWARM_2026-09-12.ledger.md`](./UI_FRESH_EYES_SWARM_2026-09-12.ledger.md).

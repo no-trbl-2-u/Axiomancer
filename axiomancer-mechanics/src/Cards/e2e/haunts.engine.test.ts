@@ -1,6 +1,6 @@
 /**
  * Hermetic E2E — the HAUNT registry (spec 34 R-13: was THOUGHTFORM) + CONJURE
- * exercise (WS2.1, plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md,
+ * exercise (WS2.1, plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md,
  * correction C-11).
  *
  * Haunts (`cards.haunts.ts`) are real `Card` records that live

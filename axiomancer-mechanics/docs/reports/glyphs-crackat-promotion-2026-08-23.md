@@ -1,7 +1,7 @@
 # GLYPHS crackAt A/B — 2026-08-23: sim policy heuristic evidence pass
 
 Working agent: card-expert (`/ship-a-phase`, Phase 51,
-`plan/phases/phase_51_crackat_policy_and_ab_court.md`). Mandate: give the sim
+`plan/archive/2026-09-25-trim-t4/plan/phases/phase_51_crackat_policy_and_ab_court.md`). Mandate: give the sim
 bots a `crackAt` charge-threshold heuristic so they can play the "ripening
 dilemma" (crack a Seal now, small, vs. wait, bigger, riskier), then run the
 seeded A/B evidence WI-2's acceptance criterion 2 (late-stage

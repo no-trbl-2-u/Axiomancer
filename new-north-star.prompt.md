@@ -15,7 +15,7 @@ T just ruled two things in the same breath, mid-`/oversight` conversation:
    pipelines) should move toward it.
 2. **The product name changed:** "Axiomancer" → **"Miserere Mei, Deus"**
    (Latin, Psalm 51 — "Have mercy on me, God"). This part is *done* — see
-   `plan/AUDIT.md`'s product-name row, `plan/naming-session-2026-08-12.md`
+   `plan/AUDIT.md`'s product-name row, `plan/archive/2026-09-25-trim-t4/plan/naming-session-2026-08-12.md`
    §6, and build-plan **Phase 67** (queued, not yet shipped — it's the code
    migration for the new title). Don't re-litigate the name in this session;
    it's closed.

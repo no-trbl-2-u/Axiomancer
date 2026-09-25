@@ -5,7 +5,7 @@
  * five curses are what the world puts in your deck when you lose an exchange.
  *
  * This file is also the AUTHORING TEMPLATE for the six theme modules beside it
- * (`plan/2026-09-02-card-authoring-brief.md` is the spec). Every card here
+ * (`plan/archive/2026-09-25-trim-t4/plan/2026-09-02-card-authoring-brief.md` is the spec). Every card here
  * shows the required shape: a FREE line worth playing without a die, a PAID
  * line whose printed numbers are exactly what the engine applies, a
  * `paidSummary` that names every one of those numbers, and a `// pts:` note

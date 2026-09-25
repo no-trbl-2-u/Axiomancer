@@ -150,7 +150,7 @@ enforcement** so `verify` stops defending them. Locations:
 | L8 | Round-turn law as *law* | See §2.3 — kept as a bug fix. |
 
 Doc hygiene after repeal: mark `specs/32`, `specs/34 §3/§8`, `specs/35`,
-`plan/tuning/2026-07-10-*.md`, `plan/tuning/2026-07-11-*`, `docs/profane-canon.md`
+`plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-*.md`, `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-*`, `docs/profane-canon.md`
 as `**Status:** HISTORICAL` in their first 40 lines (this is also the
 check-lexicon banner exemption). Rewrite `axiomancer-mechanics/CLAUDE.md`'s
 "Load-bearing doctrine" block and `VISION.md`'s combat section to state §1–§2
@@ -838,7 +838,7 @@ has the card text at its `Deal [damage:N]` line and a keyword list.
 ## Appendix B — survey artefact
 
 The full 87 KB repo survey that produced §3/§4/§10's file:line map is at
-`plan/2026-09-02-big-numbers-overhaul.survey.md` (§1 card data, §2 keyword
+`plan/archive/2026-09-25-trim-t4/plan/2026-09-02-big-numbers-overhaul.survey.md` (§1 card data, §2 keyword
 registry, §3 enemy model with six verbatim enemies, §4 engine hooks, §5
 every test/guard and which ones block a scale-up, §6 editor/mobile, §7 the
 35-law table). Line numbers were true on 2026-09-02; re-grep before editing.

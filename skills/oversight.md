@@ -60,7 +60,7 @@ In parallel where independent:
    commit?
 9. **The loop-call sweep (standing).** Grep `\[loop-call\]` and
    the legacy `\[needs-user-call\]` across `plan/` (AUDIT,
-   CRITIQUE, PHASE_CANDIDATES, `plan/tuning/`). Since THE OPEN
+   CRITIQUE, PHASE_CANDIDATES, `plan/archive/2026-09-25-trim-t4/plan/tuning/`). Since THE OPEN
    GATE (2026-08-28) the loop no longer parks decisions — it
    decides, ships, and files `[loop-call]` rows. This sweep is
    AFTER-THE-FACT REVIEW: present the calls the loop made since

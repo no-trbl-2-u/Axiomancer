@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — plan/tuning/2026-07-08-win-path-scaling.md item 1: alt-win
+ * Hermetic E2E — plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-08-win-path-scaling.md item 1: alt-win
  * paths scale with the stage curve instead of the flat pre-fix checks that
  * let Oratory/Standstill sit at 100% win rate on EVERY stage while Grace's
  * RELENT was unreachable late (Battle Lab round 2).

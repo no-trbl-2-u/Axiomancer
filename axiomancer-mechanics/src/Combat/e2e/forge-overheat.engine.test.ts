@@ -1,6 +1,6 @@
 /**
  * Hermetic E2E — Phase 32 part 4c (Forge — OVERHEAT,
- * plan/phases/phase_32_theme_deep_work.md §Part 4c).
+ * plan/archive/2026-09-25-trim-t4/plan/phases/phase_32_theme_deep_work.md §Part 4c).
  *
  * OVERHEAT is the press-your-luck knob the source doc asked for
  * (2026-07-10-theme-identity.md §2, "Forge / foundry"): a Reserve die

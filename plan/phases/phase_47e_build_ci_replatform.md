@@ -112,7 +112,7 @@ manual peer-dependency cross-check. See `bearings.md`'s Stack table
 addendum for the explicit note.
 
 **`@shopify/react-native-skia` — re-evaluated, not adopted.** D6f
-(2026-07-18, `plan/phases/phase_D6f_roll_ritual.md`) already ran this
+(2026-07-18, `plan/archive/2026-09-25-trim-t4/plan/phases/phase_D6f_roll_ritual.md`) already ran this
 evaluation once: Skia is RN-coupled (not Expo-coupled), so it
 survives the decouple, but it adds a large native binary plus a
 CanvasKit-WASM web-loading step that "would need wiring twice across

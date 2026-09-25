@@ -1,5 +1,5 @@
 /**
- * Keyword-registry honesty lints (phase 29, `plan/phases/phase_29_keyword_registry.md`).
+ * Keyword-registry honesty lints (phase 29, `plan/archive/2026-09-25-trim-t4/plan/phases/phase_29_keyword_registry.md`).
  *
  * Mirrors the "no-strike"/pricing lint shape in
  * `axiomancer-mechanics/src/Cards/e2e/curated-library.engine.test.ts`: a

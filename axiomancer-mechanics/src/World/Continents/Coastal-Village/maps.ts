@@ -679,7 +679,8 @@ const northernForest: MapDefinition = {
     // adjust-npcs pass 1 (2026-09-05) — the Forest Ranger and Lost Trader
     // are homed at nf-21 and nf-14 respectively (see `MapEvents/content.ts`);
     // northern-forest now reaches all 6 rostered NPCs and no longer declares
-    // any unstaged. See `plan/CONTENT_LEDGER.md`'s npcs row for the finding.
+    // any unstaged. See the adjust-npcs pass 1 entry in
+    // `plan/archive/CONTENT_LEDGER_2026.md` for the finding.
 };
 
 export { fishingVillage, northernForest };

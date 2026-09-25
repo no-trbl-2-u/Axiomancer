@@ -13,7 +13,7 @@
  * debt deck does not win a turn — it borrows against six of them and then
  * settles, once, for seventy.
  *
- * Authored against `plan/2026-09-02-card-authoring-brief.md`; shape copied from
+ * Authored against `plan/archive/2026-09-25-trim-t4/plan/2026-09-02-card-authoring-brief.md`; shape copied from
  * `starters.cards.ts`. Data only — all runtime behaviour lives in
  * `src/Cards/card.engine.ts` and `src/Combat/combat.engine.ts`.
  */

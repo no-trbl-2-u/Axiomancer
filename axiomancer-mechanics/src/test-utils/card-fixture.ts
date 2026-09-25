@@ -1,7 +1,7 @@
 /**
  * Shared card-play fixture for the Cards e2e lints (extracted from
  * `card-effectiveness.engine.test.ts` per WS0.4,
- * `plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md`).
+ * `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md`).
  *
  * Two variants of the same level-20 player + single-WILD-die tray:
  *

@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — Phase 33a (plan/phases/phase_33a_reactive_verb_core.md):
+ * Hermetic E2E — Phase 33a (plan/archive/2026-09-25-trim-t4/plan/phases/phase_33a_reactive_verb_core.md):
  * PLEA/Premise enemy counterplay hooks.
  *
  * `CombatThreatEffect.swayCleanse` / `.premiseShed` let an authored threat

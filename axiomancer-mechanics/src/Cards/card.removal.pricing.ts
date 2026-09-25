@@ -16,7 +16,7 @@
  * wares run ~1-12. `base` sits well under a single loot-cache find so the
  * first cut is obviously affordable early; `step` is sized so the fourth/fifth
  * cut (20 / 25) approaches a full act's income — a real sacrifice, not a
- * lockout. See `plan/phases/phase_52f_shilling_economy_calibration.md` and its
+ * lockout. See `plan/archive/2026-09-25-trim-t4/plan/phases/phase_52f_shilling_economy_calibration.md` and its
  * report for the full derivation. Do not fork copies of these numbers: read
  * the constant.
  *
