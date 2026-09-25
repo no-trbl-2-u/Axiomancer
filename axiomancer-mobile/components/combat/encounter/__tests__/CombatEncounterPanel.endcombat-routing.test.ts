@@ -81,7 +81,7 @@ describe('applyHazardOutcome: routes through endCombat (phase 54)', () => {
         expect(state.player!.experience).toBe(expectedXp);
     });
 
-    it('befriending the King of Revenge completes starting-quest, grants its currency reward, and applies faction deltas', () => {
+    it('befriending the King of Revenge completes starting-quest and grants its currency reward', () => {
         const store = createAppStore({ adapter: createMemoryAdapter() });
         const boss = ENEMY_REGISTRY['king-of-revenge'];
         const startingQuest = getMapDefinition('coastal-continent', 'fishing-village').quests!.find((q) => q.name === 'starting-quest')!;
@@ -99,7 +99,5 @@ describe('applyHazardOutcome: routes through endCombat (phase 54)', () => {
         expect(state.quests.completed).toContain('starting-quest');
         expect(state.player!.currency).toBe(currencyBefore + 25);
         expect(state.flags).toContain(boss.friendshipReward!.flagSet);
-        expect(state.factionReputations['coastal-guard']).toBe(-8);
-        expect(state.factionReputations['merchant-guild']).toBe(10);
     });
 });

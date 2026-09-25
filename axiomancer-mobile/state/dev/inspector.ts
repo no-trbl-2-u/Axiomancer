@@ -138,7 +138,6 @@ export function selectInspectorSections(state: AppStoreState): readonly Inspecto
                 { k: 'goodwill', v: Object.entries(g.mapGoodwill ?? {}).map(([m, n]) => `${m}:${n}`).join(', ') || 'none' },
                 { k: 'exploited', v: list(g.regionConsequences?.exploitedRegions) },
                 { k: 'spared', v: list(g.regionConsequences?.sparedRegions) },
-                { k: 'factions', v: Object.entries(g.factionReputations ?? {}).map(([id, r]) => `${id}:${r}`).join(', ') || 'none' },
             ],
         },
         {

@@ -34,9 +34,8 @@ describe('Phase 60 — befriendable-enemy content arc', () => {
         const report = store.getState().endCombat('friendship');
 
         expect(report.outcome).toBe('friendship');
-        // Items — the friendship grant guarantees a heart-draught regardless
-        // of the weighted-roll outcome.
-        expect(report.loot.some(item => item.id === 'heart-draught')).toBe(true);
+        // Items — Tier 0 item 2 retired heart-draught (a no-op consumable);
+        // LittleBelle's friendshipReward no longer guarantees an item.
         // xpBonus — base half-XP for LittleBelle (level 2, normal:
         // 2 * 20 / 2 = 20) plus the authored +10 bonus.
         expect(report.xpGained).toBe(30);
@@ -237,11 +236,11 @@ describe('Phase 70 — King of Revenge boss-tier friendshipReward (full Phase 60
         expect(report.outcome).toBe('friendship');
 
         // Items thread — Phase 21 retired procedural equipment; the boss-tier
-        // friendship reward is now consumables only (healing-potion + heart-draught).
+        // friendship reward is now consumables only. Tier 0 item 2 retired
+        // heart-draught (a no-op consumable), leaving healing-potion.
         const lootIds = report.loot.map(i => i.id);
         expect(lootIds).not.toContain('paradox-loop');
         expect(lootIds).toContain('healing-potion');
-        expect(lootIds).toContain('heart-draught');
 
         // xpBonus — +75 on top of the half-XP base for the boss tier
         // (6 * 200 / 2 = 600; +75 = 675).
@@ -284,7 +283,7 @@ describe('Phase 102 — Befriendable-enemy Tier-2 expansion', () => {
 
         const report = store.getState().endCombat('friendship');
         expect(report.outcome).toBe('friendship');
-        expect(report.loot.some(item => item.id === 'heart-draught')).toBe(true);
+        // heart-draught was a no-op consumable retired by Tier 0 item 2.
         expect(report.loot.some(item => item.id === 'healing-potion')).toBe(true);
         expect(report.xpGained).toBe(Math.floor(7 * 50 * 0.5) + 35); // base half-XP (elite) + 35 bonus
         expect(report.friendshipReward?.narrative).toMatch(/hag lowers her hands/);
@@ -310,8 +309,8 @@ describe('Phase 102 — Befriendable-enemy Tier-2 expansion', () => {
 
         const report = store.getState().endCombat('friendship');
         expect(report.outcome).toBe('friendship');
-        expect(report.loot.some(item => item.id === 'resonance-crystal')).toBe(true);
-        expect(report.loot.some(item => item.id === 'heart-draught')).toBe(true);
+        // resonance-crystal and heart-draught were no-op consumables retired
+        // by Tier 0 item 2.
         expect(report.loot.some(item => item.id === 'healing-potion')).toBe(true);
         expect(report.xpGained).toBe(Math.floor(21 * 50 * 0.5) + 45); // elite half-XP + 45 bonus
         expect(report.friendshipReward?.narrative).toMatch(/Everyone runs/);
@@ -324,8 +323,8 @@ describe('Phase 102 — Befriendable-enemy Tier-2 expansion', () => {
 
         const report = store.getState().endCombat('friendship');
         expect(report.outcome).toBe('friendship');
-        expect(report.loot.some(item => item.id === 'philosopher-tea')).toBe(true);
-        expect(report.loot.some(item => item.id === 'focus-vial')).toBe(true);
+        // philosopher-tea and focus-vial were no-op consumables retired by
+        // Tier 0 item 2.
         expect(report.loot.some(item => item.id === 'healing-potion')).toBe(true);
         expect(report.loot.some(item => item.id === 'clarity-serum')).toBe(true);
         expect(report.xpGained).toBe(Math.floor(26 * 200 * 0.5) + 80); // boss half-XP + 80 bonus

@@ -15,8 +15,6 @@ import {
     resolveMapEvent, applyDialogueChoice, getMapDefinition, createMapState,
     emptyQuestLog, startQuest, progressQuest, isQuestComplete, completeQuest,
 } from '../index';
-import { applyEffect, lookupEffect } from '../../Effects';
-import { createCharacter } from '../../Character';
 import { createNewGameState } from '../../Game/game.reducer';
 import { GameState } from '../../Game/types';
 import { mockSequentialRng } from '../../test-utils/rng';

@@ -16,7 +16,6 @@ import {
 import { Player } from '../../Character/characters.mock';
 import { createCharacter } from '../../Character';
 import { GameState } from '../types';
-import { applyEffect, lookupEffect} from '../../Effects';
 import { mockSequentialRng } from '../../test-utils/rng';
 
 afterEach(() => vi.restoreAllMocks());

@@ -33,7 +33,7 @@ import type { Effect } from '../../Effects/types';
 import {
     initializeCombatEncounter, rollEncounterDice,
     availableDice,
-    selectMercyChoice as selectEncounterMercyChoice, getCard,
+    selectMercyChoice as selectEncounterMercyChoice,
     handCards, resolveThreatPhase,
     THREAT_WEAKEN_PER_ROLL, THREAT_DENY_AT, THREAT_WEAKEN_FLOOR,
 } from '../combat.engine';
