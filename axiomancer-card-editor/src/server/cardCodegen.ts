@@ -245,9 +245,6 @@ export function serialize(
     if (draft.intentionallyAsymmetric != null) {
         lines.push(`${IND}intentionallyAsymmetric: ${String(draft.intentionallyAsymmetric)},`);
     }
-    if (draft.glyph != null) {
-        lines.push(`${IND}glyph: ${objLiteral(draft.glyph as unknown as Record<string, unknown>)},`);
-    }
     lines.push('};');
     return lines.join('\n');
 }

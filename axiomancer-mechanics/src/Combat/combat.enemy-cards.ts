@@ -74,7 +74,6 @@ export interface EnemyCardFace {
     enemyCleanse?: number;
     swayCleanse?: number;
     premiseShed?: number;
-    glyphShatter?: boolean;
     curseCardId?: string;
     actionText: string;
     stanceHint: string;
@@ -100,7 +99,6 @@ export interface EnemyCard {
     enemyCleanse?: number;
     swayCleanse?: number;
     premiseShed?: number;
-    glyphShatter?: boolean;
     /** Variable-rung telegraph sizing (1-4). */
     rungs?: number;
     /** THE COVETED DIE — legal only on the SECOND card of a boss/unique deck. */
@@ -1272,10 +1270,9 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         damageWeight: 1.45,
         effectId: 'debuff_mark',
         intensity: 4,
-        glyphShatter: true,
-        actionText: 'The bronze frame swings through you like a door through a draught, marks four hinges of you, and one of your glyphs comes off the wall',
+        actionText: 'The bronze frame swings through you like a door through a draught and marks four hinges of you',
         stanceHint: 'Sermon concluded, the hinge-priest recalls that he is mostly hinge.',
-        // Mid-spike at 1.2 (top of mid band), the glyphShatter identity card — a door closing IS a seal breaking. Destroys the player\'s lowest-charge glyph on Overwhelm; the punish that enforces his one-sentence rule.
+        // Mid-spike at 1.2 (top of mid band), the punish that enforces his one-sentence rule.
     },
     'what-shuts-stays-shut': {
         name: 'What Shuts, Stays Shut',
@@ -1323,10 +1320,9 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         damageWeight: 1.45,
         effectId: 'debuff_bleed',
         intensity: 5,
-        glyphShatter: true,
-        actionText: 'The card-drawer ribs slam open and shut on whatever of you is nearest, five times, and a glyph goes with them',
+        actionText: 'The card-drawer ribs slam open and shut on whatever of you is nearest, five times',
         stanceHint: 'Out of patience with citation, the golem remembers its shelving is oak and iron.',
-        // Mid-spike 1.2, the deck\'s lone body stance — the librarian stops citing and starts crushing. glyphShatter identity card: ribs slamming shut read as a seal shattering (preserves the current phase-3 payload exactly).
+        // Mid-spike 1.2, the deck\'s lone body stance — the librarian stops citing and starts crushing.
     },
     'the-errata-read-aloud': {
         name: 'The Errata, Read Aloud',
@@ -2010,8 +2006,7 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         damageWeight: 1.5,
         effectId: 'debuff_bleed',
         intensity: 5,
-        glyphShatter: true,
-        actionText: 'The shelving closes on you like a book on a moth, five ribs of oak and iron, and a glyph goes to powder in the gap',
+        actionText: 'The shelving closes on you like a book on a moth, five ribs of oak and iron',
         stanceHint: 'The Archive files by pressure when citation has failed.',
     },
     'ap-every-door-at-once': {

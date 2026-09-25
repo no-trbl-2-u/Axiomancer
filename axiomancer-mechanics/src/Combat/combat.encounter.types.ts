@@ -262,12 +262,6 @@ export interface CombatThreatEffect {
      *  `premiseMilestoneTotal` (the lifetime milestone-drip counter).
      *  Authorable on any threat phase, branch or linear. */
     premiseShed?: number;
-    /** Phase 33d (GLYPHS pilot) — enemy counterplay against the player's
-     *  GLYPHS zone: mirrors `swayCleanse`/`premiseShed`'s shape exactly.
-     *  When true (and `!doubtId`, and the player controls >= 1 glyph),
-     *  destroys the LOWEST-charge glyph (stable first-on-tie, no RNG).
-     *  Authorable on any threat phase, branch or linear. */
-    glyphShatter?: boolean;
     /** Profane-canon rework — CURSE INJECTION (the StS/Arkham deck-
      *  contamination vector): when the action fires, this curse card is
      *  shuffled into the player's COMBAT deck cycle (persistent collection
@@ -656,14 +650,6 @@ export type CombatEvent =
     | { kind: 'curse-injected'; phaseIndex: number; cardId: string }
     | { kind: 'immolated'; cardId: string; burned: string[] }
     | { kind: 'purged'; cardId: string }
-    // Phase 33d (GLYPHS pilot) — the charge-and-crack seal zone. Inscribe
-    // (PAID line), charge (FREE line or the between-phases tick — the tick
-    // itself is silent, see `processBetweenPhases`), crack (`crackGlyph`),
-    // and the enemy counterplay hook (`glyphShatter`, mirrors the 33a pair).
-    | { kind: 'glyph-inscribed'; glyphId: string; cardId: string }
-    | { kind: 'glyph-charged'; glyphId: string; charges: number; cap: number }
-    | { kind: 'glyph-cracked'; glyphId: string; cardId: string; charges: number }
-    | { kind: 'glyph-shattered'; phaseIndex: number }
     | { kind: 'hand-drawn'; cards: string[] }
     | { kind: 'cards-milled'; cards: string[] }
     | { kind: 'mercy-opened'; message: string }
@@ -704,34 +690,6 @@ export type CombatEvent =
     | { kind: 'add-bit'; addIds: string[]; raw: number; dealt: number }
     | { kind: 'add-struck'; addId: string; name: string; cost: number }
     | { kind: 'combat-ended'; outcome: CombatOutcome };
-
-// ---------------------------------------------------------------------------
-// GLYPHS (Phase 33d pilot) — sandbox-only charge-and-crack seals. See
-// `plan/archive/2026-09-25-trim-t4/plan/phases/phase_33d_glyphs_pilot.md`. No new keyword: both payloads
-// speak existing status verbs (spec 32 v3 §3's 30-keyword cap untouched).
-// ---------------------------------------------------------------------------
-
-/** The closed set of payloads a glyph may carry — existing status verbs
- *  only, no new effect types. `baseIntensity`/`baseAmount` is the FLAT term
- *  printed on the inscribing card; `+ charges` (the accumulated charge
- *  count at crack time) is applied by `crackGlyph`, not printed here. */
-export type GlyphPayload =
-    | { kind: 'poison'; baseIntensity: number; duration: number }
-    | { kind: 'barrier'; baseAmount: number };
-
-/** A charge-and-crack seal on the battlefield: inscribed by a card's PAID
- *  line, charges +1/round (`processBetweenPhases`, capped at `cap`) or via a
- *  FREE-line `CardRider.glyphCharge`, and is cracked (player-initiated, via
- *  the exported `crackGlyph`) for its payload scaled by the accumulated
- *  `charges` — then removed. `id` is `${cardId}-${index-at-inscription}`, so
- *  it stays unique even if the same card is inscribed more than once. */
-export interface GlyphInstance {
-    id: string;
-    cardId: string;
-    payload: GlyphPayload;
-    charges: number;
-    cap: number;
-}
 
 /**
  * Phase 102 (SUMMON) — one member of a foe's brood. Deliberately NOT an
@@ -826,17 +784,10 @@ export interface CombatEncounterState {
      *  PAID play of the same card promotes it to the permanent `persistentZone`.
      *  Optional for back-compat (absent = none). */
     tempZone?: { cardId: string; roundsLeft: number }[];
-    /** Phase 33d (GLYPHS pilot) — the player's live charge-and-crack seals.
-     *  Optional, "absent = none" back-compat convention (same as `tempZone`).
-     *  Ticked +1 charge/round (capped) in `processBetweenPhases`; charged via
-     *  a FREE-line `CardRider.glyphCharge`; cracked via `crackGlyph`; culled
-     *  by the enemy counterplay hook `CombatThreatEffect.glyphShatter`. */
-    glyphs?: GlyphInstance[];
     /** Phase 102 (SUMMON) — the foe's living brood. Optional, "absent = none"
-     *  back-compat (the same convention as `tempZone`/`glyphs`). NEVER part of
+     *  back-compat (the same convention as `tempZone`). NEVER part of
      *  the win condition: `checkImmediateOutcome` and `pendingOutcome` read
-     *  `state.enemy` alone, so clearing every add can no more end a fight than
-     *  cracking every Seal can. Spawned at a phase boundary, bites once per
+     *  `state.enemy` alone, so clearing every add can never end a fight. Spawned at a phase boundary, bites once per
      *  threat phase, cleared by the dieless-but-priced `strikeAdd`. A STAGE's
      *  `cleanse` does NOT clear it — cleanse wipes `enemy.effects`, and a body
      *  is not an affliction. */

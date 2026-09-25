@@ -53,17 +53,14 @@ registerSandboxCards([
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_confusion', appliedTo: 'opponent', duration: 2 }],
     },
-    // Phase 33d (GLYPHS pilot) — a FREE-line glyphCharge fixture for the
-    // spec 33 §3 rule 5 regression below ("FREE lines never touch momentum").
+    // A FREE-line rider fixture for the spec 33 §3 rule 5 regression below
+    // ("FREE lines never touch momentum").
     {
-        id: 'qa-wheel-glyph-charge', name: 'QA Wheel Glyph Charge',
-        philosophicalAspect: 'heart', description: 'wheel-test glyphCharge fixture',
+        id: 'qa-wheel-free-rider', name: 'QA Wheel Free Rider',
+        philosophicalAspect: 'heart', description: 'wheel-test FREE-rider fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 }],
-        free: {
-            glyphCharge: 1,
-            glyphChargeFallback: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 } },
-        },
+        free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 } },
     },
 ]);
 
@@ -136,9 +133,9 @@ describe('Phase 31 — momentum (engine-native)', () => {
         expect(res.state.playerStance).toBe(s.playerStance);
     });
 
-    it('spec 33 §3 rule 5 regression (Phase 33d) — a FREE glyphCharge play never mutates momentumV2', () => {
+    it('spec 33 §3 rule 5 regression — a FREE-line play never mutates momentumV2', () => {
         // `applyStanceAndMomentumV2` (the spec 33 momentum chain) is only
-        // invoked on `useBottom` (PAID) plays — a FREE-line `glyphCharge`
+        // invoked on `useBottom` (PAID) plays — a FREE-line
         // rider is structurally momentum-safe already; this proves it rather
         // than just asserting it.
         let s = open();
@@ -146,9 +143,9 @@ describe('Phase 31 — momentum (engine-native)', () => {
             ...s,
             playerStance: 'heart',
             momentumV2: { color: 'heart', length: 2 },
-            hand: [...s.hand, { uid: 'glyph-free', cardId: 'qa-wheel-glyph-charge' }],
+            hand: [...s.hand, { uid: 'rider-free', cardId: 'qa-wheel-free-rider' }],
         };
-        const res = playCombatCard(s, { uid: 'glyph-free' }, false, undefined, rng);
+        const res = playCombatCard(s, { uid: 'rider-free' }, false, undefined, rng);
         expect(res.events.some(e => e.kind === 'card-played')).toBe(true);
         expect(res.state.momentumV2).toEqual({ color: 'heart', length: 2 });
         expect(res.state.playerStance).toBe('heart');
