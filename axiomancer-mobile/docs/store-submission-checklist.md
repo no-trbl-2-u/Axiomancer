@@ -43,6 +43,7 @@
 - [ ] iOS app icon: 1024x1024 PNG ✓
 - [ ] Android adaptive icons: 1024x1024 foreground/background/monochrome ✓
 - [ ] Web favicon: 192x192 PNG ✓
+- [ ] Play Console hi-res listing icon: 512x512 PNG (`store-assets/android/play_store_512.png`)
 - [ ] All icons follow platform design guidelines
 - [ ] Splash screen assets properly configured ✓
 
