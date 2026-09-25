@@ -1,5 +1,7 @@
 # Prompt: TRIM THE FAT — finish T2a, then T2b
 
+> **Status: EXECUTED 2026-09-25.** §3 steps 1–4 merged (#371–#374; T4 #375). Continue from `plan/2026-09-25-trim-t5-handoff.prompt.md`.
+
 > Written 2026-09-25 at T's direction, mid-T2a. T asked the session to stop,
 > write this handoff, file the residue, and merge the branch **as-is**
 > (owner call: merge without re-running the gates). Main may therefore be

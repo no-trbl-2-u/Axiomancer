@@ -140,20 +140,36 @@ governs progression; only the mobile layout's `x, y` is freed from the
 bottom-to-top ladder. The per-map canvas must be larger than the viewport
 on both axes (D15's per-map canvas size lands with or before this).
 
+**D17 — A chronicle continued mid-fight restarts that fight.** (T,
+2026-09-25.) The fight's dice, hand and HP live in the combat panel and do
+not survive an app restart; only the engine's `currentEncounter` does.
+Continue lands on the map, which reopens the saved foe as a fresh fight
+(bosses keep WITHDRAW sealed). *Rejected:* reopening the prelude (FIGHT /
+WITHDRAW) and resolving the save as a flee. Accepted cost: quitting a
+losing fight resets it to pre-fight HP. Shipped in T3 (#374).
+
 ## Open follow-ups
 
 - Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and
-  sequencing in `plan/2026-09-25-trim-the-fat.spec.md`. **T1 (binaries +
-  dead docs) executed 2026-09-25.** T2a merged 2026-09-25 **unverified**
-  (owner call); finish list and T2b onward in
-  `plan/2026-09-25-trim-t2a-handoff.prompt.md`. T3–T5 not started. §5 of that spec is
+  sequencing in `plan/2026-09-25-trim-the-fat.spec.md`. **T1–T4 merged
+  2026-09-25** (T1 #369, T2a #370 + fix `e073bb6e`, T2a baselines #371,
+  T2a residue #372, T2b #373, T3 #374, T4 #375). **T5 is next**; pick-up
+  prompt: `plan/2026-09-25-trim-t5-handoff.prompt.md`. §5 of the spec is
   fully answered (D4–D10).
-  Pick-up prompt for the execution session:
-  `plan/2026-09-25-trim-the-fat.prompt.md`.
 - Map re-authoring brief (D2) — parameters set by D16 (4 regions, ~20
   nodes/map, spread in all directions). Graph first, backdrop second (D15).
 - Backdrop-anchored map renderer (D15) — nodes in image coordinates,
-  art pans/zooms with the node layer. Its own phase, after D2.
+  art pans/zooms with the node layer. Its own phase, after D2 — or folded
+  into D2, since D16's per-map canvas is the same change.
+- Act 1 map art (2026-09-25) — T generated a square four-quadrant Doré-style
+  engraving (coast/harbour, great-tree forest, mountain fastness, candlelit
+  underworld) from the prompt in this session; judged a fit (no frame or
+  text, web-shaped roads, ~20 landmarks per quadrant, crossings at the
+  seams). Before use: upscale to ≥5000px (check the upscaler keeps the
+  hatching), crop along the natural seams with overlap rather than the
+  exact centre lines, plate/halo nodes in the dark underworld quadrant, and
+  add a `provenance.json` entry (tool, model, prompt, seed). Suggested Act 1
+  order (not decided): coast → forest → mountains → underworld.
 - Scaling formula (D1 step 3) — D4 settles the direction (per-stat
   hooks); the exact stat-to-quantity mapping is designed with the hook.
 - Trim spec §5.3 / §5.6 / §5.7 answered 2026-09-25 as D8 / D9 / D10.
