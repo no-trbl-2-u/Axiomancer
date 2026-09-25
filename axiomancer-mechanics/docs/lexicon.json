@@ -126,7 +126,7 @@
       "pattern": "Lemma[^\\n]{0,20}Thesis|Thesis[^\\n]{0,20}Theorem",
       "replacement": "Splinter (R-14, rank 3)",
       "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-14)",
-      "note": "scoped to the rank-ladder enumeration context (adjacent to Lemma or Theorem) — 'thesis' is common English (academic thesis) and false-positives unscoped, e.g. docs/references/all-paradoxes-reference.md's unrelated math prose"
+      "note": "scoped to the rank-ladder enumeration context (adjacent to Lemma or Theorem) — 'thesis' is common English (academic thesis) and false-positives unscoped, e.g. the (archived) docs/references/all-paradoxes-reference.md's unrelated math prose"
     },
     {
       "id": "theorem",

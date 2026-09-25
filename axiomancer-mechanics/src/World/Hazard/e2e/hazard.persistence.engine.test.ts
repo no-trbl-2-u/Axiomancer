@@ -11,7 +11,7 @@
  * hazard library) was retired when the Hazard engine was re-aligned to the
  * mobile v2 living rules — its hooks encoded the superseded Phase-131
  * hazard identities and the old `combinedThresholds` card shape. See
- * `docs/hazard-v2-vs-mechanics-divergence.md`. The route-blocking and
+ * `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/hazard-v2-vs-mechanics-divergence.md` (archived 2026-09-25). The route-blocking and
  * navigation coverage below is independent of the minigame engine and is
  * retained.
  */

@@ -5,7 +5,7 @@
 > **Status:** Spec 07 shipped. Type, factory, six AI strategies, a 15-enemy
 > library, weighted loot tables, and a per-map encounter generator are wired
 > in. Future work (multi-enemy combat, Spec 10 difficulty bias) is tracked in
-> [`specs/07-enemy-content-and-ai.md`](../specs/07-enemy-content-and-ai.md).
+> [`specs/07-enemy-content-and-ai.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/07-enemy-content-and-ai.md) (archived 2026-09-25).
 
 ## Type Shape
 

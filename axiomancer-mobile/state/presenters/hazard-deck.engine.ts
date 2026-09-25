@@ -16,7 +16,7 @@
  * Deck MUTATION (remove-card) is deliberately NOT implemented here:
  * the brief (Phase 126 §3) forbids local deck-mutation rules, and
  * `axiomancer-mechanics` exposes no remove-card action yet (see
- * `docs/hazard-v2-vs-mechanics-divergence.md` — only
+ * `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/hazard-v2-vs-mechanics-divergence.md` (archived 2026-09-25) — only
  * `appendAcquiredCard` exists, no counterpart). The VM therefore
  * marks acquired cards as the removable set and carries an explicit
  * `removeBlocked` flag so the screen can present a graceful blocked

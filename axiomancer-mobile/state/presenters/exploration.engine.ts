@@ -177,7 +177,7 @@ export interface ExplorationViewModel {
 }
 
 // Exploration step-card icons. Closes the [3.5] DRIFT row from
-// `docs/mechanics-ui-audit-2026-05-22-exploration.md` row 10:
+// `plan/archive/2026-09-25-trim-t1/axiomancer-mobile/docs/mechanics-ui-audit-2026-05-22-exploration.md` row 10 (archived 2026-09-25):
 // `encounter` was previously `'flee'` (the same glyph the combat
 // modal uses for the FLEE button), making the encounter
 // step-card read "this lets you flee" rather than "this starts

@@ -247,8 +247,6 @@ Focused guides with runnable code samples for each major module:
 |--------|-----------|--------|
 | Character | [quickstart-character.md](./quickstart-character.md) | `createCharacter`, presets, stat allocation, card learning |
 | Combat | [quickstart-combat.md](./quickstart-combat.md) | `initializeCombatEncounter`, `playCombatCard`, threat phases, outcomes, sim |
-| Items | [quickstart-items.md](./quickstart-items.md) | `dropItem`, `previewTemplateAtRarity`, equip, shop, set bonuses |
-| World | [quickstart-world.md](./quickstart-world.md) | `resolveMapEvent`, MapEventPool authoring, `alignmentDelta` |
 
 ---
 
@@ -260,5 +258,5 @@ Focused guides with runnable code samples for each major module:
 | Understand a module's design | `docs/<module>.md` (per the table in §1) |
 | Add a hermetic test | [`docs/testing.md`](./testing.md) |
 | Re-ground stale consumer types after a bump | [`CHANGELOG.md`](../CHANGELOG.md) `[unreleased]` Migration notes (Phase 61 — the 9-row consumer-side re-grounding table covers `getCoastalMap` / `WorldMap` / `Encounter.enemy` / `DialogueChoice.id`/`.label` / `DialogueNode.speaker` / `Character.mana`/`.maxMana` / `ActiveEffect.id`/`.name` / `EffectStatTarget` / `GameState` index signature) |
-| See the per-phase shipping history | [`CHANGELOG.md`](../CHANGELOG.md), [`RELEASES.md`](../RELEASES.md) |
+| See the per-phase shipping history | [`CHANGELOG.md`](../CHANGELOG.md) |
 | File a finding / feature idea | `braindump/BRAINDUMP.md` for half-formed ideas |

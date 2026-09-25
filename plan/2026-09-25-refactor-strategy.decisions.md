@@ -74,16 +74,34 @@ draft, hidden read, STAKE, momentum wheel) and its mobile UI are
 deleted; tests and sims pinned to OFF are rewritten to the shipped
 model.
 
+**D8 — GLYPHS: cut. Card upgrades: defer.** The GLYPHS pilot (~250
+engine LOC + 4 mobile files, zero library cards) is deleted in T5.
+`card-upgrades.ts` stays until the card rework (D1 step 4) decides its
+grant path.
+
+**D9 — Resolved rows leave `## Pending`.** In AUDIT / CRITIQUE /
+PHASE_CANDIDATES, rows already resolved move to Done or `plan/archive/`
+in T4. This is the `/oversight` ruling `/consolidate` deferred on
+2026-09-02.
+
+**D10 — Retire all eight zero-invocation tuning/playtest commands.**
+deck-tuning, hazard-tuning, world-tuning, combat-ux-tuning, critic-loop,
+deep-playtest, hermes-playtest, dep-upgrades: commands and skill docs
+are deleted in T5; the playtest matrix stays as npm scripts. A `/jot`
+note records the intent to rebuild them once the game mechanics have a
+firmer footing.
+
 ## Open follow-ups
 
 - Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and
-  sequencing in `plan/2026-09-25-trim-the-fat.spec.md`. Deletions not
-  started; §5 of that spec lists the owner decisions gating Tier 3.
+  sequencing in `plan/2026-09-25-trim-the-fat.spec.md`. **T1 (binaries +
+  dead docs) executed 2026-09-25**; T2–T5 not started. §5 of that spec is
+  fully answered (D4–D10).
   Pick-up prompt for the execution session:
   `plan/2026-09-25-trim-the-fat.prompt.md`.
 - Map re-authoring brief (D2) — needs the region count and target node
   count per map before authoring.
 - Scaling formula (D1 step 3) — D4 settles the direction (per-stat
   hooks); the exact stat-to-quantity mapping is designed with the hook.
-- Still open from the trim spec §5: card upgrades and GLYPHS (wire or
-  cut), resolved rows under Pending, the tuning/playtest command set.
+- Trim spec §5.3 / §5.6 / §5.7 answered 2026-09-25 as D8 / D9 / D10.
+  Nothing in §5 remains open.

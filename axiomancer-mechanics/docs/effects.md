@@ -4,7 +4,7 @@
 
 Developer reference for every status effect in Axiomancer Mechanics. For an individual
 effect deep-dive (data fields, combat interaction, test cases) see the per-effect
-documents in [`docs/effects/`](./effects/).
+documents formerly in `docs/effects/` (archived 2026-09-25 to `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/effects/`).
 
 ---
 
@@ -490,7 +490,7 @@ no resist roll. Switching stances removes the previous stance's self-buff immedi
 
 ## Complete Effects Table — Buffs (40)
 
-Full per-effect documentation: [`docs/effects/buffs/`](./effects/buffs/)
+Full per-effect documentation (archived 2026-09-25): `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/effects/buffs/`
 
 | ID | Name | Tier | Category | Dur | Stack | resistedBy | resistDR | Payload Summary |
 |----|------|------|----------|-----|-------|-----------|---------|-----------------|
@@ -521,7 +521,7 @@ Full per-effect documentation: [`docs/effects/buffs/`](./effects/buffs/)
 
 ## Complete Effects Table — Debuffs (48)
 
-Full per-effect documentation: [`docs/effects/debuffs/`](./effects/debuffs/)
+Full per-effect documentation (archived 2026-09-25): `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/effects/debuffs/`
 
 | ID | Name | Tier | Category | Dur | Stack | resistedBy | resistDR | Payload Summary |
 |----|------|------|----------|-----|-------|-----------|---------|-----------------|
@@ -671,6 +671,6 @@ for the matching card payloads.
 The Specs 01 / 04 / 05 / 08 work that this section used to track has
 shipped. The remaining open work for the effects engine is tracked
 in `plan/AUDIT.md` and `plan/CRITIQUE.md`; per-effect doc placeholders
-(the "PENDING (Phase 2)" notes in `docs/effects/buffs/*.md` and
+(the "PENDING (Phase 2)" notes in the archived `docs/effects/buffs/*.md` and
 `debuffs/*.md`) are a separate authoring cleanup that's deferred until
 a polish pass touches the relevant buff/debuff entries.

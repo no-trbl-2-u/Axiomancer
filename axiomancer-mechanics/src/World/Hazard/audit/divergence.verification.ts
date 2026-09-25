@@ -2,7 +2,7 @@
  * Hazard Minigame Divergence Verification
  *
  * Systematic verification of current mechanics implementation against
- * documented mobile behavior in `docs/hazard-v2-vs-mechanics-divergence.md`.
+ * documented mobile behavior in `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/hazard-v2-vs-mechanics-divergence.md` (archived 2026-09-25).
  * Read-only analysis to identify any implementation gaps.
  */
 

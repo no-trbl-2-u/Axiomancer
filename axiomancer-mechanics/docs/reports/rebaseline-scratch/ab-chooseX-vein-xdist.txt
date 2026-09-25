@@ -1,9 +1,0 @@
-WS7.2 chosen-X probe — post-clamp X per policy (all stages x enemies x seeds 1..20 x HP depths 100/60/30%)
-  greedy        n=1080 modal=30 mean=29.56 range=[26,30] distinctX=2
-  blind         n=1080 modal=30 mean=29.56 range=[26,30] distinctX=2
-  dot-weaver    n=1080 modal=3 mean=3 range=[3,3] distinctX=1
-  control-lock  n=1080 modal=3 mean=3 range=[3,3] distinctX=1
-  aggro-brute   n=1080 modal=3 mean=3 range=[3,3] distinctX=1
-  turtle        n=1080 modal=3 mean=3 range=[3,3] distinctX=1
-  chaos         n=1080 modal=18 mean=113.46 range=[3,611] distinctX=171
-  mercy-seeker  n=1080 modal=3 mean=3 range=[3,3] distinctX=1

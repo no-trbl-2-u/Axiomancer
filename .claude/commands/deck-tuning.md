@@ -201,7 +201,7 @@ The tunable surface is TIERED. Work from the freest tier inward:
   candidate ships by actually moving it into the recipe with real
   color-law bookkeeping in the same PR, not by leaving the swap flag on.
   Before designing arms, read the per-card design
-  estimates ledger (`docs/reports/swap-pool-estimates-2026-07-18.json`) and
+  estimates ledger (`docs/reports/swap-pool-estimates-2026-07-18.json` — deleted 2026-09-25, deleted 2026-09-25) and
   report estimate-vs-measured deltas — that calibrates the next authoring
   pass. Standing ruling, same date: TRIMS of never-played cards are PAUSED —
   swap telemetry replaces the trim conversation until those cards have real
@@ -410,7 +410,7 @@ gate blocks building it elsewhere (THE OPEN GATE ¶5).
 - `src/Cards/cards.library.ts` — the literals you may eventually promote into
   or (guardedly) nudge.
 - Historical swap-program artifacts
-  (`docs/reports/swap-pool-estimates-2026-07-18.json`,
+  (`docs/reports/swap-pool-estimates-2026-07-18.json` — deleted 2026-09-25,
   `plan/tuning/2026-07-19-swap-pool-measurement-residue.md`) describe
   the RETIRED pre-canon library — read for method precedent only;
   their card verdicts do not transfer to the Profane Canon.
@@ -625,9 +625,9 @@ only; interpretation stays here).
 (load-bearing doctrine, incl. the 2026-07-08 starter-preset win-rate curve) ·
 swap program + verdicts: `docs/reports/swap-pool-fanout-2026-07-18.md`,
 `plan/tuning/2026-07-19-swap-pool-measurement-residue.md` · estimates
-ledger: `docs/reports/swap-pool-estimates-2026-07-18.json` · Swap-Pool
+ledger: `docs/reports/swap-pool-estimates-2026-07-18.json` (deleted 2026-09-25) · Swap-Pool
 Atlas (owner review page):
-`docs/reports/preset-metrics/2026-07-18-swap-pool-atlas.html` · pool-ratio
+`docs/reports/preset-metrics/2026-07-18-swap-pool-atlas.html` (deleted 2026-09-25) · pool-ratio
 targets in §4a (from the retired combat-tuning skill; re-derive from the
 current card library before relying on them).
 

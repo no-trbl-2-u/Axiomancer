@@ -145,8 +145,8 @@ Agent-graded walkthrough at `automation/scripts/walkthroughs/codex-unlock.*`.
 **Per-module quickstart pages (Phase 87).** Four focused guides with
 runnable code samples: [`quickstart-character.md`](./quickstart-character.md),
 [`quickstart-combat.md`](./quickstart-combat.md),
-[`quickstart-items.md`](./quickstart-items.md),
-[`quickstart-world.md`](./quickstart-world.md).
+and the archived `quickstart-items.md` / `quickstart-world.md`
+(`plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/`, 2026-09-25).
 
 ### Events (Beta)
 
@@ -338,7 +338,7 @@ reality.
   errors to `undefined` for UI-tier consumption (unknown templateId,
   level-too-low, unique-rarity on regular template). Default rng =
   `() => 0.5` for deterministic per-tuple previews. See
-  `docs/items.md` § "Previewing rolled mods (library / catalog
+  the archived `docs/items.md` § "Previewing rolled mods (library / catalog
   views — Phase 75)".
 - `previewTemplateAtAllRarities(templateId, playerLevel, rng?)` —
   Beta (Phase 76). Batch wrapper around `previewTemplateAtRarity`
@@ -362,7 +362,7 @@ reality.
   `Character → Character` reducers; bad input (negative price,
   insufficient funds, missing item) returns the input unchanged.
   `ShopWare` and `ShopInventory` types ride on `VillagePayload.shop?`
-  and the resolved village event's `shop?` field. See `docs/items.md`
+  and the resolved village event's `shop?` field. See the archived `docs/items.md`
   "Shop economy" for the schema and the authored shop tables.
 
 - **Set Items (Phase 54 / Spec 05e):** Beta. Equipping multiple

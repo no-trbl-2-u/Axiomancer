@@ -5,7 +5,7 @@
  * source (`../axiomancer-mobile/state/hazard/`, now only store actions).
  * The package exports the exact mobile surface; mobile has deleted its
  * local engine and consumes these exports. See
- * `docs/hazard-v2-vs-mechanics-divergence.md`.
+ * `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/hazard-v2-vs-mechanics-divergence.md` (archived 2026-09-25).
  */
 
 // ── Engine types ───────────────────────────────────────────────────────────

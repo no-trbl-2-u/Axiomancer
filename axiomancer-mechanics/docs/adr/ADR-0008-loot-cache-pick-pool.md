@@ -8,7 +8,7 @@
   rules.
 - Date: 2026-07-04
 - Supersedes: the original sealed-fate + free-probe loot-cache rule (never ADR'd)
-- Related: braindump `2026-07-03-lockpicking-treasure-minigame.md` (Option B chosen), `docs/encounters/loot-cache.md` (live rules)
+- Related: braindump `2026-07-03-lockpicking-treasure-minigame.md` (Option B chosen; archived 2026-09-25 to `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/braindump/`), `docs/encounters/loot-cache.md` (live rules)
 
 ## Context
 
