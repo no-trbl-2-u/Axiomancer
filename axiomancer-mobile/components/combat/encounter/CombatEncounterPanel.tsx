@@ -32,7 +32,7 @@ import Svg, { Circle, Defs, Line, Polygon, RadialGradient, Stop } from 'react-na
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
-    startTurn, endTurn, discardCombatCard, playSignatureSkill, crackGlyph, strikeAdd,
+    startTurn, endTurn, discardCombatCard, playSignatureSkill, strikeAdd,
     getFloatingDiceColors,
     selectEncounterMercyChoice, selectCapitulationChoice, buildCombatSummary,
     getLogger,
@@ -54,7 +54,7 @@ import { getEncounterEnemyArt } from '@/assets/images/enemies';
 import {
     INTENT_ICONS, buildCombatViewModel, rewardCardVMs, selectEnemyActionCard, STANCE_COLORS,
     selectCombatLogHistory, COMBAT_LOG_TOGGLE_TEXT, COMBAT_LOG_TOGGLE_A11Y, COMBAT_LOG_CLOSE_A11Y,
-    type CombatCardVM, type CombatEffectChipVM, type CombatSealVM, type CombatAddVM, type CombatSignatureVM, type EnemyActionCardVM,
+    type CombatCardVM, type CombatEffectChipVM, type CombatAddVM, type CombatSignatureVM, type EnemyActionCardVM,
 } from '@/state/presenters/combat-encounter.engine';
 import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
 import { useGameState, useGameStore } from '@/state/GameStoreProvider';
@@ -380,10 +380,8 @@ export function CombatEncounterPanel({
             return next;
         });
     }, []);
-    // Phase 50 — a tapped Seal chip's CRACK/WAIT confirm sheet (mirrors the
-    // PLEA/mercy modal pattern per Phase 49 decision 2).
-    const [sealConfirm, setSealConfirm] = useState<CombatSealVM | null>(null);
-    // Phase 102 (SUMMON) — the add-strike confirm sheet, mirroring `sealConfirm`.
+    // Phase 102 (SUMMON) — the add-strike confirm sheet (mirrors the
+    // PLEA/mercy modal pattern).
     const [addConfirm, setAddConfirm] = useState<CombatAddVM | null>(null);
     // Signature-rune info popup (long-press / unaffordable tap) + pilgrim modal.
     const [sigInfo, setSigInfo] = useState<CombatSignatureVM | null>(null);
@@ -607,13 +605,9 @@ export function CombatEncounterPanel({
     const onReprisalCancel = useCallback(() => setReprisalPrompt(null), []);
     const onDiscard = useCallback((uid: string) => { apply((s) => discardCombatCard(s, uid).state); unstageUid(uid); }, [apply, unstageUid]);
     const onSignature = useCallback((id: string) => apply((s) => playSignatureSkill(s, id).state), [apply]);
-    // Phase 50 — tap a Seal chip -> open the confirm sheet; CRACK commits
-    // `crackGlyph` (dieless, mirrors onSignature's shape); WAIT just closes.
-    const onSeal = useCallback((s: CombatSealVM) => setSealConfirm(s), []);
     const onAdd = useCallback((a: CombatAddVM) => setAddConfirm(a), []);
-    // Phase 102 — `strikeAdd` is dieless but PRICED (unlike `crackGlyph`, whose
-    // die was paid at inscription), so this reads exactly like `onCrackSeal`
-    // but the sheet above it has to quote a cost. The engine is the gate, not
+    // Phase 102 — `strikeAdd` is dieless but PRICED, so the sheet above it
+    // has to quote a cost. The engine is the gate, not
     // this callback: an unaffordable strike returns an `effect-fizzled` event
     // rather than mutating, so a stale sheet can never overdraw Conviction.
     const onStrikeAdd = useCallback(() => {
@@ -621,11 +615,6 @@ export function CombatEncounterPanel({
         apply((s) => strikeAdd(s, addConfirm.id).state);
         setAddConfirm(null);
     }, [apply, addConfirm]);
-    const onCrackSeal = useCallback(() => {
-        if (!sealConfirm) return;
-        apply((s) => crackGlyph(s, sealConfirm.id).state);
-        setSealConfirm(null);
-    }, [apply, sealConfirm]);
     const onEndPhase = useCallback(() => {
         // WI-3 — the synchronous gate: a second tap in the same frame (touch
         // double-tap) finds the lock already held and is dropped, so exactly one
@@ -789,7 +778,6 @@ export function CombatEncounterPanel({
                     resolving={resolving}
                     onInspect={onInspect}
                     onChip={setTipEffect}
-                    onSeal={onSeal}
                     onAdd={onAdd}
                     onSignatureInfo={setSigInfo}
                     onPlayerInspect={onPlayerInspect}
@@ -965,26 +953,9 @@ export function CombatEncounterPanel({
                 </View>
             )}
 
-            {/* Phase 50 — Seal crack confirm sheet: reuses the PLEA/mercy centered-modal
-                shape exactly (Phase 49 decision 2), plain View backdrop (no dismiss-by-tap)
-                so the player's tap is the explicit CRACK/WAIT choice, not a stray dismiss. */}
-            {sealConfirm && (
-                <View style={styles.backdrop} testID="combat-seal-confirm">
-                    <View style={[styles.modal, { borderColor: sealConfirm.color }]}>
-                        <Text style={styles.modalTitle}>Crack the {sealConfirm.label}?</Text>
-                        <Text style={styles.modalSub}>{sealConfirm.previewText} · {sealConfirm.charges}/{sealConfirm.cap} charges</Text>
-                        <View style={styles.modalBtns}>
-                            <Pressable onPress={onCrackSeal} testID="combat-seal-crack" accessibilityRole="button" accessibilityLabel={`Crack for ${sealConfirm.previewText}`} style={[styles.modalBtn, { borderColor: '#5bbf6a' }]}><Text style={[styles.modalBtnText, { color: '#5bbf6a' }]}>CRACK</Text></Pressable>
-                            <Pressable onPress={() => setSealConfirm(null)} testID="combat-seal-wait" accessibilityRole="button" accessibilityLabel="Wait, don't crack yet" style={[styles.modalBtn, { borderColor: AXM.ash }]}><Text style={[styles.modalBtnText, { color: AXM.ash }]}>WAIT</Text></Pressable>
-                        </View>
-                    </View>
-                </View>
-            )}
-
-            {/* Phase 102 (SUMMON) — the add-strike confirm sheet. Same shape as the
-                Seal sheet above so the two dieless board actions are one learned
-                gesture, with one difference that matters: this one has a PRICE,
-                so the price is in the sheet and the STRIKE button is visibly
+            {/* Phase 102 (SUMMON) — the add-strike confirm sheet. Same centered-modal
+                shape as the PLEA/mercy sheet, with one difference that matters: it
+                has a PRICE, so the price is in the sheet and the STRIKE button is visibly
                 refused (never silently inert) when the player cannot pay it. */}
             {addConfirm && (
                 <View style={styles.backdrop} testID="combat-add-confirm">

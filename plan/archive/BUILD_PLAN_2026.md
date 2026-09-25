@@ -1690,7 +1690,7 @@
       WI-2's illustrative +10pp — the pooled metric mixes payload kinds
       (only the poison Seal's crack lands as an enemy status). Mean rounds
       moved as anticipated at every crackAt policy. Report:
-      `docs/reports/glyphs-crackat-promotion-2026-08-23.md`.
+      `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/reports/glyphs-crackat-promotion-2026-08-23.md`.
 
 - [x] Phase 39 — Post-D8 flag-on curve repair + library theme-symmetry
       restoration (shipped `8d50591e`). Restored 7 of the D8 "dead 10"

@@ -34,89 +34,11 @@ export interface SandboxCardSet {
     overrides?: ReadonlyArray<{ cardId: string; patch: SandboxCardPatch }>;
 }
 
-// ─── GLYPHS_51_PILOT (Phase 51) ───────────────────────────────────────────────
-// Phase 33d's GLYPHS pilot (charging Seals: state.glyphs, crackGlyph) is still
-// fully live in the engine — only its card content was wiped by the Profane
-// Canon reset (84ef85bd, 2026-08-08), leaving `state.glyphs` unreachable in
-// real play (mobile's Phase 50 Seal chip row has never rendered outside a
-// hand-built test state). This re-authors a LEAN 2-card set — one Seal per
-// payload, PAID inscribe only, no FREE-line "pump" card this time (the
-// passive +1/round charge tick in `processBetweenPhases` alone exercises the
-// ripening dilemma) — so Phase 51's sim `crackAt` policy heuristic has
-// something real to crack. Numbers reused verbatim from 33d (charge cap 3,
-// poison base intensity 1 / duration 2, barrier base amount 2) per
-// `cards.pricing.ts`'s `glyphExpectedValue` — the anchor for both these
-// cards' pricing and the `crackAt` default in `combat.sim-policies.ts`.
-// Sandbox-only per Gate-4 (33d's own binding decision): register -> A/B ->
-// promote still gates any library move; this phase's evidence is for the
-// crackAt HEURISTIC, not a promotion verdict for these 2 cards.
-
-const thePlagueSeal: Card = {
-    id: 'the-plague-seal',
-    theme: 'rot',
-    name: 'The Plague Seal',
-    philosophicalAspect: 'body',
-    description:
-        'Wax pressed into the wound while it still weeps, and the parish ' +
-        'keeps the impression on file. It does not cure. It does not need ' +
-        'to. Every stamp is a debt with a date on it, and the date is yours ' +
-        'to choose.',
-    tier: 2, rank: 2, cardType: 'spell',
-    targetType: 'enemy',
-    paidSummary:
-        'Inscribe a Poison Seal (charges +1 each round, cap 3). Crack it ' +
-        'later to inflict POISON scaled by its charges (base 1, 2 turns).',
-    // pts: glyph EV — poison i1 d2, cap 3 (expected charges cap/2 = 1.5) =
-    // 5.34, × 0.6 GLYPH_CRACK_DISCOUNT (fires later, not guaranteed at print
-    // time) = 3.20 + FREE MARK i1 d2 (1.5) ≈ 4.70 → Lemma.
-    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 2 } },
-    glyph: { payload: { kind: 'poison', baseIntensity: 1, duration: 2 }, cap: 3 },
-    addedIn: '2026-08-23',
-    tags: ['rot', 'glyph', 'seal', 'dot'],
-};
-
-const theHoarwatchSigil: Card = {
-    id: 'the-hoarwatch-sigil',
-    theme: 'vigil',
-    name: 'The Hoarwatch Sigil',
-    philosophicalAspect: 'mind',
-    description:
-        'Cut into the gatepost the winter the garrison starved, and left ' +
-        'there out of spite more than hope. The frost has been filling in ' +
-        'the grooves ever since, patient as a debt collector. Break it when ' +
-        'the wall needs telling what to remember.',
-    tier: 1, rank: 1, cardType: 'spell',
-    targetType: 'self',
-    paidSummary:
-        'Inscribe a Barrier Seal (charges +1 each round, cap 3). Crack it ' +
-        'later for GUARD scaled by its charges (base 2, persists).',
-    // pts: glyph EV — barrier base 2, cap 3 (expected charges cap/2 = 1.5) =
-    // 1.17, × 0.6 GLYPH_CRACK_DISCOUNT = 0.70 + FREE THORNS i1 d2 (1.5) ≈
-    // 2.20 → Doxa.
-    free: { applyEffect: { effectId: 'buff_thorns', intensity: 1, duration: 2, to: 'self' } },
-    glyph: { payload: { kind: 'barrier', baseAmount: 2 }, cap: 3 },
-    addedIn: '2026-08-23',
-    tags: ['vigil', 'glyph', 'seal', 'defense'],
-};
-
 /**
- * The registry of named sets. Empty at the canon reset — `/deck-tuning`
- * authors the next generation of measurement-seat candidates here.
- * `GLYPHS_51_PILOT` (Phase 51) is the first entry post-reset.
+ * The registry of named sets. Empty since the GLYPHS pilot was cut (trim T5,
+ * 2026-09-25); new measurement-seat candidates are authored here.
  */
-export const SANDBOX_CARD_SETS: Record<string, SandboxCardSet> = {
-    GLYPHS_51_PILOT: {
-        id: 'GLYPHS_51_PILOT',
-        name: 'GLYPHS 51 pilot — charging Seals, re-authored',
-        description:
-            'Re-authors the 33d-era GLYPHS pilot the Profane Canon reset wiped: ' +
-            '2 inscribe-only Seal cards (rot poison, vigil barrier) so the ' +
-            'sim\'s new crackAt policy heuristic has something to crack. No ' +
-            'FREE-line pump card — the passive +1/round charge tick alone ' +
-            'exercises the ripening dilemma. Sandbox-only (Gate-4).',
-        cards: [thePlagueSeal, theHoarwatchSigil],
-    },
-};
+export const SANDBOX_CARD_SETS: Record<string, SandboxCardSet> = {};
 
 /** All registered sets (stable insertion order). */
 export function listSandboxSets(): SandboxCardSet[] {

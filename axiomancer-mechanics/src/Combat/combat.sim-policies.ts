@@ -19,7 +19,7 @@
  * status-over-strike, damage preview) — never consumes rng, so the seeded
  * engine stream is untouched there. Since the D7 flag collapse (2026-09-25)
  * deleted the hidden-stance draft and THE STAKE, `greedy` and `blind` differ
- * only in `crackAt` / `strikeAddsAt` (whatever the entries below set).
+ * only in `strikeAddsAt` (whatever the entries below set).
  */
 
 import { getCardById } from '../Cards/cards.library';
@@ -81,26 +81,12 @@ export interface CombatSimPolicy {
      */
     chooseX?(state: CombatEncounterState, card: CombatCard, range: { min: number; max: number }, rng: () => number): number;
     /**
-     * Phase 51 — a charge-count threshold for the GLYPHS `crackAt` heuristic
-     * (an optional decision seam): once a
-     * glyph the player controls has `charges >= crackAt`, the witness cracks
-     * it (dieless, no source/die consumed). Absent = never cracks — the
-     * strict default, so every policy without this field is byte-identical
-     * to its pre-Phase-51 behavior. Multiple eligible glyphs: the
-     * highest-charge one wins; ties resolve to `state.glyphs` array order
-     * (mirrors `glyphsOfKind`'s own deterministic, no-RNG doctrine in
-     * `combat.engine.ts`). Read by `upgradeablePlayPhase`
-     * (`combat.encounter.sim.ts`).
-     */
-    crackAt?: number;
-    /**
      * Phase 102 (SUMMON) — the minimum PROJECTED post-soak add damage that
      * justifies paying `STRIKE_ADD_COST`. Once
      * `projectIncomingThreat(state).addNetDamage >= strikeAddsAt` and
      * Conviction covers the price, the witness strikes the highest-bite living
      * add. Absent = never strikes — the strict default, so every policy
-     * without this field is byte-identical to its pre-Phase-102 behavior
-     * (`crackAt`'s contract, mirrored deliberately).
+     * without this field is byte-identical to its pre-Phase-102 behavior.
      *
      * The threshold reads "clear whatever the brood still gets through the
      * wall": a turtle behind a live wall projects `addNetDamage === 0` and
@@ -259,9 +245,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         mercyChoice: 'spare',
         capitulationChoice: 'continue',
         chooseX: (_s, card, range) => greedyChooseX(card, range),
-        // Phase 51 — payoffs-on-time is literally greedy's description; a
-        // ripened Seal is exactly the kind of timed payoff it already reads.
-        crackAt: 2,
         strikeAddsAt: 1,
     },
     blind: {
@@ -275,8 +258,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         mercyChoice: 'spare',
         capitulationChoice: 'continue',
         chooseX: (_s, card, range) => greedyChooseX(card, range),
-        // Phase 51 — same payoff-timing doctrine as greedy.
-        crackAt: 2,
         strikeAddsAt: 1,
     },
     'dot-weaver': {
@@ -301,9 +282,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         convictionThreshold: 7,
         mercyChoice: 'exploit',
         capitulationChoice: 'continue',
-        // Phase 51 — the erosion/poison-first witness; the poison Seal is its
-        // natural line.
-        crackAt: 2,
         strikeAddsAt: 1,
     },
     'control-lock': {
@@ -324,9 +302,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         convictionThreshold: 8,
         mercyChoice: 'spare',
         capitulationChoice: 'continue',
-        // Phase 51 — denial witness; a persistent barrier synergizes with
-        // holding a lock game.
-        crackAt: 2,
         strikeAddsAt: 1,
     },
     'aggro-brute': {
@@ -360,9 +335,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         capitulationChoice: 'continue',
         // The outlast temperament commits the least blood the card allows.
         chooseX: (_s, _card, range) => range.min,
-        // Phase 51 — the outlast/barrier witness; a persistent Seal payoff is
-        // its natural line.
-        crackAt: 2,
         strikeAddsAt: 1,
     },
     chaos: {

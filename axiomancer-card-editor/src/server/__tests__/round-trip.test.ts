@@ -4,7 +4,8 @@
  * The claim under test: saving an existing card through the editor changes
  * nothing except what the user edited. It was false — `CardDraft` carried 19
  * of the `Card` type's 24 fields, so an upsert silently deleted `theme`,
- * `persistentEffect`, `paidSummary`, `intentionallyAsymmetric` and `glyph`,
+ * `persistentEffect`, `paidSummary`, `intentionallyAsymmetric` and `glyph`
+ * (the last cut with GLYPHS, trim T5 2026-09-25),
  * and the codegen dropped the `// pts:` pricing arithmetic (content-pipelines
  * audit, 2026-08-22).
  *
@@ -83,20 +84,6 @@ describe('CardDraft carries every Card field', () => {
             }
         },
     );
-
-    it('glyph survives the round trip (no live carrier — synthetic)', () => {
-        // `glyph` is a real `Card` field with no card using it yet, and no form
-        // control. That combination is exactly why its loss went unnoticed:
-        // nothing in the library would have failed. A synthetic carrier proves
-        // the codegen path so the first authored glyph does not discover this.
-        expect(cardLibrary.some((c) => c.glyph != null)).toBe(false);
-        const synthetic: Card = {
-            ...cardLibrary[0],
-            id: 'round-trip-glyph-probe',
-            glyph: { payload: { kind: 'poison', baseIntensity: 2, duration: 3 }, cap: 3 },
-        };
-        expect(roundTrip(synthetic).glyph).toEqual(synthetic.glyph);
-    });
 
     it('synergy survives in full, including statePredicate and rider', () => {
         // The allowlist-shaped emitter dropped these two: a hand-written list of

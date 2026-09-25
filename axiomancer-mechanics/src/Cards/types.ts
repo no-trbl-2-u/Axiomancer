@@ -6,7 +6,6 @@
  */
 
 import type { CardTheme } from './card-themes';
-import type { GlyphPayload } from '../Combat/combat.encounter.types';
 
 /**
  * Philosophical aspect alignment for cards
@@ -476,20 +475,6 @@ export interface CardRider {
      *  deck if it runs dry) directly to the discard pile — never to hand.
      *  Echo's "advance the loop" verb: feeds RECALL without drawing. */
     millCards?: number;
-    // ── Phase 33d (GLYPHS pilot, sandbox-only) — FREE-currency rider family ──
-    /** GLYPH CHARGE — +N charge to a glyph you control matching this card's
-     *  own `Card.glyph.payload.kind` (or, for a card with no `glyph` field of
-     *  its own — the "pump" role — ANY glyph you control), capped at the
-     *  glyph's `cap`. If no matching glyph exists yet, the engine applies
-     *  {@link glyphChargeFallback} instead (never a silent no-op — the FREE-
-     *  currency lint law holds even before a glyph exists). Combat-engine
-     *  owned (mirrors `barrier`/`recoil`); the card engine no-ops it. */
-    glyphCharge?: number;
-    /** The plain theme-currency deposit `glyphCharge` applies when the
-     *  player controls no matching glyph yet. Itself a full `CardRider` (so
-     *  it can carry any FREE-line verb), resolved through the same executor.
-     *  Phase 33d (GLYPHS pilot, sandbox-only). */
-    glyphChargeFallback?: CardRider;
     // ── THE BIG NUMBERS REWRITE (2026-09-02) — damage on the FREE line ────────
     /** Deal N direct VITAE damage. The verb that lets a FREE line be worth
      *  playing without a die; scales with WRATH/CHAIN/FLAY like any hit. */
@@ -522,7 +507,7 @@ export interface CardRider {
 export type UpgradableRiderField =
     | 'damage' | 'guard' | 'barrier' | 'healHp' | 'sway'
     | 'drawCards' | 'cleanse' | 'souls' | 'premises' | 'foretell' | 'millCards'
-    | 'stagger' | 'pips' | 'conviction' | 'flay' | 'glyphCharge'
+    | 'stagger' | 'pips' | 'conviction' | 'flay'
     | 'bonusIntensity' | 'bonusDuration'
     | 'wrath' | 'chain' | 'ruptureMarks' | 'intensityPerPip';
 
@@ -536,8 +521,6 @@ export interface CardRiderUpgrade extends Partial<Record<UpgradableRiderField, n
     /** Deltas on the rider's `applyEffect` payload. `intensity` is clamped to
      *  `MAX_EFFECT_INTENSITY` by the applier. */
     applyEffect?: { intensity?: number; duration?: number };
-    /** Deltas on the glyph fallback rider (phase 33d). */
-    glyphChargeFallback?: CardRiderUpgrade;
 }
 
 /**
@@ -854,17 +837,6 @@ export interface Card {
      * when the player is Fallen (carries ≥2 distinct self-debuffs) at play time.
      */
     fallen?: { rider: CardRider };
-    /**
-     * Phase 33d (GLYPHS pilot, sandbox-only) — this card's PAID line inscribes
-     * a new {@link GlyphInstance} (0 charges, this `cap`) onto
-     * `CombatEncounterState.glyphs`, resolved AFTER the card's own
-     * `combatEffects`/`paidSummary` PAID line (both fire the same play — the
-     * card is never dead if its glyph is never cracked). No new `CardType`:
-     * this rides the existing `'spell'` type (WI-2's `cardType: 'glyph'`
-     * suggestion was cut — see the phase 33d brief's Decisions). Combat-engine
-     * owned; the card engine no-ops it.
-     */
-    glyph?: { payload: GlyphPayload; cap: number };
     /**
      * CARD UPGRADES (2026-09-02) — the authored patch used when this card is
      * upgraded to `<id>+`. Optional by design: a card WITHOUT one still

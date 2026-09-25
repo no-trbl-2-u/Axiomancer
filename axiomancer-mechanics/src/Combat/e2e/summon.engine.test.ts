@@ -637,7 +637,7 @@ describe('the telegraph does not lie', () => {
 
 describe('back-compat — a state with no `adds` field behaves exactly as before', () => {
     // `adds` / `addWavesSpawned` are optional, "absent = none", the same
-    // convention `tempZone` and `glyphs` carry. Every state literal written
+    // convention `tempZone` carries. Every state literal written
     // before Phase 102 — and every saved encounter — arrives here without them.
     const bare = (): CombatEncounterState => {
         const s = open(makeEnemy());               // no SUMMON keyword at all

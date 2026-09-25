@@ -22,7 +22,7 @@ import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveThreatPhase, startTurn, endTurn,
     playSignatureSkill, handCards, selectMercyChoice, selectCapitulationChoice, getSignatureSkill,
-    recoilXRange, crackGlyph,
+    recoilXRange,
     // Phase 102 (SUMMON) — the witness has to be TAUGHT the brood; a policy
     // that cannot see `strikeAdd` measures a fight no player would play.
     strikeAdd, STRIKE_ADD_COST, projectIncomingThreat,
@@ -362,10 +362,6 @@ export interface PlayPhaseResult {
  * best unspent die to Reserve. A pure measurement instrument — legible, not an
  * AI: it reuses the policy's `rankCard`/`bestSignature`, adding only the
  * momentum-steer ordering and the whiff-reroll, both spec-mandated levers.
- *
- * Phase 51 — reads `policy.crackAt` (GLYPHS): a witness with the field set
- * cracks its highest-charge eligible Seal once per loop pass, alongside the
- * existing signature-cast check.
  */
 export function upgradeablePlayPhase(
     state: CombatEncounterState,
@@ -419,24 +415,6 @@ export function upgradeablePlayPhase(
             if (sigId) {
                 const cast = playSignatureSkill(working, sigId);
                 if (cast.state !== working) { working = cast.state; if (working.finalOutcome) break; continue; }
-            }
-        }
-
-        // Phase 51 (GLYPHS) — crackAt: once a controlled Seal's charges meet
-        // the witness's threshold, crack it (dieless, no source/die
-        // consumed) — never blocks a signature or a die play in the same
-        // iteration, it just takes one guard-counted loop pass when it
-        // fires, same as a signature cast above. Highest-charge eligible
-        // Seal wins; ties resolve to `state.glyphs` array order.
-        if (policy.crackAt !== undefined) {
-            const eligible = (working.glyphs ?? []).filter(g => g.charges >= policy.crackAt!);
-            if (eligible.length > 0) {
-                let target = eligible[0];
-                for (const g of eligible) {
-                    if (g.charges > target.charges) target = g;
-                }
-                const cracked = crackGlyph(working, target.id, rng);
-                if (cracked.state !== working) { working = cracked.state; if (working.finalOutcome) break; continue; }
             }
         }
 
@@ -500,7 +478,7 @@ export function upgradeablePlayPhase(
     // this function returns.
     //
     // Highest-bite add wins; ties resolve to `state.adds` order — deterministic,
-    // no RNG, mirroring the `crackAt` block above. The projection is re-read
+    // no RNG. The projection is re-read
     // after every strike, so the witness stops paying the moment what is left
     // of the brood is soaked. Bounded like the drain above.
     let strikes = 0;
