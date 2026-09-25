@@ -1,13 +1,34 @@
 # Critique log
 
-> Last pass: 2026-09-24 at commit 94b6b96f
-> Pass count: 49
+> Last pass: 2026-09-25 at commit 6619fc10
+> Pass count: 50
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 50, 2026-09-25, commit 6619fc10] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5,
+> `CRITIQUE_VIEWPORT=both`), mobile (375×812) and desktop (1280×800),
+> against the full 11-screen set (title, onboarding, combat preview,
+> live combat-board, exploration hub, dialogue, village, cutscene,
+> rest, hazard, late-game hub) — 22 captures, 0 nav trouble, 0
+> console/page errors. Read every screenshot directly across both
+> viewports. Confirmed the pass-48 HIGH (late-game hub node-graph blank
+> on mobile) stays fixed: `sage-fv-boss-gate`'s hex grid — nine nodes,
+> edges, backdrop — renders on both viewports now (RESOLVED 2026-09-24,
+> commit 2dfcafeb). Previously-filed candidates reconfirmed unchanged
+> and not re-filed: the village "Void Essence"/"Heart Draught" wearer
+> wording (pass 41, still Pending), the dialogue reply-card label echo
+> ("WHAT NEEDS DOING?"/"LEAVE HIM BE.", still Pending), the mobile and
+> desktop combat-board's DoT paid-value chip mid-token wrap
+> (`SPOILED POULTICE` → "8/p"/"ay", pass 49, still Pending) — desktop
+> also shows `THE LONG LENT`'s "Deal 14" chip wrapping across two lines
+> at the same card width; same component, same root cause (`paidValue`
+> `Text` with no `maxWidth`/non-breaking join), not a new finding. Zero
+> fresh findings this pass.
 
 > **[critique pass 48, 2026-09-22, commit 87a8b6fc] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5,
