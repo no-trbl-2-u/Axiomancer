@@ -6,7 +6,9 @@
  * attack/defence stats, luck, the six non-combat saves/tests, and every
  * body/mind/heart stat line on relics. A v24 save still carries all of them.
  * This hop strips them so a loaded save matches the current shape, and must
- * leave everything that still means something — base stats, max VITAE, the
+ * The same hop drops `factionReputations`: the Faction system was
+ * write-only (nothing but a dev inspector read it) and was deleted in the
+ * same T2a pass. It must leave everything that still means something — base stats, max VITAE, the
  * armor relics' +5 max VITAE line, the worn loadout — exactly as it was.
  */
 
@@ -60,6 +62,7 @@ function v24Save(): Record<string, unknown> {
         ...fresh,
         version: 24,
         player,
+        factionReputations: { 'coastal-guard': -8, 'merchant-guild': 10 },
         currentEncounter: {
             enemies: [{ id: 'enemy-x', name: 'X', derivedStats: { physicalAttack: 1, luck: 1 } }],
         },
@@ -84,6 +87,11 @@ describe('migrate v24 → v25 — derived stats retired', () => {
         const migrated = migrate(v24Save(), 24, 25);
         expect(migrated.player).not.toHaveProperty('derivedStats');
         expect(migrated.player).not.toHaveProperty('nonCombatStats');
+    });
+
+    it('strips the retired faction reputations (Faction was write-only)', () => {
+        const migrated = migrate(v24Save(), 24, 25);
+        expect(migrated).not.toHaveProperty('factionReputations');
     });
 
     it('strips derivedStats from a staged encounter enemy', () => {

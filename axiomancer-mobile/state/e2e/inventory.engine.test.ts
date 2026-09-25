@@ -885,7 +885,7 @@ describe('selectInventoryViewModel: equipmentDock slot-filter', () => {
 function swordWithStats(
     id: string,
     name: string,
-    stats: ReadonlyArray<{ stat: string; value: number; isMultiplier?: boolean }>,
+    stats: ReadonlyArray<{ stat: string; value: number }>,
 ): Equipment {
     return {
         id,
@@ -896,7 +896,7 @@ function swordWithStats(
         
         
         // Test fixtures use synthetic stat names ('attack', 'stamina', etc.)
-        // rather than engine's tight `EffectStatTarget` literal union. The
+        // rather than the engine's tight `StatModifier` (`maxHp`-only) type. The
         // presenter under test only diffs by stat name, so the broader
         // type is safe here.
         statModifiers: stats.map((s) => ({ ...s })) as unknown as Equipment['statModifiers'],
@@ -992,25 +992,6 @@ describe('selectInventoryViewModel: equip-preview replacePreview', () => {
         expect(row.replacePreview).not.toBeNull();
         expect(row.replacePreview!.deltas).toHaveLength(1);
         expect(row.replacePreview!.deltas[0]).toEqual({ stat: 'reach', delta: 1 });
-    });
-
-    it('skips isMultiplier modifiers (v1 preview is flat-additive only)', () => {
-        const equipped = swordWithStats('long-blade', 'Long Blade', [
-            { stat: 'attack', value: 4 },
-        ]);
-        const replacer = swordWithStats('mystic-edge', 'Mystic Edge', [
-            { stat: 'attack', value: 4 },
-            { stat: 'attack', value: 1.5, isMultiplier: true }, // ignored by v1
-            { stat: 'mind', value: 2 },
-        ]);
-        const store = makeStore([equipped, replacer]);
-        const vm = selectInventoryViewModel(store.getState());
-
-        const row = vm.items.find((r) => r.id === 'mystic-edge')!;
-        expect(row.replacePreview).not.toBeNull();
-        // attack delta is 0 (4 - 4), dropped. mind delta is +2.
-        // The multiplier on attack is correctly skipped.
-        expect(row.replacePreview!.deltas).toEqual([{ stat: 'mind', delta: 2 }]);
     });
 });
 

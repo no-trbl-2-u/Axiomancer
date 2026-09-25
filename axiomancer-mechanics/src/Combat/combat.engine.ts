@@ -223,16 +223,6 @@ export const THREAT_ESCALATION_BOSS_MULT = 1.6;
  */
 export const THREAT_EFFECT_ESCALATION_STEP = 0.34;
 /**
- * Every THREAT_ENCHANT_CURSE_EVERY_ROUNDS rounds a fight runs, the enemy
- * either grows a new passive strength (the non-card buff `buff_all_stats_up`
- * — "Sorites Ascension") or lays a fresh curse on the player (the non-card
- * debuff `debuff_curse` — "Grelling's Malediction"), chosen 50/50 by the
- * seeded rng. A long grind doesn't just get more dangerous on the continuous
- * clock — every five rounds it also gets a genuinely NEW threat on the board.
- * Tuned by /combat-playtest (engine constants) and /deck-tuning.
- */
-export const THREAT_ENCHANT_CURSE_EVERY_ROUNDS = 5;
-/**
  * P0-truth READ RULE (replaces the old `READ_STATUS_MULT` ×1.34/×0.75 post-hoc
  * intensity rewrite, which was a provable no-op below intensity 3 and made the
  * printed status numbers wrong): the stance read bites a landed status in REAL,
@@ -408,27 +398,6 @@ export function stanceBeats(a: Stance, b: Stance): boolean {
 export interface CardDieCost {
     cost: number;
     advantage: 'advantage' | 'neutral' | 'disadvantage';
-}
-
-/**
- * LEGACY die-cost classifier (spec 25 §4.8 — RPS advantage). Maps a card color
- * against the enemy's phase stance onto the historical 0/1/2-die price
- * (advantage → 0, neutral → 1, disadvantage → 2; Wild/X → neutral). NO play
- * path charges this price any more: play legality and the actual die COST are
- * owned by THE COLOR LAW inside `playCombatCard` (step 1b — a die powers only a
- * card of its color; WILD is the sole exception), and the read's power scaling
- * lives in `READ_DAMAGE_MULT`. This function survives ONLY as the
- * advantage-read classifier behind `cardDieCostPreview` (the UI/CLI RPS
- * indicator): consumers should read `advantage` and ignore `cost`.
- * Deprecated on the public barrels (`src/Combat/index.ts`, `src/index.ts`);
- * kept because barrel removal is a semver-major phase.
- */
-export function resolveCardDieCost(cardColor: CombatDieColor, enemyPhaseStance: Stance): CardDieCost {
-    if (cardColor === 'wild' || cardColor === 'x') return { cost: 1, advantage: 'neutral' };
-    const stance = cardColor as Stance;
-    if (stanceBeats(stance, enemyPhaseStance)) return { cost: 0, advantage: 'advantage' };
-    if (stanceBeats(enemyPhaseStance, stance)) return { cost: 2, advantage: 'disadvantage' };
-    return { cost: 1, advantage: 'neutral' };
 }
 
 /**
@@ -4884,37 +4853,6 @@ export function processBetweenPhases(
     //    epic) is always reachable — byte-identical to the old one-liner.
     const resolvedRound = state.round + 1;
 
-    // THE CLOCK, discrete tier — every THREAT_ENCHANT_CURSE_EVERY_ROUNDS the
-    // fight runs, the enemy gains a new passive strength or lays a fresh
-    // curse on the player (50/50, seeded). Skipped once the encounter is
-    // already over (defeat/victory this round) so a finished fight can't
-    // still grant one on its way out.
-    if (
-        resolvedRound > 0
-        && resolvedRound % THREAT_ENCHANT_CURSE_EVERY_ROUNDS === 0
-        && !isDefeated(enemy) && !isDefeated(player)
-    ) {
-        if (rng() < 0.5) {
-            const empower = lookupEffectDef('buff_all_stats_up');
-            if (empower) {
-                const applied = applyEffect(enemy.effects, empower, resolvedRound, {
-                    intensityDelta: 1, sourceId: 'threat-clock-empower',
-                });
-                enemy = { ...enemy, effects: applied.activeEffects };
-                events.push({ kind: 'threat-clock-enchant', target: 'enemy', effectId: 'buff_all_stats_up', round: resolvedRound });
-            }
-        } else {
-            const curse = lookupEffectDef('debuff_curse');
-            if (curse) {
-                const applied = applyEffect(player.effects, curse, resolvedRound, {
-                    intensityDelta: 1, sourceId: 'threat-clock-curse',
-                });
-                player = { ...player, effects: applied.activeEffects };
-                events.push({ kind: 'threat-clock-enchant', target: 'player', effectId: 'debuff_curse', round: resolvedRound });
-            }
-        }
-    }
-
     // ── THE BIG NUMBERS REWRITE — REGROW and STAGES resolve at the boundary ──
     // REGROW: a printed healing floor the player has to out-pace. Applied
     // before the stage check so a stage's own threshold reads the post-heal
@@ -5686,21 +5624,6 @@ export function handCards(state: CombatEncounterState): Array<{ uid: string; car
     return state.hand
         .map(h => ({ uid: h.uid, card: getCard(h.cardId) }))
         .filter((x): x is { uid: string; card: CombatCard } => x.card !== null);
-}
-
-/**
- * Advantage-read preview for a card against the current phase (RPS indicator,
- * spec 25 §4.8 / §7.3) — the state-curried wrapper over the legacy classifier
- * `resolveCardDieCost`. It owns the READ surface only: the `advantage` label
- * for a hand renderer (today's sole consumer is the mechanics CLI). The `cost`
- * field is historical — play legality and the real die COST are owned by
- * THE COLOR LAW inside `playCombatCard`. Deprecated on the public barrels
- * alongside `resolveCardDieCost`.
- */
-export function cardDieCostPreview(state: CombatEncounterState, card: CombatCard): CardDieCost {
-    // Phase 104 — a grey card ('any') has no stance to read advantage from.
-    if (card.stance === 'any') return { cost: 1, advantage: 'neutral' };
-    return resolveCardDieCost(card.stance, currentPhaseStance(state));
 }
 
 /** Count of available (non-X) dice — surfaced for the dice board (§7.4). */

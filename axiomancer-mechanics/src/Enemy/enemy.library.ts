@@ -165,7 +165,7 @@ export const ChatteringSkull = createEnemy({
     mapName: 'fishing-village',
     difficulty: 'simple',
     logic: 'random',
-    loot: [none(75), drop('clarity-serum', 20), drop('focus-vial', 5)],
+    loot: [none(80), drop('clarity-serum', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
     finalBlowLines: {
         brutal: 'The jaw comes off mid-word. The argument finally has nothing left to repeat it with.',
@@ -197,11 +197,10 @@ export const LittleBelle = createEnemy({
     mapName: 'fishing-village',
     difficulty: 'normal',
     logic: 'balanced',
-    loot: [none(60), drop('heart-draught', 30), drop('minor-healing-potion', 10)],
+    loot: [none(90), drop('minor-healing-potion', 10)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
     cards: [card('thin-hymn')],
     friendshipReward: {
-        items: [{ ...getConsumableById('heart-draught')! }],
         xpBonus: 10,
         narrative:
             'The bell stops mid-swing. Little Belle holds it against its chest ' +
@@ -281,7 +280,7 @@ export const WaterHolger = createEnemy({
     mapName: 'fishing-village',
     difficulty: 'normal',
     logic: 'strategic',
-    loot: [none(50), drop('heart-draught', 30), drop('healing-potion', 15), drop('antidote', 5)],
+    loot: [none(80), drop('healing-potion', 15), drop('antidote', 5)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
     cards: [card('thin-hymn')],
     friendshipReward: {
@@ -336,7 +335,7 @@ export const CursedHead = createEnemy({
     mapName: 'fishing-village',
     difficulty: 'normal',
     logic: 'random',
-    loot: [none(60), drop('heart-draught', 25), drop('minor-healing-potion', 15)],
+    loot: [none(85), drop('minor-healing-potion', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     finalBlowLines: {
         brutal: 'The grudge outlives the argument by exactly as long as it takes to lose.',
@@ -363,7 +362,7 @@ export const Ghast = createEnemy({
     mapName: 'fishing-village',
     difficulty: 'normal',
     logic: 'strategic',
-    loot: [none(55), drop('clarity-serum', 25), drop('focus-vial', 20)],
+    loot: [none(75), drop('clarity-serum', 25)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
     cards: [card('scolds-bridle')],
     finalBlowLines: {
@@ -418,7 +417,7 @@ export const TheButcher = createEnemy({
     mapName: 'fishing-village',
     difficulty: 'elite',
     logic: 'aggressive',
-    loot: [none(35), drop('body-elixir', 35), drop('healing-potion', 20), drop('berserker-brew', 10)],
+    loot: [none(45), drop('body-elixir', 35), drop('healing-potion', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     cards: [card('unction-of-boils')],
     finalBlowLines: {
@@ -446,7 +445,7 @@ export const BrineHag = createEnemy({
     mapName: 'fishing-village',
     difficulty: 'elite',
     logic: 'strategic',
-    loot: [none(35), drop('heart-draught', 30), drop('healing-potion', 20), drop('resonance-crystal', 15)],
+    loot: [none(80), drop('healing-potion', 20)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
     cards: [card('thin-hymn')],
     befriendabilityConfig: {
@@ -455,7 +454,6 @@ export const BrineHag = createEnemy({
     },
     friendshipReward: {
         items: [
-            { ...getConsumableById('heart-draught')! },
             { ...getConsumableById('healing-potion')! },
         ],
         xpBonus: 35,
@@ -504,7 +502,7 @@ export const TheFerryman = createEnemy({
     mapName: 'fishing-village',
     difficulty: 'elite',
     logic: 'strategic',
-    loot: [none(35), drop('clarity-serum', 25), drop('focus-vial', 25), drop('philosopher-tea', 15)],
+    loot: [none(75), drop('clarity-serum', 25)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
     cards: [card('the-long-lent')],
     befriendabilityConfig: {
@@ -599,7 +597,6 @@ export const KingOfRevenge = createEnemy({
     loot: [
         drop('healing-potion', 50),
         drop('body-elixir', 30),
-        drop('heart-draught', 20),
     ],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
     cards: [card('knucklebone-recant'), card('passing-bell'), card('scolds-bridle')],
@@ -612,7 +609,6 @@ export const KingOfRevenge = createEnemy({
         // consumables/currency (relics are a fixed starting kit, not loot).
         items: [
             { ...getConsumableById('healing-potion')! },
-            { ...getConsumableById('heart-draught')! },
         ],
         xpBonus: 75,
         narrative:
@@ -628,10 +624,6 @@ export const KingOfRevenge = createEnemy({
             'been offered in a century."',
         flagSet: 'befriended-king-of-revenge',
         alignmentDelta: { outlook: +3, scope: -2 },
-        factionDeltas: {
-            'coastal-guard': -8,
-            'merchant-guild': +10,
-        },
     },
     finalBlowLines: {
         brutal: 'The crown rolls from the breakwater into the surf. Nothing under it argues.',
@@ -676,7 +668,7 @@ export const Wichtlein = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'normal',
     logic: 'defensive',
-    loot: [none(55), drop('focus-vial', 25), drop('clarity-serum', 20)],
+    loot: [none(80), drop('clarity-serum', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
     cards: [card('scolds-bridle')],
     finalBlowLines: {
@@ -745,8 +737,6 @@ export const Kudan = createEnemy({
         },
     ],
     loot: [
-        drop('void-essence', 60),
-        drop('philosopher-tea', 30),
         drop('revive-crystal', 10),
     ],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
@@ -812,7 +802,7 @@ export const WeepingHead = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'normal',
     logic: 'defensive',
-    loot: [none(55), drop('heart-draught', 30), drop('healing-potion', 15)],
+    loot: [none(85), drop('healing-potion', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
     cards: [card('thin-hymn')],
     finalBlowLines: {
@@ -840,7 +830,7 @@ export const GoblinShaman = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'normal',
     logic: 'strategic',
-    loot: [none(50), drop('clarity-serum', 25), drop('focus-vial', 15), drop('philosopher-tea', 10)],
+    loot: [none(75), drop('clarity-serum', 25)],
     philosophicalAlignment: { epistemology: -67, outlook: 0, scope: 0 },
     cards: [card('shallow-grave')],
     finalBlowLines: {
@@ -868,7 +858,7 @@ export const Sugata = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'normal',
     logic: 'random',
-    loot: [none(55), drop('heart-draught', 25), drop('quicksilver-vial', 20)],
+    loot: [none(100)],
     philosophicalAlignment: { epistemology: 0, outlook: 0, scope: -67 },
     finalBlowLines: {
         brutal: 'It stops mid-step. The erasing finishes what the dance was holding off.',
@@ -977,7 +967,7 @@ export const Mabadi = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    loot: [none(40), drop('body-elixir', 30), drop('whetstone-oil', 20), drop('healing-potion', 10)],
+    loot: [none(60), drop('body-elixir', 30), drop('healing-potion', 10)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
     cards: [card('knucklebone-recant')],
     finalBlowLines: {
@@ -1005,7 +995,7 @@ export const FrayedOne = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    loot: [none(40), drop('clarity-serum', 25), drop('void-essence', 20), drop('philosopher-tea', 15)],
+    loot: [none(75), drop('clarity-serum', 25)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
     cards: [card('the-long-lent')],
     finalBlowLines: {
@@ -1033,7 +1023,7 @@ export const BoneTotem = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'defensive',
-    loot: [none(40), drop('iron-skin-draught', 25), drop('clarity-serum', 20), drop('void-essence', 15)],
+    loot: [none(55), drop('iron-skin-draught', 25), drop('clarity-serum', 20)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
     cards: [card('unction-of-boils')],
     finalBlowLines: {
@@ -1061,7 +1051,7 @@ export const BoneWizard = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    loot: [none(35), drop('philosopher-tea', 25), drop('clarity-serum', 25), drop('void-essence', 15)],
+    loot: [none(75), drop('clarity-serum', 25)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 67 },
     cards: [card('spoiled-poultice')],
     finalBlowLines: {
@@ -1119,10 +1109,7 @@ export const Mirac = createEnemy({
         },
     ],
     loot: [
-        drop('philosopher-tea', 40),
-        drop('void-essence', 30),
         drop('revive-crystal', 20),
-        drop('resonance-crystal', 10),
     ],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
     cards: [card('the-long-lent'), card('unction-of-boils'), card('ossuary-drawer')],
@@ -1211,7 +1198,7 @@ export const HasshakuSama = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    loot: [none(30), drop('heart-draught', 30), drop('healing-potion', 25), drop('resonance-crystal', 15)],
+    loot: [none(75), drop('healing-potion', 25)],
     philosophicalAlignment: { epistemology: -67, outlook: 0, scope: -67 },
     cards: [card('thin-hymn'), card('thin-hymn')],
     befriendabilityConfig: {
@@ -1220,8 +1207,6 @@ export const HasshakuSama = createEnemy({
     },
     friendshipReward: {
         items: [
-            { ...getConsumableById('resonance-crystal')! },
-            { ...getConsumableById('heart-draught')! },
             { ...getConsumableById('healing-potion')! },
         ],
         xpBonus: 45,
@@ -1281,7 +1266,7 @@ export const JeweledTree = createEnemy({
         { kind: 'hide', n: 5 },
         { kind: 'summon', n: 2, addName: 'Brier Shoot' },
     ],
-    loot: [none(25), drop('resonance-crystal', 30), drop('heart-draught', 25), drop('greater-healing-potion', 20)],
+    loot: [none(80), drop('greater-healing-potion', 20)],
     philosophicalAlignment: { epistemology: -67, outlook: 67, scope: 67 },
     cards: [card('thin-hymn')],
     finalBlowLines: {
@@ -1309,7 +1294,7 @@ export const OgreNaga = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'aggressive',
-    loot: [none(35), drop('body-elixir', 30), drop('hunters-elixir', 20), drop('greater-healing-potion', 15)],
+    loot: [none(55), drop('body-elixir', 30), drop('greater-healing-potion', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     cards: [card('unction-of-boils')],
     finalBlowLines: {
@@ -1337,7 +1322,7 @@ export const Sidelle = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    loot: [none(35), drop('whetstone-oil', 25), drop('body-elixir', 25), drop('greater-healing-potion', 15)],
+    loot: [none(60), drop('body-elixir', 25), drop('greater-healing-potion', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     cards: [card('knucklebone-recant')],
     finalBlowLines: {
@@ -1402,7 +1387,6 @@ export const RawheadRex = createEnemy({
     loot: [
         drop('greater-healing-potion', 40),
         drop('body-elixir', 25),
-        drop('berserker-brew', 20),
         drop('revive-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
@@ -1458,9 +1442,7 @@ export const FateSpinner = createEnemy({
         },
     ],
     loot: [
-        drop('philosopher-tea', 40),
         drop('clarity-serum', 30),
-        drop('focus-vial', 20),
         drop('revive-crystal', 10),
     ],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 67 },
@@ -1471,8 +1453,6 @@ export const FateSpinner = createEnemy({
     },
     friendshipReward: {
         items: [
-            { ...getConsumableById('philosopher-tea')! },
-            { ...getConsumableById('focus-vial')! },
             { ...getConsumableById('healing-potion')! },
             { ...getConsumableById('clarity-serum')! },
         ],
@@ -1484,10 +1464,6 @@ export const FateSpinner = createEnemy({
             'Do you know what that makes you? Loose thread. I had forgotten they existed. ' +
             'I find I would rather watch where you unravel to."',
         flagSet: 'befriended-fate-spinner',
-        factionDeltas: {
-            'merchant-guild': -10,
-            'forest-wardens': +12,
-        },
     },
     pactLines: {
         quiet:   'The loom stills. For the first time, the next moment is genuinely unwoven.',
@@ -1528,7 +1504,7 @@ export const AshenBoneDrake = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'balanced',
-    loot: [none(30), drop('iron-skin-draught', 25), drop('greater-healing-potion', 25), drop('war-horn-draught', 20)],
+    loot: [none(50), drop('iron-skin-draught', 25), drop('greater-healing-potion', 25)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 0 },
     cards: [card('knucklebone-recant'), card('shallow-grave')],
     finalBlowLines: {
@@ -1581,9 +1557,6 @@ export const RaAminKa = createEnemy({
         },
     ],
     loot: [
-        drop('philosopher-tea', 35),
-        drop('void-essence', 30),
-        drop('greater-resonance-crystal', 20),
         drop('revive-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: -67, outlook: 0, scope: 67 },
@@ -1613,7 +1586,7 @@ export const LadyGabriella = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    loot: [none(30), drop('heart-draught', 30), drop('regeneration-tonic', 20), drop('greater-healing-potion', 20)],
+    loot: [none(60), drop('regeneration-tonic', 20), drop('greater-healing-potion', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     cards: [card('thin-hymn'), card('thin-hymn')],
     befriendabilityConfig: {
@@ -1623,7 +1596,6 @@ export const LadyGabriella = createEnemy({
     friendshipReward: {
         items: [
             { ...getConsumableById('regeneration-tonic')! },
-            { ...getConsumableById('heart-draught')! },
         ],
         xpBonus: 40,
         alignmentDelta: { outlook: +2 },
@@ -1673,7 +1645,7 @@ export const Zoma = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    loot: [none(30), drop('philosopher-tea', 30), drop('clarity-serum', 25), drop('greater-resonance-crystal', 15)],
+    loot: [none(75), drop('clarity-serum', 25)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 0 },
     cards: [card('scolds-bridle'), card('shallow-grave')],
     finalBlowLines: {
@@ -1701,7 +1673,7 @@ export const MabadiUndrowned = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    loot: [none(30), drop('body-elixir', 25), drop('whetstone-oil', 25), drop('supreme-healing-potion', 20)],
+    loot: [none(55), drop('body-elixir', 25), drop('supreme-healing-potion', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
     cards: [card('knucklebone-recant'), card('spoiled-poultice')],
     finalBlowLines: {
@@ -1733,7 +1705,7 @@ export const TriEyesHollowed = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    loot: [none(30), drop('clarity-serum', 25), drop('philosopher-tea', 25), drop('void-essence', 20)],
+    loot: [none(75), drop('clarity-serum', 25)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
     cards: [card('passing-bell'), card('the-long-lent')],
     finalBlowLines: {
@@ -1789,7 +1761,7 @@ export const TheUnnameable = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    loot: [none(25), drop('void-essence', 35), drop('philosopher-tea', 20), drop('supreme-healing-potion', 20)],
+    loot: [none(80), drop('supreme-healing-potion', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
     cards: [card('spoiled-poultice'), card('shallow-grave')],
     finalBlowLines: {
@@ -1817,7 +1789,7 @@ export const FireGiant = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'aggressive',
-    loot: [none(25), drop('war-horn-draught', 30), drop('supreme-healing-potion', 25), drop('iron-skin-draught', 20)],
+    loot: [none(55), drop('supreme-healing-potion', 25), drop('iron-skin-draught', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: 0, scope: -67 },
     cards: [card('unction-of-boils'), card('knucklebone-recant')],
     finalBlowLines: {
@@ -1845,7 +1817,7 @@ export const GreaterDevil = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    loot: [none(25), drop('void-essence', 30), drop('supreme-healing-potion', 25), drop('greater-resonance-crystal', 20)],
+    loot: [none(75), drop('supreme-healing-potion', 25)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
     cards: [card('scolds-bridle'), card('ossuary-drawer')],
     finalBlowLines: {
@@ -1901,7 +1873,6 @@ export const Rangda = createEnemy({
     loot: [
         drop('phoenix-tear', 35),
         drop('supreme-healing-potion', 25),
-        drop('void-essence', 25),
         drop('revive-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
@@ -1927,10 +1898,6 @@ export const Rangda = createEnemy({
             '"You stayed past the frightening part. That is the whole of witchcraft, ' +
             'you know. Everyone leaves at the frightening part."',
         flagSet: 'befriended-rangda',
-        factionDeltas: {
-            'forest-wardens': +10,
-            'coastal-guard': -6,
-        },
     },
     pactLines: {
         quiet:   'The leftmost path straightens slightly. Grief, witnessed, walks a little truer.',
@@ -1995,9 +1962,6 @@ export const ZomaAscendant = createEnemy({
         },
     ],
     loot: [
-        drop('philosopher-tea', 35),
-        drop('void-essence', 30),
-        drop('greater-resonance-crystal', 20),
         drop('revive-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
@@ -2054,7 +2018,6 @@ export const ElderFireGiant = createEnemy({
     ],
     loot: [
         drop('supreme-healing-potion', 35),
-        drop('war-horn-draught', 25),
         drop('phoenix-tear', 25),
         drop('revive-crystal', 15),
     ],
@@ -2111,9 +2074,6 @@ export const Tezcatlipoca = createEnemy({
         },
     ],
     loot: [
-        drop('void-essence', 35),
-        drop('philosopher-tea', 25),
-        drop('greater-resonance-crystal', 20),
         drop('revive-crystal', 20),
     ],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
@@ -2168,7 +2128,6 @@ export const ArchDemon = createEnemy({
         },
     ],
     loot: [
-        drop('void-essence', 35),
         drop('supreme-healing-potion', 25),
         drop('phoenix-tear', 20),
         drop('revive-crystal', 20),
@@ -2226,10 +2185,8 @@ export const Beelzebub = createEnemy({
         },
     ],
     loot: [
-        drop('void-essence', 40),
         drop('revive-crystal', 25),
         drop('phoenix-tear', 20),
-        drop('greater-resonance-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
     cards: [card('unction-of-boils'), card('shallow-grave'), card('ossuary-drawer')],
@@ -2292,10 +2249,8 @@ export const Death = createEnemy({
         },
     ],
     loot: [
-        drop('void-essence', 45),
         drop('revive-crystal', 30),
         drop('phoenix-tear', 15),
-        drop('philosopher-tea', 10),
     ],
     philosophicalAlignment: { epistemology: 0, outlook: 0, scope: 67 },
     cards: [card('spoiled-poultice'), card('the-long-lent'), card('ossuary-drawer')],
@@ -2369,10 +2324,8 @@ export const TheAbortive = createEnemy({
         },
     ],
     loot: [
-        drop('void-essence', 50),
         drop('revive-crystal', 25),
         drop('phoenix-tear', 15),
-        drop('greater-resonance-crystal', 10),
     ],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
     cards: [card('ossuary-drawer'), card('spoiled-poultice'), card('shallow-grave')],
@@ -2450,7 +2403,7 @@ export const PropWight = createEnemy({
     mapName: 'caverns',
     difficulty: 'normal',
     logic: 'defensive',
-    loot: [none(55), drop('clarity-serum', 25), drop('focus-vial', 20)],
+    loot: [none(75), drop('clarity-serum', 25)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
     finalBlowLines: {
         brutal: 'The prop splits. Whatever held it together stops holding.',
@@ -2477,7 +2430,7 @@ export const UnpaidDelver = createEnemy({
     mapName: 'caverns',
     difficulty: 'elite',
     logic: 'strategic',
-    loot: [none(40), drop('whetstone-oil', 25), drop('iron-skin-draught', 20), drop('healing-potion', 15)],
+    loot: [none(65), drop('iron-skin-draught', 20), drop('healing-potion', 15)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
     finalBlowLines: {
         brutal: 'The pick falls mid-stroke. The shift ends the only way it could.',
@@ -2504,7 +2457,7 @@ export const SumpMaren = createEnemy({
     mapName: 'caverns',
     difficulty: 'normal',
     logic: 'defensive',
-    loot: [none(55), drop('heart-draught', 30), drop('healing-potion', 15)],
+    loot: [none(85), drop('healing-potion', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
     finalBlowLines: {
         brutal: 'The water lets go of her shape. The sump forgets on the spot.',
@@ -2545,7 +2498,7 @@ export const NinthRungSpider = createEnemy({
     mapName: 'caverns',
     difficulty: 'normal',
     logic: 'strategic',
-    loot: [none(55), drop('focus-vial', 25), drop('healing-potion', 20)],
+    loot: [none(80), drop('healing-potion', 20)],
     philosophicalAlignment: { epistemology: 33, outlook: -67, scope: -33 },
     finalBlowLines: {
         brutal: 'The ninth rung finally gives for both of you at once.',
@@ -2629,7 +2582,7 @@ export const GuildKnife = createEnemy({
     // Phase 90 — a short blade doesn't deliver its invoice in one stroke:
     // FLURRY 3 (clause by clause, per the cause line already on the books).
     keywords: [{ kind: 'flurry', n: 3 }],
-    loot: [none(40), drop('quicksilver-vial', 25), drop('whetstone-oil', 20), drop('healing-potion', 15)],
+    loot: [none(85), drop('healing-potion', 15)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
     finalBlowLines: {
         brutal: 'The contract voids in the usual way. The guild will invoice someone.',
@@ -2656,7 +2609,7 @@ export const TheFactor = createEnemy({
     mapName: 'northern-city',
     difficulty: 'normal',
     logic: 'strategic',
-    loot: [none(50), drop('clarity-serum', 25), drop('philosopher-tea', 15), drop('focus-vial', 10)],
+    loot: [none(75), drop('clarity-serum', 25)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
     finalBlowLines: {
         brutal: 'His book opens on the fall. Half the city breathes easier by nightfall.',
@@ -2683,7 +2636,7 @@ export const WharfShrike = createEnemy({
     mapName: 'northern-city',
     difficulty: 'normal',
     logic: 'random',
-    loot: [none(60), drop('quicksilver-vial', 20), drop('healing-potion', 20)],
+    loot: [none(80), drop('healing-potion', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     finalBlowLines: {
         brutal: 'It comes off the sky in pieces. The hooks stand empty tonight.',
@@ -2742,10 +2695,7 @@ export const TheHarbormaster = createEnemy({
         },
     ],
     loot: [
-        drop('philosopher-tea', 40),
-        drop('void-essence', 30),
         drop('revive-crystal', 20),
-        drop('resonance-crystal', 10),
     ],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
     finalBlowLines: {
@@ -2827,7 +2777,7 @@ export const TheUnderclerk = createEnemy({
     mapName: 'the-capital',
     difficulty: 'normal',
     logic: 'strategic',
-    loot: [none(50), drop('clarity-serum', 25), drop('focus-vial', 25)],
+    loot: [none(75), drop('clarity-serum', 25)],
     philosophicalAlignment: { epistemology: 67, outlook: -33, scope: -67 },
     finalBlowLines: {
         brutal: 'The ninth copy goes unfiled. Nobody upstairs will ever notice.',
@@ -2898,7 +2848,7 @@ export const TollSkiff = createEnemy({
     mapName: 'connecting-river',
     difficulty: 'normal',
     logic: 'strategic',
-    loot: [none(50), drop('quicksilver-vial', 25), drop('clarity-serum', 25)],
+    loot: [none(75), drop('clarity-serum', 25)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
     finalBlowLines: {
         brutal: 'The boat capsizes. The current collects the fare instead.',
@@ -2925,7 +2875,7 @@ export const WeirWidow = createEnemy({
     mapName: 'connecting-river',
     difficulty: 'elite',
     logic: 'defensive',
-    loot: [none(45), drop('heart-draught', 30), drop('healing-potion', 25)],
+    loot: [none(75), drop('healing-potion', 25)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
     finalBlowLines: {
         brutal: 'The weir holds. She doesn\'t.',
@@ -3019,10 +2969,7 @@ export const TheWaterreeve = createEnemy({
         },
     ],
     loot: [
-        drop('philosopher-tea', 35),
-        drop('void-essence', 25),
         drop('revive-crystal', 25),
-        drop('resonance-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
     finalBlowLines: {
@@ -3050,7 +2997,7 @@ export const DowryCollector = createEnemy({
     mapName: 'town-across-river',
     difficulty: 'normal',
     logic: 'strategic',
-    loot: [none(50), drop('clarity-serum', 25), drop('focus-vial', 25)],
+    loot: [none(75), drop('clarity-serum', 25)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
     finalBlowLines: {
         brutal: 'The books close on an appraisal nobody asked for.',
@@ -3077,7 +3024,7 @@ export const TheKeptSuitor = createEnemy({
     mapName: 'town-across-river',
     difficulty: 'elite',
     logic: 'aggressive',
-    loot: [none(40), drop('heart-draught', 30), drop('whetstone-oil', 20), drop('healing-potion', 10)],
+    loot: [none(90), drop('healing-potion', 10)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
     finalBlowLines: {
         brutal: 'The promise breaks. Nobody is left to keep it anyway.',
@@ -3111,7 +3058,7 @@ export const TheAdjuster = createEnemy({
     mapName: 'town-across-river',
     difficulty: 'normal',
     logic: 'strategic',
-    loot: [none(50), drop('clarity-serum', 25), drop('quicksilver-vial', 25)],
+    loot: [none(75), drop('clarity-serum', 25)],
     philosophicalAlignment: { epistemology: 67, outlook: -33, scope: -33 },
     finalBlowLines: {
         brutal: 'The claim closes itself, in the adjuster\'s own hand, on the adjuster\'s own line.',
@@ -3170,10 +3117,7 @@ export const ThePortreeve = createEnemy({
         },
     ],
     loot: [
-        drop('quicksilver-vial', 30),
-        drop('void-essence', 30),
         drop('revive-crystal', 25),
-        drop('resonance-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
     finalBlowLines: {
@@ -3244,7 +3188,6 @@ export const TheDoorwarden = createEnemy({
         drop('healing-potion', 40),
         drop('iron-skin-draught', 25),
         drop('clarity-serum', 20),
-        drop('resonance-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
     cards: [card('scolds-bridle'), card('petty-indictment'), card('knucklebone-recant')],
@@ -3317,9 +3260,7 @@ export const TheIndex = createEnemy({
         },
     ],
     loot: [
-        drop('philosopher-tea', 35),
         drop('clarity-serum', 25),
-        drop('focus-vial', 25),
         drop('revive-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
@@ -3397,7 +3338,6 @@ export const TheSophist = createEnemy({
         },
     ],
     loot: [
-        drop('philosopher-tea', 35),
         drop('clarity-serum', 25),
         drop('greater-healing-potion', 20),
         drop('revive-crystal', 20),
@@ -3410,7 +3350,6 @@ export const TheSophist = createEnemy({
     },
     friendshipReward: {
         items: [
-            { ...getConsumableById('philosopher-tea')! },
             { ...getConsumableById('clarity-serum')! },
             { ...getConsumableById('revive-crystal')! },
         ],
@@ -3425,9 +3364,6 @@ export const TheSophist = createEnemy({
             '"The house wanted a witness. I wanted a better one than me. ' +
             'Go down. Finish the sentence I could not start. I will keep the record."',
         flagSet: 'befriended-the-sophist',
-        factionDeltas: {
-            'forest-wardens': +8,
-        },
     },
     pactLines: {
         quiet:   'The narration stops. For the first time in centuries, the house has no one to explain it.',

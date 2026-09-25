@@ -32,7 +32,7 @@ import type { Effect } from '../../Effects/types';
 
 import {
     initializeCombatEncounter, rollEncounterDice,
-    resolveCardDieCost, cardDieCostPreview, availableDice,
+    availableDice,
     selectMercyChoice as selectEncounterMercyChoice, getCard,
     handCards, resolveThreatPhase,
     THREAT_WEAKEN_PER_ROLL, THREAT_DENY_AT, THREAT_WEAKEN_FLOOR,
@@ -246,18 +246,6 @@ describe('Spec 25 §7 — presenter previews', () => {
         expect(availableDice(state)).toBe(expected);
     });
 
-    it('cardDieCostPreview matches resolveCardDieCost against the current phase stance', () => {
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(80, 'body'), undefined, SEED);
-        state = rollEncounterDice(state).state;
-        const cardId = state.hand[0]?.cardId ?? DOT_BODY;
-        const card = getCard(cardId)!;
-        const phaseStance = state.threatPhases[state.currentPhaseIndex].enemyStance;
-        // DOT_BODY is a fixed body-aspect fixture card, never the grey
-        // office's colourless 'any' — narrow for `resolveCardDieCost`, which
-        // (like `cardDieCostPreview`) only accepts a real die colour.
-        if (card.stance === 'any') throw new Error('unexpected grey-aspect fixture card');
-        expect(cardDieCostPreview(state, card)).toEqual(resolveCardDieCost(card.stance, phaseStance));
-    });
 });
 
 // ── Mercy choice (§7.6) — Befriend opening ──────────────────────────────────

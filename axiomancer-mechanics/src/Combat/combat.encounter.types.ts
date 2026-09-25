@@ -673,10 +673,6 @@ export type CombatEvent =
     | { kind: 'hand-drawn'; cards: string[] }
     | { kind: 'cards-milled'; cards: string[] }
     | { kind: 'mercy-opened'; message: string }
-    // THE CLOCK, discrete tier (combat-depth-epic): every
-    // THREAT_ENCHANT_CURSE_EVERY_ROUNDS the enemy grows a new passive
-    // strength or lays a fresh curse on the player.
-    | { kind: 'threat-clock-enchant'; target: 'enemy' | 'player'; effectId: string; round: number }
     // Phase 31 — the engine-native momentum wheel (ported from the mobile
     // host-side write; see `momentumWheel` on state).
     | { kind: 'wheel-lit'; lit: WheelStance[] }

@@ -113,7 +113,7 @@ export {
     getThreatSequence, generateDefaultThreatSequence,
     AUTHORED_THREAT_ENEMY_IDS,
     RAGE_UNLOCK_ROUND, RAGE_DAMAGE_WEIGHT, RAGE_HEAL_FRACTION,
-    simulateHazardPatternCombat, runHazardCombatAutoEncounter,
+    simulateHazardPatternCombat,
     mechanicText,
     // Spec 26 / 26b — stance draft, hidden read, Conviction, Signature Skills
     TURN_DICE_COUNT, rollTurnDice, dieHasStance,
@@ -160,7 +160,7 @@ export {
     // depth epic — the read bites status in REAL units (P0-truth) + the escalation clock
     READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY,
     THREAT_ESCALATION_PER_ROUND, THREAT_ESCALATION_GRACE, THREAT_ESCALATION_MAX,
-    THREAT_ESCALATION_BOSS_MULT, THREAT_EFFECT_ESCALATION_STEP, THREAT_ENCHANT_CURSE_EVERY_ROUNDS,
+    THREAT_ESCALATION_BOSS_MULT, THREAT_EFFECT_ESCALATION_STEP,
     // Phase 169 — curated combat loadout codec + synergy live-check
     COMBAT_LOADOUT_FLAG_PREFIX, COMBAT_LOADOUT_MAX,
     decodeCombatLoadout, getCombatLoadout, addToLoadout, removeFromLoadout,
@@ -190,7 +190,6 @@ export type { MomentumV2, UpgradeableDieFace, UpgradeableDieGear } from './Comba
  * sole caller; any future mobile adopter migrates next minor. Removal is a
  * semver-major phase (locked-barrel rule), so the exports stay.
  */
-export { resolveCardDieCost, cardDieCostPreview } from './Combat';
 export type {
     CombatEncounterState, CombatEncounterPhase, CombatTransition,
     CombatManaDie, CombatDieColor, CombatDieState,
@@ -202,13 +201,12 @@ export type {
     ThreatBranchCondition, CombatThreatBranch, CombatThreatBranchOutcome,
     AuthoredThreatPhase, AuthoredThreatBranch, AuthoredThreatStep,
     CombatSimStats, CombatSimPolicyId,
-    HazardAutoPolicyId, HazardCombatAutoOptions, HazardCombatAutoResult,
     CombatIntentType, CombatReadResult,
     SignatureSkill, SignatureSkillId, SignatureSkillKind, PlayerArchetype,
     CombatDeckPreset, CombatDeckFocus,
     // Phase 31 — the momentum wheel / THE STAKE shared stance subset
     WheelStance,
-    CardDieCost, FinisherProjection, CombatOutcomeProjection,
+    FinisherProjection, CombatOutcomeProjection,
     // Phase 33d — GLYPHS pilot (sandbox-only): the charge-and-crack seal zone
     GlyphInstance, GlyphPayload,
     // Phase 102 — SUMMON's brood: one member of an add wave
@@ -225,7 +223,6 @@ export {
     draftCombatDeck, resolveDeckSelection, applyDeckSwaps,
     COMBAT_SIM_POLICIES, COMBAT_SIM_POLICY_ORDER, getSimPolicy, listSimPolicies,
     runPlaytestCell, runPlaytestMatrix, formatPlaytestReport,
-    evaluateWinRateCurve, CURVE_SHAPE_TOLERANCES,
 } from './Combat';
 export type {
     CombatSimRunOptions, CombatSimDetailedOptions, CombatCardUsage, WinPathCounts,
@@ -234,7 +231,6 @@ export type {
     CombatSimPolicy,
     PlaytestCellSpec, PlaytestCellResult, PlaytestMatrixOptions,
     PlaytestStageSummary, PlaytestReport,
-    WinRateCurveClass, WinRateCurvePoint, WinRateCurveResult, CurveShapeTolerances,
 } from './Combat';
 export type { PlaytestPresetSummary, PlaytestPresetStageRow } from './Combat/combat.playtest';
 
@@ -296,18 +292,16 @@ export type {
 export {
     applyEffect,
     lookupEffect, getEffectByName, getEffectsByType, effectsLibrary,
-    processWorldEffectTick, getActiveHazards,
     // Phase 142 — Status effect depth functionality
-    evaluateInteractions, checkInteractionTrigger, applyInteractionResult,
-    EFFECT_INTERACTIONS, getInteractionsForEffect, getAllInteractionIds,
-    getInteractionById, validateInteractions,
+    evaluateInteractions, checkInteractionTrigger,
+    EFFECT_INTERACTIONS,
+    validateInteractions,
 } from './Effects';
 export type {
     Effect, EffectType, EffectTier, EffectStacking, EffectCategory, EffectPayload,
     ActiveEffect, EffectApplicationResult,
     StatModifier, DamageOverTime, RegenerationConfig, ActionRestriction, AdvantageModifier,
     ApplyEffectOptions,
-    WorldTickResult, ActiveHazard,
     // Phase 142 — Status effect interaction types
     EffectInteraction, InteractionTrigger, InteractionResult, InteractionTriggerType,
 } from './Effects';
@@ -457,8 +451,6 @@ export {
     completeNode, unlockNode, changeContinent, completeUniqueEvent,
     revealAdjacent, markNodeConsumed, unlockAdjacent,
     // Phase 135: Persistence functions
-    recordHazardOutcome, blockMapRoute, getHazardOutcomesForNode, isRouteBlocked,
-    validateMoveToNode, findAlternativePaths, getBlockedRoutesFromNode, getReachableNodes,
     // 2026-08-08 first-map audit: traversal queries + the strand audit.
     legalMovesFrom, isStranded, isMapTerminalNode, auditMapTraversal,
     // D1 (2026-09-21) — frontier roaming: the derived spent/frontier sets
@@ -467,8 +459,6 @@ export {
     visitedNodes, isNodeSpent, frontierNodes, isFrontierExhausted, forwardEdges,
     // Phase 53c — the route-coverage walk, beside the strand audit.
     auditRouteCoverage,
-    // Phase 148: Minigame Harness
-    runMinigameHarness, summarizeHarnessReport,
 } from './World';
 export {
     resolveMapEvent,
@@ -530,9 +520,7 @@ export type {
     ApplyDialogueChoiceResult,
     SeedInput,
     // Phase 135: Persistence types
-    HazardModifierEntry, HazardNodeOutcome, BlockedRoute, RouteValidationResult,
-    // Phase 148: Minigame Harness types
-    MinigameHarnessConfig, MinigameHarnessReport, MinigameHarnessSummary,
+    HazardModifierEntry, HazardNodeOutcome, BlockedRoute,
 } from './World';
 
 // ─── Ledger (Phase 42 cube + 27-cell registry; né Philosophy, Phase 44h) ─────
@@ -545,17 +533,6 @@ export type {
     AxisBucket, PhilosophicalAlignment, BesettingSin,
     PhilosophicalAlignmentCell,
 } from './Ledger';
-
-// ─── Faction (Phase 110 — faction reputation system for boss befriend consequences) ──
-export {
-    FACTION_REPUTATION_MIN, FACTION_REPUTATION_MAX, DEFAULT_FACTION_REPUTATION,
-    clampFactionReputation, createDefaultFactionReputations,
-    applyFactionReputationDeltas, getFactionReputation,
-    factionLibrary, getFactionInfo, getAllFactions,
-} from './Faction';
-export type {
-    FactionReputation, FactionReputations, FactionReputationDelta, FactionInfo,
-} from './Faction';
 
 // ─── NPCs (types + dialogue helpers) ──────────────────────────────────────────
 export type {

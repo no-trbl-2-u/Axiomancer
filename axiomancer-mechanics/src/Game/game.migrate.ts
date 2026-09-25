@@ -461,7 +461,8 @@ function stripRetiredStatLines(item: unknown): unknown {
 }
 
 /**
- * v24 → v25 (2026-09-25, TRIM THE FAT T2a / D14): derived stats retired.
+ * v24 → v25 (2026-09-25, TRIM THE FAT T2a / D14): derived stats and Faction
+ * retired.
  *
  * The six derived attack/defence stats, luck and the six non-combat
  * saves/tests were display-only (combat read none of them), and the
@@ -472,14 +473,18 @@ function stripRetiredStatLines(item: unknown): unknown {
  * - `player.derivedStats` and `player.nonCombatStats`;
  * - `derivedStats` on any staged encounter enemy;
  * - every non-`maxHp` stat line (and the retired `isMultiplier` flag) on
- *   owned and worn equipment.
+ *   owned and worn equipment;
+ * - the top-level `factionReputations` slice (the Faction system was
+ *   write-only — only a dev inspector read it — and was deleted in the same
+ *   pass).
  *
  * Nothing that still means something changes: base stats, `maxHealth`,
  * `health` and the loadout pass through (the stripped lines never touched
  * VITAE). Idempotent and pure over a raw save payload.
  */
 function migrateV24ToV25(raw: Record<string, unknown>): Record<string, unknown> {
-    const out: Record<string, unknown> = { ...raw, version: 25 };
+    const { factionReputations: _f, ...kept } = raw;
+    const out: Record<string, unknown> = { ...kept, version: 25 };
 
     const player = raw.player as Record<string, unknown> | undefined;
     if (player && typeof player === 'object') {

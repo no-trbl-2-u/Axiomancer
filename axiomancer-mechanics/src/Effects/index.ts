@@ -182,23 +182,17 @@ export function removeEffectsByType(
 }
 
 export { lookupEffect, getEffectByName, getEffectsByType, effectsLibrary } from './effects.library';
-export { processWorldEffectTick, getActiveHazards } from './world-tick';
 
 // Phase 142 — Status effect depth functionality
 export { 
     evaluateInteractions, 
     checkInteractionTrigger, 
-    applyInteractionResult 
 } from './interactions';
 export { 
     EFFECT_INTERACTIONS, 
-    getInteractionsForEffect, 
-    getAllInteractionIds, 
-    getInteractionById,
     validateInteractions
 } from './amplification.registry';
 
-export type { WorldTickResult, ActiveHazard } from './world-tick';
 export type {
     Effect, EffectType, EffectStacking, EffectTier, EffectCategory, EffectPayload,
     ActiveEffect, EffectApplicationResult,

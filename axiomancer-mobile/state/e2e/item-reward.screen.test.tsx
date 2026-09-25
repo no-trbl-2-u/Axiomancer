@@ -62,7 +62,9 @@ describe('/item-reward screen', () => {
 
         expect(screen.getByTestId('item-reward-name').props.children).toBe("Cassandra's Circlet");
         expect(screen.getByTestId('item-reward-signature')).toBeTruthy();
-        expect(screen.getByTestId('item-reward-stats')).toBeTruthy();
+        // The circlet grants ONLY its signature since TRIM THE FAT T2a (only the
+        // two armor relics keep a stat line), so no stats block renders.
+        expect(screen.queryByTestId('item-reward-stats')).toBeNull();
         // D6 — the displaced piece is named before the player commits.
         expect(screen.getByTestId('item-reward-trade-note').props.children)
             .toContain('satchel');

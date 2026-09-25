@@ -182,7 +182,7 @@ export {
     // depth epic — the read bites status in REAL units (P0-truth); the clock escalates threat
     READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY,
     THREAT_ESCALATION_PER_ROUND, THREAT_ESCALATION_GRACE, THREAT_ESCALATION_MAX,
-    THREAT_ESCALATION_BOSS_MULT, THREAT_EFFECT_ESCALATION_STEP, THREAT_ENCHANT_CURSE_EVERY_ROUNDS,
+    THREAT_ESCALATION_BOSS_MULT, THREAT_EFFECT_ESCALATION_STEP,
     // Fate Engine P1 (spec 31) — the dice get a second read
     tapFateDie, riderText,
     PIP_INTENSITY_BONUS, PIP_GUARD_BONUS, COLOR_MATCH_STATUS_DURATION_BONUS, FATE_TAP_CONVICTION,
@@ -223,8 +223,7 @@ export type { MomentumV2, UpgradeableDieFace } from './combat.upgradeable-dice';
  * sole caller; any future mobile adopter migrates next minor. Removal is a
  * semver-major phase (locked-barrel rule), so the exports stay.
  */
-export { resolveCardDieCost, cardDieCostPreview } from './combat.engine';
-export type { CardDieCost, FinisherProjection, CombatOutcomeProjection } from './combat.engine';
+export type { FinisherProjection, CombatOutcomeProjection } from './combat.engine';
 export {
     COMBAT_DICE_COUNT, TURN_DICE_COUNT, COMBAT_DIE_FACES, rollCombatDice, rollTurnDice,
     rollCombatDieColor, dieHasStance,
@@ -268,11 +267,6 @@ export type {
     CombatSimStats, CombatSimPolicyId,
     CombatSimRunOptions, CombatSimDetailedOptions, CombatCardUsage, WinPathCounts,
 } from './combat.encounter.sim';
-// deck-tuning free-metrics tier — deck-class-aware win-rate curve-shape witness.
-export { evaluateWinRateCurve, CURVE_SHAPE_TOLERANCES } from './combat.curve-shape';
-export type {
-    WinRateCurveClass, WinRateCurvePoint, WinRateCurveResult, CurveShapeTolerances,
-} from './combat.curve-shape';
 // ─── Playtest supercharge — stage profiles, deck drafting, policy roster, matrix ──
 export {
     COMBAT_STAGE_ORDER, COMBAT_STAGE_PROFILES,
@@ -296,8 +290,6 @@ export type {
 // Metrics slate (2026-07-18) — static card/preset complexity instrument.
 export { cardComplexity, presetComplexity } from './combat.card-complexity';
 export type { CardComplexityRow, PresetComplexity } from './combat.card-complexity';
-export { runHazardCombatAutoEncounter } from './combat.autoplay';
-export type { HazardAutoPolicyId, HazardCombatAutoOptions, HazardCombatAutoResult } from './combat.autoplay';
 // Phase 19/23 — archetype→signature gating retired; playerArchetype kept for portrait.
 export { playerArchetype, CONCLUDE_DMG_PER_STACK } from './combat.signature';
 export {

@@ -431,6 +431,13 @@
 
 ## Pending
 
+### [debt] TRIM THE FAT T2a merged unverified — finish list (2026-09-25)
+
+- **Context:** owner call 2026-09-25 — T2a merged mid-work without re-running the gates. Full hand-off: `plan/2026-09-25-trim-t2a-handoff.prompt.md`.
+- **Known red:** mobile `state/dev/inspector.ts:141` reads the deleted `factionReputations`; `CombatEncounterPanel.endcombat-routing.test.ts:102-103` asserts it. Mechanics suite not re-run after Tier 0 items 2-4 + Faction. Visual baselines (`character.png`, maybe `combat-encounter.png`) and the perf baseline need re-stamping.
+- **Residue:** dead `isMultiplier` branch in `village.engine.ts`; dead `payload.statModifiers` reads in mobile `tooltip.engine.ts`; stale luck/derived labels and tooltip-id docs in `inventory.modal.engine.ts`; unreachable tooltip path in `ItemModal.tsx`; card-engine `damage`/`heal` event kinds never emitted; write-never `MapState.hazardOutcomes`; `buff_all_stats_up` / `debuff_curse` now inert and unapplied; the "~198 unused barrel exports" pass not done; docs/specs still naming removed systems.
+- **Deviation from the spec, kept deliberately:** `combat.autoplay` moved to `src/test-utils/` (three surviving tests use it); `isRouteBlocked` kept (live movement check); `validateInteractions` kept (guards the live interaction registry).
+
 ### [docs] Trim-the-fat spec names `.claude/agents/mechanics-expert.md` as a delete candidate, but four live skills spawn it (2026-09-25)
 
 - **Found by:** T1 of `plan/2026-09-25-trim-the-fat.spec.md` (Tier 1 "Docs" list, last bullet: "Rewrite or delete").

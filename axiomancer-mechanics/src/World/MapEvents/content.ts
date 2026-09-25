@@ -137,8 +137,6 @@ const nfForestMarket: MapEventPool = {
             shop: {
                 wares: [
                     { itemId: 'minor-healing-potion', price: 12 },
-                    { itemId: 'philosopher-tea',      price: 35 },
-                    { itemId: 'void-essence',         price: 40 },
                     { itemId: 'clarity-serum',        price: 28 },
                     // Signet relics (owner call 2026-09-23 — a fresh run seeds
                     // no relics; the markets sell them). The first market on
@@ -1232,7 +1230,6 @@ const ncLedgerCamp: MapEventPool = {
                     { itemId: 'minor-healing-potion', price: 14 },
                     { itemId: 'antidote',             price: 16 },
                     { itemId: 'clarity-serum',        price: 30 },
-                    { itemId: 'philosopher-tea',      price: 38 },
                     // Signet relics — underground prices.
                     { itemId: 'relic-conviction-strike', price: 40 },
                     { itemId: 'relic-mounting-dread', price: 45 },
@@ -1470,7 +1467,6 @@ const ncyIronMarket: MapEventPool = {
                     { itemId: 'healing-potion',       price: 30 },
                     { itemId: 'antidote',             price: 14 },
                     { itemId: 'clarity-serum',        price: 26 },
-                    { itemId: 'philosopher-tea',      price: 34 },
                     // Signet relics — the iron trade stocks the weapon and armor.
                     { itemId: 'relic-conclusion',     price: 50 },
                     { itemId: 'relic-second-wind',    price: 50 },
@@ -1494,8 +1490,6 @@ const ncyChandlery: MapEventPool = {
                 wares: [
                     { itemId: 'minor-healing-potion', price: 11 },
                     { itemId: 'body-elixir',          price: 22 },
-                    { itemId: 'focus-vial',           price: 18 },
-                    { itemId: 'void-essence',         price: 38 },
                     // Signet relics — a chandler's odd lots.
                     { itemId: 'relic-unbroken-stride', price: 45 },
                     { itemId: 'relic-overwhelming',   price: 50 },
@@ -2163,7 +2157,6 @@ const capMarket: MapEventPool = {
                 wares: [
                     { itemId: 'greater-healing-potion', price: 45 },
                     { itemId: 'supreme-healing-potion',  price: 80 },
-                    { itemId: 'resonance-crystal',       price: 55 },
                     { itemId: 'phoenix-tear',             price: 65 },
                 ],
             },

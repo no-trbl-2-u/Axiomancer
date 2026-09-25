@@ -65,7 +65,7 @@ import {
     getSignatureSkill,
     selectMercyChoice,
     selectCapitulationChoice,
-    cardDieCostPreview,
+    resolveRead,
     isMomentumDieId,
 } from '../Combat/combat.engine';
 import type {
@@ -411,11 +411,11 @@ async function promptCardChoice(state: CombatEncounterState): Promise<{ uid: str
     if (cards.length === 0) return null;
     const enemyStance = revealedCurrentStance(state);
     const choices = cards.flatMap(({ uid, card }) => {
-        // P0-truth: every powered play costs exactly the drafted die — the old
-        // `cardDieCostPreview` free/2-die label described a pricing model the
-        // engine never charges. The read column is the real lever.
-        const preview = cardDieCostPreview(state, card);
-        const stanceLabel = enemyStance ? ` vs ${enemyStance}:${preview.advantage}` : '';
+        // P0-truth: every powered play costs exactly the drafted die. The read
+        // (the card's stance against the enemy's phase stance) is the real
+        // lever; a grey 'any' card has no stance to read.
+        const read = card.stance === 'any' ? 'neutral' : resolveRead(card.stance, currentPhaseStance(state));
+        const stanceLabel = enemyStance ? ` vs ${enemyStance}:${read}` : '';
         return [
             { name: `[top] ${card.name}  (${card.stance}, ${card.effectKind})`, value: `top:${uid}` },
             { name: `[bot] ${card.name}  cost 1 die${stanceLabel}  ${card.bottomActionText}`, value: `bot:${uid}` },

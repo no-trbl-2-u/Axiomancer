@@ -28,7 +28,7 @@ import { mockSequentialRng } from '../../test-utils/rng';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveCombatPhase, resolveThreatPhase, processBetweenPhases,
-    resolveCardDieCost, resolveRead, getCard, buildCombatSummary,
+    resolveRead, getCard, buildCombatSummary,
     draftStanceDie, getDraftedDie, isPhaseStanceRevealed,
     playSignatureSkill, discardCombatCard, projectCardImpact, endTurn,
     startTurn, SCRAP_CONVICTION_CAP_PER_TURN,
@@ -140,11 +140,6 @@ describe('Spec 26b §1 — the hidden-stance read', () => {
         expect(resolveRead('heart', 'heart')).toBe('neutral');
         expect(resolveRead('wild', 'mind')).toBe('none');
         expect(resolveRead('x', 'mind')).toBe('none');
-    });
-    it('legacy resolveCardDieCost still classifies advantage/neutral/disadvantage', () => {
-        expect(resolveCardDieCost('heart', 'body').advantage).toBe('advantage');
-        expect(resolveCardDieCost('body', 'heart').advantage).toBe('disadvantage');
-        expect(resolveCardDieCost('heart', 'heart').advantage).toBe('neutral');
     });
 });
 

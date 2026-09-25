@@ -122,7 +122,9 @@ the future hooks; keeping them but hiding them in the UI.
 
 - Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and
   sequencing in `plan/2026-09-25-trim-the-fat.spec.md`. **T1 (binaries +
-  dead docs) executed 2026-09-25**; T2–T5 not started. §5 of that spec is
+  dead docs) executed 2026-09-25.** T2a merged 2026-09-25 **unverified**
+  (owner call); finish list and T2b onward in
+  `plan/2026-09-25-trim-t2a-handoff.prompt.md`. T3–T5 not started. §5 of that spec is
   fully answered (D4–D10).
   Pick-up prompt for the execution session:
   `plan/2026-09-25-trim-the-fat.prompt.md`.

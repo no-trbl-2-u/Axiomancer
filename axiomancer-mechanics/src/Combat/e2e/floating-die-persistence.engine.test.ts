@@ -30,7 +30,7 @@ import {
     getFloatingDiceColors,
 } from '../combat.engine';
 import { FLOATING_DICE_CAP } from '../combat.dice';
-import { runHazardCombatAutoEncounter } from '../combat.autoplay';
+import { runHazardCombatAutoEncounter } from '../../test-utils/combat-autoplay';
 import type { CombatDieColor, CombatEncounterState } from '../combat.encounter.types';
 
 // PROFANE CANON (2026-08-08): `forge_floating_die` lost its library carrier

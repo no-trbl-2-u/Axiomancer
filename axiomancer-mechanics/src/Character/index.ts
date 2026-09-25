@@ -4,7 +4,7 @@ import { Equipment, Item } from '../Items/types';
 import { calculateMaxHealth } from '../Utils';
 import { getRng } from '../Utils/rng';
 import { EXPERIENCE_PER_LEVEL } from '../Game/game-mechanics.constants';
-import { equipItem } from './equipment.reducer';
+import { equipItem, wornMaxHpBonus } from './equipment.reducer';
 import { cloneStartingRelics } from '../Items/relic.library';
 
 /**
@@ -134,7 +134,8 @@ export function allocateStatPoint(
         ...character.baseStats,
         [stat]: character.baseStats[stat] + 1,
     };
-    const nextMaxHealth = calculateMaxHealth(character.level, nextBase);
+    // Tier 0 item 4 (TRIM THE FAT T2a): keep the worn armor relics' bonus.
+    const nextMaxHealth = calculateMaxHealth(character.level, nextBase) + wornMaxHpBonus(character.equipment);
     // Grow current HP by the maxHealth delta — allocation isn't a free
     // heal, but neither does raising max-HP leave the player stuck below
     // the new ceiling.

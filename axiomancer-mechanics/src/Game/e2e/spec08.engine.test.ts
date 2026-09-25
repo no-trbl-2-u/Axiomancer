@@ -16,7 +16,7 @@ import {
 import { Player } from '../../Character/characters.mock';
 import { createCharacter } from '../../Character';
 import { GameState } from '../types';
-import { applyEffect, lookupEffect, processWorldEffectTick } from '../../Effects';
+import { applyEffect, lookupEffect} from '../../Effects';
 import { mockSequentialRng } from '../../test-utils/rng';
 
 afterEach(() => vi.restoreAllMocks());
@@ -88,29 +88,6 @@ describe('Spec 08 e2e — fishing-village exploration loop', () => {
         expect(store.getState().player.currency).toBeGreaterThanOrEqual(25);
     });
 
-    it('hazard tick fires when the player moves between nodes', () => {
-        // Apply poison to the player; walk two steps; HP should drop.
-        const store = bootstrap();
-        const poison = lookupEffect('debuff_poison')!;
-        const { activeEffects } = applyEffect(store.getState().player.effects, poison, 0);
-        store.setState({ player: { ...store.getState().player, effects: activeEffects } });
-        const startHp = store.getState().player.health;
-
-        // Step 1: fv-1 → fv-2 (manual orchestration: world reducer + player tick).
-        let world = moveToNode(store.getState().world, 'fv-2');
-        let tick = processWorldEffectTick(store.getState().player);
-        store.setState({ world, player: tick.player });
-        const hpAfter1 = store.getState().player.health;
-        expect(hpAfter1).toBeLessThan(startHp);
-
-        store.setState({ world: completeCurrentNode(store.getState().world) });
-
-        // Step 2: fv-2 → fv-26 (the first gate, 2026-09-21).
-        world = moveToNode(store.getState().world, 'fv-26');
-        tick = processWorldEffectTick(store.getState().player);
-        store.setState({ world, player: tick.player });
-        expect(store.getState().player.health).toBeLessThan(hpAfter1);
-    });
 });
 
 // Compile-time sanity for the demo map's authored content.
