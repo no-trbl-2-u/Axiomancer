@@ -32,11 +32,20 @@
  *
  * Filed via `/oversight` 2026-05-19 as Phase 34 follow-up to the
  * routing/gesture fix in `3a14f5f`.
+ *
+ * 3. **Every `linking` entry in `lib/platform/router.ts` names a
+ *    registered screen.** The linking config (and `ROUTE_TABLE`, which
+ *    it mirrors) turns a URL segment into a screen `name`; an entry no
+ *    navigator registers is a dead route. `quest` outlived the retired
+ *    Quest Board screen there (phase 61) until TRIM THE FAT Tier 0
+ *    item 7 (2026-09-25).
  */
 
 import { describe, it, expect } from '@jest/globals';
 import { promises as fs } from 'fs';
 import * as path from 'path';
+
+import { linking } from '@/lib/platform/router';
 
 const APP_ROOT = path.resolve(__dirname, '..', '..', 'app');
 const ROOT_LAYOUT = path.join(APP_ROOT, '_layout.tsx');
@@ -157,5 +166,30 @@ describe('layout registration: (tabs)/_layout Tabs.Screen names match actual rou
         for (const name of screenNames) {
             expect(folderRouteShortNames.has(name)).toBe(false);
         }
+    });
+});
+
+/** Every `name="…"` string registered by a layout's navigator. */
+function registeredScreenNames(source: string): Set<string> {
+    return new Set(Array.from(source.matchAll(/\bname="([^"]+)"/g), (m) => m[1]));
+}
+
+type LinkingScreens = Record<string, string | { screens: Record<string, string> }>;
+
+describe('layout registration: every linking entry names a registered screen', () => {
+    const screens = (linking as unknown as { config: { screens: LinkingScreens } }).config.screens;
+
+    it('every root linking entry is registered in app/_layout.tsx', async () => {
+        const rootNames = registeredScreenNames(await fs.readFile(ROOT_LAYOUT, 'utf8'));
+        const unregistered = Object.keys(screens).filter((name) => !rootNames.has(name));
+        expect(unregistered).toEqual([]);
+    });
+
+    it('every tab linking entry is registered in app/(tabs)/_layout.tsx', async () => {
+        const tabNames = registeredScreenNames(await fs.readFile(TABS_LAYOUT, 'utf8'));
+        const tabs = screens['(tabs)'] as { screens: Record<string, string> };
+        expect(typeof tabs).toBe('object');
+        const unregistered = Object.keys(tabs.screens).filter((name) => !tabNames.has(name));
+        expect(unregistered).toEqual([]);
     });
 });

@@ -27,12 +27,6 @@ export type Action = 'attack' | 'defend' | 'item' | 'flee' | 'spare' | 'exploit'
 export type Advantage = 'advantage' | 'neutral' | 'disadvantage';
 
 /**
- * How a critical hit resolves on an attack roll.
- * `double` doubles raw damage before defence. `pierce` ignores defence entirely.
- */
-export type CritStyle = 'double' | 'pierce';
-
-/**
  * A combatant's choice for a single round: their stance plus their action.
  *
  * @property stance  - heart/body/mind.

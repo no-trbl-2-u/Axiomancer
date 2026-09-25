@@ -2,11 +2,9 @@
  * EnemyIllustration (visual-audit 2026-06; re-platformed on the archetype
  * figure set — Phase V8) — resolves an enemy id to a bespoke archetype
  * illustration drawn in the shared CreatureScene. Every archetype (including
- * `generic` and non-boss `tyrant`) now renders through the same figure set
- * `EnemyPortrait` uses for the in-combat HUD avatar, so the prelude/gallery
- * scene and the fight HUD always agree on what a foe looks like — the
- * pre-archetype placeholder scenes (`EncounterIllustration`/
- * `BossIllustration`) are retired.
+ * `generic` and non-boss `tyrant`) now renders through the one shared figure
+ * set (`./figures`) — the pre-archetype placeholder scenes
+ * (`EncounterIllustration`/`BossIllustration`) are retired.
  */
 
 import React from 'react';

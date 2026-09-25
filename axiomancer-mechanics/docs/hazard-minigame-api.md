@@ -20,7 +20,9 @@ Companion source-of-truth documents:
 
 ## Package surface
 
-Import Hazard helpers from the top-level package barrel:
+The Hazard module's surface lives in `src/World/Hazard` (its `index.ts`).
+The top-level package barrel re-exports only the names mobile consumes (it
+was pruned to consumed names on 2026-09-25); import the rest from the module:
 
 ```ts
 import {
@@ -37,7 +39,6 @@ import {
   HAZARD_CONSEQUENCES,
   HAZARD_SUBQUESTS,
   HAZARD_LIBRARY,
-  HAZARD_TYPES,
   getHazardCardDef,
   getHazardSubquestDef,
   getHazardDef,
@@ -175,7 +176,6 @@ Mobile owns:
 Mobile may derive labels and visual hints from mechanics data:
 
 - Use `HAZARD_KEYWORDS` for readable keyword explanations.
-- Use `HAZARD_TYPES` for meter labels.
 - Use `hazardProjectedProgress(session)` to preview staged progress.
 - Use `hazardCardPowerColors(def)` / `dieCanPowerCard(die.kind, def)` to show legal die drops.
 - Use `hazardSubquestStatus(session, subquest)` and `hazardSubquestResults(session, final)` for optional objective display.

@@ -26,7 +26,7 @@ import {
     selectEventViewModel,
     selectHasActiveEvent,
 } from '@/state/presenters/event.engine';
-import { selectHasAnyActiveSession } from '@/state/presenters/navigation.engine';
+import { selectHasAnyActiveSession, selectResumableFight } from '@/state/presenters/navigation.engine';
 import { EncounterModalOverlay } from '@/components/event/EncounterModalOverlay';
 import type { Enemy } from '@mechanics';
 
@@ -181,8 +181,28 @@ export default function ExplorationScreen() {
         if (modalWasOpen.current) {
             modalWasOpen.current = false;
             setActiveEnemy(null);
+            setResumeFight(null);
         }
     }, [inEncounterModal]);
+
+    // A chronicle continued mid-fight (the store still holds its
+    // `currentEncounter`) restarts that fight here, once, on mount: the
+    // fight's dice, hand and HP lived in the panel and did not survive the
+    // restart, so the saved foe is fought again from the top (owner call,
+    // 2026-09-25). Cold start used to route this to the dev sandbox.
+    const [resumeFight, setResumeFight] = useState<{ fleeAllowed: boolean } | null>(null);
+    const resumeChecked = useRef(false);
+    useEffect(() => {
+        if (resumeChecked.current) return;
+        resumeChecked.current = true;
+        if (inEncounterModal || inCombat) return;
+        const fight = selectResumableFight(store.getState());
+        if (!fight) return;
+        setResumeFight({ fleeAllowed: fight.fleeAllowed });
+        setActiveEnemy(fight.enemy);
+        openEncounterModal();
+        enterCombat();
+    }, [store, inEncounterModal, inCombat, openEncounterModal, enterCombat]);
 
     // The node the player has tapped but not yet confirmed; resolved against
     // the current options so a stale selection (after a move) falls away.
@@ -319,6 +339,7 @@ export default function ExplorationScreen() {
                     onFight={onEncounterFight}
                     onFlee={onEncounterFlee}
                     region={vm.region}
+                    resumeFight={resumeFight ?? undefined}
                 />
             )}
             {nodeTip !== null && <NodeToast tip={nodeTip} />}

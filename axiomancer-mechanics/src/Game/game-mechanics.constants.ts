@@ -65,23 +65,6 @@ export const RESOURCE_GENERATION = {
 } as const;
 
 // ============================================================================
-// COMBAT — RESOURCE CARRY (between encounters)
-// ============================================================================
-// A fraction of UNSPENT philosophical resources (fallacy / paradox — the card
-// fuel) carries from a won combat into the next combat's seed. This rewards
-// casting cards (which apply status effects) and planning across encounters —
-// the STRATEGIST path the VISION.md doctrine optimises for. Stance tokens
-// (heart/body/mind) are NOT carried, so turtling or basic-attack token-banking
-// earns no cross-combat momentum. Conservative defaults; the tuning loop owns
-// the numbers.
-export const RESOURCE_CARRY = {
-    /** Fraction of unspent fallacy / paradox carried forward (floored). */
-    FRACTION: 0.5,
-    /** Hard cap on the amount carried per resource, so carry cannot snowball. */
-    CAP: 3,
-} as const;
-
-// ============================================================================
 // COMBAT — FRIENDSHIP MECHANIC
 // ============================================================================
 // When both combatants choose 'defend' on the same turn the friendship

@@ -28,14 +28,16 @@ import {
     cardRemovalsOf,
     canAffordCardRemoval,
     CARD_REMOVAL_PRICING,
+} from '../card.removal';
+import {
     buildCombatDeck,
-    createCharacter,
     addToLoadout,
     getCombatLoadout,
     getDeckPreset,
     PRESET_LINEAGE,
     COMBAT_HAND_SIZE,
-} from '../../index';
+} from '../../Combat';
+import { createCharacter } from '../../index';
 import type { Character } from '../../index';
 
 // The Threadbare Office — real canon ids, so the fixtures are the shape a real

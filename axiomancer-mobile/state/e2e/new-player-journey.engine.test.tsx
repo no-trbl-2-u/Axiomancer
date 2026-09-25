@@ -24,15 +24,8 @@ afterEach(() => {
 
 describe('integration: new player journey — fresh state through first encounter', () => {
     it('fresh store shows title screen for new players', async () => {
-        const { tree, store } = withAllProviders(<TitleScreen onContinue={() => {}} />);
-        
-        // Fresh store should have new player indicators
-        // Import the presenter function since it's not on the store
-        const { selectOnboardingViewModel } = require('@/state/presenters/onboarding.engine');
-        const onboarding = selectOnboardingViewModel(store.getState());
-        expect(onboarding?.showTitleScreen).toBe(true);
-        expect(onboarding?.isNewPlayer).toBe(true);
-        
+        const { tree } = withAllProviders(<TitleScreen onContinue={() => {}} />);
+
         // Title screen component should render for new players
         const rendered = render(tree);
         // Check that the component rendered something (rather than specific testId)

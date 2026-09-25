@@ -793,4 +793,65 @@ describe('EncounterModalOverlay: in-place hazard combat (Phase 200)', () => {
         fireEvent.press(tree.getByTestId('combat-withdraw'));
         expect(onFlee).toHaveBeenCalledTimes(1);
     });
+    // Tier 0 item 6 — a chronicle continued mid-fight: there is no prelude VM
+    // (the event slice was cleared when the fight began), so the overlay must
+    // open straight into a fresh fight against the saved foe.
+    const clearedVm = (): EventViewModel => ({ ...makeCombatPreludeVm(), kind: 'narrative-choice', preludeChrome: null });
+
+    it('resumeFight opens straight into the hazard fight with no prelude VM', () => {
+        const store = createAppStore({ adapter: createMemoryAdapter() });
+        seedPlayerWithDeck(store);
+        const onFight = jest.fn();
+        const tree = render(
+            withAllProviders(
+                <EncounterModalOverlay
+                    vm={clearedVm()}
+                    encounterEnemy={createMockEncounterEnemy()}
+                    onFight={onFight}
+                    onFlee={() => {}}
+                    resumeFight={{ fleeAllowed: true }}
+                />,
+                store,
+            ),
+        );
+        expect(tree.queryByTestId('encounter-modal-hazard-combat')).not.toBeNull();
+        expect(tree.queryByTestId('combat-withdraw')).not.toBeNull();
+        // The fight was already begun before the restart — never re-begun.
+        expect(onFight).not.toHaveBeenCalled();
+    });
+
+    it('resumeFight keeps a boss sealed (no WITHDRAW)', () => {
+        const store = createAppStore({ adapter: createMemoryAdapter() });
+        seedPlayerWithDeck(store);
+        const tree = render(
+            withAllProviders(
+                <EncounterModalOverlay
+                    vm={clearedVm()}
+                    encounterEnemy={createMockEncounterEnemy()}
+                    onFight={() => {}}
+                    onFlee={() => {}}
+                    resumeFight={{ fleeAllowed: false }}
+                />,
+                store,
+            ),
+        );
+        expect(tree.queryByTestId('encounter-modal-hazard-combat')).not.toBeNull();
+        expect(tree.queryByTestId('combat-withdraw')).toBeNull();
+    });
+
+    it('without resumeFight, a missing prelude VM still renders nothing', () => {
+        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const tree = render(
+            withAllProviders(
+                <EncounterModalOverlay
+                    vm={clearedVm()}
+                    encounterEnemy={createMockEncounterEnemy()}
+                    onFight={() => {}}
+                    onFlee={() => {}}
+                />,
+                store,
+            ),
+        );
+        expect(tree.queryByTestId('encounter-modal-overlay')).toBeNull();
+    });
 });

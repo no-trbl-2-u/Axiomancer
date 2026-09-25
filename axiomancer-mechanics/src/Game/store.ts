@@ -549,6 +549,5 @@ export type { StoreApi };
 export const selectPlayer      = (s: GameStore): Character          => s.player;
 /** True while an encounter is staged (combat is driven outside the store). */
 export const selectIsInCombat  = (s: GameStore): boolean            => s.currentEncounter != null;
-export const selectInventory   = (s: GameStore): Item[]             => s.player.inventory;
 export const selectVersion     = (s: GameStore): number             => s.version;
 export const selectMoralMeter  = (s: GameStore): number             => s.moralMeter;

@@ -5,14 +5,12 @@
  * `/combat-encounter` screen holds it in local React state, so unlike the
  * gathering/hazard slices there is no mobile combat session slice here. This
  * module carries the *first-fight tutorial* flag plus the deck-identity layer:
- * dev deck presets and the pre-run starter-bundle picker, both sourced from the
- * engine's ten themed preset decks (spec 32 v3 §8). Mobile invents no cards,
- * costs, or tuning — every id comes from the engine's own preset table.
+ * the pre-run starter-bundle picker, sourced from the engine's themed preset
+ * decks (spec 32 v3 §8). Mobile invents no cards, costs, or tuning — every
+ * id comes from the engine's own preset table.
  */
 
 import {
-    COMBAT_REWARD_POOL,
-    STARTING_CARD_IDS,
     addRewardCard,
     listDeckPresets,
     rollCombatCardRewards,
@@ -53,121 +51,12 @@ export function completeCombatTutorialAction(store: AppStore, skipped: boolean):
     void skipped;
 }
 
-// ---------------------------------------------------------------------------
-// Deck presets — spec 32 v3 §8: the TEN themed preset decks, engine-owned.
-//
-// The combat deck the engine deals from is `buildCombatDeck(player)` =
-// `player.knownCards` + `player.combatRewardCards` + the synthetic cards. So a
-// "swap your deck" is just: replace `knownCards` with the preset's card ids
-// (duplicates intentional — the 4/4/2/2/1/1/1 recipe) and clear the earned
-// reward cards, leaving the deck EXACTLY the preset plus the engine's
-// always-on synthetics (Retreat).
-// ---------------------------------------------------------------------------
-
-/** Every distinct combat card the engine can deal: starters + the 70-card pool. */
-const COMBAT_CARD_POOL: readonly string[] = Object.freeze(
-    Array.from(new Set([...STARTING_CARD_IDS, ...COMBAT_REWARD_POOL])),
-);
-
-/**
- * The starting deck (spec 32 v3 §7): the engine's `STARTING_CARD_IDS`
- * (slippery-slope + brace-for-impact) — each teaches a mechanic in fight one.
- * The synthetic Retreat rides along via `buildCombatDeck`.
- */
-const STARTER_DECK_IDS: readonly string[] = STARTING_CARD_IDS;
-
 /** The three campaign preset ids (the Profane Canon rework, 2026-08-08) —
  *  snapshots of ONE deck evolving early → mid → late, in campaign order. */
 export type ThemedDeckId =
     | 'threadbare'
     | 'pilgrim'
     | 'apostate';
-
-export type CombatDeckPresetId = 'starter-baseline' | ThemedDeckId;
-
-export interface CombatDeckPreset {
-    id: CombatDeckPresetId;
-    label: string;
-    description: string;
-    cardIds: readonly string[];
-}
-
-export interface CombatDeckPresetResult {
-    presetId: CombatDeckPresetId;
-    label: string;
-    cardIds: string[];
-}
-
-// The dev presets: the starter baseline plus the engine's ten themed decks,
-// verbatim (name/description/recipe are engine truth).
-export const COMBAT_DECK_PRESETS: readonly CombatDeckPreset[] = Object.freeze([
-    {
-        id: 'starter-baseline' as const,
-        label: 'Starter baseline',
-        description: 'The starting deck a new player is seeded with. Clean control.',
-        cardIds: STARTER_DECK_IDS,
-    },
-    ...listDeckPresets().map((preset): CombatDeckPreset => ({
-        id: preset.id as ThemedDeckId,
-        label: preset.name,
-        description: preset.description,
-        cardIds: preset.cardIds,
-    })),
-]);
-
-function combatDeckPresetById(presetId: CombatDeckPresetId): CombatDeckPreset {
-    const preset = COMBAT_DECK_PRESETS.find((candidate) => candidate.id === presetId);
-    if (!preset) throw new Error(`Unknown combat deck preset: ${presetId}`);
-    return preset;
-}
-
-/**
- * Dev tool — swap the player's combat deck for a preset. Sets
- * `player.knownCards` to the preset's card ids and clears earned
- * `combatRewardCards`, so the next encounter deals exactly the preset deck
- * (`buildCombatDeck` adds only the engine's synthetic cards on top). No-op
- * with an empty result shape if there is no player loaded.
- */
-export function applyCombatDeckPresetAction(
-    store: AppStore,
-    presetId: CombatDeckPresetId,
-): CombatDeckPresetResult {
-    const preset = combatDeckPresetById(presetId);
-    const cardIds = [...preset.cardIds];
-    const player = (store.getState() as unknown as GameState).player;
-    if (player) {
-        store.setState({
-            player: { ...player, knownCards: cardIds, combatRewardCards: [] },
-        } as never);
-    }
-    return { presetId: preset.id, label: preset.label, cardIds };
-}
-
-/** How many random cards `randomizeCombatDeckAction` deals into the deck. */
-const RANDOMIZE_CARD_COUNT = 8;
-
-/**
- * Dev tool — rebuild the player's combat deck as a random selection from EVERY
- * defined combat card (starters + the full 70-card pool, rares included), so
- * dev sessions surface cards normal play rarely reaches. Replaces
- * `knownCards` with the random unique pull and clears `combatRewardCards`.
- * Returns the granted card ids.
- */
-export function randomizeCombatDeckAction(store: AppStore): string[] {
-    const pool = [...COMBAT_CARD_POOL];
-    for (let i = pool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
-    const granted = pool.slice(0, Math.min(RANDOMIZE_CARD_COUNT, pool.length));
-    const player = (store.getState() as unknown as GameState).player;
-    if (player) {
-        store.setState({
-            player: { ...player, knownCards: granted, combatRewardCards: [] },
-        } as never);
-    }
-    return granted;
-}
 
 // ---------------------------------------------------------------------------
 // Starter bundles (deck identity) — the pre-run "choose your path" decks.

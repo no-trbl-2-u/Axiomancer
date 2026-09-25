@@ -149,7 +149,7 @@ describe('app/index.tsx: title and menu', () => {
         expect(mockReplace).toHaveBeenCalledWith('/exploration');
     });
 
-    it('CONTINUE into a chronicle saved mid-fight enters the combat encounter route', () => {
+    it('CONTINUE into a chronicle saved mid-fight lands on the map (which restarts the fight), not the dev sandbox', () => {
         const midFight = { ...savedState('Fighter', 3), currentEncounter: { enemies: [] } as never };
         const slots = createMemorySlotStore({ initial: { 2: { state: midFight, savedAt: 5 } } });
         const { getByTestId } = mountIndex({ slots });
@@ -157,7 +157,8 @@ describe('app/index.tsx: title and menu', () => {
 
         act(() => { fireEvent.press(getByTestId('main-menu-continue')); });
 
-        expect(mockReplace).toHaveBeenCalledWith('/combat-encounter');
+        expect(mockReplace).toHaveBeenCalledWith('/exploration');
+        expect(mockReplace).not.toHaveBeenCalledWith('/combat-encounter');
     });
 
     it('?menu=1 skips the title (the SETTINGS return path)', () => {

@@ -13,13 +13,11 @@
 // ── Engine types ───────────────────────────────────────────────────────────
 export type {
     LootCacheChoiceOfferId,
-    LootCacheChoicePhase,
     LootCacheChoiceOutcome,
     LootCacheChoiceSession,
 } from './lootcachechoice.types';
 
 // ── Pure engine transitions ────────────────────────────────────────────────
-export type { CreateLootCacheChoiceOptions } from './lootcachechoice.engine';
 export {
     createLootCacheChoiceSession,
     chooseLootCacheChoiceOffer,

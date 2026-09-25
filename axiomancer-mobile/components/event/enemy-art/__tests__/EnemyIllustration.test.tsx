@@ -4,10 +4,10 @@
  *
  * EnemyIllustration is pure wiring: it resolves an enemy id to a drawing
  * archetype (`resolveEnemyArchetype`) and routes every archetype — including
- * `generic` and non-boss `tyrant` — through the same `CreatureScene` +
- * archetype-figure set `EnemyPortrait` uses for the in-combat HUD avatar
- * (Phase V8; the pre-archetype `EncounterIllustration`/`BossIllustration`
- * placeholder scenes are retired). The sibling scenes and the resolver
+ * `generic` and non-boss `tyrant` — through the shared `CreatureScene` +
+ * archetype-figure set (Phase V8; the pre-archetype
+ * `EncounterIllustration`/`BossIllustration` placeholder scenes are
+ * retired). The sibling scenes and the resolver
  * presenter carry their own tests; this pins the dispatcher that wires
  * them together.
  *

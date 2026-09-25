@@ -354,16 +354,8 @@ export function createEnemy(options: CreateEnemyOptions): Enemy {
     };
 }
 
-export {
-    ENEMY_KEYWORD_KINDS, ENEMY_KEYWORD_LABEL, ENEMY_KEYWORD_GLOSS,
-    enemyKeywordText, enemyKeywordGloss, findEnemyKeyword, hasEnemyKeyword,
-} from './enemy-keywords';
-export type { EnemyKeyword, EnemyStage } from './enemy-keywords';
-export { rollLoot, rollLootMany } from './loot';
-export type { LootRng } from './loot';
+export type { EnemyKeyword } from './enemy-keywords';
+
 export type {
-    Enemy, EnemyLogic, EnemyDifficulty, LootTableEntry,
-    FriendshipReward, BefriendabilityConfig,
-    FinalBlowLines, PactLines, CauseLines,
-    CodexEntry,
+    Enemy, EnemyDifficulty,
 } from './types';

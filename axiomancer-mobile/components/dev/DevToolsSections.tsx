@@ -43,7 +43,6 @@ const DebugCurrencyControl = lazyNamed(() => import('@/components/DebugCurrencyC
 const DebugAlignmentShift = lazyNamed(() => import('@/components/DebugAlignmentShift'), 'DebugAlignmentShift');
 const DebugEffectApply = lazyNamed(() => import('@/components/DebugEffectApply'), 'DebugEffectApply');
 // ── DECKS & ITEMS ──
-const DebugCombatDeck = lazyNamed(() => import('@/components/DebugCombatDeck'), 'DebugCombatDeck');
 const DebugHazardDeckRandomize = lazyNamed(() => import('@/components/DebugHazardDeckRandomize'), 'DebugHazardDeckRandomize');
 const DebugPopulateAllItems = lazyNamed(() => import('@/components/DebugPopulateAllItems'), 'DebugPopulateAllItems');
 const DebugItemPicker = lazyNamed(() => import('@/components/DebugItemPicker'), 'DebugItemPicker');
@@ -64,7 +63,6 @@ const DebugDialogueJump = lazyNamed(() => import('@/components/DebugDialogueJump
 const DebugQuestState = lazyNamed(() => import('@/components/DebugQuestState'), 'DebugQuestState');
 // ── UI ──
 const AestheticDevToggle = lazyNamed(() => import('@/components/AestheticDevToggle'), 'AestheticDevToggle');
-const DebugHudOverrides = lazyNamed(() => import('@/components/DebugHudOverrides'), 'DebugHudOverrides');
 // ── RUN & DIAGNOSTICS ──
 const DebugRunControls = lazyNamed(() => import('@/components/DebugRunControls'), 'DebugRunControls');
 const DebugLogViewer = lazyNamed(() => import('@/components/DebugLogViewer'), 'DebugLogViewer');
@@ -113,8 +111,7 @@ export function DevToolsSections() {
                     <DebugEffectApply />
                 </DevSection>
 
-                <DevSection label="DECKS & ITEMS" hint="combat deck · hazard deck · satchel" testID="dev-section-decks">
-                    <DebugCombatDeck />
+                <DevSection label="DECKS & ITEMS" hint="hazard deck · satchel" testID="dev-section-decks">
                     <DebugHazardDeckRandomize />
                     <DebugPopulateAllItems />
                     <DebugItemPicker />
@@ -143,9 +140,8 @@ export function DevToolsSections() {
                     <DebugQuestState />
                 </DevSection>
 
-                <DevSection label="UI" hint="aesthetic · HUD overrides" testID="dev-section-ui">
+                <DevSection label="UI" hint="aesthetic" testID="dev-section-ui">
                     <AestheticDevToggle />
-                    <DebugHudOverrides />
                 </DevSection>
 
                 <DevSection label="RUN & DIAGNOSTICS" hint="save · reset · galleries · log" testID="dev-section-run">

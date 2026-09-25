@@ -1,22 +1,24 @@
 /**
- * Hermetic E2E Tests — Engine events presenter (Phase 25 Tick A).
+ * Hermetic E2E Tests — engine events ring buffer (Phase 25 Tick A).
  *
- * Pins the emitter wiring + ring-buffer behaviour. Drives the engine
- * via `createAppStore` + the action layer; no direct emitter pokes.
+ * Pins the emitter wiring + the `_recentEvents` ring-buffer behaviour
+ * that the memoir chronicle and the error screen read. Drives the
+ * engine via `createAppStore` + the action layer. (The
+ * `selectRecentEngineEvents` presenter this file used to read through
+ * had no screen consumer and was removed — TRIM THE FAT T3. The
+ * `isCombat*Event` type guards are pinned engine-side in
+ * `axiomancer-mechanics/src/Game/e2e/events.engine.test.ts`.)
  */
 
 import { describe, it, expect } from '@jest/globals';
-import {
-    createEnemy,
-    isCombatStartedEvent,
-    isCombatEndedEvent,
-    type TypedGameEvent,
-} from '@mechanics';
+import { createEnemy, type TypedGameEvent } from '@mechanics';
 
 import { createAppActions } from '@/state/actions';
 import { createAppStore, RECENT_EVENTS_CAPACITY, getEmitterForStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
-import { selectRecentEngineEvents } from '@/state/presenters/engine-events.engine';
+
+const isStarted = (e: TypedGameEvent) => e.type === 'combat:started';
+const isEnded = (e: TypedGameEvent) => e.type === 'combat:ended';
 
 function makeEnemy() {
     return createEnemy({
@@ -59,9 +61,9 @@ describe('engine-events: ring buffer feeds on engine dispatch', () => {
         const actions = createAppActions(store);
         actions.startCombat(makeEnemy());
 
-        const events = selectRecentEngineEvents(store.getState());
+        const events = store.getState()._recentEvents;
         expect(events.length).toBeGreaterThan(0);
-        const started = events.find(isCombatStartedEvent);
+        const started = events.find(isStarted);
         expect(started).toBeTruthy();
     });
 
@@ -71,8 +73,8 @@ describe('engine-events: ring buffer feeds on engine dispatch', () => {
         actions.startCombat(makeEnemy());
         actions.endCombat();
 
-        const events = selectRecentEngineEvents(store.getState());
-        const ended = events.find(isCombatEndedEvent);
+        const events = store.getState()._recentEvents;
+        const ended = events.find(isEnded);
         expect(ended).toBeTruthy();
     });
 
@@ -82,13 +84,13 @@ describe('engine-events: ring buffer feeds on engine dispatch', () => {
         actions.startCombat(makeEnemy());
         actions.endCombat();
 
-        const events = selectRecentEngineEvents(store.getState());
+        const events = store.getState()._recentEvents;
         // The most-recent event is `combat:ended`; the earlier one
         // is `combat:started`. Newest-first means index 0 is the
         // most recent.
         expect(events[0]?.type).toBe('combat:ended');
-        const endedIdx = events.findIndex(isCombatEndedEvent);
-        const startedIdx = events.findIndex(isCombatStartedEvent);
+        const endedIdx = events.findIndex(isEnded);
+        const startedIdx = events.findIndex(isStarted);
         expect(endedIdx).toBeLessThan(startedIdx);
     });
 
@@ -108,76 +110,7 @@ describe('engine-events: ring buffer feeds on engine dispatch', () => {
             });
         }
 
-        const events = selectRecentEngineEvents(store.getState(), 100);
+        const events = store.getState()._recentEvents;
         expect(events.length).toBe(RECENT_EVENTS_CAPACITY);
-    });
-
-    it('respects the caller-supplied capacity cap (lower than buffer size)', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
-        const emitter = getEmitterForStore(store);
-
-        for (let i = 0; i < 10; i++) {
-            emitter!.emit({
-                type: 'combat:started',
-                payload: { state: store.getState() } as never,
-            });
-        }
-
-        expect(selectRecentEngineEvents(store.getState(), 3).length).toBe(3);
-        expect(selectRecentEngineEvents(store.getState(), 100).length).toBe(10);
-    });
-});
-
-describe('engine-events: is*Event guards narrow correctly', () => {
-    it('isCombatStartedEvent narrows the type to TypedCombatStartedEvent', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
-        const actions = createAppActions(store);
-        actions.startCombat(makeEnemy());
-
-        const events = selectRecentEngineEvents(store.getState());
-        const started = events.find(isCombatStartedEvent);
-        if (started) {
-            // Inside this branch TypeScript narrows to
-            // TypedCombatStartedEvent; the `type` literal is fixed.
-            expect(started.type).toBe('combat:started');
-            expect(typeof started.payload).toBe('object');
-        } else {
-            throw new Error('expected at least one combat:started event');
-        }
-    });
-
-    // The former `isCombatRoundEvent` guard + `combat:round` event were
-    // removed with legacy turn-based combat in mechanics 0.37.0. The
-    // corresponding narrowing test was retired.
-});
-
-describe('engine-events: presenter invariants', () => {
-    it('returns a frozen array slice', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
-        const actions = createAppActions(store);
-        actions.startCombat(makeEnemy());
-
-        const events = selectRecentEngineEvents(store.getState());
-        expect(Object.isFrozen(events)).toBe(true);
-    });
-
-    it('the slice does not mutate the underlying buffer', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
-        const actions = createAppActions(store);
-        actions.startCombat(makeEnemy());
-
-        const events = selectRecentEngineEvents(store.getState());
-        const original = events.length;
-        // Attempting to mutate a frozen array silently fails in
-        // non-strict mode and throws in strict mode; the assertion
-        // here is just that the buffer length is unaffected.
-        try {
-            (events as TypedGameEvent[]).push(events[0]!);
-        } catch {
-            // Frozen array — push throws. That's fine; the next
-            // assertion catches the no-mutate guarantee.
-        }
-        const after = selectRecentEngineEvents(store.getState());
-        expect(after.length).toBe(original);
     });
 });

@@ -6,7 +6,7 @@
  * `app/(tabs)/_layout.tsx`.
  */
 
-import { selectIsInCombat, type GameStore } from '@mechanics';
+import { selectIsInCombat, type Enemy, type GameStore } from '@mechanics';
 
 import type { AppStoreState } from '../store';
 import { selectHasActiveEvent } from './event.engine';
@@ -17,7 +17,7 @@ import { selectHasActiveRest } from './rest.engine';
 import { freezeViewModel } from './freeze';
 
 export type TabRoute = 'exploration' | 'character' | 'memoir' | 'inventory' | 'deck';
-export type ActiveRoute = TabRoute | 'combat-encounter';
+export type ActiveRoute = TabRoute;
 
 export interface TabBadge {
     /** Badge text (e.g., '!', '↑'). */
@@ -35,27 +35,44 @@ export interface NavigationViewModel {
 
 /**
  * Determines which tab should be active on cold start based on game
- * state.
+ * state. Always the map.
  *
- * Priority:
- * 1. Combat if in combat
- * 2. Exploration otherwise
+ * A chronicle saved mid-fight (`selectIsInCombat`) also lands on the map:
+ * the live fight's dice, hand and HP lived in the panel's local state and
+ * did not survive the restart, so the exploration screen re-opens that
+ * saved foe as a fresh fight (`selectResumableFight`). This used to return
+ * `'combat-encounter'` — the dev sandbox route (mock foe, nothing
+ * persisted) — which silently dropped the player out of their run.
  *
  * Events fire as a full-screen modal (see `app/event/index.tsx` +
  * `selectHasActiveEvent`), not a tab, so they do not participate in
  * tab selection.
  */
-export function selectActiveTab(state: GameStore): ActiveRoute {
-    // Legacy turn-based combat was removed from the engine (mechanics
-    // 0.37.0). The engine now signals an active encounter via
-    // `currentEncounter` (`selectIsInCombat`); live hazard combat runs
-    // in the panel's local state, so this routes cold-start combat to the
-    // standalone hazard-pattern combat encounter screen, not the retired
-    // `/combat` route.
-    if (selectIsInCombat(state)) {
-        return 'combat-encounter';
-    }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function selectActiveTab(_state: GameStore): ActiveRoute {
     return 'exploration';
+}
+
+/** A fight to restart on the map: the saved foe, and whether it may be
+ *  walked away from (bosses seal WITHDRAW, as their prelude's `flee` does). */
+export interface ResumableFight {
+    enemy: Enemy;
+    fleeAllowed: boolean;
+}
+
+/**
+ * The fight a chronicle was saved in the middle of, or `null`. Set when the
+ * store holds a `currentEncounter` (the engine's "in combat" signal). The
+ * fight's own state is gone, so the caller restarts it against this foe.
+ */
+export function selectResumableFight(state: GameStore): ResumableFight | null {
+    if (!selectIsInCombat(state)) return null;
+    const enemy = state.currentEncounter?.enemies[0];
+    if (!enemy) return null;
+    const tags = enemy.tags ?? [];
+    const isBoss = enemy.difficulty === 'boss' || enemy.difficulty === 'unique'
+        || tags.includes('boss') || tags.includes('unique');
+    return { enemy, fleeAllowed: !isBoss };
 }
 
 /**

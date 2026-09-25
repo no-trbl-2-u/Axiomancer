@@ -103,13 +103,9 @@ FONTS.mono    JetBrainsMono    — codex header strips, hints, stat rows
 
 - **✠ eyebrow + hairline rule** — the standing header convention
   (small-caps or mono label prefixed with ✠, a 1px rule beneath).
-  Audited into shared components in V3; see `EventCodexHeader.tsx` /
+  Audited into shared components in V3; see
   `ExplorationCodexHeader.tsx` for the two-token mono strip variant
   (blood-accent left token, bone right token).
-- **`TornPanel`** (`components/TornPanel.tsx`) — the torn-paper-edge
-  panel: a procedural jagged SVG mask over a solid backing color,
-  seeded so edges vary without new art. Used for card/panel furniture
-  needing a hand-cut edge instead of a hard rectangle.
 - **Iron/wax furniture** — rivets, seals, hairline borders in `AXM.ash`/
   `AXM.parchment` — the metal-and-wax-seal vocabulary from the original
   design handoff, kept consistent across SELF / SATCHEL / MEMOIR and
@@ -174,12 +170,12 @@ flora   zealot      eldritch  tyrant  generic
 Every roster enemy has a bespoke 1:1 painting
 (`assets/images/enemies/`, `assets/images/portraits/`) for its actual
 in-fight art. The archetype figures (`components/event/enemy-art/figures.tsx`)
-are the **silhouette fallback** — used by `EnemyPortrait` (the compact
-in-combat HUD avatar) for any enemy, and by `EnemyIllustration` (the
+are the **silhouette fallback** — used by `EnemyIllustration` (the
 full `CreatureScene` version) for synthetic/unauthored enemies and the
-dev-only `/devart` gallery. As of Phase V8 both consumers share the
-exact same figure set (`GenericFigure`, `TyrantFigure`, …) — the
-pre-archetype placeholder scenes (`EncounterIllustration`,
+dev-only `/devart` gallery, drawing from one figure set
+(`GenericFigure`, `TyrantFigure`, …). The compact `EnemyPortrait` HUD
+avatar that shared it had no caller and was removed (TRIM THE FAT T3,
+2026-09-25). The pre-archetype placeholder scenes (`EncounterIllustration`,
 `BossIllustration`) that predated this system and had drifted out of
 sync with it are retired.
 
@@ -187,11 +183,11 @@ sync with it are retired.
 
 Not everything is acquired art, by design — `Splatter`
 (`components/Splatter.tsx`, ink-splatter accent) renders one of four
-acquired public-domain plates via `tintColor` (Phase V7); `TornPanel`'s
-torn edge and the map's compass rose / hatch-and-vignette backdrop
-(V2) stay procedural SVG because their job is infinite, seed-varied
-texture, not a specific illustrated subject — acquiring "art" for a
-seeded jagged-edge mask would be a category error.
+acquired public-domain plates via `tintColor` (Phase V7); the map's
+compass rose / hatch-and-vignette backdrop (V2) stays procedural SVG
+because its job is infinite, seed-varied texture, not a specific
+illustrated subject — acquiring "art" for a seeded pattern would be a
+category error.
 
 ## Naming: one concept, one word — the player-facing lexicon
 

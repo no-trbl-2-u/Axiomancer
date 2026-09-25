@@ -125,11 +125,6 @@ export function colorMatchBonus(base: number): number {
 }
 
 /**
- * Legacy alias, retained so the flat-bonus call sites keep compiling while the
- * library migrates to {@link colorMatchBonus}. Deprecated: prefer the function.
- */
-export const COLOR_MATCH_DAMAGE_BONUS = 3;
-/**
  * THE BIG NUMBERS REWRITE (2026-09-02) — RETIRED. The global threat fudge
  * factor was folded into `threatDamageBudget` (`combat.threat.ts`), so a
  * telegraph's printed number IS the number the engine applies. Kept at 1 and

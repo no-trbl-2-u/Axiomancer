@@ -79,6 +79,11 @@ interface EncounterModalOverlayProps {
      *  component's own `vm` is the event VM, hence the separate name), keying
      *  the combat arena backdrop plate (phase 83). */
     region?: string;
+    /** Set when a chronicle saved mid-fight is continued: the fight's own
+     *  state did not survive the restart, so the modal opens straight into a
+     *  fresh fight against `encounterEnemy` (no prelude VM exists to engage
+     *  from). `fleeAllowed` stands in for the prelude's `flee` choice. */
+    resumeFight?: { fleeAllowed: boolean };
 }
 
 export function EncounterModalOverlay({
@@ -87,6 +92,7 @@ export function EncounterModalOverlay({
     onFight,
     onFlee,
     region,
+    resumeFight,
 }: EncounterModalOverlayProps) {
     // Phase 63b — internal mode. FIGHT advances prelude → combat
     // and bubbles the existing onFight callback up (which still
@@ -98,12 +104,12 @@ export function EncounterModalOverlay({
     // CARRY ON button fires `dismissAftermath()`.
     const AXM = usePalette();
     const styles = useStyles();
-    const [mode, setMode] = useState<EncounterModalMode>('prelude');
+    const [mode, setMode] = useState<EncounterModalMode>(resumeFight ? 'combat' : 'prelude');
     // Whether this foe may be walked away from — read off the prelude VM's
     // own `flee` choice (bosses seal it) at the moment we engage, because
     // `beginHazardEncounter` clears the event slice on the way in and the VM
     // is gone by the time the reveal renders its WITHDRAW.
-    const [fleeAllowed, setFleeAllowed] = useState(false);
+    const [fleeAllowed, setFleeAllowed] = useState(resumeFight?.fleeAllowed ?? false);
     const {
         lastOutcome,
         aftermathData,

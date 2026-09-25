@@ -33,7 +33,7 @@ const inCombat = useGameState((s) => s.currentEncounter != null);
 ```
 
 The engine also re-exports memoizable selectors (`selectPlayer`,
-`selectMoralMeter`, `selectInventory`, `selectVersion`, `selectIsInCombat`)
+`selectVersion`, `selectIsInCombat`)
 — import them via the `@mechanics` alias and pass them straight in:
 
 ```ts

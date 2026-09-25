@@ -15,7 +15,6 @@ import type {
     HazardConsequenceId,
     HazardDef,
     HazardKeywordId,
-    HazardProgressKey,
     HazardRewardId,
     HazardSubquestDef,
 } from './hazard.types';
@@ -523,11 +522,6 @@ export const HAZARD_MAXHP_SCAR = HAZARD_TUNING.rewards.maxhpScar;
 // ---------------------------------------------------------------------------
 // Progress types & die faces
 // ---------------------------------------------------------------------------
-
-export const HAZARD_TYPES: Record<HazardProgressKey, { key: HazardProgressKey; label: string }> = {
-    force: { key: 'force', label: 'FORCE' },
-    escape: { key: 'escape', label: 'ESCAPE' },
-};
 
 /** Die faces: the four colours plus hostile ✕. Authored in the tuning
  *  module (gold is the wild face); re-exported here for existing imports. */

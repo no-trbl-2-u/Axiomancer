@@ -69,7 +69,6 @@ read the log.** Section container ids are `dev-section-<key>`.
 
 | Leaf | What it does | Test ids |
 |---|---|---|
-| `DebugCombatDeck` | Combat deck presets (starter baseline + the authored bundles) and a random deck | `debug-combat-deck-preset-<id>`, `debug-combat-deck-randomize` |
 | `DebugHazardDeckRandomize` | Hazard deck presets and a random deck | `debug-hazard-deck-preset-<id>`, `debug-hazard-deck-randomize` |
 | `DebugPopulateAllItems` | One of every relic + consumable into the satchel | `debug-populate-all-items` |
 | `DebugItemPicker` | One chip per relic (red) and consumable → `actions.addItemById` | `debug-item-<id>` |
@@ -110,7 +109,6 @@ read the log.** Section container ids are `dev-section-<key>`.
 | Leaf | What it does | Test ids |
 |---|---|---|
 | `AestheticDevToggle` | Flip canonical / codex aesthetic | `debug-aesthetic-toggle` |
-| `DebugHudOverrides` | HIDE EFFECTS forces the combat HUD's effects rail empty; RESET | `debug-hud-hide-effects`, `debug-hud-reset-all` |
 
 ### RUN & DIAGNOSTICS — `dev-section-run`
 
@@ -131,6 +129,8 @@ read the log.** Section container ids are `dev-section-<key>`.
 | `DebugCombatEncounterButton`, `DebugCombatTutorialButton` | Merged into `DebugCombatSandbox`. |
 | `DebugAddItemById` | Free-text input replaced by `DebugItemPicker` chips. |
 | HIDE MANA / HIDE STANCE toggles | The HUD presenter never read them. |
+| `DebugHudOverrides`, the `devOverrides` store slice, `state/presenters/combat-hud.engine.ts` | HIDE EFFECTS fed a presenter no screen rendered, so the toggle was a no-op (TRIM THE FAT T3, 2026-09-25). |
+| `DebugCombatDeck`, `applyCombatDeckPreset` / `randomizeCombatDeck` actions | Superseded by the Deck tab (TRIM THE FAT T3, 2026-09-25). |
 | Synthetic OMEN / FRIEND / NARRATION trees, two synthetic quests | Replaced by the real NPC and quest catalogues. |
 
 ## CI coupling

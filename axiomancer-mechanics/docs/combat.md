@@ -301,7 +301,6 @@ with the legacy driver.)
 | Type | Description |
 |------|-------------|
 | `Advantage` | `'advantage' \| 'neutral' \| 'disadvantage'` — RPS matchup outcome |
-| `CritStyle` | `'double' \| 'pierce'` — Phase 32 auto-selected crit variant |
 | `CombatAction` | `{ stance: Stance; action: Action }` — the combined stance + action choice for one side of a round |
 | `CombatPhase` | `'choosing_stance' \| 'choosing_action' \| 'mercy_choice' \| 'resolving' \| 'ended'` — the state-machine phase of a turn-based combat encounter |
 | `AggregatedEffectModifiers` | Summed numeric modifiers from all active effects (`getActiveEffectModifiers`) |
@@ -477,8 +476,8 @@ progression levers.
   rounded** (`COLOR_MATCH_BONUS_PCT = 0.25`, `COLOR_MATCH_BONUS_MIN = 2`) to a
   damage / guard / barrier number, replacing the old flat +3. A percentage
   keeps the match worth making on a GUARD 40 card as well as a GUARD 8 one.
-  `COLOR_MATCH_DAMAGE_BONUS = 3` survives only as a deprecated alias for
-  unmigrated call sites — call `colorMatchBonus()`. On a status card the match
+  The old flat `COLOR_MATCH_DAMAGE_BONUS` alias was deleted 2026-09-25 (no
+  caller). On a status card the match
   still adds `COLOR_MATCH_STATUS_DURATION_BONUS` (1) turn of duration instead.
 - **Conviction (◆).** The generic token pool: it accrues from BOON (special)
   faces used to power a card, answered stance-check yields, table-ceiling

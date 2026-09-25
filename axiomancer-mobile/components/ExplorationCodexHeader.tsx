@@ -12,9 +12,8 @@
  * Design source: `design/handoff-2026-05-16/project/app.jsx`
  * `function ScreenWildsCodex` header line.
  *
- * Visually similar to `components/event/EventCodexHeader.tsx`
- * but with parchment-left rather than blood-left — exploration's
- * status is "where you are", not "what you face".
+ * Parchment-left rather than the blood-left of the retired event codex
+ * header — exploration's status is "where you are", not "what you face".
  */
 
 import React from 'react';

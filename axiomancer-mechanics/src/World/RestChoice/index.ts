@@ -12,9 +12,6 @@
 // ── Engine types ───────────────────────────────────────────────────────────
 export type {
     RestChoiceOfferId,
-    RestChoiceOffer,
-    RestChoicePhase,
-    RestChoiceOutcome,
     RestChoiceSession,
 } from './restchoice.types';
 
@@ -22,7 +19,6 @@ export type {
 export { RESTCHOICE_TUNING } from './restchoice.content';
 
 // ── Pure engine transitions ────────────────────────────────────────────────
-export type { CreateRestChoiceOptions } from './restchoice.engine';
 export {
     createRestChoiceSession,
     previewRestChoiceHeal,

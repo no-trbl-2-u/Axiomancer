@@ -124,7 +124,6 @@ doc.
 | What | Where |
 |---|---|
 | Component render — the combat-encounter screen mounts and plays through phases | [`state/e2e/combat-encounter.screen.test.tsx`](../state/e2e/combat-encounter.screen.test.tsx) |
-| HUD slice composition | [`state/e2e/combat-hud.engine.test.ts`](../state/e2e/combat-hud.engine.test.ts), [`state/presenters/__tests__/combat-hud.engine.test.ts`](../state/presenters/__tests__/combat-hud.engine.test.ts) |
 | Multi-stage board interaction (drag/END PHASE guards) | [`components/combat/encounter/__tests__/CombatBoard.multistage.test.tsx`](../components/combat/encounter/__tests__/CombatBoard.multistage.test.tsx) |
 
 `npm test` must pass twice in a row and `npx tsc --noEmit` must be clean

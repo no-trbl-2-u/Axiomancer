@@ -17,13 +17,13 @@ import {
     pickRestChoiceCut,
     claimRestChoiceOutcome,
     RESTCHOICE_TUNING,
-    MIN_COMBAT_DECK_SIZE,
     cardRemovalPrice,
     removeCardFromCombatDeck,
     createCharacter,
     buildCombatDeck,
 } from '../../../index';
 import type { RestChoiceSession, Character } from '../../../index';
+import { MIN_COMBAT_DECK_SIZE } from '../../../Cards/card.removal';
 
 const DECK = [
     'spoiled-poultice', 'chilblain-watch', 'petty-indictment', 'first-spadeful',

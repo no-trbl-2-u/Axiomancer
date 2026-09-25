@@ -206,8 +206,8 @@ minimum:
 ## Reference example (target shape)
 
 The canonical reference tests are
-[`state/e2e/combat-hud.engine.test.ts`](../state/e2e/combat-hud.engine.test.ts)
-(Spec 01 — focused HUD slice) and
+[`state/e2e/character.engine.test.ts`](../state/e2e/character.engine.test.ts)
+(Spec 05 — one focused presenter, real engine reads) and
 [`state/e2e/combat-encounter.screen.test.tsx`](../state/e2e/combat-encounter.screen.test.tsx)
 (Spec 26/26b — the full combat-encounter screen driven end-to-end).
 Together they demonstrate the top-of-file comment, deterministic
