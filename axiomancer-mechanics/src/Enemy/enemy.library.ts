@@ -3584,6 +3584,19 @@ const NORTHERN_FOREST_POOL = [
     TheAbortive,
 ];
 
+/**
+ * The caverns' pool, shared with the Beacon Crags (map revamp M3c, D29).
+ */
+const CAVERNS_POOL = [
+    Wichtlein, PaleBrood, TriEyes, VampireThrall, Mabadi, FrayedOne,
+    BoneTotem, BoneWizard, CursedPaladin, RawheadRex,
+    SeamTick, PropWight, UnpaidDelver, SumpMaren,
+    // adjust-enemies pass 1 (2026-09-05): two cavern-native additions —
+    // the pool was 10/14 (71%) forest re-treads, over the >70% sibling
+    // overlap ceiling. Now 10/16 = 62.5%.
+    NinthRungSpider, SporeWarden,
+];
+
 export const EnemiesByMap = {
     // The Breakwater's authored encounters pin their slugs in
     // `MapEvents/content.ts`; this entry is what an unpinned draw reaches.
@@ -3593,6 +3606,9 @@ export const EnemiesByMap = {
     // level) in `MapEvents/content.ts`; this entry is what an unpinned draw reaches.
     'charcoal-wood': NORTHERN_FOREST_POOL,
     'northern-forest': NORTHERN_FOREST_POOL,
+    // The Beacon Crags' authored encounters pin their slugs (and a low
+    // level) in `MapEvents/content.ts`; this entry is what an unpinned draw reaches.
+    'beacon-crags': CAVERNS_POOL,
     // The caverns (northern continent, 2026-08-28 inter-map travel) — the
     // map after northern-forest. The pool mixes the forest's harder mid
     // tier (wandering foes scale to the player via the adaptive level
@@ -3600,15 +3616,7 @@ export const EnemiesByMap = {
     // natives). Rawhead Rex — the cellar-thing, up from under the stairs —
     // is the authored Under-Gate boss, pinned per-node in
     // `MapEvents/content.ts`.
-    'caverns': [
-        Wichtlein, PaleBrood, TriEyes, VampireThrall, Mabadi, FrayedOne,
-        BoneTotem, BoneWizard, CursedPaladin, RawheadRex,
-        SeamTick, PropWight, UnpaidDelver, SumpMaren,
-        // adjust-enemies pass 1 (2026-09-05): two cavern-native additions —
-        // the pool was 10/14 (71%) forest re-treads, over the >70% sibling
-        // overlap ceiling. Now 10/16 = 62.5%.
-        NinthRungSpider, SporeWarden,
-    ],
+    'caverns': CAVERNS_POOL,
     // The northern city (Phase W3) — mostly the continent's own: the four
     // city predators plus the Harbormaster, with three forest re-treads
     // that read as city creatures (a duelist, an unraveling figure, a

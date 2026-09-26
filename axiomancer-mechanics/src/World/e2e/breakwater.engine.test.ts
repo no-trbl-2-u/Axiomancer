@@ -56,7 +56,7 @@ describe('the new-game start (D27)', () => {
         expect(coastal!.lockedMaps).toEqual(['charcoal-wood', 'fishing-village', 'northern-forest']);
         expect(northern!.availableMaps).toEqual([]);
         expect(northern!.lockedMaps).toEqual([
-            'caverns', 'northern-city', 'connecting-river', 'town-across-river', 'the-capital',
+            'beacon-crags', 'caverns', 'northern-city', 'connecting-river', 'town-across-river', 'the-capital',
         ]);
     });
 });
@@ -64,7 +64,7 @@ describe('the new-game start (D27)', () => {
 describe('starting on any map (dev tools)', () => {
     it('offers every campaign map and no labyrinth act', () => {
         expect([...STARTABLE_MAPS].sort()).toEqual([
-            'breakwater', 'caverns', 'charcoal-wood', 'connecting-river', 'fishing-village',
+            'beacon-crags', 'breakwater', 'caverns', 'charcoal-wood', 'connecting-river', 'fishing-village',
             'northern-city', 'northern-forest', 'the-capital', 'town-across-river',
         ]);
     });

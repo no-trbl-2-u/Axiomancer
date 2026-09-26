@@ -39,6 +39,8 @@ export type MapName =
 
 /**
  * NorthernContinentMaps are all the maps in the Northern Continent
+ * - 'beacon-crags': Act 1, map 3 — the mountains past the Charcoal Wood's stair cave
+ *   (map revamp M3c). Defined in `./Continents/Northern-Continent/beacon-crags.ts`.
  * - 'caverns': Caverns. Gather Iron ore
  * - 'northern-city': Northern City. Give artisans materials to build boat.
  *                    First hear rumors of the death of the advisor and     King seeking a new one.
@@ -53,6 +55,7 @@ export type MapName =
  * @todo: Come up with better names
  */
 export type NorthernContinentMapNames =
+    'beacon-crags' |
     'caverns' |
     'northern-city' |
     'connecting-river' |

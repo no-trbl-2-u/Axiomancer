@@ -1314,9 +1314,10 @@ const CW_LOOT_NODES: Record<string, { currency: number; description: string }> =
 };
 
 /**
- * The stair cave — the Charcoal Wood's door. D27: while the Act 1 mountains
- * are unbuilt, the last built Act 1 map's door leads into the shipped chain at
- * fishing-village. When the mountains ship (M3c) this door is re-pointed there.
+ * The stair cave — the Charcoal Wood's door, on to the Beacon Crags (Act 1,
+ * map 3; re-pointed from fishing-village when the mountains shipped in M3c).
+ * The first cross-continent step in Act 1: a plain travel event, the way the
+ * shipped chain's `nf-10` cave mouth crosses into the caverns.
  */
 const cwStairCave: MapEventPool = {
     id: 'cw-20.travel',
@@ -1324,9 +1325,9 @@ const cwStairCave: MapEventPool = {
         kind: 'travel', weight: 1,
         payload: {
             kind: 'travel',
-            destinationContinent: 'coastal-continent',
-            destinationMap: 'fishing-village',
-            description: 'A stair cut down into the cliff. It comes out, a long way on, above a fishing village.',
+            destinationContinent: 'northern-continent',
+            destinationMap: 'beacon-crags',
+            description: 'A stair cut down into the cliff. It runs under the hills and comes up, a long way on, on a mountain road.',
         },
     }],
 };
@@ -1352,6 +1353,123 @@ const CHARCOAL_WOOD_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }>
             } else {
                 const foe = CW_ENCOUNTER_FOES[nodeId];
                 if (!foe) throw new Error(`charcoal-wood: ${nodeId} has no authored event kind or foe.`);
+                out.push({ nodeId, pool: cwEncounterPool(nodeId, foe) });
+            }
+        }
+        return out;
+    })();
+
+// ─── The Beacon Crags (Act 1, map 3 — map revamp M3c) ────────────────────────
+//
+// D29: the mountains borrow the caverns (the nearest shipped northern map):
+// its roster, its iron, and its camp, hazard and loot builders. Nothing here is
+// a new enemy, NPC, item or event kind; only the one-line descriptions and the
+// two arrival lines are new, placed on the plate's landmarks (see
+// `Continents/Northern-Continent/beacon-crags.ts`).
+//
+// Kind spread over 17 nodes: 6 encounter, 3 rest, 2 loot-cache, 2 gathering,
+// 2 hazard, 1 arrival cutscene, 1 travel. No boss: fishing-village's King of
+// Revenge is still ahead. The caverns' roster is level 13 and up, so every
+// fight is pinned low (M3b's rule), one step above the Charcoal Wood: 3 on the
+// upper mountain, 4 below the gorge.
+
+const BC_FIGHT_LEVEL_EARLY = 3;
+const BC_FIGHT_LEVEL_LATE = 4;
+
+/** Arrival up the Charcoal Wood's stair, on the crag road. */
+const bcArrival: MapEventPool = {
+    id: 'bc-1.cutscene',
+    entries: [{
+        kind: 'cutscene', weight: 1,
+        payload: {
+            kind: 'cutscene',
+            lines: [
+                'The stair comes up into wind and snow, on a road over the crags.',
+                'On the summit to the west, a fire is burning. Someone down in the valley can see it.',
+            ],
+            description: 'You come up into the Beacon Crags.',
+        },
+    }],
+};
+
+/** Every Beacon Crags fight, pinned (`cwEncounterPool` builds the pool). */
+const BC_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; level: number; description: string }> = {
+    // c1 — the summit beacon
+    'bc-2':  { slug: 'tri-eyes',          level: BC_FIGHT_LEVEL_EARLY, description: 'Something keeps the beacon. It has three sockets, and it has already counted you.' },
+    // c3 — the ruined chapel, the toll gate
+    'bc-8':  { slug: 'bone-totem',        level: BC_FIGHT_LEVEL_EARLY, description: 'Skulls stacked in the bell tower, one word to a mouth. The sentence is nearly done.' },
+    'bc-10': { slug: 'unpaid-delver',     level: BC_FIGHT_LEVEL_EARLY, description: 'The gatehouse keeps a collector. He was never paid either, and he is still collecting.' },
+    // c4 — the arch bridge, the quarry
+    'bc-11': { slug: 'ninth-rung-spider', level: BC_FIGHT_LEVEL_LATE,  description: 'Something hangs under the arch. It does not chase. You have to cross.' },
+    'bc-13': { slug: 'prop-wight',        level: BC_FIGHT_LEVEL_LATE,  description: 'Something lives in the crane\'s rotten timbers. It holds the blocks up out of spite.' },
+    // c5 — the stone gate
+    'bc-15': { slug: 'mabadi',            level: BC_FIGHT_LEVEL_LATE,  description: 'A withered duelist waits between the statues. The gate is his, and so is the cane.' },
+};
+
+/** All three rests are CAMPS: Phase 52b keeps inns inside settlements. */
+const BC_CAMP_NODES: Record<string, string> = {
+    'bc-4':  'The shepherds let you sleep in the fold. They charge for the straw, not the wind.',
+    'bc-6':  'The monks sell a blanket and lend a bench. You take the bench.',
+    'bc-14': 'The inn is shut and the cart outside it is not. You sleep in the cart.',
+};
+
+/** The caverns' one material (`ncIronVeinPool`). */
+const BC_GATHER_NODES: Record<string, string> = {
+    'bc-7':  'The delvers left ore in the spoil heap. Nobody weighs the tailings.',
+    'bc-12': 'The falls have cut the seam open. The iron is wet and free, if you can reach it.',
+};
+
+const BC_HAZARD_NODES: Record<string, { damage: number; description: string }> = {
+    'bc-3':  { damage: 2, description: 'The spray from the falls freezes on the path. The lake is a long way down.' },
+    'bc-9':  { damage: 3, description: 'The rope bridge charges for the crossing. Halfway over, a plank charges again.' },
+};
+
+const BC_LOOT_NODES: Record<string, { currency: number; description: string }> = {
+    'bc-5':  { currency: 12, description: 'A strongbox in the castle gatehouse. The garrison left in a hurry and paid nobody.' },
+    'bc-16': { currency: 14, description: 'A toll-box at the tunnel mouth, pried open. Whoever pried it did not come back out.' },
+};
+
+/**
+ * The glacier shrine — the Beacon Crags' door. D27: while the Act 1
+ * underworld is unbuilt, the last built Act 1 map's door leads into the
+ * shipped chain at fishing-village. When the underworld ships (M3d) this door
+ * is re-pointed there.
+ */
+const bcGlacierShrine: MapEventPool = {
+    id: 'bc-17.travel',
+    entries: [{
+        kind: 'travel', weight: 1,
+        payload: {
+            kind: 'travel',
+            destinationContinent: 'coastal-continent',
+            destinationMap: 'fishing-village',
+            description: 'A stair goes down under the shrine, into the ice. It comes out, a long way on, above a fishing village.',
+        },
+    }],
+};
+
+const BEACON_CRAGS_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
+    (() => {
+        const out: Array<{ nodeId: string; pool: MapEventPool }> = [];
+        for (let i = 1; i <= 17; i++) {
+            const nodeId = `bc-${i}`;
+            if (nodeId === 'bc-1') {
+                out.push({ nodeId, pool: bcArrival });
+            } else if (nodeId === 'bc-17') {
+                out.push({ nodeId, pool: bcGlacierShrine });
+            } else if (BC_CAMP_NODES[nodeId]) {
+                out.push({ nodeId, pool: ncCampPool(nodeId, BC_CAMP_NODES[nodeId]!) });
+            } else if (BC_GATHER_NODES[nodeId]) {
+                out.push({ nodeId, pool: ncIronVeinPool(nodeId, BC_GATHER_NODES[nodeId]!) });
+            } else if (BC_HAZARD_NODES[nodeId]) {
+                const h = BC_HAZARD_NODES[nodeId]!;
+                out.push({ nodeId, pool: ncHazardPool(nodeId, h.damage, h.description) });
+            } else if (BC_LOOT_NODES[nodeId]) {
+                const l = BC_LOOT_NODES[nodeId]!;
+                out.push({ nodeId, pool: ncLootPool(nodeId, l.currency, l.description) });
+            } else {
+                const foe = BC_ENCOUNTER_FOES[nodeId];
+                if (!foe) throw new Error(`beacon-crags: ${nodeId} has no authored event kind or foe.`);
                 out.push({ nodeId, pool: cwEncounterPool(nodeId, foe) });
             }
         }
@@ -2523,6 +2641,10 @@ export function registerMapEventContent(): void {
     for (const { nodeId, pool } of CHARCOAL_WOOD_POOLS) {
         registerMapEventPool(pool);
         setNodeEventPoolOverride('coastal-continent', 'charcoal-wood', nodeId, pool.id);
+    }
+    for (const { nodeId, pool } of BEACON_CRAGS_POOLS) {
+        registerMapEventPool(pool);
+        setNodeEventPoolOverride('northern-continent', 'beacon-crags', nodeId, pool.id);
     }
     for (const { nodeId, pool } of FISHING_VILLAGE_NEW_PLAYER_POOLS) {
         registerMapEventPool(pool);

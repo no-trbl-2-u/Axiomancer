@@ -45,10 +45,11 @@ const LIVE_REGIONS: readonly string[] = ALL_MAP_LAYOUTS.map((l) => l.region);
  * back that is not in it fails. So the day the forest plate ships, the case
  * goes red and points at this entry and at the comments that name it.
  */
-// Map revamp M3a/M3b — the Breakwater (Act 1's coast) and the Charcoal Wood
-// (Act 1's forest) ship before their arena plates; their fights fall back like
-// the Northern Forest's until one is chosen.
-const AWAITING_PLATE: readonly string[] = ['Northern Forest', 'The Breakwater', 'The Charcoal Wood'];
+// Map revamp M3a/M3b/M3c — the Breakwater (Act 1's coast), the Charcoal Wood
+// (Act 1's forest) and the Beacon Crags (Act 1's mountains) ship before their
+// arena plates; their fights fall back like the Northern Forest's until one is
+// chosen.
+const AWAITING_PLATE: readonly string[] = ['Northern Forest', 'The Breakwater', 'The Charcoal Wood', 'The Beacon Crags'];
 
 /** The live regions that are meant to have a plate of their own. */
 const PLATED_REGIONS: readonly string[] = LIVE_REGIONS.filter((r) => !AWAITING_PLATE.includes(r));
@@ -116,8 +117,9 @@ describe('arenaBackdropFor', () => {
         // Pinned as two numbers, not one: a dropped plate and a dropped map are
         // different failures and neither may hide behind the other.
         expect(PLATED_REGIONS).toHaveLength(6);
-        // Map revamp M3a added the Breakwater (7 → 8), M3b the Charcoal Wood (→ 9).
-        expect(LIVE_REGIONS).toHaveLength(9);
+        // Map revamp M3a added the Breakwater (7 → 8), M3b the Charcoal Wood (→ 9),
+        // M3c the Beacon Crags (→ 10).
+        expect(LIVE_REGIONS).toHaveLength(10);
     });
 
     it("matches the village on `sweetheart` alone, so the apostrophe cannot break it", () => {

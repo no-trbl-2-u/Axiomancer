@@ -12,6 +12,7 @@ import { ContinentName, MapName } from './map.library';
 import { fishingVillage, northernForest } from './Continents/Coastal-Village/maps';
 import { breakwater } from './Continents/Coastal-Village/breakwater';
 import { charcoalWood } from './Continents/Coastal-Village/charcoal-wood';
+import { beaconCrags } from './Continents/Northern-Continent/beacon-crags';
 import { caverns, northernCity, connectingRiver, townAcrossRiver, theCapital } from './Continents/Northern-Continent/maps';
 import { aporiaColonnade, aporiaArchive, aporiaProof } from './Labyrinth/maps';
 
@@ -41,6 +42,8 @@ export const MAP_REGISTRY: Record<ContinentName, Partial<Record<MapName, MapDefi
     // the Under-Gate. Phase W4 (2026-08-31) ships the river crossing and
     // the town beyond it.
     'northern-continent': {
+        // Map revamp M3c — Act 1's mountains, past the Charcoal Wood's stair cave.
+        'beacon-crags': beaconCrags,
         'caverns': caverns,
         'northern-city': northernCity,
         'connecting-river': connectingRiver,
