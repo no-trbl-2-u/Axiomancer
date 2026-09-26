@@ -16,13 +16,163 @@
 
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
-| cards | `skills/adjust-cards.md` | 2026-09-25 | 08cc633d | 19 |
+| cards | `skills/adjust-cards.md` | 2026-09-26 | bb0f2928 | 20 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-25 | 4d21e8ee | 19 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-25 | be37a6a3 | 19 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-24 | c57a7e73 | 18 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-25 | 1d5f4bcc | 18 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-26 | 2b289bb2 | 19 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-26 | 27bd4d2d | 19 |
 
 ## Log
+
+```
+> **[adjust-cards pass 20, 2026-09-26, base bb0f2928]** Zero-CREATE, 4 UPDATE,
+> zero-REMOVE. `/march` dispatched this through Step 3b. `cards`
+> (`08cc633d`, 85 commits behind HEAD `bb0f2928`) was the stalest
+> qualifying category (`equipment` 83 and `enemies` 81 also qualified).
+> Deploy green (HEAD was a plan-only tick). No `[ ]` phase rows. Growth
+> floor clear. Critique not due (11 commits, <24h since pass 53).
+>
+> **Step 1 audit.** The TRIM passes (T2a/T2b/T3/T5) are the only card-
+> surface commits since pass 19. T2b deleted fate-X powering, so the
+> AUDIT T2b debt row's "Fate cards" item is a live card-face-honesty
+> finding: `the-note-falls-due`, `miserere`, `dead-pledge` printed an X-die
+> line that can never fire, and pricing still credited it.
+>
+> **KB gate.** `kb:dawncaster/keywords` Blood ("sacrifice your own blood
+> instead of Energy") and `kb:slay-the-spire/cards/0037-bloodletting`
+> (Lose 3 HP, gain energy): HP as a substitute payment for a worse
+> resource. The off-colour die is the live "wrong resource" in the
+> Spec 33 tray; `usury` already carries `dieBonus: off` + rider `recoil`.
+>
+> **UPDATE (x3):** fold `fate { rider, recoilHp }` ->
+> `dieBonus { onColor: 'off', rider: { ...rider, recoil } }` on all
+> three. Same numbers; the recoil moves into the rider (priced as a
+> self-cost, applied by the PAID executor, printed as RECOIL N). Faces,
+> descriptions, `// pts:` comments and `dead-pledge`'s tag rewritten to
+> the off-colour line. `choir-card-wording` test repointed.
+> **UPDATE (x1):** `the-unpaid-sexton` face said "beside your drafted
+> die" (the draft is gone) -> "beside your rolled dice".
+>
+> **Residue (AUDIT T2b row):** the `fate` field now has zero carriers;
+> it is still in types, pricing, display, upgrades, complexity and
+> card-keywords. Deleting it is cross-surface, so it is filed rather than
+> done this tick. `it-gets-up-again`'s `float_x_die` almost always pays
+> the +1 Conviction fallback but is still priced at 4.5; only the
+> `reroll_spent` relic mints X dice. That needs an owner call on the
+> relic before any card reprice, so it stays filed. The ▲/▼ read numbers
+> on card faces are still mobile display work.
+>
+> Verify: green (mechanics 3531/3531, mobile 3026/3026, card-editor
+> type-check, root `npm test` 219/219).
+```
+
+```
+> **[adjust-npcs pass 19, 2026-09-26, commit 27bd4d2d]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE. One new finding, filed rather than shipped.
+> `/march` dispatched this through Step 3b. `npcs` (`1d5f4bcc`, 86 commits
+> behind HEAD `27bd4d2d`) was the stalest qualifying category. Deploy
+> green (verify-mechanics and verify-mobile both passed at `27bd4d2d`).
+> There were no `[ ]` phase rows. The growth floor was clear (`dd204684`
+> touched `src/World` today). Critique wasn't due: 10 commits, under 24h
+> since pass 53.
+>
+> **Step 1 audit, run fresh.** Six commits since pass 18 touch the NPC
+> surface. Four are trim T2a–T5 (barrel/export cleanup; NPC content itself
+> is unchanged). The other two are map revamp M3a (`dd204684`, `db6af24b`),
+> which added **the Breakwater**, now the new-game start (D27), with
+> `npcs: []`. Every other signal matches pass 18: 21 staged NPCs, none
+> orphaned, no flat `DialogueMap` NPCs (the three `dialogue: {` hits are
+> map-event payloads), no `teachCard` in NPC content. Coastal-Village's
+> 3-NPC `unstagedNpcs` backlog is still blocked on `openShop`, and the
+> three Northern-Continent 1-NPC maps are still behind the story-overview
+> open question (6) `[gap]` row.
+>
+> **The new finding: the Breakwater has 0 staged NPCs.** It trips "map
+> with fewer than 2 staged NPCs → CREATE". It was not built here, because
+> T's D29 (`plan/2026-09-25-refactor-strategy.decisions.md`) rules "No
+> new enemies, NPCs or events in the map PRs … New content waits for the
+> story-dependent revamp". The story overview also marks "What happens
+> here" as open, and hard rule 3 applies. D29 sends gaps like this to
+> this steward to *file*, so it went into the existing Breakwater
+> `[needs-user-call]` row in `plan/AUDIT.md` as call (5). The row also
+> notes the knock-on effect: a new game now reaches its first NPC and
+> quest (Old Marrow, Phase 53c) only after the whole map, and the
+> reachability test pins `startMap: 'fishing-village'`. It offers three
+> options, including staging an existing NPC, a staging-only move. The
+> M3b session with T is the natural place to decide.
+>
+> **KB run** (for the filing's receipts; there was no CREATE/UPDATE to
+> gate). `kb_search` found no dialogue- or start-town-NPC prior art (an
+> expected miss for this corpus; no wishlist filed, since the filing
+> stands without it). It did find onboarding rows treating guided first
+> play as essential (Spirit Island, Aeon's End, Arkham Horror LCG).
+>
+> No code changed, so the verify gate wasn't needed; deploy:check runs
+> after push.
+
+> **[adjust-keywords pass 19, 2026-09-26, commit 2b289bb2]** Zero-CREATE,
+> 4 UPDATE, zero-REMOVE. `/march` dispatched this pass through the
+> content-lifecycle gate (Step 3b). All five categories were past the
+> 15-commit bar (79-86 commits each); `keywords` (last pass 2026-09-24) was
+> the stalest. Deploy was green at `2b289bb2`, no phase was pending, and the
+> critique gate was not due (9 commits, under 24h).
+>
+> **Fresh angle:** this is the first pass since the TRIM THE FAT commits
+> touched the keyword surface (T2a `2ef8f790`/`0351300e`/`cb178978`, T2b
+> `d565910d`, T3 `8ef3c7da`, T5 `e6c7fb75`). `card-expert` (consult mode)
+> audited the trim fallout.
+> - Structural wiring is clean: 50 kinds, all with a `mechanicText` case,
+>   none falling through to the default arm.
+> - GLYPHS, deleted-synergy, luck and stat-band references are gone from the
+>   atlas, mobile and the card editor.
+> - The ban list is intact. `2ef8f790` dropped only the scan of a deleted
+>   field, not a banned id.
+>
+> **Shipped (UPDATE):**
+> 1. Synced the FORGE, GHOST and WILD/X atlas rows to `KEYWORD_GLOSS`. They
+>    still described the deleted drafted-die / fate-tap model, and the
+>    atlas's rule is that the code wins.
+> 2. `docs/effects.md`: the resist-roll table and the
+>    `resolveEffectApplication` section now say every effect lands as
+>    printed (Phase 80 + D12). The dead `resistedBy`/`resistDR` fields are
+>    marked legacy and unread.
+> 3. Mobile TRINKET tooltip: dropped "save bonus" (saves were cut in D14).
+>    Fixed the stale `SUPPORT_KEYWORD` comment claiming `debuff_curse`
+>    still resolves (it has no applier since T2a).
+> 4. `skills/adjust-keywords.md` Step 1: the carrier bar is now "fewer than
+>    2", matching the atlas's ratified keep rule (overhaul §6.1). The skill
+>    said 3 and the doctrine outranks it.
+>
+> **Carrier counts:** pass 18's IMMOLATE count was wrong (it has 6
+> carriers, not 2). Ten keywords sit at exactly 2 carriers (OMEN, ECHO,
+> REPLAY, PROLONG, CHAIN, EXECUTE, PIERCE, AMBUSH, FINALE, EVENTIDE). All
+> meet the doctrine bar, so none were retired.
+>
+> **Step 1b KB angle: Blood** (`kb:dawncaster/keywords/blood.okf.md`,
+> substitute payment in HP). `fate` was our only blood-as-substitute
+> payment and has been inert since T2b. Re-hooking it needs X dice in
+> ordinary play, and the Spec 33 tray never rolls any. So the honest small
+> fix remains the `/adjust-cards` fold, and this was filed, not minted.
+> Reliable (`kb:dawncaster/keywords.csv`) is noted as the growth route for
+> the conditional keywords at 2 carriers.
+>
+> **Residue:** added to `plan/AUDIT.md`'s T2b debt row:
+> - nine inert support buffs;
+> - `debuff_curse` / `debuff_nettle_sting` have no applier, and the enemy
+>   roll-penalty path gets no input;
+> - dead `resistedBy`/`resistDR`;
+> - Tier-1 `MIND_MARK_ID` leftovers;
+> - seven zero-carrier mechanic kinds;
+> - mobile never sends `omenClaim`.
+>
+> The `fate` card faces stay on that row's existing `/adjust-cards` route.
+> The skill still treats a missing `kb:` receipt as a finding (Step 1 and
+> hard rule 5), but the atlas says receipts are optional. That conflict is
+> left for `/oversight`.
+>
+> Verify: green (mechanics verify, mobile verify, card-editor type-check,
+> root `npm test` incl. content-drift 11/11).
+```
 
 ```
 > **[adjust-enemies pass 19, 2026-09-25, commit be37a6a3]**

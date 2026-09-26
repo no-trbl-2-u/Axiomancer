@@ -40,7 +40,7 @@ and `docs/retheme-map.json` (NL-8 collision law).
 
 | Signal | Action |
 |---|---|
-| Keyword with fewer than 3 carrying cards/enemy abilities | REMOVE candidate (retirement, per atlas doctrine) |
+| Keyword with fewer than 2 carrying cards (or 2 enemies) — the atlas's keep bar, overhaul §6.1 | REMOVE candidate (retirement, per atlas doctrine) |
 | Two keywords whose semantics + `functions` tags substantially overlap (should have been one drilled keyword) | REMOVE the newer/weaker one, or UPDATE its description to differentiate the niche it actually fills |
 | Atlas row missing a `kb:` receipt for its Dawncaster (or nearest) analogue | UPDATE (research + backfill the row) |
 | A `CardSpecialMechanic`/`CardRider` kind exists in `src/Cards/types.ts` with no atlas row at all | UPDATE (row is missing, not the keyword) |

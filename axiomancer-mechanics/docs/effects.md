@@ -100,18 +100,20 @@ All effect application logic lives in `src/Effects/index.ts`. All combat-time he
 
 ## Tier Scale & Resistance Rules
 
-| Tier   | Resist DR   | Rule                                                              |
-|--------|-------------|-------------------------------------------------------------------|
-| Tier 1 | —           | Auto-applies. No resist roll. Always lands.                       |
-| Tier 2 | 12 – 14     | Resist roll required (buff: fumble only; debuff: roll vs DR).     |
-| Tier 3 | 17 – 18     | Only a natural 20 on the resist roll repels it.                   |
+Every effect lands as printed, at every tier. There is no resist roll:
+Phase 80 removed the target-side roll on Tier 2 debuffs and Tier 3 effects,
+and D12 (TRIM THE FAT, 2026-09-25) removed the hidden caster-side d20 on
+Tier 2 buffs. The tier is now a classification only.
 
-Each effect carries two resist fields (copied onto the `ActiveEffect` for fast lookup):
+| Tier   | Rule                          |
+|--------|-------------------------------|
+| Tier 1 | Auto-applies. Always lands.   |
+| Tier 2 | Always lands.                 |
+| Tier 3 | Always lands.                 |
 
-- `resistedBy: Stance` — which stat the **target** uses to resist (`heart`, `body`, `mind`)
-- `resistDR: number` — base difficulty of the resist roll
-
-**RPS Rule:** Body effects are resisted by Mind. Mind effects by Heart. Heart effects by Body.
+Effects still carry the legacy `resistedBy` / `resistDR` fields, and they are
+copied onto the `ActiveEffect`, but nothing reads them. They are dead data,
+kept only because they sit in exported types and saved state.
 
 ### Tier 2 — Buff (caster rolls)
 
@@ -250,8 +252,8 @@ combatant:
   intensity:         number;            // stack level for intensity-stacking effects
   appliedAt:         number;            // which combat round the effect was first applied
   tier:              1 | 2 | 3;
-  resistedBy?:       Stance;            // copied from Effect for fast resist lookup
-  resistDR?:         number;            // copied from Effect for fast resist lookup
+  resistedBy?:       Stance;            // legacy — copied from Effect, never read
+  resistDR?:         number;            // legacy — copied from Effect, never read
   sourceId?:         string;            // ID of who applied it (Phase 38 attribution)
 }
 ```
@@ -360,12 +362,13 @@ as `expired[]` so the CLI can display expiry messages.
 
 ### Resist resolution (Tier 2 / Tier 3)
 
-**Function:** `resolveEffectApplication(target, activeEffect, effectType, attackerHeartBonus, equipmentBonus)`
-— `src/Combat/index.ts`
+**Function:** `resolveEffectApplication(target, activeEffect, effectType)`
+— `src/Combat/resist.ts`
 
-Post-Phase-80 (direction (a) pure split): Tier 2 debuffs and Tier 3
-effects **always land** — no target-resist roll. Only Tier 2 buffs still
-roll (caster-side d20 for fumble/crit).
+Every effect **always lands** at its printed intensity. Phase 80 removed
+the target-resist roll on Tier 2 debuffs and Tier 3 effects; D12 removed
+the last roll (the caster-side d20 fumble/crit on Tier 2 buffs). The
+function is pure, consumes no RNG, and only shapes the log line.
 
 ---
 

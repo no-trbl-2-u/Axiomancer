@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-09-26 at commit 82bbf241
-> Pass count: 53
+> Last pass: 2026-09-26 at commit 5d6eca56
+> Pass count: 54
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -54,9 +54,66 @@
 > deliberate house format, not a bug — pass 51). Zero fresh findings
 > this pass.
 
+> **[critique pass 54, 2026-09-26, commit 5d6eca56] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors. First pass
+> since map revamp M3a moved the new-game start to the Breakwater. The
+> title screen copy was never updated for that move (filed MED). Also
+> filed LOW: the combat preview prints the opening tell twice.
+> Reconfirmed and not re-filed: the DoT chip mid-token wrap (pass 49,
+> Pending), the late-game hub's faint desktop oval (declined), and the
+> painted "AxiomanceR" wordmark (waits on new art, per bearings).
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
+
+### [MED] title — the title screen still promises the fishing village, but a new game now opens on the Breakwater
+- pass: 54 (commit 5d6eca56)
+- viewport: both (375×812 and 1280×800)
+- category: comprehension
+- observation: the first screen a player sees ends with the line "Your
+  path begins in the fishing village, where travelers gather before
+  venturing into the realms beyond." Since map revamp M3a (`dd204684`,
+  D27) a new game starts on the Breakwater, "a walled harbour on a storm
+  coast" whose start node is a windmill. The fishing village is now only
+  reachable later, across the river bridge. So the title makes a promise
+  the next screen breaks, at the moment a first-time player is building
+  their picture of the game. The line is also hardcoded in the component,
+  which breaks the package rule that player-facing copy must not be
+  hardcoded in components.
+- evidence: `axiomancer-mobile/components/TitleScreen.tsx:104-105`
+  (literal JSX string); `.critique-artifacts/{mobile,desktop}/01-title.png`
+  and `01-title.txt`; `axiomancer-mechanics/src/World/Continents/Coastal-Village/breakwater.ts`
+  (header: "A new game starts here (D27)").
+- suggested fix: derive the line from the engine's `STARTING_MAP`
+  definition (its name/description), or at minimum reword it to the
+  Breakwater and move it out of JSX into the copy module the rest of the
+  title uses, so the next start-map change cannot make it stale again.
+- source: critique-drive (unattended, §3.5)
+
+### [LOW] combat — the pre-fight preview prints the foe's opening tell twice, word for word
+- pass: 54 (commit 5d6eca56)
+- viewport: both (375×812 and 1280×800)
+- category: comprehension
+- observation: on the "A FOE BARS THE WAY" preview, the Brine Hag's
+  quote under its portrait ("They have heard kinder sermons than yours,
+  and drowned anyway.") is repeated verbatim in the expanded PHASE 1 row
+  as "🜲 stance hidden — They have heard kinder sermons than yours, and
+  drowned anyway." The header quote is the current phase's `stanceHint`,
+  and phase 1 is open by default, so every fight's preview repeats
+  its opening tell. The second copy reads like a layout bug, and it
+  buries the one piece of new information in that row (that the stance
+  is hidden).
+- evidence: `axiomancer-mobile/components/combat/encounter/CombatEncounterPanel.tsx:816`
+  (header renders `vm.enemy.stanceHint`) and `:861` (phase row renders
+  `p.stanceHint`); `axiomancer-mobile/state/presenters/combat-encounter.engine.ts:1532`
+  (`vm.enemy.stanceHint` = the current phase's hint);
+  `.critique-artifacts/mobile/03-combat.{png,txt}`.
+- suggested fix: in the phase row, drop the hint when it equals the
+  header's (show only "🜲 stance hidden"), or drop the header quote once
+  the threat sequence renders the per-phase tells.
+- source: critique-drive (unattended, §3.5)
 
 ### [LOW] combat — a DoT's paid-value chip word-wraps mid-token on the small hand-card face ("8/play" → "8/p" / "ay")
 - pass: 49 (commit 94b6b96f)

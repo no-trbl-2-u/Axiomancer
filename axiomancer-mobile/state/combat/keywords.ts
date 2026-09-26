@@ -80,7 +80,8 @@ const EFFECT_KEYWORD: Record<string, string> = {
  * the 30-keyword glossary; mapped so the combat log never prints a raw id.
  */
 const SUPPORT_KEYWORD: Record<string, string> = {
-    // Debuffs that still resolve (the enemy threat-clock's curse).
+    // No live applier since the threat-clock enchant was trimmed (T2a);
+    // mapped so a legacy save's combat log never prints the raw id.
     debuff_curse: 'Mark',
     // Consumable / engine buffs that still resolve. (BARRIER merged into GUARD
     // in phase 29, so buff_invincibility maps to Guard.)

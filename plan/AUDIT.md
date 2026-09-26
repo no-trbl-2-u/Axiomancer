@@ -81,7 +81,7 @@
   register it in `scripts/ci-e2e-scope` for `exploration-maps/**` and
   `src/World/**`.
 
-### [gap] The Breakwater (Act 1 coast, M3a #385) — four agent calls to confirm [needs-user-call]
+### [gap] The Breakwater (Act 1 coast, M3a #385) — five agent calls to confirm [needs-user-call]
 - category: gap
 - impact: 5
 - ease: 9
@@ -95,6 +95,24 @@
   fallback arena.
   (4) **Name overlap.** Fishing-village's own text also has "the breakwater"
   (its King of Revenge "rises from the breakwater").
+  (5) **No NPCs, and the first one is now a map away** (added by
+  `/adjust-npcs` pass 19, 2026-09-26). The Breakwater stages `npcs: []`,
+  which trips the steward's "map with fewer than 2 staged NPCs → CREATE"
+  signal. It isn't shipped here because D29 says no new NPCs in the map PRs
+  and the story overview lists "What happens here" for the Breakwater as
+  open. Hard rule 3 applies too: no inventing a named character alone.
+  The cost is real, though. Since D27 a new game meets its first NPC and
+  its first quest (Old Marrow's starting quest, Phase 53c) only after
+  crossing the whole Breakwater and its bridge into fishing-village.
+  `quest-giver-reachable.engine.test.ts` now pins
+  `startMap: 'fishing-village'`, so nothing checks the default start.
+  KB: guided first play reads as "essential, not optional" (Spirit
+  Island, Aeon's End, Arkham Horror LCG onboarding rows). Options for T:
+  (a) accept it until the story-dependent revamp (D1 step 4);
+  (b) stage 1–2 existing fishing-village NPCs on the Breakwater instead
+  (Old Marrow is the obvious one, and it is a staging-only move);
+  (c) have a `story-spec`/`character-spec` session author the Breakwater's
+  own people.
   Details: `plan/2026-09-25-map-revamp-m3.prompt.md` §3a.
 - next: `/oversight` or the M3b session (it opens with T anyway for the
   forest's name, D26). Record any change as a D-number.
@@ -149,17 +167,25 @@
 ### [debt] T2b dice-flag collapse — live content the OFF path was carrying (2026-09-25)
 
 - **Context:** D7 deleted the Upgradeable-Dice OFF path (stance draft, hidden read, STAKE, v1 wheel, fate-X powering). The shipped model already ignored all of these; the items below were already inert in players' builds and are now visibly so.
-- **Fate cards:** `the-note-falls-due`, `miserere`, `dead-pledge` carry a `fate` rider that can no longer fire (no X die ever rolls), their faces still say an X die may power them, and pricing still credits the rider. Card-content call (`/adjust-cards`).
+- **Fate cards — RESOLVED (adjust-cards pass 20, 2026-09-26):** `the-note-falls-due`, `miserere`, `dead-pledge` folded `fate` -> off-colour `dieBonus` (recoil moved into the rider). Still open: the `fate` field has zero carriers but remains in `types.ts`, `cards.pricing.ts`, `combat.cards.ts`, `card-upgrades.ts`, `combat.card-complexity.ts`, `card-keywords.ts` and the tests. Deleting it is a small cross-surface cleanup. Also `it-gets-up-again` (`float_x_die`) is priced at 4.5 but almost always pays only its +1 Conviction fallback; that is an owner call alongside the `reroll_spent` item below.
 - **Advantage buffs:** `buff_haste`, `buff_accuracy_up`, `buff_critical_damage_up` and kin grant advantage through the deleted read, so they do nothing in combat. Retire or re-hook (`/adjust-keywords`).
 - **`reroll_spent` relic mechanic** still rerolls from the legacy face bag (`rerollSpentDice`/`COMBAT_DIE_FACES`), so it can mint X or faceless dice. `float_x_die` always pays +1◆ now.
 - **Sim:** the `blind` policy now plays identically to `greedy` (kept so the matrix keeps its column); retire or redefine it at the next `/combat-playtest`.
-- **Stale copy:** "drafted die" in `grave.cards.ts` card copy and the FORGE row of `docs/keyword-atlas.md` (both feed generated devlog data).
+- **Stale copy — RESOLVED (adjust-cards pass 20):** "drafted die" in `the-unpaid-sexton`'s face now reads "rolled dice". *(The FORGE, GHOST and WILD/X atlas rows were synced to `KEYWORD_GLOSS` by adjust-keywords pass 19, 2026-09-26.)*
 - **Vestigial params:** `card-played.advantage` is always `'neutral'`; `scalePlayerHit`'s `readMult` is always 1.
 - **Card faces print a dead read:** status card faces still show ▲/▼ read numbers, but every play lands at read `'none'`. Mobile froze `READ_ADVANTAGE_INTENSITY_BONUS` / `READ_DISADVANTAGE_DURATION_PENALTY` (both 1) as local constants atop `combat-encounter.engine.ts` so it compiles; delete them with a card-face pass.
 - **CLARITY is inert:** its `forceWildOnNextDie` flag was only read on the deleted OFF path.
 - **Wrong copy (predates T2b):** the dead-tray END line says unusable dice "are discarded" (`endTurn` banks one unspent die when the Reserve has room); the CONVICTION ◆ glossary says it is banked "from unspent dice" (unspent dice earn nothing); the momentum info popup still describes the v1 wheel ("light all three").
 - **Coverage gap:** `upgradeable-dice-e2e.mjs` was the only browser run walking Press Fate, the momentum chip and blacksmith HONE; it was deleted with the flag. The other e2e scripts boot the model but do not walk those steps.
 - **`MAX_PERMANENT_WILD_DICE`** (`Combat/combat.dice.ts`) is documented as the cap on `permanentWildDice` but nothing enforces it — missing clamp or dead constant (T3 barrel pass kept it).
+- **adjust-keywords pass 19 (2026-09-26) — more trim fallout, filed not shipped:**
+  - *Fate re-hook option:* Dawncaster's Blood ("sacrifice your own blood instead of Energy", `kb:dawncaster/keywords/blood.okf.md`) is the design `fate` was reaching for: a dead X die plus `recoilHp` as a substitute payment. It only works if X dice exist in ordinary play, and the Spec 33 tray never rolls one (only `reroll_spent` can mint one). So the card fold (`fate` -> `dieBonus`, `/adjust-cards`) is still the honest small fix.
+  - *Nine inert support buffs:* besides the three named above, `buff_critical_rate_up`, `buff_liars_gambit` and `buff_abyssal_presence` (advantage-only, fed to `advantageGrants`, which nothing reads), plus `buff_haste`, `buff_haste_surge`, `buff_all_stats_up` and `buff_status_chance_up` (a positive roll modifier, which is only ever read as a penalty on the enemy). They are unobtainable and pinned for old saves. Stale copy reachable from a legacy save: `tooltip.engine.ts:349-358` and `village.engine.ts:175-176`, and `SUPPORT_KEYWORD` maps them to unrelated glosses.
+  - *`debuff_curse` has no live applier* (its only source, the threat-clock enchant, was trimmed). It was also the only negative roll modifier, so the enemy roll-penalty deny path (`combat.engine.ts` ~3415/4913/5057), `isStatDebuff` and mobile's 'weaken' class never see any input. Retire it (about six test fixtures to repoint), or give the path a new feeder. `debuff_nettle_sting` has also been orphaned since `84ef85bd`.
+  - *`resistedBy` / `resistDR` are dead data.* They are copied at `card.engine.ts:330`, `Effects/index.ts:81` and `game.reducer.ts:329`, and nothing reads them. Removing them touches exported types and saved state. (The `docs/effects.md` resist-roll prose was fixed in pass 19.)
+  - *Tier-1 leftovers:* `MIND_MARK_ID = 'tier1_mind_mark'` / `getStudyMarkIntensity` (`Combat/effects.ts:21-27`, barrel-exported) point at an id in neither library. There is also a matching glyph at `statusGlyphs.ts:117`.
+  - *Seven player mechanic kinds have zero carriers:* `strip_random_buff`, `befriend_attempt`, `refresh_die`, `convert_die_color`, `overheat`, `spend_all_pips`, `echo_next_spell`. These are wired but unused, so they are remove candidates. Retiring one touches the union, pricing, engine, mobile, editor and tests, so each is large. `befriend_attempt` sits on the befriend path and needs an owner call.
+  - *OMEN's `omenClaim` is never sent by mobile,* so OMEN always falls back to a die-derived stance with a 1-phase window.
 
 ### [debt] TRIM THE FAT T2a merged unverified — finish list (2026-09-25)
 
