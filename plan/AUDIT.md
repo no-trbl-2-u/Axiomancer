@@ -58,6 +58,35 @@
 
 ## Pending
 
+### [gap] Map revamp owner ballot — four calls before M1 [needs-user-call]
+- category: gap
+- impact: 8
+- ease: 9
+- detail: filed 2026-09-25 (T5 residue). `plan/2026-09-25-map-revamp-kickoff.prompt.md`
+  §2 needs T to answer four questions before any map work. (1) Which maps
+  become Act 1's four regions? D16 says four regions of about 20 nodes;
+  seven maps ship with 7–28 nodes each. (2) Where is the Act 1 engraving
+  file, and which upscaler should be used? The file is not in the repo.
+  (3) The Act 1 order: coast → forest → mountains → underworld was only
+  suggested. (4) Which map and node host the Labyrinth door (D5)?
+- next: `/oversight` or an attended session. Record the answers as D21 onward
+  in `plan/2026-09-25-refactor-strategy.decisions.md`.
+
+### [debt] Source comments still name the retired `/deck-tuning` loop (2026-09-25)
+- category: debt
+- impact: 2
+- ease: 8
+- detail: D10 retired `/deck-tuning` in T5 (#378). The instruction surfaces
+  were repointed to `/adjust-cards`, but about 30 provenance comments in
+  `axiomancer-mechanics/src/` still name it as the tuning loop. They were
+  left alone deliberately to keep the T5 PRs collision-free. Examples:
+  `combat.engine.ts:147-215`, `combat.playtest.ts`, `cards.pricing.ts`,
+  `cards.sandbox.ts`, `combat.objective.ts`, and the e2e headers.
+- next: `/iterate`, bundled with the next mechanics-source PR that
+  re-stamps the baseline anyway. Reword to `/adjust-cards`, or to "the
+  tuning loop (rebuild pending, jot `1fc33003`)" where the old loop's
+  A/B surface is meant.
+
 ### [debt] T5 Tier 2 docs — named for archive but still have consumers (2026-09-25; archive part resolved, effects/enemy rewrite open)
 
 - **Context:** trim T5 archived the Tier 2 docs rows

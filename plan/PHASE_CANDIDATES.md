@@ -11,6 +11,21 @@
 
 ## Pending
 
+### [ ] [score 8.0] THE MAP REVAMP — wide 2-D maps on the Act 1 engraving (D2/D15/D16 + the D5 Labyrinth door) — ATTENDED-GATED
+- proposed: 2026-09-25, T5 residue (strategy step 2, D1)
+- brief: `plan/2026-09-25-map-revamp-kickoff.prompt.md` (phases M0–M5).
+- gate: **do not dispatch autonomously.** The prompt opens with a four-question
+  owner ballot (which maps become Act 1's four regions, where the engraving
+  file is and which upscaler, the Act 1 order, the Labyrinth door node). The
+  engraving is not in the repo. The ballot is filed in `plan/AUDIT.md` as
+  `[needs-user-call]`; `/oversight` drains it.
+- shape: per-map canvas plus explicit backdrop (M2), about 20 nodes per map
+  spread in every direction on the art's landmarks (M3, one map per PR, with
+  node-id migration of event pools, NPC staging, quests and reachability), the
+  Labyrinth door (M4), and the `docs/world.md` / `forge.md` rewrite (M5).
+- after: D4 stat hooks + damage-scaling formula, then the card rework
+  (D8 card upgrades, D20 die growth).
+
 ### [ ] [score 6.5] Reconcile the shipped Drowned Parish opening and its legacy story threads with the new rulings
 - proposed: 2026-09-25, expand pass 21
 - source signals:
