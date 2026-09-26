@@ -24,7 +24,8 @@
 | M2: per-map sheet | #384 | Open, stacked on #383. `MapLayout.sheet: MapSheet` (`width`, `height`, `scale`, `backdrop`, `plateOpacity`, `chartTexture`) replaced the global `SPREAD` and the region-regex plate pick. The shipped maps use `legacySheet(plate)` and render pixel-identical. |
 | M3a: the Breakwater + new start | #385 | **Merged 2026-09-26** (2b289bb2). See §3a. |
 | M3b: the Charcoal Wood | #389 | Merged 2026-09-26. See §3b. |
-| M3c: the Beacon Crags | #392 | Built 2026-09-26 by the loop. See §3c. |
+| M3c: the Beacon Crags | #392 | Merged 2026-09-26. See §3c. |
+| T's calls on M3a/M3b | #393 | Merged 2026-09-26: D30–D35, applied to all three built maps. See §3d. |
 
 **First act of the session:** get #382 → #383 → #384 merged, in order (the
 repo uses merge commits; auto-merge is disabled). Each PR's decisions-file
@@ -245,6 +246,33 @@ from the caverns' camp, iron, hazard and loot builders and M3b's pinned
 - **For M3d:** the Lantern Deep's arrival is the glacier shrine's stair, so an
   entry near the top or left of the underworld plate reads as the same stair.
 
+## 3d. T's calls on M3a/M3b (D30–D35, 2026-09-26): what M3d must follow
+
+T answered the agent calls M3a and M3b filed. They apply to every Act 1 map,
+and #393 retrofitted them onto the Breakwater, the Charcoal Wood and the
+Beacon Crags:
+
+- **One elite per region, no boss (D30).** Exactly one fight is an
+  `elite`-tier foe from the borrowed roster, on the map's last fight column:
+  on the single pre-door node if the graph narrows to one, otherwise on the
+  centre lane of the last ring. Pin it low like the rest (3–4). Every other
+  fight is `normal`/`simple` tier. The Lantern Deep borrows `CAVERNS_POOL`,
+  whose elites are mabadi, frayed-one, bone-totem, bone-wizard,
+  cursed-paladin, unpaid-delver and spore-warden; mabadi and cursed-paladin
+  are already used by the Crags and the Wood. Add the map to `ACT1_MAPS` in
+  `World/e2e/act1-elites.engine.test.ts`.
+- **Arrival is a cutscene (D31).** Every Act 1 map opens on a short arrival
+  scene; the new-game start (`bw-1`) is one too. Arrival lines describe the
+  place only: no story facts the overview doesn't carry.
+- **Combat is plain black for now (D32).** `ARENA_PLATES_SHOWN = false`.
+  Still add the new region to `AWAITING_PLATE` (checklist step 5); the
+  resolver test keeps counting plates.
+- **Fishing-village's difficulty is not a map PR's call (D35).** It's
+  retuned from a `/combat-playtest` measurement after M3d ships (filed in
+  `plan/AUDIT.md`).
+- **No new NPCs in map PRs (D29 stands).** The Breakwater's own people are
+  an attended story-spec session (D34).
+
 ## 4. Definition of done, and who does what
 
 - **M3a:** merged 2026-09-26 (#385).
@@ -253,6 +281,6 @@ from the caverns' camp, iron, hazard and loot builders and M3b's pinned
   ticks M3b in `plan/steps/01_build_plan.md` and unblocks M3c.
 - **M3c, M3d, M4, M5:** rows in `plan/steps/01_build_plan.md` for the
   autonomous loop, in strict order (each requires the row above it `[x]`).
-  Each ships as one PR per `/ship-a-phase`, with the pins in §2 and the
-  pattern in §3a.
+  Each ships as one PR per `/ship-a-phase`, with the pins in §2, the
+  pattern in §3a–3b and T's calls in §3d.
 - Whoever ships a row updates §0 of this file with its PR.

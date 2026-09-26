@@ -73,7 +73,7 @@ export const breakwaterLayout: MapLayout = {
     sheet,
     nodes: [
         // ── c0 — the windmill: where a new game starts (D27) ──
-        { id: 'bw-1',  ...at('bw-1'),  label: 'The Windmill', description: 'Sails lashed down. A dry loft, and no rent asked.' },
+        { id: 'bw-1',  ...at('bw-1'),  label: 'The Windmill', description: 'Sails lashed down. The sea is loud below.' },
         // ── c1 ──
         { id: 'bw-2',  ...at('bw-2'),  label: 'The Crane Quay', description: 'Cargo cranes over black mud. Something under it moves.' },
         { id: 'bw-3',  ...at('bw-3'),  label: 'Gallows Hill', description: 'Built to be seen from the water. The shale is loose.' },
@@ -94,7 +94,7 @@ export const breakwaterLayout: MapLayout = {
         { id: 'bw-15', ...at('bw-15'), label: 'The Clifftop Chapel', description: 'An empty chapel over the sea. The poor box is not.' },
         { id: 'bw-16', ...at('bw-16'), label: 'The Fishing Hamlet', description: 'Fish dry on the racks. Nobody is watching them.' },
         // ── c5 — the last fight ──
-        { id: 'bw-17', ...at('bw-17'), label: 'The Watchtower', description: 'A drowned sentry stands the watch. He was never relieved.' },
+        { id: 'bw-17', ...at('bw-17'), label: 'The Watchtower', description: 'The lamp is lit. Its keeper watches the road.' },
         // ── c6 — the door ──
         { id: 'bw-18', ...at('bw-18'), label: 'The River Bridge', description: 'A toll-house with no keeper. Across it, a wood full of smoke.' },
     ],

@@ -626,7 +626,7 @@ export const KingOfRevenge = createEnemy({
         alignmentDelta: { outlook: +3, scope: -2 },
     },
     finalBlowLines: {
-        brutal: 'The crown rolls from the breakwater into the surf. Nothing under it argues.',
+        brutal: 'The crown rolls off the harbour wall into the surf. Nothing under it argues.',
         quiet:  'The grievance completes. Whatever was owed is, by default, forgiven.',
         ironic: 'Revenge finally got what it wanted: an ending. It simply was not the one it planned.',
     },

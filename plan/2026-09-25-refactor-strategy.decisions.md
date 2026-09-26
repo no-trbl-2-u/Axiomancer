@@ -243,6 +243,54 @@ the map PRs. A need the pools can't meet is filed to `adjust-enemies` /
 `adjust-npcs`. New content waits for the story-dependent revamp (D1 step
 4). *Rejected:* authoring new content per map; empty maps first.
 
+The next six were T's answers on 2026-09-26 to the agent calls M3a and M3b
+filed in `plan/AUDIT.md`. They shipped with M3c in #393.
+
+**D30 — Act 1 has no bosses; each region has one elite fight, its last
+before the door.** (T, 2026-09-26: "Not a boss, but an elite battle for each
+region"; placement "last fight before door".) The elite is an `elite`-tier
+foe from the map's borrowed roster, pinned to an Act 1 level like every other
+fight (brief §3b). Where the map narrows to one node before the door it goes
+there (the Breakwater's watchtower, `bw-17`, brine-hag); where the last fight
+column is a ring it goes on the ring's centre lane (the Charcoal Wood's
+wayside cross, `cw-17`, cursed-paladin; the Beacon Crags' stone gate,
+`bc-15`, mabadi). Every other fight is `normal`/`simple` tier, so the Crags'
+bone-totem and unpaid-delver were swapped out. Pinned by
+`World/e2e/act1-elites.engine.test.ts`. *Rejected:* promoting a normal fight
+to boss; an optional side-node elite; an elite on the door node.
+
+**D31 — A new game opens on an arrival scene at the windmill.** (T,
+2026-09-26.) `bw-1` is a cutscene, like every other Act 1 map's arrival,
+not a camp rest. *Rejected:* keeping the rest start; an empty start.
+
+**D32 — Combat shows a plain black scene for now.** (T, 2026-09-26: "an
+all black background for all combat plates for now", every map.)
+`ARENA_PLATES_SHOWN = false` in `axiomancer-mobile/assets/images/combat/
+index.ts`; the pane paints the palette's darkest ink (`deepBg`) instead of
+a plate. The plates, their descriptions and their tests stay, so turning the
+art back on is one line. *Rejected:* reusing fishing-village's plate for
+Act 1; commissioning Act 1 plates now; black only for unplated maps.
+
+**D33 — The King of Revenge rises from the harbour wall, not "the
+breakwater".** (T, 2026-09-26.) Keeps the Act 1 map's name, The Breakwater,
+and rewords fishing-village's two lines (`fv-6`'s boss description and the
+King's brutal-defeat line) so they don't point at the Act 1 map.
+*Rejected:* renaming the map; leaving both.
+
+**D34 — The Breakwater gets people of its own, authored in a story-spec
+session.** (T, 2026-09-26.) Not a staging-only move of fishing-village's
+NPCs. Names and characters need T's sign-off (hard rule 3; the story
+overview's "What happens here" for the Breakwater is still open), so this is
+an attended session, not a loop phase. Filed in `plan/AUDIT.md`.
+*Rejected:* staging Old Marrow on the Breakwater; waiting for D1 step 4.
+
+**D35 — Fishing-village is retuned after M3d, from measurement.** (T,
+2026-09-26.) Once the Lantern Deep ships and all of Act 1 can be played,
+`/combat-playtest` measures the run and fishing-village's pins
+(`FV_BOSS_LEVEL`, its fights) are raised to follow Act 1. Until then, map
+PRs don't touch fishing-village's difficulty. *Rejected:* raising it now;
+keeping the dip as a breather.
+
 ## Open follow-ups
 
 - Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and
@@ -264,8 +312,9 @@ the map PRs. A need the pools can't meet is filed to `adjust-enemies` /
   #383 and M2 #384 opened 2026-09-25 (stacked in that order). The M3
   ballot was answered the same day as D26–D29. M0–M2 merged 2026-09-26
   (#382–#384), and M3a (the Breakwater, the new start, start on any map)
-  merged 2026-09-26 (#385). All four D26 names are picked. Four agent calls
-  from M3a wait on T in `plan/AUDIT.md` Pending. **Next:** M3b–M5 are rows
+  merged 2026-09-26 (#385). All four D26 names are picked. M3b merged
+  2026-09-26 (#389), M3c the same day (#392). The agent calls M3a and M3b
+  filed were answered as D30–D35 (#393). **Next:** M3b–M5 are rows
   in `plan/steps/01_build_plan.md` (brief
   `plan/2026-09-25-map-revamp-m3.prompt.md`).
 - Backdrop-anchored map renderer (D15) — nodes in image coordinates,

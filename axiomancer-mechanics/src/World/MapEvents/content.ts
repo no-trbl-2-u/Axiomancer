@@ -974,7 +974,7 @@ const fvGauntletBoss: MapEventPool = {
             enemySlug: 'king-of-revenge',
             isBoss: true,
             level: FV_BOSS_LEVEL,
-            description: 'The King of Revenge rises from the breakwater.',
+            description: 'The King of Revenge rises from the harbour wall.',
         },
     }],
 };
@@ -1123,22 +1123,32 @@ const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: Ma
 // landmarks (see `Continents/Coastal-Village/breakwater.ts` for the node map).
 //
 // Kind spread over 18 nodes: 6 encounter, 3 rest, 3 loot-cache,
-// 3 gathering, 2 hazard, 1 travel. No boss: the watchtower (bw-17) is the
-// last fight, fishing-village's water-holger, before the door. The foes ramp
-// ring by ring in fishing-village's own order.
+// 3 gathering, 2 hazard, 1 arrival cutscene, 1 travel. No boss (D30): the
+// watchtower (bw-17), the one node every run crosses before the door, is the
+// region's elite fight. The other foes ramp ring by ring in fishing-village's
+// own order.
 
-/** The windmill is where a new game starts (D27): placed, never arrived at. A CAMP, not an inn. */
-const bwWindmillRest: MapEventPool = {
-    id: 'bw-1.rest',
+/**
+ * The windmill is where a new game starts (D27). D31: it opens on a short
+ * arrival scene, like every other Act 1 map, not on a rest screen.
+ */
+const bwWindmillArrival: MapEventPool = {
+    id: 'bw-1.cutscene',
     entries: [{
-        kind: 'rest', weight: 1,
+        kind: 'cutscene', weight: 1,
         payload: {
-            kind: 'rest',
-            shelter: 'camp',
-            description: 'A windmill with its sails lashed down. The loft is dry. Nobody asks rent.',
+            kind: 'cutscene',
+            lines: [
+                'A windmill on the headland, its sails lashed down. The sea is loud below it.',
+                'A road runs east along the breakwater, toward a watchtower with its lamp lit.',
+            ],
+            description: 'You set out along the coast.',
         },
     }],
 };
+
+/** D30: the Breakwater's elite, pinned low like every Act 1 fight (brief §3b). */
+const BW_ELITE_LEVEL = 3;
 
 const BW_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description: string }> = {
     // c1 — the crane quay
@@ -1149,8 +1159,13 @@ const BW_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description: string }
     'bw-10': { slug: 'little-belle',     description: 'A small orange vesper rings a bell in the manor yard.' },
     // c4 — the lighthouse
     'bw-14': { slug: 'foot-stealer',     description: 'Something on the lighthouse stair collects footing. Yours is next.' },
-    // c5 — the watchtower: the last fight before the bridge
-    'bw-17': { slug: 'water-holger',     description: 'A drowned sentry stands the watchtower. He was never relieved.' },
+};
+
+/** D30: the watchtower, the chokepoint before the bridge, holds the region's elite. */
+const BW_ELITE = {
+    slug: 'brine-hag' as EnemySlug,
+    level: BW_ELITE_LEVEL,
+    description: 'The watchtower lamp is lit. The hag who keeps it has been watching the road.',
 };
 
 const BW_REST_NODES: Record<string, string> = {
@@ -1196,7 +1211,9 @@ const BREAKWATER_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
         for (let i = 1; i <= 18; i++) {
             const nodeId = `bw-${i}`;
             if (nodeId === 'bw-1') {
-                out.push({ nodeId, pool: bwWindmillRest });
+                out.push({ nodeId, pool: bwWindmillArrival });
+            } else if (nodeId === 'bw-17') {
+                out.push({ nodeId, pool: cwEncounterPool(nodeId, BW_ELITE) });
             } else if (nodeId === 'bw-18') {
                 out.push({ nodeId, pool: bwRiverBridge });
             } else if (BW_REST_NODES[nodeId]) {
@@ -1272,7 +1289,8 @@ const CW_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; level: number; descri
     'cw-12': { slug: 'pale-brood',    level: CW_FIGHT_LEVEL_LATE,  description: 'Something pale pushes up between the roots. The graves here were not dug deep enough.' },
     // c4 — the rock chapel, the wayside cross, the east cave
     'cw-16': { slug: 'goblin-shaman', level: CW_FIGHT_LEVEL_LATE,  description: 'A goblin in the chapel door rattles three borrowed gods. It is collecting the tithe.' },
-    'cw-17': { slug: 'sugata',        level: CW_FIGHT_LEVEL_LATE,  description: 'A half-erased dancer circles the wayside cross. It does not stop for travellers.' },
+    // D30: the region's elite, on the centre lane of the last ring.
+    'cw-17': { slug: 'cursed-paladin', level: CW_FIGHT_LEVEL_LATE, description: 'A knight in rusted plate keeps the wayside cross. The oath outlived the faith. He still keeps the fork.' },
     'cw-19': { slug: 'wichtlein',     level: CW_FIGHT_LEVEL_LATE,  description: 'Something small and red knocks in the cave mouth. Twice, so far.' },
 };
 
@@ -1397,12 +1415,12 @@ const BC_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; level: number; descri
     // c1 — the summit beacon
     'bc-2':  { slug: 'tri-eyes',          level: BC_FIGHT_LEVEL_EARLY, description: 'Something keeps the beacon. It has three sockets, and it has already counted you.' },
     // c3 — the ruined chapel, the toll gate
-    'bc-8':  { slug: 'bone-totem',        level: BC_FIGHT_LEVEL_EARLY, description: 'Skulls stacked in the bell tower, one word to a mouth. The sentence is nearly done.' },
-    'bc-10': { slug: 'unpaid-delver',     level: BC_FIGHT_LEVEL_EARLY, description: 'The gatehouse keeps a collector. He was never paid either, and he is still collecting.' },
+    'bc-8':  { slug: 'vampire-thrall',    level: BC_FIGHT_LEVEL_EARLY, description: 'Something rings the chapel bell for a master who never comes. It will take you instead.' },
+    'bc-10': { slug: 'seam-tick',         level: BC_FIGHT_LEVEL_EARLY, description: 'Something fist-sized clings under the gatehouse arch. The last collector\'s collar lies in the road.' },
     // c4 — the arch bridge, the quarry
     'bc-11': { slug: 'ninth-rung-spider', level: BC_FIGHT_LEVEL_LATE,  description: 'Something hangs under the arch. It does not chase. You have to cross.' },
     'bc-13': { slug: 'prop-wight',        level: BC_FIGHT_LEVEL_LATE,  description: 'Something lives in the crane\'s rotten timbers. It holds the blocks up out of spite.' },
-    // c5 — the stone gate
+    // c5 — the stone gate: D30, the region's elite, on the centre lane of the last ring
     'bc-15': { slug: 'mabadi',            level: BC_FIGHT_LEVEL_LATE,  description: 'A withered duelist waits between the statues. The gate is his, and so is the cane.' },
 };
 

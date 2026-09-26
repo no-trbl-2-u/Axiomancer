@@ -58,23 +58,22 @@
 
 ## Pending
 
-### [gap] Act 1 now runs before fishing-village, but fishing-village is still tuned as the first map [needs-user-call]
+### [gap] The Breakwater has no people of its own — an attended story-spec session (D34) [needs-user-call]
 - category: gap
-- impact: 6
-- ease: 5
-- detail: filed 2026-09-26 (M3b). Under D27 a new game plays the Breakwater
-  (fights at levels 1–3) and the Charcoal Wood (pinned at 2–3), and later the
-  mountains and the underworld, all before fishing-village. Fishing-village is
-  still tuned as the opening map: its fights are level 1–3 and its boss, the
-  King of Revenge, is pinned at level 3 (`FV_BOSS_LEVEL`,
-  `MapEvents/content.ts`), so a player arriving from four Act 1 maps meets an
-  easier map than the ones behind them. The Act 1 maps pin their own fights
-  low (brief §3b) so as not to widen the gap. Options: raise fishing-village's
-  pins once Act 1 is complete; re-order where Act 1's last door leads (the
-  story overview's open question on where the shipped maps sit); or leave the
-  dip as a breather.
-- next: T's call, ideally once M3d ships and the whole Act 1 run can be
-  played; `/combat-playtest` can measure it then.
+- impact: 5
+- ease: 4
+- detail: filed 2026-09-26. T chose (D34) to give the Breakwater NPCs of its
+  own rather than move fishing-village's there. Until then a new game meets
+  its first NPC and first quest (Old Marrow's starting quest, Phase 53c)
+  only after all of Act 1, in fishing-village, and
+  `quest-giver-reachable.engine.test.ts` pins `startMap: 'fishing-village'`,
+  so nothing checks the default start. The Breakwater's "What happens here"
+  in `content/story/story-overview.md` is still open, and hard rule 3 forbids
+  inventing a named character alone, so this is not a loop phase.
+- next: an attended `story-spec`/`character-spec` session with T: settle what
+  happens at the Breakwater, draft 1–2 people for T's sign-off, then stage
+  them (`npcs:` on the map, dialogue via `content-curator`) and point
+  `quest-giver-reachable` at the default start.
 
 ### [tests] No Playwright journey walks a map node to node — the Breakwater was walked by a throwaway script
 - category: tests
@@ -98,42 +97,6 @@
   cache/gather/fight at least, hazard via `hazard-e2e.mjs`'s drag helpers) and
   register it in `scripts/ci-e2e-scope` for `exploration-maps/**` and
   `src/World/**`.
-
-### [gap] The Breakwater (Act 1 coast, M3a #385) — five agent calls to confirm [needs-user-call]
-- category: gap
-- impact: 5
-- ease: 9
-- detail: filed 2026-09-26 (M3a residue). M3a shipped the Breakwater with four
-  calls the agent made alone, each a one-line change if T overrules:
-  (1) **No boss.** The last fight is water-holger at the watchtower (bw-17),
-  because fishing-village's King of Revenge is still ahead in the chain.
-  (2) **The windmill start is a rest (camp).** A new game opens on the rest
-  screen, then the first-node relic.
-  (3) **No combat plate.** The Breakwater is in `AWAITING_PLATE` and uses the
-  fallback arena.
-  (4) **Name overlap.** Fishing-village's own text also has "the breakwater"
-  (its King of Revenge "rises from the breakwater").
-  (5) **No NPCs, and the first one is now a map away** (added by
-  `/adjust-npcs` pass 19, 2026-09-26). The Breakwater stages `npcs: []`,
-  which trips the steward's "map with fewer than 2 staged NPCs → CREATE"
-  signal. It isn't shipped here because D29 says no new NPCs in the map PRs
-  and the story overview lists "What happens here" for the Breakwater as
-  open. Hard rule 3 applies too: no inventing a named character alone.
-  The cost is real, though. Since D27 a new game meets its first NPC and
-  its first quest (Old Marrow's starting quest, Phase 53c) only after
-  crossing the whole Breakwater and its bridge into fishing-village.
-  `quest-giver-reachable.engine.test.ts` now pins
-  `startMap: 'fishing-village'`, so nothing checks the default start.
-  KB: guided first play reads as "essential, not optional" (Spirit
-  Island, Aeon's End, Arkham Horror LCG onboarding rows). Options for T:
-  (a) accept it until the story-dependent revamp (D1 step 4);
-  (b) stage 1–2 existing fishing-village NPCs on the Breakwater instead
-  (Old Marrow is the obvious one, and it is a staging-only move);
-  (c) have a `story-spec`/`character-spec` session author the Breakwater's
-  own people.
-  Details: `plan/2026-09-25-map-revamp-m3.prompt.md` §3a.
-- next: `/oversight` or the M3b session (it opens with T anyway for the
-  forest's name, D26). Record any change as a D-number.
 
 ### [debt] Source comments still name the retired `/deck-tuning` loop (2026-09-25)
 - category: debt
@@ -1434,6 +1397,16 @@ present. Row stays open until that session runs.
   a flow that is otherwise working.
 
 ## Done
+
+### [x] T's calls on the Breakwater and the Charcoal Wood — RESOLVED 2026-09-26
+- filed 2026-09-26 (M3a and M3b residue): the Breakwater's five agent calls
+  (no boss; the windmill rest start; no combat plate; the "breakwater" name
+  overlap; no NPCs) and fishing-village's difficulty order. Answered by T as
+  D30–D35 and applied to all three built maps in #393: one elite per region
+  on its last fight column; an arrival-scene start; plain black combat; the
+  King rises from the harbour wall; the Breakwater's people via a story-spec
+  session (new Pending row); fishing-village retuned after M3d (build-plan
+  row M3e). Moved here per D9.
 
 ### [x] Map revamp owner ballot — four calls before M1 — RESOLVED 2026-09-25
 - filed 2026-09-25 (T5 residue). Answered by T in the kickoff session as

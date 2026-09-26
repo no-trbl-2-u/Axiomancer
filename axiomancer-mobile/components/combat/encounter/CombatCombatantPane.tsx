@@ -32,7 +32,7 @@ import Svg, { Circle, Defs, Ellipse, LinearGradient, Path, RadialGradient, Rect,
 
 import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
 import { getEncounterEnemyArt } from '@/assets/images/enemies';
-import { arenaAltTextFor, arenaBackdropFor } from '@/assets/images/combat';
+import { ARENA_PLATES_SHOWN, BLACK_ARENA_ALT, arenaAltTextFor, arenaBackdropFor } from '@/assets/images/combat';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
@@ -698,6 +698,8 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
     // Forest is the one live region still on that path: it has no plate yet.
     // See `assets/images/combat/index.ts` and the AWAITING_PLATE list in its
     // test, which pins that count in both directions (burn-day audit 3.11).
+    // D32 (T, 2026-09-26): while `ARENA_PLATES_SHOWN` is off, every fight gets
+    // a plain black scene instead (the palette's darkest ink, `deepBg`).
     const arenaBg = arenaBackdropFor(region);
     const arenaAlt = arenaAltTextFor(region);
 
@@ -705,15 +707,23 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
         <Animated.View style={[StyleSheet.absoluteFillObject, shakeStyle]} pointerEvents="box-none" testID="combat-combatant-pane">
             {/* ── layer 0: the battlefield scene, enemy figure LARGE ── */}
             <View style={styles.sceneBand} pointerEvents="none">
-                {/* raster arena backdrop — full-bleed behind the foe */}
-                <Image
-                    source={arenaBg}
-                    style={StyleSheet.absoluteFill}
-                    contentFit="cover"
-                    contentPosition="bottom center"
-                    accessibilityLabel={arenaAlt}
-                    testID="combat-arena-backdrop"
-                />
+                {/* raster arena backdrop — full-bleed behind the foe (or plain black, D32) */}
+                {ARENA_PLATES_SHOWN ? (
+                    <Image
+                        source={arenaBg}
+                        style={StyleSheet.absoluteFill}
+                        contentFit="cover"
+                        contentPosition="bottom center"
+                        accessibilityLabel={arenaAlt}
+                        testID="combat-arena-backdrop"
+                    />
+                ) : (
+                    <View
+                        style={[StyleSheet.absoluteFill, { backgroundColor: AXM.deepBg }]}
+                        accessibilityLabel={BLACK_ARENA_ALT}
+                        testID="combat-arena-backdrop"
+                    />
+                )}
                 <Animated.View style={[StyleSheet.absoluteFillObject, enemyAnim]}>
                     <View
                         style={[

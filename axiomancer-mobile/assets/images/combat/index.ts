@@ -166,6 +166,20 @@ const FALLBACK_ARENA: Omit<ArenaPlate, 'pattern'> = {
     alt: 'A cloaked figure sits on a broken wharf sketching the ruins of a dead city across black water under a clouded moon',
 };
 
+/**
+ * Whether combat shows its arena plates at all (D32).
+ *
+ * T, 2026-09-26: "an all black background for all combat plates for now".
+ * While this is off, `CombatCombatantPane` paints the scene band plain black
+ * for every region and never draws a plate. The plates, their descriptions and
+ * the resolver below stay as they are (and stay tested), so turning combat art
+ * back on is this one line.
+ */
+export const ARENA_PLATES_SHOWN = false;
+
+/** The screen-reader label for the plain black scene while plates are off. */
+export const BLACK_ARENA_ALT = 'A plain black backdrop behind the foe';
+
 /** The matching plate for a region display string, or the fallback. */
 function plateFor(region: string | undefined): Omit<ArenaPlate, 'pattern'> {
     if (region) {
