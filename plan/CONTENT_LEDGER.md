@@ -18,7 +18,7 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-26 | bb0f2928 | 20 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-26 | de4d77b3 | 20 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-25 | be37a6a3 | 19 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-26 | 3136aacf | 20 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-26 | 2b289bb2 | 19 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-26 | 27bd4d2d | 19 |
 
@@ -636,4 +636,50 @@
 > exit 0), `npm run type-check --workspace axiomancer-card-editor`
 > (clean), and `npm test` (root, 218 tests incl. `content-drift.test.mjs`
 > 11/11) all green.
+```
+
+```
+> **[adjust-enemies pass 20, 2026-09-26, base 3136aacf]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE. Dispatched by `/march` Step 3b: `enemies`
+> (`be37a6a3`, 91 commits, ~34h) was the only category past threshold.
+> No unlabeled issues; critique not due (9 commits, 8h since pass 54);
+> the only `[ ]` phase, M3c, is already built as open PR #392 (mirror
+> #391) waiting for T's merge, and M3d-M5 need M3c `[x]` on main, so
+> nothing was shippable; growth floor clear (M3b `1d6f39c0`); deploy green
+> at `3136aacf`.
+>
+> **Step 1, re-derived from the live registry** (a ts-node pass over
+> `EnemiesByMap` / `ENEMY_REGISTRY`, since trim T1-T5 and M3a/M3b rewrote
+> the library by about 460 lines since pass 19). 12 pools: breakwater 13,
+> fishing-village 13, charcoal-wood 39, northern-forest 39, caverns 16,
+> northern-city 8, connecting-river 5, town-across-river 4, the-capital 8,
+> aporia-colonnade/archive/proof 8/8/11. 79 registry entries; orphans are
+> still only `sandbag` (test fixture) and `the-incompleteness` (never
+> pooled by design). Portraits: zero duplicates. Deck law: all 10 distinct
+> `card(...)` ids resolve in `src/Cards/library/`. Keyword kinds: the 11
+> in use match `ENEMY_KEYWORD_KINDS` exactly. Voice: zero archaic-pronoun
+> hits. Loot: 11 distinct `drop()` ids, all live consumables
+> (`void-essence` drops left with the trim).
+>
+> **The new signal, and why it isn't a CREATE:** `breakwater` and
+> `charcoal-wood` reuse their siblings' pool arrays outright
+> (`FISHING_VILLAGE_POOL`, `NORTHERN_FOREST_POOL`), so the overlap is 100%,
+> over the 70% ceiling. That is D29 (T, 2026-09-25): Act 1 borrows the
+> nearest shipped pools, and new content waits for the story-dependent
+> revamp (D1 step 4). Authoring rosters for these maps now would override
+> an owner ruling, so the finding is logged here and not filed again.
+> M3c (#392) continues the pattern with caverns. Checked the one way
+> borrowing could hurt: the borrowed rosters are level 9+, but M3b pins
+> every fight to level 2-3 and `scaleEnemyToLevel` scales even authored
+> VITAE proportionally, so a pinned level-9 foe really does arrive at
+> level-2 size.
+>
+> **Step 1b widened KB check:** `kb_search` for repetition/variety
+> complaints. `heroes-of-terrinoth/reception/reviews.okf.md` (repetition,
+> corroborated by a third reviewer) and `aeons-end/reception/better-if.okf.md`
+> ("more perceived variety") support giving Act 1 its own rosters when the
+> revamp lands. They add nothing D29 hasn't already scheduled.
+>
+> Verify: no source changed (ledger-only commit). CI verify-mechanics and
+> verify-mobile are green at `3136aacf`, this commit's parent tree.
 ```

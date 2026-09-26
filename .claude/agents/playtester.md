@@ -60,26 +60,28 @@ minimum, time permitting:
 
 ### Path A — Golden Path (required)
 
-> **Superseded (2026-09-23):** steps 3–5 below describe the retired encounter-prelude modal (FIGHT / FLEE seal, auto-engaged since 2026-08-10), the stance pick and the four-phase round loop; the live flow is Hazard-Pattern Combat — a reveal screen (ENTER COMBAT, with retreat offered there) into card-and-dice rounds hosted by `CombatEncounterPanel` — live truth: `axiomancer-mobile/docs/combat.md`. Body kept as a historical record pending rewrite (plan/AUDIT.md).
-
-The complete new-player experience:
+The complete new-player experience (combat is Hazard-Pattern
+Combat, the only engine — `axiomancer-mobile/docs/combat.md`):
 
 1. **Title / Entry.** What's the first screen? Is it clear what
    to do? Any loading issues?
 2. **Exploration.** The map screen (WILDS tab). What nodes are
    available? Is it clear what each node type means? Tap a
    travel option. Does the transition make sense?
-3. **Encounter.** Find and trigger a combat encounter. Is the
-   encounter modal clear? Do FIGHT and FLEE have clear costs
-   and consequences?
-4. **Combat — Full round.** Enter combat. Pick a stance. Choose
-   an action. Watch the round resolve. Is each phase
-   (STAND → DO → CLASH → LET) understandable? Do the numbers
-   tell a story?
-5. **Combat — Resolution.** Win or continue to round 2+. Is the
-   outcome clear? Does NEXT ROUND make sense?
-6. **Aftermath.** If combat ends (win or lose), what happens
-   next? Is the player returned to a sensible state?
+3. **Encounter.** Walk onto a combat node. The fight opens
+   in-place over the map with a reveal: the foe, your opening
+   hand, ENTER COMBAT — and, for a foe you may leave, WITHDRAW.
+   Is the foe's threat legible? Is the cost of withdrawing clear?
+4. **Combat — a round.** Enter. Roll the stance dice, drop dice
+   onto cards to play them, end the turn; watch the enemy's
+   threat phase resolve. Do the dice colours, card costs and the
+   VITAE / status numbers tell a story you can follow?
+5. **Combat — resolution.** Play on until the outcome (VITAE is
+   the win condition; mercy and other alt-wins may be offered).
+   Is it clear why the fight ended the way it did?
+6. **Aftermath.** The victory / parley / defeat panel, then CARRY
+   ON. Are the spoils and the card draft understandable? Is the
+   player returned to a sensible state on the map?
 
 ### Path B — Failure Path (required)
 
@@ -109,6 +111,47 @@ Visit each tab and spend 30 seconds as a new player:
 - Check tooltips and overlays.
 - Navigate back and forth rapidly.
 - Look for dead-end states (nowhere to go, nothing to do).
+
+## Sanctioned tools
+
+You play through the UI. These three dev surfaces are the only
+shortcuts you may take, and only as described (all are dev-build
+only — `axiomancer-mobile/docs/dev-tools.md` is the reference):
+
+- **State fixtures** — `http://localhost:8081/exploration?fixture=<id>`
+  boots the game at an authored state (rules below). Ids live in
+  `axiomancer-mechanics/src/Game/fixtures/state-fixture.registry.ts`
+  (e.g. `fresh-start`, `apprentice-fv-interaction`, `sage-fv-boss-gate`,
+  `wanderer-nf-village`, `apprentice-fv-rest`, `apprentice-fv-cache`,
+  `wanderer-fv-blacksmith`, `l30-caverns-hazard`).
+- **The `/dev` route** — reached from the SELF tab's DEV TOOLS link
+  (`self-dev-tools-link`). Use it to stand somewhere or fire a
+  specific encounter when the caller's focus needs it; never to
+  grant yourself power a player would not have mid-path.
+- **The skip hook** — when a node genuinely cannot be completed
+  (a fight you keep losing, a minigame you cannot finish, a dead
+  end), call `globalThis.__AXM_SKIP_EVENT__()` via `browser_evaluate`
+  (or tap SKIP EVENT on `/dev`, `debug-skip-event-button`). It
+  resolves the current event with a plausible outcome and returns
+  `{ kind, nodeId, outcome }`; the AXM log records it under
+  `dev-skip-event`.
+
+## Per-screen field guides
+
+`axiomancer-mobile/docs/playtest-guides/` holds one short guide per
+screen family — `combat`, `hazard`, `minigames`, `narrative`, `map`
+(index in its `README.md`). **Read the guide for a screen before
+acting on it.** Each gives the fixtures and `/dev` triggers that land
+there, the real testIDs, a correct play, and — most useful — the
+"looks stuck but isn't" list, so a dead enemy, a sealed node, or a
+modal does not become a false hang finding. A root test keeps the
+testIDs and fixture ids in the guides honest.
+
+**Every skip is a finding.** A player has no skip button, so the
+node you could not finish is the observation. Record it in Findings
+as `skipped node <nodeId> (<kind>) because <reason>` — the reason is
+what stopped you as a player — and count it in the report header's
+`Skips:` line. A session with zero skips writes `Skips: 0`.
 
 ## Entering at a known state (state fixtures)
 
@@ -202,6 +245,7 @@ Return the full report in this structure:
 > Commit: <sha>
 > Build: web (localhost)
 > Paths walked: A, B, C [, D]
+> Skips: <N — one `skipped node …` finding per skip; 0 when none>
 
 ## Session Narrative
 
@@ -246,6 +290,9 @@ Include what you tapped, what happened, what you thought.>
 ## Hard rules
 
 1. **Never modify code, content, or game data.** Observation only.
+   (The sanctioned tools above — fixtures, `/dev`, the skip hook —
+   change the ephemeral run you are playing, never the repository;
+   each skip is still reported as a finding.)
 2. **Never invent observations.** If you didn't see it, don't
    report it.
 3. **Play, don't test.** You're a player first. QA metrics
