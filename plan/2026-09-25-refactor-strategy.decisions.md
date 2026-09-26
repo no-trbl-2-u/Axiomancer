@@ -168,6 +168,46 @@ real grant path in the card rework (D1 step 4), alongside card upgrades
 reads it, so it was never dead. *Rejected:* cutting the die fields (it
 would change the sim's late-stage numbers).
 
+**D21 — Act 1 is four brand-new maps built from the plates.** (T,
+2026-09-25, map-revamp kickoff ballot.) One map per plate: coast,
+forest, mountain fastness, underworld. The seven shipped maps are not
+re-authored onto the plates; they are re-slotted into a later act, and
+stay playable until then. The art is four separate square plates, not
+one engraving to crop (T generated one image per region). *Consequence:*
+the story overview names none of the four places, so each new map's name
+and description is a ruling T makes before its M3 PR. Nothing is
+invented. *Rejected:* three shipped maps (fishing-village, northern-forest,
+caverns) plus one new mountain map; four shipped maps with northern-city
+re-themed as the mountains.
+
+**D22 — Plates are ingested by plain resize, no AI upscaler.** (T,
+2026-09-25.) Each plate is scaled 2× with a standard resampling filter.
+No invented linework; softer when zoomed in. Reversible: an upscaled file
+can replace a plate later, with a provenance edit and no code change.
+*Rejected:* Upscayl run by T; Real-ESRGAN downloaded and run by the agent.
+
+**D23 — Act 1 order: coast → forest → mountains → underworld.** (T,
+2026-09-25.) The underworld is last. The plates' drawn seams (the forest's
+cave mouths drop into the underworld, and the underworld's tunnel leads
+into the mountains) are imagery and do not bind the travel doors.
+*Rejected:* coast → forest → underworld → mountains, which followed the
+seams.
+
+**D24 — The Labyrinth door is the underworld's sealed vault door, open on
+arrival.** (T, 2026-09-25.) One node on the underworld map, placed on the
+plate's vault-door landmark, enters the Aporia through
+`enterLabyrinthAction`'s snapshot and return path as soon as the player
+reaches it. No gate. *Rejected:* a gate condition (it would need new
+content); another host map.
+
+**D25 — Every landmark on a plate gets a node.** (T, 2026-09-25: "place
+the nodes at at least the landmarks.") An Act 1 map's M3 layout puts a
+node on each landmark in `axiomancer-mobile/assets/images/maps/act1-landmarks.json`
+(read off the shipped plates in M1: 17–20 per plate). A map may add nodes
+between landmarks, but never leaves a landmark without one. This is the
+floor under D16's "~20 nodes": a plate with 20 landmarks has at least 20
+nodes.
+
 ## Open follow-ups
 
 - Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and
@@ -182,7 +222,14 @@ would change the sim's late-stage numbers).
 - Map re-authoring brief (D2) — parameters set by D16 (4 regions, ~20
   nodes/map, spread in all directions). Graph first, backdrop second (D15).
   **Kickoff prompt:** `plan/2026-09-25-map-revamp-kickoff.prompt.md` (phases
-  M0–M5; opens with a four-question owner ballot).
+  M0–M5; opens with a four-question owner ballot). **Ballot answered
+  2026-09-25 as D21–D24.** M0's CI gap was already closed on 2026-08-22
+  (`plan/AUDIT.md` contract row, RESOLVED): all of `src/World/**` runs the
+  mobile gate. M0 only adds a pin for the mobile-owned side. M0 #382, M1
+  #383 and M2 #384 opened 2026-09-25 (stacked in that order). **Next:**
+  `plan/2026-09-25-map-revamp-m3.prompt.md` (the four new maps, the
+  Labyrinth door and docs; opens with a four-question ballot on names, start
+  map, engine home and enemy pools).
 - Backdrop-anchored map renderer (D15) — nodes in image coordinates,
   art pans/zooms with the node layer. Its own phase, after D2 — or folded
   into D2, since D16's per-map canvas is the same change.
@@ -195,6 +242,10 @@ would change the sim's late-stage numbers).
   exact centre lines, plate/halo nodes in the dark underworld quadrant, and
   add a `provenance.json` entry (tool, model, prompt, seed). Suggested Act 1
   order (not decided): coast → forest → mountains → underworld.
+  **Superseded 2026-09-25:** T regenerated the art as four separate plates
+  (one per region, about 1125–1254px each, generated from per-region
+  prompts with the mountains plate as the style reference). No crop is
+  needed. Resize per D22, order per D23.
 - Scaling formula (D1 step 3) — D4 settles the direction (per-stat
   hooks); the exact stat-to-quantity mapping is designed with the hook.
 - Trim spec §5.3 / §5.6 / §5.7 answered 2026-09-25 as D8 / D9 / D10.

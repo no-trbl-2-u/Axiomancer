@@ -1,5 +1,10 @@
 # Prompt: THE MAP REVAMP — kick off D2 (with D15, D16 and the D5 Labyrinth door)
 
+> **Done 2026-09-25.** §2 was answered as D21–D24, plus D25 (a node on every
+> landmark). M0 #382, M1 #383 and M2 #384 are open, stacked in that order.
+> This prompt's M3 row (re-author the shipped maps) was overtaken by D21
+> (four new maps). Continue from `plan/2026-09-25-map-revamp-m3.prompt.md`.
+
 > Written 2026-09-25 at T's direction, after TRIM THE FAT finished (T1–T5,
 > #369–#381). This is step 2 of THE REFACTOR STRATEGY. Read these first, in
 > order:
