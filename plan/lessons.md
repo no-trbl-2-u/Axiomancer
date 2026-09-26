@@ -36,6 +36,20 @@
    model-supplied attribution footer on edit). Verify the effect, not the
    response. Source: PR #216.
 
+4. 2026-09-25 — Parallel PR branches in one session each commit the
+   same telemetry shard, so the second merge conflicts (add/add). The
+   shard is append-only: resolve by taking the union of rows, sorted by
+   timestamp. Auto-merge is disabled on this repo (`gh pr merge --auto`
+   fails), so "merge when green" means waiting on checks and then
+   merging by hand. Source: T5 PRs #376–#381.
+
+5. 2026-09-25 — Verify an explorer's "gap" claim before you file work on
+   it. A read-only sweep reported the CI map-scope gap as open, citing
+   an AUDIT row whose RESOLVED note sat a few lines below the excerpt it
+   read. Read the whole row and the live code
+   (`ci-e2e-scope.mjs:133`) first. Source: map-revamp kickoff prompt
+   M0, corrected in the T5 residue.
+
 <!-- @domain:data -->
 
 ## Data

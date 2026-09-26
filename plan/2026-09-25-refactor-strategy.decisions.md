@@ -208,6 +208,37 @@ between landmarks, but never leaves a landmark without one. This is the
 floor under D16's "~20 nodes": a plate with 20 landmarks has at least 20
 nodes.
 
+**D26 — The Act 1 places are named by agent draft, T's pick.** (T,
+2026-09-25, M3 ballot.) Before each map's M3 PR, the agent drafts three
+name + description candidates in the house voice (spec 34 §2.5: terse,
+cold, priced scenery). T picks or edits one. Nothing enters canon without
+T's choice, and the pick is recorded in the story overview's map table in
+the same PR. *Rejected:* T naming all four up front; placeholder names.
+
+**D27 — A new game starts on the coast as soon as it ships.** (T,
+2026-09-25.) `createStartingWorld()` moves from fishing-village to the
+Act 1 coast map in M3a. Act 1 runs coast → forest → mountains → underworld
+(D23). The underworld's exit door leads into the shipped chain at
+fishing-village until the later re-slot. While a later Act 1 map is still
+unbuilt, the last built one's exit door leads to fishing-village instead.
+*Accepted cost:* M3a reworks what assumes a fishing-village start (the
+opening narration's placement, new-game and save handling, the first-map
+e2e tests). *Rejected:* reaching Act 1 through a door from the shipped
+chain until all four ship.
+
+**D28 — The Act 1 maps live in the existing continents.** (T, 2026-09-25.)
+Coast and forest go under `coastal-continent`; mountains and underworld
+under `northern-continent`. Each map still takes its own node-id prefix in
+`nodeIdToMapName()`, distinct from every shipped prefix. *Rejected:* a new
+continent key.
+
+**D29 — Act 1 borrows the nearest shipped enemy and event pools.** (T,
+2026-09-25.) Coast from fishing-village, forest from northern-forest,
+mountains and underworld from caverns. No new enemies, NPCs or events in
+the map PRs. A need the pools can't meet is filed to `adjust-enemies` /
+`adjust-npcs`. New content waits for the story-dependent revamp (D1 step
+4). *Rejected:* authoring new content per map; empty maps first.
+
 ## Open follow-ups
 
 - Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and
@@ -225,7 +256,15 @@ nodes.
   M0–M5; opens with a four-question owner ballot). **Ballot answered
   2026-09-25 as D21–D24.** M0's CI gap was already closed on 2026-08-22
   (`plan/AUDIT.md` contract row, RESOLVED): all of `src/World/**` runs the
-  mobile gate. M0 only adds a pin for the mobile-owned side.
+  mobile gate. M0 only adds a pin for the mobile-owned side. M0 #382, M1
+  #383 and M2 #384 opened 2026-09-25 (stacked in that order). The M3
+  ballot was answered the same day as D26–D29. **Next:**
+  `plan/2026-09-25-map-revamp-m3.prompt.md` (the four new maps, the
+  Labyrinth door, docs). M0 #382, M1
+  #383 and M2 #384 opened 2026-09-25 (stacked in that order). **Next:**
+  `plan/2026-09-25-map-revamp-m3.prompt.md` (the four new maps, the
+  Labyrinth door and docs; opens with a four-question ballot on names, start
+  map, engine home and enemy pools).
 - Backdrop-anchored map renderer (D15) — nodes in image coordinates,
   art pans/zooms with the node layer. Its own phase, after D2 — or folded
   into D2, since D16's per-map canvas is the same change.
