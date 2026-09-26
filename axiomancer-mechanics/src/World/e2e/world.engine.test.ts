@@ -21,7 +21,7 @@ import { mockSequentialRng } from '../../test-utils/rng';
 
 afterEach(() => vi.restoreAllMocks());
 
-const startingState = (): GameState => createNewGameState();
+const startingState = (): GameState => createNewGameState({ startMap: 'fishing-village' });
 
 // fishing-village is now a combat-only new-player gauntlet, so the varied
 // MapEvent kinds (interaction / village / loot-cache) are exercised against
@@ -40,25 +40,25 @@ const nfStateAt = (nodeId: string): GameState => {
 
 describe('moveToNode', () => {
     it('moves to a connected, unlocked, uncompleted node', () => {
-        const world = createStartingWorld();
+        const world = createStartingWorld('fishing-village');
         const next = moveToNode(world, 'fv-2');
         expect(next.currentMap.currentNode).toBe('fv-2');
     });
 
     it('rejects non-adjacent nodes', () => {
-        const world = createStartingWorld();
+        const world = createStartingWorld('fishing-village');
         expect(() => moveToNode(world, 'fv-5')).toThrow(IllegalMoveError);
     });
 
     it('rejects locked nodes', () => {
-        const world = createStartingWorld();
+        const world = createStartingWorld('fishing-village');
         // fv-26 (the first gate) starts locked (only fv-2 is adjacent to start).
         expect(world.currentMap.lockedNodes).toContain('fv-26');
         expect(() => moveToNode(world, 'fv-26')).toThrow(IllegalMoveError);
     });
 
     it('locks completed nodes against back-travel (Q2)', () => {
-        let world = createStartingWorld();
+        let world = createStartingWorld('fishing-village');
         world = moveToNode(world, 'fv-2');
         world = completeCurrentNode(world);
         // After completing fv-2, the first gate (fv-26) becomes available.
@@ -69,7 +69,7 @@ describe('moveToNode', () => {
     });
 
     it('returns the same state when target equals current node', () => {
-        const world = createStartingWorld();
+        const world = createStartingWorld('fishing-village');
         const same = moveToNode(world, world.currentMap.currentNode);
         expect(same).toBe(world);
     });
@@ -290,7 +290,7 @@ describe('Phase 65 — expanded fishing-village layout', () => {
         // surface a non-null event (i.e. the registered pool fired).
         const map = fv();
         for (const node of map.nodes) {
-            const state = createNewGameState();
+            const state = createNewGameState({ startMap: 'fishing-village' });
             state.world = {
                 ...state.world,
                 currentMap: {
@@ -340,7 +340,7 @@ describe('Phase 117 — expanded northern-forest layout', () => {
         // surface a non-null event (i.e. the registered pool fired).
         const map = nf();
         for (const node of map.nodes) {
-            const state = createNewGameState();
+            const state = createNewGameState({ startMap: 'fishing-village' });
             state.world = {
                 ...state.world,
                 currentMap: {

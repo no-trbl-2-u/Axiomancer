@@ -10,6 +10,7 @@
 import { MapDefinition, MapState, NodeId, UniqueEvent } from './types';
 import { ContinentName, MapName } from './map.library';
 import { fishingVillage, northernForest } from './Continents/Coastal-Village/maps';
+import { breakwater } from './Continents/Coastal-Village/breakwater';
 import { caverns, northernCity, connectingRiver, townAcrossRiver, theCapital } from './Continents/Northern-Continent/maps';
 import { aporiaColonnade, aporiaArchive, aporiaProof } from './Labyrinth/maps';
 
@@ -27,6 +28,8 @@ export class MapNotFoundError extends Error {
  */
 export const MAP_REGISTRY: Record<ContinentName, Partial<Record<MapName, MapDefinition>>> = {
     'coastal-continent': {
+        // Map revamp M3a (D21, D28) — Act 1's coast, the new-game start (D27).
+        'breakwater': breakwater,
         'fishing-village': fishingVillage,
         'northern-forest': northernForest,
     },

@@ -34,7 +34,7 @@ import '../MapEvents/content';
 
 afterEach(() => vi.restoreAllMocks());
 
-const freshWorld = (): WorldState => createStartingWorld();
+const freshWorld = (): WorldState => createStartingWorld('fishing-village');
 
 function gameOn(world: WorldState): GameState {
     mockSequentialRng(0.5);

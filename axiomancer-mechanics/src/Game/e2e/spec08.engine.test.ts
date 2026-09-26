@@ -6,6 +6,7 @@
  * completes → currency reward granted, XP banked, loot in inventory.
  */
 
+import { createStartingWorld } from '../../World';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { createGameStore } from '../store';
 import { nullAdapter } from '../persistence/null.adapter';
@@ -29,7 +30,7 @@ function bootstrap(): ReturnType<typeof createGameStore> {
         currency: 0,
     });
     const overrides: Partial<GameState> = { player: strongPlayer };
-    return createGameStore(nullAdapter, overrides);
+    return createGameStore(nullAdapter, { world: createStartingWorld('fishing-village'), ...overrides });
 }
 
 describe('Spec 08 e2e — fishing-village exploration loop', () => {

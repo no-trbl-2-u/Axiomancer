@@ -1114,6 +1114,110 @@ const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: Ma
         return out;
     })();
 
+// ─── The Breakwater (Act 1, map 1 — map revamp M3a) ──────────────────────────
+//
+// D29: Act 1 borrows the nearest shipped pools. The Breakwater is built from
+// fishing-village's builders and roster above (its foes, inn rests,
+// materials, hazard and loot caches); nothing here is a new enemy, NPC or
+// event kind. Only the one-line descriptions are new, placed on the plate's
+// landmarks (see `Continents/Coastal-Village/breakwater.ts` for the node map).
+//
+// Kind spread over 18 nodes: 6 encounter, 3 rest, 3 loot-cache,
+// 3 gathering, 2 hazard, 1 travel. No boss: the watchtower (bw-17) is the
+// last fight, fishing-village's water-holger, before the door. The foes ramp
+// ring by ring in fishing-village's own order.
+
+/** The windmill is where a new game starts (D27): placed, never arrived at. A CAMP, not an inn. */
+const bwWindmillRest: MapEventPool = {
+    id: 'bw-1.rest',
+    entries: [{
+        kind: 'rest', weight: 1,
+        payload: {
+            kind: 'rest',
+            shelter: 'camp',
+            description: 'A windmill with its sails lashed down. The loft is dry. Nobody asks rent.',
+        },
+    }],
+};
+
+const BW_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description: string }> = {
+    // c1 — the crane quay
+    'bw-2':  { slug: 'grave-larva',      description: 'Something pale works loose from the mud under the cranes.' },
+    // c2 — the sea fort, the north pier, the walled manor
+    'bw-6':  { slug: 'float-eye',        description: 'A lidless thing hangs over the fort wall. It has already seen you.' },
+    'bw-8':  { slug: 'chattering-skull', description: 'A skull on a mooring post talks about the tide. It stops when you come near.' },
+    'bw-10': { slug: 'little-belle',     description: 'A small orange vesper rings a bell in the manor yard.' },
+    // c4 — the lighthouse
+    'bw-14': { slug: 'foot-stealer',     description: 'Something on the lighthouse stair collects footing. Yours is next.' },
+    // c5 — the watchtower: the last fight before the bridge
+    'bw-17': { slug: 'water-holger',     description: 'A drowned sentry stands the watchtower. He was never relieved.' },
+};
+
+const BW_REST_NODES: Record<string, string> = {
+    'bw-9':  'The customs house lets rooms by the night. The clerk takes coin, not names.',
+    'bw-13': 'An inn above the harbour. Warm, loud, and paid for in advance.',
+};
+
+/** Index into `FV_GATHER_MATERIALS`, and the line said on arrival. */
+const BW_GATHER_NODES: Record<string, { mat: number; description: string }> = {
+    'bw-4':  { mat: 0, description: 'Storm wrack piles at the foot of the pass. Some of it burns.' },
+    'bw-11': { mat: 3, description: 'Kelp has taken the wreck. You cut what you can carry.' },
+    'bw-16': { mat: 2, description: 'Split fish dry on the hamlet racks. Nobody is watching them.' },
+};
+
+const BW_HAZARD_NODES: Record<string, string> = {
+    'bw-3':  'The gallows hill is loose shale. It gives under you.',
+    'bw-12': 'The tide comes into the sea cave faster than you leave it.',
+};
+
+/** Index into `FV_LOOT_CACHES`. */
+const BW_LOOT_NODES: Record<string, number> = { 'bw-5': 1, 'bw-7': 2, 'bw-15': 0 };
+
+/**
+ * The river bridge — the Breakwater's door. D27: while the Act 1 forest is
+ * unbuilt, the last built Act 1 map's door leads into the shipped chain at
+ * fishing-village. When the forest ships (M3b) this door is re-pointed there.
+ */
+const bwRiverBridge: MapEventPool = {
+    id: 'bw-18.travel',
+    entries: [{
+        kind: 'travel', weight: 1,
+        payload: {
+            kind: 'travel',
+            destinationContinent: 'coastal-continent',
+            destinationMap: 'fishing-village',
+            description: 'The bridge has a toll-house and no keeper. Across it, the road runs down to a fishing village.',
+        },
+    }],
+};
+
+const BREAKWATER_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
+    (() => {
+        const out: Array<{ nodeId: string; pool: MapEventPool }> = [];
+        for (let i = 1; i <= 18; i++) {
+            const nodeId = `bw-${i}`;
+            if (nodeId === 'bw-1') {
+                out.push({ nodeId, pool: bwWindmillRest });
+            } else if (nodeId === 'bw-18') {
+                out.push({ nodeId, pool: bwRiverBridge });
+            } else if (BW_REST_NODES[nodeId]) {
+                out.push({ nodeId, pool: fvRestPool(nodeId, BW_REST_NODES[nodeId]!) });
+            } else if (BW_GATHER_NODES[nodeId]) {
+                const g = BW_GATHER_NODES[nodeId]!;
+                out.push({ nodeId, pool: fvGatheringPool(nodeId, FV_GATHER_MATERIALS[g.mat]!, g.description) });
+            } else if (BW_HAZARD_NODES[nodeId]) {
+                out.push({ nodeId, pool: fvHazardPool(nodeId, BW_HAZARD_NODES[nodeId]!) });
+            } else if (nodeId in BW_LOOT_NODES) {
+                out.push({ nodeId, pool: fvLootCachePool(nodeId, FV_LOOT_CACHES[BW_LOOT_NODES[nodeId]!]!) });
+            } else {
+                const foe = BW_ENCOUNTER_FOES[nodeId];
+                if (!foe) throw new Error(`breakwater: ${nodeId} has no authored event kind or foe.`);
+                out.push({ nodeId, pool: fvEncounterPool(nodeId, foe) });
+            }
+        }
+        return out;
+    })();
+
 // ─── The caverns (northern continent, 2026-08-28 inter-map travel) ───────────
 //
 // First map past the nf-10 door. Kind spread, over 26 nodes (25 + the
@@ -2271,6 +2375,10 @@ export function registerMapEventContent(): void {
     for (const { nodeId, pool } of NORTHERN_FOREST_POOLS) {
         registerMapEventPool(pool);
         setNodeEventPoolOverride('coastal-continent', 'northern-forest', nodeId, pool.id);
+    }
+    for (const { nodeId, pool } of BREAKWATER_POOLS) {
+        registerMapEventPool(pool);
+        setNodeEventPoolOverride('coastal-continent', 'breakwater', nodeId, pool.id);
     }
     for (const { nodeId, pool } of FISHING_VILLAGE_NEW_PLAYER_POOLS) {
         registerMapEventPool(pool);

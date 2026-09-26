@@ -28,9 +28,9 @@ const GAUNTLET_MAPS: MapDefinition[] = Object.values(MAP_REGISTRY)
     .filter((def): def is MapDefinition => def !== undefined && def.traversal !== 'labyrinth');
 
 describe('gauntlet map traversal invariants', () => {
-    it('registers the two coastal maps plus the five northern maps as gauntlets', () => {
+    it('registers the three coastal maps plus the five northern maps as gauntlets', () => {
         expect(GAUNTLET_MAPS.map(d => d.name).sort()).toEqual([
-            'caverns', 'connecting-river', 'fishing-village', 'northern-city',
+            'breakwater', 'caverns', 'connecting-river', 'fishing-village', 'northern-city',
             'northern-forest', 'the-capital', 'town-across-river',
         ]);
     });

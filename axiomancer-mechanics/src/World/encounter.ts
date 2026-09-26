@@ -37,6 +37,8 @@ export const DIFFICULTY_LEVEL_BANDS: Record<EnemyDifficulty, { min: number; max:
 
 /** Resolves a node id (e.g. `'fv-2'`) into the owning `MapName`. */
 function nodeIdToMapName(nodeId: string): MapName | undefined {
+    // Map revamp M3a — Act 1's coast (D28: a prefix distinct from every shipped one).
+    if (nodeId.startsWith('bw-')) return 'breakwater';
     if (nodeId.startsWith('fv-')) return 'fishing-village';
     if (nodeId.startsWith('nf-')) return 'northern-forest';
     // Northern continent (2026-08-28 inter-map travel) — the iron caverns

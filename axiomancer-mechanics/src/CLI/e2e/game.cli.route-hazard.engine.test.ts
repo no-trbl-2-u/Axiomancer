@@ -33,7 +33,7 @@ describe('Game CLI route walkthrough → Hazard-Pattern combat', () => {
         // dilemma ("The Borrowed Hook"); fv-11 -> fv-13 (little-belle) is
         // now the nearest surviving column-3 encounter from fv-2.
         await runGameCli([
-            '--route', 'fv-2,fv-26,fv-11,fv-27,fv-13',
+            '--start-map', 'fishing-village', '--route', 'fv-2,fv-26,fv-11,fv-27,fv-13',
             '--auto-combat',
             '--combat-policy', 'status',
             '--combat-seed', '42',

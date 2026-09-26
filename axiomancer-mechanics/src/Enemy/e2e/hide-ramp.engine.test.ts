@@ -74,7 +74,7 @@ describe('the early HIDE ramp — where a foe\'s level is decided', () => {
     });
 
     it('the live fishing-village boss event resolves a bare-skinned King', () => {
-        const base = { ...createNewGameState(), world: createStartingWorld() };
+        const base = { ...createNewGameState(), world: createStartingWorld('fishing-village') };
         const map: MapState = { ...createMapState(getMapDefinition('coastal-continent', 'fishing-village')), currentNode: 'fv-6' };
         const result = resolveMapEvent({ ...base, world: { ...base.world, currentMap: map } });
         expect(result.event.kind).toBe('encounter');

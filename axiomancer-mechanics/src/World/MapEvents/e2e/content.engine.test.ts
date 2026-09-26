@@ -34,7 +34,7 @@ const CONTINENT_OF: Record<AuthoredMap, ContinentName> = {
 };
 
 function freshWorldAt(mapName: AuthoredMap): GameState {
-    const base = { ...createNewGameState(), world: createStartingWorld() };
+    const base = { ...createNewGameState(), world: createStartingWorld('fishing-village') };
     const def = getMapDefinition(CONTINENT_OF[mapName], mapName);
     const map: MapState = createMapState(def);
     return { ...base, world: { ...base.world, currentMap: map } };

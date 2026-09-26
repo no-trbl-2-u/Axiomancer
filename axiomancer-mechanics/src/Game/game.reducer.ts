@@ -33,6 +33,7 @@ import {
 } from '../Character/first-node-grant';
 import { learnCard } from '../Cards';
 import { createStartingWorld, emptyQuestLog } from '../World';
+import type { MapName } from '../World/map.library';
 import { moveToNode as moveWorld } from '../World/world.reducer';
 import { resolveMapEvent } from '../World';
 import { applyDialogueChoice as applyDialogueRuntime } from '../World/dialogue.runtime';
@@ -148,8 +149,14 @@ import { generateRunId } from './run-loop';
  */
 export const GAME_STATE_VERSION = 25;
 
-/** Builds a brand-new GameState with default player and world. */
-export function createNewGameState(): GameState {
+/**
+ * Builds a brand-new GameState with default player and world.
+ *
+ * `opts.startMap` places the new game on another campaign map instead of the
+ * default start (`STARTING_MAP`, the Breakwater since D27). Used by the dev
+ * "start on any map" tools and by tests pinned to one map's content.
+ */
+export function createNewGameState(opts: { startMap?: MapName } = {}): GameState {
     // No curated-loadout seed (v23, 2026-09-20 — see the version log above):
     // the combat deck is `knownCards` + `combatRewardCards`, and the client
     // seeds `knownCards` from the chosen starter bundle (`ensureStarterCards`).
@@ -183,7 +190,7 @@ export function createNewGameState(): GameState {
             baseStats: { heart: 5, body: 5, mind: 5 },
             seedStartingRelics: false,
         }),
-        world: createStartingWorld(),
+        world: createStartingWorld(opts.startMap),
         quests: emptyQuestLog(),
         flags,
         moralMeter: 0,

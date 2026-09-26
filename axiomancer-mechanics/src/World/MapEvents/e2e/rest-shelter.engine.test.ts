@@ -163,7 +163,7 @@ describe('Phase 52b — the shelter classification of every authored rest pool',
         expect(new Set(labyrinthShelters)).toEqual(new Set<RestShelter>(['camp']));
     });
 
-    it('the ONLY inns in the game are inside settlements: fishing-village, the northern city, town-across-river, and the capital', () => {
+    it('the ONLY inns in the game are inside settlements: the Breakwater, fishing-village, the northern city, town-across-river, and the capital', () => {
         // Phase W3 — the northern city is the second SETTLEMENT with
         // tended, paid beds: its three rests are inns by the same 52b law
         // that made the village's four inns and every wilderness rest a
@@ -171,12 +171,16 @@ describe('Phase 52b — the shelter classification of every authored rest pool',
         // one inn (The Miller's Rest). Phase W5 — the-capital is the
         // fourth: one inn (The Waiting Room). Everything else — including
         // connecting-river, wild again after the city — still only camps.
+        // Map revamp M3a — the Breakwater is a walled harbour town: its
+        // customs house and harbour inn are inns, its windmill a camp.
         const census = censusOfAuthoredRestPools();
         const innKeys = Object.entries(census)
             .filter(([, shelters]) => shelters.includes('inn'))
             .map(([key]) => key)
             .sort();
         expect(innKeys).toEqual([
+            'coastal-continent:breakwater:bw-13',
+            'coastal-continent:breakwater:bw-9',
             'coastal-continent:fishing-village:fv-20',
             'coastal-continent:fishing-village:fv-25',
             'coastal-continent:fishing-village:fv-3',

@@ -39,7 +39,7 @@ function seatAt(state: GameState, nodeId: string): GameState {
 /** A fresh game standing on the fv-10 door. */
 function atCoastRoad(): GameState {
     mockSequentialRng(0.5);
-    return seatAt({ ...createNewGameState(), world: createStartingWorld() }, 'fv-10');
+    return seatAt({ ...createNewGameState(), world: createStartingWorld('fishing-village') }, 'fv-10');
 }
 
 describe("the fv-10 door — village → northern-forest (same continent)", () => {

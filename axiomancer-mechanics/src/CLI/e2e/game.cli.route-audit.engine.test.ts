@@ -198,7 +198,7 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         // came, so it only ever played FREE lines), which closed Little Belle
         // inside the cap on seed 32. Seed 1 keeps fv-13 UNRESOLVED at the cap.
         await runGameCli([
-            '--route', 'fv-2,fv-26,fv-11,fv-27,fv-13,fv-28,fv-5,fv-6,fv-7',
+            '--start-map', 'fishing-village', '--route', 'fv-2,fv-26,fv-11,fv-27,fv-13,fv-28,fv-5,fv-6,fv-7',
             '--auto-combat',
             '--combat-policy', 'naive',
             '--combat-seed', '1',
@@ -224,7 +224,7 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
     it('--resolve-start resolves fv-1\'s own arrival cutscene before walking the route; without it, the start node is explicitly unresolved', async () => {
         const withFlag = tmpPath('resolve-start-on');
         await runGameCli([
-            '--route', 'fv-2',
+            '--start-map', 'fishing-village', '--route', 'fv-2',
             '--resolve-start',
             '--auto-combat',
             '--combat-policy', 'status',
@@ -250,7 +250,7 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
 
         const withoutFlag = tmpPath('resolve-start-off');
         await runGameCli([
-            '--route', 'fv-2',
+            '--start-map', 'fishing-village', '--route', 'fv-2',
             '--auto-combat',
             '--combat-policy', 'status',
             '--combat-seed', '1',
@@ -277,7 +277,7 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         // fv-13 (little-belle) is the nearest surviving column-3 encounter
         // reachable from fv-2 via fv-11.
         await runGameCli([
-            '--route', 'fv-2,fv-26,fv-11,fv-27,fv-13',
+            '--start-map', 'fishing-village', '--route', 'fv-2,fv-26,fv-11,fv-27,fv-13',
             '--auto-combat',
             '--combat-policy', 'status',
             '--combat-seed', '42',

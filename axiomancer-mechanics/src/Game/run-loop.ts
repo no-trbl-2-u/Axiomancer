@@ -13,22 +13,23 @@
  * - `generateRunId(rng)` — 16-char hex id from the supplied RNG (Phase 35
  *   character-id generation pattern; deterministic when seeded).
  * - `STARTING_REGION` — canonical starting region name; today only
- *   `fishing-village` is a viable run-start point. Per Phase 72 D5 the
- *   hearth concept reuses `MapDefinition.startingNode` — the engine routes
- *   the reset world through the existing `createStartingWorld()` helper
- *   which already lands on the fishing-village starting node.
+ *   the new-game start is a viable run-start point (the Breakwater since
+ *   map revamp M3a, D27). Per Phase 72 D5 the hearth concept reuses
+ *   `MapDefinition.startingNode` — the engine routes the reset world through
+ *   the existing `createStartingWorld()` helper, which lands on it.
  */
 
 import type { MapName } from '../World/map.library';
+import { STARTING_MAP } from '../World';
 
 /**
  * Phase 72 — canonical starting region for `resetRun`. The reset sends the
  * player back to `getMapDefinition('coastal-continent',
- * STARTING_REGION).startingNode.id` (fishing-village's `fv-1` today).
- * Per-region custom hearths defer to a follow-up if regions other than
- * fishing-village ever become viable start points.
+ * STARTING_REGION).startingNode.id`. Since map revamp M3a (D27) that is the
+ * Breakwater's `bw-1`; it was fishing-village's `fv-1` before. One source:
+ * `STARTING_MAP` in the World barrel, which `createStartingWorld()` uses.
  */
-export const STARTING_REGION: MapName = 'fishing-village';
+export const STARTING_REGION: MapName = STARTING_MAP;
 
 /**
  * Phase 72 — produce a 16-char hex id string from the supplied RNG.
