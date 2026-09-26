@@ -58,6 +58,21 @@
 
 ## Pending
 
+### [content] A pinned unique pays a full level of XP in Act 1 (the Charcoal Wood's kudan)
+- category: content
+- impact: 3
+- ease: 5
+- detail: filed 2026-09-26 (M3e residue). `cw-7` stages `kudan`, a `unique`
+  foe (native level 10), pinned at level 2. `scaleEnemyToLevel` rescales its
+  default XP to 2 x 500 = 1,000, so this one fight is worth a full level:
+  more than the rest of the Charcoal Wood (410) and about a third of all of
+  Act 1 (~2,870). Every other Act 1 fight is `simple`/`normal`/`elite` (10 to
+  200 XP). D30 allows one elite per region; it says nothing about uniques, so
+  `act1-elites.engine.test.ts` does not catch it.
+- next: `/adjust-enemies` (enemies are in the steward rotation): swap cw-7 to
+  a `normal` foe from the northern forest roster, or pin its XP; then add a
+  "no `unique` in Act 1" case to `act1-elites.engine.test.ts`.
+
 ### [gap] The Breakwater has no people of its own — an attended story-spec session (D34) [needs-user-call]
 - category: gap
 - impact: 5

@@ -627,9 +627,8 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
 // displaced a `gathering` node instead, for the same reason: no roster foe
 // or flag/pricing dependency to orphan). This block supersedes the legacy
 // authored pools above (kept in source for reference). Foes stay
-// on the gentlest L1–L2 roster; the boss is pinned to a low absolute level
-// so a fresh player can actually win the climax (the shared coastal-tyrant
-// is endgame-tier elsewhere, so we override the level here).
+// on the gentlest coastal roster, pinned at `FV_FIGHT_LEVEL`; the boss is
+// pinned at `FV_BOSS_LEVEL` (M3e: the map follows all of Act 1 now).
 
 // Foes, assigned per node and ordered ALONG THE MAP rather than by node id.
 //
@@ -642,8 +641,9 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
 const FV_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description: string }> = {
     // THE THREE GATES (2026-09-21, the grey office rebalance) — one choke
     // before each open column, so every route to the breakwater fights
-    // three times and carries three rewards into the King. Levels ramp
-    // 1 / 1 / 2 through the pinned-slug path (`max(source.level, player)`).
+    // three times and carries three rewards into the King. Every fight on
+    // this map is pinned at `FV_FIGHT_LEVEL` (M3e; they used to ramp
+    // 1 / 1 / 2 by the foes' own levels, when this was the opening map).
     'fv-26': { slug: 'grave-larva',      description: 'Something pale turns over in the wet sand where the drowned are buried, and keeps turning.' },
     'fv-27': { slug: 'float-eye',        description: 'A lidless thing drifts over the salt flats at head height, and it has already seen you.' },
     'fv-28': { slug: 'chattering-skull', description: 'On the breakwater steps a skull talks to itself about the tide. It stops when you come near.' },
@@ -658,10 +658,10 @@ const FV_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description: string }
     'fv-13': { slug: 'little-belle',     description: 'A small orange vesper rings a bell for a service no one held.' },
     // c4 — Phase 61: fv-15 (formerly the quest-board node, retired) takes
     // foot-stealer back from fv-21 — its Phase 60 displacement left the
-    // slug orphaned with no flag or pricing dependency, and level 3 (same
-    // tier as fv-24's water-holger and the boss's own FV_BOSS_LEVEL) is
-    // exactly the pre-boss weight this lane wants, one column ahead of the
-    // breakwater.
+    // slug orphaned with no flag or pricing dependency, and its own level 3
+    // (fv-24's water-holger's tier) was the pre-boss weight this lane
+    // wanted, one column ahead of the breakwater. Pinned at FV_FIGHT_LEVEL
+    // since M3e, like every fight here.
     'fv-15': { slug: 'foot-stealer',     description: 'It collects footing. Yours is next on the list; balance, it maintains, is a possession like any other.' },
     // c9 — the last thing between the player and the coast road.
     'fv-24': { slug: 'water-holger',     description: 'A drowned deckhand wades up the strand, still standing his watch.' },
@@ -962,9 +962,17 @@ const fvArrival: MapEventPool = {
     }],
 };
 
-// The region boss — king-of-revenge, but pinned to a low absolute level so a
-// fresh player can win the climax (the shared enemy is mid-tier elsewhere).
-const FV_BOSS_LEVEL = 3;
+// M3e (D35, 2026-09-26) — fishing-village now comes after all of Act 1, so it
+// follows the Act 1 elites (level 3-4) instead of dipping below them. Every
+// fight is pinned at 4, the late band of the Beacon Crags and the Lantern
+// Deep; the King at 5, one above the last Act 1 elite. Measured before the
+// move (grey office + 3 card rewards, greedy and blind, player level 3 at
+// 7/7/7, the level a full Act 1 clear banks): the six fights stay 100% at 4;
+// the King goes 99% at 3 to 91% at 5. The bare grey office loses to him at
+// every level from 3 to 6, so the pin does not move that floor.
+// `World/e2e/fishing-village-after-act1.engine.test.ts` pins the ordering.
+const FV_FIGHT_LEVEL = 4;
+const FV_BOSS_LEVEL = 5;
 const fvGauntletBoss: MapEventPool = {
     id: 'fv-6.encounter-boss',
     entries: [{
@@ -1108,7 +1116,7 @@ const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: Ma
             } else {
                 const foe = FV_ENCOUNTER_FOES[nodeId];
                 if (!foe) throw new Error(`fishing-village: ${nodeId} has no authored event kind or foe.`);
-                out.push({ nodeId, pool: fvEncounterPool(nodeId, foe) });
+                out.push({ nodeId, pool: cwEncounterPool(nodeId, { ...foe, level: FV_FIGHT_LEVEL }) });
             }
         }
         return out;

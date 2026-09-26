@@ -11,6 +11,12 @@
  *   - the grey office with NO reward almost never beats him — T's ruling:
  *     winnable only by a near-perfect game, never by the sim's policies.
  * Seeded and deterministic: the numbers are exact, not sampled.
+ *
+ * Since map revamp M3e (2026-09-26) this is a fixed level-1 scenario, not
+ * the live map: a new game starts on the Breakwater, and fishing-village,
+ * after all of Act 1, pins its fights at 4 and the King at 5
+ * (`World/MapEvents/content.ts`). The level-3 King below is the early HIDE
+ * ramp's bare-skinned case, kept as the grey office's floor pin.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -22,7 +28,7 @@ import { simulateHazardPatternCombatDetailed } from '../combat.encounter.sim';
 import { STARTING_CARD_IDS, addRewardCard, rollCombatCardRewards } from '../combat.rewards';
 import type { Character } from '../../Character/types';
 
-const FV_BOSS_LEVEL = 3;
+const OPENING_KING_LEVEL = 3;
 const lcg = (seed: number) => { let s = seed; return () => { s = (s * 48271) % 2147483647; return s / 2147483647; }; };
 // A level-1 player standing at the village's first FIGHT — i.e. one who has
 // already walked their first node. Since v24 the Suppliant's Ring is handed
@@ -64,7 +70,7 @@ function winRate(mk: (seed: number) => Character, enemy: unknown, policy: 'greed
 }
 
 describe('the grey office\'s opening — fishing village, level-1 fresh player', () => {
-    const king = scaleEnemyToLevel(ENEMY_REGISTRY['king-of-revenge'], FV_BOSS_LEVEL);
+    const king = scaleEnemyToLevel(ENEMY_REGISTRY['king-of-revenge'], OPENING_KING_LEVEL);
 
     it('the pinned King carries no HIDE (the early HIDE ramp)', () => {
         expect((king.keywords ?? []).some(k => k.kind === 'hide')).toBe(false);

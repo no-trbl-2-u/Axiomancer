@@ -27,6 +27,7 @@
 | M3c: the Beacon Crags | #392 | Merged 2026-09-26. See §3c. |
 | T's calls on M3a/M3b | #394 | Merged 2026-09-26: D30–D35, applied to all three built maps. See §3d. |
 | M3d: the Lantern Deep | #396 (mirror) | Shipped 2026-09-26 straight to main by the loop. See §3e. |
+| M3e: fishing-village retune | #398 (mirror) | Shipped 2026-09-26 straight to main by the loop. See §3f. |
 
 **First act of the session:** get #382 → #383 → #384 merged, in order (the
 repo uses merge commits; auto-merge is disabled). Each PR's decisions-file
@@ -190,9 +191,8 @@ Two things M3b found that M3c and M3d must not rediscover:
   the payload's `level` (2 early, 3 late; `cwEncounterPool`). Keep the
   mountains and underworld low too (about 3–4), and let
   `charcoal-wood.engine.test.ts`'s level pin be the model. Fishing-village's
-  boss is level 3 (`FV_BOSS_LEVEL`) and still comes after all of Act 1: that
-  ordering is an open difficulty question, filed in `plan/AUDIT.md`, not
-  something a map PR settles.
+  boss was level 3 (`FV_BOSS_LEVEL`) while it came after all of Act 1; M3e
+  settled that ordering (§3f), not a map PR.
 - **Inns only inside settlements.** `rest-shelter.engine.test.ts` (Phase 52b)
   fails any `inn` outside a settlement, so wild rests are camps (`ncCampPool`).
 
@@ -293,6 +293,26 @@ which travels to fishing-village (D27). Events: `LANTERN_DEEP_POOLS` in
   round door that does not open") until M4 makes it the Labyrinth door.
 - **Halo:** `MapSheet.nodeHalo` (new, optional) draws a pale radial glow under
   each node mark; only the Lantern Deep's sheet sets it.
+
+## 3f. M3e — shipped state (2026-09-26)
+
+Fishing-village's fights are all pinned at 4 (`FV_FIGHT_LEVEL`, the Crags' and
+the Deep's late band) and the King at 5 (`FV_BOSS_LEVEL`, one above the last
+Act 1 elite; the early HIDE ramp gives him HIDE 2 there).
+`World/e2e/fishing-village-after-act1.engine.test.ts` derives both from the
+Act 1 maps, so a later retune of Act 1 fails it rather than silently leaving
+the village below.
+
+- **Measurement** (combat-playtest harness, greedy and blind, a kitted player
+  at level 3, 7/7/7, with the grey office plus N card rewards). A full Act 1
+  clear banks about 2,870 XP, which is level 3 and close to 4. The six village
+  fights are 100% at 4 for every deck. The King with 3 rewards: 99% at 3, 95%
+  at 4, 91% at 5, 90% at 6. The bare grey office loses to him at every level
+  from 3 to 6, so the pin does not move that floor. The tier-1 draft matrix
+  deck wins everything (93-100%) and says nothing here.
+- **Found on the way:** the Charcoal Wood's `cw-7` kudan is a `unique` foe,
+  so its XP rescales to 2 x 500 = 1,000: one fight is worth a full level,
+  more than the rest of the wood together. Filed in `plan/AUDIT.md`.
 
 ## 4. Definition of done, and who does what
 
