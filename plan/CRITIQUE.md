@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-09-26 at commit 5d6eca56
-> Pass count: 54
+> Last pass: 2026-09-26 at commit bd517cf9
+> Pass count: 55
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -64,9 +64,60 @@
 > Pending), the late-game hub's faint desktop oval (declined), and the
 > painted "AxiomanceR" wordmark (waits on new art, per bearings).
 
+> **[critique pass 55, 2026-09-26, commit bd517cf9] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route bounces to the title with no save, as before;
+> the fixture-booted late-game hub covers that screen). 24 commits after
+> pass 54: map revamp M3b/M3c, T's calls D30-D35 (#394), and the title-line
+> fix. Re-verified: pass 54's MED title finding now reads "Your path begins
+> on the coast, at a windmill above the breakwater." at both viewports
+> (fixed at `1f5fa3b3`/`048eef75`; the row still needs moving to Done).
+> Filed MED: D33 reworded two of fishing-village's "breakwater" lines, but
+> its arrival scene, Old Marrow's quest offer, the quest text and a gate
+> fight still send the player to "the breakwater", which is now the Act 1
+> map they walked first. Reconfirmed and not re-filed: the combat
+> preview's doubled opening tell (pass 54, Pending), the DoT chip
+> mid-token wrap (pass 49, Pending; desktop "Dea"/"14", "POIS"/"8/p"/"ay"),
+> the late-game hub's faint desktop oval (declined), and the relic
+> "Grants X" echo (pass 53, Pending).
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
+
+### [MED] fishing-village — the village still points the player at "the breakwater", which is now the first map they already walked
+- pass: 55 (commit bd517cf9)
+- viewport: both (content, not layout)
+- category: comprehension
+- observation: since M3a a new game starts on the Act 1 map named "The
+  Breakwater", and fishing-village is reached only after crossing all of
+  Act 1. D33 (T, 2026-09-26) kept the map's name and ruled that
+  fishing-village's lines must stop pointing at it, but reworded only two
+  (`fv-6`'s boss description and the King's brutal-defeat line). The rest
+  of the village still does. Its arrival scene says "Nobody here has
+  hauled a full net since the breakwater went quiet." and "Whichever way
+  you go, the breakwater is at the end of it." Old Marrow's offer (the
+  dialogue screen this pass captured) says a great crab "has nested at the
+  breakwater". The quest reads "Slay the King of Revenge holding court at
+  the breakwater." The column-6 gate fight is "On the breakwater steps a
+  skull...". A player who has just come from The Breakwater will read
+  these as a sign to go back, or as a map that loops. The arrival scene
+  also opens "You step out of the hovel", a new-game wake-up line that no
+  longer fits a player walking in from the Lantern Deep or the Beacon Crags.
+- evidence: `axiomancer-mechanics/src/World/MapEvents/content.ts` (`fvArrival`
+  lines, about 954-959; `FV_ENCOUNTER_FOES['fv-28']`, about 649);
+  `axiomancer-mechanics/src/World/Continents/Coastal-Village/maps.ts:79`
+  (Marrow's `offer`) and `:382` (`startingQuest.description`);
+  `axiomancer-mechanics/src/Enemy/enemy.library.ts:566,649` (King of Revenge
+  lore); D33 in `plan/2026-09-25-refactor-strategy.decisions.md`;
+  `.critique-artifacts/mobile/06-dialogue.txt`.
+- suggested fix: finish D33 over the remaining fishing-village lines, using
+  its own word, "the harbour wall" (or "the sea wall"). Reword the arrival
+  scene's hovel line so it reads as arriving rather than waking. Add a
+  test that no fishing-village player-facing string contains "breakwater".
+  Keep the map name. Route through `content-curator` for the prose.
+- source: critique-drive (unattended, §3.5)
 
 ### [MED] title — the title screen still promises the fishing village, but a new game now opens on the Breakwater
 - pass: 54 (commit 5d6eca56)
