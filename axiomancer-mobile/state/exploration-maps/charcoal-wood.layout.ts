@@ -90,6 +90,6 @@ export const charcoalWoodLayout: MapLayout = {
         { id: 'cw-18', ...at('cw-18'), label: 'The Well', description: 'A covered well. The cover is rotten.' },
         { id: 'cw-19', ...at('cw-19'), label: 'The East Cave', description: 'Something knocks in the cave mouth. Twice, so far.' },
         // ── c5 — the door ──
-        { id: 'cw-20', ...at('cw-20'), label: 'The Stair Cave', description: 'A stair cut into the cliff. It comes out above a fishing village.' },
+        { id: 'cw-20', ...at('cw-20'), label: 'The Stair Cave', description: 'A stair cut into the cliff. It comes up on a mountain road.' },
     ],
 };
