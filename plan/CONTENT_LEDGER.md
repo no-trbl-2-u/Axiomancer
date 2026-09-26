@@ -17,7 +17,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-26 | bb0f2928 | 20 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-25 | 4d21e8ee | 19 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-26 | de4d77b3 | 20 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-25 | be37a6a3 | 19 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-26 | 2b289bb2 | 19 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-26 | 27bd4d2d | 19 |
@@ -25,6 +25,48 @@
 ## Log
 
 ```
+> **[adjust-equipment pass 20, 2026-09-26, base de4d77b3]** Zero-CREATE,
+> 1 UPDATE, zero-REMOVE — dispatched by `/march` Step 3b: `equipment`
+> (`4d21e8ee`, 85 commits, ~31h) was stalest; `enemies` (`be37a6a3`, 83)
+> also qualified. No unlabeled issues, critique pass 54 just landed, no
+> `[ ]` phase rows, growth floor clear (M3a `dd204684` within 7 days),
+> deploy green.
+>
+> **Step 1 audit.** The TRIM passes are this surface's first real diff
+> since pass 19: T2a cut the eight inert +2 body/mind/heart relic bumps
+> (only the two armor +5 max VITAE remain), and Tier 0 item 2 made the
+> eleven no-op consumables unobtainable from shops, enemy loot, friendship
+> rewards and presets. Re-derived: 11 relics, every `grantsSignature`
+> resolves, weapons/armor pairs differ only by signature (by design, no
+> dominance); the 11 obtainable consumables all carry a payload the
+> engine reads (heal, cleanse, ARMOR `defenseModifier` at
+> `combat.engine.ts` ~3538, regeneration) and each sits in >=1 shop or
+> loot row.
+>
+> **Finding — the missed grant surface.** `rollCacheReward` (The
+> Reliquary and every loot-cache `item` offer) still drew uniformly over
+> all 22 consumables, so ~half of cache item rewards were inert. The
+> Breakwater (the new-game start, 3 loot caches) makes that the player's
+> first-hour reward.
+>
+> **KB gate.** `References/deckbuilding/deck-economy-thinning-and-bloat`
+> (src-004): Slay the Spire treated never-picked cards as non-functional
+> and pulled them for redesign rather than leaving them in the offer —
+> a reward nobody wants is dead weight in the offer.
+>
+> **UPDATE:** `consumable.library.ts` now exports
+> `UNOBTAINABLE_CONSUMABLE_IDS` (the one source of truth) and
+> `obtainableConsumables`; `rollCacheReward` draws from the latter. The
+> Tier 0 test pins the exported set to its eleven ids and adds a
+> 1,000-roll cache sweep (fails on the old pool, passes now).
+>
+> **Residue (not this surface):** the Breakwater has no shop, so a fresh
+> game can buy no relic or consumable until it crosses into
+> fishing-village. That is a map-content call (`/forge` / map revamp),
+> noted here, not filed as an equipment finding.
+>
+> Verify: green (mechanics 222 files/3533 tests + build; mobile).
+
 > **[adjust-cards pass 20, 2026-09-26, base bb0f2928]** Zero-CREATE, 4 UPDATE,
 > zero-REMOVE. `/march` dispatched this through Step 3b. `cards`
 > (`08cc633d`, 85 commits behind HEAD `bb0f2928`) was the stalest

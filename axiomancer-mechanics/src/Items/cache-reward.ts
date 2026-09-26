@@ -18,7 +18,7 @@
  * Re-tuning the mix, if ever needed, is a manual follow-up.
  */
 
-import { consumableLibrary } from './consumable.library';
+import { obtainableConsumables } from './consumable.library';
 import type { Item } from './types';
 
 /** Reward depth. `modest` = early locales, `rich` = deeper locales. */
@@ -64,13 +64,14 @@ function rollInt(rng: () => number, min: number, max: number): number {
 
 /**
  * Roll a deterministic set of consumable rewards for a loot cache. Draws a
- * tier-scaled count of consumables from `consumableLibrary` (cloned at
- * `quantity: 1` so the shared library is never mutated). Never throws; returns
- * `[]` only if the consumable library is somehow empty.
+ * tier-scaled count of consumables from `obtainableConsumables` — never one of
+ * the no-op `UNOBTAINABLE_CONSUMABLE_IDS` — cloned at `quantity: 1` so the
+ * shared library is never mutated. Never throws; returns `[]` only if the pool
+ * is somehow empty.
  */
 export function rollCacheReward(opts: RollCacheRewardOptions): Item[] {
     const rng = mulberry32(opts.seed);
-    const pool = consumableLibrary;
+    const pool = obtainableConsumables;
     if (pool.length === 0) return [];
 
     const count = rollInt(rng, ...CACHE_REWARD_TUNING[opts.tier].count);

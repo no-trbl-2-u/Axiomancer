@@ -16,7 +16,8 @@ import { EnemiesByMap } from '../../Enemy/enemy.library';
 import { characterPresets, levelLadderPresets } from '../../Character/presets';
 import { listRegisteredMapEventPools } from '../../World/MapEvents/resolve-map-event';
 import { registerMapEventContent } from '../../World/MapEvents/content';
-import { getConsumableById } from '../consumable.library';
+import { getConsumableById, UNOBTAINABLE_CONSUMABLE_IDS } from '../consumable.library';
+import { rollCacheReward, type CacheLootTier } from '../cache-reward';
 
 const NOOP_CONSUMABLES = [
     'focus-vial', 'hunters-elixir', 'heart-draught', 'berserker-brew', 'quicksilver-vial',
@@ -46,6 +47,10 @@ function allShopWareIds(): string[] {
 }
 
 describe('Tier 0 item 2 — the no-op consumables are unobtainable', () => {
+    it('the library\'s exported set names exactly these eleven', () => {
+        expect([...UNOBTAINABLE_CONSUMABLE_IDS].sort()).toEqual([...NOOP_CONSUMABLES].sort());
+    });
+
     it('the definitions still resolve (old saves keep working)', () => {
         for (const id of NOOP_CONSUMABLES) expect(getConsumableById(id), id).toBeDefined();
     });
@@ -75,5 +80,24 @@ describe('Tier 0 item 2 — the no-op consumables are unobtainable', () => {
         const wares = allShopWareIds();
         expect(wares.length).toBeGreaterThan(0); // the shops are actually being read
         expect(wares.filter(id => NOOP.has(id))).toEqual([]);
+    });
+
+    it('no loot cache rolls one', () => {
+        // adjust-equipment pass 20: rollCacheReward drew uniformly over the
+        // whole library, so half of every Reliquary / loot-cache item offer
+        // was inert after Tier 0 item 2 closed the other grant surfaces.
+        const tiers: CacheLootTier[] = ['modest', 'rich'];
+        const hits: string[] = [];
+        let rolled = 0;
+        for (const tier of tiers) {
+            for (let seed = 1; seed <= 500; seed++) {
+                for (const item of rollCacheReward({ playerLevel: 3, seed, tier })) {
+                    rolled++;
+                    if (NOOP.has(item.id)) hits.push(`${tier}/${seed}: ${item.id}`);
+                }
+            }
+        }
+        expect(rolled).toBeGreaterThan(0);
+        expect(hits).toEqual([]);
     });
 });

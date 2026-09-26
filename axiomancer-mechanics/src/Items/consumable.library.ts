@@ -33,7 +33,8 @@
 import { Consumable } from './types';
 
 /**
- * The full consumable library for Spec 05b. 22 entries. Quantities
+ * The full consumable library for Spec 05b. 22 entries, 11 of them
+ * `UNOBTAINABLE_CONSUMABLE_IDS` (kept for old saves only). Quantities
  * default to 1 — callers (shops, loot tables, debug helpers) stack as needed
  * via `stackItem`.
  */
@@ -318,6 +319,24 @@ export const consumableLibrary: Consumable[] = [
 const consumableRegistry = new Map<string, Consumable>(
     consumableLibrary.map(item => [item.id, item]),
 );
+
+/**
+ * TRIM THE FAT Tier 0 item 2 (`plan/2026-09-25-trim-the-fat.spec.md`): the
+ * eleven consumables whose payload the engine never reads for the player —
+ * drinking one does nothing. They stay in `consumableLibrary` so a saved
+ * inventory that already holds one still resolves, but no grant surface
+ * (shop, loot table, friendship reward, preset, loot cache) may hand one out
+ * until D4's stat hooks exist.
+ */
+export const UNOBTAINABLE_CONSUMABLE_IDS: ReadonlySet<string> = new Set([
+    'focus-vial', 'hunters-elixir', 'heart-draught', 'berserker-brew', 'quicksilver-vial',
+    'war-horn-draught', 'philosopher-tea', 'void-essence', 'whetstone-oil',
+    'resonance-crystal', 'greater-resonance-crystal',
+]);
+
+/** The consumables a random-draw grant surface may hand out. */
+export const obtainableConsumables: readonly Consumable[] =
+    consumableLibrary.filter(c => !UNOBTAINABLE_CONSUMABLE_IDS.has(c.id));
 
 /** O(1) consumable lookup by ID. Returns `undefined` for unknown IDs. */
 export function getConsumableById(id: string): Consumable | undefined {
