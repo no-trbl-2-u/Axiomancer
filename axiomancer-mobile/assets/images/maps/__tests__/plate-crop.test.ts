@@ -155,6 +155,10 @@ describe('map plates carry no page paper (DECISION-6 / C-267)', () => {
     it('finds the plates to check', async () => {
         const plates = await readPlates();
         expect(plates.map((p) => p.name)).toEqual([
+            'act1-coast.webp',
+            'act1-forest.webp',
+            'act1-mountains.webp',
+            'act1-underworld.webp',
             'charon-crossing.webp',
             'forest-dark.webp',
             'ludgate-hill.webp',

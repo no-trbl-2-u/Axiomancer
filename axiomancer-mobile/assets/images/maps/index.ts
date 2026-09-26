@@ -41,6 +41,19 @@ const REGION_BACKDROPS: readonly (readonly [RegExp, number])[] = [
     [/forest|wood|wilds/i, FOREST_DARK],
 ];
 
+/**
+ * The four Act 1 plates (D21): one generated Doré-style engraving per region,
+ * with landmark positions in `act1-landmarks.json`. Unlike the plates above
+ * they are the map itself, not atmosphere (D15), so no region regex reaches
+ * them: each Act 1 layout names its plate explicitly (M2).
+ */
+export const ACT1_PLATES = {
+    coast: require('./act1-coast.webp'),
+    forest: require('./act1-forest.webp'),
+    mountains: require('./act1-mountains.webp'),
+    underworld: require('./act1-underworld.webp'),
+} as const;
+
 /** Resolve the backdrop plate for a region display string. */
 export function mapBackdropFor(region: string | undefined): number {
     for (const [pattern, art] of REGION_BACKDROPS) {

@@ -81,5 +81,27 @@
       "assets/images/maps/index.ts",
       "assets/images/screens/index.ts (ScreenBg art=\"village\")"
     ]
+  },
+  {
+    "generated_by": "ai-generated (owner-run)",
+    "date": "2026-09-25",
+    "tool": "ChatGPT image generation, run by T (owner); Pillow post-process by the agent",
+    "model": "ChatGPT's built-in image model (the exact model name and version are not shown to the user)",
+    "seed": "not exposed by the tool",
+    "prompt": "One prompt per region (coast, forest, mountain fastness, underworld), recorded verbatim in act1-prompts.md. Each asks for a square, edge-to-edge, 19th-century Doré-style steel engraving map of ONE quarter of a 2x2 world map: about 15 landmarks spread across the whole plate, joined by a web of roads, with no text, border or colour. Generated in order: mountains, then underworld, then coast and forest with the mountains and underworld plates attached as style references.",
+    "artist": "Machine-generated in the manner of Gustave Doré; not a Doré plate",
+    "license": "Owner-generated for this project (OpenAI's terms assign output rights to the user)",
+    "post_process": "D22 plain resize, no AI upscaler: act1-mountains had a 24px pale strip taken off its top edge before the resize; every plate was converted to greyscale, auto-contrasted (1% cutoff), tinted to one shared parchment ramp (black 28,20,12 / mid 168,150,122 / white 246,234,212) so the underworld's orange lava and torchlight match the other three, Lanczos-resized to 2400x2400 (sources were 1125px for coast and forest, 1254px for mountains and underworld), and saved as WebP q60 method 6. No void grade: these plates are the map itself (D15), not dimmed atmosphere.",
+    "spec_section": "map revamp M1 (plan/2026-09-25-map-revamp-kickoff.prompt.md), decisions D21-D25",
+    "covers": [
+      "act1-coast.webp",
+      "act1-forest.webp",
+      "act1-mountains.webp",
+      "act1-underworld.webp"
+    ],
+    "used_by": [
+      "assets/images/maps/index.ts (ACT1_PLATES)",
+      "assets/images/maps/act1-landmarks.json (landmark positions for the M3 layouts)"
+    ]
   }
 ]

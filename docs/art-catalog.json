@@ -3,13 +3,13 @@
   "_meta": {
     "generated": "2026-09-19",
     "purpose": "Input for authoring a new story outline. Each entry pairs what is literally depicted with the narrative hooks it offers, so a story pass can be written against the art the game already has rather than against art it would need commissioned.",
-    "scope": "The twelve world plates only. Excluded: enemy/character portraits (the engine already carries authored `description` and `causeLines` prose per enemy in axiomancer-mechanics/src/Enemy/enemy.library.ts — read that directly rather than duplicating it here), card faces, treasure icons, UI motifs, and app icons.",
-    "plateCount": 12,
+    "scope": "The sixteen world plates only. Excluded: enemy/character portraits (the engine already carries authored `description` and `causeLines` prose per enemy in axiomancer-mechanics/src/Enemy/enemy.library.ts — read that directly rather than duplicating it here), card faces, treasure icons, UI motifs, and app icons.",
+    "plateCount": 16,
     "surfaceCounts": {
       "combat-arena": 7,
-      "map-backdrop": 5
+      "map-backdrop": 9
     },
-    "house_register": "The Woodcut Codex (axiomancer-mobile/docs/VISUAL_LANGUAGE.md): FromSoftware x Inscryption x illuminated manuscript. ALL twelve plates are now 19th-century wood engravings by Gustave Doré, graded toward the void (grayscale, brightness 0.62 / contrast 1.08). Ten are from London: A Pilgrimage (1872); two — the Caverns and the Capital arenas — are Dante plates, a deliberate break recorded in plan/phases/phase_103_the_last_two_arenas.md. The pixel-art outlier this catalogue previously flagged was retired in phase 103; the `coherenceFlag`s that remain record legible 1872 text on `ludgate-hill` and `arena-desolation`.",
+    "house_register": "The Woodcut Codex (axiomancer-mobile/docs/VISUAL_LANGUAGE.md): FromSoftware x Inscryption x illuminated manuscript. Twelve plates are 19th-century wood engravings by Gustave Doré, graded toward the void (grayscale, brightness 0.62 / contrast 1.08). Ten are from London: A Pilgrimage (1872); two — the Caverns and the Capital arenas — are Dante plates, a deliberate break recorded in plan/phases/phase_103_the_last_two_arenas.md. The pixel-art outlier this catalogue previously flagged was retired in phase 103; the `coherenceFlag`s that remain record legible 1872 text on `ludgate-hill` and `arena-desolation`. The four `act1-*` map plates (2026-09-25, D21) are the exception: machine-generated Doré-style engravings (ChatGPT, run by the owner), tinted to one parchment ramp instead of graded toward the void, because they are the map itself rather than atmosphere under it.",
     "tag_vocabulary": {
       "place": [
         "city",
@@ -59,7 +59,7 @@
         "collapse"
       ]
     },
-    "how_to_use": "For a story outline: read `storySeeds` across all twelve entries first — they are written to be combinable. `boundTo` says where in the world each plate already renders, so a beat set in that region already has its backdrop. `coherenceFlag` records an oddity worth knowing before a close-up or a promotional shot — currently `ludgate-hill` and `arena-desolation`, both legible 1872 text; entries with nothing flagged carry it as `null` or omit the key, and neither form means more than that; `crossCutting.gaps` is where to look for what the art CANNOT currently stage."
+    "how_to_use": "For a story outline: read `storySeeds` across every entry first — they are written to be combinable. `boundTo` says where in the world each plate already renders, so a beat set in that region already has its backdrop. `coherenceFlag` records an oddity worth knowing before a close-up or a promotional shot — currently `ludgate-hill` and `arena-desolation`, both legible 1872 text; entries with nothing flagged carry it as `null` or omit the key, and neither form means more than that; `crossCutting.gaps` is where to look for what the art CANNOT currently stage."
   },
   "plates": [
     {
@@ -420,6 +420,101 @@
         "A market that is also a home — people are selling in the room they live in. No separation between what you owe and where you sleep.",
         "This is the same street family as the Sweetheart's Village arena. The map and the fight are the same place seen twice, which can be used deliberately: arrive here, then fight here."
       ]
+    },
+    {
+      "id": "act1-coast",
+      "file": "axiomancer-mobile/assets/images/maps/act1-coast.webp",
+      "surface": "map-backdrop",
+      "boundTo": [],
+      "artist": "Machine-generated in the manner of Gustave Doré (ChatGPT, owner-run)",
+      "work": "Act 1 plate: the storm coast (one quarter of a 2x2 world map)",
+      "licence": "Owner-generated for this project",
+      "description": "A storm-beaten coast seen from high above. Open sea with breaking waves fills the left and top; a lighthouse stands on the northern cliff, a wreck lies on the rocks, and a ruined fort sits on a tidal island. A crowded walled harbour town with two long piers, moored sailing ships and cargo cranes fills the centre. Inland are a windmill, a walled manor, a gallows hill and a smugglers' cove with beached boats. A river runs down the right edge under a stone bridge; foothills close the bottom edge. Landmark positions: act1-landmarks.json.",
+      "composition": "Sea on the left third, the harbour at the centre, open pale ground and roads inland to the right and below.",
+      "mood": "Busy and exposed. The lightest, most open of the four Act 1 plates.",
+      "tags": [
+        "dock",
+        "ruin",
+        "storm",
+        "deep-water",
+        "toll",
+        "surveillance"
+      ],
+      "storySeeds": [
+        "The gallows stands on open ground in sight of the harbour: the law here is meant to be seen from the water.",
+        "A lighthouse, a wreck just past it, and a smugglers' cove the light does not reach."
+      ]
+    },
+    {
+      "id": "act1-forest",
+      "file": "axiomancer-mobile/assets/images/maps/act1-forest.webp",
+      "surface": "map-backdrop",
+      "boundTo": [],
+      "artist": "Machine-generated in the manner of Gustave Doré (ChatGPT, owner-run)",
+      "work": "Act 1 plate: the ancient forest (one quarter of a 2x2 world map)",
+      "licence": "Owner-generated for this project",
+      "description": "An old-growth forest seen from high above, broken by pale glades. A colossal gnarled tree dominates the upper centre, with a graveyard among great roots to its right. Around it are a ruined tower, a ring of standing stones, a ruined shrine with a robed statue, a cottage on stilts over a bog, a watermill, a timbered lodge, charcoal mounds, a woodcutters' shelter, a covered well, a gibbet with a hanging cage and a chapel cut into a crag. A river with a stone bridge runs down the left edge; the bottom edge is a cliff with three cavern mouths, a stair descending into the centre one. Landmark positions: act1-landmarks.json.",
+      "composition": "Dark tree mass broken by pale clearings and winding roads; the great tree is the visual anchor; the cliff and caves close the foot.",
+      "mood": "Old and watchful rather than lost: the wood is inhabited, and has been for a long time.",
+      "tags": [
+        "forest",
+        "ruin",
+        "threshold",
+        "corpse",
+        "abandonment"
+      ],
+      "storySeeds": [
+        "The dead are buried among the great tree's roots. The wood grows on its graveyard.",
+        "Three ways down at the forest's foot, and only one of them has a stair."
+      ]
+    },
+    {
+      "id": "act1-mountains",
+      "file": "axiomancer-mobile/assets/images/maps/act1-mountains.webp",
+      "surface": "map-backdrop",
+      "boundTo": [],
+      "artist": "Machine-generated in the manner of Gustave Doré (ChatGPT, owner-run)",
+      "work": "Act 1 plate: the mountain fastness (one quarter of a 2x2 world map)",
+      "licence": "Owner-generated for this project",
+      "description": "A mountain fastness seen from high above: jagged crags split by a deep central gorge with waterfalls. A beacon burns on a summit; a castle holds a crag on the left, a monastery the gorge's right cliff. A lake in a hanging valley spills into the gorge, crossed lower down by a rope bridge. There are a shepherds' village on a high meadow, a gatehouse across a pass, a mine tunnel with rails in the right-hand rock wall, a quarry with a crane, an inn, a gate flanked by carved statues, a ruined chapel and a shrine on a pale glacier. Landmark positions: act1-landmarks.json.",
+      "composition": "Dense rock hatching throughout; the gorge splits the plate top to bottom; the glacier lower left is the palest mass.",
+      "mood": "Hard, worked and guarded: every route is watched, tolled or quarried.",
+      "tags": [
+        "ruin",
+        "industry",
+        "toll",
+        "collapse",
+        "scale",
+        "labourers"
+      ],
+      "storySeeds": [
+        "A toll gate, a castle and a beacon: the pass is held, and the fire says so to anyone below.",
+        "The mountain is being taken apart: a quarry, a mine and spoil heaps on the same slope as a monastery."
+      ]
+    },
+    {
+      "id": "act1-underworld",
+      "file": "axiomancer-mobile/assets/images/maps/act1-underworld.webp",
+      "surface": "map-backdrop",
+      "boundTo": [],
+      "artist": "Machine-generated in the manner of Gustave Doré (ChatGPT, owner-run)",
+      "work": "Act 1 plate: the underworld (one quarter of a 2x2 world map)",
+      "licence": "Owner-generated for this project",
+      "description": "A cavern world seen from above as if the roof were cut away. Daylight falls through openings in the ceiling onto an underground lake with a lantern-lit ferry landing and a domed temple half under water. Arched aqueducts cross chasms between rock shelves. A cathedral is carved into the rock at upper right; a giant sleeps on a stone dais below it, and a giant skeleton lies among standing stones further down. There are a forest of giant mushrooms, a grotto of crystals, a market lit in a grotto, a forge by a lava channel, a round sealed vault door, a portcullised fortress gate, a ruined city standing in water and stairs descending into the dark. Landmark positions: act1-landmarks.json.",
+      "composition": "The densest of the four Act 1 plates: every surface is carved rock or structure; the pale roads and water are the only open ground.",
+      "mood": "Crowded and ancient: a whole civilisation under the ground, still lit.",
+      "tags": [
+        "underground",
+        "ruin",
+        "giants",
+        "deep-water",
+        "threshold",
+        "congregation"
+      ],
+      "storySeeds": [
+        "A giant sleeps above the skeleton of another giant. The underworld keeps its dead where the living can see them.",
+        "A sealed vault door among the ruins: the only thing down here still shut."
+      ]
     }
   ],
   "crossCutting": {
@@ -430,7 +525,7 @@
       "CHILDREN: two plates are dominated by children (Sweetheart's Village, Wentworth Street) and both are the poorest places depicted. The game's inheritance-of-debt theme has its art already."
     ],
     "gaps": [
-      "NO TRUE INTERIOR. Ten of twelve plates are exterior or subterranean. `arena-the-capital` is the nearest thing — a ranked hall — but there is still no domestic room, church nave, shop or chamber, so an ordinary indoor scene has no backdrop. This is now the set's largest hole.",
+      "NO TRUE INTERIOR. Ten of the twelve Doré plates are exterior or subterranean. `arena-the-capital` is the nearest thing — a ranked hall — but there is still no domestic room, church nave, shop or chamber, so an ordinary indoor scene has no backdrop. This is now the set's largest hole.",
       "NO NORTHERN FOREST ARENA. The last region without its own combat plate; it falls back to `arena-desolation`. No longer blocked on tooling (phase 103 added the plate-page crop recipe) — only on finding the right plate.",
       "NO DAYLIGHT. Every plate is night, dusk, overcast or underground. Coherent for the register, and probably correct, but it means 'the one bright scene' is currently impossible to stage. The closest is `arena-the-capital`'s central light, which is supernatural rather than daylight.",
       "RESOLVED 2026-09-19 (phase 103): 'NO CAPITAL ARENA' and 'NO CAVERN ARENA' are closed — both regions have their own plate. The incoherent pixel-art fallback they fell back to has been retired."
