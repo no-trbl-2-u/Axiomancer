@@ -34,7 +34,7 @@ An encounter node resolves to a `combat-prelude` event that renders **in place o
 | `combat-die-<id>` | One die (`components/combat/encounter/CombatDie.tsx`); tap gesture is `combat-die-tap-<id>` |
 | `combat-dice-skip` | Skip the roll ritual |
 | `combat-hand` | Hand strip |
-| `combat-hand-<uid>` | One card in hand; tap to stage |
+| `combat-hand-<uid>` | One card in hand; **tap reads it** (`combat-card-detail`), **drag to `combat-play-area` stages it** |
 | `combat-play-area` | Stage area |
 | `combat-staged-<uid>` | The staged card |
 | `combat-staged-die` | The die socket on the staged card |
@@ -60,10 +60,10 @@ An encounter node resolves to a `combat-prelude` event that renders **in place o
 
 ## 4. A correct play, step by step
 
-1. Wait for `encounter-modal-overlay` then `combat-reveal`; press `combat-enter`.
-2. If `combat-tutorial-primer` shows: `combat-primer-skip` (or walk `combat-primer-next` → `combat-primer-begin`). If `combat-tutorial` shows, either follow its "find:" line or `combat-tutorial-skip`.
-3. Tap a `combat-hand-<uid>` → it becomes `combat-staged-<uid>`.
-4. Drag a `combat-die-<id>` whose colour matches the card onto `combat-staged-die` (or tap-select the die then the socket). A wrong colour flashes `combat-drop-reject`.
+1. Wait for `encounter-modal-overlay` then `combat-reveal`. On a first fight `combat-tutorial-primer` covers the reveal **before** ENTER: `combat-primer-skip` (or walk `combat-primer-next` → `combat-primer-begin`). Then press `combat-enter`.
+2. If `combat-tutorial` shows on the board, either follow its "find:" line or `combat-tutorial-skip`.
+3. **Drag** a `combat-hand-<uid>` into `combat-play-area` → it becomes `combat-staged-<uid>`. A plain tap only opens `combat-card-detail` (the board says "tap a card to read it") — close it with `combat-card-detail-close`.
+4. **Drag** a `combat-die-<id>` whose colour matches the card onto `combat-staged-<uid>`; success shows `combat-staged-die`. A die whose aria-label says `MISS face` powers nothing — pick another. A wrong colour flashes `combat-drop-reject`. Use real pointer moves (down → several moves → up); `scripts/combat-round-e2e.mjs` `dragTo` is the reference.
 5. Press `combat-apply-<uid>`. Repeat 3–5 while dice remain, or discard via `combat-trash`.
 6. Press `combat-end-phase`; the enemy acts (`combat-enemy-action-card`), the tray re-rolls.
 7. Repeat until the foe breaks. Answer `combat-mercy-spare`/`-exploit` or `combat-capitulation-*` if asked.
