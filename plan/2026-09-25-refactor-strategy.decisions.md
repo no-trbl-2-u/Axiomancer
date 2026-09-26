@@ -200,6 +200,14 @@ plate's vault-door landmark, enters the Aporia through
 reaches it. No gate. *Rejected:* a gate condition (it would need new
 content); another host map.
 
+**D25 — Every landmark on a plate gets a node.** (T, 2026-09-25: "place
+the nodes at at least the landmarks.") An Act 1 map's M3 layout puts a
+node on each landmark in `axiomancer-mobile/assets/images/maps/act1-landmarks.json`
+(read off the shipped plates in M1: 17–20 per plate). A map may add nodes
+between landmarks, but never leaves a landmark without one. This is the
+floor under D16's "~20 nodes": a plate with 20 landmarks has at least 20
+nodes.
+
 ## Open follow-ups
 
 - Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and
