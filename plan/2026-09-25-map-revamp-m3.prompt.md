@@ -24,7 +24,7 @@
 | M2: per-map sheet | #384 | Open, stacked on #383. `MapLayout.sheet: MapSheet` (`width`, `height`, `scale`, `backdrop`, `plateOpacity`, `chartTexture`) replaced the global `SPREAD` and the region-regex plate pick. The shipped maps use `legacySheet(plate)` and render pixel-identical. |
 | M3a: the Breakwater + new start | #385 | **Merged 2026-09-26** (2b289bb2). See §3a. |
 | M3b: the Charcoal Wood | #389 | Merged 2026-09-26. See §3b. |
-| M3c: the Beacon Crags | (this PR) | Built 2026-09-26 by the loop. See §3c. |
+| M3c: the Beacon Crags | #392 | Built 2026-09-26 by the loop. See §3c. |
 
 **First act of the session:** get #382 → #383 → #384 merged, in order (the
 repo uses merge commits; auto-merge is disabled). Each PR's decisions-file
