@@ -3,7 +3,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useFonts } from '@/lib/platform/font';
 import * as SplashScreen from '@/lib/platform/splash-screen';
 import * as NavigationBar from '@/lib/platform/navigation-bar';
-import { useCallback, useEffect, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
+import { isDevToolsEnabled } from '@/lib/buildProfile';
 import { Platform } from 'react-native';
 import { StatusBar } from '@/lib/platform/status-bar';
 import { TooltipProvider } from '@/components/tooltip/TooltipProvider';
@@ -103,6 +104,13 @@ const settingsHydrated = settingsStore.hydrate();
 // old path.
 const bootFixture = resolveBootFixture();
 const storeAdapter = bootFixture ? createFixtureBootAdapter(bootFixture.state) : persistenceAdapter;
+
+// Dev-only skip hook (`components/DevSkipBridge.tsx`). Lazy so the skip
+// module and the engine combat sim it imports stay out of production
+// bundles; the mount below is additionally gated on `isDevToolsEnabled()`.
+const DevSkipBridge = lazy(() =>
+  import('@/components/DevSkipBridge').then((m) => ({ default: m.DevSkipBridge })),
+);
 
 function RootLayout() {
   // Load core fonts only - reduces initial font bundle by ~40%
@@ -253,6 +261,14 @@ function RootLayout() {
           <CacheGate />
           <ItemRewardGate />
           <BlacksmithGate />
+          {/* Dev-only: `globalThis.__AXM_SKIP_EVENT__` for browser drivers
+              (docs/dev-tools.md → "Skip the current event"). Lazy AND
+              gated, so production bundles never load the skip module. */}
+          {isDevToolsEnabled() && (
+            <Suspense fallback={null}>
+              <DevSkipBridge />
+            </Suspense>
+          )}
           <ToastHost />
           {/* PLAYTEST_BUGS_2026-09-18 BUG-03: the app had no save-on-exit
               of any kind, and the adapter's 500ms write debounce could eat
