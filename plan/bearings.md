@@ -743,6 +743,16 @@ ambiguity.)
   D2 map re-authoring (D15/D16), then the D4 stat hooks + damage-scaling
   formula, then the card rework (decides D8 card upgrades and D20 die
   growth). Never re-propose cutting the Debug\* tools (D19).
+  **Amended 2026-09-26 (T, D36–D38):** step 3 is attended, not a loop
+  phase (build-plan row S3, blocked for T). After it, every player card
+  except the two grey starters is purged, along with every player keyword
+  but DEAL and GUARD (row P1, brief `plan/2026-09-26-card-purge.prompt.md`).
+- **THE CARD HOLD (T, attended session 2026-09-26, D37).** No player card
+  and no player keyword is created outside a guided session with T. No
+  steward, `/forge`, `/expand`, phase or brief adds one, and none plans a
+  phase that would. `adjust-cards` and `adjust-keywords` are paused
+  (`skills/march.md` §3b skips them) until T re-arms them. Enemies,
+  equipment, NPCs, maps and the rest of the loop carry on.
 
 ## AUDIT category taxonomy (this project)
 

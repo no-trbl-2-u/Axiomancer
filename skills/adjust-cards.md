@@ -9,6 +9,11 @@
 > grading, no win-rate curve any more. Judge cards by structural
 > signals, not a retired objective function.
 
+> **PAUSED — THE CARD HOLD (T, 2026-09-26, D37).** Do not run this
+> steward from the loop. No card is created outside a guided session
+> with T, and every player card but the grey starters' is purged in
+> build-plan row P1 (D36). `/march` §3b skips this category. T re-arms it.
+
 ## 1. Purpose
 
 The card pool drifts in two directions between passes: thin (a theme

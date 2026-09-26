@@ -291,6 +291,40 @@ an attended session, not a loop phase. Filed in `plan/AUDIT.md`.
 PRs don't touch fishing-village's difficulty. *Rejected:* raising it now;
 keeping the dip as a breather.
 
+The next three came from the same session. T asked what was left of the
+strategy and said: *"I want to pause at the card phase."* Then, near-
+verbatim: *"Once all the other parts of the revamp are over, I want to purge
+all the cards and all the combat related keywords except for the grey strike
+and grey guard cards and keyword. Then work can continue, but no card
+generation unless it's a guided session with me."* The scope was settled by
+ballot the same day.
+
+**D36 — Purge every player card but the two grey starters, after step 3.**
+(T, 2026-09-26.) Amends D1's "no purge". Keeps `grey-strike` (A Plain Blow)
+and `grey-ward` (A Plain Ward) and their keywords, DEAL and GUARD. Purges
+every other player card: the six archetype libraries, the apocrypha set, the
+relic-granted cards and the 5 curses. Purges every other player-card keyword.
+Enemy keywords, decks and the statuses enemies apply stay. Every run deals
+the 10-card grey deck; the 10 presets and the 5/5/5 thirds go; card rewards
+and cache card offers are gated off. It ships after S3 (step 3), as build-plan
+row P1, brief `plan/2026-09-26-card-purge.prompt.md`. *Rejected:* purging
+right after M5 (before the scaling hook); stripping enemy keywords too;
+keeping presets rebuilt from grey cards.
+
+**D37 — No card generation outside a guided session with T.** (T,
+2026-09-26.) From now on, no steward, `/forge`, `/expand` or phase creates a
+player card or a player keyword. `adjust-cards` and `adjust-keywords` are
+paused (`skills/march.md` §3b skips them) until T re-arms them. Everything
+else in the loop continues. *Rejected:* letting the stewards keep making
+small passes until the purge.
+
+**D38 — The loop pauses at the card phase: step 3 is attended.** (T,
+2026-09-26.) After M5 the loop does not start D1 step 3 (the D4 per-stat
+hooks and card damage scaling). It's build-plan row S3, marked blocked for
+an attended session with T, because the stat-to-quantity mapping is still
+T's call. P1 (the purge) requires S3. *Rejected:* stopping the whole loop
+after M5.
+
 ## Open follow-ups
 
 - Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and
@@ -335,5 +369,7 @@ keeping the dip as a breather.
   needed. Resize per D22, order per D23.
 - Scaling formula (D1 step 3) — D4 settles the direction (per-stat
   hooks); the exact stat-to-quantity mapping is designed with the hook.
+  **2026-09-26:** attended with T (D38), build-plan row S3; the card purge
+  (D36, row P1) follows it.
 - Trim spec §5.3 / §5.6 / §5.7 answered 2026-09-25 as D8 / D9 / D10.
   Nothing in §5 remains open.
