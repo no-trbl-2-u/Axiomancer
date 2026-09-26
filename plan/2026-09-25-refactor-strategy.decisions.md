@@ -258,7 +258,9 @@ the map PRs. A need the pools can't meet is filed to `adjust-enemies` /
   (`plan/AUDIT.md` contract row, RESOLVED): all of `src/World/**` runs the
   mobile gate. M0 only adds a pin for the mobile-owned side. M0 #382, M1
   #383 and M2 #384 opened 2026-09-25 (stacked in that order). The M3
-  ballot was answered the same day as D26–D29. **Next:**
+  ballot was answered the same day as D26–D29. M0–M2 merged 2026-09-26
+  (#382–#384). **M3a (the Breakwater, new start, start on any map) is #385.**
+  Four agent calls from M3a wait on T in `plan/AUDIT.md` Pending. **Next:**
   `plan/2026-09-25-map-revamp-m3.prompt.md` (the four new maps, the
   Labyrinth door, docs). M0 #382, M1
   #383 and M2 #384 opened 2026-09-25 (stacked in that order). **Next:**

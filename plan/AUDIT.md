@@ -58,19 +58,23 @@
 
 ## Pending
 
-### [gap] Map revamp owner ballot — four calls before M1 [needs-user-call]
+### [gap] The Breakwater (Act 1 coast, M3a #385) — four agent calls to confirm [needs-user-call]
 - category: gap
-- impact: 8
+- impact: 5
 - ease: 9
-- detail: filed 2026-09-25 (T5 residue). `plan/2026-09-25-map-revamp-kickoff.prompt.md`
-  §2 needs T to answer four questions before any map work. (1) Which maps
-  become Act 1's four regions? D16 says four regions of about 20 nodes;
-  seven maps ship with 7–28 nodes each. (2) Where is the Act 1 engraving
-  file, and which upscaler should be used? The file is not in the repo.
-  (3) The Act 1 order: coast → forest → mountains → underworld was only
-  suggested. (4) Which map and node host the Labyrinth door (D5)?
-- next: `/oversight` or an attended session. Record the answers as D21 onward
-  in `plan/2026-09-25-refactor-strategy.decisions.md`.
+- detail: filed 2026-09-26 (M3a residue). M3a shipped the Breakwater with four
+  calls the agent made alone, each a one-line change if T overrules:
+  (1) **No boss.** The last fight is water-holger at the watchtower (bw-17),
+  because fishing-village's King of Revenge is still ahead in the chain.
+  (2) **The windmill start is a rest (camp).** A new game opens on the rest
+  screen, then the first-node relic.
+  (3) **No combat plate.** The Breakwater is in `AWAITING_PLATE` and uses the
+  fallback arena.
+  (4) **Name overlap.** Fishing-village's own text also has "the breakwater"
+  (its King of Revenge "rises from the breakwater").
+  Details: `plan/2026-09-25-map-revamp-m3.prompt.md` §3a.
+- next: `/oversight` or the M3b session (it opens with T anyway for the
+  forest's name, D26). Record any change as a D-number.
 
 ### [debt] Source comments still name the retired `/deck-tuning` loop (2026-09-25)
 - category: debt
@@ -1363,6 +1367,12 @@ present. Row stays open until that session runs.
   a flow that is otherwise working.
 
 ## Done
+
+### [x] Map revamp owner ballot — four calls before M1 — RESOLVED 2026-09-25
+- filed 2026-09-25 (T5 residue). Answered by T in the kickoff session as
+  D21–D24 (four new Act 1 maps; plain 2× resize; coast → forest → mountains
+  → underworld; the underworld's vault door, open on arrival), plus D25 (a
+  node on every landmark). Moved here per D9.
 
 ### [x] `RELEASES.md` and `CHANGELOG.md` describe the retired `healFraction` as current — RESOLVED by archiving
 - filed 2026-08-08 by Phase 52b (docs, impact 2, ease 9). Both logs are now
