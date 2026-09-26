@@ -1,4 +1,5 @@
 import { breakwaterLayout } from './breakwater.layout';
+import { charcoalWoodLayout } from './charcoal-wood.layout';
 import { fishingVillageLayout } from './fishing-village.layout';
 import { northernForestLayout } from './northern-forest.layout';
 import { cavernsLayout } from './caverns.layout';
@@ -13,6 +14,8 @@ export type { MapLayout, MapSheet, NodeLayout } from './types';
 const REGISTRY: Record<string, MapLayout> = {
     // Map revamp M3a — Act 1's coast, the new-game start (D27).
     'breakwater': breakwaterLayout,
+    // Map revamp M3b — Act 1's forest, past the Breakwater's bridge.
+    'charcoal-wood': charcoalWoodLayout,
     'fishing-village': fishingVillageLayout,
     'northern-forest': northernForestLayout,
     'caverns': cavernsLayout,

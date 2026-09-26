@@ -58,6 +58,24 @@
 
 ## Pending
 
+### [gap] Act 1 now runs before fishing-village, but fishing-village is still tuned as the first map [needs-user-call]
+- category: gap
+- impact: 6
+- ease: 5
+- detail: filed 2026-09-26 (M3b). Under D27 a new game plays the Breakwater
+  (fights at levels 1–3) and the Charcoal Wood (pinned at 2–3), and later the
+  mountains and the underworld, all before fishing-village. Fishing-village is
+  still tuned as the opening map: its fights are level 1–3 and its boss, the
+  King of Revenge, is pinned at level 3 (`FV_BOSS_LEVEL`,
+  `MapEvents/content.ts`), so a player arriving from four Act 1 maps meets an
+  easier map than the ones behind them. The Act 1 maps pin their own fights
+  low (brief §3b) so as not to widen the gap. Options: raise fishing-village's
+  pins once Act 1 is complete; re-order where Act 1's last door leads (the
+  story overview's open question on where the shipped maps sit); or leave the
+  dip as a breather.
+- next: T's call, ideally once M3d ships and the whole Act 1 run can be
+  played; `/combat-playtest` can measure it then.
+
 ### [tests] No Playwright journey walks a map node to node — the Breakwater was walked by a throwaway script
 - category: tests
 - impact: 5

@@ -3570,21 +3570,29 @@ const FISHING_VILLAGE_POOL = [
     CursedHead, Ghast, DoomEgg, TheButcher, BrineHag, TheFerryman, KingOfRevenge,
 ];
 
+/**
+ * northern-forest's pool, shared with the Charcoal Wood (map revamp M3b, D29).
+ */
+const NORTHERN_FOREST_POOL = [
+    Wichtlein, Kudan, BullBegger, WeepingHead, GoblinShaman, Sugata, PaleBrood,
+    TriEyes, Mabadi, FrayedOne, BoneTotem, BoneWizard, Mirac,
+    CursedPaladin, VampireThrall, HasshakuSama, JeweledTree, OgreNaga, Sidelle,
+    RawheadRex, FateSpinner, AshenBoneDrake, RaAminKa, LadyGabriella, Zoma,
+    MabadiUndrowned,
+    TriEyesHollowed, BlackDeath, TheUnnameable, FireGiant, GreaterDevil, Rangda,
+    ZomaAscendant, ElderFireGiant, Tezcatlipoca, ArchDemon, Beelzebub, Death,
+    TheAbortive,
+];
+
 export const EnemiesByMap = {
     // The Breakwater's authored encounters pin their slugs in
     // `MapEvents/content.ts`; this entry is what an unpinned draw reaches.
     'breakwater': FISHING_VILLAGE_POOL,
     'fishing-village': FISHING_VILLAGE_POOL,
-    'northern-forest': [
-        Wichtlein, Kudan, BullBegger, WeepingHead, GoblinShaman, Sugata, PaleBrood,
-        TriEyes, Mabadi, FrayedOne, BoneTotem, BoneWizard, Mirac,
-        CursedPaladin, VampireThrall, HasshakuSama, JeweledTree, OgreNaga, Sidelle,
-        RawheadRex, FateSpinner, AshenBoneDrake, RaAminKa, LadyGabriella, Zoma,
-        MabadiUndrowned,
-        TriEyesHollowed, BlackDeath, TheUnnameable, FireGiant, GreaterDevil, Rangda,
-        ZomaAscendant, ElderFireGiant, Tezcatlipoca, ArchDemon, Beelzebub, Death,
-        TheAbortive,
-    ],
+    // The Charcoal Wood's authored encounters pin their slugs (and a low
+    // level) in `MapEvents/content.ts`; this entry is what an unpinned draw reaches.
+    'charcoal-wood': NORTHERN_FOREST_POOL,
+    'northern-forest': NORTHERN_FOREST_POOL,
     // The caverns (northern continent, 2026-08-28 inter-map travel) — the
     // map after northern-forest. The pool mixes the forest's harder mid
     // tier (wandering foes scale to the player via the adaptive level

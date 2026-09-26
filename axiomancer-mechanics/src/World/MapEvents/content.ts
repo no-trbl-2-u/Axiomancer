@@ -1174,9 +1174,8 @@ const BW_HAZARD_NODES: Record<string, string> = {
 const BW_LOOT_NODES: Record<string, number> = { 'bw-5': 1, 'bw-7': 2, 'bw-15': 0 };
 
 /**
- * The river bridge — the Breakwater's door. D27: while the Act 1 forest is
- * unbuilt, the last built Act 1 map's door leads into the shipped chain at
- * fishing-village. When the forest ships (M3b) this door is re-pointed there.
+ * The river bridge — the Breakwater's door, on to the Charcoal Wood (Act 1,
+ * map 2; re-pointed from fishing-village when the forest shipped in M3b).
  */
 const bwRiverBridge: MapEventPool = {
     id: 'bw-18.travel',
@@ -1185,8 +1184,8 @@ const bwRiverBridge: MapEventPool = {
         payload: {
             kind: 'travel',
             destinationContinent: 'coastal-continent',
-            destinationMap: 'fishing-village',
-            description: 'The bridge has a toll-house and no keeper. Across it, the road runs down to a fishing village.',
+            destinationMap: 'charcoal-wood',
+            description: 'The bridge has a toll-house and no keeper. Across it, the road runs into a wood full of smoke.',
         },
     }],
 };
@@ -1213,6 +1212,147 @@ const BREAKWATER_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
                 const foe = BW_ENCOUNTER_FOES[nodeId];
                 if (!foe) throw new Error(`breakwater: ${nodeId} has no authored event kind or foe.`);
                 out.push({ nodeId, pool: fvEncounterPool(nodeId, foe) });
+            }
+        }
+        return out;
+    })();
+
+// ─── The Charcoal Wood (Act 1, map 2 — map revamp M3b) ───────────────────────
+//
+// D29: Act 1 borrows the nearest shipped pools. The Charcoal Wood uses the
+// shipped builders (fishing-village's gathering, hazard and loot builders, the
+// caverns' camp), the northern forest's roster and its three materials.
+// Nothing here is a new enemy, NPC, item or event kind; only the one-line
+// descriptions and the two arrival lines are new, placed on the plate's
+// landmarks (see `Continents/Coastal-Village/charcoal-wood.ts`).
+//
+// Kind spread over 20 nodes: 7 encounter, 3 rest, 3 loot-cache,
+// 3 gathering, 2 hazard, 1 arrival cutscene, 1 travel. No boss: the wood sits
+// between the Breakwater and fishing-village, whose King of Revenge is still
+// ahead. The northern forest's roster is level 9 and up, so every fight here
+// is pinned to a low absolute level (the fv-6 precedent), ramping ring by ring
+// and never above fishing-village's own boss.
+
+const CW_FIGHT_LEVEL_EARLY = 2;
+const CW_FIGHT_LEVEL_LATE = 3;
+
+/** Arrival over the river bridge from the Breakwater. */
+const cwArrival: MapEventPool = {
+    id: 'cw-1.cutscene',
+    entries: [{
+        kind: 'cutscene', weight: 1,
+        payload: {
+            kind: 'cutscene',
+            lines: [
+                'The bridge ends in pine. Smoke hangs under the branches and does not lift.',
+                'Somewhere ahead, the burners are working the clearings.',
+            ],
+            description: 'You cross into the Charcoal Wood.',
+        },
+    }],
+};
+
+function cwEncounterPool(nodeId: string, foe: { slug: EnemySlug; level: number; description: string }): MapEventPool {
+    return {
+        id: `${nodeId}.encounter`,
+        entries: [{
+            kind: 'encounter', weight: 1,
+            payload: { kind: 'encounter', enemySlug: foe.slug, isBoss: false, level: foe.level, description: foe.description },
+        }],
+    };
+}
+
+const CW_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; level: number; description: string }> = {
+    // c1 — the gibbet
+    'cw-5':  { slug: 'bull-begger',   level: CW_FIGHT_LEVEL_EARLY, description: 'Something under the gibbet cage holds out a fist. It wants you to refuse.' },
+    // c2 — the stone circle, the footbridge
+    'cw-7':  { slug: 'kudan',         level: CW_FIGHT_LEVEL_EARLY, description: 'A calf with a man\'s face lies on the slab. It has one thing to tell you.' },
+    'cw-10': { slug: 'weeping-head',  level: CW_FIGHT_LEVEL_EARLY, description: 'Something weeps under the footbridge. The stream runs faster where it cries.' },
+    // c3 — the root graveyard
+    'cw-12': { slug: 'pale-brood',    level: CW_FIGHT_LEVEL_LATE,  description: 'Something pale pushes up between the roots. The graves here were not dug deep enough.' },
+    // c4 — the rock chapel, the wayside cross, the east cave
+    'cw-16': { slug: 'goblin-shaman', level: CW_FIGHT_LEVEL_LATE,  description: 'A goblin in the chapel door rattles three borrowed gods. It is collecting the tithe.' },
+    'cw-17': { slug: 'sugata',        level: CW_FIGHT_LEVEL_LATE,  description: 'A half-erased dancer circles the wayside cross. It does not stop for travellers.' },
+    'cw-19': { slug: 'wichtlein',     level: CW_FIGHT_LEVEL_LATE,  description: 'Something small and red knocks in the cave mouth. Twice, so far.' },
+};
+
+/**
+ * All three rests are CAMPS: Phase 52b keeps inns inside settlements, and the
+ * wood has none (the hunting lodge is shut; you sleep on its porch).
+ */
+const CW_CAMP_NODES: Record<string, string> = {
+    'cw-9':  'The hunting lodge is shut for the season. Its porch is dry, and nobody collects for it.',
+    'cw-11': 'An empty cottage on stilts over the bog. The boardwalk is the only way in, and the only way out.',
+    'cw-15': 'An open shelter over stacked logs. The fire is someone else\'s. You sit by it anyway.',
+};
+
+/** The northern forest's three materials (`nfWoodGather`, `nfBerryBushes`, `nfMoonbellFlowers`). */
+const CW_GATHER_NODES: Record<string, { mat: { id: string; name: string; description: string }; description: string }> = {
+    'cw-4':  {
+        mat: { id: 'dark-berries', name: 'Dark Berries', description: 'Plump and sweet, with a hint of bitterness.' },
+        description: 'Bramble has taken the millrace. The berries on it are black, and free.',
+    },
+    'cw-8':  {
+        mat: { id: 'moonbell-petals', name: 'Moonbell Petals', description: 'Silvery petals that glow with their own light.' },
+        description: 'Moonbells grow in the great tree\'s shadow. Nobody has priced them yet.',
+    },
+    'cw-14': {
+        mat: { id: 'oak-branch', name: 'Oak Branch', description: 'Sturdy, fresh-fallen.' },
+        description: 'Oak waits by the mounds for the fire. The burners count the logs, not the branches.',
+    },
+};
+
+const CW_HAZARD_NODES: Record<string, string> = {
+    'cw-3':  'The shrine floor is rotten over the crypt. It gives under you.',
+    'cw-18': 'The well cover is rotten through. The drop is longer than the rope.',
+};
+
+const CW_LOOT_NODES: Record<string, { currency: number; description: string }> = {
+    'cw-2':  { currency: 8,  description: 'A strongbox under the tower\'s fallen stair. The lock rusted before its owner came back.' },
+    'cw-6':  { currency: 6,  description: 'Coppers in a niche at the cave mouth. Someone paid the dark and left.' },
+    'cw-13': { currency: 12, description: 'The hermit is gone. His purse is under the hearthstone, where they all keep it.' },
+};
+
+/**
+ * The stair cave — the Charcoal Wood's door. D27: while the Act 1 mountains
+ * are unbuilt, the last built Act 1 map's door leads into the shipped chain at
+ * fishing-village. When the mountains ship (M3c) this door is re-pointed there.
+ */
+const cwStairCave: MapEventPool = {
+    id: 'cw-20.travel',
+    entries: [{
+        kind: 'travel', weight: 1,
+        payload: {
+            kind: 'travel',
+            destinationContinent: 'coastal-continent',
+            destinationMap: 'fishing-village',
+            description: 'A stair cut down into the cliff. It comes out, a long way on, above a fishing village.',
+        },
+    }],
+};
+
+const CHARCOAL_WOOD_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
+    (() => {
+        const out: Array<{ nodeId: string; pool: MapEventPool }> = [];
+        for (let i = 1; i <= 20; i++) {
+            const nodeId = `cw-${i}`;
+            if (nodeId === 'cw-1') {
+                out.push({ nodeId, pool: cwArrival });
+            } else if (nodeId === 'cw-20') {
+                out.push({ nodeId, pool: cwStairCave });
+            } else if (CW_CAMP_NODES[nodeId]) {
+                out.push({ nodeId, pool: ncCampPool(nodeId, CW_CAMP_NODES[nodeId]!) });
+            } else if (CW_GATHER_NODES[nodeId]) {
+                const g = CW_GATHER_NODES[nodeId]!;
+                out.push({ nodeId, pool: fvGatheringPool(nodeId, g.mat, g.description) });
+            } else if (CW_HAZARD_NODES[nodeId]) {
+                out.push({ nodeId, pool: fvHazardPool(nodeId, CW_HAZARD_NODES[nodeId]!) });
+            } else if (CW_LOOT_NODES[nodeId]) {
+                out.push({ nodeId, pool: fvLootCachePool(nodeId, CW_LOOT_NODES[nodeId]!) });
+            } else {
+                const foe = CW_ENCOUNTER_FOES[nodeId];
+                if (!foe) throw new Error(`charcoal-wood: ${nodeId} has no authored event kind or foe.`);
+                out.push({ nodeId, pool: cwEncounterPool(nodeId, foe) });
             }
         }
         return out;
@@ -2379,6 +2519,10 @@ export function registerMapEventContent(): void {
     for (const { nodeId, pool } of BREAKWATER_POOLS) {
         registerMapEventPool(pool);
         setNodeEventPoolOverride('coastal-continent', 'breakwater', nodeId, pool.id);
+    }
+    for (const { nodeId, pool } of CHARCOAL_WOOD_POOLS) {
+        registerMapEventPool(pool);
+        setNodeEventPoolOverride('coastal-continent', 'charcoal-wood', nodeId, pool.id);
     }
     for (const { nodeId, pool } of FISHING_VILLAGE_NEW_PLAYER_POOLS) {
         registerMapEventPool(pool);

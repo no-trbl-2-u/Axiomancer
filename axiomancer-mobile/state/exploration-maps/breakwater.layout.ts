@@ -96,6 +96,6 @@ export const breakwaterLayout: MapLayout = {
         // ── c5 — the last fight ──
         { id: 'bw-17', ...at('bw-17'), label: 'The Watchtower', description: 'A drowned sentry stands the watch. He was never relieved.' },
         // ── c6 — the door ──
-        { id: 'bw-18', ...at('bw-18'), label: 'The River Bridge', description: 'A toll-house with no keeper. Across it, a fishing village.' },
+        { id: 'bw-18', ...at('bw-18'), label: 'The River Bridge', description: 'A toll-house with no keeper. Across it, a wood full of smoke.' },
     ],
 };

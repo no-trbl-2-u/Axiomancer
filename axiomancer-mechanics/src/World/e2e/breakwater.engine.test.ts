@@ -5,7 +5,7 @@
  * - a new game starts here (D27), and any campaign map can be started on
  *   instead (the dev "start on any map" tools);
  * - the map borrows fishing-village's pools and roster (D29), with one
- *   authored event on every node and a door on to fishing-village;
+ *   authored event on every node and a door on to the Charcoal Wood (M3b);
  * - every run ends at the river bridge, through the watchtower.
  *
  * The generic gauntlet invariants (no strands, column law, ribs, distinct
@@ -53,7 +53,7 @@ describe('the new-game start (D27)', () => {
     it('lists the Breakwater available and every other campaign map locked', () => {
         const [coastal, northern] = createStartingWorld().world;
         expect(coastal!.availableMaps).toEqual(['breakwater']);
-        expect(coastal!.lockedMaps).toEqual(['fishing-village', 'northern-forest']);
+        expect(coastal!.lockedMaps).toEqual(['charcoal-wood', 'fishing-village', 'northern-forest']);
         expect(northern!.availableMaps).toEqual([]);
         expect(northern!.lockedMaps).toEqual([
             'caverns', 'northern-city', 'connecting-river', 'town-across-river', 'the-capital',
@@ -64,7 +64,7 @@ describe('the new-game start (D27)', () => {
 describe('starting on any map (dev tools)', () => {
     it('offers every campaign map and no labyrinth act', () => {
         expect([...STARTABLE_MAPS].sort()).toEqual([
-            'breakwater', 'caverns', 'connecting-river', 'fishing-village',
+            'breakwater', 'caverns', 'charcoal-wood', 'connecting-river', 'fishing-village',
             'northern-city', 'northern-forest', 'the-capital', 'town-across-river',
         ]);
     });
@@ -133,10 +133,10 @@ describe('the Breakwater\'s events (D29)', () => {
         expect(r.event.kind).toBe('encounter');
     });
 
-    it('crosses the river bridge into fishing-village (D27, until the Act 1 forest ships)', () => {
+    it('crosses the river bridge into the Charcoal Wood (Act 1, map 2)', () => {
         const r = resolveMapEvent(standingOn('bw-18'));
         expect(r.event.kind).toBe('travel');
-        expect(r.state.world.currentMap.name).toBe('fishing-village');
-        expect(r.state.world.currentMap.currentNode).toBe('fv-1');
+        expect(r.state.world.currentMap.name).toBe('charcoal-wood');
+        expect(r.state.world.currentMap.currentNode).toBe('cw-1');
     });
 });

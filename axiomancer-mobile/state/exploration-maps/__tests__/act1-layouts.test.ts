@@ -27,6 +27,7 @@ type PlateKey = 'act1-coast' | 'act1-forest' | 'act1-mountains' | 'act1-underwor
 
 const ACT1_MAPS: readonly { mapId: MapName; continent: ContinentName; plate: PlateKey; art: number }[] = [
     { mapId: 'breakwater', continent: 'coastal-continent', plate: 'act1-coast', art: ACT1_PLATES.coast },
+    { mapId: 'charcoal-wood', continent: 'coastal-continent', plate: 'act1-forest', art: ACT1_PLATES.forest },
 ];
 
 /** A node counts as ON a landmark within 2% of the sheet (D25's tolerance). */

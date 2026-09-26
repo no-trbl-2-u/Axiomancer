@@ -43,6 +43,7 @@ function glyphDiameter(mapId: string): number {
 const MAPS = [
     // Map revamp M3a — Act 1's coast, on the 1000×1000 plate sheet.
     { mapId: 'breakwater', continent: 'coastal-continent' },
+    { mapId: 'charcoal-wood', continent: 'coastal-continent' },
     { mapId: 'fishing-village', continent: 'coastal-continent' },
     { mapId: 'northern-forest', continent: 'coastal-continent' },
     { mapId: 'caverns', continent: 'northern-continent' },
@@ -134,7 +135,7 @@ describe('exploration map: the sheet can carry the branching graph', () => {
         });
     }
 
-    it('accounts for all 80 ribs: 69 from D1 across the shipped maps, plus 11 on the Breakwater', () => {
+    it('accounts for all 94 ribs: 69 from D1 across the shipped maps, 11 on the Breakwater, 14 on the Charcoal Wood', () => {
         // A total, not a per-map count: this is the one number that catches a
         // whole map's ribs disappearing in a refactor of the forward-skeleton
         // read, which no per-map "> 0" assertion would notice.
@@ -143,6 +144,7 @@ describe('exploration map: the sheet can carry the branching graph', () => {
             0,
         );
         // Map revamp M3a: the Breakwater's four ring columns carry 3 + 4 + 2 + 2.
-        expect(total).toBe(69 + 11);
+        // M3b: the Charcoal Wood's four carry 4 + 3 + 3 + 4.
+        expect(total).toBe(69 + 11 + 14);
     });
 });
