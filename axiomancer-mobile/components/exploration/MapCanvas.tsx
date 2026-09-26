@@ -369,7 +369,11 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
             savedScale.value = scale.value;
         });
 
+    // `withTestId` is RNGH's own test affordance, inert in production — it
+    // lets the suite drive a real pan and then prove the BUG-04 re-fit does
+    // not undo it (issue #294).
     const pan = Gesture.Pan()
+        .withTestId('map-pan')
         .onUpdate((e) => {
             tx.value = savedTx.value + e.translationX;
             ty.value = savedTy.value + e.translationY;
