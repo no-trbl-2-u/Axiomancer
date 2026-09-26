@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-09-25 at commit 2a484f98
-> Pass count: 52
+> Last pass: 2026-09-26 at commit 82bbf241
+> Pass count: 53
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -466,6 +466,38 @@
 - evidence: user-spotted at 2026-09-25T20:06:40Z
 - suggested fix: [user has not specified — iterate to determine]
 - source: user
+
+### [MED] village / inventory — every signet relic's flavor text restates the auto-generated "grants X" line verbatim
+- pass: 53 (commit 82bbf241)
+- viewport: both (375×812 and 1280×800) — reproduces identically at both
+- category: voice
+- observation: a relic's shop/inventory row prints two lines: a mechanical
+  subtitle auto-built by joining stat modifiers with `grants
+  ${signatureName}`, then the authored `description` flavor text below it.
+  All 11 signet relics' authored descriptions end with the exact same
+  "Grants <Signature Name>." clause the subtitle already states, so the
+  grant is printed twice back to back. In the Glen Market shop alone, 3 of
+  the 5 visible stalls show it: Gorgon Brand — "GRANTS THE STILLING" /
+  "A blade that turns the argument to stone. Grants The Stilling.";
+  Coldglass Aegis — "+5 MAX VITAE · GRANTS READ THE ENTRAILS" / "See the
+  blow before it lands. Grants Read the Entrails."; Gambler's Knot —
+  "GRANTS PRESS FATE" / "Bend fate on the bad dice. Grants Press Fate."
+  Reads as a copy-paste residue rather than authored flavor, unlike the
+  non-relic consumables on the same screen (Minor Healing Potion, Clarity
+  Serum), whose flavor lines say nothing the mechanical line already said.
+- evidence: `axiomancer-mobile/state/presenters/village.engine.ts:222-228`
+  builds the subtitle via `parts.push(`grants ${signature}`)`;
+  `axiomancer-mechanics/src/Items/relic.library.ts` — all 11 `RelicSpec`
+  rows' `description` end with "Grants <Name>." (lines 69, 82, 100, 106,
+  114, 123, 130, 137, 143, plus Capstone Maul/Ashen Cuirass). Captured via
+  `critique:drive` pass 53, screen `village` (fixture
+  `wanderer-nf-village`), both viewports
+  (`.critique-artifacts/{mobile,desktop}/07-village.png`).
+- suggested fix: drop the trailing "Grants <Name>." clause from each
+  `RelicSpec.description` in `relic.library.ts` — the mechanical subtitle
+  already carries the grant; the flavor line should read like the
+  non-relic items' (world/mood only, no restated mechanics).
+- source: critique-drive (unattended, §3.5)
 
 ## Done
 
