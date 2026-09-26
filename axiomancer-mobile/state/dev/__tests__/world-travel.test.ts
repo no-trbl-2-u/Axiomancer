@@ -11,7 +11,7 @@
  *   - `completeCurrentMap` stamps completion + unlocks the next map.
  */
 
-import { getMapDefinition } from '@mechanics';
+import { getMapDefinition, createStartingWorld } from '@mechanics';
 
 import { createAppStore } from '@/state/store';
 import {
@@ -31,7 +31,7 @@ describe('world-travel dev helpers', () => {
     });
 
     it('travelToMap lands on the destination start node with the continent switched', () => {
-        const store = createAppStore();
+        const store = createAppStore({ overrides: { world: createStartingWorld('fishing-village') } });
         expect(travelToMap(store, 'northern-continent', 'northern-city')).toBe(true);
         const world = store.getState().world;
         expect(world.currentContinent.name).toBe('northern-continent');
@@ -40,7 +40,7 @@ describe('world-travel dev helpers', () => {
     });
 
     it('listNodes flags the start + current node and every node of the map', () => {
-        const store = createAppStore();
+        const store = createAppStore({ overrides: { world: createStartingWorld('fishing-village') } });
         const map = store.getState().world.currentMap;
         const nodes = listNodes(store.getState());
         expect(nodes.length).toBe(getMapDefinition(map.continent, map.name).nodes.length);
@@ -49,7 +49,7 @@ describe('world-travel dev helpers', () => {
     });
 
     it('jumpToNode moves the cursor anywhere and rejects unknown ids', () => {
-        const store = createAppStore();
+        const store = createAppStore({ overrides: { world: createStartingWorld('fishing-village') } });
         const target = listNodes(store.getState()).find((n) => !n.isCurrent)!;
         expect(jumpToNode(store, target.id)).toBe(true);
         const map = store.getState().world.currentMap;
@@ -60,7 +60,7 @@ describe('world-travel dev helpers', () => {
     });
 
     it('resetCurrentMap returns to the start node', () => {
-        const store = createAppStore();
+        const store = createAppStore({ overrides: { world: createStartingWorld('fishing-village') } });
         const start = store.getState().world.currentMap.currentNode;
         const target = listNodes(store.getState()).find((n) => !n.isCurrent)!;
         jumpToNode(store, target.id);
@@ -69,7 +69,7 @@ describe('world-travel dev helpers', () => {
     });
 
     it('completeCurrentMap stamps completion and unlocks the next locked map', () => {
-        const store = createAppStore();
+        const store = createAppStore({ overrides: { world: createStartingWorld('fishing-village') } });
         const before = store.getState().world.currentContinent;
         const nextLocked = before.lockedMaps[0];
         expect(completeCurrentMap(store)).toBe(nextLocked);

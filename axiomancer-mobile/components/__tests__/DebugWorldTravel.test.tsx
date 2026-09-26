@@ -9,6 +9,8 @@
  *   - RESET MAP returns to the start node (historic testID kept)
  *   - COMPLETE MAP unlocks the next map
  *   - An act button enters THE APORIA and pushes /labyrinth
+ *   - NEW GAME ON starts a fresh run on the chosen map in the active slot
+ *     (map revamp M3a: "start on any map")
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
@@ -19,6 +21,9 @@ import { getMapDefinition } from '@mechanics';
 import { DebugWorldTravel } from '@/components/DebugWorldTravel';
 import { listNodes } from '@/state/dev/world-travel';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
+import { SaveSlotsProvider } from '@/state/SaveSlotsProvider';
+import { createMemorySlotStore } from '@/state/persistence/memorySlotStore';
+import type { SaveSlotStore } from '@/state/persistence/saveSlots';
 import { createAppStore, type AppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 
@@ -33,7 +38,11 @@ afterEach(() => {
 });
 
 const makeStore = (): AppStore => createAppStore({ adapter: createMemoryAdapter() });
-const withProvider = (store: AppStore, child: React.ReactNode) => <GameStoreProvider store={store}>{child}</GameStoreProvider>;
+const withProvider = (store: AppStore, child: React.ReactNode, slots?: SaveSlotStore) => (
+    <GameStoreProvider store={store}>
+        <SaveSlotsProvider slots={slots}>{child}</SaveSlotsProvider>
+    </GameStoreProvider>
+);
 
 describe('DebugWorldTravel: DEV gate', () => {
     it('renders map chips, node chips, and the act buttons', () => {
@@ -105,5 +114,29 @@ describe('DebugWorldTravel: travel', () => {
         fireEvent.press(tree.getByTestId('debug-aporia-act1'));
         expect(store.getState().labyrinthUi.session?.actId).toBe('act1');
         expect(mockPush).toHaveBeenCalledWith('/labyrinth');
+    });
+
+    it('NEW GAME ON starts a fresh run on the chosen map, in the active slot', () => {
+        const store = makeStore();
+        const slots = createMemorySlotStore();
+        slots.selectSlot(2);
+        const tree = render(withProvider(store, <DebugWorldTravel />, slots));
+        const before = store.getState().runId;
+        fireEvent.press(tree.getByTestId('debug-new-game-on-caverns'));
+        const world = store.getState().world;
+        expect(world.currentMap.name).toBe('caverns');
+        expect(world.currentContinent.name).toBe('northern-continent');
+        expect(world.currentMap.currentNode).toBe(getMapDefinition('northern-continent', 'caverns').startingNode.id);
+        expect(store.getState().runId).not.toBe(before);
+        expect(slots.getActiveSlot()).toBe(2);
+        expect(mockPush).toHaveBeenCalledWith('/(tabs)/exploration');
+    });
+
+    it('offers every campaign map, marking the default start', () => {
+        const tree = render(withProvider(makeStore(), <DebugWorldTravel />));
+        for (const m of ['breakwater', 'fishing-village', 'northern-forest', 'caverns', 'the-capital']) {
+            expect(tree.queryByTestId(`debug-new-game-on-${m}`)).not.toBeNull();
+        }
+        expect(tree.queryByTestId('debug-new-game-on-aporia-colonnade')).toBeNull();
     });
 });

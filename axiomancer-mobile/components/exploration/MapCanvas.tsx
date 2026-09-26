@@ -480,8 +480,14 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
                 </Animated.View>
             </GestureDetector>
 
-            {/* Viewport-fixed chart furniture — never pans with the map */}
+            {/* Viewport-fixed chart furniture — never pans with the map.
+                Sized explicitly: an SVG with no width/height falls back to
+                300×150 on web, which drew this vignette as a dark box in the
+                chart's top-left corner (invisible under the dim atmosphere
+                plates; plain over the Act 1 plates, map revamp M3a). */}
             <Svg
+                width="100%"
+                height="100%"
                 style={StyleSheet.absoluteFillObject}
                 pointerEvents="none"
                 testID="map-vignette"

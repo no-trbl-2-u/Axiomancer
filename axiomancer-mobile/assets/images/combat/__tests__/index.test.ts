@@ -1,9 +1,10 @@
 /**
  * Combat arena backdrop resolver — phase 83 (one rule), extended in phases 101
  * and 103. Mirrors `assets/images/maps/__tests__/index.test.ts`'s coverage of
- * `mapBackdropFor`: same region-keyed-with-fallback shape. Six of the seven
- * live regions have a plate of their own; `AWAITING_PLATE` below names the
- * seventh and the assertions here pin that count in both directions.
+ * the retired `mapBackdropFor`: same region-keyed-with-fallback shape. Six of
+ * the eight live regions have a plate of their own; `AWAITING_PLATE` below
+ * names the other two and the assertions here pin that count in both
+ * directions.
  */
 
 import { describe, expect, it } from '@jest/globals';
@@ -44,7 +45,9 @@ const LIVE_REGIONS: readonly string[] = ALL_MAP_LAYOUTS.map((l) => l.region);
  * back that is not in it fails. So the day the forest plate ships, the case
  * goes red and points at this entry and at the comments that name it.
  */
-const AWAITING_PLATE: readonly string[] = ['Northern Forest'];
+// Map revamp M3a — the Breakwater (Act 1's coast) ships before its arena
+// plate; its fights fall back like the forest's until one is chosen.
+const AWAITING_PLATE: readonly string[] = ['Northern Forest', 'The Breakwater'];
 
 /** The live regions that are meant to have a plate of their own. */
 const PLATED_REGIONS: readonly string[] = LIVE_REGIONS.filter((r) => !AWAITING_PLATE.includes(r));
@@ -112,7 +115,8 @@ describe('arenaBackdropFor', () => {
         // Pinned as two numbers, not one: a dropped plate and a dropped map are
         // different failures and neither may hide behind the other.
         expect(PLATED_REGIONS).toHaveLength(6);
-        expect(LIVE_REGIONS).toHaveLength(7);
+        // Map revamp M3a added the Breakwater: 7 → 8 live regions.
+        expect(LIVE_REGIONS).toHaveLength(8);
     });
 
     it("matches the village on `sweetheart` alone, so the apostrophe cannot break it", () => {

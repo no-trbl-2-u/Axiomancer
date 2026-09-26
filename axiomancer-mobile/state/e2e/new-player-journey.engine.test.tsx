@@ -47,9 +47,9 @@ describe('integration: new player journey — fresh state through first encounte
         // - No pending events
         expect(state.event?.pending).toBeNull();
         
-        // - At starting node (fv-1)
+        // - At starting node (bw-1, the Breakwater's windmill — D27)
         if (state.world) {
-            expect(state.world.currentMap?.currentNode).toBe('fv-1');
+            expect(state.world.currentMap?.currentNode).toBe('bw-1');
         }
     });
 
@@ -57,7 +57,7 @@ describe('integration: new player journey — fresh state through first encounte
         const { store } = withAllProviders(<></>);
         
         // Confirm starting position
-        expect(store.getState().world?.currentMap?.currentNode).toBe('fv-1');
+        expect(store.getState().world?.currentMap?.currentNode).toBe('bw-1');
         
         // Get available moves from current node
         const initialAvailable = store.getState().world?.currentMap?.availableNodes || [];

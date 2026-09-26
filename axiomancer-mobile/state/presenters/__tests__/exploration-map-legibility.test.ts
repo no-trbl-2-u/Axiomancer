@@ -18,7 +18,7 @@
  */
 
 import { describe, it, expect } from '@jest/globals';
-import { getMapDefinition, forwardEdges } from '@mechanics';
+import { getMapDefinition, forwardEdges, createStartingWorld } from '@mechanics';
 
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import { createAppStore } from '@/state/store';
@@ -29,7 +29,7 @@ import {
     MAP_LEGEND_LEFT,
 } from '@/state/presenters/exploration.engine';
 
-const freshStore = () => createAppStore({ adapter: createMemoryAdapter() });
+const freshStore = () => createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
 
 // ---------------------------------------------------------------------------
 // D1 — SPENT IS NOT SEALED

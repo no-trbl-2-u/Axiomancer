@@ -233,6 +233,8 @@ export type {
 // ─── World ────────────────────────────────────────────────────────────────────
 export {
     MAP_REGISTRY, getMapDefinition, createMapState,
+    // Map revamp M3a — the new-game start (D27) and "start on any map" (dev tools).
+    createStartingWorld, STARTING_MAP, STARTABLE_MAPS,
     moveToNode,
     teleportToNode, placeOnNode, unblockMapRoute,
     applyDialogueChoice,
