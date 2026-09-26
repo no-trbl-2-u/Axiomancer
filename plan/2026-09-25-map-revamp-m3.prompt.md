@@ -23,6 +23,7 @@
 | M1: art | #383 | Open, stacked on #382. Four plates at `axiomancer-mobile/assets/images/maps/act1-{coast,forest,mountains,underworld}.webp` (2400×2400, D22), exported as `ACT1_PLATES`. **`act1-landmarks.json`** holds 73 landmark positions as plate fractions, 17–20 per plate. Also `act1-prompts.md`, provenance and art-catalog entries. |
 | M2: per-map sheet | #384 | Open, stacked on #383. `MapLayout.sheet: MapSheet` (`width`, `height`, `scale`, `backdrop`, `plateOpacity`, `chartTexture`) replaced the global `SPREAD` and the region-regex plate pick. The shipped maps use `legacySheet(plate)` and render pixel-identical. |
 | M3a: the Breakwater + new start | #385 | **Merged 2026-09-26** (2b289bb2). See §3a. |
+| M3b: the Charcoal Wood | (this PR) | Built 2026-09-26. See §3b. |
 
 **First act of the session:** get #382 → #383 → #384 merged, in order (the
 repo uses merge commits; auto-merge is disabled). Each PR's decisions-file
@@ -166,6 +167,54 @@ settled, so M3b–d copy it rather than re-derive it:
 - **Fixed on the way:** the map vignette SVG had no size and rendered as a
   dark 300×150 box on web (hidden under the dim atmosphere plates).
 - **Baseline:** re-stamped at `e2befb89`. The matrix did not move (stamp-only diff).
+
+## 3b. M3b — shipped state (2026-09-26), and the checklist M3c–d copy
+
+**The Charcoal Wood:** `charcoal-wood`, prefix `cw-`, 20 nodes on the 20 forest
+landmarks. Arrival over the river bridge on the west edge (cutscene), rings
+east and north, door at the carved stair cave (`cw-20`, travel to
+fishing-village until M3c re-points it). The Breakwater's `bw-18` now leads
+here. Engine: `Continents/Coastal-Village/charcoal-wood.ts`. Events:
+`CHARCOAL_WOOD_POOLS` in `MapEvents/content.ts`. Enemy pool: the northern
+forest's list, now the shared `NORTHERN_FOREST_POOL` const.
+
+Two things M3b found that M3c and M3d must not rediscover:
+
+- **Pin every fight's level.** The borrowed rosters are far above Act 1: the
+  northern forest's is level 9 and up, and so is most of the caverns'. An
+  unpinned or level-less encounter scales to `max(enemy.level, player.level)`,
+  so a level-2 player would meet a level-9 foe. M3b pins each encounter with
+  the payload's `level` (2 early, 3 late; `cwEncounterPool`). Keep the
+  mountains and underworld low too (about 3–4), and let
+  `charcoal-wood.engine.test.ts`'s level pin be the model. Fishing-village's
+  boss is level 3 (`FV_BOSS_LEVEL`) and still comes after all of Act 1: that
+  ordering is an open difficulty question, filed in `plan/AUDIT.md`, not
+  something a map PR settles.
+- **Inns only inside settlements.** `rest-shelter.engine.test.ts` (Phase 52b)
+  fails any `inn` outside a settlement, so wild rests are camps (`ncCampPool`).
+
+**Per-map checklist** (every file M3b touched, in order):
+
+1. Engine map `Continents/<Continent>/<map>.ts` (header comment with the ring
+   diagram), `maps.ts` name union, `map.registry.ts`, `nodeIdToMapName()` in
+   `encounter.ts`.
+2. `EnemiesByMap` entry sharing the borrowed pool's const in `enemy.library.ts`.
+3. Pools in `MapEvents/content.ts` (after the previous Act 1 map's block),
+   registered in `registerMapEventContent()`; re-point the previous map's door
+   (engine pool and its mobile layout node's description).
+4. Engine test `World/e2e/<map>.engine.test.ts` (copy the Charcoal Wood's);
+   update `breakwater.engine.test.ts` (locked-map list, `STARTABLE_MAPS`) and
+   `map-traversal.engine.test.ts` (registry list); update the previous map's
+   engine test door case.
+5. Mobile layout `state/exploration-maps/<map>.layout.ts` on `ACT1_SHEET_SIZE`,
+   registered in `index.ts`; add to `act1-layouts.test.ts` `ACT1_MAPS` and to
+   `branching-legibility.test.ts` `MAPS` (raise the rib total); add the region
+   to `AWAITING_PLATE` and bump the live-region count in
+   `assets/images/combat/__tests__/index.test.ts`.
+6. Story overview map-table row; this file's §0; tick the row in
+   `plan/steps/01_build_plan.md`.
+7. Gates: mechanics `verify`, mobile `verify`, root `npm test`, then
+   `baseline:regen` after committing (it refuses a dirty tree).
 
 ## 4. Definition of done, and who does what
 

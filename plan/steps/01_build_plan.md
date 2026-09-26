@@ -93,7 +93,7 @@ row. D26's name picks are already made (brief §1), so no row below needs T.
 `main`. If it isn't, skip the row this tick (they touch the same registry,
 event-pool and layout files).
 - [blocked: attended session building it 2026-09-26; its PR ticks this row and unblocks M3c] Phase M3b — The Charcoal Wood: Act 1 map 2 on the forest plate; the Breakwater's door leads here, this map's door to fishing-village. Then trigger the Android preview build (brief §2, M3b+).
-- [blocked: waits on Phase M3b's merge, 2026-09-26] Phase M3c — The Beacon Crags: Act 1 map 3 on the mountain plate, under `northern-continent` (the first cross-continent step in Act 1). The Charcoal Wood's door leads here; this map's door leads to fishing-village.
+- [ ] Phase M3c — The Beacon Crags: Act 1 map 3 on the mountain plate, under `northern-continent` (the first cross-continent step in Act 1). Requires M3b `[x]`. The Charcoal Wood's door (`cw-20`, the stair cave) leads here; this map's door leads to fishing-village. Copy M3b's pattern (brief §3b).
 - [ ] Phase M3d — The Lantern Deep: Act 1 map 4 on the underworld plate, under `northern-continent`. Requires M3c `[x]`. The Beacon Crags' door leads here; this map's door leads to fishing-village. Halo the node marks (densest, darkest plate) and check with `verify:visual`.
 - [ ] Phase M4 — The Labyrinth door (D24): the Lantern Deep's `vault-door` node enters the Aporia through `enterLabyrinthAction`'s snapshot and return path, with a hermetic enter/return/resume test. Requires M3d `[x]`.
 - [ ] Phase M5 — Map docs: rewrite `docs/world.md`'s stale sections and `skills/forge.md`'s column-layering line for D16's shape and `MapSheet`. Requires M3d `[x]`; may ride with M4.
