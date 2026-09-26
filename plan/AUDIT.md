@@ -75,29 +75,6 @@
   them (`npcs:` on the map, dialogue via `content-curator`) and point
   `quest-giver-reachable` at the default start.
 
-### [tests] No Playwright journey walks a map node to node — the Breakwater was walked by a throwaway script
-- category: tests
-- impact: 5
-- ease: 6
-- detail: filed 2026-09-26 (M3a residue). Every browser journey arms its
-  screen from a dev button (`debug-trigger-*`) or a fixture, so nothing proves
-  that tapping a node, confirming, playing out what the node opens, and
-  landing back on the map works across node types. An attended session walked
-  the Breakwater with a scratch script: new game, windmill rest, first relic,
-  bw-5 cache, bw-4 gather, bw-7 cache, bw-11 gather, bw-14 fight (played to
-  defeat by ending phases), back to a new run at the windmill; no page errors.
-  What the script needed: nodes off a phone viewport are clicked through the
-  DOM (the camera would need panning); a new game's `/item-reward` needs
-  `item-reward-confirm`; the hazard board shows a coach (`hazard-tutorial-skip`)
-  and PLAY stays disabled until a card is dragged in (the drag loop hung, so
-  that walk skipped hazards). The M3a harness fix for the new start
-  (`exploration-combat-roundtrip-e2e.mjs` playing out a rest arrival) was the
-  first CI sign the start had moved.
-- next: add `scripts/map-walk-e2e.mjs` (a node-to-node walk of the start map,
-  cache/gather/fight at least, hazard via `hazard-e2e.mjs`'s drag helpers) and
-  register it in `scripts/ci-e2e-scope` for `exploration-maps/**` and
-  `src/World/**`.
-
 ### [debt] Source comments still name the retired `/deck-tuning` loop (2026-09-25)
 - category: debt
 - impact: 2
@@ -1397,6 +1374,17 @@ present. Row stays open until that session runs.
   a flow that is otherwise working.
 
 ## Done
+
+### [x] [tests] No Playwright journey walked a map node to node — RESOLVED 2026-09-26
+- filed 2026-09-26 (M3a residue; an attended session had walked the
+  Breakwater with a throwaway script). `axiomancer-mobile/scripts/
+  map-walk-e2e.mjs` (`npm run e2e:map-walk`) now plays a new game node to
+  node: the windmill arrival scene, the first relic, the bw-5 cache, the bw-4
+  gathering, the bw-6 fight on the black scene played to its end (a defeat
+  restarts the run at the windmill), and lands on the bw-3 hazard intro
+  (playing the board stays `hazard-e2e.mjs`'s). It runs in `verify-mobile`
+  with the encounter suite, which `src/World/**` and the map layouts already
+  select. Moved here per D9.
 
 ### [x] T's calls on the Breakwater and the Charcoal Wood — RESOLVED 2026-09-26
 - filed 2026-09-26 (M3a and M3b residue): the Breakwater's five agent calls

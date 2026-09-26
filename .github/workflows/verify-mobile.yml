@@ -231,3 +231,12 @@ jobs:
         run: npm run e2e:exploration-roundtrip --workspace axiomancer-mobile
         env:
           ROUNDTRIP_E2E_REUSE_EXPORT: '1'
+
+      # A new game walked node to node on the start map: arrival, cache,
+      # gathering, a fight to its end, and the hazard route. World/** and the
+      # map layouts both select the encounter suite (or the full one).
+      - name: Map walk (new game, node to node)
+        if: steps.scope.outputs.encounters == 'true'
+        run: npm run e2e:map-walk --workspace axiomancer-mobile
+        env:
+          MAP_WALK_E2E_REUSE_EXPORT: '1'

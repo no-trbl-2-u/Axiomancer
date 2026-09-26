@@ -32,6 +32,12 @@ test('dev-tools leaves and helpers select the journeys they can launch', () => {
     assert.equal(rewards.hazard, false)
 })
 
+test('the map walk script selects the encounter suite it runs with', () => {
+    const result = classify('mobile', ['axiomancer-mobile/scripts/map-walk-e2e.mjs'])
+    assert.equal(result.encounters, true)
+    assert.equal(result.full, false)
+})
+
 test('mixed mobile subsystems select the union', () => {
     const result = classify('mobile', [
         'axiomancer-mobile/components/hazard/HazardCard.tsx',
