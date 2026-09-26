@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useContext } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import { FONTS } from '@/theme/axm';
@@ -6,6 +6,7 @@ import { makeStyles, usePalette } from '@/theme/runtime';
 import { NodeMark } from '@/components/NodeMark';
 import { ActionIcon } from '@/components/ActionIcon';
 import { useTooltip } from '@/hooks/useTooltip';
+import { MapSheetContext } from './mapSheetContext';
 import {
     ACTION_ICON_BY_TYPE,
     type ExplorationNode as ExplorationNodeType,
@@ -32,7 +33,7 @@ interface ExplorationNodeProps {
 // Visual-audit 2026-06: larger, more-defined nodes. The wrap is centred
 // exactly on (n.x, n.y) via a percentage position + a half-node negative
 // margin (px), so centring is correct regardless of the canvas size the
-// map is spread across (see MapCanvas SPREAD).
+// map is spread across (see MapCanvas's per-sheet scale).
 export const NODE_SIZE = 44;
 
 export function ExplorationNode({ node: n, onNodePress, isSelected }: ExplorationNodeProps) {
@@ -51,6 +52,7 @@ export function ExplorationNode({ node: n, onNodePress, isSelected }: Exploratio
         village: AXM.sulfur,
     };
     const tooltip = useTooltip();
+    const sheet = useContext(MapSheetContext);
     const ref = useRef<View | null>(null);
     const color = EVENT_COLOR[n.type] ?? EVENT_COLOR.encounter;
 
@@ -72,8 +74,8 @@ export function ExplorationNode({ node: n, onNodePress, isSelected }: Exploratio
     }, [n.kind, pulseOpacity]);
     const pulseStyle = useAnimatedStyle(() => ({ opacity: pulseOpacity.value }));
     const iconKey = ACTION_ICON_BY_TYPE[n.type] ?? 'sword';
-    const left = (n.x / 360) * 100;
-    const top = (n.y / 400) * 100;
+    const left = (n.x / sheet.width) * 100;
+    const top = (n.y / sheet.height) * 100;
     const dim = n.kind === 'locked';
     // Adjacent (reachable) nodes show a kind glyph so the player can see what
     // each one is before choosing it.

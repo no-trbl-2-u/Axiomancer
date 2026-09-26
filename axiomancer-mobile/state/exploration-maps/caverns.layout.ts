@@ -1,3 +1,5 @@
+import { MAP_PLATES } from '@/assets/images/maps';
+import { legacySheet } from './sheet';
 import type { MapLayout } from './types';
 
 /**
@@ -14,6 +16,7 @@ export const cavernsLayout: MapLayout = {
     region: 'The Caverns',
     // Ordinal only — no node/path count (CRITIQUE pass 19).
     regionProgress: 'Map i of v',
+    sheet: legacySheet(MAP_PLATES.thePit),
     nodes: [
         // ── c0 — the mouth of the dark ──
         { id: 'nc-1',  x: 180, y: 375, label: 'The Cave Mouth', description: 'Daylight ends a few steps in. It does not argue.' },

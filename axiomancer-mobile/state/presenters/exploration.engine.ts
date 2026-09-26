@@ -14,6 +14,8 @@ import { getMapDefinition, getNodePrimaryEventKind, getNodeEventPool, legalMoves
 
 import { readCurrentNodeId } from '../actions';
 import { getMapLayout } from '@/state/exploration-maps';
+import type { MapSheet } from '@/state/exploration-maps';
+import { FALLBACK_SHEET, LEGACY_SHEET_SIZE } from '@/state/exploration-maps/sheet';
 import { freezeViewModel } from './freeze';
 
 export type NodeKind = 'completed' | 'current' | 'available' | 'locked';
@@ -32,7 +34,7 @@ export type NodeType =
 export interface ExplorationNode {
     /** Stable engine node ID. */
     id: string;
-    /** Pixel position on the canonical 360×400 viewBox. */
+    /** Position on the map's sheet (`ExplorationViewModel.sheet`), in sheet units. */
     x: number;
     y: number;
     kind: NodeKind;
@@ -81,7 +83,7 @@ export interface ExplorationAction {
  * League indicator for the WHITHER, PILGRIM? step-cards — three buckets
  * (I = closest, II = middle, III = farthest). Pure presenter derivation
  * from Euclidean distance between the current node and the option node
- * on the canonical 360×400 viewBox. Ported from the prototype's
+ * on the map's sheet, normalised to legacy units. Ported from the prototype's
  * `StepCardClickable` (see `prototype.jsx:184-208` in the Claude Design
  * handoff — every step-card carries a `leagues` glyph on its right).
  */
@@ -103,6 +105,8 @@ export interface ExplorationViewModel {
     region: string;
     /** Localised "Map ii of vii" string. */
     regionProgress: string;
+    /** The sheet the map is drawn on: canvas size, scale and plate (map revamp M2). */
+    sheet: MapSheet;
     /** Engine map id (used to drive map transitions). */
     mapId: string;
     /** Engine node id of the player's current location. */
@@ -356,7 +360,8 @@ function buildEdges(
 }
 
 /**
- * Bucket an Euclidean distance (in 360×400 viewBox pixels) into a
+ * Bucket an Euclidean distance (in legacy 360×400 viewBox units — callers
+ * normalise other sheets first, see `buildOptions`) into a
  * three-band league indicator. Cutoffs are calibrated against the
  * canonical layout fixtures — most "next step" hops sit in the 40-140
  * range, so 80 / 160 gives a roughly even three-way split across the
@@ -374,7 +379,12 @@ function buildOptions(
     orderById: ReadonlyMap<string, number>,
     reachable: readonly string[],
     currentNodeId: string,
+    sheet: MapSheet,
 ): ExplorationOption[] {
+    // Leagues are calibrated on the legacy sheet. Measure in rendered device
+    // px, then express that in legacy units, so the same on-screen hop reads
+    // the same league on any sheet (M2: sheets now differ per map).
+    const toLegacyUnits = sheet.scale / LEGACY_SHEET_SIZE.scale;
     const current = metaById.get(currentNodeId) ?? null;
     return reachable
         // Don't offer the node the player is standing on (reusable encounter
@@ -384,7 +394,7 @@ function buildOptions(
         .map((id) => {
             const n = metaById.get(id)!;
             const distance =
-                current === null ? 0 : Math.hypot(n.x - current.x, n.y - current.y);
+                current === null ? 0 : Math.hypot(n.x - current.x, n.y - current.y) * toLegacyUnits;
             return {
                 nodeId: id,
                 label: n.label,
@@ -455,6 +465,7 @@ const FALLBACK_VM: ExplorationViewModel = {
     continent: 'CONTINENT · UNKNOWN',
     region: '—',
     regionProgress: '',
+    sheet: FALLBACK_SHEET,
     mapId: '',
     currentNodeId: '',
     startNodePending: false,
@@ -525,6 +536,7 @@ function computeExplorationViewModel(state: GameStore): ExplorationViewModel {
             ...FALLBACK_VM,
             continent: layout.continent,
             region: layout.region,
+            sheet: layout.sheet,
             mapId: mapName,
             currentNodeId: readCurrentNodeId(world),
             startNodePending: false,
@@ -558,8 +570,8 @@ function computeExplorationViewModel(state: GameStore): ExplorationViewModel {
     for (const eng of def.nodes) {
         const lay = layoutById.get(eng.id);
         metaById.set(eng.id, {
-            x: lay?.x ?? 180,
-            y: lay?.y ?? 200,
+            x: lay?.x ?? layout.sheet.width / 2,
+            y: lay?.y ?? layout.sheet.height / 2,
             label: lay?.label ?? eng.id,
             description: lay?.description ?? '',
             type: engineNodeType(continent, mapName, eng.id),
@@ -618,7 +630,7 @@ function computeExplorationViewModel(state: GameStore): ExplorationViewModel {
         && !consumedNodes.includes(currentNodeId)
         && getNodeEventPool(continent, mapName, currentNodeId) !== undefined;
 
-    const options = buildOptions(metaById, orderById, reachable, currentNodeId);
+    const options = buildOptions(metaById, orderById, reachable, currentNodeId, layout.sheet);
     const actions = buildActions(options);
     const edges = buildEdges(def.nodes, forward, spent, locked);
 
@@ -626,6 +638,7 @@ function computeExplorationViewModel(state: GameStore): ExplorationViewModel {
         continent: layout.continent,
         region: layout.region,
         regionProgress: layout.regionProgress,
+        sheet: layout.sheet,
         mapId: mapName,
         currentNodeId,
         startNodePending,

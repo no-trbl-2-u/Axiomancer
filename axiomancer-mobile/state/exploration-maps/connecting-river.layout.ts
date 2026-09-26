@@ -1,3 +1,5 @@
+import { MAP_PLATES } from '@/assets/images/maps';
+import { legacySheet } from './sheet';
 import type { MapLayout } from './types';
 
 /**
@@ -13,6 +15,7 @@ export const connectingRiverLayout: MapLayout = {
     region: 'The Connecting River',
     // Ordinal only — no node/path count (CRITIQUE pass 19).
     regionProgress: 'Map iii of v',
+    sheet: legacySheet(MAP_PLATES.charonCrossing),
     nodes: [
         // ── c0 — the current takes the boat ──
         { id: 'cr-1',  x: 180, y: 375, label: 'The Launch', description: 'The current takes the boat before the bank lets go of it.' },

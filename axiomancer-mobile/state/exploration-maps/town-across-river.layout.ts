@@ -1,3 +1,5 @@
+import { MAP_PLATES } from '@/assets/images/maps';
+import { legacySheet } from './sheet';
 import type { MapLayout } from './types';
 
 /**
@@ -13,6 +15,7 @@ export const townAcrossRiverLayout: MapLayout = {
     region: 'The Sweetheart\'s Village',
     // Ordinal only — no node/path count (CRITIQUE pass 19).
     regionProgress: 'Map iv of v',
+    sheet: legacySheet(MAP_PLATES.wentworthStreet),
     nodes: [
         // ── c0 — the far bank rises into a town ──
         { id: 'tar-1', x: 180, y: 375, label: 'The Far Bank', description: 'The far bank rises into a town smaller than the city, kinder than the caverns.' },

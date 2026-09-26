@@ -1,3 +1,5 @@
+import { MAP_PLATES } from '@/assets/images/maps';
+import { legacySheet } from './sheet';
 import type { MapLayout } from './types';
 
 /**
@@ -12,6 +14,7 @@ export const theCapitalLayout: MapLayout = {
     region: 'The Capital',
     // Ordinal only — no node/path count (CRITIQUE pass 19).
     regionProgress: 'Map v of v',
+    sheet: legacySheet(MAP_PLATES.ludgateHill),
     nodes: [
         // ── c0 — the ribbon-road ends at the wall ──
         { id: 'cap-1', x: 180, y: 375, label: 'The Wall', description: 'A wall tall enough to lose the sky behind. Every gate has a line.' },
