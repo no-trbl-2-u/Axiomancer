@@ -58,7 +58,7 @@
 
 ## Pending
 
-### [gap] The Breakwater (Act 1 coast, M3a #385) — four agent calls to confirm [needs-user-call]
+### [gap] The Breakwater (Act 1 coast, M3a #385) — five agent calls to confirm [needs-user-call]
 - category: gap
 - impact: 5
 - ease: 9
@@ -72,6 +72,24 @@
   fallback arena.
   (4) **Name overlap.** Fishing-village's own text also has "the breakwater"
   (its King of Revenge "rises from the breakwater").
+  (5) **No NPCs, and the first one is now a map away** (added by
+  `/adjust-npcs` pass 19, 2026-09-26). The Breakwater stages `npcs: []`,
+  which trips the steward's "map with fewer than 2 staged NPCs → CREATE"
+  signal. It isn't shipped here because D29 says no new NPCs in the map PRs
+  and the story overview lists "What happens here" for the Breakwater as
+  open. Hard rule 3 applies too: no inventing a named character alone.
+  The cost is real, though. Since D27 a new game meets its first NPC and
+  its first quest (Old Marrow's starting quest, Phase 53c) only after
+  crossing the whole Breakwater and its bridge into fishing-village.
+  `quest-giver-reachable.engine.test.ts` now pins
+  `startMap: 'fishing-village'`, so nothing checks the default start.
+  KB: guided first play reads as "essential, not optional" (Spirit
+  Island, Aeon's End, Arkham Horror LCG onboarding rows). Options for T:
+  (a) accept it until the story-dependent revamp (D1 step 4);
+  (b) stage 1–2 existing fishing-village NPCs on the Breakwater instead
+  (Old Marrow is the obvious one, and it is a staging-only move);
+  (c) have a `story-spec`/`character-spec` session author the Breakwater's
+  own people.
   Details: `plan/2026-09-25-map-revamp-m3.prompt.md` §3a.
 - next: `/oversight` or the M3b session (it opens with T anyway for the
   forest's name, D26). Record any change as a D-number.

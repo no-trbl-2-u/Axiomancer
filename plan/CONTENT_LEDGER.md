@@ -20,11 +20,54 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-25 | 4d21e8ee | 19 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-25 | be37a6a3 | 19 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-26 | 2b289bb2 | 19 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-25 | 1d5f4bcc | 18 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-26 | 27bd4d2d | 19 |
 
 ## Log
 
 ```
+> **[adjust-npcs pass 19, 2026-09-26, commit 27bd4d2d]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE. One new finding, filed rather than shipped.
+> `/march` dispatched this through Step 3b. `npcs` (`1d5f4bcc`, 86 commits
+> behind HEAD `27bd4d2d`) was the stalest qualifying category. Deploy
+> green (verify-mechanics and verify-mobile both passed at `27bd4d2d`).
+> There were no `[ ]` phase rows. The growth floor was clear (`dd204684`
+> touched `src/World` today). Critique wasn't due: 10 commits, under 24h
+> since pass 53.
+>
+> **Step 1 audit, run fresh.** Six commits since pass 18 touch the NPC
+> surface. Four are trim T2a–T5 (barrel/export cleanup; NPC content itself
+> is unchanged). The other two are map revamp M3a (`dd204684`, `db6af24b`),
+> which added **the Breakwater**, now the new-game start (D27), with
+> `npcs: []`. Every other signal matches pass 18: 21 staged NPCs, none
+> orphaned, no flat `DialogueMap` NPCs (the three `dialogue: {` hits are
+> map-event payloads), no `teachCard` in NPC content. Coastal-Village's
+> 3-NPC `unstagedNpcs` backlog is still blocked on `openShop`, and the
+> three Northern-Continent 1-NPC maps are still behind the story-overview
+> open question (6) `[gap]` row.
+>
+> **The new finding: the Breakwater has 0 staged NPCs.** It trips "map
+> with fewer than 2 staged NPCs → CREATE". It was not built here, because
+> T's D29 (`plan/2026-09-25-refactor-strategy.decisions.md`) rules "No
+> new enemies, NPCs or events in the map PRs … New content waits for the
+> story-dependent revamp". The story overview also marks "What happens
+> here" as open, and hard rule 3 applies. D29 sends gaps like this to
+> this steward to *file*, so it went into the existing Breakwater
+> `[needs-user-call]` row in `plan/AUDIT.md` as call (5). The row also
+> notes the knock-on effect: a new game now reaches its first NPC and
+> quest (Old Marrow, Phase 53c) only after the whole map, and the
+> reachability test pins `startMap: 'fishing-village'`. It offers three
+> options, including staging an existing NPC, a staging-only move. The
+> M3b session with T is the natural place to decide.
+>
+> **KB run** (for the filing's receipts; there was no CREATE/UPDATE to
+> gate). `kb_search` found no dialogue- or start-town-NPC prior art (an
+> expected miss for this corpus; no wishlist filed, since the filing
+> stands without it). It did find onboarding rows treating guided first
+> play as essential (Spirit Island, Aeon's End, Arkham Horror LCG).
+>
+> No code changed, so the verify gate wasn't needed; deploy:check runs
+> after push.
+
 > **[adjust-keywords pass 19, 2026-09-26, commit 2b289bb2]** Zero-CREATE,
 > 4 UPDATE, zero-REMOVE. `/march` dispatched this pass through the
 > content-lifecycle gate (Step 3b). All five categories were past the
