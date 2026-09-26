@@ -225,7 +225,11 @@ nodes.
   M0–M5; opens with a four-question owner ballot). **Ballot answered
   2026-09-25 as D21–D24.** M0's CI gap was already closed on 2026-08-22
   (`plan/AUDIT.md` contract row, RESOLVED): all of `src/World/**` runs the
-  mobile gate. M0 only adds a pin for the mobile-owned side.
+  mobile gate. M0 only adds a pin for the mobile-owned side. M0 #382, M1
+  #383 and M2 #384 opened 2026-09-25 (stacked in that order). **Next:**
+  `plan/2026-09-25-map-revamp-m3.prompt.md` (the four new maps, the
+  Labyrinth door and docs; opens with a four-question ballot on names, start
+  map, engine home and enemy pools).
 - Backdrop-anchored map renderer (D15) — nodes in image coordinates,
   art pans/zooms with the node layer. Its own phase, after D2 — or folded
   into D2, since D16's per-map canvas is the same change.
