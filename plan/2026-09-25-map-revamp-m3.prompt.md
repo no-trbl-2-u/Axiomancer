@@ -23,7 +23,8 @@
 | M1: art | #383 | Open, stacked on #382. Four plates at `axiomancer-mobile/assets/images/maps/act1-{coast,forest,mountains,underworld}.webp` (2400×2400, D22), exported as `ACT1_PLATES`. **`act1-landmarks.json`** holds 73 landmark positions as plate fractions, 17–20 per plate. Also `act1-prompts.md`, provenance and art-catalog entries. |
 | M2: per-map sheet | #384 | Open, stacked on #383. `MapLayout.sheet: MapSheet` (`width`, `height`, `scale`, `backdrop`, `plateOpacity`, `chartTexture`) replaced the global `SPREAD` and the region-regex plate pick. The shipped maps use `legacySheet(plate)` and render pixel-identical. |
 | M3a: the Breakwater + new start | #385 | **Merged 2026-09-26** (2b289bb2). See §3a. |
-| M3b: the Charcoal Wood | #389 | Built 2026-09-26. See §3b. |
+| M3b: the Charcoal Wood | #389 | Merged 2026-09-26. See §3b. |
+| M3c: the Beacon Crags | (this PR) | Built 2026-09-26 by the loop. See §3c. |
 
 **First act of the session:** get #382 → #383 → #384 merged, in order (the
 repo uses merge commits; auto-merge is disabled). Each PR's decisions-file
@@ -215,6 +216,34 @@ Two things M3b found that M3c and M3d must not rediscover:
    `plan/steps/01_build_plan.md`.
 7. Gates: mechanics `verify`, mobile `verify`, root `npm test`, then
    `baseline:regen` after committing (it refuses a dirty tree).
+
+## 3c. M3c — shipped state (2026-09-26)
+
+**The Beacon Crags:** `beacon-crags`, prefix `bc-`, 17 nodes on the 17
+mountain landmarks, under `northern-continent` (D28). Engine:
+`Continents/Northern-Continent/beacon-crags.ts`. The Charcoal Wood's stair
+cave (`cw-20`) now travels here: the cross-continent step is a plain `travel`
+payload with `destinationContinent: 'northern-continent'`, the same shape as
+the shipped `nf-10` → caverns door, so nothing new was needed. The stair comes
+up on the crag road (`bc-1`, the top pass, arrival cutscene); the map runs
+down the mountain in three lanes (west, middle, east) and closes on the glacier
+shrine (`bc-17`, a stair down into the ice: travel to fishing-village until M3d
+re-points it). Events: `BEACON_CRAGS_POOLS` in `MapEvents/content.ts`, built
+from the caverns' camp, iron, hazard and loot builders and M3b's pinned
+`cwEncounterPool`. Enemy pool: the caverns' list, now the shared
+`CAVERNS_POOL` const (M3d borrows it too).
+
+- **Levels:** fights pinned 3 on the upper mountain, 4 below the gorge
+  (`beacon-crags.engine.test.ts`). Still above fishing-village's level-3 boss
+  that comes later: the ordering question stays the one filed in AUDIT.
+- **Rests:** all camps. The shepherds' village is a fold, not an inn, so the
+  52b inn census did not move. The mountain inn is shut (you sleep in the cart).
+- **Why the top pass, not the tunnel bridge, is the entry:** the tunnel bridge
+  sits at y 0.88, and the D16 pin fails any entry below 0.8. The mine
+  entrance (right edge) was the other candidate; the top pass lets every
+  band span the plate's full width, and no drawn edge crosses another.
+- **For M3d:** the Lantern Deep's arrival is the glacier shrine's stair, so an
+  entry near the top or left of the underworld plate reads as the same stair.
 
 ## 4. Definition of done, and who does what
 
