@@ -11,12 +11,18 @@ import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import { Splatter } from '@/components/Splatter';
 import type { ExplorationNode, ExplorationEdge } from '@/state/presenters/exploration.engine';
+import type { MapSheet } from '@/state/exploration-maps';
+import { LEGACY_SHEET_SIZE } from '@/state/exploration-maps/sheet';
+import { MapSheetContext, type SheetSize } from './mapSheetContext';
 
 interface MapCanvasProps {
     nodes: readonly ExplorationNode[];
     edges: readonly ExplorationEdge[];
-    /** Engraving plate rendered dimmed under the chart (see assets/images/maps). */
-    backdrop?: number | null;
+    /**
+     * The map's sheet: canvas size, scale, plate and plate opacity (map revamp
+     * M2). Omitted, the canvas uses the legacy 360×400 ×2.6 size with no plate.
+     */
+    sheet?: MapSheet | null;
     /**
      * Viewport-fixed chart furniture (legend, compass copy, sheet label) —
      * rendered as a sibling of the vignette/compass SVGs, NOT inside the
@@ -29,13 +35,15 @@ interface MapCanvasProps {
     children: React.ReactNode;
 }
 
-// The engine packs node coordinates into a 360×400 space; rendered 1:1
-// the nodes overlap and labels collide. We spread them across a larger
-// pannable canvas (SPREAD×) so each node has breathing room — the window
-// clips to a viewport the user pans/zooms around. (Visual-audit 2026-06.)
-export const SPREAD = 2.6;
-const CANVAS_W = 360 * SPREAD;
-const CANVAS_H = 400 * SPREAD;
+// Node coordinates live on the map's sheet (`MapSheet`), rendered `scale`x
+// into a larger pannable canvas so each node has breathing room — the window
+// clips to a viewport the user pans/zooms around. (Visual-audit 2026-06; the
+// one global SPREAD became a per-sheet scale in map revamp M2.)
+
+/** The canvas size in device px for a sheet at 1x zoom. */
+export function canvasSizeOf(size: SheetSize): { w: number; h: number } {
+    return { w: size.width * size.scale, h: size.height * size.scale };
+}
 
 const MIN_SCALE = 0.6;
 const MAX_SCALE = 3;
@@ -98,14 +106,16 @@ interface FocusTransform { scale: number; tx: number; ty: number; }
 export function computeFocusTransform(
     nodes: readonly ExplorationNode[],
     viewport: { w: number; h: number },
+    size: SheetSize = LEGACY_SHEET_SIZE,
 ): FocusTransform {
     const focus = nodes.filter((n) => n.kind === 'available' || n.kind === 'current');
     if (focus.length === 0) {
-        return { scale: 1, tx: (viewport.w - CANVAS_W) / 2, ty: (viewport.h - CANVAS_H) / 2 };
+        const canvas = canvasSizeOf(size);
+        return { scale: 1, tx: (viewport.w - canvas.w) / 2, ty: (viewport.h - canvas.h) / 2 };
     }
 
-    const xs = focus.map((n) => n.x * SPREAD);
-    const ys = focus.map((n) => n.y * SPREAD);
+    const xs = focus.map((n) => n.x * size.scale);
+    const ys = focus.map((n) => n.y * size.scale);
     const minX = Math.min(...xs);
     const maxX = Math.max(...xs);
     const minY = Math.min(...ys);
@@ -191,17 +201,21 @@ export function edgeStroke(e: ExplorationEdge, AXM: EdgePalette): EdgeStroke {
 // swapped for real backdrop art at Phase V5 (procedural stays as the
 // fallback).
 const HATCH_STEP = 18;
-const HATCH_LINES: readonly string[] = (() => {
+
+/**
+ * 45° hatch lines across a sheet: sweep the x-intercept from -height (a line
+ * entering from the left edge) to width. On the legacy 360×400 sheet this is
+ * the original fixed set.
+ */
+export function hatchLines(width: number, height: number): string[] {
     const lines: string[] = [];
-    // 45° lines across the 360×400 sheet: sweep the x-intercept from
-    // -400 (line entering from the left edge) to 360.
-    for (let x0 = -400; x0 <= 360; x0 += HATCH_STEP) {
-        lines.push(`M ${x0} 0 L ${x0 + 400} 400`);
+    for (let x0 = -height; x0 <= width; x0 += HATCH_STEP) {
+        lines.push(`M ${x0} 0 L ${x0 + height} ${height}`);
     }
     return lines;
-})();
+}
 
-/** Nested contour rings — hand-authored cartographic hills. */
+/** Nested contour rings — hand-authored cartographic hills, on the legacy 360×400 sheet. */
 const CONTOUR_GROUPS: readonly string[][] = [
     [
         'M40 250 q 20 -22 44 -10 q 12 14 -10 20 q -26 4 -34 -10 z',
@@ -216,9 +230,13 @@ const CONTOUR_GROUPS: readonly string[][] = [
     ],
 ];
 
-export function MapCanvas({ nodes, edges, backdrop, overlays, children }: MapCanvasProps) {
+export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvasProps) {
     const styles = useStyles();
     const AXM = usePalette();
+    const size: SheetSize = sheet ?? LEGACY_SHEET_SIZE;
+    const canvas = canvasSizeOf(size);
+    const chartTexture = sheet?.chartTexture ?? true;
+    const hatch = React.useMemo(() => hatchLines(size.width, size.height), [size.width, size.height]);
     const nodeById = React.useMemo(() => {
         const m = new Map<string, ExplorationNode>();
         for (const n of nodes) m.set(n.id, n);
@@ -306,8 +324,8 @@ export function MapCanvas({ nodes, edges, backdrop, overlays, children }: MapCan
      */
     const recenter = React.useCallback(() => {
         if (!viewport || nodes.length === 0) return;
-        commitCamera(computeFocusTransform(nodes, viewport));
-    }, [viewport, nodes, commitCamera]);
+        commitCamera(computeFocusTransform(nodes, viewport, size));
+    }, [viewport, nodes, size, commitCamera]);
 
     React.useEffect(() => {
         if (!viewport || nodes.length === 0) return;
@@ -335,12 +353,12 @@ export function MapCanvas({ nodes, edges, backdrop, overlays, children }: MapCan
         // that RESOLVED row's own text anticipated a re-fit would be wanted:
         // "a tap-to-pan affordance is separable follow-up if a future pass
         // still finds nodes going out of frame after a move."
-        commitCamera(computeFocusTransform(nodes, viewport));
+        commitCamera(computeFocusTransform(nodes, viewport, size));
         // `nodes` is deliberately NOT a dependency — it is a fresh array every
         // render, and depending on it would re-fit constantly, which is exactly
         // the defect issue #294 closed. `focusKey` is its stable projection.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [viewport, focusKey, commitCamera]);
+    }, [viewport, focusKey, size.width, size.height, size.scale, commitCamera]);
 
     const pinch = Gesture.Pinch()
         .onUpdate((e) => {
@@ -378,28 +396,48 @@ export function MapCanvas({ nodes, edges, backdrop, overlays, children }: MapCan
             <Splatter color={AXM.sulfur} size={130} seed={9} style={styles.sulfurSplatter} />
 
             <GestureDetector gesture={composed}>
-                <Animated.View testID="map-canvas" style={[styles.canvas, mapTransform]}>
+                <Animated.View
+                    testID="map-canvas"
+                    style={[styles.canvas, { width: canvas.w, height: canvas.h }, mapTransform]}
+                >
                     {/* The engraving plate — pans and zooms with the chart so the
-                        wood feels painted onto the page, dimmed so roads and
-                        nodes keep contrast (dim, never blur). */}
-                    {backdrop != null && (
+                        wood feels painted onto the page. An atmosphere plate is
+                        dimmed so roads and nodes keep contrast (dim, never blur);
+                        a plate that is the map itself reads near full (D15). */}
+                    {sheet != null && (
                         <Image
-                            source={backdrop}
-                            style={styles.backdropPlate}
+                            source={sheet.backdrop}
+                            style={[styles.backdropPlate, { opacity: sheet.plateOpacity }]}
                             contentFit="cover"
                             testID="map-backdrop"
                         />
                     )}
                     {/* SVG edges — drawn across the spread canvas */}
-                    <Svg viewBox="0 0 360 400" width={CANVAS_W} height={CANVAS_H} style={StyleSheet.absoluteFillObject}>
-                        {/* The chart sheet: diagonal hatch + contour hills under the roads */}
-                        <G stroke={AXM.parchment} strokeWidth={0.4} opacity={0.05}>
-                            {HATCH_LINES.map((d) => (
-                                <Path key={d} d={d} fill="none" />
-                            ))}
-                        </G>
-                        {CONTOUR_GROUPS.map((group, gi) => (
-                            <G key={gi} opacity={0.45} stroke={AXM.ash} strokeWidth={1} fill="none">
+                    <Svg
+                        viewBox={`0 0 ${size.width} ${size.height}`}
+                        width={canvas.w}
+                        height={canvas.h}
+                        style={StyleSheet.absoluteFillObject}
+                    >
+                        {/* The chart sheet: diagonal hatch + contour hills under the
+                            roads — only over an atmosphere plate, never over a plate
+                            that draws its own terrain. */}
+                        {chartTexture && (
+                            <G stroke={AXM.parchment} strokeWidth={0.4} opacity={0.05}>
+                                {hatch.map((d) => (
+                                    <Path key={d} d={d} fill="none" />
+                                ))}
+                            </G>
+                        )}
+                        {chartTexture && CONTOUR_GROUPS.map((group, gi) => (
+                            <G
+                                key={gi}
+                                opacity={0.45}
+                                stroke={AXM.ash}
+                                strokeWidth={1}
+                                fill="none"
+                                transform={`scale(${size.width / 360} ${size.height / 400})`}
+                            >
                                 {group.map((d) => (
                                     <Path key={d} d={d} />
                                 ))}
@@ -438,7 +476,7 @@ export function MapCanvas({ nodes, edges, backdrop, overlays, children }: MapCan
                         })}
                     </Svg>
 
-                    {children}
+                    <MapSheetContext.Provider value={size}>{children}</MapSheetContext.Provider>
                 </Animated.View>
             </GestureDetector>
 
@@ -512,8 +550,6 @@ const useStyles = makeStyles((AXM) => ({
         position: 'absolute',
         top: 0,
         left: 0,
-        width: CANVAS_W,
-        height: CANVAS_H,
         // `computeFocusTransform`'s tx/ty pivot the scale around the canvas's
         // own TOP-LEFT corner. The platform default pivots around the CENTER
         // instead, which is invisible whenever scale lands at 1 (desktop
@@ -569,6 +605,5 @@ const useStyles = makeStyles((AXM) => ({
     },
     backdropPlate: {
         ...StyleSheet.absoluteFillObject,
-        opacity: 0.2,
     },
 }));

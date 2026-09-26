@@ -1,5 +1,5 @@
 /**
- * Branching-graph legibility guard — can the 360x400 sheet actually CARRY
+ * Branching-graph legibility guard — can each map's sheet actually CARRY
  * the graph the engine authored?
  *
  * The parity guard next door answers "does every engine node have a
@@ -11,8 +11,8 @@
  * (46 roads to 46 roads + 14 ribs).
  *
  * A rib between two nodes that sit too close together is a line nobody can
- * see: the node glyph is 44 device px on a canvas spread SPREAD x wider than
- * this viewBox, so it covers `NODE_SIZE / SPREAD` viewBox units, and an edge
+ * see: the node glyph is 44 device px on a canvas spread `sheet.scale` x wider
+ * than the sheet, so it covers `NODE_SIZE / sheet.scale` sheet units, and an edge
  * shorter than that is entirely hidden under the two marks it joins. The
  * owner's finding was that the map does not read as branching; a rib drawn
  * under a node glyph is a branch that was authored and never shown.
@@ -25,21 +25,20 @@
 import { describe, it, expect } from '@jest/globals';
 import { getMapDefinition, forwardEdges } from '@mechanics';
 
-import { SPREAD } from '@/components/exploration/MapCanvas';
 import { NODE_SIZE } from '@/components/exploration/ExplorationNode';
 import { getMapLayout } from '../index';
 
-/** The canonical sheet every layout fixture is authored against. */
-const VIEWBOX = { w: 360, h: 400 };
-
 /**
- * How much of the sheet ONE node glyph covers, in viewBox units.
+ * How much of a map's sheet ONE node glyph covers, in sheet units.
  *
  * `<ExplorationNode>` draws a `NODE_SIZE`-px mark on `<MapCanvas>`'s spread
- * canvas, which is `SPREAD`x the viewBox — so the mark's footprint here is
- * the quotient. Two glyphs closer together than this overlap outright.
+ * canvas, which is `sheet.scale`x the sheet — so the mark's footprint here is
+ * the quotient. Two glyphs closer together than this overlap outright. Per
+ * map, because each layout declares its own sheet (map revamp M2).
  */
-const GLYPH_DIAMETER = NODE_SIZE / SPREAD;
+function glyphDiameter(mapId: string): number {
+    return NODE_SIZE / getMapLayout(mapId)!.sheet.scale;
+}
 
 const MAPS = [
     { mapId: 'fishing-village', continent: 'coastal-continent' },
@@ -101,19 +100,21 @@ describe('exploration map: the sheet can carry the branching graph', () => {
             it('keeps every node on the sheet', () => {
                 // A node outside the viewBox is only reachable by panning to a
                 // place nothing tells the player about.
-                for (const n of getMapLayout(mapId)!.nodes) {
+                const { nodes, sheet } = getMapLayout(mapId)!;
+                for (const n of nodes) {
                     expect(n.x).toBeGreaterThanOrEqual(0);
-                    expect(n.x).toBeLessThanOrEqual(VIEWBOX.w);
+                    expect(n.x).toBeLessThanOrEqual(sheet.width);
                     expect(n.y).toBeGreaterThanOrEqual(0);
-                    expect(n.y).toBeLessThanOrEqual(VIEWBOX.h);
+                    expect(n.y).toBeLessThanOrEqual(sheet.height);
                 }
             });
 
             it('draws no edge shorter than the glyphs at its ends', () => {
                 // The bar a branch has to clear to be a branch on screen.
+                const glyph = glyphDiameter(mapId);
                 const tooShort = drawnEdges(continent, mapId)
-                    .filter((e) => e.length <= GLYPH_DIAMETER)
-                    .map((e) => `${e.a}|${e.b} (${e.length.toFixed(1)} < ${GLYPH_DIAMETER.toFixed(1)})`);
+                    .filter((e) => e.length <= glyph)
+                    .map((e) => `${e.a}|${e.b} (${e.length.toFixed(1)} < ${glyph.toFixed(1)})`);
                 // Named, so a failure says WHICH pair sits on top of itself.
                 expect(tooShort).toEqual([]);
             });
@@ -126,7 +127,7 @@ describe('exploration map: the sheet can carry the branching graph', () => {
                 // means either the ribs were lost or the forward-skeleton
                 // read is wrong — both silent on screen.
                 expect(ribs.length).toBeGreaterThan(0);
-                for (const r of ribs) expect(r.length).toBeGreaterThan(GLYPH_DIAMETER);
+                for (const r of ribs) expect(r.length).toBeGreaterThan(glyphDiameter(mapId));
             });
         });
     }

@@ -1,3 +1,5 @@
+import { MAP_PLATES } from '@/assets/images/maps';
+import { legacySheet } from './sheet';
 import type { MapLayout } from './types';
 
 export const northernForestLayout: MapLayout = {
@@ -7,6 +9,7 @@ export const northernForestLayout: MapLayout = {
     // Ordinal only — no node/path count. The live count belongs to the map
     // legend, computed from MapDefinition (CRITIQUE pass 19).
     regionProgress: 'Map ii of ii',
+    sheet: legacySheet(MAP_PLATES.forestDark),
     nodes: [
         {
             id: 'nf-1',

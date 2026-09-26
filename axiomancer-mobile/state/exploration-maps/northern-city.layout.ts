@@ -1,3 +1,5 @@
+import { MAP_PLATES } from '@/assets/images/maps';
+import { legacySheet } from './sheet';
 import type { MapLayout } from './types';
 
 /**
@@ -15,6 +17,7 @@ export const northernCityLayout: MapLayout = {
     region: 'The Northern City',
     // Ordinal only — no node/path count (CRITIQUE pass 19).
     regionProgress: 'Map ii of v',
+    sheet: legacySheet(MAP_PLATES.ludgateHill),
     nodes: [
         // ── c0 — the gatehouse ──
         { id: 'ncy-1',  x: 180, y: 375, label: 'The Gatehouse', description: 'The stair ends in lamplight. The city starts at once.' },

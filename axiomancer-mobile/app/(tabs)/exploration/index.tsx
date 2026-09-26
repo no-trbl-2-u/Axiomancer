@@ -6,7 +6,6 @@ import { ScreenBg } from '@/components/ScreenBg';
 import { StatusCard } from '@/components/StatusCard';
 import { SectionLabel } from '@/components/SectionLabel';
 import { MapCanvas } from '@/components/exploration/MapCanvas';
-import { mapBackdropFor } from '@/assets/images/maps';
 import { NodeGrid } from '@/components/exploration/NodeGrid';
 import { NodeConfirmPanel } from '@/components/exploration/NodeConfirmPanel';
 import { EventBadge } from '@/components/exploration/EventBadge';
@@ -303,7 +302,7 @@ export default function ExplorationScreen() {
             {/* Node Graph */}
             {/* Legend/compass copy ride the `overlays` slot (viewport-fixed),
                 not `children` (the pannable canvas) — CRITIQUE pass 20. */}
-            <MapCanvas nodes={vm.nodes} edges={vm.edges} backdrop={mapBackdropFor(vm.region)} overlays={<MapOverlays legend={vm.legend} hint={showMapHint ? vm.drawerCopy.mapHint : null} />}>
+            <MapCanvas nodes={vm.nodes} edges={vm.edges} sheet={vm.sheet} overlays={<MapOverlays legend={vm.legend} hint={showMapHint ? vm.drawerCopy.mapHint : null} />}>
                 <NodeGrid
                     nodes={vm.nodes}
                     onNodePress={onNodePress}

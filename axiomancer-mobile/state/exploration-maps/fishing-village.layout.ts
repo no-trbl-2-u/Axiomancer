@@ -1,3 +1,5 @@
+import { MAP_PLATES } from '@/assets/images/maps';
+import { legacySheet } from './sheet';
 import type { MapLayout } from './types';
 
 export const fishingVillageLayout: MapLayout = {
@@ -15,6 +17,7 @@ export const fishingVillageLayout: MapLayout = {
     // BUG-01). One source of truth, pinned by tests in
     // `state/e2e/exploration.engine.test.ts`.
     regionProgress: 'Map i of ii',
+    sheet: legacySheet(MAP_PLATES.wentworthStreet),
     nodes: [
         // Spine nodes (fv-1..fv-10) — visual positions only; the node graph
         // (ids + edges) is the engine's MapDefinition. See ./types.ts.

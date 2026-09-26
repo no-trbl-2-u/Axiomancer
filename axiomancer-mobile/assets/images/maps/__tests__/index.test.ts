@@ -1,40 +1,48 @@
 /**
- * Map backdrop resolver (phase V4/V5, `mapBackdropFor`). Previously
- * untested — phase 83 adds coverage while fixing the regression it found:
- * phase 44f (2026-08-12) renamed the fishing-village map's region string
- * from "Fishing Village" to "the Drowned Parish"
- * (`state/exploration-maps/fishing-village.layout.ts`), which has none of
- * "village|town|hamlet|harbour" in it — the coastal village's own map
- * backdrop had silently fallen through to the forest default ever since.
+ * Map backdrop assignment — each layout names its plate (map revamp M2).
+ *
+ * The plate used to be picked by a regex over the region display string
+ * (`mapBackdropFor`). Phase 83 found that a rename (phase 44f's "the Drowned
+ * Parish") had silently dropped the coastal village's own plate for the forest
+ * fallback. M2 retired the regex: each layout's sheet now names its plate, so
+ * these pins state the assignment directly, per map, instead of re-deriving it
+ * from region strings.
  */
 
 import { describe, expect, it } from '@jest/globals';
 
-import { mapBackdropFor } from '@/assets/images/maps';
+import { MAP_PLATES } from '@/assets/images/maps';
+import { ALL_MAP_LAYOUTS, getMapLayout } from '@/state/exploration-maps';
+import { FALLBACK_SHEET } from '@/state/exploration-maps/sheet';
 
-describe('mapBackdropFor', () => {
-    it('resolves the coastal village ("the Drowned Parish") to Wentworth Street, not the forest fallback', () => {
-        const forestFallback = mapBackdropFor(undefined);
-        const drownedParish = mapBackdropFor('the Drowned Parish');
-        expect(drownedParish).not.toEqual(forestFallback);
-        // Same plate as the other settled/village region, per art-sources.json's
-        // recorded intent ("town-across-river / fishing-village").
-        expect(drownedParish).toEqual(mapBackdropFor("The Sweetheart's Village"));
+describe('map layouts name their plates', () => {
+    it('keeps the plate each shipped map rendered under the region regex', () => {
+        const expected: Record<string, number> = {
+            'fishing-village': MAP_PLATES.wentworthStreet,
+            'northern-forest': MAP_PLATES.forestDark,
+            'caverns': MAP_PLATES.thePit,
+            'northern-city': MAP_PLATES.ludgateHill,
+            'connecting-river': MAP_PLATES.charonCrossing,
+            'town-across-river': MAP_PLATES.wentworthStreet,
+            'the-capital': MAP_PLATES.ludgateHill,
+        };
+        for (const [mapId, plate] of Object.entries(expected)) {
+            expect({ mapId, plate: getMapLayout(mapId)?.sheet.backdrop }).toEqual({ mapId, plate });
+        }
     });
 
-    it('still resolves the other named regions to their recorded plates', () => {
-        const caverns = mapBackdropFor('The Caverns');
-        const river = mapBackdropFor('The Connecting River');
-        const city = mapBackdropFor('The Northern City');
-        const forest = mapBackdropFor('Northern Forest');
-        const village = mapBackdropFor("The Sweetheart's Village");
-        // All distinct from one another (each named region gets its own plate).
-        expect(new Set([caverns, river, city, village]).size).toBe(4);
-        expect(forest).toEqual(mapBackdropFor(undefined));
+    it('gives the coastal village ("the Drowned Parish") its own plate, not the forest fallback', () => {
+        expect(getMapLayout('fishing-village')?.sheet.backdrop).not.toEqual(FALLBACK_SHEET.backdrop);
     });
 
-    it('falls back to the forest plate for an unmatched region', () => {
-        expect(mapBackdropFor('somewhere unnamed')).toEqual(mapBackdropFor(undefined));
-        expect(mapBackdropFor(undefined)).toEqual(mapBackdropFor(undefined));
+    it('gives every layout a plate', () => {
+        for (const layout of ALL_MAP_LAYOUTS) {
+            // A `require()` handle: a number under Metro, a module object under
+            // Jest's asset transform. Either way it must be there.
+            expect({ mapId: layout.mapId, has: layout.sheet.backdrop != null }).toEqual({
+                mapId: layout.mapId,
+                has: true,
+            });
+        }
     });
 });

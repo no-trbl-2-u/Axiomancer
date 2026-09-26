@@ -7,7 +7,7 @@ import { townAcrossRiverLayout } from './town-across-river.layout';
 import { theCapitalLayout } from './the-capital.layout';
 import type { MapLayout } from './types';
 
-export type { MapLayout, NodeLayout } from './types';
+export type { MapLayout, MapSheet, NodeLayout } from './types';
 
 const REGISTRY: Record<string, MapLayout> = {
     'fishing-village': fishingVillageLayout,
