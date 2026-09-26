@@ -244,7 +244,7 @@ const SLOT_CONTENT: Record<string, TooltipContent> = {
     },
     accessory: {
         title: 'TRINKET',
-        body: 'helms, gauntlets, boots, rings, charms — three interchangeable worn things. small numbers; sometimes the only place a particular blessing, sigil, or save bonus appears.',
+        body: 'helms, gauntlets, boots, rings, charms — three interchangeable worn things. small numbers; sometimes the only place a particular blessing or sigil appears.',
     },
 };
 

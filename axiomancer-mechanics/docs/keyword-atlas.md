@@ -118,7 +118,7 @@ mid-flight. Run `npm run catalog` for the current binding.
 
 | keyword | reminder text | carried by |
 |---|---|---|
-| **FORGE** | Forges a GHOST die (or revives a dead X die as WILD) that plays beside your drafted die and is spent for good. At the cap it grants Conviction instead. | (see the catalog) |
+| **FORGE** | Forges a GHOST die (or revives a dead X die as WILD) that joins your tray and is spent for good. At 3 dice, it grants +1 Conviction instead. | (see the catalog) |
 | **KINDLE** | Creates a temporary die of the printed color in your Reserve. If the Reserve is full, it grants Conviction instead. | (see the catalog) |
 | **PIP** | Each threat phase a Reserve die survives it gains a pip; each pip spent adds `PIP_INTENSITY_BONUS` intensity, or `PIP_GUARD_BONUS` Guard on a defend card. | (see the catalog) |
 | **BOON** | A die's BOON face powers a card of its color and grants Conviction; its equipped gear sets how much. | die gear (`spec 33 §6`) |
@@ -207,9 +207,9 @@ in `SYSTEM_GLOSSARY` (mobile).
 | CONVICTION ◆ | A spend-anytime resource banked from unspent dice and overflow. It never decays. |
 | TOLL ⬡ | A whole-combat running tally of dice you spend by color; a ⬡ threshold line fires at its count. |
 | RESERVE & PIPS | Dice held between phases instead of played, ripening a pip per phase. |
-| GHOST ✦ | A forged die that plays alongside your drafted die, never rerolls, and is gone when spent. |
+| GHOST ✦ | A forged die that joins your tray, never rerolls, and is gone forever when spent. |
 | RUNGS | The steps of the foe's telegraphed action. Losing all of them denies the action. |
-| WILD / X | A WILD die counts as any color; a dead X die powers nothing until forged or fate-tapped. |
+| WILD / X | A WILD die counts as any color. A dead X die powers nothing, but can be Forged wild. |
 | SENTENCE | A declared conclusion: at the printed CHARGE count its payoff fires free and the tally resets. |
 | CONDEMN | An alternate win: reaching the printed CHARGE count in one SENTENCE ends the fight. |
 | RELENT | An alternate win: PLEA reaching the foe's resolve opens an explicit accept-or-continue choice. |

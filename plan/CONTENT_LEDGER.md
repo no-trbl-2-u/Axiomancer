@@ -19,10 +19,75 @@
 | cards | `skills/adjust-cards.md` | 2026-09-25 | 08cc633d | 19 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-25 | 4d21e8ee | 19 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-25 | be37a6a3 | 19 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-24 | c57a7e73 | 18 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-26 | 2b289bb2 | 19 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-25 | 1d5f4bcc | 18 |
 
 ## Log
+
+```
+> **[adjust-keywords pass 19, 2026-09-26, commit 2b289bb2]** Zero-CREATE,
+> 4 UPDATE, zero-REMOVE. `/march` dispatched this pass through the
+> content-lifecycle gate (Step 3b). All five categories were past the
+> 15-commit bar (79-86 commits each); `keywords` (last pass 2026-09-24) was
+> the stalest. Deploy was green at `2b289bb2`, no phase was pending, and the
+> critique gate was not due (9 commits, under 24h).
+>
+> **Fresh angle:** this is the first pass since the TRIM THE FAT commits
+> touched the keyword surface (T2a `2ef8f790`/`0351300e`/`cb178978`, T2b
+> `d565910d`, T3 `8ef3c7da`, T5 `e6c7fb75`). `card-expert` (consult mode)
+> audited the trim fallout.
+> - Structural wiring is clean: 50 kinds, all with a `mechanicText` case,
+>   none falling through to the default arm.
+> - GLYPHS, deleted-synergy, luck and stat-band references are gone from the
+>   atlas, mobile and the card editor.
+> - The ban list is intact. `2ef8f790` dropped only the scan of a deleted
+>   field, not a banned id.
+>
+> **Shipped (UPDATE):**
+> 1. Synced the FORGE, GHOST and WILD/X atlas rows to `KEYWORD_GLOSS`. They
+>    still described the deleted drafted-die / fate-tap model, and the
+>    atlas's rule is that the code wins.
+> 2. `docs/effects.md`: the resist-roll table and the
+>    `resolveEffectApplication` section now say every effect lands as
+>    printed (Phase 80 + D12). The dead `resistedBy`/`resistDR` fields are
+>    marked legacy and unread.
+> 3. Mobile TRINKET tooltip: dropped "save bonus" (saves were cut in D14).
+>    Fixed the stale `SUPPORT_KEYWORD` comment claiming `debuff_curse`
+>    still resolves (it has no applier since T2a).
+> 4. `skills/adjust-keywords.md` Step 1: the carrier bar is now "fewer than
+>    2", matching the atlas's ratified keep rule (overhaul §6.1). The skill
+>    said 3 and the doctrine outranks it.
+>
+> **Carrier counts:** pass 18's IMMOLATE count was wrong (it has 6
+> carriers, not 2). Ten keywords sit at exactly 2 carriers (OMEN, ECHO,
+> REPLAY, PROLONG, CHAIN, EXECUTE, PIERCE, AMBUSH, FINALE, EVENTIDE). All
+> meet the doctrine bar, so none were retired.
+>
+> **Step 1b KB angle: Blood** (`kb:dawncaster/keywords/blood.okf.md`,
+> substitute payment in HP). `fate` was our only blood-as-substitute
+> payment and has been inert since T2b. Re-hooking it needs X dice in
+> ordinary play, and the Spec 33 tray never rolls any. So the honest small
+> fix remains the `/adjust-cards` fold, and this was filed, not minted.
+> Reliable (`kb:dawncaster/keywords.csv`) is noted as the growth route for
+> the conditional keywords at 2 carriers.
+>
+> **Residue:** added to `plan/AUDIT.md`'s T2b debt row:
+> - nine inert support buffs;
+> - `debuff_curse` / `debuff_nettle_sting` have no applier, and the enemy
+>   roll-penalty path gets no input;
+> - dead `resistedBy`/`resistDR`;
+> - Tier-1 `MIND_MARK_ID` leftovers;
+> - seven zero-carrier mechanic kinds;
+> - mobile never sends `omenClaim`.
+>
+> The `fate` card faces stay on that row's existing `/adjust-cards` route.
+> The skill still treats a missing `kb:` receipt as a finding (Step 1 and
+> hard rule 5), but the atlas says receipts are optional. That conflict is
+> left for `/oversight`.
+>
+> Verify: green (mechanics verify, mobile verify, card-editor type-check,
+> root `npm test` incl. content-drift 11/11).
+```
 
 ```
 > **[adjust-enemies pass 19, 2026-09-25, commit be37a6a3]**
