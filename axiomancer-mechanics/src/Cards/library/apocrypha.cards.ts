@@ -153,10 +153,11 @@ const theNoteFallsDue: Card = {
     tier: 3, rank: 6, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'Afflict DOOM 20. IMMOLATE 4: burn the 4 lowest cards in your hand, then deal 75, Heal 35, draw 3 and gain WRATH 4. Powered by a dead die it deals 55 more and costs 15 more VITAE.',
+        'Afflict DOOM 20. IMMOLATE 4: burn the 4 lowest cards in your hand, then deal 75, Heal 35, draw 3 and gain WRATH 4. Powered off-colour it deals 55 more, gains WRATH 3 more, and costs 15 more VITAE.',
     // pts: four cards off the bottom of your hand buy 75 damage, 35 VITAE back
-    // and three fresh cards — and the dead X die everyone else discards is
-    // collateral here, worth another 55 for fifteen of your own. DOOM 20 is
+    // and three fresh cards — and the wrong-colour die everyone else wastes is
+    // collateral here, worth another 55 for fifteen of your own (off-colour
+    // dieBonus, folded from the retired X-die `fate` line). DOOM 20 is
     // the interest that keeps swelling while you spend the principal. The FREE
     // line bleeds you on purpose: it is the fuse for the deck's FALLEN cards.
     free: {
@@ -169,7 +170,7 @@ const theNoteFallsDue: Card = {
     specialMechanics: [
         { kind: 'immolate', count: 4, rider: { damage: 75, healHp: 35, drawCards: 3, wrath: 4 } },
     ],
-    fate: { rider: { damage: 55, wrath: 3 }, recoilHp: 15 },
+    dieBonus: { onColor: 'off', rider: { damage: 55, wrath: 3, recoil: 15 } },
     addedIn: ADDED,
     tags: ['debt', 'apocrypha', 'late-game'],
 };

@@ -16,13 +16,55 @@
 
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
-| cards | `skills/adjust-cards.md` | 2026-09-25 | 08cc633d | 19 |
+| cards | `skills/adjust-cards.md` | 2026-09-26 | bb0f2928 | 20 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-25 | 4d21e8ee | 19 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-25 | be37a6a3 | 19 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-26 | 2b289bb2 | 19 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-26 | 27bd4d2d | 19 |
 
 ## Log
+
+```
+> **[adjust-cards pass 20, 2026-09-26, base bb0f2928]** Zero-CREATE, 4 UPDATE,
+> zero-REMOVE. `/march` dispatched this through Step 3b. `cards`
+> (`08cc633d`, 85 commits behind HEAD `bb0f2928`) was the stalest
+> qualifying category (`equipment` 83 and `enemies` 81 also qualified).
+> Deploy green (HEAD was a plan-only tick). No `[ ]` phase rows. Growth
+> floor clear. Critique not due (11 commits, <24h since pass 53).
+>
+> **Step 1 audit.** The TRIM passes (T2a/T2b/T3/T5) are the only card-
+> surface commits since pass 19. T2b deleted fate-X powering, so the
+> AUDIT T2b debt row's "Fate cards" item is a live card-face-honesty
+> finding: `the-note-falls-due`, `miserere`, `dead-pledge` printed an X-die
+> line that can never fire, and pricing still credited it.
+>
+> **KB gate.** `kb:dawncaster/keywords` Blood ("sacrifice your own blood
+> instead of Energy") and `kb:slay-the-spire/cards/0037-bloodletting`
+> (Lose 3 HP, gain energy): HP as a substitute payment for a worse
+> resource. The off-colour die is the live "wrong resource" in the
+> Spec 33 tray; `usury` already carries `dieBonus: off` + rider `recoil`.
+>
+> **UPDATE (x3):** fold `fate { rider, recoilHp }` ->
+> `dieBonus { onColor: 'off', rider: { ...rider, recoil } }` on all
+> three. Same numbers; the recoil moves into the rider (priced as a
+> self-cost, applied by the PAID executor, printed as RECOIL N). Faces,
+> descriptions, `// pts:` comments and `dead-pledge`'s tag rewritten to
+> the off-colour line. `choir-card-wording` test repointed.
+> **UPDATE (x1):** `the-unpaid-sexton` face said "beside your drafted
+> die" (the draft is gone) -> "beside your rolled dice".
+>
+> **Residue (AUDIT T2b row):** the `fate` field now has zero carriers;
+> it is still in types, pricing, display, upgrades, complexity and
+> card-keywords. Deleting it is cross-surface, so it is filed rather than
+> done this tick. `it-gets-up-again`'s `float_x_die` almost always pays
+> the +1 Conviction fallback but is still priced at 4.5; only the
+> `reroll_spent` relic mints X dice. That needs an owner call on the
+> relic before any card reprice, so it stays filed. The ▲/▼ read numbers
+> on card faces are still mobile display work.
+>
+> Verify: green (mechanics 3531/3531, mobile 3026/3026, card-editor
+> type-check, root `npm test` 219/219).
+```
 
 ```
 > **[adjust-npcs pass 19, 2026-09-26, commit 27bd4d2d]** Zero-CREATE,

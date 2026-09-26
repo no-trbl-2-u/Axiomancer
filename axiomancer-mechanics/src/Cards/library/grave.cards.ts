@@ -248,7 +248,7 @@ const theUnpaidSexton: Card = {
         'never complain about the wage again.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'Deal 14. FORGE a WILD ghost die that plays beside your drafted die, spent for good.',
+    paidSummary: 'Deal 14. FORGE a WILD ghost die that plays beside your rolled dice, spent for good.',
     // pts: deal 14 (4.67) + forge wild (forgeFloating 5 + forgeWildBonus 1 =
     // 6) = 10.67, + FREE deal 5. A Splinter hit that also mints a permanent
     // extra die — the theme's first FORGE carrier since ex-nihilo retired.

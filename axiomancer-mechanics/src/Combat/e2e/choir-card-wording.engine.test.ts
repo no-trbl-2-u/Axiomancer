@@ -90,12 +90,12 @@ describe('Pale Choir card wording', () => {
         expect(text).toContain('HEART ×3 spent: +2 Souls');
     });
 
-    it('Miserere states the per-Soul burst, the SIPHON, and the fate line with its price', () => {
+    it('Miserere states the per-Soul burst, the SIPHON, and the off-colour line with its price', () => {
         const text = face('miserere');
         expect(text).toContain('REAP ALL. 14 damage per Soul spent');
         expect(text).toContain('SIPHON 50% of the harvest');
-        expect(text).toContain('an X die may power this');
-        expect(text).toContain('recoil 6 VITAE');
+        expect(text).toContain('off-color die');
+        expect(text).toContain('RECOIL 6');
     });
 
     it('Choirbone Reliquary states its trigger and both payoffs on both durations', () => {

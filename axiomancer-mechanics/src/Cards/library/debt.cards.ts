@@ -6,7 +6,7 @@
  * ranks above its station and bills the difference in VITAE: RECOIL as a
  * printed price, `recoil_x` when the sum is left blank for you to fill in,
  * DOOM as compound interest, IMMOLATE when there is nothing left to pay with
- * but the goods, `fate` when a dead die is offered as collateral, and FALLEN
+ * but the goods, an off-colour `dieBonus` when the wrong die is offered as collateral, and FALLEN
  * as the payoff for a body already carrying its own afflictions.
  *
  * WRATH is the signature scaler: a combat-long +N to every hit you land. The
@@ -155,23 +155,26 @@ const deadPledge: Card = {
     name: 'The Dead Pledge',
     philosophicalAspect: 'body',
     description:
-        'Mort gage, the old clerks wrote it: the dead pledge. What has died ' +
-        'in your hand is not spent — it is collateral. The broker takes the ' +
-        'cold die, opens your arm for the difference, and pays out in kind.',
+        'Mort gage, the old clerks wrote it: the dead pledge. The die that ' +
+        'does not belong to the hand is not wasted — it is collateral. The ' +
+        'broker takes the wrong die, opens your arm for the difference, and ' +
+        'pays out in kind.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'RECOIL 5. Deal 18. Powered by a dead die it deals 12 more, grants WRATH 1, and costs 4 more VITAE.',
-    // pts: deal 18 (band ceiling) for 5 VITAE, and a dead X die is not a dead
-    // face here — it is collateral worth another 12 and a permanent scaler.
+        'RECOIL 5. Deal 18. Powered off-colour it deals 12 more, grants WRATH 1, and costs 4 more VITAE.',
+    // pts: deal 18 (band ceiling) for 5 VITAE, and the wrong-colour die is
+    // collateral here — worth another 12 and a permanent scaler (dieBonus
+    // ×0.6, the rider's RECOIL 4 credited as a self-cost). Folded from the
+    // retired `fate` line (X dice never roll since the T2b dice collapse).
     free: { damage: 6, recoil: 2 },
     specialMechanics: [
         { kind: 'recoil', hp: 5 },
         { kind: 'deal', amount: 18 },
     ],
-    fate: { rider: { damage: 12, wrath: 1 }, recoilHp: 4 },
+    dieBonus: { onColor: 'off', rider: { damage: 12, wrath: 1, recoil: 4 } },
     addedIn: ADDED,
-    tags: ['debt', 'fate', 'recoil'],
+    tags: ['debt', 'off-colour', 'recoil'],
 };
 
 const insolvency: Card = {

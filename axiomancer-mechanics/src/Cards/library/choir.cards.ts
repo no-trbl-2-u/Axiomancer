@@ -362,15 +362,17 @@ const miserere: Card = {
     tier: 3, rank: 6, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'REAP ALL. 14 damage per Soul spent. SIPHON 50% of the harvest. An X die may power this. Gain 4 SOULS and PLEA 12, and RECOIL 6.',
+        'REAP ALL. 14 damage per Soul spent. SIPHON 50% of the harvest. Powered off-colour: gain 4 SOULS and PLEA 12, and RECOIL 6.',
     // pts: uncapped by law — 12 Souls is 168, and half of it comes back as
     // VITAE. The whole deck is a machine for making this one swing large.
+    // The off-colour dieBonus (folded from the retired X-die `fate` line)
+    // re-seeds the plate at a blood price.
     free: { sway: 10, souls: 3 },
     specialMechanics: [
         { kind: 'reap_all', burstPerSoul: 14 },
         { kind: 'siphon', pct: 0.5 },
     ],
-    fate: { rider: { souls: 4, sway: 12 }, recoilHp: 6 },
+    dieBonus: { onColor: 'off', rider: { souls: 4, sway: 12, recoil: 6 } },
     addedIn: ADDED,
     tags: ['choir', 'reap', 'capstone'],
 };
