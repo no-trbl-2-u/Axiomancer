@@ -214,6 +214,10 @@ name + description candidates in the house voice (spec 34 §2.5: terse,
 cold, priced scenery). T picks or edits one. Nothing enters canon without
 T's choice, and the pick is recorded in the story overview's map table in
 the same PR. *Rejected:* T naming all four up front; placeholder names.
+*Picks:* coast **The Breakwater** (2026-09-25); forest **The Charcoal
+Wood**, mountains **The Beacon Crags**, underworld **The Lantern Deep**
+(2026-09-26, all three at once so the loop could build them unattended).
+The descriptions are in `plan/2026-09-25-map-revamp-m3.prompt.md` §1.
 
 **D27 — A new game starts on the coast as soon as it ships.** (T,
 2026-09-25.) `createStartingWorld()` moves from fishing-village to the
@@ -259,14 +263,11 @@ the map PRs. A need the pools can't meet is filed to `adjust-enemies` /
   mobile gate. M0 only adds a pin for the mobile-owned side. M0 #382, M1
   #383 and M2 #384 opened 2026-09-25 (stacked in that order). The M3
   ballot was answered the same day as D26–D29. M0–M2 merged 2026-09-26
-  (#382–#384). **M3a (the Breakwater, new start, start on any map) is #385.**
-  Four agent calls from M3a wait on T in `plan/AUDIT.md` Pending. **Next:**
-  `plan/2026-09-25-map-revamp-m3.prompt.md` (the four new maps, the
-  Labyrinth door, docs). M0 #382, M1
-  #383 and M2 #384 opened 2026-09-25 (stacked in that order). **Next:**
-  `plan/2026-09-25-map-revamp-m3.prompt.md` (the four new maps, the
-  Labyrinth door and docs; opens with a four-question ballot on names, start
-  map, engine home and enemy pools).
+  (#382–#384), and M3a (the Breakwater, the new start, start on any map)
+  merged 2026-09-26 (#385). All four D26 names are picked. Four agent calls
+  from M3a wait on T in `plan/AUDIT.md` Pending. **Next:** M3b–M5 are rows
+  in `plan/steps/01_build_plan.md` (brief
+  `plan/2026-09-25-map-revamp-m3.prompt.md`).
 - Backdrop-anchored map renderer (D15) — nodes in image coordinates,
   art pans/zooms with the node layer. Its own phase, after D2 — or folded
   into D2, since D16's per-map canvas is the same change.

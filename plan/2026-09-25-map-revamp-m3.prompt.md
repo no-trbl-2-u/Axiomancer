@@ -22,6 +22,7 @@
 | M0: CI gap | #382 | Open, CI green. The gap was already closed on 2026-08-22. M0 pins the mobile map paths in `scripts/ci-e2e-scope.test.mjs`. |
 | M1: art | #383 | Open, stacked on #382. Four plates at `axiomancer-mobile/assets/images/maps/act1-{coast,forest,mountains,underworld}.webp` (2400×2400, D22), exported as `ACT1_PLATES`. **`act1-landmarks.json`** holds 73 landmark positions as plate fractions, 17–20 per plate. Also `act1-prompts.md`, provenance and art-catalog entries. |
 | M2: per-map sheet | #384 | Open, stacked on #383. `MapLayout.sheet: MapSheet` (`width`, `height`, `scale`, `backdrop`, `plateOpacity`, `chartTexture`) replaced the global `SPREAD` and the region-regex plate pick. The shipped maps use `legacySheet(plate)` and render pixel-identical. |
+| M3a: the Breakwater + new start | #385 | **Merged 2026-09-26** (2b289bb2). See §3a. |
 
 **First act of the session:** get #382 → #383 → #384 merged, in order (the
 repo uses merge commits; auto-merge is disabled). Each PR's decisions-file
@@ -44,6 +45,18 @@ M3 starts before #384 is in.
   recommended candidate first. Record the pick in the story overview's
   "The maps — place and theme" table in the same PR. Keep the `what` field
   in the landmarks file drawing-only; it is not canon.
+- **D26 picks (all made; do not re-ask).** Use these names and descriptions
+  verbatim. Each map's PR records its pick in the story overview's map table.
+  - **Forest (M3b): The Charcoal Wood.** "Burners work the clearings and sell
+    the smoke by the sack. Three caves open in the south cliff; nobody sells
+    the way back."
+  - **Mountains (M3c): The Beacon Crags.** "A fire on the summit tells the
+    valley who is coming. The rope bridge charges for the crossing, and again
+    for the fall."
+  - **Underworld (M3d): The Lantern Deep.** "Every light below the stair was
+    carried down and paid for. Past the drowned temple, the lanterns stop."
+  - Map ids and node prefixes are the builder's call under D28's
+    no-prefix-collision rule (M3a used `breakwater` / `bw-`).
 - **D27:** a new game starts on the coast from M3a. The last built Act 1
   map's exit door leads into the shipped chain at fishing-village. Once the
   underworld ships, its door does.
@@ -154,9 +167,14 @@ settled, so M3b–d copy it rather than re-derive it:
   dark 300×150 box on web (hidden under the dim atmosphere plates).
 - **Baseline:** re-stamped at `e2befb89`. The matrix did not move (stamp-only diff).
 
-## 4. Definition of done for the next session
+## 4. Definition of done, and who does what
 
-- M3a merged.
-- M3b (the forest, name picked per D26) merged, then the Android preview
-  build (M3b+) triggered and its install link handed to T.
-- This file updated with what remains (M3c–d, M4, M5).
+- **M3a:** merged 2026-09-26 (#385).
+- **M3b (The Charcoal Wood):** built by the attended session of 2026-09-26,
+  then the Android preview build (M3b+) and its install link to T. Its PR
+  ticks M3b in `plan/steps/01_build_plan.md` and unblocks M3c.
+- **M3c, M3d, M4, M5:** rows in `plan/steps/01_build_plan.md` for the
+  autonomous loop, in strict order (each requires the row above it `[x]`).
+  Each ships as one PR per `/ship-a-phase`, with the pins in §2 and the
+  pattern in §3a.
+- Whoever ships a row updates §0 of this file with its PR.

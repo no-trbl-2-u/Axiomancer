@@ -58,6 +58,29 @@
 
 ## Pending
 
+### [tests] No Playwright journey walks a map node to node — the Breakwater was walked by a throwaway script
+- category: tests
+- impact: 5
+- ease: 6
+- detail: filed 2026-09-26 (M3a residue). Every browser journey arms its
+  screen from a dev button (`debug-trigger-*`) or a fixture, so nothing proves
+  that tapping a node, confirming, playing out what the node opens, and
+  landing back on the map works across node types. An attended session walked
+  the Breakwater with a scratch script: new game, windmill rest, first relic,
+  bw-5 cache, bw-4 gather, bw-7 cache, bw-11 gather, bw-14 fight (played to
+  defeat by ending phases), back to a new run at the windmill; no page errors.
+  What the script needed: nodes off a phone viewport are clicked through the
+  DOM (the camera would need panning); a new game's `/item-reward` needs
+  `item-reward-confirm`; the hazard board shows a coach (`hazard-tutorial-skip`)
+  and PLAY stays disabled until a card is dragged in (the drag loop hung, so
+  that walk skipped hazards). The M3a harness fix for the new start
+  (`exploration-combat-roundtrip-e2e.mjs` playing out a rest arrival) was the
+  first CI sign the start had moved.
+- next: add `scripts/map-walk-e2e.mjs` (a node-to-node walk of the start map,
+  cache/gather/fight at least, hazard via `hazard-e2e.mjs`'s drag helpers) and
+  register it in `scripts/ci-e2e-scope` for `exploration-maps/**` and
+  `src/World/**`.
+
 ### [gap] The Breakwater (Act 1 coast, M3a #385) — four agent calls to confirm [needs-user-call]
 - category: gap
 - impact: 5
