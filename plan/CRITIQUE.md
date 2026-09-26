@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-09-25 at commit e073bb6e
-> Pass count: 51
+> Last pass: 2026-09-25 at commit 2a484f98
+> Pass count: 52
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -33,6 +33,26 @@
 > checked against `relic.library.ts` and confirmed to be the
 > deliberate house format across all 11 relics, not a copy bug — not
 > filed. Zero fresh findings this pass.
+
+> **[critique pass 52, 2026-09-25, commit 2a484f98] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5,
+> `CRITIQUE_VIEWPORT=both`), mobile (375×812) and desktop (1280×800),
+> against the full 11-screen set — 22 captures, 0 nav trouble, 0
+> console/page errors. Read every screenshot directly across both
+> viewports. This pass lands 40 commits after pass 51 (e073bb6e), which
+> is entirely the T2a-tail through T5 trim/archive cycle (dead-code and
+> stale-doc removal, the Upgradeable-Dice flag collapse, a combat dice
+> off-color CI fix, GLYPHS-pilot and Codex-aesthetic cuts) — no surface
+> under critique's screen set was touched by any of it, and none shows
+> a regression. Previously-filed candidates reconfirmed unchanged and
+> not re-filed: the village "Void Essence"/"Heart Draught" wearer
+> wording (pass 41, still Pending), the dialogue reply-card label echo
+> (still Pending), the mobile/desktop combat-board DoT paid-value chip
+> mid-token wrap (pass 49, still Pending), the late-game hub's faint
+> unlabeled desktop oval (declined per pass 34/39/40, still ambiguous),
+> and the relics' description-repeats-signature-name pattern (confirmed
+> deliberate house format, not a bug — pass 51). Zero fresh findings
+> this pass.
 
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `plan/archive/CRITIQUE_2026.md`.
 

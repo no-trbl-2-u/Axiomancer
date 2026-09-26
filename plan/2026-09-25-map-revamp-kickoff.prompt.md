@@ -1,5 +1,10 @@
 # Prompt: THE MAP REVAMP — kick off D2 (with D15, D16 and the D5 Labyrinth door)
 
+> **Done 2026-09-25.** §2 was answered as D21–D24, plus D25 (a node on every
+> landmark). M0 #382, M1 #383 and M2 #384 are open, stacked in that order.
+> This prompt's M3 row (re-author the shipped maps) was overtaken by D21
+> (four new maps). Continue from `plan/2026-09-25-map-revamp-m3.prompt.md`.
+
 > Written 2026-09-25 at T's direction, after TRIM THE FAT finished (T1–T5,
 > #369–#381). This is step 2 of THE REFACTOR STRATEGY. Read these first, in
 > order:
@@ -34,7 +39,7 @@ What the map system is today:
 | Mobile pins | `exploration-maps/__tests__/{layout-engine-parity,branching-legibility,fishing-village.layout}.test.ts`, `state/presenters/__tests__/exploration-map-legibility.test.ts` | Id-set parity, on-sheet and edge-length rules that import `SPREAD`, the fv vertical spine, and the ribs-within-a-column rule. |
 | Backdrops | `assets/images/maps/` (5 webp), `mapBackdropFor(region)` regex, `provenance.json`, `plate-crop.test.ts` | Chosen by a regex over the region string, not per map. |
 | Labyrinth (D5) | `src/World/Labyrinth/`, `mobile/state/labyrinth/store-actions.ts:107` `enterLabyrinthAction`, `app/labyrinth/` | Reachable only from `DebugWorldTravel` and the CLI. The `'travel'` MapEvent (`MapEvents/types.ts:183`, `handlers.ts:271`) does not take the labyrinth snapshot path. |
-| CI scope gap | `scripts/ci-e2e-scope.mjs` (`plan/AUDIT.md` ~473) | Engine map changes (`Continents`, `map.registry`, `Labyrinth`) do not trigger the mobile parity test in CI. |
+| CI scope | `scripts/ci-e2e-scope.mjs:133-139` | Closed since 2026-08-22: every `src/World/**` change routes to the mobile verify plus the `encounters` journeys, so the parity test runs on engine map changes. |
 
 **The Act 1 engraving is not in the repo.** T generated it in an earlier
 session: a square, four-quadrant, Doré-style engraving (coast and harbour,
@@ -52,7 +57,7 @@ changes (see §4 for the Windows recipe).
 
 | Phase | Scope | Notes |
 |---|---|---|
-| **M0: close the CI gap** | Add `Continents/`, `map.registry`, `Labyrinth/` and `exploration-maps/` to `scripts/ci-e2e-scope.mjs` so a map change runs the mobile parity and legibility tests in CI. | Small. Do it first, because every later phase depends on it. |
+| **M0: confirm CI coverage** | No code expected. On the first M-phase PR, check the job log to confirm `verify --workspace axiomancer-mobile` actually ran (see `plan/lessons.md` Deploy #3: a green check is not evidence a step ran). | Only if it did not run, extend `ci-e2e-scope.mjs` in that PR. |
 | **M1: ingest the art** | Upscale T's engraving to at least 5000px on the long side, and check the upscaler keeps the hatching (zoom in and compare). Crop the four quadrants along the natural seams, with overlap, not on the exact centre lines. Export webp. Add a `provenance.json` entry for each crop (tool, model, prompt, seed, post-process, `covers`, `used_by`) and make `plate-crop.test.ts` pass. | Deletion policy D6 applies to intermediates. Never commit the raw upscale if it is huge. Put one master and the crops in the repo, and name them in provenance. |
 | **M2: per-map canvas (D15/D16)** | Each layout declares its own canvas (`width`, `height`, and the backdrop it uses), larger than the viewport on both axes. `MapCanvas` reads it in place of the global `SPREAD`. Backdrop selection moves from the region regex to an explicit per-layout field. Raise the plate opacity so the art reads. The initial camera centres on the entry node, not the bottom. | Rewrite the mobile pins that encode the old shape (`SPREAD` import, bottom-to-top spine). Keep the ones that still guard truth (on-sheet, distinct, parity). A test that pinned the ladder is a repealed law. A test that catches an off-sheet node is a guard. |
 | **M3: re-author the maps (D2, D16)** | One map per PR. About 20 nodes, a 2-D web spreading up, down, left and right from the entry, placed on the landmarks in its quadrant art. Every node must be reachable at least once under frontier roaming. | The engine's forward column skeleton still governs progression (D16). Only the mobile `x, y` is freed. If a node count or id changes, migrate every node-keyed reference in the same PR (event pools, overrides, NPC staging, quests, reachability) and revise the engine shape pins that encode the old count or spine. Plate or halo the nodes in the dark underworld quadrant. Keep any node the story overview names. |
@@ -129,6 +134,6 @@ Record each answer as a D-number in the decisions file before building.
 ## 5. Definition of done for the kickoff session
 
 - §2 answered and recorded as D-numbers.
-- M0 and M1 merged. M2 merged, or at least in review with gates green.
+- M0 confirmed and M1 merged. M2 merged, or at least in review with gates green.
 - A follow-up hand-off prompt for M3 onward, written in this file's shape
   and listing which maps are left and what node-id migration each needs.
