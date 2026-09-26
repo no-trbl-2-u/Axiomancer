@@ -48,6 +48,12 @@ export interface MapSheet {
      * the map, since invented hills over drawn mountains would contradict it.
      */
     chartTexture: boolean;
+    /**
+     * Pool each node mark in a dark halo, so the marks hold contrast over a
+     * dense plate's linework (map revamp M3d: the Lantern Deep's underworld).
+     * Omitted means no halo.
+     */
+    nodeHalo?: boolean;
 }
 
 export interface NodeLayout {

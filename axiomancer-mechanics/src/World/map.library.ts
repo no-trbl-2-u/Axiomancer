@@ -41,6 +41,8 @@ export type MapName =
  * NorthernContinentMaps are all the maps in the Northern Continent
  * - 'beacon-crags': Act 1, map 3 — the mountains past the Charcoal Wood's stair cave
  *   (map revamp M3c). Defined in `./Continents/Northern-Continent/beacon-crags.ts`.
+ * - 'lantern-deep': Act 1, map 4 — the underworld below the Beacon Crags' glacier shrine
+ *   (map revamp M3d). Defined in `./Continents/Northern-Continent/lantern-deep.ts`.
  * - 'caverns': Caverns. Gather Iron ore
  * - 'northern-city': Northern City. Give artisans materials to build boat.
  *                    First hear rumors of the death of the advisor and     King seeking a new one.
@@ -56,6 +58,7 @@ export type MapName =
  */
 export type NorthernContinentMapNames =
     'beacon-crags' |
+    'lantern-deep' |
     'caverns' |
     'northern-city' |
     'connecting-river' |

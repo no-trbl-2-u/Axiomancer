@@ -1448,10 +1448,9 @@ const BC_LOOT_NODES: Record<string, { currency: number; description: string }> =
 };
 
 /**
- * The glacier shrine — the Beacon Crags' door. D27: while the Act 1
- * underworld is unbuilt, the last built Act 1 map's door leads into the
- * shipped chain at fishing-village. When the underworld ships (M3d) this door
- * is re-pointed there.
+ * The glacier shrine — the Beacon Crags' door. A stair down under the ice into
+ * the Lantern Deep (M3d; it led to fishing-village until the underworld
+ * shipped).
  */
 const bcGlacierShrine: MapEventPool = {
     id: 'bc-17.travel',
@@ -1459,9 +1458,9 @@ const bcGlacierShrine: MapEventPool = {
         kind: 'travel', weight: 1,
         payload: {
             kind: 'travel',
-            destinationContinent: 'coastal-continent',
-            destinationMap: 'fishing-village',
-            description: 'A stair goes down under the shrine, into the ice. It comes out, a long way on, above a fishing village.',
+            destinationContinent: 'northern-continent',
+            destinationMap: 'lantern-deep',
+            description: 'A stair goes down under the shrine, into the ice, and on below it. Someone has hung a lantern on every turn.',
         },
     }],
 };
@@ -1488,6 +1487,122 @@ const BEACON_CRAGS_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> 
             } else {
                 const foe = BC_ENCOUNTER_FOES[nodeId];
                 if (!foe) throw new Error(`beacon-crags: ${nodeId} has no authored event kind or foe.`);
+                out.push({ nodeId, pool: cwEncounterPool(nodeId, foe) });
+            }
+        }
+        return out;
+    })();
+
+// ─── The Lantern Deep (Act 1, map 4 — map revamp M3d) ────────────────────────
+//
+// D29: the underworld borrows the caverns like the Beacon Crags do: the roster,
+// the iron, and the camp, hazard and loot builders. Nothing here is a new
+// enemy, NPC, item or event kind; only the one-line descriptions and the two
+// arrival lines are new, placed on the plate's landmarks (see
+// `Continents/Northern-Continent/lantern-deep.ts`).
+//
+// Kind spread over 18 nodes: 7 encounter, 3 rest, 2 loot-cache, 2 gathering,
+// 2 hazard, 1 arrival cutscene (D31), 1 travel. No boss; one elite on the last
+// fight column (D30). Every fight pinned low (M3b's rule), level with the
+// Beacon Crags: 3 above the aqueducts, 4 below them.
+
+const LD_FIGHT_LEVEL_EARLY = 3;
+const LD_FIGHT_LEVEL_LATE = 4;
+
+/** Arrival down the Beacon Crags' stair, through the cavern roof. */
+const ldArrival: MapEventPool = {
+    id: 'ld-1.cutscene',
+    entries: [{
+        kind: 'cutscene', weight: 1,
+        payload: {
+            kind: 'cutscene',
+            lines: [
+                'The stair comes down out of the ice and through a hole in a cavern roof. The daylight stops at the last step.',
+                'Below, a lake, and lanterns on the far shore. Somebody carried every one of them down.',
+            ],
+            description: 'You come down into the Lantern Deep.',
+        },
+    }],
+};
+
+/** Every Lantern Deep fight, pinned (`cwEncounterPool` builds the pool). */
+const LD_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; level: number; description: string }> = {
+    // c1 — the drowned temple, the cathedral
+    'ld-3':  { slug: 'sump-maren',        level: LD_FIGHT_LEVEL_EARLY, description: 'Something waits in the flooded nave with its hair spread on the water. It asks you to stay.' },
+    'ld-5':  { slug: 'pale-brood',        level: LD_FIGHT_LEVEL_EARLY, description: 'Something pale has hatched in the font. It has not been fed, and it knows you are food.' },
+    // c2 — the central aqueduct
+    'ld-8':  { slug: 'wichtlein',         level: LD_FIGHT_LEVEL_EARLY, description: 'Something small and red knocks three times on the aqueduct stones. The chasm is under the third.' },
+    // c3 — the mushroom forest, the ossuary
+    'ld-11': { slug: 'tri-eyes',          level: LD_FIGHT_LEVEL_LATE,  description: 'Something watches from between the stalks. Three sockets, and none of them blink.' },
+    'ld-12': { slug: 'vampire-thrall',    level: LD_FIGHT_LEVEL_LATE,  description: 'Something tends the giant\'s bones for a master buried under them. It has been told to keep visitors.' },
+    // c4 — the fortress gate
+    'ld-13': { slug: 'ninth-rung-spider', level: LD_FIGHT_LEVEL_LATE,  description: 'Something hangs in the portcullis. It does not chase. The gate is the only way through.' },
+    // c5 — the ruined city: D30, the region's elite, on the last fight column
+    'ld-16': { slug: 'bone-wizard',       level: LD_FIGHT_LEVEL_LATE,  description: 'A robed skeleton reads in the flooded square. It studied its way out of the flesh, and it wants an examiner.' },
+};
+
+/** All three rests are CAMPS: Phase 52b keeps inns inside settlements. */
+const LD_CAMP_NODES: Record<string, string> = {
+    'ld-2':  'The ferryman lets you sleep under his lantern. He charges for the oil, not the floor.',
+    'ld-10': 'The traders let you sleep behind the stalls. They sell lamp oil by the drop.',
+    'ld-17': 'A landing on the stairway, dry and out of the draught. Someone left a lantern. It is out.',
+};
+
+/** The caverns' one material (`ncIronVeinPool`). */
+const LD_GATHER_NODES: Record<string, string> = {
+    'ld-7':  'Iron runs through the crystal. Up top the crystal is worth nothing. The iron is worth something.',
+    'ld-14': 'The forge left its slag heap full of unmelted ore. Nobody down here weighs it.',
+};
+
+const LD_HAZARD_NODES: Record<string, { damage: number; description: string }> = {
+    'ld-4':  { damage: 2, description: 'The aqueduct leaks. The walkway is slick, and the lake is a long way down.' },
+    'ld-9':  { damage: 3, description: 'The giant turns in its sleep. The dais is not wide enough for the both of you.' },
+};
+
+const LD_LOOT_NODES: Record<string, { currency: number; description: string }> = {
+    'ld-6':  { currency: 12, description: 'A torch-bearer\'s purse, dropped in the west tunnel. The torches are still lit.' },
+    'ld-15': { currency: 14, description: 'Coins on the sill of a round door that does not open. Someone paid it, and it kept the money.' },
+};
+
+/**
+ * The deep stair — the Lantern Deep's door. D27: the last Act 1 map's door
+ * leads into the shipped chain at fishing-village.
+ */
+const ldDeepStair: MapEventPool = {
+    id: 'ld-18.travel',
+    entries: [{
+        kind: 'travel', weight: 1,
+        payload: {
+            kind: 'travel',
+            destinationContinent: 'coastal-continent',
+            destinationMap: 'fishing-village',
+            description: 'The stair goes down past the last lantern. It comes out, a long way on, on a shore above a fishing village.',
+        },
+    }],
+};
+
+const LANTERN_DEEP_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
+    (() => {
+        const out: Array<{ nodeId: string; pool: MapEventPool }> = [];
+        for (let i = 1; i <= 18; i++) {
+            const nodeId = `ld-${i}`;
+            if (nodeId === 'ld-1') {
+                out.push({ nodeId, pool: ldArrival });
+            } else if (nodeId === 'ld-18') {
+                out.push({ nodeId, pool: ldDeepStair });
+            } else if (LD_CAMP_NODES[nodeId]) {
+                out.push({ nodeId, pool: ncCampPool(nodeId, LD_CAMP_NODES[nodeId]!) });
+            } else if (LD_GATHER_NODES[nodeId]) {
+                out.push({ nodeId, pool: ncIronVeinPool(nodeId, LD_GATHER_NODES[nodeId]!) });
+            } else if (LD_HAZARD_NODES[nodeId]) {
+                const h = LD_HAZARD_NODES[nodeId]!;
+                out.push({ nodeId, pool: ncHazardPool(nodeId, h.damage, h.description) });
+            } else if (LD_LOOT_NODES[nodeId]) {
+                const l = LD_LOOT_NODES[nodeId]!;
+                out.push({ nodeId, pool: ncLootPool(nodeId, l.currency, l.description) });
+            } else {
+                const foe = LD_ENCOUNTER_FOES[nodeId];
+                if (!foe) throw new Error(`lantern-deep: ${nodeId} has no authored event kind or foe.`);
                 out.push({ nodeId, pool: cwEncounterPool(nodeId, foe) });
             }
         }
@@ -2663,6 +2778,10 @@ export function registerMapEventContent(): void {
     for (const { nodeId, pool } of BEACON_CRAGS_POOLS) {
         registerMapEventPool(pool);
         setNodeEventPoolOverride('northern-continent', 'beacon-crags', nodeId, pool.id);
+    }
+    for (const { nodeId, pool } of LANTERN_DEEP_POOLS) {
+        registerMapEventPool(pool);
+        setNodeEventPoolOverride('northern-continent', 'lantern-deep', nodeId, pool.id);
     }
     for (const { nodeId, pool } of FISHING_VILLAGE_NEW_PLAYER_POOLS) {
         registerMapEventPool(pool);

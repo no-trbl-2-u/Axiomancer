@@ -43,6 +43,8 @@ function nodeIdToMapName(nodeId: string): MapName | undefined {
     if (nodeId.startsWith('cw-')) return 'charcoal-wood';
     // Map revamp M3c — Act 1's mountains (northern continent).
     if (nodeId.startsWith('bc-')) return 'beacon-crags';
+    // Map revamp M3d — Act 1's underworld (northern continent).
+    if (nodeId.startsWith('ld-')) return 'lantern-deep';
     if (nodeId.startsWith('fv-')) return 'fishing-village';
     if (nodeId.startsWith('nf-')) return 'northern-forest';
     // Northern continent (2026-08-28 inter-map travel) — the iron caverns
