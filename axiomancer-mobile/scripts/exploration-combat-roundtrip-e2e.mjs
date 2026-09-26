@@ -222,9 +222,11 @@ async function runRoundTrip(page, baseUrl) {
 
     // With the encounter out of the way the screen is idle again, which lets
     // the exploration screen's ARRIVAL event for the map's start node resolve
-    // (2026-08-08) — on fishing-village that is an omen cutscene, a full-screen
-    // ROUTE with no tab bar of its own. It is not the tab LOCK, so dismiss it
-    // before reading the bar, or this harness measures the wrong thing.
+    // (2026-08-08) — on fishing-village that was an omen cutscene; since map
+    // revamp M3a the new game starts on the Breakwater, whose windmill (bw-1)
+    // arrives as a REST. Both are full-screen ROUTES with no tab bar of their
+    // own. Neither is the tab LOCK, so play them out before reading the bar,
+    // or this harness measures the wrong thing.
     //
     // RACE FIXED 2026-09-19. This used to sample `cutscene-advance` ONCE, the
     // instant after the modal hid. The arrival event resolves a beat later, so
@@ -242,8 +244,15 @@ async function runRoundTrip(page, baseUrl) {
     // real assertion is the tab-bar one below, which is left untouched.
     await Promise.race([
         page.getByTestId('cutscene-advance').waitFor({ state: 'visible', timeout: 8000 }),
+        page.getByTestId('rest-choice-offers').waitFor({ state: 'visible', timeout: 8000 }),
         page.locator(CHARACTER_TAB).first().waitFor({ state: 'visible', timeout: 8000 }),
     ]).catch(() => {})
+
+    if (await page.getByTestId('rest-choice-offers').count()) {
+        log('start-node arrival rest took the screen — resting and moving on')
+        await page.getByTestId('rest-choice-offer-rest').click({ timeout: 5000 })
+        await page.getByTestId('rest-claim').click({ timeout: 5000 })
+    }
 
     if (await page.getByTestId('cutscene-advance').count()) {
         log('start-node arrival cutscene took the screen — playing it out')
