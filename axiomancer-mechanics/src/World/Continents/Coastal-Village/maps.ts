@@ -20,10 +20,13 @@ import { shrineKeeper, chronicler, wanderingPhilosopher, forestRanger, hermitSag
 
 /**
  * CoastalContinentMapNames are all the maps in the Coastal Continent
- * - 'fishing-village': Starting village. Quest giver + shop + boss chain.
+ * - 'breakwater': Act 1, map 1 — the storm coast, where a new game starts
+ *   (map revamp M3a, D27). Defined in `./breakwater.ts`.
+ * - 'fishing-village': The first map before Act 1. Quest giver + shop + boss chain.
  * - 'northern-forest': Small forest. Gather Wood.
  */
 export type CoastalContinentMapNames =
+  'breakwater' |
   'fishing-village' |
   'northern-forest';
 

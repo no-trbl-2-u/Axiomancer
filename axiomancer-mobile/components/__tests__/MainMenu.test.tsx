@@ -27,7 +27,7 @@ describe('MainMenu', () => {
         expect(screen.getByText(MAIN_MENU_COPY.newGame)).toBeTruthy();
         expect(screen.getByText(MAIN_MENU_COPY.loadGame)).toBeTruthy();
         expect(screen.getByText(MAIN_MENU_COPY.settings)).toBeTruthy();
-        expect(screen.getByText(/chronicle I · Level 1 · Fishing Village · moments ago/)).toBeTruthy();
+        expect(screen.getByText(/chronicle I · Level 1 · Breakwater · moments ago/)).toBeTruthy();
 
         fireEvent.press(screen.getByTestId('main-menu-continue'));
         fireEvent.press(screen.getByTestId('main-menu-new-game'));

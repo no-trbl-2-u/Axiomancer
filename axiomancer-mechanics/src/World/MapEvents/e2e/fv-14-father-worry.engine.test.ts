@@ -28,7 +28,7 @@ import '../content';
 
 /** Resolves fv-14 on a fresh fishing-village world and returns its narration payload. */
 function fv14Payload(): NarrationPayload {
-    const base = { ...createNewGameState(), world: createStartingWorld() };
+    const base = { ...createNewGameState(), world: createStartingWorld('fishing-village') };
     const def = getMapDefinition('coastal-continent', 'fishing-village');
     const map: MapState = createMapState(def);
     const state: GameState = { ...base, world: { ...base.world, currentMap: map } };

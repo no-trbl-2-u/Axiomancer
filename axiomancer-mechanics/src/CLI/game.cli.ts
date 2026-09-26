@@ -47,6 +47,7 @@ import { GAME_STATE_VERSION } from '../Game/game.reducer';
 import { migrate } from '../Game/game.migrate';
 import { buildStateFromFixture } from '../Game/fixtures';
 import type { GameState } from '../Game/types';
+import { createStartingWorld, STARTABLE_MAPS } from '../World';
 import { describeFixtures, FIXTURE_LIST_REF, resolveStateFixture } from './fixture-boot';
 import { createEventEmitter } from '../Game/events';
 import { nullAdapter } from '../Game/persistence/null.adapter';
@@ -89,7 +90,7 @@ const codexLookup: Map<string, CodexEntry> = (() => {
  * boots exactly that state; without it, the historical blank L1 5/5/5
  * character (configure via the DEV menu).
  */
-async function bootstrapStore(adapter: PersistenceAdapter, initial?: GameState): Promise<GameStoreHandle> {
+async function bootstrapStore(adapter: PersistenceAdapter, initial?: GameState, startMap?: MapName): Promise<GameStoreHandle> {
     const events = createEventEmitter();
     events.onAny(emit);
     // Phase 30 unit 2 — surface newly-eligible cards after a level-up.
@@ -119,7 +120,9 @@ async function bootstrapStore(adapter: PersistenceAdapter, initial?: GameState):
     });
     log('\nStarting with a blank character (level 1, 5/5/5). Use the DEV menu to configure.\n');
 
-    const store = createGameStore(adapter, { player }, events);
+    // `--start-map` (map revamp M3a): a fresh game placed on another map.
+    const world = startMap ? { world: createStartingWorld(startMap) } : {};
+    const store = createGameStore(adapter, { player, ...world }, events);
     logState('bootstrap', null, store.getState(), { boot: 'blank' });
     return store;
 }
@@ -958,7 +961,15 @@ export async function runGameCli(rawArgs = process.argv.slice(2)): Promise<void>
         initial = buildStateFromFixture(fixture);
     }
 
-    const store = await bootstrapStore(nullAdapter, initial);
+    let startMap: MapName | undefined;
+    if (flags.startMap !== undefined) {
+        if (!STARTABLE_MAPS.includes(flags.startMap as MapName)) {
+            throw new Error(`--start-map: unknown map '${flags.startMap}'. Startable maps: ${STARTABLE_MAPS.join(', ')}`);
+        }
+        startMap = flags.startMap as MapName;
+    }
+
+    const store = await bootstrapStore(nullAdapter, initial, startMap);
 
     if (flags.route && flags.route.length > 0) {
         await runScriptedRoute(store, flags);

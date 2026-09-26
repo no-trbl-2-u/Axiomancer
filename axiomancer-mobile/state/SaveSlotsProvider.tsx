@@ -24,12 +24,16 @@ import {
 } from './menu/store-actions';
 import { createMemorySlotStore } from './persistence/memorySlotStore';
 import type { SaveSlotId, SaveSlotStore, SaveSlotSummary } from './persistence/saveSlots';
+import type { MapName } from '@mechanics';
 
 export interface SaveSlotsApi {
     /** The slot store itself (for the few callers that need `readSlot` / `clearSlot`). */
     slots: SaveSlotStore;
-    /** NEW GAME into `slot` (overwrite is the caller's confirmed decision). */
-    startNewGame: (slot: SaveSlotId) => void;
+    /**
+     * NEW GAME into `slot` (overwrite is the caller's confirmed decision).
+     * `startMap` is the dev tools' "start on any map"; players never pass it.
+     */
+    startNewGame: (slot: SaveSlotId, startMap?: MapName) => void;
     /** LOAD GAME from `slot`; `false` when the slot holds nothing loadable. */
     loadGame: (slot: SaveSlotId) => boolean;
     /** CONTINUE the most recent slot; `false` when nothing is saved. */
@@ -57,7 +61,7 @@ export function SaveSlotsProvider({ children, slots }: SaveSlotsProviderProps) {
         const s = slots ?? createMemorySlotStore();
         return {
             slots: s,
-            startNewGame: (slot) => { startNewGameAction(store, s, slot); },
+            startNewGame: (slot, startMap) => { startNewGameAction(store, s, slot, startMap); },
             loadGame: (slot) => loadGameAction(store, s, slot),
             continueGame: () => continueGameAction(store, s),
             returnToTitle: () => returnToTitleAction(store, s),

@@ -43,7 +43,7 @@ describe('summarizeSlot', () => {
         const s = summarizeSlot(1, { schemaVersion: 3, state, savedAt: 5_000 }, state);
         expect(s.status).toBe('saved');
         expect(s.level).toBe(1);
-        expect(s.mapName).toBe('fishing-village');
+        expect(s.mapName).toBe('breakwater');
         expect(s.runId).toBe(state.runId);
         expect(s.savedAt).toBe(5_000);
     });

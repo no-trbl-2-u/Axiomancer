@@ -25,7 +25,7 @@
  *   returnToTitleAction(store, slots)          save + flush so the menu is current
  */
 
-import { createNewGameState, getLogger, getRng, type GameState } from '@mechanics';
+import { createNewGameState, getLogger, getRng, type GameState, type MapName } from '@mechanics';
 
 import type { SaveSlotId, SaveSlotStore } from '../persistence/saveSlots';
 import { mostRecentSlot } from '../persistence/saveSlots';
@@ -81,9 +81,18 @@ export function hydrateStoreWithGameState(store: AppStore, next: GameState): voi
  *
  * Overwriting an occupied slot is the CALLER's decision (the slot screen
  * confirms it); this verb does not check.
+ *
+ * `startMap` (map revamp M3a, dev tools only) starts the fresh game on another
+ * campaign map instead of the default start (the Breakwater, D27). The player
+ * path never passes it.
  */
-export function startNewGameAction(store: AppStore, slots: SaveSlotStore, slot: SaveSlotId): GameState {
-    const fresh = createNewGameState();
+export function startNewGameAction(
+    store: AppStore,
+    slots: SaveSlotStore,
+    slot: SaveSlotId,
+    startMap?: MapName,
+): GameState {
+    const fresh = createNewGameState({ startMap });
     slots.selectSlot(slot);
     hydrateStoreWithGameState(store, fresh);
     try {
@@ -91,7 +100,7 @@ export function startNewGameAction(store: AppStore, slots: SaveSlotStore, slot: 
     } catch {
         /* persistence must not block the start of a run */
     }
-    getLogger().info('persistence', 'new-game', { slot, runId: fresh.runId });
+    getLogger().info('persistence', 'new-game', { slot, runId: fresh.runId, startMap: fresh.world.currentMap.name });
     return fresh;
 }
 

@@ -8,7 +8,7 @@
  */
 
 import { afterEach, describe, it, expect, jest } from '@jest/globals';
-import { createMapState, getMapDefinition, getNodeEventPool } from '@mechanics';
+import { createMapState, getMapDefinition, getNodeEventPool, createStartingWorld } from '@mechanics';
 
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import { createAppActions } from '@/state/actions';
@@ -31,7 +31,7 @@ afterEach(() => {
 
 describe('selectExplorationViewModel: shape contract', () => {
     it('returns a totally-shaped ExplorationViewModel for a fresh game', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
 
         const vm: ExplorationViewModel = selectExplorationViewModel(store.getState());
 
@@ -49,7 +49,7 @@ describe('selectExplorationViewModel: shape contract', () => {
     });
 
     it('eventCallout is either null or a {title, iconKey} object', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
 
         const vm = selectExplorationViewModel(store.getState());
 
@@ -64,7 +64,7 @@ describe('selectExplorationViewModel: shape contract', () => {
 
 describe('selectExplorationViewModel: invariants', () => {
     it('the returned VM is deep-frozen', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
 
         const vm = selectExplorationViewModel(store.getState());
 
@@ -78,7 +78,7 @@ describe('selectExplorationViewModel: invariants', () => {
 describe('selectExplorationViewModel: store lifecycle', () => {
     it('selecting the VM does not call adapter.save', () => {
         const adapter = createMemoryAdapter();
-        const store = createAppStore({ adapter });
+        const store = createAppStore({ adapter, overrides: { world: createStartingWorld('fishing-village') } });
         const saveSpy = jest.spyOn(adapter, 'save');
 
         selectExplorationViewModel(store.getState());
@@ -93,7 +93,7 @@ describe('selectExplorationViewModel: store lifecycle', () => {
 
 describe('selectExplorationViewModel: engine reads', () => {
     it('classifies the starting node as `current` and seeds available/locked', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
 
         const vm = selectExplorationViewModel(store.getState());
 
@@ -108,7 +108,7 @@ describe('selectExplorationViewModel: engine reads', () => {
     });
 
     it('exposes options for each currently available node with a thematic description', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
 
         const vm = selectExplorationViewModel(store.getState());
 
@@ -119,7 +119,7 @@ describe('selectExplorationViewModel: engine reads', () => {
     });
 
     it('marks available encounter nodes as triggersCombat; rest nodes do not', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
 
         // THE THREE GATES: fv-2's only engine neighbour is the first gate
@@ -160,7 +160,7 @@ describe('selectExplorationViewModel: engine reads', () => {
         // surfacing as "this step lets you flee" rather than
         // "this step starts combat". Pin the new mapping so a
         // future refactor doesn't silently revert.
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
         actions.moveTo('fv-2'); // unlocks the first gate fv-26 (encounter)
 
@@ -181,7 +181,7 @@ describe('selectExplorationViewModel: engine reads', () => {
 
 describe('moveTo action: happy path', () => {
     it('marks the target completed, advances currentNodeId, and unlocks connected nodes', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
 
         const result = actions.moveTo('fv-2');
@@ -208,7 +208,7 @@ describe('moveTo action: happy path', () => {
     });
 
     it('refreshes the options drawer with the new available nodes after a move', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
 
         actions.moveTo('fv-2');
@@ -234,7 +234,7 @@ describe('moveTo action: happy path', () => {
 
 describe('moveTo action: locked / invalid targets', () => {
     it('refuses to move to a locked node and leaves state untouched', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
         const before = store.getState();
 
@@ -249,7 +249,7 @@ describe('moveTo action: locked / invalid targets', () => {
     });
 
     it('refuses to move to a non-existent node', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
 
         const result = actions.moveTo('not-a-real-node');
@@ -258,7 +258,7 @@ describe('moveTo action: locked / invalid targets', () => {
     });
 
     it('allows re-entering a reusable encounter node (gauntlet re-fight)', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
 
         // fv-13 resolves to an engine `encounter` kind (reached via
@@ -275,7 +275,7 @@ describe('moveTo action: locked / invalid targets', () => {
     });
 
     it('exposes locked nodes through the VM so the screen can desaturate them', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
 
         const vm = selectExplorationViewModel(store.getState());
 
@@ -294,7 +294,7 @@ describe('moveTo action: locked / invalid targets', () => {
 
 describe('changeMap action: map transition', () => {
     it('swaps the engine currentMap and resets currentNodeId to the new startingNode', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
 
         actions.changeMap('northern-forest');
@@ -306,7 +306,7 @@ describe('changeMap action: map transition', () => {
     });
 
     it('loads the new layout fixture so node positions and labels update', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
 
         actions.changeMap('northern-forest');
@@ -336,7 +336,7 @@ describe('changeMap action: map transition', () => {
 
 describe('exploration lifecycle: multi-step navigation', () => {
     it('encounter nodes stay reusable and unlock their engine neighbours', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
 
         actions.moveTo('fv-2');  // Old Marrow's interaction node
@@ -395,7 +395,7 @@ describe('exploration lifecycle: multi-step navigation', () => {
      */
     it('a move IS a save checkpoint — mobile policy, at the Spec 09 Q4 / Phase 51 granularity', () => {
         const adapter = createMemoryAdapter();
-        const store = createAppStore({ adapter });
+        const store = createAppStore({ adapter, overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
         const saveSpy = jest.spyOn(adapter, 'save');
 
@@ -434,7 +434,7 @@ describe('exploration lifecycle: multi-step navigation', () => {
         // `MOVE_TO_NODE` IS on the engine's DURABLE_ACTIONS allowlist, so a
         // bare engine store would write here. On mobile it must not.
         const engineArm = createMemoryAdapter();
-        const engineStore = createAppStore({ adapter: engineArm });
+        const engineStore = createAppStore({ adapter: engineArm, overrides: { world: createStartingWorld('fishing-village') } });
         const engineSpy = jest.spyOn(engineArm, 'save');
 
         engineStore.getState().moveToNode('fv-2');
@@ -445,7 +445,7 @@ describe('exploration lifecycle: multi-step navigation', () => {
         // explicit checkpoint `moveToAction` takes (`state/actions.ts`),
         // which is mobile policy, not the engine allowlist.
         const mobileArm = createMemoryAdapter();
-        const mobileStore = createAppStore({ adapter: mobileArm });
+        const mobileStore = createAppStore({ adapter: mobileArm, overrides: { world: createStartingWorld('fishing-village') } });
         const mobileSpy = jest.spyOn(mobileArm, 'save');
 
         createAppActions(mobileStore).moveTo('fv-2');
@@ -455,7 +455,7 @@ describe('exploration lifecycle: multi-step navigation', () => {
 
     it('a UI-tier action still does NOT write through (Spec 09 Path B)', () => {
         const adapter = createMemoryAdapter();
-        const store = createAppStore({ adapter });
+        const store = createAppStore({ adapter, overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
         const saveSpy = jest.spyOn(adapter, 'save');
 
@@ -473,7 +473,7 @@ describe('exploration lifecycle: multi-step navigation', () => {
 
 describe('moveTo action: engine discoveredNodes population (Phase 27)', () => {
     it('populates discoveredNodes with the moved-to node’s neighbours per engine MapDefinition', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
 
         actions.moveTo('fv-2');
@@ -490,7 +490,7 @@ describe('moveTo action: engine discoveredNodes population (Phase 27)', () => {
     });
 
     it('revealing the same neighbours twice is idempotent', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
 
         actions.moveTo('fv-2');
@@ -511,7 +511,7 @@ describe('moveTo action: engine discoveredNodes population (Phase 27)', () => {
 
 describe('resolveCurrentMapEvent: engine consumedNodes population (Phase 27)', () => {
     it('marks the current node consumed when a non-none event resolves', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
         // Walk to a node before resolving — the starting node may be a
         // 'none' kind in some fixtures.
@@ -532,7 +532,7 @@ describe('resolveCurrentMapEvent: engine consumedNodes population (Phase 27)', (
     });
 
     it('does NOT mark consumed when event.kind is “none”', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
         // The starting node may or may not have an event pool. The
         // assertion is robust either way: if the produced-true branch
@@ -553,7 +553,7 @@ describe('resolveCurrentMapEvent: engine consumedNodes population (Phase 27)', (
 
 describe('selectExplorationViewModel: drawer copy', () => {
     it('exposes a lowercase-ritual empty-state and swipe hint on the VM', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const vm = selectExplorationViewModel(store.getState());
 
         expect(vm.drawerCopy.emptyMessage).toBe('the paths close as you go deeper — tap a glowing node to travel.');
@@ -564,7 +564,7 @@ describe('selectExplorationViewModel: drawer copy', () => {
     });
 
     it('drops the prior sentence-case empty literal that mismatched the screen voice', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const vm = selectExplorationViewModel(store.getState());
 
         // Pin regression: the pre-fix copy started with a capital and
@@ -586,7 +586,7 @@ describe('selectExplorationViewModel: drawer copy', () => {
 
 describe('selectExplorationViewModel: LEAGUES bucket', () => {
     it('populates a non-empty leagues value (I | II | III) on every option', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const vm = selectExplorationViewModel(store.getState());
 
         expect(vm.options.length).toBeGreaterThan(0);
@@ -596,7 +596,7 @@ describe('selectExplorationViewModel: LEAGUES bucket', () => {
     });
 
     it('buckets options monotonically by distance from the current node', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const vm = selectExplorationViewModel(store.getState());
 
         if (vm.options.length < 2) return;
@@ -626,7 +626,7 @@ describe('selectExplorationViewModel: LEAGUES bucket', () => {
     });
 
     it('respects the documented thresholds (≤80=I, ≤160=II, >160=III)', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const vm = selectExplorationViewModel(store.getState());
 
         const current = vm.nodes.find((n) => n.id === vm.currentNodeId);
@@ -667,7 +667,7 @@ describe('encounter-modal seam (Tick D)', () => {
         actions: ReturnType<typeof createAppActions>;
         encounterNodeId: string | null;
     } {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
         const vm = selectExplorationViewModel(store.getState());
         // Find the first available encounter / boss node in the starting
@@ -758,7 +758,7 @@ describe('encounter-modal seam (Tick D)', () => {
  */
 describe('FE-008: legend and counter agree on SEALED', () => {
     it('uses one word for the locked state across the legend strip', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const vm = selectExplorationViewModel(store.getState());
         expect(vm.legend.left).toContain('SEALED');
         expect(vm.legend.left).not.toContain('SHUT');
@@ -790,7 +790,7 @@ describe('BUG-01: the legend counts the nodes the map actually draws', () => {
     };
 
     it('agrees with the pips on a fresh map', () => {
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const vm = selectExplorationViewModel(store.getState());
         const counter = readCounter(vm.legend.right);
 
@@ -803,7 +803,7 @@ describe('BUG-01: the legend counts the nodes the map actually draws', () => {
         // counts. The start node stops being reachable, was never completed,
         // and was never in `lockedNodes` — so it became a sealed pip that the
         // counter did not count.
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
         actions.moveTo('fv-2');
 
@@ -817,7 +817,7 @@ describe('BUG-01: the legend counts the nodes the map actually draws', () => {
     it('agrees again after a second move', () => {
         // Cheap insurance that the agreement is structural, not a coincidence
         // that happens to hold at one position.
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
         actions.moveTo('fv-2');
         actions.moveTo('fv-26'); // the first gate, fv-2's only neighbour
@@ -843,7 +843,7 @@ describe('selectExplorationViewModel: arrivalPending', () => {
         // and that record rides the save — this flag is how the screen reads
         // it back.
         const adapter = createMemoryAdapter();
-        const store = createAppStore({ adapter });
+        const store = createAppStore({ adapter, overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
         actions.moveTo('fv-2');
         actions.moveTo('fv-26');
@@ -862,7 +862,7 @@ describe('selectExplorationViewModel: arrivalPending', () => {
         // `pendingArrival` — so an answered arrival is never re-offered,
         // here or after a reload.
         const adapter = createMemoryAdapter();
-        const store = createAppStore({ adapter });
+        const store = createAppStore({ adapter, overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
         actions.moveTo('fv-2');
         actions.moveTo('fv-26');
@@ -887,7 +887,7 @@ describe('selectExplorationViewModel: arrivalPending', () => {
         // placement as an unanswered arrival. The map screen paid it on
         // mount, and `/exploration?fixture=sage-fv-boss-gate` engaged the
         // fv-9 boss instead of drawing the map. A placement writes no debt.
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         expect(jumpToNode(store, 'fv-9')).toBe(true);
 
         const vm = selectExplorationViewModel(store.getState());
@@ -910,7 +910,7 @@ describe('selectExplorationViewModel: arrivalPending', () => {
         // a door), and resolving it clears the debt on the map being LEFT,
         // before the crossing files that map away — otherwise returning
         // through the door would cross again with no input.
-        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
         const world = store.getState().world;
         // fv-10 is the northern-forest door. Walk onto it from its neighbour

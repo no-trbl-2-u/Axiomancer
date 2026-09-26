@@ -14,6 +14,7 @@
  * Hermetic = self-contained + deterministic + isolated. See `docs/testing.md`.
  */
 
+import { createStartingWorld } from '@mechanics';
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { act, render } from '@testing-library/react-native';
 import React from 'react';
@@ -55,7 +56,7 @@ afterEach(() => {
 });
 
 function makeStore(): AppStore {
-    return createAppStore({ adapter: createMemoryAdapter() });
+    return createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
 }
 
 function mountExploration(store: AppStore) {
@@ -171,7 +172,7 @@ describe('start-node arrival: the map resolves the node it puts you on', () => {
 describe('an arrival the player never answered survives a reload', () => {
     it('engages the encounter when the map screen remounts on the saved node', () => {
         const adapter = createMemoryAdapter();
-        const store = createAppStore({ adapter });
+        const store = createAppStore({ adapter, overrides: { world: createStartingWorld('fishing-village') } });
         const actions = createAppActions(store);
         actions.moveTo('fv-2');
         actions.moveTo('fv-26');

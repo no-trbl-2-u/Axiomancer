@@ -18,6 +18,7 @@
  * payload between save/load so the round-trip assertion stays self-contained.
  */
 
+import { createStartingWorld } from '../../World';
 import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
@@ -57,7 +58,7 @@ describe('Game loop — full transcript through gameReducer', () => {
             ...Player,
             experience: Player.experienceToNextLevel - 1,
         };
-        const store = createGameStore(adapter, { player: seededPlayer }, emitter);
+        const store = createGameStore(adapter, { player: seededPlayer, world: createStartingWorld('fishing-village') }, emitter);
 
         // 1. START_COMBAT — stages the encounter in the store.
         store.getState().dispatch({
@@ -128,7 +129,7 @@ describe('Game loop — full transcript through gameReducer', () => {
 
 describe('gameReducer — pure path (no store)', () => {
     it('SAVE_GAME refreshes rngState; LOAD_GAME is a reducer-level no-op', () => {
-        const s = createNewGameState();
+        const s = createNewGameState({ startMap: 'fishing-village' });
         // SAVE_GAME stamps a fresh `rngState` snapshot (Phase 11) — every other
         // field passes through unchanged.
         const afterSave = gameReducer(s, { type: 'SAVE_GAME' });
@@ -138,7 +139,7 @@ describe('gameReducer — pure path (no store)', () => {
     });
 
     it('MOVE_TO_NODE returns a new WorldState while keeping unrelated state intact', () => {
-        const s = createNewGameState();
+        const s = createNewGameState({ startMap: 'fishing-village' });
         const next = gameReducer(s, { type: 'MOVE_TO_NODE', payload: { nodeId: 'fv-2' } });
         expect(next.world.currentMap.currentNode).toBe('fv-2');
         expect(next.player).toBe(s.player);
@@ -148,13 +149,13 @@ describe('gameReducer — pure path (no store)', () => {
 
 describe('migrate — version handling', () => {
     it('passes through a current-version payload unchanged', () => {
-        const s = createNewGameState();
+        const s = createNewGameState({ startMap: 'fishing-village' });
         const out = migrate(s, GAME_STATE_VERSION, GAME_STATE_VERSION);
         expect(out).toEqual(s);
     });
 
     it('refuses payloads from a non-current runtime version', () => {
-        const s = createNewGameState();
+        const s = createNewGameState({ startMap: 'fishing-village' });
         expect(() => migrate(s, GAME_STATE_VERSION + 1, GAME_STATE_VERSION))
             .toThrow(/not supported/);
     });

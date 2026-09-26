@@ -63,14 +63,17 @@ M3 starts before #384 is in.
 | Phase | Scope | Notes |
 |---|---|---|
 | **M3a: the coast, and the new start** | D26 name pick → engine `MapDefinition` under `src/World/Continents/Coastal-Village/` (or a sibling dir) + `map.library.ts` union + `map.registry.ts` + `nodeIdToMapName()` prefix + event pools in `MapEvents/content.ts` borrowed per D29 + mobile layout in `exploration-maps/` registered in `index.ts` + an exit door to fishing-village. **Plus D27:** `createStartingWorld()` (`src/World/index.ts:13`) starts on the coast. | The heaviest PR. See §3 for the start-map fallout. |
-| **M3b: the forest** | Same checklist. The coast's exit door now leads to the forest, and the forest's leads to fishing-village. | |
+| **M3b: the forest** | Same checklist. The coast's exit door now leads to the forest, and the forest's leads to fishing-village. | Reuse `ACT1_SHEET_SIZE` from `breakwater.layout.ts` and add the map to `act1-layouts.test.ts`'s `ACT1_MAPS`. |
+| **M3b+: Android preview build** (T, 2026-09-26) | Once M3b is merged, trigger the EAS preview APK so T can play the first two Act 1 maps on a phone: `gh workflow run preview-build.yml -f platform=android -f profile=preview` (the `preview` profile in `axiomancer-mobile/eas.json` builds an internal-distribution APK; `npm run deploy:preview` is the local equivalent). Hand T the build's install link. | Not a PR. Watch the run to completion and report its link, or its failure with the log. |
 | **M3c: the mountains** | Same checklist, under `northern-continent`. The first cross-continent step in Act 1: follow how the shipped chain's travel doors cross continents, not a new mechanism. | |
 | **M3d: the underworld** | Same checklist, under `northern-continent`. Its exit door leads to fishing-village. Plate or halo the node marks, because this plate is the densest and darkest. | Check with `verify:visual`. |
 | **M4: the Labyrinth door (D24)** | The underworld's `vault-door` landmark node enters the Aporia on arrival through `enterLabyrinthAction`'s snapshot and return path (`mobile/state/labyrinth/store-actions.ts:107`), with a hermetic test for enter, return and resume. | Its own PR, after M3d. The `'travel'` MapEvent (`MapEvents/types.ts:183`, `handlers.ts:271`) does not take the labyrinth path today. The act content and `plan/labyrinth/acts` are normative. |
 | **M5: docs** | Rewrite `docs/world.md` (the "Map Registry", "Movement … linear with completed-lock" and "Demo Content" sections are stale) and `skills/forge.md`'s "column-layering law" line to describe D16's shape and the `MapSheet`. | Can ride with M3d. |
 
-**Every Act 1 map layout's sheet:** `width`/`height` 1000×1000 (the plate is
-square), `scale` at least 1.6 so the canvas is at least 1600px on both
+**Every Act 1 map layout's sheet:** `ACT1_SHEET_SIZE` (M3a): `width`/`height`
+1000×1000 (the plate is square), `scale` 2.4, the plate's native 2400px. (1.6
+left the plate's edge and black showing on a desktop opening fit, which zooms
+out to the 0.6 floor; 2.4 still spans 1440px there.) The canvas is at least 1600px on both
 axes (D16), `backdrop: ACT1_PLATES.<region>`, `plateOpacity` about 0.85,
 `chartTexture: false`. Node `x`/`y` = landmark fraction × 1000. The
 engine's forward column skeleton still governs progression (D16); only
@@ -119,10 +122,41 @@ debug-travel entry first, then the start move. Don't ship a coast that no
 path reaches: under D27 it is the start, so the split's first half needs
 the start move before it merges to main, or a door.
 
+## 3a. M3a — shipped state (2026-09-26)
+
+M3a is on branch `claude/map-revamp-m3a` (PR opened the same day). What it
+settled, so M3b–d copy it rather than re-derive it:
+
+- **The Breakwater:** `breakwater`, prefix `bw-`, 18 nodes on the 18 coast
+  landmarks (D25), columns as rings out from the windmill, door at the river
+  bridge. Engine: `Continents/Coastal-Village/breakwater.ts`. Events:
+  `BREAKWATER_POOLS` in `MapEvents/content.ts`, built from fishing-village's
+  builders. Enemy pool shared via `FISHING_VILLAGE_POOL` in `enemy.library.ts`.
+- **The start (D27):** `STARTING_MAP` in the World barrel;
+  `createStartingWorld(startMap?)` and `createNewGameState({ startMap })`
+  place a fresh game on any campaign map (`STARTABLE_MAPS`). The fallout was
+  far smaller than the 82-file estimate: 15 mechanics and 8 mobile test files.
+  Tests about fishing-village content now pass `'fishing-village'` explicitly.
+- **Start on any map (T, 2026-09-26):** CLI `--start-map <map>`, and the dev
+  menu's **DEBUG · NEW GAME ON** row (a fresh run on any campaign map in the
+  active slot). Travel-without-reset stays in the existing TRAVEL row.
+- **Agent calls T may overrule:**
+  - The Breakwater has **no boss**. Its last fight is water-holger at the
+    watchtower, since fishing-village's boss (the King of Revenge) is still
+    ahead in the shipped chain.
+  - The windmill start is a **rest (camp)**, so a new game opens on the rest
+    screen, then the first-node relic.
+  - The Breakwater has **no combat plate** yet. It is listed in
+    `AWAITING_PLATE` and falls back like the Northern Forest.
+  - Fishing-village's own lore also has a "breakwater": its King of Revenge
+    "rises from the breakwater". The two names now overlap.
+- **Fixed on the way:** the map vignette SVG had no size and rendered as a
+  dark 300×150 box on web (hidden under the dim atmosphere plates).
+- **Baseline:** re-stamped at `e2befb89`. The matrix did not move (stamp-only diff).
+
 ## 4. Definition of done for the next session
 
-- #382–#384 merged.
-- M3a (coast, name picked, new start) merged, or in review with its gates
-  green (mechanics + mobile verify, `verify:visual`, baseline re-stamped if
-  the matrix moved).
-- This file updated with what remains (M3b–d, M4, M5).
+- M3a merged.
+- M3b (the forest, name picked per D26) merged, then the Android preview
+  build (M3b+) triggered and its install link handed to T.
+- This file updated with what remains (M3c–d, M4, M5).

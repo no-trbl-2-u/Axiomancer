@@ -15,6 +15,11 @@
  *            (`completeCurrentMap`) to drive late-game map bookkeeping.
  *   THE APORIA — enter act I / II / III of the labyrinth via
  *            `actions.enterLabyrinth` and open `/labyrinth`.
+ *   NEW GAME ON — (map revamp M3a) start a FRESH game on any campaign map
+ *            (`STARTABLE_MAPS`) in the active save slot: the same new-game
+ *            verb the slot screen uses, placed on the chosen map instead of
+ *            the default start (the Breakwater, D27). Unlike TRAVEL, the run
+ *            is new — no carried items, coin, XP, flags or quests.
  *
  * Firing a node event jumps to the WILDS tab first so overlays and gated
  * routes stack on top of the map. Renders null outside dev builds.
@@ -22,11 +27,13 @@
 
 import React, { useState } from 'react';
 import { useRouter } from '@/lib/platform/router';
-import type { GameState, LabyrinthActId } from '@mechanics';
+import { STARTABLE_MAPS, STARTING_MAP } from '@mechanics';
+import type { GameState, LabyrinthActId, MapName } from '@mechanics';
 
 import { DevButton, DevButtons, DevChip, DevChips, DevRow } from '@/components/dev/DevControls';
 import { isDevToolsEnabled } from '@/lib/buildProfile';
 import { useGameActions, useGameState, useGameStore } from '@/state/GameStoreProvider';
+import { useSaveSlots } from '@/state/SaveSlotsProvider';
 import {
     completeCurrentMap,
     jumpToNode,
@@ -51,6 +58,7 @@ export function DebugWorldTravel() {
     const currentMap = useGameState((s) => (s as unknown as GameState).world?.currentMap?.name ?? null);
     const currentNode = useGameState((s) => (s as unknown as GameState).world?.currentMap?.currentNode ?? null);
     const [feedback, setFeedback] = useState<string | null>(null);
+    const { slots, startNewGame } = useSaveSlots();
 
     if (!isDevToolsEnabled()) return null;
     if (currentMap === null) return null;
@@ -77,6 +85,14 @@ export function DebugWorldTravel() {
     const onComplete = () => {
         const unlocked = completeCurrentMap(store);
         setFeedback(unlocked ? `completed · ${currentMap} · unlocked ${unlocked}` : `completed · ${currentMap} · nothing left to unlock`);
+    };
+
+    const onNewGameOn = (map: MapName) => {
+        // The active slot, or slot 1 when none is chosen yet (a fixture boot).
+        const slot = slots.getActiveSlot() ?? 1;
+        startNewGame(slot, map);
+        router.push('/(tabs)/exploration');
+        setFeedback(`new game · slot ${slot} · ${map}`);
     };
 
     const onAct = (actId: LabyrinthActId) => {
@@ -116,6 +132,26 @@ export function DebugWorldTravel() {
                             onPress={() => onNode(n.id, n.kind)}
                             a11y={`Jump to node ${n.id} and fire its ${n.kind ?? 'empty'} event`}
                             testID={`debug-travel-node-${n.id}`}
+                        />
+                    ))}
+                </DevChips>
+            </DevRow>
+
+            <DevRow
+                label="DEBUG · NEW GAME ON"
+                sub={`a fresh run on any map · overwrites the active slot · default ${STARTING_MAP}`}
+                stacked
+                testID="debug-new-game-on"
+            >
+                <DevChips testID="debug-new-game-maps">
+                    {STARTABLE_MAPS.map((m) => (
+                        <DevChip
+                            key={m}
+                            label={m}
+                            accent={m === STARTING_MAP}
+                            onPress={() => onNewGameOn(m)}
+                            a11y={`Start a new game on ${m}`}
+                            testID={`debug-new-game-on-${m}`}
                         />
                     ))}
                 </DevChips>

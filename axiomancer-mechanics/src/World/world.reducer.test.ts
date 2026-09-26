@@ -9,7 +9,7 @@ import { createStartingWorld } from './index';
 import { getMapDefinition } from './map.registry';
 import type { MapState, WorldState } from './types';
 
-const world = () => createStartingWorld();
+const world = () => createStartingWorld('fishing-village');
 
 /** Test fixture: block the route between two nodes (either direction). The
  *  engine's own blocker (`blockMapRoute`) was deleted in TRIM THE FAT T2a;
@@ -21,7 +21,7 @@ const withBlockedRoute = (map: MapState, from: string, to: string, reason: strin
 
 /** A fishing-village world with the runtime map fields overridden. */
 const fvWorld = (patch: Partial<MapState>): WorldState => {
-    const w = createStartingWorld();
+    const w = createStartingWorld('fishing-village');
     return { ...w, currentMap: { ...w.currentMap, ...patch } };
 };
 
@@ -229,7 +229,7 @@ describe('D1 — the frontier', () => {
     it('reports an exhausted frontier as the end of the walk, not a strand', () => {
         const everything = fvWorld({
             currentNode: 'fv-10',
-            completedNodes: createStartingWorld().currentMap.lockedNodes.concat(['fv-1', 'fv-2']),
+            completedNodes: createStartingWorld('fishing-village').currentMap.lockedNodes.concat(['fv-1', 'fv-2']),
         });
         expect(isFrontierExhausted(everything.currentMap)).toBe(true);
         expect(isStranded(everything.currentMap)).toBe(true);

@@ -26,7 +26,7 @@ afterEach(() => vi.restoreAllMocks());
 describe('starting-quest is reachable in live play (Phase 53c)', () => {
     it('walks a fresh state to Old Marrow, resolves his greeting, and starts the quest', () => {
         mockSequentialRng(0.5);
-        const state = createNewGameState();
+        const state = createNewGameState({ startMap: 'fishing-village' });
 
         // The one legal move from the start node.
         const world = moveToNode(state.world, 'fv-2');

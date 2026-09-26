@@ -30,7 +30,7 @@ const REACH_FV2 = 'reach-fv2' as QuestName;
 const COLLECT_DRIFTWOOD = 'collect-driftwood' as QuestName;
 
 function freshState(): GameState {
-    return { ...createNewGameState(), world: createStartingWorld() };
+    return { ...createNewGameState(), world: createStartingWorld('fishing-village') };
 }
 
 function withPool(state: GameState, pool: MapEventPool): GameState {

@@ -8,6 +8,7 @@
  * `state.player.currency`, and `state.flags`.
  */
 
+import { createStartingWorld } from '../../World';
 import { describe, it, expect } from 'vitest';
 import { createGameStore } from '../store';
 import { nullAdapter } from '../persistence/null.adapter';
@@ -27,7 +28,7 @@ describe('Old Marrow — moral dialogue tree (Phase 14)', () => {
 
     it('declining politely from the offer node shifts +2', () => {
         const tree = findOldMarrowTree();
-        const store = createGameStore(nullAdapter);
+        const store = createGameStore(nullAdapter, { world: createStartingWorld('fishing-village') });
         const offer = tree.nodes['offer']!;
         const decline = offer.choices!.find(c => c.text.startsWith("I've got my own dead"))!;
         expect(decline.effect?.moralDelta).toBe(2);
@@ -42,7 +43,7 @@ describe('Old Marrow — moral dialogue tree (Phase 14)', () => {
 
     it('taking only half the reward shifts +5 and grants 12 coin', () => {
         const tree = findOldMarrowTree();
-        const store = createGameStore(nullAdapter);
+        const store = createGameStore(nullAdapter, { world: createStartingWorld('fishing-village') });
 
         // Simulate post-quest state: the player has completed the starting quest
         // so the `requires: { questCompleted: 'starting-quest' }` gate opens.
@@ -63,7 +64,7 @@ describe('Old Marrow — moral dialogue tree (Phase 14)', () => {
 
     it('demanding double shifts -4, grants 25 coin, sets marrow_pressed flag', () => {
         const tree = findOldMarrowTree();
-        const store = createGameStore(nullAdapter);
+        const store = createGameStore(nullAdapter, { world: createStartingWorld('fishing-village') });
 
         const baseState = store.getState();
         const completed = completeQuest(baseState.quests, 'starting-quest');
@@ -84,7 +85,7 @@ describe('Old Marrow — moral dialogue tree (Phase 14)', () => {
 
     it('moral shifts compose across choices in a single playthrough', () => {
         const tree = findOldMarrowTree();
-        const store = createGameStore(nullAdapter);
+        const store = createGameStore(nullAdapter, { world: createStartingWorld('fishing-village') });
 
         // Decline politely first (+2), then later accept the half-share (+5) =
         // +7 total. Re-prime quests between the two choices since they live on
@@ -101,7 +102,7 @@ describe('Old Marrow — moral dialogue tree (Phase 14)', () => {
 
     it('asking "where should I head" grants get-to-forest once starting-quest is complete (Phase 8)', () => {
         const tree = findOldMarrowTree();
-        const store = createGameStore(nullAdapter);
+        const store = createGameStore(nullAdapter, { world: createStartingWorld('fishing-village') });
 
         const baseState = store.getState();
         const primed = { ...baseState, quests: completeQuest(baseState.quests, 'starting-quest') };

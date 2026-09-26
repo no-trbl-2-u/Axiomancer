@@ -3560,11 +3560,21 @@ export const EnemyLibrary = [
  * only through the authored `impossible` playtest stage). `Sandbag_01` is a
  * test fixture and is likewise excluded.
  */
+/**
+ * fishing-village's pool, shared with the Breakwater (map revamp M3a, D29:
+ * Act 1 borrows the nearest shipped pool; no new enemies until the
+ * story-dependent revamp, D1 step 4).
+ */
+const FISHING_VILLAGE_POOL = [
+    GraveLarva, FloatEye, ChatteringSkull, LittleBelle, FootStealer, WaterHolger,
+    CursedHead, Ghast, DoomEgg, TheButcher, BrineHag, TheFerryman, KingOfRevenge,
+];
+
 export const EnemiesByMap = {
-    'fishing-village': [
-        GraveLarva, FloatEye, ChatteringSkull, LittleBelle, FootStealer, WaterHolger,
-        CursedHead, Ghast, DoomEgg, TheButcher, BrineHag, TheFerryman, KingOfRevenge,
-    ],
+    // The Breakwater's authored encounters pin their slugs in
+    // `MapEvents/content.ts`; this entry is what an unpinned draw reaches.
+    'breakwater': FISHING_VILLAGE_POOL,
+    'fishing-village': FISHING_VILLAGE_POOL,
     'northern-forest': [
         Wichtlein, Kudan, BullBegger, WeepingHead, GoblinShaman, Sugata, PaleBrood,
         TriEyes, Mabadi, FrayedOne, BoneTotem, BoneWizard, Mirac,

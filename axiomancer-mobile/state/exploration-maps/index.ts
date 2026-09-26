@@ -1,3 +1,4 @@
+import { breakwaterLayout } from './breakwater.layout';
 import { fishingVillageLayout } from './fishing-village.layout';
 import { northernForestLayout } from './northern-forest.layout';
 import { cavernsLayout } from './caverns.layout';
@@ -10,6 +11,8 @@ import type { MapLayout } from './types';
 export type { MapLayout, MapSheet, NodeLayout } from './types';
 
 const REGISTRY: Record<string, MapLayout> = {
+    // Map revamp M3a — Act 1's coast, the new-game start (D27).
+    'breakwater': breakwaterLayout,
     'fishing-village': fishingVillageLayout,
     'northern-forest': northernForestLayout,
     'caverns': cavernsLayout,

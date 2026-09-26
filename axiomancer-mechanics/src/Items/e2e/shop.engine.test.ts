@@ -34,7 +34,7 @@ function freshWorldAt(
     mapName: 'fishing-village' | 'northern-forest' = 'northern-forest',
     nodeId = 'nf-8',
 ): GameState {
-    const base: GameState = { ...createNewGameState(), world: createStartingWorld() };
+    const base: GameState = { ...createNewGameState(), world: createStartingWorld('fishing-village') };
     const def = getMapDefinition('coastal-continent', mapName);
     const map: MapState = createMapState(def);
     const player = createCharacter({

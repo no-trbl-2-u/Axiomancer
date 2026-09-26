@@ -24,7 +24,7 @@ import type { MapState } from '../../types';
 import '../content';
 
 function nf19Payload(): NarrationPayload {
-    const base = { ...createNewGameState(), world: createStartingWorld() };
+    const base = { ...createNewGameState(), world: createStartingWorld('fishing-village') };
     const def = getMapDefinition('coastal-continent', 'northern-forest');
     const map: MapState = createMapState(def);
     const state: GameState = { ...base, world: { ...base.world, currentMap: map } };

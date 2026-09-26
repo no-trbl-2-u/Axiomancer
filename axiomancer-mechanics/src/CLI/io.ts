@@ -40,6 +40,12 @@ export interface CliFlags {
      * registry and exits. Replaces the blank L1 5/5/5 boot character.
      */
     fixture?: string;
+    /**
+     * Map revamp M3a — start the blank new game on this campaign map instead
+     * of the default start (the Breakwater, D27). Any map in `STARTABLE_MAPS`.
+     * Ignored when `--fixture` boots a full state.
+     */
+    startMap?: string;
     /** Comma-separated explicit node ids to walk without prompts. */
     route?: string[];
     /**
@@ -148,6 +154,13 @@ export function parseArgv(args: string[]): CliFlags {
         } else if (arg === '--resolve-start') {
             flags.resolveStart = true;
             i++;
+        } else if (arg === '--start-map') {
+            const next = args[i + 1];
+            if (next === undefined || next.startsWith('--')) {
+                throw new Error('--start-map requires a map name (e.g. breakwater, fishing-village, caverns).');
+            }
+            flags.startMap = next.trim();
+            i += 2;
         } else if (arg === '--auto-combat') {
             flags.autoCombat = true;
             i++;
@@ -210,7 +223,7 @@ export function parseArgv(args: string[]): CliFlags {
         } else {
             throw new Error(
                 `Unknown CLI flag: '${arg}'.\n` +
-                `Usage: npm run game -- [--script <path>] [--stdin] [--json-events] [--state-log <path>] [--save-file <path>] [--fixture <id|path.json|list>] [--route <nodes>] [--resolve-start] [--route-audit <mapName>] [--auto-combat] [--combat-policy <policy>] [--combat-max-turns <n>] [--combat-seed <n>] [--combat-enemy <slug> --combat-enemy-node <id>] [--log-level <trace|debug|info|warn|error>] [--log-file <path>]`,
+                `Usage: npm run game -- [--script <path>] [--stdin] [--json-events] [--state-log <path>] [--save-file <path>] [--fixture <id|path.json|list>] [--start-map <mapName>] [--route <nodes>] [--resolve-start] [--route-audit <mapName>] [--auto-combat] [--combat-policy <policy>] [--combat-max-turns <n>] [--combat-seed <n>] [--combat-enemy <slug> --combat-enemy-node <id>] [--log-level <trace|debug|info|warn|error>] [--log-file <path>]`,
             );
         }
     }

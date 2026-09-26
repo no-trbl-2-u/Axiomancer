@@ -150,6 +150,7 @@ map.
 
 | Map (region name) | Shipped description | Exploration plate | Combat plate | Open |
 |---|---|---|---|---|
+| breakwater (The Breakwater) | "A walled harbour on a storm coast. Every pier charges for the calm. The wreck under the lighthouse did not pay." Named by T, 2026-09-25 (D26). Act 1, map 1; a new game starts here (D27). | The Act 1 coast plate (generated, Doré-style): harbour town, piers, lighthouse, wreck, sea fort, gallows hill, river bridge | None yet (falls back) | What happens here: its events are borrowed from fishing-village (D29). How it sits beside the Drowned Parish and the prologue's flight. |
 | fishing-village (the Drowned Parish) | "Your home town: familiar faces, salty air, old shacks lining the docks." | Wentworth Street, Whitechapel: a crowded slum street | Fishermen crowding a moored boat's rigging | Where the lie is lived (ruled). What happens here beyond that? |
 | northern-forest (Northern Forest) | "A pine-thick wood inland from the village; cold springs, low light, and a cave mouth at the far edge." | A lone figure lost in a dark wood | None (falls back to *The New Zealander*: a traveller sketching a ruined city) | What the wood is for in the arc. |
 | caverns (The Caverns) | "Iron galleries under the northern mountains; the ore is honest, the dark is not, and the only stair to the city is sealed." | Chained giants at the edge of a pit | A vast gateway cut into a rock face, two small figures at the threshold | What happens underground. |
