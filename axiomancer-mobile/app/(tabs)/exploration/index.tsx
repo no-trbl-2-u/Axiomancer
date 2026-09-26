@@ -30,6 +30,7 @@ export default function ExplorationScreen() {
     const styles = useStyles();
     const {
         enterCombat,
+        exitCombat,
         inCombat,
         inEncounterModal,
         openEncounterModal,
@@ -163,6 +164,21 @@ export default function ExplorationScreen() {
             closeEncounterModal();
         }
     }, [inEncounterModal, preludeReady, lastOutcome, inCombat, closeEncounterModal]);
+    // Dev-only SKIP EVENT (`state/dev/skip-event.ts`): the store has already
+    // settled the fight through `endCombat`, but the hazard panel's "in
+    // progress" lives in React (`inCombat`, this screen's captured foe), so
+    // the store bumps `_devSkipSeq` and this effect drops the combat flag.
+    // With `inCombat` false and no aftermath outcome, the teardown effect
+    // above closes the modal and the closing-edge effect below drops the
+    // foe. Inert in production: nothing ever bumps the counter there.
+    const devSkipSeq = useGameState((s) => s._devSkipSeq ?? 0);
+    const seenSkipSeq = useRef(devSkipSeq);
+    useEffect(() => {
+        if (devSkipSeq === seenSkipSeq.current) return;
+        seenSkipSeq.current = devSkipSeq;
+        if (inCombat) exitCombat();
+    }, [devSkipSeq, inCombat, exitCombat]);
+
     // Phase 200 — drop the captured foe once the modal session fully closes,
     // so the next encounter bootstraps clean. Strictly on the CLOSING edge:
     // since the modal auto-engages (2026-08-10) the foe is now captured by a

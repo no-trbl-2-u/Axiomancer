@@ -1,0 +1,73 @@
+# Narrative — `village` (with shop), `cutscene`, `narration`, `interaction`
+
+## 1. What these screens are for
+
+Paced (narrative-choice) events sit in the event slice and `<EventGate>` (`components/EventGate.tsx`) pushes one route per kind (`state/presenters/event.engine.ts` `selectPacedEventRoute`): `interaction` and `narration` → `/dialogue` (an NPC tree, `app/dialogue/index.tsx`; `narration` is the same screen with a tree and no NPC), `village` → `/village` (merchants + buy/sell shop, `app/village/index.tsx`), `cutscene` → `/cutscene` (authored lines, `app/cutscene/index.tsx`), anything else → `/event`. Every screen's only exits are a choice or `actions.dismissEvent()`; each pops itself when the event clears.
+
+## 2. Enter it directly
+
+- Dialogue: `/exploration?fixture=apprentice-fv-interaction` (`arrive` → `/dialogue`, first NPC on fv-2). `/dev`: `debug-dialogue-<map>-<npc-slug>` opens any staged tree.
+- Village: `/exploration?fixture=wanderer-nf-village` (`arrive` → `/village`, 240 shillings). `/dev`: `debug-trigger-encounter-village` (synthetic two-merchant village); `debug-currency-large-grant` first if you want to buy.
+- Cutscene: `/exploration?fixture=wanderer-nf-cutscene` (`arrive` → `/cutscene`, nf-17). `/dev`: `debug-trigger-encounter-cutscene`. Map start nodes also fire their own omen on landing (`fresh-start`).
+- Narration: no dedicated fixture or dev trigger; reached by walking onto a narration node (see `DebugWorldTravel`'s `debug-travel-node-<id>` chips, which fire the node's authored event).
+- No seed globals apply; `__AXM_JUICE_INSTANT__` does not affect the cutscene fade (it is RN `Animated`, honours reduced motion).
+
+## 3. Test IDs
+
+| testID | what it is |
+|---|---|
+| `dialogue-inactive` | `/dialogue` with no event (pops back) |
+| `dialogue-scroll` | Scroll view |
+| `dialogue-nameplate` | Speaker name |
+| `dialogue-speech` | Current line |
+| `dialogue-choice-<id>` | A choice; first tap arms it, second confirms |
+| `dialogue-choice-<id>-confirmed` | The armed state marker |
+| `dialogue-choice-<id>-consequences` | Consequence chips under a choice |
+| `dialogue-leave` | LEAVE — dismiss the event |
+| `village-inactive` | `/village` with no event |
+| `village-scroll` | Scroll view |
+| `village-merchant-<name>` | Merchant card |
+| `village-purse` | Shillings |
+| `village-tab-buy` / `village-tab-sell` | Shop tabs |
+| `village-ware-<itemId>` | Tap to buy (disabled when unaffordable) |
+| `village-ware-<itemId>-effect` / `village-ware-<itemId>-desc` / `village-ware-<itemId>-base-price` | Ware copy |
+| `village-buy-empty` / `village-sell-empty` | Empty notes |
+| `village-sell-<index>` | Tap to sell |
+| `village-leave` | LEAVE |
+| `cutscene-inactive` | `/cutscene` with no event |
+| `cutscene-plate` | The fading plate |
+| `cutscene-line-<index>` | The current line |
+| `cutscene-advance` | Tap anywhere to advance (last line dismisses) |
+| `cutscene-skip` | SKIP |
+| `event-prelude-header` / `event-strife-sash` / `event-choice-<id>` / `event-skip` / `event-choice-back` / `event-empty` | The `/event` fallback shell |
+
+## 4. A correct play, step by step
+
+- Dialogue: read `dialogue-speech`; tap `dialogue-choice-<id>` twice (arm, confirm) until no choices remain; `dialogue-leave`. Map returns.
+- Village: `village-tab-buy` → tap an affordable `village-ware-<itemId>` (purse drops); `village-tab-sell` → `village-sell-<index>`; `village-leave`.
+- Cutscene: tap `cutscene-advance` once per line (or `cutscene-skip`). Map returns.
+- `/event`: `event-choice-<id>` if present, else `event-skip`.
+
+## 5. Looks stuck but isn't
+
+- A dialogue choice tapped once only highlights (`*-confirmed`): it needs a second tap within the confirm window (`confirmTimerRef` in `app/dialogue/index.tsx`).
+- Cutscene lines fade (`Animated.timing`); tapping during the fade is accepted but the next line still fades in. Reduced-motion collapses it to 0.
+- Village ware not buying: it is `disabled` when unaffordable (`village-purse`); `village-buy-empty` / `village-sell-empty` mean the list is genuinely empty, not broken.
+- `*-inactive` flashes while the screen pops back after LEAVE/last line.
+- An omen stacking twice on a deep link was fixed (EventGate latch); a single push is expected.
+- Start-node omen on `fresh-start` fires on landing — not a stray event.
+
+## 6. Actually stuck
+
+- `/dialogue` with `dialogue-speech` and neither a `dialogue-choice-*` nor `dialogue-leave` reachable.
+- `dialogue-leave` / `village-leave` / last `cutscene-advance` pressed, `action/dismissEvent` logged, and the route stays.
+- `*-inactive` persisting with no map behind it, or `/event` with `event-empty` and no `event-choice-back`.
+- A choice confirmed and `game/dialogue:applied` never logged.
+Record: route, fixture/trigger, nameplate/village name, the choice ids shown, last 20 `action`+`game` lines, screenshot. `globalThis.__AXM_SKIP_EVENT__()` only after that, and file it.
+
+## 7. Read the log
+
+`__AXM_LOG__.tail(40, { domains: ['action', 'game', 'nav'] })`:
+- `action/resolveCurrentMapEvent`, `action/pickEventChoice`, `action/dismissEvent`, `action/buyVillageWare`, `action/sellVillageItem` (debug level).
+- `game/dialogue:applied` after a confirmed choice; `game/inventory:changed` after buy/sell; `game/world:processed` when the node is consumed.
+- `nav/route-changed` `/dialogue` `/village` `/cutscene` `/event` and back to `/exploration`.

@@ -221,6 +221,15 @@ export type AppStoreState = GameStore & {
      * persisted (see `wrapDeflectingAdapter`).
      */
     _recentEvents: ReadonlyArray<TypedGameEvent>;
+    /**
+     * Mobile-private counter bumped by the dev-only skip action
+     * (`state/dev/skip-event.ts`) each time it resolves something. The
+     * exploration screen watches it to tear down the in-place combat
+     * overlay — the one surface whose "in progress" state lives in React
+     * rather than the store. Optional so no boot/reset path has to seed
+     * it; absent reads as 0. Not persisted.
+     */
+    _devSkipSeq?: number;
 };
 
 export type AppStore = StoreApi<AppStoreState>;

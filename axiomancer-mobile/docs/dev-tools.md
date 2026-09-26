@@ -31,6 +31,41 @@ carries the field-path problems). Code: `state/fixtures.ts`,
 In Jest, `test-utils/fixtureStore.ts` boots the same documents.
 Guide: `docs/state-fixtures.md` at the monorepo root.
 
+## Skip the current event (2026-09-26)
+
+A playtest escape hatch for AI drivers stuck on a node they cannot finish.
+`skipCurrentEvent(store, actions)` (`state/dev/skip-event.ts`) resolves
+whatever the player is in with a plausible outcome and leaves the state
+consistent — node consumed, rewards applied, session cleared, checkpoint
+taken — by driving the same store actions the screens use:
+
+| In | Resolves as |
+|---|---|
+| live fight, or a pending combat prelude | VICTORY through the engine's real `endCombat` (XP, loot, quest objectives, level-ups). The engine combat sim (`runOneEncounter`, greedy witness) plays it first; its outcome rides the log and its HP toll (capped at half max VITAE, never fatal) is taken. No card draft. |
+| hazard | median crossing: `complete` tier, ceil(rounds/2) cleared, engine outcome path, first offered card claimed |
+| rest | the free REST offer, claimed |
+| loot-cache | the ITEM offer, claimed |
+| blacksmith | leave unchanged, claimed |
+| interaction / narration / village / cutscene / gathering | dismissed (the screen pops itself) |
+| queued item reward | every item confirmed |
+| nothing active, arrival owed on the node under the player | the node's event fires, then resolves as above; a travel door reports the crossing |
+
+Two ways in, both dev-tools-gated (production: logged no-op, nothing
+loaded — the module and the sim it imports are only reached by lazy
+imports behind `isDevToolsEnabled()`):
+
+| Channel | Where | Returns |
+|---|---|---|
+| `/dev` → ENCOUNTERS → SKIP EVENT (`debug-skip-event-button`) | `components/DebugSkipEvent.tsx` | feedback line, then jumps to WILDS |
+| `globalThis.__AXM_SKIP_EVENT__()` | installed by `components/DevSkipBridge.tsx` (mounted lazily from `app/_layout.tsx`) | `{ kind, nodeId, outcome, detail? }` — `kind` is the map-event kind (`encounter`, `hazard`, …, `item-reward`, or `none`), `outcome` a short token (`victory`, `complete:2/3`, `rest:healed=9`, `dismissed`, `nothing-to-skip`, `ignored:dev-tools-disabled`) |
+
+Every call writes `action/dev-skip-event` to the AXM log
+(`__AXM_LOG__.entries({ kind: 'dev-skip-event' })`), so captured logs show
+each skip. The in-place combat overlay tears down via `_devSkipSeq` on the
+store (watched by the exploration screen). Not covered: a fight hosted by
+`/labyrinth`, and the `/combat-encounter` sandbox (its state is panel-local
+and persists nothing). Tests: `state/dev/__tests__/skip-event.test.ts`.
+
 ## Layout
 
 | File | Role |
@@ -87,6 +122,7 @@ read the log.** Section container ids are `dev-section-<key>`.
 | `DebugTriggerEncounter` | Quick triggers on the WILDS tab: COMBAT (gentlest foe), BOSS, HAZARD, REST, GATHER, TREASURE, VILLAGE, CUTSCENE | `debug-trigger-encounter-<kind>` |
 | `DebugEnemyPicker` | Any foe from any roster (`EnemiesByMap`), bosses in red; stages a real combat prelude so rewards pay out (`state/dev/enemy-picker.ts`) | `debug-enemy-map-<map>`, `debug-enemy-<enemyId>` |
 | `DebugCombatSandbox` | `/combat-encounter` sandbox (mock foe, nothing persists): ASSEMBLE, TEACH (`?tutorial=1`) | `debug-combat-encounter-button`, `debug-combat-tutorial-button` |
+| `DebugSkipEvent` | SKIP EVENT — resolve whatever the player is in (or the arrival owed on the node under them) with a plausible outcome and jump to WILDS; see "Skip the current event" below (`state/dev/skip-event.ts`) | `debug-skip-event-button` |
 
 ### MINIGAMES & REWARDS — `dev-section-rewards`
 

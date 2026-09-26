@@ -1,8 +1,25 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { render, fireEvent } from '@testing-library/react-native';
+import { State } from 'react-native-gesture-handler';
+import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-handler/jest-utils';
 import { MapCanvas, computeFocusTransform, focusKeyOf, edgeStroke } from '../MapCanvas';
 import type { ExplorationNode, ExplorationEdge } from '@/state/presenters/exploration.engine';
+
+// The stock reanimated mock builds a fresh `{ value }` box on EVERY render
+// (no ref behind `useSharedValue`), so a camera the fit effect commits is gone
+// by the next render and the rendered transform can never be asserted. Persist
+// the box across renders; everything else stays the stock mock.
+jest.mock('react-native-reanimated', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const Reanimated = require('react-native-reanimated/mock');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { useRef } = require('react');
+    return {
+        ...Reanimated,
+        useSharedValue: <V,>(init: V) => useRef({ value: init }).current,
+    };
+});
 
 const mockNodes: ExplorationNode[] = [
     {
@@ -523,26 +540,93 @@ describe('focusKeyOf — what the camera considers a change', () => {
 
 describe('MapCanvas re-frames on a focus change', () => {
     const MockChildren = () => <></>;
+    const VIEWPORT = { w: 414, h: 896 };
 
-    it('re-renders with a changed focus set without throwing', () => {
-        // Integration smoke: the effect now runs more than once by design, so
-        // prove the second run is harmless against a live component.
+    /**
+     * The camera as the canvas currently renders it. The reanimated jest mock
+     * evaluates `useAnimatedStyle` from the shared values' `.value` at render
+     * time, so the transform on `map-canvas` is the camera as of the LAST
+     * render — one render behind the effect that commits it. Every read below
+     * therefore follows a same-props `rerender` to flush the committed fit
+     * into the style. That same-props rerender is also load-bearing for the
+     * regression guard: it is exactly the "fresh array, same content" render
+     * that issue #294's constant re-fit came from.
+     */
+    const cameraOf = (getByTestId: (id: string) => { props: { style: unknown } }) => {
+        const flat = StyleSheet.flatten(getByTestId('map-canvas').props.style) as {
+            transform: Record<string, number>[];
+        };
+        const [{ translateX: tx }, { translateY: ty }, { scale }] = flat.transform;
+        return { scale, tx, ty };
+    };
+
+    it('fits the camera to the current focus set, and re-fits when the player moves', () => {
+        // BUG-04 itself, against a live component: the second fit must
+        // actually land, not merely "not throw".
         const { getByTestId, rerender } = render(
             <MapCanvas nodes={mockNodes} edges={mockEdges}><MockChildren /></MapCanvas>,
         );
         fireEvent(getByTestId('map-canvas-wrapper'), 'layout', {
-            nativeEvent: { layout: { width: 414, height: 896 } },
+            nativeEvent: { layout: { width: VIEWPORT.w, height: VIEWPORT.h } },
         });
+        rerender(<MapCanvas nodes={[...mockNodes]} edges={mockEdges}><MockChildren /></MapCanvas>);
+        const first = cameraOf(getByTestId);
+        expect(first).toEqual(computeFocusTransform(mockNodes, VIEWPORT));
 
         const moved: ExplorationNode[] = mockNodes.map((n) =>
             n.id === 'node-1' ? { ...n, kind: 'completed' as const }
             : n.id === 'node-2' ? { ...n, kind: 'current' as const }
+            : n.id === 'node-3' ? { ...n, kind: 'available' as const }
             : n);
+        rerender(<MapCanvas nodes={moved} edges={mockEdges}><MockChildren /></MapCanvas>);
+        rerender(<MapCanvas nodes={[...moved]} edges={mockEdges}><MockChildren /></MapCanvas>);
+        const second = cameraOf(getByTestId);
+        expect(second).toEqual(computeFocusTransform(moved, VIEWPORT));
+        expect(second).not.toEqual(first);
+    });
 
-        expect(() =>
-            rerender(<MapCanvas nodes={moved} edges={mockEdges}><MockChildren /></MapCanvas>),
-        ).not.toThrow();
-        expect(getByTestId('map-canvas-wrapper')).toBeDefined();
+    it('does not undo a manual pan when a fresh nodes array describes the same focus (issue #294)', () => {
+        const { getByTestId, rerender } = render(
+            <MapCanvas nodes={mockNodes} edges={mockEdges}><MockChildren /></MapCanvas>,
+        );
+        fireEvent(getByTestId('map-canvas-wrapper'), 'layout', {
+            nativeEvent: { layout: { width: VIEWPORT.w, height: VIEWPORT.h } },
+        });
+        rerender(<MapCanvas nodes={[...mockNodes]} edges={mockEdges}><MockChildren /></MapCanvas>);
+        const fit = cameraOf(getByTestId);
+
+        // The player drags to look around. Without this perturbation the
+        // guard would be vacuous — a spurious re-fit lands on the same numbers.
+        // RNGH's jest-utils deliver the FIRST ACTIVE event as `onStart`; only a
+        // repeated ACTIVE reaches `onUpdate`, which is where the pan moves tx/ty.
+        const drag = { translationX: 120, translationY: -80 };
+        fireGestureHandler(getByGestureTestId('map-pan'), [
+            { state: State.BEGAN },
+            { state: State.ACTIVE },
+            { state: State.ACTIVE, ...drag },
+            { state: State.END, ...drag },
+        ]);
+        rerender(<MapCanvas nodes={[...mockNodes]} edges={mockEdges}><MockChildren /></MapCanvas>);
+        const panned = cameraOf(getByTestId);
+        expect(panned).toEqual({ scale: fit.scale, tx: fit.tx + drag.translationX, ty: fit.ty + drag.translationY });
+
+        // Fresh arrays, same subject — and a completed/locked-only change is
+        // not a change of subject either. The camera must stay where the
+        // player put it.
+        const dressed: ExplorationNode[] = mockNodes.map((n) =>
+            n.id === 'node-4' ? { ...n, kind: 'locked' as const } : { ...n });
+        rerender(<MapCanvas nodes={dressed} edges={mockEdges}><MockChildren /></MapCanvas>);
+        rerender(<MapCanvas nodes={[...dressed]} edges={mockEdges}><MockChildren /></MapCanvas>);
+        expect(cameraOf(getByTestId)).toEqual(panned);
+
+        // …until the player actually moves, which is when BUG-04 says it must.
+        const moved: ExplorationNode[] = dressed.map((n) =>
+            n.id === 'node-1' ? { ...n, kind: 'completed' as const }
+            : n.id === 'node-2' ? { ...n, kind: 'current' as const }
+            : n);
+        rerender(<MapCanvas nodes={moved} edges={mockEdges}><MockChildren /></MapCanvas>);
+        rerender(<MapCanvas nodes={[...moved]} edges={mockEdges}><MockChildren /></MapCanvas>);
+        expect(cameraOf(getByTestId)).toEqual(computeFocusTransform(moved, VIEWPORT));
     });
 });
 
