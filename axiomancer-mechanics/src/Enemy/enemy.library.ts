@@ -3585,7 +3585,8 @@ const NORTHERN_FOREST_POOL = [
 ];
 
 /**
- * The caverns' pool, shared with the Beacon Crags (map revamp M3c, D29).
+ * The caverns' pool, shared with the Beacon Crags (map revamp M3c) and the
+ * Lantern Deep (M3d, D29).
  */
 const CAVERNS_POOL = [
     Wichtlein, PaleBrood, TriEyes, VampireThrall, Mabadi, FrayedOne,
@@ -3609,6 +3610,8 @@ export const EnemiesByMap = {
     // The Beacon Crags' authored encounters pin their slugs (and a low
     // level) in `MapEvents/content.ts`; this entry is what an unpinned draw reaches.
     'beacon-crags': CAVERNS_POOL,
+    // The Lantern Deep's likewise (map revamp M3d).
+    'lantern-deep': CAVERNS_POOL,
     // The caverns (northern continent, 2026-08-28 inter-map travel) — the
     // map after northern-forest. The pool mixes the forest's harder mid
     // tier (wandering foes scale to the player via the adaptive level

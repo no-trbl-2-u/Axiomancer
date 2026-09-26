@@ -11,7 +11,8 @@ import type { MapLayout, MapSheet } from './types';
  *
  * The engine graph (`Continents/Northern-Continent/beacon-crags.ts`) comes up
  * the stair on to the crag road at the top of the plate and runs down the
- * mountain in three lanes, closing on the glacier shrine in the south-west.
+ * mountain in three lanes, closing on the glacier shrine in the south-west,
+ * whose stair goes down into the Lantern Deep.
  * Positions only; kind + edges come from the engine (`@mechanics`).
  */
 
@@ -85,6 +86,6 @@ export const beaconCragsLayout: MapLayout = {
         { id: 'bc-15', ...at('bc-15'), label: 'The Stone Gate', description: 'Carved statues and a duelist between them.' },
         { id: 'bc-16', ...at('bc-16'), label: 'The Tunnel Bridge', description: 'A pried toll-box at the tunnel mouth.' },
         // ── c6 — the door ──
-        { id: 'bc-17', ...at('bc-17'), label: 'The Glacier Shrine', description: 'A stair goes down into the ice. It comes out above a fishing village.' },
+        { id: 'bc-17', ...at('bc-17'), label: 'The Glacier Shrine', description: 'A stair goes down into the ice, and on below it. A lantern on every turn.' },
     ],
 };

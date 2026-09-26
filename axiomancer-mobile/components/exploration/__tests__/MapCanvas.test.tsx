@@ -231,6 +231,25 @@ describe('MapCanvas', () => {
         expect(queryByTestId('map-overlays-fixed')).toBeNull();
     });
 
+    it('haloes every node mark only on a sheet that asks for it (map revamp M3d)', () => {
+        const plate = { width: 1000, height: 1000, scale: 2.4, backdrop: 1, plateOpacity: 0.85, chartTexture: false };
+        const plain = render(
+            <MapCanvas nodes={mockNodes} edges={mockEdges} sheet={plate}>
+                <MockChildren />
+            </MapCanvas>
+        );
+        expect(plain.queryByTestId('map-node-halos')).toBeNull();
+
+        const haloed = render(
+            <MapCanvas nodes={mockNodes} edges={mockEdges} sheet={{ ...plate, nodeHalo: true }}>
+                <MockChildren />
+            </MapCanvas>
+        );
+        const halos = haloed.getByTestId('map-node-halos');
+        const discs = React.Children.toArray(halos.props.children) as React.ReactElement<{ cx: number; cy: number }>[];
+        expect(discs.map((d) => [d.props.cx, d.props.cy])).toEqual(mockNodes.map((n) => [n.x, n.y]));
+    });
+
     it('handles nodes with mixed availability states', () => {
         const mixedNodes: ExplorationNode[] = [
             {

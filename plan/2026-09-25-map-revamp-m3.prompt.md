@@ -26,6 +26,7 @@
 | M3b: the Charcoal Wood | #389 | Merged 2026-09-26. See §3b. |
 | M3c: the Beacon Crags | #392 | Merged 2026-09-26. See §3c. |
 | T's calls on M3a/M3b | #394 | Merged 2026-09-26: D30–D35, applied to all three built maps. See §3d. |
+| M3d: the Lantern Deep | #396 (mirror) | Shipped 2026-09-26 straight to main by the loop. See §3e. |
 
 **First act of the session:** get #382 → #383 → #384 merged, in order (the
 repo uses merge commits; auto-merge is disabled). Each PR's decisions-file
@@ -272,6 +273,26 @@ Beacon Crags:
   `plan/AUDIT.md`).
 - **No new NPCs in map PRs (D29 stands).** The Breakwater's own people are
   an attended story-spec session (D34).
+
+## 3e. M3d — shipped state (2026-09-26)
+
+**The Lantern Deep:** `lantern-deep`, prefix `ld-`, 18 nodes on the 18
+underworld landmarks, under `northern-continent`. Engine:
+`Continents/Northern-Continent/lantern-deep.ts`. The Beacon Crags' glacier
+shrine (`bc-17`) now travels here; the stair comes down through the cavern roof
+at the surface stair (`ld-1`, arrival cutscene), the map runs down the plate in
+bands west to east (4, 4, 3, 3, 2) and closes on the deep stair (`ld-18`),
+which travels to fishing-village (D27). Events: `LANTERN_DEEP_POOLS` in
+`MapEvents/content.ts`, the caverns' builders and `CAVERNS_POOL` again.
+
+- **Elite (D30):** bone-wizard at the ruined city (`ld-16`), level 4. The last
+  fight column is two lanes (ruined city, east stairs) with no centre, so the
+  east stairs are a camp and the ruined city is the column's only fight.
+- **Levels:** 3 in the first two bands, 4 below. Rests: all camps.
+- **The vault door (`ld-15`)** is a plain loot cache ("coins on the sill of a
+  round door that does not open") until M4 makes it the Labyrinth door.
+- **Halo:** `MapSheet.nodeHalo` (new, optional) draws a pale radial glow under
+  each node mark; only the Lantern Deep's sheet sets it.
 
 ## 4. Definition of done, and who does what
 

@@ -45,6 +45,7 @@ const MAPS = [
     { mapId: 'breakwater', continent: 'coastal-continent' },
     { mapId: 'charcoal-wood', continent: 'coastal-continent' },
     { mapId: 'beacon-crags', continent: 'northern-continent' },
+    { mapId: 'lantern-deep', continent: 'northern-continent' },
     { mapId: 'fishing-village', continent: 'coastal-continent' },
     { mapId: 'northern-forest', continent: 'coastal-continent' },
     { mapId: 'caverns', continent: 'northern-continent' },
@@ -136,7 +137,7 @@ describe('exploration map: the sheet can carry the branching graph', () => {
         });
     }
 
-    it('accounts for all 104 ribs: 69 from D1 across the shipped maps, 11 on the Breakwater, 14 on the Charcoal Wood, 10 on the Beacon Crags', () => {
+    it('accounts for all 115 ribs: 69 from D1 across the shipped maps, 11 on the Breakwater, 14 on the Charcoal Wood, 10 on the Beacon Crags, 11 on the Lantern Deep', () => {
         // A total, not a per-map count: this is the one number that catches a
         // whole map's ribs disappearing in a refactor of the forward-skeleton
         // read, which no per-map "> 0" assertion would notice.
@@ -147,6 +148,7 @@ describe('exploration map: the sheet can carry the branching graph', () => {
         // Map revamp M3a: the Breakwater's four ring columns carry 3 + 4 + 2 + 2.
         // M3b: the Charcoal Wood's four carry 4 + 3 + 3 + 4.
         // M3c: the Beacon Crags' five three-lane bands carry 2 each.
-        expect(total).toBe(69 + 11 + 14 + 10);
+        // M3d: the Lantern Deep's five bands carry 3 + 3 + 2 + 2 + 1.
+        expect(total).toBe(69 + 11 + 14 + 10 + 11);
     });
 });

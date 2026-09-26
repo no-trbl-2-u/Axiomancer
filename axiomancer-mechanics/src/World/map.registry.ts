@@ -13,6 +13,7 @@ import { fishingVillage, northernForest } from './Continents/Coastal-Village/map
 import { breakwater } from './Continents/Coastal-Village/breakwater';
 import { charcoalWood } from './Continents/Coastal-Village/charcoal-wood';
 import { beaconCrags } from './Continents/Northern-Continent/beacon-crags';
+import { lanternDeep } from './Continents/Northern-Continent/lantern-deep';
 import { caverns, northernCity, connectingRiver, townAcrossRiver, theCapital } from './Continents/Northern-Continent/maps';
 import { aporiaColonnade, aporiaArchive, aporiaProof } from './Labyrinth/maps';
 
@@ -44,6 +45,8 @@ export const MAP_REGISTRY: Record<ContinentName, Partial<Record<MapName, MapDefi
     'northern-continent': {
         // Map revamp M3c — Act 1's mountains, past the Charcoal Wood's stair cave.
         'beacon-crags': beaconCrags,
+        // Map revamp M3d — Act 1's underworld, below the Beacon Crags' glacier shrine.
+        'lantern-deep': lanternDeep,
         'caverns': caverns,
         'northern-city': northernCity,
         'connecting-river': connectingRiver,

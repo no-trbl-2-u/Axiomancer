@@ -3,8 +3,8 @@
  *
  * Pins what the map revamp decided for the third Act 1 map:
  * - the first Act 1 map on `northern-continent` (D28): the Charcoal Wood's
- *   stair cave crosses into it, and this map's glacier shrine leads on into
- *   fishing-village (D27, until the Act 1 underworld ships);
+ *   stair cave crosses into it, and this map's glacier shrine leads on down
+ *   into the Lantern Deep (M3d; it led to fishing-village until then);
  * - the map borrows the shipped builders, the caverns' roster and its iron
  *   (D29), with one authored event on every node;
  * - the caverns' roster is level 13 and up, so every fight here is pinned low.
@@ -109,11 +109,11 @@ describe('the Beacon Crags\' events (D29)', () => {
         expect(items).toEqual(['iron-ore', 'iron-ore']);
     });
 
-    it('goes down under the glacier shrine into fishing-village (D27, until the Act 1 underworld ships)', () => {
+    it('goes down under the glacier shrine into the Lantern Deep (Act 1, map 4)', () => {
         const r = resolveMapEvent(standingOn('bc-17'));
         expect(r.event.kind).toBe('travel');
-        expect(r.state.world.currentContinent.name).toBe('coastal-continent');
-        expect(r.state.world.currentMap.name).toBe('fishing-village');
-        expect(r.state.world.currentMap.currentNode).toBe('fv-1');
+        expect(r.state.world.currentContinent.name).toBe('northern-continent');
+        expect(r.state.world.currentMap.name).toBe('lantern-deep');
+        expect(r.state.world.currentMap.currentNode).toBe('ld-1');
     });
 });

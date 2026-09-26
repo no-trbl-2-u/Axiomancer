@@ -8,8 +8,6 @@
  *
  * Every Act 1 fight is pinned low (brief §3b), and the elite is too: an
  * unpinned elite would scale to its own roster level (7 and up).
- *
- * When M3d ships the Lantern Deep, add it to `ACT1_MAPS`.
  */
 
 import { describe, expect, it } from 'vitest';
@@ -21,6 +19,7 @@ const ACT1_MAPS = [
     ['coastal-continent', 'breakwater'],
     ['coastal-continent', 'charcoal-wood'],
     ['northern-continent', 'beacon-crags'],
+    ['northern-continent', 'lantern-deep'],
 ] as const;
 
 describe.each(ACT1_MAPS)('Act 1 fights on %s / %s (D30)', (continent, mapName) => {
