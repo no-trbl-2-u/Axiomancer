@@ -73,9 +73,9 @@ export const beaconCragsLayout: MapLayout = {
         { id: 'bc-6',  ...at('bc-6'),  label: 'The Cliff Monastery', description: 'The monks sell a blanket and lend a bench.' },
         { id: 'bc-7',  ...at('bc-7'),  label: 'The Mine Entrance', description: 'Rails into the rock. Nobody weighs the spoil heap.' },
         // ── c3 ──
-        { id: 'bc-8',  ...at('bc-8'),  label: 'The Ruined Chapel', description: 'Skulls in the bell tower, one word to a mouth.' },
+        { id: 'bc-8',  ...at('bc-8'),  label: 'The Ruined Chapel', description: 'The bell rings for a master who never comes.' },
         { id: 'bc-9',  ...at('bc-9'),  label: 'The Rope Bridge', description: 'It charges for the crossing, and again for the fall.' },
-        { id: 'bc-10', ...at('bc-10'), label: 'The Toll Gate', description: 'The collector was never paid. He is still collecting.' },
+        { id: 'bc-10', ...at('bc-10'), label: 'The Toll Gate', description: 'A collar in the road. Something under the arch.' },
         // ── c4 ──
         { id: 'bc-11', ...at('bc-11'), label: 'The Arch Bridge', description: 'Something hangs under the arch. You have to cross.' },
         { id: 'bc-12', ...at('bc-12'), label: 'The Gorge Falls', description: 'The water has cut the seam open. The iron is free.' },

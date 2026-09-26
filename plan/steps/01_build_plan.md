@@ -94,7 +94,8 @@ row. D26's name picks are already made (brief §1), so no row below needs T.
 event-pool and layout files).
 - [x] Phase M3b — The Charcoal Wood (#389)
 - [x] Phase M3c — The Beacon Crags (#392)
-- [ ] Phase M3d — The Lantern Deep: Act 1 map 4 on the underworld plate, under `northern-continent`. Requires M3c `[x]`. The Beacon Crags' door leads here; this map's door leads to fishing-village. Halo the node marks (densest, darkest plate) and check with `verify:visual`.
+- [ ] Phase M3d — The Lantern Deep: Act 1 map 4 on the underworld plate, under `northern-continent`. Requires M3c `[x]`. The Beacon Crags' door leads here; this map's door leads to fishing-village. Halo the node marks (densest, darkest plate) and check with `verify:visual`. Follow T's calls in the brief's §3d (D30–D35): one elite on the last fight column, no boss, an arrival cutscene, and add the map to `act1-elites.engine.test.ts`.
+- [ ] Phase M3e — Retune fishing-village for its place after Act 1 (D35): with all four Act 1 maps shipped, run `/combat-playtest` over a fresh-start run through Act 1 into fishing-village, then raise fishing-village's pins (`FV_BOSS_LEVEL` and the level of its fights in `MapEvents/content.ts`) so it follows the Act 1 elites (level 3–4) instead of dipping below them; cite the measurement in the PR. Requires M3d `[x]`.
 - [ ] Phase M4 — The Labyrinth door (D24): the Lantern Deep's `vault-door` node enters the Aporia through `enterLabyrinthAction`'s snapshot and return path, with a hermetic enter/return/resume test. Requires M3d `[x]`.
 - [ ] Phase M5 — Map docs: rewrite `docs/world.md`'s stale sections and `skills/forge.md`'s column-layering line for D16's shape and `MapSheet`. Requires M3d `[x]`; may ride with M4.
 
@@ -1109,6 +1110,14 @@ See the status rows above; generate briefs on demand.
   The same session T picked the three remaining D26 names (The Charcoal
   Wood, The Beacon Crags, The Lantern Deep), so no row waits on T. T's
   stated reason: let the loop work overnight. Resulting commit: this one.
+
+- **2026-09-26** — actor: **T, attended session** (branch
+  `claude/map-revamp-calls`). Action: **added Phase M3e** (retune
+  fishing-village after Act 1, D35), between M3d and M4, and pointed M3d
+  at the brief's new §3d (D30–D35). Confirmed T's request: yes. T
+  answered the six agent calls from M3a/M3b in a ballot ("Retune after
+  M3d" for fishing-village), then: *"Open the PR, file the residue,
+  merge, then keep it moving"*. Resulting commit: this one.
 
 ## Phase log (commit hashes)
 
