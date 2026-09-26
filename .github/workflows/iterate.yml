@@ -5,10 +5,10 @@ name: iterate
 # Dispatch-only — /march already dispatches to iterate on schedule; run
 # this directly when you want an extra quality pass without a full march.
 #
-# Model tier: this standalone workflow runs Opus 4.8 at medium effort (a
+# Model tier: this standalone workflow runs Opus 5.5 at medium effort (a
 # deliberate quality pass is worth the premium model). March-dispatched
-# iterate ticks stay on the runner's default Sonnet 5 — iterate is march's
-# fallback branch and would otherwise burn Opus tokens every 6-hour tick.
+# iterate ticks run inside the march session, which is also pinned to
+# Opus 5.5 (see march.yml).
 
 on:
   workflow_dispatch:
@@ -34,5 +34,5 @@ jobs:
         --dangerously-skip-permissions
       prompt: '/iterate'
       timeout_minutes: 90
-      model: 'claude-opus-4-8'
+      model: 'claude-opus-5-5'
       effort: 'medium'

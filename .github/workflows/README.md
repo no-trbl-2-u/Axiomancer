@@ -17,10 +17,10 @@ Two layers live here:
    All of them funnel through the reusable runner
    [`_claude-skill.yml`](./_claude-skill.yml), which owns checkout, `npm
    ci`, `.env` materialization, the nexus enforcement layer (guard hooks +
-   deny walls), and the `anthropics/claude-code-action` invocation. Every
-   Claude workflow is pinned to **Sonnet 5** (`--model claude-sonnet-5`);
-   change it in one place there (plus `claude.yml`, which doesn't use the
-   runner).
+   deny walls), and the `anthropics/claude-code-action` invocation. The
+   runner defaults to **Sonnet 5** (`claude-sonnet-5`); `march.yml`,
+   `iterate.yml`, and `claude.yml` (which doesn't use the runner) are
+   pinned to **Opus 5.5** (`claude-opus-5-5`).
 
 ## Secrets
 
