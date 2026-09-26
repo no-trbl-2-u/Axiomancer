@@ -244,7 +244,7 @@ the map PRs. A need the pools can't meet is filed to `adjust-enemies` /
 4). *Rejected:* authoring new content per map; empty maps first.
 
 The next six were T's answers on 2026-09-26 to the agent calls M3a and M3b
-filed in `plan/AUDIT.md`. They shipped with M3c in #393.
+filed in `plan/AUDIT.md`. They shipped with M3c in #394.
 
 **D30 — Act 1 has no bosses; each region has one elite fight, its last
 before the door.** (T, 2026-09-26: "Not a boss, but an elite battle for each
@@ -314,7 +314,7 @@ keeping the dip as a breather.
   (#382–#384), and M3a (the Breakwater, the new start, start on any map)
   merged 2026-09-26 (#385). All four D26 names are picked. M3b merged
   2026-09-26 (#389), M3c the same day (#392). The agent calls M3a and M3b
-  filed were answered as D30–D35 (#393). **Next:** M3b–M5 are rows
+  filed were answered as D30–D35 (#394). **Next:** M3b–M5 are rows
   in `plan/steps/01_build_plan.md` (brief
   `plan/2026-09-25-map-revamp-m3.prompt.md`).
 - Backdrop-anchored map renderer (D15) — nodes in image coordinates,

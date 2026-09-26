@@ -25,7 +25,7 @@
 | M3a: the Breakwater + new start | #385 | **Merged 2026-09-26** (2b289bb2). See §3a. |
 | M3b: the Charcoal Wood | #389 | Merged 2026-09-26. See §3b. |
 | M3c: the Beacon Crags | #392 | Merged 2026-09-26. See §3c. |
-| T's calls on M3a/M3b | #393 | Merged 2026-09-26: D30–D35, applied to all three built maps. See §3d. |
+| T's calls on M3a/M3b | #394 | Merged 2026-09-26: D30–D35, applied to all three built maps. See §3d. |
 
 **First act of the session:** get #382 → #383 → #384 merged, in order (the
 repo uses merge commits; auto-merge is disabled). Each PR's decisions-file
@@ -249,7 +249,7 @@ from the caverns' camp, iron, hazard and loot builders and M3b's pinned
 ## 3d. T's calls on M3a/M3b (D30–D35, 2026-09-26): what M3d must follow
 
 T answered the agent calls M3a and M3b filed. They apply to every Act 1 map,
-and #393 retrofitted them onto the Breakwater, the Charcoal Wood and the
+and #394 retrofitted them onto the Breakwater, the Charcoal Wood and the
 Beacon Crags:
 
 - **One elite per region, no boss (D30).** Exactly one fight is an

@@ -1402,7 +1402,7 @@ present. Row stays open until that session runs.
 - filed 2026-09-26 (M3a and M3b residue): the Breakwater's five agent calls
   (no boss; the windmill rest start; no combat plate; the "breakwater" name
   overlap; no NPCs) and fishing-village's difficulty order. Answered by T as
-  D30–D35 and applied to all three built maps in #393: one elite per region
+  D30–D35 and applied to all three built maps in #394: one elite per region
   on its last fight column; an arrival-scene start; plain black combat; the
   King rises from the harbour wall; the Breakwater's people via a story-spec
   session (new Pending row); fishing-village retuned after M3d (build-plan
