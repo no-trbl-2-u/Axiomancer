@@ -157,6 +157,11 @@ Otherwise fall through to 3b.
 
 #### 3b. Content lifecycle due (rate-limited, per category)?
 
+> **THE CARD HOLD (T, 2026-09-26, D37).** `cards` and `keywords` are
+> paused: never pick them here, however stale their ledger row. Only the
+> other three categories (equipment, enemies, npcs) qualify until T
+> re-arms them. See `plan/bearings.md` → THE CARD HOLD.
+
 The five per-item content surfaces (cards, equipment, enemies,
 keywords, NPCs) each have a standing steward — the `adjust-*`
 family — that creates, updates, AND retires that surface's content.

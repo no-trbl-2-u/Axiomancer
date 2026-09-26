@@ -98,6 +98,8 @@ event-pool and layout files).
 - [ ] Phase M3e — Retune fishing-village for its place after Act 1 (D35): with all four Act 1 maps shipped, run `/combat-playtest` over a fresh-start run through Act 1 into fishing-village, then raise fishing-village's pins (`FV_BOSS_LEVEL` and the level of its fights in `MapEvents/content.ts`) so it follows the Act 1 elites (level 3–4) instead of dipping below them; cite the measurement in the PR. Requires M3d `[x]`.
 - [ ] Phase M4 — The Labyrinth door (D24): the Lantern Deep's `vault-door` node enters the Aporia through `enterLabyrinthAction`'s snapshot and return path, with a hermetic enter/return/resume test. Requires M3d `[x]`.
 - [ ] Phase M5 — Map docs: rewrite `docs/world.md`'s stale sections and `skills/forge.md`'s column-layering line for D16's shape and `MapSheet`. Requires M3d `[x]`; may ride with M4.
+- [blocked: attended with T — the loop pauses at the card phase (D38); the stat-to-quantity mapping is T's call 2026-09-26] Phase S3 — Per-stat combat hooks and card damage scaling (refactor D1 step 3, D4): body, mind and heart each drive a distinct combat quantity, and card damage scales off them. Requires M5 `[x]`. Not a loop phase; `/oversight` unblocks it only when T runs it.
+- [blocked: requires S3 `[x]` (D36); unblock when S3 merges 2026-09-26] Phase P1 — The card purge (D36): purge every player card except `grey-strike` and `grey-ward`, and every player keyword except DEAL and GUARD; every run deals the grey deck; presets, the 5/5/5 thirds, card rewards and cache card offers go. Enemies keep their keywords. Brief `plan/2026-09-26-card-purge.prompt.md`. Requires S3 `[x]`.
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics (9180fa5d)
@@ -1118,6 +1120,17 @@ See the status rows above; generate briefs on demand.
   answered the six agent calls from M3a/M3b in a ballot ("Retune after
   M3d" for fishing-village), then: *"Open the PR, file the residue,
   merge, then keep it moving"*. Resulting commit: this one.
+
+- **2026-09-26** — actor: **T, attended session** (branch
+  `claude/card-purge-queue`). Action: **added Phase S3** (the D4 stat
+  hooks, blocked for an attended session: the loop pauses at the card
+  phase, D38) and **Phase P1** (the card purge, D36), after M5.
+  Confirmed T's request: yes. T, near-verbatim: *"I want to pause at the
+  card phase"*, then *"purge all the cards and all the combat related
+  keywords except for the grey strike and grey guard cards and keyword.
+  Then work can continue, but no card generation unless it's a guided
+  session with me"*. Scope settled by ballot (D36-D38). Resulting
+  commit: this one.
 
 ## Phase log (commit hashes)
 
