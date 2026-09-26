@@ -85,6 +85,19 @@ in TRIM THE FAT T4 (2026-09-25) lives verbatim in
 - [x] Phase 103 — The last two arenas: the acquisition pipeline learns to crop a plate off a scanned page (e333fbb)
 - [x] Phase 104 — The grey office and the keyword pull (510953cf)
 
+**THE MAP REVAMP — the rest of Act 1's maps** (T, 2026-09-26). Brief for
+every row: `plan/2026-09-25-map-revamp-m3.prompt.md` (§1 rulings, §2 phase table, §3a the M3a
+pattern to copy). Generate `plan/phases/phase_<id>_<topic>.md` from its §2
+row. D26's name picks are already made (brief §1), so no row below needs T.
+**Order is strict:** each row requires the one above it ticked `[x]` on
+`main`. If it isn't, skip the row this tick (they touch the same registry,
+event-pool and layout files).
+- [blocked: attended session building it 2026-09-26; its PR ticks this row and unblocks M3c] Phase M3b — The Charcoal Wood: Act 1 map 2 on the forest plate; the Breakwater's door leads here, this map's door to fishing-village. Then trigger the Android preview build (brief §2, M3b+).
+- [blocked: waits on Phase M3b's merge, 2026-09-26] Phase M3c — The Beacon Crags: Act 1 map 3 on the mountain plate, under `northern-continent` (the first cross-continent step in Act 1). The Charcoal Wood's door leads here; this map's door leads to fishing-village.
+- [ ] Phase M3d — The Lantern Deep: Act 1 map 4 on the underworld plate, under `northern-continent`. Requires M3c `[x]`. The Beacon Crags' door leads here; this map's door leads to fishing-village. Halo the node marks (densest, darkest plate) and check with `verify:visual`.
+- [ ] Phase M4 — The Labyrinth door (D24): the Lantern Deep's `vault-door` node enters the Aporia through `enterLabyrinthAction`'s snapshot and return path, with a hermetic enter/return/resume test. Requires M3d `[x]`.
+- [ ] Phase M5 — Map docs: rewrite `docs/world.md`'s stale sections and `skills/forge.md`'s column-layering line for D16's shape and `MapSheet`. Requires M3d `[x]`; may ride with M4.
+
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics (9180fa5d)
 
@@ -1084,6 +1097,18 @@ See the status rows above; generate briefs on demand.
   equipment,keywords,npcs}.md` per the "zero-diff at pass 9-10" plateau
   flag. Resulting commit: this one; briefs generate on demand per the
   Status block scope lines.
+
+- **2026-09-26** — actor: **T, attended session** (branch
+  `claude/map-revamp-queue`). Action: **added Phases M3b, M3c, M3d, M4
+  and M5** (the map revamp's remaining phases, brief
+  `plan/2026-09-25-map-revamp-m3.prompt.md`). M3b is blocked while this
+  session builds it; M3c is blocked until M3b merges; M3d, M4 and M5 are
+  pickable in order. Confirmed T's request: yes. T, near-verbatim: *"make
+  sure what's left of this revamp has been distributed to the build plan
+  so the nexus loop can tackle some of the work while I'm sleeping"*.
+  The same session T picked the three remaining D26 names (The Charcoal
+  Wood, The Beacon Crags, The Lantern Deep), so no row waits on T. T's
+  stated reason: let the loop work overnight. Resulting commit: this one.
 
 ## Phase log (commit hashes)
 
