@@ -122,6 +122,21 @@ test('mechanics world content outside the named minigames selects encounter rout
     }
 })
 
+test('mobile map layouts and canvas run the full mobile suite', () => {
+    // The map revamp (D2/D16) rewrites these; the layout-engine parity and
+    // legibility tests ride the mobile gate, so a layout-only PR must run it.
+    for (const path of [
+        'axiomancer-mobile/state/exploration-maps/fishing-village.layout.ts',
+        'axiomancer-mobile/state/exploration-maps/index.ts',
+        'axiomancer-mobile/components/exploration/MapCanvas.tsx',
+        'axiomancer-mobile/assets/images/maps/provenance.json',
+    ]) {
+        const result = classify('mobile', [path])
+        assert.equal(result.mobile, true, `${path} should run the mobile gate`)
+        assert.equal(result.full, true, `${path} should run the full suite`)
+    }
+})
+
 test('uncoupled mechanics source remains mechanics-only', () => {
     const result = classify('mechanics', ['axiomancer-mechanics/src/Inventory/inventory.ts'])
     assert.equal(result.mobile, false)
