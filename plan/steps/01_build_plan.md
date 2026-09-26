@@ -95,7 +95,7 @@ event-pool and layout files).
 - [x] Phase M3b — The Charcoal Wood (#389)
 - [x] Phase M3c — The Beacon Crags (#392)
 - [x] Phase M3d — The Lantern Deep (#396)
-- [ ] Phase M3e — Retune fishing-village for its place after Act 1 (D35): with all four Act 1 maps shipped, run `/combat-playtest` over a fresh-start run through Act 1 into fishing-village, then raise fishing-village's pins (`FV_BOSS_LEVEL` and the level of its fights in `MapEvents/content.ts`) so it follows the Act 1 elites (level 3–4) instead of dipping below them; cite the measurement in the PR. Requires M3d `[x]`.
+- [x] Phase M3e — Retune fishing-village for its place after Act 1 (425525ce)
 - [ ] Phase M4 — The Labyrinth door (D24): the Lantern Deep's `vault-door` node enters the Aporia through `enterLabyrinthAction`'s snapshot and return path, with a hermetic enter/return/resume test. Requires M3d `[x]`.
 - [ ] Phase M5 — Map docs: rewrite `docs/world.md`'s stale sections and `skills/forge.md`'s column-layering line for D16's shape and `MapSheet`. Requires M3d `[x]`; may ride with M4.
 - [blocked: attended with T — the loop pauses at the card phase (D38); the stat-to-quantity mapping is T's call 2026-09-26] Phase S3 — Per-stat combat hooks and card damage scaling (refactor D1 step 3, D4): body, mind and heart each drive a distinct combat quantity, and card damage scales off them. Requires M5 `[x]`. Not a loop phase; `/oversight` unblocks it only when T runs it.
