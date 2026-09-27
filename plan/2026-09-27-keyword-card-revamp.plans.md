@@ -201,6 +201,66 @@ written as spell/oath/hex after two tries and ≥3 cards want the same
 shape. Plan C: from a threat row no one-shot or passive answers. All three
 paper or sandbox the shape before any engine file changes (§6 C3–C4).
 
+### 5.3 Card progression — how one card changes over a run
+
+T, 2026-09-27: *"new card progression (upgrades, merging, transforming). I'm
+open to all types of card related ideas."* What is already ruled: THE PATH
+(2026-09-02) names six progression axes — staged decks, card removal, card
+upgrades (Slay the Spire's model), die upgrades, act-reward dice, items →
+signature skills. D8 deferred card upgrades' grant path to this rework; D20
+kept die growth for it. Neither ruling said *which* mechanisms; that is this
+section's job. Each row: the rule, what the engine already has, the
+progression-specific test, and a verdict with confidence. Nothing here is
+adopted; every row is a ballot for the guided session.
+
+**The progression test** (in addition to §5 where a mechanism needs a type):
+(p1) the changed card must still print the number the engine applies
+(`paid-summary-honesty` law); (p2) the change must be visible on the face
+without a tooltip; (p3) it must scale with the stat model (D41) without a
+second formula; (p4) it must have a *price* on THE PATH (a node, a currency,
+a sacrifice, plays) — free progression is a difficulty knob, not a choice.
+
+| Mechanism | Prior art | Rule | Engine today | Test | Verdict | Conf. |
+|---|---|---|---|---|---|---|
+| **Linear upgrade** (`+`) | Slay the Spire rest-site `+`; Monster Train stones, two slots max | One strictly-better copy per card; computed by bucket (+40% magnitude, +25% rate, +1 count) or an authored patch | `card-upgrades.ts` — the whole rule, minus a grant path and the oath/hex hook-by-id hazard | p1 ✓ (face regenerates), p2 needs a `+` marker, p3 ✓ (base moves, formula unchanged), p4 **missing** — that is D8 | Ship first: the cheapest axis, engine-complete. Grant path is the only decision: rest choice vs Blacksmith vs a currency | 85 |
+| **Branching upgrade** (A / B) | Cobalt Core's A/B; Griftlands' choice-of-two on level | Two authored patches; the player picks one; the other is gone for the run | `CardUpgrade` patch supports one path only | p2 ✓, p4 ✓ if it reuses the `+` grant; costs 2 authored patches per card, so it fights the slice budget | Defer to Skull/Saint cards only, after `+` ships; a `+` with a choice is the same face | 70 |
+| **Upgrade by use** (XP) | Griftlands: cards level after N plays | A play counter per card instance; the upgrade fires from the counter, not a node | Nothing counts plays per card instance; combat state has no per-card counter | p4 ✓ (the price is play), p2 needs a pip meter on the face; new deck-state field, saves migrate | The most *game-shaped* option for a campaign RPG (a card you use becomes yours). Evaluate at B5/C5 once the pick × win table exists | 60 |
+| **Merge / fusion** | Inscryption: sacrifice one card's sigil onto another; "mycologists" fuse two identical cards | Two cards → one; the result carries one card's numbers and the other's keyword or line | No card-on-card reference in the data model (same gap as Affix, §5.1); card removal exists | p1 ✓ only if the fused face is generated, p3 ✓, p4 ✓ (the sacrifice is the price); fails p2 unless the face has room for a second line | Attractive for the doom register (a card *eats* another). Prototype on paper: "the merged card = FREE line of A + PAID line of B" is expressible today as a new authored card, no engine work, so pilot it as **authored fusion results** before generic fusion | 55 |
+| **Transform** | Slay the Spire Transform event; Dawncaster Ascension I→II→III and Path I→II→III chains that replace themselves | A card becomes a different card, by chance (event) or by chain (its next stage) | Card ids are static; reward/cache offers gated off; map events exist | Chains satisfy p1–p3 as separate authored cards; p4 is the chain's trigger (plays, an act boundary, a story beat). Random transform fails p4 (no choice) unless it is an event's price | Chains, yes, as a Plan C late slot or a Saint slot: a card that *ends* as something else is the cheapest transformation and pure content. Random transform: an event, not a card system | 70 |
+| **Attachment / charm** | Wildfrost charms; Balatro enhancements, editions, seals; Roguebook gems | A modifier object sits on a card and changes one number or adds one keyword | None; the closest live thing is die gear (Blacksmith payload swap) | Fails p2 (a second glyph on the face) and needs a new zone; p3 ✓ if the modifier is a keyword | Not for the first pool. If T wants a "modifier" fantasy, put it on the **dice** (gear already exists) rather than on cards | 75 |
+| **Die growth** (the card-adjacent axis) | Astrea's risk-tiered dice; THE PATH axes 4–5 | Hone miss faces to mana; add a die per act | `honedDieGear`, `bonusTurnDice`, `dieUpgradeLevel`; D31a proved these the strongest axes | Passes all four; the only open question is the grant path (D20) | Decide the grant with `+` upgrades in the same session: one Blacksmith / rest surface for both | 80 |
+| **Removal** (deck thinning) | StS removal pricing; Dominion trashing | Linear price `base + step × removals` | Shipped (Phase 52a/52f), rest offers "cut a card" | Passes | Untouched. It is the axis that makes a small pool feel curated | 95 |
+
+Reading the table: `+` upgrades and die growth are engine-complete and want
+one grant decision; chains and authored fusion results are content, not
+engine; upgrade-by-use is the one mechanism worth a real prototype; charms
+and generic fusion wait. Confidence in that ordering: 70.
+
+**Where each plan decides progression.** Plan A: A2 names the axes the
+skeleton assumes (a `+` column per slot?), A5 ratifies the grant paths. Plan
+B: B2 ships `+` for slice 1 as its own mini-slice so the kill session
+compares base vs `+`; B5 decides die growth and use-XP. Plan C: C2's answer
+slots may be answered by a *progression* (a `+` that turns a chip card into
+an answer) rather than a new card; C5 decides grants with the stamp.
+
+### 5.4 Everything else card-shaped (the open backlog)
+
+Ideas T is open to, filed so no session has to rediscover them. None is
+scheduled; each names its existing surface.
+
+| Idea | Surface today | One-line note |
+|---|---|---|
+| Card rewards after fights | Gated off (P1), machinery kept | Re-armed per slice; the offer *order* teaches keywords (§6 B5) |
+| Cache "take a card" offer | Gated off, kept | Same pool as rewards, or a rarer one |
+| A shop for cards | Act 1 has no shop (adjust-equipment pass 21 filed it) | Card purchase is also a progression price (p4) |
+| Curses / junk injected by enemies | Removed in P1 | Only via Plan C's threat rows (§5.1 junk row) |
+| Allies / summons | `cards.allies.ts` (typed oath) | Needs a slice that wants a second body on the board |
+| Haunts (CONJURE-only class) | `cards.haunts.ts` | Conjured cards are a free way to add *temporary* cards without a type |
+| Relic-granted cards | Purged; relic effects stay | A relic can hand you a card again once the pool exists |
+| Deck-size floor / ceiling | Deck sizes open since 2026-09-02 | A ceiling makes removal and fusion matter |
+| Card colour vs die colour | `color`, colour-match +25% | The Form / stance candidate (§5.1) is the one that touches this rule |
+| Signature skills from items | THE PATH axis 6 | Not cards; leave to `/adjust-equipment` |
+
 ## 6. Research receipts
 
 Gathered 2026-09-27 by web scouts; primary sources unless marked
@@ -268,3 +328,6 @@ answered):
 2. Whether the "last 2 times" are the two runs named in §0 (confidence 65).
 3. Whether card upgrades (D8) and die growth (D20) are decided inside the
    first slice or held for the ratification session.
+4. Which progression mechanisms beyond `+` and die growth get a prototype in
+   the first pool (§5.3 recommends upgrade-by-use and authored fusion
+   results; confidence 60).
