@@ -339,8 +339,18 @@ library the unit of work; B is the only plan whose first session ends with
 T playing new cards, and its keyword extraction rule makes carrier count a
 consequence rather than a gate. Confidence: 70.
 
+**Ballot outcome (2026-09-27).** All four calls were put to T through
+`AskUserQuestion` and answered "no preference". Per `docs/asking-well.md`
+rule 5 the stated defer paths apply and are policy until T reopens them:
+(1) all three plans are filed as one attended candidate in
+`plan/PHASE_CANDIDATES.md`; nothing starts. (2) §0's identification of the
+two prior runs stays as written, marked unconfirmed (confidence 65).
+(3) The D8 / D20 grant paths are held for the ratification session of
+whichever plan runs. (4) No progression mechanism beyond `+` and die growth
+is prototyped in the first pool; §5.3 stays an inventory.
+
 Open calls for T (put as a ballot, `AskUserQuestion`, not re-asked once
-answered):
+answered; answered 2026-09-27 as above):
 
 1. Which plan (or splice).
 2. Whether the "last 2 times" are the two runs named in §0 (confidence 65).
