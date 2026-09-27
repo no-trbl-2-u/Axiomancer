@@ -90,11 +90,10 @@ describe('stage-eligible card pools', () => {
             // share of the deck the player has spent rest-site beats on. The
             // pool is still one entry per eligible card, so compare on BASE ids.
             const pool = new Set(stageEligibleCardIds(stage).map(baseCardId));
-            // Phase 104 — the grey office is a run's opening hand, never a
-            // draft target, so the two grey starters sit outside every pool.
+            // The card purge (D44, 2026-09-27): the grey office is now also
+            // the reward pool, so it sits inside every stage pool.
             const expected = cardLibrary.filter(c =>
-                c.theme !== 'grey'
-                && c.tier <= stage.maxCardTier
+                c.tier <= stage.maxCardTier
                 && rankMaturityLevel(c.rank) <= stage.playerLevel);
             expect(pool.size, `${id} pool size`).toBe(expected.length);
             for (const card of expected) {
@@ -104,9 +103,19 @@ describe('stage-eligible card pools', () => {
     });
 
     it('the early pool is strictly smaller than the late pool (deck maturity grows)', () => {
-        const early = stageEligibleCardIds(COMBAT_STAGE_PROFILES.early);
-        const late = stageEligibleCardIds(COMBAT_STAGE_PROFILES.late);
+        // Rewritten after the card purge (P1, 2026-09-27): the library is three
+        // tier-1 grey cards that pass every gate, so a tier-3, rank-5 extra
+        // card stands in for the mature content the late stage unlocks.
+        const mature: Card = {
+            id: 'stage-test-mature', name: 'Stage Test Mature',
+            color: 'body', description: 'test-only card', tier: 3,
+            targetType: 'enemy', rank: 5, cardType: 'spell',
+        };
+        const early = stageEligibleCardIds(COMBAT_STAGE_PROFILES.early, [mature]);
+        const late = stageEligibleCardIds(COMBAT_STAGE_PROFILES.late, [mature]);
         expect(early.length).toBeLessThan(late.length);
+        expect(early).not.toContain('stage-test-mature');
+        expect(late.map(baseCardId)).toContain('stage-test-mature');
     });
 
     it('extraCards join the pool under the same gates (and may override by id)', () => {

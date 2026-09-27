@@ -13,8 +13,10 @@ export const GOODWILL_DISCOUNT_THRESHOLD = 1;
 export const GOODWILL_DISCOUNT_RATE = 0.10;
 
 export const GOODWILL_ALLY_THRESHOLD = 2;
-/** The Ally granted at Tier 2. Phase 62's only shipped Ally. */
-export const GOODWILL_ALLY_CARD_ID = 'the-sworn-second';
+/** The Ally granted at Tier 2. `null` since the card purge (P1, D36): The
+ *  Sworn Second was purged, so Tier 2 grants nothing until a guided session
+ *  seats a new Ally here. */
+export const GOODWILL_ALLY_CARD_ID: string | null = null;
 
 export const GOODWILL_BONUS_THRESHOLD = 3;
 export const GOODWILL_BONUS_CURRENCY = 25;

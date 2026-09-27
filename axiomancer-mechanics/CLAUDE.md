@@ -53,12 +53,11 @@ reference for every new number. This is not about difficulty. It is about every
 play visibly moving something. When a tuning run says the numbers are too big,
 the answer is to buff the neighbours, not to shrink the card.
 
-**2. Only three constraints survive.**
+**2. Only two constraints survive.** (The 5/5/5 aspect thirds were repealed
+with the presets in the card purge, D36, 2026-09-27: the player library is the
+grey office — A Plain Blow, Ward and Word — and new cards arrive only through a
+guided session with T, D37.)
 
-- **The 5/5/5 aspect thirds.** Every preset deck splits into exact thirds by
-  `color` (body/mind/heart). Deck sizes are open; the thirds are
-  not. Enforced at `src/Combat/combat.starter-deck-presets.ts` and
-  `src/Combat/e2e/deck-presets.engine.test.ts`.
 - **Every card has a FREE line.** A card must be playable without a die
   (`Card.free`, `playTopAction`). Existence only — the old sub-rules (budget
   percentage, theme-currency deposit, the draw-kicker clause, the generic-draw

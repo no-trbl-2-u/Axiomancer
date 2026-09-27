@@ -153,16 +153,6 @@ describe('card upgrades — a + never subtracts', () => {
         expect(inert).toEqual([]);
     });
 
-    it('a curse is upgraded structurally only — every number on it is a price', () => {
-        const curses = LIBRARY.filter(c => c.theme === 'curse');
-        expect(curses.length).toBeGreaterThan(0);
-        for (const c of curses) {
-            const up = upgradeCard(c);
-            expect(changedSomething(c, up)).toBe(false);
-            expect(up.id).toBe(`${c.id}+`);
-        }
-    });
-
     it('never raises a printed COST (recoil / ante / reap cost / burn count)', () => {
         const costPaths = /(\.recoil$|\.hp$|anteConviction|\.cost$|recoilHp)/;
         const offenders: string[] = [];
@@ -259,9 +249,15 @@ describe('card upgrades — purity', () => {
     });
 
     it('shares no object with the input card', () => {
-        const withEverything = LIBRARY.find(c => c.specialMechanics?.length && c.combatEffects?.length && c.free);
-        expect(withEverything).toBeDefined();
-        const card = withEverything as Card;
+        // After the card purge (P1, 2026-09-27) no library card carries all
+        // three payload shapes at once, so the witness joins A Plain Blow's
+        // mechanic + FREE line with A Plain Word's status.
+        const strike = LIBRARY.find(c => c.id === 'grey-strike');
+        const word = LIBRARY.find(c => c.id === 'grey-word');
+        expect(strike?.specialMechanics?.length).toBeGreaterThan(0);
+        expect(word?.combatEffects?.length).toBeGreaterThan(0);
+        const card: Card = { ...strike!, id: 'upgrade-purity-witness', combatEffects: word!.combatEffects };
+        expect(card.free).toBeDefined();
         const up = upgradeCard(card);
         expect(up).not.toBe(card);
         expect(up.specialMechanics).not.toBe(card.specialMechanics);

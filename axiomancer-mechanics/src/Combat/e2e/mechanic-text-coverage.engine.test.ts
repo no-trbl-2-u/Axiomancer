@@ -40,14 +40,4 @@ describe('mechanicText covers every live CardSpecialMechanic kind', () => {
         const total = cardLibrary.reduce((n, c) => n + (c.specialMechanics?.length ?? 0), 0);
         expect(total).toBeGreaterThan(0);
     });
-
-    it('conjure_card renders the conjured card\'s real name, not its raw id', () => {
-        const carrier = cardLibrary.find(c => (c.specialMechanics ?? []).some(m => m.kind === 'conjure_card'));
-        expect(carrier).toBeDefined();
-        const mech = carrier!.specialMechanics!.find(m => m.kind === 'conjure_card')!;
-        const text = mechanicText(mech);
-        expect(text).not.toBeNull();
-        expect(text).not.toContain('conjure_card');
-        expect(text).toContain('Cinder');
-    });
 });

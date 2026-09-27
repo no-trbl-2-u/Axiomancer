@@ -16,6 +16,10 @@
  *
  * spec 32 v3 re-pin: REACT is deleted (REAP/RUPTURE absorb the payoff role);
  * riders carry no chipHp (the strike is dead); fixtures carry rank/cardType.
+ *
+ * The card purge (P1, 2026-09-27) deleted the "library cards print their
+ * threshold die lines" block: its carriers (the-long-lent, the-offertory-
+ * plate) are gone and no surviving card prints a threshold.
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
@@ -28,7 +32,7 @@ import { deepClone } from '../../Utils';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
-    endTurn, getCard,
+    endTurn,
     PIP_INTENSITY_BONUS, PIP_GUARD_BONUS, COLOR_MATCH_STATUS_DURATION_BONUS,
 } from '../combat.engine';
 import { RESERVE_MAX, RESERVE_PIP_CAP } from '../combat.dice';
@@ -184,15 +188,5 @@ describe('R8 — a bogus dieId is an explicit fizzle', () => {
         const res = playCombatCard(s, { uid: entry.uid }, true, 'no-such-die');
         expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
         expect(res.state.enemy.effects.length).toBe(0);
-    });
-});
-
-describe('the projected card prints its die lines (real units)', () => {
-    it('threshold lines appear on profane-canon library cards', () => {
-        // the-long-lent: threshold mind×3 → tick every DoT now
-        expect(getCard('the-long-lent')!.dieLines?.some(l => l.includes('MIND ×3'))).toBe(true);
-        // the-offertory-plate: threshold heart×3 → +2 Souls
-        expect(getCard('the-offertory-plate')!.dieLines?.some(l => l.includes('HEART ×3'))).toBe(true);
-        expect(getCard('the-offertory-plate')!.dieLines?.some(l => l.includes('Souls'))).toBe(true);
     });
 });

@@ -17,8 +17,10 @@
  *   2. The two round-clock aliases ('round-start'/'round-end' ≡ `tickPhase`).
  *   3. Engine call sites: 'card-played' fires on a PLAYER spell play (PAID
  *      bottom or FREE top — the FREE site was missing until 2026-09-04);
- *      'payoff' fires inside the rupture verb BEFORE consumption;
  *      'damage-instance' fires on the shared enemy-damage funnel (THORNS).
+ *      (The card purge, P1 2026-09-27, deleted the 'payoff' call-site test —
+ *      RUPTURE has no surviving carrier — and the card-landed fresh-stack /
+ *      play-site Soul tests: no surviving card lands a DoT.)
  *   4. `calendarExpiry: false` persistence (no round-end countdown) and the
  *      Soul-on-decay-consumed law (Harvest must not starve without calendars).
  *   5. `growth: 'per-enemy-action'` — Doom deepens when the enemy acts, and
@@ -42,7 +44,6 @@ import { effectsLibrary, lookupEffect } from '../../Effects/effects.library';
 import { mockSequentialRng } from '../../test-utils/rng';
 import { buildFixtureState } from '../../test-utils/card-fixture';
 import { playCombatCard, resolveThreatPhase } from '../combat.engine';
-import { buildCombatSummary } from '../combat.attribution';
 import type { CombatEncounterState, CombatEvent } from '../combat.encounter.types';
 import {
     fireDotTrigger, growPerEnemyActionDots, EXPECTED_TRIGGERS_PER_ROUND,
@@ -234,35 +235,18 @@ describe("engine call site — 'card-played' (player-side plays only, ratified)"
         mockSequentialRng(0.5);
         const before = stateWithEnemyEffects(
             [ae('ws3x_card_played', 2, 4)],
-            [{ uid: 't1', cardId: 'spoiled-poultice' }],
+            [{ uid: 't1', cardId: 'grey-strike' }],
         );
         const { state: after, events } = playCombatCard(before, { uid: 't1' }, true, 'fx-die');
 
-        // Everything the foe lost beyond the card's own hit IS the clock tick:
-        // spoiled-poultice's fresh POISON stack is clock-capped out of this
-        // same play (WS3.3 eligibility), so only the staged instance ticks.
+        // Everything the foe lost beyond the card's own hit IS the clock tick
+        // (A Plain Blow lands no DoT of its own; card purge P1, 2026-09-27).
         expect(before.enemy.health - after.enemy.health).toBe(directDamageToEnemy(events) + 6);
         const ticks = findEvents(events, 'dot-tick').filter(e => e.effectId === 'ws3x_card_played');
         expect(ticks).toEqual([{ kind: 'dot-tick', effectId: 'ws3x_card_played', label: 'ws3x_card_played', amount: 6, target: 'enemy' }]);
         // The play itself never ticks calendars — duration untouched.
         const inst = after.enemy.effects.find(e => e.effectId === 'ws3x_card_played');
         expect(inst).toMatchObject({ intensity: 2, remainingDuration: 4 });
-    });
-
-    it('a decay-consumed no-calendar instance yields a Soul at the play site', () => {
-        mockSequentialRng(0.5);
-        const before = stateWithEnemyEffects(
-            [ae('ws3x_cp_decay', 1, -1)],
-            [{ uid: 't1', cardId: 'spoiled-poultice' }],
-        );
-        const { state: after, events } = playCombatCard(before, { uid: 't1' }, true, 'fx-die');
-
-        expect(before.enemy.health - after.enemy.health).toBe(directDamageToEnemy(events) + 5);
-        expect(after.enemy.effects.some(e => e.effectId === 'ws3x_cp_decay')).toBe(false);
-        expect(after.souls).toBe(1);
-        expect(findEvents(events, 'soul-gained')).toEqual([
-            { kind: 'soul-gained', amount: 1, total: 1, reason: 'expiry' },
-        ]);
     });
 
     // Playtest fix 2026-09-04: the FREE line is a player-side spell play and
@@ -272,7 +256,9 @@ describe("engine call site — 'card-played' (player-side plays only, ratified)"
         mockSequentialRng(0.5);
         const before = stateWithEnemyEffects(
             [ae('ws3x_card_played', 2, 4)],
-            [{ uid: 't1', cardId: 'spoiled-poultice' }],
+            // A Plain Ward's FREE line (GUARD 2) deals nothing itself, so the
+            // whole enemy delta is the clock tick (card purge P1, 2026-09-27).
+            [{ uid: 't1', cardId: 'grey-ward' }],
         );
         const { state: after, events } = playCombatCard(before, { uid: 't1' }, false);
 
@@ -280,36 +266,13 @@ describe("engine call site — 'card-played' (player-side plays only, ratified)"
         const ticks = findEvents(events, 'dot-tick').filter(e => e.effectId === 'ws3x_card_played');
         expect(ticks).toEqual([{ kind: 'dot-tick', effectId: 'ws3x_card_played', label: 'ws3x_card_played', amount: 6, target: 'enemy' }]);
         expect(after.directDamageDealt - before.directDamageDealt).toBe(6);
-        // The play's OWN fresh POISON stack is clock-capped out (WS3.3).
-        expect(findEvents(events, 'dot-tick').filter(e => e.effectId === 'debuff_poison')).toEqual([]);
         const inst = after.enemy.effects.find(e => e.effectId === 'ws3x_card_played');
         expect(inst).toMatchObject({ intensity: 2, remainingDuration: 4 });
     });
 
-    it('a FREE play never ticks the stacks it just landed (fresh-stack gate)', () => {
-        mockSequentialRng(0.5);
-        const before = stateWithEnemyEffects([], [{ uid: 't1', cardId: 'spoiled-poultice' }]);
-        const { state: after, events } = playCombatCard(before, { uid: 't1' }, false);
-        expect(findEvents(events, 'dot-tick')).toEqual([]);
-        expect(after.enemy.health).toBe(before.enemy.health);
-        // ...but the NEXT free play does tick them.
-        const again = { ...after, hand: [{ uid: 't2', cardId: 'spoiled-poultice' }] };
-        const second = playCombatCard(again, { uid: 't2' }, false);
-        const ticks = findEvents(second.events, 'dot-tick').filter(e => e.effectId === 'debuff_poison' && e.target === 'enemy');
-        expect(ticks).toHaveLength(1);
-        expect(ticks[0].amount).toBeGreaterThan(0);
-        expect(again.enemy.health - second.state.enemy.health).toBe(ticks[0].amount);
-        // Playtest fix 2026-09-04: the FREE line records provenance, so the
-        // tick is credited to Spoiled Poultice — not "Lingering afflictions".
-        const summary = buildCombatSummary(second.state);
-        expect(summary.rows.find(r => r.cardId === 'spoiled-poultice')).toMatchObject({ dotDamage: ticks[0].amount });
-        expect(summary.rows.some(r => r.name === 'Lingering afflictions')).toBe(false);
-        expect(summary.bestCard).toBe('Spoiled Poultice');
-    });
-
     it('a FREE play advances card-played DoTs the PLAYER bears (pre-existing stacks only)', () => {
         mockSequentialRng(0.5);
-        const base = stateWithEnemyEffects([], [{ uid: 't1', cardId: 'spoiled-poultice' }]);
+        const base = stateWithEnemyEffects([], [{ uid: 't1', cardId: 'grey-ward' }]);
         const before: CombatEncounterState = {
             ...base,
             player: { ...base.player, effects: [ae('ws3x_card_played', 1, 4)] },
@@ -318,31 +281,6 @@ describe("engine call site — 'card-played' (player-side plays only, ratified)"
         const selfTicks = findEvents(events, 'dot-tick').filter(e => e.target === 'self');
         expect(selfTicks).toEqual([{ kind: 'dot-tick', effectId: 'ws3x_card_played', label: 'ws3x_card_played', amount: 3, target: 'self' }]);
         expect(before.player.health - after.player.health).toBe(3);
-    });
-});
-
-describe("engine call site — 'payoff' (rupture / consume_affliction / reap_all)", () => {
-    it('the rupture verb ticks payoff-clocked DoTs BEFORE consuming them', () => {
-        mockSequentialRng(0.5);
-        // Profane Canon (2026-08-08): the rupture carrier is now
-        // communion-of-the-worm (RUPTURE ALL + SIPHON) — same payoff verb.
-        const before = stateWithEnemyEffects(
-            [ae('ws3x_payoff', 1, 3)],
-            [{ uid: 't1', cardId: 'communion-of-the-worm' }],
-        );
-        const { state: after, events } = playCombatCard(before, { uid: 't1' }, true, 'fx-die');
-
-        const ticks = findEvents(events, 'dot-tick').filter(e => e.effectId === 'ws3x_payoff');
-        expect(ticks).toEqual([{ kind: 'dot-tick', effectId: 'ws3x_payoff', label: 'ws3x_payoff', amount: 4, target: 'enemy' }]);
-
-        // The detonation then consumed the instance and burst for its pending
-        // fuel (expected-trigger math: payoff × 1/round × 3 rounds × 4 HP).
-        const [detonated] = findEvents(events, 'rupture-detonated');
-        expect(detonated.consumed).toEqual(['ws3x_payoff']);
-        expect(after.enemy.effects).toEqual([]);
-        expect(before.enemy.health - after.enemy.health)
-            .toBe(directDamageToEnemy(events) + 4 + detonated.amount);
-        expect(detonated.amount).toBeGreaterThan(0);
     });
 });
 
@@ -518,10 +456,11 @@ describe('legacy parity — an untagged DoT keeps exactly the old behavior', () 
         mockSequentialRng(0.5);
         const before = stateWithEnemyEffects(
             [ae('ws3x_legacy', 2, 4)],
-            [{ uid: 't1', cardId: 'spoiled-poultice' }],
+            [{ uid: 't1', cardId: 'grey-strike' }],
         );
         const { state: after, events } = playCombatCard(before, { uid: 't1' }, true, 'fx-die');
         // The card's own hit lands; the untagged DoT contributes NOTHING.
+        expect(directDamageToEnemy(events), 'the play must actually land').toBeGreaterThan(0);
         expect(before.enemy.health - after.enemy.health).toBe(directDamageToEnemy(events));
         expect(findEvents(events, 'dot-tick')).toEqual([]);
         expect(after.enemy.effects.find(e => e.effectId === 'ws3x_legacy')).toMatchObject({

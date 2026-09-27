@@ -38,24 +38,24 @@ const swapCandidate: Card = {
 
 describe('applyDeckSwaps', () => {
     it('replaces EVERY copy of out, preserving copy count and seat order', () => {
-        const deck = ['a-card', 'spoiled-poultice', 'a-card', 'other'];
+        const deck = ['a-card', 'grey-strike', 'a-card', 'other'];
         // 'out' presence is checked against the list; 'in' must resolve via
         // getCardById — use a real library id.
-        const swapped = applyDeckSwaps(deck, [{ out: 'a-card', in: 'spoiled-poultice' }]);
-        expect(swapped).toEqual(['spoiled-poultice', 'spoiled-poultice', 'spoiled-poultice', 'other']);
+        const swapped = applyDeckSwaps(deck, [{ out: 'a-card', in: 'grey-strike' }]);
+        expect(swapped).toEqual(['grey-strike', 'grey-strike', 'grey-strike', 'other']);
     });
 
     it('applies swaps in order — a later swap may target a swapped-in id', () => {
         const deck = ['x', 'y'];
         const swapped = applyDeckSwaps(deck, [
-            { out: 'x', in: 'spoiled-poultice' },
-            { out: 'spoiled-poultice', in: 'petty-indictment' },
+            { out: 'x', in: 'grey-strike' },
+            { out: 'grey-strike', in: 'grey-word' },
         ]);
-        expect(swapped).toEqual(['petty-indictment', 'y']);
+        expect(swapped).toEqual(['grey-word', 'y']);
     });
 
     it('throws when out is not in the deck (no silent no-op)', () => {
-        expect(() => applyDeckSwaps(['a'], [{ out: 'missing', in: 'spoiled-poultice' }]))
+        expect(() => applyDeckSwaps(['a'], [{ out: 'missing', in: 'grey-strike' }]))
             .toThrow(/'missing' is not in the resolved deck/);
     });
 
@@ -73,15 +73,15 @@ describe('applyDeckSwaps', () => {
 
 describe('parseDeckSelectionArg — the +swap: suffix', () => {
     it('parses a plain preset unchanged', () => {
-        expect(parseDeckSelectionArg('preset:threadbare')).toEqual({ kind: 'preset', presetId: 'threadbare' });
+        expect(parseDeckSelectionArg('preset:grey')).toEqual({ kind: 'preset', presetId: 'grey' });
     });
 
     it('parses one and many swap pairs', () => {
-        expect(parseDeckSelectionArg('preset:threadbare+swap:a/b')).toEqual({
-            kind: 'preset', presetId: 'threadbare', swaps: [{ out: 'a', in: 'b' }],
+        expect(parseDeckSelectionArg('preset:grey+swap:a/b')).toEqual({
+            kind: 'preset', presetId: 'grey', swaps: [{ out: 'a', in: 'b' }],
         });
-        expect(parseDeckSelectionArg('preset:threadbare+swap:a/b, c/d')).toEqual({
-            kind: 'preset', presetId: 'threadbare',
+        expect(parseDeckSelectionArg('preset:grey+swap:a/b, c/d')).toEqual({
+            kind: 'preset', presetId: 'grey',
             swaps: [{ out: 'a', in: 'b' }, { out: 'c', in: 'd' }],
         });
     });
@@ -91,22 +91,22 @@ describe('parseDeckSelectionArg — the +swap: suffix', () => {
     });
 
     it('rejects malformed pairs and an empty suffix loudly', () => {
-        expect(() => parseDeckSelectionArg('preset:threadbare+swap:a')).toThrow(/Bad swap pair 'a'/);
-        expect(() => parseDeckSelectionArg('preset:threadbare+swap:a/b/c')).toThrow(/Bad swap pair 'a\/b\/c'/);
-        expect(() => parseDeckSelectionArg('preset:threadbare+swap:')).toThrow(/needs at least one/);
+        expect(() => parseDeckSelectionArg('preset:grey+swap:a')).toThrow(/Bad swap pair 'a'/);
+        expect(() => parseDeckSelectionArg('preset:grey+swap:a/b/c')).toThrow(/Bad swap pair 'a\/b\/c'/);
+        expect(() => parseDeckSelectionArg('preset:grey+swap:')).toThrow(/needs at least one/);
     });
 });
 
 describe('resolveDeckSelection — preset + swaps', () => {
     it('resolves to the preset deck with the seat substituted (flag-agnostic)', () => {
         registerSandboxCards([swapCandidate]);
-        const base = buildPresetDeck('threadbare');
+        const base = buildPresetDeck('grey');
         expect(base.length).toBeGreaterThan(0);
         const out = base[0];
         const copies = base.filter(id => id === out).length;
 
         const resolved = resolveDeckSelection(
-            { kind: 'preset', presetId: 'threadbare', swaps: [{ out, in: swapCandidate.id }] },
+            { kind: 'preset', presetId: 'grey', swaps: [{ out, in: swapCandidate.id }] },
             undefined,
         );
 
@@ -117,7 +117,7 @@ describe('resolveDeckSelection — preset + swaps', () => {
     });
 
     it('swap-less preset selections stay byte-identical to buildPresetDeck', () => {
-        expect(resolveDeckSelection({ kind: 'preset', presetId: 'threadbare' }, undefined))
-            .toEqual(buildPresetDeck('threadbare'));
+        expect(resolveDeckSelection({ kind: 'preset', presetId: 'grey' }, undefined))
+            .toEqual(buildPresetDeck('grey'));
     });
 });

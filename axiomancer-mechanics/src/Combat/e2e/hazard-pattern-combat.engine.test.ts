@@ -77,10 +77,27 @@ registerSandboxCards([{
     cardType: 'spell',
     targetType: 'enemy',
     combatEffects: [{ effectId: 'debuff_nettle_sting', appliedTo: 'opponent', intensity: 1, duration: 2 }],
+}, {
+    // The card purge (P1, 2026-09-27): spoiled-poultice is gone and the grey
+    // office is colourless with no DoT, so this SYNTHETIC mirror of its exact
+    // shape keeps the body-coloured POISON seat (the colour law and the
+    // status-play pins need a coloured DoT card; poison itself stays live —
+    // enemies inflict it).
+    id: 'qa-poultice-dot',
+    name: 'QA Poultice DoT (test fixture)',
+    color: 'body',
+    description: 'Test-only fixture: the retired spoiled-poultice shape (deal 7 + POISON).',
+    tier: 1,
+    rank: 1,
+    cardType: 'spell',
+    targetType: 'enemy',
+    free: { applyEffect: { effectId: 'debuff_poison', intensity: 3, duration: 2 } },
+    specialMechanics: [{ kind: 'deal', amount: 7 }],
+    combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 4, duration: 3 }],
 }]);
 
-const DOT_BODY = 'spoiled-poultice';     // body starter, applies debuff_poison (card-played-clock DoT)
-const CONTROL_CARD = 'scolds-bridle';    // body, tier 2, STAGGER + BACKFIRE (control)
+const DOT_BODY = 'qa-poultice-dot';      // body, applies debuff_poison (card-played-clock DoT) — sandbox
+const CONTROL_CARD = 'grey-word';        // colourless, control track (VULNERABLE, stat-debuff)
 const DAMAGE_BODY = 'qa-payoff-burst';   // body, tier 1, RUPTURE payoff (sandbox fixture)
 
 function makePlayer(cards: string[]): Character {

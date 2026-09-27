@@ -40,47 +40,13 @@
 
 import type { Card } from './types';
 
-// ─── The Sworn Second — Phase 62's reference Ally ────────────────────────────
-
 /**
- * A companion recruited through a village's goodwill (the loot-cache
- * sacrifice chain Phase 65 wires up), not drafted or found. Its passive is
- * built entirely from the existing THORNS vocabulary (Bulwark's hallmark,
- * `buff_thorns` in `Effects/buffs.library.json`) — no new keyword. Hooked at
- * the SAME round-end site every other oath/hex passive uses
- * (`combat.engine.ts` `processBetweenPhases`, gated by `zoneHas`), capped at
- * 3 stacks so a long fight's standing reflect never runs away — mirrors the
- * `grace-momentum` cap's shape (irresistible-grace, `GRACE_MOMENTUM_MAX_STACKS`).
+ * Every Ally in existence. EMPTY since the card purge (P1, 2026-09-27; D36):
+ * The Sworn Second went with the rest of the player library, and new Allies
+ * arrive only through a guided session with T (D37). The registry and its
+ * lookups stay so a future Ally has a home.
  */
-const theSwornSecond: Card = {
-    id: 'the-sworn-second',
-    name: 'The Sworn Second',
-    color: 'heart',
-    persistentEffect:
-        'At the end of each round, while you carry fewer than 3 stacks of ' +
-        'THORNS, your retainer answers a blow leveled at you: gain THORNS 1 ' +
-        'for 2 turns.',
-    description:
-        'Recruited, not conscripted — a debt paid forward from a village you ' +
-        'did not have to help. They do not carry your cards. They carry your ' +
-        'back.',
-    tier: 2, rank: 5, cardType: 'oath',
-    targetType: 'self',
-    // pts: engine text — a capped, refreshed THORNS 1 (2t) at round end
-    // (statusPerIntensityTurn 0.75 x i1 x d2 = 1.5/application, hand-priced
-    // per the min-4-triggers convention every oath/hex comment uses) sustained
-    // across a full fight -> Skull-adjacent. The 3-stack cap keeps the payoff
-    // bounded rather than a runaway reflect stack (grace-momentum precedent).
-    addedIn: '2026-08-26',
-    tags: ['ally', 'reward', 'oath'],
-};
-
-/**
- * Every Ally in existence. NOT part of the curated library — no
- * reward/stage/draft pool ever offers one; Phase 65's village-goodwill
- * payout is the only intended grant path (not built here).
- */
-export const allyLibrary: Card[] = [theSwornSecond];
+export const allyLibrary: Card[] = [];
 
 const registry = new Map<string, Card>(allyLibrary.map(card => [card.id, card]));
 

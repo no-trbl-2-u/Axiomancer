@@ -753,6 +753,10 @@ ambiguity.)
   is decided (families by where the effect lands, `base × stat ÷ 5`, no
   caps; brief `plan/2026-09-27-stat-scaling.prompt.md`). A third grey card,
   VULNERABLE, survives the purge with the other two.
+  **Shipped 2026-09-27:** S3 (#404) and P1, the purge. The player library
+  is the grey office alone; per D44 the grey cards are also the reward pool
+  (rewards and the cache's card offer stay on). A separate card agent now
+  owns card and keyword design with T; the loop still creates none (D37).
 - **THE CARD HOLD (T, attended session 2026-09-26, D37).** No player card
   and no player keyword is created outside a guided session with T. No
   steward, `/forge`, `/expand`, phase or brief adds one, and none plans a

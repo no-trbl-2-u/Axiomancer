@@ -14,6 +14,14 @@
  * `resolveDrop` feeds with measurements); the APPLY assertions choose a die
  * through the board's real tap-to-power gesture (`tapCombatDie`), which runs
  * the same gate.
+ *
+ * Since the card purge (2026-09-27) every card in the library is colourless
+ * ('any' — the grey office), so no real hand can hold an off-colour card: the
+ * board-level off-colour cases (disabled-on-drag, refused-die → FREE) went
+ * with the aspect cards. The pure gate (`dieCanPowerCardVM`,
+ * `resolveDieDropTarget`) is still pinned on synthetic colours below, and the
+ * board cases now pin the other half of the law: a colourless card takes a
+ * die of every colour.
  */
 
 import React from 'react';
@@ -30,9 +38,8 @@ import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 import { tapCombatDie } from '@/test-utils/tapCombatDie';
 
-// Spec 32 v3 fixtures (same as the multistage suite): two Affliction DoTs,
-// the Bulwark guard, a Charm sway — a hand guaranteed to span stances.
-const CARDS = ['spoiled-poultice', 'unction-of-boils', 'frostbitten-palisade', 'thin-hymn'];
+// The grey office (same as the multistage suite) — every card colourless.
+const CARDS = ['grey-strike', 'grey-ward', 'grey-word', 'grey-strike'];
 const STANCES = ['heart', 'body', 'mind'] as const;
 
 const noopDrag = (): DragController =>
@@ -65,9 +72,6 @@ function freshEncounter(seed = 16): { store: ReturnType<typeof withAllProviders>
     s = rollEncounterDice(s).state;
     return { store, s };
 }
-
-/** A stance color the card does NOT match (the off-color drag fixture). */
-const offColorFor = (stance: string): string => STANCES.find((c) => c !== stance)!;
 
 afterEach(() => { jest.clearAllMocks(); });
 
@@ -143,39 +147,29 @@ describe('resolveDieDropTarget — an illegal drop dispatches NOTHING', () => {
 
 // ── Render: the drag-time affordance ─────────────────────────────────────────
 
-describe('CombatBoard — staged cards read disabled while an off-color die is in flight', () => {
-    it('an off-color drag disables the card; a matching card stays enabled', () => {
-        const { store, s } = freshEncounter();
+describe('CombatBoard — staged cards under a die drag', () => {
+    it('the hand is colourless — the fixture every case below leans on', () => {
+        const { s } = freshEncounter();
         const vm = buildCombatViewModel(s);
         expect(vm.hand.length).toBeGreaterThanOrEqual(2);
-        const card = vm.hand[0];
-        const off = offColorFor(card.stance);
-
-        const { tree } = withAllProviders(
-            <CombatBoard vm={vm} drag={dieDrag(ghostDie(off))} stagedUids={[card.uid]} {...boardCallbacks()} />,
-            { store },
-        );
-        render(tree);
-
-        // "a red-die drop on a blue card … the card reads disabled during the drag"
-        expect(screen.getByTestId(`combat-staged-${card.uid}`).props.accessibilityState)
-            .toEqual({ disabled: true });
-        // and its socket does not invite the drop.
-        expect(screen.getByTestId(`combat-socket-${card.uid}`)).toBeTruthy();
+        for (const card of vm.hand) expect(card.stance).toBe('any');
     });
 
-    it('a MATCHING die drag leaves the card enabled', () => {
-        const { store, s } = freshEncounter();
-        const vm = buildCombatViewModel(s);
-        const card = vm.hand[0];
+    it('a die of EVERY colour leaves a colourless card enabled', () => {
+        for (const color of STANCES) {
+            const { store, s } = freshEncounter();
+            const vm = buildCombatViewModel(s);
+            const card = vm.hand[0];
 
-        const { tree } = withAllProviders(
-            <CombatBoard vm={vm} drag={dieDrag(ghostDie(card.stance))} stagedUids={[card.uid]} {...boardCallbacks()} />,
-            { store },
-        );
-        render(tree);
-        expect(screen.getByTestId(`combat-staged-${card.uid}`).props.accessibilityState)
-            .toEqual({ disabled: false });
+            const { tree } = withAllProviders(
+                <CombatBoard vm={vm} drag={dieDrag(ghostDie(color))} stagedUids={[card.uid]} {...boardCallbacks()} />,
+                { store },
+            );
+            const view = render(tree);
+            expect(screen.getByTestId(`combat-staged-${card.uid}`).props.accessibilityState)
+                .toEqual({ disabled: false });
+            view.unmount();
+        }
     });
 
     it('a WILD die drag disables NO staged card', () => {
@@ -197,7 +191,7 @@ describe('CombatBoard — staged cards read disabled while an off-color die is i
 
 // ── APPLY routing: an off-color die never powers ─────────────────────────────
 
-describe('CombatBoard — APPLY never routes an off-color die', () => {
+describe('CombatBoard — APPLY routes only an explicitly chosen legal die', () => {
     /** Recolor the first live tray die to `color` (a MANA face, so it powers)
      *  — a pure-state override giving the board a die of a KNOWN color. */
     function withTrayDie(s: CombatEncounterState, color: CombatDieColor): { s: CombatEncounterState; dieId: string } {
@@ -218,25 +212,10 @@ describe('CombatBoard — APPLY never routes an off-color die', () => {
         return cbs;
     }
 
-    it('an off-color die is refused → APPLY dispatches the FREE action (no die, no fizzle)', async () => {
+    it('a coloured die → APPLY powers a colourless card with that EXPLICIT die', async () => {
         const { store, s: s0 } = freshEncounter();
         const card = buildCombatViewModel(s0).hand[0];
-        const { s, dieId } = withTrayDie(s0, offColorFor(card.stance) as CombatDieColor);
-        const cbs = renderStaged(s, card.uid, store);
-
-        // The player chooses the off-color die: the gate refuses it…
-        await tapCombatDie(dieId);
-        expect(screen.queryByTestId('combat-staged-die')).toBeNull();
-        // …and APPLY commits the FREE action instead of routing the die at it.
-        fireEvent.press(screen.getByTestId(`combat-apply-${card.uid}`));
-        expect(cbs.onApply).toHaveBeenCalledTimes(1);
-        expect(cbs.onApply).toHaveBeenCalledWith(card.uid, null, false);
-    });
-
-    it('a matching die → APPLY powers the card with that EXPLICIT die', async () => {
-        const { store, s: s0 } = freshEncounter();
-        const card = buildCombatViewModel(s0).hand[0];
-        const { s, dieId } = withTrayDie(s0, card.stance as CombatDieColor);
+        const { s, dieId } = withTrayDie(s0, 'body');
         const cbs = renderStaged(s, card.uid, store);
 
         await tapCombatDie(dieId);
@@ -256,10 +235,10 @@ describe('CombatBoard — APPLY never routes an off-color die', () => {
         expect(cbs.onApply).toHaveBeenCalledWith(card.uid, dieId, true);
     });
 
-    it('no die chosen → APPLY is FREE — nothing auto-attaches, even a matching die', () => {
+    it('no die chosen → APPLY is FREE — nothing auto-attaches, even a legal die', () => {
         const { store, s: s0 } = freshEncounter();
         const card = buildCombatViewModel(s0).hand[0];
-        const { s } = withTrayDie(s0, card.stance as CombatDieColor);
+        const { s } = withTrayDie(s0, 'body');
         const cbs = renderStaged(s, card.uid, store);
 
         expect(screen.queryByTestId('combat-staged-die')).toBeNull();
@@ -267,22 +246,10 @@ describe('CombatBoard — APPLY never routes an off-color die', () => {
         expect(cbs.onApply).toHaveBeenCalledWith(card.uid, null, false);
     });
 
-    it('END PHASE batch honors the law too: a refused off-color die auto-applies FREE', async () => {
+    it('END PHASE batch commits a chosen legal die POWERED', async () => {
         const { store, s: s0 } = freshEncounter();
         const card = buildCombatViewModel(s0).hand[0];
-        const { s, dieId } = withTrayDie(s0, offColorFor(card.stance) as CombatDieColor);
-        const cbs = renderStaged(s, card.uid, store);
-
-        await tapCombatDie(dieId);
-        fireEvent.press(screen.getByTestId('combat-end-phase'));
-        expect(cbs.onApply).toHaveBeenCalledWith(card.uid, null, false);
-        expect(cbs.onEndPhase).toHaveBeenCalledTimes(1);
-    });
-
-    it('END PHASE batch commits a chosen matching die POWERED', async () => {
-        const { store, s: s0 } = freshEncounter();
-        const card = buildCombatViewModel(s0).hand[0];
-        const { s, dieId } = withTrayDie(s0, card.stance as CombatDieColor);
+        const { s, dieId } = withTrayDie(s0, 'mind');
         const cbs = renderStaged(s, card.uid, store);
 
         await tapCombatDie(dieId);

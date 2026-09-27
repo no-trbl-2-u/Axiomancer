@@ -2,13 +2,16 @@
  * Hermetic E2E — CROSS-COMBAT floating-die persistence (spec 32 v3 §5).
  *
  * The handoff's open checklist item (2026-07-09): the save-back seam was only
- * unit-covered — this pins the WHOLE loop through real encounters:
+ * unit-covered — this pins the loop through real encounters:
  *
- *   fight 1: forge a float (a sandbox fixture mirroring the retired
- *   ex-nihilo — see the FORGE registration below) → combat ends →
- *   getFloatingDiceColors → Character.floatingDice (the save-back) →
- *   fight 2: the float materializes in the opening tray → spend it (named as
- *   the powering die) → gone forever → fight 3 opens with an empty pool.
+ *   a persisted float (Character.floatingDice) → fight 2: the float
+ *   materializes in the opening tray → spend it (named as the powering die)
+ *   → getFloatingDiceColors (the save-back) is empty → fight 3 opens with an
+ *   empty pool.
+ *
+ * The card purge (P1, 2026-09-27) removed the fight-1 FORGE step (the
+ * `forge_floating_die` card verb has no surviving carrier); the loop now
+ * starts from a saved float.
  *
  * Plus the seam under the real auto-runner (`runHazardCombatAutoEncounter` ×2
  * — the map-run shape): the pool never grows without a forge card in the deck
@@ -24,34 +27,17 @@ import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
 import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
-import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     getFloatingDiceColors,
 } from '../combat.engine';
 import { FLOATING_DICE_CAP } from '../combat.dice';
 import { runHazardCombatAutoEncounter } from '../../test-utils/combat-autoplay';
-import type { CombatDieColor, CombatEncounterState } from '../combat.encounter.types';
+import type { CombatEncounterState } from '../combat.encounter.types';
 
-// PROFANE CANON (2026-08-08): `forge_floating_die` lost its library carrier
-// (ex-nihilo, retired with the forge theme). The verb — and the cross-combat
-// persistence seam this file pins — is still engine-live, so a SYNTHETIC
-// sandbox fixture mirroring the retired card's exact shape forges the float.
-const FORGE = 'qa-ex-nihilo';    // mind spell fixture: FORGE a WILD floating die
-const DOT = 'spoiled-poultice';  // body spell (canon starter): Poison — a wild float powers it
-
-registerSandboxCards([
-    {
-        id: FORGE, name: 'QA Ex Nihilo (forge fixture)',
-        color: 'mind', description: 'forge_floating_die fixture', tier: 2,
-        targetType: 'self', rank: 4, cardType: 'spell',
-        free: { pips: 1 },
-        specialMechanics: [
-            { kind: 'forge_floating_die', color: 'wild' },
-            { kind: 'bank_spent_die' },
-        ],
-    },
-]);
+// The card purge (P1, 2026-09-27): A Plain Blow (colourless) — any die,
+// a wild float included, powers it.
+const DOT = 'grey-strike';
 
 function makePlayer(cards: string[], floatingDice: ('heart' | 'body' | 'mind' | 'wild')[] = []): Character {
     const p = deepClone(Player);
@@ -69,19 +55,6 @@ function makeEnemy(hp: number): Enemy {
     return e;
 }
 
-/** Forces this turn's tray to known colors (deterministic; keeps floats).
- *  Spec 33: every non-X die shows a MANA face; an X die is a dead miss. */
-function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
-    const turn = state.turn || 1;
-    const dice = colors.map((c, i) => ({
-        id: `t${turn}-d${i}`, color: c,
-        state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
-        face: c === 'x' ? ('miss' as const) : ('mana' as const),
-    }));
-    const floating = state.dice.filter(d => d.floating);
-    return { ...state, dice: [...dice, ...floating], turn };
-}
-
 function playFromHand(state: CombatEncounterState, cardId: string, useBottom = true, dieId?: string) {
     const entry = state.hand.find(h => h.cardId === cardId);
     expect(entry, `${cardId} should be in hand`).toBeDefined();
@@ -89,21 +62,9 @@ function playFromHand(state: CombatEncounterState, cardId: string, useBottom = t
 }
 
 describe('GHOST DICE — cross-combat persistence (the save-back seam, full loop)', () => {
-    it('forge in fight 1 → save-back → fight 2 opening tray → spend → fight 3 empty', () => {
-        // ── FIGHT 1: forge the float ────────────────────────────────────────
-        const player1 = makePlayer([FORGE, DOT, DOT, DOT, DOT]);
-        let s1 = initializeCombatEncounter(player1, makeEnemy(80), [FORGE, DOT, DOT, DOT, DOT], 7);
-        s1 = rollEncounterDice(s1).state;
-        s1 = setDice(s1, ['mind', 'x']);
-        const forged = playFromHand(s1, FORGE, true, s1.dice[0].id);
-        const floated = forged.events.find(e => e.kind === 'die-floated') as { dieId: string; color: string } | undefined;
-        expect(floated).toBeDefined();
-        expect(floated!.color).toBe('wild');
-        s1 = forged.state;
-
-        // The save-back seam — exactly what the panel writes to the character.
-        const saved = getFloatingDiceColors(s1);
-        expect(saved).toEqual(['wild']);
+    it('saved float → fight 2 opening tray → spend → save-back empty → fight 3 empty', () => {
+        // The persisted pool, exactly what the panel wrote to the character.
+        const saved: ('heart' | 'body' | 'mind' | 'wild')[] = ['wild'];
 
         // ── FIGHT 2: the float arrives in the OPENING tray ──────────────────
         const player2 = makePlayer([DOT, DOT, DOT, DOT], saved);
@@ -116,7 +77,7 @@ describe('GHOST DICE — cross-combat persistence (the save-back seam, full loop
         expect(tray!.color).toBe('wild');
 
         // Spend it by naming it as the powering die; a wild float is
-        // color-legal on the body DoT.
+        // color-legal on the colourless blow.
         const spent = playFromHand(s2, DOT, true, tray!.id);
         expect(spent.events.some(e => e.kind === 'effect-fizzled')).toBe(false);
         expect(spent.events.some(e => e.kind === 'floating-die-spent')).toBe(true);

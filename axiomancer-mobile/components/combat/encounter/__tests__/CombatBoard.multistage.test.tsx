@@ -19,8 +19,9 @@ import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 import { tapCombatDie } from '@/test-utils/tapCombatDie';
 
-// Spec 32 v3 fixtures: two Affliction DoTs, the Bulwark guard, a Charm sway.
-const CARDS = ['spoiled-poultice', 'unction-of-boils', 'frostbitten-palisade', 'thin-hymn'];
+// A four-card hand off the grey office (the whole library since the card
+// purge, 2026-09-27).
+const CARDS = ['grey-strike', 'grey-ward', 'grey-word', 'grey-strike'];
 
 const noopDrag = (): DragController =>
     ({ begin: () => undefined, move: () => undefined, end: () => undefined, active: null } as unknown as DragController);
@@ -138,7 +139,7 @@ describe('CombatBoard — multi-card staging', () => {
 });
 
 // ── Invariants (locked, not brittle snapshots) ───────────────────────────────
-describe('CombatBoard — die-attribution + DoT-notation invariants', () => {
+describe('CombatBoard — die-attribution invariants', () => {
     // (c) A chosen die lights up EXACTLY ONE staged card — the one it was
     // dropped on — never every staged card at once, and staging a second card
     // afterwards never shares or moves it.
@@ -174,31 +175,5 @@ describe('CombatBoard — die-attribution + DoT-notation invariants', () => {
         view.rerender(tree2);
         expect(screen.getAllByTestId('combat-staged-die')).toHaveLength(1);
         expect(screen.getByTestId(`combat-socket-${uids[1]}`)).toBeTruthy();
-    });
-
-    // (c) The DoT face VM is legible — never the user-rejected 'n/t·t' bare-slash
-    // per-turn form. WI-2: an event DoT (poison=card-played / bleed=damage-instance)
-    // reads its real trigger ("2/play", "per card you play · Nt"); a round-clock DoT
-    // still reads "N over M turns". Both are legible; the rejected "N/t" is not.
-    it('the DoT VM reads its real trigger (event) or lifetime (round-clock), never n/t·t', () => {
-        const { store } = withAllProviders(<></>);
-        const base = store.getState().player;
-        const player = { ...base, knownCards: CARDS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 };
-
-        let s = initializeCombatEncounter(player, createMockEncounterEnemy(), undefined, 16);
-        s = rollEncounterDice(s).state;
-        const vm = buildCombatViewModel(s);
-        const dot = vm.hand.find((c) => c.face.kind === 'dot');
-        expect(dot).toBeTruthy();
-        // Event face ("2/play") OR round-clock face (pure integer total).
-        expect(dot!.face.heroText).toMatch(/^\d+(\/(play|hit|payoff))?$/);
-        expect(dot!.face.heroSub).toMatch(
-            /^(over \d+ turns|per card you play · \d+t|per hit taken · \d+ stacks?|per payoff you detonate · \d+t)$/,
-        );
-        // Never the rejected per-turn bare-slash notation.
-        expect(dot!.face.heroText).not.toMatch(/\d+\/t\b/);
-        expect(`${dot!.face.heroSub}`).not.toMatch(/\d+\/t\b/);
-        // HP→VITAE: the verb line never says HP.
-        expect(dot!.face.verbLine).not.toMatch(/\bHP\b/);
     });
 });

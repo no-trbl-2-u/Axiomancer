@@ -38,7 +38,7 @@ import { cardLibrary } from '../Cards/cards.library';
 
 /** Filler deck/draw-pile content: a real, always-playable spell, so `drawCards`
  *  riders never starve regardless of how many cards a given test draws. */
-export const FIXTURE_FILLER: readonly string[] = Array<string>(12).fill('spoiled-poultice');
+export const FIXTURE_FILLER: readonly string[] = Array<string>(12).fill('grey-strike');
 export const FIXTURE_SEED = 20260708;
 
 export function buildFixtureState(options: { clean?: boolean } = {}): CombatEncounterState {
@@ -113,14 +113,14 @@ export function buildFixtureState(options: { clean?: boolean } = {}): CombatEnco
         omenHits: 0,
         echoNextSpell: false,
         spellsPlayedThisTurn: 0,
-        lastSpellCardId: 'spoiled-poultice', // a real, different, replayable spell (REPLAY fodder)
+        lastSpellCardId: 'grey-strike', // a real, different, replayable spell (REPLAY fodder)
         // Phase 39 (2026-08-08): REPLAY_LAST's precondition-width
         // retune requires `lastSpellRound === round` ("landed THIS turn") —
         // the fixture's `round` is 1 (initializeCombatEncounter's default).
         lastSpellRound: 1,
         persistentZone: [],
         enemyAttachments: [],
-        discard: ['spoiled-poultice', 'thin-hymn', 'the-long-lent'], // RECALL fodder (canon re-slug 2026-08-08)
+        discard: ['grey-strike', 'grey-ward', 'grey-word'], // RECALL fodder (the grey office since the purge)
         drawPile: FIXTURE_FILLER.slice(),
         deck: FIXTURE_FILLER.slice(),
         hand: [],

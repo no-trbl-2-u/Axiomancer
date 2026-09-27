@@ -100,7 +100,16 @@ describe('starter cards + learn-card flow', () => {
         expect(known).toContain('grey-ward');
     });
 
+    /** The grey office is the whole library since the card purge, and the
+     *  starter seed knows all three of its cards — so a player who knows only
+     *  A Plain Blow is the one with something left to learn. */
+    function knowOnlyTheBlow(): void {
+        const player = store.getState().player;
+        store.setState({ player: { ...player, knownCards: ['grey-strike'] } } as never);
+    }
+
     it('getLearnableCardOffers returns ≤3 unknown, requirement-met offers with effect lines', () => {
+        knowOnlyTheBlow();
         const offers = actions.getLearnableCardOffers();
         expect(offers.length).toBeGreaterThan(0);
         expect(offers.length).toBeLessThanOrEqual(3);
@@ -113,6 +122,7 @@ describe('starter cards + learn-card flow', () => {
     });
 
     it('learnCard grows knownCards through the engine and is idempotent', () => {
+        knowOnlyTheBlow();
         const offers = actions.getLearnableCardOffers();
         const pick = offers[0];
         expect(actions.learnCard(pick.id)).toBe(true);

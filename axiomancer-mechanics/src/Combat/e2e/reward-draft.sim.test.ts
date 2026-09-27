@@ -6,9 +6,9 @@
  * gate (bridge pick rates, per-origin floors) reads the emitted counts in
  * `/deck-tuning` reports — no balance band lives in this file.
  *
- * PROFANE-CANON RESET (2026-08-08): the origins are the three campaign
- * presets (threadbare/pilgrim/apostate) and the shipped sandbox-set registry
- * is EMPTY (the spec-32 'bridge-rewards' set retired with the old library).
+ * CARD PURGE (P1, 2026-09-27): the only origin is the `grey` preset (the
+ * campaign presets went with their cards, D36), and the shipped sandbox-set
+ * registry is EMPTY (the spec-32 'bridge-rewards' set retired with the old library).
  * The WS6.2 injection hook is still live code, so it is exercised through a
  * test-local FIXTURE set registered into the same registry the CLI reads —
  * the code path under test is unchanged.
@@ -54,7 +54,7 @@ describe('WS6.1 — reward-draft harness (telemetry only)', () => {
     });
 
     it('every counted card id resolves and belongs to the reward pool', () => {
-        const result = runRewardDraftSim('threadbare', 3, SCREENS);
+        const result = runRewardDraftSim('grey', 3, SCREENS);
         for (const id of [...Object.keys(result.picks), ...Object.keys(result.offers)]) {
             expect(getCardById(id)).toBeTruthy();
             expect(COMBAT_REWARD_POOL).toContain(id);
@@ -108,8 +108,8 @@ describe('WS6.2 — the sandbox-injection hook (extra cards at the reward screen
             description: 'A synthetic reward-screen candidate (WS6.2 hook fixture).',
             tier: 1, rank: 3, cardType: 'spell',
             targetType: 'self',
-            paidSummary: 'Gain PLEA 1 (3 turns).',
-            combatEffects: [{ effectId: 'buff_sway', appliedTo: 'self', intensity: 1, duration: 3 }],
+            paidSummary: 'GUARD 4.',
+            specialMechanics: [{ kind: 'guard', amount: 4 }],
             tags: ['e2e-fixture'],
         },
     ];
@@ -126,7 +126,7 @@ describe('WS6.2 — the sandbox-injection hook (extra cards at the reward screen
     afterAll(() => { delete SANDBOX_CARD_SETS[FIXTURE_SET]; });
 
     it('a plain library run reports an empty injected pool and never offers sandbox ids', () => {
-        const result = runRewardDraftSim('threadbare', 1, SCREENS);
+        const result = runRewardDraftSim('grey', 1, SCREENS);
         expect(result.extraPoolIds).toEqual([]);
         for (const id of bridgeIds) {
             expect(result.offers[id], `${id} offered without injection`).toBeUndefined();
@@ -135,7 +135,7 @@ describe('WS6.2 — the sandbox-injection hook (extra cards at the reward screen
     });
 
     it('sandboxSetId applies the set, reports its ids, and the counts still add up', () => {
-        const result = runRewardDraftSim('threadbare', 1, SCREENS, { sandboxSetId: FIXTURE_SET });
+        const result = runRewardDraftSim('grey', 1, SCREENS, { sandboxSetId: FIXTURE_SET });
         expect(result.extraPoolIds).toEqual(bridgeIds);
         // The set is live in the registry: every id resolves.
         for (const id of bridgeIds) expect(getCardById(id), id).toBeDefined();
@@ -145,7 +145,7 @@ describe('WS6.2 — the sandbox-injection hook (extra cards at the reward screen
         expect(offerTotal).toBe(SCREENS * 3);
     });
 
-    it('injected cards actually surface: across the 3 origins every bridge id is OFFERED', () => {
+    it('injected cards actually surface: across every origin each bridge id is OFFERED', () => {
         const offered = new Set<string>();
         for (const originId of COMBAT_DECK_PRESET_ORDER) {
             const result = runRewardDraftSim(originId, 11, SCREENS, { sandboxSetId: FIXTURE_SET });
@@ -157,22 +157,22 @@ describe('WS6.2 — the sandbox-injection hook (extra cards at the reward screen
     });
 
     it('is deterministic with the hook: same (origin, seed, screens, set) → identical counts', () => {
-        const a = runRewardDraftSim('pilgrim', 42, SCREENS, { sandboxSetId: FIXTURE_SET });
-        const b = runRewardDraftSim('pilgrim', 42, SCREENS, { sandboxSetId: FIXTURE_SET });
+        const a = runRewardDraftSim('grey', 42, SCREENS, { sandboxSetId: FIXTURE_SET });
+        const b = runRewardDraftSim('grey', 42, SCREENS, { sandboxSetId: FIXTURE_SET });
         expect(b.picks).toEqual(a.picks);
         expect(b.offers).toEqual(a.offers);
         expect(b.extraPoolIds).toEqual(a.extraPoolIds);
     });
 
     it('an explicit extraPool id that is NOT registered is dropped by the resolve filter, never offered', () => {
-        const result = runRewardDraftSim('threadbare', 5, SCREENS, { extraPool: ['no-such-card'] });
+        const result = runRewardDraftSim('grey', 5, SCREENS, { extraPool: ['no-such-card'] });
         expect(result.extraPoolIds).toEqual(['no-such-card']); // reported for reproducibility …
         expect(result.offers['no-such-card']).toBeUndefined(); // … but never rollable
         expect(Object.values(result.offers).reduce((a, b) => a + b, 0)).toBe(SCREENS * 3);
     });
 
     it('throws on an unknown sandbox set id (a silently-empty injection would read as a dead bridge)', () => {
-        expect(() => runRewardDraftSim('threadbare', 1, 10, { sandboxSetId: 'no-such-set' }))
+        expect(() => runRewardDraftSim('grey', 1, 10, { sandboxSetId: 'no-such-set' }))
             .toThrow(/unknown sandbox set/);
     });
 });

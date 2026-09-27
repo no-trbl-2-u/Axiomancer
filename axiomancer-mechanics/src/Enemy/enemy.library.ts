@@ -49,19 +49,8 @@ import { createEnemy, enemyStatBudget } from './index';
 import { LootTableEntry } from './types';
 import { consumableLibrary, getConsumableById } from '../Items/consumable.library';
 import { Consumable } from '../Items/types';
-import { getCardById } from '../Cards/cards.library';
-import type { Card } from '../Cards/types';
 
 // ─── Card rotation helpers ────────────────────────────────────────────────────
-
-/** Returns a fresh copy of the named card from the library. */
-function card(id: string): Card {
-    const found = getCardById(id);
-    if (!found) {
-        throw new Error(`enemy.library: unknown card id '${id}'.`);
-    }
-    return found;
-}
 
 // ─── Loot helpers ─────────────────────────────────────────────────────────────
 
@@ -195,7 +184,6 @@ export const LittleBelle = createEnemy({
     difficulty: 'normal',
     logic: 'balanced',
     loot: [none(90), drop('minor-healing-potion', 10)],
-    cards: [card('thin-hymn')],
     friendshipReward: {
         xpBonus: 10,
         narrative:
@@ -275,7 +263,6 @@ export const WaterHolger = createEnemy({
     difficulty: 'normal',
     logic: 'strategic',
     loot: [none(80), drop('healing-potion', 15), drop('antidote', 5)],
-    cards: [card('thin-hymn')],
     friendshipReward: {
         items: [
             { ...getConsumableById('healing-potion')! },
@@ -354,7 +341,6 @@ export const Ghast = createEnemy({
     difficulty: 'normal',
     logic: 'strategic',
     loot: [none(75), drop('clarity-serum', 25)],
-    cards: [card('scolds-bridle')],
     finalBlowLines: {
         brutal: 'It asks one last time. The blow answers before the manners can.',
         quiet:  'It withdraws the question, hunger and all, without waiting to hear how it would have ended.',
@@ -407,7 +393,6 @@ export const TheButcher = createEnemy({
     difficulty: 'elite',
     logic: 'aggressive',
     loot: [none(45), drop('body-elixir', 35), drop('healing-potion', 20)],
-    cards: [card('unction-of-boils')],
     finalBlowLines: {
         brutal: 'He meets an argument the cleaver cannot dress. It costs him the block.',
         quiet:  'The cleaver goes still on the table, for once, between courses.',
@@ -434,7 +419,6 @@ export const BrineHag = createEnemy({
     difficulty: 'elite',
     logic: 'strategic',
     loot: [none(80), drop('healing-potion', 20)],
-    cards: [card('thin-hymn')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.3 },
         roundsThreshold: 4,
@@ -489,7 +473,6 @@ export const TheFerryman = createEnemy({
     difficulty: 'elite',
     logic: 'strategic',
     loot: [none(75), drop('clarity-serum', 25)],
-    cards: [card('the-long-lent')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.25 },
         roundsThreshold: 6,
@@ -575,14 +558,12 @@ export const KingOfRevenge = createEnemy({
             gain: [{ kind: 'brutal' }],
             heal: { pct: 0.1 },
             threatBonus: 0.5,
-            curseCardId: 'arrears',
         },
     ],
     loot: [
         drop('healing-potion', 50),
         drop('body-elixir', 30),
     ],
-    cards: [card('knucklebone-recant'), card('passing-bell'), card('scolds-bridle')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.7 },
         roundsThreshold: 1,
@@ -651,7 +632,6 @@ export const Wichtlein = createEnemy({
     difficulty: 'normal',
     logic: 'defensive',
     loot: [none(80), drop('clarity-serum', 20)],
-    cards: [card('scolds-bridle')],
     finalBlowLines: {
         brutal: 'The third knock never lands. The ceiling holds; the miner does not.',
         quiet:  'It sets down its little hammer, having finally measured wrong.',
@@ -720,7 +700,6 @@ export const Kudan = createEnemy({
     loot: [
         drop('revive-crystal', 10),
     ],
-    cards: [card('spoiled-poultice')],
     finalBlowLines: {
         brutal: 'The prophecy dies unspoken. Whatever it knew becomes, mercifully, unknowable.',
         quiet:  'It lies down like cattle before weather. The calamity will have to introduce itself.',
@@ -782,7 +761,6 @@ export const WeepingHead = createEnemy({
     difficulty: 'normal',
     logic: 'defensive',
     loot: [none(85), drop('healing-potion', 15)],
-    cards: [card('thin-hymn')],
     finalBlowLines: {
         brutal: 'The river runs dry mid-current. The grief does not get to finish its sentence.',
         quiet:  'It cries one last, quiet time, and the crying is the whole of the ending.',
@@ -809,7 +787,6 @@ export const GoblinShaman = createEnemy({
     difficulty: 'normal',
     logic: 'strategic',
     loot: [none(75), drop('clarity-serum', 25)],
-    cards: [card('shallow-grave')],
     finalBlowLines: {
         brutal: 'All three gods call in their debts at once. The shaman cannot cover the interest.',
         quiet:  'The rattle goes still. Three small gods, unpaid, go looking for a new creditor.',
@@ -893,7 +870,6 @@ export const TriEyes = createEnemy({
     difficulty: 'normal',
     logic: 'balanced',
     loot: [none(50), drop('clarity-serum', 30), drop('healing-potion', 20)],
-    cards: [card('scolds-bridle'), card('passing-bell')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.7 },
         roundsThreshold: 1,
@@ -941,7 +917,6 @@ export const Mabadi = createEnemy({
     difficulty: 'elite',
     logic: 'strategic',
     loot: [none(60), drop('body-elixir', 30), drop('healing-potion', 10)],
-    cards: [card('knucklebone-recant')],
     finalBlowLines: {
         brutal: 'The cane finally meets an argument it cannot outlast.',
         quiet:  'He sets the cane down, upright, the way a duelist concedes a bout he respected.',
@@ -968,7 +943,6 @@ export const FrayedOne = createEnemy({
     difficulty: 'elite',
     logic: 'strategic',
     loot: [none(75), drop('clarity-serum', 25)],
-    cards: [card('the-long-lent')],
     finalBlowLines: {
         brutal: 'The last thread goes, and there is nothing left to replace it with.',
         quiet:  'It comes fully undone, at last, into a pile of threads that were always going to be someone else\'s.',
@@ -995,7 +969,6 @@ export const BoneTotem = createEnemy({
     difficulty: 'elite',
     logic: 'defensive',
     loot: [none(55), drop('iron-skin-draught', 25), drop('clarity-serum', 20)],
-    cards: [card('unction-of-boils')],
     finalBlowLines: {
         brutal: 'The stack comes down before the sentence finishes. The curse goes unsaid.',
         quiet:  'The topmost skull settles, its one word spoken at last, to no one in particular.',
@@ -1022,7 +995,6 @@ export const BoneWizard = createEnemy({
     difficulty: 'elite',
     logic: 'strategic',
     loot: [none(75), drop('clarity-serum', 25)],
-    cards: [card('spoiled-poultice')],
     finalBlowLines: {
         brutal: 'The peer review concludes, unfavorably, and permanently.',
         quiet:  'It sets down the last of its borrowed authority and returns, finally, to being bone.',
@@ -1074,13 +1046,11 @@ export const Mirac = createEnemy({
             gain: [{ kind: 'swift' }],
             heal: { pct: 0.08 },
             threatBonus: 0.55,
-            curseCardId: 'overheard-name',
         },
     ],
     loot: [
         drop('revive-crystal', 20),
     ],
-    cards: [card('the-long-lent'), card('unction-of-boils'), card('ossuary-drawer')],
     finalBlowLines: {
         brutal: 'The court adjourns violently. The verdict, unread, unhappens.',
         quiet:  'The hood bows. The red orb dims to a case dismissed.',
@@ -1111,7 +1081,6 @@ export const CursedPaladin = createEnemy({
     difficulty: 'elite',
     logic: 'balanced',
     loot: [none(35), drop('iron-skin-draught', 25), drop('body-elixir', 25), drop('healing-potion', 15)],
-    cards: [card('knucklebone-recant'), card('thin-hymn')],
     finalBlowLines: {
         brutal: 'The armor stops walking. The oath inside it finally runs out of people to be right at.',
         quiet:  'It kneels, an old posture the armor remembers better than the man ever did.',
@@ -1138,7 +1107,6 @@ export const VampireThrall = createEnemy({
     difficulty: 'normal',
     logic: 'aggressive',
     loot: [none(55), drop('body-elixir', 25), drop('healing-potion', 20)],
-    cards: [card('unction-of-boils')],
     finalBlowLines: {
         brutal: 'The final installment comes due, and there is no will left to pay it with.',
         quiet:  'It stops reaching, mid-payment, the debt finally called even.',
@@ -1165,7 +1133,6 @@ export const HasshakuSama = createEnemy({
     difficulty: 'elite',
     logic: 'strategic',
     loot: [none(75), drop('healing-potion', 25)],
-    cards: [card('thin-hymn'), card('thin-hymn')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.4 },
         roundsThreshold: 3,
@@ -1231,7 +1198,6 @@ export const JeweledTree = createEnemy({
         { kind: 'summon', n: 2, addName: 'Brier Shoot' },
     ],
     loot: [none(80), drop('greater-healing-potion', 20)],
-    cards: [card('thin-hymn')],
     finalBlowLines: {
         brutal: 'The trunk splits before the mouth gets its turn.',
         quiet:  'The gemstone eyes dim, one by one, the wanting finally unmet.',
@@ -1258,7 +1224,6 @@ export const OgreNaga = createEnemy({
     difficulty: 'elite',
     logic: 'aggressive',
     loot: [none(55), drop('body-elixir', 30), drop('greater-healing-potion', 15)],
-    cards: [card('unction-of-boils')],
     finalBlowLines: {
         brutal: 'The coils go slack. The debate ends the one way it never has: unfinished.',
         quiet:  'It settles into itself, crown and coil both, and does not rise for the next argument.',
@@ -1285,7 +1250,6 @@ export const Sidelle = createEnemy({
     difficulty: 'elite',
     logic: 'strategic',
     loot: [none(60), drop('body-elixir', 25), drop('greater-healing-potion', 15)],
-    cards: [card('knucklebone-recant')],
     finalBlowLines: {
         brutal: 'The spite finally runs out of structure to hold it up.',
         quiet:  'It folds its wings for the first time, an old capitulation it never once used.',
@@ -1342,7 +1306,6 @@ export const RawheadRex = createEnemy({
             gain: [{ kind: 'wounding', n: 40 }],
             heal: 70,
             threatBonus: 0.5,
-            curseCardId: 'gnaw-marks',
         },
     ],
     loot: [
@@ -1350,7 +1313,6 @@ export const RawheadRex = createEnemy({
         drop('body-elixir', 25),
         drop('revive-crystal', 15),
     ],
-    cards: [card('unction-of-boils'), card('knucklebone-recant'), card('passing-bell')],
     finalBlowLines: {
         brutal: 'The bloody bones come apart into their two advertised components.',
         quiet:  'It backs down the cellar stairs one last time, and the dark closes politely behind it.',
@@ -1405,7 +1367,6 @@ export const FateSpinner = createEnemy({
         drop('clarity-serum', 30),
         drop('revive-crystal', 10),
     ],
-    cards: [card('shallow-grave'), card('scolds-bridle'), card('spoiled-poultice')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.2 },
         roundsThreshold: 8,
@@ -1463,7 +1424,6 @@ export const AshenBoneDrake = createEnemy({
     difficulty: 'elite',
     logic: 'balanced',
     loot: [none(50), drop('iron-skin-draught', 25), drop('greater-healing-potion', 25)],
-    cards: [card('knucklebone-recant'), card('shallow-grave')],
     finalBlowLines: {
         brutal: 'What refused finally has nothing left to refuse with.',
         quiet:  'The ash settles. Even the argument, eventually, runs out of fire to make its point with.',
@@ -1516,7 +1476,6 @@ export const RaAminKa = createEnemy({
     loot: [
         drop('revive-crystal', 15),
     ],
-    cards: [card('ossuary-drawer'), card('spoiled-poultice'), card('petty-indictment')],
     finalBlowLines: {
         brutal: 'The wrappings unwind all at once. The decree inside was four thousand years of dust.',
         quiet:  'The king lies back down. The administration, at very long last, adjourns.',
@@ -1543,7 +1502,6 @@ export const LadyGabriella = createEnemy({
     difficulty: 'elite',
     logic: 'strategic',
     loot: [none(60), drop('regeneration-tonic', 20), drop('greater-healing-potion', 20)],
-    cards: [card('thin-hymn'), card('thin-hymn')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.35 },
         roundsThreshold: 5,
@@ -1600,7 +1558,6 @@ export const Zoma = createEnemy({
     difficulty: 'elite',
     logic: 'strategic',
     loot: [none(75), drop('clarity-serum', 25)],
-    cards: [card('scolds-bridle'), card('shallow-grave')],
     finalBlowLines: {
         brutal: 'Both heads go still at once. For once, the argument resolves unanimously.',
         quiet:  'The two voices trail into the same silence, having finally agreed on something.',
@@ -1627,7 +1584,6 @@ export const MabadiUndrowned = createEnemy({
     difficulty: 'elite',
     logic: 'strategic',
     loot: [none(55), drop('body-elixir', 25), drop('supreme-healing-potion', 20)],
-    cards: [card('knucklebone-recant'), card('spoiled-poultice')],
     finalBlowLines: {
         brutal: 'The interest goes uncollected. The principal, this once, keeps its debtor.',
         quiet:  'He sets the cane down in the shallows, the debt closed on terms he did not choose.',
@@ -1658,7 +1614,6 @@ export const TriEyesHollowed = createEnemy({
     difficulty: 'elite',
     logic: 'strategic',
     loot: [none(75), drop('clarity-serum', 25)],
-    cards: [card('passing-bell'), card('the-long-lent')],
     finalBlowLines: {
         brutal: 'The third eye finds an error it cannot finish cataloguing.',
         quiet:  'All three sockets go dark at once, the tally closed with nothing left to want it open.',
@@ -1685,7 +1640,6 @@ export const BlackDeath = createEnemy({
     difficulty: 'elite',
     logic: 'aggressive',
     loot: [none(25), drop('antidote', 30), drop('supreme-healing-potion', 25), drop('phoenix-tear', 20)],
-    cards: [card('unction-of-boils'), card('knucklebone-recant')],
     finalBlowLines: {
         brutal: 'The spine finally gives out what the plague never could.',
         quiet:  'It stops walking, at last, and the stillness reads like every town it never got to.',
@@ -1712,7 +1666,6 @@ export const TheUnnameable = createEnemy({
     difficulty: 'elite',
     logic: 'strategic',
     loot: [none(80), drop('supreme-healing-potion', 20)],
-    cards: [card('spoiled-poultice'), card('shallow-grave')],
     finalBlowLines: {
         brutal: 'It goes down still unnamed. No one survives long enough to try again.',
         quiet:  'It folds into the shape language avoided all along, and the avoiding, at last, is complete.',
@@ -1739,7 +1692,6 @@ export const FireGiant = createEnemy({
     difficulty: 'elite',
     logic: 'aggressive',
     loot: [none(55), drop('supreme-healing-potion', 25), drop('iron-skin-draught', 20)],
-    cards: [card('unction-of-boils'), card('knucklebone-recant')],
     finalBlowLines: {
         brutal: 'The furnace goes cold in one motion. The genealogy ends here, undocumented.',
         quiet:  'He sets the sword down, and for a moment it is only a mountain\'s spine again, resting.',
@@ -1766,7 +1718,6 @@ export const GreaterDevil = createEnemy({
     difficulty: 'elite',
     logic: 'strategic',
     loot: [none(75), drop('supreme-healing-potion', 25)],
-    cards: [card('scolds-bridle'), card('ossuary-drawer')],
     finalBlowLines: {
         brutal: 'The paperwork, for once, fails to account for the outcome.',
         quiet:  'It sets down the ledger, the office finally, formally, vacated.',
@@ -1822,7 +1773,6 @@ export const Rangda = createEnemy({
         drop('supreme-healing-potion', 25),
         drop('revive-crystal', 15),
     ],
-    cards: [card('thin-hymn'), card('the-long-lent'), card('shallow-grave')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.2 },
         roundsThreshold: 8,
@@ -1909,7 +1859,6 @@ export const ZomaAscendant = createEnemy({
     loot: [
         drop('revive-crystal', 15),
     ],
-    cards: [card('shallow-grave'), card('ossuary-drawer'), card('scolds-bridle')],
     finalBlowLines: {
         brutal: 'The two heads disagree one final, fatal time — about which of them was struck.',
         quiet:  'Both voices finish the same sentence and, having nothing left to settle, stop.',
@@ -1965,7 +1914,6 @@ export const ElderFireGiant = createEnemy({
         drop('phoenix-tear', 25),
         drop('revive-crystal', 15),
     ],
-    cards: [card('unction-of-boils'), card('knucklebone-recant'), card('passing-bell')],
     finalBlowLines: {
         brutal: 'The white fire goes out all at once, and the cold that follows has a genealogy too.',
         quiet:  'The elder banks his own coals, unhurried to the end.',
@@ -2019,7 +1967,6 @@ export const Tezcatlipoca = createEnemy({
     loot: [
         drop('revive-crystal', 20),
     ],
-    cards: [card('shallow-grave'), card('ossuary-drawer'), card('the-long-lent')],
     finalBlowLines: {
         brutal: 'The mirror takes one last look at itself. The smoke declines to survive the review.',
         quiet:  'The reflection bows first. The god, being thorough, follows it down.',
@@ -2066,7 +2013,6 @@ export const ArchDemon = createEnemy({
             gain: [{ kind: 'wounding', n: 80 }],
             heal: { pct: 0.15 },
             threatBonus: 0.55,
-            curseCardId: 'gnaw-marks',
         },
     ],
     loot: [
@@ -2074,7 +2020,6 @@ export const ArchDemon = createEnemy({
         drop('phoenix-tear', 20),
         drop('revive-crystal', 20),
     ],
-    cards: [card('unction-of-boils'), card('knucklebone-recant'), card('ossuary-drawer')],
     finalBlowLines: {
         brutal: 'The promotion is rescinded from above, violently, with prejudice.',
         quiet:  'The appetite completes. There was, in the end, exactly one thing it had not eaten.',
@@ -2129,7 +2074,6 @@ export const Beelzebub = createEnemy({
         drop('revive-crystal', 25),
         drop('phoenix-tear', 20),
     ],
-    cards: [card('unction-of-boils'), card('shallow-grave'), card('ossuary-drawer')],
     finalBlowLines: {
         brutal: 'The swarm loses quorum. Policy, lacking a body, disbands.',
         quiet:  'One fly leaves, then the rest. Lordship over what swarms was always a tenancy.',
@@ -2185,14 +2129,12 @@ export const Death = createEnemy({
             gain: [{ kind: 'brutal' }],
             cleanse: true,
             threatBonus: 0.6,
-            curseCardId: 'arrears',
         },
     ],
     loot: [
         drop('revive-crystal', 30),
         drop('phoenix-tear', 15),
     ],
-    cards: [card('spoiled-poultice'), card('the-long-lent'), card('ossuary-drawer')],
     finalBlowLines: {
         brutal: 'The appointment is cancelled with force. The calendar bleeds a little.',
         quiet:  'It checks the ledger, finds an error in your favor, and withdraws without apology.',
@@ -2266,7 +2208,6 @@ export const TheAbortive = createEnemy({
         drop('revive-crystal', 25),
         drop('phoenix-tear', 15),
     ],
-    cards: [card('ossuary-drawer'), card('spoiled-poultice'), card('shallow-grave')],
     finalBlowLines: {
         brutal: 'The unbegun ends. The two states were closer than theology admits.',
         quiet:  'It curls back into the shape of a thing about to start, and rests there.',
@@ -2619,7 +2560,6 @@ export const TheHarbormaster = createEnemy({
             gain: [{ kind: 'brutal' }],
             heal: { pct: 0.1 },
             threatBonus: 0.55,
-            curseCardId: 'mouthful-of-brine',
         },
     ],
     loot: [
@@ -2886,7 +2826,6 @@ export const TheWaterreeve = createEnemy({
             gain: [{ kind: 'unshaken' }],
             heal: { pct: 0.1 },
             threatBonus: 0.5,
-            curseCardId: 'arrears',
         },
     ],
     loot: [
@@ -3030,7 +2969,6 @@ export const ThePortreeve = createEnemy({
             gain: [{ kind: 'swift' }],
             heal: { pct: 0.08 },
             threatBonus: 0.55,
-            curseCardId: 'arrears',
         },
     ],
     loot: [
@@ -3105,7 +3043,6 @@ export const TheDoorwarden = createEnemy({
         drop('iron-skin-draught', 25),
         drop('clarity-serum', 20),
     ],
-    cards: [card('scolds-bridle'), card('petty-indictment'), card('knucklebone-recant')],
     finalBlowLines: {
         brutal: 'The hinge-priest comes apart at every joint at once. Ten thousand doors, unheld, swing open somewhere.',
         quiet:  'He folds shut along his own seams, the way a door closes on an empty room, and stays closed.',
@@ -3171,14 +3108,12 @@ export const TheIndex = createEnemy({
             gain: [{ kind: 'brutal' }],
             cleanse: true,
             threatBonus: 0.55,
-            curseCardId: 'overheard-name',
         },
     ],
     loot: [
         drop('clarity-serum', 25),
         drop('revive-crystal', 15),
     ],
-    cards: [card('the-long-lent'), card('shallow-grave'), card('scolds-bridle')],
     finalBlowLines: {
         brutal: 'The drawers burst in order, A through the end of knowing. The misfiled truths get one moment of daylight each.',
         quiet:  'It shelves itself, finally, in the one place it never checked: under its own name.',
@@ -3248,7 +3183,6 @@ export const TheSophist = createEnemy({
             gain: [{ kind: 'wounding', n: 35 }],
             heal: { pct: 0.1 },
             threatBonus: 0.55,
-            curseCardId: 'overheard-name',
         },
     ],
     loot: [
@@ -3256,7 +3190,6 @@ export const TheSophist = createEnemy({
         drop('greater-healing-potion', 20),
         drop('revive-crystal', 20),
     ],
-    cards: [card('ossuary-drawer'), card('shallow-grave'), card('scolds-bridle')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.25 },
         roundsThreshold: 6,
@@ -3398,12 +3331,10 @@ export const TheIncompleteness = createEnemy({
             heal: { pct: 0.3 },
             cleanse: true,
             threatBonus: 0.6,
-            curseCardId: 'overheard-name',
         },
     ],
     // It drops nothing; the fight is the lesson.
     loot: [none(100)],
-    cards: [card('ossuary-drawer'), card('spoiled-poultice'), card('shallow-grave')],
     finalBlowLines: {
         brutal: 'You do not finish the proof. You break the page it was written on, and the page stops holding sentences.',
         quiet: 'It remains true. It simply stops insisting, and the wood is quiet where the argument stood.',

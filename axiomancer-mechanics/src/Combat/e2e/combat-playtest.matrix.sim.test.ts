@@ -17,8 +17,28 @@ import {
     runPlaytestCell, runPlaytestMatrix, formatPlaytestReport,
     type PlaytestMatrixOptions, type PlaytestReport,
 } from '../combat.playtest';
+import { registerSandboxCards, clearSandboxCards } from '../../Cards/cards.sandbox';
+import type { Card } from '../../Cards/types';
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+    vi.restoreAllMocks();
+    clearSandboxCards();
+});
+
+/** A minimal sandbox DoT card (the card purge, P1, 2026-09-27): the grey
+ *  office prints no DoT and its 3 × 2 copies cannot fill a 10-card draft, so
+ *  per-policy drafting is only observable with a wider pool. */
+function sandboxDotCard(id: string, overrides: Partial<Card> = {}): Card {
+    return {
+        id, theme: 'rot', name: id, color: 'body',
+        description: 'QA fixture: a plain poison.',
+        tier: 1, rank: 1, cardType: 'spell', targetType: 'enemy',
+        free: { damage: 1 },
+        combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 3, duration: 3 }],
+        addedIn: '2026-09-27', tags: ['qa'],
+        ...overrides,
+    };
+}
 
 /** Small matrix reused across assertions: 1 enemy per stage, 8 runs per cell. */
 const SMALL: PlaytestMatrixOptions = {
@@ -105,6 +125,10 @@ describe('playtest matrix — cell invariants', () => {
 
 describe('playtest matrix — policy-pick decks resolve per-policy', () => {
     it('dot-weaver and aggro-brute cells draft different decks under the same seed', () => {
+        // Rewritten after the card purge (P1, 2026-09-27): three sandbox DoT
+        // cards widen the pool past the draft size so the policy focus shows.
+        const DOTS = ['qa-dot-a', 'qa-dot-b', 'qa-dot-c'];
+        registerSandboxCards(DOTS.map(id => sandboxDotCard(id)));
         const report = runPlaytestMatrix({
             stages: ['early'],
             policies: ['dot-weaver', 'aggro-brute'],
@@ -117,6 +141,14 @@ describe('playtest matrix — policy-pick decks resolve per-policy', () => {
         expect(weaver.spec.policyId).toBe('dot-weaver');
         expect(brute.spec.policyId).toBe('aggro-brute');
         expect(weaver.deckCardIds).not.toEqual(brute.deckCardIds);
+        // …and the difference is the focus: the weaver leans DoT, the brute
+        // leans on the plain damage card.
+        const count = (deck: readonly string[], pred: (id: string) => boolean): number =>
+            deck.filter(pred).length;
+        expect(count(weaver.deckCardIds, id => DOTS.includes(id)))
+            .toBeGreaterThan(count(brute.deckCardIds, id => DOTS.includes(id)));
+        expect(count(brute.deckCardIds, id => id === 'grey-strike'))
+            .toBeGreaterThan(count(weaver.deckCardIds, id => id === 'grey-strike'));
     }, 30_000);
 });
 
@@ -146,16 +178,20 @@ describe('playtest harness — honest failures', () => {
         })).toThrow(/Unknown enemy slug/);
     });
 
-    it('grants the stage player knowledge of explicit deck cards (a preset above the stage gate still runs)', () => {
-        // The apostate preset carries tier-3 cards (communion-of-the-worm) the
-        // early-stage player has not learned; the harness grants deck knowledge
-        // so the cell still runs (the maturity gate lives in DRAFTING, not the
-        // engine knownCards check).
+    it('grants the stage player knowledge of explicit deck cards (a deck above the stage gate still runs)', () => {
+        // Rewritten after the card purge (P1, 2026-09-27): the tier-3 preset
+        // card (communion-of-the-worm) is gone, so a sandbox tier-3 card the
+        // early-stage player has not learned stands in. The harness grants
+        // deck knowledge so the cell still runs and the card is PLAYED (the
+        // maturity gate lives in DRAFTING, not the engine knownCards check).
+        registerSandboxCards([sandboxDotCard('qa-tier3-dot', { tier: 3, rank: 5 })]);
         const cell = runPlaytestCell({
             stage: 'early', enemySlug: 'grave-larva', policyId: 'greedy',
-            deck: { kind: 'preset', presetId: 'apostate' }, runs: 2, seed: 1,
+            deck: { kind: 'cards', cardIds: ['qa-tier3-dot', 'qa-tier3-dot', 'grey-strike', 'grey-ward'] },
+            runs: 2, seed: 1,
         });
-        expect(cell.deckCardIds).toContain('communion-of-the-worm');
+        expect(cell.deckCardIds).toContain('qa-tier3-dot');
         expect(cell.stats.runs).toBe(2);
+        expect(cell.cardUsage['qa-tier3-dot']?.plays ?? 0).toBeGreaterThan(0);
     }, 30_000);
 });

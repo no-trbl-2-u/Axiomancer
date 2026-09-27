@@ -26,12 +26,10 @@ import { createCharacter } from '../../Character';
 import { GraveLarva } from '../../Enemy/enemy.library';
 import type { ActiveEffect } from '../../Effects/types';
 
-// Profane Canon (2026-08-08): fixture seats moved to the new library —
-// spoiled-poultice (poison starter), chilblain-watch (guard starter),
-// the-long-lent (PROLONG glue) hold the roles slippery-slope /
-// brace-for-impact / festering-argument used to.
-const CARD_A = 'spoiled-poultice';
-const CARD_B = 'chilblain-watch';
+// The card purge (P1, 2026-09-27): the grey office is the whole library, so
+// its three cards hold the fixture seats (A Plain Blow / Ward / Word).
+const CARD_A = 'grey-strike';
+const CARD_B = 'grey-ward';
 
 describe('combat loadout codec', () => {
     it('addToLoadout encodes a card as a flag', () => {
@@ -90,7 +88,7 @@ describe('buildCombatDeck with curated loadout', () => {
         level: 1,
         baseStats: { heart: 5, body: 5, mind: 5 },
     });
-    const EXTRA = 'the-long-lent'; // a third real card only knownCards carries
+    const EXTRA = 'grey-word'; // a third real card only knownCards carries
     const playerWithCards = { ...player, knownCards: [CARD_A, CARD_B, EXTRA] };
 
     it('uses the curated loadout when loadout flags are present', () => {
@@ -129,7 +127,7 @@ describe('initializeCombatEncounter — loadout flags reachability (Phase 93)', 
         level: 1,
         baseStats: { heart: 5, body: 5, mind: 5 },
     });
-    const EXTRA = 'the-long-lent'; // a third real card only knownCards carries
+    const EXTRA = 'grey-word'; // a third real card only knownCards carries
     const playerWithCards = { ...player, knownCards: [CARD_A, CARD_B, EXTRA] };
 
     it('deals the curated loadout, not the full knownCards list, when flags are passed', () => {

@@ -49,19 +49,64 @@ const asData = (card: unknown): Record<string, unknown> =>
             .sort(([a], [b]) => a.localeCompare(b)),
     );
 
+/**
+ * The card purge (P1, 2026-09-27) left the library as the three grey cards,
+ * which carry none of the rarer Card fields. These fixtures — three purged
+ * cards, restored verbatim from git history — keep every field the editor
+ * used to drop under test. They are editor fixtures, not library cards.
+ */
+const FIELD_FIXTURES: Card[] = [
+    {
+        id: 'fixture-persistent', name: 'The Sworn Second', color: 'heart',
+        persistentEffect:
+            'At the end of each round, while you carry fewer than 3 stacks of '
+            + 'THORNS, your retainer answers a blow leveled at you: gain THORNS 1 for 2 turns.',
+        description: 'Recruited, not conscripted.',
+        tier: 2, rank: 5, cardType: 'oath', targetType: 'self',
+        addedIn: '2026-08-26', tags: ['ally', 'oath'],
+    },
+    {
+        id: 'fixture-asymmetric', theme: 'curse', name: 'Arrears', color: 'mind',
+        description: 'The sum was small when it was first written down.',
+        tier: 1, rank: 1, cardType: 'spell', targetType: 'self',
+        paidSummary: 'PURGE this card from the fight. Its FREE line costs you 2 VITAE and mills 2.',
+        free: { recoil: 2, millCards: 2 },
+        specialMechanics: [{ kind: 'purge_self' }],
+        intentionallyAsymmetric: true,
+        addedIn: '2026-09-02', tags: ['curse'],
+    },
+    {
+        id: 'fixture-synergy', theme: 'vigil', name: 'Nothing Crossed the Ice', color: 'mind',
+        description: "The sentry's ledger, fourth bell.",
+        tier: 2, rank: 3, cardType: 'spell', targetType: 'self',
+        paidSummary: 'GUARD 16 (persists). FORETELL 3.',
+        free: { barrier: 6, foretell: 1 },
+        specialMechanics: [{ kind: 'barrier', amount: 16 }, { kind: 'foretell', count: 3 }],
+        synergy: {
+            statePredicate: { kind: 'enemy-dealt-no-damage-last-round' },
+            rider: { drawCards: 2, conviction: 2 },
+        },
+        addedIn: '2026-09-02', tags: ['vigil'],
+    },
+];
+
+/** The live library plus the field fixtures — what the round trip sweeps. */
+const SWEPT: Card[] = [...cardLibrary, ...FIELD_FIXTURES];
+
 describe('CardDraft carries every Card field', () => {
     it('the library is non-empty (the sweep below is not vacuous)', () => {
-        expect(cardLibrary.length).toBeGreaterThan(40);
+        // The grey office (A Plain Blow, Ward, Word) since the card purge.
+        expect(cardLibrary.length).toBeGreaterThanOrEqual(3);
     });
 
     it('toDraft -> fromDraft preserves every card exactly', () => {
-        for (const card of cardLibrary) {
+        for (const card of SWEPT) {
             expect(asData(fromDraft(toDraft(card))), card.id).toEqual(asData(card));
         }
     });
 
     it('toDraft -> serialize -> parse preserves every card exactly', () => {
-        for (const card of cardLibrary) {
+        for (const card of SWEPT) {
             expect(asData(roundTrip(card)), card.id).toEqual(asData(card));
         }
     });
@@ -73,7 +118,7 @@ describe('CardDraft carries every Card field', () => {
     it.each(['theme', 'persistentEffect', 'paidSummary', 'intentionallyAsymmetric'])(
         '%s survives the round trip on every live carrier',
         (field) => {
-            const carriers = cardLibrary.filter(
+            const carriers = SWEPT.filter(
                 (c) => (c as unknown as Record<string, unknown>)[field] != null,
             );
             expect(carriers.length, `no live card carries ${field}`).toBeGreaterThan(0);
@@ -88,7 +133,7 @@ describe('CardDraft carries every Card field', () => {
     it('synergy survives in full, including statePredicate and rider', () => {
         // The allowlist-shaped emitter dropped these two: a hand-written list of
         // known synergy keys silently lost every key added after it was written.
-        const carriers = cardLibrary.filter((c) => c.synergy != null);
+        const carriers = SWEPT.filter((c) => c.synergy != null);
         expect(carriers.length).toBeGreaterThan(0);
         for (const card of carriers) {
             expect(roundTrip(card).synergy, `${card.id} lost synergy detail`)
@@ -135,7 +180,8 @@ describe('the pricing comment survives a rewrite', () => {
             const start = libraryText.indexOf(`id: '${c.id}'`);
             return start !== -1 && /\/\/\s*pts:/.test(libraryText.slice(Math.max(0, start - 400), start + 1200));
         });
-        expect(priced.length, 'no priced cards found to test').toBeGreaterThan(10);
+        // The grey office's priced cards (Blow and Ward) since the card purge.
+        expect(priced.length, 'no priced cards found to test').toBeGreaterThanOrEqual(2);
 
         for (const card of priced) {
             const before = pricingComment(cardBlockOf(libraryText, card.id));

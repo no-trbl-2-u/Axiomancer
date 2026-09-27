@@ -21,16 +21,17 @@ import { CARD_THEMES, THEME_KEYWORDS, type CardTheme } from '../Cards/card-theme
 import { cardKeywords } from '../Cards/card-keywords';
 
 /**
- * The card-reward pool — the Profane Canon: the whole library EXCEPT the
- * curse class (theme `'curse'` cards are enemy-injected junk — offering one
- * as a reward would be a cruelty the reward screen does not stock) and the
- * grey office (Phase 104 — a starter-only shape, never a reward). Drop
- * odds are governed by PER-RARITY weights: common cards drop freely,
- * uncommons less, rares are the prize. Invalid ids are filtered at roll time
+ * The card-reward pool: the whole library EXCEPT the curse class (theme
+ * `'curse'` cards are enemy-injected junk — offering one as a reward would be
+ * a cruelty the reward screen does not stock). Since the card purge (D44) the
+ * grey office IS the pool: a won fight offers A Plain Blow, Ward and Word, and
+ * the pool grows as guided sessions add cards. Grey cards carry no reward
+ * theme, so the theme-aware roll falls through to the whole pool. Drop odds
+ * are governed by PER-RARITY weights. Invalid ids are filtered at roll time
  * so the list stays safe to edit.
  */
 export const COMBAT_REWARD_POOL: readonly string[] = Object.freeze(
-    cardLibrary.filter(card => card.theme !== 'curse' && card.theme !== 'grey').map(card => card.id),
+    cardLibrary.filter(card => card.theme !== 'curse').map(card => card.id),
 );
 
 /** Per-rarity drop weights (spec 32 v3 §4 — the reward-roll lever). Tunable. */

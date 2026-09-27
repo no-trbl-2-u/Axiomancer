@@ -24,11 +24,11 @@ import { buildCombatViewModel, type CombatCardVM } from '@/state/presenters/comb
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
-// A hand that spans stances and card shapes: two Affliction DoTs, the Bulwark
-// guard, a Charm sway (the colour-law suite's fixture) plus The Long Lent,
-// whose threshold prints a DIE LINE — without it the die-line sweep below
-// would pass vacuously.
-const CARDS = ['spoiled-poultice', 'unction-of-boils', 'frostbitten-palisade', 'thin-hymn', 'the-long-lent'];
+// The grey office — the whole library since the card purge (2026-09-27): a
+// DEAL, a GUARD and a VULNERABLE face. A Plain Word's PAID sentence
+// ('VULNERABLE +25% for 2 turns.') is long enough that the sentence sweep
+// below is not vacuous.
+const CARDS = ['grey-strike', 'grey-ward', 'grey-word'];
 
 function handVMs(): CombatCardVM[] {
     const { store } = withAllProviders(<></>);
@@ -67,10 +67,11 @@ describe('CombatCardFace — no prose on the face (2026-08-10 declutter)', () =>
 
     // Non-vacuity: the sweeps below are per-card `not.toContain` loops, so a
     // fixture that lost its prose upstream would pass them for the wrong
-    // reason. Pin that the fixture still HAS a sentence and a die line to hide.
+    // reason. Pin that the fixture still HAS a sentence to hide. (No surviving
+    // card prints a die line since the card purge, so the die-line sweep went
+    // with the threshold cards that printed one.)
     it('the fixture actually carries the prose the face must not print', () => {
         expect(cards.length).toBeGreaterThan(0);
-        expect(cards.some(c => (c.dieLines?.length ?? 0) > 0)).toBe(true);
         expect(cards.some(c => (c.bottomActionText || '').split(/\s+/).length >= 5)).toBe(true);
         expect(cards.every(c => c.face.typeStrip.length > 0)).toBe(true);
     });
@@ -91,13 +92,6 @@ describe('CombatCardFace — no prose on the face (2026-08-10 declutter)', () =>
     it('never prints the type strip', () => {
         for (const card of cards) {
             expect(faceText(card)).not.toContain(card.face.typeStrip);
-        }
-    });
-
-    it('never prints the die lines', () => {
-        for (const card of cards) {
-            const flat = faceText(card);
-            for (const line of card.dieLines ?? []) expect(flat).not.toContain(line);
         }
     });
 

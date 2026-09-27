@@ -82,6 +82,11 @@ Ballot answers, the same day:
 6. It can be more than one PR if the diff is unreviewable: engine and
    content first, then mobile and editor. Keep main green between them.
 
+> **Amended 2026-09-27 (D44).** Card rewards and the cache's card offer
+> stay ON: the grey office (Blow, Ward, Word) becomes the reward pool, in
+> place of the gate-off in §3. The fresh-run deck is Blow 5 / Ward 3 / Word 2
+> (D43).
+
 ## 5. After the purge (D37)
 
 - **No card generation outside a guided session with T.** No steward,
