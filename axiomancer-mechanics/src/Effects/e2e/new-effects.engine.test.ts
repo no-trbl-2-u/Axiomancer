@@ -3,8 +3,9 @@
  *
  * The pre-v3 "since April" content sweep this file used to cover was retired
  * wholesale with the keyword reset. What remains under coverage is the
- * rebuilt CARD vocabulary — exactly six effects — plus the schema contract
- * every entry must honour. Asserts that:
+ * rebuilt CARD vocabulary plus the schema contract every entry must honour
+ * (BACKFIRE and THORNS left the six with the keyword audit, 2026-09-27, when
+ * the card purge deleted every card carrying them). Asserts that:
  *   - every card-vocabulary id resolves via the effects library lookup,
  *   - each has a valid tier (1-3) and a non-empty payload,
  *   - tier 2/3 entries declare `resistedBy` (+ a `resistDR`),
@@ -18,17 +19,14 @@ import { applyEffect } from '../../Effects';
 import { lookupEffect } from '../effects.library';
 import type { Effect, EffectPayload } from '../types';
 
-const V3_BUFF_IDS = ['buff_thorns'];
-
 const V3_DEBUFF_IDS = [
     'debuff_poison',
     'debuff_bleed',
     'debuff_mark',
-    'debuff_backfire',
     'debuff_quarter',
 ];
 
-const ALL_V3_IDS = [...V3_BUFF_IDS, ...V3_DEBUFF_IDS];
+const ALL_V3_IDS = [...V3_DEBUFF_IDS];
 
 const payloadIsNonEmpty = (payload: EffectPayload): boolean =>
     Object.keys(payload).length > 0;
@@ -38,10 +36,6 @@ describe('v3 card vocabulary — library lookup + schema', () => {
         for (const id of ALL_V3_IDS) {
             expect(lookupEffect(id), `${id} must exist in the effects library`).toBeDefined();
         }
-    });
-
-    it.each(V3_BUFF_IDS)('%s is typed as a buff', (id) => {
-        expect(lookupEffect(id)!.type).toBe('buff');
     });
 
     it.each(V3_DEBUFF_IDS)('%s is typed as a debuff', (id) => {
@@ -103,19 +97,9 @@ describe('v3 card vocabulary — pinned payload numbers (spec 32 §3)', () => {
         expect((mark.payload as { tickAmplifyFlat?: number }).tickAmplifyFlat).toBe(1);
     });
 
-    it('debuff_backfire bills the enemy per denied rung', () => {
-        const backfire = lookupEffect('debuff_backfire')!;
-        expect((backfire.payload as { backfirePerRung?: number }).backfirePerRung).toBe(1);
-    });
-
     it('debuff_quarter softens outgoing enemy damage by 10% per stack', () => {
         const rapport = lookupEffect('debuff_quarter')!;
         expect(rapport.payload.outgoingDamageMulPct).toBe(-10);
-    });
-
-    it('buff_thorns reflects 1 per stack', () => {
-        const thorns = lookupEffect('buff_thorns')!;
-        expect(thorns.payload.reflectDamage).toBe(1);
     });
 });
 

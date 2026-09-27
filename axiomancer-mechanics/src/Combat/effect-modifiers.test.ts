@@ -17,6 +17,12 @@ import {
     processDamageOverTime, processRoundStartEffects, processRoundEndEffects,
     applyCleanse, applyDispel,
 } from './effects';
+import { registerFixtureEffects } from '../test-utils/fixture-effects';
+
+// The keyword audit (2026-09-27) deleted buff_thorns / debuff_backfire /
+// the round-clock DoT species from the library; their engine channels are
+// exercised through the `fixture_*` effects instead.
+registerFixtureEffects();
 
 /**
  * The spec 32 v3 keyword reset deleted the library effects that used to carry
@@ -84,8 +90,8 @@ describe('getActiveEffectModifiers', () => {
         // must carry ZERO for them. The round-clocked card-local species
         // (kindling ember: start; nettle sting: end) keep the phase split.
         const mods = getActiveEffectModifiers([
-            ae('debuff_kindling_ember', 2),  // 1 × 2 = 2 at start
-            ae('debuff_nettle_sting',   1),  // 2 × 1 = 2 at end
+            ae('fixture_ember', 2),  // 1 × 2 = 2 at start
+            ae('fixture_nettle',   1),  // 2 × 1 = 2 at end
             ae('debuff_poison', 1),          // card-played clock → 0 here
             ae('debuff_bleed',  1),          // damage-instance clock → 0 here
         ]);
@@ -178,7 +184,7 @@ describe('DoT and drain HP changes', () => {
     it('processDamageOverTime applies start-phase damage only', () => {
         // WS3.3: poison left the round clocks — the round-clocked witness is
         // kindling ember (dpr 1, start phase).
-        const t = fixture([ae('debuff_kindling_ember', 2)]);
+        const t = fixture([ae('fixture_ember', 2)]);
         const before = t.health;
         const r = processDamageOverTime(t, 'start');
         expect(r.damage).toBe(2); // ember: 1 × 2 = 2
@@ -189,7 +195,7 @@ describe('DoT and drain HP changes', () => {
         // Round-clocked species: ember starts (1), nettle ends (2). The
         // event-clocked poison/bleed never tick at either boundary (WS3.3).
         const t = fixture([
-            ae('debuff_kindling_ember'), ae('debuff_nettle_sting'),
+            ae('fixture_ember'), ae('fixture_nettle'),
             ae('debuff_poison'), ae('debuff_bleed'),
         ]);
         const startTick = processDamageOverTime(t, 'start');
@@ -221,7 +227,7 @@ describe('processRoundStartEffects orchestrator', () => {
         // kindling ember (DoT 1 start, ×2) + test_disease (DoT 2 start,
         // drain 1 — the retired disease shape as a fixture). WS3.3: poison is
         // event-clocked and would carry 0 at the round boundary.
-        const t = { ...fixture([ae('debuff_kindling_ember', 2), ae('test_disease')]), health: 30 };
+        const t = { ...fixture([ae('fixture_ember', 2), ae('test_disease')]), health: 30 };
         const r = processRoundStartEffects(t);
         // start-DoT total: 2 + 2 = 4; drain: 1
         expect(r.dotDamage).toBe(4);
@@ -236,11 +242,11 @@ describe('processRoundEndEffects orchestrator', () => {
         // damage-instance clock now: it neither ticks nor decays at round end
         // (its per-tick decay is exercised via `fireDotTrigger`); its
         // CALENDAR still counts down.
-        const t = { ...fixture([ae('debuff_nettle_sting', 2, 2), ae('debuff_bleed', 2, 2)]), health: 20 };
+        const t = { ...fixture([ae('fixture_nettle', 2, 2), ae('debuff_bleed', 2, 2)]), health: 20 };
         const r = processRoundEndEffects(t);
         expect(r.dotDamage).toBe(4); // nettle: floor(2 × 2) = 4; bleed: 0
         expect(r.target.health).toBe(16); // 20 - 4
-        const nettle = r.target.effects.find(e => e.effectId === 'debuff_nettle_sting')!;
+        const nettle = r.target.effects.find(e => e.effectId === 'fixture_nettle')!;
         expect(nettle.intensity).toBe(2); // decaysPerTick: false
         expect(nettle.remainingDuration).toBe(1);
         const bleed = r.target.effects.find(e => e.effectId === 'debuff_bleed')!;
@@ -253,18 +259,18 @@ describe('applyCleanse / applyDispel (Q10)', () => {
     it('Tier 2 cleanse strips Tier 1 + 2 debuffs', () => {
         const t = fixture([
             { effectId: 'debuff_poison', intensity: 1, remainingDuration: 3, appliedAt: 1, tier: 2 },
-            { effectId: 'debuff_backfire', intensity: 1, remainingDuration: 2, appliedAt: 1, tier: 3 },
+            { effectId: 'fixture_backfire', intensity: 1, remainingDuration: 2, appliedAt: 1, tier: 3 },
         ]);
         const r = applyCleanse(t, 2);
         expect(r.removed.map(e => e.effectId)).toEqual(['debuff_poison']);
         // Tier 3 survives
-        expect(r.target.effects.some(e => e.effectId === 'debuff_backfire')).toBe(true);
+        expect(r.target.effects.some(e => e.effectId === 'fixture_backfire')).toBe(true);
     });
 
     it('Tier 3 cleanse strips everything', () => {
         const t = fixture([
             { effectId: 'debuff_poison',  intensity: 1, remainingDuration: 3, appliedAt: 1, tier: 2 },
-            { effectId: 'debuff_backfire', intensity: 1, remainingDuration: 2, appliedAt: 1, tier: 3 },
+            { effectId: 'fixture_backfire', intensity: 1, remainingDuration: 2, appliedAt: 1, tier: 3 },
         ]);
         const r = applyCleanse(t, 3);
         expect(r.removed).toHaveLength(2);

@@ -162,17 +162,14 @@ function upcomingThreatHasRider(s: CombatEncounterState): boolean {
 
 /**
  * WS8.4 falsifiable probe (spec 32 §12 #6) — the control-lock policy's pick
- * should be a matchup read, not a fixed rotation. Two distinct control
- * surfaces exist among rung-denial candidates: STAGGER (rungsTotal on the
- * card's `stagger` special mechanic — softens/denies the telegraphed hit
- * itself) and BACKFIRE (`debuff_backfire`'s intensity × duration — punishes
- * the enemy for every rung denied, landing regardless of what the rung
- * carried). Against a threat that carries a RIDER, denying rungs alone
- * doesn't erase it (only the WS8.2 BLIND surface does, a distinct card
- * class) — cash in on the guaranteed BACKFIRE punish instead. Against a
- * clean or compounding threat, the rung denial itself IS the win — rank on
- * STAGGER rungs first (stance-lock as a certainty tiebreak), BACKFIRE as a
- * rounding error.
+ * should be a matchup read, not a fixed rotation. Against a clean or
+ * compounding threat, the rung denial itself IS the win — rank on STAGGER
+ * rungs (rungsTotal on the card's `stagger` special mechanic) first, with
+ * stance-lock as a certainty tiebreak. Against a threat that carries a
+ * RIDER, denying rungs alone doesn't erase it (only the WS8.2 BLIND surface
+ * does), so no control surface scores. (BACKFIRE, the rider-proof punish
+ * this probe once preferred there, left with its cards in the keyword audit,
+ * 2026-09-27; `debuff_backfire` no longer exists, so its score was always 0.)
  */
 function controlSurfaceBonus(s: CombatEncounterState, card: CombatCard): number {
     const source = getCardById(card.id);
@@ -180,11 +177,9 @@ function controlSurfaceBonus(s: CombatEncounterState, card: CombatCard): number 
     const staggerRungs = source.specialMechanics
         ?.find((m): m is { kind: 'stagger'; rungs: number } => m.kind === 'stagger')?.rungs ?? 0;
     const locksStance = source.specialMechanics?.some(m => m.kind === 'lock_stance') ?? false;
-    const backfire = source.combatEffects?.find(e => e.effectId === 'debuff_backfire');
-    const backfireValue = backfire ? (backfire.intensity ?? 1) * (backfire.duration ?? 1) : 0;
 
-    if (upcomingThreatHasRider(s)) return backfireValue * 100;
-    return staggerRungs * 1000 + (locksStance ? 10 : 0) + backfireValue;
+    if (upcomingThreatHasRider(s)) return 0;
+    return staggerRungs * 1000 + (locksStance ? 10 : 0);
 }
 
 /**

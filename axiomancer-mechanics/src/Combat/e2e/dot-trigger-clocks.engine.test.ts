@@ -51,6 +51,12 @@ import {
     processRoundStartEffects, processRoundEndEffects, processDamageOverTime,
 } from '../effects';
 import { rampedDamagePerRound, getDotAmplificationByEffect } from '../effect-modifiers';
+import { registerFixtureEffects } from '../../test-utils/fixture-effects';
+
+// The keyword audit (2026-09-27) deleted buff_thorns / debuff_backfire /
+// the round-clock DoT species from the library; their engine channels are
+// exercised through the `fixture_*` effects instead.
+registerFixtureEffects();
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -290,7 +296,7 @@ describe("engine call site — 'damage-instance' (shared enemy-damage funnel)", 
         const base = stateWithEnemyEffects([ae('ws3x_damage_instance', 2, 4)]);
         const before: CombatEncounterState = {
             ...base,
-            player: { ...base.player, effects: [ae('buff_thorns', 2, 3)] }, // reflect 1 × 2
+            player: { ...base.player, effects: [ae('fixture_thorns', 2, 3)] }, // reflect 1 × 2
         };
         const { state: after, events } = resolveThreatPhase(before);
 
@@ -446,7 +452,7 @@ describe('legacy parity — an untagged DoT keeps exactly the old behavior', () 
         // clocks — the round-clocked card-local species and the support hex
         // are the remaining untagged witnesses).
         const enemy = stateWithEnemyEffects([
-            ae('debuff_kindling_ember', 3, 4), ae('debuff_nettle_sting', 3, 3), ae('debuff_hex', 2, 2),
+            ae('fixture_ember', 3, 4), ae('fixture_nettle', 3, 3), ae('debuff_hex', 2, 2),
         ]).enemy;
         expect(getPendingDotTotal(enemy, 2).total).toBe(legacyPending(enemy, 2));
         expect(getPendingDotTotal(enemy).total).toBe(legacyPending(enemy));

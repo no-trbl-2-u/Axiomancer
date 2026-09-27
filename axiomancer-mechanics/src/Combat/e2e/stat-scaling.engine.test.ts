@@ -208,7 +208,7 @@ describe('S3 — the guard: every keyword has a family', () => {
         expect(effectFamily(v, false)).toBe('heart');
         expect(effectScaling(v)).toBe('one-shot');
         expect(effectScaling(lookupEffect('debuff_poison')!)).toBe('repeating');
-        expect(effectScaling(lookupEffect('buff_thorns')!)).toBe('repeating');
+        expect(effectScaling(lookupEffect('debuff_bleed')!)).toBe('repeating');
         expect(effectScaling(lookupEffect('debuff_petrify')!)).toBe('flat');
     });
 });

@@ -33,7 +33,6 @@ import type { Character } from '../Character/types';
 import type { Enemy } from '../Enemy/types';
 import { findEnemyKeyword, hasEnemyKeyword, enemyKeywordText } from '../Enemy/enemy-keywords';
 import { getCardById } from '../Cards/cards.library';
-import { baseCardId } from '../Cards/card-upgrades';
 import { executeCard } from '../Cards/card.engine';
 import { checkStatePredicate } from '../Cards/synergy-predicates';
 import type { Card, CardAspect, CardRider, CardSpecialMechanic } from '../Cards/types';
@@ -816,26 +815,9 @@ function removePlayedEntry(state: CombatEncounterState, uid: string): CombatEnco
 
 // ── Spec 32 v3 — shared rider/state helpers ──────────────────────────────────
 
-/** True when any zone — permanent or temporary — carries a given card id (player
- *  enchantment or enemy-attached disenchant). The zone IS the hook registry: each
- *  persistent card's passive is implemented at its trigger site, gated by this
- *  check. Spec 32 v4 — a FREE-line TIMED instance (`tempZone` / `enemyTempAttachments`)
- *  lights up the exact same hook while its `roundsLeft` holds, so the weak and the
- *  permanent versions differ only in duration, never in effect. */
-function zoneHas(state: CombatEncounterState, cardId: string): boolean {
-    // THE PATH — card upgrades. An oath/hex passive is hooked by LITERAL card
-    // id (`zoneHas(state, 'every-stone-an-oath')`), so an upgraded copy sitting
-    // in the zone as `every-stone-an-oath+` would match nothing and the card
-    // would silently lose the only thing it does — a strict DOWNGRADE wearing a
-    // `+`. Compare on the BASE id so `x` and `x+` are the same oath.
-    const want = baseCardId(cardId);
-    const sameCard = (id: string): boolean => baseCardId(id) === want;
-    return state.persistentZone.some(sameCard)
-        || (state.enemyAttachments ?? []).some(sameCard)
-        || (state.enemyEnchantments ?? []).some(sameCard)
-        || (state.tempZone ?? []).some(t => sameCard(t.cardId))
-        || (state.enemyTempAttachments ?? []).some(t => sameCard(t.cardId));
-}
+// (`zoneHas`, the per-card oath/hex hook registry, was deleted in the keyword
+// audit, 2026-09-27: the card purge left no persistent card for it to find.
+// Git history keeps it, with its upgrade-aware base-id comparison.)
 
 /** WS3.2 'damage-instance' clock — the shared enemy-damage funnel: applies the
  *  hit, then advances every damage-instance-clocked DoT on the enemy (BLEED's
@@ -1018,22 +1000,9 @@ function gainSouls(
     events: CombatEvent[],
 ): CombatEncounterState {
     if (amount <= 0) return state;
-    let souls = (state.souls ?? 0) + amount;
+    const souls = (state.souls ?? 0) + amount;
     events.push({ kind: 'soul-gained', amount, total: souls, reason });
-    // `choirbone-reliquary` (E): the box counts every ending — each
-    // affliction that expires or is consumed yields +1 SOUL and PLEA 4 on
-    // top of the base law. Gated on reason so its OWN grants never recurse.
-    // Card face, THE BIG NUMBERS REWRITE 2026-09-02: "gain 1 SOUL and PLEA
-    // 4" — this hook predates the rewrite's text and was left granting PLEA
-    // 1:1 with the SOUL bonus; fixed to match the printed PLEA number,
-    // card-face-honesty.
-    let next: CombatEncounterState = { ...state, souls };
-    if (reason !== 'granted' && zoneHas(state, 'choirbone-reliquary')) {
-        souls += amount;
-        events.push({ kind: 'soul-gained', amount, total: souls, reason: 'granted' });
-        next = gainSway({ ...next, souls }, amount * 4, events);
-    }
-    return next;
+    return { ...state, souls };
 }
 
 /** PLEA gain (spec 32 v3 §9, reworked by plan/archive/2026-09-25-trim-t4/plan/tuning/
@@ -1055,18 +1024,10 @@ function gainSway(
     events: CombatEvent[],
 ): CombatEncounterState {
     if (amount <= 0) return state;
-    // Grace late-stage rebalance (2026-07-08): buff_grace_momentum multiplies
-    // every PLEA gain by its payload's outgoingSwayGainMulPct per stack — a
-    // genuinely compounding payoff, not just a flat bonus.
-    const momentum = state.player.effects.find(e => e.effectId === 'buff_grace_momentum');
-    let scaledAmount = amount;
-    if (momentum) {
-        const momentumDef = lookupEffectDef('buff_grace_momentum');
-        const pct = momentumDef?.payload.outgoingSwayGainMulPct ?? 0;
-        scaledAmount = Math.round(amount * (1 + (pct / 100) * momentum.intensity));
-    }
-    let sway = (state.sway ?? 0) + scaledAmount;
-    events.push({ kind: 'sway-gained', amount: scaledAmount, total: sway });
+    // (The buff_grace_momentum PLEA multiplier left with its cards in the
+    // keyword audit, 2026-09-27.)
+    let sway = (state.sway ?? 0) + amount;
+    events.push({ kind: 'sway-gained', amount, total: sway });
 
     // Resolve milestones: each waypoint fires AT MOST ONCE this combat — a
     // milestone already paid stays paid even if a later call's LIVE resolve
@@ -1351,33 +1312,6 @@ function applyRiderToState(
             const tierGuard = tiersCrossed * AKRASIA_DEBT_TIER_GUARD;
             guard += tierGuard;
             events.push({ kind: 'debt-tier-payoff', tiersCrossed, guard: tierGuard, total: akrasiaDebt });
-        }
-        // `the-red-ledger` (E) — the debt-payoff pair fires on FREE-line
-        // recoil too (the ledger forwards every drop, whoever signed it).
-        // Card face, THE BIG NUMBERS REWRITE 2026-09-02: "Whenever you pay
-        // RECOIL, gain WRATH 1 and deal 6 to the foe" — this hook predates
-        // the rewrite's text (which replaced a BLEED-billing effect with a
-        // WRATH+damage payoff) and was left applying the old BLEED; fixed to
-        // match the printed effect, card-face-honesty.
-        if (zoneHas(next, 'the-red-ledger') && !isDefeated(enemy)) {
-            wrath += 1;
-            events.push({ kind: 'wrath-gained', cardId: 'the-red-ledger', amount: 1, total: wrath });
-            const hit = applyEnemyDamage(enemy, 6, next.round, events);
-            enemy = hit.enemy;
-            directDamage += 6 + hit.clockDamage;
-            washedOutHere.push(...hit.washedOut);
-            events.push({ kind: 'damage-dealt', cardId: 'the-red-ledger', target: 'enemy', amount: 6 });
-        }
-        // `joint-and-several` (D): liability is shared — the foe loses TWICE
-        // the RECOIL paid. Card face, THE BIG NUMBERS REWRITE 2026-09-02:
-        // "the foe loses twice that much VITAE" — this hook predates the
-        // rewrite's text and was left at a flat 1x; fixed to match the
-        // printed multiplier, card-face-honesty.
-        if (zoneHas(next, 'joint-and-several') && !isDefeated(enemy)) {
-            const liable = Math.min(r.recoil * 2, enemy.health);
-            enemy = applyDamage(enemy, liable);
-            directDamage += liable;
-            events.push({ kind: 'damage-dealt', cardId: 'joint-and-several', target: 'enemy', amount: liable });
         }
     }
     if (r.cleanse) {
@@ -1941,10 +1875,6 @@ function playBottomAction(
     let twinArmed = false;
     /** VITAE this play drove past the foe's last point, for an OVERKILL clause. */
     let overkillExcess = 0;
-    /** the-sextons-count's RECALL/REPLAY sites set this so the generic TWIN
-     *  toll below never double-tolls a card that is both a reprise/replay
-     *  carrier and resolving under an armed TWIN charge (phase 86). */
-    let sextonsTolled = false;
     /** EXECUTE is evaluated ONCE, before this card's hits land, so a multi-hit
      *  card cannot flip its own threshold partway through the swing. */
     const executeArmed = (sourceCard.specialMechanics ?? []).some(
@@ -1989,18 +1919,11 @@ function playBottomAction(
     // play — removed from the tray after the powering-die spend.
     const transmutedXIds: string[] = [];
 
-    // Local SOUL gain. `choirbone-reliquary` (E, profane canon): every
-    // affliction that expires or is consumed mid-play also yields +1 SOUL and
-    // PLEA 1 (gated on reason so its own grants never recurse).
+    // Local SOUL gain.
     const gainSoulsLocal = (n: number, reason: 'expiry' | 'consumed' | 'granted'): void => {
         if (n <= 0) return;
         souls += n;
         events.push({ kind: 'soul-gained', amount: n, total: souls, reason });
-        if (reason !== 'granted' && zoneHas(state, 'choirbone-reliquary')) {
-            souls += n;
-            events.push({ kind: 'soul-gained', amount: n, total: souls, reason: 'granted' });
-            swayGained += n;
-        }
     };
 
     // WS3.2 event clocks (spec 32 §12 #3): 'card-played' fires once per
@@ -2541,25 +2464,6 @@ function playBottomAction(
                 }
                 if (returned.length > 0) {
                     events.push({ kind: 'reprised', cardId: card.id, returned });
-                    // `the-sextons-count` (E): he rings once for every body
-                    // raised — a RECALL costs the foe 8 VITAE and mills you
-                    // 1. Card face, THE BIG NUMBERS REWRITE 2026-09-02:
-                    // "the foe loses 8 VITAE and you MILL 1" — this hook
-                    // predates the rewrite's text (which replaced a DOOM tick
-                    // with direct damage + MILL) and was left applying the
-                    // old DOOM 1; fixed to match the printed effect,
-                    // card-face-honesty.
-                    if (zoneHas(state, 'the-sextons-count')) {
-                        sextonsTolled = true;
-                        const hit = applyEnemyDamage(enemy, 8, state.round, events);
-                        enemy = hit.enemy;
-                        directDamage += 8 + hit.clockDamage;
-                        events.push({ kind: 'damage-dealt', cardId: 'the-sextons-count', target: 'enemy', amount: 8 });
-                        const tolled = drawCombatCards(drawPile, discard, state.deck, 1, _rng);
-                        drawPile = tolled.drawPile;
-                        discard = [...tolled.discard, ...tolled.drawn];
-                        events.push({ kind: 'cards-milled', cards: tolled.drawn });
-                    }
                 } else {
                     events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'the discard pile is empty' });
                 }
@@ -2594,21 +2498,6 @@ function playBottomAction(
                         } catch { break; }
                     }
                     events.push({ kind: 'echoed', cardId: lastCard.id });
-                    // `the-sextons-count` (E): a REPLAY is a body raised —
-                    // the bell costs the foe 8 VITAE and mills you 1. Card
-                    // face, THE BIG NUMBERS REWRITE 2026-09-02 (see the
-                    // RECALL site above — same fix, same reason).
-                    if (zoneHas(state, 'the-sextons-count')) {
-                        sextonsTolled = true;
-                        const hit = applyEnemyDamage(enemy, 8, state.round, events);
-                        enemy = hit.enemy;
-                        directDamage += 8 + hit.clockDamage;
-                        events.push({ kind: 'damage-dealt', cardId: 'the-sextons-count', target: 'enemy', amount: 8 });
-                        const tolled = drawCombatCards(drawPile, discard, state.deck, 1, _rng);
-                        drawPile = tolled.drawPile;
-                        discard = [...tolled.discard, ...tolled.drawn];
-                        events.push({ kind: 'cards-milled', cards: tolled.drawn });
-                    }
                 } else {
                     events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'no prior spell to replay' });
                 }
@@ -2753,24 +2642,6 @@ function playBottomAction(
             }
             default: break; // guard/barrier/riposte/echo/befriend etc. handled elsewhere
         }
-    }
-    // `the-sextons-count` (E): TWIN is the third body raised — a play that
-    // resolved twice via the general TWIN mechanism tolls the bell exactly
-    // like RECALL/REPLAY (see the two sites above in the mechs loop), unless
-    // one of those sites already tolled it this play — a card that is BOTH
-    // a reprise/replay carrier AND resolving under an armed TWIN charge
-    // would otherwise pay the toll twice for one doubling (phase 86; the
-    // reason TWIN was trimmed from the printed text 2026-09-04 pending this
-    // exact scoping).
-    if (twinCharge && !sextonsTolled && zoneHas(state, 'the-sextons-count')) {
-        const hit = applyEnemyDamage(enemy, 8, state.round, events);
-        enemy = hit.enemy;
-        directDamage += 8 + hit.clockDamage;
-        events.push({ kind: 'damage-dealt', cardId: 'the-sextons-count', target: 'enemy', amount: 8 });
-        const tolled = drawCombatCards(drawPile, discard, state.deck, 1, _rng);
-        drawPile = tolled.drawPile;
-        discard = [...tolled.discard, ...tolled.drawn];
-        events.push({ kind: 'cards-milled', cards: tolled.drawn });
     }
     const reactFired = false;
     const permanentWildDice = state.permanentWildDice ?? 0;
@@ -3124,36 +2995,6 @@ function playBottomAction(
         if (tiersCrossed > 0 && wasFallen) {
             tierGuardBonus = tiersCrossed * AKRASIA_DEBT_TIER_GUARD;
             events.push({ kind: 'debt-tier-payoff', tiersCrossed, guard: tierGuardBonus, total: akrasiaDebt });
-        }
-        // `the-red-ledger` (E): every RECOIL paid this play is billed again —
-        // WRATH 1 and 6 to the foe, once per play. Card face, THE BIG NUMBERS
-        // REWRITE 2026-09-02: "gain WRATH 1 and deal 6 to the foe" — this
-        // hook predates the rewrite's text (which replaced a BLEED-billing
-        // effect with a WRATH+damage payoff) and was left applying the old
-        // BLEED; fixed to match the printed effect, card-face-honesty.
-        if (zoneHas(state, 'the-red-ledger') && !isDefeated(enemy)) {
-            wrath += 1;
-            events.push({ kind: 'wrath-gained', cardId: 'the-red-ledger', amount: 1, total: wrath });
-            const hpBefore = enemy.health;
-            const hit = applyEnemyDamage(enemy, 6, state.round, events);
-            enemy = hit.enemy;
-            directDamage += 6 + hit.clockDamage;
-            attribution = recordAttribution(attribution, 'the-red-ledger', 'The Red Ledger', null, 6, hpBefore);
-            events.push({ kind: 'damage-dealt', cardId: 'the-red-ledger', target: 'enemy', amount: 6 });
-        }
-        // `joint-and-several` (D): liability is shared — the foe loses TWICE
-        // every RECOIL paid this play (engine-drip channel; the strike stays
-        // dead). Card face, THE BIG NUMBERS REWRITE 2026-09-02: "the foe
-        // loses twice that much VITAE" — this hook predates the rewrite's
-        // text and was left at a flat 1x; fixed to match the printed
-        // multiplier, card-face-honesty.
-        if (zoneHas(state, 'joint-and-several') && !isDefeated(enemy)) {
-            const liable = Math.min(recoilTaken * 2, enemy.health);
-            const hpBefore = enemy.health;
-            enemy = applyDamage(enemy, liable);
-            directDamage += liable;
-            attribution = recordAttribution(attribution, 'joint-and-several', 'Joint and Several', null, liable, hpBefore);
-            events.push({ kind: 'damage-dealt', cardId: 'joint-and-several', target: 'enemy', amount: liable });
         }
     }
 
@@ -3536,23 +3377,6 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         directDamage += drip + hit.clockDamage;
         events.push({ kind: 'backfired', amount: drip, rungs: rungsForBackfire });
     }
-    // `the-assize-bell` (E): one bronze syllable per objection sustained —
-    // every rung this phase's telegraph lost becomes 2 CHARGES and 4 direct
-    // damage. Raw tally add (the CONDEMN check runs on the next
-    // `gainPremises`). Card face, THE BIG NUMBERS REWRITE 2026-09-02: "gain
-    // 2 CHARGES and deal 4 to the foe" — this hook predates the rewrite's
-    // text and was left granting 1 CHARGE with no damage at all; fixed to
-    // match the printed numbers, card-face-honesty.
-    if (zoneHas(state, 'the-assize-bell') && rungsForBackfire > 0) {
-        const bellCharges = rungsForBackfire * 2;
-        premises += bellCharges;
-        events.push({ kind: 'premise-gained', amount: bellCharges, total: premises });
-        const bellDmg = rungsForBackfire * 4;
-        const bellHit = applyEnemyDamage(enemy, bellDmg, state.round, events);
-        enemy = bellHit.enemy;
-        directDamage += bellDmg + bellHit.clockDamage;
-        events.push({ kind: 'damage-dealt', cardId: 'the-assize-bell', target: 'enemy', amount: bellDmg });
-    }
 
     // ARMOR (defenseModifier) — flat per-hit reduction of the incoming telegraph,
     // the live home for buff_damage_reduction (Iron Skin), buff_invincibility
@@ -3693,43 +3517,10 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                             events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'self' });
                         }
                     }
-                    // `caltrops-under-the-snow` (D): whatever reaches you
-                    // walked the field to do it — every damaging hit the
-                    // enemy lands seeds BLEED 8 on the striker. Card face,
-                    // THE BIG NUMBERS REWRITE 2026-09-02: "Whenever the foe
-                    // deals you damage it gains BLEED 8" — this hook
-                    // predates the rewrite's text and was left at BLEED 2;
-                    // fixed to match the printed number, card-face-honesty.
-                    if (zoneHas(state, 'caltrops-under-the-snow')) {
-                        const bleedDef = lookupEffectDef('debuff_bleed');
-                        if (bleedDef) {
-                            const seeded = applyEffect(enemy.effects, bleedDef, state.round, {
-                                intensityDelta: 8, sourceId: 'caltrops-under-the-snow',
-                            });
-                            enemy = { ...enemy, effects: seeded.activeEffects };
-                            events.push({
-                                kind: 'effect-landed', cardId: 'caltrops-under-the-snow',
-                                effectId: 'debuff_bleed', target: 'enemy', effectKind: 'dot',
-                                intensity: seeded.result.activeEffect?.intensity ?? 8, effect: bleedDef,
-                            });
-                        }
-                    }
                 }
                 else {
                     attacksFullyBlocked += 1;
                     blockedBlowTotal += preSoakDmg;
-                    // `caltrops-under-the-snow` (D): the second clause — a
-                    // fully blocked attack costs the foe 15. Card face, THE
-                    // BIG NUMBERS REWRITE 2026-09-02: "Whenever your GUARD
-                    // fully blocks its attack it takes 15 damage" — this
-                    // clause had NO engine hook at all until this fix
-                    // (card-face-honesty: half the printed card did nothing).
-                    if (zoneHas(state, 'caltrops-under-the-snow') && !isDefeated(enemy)) {
-                        const hit = applyEnemyDamage(enemy, 15, state.round, events);
-                        enemy = hit.enemy;
-                        directDamage += 15 + hit.clockDamage;
-                        events.push({ kind: 'damage-dealt', cardId: 'caltrops-under-the-snow', target: 'enemy', amount: 15 });
-                    }
                 }
             }
             if (eff.effectId && !doubtId && riderSuppressId) {
@@ -3757,16 +3548,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                 }
             }
             if (eff.enemyHeal && eff.enemyHeal > 0 && !doubtId) {
-                // `edict-of-the-open-wound` (D, profane canon): the salve is
-                // confiscated — the enemy's healing fails while the writ stands.
-                const edicted = zoneHas(state, 'edict-of-the-open-wound');
-                const healAmt = edicted ? 0 : Math.round(eff.enemyHeal * getHealingReceivedMult(enemy));
-                if (edicted) {
-                    events.push({
-                        kind: 'effect-fizzled', cardId: 'edict-of-the-open-wound', effectId: '',
-                        message: 'the wound stays open — its healing fails',
-                    });
-                }
+                const healAmt = Math.round(eff.enemyHeal * getHealingReceivedMult(enemy));
                 if (healAmt > 0) {
                     const hpBefore = enemy.health;
                     enemy = decayDotsOnHeal(heal(enemy, healAmt)).combatant;
@@ -4055,30 +3837,8 @@ export function processBetweenPhases(
     // 2. Process a full round of effects on the enemy — DoT ERODES real enemy HP
     //    (the status damage engine; no track, the HP loss is the win progress).
     const enemyStart = processRoundStartEffects(state.enemy, state.round);
-    // `edict-of-the-open-wound` (D, profane canon): the enemy's wounds refuse
-    // to close — an EXTRA +1 duration on every calendar-clocked enemy debuff
-    // BEFORE the normal end-of-round decrement, so the net calendar movement
-    // is zero: DoTs no longer expire while the writ stands. No-calendar
-    // effects (DOOM, MARK) need no freezing; BLEED's per-trigger intensity
-    // decay survives untouched (decay is not calendar). Side effect kept
-    // deliberately: frozen wounds never EXPIRE, so the expiry Soul law goes
-    // quiet under the edict — the parish takes its fee.
-    let edictTarget = enemyStart.target;
     const tithedExpired: ActiveEffect[] = [];
-    if (zoneHas(state, 'edict-of-the-open-wound')) {
-        edictTarget = {
-            ...edictTarget,
-            effects: edictTarget.effects.map(ae => {
-                const def = lookupEffectDef(ae.effectId);
-                if (ae.remainingDuration === -1 || def?.type !== 'debuff'
-                    || def.payload.dotModifiers?.calendarExpiry === false) {
-                    return ae;
-                }
-                return { ...ae, remainingDuration: ae.remainingDuration + 1 };
-            }),
-        };
-    }
-    const enemyEnd = processRoundEndEffects(edictTarget, state.round);
+    const enemyEnd = processRoundEndEffects(enemyStart.target, state.round);
     let enemy = enemyEnd.target as Enemy;
     const enemyDotTicks = clampDotTickBreakdown(
         projectedEnemyDotTicks,
@@ -4093,72 +3853,6 @@ export function processBetweenPhases(
         .filter(ae => lookupEffectDef(ae.effectId)?.type === 'debuff').length
         + soulWorthyWashouts([...enemyStart.dotWashedOut, ...enemyEnd.washedOut]);
 
-    // `suppurating-curse` (D): the enemy takes bonus HP loss equal to the REAL
-    // DAMAGE its DoTs ticked for this round — doubling the deck's total DoT
-    // throughput (Erosion late-stage rebalance, 2026-07-08).
-    //
-    // WI-1 (2026-07-12): post trigger-migration the round-clock pool
-    // (`enemyDotTicks`) is empty for POISON (`card-played`) and BLEED
-    // (`damage-instance`) — the exact families the curse names — so the old
-    // `enemyDotTicks.length > 0` gate made it structurally inert in its own
-    // EROSION deck. It now rides the event ticks accumulated across the turn
-    // (`enemyDotDamageThisRound`, folded in `withLog`) PLUS any round-clock
-    // ticks this round, so the drip equals the round's true DoT total.
-    // ── The profane canon's round-end persistent battery (enchant/disenchant
-    //    hooks; each is one sentence of engine text, gated by its zone card).
-    // `the-untended-garden` (E): end-of-round FESTER 2 — every enemy DoT
-    // gains +2 intensity (card face, THE BIG NUMBERS REWRITE 2026-09-02:
-    // "FESTER 2: every affliction on the foe gains 2 intensity" — this hook
-    // predates the rewrite's text and was left at the old +1; fixed to match
-    // the printed number, card-face-honesty).
-    if (zoneHas(state, 'the-untended-garden') && !isDefeated(enemy)) {
-        const affected: string[] = [];
-        enemy = {
-            ...enemy,
-            effects: enemy.effects.map(ae => {
-                const def = lookupEffectDef(ae.effectId);
-                if (def?.type === 'debuff' && def.payload.damageOverTime) {
-                    affected.push(ae.effectId);
-                    return { ...ae, intensity: Math.min(MAX_EFFECT_INTENSITY, ae.intensity + 2) };
-                }
-                return ae;
-            }),
-        };
-        if (affected.length > 0) events.push({ kind: 'dots-boosted', intensity: 2, affected });
-    }
-    // `writ-of-attainder` (D): the sentence compounds — a fresh DOOM 3 lands
-    // at each round's end onto a stack that already grows as the foe acts
-    // (card face, THE BIG NUMBERS REWRITE 2026-09-02: "inflict DOOM 3 on the
-    // foe and gain 2 CHARGES" — this hook predates the rewrite's text and was
-    // left at the old DOOM 1 with no CHARGES at all; DOOM fixed here, the
-    // CHARGES half is added below alongside the other round-end oaths).
-    if (zoneHas(state, 'writ-of-attainder') && !isDefeated(enemy)) {
-        const doomDef = lookupEffectDef('debuff_creeping_doom');
-        if (doomDef) {
-            const applied = applyEffect(enemy.effects, doomDef, state.round, {
-                intensityDelta: 3, sourceId: 'writ-of-attainder',
-            });
-            enemy = { ...enemy, effects: applied.activeEffects };
-            events.push({
-                kind: 'effect-landed', cardId: 'writ-of-attainder', effectId: 'debuff_creeping_doom',
-                target: 'enemy', effectKind: 'dot',
-                intensity: applied.result.activeEffect?.intensity ?? 3, effect: doomDef,
-            });
-        }
-    }
-    // `the-congregation-below` (D): at the close of each round the dead read
-    // the minutes into the record — 1 VITAE per 2 cards in the discard pile
-    // (card face, THE BIG NUMBERS REWRITE 2026-09-02: "the foe loses 1 VITAE
-    // for every 2 cards in your discard pile" — this hook predates the
-    // rewrite's text and was left at the old divisor of 3; fixed to match
-    // the printed number, card-face-honesty).
-    if (zoneHas(state, 'the-congregation-below') && !isDefeated(enemy)) {
-        const testimony = Math.min(Math.floor(state.discard.length / 2), enemy.health);
-        if (testimony > 0) {
-            enemy = applyDamage(enemy, testimony);
-            events.push({ kind: 'dot-tick', effectId: 'the-congregation-below', label: 'The Congregation Below', amount: testimony, target: 'enemy' });
-        }
-    }
 
     // VULNERABLE DoT surcharge: the natural tick above lands at ×1 (already
     // combo-amplified). Apply the EXTRA (mult-1) fraction the foe's vulnerability
@@ -4393,73 +4087,8 @@ export function processBetweenPhases(
     }
 
     // SOULS from expiry (base law: 1 per expired enemy affliction instance).
-    // `choirbone-reliquary`'s per-ending bonus rides inside `gainSouls`.
     if (expiredAfflictions > 0) {
         omenState = gainSouls(omenState, expiredAfflictions, 'expiry', events);
-    }
-    // `every-stone-an-oath` (E): a bloodless round lays a new course — +12
-    // BARRIER and THORNS 4 (2 turns) when the enemy dealt no damage this
-    // round (card face, THE BIG NUMBERS REWRITE 2026-09-02: "gain BARRIER 12
-    // and THORNS 4 for 2 turns" — this hook predates the rewrite's text and
-    // was left at the old +3 BARRIER with no THORNS at all; fixed to match
-    // the printed numbers, card-face-honesty).
-    if (zoneHas(state, 'every-stone-an-oath') && (state.enemyDamageThisTurn ?? 0) === 0
-        && !isDefeated(omenState.player) && !isDefeated(omenState.enemy)) {
-        // Silent — the growing barrier
-        // total is its own visible surface on the combat HUD.
-        omenState = { ...omenState, barrier: (omenState.barrier ?? 0) + 12 };
-        const thornsDef = lookupEffectDef('buff_thorns');
-        if (thornsDef) {
-            const applied = applyEffect(omenState.player.effects, thornsDef, state.round, {
-                intensityDelta: 4, durationMode: 'additive', durationDelta: 2,
-                sourceId: 'every-stone-an-oath',
-            });
-            omenState = { ...omenState, player: { ...omenState.player, effects: applied.activeEffects } };
-            events.push({
-                kind: 'effect-landed', cardId: 'every-stone-an-oath', effectId: 'buff_thorns', target: 'self',
-                effectKind: 'none', intensity: applied.result.activeEffect?.intensity ?? 4, effect: thornsDef,
-            });
-        }
-    }
-    // `writ-of-attainder` (D): the CHARGES half of the round-end tick — DOOM
-    // was applied earlier (while `enemy` was still local, above); CHARGES
-    // lives here alongside the other round-end oaths so it can bump
-    // `omenState.premises` (card face: "inflict DOOM 3 on the foe and gain 2
-    // CHARGES" — the CHARGES half never existed until this fix).
-    if (zoneHas(state, 'writ-of-attainder') && !isDefeated(omenState.enemy)) {
-        omenState = { ...omenState, premises: (omenState.premises ?? 0) + 2 };
-        events.push({ kind: 'premise-gained', amount: 2, total: omenState.premises ?? 0 });
-    }
-    // `the-sworn-second` (Ally, Phase 62 — cards.allies.ts): a recruited
-    // retainer answers a blow every round, capped at 3 THORNS stacks so a
-    // long fight's standing reflect never runs away (mirrors the
-    // grace-momentum cap's shape, below).
-    if (zoneHas(state, 'the-sworn-second') && !isDefeated(omenState.player) && !isDefeated(omenState.enemy)) {
-        const thornsDef = lookupEffectDef('buff_thorns');
-        if (thornsDef) {
-            const ALLY_THORNS_CAP = 3;
-            const current = omenState.player.effects.find(e => e.effectId === 'buff_thorns');
-            if (!current || current.intensity < ALLY_THORNS_CAP) {
-                const applied = applyEffect(omenState.player.effects, thornsDef, state.round, {
-                    intensityDelta: 1, sourceId: 'the-sworn-second',
-                });
-                omenState = { ...omenState, player: { ...omenState.player, effects: applied.activeEffects } };
-                events.push({
-                    kind: 'effect-landed', cardId: 'the-sworn-second', effectId: 'buff_thorns', target: 'self',
-                    effectKind: 'none', intensity: applied.result.activeEffect?.intensity ?? 1, effect: thornsDef,
-                });
-            }
-        }
-    }
-    // `the-long-amen` (D): the held word accrues — the enemy gains PLEA equal
-    // to 3 times the Souls you hold, every round's end. Reads the bank, never
-    // spends it (the deliberate hold-or-spend tension). Card face, THE BIG
-    // NUMBERS REWRITE 2026-09-02: "the foe gains PLEA equal to 3 times the
-    // number of Souls you hold" — this hook predates the rewrite's text and
-    // was left at a flat 1x; fixed to match the printed multiplier,
-    // card-face-honesty.
-    if (zoneHas(state, 'the-long-amen') && (omenState.souls ?? 0) > 0 && !isDefeated(omenState.enemy)) {
-        omenState = gainSway(omenState, (omenState.souls ?? 0) * 3, events);
     }
 
     // PLEA decays at the turn boundary (ratified A2).

@@ -126,22 +126,23 @@ describe('removeEffectsByType', () => {
         { effectId: 'buff_regeneration',  remainingDuration: 4, intensity: 1, appliedAt: 1, tier: 2 },
         // a Tier 2 debuff (v3 card vocabulary)
         { effectId: 'debuff_poison',      remainingDuration: 3, intensity: 1, appliedAt: 1, tier: 2 },
-        // a Tier 1 buff (v3 card vocabulary — Thorns)
-        { effectId: 'buff_thorns',        remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 1 },
+        // a Tier 1 buff (support / non-card — Stoic Resolve; buff_thorns left
+        // the library in the keyword audit, 2026-09-27)
+        { effectId: 'buff_stoic_resolve', remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 1 },
         // a Tier 3 buff (haste)
         { effectId: 'buff_haste',         remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 3 },
     ];
 
     it('strips all buffs when no tier cap', () => {
         const { activeEffects, removed } = removeEffectsByType(effects, 'buff');
-        expect(removed.map(r => r.effectId).sort()).toEqual(['buff_haste', 'buff_regeneration', 'buff_thorns']);
+        expect(removed.map(r => r.effectId).sort()).toEqual(['buff_haste', 'buff_regeneration', 'buff_stoic_resolve']);
         expect(activeEffects).toHaveLength(1);
         expect(activeEffects[0].effectId).toBe('debuff_poison');
     });
 
     it('respects maxTier — Tier 2 dispel does not touch Tier 3', () => {
         const { activeEffects, removed } = removeEffectsByType(effects, 'buff', 2);
-        expect(removed.map(r => r.effectId).sort()).toEqual(['buff_regeneration', 'buff_thorns']);
+        expect(removed.map(r => r.effectId).sort()).toEqual(['buff_regeneration', 'buff_stoic_resolve']);
         expect(activeEffects.find(e => e.effectId === 'buff_haste')).toBeDefined();
     });
 
@@ -155,9 +156,9 @@ describe('removeEffectsByType', () => {
 
 describe('effectsLibrary', () => {
     it('lookupEffect finds buffs', () => {
-        const effect = lookupEffect('buff_thorns');
+        const effect = lookupEffect('buff_stoic_resolve');
         expect(effect).toBeDefined();
-        expect(effect?.name).toBe('Thorns');
+        expect(effect?.name).toBe('Stoic Resolve');
     });
 
     it('lookupEffect finds debuffs', () => {

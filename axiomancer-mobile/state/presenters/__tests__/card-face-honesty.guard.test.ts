@@ -17,7 +17,7 @@
 import { describe, it, expect } from '@jest/globals';
 import { getCard, getCardById, cardLibrary, lookupEffect } from '@mechanics';
 import { faceStats, detailStats } from '@/state/presenters/combat-encounter.engine';
-import { keywordsInPersistentText, keywordForEffect, keywordGloss, SYSTEM_GLOSSARY } from '@/state/combat/keywords';
+import { keywordsInPersistentText, keywordForEffect, keywordForVerb, keywordGloss, SYSTEM_GLOSSARY } from '@/state/combat/keywords';
 import { glyphShapeFor } from '@/components/combat/glyphShapes';
 
 describe('card-face honesty guard', () => {
@@ -189,8 +189,8 @@ describe('card-face honesty guard', () => {
         // 2026-07-12 (owner directive): the inspect overlay is the popup layer.
         // Every UPPERCASE registry word on the printed lines must render a
         // keyword chip WITH a gloss; every authored status effect must resolve
-        // its keyword chip; the card-local Peroration words (SENTENCE /
-        // CONDEMN) must surface their system-glossary entry.
+        // its keyword chip. (The Peroration words SENTENCE / CONDEMN left the
+        // systems glossary in the keyword audit, 2026-09-27, with their cards.)
         const offenders: string[] = [];
         for (const { id } of cardLibrary) {
             const card = getCard(id);
@@ -198,7 +198,6 @@ describe('card-face honesty guard', () => {
             if (!card || !src) continue;
             const d = detailStats(card, src);
             const chips = new Set(d.keywords.filter(k => k.def).map(k => k.name));
-            const sys = new Set(d.systemTerms.map(s => s.term));
             const printed = [card.topActionText, card.bottomActionText, ...(card.dieLines ?? [])].join(' ');
             for (const kw of keywordsInPersistentText(printed)) {
                 if (!chips.has(kw.toUpperCase())) offenders.push(`${id} → prints ${kw.toUpperCase()} but renders no defined chip`);
@@ -207,8 +206,6 @@ describe('card-face honesty guard', () => {
                 const kw = keywordForEffect(ce.effectId);
                 if (kw && !chips.has(kw.toUpperCase())) offenders.push(`${id} → applies ${ce.effectId} but renders no ${kw.toUpperCase()} chip`);
             }
-            if (/\bPERORATION\b/.test(printed) && !sys.has('SENTENCE')) offenders.push(`${id} → prints SENTENCE with no popup`);
-            if (/\bCONCEDE\b/.test(printed) && !sys.has('CONDEMN')) offenders.push(`${id} → prints CONDEMN with no popup`);
         }
         expect(offenders).toEqual([]);
     });
@@ -242,6 +239,19 @@ describe('card-face honesty guard', () => {
         // ambiguous PAID fallback the rest of this file guards against.
         const missing = ['Boon', 'Hone', 'Temper'].filter(kw => !keywordGloss(kw));
         expect(missing).toEqual([]);
+    });
+
+    it('the grey office vocabulary survives the keyword audit — GUARD and VULNERABLE resolve end to end', () => {
+        // The keyword audit (2026-09-27) cut the registry to what live content
+        // prints. The three grey cards are the whole player library, so their
+        // words are pinned directly: the gloss, the effect/verb mapping, and a
+        // drawn silhouette for each.
+        expect(keywordGloss('Guard')).toBeTruthy();
+        expect(keywordGloss('Vulnerable')).toBeTruthy();
+        expect(keywordForEffect('debuff_vulnerable')).toBe('Vulnerable');
+        expect(keywordForVerb('defend')).toBe('Guard');
+        expect(glyphShapeFor('GUARD')).toBeTruthy();
+        expect(glyphShapeFor('VULNERABLE')).toBeTruthy();
     });
 
     it('every headlined PAID keyword has a glossary definition (the "description above the card")', () => {

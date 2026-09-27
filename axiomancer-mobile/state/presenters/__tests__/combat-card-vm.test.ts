@@ -28,6 +28,7 @@ import type { Card } from '@mechanics';
 import {
     faceStats, detailStats, engineHonestKind, resolvePrimary, armedReadValue,
 } from '@/state/presenters/combat-encounter.engine';
+import { registerFixtureEffects } from '@mechanics/test-utils/fixture-effects';
 
 /**
  * The Profane Canon prints no round-clock DoT: POISON ticks per card played,
@@ -44,11 +45,17 @@ const FX_EMBER: Card = {
     targetType: 'enemy',
     paidSummary: 'Inflict KINDLING EMBER 1 for 3 turns.',
     free: { foretell: 1 },
-    combatEffects: [{ effectId: 'debuff_kindling_ember', appliedTo: 'opponent', intensity: 1, duration: 3 }],
+    combatEffects: [{ effectId: 'fixture_ember', appliedTo: 'opponent', intensity: 1, duration: 3 }],
     addedIn: '2026-08-08',
     tags: ['rot'],
 };
-beforeAll(() => registerSandboxCards([FX_EMBER]));
+// The keyword audit (2026-09-27) deleted debuff_kindling_ember, debuff_backfire
+// and buff_thorns from the effects library; the mechanics `fixture_*` effects
+// carry their payloads so the presenter branches stay under test.
+beforeAll(() => {
+    registerFixtureEffects();
+    registerSandboxCards([FX_EMBER]);
+});
 afterAll(() => clearSandboxCards());
 
 const cardOf = (id: string) => {
@@ -63,9 +70,9 @@ describe('engineHonestKind — the honesty gate', () => {
         expect(engineHonestKind('debuff_poison')).toBe('dot');
         expect(engineHonestKind('debuff_bleed')).toBe('dot');
         expect(engineHonestKind('debuff_mark')).toBe('mark');           // tickAmplifyFlat
-        expect(engineHonestKind('debuff_backfire')).toBe('backfire');   // backfirePerRung
+        expect(engineHonestKind('fixture_backfire')).toBe('backfire');  // backfirePerRung
         expect(engineHonestKind('debuff_quarter')).toBe('weaken');      // outgoingDamageMulPct < 0
-        expect(engineHonestKind('buff_thorns')).toBe('thorns');         // reflectDamage
+        expect(engineHonestKind('fixture_thorns')).toBe('thorns');      // reflectDamage
         expect(engineHonestKind(null)).toBeNull();
     });
 });

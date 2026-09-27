@@ -9,6 +9,12 @@ import { createCharacter } from '../Character';
 import { createEnemy } from '../Enemy';
 import { ActiveEffect } from '../Effects/types';
 import { setSeed } from '../Utils/rng';
+import { registerFixtureEffects } from '../test-utils/fixture-effects';
+
+// The keyword audit (2026-09-27) deleted buff_thorns / debuff_backfire /
+// the round-clock DoT species from the library; their engine channels are
+// exercised through the `fixture_*` effects instead.
+registerFixtureEffects();
 
 const makePlayer = () => createCharacter({ name: 'Test', level: 1, baseStats: { heart: 4, body: 3, mind: 2 } });
 const makeEnemy = () => createEnemy({
@@ -197,8 +203,8 @@ describe('getThornsReflect', () => {
     expect(getThornsReflect(makePlayer())).toBe(0);
   });
 
-  it('returns reflectDamage × intensity for buff_thorns (reflectDamage: 1)', () => {
-    const thorns: ActiveEffect = { effectId: 'buff_thorns', remainingDuration: 3, intensity: 2, appliedAt: 0, tier: 1 };
+  it('returns reflectDamage × intensity (fixture_thorns, reflectDamage: 1)', () => {
+    const thorns: ActiveEffect = { effectId: 'fixture_thorns', remainingDuration: 3, intensity: 2, appliedAt: 0, tier: 1 };
     const p = { ...makePlayer(), effects: [thorns] };
     expect(getThornsReflect(p)).toBe(2);
   });

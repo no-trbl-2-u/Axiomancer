@@ -38,16 +38,17 @@ export const CARD_THEMES: readonly CardTheme[] = Object.freeze([
  * exposes per theme.
  */
 export const THEME_KEYWORDS: Record<CardTheme, readonly string[]> = Object.freeze({
-    rot:   ['POISON', 'BLEED', 'DOOM', 'MARK', 'RUPTURE', 'SIPHON', 'PROLONG', 'FESTER'],
-    debt:  ['RECOIL', 'FALLEN', 'DOOM', 'IMMOLATE', 'BLEED', 'DRAW', 'HEAL'],
-    grave: ['MILL', 'RECALL', 'REPLAY', 'REQUIEM', 'IMMOLATE', 'ECHO', 'DOOM', 'FORETELL'],
-    vigil: ['GUARD', 'THORNS', 'RIPOSTE', 'BLEED', 'DOOM', 'FORETELL'],
-    // CONDEMN / SENTENCE are deliberately ABSENT: both were demoted from the
-    // keyword registry (phase 29) and live in the systems glossary instead, so
-    // a theme family may not claim them (mobile KW-6 parity law).
-    trial: ['CHARGE', 'STAGGER', 'BACKFIRE', 'MARK', 'DOOM'],
-    choir: ['PLEA', 'QUARTER', 'SOUL', 'REAP', 'DOOM', 'HEAL', 'CLEANSE', 'KINDLE'],
-    curse: ['PURGE'],
+    // The keyword audit (2026-09-27, after the card purge) stripped every word
+    // whose gloss left the registry with the purged cards (mobile KW-6 parity
+    // law). Every theme key stays; a family may be empty until a guided card
+    // session (D37) gives it carriers again.
+    rot:   ['POISON', 'BLEED', 'DOOM', 'MARK'],
+    debt:  ['DOOM', 'BLEED', 'DRAW', 'HEAL'],
+    grave: ['DOOM', 'FORETELL'],
+    vigil: ['GUARD', 'RIPOSTE', 'BLEED', 'DOOM', 'FORETELL'],
+    trial: ['STAGGER', 'MARK', 'DOOM'],
+    choir: ['PLEA', 'QUARTER', 'DOOM', 'HEAL', 'CLEANSE'],
+    curse: [],
     // The grey office carries no archetype keywords by design (Phase 104).
     grey: [],
 });

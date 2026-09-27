@@ -35,7 +35,13 @@ import {
 import { classifyVerbClass, toCombatCard } from '../combat.cards';
 import { getActiveDotTotal, getActiveDotAmplifications } from '../effect-modifiers';
 import { COMBAT_REWARD_POOL } from '../combat.rewards';
-import type { CombatEvent } from '../combat.encounter.types';
+import type { CombatEvent } from '../combat.encounter.types';
+import { registerFixtureEffects } from '../../test-utils/fixture-effects';
+
+// The keyword audit (2026-09-27) deleted buff_thorns / debuff_backfire /
+// the round-clock DoT species from the library; their engine channels are
+// exercised through the `fixture_*` effects instead.
+registerFixtureEffects();
 
 afterEach(() => { vi.restoreAllMocks(); });
 
@@ -175,7 +181,7 @@ describe('DISRUPT — a variety of control SURFACES denies the telegraphed turn 
 describe('THORNS — the foe telegraphed hit rebounds onto it', () => {
     it('reflects reflectDamage back at the enemy when it attacks', () => {
         mockSequentialRng(0.05);
-        const player = makePlayer([], [ae('buff_thorns', 1)]); // reflectDamage 1
+        const player = makePlayer([], [ae('fixture_thorns', 1)]); // reflectDamage 1
         const base = initializeCombatEncounter(player, makeEnemy(300, 'mind'), undefined, 7);
         const state = rollEncounterDice(base).state;
         const hpBefore = state.enemy.health;
@@ -187,9 +193,9 @@ describe('THORNS — the foe telegraphed hit rebounds onto it', () => {
         expect(hpBefore - res.state.enemy.health).toBe(1); // enemy has no DoT — only the reflect
     });
 
-    it('the v3 buff_thorns card effect reflects 1 per intensity', () => {
+    it('the THORNS reflect channel (fixture_thorns) reflects 1 per intensity', () => {
         mockSequentialRng(0.05);
-        const player = makePlayer([], [ae('buff_thorns', 3, 2)]);
+        const player = makePlayer([], [ae('fixture_thorns', 3, 2)]);
         const base = initializeCombatEncounter(player, makeEnemy(300, 'mind'), undefined, 7);
         const res = resolveThreatPhase(rollEncounterDice(base).state);
         const reflected = res.events.find(e => e.kind === 'thorns-reflected') as { amount: number } | undefined;
@@ -291,16 +297,16 @@ describe('INVARIANT — no new behavior fires without its marker', () => {
         // One control (roll -3) → below every deny threshold; one ROUND-CLOCKED
         // DoT, no combo. (WS3.3: poison moved to the card-played clock — it no
         // longer ticks at the round boundary, so the round-tick witness here is
-        // nettle_sting, the bulwark card-local species: dpr 2, round-end.)
-        const enemyEffects = [ae('test_ctrl_knockdown', 1), ae('debuff_nettle_sting', 2)];
+        // the nettle-sting fixture (`fixture_nettle`): dpr 2, round-end.)
+        const enemyEffects = [ae('test_ctrl_knockdown', 1), ae('fixture_nettle', 2)];
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', enemyEffects), undefined, 7);
         const state = rollEncounterDice(base).state;
         const res = resolveThreatPhase(state); // fires threat + processBetweenPhases
 
         for (const ev of res.events) expect(NEW_KINDS.has(ev.kind), ev.kind).toBe(false);
         expect(res.events.some(e => e.kind === 'dot-tick' && e.effectId === 'vulnerable-surcharge')).toBe(false);
-        // nettle_sting i2, round 1, no combo → floor(2×2)=4 exactly.
-        const tick = res.events.find(e => e.kind === 'dot-tick' && e.effectId === 'debuff_nettle_sting') as { amount: number } | undefined;
+        // fixture_nettle i2, round 1, no combo → floor(2×2)=4 exactly.
+        const tick = res.events.find(e => e.kind === 'dot-tick' && e.effectId === 'fixture_nettle') as { amount: number } | undefined;
         expect(tick!.amount).toBe(4);
         expect(res.events.some(e => e.kind === 'threat-fired')).toBe(true); // enemy still acts
     });

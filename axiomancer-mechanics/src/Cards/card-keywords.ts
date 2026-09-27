@@ -19,9 +19,6 @@
 import type { Card, CardRider } from './types';
 
 const EFFECT_ID_KEYWORD: Readonly<Record<string, string>> = Object.freeze({
-    buff_thorns: 'THORNS',
-    buff_grace_momentum: 'PLEA',
-    debuff_backfire: 'BACKFIRE',
     debuff_bleed: 'BLEED',
     debuff_creeping_doom: 'DOOM',
     debuff_mark: 'MARK',
@@ -29,53 +26,31 @@ const EFFECT_ID_KEYWORD: Readonly<Record<string, string>> = Object.freeze({
     debuff_quarter: 'QUARTER',
 });
 
+// The keyword audit (2026-09-27, after the card purge) kept only the kinds
+// whose keyword still carries a gloss in mobile's KEYWORD_GLOSS. The other
+// kinds stay in the engine union; they simply resolve to no theme keyword.
 const MECHANIC_KIND_KEYWORD: Readonly<Record<string, string>> = Object.freeze({
     barrier: 'GUARD',
     guard: 'GUARD',
     riposte: 'RIPOSTE',
-    rupture: 'RUPTURE',
-    reap: 'REAP',
-    reap_all: 'REAP',
     stagger: 'STAGGER',
     lock_stance: 'STAGGER',
-    turnabout: 'BACKFIRE',
     foretell: 'FORETELL',
-    premise: 'CHARGE',
-    spend_premises: 'CHARGE',
-    recoil: 'RECOIL',
-    recoil_x: 'RECOIL',
-    soul_gain: 'SOUL',
-    consume_affliction: 'RUPTURE',
-    siphon: 'SIPHON',
     sway: 'PLEA',
-    echo: 'ECHO',
-    echo_next_spell: 'ECHO',
-    reprise: 'RECALL',
-    extend_dots: 'PROLONG',
-    boost_all_dots: 'FESTER',
-    immolate: 'IMMOLATE',
-    purge_self: 'PURGE',
-    replay_last: 'REPLAY',
-    requiem: 'REQUIEM',
-    create_temporary_die: 'KINDLE',
 });
 
 /**
- * `CardRider` field → keyword. Covers the rider verbs THEME_KEYWORDS
- * actually lists (MILL only ever reaches a card through a rider — no
- * `specialMechanics` kind carries it, so this is the sole source for it).
+ * `CardRider` field → keyword. Covers the rider verbs whose keyword still
+ * carries a gloss (the keyword audit, 2026-09-27, dropped MILL, SOUL, CHARGE
+ * and RECOIL with the purged cards).
  */
 const RIDER_FIELD_KEYWORD: { readonly [K in keyof CardRider]?: string } = Object.freeze({
     guard: 'GUARD',
     barrier: 'GUARD',
-    millCards: 'MILL',
     cleanse: 'CLEANSE',
-    souls: 'SOUL',
-    premises: 'CHARGE',
     foretell: 'FORETELL',
     stagger: 'STAGGER',
     sway: 'PLEA',
-    recoil: 'RECOIL',
     healHp: 'HEAL',
     drawCards: 'DRAW',
 });
