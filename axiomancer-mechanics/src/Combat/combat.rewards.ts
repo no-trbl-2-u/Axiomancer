@@ -42,7 +42,9 @@ export const REWARD_RARITY_WEIGHTS: Readonly<Record<'common' | 'uncommon' | 'rar
  * deck: two colourless shapes (`color: 'any'` — every die
  * colour powers either), so fight one teaches STRIKE, WARD, FREE-vs-PAID, and
  * the die-spend loop with zero colour arithmetic. Mobile's
- * `ensureStarterCards` writes this list VERBATIM (copies kept — 7 + 3, not
+ * S3 (T, 2026-09-27): Blow 5, Ward 3, and 2 of A Plain Word (D42, D43).
+ *
+ * `ensureStarterCards` writes this list VERBATIM (copies kept — 5 + 3 + 2, not
  * deduplicated) into a fresh character's `knownCards`.
  *
  * (Superseded history: 2026-07-through-2026-09-19 this was
@@ -55,9 +57,9 @@ export const REWARD_RARITY_WEIGHTS: Readonly<Record<'common' | 'uncommon' | 'rar
  * so the starting set no longer needs to span the three stances itself.)
  */
 export const STARTING_CARD_IDS: readonly string[] = Object.freeze([
-    'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike',
-    'grey-strike', 'grey-strike', 'grey-strike',
+    'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike',
     'grey-ward', 'grey-ward', 'grey-ward',
+    'grey-word', 'grey-word',
 ]);
 
 /** Fewer than this many reward cards taken ⇒ the draft is fully uniform (no

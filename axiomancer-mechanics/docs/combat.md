@@ -548,7 +548,7 @@ are here.
 `src/Game/game-mechanics.constants.ts`):
 
 ```
-PLAYER_VITAE = PLAYER_VITAE_BASE + (body + heart + mind) × HEALTH_PER_STAT
+PLAYER_VITAE = PLAYER_VITAE_BASE + 12·body + 6·mind + 6·heart
              = 50 + stats × 8
 ```
 
@@ -618,7 +618,6 @@ EXECUTE, VULNERABLE, SIPHON) and by mobile for hit-preview rendering.
 | `consumeDotEffects(target)` | Removes all active DoT effects and returns the total damage consumed. Used by RUPTURE to convert stacked DoT into a single burst. |
 | `getDistinctDebuffCount(target)` | Counts the number of distinct active debuff effect types on the target. Drives COMPOUND damage scaling (capped at `COMPOUND_COUNT_CAP`). |
 | `getDistinctControlCount(target)` | Counts the number of distinct active control effects. Drives DISRUPT — when ≥ `DISRUPT_DENY_AT` the target's next action is denied. |
-| `VULNERABLE_MAX_MULT` | Maximum incoming-damage multiplier cap when Vulnerable is active. |
 | `RUPTURE_CAP_FRACTION` / `ruptureBurstCap(maxHp)` | RUPTURE burst cap: `round(fraction × enemy max VITAE)`. **The cap is repealed** (2026-09-02) — payoffs are uncapped by design; the constant is `Number.POSITIVE_INFINITY` in `src/Combat/effects.ts`, matching doctrine. |
 | `COMPOUND_COUNT_CAP` | Maximum distinct debuff count credited by COMPOUND. |
 | `DISRUPT_DENY_AT` | Distinct-control-effect threshold at which DISRUPT denies the next enemy action. |

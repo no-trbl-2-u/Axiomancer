@@ -39,6 +39,8 @@ const KNOWN_UPPER = new Set([
     // plus the turn-shape conditions promoted to face terms.
     'DEAL', 'PIERCE', 'WRATH', 'FLAY', 'TWIN', 'CHAIN', 'EXECUTE', 'OVERKILL',
     'AMBUSH', 'FLOW', 'FINALE', 'BARRIER', 'TOLL',
+    // S3 (D43) — VULNERABLE, rebuilt for the grey office's A Plain Word.
+    'VULNERABLE',
     // `/adjust-keywords` pass 11 — EVENTIDE, the Chaos-family parity drill.
     'EVENTIDE',
     // `/adjust-keywords` pass 12 — UNMOVED, backfilled gloss for the

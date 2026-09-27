@@ -1840,8 +1840,16 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     // PRINTED PLATE: STANCE colours the frame + the die cube; CATEGORY colours
     // the FREE glyph + the keyword. Inert cards grey both honestly.
     const band = f.stanceColor;
-    const baseKw = f.inert ? AXM.ash : f.categoryColor;
+    // S3 (D40) — a keyword wears its STAT FAMILY's dice colour and glyph
+    // (body ⚡, mind ★, heart ♥) on the live hand; elsewhere, its category.
+    const baseKw = f.inert ? AXM.ash : (f.familyColor ?? f.categoryColor);
     const kwColor = accent ?? baseKw;
+    // The number the player's stat raised is tinted in the family colour; a
+    // lowered one reads muted. The face always shows the FINAL number.
+    const tintFor = (dir: 'up' | 'down' | null | undefined) => f.inert || !dir ? null
+        : dir === 'up' ? (f.familyColor ?? AXM.sulfur) : AXM.ash;
+    const scaledTint = tintFor(f.statScaled);
+    const freeTint = tintFor(f.freeStatScaled);
     const paidValue = paidValueFor(f, heroOverride);
     const freeInner = compactFree(f.freeValue ?? (f.freeHeroText || null));
     const hasFree = !!f.freeGlyph;
@@ -1958,7 +1966,7 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                                 <Text style={[styles.plateFreeGlyph, { fontSize: glyphSize * 0.85, lineHeight: glyphSize, color: f.inert ? AXM.ash : kwColor }]} allowFontScaling={false}>{f.freeGlyph}</Text>
                             )}
                             {freeInner ? (
-                                <Text style={[styles.plateFreeValue, large && styles.plateFreeValueLarge]} allowFontScaling={false}>{freeInner}</Text>
+                                <Text style={[styles.plateFreeValue, large && styles.plateFreeValueLarge, freeTint ? { color: freeTint } : null]} allowFontScaling={false}>{freeInner}</Text>
                             ) : null}
                         </View>
                     ) : null}
@@ -1973,12 +1981,12 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                                     allowFontScaling={false}
                                     testID="combat-card-face-keyword"
                                 >
-                                    {f.keyword.toUpperCase()}
+                                    {f.familyGlyph ? `${f.familyGlyph} ` : ''}{f.keyword.toUpperCase()}
                                 </Text>
                             ) : null}
                             {paidValue ? (
                                 <Text
-                                    style={[styles.paidValue, large && styles.paidValueLarge]}
+                                    style={[styles.paidValue, large && styles.paidValueLarge, scaledTint ? { color: scaledTint } : null]}
                                     numberOfLines={large ? 1 : 2}
                                     allowFontScaling={false}
                                     testID="combat-card-face-value"

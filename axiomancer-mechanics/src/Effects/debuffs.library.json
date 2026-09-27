@@ -80,6 +80,27 @@
       ]
     },
     {
+      "id": "debuff_vulnerable",
+      "name": "Vulnerable",
+      "description": "Said plainly, to its face. It hears you, and every blow that follows lands a little deeper for it.",
+      "type": "debuff",
+      "category": "stat",
+      "duration": 2,
+      "stacking": "intensity",
+      "refreshOnStack": true,
+      "payload": {
+        "damageTakenMult": 1.01
+      },
+      "tier": 1,
+      "addedIn": "2026-09-27",
+      "tags": [
+        "v3",
+        "s3",
+        "heart",
+        "vulnerable"
+      ]
+    },
+    {
       "id": "debuff_backfire",
       "name": "Backfire",
       "description": "Every motion they are denied turns inward. The blow that cannot land must land somewhere.",

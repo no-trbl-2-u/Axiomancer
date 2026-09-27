@@ -45,7 +45,10 @@ export function buildFixtureState(options: { clean?: boolean } = {}): CombatEnco
     const clean = options.clean ?? false;
 
     const player: Character = deepClone(Player);
-    player.baseStats = { heart: 10, body: 10, mind: 10 };
+    // NEUTRAL stats (S3, D41): 5 leaves every printed number as printed, so a
+    // card test asserts the card's own numbers. Stat scaling has its own
+    // suite (`Combat/e2e/stat-scaling.engine.test.ts`).
+    player.baseStats = { heart: 5, body: 5, mind: 5 };
     player.level = 20;
     // executeCard's ownership gate requires the played card in knownCards
     // (or combatRewardCards) — own the whole library so any card id is legal.

@@ -117,7 +117,7 @@ export interface EffectPayload {
      * `1` (or absent) is neutral; `1.5` means the bearer takes +50% from the
      * attacker's HP sources. Read by the HP-model combat engine
      * (`getDamageTakenMultiplier`) and aggregated additively across the bearer's
-     * own payloads, then clamped to `VULNERABLE_MAX_MULT`. Inert in the legacy
+     * own payloads, uncapped since S3 (D41). Inert in the legacy
      * resolver (it never reads this field), so existing exact-HP tests are
      * byte-identical. See the VULNERABLE epic (mechanics 0.34.0).
      */
@@ -299,6 +299,13 @@ export interface Effect {
     payload: EffectPayload;
     resistedBy?: Stance;
     resistDR?: number;
+    /**
+     * S3 (D43) — on re-application an `intensity`-stacking effect normally
+     * extends (additive) or resets its duration. With this set it adds the
+     * intensity and refreshes the duration to the longer of the two, so
+     * repeating the card grows the effect without stretching its window.
+     */
+    refreshOnStack?: boolean;
     /**
      * Content-provenance metadata (originally consumed by the since-retired
      * tuning `--focus` filter). `addedIn` is an ISO date (`YYYY-MM-DD`)

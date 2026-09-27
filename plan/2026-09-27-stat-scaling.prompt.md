@@ -63,8 +63,11 @@ hits-to-kill holds steady.
 
 ## 3. Worked numbers (pin these in tests)
 
-Grey cards: A Plain Blow DEAL 5, A Plain Ward GUARD 5, the heart grey card
-VULNERABLE +25% (D42).
+Grey cards: A Plain Blow DEAL 5, A Plain Ward GUARD 5, and A Plain Word
+(D42, D43): PAID VULNERABLE +25% for 2 turns, FREE VULNERABLE +10% for 1
+turn. VULNERABLE adds up on re-application and refreshes its duration.
+"Blow on a marked foe" rounds to nearest, as the engine's on-hit damage
+does (47 × 1.25 = 58.75 → 59).
 
 | Build | Level | Blow | Ward | Mark | Blow on a marked foe | VITAE |
 |---|---|---|---|---|---|---|
@@ -72,7 +75,7 @@ VULNERABLE +25% (D42).
 | 32/5/5 | 10 | 32 | 5 | +25% | 40 | 494 |
 | 47/5/5 | 15 | 47 | 5 | +25% | 59 | 674 |
 | 19/19/19 | 15 | 19 | 19 | +95% | 37 | 506 |
-| 26/5/26 | 15 | 26 | 5 | +130% | 60 | 518 |
+| 26/5/26 | 15 | 26 | 5 | +130% | 60 | 548 |
 
 ## 4. Shipping
 

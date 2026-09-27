@@ -66,19 +66,24 @@ describe('spec 33 D3 — realized-play invariants', () => {
     });
     const p = result.pooled;
 
+    // S3 (2026-09-27, D41) — stats now scale the player's numbers (mid runs at
+    // 17/17/17, ×3.4), so fights end sooner: 48 rounds over the 30 encounters
+    // (was > 50), and more rolled specials are left unspent when the foe
+    // drops (spend-rate 0.50). The floors below were re-measured, not relaxed
+    // for a bug: the game is different, not wrong.
     it('the matrix ran real rounds', () => {
-        expect(p.rounds).toBeGreaterThan(50);
+        expect(p.rounds).toBeGreaterThan(40);
         expect(p.encounters).toBe(30);
     });
 
     it('special spend-rate never exceeds 1 (can\'t realize more ◆ than rolled)', () => {
         expect(p.specialSpendRate).toBeLessThanOrEqual(1.001);
-        expect(p.specialSpendRate).toBeGreaterThan(0.5);
+        expect(p.specialSpendRate).toBeGreaterThan(0.4);
     });
 
     it('realized ◆ income is positive and specials-driven', () => {
         expect(p.totalIncomePerRound).toBeGreaterThan(0.6);
-        expect(p.specialIncomePerRound).toBeGreaterThan(0.5);
+        expect(p.specialIncomePerRound).toBeGreaterThan(0.4);
     });
 
     it('surges fire and momentum breaks occur', () => {
@@ -154,7 +159,9 @@ describe('spec 33 D7 — ratified economy envelope', () => {
     });
 
     it('RATIFIED: income is specials-driven with a yield contribution (D6e telegraphs)', () => {
-        expect(p.specialIncomePerRound).toBeGreaterThan(0.9);
+        // Re-measured post-S3 (2026-09-27): 0.70 — shorter stat-scaled fights
+        // strand more specials at the kill (was > 0.9).
+        expect(p.specialIncomePerRound).toBeGreaterThan(0.6);
         // Floor re-measured post-D9 (2026-07-19): D9 replaced 14 enemies' uniform
         // two-sided default checks with hand-authored, often single-sided ones
         // (a phase may name only a `punishes` or only a `yields`, per spec 33 §2's

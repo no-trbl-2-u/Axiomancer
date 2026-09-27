@@ -154,7 +154,7 @@ export function createDieRoll(advantage: Advantage): () => number {
 
 /**
  * Calculates the maximum VITAE of a PLAYER-side entity from all base stats.
- * Equation: PLAYER_VITAE_BASE + (body + heart + mind) × HEALTH_PER_STAT
+ * Equation: PLAYER_VITAE_BASE + 12·body + 6·mind + 6·heart (S3, D41)
  *
  * THE BIG NUMBERS REWRITE (2026-09-02): the flat base is what keeps a level-1
  * pilgrim standing through the opening telegraphs now that threats are printed
@@ -172,7 +172,9 @@ export function calculateMaxHealth(level: number, healthStats: BaseStats): numbe
   void level;
   return (
     PLAYER_VITAE_BASE +
-    sum([healthStats.body, healthStats.heart, healthStats.mind]) * RESOURCE_MULTIPLIERS.HEALTH_PER_STAT
+    healthStats.body * RESOURCE_MULTIPLIERS.VITAE_PER_BODY +
+    healthStats.mind * RESOURCE_MULTIPLIERS.VITAE_PER_MIND +
+    healthStats.heart * RESOURCE_MULTIPLIERS.VITAE_PER_HEART
   );
 }
 

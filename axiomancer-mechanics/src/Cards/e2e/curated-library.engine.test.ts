@@ -126,15 +126,16 @@ describe('profane canon — id hygiene and provenance', () => {
         }
     });
 
-    it('the starting set resolves, teaches a mechanic each, and is the 7/3 grey recipe', () => {
+    it('the starting set resolves, teaches a mechanic each, and is the 5/3/2 grey recipe', () => {
         // Phase 104 (the grey office) — a brand-new player's first ten cards
         // are two colourless shapes, not one card per stance colour: 'any'
         // means every die powers every starter, so the old three-colours-
         // represented law is superseded (there is no colour to fail to cover).
+        // S3 (T, 2026-09-27): Blow 5, Ward 3, A Plain Word 2 (D42, D43).
         expect(STARTING_CARD_IDS).toEqual([
-            'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike',
-            'grey-strike', 'grey-strike', 'grey-strike',
+            'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike',
             'grey-ward', 'grey-ward', 'grey-ward',
+            'grey-word', 'grey-word',
         ]);
         for (const id of STARTING_CARD_IDS) {
             const card = getCardById(id);

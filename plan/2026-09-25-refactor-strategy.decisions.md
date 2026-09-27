@@ -366,6 +366,19 @@ VULNERABLE +25%, a FREE line to be set in the guided session that builds
 it, D37). After the purge the player's keywords are DEAL, GUARD and
 VULNERABLE. *Rejected:* BLEED, WEAKEN.
 
+**D43 — A Plain Word: VULNERABLE rebuilt.** (T, guided S3 session,
+2026-09-27; ballot.) VULNERABLE was not a live player keyword (no card
+applied it; `debuff_vulnerable` sat on the deprecated list; only the
+`damageTakenMult` path survived), so S3 rebuilds it on that path. The
+effect's intensity is percentage points (+25 = the foe takes +25% damage),
+heart scales the percentage when it is applied, and it **lasts 2 turns**.
+Re-applying it **adds up and refreshes** the duration (+25% and +25% =
++50%), uncapped. The card is **A Plain Word** (`grey-word`, heart, grey
+office): PAID VULNERABLE +25% for 2 turns, **FREE VULNERABLE +10% for 1
+turn** (also heart-scaled). *Rejected:* 1 turn and until-your-next-hit
+durations; keep-the-higher stacking; FREE Deal 2 or GUARD 2; the names A
+Plain Mark (collides with `debuff_mark`) and A Plain Flaw.
+
 ## Open follow-ups
 
 - Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and
