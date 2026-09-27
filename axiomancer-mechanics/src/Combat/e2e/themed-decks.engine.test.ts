@@ -33,7 +33,13 @@ import { runHazardCombatAutoEncounter } from '../../test-utils/combat-autoplay';
 import { buildPresetDeck, COMBAT_DECK_PRESET_ORDER } from '../combat.starter-deck-presets';
 import type {
     CombatDieColor, CombatEncounterState, CombatEvent, CombatManaDie, CombatThreatPhase,
-} from '../combat.encounter.types';
+} from '../combat.encounter.types';
+import { registerFixtureEffects } from '../../test-utils/fixture-effects';
+
+// The keyword audit (2026-09-27) deleted buff_thorns / debuff_backfire /
+// the round-clock DoT species from the library; their engine channels are
+// exercised through the `fixture_*` effects instead.
+registerFixtureEffects();
 
 afterEach(() => { vi.restoreAllMocks(); });
 
@@ -128,7 +134,7 @@ describe('STAGGER rungs — partial removal weakens the telegraph; BACKFIRE drip
         const phases = customPhases(['mind'], 10);
         const base = () => {
             const s = initializeCombatEncounter(
-                makePlayer([]), makeEnemy(300, 'mind', [ae('debuff_backfire', 1, 3)]), undefined, 7);
+                makePlayer([]), makeEnemy(300, 'mind', [ae('fixture_backfire', 1, 3)]), undefined, 7);
             const opened = rollEncounterDice(s).state;
             return { ...opened, threatPhases: phases, threatMarks: ['pending' as const], currentPhaseIndex: 0 };
         };
@@ -197,7 +203,7 @@ describe('BLEED — damage-instance clocked (WS3.3), decays 1 intensity per tick
         const seeded = {
             ...base,
             enemy: { ...base.enemy, effects: [ae('debuff_bleed', 2, 3)] },
-            player: { ...base.player, effects: [ae('buff_thorns', 2, 3)] }, // reflect 1 × 2
+            player: { ...base.player, effects: [ae('fixture_thorns', 2, 3)] }, // reflect 1 × 2
         };
         const res = resolveThreatPhase(seeded);
         const tick = res.events.find(e => e.kind === 'dot-tick' && e.effectId === 'debuff_bleed') as { amount: number } | undefined;
@@ -212,15 +218,15 @@ describe('MARK — +1 per stack on EVERY DoT tick on the bearer (ratified A3)', 
         // WS3.3: poison left the round clocks — kindling ember (round-start,
         // dpr 1) is the boundary witness; MARK amplifies its tick the same.
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
-        const plain = processBetweenPhases({ ...base, enemy: { ...base.enemy, effects: [ae('debuff_kindling_ember', 1, 4)] } });
+        const plain = processBetweenPhases({ ...base, enemy: { ...base.enemy, effects: [ae('fixture_ember', 1, 4)] } });
         expect(300 - plain.state.enemy.health).toBe(1); // ember i1 → 1
 
         const marked = processBetweenPhases({
             ...base,
-            enemy: { ...base.enemy, effects: [ae('debuff_kindling_ember', 1, 4), ae('debuff_mark', 2, 3)] },
+            enemy: { ...base.enemy, effects: [ae('fixture_ember', 1, 4), ae('debuff_mark', 2, 3)] },
         });
         expect(300 - marked.state.enemy.health).toBe(3); // 1 + 2 mark stacks
-        const tick = marked.events.find(e => e.kind === 'dot-tick' && e.effectId === 'debuff_kindling_ember') as { amount: number };
+        const tick = marked.events.find(e => e.kind === 'dot-tick' && e.effectId === 'fixture_ember') as { amount: number };
         expect(tick.amount).toBe(3); // the emitted tick is the real amplified number
     });
 });

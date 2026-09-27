@@ -59,7 +59,13 @@ import {
     applyFixtureCards,
 } from '../../test-utils/retired-verb-cards';
 import { clearSandboxCards } from '../cards.sandbox';
-import { checkStatePredicate } from '../synergy-predicates';
+import { checkStatePredicate } from '../synergy-predicates';
+import { registerFixtureEffects } from '../../test-utils/fixture-effects';
+
+// The keyword audit (2026-09-27) deleted buff_thorns / debuff_backfire /
+// the round-clock DoT species from the library; their engine channels are
+// exercised through the `fixture_*` effects instead.
+registerFixtureEffects();
 
 afterEach(() => {
     vi.restoreAllMocks();
@@ -211,7 +217,7 @@ describe('slag-runoff (WS4.1) — RIPEN whose overflow converts to Kindling Embe
         const { after, events } = play(before, true);
 
         expect(reservePips(after)).toBe(RESERVE_PIP_CAP);
-        const ember = enemyEffect(after, 'debuff_kindling_ember');
+        const ember = enemyEffect(after, 'fixture_ember');
         expect(ember, 'overflow pip must land as an Ember').toBeDefined();
         expect(ember!.intensity).toBe(1);
         const overflowed = findEvent(events, 'pips-overflowed');
@@ -223,7 +229,7 @@ describe('slag-runoff (WS4.1) — RIPEN whose overflow converts to Kindling Embe
         const before = fixtureWith('slag-runoff', {}, s => ({ ...s, reserve: [] }));
         const { after, events } = play(before, true);
 
-        const ember = enemyEffect(after, 'debuff_kindling_ember');
+        const ember = enemyEffect(after, 'fixture_ember');
         expect(ember, 'full overflow must land as Ember').toBeDefined();
         expect(ember!.intensity).toBe(2);
         expect(findEvent(events, 'pips-overflowed')!.pips).toBe(2);
@@ -238,7 +244,7 @@ describe('slag-runoff (WS4.1) — RIPEN whose overflow converts to Kindling Embe
         const { after, events } = play(before, true);
 
         expect(reservePips(after)).toBe(2);
-        expect(enemyEffect(after, 'debuff_kindling_ember')).toBeUndefined();
+        expect(enemyEffect(after, 'fixture_ember')).toBeUndefined();
         expect(findEvent(events, 'pips-overflowed')).toBeUndefined();
     });
 });
@@ -325,7 +331,7 @@ describe('grit-between-stones (WS4.2) — Nettle Sting + Guard + mark detonation
         const hpBefore = before.enemy.health;
         const { after } = play(before, true);
 
-        const sting = enemyEffect(after, 'debuff_nettle_sting');
+        const sting = enemyEffect(after, 'fixture_nettle');
         expect(sting, 'Nettle Sting must land without the enemy attacking').toBeDefined();
         expect(sting!.intensity).toBeGreaterThanOrEqual(2);
         expect(after.guard).toBeGreaterThan(before.guard ?? 0);
@@ -339,7 +345,7 @@ describe('grit-between-stones (WS4.2) — Nettle Sting + Guard + mark detonation
         const before = fixtureWith('grit-between-stones');
         const { after } = play(before, false);
         expect(after.barrier ?? 0).toBe((before.barrier ?? 0) + 2);
-        expect(enemyEffect(after, 'debuff_nettle_sting')).toBeUndefined();
+        expect(enemyEffect(after, 'fixture_nettle')).toBeUndefined();
     });
 });
 
@@ -358,12 +364,12 @@ describe('the-unmoved-mover (WS4.2) — the combat-ledger state predicate', () =
     it('PAID while UNMOVED (ledger 0): Barrier lands AND the rider fires — THORNS i2 self + Guard 4', () => {
         const before = fixtureWith('the-unmoved-mover');
         expect(before.enemyDamageLastRound ?? 0).toBe(0); // fresh encounter — no prior hit
-        expect(playerEffect(before, 'buff_thorns')).toBeUndefined();
+        expect(playerEffect(before, 'fixture_thorns')).toBeUndefined();
 
         const { after, events } = play(before, true);
 
         expect(after.barrier).toBeGreaterThan(before.barrier ?? 0);
-        const thorns = playerEffect(after, 'buff_thorns');
+        const thorns = playerEffect(after, 'fixture_thorns');
         expect(thorns, 'UNMOVED rider must lay THORNS on the player').toBeDefined();
         expect(thorns!.intensity).toBe(2);
         // riderGuard is unscaled real units: exactly +4 over the FREE-less play.
@@ -380,7 +386,7 @@ describe('the-unmoved-mover (WS4.2) — the combat-ledger state predicate', () =
         const { after, events } = play(before, true);
 
         expect(after.barrier).toBeGreaterThan(before.barrier ?? 0);
-        expect(playerEffect(after, 'buff_thorns')).toBeUndefined();
+        expect(playerEffect(after, 'fixture_thorns')).toBeUndefined();
         expect(after.guard).toBe(before.guard ?? 0);
         expect(events.find(
             e => e.kind === 'die-bonus-fired' && e.riderText.startsWith('UNMOVED'),
@@ -391,7 +397,7 @@ describe('the-unmoved-mover (WS4.2) — the combat-ledger state predicate', () =
         const before = fixtureWith('the-unmoved-mover');
         const { after } = play(before, false);
         expect(after.barrier ?? 0).toBe((before.barrier ?? 0) + 2);
-        expect(playerEffect(after, 'buff_thorns')).toBeUndefined();
+        expect(playerEffect(after, 'fixture_thorns')).toBeUndefined();
     });
 });
 

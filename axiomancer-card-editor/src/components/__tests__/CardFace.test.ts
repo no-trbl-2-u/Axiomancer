@@ -38,29 +38,42 @@ describe('projectFace — specialMechanics[0] keyword projection', () => {
         expect(face.paidVal).toBe(12);
     });
 
-    it('projects RECOIL (paid) to the recoil keyword with its hp cost', () => {
-        const face = projectFace(cardWith([{ kind: 'recoil', hp: 6 }]));
-        expect(face.paidKw).toBe('recoil');
-        expect(face.paidVal).toBe(6);
+    it('projects the audit-retired kinds (RECOIL, RECOIL_X, IMMOLATE, PURGE_SELF) to the generic control glyph', () => {
+        // The keyword audit (2026-09-27, after the card purge) removed the
+        // recoil / immolate / purge display rows with the cards that printed
+        // them. The kinds stay in the engine union, so they must still project
+        // to a live keyword rather than an id the vocabulary no longer has.
+        const kinds = [
+            { kind: 'recoil', hp: 6 },
+            { kind: 'recoil_x', min: 4, poisonPerX: 2 },
+            { kind: 'immolate', count: 2, rider: {} },
+            { kind: 'purge_self' },
+        ] as ReturnType<typeof blankCard>['specialMechanics'];
+        for (const sm of kinds) {
+            const face = projectFace(cardWith([sm]));
+            expect(face.paidKw, sm.kind).toBe('control');
+            expect(face.paidVal, sm.kind).toBe(0);
+        }
     });
 
-    it('projects RECOIL_X to the recoil keyword with its min cost', () => {
-        const face = projectFace(cardWith([{ kind: 'recoil_x', min: 4, poisonPerX: 2 }]));
-        expect(face.paidKw).toBe('recoil');
-        expect(face.paidVal).toBe(4);
+    it('projects BARRIER to the guard keyword (BARRIER merged into GUARD)', () => {
+        const face = projectFace(cardWith([{ kind: 'barrier', amount: 7 }]));
+        expect(face.paidKw).toBe('guard');
+        expect(face.paidVal).toBe(7);
     });
 
-    it('projects IMMOLATE to the immolate keyword with its card count', () => {
-        const face = projectFace(
-            cardWith([{ kind: 'immolate', count: 2, rider: {} }]),
-        );
-        expect(face.paidKw).toBe('immolate');
-        expect(face.paidVal).toBe(2);
-    });
-
-    it('projects PURGE_SELF to the purge keyword', () => {
-        const face = projectFace(cardWith([{ kind: 'purge_self' }]));
-        expect(face.paidKw).toBe('purge');
+    it("projects A Plain Word's VULNERABLE (paid and free) to the vulnerable keyword", () => {
+        // S3 (D43): debuff_vulnerable is a `stat` debuff, which used to read as
+        // soft CONTROL on the editor face.
+        const face = projectFace({
+            ...cardWith([]),
+            combatEffects: [{ effectId: 'debuff_vulnerable', appliedTo: 'opponent', intensity: 25, duration: 2 }],
+            free: { applyEffect: { effectId: 'debuff_vulnerable', intensity: 10, duration: 1 } },
+        });
+        expect(face.paidKw).toBe('vulnerable');
+        expect(face.paidVal).toBe(25);
+        expect(face.freeKw).toBe('vulnerable');
+        expect(face.freeVal).toBe(10);
     });
 
     it('still falls through to the generic control glyph for the documented residual kinds (rider)', () => {

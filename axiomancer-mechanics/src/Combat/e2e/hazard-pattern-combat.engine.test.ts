@@ -44,6 +44,12 @@ import type { CombatDieColor, CombatEncounterState, CombatEvent, CombatTransitio
 import type { ActiveEffect, Effect } from '../../Effects/types';
 import { effectsLibrary } from '../../Effects/effects.library';
 import { lookupEffect, applyEffect } from '../../Effects';
+import { registerFixtureEffects } from '../../test-utils/fixture-effects';
+
+// The keyword audit (2026-09-27) deleted buff_thorns / debuff_backfire /
+// the round-clock DoT species from the library; their engine channels are
+// exercised through the `fixture_*` effects instead.
+registerFixtureEffects();
 
 afterEach(() => {
     vi.restoreAllMocks();
@@ -55,8 +61,9 @@ afterEach(() => {
 // The "damage class" fixture is a bare RUPTURE payoff (affliction-gated burst).
 // Profane Canon (2026-08-08): the round-clock DoT lost its library carrier
 // (nettle-cloak retired; poison/bleed ride EVENT clocks), so the round-boundary
-// witness is a SYNTHETIC carrier of the still-live `debuff_nettle_sting`
-// effect (carrier-less-verb policy: engine behavior stays under test).
+// witness is a SYNTHETIC carrier of the round-end DoT fixture (`fixture_nettle`,
+// the old nettle sting — deleted from the library in the keyword audit,
+// 2026-09-27; carrier-less-verb policy: engine behavior stays under test).
 registerSandboxCards([{
     id: 'qa-payoff-burst',
     name: 'QA Payoff Burst (test fixture)',
@@ -76,7 +83,7 @@ registerSandboxCards([{
     rank: 1,
     cardType: 'spell',
     targetType: 'enemy',
-    combatEffects: [{ effectId: 'debuff_nettle_sting', appliedTo: 'opponent', intensity: 1, duration: 2 }],
+    combatEffects: [{ effectId: 'fixture_nettle', appliedTo: 'opponent', intensity: 1, duration: 2 }],
 }, {
     // The card purge (P1, 2026-09-27): spoiled-poultice is gone and the grey
     // office is colourless with no DoT, so this SYNTHETIC mirror of its exact
@@ -319,7 +326,7 @@ describe('Spec 25 §4.5 — between-phases processing', () => {
         const played = playWithDie(state, NETTLE);
         expect(fizzled(played.events!)).toBe(false);
         state = played.state;
-        const dotBefore = state.enemy.effects.find(e => e.effectId === 'debuff_nettle_sting');
+        const dotBefore = state.enemy.effects.find(e => e.effectId === 'fixture_nettle');
         expect(dotBefore).toBeDefined();
         const hpBefore = state.enemy.health;
         const durBefore = dotBefore!.remainingDuration;
@@ -328,7 +335,7 @@ describe('Spec 25 §4.5 — between-phases processing', () => {
         const after = bp.state;
         expect(after.enemy.health).toBeLessThan(hpBefore);
         expect(bp.events.some(e => e.kind === 'dot-tick' && e.target === 'enemy')).toBe(true);
-        const dotAfter = after.enemy.effects.find(e => e.effectId === 'debuff_nettle_sting');
+        const dotAfter = after.enemy.effects.find(e => e.effectId === 'fixture_nettle');
         if (dotAfter) expect(dotAfter.remainingDuration).toBeLessThan(durBefore);
         expect(after.hand.length).toBe(COMBAT_HAND_SIZE);
         // A new phase clears the tray so the next turn rolls fresh.

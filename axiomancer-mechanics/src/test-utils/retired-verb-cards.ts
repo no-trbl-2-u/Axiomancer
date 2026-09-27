@@ -14,7 +14,13 @@
  * `CardTheme`; nothing else about them was touched.
  *
  * Provenance: `src/Cards/cards.sandbox-sets.ts` @ a69eab56 (WS4 theme roles,
- * WS5.2 sequencing microset, WS6.2 cross-theme bridges).
+ * WS6.2 cross-theme bridges). The WS5.2 sequencing microset had no remaining
+ * importer and was deleted in the keyword audit (2026-09-27).
+ *
+ * The keyword audit also deleted `debuff_kindling_ember`, `debuff_nettle_sting`
+ * and `buff_thorns` from the effects library; the fixtures that applied them
+ * now name the `fixture_*` effects in `./fixture-effects.ts`, which a test must
+ * register (`registerFixtureEffects`) alongside these cards.
  */
 
 import { registerSandboxCards } from '../Cards/cards.sandbox';
@@ -41,14 +47,14 @@ const slagRunoff: Card = {
         'them.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'self',
-    // pts: PAID grant_pip 2 (2 × 1.5 = 3.0) + overflow→ember (kindling_ember
+    // pts: PAID grant_pip 2 (2 × 1.5 = 3.0) + overflow→ember (fixture_ember, the old kindling_ember
     // i1 d3 printed 3 → phase-36b tempo-weighted 2.31 ÷ 3 = 0.77 per overflowed
     // pip × expectedOverflowPips 1 = 0.77) + FREE pips 1 (1.5) = 5.27 → common
     // band 1.5-7.5 (Tooth). FREE share 1.5/5.27 = 28.5% ✓ the 25-35% window.
     free: { pips: 1 },
     specialMechanics: [{
         kind: 'grant_pip', count: 2,
-        overflow: { applyEffect: { effectId: 'debuff_kindling_ember' } },
+        overflow: { applyEffect: { effectId: 'fixture_ember' } },
     }],
     addedIn: '2026-07-11',
     tags: ['forge', 'dice', 'ember'],
@@ -121,7 +127,7 @@ const gritBetweenStones: Card = {
     // = 1.33) + FREE barrier 2 (0.67) = 6.58 → uncommon band 4.5-13 (Rib).
     free: { barrier: 2 },
     combatEffects: [
-        { effectId: 'debuff_nettle_sting', appliedTo: 'opponent', intensity: 2, duration: 3 },
+        { effectId: 'fixture_nettle', appliedTo: 'opponent', intensity: 2, duration: 3 },
     ],
     specialMechanics: [
         { kind: 'guard', amount: 6 },
@@ -159,7 +165,7 @@ const theUnmovedMover: Card = {
     synergy: {
         statePredicate: { kind: 'enemy-dealt-no-damage-last-round' },
         rider: {
-            applyEffect: { effectId: 'buff_thorns', intensity: 2, duration: 2, to: 'self' },
+            applyEffect: { effectId: 'fixture_thorns', intensity: 2, duration: 2, to: 'self' },
             guard: 4,
         },
     },
@@ -290,222 +296,6 @@ const seedcornSacrifice: Card = {
     }],
     addedIn: '2026-07-11',
     tags: ['harvest', 'dot'],
-};
-
-// ── WS5.2 — the sequencing-grammar microset (`sequencing-microset`) ──────────
-// Six condition cards that read the turn's SHAPE through the extended
-// CardSynergy state-predicate gate (the ONE conditional gate, WS4.2): two
-// "early" (OPENING — at most N prior spells this turn), two "late" (the
-// closing play — ≤ 2 cards left in hand after this), two "after-cost" (a
-// blood price already on the ledger / the enemy drew blood since your last
-// turn). Every condition prices at the threshold ×0.5 discount. OPENING is
-// the microset's ONE shared face term — card-local per the card-keyword
-// doctrine, registered nowhere until it earns ~3 proven cards. The set stays
-// sandbox for the whole prototype: promotion is gated on the WS5.3
-// falsifiable test AND the WS5.4 draft-appeal evidence (post-Phase-26).
-
-/**
- * Captatio Benevolentiae — peroration Tooth, the OPENING witness: the
- * classical opening bid for goodwill. Worth a Premise and a modest Guard any
- * time; worth double when it actually OPENS (first spell of the turn).
- */
-const captatioBenevolentiae: Card = {
-    id: 'captatio-benevolentiae',
-    theme: 'trial',
-    name: 'Captatio Benevolentiae',
-    color: 'heart',
-    description:
-        'Win the room before the argument starts. Spoken first, the courtesy '
-        + 'is a foundation; spoken third, it is only a pleasantry.',
-    tier: 1, rank: 2, cardType: 'spell',
-    targetType: 'self',
-    // pts: PAID [guard 5 (1.25) + CHARGE 1 (0.8)] = 2.05 + OPENING rider
-    // [guard 5 (1.25) + premise 1 (0.8)] × threshold 0.5 = 1.025 + FREE
-    // [premise 1 (0.8) + guard 1 (0.25)] = 1.05 → 4.125 → common band
-    // 1.5-7.5 (Tooth). FREE share 1.05/4.125 = 25.5% ✓ window.
-    free: { premises: 1, guard: 1 },
-    specialMechanics: [
-        { kind: 'guard', amount: 5 },
-        { kind: 'premise', count: 1 },
-    ],
-    synergy: {
-        statePredicate: { kind: 'opening', maxPriorSpells: 0 },
-        rider: { guard: 5, premises: 1 },
-    },
-    addedIn: '2026-07-11',
-    tags: ['peroration', 'sequencing', 'condition'],
-};
-
-/**
- * In Medias Res — peroration Splinter, the looser OPENING (first OR second
- * spell): start inside the action and the poison you open with runs deeper
- * (+1 intensity on this play's statuses) while the thread pulls a card.
- */
-const inMediasRes: Card = {
-    id: 'in-medias-res',
-    theme: 'trial',
-    name: 'In Medias Res',
-    color: 'mind',
-    description:
-        'Skip the preamble — begin where the wound already is. An argument '
-        + 'entered early runs deeper than one arrived at politely.',
-    tier: 1, rank: 3, cardType: 'spell',
-    targetType: 'enemy',
-    // pts: PAID [poison i1 d2 (spec 33 D4 1.83 cadence: tempo-weighted 6.4 ÷ 3
-    // = 2.14) + CHARGE 1 (0.8)] = 2.94 + OPENING(≤1) rider [bonusIntensity 1
-    // (1.5) + draw (2.0)] × threshold 0.5 = 1.75 + FREE [premises 2 (1.6) +
-    // guard 1 (0.25)] = 1.85 → 6.54 → uncommon band 4.5-13 (Splinter). FREE
-    // share 1.85/6.54 = 28.3% ✓ window.
-    free: { premises: 2, guard: 1 },
-    combatEffects: [
-        { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 2 },
-    ],
-    specialMechanics: [{ kind: 'premise', count: 1 }],
-    synergy: {
-        statePredicate: { kind: 'opening', maxPriorSpells: 1 },
-        rider: { bonusIntensity: 1, drawCards: 1 },
-    },
-    addedIn: '2026-07-11',
-    tags: ['peroration', 'sequencing', 'condition', 'dot'],
-};
-
-/**
- * Coda — echo Splinter, the finale REPRISE: when the verse runs out (≤ 2 cards
- * left behind), the refrain returns and the hand refills. The reprise itself
- * pulls a spent card back, so the coda writes the next movement.
- */
-const coda: Card = {
-    id: 'coda',
-    theme: 'grave',
-    name: 'Coda',
-    color: 'mind',
-    description:
-        'The piece is not over when the notes run out — the ending is where '
-        + 'the theme comes back to collect. Save it for the empty bars.',
-    tier: 2, rank: 3, cardType: 'spell',
-    targetType: 'enemy',
-    // pts: PAID [REPRISE 1 (2.0) + mark i1 d2 (1.5)] = 3.5 + closing-play
-    // rider [draw 2 (4.0)] × threshold 0.5 = 2.0 + FREE [mark i1 d2 (1.5) +
-    // conviction 1 (1.0)] = 2.5 → 8.0 → uncommon band 4.5-13 (Splinter).
-    // FREE share 2.5/8.0 = 31.3% ✓ window.
-    free: { applyEffect: { effectId: 'debuff_mark', duration: 2 }, conviction: 1 },
-    combatEffects: [
-        { effectId: 'debuff_mark', appliedTo: 'opponent', intensity: 1, duration: 2 },
-    ],
-    specialMechanics: [{ kind: 'reprise', count: 1 }],
-    synergy: {
-        statePredicate: { kind: 'finale', cardsLeftAtMost: 2 },
-        rider: { drawCards: 2 },
-    },
-    addedIn: '2026-07-11',
-    tags: ['echo', 'sequencing', 'condition'],
-};
-
-/**
- * Dying Echo — echo Tooth, the finale DoT: a small poison that rings loudest
- * as the last note (played with ≤ 2 cards left behind it lands +2 intensity,
- * +1 turn). Early it is a whisper the card-played clock multiplies; late it
- * is the note that hangs after the music stops.
- */
-const dyingEcho: Card = {
-    id: 'dying-echo',
-    theme: 'grave',
-    name: 'Dying Echo',
-    color: 'mind',
-    description:
-        'Every hall answers the last word longest. Say it when nothing '
-        + 'follows, and it never quite stops being said.',
-    tier: 1, rank: 2, cardType: 'spell',
-    targetType: 'enemy',
-    // pts: PAID poison i1 d2 (spec 33 D4 1.83 cadence: tempo-weighted 6.4 ÷ 3
-    // = 2.14) + closing-play rider [bonusIntensity 2 (3.0) + bonusDuration 1
-    // (1.0)] × threshold 0.5 = 2.0 + FREE [mark i1 d1 (0.75) + conviction 1
-    // (1.0)] = 1.75 → 5.89 → common band 1.5-7.5 (Tooth). FREE share
-    // 1.75/5.89 = 29.7% ✓ window.
-    free: { applyEffect: { effectId: 'debuff_mark', duration: 1 }, conviction: 1 },
-    combatEffects: [
-        { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 2 },
-    ],
-    synergy: {
-        statePredicate: { kind: 'finale', cardsLeftAtMost: 2 },
-        rider: { bonusIntensity: 2, bonusDuration: 1 },
-    },
-    addedIn: '2026-07-11',
-    tags: ['echo', 'sequencing', 'condition', 'dot'],
-};
-
-/**
- * Wages of Weakness — akrasia Splinter, the Frenzy after RECOIL: a bleed and a
- * mark any time, but if a blood price is already on this turn's ledger
- * (`recoilPaidThisTurn > 0` — a PRIOR play paid it; this card pays none), the
- * spilled blood answers: a second bleed and 3 HP back.
- */
-const wagesOfWeakness: Card = {
-    id: 'wages-of-weakness',
-    theme: 'debt',
-    name: 'Wages of Weakness',
-    color: 'body',
-    description:
-        'You have already bled for this argument — so collect. Every drop '
-        + 'you paid earlier comes back with interest, and the interest cuts.',
-    tier: 2, rank: 3, cardType: 'spell',
-    targetType: 'enemy',
-    // pts: PAID [bleed i2 d2 (9 HP ÷ 3 = 3.0) + mark i1 d2 (1.5)] = 4.5 +
-    // blood-paid rider [bleed i2 d2 (3.0) + heal 3 (1.0)] × threshold 0.5 =
-    // 2.0 + FREE [mark i1 d2 (1.5) + heal 3 (1.0)] = 2.5 → 9.0 → uncommon
-    // band 4.5-13 (Splinter). FREE share 2.5/9.0 = 27.8% ✓ window.
-    free: { applyEffect: { effectId: 'debuff_mark', duration: 2 }, healHp: 3 },
-    combatEffects: [
-        { effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 2 },
-        { effectId: 'debuff_mark', appliedTo: 'opponent', intensity: 1, duration: 2 },
-    ],
-    synergy: {
-        statePredicate: { kind: 'recoil-paid-this-turn' },
-        rider: {
-            applyEffect: { effectId: 'debuff_bleed', intensity: 2, duration: 2 },
-            healHp: 3,
-        },
-    },
-    addedIn: '2026-07-11',
-    tags: ['akrasia', 'sequencing', 'condition', 'dot'],
-};
-
-/**
- * Answered in Kind — akrasia Tooth, the Frenzy after the enemy's hit: a short
- * heavy bleed any time; if the enemy drew blood since your last turn
- * (`enemyDamageLastRound > 0` — threats land between player turns), the
- * answer marks them deep (MARK ×2) and closes 2 HP of the wound.
- */
-const answeredInKind: Card = {
-    id: 'answered-in-kind',
-    theme: 'debt',
-    name: 'Answered in Kind',
-    color: 'heart',
-    description:
-        'They opened the wound; you only widened the custom. What was taken '
-        + 'in blood is returned in blood, at the prevailing rate.',
-    tier: 1, rank: 2, cardType: 'spell',
-    targetType: 'enemy',
-    // pts (post-Phase-30 merge re-pin 2026-07-12 — FREE deposits akrasia's
-    // currency, a self-MARK seed toward FALLEN, replacing conviction, which
-    // is a system token not a registry keyword; heal 2 stays as the weak-
-    // deposit utility kicker): PAID bleed i2 d1 (9 HP ÷ 3 = 3.0) +
-    // drew-blood rider [mark i2 d2 (3.0) + heal 2 (0.67)] × threshold 0.5 =
-    // 1.83 + FREE [self-mark i1 d1 (0.75) + heal 2 (0.67)] = 1.42 → 6.25 →
-    // common band 1.5-7.5 (Tooth). FREE share 1.42/6.25 = 22.7%.
-    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1, to: 'self' }, healHp: 2 },
-    combatEffects: [
-        { effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 1 },
-    ],
-    synergy: {
-        statePredicate: { kind: 'enemy-drew-blood' },
-        rider: {
-            applyEffect: { effectId: 'debuff_mark', intensity: 2, duration: 2 },
-            healHp: 2,
-        },
-    },
-    addedIn: '2026-07-11',
-    tags: ['akrasia', 'sequencing', 'condition'],
 };
 
 // ── WS6.2 — cross-theme bridge rewards (`bridge-rewards`) ────────────────────
@@ -735,10 +525,6 @@ export const ROLES_FORGE_CARDS: readonly Card[] = [slagRunoff, ingotOfRuin];
 export const ROLES_BULWARK_CARDS: readonly Card[] = [gritBetweenStones, theUnmovedMover];
 export const ROLES_CHARM_CARDS: readonly Card[] = [aSweeterPoison];
 export const ROLES_HARVEST_CARDS: readonly Card[] = [theLongLedger, seedcornSacrifice];
-export const SEQUENCING_MICROSET_CARDS: readonly Card[] = [
-    captatioBenevolentiae, inMediasRes, coda,
-    dyingEcho, wagesOfWeakness, answeredInKind,
-];
 export const BRIDGE_REWARD_CARDS: readonly Card[] = [
     barbedCompliment, thePouredRampart, interestOnTheFlesh,
     enteredIntoEvidence, stolenCadence, unbrokenCountenance,

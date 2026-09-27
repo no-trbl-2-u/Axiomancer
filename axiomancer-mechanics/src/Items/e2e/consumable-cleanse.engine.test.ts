@@ -35,16 +35,16 @@ describe('CLEANSE consumables strip debuffs (buff_cleanse payload.cleanse wiring
     it('antidote purges tier 1 + tier 2 debuffs and leaves buffs alone', () => {
         const player = afflictedPlayer([
             ae('debuff_poison', 2),           // tier 2 debuff — cleansed
-            ae('debuff_kindling_ember', 1),   // tier 1 debuff — cleansed
-            ae('buff_thorns', 1),             // buff — survives
+            ae('debuff_mark', 1),             // tier 1 debuff — cleansed
+            ae('buff_stoic_resolve', 1),      // buff — survives
         ]);
         const antidote = getConsumableById('antidote')!;
         const { player: after, applied } = useConsumableEffect(player, antidote, 1, lookupEffect);
 
         const ids = after.effects.map(e => e.effectId);
         expect(ids).not.toContain('debuff_poison');
-        expect(ids).not.toContain('debuff_kindling_ember');
-        expect(ids).toContain('buff_thorns');        // a buff is never cleansed
+        expect(ids).not.toContain('debuff_mark');
+        expect(ids).toContain('buff_stoic_resolve');        // a buff is never cleansed
         // The cleanse instant is NOT itself added as a lingering effect.
         expect(ids).not.toContain('buff_cleanse');
         expect(applied?.id).toBe('buff_cleanse');
@@ -59,17 +59,17 @@ describe('CLEANSE consumables strip debuffs (buff_cleanse payload.cleanse wiring
 
     it('clarity-serum (tier-1 minor cleanse) strips a tier-1 debuff but leaves a tier-2 debuff and buffs alone', () => {
         const player = afflictedPlayer([
-            ae('debuff_kindling_ember', 1),   // tier 1 debuff — cleansed
+            ae('debuff_mark', 1),             // tier 1 debuff — cleansed
             ae('debuff_poison', 2),           // tier 2 debuff — survives a tier-1 cleanse
-            ae('buff_thorns', 1),             // buff — survives
+            ae('buff_stoic_resolve', 1),      // buff — survives
         ]);
         const serum = getConsumableById('clarity-serum')!;
         const { player: after, applied } = useConsumableEffect(player, serum, 1, lookupEffect);
 
         const ids = after.effects.map(e => e.effectId);
-        expect(ids).not.toContain('debuff_kindling_ember');
+        expect(ids).not.toContain('debuff_mark');
         expect(ids).toContain('debuff_poison');
-        expect(ids).toContain('buff_thorns');
+        expect(ids).toContain('buff_stoic_resolve');
         expect(ids).not.toContain('buff_cleanse_minor');
         expect(applied?.id).toBe('buff_cleanse_minor');
     });

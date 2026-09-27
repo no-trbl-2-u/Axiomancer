@@ -38,6 +38,12 @@ import {
     getDistinctDebuffCount, getDistinctControlCount,
 } from '../effects';
 import { getActiveDotTotal, getActiveDotAmplifications, getTickAmplifyFlat } from '../effect-modifiers';
+import { registerFixtureEffects } from '../../test-utils/fixture-effects';
+
+// The keyword audit (2026-09-27) deleted buff_thorns / debuff_backfire /
+// the round-clock DoT species from the library; their engine channels are
+// exercised through the `fixture_*` effects instead.
+registerFixtureEffects();
 
 // v3 debuff base values:
 //   debuff_poison 2/round (start, ramps +floor(0.5×turnsActive) when a round is
@@ -147,12 +153,12 @@ describe('getPendingDotTotal / consumeDotEffects (RUPTURE fuel)', () => {
     it('consumeAfflictions strips EVERY debuff and counts non-DoT stacks (v3 RUPTURE)', () => {
         const c = combatant([
             ae('debuff_poison', 2), ae('debuff_mark', 3), ae('debuff_quarter', 1),
-            ae('buff_thorns', 2),
+            ae('fixture_thorns', 2),
         ]);
         const { combatant: stripped, consumed, nonDotStacks } = consumeAfflictions(c);
         expect(consumed.sort()).toEqual(['debuff_mark', 'debuff_poison', 'debuff_quarter']);
         expect(nonDotStacks).toBe(4); // mark 3 + rapport 1 (poison is DoT)
-        expect(stripped.effects.map(e => e.effectId)).toEqual(['buff_thorns']);
+        expect(stripped.effects.map(e => e.effectId)).toEqual(['fixture_thorns']);
     });
 
     it('consumeMarks removes only MARK-class stacks (the conclusion fuel)', () => {
@@ -169,7 +175,7 @@ describe('getDistinctDebuffCount (FALLEN / variety payoffs)', () => {
             ae('debuff_poison', 1), ae('debuff_poison', 2), ae('debuff_bleed', 1), ae('debuff_mark', 1),
         ]))).toBe(3);
         // buffs do not count toward debuff variety.
-        expect(getDistinctDebuffCount(combatant([ae('buff_thorns', 1)]))).toBe(0);
+        expect(getDistinctDebuffCount(combatant([ae('fixture_thorns', 1)]))).toBe(0);
     });
 });
 

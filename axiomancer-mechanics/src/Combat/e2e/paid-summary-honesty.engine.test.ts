@@ -27,28 +27,17 @@ import { paidText } from '../combat.cards';
 /** The spec 32 §3 keyword registry (mirrors the mobile KEYWORD_GLOSS keys)
  *  plus the structural words a paid sentence may legitimately print in caps. */
 const KNOWN_UPPER = new Set([
-    // registry keywords
-    'DRAW', 'FORGE', 'GUARD', 'TICK', 'MARK', 'CLEANSE', 'HEAL', 'RUPTURE',
-    'SIPHON', 'PROLONG', 'CURDLE', 'POISON', 'BLEED', 'DOOM', 'CHARGE',
-    'CHARGES', 'KINDLE', 'PIP', 'PIPS', 'RECOIL', 'FALLEN', 'STAGGER',
-    'BACKFIRE', 'FORETELL', 'OMEN', 'SOUL', 'SOULS', 'REAP', 'PLEA',
-    'QUARTER', 'THORNS', 'RIPOSTE', 'ECHO', 'RECALL', 'MILL',
-    // profane canon (2026-08-08) — the rework's new vocabulary
-    'REPLAY', 'REQUIEM', 'FESTER', 'IMMOLATE', 'PURGE',
-    // THE BIG NUMBERS REWRITE (2026-09-02) — direct damage and its family,
-    // plus the turn-shape conditions promoted to face terms.
-    'DEAL', 'PIERCE', 'WRATH', 'FLAY', 'TWIN', 'CHAIN', 'EXECUTE', 'OVERKILL',
-    'AMBUSH', 'FLOW', 'FINALE', 'BARRIER', 'TOLL',
+    // registry keywords — cut to the live registry by the keyword audit
+    // (2026-09-27, after the card purge), with the stale CURDLE / OPENING /
+    // PIPS / SOULS / CHARGES / TOLL forms that no longer print anywhere.
+    'DRAW', 'GUARD', 'MARK', 'CLEANSE', 'HEAL', 'POISON', 'BLEED', 'DOOM',
+    'PIP', 'STAGGER', 'FORETELL', 'PLEA', 'QUARTER', 'RIPOSTE',
+    // THE BIG NUMBERS REWRITE (2026-09-02) — direct damage and its family.
+    'DEAL', 'PIERCE', 'WRATH', 'CHAIN', 'BARRIER',
     // S3 (D43) — VULNERABLE, rebuilt for the grey office's A Plain Word.
     'VULNERABLE',
-    // `/adjust-keywords` pass 11 — EVENTIDE, the Chaos-family parity drill.
-    'EVENTIDE',
-    // `/adjust-keywords` pass 12 — UNMOVED, backfilled gloss for the
-    // long-live `enemy-dealt-no-damage-last-round` predicate.
-    'UNMOVED',
     // structural / system words the faces already print in caps
-    'FREE', 'ALL', 'WILD', 'VITAE', 'CONDEMN', 'SENTENCE', 'OPENING',
-    'DOT', 'DOTS', 'HP',
+    'FREE', 'ALL', 'WILD', 'VITAE', 'DOT', 'DOTS', 'HP',
 ]);
 
 const summaried = cardLibrary.filter(c => c.paidSummary !== undefined);

@@ -67,67 +67,24 @@ export const GLYPH_COLORS: Record<StatusGlyphKind, string> = {
  * listed falls back to its category glyph via `kindGlyph`.
  */
 const EFFECT_GLYPHS: Record<string, string> = {
+    // The keyword audit (2026-09-27, after the card purge) cut this table to
+    // the ids the effects library still defines; the ~40 legacy rows (burn,
+    // stun, frostbite, ...) and the purged-card species (kindling_ember,
+    // nettle_sting, backfire, buff_thorns) pointed at nothing.
     // ── DoT ──
     debuff_poison: '☠',
-    debuff_strong_poison: '☣',
     debuff_bleed: '🩸',
     debuff_creeping_doom: '🕸',
-    // 2026-07-12 (card-wording audit) — the two live DoT species both fell
-    // through to the shared 🔥 and were indistinguishable on the board: EMBER
-    // keeps the curated flame, NETTLE gets its own leaf.
-    debuff_kindling_ember: '🔥',
-    debuff_nettle_sting: '🌿',
-    debuff_burn: '🔥',
-    debuff_frostbite: '❄',
-    debuff_shock: '⚡',
-    debuff_disease: '🦠',
-    debuff_hex: '🕯',
-    debuff_hp_decay: '⌛',
-    debuff_tartarus_rot: '🦴',
-    debuff_basilisk_venom: '🐍',
-    debuff_acid: '🧪',
     // ── Control ──
-    debuff_stun: '💫',
-    debuff_sleep: '💤',
     debuff_petrify: '🗿',
-    debuff_fear: '👁',
-    debuff_charm: '💗',
-    debuff_confusion: '🌀',
-    debuff_blind: '🌑',
-    debuff_silence: '🤐',
-    debuff_slow: '🐌',
-    debuff_root: '⚓',
-    debuff_knockdown: '⬇',
-    debuff_moral_learning: '⚖',
-    debuff_transformative: '🔄',
-    debuff_causal_emergence: '🌋',
-    debuff_category_error: '⁇',
-    debuff_lethe_fog: '🌫',
-    debuff_gorgon_gaze: '🐍',
-    debuff_minotaur_maze: '🌀',
-    buff_taunt: '🎯',
     // ── Stat-down / marks ──
-    // 2026-07-12 (card-wording audit) — the three CORE keyword afflictions
-    // (Mark / Backfire / Quarter ARE the keyword system) had no curated glyph
-    // and rendered generic category icons while ~40 curated rows below point
-    // at legacy ids that no longer exist in the live library.
     debuff_mark: '◉',
-    debuff_backfire: '⟲',
     debuff_quarter: '☙',
-    tier1_mind_mark: '◎',
-    debuff_all_stats_down: '▽',
+    // S3 (D43) — A Plain Word's affliction: the foe's guard is open.
+    debuff_vulnerable: '▼',
     debuff_curse: '🧿',
-    debuff_wound: '🩹',
-    debuff_berserk: '💢',
-    debuff_exhaustion: '😮‍💨',
-    debuff_vulnerability_body: '🛡',
-    debuff_vulnerability_mind: '🧠',
-    debuff_vulnerability_heart: '❣',
-    debuff_dispel: '✖',
-    // ── Regen / drain / thorns / advantage (buffs) ──
+    // ── Regen / advantage (buffs) ──
     buff_regeneration: '✚',
-    buff_barrier: '🛡',
-    buff_thorns: '✸',
     buff_critical_rate_up: '✷',
     buff_all_stats_up: '⬆',
 };

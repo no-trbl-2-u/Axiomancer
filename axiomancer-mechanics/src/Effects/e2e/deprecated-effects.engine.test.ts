@@ -44,19 +44,18 @@ import { flattenAuthoredSteps } from '../../Combat/combat.threat';
 // debuff_creeping_doom is the WS3.4 Doom species (grows per enemy action, no
 // calendar — ratified as card-local, NOT keyword #31); its only card lives in
 // the 'doom-species' sandbox set until promotion.
+//
+// THE KEYWORD AUDIT (2026-09-27, after the card purge): debuff_backfire,
+// buff_thorns and the two card-local species (kindling_ember, nettle_sting)
+// were deleted with the cards that carried them — see RETIRED_CARD_VOCABULARY.
 const CARD_EFFECT_SET = new Set([
     'debuff_poison',
     'debuff_bleed',
     'debuff_mark',
-    'debuff_backfire',
     'debuff_quarter',
-    'buff_thorns',
     // S3 (D43, T's guided session 2026-09-27): VULNERABLE rebuilt for the
     // grey office's A Plain Word — revived from the stat-down zoo below.
     'debuff_vulnerable',
-    // card-local species (card-keyword doctrine, 2026-07-10):
-    'debuff_kindling_ember',
-    'debuff_nettle_sting',
     'debuff_creeping_doom',
 ]);
 
@@ -67,6 +66,11 @@ const CARD_EFFECT_SET = new Set([
  * (items and the Cards system still resolve them); cards may not touch them.
  */
 const RETIRED_CARD_VOCABULARY = [
+    // THE KEYWORD AUDIT (2026-09-27, after the card purge) — deleted from the
+    // library JSONs with the cards that carried them. `buff_grace_momentum`
+    // was support-tagged (engine-granted by a purged choir card).
+    'debuff_backfire', 'buff_thorns', 'debuff_kindling_ember',
+    'debuff_nettle_sting', 'buff_grace_momentum',
     // WS10.1 / Phase 29 KW-1 (2026-07-11) — keyword-less themed clones, folded
     // into POISON / MARK / BACKFIRE and DELETED from the library JSONs.
     // Ids die; they are never renamed and never resurrected.
@@ -147,7 +151,7 @@ function effectIdsReferencedBy(card: Card): string[] {
 }
 
 describe('effect deprecation contract (spec 32 v3 §3) — the ban list', () => {
-    it('the six-keyword card set is live in the library and carries the v3 tag', () => {
+    it('the card effect set is live in the library and carries the v3 tag', () => {
         for (const id of CARD_EFFECT_SET) {
             const def = lookupEffect(id);
             expect(def, `${id} must exist in the effects library`).toBeDefined();

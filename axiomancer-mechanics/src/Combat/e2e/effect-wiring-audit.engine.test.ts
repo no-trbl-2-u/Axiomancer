@@ -25,6 +25,12 @@ import {
     initializeCombatEncounter, rollEncounterDice, resolveThreatPhase,
 } from '../combat.engine';
 import type { CombatEvent } from '../combat.encounter.types';
+import { registerFixtureEffects } from '../../test-utils/fixture-effects';
+
+// The keyword audit (2026-09-27) deleted buff_thorns / debuff_backfire /
+// the round-clock DoT species from the library; their engine channels are
+// exercised through the `fixture_*` effects instead.
+registerFixtureEffects();
 
 afterEach(() => { vi.restoreAllMocks(); });
 
@@ -92,7 +98,7 @@ describe('BACKFIRE — a lethal drip cancels the enemy swing this phase', () => 
         mockSequentialRng(0.05);
         // 1-HP enemy carrying backfire; one rung staggered (not fully denied) so
         // it WOULD act — but the 1-HP backfire drip kills it before the swing.
-        const enemy = makeEnemy(1, 'mind', [ae('debuff_backfire', 1, 2)]);
+        const enemy = makeEnemy(1, 'mind', [ae('fixture_backfire', 1, 2)]);
         const base = initializeCombatEncounter(makePlayer(), enemy, undefined, 7);
         const state = { ...rollEncounterDice(base).state, staggerRungs: 1 };
         const res = resolveThreatPhase(state);

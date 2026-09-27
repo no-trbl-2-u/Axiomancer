@@ -274,10 +274,12 @@ function freeRail(card: CombatCard, sourceCard?: Card): { freeKeyword: string | 
 // FREE-effect glyph — the hero mark for the dieless play. Affliction riders use
 // their effect's board glyph; currency riders (guard/draw/premise…) map to a
 // terse rune. '' when the card has no free line.
+// The keyword audit (2026-09-27, after the card purge) kept only the live
+// registry words; CHARGE / SOUL / TICK / RECOIL / MILL / RUPTURE riders fall
+// back to the generic ◆ rune.
 const FREE_KW_GLYPH: Record<string, string> = {
-    GUARD: '❖', HEAL: '✚', DRAW: '⚑', CHARGE: '❡', PLEA: '∿', SOUL: '✦',
-    FORETELL: '◉', TICK: '❋', CLEANSE: '✦', PIP: '⬡', STAGGER: '⚔',
-    RECOIL: '▽', MILL: '⁇', RUPTURE: '❋',
+    GUARD: '❖', HEAL: '✚', DRAW: '⚑', PLEA: '∿',
+    FORETELL: '◉', CLEANSE: '✦', PIP: '⬡', STAGGER: '⚔',
 };
 /** The FREE glyph plus the KEYWORD that drives it — the key lets the face swap
  *  the text rune for the effect's SILHOUETTE (glyphShapes.ts) when one exists. */
@@ -1651,11 +1653,11 @@ type EffectPayloadLike = {
     rollModifier?: number;
     rollModifierPerIntensity?: number;
     // ── mechanics 0.34.0 ──
-    reflectDamage?: number;     // buff_thorns / tier1_body_defend → Thorns
+    reflectDamage?: number;     // the THORNS reflect channel (no live library carrier)
     damageTakenMult?: number;   // debuff_vulnerable / debuff_vulnerability_* → Vulnerable (>1) / buff_resolute → Resolute (<1)
     // ── spec 32 v3 — the themed-deck payload keys ──
     tickAmplifyFlat?: number;      // debuff_mark → +N per DoT tick per stack
-    backfirePerRung?: number;      // debuff_backfire → N per rung the enemy's action loses
+    backfirePerRung?: number;      // the BACKFIRE channel → N per rung the enemy's action loses (no live library carrier)
     outgoingDamageMulPct?: number; // debuff_quarter → the enemy deals N% less damage (<0)
     // ── card-overhaul (2026-07-03) ──
     defenseModifier?: number;          // debuff_exposure → real -N DEF number

@@ -38,8 +38,8 @@
  * `hazard-pattern-combat.engine.test.ts`; the sandbox-fixture-card and
  * `mockSequentialRng` conventions follow `cards-sandbox.engine.test.ts` and
  * neighboring Combat e2e suites. Tier 1-3 debuffs always land unconditionally
- * (`src/Combat/resist.ts`, the Phase 80 always-land law) and the library's
- * self-buff (`buff_thorns`) plus every combatEffects target here use
+ * (`src/Combat/resist.ts`, the Phase 80 always-land law) and every
+ * combatEffects target here uses
  * `stacking: 'intensity'` (verified against `debuffs.library.json`), so a
  * fixed RNG of 0.5 (neutral d20, no fumble/crit) is sufficient determinism —
  * no seed sweep is needed.

@@ -32,21 +32,26 @@ describe('statusGlyphs — resolution', () => {
     it('gives distinctive glyphs to named effects', () => {
         expect(effectGlyph({ id: 'debuff_poison', type: 'debuff', payload: { damageOverTime: {} } }).glyph).toBe('☠');
         expect(effectGlyph({ id: 'debuff_bleed', type: 'debuff', payload: { damageOverTime: {} } }).glyph).toBe('🩸');
-        expect(effectGlyph({ id: 'debuff_burn', type: 'debuff', payload: { damageOverTime: {} } }).glyph).toBe('🔥');
-        expect(effectGlyph({ id: 'debuff_stun', type: 'debuff', category: 'control', payload: { actionRestriction: { skipTurn: true } } }).glyph).toBe('💫');
+        expect(effectGlyph({ id: 'debuff_creeping_doom', type: 'debuff', payload: { damageOverTime: {} } }).glyph).toBe('🕸');
+        expect(effectGlyph({ id: 'debuff_petrify', type: 'debuff', category: 'control', payload: { actionRestriction: { skipTurn: true } } }).glyph).toBe('🗿');
     });
 
-    it('curates the three core keyword afflictions + the DoT-species split (card-wording audit 2026-07-12)', () => {
-        // Mark/Backfire/Rapport ARE the keyword system — no generic category icons.
+    it('curates the core keyword afflictions (card-wording audit 2026-07-12; keyword audit 2026-09-27)', () => {
+        // Mark/Quarter/Vulnerable ARE the keyword system — no generic category icons.
         expect(effectGlyph({ id: 'debuff_mark', type: 'debuff' }).glyph).toBe('◉');
-        expect(effectGlyph({ id: 'debuff_backfire', type: 'debuff' }).glyph).toBe('⟲');
         expect(effectGlyph({ id: 'debuff_quarter', type: 'debuff' }).glyph).toBe('☙');
-        // The two live DoT species no longer share one 🔥.
-        const ember = effectGlyph({ id: 'debuff_kindling_ember', type: 'debuff', payload: { damageOverTime: {} } }).glyph;
-        const nettle = effectGlyph({ id: 'debuff_nettle_sting', type: 'debuff', payload: { damageOverTime: {} } }).glyph;
-        expect(ember).toBe('🔥');
-        expect(nettle).toBe('🌿');
-        expect(ember).not.toBe(nettle);
+        // A Plain Word's VULNERABLE no longer falls back to the category ▼
+        // by accident: it is curated (the same arrow, on purpose).
+        expect(effectGlyph({ id: 'debuff_vulnerable', type: 'debuff' }).glyph).toBe('▼');
+    });
+
+    it('curates only ids the effects library defines (keyword audit 2026-09-27)', () => {
+        // Rows for deleted ids render nothing and hide drift; the purged-card
+        // species now fall back like any unknown id.
+        for (const id of ['debuff_backfire', 'debuff_kindling_ember', 'debuff_nettle_sting', 'buff_thorns', 'debuff_burn', 'debuff_stun']) {
+            const g = effectGlyph({ id, type: 'debuff', category: 'control', payload: { actionRestriction: { skipTurn: true } } });
+            expect(g.glyph).toBe('⛓');
+        }
     });
 
     it('falls back to a category glyph for unnamed effects, with a colour and label', () => {
