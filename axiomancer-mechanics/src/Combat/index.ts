@@ -28,7 +28,7 @@ export {
     updateEffectDuration, tickAllEffects,
     removeRandomBuff, extendRandomBuffDuration,
     // 0.34.0 status-depth epic — HP-model selectors + tunable scalars
-    VULNERABLE_MAX_MULT, RUPTURE_CAP_FRACTION,
+    RUPTURE_CAP_FRACTION,
     DISRUPT_DENY_AT,
     CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
     // CONDEMN Premise floor per enemy difficulty — the single source the engine
@@ -153,6 +153,14 @@ export {
     // Spec 32 v3 — floating dice save-back + sway decay knob
     getFloatingDiceColors, SWAY_DECAY_PER_TURN,
 } from './combat.engine';
+// S3 — stat scaling (D40–D43): the formula, the keyword families, and the
+// display-only stat-scaled card the hand prints.
+export {
+    scaleAmount, scaleFor, statFor, scaleRider, scaleCardForStats,
+    scaleEffectIntensity, effectScaling, effectFamily,
+    MECHANIC_SCALING, RIDER_SCALING, PAYLOAD_SCALING, NEUTRAL_STAT,
+} from './stat-scaling';
+export type { StatFamily, ScalingKind, KeywordScaling } from './stat-scaling';
 // Spec 33 — the Upgradeable-Dice model: THE combat dice model (the flag was
 // collapsed in D7, 2026-09-25).
 export {
@@ -168,8 +176,6 @@ export {
 export { COMBAT_HAND_SIZE, buildCombatDeck } from './combat.deck';
 export {
     COMBAT_DECK_PRESETS, COMBAT_DECK_PRESET_ORDER,
-    // aspect-thirds recipe color law (spec 32 §12 item 9) — the documented borrow map
-    PRESET_LINEAGE,
     listDeckPresets, getDeckPreset,
 } from './combat.starter-deck-presets';
 

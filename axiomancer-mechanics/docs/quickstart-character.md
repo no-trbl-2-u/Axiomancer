@@ -14,7 +14,7 @@ const hero = createCharacter({
   baseStats: { body: 4, mind: 6, heart: 5 },
 });
 // hero.id is auto-generated (char-<base36> from RNG)
-// hero.maxHealth = PLAYER_VITAE_BASE (50) + (body + heart + mind) × HEALTH_PER_STAT (8)
+// hero.maxHealth = PLAYER_VITAE_BASE (50) + 12·body + 6·mind + 6·heart
 ```
 
 ## Use a preset

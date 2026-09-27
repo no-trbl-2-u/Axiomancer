@@ -19,7 +19,7 @@ import {
     lookupEffect, READ_DAMAGE_MULT, colorMatchBonus,
     RESERVE_MAX,
     RUPTURE_CAP_FRACTION, recoilXRange, riderText,
-    VULNERABLE_MAX_MULT, DISRUPT_DENY_AT,
+    DISRUPT_DENY_AT,
     // phase 28 — legibility sweep
     projectRuptureBurst, projectIncomingThreat,
     CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
@@ -35,6 +35,9 @@ import {
     // Spec 33 (Phase D6b) — the momentum chain, stance-check telegraph, and
     // die-gear rail.
     MOMENTUM_CHAIN_ORDER, MOMENTUM_SURGE_LENGTH, activeDieGear, DEFAULT_DIE_GEAR,
+    // S3 — stat scaling: the hand prints final numbers in the family colour.
+    scaleCardForStats,
+    type StatFamily,
     type CombatEncounterState, type CombatCard, type CombatManaDie, type CombatEvent,
     type CombatThreatPhase, type CombatThreatEffect, type CombatIntentType, type CombatReadResult,
     type CombatSummary, type SignatureSkill, type Stance,
@@ -571,6 +574,16 @@ export type CombatCardKind =
 export interface CombatCardFaceVM {
     kind: CombatCardKind;
     keyword: string | null;        // UPPERCASE keyword for the face (e.g. 'BLEED')
+    /** S3 (D40) — the stat family of the card's main keyword (body: damage to
+     *  the foe; mind: on you; heart: on the foe). Set on the live hand only. */
+    statFamily?: StatFamily | null;
+    /** The family's dice colour and stat glyph (♥ ⚡ ★) for the keyword text. */
+    familyColor?: string | null;
+    familyGlyph?: string | null;
+    /** The PAID value was raised (or lowered) by the player's stat. */
+    statScaled?: 'up' | 'down' | null;
+    /** The FREE value was raised (or lowered) by the player's stat. */
+    freeStatScaled?: 'up' | 'down' | null;
     glyph: string;                 // sourced from statusGlyphs → matches the board chip
     /** The FREE effect's glyph — the hero mark for the dieless play (top-left of
      *  the rail face). Derived from the free rider's effect / keyword; '' when
@@ -1961,11 +1974,11 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
             out.intensity = pr.ce?.intensity ?? 1;
             out.turns = pr.ce?.duration ?? eff?.duration ?? 0;
             // P0-truth: the % shown is the engine's real intensity-scaled delta
-            // (mult = 1 + (dtm−1) × intensity, capped) — not the per-stack figure.
+            // (mult = 1 + (dtm−1) × intensity, uncapped since S3) — not the per-stack figure.
             const keyed = (p as { damageTakenMultForStance?: { mult: number } }).damageTakenMultForStance;
             const dtm = p.damageTakenMult ?? keyed?.mult ?? 1;
             const pct = (i: number): number =>
-                Math.round((Math.min(VULNERABLE_MAX_MULT, 1 + (dtm - 1) * i) - 1) * 100);
+                Math.round((dtm - 1) * i * 100);
             out.vulnPct = pct(out.intensity);
             out.vulnPctAdv = pct(out.intensity + READ_ADVANTAGE_INTENSITY_BONUS);
             out.keyword = keywordForEffect(pr.ce?.effectId) ?? 'Vulnerable';
@@ -2541,31 +2554,31 @@ function detailCore(card: CombatCard, sourceCard?: Card, enemyDifficulty?: Enemy
                     outcomeLine: `Apply ${Title} — ${c.perTurn} VITAE each ${evt.noun}.`,
                     outcomeStats: [{ label: 'PER TICK', value: `${c.perTurn}` }, { label: 'TRIGGER', value: evt.trig }, evt.dur],
                     stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine,
-                    powerLine: `◆ WITH A DIE: apply ${Title} — ${c.perTurn} VITAE each ${evt.noun} while it holds, plus a small hit.`,
+                    powerLine: `◆ WITH A DIE: apply ${Title} — ${c.perTurn} VITAE each ${evt.noun} while it holds.`,
                     readNote: `The read scales the PER-TICK bite: ▲ won read lands +${READ_ADVANTAGE_INTENSITY_BONUS} intensity (${perTickAdv}/tick), ▼ lost read −${READ_DISADVANTAGE_DURATION_PENALTY} turn of duration.`,
                     mathLine: `${c.perTurn}/tick = ${c.dpr} base × ${c.intensity} intensity, ${evt.trig}${c.stacks ? ' · stacks by intensity' : ''}.`,
                     keywords,
                 };
             }
-            return { subtitle: `${Title} the enemy — damage over time.`, metaChip, outcomeLine: `Apply ${Title} ${c.total} over ${c.turns} turns.`, outcomeStats: [{ label: 'PER TURN', value: `${c.perTurn}` }, { label: 'TURNS', value: `${c.turns}` }, { label: 'TOTAL', value: `${c.total}` }], stacksText: c.stacks ? 'Stacks up to 10×.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — ${c.perTurn} VITAE/turn for ${c.turns} turns (${c.total} total), plus a small hit.`, readNote: `The read is exact: ▲ won read lands +${READ_ADVANTAGE_INTENSITY_BONUS} intensity (${c.totalAdv} total), ▼ lost read −${READ_DISADVANTAGE_DURATION_PENALTY} turn (${c.totalDis} total); ${c.total} on an even read.`, mathLine: `${c.perTurn}/turn = ${c.dpr} base × ${c.intensity} intensity · ${c.turns} turns · ${c.total} VITAE total on an even read${c.stacks ? ' · stacks to 10×' : ''}.`, keywords };
+            return { subtitle: `${Title} the enemy — damage over time.`, metaChip, outcomeLine: `Apply ${Title} ${c.total} over ${c.turns} turns.`, outcomeStats: [{ label: 'PER TURN', value: `${c.perTurn}` }, { label: 'TURNS', value: `${c.turns}` }, { label: 'TOTAL', value: `${c.total}` }], stacksText: c.stacks ? 'Stacks up to 10×.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — ${c.perTurn} VITAE/turn for ${c.turns} turns (${c.total} total).`, readNote: `The read is exact: ▲ won read lands +${READ_ADVANTAGE_INTENSITY_BONUS} intensity (${c.totalAdv} total), ▼ lost read −${READ_DISADVANTAGE_DURATION_PENALTY} turn (${c.totalDis} total); ${c.total} on an even read.`, mathLine: `${c.perTurn}/turn = ${c.dpr} base × ${c.intensity} intensity · ${c.turns} turns · ${c.total} VITAE total on an even read${c.stacks ? ' · stacks to 10×' : ''}.`, keywords };
         }
-        case 'stun': return { subtitle: `${Title} the enemy — it loses its turns.`, metaChip, outcomeLine: `Apply ${Title} ${c.skips} turn${c.skips === 1 ? '' : 's'}.`, outcomeStats: [{ label: 'SKIPS', value: `${c.skips} turns` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${Title} — the foe skips its next ${c.skips} actions, plus a small hit.`, readNote: `The read is exact: ▲ won read changes nothing (skips are duration-driven), ▼ lost read shortens the skip by ${READ_DISADVANTAGE_DURATION_PENALTY} turn (floor 1).`, mathLine: `skip ${c.skips}t = ${Title.toLowerCase()} duration ${c.skips} (each turn it would act is cancelled).`, keywords };
+        case 'stun': return { subtitle: `${Title} the enemy — it loses its turns.`, metaChip, outcomeLine: `Apply ${Title} ${c.skips} turn${c.skips === 1 ? '' : 's'}.`, outcomeStats: [{ label: 'SKIPS', value: `${c.skips} turns` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${Title} — the foe skips its next ${c.skips} actions.`, readNote: `The read is exact: ▲ won read changes nothing (skips are duration-driven), ▼ lost read shortens the skip by ${READ_DISADVANTAGE_DURATION_PENALTY} turn (floor 1).`, mathLine: `skip ${c.skips}t = ${Title.toLowerCase()} duration ${c.skips} (each turn it would act is cancelled).`, keywords };
         case 'weaken': return { subtitle: `${Title} the enemy — its attacks hit softer.`, metaChip, outcomeLine: c.turns > 0 ? `Apply ${Title} · ${c.turns} turns.` : `Apply ${Title}.`, outcomeStats: c.turns > 0 ? [{ label: 'TURNS', value: `${c.turns}` }] : [], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — the foe's hits land softer while it holds.`, readNote: `${Title} weakens the enemy's blows; pile on STAGGER to deny the turn outright.`, mathLine: `${Title} reduces the enemy's outgoing damage while active (real engine units).`, keywords };
         case 'mark': return { subtitle: `${Title} the enemy — the flaw is named.`, metaChip, outcomeLine: `Apply ${Title} +${c.markAmp}/tick · ${c.turns} turns.`, outcomeStats: [{ label: 'PER TICK', value: `+${c.markAmp}` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — every DoT tick and payoff hit on the foe deals +${c.markAmp} while it holds.`, readNote: `${Title} counts as an affliction — RUPTURE, SOUL, and REAP all feed on it.`, mathLine: `+${c.markAmp}/tick = tickAmplifyFlat × intensity, for ${c.turns} turns.`, keywords };
         case 'backfire': return { subtitle: `${Title} — denied blows land inward.`, metaChip, outcomeLine: `Apply ${Title} ${c.backfireN}/rung · ${c.turns} turns.`, outcomeStats: [{ label: 'PER RUNG', value: `${c.backfireN}` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — the foe takes ${c.backfireN} per rung its actions lose while it holds.`, readNote: `Pair with STAGGER: every rung you strip is ${c.backfireN} VITAE off the foe.`, mathLine: `${c.backfireN}/rung = backfirePerRung × intensity, for ${c.turns} turns.`, keywords };
         case 'regen': return { subtitle: 'Heal yourself over time.', metaChip, outcomeLine: `${Title || 'Regenerate'} ${c.total} over ${c.turns} turns.`, outcomeStats: [{ label: 'PER TURN', value: `${c.perTurn}` }, { label: 'TURNS', value: `${c.turns}` }, { label: 'TOTAL', value: `${c.total}` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: regenerate ${c.perTurn} VITAE/turn for ${c.turns} turns (${c.total} total). Needs a ${STANCE} or WILD die.`, readNote: `Heals YOU — no read needed; ${c.total} is exact.`, mathLine: `${c.perTurn}/turn = ${c.dpr} base × ${c.intensity} intensity · ${c.turns} turns · ${c.total} total.`, keywords };
         case 'guard': { const b = c.guardAmount ?? 0; const adv = Math.max(1, Math.round(b * READ_DAMAGE_MULT.advantage)); const dis = Math.max(1, Math.round(b * READ_DAMAGE_MULT.disadvantage)); return { subtitle: 'Guard yourself — soak the next hit.', metaChip, outcomeLine: `Gain ${Title} ${b}.`, outcomeStats: [{ label: 'GUARD', value: `${b} (▲${adv} · —${b} · ▼${dis})` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: Guard ${b}; ▲ read raises it to ${adv}, ▼ read drops it to ${dis}; +${colorMatchBonus(b)} if a ${STANCE} die matches.`, readNote: `The read scales this: ▲ advantage ×${READ_DAMAGE_MULT.advantage}, ▼ disadvantage ×${READ_DAMAGE_MULT.disadvantage}.`, mathLine: `POWER = round(${b} × read) + ${colorMatchBonus(b)} on a colour match.`, keywords }; }
         case 'befriend': return { subtitle: 'Spare a near-dead foe.', metaChip, outcomeLine: 'Spare a near-dead foe — end combat peacefully.', outcomeStats: [], stacksText: null, freeLine, powerLine: '◆ WITH A DIE: if the enemy VITAE is low, end combat peacefully (befriend).', readNote: 'Watch the enemy VITAE bar — befriend lands only when it is low.', mathLine: 'No fixed number — a conditional outcome gated on low enemy VITAE.', keywords };
-        case 'vulnerable': { const cap = Math.round((VULNERABLE_MAX_MULT - 1) * 100); return { subtitle: `${Title} the enemy — it takes more damage.`, metaChip, outcomeLine: `Apply ${Title} +${c.vulnPct}% · ${c.turns} turns.`, outcomeStats: [{ label: 'DMG TAKEN', value: `+${c.vulnPct}%` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: `Stacks to +${cap}%.`, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — +${c.vulnPct}% damage taken for ${c.turns} turns, plus a small hit.`, readNote: `The read is exact: ▲ won read lands +${READ_ADVANTAGE_INTENSITY_BONUS} intensity (+${c.vulnPctAdv}%), ▼ lost read −${READ_DISADVANTAGE_DURATION_PENALTY} turn; +${c.vulnPct}% on an even read.`, mathLine: `+${c.vulnPct}% = (damageTakenMult − 1) × 100 × intensity on an even read; combined Vulnerable caps at +${cap}%.`, keywords }; }
-        case 'thorns': return { subtitle: `${Title} — attackers take damage back.`, metaChip, outcomeLine: `Gain ${Title} ${c.reflectN} · ${c.turns} turns.`, outcomeStats: [{ label: 'REFLECT', value: `${c.reflectN}` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.intensity > 1 || (lookupEffect(c.ce?.effectId ?? '')?.stacking === 'intensity') ? 'Stacks.' : null, freeLine, powerLine: `◆ WITH A DIE: gain ${Title} (Reflect ${c.reflectN}) plus a small hit.`, readNote: 'Your reflect takes no read — Reflect is exact (a self-buff, not scaled by the stance read).', mathLine: `Reflect ${c.reflectN} returned per enemy hit, ${c.turns} turns; stacking raises the reflect.`, keywords };
+        case 'vulnerable': { return { subtitle: `${Title} the enemy — it takes more damage.`, metaChip, outcomeLine: `Apply ${Title} +${c.vulnPct}% · ${c.turns} turns.`, outcomeStats: [{ label: 'DMG TAKEN', value: `+${c.vulnPct}%` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: 'Stacks without limit.', freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — +${c.vulnPct}% damage taken for ${c.turns} turns.`, readNote: `The read is exact: ▲ won read lands +${READ_ADVANTAGE_INTENSITY_BONUS} intensity (+${c.vulnPctAdv}%), ▼ lost read −${READ_DISADVANTAGE_DURATION_PENALTY} turn; +${c.vulnPct}% on an even read.`, mathLine: `+${c.vulnPct}% = (damageTakenMult − 1) × 100 × intensity on an even read; combined Vulnerable is uncapped.`, keywords }; }
+        case 'thorns': return { subtitle: `${Title} — attackers take damage back.`, metaChip, outcomeLine: `Gain ${Title} ${c.reflectN} · ${c.turns} turns.`, outcomeStats: [{ label: 'REFLECT', value: `${c.reflectN}` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.intensity > 1 || (lookupEffect(c.ce?.effectId ?? '')?.stacking === 'intensity') ? 'Stacks.' : null, freeLine, powerLine: `◆ WITH A DIE: gain ${Title} (Reflect ${c.reflectN}).`, readNote: 'Your reflect takes no read — Reflect is exact (a self-buff, not scaled by the stance read).', mathLine: `Reflect ${c.reflectN} returned per enemy hit, ${c.turns} turns; stacking raises the reflect.`, keywords };
         // ── card-overhaul (2026-07-03) — the 6 previously-blank effects ──
-        case 'exposure': return { subtitle: `${Title} the enemy — its defenses give.`, metaChip, outcomeLine: `Apply ${Title} ${c.exposureDelta} DEF · ${c.turns} turns.`, outcomeStats: [{ label: 'DEF', value: `${c.exposureDelta}` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — ${c.exposureDelta} DEF for ${c.turns} turns, plus a small hit.`, readNote: `${Title} is a flat defense cut — it does not scale with the read.`, mathLine: `${c.exposureDelta} DEF = defenseModifier on an even application${c.stacks ? '; stacks by intensity' : ''}.`, keywords };
-        case 'doubt': return { subtitle: `${Title} the enemy — its next play is forced weak.`, metaChip, outcomeLine: `Apply ${Title} · ${c.turns} turn${c.turns === 1 ? '' : 's'}.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — the foe's next card play is forced to weak-tier even if it spends a die, plus a small hit.`, readNote: `${Title} is consumed on the foe's next play — a one-shot tax, not a scaling number.`, mathLine: `${Title} forces weak-tier resolution on the foe's next play, then is consumed — no fixed number (real-units-or-no-number).`, keywords };
-        case 'sensoryNull': return { subtitle: `${Title} the enemy — its reads and controls dull.`, metaChip, outcomeLine: `Apply ${Title} · ${c.turns} turns.`, outcomeStats: [{ label: 'TURNS', value: `${c.turns}` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — blocks the foe's advantage reads and dulls its control accuracy for ${c.turns} turns, plus a small hit.`, readNote: `${Title} denies the foe's own read/control edge — no fabricated number, just the blocked mechanic.`, mathLine: `${Title} blocks advantage-read access and reduces control accuracy for ${c.turns} turns.`, keywords };
-        case 'isolated': return { subtitle: `${Title} the enemy — no help is coming.`, metaChip, outcomeLine: `Apply ${Title} · ${c.turns} turn${c.turns === 1 ? '' : 's'}.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — denies the foe ally-buff targeting (solo fights deny its own self-buff card instead) for ${c.turns} turn${c.turns === 1 ? '' : 's'}, plus a small hit.`, readNote: `${Title} denies a targeting option, not a number — real-units-or-no-number.`, mathLine: `${Title} denies ally-buff targeting (or, solo, denies a self-buff card) for ${c.turns} turn${c.turns === 1 ? '' : 's'}.`, keywords };
+        case 'exposure': return { subtitle: `${Title} the enemy — its defenses give.`, metaChip, outcomeLine: `Apply ${Title} ${c.exposureDelta} DEF · ${c.turns} turns.`, outcomeStats: [{ label: 'DEF', value: `${c.exposureDelta}` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — ${c.exposureDelta} DEF for ${c.turns} turns.`, readNote: `${Title} is a flat defense cut — it does not scale with the read.`, mathLine: `${c.exposureDelta} DEF = defenseModifier on an even application${c.stacks ? '; stacks by intensity' : ''}.`, keywords };
+        case 'doubt': return { subtitle: `${Title} the enemy — its next play is forced weak.`, metaChip, outcomeLine: `Apply ${Title} · ${c.turns} turn${c.turns === 1 ? '' : 's'}.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — the foe's next card play is forced to weak-tier even if it spends a die.`, readNote: `${Title} is consumed on the foe's next play — a one-shot tax, not a scaling number.`, mathLine: `${Title} forces weak-tier resolution on the foe's next play, then is consumed — no fixed number (real-units-or-no-number).`, keywords };
+        case 'sensoryNull': return { subtitle: `${Title} the enemy — its reads and controls dull.`, metaChip, outcomeLine: `Apply ${Title} · ${c.turns} turns.`, outcomeStats: [{ label: 'TURNS', value: `${c.turns}` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — blocks the foe's advantage reads and dulls its control accuracy for ${c.turns} turns.`, readNote: `${Title} denies the foe's own read/control edge — no fabricated number, just the blocked mechanic.`, mathLine: `${Title} blocks advantage-read access and reduces control accuracy for ${c.turns} turns.`, keywords };
+        case 'isolated': return { subtitle: `${Title} the enemy — no help is coming.`, metaChip, outcomeLine: `Apply ${Title} · ${c.turns} turn${c.turns === 1 ? '' : 's'}.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — denies the foe ally-buff targeting (solo fights deny its own self-buff card instead) for ${c.turns} turn${c.turns === 1 ? '' : 's'}.`, readNote: `${Title} denies a targeting option, not a number — real-units-or-no-number.`, mathLine: `${Title} denies ally-buff targeting (or, solo, denies a self-buff card) for ${c.turns} turn${c.turns === 1 ? '' : 's'}.`, keywords };
         case 'overextended': return { subtitle: `${Title} — a self-cost for reaching too far.`, metaChip, outcomeLine: `Take ${Title} · ${c.turns} turn${c.turns === 1 ? '' : 's'}.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: this play also costs you ${Title} — your own next card play is forced to weak-tier, then consumed.`, readNote: `${Title} is consumed on your own next play — the price of this card's payoff.`, mathLine: `${Title} forces your own next play to weak-tier, then is consumed — no fixed number (real-units-or-no-number).`, keywords };
-        case 'clarity': return { subtitle: `${Title} — your next die is Wild.`, metaChip, outcomeLine: `Gain ${Title} — next die: WILD.`, outcomeStats: [{ label: 'NEXT DIE', value: 'WILD' }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: gain ${Title} — your next die counts as Wild, plus a small hit.`, readNote: `${Title} is exact — the next die is Wild, full stop, then consumed.`, mathLine: `${Title}: next die → Wild (forceWildOnNextDie), consumed on use.`, keywords };
-        case 'resolute': return { subtitle: `${Title} — you take less damage.`, metaChip, outcomeLine: `Gain ${Title} ${c.resolutePct}% · ${c.turns} turns.`, outcomeStats: [{ label: 'DMG TAKEN', value: `${c.resolutePct}%` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: gain ${Title} — ${c.resolutePct}% damage taken for ${c.turns} turns, plus a small hit.`, readNote: `Your damage reduction takes no read — ${Title} is exact (a self-buff, not scaled by the stance read).`, mathLine: `${c.resolutePct}% = (damageTakenMult − 1) × 100 on an even application${c.stacks ? '; stacks by intensity' : ''}.`, keywords };
+        case 'clarity': return { subtitle: `${Title} — your next die is Wild.`, metaChip, outcomeLine: `Gain ${Title} — next die: WILD.`, outcomeStats: [{ label: 'NEXT DIE', value: 'WILD' }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: gain ${Title} — your next die counts as Wild.`, readNote: `${Title} is exact — the next die is Wild, full stop, then consumed.`, mathLine: `${Title}: next die → Wild (forceWildOnNextDie), consumed on use.`, keywords };
+        case 'resolute': return { subtitle: `${Title} — you take less damage.`, metaChip, outcomeLine: `Gain ${Title} ${c.resolutePct}% · ${c.turns} turns.`, outcomeStats: [{ label: 'DMG TAKEN', value: `${c.resolutePct}%` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: gain ${Title} — ${c.resolutePct}% damage taken for ${c.turns} turns.`, readNote: `Your damage reduction takes no read — ${Title} is exact (a self-buff, not scaled by the stance read).`, mathLine: `${c.resolutePct}% = (damageTakenMult − 1) × 100 on an even application${c.stacks ? '; stacks by intensity' : ''}.`, keywords };
         case 'barrier': { const b = c.barrierAmt; const adv = Math.max(1, Math.round(b * READ_DAMAGE_MULT.advantage)); const dis = Math.max(1, Math.round(b * READ_DAMAGE_MULT.disadvantage)); return { subtitle: 'Barrier — a stacking shield that soaks damage.', metaChip, outcomeLine: `Gain ${Title} ${b}.`, outcomeStats: [{ label: 'SOAK', value: `${b} (▲${adv} · —${b} · ▼${dis})` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: gain Barrier ${b}; ▲ read raises it to ${adv}, ▼ drops it to ${dis}; +${colorMatchBonus(b)} on a ${STANCE} match.`, readNote: `The read scales the Barrier granted: ▲ ×${READ_DAMAGE_MULT.advantage}, ▼ ×${READ_DAMAGE_MULT.disadvantage}.`, mathLine: `Soak ${b} base × read + ${colorMatchBonus(b)} on a colour match; barriers stack.`, keywords }; }
         case 'riposte': { const guardLine = c.guardAmount ? ` · Guard ${c.guardAmount}` : ''; const stats = [{ label: 'COUNTER', value: `${c.riposteDmg}` }, { label: 'REDUCE', value: `-${c.riposteReduce}` }]; if (c.guardAmount) stats.push({ label: 'GUARD', value: `${c.guardAmount}` }); return { subtitle: 'Riposte — counter the next hit and blunt it.', metaChip, outcomeLine: `Arm ${Title} — Counter ${c.riposteDmg} · Cut ${c.riposteReduce}${guardLine}.`, outcomeStats: stats, stacksText: null, freeLine, powerLine: `◆ WITH A DIE: arm Riposte — counter ${c.riposteDmg}, reduce ${c.riposteReduce}${c.guardAmount ? `, +Guard ${c.guardAmount}` : ''}; the read scales it.`, readNote: 'The read scales both the counter damage and the reduction.', mathLine: `Counter ${c.riposteDmg} & reduce ${c.riposteReduce}, each × read (+${colorMatchBonus(c.riposteDmg)} counter on a colour match).`, keywords }; }
         case 'siphon': return { subtitle: 'Siphon — heal for part of the harm you cash in.', metaChip, outcomeLine: `${Title} ${c.siphonPct}%.`, outcomeStats: [{ label: 'LIFESTEAL', value: `${c.siphonPct}%` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: heal ${c.siphonPct}% of the VITAE this card's payoff erodes.`, readNote: `The burst is live; the ${c.siphonPct}% rate is exact.`, mathLine: `Heal = ${c.siphonPct}% × (the payoff burst) — the burst is live, so no fixed heal number.`, keywords };
@@ -2739,7 +2752,10 @@ export function detailStats(card: CombatCard, sourceCard?: Card, enemyDifficulty
         ? `${persistentFreeRounds(card)} free · permanent with a die`
         : null;
     // The colour law (dice-law rework 2026-07-09) — rendered ONCE per modal.
-    const colorMatchHint = `Only a ${STANCE} or WILD die can power this card.`;
+    // A colourless (grey) card takes any die — never 'Only a ANY … die'.
+    const colorMatchHint = card.stance === 'any'
+        ? 'Any die can power this card.'
+        : `Only a ${STANCE} or WILD die can power this card.`;
     // 2026-07-12 — the per-card systems-glossary slice: scan the card's OWN
     // printed lines plus its overlay free/stacks lines (colorMatchHint excluded
     // — its WILD is the global colour law, not a card reference) and drop
@@ -2790,17 +2806,72 @@ export function armedReadValue(face: CombatCardFaceVM, read: CombatReadResult, c
     return null;
 }
 
+/**
+ * S3 (D40) — the stat family of the keyword a face SHOWS, by where it lands:
+ * body = damage to the foe, mind = on you, heart = on the foe. Keyed by the
+ * face's keyword (a card can DEAL and POISON; the face names one of them).
+ * Keywords not listed are grey: no colour, no glyph.
+ */
+const KEYWORD_FAMILY: Record<string, StatFamily> = {
+    DEAL: 'body', RUPTURE: 'body', REAP: 'body', IMMOLATE: 'body', EXECUTE: 'body', OVERKILL: 'body',
+    GUARD: 'mind', BARRIER: 'mind', RIPOSTE: 'mind', THORNS: 'mind', REGEN: 'mind', HEAL: 'mind',
+    SIPHON: 'mind', WRATH: 'mind', CHAIN: 'mind', CHARGE: 'mind', SOUL: 'mind', OATH: 'mind',
+    RESOLUTE: 'mind',
+    POISON: 'heart', BLEED: 'heart', DOOM: 'heart', MARK: 'heart', BACKFIRE: 'heart', QUARTER: 'heart',
+    VULNERABLE: 'heart', STAGGER: 'heart', PLEA: 'heart', FLAY: 'heart', STUN: 'heart', FESTER: 'heart',
+    PROLONG: 'heart', TICK: 'heart', HEX: 'heart', KINDLE: 'heart', WEAKEN: 'heart',
+};
+
+/**
+ * The family colour + glyph for a face's keyword, and whether the player's
+ * stats actually moved each printed number (`scaled` vs the `printed` face).
+ */
+export function familyFace(
+    scaled: CombatCardFaceVM,
+    printed: CombatCardFaceVM,
+): Pick<CombatCardFaceVM, 'statFamily' | 'familyColor' | 'familyGlyph' | 'statScaled' | 'freeStatScaled'> {
+    // Direction from the NUMBERS, not the stat: a card mixes families, so the
+    // only honest "raised" signal is that the printed figure went up.
+    const dir = (a: string | null | undefined, b: string | null | undefined): 'up' | 'down' | null => {
+        if (a === b || a == null || b == null) return null;
+        const na = parseInt(a.replace(/[^0-9-]/g, ''), 10);
+        const nb = parseInt(b.replace(/[^0-9-]/g, ''), 10);
+        if (Number.isNaN(na) || Number.isNaN(nb) || na === nb) return null;
+        return Math.abs(na) > Math.abs(nb) ? 'up' : 'down';
+    };
+    const paidMoved = dir(scaled.heroText, printed.heroText);
+    const freeMoved = dir(scaled.freeValue ?? scaled.freeHeroText, printed.freeValue ?? printed.freeHeroText);
+    const fam = scaled.keyword ? KEYWORD_FAMILY[scaled.keyword.toUpperCase()] ?? null : null;
+    if (!fam || fam === 'grey') {
+        return { statFamily: null, familyColor: null, familyGlyph: null, statScaled: paidMoved, freeStatScaled: freeMoved };
+    }
+    return {
+        statFamily: fam,
+        familyColor: STANCE_COLORS[fam] ?? null,
+        familyGlyph: DIE_GLYPHS[fam] ?? null,
+        statScaled: paidMoved,
+        freeStatScaled: freeMoved,
+    };
+}
+
 function handVM(state: CombatEncounterState): CombatCardVM[] {
     return engineHandCards(state)
         // Retreat is no longer an in-combat card — fleeing is offered at the
         // encounter prelude (ENGAGE / FLEE), not from the hand.
         .filter(({ card }: { card: CombatCard }) => card.id !== 'card-retreat' && card.verbClass !== 'retreat')
         .map(({ uid, card }: { uid: string; card: CombatCard }) => {
-        const sourceCard = getCardById(card.id);
+        // S3 — the hand prints FINAL numbers: the stat-scaled copy of the card
+        // (the engine's `handCards` already built `card` from the same copy).
+        const libraryCard = getCardById(card.id);
+        const stats = state.player.baseStats;
+        const sourceCard = libraryCard ? scaleCardForStats(libraryCard, stats) : libraryCard;
         // WI-6 — the hand is IN combat, so the live enemy difficulty is known:
         // a CONDEMN face resolves its tier-floored threshold ("concede at 10 vs
         // this foe") instead of the raw authored 8.
-        const rawFace = faceStats(card, sourceCard, state.enemy.difficulty);
+        const scaledFace = faceStats(card, sourceCard, state.enemy.difficulty);
+        const printedCard = getCard(card.id);
+        const printedFace = printedCard ? faceStats(printedCard, libraryCard, state.enemy.difficulty) : scaledFace;
+        const rawFace = { ...scaledFace, ...familyFace(scaledFace, printedFace) };
         // phase 28 — RUPTURE's live burst is an honest, already-computed engine
         // number (projectRuptureBurst); the word-only "detonate" face predates
         // that selector's existence. Real-units-or-no-number, now with a number.

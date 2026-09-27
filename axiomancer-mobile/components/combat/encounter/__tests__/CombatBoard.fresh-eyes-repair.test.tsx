@@ -35,7 +35,9 @@ import { buildCombatViewModel, type CombatViewModel } from '@/state/presenters/c
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
-const CARDS = ['spoiled-poultice', 'unction-of-boils', 'frostbitten-palisade', 'thin-hymn'];
+// A four-card hand off the grey office (the whole library since the card
+// purge, 2026-09-27).
+const CARDS = ['grey-strike', 'grey-ward', 'grey-word', 'grey-strike'];
 /** The capture's primary viewport — the one the fan collapsed at. */
 const PHONE = { width: 375, height: 812, scale: 3, fontScale: 1 };
 /** The capture's second viewport — a fix for one must not cost the other. */

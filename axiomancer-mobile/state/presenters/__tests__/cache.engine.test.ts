@@ -54,18 +54,6 @@ describe('selectCacheVM — Phase 65 goodwill previews', () => {
         expect(vm.outcome?.bonusPreview).toBeNull();
     });
 
-    it('previews the Ally grant once the claim would reach Tier 2', () => {
-        const vm = selectCacheVM(makeState({ goodwill: 1 }));
-        expect(vm.outcome?.goodwillPreview).toBe(2);
-        expect(vm.outcome?.allyGrantPreview).toBe('The Sworn Second');
-        expect(vm.outcome?.bonusPreview).toBeNull();
-    });
-
-    it('does not preview the Ally grant if already known', () => {
-        const vm = selectCacheVM(makeState({ goodwill: 1, knownCards: ['the-sworn-second'] }));
-        expect(vm.outcome?.allyGrantPreview).toBeNull();
-    });
-
     it('previews the currency bonus once the claim would reach Tier 3', () => {
         const vm = selectCacheVM(makeState({ goodwill: 2 }));
         expect(vm.outcome?.goodwillPreview).toBe(3);

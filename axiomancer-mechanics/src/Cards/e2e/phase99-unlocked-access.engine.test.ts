@@ -21,10 +21,8 @@ describe('Phase 99 unlocked card access', () => {
             level: 5,
             baseStats: { heart: 8, body: 6, mind: 7 },
             knownCards: [
-                'spoiled-poultice',
-                'chilblain-watch',
-                'thin-hymn',
-                'first-spadeful',
+                'grey-strike',
+                'grey-ward',
             ],
             effects: [],
         });
@@ -47,7 +45,7 @@ describe('Phase 99 unlocked card access', () => {
         expect(availableCards).toEqual(player.knownCards);
 
         // Test card that player doesn't know
-        const unknownCardId = 'miserere'; // rank-5 finisher
+        const unknownCardId = 'grey-word'; // a real library card this player has not learned
         expect(player.knownCards).not.toContain(unknownCardId);
     });
 

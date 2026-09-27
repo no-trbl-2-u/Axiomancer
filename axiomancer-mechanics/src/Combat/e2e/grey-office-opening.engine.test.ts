@@ -6,8 +6,9 @@
  * (the early HIDE ramp). This pins the resulting opening at the sim's
  * policies, with a real level-1 fresh player:
  *   - the grey office beats the two pinned normal fights outright;
- *   - the grey office plus ONE random reward beats the pinned King most of
- *     the time under the greedy policy;
+ *   - the grey office plus ONE random reward beat the pinned King most of
+ *     the time under the greedy policy — until the card purge (P1,
+ *     2026-09-27) made rewards grey too; now pinned at 0 as a canary;
  *   - the grey office with NO reward almost never beats him — T's ruling:
  *     winnable only by a near-perfect game, never by the sim's policies.
  * Seeded and deterministic: the numbers are exact, not sampled.
@@ -85,8 +86,15 @@ describe('the grey office\'s opening — fishing village, level-1 fresh player',
         }
     });
 
-    it('one random reward makes the King a likely win; none makes him a near-certain loss', () => {
-        expect(winRate(s => withRewards(1, s), king, 'greedy')).toBeGreaterThanOrEqual(0.8);
+    it('one random reward (now a grey card, D44) does not yet lift the King; none makes him a near-certain loss', () => {
+        // Re-measured after the card purge (P1, 2026-09-27): rewards draw from
+        // the grey office (D44), and one extra grey card (every seed offers A
+        // Plain Blow first) wins 0/40 against the level-3 King — was >= 0.8
+        // with the coloured reward pool. T's opening ruling ("one reward makes
+        // the King a likely win") therefore does NOT hold on the purged tree.
+        // Pinned exactly as a canary: when a guided session grows the reward
+        // pool this goes red — restore the `>= 0.8` floor then.
+        expect(winRate(s => withRewards(1, s), king, 'greedy')).toBe(0);
         expect(winRate(() => fresh(), king, 'greedy', 1, 20)).toBeLessThanOrEqual(0.1);
     });
 });

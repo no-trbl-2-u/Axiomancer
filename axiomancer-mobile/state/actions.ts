@@ -585,8 +585,8 @@ export interface UseItemResult {
 
 /**
  * Phase 104 (the grey office) — the new player's starting combat repertoire.
- * `STARTING_CARD_IDS` is the engine's 10-card grey recipe (`grey-strike` ×7,
- * `grey-ward` ×3): two colourless shapes, any die powers either, so fight one
+ * `STARTING_CARD_IDS` is the engine's 10-card grey recipe (`grey-strike` ×5,
+ * `grey-ward` ×3, `grey-word` ×2 since S3): colourless shapes, any die powers each, so fight one
  * teaches STRIKE, WARD, FREE-vs-PAID, and the die-spend loop with zero colour
  * arithmetic. `buildCombatDeck` deals `knownCards` verbatim (copies are real,
  * not deduplicated), so `ensureStarterCards` writes the recipe directly

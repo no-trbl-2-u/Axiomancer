@@ -26,16 +26,16 @@ function stateWith(events: CombatEvent[]): CombatEncounterState {
 
 describe('selectCombatLogHistory — damage-dealt is narrated on both sides', () => {
     it('damage dealt TO the enemy reads as "You deal N" and carries the card name', () => {
-        const events: CombatEvent[] = [{ kind: 'damage-dealt', cardId: 'spoiled-poultice', target: 'enemy', amount: 9 }];
+        const events: CombatEvent[] = [{ kind: 'damage-dealt', cardId: 'grey-strike', target: 'enemy', amount: 9 }];
         const history = selectCombatLogHistory(stateWith(events));
         expect(history).toHaveLength(1);
         expect(history[0].side).toBe('enemy');
         expect(history[0].text).toContain('You deal 9');
-        expect(history[0].text).toContain('Spoiled Poultice');
+        expect(history[0].text).toContain('A Plain Blow');
     });
 
     it('damage dealt TO the player reads as "It deals N to you"', () => {
-        const events: CombatEvent[] = [{ kind: 'damage-dealt', cardId: 'spoiled-poultice', target: 'self', amount: 4 }];
+        const events: CombatEvent[] = [{ kind: 'damage-dealt', cardId: 'grey-strike', target: 'self', amount: 4 }];
         const history = selectCombatLogHistory(stateWith(events));
         expect(history).toHaveLength(1);
         expect(history[0].side).toBe('player');
@@ -55,15 +55,15 @@ describe('selectCombatLogHistory — dot-tick', () => {
 
 describe('selectCombatLogHistory — card-played: FREE vs die-powered', () => {
     it('dieId === null reads as FREE', () => {
-        const events: CombatEvent[] = [{ kind: 'card-played', cardId: 'spoiled-poultice', useBottom: false, dieId: null, advantage: 'neutral' }];
+        const events: CombatEvent[] = [{ kind: 'card-played', cardId: 'grey-strike', useBottom: false, dieId: null, advantage: 'neutral' }];
         const [line] = selectCombatLogHistory(stateWith(events));
-        expect(line.text).toContain('Spoiled Poultice');
+        expect(line.text).toContain('A Plain Blow');
         expect(line.text).toContain('FREE');
         expect(line.text).not.toContain('die-powered');
     });
 
     it('a real dieId reads as die-powered', () => {
-        const events: CombatEvent[] = [{ kind: 'card-played', cardId: 'spoiled-poultice', useBottom: true, dieId: 'die-0', advantage: 'advantage' }];
+        const events: CombatEvent[] = [{ kind: 'card-played', cardId: 'grey-strike', useBottom: true, dieId: 'die-0', advantage: 'advantage' }];
         const [line] = selectCombatLogHistory(stateWith(events));
         expect(line.text).toContain('die-powered');
     });
@@ -124,7 +124,7 @@ describe('selectCombatLogHistory — turn dividers', () => {
 describe('selectCombatLogHistory — caps at the most recent 200 entries', () => {
     it('a longer event stream is trimmed to the last 200, oldest first dropped', () => {
         const events: CombatEvent[] = Array.from({ length: 250 }, (_, i) => (
-            { kind: 'damage-dealt', cardId: 'spoiled-poultice', target: 'enemy', amount: i } as CombatEvent
+            { kind: 'damage-dealt', cardId: 'grey-strike', target: 'enemy', amount: i } as CombatEvent
         ));
         const history = selectCombatLogHistory(stateWith(events));
         expect(history).toHaveLength(200);

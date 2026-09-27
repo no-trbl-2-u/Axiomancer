@@ -32,7 +32,9 @@ import { buildCombatViewModel, type CombatViewModel } from '@/state/presenters/c
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
-const CARDS = ['spoiled-poultice', 'unction-of-boils', 'frostbitten-palisade', 'thin-hymn'];
+// A four-card hand off the grey office (the whole library since the card
+// purge, 2026-09-27).
+const CARDS = ['grey-strike', 'grey-ward', 'grey-word', 'grey-strike'];
 const PHONE = { width: 390, height: 844, scale: 3, fontScale: 1 };
 const INSETS = { top: 47, bottom: 34, left: 0, right: 0 };
 

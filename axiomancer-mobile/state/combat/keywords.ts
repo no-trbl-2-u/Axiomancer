@@ -52,6 +52,8 @@ const EFFECT_KEYWORD: Record<string, string> = {
     debuff_backfire: 'Backfire',
     debuff_quarter: 'Quarter',
     buff_thorns: 'Thorns',
+    // S3 (D43) — rebuilt for the grey office's A Plain Word.
+    debuff_vulnerable: 'Vulnerable',
     // ── KW-1 fold (phase 29): DoT-species ids that had no keyword home and
     // rendered the blank "◆ DIE" face. Presentation-only — no payloads
     // change. Of the cloud pass's six, four (argument_wound, echo_sting,
@@ -242,6 +244,8 @@ const KEYWORD_GLOSS: Record<string, string> = {
     Poison:
         'Each time a card is played, the foe loses 2 VITAE per Poison stack. The longer it holds, the harder it bites.',
     Bleed: 'Each hit the bearer takes deals 3 more VITAE per Bleed stack, then removes a stack.',
+    Vulnerable:
+        'The foe takes that much more damage from every hit. Adding more stacks it and refreshes the turns.',
     Doom:
         'Deals 1 VITAE per stack at the start of each round and grows a stack every time the foe acts. '
         + 'It ends only when consumed.',

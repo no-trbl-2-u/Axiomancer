@@ -17,7 +17,7 @@ import { CARD_RANK_NAMES } from '../types';
 import { CARD_THEMES } from '../card-themes';
 import type { Card } from '../types';
 import { COMBAT_REWARD_POOL, STARTING_CARD_IDS } from '../../Combat/combat.rewards';
-import { listDeckPresets, cardOrigin } from '../../Combat/combat.starter-deck-presets';
+import { listDeckPresets } from '../../Combat/combat.starter-deck-presets';
 
 /** The eight theme tags (Phase 104 added 'grey') — every card carries exactly one. */
 const THEMES = CARD_THEMES;
@@ -97,10 +97,6 @@ describe('profane canon — FREE/PAID anatomy', () => {
         }
     });
 
-    it('cardOrigin tags a non-preset id as a reward', () => {
-        expect(cardOrigin('no-such-card-not-in-any-preset').source).toBe('reward');
-    });
-
     it('oaths sit player-side; hexes attach to the enemy', () => {
         for (const card of cardLibrary.filter(c => c.cardType === 'oath')) {
             expect(card.targetType, `${card.id}`).toBe('self');
@@ -126,15 +122,16 @@ describe('profane canon — id hygiene and provenance', () => {
         }
     });
 
-    it('the starting set resolves, teaches a mechanic each, and is the 7/3 grey recipe', () => {
+    it('the starting set resolves, teaches a mechanic each, and is the 5/3/2 grey recipe', () => {
         // Phase 104 (the grey office) — a brand-new player's first ten cards
         // are two colourless shapes, not one card per stance colour: 'any'
         // means every die powers every starter, so the old three-colours-
         // represented law is superseded (there is no colour to fail to cover).
+        // S3 (T, 2026-09-27): Blow 5, Ward 3, A Plain Word 2 (D42, D43).
         expect(STARTING_CARD_IDS).toEqual([
-            'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike',
-            'grey-strike', 'grey-strike', 'grey-strike',
+            'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike',
             'grey-ward', 'grey-ward', 'grey-ward',
+            'grey-word', 'grey-word',
         ]);
         for (const id of STARTING_CARD_IDS) {
             const card = getCardById(id);
@@ -146,11 +143,13 @@ describe('profane canon — id hygiene and provenance', () => {
         expect([...aspects]).toEqual(['any']);
     });
 
-    it('the reward pool never seats a curse or a grey starter, and every id resolves', () => {
+    it('the reward pool never seats a curse, and every id resolves', () => {
+        // D44 (the card purge, 2026-09-27): the grey office IS the reward pool,
+        // so the old "never a grey starter" leg is repealed.
+        expect(COMBAT_REWARD_POOL.length).toBeGreaterThan(0);
         for (const id of COMBAT_REWARD_POOL) {
             expect(getCardById(id), `reward pool: ${id}`).toBeDefined();
             expect(getCardById(id)!.theme, `${id} — a curse is never a reward`).not.toBe('curse');
-            expect(getCardById(id)!.theme, `${id} — the grey office is never a reward`).not.toBe('grey');
         }
     });
 });

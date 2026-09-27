@@ -79,6 +79,7 @@ import {
     toCombatCard, cardStanceColor, effectImpact, riderText, statePredicateText,
 } from './combat.cards';
 import { recordAttribution } from './combat.attribution';
+import { scaleFor, scaleEffectIntensity, scaleCardForStats } from './stat-scaling';
 import { canAct, getActiveEffectModifiers, getActiveDotTotal, dotRoundClockPhase } from './effect-modifiers';
 import { getThreatSequence, commitThreatBranch } from './combat.threat';
 import { getSignatureSkill, applySignatureSkill, playerArchetype } from './combat.signature';
@@ -897,7 +898,9 @@ export function effectiveHide(enemy: Enemy, staggeredThisRound: boolean): number
  *   4. CHAIN — flat, the next hit only (the caller spends it)
  *   5. FLAY — +50%, consuming one stack (the caller spends it)
  *   6. EXECUTE — doubled while the foe is at or below the printed threshold
- *   7. HIDE — subtracted last, floor 1, unless the hit PIERCEs
+ *   7. VULNERABLE — the foe's incoming-damage multiplier (S3, D41: last of
+ *      the multipliers, uncapped). The caller scales `base` by body first.
+ *   8. HIDE — subtracted last, floor 1, unless the hit PIERCEs
  *
  * Multiplicative steps run before the flat armour subtraction so HIDE is a
  * genuine floor on small hits rather than a percentage tax on big ones.
@@ -912,6 +915,8 @@ export interface PlayerHitParams {
     execute: boolean;
     hide: number;
     pierce: boolean;
+    /** VULNERABLE on the foe (`getDamageTakenMultiplier`); 1 when absent. */
+    vulnMult?: number;
 }
 
 export function scalePlayerHit(params: PlayerHitParams): number {
@@ -933,6 +938,7 @@ export function scalePlayerHitDetailed(params: PlayerHitParams): { dmg: number; 
     dmg += params.chain;
     if (params.flay) dmg = Math.round(dmg * FLAY_DAMAGE_MULT);
     if (params.execute) dmg = Math.round(dmg * EXECUTE_DAMAGE_MULT);
+    if (params.vulnMult !== undefined && params.vulnMult !== 1) dmg = Math.round(dmg * params.vulnMult);
     let hideSoaked = 0;
     if (!params.pierce && params.hide > 0) {
         const armoured = Math.max(1, dmg - params.hide);
@@ -1252,10 +1258,14 @@ function applyRiderToState(
     // Manual-tick washouts (decaysPerTick instances spent by tickOne /
     // tickAllDots) — soul-worthy ones yield their expiry Soul below.
     const washedOutHere: ActiveEffect[] = [];
+    // S3 (D40–D41) — every number a rider prints scales by the stat of where
+    // it lands: damage by body, guard/barrier/heal by mind, a status by heart
+    // (on the foe) or mind (on you). See `stat-scaling.ts`.
+    const stats = player.baseStats;
 
-    if (r.guard) guard += r.guard;
+    if (r.guard) guard += scaleFor(r.guard, stats, 'mind', 'one-shot');
     let barrier = next.barrier ?? 0;
-    if (r.barrier) barrier += r.barrier;
+    if (r.barrier) barrier += scaleFor(r.barrier, stats, 'mind', 'one-shot');
     // ── THE BIG NUMBERS REWRITE — the damage family on a rider ───────────────
     // A rider fires on the FREE line and from condition payoffs, both OUTSIDE
     // the PAID line's read/colour-match scaling, so a rider hit takes WRATH,
@@ -1275,7 +1285,7 @@ function applyRiderToState(
     if (r.damage) {
         const hideBefore = effectiveHide(enemy, (next.staggerRungs ?? 0) > 0);
         const hit0 = scalePlayerHitDetailed({
-            base: r.damage,
+            base: scaleFor(r.damage, stats, 'body', 'one-shot'),
             readMult: 1,
             colorMatch: false,
             wrath,
@@ -1284,6 +1294,7 @@ function applyRiderToState(
             execute: false,
             hide: hideBefore,
             pierce: r.pierce === true,
+            vulnMult: getDamageTakenMultiplier(enemy),
         });
         const dmg = hit0.dmg;
         if (hit0.hideSoaked > 0) {
@@ -1316,7 +1327,7 @@ function applyRiderToState(
     }
     if (r.conviction) conviction = Math.min(CONVICTION_CAP, conviction + r.conviction);
     if (r.healHp) {
-        const healAmt = Math.round(r.healHp * getHealingReceivedMult(player));
+        const healAmt = Math.round(scaleFor(r.healHp, stats, 'mind', 'one-shot') * getHealingReceivedMult(player));
         if (healAmt > 0) {
             player = heal(player, healAmt);
             events.push({ kind: 'damage-dealt', cardId, target: 'self', amount: -healAmt });
@@ -1429,7 +1440,8 @@ function applyRiderToState(
             const toSelf = r.applyEffect.to === 'self';
             const bearer = toSelf ? player : enemy;
             const applied = applyEffect(bearer.effects, def, next.round, {
-                intensityDelta: r.applyEffect.intensity ?? 1,
+                intensityDelta: scaleEffectIntensity(def, r.applyEffect.intensity ?? 1, toSelf, stats),
+                uncapped: true,
                 ...(r.applyEffect.duration !== undefined
                     ? { durationMode: 'additive' as const, durationDelta: r.applyEffect.duration }
                     : {}),
@@ -1736,6 +1748,10 @@ function playBottomAction(
     // (even powered by wild), never off-colour.
     const colorMatch = card.stance !== 'any' && (powering.color === 'wild' || powering.color === card.stance);
     const poweringPips = powering.pips ?? 0;
+    // S3 (D40–D41) — the player's stats scale this play's printed numbers
+    // (`stat-scaling.ts`): DEAL by body, GUARD/barrier/heal by mind, statuses
+    // by where they land. Colour match and VULNERABLE stack on top.
+    const stats = state.player.baseStats;
     // Tracks blood-price HP taken THIS play (the recoil mechanics) for the
     // Akrasia DEBT ledger below (Phase 32 part 3).
     let recoilTaken = 0;
@@ -2026,7 +2042,7 @@ function playBottomAction(
     const landHit = (base: number, pierce: boolean, label: string): number => {
         const healthBefore = enemy.health;
         const scaled = scalePlayerHitDetailed({
-            base,
+            base: scaleFor(base, stats, 'body', 'one-shot'),
             readMult: 1,
             colorMatch,
             wrath,
@@ -2035,6 +2051,7 @@ function playBottomAction(
             execute: executeArmed,
             hide: effectiveHide(enemy, staggeredThisRound),
             pierce,
+            vulnMult,
         });
         const dmg = scaled.dmg;
         if (scaled.hideSoaked > 0) {
@@ -2825,7 +2842,7 @@ function playBottomAction(
         // engine never applied. Caught 2026-09-02 by the effectiveness pass.
         if (r.damage) {
             const scaled = scalePlayerHitDetailed({
-                base: r.damage,
+                base: scaleFor(r.damage, stats, 'body', 'one-shot'),
                 readMult: 1,
                 colorMatch,
                 wrath, chain,
@@ -2833,6 +2850,7 @@ function playBottomAction(
                 execute: executeArmed,
                 hide: effectiveHide(enemy, staggeredThisRound),
                 pierce: r.pierce === true,
+                vulnMult,
             });
             const dmg = scaled.dmg;
             if (scaled.hideSoaked > 0) {
@@ -2864,7 +2882,7 @@ function playBottomAction(
             flayStacks += r.flay;
             events.push({ kind: 'flay-applied', cardId: card.id, amount: r.flay, total: flayStacks });
         }
-        if (r.guard) riderGuard += r.guard;
+        if (r.guard) riderGuard += scaleFor(r.guard, stats, 'mind', 'one-shot');
         if (r.conviction) conviction = Math.min(CONVICTION_CAP, conviction + r.conviction);
         if (r.refreshDie) riderRefresh = true;
         if (r.revealStance) {
@@ -2940,7 +2958,8 @@ function playBottomAction(
                 const toSelf = r.applyEffect.to === 'self';
                 const bearer = toSelf ? player : enemy;
                 const applied = applyEffect(bearer.effects, def, state.round, {
-                    intensityDelta: r.applyEffect.intensity ?? 1,
+                    intensityDelta: scaleEffectIntensity(def, r.applyEffect.intensity ?? 1, toSelf, stats),
+                    uncapped: true,
                     ...(r.applyEffect.duration !== undefined
                         ? { durationMode: 'additive' as const, durationDelta: r.applyEffect.duration }
                         : {}),
@@ -2964,7 +2983,7 @@ function playBottomAction(
             };
         }
         if (r.healHp) {
-            const healAmt = Math.round(r.healHp * getHealingReceivedMult(state.player));
+            const healAmt = Math.round(scaleFor(r.healHp, stats, 'mind', 'one-shot') * getHealingReceivedMult(state.player));
             if (healAmt > 0) {
                 player = heal(player, healAmt);
                 events.push({ kind: 'damage-dealt', cardId: card.id, target: 'self', amount: -healAmt });
@@ -3073,12 +3092,12 @@ function playBottomAction(
         events.push({ kind: 'pips-cashed', cardId: card.id, pips: poweringPips, bonus: 'guard', amount: pipGuard });
     }
     const guardGain = (guardMech
-        ? (() => { const b = Math.max(1, Math.round(guardMech.amount)); return b + (colorMatch ? colorMatchBonus(b) : 0); })()
+        ? (() => { const b = scaleFor(Math.max(1, Math.round(guardMech.amount)), stats, 'mind', 'one-shot'); return b + (colorMatch ? colorMatchBonus(b) : 0); })()
         : 0) + riderGuard + pipGuard + pipGuardExtra;
     // BARRIER — a STACKING, persistent soak (distinct from one-shot guard).
     const barrierMech = mechs.find(m => m.kind === 'barrier') as { kind: 'barrier'; amount: number } | undefined;
     const barrierGain = barrierMech
-        ? (() => { const b = Math.max(1, Math.round(barrierMech.amount)); return b + (colorMatch ? colorMatchBonus(b) : 0); })()
+        ? (() => { const b = scaleFor(Math.max(1, Math.round(barrierMech.amount)), stats, 'mind', 'one-shot'); return b + (colorMatch ? colorMatchBonus(b) : 0); })()
         : 0;
     // RIPOSTE — arm the counter-stance (spec 32 v3: fires only on a FULL block —
     // see `resolveThreatPhase`); a prior arming this phase survives.
@@ -4820,8 +4839,15 @@ export { buildCombatSummary } from './combat.attribution';
 
 /** Cards in hand, projected to their views (for the UI hand display, §7.3). */
 export function handCards(state: CombatEncounterState): Array<{ uid: string; card: CombatCard }> {
+    // S3 — the hand prints FINAL numbers: each card is built from its
+    // stat-scaled copy (display only; play always executes the library card).
+    const stats = state.player.baseStats;
+    const scaledLookup = (id: string) => {
+        const c = lookupCard(id);
+        return c ? scaleCardForStats(c, stats) : c;
+    };
     return state.hand
-        .map(h => ({ uid: h.uid, card: getCard(h.cardId) }))
+        .map(h => ({ uid: h.uid, card: toCombatCard(h.cardId, scaledLookup, lookupEffectDef) }))
         .filter((x): x is { uid: string; card: CombatCard } => x.card !== null);
 }
 

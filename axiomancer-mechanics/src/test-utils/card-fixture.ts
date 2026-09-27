@@ -38,14 +38,17 @@ import { cardLibrary } from '../Cards/cards.library';
 
 /** Filler deck/draw-pile content: a real, always-playable spell, so `drawCards`
  *  riders never starve regardless of how many cards a given test draws. */
-export const FIXTURE_FILLER: readonly string[] = Array<string>(12).fill('spoiled-poultice');
+export const FIXTURE_FILLER: readonly string[] = Array<string>(12).fill('grey-strike');
 export const FIXTURE_SEED = 20260708;
 
 export function buildFixtureState(options: { clean?: boolean } = {}): CombatEncounterState {
     const clean = options.clean ?? false;
 
     const player: Character = deepClone(Player);
-    player.baseStats = { heart: 10, body: 10, mind: 10 };
+    // NEUTRAL stats (S3, D41): 5 leaves every printed number as printed, so a
+    // card test asserts the card's own numbers. Stat scaling has its own
+    // suite (`Combat/e2e/stat-scaling.engine.test.ts`).
+    player.baseStats = { heart: 5, body: 5, mind: 5 };
     player.level = 20;
     // executeCard's ownership gate requires the played card in knownCards
     // (or combatRewardCards) — own the whole library so any card id is legal.
@@ -110,14 +113,14 @@ export function buildFixtureState(options: { clean?: boolean } = {}): CombatEnco
         omenHits: 0,
         echoNextSpell: false,
         spellsPlayedThisTurn: 0,
-        lastSpellCardId: 'spoiled-poultice', // a real, different, replayable spell (REPLAY fodder)
+        lastSpellCardId: 'grey-strike', // a real, different, replayable spell (REPLAY fodder)
         // Phase 39 (2026-08-08): REPLAY_LAST's precondition-width
         // retune requires `lastSpellRound === round` ("landed THIS turn") —
         // the fixture's `round` is 1 (initializeCombatEncounter's default).
         lastSpellRound: 1,
         persistentZone: [],
         enemyAttachments: [],
-        discard: ['spoiled-poultice', 'thin-hymn', 'the-long-lent'], // RECALL fodder (canon re-slug 2026-08-08)
+        discard: ['grey-strike', 'grey-ward', 'grey-word'], // RECALL fodder (the grey office since the purge)
         drawPile: FIXTURE_FILLER.slice(),
         deck: FIXTURE_FILLER.slice(),
         hand: [],

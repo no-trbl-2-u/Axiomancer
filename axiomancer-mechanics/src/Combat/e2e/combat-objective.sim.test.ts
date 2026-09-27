@@ -36,7 +36,8 @@ import {
 
 afterEach(() => vi.restoreAllMocks());
 
-const DECK = ['spoiled-poultice', 'chilblain-watch', 'thin-hymn', 'first-spadeful', 'thumbprick-oath'];
+// The card purge (P1, 2026-09-27): the grey office is the whole library.
+const DECK = ['grey-strike', 'grey-strike', 'grey-ward', 'grey-ward', 'grey-word'];
 
 function loadout(cards: readonly string[]): Character {
     const p = deepClone(Player);
@@ -96,18 +97,27 @@ describe('objective v2 — the LOCKED systems are exercised in real play', () =>
         expect(pooled.convictionSpent, 'Conviction is never spent').toBeGreaterThan(0);
         expect(pooled.signatureCasts).toBeGreaterThan(0);
 
-        // Surge meter — the chain is driven and at least sometimes completes.
-        expect(pooled.momentumAdvances, 'the momentum chain never advances').toBeGreaterThan(0);
-        expect(pooled.surges, 'no chain ever surges').toBeGreaterThan(0);
+        // Surge meter — CANARY since the card purge (P1, 2026-09-27): the grey
+        // office is colourless (`color: 'any'`), so no shipped card sets a
+        // chain stance and the momentum chain cannot advance (measured 0).
+        // When a guided session adds a coloured card this goes red: flip it
+        // back to `> 0` for both counters (the pre-purge guard).
+        expect(pooled.momentumAdvances, 'the momentum chain advances again — restore the > 0 guard').toBe(0);
+        expect(pooled.surges, 'a chain surges again — restore the > 0 guard').toBe(0);
 
         // Dice — rolled, spent, and the die ECONOMY is touched (not just rolled).
         expect(pooled.diceRolled).toBeGreaterThan(0);
         expect(pooled.diceSpent, 'rolled dice never power a line').toBeGreaterThan(0);
         expect(diceEconomyBreadth(pooled), 'the die economy is never played').toBeGreaterThan(0);
 
-        // …and therefore every locked sub-score is live rather than structurally 0.
+        // …and therefore every locked sub-score is live rather than structurally
+        // 0 — except 'surge', dead with the coloured cards (canary above).
         const score = scoreCombatObjective(pooled);
         for (const term of LOCKED_MECHANIC_TERMS) {
+            if (term === 'surge') {
+                expect(score.spineComponents[term], 'surge is live again — restore the > 0 guard').toBe(0);
+                continue;
+            }
             expect(score.spineComponents[term], `locked sub-score '${term}' is dead`).toBeGreaterThan(0);
         }
     }, 120_000);
@@ -115,14 +125,13 @@ describe('objective v2 — the LOCKED systems are exercised in real play', () =>
     it('silencing a locked system in the MEASURED telemetry costs real score', () => {
         const pooled = poolObjectiveTelemetry(report().cells.map(c => c.stats.objectiveTelemetry));
         const live = scoreCombatObjective(pooled);
-        for (const term of LOCKED_MECHANIC_TERMS) {
+        // 'surge' is structurally 0 in the grey-office tree (see the canary
+        // above), so silencing it can cost nothing; every LIVE term must.
+        for (const term of LOCKED_MECHANIC_TERMS.filter(t => t !== 'surge')) {
             const blinded = { ...pooled, diceEconomyVerbs: { ...pooled.diceEconomyVerbs } };
             if (term === 'conviction') {
                 blinded.convictionGained = 0;
                 blinded.convictionSpent = 0;
-            } else if (term === 'surge') {
-                blinded.momentumAdvances = 0;
-                blinded.surges = 0;
             } else {
                 blinded.diceSpent = 0;
                 blinded.diceEconomyVerbs = {};

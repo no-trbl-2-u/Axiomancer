@@ -57,9 +57,6 @@ export function getThornsReflect(bearer: Combatant): number {
 // behavior itself is owned by `combat.engine.ts`. Kept here (a writable,
 // non-engine home) so the tuning loops can rebalance them by simulation.
 
-/** VULNERABLE — hard ceiling on the outgoing-damage multiplier against a marked
- *  target. Conservative for burst (a marked foe takes at most ×2.0). Tunable. */
-export const VULNERABLE_MAX_MULT = 2.0;
 /** RESOLUTE — hard floor on the incoming-damage multiplier for a protected
  *  bearer (a fully-stacked protective mult still lets half the hit through).
  *  P0-truth: protective (`damageTakenMult < 1`) payloads are REAL now. Tunable. */
@@ -304,7 +301,8 @@ export function bossRungGrowthCap(naturalRungs: number): number {
  * to every HP source landing on this bearer. Aggregated additively across the
  * bearer's OWN `damageTakenMult` payloads:
  *   mult = 1 + Σ ((damageTakenMult - 1) × intensity)
- * clamped to `[RESOLUTE_MIN_MULT, VULNERABLE_MAX_MULT]`. Returns EXACTLY `1`
+ * floored at `RESOLUTE_MIN_MULT` and UNCAPPED above (S3, D41: the old ×2.0
+ * `VULNERABLE_MAX_MULT` ceiling is gone). Returns EXACTLY `1`
  * when the bearer carries no marker, so unmarked HP assertions are byte-identical.
  * P0-truth: the old `Math.max(1, …)` clamp silently erased every protective
  * (<1) payload — `buff_resolute` and self-`debuff_vulnerable` are real now. Pure.
@@ -317,7 +315,7 @@ export function getDamageTakenMultiplier(bearer: Combatant): number {
         if (dtm === undefined) continue;
         mult += (dtm - 1) * (ae.intensity ?? 1);
     }
-    return Math.min(VULNERABLE_MAX_MULT, Math.max(RESOLUTE_MIN_MULT, mult));
+    return Math.max(RESOLUTE_MIN_MULT, mult);
 }
 
 /**
@@ -412,7 +410,7 @@ export function consumeEffect<T extends Combatant>(bearer: T, effectId: string):
  * Fate Engine P1 (spec 31 §3.1 #17) — STANCE-KEYED VULNERABLE: the extra
  * multiplier the bearer takes from plays powered by a die of `dieColor` (Wild
  * matches every stance; X matches none). Composes multiplicatively with the
- * plain `damageTakenMult` aggregate; clamped to `[1, VULNERABLE_MAX_MULT]`.
+ * plain `damageTakenMult` aggregate; floored at 1, uncapped (S3, D41).
  * Exactly 1 for an unmarked bearer or an un-keyed die. Pure.
  */
 export function getStanceVulnMult(bearer: Combatant, dieColor: string): number {
@@ -425,7 +423,7 @@ export function getStanceVulnMult(bearer: Combatant, dieColor: string): number {
             mult += (keyed.mult - 1) * (ae.intensity ?? 1);
         }
     }
-    return Math.min(VULNERABLE_MAX_MULT, Math.max(1, mult));
+    return Math.max(1, mult);
 }
 
 /** True when the bearer carries a given payload flag (P0-truth gate reads). */

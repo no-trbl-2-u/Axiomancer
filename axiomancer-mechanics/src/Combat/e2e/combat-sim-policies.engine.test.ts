@@ -71,7 +71,8 @@ const ALL_POLICY_IDS: readonly CombatSimPolicyId[] = [
 function loadout(cards: string[]): Character {
     const p = deepClone(Player);
     p.knownCards = cards.slice();
-    p.baseStats = { heart: 10, body: 10, mind: 10 };
+    // Neutral stats (S3): printed numbers land as printed.
+    p.baseStats = { heart: 5, body: 5, mind: 5 };
     p.health = 150;
     p.maxHealth = 150;
     return p;
@@ -84,7 +85,13 @@ function loadout(cards: string[]): Character {
 //  recurring-symptom — same theme, same body aspect), scolds-bridle
 //  (STAGGER + BACKFIRE control, was red-herring), chilblain-watch (guard
 //  starter, was brace-for-impact).)
-const MIX = ['spoiled-poultice', 'unction-of-boils', 'scolds-bridle', 'chilblain-watch'];
+//
+// The card purge (P1, 2026-09-27): the library is the grey office alone, so
+// MIX is its three roles — A Plain Word (the VULNERABLE status card), two
+// Plain Blows (direct damage), A Plain Ward (GUARD).
+const MIX = ['grey-word', 'grey-strike', 'grey-strike', 'grey-ward'];
+/** The status card of MIX (VULNERABLE) — the seat the DoT starter held. */
+const STATUS_CARD = 'grey-word';
 
 function card(id: string): CombatCard {
     const projected = toCombatCard(id, getCardById, lookupEffect);
@@ -133,7 +140,7 @@ describe('policy roster — every id resolves', () => {
     it('aggro-brute is the doctrinal weak baseline: pure damage preview, no status awareness', () => {
         const s = freshState();
         const brute = COMBAT_SIM_POLICIES['aggro-brute'];
-        const dot = card('spoiled-poultice');
+        const dot = card(STATUS_CARD);
         const plain = card(QA_STATUSLESS);
         // The brute ranks strictly by preview — it does NOT put status first.
         expect(brute.rankCard(s, dot, forbiddenRng)).toBe(dot.bottomDamagePreview);
@@ -144,13 +151,13 @@ describe('policy roster — every id resolves', () => {
 describe('greedy rankCard — the legacy ordering as scores (doctrine: status > everything)', () => {
     it('ranks a status card above a statusless card', () => {
         const s = freshState();
-        expect(COMBAT_SIM_POLICIES.greedy.rankCard(s, card('spoiled-poultice'), forbiddenRng))
+        expect(COMBAT_SIM_POLICIES.greedy.rankCard(s, card(STATUS_CARD), forbiddenRng))
             .toBeGreaterThan(COMBAT_SIM_POLICIES.greedy.rankCard(s, card(QA_STATUSLESS), forbiddenRng));
     });
 
     it('ranks a status NEW to the board above the same status already applied', () => {
         const s = freshState();
-        const dot = card('spoiled-poultice');
+        const dot = card(STATUS_CARD);
         const freshScore = COMBAT_SIM_POLICIES.greedy.rankCard(s, dot, forbiddenRng);
         const applied = deepClone(s);
         applied.enemy.effects = [
@@ -166,10 +173,10 @@ describe('greedy rankCard — the legacy ordering as scores (doctrine: status > 
         low.enemy.health = 1;
         const greedy = COMBAT_SIM_POLICIES.greedy;
         expect(greedy.rankCard(low, card(QA_BEFRIEND), forbiddenRng))
-            .toBeGreaterThan(greedy.rankCard(low, card('spoiled-poultice'), forbiddenRng));
+            .toBeGreaterThan(greedy.rankCard(low, card(STATUS_CARD), forbiddenRng));
         // ...but NOT before that (status play stays the default game).
         expect(greedy.rankCard(s, card(QA_BEFRIEND), forbiddenRng))
-            .toBeLessThan(greedy.rankCard(s, card('spoiled-poultice'), forbiddenRng));
+            .toBeLessThan(greedy.rankCard(s, card(STATUS_CARD), forbiddenRng));
     });
 });
 
@@ -240,12 +247,16 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // the first — these pins included — silently measured the deleted
     // draft-era model. First honest spec-33 measurement: same one-round
     // victory, fewer status lands (3→1).
+    //
+    // Re-measured after the card purge (P1, 2026-09-27): MIX is the grey
+    // office (see the MIX comment above) — a five-round victory, 24 plays,
+    // 5 VULNERABLE lands, all from A Plain Word.
     it('seed 11 vs LittleBelle: a status victory', () => {
         const r = runOneEncounter(loadout(MIX), LittleBelle, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 1, plays: 5, statusPlays: 1 });
-        expect(r.cardUsage['spoiled-poultice']).toEqual({
-            cardId: 'spoiled-poultice', plays: 1, bottomPlays: 0, topPlays: 1, statusLands: 0, discards: 0,
+            .toEqual({ outcome: 'victory', rounds: 5, plays: 24, statusPlays: 5 });
+        expect(r.cardUsage['grey-word']).toEqual({
+            cardId: 'grey-word', plays: 6, bottomPlays: 5, topPlays: 1, statusLands: 5, discards: 0,
         });
         // Telemetry stays internally consistent whatever the sequence is: the
         // per-card counters sum to the aggregates (the actual bug detector).
@@ -286,10 +297,13 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // Re-measured 2026-09-25 (D7 flag collapse, see the LittleBelle pin
     // above): the first spec-33 measurement of this line — a three-round
     // victory (plays 11, statusPlays 2).
-    it('seed 11 vs KingOfRevenge: a status victory (Gate 0 law: one tray per phase)', () => {
+    // Re-measured after the card purge (P1, 2026-09-27): the grey MIX at 5/5/5
+    // loses this line in four rounds (plays 20, statusPlays 4). A fidelity
+    // pin, not a balance gate — the grey office is the deck you outgrow.
+    it('seed 11 vs KingOfRevenge: the pinned sequence (Gate 0 law: one tray per phase)', () => {
         const r = runOneEncounter(loadout(MIX), KingOfRevenge, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 3, plays: 11, statusPlays: 2 });
+            .toEqual({ outcome: 'defeat', rounds: 4, plays: 20, statusPlays: 4 });
         // Determinism, not balance: the same seed must reproduce the same
         // sequence byte-for-byte. (The exact figures above are a fidelity
         // measurement of the CURRENT library + engine and are expected to be
@@ -307,7 +321,7 @@ describe('chaos — randomness flows only through the injected seeded rng', () =
         const s = freshState();
         let calls = 0;
         const rng = (): number => { calls++; return 0.42; };
-        const score = COMBAT_SIM_POLICIES.chaos.rankCard(s, card('spoiled-poultice'), rng);
+        const score = COMBAT_SIM_POLICIES.chaos.rankCard(s, card(STATUS_CARD), rng);
         expect(calls).toBe(1);
         expect(score).toBe(0.42);
         expect(COMBAT_SIM_POLICIES.chaos.rankSignature).toBeDefined();
@@ -342,7 +356,7 @@ describe('per-card telemetry — cardUsage is consistent with the aggregate coun
     });
 
     it('respects an explicit deck: only its ids appear in usage', () => {
-        const deck = ['spoiled-poultice', 'spoiled-poultice', 'chilblain-watch'];
+        const deck = ['grey-word', 'grey-word', 'grey-ward'];
         const allowed = new Set(deck);
         const r = runOneEncounter(loadout(MIX), LittleBelle, 4, 'greedy', { deck });
         expect(Object.keys(r.cardUsage).length).toBeGreaterThan(0);
@@ -352,14 +366,14 @@ describe('per-card telemetry — cardUsage is consistent with the aggregate coun
     });
 
     it('focusCardIds boosts a card to the front of ranking so it gets exercised', () => {
-        // Greedy would normally power the DoT before the guard; the focus
-        // boost must force the guard into play (the card-coverage lever).
-        const deck = ['spoiled-poultice', 'chilblain-watch', 'chilblain-watch', 'hoarfrost-teeth'];
+        // Greedy would normally power the status card before the guard; the
+        // focus boost must force the guard into play (the card-coverage lever).
+        const deck = ['grey-word', 'grey-ward', 'grey-ward', 'grey-strike'];
         const r = runOneEncounter(loadout(deck), LittleBelle, 6, 'greedy', {
-            deck, focusCardIds: ['chilblain-watch'],
+            deck, focusCardIds: ['grey-ward'],
         });
-        expect(r.cardUsage['chilblain-watch']?.plays ?? 0).toBeGreaterThanOrEqual(1);
-        expect(r.cardUsage['chilblain-watch']?.bottomPlays ?? 0).toBeGreaterThanOrEqual(1);
+        expect(r.cardUsage['grey-ward']?.plays ?? 0).toBeGreaterThanOrEqual(1);
+        expect(r.cardUsage['grey-ward']?.bottomPlays ?? 0).toBeGreaterThanOrEqual(1);
     });
 
     it('throws on an unknown policy id (honest failure, no silent fallback)', () => {
@@ -405,8 +419,11 @@ describe('strikeAddsAt decision seam — upgradeablePlayPhase (combat.encounter.
         };
     }
 
-    function broodState(over: Partial<CombatEncounterState> = {}): CombatEncounterState {
-        const initial = initializeCombatEncounter(loadout(MIX), deepClone(GraveLarva), undefined, 5);
+    function broodState(
+        over: Partial<CombatEncounterState> = {},
+        deck: string[] = MIX,
+    ): CombatEncounterState {
+        const initial = initializeCombatEncounter(loadout(deck), deepClone(GraveLarva), deck, 5);
         return {
             ...rollEncounterDice(initial).state,
             conviction: 12,
@@ -455,16 +472,24 @@ describe('strikeAddsAt decision seam — upgradeablePlayPhase (combat.encounter.
         // Fixture: guard 2 at the top of the phase leaves this small brood
         // getting through (addNetDamage 2 >= strikeAddsAt 1), but the wall the
         // phase itself buys takes addNetDamage to 0.
+        // The card purge (P1, 2026-09-27): a Plain Ward walls far less than
+        // chilblain-watch did, so this fixture deals a ward-heavy grey deck
+        // (three Wards + a Word) — MIX's single Ward buys 2 GUARD this phase,
+        // short of the 7 the threat + brood need.
         const state = broodState({
             guard: 2,
             adds: [
                 { id: 'a1', name: 'QA Shoot', vitae: 1, maxVitae: 1, bite: 1 },
                 { id: 'a2', name: 'QA Bough', vitae: 1, maxVitae: 1, bite: 1 },
             ],
-        });
+        }, ['grey-word', 'grey-ward', 'grey-ward', 'grey-ward']);
+        expect(
+            projectIncomingThreat(state).addNetDamage,
+            'fixture premise: the brood gets through the top-of-phase wall',
+        ).toBeGreaterThanOrEqual(1);
         const result = upgradeablePlayPhase(state, stubPolicy(1), () => 0.5, {}, {});
 
-        // Asserted UNCONDITIONALLY: if MIX's draw order or chilblain-watch's
+        // Asserted UNCONDITIONALLY: if this deck's draw order or grey-ward's
         // guard ever changes, this fails loudly on its own premise rather than
         // passing vacuously.
         expect(

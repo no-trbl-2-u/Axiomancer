@@ -68,17 +68,26 @@ describe('createNewGameState — no starting-loadout seed (v23)', () => {
 
     it('the dealt deck is exactly the starter bundle written to knownCards', () => {
         const fresh = createNewGameState();
-        const bundle = buildPresetDeck('threadbare');
-        expect(bundle.length).toBeGreaterThan(MIN_COMBAT_DECK_SIZE);
+        const bundle = buildPresetDeck('grey');
+        expect(bundle.length).toBeGreaterThanOrEqual(MIN_COMBAT_DECK_SIZE);
         const player = { ...fresh.player, knownCards: bundle, combatRewardCards: [] };
         expect(buildCombatDeck(player, fresh.flags)).toEqual(bundle);
     });
 
-    it('a rest-node CUT is legal on a fresh bundle (the floor is no longer hit)', () => {
+    // Re-fixtured after the card purge (P1, 2026-09-27): the fresh grey deck
+    // sits exactly AT the floor (10 = MIN_COMBAT_DECK_SIZE), so the first CUT
+    // is legal after the first reward card (card.removal.ts). The legacy seed
+    // shadowed that bundle with 4 cards and kept the deck under the floor.
+    it('a rest-node CUT is legal once the bundle holds one reward (the seed no longer shadows it)', () => {
         const fresh = createNewGameState();
-        const player = { ...fresh.player, knownCards: buildPresetDeck('threadbare'), combatRewardCards: [] };
-        const cut = removeCardFromCombatDeck(player, 'spoiled-poultice', fresh.flags);
+        const player = {
+            ...fresh.player, knownCards: buildPresetDeck('grey'), combatRewardCards: ['grey-strike'],
+        };
+        const cut = removeCardFromCombatDeck(player, 'grey-strike', fresh.flags);
         expect(cut.ok).toBe(true);
+        // The same player under the legacy seed flags is dealt 4 + 1 and refused.
+        const seeded = removeCardFromCombatDeck(player, 'grey-strike', [...fresh.flags, ...legacySeedFlags()]);
+        expect(seeded.ok).toBe(false);
     });
 });
 
@@ -114,8 +123,10 @@ describe('migrate v22 → v23 — strip the starting-loadout seed', () => {
     });
 
     it('REPRO: the seed dealt a starter the bundle lacked and executeCard threw; v23 does not', () => {
-        // A themed bundle that does NOT contain the seeded `thin-hymn`.
-        const bundle = buildPresetDeck('pilgrim').filter(id => id !== 'thin-hymn');
+        // The grey bundle does NOT contain the seeded `thin-hymn`.
+        const bundle = buildPresetDeck('grey');
+        expect(bundle.length).toBeGreaterThan(0);
+        expect(bundle).not.toContain('thin-hymn');
         expect(LEGACY_V22_SEED_IDS).toContain('thin-hymn');
         const raw = v22Save();
         const before = migrate(raw, 22, 22);

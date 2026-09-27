@@ -6,7 +6,7 @@
  * forward themselves.
  */
 
-import { Character } from '../Character/types';
+import { BaseStats, Character } from '../Character/types';
 import { Enemy } from '../Enemy/types';
 import { ActiveEffect, Effect } from '../Effects/types';
 import { lookupEffect, applyEffect } from '../Effects';
@@ -15,6 +15,7 @@ import { resolveEffectApplication } from '../Combat/resist';
 import { incrementFriendship } from '../Combat/combat.reducer';
 import { isBefriendAttemptEligible } from '../Combat/index';
 import { Combatant, CombatState } from '../Combat/types';
+import { scaleEffectIntensity } from '../Combat/stat-scaling';
 import {
     Card, CardCombatEffects,
     CardSpecialMechanic,
@@ -175,6 +176,7 @@ export function executeCard(
     for (const payload of card.combatEffects ?? []) {
         const result = applyCardEffect(
             payload, card, workingCaster, workingTarget, state.round,
+            isPlayerCaster ? state.player.baseStats : undefined,
         );
         workingCaster = result.caster;
         workingTarget = result.target;
@@ -254,6 +256,9 @@ function applyCardEffect(
     caster: Combatant,
     target: Combatant,
     round: number,
+    /** The player's stats when the player cast it (S3); enemies pass none,
+     *  so their printed intensities apply as authored. */
+    playerStats?: BaseStats,
 ): CardEffectResult {
     const events: CardEvent[] = [];
     const effect = lookupEffect(payload.effectId);
@@ -263,7 +268,9 @@ function applyCardEffect(
 
     const targetIsSelf = payload.appliedTo === 'self';
     const effectTarget: Combatant = targetIsSelf ? caster : target;
-    const intensityOverride = payload.intensity;
+    const intensityOverride = playerStats
+        ? scaleEffectIntensity(effect, payload.intensity ?? 1, targetIsSelf, playerStats)
+        : payload.intensity;
     const durationOverride  = payload.duration;
 
     const built = buildActiveEffect(effect, round, intensityOverride, durationOverride);
@@ -292,7 +299,7 @@ function applyCardEffect(
 
     const applied = applyEffect(
         effectTarget.effects, effect, round,
-        { ...buildApplyOptions(appliedIntensity, appliedDuration), sourceId: caster.id },
+        { ...buildApplyOptions(appliedIntensity, appliedDuration), sourceId: caster.id, uncapped: playerStats !== undefined },
     );
 
     events.push({

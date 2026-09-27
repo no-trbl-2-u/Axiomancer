@@ -31,6 +31,8 @@ const BOLT: GlyphShape = { d: 'M13 2 L5 13 H10 L8 22 L19 9 H13 L15 2 Z' };
 // never read as a generic fallback (owner feedback 2026-07-16).
 const CROSSHAIR: GlyphShape = { d: 'M12 3.5 A8.5 8.5 0 1 0 12 20.5 A8.5 8.5 0 1 0 12 3.5 Z M12 6 A6 6 0 1 0 12 18 A6 6 0 1 0 12 6 Z M12 9.25 A2.75 2.75 0 1 0 12 14.75 A2.75 2.75 0 1 0 12 9.25 Z M11 0.5 H13 V3 H11 Z M11 21 H13 V23.5 H11 Z M0.5 11 H3 V13 H0.5 Z M21 11 H23.5 V13 H21 Z', evenodd: true };
 const SHIELD: GlyphShape = { d: 'M12 2 L21 5 V12 C21 17 17 21 12 22 C7 21 3 17 3 12 V5 Z' };
+// VULNERABLE (S3, D43) — the shield, split by a crack: the foe's guard is open.
+const CRACKED_SHIELD: GlyphShape = { d: 'M12 2 L21 5 V12 C21 17 17 21 12 22 C7 21 3 17 3 12 V5 Z M12.6 4.2 L10 9.5 L13.4 11.4 L10.4 19.6 L11.6 19.8 L15.4 10.8 L12 9 L14 4.4 Z', evenodd: true };
 const HEART: GlyphShape = { d: 'M12 21 C5 16 3 12 3 8 A4.6 4.6 0 0 1 12 7 A4.6 4.6 0 0 1 21 8 C21 12 19 16 12 21 Z' };
 const CARD_SHEET: GlyphShape = { d: 'M7 2 H17 A1.5 1.5 0 0 1 18.5 3.5 V20.5 A1.5 1.5 0 0 1 17 22 H7 A1.5 1.5 0 0 1 5.5 20.5 V3.5 A1.5 1.5 0 0 1 7 2 Z M8 4.5 H16 V11 H8 Z', evenodd: true };
 const HOURGLASS: GlyphShape = { d: 'M6 2 H18 V6 L13.5 12 L18 18 V22 H6 V18 L10.5 12 L6 6 Z' };
@@ -68,6 +70,7 @@ export const GLYPH_SHAPES: Record<string, GlyphShape> = {
     PETRIFY: STONE,
     GRACE_MOMENTUM: CHEVRONS_RIGHT,
     MARK: CROSSHAIR,
+    VULNERABLE: CRACKED_SHIELD,
     BACKFIRE: RETURN_ARROW,
     QUARTER: SPEECH,
     STUN: BURST, RUPTURE: BURST, THORNS: BURST,

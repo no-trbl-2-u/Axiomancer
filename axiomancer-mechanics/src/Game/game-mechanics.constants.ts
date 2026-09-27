@@ -8,7 +8,8 @@
 // CHARACTER — RESOURCE CALCULATIONS
 // ============================================================================
 // THE BIG NUMBERS REWRITE (2026-09-02) — the player's VITAE pool.
-// Formula: VITAE = PLAYER_VITAE_BASE + (body + heart + mind) × HEALTH_PER_STAT.
+// Formula: VITAE = PLAYER_VITAE_BASE + 12·body + 6·mind + 6·heart (S3, D41:
+// body is the hardy stat; 170 at 5/5/5, as before).
 // The flat base keeps a level-1 pilgrim alive long enough to see a second
 // telegraph now that enemy threats open in the high single digits; the
 // per-stat term is what progression buys. Level influences VITAE through the
@@ -16,7 +17,9 @@
 // Reference points: level 1 ≈ 100, level 3 ≈ 120, level 18 ≈ 350.
 
 export const RESOURCE_MULTIPLIERS = {
-    HEALTH_PER_STAT: 8,
+    VITAE_PER_BODY: 12,
+    VITAE_PER_MIND: 6,
+    VITAE_PER_HEART: 6,
 } as const;
 
 /** Flat floor added to every player VITAE pool before the per-stat term. */

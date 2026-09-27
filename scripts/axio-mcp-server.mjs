@@ -141,7 +141,7 @@ function extractDoctrine() {
   // that DEAL is a first-class verb. Those are the paragraphs agents must read
   // as current law; everything older was repealed.
   return paragraphs.filter((p) =>
-    /THREE SURVIVING CONSTRAINTS|no rank band|Direct damage is a first-class verb/.test(p))
+    /SURVIVING CONSTRAINTS|no rank band|Direct damage is a first-class verb/.test(p))
 }
 
 // --- tools ------------------------------------------------------------------

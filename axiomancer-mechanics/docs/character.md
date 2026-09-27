@@ -23,7 +23,7 @@ save migration strips them from old saves.
 ## Resources
 
 ```
-maxHealth = PLAYER_VITAE_BASE (50) + (body + heart + mind) × HEALTH_PER_STAT (8)
+maxHealth = PLAYER_VITAE_BASE (50) + 12·body + 6·mind + 6·heart   (S3, D41)
 ```
 
 Health starts at max on character creation. Cards run on the resonance

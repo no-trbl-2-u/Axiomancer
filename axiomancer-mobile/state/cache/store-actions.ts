@@ -150,7 +150,7 @@ export function claimLootCacheChoiceOutcomeAction(store: AppStore): ClaimLootCac
             // guards (knownCards-includes / flags-includes), not `===`, so a
             // save that already held a qualifying tally before this shipped
             // self-heals on its next sacrifice claim.
-            if (goodwill! >= GOODWILL_ALLY_THRESHOLD && !player.knownCards.includes(GOODWILL_ALLY_CARD_ID)) {
+            if (GOODWILL_ALLY_CARD_ID && goodwill! >= GOODWILL_ALLY_THRESHOLD && !player.knownCards.includes(GOODWILL_ALLY_CARD_ID)) {
                 player = unlockCardViaDilemma(player, GOODWILL_ALLY_CARD_ID);
             }
 

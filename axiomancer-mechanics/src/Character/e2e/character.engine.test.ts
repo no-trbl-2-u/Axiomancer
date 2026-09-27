@@ -72,7 +72,7 @@ const armorMaxHpLarge = (): Equipment => ({
 
 /** VITAE of the bare `buildBaseStats()` player (no worn maxHp). */
 const bareMaxHealth = (): number =>
-    PLAYER_VITAE_BASE + (3 + 4 + 2) * RESOURCE_MULTIPLIERS.HEALTH_PER_STAT;
+    PLAYER_VITAE_BASE + 3 * RESOURCE_MULTIPLIERS.VITAE_PER_BODY + 2 * RESOURCE_MULTIPLIERS.VITAE_PER_MIND + 4 * RESOURCE_MULTIPLIERS.VITAE_PER_HEART;
 
 /** Real effect from the library so passiveEffects round-trip via lookupEffect. */
 const armorWithPassive = (): Equipment => ({
@@ -86,10 +86,10 @@ const armorWithPassive = (): Equipment => ({
 // ─── createCharacter — derivation + defaults ─────────────────────────────────
 
 describe('createCharacter — derivation contracts', () => {
-    it('sets VITAE = PLAYER_VITAE_BASE + sum(body, heart, mind) × HEALTH_PER_STAT and seeds it full', () => {
+    it('sets VITAE = PLAYER_VITAE_BASE + 12·body + 6·mind + 6·heart and seeds it full', () => {
         mockSequentialRng(0.5);
         const ch = buildPlayer({ level: 3 });
-        const expected = PLAYER_VITAE_BASE + (3 + 4 + 2) * RESOURCE_MULTIPLIERS.HEALTH_PER_STAT;
+        const expected = PLAYER_VITAE_BASE + 3 * RESOURCE_MULTIPLIERS.VITAE_PER_BODY + 2 * RESOURCE_MULTIPLIERS.VITAE_PER_MIND + 4 * RESOURCE_MULTIPLIERS.VITAE_PER_HEART;
         expect(ch.maxHealth).toBe(expected);
         expect(ch.health).toBe(expected);
     });

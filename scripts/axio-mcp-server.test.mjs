@@ -81,14 +81,15 @@ test('axio_overview publishes live doctrine, not the retired STRIKE IS DEAD ban'
   // constraints, the absence of a governing objective function, and DEAL as a
   // first-class verb. Reword the library header freely; this still holds.
   assert.match(text, /# Doctrine — /)
-  assert.match(text, /THREE SURVIVING CONSTRAINTS/)
+  // The count moved with the card purge (D36): the 5/5/5 thirds were repealed.
+  assert.match(text, /SURVIVING CONSTRAINTS/)
   assert.match(text, /no rank band/)
   assert.match(text, /Direct damage is a first-class verb/)
 })
 
 test('axio_cards finds a known card by keyword substring', async () => {
   const replies = await drive([
-    { jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'axio_cards', arguments: { theme: 'rot', limit: 3 } } },
+    { jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'axio_cards', arguments: { theme: 'grey', limit: 3 } } },
   ])
   const text = replies.get(1)?.result?.content?.[0]?.text ?? ''
   assert.ok(text.length > 0)

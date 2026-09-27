@@ -19,10 +19,6 @@ afterEach(() => {
 // ─── Library structural invariants ───────────────────────────────────────────
 
 describe('Card library structural invariants', () => {
-    it('exports at least 12 early-game cards', () => {
-        expect(cardLibrary.length).toBeGreaterThanOrEqual(12);
-    });
-
     it('every card has the Spec 04b required shape', () => {
         for (const card of cardLibrary) {
             expect(typeof card.id).toBe('string');
@@ -40,10 +36,5 @@ describe('Card library structural invariants', () => {
     it('all card IDs are unique', () => {
         const ids = cardLibrary.map(s => s.id);
         expect(new Set(ids).size).toBe(ids.length);
-    });
-
-    it('library carries at least 3 Tier 3 cards', () => {
-        const t3 = cardLibrary.filter(s => s.tier === 3);
-        expect(t3.length).toBeGreaterThanOrEqual(3);
     });
 });

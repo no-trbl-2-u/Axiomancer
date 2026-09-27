@@ -68,23 +68,27 @@ describe('draftCombatDeck determinism', () => {
 });
 
 describe('draftCombatDeck size / copies / retreat', () => {
-    it('drafts exactly `size` cards (default 10), no escape card, max 2 copies each', () => {
+    it('drafts exactly `size` cards (default 10), no escape card, never over maxCopies', () => {
+        // After the card purge (P1, 2026-09-27) the pool is the three grey
+        // cards, so the default maxCopies (2) caps a draft at 6. A maxCopies of
+        // 4 leaves room for the default size of 10 while still binding.
         for (const seed of [1, 7, 13]) {
-            const deck = draftCombatDeck({ focus: 'balanced', rng: lcg(seed) });
+            const deck = draftCombatDeck({ focus: 'balanced', maxCopies: 4, rng: lcg(seed) });
             const cards = withoutRetreat(deck);
             expect(cards.length).toBe(10);
             expect(deck).not.toContain('card-retreat');
             const counts = new Map<string, number>();
             for (const id of cards) counts.set(id, (counts.get(id) ?? 0) + 1);
-            for (const [id, n] of counts) expect(n, `${id} over maxCopies`).toBeLessThanOrEqual(2);
+            for (const [id, n] of counts) expect(n, `${id} over maxCopies`).toBeLessThanOrEqual(4);
         }
     });
 
     it('honors a custom size and maxCopies', () => {
-        const deck = draftCombatDeck({ focus: 'dot', size: 6, maxCopies: 1, rng: lcg(5) });
+        // Size 2 from the three-card grey pool: under capacity, so the size binds.
+        const deck = draftCombatDeck({ focus: 'dot', size: 2, maxCopies: 1, rng: lcg(5) });
         const cards = withoutRetreat(deck);
-        expect(cards.length).toBe(6);
-        expect(new Set(cards).size).toBe(6); // maxCopies 1 → all unique
+        expect(cards.length).toBe(2);
+        expect(new Set(cards).size).toBe(2); // maxCopies 1 → all unique
     });
 
     it('caps at pool capacity when size exceeds it (early stage, exhaustive draft)', () => {
@@ -96,14 +100,34 @@ describe('draftCombatDeck size / copies / retreat', () => {
 });
 
 describe('draftCombatDeck focus weighting', () => {
+    // After the card purge (P1, 2026-09-27) the pool is the grey office — one
+    // defend (A Plain Ward), one stat-debuff (A Plain Word), and A Plain Blow —
+    // with no direct-dot card, so the dot lean is proved on a minimal
+    // test-only DoT card joined through `extraCards`. maxCopies is lifted so
+    // the 4x lean is not flattened by the per-card cap on a tiny pool.
+    const draftDot: Card = {
+        id: 'draft-test-focus-dot', name: 'Draft Test Focus Dot',
+        color: 'body', description: 'test-only DoT card', tier: 1,
+        targetType: 'enemy', rank: 1, cardType: 'spell',
+        combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 3 }],
+    };
+
+    // The fixture is the pool's only direct-dot card (and is unknown to
+    // getCardById), so the direct-dot count is its copy count.
+    const countDot = (deck: string[]): number => deck.filter(id => id === draftDot.id).length;
+
     it('a dot-focus deck carries strictly more direct-dot cards than a damage-focus deck', () => {
         // Aggregated over fixed seeds so the assertion is a property of the 4x
         // weighting, not a fluke of one sample. Deterministic — never flakes.
         let dotCount = 0;
         let damageCount = 0;
         for (const seed of [1, 2, 3, 4, 5]) {
-            dotCount += countClass(draftCombatDeck({ focus: 'dot', rng: lcg(seed) }), ['direct-dot']);
-            damageCount += countClass(draftCombatDeck({ focus: 'damage', rng: lcg(seed) }), ['direct-dot']);
+            dotCount += countDot(draftCombatDeck({
+                focus: 'dot', maxCopies: 10, rng: lcg(seed), extraCards: [draftDot],
+            }));
+            damageCount += countDot(draftCombatDeck({
+                focus: 'damage', maxCopies: 10, rng: lcg(seed), extraCards: [draftDot],
+            }));
         }
         expect(dotCount).toBeGreaterThan(damageCount);
     });
@@ -113,10 +137,10 @@ describe('draftCombatDeck focus weighting', () => {
         let utilityCount = 0;
         for (const seed of [1, 2, 3, 4, 5]) {
             controlCount += countClass(
-                draftCombatDeck({ focus: 'control', rng: lcg(seed) }),
+                draftCombatDeck({ focus: 'control', maxCopies: 10, rng: lcg(seed) }),
                 ['direct-control', 'stat-debuff']);
             utilityCount += countClass(
-                draftCombatDeck({ focus: 'utility', rng: lcg(seed) }),
+                draftCombatDeck({ focus: 'utility', maxCopies: 10, rng: lcg(seed) }),
                 ['direct-control', 'stat-debuff']);
         }
         expect(controlCount).toBeGreaterThan(utilityCount);
@@ -232,32 +256,33 @@ describe('draftCombatDeck newcomer-visibility guarantee (GH #163)', () => {
 
 describe('resolveDeckSelection', () => {
     it("kind 'preset' delegates to buildPresetDeck (unknown preset → empty)", () => {
-        const selection: CombatDeckSelection = { kind: 'preset', presetId: 'threadbare' };
-        expect(resolveDeckSelection(selection, undefined)).toEqual(buildPresetDeck('threadbare'));
+        const selection: CombatDeckSelection = { kind: 'preset', presetId: 'grey' };
+        expect(resolveDeckSelection(selection, undefined)).toEqual(buildPresetDeck('grey'));
         expect(resolveDeckSelection(selection, undefined).length).toBeGreaterThan(0);
         expect(resolveDeckSelection({ kind: 'preset', presetId: 'nope' }, undefined)).toEqual([]);
     });
 
     it("kind 'draft' drafts with the given focus/size, scoped to the stage", () => {
-        const selection: CombatDeckSelection = { kind: 'draft', focus: 'control', size: 8 };
+        // Size 5 sits under the grey pool's default capacity (3 cards x 2 copies).
+        const selection: CombatDeckSelection = { kind: 'draft', focus: 'control', size: 5 };
         const early = COMBAT_STAGE_PROFILES.early;
         const a = resolveDeckSelection(selection, early, lcg(21));
         const b = resolveDeckSelection(selection, early, lcg(21));
         expect(a).toEqual(b);
-        expect(withoutRetreat(a).length).toBe(8);
+        expect(withoutRetreat(a).length).toBe(5);
         for (const id of withoutRetreat(a)) expect(getCardById(id)!.tier).toBe(1);
     });
 
     it("kind 'cards' drops invalid ids, with no escape card appended", () => {
         const deck = resolveDeckSelection(
-            { kind: 'cards', cardIds: ['spoiled-poultice', 'not-a-card', 'chilblain-watch'] },
+            { kind: 'cards', cardIds: ['grey-strike', 'not-a-card', 'grey-ward'] },
             undefined);
-        expect(deck).toEqual(['spoiled-poultice', 'chilblain-watch']);
+        expect(deck).toEqual(['grey-strike', 'grey-ward']);
 
         // The removed Retreat id is now just another invalid id — dropped like any other.
         const trusted = resolveDeckSelection(
-            { kind: 'cards', cardIds: ['card-retreat', 'scolds-bridle'] }, undefined);
-        expect(trusted).toEqual(['scolds-bridle']);
+            { kind: 'cards', cardIds: ['card-retreat', 'grey-word'] }, undefined);
+        expect(trusted).toEqual(['grey-word']);
     });
 
     it("kind 'policy-pick' throws at this layer (the harness resolves it)", () => {

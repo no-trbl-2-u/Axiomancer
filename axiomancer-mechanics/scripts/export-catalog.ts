@@ -34,7 +34,7 @@ import { cardLibrary, getCardById } from '../src/Cards/cards.library';
 import { toCombatCard } from '../src/Combat/combat.cards';
 import { CARD_RANK_NAMES, rankToRarity } from '../src/Cards/types';
 import { FREE_ENCHANT_ROUNDS } from '../src/Game/game-mechanics.constants';
-import { cardOrigin } from '../src/Combat/combat.starter-deck-presets';
+import { STARTING_CARD_IDS } from '../src/Combat/combat.rewards';
 import { THEME_KEYWORDS, type CardTheme } from '../src/Cards/card-themes';
 import { mechanicText, riderText } from '../src/Combat/combat.cards';
 import { EnemyLibrary } from '../src/Enemy/enemy.library';
@@ -278,9 +278,8 @@ function cardStats(c: any): { chips: Chip[]; lines: string[] } {
         const kws = THEME_KEYWORDS[c.theme as CardTheme];
         if (kws && kws.length) chips.push({ k: 'Keywords', v: kws.join(' · ') });
     }
-    const origin = cardOrigin(c.id);
-    chips.push({ k: 'Source', v: origin.source });
-    if (origin.presetDeck) chips.push({ k: 'Preset', v: origin.presetDeck });
+    // Since the card purge (D44) every card is both a starter and a reward.
+    chips.push({ k: 'Source', v: STARTING_CARD_IDS.includes(c.id) ? 'starter' : 'reward' });
 
     const lines: string[] = [];
     // Spec 32 v4 — enchant/disenchant passives live in engine hooks; their authored

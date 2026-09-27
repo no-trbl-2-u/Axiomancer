@@ -143,7 +143,7 @@ Calculates maximum VITAE from the base stats (`level` is accepted for call-site 
 
 ```typescript
 const maxHP = calculateMaxHealth(3, { body: 10, heart: 8, mind: 12 });
-// Formula: PLAYER_VITAE_BASE + (body + heart + mind) * HEALTH_PER_STAT
+// Formula: PLAYER_VITAE_BASE + 12*body + 6*mind + 6*heart
 ```
 
 ### General utilities

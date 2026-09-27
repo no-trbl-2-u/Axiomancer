@@ -51,6 +51,9 @@ const CARD_EFFECT_SET = new Set([
     'debuff_backfire',
     'debuff_quarter',
     'buff_thorns',
+    // S3 (D43, T's guided session 2026-09-27): VULNERABLE rebuilt for the
+    // grey office's A Plain Word — revived from the stat-down zoo below.
+    'debuff_vulnerable',
     // card-local species (card-keyword doctrine, 2026-07-10):
     'debuff_kindling_ember',
     'debuff_nettle_sting',
@@ -82,7 +85,7 @@ const RETIRED_CARD_VOCABULARY = [
     'debuff_knockdown', 'debuff_berserk', 'debuff_gorgon_gaze',
     'debuff_minotaur_maze', 'debuff_lethe_fog',
     // the stat-down zoo
-    'debuff_weaken', 'debuff_enfeeble', 'debuff_sunder', 'debuff_vulnerable',
+    'debuff_weaken', 'debuff_enfeeble', 'debuff_sunder',
     'debuff_expose', 'debuff_curse', 'debuff_evasion_down',
     'debuff_accuracy_down', 'debuff_defense_down', 'debuff_fatigue',
     'debuff_exhaustion', 'debuff_wound', 'debuff_disease', 'debuff_hex',

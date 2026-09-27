@@ -21,16 +21,17 @@ import { CARD_THEMES, THEME_KEYWORDS, type CardTheme } from '../Cards/card-theme
 import { cardKeywords } from '../Cards/card-keywords';
 
 /**
- * The card-reward pool — the Profane Canon: the whole library EXCEPT the
- * curse class (theme `'curse'` cards are enemy-injected junk — offering one
- * as a reward would be a cruelty the reward screen does not stock) and the
- * grey office (Phase 104 — a starter-only shape, never a reward). Drop
- * odds are governed by PER-RARITY weights: common cards drop freely,
- * uncommons less, rares are the prize. Invalid ids are filtered at roll time
+ * The card-reward pool: the whole library EXCEPT the curse class (theme
+ * `'curse'` cards are enemy-injected junk — offering one as a reward would be
+ * a cruelty the reward screen does not stock). Since the card purge (D44) the
+ * grey office IS the pool: a won fight offers A Plain Blow, Ward and Word, and
+ * the pool grows as guided sessions add cards. Grey cards carry no reward
+ * theme, so the theme-aware roll falls through to the whole pool. Drop odds
+ * are governed by PER-RARITY weights. Invalid ids are filtered at roll time
  * so the list stays safe to edit.
  */
 export const COMBAT_REWARD_POOL: readonly string[] = Object.freeze(
-    cardLibrary.filter(card => card.theme !== 'curse' && card.theme !== 'grey').map(card => card.id),
+    cardLibrary.filter(card => card.theme !== 'curse').map(card => card.id),
 );
 
 /** Per-rarity drop weights (spec 32 v3 §4 — the reward-roll lever). Tunable. */
@@ -42,7 +43,9 @@ export const REWARD_RARITY_WEIGHTS: Readonly<Record<'common' | 'uncommon' | 'rar
  * deck: two colourless shapes (`color: 'any'` — every die
  * colour powers either), so fight one teaches STRIKE, WARD, FREE-vs-PAID, and
  * the die-spend loop with zero colour arithmetic. Mobile's
- * `ensureStarterCards` writes this list VERBATIM (copies kept — 7 + 3, not
+ * S3 (T, 2026-09-27): Blow 5, Ward 3, and 2 of A Plain Word (D42, D43).
+ *
+ * `ensureStarterCards` writes this list VERBATIM (copies kept — 5 + 3 + 2, not
  * deduplicated) into a fresh character's `knownCards`.
  *
  * (Superseded history: 2026-07-through-2026-09-19 this was
@@ -55,9 +58,9 @@ export const REWARD_RARITY_WEIGHTS: Readonly<Record<'common' | 'uncommon' | 'rar
  * so the starting set no longer needs to span the three stances itself.)
  */
 export const STARTING_CARD_IDS: readonly string[] = Object.freeze([
-    'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike',
-    'grey-strike', 'grey-strike', 'grey-strike',
+    'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike',
     'grey-ward', 'grey-ward', 'grey-ward',
+    'grey-word', 'grey-word',
 ]);
 
 /** Fewer than this many reward cards taken ⇒ the draft is fully uniform (no

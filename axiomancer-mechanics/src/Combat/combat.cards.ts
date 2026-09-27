@@ -126,7 +126,10 @@ export function classifyVerbClass(
     }
     if (defs.some(isControl)) return { verbClass: 'direct-control', track: 'control' };
     if (defs.some(isStatDebuff)) return { verbClass: 'stat-debuff', track: 'control' };
-    if (mechs.some(m => PAYOFF_KINDS.has(m.kind))) {
+    // A plain DEAL is direct damage too (the card purge made A Plain Blow the
+    // deck's only attack; it used to fall through to `buff-self`, so the sim
+    // pilots played it as utility).
+    if (mechs.some(m => PAYOFF_KINDS.has(m.kind) || m.kind === 'deal')) {
         return { verbClass: 'direct-damage', track: 'none' };
     }
     if (mechs.some(m => m.kind === 'sway')) {

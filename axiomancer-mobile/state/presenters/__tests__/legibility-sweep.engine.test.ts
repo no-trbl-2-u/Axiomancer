@@ -1,20 +1,23 @@
 /**
  * Phase 28 (Show the Engine legibility sweep) — presenter coverage for the
- * mobile-side surfaces: the Premise/CONDEMN VM, discard-pile names (the
- * REPRISE picker's data source), the live rupture-burst card face, the
- * `needsReprisalChoice` flag, and the wall-math intent projection.
+ * mobile-side surfaces: discard-pile names, the projected-lethality readout,
+ * the wall-math intent projection, and the standing-chip guard.
+ *
+ * The card purge (2026-09-27) retired the card-only surfaces this file also
+ * pinned — the Premise/CONDEMN track, the PLEA/CHARGE meters, the REPRISE
+ * flag, the RUPTURE face and the oath/hex standing chips — with the cards
+ * that printed them. The grey office is the fixture now.
  */
 
 import { describe, it, expect } from '@jest/globals';
-import { createCharacter, initializeCombatEncounter, rollEncounterDice, capitulateThreshold, concedeFloorFor } from '@mechanics';
+import { createCharacter, initializeCombatEncounter, rollEncounterDice } from '@mechanics';
 import type { CombatEncounterState } from '@mechanics';
 
 import { buildCombatViewModel } from '@/state/presenters/combat-encounter.engine';
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 
-// Fallback deck — any playable spell works; these three exercise the three
-// surfaces under test (rupture face, reprise mechanic, plain filler).
-const DECK = ['resonance-detonation', 'second-thoughts', 'slippery-slope'];
+// Any playable deck works — the grey office is the whole library.
+const DECK = ['grey-strike', 'grey-ward', 'grey-word'];
 
 function openState(): CombatEncounterState {
     const player = createCharacter({ name: 'Hero', level: 3, baseStats: { heart: 8, body: 8, mind: 8 } });
@@ -22,76 +25,6 @@ function openState(): CombatEncounterState {
     const state = initializeCombatEncounter(player, createMockEncounterEnemy(), DECK, 7);
     return rollEncounterDice(state).state;
 }
-
-describe('CombatViewModel.peroration — the Premise track + CONDEMN beat (phase 28)', () => {
-    it('is inactive with no declared Peroration', () => {
-        const vm = buildCombatViewModel(openState());
-        expect(vm.peroration.active).toBe(false);
-        expect(vm.peroration.premises).toBe(0);
-    });
-
-    it('surfaces the declared card, tally, and tier-floored CONDEMN threshold', () => {
-        let s = openState();
-        // createMockEncounterEnemy is difficulty 'elite', so the elite floor
-        // raises The Black Cap's authored concedeAt. Derived from the engine's
-        // own ladder rather than pinned: it rescaled to 12/24/40/60 on
-        // 2026-09-02 and the point of this case is that the FLOOR wins, not
-        // what the floor currently is.
-        s = { ...s, premises: 3, peroration: { cardId: 'the-black-cap', at: 6, concedeAt: 8 } };
-        const vm = buildCombatViewModel(s);
-        expect(vm.peroration.active).toBe(true);
-        expect(vm.peroration.premises).toBe(3);
-        expect(vm.peroration.at).toBe(6);
-        expect(vm.peroration.concedeAt).toBe(concedeFloorFor('elite'));
-        expect(vm.peroration.concedeAt).toBeGreaterThan(8); // the raw authored value loses
-        expect(vm.peroration.cardName).toBe('The Black Cap');
-    });
-});
-
-// WI-5 — the invisible alt-win currencies (PLEA → RELENT, CHARGE →
-// ORATORY) now render as meters on the enemy pane. A GRACE run used to play its
-// whole plan and die with zero feedback on progress.
-describe('WI-5 — PLEA / CHARGE alt-win meters', () => {
-    function deckState(deck: string[], seed = 7): CombatEncounterState {
-        const player = createCharacter({ name: 'Hero', level: 3, baseStats: { heart: 8, body: 8, mind: 8 } });
-        player.knownCards = deck.slice();
-        return rollEncounterDice(initializeCombatEncounter(player, createMockEncounterEnemy(), deck, seed)).state;
-    }
-
-    it('surfaces the PLEA meter with the engine capitulate target when sway accrues', () => {
-        const s = { ...openState(), sway: 5 };
-        const vm = buildCombatViewModel(s);
-        expect(vm.enemy.swayVisible).toBe(true);
-        expect(vm.enemy.sway).toBe(5);
-        expect(vm.enemy.swayTarget).toBe(capitulateThreshold(s.enemy)); // engine-owned, not duplicated
-    });
-
-    it('shows the PLEA meter from turn 1 when the deck plan is PLEA, before any is gained (GRACE)', () => {
-        const vm = buildCombatViewModel(deckState(['thin-hymn', 'thin-hymn', 'thin-hymn']));
-        expect(vm.enemy.sway).toBe(0);
-        expect(vm.enemy.swayVisible).toBe(true);
-    });
-
-    it('surfaces the undeclared CHARGE tally, then yields to the peroration track once declared', () => {
-        let s = deckState(['petty-indictment', 'petty-indictment', 'petty-indictment']);
-        s = { ...s, premises: 2 };
-        let vm = buildCombatViewModel(s);
-        expect(vm.enemy.premiseVisible).toBe(true);
-        expect(vm.enemy.premises).toBe(2);
-        expect(vm.enemy.premiseAt).toBe(0); // no target bar until a Peroration is declared
-
-        // Declaring a SENTENCE hands the readout to the existing peroration track.
-        s = { ...s, peroration: { cardId: 'the-black-cap', at: 6, concedeAt: 8 } };
-        vm = buildCombatViewModel(s);
-        expect(vm.enemy.premiseVisible).toBe(false);
-    });
-
-    it('hides both meters for a deck that feeds neither currency', () => {
-        const vm = buildCombatViewModel(openState()); // DECK: rupture / reprise / dot
-        expect(vm.enemy.swayVisible).toBe(false);
-        expect(vm.enemy.premiseVisible).toBe(false);
-    });
-});
 
 // Phase 2 (spec 30) — the status kill-path foresight. The engine selector
 // (`projectCombatOutcome`) already had hermetic coverage in mechanics; this
@@ -140,44 +73,15 @@ describe('Phase 2 — projected-lethality readout (spec 30)', () => {
     });
 });
 
-describe('CombatViewModel.discardCards — the REPRISE picker data source (phase 28)', () => {
+describe('CombatViewModel.discardCards — discard-pile names (phase 28)', () => {
     it('resolves discard-pile ids to display names', () => {
         let s = openState();
-        s = { ...s, discard: ['the-long-lent', 'open-every-grave'] };
+        s = { ...s, discard: ['grey-strike', 'grey-word'] };
         const vm = buildCombatViewModel(s);
         expect(vm.discardCards).toEqual([
-            { id: 'the-long-lent', name: 'The Long Lent' },
-            { id: 'open-every-grave', name: 'Open Every Grave' },
+            { id: 'grey-strike', name: 'A Plain Blow' },
+            { id: 'grey-word', name: 'A Plain Word' },
         ]);
-    });
-});
-
-describe('CombatCardVM.needsReprisalChoice (phase 28)', () => {
-    it('is true for a reprise-mechanic card, false otherwise', () => {
-        let s = openState();
-        s = {
-            ...s,
-            hand: [
-                { uid: 'u-reprise', cardId: 'shallow-grave' },
-                { uid: 'u-plain', cardId: 'spoiled-poultice' },
-            ],
-        };
-        const vm = buildCombatViewModel(s);
-        const reprise = vm.hand.find(c => c.uid === 'u-reprise')!;
-        const plain = vm.hand.find(c => c.uid === 'u-plain')!;
-        expect(reprise.needsReprisalChoice).toBe(true);
-        expect(plain.needsReprisalChoice).toBe(false);
-    });
-});
-
-describe('CombatCardVM rupture face — live projected burst (phase 28)', () => {
-    it('shows a real projected number, not the qualitative "detonate" word', () => {
-        let s = openState();
-        s = { ...s, hand: [{ uid: 'u-rupture', cardId: 'communion-of-the-worm' }] };
-        const vm = buildCombatViewModel(s);
-        const card = vm.hand.find(c => c.uid === 'u-rupture')!;
-        expect(card.face.kind).toBe('rupture');
-        expect(card.face.heroText).toMatch(/^\d+$/);
     });
 });
 
@@ -194,35 +98,6 @@ describe('CombatIntentVM.wallMath — the telegraph readout (phase 28)', () => {
 // gated by card id at its engine trigger sites, never an applied effect id, so
 // the board used to show NOTHING while an enchantment/curse was attached.
 describe('standing enchant/curse chips (card-wording audit 2026-07-12)', () => {
-    it('a permanent player enchantment renders a ❖ chip with the passive gloss', () => {
-        const s = { ...openState(), persistentZone: ['the-untended-garden'] };
-        const vm = buildCombatViewModel(s);
-        const chip = vm.player.effects.find(e => e.effectId === 'the-untended-garden');
-        expect(chip).toBeDefined();
-        expect(chip!.standing).toBe(true);
-        expect(chip!.glyph.glyph).toBe('❖');
-        expect(chip!.glyph.label).toBe('The Untended Garden');
-        expect(chip!.duration).toBe(0);              // permanent → no countdown tag
-        expect(chip!.gloss).toBeTruthy();            // Card.persistentEffect
-    });
-
-    it('a timed FREE instance carries its rounds-left clock', () => {
-        const s = { ...openState(), tempZone: [{ cardId: 'the-untended-garden', roundsLeft: 2 }] };
-        const vm = buildCombatViewModel(s);
-        const chip = vm.player.effects.find(e => e.effectId === 'the-untended-garden');
-        expect(chip?.standing).toBe(true);
-        expect(chip?.duration).toBe(2);
-    });
-
-    it('a curse attached to the enemy renders a ☒ chip on the enemy pane', () => {
-        const s = { ...openState(), enemyAttachments: ['the-congregation-below'] };
-        const vm = buildCombatViewModel(s);
-        const chip = vm.enemy.effects.find(e => e.effectId === 'the-congregation-below');
-        expect(chip).toBeDefined();
-        expect(chip!.standing).toBe(true);
-        expect(chip!.glyph.glyph).toBe('☒');
-    });
-
     it('no zones → no standing chips (and never a crash on missing ids)', () => {
         const vm = buildCombatViewModel({ ...openState(), enemyAttachments: ['not-a-card'] });
         expect(vm.player.effects.every(e => !e.standing)).toBe(true);

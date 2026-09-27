@@ -9,9 +9,11 @@
  *      bug);
  *   2. several dice — floats and a tray die — power plays in the same turn;
  *   3. a spent floating die is GONE FOREVER (leaves `floatingDice`).
- * Plus the color law: a floating die must match the card's color (wild floats
- * match everything), and a fresh tray die commits a paid play (the D6d
- * "die spent, PLEA 0, card bounces" regression).
+ * Plus a fresh tray die commits a paid play (the D6d "die spent, card
+ * bounces" regression).
+ *
+ * Fixtures are the grey office (the whole library since the card purge,
+ * 2026-09-27): colourless cards every die colour powers.
  */
 
 import {
@@ -22,7 +24,7 @@ import type { CombatEncounterState, CombatManaDie } from '@mechanics';
 import { buildCombatViewModel } from '../combat-encounter.engine';
 import { createMockEncounterEnemy } from '../../mocks/combat.mock';
 
-const DECK = ['spoiled-poultice', 'spoiled-poultice', 'chilblain-watch', 'chilblain-watch', 'first-spadeful', 'first-spadeful'];
+const DECK = ['grey-strike', 'grey-strike', 'grey-ward', 'grey-ward', 'grey-strike', 'grey-ward'];
 
 function openEncounter(floating: ('heart' | 'body' | 'mind' | 'wild')[]): CombatEncounterState {
     const player = createCharacter({ name: 'Hero', level: 3, baseStats: { heart: 8, body: 8, mind: 8 } });
@@ -43,7 +45,7 @@ describe('floating-die APPLY (the snap-back bug)', () => {
         const s = openEncounter(['wild']);
         const float = s.dice.find(d => d.floating)!;
         expect(float).toBeDefined();
-        const uid = findHand(s, 'spoiled-poultice');
+        const uid = findHand(s, 'grey-strike');
         const res = playCombatCard(s, { uid }, true, float.id);
         expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(false);
         expect(res.events.some(e => e.kind === 'floating-die-spent')).toBe(true);
@@ -61,8 +63,7 @@ describe('floating-die APPLY (the snap-back bug)', () => {
         expect(trayIdx).toBeGreaterThanOrEqual(0);
         s = { ...s, dice: s.dice.map((d, i) => (i === trayIdx ? { ...d, color: 'wild' as const, face: 'mana' as const } : d)) };
         const trayId = s.dice[trayIdx].id;
-        // (first-spadeful is skipped: its own effect needs a discard pile.)
-        const nextUid = () => s.hand.find(h => ['spoiled-poultice', 'chilblain-watch'].includes(h.cardId))!.uid;
+        const nextUid = () => s.hand.find(h => ['grey-strike', 'grey-ward'].includes(h.cardId))!.uid;
         let res = playCombatCard(s, { uid: nextUid() }, true, trayId);
         expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(false);
         s = res.state;
@@ -75,16 +76,6 @@ describe('floating-die APPLY (the snap-back bug)', () => {
         expect((s.floatingDice ?? []).length).toBe(0);
     });
 
-    it('a colored floating die obeys the color law (body float cannot power a mind card)', () => {
-        const s = openEncounter(['body']);
-        const float = s.dice.find(d => d.floating)!;
-        const uid = findHand(s, 'first-spadeful'); // mind spell
-        const res = playCombatCard(s, { uid }, true, float.id);
-        expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
-        // The mismatch never consumes the float.
-        expect((res.state.floatingDice ?? []).some(d => d.id === float.id)).toBe(true);
-    });
-
     it('the view-model tags floating dice so the tray can tell them from turn dice', () => {
         const s = openEncounter(['wild']);
         const vm = buildCombatViewModel(s);
@@ -92,15 +83,15 @@ describe('floating-die APPLY (the snap-back bug)', () => {
         expect(float).toBeDefined();
     });
 
-    // ── D6d regression (the "die spent, PLEA 0, card bounces" bug) ──
+    // ── D6d regression (the "die spent, card bounces" bug) ──
     // The engine's `playBottomAction` REQUIRES an explicit `dieId` (undefined
     // fizzles "choose a die"). The presenter once routed a fresh tray die
     // draft-first, so the commit reached the engine with no die and fizzled
     // while the tray die read spent + the card bounced. The panel now forwards
     // every dropped die as the explicit power source.
-    describe('tray-die APPLY (D6d PLEA-commit bug)', () => {
+    describe('tray-die APPLY (D6d paid-commit bug)', () => {
         function openHeartEncounter(): CombatEncounterState {
-            const deck = ['thin-hymn', 'thin-hymn', 'chilblain-watch', 'chilblain-watch', 'first-spadeful', 'first-spadeful'];
+            const deck = ['grey-strike', 'grey-strike', 'grey-ward', 'grey-ward', 'grey-word', 'grey-word'];
             const player = createCharacter({ name: 'Hero', level: 3, baseStats: { heart: 8, body: 8, mind: 8 } });
             player.knownCards = Array.from(new Set([...(player.knownCards ?? []), ...deck]));
             const state = initializeCombatEncounter(player, createMockEncounterEnemy(), deck, 7);
@@ -108,16 +99,16 @@ describe('floating-die APPLY (the snap-back bug)', () => {
         }
         const heartMana = (): CombatManaDie => ({ id: 'u-heart', color: 'heart', face: 'mana', state: 'available', temporary: false });
 
-        it('a heart tray die COMMITS Soft Word paid — PLEA rises, die spends, card leaves hand, no fizzle', () => {
+        it('a heart tray die COMMITS A Plain Blow paid — the paid DEAL lands, die spends, card leaves hand, no fizzle', () => {
             const s = openHeartEncounter();
             s.dice = [heartMana()];
-            const uid = findHand(s, 'thin-hymn');
+            const uid = findHand(s, 'grey-strike');
             const res = playCombatCard(s, { uid }, true, 'u-heart');
             // card-played:1, fizzled:0 (the hermetic probe's exact signature).
             expect(res.events.some(e => e.kind === 'card-played')).toBe(true);
             expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(false);
-            // PLEA 0 → >0 (the meter that stayed 0/31 in the bug).
-            expect(res.state.sway ?? 0).toBeGreaterThan(0);
+            // The PAID effect resolved: the foe took damage (nothing landed in the bug).
+            expect(res.state.enemy.health).toBeLessThan(s.enemy.health);
             // Die spent (gone/locked from the tray) and the card left hand.
             expect(res.state.dice.find(d => d.id === 'u-heart')?.state).not.toBe('available');
             expect(res.state.hand.some(h => h.uid === uid)).toBe(false);
@@ -126,7 +117,7 @@ describe('floating-die APPLY (the snap-back bug)', () => {
         it('a paid play with NO die fizzles — the panel must always forward the die', () => {
             const s = openHeartEncounter();
             s.dice = [heartMana()];
-            const uid = findHand(s, 'thin-hymn');
+            const uid = findHand(s, 'grey-strike');
             const res = playCombatCard(s, { uid }, true, undefined);
             expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
             expect(res.state.dice.find(d => d.id === 'u-heart')?.state).toBe('available');

@@ -56,9 +56,9 @@ describe('sandbox registry — register / lookup / clear', () => {
     it('starts empty and stays invisible to getCardById', () => {
         expect(hasSandboxContent()).toBe(false);
         expect(listSandboxCards()).toEqual([]);
-        expect(getSandboxCard('spoiled-poultice')).toBeUndefined();
+        expect(getSandboxCard('grey-word')).toBeUndefined();
         // Library lookups are untouched when the sandbox is empty.
-        expect(getCardById('spoiled-poultice')?.name).toBe('Spoiled Poultice');
+        expect(getCardById('grey-word')?.name).toBe('A Plain Word');
         expect(getCardById('no-such-card')).toBeUndefined();
     });
 
@@ -72,14 +72,14 @@ describe('sandbox registry — register / lookup / clear', () => {
 
     it('clearSandboxCards wipes both new cards and overrides', () => {
         registerSandboxCards([testDotCard()]);
-        registerSandboxOverride('spoiled-poultice', { tier: 3 });
+        registerSandboxOverride('grey-word', { tier: 3 });
         expect(hasSandboxContent()).toBe(true);
         expect(listSandboxCards()).toHaveLength(2);
 
         clearSandboxCards();
         expect(hasSandboxContent()).toBe(false);
         expect(getCardById('sandbox-test-rot')).toBeUndefined();
-        expect(getCardById('spoiled-poultice')?.tier).toBe(1); // library literal (profane canon)
+        expect(getCardById('grey-word')?.tier).toBe(1); // library literal (the grey office)
     });
 });
 
@@ -87,7 +87,7 @@ describe('sandbox registry — register / lookup / clear', () => {
 
 describe('sandbox registry — collisions and validation', () => {
     it('registering an id that exists in the card library throws', () => {
-        expect(() => registerSandboxCards([testDotCard('spoiled-poultice')]))
+        expect(() => registerSandboxCards([testDotCard('grey-strike')]))
             .toThrow(/collides with the card library/);
     });
 
@@ -98,7 +98,7 @@ describe('sandbox registry — collisions and validation', () => {
     });
 
     it('registration is atomic — a colliding batch registers nothing', () => {
-        expect(() => registerSandboxCards([testDotCard('sandbox-ok'), testDotCard('chilblain-watch')]))
+        expect(() => registerSandboxCards([testDotCard('sandbox-ok'), testDotCard('grey-ward')]))
             .toThrow();
         expect(getSandboxCard('sandbox-ok')).toBeUndefined();
         expect(hasSandboxContent()).toBe(false);
@@ -113,33 +113,33 @@ describe('sandbox registry — collisions and validation', () => {
 // ── Overrides ────────────────────────────────────────────────────────────────
 
 describe('sandbox registry — library-card overrides', () => {
-    // (Override target was straw-mans-jab until its D8 retirement — re-targeted
-    //  to slippery-slope, a surviving library card with a combatEffects payload.)
+    // (Override target re-pinned at the card purge, P1 2026-09-27, to
+    //  grey-word — the one surviving library card with a combatEffects payload.)
     it('a shallow patch is merged over the library card and visible via getCardById', () => {
-        const base = getCardById('spoiled-poultice');
-        expect(base?.combatEffects?.[0]?.intensity).toBe(4); // library literal (profane canon)
+        const base = getCardById('grey-word');
+        expect(base?.combatEffects?.[0]?.intensity).toBe(25); // library literal (the grey office)
 
-        registerSandboxOverride('spoiled-poultice', {
+        registerSandboxOverride('grey-word', {
             combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 3, duration: 2 }],
         });
-        const merged = getCardById('spoiled-poultice');
+        const merged = getCardById('grey-word');
         expect(merged?.combatEffects?.[0]?.intensity).toBe(3);
         // Untouched fields survive the merge; the id is immutable.
-        expect(merged?.id).toBe('spoiled-poultice');
+        expect(merged?.id).toBe('grey-word');
         expect(merged?.name).toBe(base?.name);
         expect(merged?.dieBonus).toEqual(base?.dieBonus);
         expect(merged?.rank).toBe(base?.rank);
     });
 
     it('repeated overrides of the same card accumulate (shallow-merge order)', () => {
-        // slippery-slope's library literals are rank 1 / tier 2 — both patches
+        // grey-word's library literals are rank 1 / tier 1 — both patches
         // must move the merged value away from the base.
-        registerSandboxOverride('spoiled-poultice', { rank: 3 });
-        registerSandboxOverride('spoiled-poultice', { tier: 3 });
-        const merged = getCardById('spoiled-poultice');
+        registerSandboxOverride('grey-word', { rank: 3 });
+        registerSandboxOverride('grey-word', { tier: 3 });
+        const merged = getCardById('grey-word');
         expect(merged?.rank).toBe(3);
         expect(merged?.tier).toBe(3);
-        expect(listSandboxCards().map(c => c.id)).toEqual(['spoiled-poultice']);
+        expect(listSandboxCards().map(c => c.id)).toEqual(['grey-word']);
     });
 });
 

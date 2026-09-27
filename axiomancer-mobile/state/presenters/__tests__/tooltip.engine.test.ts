@@ -240,7 +240,9 @@ describe('selectTooltipContentFor', () => {
             // getCombatCardById uppercases the name.
             expect(content?.title).toBe(first.name.toUpperCase());
             expect(content?.body).toBe(first.description);
-            expect(content?.footnote).toMatch(/^stance (HEART|BODY|MIND)$/);
+            // The grey office is colourless ('any') — the footnote names that too.
+            expect(content?.footnote).toMatch(/^stance (HEART|BODY|MIND|ANY)$/);
+            expect(content?.footnote).toBe(`stance ${first.color.toUpperCase()}`);
         });
 
         it('returns null for an unknown card id', () => {

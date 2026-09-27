@@ -3,7 +3,7 @@
  *
  * `grey-strike` ("A Plain Blow") and `grey-ward` ("A Plain Ward") are the
  * two colourless cards (`color: 'any'`) every brand-new run
- * seeds ten copies of (7 + 3 — see `STARTING_CARD_IDS`,
+ * seeds ten copies of (5 + 3 + 2 with A Plain Word, S3 — see `STARTING_CARD_IDS`,
  * `Combat/combat.rewards.ts`). This suite pins:
  *
  *   - both resolve with the right shape (colourless aspect, `theme: 'grey'`,
@@ -13,7 +13,8 @@
  *   - FREE/PAID ledgers read exactly 2 / 5, as printed;
  *   - a fresh `STARTING_CARD_IDS`-shaped deck deals exactly 7 grey-strike +
  *     3 grey-ward (`ensureStarterCards`'s verbatim-copy contract);
- *   - neither grey id is ever offered as a reward.
+ *   - the grey office IS the reward pool (D44, the card purge — reversing
+ *     Phase 104's "never a reward" law).
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
@@ -53,9 +54,8 @@ describe('Phase 104 — the grey office: card shape', () => {
         expect(getCardById('grey-ward')!.targetType).toBe('self');
     });
 
-    it('neither grey card is ever offered as a reward', () => {
-        expect(COMBAT_REWARD_POOL).not.toContain('grey-strike');
-        expect(COMBAT_REWARD_POOL).not.toContain('grey-ward');
+    it('the grey office is the whole reward pool (D44, the card purge)', () => {
+        expect([...COMBAT_REWARD_POOL].sort()).toEqual(['grey-strike', 'grey-ward', 'grey-word']);
     });
 });
 
@@ -121,12 +121,13 @@ describe('Phase 104 — the grey office: FREE/PAID ledgers read exactly as print
 });
 
 describe('Phase 104 — the grey office: the fresh-run deck', () => {
-    it('a fresh STARTING_CARD_IDS-shaped player deals exactly 7 grey-strike + 3 grey-ward', () => {
+    it('a fresh STARTING_CARD_IDS-shaped player deals exactly 5 grey-strike + 3 grey-ward + 2 grey-word', () => {
         const player: Character = { ...deepClone(Player), knownCards: [...STARTING_CARD_IDS], combatRewardCards: [] };
         const deck = buildCombatDeck(player);
         expect(deck).toHaveLength(10);
-        expect(deck.filter(id => id === 'grey-strike')).toHaveLength(7);
+        expect(deck.filter(id => id === 'grey-strike')).toHaveLength(5);
         expect(deck.filter(id => id === 'grey-ward')).toHaveLength(3);
+        expect(deck.filter(id => id === 'grey-word')).toHaveLength(2);
     });
 
     it('the floor (10) refuses a fresh run\'s first CUT; taking one reward makes it legal', () => {

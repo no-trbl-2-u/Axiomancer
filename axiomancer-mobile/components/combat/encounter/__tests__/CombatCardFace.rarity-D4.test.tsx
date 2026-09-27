@@ -16,14 +16,18 @@
  *   1. the face draws a fixed THREE-slot pip track, with `RARITY_PIPS[band]`
  *      of them filled — so the count reads as "n of three" on a single card,
  *      not only when two cards sit side by side;
- *   2. the three bands produce three DIFFERENT filled counts, with the colour
+ *   2. the filled count is exactly `RARITY_PIPS[band]`, read with the colour
  *      channel ignored entirely;
  *   3. the `large` face prints the named label; the small face does NOT (it
  *      would cost the fanned name column — see `NAME_BAND_LEFT_CHROME`);
  *   4. the small face still announces the band in WORDS to a screen reader,
  *      so the leg it cannot print is not simply lost;
  *   5. the band is derived by the shared module, never re-banded here: the
- *      face agrees with `rarityFor` for real library cards at every rank.
+ *      face agrees with `rarityFor` for every real library card.
+ *
+ * Since the card purge (2026-09-27) the library is the grey office — every
+ * card rank 1, one band — so the multi-band cases (the fixture spanning
+ * bands, bands separated by count) went with the higher-rank cards.
  */
 
 import React from 'react';
@@ -42,9 +46,9 @@ import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
 /**
- * One real library card id per rank on the ladder, so the hand below spans all
- * three bands through the REAL presenter rather than through a hand-built VM
- * that could disagree with what the board renders.
+ * One real library card id per rank on the ladder, so the hand below spans
+ * every band the library carries through the REAL presenter rather than
+ * through a hand-built VM that could disagree with what the board renders.
  */
 function idsSpanningTheLadder(): string[] {
     const byRank = new Map<CardRank, string>();
@@ -102,10 +106,8 @@ describe('CombatCardFace — D4 rarity pip track', () => {
     const ids = idsSpanningTheLadder();
     const cards = handVMs(ids);
 
-    it('the fixture actually spans more than one band (non-vacuity)', () => {
+    it('the fixture is non-empty (non-vacuity)', () => {
         expect(cards.length).toBeGreaterThan(0);
-        const bands = new Set(cards.map((c) => rarityFor(c)));
-        expect(bands.size).toBeGreaterThan(1);
     });
 
     it('always draws the full track, however common the card', () => {
@@ -134,28 +136,6 @@ describe('CombatCardFace — D4 rarity pip track', () => {
             );
             unmount();
         }
-    });
-
-    it('separates the bands by COUNT alone — the signal survives greyscale', () => {
-        // Group the fixture by band, then assert that the filled-pip count is a
-        // one-to-one function of the band. Colour is never consulted, so this
-        // would still pass with RARITY_COLOR returning one hue for all three —
-        // which is what "never colour alone" has to mean to be worth anything.
-        const countsByBand = new Map<string, Set<number>>();
-        for (const card of cards) {
-            const band = rarityFor(card);
-            const { unmount } = renderFace(card, false);
-            const filled = trackSlots().filter(Boolean).length;
-            unmount();
-            const seen = countsByBand.get(band) ?? new Set<number>();
-            seen.add(filled);
-            countsByBand.set(band, seen);
-        }
-        // Each band renders exactly one count …
-        for (const [, counts] of countsByBand) expect(counts.size).toBe(1);
-        // … and no two bands share theirs.
-        const counts = [...countsByBand.values()].map((s) => [...s][0]);
-        expect(new Set(counts).size).toBe(counts.length);
     });
 
     it('tracks the ENGINE rank, not a mobile-side re-band', () => {

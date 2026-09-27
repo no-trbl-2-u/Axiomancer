@@ -7,10 +7,14 @@
  *
  *   - the card adapter classifies a `guard` card as the `defend` verb class
  *     (0 pressure — it's a tempo/survival tool, not a pressure source);
- *   - playing one (POWER) grants its printed GUARD (+ colour match) onto the state;
+ *   - playing one (POWER) grants its printed GUARD onto the state;
  *   - GUARD absorbs the next threat — a defending player takes strictly LESS HP
  *     than the same player who played an offensive card instead;
- *   - the three authored defense cards are real + reachable via COMBAT_REWARD_POOL.
+ *   - the library's defense card is real + reachable via COMBAT_REWARD_POOL.
+ *
+ * The card purge (P1, 2026-09-27): the three vigil defense cards are gone;
+ * A Plain Ward (grey-ward, GUARD 5, colourless) is the library's defense
+ * card and A Plain Blow (grey-strike) the offensive control case.
  *
  * Doctrine: defense never out-damages STATUS. It deals no HP and spends the turn's
  * die, so DoT erosion stays the efficient path to the enemy's only bar (HP).
@@ -40,16 +44,15 @@ afterEach(() => {
     vi.restoreAllMocks();
 });
 
-const BRACE = 'frostbitten-palisade';  // BODY defense (GUARD 10 + RIPOSTE) — vigil Ash
-const HALF_STEP = 'chilblain-watch';   // BODY defense (GUARD 12 + THORNS) — vigil starter
-const ANSWER = 'hoarfrost-teeth';      // BODY defense (GUARD 14 + THORNS) — vigil Tooth
-const DOT_BODY = 'spoiled-poultice';   // body, DoT — the offensive control case
-const DEFENSE_IDS = [BRACE, HALF_STEP, ANSWER] as const;
+const BRACE = 'grey-ward';             // colourless defense (PAID GUARD 5)
+const STRIKE = 'grey-strike';          // colourless, PAID deal 5 — the offensive control case
+const DEFENSE_IDS = [BRACE] as const;
 
 function makePlayer(cards: string[]): Character {
     const p = deepClone(Player);
     p.knownCards = cards.slice();
-    p.baseStats = { heart: 8, body: 8, mind: 8 };
+    // Neutral stats (S3): printed numbers land as printed.
+    p.baseStats = { heart: 5, body: 5, mind: 5 };
     p.health = 200;
     p.maxHealth = 200;
     return p;
@@ -103,7 +106,7 @@ describe('Spec 26b — defense cards classify as `defend`', () => {
         expect(card!.bottomActionText).toMatch(/Guard/i);
     });
 
-    it('all three defense cards are reachable via COMBAT_REWARD_POOL', () => {
+    it('every defense card is reachable via COMBAT_REWARD_POOL', () => {
         for (const id of DEFENSE_IDS) {
             expect(COMBAT_REWARD_POOL, id).toContain(id);
         }
@@ -113,18 +116,18 @@ describe('Spec 26b — defense cards classify as `defend`', () => {
 // ── Granting GUARD (§4) ──────────────────────────────────────────────────────
 
 describe('Spec 26b — playing a defense card grants GUARD', () => {
-    it('a POWERED brace grants its printed GUARD plus the color match', () => {
+    it('a POWERED brace grants its printed GUARD', () => {
         mockSequentialRng(0.05);
         // Spec 33 retired the hidden stance read — every play lands printed
-        // (1.0×); a BODY die powering a BODY card still pays the colour match
-        // (+25%, min +2). GUARD 10 (frostbitten-palisade) + round(10 × 0.25) = +3 → 13.
+        // (1.0×). A Plain Ward is colourless, so no colour match applies: its
+        // printed GUARD 5 lands as printed at 5/5/5 stats.
         const state = openPhase(initializeCombatEncounter(makePlayer([BRACE]), makeEnemy(80, 'mind'), [BRACE, BRACE, BRACE, BRACE, BRACE], 7));
 
         const entry = state.hand.find(h => h.cardId === BRACE);
         expect(entry, 'brace should be in hand').toBeDefined();
         const res = playCombatCard(state, { uid: entry!.uid }, true, state.dice[0].id);
 
-        expect(res.state.guard).toBe(13);
+        expect(res.state.guard).toBe(5);
         // Defense deals no HP to the enemy (status stays the win path).
         expect(res.state.enemy.health).toBe(80);
     });
@@ -138,11 +141,11 @@ describe('Spec 26b — GUARD absorbs the next enemy threat', () => {
         const enemyHp = 120;
         const seed = 11;
 
-        // Both cards are BODY — each names the tray's BODY die (spec 33).
+        // Both cards are colourless — each names the tray's first die (spec 33).
         mockSequentialRng(0.05);
         const control = resolveCombatPhase(
-            openPhase(initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(enemyHp, 'mind'), [DOT_BODY, DOT_BODY, DOT_BODY], seed)),
-            [{ cardId: DOT_BODY, useBottom: true, dieId: 't1-d0' }],
+            openPhase(initializeCombatEncounter(makePlayer([STRIKE]), makeEnemy(enemyHp, 'mind'), [STRIKE, STRIKE, STRIKE], seed)),
+            [{ cardId: STRIKE, useBottom: true, dieId: 't1-d0' }],
         );
         const controlLoss = 200 - control.state.player.health;
 

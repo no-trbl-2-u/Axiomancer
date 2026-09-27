@@ -5,9 +5,14 @@
  * feeds Souls; RIPOSTE fires only on a FULL block).
  *
  * Covers each surviving behavior end to end (DoT-amplification honesty,
- * RUPTURE detonate + cap, DISRUPT deny, THORNS / BARRIER / RIPOSTE / SIPHON),
- * an INVARIANT guard that the shared hot path stays quiet without its marker,
- * and the card-projection / reward-pool contract for the v3 library.
+ * DISRUPT deny, THORNS / BARRIER / RIPOSTE), an INVARIANT guard that the
+ * shared hot path stays quiet without its marker, and the card-projection /
+ * reward-pool contract for the library.
+ *
+ * Card purge (P1, 2026-09-27): RUPTURE and SIPHON lost every carrier (their
+ * sandbox fixtures went with them — the verbs leave the engine next), and the
+ * card-play cases for BARRIER (Adamant Wall) and RIPOSTE (Reprisal Bell) left
+ * with their cards; the state-driven BARRIER / RIPOSTE laws stay.
  */
 
 import { describe, it, expect, afterEach, afterAll, beforeAll, vi } from 'vitest';
@@ -19,58 +24,20 @@ import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { mockSequentialRng } from '../../test-utils/rng';
 import { getCardById } from '../../Cards/cards.library';
-import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import { lookupEffect } from '../../Effects';
 import { effectsLibrary } from '../../Effects/effects.library';
 import type { ActiveEffect, Effect } from '../../Effects/types';
 import {
-    initializeCombatEncounter, rollEncounterDice, playCombatCard,
+    initializeCombatEncounter, rollEncounterDice,
     resolveThreatPhase, processBetweenPhases,
-    projectRupture, projectSiphonHeal,
     getDisruptMeter, getEnemyIncomingDamageMultiplier,
 } from '../combat.engine';
 import { classifyVerbClass, toCombatCard } from '../combat.cards';
 import { getActiveDotTotal, getActiveDotAmplifications } from '../effect-modifiers';
-import { ruptureBurstCap } from '../effects';
 import { COMBAT_REWARD_POOL } from '../combat.rewards';
-import type { CombatDieColor, CombatEncounterState, CombatEvent } from '../combat.encounter.types';
+import type { CombatEvent } from '../combat.encounter.types';
 
 afterEach(() => { vi.restoreAllMocks(); });
-
-// Spec 32 v3: no library card carries `siphon` (leeching-syllogism retired), so
-// the SIPHON isolation test pairs it with a RUPTURE on a sandbox fixture —
-// siphon heals a fraction of the HP the play's PAYOFFS eroded (never a strike;
-// basePower no longer exists at the schema level).
-registerSandboxCards([
-    {
-        id: 'qa-siphon-rupture',
-        name: 'QA Siphon Rupture (test fixture)',
-        color: 'heart',
-        description: 'Test-only fixture: RUPTURE paired with siphon 50%.',
-        tier: 2,
-        rank: 3,
-        cardType: 'spell',
-        targetType: 'enemy',
-        specialMechanics: [{ kind: 'rupture' }, { kind: 'siphon', pct: 0.5 }],
-    },
-    {
-        // THE BIG NUMBERS REWRITE (2026-09-02): `communion-of-the-worm` is no
-        // longer a plain detonator — it prints "Deal 30. PIERCE." AHEAD of its
-        // RUPTURE, and that hit fires the damage-instance clock, so part of the
-        // fuel is spent (and must not be re-paid) before the burst is priced.
-        // The RUPTURE arithmetic itself still needs a card that does nothing
-        // else, so here is one.
-        id: 'qa-plain-rupture',
-        name: 'QA Plain Rupture (test fixture)',
-        color: 'heart',
-        description: 'Test-only fixture: RUPTURE and nothing else.',
-        tier: 2,
-        rank: 3,
-        cardType: 'spell',
-        targetType: 'enemy',
-        specialMechanics: [{ kind: 'rupture' }],
-    },
-]);
 
 const ae = (effectId: string, intensity = 1, remainingDuration = 4, tier: 1 | 2 | 3 = 2): ActiveEffect =>
     ({ effectId, intensity, remainingDuration, appliedAt: 1, tier });
@@ -112,31 +79,6 @@ function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'mind', effec
     return e;
 }
 
-/** Forces this turn's tray to known colors (deterministic). Spec 33: every
- *  non-X die shows a MANA face; an X die is a dead miss. */
-function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
-    const turn = state.turn || 1;
-    const dice = colors.map((c, i) => ({
-        id: `t${turn}-d${i}`, color: c,
-        state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
-        face: c === 'x' ? ('miss' as const) : ('mana' as const),
-    }));
-    return { ...state, dice, turn };
-}
-
-/** Opens phase-play and forces the tray: die 0 (color `die`) powers paid plays. */
-function openWithDie(player: Character, enemy: Enemy, deck: string[], die: CombatDieColor, seed = 7): CombatEncounterState {
-    let state = initializeCombatEncounter(player, enemy, deck, seed);
-    state = rollEncounterDice(state).state;
-    state = setDice(state, [die, 'x']);
-    return state;
-}
-
-/** PAID play of `cardId` from hand, powered by tray die 0. */
-function playPaid(state: CombatEncounterState, cardId: string) {
-    return playCombatCard(state, { uid: state.hand.find(h => h.cardId === cardId)!.uid }, true, state.dice[0].id);
-}
-
 const enemyDotSum = (events: readonly CombatEvent[]): number =>
     events.filter(e => e.kind === 'dot-tick' && e.target === 'enemy')
         .reduce((s, e) => s + (e as { amount: number }).amount, 0);
@@ -168,99 +110,6 @@ describe('AMPLIFICATION — the combo registry is surfaced honestly', () => {
         const state = initializeCombatEncounter(
             makePlayer([]), makeEnemy(300, 'mind', [ae('debuff_poison', 2)]), undefined, 7);
         expect(getEnemyIncomingDamageMultiplier(state)).toBe(1);
-    });
-});
-
-// ── RUPTURE — consume ALL afflictions, deal the pending total ────────────────
-
-describe('RUPTURE — detonate the foe afflictions for the pending total', () => {
-    // A PLAIN rupture card (no bonusPct, no other verb) so
-    // `burst === projectRupture` — the projection-honesty invariant. The
-    // library's detonator, `communion-of-the-worm`, now spends fuel with its
-    // own printed "Deal 30. PIERCE." before it detonates, so it can no longer
-    // carry this arithmetic (see the divergence case at the bottom).
-    const RUP = 'qa-plain-rupture';
-    const LIBRARY_RUP = 'communion-of-the-worm';
-
-    it('strips ALL afflictions, bursts for projectRupture, and yields Souls per instance', () => {
-        mockSequentialRng(0.05);
-        const enemyEffects = [ae('debuff_poison', 2, 4), ae('debuff_bleed', 1, 4)];
-        // HEART die on the heart card (color law); spec 33 lands it printed (×1).
-        const state = openWithDie(makePlayer([RUP]), makeEnemy(300, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
-        const projected = projectRupture(state); // no read under spec 33 → ×1
-        // WS3.3 clock fuel: poison RAMPS + Hemorrhage on the card-played
-        // clock (2 expected ticks/round): per-round dprs 6,6,9,9 × 2 = 60;
-        // bleed i1 DECAYS — exactly one tick of 3. pending = 63.
-        expect(projected).toBe(63);
-
-        const hpBefore = state.enemy.health;
-        const res = playPaid(state, RUP);
-        const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number; consumed: string[] } | undefined;
-        expect(det).toBeDefined();
-        expect(det!.amount).toBe(projected);
-        expect(det!.consumed.sort()).toEqual(['debuff_bleed', 'debuff_poison']);
-        // ALL afflictions are gone; HP dropped by at least the burst.
-        expect(res.state.enemy.effects.some(e => lookupEffect(e.effectId)?.type === 'debuff')).toBe(false);
-        expect(hpBefore - res.state.enemy.health).toBeGreaterThanOrEqual(projected);
-        // Consumed instances feed the SOUL bank (spec 32 v3 T7).
-        expect(res.state.souls ?? 0).toBe(2);
-    });
-
-    it('adds a flat burst per NON-DoT affliction stack consumed (marks)', () => {
-        mockSequentialRng(0.05);
-        const enemyEffects = [ae('debuff_mark', 3, 2)];
-        const state = openWithDie(makePlayer([RUP]), makeEnemy(300, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
-        const res = playPaid(state, RUP);
-        const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number } | undefined;
-        // No DoT fuel; RUPTURE_PER_AFFLICTION_STACK (3) × 3 mark stacks = 9.
-        expect(det!.amount).toBe(9);
-    });
-
-    // REPEALED 2026-09-02 (L12): the 0.60 × maxHP RUPTURE cap and its
-    // pure-fraction/flat-floor arithmetic are gone — payoffs are uncapped and
-    // are meant to reach 100-300 in a fed deck. The two cap tests that pinned
-    // `round(RUPTURE_CAP_FRACTION × maxHp)` are deleted; what replaces them is
-    // the property the repeal asserts.
-    it('is UNCAPPED — a huge affliction bank detonates for its whole fuel', () => {
-        mockSequentialRng(0.05);
-        const enemyEffects = [ae('debuff_poison', 10, 10)];
-        const state = openWithDie(makePlayer([RUP]), makeEnemy(900, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
-        const projected = projectRupture(state);
-        const res = playPaid(state, RUP);
-        const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number } | undefined;
-        expect(ruptureBurstCap(900)).toBe(Number.POSITIVE_INFINITY);
-        expect(det!.amount).toBe(projected);
-        // Well past the retired 0.60 × 900 = 540 ceiling's small-pool sibling:
-        // the burst is the fuel, not a fraction of the foe.
-        expect(det!.amount).toBeGreaterThan(300);
-    });
-
-    /**
-     * SUSPECTED PROJECTION BUG (found 2026-09-02, deliberately NOT papered over).
-     *
-     * `projectRupture` / `projectRuptureBurst` price the burst off the enemy's
-     * pre-play affliction bank. `communion-of-the-worm` now prints
-     * "Deal 30. PIERCE." BEFORE its RUPTURE, and that hit fires the
-     * damage-instance clock, so BLEED ticks out and washes away before the
-     * burst is priced. On the standard poison-2/bleed-1 board the card
-     * previews 63 and detonates for 40 — a 57% overstatement on the one
-     * detonator in the library. The projection selectors are not aware of the
-     * card's own pre-payoff verbs.
-     *
-     * `it.fails` keeps the claim in the suite without a red build: it turns RED
-     * the moment the projection is taught about composition, and must be
-     * deleted then.
-     */
-    it.fails('the library detonator\'s preview equals its burst (PROJECTION BUG: its own DEAL spends the fuel first)', () => {
-        mockSequentialRng(0.05);
-        const enemyEffects = [ae('debuff_poison', 2, 4), ae('debuff_bleed', 1, 4)];
-        const state = openWithDie(
-            makePlayer([LIBRARY_RUP]), makeEnemy(300, 'heart', enemyEffects),
-            [LIBRARY_RUP, LIBRARY_RUP, LIBRARY_RUP], 'heart');
-        const projected = projectRupture(state);
-        const res = playPaid(state, LIBRARY_RUP);
-        const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number } | undefined;
-        expect(det!.amount).toBe(projected);
     });
 });
 
@@ -351,14 +200,6 @@ describe('THORNS — the foe telegraphed hit rebounds onto it', () => {
 // ── BARRIER — stacking, persistent soak (distinct from one-shot GUARD) ────────
 
 describe('BARRIER — a persistent, stacking soak', () => {
-    it('a powered Adamant Wall STACKS onto any existing barrier', () => {
-        mockSequentialRng(0.05);
-        const WALL = 'nothing-crossed-the-ice';
-        const state = openWithDie(makePlayer([WALL]), makeEnemy(300, 'mind'), [WALL, WALL, WALL], 'mind');
-        const seeded = { ...state, barrier: 10 };
-        const res = playPaid(seeded, WALL);
-        expect(res.state.barrier ?? 0).toBeGreaterThan(10); // stacked, not replaced
-    });
 
     it('persists across a phase (only the absorbed amount is spent) while GUARD resets', () => {
         mockSequentialRng(0.05);
@@ -434,34 +275,6 @@ describe('RIPOSTE — counters only when Guard/Barrier fully blocked the attack'
         expect(res.events.some(e => e.kind === 'riposte-fired')).toBe(false);
         expect(res.state.riposte).toBeUndefined();                  // still clears
     });
-
-    it('a powered Reprisal Bell arms the parry AND grants Guard', () => {
-        mockSequentialRng(0.05);
-        const MA = 'the-reprisal-bell';
-        const state = openWithDie(makePlayer([MA]), makeEnemy(300, 'heart'), [MA, MA, MA], 'heart');
-        const res = playPaid(state, MA);
-        expect(res.state.riposte).toBeDefined();
-        expect(res.state.guard ?? 0).toBeGreaterThan(0);
-    });
-});
-
-// ── SIPHON — payoff-scaled sustain (no strike exists to skim) ────────────────
-
-describe('SIPHON — heal for part of the HP the payoff eroded', () => {
-    it('heals the player for a fraction of the rupture burst', () => {
-        mockSequentialRng(0.05);
-        const SIP = 'qa-siphon-rupture';
-        const player = makePlayer([SIP]);
-        player.health = 100; // leave headroom to observe the heal
-        const enemyEffects = [ae('debuff_poison', 2, 4)];
-        const state = openWithDie(player, makeEnemy(300, 'heart', enemyEffects), [SIP, SIP, SIP], 'heart');
-        expect(projectSiphonHeal(state, toCombatCard(SIP, getCardById, lookupEffect)!)).toBeGreaterThan(0);
-        const res = playPaid(state, SIP);
-        const heal = res.events.find(e => e.kind === 'damage-dealt' && e.target === 'self') as { amount: number } | undefined;
-        expect(heal).toBeDefined();
-        expect(heal!.amount).toBeLessThan(0);           // negative amount == heal
-        expect(res.state.player.health).toBeGreaterThan(100);
-    });
 });
 
 // ── INVARIANT — the shared hot path is untouched without the new markers ──────
@@ -495,19 +308,17 @@ describe('INVARIANT — no new behavior fires without its marker', () => {
 
 // ── Projection / verbClass / reward-pool contract ────────────────────────────
 
-describe('card projection — the v3 library classifies + advertises sensibly', () => {
+describe('card projection — the grey office classifies + advertises sensibly', () => {
+    // Card purge (P1, 2026-09-27): the library is the grey office. The
+    // purged cases (RUPTURE/REAP finishers, DoT seeds, STAGGER/PLEA control,
+    // oath/hex frames) left with their cards. A Plain Blow is deliberately
+    // NOT pinned here: `classifyVerbClass` has no branch for a plain `deal`,
+    // so it reads 'buff-self' — a classification gap reported for a source
+    // fix rather than frozen into this contract.
     const cases: Array<[string, string, string]> = [
         // [cardId, expected verbClass, expected effectKind/track]
-        ['communion-of-the-worm', 'direct-damage', 'none'],   // RUPTURE finisher
-        ['miserere', 'direct-damage', 'none'],               // REAP-all finisher
-        ['spoiled-poultice', 'direct-dot', 'dot'],
-        ['unction-of-boils', 'direct-dot', 'dot'],
-        ['scolds-bridle', 'direct-control', 'control'],      // STAGGER
-        ['thin-hymn', 'direct-control', 'control'],          // PLEA
-        ['chilblain-watch', 'defend', 'none'],
-        ['nothing-crossed-the-ice', 'defend', 'none'],
-        ['the-untended-garden', 'oath', 'none'],
-        ['the-congregation-below', 'hex', 'control'],
+        ['grey-ward', 'defend', 'none'],            // GUARD
+        ['grey-word', 'stat-debuff', 'control'],    // VULNERABLE
     ];
 
     for (const [id, verbClass, track] of cases) {
@@ -523,12 +334,9 @@ describe('card projection — the v3 library classifies + advertises sensibly', 
         });
     }
 
-    it('DoT cards preview their REAL lifetime HP (a longer calendar previews more)', () => {
-        const short = toCombatCard('spoiled-poultice', getCardById, lookupEffect)!.bottomDamagePreview;
-        const long = toCombatCard('unction-of-boils', getCardById, lookupEffect)!.bottomDamagePreview;
-        expect(short).toBeGreaterThan(0);
-        // Same POISON i1, twice the calendar (d2 vs d4) — the preview is the
-        // real ramped lifetime, so the longer one previews strictly more.
-        expect(long).toBeGreaterThan(short);
+    it('A Plain Blow previews its printed DEAL and is reachable via COMBAT_REWARD_POOL', () => {
+        const card = toCombatCard('grey-strike', getCardById, lookupEffect)!;
+        expect(card.bottomDamagePreview).toBe(5);
+        expect(COMBAT_REWARD_POOL).toContain('grey-strike');
     });
 });

@@ -104,7 +104,7 @@ export function selectCacheVM(
         itemNames: s.outcome.items.map(i => i.name),
         currency: s.outcome.currency,
         goodwillPreview,
-        allyGrantPreview: goodwillPreview !== null
+        allyGrantPreview: GOODWILL_ALLY_CARD_ID && goodwillPreview !== null
             && goodwillPreview >= GOODWILL_ALLY_THRESHOLD
             && !knownCards.includes(GOODWILL_ALLY_CARD_ID)
             ? (getCardById(GOODWILL_ALLY_CARD_ID)?.name ?? GOODWILL_ALLY_CARD_ID)

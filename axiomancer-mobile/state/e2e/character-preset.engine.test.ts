@@ -71,8 +71,13 @@ describe('applyCharacterPreset: replaces player with engine preset', () => {
 
         expect(sageName).toBe('Sage');
         expect(sageName).not.toBe(wandererName);
-        // Card set is rebuilt from the new preset, not appended.
-        expect(sageCards).not.toEqual(wandererCards);
+        // Card set is rebuilt from the new preset, not appended. Every preset
+        // seeds the grey office since the card purge, so compare against a
+        // sage applied on a fresh store rather than against the wanderer.
+        const fresh = makeStore();
+        fresh.actions.applyCharacterPreset('sage');
+        expect(sageCards).toEqual(fresh.store.getState().player.knownCards ?? []);
+        expect(wandererCards.length).toBeGreaterThan(0);
     });
 });
 

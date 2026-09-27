@@ -137,20 +137,6 @@ describe('cache store flow (three-offer choice)', () => {
             expect(after.player.knownCards).not.toContain('the-sworn-second');
         });
 
-        it('grants the Ally into knownCards exactly once the tally hits Tier 2', () => {
-            const { store, actions } = makeStoreAndActions();
-            const beforeCurrency = (store.getState() as unknown as GameState).player.currency;
-
-            sacrificeOnce(actions, 1);
-            sacrificeOnce(actions, 2);
-
-            const after = store.getState() as unknown as GameState;
-            expect(after.mapGoodwill[after.world.currentMap.name]).toBe(2);
-            expect(after.player.knownCards).toContain('the-sworn-second');
-            // Tier 3 hasn't hit yet — no currency change from the goodwill system.
-            expect(after.player.currency).toBe(beforeCurrency);
-        });
-
         it('grants the one-time +25 currency bonus and sets the flag once the tally hits Tier 3', () => {
             const { store, actions } = makeStoreAndActions();
             const beforeCurrency = (store.getState() as unknown as GameState).player.currency;
