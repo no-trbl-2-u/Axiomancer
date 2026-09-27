@@ -50,9 +50,59 @@ lets it die before the next slice starts.
 - **Numbers come from the ladder, verdicts come from play.** No governing
   objective function returns (CLAUDE.md doctrine §3). The matrix and the
   `playtester` agents are bug detectors and a witness, not a grade.
-- **Residue is filed.** Every session ends with decisions appended to
-  `plan/2026-09-25-refactor-strategy.decisions.md` (D43+) and the brief for
-  the next slice in `plan/`.
+- **The verdict vocabulary.** In any session T judges a card with one of
+  KEEP; TWEAK <one integer delta> (numbers first, never a redesign); CUT
+  <reason>, the reason one of weak / strong / redundant / wordy / tracking /
+  dull / unfun-to-face / never-taken / too-niche / does-not-advance-the-set;
+  PARK (to the ledger's outtakes, argued again only when a slot opens);
+  TRANSFORM <to a persistent card | die face | relic | enemy-side>; REVISIT
+  <date>. CUT is the default. Category verdicts ("every X in this batch")
+  are legal. T never writes card text; numeric tuning of a wired card
+  belongs to the kill session (§6 R2-03, R6-04, RC-04).
+- **Generation is cheap; the session is a cull.** Inside the attended
+  session agents draft 2–3× the slice as unwired ballot material: one line
+  per candidate (slot code, FREE line, PAID line, ≤20 words together,
+  generator persona and mode top-down / bottom-up), ≤3 candidates per slot,
+  ≤4 on screen at once, ≤36 lines per build session. T strikes, keeps or
+  merges; only survivors are built. Nothing is drafted between sessions
+  (D37) (§6 R1-02, R2-01, R6-13).
+- **Three artefacts, one ladder.** Every slice climbs three rungs: (1) the
+  ballot; (2) the **sandbox set**, the survivors registered as one named set
+  in `cards.sandbox-sets.ts` so they render in the editor face and run in
+  the matrix and the reward-draft sim without touching `library/*.cards.ts`,
+  reached only after a deterministic lint (schema, closed keyword list, rank
+  word budget, printed-number honesty); (3) the wired slice, promoted at the
+  kill session through the editor write-back and the 12-step checklist. No
+  candidate reaches T unlinted (§6 R3-09, R3-11, R3-14, R6-07).
+- **Session shape and clock.** A slice is two attended sessions. Build
+  session, ≤90 min: 0–10 T signs the slice pitch; 10–70 agents generate the
+  ballot and T culls; 70–90 agents register the sandbox set and T plays ≥3
+  seeded fights. Kill session, ≤60 min, opens the next slice: T reads the
+  batch sheet and the playtester write-ups side by side, cuts, extracts,
+  promotes. No tuning in build, no new cards in kill (§6 R6-14, R2-04).
+- **The batch sheet, the only between-session artefact.** One row per
+  sandbox or promoted card: play rate and top/bottom split from `cardUsage`
+  in `combat.encounter.sim.ts`; offered-vs-picked from
+  `combat.reward-draft.sim.ts` (it already loads sandbox sets); win-cell
+  presence, to be added before B2; damage per enemy; a synergy-gated flag;
+  the cheapest patch; lint status. Flags, never bands (doctrine §3). Plus a
+  prose write-up and a novelty line per playtester run, and a before/after
+  run per slice (§6 R3-06, R6-03, R1-10).
+- **Pool size is a decision, not a discovery.** At session 0 T writes one
+  soft target for the first shippable pool (comparators: ~18-card modules
+  make a runnable game; ~40 is the skeleton ceiling; 70–85 draftable per run
+  at 1.0, roughly 25/50/25 by rarity, which `rankToRarity` already derives)
+  with ±25% flex and a stop rule: growth beyond it only when the
+  reward-draft sim's offer counts and playtester runs show repeats
+  (§6 R1-03, R1-05, R1-12, RC-05).
+- **Residue is filed in two places.** Design rulings (a keyword extracted,
+  a grant path, a type verdict, the pool-size target) go to
+  `plan/2026-09-25-refactor-strategy.decisions.md` (D45+) as today. Per-card
+  outcomes go to a slice ledger, `plan/card-ledger/<slice-id>.md`, with
+  three tables: ballot (every candidate seen: slot code, one line, persona
+  and mode, verdict, reason), outtakes (every CUT and PARK with its reason),
+  revisions (each TWEAK; a card is replaced at its third revision). The next
+  slice's brief is proposed by this slice's kill session (§6 R2-03, R2-11).
 
 ## 2. Plan A — Vision first (the staged pipeline)
 
@@ -64,7 +114,7 @@ player fantasies fixed before any card exists.
 |---|---|---|---|
 | A0 | **Pillars** | 3–5 one-line player fantasies per family (body/mind/heart) + the grey office's job. What the deck should *feel* like at level 1, 8, 15 | T signs the fantasy list; ≤1 page |
 | A1 | **Exploratory** | Wide brainstorm (`/brainstorm-mechanics`, `card-expert` consult, KB receipts): 30–40 mechanic *ideas*, no wiring, no names. Rejects logged with a reason | Ideas tagged to a fantasy; anything untagged dies |
-| A2 | **Vision doc + skeleton** | ≤2 pages: keyword shortlist (≤8), card-type verdict (§5), the **skeleton** — a grid of slots by rank × family × type, each slot a one-line role ("Ash body: cheap multi-hit") | Skeleton slots ≤ 40 for the first pool; T ratifies; the doc **expires** after set design (no law accumulates) |
+| A2 | **Vision doc + skeleton** | ≤2 pages: keyword shortlist (≤8), card-type verdict (§5), the **skeleton** — a grid of slots by rank × family × type, each slot a one-line role ("Ash body: cheap multi-hit") Agents draft the skeleton and T prunes it (strike rows, never write them); only the next wave's ≤12 slots are shown, the full grid stays an agent working file; a headline mechanic gets a throwaway codename plus 3–6 sample cards, never a bare keyword row, and is named at A5 after play (§6 R7-02 naming). | Skeleton slots ≤ 40 for the first pool; T ratifies; the doc **expires** after set design (no law accumulates) |
 | A3 | **Set design, in waves** | Fill the skeleton 10–12 slots per session, wired through the checklist; sandbox A/B per wave | Each wave green on all three verify gates before the next |
 | A4 | **Play design** | `combat-playtest` matrix + `playtester` agents on seeded fights; kill/replace list | ≥2 cards cut per wave, or the wave is suspicious |
 | A5 | **Evergreen ratification** | Which keywords are evergreen (any future set may use them), which are deciduous (this pool only) | Atlas rows labelled; D8 upgrades + D20 die growth decided here |
@@ -88,11 +138,12 @@ timeline, Hearthstone's "a keyword only when many cards already say it"
 
 | Session | Name | Output | Gate to next |
 |---|---|---|---|
-| B1 | **Slice 1: one fantasy, one family** | ~8–10 cards for a single body fantasy, written as **plain rules text** (no new keyword yet), built in the card editor, playable the same session on seeded fights | Slice beats the Act 1 elite set with the grey deck + slice; `playtester` report |
-| B2 | **Kill + extract** | Cut what nobody played; **extract keywords** only where ≥3 cards share identical text and Vilain's tests pass; wire them (12 steps) | Extracted keywords ≤2; cut list ≥2 |
-| B3 | **Slice 2: mind** | Same shape for a mind fantasy | Same gate |
+| B1a | **Pitch + ballot** | T signs a one-page slice pitch (one fantasy line from A0, one family, ≤12 slot codes with a one-line role each, drafted by agents from C1's threat matrix and pruned by T). Agents then generate the ballot in-session: 2–3 candidates per slot as **plain rules text** (no new keyword yet), tagged top-down or bottom-up. T culls with the §1 vocabulary to ≤12 survivors | ≤36 ballot lines; ≤4 on screen at once; CUT is the default |
+| B1b | **Sandbox play** | Survivors are registered as one named set in `cards.sandbox-sets.ts` (id = the slice id) behind the deterministic lint, so they render in the editor face and run in the matrix (`--sandbox=<setId>`) and the reward-draft sim without touching `library/*.cards.ts`. T plays ≥3 seeded fights with the grey deck plus the set | Slice beats the Act 1 elite set with the grey deck + set; `playtester` write-up per run |
+| B2 | **Kill + extract + promote** | T reads the batch sheet (§1) and the playtester write-ups side by side; cuts with a reason; **extracts keywords** only where ≥3 KEEP cards share identical text and Vilain's tests pass; survivors are promoted from the sandbox set into the library in the same PR (the editor write-back is used here, at the last rung only); the slice ledger is updated | Cut list ≥2; extracted keywords ≤2; wired through the 12 steps; ledger complete |
+| B3 | **Rules note, then slice 2: mind** | Before slice 2 opens, T ratifies a ≤15-line note (prepared by agents from `combat.engine.ts`) fixing what "hit", "dealt", "guarded", "applied" and "consumed" mean for triggers and when a turn ends for a fading effect; it lives in the atlas header (wording, not a keyword, so D37 holds). Then the same B1a/B1b/B2 shape for a mind fantasy | Note ratified; same gate |
 | B4 | **Slice 3: heart** + vocabulary review | Same shape; then a **vocabulary review**: merge/rename keywords across all slices, check the rank budget | Atlas consistent across slices |
-| B5 | **Cross-slice play** | Mixed decks; the reward/cache pools re-armed on the surviving cards; matrix re-shaped and re-stamped | Baseline stamped; D8/D20 decided from what the slices needed |
+| B5 | **Cross-slice play** | Mixed decks are the three family pairs plus the three mono lanes (six run identities from three slices); the reward pool must reward adding cards, not only thinning; every extracted keyword gets an evergreen / deciduous / set-only label and every card a core / expansion label (core = one keyword, no condition); matrix re-shaped and re-stamped | Baseline stamped; D8/D20 decided from what the slices needed; use-XP judged on paper (ballot outcome 4) |
 | B6+ | Repeat per fantasy | Each further slice is one session + one kill session | — |
 
 **Card types in Plan B.** Types by necessity: a type is proposed only when a
@@ -119,8 +170,8 @@ that already exist.
 | Session | Name | Output | Gate to next |
 |---|---|---|---|
 | C1 | **Threat matrix** | Inventory the 78 enemies' 11 keywords, telegraph patterns and statuses by Act; each row a *problem* ("HIDE walls chip damage", "FLURRY punishes single big GUARD") | Matrix ≤ 25 rows, agent-prepared, T prunes |
-| C2 | **Answer slots** | For each row, the answer *shapes* each family could own (body: burst through; mind: absorb; heart: pre-empt). This is the skeleton, derived instead of imagined | Every Act 1 row has ≥1 answer slot per family; rows nobody wants to answer are enemy-side work, filed |
-| C3 | **Slice by Act** | Cards for Act 1 answers (~12), plain text, wired, played on the actual Act 1 encounter pools | Matrix + `playtester` on Act 1; kill list |
+| C2 | **Answer slots** | For each row, the answer *shapes* each family could own (body: burst through; mind: absorb; heart: pre-empt). This is the skeleton, derived instead of imagined Capped at ≤12 slots per Act-slice; the pruned list is the slice pitch T signs. | Every Act 1 row has ≥1 answer slot per family; rows nobody wants to answer are enemy-side work, filed |
+| C3 | **Slice by Act** | Cards for Act 1 answers (~12), plain text, wired, played on the actual Act 1 encounter pools Climbs the §1 ladder: ballot, then sandbox set, then wired at C4. | Matrix + `playtester` on Act 1; kill list |
 | C4 | **Fantasy pass** | Give each surviving card a role in a fantasy; rename; extract keywords (≥3 carriers) | Atlas; rank budget |
 | C5 | **Measure** | Re-shape the baseline to the grey deck + Act 1 pool; stamp; then Act 2 rows | Stamp cited in the brief for C6 |
 | C6+ | Next Act | Repeat C3–C5 per Act | — |
@@ -218,30 +269,41 @@ adopted; every row is a ballot for the guided session.
 **The progression test** (in addition to §5 where a mechanism needs a type):
 (p1) the changed card must still print the number the engine applies
 (`paid-summary-honesty` law); (p2) the change must be visible on the face
-without a tooltip; (p3) it must scale with the stat model (D41) without a
-second formula; (p4) it must have a *price* on THE PATH (a node, a currency,
-a sacrifice, plays) — free progression is a difficulty knob, not a choice.
+without a tooltip; (p3) it must not add a second multiplier to a number the
+stat model already multiplies: name the ONE axis that owns each printed
+number (stat, die, or `+`), and the harness prints the max product at Saint
+rank with maxed stats and honed dice as the declared ceiling (the S3 residue,
+PR #404, is the in-tree witness of what compounding does); (p4) it must have
+a *price* on THE PATH (a node, a currency, a sacrifice, plays) — free
+progression is a difficulty knob, not a choice; (p5) an upgraded or
+transformed face must differ from its base in at least one printed number
+or line, guarded by a test beside `paid-summary-honesty`; (p6) no repeatable
+in-fight action may produce a permanent progression change: the price is
+paid once per node or once per fight, with a playtester check that fight
+length does not rise when the mechanism is on.
 
 | Mechanism | Prior art | Rule | Engine today | Test | Verdict | Conf. |
 |---|---|---|---|---|---|---|
-| **Linear upgrade** (`+`) | Slay the Spire rest-site `+`; Monster Train stones, two slots max | One strictly-better copy per card; computed by bucket (+40% magnitude, +25% rate, +1 count) or an authored patch | `card-upgrades.ts` — the whole rule, minus a grant path and the oath/hex hook-by-id hazard | p1 ✓ (face regenerates), p2 needs a `+` marker, p3 ✓ (base moves, formula unchanged), p4 **missing** — that is D8 | Ship first: the cheapest axis, engine-complete. Grant path is the only decision: rest choice vs Blacksmith vs a currency. Keep the one-upgrade cap (§6 D1: stacking "wasn't deckbuilding"); treat the computed rule as a scaffold and author the `+` per card in the slice | 85 |
+| **Linear upgrade** (`+`) | Slay the Spire rest-site `+`; Monster Train stones, two slots max | One strictly-better copy per card; computed by bucket (+40% magnitude, +25% rate, +1 count) or an authored patch | `card-upgrades.ts` — the whole rule, minus a grant path and the oath/hex hook-by-id hazard | p1 ✓ (face regenerates), p2 needs a `+` marker, p3 **fails as computed**: the +40% magnitude bucket multiplies a number the stat model already multiplies (the S3 residue shape); p3 passes only with small integer steps and one declared owner per number, p4 **missing** — that is D8 | Ship first: the cheapest axis, engine-complete. Grant path is the only decision: rest choice vs Blacksmith vs a currency. Keep the one-upgrade cap (§6 D1). Keep the computed default with a per-card opt-out (Dawncaster's shape, §6 KB-03), but move it to ±1 steps and lint every `+` for a cost, count, rider or downside change; author only where the lint flags a number-only face (§6 R4-03). Ratify `+` as a base/upgraded pair table, never per card | 85 |
 | **Branching upgrade** (A / B) | Cobalt Core's A/B; Griftlands' choice-of-two on level | Two authored patches; the player picks one; the other is gone for the run | `CardUpgrade` patch supports one path only | p2 ✓, p4 ✓ if it reuses the `+` grant; costs 2 authored patches per card, so it fights the slice budget | Defer to Skull/Saint cards only, after `+` ships; a `+` with a choice is the same face | 70 |
-| **Upgrade by use** (XP) | Griftlands: cards level after N plays | A play counter per card instance; the upgrade fires from the counter, not a node | Nothing counts plays per card instance; combat state has no per-card counter | p4 ✓ (the price is play), p2 needs a pip meter on the face; new deck-state field, saves migrate; needs a per-fight XP cutoff from day one or players draw fights out (§6 D4) | The most *game-shaped* option for a campaign RPG (a card you use becomes yours). Evaluate at B5/C5 once the pick × win table exists | 60 |
+| **Upgrade by use** (XP) | Griftlands: cards level after N plays | A play counter per card instance; the upgrade fires from the counter, not a node | Nothing counts plays per card instance; combat state has no per-card counter | p4 ✓ (the price is play), p2 needs a pip meter on the face; new deck-state field, saves migrate; needs a per-fight XP cutoff from day one or players draw fights out (§6 D4); if prototyped later, one XP per card per fight | The most *game-shaped* option for a campaign RPG (a card you use becomes yours). Evaluate at B5/C5 once the pick × win table exists | 60 |
 | **Merge / fusion** | Inscryption: the altar moves one card's sigil onto another and destroys the source; the Mycologists fuse two identical cards (§6 D5) | Two cards → one; the result carries one card's numbers and the other's keyword or line | No card-on-card reference in the data model (same gap as Affix, §5.1); card removal exists | p1 ✓ only if the fused face is generated, p3 ✓, p4 ✓ (the sacrifice is the price); fails p2 unless the face has room for a second line | Attractive for the doom register (a card *eats* another). Prototype on paper: "the merged card = FREE line of A + PAID line of B" is expressible today as a new authored card, no engine work, so pilot it as **authored fusion results** before generic fusion | 55 |
-| **Transform** | Slay the Spire Transform event; Dawncaster Ascension I→II→III and Path I→II→III numbered chains (self-replacement UNVERIFIED, §6 D8) | A card becomes a different card, by chance (event) or by chain (its next stage) | Card ids are static; reward/cache offers gated off; map events exist | Chains satisfy p1–p3 as separate authored cards; p4 is the chain's trigger (plays, an act boundary, a story beat). Random transform fails p4 (no choice) unless it is an event's price | Chains, yes, as a Plan C late slot or a Saint slot: a card that *ends* as something else is the cheapest transformation and pure content. Random transform: an event, not a card system | 70 |
+| **Transform** | Slay the Spire Transform event; Dawncaster Ascension I→II→III and Path I→II→III numbered chains (in-place replacement VERIFIED from the Blightbane card API, game v1.19.002, §6 D8: the transforming object is a persistent self-buff on the player, this engine's oath shape, not a deck card; every stage is unique and only stage I is offered) | A card becomes a different card, by chance (event) or by chain (its next stage) | Card ids are static; reward/cache offers gated off; map events exist | Chains satisfy p1–p3 as separate authored cards; p4 is the chain's trigger (plays, an act boundary, a story beat). Random transform fails p4 (no choice) unless it is an event's price | Chains, yes, as a Plan C late slot or a Saint slot: a card that *ends* as something else is the cheapest transformation and pure content. Random transform: an event, not a card system | 70 |
 | **Attachment / charm** | Wildfrost charms; Balatro enhancements, editions, seals; Roguebook gems | A modifier object sits on a card and changes one number or adds one keyword | None; the closest live thing is die gear (Blacksmith payload swap) | Fails p2 (a second glyph on the face) and needs a new zone; p3 ✓ if the modifier is a keyword | Not for the first pool. If T wants a "modifier" fantasy, put it on the **dice** (gear already exists) rather than on cards | 75 |
 | **Die growth** (the card-adjacent axis) | Astrea's risk-tiered dice; THE PATH axes 4–5 | Hone miss faces to mana; add a die per act | `honedDieGear`, `bonusTurnDice`, `dieUpgradeLevel`; D31a proved these the strongest axes | Passes all four; the only open question is the grant path (D20) | Decide the grant with `+` upgrades in the same session: one Blacksmith / rest surface for both | 80 |
 | **Removal** (deck thinning) | StS removal pricing; Dominion trashing | Linear price `base + step × removals` | Shipped (Phase 52a/52f), rest offers "cut a card" | Passes | Untouched. It is the axis that makes a small pool feel curated | 95 |
 
 Reading the table: `+` upgrades and die growth are engine-complete and want
 one grant decision; chains and authored fusion results are content, not
-engine; upgrade-by-use is the one mechanism worth a real prototype; charms
-and generic fusion wait. Confidence in that ordering: 70.
+engine; upgrade-by-use is evaluated on paper at B5/C5 once the batch sheet
+exists (per §7 ballot outcome 4, nothing beyond `+` and die growth is
+prototyped in the first pool); charms and generic fusion wait. Confidence in
+that ordering: 70.
 
 **Where each plan decides progression.** Plan A: A2 names the axes the
 skeleton assumes (a `+` column per slot?), A5 ratifies the grant paths. Plan
 B: B2 ships `+` for slice 1 as its own mini-slice so the kill session
-compares base vs `+`; B5 decides die growth and use-XP. Plan C: C2's answer
+compares base vs `+`; B5 decides die growth, and use-XP is a paper verdict. Plan C: C2's answer
 slots may be answered by a *progression* (a `+` that turns a chip card into
 an answer) rather than a new card; C5 decides grants with the stamp.
 
@@ -262,6 +324,8 @@ scheduled; each names its existing surface.
 | Deck-size floor / ceiling | Deck sizes open since 2026-09-02 | A ceiling makes removal and fusion matter |
 | Card colour vs die colour | `color`, colour-match +25% | The Form / stance candidate (§5.1) is the one that touches this rule |
 | Signature skills from items | THE PATH axis 6 | Not cards; leave to `/adjust-equipment` |
+| Reward re-arming per slice | `COMBAT_REWARD_POOL`, `REWARD_RARITY_WEIGHTS` (`combat.rewards.ts`) | A slice enters the pool only after its kill gate; offers stay 3 wide; rarity derives from rank so the weights are the lever, not a rewrite; add a pity ramp once the pool passes one slice; the reward-draft sim's per-card offer counts are the repeat-rate witness |
+| Pool gating by progression tier | Act boundaries, `dieUpgradeLevel` bands | Gate what already has a grant path (dice, `+`, kit) before gating cards; if cards are withheld, the open tier must be self-sufficient and the withheld slice thin (§8 R-gate-01/03) |
 
 ## 6. Research receipts
 
@@ -287,7 +351,7 @@ carries no weight in §2–§5.
 | # | Principle | Source | What to copy |
 |---|---|---|---|
 | B1 | Balance by data, not intuition: pick rate when offered × presence in winning decks, weekly patches; feedback channel for "feel" because "the numbers are not telling us how things feel". Rework before delete (Dual Wield) | Game Developer, "How Slay the Spire's devs use data", 2018-02-27, gamedeveloper.com/design/how-i-slay-the-spire-i-s-devs-use-data-to-balance-their-roguelike-deck-builder; GDC 2019 "Metrics Driven Design and Balance" (video; the "largest mechanic cut" section UNVERIFIED) | B2's kill session reads a pick × win table from the matrix plus the `playtester` feel report |
-| B2 | Build the scoring core first, add a layer only when the core proves out; every Joker went through a balance change, some scrapped; cut anything that "cannibalises all the adjacent strategies" | LocalThunk, "Balatro Timeline", 2024-03, localthunk.com/blog/balatro-timeline-3aarh; Rogueliker interview 2024-03-07 | B1 starts from the grey core; B2's cut criterion |
+| B2 | Build the scoring core first, add a layer only when the core proves out (Timeline). Every Joker went through a balance change, some scrapped; the cut is two-sided: "too good and cannibalises all the adjacent strategies" or never worth taking; change a number first, rewrite an effect last (Rogueliker) | LocalThunk, "Balatro Timeline", 2025-03-06, localthunk.com/blog/balatro-timeline-3aarh; LocalThunk interviewed by Mike Holmes, Rogueliker, 2024-03-07, rogueliker.com/balatro-interview (corrected in the second pass, §8 RC-03) | B1 starts from the grey core; B2's two-sided cut criterion and the number-first rule |
 | B3 | Keyword only when the effect recurs; a two-card effect was left unkeyworded; "keywords are double-edged swords" between condensing and vocabulary load. Expansion keywords rotate so players "don't have to learn a hundred new mechanics" | Brode via hearthstone.wiki.gg/wiki/Ability (*wiki-mediated*); Yong Woo, Gamescom 2014 (*wiki-mediated*); Ayala, hsreplay interview 2018-11-07 | B2's ≥3-carrier extraction; a short evergreen list per A7 |
 | B4 | Keyword stacks lose identity ("Fearsome is much less impactful when it already has Challenger and Elusive") | Riot (Morgan) via outof.games 2022-07 (*secondary*) | Rank budget: ≤2 keywords per card below Skull |
 | B5 | Marvel Snap: one card type, two keywords, ~11 words per card; "simplify, even if your team hates you"; teach each keyword by the card that showcases it, in unlock order | mobilegamer.biz 2023-03-23 and 2023-03-21 (Brode, Hagman; GDC 2023) | The reward pool's re-arm order teaches keywords one at a time |
@@ -321,11 +385,11 @@ design writer (no such source).
 | D1 | Slay the Spire's first prototype let cards "increase values indefinitely" and was thrown out: "Acquire good card, just upgrade that card. This wasn't deckbuilding!" Reduced to one upgrade per card, then "8 straight hours creating a unique upgrade for every single card". The Rest Site makes the upgrade compete with a 30% heal | Yano, Mega Crit AMA, 2019-01-24, bestofama.com/amas/aj6sq1; slaythespire.wiki.gg/wiki/Rest_Site | One `+` per card, and the grant competes with healing. The engine's computed default rule is a scaffold; the authored patch is the product |
 | D2 | Monster Train: upgrade stones bought for gold, "cards only have two upgrade slots" (a third via artifacts); impactful upgrades cost 100+ gold | TheGamer (Alston) 2025-05-28; monster-train.fandom.com/wiki/Upgrades (*snippet, medium*) | If stacking is ever wanted, hard-cap at 2 slots and price it |
 | D3 | Cobalt Core: every card has Upgrade A and Upgrade B, chosen at a node that also offers heal or remove; an event lets you flip A↔B | cobaltcore.wiki.gg/wiki/Basic_Shot, /wiki/Annoying_Debate | A/B forks at the same node as `+`; authored per card |
-| D4 | Griftlands: cards gain XP per play (3–7 uses), then a choice of two upgrade paths. XP-per-play "incentivizes players to draw out fights"; Fatigue (round 6 cutoff) was the fix | Gamepur (Palm) 2020-06-16; Klei dev log 2019-07-18 (Forbes; *snippet, medium*) | Upgrade-by-use needs a per-fight XP cutoff from day one (added to §5.3's row) |
+| D4 | Griftlands: cards gain XP per play (3–7 uses), then a choice of two upgrade paths. XP-per-play "incentivizes players to draw out fights"; Fatigue (round 6 cutoff) was the fix | Gamepur (Palm) 2020-06-16; Klei Entertainment, Griftlands update 355233, 2019-07-24, kleiforums.com/game-updates/griftlands/355233-r832/ (primary, confirmed in the second pass) | Upgrade-by-use needs a per-fight XP cutoff from day one (added to §5.3's row) |
 | D5 | Inscryption: the Sacrificial Altar destroys one card and moves its sigil onto another (sigils union, duplicates don't double); the Mycologists fuse two identical cards, summing stats and unioning sigils | Steam discussion 1092790/3419936083033918051; inscryption.fandom.com/wiki/The_Mycologists (*snippet*) | "Sacrifice X onto Y" is the cheapest fusion: one line moves, the source dies |
 | D6 | Across the Obelisk: a Blue (cheaper) and a Gold (stronger) upgrade per card, priced in shards by rarity; converting between them costs gold | TheGamer (Buchalter) 2022-09-13 | Rarity-priced upgrades are a currency sink that scales with rank |
 | D7 | Slay the Spire Transform: remove a card, add a random non-basic card of the class, "equally likely across rarities"; sourced from events and two relics, never a shop | slaythespire.wiki.gg/wiki/Transform | Transform is an event's price, not a card system |
-| D8 | Dawncaster's Ascension I/II/III and Path I→III exist as numbered cards; whether a stage replaces itself on play is UNVERIFIED (JS-rendered card site; wiki blocked) | blightbane.io/card/Ascension_I; `kb:dawncaster` records 0104–0106, 0071–0073 | Chains stay a *candidate*; verify the rule with the app before copying it |
+| D8 | Dawncaster's Ascend/Advance chains VERIFIED from the Blightbane card API (game v1.19.002): each stage is a persistent self-enchantment (category Form), the step is an in-place replacement (`enchantref:self;removeenchant:this` with the next stage in the effect's card list); the seven zodiac chains (Aquarius' Dream and the rest) are "and Advance. Unique." with only stage I acquirable | blightbane.io/api/card/Dark_Ascension_I; blightbane.io/api/cards?category=17 (fetched 2026-09-27, §8 KB-01/KB-02) | A chain occupies a persistent slot, not a deck slot; the unique flag stops a second copy double-advancing |
 | D9 | Wildfrost charms: attached between fights, "cannot be removed or undone", max 3 per card. Balatro: one Enhancement, one Edition, one Seal per card; a new one replaces the old. Roguebook: 0–2 sockets, gems permanent | wildfrostwiki.com/Charms; balatrowiki.org/w/Card_modifiers; Game Rant (Meffert) 2021-07-03 | Typed slots, one of each, new replaces old, permanent. Still parked for the first pool (§5.3) |
 | D10 | Removal price: StS "starts at 75 gold and increases by 25 each time"; Dominion's Chapel is "probably" the strongest card for its cost | slaythespire.wiki.gg/wiki/The_Merchant; Vaccarino via meadowparty.com 2010-12-19 | The shipped linear removal curve (Phase 52a) is the standard brake; keep it |
 
@@ -361,3 +425,157 @@ answered; answered 2026-09-27 as above):
 4. Which progression mechanisms beyond `+` and die growth get a prototype in
    the first pool (§5.3 recommends upgrade-by-use and authored fusion
    results; confidence 60).
+
+**Second research pass (2026-09-27, §8).** A 56-agent pass (six research
+dimensions, two-lens source checks, two critic rounds, three comparison
+lenses) returned **partly aligned**: the spine holds (slice as unit, kill
+gate first, keywords extracted after play, verdicts from play) and the gap
+was the process layer that decides T's role. That layer is now §1's six new
+bullets. The pass re-affirms Plan B with A0 and C1 spliced in (its
+confidence 80) and says the next question for T is not which plan but
+whether the §1 session format is ratified as written; the format is the
+same under all three plans. Two further calls it adds:
+
+5. The pool-size soft target for the first shippable pool (§1, comparators
+   18 / 40 / 70–85).
+6. Whether the §1 session format (vocabulary, ladder, clock, ledger, batch
+   sheet) is ratified as written. Defer path: it applies as written to
+   whichever plan runs and resurfaces at the next `/oversight`.
+
+## 8. Alignment review (2026-09-27, second research pass)
+
+Tree read after merging origin/main into the branch at f2f8522. The branch is at parity with main. Main's keyword audit (#407, e663ef0) has landed; the atlas still lists 22 player rows and 11 enemy rows under a header that says two carriers. The three lens reviews, the research corpus and the plan file were read in full. Overall verdict: partly aligned. The spine holds; the process layer that decides T's role is missing.
+
+### 8.1 Receipts
+
+Source verdict is the corpus's own confidence or verification tag. Fit verdict is how the plan file stands against the finding today.
+
+| id | Principle | Source | Source verdict | Fit verdict |
+|---|---|---|---|---|
+| R1-01 | Build the pool in archetype batches, then sculpt single cards from play data | gamedeveloper.com/design/how-i-slay-the-spire-i-s-devs-use-data-to-balance-their-roguelike-deck-builder | partly | aligned, adapted to the slice |
+| R1-02 | Shipped pools are survivors of a 2 to 3x generated set; the cull is the design work | pcgamer.com/games/card-games/its-kind-of-like-youre-a-butcher-hundreds-of-slay-the-spire-2-card-ideas-were-cut-during-development-in-an-incredibly-destructive-process/ | high | missing |
+| R1-05 | Fix the visible set first; grow the pool only when runs repeat cards | dominionstrategy.com/2012/12/20/interview-with-donald-x-vaccarino-part-i-boardgame-design/ | confirmed | partly |
+| R1-06 | Ship a simple core first; label core and expansion at creation | dominionstrategy.com/2013/06/24/the-secret-history-of-dominion/ | high | partly, Plan A only |
+| R1-07 | A skeleton of empty slots is a blueprint, not a lock | magic.wizards.com/en/news/making-magic/nuts-bolts-design-skeleton-2010-02-15 | confirmed | partly, slice-sized |
+| R1-10 | A reused old pool reads as stale to testers | pcgamer.com/games/roguelike/slay-the-spire-2-dev-says-an-early-idea-was-to-actually-reduce-the-card-pool-but-players-hated-it-we-need-new-stuff/ | high | missing |
+| R1-11 | Family pairs plus mono lanes carry variety in a small pool | gamedeveloper.com/design/tackling-deckbuilding-design-in-abrakam-s-roguebook | high | aligned |
+| R1-13 | Reward screens are rated on difficulty, good options and interest | uu.diva-portal.org/smash/get/diva2:2078257/FULLTEXT01.pdf | low, results unread | missing |
+| R2-01 | Generate 2 to 3x and make cut the default outcome | pcgamer.com, as R1-02 | confirmed | missing |
+| R2-03 | Every cut carries a one-word reason; keep an outtakes file | dominionstrategy.com/2013/06/24/dominion-outtakes/ | high | missing |
+| R2-04 | Two owner touchpoints per batch: the pitch and the ship list | outof.games/news/2987-dean-ayala-details-the-different-groups-of-the-hearthstone-dev-team-confirms-more-battlegrounds-content-in-the-future/ | confirmed | partly, absent from Plan B |
+| R2-06 | Competing candidates are filed under one slot code | magic.wizards.com/en/news/making-magic/nuts-bolts-filling-design-skeleton-2011-02-28 | partly | missing |
+| R2-07 | The lead frames and votes; the lead does not author the list | magic.wizards.com/en/news/making-magic/nuts-bolts-14-initial-ideation-2022-03-07 | high | missing |
+| R2-11 | Three reworks, then replace | mobilegamer.biz/second-dinner-reveals-the-secrets-of-marvel-snaps-onboarding-and-card-design/ | medium | missing |
+| R2-13 | Change a number first; reserve effect rewrites for the owner | rogueliker.com/balatro-interview/ | medium | partly, conflicts with D37 unless stated |
+| R3-06 | Four per-card metrics; healthy means wanted some of the time | gamedeveloper.com, as R1-01 | high | partly, one column missing in the tree |
+| R3-07 | Designers edit content, not parameters | arxiv.org/abs/2005.07478 | confirmed | aligned with §0's diagnosis |
+| R3-09 | No generated card reaches the reviewer without a validator | markrosewater.tumblr.com/post/720140714202267648 | high | missing |
+| R3-10 | Budgets and distribution are code; prose is the model's job | mechanisticmind.substack.com/p/creating-magic-the-gathering-cards-with-generative-ai | confirmed | partly, as a lint |
+| R3-11 | A strict schema and a closed keyword list stop hallucinated mechanics | arxiv.org/abs/2604.27972 | high | missing |
+| R3-13 | Restricted play gives a per-card value delta | ojs.aaai.org/index.php/AIIDE/article/view/12513 | medium | missing |
+| R3-14 | Cards are data rows; a batch is a reviewable diff | riotgames.com/en/news/engineering-tools-designers-legends-runeterra | high | partly, sandbox registry unused |
+| R4-01 | One upgrade per card; unbounded upgrades were not deckbuilding | bestofama.com/amas/aj6sq1 | confirmed | aligned |
+| R4-02 | The upgrade is priced by its competitor | steamcommunity.com/app/2868840/discussions/0/806845754928808544/ | confirmed | partly, no measurement method |
+| R4-03 | Number-only upgrades read flat; cost, count and rider changes register | steamcommunity.com, as R4-02 | medium | misaligned with the computed bucket |
+| R4-04 | Upgrade by use needs a per-fight cutoff from day one | kleiforums.com/game-updates/griftlands/355233-r832/ | high | aligned |
+| R4-09 | An upgrade that changes nothing on the face is a defect | blog.febucci.com/2026/08/interview-red-nexus-peglin-behind-the-scenes/ | high | missing |
+| R4-10 | Early upgrade power busts balance; gate grants by act | steamcommunity.com/app/1135810/discussions/0/2968398218091214440/ | high | missing |
+| R4-12 | Base and upgraded values are tuned as a pair and reversible | pcgamesn.com/slay-the-spire-2/patch-notes-live-april-2026 | medium | missing |
+| R5-01 | A merge is a pure function, optional, capped | steamcommunity.com/app/1092790/discussions/0/4588603157850224567 | high | aligned, conditions missing |
+| R5-08 | Transform is an event's price, never a shop | slaythespire.wiki.gg/wiki/Transform | partly | aligned, deferred |
+| KB-01 | A chain steps in place; the object is a persistent self-buff, not a deck card | blightbane.io/api/card/Dark_Ascension_I | high | misaligned, plan says unverified |
+| KB-02 | Every chain stage is unique; only stage one is offered | blightbane.io/api/cards?search=&rarity=&category=17&type=&banner=&exp= | high | missing |
+| KB-03 | Upgrades are computed by default with a per-card opt-out | blightbane.io/api/card/Aegis | medium | misaligned with the authored default |
+| KB-04 | Upgrade levels stack additively with no visible cap | blightbane.io/api/card/Ambition | high | conflicts with D1; owner call |
+| R6-01 | The handoff rates each mechanic's fate; the owner objects at review, never hand-edits | markrosewater.tumblr.com/post/809181847710056448 | high | partly |
+| R6-03 | Every playtest ends with a short prose write-up | magic.wizards.com/en/news/making-magic/nuts-bolts-initial-playtesting-2013-02-11 | high | missing |
+| R6-04 | Park is distinct from cut; cut what does not advance the set | magic.wizards.com/en/news/making-magic/nuts-bolts-three-stages-design-2015-03-30 | high | missing |
+| R6-05 | Generators and ratifiers are separate roles with a halfway checkpoint | outof.games, as R2-04 | confirmed | partly |
+| R6-08 | One card changed per test; verdicts at category level | dominionstrategy.com/2012/12/20/interview-with-donald-x-vaccarino-part-i-boardgame-design/ | high | missing |
+| R6-09 | The archetype batch is the unit; numbers never say how things feel | gamedeveloper.com, as R1-01 | confirmed | aligned |
+| R6-12 | Ratify event definitions once before batch two | mcvuk.com/business-news/when-we-made-wildfrost/ | medium | missing |
+| R6-13 | Reviewers discard over half; show at most four suggestions at a time | arxiv.org/abs/1901.06417 | medium | missing |
+| R6-14 | Reviewer detection falls past sixty minutes | smartbear.com/learn/code-review/best-practices-for-peer-code-review/ | low | missing |
+| GAP-1 R6-02 | Exactly one axis may touch printed numbers | levelwinner.com/dawncaster-beginners-guide-tips-tricks-strategies/ | medium, unverified | misaligned with p3 |
+| GAP-1 R6-03 | Upgrades move in plus or minus one steps; extra dice at fixed levels | terrycavanagh.itch.io/dicey-dungeons/devlog/104827/dicey-dungeons-version-15 | high, unverified | partly |
+| GAP-1 R6-04 | Card upgrade and die growth share one surface | store.steampowered.com/app/1755830/Astrea_SixSided_Oracles/ | medium, unverified | aligned |
+| R7-01 naming | A keyword is a count decision made after the cards exist | markrosewater.tumblr.com/post/674919453694296064/ | high | aligned with Plan B |
+| R7-02 naming | Headline mechanics get a codename plus sample cards; the name comes late | magic.wizards.com/en/news/making-magic/bloomburrow-vision-design-handoff-part-2 | high | misaligned with A2 |
+| R7-04 naming | Roughly half of named mechanics die before print | magic.wizards.com, as R7-02 naming | medium | missing |
+| R7-02 contests | Keep the ritual light; the reject pile seeds later briefs | markrosewater.tumblr.com/post/817972556104597504 | high | missing |
+| R7-04 contests | The owner sets the brief, judges once, and the winner sets the next brief | forum.dominionstrategy.com/index.php?topic=18987.0 | high | missing |
+| R5-01 cut-lines | Two directional cut metrics; no number was ever published | gamedeveloper.com, as R1-01 | high | partly |
+| R5-02 cut-lines | Synergy-gated cards are reviewed, not killed; kill by before/after delta | bestofama.com/amas/aj6sq1 | medium | missing |
+| RC-01 | The three GDC talks are gated; abstracts hold no rationale | gdcvault.com/play/1025731/-Slay-the-Spire-Metrics | high | aligned, rows stay UNVERIFIED |
+| RC-03 | The cannibalise line is Rogueliker 2024-03-07; the cut is two-sided | rogueliker.com/balatro-interview/ | high | misaligned citation in B2 |
+| RC-04 | A twenty-word face cap; a three-way kill verdict | gameinformer.com/interview/2024/03/21/balatro-was-almost-called-joker-poker-and-other-details-from-its-creator | high | partly |
+| RC-05 | Pool size was set by fiat, then grown by slices | localthunk.com/blog/balatro-timeline-3aarh | high | aligned |
+| R8-02 | No shipped card carries two frame keywords; a third carry none | slaythespire.wiki.gg/wiki/Ironclad_Cards | medium | misaligned rank budget |
+| R8-05 | Two signature keywords per fantasy; a ceiling near thirteen | slaythespire.wiki.gg/wiki/Keywords_(Slay_the_Spire_2) | medium | missing stop |
+| R-gate-01 | Withheld cards are a thin slice designed with the open pool | slaythespire.wiki.gg/wiki/Ironclad | high, unverified | missing |
+| R-gate-03 | The open tier must be self-sufficient | steamcommunity.com/app/2742830/discussions/0/599653598138280893 | medium, unverified | missing |
+
+### 8.2 Verdict per lens
+
+**Library and keywords: partly.** The slice unit, the kill gate before the growth gate, extraction after play, and verdicts from play all match the comparators (R1-01, R6-09, R7-01 naming, R7-03 naming, R5-01 cut-lines). §0 is stale in a way that changes the pre-session step: the code purge landed on main, the atlas trim remains, and the branch contradicts itself on the carrier threshold (R7-01 naming, R8-03). No plan has an overgenerate-then-cull step, a kill-reason vocabulary, an outtakes file, or a validator before T's eyes (R1-02, R2-03, R3-09, R3-11). The B2 attribution is wrong and the D8 chain rule is now verified (RC-03, KB-01). Pool size, per-slice density, a keyword ceiling, reward re-arming and withholding are unwritten (R1-05, R8-02, R8-05, R1-04, R-gate-01).
+
+**Progression: partly.** The one-upgrade cap, the open grant path, deferred forks, the use-XP cutoff, authored fusion before generic fusion, transform as an event's price, charms refused and die growth as the strongest axis all match (R4-01, R4-02, R4-04, R5-01, R5-08, GAP-1 R6-04). The p3 test marks the compounding case as safe, which is the S3 residue shape (GAP-1 R6-02, GAP-1 R6-01). The computed magnitude bucket and the authored-per-card default both run against the comparators, which use small integer steps and a computed default with an opt-out (GAP-1 R6-03, KB-03, R4-03). The reading paragraph contradicts §7's ballot outcome (R2-11, R6-09). One tree fact in the lens is corrected here: a reward-draft sim exists at axiomancer-mechanics/src/Combat/combat.reward-draft.sim.ts and already loads sandbox sets. Offered-versus-picked is reachable today; win-cell presence is the only missing column (R3-06, R5-01 cut-lines).
+
+**Owner in the loop: partly.** The slice is the right size for one sitting, agents prepare evidence not content, and C1's prune-not-author shape is the right template (R6-14, R2-04, R6-02). No plan gives T a verdict vocabulary, a candidate ceiling, a clock, a per-card ledger or a fixed batch sheet (R2-03, R6-13, R6-14, R2-02, R3-06). Plan B wires cards before T culls them because the editor writes into the real library; the sandbox set registry is the unwired middle rung the plans never use (R3-14, R6-07). Plan A's A2 asks T to ratify forty abstract slots before any card exists, the registry-first shape §0 blames (R3-07, R7-02 naming). The next question to T is the session format, not the plan.
+
+### 8.3 Amendments
+
+Applied in this revision: must 1–12; should 13, 15, 16, 18, 19, 20 and 22, and the D4 / D8 rows of 23. Listed only, for the session: should 14, 17, 21, the rest of 23, 24 (put to T as §7 call 6); could 25–28.
+
+Must.
+
+1. §0. Refresh the purge row: code purge landed as #407, atlas trim and carrier census remain, raise the card threshold to three carriers, baseline c6fd758c. Sources R7-01 naming, R8-01, R8-03, R8-04, A4.
+2. §1. Add the verdict vocabulary: KEEP, TWEAK one integer, CUT with a fixed reason, PARK, TRANSFORM, REVISIT with a date; CUT is the default; category verdicts are legal; T never writes card text; numeric tuning of a wired card belongs to the kill session. Sources R2-03, R2-01, R6-04, R6-06, R6-08, R6-10, R6-11, RC-03, RC-04, R2-13.
+3. §1, B1, A3, C3. Generation is cheap and the session is a cull: agents draft two to three times the slice in-session as one-line ballot material, at most three per slot and four on screen, at most thirty-six lines per build session. Sources R1-02, R2-01, R2-06, R6-01, R6-13, R6-14, R3-07, RC-04.
+4. §1 and B1. Three artefacts on one ladder: ballot, then a named sandbox set in cards.sandbox-sets.ts behind a deterministic lint, then the wired slice at the kill session; the editor write-back is used at the last rung only. Sources R6-07, R3-07, R3-09, R3-10, R3-11, R3-14, R2-10, RC-04, A6.
+5. §3 Plan B. Split B1 into pitch plus ballot and sandbox play; B2 becomes batch sheet, two cuts, extraction from three KEEP cards, promotion in the same PR, ledger updated. Sources R2-04, R6-05, R2-06, R6-02, R3-14, R1-01, R7-04 contests, R2-12.
+6. §1. Session shape and clock: a build session under ninety minutes and a kill session under sixty, with a fixed agenda; no tuning in build, no new cards in kill. Sources R6-14, R6-13, R2-07, R2-04, R6-05, A1.
+7. §1. Residue is filed in two places: rulings to the decisions file, per-card outcomes to plan/card-ledger/<slice-id>.md with ballot, outtakes and revision tables; replace at revision three. Sources R2-02, R2-03, R6-04, R2-11, R7-02 contests, R7-05 contests, R6-01.
+8. §5.3 p3 and the linear upgrade row. One axis owns each printed number and the harness prints the ceiling; the computed magnitude bucket fails p3; keep the computed default with an opt-out, lint each upgrade for cost, count, rider or downside, and author only where flagged. Sources GAP-1 R6-01, GAP-1 R6-02, GAP-1 R6-03, GAP-1 R6-04, KB-03, R4-13, R4-03, R4-01, R2-13.
+9. §5.3 reading paragraph. Align with §7 ballot outcome four: nothing beyond the upgrade and die growth is prototyped in the first pool; use-XP is a paper verdict. Sources R2-11, R6-09, RC-05, R4-04.
+10. §5.3 transform row and §6 D8. Mark chains verified from the Blightbane API, note the transforming object is a persistent self-buff, drop the missing chain citation, add the unique flag and stage rules. Sources KB-01, KB-02, KB-05, R5-08, R5-10.
+11. §6 B2. Fix the attribution to Rogueliker 2024-03-07, date the Timeline 2025-03-06, add the two-sided cut and the number-first rule. Sources RC-03, RC-05, R5-01 cut-lines.
+12. §5.3, §6 B1 and C1, §1. Specify the batch sheet and the witness: play rate, offered versus picked from the existing reward-draft sim, win-cell presence to be added before B2, damage per enemy, a synergy-gated flag, bombo count, cheapest patch, lint status; flags not bands; a prose write-up and novelty line per run; a before and after run per slice. Sources R3-06, R5-01 cut-lines, R5-02 cut-lines, RC-03, R2-09, R3-03, R3-09, R3-12, R3-13, R6-03, R1-10, R1-13, R3-04, R4-11, R2-11.
+
+Should.
+
+13. §1 and §7. Pool size is a decision at session 0 with a soft target, a quarter of flex and a stop rule; add a fifth ballot line. Sources R1-03, R1-05, R1-06, R1-09, R1-12, R2-13, RC-05.
+14. §1, B2, B4, C4, atlas. Density targets per slice, a third of cards with no keyword, no two keywords below Skull, a library ceiling near thirteen with reuse-or-swap after slice three. Sources R8-01, R8-02, R8-03, R8-04, R8-05, C6, B4.
+15. §2 Plan A. Agents draft the skeleton and T prunes it; only the next twelve slots are shown; headline mechanics get a codename plus sample cards and a fate tag; half will die. Sources R7-02 naming, R7-03 naming, R7-04 naming, R6-01, R6-02, R1-07, R2-06, R3-07.
+16. §4 Plan C. Make C1's prune shape the template; cap C2 at twelve slots; C3 climbs the ladder; C1 becomes briefing under the splice. Sources R6-02, R6-08, R2-06, R1-01, R3-14.
+17. §5.3 upgrade row and §7 call three. Ballot lines with their tree cost, an act gate for the first grant, and the weakness test using upgradedCardShare against restHealFraction. Sources R4-02, GAP-1 R6-04, R4-10, R5-13, R4-13, R4-11, R4-12.
+18. §5.3 tests and B2. Add p5 must-differ and p6 no-farm; the upgrade is ratified as a base and upgraded pair table, never per card. Sources R4-09, R5-07, R4-04, R4-12, R4-01, R4-03.
+19. §3 B3. A fifteen-line engine-event rules note ratified before slice two. Sources R6-12, R3-11.
+20. §3 B5 and C5. Mixed decks as pairs plus mono lanes; keyword tiers and a core label in every plan, not only Plan A. Sources R1-11, A7, R1-06, R7-04 naming.
+21. §5.3 merge, die growth and branching rows. Record the ship conditions the prior art learned: optional merge with a chosen output and a keyword cap, dice at fixed act boundaries, forks only with both branches picked. Sources R5-01, R5-02, R5-12, KB-02, GAP-1 R6-03, R4-08, R5-07, GAP-1 R6-01, R4-05, R4-06.
+22. §5.4. Four new rows: reward re-arming with a pity ramp, thin pool gating with a self-sufficient open tier, bounded offer weight as the first knob, reversibility notation. Sources R1-04, R1-05, R-gate-01, R-gate-02, R-gate-03, R-gate-04, R-gate-05, R3-05, R4-12, B5.
+23. §6 D. Replace secondary citations with primaries, mark D8 verified, add rows D11 to D16, surface KB-04 as an owner call. Sources R4-04, KB-01, KB-02, KB-05, R5-03, R4-09, R4-10, R5-07, KB-03, KB-04, GAP-1 R6-03, GAP-1 R6-01.
+24. §7. Put the session format to T as the next question; the defer path applies it as written to whichever plan runs. Sources R2-07, R6-01, R6-05, R2-04.
+
+Could.
+
+25. §2 A0 and A1. Run the fantasy list as a dot-vote; tag every candidate with its generation mode. Sources R2-07, R2-12, RC-02, A8.
+26. §3 B6 and beyond. Seasons of slices with a retro between; each kill session proposes the next brief; one submission per persona; the library file is the hall of fame. Sources R7-01 contests, R7-02 contests, R7-03 contests, R7-04 contests, R7-05 contests.
+27. §5.3 preamble. Every progression mechanism is ratified as a batch rule with a named review format, never per card. Sources R4-12, R4-10, KB-02, R5-10, R4-02.
+28. §5.3 p2 note. The mobile grant surface shows a short filtered list with the before and after face inline; eligibility is printed on the face. Sources R4-14, R5-11.
+
+### 8.4 Not found
+
+- Any numeric pick-rate or win-rate cut line from Mega Crit, in the 2018 article, the 2019 AMA, or any of the 56 weekly patches; the GDC 2019 talk is members-only (R5-01 cut-lines, R5-03 cut-lines, R5-05 cut-lines, RC-01).
+- Cooke's GDC 2021 rationale for upgrade slots and Mullins's GDC 2022 rationale for sacrifice mechanics; both talks are gated (RC-01).
+- Any LocalThunk statement on modifying cards rather than adding more; the podcast has no transcript (RC-02, RC-05).
+- The Dawncaster glossary prose for its chain and upgrade terms, any cap on its upgrade level, and the chain the branch's D8 row cited; no such record exists on Blightbane (KB-05).
+- A designer statement from any studio on keeping one growth axis dominant or capping the product of stat, die and upgrade (GAP-1, all four rows).
+- A primary Brode statement of the Hearthstone recurrence rule; the cited video could not be confirmed (R7 naming, not found).
+- A published ratio of candidate cards to shipped cards at Hearthstone, or a percentage of named mechanics that die at Wizards (R2 not found, R7-04 naming).
+- Any card studio's guidance on how many cards to review per sitting; the sixty-minute figure is a code-review analogue (R6-14).
+- A studio postmortem of LLM-generated card batches shipped in a commercial deckbuilder (R3 not found).
+- The Uppsala thesis results on three versus six reward offers; the PDF returned 503 (R1-13).
+- Rules and cadence of the r/customhearthstone weekly competition; Reddit was unreachable (R7 contests, not found).
+- Wildfrost's pool size, cut process, or charm design rationale; the wikis are blocked (R1, R5-03 not found).
+- The Ayala hsreplay 2018 interview cited without a URL in §6 B3; not located (R7 naming, not found).
