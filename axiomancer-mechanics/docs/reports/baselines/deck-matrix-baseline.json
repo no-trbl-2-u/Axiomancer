@@ -1,7 +1,7 @@
 {
  "meta": {
-  "generatedAt": "2026-09-26",
-  "commit": "33544f8d",
+  "generatedAt": "2026-09-27",
+  "commit": "b5fb0ac9",
   "command": "npm run combat-playtest -- --stage=all --policy=all --deck=policy-pick --runs=60 --seed=1 --cards --json",
   "seeds": {
    "baseline": 1,
@@ -9,7 +9,7 @@
   },
   "runsPerCell": 60,
   "confidence": "full",
-  "note": "Full re-baseline via scripts/regen-deck-matrix-baseline.mjs at 33544f8d."
+  "note": "Full re-baseline via scripts/regen-deck-matrix-baseline.mjs at b5fb0ac9."
  },
  "report": {
   "cells": [
