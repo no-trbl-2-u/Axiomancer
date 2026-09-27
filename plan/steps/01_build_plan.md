@@ -97,7 +97,7 @@ event-pool and layout files).
 - [x] Phase M3d — The Lantern Deep (#396)
 - [x] Phase M3e — Retune fishing-village for its place after Act 1 (425525ce)
 - [x] Phase M4 — The Labyrinth door (571d5b3f)
-- [ ] Phase M5 — Map docs: rewrite `docs/world.md`'s stale sections and `skills/forge.md`'s column-layering line for D16's shape and `MapSheet`. Requires M3d `[x]`; may ride with M4.
+- [x] Phase M5 — Map docs (1ec11390)
 - [blocked: attended with T — the loop pauses at the card phase (D38); the stat-to-quantity mapping is T's call 2026-09-26] Phase S3 — Per-stat combat hooks and card damage scaling (refactor D1 step 3, D4): body, mind and heart each drive a distinct combat quantity, and card damage scales off them. Requires M5 `[x]`. Not a loop phase; `/oversight` unblocks it only when T runs it.
 - [blocked: requires S3 `[x]` (D36); unblock when S3 merges 2026-09-26] Phase P1 — The card purge (D36): purge every player card except `grey-strike` and `grey-ward`, and every player keyword except DEAL and GUARD; every run deals the grey deck; presets, the 5/5/5 thirds, card rewards and cache card offers go. Enemies keep their keywords. Brief `plan/2026-09-26-card-purge.prompt.md`. Requires S3 `[x]`.
 

@@ -29,6 +29,7 @@
 | M3d: the Lantern Deep | #396 (mirror) | Shipped 2026-09-26 straight to main by the loop. See §3e. |
 | M3e: fishing-village retune | #398 (mirror) | Shipped 2026-09-26 straight to main by the loop. See §3f. |
 | M4: the Labyrinth door | #399 (mirror) | Shipped 2026-09-27 straight to main by the loop. See §3g. |
+| M5: map docs | #400 (mirror) | Shipped 2026-09-27 straight to main by the loop (1ec11390). |
 
 **First act of the session:** get #382 → #383 → #384 merged, in order (the
 repo uses merge commits; auto-merge is disabled). Each PR's decisions-file
