@@ -162,15 +162,15 @@ phase.
 
 ### Map exploration
 
-The starting map `fishing-village` is a 25-node branching grid since
-Phase 65 (preserved spine `fv-1` → `fv-10` along `y=0` plus three
-sub-areas: Harbor District `fv-11..fv-15`, Inland Streets
-`fv-16..fv-20`, Cliff Path `fv-21..fv-25`). Each node fires a
-weighted `MapEventPool` on entry per the Phase 23 taxonomy
-(encounter / interaction / gathering / rest / village / cutscene /
-hazard / loot-cache, plus narration / blacksmith / travel; the Phase 137
-'quest' kind was retired). See [`world.md` § "Demo Content"](./world.md#demo-content-fishing-village)
-for the full layout.
+A new game starts on the Breakwater (`breakwater`, D27), the first of
+the four Act 1 maps, and moves between maps through `travel` doors.
+Movement is frontier roaming (D1): any unspent node next to explored
+ground is a legal move. Each node fires a weighted `MapEventPool` on
+entry (encounter / interaction / gathering / rest / village / cutscene /
+hazard / loot-cache / narration / blacksmith / travel / labyrinth; the
+Phase 137 'quest' kind was retired). See [`world.md` § "Campaign maps"](./world.md#campaign-maps)
+for the door chain and [§ "Map shape"](./world.md#map-shape) for how a
+map is built.
 
 ### Save / load
 
