@@ -11,7 +11,9 @@
  * `hydrateStoreWithGameState` is that replacement. It is the one place that
  * knows the full list of mobile-only slices, because a loaded run must not
  * inherit the previous run's open event, pending reward, hazard session or
- * event buffer. It also restores the engine RNG from the loaded state, as
+ * event buffer. The one slice it rebuilds rather than empties is the
+ * Labyrinth visit: a save taken inside the Aporia resumes there
+ * (`resumeLabyrinthSession`). It also restores the engine RNG from the loaded state, as
  * `createGameStore` does at boot, so a loaded run replays deterministically.
  *
  * Every verb here is `(store, slots, …)`: the slot store is passed in, not
@@ -27,6 +29,7 @@
 
 import { createNewGameState, getLogger, getRng, type GameState, type MapName } from '@mechanics';
 
+import { resumeLabyrinthSession } from '../labyrinth/resume';
 import type { SaveSlotId, SaveSlotStore } from '../persistence/saveSlots';
 import { mostRecentSlot } from '../persistence/saveSlots';
 import {
@@ -47,17 +50,16 @@ import {
  * Replace the engine state held by `store` with `next` and reset every
  * mobile-only slice to its empty value.
  *
- * `currentEncounter` and `lastSeenAlignmentCells` are OPTIONAL on
- * `GameState`; they are written explicitly (possibly as `undefined`) so a
- * run that has none does not inherit the previous run's values through the
- * merge. Pure over its inputs apart from the store write and the RNG reset.
+ * `currentEncounter` is OPTIONAL on `GameState`; it is written explicitly
+ * (possibly as `undefined`) so a run that has none does not inherit the
+ * previous run's value through the merge. Pure over its inputs apart from the store write and the RNG reset.
  */
 export function hydrateStoreWithGameState(store: AppStore, next: GameState): void {
     if (typeof next.rngState === 'number') getRng().setState(next.rngState);
+    const resumed = resumeLabyrinthSession(next);
     const patch: Partial<AppStoreState> = {
         ...next,
         currentEncounter: next.currentEncounter,
-        lastSeenAlignmentCells: next.lastSeenAlignmentCells,
         event: EMPTY_EVENT_SLICE,
         combatReward: EMPTY_COMBAT_REWARD_SLICE,
         itemReward: EMPTY_ITEM_REWARD_SLICE,
@@ -65,7 +67,8 @@ export function hydrateStoreWithGameState(store: AppStore, next: GameState): voi
         rest: EMPTY_REST_SLICE,
         cache: EMPTY_CACHE_SLICE,
         blacksmith: EMPTY_BLACKSMITH_SLICE,
-        labyrinthUi: EMPTY_LABYRINTH_SLICE,
+        // A save taken inside the Aporia resumes there (map revamp M4).
+        labyrinthUi: resumed ? { session: resumed } : EMPTY_LABYRINTH_SLICE,
         notifications: DEFAULT_NOTIFICATIONS_SLICE,
         _recentEvents: [],
     };

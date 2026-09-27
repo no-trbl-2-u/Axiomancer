@@ -1,22 +1,5 @@
 import { Image } from '../Utils/types';
 import { QuestName } from '../World/quest.library';
-import { PhilosophicalAlignment } from '../Ledger/types';
-
-/**
- * Single-clause alignment predicate used by `DialogueChoice.requires` to gate
- * content behind a position on the Phase 42 alignment cube.
- *
- * `gte` matches when the player's axis value is greater than or equal to
- * `value`; `lte` matches when less than or equal. Compound gates (e.g.
- * "pessimistic AND transcendent") author as two separate gated choices
- * sharing a `nextNodeId` until a real consumer demands an AND-of-array
- * shape.
- */
-export interface AlignmentGate {
-    axis: 'epistemology' | 'outlook' | 'scope';
-    op: 'gte' | 'lte';
-    value: number;
-}
 
 /**
  * NPCs module type definitions.
@@ -31,7 +14,7 @@ export interface AlignmentGate {
 
 /**
  * Legacy flat dialogue map kept for back-compat. Use `DialogueTree` for new
- * NPCs — the branching shape enables the moral / quest gating from Spec 10.
+ * NPCs — the branching shape enables quest / flag gating.
  *
  * @example
  * {
@@ -62,24 +45,6 @@ export interface DialogueChoice {
         quest?: QuestName;
         flag?: string;
         questCompleted?: QuestName;
-        /**
-         * Phase 46 — gates the choice on the player's position on the
-         * Phase 42 alignment cube. Single axis + operator + threshold;
-         * the choice is hidden by `visibleChoices` when either the
-         * gate is unmet OR the player's alignment isn't in
-         * `DialogueContext`.
-         */
-        requiresAlignment?: AlignmentGate;
-        /**
-         * Phase 63 — when `true`, the choice surfaces only when the
-         * player's current alignment cell differs from the one cached
-         * by this tree's last interaction. Requires
-         * `DialogueContext.alignment` AND
-         * `DialogueContext.lastSeenAlignmentCellId` to be set;
-         * otherwise the gate hides the choice. Use for "I notice you
-         * have shifted" reactive branches on observing NPCs.
-         */
-        playerAlignmentCellChangedSince?: boolean;
     };
     effect?: {
         startQuest?: QuestName;
@@ -88,20 +53,6 @@ export interface DialogueChoice {
         teachCard?: string;
         setFlag?: string;
         grantCurrency?: number;
-        /**
-         * Direct moral-meter shift applied by `applyDialogueChoice`. Clamped
-         * to [-100, +100] against `gameState.moralMeter`. Positive values
-         * read as "more virtuous"; negative as "more pragmatic / cruel".
-         */
-        moralDelta?: number;
-        /**
-         * Per-axis shift on the Phase 42 philosophical alignment cube,
-         * applied by `applyDialogueChoice` via `applyAlignmentDelta`. Each
-         * axis clamps to [-100, +100]. Missing axes in the partial pass
-         * through unchanged. Authoring band: ±1..±5; defining ±10 choices
-         * reserved for endgame.
-         */
-        alignmentDelta?: Partial<PhilosophicalAlignment>;
     };
 }
 
@@ -121,15 +72,7 @@ export interface DialogueNode {
 export interface DialogueTree {
     rootId: string;
     nodes: Record<string, DialogueNode>;
-    /**
-     * Phase 63 — optional tree identifier used as the cache key for
-     * `GameState.lastSeenAlignmentCells`. When set, `applyDialogueChoice`
-     * writes the player's current alignment cell id to that cache slot
-     * after applying each choice; `DialogueChoice.requires.playerAlignmentCellChangedSince`
-     * gates against the cached cell. Trees without an id opt out of the
-     * observer machinery (the cache is never written; the gate always
-     * hides).
-     */
+    /** Optional stable tree identifier. */
     id?: string;
 }
 

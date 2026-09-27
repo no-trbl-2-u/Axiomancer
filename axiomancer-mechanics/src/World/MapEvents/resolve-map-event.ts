@@ -26,7 +26,6 @@ import { revealAdjacent, markNodeConsumed, unlockAdjacent } from '../world.reduc
 import { getRng } from '../../Utils/rng';
 import { applyPayload } from './handlers';
 import { reachableObjectives, collectObjectives, progressQuest } from '../quest.engine';
-import { applyAlignmentDelta } from '../../Ledger';
 import type { QuestLog, NodeId } from '../types';
 import type {
     MapEventPool, MapEventPoolEntry, MapEventKind, ResolveMapEventResult, ResolvedEvent,
@@ -319,43 +318,23 @@ export function resolveMapEvent(
     // re-resolving the departed node, should the player ever stand on it
     // again, travels again.
     if (result.event.kind === 'travel') {
-        const stateWithTravelAlignment: GameState = entry.alignmentDelta
-            ? {
-                ...result.state,
-                philosophicalAlignment: applyAlignmentDelta(
-                    result.state.philosophicalAlignment,
-                    entry.alignmentDelta,
-                ),
-            }
-            : result.state;
-        return { state: stateWithTravelAlignment, event: result.event };
+        return { state: result.state, event: result.event };
     }
-
-    // 4b. Apply the pool entry's authored alignment delta, if any (Phase 43).
-    // Mirrors the dialogue-runtime moralDelta path — the handler computes its
-    // event delta on the pre-shift state; the alignment shift applies on top.
-    const stateWithAlignment: GameState = entry.alignmentDelta
-        ? {
-            ...stateAfterCollect,
-            philosophicalAlignment: applyAlignmentDelta(
-                stateAfterCollect.philosophicalAlignment,
-                entry.alignmentDelta,
-            ),
-        }
-        : stateAfterCollect;
 
     // 5. Reveal + unlock adjacents + mark consumed. Phase 31 — unlock is what
     // moves the adjacents out of `lockedNodes` into `availableNodes` so the
     // CLI `mapTab` filter actually offers them as valid moves. The reveal
     // path (Spec 23) only updates `discoveredNodes`.
     const next = unlockAdjacent(
-        revealAdjacent(stateWithAlignment.world.currentMap, nodeId),
+        revealAdjacent(stateAfterCollect.world.currentMap, nodeId),
         nodeId,
     );
-    const consumed = markNodeConsumed(next, nodeId);
+    // The Labyrinth door (M4, D24) opens the way on like any node but is
+    // never consumed: it stays a door, and the next arrival enters again.
+    const consumed = result.event.kind === 'labyrinth' ? next : markNodeConsumed(next, nodeId);
     const nextState: GameState = {
-        ...stateWithAlignment,
-        world: { ...stateWithAlignment.world, currentMap: consumed },
+        ...stateAfterCollect,
+        world: { ...stateAfterCollect.world, currentMap: consumed },
     };
 
     return { state: nextState, event: result.event };

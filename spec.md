@@ -19,10 +19,10 @@ consequential stance, not a role-play veneer.
 
 The core loop: explore a map → resolve authored node encounters
 (combat, minigames, dialogue, cutscenes) → make morally charged
-choices that shift THE OATHS (a 3-axis alignment: CREED, AUGURY,
-TROTH), GRACE (a moral-difficulty meter), and faction reputation
-→ carry those consequences into future world, boss, and region
-state.
+choices that shift quests, flags, and faction reputation → carry
+those consequences into future world, boss, and region state.
+THE OATHS (the 3-axis alignment cube) and GRACE (the moral meter)
+were removed 2026-09-27 (T6, D39).
 
 ## Audience
 
@@ -98,8 +98,7 @@ tests, plus pure-choice nodes with no standalone driver:
 
 Supporting engines: character / progression / equipment (rarity,
 affixes, set items), effects and interactions, enemy content +
-AI, THE OATHS (a 3-axis CREED/AUGURY/TROTH alignment cube),
-faction reputation, NPC dialogue trees, world maps / quests /
+AI, faction reputation, NPC dialogue trees, world maps / quests /
 map-events, deterministic seeded RNG, and a Monte-Carlo
 balance-sim harness.
 

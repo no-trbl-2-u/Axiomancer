@@ -6,7 +6,8 @@
  *   instead (the dev "start on any map" tools);
  * - the map borrows fishing-village's pools and roster (D29), with one
  *   authored event on every node and a door on to the Charcoal Wood (M3b);
- * - every run ends at the river bridge, through the watchtower.
+ * - every run ends at the river bridge, through the watchtower, where the
+ *   region's elite waits (D30); the start is an arrival scene (D31).
  *
  * The generic gauntlet invariants (no strands, column law, ribs, distinct
  * coordinates) run over this map in `map-traversal.engine.test.ts` like every
@@ -18,7 +19,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
     createStartingWorld, STARTING_MAP, STARTABLE_MAPS,
-    getMapDefinition, createMapState, resolveMapEvent,
+    getMapDefinition, createMapState, resolveMapEvent, getNodeEventPool,
 } from '../index';
 import { auditMapTraversal } from '../world.reducer';
 import { createNewGameState } from '../../Game/game.reducer';
@@ -56,7 +57,7 @@ describe('the new-game start (D27)', () => {
         expect(coastal!.lockedMaps).toEqual(['charcoal-wood', 'fishing-village', 'northern-forest']);
         expect(northern!.availableMaps).toEqual([]);
         expect(northern!.lockedMaps).toEqual([
-            'caverns', 'northern-city', 'connecting-river', 'town-across-river', 'the-capital',
+            'beacon-crags', 'lantern-deep', 'caverns', 'northern-city', 'connecting-river', 'town-across-river', 'the-capital',
         ]);
     });
 });
@@ -64,8 +65,8 @@ describe('the new-game start (D27)', () => {
 describe('starting on any map (dev tools)', () => {
     it('offers every campaign map and no labyrinth act', () => {
         expect([...STARTABLE_MAPS].sort()).toEqual([
-            'breakwater', 'caverns', 'charcoal-wood', 'connecting-river', 'fishing-village',
-            'northern-city', 'northern-forest', 'the-capital', 'town-across-river',
+            'beacon-crags', 'breakwater', 'caverns', 'charcoal-wood', 'connecting-river', 'fishing-village',
+            'lantern-deep', 'northern-city', 'northern-forest', 'the-capital', 'town-across-river',
         ]);
     });
 
@@ -116,21 +117,21 @@ describe('the Breakwater\'s events (D29)', () => {
         expect(Object.keys(kinds)).toHaveLength(18);
     });
 
-    it('spreads 6 encounters, 3 rests, 3 loot caches, 3 gatherings, 2 hazards and 1 door', () => {
+    it('spreads 6 encounters, 2 rests, 3 loot caches, 3 gatherings, 2 hazards, an arrival and 1 door', () => {
         const tally: Record<string, number> = {};
         for (const k of Object.values(kinds)) tally[k] = (tally[k] ?? 0) + 1;
         expect(tally).toEqual({
-            encounter: 6, rest: 3, 'loot-cache': 3, gathering: 3, hazard: 2, travel: 1,
+            encounter: 6, rest: 2, 'loot-cache': 3, gathering: 3, hazard: 2, cutscene: 1, travel: 1,
         });
     });
 
-    it('opens on a rest at the windmill: the start node owes the player nothing dangerous', () => {
-        expect(kinds['bw-1']).toBe('rest');
+    it('opens on an arrival scene at the windmill, not a rest screen (D31)', () => {
+        expect(kinds['bw-1']).toBe('cutscene');
     });
 
-    it('fights water-holger at the watchtower, the last fight before the door', () => {
-        const r = resolveMapEvent(standingOn('bw-17'));
-        expect(r.event.kind).toBe('encounter');
+    it('fights the region\'s elite at the watchtower, pinned low, the last fight before the door (D30)', () => {
+        const payload = getNodeEventPool('coastal-continent', 'breakwater', 'bw-17')!.entries[0]!.payload;
+        expect(payload).toMatchObject({ kind: 'encounter', enemySlug: 'brine-hag', isBoss: false, level: 3 });
     });
 
     it('crosses the river bridge into the Charcoal Wood (Act 1, map 2)', () => {

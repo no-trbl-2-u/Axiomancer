@@ -18,7 +18,7 @@
  * outcome through the engine's real `endCombat` reducer for everything else
  * (XP, loot, quest kill-objective advancement + completion rewards, and, on
  * a merciful win, the authored `friendshipReward` payload: flags, codex
- * unlocks, alignment shift, faction deltas, moral-meter). `beginHazardEncounter`
+ * unlocks, faction deltas). `beginHazardEncounter`
  * stages `state.currentEncounter` via `startCombat` so `endCombat` has a real
  * encounter to resolve against. The deckbuilder reward card is written
  * regardless — it's the new system's own reward (Spec 26b §C). Defeat HP /
@@ -172,8 +172,7 @@ function mapHazardOutcomeToEndCombat(
  * (Phase 54) dispatches the real `game.reducer.ts` `endCombat` for
  * everything else: XP, loot, quest kill-objective advancement + completion
  * rewards, and — on a merciful win — the authored `friendshipReward`
- * payload (flags, codex unlock, alignment shift, faction deltas,
- * moral-meter). `endCombat` reads its own `Enemy` off the `currentEncounter`
+ * payload (flags, codex unlock, faction deltas). `endCombat` reads its own `Enemy` off the `currentEncounter`
  * `beginHazardEncounter` staged via `startCombat`, so no `finalPlayer` is
  * passed here — the write-back below already lands HP/floatingDice/
  * bankedSouls on `state.player` first, and `endCombat` builds its grant on
@@ -208,8 +207,8 @@ export function applyHazardOutcome(
     });
     // Phase 54 — resolve the staged encounter through the engine's real
     // endCombat reducer: XP, loot, quest kill-objective advancement +
-    // completion rewards, and (on 'friendship') flags/codex/alignment/
-    // faction/moral-meter, all read off Enemy.xpReward / .loot /
+    // completion rewards, and (on 'friendship') flags/codex/faction
+    // deltas, all read off Enemy.xpReward / .loot /
     // .friendshipReward / .journalEntry via state.currentEncounter.
     store.getState().endCombat(mapHazardOutcomeToEndCombat(outcome));
     // Cascade level-ups through the engine store (applyLevelUps isn't exported,
@@ -878,7 +877,7 @@ export function CombatEncounterPanel({
                                 style={styles.withdrawBtn}
                             >
                                 <Text style={[styles.withdrawBtnText, { color: AXM.bone }]}>WITHDRAW</Text>
-                                <Text style={styles.withdrawSub}>forfeit the path · grace −2</Text>
+                                <Text style={styles.withdrawSub}>forfeit the path</Text>
                             </Pressable>
                         )}
                     </ScrollView>

@@ -99,9 +99,6 @@ const delverTree: DialogueTree = {
                 {
                     text: "Carry your own ore.",
                     nextNodeId: 'refused',
-                    // Cold refusal of a fair trade: self-first, colder read
-                    // of the world.
-                    effect: { alignmentDelta: { outlook: -1, scope: -1 } },
                 },
             ],
         },
@@ -266,8 +263,6 @@ const gateClerkTree: DialogueTree = {
                 {
                     text: "Give your name.",
                     nextNodeId: 'named',
-                    // Playing along with the machinery: an orderly, local read.
-                    effect: { alignmentDelta: { epistemology: 1, scope: -1 } },
                 },
                 {
                     text: "What is the book for?",
@@ -686,12 +681,10 @@ const sweetheartTree: DialogueTree = {
                 {
                     text: "I came back.",
                     nextNodeId: 'stayed',
-                    effect: { alignmentDelta: { outlook: 1 } },
                 },
                 {
                     text: "I'm only passing through.",
                     nextNodeId: 'passing',
-                    effect: { alignmentDelta: { outlook: -1 } },
                 },
                 {
                     text: "Tell me what's happened here.",

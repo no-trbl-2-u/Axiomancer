@@ -73,6 +73,8 @@ function classifyMobilePath(path, result) {
         /^axiomancer-mobile\/components\/(?:DebugEnemy|DebugQuest|DebugRest|DebugReward|DebugTriggerEncounter|DebugWorld)/,
         /^axiomancer-mobile\/state\/dev\/(?:enemy-picker|rewards|world-travel)\.ts$/,
         /^axiomancer-mobile\/scripts\/encounter-routing-e2e\.mjs$/,
+        // The map walk (new game, node to node) runs with the encounter suite.
+        /^axiomancer-mobile\/scripts\/map-walk-e2e\.mjs$/,
     ]
 
     let matched = false

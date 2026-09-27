@@ -9,7 +9,7 @@ import { consumableLibrary } from '../../Items/consumable.library';
 import {
     devSetLevel, devSetStats, devLearnCards,
     devGrantAllEquipment, devGrantAllConsumables, devGrantCurrency,
-    devSetMoralMeter, devSetAlignment, devSpawnEnemy, devMaxOut,
+    devSpawnEnemy, devMaxOut,
 } from '../dev-tools';
 
 afterEach(() => { vi.restoreAllMocks(); });
@@ -122,47 +122,6 @@ describe('devGrantCurrency', () => {
         devGrantCurrency(store, 100);
         devGrantCurrency(store, 200);
         expect(store.getState().player.currency).toBe(300);
-    });
-});
-
-describe('devSetMoralMeter', () => {
-    it('sets the moral meter', () => {
-        const store = freshStore();
-        devSetMoralMeter(store, 75);
-        expect(store.getState().moralMeter).toBe(75);
-    });
-
-    it('clamps to [-100, 100]', () => {
-        const store = freshStore();
-        devSetMoralMeter(store, 200);
-        expect(store.getState().moralMeter).toBe(100);
-        devSetMoralMeter(store, -200);
-        expect(store.getState().moralMeter).toBe(-100);
-    });
-});
-
-describe('devSetAlignment', () => {
-    it('sets all three axes', () => {
-        const store = freshStore();
-        devSetAlignment(store, { epistemology: 50, outlook: -30, scope: 80 });
-        const a = store.getState().philosophicalAlignment;
-        expect(a.epistemology).toBe(50);
-        expect(a.outlook).toBe(-30);
-        expect(a.scope).toBe(80);
-    });
-
-    it('clamps to [-100, 100]', () => {
-        const store = freshStore();
-        devSetAlignment(store, { epistemology: 999 });
-        expect(store.getState().philosophicalAlignment.epistemology).toBe(100);
-    });
-
-    it('preserves unset axes', () => {
-        const store = freshStore();
-        devSetAlignment(store, { epistemology: 50 });
-        const a = store.getState().philosophicalAlignment;
-        expect(a.epistemology).toBe(50);
-        expect(a.outlook).toBe(0);
     });
 });
 

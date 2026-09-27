@@ -13,8 +13,6 @@ import {
 } from './quest.engine';
 import { getMapDefinition } from './map.registry';
 import { QuestName } from './quest.library';
-import { applyAlignmentDelta, getAlignmentCell } from '../Ledger';
-import type { PhilosophicalAlignment } from '../Ledger/types';
 
 /** Result of applying a dialogue choice to the GameState. */
 export interface ApplyDialogueChoiceResult {
@@ -28,13 +26,6 @@ export interface ApplyDialogueChoiceResult {
         learnedCard?: string;
         setFlag?: string;
         grantedCurrency?: number;
-        moralShift?: number;
-        /**
-         * Per-axis shift on the Phase 42 philosophical alignment cube. Only
-         * the axes that actually moved are present (non-zero deltas).
-         * Mirrors the `moralShift?` convention.
-         */
-        philosophicalShift?: Partial<PhilosophicalAlignment>;
     };
 }
 
@@ -55,8 +46,6 @@ export function applyDialogueChoice(
     let player = gameState.player;
     let quests = gameState.quests;
     let flags = gameState.flags;
-    let moralMeter = gameState.moralMeter;
-    let philosophicalAlignment = gameState.philosophicalAlignment;
     const effects: ApplyDialogueChoiceResult['effects'] = {};
 
     const e = choice.effect;
@@ -108,46 +97,14 @@ export function applyDialogueChoice(
             player = { ...player, currency: player.currency + e.grantCurrency };
             effects.grantedCurrency = e.grantCurrency;
         }
-        if (typeof e.moralDelta === 'number' && e.moralDelta !== 0) {
-            const delta = e.moralDelta;
-            moralMeter = Math.max(-100, Math.min(100, moralMeter + delta));
-            effects.moralShift = (effects.moralShift ?? 0) + delta;
-        }
-        if (e.alignmentDelta) {
-            philosophicalAlignment = applyAlignmentDelta(philosophicalAlignment, e.alignmentDelta);
-            const shifted: Partial<PhilosophicalAlignment> = {};
-            const axes: Array<keyof PhilosophicalAlignment> = ['epistemology', 'outlook', 'scope'];
-            for (const axis of axes) {
-                const v = e.alignmentDelta[axis];
-                if (typeof v === 'number' && v !== 0) shifted[axis] = v;
-            }
-            if (Object.keys(shifted).length > 0) effects.philosophicalShift = shifted;
-        }
     }
 
     const nextNode = choice.nextNodeId ? (tree.nodes[choice.nextNodeId] ?? null) : null;
 
-    // Phase 63 — for identified trees, cache the player's current
-    // alignment cell after applying the choice's effects so reactive
-    // branches can detect shifts on re-conversation. Trees without an
-    // `id` opt out of the observer machinery.
-    let lastSeenAlignmentCells = gameState.lastSeenAlignmentCells;
-    if (tree.id) {
-        const currentCellId = getAlignmentCell(philosophicalAlignment).id;
-        const prior = lastSeenAlignmentCells?.[tree.id];
-        if (prior !== currentCellId) {
-            lastSeenAlignmentCells = {
-                ...(lastSeenAlignmentCells ?? {}),
-                [tree.id]: currentCellId,
-            };
-        }
-    }
-
     return {
         gameState: {
             ...gameState,
-            player, quests, flags, moralMeter, philosophicalAlignment,
-            lastSeenAlignmentCells,
+            player, quests, flags,
         },
         nextNode,
         effects,

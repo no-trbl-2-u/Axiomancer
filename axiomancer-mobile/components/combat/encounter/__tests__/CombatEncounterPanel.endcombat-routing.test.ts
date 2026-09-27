@@ -5,7 +5,7 @@
  * way `beginHazardEncounter` now does, then assert `endCombat`'s full grant
  * lands live: quest kill-objective advancement + completion reward, and —
  * on a merciful win — the authored `friendshipReward` payload (flags,
- * codex unlock, alignment shift, faction deltas, moral-meter). Resolves
+ * codex unlock, faction deltas). Resolves
  * `plan/AUDIT.md`'s endCombat row (first-map audit 2026-08-08, finding F3).
  */
 
@@ -62,8 +62,8 @@ describe('applyHazardOutcome: routes through endCombat (phase 54)', () => {
 
     it('a merciful win maps to the reducer\'s friendship outcome and activates authored friendshipReward content', () => {
         const store = createAppStore({ adapter: createMemoryAdapter() });
-        // Little Belle: friendshipReward carries items, xpBonus, flagSet,
-        // alignmentDelta and journalEntry — real authored content, not a test
+        // Little Belle: friendshipReward carries items, xpBonus, flagSet
+        // and journalEntry — real authored content, not a test
         // fixture, previously unreachable from live hazard combat.
         const littleBelle = ENEMY_REGISTRY['little-belle'];
         store.getState().startCombat(littleBelle);
@@ -74,9 +74,7 @@ describe('applyHazardOutcome: routes through endCombat (phase 54)', () => {
         const state = store.getState();
         expect(state.currentEncounter).toBeUndefined();
         expect(state.flags).toContain(littleBelle.friendshipReward!.flagSet);
-        expect(state.philosophicalAlignment.outlook).toBe(littleBelle.friendshipReward!.alignmentDelta!.outlook);
         expect(state.codex.unlockedEntries).toContain(littleBelle.journalEntry!.id);
-        expect(state.moralMeter).toBe(1);
         const expectedXp = Math.floor((littleBelle.xpReward ?? 0) * 0.5) + (littleBelle.friendshipReward!.xpBonus ?? 0);
         expect(state.player!.experience).toBe(expectedXp);
     });

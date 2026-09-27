@@ -616,7 +616,7 @@ async function playSeed(browser, baseUrl, seed, mode) {
         }
 
         // Live play only: ride the outcome all the way out. The aftermath
-        // panels write the run back to the player (loot, XP, morale) — the
+        // panels write the run back to the player (loot, XP) — the
         // sandbox skips all of it, so a crash here has never been reachable.
         // Capture this BEFORE the aftermath walk — dismissing the summary would
         // otherwise make a resolved fight report as "still live".

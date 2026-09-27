@@ -3,7 +3,7 @@
  *
  * Pins what the map revamp decided for the second Act 1 map:
  * - the Breakwater's river bridge leads here, and this map's stair cave leads
- *   on into fishing-village (D27, until the Act 1 mountains ship);
+ *   on into the Beacon Crags (M3c; it led to fishing-village until then);
  * - the map borrows the shipped builders, the northern forest's roster and
  *   its materials (D29), with one authored event on every node;
  * - the forest roster is level 9 and up, so every fight here is pinned low.
@@ -98,11 +98,12 @@ describe('the Charcoal Wood\'s events (D29)', () => {
         expect(items.sort()).toEqual(['dark-berries', 'moonbell-petals', 'oak-branch']);
     });
 
-    it('goes down the stair cave into fishing-village (D27, until the Act 1 mountains ship)', () => {
+    it('goes down the stair cave into the Beacon Crags, on the northern continent (Act 1, map 3)', () => {
         const r = resolveMapEvent(standingOn(charcoalWood, 'cw-20'));
         expect(r.event.kind).toBe('travel');
-        expect(r.state.world.currentMap.name).toBe('fishing-village');
-        expect(r.state.world.currentMap.currentNode).toBe('fv-1');
+        expect(r.state.world.currentContinent.name).toBe('northern-continent');
+        expect(r.state.world.currentMap.name).toBe('beacon-crags');
+        expect(r.state.world.currentMap.currentNode).toBe('bc-1');
     });
 });
 

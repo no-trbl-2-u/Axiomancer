@@ -43,7 +43,7 @@ const DOT = 'spoiled-poultice';  // body spell (canon starter): Poison — a wil
 registerSandboxCards([
     {
         id: FORGE, name: 'QA Ex Nihilo (forge fixture)',
-        philosophicalAspect: 'mind', description: 'forge_floating_die fixture', tier: 2,
+        color: 'mind', description: 'forge_floating_die fixture', tier: 2,
         targetType: 'self', rank: 4, cardType: 'spell',
         free: { pips: 1 },
         specialMechanics: [

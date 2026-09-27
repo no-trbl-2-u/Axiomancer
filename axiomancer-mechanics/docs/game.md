@@ -25,8 +25,6 @@ The `GameState` type is the root object that aggregates all game data:
 | `combat` | `CombatState \| null` | Active combat encounter or null when exploring |
 | `currentEncounter` | `Encounter \| null` | Full encounter context (transient, not saved) |
 | `quests` | `QuestLog` | Player's quest progress and objectives |
-| `moralMeter` | `number` | Moral choice alignment (-100 to +100) |
-| `philosophicalAlignment` | `PhilosophicalAlignment` | Three-axis philosophy cube |
 | `codex` | `CodexState` | Unlocked journal entries and lore |
 | `runId` | `string` | Unique identifier for this playthrough |
 | `rngState` | `number` | Deterministic RNG seed state |
@@ -93,7 +91,6 @@ The store provides typed selectors for common queries:
 | `selectPlayer(state)` | `Character` | Current player character |
 | `selectIsInCombat(state)` | `boolean` | Whether player is in combat |
 | `selectVersion(state)` | `number` | Game state schema version |
-| `selectMoralMeter(state)` | `number` | Current moral alignment |
 
 ## Game Reducer
 
@@ -115,7 +112,6 @@ function gameReducer(state: GameState, action: GameAction): GameState
 | `LEVEL_UP` / `ALLOCATE_STAT_POINT` | Progression and stat allocation |
 | `MOVE_TO_NODE` / `PROCESS_NODE` | Map traversal and node-event resolution |
 | `APPLY_DIALOGUE` | Apply an NPC dialogue choice |
-| `SHIFT_MORAL_METER` / `SHIFT_PHILOSOPHICAL_ALIGNMENT` | Record moral / alignment shifts |
 | `UNLOCK_CODEX_ENTRY` | Unlock a codex entry |
 | `SAVE_GAME` / `LOAD_GAME` | Persistence (store handles I/O) |
 | `RESET_RUN` | Start a new playthrough |

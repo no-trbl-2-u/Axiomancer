@@ -1,6 +1,5 @@
 import type { GameState } from '@mechanics';
 import {
-    defaultAlignment,
     migrate,
     GAME_STATE_VERSION,
 } from '@mechanics';
@@ -76,36 +75,19 @@ function migrateV1ToV2(state: unknown): unknown {
 }
 
 /**
- * Migration from schema v2 to v3 (Phase 51, engine 0.10.0): backfill
- * the top-level `state.philosophicalAlignment` field added by engine
- * Phase 42 (`PhilosophicalAlignment` — three-axis cube). The
- * engine's `defaultAlignment()` is the canonical seed for a neutral
- * start, so we call it rather than hardcoding the field shape;
- * future engine tweaks to the axis names ride through automatically.
- *
- * Field name correction (Phase 52, 2026-05-19): the first cut of
- * this migration wrote `state.alignment`, but the engine's
- * `GameState` exposes the field as `philosophicalAlignment` (see
- * `engine dist/World/dialogue.runtime.js` — the dialogue + map-event
- * reducers read `gameState.philosophicalAlignment`). Writing to the
- * wrong key created a dead field. Corrected here as part of the
- * Phase 52 SELF-tab adoption work.
+ * Migration from schema v2 to v3. Originally (Phase 51, engine 0.10.0)
+ * backfilled the top-level alignment cube; the alignment grid and the GRACE
+ * meter were removed from the engine (T6 / D39, engine save v26), so the step
+ * now only validates the save is an object. It stays in the chain so a v2
+ * envelope still walks v2 → v3; the engine's `migrate` strips the retired
+ * fields from engine-shaped saves.
  */
 function migrateV2ToV3(state: unknown): unknown {
     if (!state || typeof state !== 'object') {
         throw new Error('Migration v2→v3: invalid state object');
     }
 
-    const gameState = state as Record<string, unknown>;
-
-    if (
-        gameState.philosophicalAlignment === undefined ||
-        gameState.philosophicalAlignment === null
-    ) {
-        gameState.philosophicalAlignment = defaultAlignment();
-    }
-
-    return gameState;
+    return state;
 }
 
 /**
@@ -134,7 +116,7 @@ export function wrap(state: GameState, savedAt?: number): StoredEnvelope {
  * Two stages:
  *  1. **Legacy envelope bridge** — applies the frozen v1→v3 mobile steps
  *     to normalise pre-engine save *shapes* (string `version`, missing
- *     `derivedStats` / `philosophicalAlignment`). No new steps are added
+ *     base stats). No new steps are added
  *     here.
  *  2. **Engine migration (source of truth)** — delegates to the engine's
  *     `migrate`, keyed on the engine numeric `GameState.version`, to bring

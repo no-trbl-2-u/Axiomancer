@@ -117,7 +117,7 @@ export interface CombatCard {
     id: string;
     name: string;
     /** Colour identity (Heart / Body / Mind / Any). Derived verbatim from the
-     *  card's `philosophicalAspect` (Phase 104 — 'any' is the grey office's
+     *  card's `color` (Phase 104 — 'any' is the grey office's
      *  colourless aspect, distinct from a die's own 'wild'/'x' colours). */
     stance: CardAspect;
     verbClass: CombatVerbClass;

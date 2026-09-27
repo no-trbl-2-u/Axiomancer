@@ -34,7 +34,7 @@ const frostbittenPalisade: Card = {
     id: 'frostbitten-palisade',
     theme: 'vigil',
     name: 'Frostbitten Palisade',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'Stakes cut from the drowned orchard, sharpened in October, blessed ' +
         'with nothing. The frost volunteers the rest — it always does. Let ' +
@@ -57,7 +57,7 @@ const iceOnTheLadderRungs: Card = {
     id: 'ice-on-the-ladder-rungs',
     theme: 'vigil',
     name: 'Ice on the Ladder Rungs',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'You do not have to fight a man on a ladder. You only have to have ' +
         'poured water down it at the third bell, and gone back inside, and ' +
@@ -81,7 +81,7 @@ const hoarfrostTeeth: Card = {
     id: 'hoarfrost-teeth',
     theme: 'vigil',
     name: 'Hoarfrost Teeth',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'By the third night of the siege the rime stands out from the ' +
         'stones like a dog\'s hackles. No mason planned this. The wall has ' +
@@ -102,7 +102,7 @@ const theBellRope: Card = {
     id: 'the-bell-rope',
     theme: 'vigil',
     name: 'The Bell Rope',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'Hemp, waxed, long enough that a small man can hang his whole weight ' +
         'from it. It is not the bell that answers. It is everyone who has ' +
@@ -127,7 +127,7 @@ const nothingCrossedTheIce: Card = {
     id: 'nothing-crossed-the-ice',
     theme: 'vigil',
     name: 'Nothing Crossed the Ice',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'The sentry\'s ledger, fourth bell: no torches, no ladders, no ' +
         'sound but the lake settling under its lid. An empty page is still ' +
@@ -156,7 +156,7 @@ const answerAtThePostern: Card = {
     id: 'answer-at-the-postern',
     theme: 'vigil',
     name: 'Answer at the Postern',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'The little door nobody defends, because nobody defends it — that is ' +
         'the entire point of it. You go out through it while they are busy ' +
@@ -185,7 +185,7 @@ const theIceTakesItsTithe: Card = {
     id: 'the-ice-takes-its-tithe',
     theme: 'vigil',
     name: 'The Ice Takes Its Tithe',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'Every parish under the lake keeps a curate, and the curate takes ' +
         'his portion of whatever walks over him. He does not ask for it. He ' +
@@ -210,7 +210,7 @@ const theEvenBell: Card = {
     id: 'the-even-bell',
     theme: 'vigil',
     name: 'The Even Bell',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'The watch keeps its own arithmetic, and the bell answers to nobody ' +
         'but the number of the hour. Ring it on an odd count and it tolls ' +
@@ -239,7 +239,7 @@ const theReprisalBell: Card = {
     id: 'the-reprisal-bell',
     theme: 'vigil',
     name: 'The Reprisal Bell',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'It hangs green and untuned above the gatehouse and rings for one ' +
         'occasion only. Not for warning — warning is the watchman\'s work. ' +
@@ -271,7 +271,7 @@ const nullaBona: Card = {
     id: 'nulla-bona',
     theme: 'vigil',
     name: 'Nulla Bona',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'The sheriff\'s return on an empty house — nothing found, nothing ' +
         'seized, nothing owed to anyone living. The watch writes the same ' +
@@ -301,7 +301,7 @@ const theHedgehog: Card = {
     id: 'the-hedgehog',
     theme: 'vigil',
     name: 'The Hedgehog',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'Stakes lashed in threes and planted at the height of a horse\'s ' +
         'chest, in the dark, by men who will not be there in the morning. It ' +
@@ -330,7 +330,7 @@ const theBesiegersWinter: Card = {
     id: 'the-besiegers-winter',
     theme: 'vigil',
     name: 'The Besieger\'s Winter',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'They counted their grain in weeks. The wall counts in winters, and ' +
         'it is owed several. Every quiet night the frost moves one tent ' +
@@ -365,7 +365,7 @@ const theSallyPort: Card = {
     id: 'the-sally-port',
     theme: 'vigil',
     name: 'The Sally Port',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'The gate that opens outward, once a night, and only when the wall ' +
         'has taken enough to be certain. They spent a whole season getting ' +
@@ -397,7 +397,7 @@ const everyStoneAnOath: Card = {
     id: 'every-stone-an-oath',
     theme: 'vigil',
     name: 'Every Stone an Oath',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     persistentEffect:
         'At the end of each round in which the foe dealt you no damage, gain ' +
         'BARRIER 12 and THORNS 4 for 2 turns.',
@@ -423,7 +423,7 @@ const theWallSpeaksLast: Card = {
     id: 'the-wall-speaks-last',
     theme: 'vigil',
     name: 'The Wall Speaks Last',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'Every course of it was laid by someone who is dead now, and every ' +
         'one of them had an opinion. Stone holds its tongue through a whole ' +
@@ -457,7 +457,7 @@ const nothingToReport: Card = {
     id: 'nothing-to-report',
     theme: 'vigil',
     name: 'Nothing to Report',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'Three words at the foot of the page, in a hand that has finally ' +
         'stopped shaking. The night was quiet. The night was quiet because ' +
@@ -488,7 +488,7 @@ const caltropsUnderTheSnow: Card = {
     id: 'caltrops-under-the-snow',
     theme: 'vigil',
     name: 'Caltrops Under the Snow',
-    philosophicalAspect: 'body',
+    color: 'body',
     persistentEffect:
         'Whenever the foe deals you damage it gains BLEED 8. Whenever your ' +
         'GUARD fully blocks its attack it takes 15 damage.',

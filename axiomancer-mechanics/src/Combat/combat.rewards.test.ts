@@ -256,7 +256,7 @@ describe('theme-aware combat card rewards', () => {
                 id: 'qa-reward-sandbox-card',
                 name: 'QA Reward Sandbox Card (test fixture)',
                 description: 'Sandbox candidate for the reward-pool injection hook.',
-                philosophicalAspect: 'body',
+                color: 'body',
                 theme: 'trial',
                 rank: 1,
                 cardType: 'spell',

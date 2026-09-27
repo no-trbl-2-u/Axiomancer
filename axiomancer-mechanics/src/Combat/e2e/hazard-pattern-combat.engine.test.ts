@@ -60,7 +60,7 @@ afterEach(() => {
 registerSandboxCards([{
     id: 'qa-payoff-burst',
     name: 'QA Payoff Burst (test fixture)',
-    philosophicalAspect: 'body',
+    color: 'body',
     description: 'Test-only fixture: a bare RUPTURE payoff with no status payload.',
     tier: 1,
     rank: 1,
@@ -70,7 +70,7 @@ registerSandboxCards([{
 }, {
     id: 'qa-round-dot',
     name: 'QA Round-Clock DoT (test fixture)',
-    philosophicalAspect: 'body',
+    color: 'body',
     description: 'Test-only fixture: a round-end-clock DoT carrier (nettle sting).',
     tier: 1,
     rank: 1,

@@ -58,82 +58,101 @@
 
 ## Pending
 
-### [gap] Act 1 now runs before fishing-village, but fishing-village is still tuned as the first map [needs-user-call]
+### [gap] Act 1 has no shop, so the relic kit the 2026-09-23 owner call put "on the road" is five maps away
 - category: gap
 - impact: 6
-- ease: 5
-- detail: filed 2026-09-26 (M3b). Under D27 a new game plays the Breakwater
-  (fights at levels 1–3) and the Charcoal Wood (pinned at 2–3), and later the
-  mountains and the underworld, all before fishing-village. Fishing-village is
-  still tuned as the opening map: its fights are level 1–3 and its boss, the
-  King of Revenge, is pinned at level 3 (`FV_BOSS_LEVEL`,
-  `MapEvents/content.ts`), so a player arriving from four Act 1 maps meets an
-  easier map than the ones behind them. The Act 1 maps pin their own fights
-  low (brief §3b) so as not to widen the gap. Options: raise fishing-village's
-  pins once Act 1 is complete; re-order where Act 1's last door leads (the
-  story overview's open question on where the shipped maps sit); or leave the
-  dip as a breather.
-- next: T's call, ideally once M3d ships and the whole Act 1 run can be
-  played; `/combat-playtest` can measure it then.
-
-### [tests] No Playwright journey walks a map node to node — the Breakwater was walked by a throwaway script
-- category: tests
-- impact: 5
 - ease: 6
-- detail: filed 2026-09-26 (M3a residue). Every browser journey arms its
-  screen from a dev button (`debug-trigger-*`) or a fixture, so nothing proves
-  that tapping a node, confirming, playing out what the node opens, and
-  landing back on the map works across node types. An attended session walked
-  the Breakwater with a scratch script: new game, windmill rest, first relic,
-  bw-5 cache, bw-4 gather, bw-7 cache, bw-11 gather, bw-14 fight (played to
-  defeat by ending phases), back to a new run at the windmill; no page errors.
-  What the script needed: nodes off a phone viewport are clicked through the
-  DOM (the camera would need panning); a new game's `/item-reward` needs
-  `item-reward-confirm`; the hazard board shows a coach (`hazard-tutorial-skip`)
-  and PLAY stays disabled until a card is dragged in (the drag loop hung, so
-  that walk skipped hazards). The M3a harness fix for the new start
-  (`exploration-combat-roundtrip-e2e.mjs` playing out a rest arrival) was the
-  first CI sign the start had moved.
-- next: add `scripts/map-walk-e2e.mjs` (a node-to-node walk of the start map,
-  cache/gather/fight at least, hazard via `hazard-e2e.mjs`'s drag helpers) and
-  register it in `scripts/ci-e2e-scope` for `exploration-maps/**` and
-  `src/World/**`.
+- detail: filed 2026-09-27 by `/adjust-equipment` pass 21. The owner call of
+  2026-09-23 (THE VERY START) made a fresh run seed no relics. Only the
+  Suppliant's Ring comes at the first node, and "the markets sell them".
+  `nfForestMarket` (`MapEvents/content.ts` ~129, Glen Market, `nf-8`) says
+  in its comment that "the first market on the road stocks the Phase-19
+  starter kit's weapon, armor and charm, so the intended opening loadout is
+  buyable before the forest deepens". The map revamp moved that road. Across
+  the Breakwater, the Charcoal Wood, the Beacon Crags, the Lantern Deep
+  (M3a–M3d) and fishing-village, there is no `village` node and no `shop:`
+  (the only `shop:` payloads are northern-forest's and later maps'). So a
+  new game plays all of Act 1 plus fishing-village with one signature
+  (the ring). It has nowhere in Act 1 to spend its loot-cache and fight
+  currency; fishing-village's blacksmith swaps gear variants but sells no
+  relic. Glen Market is the sixth map. The Lantern Deep even has a "market grotto"
+  landmark (`ld-10`), but it is staged as a camp: "The traders let you sleep
+  behind the stalls."
+  Prior art: `kb:slay-the-spire-the-board-game/rules/actions` (src-006).
+  Shops that sell potions and relics are part of every act's map there, not
+  something saved for later acts.
+- why not shipped in the steward tick: the fix changes the kind spread of
+  maps authored under T's D21–D35 rulings, along with their e2e kind pins. That
+  makes it a cross-surface change, which is "large" under THE GROWTH FLOOR
+  ¶2. No new item, keyword or art is needed.
+- next (`/iterate`): stage one Act 1 `village` node with a merchant-less
+  `shop:` (`VillagePayload.merchants` may be empty, so D29 and the Act 1
+  people session (rows below) aren't touched). Stock it with the starter
+  kit (`relic-overwhelming`, `relic-read`, `relic-press-the-point`) plus
+  `minor-healing-potion`. There are two readings. (a) `ld-10`, the market
+  grotto: this is truest to the plate, but it comes late (map 4) and turns
+  one of three camps into a village. (b) A node in the Charcoal Wood (map 2):
+  the kit comes early, but no landmark there is named for a market. Pick
+  (a) unless a playtest shows the kit arriving too late. Update Glen
+  Market's comment and the map's kind-spread comment and test, and add an
+  e2e that pins a `shop:` reachable in Act 1 from the default start.
 
-### [gap] The Breakwater (Act 1 coast, M3a #385) — five agent calls to confirm [needs-user-call]
+### [content] A pinned unique pays a full level of XP in Act 1 (the Charcoal Wood's kudan)
+- category: content
+- impact: 3
+- ease: 5
+- detail: filed 2026-09-26 (M3e residue). `cw-7` stages `kudan`, a `unique`
+  foe (native level 10), pinned at level 2. `scaleEnemyToLevel` rescales its
+  default XP to 2 x 500 = 1,000, so this one fight is worth a full level:
+  more than the rest of the Charcoal Wood (410) and about a third of all of
+  Act 1 (~2,870). Every other Act 1 fight is `simple`/`normal`/`elite` (10 to
+  200 XP). D30 allows one elite per region; it says nothing about uniques, so
+  `act1-elites.engine.test.ts` does not catch it.
+- next: `/adjust-enemies` (enemies are in the steward rotation): swap cw-7 to
+  a `normal` foe from the northern forest roster, or pin its XP; then add a
+  "no `unique` in Act 1" case to `act1-elites.engine.test.ts`.
+
+### [gap] The Breakwater has no people of its own — an attended story-spec session (D34) [needs-user-call]
 - category: gap
 - impact: 5
-- ease: 9
-- detail: filed 2026-09-26 (M3a residue). M3a shipped the Breakwater with four
-  calls the agent made alone, each a one-line change if T overrules:
-  (1) **No boss.** The last fight is water-holger at the watchtower (bw-17),
-  because fishing-village's King of Revenge is still ahead in the chain.
-  (2) **The windmill start is a rest (camp).** A new game opens on the rest
-  screen, then the first-node relic.
-  (3) **No combat plate.** The Breakwater is in `AWAITING_PLATE` and uses the
-  fallback arena.
-  (4) **Name overlap.** Fishing-village's own text also has "the breakwater"
-  (its King of Revenge "rises from the breakwater").
-  (5) **No NPCs, and the first one is now a map away** (added by
-  `/adjust-npcs` pass 19, 2026-09-26). The Breakwater stages `npcs: []`,
-  which trips the steward's "map with fewer than 2 staged NPCs → CREATE"
-  signal. It isn't shipped here because D29 says no new NPCs in the map PRs
-  and the story overview lists "What happens here" for the Breakwater as
-  open. Hard rule 3 applies too: no inventing a named character alone.
-  The cost is real, though. Since D27 a new game meets its first NPC and
-  its first quest (Old Marrow's starting quest, Phase 53c) only after
-  crossing the whole Breakwater and its bridge into fishing-village.
-  `quest-giver-reachable.engine.test.ts` now pins
-  `startMap: 'fishing-village'`, so nothing checks the default start.
-  KB: guided first play reads as "essential, not optional" (Spirit
-  Island, Aeon's End, Arkham Horror LCG onboarding rows). Options for T:
-  (a) accept it until the story-dependent revamp (D1 step 4);
-  (b) stage 1–2 existing fishing-village NPCs on the Breakwater instead
-  (Old Marrow is the obvious one, and it is a staging-only move);
-  (c) have a `story-spec`/`character-spec` session author the Breakwater's
-  own people.
-  Details: `plan/2026-09-25-map-revamp-m3.prompt.md` §3a.
-- next: `/oversight` or the M3b session (it opens with T anyway for the
-  forest's name, D26). Record any change as a D-number.
+- ease: 4
+- detail: filed 2026-09-26. T chose (D34) to give the Breakwater NPCs of its
+  own rather than move fishing-village's there. Until then a new game meets
+  its first NPC and first quest (Old Marrow's starting quest, Phase 53c)
+  only after all of Act 1, in fishing-village, and
+  `quest-giver-reachable.engine.test.ts` pins `startMap: 'fishing-village'`,
+  so nothing checks the default start. The Breakwater's "What happens here"
+  in `content/story/story-overview.md` is still open, and hard rule 3 forbids
+  inventing a named character alone, so this is not a loop phase.
+- next: an attended `story-spec`/`character-spec` session with T: settle what
+  happens at the Breakwater, draft 1–2 people for T's sign-off, then stage
+  them (`npcs:` on the map, dialogue via `content-curator`) and point
+  `quest-giver-reachable` at the default start.
+
+### [gap] The rest of Act 1 has no people either: the Charcoal Wood, the Beacon Crags, the Lantern Deep [needs-user-call]
+- category: gap
+- impact: 5
+- ease: 4
+- detail: filed 2026-09-27 by `/adjust-npcs` pass 20. M3b–M3d shipped the
+  three maps with `npcs: []`, as D29 requires ("No new enemies, NPCs or
+  events in the map PRs … a need the pools can't meet is filed to
+  `adjust-npcs`"). Each trips the steward's "map with fewer than 2 staged
+  NPCs → CREATE" signal. With the Breakwater row above, that makes all four
+  Act 1 maps empty of people. A new game crosses four maps before its first
+  conversation (fishing-village). Each map's "What happens here" in
+  `content/story/story-overview.md` names the open question as a person:
+  "Who the burners are" (Charcoal Wood), "Who keeps the beacon, and who it
+  signals" (Beacon Crags), "Who carried the lanterns down" (Lantern Deep).
+  These are personhood calls, and hard rule 3 forbids inventing them alone.
+  D34 set the precedent for the Breakwater (its own people, from a
+  story-spec session, not moved from fishing-village), so this is the same
+  shape rather than a loop phase.
+- next: fold into the Breakwater's attended `story-spec` session (one Act 1
+  people session, not four): answer each map's "who" line, draft 1–2 people
+  per map for T's sign-off, then stage them (`npcs:` on the map, dialogue via
+  `content-curator`). Or T rules that some Act 1 maps stay deliberately
+  unpeopled, and that ruling gets recorded as a D-row so the steward stops
+  re-flagging them.
 
 ### [debt] Source comments still name the retired `/deck-tuning` loop (2026-09-25)
 - category: debt
@@ -1434,6 +1453,27 @@ present. Row stays open until that session runs.
   a flow that is otherwise working.
 
 ## Done
+
+### [x] [tests] No Playwright journey walked a map node to node — RESOLVED 2026-09-26
+- filed 2026-09-26 (M3a residue; an attended session had walked the
+  Breakwater with a throwaway script). `axiomancer-mobile/scripts/
+  map-walk-e2e.mjs` (`npm run e2e:map-walk`) now plays a new game node to
+  node: the windmill arrival scene, the first relic, the bw-5 cache, the bw-4
+  gathering, the bw-6 fight on the black scene played to its end (a defeat
+  restarts the run at the windmill), and lands on the bw-3 hazard intro
+  (playing the board stays `hazard-e2e.mjs`'s). It runs in `verify-mobile`
+  with the encounter suite, which `src/World/**` and the map layouts already
+  select. Moved here per D9.
+
+### [x] T's calls on the Breakwater and the Charcoal Wood — RESOLVED 2026-09-26
+- filed 2026-09-26 (M3a and M3b residue): the Breakwater's five agent calls
+  (no boss; the windmill rest start; no combat plate; the "breakwater" name
+  overlap; no NPCs) and fishing-village's difficulty order. Answered by T as
+  D30–D35 and applied to all three built maps in #394: one elite per region
+  on its last fight column; an arrival-scene start; plain black combat; the
+  King rises from the harbour wall; the Breakwater's people via a story-spec
+  session (new Pending row); fishing-village retuned after M3d (build-plan
+  row M3e). Moved here per D9.
 
 ### [x] Map revamp owner ballot — four calls before M1 — RESOLVED 2026-09-25
 - filed 2026-09-25 (T5 residue). Answered by T in the kickoff session as

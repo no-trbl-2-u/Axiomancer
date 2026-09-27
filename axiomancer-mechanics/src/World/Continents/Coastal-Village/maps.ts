@@ -36,10 +36,6 @@ export type CoastalContinentMapNames =
 // ─── NPC content for fishing-village ──────────────────────────────────────────
 
 const oldDockmasterTree: DialogueTree = {
-    // Phase 63 — observed tree. applyDialogueChoice writes the player's
-    // current alignment cell id to state.lastSeenAlignmentCells['old-marrow']
-    // after each choice; the gull_recognition-style reactive branch below
-    // surfaces when the player's cell has shifted since the last visit.
     id: 'old-marrow',
     rootId: 'greet',
     nodes: {
@@ -60,17 +56,8 @@ const oldDockmasterTree: DialogueTree = {
                     nextNodeId: undefined,
                 },
                 {
-                    // Phase 63 — reactive branch surfacing when the player's
-                    // alignment cell has shifted since the last conversation
-                    // with Old Marrow. Placed LAST per the stable-index
-                    // convention. The observer cache is keyed by tree.id.
                     text: "(Stand quietly. He looks up and sees who you have become.)",
                     nextNodeId: 'observer_recognition',
-                    requires: { playerAlignmentCellChangedSince: true },
-                    effect: {
-                        moralDelta: 1,
-                        alignmentDelta: { outlook: 1 },
-                    },
                 },
             ],
         },
@@ -86,22 +73,12 @@ const oldDockmasterTree: DialogueTree = {
                 {
                     text: "I've got my own dead to bury — maybe later.",
                     nextNodeId: undefined,
-                    // Phase 43 — declining for personal grief: scope leans
-                    // individual; outlook nudges pessimistic via the weight
-                    // of acknowledged loss.
-                    effect: { moralDelta: 2, alignmentDelta: { outlook: -1, scope: -2 } },
                 },
                 {
-                    // Phase 46 — pessimistic-only branch. Surfaces only when
-                    // the player already shares Old Marrow's grief-shape.
-                    // Two-broken-people recognition: he opens up because you
-                    // arrive carrying the same weight.
                     text: "You speak like someone who already lost everything.",
                     nextNodeId: 'accepted',
-                    requires: { requiresAlignment: { axis: 'outlook', op: 'lte', value: -34 } },
                     effect: {
                         startQuest: 'starting-quest',
-                        alignmentDelta: { outlook: -1, scope: 1 },
                     },
                 },
             ],
@@ -112,9 +89,6 @@ const oldDockmasterTree: DialogueTree = {
         },
         observer_recognition: {
             id: 'observer_recognition',
-            // Phase 63 — terminal node for the post-shift reactive branch.
-            // Old Marrow has been weighing nets long enough to notice when
-            // the wind off a person changes.
             text: "He sets the net down. “Aye. Something's moved in you since we last spoke. The sea makes that kind of weather too — a tide that turns inside, not on the chart.” He doesn't ask which way it turned.",
         },
         thanks: {
@@ -131,25 +105,17 @@ const oldDockmasterTree: DialogueTree = {
                     text: "Take only half — your need is greater than mine.",
                     nextNodeId: undefined,
                     requires: { questCompleted: 'starting-quest' },
-                    // Phase 43 — Faith-Optimistic-Relational lean (Jean
-                    // Valjean / Dorothy Day cells): mercy + service.
                     effect: {
                         grantCurrency: 12,
-                        moralDelta: 5,
-                        alignmentDelta: { epistemology: -2, outlook: 3, scope: 3 },
                     },
                 },
                 {
                     text: "This nearly killed me. Pay double or keep it.",
                     nextNodeId: undefined,
                     requires: { questCompleted: 'starting-quest' },
-                    // Phase 43 — Logic-Pessimistic-Individual lean (Underground
-                    // Man cell): hyper-rational grievance + self-prioritisation.
                     effect: {
                         grantCurrency: 25,
-                        moralDelta: -4,
                         setFlag: 'marrow_pressed',
-                        alignmentDelta: { epistemology: 3, outlook: -3, scope: -3 },
                     },
                 },
                 {
@@ -226,58 +192,30 @@ const beggarTree: DialogueTree = {
                 {
                     text: "Give ten gold. “Take it.”",
                     nextNodeId: 'grateful_generous',
-                    // Phase 43 — Faith-Optimistic-Relational lean.
                     effect: {
                         grantCurrency: -10,
-                        moralDelta: 5,
-                        alignmentDelta: { epistemology: -2, outlook: 2, scope: 3 },
                     },
                 },
                 {
                     text: "Give five gold. “I can spare this much.”",
                     nextNodeId: 'grateful_small',
-                    effect: { grantCurrency: -5, moralDelta: 1 },
+                    effect: { grantCurrency: -5 },
                 },
                 {
                     text: "Offer your rations instead.",
                     nextNodeId: 'grateful_kind',
-                    // Phase 43 — Agnostic-Optimistic-Relational lean (Atticus
-                    // Finch / Dewey cells): practical kindness without
-                    // metaphysical justification.
-                    effect: {
-                        moralDelta: 3,
-                        alignmentDelta: { outlook: 2, scope: 2 },
-                    },
                 },
                 {
                     text: "“Everyone carries something.” (Walk on.)",
                     nextNodeId: 'dismissed',
-                    effect: { moralDelta: -1 },
                 },
                 {
                     text: "“Find work, like everyone else.” (Speak coldly.)",
                     nextNodeId: 'harsh',
-                    // Phase 43 — Logic-Pessimistic-Individual lean: cold
-                    // rationality + dismissal of relational obligation.
-                    effect: {
-                        moralDelta: -5,
-                        alignmentDelta: { epistemology: 2, outlook: -2, scope: -3 },
-                    },
                 },
                 {
-                    // Phase 46 — transcendent-only branch (placed LAST so the
-                    // index-based tests in moral.meter.engine.test.ts keep
-                    // their assertions stable). A player whose scope already
-                    // reaches past the individual hears the beggar as a node
-                    // in the larger weave; the recognition changes the
-                    // encounter.
                     text: "Sit with them a while. Their grief is yours too.",
                     nextNodeId: 'grateful_kind',
-                    requires: { requiresAlignment: { axis: 'scope', op: 'gte', value: 34 } },
-                    effect: {
-                        moralDelta: 4,
-                        alignmentDelta: { epistemology: -1, outlook: 1, scope: 2 },
-                    },
                 },
                 {
                     // Phase 62 — flag-gated branch surfacing only after the
@@ -289,21 +227,15 @@ const beggarTree: DialogueTree = {
                     text: "“The bell by the docks has gone quiet.” (Mention Little Belle.)",
                     nextNodeId: 'gull_recognition',
                     requires: { flag: 'befriended-little-belle' },
-                    effect: {
-                        moralDelta: 2,
-                        alignmentDelta: { outlook: 1, scope: 1 },
-                    },
                 },
                 // Phase 53e (S-02 "the read-back web") — three mutually
                 // exclusive reads of fv-14's father flags (column 3, strictly
                 // ahead of this node's column 6). Only one of the three flags
                 // is ever set in a single playthrough, so despite being three
                 // `DialogueChoice` entries this reads as ONE acknowledgement,
-                // per the spec's "one branch, three leaf texts" rule. No
-                // `moralDelta` — the beggar notices, the beggar does not
-                // grade; that judgment stays with this NPC's *ordinary*
-                // branches above. Placed LAST per the index-stability
-                // convention.
+                // per the spec's "one branch, three leaf texts" rule. The
+                // beggar notices; the beggar does not grade. Placed LAST per
+                // the index-stability convention.
                 {
                     text: "(The beggar's head lifts. Word of the boy and his father has reached even here.)",
                     nextNodeId: 'father_echo_truth',

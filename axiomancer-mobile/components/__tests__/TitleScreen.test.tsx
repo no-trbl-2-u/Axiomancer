@@ -32,7 +32,8 @@ describe('TitleScreen', () => {
     );
 
     expect(getByText(/The cursed lands await/)).toBeTruthy();
-    expect(getByText(/fishing village/)).toBeTruthy();
+    // D27: a new game starts on the Breakwater, at the windmill (M3a).
+    expect(getByText(/windmill above the\s+breakwater/)).toBeTruthy();
   });
 
   it('renders embark button with accessibility', () => {

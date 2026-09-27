@@ -40,8 +40,6 @@ import {
     Item, Equipment, EquipmentSlot,
 } from '../Items/types';
 import { DialogueTree, DialogueChoice } from '../NPCs/types';
-import { PhilosophicalAlignment } from '../Ledger/types';
-import { applyAlignmentDelta } from '../Ledger/alignment.engine';
 import { GameState } from './types';
 import { GameAction } from './actions.types';
 import { gameReducer, createNewGameState } from './game.reducer';
@@ -62,8 +60,7 @@ import {
  * provided `PersistenceAdapter` (Phase 51, Spec 09 Q4 path B).
  *
  * UI-tier actions (`USE_ITEM`, `EQUIP_ITEM`, `ALLOCATE_STAT_POINT`,
- * `LEARN_CARD`, `SHIFT_MORAL_METER`, `SHIFT_PHILOSOPHICAL_ALIGNMENT`,
- * `START_COMBAT`, `PROCESS_NODE`, `LOAD_GAME`) are intentionally excluded —
+ * `LEARN_CARD`, `START_COMBAT`, `PROCESS_NODE`, `LOAD_GAME`) are intentionally excluded —
  * they will save on the next durable transition or via an explicit
  * `SAVE_GAME` / `save()` call.
  */
@@ -85,7 +82,7 @@ const DURABLE_ACTIONS: ReadonlySet<GameAction['type']> = new Set<GameAction['typ
  *
  * - `outcome` — `'victory'` when the player killed the enemy, `'defeat'`
  *   when the player went down first, `'friendship'` when the
- *   friendship-counter capped (Phase 36 — half XP and a moral-meter shift),
+ *   friendship-counter capped (Phase 36 — half XP),
  *   `'flee'` when combat ended without any of the above (manual escape).
  * - `xpGained` — flat XP added to `player.experience` this turn (enemy XP
  *   only; quest reward XP is folded directly into `player.experience`).
@@ -104,16 +101,9 @@ export interface CombatEndReport {
      * `friendshipReward`. The engine has already applied the reward's
      * `items` to `loot` and `xpBonus` to `xpGained` by the time this
      * surfaces; `narrative` is here for the CLI / UI to render.
-     * Phase 69 — `alignmentShift` carries the post-clamp
-     * `PhilosophicalAlignment` for the consumer to render (the
-     * END_COMBAT reducer has already written the new cell to
-     * `state.philosophicalAlignment` by the time this surfaces).
-     * Mirrors the way `applyDialogueChoice` returns
-     * `effects.philosophicalShift`.
      */
     friendshipReward?: {
         narrative?: string;
-        alignmentShift?: PhilosophicalAlignment;
         /**
          * Phase 73 — when the befriended enemy carries a `journalEntry`
          * and the entry wasn't already unlocked, the engine appends its
@@ -140,7 +130,7 @@ export interface GameActions {
 
     // ── Combat ───────────────────────────────────────────────────────────────
     /**
-     * Stages an encounter for combat. Applies moral-meter / region-mercy
+     * Stages an encounter for combat. Applies region-mercy
      * scaling to the lead enemy and writes the result to `currentEncounter`.
      * The fight itself is driven by the Hazard-Pattern engine outside the
      * store; call `endCombat` with the reported outcome to grant rewards.
@@ -178,16 +168,12 @@ export interface GameActions {
     allocateStatPoint: (stat: 'heart' | 'body' | 'mind') => void;
     learnCard: (cardId: string) => void;
     save: () => void;
-    // ── Morality ─────────────────────────────────────────────────────────────
-    shiftMoralMeter: (delta: number, gating?: { min?: number; max?: number }) => void;
-    // ── Philosophical alignment ──────────────────────────────────────────────
-    shiftPhilosophicalAlignment: (delta: Partial<PhilosophicalAlignment>) => void;
     // ── Run loop (Phase 72) ──────────────────────────────────────────────────
     /**
      * Phase 72 — resets the playthrough back to the starting hearth (closes
      * GH#65 ask 2). `keepCharacter: true` preserves the character ledger
-     * (player + philosophicalAlignment + moralMeter + rngState + codex) and
-     * refills HP; world / combat / quests / flags / observer cache reset.
+     * (player + rngState + codex) and
+     * refills HP; world / combat / quests / flags reset.
      * `keepCharacter: false` performs a full new-game reset. Every call
      * assigns a fresh `runId`. Dispatches `RESET_RUN`; persists via the
      * standard DURABLE_ACTIONS pipeline. Returns the post-reset GameState.
@@ -290,6 +276,26 @@ function logGameEventSanitized(event: GameEvent): void {
 }
 
 /**
+ * The part of the state a save writes: every durable `GameState` field, and
+ * not the transient `currentEncounter` (encounters re-roll on load, Spec 07)
+ * or the store's verbs. One list for the autosave and the explicit `save()`.
+ * `labyrinth` is the Aporia's durable progress (W-01), and with it an open
+ * visit's way back (map revamp M4); it is absent until the player first
+ * enters, so saves from before then are unchanged.
+ */
+function durableSlice(next: GameState): GameState {
+    const {
+        version, runId, player, world, quests, flags,
+        rngState, codex, regionConsequences, mapGoodwill, labyrinth,
+    } = next;
+    return {
+        version, runId, player, world, quests, flags,
+        rngState, codex, regionConsequences, mapGoodwill,
+        ...(labyrinth ? { labyrinth } : {}),
+    };
+}
+
+/**
  * Constructs a Zustand vanilla store backed by `adapter`.
  *
  * @param adapter   - Persistence backend (Node fs, AsyncStorage, null for tests).
@@ -340,16 +346,7 @@ export function createGameStore(
             // Save excludes transient currentEncounter — encounters re-roll on
             // load (Spec 07).
             if (DURABLE_ACTIONS.has(action.type)) {
-                const {
-                    currentEncounter: _drop, version, runId, player, world, quests, flags,
-                    moralMeter, rngState, philosophicalAlignment,
-                    lastSeenAlignmentCells, codex, regionConsequences, mapGoodwill,
-                } = next;
-                adapter.save({
-                    version, runId, player, world, quests, flags,
-                    moralMeter, rngState, philosophicalAlignment,
-                    lastSeenAlignmentCells, codex, regionConsequences, mapGoodwill,
-                });
+                adapter.save(durableSlice(next));
             }
             return next;
         }
@@ -397,10 +394,6 @@ export function createGameStore(
                 // Phase 60 — surface the narrative on the report so the CLI /
                 // UI can render it. Items + xpBonus already reach the consumer
                 // through report.loot / report.xpGained.
-                // Phase 69 — surface the post-clamp PhilosophicalAlignment so
-                // the CLI / UI can render the shift; the reducer applies the
-                // delta to state.philosophicalAlignment under the dispatch
-                // below.
                 if (outcome === 'friendship') {
                     const fr = foe.friendshipReward;
                     const entry = foe.journalEntry;
@@ -408,19 +401,12 @@ export function createGameStore(
                         ? pre.codex.unlockedEntries.includes(entry.id)
                         : true;
                     const willUnlockCodex = entry && !codexAlreadyKnown;
-                    if (fr?.narrative || fr?.alignmentDelta || willUnlockCodex) {
+                    if (fr?.narrative || willUnlockCodex) {
                         const friendshipReport: {
                             narrative?: string;
-                            alignmentShift?: PhilosophicalAlignment;
                             codexEntryUnlocked?: { id: string; title: string };
                         } = {};
                         if (fr?.narrative) friendshipReport.narrative = fr.narrative;
-                        if (fr?.alignmentDelta) {
-                            friendshipReport.alignmentShift = applyAlignmentDelta(
-                                pre.philosophicalAlignment,
-                                fr.alignmentDelta,
-                            );
-                        }
                         if (willUnlockCodex && entry) {
                             // Phase 73 — surface the unlocked entry's id +
                             // title on the report (the END_COMBAT reducer
@@ -506,27 +492,8 @@ export function createGameStore(
 
             save() {
                 const next = get();
-                const {
-                    currentEncounter: _drop, version, runId, player, world, quests, flags,
-                    moralMeter, rngState, philosophicalAlignment,
-                    lastSeenAlignmentCells, codex, regionConsequences, mapGoodwill,
-                } = next;
-                adapter.save({
-                    version, runId, player, world, quests, flags,
-                    moralMeter, rngState, philosophicalAlignment,
-                    lastSeenAlignmentCells, codex, regionConsequences, mapGoodwill,
-                });
+                adapter.save(durableSlice(next));
                 if (emitter) emitter.emit({ type: 'game:saved', payload: { state: next } });
-            },
-
-            // ── Morality ──────────────────────────────────────────────────────
-            shiftMoralMeter(delta: number, gating?: { min?: number; max?: number }) {
-                dispatch({ type: 'SHIFT_MORAL_METER', payload: { delta, gating } });
-            },
-
-            // ── Philosophical alignment ──────────────────────────────────────
-            shiftPhilosophicalAlignment(delta: Partial<PhilosophicalAlignment>) {
-                dispatch({ type: 'SHIFT_PHILOSOPHICAL_ALIGNMENT', payload: { delta } });
             },
 
             // ── Run loop (Phase 72) ──────────────────────────────────────────
@@ -550,4 +517,3 @@ export const selectPlayer      = (s: GameStore): Character          => s.player;
 /** True while an encounter is staged (combat is driven outside the store). */
 export const selectIsInCombat  = (s: GameStore): boolean            => s.currentEncounter != null;
 export const selectVersion     = (s: GameStore): number             => s.version;
-export const selectMoralMeter  = (s: GameStore): number             => s.moralMeter;

@@ -13,10 +13,6 @@
  */
 
 import {
-    AXIS_LOW_THRESHOLD,
-    bucketAxis,
-    defaultAlignment,
-    getAlignmentCell,
     lookupEffect,
     type ActiveEffect,
     type Character,
@@ -30,30 +26,6 @@ import type { Equipment } from '@mechanics';
 export type StanceKey = 'heart' | 'body' | 'mind';
 export type EffectKind = 'buff' | 'debuff' | 'poison' | 'bleed';
 export type EffectTint = 'buff' | 'debuff';
-
-/**
- * Three philosophical axes the engine 0.10.0 alignment cube tracks
- * (`state.philosophicalAlignment`). Each axis is bucketed via
- * `bucketAxis()` to `low` | `mid` | `high` for display.
- */
-export type AlignmentAxisKey = 'epistemology' | 'outlook' | 'scope';
-export type AlignmentBucket = 'low' | 'mid' | 'high';
-
-export interface AlignmentAxisRow {
-    axisKey: AlignmentAxisKey;
-    /** Display label, e.g. `'EPISTEMOLOGY'`. */
-    label: string;
-    /** Bucketed value for the axis. */
-    bucket: AlignmentBucket;
-}
-
-export interface AlignmentSlice {
-    /** Human-readable cell name from `philosophicalAlignmentLibrary`, e.g.
-     * `'Agnostic-Neutral-Relational'`. */
-    cellName: string;
-    /** Three axis rows in display order: epistemology, outlook, scope. */
-    axes: readonly AlignmentAxisRow[];
-}
 
 export interface BaseStatRow {
     /** Stable key the component maps to a `StanceGlyph` kind. */
@@ -168,37 +140,6 @@ export interface CharacterViewModel {
     emptyEffectsMessage: string;
     equipment: readonly EquipmentSlotRow[];
     cards: readonly CharacterCardRow[];
-    /**
-     * Philosophical alignment cube (Phase 52, engine 0.10.0).
-     * Computed from `state.philosophicalAlignment` via the engine's
-     * `getAlignmentCell` + `bucketAxis`. Defaults to mid/mid/mid for
-     * a fresh game (the engine's `defaultAlignment()` seed).
-     */
-    alignment: AlignmentSlice;
-    /**
-     * Phase 92 — morale meter value. Sourced from `state.moralMeter`
-     * (engine alignment/personality state). Displays current morale
-     * level affected by flee actions and other moral choices. Makes
-     * the flee cost visible per deep-playtest F03 feedback.
-     */
-    morale: number;
-    /**
-     * Copy for the GRACE readouts (FE-003).
-     *
-     * The sheet shows grace twice: a 1-10 pool bar under POOLS, and the raw
-     * `moralMeter` balance further down. Both were headed with the bare word
-     * GRACE, so two different numbers appeared under one name with no stated
-     * relationship. These strings name the second one as the balance the pool
-     * is read from, and live here because presenters own player-facing copy.
-     */
-    graceCopy: {
-        /** Heading for the raw-balance section — distinct from the pool's word. */
-        readonly balanceHeading: string;
-        /** Sub-label under the balance number. */
-        readonly balanceUnit: string;
-        /** One line tying the balance to the pool bar above it. */
-        readonly balanceRelation: string;
-    };
     /** Accessibility labels for character screen elements. */
     a11y: {
         characterName: string;
@@ -213,8 +154,6 @@ export interface CharacterViewModel {
          * (Hard Rule #8 — content stays in the proper layer).
          */
         crucibleOpen: string;
-        /** Screen-reader analogue for the alignment row. */
-        alignment: string;
     };
 }
 
@@ -300,100 +239,8 @@ function buildEquipment(player: Character): readonly EquipmentSlotRow[] {
  * All fields are driven by the engine's `state.player`. Cards are
  * empty until engine Spec 04 ships known-card reads.
  */
-const ALIGNMENT_AXIS_LABELS: Record<AlignmentAxisKey, string> = {
-    epistemology: 'CREED',
-    outlook: 'AUGURY',
-    scope: 'TROTH',
-};
-
-function buildAlignmentSlice(state: GameStore): AlignmentSlice {
-    // Character-audit [2.5] fix 2026-05-22: dropped `(state as
-    // any).philosophicalAlignment` cast. Engine `GameState.philosophicalAlignment:
-    // PhilosophicalAlignment` is typed cleanly (non-optional);
-    // v3 saves backfill it via the persistence migration. The
-    // `?? defaultAlignment()` defensive fallback only covers
-    // synthetic test fixtures that bypass `createNewGameState`.
-    const alignment = state.philosophicalAlignment ?? defaultAlignment();
-
-    const cell = getAlignmentCell(alignment);
-
-    const axes: AlignmentAxisRow[] = (Object.keys(ALIGNMENT_AXIS_LABELS) as AlignmentAxisKey[])
-        .map((axisKey) => ({
-            axisKey,
-            label: ALIGNMENT_AXIS_LABELS[axisKey],
-            bucket: bucketAxis(alignment[axisKey] ?? 0),
-        }));
-
-    return { cellName: cell.label, axes };
-}
-
-/** Width of the GRACE track in tenths — the readout prints `value / 10`. */
-export const GRACE_TRACK_MAX = 10;
-
-/**
- * Geometry for a GRACE track (the exploration HUD's StatusCard and the SELF
- * sheet's POOLS panel draw the same bar).
- */
-export interface GraceTrack {
-    /** The printed tenths, 1-10: `round((meter + 100) / 20)` clamped. */
-    value: number;
-    /** Always `GRACE_TRACK_MAX`. */
-    max: number;
-    /** Fill width in percent from the RAW meter, so the fill and the tic compare exactly. */
-    fillPct: number;
-    /** The arrears tic's left offset in percent, from the engine's own band boundary. */
-    breakPct: number;
-    /** `true` when the meter sits in the IN ARREARS band (`<= AXIS_LOW_THRESHOLD`). */
-    inArrears: boolean;
-}
-
-/**
- * Lays out a GRACE track from the moral meter (-100..100).
- *
- * Purpose: one source for the number, the fill, the tic and the arrears
- * verdict, so the HUD, the SELF sheet and `/memoir` agree.
- *
- * Audit 2026-09-12: both surfaces hard-coded the tic at 2/10 (meter ≈ -60)
- * while `/memoir` puts IN ARREARS at meter <= -34 (`AXIS_LOW_THRESHOLD`, the
- * same boundary `bucketAxis` uses). The tic now sits at that boundary
- * (33% of the track) and the fill follows the raw meter rather than the
- * rounded tenths, so a meter of -33 draws just right of the tic
- * (INDIFFERENT) and -34 touches it (IN ARREARS) — exactly the memoir chip.
- *
- * @param moralMeter - `state.moralMeter`; non-finite reads as 0.
- * @returns a frozen-by-convention geometry object (plain data, no tokens).
- */
-export function graceTrack(moralMeter: number): GraceTrack {
-    const meter = Number.isFinite(moralMeter) ? Math.max(-100, Math.min(100, moralMeter)) : 0;
-    const value = Math.max(1, Math.min(GRACE_TRACK_MAX, Math.round((meter + 100) / 20)));
-    return {
-        value,
-        max: GRACE_TRACK_MAX,
-        fillPct: ((meter + 100) / 200) * 100,
-        breakPct: ((AXIS_LOW_THRESHOLD + 100) / 200) * 100,
-        inArrears: meter <= AXIS_LOW_THRESHOLD,
-    };
-}
-
-/**
- * Legend copy for the red break tic drawn on a GRACE track.
- *
- * Purpose: the tic is the only mark on either grace bar and nothing named
- * it, so it read as damage on the bar rather than as the arrears threshold
- * the ledger warns about. Resolves cluster S3-sheet-C12.
- *
- * Output: one lowercase marginal line, glyph first so the eye ties the text
- * to the mark. It names no number: the printed tenths round, the band does
- * not (a meter of -33 and -34 both print 3), so any tenths figure would
- * contradict `/memoir` at the edge. The mark itself is the threshold.
- */
-export function graceBreakLegend(): string {
-    return '▏arrears left of the mark';
-}
-
 export function selectCharacterViewModel(state: GameStore): CharacterViewModel {
     const player = state.player;
-    const alignment = buildAlignmentSlice(state);
     // Character-audit [2.5] fix 2026-05-22: lifted `buildEffects(player)`
     // to a single call. Pre-fix called it 3x (vm field + 2x a11y
     // branches) — wasteful + brittle if the helper extends to
@@ -415,13 +262,6 @@ export function selectCharacterViewModel(state: GameStore): CharacterViewModel {
         emptyEffectsMessage: 'none at hand.',
         equipment: buildEquipment(player),
         cards: [],
-        alignment,
-        morale: state.moralMeter,
-        graceCopy: {
-            balanceHeading: '✠ GRACE · THE BALANCE',
-            balanceUnit: 'on the parish ledger',
-            balanceRelation: 'the pool above is this balance, read in tenths.',
-        },
         a11y: {
             characterName: `Character name: ${player.name}`,
             level: `Level ${player.level}`,
@@ -432,7 +272,6 @@ export function selectCharacterViewModel(state: GameStore): CharacterViewModel {
                 ? `${effects.length} active effects`
                 : 'No active effects',
             crucibleOpen: 'Open Token Crucible.',
-            alignment: `The Oaths: ${alignment.cellName}. ${alignment.axes.map((a) => `${a.label.toLowerCase()} ${a.bucket}`).join(', ')}.`,
         },
     });
 }

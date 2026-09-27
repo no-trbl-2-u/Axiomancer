@@ -243,6 +243,129 @@ the map PRs. A need the pools can't meet is filed to `adjust-enemies` /
 `adjust-npcs`. New content waits for the story-dependent revamp (D1 step
 4). *Rejected:* authoring new content per map; empty maps first.
 
+The next six were T's answers on 2026-09-26 to the agent calls M3a and M3b
+filed in `plan/AUDIT.md`. They shipped with M3c in #394.
+
+**D30 — Act 1 has no bosses; each region has one elite fight, its last
+before the door.** (T, 2026-09-26: "Not a boss, but an elite battle for each
+region"; placement "last fight before door".) The elite is an `elite`-tier
+foe from the map's borrowed roster, pinned to an Act 1 level like every other
+fight (brief §3b). Where the map narrows to one node before the door it goes
+there (the Breakwater's watchtower, `bw-17`, brine-hag); where the last fight
+column is a ring it goes on the ring's centre lane (the Charcoal Wood's
+wayside cross, `cw-17`, cursed-paladin; the Beacon Crags' stone gate,
+`bc-15`, mabadi). Every other fight is `normal`/`simple` tier, so the Crags'
+bone-totem and unpaid-delver were swapped out. Pinned by
+`World/e2e/act1-elites.engine.test.ts`. *Rejected:* promoting a normal fight
+to boss; an optional side-node elite; an elite on the door node.
+
+**D31 — A new game opens on an arrival scene at the windmill.** (T,
+2026-09-26.) `bw-1` is a cutscene, like every other Act 1 map's arrival,
+not a camp rest. *Rejected:* keeping the rest start; an empty start.
+
+**D32 — Combat shows a plain black scene for now.** (T, 2026-09-26: "an
+all black background for all combat plates for now", every map.)
+`ARENA_PLATES_SHOWN = false` in `axiomancer-mobile/assets/images/combat/
+index.ts`; the pane paints the palette's darkest ink (`deepBg`) instead of
+a plate. The plates, their descriptions and their tests stay, so turning the
+art back on is one line. *Rejected:* reusing fishing-village's plate for
+Act 1; commissioning Act 1 plates now; black only for unplated maps.
+
+**D33 — The King of Revenge rises from the harbour wall, not "the
+breakwater".** (T, 2026-09-26.) Keeps the Act 1 map's name, The Breakwater,
+and rewords fishing-village's two lines (`fv-6`'s boss description and the
+King's brutal-defeat line) so they don't point at the Act 1 map.
+*Rejected:* renaming the map; leaving both.
+
+**D34 — The Breakwater gets people of its own, authored in a story-spec
+session.** (T, 2026-09-26.) Not a staging-only move of fishing-village's
+NPCs. Names and characters need T's sign-off (hard rule 3; the story
+overview's "What happens here" for the Breakwater is still open), so this is
+an attended session, not a loop phase. Filed in `plan/AUDIT.md`.
+*Rejected:* staging Old Marrow on the Breakwater; waiting for D1 step 4.
+
+**D35 — Fishing-village is retuned after M3d, from measurement.** (T,
+2026-09-26.) Once the Lantern Deep ships and all of Act 1 can be played,
+`/combat-playtest` measures the run and fishing-village's pins
+(`FV_BOSS_LEVEL`, its fights) are raised to follow Act 1. Until then, map
+PRs don't touch fishing-village's difficulty. *Rejected:* raising it now;
+keeping the dip as a breather.
+
+The next three came from the same session. T asked what was left of the
+strategy and said: *"I want to pause at the card phase."* Then, near-
+verbatim: *"Once all the other parts of the revamp are over, I want to purge
+all the cards and all the combat related keywords except for the grey strike
+and grey guard cards and keyword. Then work can continue, but no card
+generation unless it's a guided session with me."* The scope was settled by
+ballot the same day.
+
+**D36 — Purge every player card but the two grey starters, after step 3.**
+(T, 2026-09-26.) Amends D1's "no purge". Keeps `grey-strike` (A Plain Blow)
+and `grey-ward` (A Plain Ward) and their keywords, DEAL and GUARD. Purges
+every other player card: the six archetype libraries, the apocrypha set, the
+relic-granted cards and the 5 curses. Purges every other player-card keyword.
+Enemy keywords, decks and the statuses enemies apply stay. Every run deals
+the 10-card grey deck; the 10 presets and the 5/5/5 thirds go; card rewards
+and cache card offers are gated off. It ships after S3 (step 3), as build-plan
+row P1, brief `plan/2026-09-26-card-purge.prompt.md`. *Rejected:* purging
+right after M5 (before the scaling hook); stripping enemy keywords too;
+keeping presets rebuilt from grey cards.
+
+**D37 — No card generation outside a guided session with T.** (T,
+2026-09-26.) From now on, no steward, `/forge`, `/expand` or phase creates a
+player card or a player keyword. `adjust-cards` and `adjust-keywords` are
+paused (`skills/march.md` §3b skips them) until T re-arms them. Everything
+else in the loop continues. *Rejected:* letting the stewards keep making
+small passes until the purge.
+
+**D38 — The loop pauses at the card phase: step 3 is attended.** (T,
+2026-09-26.) After M5 the loop does not start D1 step 3 (the D4 per-stat
+hooks and card damage scaling). It's build-plan row S3, marked blocked for
+an attended session with T, because the stat-to-quantity mapping is still
+T's call. P1 (the purge) requires S3. *Rejected:* stopping the whole loop
+after M5.
+
+The next four came from the stats conversation (T, attended, 2026-09-26/27).
+T asked for prior art on stat-scaling deckbuilders, then for high-number RPG
+formulas; each call below was a ballot with worked late-game numbers.
+Research sources and the full model: `plan/2026-09-27-stat-scaling.prompt.md`.
+
+**D39 — Remove alignment, philosophy and GRACE; keep card colour.** (T,
+2026-09-27: "remove everything that has to do with alignment and philosophy.
+That includes grace.") Removes the philosophical-alignment grid
+(`Ledger/alignment.*`, `GameState.philosophicalAlignment`, the dialogue
+gates and read-backs that use it) and the GRACE morale meter (the HUD, the
+withdraw penalty). The card colour survives: `philosophicalAspect` is
+renamed to a neutral name (e.g. `color`) with no behaviour change, because
+the dice and the colour-match bonus read it. A loop phase, build-plan row
+T6, before S3. *Rejected:* removing card colour too; doing it attended;
+folding it into the purge.
+
+**D40 — Stats scale keyword families, decided by where the effect lands.**
+(T, 2026-09-27.) Body: immediate damage to the foe. Mind: anything on you
+(GUARD, THORNS, self-buffs). Heart: anything on the foe (VULNERABLE, BURN,
+BLEED, STUN). Grey: the rest, unscaled. Keyword text is coloured in its
+family's dice colour, with a stat glyph; combat shows final numbers; a
+card's colour is its main keyword's family. Gordian Quest is the model T
+named. *Rejected:* card colour picks the stat (a grey deck would make
+all-body strictly best); heart scales statuses only; per-keyword mapping
+without families (T: confusing once there are dozens of keywords).
+
+**D41 — The formula: `base × stat ÷ 5`, nothing capped.** (T, 2026-09-27.)
+One-shot amounts and percentages scale `base × stat ÷ 5`, so 5 is neutral
+and each point is +20% of the base. Repeating amounts (DoTs, THORNS, regen)
+scale at half rate. On/off effects and every duration never scale. No
+caps: `VULNERABLE_MAX_MULT` goes. VITAE is `50 + 12·body + 6·mind +
+6·heart` (170 at 5/5/5, as today). Enemy VITAE stays linear,
+`(30 + 18·level) × difficulty`. *Rejected:* `÷ 3` (steeper), `+10%` per
+point (gentler, under the late ladder), geometric enemy health.
+
+**D42 — A third grey card: VULNERABLE.** (T, 2026-09-27.) The grey office
+gains a heart card that applies VULNERABLE (working draft: PAID
+VULNERABLE +25%, a FREE line to be set in the guided session that builds
+it, D37). After the purge the player's keywords are DEAL, GUARD and
+VULNERABLE. *Rejected:* BLEED, WEAKEN.
+
 ## Open follow-ups
 
 - Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and
@@ -264,8 +387,9 @@ the map PRs. A need the pools can't meet is filed to `adjust-enemies` /
   #383 and M2 #384 opened 2026-09-25 (stacked in that order). The M3
   ballot was answered the same day as D26–D29. M0–M2 merged 2026-09-26
   (#382–#384), and M3a (the Breakwater, the new start, start on any map)
-  merged 2026-09-26 (#385). All four D26 names are picked. Four agent calls
-  from M3a wait on T in `plan/AUDIT.md` Pending. **Next:** M3b–M5 are rows
+  merged 2026-09-26 (#385). All four D26 names are picked. M3b merged
+  2026-09-26 (#389), M3c the same day (#392). The agent calls M3a and M3b
+  filed were answered as D30–D35 (#394). **Next:** M3b–M5 are rows
   in `plan/steps/01_build_plan.md` (brief
   `plan/2026-09-25-map-revamp-m3.prompt.md`).
 - Backdrop-anchored map renderer (D15) — nodes in image coordinates,
@@ -286,5 +410,8 @@ the map PRs. A need the pools can't meet is filed to `adjust-enemies` /
   needed. Resize per D22, order per D23.
 - Scaling formula (D1 step 3) — D4 settles the direction (per-stat
   hooks); the exact stat-to-quantity mapping is designed with the hook.
+  **2026-09-26:** attended with T (D38), build-plan row S3; the card purge
+  (D36, row P1) follows it. **2026-09-27:** the model is decided (D40–D42),
+  brief `plan/2026-09-27-stat-scaling.prompt.md`; T6 (D39) ships first.
 - Trim spec §5.3 / §5.6 / §5.7 answered 2026-09-25 as D8 / D9 / D10.
   Nothing in §5 remains open.

@@ -9,7 +9,8 @@
  * level is decided. Pins: the cap itself; the difficulty defaults at the
  * opening levels; `createEnemy`'s authored lists; `scaleEnemyToLevel` on the
  * King (bare at 3, HIDE 3 at his home level 6); only HIDE ramps; and the
- * live fishing-village boss event resolves bare-skinned.
+ * live fishing-village boss event resolves through the ramp (HIDE 2 at his
+ * pinned level 5 since M3e moved the village after Act 1; bare at 3 before).
  */
 
 import { describe, it, expect } from 'vitest';
@@ -73,7 +74,7 @@ describe('the early HIDE ramp — where a foe\'s level is decided', () => {
         expect(hideOf(scaleEnemyToLevel(king, 4).keywords)).toBe(1);
     });
 
-    it('the live fishing-village boss event resolves a bare-skinned King', () => {
+    it('the live fishing-village boss event resolves the King through the ramp', () => {
         const base = { ...createNewGameState(), world: createStartingWorld('fishing-village') };
         const map: MapState = { ...createMapState(getMapDefinition('coastal-continent', 'fishing-village')), currentNode: 'fv-6' };
         const result = resolveMapEvent({ ...base, world: { ...base.world, currentMap: map } });
@@ -81,7 +82,8 @@ describe('the early HIDE ramp — where a foe\'s level is decided', () => {
         if (result.event.kind !== 'encounter') return;
         const foe = result.event.encounter.enemies[0]!;
         expect(foe.id).toContain('king');
-        expect(foe.level).toBe(3);
-        expect(hideOf(foe.keywords)).toBeNull();
+        expect(foe.level).toBe(5);
+        expect(hideOf(foe.keywords)).toBe(hideCapForLevel(5));
+        expect(hideCapForLevel(5)).toBe(2);
     });
 });

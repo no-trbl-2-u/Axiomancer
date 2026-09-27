@@ -62,7 +62,7 @@ const readingOfTheCharges: Card = {
     id: 'reading-of-the-charges',
     theme: 'trial',
     name: 'Reading of the Charges',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'The clerk reads without looking up: seven counts, each in a voice ' +
         'like earth on a coffin lid. By the third, the gallery remembers ' +
@@ -86,7 +86,7 @@ const hueAndCry: Card = {
     id: 'hue-and-cry',
     theme: 'trial',
     name: 'Hue and Cry',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'By old law every soul within earshot must drop the plough and run ' +
         'the felon down. Nobody remembers repealing it. The village comes ' +
@@ -109,7 +109,7 @@ const benefitOfClergy: Card = {
     id: 'benefit-of-clergy',
     theme: 'trial',
     name: 'Benefit of Clergy',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'You cannot read, but you have the neck-verse by heart, and the ' +
         'bench cannot tell the difference. Recite it steadily. The rope ' +
@@ -134,7 +134,7 @@ const scoldsBridle: Card = {
     id: 'scolds-bridle',
     theme: 'trial',
     name: "Scold's Bridle",
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'An iron cage for the jaw and a spike to keep the tongue devout. ' +
         'Whatever they meant to howl is entered in the record as silence. ' +
@@ -158,7 +158,7 @@ const billOfParticulars: Card = {
     id: 'bill-of-particulars',
     theme: 'trial',
     name: 'Bill of Particulars',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'Not the crime — the crime itemised. Where, and at what hour, and ' +
         'with whose knife, and how many times. The foe learns what they did ' +
@@ -181,7 +181,7 @@ const theGalleryMurmurs: Card = {
     id: 'the-gallery-murmurs',
     theme: 'trial',
     name: 'The Gallery Murmurs',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'No one word is loud enough to be struck from the record, and so ' +
         'none of them are. The sound comes off the benches like weather. ' +
@@ -206,7 +206,7 @@ const thePrickingNeedle: Card = {
     id: 'the-pricking-needle',
     theme: 'trial',
     name: 'The Pricking Needle',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'Three inches of licensed steel, probing for the spot the Devil ' +
         'kissed numb. Where the needle draws no blood, the court draws its ' +
@@ -228,7 +228,7 @@ const struckFromTheRecord: Card = {
     id: 'struck-from-the-record',
     theme: 'trial',
     name: 'Struck from the Record',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'The clerk draws one wet line and the thing unhappens. It was said. ' +
         'Everyone heard it said. It was not said. Go on, the bench tells ' +
@@ -256,7 +256,7 @@ const thePerjurersTongue: Card = {
     id: 'the-perjurers-tongue',
     theme: 'trial',
     name: "The Perjurer's Tongue",
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'The statute is explicit about the instrument and silent about the ' +
         'aftercare. What they swore to comes back up the same road it went ' +
@@ -284,7 +284,7 @@ const contemptOfCourt: Card = {
     id: 'contempt-of-court',
     theme: 'trial',
     name: 'Contempt of Court',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'They rose. They struck the rail. Good — every violence offered in ' +
         'this room is testimony now, and the bench is grateful for the ' +
@@ -314,7 +314,7 @@ const pressedForAPlea: Card = {
     id: 'pressed-for-a-plea',
     theme: 'trial',
     name: 'Pressed for a Plea',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'They will not plead, so the court lays a board across them and ' +
         'adds a stone, and asks again. Then another stone, and asks again. ' +
@@ -342,7 +342,7 @@ const theSummingUp: Card = {
     id: 'the-summing-up',
     theme: 'trial',
     name: 'The Summing Up',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'He gathers three days of testimony into eleven minutes and gives ' +
         'the jury the shape of it, which is not the same as the truth of ' +
@@ -370,7 +370,7 @@ const theAssizeBell: Card = {
     id: 'the-assize-bell',
     theme: 'trial',
     name: 'The Assize Bell',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     persistentEffect:
         'Whenever STAGGER or BACKFIRE denies the foe a rung of its telegraph, gain 2 CHARGES and deal 4 to the foe.',
     description:
@@ -390,7 +390,7 @@ const judgmentEnteredAgainstThem: Card = {
     id: 'judgment-entered-against-them',
     theme: 'trial',
     name: 'Judgment Entered Against Them',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'Every motion denied since the arraignment has been kept somewhere ' +
         'cold, and the ledger is thick now. The bench reads the total aloud ' +
@@ -421,7 +421,7 @@ const theBlackCap: Card = {
     id: 'the-black-cap',
     theme: 'trial',
     name: 'The Black Cap',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'A square of black silk, lighter than a moth, heavier than the ' +
         'church roof. He sets it upon the wig without hurry, for the ' +
@@ -454,7 +454,7 @@ const writOfAttainder: Card = {
     id: 'writ-of-attainder',
     theme: 'trial',
     name: 'Writ of Attainder',
-    philosophicalAspect: 'body',
+    color: 'body',
     persistentEffect:
         'At the end of each round, inflict DOOM 3 on the foe and gain 2 CHARGES.',
     description:
@@ -476,7 +476,7 @@ const theVillageComesOverTheHill: Card = {
     id: 'the-village-comes-over-the-hill',
     theme: 'trial',
     name: 'The Village Comes Over the Hill',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'Hue and Cry only starts it. By the second field the miller has ' +
         'joined, and the smith, and every idle hand between here and the ' +
@@ -507,7 +507,7 @@ const theDuckingStool: Card = {
     id: 'the-ducking-stool',
     theme: 'trial',
     name: 'The Ducking Stool',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'They tie the rope and lower her once, to see which way the river ' +
         'rules. The court has already guessed the verdict. The water is ' +
@@ -537,7 +537,7 @@ const theDoorComesDownFirst: Card = {
     id: 'the-door-comes-down-first',
     theme: 'trial',
     name: 'The Door Comes Down First',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'The warrant is read afterward, to whoever is left standing to hear ' +
         'it. Everything about this arrest happens in the wrong order on ' +
@@ -565,7 +565,7 @@ const nothingFurtherYourHonour: Card = {
     id: 'nothing-further-your-honour',
     theme: 'trial',
     name: 'Nothing Further, Your Honour',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'The advocate sits down. There is nothing left in the folder and ' +
         'she has said so plainly, which is its own kind of weapon — a case ' +

@@ -188,68 +188,6 @@ describe('visibleChoices — gating logic', () => {
     });
 });
 
-// ─── Phase 46 — requiresAlignment ─────────────────────────────────────────────
-
-describe('visibleChoices — requiresAlignment (Phase 46)', () => {
-    const gatedChoice: DialogueChoice = {
-        text: 'You speak like someone who already lost everything.',
-        nextNodeId: 'pessimistic-branch',
-        requires: { requiresAlignment: { axis: 'outlook', op: 'lte', value: -34 } },
-    };
-    const node = makeNode('root', [gatedChoice]);
-
-    it('is visible to a player whose alignment axis meets the gte/lte threshold', () => {
-        const ctx: DialogueContext = {
-            ...emptyCtx,
-            alignment: { epistemology: 0, outlook: -50, scope: 0 },
-        };
-        expect(visibleChoices(node, ctx)).toEqual([gatedChoice]);
-    });
-
-    it('is hidden when the player\'s axis value misses the threshold', () => {
-        const ctx: DialogueContext = {
-            ...emptyCtx,
-            alignment: { epistemology: 0, outlook: 0, scope: 0 },
-        };
-        expect(visibleChoices(node, ctx)).toEqual([]);
-    });
-
-    it('is visible at exactly the lte threshold and hidden one above', () => {
-        const at: DialogueContext = {
-            ...emptyCtx,
-            alignment: { epistemology: 0, outlook: -34, scope: 0 },
-        };
-        const above: DialogueContext = {
-            ...emptyCtx,
-            alignment: { epistemology: 0, outlook: -33, scope: 0 },
-        };
-        expect(visibleChoices(node, at)).toEqual([gatedChoice]);
-        expect(visibleChoices(node, above)).toEqual([]);
-    });
-
-    it('hides the gated choice when ctx.alignment is undefined (parallel to missing flag)', () => {
-        expect(visibleChoices(node, emptyCtx)).toEqual([]);
-    });
-
-    it('honours `gte` operator in the opposite direction', () => {
-        const choice: DialogueChoice = {
-            text: 'Your scope is wide enough.',
-            requires: { requiresAlignment: { axis: 'scope', op: 'gte', value: 34 } },
-        };
-        const n = makeNode('root', [choice]);
-        const transcendent: DialogueContext = {
-            ...emptyCtx,
-            alignment: { epistemology: 0, outlook: 0, scope: 50 },
-        };
-        const individual: DialogueContext = {
-            ...emptyCtx,
-            alignment: { epistemology: 0, outlook: 0, scope: -50 },
-        };
-        expect(visibleChoices(n, transcendent)).toEqual([choice]);
-        expect(visibleChoices(n, individual)).toEqual([]);
-    });
-});
-
 // ─── isLeafNode ───────────────────────────────────────────────────────────────
 
 describe('isLeafNode', () => {

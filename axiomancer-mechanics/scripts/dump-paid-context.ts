@@ -34,7 +34,7 @@ for (const pid of PRESETS) {
         });
         return {
             id, name: card.name, theme: card.theme, cardType: card.cardType,
-            aspect: card.philosophicalAspect, rank: card.rank, tier: card.tier,
+            aspect: card.color, rank: card.rank, tier: card.tier,
             targetType: card.targetType,
             persistentEffect: card.persistentEffect ?? null,
             paidSummary: card.paidSummary ?? null,

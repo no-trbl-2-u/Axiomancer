@@ -10,7 +10,7 @@
 
 ```ts
 interface GameState {
-  version: number;                   // GAME_STATE_VERSION (current: 24)
+  version: number;                   // GAME_STATE_VERSION (current: 26)
   runId: string;                     // Phase 72 — UUID per run; bumped by resetRun
   player: Character;
   world: WorldState;
@@ -18,10 +18,7 @@ interface GameState {
   currentEncounter?: Encounter;      // transient — excluded from saves
   quests: QuestLog;
   flags: string[];
-  moralMeter: number;                // Spec 10 — clamped to [-100, +100]
   rngState: number;                  // Spec 11 — LCG seed snapshot
-  philosophicalAlignment: PhilosophicalAlignment;  // Phase 42 — 3-axis cube
-  lastSeenAlignmentCells?: Record<string, string>; // Phase 63 — observer cache
   codex: CodexState;                 // Phase 73 — unlocked journal entries
 }
 ```
@@ -55,7 +52,6 @@ type GameAction =
   | { type: 'LEVEL_UP'      }
   | { type: 'ALLOCATE_STAT_POINT'; payload: { stat: 'body' | 'mind' | 'heart' } }  // Phase 29
   | { type: 'LEARN_CARD';         payload: { skillId: string } }                  // Phase 30
-  | { type: 'SHIFT_MORAL_METER';   payload: { delta: number; gating?: { min?: number; max?: number } } }
   | { type: 'SAVE_GAME'     }   // reducer stamps `rngState`; store handles I/O
   | { type: 'LOAD_GAME'     };  // reducer no-op — store handles I/O
 ```
@@ -252,12 +248,15 @@ to `migrate()`, which:
 - Returns it as-is when versions match.
 - Refuses payloads newer than the runtime.
 - Funnels older payloads through stepwise upgrades. The ladder today
-  chains `migrateV11ToV12` … `migrateV23ToV24` (see the hop-by-hop
+  chains `migrateV11ToV12` … `migrateV25ToV26` (see the hop-by-hop
   comment in `src/Game/game.migrate.ts`); saves older than v11 are
   refused with an error.
+- The v25 → v26 hop strips the removed alignment and GRACE fields
+  (`philosophicalAlignment`, `lastSeenAlignmentCells`, `moralMeter`)
+  and renames each card's `philosophicalAspect` to `color` (T6, D39).
 - Validates the top-level shape before handing back a `GameState`.
 
-When `GAME_STATE_VERSION` next bumps, add a `migrateV24ToV25` step and call it
+When `GAME_STATE_VERSION` next bumps, add a `migrateV26ToV27` step and call it
 from `migrate()`. Each step is a pure `(prev) => next` function — no I/O,
 no defaults pulled at call time.
 
@@ -282,8 +281,6 @@ store.resetRun({ keepCharacter: true }): GameState
 | `player` | preserved (id, name, level, baseStats, equipment, knownCards, inventory) | fresh `createCharacter` (level 1) |
 | `player.health` | refilled to `maxHealth` | new character → full health |
 | `player.effects` | cleared (defensive — already empty between combats) | empty |
-| `philosophicalAlignment` | preserved (character ledger) | `defaultAlignment()` |
-| `moralMeter` | preserved (character ledger) | `0` |
 | `rngState` | preserved (don't reset mid-session — breaks deterministic replay) | preserved |
 | `runId` | NEW (always bumped) | NEW |
 | `world` | `createStartingWorld()` (back to fishing-village `fv-1`) | `createStartingWorld()` |
@@ -291,7 +288,6 @@ store.resetRun({ keepCharacter: true }): GameState
 | `currentEncounter` | `undefined` | `undefined` |
 | `quests` | `emptyQuestLog()` | `emptyQuestLog()` |
 | `flags` | `[]` | `[]` |
-| `lastSeenAlignmentCells` | `undefined` (observer cache resets) | `undefined` |
 
 ### Starting hearth
 
@@ -339,13 +335,13 @@ all math lives in the resolvers/reducers. Tabs:
 |------------|------------------------------------------------------------------|
 | Map        | Lists reachable adjacents, dispatches `MOVE_TO_NODE`, then resolves the destination node's `MapEvent` via `resolveMapEvent` (Spec 23). Auto-pivots into Combat when the resolved event is an `encounter`. |
 | Combat     | Hazard-Pattern Combat runs as a subcommand (`npm run combat` / `npm run game -- combat`, `src/CLI/combat.cli.ts`): power cards with the round's four dice, resolve the enemy threat phase. |
-| Journal    | Read-only: active / completed quests + flags + alignment stub.   |
+| Journal    | Read-only: active / completed quests + flags.                 |
 | Cards     | Read-only: learned/unlocked cards; legacy equipped view is removed by Phase 99. |
 | Codex      | **(Phase 82)** Read-only render of `state.codex.unlockedEntries` (Phase 73). Looks up each entry id via a one-time `EnemyLibrary` walk (`codexLookup` at module load); renders title + body per entry. Empty-state copy: "Your codex is empty — befriend a foe with a journal entry to start filling it." |
 | Inventory  | Read-only listing of carried items.                              |
 | Character  | Full stats + equipment + effects sheet (Phase 26 unit 3). When `availableStatPoints > 0`, prompts the player to spend points into heart / body / mind via `allocateStatPoint` (Phase 29). |
 | Debug      | Spawns any enemy from `ENEMY_REGISTRY` directly into combat (Phase 19). |
-| Begin again | **(Phase 82)** Prompts the player to reset to the starting hearth via `store.resetRun({ keepCharacter })` (Phase 72). Three options: **full reset** (`keepCharacter: false` — new character + new world), **keep character** (`keepCharacter: true` — fresh world, character ledger preserved per the Phase 72 D-decisions: `philosophicalAlignment` + `moralMeter` + `rngState` + `codex` survive), and **cancel** (no-op return). Logs the post-reset `runId` + hearth node id. |
+| Begin again | **(Phase 82)** Prompts the player to reset to the starting hearth via `store.resetRun({ keepCharacter })` (Phase 72). Three options: **full reset** (`keepCharacter: false` — new character + new world), **keep character** (`keepCharacter: true` — fresh world, character preserved per the Phase 72 D-decisions: `rngState` + `codex` survive), and **cancel** (no-op return). Logs the post-reset `runId` + hearth node id. |
 | Save       | Writes the current state to the `--save-file` snapshot slot via a dedicated `PersistenceAdapter` (Phase 27 unit 2). Decoupled from dispatch-time autosave so Load is a real rollback. |
 | Load       | Restores the snapshot via `setState`. Emits `game:loaded`. |
 | Quit       | Emits `cli:exit` with reason `'quit'` and returns. |

@@ -42,7 +42,6 @@ import { calculateMaxHealth } from '../Utils';
 import { EXPERIENCE_PER_LEVEL, STAT_POINTS_PER_LEVEL } from './game-mechanics.constants';
 import { addItemStacking, rollEncounterLoot, totalEncounterXp } from './combat-grants';
 import { getRng } from '../Utils/rng';
-import { applyAlignmentDelta, defaultAlignment } from '../Ledger';
 import { generateRunId } from './run-loop';
 
 /**
@@ -146,8 +145,12 @@ import { generateRunId } from './run-loop';
  *   the write-only `factionReputations` slice are retired; the hop strips
  *   them from loaded saves (see
  *   `game.migrate.ts`).
+ * 2026-09-27 — bumped 25 → 26: T6 (D39). The philosophical-alignment grid,
+ *   its observer cache and the GRACE meter (`moralMeter`) are removed, and a
+ *   card's `philosophicalAspect` is renamed `color`; the hop strips and
+ *   renames them in loaded saves.
  */
-export const GAME_STATE_VERSION = 25;
+export const GAME_STATE_VERSION = 26;
 
 /**
  * Builds a brand-new GameState with default player and world.
@@ -193,9 +196,7 @@ export function createNewGameState(opts: { startMap?: MapName } = {}): GameState
         world: createStartingWorld(opts.startMap),
         quests: emptyQuestLog(),
         flags,
-        moralMeter: 0,
         rngState: getRng().getState(),
-        philosophicalAlignment: defaultAlignment(),
         codex: { unlockedEntries: [] },
         regionConsequences: { exploitedRegions: [], sparedRegions: [] },
         mapGoodwill: {},
@@ -233,33 +234,6 @@ function applyLevelUps(player: Character): Character {
         };
     }
     return next;
-}
-
-/**
- * Shifts the moral meter by the specified delta, clamping to [-100, +100].
- * Optionally gated by min/max requirements — if the current meter doesn't meet
- * the gating criteria, the shift is blocked and state returns unchanged.
- */
-function shiftMoralMeter(state: GameState, delta: number, gating?: { min?: number; max?: number }): GameState {
-    const current = state.moralMeter;
-    
-    // Check gating constraints
-    if (gating) {
-        if (gating.min !== undefined && current < gating.min) {
-            return state; // Blocked by minimum requirement
-        }
-        if (gating.max !== undefined && current > gating.max) {
-            return state; // Blocked by maximum requirement
-        }
-    }
-    
-    // Apply shift with clamping
-    const newMeter = Math.max(-100, Math.min(100, current + delta));
-    
-    return {
-        ...state,
-        moralMeter: newMeter,
-    };
 }
 
 // ─── Reducer ──────────────────────────────────────────────────────────────────
@@ -419,20 +393,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 }
             }
 
-            // Phase 69 — friendship resolutions apply the per-enemy
-            // `alignmentDelta` to state.philosophicalAlignment via the
-            // Phase 42 `applyAlignmentDelta` clamp helper. Each axis
-            // clamps to [-100, +100]; missing axes pass through. Closes
-            // Spec 14 Q4. Combined with the Phase 62 flag-set above so the
-            // friendship outcome can carry world flags AND alignment
-            // shifts independently.
-            let nextAlignment = state.philosophicalAlignment;
-            if (outcome === 'friendship') {
-                const delta = foe.friendshipReward?.alignmentDelta;
-                if (delta) {
-                    nextAlignment = applyAlignmentDelta(nextAlignment, delta);
-                }
-            }
             // Phase 73 — friendship resolutions auto-fire the per-enemy
             // codex unlock. The entry's id is appended to
             // state.codex.unlockedEntries (de-duped); the store layer
@@ -450,20 +410,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 }
             }
 
-            // Friendship victories grant +1 to moral meter (compassion)
-            const baseState = {
+            return {
                 ...state,
                 player: nextPlayer,
                 quests: nextQuests,
                 flags: nextFlags,
-                philosophicalAlignment: nextAlignment,
                 codex: nextCodex,
                 currentEncounter: undefined,
             };
-
-            return outcome === 'friendship'
-                ? shiftMoralMeter(baseState, 1)
-                : baseState;
         }
 
         case 'MOVE_TO_NODE': {
@@ -527,20 +481,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             };
         }
 
-        case 'SHIFT_MORAL_METER': {
-            return shiftMoralMeter(state, action.payload.delta, action.payload.gating);
-        }
-
-        case 'SHIFT_PHILOSOPHICAL_ALIGNMENT': {
-            return {
-                ...state,
-                philosophicalAlignment: applyAlignmentDelta(
-                    state.philosophicalAlignment,
-                    action.payload.delta,
-                ),
-            };
-        }
-
         case 'SAVE_GAME': {
             return {
                 ...state,
@@ -566,7 +506,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             }
 
             // keepCharacter: true — preserve persistent character ledger
-            // (player + philosophicalAlignment + moralMeter + rngState per
+            // (player + rngState per
             // Phase 72 D1; codex per Phase 73 D12 — codex unlocks are
             // character knowledge, carry across runs); reset run-scoped
             // state. HP refills to maxHealth; effects clears defensively
@@ -582,17 +522,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 world: createStartingWorld(),
                 quests: emptyQuestLog(),
                 flags: [],
-                moralMeter: state.moralMeter,
                 rngState: state.rngState,
-                philosophicalAlignment: state.philosophicalAlignment,
                 codex: state.codex,
                 regionConsequences: state.regionConsequences,
                 // mapGoodwill (Phase 63) carries forward — village goodwill
                 // is player-knowledge-shaped, not run-scoped.
                 mapGoodwill: state.mapGoodwill,
-                // lastSeenAlignmentCells intentionally dropped (Phase 72
-                // D12 — observer cache resets; fresh run, fresh
-                // observation history).
             };
         }
 

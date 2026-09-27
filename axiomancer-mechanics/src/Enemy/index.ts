@@ -2,7 +2,6 @@ import { Card } from '../Cards/types';
 import { MapName } from '../World/map.library';
 import { ActiveEffect } from '../Effects/types';
 import { BaseStats } from '../Character/types';
-import { PhilosophicalAlignment } from '../Ledger/types';
 import {
     ENEMY_STAT_PER_LEVEL, ENEMY_GEAR_TIER_PER_LEVEL,
     ENEMY_VITAE_BASE, ENEMY_VITAE_PER_LEVEL, ENEMY_VITAE_MULT,
@@ -31,8 +30,6 @@ export interface CreateEnemyOptions {
     loot?: LootTableEntry[];
     xpReward?: number;
     effects?: ActiveEffect[];
-    /** Phase 45 — optional pin on the 27-cell alignment cube. */
-    philosophicalAlignment?: PhilosophicalAlignment;
     /** Phase 60 — optional per-enemy friendship-resolution content. */
     friendshipReward?: FriendshipReward;
     /**
@@ -312,7 +309,7 @@ export function createEnemy(options: CreateEnemyOptions): Enemy {
     const {
         id, name, description, level, baseStats, mapName, logic,
         difficulty,
-        cards, loot, xpReward, effects = [], philosophicalAlignment,
+        cards, loot, xpReward, effects = [],
         friendshipReward, befriendabilityConfig,
         finalBlowLines, pactLines, causeLines,
         journalEntry, addedIn, tags,
@@ -334,7 +331,6 @@ export function createEnemy(options: CreateEnemyOptions): Enemy {
         loot,
         xpReward: resolvedXp,
         effects,
-        philosophicalAlignment,
         friendshipReward,
         befriendabilityConfig,
         finalBlowLines,

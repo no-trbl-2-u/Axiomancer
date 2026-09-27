@@ -41,21 +41,9 @@ describe('Phase 72 — run-loop semantics', () => {
         expect(next.player.effects).toEqual([]); // D1 — defensive clear
     });
 
-    it('keepCharacter: true preserves philosophicalAlignment + moralMeter (character ledger)', () => {
-        const store = createGameStore(nullAdapter);
-        // Shift both ledgers so the preserve assertion is meaningful.
-        store.getState().shiftMoralMeter(15);
-        store.getState().shiftPhilosophicalAlignment({ outlook: 20 });
-        const before = store.getState();
-        const next = store.getState().resetRun({ keepCharacter: true });
-        expect(next.moralMeter).toBe(before.moralMeter);
-        expect(next.philosophicalAlignment).toEqual(before.philosophicalAlignment);
-    });
-
-    it('keepCharacter: true resets world / combat / quests / flags / observer cache', () => {
+    it('keepCharacter: true resets world / combat / quests / flags', () => {
         const store = createGameStore(nullAdapter, {
             flags: ['pre-reset-flag'],
-            lastSeenAlignmentCells: { 'old-marrow': 'mid-mid-mid' },
         });
         store.getState().startCombat(GraveLarva);
         expect(store.getState().currentEncounter).toBeDefined();
@@ -63,7 +51,6 @@ describe('Phase 72 — run-loop semantics', () => {
         expect(next.currentEncounter).toBeUndefined();
         expect(next.flags).toEqual([]);
         expect(next.quests.active).toEqual([]);
-        expect(next.lastSeenAlignmentCells).toBeUndefined(); // D12
         // World resets back to STARTING_REGION's starting node
         // (createStartingWorld pattern; D5).
         const startingNodeId = getMapDefinition(
@@ -82,16 +69,12 @@ describe('Phase 72 — run-loop semantics', () => {
         expect(next.runId).toMatch(/^[0-9a-f]{16}$/);
     });
 
-    it('keepCharacter: false performs full new-game reset (level 1 / default alignment / moralMeter 0)', () => {
+    it('keepCharacter: false performs full new-game reset (level 1)', () => {
         const store = createGameStore(nullAdapter);
-        store.getState().shiftMoralMeter(50);
-        store.getState().shiftPhilosophicalAlignment({ epistemology: 40 });
         const before = store.getState();
         const next = store.getState().resetRun({ keepCharacter: false });
         expect(next.player.id).not.toBe(before.player.id); // fresh character
         expect(next.player.level).toBe(1);
-        expect(next.moralMeter).toBe(0);
-        expect(next.philosophicalAlignment).toEqual({ epistemology: 0, outlook: 0, scope: 0 });
         expect(next.runId).not.toBe(before.runId);
         expect(next.runId).toMatch(/^[0-9a-f]{16}$/);
     });

@@ -68,7 +68,6 @@ export function selectInspectorSections(state: AppStoreState): readonly Inspecto
     const w = g.world;
     const map = w?.currentMap;
     const flags = g.flags ?? [];
-    const align = g.philosophicalAlignment;
     const equipped = p?.equipment;
     const openSession =
         state.hazard?.session ? 'hazard'
@@ -100,8 +99,6 @@ export function selectInspectorSections(state: AppStoreState): readonly Inspecto
                 { k: 'shillings', v: num(p?.currency) },
                 { k: 'souls', v: num(p?.bankedSouls) },
                 { k: 'effects', v: list((p?.effects ?? []).map((e) => `${e.effectId}×${e.remainingDuration}`)) },
-                { k: 'moral', v: num(g.moralMeter) },
-                { k: 'alignment', v: align ? `epist ${align.epistemology} · outlook ${align.outlook} · scope ${align.scope}` : '—' },
             ],
         },
         {

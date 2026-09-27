@@ -318,10 +318,10 @@ export function buildUpgradeableDicePresetDeck(
     if (!valve) throw new Error(`D8 valve law: valve '${seat.valveId}' (${presetId}) is not a library card.`);
     const source = getCardById(seat.replacesId);
     if (!source) throw new Error(`D8 valve law: source '${seat.replacesId}' (${presetId}) is not a library card.`);
-    if (valve.philosophicalAspect !== source.philosophicalAspect) {
+    if (valve.color !== source.color) {
         throw new Error(
-            `D8 valve law: '${seat.valveId}' (${valve.philosophicalAspect}) must match `
-            + `'${seat.replacesId}' (${source.philosophicalAspect}) — the color law would break.`,
+            `D8 valve law: '${seat.valveId}' (${valve.color}) must match `
+            + `'${seat.replacesId}' (${source.color}) — the color law would break.`,
         );
     }
     const idx = preset.cardIds.indexOf(seat.replacesId);

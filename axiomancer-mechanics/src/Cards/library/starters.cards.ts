@@ -29,7 +29,7 @@ const spoiledPoultice: Card = {
     id: 'spoiled-poultice',
     theme: 'rot',
     name: 'Spoiled Poultice',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'Bread mold and honey, bound in linen the way grandmother taught. It ' +
         'was meant to draw the sickness out — nobody wrote down which ' +
@@ -50,7 +50,7 @@ const chilblainWatch: Card = {
     id: 'chilblain-watch',
     theme: 'vigil',
     name: 'Chilblain Watch',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'Four hours on the wall with wet boots and no relief coming. The cold ' +
         'gets into the joints and stays there. You will not be warm again, ' +
@@ -71,7 +71,7 @@ const firstSpadeful: Card = {
     id: 'first-spadeful',
     theme: 'grave',
     name: 'First Spadeful',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'The soil comes up easy at the top and hard underneath, and the ' +
         'difference is where they stopped digging last time. You do not have ' +
@@ -94,7 +94,7 @@ const pettyIndictment: Card = {
     id: 'petty-indictment',
     theme: 'trial',
     name: 'Petty Indictment',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'A small charge, poorly drafted, filed by a clerk who has read the ' +
         'statute exactly once. It will not convict anyone. It goes in the ' +
@@ -118,7 +118,7 @@ const thinHymn: Card = {
     id: 'thin-hymn',
     theme: 'choir',
     name: 'Thin Hymn',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'Two voices where there should be forty, in a nave built to swallow ' +
         'forty. It sounds like an apology. It is not one — nobody here is ' +
@@ -141,7 +141,7 @@ const thumbprickOath: Card = {
     id: 'thumbprick-oath',
     theme: 'debt',
     name: 'Thumbprick Oath',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'A pin, a thumb, a smear on the page where a signature should be. ' +
         'Nobody reads it back to you. The terms were always going to be ' +
@@ -164,7 +164,7 @@ const grandmothersPsalter: Card = {
     id: 'grandmothers-psalter',
     theme: 'choir',
     name: "Grandmother's Psalter",
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'Her hand in the margins, arguing with the psalmist for sixty years. ' +
         'Half the annotations are recipes. The book has been read to pieces ' +
@@ -184,7 +184,7 @@ const threadbareCope: Card = {
     id: 'threadbare-cope',
     theme: 'vigil',
     name: 'Threadbare Cope',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'The good vestment, if you do not look at the hem, or the shoulders, ' +
         'or the place where the orphrey was cut away and sold. Worn for ' +
@@ -218,7 +218,7 @@ const greyStrike: Card = {
     id: 'grey-strike',
     theme: 'grey',
     name: 'A Plain Blow',
-    philosophicalAspect: 'any',
+    color: 'any',
     description:
         'No flourish, no colour, no argument. You hit the thing that is ' +
         'hitting you. It works today the same as it will in a month.',
@@ -237,7 +237,7 @@ const greyWard: Card = {
     id: 'grey-ward',
     theme: 'grey',
     name: 'A Plain Ward',
-    philosophicalAspect: 'any',
+    color: 'any',
     description:
         'No flourish, no colour, no argument. You put something solid ' +
         'between yourself and the thing that wants in.',
@@ -263,7 +263,7 @@ export const GREY_OFFICE_CARDS: Card[] = [greyStrike, greyWard];
 function curse(
     id: string,
     name: string,
-    aspect: Card['philosophicalAspect'],
+    aspect: Card['color'],
     description: string,
     free: Card['free'],
     freeText: string,
@@ -272,7 +272,7 @@ function curse(
         id,
         theme: 'curse',
         name,
-        philosophicalAspect: aspect,
+        color: aspect,
         description,
         tier: 1, rank: 1, cardType: 'spell',
         targetType: 'self',

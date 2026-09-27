@@ -86,10 +86,10 @@ export const charcoalWoodLayout: MapLayout = {
         // ── c4 ──
         { id: 'cw-15', ...at('cw-15'), label: 'The Woodcutters’ Camp', description: 'Stacked logs and someone else’s fire.' },
         { id: 'cw-16', ...at('cw-16'), label: 'The Rock Chapel', description: 'A door cut into the crag. The tithe is collected here.' },
-        { id: 'cw-17', ...at('cw-17'), label: 'The Wayside Cross', description: 'A cross at the fork. Something dances round it.' },
+        { id: 'cw-17', ...at('cw-17'), label: 'The Wayside Cross', description: 'A cross at the fork. A knight in rust keeps it.' },
         { id: 'cw-18', ...at('cw-18'), label: 'The Well', description: 'A covered well. The cover is rotten.' },
         { id: 'cw-19', ...at('cw-19'), label: 'The East Cave', description: 'Something knocks in the cave mouth. Twice, so far.' },
         // ── c5 — the door ──
-        { id: 'cw-20', ...at('cw-20'), label: 'The Stair Cave', description: 'A stair cut into the cliff. It comes out above a fishing village.' },
+        { id: 'cw-20', ...at('cw-20'), label: 'The Stair Cave', description: 'A stair cut into the cliff. It comes up on a mountain road.' },
     ],
 };

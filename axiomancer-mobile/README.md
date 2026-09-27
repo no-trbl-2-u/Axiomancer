@@ -1,8 +1,8 @@
 # Axiomancer — Mobile Client
 
 Expo / React Native client for Axiomancer — a dark fantasy deckbuilding
-RPG campaign exploring moral choice through tactical combat and
-character alignment. This package lives in the Axiomancer monorepo
+RPG campaign exploring mercy and consequence through tactical combat.
+This package lives in the Axiomancer monorepo
 (npm workspaces) and is the **presentation layer** only. Game rules,
 state shape, and randomness live in the sibling
 [`axiomancer-mechanics`](../axiomancer-mechanics/) workspace, consumed
@@ -43,8 +43,8 @@ The boundaries, stated plainly:
   [`plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/`](../plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/).
   New work is planned through the root loop (`plan/`, `skills/`).
 - **[`VISION.md`](./VISION.md)** is **doctrine** — T's game vision and UX
-  guardrails. Read before major mobile UX, combat, mercy/friendship, or
-  alignment work.
+  guardrails. Read before major mobile UX, combat, or mercy/friendship
+  work.
 
 ---
 
@@ -185,7 +185,7 @@ app/                       expo-router routes
     _layout.tsx            tab bar config
     exploration/           map / node graph
     character/             character sheet (links to /settings)
-    memoir/                quests, chronicle, alignment
+    memoir/                quests, chronicle, remains
     inventory/             inventory + equipment
     deck/                  the combat deck, read-only
   combat-encounter/        dev-only sandbox launcher for Hazard-Pattern combat (live combat mounts in EncounterModalOverlay)

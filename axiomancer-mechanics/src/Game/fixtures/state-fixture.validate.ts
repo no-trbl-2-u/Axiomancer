@@ -29,7 +29,6 @@ export class StateFixtureError extends Error {
 /** Same rule `scripts/check-naming-law.mjs` applies to content ids. */
 const KEBAB_CASE = /^[a-z][a-z0-9-]*$/;
 
-const ALIGNMENT_AXES = ['epistemology', 'outlook', 'scope'] as const;
 const STAT_AXES = ['heart', 'body', 'mind'] as const;
 
 const isRecord = (x: unknown): x is Record<string, unknown> =>
@@ -107,7 +106,6 @@ function worldProblems(world: unknown): string[] {
 /** Every violation in `raw`, as `path: message` strings. Empty = valid. */
 export function problemsFor(raw: unknown): string[] {
     if (!isRecord(raw)) return ['fixture: expected an object'];
-    const alignment = raw.alignment;
     return [
         ...(typeof raw.id === 'string' && KEBAB_CASE.test(raw.id) ? [] : ['id: required, kebab-case']),
         ...optional(raw.description, v => typeof v === 'string', 'description', 'a string'),
@@ -116,14 +114,6 @@ export function problemsFor(raw: unknown): string[] {
         ...playerProblems(raw.player),
         ...worldProblems(raw.world),
         ...optional(raw.flags, isStringArray, 'flags', 'an array of strings'),
-        ...optional(raw.moralMeter, isFiniteNumber, 'moralMeter', 'a number'),
-        ...(alignment === undefined
-            ? []
-            : !isRecord(alignment)
-                ? ['alignment: expected an object']
-                : ALIGNMENT_AXES.flatMap(axis =>
-                    optional(alignment[axis], isFiniteNumber, `alignment.${axis}`, 'a number'),
-                )),
         ...optional(raw.arrive, v => typeof v === 'boolean', 'arrive', 'a boolean'),
     ];
 }

@@ -18,6 +18,8 @@ import type { HazardSessionState } from '@mechanics';
 import type { BlacksmithSession, LootCacheChoiceSession, RestChoiceSession } from '@mechanics';
 import type { LabyrinthActId, WorldState } from '@mechanics';
 
+import { resumeLabyrinthSession } from './labyrinth/resume';
+
 /**
  * Mobile-only state slice for the event modal. The engine returns
  * `ResolveMapEventResult` synchronously from `resolveMapEvent(state)`;
@@ -350,6 +352,8 @@ export function createAppStore(options: CreateAppStoreOptions = {}): AppStore {
     // Engine's `save()` writes through `adapter.save(...)`. Gate the
     // wrapped adapter so only this explicit path reaches the real one.
     const engineSave = engineStore.getState().save;
+    // A save taken inside the Aporia boots back into it (map revamp M4).
+    const resumed = resumeLabyrinthSession(engineStore.getState());
     store.setState({
         save: () => withPassthrough(engineSave),
         event: EMPTY_EVENT_SLICE,
@@ -359,7 +363,7 @@ export function createAppStore(options: CreateAppStoreOptions = {}): AppStore {
         rest: EMPTY_REST_SLICE,
         cache: EMPTY_CACHE_SLICE,
         blacksmith: EMPTY_BLACKSMITH_SLICE,
-        labyrinthUi: EMPTY_LABYRINTH_SLICE,
+        labyrinthUi: resumed ? { session: resumed } : EMPTY_LABYRINTH_SLICE,
         notifications: DEFAULT_NOTIFICATIONS_SLICE,
         _recentEvents: [],
     });

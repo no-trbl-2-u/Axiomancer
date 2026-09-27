@@ -6,9 +6,7 @@ import { relicLibrary, getRelicById } from '../Items/relic.library';
 import { consumableLibrary } from '../Items/consumable.library';
 import { cardLibrary } from '../Cards/cards.library';
 import { ENEMY_REGISTRY, EnemySlug } from '../Enemy/enemy.library';
-import type { PhilosophicalAlignment } from '../Ledger/types';
 import type { createGameStore } from '../Game/store';
-import { clamp } from '../Utils';
 
 type Store = ReturnType<typeof createGameStore>;
 
@@ -130,24 +128,6 @@ export function devGrantCurrency(store: Store, amount: number): DevResult {
         player: { ...state.player, currency: state.player.currency + amount },
     });
     return { ok: true, detail: `Currency: ${state.player.currency} → ${store.getState().player.currency}` };
-}
-
-export function devSetMoralMeter(store: Store, value: number): DevResult {
-    const clamped = clamp(value, -100, 100);
-    store.setState({ moralMeter: clamped });
-    return { ok: true, detail: `Moral meter set to ${clamped}` };
-}
-
-export function devSetAlignment(store: Store, alignment: Partial<PhilosophicalAlignment>): DevResult {
-    const state = store.getState();
-    const current = state.philosophicalAlignment;
-    const next: PhilosophicalAlignment = {
-        epistemology: clamp(alignment.epistemology ?? current.epistemology, -100, 100),
-        outlook: clamp(alignment.outlook ?? current.outlook, -100, 100),
-        scope: clamp(alignment.scope ?? current.scope, -100, 100),
-    };
-    store.setState({ philosophicalAlignment: next });
-    return { ok: true, detail: `Alignment: E:${next.epistemology} O:${next.outlook} S:${next.scope}` };
 }
 
 export function devSpawnEnemy(store: Store, slug: EnemySlug): DevResult {

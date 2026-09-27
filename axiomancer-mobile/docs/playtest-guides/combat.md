@@ -20,7 +20,7 @@ An encounter node resolves to a `combat-prelude` event that renders **in place o
 | `combat-reveal` | Pre-fight reveal (foe, phases, your vitae) |
 | `combat-reveal-phase-<i>` | One phase card on the reveal |
 | `combat-enter` | ENTER — starts the fight and rolls the first tray |
-| `combat-withdraw` | WITHDRAW on the reveal — flee, grace −2 |
+| `combat-withdraw` | WITHDRAW on the reveal — flee the fight |
 | `combat-tutorial-primer` | First-fight primer panels (shown when `combat-tutorial-done` is unset or `?tutorial=1`) |
 | `combat-primer-next` / `combat-primer-begin` | Advance / finish the primer |
 | `combat-primer-skip` | Skip the primer |

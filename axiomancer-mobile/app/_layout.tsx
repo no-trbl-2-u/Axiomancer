@@ -31,6 +31,7 @@ import { BlacksmithGate } from '@/components/BlacksmithGate';
 import { CacheGate } from '@/components/CacheGate';
 import { EventGate } from '@/components/EventGate';
 import { HazardGate } from '@/components/HazardGate';
+import { LabyrinthGate } from '@/components/LabyrinthGate';
 import { ItemRewardGate } from '@/components/item-reward/ItemRewardGate';
 import { RestGate } from '@/components/RestGate';
 import { NavLogger } from '@/components/NavLogger';
@@ -261,6 +262,7 @@ function RootLayout() {
           <CacheGate />
           <ItemRewardGate />
           <BlacksmithGate />
+          <LabyrinthGate />
           {/* Dev-only: `globalThis.__AXM_SKIP_EVENT__` for browser drivers
               (docs/dev-tools.md → "Skip the current event"). Lazy AND
               gated, so production bundles never load the skip module. */}

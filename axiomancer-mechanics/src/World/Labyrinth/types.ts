@@ -10,7 +10,7 @@
  * economy (hints + refused assertions) that arms the finale.
  */
 
-import type { NodeId } from '../types';
+import type { NodeId, WorldState } from '../types';
 import type { MapName } from '../map.library';
 
 /** Which realm a room belongs to (design taxonomy; drives hints/UI tags). */
@@ -138,8 +138,7 @@ export type LabyrinthBossOutcome = 'slain' | 'spared' | 'exploited';
 /**
  * Cross-act labyrinth progress. Optional slice on `GameState`
  * (`state.labyrinth`) — absent until the player first enters the
- * continent; older saves need no migration (lazy default, like
- * `lastSeenAlignmentCells`).
+ * continent; older saves need no migration (lazy default).
  */
 export interface LabyrinthProgress {
     currentAct: LabyrinthActId;
@@ -168,6 +167,13 @@ export interface LabyrinthProgress {
     actsCompleted: LabyrinthActId[];
     /** The Unfounded Door has been walked. */
     completed: boolean;
+    /**
+     * The overworld to return to while a visit is open (map revamp M4): the
+     * host's snapshot, taken on entry and cleared on exit. It lives on the
+     * durable progress so a save taken inside the Aporia still has its way
+     * back after a reload. Absent outside a visit and on older saves.
+     */
+    returnWorld?: WorldState;
 }
 
 /** What a door looks like to a client (CLI list / UI POI). */

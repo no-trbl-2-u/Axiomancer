@@ -108,12 +108,13 @@ describe('DebugWorldTravel: travel', () => {
         expect(store.getState().world.currentContinent.availableMaps).toContain(next);
     });
 
-    it('an act button enters THE APORIA and pushes /labyrinth', () => {
+    it('an act button enters THE APORIA (the LabyrinthGate owns the route)', () => {
         const store = makeStore();
         const tree = render(withProvider(store, <DebugWorldTravel />));
         fireEvent.press(tree.getByTestId('debug-aporia-act1'));
         expect(store.getState().labyrinthUi.session?.actId).toBe('act1');
-        expect(mockPush).toHaveBeenCalledWith('/labyrinth');
+        // One router for every way in, so the dev menu never double-pushes.
+        expect(mockPush).not.toHaveBeenCalledWith('/labyrinth');
     });
 
     it('NEW GAME ON starts a fresh run on the chosen map, in the active slot', () => {

@@ -4,8 +4,8 @@
  * Three buttons — one per engine `characterPresets` row
  * (apprentice / wanderer / sage). Press swaps the player slice
  * with `buildCharacterFromPreset(preset)` so the rest of the
- * surface (SELF tab, inventory dock, combat cards, alignment
- * cube) re-renders against a freshly-built archetype.
+ * surface (SELF tab, inventory dock, combat cards) re-renders
+ * against a freshly-built archetype.
  *
  * Sits beside the finer `DebugPlayerTierPresets` ladder in the `/dev`
  * PLAYER section. Renders null in production builds.

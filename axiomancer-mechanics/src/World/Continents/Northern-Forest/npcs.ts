@@ -17,14 +17,10 @@ const shrineKeeperTree: DialogueTree = {
                 {
                     text: "Something here feels different to me.",
                     nextNodeId: 'veil_thin',
-                    requires: { requiresAlignment: { axis: 'epistemology', op: 'gte', value: 20 } },
-                    effect: { alignmentDelta: { epistemology: 2, scope: 1 } },
                 },
                 {
                     text: "Stone doesn't count. That's superstition.",
                     nextNodeId: 'skeptic_response',
-                    requires: { requiresAlignment: { axis: 'epistemology', op: 'lte', value: -20 } },
-                    effect: { alignmentDelta: { epistemology: -1, outlook: -1 } },
                 },
                 {
                     text: "Leave quietly.",
@@ -33,8 +29,6 @@ const shrineKeeperTree: DialogueTree = {
                 {
                     text: "(The Keeper's eyes catch on you. Something in you has changed.)",
                     nextNodeId: 'observer_transformation',
-                    requires: { playerAlignmentCellChangedSince: true },
-                    effect: { alignmentDelta: { scope: 2 } },
                 },
             ],
         },
@@ -46,19 +40,16 @@ const shrineKeeperTree: DialogueTree = {
                     text: "I want to understand what's really here.",
                     nextNodeId: 'truth_seeker',
                     effect: {
-                        alignmentDelta: { epistemology: 3, scope: 2 },
                         setFlag: 'shrine_keeper_recognizes_seeker'
                     },
                 },
                 {
                     text: "I want knowledge I can use.",
                     nextNodeId: 'practical_seeker',
-                    effect: { alignmentDelta: { epistemology: -1, outlook: 1 } },
                 },
                 {
                     text: "That's a boot-worn groove. Nothing more.",
                     nextNodeId: 'dismiss_mysticism',
-                    effect: { alignmentDelta: { epistemology: -2, scope: -1 } },
                 },
             ],
         },
@@ -71,17 +62,11 @@ const shrineKeeperTree: DialogueTree = {
                     nextNodeId: undefined,
                     effect: {
                         setFlag: 'shrine_keeper_crystal_gift',
-                        alignmentDelta: { epistemology: 2, scope: 1 },
-                        moralDelta: 1
                     },
                 },
                 {
                     text: "I can't take something this valuable.",
                     nextNodeId: undefined,
-                    effect: {
-                        alignmentDelta: { scope: -1, outlook: 1 },
-                        moralDelta: 2
-                    },
                 },
             ],
         },
@@ -98,7 +83,6 @@ const shrineKeeperTree: DialogueTree = {
                     nextNodeId: undefined,
                     effect: {
                         setFlag: 'shrine_keeper_teaching_offered',
-                        alignmentDelta: { epistemology: 2, scope: 1 }
                     },
                 },
             ],
@@ -142,14 +126,12 @@ const chroniclerTree: DialogueTree = {
                     text: "I've seen strange things in my travels.",
                     nextNodeId: 'share_observations',
                     effect: {
-                        alignmentDelta: { epistemology: 1, scope: 1 },
                         setFlag: 'chronicler_met'
                     },
                 },
                 {
                     text: "I don't have time for scholarly pursuits.",
                     nextNodeId: 'no_time',
-                    effect: { alignmentDelta: { outlook: -1, scope: -1 } },
                 },
                 {
                     text: "Move along without disturbing their work.",
@@ -158,8 +140,6 @@ const chroniclerTree: DialogueTree = {
                 {
                     text: "(The Chronicler looks up. Something about you reads differently now.)",
                     nextNodeId: 'scholar_observation',
-                    requires: { playerAlignmentCellChangedSince: true },
-                    effect: { alignmentDelta: { epistemology: 1 } },
                 },
             ],
         },
@@ -171,15 +151,12 @@ const chroniclerTree: DialogueTree = {
                     text: "How can I contribute to this work?",
                     nextNodeId: 'contribution_offer',
                     effect: {
-                        alignmentDelta: { epistemology: 2, scope: 1 },
                         setFlag: 'chronicle_contributor'
                     },
                 },
                 {
                     text: "Why preserve the past? Focus on the present.",
                     nextNodeId: 'present_focus',
-                    requires: { requiresAlignment: { axis: 'scope', op: 'lte', value: -10 } },
-                    effect: { alignmentDelta: { scope: -1, outlook: 1 } },
                 },
             ],
         },
@@ -190,17 +167,10 @@ const chroniclerTree: DialogueTree = {
                 {
                     text: "Tell me more about these patterns.",
                     nextNodeId: 'ancient_patterns',
-                    effect: {
-                        alignmentDelta: { epistemology: 1, scope: 1 }
-                    },
                 },
                 {
                     text: "I've documented my travels carefully.",
                     nextNodeId: 'documented_travels',
-                    effect: {
-                        alignmentDelta: { epistemology: 1, scope: 2 },
-                        moralDelta: 1
-                    },
                 },
             ],
         },
@@ -217,7 +187,6 @@ const chroniclerTree: DialogueTree = {
                     nextNodeId: undefined,
                     effect: {
                         setFlag: 'chronicler_scholarly_mission',
-                        alignmentDelta: { epistemology: 2, scope: 2 }
                     },
                 },
             ],
@@ -260,7 +229,6 @@ const wanderingPhilosopherTree: DialogueTree = {
                 {
                     text: "I'm seeking my place in the world.",
                     nextNodeId: 'seeking_place',
-                    effect: { alignmentDelta: { scope: 1, epistemology: 1 } },
                 },
                 {
                     text: "Just passing through.",
@@ -269,20 +237,14 @@ const wanderingPhilosopherTree: DialogueTree = {
                 {
                     text: "The forest offers peace for reflection.",
                     nextNodeId: 'reflective_peace',
-                    requires: { requiresAlignment: { axis: 'outlook', op: 'gte', value: 10 } },
-                    effect: { alignmentDelta: { outlook: 1, scope: 1 } },
                 },
                 {
                     text: "I've no patience for philosophical rambling.",
                     nextNodeId: 'impatient_response',
-                    requires: { requiresAlignment: { axis: 'outlook', op: 'lte', value: -10 } },
-                    effect: { alignmentDelta: { outlook: -1, scope: -1 } },
                 },
                 {
                     text: "(The Philosopher looks up — something about you has changed.)",
                     nextNodeId: 'philosophical_recognition',
-                    requires: { playerAlignmentCellChangedSince: true },
-                    effect: { alignmentDelta: { epistemology: 1 } },
                 },
             ],
         },
@@ -293,27 +255,19 @@ const wanderingPhilosopherTree: DialogueTree = {
                 {
                     text: "Fate guides us toward our destined role.",
                     nextNodeId: 'fate_perspective',
-                    requires: { requiresAlignment: { axis: 'epistemology', op: 'gte', value: 15 } },
-                    effect: { alignmentDelta: { epistemology: 2, scope: -1 } },
                 },
                 {
                     text: "We forge our own destiny through determination.",
                     nextNodeId: 'will_perspective',
-                    requires: { requiresAlignment: { axis: 'scope', op: 'lte', value: 0 } },
-                    effect: { alignmentDelta: { scope: -2, outlook: 1 } },
                 },
                 {
                     text: "We find ourselves through community and connection.",
                     nextNodeId: 'community_perspective',
-                    requires: { requiresAlignment: { axis: 'scope', op: 'gte', value: 15 } },
-                    effect: { alignmentDelta: { scope: 2, outlook: 1 } },
                 },
                 {
                     text: "I'm not sure. That's why I'm searching.",
                     nextNodeId: 'uncertain_seeker',
                     effect: {
-                        alignmentDelta: { epistemology: 1 },
-                        moralDelta: 1,
                         setFlag: 'philosopher_appreciates_honesty'
                     },
                 },
@@ -326,12 +280,10 @@ const wanderingPhilosopherTree: DialogueTree = {
                 {
                     text: "I hadn't considered the impact of my journey.",
                     nextNodeId: 'impact_realization',
-                    effect: { alignmentDelta: { scope: 2, epistemology: 1 } },
                 },
                 {
                     text: "Sometimes a walk is just a walk.",
                     nextNodeId: 'simple_acceptance',
-                    effect: { alignmentDelta: { epistemology: -1, outlook: 1 } },
                 },
             ],
         },
@@ -342,7 +294,6 @@ const wanderingPhilosopherTree: DialogueTree = {
                 {
                     text: "What have the trees taught you?",
                     nextNodeId: 'tree_wisdom',
-                    effect: { alignmentDelta: { epistemology: 1, outlook: 2 } },
                 },
             ],
         },
@@ -433,16 +384,11 @@ const forestRangerTree: DialogueTree = {
                 {
                     text: "The forest endures. It always has.",
                     nextNodeId: 'nature_wisdom_endures',
-                    requires: { requiresAlignment: { axis: 'epistemology', op: 'gte', value: 15 } },
-                    effect: { alignmentDelta: { epistemology: 2, scope: 2 } },
                 },
                 {
                     text: "I'll fund sustainable forest trades for the loggers.",
                     nextNodeId: 'sustainable_alternatives',
-                    requires: { requiresAlignment: { axis: 'scope', op: 'gte', value: 15 } },
                     effect: {
-                        alignmentDelta: { scope: 3, outlook: 2 },
-                        moralDelta: 3,
                         grantCurrency: -25,
                         setFlag: 'forest_conservation_supporter'
                     },
@@ -450,10 +396,7 @@ const forestRangerTree: DialogueTree = {
                 {
                     text: "Trees grow back. Let them cut. People eat today.",
                     nextNodeId: 'pragmatic_exploitation',
-                    requires: { requiresAlignment: { axis: 'scope', op: 'lte', value: -5 } },
                     effect: {
-                        alignmentDelta: { scope: -2, outlook: -1 },
-                        moralDelta: -2,
                         grantCurrency: 35,
                         setFlag: 'forest_exploitation_supporter'
                     },
@@ -527,16 +470,11 @@ const hermitSageTree: DialogueTree = {
                 {
                     text: "Wisdom finds its own way to those who need it.",
                     nextNodeId: 'divine_wisdom_flows',
-                    requires: { requiresAlignment: { axis: 'epistemology', op: 'gte', value: 20 } },
-                    effect: { alignmentDelta: { epistemology: 3, scope: -1 } },
                 },
                 {
                     text: "I'll help you share your wisdom while preserving your solitude.",
                     nextNodeId: 'balanced_sharing',
-                    requires: { requiresAlignment: { axis: 'scope', op: 'gte', value: 10 } },
                     effect: {
-                        alignmentDelta: { scope: 2, epistemology: 1 },
-                        moralDelta: 2,
                         grantCurrency: -10,
                         setFlag: 'hermit_wisdom_bridge'
                     },
@@ -544,9 +482,7 @@ const hermitSageTree: DialogueTree = {
                 {
                     text: "Keep your secrets. Your example teaches more than your advice would.",
                     nextNodeId: 'wisdom_through_example',
-                    requires: { requiresAlignment: { axis: 'scope', op: 'lte', value: 0 } },
                     effect: {
-                        alignmentDelta: { scope: -1, epistemology: 1 },
                         grantCurrency: 15,
                         setFlag: 'hermit_isolation_supporter'
                     },
@@ -609,16 +545,11 @@ const lostTraderTree: DialogueTree = {
                 {
                     text: "Providence put us on the same road. That's a bond worth honoring.",
                     nextNodeId: 'sacred_trust_bond',
-                    requires: { requiresAlignment: { axis: 'epistemology', op: 'gte', value: 15 } },
-                    effect: { alignmentDelta: { epistemology: 2, scope: 1 } },
                 },
                 {
                     text: "I'll help you carry it. Trust is built through honest action.",
                     nextNodeId: 'honest_mutual_aid',
-                    requires: { requiresAlignment: { axis: 'scope', op: 'gte', value: 10 } },
                     effect: {
-                        alignmentDelta: { scope: 2, outlook: 1 },
-                        moralDelta: 2,
                         grantCurrency: -5,
                         setFlag: 'trader_honest_helper'
                     },
@@ -626,9 +557,7 @@ const lostTraderTree: DialogueTree = {
                 {
                     text: "Show me the item first. Then we'll talk terms.",
                     nextNodeId: 'pragmatic_verification',
-                    requires: { requiresAlignment: { axis: 'outlook', op: 'lte', value: 5 } },
                     effect: {
-                        alignmentDelta: { outlook: -1, scope: -1 },
                         grantCurrency: 20,
                         setFlag: 'trader_pragmatic_partner'
                     },

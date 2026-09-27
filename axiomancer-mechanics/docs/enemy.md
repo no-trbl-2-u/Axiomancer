@@ -69,60 +69,8 @@ need to react to the player (every non-random strategy) receive the live
 
 ## Alignment-driven AI tuning (Phase 45)
 
-`Enemy.philosophicalAlignment?: PhilosophicalAlignment` (optional) pins an
-enemy to a cell on the [Phase 42 27-cell cube](./oaths.md). When set,
-`decideEnemyAction` runs the per-strategy decision and then post-passes the
-result through `applyOutlookBias`:
-
-- **Pessimistic enemies** (outlook bucket `'low'`, value `<= -34`): with
-  probability `0.25` per round, an `attack` decision flips to `defend`.
-  Stance is preserved.
-- **Optimistic enemies** (outlook bucket `'high'`, value `>= 34`): with
-  probability `0.25` per round, a `defend` decision flips to `attack`.
-- **Neutral enemies** (outlook bucket `'mid'`): bias is a no-op.
-- **Non-basic actions** (`card` / `item` / `flee`): bias is a no-op.
-
-The bias spends one `getRng().random()` call per dispatch — deterministic
-under the `src/test-utils/rng.ts` stubs. Enemies without an alignment pin
-(legacy fixtures, the single-arg `decideEnemyAction(logic)` path) are
-unaffected.
-
-### Cell pins on authored enemies
-
-`ENEMY_REGISTRY` holds 63 authored enemies. The 26 below carry the
-first-pass cell pins:
-
-| Enemy | Cell | Archetype |
-|---|---|---|
-| TidepoolCrab, EchoOfPyrrhonia | `mid-mid-individual` | Montaigne / Ishmael |
-| SeaMistWisp | `mid-mid-transcendent` | Lao Tzu / Siddhartha |
-| LullabyMoth | `faith-optimistic-individual` | Kierkegaard / Alyosha |
-| Disatree_01 | `mid-pessimistic-relational` | Zapffe / Ahab |
-| WetHound | `logic-pessimistic-individual` | Schopenhauer / Underground Man |
-| MournfulGull | `mid-pessimistic-individual` | Cioran / Hamlet |
-| ForestSprite | `mid-optimistic-individual` | Rorty / Huck Finn |
-| HollowEyedBeggar | `faith-pessimistic-relational` | Mainländer / Ferreira |
-| ArgumentativeCrow | `logic-optimistic-individual` | Nietzsche / Prometheus |
-| TideflukeReaver | `logic-pessimistic-relational` | Ligotti / Rust Cohle |
-| HushWraith | `mid-pessimistic-transcendent` | Lovecraft / Burroughs |
-| HollowSaint | `faith-mid-transcendent` | St. John of the Cross / Rodrigues |
-| CoastalTyrant | `faith-pessimistic-transcendent` | Marcion / Grand Inquisitor |
-| TheDisagreement | `logic-mid-individual` | Camus / Meursault |
-| ThornedSentinel | `faith-pessimistic-relational` | Mainländer / Ferreira |
-| PackleaderWolf | `logic-mid-individual` | Camus / Meursault |
-| WhisperingOak | `mid-optimistic-transcendent` | Teilhard / Whitman |
-| FrostboundHunter | `logic-pessimistic-relational` | Ligotti / Rust Cohle |
-| MistwalkerShade | `mid-mid-transcendent` | Lao Tzu / Siddhartha |
-| VerdantProtector | `faith-optimistic-transcendent` | Aquinas / Hopkins |
-| NightmareStag | `mid-pessimistic-transcendent` | Lovecraft / Burroughs |
-| TheForestMind | `faith-mid-transcendent` | Eckhart / Teilhard |
-| EternalAutumn | `logic-mid-relational` | Wittgenstein / Buber |
-| ShadowOfTheFirst | `mid-mid-individual` | Montaigne / Ishmael |
-| Sandbag_01 | `mid-mid-relational` | Buber / Carraway |
-
-23 distinct cells used out of 27; the remaining 4 are headroom for future
-enemies. Cell ids are stable across versions (see
-[docs/oaths.md](./oaths.md) for the full registry).
+Removed 2026-09-27 (T6, D39). Enemies no longer carry
+`philosophicalAlignment`, and `decideEnemyAction` applies no outlook bias.
 
 ## Loot tables
 
@@ -196,7 +144,7 @@ Forest Sprite (mind), Hollow-Eyed Beggar (heart), Argumentative Crow (mind).
 **Elite (2)** — Cindergeist Revenant (heart, ghost of flame), Obsidian Colossus (body, volcanic glass guardian).
 **Boss (1)** — The Lich of Missing Steps (mind+heart, undead philosopher-king with flawed eternal proof).
 
-The ancient-ruins family explores undead/construct/elemental themes with comprehensive befriendability configurations, card rotations using Tier 3 effects, rich friendship reward content including unique items and alignment shifts, complete aftermath narrative (finalBlowLines/pactLines/causeLines), and journal entries that unlock ancient lore. All five enemies are thematically placed in the northern-forest map but represent a distinct archetype family focused on philosophical examination of existence, duty, and transformation.
+The ancient-ruins family explores undead/construct/elemental themes with comprehensive befriendability configurations, card rotations using Tier 3 effects, rich friendship reward content including unique items, complete aftermath narrative (finalBlowLines/pactLines/causeLines), and journal entries that unlock ancient lore. All five enemies are thematically placed in the northern-forest map but represent a distinct archetype family focused on philosophical examination of existence, duty, and transformation.
 
 `EnemiesByMap` indexes them per map for `generateEncounter`. `ENEMY_REGISTRY`
 keys them by CLI slug (`tidepool-crab`, `thorned-sentinel`, `disatree`, `sandbag`, ...) for the
@@ -225,7 +173,7 @@ during combat. `decideEnemyAction` consults a new helper
 rotation is non-empty AND `getRng().random() < ENEMY_SKILL_PICK_CHANCE`
 (0.35), it returns `{ action: 'card', skillId, stance }`. Otherwise
 the strategy resolves normally. The stance is sourced from
-`card.philosophicalAspect` so a body-aspected card arrives with
+`card.color` so a body-aspected card arrives with
 `stance: 'body'`.
 
 Nine enemies carry rotations — 2 from Phase 49, 7 from Phase 57.
@@ -255,18 +203,12 @@ The actual card execution runs through `executeSkill` with
 (Phase 49)" for the engine-side semantics, including D3
 (`card.targetType` is relative to the caster).
 
-Calibration: the 0.35 fire rate is colocated with the Phase 45
-`ALIGNMENT_FLIP_CHANCE` in `src/Enemy/enemy.logic.ts`. Tune both
-together if a future playtest pass shows elite/boss encounters
-feel too spammy or too quiet.
-
 ## Befriendable enemies (Phase 60)
 
 Per-enemy `Enemy.friendshipReward?: FriendshipReward` lets authors
 attach bonus content to the Phase 36 friendship-victory path. The
 field is optional; enemies without an authored reward resolve via
-the Phase 36 base only (half-XP + weighted-loot roll + +1
-moralMeter).
+the Phase 36 base only (half-XP + weighted-loot roll).
 
 ```typescript
 interface FriendshipReward {
@@ -279,12 +221,6 @@ interface FriendshipReward {
     /** Phase 62 — optional world flag appended to state.flags on
      *  friendship. Convention: `befriended-<enemy-id-stem>`. */
     flagSet?: string;
-    /** Phase 69 — optional shift applied to the player's
-     *  philosophical alignment cube on the friendship outcome.
-     *  Routed through applyAlignmentDelta (Phase 42 clamp helper).
-     *  Authoring band: ±1..±5 per axis (matches Phase 43 dialogue
-     *  / map-event delta convention). Closes Spec 14 Q4. */
-    alignmentDelta?: Partial<PhilosophicalAlignment>;
 }
 ```
 
@@ -292,31 +228,29 @@ Engine wiring lives in `src/Game/store.ts#endCombat`: in the
 `outcome === 'friendship'` branch, the reward's `items` append to
 `report.loot`, `xpBonus` adds to `report.xpGained`, `narrative`
 surfaces on `CombatEndReport.friendshipReward.narrative`, and
-(Phase 69) `alignmentDelta` is folded into `state.philosophicalAlignment`
-via `applyAlignmentDelta` — the post-clamp value also surfaces on
-`CombatEndReport.friendshipReward.alignmentShift?: PhilosophicalAlignment`
-for the consumer to render. None of
+`flagSet` is appended to `state.flags`. The Phase 69 `alignmentDelta`
+was removed 2026-09-27 (T6, D39). None of
 the FriendshipReward fields REPLACE the Phase 36 grants; they
 augment them.
 
 Seven enemies ship authored predicates / rewards (Phase 102 expanded from 3 → 7):
 
-| Enemy | Difficulty | World placement | Items | xpBonus | alignmentDelta (Phase 69) | BefriendabilityConfig (Phase 68) | Narrative tone |
-|---|---|---|---|---|---|---|---|
-| **MournfulGull** | normal | `fv-15` gull crag (Harbor District dead-end via `fv-11` → `fv-14`) | 1 × heart-draught | +10 | `{ outlook: +3 }` — wistful-empathy nudge toward optimistic | default Phase 36 mechanic (no config) | Heart-attuned remembrance gift; the gull stops circling. Sets flag `befriended-mournful-gull` (Phase 62) — Coastal Beggar's dialogue surfaces a new branch acknowledging the gull's silence. |
-| **HollowEyedBeggar** | normal | `fv-18` back alley (Inland Streets, on the way to the abandoned-shack loop via `fv-5` → `fv-18` or `fv-3` → `fv-16` → `fv-17` → `fv-18`) | 1 × healing-potion + 1 × antidote | +15 | `{ scope: -3 }` — re-grounds toward the relational individual | default Phase 36 mechanic (no config) | Reversal of the begging dynamic; they offer what they carry. |
-| **TideflukeReaver** | elite | `fv-*` fishing-village elite encounters | 1 × body-elixir + 1 × healing-potion | +35 | `{ outlook: +2, scope: +1 }` — softens pessimism, opens to relationship | `{ hpGate: { belowPct: 0.3 }, requiredStances: ['heart'], roundsThreshold: 4 }` | Salt-bound reaver's chains dissolve; empathy required. Sets flag `befriended-tidefluke-reaver` (Phase 102). |
-| **HushWraith** | elite | `nf-*` northern-forest elite encounters | 1 × clarity-serum + 1 × antidote | +40 | `{ outlook: +1 }` — slight hope in cosmic indifference | `{ hpGate: { belowPct: 0.25 }, requiredStances: ['heart'], roundsThreshold: 6 }` | Transcendent silence breaks into whisper; patience required. Sets flag `befriended-hush-wraith` (Phase 102). |
-| **HollowSaint** | elite | `nf-*` northern-forest elite encounters | 1 × resonance-crystal + 1 × heart-draught + 1 × healing-potion | +45 | `{ scope: -2 }` — turns inward from transcendent to individual | `{ hpGate: { belowPct: 0.4 }, requiredStances: ['heart'], requiredSkillUse: ['prayer'], roundsThreshold: 3 }` | Martyr finds purpose in witness; prayer card connection if available. Sets flag `befriended-hollow-saint` (Phase 102). |
-| **CoastalTyrant** | boss | `coastal-continent` fishing-village boss tile | `paradox-loop` (unique circlet, requiredLevel 15) + healing-potion + heart-draught | +75 | `{ outlook: +3, scope: -2 }` — recognition + release; he gave up his despair toward optimism, and saw a person rather than a doctrine | `{ hpGate: { belowPct: 0.4 }, requiredStances: ['heart'], roundsThreshold: 3 }` | Magistrate-fallen-priest; friendship opens only after he's been brought low, the player has shown empathy at least once, and 3 both-defend rounds have passed. The fallen-priest hands over his regalia (Paradox Loop unique — "a sentence which forever ends without finishing") + healing tokens; multi-paragraph narrative captures the recognition + release. Sets flag `befriended-coastal-tyrant` (Phase 62) for downstream dialogue / quest gates. Demonstrates the full Phase 60+62+68+69 stack on a single high-stakes encounter (Phase 70). |
-| **TheDisagreement** | boss | `coastal-continent` northern-forest boss tile | 1 × philosopher-tea + 1 × focus-vial + 1 × healing-potion + 1 × clarity-serum | +80 | `{ scope: +1 }` — opens to relational despite absurdism | `{ hpGate: { belowPct: 0.2 }, requiredStances: ['mind'], roundsThreshold: 8 }` | Disagreement resolves into dialogue; reasoned argumentation and boss patience required. Sets flag `befriended-the-disagreement` (Phase 102). |
+| Enemy | Difficulty | World placement | Items | xpBonus | BefriendabilityConfig (Phase 68) | Narrative tone |
+|---|---|---|---|---|---|---|
+| **MournfulGull** | normal | `fv-15` gull crag (Harbor District dead-end via `fv-11` → `fv-14`) | 1 × heart-draught | +10 | default Phase 36 mechanic (no config) | Heart-attuned remembrance gift; the gull stops circling. Sets flag `befriended-mournful-gull` (Phase 62) — Coastal Beggar's dialogue surfaces a new branch acknowledging the gull's silence. |
+| **HollowEyedBeggar** | normal | `fv-18` back alley (Inland Streets, on the way to the abandoned-shack loop via `fv-5` → `fv-18` or `fv-3` → `fv-16` → `fv-17` → `fv-18`) | 1 × healing-potion + 1 × antidote | +15 | default Phase 36 mechanic (no config) | Reversal of the begging dynamic; they offer what they carry. |
+| **TideflukeReaver** | elite | `fv-*` fishing-village elite encounters | 1 × body-elixir + 1 × healing-potion | +35 | `{ hpGate: { belowPct: 0.3 }, requiredStances: ['heart'], roundsThreshold: 4 }` | Salt-bound reaver's chains dissolve; empathy required. Sets flag `befriended-tidefluke-reaver` (Phase 102). |
+| **HushWraith** | elite | `nf-*` northern-forest elite encounters | 1 × clarity-serum + 1 × antidote | +40 | `{ hpGate: { belowPct: 0.25 }, requiredStances: ['heart'], roundsThreshold: 6 }` | Transcendent silence breaks into whisper; patience required. Sets flag `befriended-hush-wraith` (Phase 102). |
+| **HollowSaint** | elite | `nf-*` northern-forest elite encounters | 1 × resonance-crystal + 1 × heart-draught + 1 × healing-potion | +45 | `{ hpGate: { belowPct: 0.4 }, requiredStances: ['heart'], requiredSkillUse: ['prayer'], roundsThreshold: 3 }` | Martyr finds purpose in witness; prayer card connection if available. Sets flag `befriended-hollow-saint` (Phase 102). |
+| **CoastalTyrant** | boss | `coastal-continent` fishing-village boss tile | `paradox-loop` (unique circlet, requiredLevel 15) + healing-potion + heart-draught | +75 | `{ hpGate: { belowPct: 0.4 }, requiredStances: ['heart'], roundsThreshold: 3 }` | Magistrate-fallen-priest; friendship opens only after he's been brought low, the player has shown empathy at least once, and 3 both-defend rounds have passed. The fallen-priest hands over his regalia (Paradox Loop unique — "a sentence which forever ends without finishing") + healing tokens; multi-paragraph narrative captures the recognition + release. Sets flag `befriended-coastal-tyrant` (Phase 62) for downstream dialogue / quest gates. Demonstrates the full Phase 60+62+68 stack on a single high-stakes encounter (Phase 70). |
+| **TheDisagreement** | boss | `coastal-continent` northern-forest boss tile | 1 × philosopher-tea + 1 × focus-vial + 1 × healing-potion + 1 × clarity-serum | +80 | `{ hpGate: { belowPct: 0.2 }, requiredStances: ['mind'], roundsThreshold: 8 }` | Disagreement resolves into dialogue; reasoned argumentation and boss patience required. Sets flag `befriended-the-disagreement` (Phase 102). |
 
 The 2 normal-tier enemies (MournfulGull, HollowEyedBeggar) are 
 picked from the fishing-village (level 2-3), where the player's first 
 deliberate befriending attempts are likeliest to land. Phase 102 expands 
 the roster with 4 new enemies: 3 elite-tier (TideflukeReaver, HushWraith, 
 HollowSaint) and 1 boss-tier (TheDisagreement), bringing the total 
-befriendable count from 3 → 7. All carry the full Phase 60+62+68+69+71+73 
+befriendable count from 3 → 7. All carry the full Phase 60+62+68+71+73 
 stack: `befriendabilityConfig` predicates, `friendshipReward` content, 
 `pactLines` narrative, and `journalEntry` codex unlocks. CoastalTyrant 
 demonstrates the Phase 70 boss-tier reward integration; TheDisagreement 
@@ -330,8 +264,7 @@ regression case (TidepoolCrab) + a victory-outcome regression case
 (no friendshipReward thread on non-friendship outcomes).
 
 See `docs/combat.md` § "Friendship Path" for the engine-side
-semantics + `docs/morality.md` § "Combat: Friendship Victories" for
-the moralMeter shift that fires alongside.
+semantics.
 
 ## Aftermath narrative (Phase 71)
 
@@ -376,7 +309,7 @@ meaningful when the enemy also carries a `friendshipReward`).
 Total authored: **15 of 16** enemies; the only un-authored entry
 is `Sandbag_01` (Phase 74 D1 — test sandbox with no narrative
 weight). Each new sweep voice extends the existing enemy
-identity (description + Phase 45 alignment archetype + Phase 49
+identity (description + Phase 49
 card rotation where present). Mobile presenter's `derive*Phrase`
 fallback now only fires on the test sandbox — the player-visible
 roster all renders engine-authored prose.
@@ -409,8 +342,7 @@ CoastalTyrant ("The Magistrate Who Set Down the Circlet").
 Phase 102 expansion: TideflukeReaver ("The Salt-Bound Oath"),
 HushWraith ("The Question After Silence"), HollowSaint ("The Witness
 Who Chose to Stay"), TheDisagreement ("The Art of Arguing in Good Faith").
-All bodies extend their respective Phase 71 chronicle voices and
-philosophical archetypes.
+All bodies extend their respective Phase 71 chronicle voices.
 
 Victory / defeat / flee outcomes do NOT unlock the entry. Future
 dialogue / map-event content can grant codex entries outside combat

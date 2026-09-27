@@ -245,6 +245,9 @@ const KIND_TO_NODE_TYPE: Record<MapEventKind, NodeType> = {
     // 2026-08-28 — inter-map travel doors. No bespoke door glyph yet; the
     // follow-up travel-UI wave owns one. Borrows the narrative icon.
     travel: 'quest',
+    // Map revamp M4 — the Labyrinth door (the Lantern Deep's vault door).
+    // No door glyph yet either; it borrows the same icon as travel.
+    labyrinth: 'quest',
 };
 
 /** Node display type, sourced from the engine's authored event pools. */

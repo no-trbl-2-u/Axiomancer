@@ -20,7 +20,7 @@ current-version state every time it runs.
 |---|---|---|
 | `StateFixture` type | `axiomancer-mechanics/src/Game/fixtures/state-fixture.types.ts` | The document shape. Every field optional except `id`. |
 | `validateStateFixture` / `parseStateFixture` | `…/state-fixture.validate.ts` | `unknown` → typed fixture, or one `StateFixtureError` listing **every** problem with its field path (`world.node: 'zz' is not on map 'fishing-village'`). Ids, presets, maps, nodes are checked against the live registries. |
-| `buildStateFromFixture` | `…/state-fixture.builder.ts` | Pure pipeline: seed RNG → `createNewGameState` → preset → player overrides → world placement → flags → moral → alignment → stamp `rngState`. Deterministic when `seed` is set (run id included). |
+| `buildStateFromFixture` | `…/state-fixture.builder.ts` | Pure pipeline: seed RNG → `createNewGameState` → preset → player overrides → world placement → flags → stamp `rngState`. Deterministic when `seed` is set (run id included). |
 | `STATE_FIXTURES` registry | `…/state-fixture.registry.ts` | Committed, shared fixtures. `getStateFixtureById`, `listStateFixtureIds`. The engine suite builds every entry. |
 | `placeOnNode` | `axiomancer-mechanics/src/World/world.reducer.ts` | The placement primitive fixtures and `/dev` JUMP share: stand on any node, mark it live, unlock its neighbours. |
 | CLI `--fixture` | `axiomancer-mechanics/src/CLI/fixture-boot.ts`, `io.ts`, `game.cli.ts` | Registry id or `.json` path → boot state. `--fixture list` prints the registry. `arrive` ⇒ `--resolve-start`. |
@@ -41,8 +41,6 @@ current-version state every time it runs.
   "player": { "level": 7, "baseStats": { "body": 9 }, "health": 5, "currency": 33, "knownCards": ["thin-hymn"], "name": "Tester" },
   "world": { "continent": "coastal-continent", "map": "fishing-village", "node": "fv-9", "completedMaps": [] },
   "flags": ["combat-tutorial-done"],  // appended to the new-game flags, deduped
-  "moralMeter": 20,
-  "alignment": { "epistemology": 60 },// each axis clamped to [-100, 100]
   "arrive": true                      // fire the node's event on boot (CLI: --resolve-start; mobile: <FixtureBoot>)
 }
 ```

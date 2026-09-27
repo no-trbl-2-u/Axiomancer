@@ -1,7 +1,6 @@
 import { WorldState, QuestLog, Encounter } from '../World/types';
 import { LabyrinthProgress } from '../World/Labyrinth/types';
 import { Character } from '../Character/types';
-import { PhilosophicalAlignment } from '../Ledger/types';
 
 /**
  * Top-level game state. The root object that aggregates the player,
@@ -23,18 +22,9 @@ import { PhilosophicalAlignment } from '../Ledger/types';
  * @property flags            - Generic world flags set by dialogue / events.
  *                              Used by dialogue `requires.flag` gates and by
  *                              quest objectives of type `'flag'`.
- * @property moralMeter       - Moral choice difficulty meter (-100 to +100).
- *                              Tracks player alignment from choices: negative
- *                              values (ruthless), positive values (compassionate).
- *                              Affects available dialogue options and story paths.
  * @property rngState         - Current RNG seed state for deterministic replays.
  *                              Persisted and restored to maintain reproducible
  *                              random sequences across save/load cycles.
- * @property philosophicalAlignment - Three-axis alignment cube (Phase 42):
- *                              epistemology / outlook / scope, each integer
- *                              in [-100, +100], defaults 0/0/0. Buckets to
- *                              one of 27 cells in `philosophicalAlignmentLibrary`.
- *                              Orthogonal to `moralMeter` — see docs/oaths.md.
  */
 /**
  * Phase 73 — per-foe codex / journal entry unlocked when the player
@@ -114,18 +104,7 @@ export interface GameState {
     currentEncounter?: Encounter;
     quests: QuestLog;
     flags: string[];
-    moralMeter: number;
     rngState: number;
-    philosophicalAlignment: PhilosophicalAlignment;
-    /**
-     * Phase 63 — per-tree alignment-observer cache. Keyed by
-     * `DialogueTree.id`; value is the player's alignment cell id at the
-     * end of the last `applyDialogueChoice` against that tree.
-     * Optional; `undefined` means no observations have been recorded yet
-     * (the gate `playerAlignmentCellChangedSince` hides choices in that
-     * case). Trees without an `id` are never written to the cache.
-     */
-    lastSeenAlignmentCells?: Record<string, string>;
     /**
      * Phase 73 — codex slice (closes GH#65 ask 3). Required state
      * slice; defaults to `{ unlockedEntries: [] }` on new games.
@@ -143,7 +122,7 @@ export interface GameState {
     /**
      * W-01 — cross-act labyrinth (The Aporia) progress: pocket of
      * fragments, opened gates, revealed secrets, the debt ledger, and
-     * waystones. Optional lazy slice like `lastSeenAlignmentCells`:
+     * waystones. Optional lazy slice:
      * absent until the player first enters the continent, so older
      * saves need no migration.
      */

@@ -27,7 +27,6 @@
 | `node-confirm-cancel` | Close the sheet |
 | `exploration-node-toast` | 2 s toast ("This path is sealed." / "walked already" / "you stand here") |
 | `encounter-modal-overlay` | Combat seal (see combat.md) |
-| `status-grace-break-legend` | Status card legend (hidden while the seal is up) |
 | `self-dev-tools-link` | On the SELF tab — the way to `/dev` |
 
 ## 4. A correct play, step by step

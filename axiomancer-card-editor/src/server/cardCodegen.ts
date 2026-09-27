@@ -206,7 +206,7 @@ export function serialize(
     lines.push(`const ${ident}: Card = {`);
     lines.push(`${IND}id: ${str(draft.id.trim())},`);
     lines.push(`${IND}name: ${str(draft.name.trim())},`);
-    lines.push(`${IND}philosophicalAspect: ${str(draft.philosophicalAspect)},`);
+    lines.push(`${IND}color: ${str(draft.color)},`);
     lines.push(...descriptionLines(draft.description));
     // Spec 32 v3 — tier/rank/cardType share a line, mirroring the library style.
     lines.push(`${IND}tier: ${num(draft.tier)}, rank: ${num(draft.rank)}, cardType: ${str(draft.cardType)},`);

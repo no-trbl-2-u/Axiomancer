@@ -45,7 +45,7 @@ registerSandboxCards([
     {
         id: 'qa-siphon-rupture',
         name: 'QA Siphon Rupture (test fixture)',
-        philosophicalAspect: 'heart',
+        color: 'heart',
         description: 'Test-only fixture: RUPTURE paired with siphon 50%.',
         tier: 2,
         rank: 3,
@@ -62,7 +62,7 @@ registerSandboxCards([
         // else, so here is one.
         id: 'qa-plain-rupture',
         name: 'QA Plain Rupture (test fixture)',
-        philosophicalAspect: 'heart',
+        color: 'heart',
         description: 'Test-only fixture: RUPTURE and nothing else.',
         tier: 2,
         rank: 3,

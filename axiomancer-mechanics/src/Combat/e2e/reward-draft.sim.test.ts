@@ -93,7 +93,7 @@ describe('WS6.2 — the sandbox-injection hook (extra cards at the reward screen
         {
             id: 'e2e-fixture-tincture',
             name: 'Fixture Tincture',
-            philosophicalAspect: 'body',
+            color: 'body',
             description: 'A synthetic reward-screen candidate (WS6.2 hook fixture).',
             tier: 1, rank: 1, cardType: 'spell',
             targetType: 'enemy',
@@ -104,7 +104,7 @@ describe('WS6.2 — the sandbox-injection hook (extra cards at the reward screen
         {
             id: 'e2e-fixture-lantern',
             name: 'Fixture Lantern',
-            philosophicalAspect: 'mind',
+            color: 'mind',
             description: 'A synthetic reward-screen candidate (WS6.2 hook fixture).',
             tier: 1, rank: 3, cardType: 'spell',
             targetType: 'self',

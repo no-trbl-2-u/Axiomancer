@@ -4,7 +4,7 @@
  * Pops ON TOP of the stat-allocation LevelUpModal when LEVEL UP is
  * tapped: one pick of three qualifying cards per level gained
  * (stacked levels queue consecutive picks). Offers come from the
- * engine's alignment-gated `getAvailableCards` via
+ * engine's `getAvailableCards` via
  * `actions.getLearnableCardOffers()`; a pick dispatches
  * `actions.learnCard(id)` upstream. Non-tap-out-dismissible — the
  * only exits are LEARN (per row) or FORGO.

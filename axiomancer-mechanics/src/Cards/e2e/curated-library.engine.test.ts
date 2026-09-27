@@ -119,7 +119,7 @@ describe('profane canon — id hygiene and provenance', () => {
             expect([1, 2, 3, 4, 5, 6]).toContain(card.rank);
             expect(['spell', 'oath', 'hex']).toContain(card.cardType);
             expect(['self', 'enemy']).toContain(card.targetType);
-            expect(['body', 'mind', 'heart', 'any']).toContain(card.philosophicalAspect);
+            expect(['body', 'mind', 'heart', 'any']).toContain(card.color);
             // Provenance stamp: a well-formed ISO date. The 2026-08-08 floor
             // (Profane Canon wholesale replacement) was repealed 2026-09-02.
             expect(card.addedIn).toMatch(/^\d{4}-\d{2}-\d{2}$/);
@@ -142,7 +142,7 @@ describe('profane canon — id hygiene and provenance', () => {
             expect(card!.rank).toBe(1); // starters are Ash
             expect(card!.tags).toContain('starter');
         }
-        const aspects = new Set(STARTING_CARD_IDS.map(id => getCardById(id)!.philosophicalAspect));
+        const aspects = new Set(STARTING_CARD_IDS.map(id => getCardById(id)!.color));
         expect([...aspects]).toEqual(['any']);
     });
 

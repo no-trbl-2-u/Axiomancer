@@ -56,7 +56,7 @@ the answer is to buff the neighbours, not to shrink the card.
 **2. Only three constraints survive.**
 
 - **The 5/5/5 aspect thirds.** Every preset deck splits into exact thirds by
-  `philosophicalAspect` (body/mind/heart). Deck sizes are open; the thirds are
+  `color` (body/mind/heart). Deck sizes are open; the thirds are
   not. Enforced at `src/Combat/combat.starter-deck-presets.ts` and
   `src/Combat/e2e/deck-presets.engine.test.ts`.
 - **Every card has a FREE line.** A card must be playable without a die

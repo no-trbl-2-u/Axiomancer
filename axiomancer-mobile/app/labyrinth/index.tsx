@@ -1,7 +1,8 @@
 /**
- * THE APORIA — labyrinth screen (dev-menu entry only, W-01 / DESIGN.md
- * section 7). Act select → room scene → accordion; gates, fog map,
- * finale.
+ * THE APORIA — labyrinth screen (W-01 / DESIGN.md section 7). Entered
+ * through the Lantern Deep's vault door (map revamp M4, D24) or the dev
+ * menu; `<LabyrinthGate>` routes here. Act select → room scene →
+ * accordion; gates, fog map, finale.
  *
  * Event plumbing mirrors the exploration screen: arrival (and baited-
  * clue) encounters rise as the in-place `<EncounterModalOverlay>`

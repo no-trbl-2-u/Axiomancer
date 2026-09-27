@@ -32,7 +32,6 @@ import type { AppStoreState } from '@/state/store';
 
 export type TooltipKind =
     | 'stat'
-    | 'alignment'
     | 'affliction'
     | 'blessing'
     | 'effect'
@@ -67,8 +66,7 @@ export interface TooltipContent {
 const STAT_CONTENT: Record<string, TooltipContent> = {
     HEART: {
         title: 'HEART',
-        body: "the will to stay with what's difficult. governs grace, willpower, and the heart-stance damage curve.",
-        footnote: '+1 grace per defend at heart stance',
+        body: "the will to stay with what's difficult. governs willpower and the heart-stance damage curve.",
         accent: 'heart',
     },
     BODY: {
@@ -133,7 +131,7 @@ const CHRONICLE_CONTENT: Record<string, TooltipContent> = {
     },
     'dialogue:applied': {
         title: 'WORDS EXCHANGED',
-        body: 'a dialogue choice landed and its consequence applied — flag set, alignment shifted, item given, threshold crossed.',
+        body: 'a dialogue choice landed and its consequence applied — flag set, item given, threshold crossed.',
         footnote: 'engine: dialogue:applied',
     },
 };
@@ -248,44 +246,6 @@ const SLOT_CONTENT: Record<string, TooltipContent> = {
     },
 };
 
-// Phase 74 follow-up walkthrough Tick 2 — alignment axis content.
-// Keys match `AlignmentAxisKey` in `state/presenters/character.engine.ts`
-// (`'epistemology' | 'outlook' | 'scope'`); SELF axis chips pass
-// the axisKey verbatim as the tooltip id. Each entry explains what
-// the axis measures + the bucket-direction convention.
-const ALIGNMENT_CONTENT: Record<string, TooltipContent> = {
-    epistemology: {
-        title: 'CREED',
-        body: 'what you take on trust. low leans on faith; high demands what can be shown.',
-        footnote: 'low ← faith · mid ← doubt · high → evidence',
-    },
-    outlook: {
-        title: 'AUGURY',
-        body: 'the omen you read in your own days. low reads dread; high reads hope.',
-        footnote: 'low ← dread · mid ← endurance · high → hope',
-    },
-    scope: {
-        title: 'TROTH',
-        body: 'whom your conduct is pledged to. low keeps troth with the self; high keeps troth with the dead saints.',
-        footnote: 'low ← self · mid ← kin · high → saints',
-    },
-    // Memoir walkthrough Tick 1 — two derived alignment chips read
-    // from `state.moralMeter` + `player.baseStats`. Bands ladder
-    // from IN ARREARS / INDIFFERENT / IN GRACE for moral (Phase 44h —
-    // spec 34 §6.1); from HEART/BODY/MIND for the bent (dominant base
-    // stat, ties land in 'UNDECLARED').
-    moral: {
-        title: 'GRACE',
-        body: 'where your mercy and cruelty leave you with the Parish. each choice nudges the account; the band on this chip is what the Parish currently reads.',
-        footnote: 'in arrears ← indifferent → in grace',
-    },
-    philosophical: {
-        title: 'THE BENT',
-        body: 'which of the three base stats — heart, body, mind — leads the others. the dominant stat colours how the world reads you; ties leave you undeclared.',
-        footnote: 'derived from base stats · ties → undeclared',
-    },
-};
-
 // ---------------------------------------------------------------------------
 // Effect payload formatter (Phase 75 follow-up).
 //
@@ -393,7 +353,7 @@ export function selectTooltipContentFor(
     kind: TooltipKind,
     id: string,
     // Reserved for kinds that need live state (effect-attribution,
-    // alignment readings, codex entries). Current authored kinds
+    // codex entries). Current authored kinds
     // read engine static data only, so state is unused — keeping
     // the signature stable means future ticks don't have to
     // retrofit every call site.
@@ -405,9 +365,6 @@ export function selectTooltipContentFor(
     }
     if (kind === 'stance-chip') {
         return STANCE_CHIP_CONTENT[id] ?? null;
-    }
-    if (kind === 'alignment') {
-        return ALIGNMENT_CONTENT[id] ?? null;
     }
     if (kind === 'slot') {
         return SLOT_CONTENT[id] ?? null;

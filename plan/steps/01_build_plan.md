@@ -93,10 +93,14 @@ row. D26's name picks are already made (brief §1), so no row below needs T.
 `main`. If it isn't, skip the row this tick (they touch the same registry,
 event-pool and layout files).
 - [x] Phase M3b — The Charcoal Wood (#389)
-- [ ] Phase M3c — The Beacon Crags: Act 1 map 3 on the mountain plate, under `northern-continent` (the first cross-continent step in Act 1). Requires M3b `[x]`. The Charcoal Wood's door (`cw-20`, the stair cave) leads here; this map's door leads to fishing-village. Copy M3b's pattern (brief §3b).
-- [ ] Phase M3d — The Lantern Deep: Act 1 map 4 on the underworld plate, under `northern-continent`. Requires M3c `[x]`. The Beacon Crags' door leads here; this map's door leads to fishing-village. Halo the node marks (densest, darkest plate) and check with `verify:visual`.
-- [ ] Phase M4 — The Labyrinth door (D24): the Lantern Deep's `vault-door` node enters the Aporia through `enterLabyrinthAction`'s snapshot and return path, with a hermetic enter/return/resume test. Requires M3d `[x]`.
-- [ ] Phase M5 — Map docs: rewrite `docs/world.md`'s stale sections and `skills/forge.md`'s column-layering line for D16's shape and `MapSheet`. Requires M3d `[x]`; may ride with M4.
+- [x] Phase M3c — The Beacon Crags (#392)
+- [x] Phase M3d — The Lantern Deep (#396)
+- [x] Phase M3e — Retune fishing-village for its place after Act 1 (425525ce)
+- [x] Phase M4 — The Labyrinth door (571d5b3f)
+- [x] Phase M5 — Map docs (1ec11390)
+- [x] Phase T6 — Remove alignment, philosophy and GRACE (67fd0106)
+- [blocked: attended with T — the loop pauses at the card phase (D38); the model is decided (D40–D42), T starts the build 2026-09-27] Phase S3 — Stat scaling (refactor D1 step 3): keyword families by where the effect lands (body: damage to the foe; mind: anything on you; heart: anything on the foe), `base × stat ÷ 5` with repeating amounts at half rate and durations flat, no caps, VITAE `50 + 12·body + 6·mind + 6·heart`, coloured keywords with a stat glyph, final numbers on card faces. Brief `plan/2026-09-27-stat-scaling.prompt.md`. Requires T6 `[x]`.
+- [blocked: requires S3 `[x]` (D36); unblock when S3 merges 2026-09-26] Phase P1 — The card purge (D36): purge every player card except the grey office (`grey-strike`, `grey-ward` and the VULNERABLE grey card, D42), and every player keyword except DEAL, GUARD and VULNERABLE; every run deals the grey deck; presets, the 5/5/5 thirds, card rewards and cache card offers go. Enemies keep their keywords. Brief `plan/2026-09-26-card-purge.prompt.md`. Requires S3 `[x]`.
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics (9180fa5d)
@@ -1109,6 +1113,34 @@ See the status rows above; generate briefs on demand.
   The same session T picked the three remaining D26 names (The Charcoal
   Wood, The Beacon Crags, The Lantern Deep), so no row waits on T. T's
   stated reason: let the loop work overnight. Resulting commit: this one.
+
+- **2026-09-26** — actor: **T, attended session** (branch
+  `claude/map-revamp-calls`). Action: **added Phase M3e** (retune
+  fishing-village after Act 1, D35), between M3d and M4, and pointed M3d
+  at the brief's new §3d (D30–D35). Confirmed T's request: yes. T
+  answered the six agent calls from M3a/M3b in a ballot ("Retune after
+  M3d" for fishing-village), then: *"Open the PR, file the residue,
+  merge, then keep it moving"*. Resulting commit: this one.
+
+- **2026-09-26** — actor: **T, attended session** (branch
+  `claude/card-purge-queue`). Action: **added Phase S3** (the D4 stat
+  hooks, blocked for an attended session: the loop pauses at the card
+  phase, D38) and **Phase P1** (the card purge, D36), after M5.
+  Confirmed T's request: yes. T, near-verbatim: *"I want to pause at the
+  card phase"*, then *"purge all the cards and all the combat related
+  keywords except for the grey strike and grey guard cards and keyword.
+  Then work can continue, but no card generation unless it's a guided
+  session with me"*. Scope settled by ballot (D36-D38). Resulting
+  commit: this one.
+
+- **2026-09-27** — actor: **T, attended session** (branch
+  `claude/stat-model`). Action: **added Phase T6** (remove alignment,
+  philosophy and GRACE, D39) before S3, rewrote S3 around the decided
+  stat model (D40-D41, brief `plan/2026-09-27-stat-scaling.prompt.md`),
+  and widened P1 to keep a third grey card, VULNERABLE (D42). Confirmed
+  T's request: yes. T, near-verbatim: *"remove everything that has to do
+  with alignment and philosophy. That includes grace"*, and T picked
+  "Loop, after M5" for its timing. Resulting commit: this one.
 
 ## Phase log (commit hashes)
 

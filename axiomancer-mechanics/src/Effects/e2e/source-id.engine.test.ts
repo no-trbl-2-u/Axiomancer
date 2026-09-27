@@ -28,7 +28,7 @@ const lookup = (card: Card) => (id: string): Card | undefined =>
 const debuffCard: Card = {
     id: 'sk_doubt',
     name: 'Sow Doubt',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description: 'Plants a seed of doubt.',
     tier: 1,
     rank: 1,
@@ -40,7 +40,7 @@ const debuffCard: Card = {
 const buffCard: Card = {
     id: 'sk_resolve',
     name: 'Self-Resolve',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description: 'A heartening certainty.',
     tier: 1,
     rank: 1,

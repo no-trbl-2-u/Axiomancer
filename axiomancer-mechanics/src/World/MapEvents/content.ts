@@ -79,9 +79,6 @@ const nfSpring: MapEventPool = {
             shelter: 'camp',
             description: 'A clearing with a cold spring. You catch your breath.',
         },
-        // Phase 43 — the spring's hush invites the larger picture:
-        // transcendent scope, mild faith-leaning epistemology.
-        alignmentDelta: { epistemology: -1, scope: 2 },
     }],
 };
 
@@ -168,10 +165,6 @@ const nfCaveMouth: MapEventPool = {
             destinationMap: 'caverns',
             description: 'A cave mouth yawns in the cliff face. Cold air spills out. Something deeper is breathing. You go in anyway.',
         },
-        // Phase 43 — cosmic dread at the dark gate: Lovecraft / Cioran
-        // territory (Agnostic-Pessimistic-Transcendent). Carried over from
-        // the cutscene this door replaced.
-        alignmentDelta: { outlook: -2, scope: 3 },
     }],
 };
 
@@ -186,7 +179,6 @@ const nfShrineKeeper: MapEventPool = {
             npcName: 'Shrine Keeper',
             description: 'The Shrine Keeper tends ancient carved stones among the forest growth.',
         },
-        alignmentDelta: { epistemology: 1, scope: 1 },
     }],
 };
 
@@ -199,7 +191,6 @@ const nfChronicler: MapEventPool = {
             npcName: 'The Chronicler',
             description: 'The Chronicler sits surrounded by leather-bound tomes and parchments.',
         },
-        alignmentDelta: { epistemology: 1 },
     }],
 };
 
@@ -212,7 +203,6 @@ const nfWanderingPhilosopher: MapEventPool = {
             npcName: 'The Wandering Philosopher',
             description: 'A contemplative figure in simple robes sits among the trees.',
         },
-        alignmentDelta: { epistemology: 1, scope: 1 },
     }],
 };
 
@@ -226,7 +216,6 @@ const nfMossyClearing: MapEventPool = {
             shelter: 'camp',
             description: 'A mossy clearing with a fallen log that serves as a natural bench.',
         },
-        alignmentDelta: { scope: 1 },
     }],
 };
 
@@ -238,9 +227,6 @@ const nfMossyClearing: MapEventPool = {
 // yet; it ships anyway per S-01's answered ruling — splitting the spec
 // across two phases to chase reachability would leave it half-shipped
 // indefinitely, and the four dilemmas are one authored set with one voice.
-// Branch 3 carries the spec's one permitted `alignmentDelta`: "note the
-// spot, mean to tell someone" names a worldview (`scope`), not a virtue —
-// the same distinction fv-14's joke-deflection branch draws.
 const nfCrowningWitnessedDialogue: MapEventPool = {
     id: 'nf-12.narration',
     entries: [{
@@ -269,7 +255,7 @@ const nfCrowningWitnessedDialogue: MapEventPool = {
                             {
                                 text: 'Mark the spot. Leave. Mean to tell someone in the city.',
                                 nextNodeId: 'marked',
-                                effect: { setFlag: 'boy-marked-the-crowning', alignmentDelta: { scope: 1 } },
+                                effect: { setFlag: 'boy-marked-the-crowning' },
                             },
                         ],
                     },
@@ -333,7 +319,6 @@ const nfBrambleTrap: MapEventPool = {
             damage: 1,
             description: 'Hidden brambles catch at your feet and tear at exposed skin.',
         },
-        alignmentDelta: { outlook: -1 },
     }],
 };
 
@@ -362,7 +347,6 @@ const nfBoneCircle: MapEventPool = {
             ],
             description: 'A circle of ancient bones in the hollow.',
         },
-        alignmentDelta: { epistemology: -2, scope: -1 },
     }],
 };
 
@@ -472,7 +456,6 @@ const nfRangerCairn: MapEventPool = {
             npcName: 'Forest Ranger',
             description: "A cairn of fitted stones marks the trail's edge. The Forest Ranger kneels beside it. One hand rests flat on the topmost stone. A colleague, lost to the same logging line he still watches.",
         },
-        alignmentDelta: { outlook: -1, epistemology: 1 },
     }],
 };
 
@@ -506,7 +489,6 @@ const nfEchoStone: MapEventPool = {
             ],
             description: 'A stone formation that answers in your own voice.',
         },
-        alignmentDelta: { epistemology: 1 },
     }],
 };
 
@@ -521,7 +503,6 @@ const nfHiddenGrove: MapEventPool = {
             shelter: 'camp',
             description: 'A hidden grove surrounds a natural spring. The water runs clear and cold.',
         },
-        alignmentDelta: { scope: 2 },
     }],
 };
 
@@ -534,7 +515,6 @@ const nfMistPools: MapEventPool = {
             damage: 2,
             description: 'Thick pools of mist swirl and eddy, confusing your sense of direction.',
         },
-        alignmentDelta: { epistemology: -1 },
     }],
 };
 
@@ -574,7 +554,7 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
     { nodeId: 'nf-19', pool: nfFrightenedFriendDialogue },
     { nodeId: 'nf-20', pool: nfAxeHead          },
     { nodeId: 'nf-21', pool: nfRangerCairn      },
-    { nodeId: 'nf-22', pool: nfMoonbellFlowers  },
+    { nodeId: 'nf-22', pool: nfMoonbellFlowers },
     { nodeId: 'nf-23', pool: nfEchoStone        },
     { nodeId: 'nf-24', pool: nfHiddenGrove      },
     { nodeId: 'nf-25', pool: nfMistPools        },
@@ -627,9 +607,8 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
 // displaced a `gathering` node instead, for the same reason: no roster foe
 // or flag/pricing dependency to orphan). This block supersedes the legacy
 // authored pools above (kept in source for reference). Foes stay
-// on the gentlest L1–L2 roster; the boss is pinned to a low absolute level
-// so a fresh player can actually win the climax (the shared coastal-tyrant
-// is endgame-tier elsewhere, so we override the level here).
+// on the gentlest coastal roster, pinned at `FV_FIGHT_LEVEL`; the boss is
+// pinned at `FV_BOSS_LEVEL` (M3e: the map follows all of Act 1 now).
 
 // Foes, assigned per node and ordered ALONG THE MAP rather than by node id.
 //
@@ -642,8 +621,9 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
 const FV_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description: string }> = {
     // THE THREE GATES (2026-09-21, the grey office rebalance) — one choke
     // before each open column, so every route to the breakwater fights
-    // three times and carries three rewards into the King. Levels ramp
-    // 1 / 1 / 2 through the pinned-slug path (`max(source.level, player)`).
+    // three times and carries three rewards into the King. Every fight on
+    // this map is pinned at `FV_FIGHT_LEVEL` (M3e; they used to ramp
+    // 1 / 1 / 2 by the foes' own levels, when this was the opening map).
     'fv-26': { slug: 'grave-larva',      description: 'Something pale turns over in the wet sand where the drowned are buried, and keeps turning.' },
     'fv-27': { slug: 'float-eye',        description: 'A lidless thing drifts over the salt flats at head height, and it has already seen you.' },
     'fv-28': { slug: 'chattering-skull', description: 'On the breakwater steps a skull talks to itself about the tide. It stops when you come near.' },
@@ -658,10 +638,10 @@ const FV_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description: string }
     'fv-13': { slug: 'little-belle',     description: 'A small orange vesper rings a bell for a service no one held.' },
     // c4 — Phase 61: fv-15 (formerly the quest-board node, retired) takes
     // foot-stealer back from fv-21 — its Phase 60 displacement left the
-    // slug orphaned with no flag or pricing dependency, and level 3 (same
-    // tier as fv-24's water-holger and the boss's own FV_BOSS_LEVEL) is
-    // exactly the pre-boss weight this lane wants, one column ahead of the
-    // breakwater.
+    // slug orphaned with no flag or pricing dependency, and its own level 3
+    // (fv-24's water-holger's tier) was the pre-boss weight this lane
+    // wanted, one column ahead of the breakwater. Pinned at FV_FIGHT_LEVEL
+    // since M3e, like every fight here.
     'fv-15': { slug: 'foot-stealer',     description: 'It collects footing. Yours is next on the list; balance, it maintains, is a possession like any other.' },
     // c9 — the last thing between the player and the coast road.
     'fv-24': { slug: 'water-holger',     description: 'A drowned deckhand wades up the strand, still standing his watch.' },
@@ -800,7 +780,7 @@ const fvFatherWorryDialogue: MapEventPool = {
                             {
                                 text: '"A boat fit for a king, obviously." (grin)',
                                 nextNodeId: 'deflected',
-                                effect: { setFlag: 'boy-deflected-father', alignmentDelta: { outlook: 1 } },
+                                effect: { setFlag: 'boy-deflected-father' },
                             },
                         ],
                     },
@@ -831,9 +811,7 @@ const fvFatherWorryDialogue: MapEventPool = {
 // `encounter` node — the only kind either map carries a surplus of, per the
 // spec's answered Open Question 1 — and both sit strictly ahead of the
 // post-boss column (fv-18/fv-7/fv-19, column 6) that will read their flags
-// once Phase 53e lands the read-back web. Flags only; no `moralDelta` on
-// either — the meter stays concentrated in Old Marrow and the Coastal
-// Beggar, where a legible verdict belongs (S-01's answered Open Question 2).
+// once Phase 53e lands the read-back web. Flags only.
 const fvBorrowedHookDialogue: MapEventPool = {
     id: 'fv-16.narration',
     entries: [{
@@ -962,9 +940,17 @@ const fvArrival: MapEventPool = {
     }],
 };
 
-// The region boss — king-of-revenge, but pinned to a low absolute level so a
-// fresh player can win the climax (the shared enemy is mid-tier elsewhere).
-const FV_BOSS_LEVEL = 3;
+// M3e (D35, 2026-09-26) — fishing-village now comes after all of Act 1, so it
+// follows the Act 1 elites (level 3-4) instead of dipping below them. Every
+// fight is pinned at 4, the late band of the Beacon Crags and the Lantern
+// Deep; the King at 5, one above the last Act 1 elite. Measured before the
+// move (grey office + 3 card rewards, greedy and blind, player level 3 at
+// 7/7/7, the level a full Act 1 clear banks): the six fights stay 100% at 4;
+// the King goes 99% at 3 to 91% at 5. The bare grey office loses to him at
+// every level from 3 to 6, so the pin does not move that floor.
+// `World/e2e/fishing-village-after-act1.engine.test.ts` pins the ordering.
+const FV_FIGHT_LEVEL = 4;
+const FV_BOSS_LEVEL = 5;
 const fvGauntletBoss: MapEventPool = {
     id: 'fv-6.encounter-boss',
     entries: [{
@@ -974,7 +960,7 @@ const fvGauntletBoss: MapEventPool = {
             enemySlug: 'king-of-revenge',
             isBoss: true,
             level: FV_BOSS_LEVEL,
-            description: 'The King of Revenge rises from the breakwater.',
+            description: 'The King of Revenge rises from the harbour wall.',
         },
     }],
 };
@@ -1108,7 +1094,7 @@ const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: Ma
             } else {
                 const foe = FV_ENCOUNTER_FOES[nodeId];
                 if (!foe) throw new Error(`fishing-village: ${nodeId} has no authored event kind or foe.`);
-                out.push({ nodeId, pool: fvEncounterPool(nodeId, foe) });
+                out.push({ nodeId, pool: cwEncounterPool(nodeId, { ...foe, level: FV_FIGHT_LEVEL }) });
             }
         }
         return out;
@@ -1123,22 +1109,32 @@ const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: Ma
 // landmarks (see `Continents/Coastal-Village/breakwater.ts` for the node map).
 //
 // Kind spread over 18 nodes: 6 encounter, 3 rest, 3 loot-cache,
-// 3 gathering, 2 hazard, 1 travel. No boss: the watchtower (bw-17) is the
-// last fight, fishing-village's water-holger, before the door. The foes ramp
-// ring by ring in fishing-village's own order.
+// 3 gathering, 2 hazard, 1 arrival cutscene, 1 travel. No boss (D30): the
+// watchtower (bw-17), the one node every run crosses before the door, is the
+// region's elite fight. The other foes ramp ring by ring in fishing-village's
+// own order.
 
-/** The windmill is where a new game starts (D27): placed, never arrived at. A CAMP, not an inn. */
-const bwWindmillRest: MapEventPool = {
-    id: 'bw-1.rest',
+/**
+ * The windmill is where a new game starts (D27). D31: it opens on a short
+ * arrival scene, like every other Act 1 map, not on a rest screen.
+ */
+const bwWindmillArrival: MapEventPool = {
+    id: 'bw-1.cutscene',
     entries: [{
-        kind: 'rest', weight: 1,
+        kind: 'cutscene', weight: 1,
         payload: {
-            kind: 'rest',
-            shelter: 'camp',
-            description: 'A windmill with its sails lashed down. The loft is dry. Nobody asks rent.',
+            kind: 'cutscene',
+            lines: [
+                'A windmill on the headland, its sails lashed down. The sea is loud below it.',
+                'A road runs east along the breakwater, toward a watchtower with its lamp lit.',
+            ],
+            description: 'You set out along the coast.',
         },
     }],
 };
+
+/** D30: the Breakwater's elite, pinned low like every Act 1 fight (brief §3b). */
+const BW_ELITE_LEVEL = 3;
 
 const BW_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description: string }> = {
     // c1 — the crane quay
@@ -1149,8 +1145,13 @@ const BW_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description: string }
     'bw-10': { slug: 'little-belle',     description: 'A small orange vesper rings a bell in the manor yard.' },
     // c4 — the lighthouse
     'bw-14': { slug: 'foot-stealer',     description: 'Something on the lighthouse stair collects footing. Yours is next.' },
-    // c5 — the watchtower: the last fight before the bridge
-    'bw-17': { slug: 'water-holger',     description: 'A drowned sentry stands the watchtower. He was never relieved.' },
+};
+
+/** D30: the watchtower, the chokepoint before the bridge, holds the region's elite. */
+const BW_ELITE = {
+    slug: 'brine-hag' as EnemySlug,
+    level: BW_ELITE_LEVEL,
+    description: 'The watchtower lamp is lit. The hag who keeps it has been watching the road.',
 };
 
 const BW_REST_NODES: Record<string, string> = {
@@ -1196,7 +1197,9 @@ const BREAKWATER_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
         for (let i = 1; i <= 18; i++) {
             const nodeId = `bw-${i}`;
             if (nodeId === 'bw-1') {
-                out.push({ nodeId, pool: bwWindmillRest });
+                out.push({ nodeId, pool: bwWindmillArrival });
+            } else if (nodeId === 'bw-17') {
+                out.push({ nodeId, pool: cwEncounterPool(nodeId, BW_ELITE) });
             } else if (nodeId === 'bw-18') {
                 out.push({ nodeId, pool: bwRiverBridge });
             } else if (BW_REST_NODES[nodeId]) {
@@ -1272,7 +1275,8 @@ const CW_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; level: number; descri
     'cw-12': { slug: 'pale-brood',    level: CW_FIGHT_LEVEL_LATE,  description: 'Something pale pushes up between the roots. The graves here were not dug deep enough.' },
     // c4 — the rock chapel, the wayside cross, the east cave
     'cw-16': { slug: 'goblin-shaman', level: CW_FIGHT_LEVEL_LATE,  description: 'A goblin in the chapel door rattles three borrowed gods. It is collecting the tithe.' },
-    'cw-17': { slug: 'sugata',        level: CW_FIGHT_LEVEL_LATE,  description: 'A half-erased dancer circles the wayside cross. It does not stop for travellers.' },
+    // D30: the region's elite, on the centre lane of the last ring.
+    'cw-17': { slug: 'cursed-paladin', level: CW_FIGHT_LEVEL_LATE, description: 'A knight in rusted plate keeps the wayside cross. The oath outlived the faith. He still keeps the fork.' },
     'cw-19': { slug: 'wichtlein',     level: CW_FIGHT_LEVEL_LATE,  description: 'Something small and red knocks in the cave mouth. Twice, so far.' },
 };
 
@@ -1314,9 +1318,10 @@ const CW_LOOT_NODES: Record<string, { currency: number; description: string }> =
 };
 
 /**
- * The stair cave — the Charcoal Wood's door. D27: while the Act 1 mountains
- * are unbuilt, the last built Act 1 map's door leads into the shipped chain at
- * fishing-village. When the mountains ship (M3c) this door is re-pointed there.
+ * The stair cave — the Charcoal Wood's door, on to the Beacon Crags (Act 1,
+ * map 3; re-pointed from fishing-village when the mountains shipped in M3c).
+ * The first cross-continent step in Act 1: a plain travel event, the way the
+ * shipped chain's `nf-10` cave mouth crosses into the caverns.
  */
 const cwStairCave: MapEventPool = {
     id: 'cw-20.travel',
@@ -1324,9 +1329,9 @@ const cwStairCave: MapEventPool = {
         kind: 'travel', weight: 1,
         payload: {
             kind: 'travel',
-            destinationContinent: 'coastal-continent',
-            destinationMap: 'fishing-village',
-            description: 'A stair cut down into the cliff. It comes out, a long way on, above a fishing village.',
+            destinationContinent: 'northern-continent',
+            destinationMap: 'beacon-crags',
+            description: 'A stair cut down into the cliff. It runs under the hills and comes up, a long way on, on a mountain road.',
         },
     }],
 };
@@ -1352,6 +1357,255 @@ const CHARCOAL_WOOD_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }>
             } else {
                 const foe = CW_ENCOUNTER_FOES[nodeId];
                 if (!foe) throw new Error(`charcoal-wood: ${nodeId} has no authored event kind or foe.`);
+                out.push({ nodeId, pool: cwEncounterPool(nodeId, foe) });
+            }
+        }
+        return out;
+    })();
+
+// ─── The Beacon Crags (Act 1, map 3 — map revamp M3c) ────────────────────────
+//
+// D29: the mountains borrow the caverns (the nearest shipped northern map):
+// its roster, its iron, and its camp, hazard and loot builders. Nothing here is
+// a new enemy, NPC, item or event kind; only the one-line descriptions and the
+// two arrival lines are new, placed on the plate's landmarks (see
+// `Continents/Northern-Continent/beacon-crags.ts`).
+//
+// Kind spread over 17 nodes: 6 encounter, 3 rest, 2 loot-cache, 2 gathering,
+// 2 hazard, 1 arrival cutscene, 1 travel. No boss: fishing-village's King of
+// Revenge is still ahead. The caverns' roster is level 13 and up, so every
+// fight is pinned low (M3b's rule), one step above the Charcoal Wood: 3 on the
+// upper mountain, 4 below the gorge.
+
+const BC_FIGHT_LEVEL_EARLY = 3;
+const BC_FIGHT_LEVEL_LATE = 4;
+
+/** Arrival up the Charcoal Wood's stair, on the crag road. */
+const bcArrival: MapEventPool = {
+    id: 'bc-1.cutscene',
+    entries: [{
+        kind: 'cutscene', weight: 1,
+        payload: {
+            kind: 'cutscene',
+            lines: [
+                'The stair comes up into wind and snow, on a road over the crags.',
+                'On the summit to the west, a fire is burning. Someone down in the valley can see it.',
+            ],
+            description: 'You come up into the Beacon Crags.',
+        },
+    }],
+};
+
+/** Every Beacon Crags fight, pinned (`cwEncounterPool` builds the pool). */
+const BC_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; level: number; description: string }> = {
+    // c1 — the summit beacon
+    'bc-2':  { slug: 'tri-eyes',          level: BC_FIGHT_LEVEL_EARLY, description: 'Something keeps the beacon. It has three sockets, and it has already counted you.' },
+    // c3 — the ruined chapel, the toll gate
+    'bc-8':  { slug: 'vampire-thrall',    level: BC_FIGHT_LEVEL_EARLY, description: 'Something rings the chapel bell for a master who never comes. It will take you instead.' },
+    'bc-10': { slug: 'seam-tick',         level: BC_FIGHT_LEVEL_EARLY, description: 'Something fist-sized clings under the gatehouse arch. The last collector\'s collar lies in the road.' },
+    // c4 — the arch bridge, the quarry
+    'bc-11': { slug: 'ninth-rung-spider', level: BC_FIGHT_LEVEL_LATE,  description: 'Something hangs under the arch. It does not chase. You have to cross.' },
+    'bc-13': { slug: 'prop-wight',        level: BC_FIGHT_LEVEL_LATE,  description: 'Something lives in the crane\'s rotten timbers. It holds the blocks up out of spite.' },
+    // c5 — the stone gate: D30, the region's elite, on the centre lane of the last ring
+    'bc-15': { slug: 'mabadi',            level: BC_FIGHT_LEVEL_LATE,  description: 'A withered duelist waits between the statues. The gate is his, and so is the cane.' },
+};
+
+/** All three rests are CAMPS: Phase 52b keeps inns inside settlements. */
+const BC_CAMP_NODES: Record<string, string> = {
+    'bc-4':  'The shepherds let you sleep in the fold. They charge for the straw, not the wind.',
+    'bc-6':  'The monks sell a blanket and lend a bench. You take the bench.',
+    'bc-14': 'The inn is shut and the cart outside it is not. You sleep in the cart.',
+};
+
+/** The caverns' one material (`ncIronVeinPool`). */
+const BC_GATHER_NODES: Record<string, string> = {
+    'bc-7':  'The delvers left ore in the spoil heap. Nobody weighs the tailings.',
+    'bc-12': 'The falls have cut the seam open. The iron is wet and free, if you can reach it.',
+};
+
+const BC_HAZARD_NODES: Record<string, { damage: number; description: string }> = {
+    'bc-3':  { damage: 2, description: 'The spray from the falls freezes on the path. The lake is a long way down.' },
+    'bc-9':  { damage: 3, description: 'The rope bridge charges for the crossing. Halfway over, a plank charges again.' },
+};
+
+const BC_LOOT_NODES: Record<string, { currency: number; description: string }> = {
+    'bc-5':  { currency: 12, description: 'A strongbox in the castle gatehouse. The garrison left in a hurry and paid nobody.' },
+    'bc-16': { currency: 14, description: 'A toll-box at the tunnel mouth, pried open. Whoever pried it did not come back out.' },
+};
+
+/**
+ * The glacier shrine — the Beacon Crags' door. A stair down under the ice into
+ * the Lantern Deep (M3d; it led to fishing-village until the underworld
+ * shipped).
+ */
+const bcGlacierShrine: MapEventPool = {
+    id: 'bc-17.travel',
+    entries: [{
+        kind: 'travel', weight: 1,
+        payload: {
+            kind: 'travel',
+            destinationContinent: 'northern-continent',
+            destinationMap: 'lantern-deep',
+            description: 'A stair goes down under the shrine, into the ice, and on below it. Someone has hung a lantern on every turn.',
+        },
+    }],
+};
+
+const BEACON_CRAGS_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
+    (() => {
+        const out: Array<{ nodeId: string; pool: MapEventPool }> = [];
+        for (let i = 1; i <= 17; i++) {
+            const nodeId = `bc-${i}`;
+            if (nodeId === 'bc-1') {
+                out.push({ nodeId, pool: bcArrival });
+            } else if (nodeId === 'bc-17') {
+                out.push({ nodeId, pool: bcGlacierShrine });
+            } else if (BC_CAMP_NODES[nodeId]) {
+                out.push({ nodeId, pool: ncCampPool(nodeId, BC_CAMP_NODES[nodeId]!) });
+            } else if (BC_GATHER_NODES[nodeId]) {
+                out.push({ nodeId, pool: ncIronVeinPool(nodeId, BC_GATHER_NODES[nodeId]!) });
+            } else if (BC_HAZARD_NODES[nodeId]) {
+                const h = BC_HAZARD_NODES[nodeId]!;
+                out.push({ nodeId, pool: ncHazardPool(nodeId, h.damage, h.description) });
+            } else if (BC_LOOT_NODES[nodeId]) {
+                const l = BC_LOOT_NODES[nodeId]!;
+                out.push({ nodeId, pool: ncLootPool(nodeId, l.currency, l.description) });
+            } else {
+                const foe = BC_ENCOUNTER_FOES[nodeId];
+                if (!foe) throw new Error(`beacon-crags: ${nodeId} has no authored event kind or foe.`);
+                out.push({ nodeId, pool: cwEncounterPool(nodeId, foe) });
+            }
+        }
+        return out;
+    })();
+
+// ─── The Lantern Deep (Act 1, map 4 — map revamp M3d) ────────────────────────
+//
+// D29: the underworld borrows the caverns like the Beacon Crags do: the roster,
+// the iron, and the camp, hazard and loot builders. Nothing here is a new
+// enemy, NPC, item or event kind; only the one-line descriptions and the two
+// arrival lines are new, placed on the plate's landmarks (see
+// `Continents/Northern-Continent/lantern-deep.ts`).
+//
+// Kind spread over 18 nodes: 7 encounter, 3 rest, 2 loot-cache, 2 gathering,
+// 2 hazard, 1 arrival cutscene (D31), 1 travel. No boss; one elite on the last
+// fight column (D30). Every fight pinned low (M3b's rule), level with the
+// Beacon Crags: 3 above the aqueducts, 4 below them.
+
+const LD_FIGHT_LEVEL_EARLY = 3;
+const LD_FIGHT_LEVEL_LATE = 4;
+
+/** Arrival down the Beacon Crags' stair, through the cavern roof. */
+const ldArrival: MapEventPool = {
+    id: 'ld-1.cutscene',
+    entries: [{
+        kind: 'cutscene', weight: 1,
+        payload: {
+            kind: 'cutscene',
+            lines: [
+                'The stair comes down out of the ice and through a hole in a cavern roof. The daylight stops at the last step.',
+                'Below, a lake, and lanterns on the far shore. Somebody carried every one of them down.',
+            ],
+            description: 'You come down into the Lantern Deep.',
+        },
+    }],
+};
+
+/** Every Lantern Deep fight, pinned (`cwEncounterPool` builds the pool). */
+const LD_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; level: number; description: string }> = {
+    // c1 — the drowned temple, the cathedral
+    'ld-3':  { slug: 'sump-maren',        level: LD_FIGHT_LEVEL_EARLY, description: 'Something waits in the flooded nave with its hair spread on the water. It asks you to stay.' },
+    'ld-5':  { slug: 'pale-brood',        level: LD_FIGHT_LEVEL_EARLY, description: 'Something pale has hatched in the font. It has not been fed, and it knows you are food.' },
+    // c2 — the central aqueduct
+    'ld-8':  { slug: 'wichtlein',         level: LD_FIGHT_LEVEL_EARLY, description: 'Something small and red knocks three times on the aqueduct stones. The chasm is under the third.' },
+    // c3 — the mushroom forest, the ossuary
+    'ld-11': { slug: 'tri-eyes',          level: LD_FIGHT_LEVEL_LATE,  description: 'Something watches from between the stalks. Three sockets, and none of them blink.' },
+    'ld-12': { slug: 'vampire-thrall',    level: LD_FIGHT_LEVEL_LATE,  description: 'Something tends the giant\'s bones for a master buried under them. It has been told to keep visitors.' },
+    // c4 — the fortress gate
+    'ld-13': { slug: 'ninth-rung-spider', level: LD_FIGHT_LEVEL_LATE,  description: 'Something hangs in the portcullis. It does not chase. The gate is the only way through.' },
+    // c5 — the ruined city: D30, the region's elite, on the last fight column
+    'ld-16': { slug: 'bone-wizard',       level: LD_FIGHT_LEVEL_LATE,  description: 'A robed skeleton reads in the flooded square. It studied its way out of the flesh, and it wants an examiner.' },
+};
+
+/** All three rests are CAMPS: Phase 52b keeps inns inside settlements. */
+const LD_CAMP_NODES: Record<string, string> = {
+    'ld-2':  'The ferryman lets you sleep under his lantern. He charges for the oil, not the floor.',
+    'ld-10': 'The traders let you sleep behind the stalls. They sell lamp oil by the drop.',
+    'ld-17': 'A landing on the stairway, dry and out of the draught. Someone left a lantern. It is out.',
+};
+
+/** The caverns' one material (`ncIronVeinPool`). */
+const LD_GATHER_NODES: Record<string, string> = {
+    'ld-7':  'Iron runs through the crystal. Up top the crystal is worth nothing. The iron is worth something.',
+    'ld-14': 'The forge left its slag heap full of unmelted ore. Nobody down here weighs it.',
+};
+
+const LD_HAZARD_NODES: Record<string, { damage: number; description: string }> = {
+    'ld-4':  { damage: 2, description: 'The aqueduct leaks. The walkway is slick, and the lake is a long way down.' },
+    'ld-9':  { damage: 3, description: 'The giant turns in its sleep. The dais is not wide enough for the both of you.' },
+};
+
+const LD_LOOT_NODES: Record<string, { currency: number; description: string }> = {
+    'ld-6':  { currency: 12, description: 'A torch-bearer\'s purse, dropped in the west tunnel. The torches are still lit.' },
+};
+
+/**
+ * The vault door — the Labyrinth's (map revamp M4, D24). Open on arrival, no
+ * gate: the round door turns, and the Aporia is behind it. Never consumed,
+ * so the door can be used again.
+ */
+const ldVaultDoor: MapEventPool = {
+    id: 'ld-15.labyrinth',
+    entries: [{
+        kind: 'labyrinth', weight: 1,
+        payload: {
+            kind: 'labyrinth',
+            description: 'The round door turns when you touch it. Behind it is a corridor of columns, and it goes on further than the cavern does.',
+        },
+    }],
+};
+
+/**
+ * The deep stair — the Lantern Deep's door. D27: the last Act 1 map's door
+ * leads into the shipped chain at fishing-village.
+ */
+const ldDeepStair: MapEventPool = {
+    id: 'ld-18.travel',
+    entries: [{
+        kind: 'travel', weight: 1,
+        payload: {
+            kind: 'travel',
+            destinationContinent: 'coastal-continent',
+            destinationMap: 'fishing-village',
+            description: 'The stair goes down past the last lantern. It comes out, a long way on, on a shore above a fishing village.',
+        },
+    }],
+};
+
+const LANTERN_DEEP_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
+    (() => {
+        const out: Array<{ nodeId: string; pool: MapEventPool }> = [];
+        for (let i = 1; i <= 18; i++) {
+            const nodeId = `ld-${i}`;
+            if (nodeId === 'ld-1') {
+                out.push({ nodeId, pool: ldArrival });
+            } else if (nodeId === 'ld-15') {
+                out.push({ nodeId, pool: ldVaultDoor });
+            } else if (nodeId === 'ld-18') {
+                out.push({ nodeId, pool: ldDeepStair });
+            } else if (LD_CAMP_NODES[nodeId]) {
+                out.push({ nodeId, pool: ncCampPool(nodeId, LD_CAMP_NODES[nodeId]!) });
+            } else if (LD_GATHER_NODES[nodeId]) {
+                out.push({ nodeId, pool: ncIronVeinPool(nodeId, LD_GATHER_NODES[nodeId]!) });
+            } else if (LD_HAZARD_NODES[nodeId]) {
+                const h = LD_HAZARD_NODES[nodeId]!;
+                out.push({ nodeId, pool: ncHazardPool(nodeId, h.damage, h.description) });
+            } else if (LD_LOOT_NODES[nodeId]) {
+                const l = LD_LOOT_NODES[nodeId]!;
+                out.push({ nodeId, pool: ncLootPool(nodeId, l.currency, l.description) });
+            } else {
+                const foe = LD_ENCOUNTER_FOES[nodeId];
+                if (!foe) throw new Error(`lantern-deep: ${nodeId} has no authored event kind or foe.`);
                 out.push({ nodeId, pool: cwEncounterPool(nodeId, foe) });
             }
         }
@@ -1385,8 +1639,6 @@ const ncArrival: MapEventPool = {
             ],
             description: 'The caverns take you in.',
         },
-        // The dark under the world: the scope widens, the outlook does not.
-        alignmentDelta: { outlook: -1, scope: 2 },
     }],
 };
 
@@ -1497,7 +1749,6 @@ const ncOldDelve: MapEventPool = {
             ],
             description: 'The bones of an older delve.',
         },
-        alignmentDelta: { outlook: -1, epistemology: 1 },
     }],
 };
 
@@ -1551,8 +1802,6 @@ const ncGateStandsOpen: MapEventPool = {
             destinationMap: 'northern-city',
             description: 'Past the gate, a stair climbs toward lamplight and the sound of a city. You climb.',
         },
-        // Out of the dark, upward: the outlook lifts, the world gets bigger.
-        alignmentDelta: { outlook: 1, scope: 1 },
     }],
 };
 
@@ -1615,8 +1864,6 @@ const ncyArrival: MapEventPool = {
             ],
             description: 'The northern city takes you in.',
         },
-        // Up out of the dark and into a working city: the world widens.
-        alignmentDelta: { outlook: 1, scope: 1 },
     }],
 };
 
@@ -1665,7 +1912,7 @@ const ncyAdvisorRumor: MapEventPool = {
                             {
                                 text: 'Stop. Ask what a province sends.',
                                 nextNodeId: 'asked',
-                                effect: { setFlag: 'boy-chased-the-rumor', alignmentDelta: { scope: 1 } },
+                                effect: { setFlag: 'boy-chased-the-rumor' },
                             },
                             {
                                 text: 'Note it, and keep walking.',
@@ -1675,7 +1922,7 @@ const ncyAdvisorRumor: MapEventPool = {
                             {
                                 text: 'Kings bury their own. Not your street.',
                                 nextNodeId: 'shrugged',
-                                effect: { setFlag: 'boy-shrugged-the-rumor', alignmentDelta: { scope: -1 } },
+                                effect: { setFlag: 'boy-shrugged-the-rumor' },
                             },
                         ],
                     },
@@ -1817,7 +2064,6 @@ const ncyAssizeBell: MapEventPool = {
             ],
             description: 'The assize bell.',
         },
-        alignmentDelta: { epistemology: 1, outlook: -1 },
     }],
 };
 
@@ -1853,7 +2099,6 @@ const ncyDrownedSlip: MapEventPool = {
             ],
             description: 'The drowned slip.',
         },
-        alignmentDelta: { scope: 1 },
     }],
 };
 
@@ -1885,8 +2130,6 @@ const ncyWaterGateStandsOpen: MapEventPool = {
             destinationMap: 'connecting-river',
             description: 'Past the weighing-house, the harbor opens onto open water. A current takes you before you decide to follow it.',
         },
-        // Out past the last wall, onto open water: the world widens again.
-        alignmentDelta: { outlook: 1, scope: 1 },
     }],
 };
 
@@ -1947,7 +2190,6 @@ const crArrival: MapEventPool = {
             ],
             description: 'Downriver.',
         },
-        alignmentDelta: { scope: 1 },
     }],
 };
 
@@ -2059,7 +2301,6 @@ const crRiverCourt: MapEventPool = {
                             {
                                 text: 'Walk on. This isn\'t yours to watch.',
                                 nextNodeId: undefined,
-                                effect: { alignmentDelta: { scope: -1 } },
                             },
                         ],
                     },
@@ -2143,7 +2384,6 @@ const crWaterGateStandsOpen: MapEventPool = {
             destinationMap: 'town-across-river',
             description: 'Past the reeve\'s post, the river opens onto the far bank. A town waits where the current slows.',
         },
-        alignmentDelta: { outlook: 1, scope: 1 },
     }],
 };
 
@@ -2185,7 +2425,6 @@ const tarArrival: MapEventPool = {
             ],
             description: 'The town across the river.',
         },
-        alignmentDelta: { outlook: 1 },
     }],
 };
 
@@ -2240,7 +2479,6 @@ const tarVillageCourt: MapEventPool = {
                             {
                                 text: 'Look away.',
                                 nextNodeId: undefined,
-                                effect: { alignmentDelta: { outlook: -1 } },
                             },
                         ],
                     },
@@ -2290,7 +2528,6 @@ const tarRibbonRoadOpen: MapEventPool = {
             destinationMap: 'the-capital',
             description: 'Past the Portreeve\'s desk, the ribbon-road runs straight to the capital. Every nominee walks it eventually.',
         },
-        alignmentDelta: { outlook: 1, scope: 1 },
     }],
 };
 
@@ -2323,7 +2560,6 @@ const capArrival: MapEventPool = {
             ],
             description: 'The capital.',
         },
-        alignmentDelta: { scope: 1 },
     }],
 };
 
@@ -2523,6 +2759,14 @@ export function registerMapEventContent(): void {
     for (const { nodeId, pool } of CHARCOAL_WOOD_POOLS) {
         registerMapEventPool(pool);
         setNodeEventPoolOverride('coastal-continent', 'charcoal-wood', nodeId, pool.id);
+    }
+    for (const { nodeId, pool } of BEACON_CRAGS_POOLS) {
+        registerMapEventPool(pool);
+        setNodeEventPoolOverride('northern-continent', 'beacon-crags', nodeId, pool.id);
+    }
+    for (const { nodeId, pool } of LANTERN_DEEP_POOLS) {
+        registerMapEventPool(pool);
+        setNodeEventPoolOverride('northern-continent', 'lantern-deep', nodeId, pool.id);
     }
     for (const { nodeId, pool } of FISHING_VILLAGE_NEW_PLAYER_POOLS) {
         registerMapEventPool(pool);

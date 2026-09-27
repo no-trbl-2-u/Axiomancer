@@ -13,7 +13,7 @@ import type { EventConsequence } from '../event.engine';
 /**
  * A slug is a lowercase word joined to another by `-` or `_`
  * (`starting-quest`, `shrine_keeper_met`). Deliberately narrower than "any
- * hyphen": a legitimate label may carry a minus sign (`-1 grace`) or an
+ * hyphen": a legitimate label may carry a minus sign (`-5 VITAE`) or an
  * en-dash, and neither is an identifier leak.
  */
 const looksLikeSlug = (s: string) => /[a-z0-9]+[-_][a-z0-9]+/.test(s);
@@ -88,10 +88,9 @@ describe('consequenceLabel (FE-002 branches)', () => {
         expect(consequenceLabel(q('heal', undefined, 5))).toBe('+5 VITAE');
     });
 
-    it('keeps the currency and grace branches unchanged', () => {
+    it('keeps the currency branch unchanged', () => {
         expect(consequenceLabel(q('currency', undefined, 1))).toBe('+1 shilling');
         expect(consequenceLabel(q('currency', undefined, 4))).toBe('+4 shillings');
-        expect(consequenceLabel(q('moral', undefined, 2))).toBe('+2 grace');
     });
 
     it('no labelled consequence leaks a slug', () => {
@@ -101,7 +100,6 @@ describe('consequenceLabel (FE-002 branches)', () => {
             q('card-learn', 'thin-hymn'),
             q('flag', 'chronicler_met'),
             q('currency', undefined, 3),
-            q('moral', undefined, -1),
         ];
         for (const c of all) {
             const label = consequenceLabel(c);
@@ -115,12 +113,12 @@ describe('visibleConsequences', () => {
     it('filters the unlabelled rows so the overflow count stays honest', () => {
         const list: EventConsequence[] = [
             { kind: 'flag', label: 'chronicler_met' } as EventConsequence,
-            { kind: 'moral', amount: 2 } as EventConsequence,
+            { kind: 'currency', amount: 2 } as EventConsequence,
             { kind: 'flag', label: 'chronicle_contributor' } as EventConsequence,
         ];
         const visible = visibleConsequences(list);
         expect(visible).toHaveLength(1);
-        expect(consequenceLabel(visible[0])).toBe('+2 grace');
+        expect(consequenceLabel(visible[0])).toBe('+2 shillings');
     });
 
     it('does not mutate its input', () => {

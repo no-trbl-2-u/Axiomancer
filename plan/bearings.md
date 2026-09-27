@@ -306,8 +306,9 @@ ambiguity.)
   (reachability, duplication, domination, wiring honesty) — never the
   repealed CQI/win-rate machinery, and there is no runtime telemetry
   to consult.
-- **Copy canon:** VITAE, STANCE, GRACE (né MORALE, spec 34 §5.6 / Phase
-  44h). Never HEALTH / GUARD / MORALE.
+- **Copy canon:** VITAE, STANCE. Never HEALTH / GUARD (as the stance
+  name) / MORALE. GRACE (né MORALE, Phase 44h) was removed in T6 (D39,
+  2026-09-27).
 - **Content location:** engine content in mechanics `src/*`
   libraries; player-facing strings in mobile presenters /
   `*.copy.ts`; no hardcoded copy in components; no hex literals
@@ -743,6 +744,21 @@ ambiguity.)
   D2 map re-authoring (D15/D16), then the D4 stat hooks + damage-scaling
   formula, then the card rework (decides D8 card upgrades and D20 die
   growth). Never re-propose cutting the Debug\* tools (D19).
+  **Amended 2026-09-26 (T, D36–D38):** step 3 is attended, not a loop
+  phase (build-plan row S3, blocked for T). After it, every player card
+  except the two grey starters is purged, along with every player keyword
+  but DEAL and GUARD (row P1, brief `plan/2026-09-26-card-purge.prompt.md`).
+  **Amended 2026-09-27 (T, D39–D42):** alignment, philosophy and GRACE are
+  removed (row T6, before S3; card colour stays, renamed). The stat model
+  is decided (families by where the effect lands, `base × stat ÷ 5`, no
+  caps; brief `plan/2026-09-27-stat-scaling.prompt.md`). A third grey card,
+  VULNERABLE, survives the purge with the other two.
+- **THE CARD HOLD (T, attended session 2026-09-26, D37).** No player card
+  and no player keyword is created outside a guided session with T. No
+  steward, `/forge`, `/expand`, phase or brief adds one, and none plans a
+  phase that would. `adjust-cards` and `adjust-keywords` are paused
+  (`skills/march.md` §3b skips them) until T re-arms them. Enemies,
+  equipment, NPCs, maps and the rest of the loop carry on.
 
 ## AUDIT category taxonomy (this project)
 

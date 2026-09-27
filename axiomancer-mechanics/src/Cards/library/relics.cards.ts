@@ -23,7 +23,7 @@ const knuckleboneRecant: Card = {
     id: 'knucklebone-recant',
     theme: 'trial',
     name: 'Knucklebone Recant',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'Testimony may be withdrawn. So may a bad cast. Sweep the bones off ' +
         'the table before they finish speaking, breathe your side of it ' +
@@ -48,7 +48,7 @@ const ossuaryDrawer: Card = {
     id: 'ossuary-drawer',
     theme: 'grave',
     name: 'The Ossuary Drawer',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'Each drawer bears a clerk\'s label: which knuckle, which saint, ' +
         'what the loan settled. File the bone back into the dark and let it ' +
@@ -74,7 +74,7 @@ const saintsFingerBone: Card = {
     id: 'saints-finger-bone',
     theme: 'choir',
     name: "The Saint's Finger-Bone",
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'The reliquary stands empty. The finger travels. Held loosely, it ' +
         'points — at the next verse, at the mended thing, at the door. The ' +

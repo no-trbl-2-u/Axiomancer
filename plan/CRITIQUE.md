@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-09-26 at commit 5d6eca56
-> Pass count: 54
+> Last pass: 2026-09-27 at commit 409b72bf
+> Pass count: 57
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -64,32 +64,133 @@
 > Pending), the late-game hub's faint desktop oval (declined), and the
 > painted "AxiomanceR" wordmark (waits on new art, per bearings).
 
+> **[critique pass 55, 2026-09-26, commit bd517cf9] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route bounces to the title with no save, as before;
+> the fixture-booted late-game hub covers that screen). 24 commits after
+> pass 54: map revamp M3b/M3c, T's calls D30-D35 (#394), and the title-line
+> fix. Re-verified: pass 54's MED title finding now reads "Your path begins
+> on the coast, at a windmill above the breakwater." at both viewports
+> (fixed at `1f5fa3b3`/`048eef75`; the row still needs moving to Done).
+> Filed MED: D33 reworded two of fishing-village's "breakwater" lines, but
+> its arrival scene, Old Marrow's quest offer, the quest text and a gate
+> fight still send the player to "the breakwater", which is now the Act 1
+> map they walked first. Reconfirmed and not re-filed: the combat
+> preview's doubled opening tell (pass 54, Pending), the DoT chip
+> mid-token wrap (pass 49, Pending; desktop "Dea"/"14", "POIS"/"8/p"/"ay"),
+> the late-game hub's faint desktop oval (declined), and the relic
+> "Grants X" echo (pass 53, Pending).
+
+> **[critique pass 56, 2026-09-27, commit 16fb2990] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route still bounces to the title with no save; the
+> fixture-booted late-game hub covers that screen). 12 commits after pass
+> 55: map revamp M3d (the Lantern Deep) and M3e (fishing-village after Act
+> 1), the card hold (D36-D38), and two baseline re-stamps. No new map
+> surface is in the screen set yet, and none of the 11 screens shows a
+> regression. Housekeeping: moved pass 54's title row to Done, since it
+> was fixed at `1f5fa3b3` and verified on screen twice. Filed MED: all six
+> hazard intros narrate the player in the third person as "he", while
+> every other narrated screen says "you". Checked and not filed: the
+> late-game hub states the travel instruction three times, but the chip
+> fades after 5 s (`exploration/index.tsx:47`). The chart also shows
+> empty space past the sheet edge, which is the deliberate no-clamp trade
+> documented at `MapCanvas.tsx:323`. Reconfirmed and not re-filed: the
+> fishing-village "breakwater" lines (pass 55, Pending; the arrival and
+> quest strings are unchanged), the combat preview's doubled opening
+> tell (pass 54, Pending), the DoT chip mid-token wrap (pass 49,
+> Pending; desktop "POIS"/"8/p"/"ay"), and the relic "Grants X" echo
+> (Pending).
+
+> **[critique pass 57, 2026-09-27, commit 409b72bf] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route still bounces to the title with no save; the
+> fixture-booted late-game hub covers that screen). 14 commits after pass
+> 56. Only M4 (the Lantern Deep's vault door into the Aporia) touched
+> product. The rest were M5's map docs, the stat-model plan (D39-D42),
+> three zero-diff steward passes, a digest and a baseline re-stamp. The
+> Aporia door is not in the screen set, and none of the 11 screens shows a
+> regression. Checked and not filed: the combat preview's five
+> identically labelled "PHASE N · SURGES" rows are the Brine Hag's real
+> sequence, not a render bug. The late-game hub's GRACE meter is not
+> filed either, because T6 removes GRACE (D39). The mobile hand fan's
+> "CHILBLA IN ..." wrap is the ratified two-line-then-ellipsis rule
+> (Done, burn-day 3.13). Reconfirmed and not re-filed: the six hazard
+> intros' "he"/"his" (pass 56, Pending), fishing-village's "breakwater"
+> lines (pass 55, Pending), the doubled opening tell (pass 54, Pending),
+> the DoT chip mid-token wrap (pass 49, Pending; desktop "Dea"/"14",
+> "POIS"/"8/p"/"ay"), and the relic "Grants X" echo (Pending). Zero fresh
+> findings this pass.
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
 
-### [MED] title — the title screen still promises the fishing village, but a new game now opens on the Breakwater
-- pass: 54 (commit 5d6eca56)
-- viewport: both (375×812 and 1280×800)
+### [MED] hazard — every hazard intro narrates the player as "he", while the rest of the game says "you"
+- pass: 56 (commit 16fb2990)
+- viewport: both (content, not layout)
+- category: voice
+- observation: the hazard card that opens every crossing speaks about the
+  player in the third person, as a man. Ashfall Crossing (the fixture
+  `l30-caverns-hazard-arrive`): "It fills his bootprints behind him, then
+  his lungs. ... It will not even notice him." All six authored hazards do
+  the same: "He will join them" (cracked cliff), "faster than he can climb
+  them" (the flooded crypt), "His body has begun eating itself" and "He
+  dies walking" (starvation), "They have his scent, his pace, and his
+  road" (bandits), "Men twice his size ... He has a day" (fever). Every
+  other narrated screen addresses the player directly: the rest stop ("You
+  stop to bind your wounds"), the fishing-village arrival ("You step out of
+  the hovel"), the combat tells ("sings your mercy back"). So on the one
+  screen where the stakes are highest, the game switches to a stranger,
+  and it fixes that stranger as male whichever preset is playing. Spec 34
+  §2.5.4 (MB-4) permits second person for instructing and pricing, and a
+  hazard intro prices a death, so "you" is allowed here.
+- evidence: `axiomancer-mechanics/src/World/Hazard/hazard.content.ts:550,566,582,598,614,630`
+  (the six `intro:` strings); `.critique-artifacts/{mobile,desktop}/10-hazard.{png,txt}`;
+  `axiomancer-mechanics/specs/34-dark-fantasy-campaign.md` §2.5.4 (MB-4)
+  and §2.2 V-7 (second person may never flatter, so "you" must not turn
+  these into "you are the last hope").
+- suggested fix: rewrite the six intros in the second person, keeping
+  their cold, priced shape ("It fills your bootprints behind you, then
+  your lungs."). Route the prose through `content-curator`. Add a test
+  that no `HazardDef.intro` contains a gendered third-person pronoun
+  (he/him/his/she/her).
+- source: critique-drive (unattended, §3.5)
+
+### [MED] fishing-village — the village still points the player at "the breakwater", which is now the first map they already walked
+- pass: 55 (commit bd517cf9)
+- viewport: both (content, not layout)
 - category: comprehension
-- observation: the first screen a player sees ends with the line "Your
-  path begins in the fishing village, where travelers gather before
-  venturing into the realms beyond." Since map revamp M3a (`dd204684`,
-  D27) a new game starts on the Breakwater, "a walled harbour on a storm
-  coast" whose start node is a windmill. The fishing village is now only
-  reachable later, across the river bridge. So the title makes a promise
-  the next screen breaks, at the moment a first-time player is building
-  their picture of the game. The line is also hardcoded in the component,
-  which breaks the package rule that player-facing copy must not be
-  hardcoded in components.
-- evidence: `axiomancer-mobile/components/TitleScreen.tsx:104-105`
-  (literal JSX string); `.critique-artifacts/{mobile,desktop}/01-title.png`
-  and `01-title.txt`; `axiomancer-mechanics/src/World/Continents/Coastal-Village/breakwater.ts`
-  (header: "A new game starts here (D27)").
-- suggested fix: derive the line from the engine's `STARTING_MAP`
-  definition (its name/description), or at minimum reword it to the
-  Breakwater and move it out of JSX into the copy module the rest of the
-  title uses, so the next start-map change cannot make it stale again.
+- observation: since M3a a new game starts on the Act 1 map named "The
+  Breakwater", and fishing-village is reached only after crossing all of
+  Act 1. D33 (T, 2026-09-26) kept the map's name and ruled that
+  fishing-village's lines must stop pointing at it, but reworded only two
+  (`fv-6`'s boss description and the King's brutal-defeat line). The rest
+  of the village still does. Its arrival scene says "Nobody here has
+  hauled a full net since the breakwater went quiet." and "Whichever way
+  you go, the breakwater is at the end of it." Old Marrow's offer (the
+  dialogue screen this pass captured) says a great crab "has nested at the
+  breakwater". The quest reads "Slay the King of Revenge holding court at
+  the breakwater." The column-6 gate fight is "On the breakwater steps a
+  skull...". A player who has just come from The Breakwater will read
+  these as a sign to go back, or as a map that loops. The arrival scene
+  also opens "You step out of the hovel", a new-game wake-up line that no
+  longer fits a player walking in from the Lantern Deep or the Beacon Crags.
+- evidence: `axiomancer-mechanics/src/World/MapEvents/content.ts` (`fvArrival`
+  lines, about 954-959; `FV_ENCOUNTER_FOES['fv-28']`, about 649);
+  `axiomancer-mechanics/src/World/Continents/Coastal-Village/maps.ts:79`
+  (Marrow's `offer`) and `:382` (`startingQuest.description`);
+  `axiomancer-mechanics/src/Enemy/enemy.library.ts:566,649` (King of Revenge
+  lore); D33 in `plan/2026-09-25-refactor-strategy.decisions.md`;
+  `.critique-artifacts/mobile/06-dialogue.txt`.
+- suggested fix: finish D33 over the remaining fishing-village lines, using
+  its own word, "the harbour wall" (or "the sea wall"). Reword the arrival
+  scene's hovel line so it reads as arriving rather than waking. Add a
+  test that no fishing-village player-facing string contains "breakwater".
+  Keep the map name. Route through `content-curator` for the prose.
 - source: critique-drive (unattended, §3.5)
 
 ### [LOW] combat — the pre-fight preview prints the foe's opening tell twice, word for word
@@ -557,6 +658,30 @@
 - source: critique-drive (unattended, §3.5)
 
 ## Done
+
+### [x] [MED] title — the title screen still promises the fishing village, but a new game now opens on the Breakwater — RESOLVED 2026-09-26 (commit 1f5fa3b3, test pin 048eef75; verified on screen passes 55-56)
+- pass: 54 (commit 5d6eca56)
+- viewport: both (375×812 and 1280×800)
+- category: comprehension
+- observation: the first screen a player sees ends with the line "Your
+  path begins in the fishing village, where travelers gather before
+  venturing into the realms beyond." Since map revamp M3a (`dd204684`,
+  D27) a new game starts on the Breakwater, "a walled harbour on a storm
+  coast" whose start node is a windmill. The fishing village is now only
+  reachable later, across the river bridge. So the title makes a promise
+  the next screen breaks, at the moment a first-time player is building
+  their picture of the game. The line is also hardcoded in the component,
+  which breaks the package rule that player-facing copy must not be
+  hardcoded in components.
+- evidence: `axiomancer-mobile/components/TitleScreen.tsx:104-105`
+  (literal JSX string); `.critique-artifacts/{mobile,desktop}/01-title.png`
+  and `01-title.txt`; `axiomancer-mechanics/src/World/Continents/Coastal-Village/breakwater.ts`
+  (header: "A new game starts here (D27)").
+- suggested fix: derive the line from the engine's `STARTING_MAP`
+  definition (its name/description), or at minimum reword it to the
+  Breakwater and move it out of JSX into the copy module the rest of the
+  title uses, so the next start-map change cannot make it stale again.
+- source: critique-drive (unattended, §3.5)
 
 ### [x] [HIGH] exploration — the late-game hub's node-graph map renders completely blank on mobile — RESOLVED 2026-09-24 (commit 2dfcafeb, issue #366)
 - pass: 48 (commit 87a8b6fc)

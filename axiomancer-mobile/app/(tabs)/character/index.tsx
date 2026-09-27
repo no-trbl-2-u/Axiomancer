@@ -18,24 +18,16 @@ import { XpChain } from '@/components/XpChain';
 import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
 import { nextPlayerPortrait, portraitIdFromFlags, PORTRAIT_FLAG_PREFIX } from '@/assets/images/portraits';
 import { useGameActions, useGameState, useGameStore } from '@/state/GameStoreProvider';
-import { graceBreakLegend, graceTrack, selectCharacterViewModel } from '@/state/presenters/character.engine';
+import { selectCharacterViewModel } from '@/state/presenters/character.engine';
 
 /**
  * The SELF sheet (`/character`).
  *
  * Purpose: render the character view model — identity, POOLS, DERIVED, SAVES &
- * TESTS, the GRACE balance and effects — as the tab's scrolling sheet.
- * Inputs: none by argument; reads the `player`, `moralMeter` and
- * `philosophicalAlignment` store slices and turns them into a view model via
- * `selectCharacterViewModel`.
+ * TESTS and effects — as the tab's scrolling sheet.
+ * Inputs: none by argument; reads the `player` store slice and turns it into
+ * a view model via `selectCharacterViewModel`.
  * Output: the sheet element tree.
- *
- * Resolves `05-character-fresh / 06-character-midgame (/character, GRACE
- * footer)`: the GRACE break legend added a stacked 12pt line under the pool
- * track, which pushed 'the pool above is this balance, read in tenths.' onto
- * the bottom tab bar and sliced it through the x-height. The legend now rides
- * the pool label row, which is already 13pt tall, so the sheet's below-pools
- * rhythm returns to where it sat before the legend existed.
  */
 export default function CharacterScreen() {
   const AXM = usePalette();
@@ -46,22 +38,7 @@ export default function CharacterScreen() {
   // selector. Pull the underlying slice and memoize the VM downstream
   // (mirrors the pattern fixed in event screen, Phase 6 Tick A).
   const player = useGameState((s) => s.player);
-  // FE-017: `selectCharacterViewModel` reads three slices — player,
-  // moralMeter and philosophicalAlignment — but the screen only ever handed
-  // it `{ player }`. The other two arrived undefined on every render, so the
-  // sheet's GRACE was pinned to the value for a zero balance and the
-  // alignment line to the default cell, no matter what the run had done. The
-  // exploration HUD reads moralMeter directly and showed 6/10 on the same
-  // save where this screen showed 5/10. Both slices are stable references, so
-  // subscribing to them keeps the getSnapshot identity contract intact.
-  const moralMeter = useGameState((s) => s.moralMeter);
-  const philosophicalAlignment = useGameState((s) => s.philosophicalAlignment);
-  const vm = useMemo(
-    () => selectCharacterViewModel({ player, moralMeter, philosophicalAlignment } as never),
-    [player, moralMeter, philosophicalAlignment],
-  );
-  // Audit 2026-09-12: GRACE track geometry from the presenter (engine band boundary).
-  const grace = graceTrack(vm.morale);
+  const vm = useMemo(() => selectCharacterViewModel({ player } as never), [player]);
   const store = useGameStore();
   const actions = useGameActions();
   const router = useRouter();
@@ -81,9 +58,6 @@ export default function CharacterScreen() {
   // commit / keep-deliberating dismisses. Snapshot the level + base
   // stat values at the moment the modal opens so it has the "before"
   // figures even if the engine mutates underneath us mid-allocation.
-  // The Account is static reference (gain/loss rules); collapsed by
-  // default so the live sheet fits one screen. One tap reveals it.
-  const [ledgerOpen, setLedgerOpen] = useState<boolean>(false);
   const [levelUpOpen, setLevelUpOpen] = useState<boolean>(false);
   const onOpenLevelUp = useCallback(() => setLevelUpOpen(true), []);
   const onCloseLevelUp = useCallback(() => setLevelUpOpen(false), []);
@@ -157,7 +131,7 @@ export default function CharacterScreen() {
   return (
     <ScreenBg>
       {/* Sheet header — portrait + identity, in the D&D character-sheet
-          idiom: bust top-left, name + alignment + XP centre, level box
+          idiom: bust top-left, name + XP centre, level box
           top-right. */}
       <View
         style={styles.sheetHeader}
@@ -178,12 +152,6 @@ export default function CharacterScreen() {
           <View style={styles.identityCol}>
             <SectionLabel size={9} color={AXM.bone}>{vm.subtitle}</SectionLabel>
             <Text style={styles.characterName} numberOfLines={1}>{vm.displayName}</Text>
-            {/* S3-sheet-C17: the cell names run to 33 characters
-              * ('Agnostic-Pessimistic-Transcendent') and this column is ~106pt
-              * wide, so a one-line clamp cut every long alignment to
-              * 'Agnostic-Neutral-…' with no second surface carrying the rest.
-              * Unclamped it wraps on its own hyphens and is readable in full. */}
-            <Text style={styles.identityAlignment} testID="self-identity-alignment">{vm.alignment.cellName}</Text>
             <View style={styles.xpRow}>
               {/* FE-004: value first, then the caption naming what it counts
                 * TOWARD. Side-by-side, the label and value each wrapped inside
@@ -285,103 +253,27 @@ export default function CharacterScreen() {
         <Text style={styles.deckLinkChevron}>›</Text>
       </Pressable>
 
-      {/* Pools — VITAE + GRACE (Problem 6 design; GRACE né MORALE, Phase 44h) */}
+      {/* Pools — VITAE (Problem 6 design) */}
       <View style={styles.section}>
         <SectionLabel size={13}>✠ POOLS</SectionLabel>
         <View style={styles.poolsCard}>
           {[
             { label: 'VITAE', value: player?.health ?? 0, max: player?.maxHealth ?? 1, color: AXM.blood, gloss: 'flesh holds' },
-            // Audit 2026-09-12: the GRACE geometry (tenths, fill, arrears tic)
-            // comes from the presenter, which reads the engine's band boundary.
-            { label: 'GRACE', value: grace.value, max: grace.max, fillPct: grace.fillPct, breakPct: grace.breakPct, color: AXM.sulfur, gloss: 'kept by the parish' },
           ].map((pool) => (
             <View key={pool.label} style={styles.poolRow}>
               <View style={styles.poolHeader} testID={`self-pool-header-${pool.label.toLowerCase()}`}>
                 <View style={styles.poolLabelRow}>
                   <Text style={[styles.poolLabel, { color: pool.color }]}>{pool.label}</Text>
                   <Text style={styles.poolGloss}>· {pool.gloss}</Text>
-                  {/* S3-sheet-C12: the tic was the only mark on the track and
-                    * carried no key, so it read as a notch in the bar. Copy
-                    * comes from the presenter; the threshold stays where it was.
-                    *
-                    * Repair (fresh-eyes GRACE footer): the key used to be its
-                    * own line under the track, which cost the sheet 12pt and
-                    * pushed 'read in tenths.' down onto the tab bar, sliced
-                    * through the x-height at BOTH viewports. Riding the label
-                    * line instead costs nothing — this row is already 13pt tall
-                    * for the pool name — so the sheet keeps its old rhythm and
-                    * the key stays beside the track it keys. */}
-                  {'breakPct' in pool && pool.breakPct != null && (
-                    <Text style={styles.poolBreakLegend} numberOfLines={1} testID="self-grace-break-legend">
-                      {graceBreakLegend()}
-                    </Text>
-                  )}
                 </View>
                 <Text style={styles.poolValue}>{pool.value}<Text style={styles.boneText}> / {pool.max}</Text></Text>
               </View>
               <View style={styles.poolTrack}>
-                <View style={[styles.poolFill, { width: `${'fillPct' in pool && pool.fillPct != null ? pool.fillPct : (pool.value / pool.max) * 100}%`, backgroundColor: pool.color }]} />
-                {'breakPct' in pool && pool.breakPct != null && (
-                  <View style={[styles.poolBreakTic, { left: `${pool.breakPct}%` }]} />
-                )}
+                <View style={[styles.poolFill, { width: `${(pool.value / pool.max) * 100}%`, backgroundColor: pool.color }]} />
               </View>
             </View>
           ))}
         </View>
-        <View style={styles.moraleLedger}>
-          <Pressable
-            style={styles.ledgerHeader}
-            onPress={() => setLedgerOpen((o) => !o)}
-            accessibilityRole="button"
-            accessibilityLabel={`The Account, ${ledgerOpen ? 'expanded' : 'collapsed'}`}
-            testID="self-morale-ledger-toggle"
-          >
-            <SectionLabel size={9} color={AXM.sulfur}>THE ACCOUNT</SectionLabel>
-            <Text style={styles.ledgerChevron}>{ledgerOpen ? '▾' : '▸'}</Text>
-          </Pressable>
-          {ledgerOpen && (
-            <>
-              <View style={styles.ledgerGrid}>
-                {[
-                  { v: '+i', l: 'every victory', c: AXM.sulfur },
-                  { v: '+ii', l: 'good rest at inn', c: AXM.sulfur },
-                  { v: '+i', l: 'mercy granted', c: AXM.sulfur },
-                  { v: '−ii', l: 'flee combat', c: AXM.blood },
-                  { v: '−i', l: 'ally falls', c: AXM.blood },
-                  { v: '−i', l: 'no rest in iii nights', c: AXM.blood },
-                ].map((r, i) => (
-                  <View key={i} style={styles.ledgerRow}>
-                    <Text style={[styles.ledgerValue, { color: r.c }]}>{r.v}</Text>
-                    <Text style={styles.ledgerDesc}>{r.l}</Text>
-                  </View>
-                ))}
-              </View>
-              <View style={styles.ledgerDivider} />
-              <Text style={styles.ledgerLore}>
-                {"At "}
-                <Text style={styles.bloodText}>ii or below</Text>
-                {" you are in arrears. The Parish remembers everything it was owed."}
-              </Text>
-            </>
-          )}
-        </View>
-      </View>
-
-
-      {/* Phase 92 — Grace (né Morale, Phase 44h).
-        * FE-003: this section and the GRACE bar under POOLS are the same
-        * resource at two scales — the bar is this balance bucketed to 1-10.
-        * Headed with the bare word GRACE they read as two separate pools with
-        * two different numbers, so the heading now names this one as the
-        * balance and a line under it states the relationship. Copy comes from
-        * the presenter (`vm.graceCopy`); the screen carries no literal. */}
-      <View style={styles.section}>
-        <SectionLabel size={13}>{vm.graceCopy.balanceHeading}</SectionLabel>
-        <View style={styles.moraleRow}>
-          <Text style={styles.moraleValue}>{Number.isFinite(vm.morale) ? vm.morale : 0}</Text>
-          <Text style={styles.moraleLabel}>{vm.graceCopy.balanceUnit}</Text>
-        </View>
-        <Text style={styles.graceRelation}>{vm.graceCopy.balanceRelation}</Text>
       </View>
 
       {/* Afflictions & Blessings */}
@@ -488,13 +380,10 @@ const useStyles = makeStyles((AXM) => ({
   sheetHeaderTopRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   portraitFrame: { width: 180, height: 216, borderWidth: 1, borderColor: AXM.ash, backgroundColor: AXM.deepBg, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   identityCol: { flex: 1, paddingTop: 2 },
-  identityAlignment: { fontFamily: FONTS.serifItalic, fontSize: 11, color: AXM.bone, marginTop: 1, marginBottom: 4 },
   characterName: { fontFamily: FONTS.gothic, fontSize: 22, lineHeight: 24, color: AXM.parchment, marginTop: 1 },
   levelBox: { width: 60, height: 66, borderWidth: 2, borderColor: AXM.parchment, backgroundColor: AXM.deepBg, alignItems: 'center', justifyContent: 'center' },
   levelText: { fontFamily: FONTS.gothic, fontSize: 34, lineHeight: 36, color: AXM.sulfur },
   levelCaption: { fontFamily: FONTS.sans, fontSize: 8, letterSpacing: 2, color: AXM.bone },
-  ledgerHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  ledgerChevron: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.sulfur },
   xpRow: { flexDirection: 'column', marginBottom: 2 },
   xpLabel: { fontFamily: FONTS.mono, fontSize: 10, color: AXM.bone, letterSpacing: 1 },
   xpValue: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.sulfur },
@@ -508,16 +397,6 @@ const useStyles = makeStyles((AXM) => ({
   baseCard: { flex: 1, paddingVertical: 10, paddingHorizontal: 6, backgroundColor: AXM.panelBg, borderWidth: 1, borderColor: AXM.ash, alignItems: 'center' },
   baseStatLabel: { fontFamily: FONTS.sans, fontSize: 13, letterSpacing: 2, color: AXM.bone, marginTop: 3 },
   baseStatValue: { fontFamily: FONTS.gothic, fontSize: 32, color: AXM.sulfur, lineHeight: 34, marginTop: 2 },
-  alignmentCellName: { fontFamily: FONTS.gothic, fontSize: 17, color: AXM.parchment, letterSpacing: 1, marginTop: 3 },
-  alignmentAxesRow: { flexDirection: 'row', gap: 6, marginTop: 5 },
-  alignmentAxisChip: { flex: 1, borderWidth: 1, borderColor: AXM.ash, borderStyle: 'dashed', paddingVertical: 5, paddingHorizontal: 6 },
-  alignmentAxisLabel: { fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 1, color: AXM.bone },
-  alignmentAxisBucket: { fontFamily: FONTS.mono, fontSize: 14, color: AXM.parchment, marginTop: 2 },
-  moraleRow: { flexDirection: 'row', alignItems: 'baseline', gap: 8, marginTop: 4 },
-  moraleValue: { fontFamily: FONTS.gothic, fontSize: 24, color: AXM.parchment },
-  moraleLabel: { fontFamily: FONTS.serif, fontSize: 14, color: AXM.bone, letterSpacing: 1 },
-  // FE-003 — the line that ties the raw balance to the 1-10 pool bar above.
-  graceRelation: { fontFamily: FONTS.serifItalic, fontSize: 11, color: AXM.bone, lineHeight: 15, marginTop: 2 },
   effectsList: { marginTop: 4, gap: 4 },
   emptyLabel: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.bone, letterSpacing: 1, textTransform: 'uppercase' },
   effectRow: { flexDirection: 'row', gap: 8, alignItems: 'center', borderWidth: 1, padding: 5, paddingHorizontal: 7 },
@@ -533,7 +412,6 @@ const useStyles = makeStyles((AXM) => ({
   slotItem: { fontFamily: FONTS.serif, fontSize: 11, color: AXM.parchment, lineHeight: 14 },
   cardsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 3 },
   boneText: { color: AXM.bone },
-  bloodText: { color: AXM.blood },
   flexOne: { flex: 1 },
   marginTop8: { marginTop: 5 },
   cardTile: { width: '48%', borderWidth: 2, padding: 4, paddingHorizontal: 6, backgroundColor: AXM.bg, flexDirection: 'row', alignItems: 'center', gap: 6 },
@@ -542,7 +420,7 @@ const useStyles = makeStyles((AXM) => ({
   poolRow: {},
   poolHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 2 },
   // `flexShrink` so the label row yields to the value instead of overflowing
-  // the card once the GRACE row carries the break legend as a third child.
+  // the card.
   poolLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 1 },
   poolLabel: { fontFamily: FONTS.sans, fontSize: 13, letterSpacing: 1.6 },
   poolNewBadge: { fontFamily: FONTS.mono, fontSize: 8, color: AXM.bg, backgroundColor: AXM.sulfur, paddingHorizontal: 4, paddingVertical: 1, letterSpacing: 1, overflow: 'hidden' },
@@ -550,17 +428,4 @@ const useStyles = makeStyles((AXM) => ({
   poolValue: { fontFamily: FONTS.mono, fontSize: 13, color: AXM.parchment },
   poolTrack: { position: 'relative' as const, height: 10, backgroundColor: AXM.deepBg, borderWidth: 1, borderColor: AXM.ash },
   poolFill: { position: 'absolute' as const, top: 1, bottom: 1, left: 1 },
-  poolBreakTic: { position: 'absolute' as const, top: -2, bottom: -2, width: 1, backgroundColor: AXM.blood },
-  // S3-sheet-C12 — the tic's key: blood-coloured so the line and the mark read
-  // as one thing. It rides the pool label row (no `marginTop`, no block of its
-  // own): stacked under the track it added 12pt to the sheet and drove the
-  // GRACE balance caption under the tab bar at both viewports.
-  poolBreakLegend: { fontFamily: FONTS.mono, fontSize: 8, color: AXM.blood, letterSpacing: 0.6, flexShrink: 1 },
-  moraleLedger: { marginTop: 5, backgroundColor: AXM.deepBg, borderWidth: 1, borderColor: AXM.ash, paddingVertical: 7, paddingHorizontal: 12 },
-  ledgerGrid: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 8, rowGap: 2, marginTop: 4 },
-  ledgerRow: { flexDirection: 'row', alignItems: 'baseline', gap: 6, width: '48%' },
-  ledgerValue: { fontFamily: FONTS.mono, fontSize: 13, width: 24, textAlign: 'right' },
-  ledgerDesc: { fontFamily: FONTS.serif, fontSize: 12, color: AXM.parchment },
-  ledgerDivider: { height: 1, borderTopWidth: 1, borderTopColor: AXM.ash, borderStyle: 'dashed', marginTop: 5, marginBottom: 4 },
-  ledgerLore: { fontFamily: FONTS.serifItalic, fontSize: 12, color: AXM.bone, lineHeight: 15 },
 }));

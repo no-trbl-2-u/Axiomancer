@@ -5,7 +5,6 @@ import { makeStyles, usePalette } from '@/theme/runtime';
 import { StatBar } from './StatBar';
 import { SectionLabel } from './SectionLabel';
 import { useGameState } from '@/state/GameStoreProvider';
-import { graceBreakLegend, graceTrack } from '@/state/presenters/character.engine';
 
 interface StatusCardProps {
   /**
@@ -36,21 +35,11 @@ export function StatusCard(props: StatusCardProps = {}) {
   const playerLevel = useGameState((s) => s.player?.level ?? 1);
   const playerHp = useGameState((s) => s.player?.health ?? 0);
   const playerHpMax = useGameState((s) => s.player?.maxHealth ?? 0);
-  const moralMeter = useGameState((s) => s.moralMeter ?? 0);
 
   const name = props.name ?? playerName;
   const level = props.level ?? playerLevel;
   const hp = props.hp ?? playerHp;
   const hpMax = props.hpMax ?? playerHpMax;
-
-  // Audit 2026-09-12: the track's number, fill, tic and arrears verdict all
-  // come from the presenter, which reads the engine's band boundary — the
-  // HUD, the SELF sheet and /memoir name one threshold.
-  const grace = graceTrack(moralMeter);
-  const moraleDisplay = grace.value;
-  const moraleMax = grace.max;
-  const moraleFillPercent = grace.fillPct;
-  const moraleBreakPercent = grace.breakPct;
 
   return (
     <View style={styles.card}>
@@ -70,29 +59,6 @@ export function StatusCard(props: StatusCardProps = {}) {
           * track's edge blood, so a nearly-empty bar reads as danger rather
           * than as a bar that failed to fill. */}
         <StatBar value={hp} max={hpMax} color={AXM.blood} label="VITAE" height={8} alarmAt={0.25} />
-        <View style={styles.moraleRow}>
-          <View style={styles.moraleHeader}>
-            <View style={styles.moraleLabelRow}>
-              <Text style={styles.moraleLabel}>GRACE</Text>
-              <Text style={styles.moraleGloss}>· KEPT BY THE PARISH</Text>
-            </View>
-            <Text style={styles.moraleValue}>
-              {moraleDisplay}<Text style={styles.moraleMax}> / {moraleMax}</Text>
-            </Text>
-          </View>
-          <View style={styles.moraleTrack}>
-            <View style={[styles.moraleFill, { width: `${moraleFillPercent}%` }]} />
-            <View style={[styles.moraleBreakTic, { left: `${moraleBreakPercent}%` }]} />
-          </View>
-          {/* S3-sheet-C12: the red tic sat in the GRACE track unlabelled and
-            * read as a notch in the bar. Its key, worded by the presenter. */}
-          <Text style={styles.moraleBreakLegend} testID="status-grace-break-legend">
-            {graceBreakLegend()}
-          </Text>
-          {grace.inArrears && (
-            <Text style={styles.moraleWarning}>the account runs to arrears.</Text>
-          )}
-        </View>
       </View>
     </View>
   );
@@ -141,76 +107,8 @@ const useStyles = makeStyles((AXM) => ({
     marginTop: 6,
     gap: 6,
   },
-  moraleRow: {},
-  moraleHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
-    marginBottom: 2,
-  },
-  moraleLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
-  moraleLabel: {
-    fontFamily: FONTS.sans,
-    fontSize: 9,
-    color: AXM.sulfur,
-    letterSpacing: 1.5,
-  },
-  moraleGloss: {
-    fontFamily: FONTS.mono,
-    fontSize: 7,
-    color: AXM.bone,
-    letterSpacing: 1,
-  },
-  moraleValue: {
-    fontFamily: FONTS.mono,
-    fontSize: 9,
-    color: AXM.parchment,
-  },
-  moraleTrack: {
-    position: 'relative' as const,
-    height: 8,
-    backgroundColor: AXM.deepBg,
-    borderWidth: 1,
-    borderColor: AXM.ash,
-  },
-  moraleFill: {
-    position: 'absolute' as const,
-    top: 1,
-    bottom: 1,
-    left: 1,
-    backgroundColor: AXM.sulfur,
-  },
-  moraleBreakTic: {
-    position: 'absolute' as const,
-    top: -2,
-    bottom: -2,
-    width: 1,
-    backgroundColor: AXM.blood,
-  },
-  // S3-sheet-C12 — the tic's key: blood-coloured so the line and the mark read
-  // as one thing.
-  moraleBreakLegend: {
-    fontFamily: FONTS.mono,
-    fontSize: 7,
-    color: AXM.blood,
-    letterSpacing: 0.6,
-    marginTop: 2,
-  },
   levelSubtitle: {
     color: AXM.bone,
-    marginTop: 2,
-  },
-  moraleMax: {
-    color: AXM.bone,
-  },
-  moraleWarning: {
-    fontFamily: FONTS.serifItalic,
-    fontSize: 9,
-    color: AXM.blood,
     marginTop: 2,
   },
 }));

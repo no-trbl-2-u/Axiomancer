@@ -137,11 +137,9 @@ describe('World/Continents Engine Tests', () => {
       const greetNode = captainBlackwater.dialogueTree!.nodes['greet'];
       expect(greetNode.choices!).toHaveLength(6); // +1 Phase 53e marrow_pressed read-back
       
-      // Test alignment-gated fair trade choice
+      // Formerly alignment-gated (ungated by T6 / D39): fair trade choice
       const fairTradeChoice = greetNode.choices!.find(c => c.text.includes('how you deal fair'));
-      expect(fairTradeChoice?.requires?.requiresAlignment?.axis).toBe('scope');
-      expect(fairTradeChoice?.requires?.requiresAlignment?.op).toBe('gte');
-      expect(fairTradeChoice?.requires?.requiresAlignment?.value).toBe(20);
+      expect(fairTradeChoice).toBeDefined();
     });
 
     it("Fisherman's Daughter has mentorship-themed dialogue with growth recognition", () => {
@@ -150,12 +148,8 @@ describe('World/Continents Engine Tests', () => {
       
       const greetNode = fishermansDaughter.dialogueTree!.nodes['greet'];
       
-      // Test growth recognition choice (Phase 63 pattern)
-      const recognitionChoice = greetNode.choices!.find(c => 
-        c.requires?.playerAlignmentCellChangedSince === true
-      );
-      expect(recognitionChoice).toBeDefined();
-      expect(recognitionChoice?.nextNodeId).toBe('growth_recognition');
+      // The growth-recognition branch is ungated now (T6 / D39).
+      expect(greetNode.choices!.some(c => c.nextNodeId === 'growth_recognition')).toBe(true);
     });
 
     it('Village Healer has medical ethics dilemmas with resource constraints', () => {
@@ -170,11 +164,11 @@ describe('World/Continents Engine Tests', () => {
       expect(situationNode.text.toLowerCase()).toContain('fever spreads');
       expect(situationNode.text).toContain('hoarded in the wealthy district');
       
-      // Test alignment-gated providence choice
+      // Formerly alignment-gated (ungated by T6 / D39): providence choice
       const providenceChoice = situationNode.choices!.find(c => 
         c.text.includes('Trust to providence')
       );
-      expect(providenceChoice?.requires?.requiresAlignment?.axis).toBe('epistemology');
+      expect(providenceChoice).toBeDefined();
     });
 
     it('Union Leader has labor rights themes with collective action choices', () => {
@@ -205,7 +199,6 @@ describe('World/Continents Engine Tests', () => {
         c.text.includes('both justice and mercy')
       );
       expect(mercyChoice?.effect?.setFlag).toBe('widow_mediator');
-      expect(mercyChoice?.effect?.moralDelta).toBe(3);
     });
   });
 
@@ -221,8 +214,7 @@ describe('World/Continents Engine Tests', () => {
       const veilChoice = greetNode.choices!.find(c =>
         c.text.includes('feels different')
       );
-      expect(veilChoice?.requires?.requiresAlignment?.axis).toBe('epistemology');
-      expect(veilChoice?.effect?.alignmentDelta?.epistemology).toBe(2);
+      expect(veilChoice).toBeDefined();
     });
 
     it('Chronicler has scholarly documentation themes with chronicle integration', () => {
@@ -250,8 +242,7 @@ describe('World/Continents Engine Tests', () => {
       const fateChoice = seekingNode.choices!.find(c => 
         c.text.includes('Fate guides us')
       );
-      expect(fateChoice?.requires?.requiresAlignment?.axis).toBe('epistemology');
-      expect(fateChoice?.requires?.requiresAlignment?.value).toBe(15);
+      expect(fateChoice).toBeDefined();
     });
 
     it('Forest Ranger has conservation vs exploitation themes', () => {
@@ -320,10 +311,9 @@ describe('World/Continents Engine Tests', () => {
     it('has alignment-gated choices with proper requirements', () => {
       const greetNode = captainBlackwater.dialogueTree!.nodes['greet'];
       const fairTradeChoice = greetNode.choices!.find(c => c.text.includes('how you deal fair'));
+      expect(fairTradeChoice).toBeDefined();
       
       // Choice should require scope >= 20
-      expect(fairTradeChoice?.requires?.requiresAlignment?.axis).toBe('scope');
-      expect(fairTradeChoice?.requires?.requiresAlignment?.value).toBe(20);
     });
 
     it('has choices with alignment delta effects', () => {
@@ -332,9 +322,8 @@ describe('World/Continents Engine Tests', () => {
       const wisdomChoice = greetNode.choices!.find(c => 
         c.text.includes('seen much of the world')
       );
+      expect(wisdomChoice).toBeDefined();
       
-      expect(wisdomChoice?.effect?.alignmentDelta?.scope).toBe(1);
-      expect(wisdomChoice?.effect?.alignmentDelta?.epistemology).toBe(1);
     });
 
     it('handles flag-gated choices and flag setting', () => {
@@ -345,16 +334,7 @@ describe('World/Continents Engine Tests', () => {
       );
       
       expect(solidarityChoice?.effect?.setFlag).toBe('union_supporter');
-      
-      // Test flag-gated choice (from beggar NPC in maps.ts)
-      const oldDockmasterTree = fishingVillage.npcs!.find(npc => npc.name === 'Old Marrow')?.dialogueTree;
-      if (oldDockmasterTree) {
-        const greetNode = oldDockmasterTree.nodes['greet'];
-        const alignmentChoice = greetNode.choices!.find(c => 
-          c.requires?.playerAlignmentCellChangedSince === true
-        );
-        expect(alignmentChoice).toBeDefined();
-      }
+
     });
 
     it('handles currency effects correctly', () => {
@@ -369,16 +349,15 @@ describe('World/Continents Engine Tests', () => {
       expect(helpChoice?.effect?.grantCurrency).toBe(-15);
     });
 
-    it('handles moral meter effects', () => {
-      // Test positive moral effect
+    it('keeps the choices that once carried moral effects', () => {
+      // These choices shifted GRACE until T6 (D39); they remain on offer.
       const wisdomNode = fishermansDaughter.dialogueTree!.nodes['worldly_wisdom'];
       const stayTrueChoice = wisdomNode.choices!.find(c => c.text.includes('Hold to what you are'));
-      expect(stayTrueChoice?.effect?.moralDelta).toBe(2);
+      expect(stayTrueChoice).toBeDefined();
       
-      // Test negative moral effect
       const troublesNode = merchantWidow.dialogueTree!.nodes['talk_troubles'];
       const vengeanceChoice = troublesNode.choices!.find(c => c.text.includes('hire the best hunters'));
-      expect(vengeanceChoice?.effect?.moralDelta).toBe(-1);
+      expect(vengeanceChoice).toBeDefined();
     });
   });
 
@@ -419,23 +398,5 @@ describe('World/Continents Engine Tests', () => {
       }
     });
 
-    it('has observer recognition patterns across multiple NPCs', () => {
-      // Test that multiple NPCs have alignment observer recognition choices
-      const npcTrees = [
-        captainBlackwater.dialogueTree!,
-        fishermansDaughter.dialogueTree!,
-        shrineKeeper.dialogueTree!,
-        chronicler.dialogueTree!,
-        wanderingPhilosopher.dialogueTree!
-      ];
-
-      npcTrees.forEach(tree => {
-        const greetNode = tree.nodes['greet'];
-        const observerChoice = greetNode.choices!.find(c => 
-          c.requires?.playerAlignmentCellChangedSince === true
-        );
-        expect(observerChoice).toBeDefined();
-      });
-    });
   });
 });

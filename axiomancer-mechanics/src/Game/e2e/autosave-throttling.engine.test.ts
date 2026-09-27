@@ -59,18 +59,6 @@ describe('Phase 51 — autosave throttling restricts adapter.save to DURABLE_ACT
             payload: { stat: 'body' },
         });
 
-        // SHIFT_MORAL_METER — not in durable set.
-        store.getState().dispatch({
-            type: 'SHIFT_MORAL_METER',
-            payload: { delta: 5 },
-        });
-
-        // SHIFT_PHILOSOPHICAL_ALIGNMENT — not in durable set.
-        store.getState().dispatch({
-            type: 'SHIFT_PHILOSOPHICAL_ALIGNMENT',
-            payload: { delta: { epistemology: 5 } },
-        });
-
         expect(adapter.saves).toBe(0);
     });
 

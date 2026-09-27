@@ -55,7 +55,7 @@ import type { Card } from './types';
 const theSwornSecond: Card = {
     id: 'the-sworn-second',
     name: 'The Sworn Second',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     persistentEffect:
         'At the end of each round, while you carry fewer than 3 stacks of ' +
         'THORNS, your retainer answers a blow leveled at you: gain THORNS 1 ' +

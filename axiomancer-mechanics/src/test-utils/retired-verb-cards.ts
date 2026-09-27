@@ -34,7 +34,7 @@ const slagRunoff: Card = {
     id: 'slag-runoff',
     theme: 'grave',
     name: 'Slag Runoff',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'What the mold cannot hold does not return to the crucible — it ' +
         'runs, still glowing, wherever the floor tilts. Let it tilt toward ' +
@@ -68,7 +68,7 @@ const ingotOfRuin: Card = {
     id: 'ingot-of-ruin',
     theme: 'grave',
     name: 'Ingot of Ruin',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'Every pip you hoarded was a syllable of their name. Pour the whole ' +
         'crucible at once and read it back to them — cast, cooled, and ' +
@@ -108,7 +108,7 @@ const gritBetweenStones: Card = {
     id: 'grit-between-stones',
     theme: 'vigil',
     name: 'Grit Between Stones',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'The wall was never smooth. Everything they have thrown at it is ' +
         'still in it, edge out — and today the mortar gives it all back.',
@@ -142,7 +142,7 @@ const theUnmovedMover: Card = {
     id: 'the-unmoved-mover',
     theme: 'vigil',
     name: 'The Unmoved Mover',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'It moves everything and is moved by nothing. Prove it for one full ' +
         'round — let their whole argument arrive and change you not at all — ' +
@@ -190,7 +190,7 @@ const aSweeterPoison: Card = {
     id: 'a-sweeter-poison',
     theme: 'choir',
     name: 'A Sweeter Poison',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'Flattery with the pit left in. They swallow the kindness whole, and ' +
         'every flaw you ever named in them turns over at once — sweeter ' +
@@ -231,7 +231,7 @@ const theLongLedger: Card = {
     id: 'the-long-ledger',
     theme: 'choir',
     name: 'The Long Ledger',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'Every wound is an entry, and entries accrue. Today the ledger calls ' +
         'in two accounts at full term, early — and opens a fresh line of ' +
@@ -269,7 +269,7 @@ const seedcornSacrifice: Card = {
     id: 'seedcorn-sacrifice',
     theme: 'choir',
     name: 'Seedcorn Sacrifice',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'Eat the seed and there is no next year; sow the souls you meant to ' +
         'keep and next year arrives early, bleeding. The granary weeps. The ' +
@@ -313,7 +313,7 @@ const captatioBenevolentiae: Card = {
     id: 'captatio-benevolentiae',
     theme: 'trial',
     name: 'Captatio Benevolentiae',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'Win the room before the argument starts. Spoken first, the courtesy '
         + 'is a foundation; spoken third, it is only a pleasantry.',
@@ -345,7 +345,7 @@ const inMediasRes: Card = {
     id: 'in-medias-res',
     theme: 'trial',
     name: 'In Medias Res',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'Skip the preamble — begin where the wound already is. An argument '
         + 'entered early runs deeper than one arrived at politely.',
@@ -378,7 +378,7 @@ const coda: Card = {
     id: 'coda',
     theme: 'grave',
     name: 'Coda',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'The piece is not over when the notes run out — the ending is where '
         + 'the theme comes back to collect. Save it for the empty bars.',
@@ -411,7 +411,7 @@ const dyingEcho: Card = {
     id: 'dying-echo',
     theme: 'grave',
     name: 'Dying Echo',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'Every hall answers the last word longest. Say it when nothing '
         + 'follows, and it never quite stops being said.',
@@ -444,7 +444,7 @@ const wagesOfWeakness: Card = {
     id: 'wages-of-weakness',
     theme: 'debt',
     name: 'Wages of Weakness',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'You have already bled for this argument — so collect. Every drop '
         + 'you paid earlier comes back with interest, and the interest cuts.',
@@ -480,7 +480,7 @@ const answeredInKind: Card = {
     id: 'answered-in-kind',
     theme: 'debt',
     name: 'Answered in Kind',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'They opened the wound; you only widened the custom. What was taken '
         + 'in blood is returned in blood, at the prevailing rate.',
@@ -539,7 +539,7 @@ const barbedCompliment: Card = {
     id: 'barbed-compliment',
     theme: 'rot',
     name: 'Barbed Compliment',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'Praise with the hook left in. They wear the kind word like a medal, '
         + 'and every wound you deal afterward finds the pin — while something '
@@ -569,7 +569,7 @@ const thePouredRampart: Card = {
     id: 'the-poured-rampart',
     theme: 'grave',
     name: 'The Poured Rampart',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'Why hammer a blade when the argument only needs a wall? Tip the '
         + 'crucible over the footing and let everything you saved harden '
@@ -601,7 +601,7 @@ const interestOnTheFlesh: Card = {
     id: 'interest-on-the-flesh',
     theme: 'debt',
     name: 'Interest on the Flesh',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'The granary does not ask whose blood watered the field. Open a vein, '
         + 'book the yield in advance, and mark the debtor — every harvest '
@@ -634,7 +634,7 @@ const enteredIntoEvidence: Card = {
     id: 'entered-into-evidence',
     theme: 'trial',
     name: 'Entered into Evidence',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'State tomorrow under oath. When it arrives exactly as sworn, the '
         + 'court has no choice: the prophecy stops being a guess and becomes '
@@ -672,7 +672,7 @@ const stolenCadence: Card = {
     id: 'stolen-cadence',
     theme: 'vigil',
     name: 'Stolen Cadence',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'Every argument keeps time. Lift one beat from their downstroke and '
         + 'the whole phrase stumbles — then play the stolen measure back, in '
@@ -704,7 +704,7 @@ const unbrokenCountenance: Card = {
     id: 'unbroken-countenance',
     theme: 'choir',
     name: 'Unbroken Countenance',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'Let the whole tirade land and change nothing in your face. There is '
         + 'no rebuttal like composure: they watch their best blow be received '

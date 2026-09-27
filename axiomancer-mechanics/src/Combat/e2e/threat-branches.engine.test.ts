@@ -44,7 +44,7 @@ afterEach(() => vi.restoreAllMocks());
 registerSandboxCards([
     {
         id: 'qa-branch-bleed', name: 'QA Branch Bleed',
-        philosophicalAspect: 'mind', description: 'branch-divergence fixture',
+        color: 'mind', description: 'branch-divergence fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         // Intensity 2: bleed decaysPerTick — it must still be standing (at 1)
         // when the phase-2 branch reads the bearer at its START.
@@ -52,13 +52,13 @@ registerSandboxCards([
     },
     {
         id: 'qa-branch-poison', name: 'QA Branch Poison',
-        philosophicalAspect: 'mind', description: 'branch-divergence fixture',
+        color: 'mind', description: 'branch-divergence fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 3 }],
     },
     {
         id: 'qa-branch-mark', name: 'QA Branch Mark',
-        philosophicalAspect: 'mind', description: 'branch-divergence fixture',
+        color: 'mind', description: 'branch-divergence fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'opponent', intensity: 1, duration: 3 }],
     },

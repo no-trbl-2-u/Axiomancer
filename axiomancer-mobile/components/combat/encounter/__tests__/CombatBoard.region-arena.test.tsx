@@ -3,6 +3,12 @@
  * `CombatCombatantPane`'s arena backdrop. Fixture pattern lifted from
  * `CombatBoard.S1-board.test.tsx`: a real engine-initialized `CombatViewModel`
  * mounted through `withAllProviders`.
+ *
+ * D32 (T, 2026-09-26): combat shows a plain black scene "for now". While
+ * `ARENA_PLATES_SHOWN` is off, the first block pins that every region gets the
+ * same black backdrop; the phase-83 threading block runs again the moment the
+ * switch comes back on. The plates themselves stay pinned at the unit level in
+ * `assets/images/combat/__tests__/index.test.ts`.
  */
 
 import React from 'react';
@@ -11,6 +17,7 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 
 import { initializeCombatEncounter, rollEncounterDice } from '@mechanics';
+import { ARENA_PLATES_SHOWN, BLACK_ARENA_ALT } from '@/assets/images/combat';
 import { CombatBoard, type DragController } from '@/components/combat/encounter/CombatBoard';
 import { buildCombatViewModel, type CombatViewModel } from '@/state/presenters/combat-encounter.engine';
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
@@ -47,7 +54,17 @@ function renderBoard(region: string | undefined) {
     return render(tree);
 }
 
-describe('CombatBoard: region-keyed arena backdrop (phase 83)', () => {
+(ARENA_PLATES_SHOWN ? describe.skip : describe)('CombatBoard: plain black arena while plates are off (D32)', () => {
+    it('draws the same black scene, and no plate, for a plated region, an unplated one and none', () => {
+        for (const region of ['the Drowned Parish', 'The Breakwater', undefined]) {
+            const backdrop = renderBoard(region).getByTestId('combat-arena-backdrop');
+            expect(backdrop.props.source).toBeUndefined();
+            expect(backdrop.props.accessibilityLabel).toBe(BLACK_ARENA_ALT);
+        }
+    });
+});
+
+(ARENA_PLATES_SHOWN ? describe : describe.skip)('CombatBoard: region-keyed arena backdrop (phase 83)', () => {
     it('the Drowned Parish resolves to the coastal-village plate, not the fallback', () => {
         const withRegion = renderBoard('the Drowned Parish');
         const withoutRegion = renderBoard(undefined);

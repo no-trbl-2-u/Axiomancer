@@ -39,49 +39,49 @@ const rng = (): number => 0.5;
 // power any of them, and all rank 1 so IMMOLATE-style rank picks stay stable.
 registerSandboxCards([
     {
-        id: 'qa-bn-deal', name: 'QA Deal', philosophicalAspect: 'body',
+        id: 'qa-bn-deal', name: 'QA Deal', color: 'body',
         description: 'deal fixture', tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         free: { damage: 3 },
         specialMechanics: [{ kind: 'deal', amount: 20 }],
     },
     {
-        id: 'qa-bn-multi', name: 'QA Multi', philosophicalAspect: 'body',
+        id: 'qa-bn-multi', name: 'QA Multi', color: 'body',
         description: 'multi-hit fixture', tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         free: { damage: 2 },
         specialMechanics: [{ kind: 'deal', amount: 10, hits: 3 }],
     },
     {
-        id: 'qa-bn-pierce', name: 'QA Pierce', philosophicalAspect: 'body',
+        id: 'qa-bn-pierce', name: 'QA Pierce', color: 'body',
         description: 'pierce fixture', tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         free: { damage: 2 },
         specialMechanics: [{ kind: 'deal', amount: 20, pierce: true }],
     },
     {
-        id: 'qa-bn-wrath', name: 'QA Wrath', philosophicalAspect: 'body',
+        id: 'qa-bn-wrath', name: 'QA Wrath', color: 'body',
         description: 'wrath fixture', tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         free: { wrath: 5 },
         specialMechanics: [{ kind: 'wrath', amount: 5 }],
     },
     {
-        id: 'qa-bn-chain', name: 'QA Chain', philosophicalAspect: 'body',
+        id: 'qa-bn-chain', name: 'QA Chain', color: 'body',
         description: 'chain fixture', tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         free: { chain: 4 },
         specialMechanics: [{ kind: 'chain', amount: 4 }],
     },
     {
-        id: 'qa-bn-flay', name: 'QA Flay', philosophicalAspect: 'body',
+        id: 'qa-bn-flay', name: 'QA Flay', color: 'body',
         description: 'flay fixture', tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         free: { flay: 1 },
         specialMechanics: [{ kind: 'flay', stacks: 2 }],
     },
     {
-        id: 'qa-bn-execute', name: 'QA Execute', philosophicalAspect: 'body',
+        id: 'qa-bn-execute', name: 'QA Execute', color: 'body',
         description: 'execute fixture', tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         free: { damage: 1 },
         specialMechanics: [{ kind: 'execute', atPct: 0.5 }, { kind: 'deal', amount: 20 }],
     },
     {
-        id: 'qa-bn-overkill', name: 'QA Overkill', philosophicalAspect: 'body',
+        id: 'qa-bn-overkill', name: 'QA Overkill', color: 'body',
         description: 'overkill fixture', tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         free: { damage: 1 },
         specialMechanics: [
@@ -90,13 +90,13 @@ registerSandboxCards([
         ],
     },
     {
-        id: 'qa-bn-echo-deal', name: 'QA Echo Deal', philosophicalAspect: 'body',
+        id: 'qa-bn-echo-deal', name: 'QA Echo Deal', color: 'body',
         description: 'echo+deal fixture', tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         free: { damage: 1 },
         specialMechanics: [{ kind: 'deal', amount: 10 }, { kind: 'echo' }],
     },
     {
-        id: 'qa-bn-twin', name: 'QA Twin', philosophicalAspect: 'body',
+        id: 'qa-bn-twin', name: 'QA Twin', color: 'body',
         description: 'twin fixture', tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         free: { damage: 1 },
         specialMechanics: [{ kind: 'twin' }],

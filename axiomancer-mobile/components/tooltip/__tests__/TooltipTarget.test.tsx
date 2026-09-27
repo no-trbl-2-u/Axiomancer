@@ -100,7 +100,6 @@ describe('<TooltipTarget>', () => {
         const kinds: { kind: any; id: string }[] = [
             { kind: 'stat', id: 'HEART' },
             { kind: 'derived', id: 'body-save' },
-            { kind: 'alignment', id: 'moral' },
             { kind: 'affliction', id: 'bleeding' },
             { kind: 'blessing', id: 'blessed' },
             { kind: 'effect', id: 'tier1_heart_attack' },

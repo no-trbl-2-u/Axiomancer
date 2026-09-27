@@ -1,7 +1,7 @@
 /**
  * MapEvents (Spec 23) — type surface.
  *
- * Eleven event kinds plus a weighted-pool authoring model. ('quest' joined
+ * Twelve event kinds plus a weighted-pool authoring model. ('quest' joined
  * the original eight in Phase 137 and was retired in Phase 61 — the
  * Quest Board minigame it launched is gone.) See `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/23-map-events.md`
  * for the original spec; see
@@ -16,13 +16,14 @@ import type { NPC, DialogueTree } from '../../NPCs/types';
 import type { EnemySlug } from '../../Enemy/enemy.library';
 import type { ContinentName, MapName } from '../map.library';
 import type { Encounter, NodeId } from '../types';
-import type { PhilosophicalAlignment } from '../../Ledger/types';
 import type { BlacksmithVariantOffer } from '../Blacksmith/blacksmith.types';
+import type { LabyrinthActId } from '../Labyrinth/types';
 
 /**
  * The MapEvent kinds. 'narration' (a dialogue-backed monologue shell)
  * joined the original eight in 2026-06; 'quest' (Phase 137) was retired
- * in Phase 61; 'travel' (inter-map doors) joined 2026-08-28.
+ * in Phase 61; 'travel' (inter-map doors) joined 2026-08-28; 'labyrinth'
+ * (the Aporia's door, map revamp M4, D24) joined 2026-09-27.
  */
 export type MapEventKind =
     | 'encounter'
@@ -35,7 +36,8 @@ export type MapEventKind =
     | 'loot-cache'
     | 'narration'
     | 'blacksmith'
-    | 'travel';
+    | 'travel'
+    | 'labyrinth';
 
 // ─── Per-kind authoring payloads ──────────────────────────────────────────────
 
@@ -187,6 +189,19 @@ export interface TravelPayload {
     description?: string;
 }
 
+/**
+ * Labyrinth door (map revamp M4, D24): arriving enters THE APORIA. The engine
+ * only names the act: the durable progress's `currentAct`, so a first visit
+ * opens act I and a return opens the act the player left. The world swap,
+ * its overworld snapshot and the way back belong to the host (mobile
+ * `enterLabyrinthAction`). Never consumed, so the door can be used again, like
+ * `travel`.
+ */
+export interface LabyrinthDoorPayload {
+    kind: 'labyrinth';
+    description?: string;
+}
+
 /** Discriminated union of all authoring payloads. */
 export type MapEventPayload =
     | EncounterPayload
@@ -199,7 +214,8 @@ export type MapEventPayload =
     | LootCachePayload
     | NarrationPayload
     | BlacksmithPayload
-    | TravelPayload;
+    | TravelPayload
+    | LabyrinthDoorPayload;
 
 // ─── Pools ────────────────────────────────────────────────────────────────────
 
@@ -209,13 +225,6 @@ export interface MapEventPoolEntry {
     /** Weight for weighted-random draw; must be positive. */
     weight: number;
     payload: MapEventPayload;
-    /**
-     * Per-axis shift on the Phase 42 philosophical alignment cube, applied
-     * by `resolveMapEvent` after the matching handler runs. Each axis clamps
-     * to [-100, +100]. Missing axes in the partial pass through unchanged.
-     * Authoring band: ±1..±5; defining ±10 choices reserved for endgame.
-     */
-    alignmentDelta?: Partial<PhilosophicalAlignment>;
 }
 
 export interface MapEventPool {
@@ -248,6 +257,8 @@ export type ResolvedEvent =
     // The world state on the result has already crossed; the resolved event
     // names where the door led so hosts can narrate the departure.
     | { kind: 'travel';      destinationContinent: ContinentName; destinationMap: MapName; description?: string }
+    // The state is unchanged; the host enters `act` through its own snapshot.
+    | { kind: 'labyrinth';   act: LabyrinthActId; description?: string }
     | { kind: 'none' };
 
 export interface ResolveMapEventResult {

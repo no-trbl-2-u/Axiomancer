@@ -1,5 +1,7 @@
 import { breakwaterLayout } from './breakwater.layout';
 import { charcoalWoodLayout } from './charcoal-wood.layout';
+import { beaconCragsLayout } from './beacon-crags.layout';
+import { lanternDeepLayout } from './lantern-deep.layout';
 import { fishingVillageLayout } from './fishing-village.layout';
 import { northernForestLayout } from './northern-forest.layout';
 import { cavernsLayout } from './caverns.layout';
@@ -16,6 +18,10 @@ const REGISTRY: Record<string, MapLayout> = {
     'breakwater': breakwaterLayout,
     // Map revamp M3b — Act 1's forest, past the Breakwater's bridge.
     'charcoal-wood': charcoalWoodLayout,
+    // Map revamp M3c — Act 1's mountains, past the Charcoal Wood's stair cave.
+    'beacon-crags': beaconCragsLayout,
+    // Map revamp M3d — Act 1's underworld, below the Beacon Crags' glacier shrine.
+    'lantern-deep': lanternDeepLayout,
     'fishing-village': fishingVillageLayout,
     'northern-forest': northernForestLayout,
     'caverns': cavernsLayout,

@@ -23,7 +23,13 @@
 | M1: art | #383 | Open, stacked on #382. Four plates at `axiomancer-mobile/assets/images/maps/act1-{coast,forest,mountains,underworld}.webp` (2400×2400, D22), exported as `ACT1_PLATES`. **`act1-landmarks.json`** holds 73 landmark positions as plate fractions, 17–20 per plate. Also `act1-prompts.md`, provenance and art-catalog entries. |
 | M2: per-map sheet | #384 | Open, stacked on #383. `MapLayout.sheet: MapSheet` (`width`, `height`, `scale`, `backdrop`, `plateOpacity`, `chartTexture`) replaced the global `SPREAD` and the region-regex plate pick. The shipped maps use `legacySheet(plate)` and render pixel-identical. |
 | M3a: the Breakwater + new start | #385 | **Merged 2026-09-26** (2b289bb2). See §3a. |
-| M3b: the Charcoal Wood | #389 | Built 2026-09-26. See §3b. |
+| M3b: the Charcoal Wood | #389 | Merged 2026-09-26. See §3b. |
+| M3c: the Beacon Crags | #392 | Merged 2026-09-26. See §3c. |
+| T's calls on M3a/M3b | #394 | Merged 2026-09-26: D30–D35, applied to all three built maps. See §3d. |
+| M3d: the Lantern Deep | #396 (mirror) | Shipped 2026-09-26 straight to main by the loop. See §3e. |
+| M3e: fishing-village retune | #398 (mirror) | Shipped 2026-09-26 straight to main by the loop. See §3f. |
+| M4: the Labyrinth door | #399 (mirror) | Shipped 2026-09-27 straight to main by the loop. See §3g. |
+| M5: map docs | #400 (mirror) | Shipped 2026-09-27 straight to main by the loop (1ec11390). |
 
 **First act of the session:** get #382 → #383 → #384 merged, in order (the
 repo uses merge commits; auto-merge is disabled). Each PR's decisions-file
@@ -187,9 +193,8 @@ Two things M3b found that M3c and M3d must not rediscover:
   the payload's `level` (2 early, 3 late; `cwEncounterPool`). Keep the
   mountains and underworld low too (about 3–4), and let
   `charcoal-wood.engine.test.ts`'s level pin be the model. Fishing-village's
-  boss is level 3 (`FV_BOSS_LEVEL`) and still comes after all of Act 1: that
-  ordering is an open difficulty question, filed in `plan/AUDIT.md`, not
-  something a map PR settles.
+  boss was level 3 (`FV_BOSS_LEVEL`) while it came after all of Act 1; M3e
+  settled that ordering (§3f), not a map PR.
 - **Inns only inside settlements.** `rest-shelter.engine.test.ts` (Phase 52b)
   fails any `inn` outside a settlement, so wild rests are camps (`ncCampPool`).
 
@@ -216,6 +221,125 @@ Two things M3b found that M3c and M3d must not rediscover:
 7. Gates: mechanics `verify`, mobile `verify`, root `npm test`, then
    `baseline:regen` after committing (it refuses a dirty tree).
 
+## 3c. M3c — shipped state (2026-09-26)
+
+**The Beacon Crags:** `beacon-crags`, prefix `bc-`, 17 nodes on the 17
+mountain landmarks, under `northern-continent` (D28). Engine:
+`Continents/Northern-Continent/beacon-crags.ts`. The Charcoal Wood's stair
+cave (`cw-20`) now travels here: the cross-continent step is a plain `travel`
+payload with `destinationContinent: 'northern-continent'`, the same shape as
+the shipped `nf-10` → caverns door, so nothing new was needed. The stair comes
+up on the crag road (`bc-1`, the top pass, arrival cutscene); the map runs
+down the mountain in three lanes (west, middle, east) and closes on the glacier
+shrine (`bc-17`, a stair down into the ice: travel to fishing-village until M3d
+re-points it). Events: `BEACON_CRAGS_POOLS` in `MapEvents/content.ts`, built
+from the caverns' camp, iron, hazard and loot builders and M3b's pinned
+`cwEncounterPool`. Enemy pool: the caverns' list, now the shared
+`CAVERNS_POOL` const (M3d borrows it too).
+
+- **Levels:** fights pinned 3 on the upper mountain, 4 below the gorge
+  (`beacon-crags.engine.test.ts`). Still above fishing-village's level-3 boss
+  that comes later: the ordering question stays the one filed in AUDIT.
+- **Rests:** all camps. The shepherds' village is a fold, not an inn, so the
+  52b inn census did not move. The mountain inn is shut (you sleep in the cart).
+- **Why the top pass, not the tunnel bridge, is the entry:** the tunnel bridge
+  sits at y 0.88, and the D16 pin fails any entry below 0.8. The mine
+  entrance (right edge) was the other candidate; the top pass lets every
+  band span the plate's full width, and no drawn edge crosses another.
+- **For M3d:** the Lantern Deep's arrival is the glacier shrine's stair, so an
+  entry near the top or left of the underworld plate reads as the same stair.
+
+## 3d. T's calls on M3a/M3b (D30–D35, 2026-09-26): what M3d must follow
+
+T answered the agent calls M3a and M3b filed. They apply to every Act 1 map,
+and #394 retrofitted them onto the Breakwater, the Charcoal Wood and the
+Beacon Crags:
+
+- **One elite per region, no boss (D30).** Exactly one fight is an
+  `elite`-tier foe from the borrowed roster, on the map's last fight column:
+  on the single pre-door node if the graph narrows to one, otherwise on the
+  centre lane of the last ring. Pin it low like the rest (3–4). Every other
+  fight is `normal`/`simple` tier. The Lantern Deep borrows `CAVERNS_POOL`,
+  whose elites are mabadi, frayed-one, bone-totem, bone-wizard,
+  cursed-paladin, unpaid-delver and spore-warden; mabadi and cursed-paladin
+  are already used by the Crags and the Wood. Add the map to `ACT1_MAPS` in
+  `World/e2e/act1-elites.engine.test.ts`.
+- **Arrival is a cutscene (D31).** Every Act 1 map opens on a short arrival
+  scene; the new-game start (`bw-1`) is one too. Arrival lines describe the
+  place only: no story facts the overview doesn't carry.
+- **Combat is plain black for now (D32).** `ARENA_PLATES_SHOWN = false`.
+  Still add the new region to `AWAITING_PLATE` (checklist step 5); the
+  resolver test keeps counting plates.
+- **Fishing-village's difficulty is not a map PR's call (D35).** It's
+  retuned from a `/combat-playtest` measurement after M3d ships (filed in
+  `plan/AUDIT.md`).
+- **No new NPCs in map PRs (D29 stands).** The Breakwater's own people are
+  an attended story-spec session (D34).
+
+## 3e. M3d — shipped state (2026-09-26)
+
+**The Lantern Deep:** `lantern-deep`, prefix `ld-`, 18 nodes on the 18
+underworld landmarks, under `northern-continent`. Engine:
+`Continents/Northern-Continent/lantern-deep.ts`. The Beacon Crags' glacier
+shrine (`bc-17`) now travels here; the stair comes down through the cavern roof
+at the surface stair (`ld-1`, arrival cutscene), the map runs down the plate in
+bands west to east (4, 4, 3, 3, 2) and closes on the deep stair (`ld-18`),
+which travels to fishing-village (D27). Events: `LANTERN_DEEP_POOLS` in
+`MapEvents/content.ts`, the caverns' builders and `CAVERNS_POOL` again.
+
+- **Elite (D30):** bone-wizard at the ruined city (`ld-16`), level 4. The last
+  fight column is two lanes (ruined city, east stairs) with no centre, so the
+  east stairs are a camp and the ruined city is the column's only fight.
+- **Levels:** 3 in the first two bands, 4 below. Rests: all camps.
+- **The vault door (`ld-15`)** is a plain loot cache ("coins on the sill of a
+  round door that does not open") until M4 makes it the Labyrinth door.
+- **Halo:** `MapSheet.nodeHalo` (new, optional) draws a pale radial glow under
+  each node mark; only the Lantern Deep's sheet sets it.
+
+## 3f. M3e — shipped state (2026-09-26)
+
+Fishing-village's fights are all pinned at 4 (`FV_FIGHT_LEVEL`, the Crags' and
+the Deep's late band) and the King at 5 (`FV_BOSS_LEVEL`, one above the last
+Act 1 elite; the early HIDE ramp gives him HIDE 2 there).
+`World/e2e/fishing-village-after-act1.engine.test.ts` derives both from the
+Act 1 maps, so a later retune of Act 1 fails it rather than silently leaving
+the village below.
+
+- **Measurement** (combat-playtest harness, greedy and blind, a kitted player
+  at level 3, 7/7/7, with the grey office plus N card rewards). A full Act 1
+  clear banks about 2,870 XP, which is level 3 and close to 4. The six village
+  fights are 100% at 4 for every deck. The King with 3 rewards: 99% at 3, 95%
+  at 4, 91% at 5, 90% at 6. The bare grey office loses to him at every level
+  from 3 to 6, so the pin does not move that floor. The tier-1 draft matrix
+  deck wins everything (93-100%) and says nothing here.
+- **Found on the way:** the Charcoal Wood's `cw-7` kudan is a `unique` foe,
+  so its XP rescales to 2 x 500 = 1,000: one fight is worth a full level,
+  more than the rest of the wood together. Filed in `plan/AUDIT.md`.
+
+## 3g. M4 — shipped state (2026-09-27)
+
+The Lantern Deep's vault door (`ld-15`) is the Labyrinth's (D24). Brief:
+`plan/phases/phase_M4_labyrinth_door.md`.
+
+- **Engine:** a new `labyrinth` map-event kind (`LabyrinthDoorPayload`). It
+  resolves to `{ kind: 'labyrinth', act }`, where `act` is the durable
+  progress's `currentAct` (act I on a first visit). It leaves the state
+  alone and is never consumed, so the door can be used again. The way on
+  (`ld-16`, `ld-17`) opens as at any node. The loot cache that sat there is gone.
+- **Mobile:** `resolveCurrentMapEventAction` settles the overworld and then
+  enters through `enterLabyrinthAction`, so the snapshot is the door and
+  LEAVE puts the player back on it. `<LabyrinthGate>` (root layout) routes to
+  `/labyrinth` for every way in; the dev menu no longer pushes it itself.
+- **Resume:** the snapshot is also written to `LabyrinthProgress.returnWorld`.
+  The cold boot (`createAppStore`) and the slot load
+  (`hydrateStoreWithGameState`) rebuild the visit from it
+  (`state/labyrinth/resume.ts`). Exit and `resetRun` clear it.
+- **Found on the way:** the engine's two save paths never wrote
+  `GameState.labyrinth`, although it was documented as persisted, so all
+  Aporia progress was lost on reload. Both paths now share one field list
+  (`durableSlice` in `Game/store.ts`), pinned by
+  `Game/e2e/save-labyrinth.engine.test.ts`.
+
 ## 4. Definition of done, and who does what
 
 - **M3a:** merged 2026-09-26 (#385).
@@ -224,6 +348,6 @@ Two things M3b found that M3c and M3d must not rediscover:
   ticks M3b in `plan/steps/01_build_plan.md` and unblocks M3c.
 - **M3c, M3d, M4, M5:** rows in `plan/steps/01_build_plan.md` for the
   autonomous loop, in strict order (each requires the row above it `[x]`).
-  Each ships as one PR per `/ship-a-phase`, with the pins in §2 and the
-  pattern in §3a.
+  Each ships as one PR per `/ship-a-phase`, with the pins in §2, the
+  pattern in §3a–3b and T's calls in §3d.
 - Whoever ships a row updates §0 of this file with its PR.

@@ -31,7 +31,7 @@ const almsOfBreath: Card = {
     id: 'alms-of-breath',
     theme: 'choir',
     name: 'Alms of Breath',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'The Choir does not beg. It offers — a bar of warm song pressed into ' +
         'the cold of you — and notes, in the parish ledger, what loosens as ' +
@@ -55,7 +55,7 @@ const theBellRope: Card = {
     id: 'the-tolling-hand',
     theme: 'choir',
     name: 'The Tolling Hand',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'Hemp gone black with sixty years of hands. You put your weight on it ' +
         'and the tower answers, and something in the churchyard stops what it ' +
@@ -79,7 +79,7 @@ const sixpenceForTheFerryman: Card = {
     id: 'sixpence-for-the-ferryman',
     theme: 'choir',
     name: 'Sixpence for the Ferryman',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'Coin under the tongue, pressed in while the jaw still gives. The old ' +
         'rite says it buys passage. The parish has never established who is ' +
@@ -103,7 +103,7 @@ const passingBell: Card = {
     id: 'passing-bell',
     theme: 'choir',
     name: 'Passing-Bell',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'In the pale parish the bell is rung before the death, to spare the ' +
         'ringer a second climb. Each round it tolls a little louder, so the ' +
@@ -124,7 +124,7 @@ const theCharnelCenser: Card = {
     id: 'the-charnel-censer',
     theme: 'choir',
     name: 'The Charnel Censer',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'Brass on a short chain, swung hard enough to be a weapon and often ' +
         'used as one. What burns inside it is not frankincense and has not ' +
@@ -148,7 +148,7 @@ const lastRitesSungEarly: Card = {
     id: 'last-rites-sung-early',
     theme: 'choir',
     name: 'Last Rites, Sung Early',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'Why keep vigil at a sickbed when the psalm already knows the ending? ' +
         'The Choir sings the rite at double time, and whatever ailed them ' +
@@ -171,7 +171,7 @@ const naveFullOfStrangers: Card = {
     id: 'nave-full-of-strangers',
     theme: 'choir',
     name: 'Nave Full of Strangers',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'Nobody knows whose funeral it is. They came for the warmth and ' +
         'stayed for the singing, and now there are forty of them between you ' +
@@ -195,7 +195,7 @@ const thePardonersLadder: Card = {
     id: 'the-pardoners-ladder',
     theme: 'choir',
     name: "The Pardoner's Ladder",
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'Seven rungs, one for each sin he was licensed to forgive, and an ' +
         'eighth he added himself. He is dead. The ladder is still leaning ' +
@@ -222,7 +222,7 @@ const theOffertoryPlate: Card = {
     id: 'the-offertory-plate',
     theme: 'choir',
     name: 'The Offertory Plate',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'It goes hand to hand and is never empty, and the parish long ago ' +
         'stopped asking what fills it. Spend from it and the Choir grows ' +
@@ -250,7 +250,7 @@ const theCoffinPath: Card = {
     id: 'the-coffin-path',
     theme: 'choir',
     name: 'The Coffin Path',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'The old way over the fell, walked only by the dead and whoever is ' +
         'carrying them. Four bearers, four stones to rest the box on, four ' +
@@ -276,7 +276,7 @@ const everyNameInTheRegister: Card = {
     id: 'every-name-in-the-register',
     theme: 'choir',
     name: 'Every Name in the Register',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'Baptisms, marriages, burials, in three hands and four inks, back to ' +
         'a year nobody can read. You start at the front and you do not stop. ' +
@@ -307,7 +307,7 @@ const choirboneReliquary: Card = {
     id: 'choirbone-reliquary',
     theme: 'choir',
     name: 'Choirbone Reliquary',
-    philosophicalAspect: 'body',
+    color: 'body',
     persistentEffect:
         'Whenever an affliction on the foe expires or is consumed, gain 1 SOUL and PLEA 4.',
     description:
@@ -326,7 +326,7 @@ const thePaleCongregation: Card = {
     id: 'the-pale-congregation',
     theme: 'choir',
     name: 'The Pale Congregation',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'They fill the pews from the back, as they always did, and they are ' +
         'thicker than a wall and quieter than snow. Nothing gets through a ' +
@@ -354,7 +354,7 @@ const miserere: Card = {
     id: 'miserere',
     theme: 'choir',
     name: 'Miserere',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'Have mercy is a request with a price, and the Choir sings it holding ' +
         'the whole collection. Every soul in the plate goes up at once, one ' +
@@ -381,7 +381,7 @@ const teDeumForADyingThing: Card = {
     id: 'te-deum-for-a-dying-thing',
     theme: 'choir',
     name: 'Te Deum for a Dying Thing',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'The thanksgiving hymn, sung for a thing that has not finished dying ' +
         'yet, in the full voice the parish keeps for saints. Nobody has ever ' +
@@ -410,7 +410,7 @@ const theLongAmen: Card = {
     id: 'the-long-amen',
     theme: 'choir',
     name: 'The Long Amen',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     persistentEffect:
         'At the end of each round, the foe gains PLEA equal to 3 times the number of Souls you hold.',
     description:

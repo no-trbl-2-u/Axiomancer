@@ -28,7 +28,7 @@ const promissoryCut: Card = {
     id: 'promissory-cut',
     theme: 'debt',
     name: 'Promissory Cut',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'The note is short and the terms are shorter: whatever is asked, ' +
         'paid at the asking. You open the vein and the page turns itself. ' +
@@ -51,7 +51,7 @@ const tallyStick: Card = {
     id: 'tally-stick',
     theme: 'debt',
     name: 'Tally Stick',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'Hazel, split lengthwise, notched once for every debt and once again ' +
         'for the interest. You keep the stock and they keep the foil, and the ' +
@@ -74,7 +74,7 @@ const chalkOnTheDoorpost: Card = {
     id: 'chalk-on-the-doorpost',
     theme: 'debt',
     name: 'Chalk on the Doorpost',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'A short white stroke by the lintel, added at dusk, never wiped off. ' +
         'The grocer does not have to say anything and neither do you. Rain ' +
@@ -99,7 +99,7 @@ const theVig: Card = {
     id: 'the-vig',
     theme: 'debt',
     name: 'The Vig',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'Nobody remembers borrowing. The interest remembers for them. Every ' +
         'morning the figure is larger, and every morning is the last ' +
@@ -125,7 +125,7 @@ const theGracePeriod: Card = {
     id: 'the-grace-period',
     theme: 'debt',
     name: 'The Grace Period',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'The house is generous about when. It has never once been generous ' +
         'about whether. Sleep tonight behind a door nobody will knock on, ' +
@@ -153,7 +153,7 @@ const deadPledge: Card = {
     id: 'dead-pledge',
     theme: 'debt',
     name: 'The Dead Pledge',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'Mort gage, the old clerks wrote it: the dead pledge. The die that ' +
         'does not belong to the hand is not wasted — it is collateral. The ' +
@@ -181,7 +181,7 @@ const insolvency: Card = {
     id: 'insolvency',
     theme: 'debt',
     name: 'Insolvency',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'There is a threshold past which the arithmetic stops being about ' +
         'you and starts being about them. Cross it. A man with nothing left ' +
@@ -202,7 +202,7 @@ const usury: Card = {
     id: 'usury',
     theme: 'debt',
     name: 'Usury',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'The sin is not the lending. The sin is charging for time, which ' +
         'belongs to nobody, and which the church says is God\'s. You have ' +
@@ -228,7 +228,7 @@ const anEvenReckoning: Card = {
     id: 'an-even-reckoning',
     theme: 'debt',
     name: 'An Even Reckoning',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'The clerk will not close a book on an odd number — bad luck follows ' +
         'an uneven sum out the door and into the world. So he counts twice, ' +
@@ -259,7 +259,7 @@ const distraint: Card = {
     id: 'distraint',
     theme: 'debt',
     name: 'Distraint',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'The bailiff does not knock. He inventories. What cannot be paid in ' +
         'blood is paid in kind — the least things you carry go onto the ' +
@@ -283,7 +283,7 @@ const surplusage: Card = {
     id: 'surplusage',
     theme: 'debt',
     name: 'Surplusage',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'Matter pleaded beyond what the case required. The clerks strike it ' +
         'out and the court ignores it and it is still there, in the margin, ' +
@@ -308,7 +308,7 @@ const aPoundOfFlesh: Card = {
     id: 'a-pound-of-flesh',
     theme: 'debt',
     name: 'A Pound of Flesh',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'Nearest the heart, the bond specifies, and no blood — as though the ' +
         'two could be separated by anybody who had ever cut anything. You ' +
@@ -339,7 +339,7 @@ const blankIndenture: Card = {
     id: 'blank-indenture',
     theme: 'debt',
     name: 'Blank Indenture',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'The sum is left open, in the oldest courtesy of the trade. You ' +
         'fill the figure in with the only ink the house accepts, and the ' +
@@ -365,7 +365,7 @@ const confessionOfJudgment: Card = {
     id: 'confession-of-judgment',
     theme: 'debt',
     name: 'Confession of Judgment',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'You sign away the right to be heard about it later. No hearing, no ' +
         'defence, no delay — only the entry, already drafted, waiting for the ' +
@@ -390,7 +390,7 @@ const theRedLedger: Card = {
     id: 'the-red-ledger',
     theme: 'debt',
     name: 'The Red Ledger',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     persistentEffect:
         'Whenever you pay RECOIL, gain WRATH 1 and deal 6 to the foe.',
     description:
@@ -411,7 +411,7 @@ const theLastAssize: Card = {
     id: 'the-last-assize',
     theme: 'debt',
     name: 'The Last Assize',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'The circuit judge comes round once. Every account in the parish is ' +
         'read out at once, in a voice that does not tire, and there is no ' +
@@ -439,7 +439,7 @@ const jointAndSeveral: Card = {
     id: 'joint-and-several',
     theme: 'debt',
     name: 'Joint and Several',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     persistentEffect:
         'Whenever you pay RECOIL, the foe loses twice that much VITAE.',
     description:

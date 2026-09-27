@@ -30,10 +30,10 @@ const mockRewardsVM: HazardRewardsVM = {
     ],
     consequences: [
         {
-            id: 'align-1',
-            icon: 'align',
-            name: '-1 Alignment',
-            desc: 'Moral cost',
+            id: 'wound-1',
+            icon: 'wound',
+            name: '-3 VITAE',
+            desc: 'Blood cost',
         },
     ],
     consequencesLabel: '☠ CONSEQUENCES — 1 ROUND LOST',
@@ -113,7 +113,7 @@ describe('RewardsOverlay', () => {
 
     it('renders consequence items', () => {
         const { getByLabelText } = render(<RewardsOverlay {...mockProps} />);
-        expect(getByLabelText('-1 Alignment. Moral cost')).toBeTruthy();
+        expect(getByLabelText('-3 VITAE. Blood cost')).toBeTruthy();
     });
 
     it('renders card offers', () => {

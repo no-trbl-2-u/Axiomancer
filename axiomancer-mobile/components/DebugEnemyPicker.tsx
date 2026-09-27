@@ -5,8 +5,8 @@
  * Pick a roster (map chips), then a foe (chips; bosses in blood). The
  * pick stages the same `combat-prelude` the live map produces
  * (`stageEncounter`, state/dev/enemy-picker.ts), jumps to the WILDS tab,
- * and `<EncounterModalOverlay>` engages — so rewards, journal unlocks,
- * and alignment deltas all pay out through the real `endCombat`.
+ * and `<EncounterModalOverlay>` engages — so rewards and journal unlocks
+ * all pay out through the real `endCombat`.
  *
  * Renders null outside dev builds.
  */

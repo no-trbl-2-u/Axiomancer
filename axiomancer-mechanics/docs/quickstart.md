@@ -12,24 +12,23 @@
 
 ## 1. What's shipped (module by module)
 
-The engine ships eleven modules; each exports a small set of
+The engine ships ten modules; each exports a small set of
 canonical entry points. Cross-link to the per-module doc for depth.
 
 | Module | Marquee surface | Phases | Doc |
 |---|---|---|---|
 | **Character** | `createCharacter`, presets (`apprentice`/`wanderer`/`sage`), equipment + stat allocation, `Character.id` auto-gen | 18, 29, 35 | [character.md](./character.md) |
 | **Combat** | Hazard-Pattern Combat (`initializeCombatEncounter` / `playCombatCard` / `resolveThreatPhase` / `simulateHazardPatternCombat`), the stance read / friendship | 9, 15, 32, 36, 38, 165+ | [combat.md](./combat.md) |
-| **Effects** | `applyEffect`, Tier 1-3 application rules, intensity scaling, fallacy payloads | 1, 3, 38, 44, 48 | [effects.md](./effects.md) |
-| **Enemy** | `createEnemy`, AI strategies + outlook-bias (Phase 45), enemy-card caster path (Phase 49), per-enemy alignment + `friendshipReward` (+ Phase 69 `alignmentDelta`) + Phase 68 `BefriendabilityConfig` | 7, 45, 49, 57, 60, 62, 68, 69 | [enemy.md](./enemy.md) |
-| **Game** | `createGameStore`, save/load + migrators (`GAME_STATE_VERSION` 24), event surface, autosave throttling, persistence adapters, run-loop semantics (`resetRun` + `runId`), Codex slice | 9, 11, 12, 21, 35, 38, 50, 51, 55, 72, 73 | [gameloop.md](./gameloop.md) |
+| **Effects** | `applyEffect`, Tier 1-3 application rules, intensity scaling | 1, 3, 38, 48 | [effects.md](./effects.md) |
+| **Enemy** | `createEnemy`, AI strategies, enemy-card caster path (Phase 49), per-enemy `friendshipReward` + Phase 68 `BefriendabilityConfig` | 7, 49, 57, 60, 62, 68 | [enemy.md](./enemy.md) |
+| **Game** | `createGameStore`, save/load + migrators (`GAME_STATE_VERSION` 26), event surface, autosave throttling, persistence adapters, run-loop semantics (`resetRun` + `runId`), Codex slice | 9, 11, 12, 21, 35, 38, 50, 51, 55, 72, 73 | [gameloop.md](./gameloop.md) |
 | **Items** | `addItem` / shop reducers (`buyItem`/`sellItem`/`defaultSellPrice` — Phase 37), set items engine (Phase 54), `previewTemplateAtRarity` UI-tier preview helper (Phase 75 — closes the user-jot for mobile item-library mod-visibility), `previewTemplateAtAllRarities` batch wrapper (Phase 76 — UI tooltip / item-detail rarity-strip views in a single call) | 5, 5b, 37, 54, 75, 76 | [items.md](./items.md), [equipment.md](./equipment.md) |
-| **NPCs** | `getDialogueNode` + `visibleChoices`, alignment gates (Phase 46), tree-id observer cache (Phase 63) | 14, 22, 46, 63 | [npcs.md](./npcs.md) |
-| **The Oaths** | 3-axis alignment cube + 27-cell library, `alignmentDelta` authoring, enemy alignment + AI bias (Phase 45), alignment-gated content (Phase 46) | 42-46 | [oaths.md](./oaths.md) |
+| **NPCs** | `getDialogueNode` + `visibleChoices`, quest / flag gates | 14, 22 | [npcs.md](./npcs.md) |
 | **Cards** | `executeCard` caster-agnostic (Phase 49), `learnCard` + runtime learning (Phase 30), Tier 1-3 card library + combat-state synergy clauses | 4, 4b, 30, 33, 44, 49, 66 | cards.md |
 | **World** | `createStartingWorld` + per-continent maps, MapEvents engine (`resolveMapEvent`, eleven-kind pool taxonomy — Phase 23/24; the Phase 137 'quest' kind was later retired), expanded fishing-village (Phase 65 — 25 nodes, 3 sub-areas) | 8, 23, 24, 25, 31, 65 | [world.md](./world.md) |
 | **Utils** | RNG harness, max VITAE, dice / type guards | 11 | — |
 
-Marquee mechanics shipped end-to-end: moral meter (Phase 10), set
+Marquee mechanics shipped end-to-end: set
 bonuses (Phase 54), befriendable enemies with per-enemy reward
 content + flag-gated dialogue (Phase 60 / 62).
 
@@ -88,7 +87,7 @@ npm run game -- --script automation/scripts/walkthroughs/<name>.json  # direct r
 |---|---|---|---|
 | `boss-encounter` | Long combat loop driving a boss-tier enemy through `debugSpawn` + body attacks | sage | coastal-tyrant |
 | `character-sheet` | Character tab rendering (Phase 26 unit 3) | apprentice | — |
-| `endgame-loadout` | **Phase 64** — Tier 3 card (`bootstrap-paradox`) + boss combat + enemy alignment bias | sage | coastal-tyrant |
+| `endgame-loadout` | **Phase 64** — Tier 3 card (`bootstrap-paradox`) + boss combat | sage | coastal-tyrant |
 | `item-use` | In-combat `item` action consuming a `healing-potion` | wanderer | sandbag (debug) |
 | `map-events` | Map tab + `resolveMapEvent` dispatcher firing on `fv-2` | apprentice | — |
 | `save-load` | Save / Load tabs + `--save-file` slot + Phase 31 fv-1 → fv-2 → fv-3 rollback | apprentice | — |
@@ -116,8 +115,7 @@ the full inventory + exit expectations.
 4. **Friendship path** (Phase 36) — both combatants picking `defend`
    on the same round increments `combat.friendshipCounter`. When it
    reaches `FRIENDSHIP_COUNTER_MAX` (3), `endCombat()` reports
-   `outcome: 'friendship'`, grants half-XP + full loot + a +1
-   moralMeter shift.
+   `outcome: 'friendship'`, grants half-XP + full loot.
 5. **Per-enemy `friendshipReward`** (Phase 60 + 62) — if the
    befriended enemy carries an authored `friendshipReward`, items
    append to `report.loot`, `xpBonus` adds to `report.xpGained`,
@@ -136,41 +134,30 @@ the full inventory + exit expectations.
    semantics. First boss-tier authored config: `CoastalTyrant`
    (`hpGate { belowPct: 0.4 }`, `requiredStances: ['heart']`,
    `roundsThreshold: 5`).
-7. **Per-enemy `alignmentDelta` on friendship** (Phase 69 — closes
-   Spec 14 Q4) — if the befriended enemy carries
-   `friendshipReward.alignmentDelta?: Partial<PhilosophicalAlignment>`,
-   the END_COMBAT reducer applies the delta to
-   `state.philosophicalAlignment` via the Phase 42 `applyAlignmentDelta`
-   clamp helper (each axis clamps to `[-100, +100]`; missing axes pass
-   through). The post-clamp `PhilosophicalAlignment` surfaces on
-   `report.friendshipReward.alignmentShift` for the CLI / UI to render.
-   Phase 36's +1 `moralMeter` stays on top. Authoring band: ±1..±5 per
-   axis.
 
 Two normal-tier befriendable enemies ship authored content today
-(Phase 60 + 65 + 69) — both default to the Phase 36 mechanic:
+(Phase 60 + 65) — both default to the Phase 36 mechanic:
 
 - **MournfulGull** at `fv-15` (gull crag, harbor district dead-end
-  via `fv-11` → `fv-14`). Phase 69 `alignmentDelta: { outlook: +3 }`.
+  via `fv-11` → `fv-14`).
 - **HollowEyedBeggar** at `fv-18` (back alley, inland streets).
-  Phase 69 `alignmentDelta: { scope: -3 }`.
 
 CoastalTyrant ships only the Phase 68 predicate today; the matching
 `friendshipReward` content (multi-paragraph narrative + boss-tier
-items + Phase 69 `alignmentDelta`) is deferred to a follow-up content
+items) is deferred to a follow-up content
 phase.
 
 ### Map exploration
 
-The starting map `fishing-village` is a 25-node branching grid since
-Phase 65 (preserved spine `fv-1` → `fv-10` along `y=0` plus three
-sub-areas: Harbor District `fv-11..fv-15`, Inland Streets
-`fv-16..fv-20`, Cliff Path `fv-21..fv-25`). Each node fires a
-weighted `MapEventPool` on entry per the Phase 23 taxonomy
-(encounter / interaction / gathering / rest / village / cutscene /
-hazard / loot-cache, plus narration / blacksmith / travel; the Phase 137
-'quest' kind was retired). See [`world.md` § "Demo Content"](./world.md#demo-content-fishing-village)
-for the full layout.
+A new game starts on the Breakwater (`breakwater`, D27), the first of
+the four Act 1 maps, and moves between maps through `travel` doors.
+Movement is frontier roaming (D1): any unspent node next to explored
+ground is a legal move. Each node fires a weighted `MapEventPool` on
+entry (encounter / interaction / gathering / rest / village / cutscene /
+hazard / loot-cache / narration / blacksmith / travel / labyrinth; the
+Phase 137 'quest' kind was retired). See [`world.md` § "Campaign maps"](./world.md#campaign-maps)
+for the door chain and [§ "Map shape"](./world.md#map-shape) for how a
+map is built.
 
 ### Save / load
 
@@ -179,33 +166,14 @@ durable actions only — `COMBAT_ROUND`, `LEVEL_UP`, `END_COMBAT`,
 `MOVE_TO_NODE`, `APPLY_DIALOGUE`, `SAVE_GAME`; Phase 72 added
 `RESET_RUN`; Phase 73 added `UNLOCK_CODEX_ENTRY`). `store.load()`
 restores via the configured `PersistenceAdapter` + `migrate()` ladder
-(`GAME_STATE_VERSION = 24`; the ladder in `src/Game/game.migrate.ts`
-chains `migrateV11ToV12` … `migrateV23ToV24`, and saves older than v11
+(`GAME_STATE_VERSION = 26`; the ladder in `src/Game/game.migrate.ts`
+chains `migrateV11ToV12` … `migrateV25ToV26`, and saves older than v11
 are refused).
 
 For Node consumers, `'axiomancer-mechanics/node'` exports
 `createNodeAdapter(filePath)` to persist to a JSON file.
 For React Native, implement the `PersistenceAdapter` interface (see
 [`gameloop.md` § "Extending PersistenceAdapter"](./gameloop.md)).
-
-### Alignment-gated content (Phase 46 + 63)
-
-Player position on the 3-axis Oaths cube
-(`epistemology × outlook × scope`) drives dialogue + card-learning
-gates:
-
-- `DialogueChoice.requires.requiresAlignment?` — gate a choice on an
-  axis threshold (e.g. `{ axis: 'scope', op: 'gte', value: 34 }`).
-- `CardLearningRequirement.requiresAlignment?` — same shape; gates
-  whether the card is learnable.
-- `DialogueChoice.requires.playerAlignmentCellChangedSince?: true`
-  (Phase 63) — surfaces the choice only when the player's cell has
-  shifted since the last visit; requires an identified tree
-  (`DialogueTree.id?: string`). First authored use: Old Marrow's
-  tree gains an observer branch.
-
-Authoring side: `DialogueChoice.effect.alignmentDelta` + `MapEventPoolEntry.alignmentDelta`
-shift the cube on resolution (Phase 43).
 
 ---
 

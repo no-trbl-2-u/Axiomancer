@@ -13,7 +13,7 @@
  *   - `id` = engine `id` (e.g. `'slippery-slope'`)
  *   - `name` = engine `name`, uppercased for display
  *   - `description` = engine `description` verbatim
- *   - `stance` = engine `philosophicalAspect` ('body' | 'mind' | 'heart')
+ *   - `stance` = engine `color` ('body' | 'mind' | 'heart')
  */
 
 import {
@@ -77,7 +77,7 @@ function toCombatCardOption(card: Card): CombatCardOption {
         id: card.id,
         name: card.name.toUpperCase(),
         description: card.description,
-        stance: card.philosophicalAspect,
+        stance: card.color,
         targetType: card.targetType,
         combatEffects: card.combatEffects ?? [],
     };

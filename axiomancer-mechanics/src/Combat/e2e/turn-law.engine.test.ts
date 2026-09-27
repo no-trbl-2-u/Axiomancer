@@ -41,19 +41,19 @@ afterEach(() => vi.restoreAllMocks());
 registerSandboxCards([
     {
         id: 'qa-law-heart', name: 'QA Law Heart',
-        philosophicalAspect: 'heart', description: 'turn-law heart fixture',
+        color: 'heart', description: 'turn-law heart fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 }],
     },
     {
         id: 'qa-law-body', name: 'QA Law Body',
-        philosophicalAspect: 'body', description: 'turn-law body fixture',
+        color: 'body', description: 'turn-law body fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 2 }],
     },
     {
         id: 'qa-law-mind', name: 'QA Law Mind',
-        philosophicalAspect: 'mind', description: 'turn-law mind fixture',
+        color: 'mind', description: 'turn-law mind fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_confusion', appliedTo: 'opponent', duration: 2 }],
     },

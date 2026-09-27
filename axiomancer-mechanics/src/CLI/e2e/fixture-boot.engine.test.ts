@@ -62,7 +62,6 @@ describe('boot path', () => {
         const store = createGameStore(nullAdapter, initial);
         expect(store.getState().player.level).toBe(15);
         expect(store.getState().world.currentMap.currentNode).toBe('fv-9');
-        expect(store.getState().moralMeter).toBe(20);
     });
 
     it('describeFixtures lists every registry id', () => {

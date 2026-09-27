@@ -101,8 +101,8 @@ export function TitleScreen({ onContinue }: TitleScreenProps) {
         </Pressable>
 
         <Text style={styles.footerText}>
-          Your path begins in the fishing village, where travelers gather
-          before venturing into the realms beyond.
+          Your path begins on the coast, at a windmill above the
+          breakwater.
         </Text>
       </View>
     </View>

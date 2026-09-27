@@ -31,12 +31,6 @@ describe('consequenceLabel', () => {
         expect(consequenceLabel({ kind: 'currency', amount: 25 })).toBe('+25 shillings');
     });
 
-    it('renders moral shift with an explicit sign', () => {
-        expect(consequenceLabel({ kind: 'moral', amount: 2 })).toBe('+2 grace');
-        expect(consequenceLabel({ kind: 'moral', amount: -2 })).toBe('-2 grace');
-        expect(consequenceLabel({ kind: 'moral', amount: 0 })).toBe('0 grace');
-    });
-
     it('renders an item from its authored label, and no chip for a story flag', () => {
         expect(consequenceLabel({ kind: 'item', label: 'Rusty Key' })).toBe('Rusty Key');
         // A flag id is bookkeeping, never copy — FE-002.

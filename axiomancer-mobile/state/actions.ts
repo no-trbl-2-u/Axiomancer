@@ -19,7 +19,6 @@ import {
     defaultSellPrice as engineDefaultSellPrice,
     applyGoodwillDiscount,
     buildCharacterFromPreset,
-    defaultAlignment,
     getAvailableCards,
     learnCard as engineLearnCard,
     changeMap as worldChangeMap,
@@ -56,7 +55,6 @@ import {
     type Item,
     type MapName,
     type MapState,
-    type PhilosophicalAlignment,
     type ResolveMapEventResult,
     type Card,
     type WorldState,
@@ -154,6 +152,7 @@ import {
     labyrinthSettleDebtAction,
     labyrinthSpeakNameAction,
     labyrinthSubmitGateAction,
+    withoutReturnWorld,
     type LabyrinthGateOutcome,
     type LabyrinthHintOutcome,
     type LabyrinthInspectOutcome,
@@ -241,8 +240,8 @@ export interface AppActions {
     beginHazardEncounter: () => Enemy | null;
     /**
      * Phase 78 — returns the engine `CombatEndReport` (was `void`).
-     * Callers that need post-combat metadata (codex unlock, alignment
-     * shift, narrative) read it off the return value; legacy callers
+     * Callers that need post-combat metadata (codex unlock, narrative)
+     * read it off the return value; legacy callers
      * that ignore the return value remain compatible.
      */
     /**
@@ -391,8 +390,8 @@ export interface AppActions {
     pickEventChoice: (choiceId: string) => void;
     /**
      * Withdraw from an encounter already entered (the combat reveal's
-     * WITHDRAW). Pays the non-boss retreat cost — -2 grace + its toast —
-     * without requiring a pending event slice, which `beginHazardEncounter`
+     * WITHDRAW). Toasts the retreat — it costs nothing since the morale
+     * meter was removed (D39) — without requiring a pending event slice, which `beginHazardEncounter`
      * has already cleared by then. Only offered where retreat is allowed;
      * boss encounters never surface it.
      */
@@ -507,8 +506,9 @@ export interface AppActions {
     completeBlacksmithTutorial: (skipped: boolean) => void;
 
     // -----------------------------------------------------------------
-    // The Labyrinth — THE APORIA (W-01; see state/labyrinth/). Dev-menu
-    // entry only. Durable progress lives on GameState.labyrinth; the
+    // The Labyrinth — THE APORIA (W-01; see state/labyrinth/). Entered
+    // through the Lantern Deep's vault door (map revamp M4, D24) or the dev
+    // menu. Durable progress lives on GameState.labyrinth; the
     // transient visit on the labyrinthUi slice. Arrival events resolve
     // through resolveCurrentMapEvent with labyrinth bracketing (waystone
     // before the roll, Oubliette ejection after).
@@ -562,7 +562,7 @@ export interface AppActions {
     /**
      * Rolls up to `count` (default 3) level-up card offers from
      * everything the player currently qualifies for (engine
-     * `getAvailableCards`, alignment-gated). Empty = nothing new to
+     * `getAvailableCards`, ungated). Empty = nothing new to
      * learn; the caller skips the modal.
      */
     getLearnableCardOffers: (count?: number) => LearnableCardOffer[];
@@ -592,15 +592,11 @@ export interface UseItemResult {
  * not deduplicated), so `ensureStarterCards` writes the recipe directly
  * rather than `engineLearnCard`-ing a Set — a learn-requirement gate has no
  * business touching cards the world hands every player on day one.
+ *
+ * Seeds the starter deck when the player knows nothing yet — the chosen
+ * starter bundle if one was picked (the dev deck-swap menu only, post-104 —
+ * the fresh-run flow never offers a picker), else the grey office.
  */
-function currentAlignment(store: AppStore): PhilosophicalAlignment {
-    const state = store.getState() as unknown as GameState;
-    return state.philosophicalAlignment ?? defaultAlignment();
-}
-
-/** Seeds the starter deck when the player knows nothing yet — the chosen
- *  starter bundle if one was picked (the dev deck-swap menu only, post-104 —
- *  the fresh-run flow never offers a picker), else the grey office. */
 function ensureStarterCards(store: AppStore): void {
     const player = store.getState().player;
     if (!player || (player.knownCards?.length ?? 0) > 0) return;
@@ -641,7 +637,7 @@ function toLearnableOffer(store: AppStore, card: Card): LearnableCardOffer {
         id: card.id,
         name: card.name.toUpperCase(),
         description: card.description,
-        stance: card.philosophicalAspect,
+        stance: card.color,
         tier: card.tier,
         effectText: combatCard
             ? cardEffectText(combatCard, damage)
@@ -652,7 +648,7 @@ function toLearnableOffer(store: AppStore, card: Card): LearnableCardOffer {
 /**
  * Rolls the level-up card offers: up to `count` random picks from
  * everything the player currently qualifies for (engine
- * `getAvailableCards`, alignment-gated). Empty when nothing new is
+ * `getAvailableCards`, ungated). Empty when nothing new is
  * learnable — the caller skips the modal.
  */
 function getLearnableCardOffersAction(store: AppStore, count = 3): LearnableCardOffer[] {
@@ -731,7 +727,7 @@ export function createAppActions(store: AppStore): AppActions {
             // driven entirely by the panel's local React state — but we DO
             // stage `state.currentEncounter` via `startCombat` (Phase 54) so
             // the exit-time `endCombat` call has a real encounter to resolve
-            // rewards, flags, codex unlocks, and faction/alignment deltas
+            // rewards, flags, codex unlocks, and faction deltas
             // against instead of silently no-op'ing.
             const slice = store.getState().event;
             const pending = slice?.pending ?? null;
@@ -751,8 +747,7 @@ export function createAppActions(store: AppStore): AppActions {
             // END_COMBAT banks unspent philosophical resources onto the player
             // and folds them into the next combat's seed) — no client carry.
             // Phase 78 — surface the engine `CombatEndReport` so callers can
-            // read post-combat metadata (codex unlock, alignment shift,
-            // narrative). The engine `endCombat` now requires an explicit
+            // read post-combat metadata (codex unlock, narrative). The engine `endCombat` now requires an explicit
             // outcome; default to `'flee'` (no reward) when unspecified. It
             // returns a stub 'flee' report when called outside an encounter.
             const report = store.getState().endCombat(outcome ?? 'flee');
@@ -804,6 +799,12 @@ export function createAppActions(store: AppStore): AppActions {
             if (store.getState().labyrinthUi?.session) {
                 store.setState({ labyrinthUi: EMPTY_LABYRINTH_SLICE });
             }
+            // The visit's durable return point (map revamp M4) goes with it:
+            // the fresh overworld is where the run now stands.
+            const lab = store.getState().labyrinth;
+            if (lab?.returnWorld) {
+                store.setState({ labyrinth: withoutReturnWorld(lab) });
+            }
         },
         levelUp: () => {
             // Phase 73 follow-up — engine `levelUp` action. Same
@@ -840,12 +841,7 @@ export function createAppActions(store: AppStore): AppActions {
         applyHazardDeckPreset: (presetId) => applyHazardDeckPresetAction(store, presetId),
         completeHazardTutorial: (skipped) => completeHazardTutorialAction(store, skipped),
         // ── The Labyrinth (THE APORIA) ──
-        enterLabyrinth: (actId) => {
-            enterLabyrinthAction(store, actId);
-            labyrinthPreArriveAction(store);
-            resolveCurrentMapEventAction(store, 'labyrinth');
-            labyrinthPostArriveAction(store);
-        },
+        enterLabyrinth: (actId) => enterLabyrinthAndArriveAction(store, actId),
         exitLabyrinth: () => exitLabyrinthAction(store),
         labyrinthMove: (to) => {
             const session = store.getState().labyrinthUi?.session ?? null;
@@ -963,6 +959,18 @@ function useItemAction(store: AppStore, itemId: string): UseItemResult {
         healed: Math.max(0, delta),
         damaged: Math.max(0, -delta),
     };
+}
+
+/**
+ * Enter an act and answer its entry room: the snapshot and swap, then the
+ * waystone before the arrival roll and the Oubliette after it. Shared by
+ * the dev menu, the act-select screen and the Lantern Deep's vault door.
+ */
+function enterLabyrinthAndArriveAction(store: AppStore, actId: LabyrinthActId): void {
+    enterLabyrinthAction(store, actId);
+    labyrinthPreArriveAction(store);
+    resolveCurrentMapEventAction(store, 'labyrinth');
+    labyrinthPostArriveAction(store);
 }
 
 /** Surface a one-shot toast, preserving the existing level-up ack flag. */
@@ -1471,7 +1479,7 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
         // start node — mirroring the engine dispatcher's own travel
         // short-circuit. Doors stay repeatable.
         const shouldConsumeNode = result.event.kind !== 'none' &&
-            !['encounter', 'travel'].includes(result.event.kind);
+            !['encounter', 'travel', 'labyrinth'].includes(result.event.kind);
         if (shouldConsumeNode) {
             const currentNodeId = resolvedState.world?.currentMap?.currentNode;
             if (currentNodeId) {
@@ -1601,6 +1609,22 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
             return true;
         }
 
+        // The Labyrinth door (map revamp M4, D24): the engine names the act
+        // and leaves the world alone; the swap is `enterLabyrinthAction`'s.
+        // Settle the resolved overworld first (the door's way on is open and
+        // the node is NOT consumed), so the snapshot the entry takes is the
+        // one the exit restores: the player comes back out on the door.
+        // `<LabyrinthGate>` routes to `/labyrinth` once the session opens.
+        if (result.event.kind === 'labyrinth') {
+            store.setState({
+                ...resolvedState,
+                event: EMPTY_EVENT_SLICE,
+            });
+            if (result.event.description) pushToast(store, result.event.description);
+            enterLabyrinthAndArriveAction(store, result.event.act);
+            return true;
+        }
+
         // Travel events are already fully applied engine-side: the world
         // on `result.state` has crossed maps (and continents when the door
         // spans one). No screen detour and no pending card — clear the
@@ -1668,26 +1692,22 @@ function clearEventSlice(store: AppStore): void {
 }
 
 /**
- * The price of walking away from a non-boss encounter.
- *
- * [4.5] DRIFT fix (mechanics-vs-UI audit row 10): the retreat chrome reads
- * `forfeit the path · -ii grace`, so honour it — shift the engine
- * `moralMeter` by -2 and surface the cost. Boss encounters are sealed (the
+ * Walking away from a non-boss encounter. Boss encounters are sealed (the
  * retreat is never offered), so this is only ever called for a foe you were
- * allowed to leave.
+ * allowed to leave. Retreat carried a -2 grace cost until the morale meter
+ * was removed (D39); it is free now and only narrates.
  *
  * Phase 92 — flee narrative feedback: prose-style narrative in the lowercase
- * ritual register, carrying the grace cost (deep-playtest F03).
+ * ritual register (deep-playtest F03).
  */
-function applyFleeCost(store: AppStore): void {
-    store.getState().shiftMoralMeter(-2);
+function announceFlee(store: AppStore): void {
     const prev = store.getState().notifications;
     store.setState({
         notifications: {
             levelUpAcknowledged: prev?.levelUpAcknowledged ?? true,
             questAcknowledged: prev?.questAcknowledged ?? true,
             toast: {
-                text: 'you fled the encounter. the path bends away.\n\ngrace -2',
+                text: 'you fled the encounter. the path bends away.',
                 id: (prev?.toast?.id ?? 0) + 1,
             },
         },
@@ -1699,13 +1719,13 @@ function applyFleeCost(store: AppStore): void {
  * combat reveal's WITHDRAW, which replaced the old prelude modal's FLEE
  * (2026-08-10 user report: two consecutive popups asked to agree to the same
  * fight). By then `beginHazardEncounter` has already cleared the event slice,
- * so unlike `pickEventChoice('flee')` this pays the cost without needing a
+ * so unlike `pickEventChoice('flee')` this narrates the retreat without needing a
  * pending event; the slice is cleared defensively for any path that still has
  * one. The modal teardown is the caller's (the overlay's) concern.
  */
 function fleeEncounterAction(store: AppStore): void {
     try {
-        applyFleeCost(store);
+        announceFlee(store);
     } catch (error) {
         console.error('Failed to process flee action:', error);
     }
@@ -1743,7 +1763,7 @@ function pickEventChoiceAction(store: AppStore, choiceId: string): void {
             }
             if (choiceId === 'flee') {
                 try {
-                    if (!processed.isBoss) applyFleeCost(store);
+                    if (!processed.isBoss) announceFlee(store);
                     clearEventSlice(store);
                 } catch (error) {
                     console.error('Failed to process flee action:', error);

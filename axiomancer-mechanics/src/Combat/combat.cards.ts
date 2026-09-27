@@ -91,7 +91,7 @@ export function effectImpact(
  *  Phase 104 — 'any' is the grey office's colourless aspect: every die colour
  *  powers it, with a neutral (never on/off) colour-match bonus. */
 export function cardStanceColor(card: Card): CardAspect {
-    return card.philosophicalAspect;
+    return card.color;
 }
 
 /** Payoff mechanics that read as the "closer" class (status-payoff bursts). */

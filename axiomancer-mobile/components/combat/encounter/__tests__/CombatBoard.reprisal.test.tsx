@@ -114,7 +114,7 @@ describe('CombatBoard — REPRISE songbook interception', () => {
             id: 'test-x-reprise',
             theme: 'grave',
             name: 'Test X Reprise',
-            philosophicalAspect: 'mind',
+            color: 'mind',
             description: 'Board-test fixture: REPRISE + chosen-X on one card.',
             tier: 1, rank: 2, cardType: 'spell',
             targetType: 'enemy',

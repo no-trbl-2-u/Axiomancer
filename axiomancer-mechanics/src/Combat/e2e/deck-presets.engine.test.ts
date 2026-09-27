@@ -5,7 +5,7 @@
  * equality assertion were repealed 2026-09-02 (big-numbers overhaul §3 L19,
  * §10) — preset sizes are open. What survives (§2.1, the ONLY kept preset
  * law): every preset splits into exact aspect thirds by
- * `philosophicalAspect`, no curse cards in any preset, valves seat
+ * `color`, no curse cards in any preset, valves seat
  * same-aspect in the built deck, the builder appends no escape-hatch
  * card, and a preset deck drives a real encounter end to end.
  */
@@ -57,7 +57,7 @@ describe('campaign presets — the evolving deck', () => {
             const preset = getDeckPreset(id)!;
             const byAspect = { body: 0, mind: 0, heart: 0 };
             for (const cardId of preset.cardIds) {
-                const aspect = getCardById(cardId)!.philosophicalAspect;
+                const aspect = getCardById(cardId)!.color;
                 // Phase 104 — the grey office is starter-only; a preset carrying
                 // one would be a real regression, not a type-narrowing formality.
                 expect(aspect, `${id}: ${cardId} is a grey card in a preset`).not.toBe('any');
@@ -102,7 +102,7 @@ describe('campaign presets — the evolving deck', () => {
             const valve = getCardById(seat.valveId)!;
             const source = getCardById(seat.replacesId)!;
             expect(valve.tags).toEqual(expect.arrayContaining(['dice', 'valve']));
-            expect(valve.philosophicalAspect).toBe(source.philosophicalAspect);
+            expect(valve.color).toBe(source.color);
             const deck = buildUpgradeableDicePresetDeck(id);
             expect(deck.length).toBe(getDeckPreset(id)!.cardIds.length);
             expect(deck.filter(c => c === seat.valveId)).toHaveLength(1);
@@ -115,7 +115,7 @@ describe('campaign presets — the evolving deck', () => {
 
     it('the three valves cover all three aspects across the campaign', () => {
         const aspects = SPEC_PRESET_IDS
-            .map(id => getCardById(PRESET_DICE_VALVES[id].valveId)!.philosophicalAspect)
+            .map(id => getCardById(PRESET_DICE_VALVES[id].valveId)!.color)
             .sort();
         expect(aspects).toEqual(['body', 'heart', 'mind']);
     });

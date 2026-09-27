@@ -188,9 +188,9 @@ describe('fishing-village content — new-player map', () => {
         if (result.event.kind === 'encounter') {
             expect(result.event.isBoss).toBe(true);
             // king-of-revenge is mid-tier (L6); the encounter `level`
-            // override scales it down so a fresh player can win the climax.
+            // override pins him one above the last Act 1 elite (M3e).
             const boss = result.event.encounter.enemies[0];
-            expect(boss.level).toBe(3);
+            expect(boss.level).toBe(5);
             expect(boss.name).toBe('The King of Revenge');
         }
     });

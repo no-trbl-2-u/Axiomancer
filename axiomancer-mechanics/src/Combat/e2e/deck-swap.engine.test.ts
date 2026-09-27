@@ -26,7 +26,7 @@ afterEach(() => {
 const swapCandidate: Card = {
     id: 'test-swap-candidate',
     name: 'Test Swap Candidate',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description: 'A fixture. It argues nothing.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'enemy',

@@ -4,12 +4,11 @@
  * Covers the v1 → v2 migration that validates the save's base stats
  * (it no longer backfills derivedStats / nonCombatStats — those stats were
  * deleted from the engine in TRIM THE FAT T2a), and
- * the v2 → v3 migration that backfills `state.philosophicalAlignment` (engine
- * Phase 42, mobile Phase 51 bump from 0.7.0 → 0.10.0).
+ * the v2 → v3 migration, now a pass-through (it backfilled the alignment
+ * cube until T6 / D39 removed the grid and the GRACE meter).
  */
 
 import {
-    defaultAlignment,
     createNewGameState,
     GAME_STATE_VERSION,
 } from '@mechanics';
@@ -44,7 +43,6 @@ describe('migrations.engine', () => {
                 unlockedMaps: ['coastal'],
                 completedMaps: [],
                 questLog: {},
-                moralMeter: 0,
                 uniqueEvents: {},
             },
             version: '0.4.0',
@@ -115,7 +113,7 @@ describe('migrations.engine', () => {
             expect(() => unwrap(malformedEnvelope)).toThrow('Migration v1→v2: invalid baseStats structure');
         });
 
-        test('v2 envelope migrates to v3 by backfilling philosophicalAlignment', () => {
+        test('v2 envelope migrates to v3 with the player untouched', () => {
             const v2State = {
                 ...mockV1GameState,
                 player: { ...mockV1GameState.player },
@@ -128,29 +126,17 @@ describe('migrations.engine', () => {
 
             const result = unwrap(v2Envelope) as unknown as Record<string, unknown>;
 
-            expect(result.philosophicalAlignment).toEqual(defaultAlignment());
-            // Other fields pass through untouched.
+            expect(Object.keys(result).sort()).toEqual(Object.keys(v2State).sort());
             expect((result as { player: unknown }).player).toEqual(v2State.player);
         });
     });
 
-    describe('v2 → v3 migration (alignment backfill, engine 0.10.0)', () => {
-        test('adds philosophicalAlignment when missing, using defaultAlignment()', () => {
+    describe('v2 → v3 migration (pass-through since the alignment grid was removed, D39)', () => {
+        test('adds nothing to the save', () => {
             const v2State = { player: { name: 'Pilgrim' } };
             const result = unwrap({ schemaVersion: 2, state: v2State }) as unknown as Record<string, unknown>;
 
-            expect(result.philosophicalAlignment).toEqual(defaultAlignment());
-        });
-
-        test('preserves philosophicalAlignment if already present (no overwrite)', () => {
-            const existing = { ...defaultAlignment(), epistemology: 42 };
-            const v2State = {
-                player: { name: 'Pilgrim' },
-                philosophicalAlignment: existing,
-            };
-            const result = unwrap({ schemaVersion: 2, state: v2State }) as unknown as Record<string, unknown>;
-
-            expect(result.philosophicalAlignment).toEqual(existing);
+            expect(result).toEqual({ player: { name: 'Pilgrim' } });
         });
 
         test('rejects non-object state', () => {
@@ -179,26 +165,14 @@ describe('migrations.engine', () => {
             expect(result.version).toBe(GAME_STATE_VERSION);
         });
 
-        // Phase 53b — lastSeenAlignmentCells is a plain optional field on
-        // GameState (no bump needed: absent-after-migration reads as "no
-        // prior observation", the correct first-visit behaviour). Pin the
-        // round-trip so a future envelope change can't silently drop it.
-        test('lastSeenAlignmentCells survives a save/load round-trip when present', () => {
-            const current = createNewGameState();
-            const withObservation = { ...current, lastSeenAlignmentCells: { 'captain-blackwater': 'cell-13' } };
-
-            const result = unwrap({ schemaVersion: CURRENT_SCHEMA_VERSION, state: withObservation });
-
-            expect(result.lastSeenAlignmentCells).toEqual({ 'captain-blackwater': 'cell-13' });
-        });
-
-        test('lastSeenAlignmentCells stays absent (not defaulted to {}) when the save never wrote it', () => {
+        test('a v25 engine save rides the engine hop to the current version (T6 / D39)', () => {
             const current = createNewGameState() as unknown as Record<string, unknown>;
-            expect(current.lastSeenAlignmentCells).toBeUndefined();
+            const v25 = { ...current, version: 25 };
 
-            const result = unwrap({ schemaVersion: CURRENT_SCHEMA_VERSION, state: current }) as unknown as Record<string, unknown>;
+            const result = unwrap({ schemaVersion: CURRENT_SCHEMA_VERSION, state: v25 });
 
-            expect(result.lastSeenAlignmentCells).toBeUndefined();
+            expect(GAME_STATE_VERSION).toBe(26);
+            expect(result.version).toBe(GAME_STATE_VERSION);
         });
     });
 

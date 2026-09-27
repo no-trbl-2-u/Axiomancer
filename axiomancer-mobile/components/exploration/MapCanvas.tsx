@@ -14,6 +14,7 @@ import type { ExplorationNode, ExplorationEdge } from '@/state/presenters/explor
 import type { MapSheet } from '@/state/exploration-maps';
 import { LEGACY_SHEET_SIZE } from '@/state/exploration-maps/sheet';
 import { MapSheetContext, type SheetSize } from './mapSheetContext';
+import { NODE_SIZE } from './ExplorationNode';
 
 interface MapCanvasProps {
     nodes: readonly ExplorationNode[];
@@ -255,6 +256,9 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
     const size: SheetSize = sheet ?? LEGACY_SHEET_SIZE;
     const canvas = canvasSizeOf(size);
     const chartTexture = sheet?.chartTexture ?? true;
+    const nodeHalo = sheet?.nodeHalo ?? false;
+    // A halo reaches a little past the node glyph, in sheet units.
+    const haloRadius = NODE_SIZE / size.scale;
     const hatch = React.useMemo(() => hatchLines(size.width, size.height), [size.width, size.height]);
     const nodeById = React.useMemo(() => {
         const m = new Map<string, ExplorationNode>();
@@ -498,6 +502,24 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
                                 </G>
                             );
                         })}
+                        {/* Node halos over the roads and under the glyphs: a dark
+                            pool that clears a dense plate's linework from around
+                            each mark, so the mark reads as a mark. */}
+                        {nodeHalo && (
+                            <Defs>
+                                <RadialGradient id="axmNodeHalo" cx="50%" cy="50%" r="50%">
+                                    <Stop offset="40%" stopColor={AXM.deepBg} stopOpacity={0.85} />
+                                    <Stop offset="100%" stopColor={AXM.deepBg} stopOpacity={0} />
+                                </RadialGradient>
+                            </Defs>
+                        )}
+                        {nodeHalo && (
+                            <G testID="map-node-halos">
+                                {nodes.map((n) => (
+                                    <Circle key={n.id} cx={n.x} cy={n.y} r={haloRadius} fill="url(#axmNodeHalo)" />
+                                ))}
+                            </G>
+                        )}
                     </Svg>
 
                     <MapSheetContext.Provider value={size}>{children}</MapSheetContext.Provider>

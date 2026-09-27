@@ -1,13 +1,12 @@
 # World
 
-> **Status:** Spec 08 + Spec 23 + Phase 25 landed — `moveToNode`,
-> `resolveMapEvent`, branching dialogue, a per-objective quest engine, the
-> continent-keyed map registry, and the hazard tick on movement are all
-> live. Fishing-village ships with a demo chain (NPC quest-giver → village →
-> encounter → loot-cache → boss) that exercises the loop end-to-end. The
-> legacy `processNode` + `MapEvent`/`MapEventType` surface was removed in
-> Phase 25; node events are now authored via weighted pools (see
-> `src/World/MapEvents/content.ts`).
+> **Status:** frontier roaming (D1, 2026-09-21) and the map revamp (M3a–M4,
+> 2026-09-26/27) are live. A new game starts on the Breakwater, walks the
+> four Act 1 maps (Breakwater, Charcoal Wood, Beacon Crags, Lantern Deep),
+> and comes out at fishing-village. Every map lives in the continent-keyed
+> registry, and node events are rolled from weighted pools
+> (`src/World/MapEvents/content.ts`). The branching dialogue and the
+> per-objective quest engine are unchanged from Spec 08.
 
 ## State Shape
 
@@ -39,6 +38,7 @@ interface WorldState {
   world: Continent[];           // catalogue
   currentContinent: Continent;
   currentMap: MapState;         // runtime state — lookup template via getMapDefinition()
+  mapStates?: Partial<Record<MapName, MapState>>; // maps left behind through a door
 }
 ```
 
@@ -63,45 +63,131 @@ interface GameState {
 }
 ```
 
-## Map Registry (Spec 08 Q6)
+## Map Registry
 
 `src/World/map.registry.ts`:
 
 - `MAP_REGISTRY` — `Record<ContinentName, Partial<Record<MapName, MapDefinition>>>`.
+  Three continents are registered:
+
+  | Continent | Maps |
+  |---|---|
+  | `coastal-continent` | `breakwater`, `charcoal-wood`, `fishing-village`, `northern-forest` |
+  | `northern-continent` | `beacon-crags`, `lantern-deep`, `caverns`, `northern-city`, `connecting-river`, `town-across-river`, `the-capital` |
+  | `labyrinth-continent` | `aporia-colonnade`, `aporia-archive`, `aporia-proof` (THE APORIA, W-01) |
+
 - `getMapDefinition(continent, mapName)` — returns the static template. Throws
   `MapNotFoundError` for unknown pairs.
-- `createMapState(def)` — builds the initial runtime `MapState` from a
-  definition: starting node populated, neighbours enter `availableNodes`,
-  everything else enters `lockedNodes`.
+- `createMapState(def)` — builds the initial runtime `MapState`: the player
+  stands on the starting node, its neighbours enter `availableNodes`, every
+  other node enters `lockedNodes`, and fog-of-war is seeded with the start.
+  A labyrinth map's `initialBlockedRoutes` arrive pre-blocked.
 
-Adding a continent or map is a one-file change to the registry plus the
-authoring file under `src/World/Continents/<Name>/maps.ts`.
+`createStartingWorld(startMap = STARTING_MAP)` (`src/World/index.ts`) builds
+a new save's `WorldState`. `STARTING_MAP` is `'breakwater'` (D27). The
+catalogue carries the two campaign continents: the start map is available
+and every other campaign map starts locked until a door unlocks it. The
+labyrinth continent is left out of the catalogue on purpose. The Aporia is
+entered only through its door (see "Campaign maps") or the dev tools.
 
-## Movement (Spec 08 Q2 — linear with completed-lock)
+Adding a map takes all of these, and a map without a door is not shipped
+content:
 
-`moveToNode(state, nodeId): WorldState`
+1. a `MapName` in `map.library.ts` and an authoring file under
+   `src/World/Continents/<Name>/`, shaped as "Map shape" below says;
+2. its entry in `MAP_REGISTRY` and a `nodeIdToMapName()` prefix;
+3. its event pools in `MapEvents/content.ts`;
+4. a mobile layout registered in `axiomancer-mobile/state/exploration-maps/index.ts`;
+5. a `travel` node on some other map that leads into it.
 
-Validation:
+## Movement (D1 — frontier roaming)
 
-1. The destination must be a real node on the current map.
-2. The destination must be in the current node's `connectedNodes` (linear).
-3. **Completed nodes are locked from re-entry — no back-travel.**
-4. The destination must not be in `lockedNodes`.
+`moveToNode(state, nodeId): WorldState` (`src/World/world.reducer.ts`).
+D1 (2026-09-21) replaced Spec 08's linear, no-back-travel rule.
 
-`completeCurrentNode(state)` marks the current node completed and unlocks
-its neighbours. Both reducers are pure.
+- **Spent nodes.** A node is spent once it is resolved (`completedNodes` ∪
+  `consumedNodes`). A spent node stays drawn but is never a destination
+  again, so nothing can be re-farmed. Walking through a node does not spend
+  it: only resolving its event does.
+- **The frontier.** `frontierNodes(map)` is every unspent node joined by an
+  unblocked edge to *any* visited node (the spent set plus the node the
+  player stands on), not only to the current node. The player can double
+  back and clear a lane they skipped. Edges are authored one way but walked
+  both ways.
+- **Validation.** The destination must be a real node, must not be spent,
+  and must be on the frontier. Blocked routes (hazard outcomes, secret doors)
+  are cut out of the adjacency first. A node reachable only across a blocked
+  edge is illegal, and the error names the blockage. A node still reachable
+  another way stays legal.
+- **The boss.** Nothing forces the climax until `isFrontierExhausted(map)`.
+  That falls out of the rule and is not special-cased.
+- **Arrival.** `moveToNode` is the arrival verb. It records
+  `pendingArrival`, which `resolveMapEvent` clears. `placeOnNode` and
+  `teleportToNode` stand the player on a node without owing an arrival.
+- **Legacy lists.** `completeCurrentNode` keeps `availableNodes` and
+  `lockedNodes` in sync with the frontier. The CLI's move filter and
+  mobile's tap gate still read them, but `legalMovesFrom(map)` is the
+  authority.
+- **Labyrinth maps** (`traversal: 'labyrinth'`) keep their own rule: free
+  travel along the current room's doors, back into solved rooms included
+  (W-01).
 
-`IllegalMoveError` is thrown for any invalid move.
+`IllegalMoveError` is thrown for any invalid move. Hazard ticking on each
+move belongs to the `Game/` orchestrator, not this reducer.
+
+## Map shape
+
+A map has two halves: the engine graph and the mobile layout. They share
+node ids and nothing else.
+
+**The engine graph** (`MapDefinition.nodes`) is columns and lanes. A node's
+`location` is `[column, lane]`. Three rules hold on every gauntlet map
+(the layer law, pinned in `src/World/e2e/map-traversal.engine.test.ts`):
+
+- every edge runs one column forward, or sideways (a lateral rib, D1)
+  between two lanes that are neighbours in that column;
+- every non-terminal column with more than one node is chained sideways
+  end to end;
+- the terminal nodes share the last column and have no edges.
+
+The same file pins that no route strands on a non-terminal node and that
+every node can be reached from the start. The forward skeleton is what
+governs progression. The columns need not be a line: the Act 1 maps use
+rings that spread out from the entry (the Breakwater's c1 is the four
+landmarks around the windmill).
+
+**The mobile layout** (`axiomancer-mobile/state/exploration-maps/<map>.layout.ts`)
+places each node at a free `x`/`y` on the map's `MapSheet`. Position does
+not follow the column order (D16): a map must not read as a climb, and it
+spreads up, down, left and right from the entry. The `MapSheet`
+(`exploration-maps/types.ts`) is per map:
+
+| Field | Meaning |
+|---|---|
+| `width`, `height` | The node coordinate space (the SVG viewBox), in sheet units. |
+| `scale` | Device px per sheet unit at 1x zoom. The canvas is `width * scale` by `height * scale` and must be larger than the viewport on both axes (D16). |
+| `backdrop` | The plate drawn under the chart, stretched to the whole sheet. It pans and zooms with the nodes. |
+| `plateOpacity` | About 0.2 for an atmosphere plate, about 0.85 when the plate is the map (D15). |
+| `chartTexture` | The procedural hatch and contour hills. Off when the plate is the map. |
+| `nodeHalo?` | A dark halo under each node mark, for a dense plate (the Lantern Deep). |
+
+The Act 1 maps share `ACT1_SHEET_SIZE` (`breakwater.layout.ts`): 1000×1000
+units at scale 2.4, the plates' native 2400px. Each Act 1 layout puts one
+node on every landmark of its plate (D25), reading the positions as plate
+fractions from `assets/images/maps/act1-landmarks.json`. The seven maps
+built before the revamp use `legacySheet(plate)` (`sheet.ts`): the old
+360×400 viewBox at scale 2.6, plate at 0.2, chart texture on. The
+layout-engine parity test holds both halves to the same node ids.
 
 ## Node Event Dispatcher
 
 The current dispatcher is `resolveMapEvent(state, rng?)` from
 `src/World/MapEvents/resolve-map-event.ts`, shipped in Spec 23 and
 populated with content in Phase 24. It returns `{ state, event }`
-where `event` is a discriminated union over the eleven `MapEventKind`
+where `event` is a discriminated union over the twelve `MapEventKind`
 values ('quest' joined the original eight in Phase 137 and was retired
 in Phase 61; 'narration' joined in 2026-06, 'blacksmith' and 'travel'
-later in 2026-08):
+later in 2026-08, 'labyrinth' in M4, 2026-09-27):
 
 | Event kind     | Result shape                                                              |
 |----------------|---------------------------------------------------------------------------|
@@ -223,92 +309,40 @@ The legacy flat `DialogueMap` is still supported on the `NPC` interface.
 `Character.currency: number` exists; shop reducers are deferred to a later
 spec. Rewards (`{ kind: 'currency', amount }`) increment this directly.
 
-## Demo Content (fishing-village)
+## Campaign maps
 
-`src/World/Continents/Coastal-Village/maps.ts` ships the canonical
-"base" starting map. **As of Phase 65** it's a 25-node branching grid
-with three sub-areas; the linear 10-node spine `fv-1` → `fv-10` along
-`y=0` is preserved so existing Phase 23/24 MapEventPool overrides +
-Phase 43 alignmentDelta authoring + Phase 62 flag-gated dialogue +
-Phase 63 observer wiring all continue to work without modification.
-
-### Historical static-template spine (`y=0`, pre-Phase-65)
-
-The labels below describe the original static map templates, not the current
-resolved `MapEvent` content. Later pool overrides and Phase 53d narrative work
-changed several live node kinds. In current authored-event truth, `fv-4` is the
-"Stranger's Net" narration dilemma; the nearest early encounter from `fv-2`
-is reached through `fv-11` → `fv-13` (Little Belle). Route witnesses must use
-the live event registry rather than infer encounter kinds from this historical
-diagram.
+The maps join through `travel` nodes. Each door is the terminal node of its
+map, so the way on opens once the map is walked:
 
 ```
-fv-1 (start, dock cutscene)
-  → fv-2 (interaction: Old Marrow, quest-giver — branching tree)
-  → fv-3 (village: Fishing Village Stalls — Tide-Shopkeeper)
-  → fv-4 (historical template: encounter; current event: narration)
-  → fv-5 (loot-cache, +10 currency)
-  → fv-6 (encounter-boss: The Coastal Tyrant)
-  → fv-7 (interaction: Coastal Beggar)
-  → fv-8 (gathering: driftwood)
-  → fv-9 (rest: campfire)
-  → fv-10 (hazard: barnacles)
+breakwater (bw-18) → charcoal-wood (cw-20) → beacon-crags (bc-17)
+  → lantern-deep (ld-18) → fishing-village (fv-10) → northern-forest (nf-10)
+  → caverns (nc-26) → northern-city (ncy-26) → connecting-river (cr-13)
+  → town-across-river (tar-7) → the-capital
 ```
 
-The starting quest's objective is `kill The Coastal Tyrant`;
-defeating the boss auto-completes the quest and grants the
-25-currency reward.
+**Act 1** is the first four maps, one per quadrant of T's plates (coast,
+forest, mountains, underworld). Each is about 20 nodes, one per landmark.
+They follow the rules T set for every Act 1 map (D30, D31):
 
-### Sub-areas (Phase 65)
+- one `elite` fight on the last fight column and no boss; every other fight
+  is `normal` or `simple` tier;
+- the map opens on a short arrival cutscene, the new-game start (`bw-1`)
+  included;
+- no new NPCs. Events borrow an existing map's pools and roster (D29).
 
-**Harbor district** (`y=+1..+2`, entered from fv-1 / fv-2 / fv-3):
-- fv-11 fishmonger row (village — Net-Mender Joss + small shop).
-- fv-12 ferry slip (cutscene — empty slip; absent ferrier).
-- fv-13 quayside chapel (rest, half-heal).
-- fv-14 tide pools — **overridden 2026-07** by the fishing-village
-  new-player pool registration to a `narration` node: "What Do I Tell
-  Father?" (the boy's first ethical dilemma, a real branching
-  `DialogueTree` at dinner; see `src/World/MapEvents/content.ts`'s
-  `fvFatherWorryDialogue`). No longer a gathering node on that path.
-- fv-15 gull crag (encounter — Mournful Gull, Phase 60 befriendable;
-  **dead-end** via fv-14).
+**The Labyrinth door (D24).** `ld-15`, the Lantern Deep's sealed vault door,
+is a `labyrinth` event. Arriving there enters the Aporia at the act the
+player last left, with no gate. `enterLabyrinthAction` snapshots the
+overworld, `LabyrinthProgress.returnWorld` makes the snapshot durable so a
+save taken inside resumes there, and leaving puts the player back on
+`ld-15`. The node is never consumed, so the door can be used again.
 
-**Inland streets** (`y=-1..-2`, entered from fv-3 / fv-4 / fv-5):
-- fv-16 town well (rest, three-quarter heal).
-- fv-17 smokehouse (gathering — salt-fish).
-- fv-18 back alley (encounter — Hollow-Eyed Beggar, Phase 60
-  befriendable).
-- fv-19 abandoned shack (loot-cache, +8 currency).
-- fv-20 old shrine (cutscene — kept offerings to a half-forgotten
-  sea-god). **Small loop**: fv-17 ↔ fv-19; fv-20 cul-de-sac off
-  fv-19.
-
-**Cliff path / headlands** (`y=+1..+2` east, entered from fv-7 / fv-8):
-- fv-21 gull-tossed steps (cutscene — returning fisherman).
-- fv-22 sea-stack (loot-cache, +12 currency).
-- fv-23 lighthouse ruin (cutscene — the lamp room open to sky).
-- fv-24 keeper's cottage (rest, full heal).
-- fv-25 gull's nest (hazard — fledglings; **dead-end** via fv-24).
-
-All 8 `MapEventKind` values are represented multiple times across the
-25 nodes (5 cutscene / 2 village / 2 interaction / 3 gathering / 4
-encounter / 3 loot-cache / 4 rest / 2 hazard).
-
-`northern-forest` expanded from a 10-node branching pattern to a
-25-node multi-area layout in **Phase 117**. The original fork-and-rejoin
-structure (nf-1 splits to nf-2/nf-3, rejoins at nf-6) is preserved,
-with three new sub-areas: Glen Path (forest floor), Bone Hollow
-(ancient themes), and Mist Ridge (elevated mystical). Features 2
-dead-ends (nf-17, nf-21) and 1 small loop (nf-24 ↔ nf-25).
-
-## Bootstrap
-
-`src/World/index.ts`:
-
-- `createStartingWorld()` — initial `WorldState`. Coastal Continent with
-  `fishing-village` available and `northern-forest` locked.
-- `MAP_REGISTRY`, `getMapDefinition`, `createMapState`.
-- `MapNotFoundError` — thrown when the registry lookup fails.
+**Fishing-village** was the starting map before the revamp. It now comes
+after Act 1 and was retuned for that place in M3e. Its node-by-node history
+(Phases 23–65) is in git and in `plan/archive/`. Read live event content
+from `MapEvents/content.ts`, not from the static templates in
+`Continents/Coastal-Village/maps.ts`.
 
 ## MapEvents (Spec 23)
 
@@ -316,9 +350,9 @@ Phase 23 introduced the **MapEvents** node-event surface. Phase 25
 removed the bespoke `processNode` predecessor; MapEvents is now the
 only node-event dispatcher.
 
-- **Taxonomy.** Eleven kinds: `encounter`, `interaction`, `gathering`,
+- **Taxonomy.** Twelve kinds: `encounter`, `interaction`, `gathering`,
   `rest`, `village`, `cutscene`, `hazard`, `loot-cache`, `narration`,
-  `blacksmith`, `travel`. The old
+  `blacksmith`, `travel`, `labyrinth`. The old
   `npc`/`shop` kinds are folded into `interaction` and `village`.
 - **Pool authoring.** Events are not authored per node; they're rolled
   from a **weighted pool** at the moment a node is entered. Pools live
@@ -341,17 +375,6 @@ only node-event dispatcher.
   node whose MapEvent has resolved. Re-entering a consumed node
   returns `{ kind: 'none' }` — the player can still walk through, but
   the event won't re-fire.
-- **Philosophical alignment shifts (Phase 43).** Each
-  `MapEventPoolEntry` may carry an optional
-  `alignmentDelta?: Partial<PhilosophicalAlignment>`. When the entry
-  is rolled, `resolveMapEvent` threads the delta through
-  `applyAlignmentDelta(state.philosophicalAlignment, delta)` after
-  the matching handler runs, surfacing the shift on
-  `ResolveMapEventResult.effects.philosophicalShift`. Conventional
-  authoring band is ±1..±5 per axis; the helper clamps each axis to
-  `[-100, +100]`. See [`docs/oaths.md`](./oaths.md)
-  "Authoring deltas (Phase 43)" for the per-axis semantics + the
-  first-pass authored deltas on Coastal-Village + Old Marrow maps.
 - **RNG plumbing.** `resolveMapEvent(state, rng?)` accepts a seeded
   RNG (defaults to `getRng().random()`). Tests inject deterministic
   RNGs via `mockSequentialRng` / `mockFixedRng`.

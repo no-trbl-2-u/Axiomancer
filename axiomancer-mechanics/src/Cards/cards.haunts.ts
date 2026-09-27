@@ -53,7 +53,7 @@ const cinder: Card = {
     id: 'ht-cinder',
     theme: 'grave',
     name: 'Cinder',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'A thought struck off the forge, still glowing. It exists to be ' +
         'thrown once — and it does not come back.',
@@ -79,7 +79,7 @@ const minorCharge: Card = {
     id: 'ht-minor-charge',
     theme: 'trial',
     name: 'Minor Charge',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'Small, undeniable, already conceded. Say it once and it has done ' +
         'its work; the case keeps the weight, not the words.',

@@ -97,7 +97,6 @@ describe('store boot through the fixture adapter', () => {
         expect(s.player.level).toBe(15);
         expect(s.world.currentMap.name).toBe('fishing-village');
         expect(s.world.currentMap.currentNode).toBe('fv-9');
-        expect(s.moralMeter).toBe(20);
         // Mobile-only slices are still layered on.
         expect(s.event.pending).toBeNull();
 

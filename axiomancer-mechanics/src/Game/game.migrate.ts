@@ -18,8 +18,10 @@
  * (2026-09-20, strip the starting curated-loadout flags that shadowed the
  * starter bundle), and v23 → v24 (2026-09-21, stamp the first-node relic
  * grant as already settled — every existing save already wears the
- * Suppliant's Ring), and v24 → v25 (2026-09-25, strip the retired derived
- * stats and non-maxHp stat lines). The hops chain, so a v11 save lands at v25 in one
+ * Suppliant's Ring), v24 → v25 (2026-09-25, strip the retired derived
+ * stats and non-maxHp stat lines), and v25 → v26 (2026-09-27, T6 / D39: strip
+ * the alignment grid and GRACE, rename a card's `philosophicalAspect` to
+ * `color`). The hops chain, so a v11 save lands at v26 in one
  * `migrate` call. Every other version mismatch still rejects.
  */
 
@@ -517,6 +519,31 @@ function migrateV24ToV25(raw: Record<string, unknown>): Record<string, unknown> 
     return out;
 }
 
+/** Renames a card's `philosophicalAspect` to `color`, anywhere in the tree. */
+function renameCardAspect(node: unknown): unknown {
+    if (Array.isArray(node)) return node.map(renameCardAspect);
+    if (!node || typeof node !== 'object') return node;
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(node as Record<string, unknown>)) {
+        out[k === 'philosophicalAspect' ? 'color' : k] = renameCardAspect(v);
+    }
+    return out;
+}
+
+/**
+ * v25 → v26 (2026-09-27, T6 / D39): the philosophical-alignment grid and the
+ * GRACE meter are gone. Strips `moralMeter`, `philosophicalAlignment` and the
+ * `lastSeenAlignmentCells` observer cache, and renames every card's
+ * `philosophicalAspect` to `color` (a staged encounter's enemies carry their
+ * cards whole). Idempotent and pure over a raw save payload.
+ */
+function migrateV25ToV26(raw: Record<string, unknown>): Record<string, unknown> {
+    const {
+        moralMeter: _m, philosophicalAlignment: _p, lastSeenAlignmentCells: _l, ...kept
+    } = raw;
+    return { ...(renameCardAspect(kept) as Record<string, unknown>), version: 26 };
+}
+
 /**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
@@ -551,7 +578,8 @@ export function migrate(
     // appends the Phase 85 head/hands/feet signet relics to inventory; v22 →
     // v23 strips the curated-loadout seed flags; v23 → v24 stamps the
     // first-node relic grant settled; v24 → v25 strips the retired derived
-    // stats and stat lines. Chained so a v11 save lands at v25 in one call.
+    // stats and stat lines; v25 → v26 strips the alignment grid and GRACE.
+    // Chained so a v11 save lands at v26 in one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
@@ -608,6 +636,10 @@ export function migrate(
         working = migrateV24ToV25(working);
         version = 25;
     }
+    if (version === 25 && toVersion >= 26) {
+        working = migrateV25ToV26(working);
+        version = 26;
+    }
 
     if (version !== toVersion) {
         throw new Error(
@@ -632,12 +664,7 @@ function assertGameState(raw: unknown): GameState {
         || r.world == null
         || r.quests == null
         || !Array.isArray(r.flags)
-        || typeof r.moralMeter !== 'number'
         || typeof r.rngState !== 'number'
-        || r.philosophicalAlignment == null
-        || typeof r.philosophicalAlignment.epistemology !== 'number'
-        || typeof r.philosophicalAlignment.outlook !== 'number'
-        || typeof r.philosophicalAlignment.scope !== 'number'
         || r.codex == null
         || !Array.isArray(r.codex.unlockedEntries)
     ) {

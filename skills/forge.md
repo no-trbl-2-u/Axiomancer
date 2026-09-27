@@ -84,12 +84,19 @@ thee/thou/thy/thine/ye.
 ### Step 3 — Ship through the surface's wiring checklist
 
 **Map**: `map.library.ts` unions + `MapDefinition` under
-`src/World/Continents/<name>/` obeying the column-layering law +
+`src/World/Continents/<name>/` obeying the layer law (every edge one
+column forward or a rib between neighbouring lanes, terminal column
+edgeless; `map-traversal.engine.test.ts` green) +
 `map.registry.ts` + `nodeIdToMapName()` prefix + event pools in
 `MapEvents/content.ts` (idempotent registration) + mobile layout
 fixture registered in `exploration-maps/index.ts`
-(layout-engine-parity green) + a backdrop plate with provenance + a
-travel door INTO it (a map without a door is not shipped content).
+(layout-engine-parity green) on its own `MapSheet`, larger than the
+viewport both ways, with nodes placed freely on the plate so the map
+spreads from its entry instead of climbing (D16) and one node on every
+landmark when the plate has them (D25) + a backdrop plate with
+provenance + a travel door INTO it (a map without a door is not
+shipped content). `axiomancer-mechanics/docs/world.md` → "Map shape"
+has the full contract.
 Reference existing enemy pools / NPCs when the map needs them — don't
 author new enemies or NPCs here; file that need to `adjust-enemies` /
 `adjust-npcs` if the map can't be reasonably populated from what

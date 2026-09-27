@@ -33,7 +33,7 @@ afterEach(() => {
 registerSandboxCards([
     {
         id: 'dg-body-dot', name: 'DG Body DoT',
-        philosophicalAspect: 'body', description: 'body fixture', tier: 1,
+        color: 'body', description: 'body fixture', tier: 1,
         targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 }],
     },
