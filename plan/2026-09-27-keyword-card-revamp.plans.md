@@ -12,15 +12,17 @@
 
 | Fact | Value |
 |---|---|
-| After P1 the player owns | 3 grey cards (`grey-strike`, `grey-ward`, the VULNERABLE grey card) and 3 keywords (DEAL, GUARD, VULNERABLE) |
-| Card types in the engine | `CardType = 'spell' \| 'oath' \| 'hex'` — an **open enum** by design (`Cards/types.ts:65`); plus the haunt class (CONJURE-only) and allies (typed `oath`) |
+| After P1 (merged 2026-09-27, #406) the player owns | 3 grey cards: `grey-strike` A Plain Blow, `grey-ward` A Plain Ward, `grey-word` A Plain Word (D43: PAID VULNERABLE +25% for 2 turns, FREE +10% for 1 turn, stacking and uncapped) and 3 live keywords (DEAL, GUARD, VULNERABLE) |
+| Card types in the engine | `CardType = 'spell' \| 'oath' \| 'hex'` — an **open enum** by design (`Cards/types.ts:65`). The haunt class and the ally library were emptied by P1; their modules remain as stubs (`hauntLibrary = []`, `allyLibrary = []`) |
 | Card anatomy that survives | FREE line + PAID line, rank ladder Ash→Saint (6), tier 1–3, `color` body/mind/heart, one tray roll per threat phase |
 | Stat model (S3, D40–D41) | Body = damage to the foe; Mind = anything on you; Heart = anything on the foe; Grey = unscaled. `base × stat ÷ 5`, no caps |
 | Enemy side after P1 | 78 enemies keep 11 enemy keywords (HIDE, SWIFT, BRUTAL, VENOM, UNSHAKEN, ELUSIVE, REGROW, RAVENOUS, WOUNDING, FLURRY, SUMMON) and their statuses |
-| Machinery kept for the rework | card rewards + cache offers (gated off, not deleted), `card-upgrades.ts` (D8), die growth `bonusTurnDice` / `dieUpgradeLevel` (D20), the card editor, the sandbox A/B harness, `combat-playtest` matrix + `playtester` agents, `baseline:regen` |
+| Machinery kept for the rework | card rewards and cache offers are **live** on the grey cards (D44 amended D36: a won fight offers Blow, Ward and Word), `card-upgrades.ts` (D8), die growth `bonusTurnDice` / `dieUpgradeLevel` (D20), the card editor, the sandbox A/B harness, `combat-playtest` matrix + `playtester` agents, `baseline:regen` |
 | Keyword discipline still on the books | ≥2 carriers + Vilain's three tests (flavor, compresses, class); complexity budget by rank (Ash/Tooth ≤1 keyword, no trigger; Splinter/Rib ≤2, one condition; Skull/Saint open) |
+| **Keyword glossary purge: pending** | P1 shipped the card purge only (commit `73c408e` touched no keyword surface). The atlas still carries 53 player keyword rows across 8 families and the mobile `KEYWORD_GLOSS` 68 entries, while only DEAL, GUARD and VULNERABLE have a carrier. T, 2026-09-27: "Then we're going to purge the keyword glossary of unused keywords." The build-plan P1 row reads as if that shipped; it did not (confidence 90). Every plan below treats the glossary purge as the step before session 1 |
+| Ownership | S3 residue (PR #404): "A separate card agent owns card, keyword, upgrade and transformation design from here (T, 2026-09-27)." The plans below are that agent's process |
 | Keyword wiring cost | 12 touch points per keyword (engine piece, runtime switch, display, pricing, carriers, hermetic e2e, exports, ban-list, mobile registry + gloss + glyph ×3, editor union, atlas) |
-| Baseline | `b5fb0ac9`, 2026-09-27, STALE by one mechanics commit (T6). The matrix measures presets P1 deletes; it must be re-shaped to the grey deck before any number here is cited |
+| Baseline | `73c408e7`, 2026-09-27, FRESH: re-stamped after P1 on the grey deck (`npm run baseline:check`). The S3 residue note warns that stat scaling on top of rank-scaled bases double-counted (mid/late/impossible went to 100%); the purge was expected to undo most of it, and the post-P1 stamp is the one to read before any tuning |
 
 **The two previous runs (confidence 65 that these are the "last 2 times").**
 
@@ -174,7 +176,7 @@ inferences (confidence in the last column); the guided session decides.
 | **Consumable / one-use** | Dawncaster Item, StS Exhaust, MT consumables | Lifetime: removed from the deck after one play (this run, not this fight) | Cache offers, `card.removal.ts` | Fails q1 as a type: a keyword (a BURN-the-card verb) on a spell does it. Fails q4 unless rewards can offer it separately | 75 |
 | **Path / self-upgrading card** | Dawncaster Path I→II→III, StS upgrades (+) | Lifetime across plays: the card *becomes* its next stage | `card-upgrades.ts` (D8, held for this rework) | Not a type: D8 decides the grant path; the same card id with `upgradeLevel`. Evaluate at A5 / B5 / C4 with D8 | 80 |
 | **Affix / modifier** | Dawncaster Affix, Revelation | Attaches to *another card* in the deck | None; the editor has no card-on-card reference | Fails q4–q5 hard (a new zone in deck state, a face for the host). Defer past the first pool | 85 |
-| **Summon / ally** | Dawncaster Monster, MT units, StS orbs | A second combatant with its own VITAE that acts in the threat phase | Allies exist, typed `oath`, unscored (`cards.allies.ts`); enemy SUMMON exists | Half-exists. The question is whether allies need their own type to be *targetable* (q1) — today they don't. Re-examine only if a slice needs the foe to hit them | 70 |
+| **Summon / ally** | Dawncaster Monster, MT units, StS orbs | A second combatant with its own VITAE that acts in the threat phase | The ally library was emptied by P1; the `oath`-typed schema and `cards.allies.ts` stub remain; enemy SUMMON exists | Schema half-exists. The question is whether allies need their own type to be *targetable* (q1). Re-examine only if a slice needs the foe to hit them | 70 |
 | **Junk / wound** | StS Status + Curse; the 5 purged curses | Unplayable or self-harming, injected by enemies, removed by a specific verb | Curse injection removed in P1; removal machinery kept | Only if an enemy row (Plan C) needs "clogs your deck" as its threat. A type only because it needs a *removal rule*; otherwise a `hex` on yourself | 60 |
 | **Die card** | Astrea's safe / balanced / risky dice | Grants or replaces a die for the fight; a risk axis (more power, more corrupted faces) | `bonusTurnDice`, `dieUpgradeLevel` (D20), the KINDLE/FORGE/BANK die economy | Rides D20, not a card type: a die-growth *grant* can be a spell's PAID line. Only becomes a type if the die itself must sit in the deck (q1: zone) | 60 |
 | **Basic attack** | Dawncaster Basic Attack | Always available, never drafted, no rarity | The grey office (Phase 104) | Exists as a *theme* (`grey`), not a type. Leave as is | 90 |
@@ -250,12 +252,12 @@ scheduled; each names its existing surface.
 
 | Idea | Surface today | One-line note |
 |---|---|---|
-| Card rewards after fights | Gated off (P1), machinery kept | Re-armed per slice; the offer *order* teaches keywords (§6 B5) |
-| Cache "take a card" offer | Gated off, kept | Same pool as rewards, or a rarer one |
+| Card rewards after fights | Live on the grey cards (D44) | Each slice widens the offer pool; the offer *order* teaches keywords (§6 B5) |
+| Cache "take a card" offer | Live on the grey cards (D44) | Same pool as rewards, or a rarer one |
 | A shop for cards | Act 1 has no shop (adjust-equipment pass 21 filed it) | Card purchase is also a progression price (p4) |
 | Curses / junk injected by enemies | Removed in P1 | Only via Plan C's threat rows (§5.1 junk row) |
-| Allies / summons | `cards.allies.ts` (typed oath) | Needs a slice that wants a second body on the board |
-| Haunts (CONJURE-only class) | `cards.haunts.ts` | Conjured cards are a free way to add *temporary* cards without a type |
+| Allies / summons | `cards.allies.ts` stub, library emptied by P1 | Needs a slice that wants a second body on the board |
+| Haunts (CONJURE-only class) | `cards.haunts.ts` stub, library emptied by P1 | Conjured cards are a free way to add *temporary* cards without a type |
 | Relic-granted cards | Purged; relic effects stay | A relic can hand you a card again once the pool exists |
 | Deck-size floor / ceiling | Deck sizes open since 2026-09-02 | A ceiling makes removal and fusion matter |
 | Card colour vs die colour | `color`, colour-match +25% | The Form / stance candidate (§5.1) is the one that touches this rule |
