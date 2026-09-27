@@ -31,7 +31,8 @@ import { REST_PASSIVE_HEAL_FRACTION, restShelterOf } from './rest-shelter';
 import type {
     EncounterPayload, InteractionPayload, GatheringPayload, RestPayload,
     VillagePayload, CutscenePayload, HazardPayload, LootCachePayload,
-    NarrationPayload, BlacksmithPayload, TravelPayload, ResolveMapEventResult,
+    NarrationPayload, BlacksmithPayload, TravelPayload, LabyrinthDoorPayload,
+    ResolveMapEventResult,
 } from './types';
 
 function withPlayer(state: GameState, next: Character): GameState {
@@ -321,6 +322,28 @@ export function resolveTravel(
     };
 }
 
+// ─── labyrinth ────────────────────────────────────────────────────────────────
+
+/**
+ * The Labyrinth door (map revamp M4, D24). Pure signal: the state is
+ * returned untouched, and the resolved event names the act to enter, which is
+ * the durable progress's `currentAct` (act I when the player has never been
+ * in). The host performs the swap and keeps the way back.
+ */
+export function resolveLabyrinthDoor(
+    state: GameState,
+    payload: LabyrinthDoorPayload,
+): ResolveMapEventResult {
+    return {
+        state,
+        event: {
+            kind: 'labyrinth',
+            act: state.labyrinth?.currentAct ?? 'act1',
+            description: payload.description,
+        },
+    };
+}
+
 // ─── dispatch table ───────────────────────────────────────────────────────────
 
 import type { MapEventPayload } from './types';
@@ -342,5 +365,6 @@ export function applyPayload(
         case 'narration':   return resolveNarration(state, payload);
         case 'blacksmith':  return resolveBlacksmith(state, payload);
         case 'travel':      return resolveTravel(state, payload);
+        case 'labyrinth':   return resolveLabyrinthDoor(state, payload);
     }
 }

@@ -11,7 +11,9 @@
  * `hydrateStoreWithGameState` is that replacement. It is the one place that
  * knows the full list of mobile-only slices, because a loaded run must not
  * inherit the previous run's open event, pending reward, hazard session or
- * event buffer. It also restores the engine RNG from the loaded state, as
+ * event buffer. The one slice it rebuilds rather than empties is the
+ * Labyrinth visit: a save taken inside the Aporia resumes there
+ * (`resumeLabyrinthSession`). It also restores the engine RNG from the loaded state, as
  * `createGameStore` does at boot, so a loaded run replays deterministically.
  *
  * Every verb here is `(store, slots, …)`: the slot store is passed in, not
@@ -27,6 +29,7 @@
 
 import { createNewGameState, getLogger, getRng, type GameState, type MapName } from '@mechanics';
 
+import { resumeLabyrinthSession } from '../labyrinth/resume';
 import type { SaveSlotId, SaveSlotStore } from '../persistence/saveSlots';
 import { mostRecentSlot } from '../persistence/saveSlots';
 import {
@@ -54,6 +57,7 @@ import {
  */
 export function hydrateStoreWithGameState(store: AppStore, next: GameState): void {
     if (typeof next.rngState === 'number') getRng().setState(next.rngState);
+    const resumed = resumeLabyrinthSession(next);
     const patch: Partial<AppStoreState> = {
         ...next,
         currentEncounter: next.currentEncounter,
@@ -65,7 +69,8 @@ export function hydrateStoreWithGameState(store: AppStore, next: GameState): voi
         rest: EMPTY_REST_SLICE,
         cache: EMPTY_CACHE_SLICE,
         blacksmith: EMPTY_BLACKSMITH_SLICE,
-        labyrinthUi: EMPTY_LABYRINTH_SLICE,
+        // A save taken inside the Aporia resumes there (map revamp M4).
+        labyrinthUi: resumed ? { session: resumed } : EMPTY_LABYRINTH_SLICE,
         notifications: DEFAULT_NOTIFICATIONS_SLICE,
         _recentEvents: [],
     };

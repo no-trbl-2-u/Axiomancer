@@ -154,6 +154,7 @@ import {
     labyrinthSettleDebtAction,
     labyrinthSpeakNameAction,
     labyrinthSubmitGateAction,
+    withoutReturnWorld,
     type LabyrinthGateOutcome,
     type LabyrinthHintOutcome,
     type LabyrinthInspectOutcome,
@@ -507,8 +508,9 @@ export interface AppActions {
     completeBlacksmithTutorial: (skipped: boolean) => void;
 
     // -----------------------------------------------------------------
-    // The Labyrinth — THE APORIA (W-01; see state/labyrinth/). Dev-menu
-    // entry only. Durable progress lives on GameState.labyrinth; the
+    // The Labyrinth — THE APORIA (W-01; see state/labyrinth/). Entered
+    // through the Lantern Deep's vault door (map revamp M4, D24) or the dev
+    // menu. Durable progress lives on GameState.labyrinth; the
     // transient visit on the labyrinthUi slice. Arrival events resolve
     // through resolveCurrentMapEvent with labyrinth bracketing (waystone
     // before the roll, Oubliette ejection after).
@@ -804,6 +806,12 @@ export function createAppActions(store: AppStore): AppActions {
             if (store.getState().labyrinthUi?.session) {
                 store.setState({ labyrinthUi: EMPTY_LABYRINTH_SLICE });
             }
+            // The visit's durable return point (map revamp M4) goes with it:
+            // the fresh overworld is where the run now stands.
+            const lab = store.getState().labyrinth;
+            if (lab?.returnWorld) {
+                store.setState({ labyrinth: withoutReturnWorld(lab) });
+            }
         },
         levelUp: () => {
             // Phase 73 follow-up — engine `levelUp` action. Same
@@ -840,12 +848,7 @@ export function createAppActions(store: AppStore): AppActions {
         applyHazardDeckPreset: (presetId) => applyHazardDeckPresetAction(store, presetId),
         completeHazardTutorial: (skipped) => completeHazardTutorialAction(store, skipped),
         // ── The Labyrinth (THE APORIA) ──
-        enterLabyrinth: (actId) => {
-            enterLabyrinthAction(store, actId);
-            labyrinthPreArriveAction(store);
-            resolveCurrentMapEventAction(store, 'labyrinth');
-            labyrinthPostArriveAction(store);
-        },
+        enterLabyrinth: (actId) => enterLabyrinthAndArriveAction(store, actId),
         exitLabyrinth: () => exitLabyrinthAction(store),
         labyrinthMove: (to) => {
             const session = store.getState().labyrinthUi?.session ?? null;
@@ -963,6 +966,18 @@ function useItemAction(store: AppStore, itemId: string): UseItemResult {
         healed: Math.max(0, delta),
         damaged: Math.max(0, -delta),
     };
+}
+
+/**
+ * Enter an act and answer its entry room: the snapshot and swap, then the
+ * waystone before the arrival roll and the Oubliette after it. Shared by
+ * the dev menu, the act-select screen and the Lantern Deep's vault door.
+ */
+function enterLabyrinthAndArriveAction(store: AppStore, actId: LabyrinthActId): void {
+    enterLabyrinthAction(store, actId);
+    labyrinthPreArriveAction(store);
+    resolveCurrentMapEventAction(store, 'labyrinth');
+    labyrinthPostArriveAction(store);
 }
 
 /** Surface a one-shot toast, preserving the existing level-up ack flag. */
@@ -1471,7 +1486,7 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
         // start node — mirroring the engine dispatcher's own travel
         // short-circuit. Doors stay repeatable.
         const shouldConsumeNode = result.event.kind !== 'none' &&
-            !['encounter', 'travel'].includes(result.event.kind);
+            !['encounter', 'travel', 'labyrinth'].includes(result.event.kind);
         if (shouldConsumeNode) {
             const currentNodeId = resolvedState.world?.currentMap?.currentNode;
             if (currentNodeId) {
@@ -1598,6 +1613,22 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
                 variants: result.event.variants,
                 tutorial: !tutorialDone,
             });
+            return true;
+        }
+
+        // The Labyrinth door (map revamp M4, D24): the engine names the act
+        // and leaves the world alone; the swap is `enterLabyrinthAction`'s.
+        // Settle the resolved overworld first (the door's way on is open and
+        // the node is NOT consumed), so the snapshot the entry takes is the
+        // one the exit restores: the player comes back out on the door.
+        // `<LabyrinthGate>` routes to `/labyrinth` once the session opens.
+        if (result.event.kind === 'labyrinth') {
+            store.setState({
+                ...resolvedState,
+                event: EMPTY_EVENT_SLICE,
+            });
+            if (result.event.description) pushToast(store, result.event.description);
+            enterLabyrinthAndArriveAction(store, result.event.act);
             return true;
         }
 

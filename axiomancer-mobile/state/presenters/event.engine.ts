@@ -686,6 +686,9 @@ function composeNarrative(resolved: ResolvedEvent): Omit<EventViewModel, 'prelud
         // crossed when the event surfaces); the follow-up travel-UI wave
         // owns its presentation. Falls to the empty VM defensively.
         case 'travel':
+        // Map revamp M4 — the Labyrinth door enters the Aporia from its
+        // interceptor; like travel it never composes a card.
+        case 'labyrinth':
         case 'none':
             return EMPTY_VM;
     }

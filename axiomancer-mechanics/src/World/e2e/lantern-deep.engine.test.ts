@@ -7,7 +7,9 @@
  *   where the shipped chain resumes;
  * - the map borrows the shipped builders, the caverns' roster and its iron
  *   (D29), with one authored event on every node;
- * - the caverns' roster is level 13 and up, so every fight here is pinned low.
+ * - the caverns' roster is level 13 and up, so every fight here is pinned low;
+ * - the vault door (`ld-15`) is the Labyrinth's (D24, M4): open on arrival,
+ *   never consumed, and it names the act the durable progress is on.
  *
  * The generic gauntlet invariants (no strands, column law, ribs, distinct
  * coordinates) run over this map in `map-traversal.engine.test.ts` like every
@@ -17,7 +19,9 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { getMapDefinition, createMapState, resolveMapEvent, getNodeEventPool } from '../index';
+import {
+    getMapDefinition, createMapState, resolveMapEvent, getNodeEventPool, createLabyrinthProgress,
+} from '../index';
 import { auditMapTraversal } from '../world.reducer';
 import { createNewGameState } from '../../Game/game.reducer';
 import { EnemiesByMap } from '../../Enemy/enemy.library';
@@ -75,11 +79,11 @@ describe('the Lantern Deep\'s events (D29)', () => {
         expect(Object.keys(kinds)).toHaveLength(18);
     });
 
-    it('spreads 7 encounters, 3 rests, 2 loot caches, 2 gatherings, 2 hazards, an arrival and a door', () => {
+    it('spreads 7 encounters, 3 rests, a loot cache, 2 gatherings, 2 hazards, an arrival, the Labyrinth door and a stair', () => {
         const tally: Record<string, number> = {};
         for (const k of Object.values(kinds)) tally[k] = (tally[k] ?? 0) + 1;
         expect(tally).toEqual({
-            encounter: 7, rest: 3, 'loot-cache': 2, gathering: 2, hazard: 2, cutscene: 1, travel: 1,
+            encounter: 7, rest: 3, 'loot-cache': 1, gathering: 2, hazard: 2, cutscene: 1, labyrinth: 1, travel: 1,
         });
     });
 
@@ -107,6 +111,33 @@ describe('the Lantern Deep\'s events (D29)', () => {
     it('gathers only the caverns\' own iron', () => {
         const items = payloads.flatMap(p => (p.kind === 'gathering' ? p.items.map(i => i.id) : []));
         expect(items).toEqual(['iron-ore', 'iron-ore']);
+    });
+
+    it('opens the Labyrinth at the vault door on arrival, with no gate (D24)', () => {
+        const before = standingOn('ld-15');
+        const r = resolveMapEvent(before);
+        expect(r.event).toMatchObject({ kind: 'labyrinth', act: 'act1' });
+        // The engine only names the act; the host swaps the world.
+        expect(r.state.world.currentMap.name).toBe('lantern-deep');
+        expect(r.state.world.currentMap.currentNode).toBe('ld-15');
+    });
+
+    it('keeps the vault door a door: never consumed, and the way on opens', () => {
+        const r = resolveMapEvent(standingOn('ld-15'));
+        expect(r.state.world.currentMap.consumedNodes).not.toContain('ld-15');
+        for (const next of ['ld-16', 'ld-17']) {
+            expect(r.state.world.currentMap.availableNodes).toContain(next);
+        }
+        expect(resolveMapEvent(r.state).event.kind).toBe('labyrinth');
+    });
+
+    it('opens the act the player left, not act I, on a return', () => {
+        const base = standingOn('ld-15');
+        const r = resolveMapEvent({
+            ...base,
+            labyrinth: { ...createLabyrinthProgress(), currentAct: 'act2' },
+        });
+        expect(r.event).toMatchObject({ kind: 'labyrinth', act: 'act2' });
     });
 
     it('leaves down the deep stair into fishing-village, where the shipped chain resumes (D27)', () => {

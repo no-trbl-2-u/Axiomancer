@@ -87,7 +87,7 @@ export const lanternDeepLayout: MapLayout = {
         // ── c4 ──
         { id: 'ld-13', ...at('ld-13'), label: 'The Fortress Gate', description: 'A portcullis, and something hanging in it.' },
         { id: 'ld-14', ...at('ld-14'), label: 'The Forge', description: 'A forge by the lava channel. The slag is full of ore.' },
-        { id: 'ld-15', ...at('ld-15'), label: 'The Vault Door', description: 'A round door that does not open. Coins on the sill.' },
+        { id: 'ld-15', ...at('ld-15'), label: 'The Vault Door', description: 'A round door in the rock. It opens for anyone who reaches it.' },
         // ── c5 ──
         { id: 'ld-16', ...at('ld-16'), label: 'The Ruined City', description: 'A city standing in water. Something reads in the square.' },
         { id: 'ld-17', ...at('ld-17'), label: 'The East Stairs', description: 'Arched stairways going down. A dry landing, and a lantern that is out.' },

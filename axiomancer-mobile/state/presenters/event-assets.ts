@@ -72,6 +72,9 @@ export function selectEventArtSlug(event: ResolvedEvent): EventArtSlug {
         // 2026-08-28 — 'travel' resolves engine-side (the world has already
         // crossed); the travel-UI wave owns its presentation.
         case 'travel':
+        // Map revamp M4 — the Labyrinth door enters the Aporia straight
+        // from its interceptor; it never reaches the modal.
+        case 'labyrinth':
         case 'none':
             return 'interaction-generic';
     }
@@ -99,6 +102,9 @@ const DEFAULT_BODY_BY_KIND: Record<ResolvedEvent['kind'], string> = {
     // 2026-08-28 — travel doors resolve engine-side; the travel-UI wave
     // owns the real presentation. Exhaustive record needs the entry.
     travel: 'The road goes on. So do you.',
+    // Map revamp M4 — the Labyrinth door never renders in the modal (its
+    // interceptor enters the Aporia); the exhaustive record needs the entry.
+    labyrinth: 'A door that was not open before.',
     none: '',
 };
 

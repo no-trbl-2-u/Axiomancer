@@ -14,7 +14,7 @@
  *   COMPLETE — stamp the current map done + unlock the next
  *            (`completeCurrentMap`) to drive late-game map bookkeeping.
  *   THE APORIA — enter act I / II / III of the labyrinth via
- *            `actions.enterLabyrinth` and open `/labyrinth`.
+ *            `actions.enterLabyrinth`; `<LabyrinthGate>` opens `/labyrinth`.
  *   NEW GAME ON — (map revamp M3a) start a FRESH game on any campaign map
  *            (`STARTABLE_MAPS`) in the active save slot: the same new-game
  *            verb the slot screen uses, placed on the chosen map instead of
@@ -95,10 +95,8 @@ export function DebugWorldTravel() {
         setFeedback(`new game · slot ${slot} · ${map}`);
     };
 
-    const onAct = (actId: LabyrinthActId) => {
-        actions.enterLabyrinth(actId);
-        router.push('/labyrinth' as never);
-    };
+    // `<LabyrinthGate>` routes to `/labyrinth` once the visit opens.
+    const onAct = (actId: LabyrinthActId) => actions.enterLabyrinth(actId);
 
     return (
         <>

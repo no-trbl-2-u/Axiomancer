@@ -103,19 +103,28 @@ function labyrinthWorld(actId: LabyrinthActId): WorldState {
  * world to the act's map, and stamps `currentAct` on the durable
  * progress. The caller (actions.ts) resolves the entry room's arrival
  * event afterwards — entrances narrate (authored override).
+ *
+ * The snapshot is written twice: on the session, and on the durable
+ * progress as `returnWorld` (map revamp M4), so the save this action takes
+ * still knows the way back after a reload (`resumeLabyrinthSession`).
  */
 export function enterLabyrinthAction(store: AppStore, actId: LabyrinthActId): void {
     const state = store.getState();
     const existing = sessionOf(store);
     const progress = labyrinthProgressOf(state as unknown as GameState);
+    // A descent (act1 → act2 → act3) keeps the ORIGINAL snapshot.
+    const savedWorld = existing?.savedWorld ?? state.world ?? null;
     store.setState({
         world: labyrinthWorld(actId),
-        labyrinth: { ...progress, currentAct: actId },
+        labyrinth: {
+            ...progress,
+            currentAct: actId,
+            ...(savedWorld ? { returnWorld: savedWorld } : {}),
+        },
         labyrinthUi: {
             session: {
                 actId,
-                // A descent (act1 → act2 → act3) keeps the ORIGINAL snapshot.
-                savedWorld: existing?.savedWorld ?? state.world ?? null,
+                savedWorld,
                 lastRemark: null,
                 arrivalNote: null,
             },
@@ -125,12 +134,27 @@ export function enterLabyrinthAction(store: AppStore, actId: LabyrinthActId): vo
     saveQuietly(store);
 }
 
-/** Leave the labyrinth: restore the overworld snapshot, clear the visit. */
+/** The durable progress without its open-visit return point. */
+export function withoutReturnWorld(progress: LabyrinthProgress): LabyrinthProgress {
+    if (progress.returnWorld === undefined) return progress;
+    const { returnWorld: _dropped, ...rest } = progress;
+    return rest;
+}
+
+/**
+ * Leave the labyrinth: restore the overworld snapshot (the Lantern Deep's
+ * vault door, when the visit came in through it), clear the visit and its
+ * durable return point.
+ */
 export function exitLabyrinthAction(store: AppStore): void {
     const session = sessionOf(store);
     if (!session) return;
+    const state = store.getState();
+    const progress = labyrinthProgressOf(state as unknown as GameState);
+    const savedWorld = session.savedWorld ?? progress.returnWorld ?? null;
     store.setState({
-        ...(session.savedWorld ? { world: session.savedWorld } : {}),
+        ...(savedWorld ? { world: savedWorld } : {}),
+        ...(state.labyrinth ? { labyrinth: withoutReturnWorld(progress) } : {}),
         labyrinthUi: EMPTY_LABYRINTH_SLICE,
         event: EMPTY_EVENT_SLICE,
     });

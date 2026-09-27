@@ -352,7 +352,9 @@ export function resolveMapEvent(
         revealAdjacent(stateWithAlignment.world.currentMap, nodeId),
         nodeId,
     );
-    const consumed = markNodeConsumed(next, nodeId);
+    // The Labyrinth door (M4, D24) opens the way on like any node but is
+    // never consumed: it stays a door, and the next arrival enters again.
+    const consumed = result.event.kind === 'labyrinth' ? next : markNodeConsumed(next, nodeId);
     const nextState: GameState = {
         ...stateWithAlignment,
         world: { ...stateWithAlignment.world, currentMap: consumed },

@@ -1569,7 +1569,22 @@ const LD_HAZARD_NODES: Record<string, { damage: number; description: string }> =
 
 const LD_LOOT_NODES: Record<string, { currency: number; description: string }> = {
     'ld-6':  { currency: 12, description: 'A torch-bearer\'s purse, dropped in the west tunnel. The torches are still lit.' },
-    'ld-15': { currency: 14, description: 'Coins on the sill of a round door that does not open. Someone paid it, and it kept the money.' },
+};
+
+/**
+ * The vault door — the Labyrinth's (map revamp M4, D24). Open on arrival, no
+ * gate: the round door turns, and the Aporia is behind it. Never consumed,
+ * so the door can be used again.
+ */
+const ldVaultDoor: MapEventPool = {
+    id: 'ld-15.labyrinth',
+    entries: [{
+        kind: 'labyrinth', weight: 1,
+        payload: {
+            kind: 'labyrinth',
+            description: 'The round door turns when you touch it. Behind it is a corridor of columns, and it goes on further than the cavern does.',
+        },
+    }],
 };
 
 /**
@@ -1596,6 +1611,8 @@ const LANTERN_DEEP_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> 
             const nodeId = `ld-${i}`;
             if (nodeId === 'ld-1') {
                 out.push({ nodeId, pool: ldArrival });
+            } else if (nodeId === 'ld-15') {
+                out.push({ nodeId, pool: ldVaultDoor });
             } else if (nodeId === 'ld-18') {
                 out.push({ nodeId, pool: ldDeepStair });
             } else if (LD_CAMP_NODES[nodeId]) {

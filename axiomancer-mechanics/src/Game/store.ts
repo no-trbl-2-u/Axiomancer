@@ -290,6 +290,29 @@ function logGameEventSanitized(event: GameEvent): void {
 }
 
 /**
+ * The part of the state a save writes: every durable `GameState` field, and
+ * not the transient `currentEncounter` (encounters re-roll on load, Spec 07)
+ * or the store's verbs. One list for the autosave and the explicit `save()`.
+ * `labyrinth` is the Aporia's durable progress (W-01), and with it an open
+ * visit's way back (map revamp M4); it is absent until the player first
+ * enters, so saves from before then are unchanged.
+ */
+function durableSlice(next: GameState): GameState {
+    const {
+        version, runId, player, world, quests, flags,
+        moralMeter, rngState, philosophicalAlignment,
+        lastSeenAlignmentCells, codex, regionConsequences, mapGoodwill,
+        labyrinth,
+    } = next;
+    return {
+        version, runId, player, world, quests, flags,
+        moralMeter, rngState, philosophicalAlignment,
+        lastSeenAlignmentCells, codex, regionConsequences, mapGoodwill,
+        ...(labyrinth ? { labyrinth } : {}),
+    };
+}
+
+/**
  * Constructs a Zustand vanilla store backed by `adapter`.
  *
  * @param adapter   - Persistence backend (Node fs, AsyncStorage, null for tests).
@@ -340,16 +363,7 @@ export function createGameStore(
             // Save excludes transient currentEncounter — encounters re-roll on
             // load (Spec 07).
             if (DURABLE_ACTIONS.has(action.type)) {
-                const {
-                    currentEncounter: _drop, version, runId, player, world, quests, flags,
-                    moralMeter, rngState, philosophicalAlignment,
-                    lastSeenAlignmentCells, codex, regionConsequences, mapGoodwill,
-                } = next;
-                adapter.save({
-                    version, runId, player, world, quests, flags,
-                    moralMeter, rngState, philosophicalAlignment,
-                    lastSeenAlignmentCells, codex, regionConsequences, mapGoodwill,
-                });
+                adapter.save(durableSlice(next));
             }
             return next;
         }
@@ -506,16 +520,7 @@ export function createGameStore(
 
             save() {
                 const next = get();
-                const {
-                    currentEncounter: _drop, version, runId, player, world, quests, flags,
-                    moralMeter, rngState, philosophicalAlignment,
-                    lastSeenAlignmentCells, codex, regionConsequences, mapGoodwill,
-                } = next;
-                adapter.save({
-                    version, runId, player, world, quests, flags,
-                    moralMeter, rngState, philosophicalAlignment,
-                    lastSeenAlignmentCells, codex, regionConsequences, mapGoodwill,
-                });
+                adapter.save(durableSlice(next));
                 if (emitter) emitter.emit({ type: 'game:saved', payload: { state: next } });
             },
 

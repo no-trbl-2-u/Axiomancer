@@ -28,6 +28,7 @@
 | T's calls on M3a/M3b | #394 | Merged 2026-09-26: D30–D35, applied to all three built maps. See §3d. |
 | M3d: the Lantern Deep | #396 (mirror) | Shipped 2026-09-26 straight to main by the loop. See §3e. |
 | M3e: fishing-village retune | #398 (mirror) | Shipped 2026-09-26 straight to main by the loop. See §3f. |
+| M4: the Labyrinth door | #399 (mirror) | Shipped 2026-09-27 straight to main by the loop. See §3g. |
 
 **First act of the session:** get #382 → #383 → #384 merged, in order (the
 repo uses merge commits; auto-merge is disabled). Each PR's decisions-file
@@ -313,6 +314,30 @@ the village below.
 - **Found on the way:** the Charcoal Wood's `cw-7` kudan is a `unique` foe,
   so its XP rescales to 2 x 500 = 1,000: one fight is worth a full level,
   more than the rest of the wood together. Filed in `plan/AUDIT.md`.
+
+## 3g. M4 — shipped state (2026-09-27)
+
+The Lantern Deep's vault door (`ld-15`) is the Labyrinth's (D24). Brief:
+`plan/phases/phase_M4_labyrinth_door.md`.
+
+- **Engine:** a new `labyrinth` map-event kind (`LabyrinthDoorPayload`). It
+  resolves to `{ kind: 'labyrinth', act }`, where `act` is the durable
+  progress's `currentAct` (act I on a first visit). It leaves the state
+  alone and is never consumed, so the door can be used again. The way on
+  (`ld-16`, `ld-17`) opens as at any node. The loot cache that sat there is gone.
+- **Mobile:** `resolveCurrentMapEventAction` settles the overworld and then
+  enters through `enterLabyrinthAction`, so the snapshot is the door and
+  LEAVE puts the player back on it. `<LabyrinthGate>` (root layout) routes to
+  `/labyrinth` for every way in; the dev menu no longer pushes it itself.
+- **Resume:** the snapshot is also written to `LabyrinthProgress.returnWorld`.
+  The cold boot (`createAppStore`) and the slot load
+  (`hydrateStoreWithGameState`) rebuild the visit from it
+  (`state/labyrinth/resume.ts`). Exit and `resetRun` clear it.
+- **Found on the way:** the engine's two save paths never wrote
+  `GameState.labyrinth`, although it was documented as persisted, so all
+  Aporia progress was lost on reload. Both paths now share one field list
+  (`durableSlice` in `Game/store.ts`), pinned by
+  `Game/e2e/save-labyrinth.engine.test.ts`.
 
 ## 4. Definition of done, and who does what
 

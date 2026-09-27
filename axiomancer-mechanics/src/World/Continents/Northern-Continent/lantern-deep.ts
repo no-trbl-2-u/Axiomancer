@@ -25,7 +25,7 @@
  *
  * Lanes run west to east in every band, so every lateral rib (D1) joins two
  * landmarks that are neighbours on the plate. The vault door is the
- * Labyrinth's (D24); M4 wires it. Events use the shipped builders and the
+ * Labyrinth's door (D24, wired in M4). Events use the shipped builders and the
  * caverns' roster and iron (D29): see `MapEvents/content.ts`.
  */
 
