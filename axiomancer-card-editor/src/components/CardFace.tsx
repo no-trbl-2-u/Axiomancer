@@ -45,7 +45,7 @@ export interface FaceCard {
     glyphKw: KeywordId;
     /** May exceed the KEYWORDS vocabulary — every unique FREE effect gets its
      *  own silhouette (owner directive 2026-07-16), incl. rider verbs the paid
-     *  vocabulary never uses (reveal / pip / mill / conviction / …). */
+     *  vocabulary never uses (pip / quarter / cleanse). */
     freeKw: KeywordId | string;
     freeVal: number;
     paidKw: KeywordId;
@@ -77,20 +77,21 @@ function primaryKeyword(card: CardDraft): { kw: KeywordId; val: number } {
             case 'guard':
                 return { kw: 'guard', val: sm.amount };
             case 'barrier':
-                return { kw: 'barrier', val: sm.amount };
+                return { kw: 'guard', val: sm.amount };
             case 'riposte':
                 return { kw: 'riposte', val: sm.damage };
+            // The keyword audit (2026-09-27, after the card purge) retired the
+            // RUPTURE / SIPHON / REAP / SOUL display rows with their cards;
+            // the kinds still project to the closest live family.
             case 'rupture':
-                return { kw: 'rupture', val: sm.bonusPct ?? 0 };
-            case 'siphon':
-                return { kw: 'siphon', val: Math.round(sm.pct * 100) };
             case 'reap':
-                return { kw: 'reap', val: sm.cost };
             case 'reap_all':
-                return { kw: 'reap', val: 0 };
+                return { kw: 'damage', val: 0 };
+            case 'siphon':
+                return { kw: 'heal_self', val: Math.round(sm.pct * 100) };
             case 'soul_gain':
             case 'consume_affliction':
-                return { kw: 'soul', val: 0 };
+                return { kw: 'dot', val: 0 };
             case 'sway':
                 return { kw: 'sway', val: sm.amount };
             case 'stagger':
@@ -101,26 +102,24 @@ function primaryKeyword(card: CardDraft): { kw: KeywordId; val: number } {
                 return { kw: 'foretell', val: sm.count };
             case 'omen':
                 return { kw: 'foretell', val: 0 };
+            // CHARGE / ECHO / FORGE / STRIP BUFF left the display vocabulary
+            // in the keyword audit (2026-09-27): generic control glyph, no value.
             case 'premise':
-                return { kw: 'premise', val: sm.count };
             case 'peroration':
             case 'spend_premises':
-                return { kw: 'premise', val: 0 };
             case 'echo':
             case 'echo_next_spell':
             case 'reprise':
             case 'replay_last':
-                return { kw: 'echo', val: 0 };
             case 'forge_floating_die':
             case 'float_x_die':
             case 'create_temporary_die':
-                return { kw: 'forge', val: 0 };
+            case 'strip_random_buff':
+                return { kw: 'control', val: 0 };
             case 'extend_dots':
             case 'convert_dots':
             case 'boost_all_dots':
                 return { kw: 'dot', val: 0 };
-            case 'strip_random_buff':
-                return { kw: 'strip_buff', val: 0 };
             // ── THE BIG NUMBERS REWRITE (2026-09-02) + long-standing profane-
             // canon verbs that were never given a projection case (found by
             // `/adjust-keywords` pass 5, 2026-09-10): all four already have a
@@ -130,14 +129,13 @@ function primaryKeyword(card: CardDraft): { kw: KeywordId; val: number } {
             // through to the generic CONTROL clock glyph with no value shown. ──
             case 'deal':
                 return { kw: 'damage', val: sm.amount };
+            // RECOIL / IMMOLATE / PURGE left the display vocabulary in the
+            // keyword audit (2026-09-27, after the card purge).
             case 'recoil':
-                return { kw: 'recoil', val: sm.hp };
             case 'recoil_x':
-                return { kw: 'recoil', val: sm.min };
             case 'immolate':
-                return { kw: 'immolate', val: sm.count };
             case 'purge_self':
-                return { kw: 'purge', val: 0 };
+                return { kw: 'control', val: 0 };
             // Still falling to the generic CONTROL default below, deliberately
             // left unfixed this pass: `rider` (5 live cards) wraps an arbitrary
             // `CardRider` and needs the same field-by-field dispatch
@@ -163,8 +161,10 @@ function primaryKeyword(card: CardDraft): { kw: KeywordId; val: number } {
         if (ce.effectId.includes('mark')) {
             return { kw: 'mark', val: ce.intensity ?? 1 };
         }
-        if (ce.effectId.includes('backfire')) {
-            return { kw: 'backfire', val: ce.intensity ?? 1 };
+        // S3 (D43) — A Plain Word's VULNERABLE (a `stat` debuff, so without
+        // this arm it read as soft CONTROL on the face).
+        if (ce.effectId.includes('vulnerable')) {
+            return { kw: 'vulnerable', val: ce.intensity ?? 1 };
         }
         if (eff?.category === 'control') {
             const skip = !!payload?.actionRestriction?.skipTurn;
@@ -177,7 +177,7 @@ function primaryKeyword(card: CardDraft): { kw: KeywordId; val: number } {
             return { kw: 'regen', val: ce.intensity ?? 1 };
         }
         if (eff?.category === 'defense') {
-            return { kw: 'barrier', val: ce.intensity ?? 1 };
+            return { kw: 'guard', val: ce.intensity ?? 1 };
         }
         // stat / advantage / other debuff → treat as soft control on the face.
         return { kw: 'control', val: ce.duration ?? eff?.duration ?? 1 };
@@ -206,30 +206,25 @@ function freeKeyword(card: CardDraft): { kw: KeywordId | string; val: number } {
         const i = f.applyEffect.intensity ?? 1;
         if (id.includes('mark')) return { kw: 'mark', val: i };
         if (id.includes('bleed') || id.includes('poison')) return { kw: dotKeyword(id), val: i };
-        if (id.includes('fester') || id.includes('acid')) return { kw: 'poison', val: i };
-        if (id.includes('burn')) return { kw: 'dot', val: i };
         if (id.includes('quarter')) return { kw: 'quarter', val: i };
-        if (id.includes('backfire')) return { kw: 'backfire', val: i };
+        if (id.includes('vulnerable')) return { kw: 'vulnerable', val: i };
         if (id.includes('doom')) return { kw: 'doom', val: i };
         return { kw: 'control', val: 0 };
     }
+    if (f.damage) return { kw: 'damage', val: f.damage };
     if (f.guard) return { kw: 'guard', val: f.guard };
-    if (f.barrier) return { kw: 'barrier', val: f.barrier };
+    if (f.barrier) return { kw: 'guard', val: f.barrier };
     if (f.healHp) return { kw: 'heal_self', val: f.healHp };
     if (f.drawCards) return { kw: 'draw', val: f.drawCards };
-    if (f.tickOne || f.tickAllDots) return { kw: 'tick', val: 0 };
+    if (f.tickOne || f.tickAllDots) return { kw: 'dot', val: 0 };
     if (f.cleanse) return { kw: 'cleanse', val: f.cleanse };
-    if (f.premises) return { kw: 'premise', val: f.premises };
     if (f.sway) return { kw: 'sway', val: f.sway };
-    if (f.souls) return { kw: 'soul', val: f.souls };
     if (f.foretell) return { kw: 'foretell', val: f.foretell };
-    if (f.revealStance) return { kw: 'reveal', val: 0 };
+    if (f.revealStance) return { kw: 'foretell', val: 0 };
     if (f.pips) return { kw: 'pip', val: f.pips };
-    if (f.millCards) return { kw: 'mill', val: f.millCards };
-    if (f.recoil) return { kw: 'recoil', val: f.recoil };
     if (f.stagger) return { kw: 'stagger', val: f.stagger };
-    if (f.refreshDie) return { kw: 'refresh', val: 0 };
-    if (f.conviction) return { kw: 'conviction', val: f.conviction };
+    // CHARGE / SOUL / MILL / RECOIL / REFRESH / CONVICTION riders lost their
+    // silhouettes in the keyword audit (2026-09-27, after the card purge).
     return { kw: 'control', val: 0 };
 }
 
@@ -284,7 +279,6 @@ export function KwGlyph({
                 </svg>
             );
         case 'dot':
-        case 'rupture':
             return (
                 <svg viewBox="0 0 24 24" style={s} fill={color}>
                     <path d="M12 2 C14 6 18 8 18 13 C18 17 15 21 12 21 C9 21 6 18 6 14 C6 11 8 10 9 8 C10 11 11 10 12 8 C12 6 11 4 12 2Z" />
@@ -298,14 +292,12 @@ export function KwGlyph({
             );
         case 'regen':
         case 'heal_self':
-        case 'siphon':
             return (
                 <svg viewBox="0 0 24 24" style={s} fill="none" stroke={color} strokeWidth="1.7" strokeLinejoin="round">
                     <path d="M12 21 C5 16 3 12 3 8 A4 4 0 0 1 12 6 A4 4 0 0 1 21 8 C21 12 19 16 12 21Z" fill={color} fillOpacity="0.22" />
                 </svg>
             );
         case 'guard':
-        case 'barrier':
         case 'riposte':
             return (
                 <svg viewBox="0 0 24 24" style={s} fill={color} stroke={color} strokeWidth="1">
@@ -328,22 +320,10 @@ export function KwGlyph({
                     <path d="M12 3.5 A8.5 8.5 0 1 0 12 20.5 A8.5 8.5 0 1 0 12 3.5 Z M12 6 A6 6 0 1 0 12 18 A6 6 0 1 0 12 6 Z M12 9.25 A2.75 2.75 0 1 0 12 14.75 A2.75 2.75 0 1 0 12 9.25 Z M11 0.5 H13 V3 H11 Z M11 21 H13 V23.5 H11 Z M0.5 11 H3 V13 H0.5 Z M21 11 H23.5 V13 H21 Z" />
                 </svg>
             );
-        case 'reveal':
-            return (
-                <svg viewBox="0 0 24 24" style={s} fill={color} fillRule="evenodd">
-                    <path d="M2 8 C5 6.5 9 6.5 12 8 C15 6.5 19 6.5 22 8 C22 13 19 16.5 15.5 16.5 C13.8 16.5 12.8 15.4 12 14.2 C11.2 15.4 10.2 16.5 8.5 16.5 C5 16.5 2 13 2 8 Z M6.2 10 A1.8 1.8 0 1 0 6.2 13.6 A1.8 1.8 0 1 0 6.2 10 Z M17.8 10 A1.8 1.8 0 1 0 17.8 13.6 A1.8 1.8 0 1 0 17.8 10 Z" />
-                </svg>
-            );
         case 'cleanse':
             return (
                 <svg viewBox="0 0 24 24" style={s} fill={color}>
                     <path d="M12 2 C17 9 19 12 19 15.5 A7 7 0 0 1 5 15.5 C5 12 7 9 12 2 Z" />
-                </svg>
-            );
-        case 'conviction':
-            return (
-                <svg viewBox="0 0 24 24" style={s} fill={color}>
-                    <path d="M12 2 L22 12 L12 22 L2 12 Z" />
                 </svg>
             );
         case 'pip':
@@ -352,28 +332,18 @@ export function KwGlyph({
                     <path d="M12 2 L21 7 V17 L12 22 L3 17 V7 Z" />
                 </svg>
             );
-        case 'mill':
-            return (
-                <svg viewBox="0 0 24 24" style={s} fill={color}>
-                    <path d="M3 6 L11 3 L14 12 L6 15 Z M10 9 H21 V21 H10 Z" />
-                </svg>
-            );
-        case 'recoil':
-            return (
-                <svg viewBox="0 0 24 24" style={s} fill={color}>
-                    <path d="M8 3 H16 V12 H21 L12 22 L3 12 H8 Z" />
-                </svg>
-            );
         case 'stagger':
             return (
                 <svg viewBox="0 0 24 24" style={s} fill={color}>
                     <path d="M4 4 H16 V7 H4 Z M8 10.5 H20 V13.5 H8 Z M4 17 H16 V20 H4 Z" />
                 </svg>
             );
-        case 'backfire':
+        // VULNERABLE (S3, D43) — the shield, split by a crack: the foe's guard
+        // is open. Mirrors the mobile/catalog CRACKED_SHIELD path.
+        case 'vulnerable':
             return (
-                <svg viewBox="0 0 24 24" style={s} fill={color}>
-                    <path d="M14 3 A7 7 0 0 1 14 17 H11 V21 L4 15 L11 9 V13 H14 A3 3 0 0 0 14 7 H8 V3 Z" />
+                <svg viewBox="0 0 24 24" style={s} fill={color} fillRule="evenodd">
+                    <path d="M12 2 L21 5 V12 C21 17 17 21 12 22 C7 21 3 17 3 12 V5 Z M12.6 4.2 L10 9.5 L13.4 11.4 L10.4 19.6 L11.6 19.8 L15.4 10.8 L12 9 L14 4.4 Z" />
                 </svg>
             );
         case 'quarter':
@@ -382,22 +352,10 @@ export function KwGlyph({
                     <path d="M3 4 H21 V16 H12 L7 21 V16 H3 Z" />
                 </svg>
             );
-        case 'refresh':
-            return (
-                <svg viewBox="0 0 24 24" style={s} fill={color}>
-                    <path d="M12 3 A9 9 0 1 0 21 12 H18.5 A6.5 6.5 0 1 1 12 5.5 L12 9 L18 4.5 L12 0 Z" />
-                </svg>
-            );
         case 'draw':
             return (
                 <svg viewBox="0 0 24 24" style={s} fill={color} fillRule="evenodd">
                     <path d="M7 2 H17 A1.5 1.5 0 0 1 18.5 3.5 V20.5 A1.5 1.5 0 0 1 17 22 H7 A1.5 1.5 0 0 1 5.5 20.5 V3.5 A1.5 1.5 0 0 1 7 2 Z M8 4.5 H16 V11 H8 Z" />
-                </svg>
-            );
-        case 'tick':
-            return (
-                <svg viewBox="0 0 24 24" style={s} fill={color}>
-                    <path d="M6 2 H18 V6 L13.5 12 L18 18 V22 H6 V18 L10.5 12 L6 6 Z" />
                 </svg>
             );
         case 'foretell':
@@ -406,25 +364,12 @@ export function KwGlyph({
                     <path d="M12 5.5 C6 5.5 2 12 2 12 C2 12 6 18.5 12 18.5 C18 18.5 22 12 22 12 C22 12 18 5.5 12 5.5 Z M12 8.5 A3.5 3.5 0 1 0 12 15.5 A3.5 3.5 0 1 0 12 8.5 Z" />
                 </svg>
             );
-        case 'premise':
-            return (
-                <svg viewBox="0 0 24 24" style={s} fill={color}>
-                    <path d="M7 2 H17 V22 L12 17.5 L7 22 Z" />
-                </svg>
-            );
-        case 'soul':
-            return (
-                <svg viewBox="0 0 24 24" style={s} fill={color}>
-                    <path d="M12 2 L14.2 9.8 L22 12 L14.2 14.2 L12 22 L9.8 14.2 L2 12 L9.8 9.8 Z" />
-                </svg>
-            );
         case 'sway':
             return (
                 <svg viewBox="0 0 24 24" style={s} fill={color}>
                     <path d="M2 9 C4.8 5.8 8 5.8 11 8.8 C13.7 11.5 16.3 11.5 19 8.8 L22 10.3 C18.4 14.2 14.3 14.3 11 11 C8.4 8.4 6 8.6 3.6 11.3 Z M2 15 C4.8 11.8 8 11.8 11 14.8 C13.7 17.5 16.3 17.5 19 14.8 L22 16.3 C18.4 20.2 14.3 20.3 11 17 C8.4 14.4 6 14.6 3.6 17.3 Z" />
                 </svg>
             );
-        case 'forge':
         case 'oath':
             return (
                 <svg viewBox="0 0 24 24" style={s} fill={color}>
@@ -436,14 +381,6 @@ export function KwGlyph({
             return (
                 <svg viewBox="0 0 24 24" style={s} fill={color} fillRule="evenodd">
                     <path d="M12 2 C7.3 2 4 5.4 4 9.4 C4 12.3 5.7 14.5 8 15.6 L8 20 H10.2 L10.2 17.2 H11.2 L11.2 20 H12.8 L12.8 17.2 H13.8 L13.8 20 H16 L16 15.6 C18.3 14.5 20 12.3 20 9.4 C20 5.4 16.7 2 12 2 Z M8.8 8 A2 2 0 1 0 8.8 12 A2 2 0 1 0 8.8 8 Z M15.2 8 A2 2 0 1 0 15.2 12 A2 2 0 1 0 15.2 8 Z" />
-                </svg>
-            );
-        case 'strip_buff':
-            return (
-                <svg viewBox="0 0 24 24" style={s} fill={color}>
-                    <rect x="4" y="13" width="16" height="3.5" />
-                    <rect x="6" y="8" width="12" height="3" />
-                    <rect x="8" y="4" width="8" height="2.5" />
                 </svg>
             );
         case 'damage':

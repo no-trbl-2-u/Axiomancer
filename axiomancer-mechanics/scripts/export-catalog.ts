@@ -151,24 +151,19 @@ function specialMechanicLabel(sm: any): string {
 
 // Non-effect FREE riders (guard / draw / premise …) → a terse rune for the
 // giant free-glyph; affliction riders use their own effect glyph instead.
+// The keyword audit (2026-09-27, after the card purge) kept only the rider
+// fields whose keyword is still live; the others fall back to the ◆ rune.
 const FREE_TXT_GLYPH: Record<string, string> = {
-    guard: '❖', barrier: '❖', healHp: '✚', drawCards: '⚑', premises: '❡',
-    sway: '∿', souls: '✦', foretell: '◉', pips: '⬡', stagger: '⚔',
-    tickOne: '❋', tickAllDots: '❋', cleanse: '✦', recoil: '▽', millCards: '⁇',
-    revealStance: '◉', conviction: '◆', refreshDie: '↻',
-    bonusIntensity: '▲', bonusDuration: '⌛', ruptureMarks: '❋', intensityPerPip: '⬡',
+    guard: '❖', barrier: '❖', healHp: '✚', drawCards: '⚑',
+    sway: '∿', foretell: '◉', pips: '⬡', stagger: '⚔', cleanse: '✦',
 };
 
 // Rider field → the UPPERCASE face keyword the silhouette table keys off
 // (build-catalog.mjs GLYPH_SHAPES — the copy of mobile glyphShapes.ts).
 const FREE_RIDER_KW: Record<string, string> = {
     guard: 'GUARD', barrier: 'GUARD', healHp: 'HEAL', drawCards: 'DRAW',
-    premises: 'PREMISE', sway: 'SWAY', souls: 'SOUL', foretell: 'FORETELL',
-    pips: 'PIP', stagger: 'STAGGER', tickOne: 'TICK', tickAllDots: 'TICK',
-    cleanse: 'CLEANSE', recoil: 'RECOIL', millCards: 'MILL',
-    revealStance: 'REVEAL', conviction: 'CONVICTION', refreshDie: 'REFRESH',
-    bonusIntensity: 'INTENSITY', bonusDuration: 'DURATION',
-    ruptureMarks: 'RUPTURE', intensityPerPip: 'PIP',
+    sway: 'PLEA', foretell: 'FORETELL', pips: 'PIP', stagger: 'STAGGER',
+    cleanse: 'CLEANSE',
 };
 // Effect id → UPPERCASE face keyword. The mobile registry (keywordForEffect —
 // the exact map the card faces speak) wins; ids outside the registry fall back

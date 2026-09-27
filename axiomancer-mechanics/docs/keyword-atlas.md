@@ -40,11 +40,7 @@ mid-flight. Run `npm run catalog` for the current binding.
 | **DEAL N** | Direct VITAE damage. Not a keyword — plain English on the face; a multi-hit prints `N × k` and each hit is its own damage instance. | (see the catalog) |
 | **PIERCE** | This damage ignores the foe's HIDE and every effect that would reduce it. | (see the catalog) |
 | **WRATH N** | Every hit you land deals that much more, for the rest of the fight. It stacks and never fades. | (see the catalog) |
-| **FLAY N** | Each of your next hits deals half again as much, spending one stack per hit. | (see the catalog) |
 | **CHAIN N** | Your next hit deals that much more. Chain fades at the end of a turn that added none. | (see the catalog) |
-| **EXECUTE N%** | While the foe is at or below the printed share of its VITAE, this card's damage doubles. | (see the catalog) |
-| **OVERKILL** | Damage past the killing blow is not wasted: it converts at the printed rate (Conviction, healing, or Souls). | (see the catalog) |
-| **TWIN** | Your next spell this turn resolves its PAID line twice. Never chains — a twinned spell that arms TWIN does not re-arm. | (see the catalog) |
 
 ## Player keywords — afflictions and their payoffs
 
@@ -55,18 +51,12 @@ mid-flight. Run `npm run catalog` for the current binding.
 | **DOOM iN** | Deals VITAE per stack at the start of each round and grows a stack every time the foe acts. It ends only when consumed. | (see the catalog) |
 | **MARK iN dM** | Every damage-over-time tick on the bearer deals +1 VITAE per Mark stack. Marks hold until consumed, not until a calendar expires. | (see the catalog) |
 | **VULNERABLE +N% dM** | The foe takes N% more damage from every hit. Re-applying adds up and refreshes the turns; uncapped. Heart scales N (S3, D43). | grey-word |
-| **RUPTURE N** | Consumes the foe's afflictions and deals their remaining damage at once. ALL-spenders are uncapped. | (see the catalog) |
-| **FESTER N** | Every damage-over-time effect on the foe gains that much intensity. | (see the catalog) |
-| **PROLONG N** | Adds that many turns to every damage-over-time effect you have on the foe. | (see the catalog) |
-| **TICK** | Your strongest damage-over-time effect on the foe ticks again, immediately. | (see the catalog) |
-| **SIPHON N%** | Heals you for the printed percentage of the damage this play deals. | (see the catalog) |
 
 ## Player keywords — walls and reprisal
 
 | keyword | reminder text | carried by |
 |---|---|---|
 | **GUARD N** | Blocks that much incoming damage during the next threat phase. Unused Guard is lost unless the card prints "persists". | (see the catalog) |
-| **THORNS iN dM** | The foe takes VITAE per Thorns stack each threat phase it attacks you, even through a full block. | (see the catalog) |
 | **RIPOSTE iN dM** | Armed for one threat phase: reduces the first attack by its parry value, and if the blow is fully blocked the foe takes the counter instead. | (see the catalog) |
 
 ## Player keywords — tempo and control
@@ -74,53 +64,27 @@ mid-flight. Run `npm run catalog` for the current binding.
 | keyword | reminder text | carried by |
 |---|---|---|
 | **STAGGER N** | Removes that many rungs (the steps of the foe's telegraph) from its next action. Strip them all and the action is denied. | (see the catalog) |
-| **BACKFIRE iN dM** | The foe takes VITAE per Backfire stack for each rung its telegraphed action loses; a denied action counts all of its rungs. | (see the catalog) |
-| **CHARGE** | A running tally. When it reaches the count printed on the card that spends it, that payoff fires free and the tally resets. | (see the catalog) |
 | **FORETELL N** | Reveals the foe's next stance and looks at that many cards of your deck, moving the best to the top. | (see the catalog) |
-| **OMEN** | Stake a stance and a window of phases it must land within, paying a Conviction ante up front. A hit fires the payoff free; a miss keeps the ante. | (see the catalog) |
 | **QUARTER iN dM** | The foe's attacks deal less damage per Quarter stack. | (see the catalog) |
-
-## Player keywords — turn shape (the conditions a line waits on)
-
-| keyword | reminder text | carried by |
-|---|---|---|
-| **AMBUSH** | This line fires only when the card is your first spell of the turn. (Engine: the `opening` predicate at `maxPriorSpells: 0`.) | (see the catalog) |
-| **FLOW N** | This line fires once you have already played that many spells this turn. | (see the catalog) |
-| **FINALE** | This line fires when playing the card leaves at most the printed number of cards in hand. | (see the catalog) |
-| **REQUIEM N** | A card's REQUIEM line fires free while your discard pile holds that many cards. | (see the catalog) |
-| **FALLEN** | A state: you carry 2 or more different afflictions. A card's FALLEN line fires free while you are Fallen. | (see the catalog) |
-| **EVENTIDE** | A card's EVENTIDE line fires free while your draw pile holds an even number of cards. | (see the catalog) |
-| **UNMOVED** | A card's UNMOVED line fires free while the foe dealt you no damage last round. | (see the catalog) |
 
 ## Player keywords — the deck as a resource
 
 | keyword | reminder text | carried by |
 |---|---|---|
-| **DRAW N** | Draw that many cards from your deck, up to your hand limit. | (see the catalog) |
-| **MILL N** | Sends that many cards from your deck to your discard pile. | (see the catalog) |
-| **RECALL N** | Returns that many cards from your discard pile to your hand, highest rank first. | (see the catalog) |
-| **ECHO** | The card's PAID line fires twice. FREE lines never echo. | (see the catalog) |
-| **REPLAY N** | Says your last spell again: its PAID payload fires that many more times. | (see the catalog) |
-| **IMMOLATE** | Burns the lowest-rank cards in your hand as a cost, and they leave the fight entirely. A curse burns as well as anything. | (see the catalog) |
-| **PURGE** | Playing this curse removes it from the fight entirely. A die and a beat buy the deck clean. | (see the catalog) |
+| **DRAW N** | Draw that many cards from your deck, up to your hand limit. | consumables, signature skills |
 
-## Player keywords — resolve, harvest and mercy
+## Player keywords — resolve and mercy
 
 | keyword | reminder text | carried by |
 |---|---|---|
-| **SOUL** | You gain 1 Soul each time an affliction on the foe expires or is consumed. | (see the catalog) |
-| **REAP N** | Spends the printed number of Souls to fire the printed effect. With fewer Souls, it fizzles. REAP ALL is uncapped. | (see the catalog) |
 | **PLEA N** | Builds on the foe and decays each round. At their resolve, they relent. | (see the catalog) |
 | **HEAL N** | Restores that much VITAE, up to your maximum. | (see the catalog) |
 | **CLEANSE N** | Removes up to that many afflictions from you. | (see the catalog) |
-| **RECOIL N** | Pay the printed VITAE as a cost when the card is played. No defense can prevent it. | (see the catalog) |
 
 ## Player keywords — the dice
 
 | keyword | reminder text | carried by |
 |---|---|---|
-| **FORGE** | Forges a GHOST die (or revives a dead X die as WILD) that joins your tray and is spent for good. At 3 dice, it grants +1 Conviction instead. | (see the catalog) |
-| **KINDLE** | Creates a temporary die of the printed color in your Reserve. If the Reserve is full, it grants Conviction instead. | (see the catalog) |
 | **PIP** | Each threat phase a Reserve die survives it gains a pip; each pip spent adds `PIP_INTENSITY_BONUS` intensity, or `PIP_GUARD_BONUS` Guard on a defend card. | (see the catalog) |
 | **BOON** | A die's BOON face powers a card of its color and grants Conviction; its equipped gear sets how much. | die gear (`spec 33 §6`) |
 | **HONE** | A blacksmith upgrade: adds a mana face to a die's gear, so more of its rolls power a card. | blacksmith service |
@@ -206,14 +170,9 @@ in `SYSTEM_GLOSSARY` (mobile).
 | term | what it is |
 |---|---|
 | CONVICTION ◆ | A spend-anytime resource banked from unspent dice and overflow. It never decays. |
-| TOLL ⬡ | A whole-combat running tally of dice you spend by color; a ⬡ threshold line fires at its count. |
 | RESERVE & PIPS | Dice held between phases instead of played, ripening a pip per phase. |
-| GHOST ✦ | A forged die that joins your tray, never rerolls, and is gone forever when spent. |
 | RUNGS | The steps of the foe's telegraphed action. Losing all of them denies the action. |
-| WILD / X | A WILD die counts as any color. A dead X die powers nothing, but can be Forged wild. |
-| SENTENCE | A declared conclusion: at the printed CHARGE count its payoff fires free and the tally resets. |
-| CONDEMN | An alternate win: reaching the printed CHARGE count in one SENTENCE ends the fight. |
-| RELENT | An alternate win: PLEA reaching the foe's resolve opens an explicit accept-or-continue choice. |
+| WILD / X | A WILD die counts as any color. A dead X die powers nothing. |
 
 **OATH** and **HEX** are card *types*, not keywords: a passive on your side and
 a standing curse on the foe respectively, three rounds when played free and
@@ -325,6 +284,22 @@ stale and corrected in the same pass.)
   sweep pick it up automatically — no other mobile code needed.
 
 ## Retired
+
+- **THE KEYWORD AUDIT** (2026-09-27, after the card purge P1) — the player
+  library is the grey office alone (A Plain Blow DEAL, A Plain Ward GUARD, A
+  Plain Word VULNERABLE), so every keyword whose only carriers were purged
+  cards lost its row here, its `KEYWORD_GLOSS` entry, its glyph and its
+  editor vocabulary row: FLAY, EXECUTE, OVERKILL, TWIN, RUPTURE, FESTER,
+  PROLONG, TICK, SIPHON, THORNS, BACKFIRE, CHARGE, OMEN, AMBUSH, FLOW, FINALE,
+  REQUIEM, FALLEN, EVENTIDE, UNMOVED, MILL, RECALL, ECHO, REPLAY, IMMOLATE,
+  PURGE, REAP, RECOIL, FORGE, KINDLE and SOUL; and the system terms TOLL,
+  GHOST, SENTENCE, CONDEMN and RELENT. Words that enemy text, the relic
+  signature skills, consumables or the dice still print stay (PIERCE,
+  RIPOSTE, PLEA, STAGGER, WRATH, CHAIN, FORETELL, QUARTER, PIP, DRAW, HEAL,
+  CLEANSE, and the OATH/HEX type labels). The engine mechanic kinds behind
+  the retired words are untouched; a returning word re-earns its row in a
+  guided card session (D37). The EVENTIDE and UNMOVED "Added" entries above are
+  history, not live rows.
 
 - **CURDLE** (2026-09-05, `/adjust-keywords` pass 1) — the "afflictions and
   their payoffs" row above is gone. Audit found exactly one live carrier

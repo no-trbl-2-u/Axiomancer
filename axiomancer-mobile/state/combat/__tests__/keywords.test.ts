@@ -69,8 +69,18 @@ describe('keyword registry — KW-3 (no dead references)', () => {
         // the number in its hero slot rather than badging the word (see
         // `MECHANIC_KEYWORD`'s own note, and `mechanicHeadline`'s `deal` case,
         // which returns a keyword-less headline on purpose). Its FAMILY —
-        // WRATH, FLAY, TWIN, CHAIN, EXECUTE, OVERKILL — all carry real rows.
+        // WRATH and CHAIN still carry real rows (the relic signature skills
+        // grant them); the rest of the family is listed below.
         'deal',
+        // THE KEYWORD AUDIT (2026-09-27, after the card purge): every card
+        // that printed these kinds' keywords was deleted, so their glosses
+        // went too. The kinds stay in the engine union (out of the audit's
+        // scope) and print as plain rules text if a new card ever uses one;
+        // a returning keyword re-earns its row in a guided session (D37).
+        'turnabout', 'omen', 'premise', 'spend_premises', 'recoil', 'recoil_x',
+        'consume_affliction', 'siphon', 'echo', 'echo_next_spell', 'reprise',
+        'extend_dots', 'boost_all_dots', 'immolate', 'purge_self', 'replay_last',
+        'flay', 'twin', 'execute', 'overkill', 'soul_gain',
     ];
 
     it('every mechanic kind either maps to a glossed keyword or is classified', () => {

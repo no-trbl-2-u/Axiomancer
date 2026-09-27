@@ -244,9 +244,8 @@ export const SWAY_FALTERING_FRACTION = 0.8;
  *  resistance visibly softens as their will starts to waver — this is the
  *  "small dividend" speaking Charm's OWN vocabulary, not a borrowed one. */
 export const SWAY_WAVERING_RAPPORT = 1;
-/** Faltering dividend — a small BONUS PLEA nudge (unscaled by
- *  `buff_grace_momentum`: a flat ledger dividend, not a re-scaled gain, same
- *  "modest ledger bonus" idiom as `AKRASIA_DEBT_TIER_GUARD`/
+/** Faltering dividend — a small BONUS PLEA nudge (a flat ledger
+ *  dividend, not a re-scaled gain, same "modest ledger bonus" idiom as `AKRASIA_DEBT_TIER_GUARD`/
  *  `PREMISE_MILESTONE_RUNGS`). Commitment breeds more commitment as their
  *  will visibly breaks — the two-stage arc escalates from softening THEM
  *  (Wavering/QUARTER) to accelerating YOUR OWN climb (Faltering/PLEA).

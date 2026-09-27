@@ -147,7 +147,7 @@ describe('Phase 104 — at REWARD_RANDOM_PICKS: slot 0 is guaranteed', () => {
         const counts = deckThemeCounts(player);
         expect(counts.rot).toBeGreaterThan(0);
 
-        const rotFamily: readonly string[] = ['POISON', 'BLEED', 'DOOM', 'MARK', 'RUPTURE', 'SIPHON', 'PROLONG', 'FESTER'];
+        const rotFamily: readonly string[] = ['POISON', 'BLEED', 'DOOM', 'MARK'];
         for (let seed = 1; seed <= 200; seed++) {
             const [slot0] = roll(player, seed);
             const kws = keywordsOf(slot0);

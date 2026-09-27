@@ -54,8 +54,10 @@ test('the mobile and catalog glyph tables draw the same shapes', () => {
 test('the glyph parsers found a real table, not an empty one', () => {
   // Without this the two assertions above pass vacuously the moment either
   // file is reformatted past its extractor.
-  assert.ok(mobileGlyphTable().size > 30)
-  assert.ok(catalogGlyphTable().size > 30)
+  // Floors lowered to the tables' true size after the keyword audit
+  // (2026-09-27, after the card purge): 14 keys each.
+  assert.ok(mobileGlyphTable().size >= 12)
+  assert.ok(catalogGlyphTable().size >= 12)
 })
 
 // ── The card-editor's independent display vocabulary ─────────────────────────
@@ -75,11 +77,8 @@ const EDITOR_LOCAL_LABELS = new Set([
   'DAMAGE',     // the generic direct-damage family, legal again since THE UNSHACKLING
   'DOT',        // the family name; the registry names the species (Bleed, Poison...)
   'CONTROL',    // the family name for stance/turn denial
-  'BARRIER',    // merged into GUARD's registry semantics in phase 29; the editor
-                // keeps the distinct authoring knob
   'REGEN',      // effect species, glossed by effect id rather than a keyword row
   'STUN',       // effect species, same
-  'STRIP BUFF', // a mechanic kind (`strip_random_buff`) with no keyword badge
   'HEAL SELF',  // a rider shape, not a keyword
 ])
 
@@ -122,8 +121,7 @@ test('every editor glyph case names something the project actually has', () => {
  */
 const REGISTRY_WITHOUT_ATLAS_ROW = new Set([
   'OATH', 'HEX',                                   // card TYPES, not keywords
-  'DOOM', 'FESTER', 'REPLAY', 'REQUIEM',           // Profane Canon words below the row bar
-  'IMMOLATE', 'PURGE',                             // same — curse-local verbs
+  'DOOM',                                          // Profane Canon word below the row bar
 ])
 
 /**
@@ -174,7 +172,9 @@ test('the exemption list holds no keyword that left the registry', () => {
 })
 
 test('the keyword parsers found real tables', () => {
-  assert.ok(keys(mobileRegistryKeywords()).length > 30)
+  // Floors lowered to the tables' true size after the keyword audit
+  // (2026-09-27, after the card purge): registry 23, atlas 37, editor 19.
+  assert.ok(keys(mobileRegistryKeywords()).length >= 20)
   assert.ok(keys(atlasKeywords()).length > 25)
-  assert.ok(editorVocabulary().size > 25)
+  assert.ok(editorVocabulary().size >= 15)
 })
