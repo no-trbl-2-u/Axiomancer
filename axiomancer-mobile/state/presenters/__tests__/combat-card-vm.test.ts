@@ -135,8 +135,8 @@ describe('Option A split rail — freeKeyword/freeValue + typeStrip (owner-picke
         const { card, sourceCard } = cardOf('grey-word');
         const f = faceStats(card, sourceCard);
         expect(f.freeKeyword).toBe('VULNERABLE');
-        expect(f.freeValue).toBe('×10 · 1t');
-        expect(f.freeHeroText).toBe('vulnerable ×10 · 1 turn');
+        expect(f.freeValue).toBe('+10% · 1t');
+        expect(f.freeHeroText).toBe('vulnerable +10% · 1 turn');
     });
 });
 

@@ -522,6 +522,11 @@
   re-asking the policy.
 
 ### The Incompleteness premiseShed — close the CONCEDE hole at impossible (owner-ruled 2026-07-18)
+- **MOOT (2026-09-27, card purge P1):** premises came only from player
+  cards (CHARGE riders, `spend_premises`), and every one of them was purged.
+  premiseShed has nothing left to eat, and the CONCEDE-by-tally hole this
+  row targets went with the oratory decks. Re-read only if the card agent
+  brings a premise economy back (D37).
 - source: fan-out ballot ruling R3. Evidence: oratory wins 18% flag-ON /
   32% flag-OFF at the impossible stage (band ~0), almost purely CONCEDE
   (flag-ON: 87 concede + 1 victory of 480) — The Incompleteness has no

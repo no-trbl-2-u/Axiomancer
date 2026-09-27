@@ -100,7 +100,7 @@ event-pool and layout files).
 - [x] Phase M5 — Map docs (1ec11390)
 - [x] Phase T6 — Remove alignment, philosophy and GRACE (67fd0106)
 - [x] Phase S3 — Stat scaling (refactor D1 step 3): keyword families by where the effect lands (body: damage to the foe; mind: anything on you; heart: anything on the foe), `base × stat ÷ 5` with repeating amounts at half rate and durations flat, no caps, VITAE `50 + 12·body + 6·mind + 6·heart`, coloured keywords with a stat glyph, final numbers on card faces. Brief `plan/2026-09-27-stat-scaling.prompt.md`. Requires T6 `[x]`.
-- [x] Phase P1 — The card purge (D36): purge every player card except the grey office (`grey-strike`, `grey-ward` and the VULNERABLE grey card, D42), and every player keyword except DEAL, GUARD and VULNERABLE; every run deals the grey deck; presets, the 5/5/5 thirds, card rewards and cache card offers go. Enemies keep their keywords. Brief `plan/2026-09-26-card-purge.prompt.md`. Requires S3 `[x]`.
+- [x] Phase P1 — The card purge (D36): purge every player card except the grey office (`grey-strike`, `grey-ward` and the VULNERABLE grey card, D42), and every player keyword except DEAL, GUARD and VULNERABLE; every run deals the grey deck; presets and the 5/5/5 thirds go (card rewards and the cache card offer stay, offering the grey cards: D44). Keyword audit follow-up merged as #407. Enemies keep their keywords. Brief `plan/2026-09-26-card-purge.prompt.md`. Requires S3 `[x]`.
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics (9180fa5d)
@@ -1158,6 +1158,22 @@ See the status rows above; generate briefs on demand.
   and the cache's card offer stay on. Confirmed T's request: yes ("purge
   the card library of all the cards except these 3 grey starters").
   Resulting commit: this one.
+
+- **2026-09-27** — actor: **T, attended session** (branch
+  `claude/keyword-audit`, PR #407). Action: removed every card keyword,
+  gloss, glyph, editor word and effect only purged cards used, and the inert
+  per-card engine hooks keyed on purged ids. Enemy keywords were kept.
+  Baseline unchanged. A live playtest confirmed card rewards: four wins, each
+  offering Blow, Ward and Word, with TAKE CARD growing the deck 10 → 11.
+  Confirmed T's request: yes ("audit the keyword library and glossary …
+  then remove them"). Resulting commit: `36238fd8`.
+
+- **2026-09-27** — actor: **T, attended session** (branch
+  `claude/purge-residue`). Action: filed the P1 and keyword-audit residue
+  (decisions doc, four post-purge `plan/AUDIT.md` rows, #216 evidence,
+  premiseShed candidate marked moot) and fixed A Plain Word's FREE value
+  ("×10" → "+10%"). Confirmed T's request: yes ("file the residue, clean
+  up any remaining work"). Resulting commit: this one.
 
 ## Phase log (commit hashes)
 

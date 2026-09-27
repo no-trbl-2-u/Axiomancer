@@ -54,9 +54,67 @@
   get the owner's device log (SELF -> dev tools -> DIAGNOSTICS -> PREV
   SESSION, domain ERROR) to confirm before closing; can't be shipped
   blind on web alone.
+- evidence 2026-09-27 (post-purge playtest): `combat-round-e2e.mjs`
+  `MODE=live PRESET=sage` won four fights (seeds 16 and 8). Each run tapped
+  an offer, then CHOOSE THIS, then TAKE CARD, with no page error, and the
+  Deck tab showed the pick (10 → 11 cards). The web accept path is clean on
+  the grey pool; the device log is still the only way to close this.
 
 
 ## Pending
+
+### [ui] Post-purge: a staged A Plain Word wraps "+25%" mid-token to "+2/5%" (2026-09-27)
+- category: ui
+- impact: 4
+- ease: 6
+- detail: found in the P1 playtest (browser pane, 375 wide). The PAID
+  hero value on the narrow staged card breaks inside the token. This is
+  the same family as CRITIQUE pass 49's DoT chip wrap ("8/p"/"ay"), now
+  on a card every run deals. (Its FREE rail also read "×10" for a
+  percent status. That was fixed in the residue PR: `percentIntensity`,
+  `combat-encounter.engine.ts`.)
+- next (`/iterate`): give the hero value text `numberOfLines={1}` with
+  `adjustsFontSizeToFit` (or a min width) on the staged card, and pin it
+  with a visual capture of a staged grey-word.
+
+### [balance] Post-purge: the level-3 King of Revenge is 0/40 against the grey deck (2026-09-27)
+- category: balance
+- impact: 6
+- ease: 4
+- detail: measured in the P1 matrix (baseline stamp `c6fd758c`: early
+  60%, mid 83%, late 99%, impossible 67%). fishing-village's boss, reached
+  around level 3 with Blow 5 / Ward 3 / Word 2 and at most a few grey
+  rewards, wins 0 of 40 sims. The stage bands are healthy, so this is one
+  foe, not the curve. The fix is enemy-side (its phase count or VITAE) or
+  waits for the card agent's library (D37). Do not shrink numbers (pillar
+  1); buff the neighbours or re-pin the foe.
+- next: `/adjust-enemies`. Re-run the King's cell with `npm run
+  baseline:check` fresh, then decide re-pin vs wait. Record the choice here.
+
+### [debt] Post-purge: WOUNDING has no payload — 13 foes carry it, its gloss promises a WOUND card that no longer exists (2026-09-27)
+- category: debt
+- impact: 5
+- ease: 6
+- detail: D17 made WOUNDING's payload the curse card `the-wound`, and P1
+  purged every curse. The enemy keyword (`Enemy/enemy-keywords.ts` ~147,
+  gloss "puts a WOUND in your deck") still prints on 13 foes and does
+  nothing. That breaks the bug-detector law (a keyword with no effect).
+- next: `/adjust-enemies`. Either strip `wounding` from those foes and
+  retire the keyword with its gloss, or give it a non-card payload (for
+  example a short BLEED). The first is loop-shippable; the second is a
+  keyword design call for the card agent's session (D37).
+
+### [content] Post-purge: the colour systems are dormant, but the Momentum tutorial still teaches them (2026-09-27)
+- category: content
+- impact: 4
+- ease: 5
+- detail: every live card is grey ("Any die can power this card"), so
+  momentum, surge and colour yields never fire for the player. The
+  first-combat Momentum tutorial still explains that system, so a new
+  player learns a rule they cannot use. The systems stay (the card agent
+  may bring colour back, D37). The copy is the problem.
+- next: gate the Momentum tutorial on the deck holding a coloured card,
+  and leave the system code alone. Revisit when coloured cards return.
 
 ### [gap] Act 1 has no shop, so the relic kit the 2026-09-23 owner call put "on the road" is five maps away
 - category: gap
