@@ -52,36 +52,20 @@ export interface CharacterPreset {
 
 // ─── Preset records ───────────────────────────────────────────────────────────
 
-// Profane-canon rework (2026-08-08): the ladder presets seed from the
-// Threadbare Office starters (tier 1), the first reward commons (tier 2),
-// and the mid-game uncommons (tier 3).
+// The card purge (P1, 2026-09-27; D36): every preset seeds the grey deck a
+// fresh run opens with (Blow 5 / Ward 3 / Word 2, D43 — mirrors
+// `STARTING_CARD_IDS`); the higher tiers had only purged cards to add.
 const TIER_1_CARDS = [
-    'spoiled-poultice',
-    'chilblain-watch',
-    'petty-indictment',
-    'thin-hymn',
-    'first-spadeful',
-    'thumbprick-oath',
-    'threadbare-cope',
+    'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike',
+    'grey-ward', 'grey-ward', 'grey-ward',
+    'grey-word', 'grey-word',
 ];
 
-const TIER_2_CARDS = [
-    'unction-of-boils',
-    'scolds-bridle',
-    'promissory-cut',
-];
+const TIER_2_CARDS: string[] = [];
 
-const TIER_3_CARDS = [
-    'the-long-lent',
-    'hoarfrost-teeth',
-    'shallow-grave',
-];
+const TIER_3_CARDS: string[] = [];
 
-// The synergy-payoff line — knownCards is a set-like catalogue, so the lists
-// stay disjoint to avoid duplicate ids.
-const TIER_2_SYNERGY_CARDS = [
-    'communion-of-the-worm',
-];
+const TIER_2_SYNERGY_CARDS: string[] = [];
 
 export const apprenticePreset: CharacterPreset = {
     id: 'apprentice',

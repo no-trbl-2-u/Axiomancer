@@ -176,8 +176,6 @@ export {
 export { COMBAT_HAND_SIZE, buildCombatDeck } from './combat.deck';
 export {
     COMBAT_DECK_PRESETS, COMBAT_DECK_PRESET_ORDER,
-    // aspect-thirds recipe color law (spec 32 §12 item 9) — the documented borrow map
-    PRESET_LINEAGE,
     listDeckPresets, getDeckPreset,
 } from './combat.starter-deck-presets';
 

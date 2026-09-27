@@ -10,8 +10,9 @@
  * JOINTS."
  *
  * Seven archetypes, each with shared commons + escalations (the faction's
- * mechanical throughline), exactly one curse-injector (`curseCardId` — the
- * deck-contamination vector), and per-boss SIGNATURE cards (the bespoke
+ * mechanical throughline), a curse-injector slot (`curseCardId` — the
+ * deck-contamination vector; EMPTY since the card purge, D36, because the
+ * curse cards it named were purged), and per-boss SIGNATURE cards (the bespoke
  * voice). Aeon's-End-style structural escalation: a deck's later cards carry
  * heavier weights, and its final card is a spike.
  *
@@ -217,7 +218,6 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         grade: 'escalation',
         stance: 'mind',
         damageWeight: 1.05,
-        curseCardId: 'overheard-name', // designer: curse-leaden-psalm
         actionText: 'A writ of anathema is pressed into your hand, cold from the vault, and it will not put itself down',
         stanceHint: 'The church does not curse in anger; it curses in paperwork, and the paperwork travels with you.',
         // THE archetype\'s single curse-injector. On a landed threat it shuffles \'curse-leaden-psalm\' into the player\'s deck — a rank-1 curse per brief §4 (theme \'curse\', paid line \'PURGE this curse\', free line a small self-harm; suggested free line: TICK one of your own DoTs — the psalm weighs on the 
@@ -401,7 +401,6 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         grade: 'escalation',
         stance: 'mind',
         damageWeight: 1.05,
-        curseCardId: 'arrears', // designer: curse-outstanding-lien
         actionText: 'A lien is entered against your future and filed among the cards you have not drawn yet',
         stanceHint: 'It does not strike so much as append; the appendix is yours now, and it travels with you.',
         // THE archetype\'s single curse-injector. Damage stays mid-band (0.95) because the curse is the payload: \'curse-outstanding-lien\' — rank-1 curse theme, PURGE paid line, small self-harm free line (per brief §4.4). Carried by exactly one deck (hasshaku-sama: her choosing follows you home).
@@ -588,7 +587,6 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         grade: 'escalation',
         stance: 'mind',
         damageWeight: 1.05,
-        curseCardId: 'mouthful-of-brine', // designer: curse-swallowed-bell
         actionText: 'Cold fingers sew a small lead bell into the hem of your coat, and it begins, quietly, to ring',
         stanceHint: 'The stitching is small, deliberate work — somewhere a ledger gains a line with your name on it.',
         // THE archetype\'s single curse-injector (mid band 1.0). curse-swallowed-bell: a rank-1 \'curse\'-theme player card — The Swallowed Bell — whose paid line is \'PURGE this curse\' and whose free line is a small self-toll, per brief §4.4. Graded \'escalation\' because the schema\'s grade enum has no inj
@@ -746,7 +744,6 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         grade: 'escalation',
         stance: 'heart',
         damageWeight: 1.05,
-        curseCardId: 'gnaw-marks', // designer: curse-guest-debt
         actionText: 'It enters your name in the guest book in ink you did not offer, and the invitation follows you home',
         stanceHint: 'The welcome is heartfelt, which is precisely what makes it binding.',
         // THE archetype\'s single curse-injector. curse-guest-debt: a rank-1 PURGE-line curse — hospitality as a debt instrument shuffled into the player\'s deck. Deployed sparingly: only Lady Gabriella\'s opener (the hostess is the one who keeps the book). Mid-band weight 0.9 so the injection, not the hit, i
@@ -927,7 +924,6 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         grade: 'escalation',
         stance: 'heart',
         damageWeight: 1.1,
-        curseCardId: 'arrears', // designer: curse-clinker
         actionText: 'It presses a live coal into your keeping, and your keeping closes around it whether you agree or not',
         stanceHint: 'A gift, by fire\'s etiquette — and warmth of this vintage keeps a ledger of what it is owed.',
         // THE archetype\'s single curse-injector. On a landed threat, shuffles `curse-clinker` into the player\'s combat deck — a rank-1 CURSE: a lump of fused slag that will not burn and will not leave; FREE line a 1-tick ember self-singe, paid line \'PURGE this curse\'. Old fire pays its debts in clinker: t
@@ -1071,7 +1067,6 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         grade: 'escalation',
         stance: 'mind',
         damageWeight: 1.05,
-        curseCardId: 'overheard-name', // designer: curse-already-written
         actionText: 'It writes one line of you ahead of time and files it among the cards you have not drawn',
         stanceHint: 'Somewhere in what you have not yet drawn, the sentence is already waiting.',
         // THE archetype\'s single curse-injector. Shuffling \'curse-already-written\' into the player\'s deck IS the flavor — your future draws now contain a sentence someone else wrote. Intended player curse: rank-1 curse-theme junk, FREE line a small self-MARK, paid line \'PURGE this curse\'. No effectId — 
@@ -1294,7 +1289,6 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         damageWeight: 1.3,
         effectId: 'debuff_bleed',
         intensity: 3,
-        curseCardId: 'overheard-name', // designer: curse-misfiled-entry
         actionText: 'A drawer opens at your name, issues the first three thousand paper cuts, and files a page of its own among yours',
         stanceHint: 'It catalogues before it strikes; the cuts arrive pre-filed, and so does the forgery.',
         // THE ARCHETYPE\'S ONE CURSE INJECTOR (exactly one per archetype, per deck law). On a landed opener, shuffles curse-misfiled-entry into the player\'s combat deck — the Index attacks the one place players treat as safe ground: their own pages. Opener band at 1.0 (current default weight preserved); BLEE
@@ -2052,7 +2046,6 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         damageWeight: 1.15,
         effectId: 'debuff_mark',
         intensity: 4,
-        curseCardId: 'overheard-name', // designer: curse-marginalia
         actionText: 'It writes four words in the margin of you and files the page among the cards in your hand',
         stanceHint: 'The correction is small, legible, and permanent.',
     },
