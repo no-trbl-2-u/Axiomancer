@@ -98,8 +98,9 @@ event-pool and layout files).
 - [x] Phase M3e — Retune fishing-village for its place after Act 1 (425525ce)
 - [x] Phase M4 — The Labyrinth door (571d5b3f)
 - [x] Phase M5 — Map docs (1ec11390)
-- [blocked: attended with T — the loop pauses at the card phase (D38); the stat-to-quantity mapping is T's call 2026-09-26] Phase S3 — Per-stat combat hooks and card damage scaling (refactor D1 step 3, D4): body, mind and heart each drive a distinct combat quantity, and card damage scales off them. Requires M5 `[x]`. Not a loop phase; `/oversight` unblocks it only when T runs it.
-- [blocked: requires S3 `[x]` (D36); unblock when S3 merges 2026-09-26] Phase P1 — The card purge (D36): purge every player card except `grey-strike` and `grey-ward`, and every player keyword except DEAL and GUARD; every run deals the grey deck; presets, the 5/5/5 thirds, card rewards and cache card offers go. Enemies keep their keywords. Brief `plan/2026-09-26-card-purge.prompt.md`. Requires S3 `[x]`.
+- [ ] Phase T6 — Remove alignment, philosophy and GRACE (D39): the philosophical-alignment grid (`Ledger/alignment.*`, `GameState.philosophicalAlignment`, its dialogue gates and read-backs) and the GRACE morale meter (HUD, withdraw penalty). Rename `philosophicalAspect` to a neutral name (e.g. `color`) with no behaviour change: the card colour stays, because the dice and the colour-match bonus read it. Inventory first in the PR body; ungate, don't delete, any dialogue choice that only an alignment gate hid. Requires M5 `[x]`.
+- [blocked: attended with T — the loop pauses at the card phase (D38); the model is decided (D40–D42), T starts the build 2026-09-27] Phase S3 — Stat scaling (refactor D1 step 3): keyword families by where the effect lands (body: damage to the foe; mind: anything on you; heart: anything on the foe), `base × stat ÷ 5` with repeating amounts at half rate and durations flat, no caps, VITAE `50 + 12·body + 6·mind + 6·heart`, coloured keywords with a stat glyph, final numbers on card faces. Brief `plan/2026-09-27-stat-scaling.prompt.md`. Requires T6 `[x]`.
+- [blocked: requires S3 `[x]` (D36); unblock when S3 merges 2026-09-26] Phase P1 — The card purge (D36): purge every player card except the grey office (`grey-strike`, `grey-ward` and the VULNERABLE grey card, D42), and every player keyword except DEAL, GUARD and VULNERABLE; every run deals the grey deck; presets, the 5/5/5 thirds, card rewards and cache card offers go. Enemies keep their keywords. Brief `plan/2026-09-26-card-purge.prompt.md`. Requires S3 `[x]`.
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics (9180fa5d)
@@ -1131,6 +1132,15 @@ See the status rows above; generate briefs on demand.
   Then work can continue, but no card generation unless it's a guided
   session with me"*. Scope settled by ballot (D36-D38). Resulting
   commit: this one.
+
+- **2026-09-27** — actor: **T, attended session** (branch
+  `claude/stat-model`). Action: **added Phase T6** (remove alignment,
+  philosophy and GRACE, D39) before S3, rewrote S3 around the decided
+  stat model (D40-D41, brief `plan/2026-09-27-stat-scaling.prompt.md`),
+  and widened P1 to keep a third grey card, VULNERABLE (D42). Confirmed
+  T's request: yes. T, near-verbatim: *"remove everything that has to do
+  with alignment and philosophy. That includes grace"*, and T picked
+  "Loop, after M5" for its timing. Resulting commit: this one.
 
 ## Phase log (commit hashes)
 

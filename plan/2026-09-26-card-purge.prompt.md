@@ -21,6 +21,11 @@ Ballot answers, the same day:
 | Other card-shaped content | **Purge all three:** the 5 curse cards, the relic-granted cards (`relics.cards.ts`) and the apocrypha set |
 | What the player starts with and finds | **The grey starter only.** Every run deals the 10-card grey deck (`grey-strike` ×7, `grey-ward` ×3). The 10 presets go, and with them the 5/5/5 aspect thirds. Card rewards and cache card offers are off until a guided session adds cards |
 
+> **Amended 2026-09-27 (D39–D42).** A third grey card survives: the grey
+> office's VULNERABLE card (D42), so the player keywords that survive are
+> DEAL, GUARD and VULNERABLE. S3 (the stat model) and T6 (alignment and
+> GRACE removed; `philosophicalAspect` renamed) ship before this.
+
 ## 2. What survives
 
 - **Cards:** `grey-strike` (A Plain Blow: FREE 2 damage, PAID DEAL 5) and

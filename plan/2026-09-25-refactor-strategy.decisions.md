@@ -325,6 +325,47 @@ an attended session with T, because the stat-to-quantity mapping is still
 T's call. P1 (the purge) requires S3. *Rejected:* stopping the whole loop
 after M5.
 
+The next four came from the stats conversation (T, attended, 2026-09-26/27).
+T asked for prior art on stat-scaling deckbuilders, then for high-number RPG
+formulas; each call below was a ballot with worked late-game numbers.
+Research sources and the full model: `plan/2026-09-27-stat-scaling.prompt.md`.
+
+**D39 — Remove alignment, philosophy and GRACE; keep card colour.** (T,
+2026-09-27: "remove everything that has to do with alignment and philosophy.
+That includes grace.") Removes the philosophical-alignment grid
+(`Ledger/alignment.*`, `GameState.philosophicalAlignment`, the dialogue
+gates and read-backs that use it) and the GRACE morale meter (the HUD, the
+withdraw penalty). The card colour survives: `philosophicalAspect` is
+renamed to a neutral name (e.g. `color`) with no behaviour change, because
+the dice and the colour-match bonus read it. A loop phase, build-plan row
+T6, before S3. *Rejected:* removing card colour too; doing it attended;
+folding it into the purge.
+
+**D40 — Stats scale keyword families, decided by where the effect lands.**
+(T, 2026-09-27.) Body: immediate damage to the foe. Mind: anything on you
+(GUARD, THORNS, self-buffs). Heart: anything on the foe (VULNERABLE, BURN,
+BLEED, STUN). Grey: the rest, unscaled. Keyword text is coloured in its
+family's dice colour, with a stat glyph; combat shows final numbers; a
+card's colour is its main keyword's family. Gordian Quest is the model T
+named. *Rejected:* card colour picks the stat (a grey deck would make
+all-body strictly best); heart scales statuses only; per-keyword mapping
+without families (T: confusing once there are dozens of keywords).
+
+**D41 — The formula: `base × stat ÷ 5`, nothing capped.** (T, 2026-09-27.)
+One-shot amounts and percentages scale `base × stat ÷ 5`, so 5 is neutral
+and each point is +20% of the base. Repeating amounts (DoTs, THORNS, regen)
+scale at half rate. On/off effects and every duration never scale. No
+caps: `VULNERABLE_MAX_MULT` goes. VITAE is `50 + 12·body + 6·mind +
+6·heart` (170 at 5/5/5, as today). Enemy VITAE stays linear,
+`(30 + 18·level) × difficulty`. *Rejected:* `÷ 3` (steeper), `+10%` per
+point (gentler, under the late ladder), geometric enemy health.
+
+**D42 — A third grey card: VULNERABLE.** (T, 2026-09-27.) The grey office
+gains a heart card that applies VULNERABLE (working draft: PAID
+VULNERABLE +25%, a FREE line to be set in the guided session that builds
+it, D37). After the purge the player's keywords are DEAL, GUARD and
+VULNERABLE. *Rejected:* BLEED, WEAKEN.
+
 ## Open follow-ups
 
 - Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and
@@ -370,6 +411,7 @@ after M5.
 - Scaling formula (D1 step 3) — D4 settles the direction (per-stat
   hooks); the exact stat-to-quantity mapping is designed with the hook.
   **2026-09-26:** attended with T (D38), build-plan row S3; the card purge
-  (D36, row P1) follows it.
+  (D36, row P1) follows it. **2026-09-27:** the model is decided (D40–D42),
+  brief `plan/2026-09-27-stat-scaling.prompt.md`; T6 (D39) ships first.
 - Trim spec §5.3 / §5.6 / §5.7 answered 2026-09-25 as D8 / D9 / D10.
   Nothing in §5 remains open.
