@@ -379,6 +379,23 @@ turn** (also heart-scaled). *Rejected:* 1 turn and until-your-next-hit
 durations; keep-the-higher stacking; FREE Deal 2 or GUARD 2; the names A
 Plain Mark (collides with `debuff_mark`) and A Plain Flaw.
 
+**D44 — After the purge, the grey cards ARE the reward pool.** (T,
+2026-09-27, ballot; amends D36.) D36 gated card rewards and the cache's
+card offer off, because the grey office was never offered. T instead keeps
+the reward loop live: a won fight offers Blow, Ward and Word, and taking one
+adds a copy. The machinery stays whole for the cards later guided sessions
+add. *Rejected:* rewards off until new cards exist; a small non-grey pool.
+
+**S3 residue (2026-09-27, PR #404).** Re-stamping the baseline after S3
+moved mid 91% → 100%, late 77% → 100%, impossible 13% → 100% (early is
+unchanged at 5/5/5). The cause is a double count: rank-scaled printed
+numbers (a mid DEAL 25) times the stat multiplier (body 39 → ×7.8). The
+brief's "hits-to-kill holds steady" holds for grey bases (5), so the purge
+(P1) should largely undo it. Re-read the matrix after P1 before any tuning;
+D41 ("no caps") stands. A separate card agent owns card, keyword, upgrade
+and transformation design from here (T, 2026-09-27); S3 touched only the
+files listed in #404.
+
 ## Open follow-ups
 
 - Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and
