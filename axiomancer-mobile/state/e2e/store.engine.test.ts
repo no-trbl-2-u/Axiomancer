@@ -71,10 +71,10 @@ describe('createAppStore: happy path', () => {
     it('honours overrides supplied at construction time', () => {
         const store = createAppStore({
             adapter,
-            // World/player default; only override moralMeter to assert the merge.
-            overrides: { moralMeter: 7 },
+            // World/player default; only override flags to assert the merge.
+            overrides: { flags: ['override-probe'] },
         });
-        expect(store.getState().moralMeter).toBe(7);
+        expect(store.getState().flags).toEqual(['override-probe']);
     });
 });
 
@@ -121,7 +121,7 @@ describe('createAppActions: dispatch', () => {
         // Every seeded starter shares the same colourless aspect — any die
         // powers any starter, so there is no colour left to fail to cover.
         const aspects = new Set(
-            player.knownCards.map((id) => getCardById(id)!.philosophicalAspect),
+            player.knownCards.map((id) => getCardById(id)!.color),
         );
         expect([...aspects]).toEqual(['any']);
 

@@ -22,10 +22,6 @@ export function consequenceLabel(c: EventConsequence): string {
     if (c.kind === 'damage') return `-${c.amount ?? 0} VITAE`;
     if (c.kind === 'heal') return `+${c.amount ?? 0} VITAE`;
     if (c.kind === 'currency') return `+${c.amount ?? 0} ${c.amount === 1 ? 'shilling' : 'shillings'}`;
-    if (c.kind === 'moral') {
-        const delta = c.amount ?? 0;
-        return `${delta > 0 ? '+' : ''}${delta} grace`;
-    }
     if (c.kind === 'item') return c.label ?? 'item';
     // A story flag is internal bookkeeping — it has no player-facing meaning
     // and its id (`shrine_keeper_recognizes_seeker`) is not copy. No chip.

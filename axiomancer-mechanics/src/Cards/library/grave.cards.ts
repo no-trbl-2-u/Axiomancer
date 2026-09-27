@@ -28,7 +28,7 @@ const spadework: Card = {
     id: 'spadework',
     theme: 'grave',
     name: 'Spadework',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'The yard takes no appointments, only measurements. You dig ahead of ' +
         'need — two for the stranger, two for the friend — and the soil you ' +
@@ -51,7 +51,7 @@ const theBoneTithe: Card = {
     id: 'the-bone-tithe',
     theme: 'grave',
     name: 'The Bone Tithe',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'One in ten, the charter says, and the charter does not say of what. ' +
         'The ossuary keeps its tenth in tidy stacks and pays the interest ' +
@@ -73,7 +73,7 @@ const shallowGrave: Card = {
     id: 'shallow-grave',
     theme: 'grave',
     name: 'Shallow Grave',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'Buried in haste is remembered in full. What the ground barely holds, ' +
         'the hand barely needs to reach for. The briefly-woken dead are ' +
@@ -96,7 +96,7 @@ const theQuietRow: Card = {
     id: 'the-quiet-row',
     theme: 'grave',
     name: 'The Quiet Row',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'Twelve plots in a line along the north wall, all of them filled, all ' +
         'of them settled. Stand behind them. Nothing has ever come at you ' +
@@ -119,7 +119,7 @@ const theLychGate: Card = {
     id: 'the-lych-gate',
     theme: 'grave',
     name: 'The Lych Gate',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'The roof over the gate exists so a coffin may wait out of the rain ' +
         'while the priest is found. Everything that enters the yard pauses ' +
@@ -144,7 +144,7 @@ const paupersPyre: Card = {
     id: 'paupers-pyre',
     theme: 'grave',
     name: "The Pauper's Pyre",
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'The parish burns what it cannot afford to bury. The poorest go ' +
         'first, chosen by rank of poverty, and the smoke goes up out of the ' +
@@ -167,7 +167,7 @@ const theCharnelLedger: Card = {
     id: 'the-charnel-ledger',
     theme: 'grave',
     name: 'The Charnel Ledger',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'Every bone in the house is numbered in a hand that gave out in the ' +
         'third decade and kept writing regardless. Read the tally aloud and ' +
@@ -192,7 +192,7 @@ const theKeening: Card = {
     id: 'the-keening',
     theme: 'grave',
     name: 'The Keening',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'The women of the parish were paid in bread to make this noise, and ' +
         'then the bread ran out, and they kept making it. It goes up twice. ' +
@@ -240,7 +240,7 @@ const theUnpaidSexton: Card = {
     id: 'the-unpaid-sexton',
     theme: 'grave',
     name: 'The Unpaid Sexton',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'He was buried with his spade, which the parish considered a fair ' +
         'settlement. Nobody told him the shift had ended. Give the ground a ' +
@@ -267,7 +267,7 @@ const dirgeForTheDisinterred: Card = {
     id: 'dirge-for-the-disinterred',
     theme: 'grave',
     name: 'Dirge for the Disinterred',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'Sung once for the dying and twice for the dug-up. When the pile ' +
         'beneath the pulpit grows deep enough, you will find the congregation ' +
@@ -294,7 +294,7 @@ const theSecondBurial: Card = {
     id: 'the-second-burial',
     theme: 'grave',
     name: 'The Second Burial',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'The first burial is for the body. The second is for whatever part of ' +
         'them would not settle. Your hands have done this before and already ' +
@@ -317,7 +317,7 @@ const graveGoods: Card = {
     id: 'grave-goods',
     theme: 'grave',
     name: 'Grave Goods',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'They went down with a comb, a coin, and a knife that was already old ' +
         'when it was buried. The parish considers all of it a loan. Call the ' +
@@ -345,7 +345,7 @@ const itGetsUpAgain: Card = {
     id: 'it-gets-up-again',
     theme: 'grave',
     name: 'It Gets Up Again',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'You put it down twice. The second time was for good measure. It has ' +
         'opinions about that, and it is coming to share them — not against ' +
@@ -373,7 +373,7 @@ const openEveryGrave: Card = {
     id: 'open-every-grave',
     theme: 'grave',
     name: 'Open Every Grave',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'On the parish\'s last day there is no more waiting and no more quiet. ' +
         'Every plot opens on its own hinge. Every voice comes up still ' +
@@ -398,7 +398,7 @@ const thePlaguePit: Card = {
     id: 'the-plague-pit',
     theme: 'grave',
     name: 'The Plague Pit',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'They stopped digging separate holes in the second winter. What is ' +
         'down there is not a person — it is a decision made by fourteen very ' +
@@ -426,7 +426,7 @@ const theSextonsCount: Card = {
     id: 'the-sextons-count',
     theme: 'grave',
     name: "The Sexton's Count",
-    philosophicalAspect: 'mind',
+    color: 'mind',
     persistentEffect:
         'Whenever you RECALL, REPLAY, or TWIN a card, the foe loses 8 VITAE and you MILL 1.',
     description:
@@ -451,7 +451,7 @@ const theGeneralExhumation: Card = {
     id: 'the-general-exhumation',
     theme: 'grave',
     name: 'The General Exhumation',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'The order is read at the gate and it is very short. Everything comes ' +
         'up. Every stone is moved and every name is called twice, and it is ' +
@@ -482,7 +482,7 @@ const theCongregationBelow: Card = {
     id: 'the-congregation-below',
     theme: 'grave',
     name: 'The Congregation Below',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     persistentEffect:
         'REQUIEM: at the end of each round, the foe loses 1 VITAE for every 2 cards in your discard pile.',
     description:

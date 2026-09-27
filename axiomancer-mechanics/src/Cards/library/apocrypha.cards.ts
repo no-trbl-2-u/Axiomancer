@@ -41,7 +41,7 @@ const theFeastOfAllCorruption: Card = {
     id: 'the-feast-of-all-corruption',
     theme: 'rot',
     name: 'The Feast of All Corruption',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'The table is laid the length of the nave and every seat is taken by ' +
         'something that used to be a parishioner. Grace is said in one long ' +
@@ -79,7 +79,7 @@ const theWholeBodyConfesses: Card = {
     id: 'the-whole-body-confesses',
     theme: 'rot',
     name: 'The Whole Body Confesses',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'Ask the hand and the hand tells you. Ask the gut, the marrow, the ' +
         'small bones of the ear — every one of them has been waiting to be ' +
@@ -114,7 +114,7 @@ const theVeinCalledIn: Card = {
     id: 'the-vein-called-in',
     theme: 'debt',
     name: 'The Vein Called In',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'Not a payment. A recall. Everything ever lent against your blood is ' +
         'summoned back through the one narrow door it went out of, all in the ' +
@@ -144,7 +144,7 @@ const theNoteFallsDue: Card = {
     id: 'the-note-falls-due',
     theme: 'debt',
     name: 'The Note Falls Due',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'There was a date on it. There is always a date on it, and it is ' +
         'always further off than today until the morning it is not. The house ' +
@@ -181,7 +181,7 @@ const nothingStaysBuried: Card = {
     id: 'nothing-stays-buried',
     theme: 'grave',
     name: 'Nothing Stays Buried',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'The sexton stopped filling holes years ago. What goes down comes up ' +
         'by Thursday, in worse temper, with the same complaint it had the ' +
@@ -214,7 +214,7 @@ const theLastPageTornOut: Card = {
     id: 'the-last-page-torn-out',
     theme: 'grave',
     name: 'The Last Page Torn Out',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'Whoever kept the register kept it honestly until the final leaf, and ' +
         'then took that one with them. What burns here is the rest of it: the ' +
@@ -247,7 +247,7 @@ const nineNightsWithoutABreach: Card = {
     id: 'nine-nights-without-a-breach',
     theme: 'vigil',
     name: 'Nine Nights Without a Breach',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'The watch-book has nine identical entries and a hand that got ' +
         'steadier every one of them. Nine nights is not luck. Nine nights is ' +
@@ -280,7 +280,7 @@ const everyLadderBroken: Card = {
     id: 'every-ladder-broken',
     theme: 'vigil',
     name: 'Every Ladder Broken',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'They spent the autumn cutting the ladders and the winter carrying ' +
         'them. The watch spends one minute on each. There is a sound a ' +
@@ -320,7 +320,7 @@ const theBenchDoesNotRetire: Card = {
     id: 'the-bench-does-not-retire',
     theme: 'trial',
     name: 'The Bench Does Not Retire',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'No recess, no deliberation, no going out to consider. The bench has ' +
         'been considering since before the arraignment and it considers in ' +
@@ -360,7 +360,7 @@ const allObjectionsSustained: Card = {
     id: 'all-objections-sustained',
     theme: 'trial',
     name: 'All Objections Sustained',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'Every motion you ever raised, granted at once, retroactively, by a ' +
         'court that has run out of patience with the other side. It arrives ' +
@@ -395,7 +395,7 @@ const everyCoinInThePoorbox: Card = {
     id: 'every-coin-in-the-poorbox',
     theme: 'choir',
     name: 'Every Coin in the Poorbox',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'The box has not been opened since the old dean, and the old dean is ' +
         'a rumour. You take the lid off with a chisel and the parish holds ' +
@@ -425,7 +425,7 @@ const theLongKyrie: Card = {
     id: 'the-long-kyrie',
     theme: 'choir',
     name: 'The Long Kyrie',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'Lord have mercy, forty times, then four hundred, then past counting. ' +
         'It is not a prayer any more by the third hour. It is a weather. The ' +

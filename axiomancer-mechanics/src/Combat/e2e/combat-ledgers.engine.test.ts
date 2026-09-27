@@ -42,7 +42,7 @@ afterEach(() => vi.restoreAllMocks());
 registerSandboxCards([
     {
         id: 'qa-ledger-recoil', name: 'QA Ledger Recoil',
-        philosophicalAspect: 'body', description: 'recoil-mech ledger fixture',
+        color: 'body', description: 'recoil-mech ledger fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 }],
         specialMechanics: [{ kind: 'recoil', hp: 4 }],

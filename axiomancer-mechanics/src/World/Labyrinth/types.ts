@@ -138,8 +138,7 @@ export type LabyrinthBossOutcome = 'slain' | 'spared' | 'exploited';
 /**
  * Cross-act labyrinth progress. Optional slice on `GameState`
  * (`state.labyrinth`) — absent until the player first enters the
- * continent; older saves need no migration (lazy default, like
- * `lastSeenAlignmentCells`).
+ * continent; older saves need no migration (lazy default).
  */
 export interface LabyrinthProgress {
     currentAct: LabyrinthActId;

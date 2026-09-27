@@ -1,9 +1,10 @@
 /**
  * Hermetic E2E Tests — Flee action behavior (Phase 92)
  *
- * Tests the flee action narrative feedback and morale system integration.
- * Covers the F03 regression (flee gives visible feedback) and verifies
- * the narrative toast is displayed after successful flee.
+ * Tests the flee action narrative feedback. Covers the F03 regression
+ * (flee gives visible feedback) and verifies the narrative toast is
+ * displayed after successful flee. Retreat carried a -2 grace cost until
+ * the morale meter was removed (D39); the toast now names no cost.
  */
 
 import { afterEach, describe, it, expect, jest } from '@jest/globals';
@@ -73,8 +74,6 @@ describe('flee action: narrative feedback', () => {
             },
         });
 
-        const initialMorale = store.getState().moralMeter;
-
         // Execute flee action
         actions.pickEventChoice('flee');
 
@@ -82,12 +81,9 @@ describe('flee action: narrative feedback', () => {
         
         // Verify narrative toast was set
         expect(state.notifications?.toast?.text).toBe(
-            'you fled the encounter. the path bends away.\n\ngrace -2'
+            'you fled the encounter. the path bends away.'
         );
         expect(state.notifications?.toast?.id).toBe(1);
-        
-        // Verify morale was decreased
-        expect(state.moralMeter).toBe(initialMorale - 2);
         
         // Verify event was cleared
         expect(state.event?.pending).toBeNull();
@@ -109,8 +105,6 @@ describe('flee action: narrative feedback', () => {
             },
         });
 
-        const initialMorale = store.getState().moralMeter;
-
         // Execute flee action (should be no-op for boss)
         actions.pickEventChoice('flee');
 
@@ -120,17 +114,13 @@ describe('flee action: narrative feedback', () => {
         expect(state.notifications?.toast?.text).toBeNull();
         expect(state.notifications?.toast?.id).toBe(0);
         
-        // Verify morale was unchanged
-        expect(state.moralMeter).toBe(initialMorale);
-        
         // Verify event was cleared
         expect(state.event?.pending).toBeNull();
     });
 
     it('regression test for F03: flee action provides visible feedback', () => {
         // This test ensures that the deep-playtest F03 finding
-        // "FLEE gives no visible feedback or morale indication"
-        // is addressed. Previously, flee would clear the event
+        // "FLEE gives no visible feedback" is addressed. Previously, flee would clear the event
         // silently without any player feedback.
         
         const store = makeStore();
@@ -145,9 +135,7 @@ describe('flee action: narrative feedback', () => {
         
         // F03 fix: flee now provides visible feedback via toast
         expect(state.notifications?.toast?.text).toContain('you fled the encounter');
-        expect(state.notifications?.toast?.text).toContain('grace -2');
-        
-        // F03 fix: morale cost is now visible and applied
-        expect(typeof state.moralMeter).toBe('number');
+        // D39: the morale meter is gone, so the toast carries no grace cost.
+        expect(state.notifications?.toast?.text).not.toMatch(/grace/i);
     });
 });

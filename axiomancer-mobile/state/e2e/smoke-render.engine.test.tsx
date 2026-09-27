@@ -303,3 +303,18 @@ describe('smoke-render: surfaces with an ACTIVE event (no infinite render loop)'
         expect(() => render(withProviders(store, <EventScreen />))).not.toThrow();
     });
 });
+
+describe('smoke-render: the GRACE meter and the alignment grid are gone (D39)', () => {
+    it.each([
+        ['character', () => <CharacterScreen />],
+        ['exploration', () => <ExplorationScreen />],
+        ['memoir', () => <MemoirScreen />],
+    ])('%s tab prints no GRACE, arrears, MEASURE or oath readout', (surface, screen) => {
+        const store = makeStore();
+        const text = collectVisibleStrings(render(withProviders(store, screen()))).join(' ');
+        expect({ surface, leaks: text.match(/GRACE|arrears|MEASURE|CREED|AUGURY|TROTH|THE ACCOUNT/g) }).toEqual({
+            surface,
+            leaks: null,
+        });
+    });
+});

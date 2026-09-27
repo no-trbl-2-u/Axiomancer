@@ -98,18 +98,6 @@ describe('fv-14 "What Do I Tell Father?"', () => {
         expect(nextNode.text.length).toBeGreaterThan(0);
     });
 
-    it('the deflection choice also nudges outlook alignment positive', () => {
-        const payload = fv14Payload();
-        const tree = payload.dialogue;
-        const root = tree.nodes[tree.rootId]!;
-        const deflect = root.choices!.find(c => c.nextNodeId === 'deflected')!;
-
-        const state = createNewGameState();
-        const before = state.philosophicalAlignment.outlook;
-        const result = applyDialogueChoice(state, tree, deflect);
-        expect(result.gameState.philosophicalAlignment.outlook).toBe(before + 1);
-    });
-
     it('a hypothetical future choice gated on boy-spared-father-worry is hidden until that flag is set', () => {
         // Proves the exact flag-gating mechanism a future Northern Forest
         // node would use to react to this dilemma's outcome (per the spec's

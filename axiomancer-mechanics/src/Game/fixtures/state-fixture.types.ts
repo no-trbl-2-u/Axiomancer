@@ -16,7 +16,6 @@
  */
 
 import type { BaseStats } from '../../Character/types';
-import type { PhilosophicalAlignment } from '../../Ledger/types';
 import type { ContinentName, MapName } from '../../World/map.library';
 
 /** Player overrides layered over the preset (or the new-game player). */
@@ -62,10 +61,6 @@ export interface StateFixture {
     world?: StateFixtureWorld;
     /** Flags appended to the new-game flag set (deduped). */
     flags?: string[];
-    /** Moral meter value. */
-    moralMeter?: number;
-    /** Partial alignment; each axis is clamped to `[-100, 100]`. */
-    alignment?: Partial<PhilosophicalAlignment>;
     /**
      * Ask the consumer to fire the current node's authored event on boot,
      * so state-gated screens (`/event`, `/village`, `/dialogue`, `/cutscene`)

@@ -42,14 +42,14 @@ afterEach(() => vi.restoreAllMocks());
 registerSandboxCards([
     {
         id: 'qa-threshold-dot', name: 'QA Threshold DoT',
-        philosophicalAspect: 'body', description: 'threshold fixture', tier: 1,
+        color: 'body', description: 'threshold fixture', tier: 1,
         targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 }],
         threshold: { color: 'body', count: 1, rider: { conviction: 2, guard: 4 } },
     },
     {
         id: 'qa-guard-card', name: 'QA Guard Card',
-        philosophicalAspect: 'heart', description: 'guard fixture', tier: 1,
+        color: 'heart', description: 'guard fixture', tier: 1,
         targetType: 'self', rank: 1, cardType: 'spell',
         specialMechanics: [{ kind: 'guard', amount: 10 }],
     },

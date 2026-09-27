@@ -84,7 +84,6 @@ describe('Phase 53e — the read-back web', () => {
             const withFlag = visibleChoices(beggarTree.nodes.greet, ctxWithFlags([flag]));
             const reactive = withFlag.find(c => c.nextNodeId === leafId);
             expect(reactive).toBeDefined();
-            expect(reactive!.effect?.moralDelta).toBeUndefined();
 
             // Additive: exactly one new choice appears, nothing else changes.
             expect(withFlag.length).toBe(withoutFlag.length + 1);
@@ -106,14 +105,13 @@ describe('Phase 53e — the read-back web', () => {
     });
 
     describe('Captain Blackwater — reads marrow_pressed', () => {
-        it('hidden without the flag, visible with it, sets no moralDelta', () => {
+        it('hidden without the flag, visible with it', () => {
             const withoutFlag = visibleChoices(blackwaterTree.nodes.greet, ctxWithFlags([]));
             expect(withoutFlag.find(c => c.nextNodeId === 'marrow_pressed_recognition')).toBeUndefined();
 
             const withFlag = visibleChoices(blackwaterTree.nodes.greet, ctxWithFlags(['marrow_pressed']));
             const reactive = withFlag.find(c => c.nextNodeId === 'marrow_pressed_recognition');
             expect(reactive).toBeDefined();
-            expect(reactive!.effect?.moralDelta).toBeUndefined();
             expect(withFlag.length).toBe(withoutFlag.length + 1);
 
             const leaf = blackwaterTree.nodes.marrow_pressed_recognition!;
@@ -122,7 +120,7 @@ describe('Phase 53e — the read-back web', () => {
         });
     });
 
-    describe("Fisherman's Daughter — reads the father flags and the Stranger's Net flags, no moralDelta ever", () => {
+    describe("Fisherman's Daughter — reads the father flags and the Stranger's Net flags", () => {
         const cases: Array<[string, string]> = [
             ['boy-told-father-truth', 'daughter_reads_told_truth'],
             ['boy-spared-father-worry', 'daughter_reads_spared_worry'],
@@ -132,7 +130,7 @@ describe('Phase 53e — the read-back web', () => {
             ['boy-took-the-net', 'daughter_reads_took_net'],
         ];
 
-        it.each(cases)('hidden without %s, visible with it, leads to %s, sets no moralDelta', (flag, leafId) => {
+        it.each(cases)('hidden without %s, visible with it, leads to %s', (flag, leafId) => {
             const withoutFlag = visibleChoices(daughterTree.nodes.greet, ctxWithFlags([]));
             expect(withoutFlag.find(c => c.nextNodeId === leafId)).toBeUndefined();
 

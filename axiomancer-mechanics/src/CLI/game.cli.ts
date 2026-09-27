@@ -10,7 +10,7 @@
  *                       PROCESS_NODE to trigger the node's authored event.
  *                       Encounters are staged into combat state; the
  *                       Hazard-Pattern combat driver runs via `npm run combat`.
- *   • Journal         — read-only: active / completed quests + alignment stub.
+ *   • Journal         — read-only: active / completed quests + world flags.
  *   • Cards          — read-only: known/unlocked cards.
  *   • Codex           — read-only: unlocked journal entries.
  *   • Inventory       — read-only listing of carried items.
@@ -37,7 +37,7 @@ import { SLOT_CAPACITY } from '../Items';
 import {
     devSetLevel, devSetStats, devLearnCards,
     devGrantAllEquipment, devGrantAllConsumables, devEquipItem,
-    devGrantCurrency, devSetMoralMeter, devSetAlignment,
+    devGrantCurrency,
     devSpawnEnemy, devMaxOut, getEnemySlugs, getCardIds,
     getEquipmentTemplateIds,
 } from './dev-tools';
@@ -62,7 +62,6 @@ import { getAvailableCards } from '../Cards/card.engine';
 import { isConsumable } from '../Items/types';
 import { buyItem, sellItem, defaultSellPrice } from '../Items/shop.reducer';
 import { getConsumableById } from '../Items/consumable.library';
-import { bucketAxis, getAlignmentCell } from '../Ledger';
 import { runHazardCombatCliEncounter, type CombatAutoPolicyId } from './combat.cli';
 import type { CombatOutcome } from '../Combat/combat.encounter.types';
 
@@ -130,7 +129,7 @@ async function bootstrapStore(adapter: PersistenceAdapter, initial?: GameState, 
 async function pickTab(): Promise<Tab> {
     const tabs: Array<{ name: string; value: Tab }> = [
         { name: 'Map             — travel + resolve node events', value: 'map' },
-        { name: 'Journal    — quests + alignment', value: 'journal' },
+        { name: 'Journal    — quests + flags', value: 'journal' },
         { name: 'Cards     — known/unlocked', value: 'cards' },
         { name: 'Codex      — unlocked journal entries from befriended foes (Phase 73)', value: 'codex' },
         { name: 'Inventory  — items in pack', value: 'inventory' },
@@ -514,9 +513,6 @@ function journalTab(store: GameStoreHandle): void {
     log(`Active quests   : ${quests.active.map(q => q.name).join(', ') || '(none)'}`);
     log(`Completed quests: ${quests.completed.join(', ') || '(none)'}`);
     log(`World flags     : ${flags.join(', ') || '(none)'}`);
-    // Alignment / philosophy meter is the Phase 10 hook — print a placeholder
-    // so the tab is reachable today.
-    log('Alignment       : neutral (Spec 10 will compute this)');
 }
 
 function cardsTab(store: GameStoreHandle): void {
@@ -593,21 +589,9 @@ async function characterTab(store: GameStoreHandle): Promise<void> {
     log(`Level:    ${p.level}  (XP ${p.experience}/${p.experienceToNextLevel})`);
     log(`Health:   ${p.health}/${p.maxHealth}`);
     log(`Currency: ${p.currency}`);
-    log(`Grace:    ${state.moralMeter}`);
     if (p.availableStatPoints > 0) {
         log(`Points:   ${p.availableStatPoints} available to allocate`);
     }
-
-    // The Oaths — alignment block (Phase 42 cube, re-skinned Phase 44h).
-    const a = state.philosophicalAlignment;
-    const cell = getAlignmentCell(a);
-    log('\nThe Oaths:');
-    log(`  Cell:            ${cell.label}`);
-    log(`  Damned exemplar: ${cell.damnedExemplar}`);
-    log(`  Cautionary tale: ${cell.cautionaryTale.name} — ${cell.cautionaryTale.toldIn}`);
-    log(`  Creed:           ${bucketAxis(a.epistemology)} (${a.epistemology})`);
-    log(`  Augury:          ${bucketAxis(a.outlook)} (${a.outlook})`);
-    log(`  Troth:           ${bucketAxis(a.scope)} (${a.scope})`);
 
     log('\nBase stats:');
     log(`  heart ${p.baseStats.heart}   body ${p.baseStats.body}   mind ${p.baseStats.mind}`);
@@ -754,7 +738,7 @@ function loadTab(store: GameStoreHandle, snapshotAdapter: PersistenceAdapter | n
 
 type DevAction = 'set-level' | 'set-stats' | 'learn-cards'
     | 'grant-equipment' | 'grant-consumables' | 'equip-item' | 'grant-currency'
-    | 'set-moral' | 'set-alignment' | 'spawn-enemy' | 'max-out' | 'back';
+    | 'spawn-enemy' | 'max-out' | 'back';
 
 async function devTab(store: GameStoreHandle): Promise<void> {
     const { action } = await prompt<{ action: DevAction }>([{
@@ -768,8 +752,6 @@ async function devTab(store: GameStoreHandle): Promise<void> {
             { name: 'Grant all consumables',     value: 'grant-consumables' },
             { name: 'Equip specific item',       value: 'equip-item' },
             { name: 'Grant currency',           value: 'grant-currency' },
-            { name: 'Set moral meter',           value: 'set-moral' },
-            { name: 'Set philosophical alignment', value: 'set-alignment' },
             { name: 'Spawn enemy',              value: 'spawn-enemy' },
             { name: 'MAX OUT (level 20, all cards/items)', value: 'max-out' },
             { name: '← Back',                  value: 'back' },
@@ -849,25 +831,6 @@ async function devTab(store: GameStoreHandle): Promise<void> {
                 { type: 'number', name: 'amount', message: 'Amount to add:', default: 100 },
             ]);
             const r = devGrantCurrency(store, amount);
-            log(`\n${r.detail}\n`);
-            break;
-        }
-        case 'set-moral': {
-            const { value } = await prompt<{ value: number }>([
-                { type: 'number', name: 'value', message: 'Moral meter value (-100 to 100):', default: 0 },
-            ]);
-            const r = devSetMoralMeter(store, value);
-            log(`\n${r.detail}\n`);
-            break;
-        }
-        case 'set-alignment': {
-            const cur = store.getState().philosophicalAlignment;
-            const { epistemology, outlook, scope } = await prompt<{ epistemology: number; outlook: number; scope: number }>([
-                { type: 'number', name: 'epistemology',   message: 'Epistemology (-100 to 100):',   default: cur.epistemology },
-                { type: 'number', name: 'outlook',  message: 'Outlook (-100 to 100):', default: cur.outlook },
-                { type: 'number', name: 'scope',    message: 'Scope (-100 to 100):',   default: cur.scope },
-            ]);
-            const r = devSetAlignment(store, { epistemology, outlook, scope });
             log(`\n${r.detail}\n`);
             break;
         }

@@ -66,7 +66,7 @@ const FIXTURE_TURNABOUT: Card = {
     id: 'turnabout',
     theme: 'vigil',
     name: 'Turnabout (fixture)',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description: 'Test carrier for TURNABOUT — cash the whole denial ledger.',
     tier: 3, rank: 6, cardType: 'spell',
     targetType: 'enemy',

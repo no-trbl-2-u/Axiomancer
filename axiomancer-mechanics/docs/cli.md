@@ -13,7 +13,7 @@ The CLI module provides a complete command-line interface for playing and testin
 The primary CLI driver that provides a tabbed inquirer interface for playing the game. Main tabs include:
 
 - **Map** - Navigate between nodes and trigger map events. Hazard-Pattern Combat is reached via `npm run combat` (a subcommand of the game CLI).
-- **Journal** - View active/completed quests and philosophical alignment
+- **Journal** - View active/completed quests and world flags
 - **Cards** - View learned/unlocked cards; combat should show only currently affordable cards
 - **Inventory** - View carried items and equipment
 

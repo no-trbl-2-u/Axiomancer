@@ -266,7 +266,7 @@ function riderProse(r: any, opts?: { selfTargetCard?: boolean }): string {
 
 function cardStats(c: any): { chips: Chip[]; lines: string[] } {
     const chips: Chip[] = [
-        { k: 'Stance', v: c.philosophicalAspect },
+        { k: 'Stance', v: c.color },
         { k: 'Type', v: c.category },
         { k: 'Tier', v: String(c.tier) },
         { k: 'Target', v: c.targetType === 'self' ? 'self' : 'enemy' },

@@ -75,7 +75,7 @@ unchanged, but the absolute semver guarantee starts at 1.0.
 - `GameState`, `GameAction`, `GameActions` types — Stable.
 - Event emitter (`createEventEmitter`) — Stable.
 - Selectors (`selectPlayer`, `selectIsInCombat`,
-  `selectMoralMeter`, etc.) — Stable.
+  `selectVersion`, etc.) — Stable.
 - `PersistenceAdapter` interface — Stable. (The concrete
   `createNodeAdapter` lives on the `./node` subpath only — see Node.js
   Exports below.)
@@ -96,7 +96,7 @@ per-foe content surface + auto-firing wire for the post-parley
   `state.codex.unlockedEntries` (de-duped) and surfaced as
   `report.friendshipReward.codexEntryUnlocked: { id, title }`
   (body recovered via content-registry lookup at consumer render
-  time — mirrors Phase 69 `alignmentShift` pattern).
+  time).
 - `store.unlockCodexEntry(entryId)` — dispatchable surface so
   future dialogue / map-event content can grant codex entries
   outside combat.
@@ -117,9 +117,8 @@ method + supporting exports:
 
 - `store.resetRun({ keepCharacter: boolean }): GameState` — rewinds the
   playthrough back to the starting hearth. `keepCharacter: true`
-  preserves the character ledger (player + philosophicalAlignment +
-  moralMeter + rngState) and refills HP to maxHealth; world /
-  combat / quests / flags / observer cache reset.
+  preserves the character (player + rngState) and refills HP to
+  maxHealth; world / combat / quests / flags reset.
   `keepCharacter: false` performs a full new-game reset carrying only
   `rngState`. Every call assigns a fresh `runId`. Dispatches
   `RESET_RUN`; persists via the standard `DURABLE_ACTIONS` pipeline.
@@ -175,9 +174,9 @@ read the typed `CombatEvent[]` stream directly from the engine's
 
 `CombatEndReport.outcome` is `'victory' | 'defeat' | 'friendship' |
 'flee'`. Phase 36 added `'friendship'` for the friendship-counter exit
-— half XP grant + full loot + `+1` moral meter.
+— half XP grant + full loot.
 
-**Befriendable-enemy content (Phase 60 + Phase 62 + Phase 69) — Beta.**
+**Befriendable-enemy content (Phase 60 + Phase 62) — Beta.**
 Phase 60 added `CombatEndReport.friendshipReward?: { narrative?: string }`
 — present only on `outcome === 'friendship'` when the befriended enemy
 carries an authored `Enemy.friendshipReward?: FriendshipReward`.
@@ -193,22 +192,6 @@ gate primitive. Convention: `befriended-<enemy-id-stem>`. First
 authored use: `MournfulGull.friendshipReward.flagSet:
 'befriended-mournful-gull'` unlocks a flag-gated branch on the
 Coastal Beggar's `greet` node.
-
-Phase 69 extended `FriendshipReward` with
-`alignmentDelta?: Partial<PhilosophicalAlignment>` — when present,
-the END_COMBAT reducer applies the delta to
-`state.philosophicalAlignment` via the Phase 42 `applyAlignmentDelta`
-clamp helper (each axis clamps to `[-100, +100]`; missing axes pass
-through). The post-clamp `PhilosophicalAlignment` surfaces on
-`CombatEndReport.friendshipReward.alignmentShift?: PhilosophicalAlignment`
-for consumers to render (mirrors `applyDialogueChoice`'s
-`effects.philosophicalShift`). Phase 36's +1 `moralMeter` shift stays
-unchanged on top — friendship resolutions now optionally shift BOTH
-axes per encounter. Closes Spec 14 Q4. Authoring band: ±1..±5 per axis
-(matches Phase 43's dialogue / map-event delta convention). First
-authored deltas: MournfulGull `{ outlook: +3 }` (wistful empathy);
-HollowEyedBeggar `{ scope: -3 }` (re-grounds toward the relational
-individual).
 
 See `docs/combat.md` § "Friendship Path" + § "Befriendable-enemy
 content (Phase 60)" and `docs/enemy.md` § "Befriendable enemies
@@ -269,28 +252,9 @@ defaults. Initial author coverage at Phase 71: MournfulGull,
 HollowEyedBeggar, CoastalTyrant. See `docs/enemy.md` § "Aftermath
 narrative (Phase 71)" for variant semantics + voice guidance.
 
-**Reactive NPCs — alignment observers (Phase 63).** Tree-level
-observer machinery — Beta:
-
-- `DialogueTree.id?: string` — optional tree identifier opting the
-  tree into the observer cache.
-- `GameState.lastSeenAlignmentCells?: Record<string, string>` —
-  additive optional cache keyed by `tree.id`, value is the alignment
-  cell id at the last `applyDialogueChoice` against the tree.
-  Defaults to `undefined` (cold-start); no `GAME_STATE_VERSION`
-  bump.
-- `DialogueChoice.requires.playerAlignmentCellChangedSince?: boolean`
-  — reactive gate visible only when the player's CURRENT cell
-  differs from the cached one.
-- `DialogueContext.lastSeenAlignmentCellId?: string` — caller
-  sources this from `state.lastSeenAlignmentCells?.[tree.id]` when
-  invoking `visibleChoices`.
-
-First authored use: Old Marrow's tree (`id: 'old-marrow'`) surfaces
-a reactive `(Stand quietly. He looks up and sees who you have
-become.)` branch on re-conversation after the player's alignment
-cell has shifted. See `docs/npcs.md` § "Reactive NPCs — alignment
-observers (Phase 63)" for the consumer-side API.
+**Reactive NPCs — alignment observers (Phase 63).** Removed
+2026-09-27 (T6, D39). `DialogueTree.id?: string` survives as an
+optional stable tree identifier.
 
 `TypedGameEvent<T>` narrows the event by topic; `payload` is always
 the engine envelope above. Per-topic aliases ship for all 9
@@ -472,47 +436,11 @@ hermetic walkthrough.
   `ActiveEffect`, `StatModifier`, `DamageOverTime`,
   `RegenerationConfig`, `ActionRestriction`, etc.) — Stable.
 
-### The Oaths (Phase 42, Phase 43, Phase 44, Phase 46) — Beta
+### The Oaths — removed
 
-3-axis alignment cube indexing a 27-cell content registry. See
-[docs/oaths.md](./oaths.md) for the full table.
-
-- Types (`PhilosophicalAlignment`, `AxisBucket`, `BesettingSin`,
-  `PhilosophicalAlignmentCell`) — Beta.
-- Engine (`bucketAxis`, `getAlignmentCell`, `applyAlignmentDelta`,
-  `defaultAlignment`) — Beta.
-- Constants (`AXIS_HIGH_THRESHOLD`, `AXIS_LOW_THRESHOLD`) — Beta.
-- Library (`philosophicalAlignmentLibrary`) — Beta. Frozen array
-  of 27 cells; each carries philosopher, literary character + work,
-  and 3 signature fallacies.
-- State field `GameState.philosophicalAlignment` — Beta. Persists
-  across save/load (`GAME_STATE_VERSION` is now `5`; v4 saves
-  migrate cleanly via `migrateV4toV5`).
-- Action `SHIFT_PHILOSOPHICAL_ALIGNMENT` + store action
-  `shiftPhilosophicalAlignment(delta: Partial<PhilosophicalAlignment>)` — Beta.
-
-Orthogonal to `moralMeter` — both fields persist independently. The
-three fallacies per cell are content fuel for card/effect/spell
-authoring; the first batch is live as of Phase 44.
-
-**Phase 43 — content authoring surfaces:**
-- `DialogueChoice.effect.alignmentDelta?: Partial<PhilosophicalAlignment>` — Beta. Applied by `applyDialogueChoice` and surfaced on `effects.philosophicalShift`.
-- `MapEventPoolEntry.alignmentDelta?: Partial<PhilosophicalAlignment>` — Beta. Applied by `resolveMapEvent` after the matching handler runs.
-
-**Phase 44 — fallacies-as-spells / abilities:**
-- `Card.sourcedFromCell?: string` — Beta. Cross-link to the originating cell id for fallacy-themed cards.
-- `Effect.sourcedFromCell?: string` — Beta. Same for fallacy-themed status effects.
-- 4 new Tier 3 fallacy cards (`appeal-to-consequences`, `nirvana-fallacy`, `pascals-wager`, `appeal-to-fear`) in `cardLibrary`.
-- 3 new fallacy status effects (`debuff_no_true_scotsman`, `buff_special_pleading`, `debuff_category_error`) in `effectsLibrary`.
-
-> **Superseded (2026-09-23):** `CardLearningRequirement.requiresAlignment` and the alignment argument on `meetsLearningRequirement` / `getAvailableCards` / `learnCard` below are gone (learning gate removed 2026-07-08); only the `DialogueChoice.requires.requiresAlignment` gate is live — live truth: src/Cards/card.engine.ts, src/NPCs/. Body kept as a historical record pending rewrite (plan/AUDIT.md).
-
-**Phase 46 — alignment-gated content:**
-- `AlignmentGate` type (`{ axis: 'epistemology' | 'outlook' | 'scope', op: 'gte' | 'lte', value: number }`) — Beta. Predicate shape for gating content on the player's current alignment cube position.
-- `DialogueChoice.requires.requiresAlignment?: AlignmentGate` — Beta. Applied by `visibleChoices` (gated choices are hidden when the gate misses).
-- `CardLearningRequirement.requiresAlignment?: AlignmentGate` — Beta. Applied by `meetsLearningRequirement` / `getAvailableCards` / `learnCard` (each accepts an optional `alignment` argument; the `LEARN_CARD` reducer reads `state.philosophicalAlignment` automatically).
-- `DialogueContext.alignment?: PhilosophicalAlignment` — Beta. Optional context field threaded through `visibleChoices` so callers can preview gates without committing dispatch.
-- 2 live gates authored on `nirvana-fallacy` (`outlook ≤ -34`) + `appeal-to-fear` (`scope ≥ 34`); 2 dialogue branches gated on Old Marrow + Coastal Beggar. See [docs/oaths.md "Authoring gates (Phase 46)"](./oaths.md) for operator semantics + authoring guidance.
+The alignment cube, GRACE (`moralMeter`), and every alignment gate
+and delta were removed 2026-09-27 (T6, D39). A card's former
+`philosophicalAspect` is now `color`.
 
 ### NPCs & Dialogue
 

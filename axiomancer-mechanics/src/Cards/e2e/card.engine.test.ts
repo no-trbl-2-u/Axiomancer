@@ -22,7 +22,7 @@ afterEach(() => {
 const dotCard: Card = {
     id: 'sk_erode',
     name: 'Test Erosion',
-    philosophicalAspect: 'body',
+    color: 'body',
     description: 'A wound of reasoning.',
     tier: 1,
     rank: 1,
@@ -35,7 +35,7 @@ const dotCard: Card = {
 const buffCard: Card = {
     id: 'sk_resolve',
     name: 'Self-Resolve',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description: 'A heartening certainty.',
     tier: 1,
     rank: 1,
@@ -48,7 +48,7 @@ const buffCard: Card = {
 const debuffCard: Card = {
     id: 'sk_doubt',
     name: 'Sow Doubt',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description: 'Plants a seed of doubt.',
     tier: 1,
     rank: 1,

@@ -61,7 +61,7 @@ const foundrySprite: Card = {
     id: 'foundry-sprite',
     theme: 'grave',
     name: 'Foundry Sprite',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'A leftover intention that never cooled. It ripens what waits in ' +
         'the racks, then hammers a stray thought into something you can ' +
@@ -83,7 +83,7 @@ const corollary: Card = {
     id: 'corollary',
     theme: 'trial',
     name: 'Corollary',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'State the premise and its consequence arrives unbidden, already ' +
         'phrased. You did not argue it; it follows.',

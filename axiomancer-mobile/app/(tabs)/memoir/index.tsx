@@ -60,35 +60,22 @@ function QuestCard({ quest }: { quest: MemoirQuestRow }) {
  * MEMOIR screen — read-only journal surface. Phase 33 Tick A
  * renders the four section shells with presenter-sourced
  * empty-state copy; Tick B (this commit) renders quest cards
- * from `state.quests`. Ticks C-D fill in alignment + chronicle.
+ * from `state.quests`. Tick D fills in the chronicle.
  *
  * Subscribes to slim slices and memo's the VM (Phase 30 Tick A
  * pattern) — `useGameState(selectMemoirViewModel)` would churn
  * `useSyncExternalStore` because the VM is a frozen-new object
  * every call.
  *
- * Inputs: none (reads store slices via hooks). Output: the MEASURE /
- * chronicle / errands / remains screen element.
- * Resolves: 09-memoir-fresh — the MEASURE row's chips are laid out as
- * shrinkable, wrappable flex children so the long UNTESTED hint stays
- * inside a 375pt viewport instead of running off-screen.
+ * Inputs: none (reads store slices via hooks). Output: the chronicle /
+ * errands / remains screen element.
  */
 export default function MemoirScreen() {
     const styles = useStyles();
     const AXM = usePalette();
-    const resolveTint = (
-        key: MemoirViewModel['moralAlignment']['chip']['tintKey'],
-    ): string => {
-        if (key === 'blood') return AXM.blood;
-        if (key === 'rust') return AXM.rust;
-        if (key === 'sulfur') return AXM.sulfur;
-        if (key === 'parchment') return AXM.parchment;
-        return AXM.bone;
-    };
     const store = useGameStore();
     const player = useGameState((s) => s.player);
     const quests = useGameState((s) => s.quests);
-    const moralMeter = useGameState((s) => s.moralMeter);
 
     // Phase 46c: acknowledge any pending quest the moment Memoir
     // renders. The tab badge clears via `selectTabBadges` (which gates
@@ -114,11 +101,10 @@ export default function MemoirScreen() {
             selectMemoirViewModel({
                 player,
                 quests,
-                moralMeter,
                 _recentEvents: recentEvents,
                 flags,
             } as never),
-        [player, quests, moralMeter, recentEvents, flags],
+        [player, quests, recentEvents, flags],
     );
 
     return (
@@ -205,80 +191,6 @@ export default function MemoirScreen() {
                                 </View>
                             )}
                         </>
-                    )}
-                </View>
-
-                {/* Measure */}
-                <View style={styles.section} testID="memoir-measure">
-                    <SectionLabel size={10}>{vm.measureEyebrow}</SectionLabel>
-                    <View style={styles.measureRow} testID="memoir-measure-row">
-                        {/* Phase 74 follow-up walkthrough — memoir Tick 1:
-                            wrap each alignment chip in a TooltipTarget
-                            pointing at the new kind:'alignment' ids
-                            ('moral', 'philosophical'). */}
-                        <TooltipTarget
-                            kind="alignment"
-                            id="moral"
-                            accessibilityLabel="Explain moral alignment"
-                            accessibilityHint="tap to read description"
-                            testID="memoir-moral-chip-tooltip"
-                            style={styles.measureChipTarget}
-                        >
-                            <View
-                                style={[
-                                    styles.measureChip,
-                                    { borderColor: resolveTint(vm.moralAlignment.chip.tintKey) },
-                                ]}
-                                testID="memoir-moral-chip"
-                            >
-                                <Text
-                                    style={[
-                                        styles.measureLabel,
-                                        { color: resolveTint(vm.moralAlignment.chip.tintKey) },
-                                    ]}
-                                >
-                                    {vm.moralAlignment.chip.label}
-                                </Text>
-                                {vm.moralAlignment.isEmpty && (
-                                    <Text style={styles.measureEmpty} testID="memoir-moral-empty">
-                                        {vm.emptyMoral}
-                                    </Text>
-                                )}
-                            </View>
-                        </TooltipTarget>
-                        <TooltipTarget
-                            kind="alignment"
-                            id="philosophical"
-                            accessibilityLabel="Explain philosophical alignment"
-                            accessibilityHint="tap to read description"
-                            testID="memoir-philosophical-chip-tooltip"
-                            style={styles.measureChipTarget}
-                        >
-                            <View style={styles.measureChip} testID="memoir-philosophical-chip">
-                                <Text style={styles.measureLabel}>
-                                    {vm.philosophicalAlignment.label}
-                                </Text>
-                                {vm.philosophicalAlignment.rationale.length > 0 && (
-                                    <Text style={styles.measureRationale}>
-                                        {vm.philosophicalAlignment.rationale}
-                                    </Text>
-                                )}
-                                {/* S8-memoir-C02: the untested chip used to
-                                    print `vm.emptyPhilosophical` ('untested.')
-                                    directly under the UNTESTED label — the same
-                                    word twice. The presenter's `hint` says what
-                                    the untested state means and what resolves
-                                    it instead. */}
-                                {vm.philosophicalAlignment.rationale.length === 0 && (
-                                    <Text style={styles.measureEmpty} testID="memoir-philosophical-empty">
-                                        {vm.philosophicalAlignment.hint}
-                                    </Text>
-                                )}
-                            </View>
-                        </TooltipTarget>
-                    </View>
-                    {vm.exemplarQuote !== null && (
-                        <Text style={styles.quote}>{vm.exemplarQuote}</Text>
                     )}
                 </View>
 
@@ -413,51 +325,6 @@ const useStyles = makeStyles((AXM) => ({
         letterSpacing: 0.5,
     },
     objectiveDone: { color: AXM.sulfur, textDecorationLine: 'line-through' },
-    // 09-memoir-fresh: the chips hang off a TooltipTarget (a Pressable),
-    // so `measureChip`'s `flex: 1` only ever sized the inner View inside
-    // that pressable's column — the pressable itself kept RN's default
-    // `flexShrink: 0` and sized to max-content. Once the UNTESTED chip
-    // carried the presenter's 75-char hint it ran past the 375pt
-    // viewport. The row now wraps and the targets shrink: at 375 the
-    // long chip drops to its own line and fits the width; at 1280 both
-    // still fit side by side at content width, unchanged.
-    measureRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 },
-    measureChipTarget: { flexShrink: 1, minWidth: 0 },
-    measureChip: {
-        flex: 1,
-        paddingVertical: 6,
-        paddingHorizontal: 10,
-        borderWidth: 1,
-        borderColor: AXM.ash,
-        backgroundColor: AXM.panelBg,
-    },
-    measureLabel: {
-        fontFamily: FONTS.gothic,
-        fontSize: 14,
-        color: AXM.parchment,
-        letterSpacing: 1,
-    },
-    measureRationale: {
-        fontFamily: FONTS.serifItalic,
-        fontSize: 12,
-        color: AXM.bone,
-        marginTop: 2,
-        lineHeight: 15,
-    },
-    measureEmpty: {
-        fontFamily: FONTS.serifItalic,
-        fontSize: 12,
-        color: AXM.bone,
-        marginTop: 4,
-        lineHeight: 15,
-    },
-    quote: {
-        fontFamily: FONTS.serifItalic,
-        fontSize: 11,
-        color: AXM.sulfur,
-        marginTop: 8,
-        lineHeight: 14,
-    },
     remainsLine: {
         fontFamily: FONTS.serifItalic,
         fontSize: 12,

@@ -102,15 +102,12 @@ the returned `CombatEndReport` carries:
 - `loot: rollEncounterLoot(encounter) ++ friendshipReward?.items` —
   the full weighted-loot roll with any per-enemy guaranteed items
   appended (Phase 60)
-- `friendshipReward?: { narrative?, alignmentShift?, codexEntryUnlocked? }`
-  (Phase 60 + 69 + 73) — present only when the befriended enemy
-  carries an authored `friendshipReward` with `narrative` /
-  `alignmentDelta`, OR a `journalEntry` that wasn't already
+- `friendshipReward?: { narrative?, codexEntryUnlocked? }`
+  (Phase 60 + 73) — present only when the befriended enemy
+  carries an authored `friendshipReward` with `narrative`, OR a
+  `journalEntry` that wasn't already
   unlocked. Engine doesn't interpret `narrative`; CLI / UI renders.
-  `alignmentShift` (Phase 69) carries the post-clamp
-  `PhilosophicalAlignment` the reducer just wrote to
-  `state.philosophicalAlignment` — surface parity for consumers
-  that don't subscribe separately. `codexEntryUnlocked` (Phase 73)
+  `codexEntryUnlocked` (Phase 73)
   carries `{ id, title }` for the newly-unlocked codex entry;
   body is looked up against the source `Enemy.journalEntry`.
 - **State side effect (Phase 62)** — when the befriended enemy carries
@@ -120,14 +117,6 @@ the returned `CombatEndReport` carries:
   `DialogueChoice.requires.flag` machinery — no new engine surface
   for the consumer. Convention is `befriended-<enemy-id-stem>` (e.g.
   `befriended-mournful-gull`). The flag does NOT surface on the report.
-- **State side effect (Phase 69)** — when the befriended enemy carries
-  `friendshipReward.alignmentDelta?: Partial<PhilosophicalAlignment>`,
-  the END_COMBAT reducer applies the delta to
-  `state.philosophicalAlignment` via `applyAlignmentDelta` (Phase 42
-  clamp helper; each axis clamps to `[-100, +100]`, missing axes pass
-  through). Closes Spec 14 Q4. Authoring band: ±1..±5 per axis (matches
-  the Phase 43 dialogue / map-event delta convention). The post-clamp
-  cell surfaces on `CombatEndReport.friendshipReward.alignmentShift`.
 - **State side effect (Phase 73 — closes GH#65 ask 3)** — when the
   befriended enemy carries `journalEntry?: CodexEntry`
   (`{ id, title, body }`), the END_COMBAT reducer appends the
@@ -141,8 +130,7 @@ the returned `CombatEndReport` carries:
   NOT unlock the entry; future content can grant entries outside
   combat via `store.unlockCodexEntry(entryId)`.
 
-The reducer side (Phase 10) also shifts the moral meter `+1` (see
-`docs/morality.md` § "Combat: Friendship Victories") and routes the player
+The reducer side also routes the player
 through `applyLevelUps` if the (now possibly-bonused) XP crossed a threshold.
 
 ### Befriendable-enemy content (Phase 60)
@@ -204,7 +192,7 @@ friendship trigger later (e.g. once `hpGate` clears via damage progress).
 Coastal Tyrant is the first boss-tier authored config (Phase 68):
 
 ```typescript
-// CoastalTyrant (boss; alignment faith-pessimistic-transcendent)
+// CoastalTyrant (boss)
 befriendabilityConfig: {
     hpGate: { belowPct: 0.4 },
     requiredStances: ['heart'],
@@ -511,7 +499,7 @@ progression levers.
 | `generateDefaultThreatSequence(enemy)` | Generates a 3-phase fallback threat sequence from the enemy's dominant stance, rotating through Heart / Body / Mind. Used automatically by `getThreatSequence` when no authored sequence exists. |
 | `rerollSpentDice(state, rng?)` / `hasRerollableDice(state)` / `dieIsRerollable(die)` | The `reroll_spent` card mechanic's partial re-roll: re-rolls only spent/exhausted + dead `x`-face dice from the legacy face bag, leaving usable dice in play. (Press Fate itself uses spec 33's honest `rerollMissFacesHonest`.) |
 | `THREAT_WEAKEN_PER_ROLL` / `THREAT_DENY_AT` / `THREAT_WEAKEN_FLOOR` | Soft-control and stat-debuff threat tunables (0.33.0). Each point of enemy roll penalty (from confusion, fear, blind, slow, accuracy/attack-down etc.) reduces the incoming hit by `THREAT_WEAKEN_PER_ROLL` (default 0.06). When the cumulative roll penalty reaches `THREAT_DENY_AT` (default 8), the turn is fully denied (same as hard control). `THREAT_WEAKEN_FLOOR` (default 0.4) clamps the minimum damage multiplier for a weakened-but-not-denied enemy. Read these to display soft-control thresholds in the UI. |
-| `COMBAT_DECK_PRESETS` / `COMBAT_DECK_PRESET_ORDER` / `listDeckPresets()` / `getDeckPreset(id)` / `buildPresetDeck(id)` | The three campaign-stage preset decks (`src/Combat/combat.starter-deck-presets.ts`): `threadbare` ("The Threadbare Office", early), `pilgrim` ("The Pilgrim's Burden", mid), `apostate` ("The Apostate's Canon", late), plus `PRESET_LINEAGE` describing the removals/additions that walk one rung to the next. **The one surviving deck law is exact aspect thirds** — every preset splits evenly across body/mind/heart by `philosophicalAspect`. Deck sizes, copy limits and the lineage multiset are no longer laws (2026-09-02). `buildPresetDeck` appends no escape card — there is no in-combat retreat — and is ready to feed `initializeCombatEncounter`. |
+| `COMBAT_DECK_PRESETS` / `COMBAT_DECK_PRESET_ORDER` / `listDeckPresets()` / `getDeckPreset(id)` / `buildPresetDeck(id)` | The three campaign-stage preset decks (`src/Combat/combat.starter-deck-presets.ts`): `threadbare` ("The Threadbare Office", early), `pilgrim` ("The Pilgrim's Burden", mid), `apostate` ("The Apostate's Canon", late), plus `PRESET_LINEAGE` describing the removals/additions that walk one rung to the next. **The one surviving deck law is exact aspect thirds** — every preset splits evenly across body/mind/heart by `color`. Deck sizes, copy limits and the lineage multiset are no longer laws (2026-09-02). `buildPresetDeck` appends no escape card — there is no in-combat retreat — and is ready to feed `initializeCombatEncounter`. |
 | `CombatDeckPreset`, `CombatDeckFocus` | `CombatDeckPreset` describes a single named preset deck entry (id, name, theme, focus, description, cardIds). `CombatDeckFocus` is the discriminated string union of the (now six) coarse design-lever tags used by draft/sim-policy consumers — `'dot' \| 'control' \| 'utility' \| 'damage' \| 'rush-execute' \| 'balanced'` (not the old per-preset name union). Both are importable as `import type { CombatDeckPreset, CombatDeckFocus } from 'axiomancer-mechanics'`. |
 | `CombatIntentType`, `CombatReadResult`, `SignatureSkill`, `SignatureSkillId`, `SignatureSkillKind`, `PlayerArchetype` | The depth-layer type family. |
 

@@ -84,7 +84,7 @@ describe('card upgrades — structure', () => {
             if (up.cardType !== card.cardType) offenders.push(`${card.id}: cardType`);
             if (up.theme !== card.theme) offenders.push(`${card.id}: theme`);
             if (up.targetType !== card.targetType) offenders.push(`${card.id}: targetType`);
-            if (up.philosophicalAspect !== card.philosophicalAspect) offenders.push(`${card.id}: aspect`);
+            if (up.color !== card.color) offenders.push(`${card.id}: aspect`);
             // The FREE-line law (constraint 2) survives the upgrade.
             const hadFree = card.free !== undefined;
             if (hadFree && up.free === undefined) offenders.push(`${card.id}: lost its FREE line`);
@@ -233,7 +233,7 @@ describe('card upgrades — paidSummary never lies', () => {
         // `paidText` reads combatEffects + specialMechanics only, so a FREE-only
         // upgrade leaves the PAID sentence true.
         const card: Card = {
-            id: 'fixture-free-only', name: 'Fixture', philosophicalAspect: 'mind',
+            id: 'fixture-free-only', name: 'Fixture', color: 'mind',
             description: 'x', tier: 1, rank: 1, cardType: 'spell', targetType: 'enemy',
             paidSummary: 'STAGGER 1.',
             free: { drawCards: 1 },
@@ -283,7 +283,7 @@ describe('card upgrades — purity', () => {
 
 describe('card upgrades — the default rule numbers', () => {
     const fixture = (over: Partial<Card>): Card => ({
-        id: 'fx', name: 'Fx', philosophicalAspect: 'body', description: 'x',
+        id: 'fx', name: 'Fx', color: 'body', description: 'x',
         tier: 1, rank: 1, cardType: 'spell', targetType: 'enemy', ...over,
     });
 
@@ -365,7 +365,7 @@ describe('card upgrades — the default rule numbers', () => {
 
 describe('card upgrades — an authored patch wins over the default', () => {
     const base: Card = {
-        id: 'authored', name: 'Authored', philosophicalAspect: 'heart', description: 'x',
+        id: 'authored', name: 'Authored', color: 'heart', description: 'x',
         tier: 2, rank: 3, cardType: 'spell', targetType: 'enemy',
         paidSummary: 'Deal 7 four times. Inflict BLEED 4 for 2 turns.',
         free: { damage: 4 },

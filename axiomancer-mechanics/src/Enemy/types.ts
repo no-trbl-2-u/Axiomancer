@@ -3,7 +3,6 @@ import { MapName } from '../World/map.library';
 import { BaseStats } from '../Character/types';
 import { ActiveEffect } from '../Effects/types';
 import { Item } from '../Items/types';
-import { PhilosophicalAlignment } from '../Ledger/types';
 // Phase 73 — CodexEntry's semantic home is src/Game/types.ts (alongside
 // CodexState + the Game-loop persistence surface). It's re-exported here
 // so `Enemy.journalEntry?: CodexEntry` decoration works at the per-foe
@@ -82,7 +81,7 @@ export type EnemyDifficulty = 'simple' | 'normal' | 'elite' | 'boss' | 'unique';
  * friendship (Phase 36's `outcome === 'friendship'` path).
  *
  * Layered ON TOP OF the existing Phase 36 base: half-XP +
- * full loot + +1 moralMeter. None of the FriendshipReward fields
+ * full loot. None of the FriendshipReward fields
  * REPLACE the Phase 36 grants; they augment them. Authors leave
  * undefined for enemies whose friendship path is purely mechanical
  * (no content stakes).
@@ -109,19 +108,6 @@ export interface FriendshipReward {
      * (e.g. `'befriended-mournful-gull'`). De-duplicated on append.
      */
     flagSet?: string;
-    /**
-     * Phase 69 — optional shift applied to the player's philosophical
-     * alignment cube on the friendship outcome. The END_COMBAT reducer
-     * routes the delta through `applyAlignmentDelta(state.philosophicalAlignment,
-     * delta)` (Phase 42's clamp helper at `src/Ledger/alignment.engine.ts`);
-     * each named axis clamps to `[-100, +100]`, missing axes pass through
-     * unchanged. Authoring band mirrors Phase 43's dialogue / map-event
-     * `alignmentDelta` convention (±1..±5 per axis; ±10 reserved for endgame).
-     * Closes Spec 14 Q4 — the friendship-victory ↔ alignment-cube
-     * intersection is now opt-in per encounter rather than orthogonal by
-     * default.
-     */
-    alignmentDelta?: Partial<PhilosophicalAlignment>;
 }
 
 /**
@@ -220,18 +206,10 @@ export interface Enemy {
     xpReward?: number;
     effects: ActiveEffect[];
     /**
-     * Phase 45 — per-enemy pin on the 3-axis philosophical alignment cube.
-     * Optional; enemies without a pin behave exactly as before. Consumed by
-     * dialogue / alignment surfaces and (historically) by the legacy
-     * turn-based AI's outlook bias, which was removed with that combat driver.
-     */
-    philosophicalAlignment?: PhilosophicalAlignment;
-    /**
      * Phase 60 — optional per-enemy reward content surfaced on
      * `outcome === 'friendship'`. See {@link FriendshipReward}.
      * When undefined, the enemy's friendship resolution is purely
-     * mechanical (Phase 36 base only: half-XP + weighted-loot roll
-     * + +1 moralMeter).
+     * mechanical (Phase 36 base only: half-XP + weighted-loot roll).
      */
     friendshipReward?: FriendshipReward;
     /**

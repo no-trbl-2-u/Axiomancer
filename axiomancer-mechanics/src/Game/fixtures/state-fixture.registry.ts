@@ -42,7 +42,6 @@ export const STATE_FIXTURES: readonly StateFixture[] = Object.freeze([
         preset: 'sage',
         world: { continent: 'coastal-continent', map: 'fishing-village', node: 'fv-9' },
         flags: ['combat-tutorial-done', 'hazard-tutorial-done'],
-        moralMeter: 20,
     },
     {
         id: 'wanderer-nf-village',
@@ -70,7 +69,6 @@ export const STATE_FIXTURES: readonly StateFixture[] = Object.freeze([
         },
         player: { health: 12 },
         flags: ['combat-tutorial-done', 'hazard-tutorial-done'],
-        alignment: { epistemology: 60, outlook: -40 },
     },
     {
         id: 'broke-l1-fv-rest',

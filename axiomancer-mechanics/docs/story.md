@@ -28,20 +28,18 @@
 
 ### Old Marrow (Fishing Village, `fv-2`)
 
-A weather-worn dockmaster on the player's home dock. Old Marrow is the
-**first canonical moral NPC** — his reward branch (after the starting
-"Coastal Tyrant" quest) offers three responses that move the moral meter
-directly via `DialogueChoice.effect.moralDelta`:
+A weather-worn dockmaster on the player's home dock. His reward branch
+(after the starting "Coastal Tyrant" quest) offers three responses:
 
-| Choice                                          | Moral shift | Currency | Side effect       |
-|-------------------------------------------------|------------:|---------:|-------------------|
-| "Take it — coin keeps a man fed."               | 0           | +25      | —                 |
-| "Take only half — your need is greater."        | +5          | +12      | —                 |
-| "This nearly killed me. Pay double or keep it." | −4          | +25      | sets `marrow_pressed` |
+| Choice                                          | Currency | Side effect       |
+|-------------------------------------------------|---------:|-------------------|
+| "Take it — coin keeps a man fed."               | +25      | —                 |
+| "Take only half — your need is greater."        | +12      | —                 |
+| "This nearly killed me. Pay double or keep it." | +25      | sets `marrow_pressed` |
 
-The offer node also exposes a polite refusal (`+2`) that doesn't start
-the quest, for players who want to push the meter without committing to
-the encounter. Voice is laconic and weather-worn — no exclamation
+The offer node also exposes a polite refusal that doesn't start the
+quest. The moral meter these choices once moved was removed 2026-09-27
+(T6, D39). Voice is laconic and weather-worn — no exclamation
 points, no speeches; choices read in the Boy's village-direct cadence.
 
 See `src/World/Continents/Coastal-Village/maps.ts` for the dialogue
@@ -50,8 +48,8 @@ covering all three reward paths.
 
 ### Hollow-Eyed Beggar (Fishing Village)
 
-The original Spec-10 demonstration NPC. Migrated in Phase 14 onto the
-same direct `moralDelta` field; numeric shifts are unchanged (`+5 / +3
-/ +1 / −1 / −5`). See `src/Game/e2e/moral.meter.engine.test.ts`.
+The original Spec-10 demonstration NPC for the moral meter, which was
+removed 2026-09-27 (T6, D39). Its choices now carry only their
+currency and flag effects.
 
 ## Progression

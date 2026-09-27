@@ -147,14 +147,14 @@ const CB = 'qa-cassandras-burden';   // OMEN fixture: window ≤2, ante 2, rider
 registerSandboxCards([
     {
         id: SOP, name: 'QA Signs and Portents',
-        philosophicalAspect: 'heart', description: 'omen fixture (draw rider)', tier: 1,
+        color: 'heart', description: 'omen fixture (draw rider)', tier: 1,
         targetType: 'self', rank: 2, cardType: 'spell',
         free: { foretell: 1 },
         specialMechanics: [{ kind: 'omen', maxWindow: 2, anteConviction: 2, rider: { drawCards: 2 } }],
     },
     {
         id: CB, name: "QA Cassandra's Burden",
-        philosophicalAspect: 'heart', description: 'omen fixture (guard rider)', tier: 2,
+        color: 'heart', description: 'omen fixture (guard rider)', tier: 2,
         targetType: 'enemy', rank: 3, cardType: 'spell',
         free: { foretell: 1, drawCards: 1 },
         combatEffects: [

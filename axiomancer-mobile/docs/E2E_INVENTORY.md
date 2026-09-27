@@ -50,7 +50,7 @@ assertions. Suites that need the player seated somewhere boot from a
 | File | Pattern | Pins | desc | it |
 |---|---|---|---:|---:|
 | `state-fixture.engine.test.ts` | P2 | State-fixture boot (2026-09-08): request channels (`__AXM_FIXTURE__` vs `?fixture=`), the dev-tools gate, invalid-request fallback, ephemeral `fixtureBootAdapter`, and one row per arrival fixture pinning that `arrive` lands the state its gate routes on (`/dialogue`, `/village`, `/cutscene`, rest / cache / blacksmith / hazard sessions); `test-utils/fixtureStore.ts` helper | 5 | 20 |
-| `character.engine.test.ts` | P1 | Character VM shape + stat-row composition + saves/tests block + 7 equipment slots in display order; alignment slice (cell name, three-axis bucketing, low/mid/high boundaries, a11y sentence) per Phase 52 | 9 | 34 |
+| `character.engine.test.ts` | P1 | Character VM shape + stat-row composition + saves/tests block + 7 equipment slots in display order; no GRACE / alignment fields (D39) | 9 | 34 |
 | `combat-mode.engine.test.tsx` | P3 | `useCombatMode` context: `lastOutcome` one-shot signal, `exitCombatWith` (with optional aftermath snapshot payload), `clearLastOutcome`, `inEncounterModal` session flag (Phase 63c), `aftermathData` + `dismissAftermath` (Phase 70 Tick A), run-stats counters `encountersFaced` / `deepestNodeId` / `recordDeepestNode` / `resetRunStats` (Phase 70 Tick C) | 4 | 21 |
 | `combat-encounter.screen.test.tsx` | P4 | `app/combat-encounter/index.tsx` (Spec 25/26 Hazard-Pattern combat) driven end-to-end: reveal → ENTER → board render, the drag-to-power card flow, END PHASE to a terminal outcome | 3 | 5 |
 | `engine-events.engine.test.ts` | P2 | `_recentEvents` ring buffer is populated by real engine dispatches (`combat:started`, `combat:ended`); newest-first ordering; capacity at `RECENT_EVENTS_CAPACITY`; un-wired store returns `null` emitter | 2 | 7 |
@@ -63,7 +63,7 @@ assertions. Suites that need the player seated somewhere boot from a
 | `inventory-feedback.engine.test.ts` | P1 (pure) | `selectInventoryToast` — synthetic `inventory:changed` events produce correct toasts; unrelated event kinds yield `null` (no false toasts) | 1 | 8 |
 | `inventory.modal.engine.test.ts` | P1 | Item-modal VM: USE preview HP delta; EQUIP / EQUIP·REPLACE label branches; null on unknown item id | 4 | 9 |
 | `inventory.screen.test.tsx` | P4 | Inventory screen renders empty + populated; modal confirm routes through action layer | 2 | 3 |
-| `memoir.engine.test.ts` | P1 | Memoir VM shape; quest section composition (active + completed); alignment / chronicle sections (extension-stable shape); REMAINS goodwill read-back (Phase 64) | 7 | 56 |
+| `memoir.engine.test.ts` | P1 | Memoir VM shape; quest section composition (active + completed); chronicle section (extension-stable shape); no MEASURE section (D39); REMAINS goodwill read-back (Phase 64) | 7 | 56 |
 | `navigation.engine.test.ts` | P1 | `selectActiveTab` / `selectTabBadges` / full nav VM under varied game states | 4 | 15 |
 | `route-registration.engine.test.ts` | **P5** | `<GestureHandlerRootView>` wraps `app/_layout.tsx`; `<Tabs.Screen name="…">` strings match folder-route IDs (`<dir>/index`) — pins the 2026-05-19 runtime regressions; every `lib/platform/router.ts` linking entry names a registered screen (TRIM THE FAT Tier 0 item 7) | 3 | 7 |
 | `route-tree.engine.test.ts` | **P5** | No stray `_layout.*` files in `app/` other than `_layout.tsx` (Expo Router's `require.context` would mount them as routes / layouts in production) | 3 | 4 |
@@ -83,8 +83,8 @@ assertions. Suites that need the player seated somewhere boot from a
 
 | File | Pattern | Pins | desc | it |
 |---|---|---|---:|---:|
-| `asyncStorageAdapter.engine.test.ts` | P2 | `createAsyncStorageAdapter` round-trips via AsyncStorage's jest mock; envelope wrap/unwrap; error recovery; v2 envelope → v3 alignment backfill end-to-end (Phase 51) | 4 | 16 |
-| `migrations.engine.test.ts` | P1 (pure) | v1→v2 migration no longer adds the retired `derivedStats` / `nonCombatStats` keys; v2→v3 migration backfills `state.alignment` via `defaultAlignment()`; schema version pin + DEFAULT_MIGRATIONS infrastructure (Phase 51) | 4 | 0¹ |
+| `asyncStorageAdapter.engine.test.ts` | P2 | `createAsyncStorageAdapter` round-trips via AsyncStorage's jest mock; envelope wrap/unwrap; error recovery; v2 envelope walks the legacy bridge end-to-end (Phase 51) | 4 | 16 |
+| `migrations.engine.test.ts` | P1 (pure) | v1→v2 migration no longer adds the retired `derivedStats` / `nonCombatStats` keys; v2→v3 migration is a pass-through since the alignment grid was removed (D39); a v25 engine save rides the engine hop to v26; schema version pin + DEFAULT_MIGRATIONS infrastructure (Phase 51) | 4 | 0¹ |
 
 ¹ All assertions live in `describe`-level setup or `test()` (not `it()`) — see source.
 

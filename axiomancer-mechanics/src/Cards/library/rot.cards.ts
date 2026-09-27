@@ -32,7 +32,7 @@ const unctionOfBoils: Card = {
     id: 'unction-of-boils',
     theme: 'rot',
     name: 'Unction of Boils',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'The chrism went rancid a century back, and the parish anoints with ' +
         'it anyway. Thumb to brow, brow to blister, blister to the blood ' +
@@ -54,7 +54,7 @@ const saltInTheFont: Card = {
     id: 'salt-in-the-font',
     theme: 'rot',
     name: 'Salt in the Font',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'A handful of grey salt, tipped in while the sexton was counting ' +
         'candles. Everyone who blesses themselves today carries the flaw out ' +
@@ -76,7 +76,7 @@ const vinegarAndGall: Card = {
     id: 'vinegar-and-gall',
     theme: 'rot',
     name: 'Vinegar and Gall',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'What they offered the dying man on the hill, held up on a sponge by ' +
         'somebody who thought he was being kind. You have kept the recipe. ' +
@@ -100,7 +100,7 @@ const theSextonsBell: Card = {
     id: 'the-sextons-bell',
     theme: 'rot',
     name: "The Sexton's Bell",
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'The sexton rings once for the dying and twice for the dead, and ' +
         'for you he has not stopped ringing. Every toll lands heavier than ' +
@@ -124,7 +124,7 @@ const theBlisterRosary: Card = {
     id: 'the-blister-rosary',
     theme: 'rot',
     name: 'The Blister Rosary',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'Told on the skin instead of the beads, one raised bead of pus per ' +
         'decade. The faithful say the prayer is finished when the string ' +
@@ -147,7 +147,7 @@ const theSurgeonsAbsence: Card = {
     id: 'the-surgeons-absence',
     theme: 'rot',
     name: "The Surgeon's Absence",
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'He was called away in the spring and the parish has been managing. ' +
         'Managing means nobody closes anything now. What was going to be a ' +
@@ -173,7 +173,7 @@ const theLongLent: Card = {
     id: 'the-long-lent',
     theme: 'rot',
     name: 'The Long Lent',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'Forty days, says the canon. But nowhere does it say the fast ends ' +
         'when the forty are spent — only that the flesh must keep giving ' +
@@ -199,7 +199,7 @@ const almsOfBadBread: Card = {
     id: 'alms-of-bad-bread',
     theme: 'rot',
     name: 'Alms of Bad Bread',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'You give what you have. What you have is the loaf that has gone ' +
         'blue and hairy at the heel, and a hungry mouth does not inspect a ' +
@@ -225,7 +225,7 @@ const theInventoryOfWounds: Card = {
     id: 'the-inventory-of-wounds',
     theme: 'rot',
     name: 'The Inventory of Wounds',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'Every hurt this body has taken, listed in a clerk hand, with the ' +
         'dates. You are not reading it for sympathy. You are reading it for ' +
@@ -253,7 +253,7 @@ const gangreneGospel: Card = {
     id: 'gangrene-gospel',
     theme: 'rot',
     name: 'Gangrene Gospel',
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'The good news travels limb to limb, and every limb believes. What ' +
         'the flesh receives, the flesh must preach onward. By the third ' +
@@ -281,7 +281,7 @@ const theLazarsKiss: Card = {
     id: 'the-lazars-kiss',
     theme: 'rot',
     name: "The Lazar's Kiss",
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'The old rite says the saint kissed the leper and took the sickness ' +
         'off him. It does not say where the saint put it. You have read the ' +
@@ -311,7 +311,7 @@ const communionOfTheWorm: Card = {
     id: 'communion-of-the-worm',
     theme: 'rot',
     name: 'Communion of the Worm',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description:
         'Take, eat: this is the body, broken open for the worm. Drink: it ' +
         'is still warm. The congregation of rot says grace, and you are ' +
@@ -338,7 +338,7 @@ const theButchersSacrament: Card = {
     id: 'the-butchers-sacrament',
     theme: 'rot',
     name: "The Butcher's Sacrament",
-    philosophicalAspect: 'body',
+    color: 'body',
     description:
         'He blesses the block before the first cut and again after the last, ' +
         'and in between he does not speak. The apprentices think it is ' +
@@ -363,7 +363,7 @@ const theUntendedGarden: Card = {
     id: 'the-untended-garden',
     theme: 'rot',
     name: 'The Untended Garden',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     persistentEffect:
         'At the end of each round, FESTER 2: every affliction on the foe gains 2 intensity.',
     description:
@@ -385,7 +385,7 @@ const edictOfTheOpenWound: Card = {
     id: 'edict-of-the-open-wound',
     theme: 'rot',
     name: 'Edict of the Open Wound',
-    philosophicalAspect: 'body',
+    color: 'body',
     persistentEffect:
         "The foe's wounds refuse to close: its POISON, BLEED and DOOM no longer lose duration, and its HEAL fails.",
     description:
@@ -406,7 +406,7 @@ const everyWoundAccounted: Card = {
     id: 'every-wound-accounted',
     theme: 'rot',
     name: 'Every Wound Accounted',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description:
         'The clerk closes the book, and there is nothing outstanding. Not ' +
         'one cut unentered, not one fever unpriced, not one hour of it ' +

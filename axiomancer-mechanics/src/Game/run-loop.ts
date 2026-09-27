@@ -4,8 +4,7 @@
  * The `resetRun` action on `createGameStore` lets a consumer rewind a
  * playthrough back to its starting hearth without quitting the session.
  * `keepCharacter: true` preserves the persistent character ledger (player +
- * philosophicalAlignment + moralMeter + rngState); run-scoped state
- * (world / combat / quests / flags / observer cache) resets and the
+ * rngState); run-scoped state (world / combat / quests / flags) resets and the
  * character's HP refills. `keepCharacter: false` performs a full new-game
  * reset. Every reset assigns a fresh `runId`.
  *

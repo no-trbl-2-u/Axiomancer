@@ -107,7 +107,7 @@ function paidBurst(cardId: string): number {
     if (!card) return 0;
     // Phase 104 — the grey office's colourless 'any' aspect has no die
     // colour of its own; wild powers it same as every other card.
-    const s = openFed(cardId, card.philosophicalAspect === 'any' ? 'wild' : card.philosophicalAspect);
+    const s = openFed(cardId, card.color === 'any' ? 'wild' : card.color);
     const before = s.enemy.health;
     const res = playCombatCard(s, { uid: 'ceiling-under-test' }, true, 't1-d0', rng);
     return before - res.state.enemy.health;

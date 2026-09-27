@@ -23,8 +23,6 @@ import type { TypedLevelUpEvent } from '../events.types';
 function buildStore(level: number, opts: {
     experience?: number;
     knownCards?: string[];
-    /** Phase 46 — override alignment so alignment-gated tier-3 cards can pass. */
-    philosophicalAlignment?: { epistemology: number; outlook: number; scope: number };
 } = {}) {
     const events = createEventEmitter();
     const player = createCharacter({
@@ -35,9 +33,6 @@ function buildStore(level: number, opts: {
     });
     const state = { ...createNewGameState(), player };
     if (opts.experience !== undefined) state.player.experience = opts.experience;
-    if (opts.philosophicalAlignment !== undefined) {
-        state.philosophicalAlignment = opts.philosophicalAlignment;
-    }
     const captured: TypedLevelUpEvent[] = [];
     events.on('character:levelup', e => captured.push(e as TypedLevelUpEvent));
     const store = createGameStore(nullAdapter, state, events);
@@ -58,7 +53,7 @@ describe('character:levelup payload — cards are no longer level-gated (2026-07
         // Cross level 5 (and beyond): under the removed level gate this used to
         // unlock the tier-2/3 cards. Now that cards carry no level requirement,
         // eligibility is identical before and after the promotion, so the diff
-        // is empty (only alignment/stat/prereq gates could ever change it, and
+        // is empty (only stat/prereq gates could ever change it, and
         // none of those move on a plain level-up).
         const { store, captured } = buildStore(4, {
             experience: 14 * EXPERIENCE_PER_LEVEL,

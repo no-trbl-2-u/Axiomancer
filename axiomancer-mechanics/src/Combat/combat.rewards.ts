@@ -39,7 +39,7 @@ export const REWARD_RARITY_WEIGHTS: Readonly<Record<'common' | 'uncommon' | 'rar
 
 /**
  * Phase 104 (the grey office) — every brand-new player's opening 10-card
- * deck: two colourless shapes (`philosophicalAspect: 'any'` — every die
+ * deck: two colourless shapes (`color: 'any'` — every die
  * colour powers either), so fight one teaches STRIKE, WARD, FREE-vs-PAID, and
  * the die-spend loop with zero colour arithmetic. Mobile's
  * `ensureStarterCards` writes this list VERBATIM (copies kept — 7 + 3, not
@@ -90,7 +90,7 @@ function validPool(extraPool: readonly string[] = []): string[] {
 // ---------------------------------------------------------------------------
 // THEME-AWARE DRAFT (2026-08-08) — replaces the archetype skew.
 //
-// The old lever read the player's dominant `philosophicalAspect` and doubled
+// The old lever read the player's dominant `color` and doubled
 // the weight of matching cards. It was blunt (three coarse aspects over a
 // six-theme canon) and, on the neutral Threadbare Office, it did nothing at
 // all. The new lever reads the deck the player is ACTUALLY PLAYING — the

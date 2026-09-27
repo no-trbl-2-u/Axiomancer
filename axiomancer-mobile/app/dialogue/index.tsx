@@ -2,7 +2,7 @@
  * /dialogue — the dedicated NPC interaction screen (Phase 137).
  *
  * Renders the same composed event view-model the generic modal used
- * (dialogue-cursor walking, alignment/quest gating, consequence
+ * (dialogue-cursor walking, flag/quest gating, consequence
  * chips all live in `state/presenters/event.engine`), with chrome
  * built for a conversation: nameplate, spoken text panel, replies.
  */

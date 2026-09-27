@@ -26,8 +26,10 @@ for content gaps and the working hand for narrative phases.
   short: terse, archaic-flavored, "cold and old" — **no
   thee/thou/thy/thine/ye**, no exclamation marks, mercy/exploit
   language reads morally charged, never neutral.
-- **Copy canon:** VITAE / STANCE / GRACE — never HEALTH / GUARD /
-  MORALE. Real-units-or-no-number on card faces. Effect ids are never
+- **Copy canon:** VITAE / STANCE — never HEALTH / GUARD. There is no
+  morale meter: GRACE, the alignment cube and its gates and deltas were
+  removed 2026-09-27 (T6, D39). Do not write choices that shift or
+  read them. Real-units-or-no-number on card faces. Effect ids are never
   renamed for player text (map them in mobile's keyword registry).
 - **Lexicon lint:** `node scripts/check-lexicon.mjs` (retired-term
   registry `axiomancer-mechanics/docs/lexicon.json`) runs on every
@@ -52,7 +54,7 @@ All engine paths relative to `axiomancer-mechanics/`:
 
 | Surface | File(s) | Player-visible via |
 |---|---|---|
-| Dialogue trees + NPCs | `src/World/Continents/<Continent>/npcs.ts`; types in `src/NPCs/types.ts` (`DialogueTree`/`DialogueNode`/`DialogueChoice` — gates: quest/flag/alignment; effects: startQuest/teachCard/setFlag/moralDelta/alignmentDelta/…) | `/dialogue` route |
+| Dialogue trees + NPCs | `src/World/Continents/<Continent>/npcs.ts`; types in `src/NPCs/types.ts` (`DialogueTree`/`DialogueNode`/`DialogueChoice` — gates: quest/questCompleted/flag; effects: startQuest/progressQuest/completeQuest/teachCard/setFlag/grantCurrency) | `/dialogue` route |
 | Map-event pools | `src/World/MapEvents/content.ts` (`description`, `cutscene.lines[]`, `narration` monologue trees, `interaction` refs) | `/event`, `/cutscene` (`description` reaches `ResolvedEvent` since Phase 58) |
 | Labyrinth rooms | `src/World/Labyrinth/content/act{1,2,3}.content.ts` (`scene`, `narration`, `pois[].remark`, gate riddles/refusals) | `/labyrinth` |
 | Quest objectives (QuestLog) | `src/World/quest.library.ts` / `quest.engine.ts` (`startQuest`/`progressQuest`/`completeQuest`, `startingQuest`) — the Quest Board minigame that used to sit alongside these was retired in Phase 61; story beats now author through dialogue/narration content instead | `/memoir` (quest section), `DebugQuestState` |
@@ -70,17 +72,14 @@ rules/state/RNG in a presenter.
    suite) fails on orphaned trees, unresolved interaction refs, and
    scenery-as-people. Every tree you author must be reachable from a
    pool entry or NPC.
-2. **Alignment bands:** `alignmentDelta` magnitudes are asserted by
-   `src/Ledger/e2e/alignment-authoring.engine.test.ts` — read its
-   bands before assigning deltas.
-3. **Tests alongside content:** a new tree/beat gets a hermetic e2e
+2. **Tests alongside content:** a new tree/beat gets a hermetic e2e
    asserting its gates and effects fire (deterministic RNG via
    `src/test-utils/rng.ts`).
-4. **Verify gate:** `npm run verify -w axiomancer-mechanics`; if the
+3. **Verify gate:** `npm run verify -w axiomancer-mechanics`; if the
    diff touches `src/World/**`, `src/NPCs/**`, or `src/Enemy/**`, also
    `npm run verify -w axiomancer-mobile` (the CI classifier routes
    these to the mobile gate — AGENTS.md impact checklist).
-5. **No emojis. No `Co-Authored-By:`.** Terse commit style.
+4. **No emojis. No `Co-Authored-By:`.** Terse commit style.
 
 ## Prior art
 

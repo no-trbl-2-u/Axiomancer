@@ -32,7 +32,7 @@ import type {
     ResolveMapEventResult,
     ResolvedEvent,
 } from '@mechanics';
-import { defaultAlignment, getDialogueNode, visibleChoices } from '@mechanics';
+import { getDialogueNode, visibleChoices } from '@mechanics';
 
 import { ENCOUNTER_ENEMY_HP_MULTIPLIER, withScaledEnemyHp } from '../actions';
 import type { AppStoreState } from '../store';
@@ -63,7 +63,6 @@ export type ConsequenceKind =
     | 'currency'
     | 'item'
     | 'flag'
-    | 'moral'
     | 'quest-start'
     | 'quest-progress'
     | 'card-learn';
@@ -90,7 +89,7 @@ export interface EventChoice {
      * `prototype.jsx:481-489` (combat shell) + `:522-531` (paced
      * shell). `null` when no subtitle should render (default for
      * narrative-choice dialogue branches; combat-prelude populates
-     * via the enemy-stats / morale ritual lines below).
+     * via the enemy-stats / retreat ritual lines below).
      *
      * Distinct from `description` (which is the deeper "Combat ·
      * turns" / "Luck Save" line the modal sometimes ships above
@@ -483,14 +482,15 @@ function composeCombatPrelude(encounter: Encounter, isBoss: boolean): Omit<Event
     // Phase 45 port: chrome subtitles under each action button (the
     // italic cost/consequence preview from prototype.jsx:481-489 +
     // :486-489 — 'ix · vi vitae · adv. unknown' on FIGHT, 'forfeit
-    // the path · -ii grace' on FLEE). Lowercase-roman cost line +
-    // ritual-register kicker. Boss variant tightens the kicker
+    // the path' on FLEE). Lowercase-roman cost line + ritual-register
+    // kicker. The FLEE line carried a grace cost until the morale meter
+    // was removed (D39); retreat is now free. Boss variant tightens the kicker
     // since the engine's boss-blocks-flee rule is part of the
     // design intent (KNEEL is sealed, not a real choice).
     const fightSubtitle = `${toRomanLower(enemy.level)} · ${toRomanLower(previewHealth)} vitae · adv. unknown`;
     const fleeSubtitle = isBoss
         ? 'sealed · no retreat'
-        : 'forfeit the path · -ii grace';
+        : 'forfeit the path';
 
     const choices: EventChoice[] = [
         {
@@ -513,7 +513,7 @@ function composeCombatPrelude(encounter: Encounter, isBoss: boolean): Omit<Event
             accentKey: 'bone',
             enabled: !isBoss,
             subtitle: fleeSubtitle,
-            decode: isBoss ? null : 'Give up this node · spend 2 Grace',
+            decode: isBoss ? null : 'Give up this node',
         },
     ];
     let subtitle: string;
@@ -547,18 +547,15 @@ function composeCombatPrelude(encounter: Encounter, isBoss: boolean): Omit<Event
 /**
  * Builds the engine's `DialogueContext` from mobile store state. The single
  * source of truth for every `visibleChoices` call site — a second hand-built
- * context is how the phase 53b gap (alignment gates evaluating false for
- * every player, forever) happened in the first place.
+ * context is how the phase 53b gap (gates evaluating false for every player,
+ * forever) happened in the first place.
  */
-export function buildDialogueContext(tree: DialogueTree, state: AppStoreState): DialogueContext {
+export function buildDialogueContext(state: AppStoreState): DialogueContext {
     const activeNames: string[] = state.quests.active.map((q: { name: string }) => q.name);
-    const alignment = state.philosophicalAlignment ?? defaultAlignment();
     return {
         activeQuests: new Set<string>(activeNames),
         completedQuests: new Set<string>(state.quests.completed as string[]),
         flags: new Set<string>(state.flags as string[]),
-        alignment,
-        lastSeenAlignmentCellId: tree.id ? state.lastSeenAlignmentCells?.[tree.id] : undefined,
     };
 }
 
@@ -592,7 +589,7 @@ function composeNpcDialogue(
 ): Omit<EventViewModel, 'preludeChrome' | 'chrome' | 'sourceNodeType'> {
     const node: DialogueNode = getDialogueNode(tree, nodeId);
     const rawChoices = node.choices ?? [];
-    const ctx = buildDialogueContext(tree, state);
+    const ctx = buildDialogueContext(state);
     const visible = visibleChoices(node, ctx);
     // Phase 60c — engine's DialogueChoice was flattened: `.id` and
     // `.label` were removed; the canonical user-facing field is
@@ -601,9 +598,7 @@ function composeNpcDialogue(
     // into), not its index in `visible` — a gate hiding any earlier
     // choice shifts the filtered array's indices out of step with the
     // raw one, which silently fires the wrong branch on click. (Phase
-    // 53b: caught while wiring the alignment gates live, since gating
-    // now hides choices far more often than the one pre-existing
-    // `flag`/`questCompleted` gate did.)
+    // 53b: caught while wiring the since-removed alignment gates live.)
     const choices: EventChoice[] = visible.map((choice) => ({
         id: String(rawChoices.indexOf(choice)),
         label: choice.text.toUpperCase(),
@@ -880,9 +875,6 @@ function extractDialogueConsequences(choice: DialogueChoice): ReadonlyArray<Even
     const e = choice.effect;
     if (!e) return out;
     if (e.grantCurrency) out.push({ kind: 'currency', amount: e.grantCurrency });
-    if (typeof e.moralDelta === 'number' && e.moralDelta !== 0) {
-        out.push({ kind: 'moral', amount: e.moralDelta });
-    }
     if (e.startQuest) out.push({ kind: 'quest-start', label: e.startQuest });
     if (e.completeQuest) out.push({ kind: 'quest-progress', label: e.completeQuest });
     if (e.progressQuest) {

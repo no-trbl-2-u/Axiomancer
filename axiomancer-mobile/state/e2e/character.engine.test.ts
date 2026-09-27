@@ -55,7 +55,10 @@ describe('selectCharacterViewModel: shape contract', () => {
         expect(Array.isArray(vm.effects)).toBe(true);
         expect(Array.isArray(vm.equipment)).toBe(true);
         expect(Array.isArray(vm.cards)).toBe(true);
-        expect(typeof vm.morale).toBe('number');
+        // D39: the GRACE meter and the alignment grid are gone from the sheet.
+        expect(vm).not.toHaveProperty('morale');
+        expect(vm).not.toHaveProperty('alignment');
+        expect(vm).not.toHaveProperty('graceCopy');
     });
 
     it('threads availableStatPoints onto vm.pendingPoints (Phase 73)', () => {
@@ -437,122 +440,6 @@ describe('selectCharacterViewModel: a11y block', () => {
     });
 });
 
-// ---------------------------------------------------------------------------
-// Alignment slice (Phase 52, engine 0.10.0 Philosophy module)
-// ---------------------------------------------------------------------------
-
-describe('selectCharacterViewModel: alignment slice', () => {
-    it('returns a totally-shaped alignment block for a fresh game (mid/mid/mid)', () => {
-        const store = createGameStore(createMemoryAdapter());
-
-        const vm = selectCharacterViewModel(store.getState());
-
-        expect(vm.alignment).toBeDefined();
-        expect(typeof vm.alignment.cellName).toBe('string');
-        expect(vm.alignment.cellName.length).toBeGreaterThan(0);
-        expect(vm.alignment.axes).toHaveLength(3);
-    });
-
-    it('exposes the three axis rows in canonical display order: epistemology, outlook, scope', () => {
-        const store = createGameStore(createMemoryAdapter());
-
-        const vm = selectCharacterViewModel(store.getState());
-
-        const keys = vm.alignment.axes.map((a) => a.axisKey);
-        expect(keys).toEqual(['epistemology', 'outlook', 'scope']);
-    });
-
-    it('axis labels are uppercase mono tokens (no second-person archaic register)', () => {
-        const store = createGameStore(createMemoryAdapter());
-
-        const vm = selectCharacterViewModel(store.getState());
-
-        expect(vm.alignment.axes.map((a) => a.label)).toEqual([
-            'CREED',
-            'AUGURY',
-            'TROTH',
-        ]);
-    });
-
-    it('defaults every axis bucket to "mid" when the engine state carries defaultAlignment', () => {
-        const store = createGameStore(createMemoryAdapter());
-
-        const vm = selectCharacterViewModel(store.getState());
-
-        for (const axis of vm.alignment.axes) {
-            expect(axis.bucket).toBe('mid');
-        }
-    });
-
-    it('threads explicit alignment values through bucketAxis (low / mid / high boundaries)', () => {
-        const store = createGameStore(createMemoryAdapter());
-
-        // Stamp a synthetic alignment onto the store directly. The
-        // engine's reducers route alignment updates through dialogue /
-        // map-event payloads; this test bypasses that to assert the
-        // presenter's bucketing logic.
-        const stateWithAlignment = {
-            ...store.getState(),
-            philosophicalAlignment: { epistemology: -50, outlook: 0, scope: 50 },
-        };
-
-        const vm = selectCharacterViewModel(stateWithAlignment as never);
-
-        const byKey = Object.fromEntries(vm.alignment.axes.map((a) => [a.axisKey, a.bucket]));
-        expect(byKey.epistemology).toBe('low');
-        expect(byKey.outlook).toBe('mid');
-        expect(byKey.scope).toBe('high');
-    });
-
-    it('a11y.alignment surfaces a screen-reader sentence including cell + axis values', () => {
-        const store = createGameStore(createMemoryAdapter());
-
-        const vm = selectCharacterViewModel(store.getState());
-
-        expect(vm.a11y.alignment).toContain(vm.alignment.cellName);
-        for (const axis of vm.alignment.axes) {
-            // Each axis label appears lowercased in the a11y sentence.
-            expect(vm.a11y.alignment.toLowerCase()).toContain(axis.label.toLowerCase());
-            expect(vm.a11y.alignment).toContain(axis.bucket);
-        }
-    });
-});
-
-// ---------------------------------------------------------------------------
-// Morale (Phase 92)
-// ---------------------------------------------------------------------------
-
-describe('selectCharacterViewModel: morale', () => {
-    it('threads state.moralMeter onto vm.morale', () => {
-        const store = createGameStore(createMemoryAdapter());
-        // Fresh game starts with default morale from engine
-        const fresh = selectCharacterViewModel(store.getState());
-        const expectedFresh = store.getState().moralMeter;
-        expect(fresh.morale).toBe(expectedFresh);
-
-        // Modify morale and verify VM reflects the change
-        store.setState({ moralMeter: -5 });
-        const modified = selectCharacterViewModel(store.getState());
-        expect(modified.morale).toBe(-5);
-    });
-});
-
-/**
- * FE-003 — the SELF sheet must not show two different numbers under the
- * bare word GRACE. The pool bar is `moralMeter` bucketed to 1-10; this
- * section is the raw balance. The copy names the difference.
- */
-describe('FE-003: grace balance copy', () => {
-    it('heads the raw balance distinctly from the POOLS bar and states the relationship', () => {
-        const store = makeStore();
-        const vm = selectCharacterViewModel(store.getState() as never);
-        expect(vm.graceCopy.balanceHeading).not.toBe('✠ GRACE');
-        expect(vm.graceCopy.balanceHeading).toContain('BALANCE');
-        expect(vm.graceCopy.balanceUnit.length).toBeGreaterThan(0);
-        expect(vm.graceCopy.balanceRelation).toMatch(/pool/i);
-    });
-});
-
 /**
  * FE-004 — the XP row must not read as the player's current level. It sits
  * beside a medallion printing the current level, and printed `XP · LVL 2`
@@ -573,39 +460,3 @@ describe('FE-004: xp label names the NEXT level', () => {
     });
 });
 
-/**
- * FE-017 — the SELF sheet's GRACE and alignment must track the real save.
- * The screen handed the presenter only `{ player }`, so `moralMeter` and
- * `philosophicalAlignment` arrived undefined and both readouts were frozen at
- * their zero/default values while the exploration HUD showed the true ones.
- */
-describe('FE-017: grace and alignment follow the state the screen passes', () => {
-    it('reads moralMeter rather than defaulting it', () => {
-        const base = createCharacter({ name: 'Test Hero', level: 1, baseStats: { heart: 1, body: 1, mind: 1 } });
-        const store = createGameStore(createMemoryAdapter(), { player: base });
-        store.setState({ moralMeter: 20 } as never);
-
-        const vm = selectCharacterViewModel(store.getState());
-
-        expect(vm.morale).toBe(20);
-    });
-
-    it('a different moralMeter produces a different reading', () => {
-        const base = createCharacter({ name: 'Test Hero', level: 1, baseStats: { heart: 1, body: 1, mind: 1 } });
-        const store = createGameStore(createMemoryAdapter(), { player: base });
-        store.setState({ moralMeter: -60 } as never);
-
-        const vm = selectCharacterViewModel(store.getState());
-
-        expect(vm.morale).toBe(-60);
-    });
-
-    it('the pool bucket the screen draws moves with the balance', () => {
-        // The screen buckets morale to 1-10 the same way the HUD does; pin the
-        // arithmetic so the two surfaces cannot drift apart again.
-        const bucket = (m: number) => Math.max(1, Math.min(10, Math.round((m + 100) / 20)));
-        expect(bucket(20)).toBe(6);
-        expect(bucket(0)).toBe(5);
-        expect(bucket(-60)).toBe(2);
-    });
-});

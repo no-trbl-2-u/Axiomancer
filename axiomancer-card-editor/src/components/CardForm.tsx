@@ -385,7 +385,7 @@ export function CardForm({ card, setCard }: { card: CardDraft; setCard: (c: Card
             <Section title="CLASSIFICATION" defaultOpen>
                 <div>
                     <FieldLabel hint="stance / die colour">PHILOSOPHICAL ASPECT</FieldLabel>
-                    <Segmented options={STANCES} value={card.philosophicalAspect} onChange={(v) => set({ philosophicalAspect: v })} colorFor={dieColor} />
+                    <Segmented options={STANCES} value={card.color} onChange={(v) => set({ color: v })} colorFor={dieColor} />
                 </div>
                 <div style={{ display: 'flex', gap: 12 }}>
                     <div style={{ flex: 1 }}>

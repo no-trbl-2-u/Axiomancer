@@ -79,9 +79,6 @@ const nfSpring: MapEventPool = {
             shelter: 'camp',
             description: 'A clearing with a cold spring. You catch your breath.',
         },
-        // Phase 43 — the spring's hush invites the larger picture:
-        // transcendent scope, mild faith-leaning epistemology.
-        alignmentDelta: { epistemology: -1, scope: 2 },
     }],
 };
 
@@ -168,10 +165,6 @@ const nfCaveMouth: MapEventPool = {
             destinationMap: 'caverns',
             description: 'A cave mouth yawns in the cliff face. Cold air spills out. Something deeper is breathing. You go in anyway.',
         },
-        // Phase 43 — cosmic dread at the dark gate: Lovecraft / Cioran
-        // territory (Agnostic-Pessimistic-Transcendent). Carried over from
-        // the cutscene this door replaced.
-        alignmentDelta: { outlook: -2, scope: 3 },
     }],
 };
 
@@ -186,7 +179,6 @@ const nfShrineKeeper: MapEventPool = {
             npcName: 'Shrine Keeper',
             description: 'The Shrine Keeper tends ancient carved stones among the forest growth.',
         },
-        alignmentDelta: { epistemology: 1, scope: 1 },
     }],
 };
 
@@ -199,7 +191,6 @@ const nfChronicler: MapEventPool = {
             npcName: 'The Chronicler',
             description: 'The Chronicler sits surrounded by leather-bound tomes and parchments.',
         },
-        alignmentDelta: { epistemology: 1 },
     }],
 };
 
@@ -212,7 +203,6 @@ const nfWanderingPhilosopher: MapEventPool = {
             npcName: 'The Wandering Philosopher',
             description: 'A contemplative figure in simple robes sits among the trees.',
         },
-        alignmentDelta: { epistemology: 1, scope: 1 },
     }],
 };
 
@@ -226,7 +216,6 @@ const nfMossyClearing: MapEventPool = {
             shelter: 'camp',
             description: 'A mossy clearing with a fallen log that serves as a natural bench.',
         },
-        alignmentDelta: { scope: 1 },
     }],
 };
 
@@ -238,9 +227,6 @@ const nfMossyClearing: MapEventPool = {
 // yet; it ships anyway per S-01's answered ruling — splitting the spec
 // across two phases to chase reachability would leave it half-shipped
 // indefinitely, and the four dilemmas are one authored set with one voice.
-// Branch 3 carries the spec's one permitted `alignmentDelta`: "note the
-// spot, mean to tell someone" names a worldview (`scope`), not a virtue —
-// the same distinction fv-14's joke-deflection branch draws.
 const nfCrowningWitnessedDialogue: MapEventPool = {
     id: 'nf-12.narration',
     entries: [{
@@ -269,7 +255,7 @@ const nfCrowningWitnessedDialogue: MapEventPool = {
                             {
                                 text: 'Mark the spot. Leave. Mean to tell someone in the city.',
                                 nextNodeId: 'marked',
-                                effect: { setFlag: 'boy-marked-the-crowning', alignmentDelta: { scope: 1 } },
+                                effect: { setFlag: 'boy-marked-the-crowning' },
                             },
                         ],
                     },
@@ -333,7 +319,6 @@ const nfBrambleTrap: MapEventPool = {
             damage: 1,
             description: 'Hidden brambles catch at your feet and tear at exposed skin.',
         },
-        alignmentDelta: { outlook: -1 },
     }],
 };
 
@@ -362,7 +347,6 @@ const nfBoneCircle: MapEventPool = {
             ],
             description: 'A circle of ancient bones in the hollow.',
         },
-        alignmentDelta: { epistemology: -2, scope: -1 },
     }],
 };
 
@@ -472,7 +456,6 @@ const nfRangerCairn: MapEventPool = {
             npcName: 'Forest Ranger',
             description: "A cairn of fitted stones marks the trail's edge. The Forest Ranger kneels beside it. One hand rests flat on the topmost stone. A colleague, lost to the same logging line he still watches.",
         },
-        alignmentDelta: { outlook: -1, epistemology: 1 },
     }],
 };
 
@@ -506,7 +489,6 @@ const nfEchoStone: MapEventPool = {
             ],
             description: 'A stone formation that answers in your own voice.',
         },
-        alignmentDelta: { epistemology: 1 },
     }],
 };
 
@@ -521,7 +503,6 @@ const nfHiddenGrove: MapEventPool = {
             shelter: 'camp',
             description: 'A hidden grove surrounds a natural spring. The water runs clear and cold.',
         },
-        alignmentDelta: { scope: 2 },
     }],
 };
 
@@ -534,7 +515,6 @@ const nfMistPools: MapEventPool = {
             damage: 2,
             description: 'Thick pools of mist swirl and eddy, confusing your sense of direction.',
         },
-        alignmentDelta: { epistemology: -1 },
     }],
 };
 
@@ -574,7 +554,7 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
     { nodeId: 'nf-19', pool: nfFrightenedFriendDialogue },
     { nodeId: 'nf-20', pool: nfAxeHead          },
     { nodeId: 'nf-21', pool: nfRangerCairn      },
-    { nodeId: 'nf-22', pool: nfMoonbellFlowers  },
+    { nodeId: 'nf-22', pool: nfMoonbellFlowers },
     { nodeId: 'nf-23', pool: nfEchoStone        },
     { nodeId: 'nf-24', pool: nfHiddenGrove      },
     { nodeId: 'nf-25', pool: nfMistPools        },
@@ -800,7 +780,7 @@ const fvFatherWorryDialogue: MapEventPool = {
                             {
                                 text: '"A boat fit for a king, obviously." (grin)',
                                 nextNodeId: 'deflected',
-                                effect: { setFlag: 'boy-deflected-father', alignmentDelta: { outlook: 1 } },
+                                effect: { setFlag: 'boy-deflected-father' },
                             },
                         ],
                     },
@@ -831,9 +811,7 @@ const fvFatherWorryDialogue: MapEventPool = {
 // `encounter` node — the only kind either map carries a surplus of, per the
 // spec's answered Open Question 1 — and both sit strictly ahead of the
 // post-boss column (fv-18/fv-7/fv-19, column 6) that will read their flags
-// once Phase 53e lands the read-back web. Flags only; no `moralDelta` on
-// either — the meter stays concentrated in Old Marrow and the Coastal
-// Beggar, where a legible verdict belongs (S-01's answered Open Question 2).
+// once Phase 53e lands the read-back web. Flags only.
 const fvBorrowedHookDialogue: MapEventPool = {
     id: 'fv-16.narration',
     entries: [{
@@ -1661,8 +1639,6 @@ const ncArrival: MapEventPool = {
             ],
             description: 'The caverns take you in.',
         },
-        // The dark under the world: the scope widens, the outlook does not.
-        alignmentDelta: { outlook: -1, scope: 2 },
     }],
 };
 
@@ -1773,7 +1749,6 @@ const ncOldDelve: MapEventPool = {
             ],
             description: 'The bones of an older delve.',
         },
-        alignmentDelta: { outlook: -1, epistemology: 1 },
     }],
 };
 
@@ -1827,8 +1802,6 @@ const ncGateStandsOpen: MapEventPool = {
             destinationMap: 'northern-city',
             description: 'Past the gate, a stair climbs toward lamplight and the sound of a city. You climb.',
         },
-        // Out of the dark, upward: the outlook lifts, the world gets bigger.
-        alignmentDelta: { outlook: 1, scope: 1 },
     }],
 };
 
@@ -1891,8 +1864,6 @@ const ncyArrival: MapEventPool = {
             ],
             description: 'The northern city takes you in.',
         },
-        // Up out of the dark and into a working city: the world widens.
-        alignmentDelta: { outlook: 1, scope: 1 },
     }],
 };
 
@@ -1941,7 +1912,7 @@ const ncyAdvisorRumor: MapEventPool = {
                             {
                                 text: 'Stop. Ask what a province sends.',
                                 nextNodeId: 'asked',
-                                effect: { setFlag: 'boy-chased-the-rumor', alignmentDelta: { scope: 1 } },
+                                effect: { setFlag: 'boy-chased-the-rumor' },
                             },
                             {
                                 text: 'Note it, and keep walking.',
@@ -1951,7 +1922,7 @@ const ncyAdvisorRumor: MapEventPool = {
                             {
                                 text: 'Kings bury their own. Not your street.',
                                 nextNodeId: 'shrugged',
-                                effect: { setFlag: 'boy-shrugged-the-rumor', alignmentDelta: { scope: -1 } },
+                                effect: { setFlag: 'boy-shrugged-the-rumor' },
                             },
                         ],
                     },
@@ -2093,7 +2064,6 @@ const ncyAssizeBell: MapEventPool = {
             ],
             description: 'The assize bell.',
         },
-        alignmentDelta: { epistemology: 1, outlook: -1 },
     }],
 };
 
@@ -2129,7 +2099,6 @@ const ncyDrownedSlip: MapEventPool = {
             ],
             description: 'The drowned slip.',
         },
-        alignmentDelta: { scope: 1 },
     }],
 };
 
@@ -2161,8 +2130,6 @@ const ncyWaterGateStandsOpen: MapEventPool = {
             destinationMap: 'connecting-river',
             description: 'Past the weighing-house, the harbor opens onto open water. A current takes you before you decide to follow it.',
         },
-        // Out past the last wall, onto open water: the world widens again.
-        alignmentDelta: { outlook: 1, scope: 1 },
     }],
 };
 
@@ -2223,7 +2190,6 @@ const crArrival: MapEventPool = {
             ],
             description: 'Downriver.',
         },
-        alignmentDelta: { scope: 1 },
     }],
 };
 
@@ -2335,7 +2301,6 @@ const crRiverCourt: MapEventPool = {
                             {
                                 text: 'Walk on. This isn\'t yours to watch.',
                                 nextNodeId: undefined,
-                                effect: { alignmentDelta: { scope: -1 } },
                             },
                         ],
                     },
@@ -2419,7 +2384,6 @@ const crWaterGateStandsOpen: MapEventPool = {
             destinationMap: 'town-across-river',
             description: 'Past the reeve\'s post, the river opens onto the far bank. A town waits where the current slows.',
         },
-        alignmentDelta: { outlook: 1, scope: 1 },
     }],
 };
 
@@ -2461,7 +2425,6 @@ const tarArrival: MapEventPool = {
             ],
             description: 'The town across the river.',
         },
-        alignmentDelta: { outlook: 1 },
     }],
 };
 
@@ -2516,7 +2479,6 @@ const tarVillageCourt: MapEventPool = {
                             {
                                 text: 'Look away.',
                                 nextNodeId: undefined,
-                                effect: { alignmentDelta: { outlook: -1 } },
                             },
                         ],
                     },
@@ -2566,7 +2528,6 @@ const tarRibbonRoadOpen: MapEventPool = {
             destinationMap: 'the-capital',
             description: 'Past the Portreeve\'s desk, the ribbon-road runs straight to the capital. Every nominee walks it eventually.',
         },
-        alignmentDelta: { outlook: 1, scope: 1 },
     }],
 };
 
@@ -2599,7 +2560,6 @@ const capArrival: MapEventPool = {
             ],
             description: 'The capital.',
         },
-        alignmentDelta: { scope: 1 },
     }],
 };
 

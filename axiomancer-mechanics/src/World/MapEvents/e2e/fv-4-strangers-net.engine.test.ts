@@ -2,7 +2,7 @@
  * fv-4 "The Stranger's Net" — hermetic coverage for the second of S-01's
  * remaining three dilemmas (Phase 53d). Mirrors
  * `fv-14-father-worry.engine.test.ts`'s shape: pool wiring, all three
- * flags settable, each choice a terminating leaf, no `moralDelta`. Also
+ * flags settable, each choice a terminating leaf. Also
  * proves the binding placement constraint from S-01's answered Open
  * Question 1 — a dilemma read by a later node must sit strictly ahead of
  * it on the gauntlet's column axis.
@@ -64,21 +64,18 @@ describe('fv-4 "The Stranger\'s Net"', () => {
         ['returned', 'boy-returned-the-net'],
         ['skimmed', 'boy-skimmed-the-net'],
         ['took', 'boy-took-the-net'],
-    ])('setting choice leading to %s sets flag %s, advances to a leaf, and sets no moralDelta', (nextNodeId, flag) => {
+    ])('setting choice leading to %s sets flag %s, advances to a leaf, and advances', (nextNodeId, flag) => {
         const payload = fv4Payload();
         const tree = payload.dialogue;
         const root = tree.nodes[tree.rootId]!;
         const choice = root.choices!.find(c => c.nextNodeId === nextNodeId)!;
         expect(choice).toBeDefined();
-        expect(choice.effect?.moralDelta).toBeUndefined();
 
         const state = createNewGameState();
         expect(state.flags).not.toContain(flag);
-        const before = state.moralMeter;
 
         const result = applyDialogueChoice(state, tree, choice);
         expect(result.gameState.flags).toContain(flag);
-        expect(result.gameState.moralMeter).toBe(before);
 
         const nextNode: DialogueNode = tree.nodes[choice.nextNodeId!]!;
         expect(nextNode.choices).toBeUndefined(); // each outcome is a leaf

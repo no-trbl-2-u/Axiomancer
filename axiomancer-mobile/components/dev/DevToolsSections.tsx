@@ -40,7 +40,6 @@ const DebugPresetPicker = lazyNamed(() => import('@/components/DebugPresetPicker
 const DebugPlayerTierPresets = lazyNamed(() => import('@/components/DebugPlayerTierPresets'), 'DebugPlayerTierPresets');
 const DebugXpGrant = lazyNamed(() => import('@/components/DebugXpGrant'), 'DebugXpGrant');
 const DebugCurrencyControl = lazyNamed(() => import('@/components/DebugCurrencyControl'), 'DebugCurrencyControl');
-const DebugAlignmentShift = lazyNamed(() => import('@/components/DebugAlignmentShift'), 'DebugAlignmentShift');
 const DebugEffectApply = lazyNamed(() => import('@/components/DebugEffectApply'), 'DebugEffectApply');
 // ── DECKS & ITEMS ──
 const DebugHazardDeckRandomize = lazyNamed(() => import('@/components/DebugHazardDeckRandomize'), 'DebugHazardDeckRandomize');
@@ -102,12 +101,11 @@ export function DevToolsSections() {
                     <DebugStateInspector />
                 </DevSection>
 
-                <DevSection label="PLAYER" hint="archetype · level · wallet · ledger · effects" testID="dev-section-player">
+                <DevSection label="PLAYER" hint="archetype · level · wallet · effects" testID="dev-section-player">
                     <DebugPresetPicker />
                     <DebugPlayerTierPresets />
                     <DebugXpGrant />
                     <DebugCurrencyControl />
-                    <DebugAlignmentShift />
                     <DebugEffectApply />
                 </DevSection>
 

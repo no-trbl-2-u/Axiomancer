@@ -235,7 +235,7 @@ function freeKeyword(card: CardDraft): { kw: KeywordId | string; val: number } {
 
 /** Derive face-ready fields from any editable card draft. */
 export function projectFace(card: CardDraft): FaceCard {
-    const die = card.philosophicalAspect; // body | mind | heart | any
+    const die = card.color; // body | mind | heart | any
     // Spec 32 v3 §4 — rarity derives from the rank ladder (gold is gone).
     const rarity: RarityKey = rankToRarity(card.rank);
     const primary = primaryKeyword(card);
@@ -583,7 +583,7 @@ export function CardFace({
     // Persistent cards (oath / hex) have no dieless FREE line to badge.
     const persistent = card.cardType === 'oath' || card.cardType === 'hex';
     const typeLabel =
-        card.philosophicalAspect.toUpperCase() +
+        card.color.toUpperCase() +
         (card.cardType ? ` · ${card.cardType.toUpperCase()}` : '');
     // ② PAID = the composed sentence; fall back to the terse keyword+value line.
     const paid = paidSentence(card);

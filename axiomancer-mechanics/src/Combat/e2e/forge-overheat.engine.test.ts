@@ -67,7 +67,7 @@ const OVERHEAT_CARD = 'qa-overheat-half-step';
 registerSandboxCards([
     {
         id: OVERHEAT_CARD, name: 'QA Overheat (ex-Half-Step)',
-        philosophicalAspect: 'body', description: 'overheat fixture', tier: 1,
+        color: 'body', description: 'overheat fixture', tier: 1,
         targetType: 'self', rank: 2, cardType: 'spell',
         free: { pips: 1 },
         specialMechanics: [

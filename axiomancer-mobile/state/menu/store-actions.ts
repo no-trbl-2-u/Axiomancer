@@ -50,10 +50,9 @@ import {
  * Replace the engine state held by `store` with `next` and reset every
  * mobile-only slice to its empty value.
  *
- * `currentEncounter` and `lastSeenAlignmentCells` are OPTIONAL on
- * `GameState`; they are written explicitly (possibly as `undefined`) so a
- * run that has none does not inherit the previous run's values through the
- * merge. Pure over its inputs apart from the store write and the RNG reset.
+ * `currentEncounter` is OPTIONAL on `GameState`; it is written explicitly
+ * (possibly as `undefined`) so a run that has none does not inherit the
+ * previous run's value through the merge. Pure over its inputs apart from the store write and the RNG reset.
  */
 export function hydrateStoreWithGameState(store: AppStore, next: GameState): void {
     if (typeof next.rngState === 'number') getRng().setState(next.rngState);
@@ -61,7 +60,6 @@ export function hydrateStoreWithGameState(store: AppStore, next: GameState): voi
     const patch: Partial<AppStoreState> = {
         ...next,
         currentEncounter: next.currentEncounter,
-        lastSeenAlignmentCells: next.lastSeenAlignmentCells,
         event: EMPTY_EVENT_SLICE,
         combatReward: EMPTY_COMBAT_REWARD_SLICE,
         itemReward: EMPTY_ITEM_REWARD_SLICE,

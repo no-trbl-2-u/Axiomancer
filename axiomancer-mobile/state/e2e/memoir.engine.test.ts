@@ -1,8 +1,9 @@
 /**
  * Hermetic E2E Tests — MEMOIR presenter (Phase 33).
  *
- * Tick A pins the VM shape end-to-end. Ticks B-D will extend with
- * quest / alignment / chronicle cases. The shape contract here is
+ * Tick A pins the VM shape end-to-end. Ticks B-D extend with quest /
+ * chronicle cases (Tick C's alignment readouts were removed with the
+ * alignment system, D39). The shape contract here is
  * stable across those extensions — only the section *contents* fill
  * in.
  *
@@ -41,7 +42,6 @@ describe('selectMemoirViewModel: shape contract', () => {
         expect(vm.questsActiveEyebrow).toBe('✠ AT HAND');
         expect(vm.questsCompletedEyebrow).toBe('✠ COMPLETED');
         expect(vm.questsForgottenEyebrow).toBe('✠ FORGOTTEN');
-        expect(vm.measureEyebrow).toBe('✠ MEASURE');
 
         // Sections — Tick A ships empty placeholders.
         expect(Array.isArray(vm.chronicle)).toBe(true);
@@ -50,26 +50,14 @@ describe('selectMemoirViewModel: shape contract', () => {
         expect(Array.isArray(vm.quests.completed)).toBe(true);
         expect(Array.isArray(vm.quests.forgotten)).toBe(true);
 
-        // Alignment defaults — Tick C will populate from state.moralMeter
-        // and the highest-base-stat heuristic.
-        expect(vm.moralAlignment.value).toBe(0);
-        expect(vm.moralAlignment.chip.label).toBe('INDIFFERENT');
-        expect(vm.moralAlignment.chip.tintKey).toBe('bone');
-        // Chip label sits in chrome register (UNTESTED, no period);
-        // the narrative empty-state line is `emptyPhilosophical`
-        // (`untested.`, lowercase + period). CRITIQUE pass 7 LOW
-        // drain split the two registers.
-        expect(vm.philosophicalAlignment.label).toBe('UNTESTED');
-        expect(vm.philosophicalAlignment.provisional).toBe(true);
-
-        // Quote slot — null until a follow-up phase wires alignments.
-        expect(vm.exemplarQuote).toBeNull();
+        // D39: the MEASURE section (GRACE band + philosophical bent) is gone.
+        expect(vm).not.toHaveProperty('measureEyebrow');
+        expect(vm).not.toHaveProperty('moralAlignment');
+        expect(vm).not.toHaveProperty('exemplarQuote');
 
         // Empty-state copy locked per the brief.
         expect(vm.emptyChronicle).toBe('the page is bare.');
         expect(vm.emptyQuests).toBe('no errands written here.');
-        expect(vm.emptyMoral).toBe('the scales are level.');
-        expect(vm.emptyPhilosophical).toBe('untested.');
     });
 
     it('substitutes the player name into the header sub-line when available', () => {
@@ -91,8 +79,6 @@ describe('selectMemoirViewModel: shape contract', () => {
 
         expect(Object.isFrozen(vm)).toBe(true);
         expect(Object.isFrozen(vm.quests)).toBe(true);
-        expect(Object.isFrozen(vm.moralAlignment)).toBe(true);
-        expect(Object.isFrozen(vm.philosophicalAlignment)).toBe(true);
     });
 });
 
@@ -239,141 +225,6 @@ describe('selectMemoirViewModel: quests section', () => {
         const vm = selectMemoirViewModel(store.getState());
 
         expect(vm.quests.forgotten).toEqual([]);
-    });
-});
-
-// ---------------------------------------------------------------------------
-// Tick C — moral + provisional philosophical alignment
-//
-// GRACE bands, retitled + reduced to 3 Phase 44h (spec 34 §6.1):
-// -100..-34 IN ARREARS, -33..33 INDIFFERENT, 34..100 IN GRACE.
-// Philosophical alignment: highest base stat wins, ties favour Heart,
-// 3-way tie returns the `untested.` empty state.
-// ---------------------------------------------------------------------------
-
-function setMoralMeter(store: ReturnType<typeof createGameStore>, value: number): void {
-    // Type assertion needed for test mock data - setState expects AppStoreState partial
-    store.setState({ moralMeter: value } as unknown as Partial<AppStoreState>);
-}
-
-function setBaseStats(
-    store: ReturnType<typeof createGameStore>,
-    stats: { heart: number; body: number; mind: number },
-): void {
-    const player = store.getState().player;
-    // Type assertion needed for test mock data - setState expects AppStoreState partial
-    store.setState({ player: { ...player, baseStats: stats } } as unknown as Partial<AppStoreState>);
-}
-
-describe('selectMemoirViewModel: moral alignment', () => {
-    it('defaults to INDIFFERENT (bone tint) at moralMeter = 0', () => {
-        const store = createGameStore(createMemoryAdapter());
-        const vm = selectMemoirViewModel(store.getState());
-        expect(vm.moralAlignment.value).toBe(0);
-        expect(vm.moralAlignment.chip).toEqual({ label: 'INDIFFERENT', tintKey: 'bone' });
-    });
-
-    it.each([
-        [-100, 'IN ARREARS', 'blood'],
-        [-70, 'IN ARREARS', 'blood'],
-        [-34, 'IN ARREARS', 'blood'],
-        [-33, 'INDIFFERENT', 'bone'],
-        [0, 'INDIFFERENT', 'bone'],
-        [33, 'INDIFFERENT', 'bone'],
-        [34, 'IN GRACE', 'parchment'],
-        [65, 'IN GRACE', 'parchment'],
-        [100, 'IN GRACE', 'parchment'],
-    ])(
-        'maps moralMeter %p to band %s (tint %s)',
-        (value, label, tint) => {
-            const store = createGameStore(createMemoryAdapter());
-            setMoralMeter(store, value as number);
-            const vm = selectMemoirViewModel(store.getState());
-            expect(vm.moralAlignment.value).toBe(value);
-            expect(vm.moralAlignment.chip.label).toBe(label);
-            expect(vm.moralAlignment.chip.tintKey).toBe(tint);
-        },
-    );
-
-    it('clamps moralMeter outside [-100, 100] to the boundary band', () => {
-        const store = createGameStore(createMemoryAdapter());
-        setMoralMeter(store, 200);
-        let vm = selectMemoirViewModel(store.getState());
-        expect(vm.moralAlignment.value).toBe(100);
-        expect(vm.moralAlignment.chip.label).toBe('IN GRACE');
-
-        setMoralMeter(store, -500);
-        vm = selectMemoirViewModel(store.getState());
-        expect(vm.moralAlignment.value).toBe(-100);
-        expect(vm.moralAlignment.chip.label).toBe('IN ARREARS');
-    });
-
-    it('marks moralAlignment.isEmpty true only in the indifferent band', () => {
-        const store = createGameStore(createMemoryAdapter());
-        // -33..33 band → empty
-        setMoralMeter(store, 0);
-        expect(selectMemoirViewModel(store.getState()).moralAlignment.isEmpty).toBe(true);
-        setMoralMeter(store, -33);
-        expect(selectMemoirViewModel(store.getState()).moralAlignment.isEmpty).toBe(true);
-        setMoralMeter(store, 33);
-        expect(selectMemoirViewModel(store.getState()).moralAlignment.isEmpty).toBe(true);
-        // outside the undeclared band → not empty
-        setMoralMeter(store, -34);
-        expect(selectMemoirViewModel(store.getState()).moralAlignment.isEmpty).toBe(false);
-        setMoralMeter(store, 50);
-        expect(selectMemoirViewModel(store.getState()).moralAlignment.isEmpty).toBe(false);
-    });
-});
-
-describe('selectMemoirViewModel: provisional philosophical alignment', () => {
-    it('returns UNTESTED chip when all three base stats are equal (3-way tie)', () => {
-        const store = createGameStore(createMemoryAdapter());
-        setBaseStats(store, { heart: 4, body: 4, mind: 4 });
-        const vm = selectMemoirViewModel(store.getState());
-        // Chip label is chrome register (UNTESTED, no period). The
-        // matching narrative line is on `vm.emptyPhilosophical`
-        // (`'untested.'`) and renders beneath the chip.
-        expect(vm.philosophicalAlignment.label).toBe('UNTESTED');
-        expect(vm.philosophicalAlignment.rationale).toBe('');
-        expect(vm.philosophicalAlignment.provisional).toBe(true);
-    });
-
-    it('picks Heart as the largest measure with rationale', () => {
-        const store = createGameStore(createMemoryAdapter());
-        setBaseStats(store, { heart: 12, body: 5, mind: 7 });
-        const vm = selectMemoirViewModel(store.getState());
-        expect(vm.philosophicalAlignment.label).toBe('of the Heart');
-        expect(vm.philosophicalAlignment.rationale).toBe('Heart is your largest measure (12).');
-    });
-
-    it('picks Body as the largest measure with rationale', () => {
-        const store = createGameStore(createMemoryAdapter());
-        setBaseStats(store, { heart: 3, body: 10, mind: 6 });
-        const vm = selectMemoirViewModel(store.getState());
-        expect(vm.philosophicalAlignment.label).toBe('of the Body');
-        expect(vm.philosophicalAlignment.rationale).toBe('Body is your largest measure (10).');
-    });
-
-    it('picks Mind as the largest measure with rationale', () => {
-        const store = createGameStore(createMemoryAdapter());
-        setBaseStats(store, { heart: 2, body: 4, mind: 9 });
-        const vm = selectMemoirViewModel(store.getState());
-        expect(vm.philosophicalAlignment.label).toBe('of the Mind');
-        expect(vm.philosophicalAlignment.rationale).toBe('Mind is your largest measure (9).');
-    });
-
-    it('breaks a Heart/Body tie in favour of Heart (per brief)', () => {
-        const store = createGameStore(createMemoryAdapter());
-        setBaseStats(store, { heart: 8, body: 8, mind: 3 });
-        const vm = selectMemoirViewModel(store.getState());
-        expect(vm.philosophicalAlignment.label).toBe('of the Heart');
-    });
-
-    it('breaks a Body/Mind tie in favour of Body (highest non-Heart wins)', () => {
-        const store = createGameStore(createMemoryAdapter());
-        setBaseStats(store, { heart: 2, body: 6, mind: 6 });
-        const vm = selectMemoirViewModel(store.getState());
-        expect(vm.philosophicalAlignment.label).toBe('of the Body');
     });
 });
 

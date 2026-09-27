@@ -39,7 +39,7 @@ const FX_EMBER: Card = {
     id: 'fx-ember',
     theme: 'rot',
     name: 'Ember (fixture)',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description: 'Test carrier: a genuine round-clock DoT.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'enemy',

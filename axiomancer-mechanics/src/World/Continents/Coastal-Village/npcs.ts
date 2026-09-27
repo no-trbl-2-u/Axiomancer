@@ -17,14 +17,10 @@ const captainBlackwaterTree: DialogueTree = {
                 {
                     text: "Tell me how you deal fair.",
                     nextNodeId: 'fair_trade',
-                    requires: { requiresAlignment: { axis: 'scope', op: 'gte', value: 20 } },
-                    effect: { alignmentDelta: { scope: 1, outlook: 1 } },
                 },
                 {
                     text: "What's the quickest coin to be made here?",
                     nextNodeId: 'quick_profit',
-                    requires: { requiresAlignment: { axis: 'scope', op: 'lte', value: -10 } },
-                    effect: { alignmentDelta: { scope: -1, outlook: -1 } },
                 },
                 {
                     text: "Just looking.",
@@ -33,8 +29,6 @@ const captainBlackwaterTree: DialogueTree = {
                 {
                     text: "(The captain's eyes narrow. He sees how you deal differently now.)",
                     nextNodeId: 'merchant_recognition',
-                    requires: { playerAlignmentCellChangedSince: true },
-                    effect: { alignmentDelta: { outlook: 1 } },
                 },
                 // Phase 53e (S-02 "the read-back web") — reads `marrow_pressed`
                 // (set at fv-2, column 1, strictly ahead of this node's column
@@ -48,8 +42,8 @@ const captainBlackwaterTree: DialogueTree = {
                 // acknowledgements for one event, not one. `DialogueChoice.requires`
                 // has no "flag NOT set" predicate to exclude that overlap, so
                 // this narrows to the single sharper read: the businessman
-                // noticing another businessman's hard bargain. No `moralDelta`
-                // — recognition, not judgment. Placed LAST.
+                // noticing another businessman's hard bargain — recognition,
+                // not judgment. Placed LAST.
                 {
                     text: "(Blackwater's eyes flick to you a beat too long.)",
                     nextNodeId: 'marrow_pressed_recognition',
@@ -69,15 +63,10 @@ const captainBlackwaterTree: DialogueTree = {
                 {
                     text: "That is a rare way to deal.",
                     nextNodeId: 'admire_philosophy',
-                    effect: {
-                        alignmentDelta: { outlook: 1, scope: 1 },
-                        moralDelta: 1
-                    },
                 },
                 {
                     text: "Surely quick coin tempts any merchant.",
                     nextNodeId: 'temptation_question',
-                    effect: { alignmentDelta: { outlook: -1 } },
                 },
                 {
                     text: "Show me your wares.",
@@ -93,7 +82,6 @@ const captainBlackwaterTree: DialogueTree = {
                     text: "How do you hold to that, with every merchant undercutting you?",
                     nextNodeId: 'competitive_ethics',
                     effect: {
-                        alignmentDelta: { scope: 2, epistemology: 1 },
                         setFlag: 'captain_respects_ethics'
                     },
                 },
@@ -101,7 +89,6 @@ const captainBlackwaterTree: DialogueTree = {
                     text: "Would you stand behind a guild built on the same terms?",
                     nextNodeId: 'guild_proposal',
                     effect: {
-                        alignmentDelta: { scope: 2 },
                         setFlag: 'guild_support_secured'
                     },
                 },
@@ -114,18 +101,10 @@ const captainBlackwaterTree: DialogueTree = {
                 {
                     text: "Sometimes survival demands harsh choices.",
                     nextNodeId: 'harsh_necessity',
-                    effect: {
-                        alignmentDelta: { outlook: -1, scope: -1 },
-                        moralDelta: -1
-                    },
                 },
                 {
                     text: "Perhaps you're right, in the long view.",
                     nextNodeId: 'long_term_wisdom',
-                    effect: {
-                        alignmentDelta: { outlook: 2, scope: 1 },
-                        moralDelta: 2
-                    },
                 },
             ],
         },
@@ -149,8 +128,6 @@ const captainBlackwaterTree: DialogueTree = {
                     text: "Your goods speak for you.",
                     nextNodeId: undefined,
                     effect: {
-                        alignmentDelta: { scope: 1 },
-                        moralDelta: 1,
                         grantCurrency: 5
                     },
                 },
@@ -202,31 +179,18 @@ const fishermansDaughterTree: DialogueTree = {
                 {
                     text: "I've seen much of the world. Ask.",
                     nextNodeId: 'worldly_wisdom',
-                    effect: { alignmentDelta: { scope: 1, epistemology: 1 } },
                 },
                 {
                     text: "You've too sharp an eye for net-mending.",
                     nextNodeId: 'bright_observation',
-                    requires: { requiresAlignment: { axis: 'scope', op: 'gte', value: 10 } },
-                    effect: {
-                        alignmentDelta: { scope: 1, outlook: 1 },
-                        moralDelta: 1
-                    },
                 },
                 {
                     text: "Mind your nets, child.",
                     nextNodeId: 'dismissive_response',
-                    requires: { requiresAlignment: { axis: 'outlook', op: 'lte', value: -15 } },
-                    effect: {
-                        alignmentDelta: { outlook: -1, scope: -1 },
-                        moralDelta: -2
-                    },
                 },
                 {
                     text: "(She studies you a moment longer than she should. Something in you has changed.)",
                     nextNodeId: 'growth_recognition',
-                    requires: { playerAlignmentCellChangedSince: true },
-                    effect: { alignmentDelta: { epistemology: 1 } },
                 },
                 // Phase 53e (S-02 "the read-back web") — the peer who is
                 // further along the same reckoning. Two mutually exclusive
@@ -236,12 +200,10 @@ const fishermansDaughterTree: DialogueTree = {
                 // flag is ever set in a playthrough, so each group reads as
                 // ONE acknowledgement despite being three `DialogueChoice`
                 // entries, per the spec's "one branch, three leaf texts"
-                // rule. **No `moralDelta` on any of these six** — S-01's
-                // father dilemma pointedly refuses to score itself, and an
-                // NPC who scored it retroactively would overrule that
-                // refusal (the one binding rule the brief singles out for
-                // this NPC). She notices. She does not grade. All placed
-                // LAST.
+                // rule. S-01's father dilemma pointedly refuses to score
+                // itself, and an NPC who scored it retroactively would
+                // overrule that refusal. She notices. She does not grade.
+                // All placed LAST.
                 {
                     text: "(She studies you, then guesses at something between you and your father.)",
                     nextNodeId: 'daughter_reads_told_truth',
@@ -319,23 +281,16 @@ const fishermansDaughterTree: DialogueTree = {
                     text: "The world holds both — wonder, and danger.",
                     nextNodeId: 'balanced_view',
                     effect: {
-                        alignmentDelta: { epistemology: 1, outlook: 1 },
                         setFlag: 'daughter_appreciates_honesty'
                     },
                 },
                 {
                     text: "Your father is wise. The world is cruel enough.",
                     nextNodeId: 'protective_warning',
-                    effect: { alignmentDelta: { outlook: -1, scope: -1 } },
                 },
                 {
                     text: "Dream past this harbor. The world waits for those who leave it.",
                     nextNodeId: 'encourage_dreams',
-                    requires: { requiresAlignment: { axis: 'outlook', op: 'gte', value: 15 } },
-                    effect: {
-                        alignmentDelta: { outlook: 2, scope: 1 },
-                        moralDelta: 2
-                    },
                 },
             ],
         },
@@ -347,27 +302,20 @@ const fishermansDaughterTree: DialogueTree = {
                     text: "Every soul carries wisdom worth the hearing.",
                     nextNodeId: 'wisdom_everywhere',
                     effect: {
-                        alignmentDelta: { scope: 2, epistemology: 1 },
                         setFlag: 'mentored_fishermans_daughter_wisdom'
                     },
                 },
                 {
                     text: "Hold to what you are, whatever leans against you.",
                     nextNodeId: 'stay_true',
-                    effect: {
-                        alignmentDelta: { epistemology: 1, outlook: 1 },
-                        moralDelta: 2
-                    },
                 },
                 {
                     text: "Learn to bend. The rigid tree breaks in the storm.",
                     nextNodeId: 'adaptability_lesson',
-                    effect: { alignmentDelta: { epistemology: -1, outlook: 1 } },
                 },
                 {
                     text: "Trust yourself. Test what others tell you.",
                     nextNodeId: 'critical_thinking',
-                    effect: { alignmentDelta: { epistemology: 2 } },
                 },
             ],
         },
@@ -378,21 +326,17 @@ const fishermansDaughterTree: DialogueTree = {
                 {
                     text: "What calls you past them?",
                     nextNodeId: 'calling_exploration',
-                    effect: { alignmentDelta: { scope: 1, epistemology: 1 } },
                 },
                 {
                     text: "Knowledge is worth the reaching.",
                     nextNodeId: 'knowledge_validation',
                     effect: {
-                        alignmentDelta: { epistemology: 2, scope: 1 },
-                        moralDelta: 2,
                         setFlag: 'encouraged_daughters_learning'
                     },
                 },
                 {
                     text: "Study, then, and still keep your father's nets.",
                     nextNodeId: 'balanced_path',
-                    effect: { alignmentDelta: { scope: 1 } },
                 },
             ],
         },
@@ -484,26 +428,18 @@ const villageHealerTree: DialogueTree = {
                 {
                     text: "Trust to providence. It provides what's needed.",
                     nextNodeId: 'divine_providence',
-                    requires: { requiresAlignment: { axis: 'epistemology', op: 'gte', value: 15 } },
-                    effect: { alignmentDelta: { epistemology: 2, scope: 1 } },
                 },
                 {
                     text: "I'll help you get those herbs. Whatever it takes.",
                     nextNodeId: 'offer_help',
-                    requires: { requiresAlignment: { axis: 'scope', op: 'gte', value: 10 } },
                     effect: {
-                        alignmentDelta: { scope: 2, outlook: 1 },
-                        moralDelta: 2,
                         grantCurrency: -15
                     },
                 },
                 {
                     text: "The wealthy won't miss a few herbs. Take what you need.",
                     nextNodeId: 'take_what_needed',
-                    requires: { requiresAlignment: { axis: 'outlook', op: 'lte', value: -5 } },
                     effect: {
-                        alignmentDelta: { outlook: -2, scope: 1 },
-                        moralDelta: -1,
                         grantCurrency: 10,
                         setFlag: 'aided_healer_questionable_means'
                     },
@@ -566,16 +502,11 @@ const unionLeaderTree: DialogueTree = {
                 {
                     text: "The divine order teaches us to accept our lot, and trust to a higher justice.",
                     nextNodeId: 'accept_divine_order',
-                    requires: { requiresAlignment: { axis: 'epistemology', op: 'gte', value: 20 } },
-                    effect: { alignmentDelta: { epistemology: 1, scope: -2 } },
                 },
                 {
                     text: "I'll stand with you. An injustice anywhere is a threat everywhere.",
                     nextNodeId: 'solidarity_support',
-                    requires: { requiresAlignment: { axis: 'scope', op: 'gte', value: 15 } },
                     effect: {
-                        alignmentDelta: { scope: 3, outlook: 1 },
-                        moralDelta: 3,
                         grantCurrency: -20,
                         setFlag: 'union_supporter'
                     },
@@ -583,10 +514,7 @@ const unionLeaderTree: DialogueTree = {
                 {
                     text: "A wise man looks after himself. I'll pay the frightened ones to cross your line.",
                     nextNodeId: 'undermine_strike',
-                    requires: { requiresAlignment: { axis: 'scope', op: 'lte', value: -10 } },
                     effect: {
-                        alignmentDelta: { scope: -3, outlook: -1 },
-                        moralDelta: -3,
                         grantCurrency: 25,
                         setFlag: 'strike_breaker'
                     },
@@ -649,16 +577,11 @@ const merchantWidowTree: DialogueTree = {
                 {
                     text: "Forgiveness is divine. Let heaven judge, and heal your own heart.",
                     nextNodeId: 'divine_forgiveness',
-                    requires: { requiresAlignment: { axis: 'epistemology', op: 'gte', value: 20 } },
-                    effect: { alignmentDelta: { epistemology: 2, outlook: 2 } },
                 },
                 {
                     text: "I'll help you find a road that serves both justice and mercy.",
                     nextNodeId: 'justice_with_mercy',
-                    requires: { requiresAlignment: { axis: 'scope', op: 'gte', value: 10 } },
                     effect: {
-                        alignmentDelta: { scope: 2, outlook: 1 },
-                        moralDelta: 3,
                         grantCurrency: -30,
                         setFlag: 'widow_mediator'
                     },
@@ -666,10 +589,7 @@ const merchantWidowTree: DialogueTree = {
                 {
                     text: "Justice demands payment. I'll help you hire the best hunters there are.",
                     nextNodeId: 'pursue_vengeance',
-                    requires: { requiresAlignment: { axis: 'outlook', op: 'lte', value: 0 } },
                     effect: {
-                        alignmentDelta: { outlook: -2, scope: -1 },
-                        moralDelta: -1,
                         grantCurrency: 40,
                         setFlag: 'widow_vengeance_supporter'
                     },

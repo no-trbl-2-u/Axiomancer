@@ -2,14 +2,14 @@
  * Hermetic E2E — Phase 104: the grey office (the fresh-run starter shapes).
  *
  * `grey-strike` ("A Plain Blow") and `grey-ward` ("A Plain Ward") are the
- * two colourless cards (`philosophicalAspect: 'any'`) every brand-new run
+ * two colourless cards (`color: 'any'`) every brand-new run
  * seeds ten copies of (7 + 3 — see `STARTING_CARD_IDS`,
  * `Combat/combat.rewards.ts`). This suite pins:
  *
  *   - both resolve with the right shape (colourless aspect, `theme: 'grey'`,
  *     Ash tier/rank, spell);
  *   - THE COLOUR LAW's exception: every die colour, plus wild, powers either
- *     card (no fizzle) — the missing half `philosophicalAspect: 'any'` adds;
+ *     card (no fizzle) — the missing half `color: 'any'` adds;
  *   - FREE/PAID ledgers read exactly 2 / 5, as printed;
  *   - a fresh `STARTING_CARD_IDS`-shaped deck deals exactly 7 grey-strike +
  *     3 grey-ward (`ensureStarterCards`'s verbatim-copy contract);
@@ -41,7 +41,7 @@ describe('Phase 104 — the grey office: card shape', () => {
         for (const id of GREY_IDS) {
             const card = getCardById(id);
             expect(card, id).toBeDefined();
-            expect(card!.philosophicalAspect, id).toBe('any');
+            expect(card!.color, id).toBe('any');
             expect(card!.theme, id).toBe('grey');
             expect(card!.tier, id).toBe(1);
             expect(card!.rank, id).toBe(1);

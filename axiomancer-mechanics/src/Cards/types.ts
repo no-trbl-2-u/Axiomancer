@@ -8,8 +8,8 @@
 import type { CardTheme } from './card-themes';
 
 /**
- * Philosophical aspect alignment for cards
- * Determines which base stat the card scales with and which combat type it uses.
+ * A stat colour (body / mind / heart). A card's `color` is one of these or
+ * 'any' (see `CardAspect`); the dice and the colour-match bonus read it.
  * - 'body': Physical/strength-based cards
  * - 'mind': Mental/intelligence-based cards
  * - 'heart': Emotional/charisma-based cards
@@ -713,7 +713,7 @@ export interface CardSynergy {
  * @property id              - Unique identifier for this card.
  * @property name            - Display name.
  * @property description     - Flavor text or lore.
- * @property philosophicalAspect - Stat alignment of the card (heart/body/mind),
+ * @property color           - The card's colour (heart/body/mind),
  *                              or 'any' for the grey office's colourless cards.
  * @property tier            - 1 / 2 / 3, mirrors the effect tier system.
  * @property targetType      - 'self' or 'enemy'.
@@ -726,7 +726,7 @@ export interface CardSynergy {
 export interface Card {
     id: string;
     name: string;
-    philosophicalAspect: CardAspect;
+    color: CardAspect;
     description: string;
     tier: CardTier;
     targetType: CardTarget;

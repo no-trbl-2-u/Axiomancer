@@ -21,7 +21,7 @@
 // popup is retired), so the armed state to assert on is the combat
 // REVEAL. WITHDRAW — retreat's new home, on the reveal beside ENTER
 // COMBAT — closes the round trip: `fleeEncounter` is an unconditional
-// morale shift, no dice roll, so the return path is as deterministic as
+// retreat, no dice roll, so the return path is as deterministic as
 // the open. `scripts/combat-encounter-e2e.mjs` already covers playing a
 // live hazard combat to resolution — duplicating that here would be
 // redundant, not new coverage.

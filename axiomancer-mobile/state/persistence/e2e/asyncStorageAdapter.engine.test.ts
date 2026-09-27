@@ -372,13 +372,11 @@ describe('migrations — unwrap', () => {
         }
     });
 
-    it('preload + load on a v2 envelope yields state with philosophicalAlignment backfilled (Phase 51 + 52)', async () => {
-        // Per the brief: load a `schemaVersion: 2` envelope through the
-        // adapter and confirm the resulting state has the engine's
-        // defaultAlignment() applied. Pins the migration runs end-to-end
-        // through createAsyncStorageAdapter, not just through unwrap().
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { defaultAlignment } = require('@mechanics');
+    it('preload + load on a v2 envelope walks the legacy bridge (Phase 51 + 52)', async () => {
+        // Load a `schemaVersion: 2` envelope through the adapter and confirm
+        // it comes back intact. Pins the migration runs end-to-end through
+        // createAsyncStorageAdapter, not just through unwrap(). (The v2 → v3
+        // step backfilled the alignment cube until D39 removed it.)
         const v2State = {
             player: {
                 name: 'V2 Pilgrim',
@@ -398,6 +396,6 @@ describe('migrations — unwrap', () => {
         const loaded = adapter.load() as unknown as Record<string, unknown>;
 
         expect(loaded).not.toBeNull();
-        expect(loaded.philosophicalAlignment).toEqual(defaultAlignment());
+        expect((loaded.player as { name: string }).name).toBe('V2 Pilgrim');
     });
 });

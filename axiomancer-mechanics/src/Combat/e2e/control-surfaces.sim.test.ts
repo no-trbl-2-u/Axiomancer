@@ -224,7 +224,7 @@ describe('WS8.2 — CONFUSION owns the STANCE surface (BLUR: player-borne fog)',
 const SURFACE_CARDS: readonly Card[] = [
     {
         id: 'fx-rung-wall', theme: 'trial', name: 'Rung Wall (fixture)',
-        philosophicalAspect: 'body',
+        color: 'body',
         description: 'Test carrier: pure STAGGER — rung strength only.',
         tier: 2, rank: 3, cardType: 'spell', targetType: 'enemy',
         paidSummary: 'STAGGER 1.',
@@ -234,7 +234,7 @@ const SURFACE_CARDS: readonly Card[] = [
     },
     {
         id: 'fx-punish-drip', theme: 'trial', name: 'Punish Drip (fixture)',
-        philosophicalAspect: 'mind',
+        color: 'mind',
         description: 'Test carrier: pure BACKFIRE — deny-punish drip only.',
         tier: 2, rank: 3, cardType: 'spell', targetType: 'enemy',
         paidSummary: 'Apply BACKFIRE 2 for 3 turns.',
@@ -244,7 +244,7 @@ const SURFACE_CARDS: readonly Card[] = [
     },
     {
         id: 'fx-stance-pin', theme: 'trial', name: 'Stance Pin (fixture)',
-        philosophicalAspect: 'body',
+        color: 'body',
         description: 'Test carrier: lock_stance + STAGGER — stance certainty.',
         tier: 2, rank: 4, cardType: 'spell', targetType: 'enemy',
         paidSummary: 'Lock the foe into its telegraphed stance. STAGGER 1.',

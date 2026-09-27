@@ -227,7 +227,7 @@ export function resolveLootCache(
  * the existing dialogue runtime (modeled on the `interaction` handler, but
  * with the tree authored inline on the node rather than fetched from a map
  * NPC). The shell touches no state — the dialogue runtime owns any side
- * effects (e.g. alignment shifts from authored monologue nodes).
+ * effects (e.g. a flag set by an authored monologue node).
  */
 export function resolveNarration(
     state: GameState,

@@ -37,7 +37,7 @@ const FIXTURE_BONUS_RUPTURE: Card = {
     id: 'fx-resonance-detonation',
     theme: 'rot',
     name: 'Resonance Detonation (fixture)',
-    philosophicalAspect: 'mind',
+    color: 'mind',
     description: 'Test carrier for RUPTURE with a bonusPct amplifier.',
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'enemy',
@@ -52,7 +52,7 @@ const FIXTURE_PIP_RUPTURE: Card = {
     id: 'fx-the-overtake',
     theme: 'grave',
     name: 'The Overtake (fixture)',
-    philosophicalAspect: 'body',
+    color: 'body',
     description: 'Test carrier for the pip-fed RUPTURE and its 2-pip gate.',
     tier: 2, rank: 5, cardType: 'spell',
     targetType: 'enemy',
@@ -134,7 +134,7 @@ describe('projectRuptureBurst — per-card-accurate rupture preview (phase 28)',
 });
 
 describe('Overtake 2-pip gate (phase 28)', () => {
-    // the pip-fed fixture is philosophicalAspect 'body' — powering it requires a body die.
+    // the pip-fed fixture is color 'body' — powering it requires a body die.
     const OVERTAKE = FIXTURE_PIP_RUPTURE.id;
     beforeEach(() => { registerSandboxCards([FIXTURE_PIP_RUPTURE]); });
 

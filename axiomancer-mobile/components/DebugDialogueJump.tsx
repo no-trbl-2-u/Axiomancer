@@ -6,7 +6,7 @@
  * the event slice with an `interaction` + a cursor at the tree root
  * (`openNpcDialogue`, state/dev/story-catalog.ts); `<EventGate>` pushes
  * `/dialogue`, and choices apply through the live path — quest starts,
- * taught cards, flags, alignment gates all behave as in play.
+ * taught cards, flags, quest gates all behave as in play.
  *
  * The chip id is `debug-dialogue-<map>-<npc-slug>`. Renders null
  * outside dev builds.

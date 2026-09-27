@@ -1382,7 +1382,7 @@ export function selectCombatLogHistory(state: CombatEncounterState): CombatLogHi
             case 'card-played': {
                 const card = getCardById(e.cardId);
                 const name = card?.name ?? e.cardId;
-                const color = (card && STANCE_COLORS[card.philosophicalAspect]) ?? GUARD_COLOR;
+                const color = (card && STANCE_COLORS[card.color]) ?? GUARD_COLOR;
                 push('player', color, `${name} — ${e.dieId === null ? 'FREE' : 'die-powered'}.`);
                 break;
             }

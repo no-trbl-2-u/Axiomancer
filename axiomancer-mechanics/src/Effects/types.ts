@@ -300,13 +300,6 @@ export interface Effect {
     resistedBy?: Stance;
     resistDR?: number;
     /**
-     * Phase 44 — cross-link back to the originating
-     * `PhilosophicalAlignmentCell.id` (kebab-case) for effects authored
-     * from a fallacy in the 27-cell library. Optional; only set on
-     * philosophy-sourced effects. See `docs/oaths.md`.
-     */
-    sourcedFromCell?: string;
-    /**
      * Content-provenance metadata (originally consumed by the since-retired
      * tuning `--focus` filter). `addedIn` is an ISO date (`YYYY-MM-DD`)
      * or phase tag marking when the effect was authored; `tags` are freeform

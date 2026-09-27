@@ -6,7 +6,7 @@
  *  - victory spoils are engine-owned: `endCombat('victory')`'s report
  *    carries the rolled loot + granted XP, already applied to the player;
  *  - starter cards seed an empty `knownCards` before combat starts;
- *  - level-up learn offers come alignment-gated from the engine and
+ *  - level-up learn offers come from the engine and
  *    `learnCard` grows `knownCards`.
  *
  * Legacy turn-based combat (the `state.combat` slice, its per-round

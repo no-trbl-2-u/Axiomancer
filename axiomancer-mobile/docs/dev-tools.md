@@ -87,7 +87,7 @@ read the log.** Section container ids are `dev-section-<key>`.
 
 | Leaf | Helper | What it does |
 |---|---|---|
-| `DebugStateInspector` | `state/dev/inspector.ts` → `selectInspectorSections` | Live read-only key/value view. Groups: RUN (run id, save version, rng, open session), PLAYER (level/xp/points, vitae, stats, shillings, souls, effects, moral, alignment), DECK & GEAR (known/reward cards, removals, hazard deck, dice, die gear, worn relics, inventory), WORLD (continent/map/node, node counts, maps done/open/locked, goodwill, exploited/spared), STORY (quests, journal, flags), THE APORIA (act, acts done, completed, pocket, gates, debt, waystones, boss outcomes). Tap a chip to expand a group. |
+| `DebugStateInspector` | `state/dev/inspector.ts` → `selectInspectorSections` | Live read-only key/value view. Groups: RUN (run id, save version, rng, open session), PLAYER (level/xp/points, vitae, stats, shillings, souls, effects), DECK & GEAR (known/reward cards, removals, hazard deck, dice, die gear, worn relics, inventory), WORLD (continent/map/node, node counts, maps done/open/locked, goodwill, exploited/spared), STORY (quests, journal, flags), THE APORIA (act, acts done, completed, pocket, gates, debt, waystones, boss outcomes). Tap a chip to expand a group. |
 
 ### PLAYER — `dev-section-player`
 
@@ -97,7 +97,6 @@ read the log.** Section container ids are `dev-section-<key>`.
 | `DebugPlayerTierPresets` | Rebuild at L1 / L15 / L30 / L50 via `levelLadderPresets` | `debug-player-tier-<id>` |
 | `DebugXpGrant` | +100 XP, +1000 XP, or force a LEVELUP through the engine dispatch (`state/dev/rewards.ts`) | `debug-xp-grant-button`, `debug-xp-grant-large-button`, `debug-xp-levelup-button` |
 | `DebugCurrencyControl` | +50S, +500S, BROKE (wallet to zero) | `debug-currency-{small-grant,large-grant,broke}` |
-| `DebugAlignmentShift` | ±10 on epistemology / outlook / scope; ±25 on the moral meter | `debug-align-<axis>-{plus,minus}`, `debug-moral-{plus,minus}` |
 | `DebugEffectApply` | One chip per buff/debuff in `effectsLibrary` (engine `applyEffect`); CLEAR | `debug-effect-<id>`, `debug-effect-clear` |
 
 ### DECKS & ITEMS — `dev-section-decks`

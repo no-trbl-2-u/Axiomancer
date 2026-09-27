@@ -66,36 +66,22 @@ describe('nf-12 "The Crowning Witnessed"', () => {
         ['witnessed', 'boy-witnessed-the-crowning'],
         ['ignored', 'boy-ignored-the-crowning'],
         ['marked', 'boy-marked-the-crowning'],
-    ])('setting choice leading to %s sets flag %s, advances to a leaf, and sets no moralDelta', (nextNodeId, flag) => {
+    ])('setting choice leading to %s sets flag %s, advances to a leaf, and advances', (nextNodeId, flag) => {
         const payload = nf12Payload();
         const tree = payload.dialogue;
         const root = tree.nodes[tree.rootId]!;
         const choice = root.choices!.find(c => c.nextNodeId === nextNodeId)!;
         expect(choice).toBeDefined();
-        expect(choice.effect?.moralDelta).toBeUndefined();
 
         const state = createNewGameState();
         expect(state.flags).not.toContain(flag);
-        const before = state.moralMeter;
 
         const result = applyDialogueChoice(state, tree, choice);
         expect(result.gameState.flags).toContain(flag);
-        expect(result.gameState.moralMeter).toBe(before);
 
         const nextNode: DialogueNode = tree.nodes[choice.nextNodeId!]!;
         expect(nextNode.choices).toBeUndefined(); // each outcome is a leaf
         expect(nextNode.text.length).toBeGreaterThan(0);
     });
 
-    it('the "mark the spot" branch nudges scope alignment — a worldview move, not a virtue', () => {
-        const payload = nf12Payload();
-        const tree = payload.dialogue;
-        const root = tree.nodes[tree.rootId]!;
-        const marked = root.choices!.find(c => c.nextNodeId === 'marked')!;
-
-        const state = createNewGameState();
-        const before = state.philosophicalAlignment.scope;
-        const result = applyDialogueChoice(state, tree, marked);
-        expect(result.gameState.philosophicalAlignment.scope).toBe(before + 1);
-    });
 });

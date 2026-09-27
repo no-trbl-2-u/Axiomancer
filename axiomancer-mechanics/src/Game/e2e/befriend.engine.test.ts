@@ -9,7 +9,7 @@
  *   - xpBonus adds to `report.xpGained` on top of Phase 36 half-XP (D5)
  *   - narrative surfaces on `report.friendshipReward.narrative` (D7)
  *
- * Phase 36 mechanics (half-XP base, +1 moralMeter) are preserved.
+ * Phase 36 mechanics (half-XP base) are preserved.
  *
  * Combat is now decoupled from the store: `endCombat(outcome)` takes the
  * resolved outcome directly (the Hazard-Pattern engine decides eligibility
@@ -22,7 +22,7 @@ import {
     LittleBelle, WaterHolger, GraveLarva, KingOfRevenge,
     BrineHag, TheFerryman, HasshakuSama, FateSpinner,
 } from '../../Enemy/enemy.library';
-import { createGameStore, selectMoralMeter } from '../store';
+import { createGameStore } from '../store';
 import { nullAdapter } from '../persistence/null.adapter';
 
 describe('Phase 60 — befriendable-enemy content arc', () => {
@@ -30,7 +30,6 @@ describe('Phase 60 — befriendable-enemy content arc', () => {
         const store = createGameStore(nullAdapter);
         store.getState().startCombat(LittleBelle);
 
-        const initialMeter = selectMoralMeter(store.getState());
         const report = store.getState().endCombat('friendship');
 
         expect(report.outcome).toBe('friendship');
@@ -41,8 +40,6 @@ describe('Phase 60 — befriendable-enemy content arc', () => {
         expect(report.xpGained).toBe(30);
         // Narrative — pulls from the authored string in enemy.library.ts.
         expect(report.friendshipReward?.narrative).toMatch(/bell/);
-        // Phase 36 base still fires: +1 moralMeter shift.
-        expect(selectMoralMeter(store.getState())).toBe(initialMeter + 1);
     });
 
     it('WaterHolger friendship grants 2 phials + xpBonus 15 + watch-stood narrative', () => {
@@ -164,73 +161,10 @@ describe('Phase 68 — King of Revenge BefriendabilityConfig integration', () =>
     });
 });
 
-describe('Phase 69 — FriendshipReward.alignmentDelta', () => {
-    it('applies the per-enemy alignmentDelta to state.philosophicalAlignment on friendship', () => {
-        const store = createGameStore(nullAdapter);
-        store.getState().startCombat(LittleBelle);
-        const before = store.getState().philosophicalAlignment;
-        const report = store.getState().endCombat('friendship');
-
-        expect(report.outcome).toBe('friendship');
-        const belleDelta = LittleBelle.friendshipReward?.alignmentDelta;
-        if (!belleDelta) {
-            throw new Error('Phase 69 test premise: LittleBelle must carry alignmentDelta');
-        }
-        const expected = {
-            epistemology: clamp(before.epistemology + (belleDelta.epistemology ?? 0)),
-            outlook: clamp(before.outlook + (belleDelta.outlook ?? 0)),
-            scope: clamp(before.scope + (belleDelta.scope ?? 0)),
-        };
-        expect(store.getState().philosophicalAlignment).toEqual(expected);
-        expect(report.friendshipReward?.alignmentShift).toEqual(expected);
-    });
-
-    it('does NOT shift alignment on victory even when the enemy carries alignmentDelta', () => {
-        const store = createGameStore(nullAdapter);
-        store.getState().startCombat(LittleBelle);
-        const before = store.getState().philosophicalAlignment;
-        const report = store.getState().endCombat('victory');
-
-        expect(report.outcome).toBe('victory');
-        expect(store.getState().philosophicalAlignment).toEqual(before);
-        expect(report.friendshipReward).toBeUndefined();
-    });
-
-    it('clamps each axis to [-100, +100] at the eligibility check', () => {
-        const store = createGameStore(nullAdapter);
-        // Pre-load the player near the +100 ceiling on outlook so the
-        // delta exercises the clamp.
-        store.getState().shiftPhilosophicalAlignment({ outlook: 100 });
-        const cap = store.getState().philosophicalAlignment.outlook;
-        expect(cap).toBe(100);
-
-        store.getState().startCombat(LittleBelle);
-        const report = store.getState().endCombat('friendship');
-
-        expect(report.outcome).toBe('friendship');
-        // outlook would have overshot 100 + positive delta; clamp pins it at 100.
-        expect(store.getState().philosophicalAlignment.outlook).toBeLessThanOrEqual(100);
-        expect(report.friendshipReward?.alignmentShift?.outlook).toBeLessThanOrEqual(100);
-    });
-
-    it('omits friendshipReward.alignmentShift when the enemy has no alignmentDelta', () => {
-        const store = createGameStore(nullAdapter);
-        store.getState().startCombat(GraveLarva);
-        const report = store.getState().endCombat('friendship');
-
-        expect(report.outcome).toBe('friendship');
-        // GraveLarva carries no friendshipReward at all; alignmentShift should
-        // remain undefined.
-        expect(report.friendshipReward).toBeUndefined();
-    });
-});
-
 describe('Phase 70 — King of Revenge boss-tier friendshipReward (full Phase 60+62+68+69 stack)', () => {
-    it('threads items + xpBonus + narrative + alignmentShift + flagSet on the friendship path', () => {
+    it('threads items + xpBonus + narrative + flagSet on the friendship path', () => {
         const store = createGameStore(nullAdapter);
         store.getState().startCombat(KingOfRevenge);
-        const beforeAlignment = store.getState().philosophicalAlignment;
-        const initialMeter = selectMoralMeter(store.getState());
 
         const report = store.getState().endCombat('friendship');
         expect(report.outcome).toBe('friendship');
@@ -250,20 +184,8 @@ describe('Phase 70 — King of Revenge boss-tier friendshipReward (full Phase 60
         expect(report.friendshipReward?.narrative).toMatch(/grievance/);
         expect(report.friendshipReward?.narrative).toMatch(/crown/);
 
-        // alignmentShift — { outlook: +3, scope: -2 } applied via clamp.
-        const expectedAlignment = {
-            epistemology: beforeAlignment.epistemology,
-            outlook: beforeAlignment.outlook + 3,
-            scope: beforeAlignment.scope - 2,
-        };
-        expect(report.friendshipReward?.alignmentShift).toEqual(expectedAlignment);
-        expect(store.getState().philosophicalAlignment).toEqual(expectedAlignment);
-
         // flagSet — Phase 62 convention; downstream content can gate on the flag.
         expect(store.getState().flags).toContain('befriended-king-of-revenge');
-
-        // Phase 36 baseline still fires — moral meter +1.
-        expect(selectMoralMeter(store.getState())).toBe(initialMeter + 1);
     });
 
     it('does NOT thread the friendshipReward content on victory outcome', () => {
@@ -333,6 +255,3 @@ describe('Phase 102 — Befriendable-enemy Tier-2 expansion', () => {
     });
 });
 
-function clamp(v: number): number {
-    return Math.max(-100, Math.min(100, v));
-}

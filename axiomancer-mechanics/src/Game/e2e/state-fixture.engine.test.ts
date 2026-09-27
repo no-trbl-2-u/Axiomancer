@@ -93,17 +93,13 @@ describe('buildStateFromFixture', () => {
         expect(new Set(p.knownCards).size).toBe(p.knownCards.length);
     });
 
-    it('clamps health to maxHealth and alignment to ±100', () => {
+    it('clamps health to maxHealth', () => {
         const state = buildStateFromFixture({
             id: 'clamp',
             seed: 2,
             player: { health: 99999 },
-            alignment: { epistemology: 500, scope: -500 },
         });
         expect(state.player.health).toBe(state.player.maxHealth);
-        expect(state.philosophicalAlignment.epistemology).toBe(100);
-        expect(state.philosophicalAlignment.scope).toBe(-100);
-        expect(state.philosophicalAlignment.outlook).toBe(0);
     });
 
     it('world placement unlocks the map, stamps completed maps, and marks the node live', () => {
@@ -122,12 +118,11 @@ describe('buildStateFromFixture', () => {
         expect(currentMap.discoveredNodes).toContain('nf-8');
     });
 
-    it('flags append without duplicates; moralMeter assigns', () => {
+    it('flags append without duplicates', () => {
         const base = buildStateFromFixture({ id: 'base', seed: 4 });
-        const withFlags = buildStateFromFixture({ id: 'flags', seed: 4, flags: [base.flags[0]!, 'x-flag', 'x-flag'], moralMeter: -30 });
+        const withFlags = buildStateFromFixture({ id: 'flags', seed: 4, flags: [base.flags[0]!, 'x-flag', 'x-flag'] });
         expect(withFlags.flags.filter(f => f === 'x-flag')).toHaveLength(1);
         expect(withFlags.flags.filter(f => f === base.flags[0])).toHaveLength(1);
-        expect(withFlags.moralMeter).toBe(-30);
     });
 
     it('boots a store through createGameStore as full overrides', () => {
@@ -149,7 +144,6 @@ describe('validateStateFixture', () => {
         player: { level: 0, baseStats: { heart: 'x' } },
         world: { continent: 'coastal-continent', map: 'fishing-village', node: 'zz-99', completedMaps: ['nowhere'] },
         flags: 'oops',
-        alignment: { outlook: 'high' },
         arrive: 'yes',
     };
 
@@ -163,7 +157,6 @@ describe('validateStateFixture', () => {
             expect.stringContaining("world.node: 'zz-99'"),
             expect.stringContaining("world.completedMaps: unknown map"),
             expect.stringContaining('flags:'),
-            expect.stringContaining('alignment.outlook'),
             expect.stringContaining('arrive:'),
         ]));
         expect(() => validateStateFixture(bad)).toThrow(StateFixtureError);

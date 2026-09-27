@@ -133,7 +133,7 @@ describe('combat-encounter screen — the enemy plays its card back at you', () 
 });
 
 // The dev sandbox route hands the panel no `onWithdraw` — retreat is a live-map
-// concern (it costs morale on the real run), so the sandbox must not offer it.
+// concern (it forfeits a real map node), so the sandbox must not offer it.
 describe('combat-encounter screen — retreat is a live-map affordance only', () => {
     it('the dev route\'s reveal offers no WITHDRAW', () => {
         mount();

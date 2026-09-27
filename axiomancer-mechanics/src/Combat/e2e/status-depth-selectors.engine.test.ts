@@ -265,7 +265,7 @@ describe('card engine — every combat-engine-owned mechanic kind is a NO-OP thr
         it(`'${mech.kind}' leaves caster/target HP + effects unchanged`, () => {
             const card: Card = {
                 id: 'test-mech-card', name: 'Test Mechanic',
-                philosophicalAspect: 'body', description: 'x', tier: 1,
+                color: 'body', description: 'x', tier: 1,
                 targetType: 'enemy', rank: 1, cardType: 'spell',
                 specialMechanics: [mech],
             };

@@ -19,7 +19,6 @@ import {
     defaultSellPrice as engineDefaultSellPrice,
     applyGoodwillDiscount,
     buildCharacterFromPreset,
-    defaultAlignment,
     getAvailableCards,
     learnCard as engineLearnCard,
     changeMap as worldChangeMap,
@@ -56,7 +55,6 @@ import {
     type Item,
     type MapName,
     type MapState,
-    type PhilosophicalAlignment,
     type ResolveMapEventResult,
     type Card,
     type WorldState,
@@ -242,8 +240,8 @@ export interface AppActions {
     beginHazardEncounter: () => Enemy | null;
     /**
      * Phase 78 — returns the engine `CombatEndReport` (was `void`).
-     * Callers that need post-combat metadata (codex unlock, alignment
-     * shift, narrative) read it off the return value; legacy callers
+     * Callers that need post-combat metadata (codex unlock, narrative)
+     * read it off the return value; legacy callers
      * that ignore the return value remain compatible.
      */
     /**
@@ -392,8 +390,8 @@ export interface AppActions {
     pickEventChoice: (choiceId: string) => void;
     /**
      * Withdraw from an encounter already entered (the combat reveal's
-     * WITHDRAW). Pays the non-boss retreat cost — -2 grace + its toast —
-     * without requiring a pending event slice, which `beginHazardEncounter`
+     * WITHDRAW). Toasts the retreat — it costs nothing since the morale
+     * meter was removed (D39) — without requiring a pending event slice, which `beginHazardEncounter`
      * has already cleared by then. Only offered where retreat is allowed;
      * boss encounters never surface it.
      */
@@ -564,7 +562,7 @@ export interface AppActions {
     /**
      * Rolls up to `count` (default 3) level-up card offers from
      * everything the player currently qualifies for (engine
-     * `getAvailableCards`, alignment-gated). Empty = nothing new to
+     * `getAvailableCards`, ungated). Empty = nothing new to
      * learn; the caller skips the modal.
      */
     getLearnableCardOffers: (count?: number) => LearnableCardOffer[];
@@ -594,15 +592,11 @@ export interface UseItemResult {
  * not deduplicated), so `ensureStarterCards` writes the recipe directly
  * rather than `engineLearnCard`-ing a Set — a learn-requirement gate has no
  * business touching cards the world hands every player on day one.
+ *
+ * Seeds the starter deck when the player knows nothing yet — the chosen
+ * starter bundle if one was picked (the dev deck-swap menu only, post-104 —
+ * the fresh-run flow never offers a picker), else the grey office.
  */
-function currentAlignment(store: AppStore): PhilosophicalAlignment {
-    const state = store.getState() as unknown as GameState;
-    return state.philosophicalAlignment ?? defaultAlignment();
-}
-
-/** Seeds the starter deck when the player knows nothing yet — the chosen
- *  starter bundle if one was picked (the dev deck-swap menu only, post-104 —
- *  the fresh-run flow never offers a picker), else the grey office. */
 function ensureStarterCards(store: AppStore): void {
     const player = store.getState().player;
     if (!player || (player.knownCards?.length ?? 0) > 0) return;
@@ -643,7 +637,7 @@ function toLearnableOffer(store: AppStore, card: Card): LearnableCardOffer {
         id: card.id,
         name: card.name.toUpperCase(),
         description: card.description,
-        stance: card.philosophicalAspect,
+        stance: card.color,
         tier: card.tier,
         effectText: combatCard
             ? cardEffectText(combatCard, damage)
@@ -654,7 +648,7 @@ function toLearnableOffer(store: AppStore, card: Card): LearnableCardOffer {
 /**
  * Rolls the level-up card offers: up to `count` random picks from
  * everything the player currently qualifies for (engine
- * `getAvailableCards`, alignment-gated). Empty when nothing new is
+ * `getAvailableCards`, ungated). Empty when nothing new is
  * learnable — the caller skips the modal.
  */
 function getLearnableCardOffersAction(store: AppStore, count = 3): LearnableCardOffer[] {
@@ -733,7 +727,7 @@ export function createAppActions(store: AppStore): AppActions {
             // driven entirely by the panel's local React state — but we DO
             // stage `state.currentEncounter` via `startCombat` (Phase 54) so
             // the exit-time `endCombat` call has a real encounter to resolve
-            // rewards, flags, codex unlocks, and faction/alignment deltas
+            // rewards, flags, codex unlocks, and faction deltas
             // against instead of silently no-op'ing.
             const slice = store.getState().event;
             const pending = slice?.pending ?? null;
@@ -753,8 +747,7 @@ export function createAppActions(store: AppStore): AppActions {
             // END_COMBAT banks unspent philosophical resources onto the player
             // and folds them into the next combat's seed) — no client carry.
             // Phase 78 — surface the engine `CombatEndReport` so callers can
-            // read post-combat metadata (codex unlock, alignment shift,
-            // narrative). The engine `endCombat` now requires an explicit
+            // read post-combat metadata (codex unlock, narrative). The engine `endCombat` now requires an explicit
             // outcome; default to `'flee'` (no reward) when unspecified. It
             // returns a stub 'flee' report when called outside an encounter.
             const report = store.getState().endCombat(outcome ?? 'flee');
@@ -1699,26 +1692,22 @@ function clearEventSlice(store: AppStore): void {
 }
 
 /**
- * The price of walking away from a non-boss encounter.
- *
- * [4.5] DRIFT fix (mechanics-vs-UI audit row 10): the retreat chrome reads
- * `forfeit the path · -ii grace`, so honour it — shift the engine
- * `moralMeter` by -2 and surface the cost. Boss encounters are sealed (the
+ * Walking away from a non-boss encounter. Boss encounters are sealed (the
  * retreat is never offered), so this is only ever called for a foe you were
- * allowed to leave.
+ * allowed to leave. Retreat carried a -2 grace cost until the morale meter
+ * was removed (D39); it is free now and only narrates.
  *
  * Phase 92 — flee narrative feedback: prose-style narrative in the lowercase
- * ritual register, carrying the grace cost (deep-playtest F03).
+ * ritual register (deep-playtest F03).
  */
-function applyFleeCost(store: AppStore): void {
-    store.getState().shiftMoralMeter(-2);
+function announceFlee(store: AppStore): void {
     const prev = store.getState().notifications;
     store.setState({
         notifications: {
             levelUpAcknowledged: prev?.levelUpAcknowledged ?? true,
             questAcknowledged: prev?.questAcknowledged ?? true,
             toast: {
-                text: 'you fled the encounter. the path bends away.\n\ngrace -2',
+                text: 'you fled the encounter. the path bends away.',
                 id: (prev?.toast?.id ?? 0) + 1,
             },
         },
@@ -1730,13 +1719,13 @@ function applyFleeCost(store: AppStore): void {
  * combat reveal's WITHDRAW, which replaced the old prelude modal's FLEE
  * (2026-08-10 user report: two consecutive popups asked to agree to the same
  * fight). By then `beginHazardEncounter` has already cleared the event slice,
- * so unlike `pickEventChoice('flee')` this pays the cost without needing a
+ * so unlike `pickEventChoice('flee')` this narrates the retreat without needing a
  * pending event; the slice is cleared defensively for any path that still has
  * one. The modal teardown is the caller's (the overlay's) concern.
  */
 function fleeEncounterAction(store: AppStore): void {
     try {
-        applyFleeCost(store);
+        announceFlee(store);
     } catch (error) {
         console.error('Failed to process flee action:', error);
     }
@@ -1774,7 +1763,7 @@ function pickEventChoiceAction(store: AppStore, choiceId: string): void {
             }
             if (choiceId === 'flee') {
                 try {
-                    if (!processed.isBoss) applyFleeCost(store);
+                    if (!processed.isBoss) announceFlee(store);
                     clearEventSlice(store);
                 } catch (error) {
                     console.error('Failed to process flee action:', error);

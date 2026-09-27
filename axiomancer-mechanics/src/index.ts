@@ -355,15 +355,6 @@ export type {
     SeedInput,
 } from './World';
 
-// ─── Ledger (Phase 42 cube + 27-cell registry; né Philosophy, Phase 44h) ─────
-export {
-    bucketAxis, getAlignmentCell, defaultAlignment,
-    AXIS_LOW_THRESHOLD,
-} from './Ledger';
-export type {
-    PhilosophicalAlignment,
-} from './Ledger';
-
 // ─── NPCs (types + dialogue helpers) ──────────────────────────────────────────
 export type {
     NPC, DialogueTree, DialogueNode, DialogueChoice, DialogueContext,

@@ -4,7 +4,7 @@
  * Tick A authored `kind: 'stat'`. Phase 75 authored `kind: 'effect'`,
  * `kind: 'stance-chip'`, `kind: 'card'`. All current branches read
  * engine static data; state is passed as `{}` cast to AppStoreState.
- * Later kinds (alignment, codex, slot, item-stat, …) will exercise
+ * Later kinds (codex, slot, item-stat, …) will exercise
  * live state reads.
  */
 
@@ -23,12 +23,13 @@ const EMPTY_STATE = {} as AppStoreState;
 
 describe('selectTooltipContentFor', () => {
     describe('kind: stat (Tick A authored)', () => {
-        it('returns HEART content with title, body, and footnote', () => {
+        it('returns HEART content with title and body, no grace (D39)', () => {
             const content = selectTooltipContentFor('stat', 'HEART', EMPTY_STATE);
             expect(content).not.toBeNull();
             expect(content?.title).toBe('HEART');
             expect(content?.body).toContain("will to stay");
-            expect(content?.footnote).toContain('grace');
+            expect(content?.body).not.toMatch(/grace/i);
+            expect(content?.footnote).toBeUndefined();
         });
 
         it('returns BODY content', () => {
@@ -177,45 +178,6 @@ describe('selectTooltipContentFor', () => {
         });
     });
 
-    describe('kind: alignment (Phase 74 walkthrough Tick 2; retitled Phase 44h — spec 34 §6.2)', () => {
-        it('returns content for each AlignmentAxisKey, titled CREED / AUGURY / TROTH', () => {
-            const expectedTitles: Record<'epistemology' | 'outlook' | 'scope', string> = {
-                epistemology: 'CREED',
-                outlook: 'AUGURY',
-                scope: 'TROTH',
-            };
-            for (const key of ['epistemology', 'outlook', 'scope'] as const) {
-                const content = selectTooltipContentFor('alignment', key, EMPTY_STATE);
-                expect(content).not.toBeNull();
-                expect(content?.title).toBe(expectedTitles[key]);
-                expect(typeof content?.body).toBe('string');
-                expect(typeof content?.footnote).toBe('string');
-            }
-        });
-
-        it('returns null for an unknown alignment id', () => {
-            expect(selectTooltipContentFor('alignment', 'whatever', EMPTY_STATE)).toBeNull();
-        });
-
-        it('returns null for an empty alignment id', () => {
-            expect(selectTooltipContentFor('alignment', '', EMPTY_STATE)).toBeNull();
-        });
-
-        it('returns content for the memoir "moral" id, titled GRACE (Phase 44h)', () => {
-            const content = selectTooltipContentFor('alignment', 'moral', EMPTY_STATE);
-            expect(content?.title).toBe('GRACE');
-            expect(content?.body).toContain('mercy');
-            expect(content?.footnote).toMatch(/arrears.*grace/i);
-        });
-
-        it('returns content for the memoir "philosophical" id, titled THE BENT (Phase 44h)', () => {
-            const content = selectTooltipContentFor('alignment', 'philosophical', EMPTY_STATE);
-            expect(content?.title).toBe('THE BENT');
-            expect(content?.body).toContain('three base stats');
-            expect(content?.footnote).toContain('ties');
-        });
-    });
-
     describe('kind: stance-chip (Phase 75)', () => {
         it('returns ADVANTAGE content for id "adv"', () => {
             const content = selectTooltipContentFor('stance-chip', 'adv', EMPTY_STATE);
@@ -293,7 +255,7 @@ describe('selectTooltipContentFor', () => {
     describe('card kind threads stance accent', () => {
         it('card on body stance returns body accent', () => {
             const { cardLibrary } = require('@mechanics');
-            const bodyCard = cardLibrary.find((s: { philosophicalAspect: string }) => s.philosophicalAspect === 'body');
+            const bodyCard = cardLibrary.find((s: { color: string }) => s.color === 'body');
             if (!bodyCard) {
                 // No body-stance card in library; skip without
                 // failing — the contract is still pinned by stat

@@ -113,7 +113,7 @@ describe('stage-eligible card pools', () => {
         const early = COMBAT_STAGE_PROFILES.early;
         const fits: Card = {
             id: 'stage-test-extra-fit', name: 'Stage Test Extra',
-            philosophicalAspect: 'body', description: 'test-only card', tier: 1,
+            color: 'body', description: 'test-only card', tier: 1,
             targetType: 'enemy', rank: 1, cardType: 'spell',
         };
         const overTier: Card = { ...fits, id: 'stage-test-extra-tier3', tier: 3 };

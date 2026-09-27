@@ -51,7 +51,7 @@ function makeSeededRng(seed: number): () => number {
 }
 
 /**
- * The origin's archetype = the dominant `philosophicalAspect` across the
+ * The origin's archetype = the dominant `color` across the
  * preset's recipe (duplicates count — commons carry the deck's
  * texture). Tie precedence matches `playerArchetype` (body ≥ mind ≥ heart),
  * so the derived stat spread and the engine's derivation can never disagree.
@@ -62,7 +62,7 @@ function originArchetype(preset: CombatDeckPreset): StatType {
         const card = getCardById(id);
         // Phase 104 — campaign presets never carry a grey ('any') card; this
         // guard is a type-narrowing formality, not a real branch.
-        if (card && card.philosophicalAspect !== 'any') tally[card.philosophicalAspect]++;
+        if (card && card.color !== 'any') tally[card.color]++;
     }
     if (tally.body >= tally.heart && tally.body >= tally.mind) return 'body';
     if (tally.mind >= tally.heart && tally.mind >= tally.body) return 'mind';

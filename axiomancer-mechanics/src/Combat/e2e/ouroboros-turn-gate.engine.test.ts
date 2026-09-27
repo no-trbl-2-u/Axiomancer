@@ -50,7 +50,7 @@ afterEach(() => vi.restoreAllMocks());
 registerSandboxCards([
     {
         id: 'qa-turnabout', name: 'QA Turnabout',
-        philosophicalAspect: 'mind', description: 'carrier-less TURNABOUT fixture',
+        color: 'mind', description: 'carrier-less TURNABOUT fixture',
         tier: 3, rank: 6, cardType: 'spell', targetType: 'enemy',
         specialMechanics: [{ kind: 'turnabout', burstPerRung: 1.5 }],
     },

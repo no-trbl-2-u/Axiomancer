@@ -37,19 +37,19 @@ afterEach(() => vi.restoreAllMocks());
 registerSandboxCards([
     {
         id: 'qa-wheel-heart', name: 'QA Wheel Heart',
-        philosophicalAspect: 'heart', description: 'wheel-test heart fixture',
+        color: 'heart', description: 'wheel-test heart fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 }],
     },
     {
         id: 'qa-wheel-body', name: 'QA Wheel Body',
-        philosophicalAspect: 'body', description: 'wheel-test body fixture',
+        color: 'body', description: 'wheel-test body fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 2 }],
     },
     {
         id: 'qa-wheel-mind', name: 'QA Wheel Mind',
-        philosophicalAspect: 'mind', description: 'wheel-test mind fixture',
+        color: 'mind', description: 'wheel-test mind fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_confusion', appliedTo: 'opponent', duration: 2 }],
     },
@@ -57,7 +57,7 @@ registerSandboxCards([
     // ("FREE lines never touch momentum").
     {
         id: 'qa-wheel-free-rider', name: 'QA Wheel Free Rider',
-        philosophicalAspect: 'heart', description: 'wheel-test FREE-rider fixture',
+        color: 'heart', description: 'wheel-test FREE-rider fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 }],
         free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 } },

@@ -196,14 +196,15 @@ describe('integration: exploration + tab-bar lock survive the encounter-modal li
         expect(latestScreenOptions('character/index')?.tabBarButton).toBeUndefined();
     });
 
-    it('WITHDRAW pays the retreat cost (grace −2) even though the event slice is already cleared', () => {
+    it('WITHDRAW narrates the retreat at no grace cost (D39) even though the event slice is already cleared', () => {
         const store = makeStore();
         seedActiveEvent(store, ENCOUNTER_EVENT);
-        const before = store.getState().moralMeter;
         const tree = mountBothScreens(store);
 
         fireEvent.press(tree.getByTestId('combat-withdraw'));
 
-        expect(store.getState().moralMeter).toBe(before - 2);
+        const toast = store.getState().notifications?.toast?.text ?? '';
+        expect(toast).toContain('you fled the encounter');
+        expect(toast).not.toMatch(/grace/i);
     });
 });

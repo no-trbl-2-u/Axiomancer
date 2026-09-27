@@ -10,8 +10,6 @@
  *   applyPlayer      → `createCharacter` rebuild for level / stats, then clamps
  *   applyWorld       → `changeContinent` / `unlockMap` / `changeMap` / `completeMap` / `placeOnNode`
  *   applyFlags       → deduped append
- *   applyMoral       → assignment
- *   applyAlignment   → per-axis clamp to [-100, 100]
  *   stampRng         → `rngState` re-read after every roll above
  *
  * The one side effect is the RNG seed (the engine RNG is a process-wide
@@ -91,22 +89,6 @@ const applyWorld = (target: StateFixtureWorld | undefined) => (state: GameState)
 const applyFlags = (flags: readonly string[] | undefined) => (state: GameState): GameState =>
     flags ? { ...state, flags: dedupe([...state.flags, ...flags]) } : state;
 
-const applyMoral = (moralMeter: number | undefined) => (state: GameState): GameState =>
-    moralMeter === undefined ? state : { ...state, moralMeter };
-
-const applyAlignment = (alignment: StateFixture['alignment']) => (state: GameState): GameState => {
-    if (!alignment) return state;
-    const merged = { ...state.philosophicalAlignment, ...alignment };
-    return {
-        ...state,
-        philosophicalAlignment: {
-            epistemology: clamp(merged.epistemology, -100, 100),
-            outlook: clamp(merged.outlook, -100, 100),
-            scope: clamp(merged.scope, -100, 100),
-        },
-    };
-};
-
 /** Every builder above may roll; persist the RNG cursor last. */
 const stampRng = (state: GameState): GameState => ({ ...state, rngState: getRng().getState() });
 
@@ -127,8 +109,6 @@ export function buildStateFromFixture(fixture: StateFixture): GameState {
         applyPlayer(fixture.player),
         applyWorld(fixture.world),
         applyFlags(fixture.flags),
-        applyMoral(fixture.moralMeter),
-        applyAlignment(fixture.alignment),
         stampRng,
     )(createNewGameState());
 }

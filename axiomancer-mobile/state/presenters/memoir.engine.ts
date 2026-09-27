@@ -2,10 +2,8 @@
  * MEMOIR presenter (Phase 33 — shipped).
  *
  * Pure mapper from `GameStore` to the journal surface's view-model.
- * All four sections — chronicle, quests, moral + provisional
- * philosophical alignment — read live engine state. The
- * exemplar-quote slot stays `null` until exact alignments + a
- * quote inventory ship in a follow-up phase. See the JSDoc on
+ * Every section — chronicle, quests, remains — reads live engine
+ * state. See the JSDoc on
  * `selectMemoirViewModel` for the per-section read map and the
  * Phase 33 sub-tick history.
  *
@@ -16,7 +14,6 @@
  */
 
 import type {
-    BaseStats,
     DialogueTree,
     GameStore,
     Quest,
@@ -99,48 +96,6 @@ export interface MemoirQuestRow {
 }
 
 /**
- * Moral alignment chip — reads `state.moralMeter` via Tick C.
- * Tick A ships the `'UNDECLARED'` band as a placeholder.
- */
-export interface MoralAlignment {
-    /** Raw moral-meter value from the engine. Tick A: 0. */
-    value: number;
-    /** Display chip — band label + theme tint key. */
-    chip: { label: string; tintKey: 'blood' | 'rust' | 'bone' | 'sulfur' | 'parchment' };
-    /**
-     * `true` for the default/undeclared band; the screen renders its
-     * empty-state hint when this is set rather than pinning to the
-     * `'UNDECLARED'` label literal (which is free to be renamed in a
-     * later voice pass without breaking the conditional).
-     */
-    isEmpty: boolean;
-}
-
-/**
- * Provisional philosophical alignment — Tick C derives from the
- * highest base stat (heart > body > mind, ties → heart) and marks
- * `provisional: true`. The follow-up phase that ships real
- * alignments swaps the mapping without schema change.
- */
-export interface PhilosophicalAlignment {
-    /** Display label: 'of the Heart' / 'of the Body' / 'of the Mind' / 'UNTESTED'. */
-    label: string;
-    /** One-line rationale shown beneath the label (or empty in the untested state). */
-    rationale: string;
-    /**
-     * S8-memoir-C02: the line the screen renders beneath the chip while
-     * the measure is untested — it says WHAT the untested state means
-     * (the three base stats stand level) and HOW it resolves (the
-     * greatest of them names the bent), instead of echoing the chip's
-     * own word back at the player. Empty once `rationale` is populated,
-     * because the rationale already names the leading stat.
-     */
-    hint: string;
-    /** Always `true` until exact alignments are defined upstream. */
-    provisional: boolean;
-}
-
-/**
  * REMAINS section (Phase 6) — read-back of two previously-orphaned
  * durable records: out-of-combat death tombstones (`hazardDeathCount`,
  * unconsumed since Phase 130) and Rest/LootCache keepsake labels
@@ -185,7 +140,6 @@ export interface MemoirViewModel {
     questsActiveEyebrow: string;
     questsCompletedEyebrow: string;
     questsForgottenEyebrow: string;
-    measureEyebrow: string;
     /** REMAINS section eyebrows (Phase 6). */
     remainsEyebrow: string;
     remainsKeepsakesEyebrow: string;
@@ -199,125 +153,16 @@ export interface MemoirViewModel {
         completed: ReadonlyArray<MemoirQuestRow>;
         forgotten: ReadonlyArray<MemoirQuestRow>;
     };
-    /** Alignment readouts — Tick C populates. */
-    moralAlignment: MoralAlignment;
-    philosophicalAlignment: PhilosophicalAlignment;
-    /**
-     * Damned-exemplar quote slot (Phase 44h — né `philosopherQuote`).
-     * Renders nothing when `null` — a follow-up phase wires the lookup
-     * once exact alignments + a quote inventory are defined. Tick A
-     * through Tick D all emit `null` here.
-     */
-    exemplarQuote: string | null;
     /** REMAINS section (Phase 6) — death tally + keepsake read-back. */
     remains: MemoirRemainsViewModel;
     /** Empty-state copy lines, pinned per Phase 33 brief. */
     emptyChronicle: string;
     emptyQuests: string;
-    emptyMoral: string;
-    /**
-     * Terse untested token. Retained on the contract, but since
-     * S8-memoir-C02 the screen renders
-     * `philosophicalAlignment.hint` in this slot instead — printing
-     * `untested.` under an `UNTESTED` chip said the same word twice.
-     */
-    emptyPhilosophical: string;
     /** Phase 6 — shown when `remains.keepsakes` is empty. */
     emptyKeepsakes: string;
     /** Phase 64 — shown when `remains.goodwill` is empty. */
     emptyGoodwill: string;
 }
-
-const DEFAULT_MORAL: MoralAlignment = Object.freeze({
-    value: 0,
-    chip: Object.freeze({ label: 'INDIFFERENT', tintKey: 'bone' }),
-    isEmpty: true,
-}) as MoralAlignment;
-
-/**
- * Empty-state philosophical alignment when no stat has emerged as
- * the player's largest measure (3-way tie). The chip label sits in
- * chrome register (`UNTESTED`, all-caps, no period) so it visually
- * rhymes with the other alignment chips (IN ARREARS / INDIFFERENT /
- * IN GRACE). CRITIQUE pass 7 LOW drain split the two registers —
- * before, both strings were `'untested.'`, which read as a stray
- * narrative fragment promoted into a chrome slot.
- *
- * S8-memoir-C02: splitting the registers still left `UNTESTED` stacked
- * over `untested.` — the same word twice, teaching nothing. The chip's
- * second line is now `hint`, which names what the untested state means
- * and how it resolves. `vm.emptyPhilosophical` stays on the view-model
- * as the terse token pinned by the shape contract; the screen no
- * longer renders it.
- */
-const DEFAULT_PHILOSOPHICAL: PhilosophicalAlignment = Object.freeze({
-    label: 'UNTESTED',
-    rationale: '',
-    hint: 'heart, body and mind stand level. the greatest of the three names your bent.',
-    provisional: true,
-}) as PhilosophicalAlignment;
-
-/**
- * GRACE band lookup (Tick C; retitled + reduced to 3 bands Phase 44h
- * per spec 34 §6.1). Bands: -100..-34 IN ARREARS, -33..33 INDIFFERENT,
- * 34..100 IN GRACE — the ruling's exact thresholds (`±34`, matching
- * `bucketAxis`'s bucket boundaries elsewhere in the codebase). Pure
- * function; chip is frozen to keep referential equality stable across
- * calls with the same band (lets the screen's React.memo see a stable
- * chip reference).
- */
-const MORAL_BANDS: ReadonlyArray<{
-    min: number;
-    max: number;
-    label: string;
-    tintKey: MoralAlignment['chip']['tintKey'];
-}> = Object.freeze([
-    { min: -100, max: -34, label: 'IN ARREARS', tintKey: 'blood' },
-    { min: -33, max: 33, label: 'INDIFFERENT', tintKey: 'bone' },
-    { min: 34, max: 100, label: 'IN GRACE', tintKey: 'parchment' },
-]);
-
-const MORAL_CHIP_BY_BAND: ReadonlyMap<string, MoralAlignment['chip']> = new Map(
-    MORAL_BANDS.map(
-        (b): [string, MoralAlignment['chip']] => [
-            b.label,
-            Object.freeze({ label: b.label, tintKey: b.tintKey }) as MoralAlignment['chip'],
-        ],
-    ),
-);
-
-function buildMoralAlignment(rawValue: unknown): MoralAlignment {
-    const value: number = typeof rawValue === 'number' && Number.isFinite(rawValue) ? rawValue : 0;
-    const clamped = Math.max(-100, Math.min(100, value));
-    const band =
-        MORAL_BANDS.find((b) => clamped >= b.min && clamped <= b.max) ?? MORAL_BANDS[1];
-    const chip = MORAL_CHIP_BY_BAND.get(band.label) ?? DEFAULT_MORAL.chip;
-    return Object.freeze({
-        value: clamped,
-        chip,
-        isEmpty: band.label === DEFAULT_MORAL.chip.label,
-    }) as MoralAlignment;
-}
-
-/**
- * Provisional philosophical alignment (Tick C). Reads
- * `state.player.baseStats` (engine shape: `{ heart, body, mind }`,
- * lowercase keys per `Game/game.reducer.js:32`). Highest stat wins;
- * pairwise ties favour Heart (per brief §"Tick C"). A 3-way tie
- * returns the `UNTESTED` chip + its explanatory `hint` so the player
- * sees an empty-state chip rather than a spuriously-emitted alignment.
- */
-const PHILOSOPHICAL_BY_STAT: Readonly<Record<'heart' | 'body' | 'mind', string>> = Object.freeze({
-    heart: 'of the Heart',
-    body: 'of the Body',
-    mind: 'of the Mind',
-});
-
-const STAT_PROPER_NAME: Readonly<Record<'heart' | 'body' | 'mind', string>> = Object.freeze({
-    heart: 'Heart',
-    body: 'Body',
-    mind: 'Mind',
-});
 
 /**
  * Tick D: chronicle mapper. Reads `state._recentEvents` (Phase 25
@@ -466,40 +311,6 @@ function buildChronicle(rawEvents: unknown): ReadonlyArray<ChronicleEntry> {
     return Object.freeze(capped) as readonly ChronicleEntry[];
 }
 
-/**
- * Purpose: derive the MEASURE screen's provisional philosophical chip
- * (label + second line) from the player's base stats.
- * Input: `stats` — the engine's `BaseStats` (`{heart, body, mind}`), or
- * `undefined` before a player exists.
- * Output: a frozen `PhilosophicalAlignment`. When one stat leads, the
- * chip names the bent and `rationale` explains which stat earned it
- * (`hint` is then empty). On a 3-way tie it returns
- * `DEFAULT_PHILOSOPHICAL` — the `UNTESTED` chip whose `hint` explains
- * what untested means and what resolves it.
- * Resolves: S8-memoir-C02 (the chip's second line repeated the label).
- */
-function buildPhilosophicalAlignment(stats: BaseStats | undefined): PhilosophicalAlignment {
-    // Engine `BaseStats` declares `heart/body/mind: number` as required;
-    // the `Number.isFinite` guard stays as defense against NaN /
-    // Infinity that a downstream effect might inject before the
-    // memoir reads here.
-    const heart = stats && Number.isFinite(stats.heart) ? stats.heart : 0;
-    const body = stats && Number.isFinite(stats.body) ? stats.body : 0;
-    const mind = stats && Number.isFinite(stats.mind) ? stats.mind : 0;
-    // 3-way tie → untested
-    if (heart === body && body === mind) return DEFAULT_PHILOSOPHICAL;
-    // Pairwise tie-break favours Heart per brief
-    const max = Math.max(heart, body, mind);
-    const winner: 'heart' | 'body' | 'mind' =
-        heart === max ? 'heart' : body === max ? 'body' : 'mind';
-    return Object.freeze({
-        label: PHILOSOPHICAL_BY_STAT[winner],
-        rationale: `${STAT_PROPER_NAME[winner]} is your largest measure (${max}).`,
-        hint: '',
-        provisional: true,
-    }) as PhilosophicalAlignment;
-}
-
 const DEFAULT_REMAINS: MemoirRemainsViewModel = Object.freeze({
     deathCount: 0,
     deathLine: 'you have not yet fallen.',
@@ -517,7 +328,6 @@ const FALLBACK_VM: MemoirViewModel = Object.freeze({
     questsActiveEyebrow: '✠ AT HAND',
     questsCompletedEyebrow: '✠ COMPLETED',
     questsForgottenEyebrow: '✠ FORGOTTEN',
-    measureEyebrow: '✠ MEASURE',
     remainsEyebrow: '✠ REMAINS',
     remainsKeepsakesEyebrow: '✠ KEEPSAKES',
     remainsGoodwillEyebrow: '✠ GOODWILL',
@@ -527,14 +337,9 @@ const FALLBACK_VM: MemoirViewModel = Object.freeze({
         completed: Object.freeze([]) as ReadonlyArray<MemoirQuestRow>,
         forgotten: Object.freeze([]) as ReadonlyArray<MemoirQuestRow>,
     }) as MemoirViewModel['quests'],
-    moralAlignment: DEFAULT_MORAL,
-    philosophicalAlignment: DEFAULT_PHILOSOPHICAL,
-    exemplarQuote: null,
     remains: DEFAULT_REMAINS,
     emptyChronicle: 'the page is bare.',
     emptyQuests: 'no errands written here.',
-    emptyMoral: 'the scales are level.',
-    emptyPhilosophical: 'untested.',
     emptyKeepsakes: 'nothing kept.',
     emptyGoodwill: 'nothing given.',
 }) as MemoirViewModel;
@@ -782,7 +587,7 @@ function buildRemains(
 
 /**
  * Pure mapper from game state → `MemoirViewModel`. Builds the full
- * journal surface — header, chronicle, quests, alignment readouts —
+ * journal surface — header, chronicle, quests, remains —
  * off the engine state in one pass.
  *
  * Each section reads from a distinct slice:
@@ -797,16 +602,6 @@ function buildRemains(
  *   just the name). `forgotten` stays empty — the engine has no
  *   failed-quest concept today; the field is reserved for future
  *   expansion without forcing a schema change.
- * - **Moral alignment** — reads `state.moralMeter` (number in
- *   [-100, 100]) and buckets into one of five bands per
- *   `MORAL_BANDS` (RUTHLESS / STERN / UNDECLARED / BENEVOLENT /
- *   SAINTLY) with a tint-key for the chip.
- * - **Philosophical alignment** — provisional heuristic that reads
- *   `state.player.baseStats` and picks the highest of
- *   `{ heart, body, mind }`. Pairwise ties favour Heart; 3-way tie
- *   returns the documented `UNTESTED` chip, whose `hint` explains what
- *   the untested state means and what resolves it (S8-memoir-C02).
- *   `provisional: true` until exact alignments are defined upstream.
  * - **Chronicle** — reads `state._recentEvents` (Phase 25 ring
  *   buffer, capacity 20) and folds typed events into reverse-
  *   chronological `ChronicleEntry` rows via `buildChronicle`. Combat
@@ -816,9 +611,6 @@ function buildRemains(
  *   event kinds are skipped per the brief. Capped at
  *   `CHRONICLE_VISIBLE_CAP` (12) rows; the screen scrolls if more
  *   exist.
- * - **Philosopher quote** — currently always `null`. A follow-up
- *   phase wires the lookup once exact alignments + a quote inventory
- *   are defined.
  * - **Remains** (Phase 6; Phase 32 part 1b) — reads `state.flags` (engine
  *   `GameState.flags`). Death tally via the previously-unconsumed
  *   `hazardDeathCount`; keepsakes merge Rest's `night-keepsake:` and
@@ -840,15 +632,15 @@ function buildRemains(
  * - Tick A `6515cb5` — route + skeleton VM + empty fixtures.
  * - Tick B `2f70eac` — quests section reads `state.quests`.
  * - Tick C `6105b90` — moral bands + provisional philosophical
- *   alignment from `baseStats`.
+ *   alignment from `baseStats` (both removed with the alignment
+ *   system, D39).
  * - Tick D `9ccdee2` — chronicle from `_recentEvents`.
  */
 export function selectMemoirViewModel(state: MemoirStateInput): MemoirViewModel {
     // Memoir-audit [2.5] fix 2026-05-22: typed `state` as
     // `MemoirStateInput` (GameStore + optional `_recentEvents`)
     // instead of `GameStore` with `(state as any)` casts. Engine
-    // `GameState.quests: QuestLog` and `GameState.moralMeter:
-    // number` are typed cleanly on `GameStore`; the
+    // `GameState.quests: QuestLog` is typed cleanly on `GameStore`; the
     // `_recentEvents` ring buffer is mobile-private (Phase 25)
     // so we extend with the optional field. Tests that pass an
     // engine `GameStore` (no mobile slices) still work — the
@@ -861,8 +653,6 @@ export function selectMemoirViewModel(state: MemoirStateInput): MemoirViewModel 
     const log: QuestLog | undefined = state.quests;
     const active = buildActiveRows(log?.active);
     const completed = buildCompletedRows(log?.completed);
-    const moralAlignment = buildMoralAlignment(state.moralMeter);
-    const philosophicalAlignment = buildPhilosophicalAlignment(player?.baseStats);
     const chronicle = buildChronicle(state._recentEvents);
     const remains = buildRemains(state.flags, player?.bankedSouls, state.mapGoodwill);
     return freezeViewModel({
@@ -874,8 +664,6 @@ export function selectMemoirViewModel(state: MemoirStateInput): MemoirViewModel 
             completed,
             forgotten: Object.freeze([]) as readonly MemoirQuestRow[],
         },
-        moralAlignment,
-        philosophicalAlignment,
         remains,
     });
 }

@@ -37,7 +37,7 @@ import type { CardTheme } from '@mechanics/Cards/card-themes';
 export interface CardDraft {
     id: string;
     name: string;
-    philosophicalAspect: CardAspect;
+    color: CardAspect;
     description: string;
     tier: CardTier;
     targetType: CardTarget;
@@ -80,7 +80,7 @@ export function blankCard(): CardDraft {
     return {
         id: '',
         name: '',
-        philosophicalAspect: 'body',
+        color: 'body',
         description: '',
         tier: 1,
         targetType: 'enemy',
@@ -109,7 +109,7 @@ export function toDraft(card: Card): CardDraft {
     return {
         id: card.id,
         name: card.name,
-        philosophicalAspect: card.philosophicalAspect,
+        color: card.color,
         description: card.description,
         tier: card.tier,
         targetType: card.targetType,
@@ -140,7 +140,7 @@ export function fromDraft(draft: CardDraft): Card {
     const card: Card = {
         id: draft.id.trim(),
         name: draft.name.trim(),
-        philosophicalAspect: draft.philosophicalAspect,
+        color: draft.color,
         description: draft.description,
         tier: draft.tier,
         targetType: draft.targetType,

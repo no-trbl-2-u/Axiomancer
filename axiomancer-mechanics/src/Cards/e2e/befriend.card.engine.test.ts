@@ -22,7 +22,7 @@ import { createEnemy } from '../../Enemy';
 const befriendCard: Card = {
     id: 'fix-befriend',
     name: 'Fixture Befriend',
-    philosophicalAspect: 'heart',
+    color: 'heart',
     description: 'An open hand (fixture).',
     tier: 1,
     rank: 1,
