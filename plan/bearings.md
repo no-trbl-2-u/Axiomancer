@@ -306,8 +306,9 @@ ambiguity.)
   (reachability, duplication, domination, wiring honesty) — never the
   repealed CQI/win-rate machinery, and there is no runtime telemetry
   to consult.
-- **Copy canon:** VITAE, STANCE, GRACE (né MORALE, spec 34 §5.6 / Phase
-  44h). Never HEALTH / GUARD / MORALE.
+- **Copy canon:** VITAE, STANCE. Never HEALTH / GUARD (as the stance
+  name) / MORALE. GRACE (né MORALE, Phase 44h) was removed in T6 (D39,
+  2026-09-27).
 - **Content location:** engine content in mechanics `src/*`
   libraries; player-facing strings in mobile presenters /
   `*.copy.ts`; no hardcoded copy in components; no hex literals
