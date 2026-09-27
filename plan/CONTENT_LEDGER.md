@@ -18,13 +18,52 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-26 | bb0f2928 | 20 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-27 | d54e85b2 | 21 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-26 | 3136aacf | 20 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-27 | 985f87c1 | 21 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-26 | 2b289bb2 | 19 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-27 | c250a53c | 20 |
 
 ## Log
 
 ```
+> **[adjust-enemies pass 21, 2026-09-27, base 985f87c1]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE. `/march` dispatched this through Step 3b. No
+> unlabeled issues or `loop:do`, and critique wasn't due (11 commits, ~12h
+> since pass 56). No `[ ]` phase rows: S3 and P1 are blocked for T. The
+> growth floor was clear (M4 `571d5b3f`). With cards and keywords on THE
+> CARD HOLD, `enemies` (`3136aacf`, 38 commits, ~24h) was stalest, ahead
+> of `npcs` and `equipment` (both today). No verify run is red on main.
+>
+> **Step 1, re-derived from the live registry** (a ts-node pass over
+> `EnemiesByMap` / `ENEMY_REGISTRY`). 14 pools now: M3c and M3d added
+> `beacon-crags` and `lantern-deep`, both on `CAVERNS_POOL` (16). 79
+> registry entries. The only orphans are still `sandbag` (test fixture)
+> and `the-incompleteness` (never pooled, by design). Zero duplicate
+> portraits. Since `3136aacf` the library changed only in comments, the
+> `lantern-deep` key, and D33's King of Revenge line ("off the harbour
+> wall"); M3d's 7.5k-line diff is line-ending churn (`git diff -w` shows 5
+> lines). No commit touched `src/Cards`, `src/Items` or `loot.ts`, so pass
+> 20's deck-law, keyword-kind and loot checks stand. Archaic-pronoun hits: 0.
+>
+> **New cross-surface check: Act 1's pinned fights.** All 7 distinct
+> `enemySlug`s in `MapEvents/content.ts` resolve. D30's one-elite-per-region
+> rule is pinned for all four Act 1 maps by `World/e2e/act1-elites.engine.test.ts`
+> (the Lantern Deep included). The pinned fights repeat in two places:
+> 5 of the Breakwater's foes return in fishing-village (Act 1's first and last
+> maps), and the Crags and the Deep share 3 (tri-eyes, vampire-thrall,
+> ninth-rung-spider). Both are D29 as written: the coast borrows
+> fishing-village's pool and the mountains and underworld borrow caverns'.
+> Re-pinning is World-surface work that T reviewed in the M3 PRs, and D35
+> already queues fishing-village's retune from measurement. So this is
+> logged, not filed. It is the first thing the D1 step-4 roster revamp
+> should fix.
+>
+> **Step 1b widened KB check:** `kb_search` for repetition and variety
+> complaints. `forgotten-waters/reception/better-if.okf.md` ("less
+> repetitive or more consequential") joins pass 20's Heroes of Terrinoth
+> and Aeons End receipts. It adds nothing D29 hasn't already scheduled.
+>
+> Verify: no source changed (ledger-only commit).
+
 > **[adjust-equipment pass 21, 2026-09-27, base d54e85b2]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE. One finding filed rather than shipped.
 > `/march` dispatched this through Step 3b. No unlabeled issues or `loop:do`,
