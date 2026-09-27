@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-09-27 at commit 16fb2990
-> Pass count: 56
+> Last pass: 2026-09-27 at commit 409b72bf
+> Pass count: 57
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -103,6 +103,27 @@
 > tell (pass 54, Pending), the DoT chip mid-token wrap (pass 49,
 > Pending; desktop "POIS"/"8/p"/"ay"), and the relic "Grants X" echo
 > (Pending).
+
+> **[critique pass 57, 2026-09-27, commit 409b72bf] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route still bounces to the title with no save; the
+> fixture-booted late-game hub covers that screen). 14 commits after pass
+> 56. Only M4 (the Lantern Deep's vault door into the Aporia) touched
+> product. The rest were M5's map docs, the stat-model plan (D39-D42),
+> three zero-diff steward passes, a digest and a baseline re-stamp. The
+> Aporia door is not in the screen set, and none of the 11 screens shows a
+> regression. Checked and not filed: the combat preview's five
+> identically labelled "PHASE N · SURGES" rows are the Brine Hag's real
+> sequence, not a render bug. The late-game hub's GRACE meter is not
+> filed either, because T6 removes GRACE (D39). The mobile hand fan's
+> "CHILBLA IN ..." wrap is the ratified two-line-then-ellipsis rule
+> (Done, burn-day 3.13). Reconfirmed and not re-filed: the six hazard
+> intros' "he"/"his" (pass 56, Pending), fishing-village's "breakwater"
+> lines (pass 55, Pending), the doubled opening tell (pass 54, Pending),
+> the DoT chip mid-token wrap (pass 49, Pending; desktop "Dea"/"14",
+> "POIS"/"8/p"/"ay"), and the relic "Grants X" echo (Pending). Zero fresh
+> findings this pass.
 
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `plan/archive/CRITIQUE_2026.md`.
 
