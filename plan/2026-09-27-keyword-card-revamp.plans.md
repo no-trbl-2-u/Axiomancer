@@ -155,13 +155,51 @@ Before any type is wired, answer in writing:
 5. **What does it cost the face and the editor?** List the files. Paper or
    sandbox it before any of them change (§6 C3–C4).
 
-Candidate shapes to *evaluate* (not adopt) come from the corpora in §6:
-Dawncaster's categories (Action, Enchantment, Form, Basic Attack, Equipment,
-Affix, Revelation, Artifact, Path, Item) and Slay the Spire's five (Attack,
-Skill, Power, Status, Curse) — plus the shapes this engine already half-owns:
-haunts, allies, the relic-granted card, die growth (D20) and card upgrades
-(D8). Confidence that at most one new type earns its place in the first pool:
-70.
+### 5.1 Candidate shapes — an inventory to evaluate, not a list to adopt
+
+Sources: Dawncaster's categories (Action, Enchantment, Form, Basic Attack,
+Equipment, Affix, Revelation, Artifact, Path, Item; `kb:dawncaster` card
+records, `category:` field), Slay the Spire's five (Attack, Skill, Power,
+Status, Curse), Monster Train 2 (Equipment, Room), Wildfrost (clunkers),
+Astrea (risk-tiered dice), and the shapes this engine already half-owns.
+Each row names the rule that would be the type's own (§5 q1), the engine
+hook it would ride, and how it fares against the test *today*. Verdicts are
+inferences (confidence in the last column); the guided session decides.
+
+| Shape | Prior art | The rule that would be its own | Existing hook | Against §5 | Conf. |
+|---|---|---|---|---|---|
+| **Persistent passive** | StS Power, Dawncaster Enchantment | Lifetime: rest of fight, leaves the cycle | Already `oath` (on you) / `hex` (on the foe) | Exists. Any "power" idea is an oath or a hex, not a type | 95 |
+| **Form / stance** | Dawncaster Form, StS stances (Watcher) | Exclusive slot: one Form at a time, replacing the last; changes a *rule* (which die colour matches, what FREE lines do) rather than adding a number | The tray's colour-match step (`cardStanceColor`), `color` on cards | Strongest candidate: no oath expresses "replace the previous one" or "rewrite the match rule". Needs a face marker and one slot in combat state | 65 |
+| **Attachment** | MT2 Equipment (to a unit) / Room (to a floor), Dawncaster Equipment | Zone: attaches to a target that isn't the player or the foe — here the only such target is a **die** or a **tray slot**; limit one per target | `Combat/combat.dice.ts` reserve + slots; the relic-granted card path | Viable only if dice become a zone worth building on (D20). Otherwise a keyword on a spell ("your body die gains …") | 55 |
+| **Consumable / one-use** | Dawncaster Item, StS Exhaust, MT consumables | Lifetime: removed from the deck after one play (this run, not this fight) | Cache offers, `card.removal.ts` | Fails q1 as a type: a keyword (a BURN-the-card verb) on a spell does it. Fails q4 unless rewards can offer it separately | 75 |
+| **Path / self-upgrading card** | Dawncaster Path I→II→III, StS upgrades (+) | Lifetime across plays: the card *becomes* its next stage | `card-upgrades.ts` (D8, held for this rework) | Not a type: D8 decides the grant path; the same card id with `upgradeLevel`. Evaluate at A5 / B5 / C4 with D8 | 80 |
+| **Affix / modifier** | Dawncaster Affix, Revelation | Attaches to *another card* in the deck | None; the editor has no card-on-card reference | Fails q4–q5 hard (a new zone in deck state, a face for the host). Defer past the first pool | 85 |
+| **Summon / ally** | Dawncaster Monster, MT units, StS orbs | A second combatant with its own VITAE that acts in the threat phase | Allies exist, typed `oath`, unscored (`cards.allies.ts`); enemy SUMMON exists | Half-exists. The question is whether allies need their own type to be *targetable* (q1) — today they don't. Re-examine only if a slice needs the foe to hit them | 70 |
+| **Junk / wound** | StS Status + Curse; the 5 purged curses | Unplayable or self-harming, injected by enemies, removed by a specific verb | Curse injection removed in P1; removal machinery kept | Only if an enemy row (Plan C) needs "clogs your deck" as its threat. A type only because it needs a *removal rule*; otherwise a `hex` on yourself | 60 |
+| **Die card** | Astrea's safe / balanced / risky dice | Grants or replaces a die for the fight; a risk axis (more power, more corrupted faces) | `bonusTurnDice`, `dieUpgradeLevel` (D20), the KINDLE/FORGE/BANK die economy | Rides D20, not a card type: a die-growth *grant* can be a spell's PAID line. Only becomes a type if the die itself must sit in the deck (q1: zone) | 60 |
+| **Basic attack** | Dawncaster Basic Attack | Always available, never drafted, no rarity | The grey office (Phase 104) | Exists as a *theme* (`grey`), not a type. Leave as is | 90 |
+
+Reading the table: **one** shape (Form / stance) passes the test on paper
+today; two (Attachment, Die card) become live only if D20 turns the tray
+into a zone; the rest are keywords, D8, or later. So the first pool most
+likely ships with `spell | oath | hex` plus at most one addition, and the
+type ledger below is where every proposal goes to die or live. Confidence
+that at most one new type earns its place in the first pool: 70.
+
+### 5.2 The type ledger (all plans)
+
+Every session appends to a `## Card-type proposals` table in the running
+brief: proposal, the slice that raised it, answers to §5 q1–q5, verdict
+(keyword / type / defer), and the card that motivated it. A shape proposed
+twice with the same failing answer is closed for the phase. This is the
+"deciduous" tier for types (§6 A7): a shape can be *available* without
+being *used*.
+
+**Where each plan discovers types.** Plan A: once, at A2, from empty
+skeleton slots. Plan B: by necessity, when a card in a slice can't be
+written as spell/oath/hex after two tries and ≥3 cards want the same
+shape. Plan C: from a threat row no one-shot or passive answers. All three
+paper or sandbox the shape before any engine file changes (§6 C3–C4).
 
 ## 6. Research receipts
 
