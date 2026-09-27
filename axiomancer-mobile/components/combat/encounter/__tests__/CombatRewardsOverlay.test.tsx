@@ -27,8 +27,9 @@ import { RARITY_LABEL, RARITY_PIPS, rarityFor } from '@/state/presenters/card-ra
 import { RARITY_TRACK_SLOTS } from '@/components/combat/encounter/CombatBoard';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
-// Three real library cards spanning stances and rarities.
-const OFFER_IDS = ['spoiled-poultice', 'frostbitten-palisade', 'thin-hymn'];
+// The three real library cards the reward draft offers since the card purge
+// (D44): the grey office.
+const OFFER_IDS = ['grey-strike', 'grey-ward', 'grey-word'];
 
 function renderOverlay(onPick: (cardId: string | null) => void = () => undefined) {
     const offers = rewardCardVMs(OFFER_IDS);

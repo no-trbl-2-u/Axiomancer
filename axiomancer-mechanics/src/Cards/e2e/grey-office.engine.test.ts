@@ -13,7 +13,8 @@
  *   - FREE/PAID ledgers read exactly 2 / 5, as printed;
  *   - a fresh `STARTING_CARD_IDS`-shaped deck deals exactly 7 grey-strike +
  *     3 grey-ward (`ensureStarterCards`'s verbatim-copy contract);
- *   - neither grey id is ever offered as a reward.
+ *   - the grey office IS the reward pool (D44, the card purge — reversing
+ *     Phase 104's "never a reward" law).
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
@@ -53,9 +54,8 @@ describe('Phase 104 — the grey office: card shape', () => {
         expect(getCardById('grey-ward')!.targetType).toBe('self');
     });
 
-    it('neither grey card is ever offered as a reward', () => {
-        expect(COMBAT_REWARD_POOL).not.toContain('grey-strike');
-        expect(COMBAT_REWARD_POOL).not.toContain('grey-ward');
+    it('the grey office is the whole reward pool (D44, the card purge)', () => {
+        expect([...COMBAT_REWARD_POOL].sort()).toEqual(['grey-strike', 'grey-ward', 'grey-word']);
     });
 });
 

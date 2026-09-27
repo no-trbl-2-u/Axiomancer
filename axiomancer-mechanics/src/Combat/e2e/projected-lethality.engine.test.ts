@@ -4,6 +4,10 @@
  * Re-pinned to spec 32 v3: the finisher vocabulary is RUPTURE and REAP
  * (amplify/execute are deleted); bleed decays 1 intensity per tick and the
  * projection models it. Seeded RNG only; no disk / network / TTY.
+ *
+ * Card purge (P1, 2026-09-27): no surviving card prints RUPTURE or REAP, so
+ * the finisher-readiness cases left with their carriers; the no-finisher
+ * case and the pending-DoT / heal-aware readouts stay.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -15,7 +19,7 @@ import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import type { ActiveEffect } from '../../Effects/types';
 import {
-    initializeCombatEncounter, projectCombatOutcome, projectRupture, projectReapAll, handCards,
+    initializeCombatEncounter, projectCombatOutcome,
 } from '../combat.engine';
 import { getPendingDotTotal } from '../effects';
 
@@ -37,12 +41,6 @@ function makeEnemy(hp: number, effects: ActiveEffect[] = []): Enemy {
     e.baseStats = { heart: 2, body: 2, mind: 6 };
     return e;
 }
-
-// Profane Canon (2026-08-08): the finisher carriers are now
-// communion-of-the-worm (RUPTURE ALL + SIPHON 50%) and miserere
-// (REAP ALL — 3 per Soul + SIPHON 50%).
-const RUPTURE_CARD = 'communion-of-the-worm';
-const REAP_CARD = 'miserere';
 
 describe('projectCombatOutcome — the consolidated status kill-path readout', () => {
     it('no DoT on the foe — nothing pending, no foreseeable kill, no finishers', () => {
@@ -97,51 +95,10 @@ describe('projectCombatOutcome — the consolidated status kill-path readout', (
         expect(projection.isLethalInFlight).toBe(true);
     });
 
-    it('a hand with rupture / reap cards reports each as a finisher matching its own selector', () => {
-        const enemyEffects = [ae('debuff_poison', 2, 4), ae('debuff_bleed', 1, 4)];
-        const enemy = makeEnemy(300, enemyEffects);
-        const deck = [RUPTURE_CARD, REAP_CARD];
-        const base = initializeCombatEncounter(makePlayer([RUPTURE_CARD, REAP_CARD]), enemy, deck, 7);
-        // Fund the Soul bank so the REAP-all projection is live.
-        const state = { ...base, souls: 3 };
-        const projection = projectCombatOutcome(state);
-
-        // The 2-card deck reshuffles into a 5-card hand, so each finisher
-        // mechanic is represented at least once (counts are hand-order noise).
-        expect(projection.finishers.length).toBeGreaterThanOrEqual(2);
-        expect(new Set(projection.finishers.map(f => f.mechanic))).toEqual(new Set(['rupture', 'reap']));
-
-        const rupture = projection.finishers.find(f => f.mechanic === 'rupture')!;
-        expect(rupture.cardId).toBe(RUPTURE_CARD);
-        expect(rupture.ready).toBe(true);
-        expect(rupture.amount).toBe(projectRupture(state));
-        expect(rupture.amount).toBe(63); // WS3.3 clock fuel — see the RUPTURE e2e pin
-
-        const reapCard = handCards(state).find(h => h.card.id === REAP_CARD)!.card;
-        const reap = projection.finishers.find(f => f.mechanic === 'reap')!;
-        expect(reap.cardId).toBe(REAP_CARD);
-        const expectedReap = projectReapAll(state, reapCard);
-        expect(reap.ready).toBe(true);
-        expect(reap.ready).toBe(expectedReap.ready);
-        expect(reap.amount).toBe(expectedReap.amount);
-        // BIG NUMBERS (2026-09-02): miserere prints `reap_all` at burstPerSoul
-        // 14 (was 3). 14 × 3 Souls on a neutral read.
-        expect(reap.amount).toBe(42);
-    });
-
-    it('an empty Soul bank leaves the reap finisher present but NOT ready', () => {
-        const state = initializeCombatEncounter(makePlayer([REAP_CARD]), makeEnemy(300), [REAP_CARD], 7);
-        const projection = projectCombatOutcome(state);
-        const reap = projection.finishers.find(f => f.mechanic === 'reap')!;
-        expect(reap).toBeDefined();
-        expect(reap.ready).toBe(false);
-        expect(reap.amount).toBe(0);
-    });
-
     it('a hand with no finisher-mechanic cards reports no finishers', () => {
         const enemy = makeEnemy(300, [ae('debuff_bleed', 1, 2)]);
-        const deck = ['chilblain-watch']; // a real, playable, non-finisher card
-        const state = initializeCombatEncounter(makePlayer(['chilblain-watch']), enemy, deck, 7);
+        const deck = ['grey-ward']; // a real, playable, non-finisher card
+        const state = initializeCombatEncounter(makePlayer(['grey-ward']), enemy, deck, 7);
         const projection = projectCombatOutcome(state);
         expect(projection.finishers).toEqual([]);
     });

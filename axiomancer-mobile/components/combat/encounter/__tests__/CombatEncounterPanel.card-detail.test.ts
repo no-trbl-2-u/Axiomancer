@@ -109,28 +109,9 @@ describe('combat card detail — the VM behind the shape', () => {
     });
 
     it('folds the colour law into the ◆ tag on a spell', () => {
-        const d = detailFor('spoiled-poultice');
+        // A Plain Blow is colourless: its tag names the 'any' aspect.
+        const d = detailFor('grey-strike');
         expect(d.freeTag).toBe('NO DIE');
-        expect(d.paidTag).toBe('+DIE · BODY/WILD');
-    });
-
-    it('folds the persistent free-vs-paid duration into the ◇/◆ tags', () => {
-        const oath = cardLibrary.find(c => c.cardType === 'oath' || c.cardType === 'hex');
-        expect(oath).toBeDefined();
-        const d = detailFor(oath!.id);
-        expect(d.freeTag).toMatch(/^NO DIE · \d+ rounds?$/);
-        expect(d.paidTag).toBe('+DIE · rest of combat');
-    });
-
-    it('a persistent card states its passive on the ◆ row, not just its duration', () => {
-        // The old overlay printed 'FREE: yours for 3 rounds. PAID: rest of
-        // combat.' there — a row about the CLOCK that never said what the oath
-        // or hex actually does.
-        for (const authored of cardLibrary) {
-            if (authored.cardType !== 'oath' && authored.cardType !== 'hex') continue;
-            const d = detailFor(authored.id);
-            expect(d.diePaidLine).toBeTruthy();
-            expect(d.diePaidLine).not.toMatch(/^FREE:/);
-        }
+        expect(d.paidTag).toBe('+DIE · ANY/WILD');
     });
 });

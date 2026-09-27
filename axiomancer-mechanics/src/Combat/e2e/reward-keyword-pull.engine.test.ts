@@ -20,6 +20,12 @@
  *   - an all-zero tally never guarantees (offers spread across themes, same
  *     as the uncommitted-deck case `combat.rewards.test.ts` already pins);
  *   - the grey office never counts toward the tally.
+ *
+ * Card purge (P1, 2026-09-27): the pinned pool is the grey office, which
+ * carries no reward theme, so the themed candidates are SANDBOX fixtures fed
+ * through the roll's own `extraPool` hook (WS6.2): three ROT cards landing
+ * POISON and three VIGIL cards printing GUARD. The roll under test is
+ * unchanged; only its candidates are synthetic.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -27,7 +33,10 @@ import { describe, it, expect } from 'vitest';
 import {
     REWARD_THEMES, REWARD_RANDOM_PICKS, rollCombatCardRewards, deckThemeCounts, addRewardCard,
 } from '../combat.rewards';
-import { cardLibrary, getCardById } from '../../Cards/cards.library';
+import { getCardById } from '../../Cards/cards.library';
+import { registerSandboxCards } from '../../Cards/cards.sandbox';
+import type { Card } from '../../Cards/types';
+import type { CardTheme } from '../../Cards/card-themes';
 import { keywordsOf } from '../../Cards';
 import { Player } from '../../Character/characters.mock';
 import { deepClone } from '../../Utils';
@@ -53,30 +62,65 @@ function playerWithDeck(cardIds: readonly string[], rewardIds: readonly string[]
     return player;
 }
 
+function fixture(id: string, theme: CardTheme): Card {
+    const base = {
+        id, theme, name: id, description: 'reward keyword-pull fixture',
+        tier: 1 as const, rank: 1 as const, cardType: 'spell' as const,
+    };
+    return theme === 'rot'
+        ? {
+            ...base, color: 'body', targetType: 'enemy', free: { damage: 1 },
+            combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 2, duration: 3 }],
+        }
+        : {
+            ...base, color: 'heart', targetType: 'self', free: { guard: 1 },
+            specialMechanics: [{ kind: 'guard', amount: 4 }],
+        };
+}
+
+const rotIds = ['qa-pull-rot-a', 'qa-pull-rot-b', 'qa-pull-rot-c'];
+const vigilIds = ['qa-pull-vigil-a', 'qa-pull-vigil-b', 'qa-pull-vigil-c'];
+registerSandboxCards([
+    ...rotIds.map(id => fixture(id, 'rot')),
+    ...vigilIds.map(id => fixture(id, 'vigil')),
+]);
+/** The themed candidates, injected beside the pinned (grey) pool. */
+const EXTRA: readonly string[] = [...rotIds, ...vigilIds];
+const roll = (player: Character, seed: number): string[] =>
+    rollCombatCardRewards(player, seededRng(seed), 3, EXTRA);
+
 const themeOf = (id: string): string => getCardById(id)?.theme ?? 'none';
 const share = (ids: readonly string[], predicate: (id: string) => boolean): number =>
     ids.filter(predicate).length / ids.length;
 
 describe('Phase 104 — below REWARD_RANDOM_PICKS: every slot is uniform', () => {
-    const rotIds = cardLibrary.filter(c => c.theme === 'rot').map(c => c.id);
+    it('the fixtures join the grey pool and carry the families under test', () => {
+        const player = playerWithDeck([]);
+        const seen = new Set<string>();
+        for (let seed = 1; seed <= 200; seed++) for (const id of roll(player, seed)) seen.add(id);
+        for (const id of EXTRA) expect(seen.has(id), id).toBe(true);
+        expect(seen.has('grey-strike')).toBe(true);
+        for (const id of rotIds) expect(keywordsOf(id)).toContain('POISON');
+        for (const id of vigilIds) expect(keywordsOf(id)).toContain('GUARD');
+    });
 
     it.each([0, 1, 2])('with %i reward cards already held, a rot-only deck shows no rot bias', (n) => {
         const rewards = rotIds.slice(0, n); // n < REWARD_RANDOM_PICKS — stays under the gate
         expect(rewards.length).toBeLessThan(REWARD_RANDOM_PICKS);
         const player = playerWithDeck(rotIds, rewards);
         const offers: string[] = [];
-        for (let seed = 1; seed <= 300; seed++) offers.push(...rollCombatCardRewards(player, seededRng(seed), 3));
+        for (let seed = 1; seed <= 300; seed++) offers.push(...roll(player, seed));
         const onTheme = share(offers, id => themeOf(id) === 'rot');
-        // Uniform over ~6 non-curse/non-grey themes ⇒ ~1/6 per theme, nowhere
-        // near the ~65%+ on-theme rate a themed deck earns past the gate
-        // (see `combat.rewards.test.ts`'s "on-theme pull is real" suite).
-        expect(onTheme).toBeLessThan(0.35);
+        // Uniform over the 9-card pool (3 grey + 3 rot + 3 vigil) ⇒ rot sits
+        // near its 1/3 pool share, nowhere near the slot-0 guarantee a
+        // themed deck earns past the gate (see the next suite).
+        expect(Math.abs(onTheme - 1 / 3)).toBeLessThan(0.08);
     });
 
     it('offers stay distinct within a single uniform draft', () => {
         const player = playerWithDeck([]);
         for (let seed = 1; seed <= 100; seed++) {
-            const offers = rollCombatCardRewards(player, seededRng(seed), 3);
+            const offers = roll(player, seed);
             expect(offers.length).toBe(3);
             expect(new Set(offers).size).toBe(3);
         }
@@ -86,17 +130,18 @@ describe('Phase 104 — below REWARD_RANDOM_PICKS: every slot is uniform', () =>
         // combatRewardCards only grows on a real TAKE (`addRewardCard`); a
         // SKIP leaves it untouched, so the player stays under the gate no
         // matter how many drafts they have seen.
-        const rotOnly = cardLibrary.filter(c => c.theme === 'rot').map(c => c.id);
-        const player = playerWithDeck(rotOnly, rotOnly.slice(0, 2)); // 2 < 3
+        const player = playerWithDeck(rotIds, rotIds.slice(0, 2)); // 2 < 3
         const offers: string[] = [];
-        for (let seed = 1; seed <= 300; seed++) offers.push(...rollCombatCardRewards(player, seededRng(seed), 3));
-        expect(share(offers, id => themeOf(id) === 'rot')).toBeLessThan(0.35);
+        for (let seed = 1; seed <= 300; seed++) offers.push(...roll(player, seed));
+        expect(Math.abs(share(offers, id => themeOf(id) === 'rot') - 1 / 3)).toBeLessThan(0.08);
+        // … and slot 0 is NOT pinned to rot below the gate.
+        const slot0s = Array.from({ length: 300 }, (_, i) => roll(player, i + 1)[0]);
+        expect(slot0s.some(id => themeOf(id) !== 'rot')).toBe(true);
     });
 });
 
 describe('Phase 104 — at REWARD_RANDOM_PICKS: slot 0 is guaranteed', () => {
     it('with 3 rot reward cards held, slot 0 always carries a rot-family keyword (200 seeds)', () => {
-        const rotIds = cardLibrary.filter(c => c.theme === 'rot').map(c => c.id);
         expect(rotIds.length).toBeGreaterThanOrEqual(REWARD_RANDOM_PICKS);
         const player = playerWithDeck(rotIds, rotIds.slice(0, REWARD_RANDOM_PICKS));
         const counts = deckThemeCounts(player);
@@ -104,7 +149,7 @@ describe('Phase 104 — at REWARD_RANDOM_PICKS: slot 0 is guaranteed', () => {
 
         const rotFamily: readonly string[] = ['POISON', 'BLEED', 'DOOM', 'MARK', 'RUPTURE', 'SIPHON', 'PROLONG', 'FESTER'];
         for (let seed = 1; seed <= 200; seed++) {
-            const [slot0] = rollCombatCardRewards(player, seededRng(seed), 3);
+            const [slot0] = roll(player, seed);
             const kws = keywordsOf(slot0);
             const overlaps = kws.some(kw => rotFamily.includes(kw));
             expect(overlaps, `seed ${seed}: ${slot0} (${kws.join(',')})`).toBe(true);
@@ -117,51 +162,50 @@ describe('Phase 104 — at REWARD_RANDOM_PICKS: slot 0 is guaranteed', () => {
         const player = playerWithDeck([], ['grey-strike', 'grey-strike', 'grey-strike']);
         expect(deckThemeCounts(player)).toEqual(Object.fromEntries(REWARD_THEMES.map(t => [t, 0])));
         const offers: string[] = [];
-        for (let seed = 1; seed <= 400; seed++) offers.push(...rollCombatCardRewards(player, seededRng(seed), 3));
-        for (const theme of REWARD_THEMES) {
+        for (let seed = 1; seed <= 400; seed++) offers.push(...roll(player, seed));
+        // Every theme the pool actually stocks (rot, vigil, and the themeless
+        // grey office) is offered — no single family captures the screen.
+        for (const theme of ['rot', 'vigil', 'grey']) {
             expect(share(offers, id => themeOf(id) === theme), theme).toBeGreaterThan(0.05);
         }
     });
 
-    it('ties resolve in REWARD_THEMES order (rot before grave)', () => {
-        // Equal counts, rot ahead of grave in canon order — the guarantee
-        // must resolve to rot's family, not grave's.
-        const rotIds = cardLibrary.filter(c => c.theme === 'rot').map(c => c.id).slice(0, 3);
-        const graveIds = cardLibrary.filter(c => c.theme === 'grave').map(c => c.id).slice(0, 3);
+    it('ties resolve in REWARD_THEMES order (rot before vigil)', () => {
+        // Equal counts, rot ahead of vigil in canon order — the guarantee
+        // must resolve to rot's family, not vigil's.
         // Grey filler clears the REWARD_RANDOM_PICKS gate without tilting
         // either theme's count (the grey office never counts toward the tally).
-        const player = playerWithDeck([...rotIds, ...graveIds], ['grey-strike', 'grey-strike', 'grey-strike']);
+        const player = playerWithDeck([...rotIds, ...vigilIds], ['grey-strike', 'grey-strike', 'grey-strike']);
         const counts = deckThemeCounts(player);
-        expect(counts.rot).toBe(counts.grave); // a genuine tie
-        expect(REWARD_THEMES.indexOf('rot')).toBeLessThan(REWARD_THEMES.indexOf('grave'));
+        expect(counts.rot).toBe(counts.vigil); // a genuine tie
+        expect(REWARD_THEMES.indexOf('rot')).toBeLessThan(REWARD_THEMES.indexOf('vigil'));
 
-        // rot-exclusive verbs (never carried by grave cards) — seeing one
-        // proves the tie resolved to rot.
-        const rotOnlyKeywords = ['POISON', 'BLEED', 'SIPHON'];
-        const seenRotOnly = new Set<string>();
+        // POISON is rot-exclusive here (vigil's family never claims it) —
+        // every slot 0 carrying it proves the tie resolved to rot.
         for (let seed = 1; seed <= 150; seed++) {
-            const [slot0] = rollCombatCardRewards(player, seededRng(seed), 3);
-            for (const kw of keywordsOf(slot0)) if (rotOnlyKeywords.includes(kw)) seenRotOnly.add(kw);
+            const [slot0] = roll(player, seed);
+            expect(keywordsOf(slot0), `seed ${seed}: ${slot0}`).toContain('POISON');
         }
-        expect(seenRotOnly.size, 'expected at least one rot-exclusive keyword across 150 seeds').toBeGreaterThan(0);
     });
 
     it('every slot 1+ still uses the ordinary allegiance roll (only slot 0 is guaranteed)', () => {
-        const rotIds = cardLibrary.filter(c => c.theme === 'rot').map(c => c.id);
         const player = playerWithDeck(rotIds, rotIds.slice(0, REWARD_RANDOM_PICKS));
+        let offThemeLater = 0;
         for (let seed = 1; seed <= 50; seed++) {
-            const offers = rollCombatCardRewards(player, seededRng(seed), 3);
+            const offers = roll(player, seed);
             expect(offers.length).toBe(3);
             expect(new Set(offers).size).toBe(3);
+            offThemeLater += offers.slice(1).filter(id => themeOf(id) !== 'rot').length;
         }
+        expect(offThemeLater).toBeGreaterThan(0);
     });
 });
 
 describe('Phase 104 — addRewardCard drives the gate directly', () => {
     it('appending copies through addRewardCard eventually clears the gate', () => {
-        let player = playerWithDeck(cardLibrary.filter(c => c.theme === 'rot').map(c => c.id), []);
+        let player = playerWithDeck(rotIds, []);
         expect((player.combatRewardCards ?? []).length).toBeLessThan(REWARD_RANDOM_PICKS);
-        for (let i = 0; i < REWARD_RANDOM_PICKS; i++) player = addRewardCard(player, 'the-sextons-bell');
+        for (let i = 0; i < REWARD_RANDOM_PICKS; i++) player = addRewardCard(player, 'grey-strike');
         expect((player.combatRewardCards ?? []).length).toBe(REWARD_RANDOM_PICKS);
     });
 });

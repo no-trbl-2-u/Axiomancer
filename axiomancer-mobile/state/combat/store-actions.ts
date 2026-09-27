@@ -53,10 +53,8 @@ export function completeCombatTutorialAction(store: AppStore, skipped: boolean):
 
 /** The three campaign preset ids (the Profane Canon rework, 2026-08-08) —
  *  snapshots of ONE deck evolving early → mid → late, in campaign order. */
-export type ThemedDeckId =
-    | 'threadbare'
-    | 'pilgrim'
-    | 'apostate';
+/** The engine's preset ids. Only the grey office since the card purge (D36). */
+export type ThemedDeckId = 'grey';
 
 // ---------------------------------------------------------------------------
 // Starter bundles (deck identity) — the pre-run "choose your path" decks.
@@ -102,9 +100,9 @@ const ARCHETYPE_FLAG_PREFIX = 'archetype:';
  *  Office skews nowhere (it is deliberately neutral chaff); the mid Burden
  *  leans rot/debt (bleeder); the late Canon adds the wall (guardian). */
 const BUNDLE_CHROME: Record<ThemedDeckId, { accent: string; pills: readonly string[]; archetype: StarterArchetype | null }> = {
-    threadbare: { accent: '#8a8273', pills: ['GUARD', 'POISON'], archetype: null },
-    pilgrim: { accent: '#5aa02c', pills: ['POISON', 'RECOIL'], archetype: 'bleeder' },
-    apostate: { accent: '#a63a3a', pills: ['DOOM', 'THORNS'], archetype: 'guardian' },
+    // DEAL has no gloss row (it reads as plain text), so the pills name the
+    // grey office's two glossed keywords.
+    grey: { accent: '#8a8273', pills: ['GUARD', 'VULNERABLE'], archetype: null },
 };
 
 // One bundle per themed preset deck, in the engine's display order. Each
@@ -131,7 +129,7 @@ export function starterBundleById(id: string): StarterBundle | null {
 
 /** The sole starter offered to a brand-new player (phase 46b, per 46a's D4:
  *  the neutral, earliest campaign snapshot — no picker among the three). */
-export const NEW_PLAYER_STARTER_BUNDLE_ID: string = 'threadbare';
+export const NEW_PLAYER_STARTER_BUNDLE_ID: string = 'grey';
 
 /** The starter bundle chosen this run (read from flags), or null. */
 export function chosenStarterBundle(store: AppStore): StarterBundle | null {

@@ -15,6 +15,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { cardLibrary } from '../../Cards/cards.library';
+import type { Card } from '../../Cards/types';
 import { lookupEffect } from '../../Effects';
 import { mechanicText, paidText, riderText } from '../combat.cards';
 import {
@@ -79,18 +80,29 @@ describe('card-text projection', () => {
     });
 
     it('a DEAL clause survives on a card that also carries other verbs', () => {
-        // The exact regression behind finding 4: `the-lazars-kiss` deals 20 and
-        // the old presenter walk dropped it, because DEAL carries no keyword
-        // badge and the walk was keyed on badges.
-        const card = cardLibrary.find(c => c.id === 'the-lazars-kiss');
-        expect(card).toBeDefined();
-        const clauses = paidClauses(card!, lookupEffect);
+        // The exact regression behind finding 4: a card that dealt 20 alongside
+        // other verbs lost its DEAL clause, because DEAL carries no keyword
+        // badge and the old presenter walk was keyed on badges. After the card
+        // purge (P1, 2026-09-27) no library card pairs DEAL with another verb,
+        // so the witness is A Plain Blow widened in place: DEAL 20 plus
+        // A Plain Word's VULNERABLE status.
+        const strike = cardLibrary.find(c => c.id === 'grey-strike');
+        const word = cardLibrary.find(c => c.id === 'grey-word');
+        expect(strike).toBeDefined();
+        expect(word).toBeDefined();
+        const card: Card = {
+            ...strike!,
+            id: 'multi-verb-witness',
+            paidSummary: undefined,
+            specialMechanics: [{ kind: 'deal', amount: 20 }],
+            combatEffects: word!.combatEffects,
+        };
+        const clauses = paidClauses(card, lookupEffect);
         const deal = clauses.find(c => c.id === 'deal');
         expect(deal).toBeDefined();
         expect(deal!.label).toBe('DEAL');
         expect(deal!.value).toBe('20');
-        expect(clauses.map(c => c.id)).toContain('convert_dots');
-        expect(clauses.map(c => c.id)).toContain('rider');
+        expect(clauses.some(c => c.source === 'effect' && c.id === 'debuff_vulnerable')).toBe(true);
     });
 
     it('a bare rider clause hands over its own parts, joining back to its text', () => {
@@ -104,14 +116,5 @@ describe('card-text projection', () => {
             }
         }
         expect(drift).toEqual([]);
-    });
-
-    it('a self-cost clause reads as a cost, not as harm done to the foe', () => {
-        const card = cardLibrary.find(c => c.id === 'thumbprick-oath');
-        expect(card).toBeDefined();
-        const recoil = paidClauses(card!, lookupEffect).find(c => c.id === 'recoil');
-        expect(recoil).toBeDefined();
-        expect(recoil!.side).toBe('self');
-        expect(recoil!.label).toBe('RECOIL');
     });
 });

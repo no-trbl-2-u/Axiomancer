@@ -100,7 +100,7 @@ event-pool and layout files).
 - [x] Phase M5 — Map docs (1ec11390)
 - [x] Phase T6 — Remove alignment, philosophy and GRACE (67fd0106)
 - [x] Phase S3 — Stat scaling (refactor D1 step 3): keyword families by where the effect lands (body: damage to the foe; mind: anything on you; heart: anything on the foe), `base × stat ÷ 5` with repeating amounts at half rate and durations flat, no caps, VITAE `50 + 12·body + 6·mind + 6·heart`, coloured keywords with a stat glyph, final numbers on card faces. Brief `plan/2026-09-27-stat-scaling.prompt.md`. Requires T6 `[x]`.
-- [blocked: attended with T (D38); S3 is `[x]` 2026-09-27, T starts it] Phase P1 — The card purge (D36): purge every player card except the grey office (`grey-strike`, `grey-ward` and the VULNERABLE grey card, D42), and every player keyword except DEAL, GUARD and VULNERABLE; every run deals the grey deck; presets, the 5/5/5 thirds, card rewards and cache card offers go. Enemies keep their keywords. Brief `plan/2026-09-26-card-purge.prompt.md`. Requires S3 `[x]`.
+- [x] Phase P1 — The card purge (D36): purge every player card except the grey office (`grey-strike`, `grey-ward` and the VULNERABLE grey card, D42), and every player keyword except DEAL, GUARD and VULNERABLE; every run deals the grey deck; presets, the 5/5/5 thirds, card rewards and cache card offers go. Enemies keep their keywords. Brief `plan/2026-09-26-card-purge.prompt.md`. Requires S3 `[x]`.
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics (9180fa5d)
@@ -1149,6 +1149,15 @@ See the status rows above; generate briefs on demand.
   grey frame; the fresh-run deck is Blow 5 / Ward 3 / Word 2. Confirmed
   T's request: yes (T picked "Start S3 now" and every ballot). Resulting
   commit: this one.
+
+- **2026-09-27** — actor: **T, attended session** (branch
+  `claude/card-purge`). Action: **shipped Phase P1** (the card purge, D36):
+  the player library is the grey office alone (Blow, Ward, Word); presets,
+  haunts, allies, curses and enemy curse injection went with it. T amended
+  D36 by ballot (D44): the grey cards are the reward pool, so card rewards
+  and the cache's card offer stay on. Confirmed T's request: yes ("purge
+  the card library of all the cards except these 3 grey starters").
+  Resulting commit: this one.
 
 ## Phase log (commit hashes)
 

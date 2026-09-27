@@ -25,9 +25,10 @@ import { createAppStore, type AppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
-const SPELL = 'spoiled-poultice';
-const OATH = 'the-untended-garden';
-const HEX = 'the-congregation-below';
+// The grey office is the whole library after the card purge (2026-09-27).
+const BLOW = 'grey-strike';
+const WARD = 'grey-ward';
+const WORD = 'grey-word';
 
 function seed(store: AppStore, knownCards: readonly string[]): void {
     const player = store.getState().player;
@@ -45,32 +46,33 @@ function mount(knownCards: readonly string[]) {
 
 describe('DeckScreen: the list', () => {
     it('lists a real row per card in the run deck', () => {
-        mount([SPELL, SPELL, OATH, HEX]);
+        mount([BLOW, BLOW, WARD, WORD]);
 
-        expect(screen.getByTestId(`deck-card-${SPELL}`)).toBeTruthy();
-        expect(screen.getByTestId(`deck-card-${OATH}`)).toBeTruthy();
-        expect(screen.getByTestId(`deck-card-${HEX}`)).toBeTruthy();
+        expect(screen.getByTestId(`deck-card-${BLOW}`)).toBeTruthy();
+        expect(screen.getByTestId(`deck-card-${WARD}`)).toBeTruthy();
+        expect(screen.getByTestId(`deck-card-${WORD}`)).toBeTruthy();
         // The row prints the card's OWN name, off the engine projection.
-        expect(screen.getAllByText(getCardById(SPELL)!.name).length).toBeGreaterThan(0);
+        expect(screen.getAllByText(getCardById(BLOW)!.name).length).toBeGreaterThan(0);
     });
 
     it('marks the copy count only where there is more than one copy', () => {
-        mount([SPELL, SPELL, OATH]);
+        mount([BLOW, BLOW, WARD]);
 
-        expect(screen.getByTestId(`deck-card-count-${SPELL}`)).toBeTruthy();
-        expect(screen.queryByTestId(`deck-card-count-${OATH}`)).toBeNull();
+        expect(screen.getByTestId(`deck-card-count-${BLOW}`)).toBeTruthy();
+        expect(screen.queryByTestId(`deck-card-count-${WARD}`)).toBeNull();
     });
 
     it('sections the list by card type', () => {
-        mount([SPELL, OATH, HEX]);
+        mount([BLOW, WARD, WORD]);
 
+        // Every surviving card is a spell; a type the deck lacks gets no section.
         expect(screen.getByTestId('deck-group-spell')).toBeTruthy();
-        expect(screen.getByTestId('deck-group-oath')).toBeTruthy();
-        expect(screen.getByTestId('deck-group-hex')).toBeTruthy();
+        expect(screen.queryByTestId('deck-group-oath')).toBeNull();
+        expect(screen.queryByTestId('deck-group-hex')).toBeNull();
     });
 
     it('renders the headline tallies and the rarity distribution', () => {
-        mount([SPELL, OATH, HEX]);
+        mount([BLOW, WARD, WORD]);
 
         expect(screen.getByTestId('deck-stats')).toBeTruthy();
         expect(screen.getByTestId('deck-rarity-common')).toBeTruthy();
@@ -79,25 +81,25 @@ describe('DeckScreen: the list', () => {
 
 describe('DeckScreen: the detail is flavor\'s new home', () => {
     it('opens a detail when a card is tapped', () => {
-        mount([SPELL, OATH]);
+        mount([BLOW, WARD]);
         expect(screen.queryByTestId('deck-card-detail')).toBeNull();
 
-        fireEvent.press(screen.getByTestId(`deck-card-${SPELL}`));
+        fireEvent.press(screen.getByTestId(`deck-card-${BLOW}`));
 
         expect(screen.getByTestId('deck-card-detail')).toBeTruthy();
     });
 
     it('shows the card\'s authored flavor prose, verbatim', () => {
-        mount([SPELL]);
-        fireEvent.press(screen.getByTestId(`deck-card-${SPELL}`));
+        mount([BLOW]);
+        fireEvent.press(screen.getByTestId(`deck-card-${BLOW}`));
 
         const flavor = screen.getByTestId('deck-card-detail-flavor');
-        expect(flavor.props.children).toBe(getCardById(SPELL)!.description);
+        expect(flavor.props.children).toBe(getCardById(BLOW)!.description);
     });
 
     it('prints the kept ◇ NO DIE shorthand (D3 keeps the notation)', () => {
-        mount([SPELL]);
-        fireEvent.press(screen.getByTestId(`deck-card-${SPELL}`));
+        mount([BLOW]);
+        fireEvent.press(screen.getByTestId(`deck-card-${BLOW}`));
 
         expect(screen.getByTestId('deck-card-detail-free')).toBeTruthy();
     });
@@ -107,8 +109,8 @@ describe('DeckScreen: the detail is flavor\'s new home', () => {
         // line that uses it, so the glossary cannot sit underneath it. Asserted
         // on render ORDER, not on presence, because presence alone passed
         // before finding 5 was ever filed.
-        mount([HEX]);
-        fireEvent.press(screen.getByTestId(`deck-card-${HEX}`));
+        mount([WORD]);
+        fireEvent.press(screen.getByTestId(`deck-card-${WORD}`));
 
         const detail = screen.getByTestId('deck-card-detail');
         const order = collectTestIDs(detail);
@@ -123,8 +125,8 @@ describe('DeckScreen: the detail is flavor\'s new home', () => {
     });
 
     it('closes again', () => {
-        mount([SPELL]);
-        fireEvent.press(screen.getByTestId(`deck-card-${SPELL}`));
+        mount([BLOW]);
+        fireEvent.press(screen.getByTestId(`deck-card-${BLOW}`));
         fireEvent.press(screen.getByTestId('deck-card-detail-close'));
 
         expect(screen.queryByTestId('deck-card-detail')).toBeNull();

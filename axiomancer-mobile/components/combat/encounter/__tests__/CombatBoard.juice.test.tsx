@@ -24,7 +24,9 @@ jest.mock('@/lib/juice', () => {
     };
 });
 
-const CARDS = ['spoiled-poultice', 'unction-of-boils', 'frostbitten-palisade', 'thin-hymn'];
+// A four-card hand off the grey office (the whole library since the card
+// purge, 2026-09-27).
+const CARDS = ['grey-strike', 'grey-ward', 'grey-word', 'grey-strike'];
 
 function freshCard() {
     const { store } = withAllProviders(<></>);

@@ -49,23 +49,26 @@ import { generateDefaultThreatSequence, AUTHORED_THREAT_ENEMY_IDS } from '../com
 import { ENEMY_REGISTRY } from '../../Enemy/enemy.library';
 import type { CombatManaDie, CombatEvent } from '../combat.encounter.types';
 
-// Spec 32 v3: basePower no longer exists at the schema level — the "damage
-// class" is the affliction-payoff burst. The fixture is a bare RUPTURE card.
+// The card purge (P1, 2026-09-27): the library is the grey office. A Plain
+// Word is its control-track card (VULNERABLE, stat-debuff) and A Plain Blow
+// its direct-damage card; no surviving card prints a DoT, so a minimal
+// sandbox POISON card (poison stays live — enemies inflict it) holds the DoT
+// seat for the adapter and presenter contracts.
 registerSandboxCards([{
-    id: 'qa-payoff-burst',
-    name: 'QA Payoff Burst (test fixture)',
+    id: 'qa-poison-dot',
+    name: 'QA Poison DoT (test fixture)',
     color: 'body',
-    description: 'Test-only fixture: a bare RUPTURE payoff with no status payload.',
+    description: 'Test-only fixture: a plain poison applier.',
     tier: 1,
     rank: 1,
     cardType: 'spell',
     targetType: 'enemy',
-    specialMechanics: [{ kind: 'rupture' }],
+    combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 3, duration: 3 }],
 }]);
 
-const DOT_BODY = 'spoiled-poultice';     // body starter, DoT (poison, card-played clock)
-const CONTROL_HEART = 'scolds-bridle';   // body, control (STAGGER + BACKFIRE)
-const DAMAGE_BODY = 'qa-payoff-burst';   // body, payoff burst (sandbox fixture)
+const DOT_BODY = 'qa-poison-dot';        // body, DoT (poison, card-played clock) — sandbox fixture
+const CONTROL_HEART = 'grey-word';       // colourless, control track (VULNERABLE)
+const DAMAGE_BODY = 'grey-strike';       // colourless, direct damage (attribution rows)
 
 const SEED = 12345;
 
@@ -192,11 +195,9 @@ describe('Spec 25 §6 — card adapters', () => {
         expect(track).toBe('control');
     });
 
-    it('classifyVerbClass marks a payoff-burst card as direct-damage / no track', () => {
-        const { verbClass, track } = classifyVerbClass(getCardById(DAMAGE_BODY)!, lookupEffect);
-        expect(verbClass).toBe('direct-damage');
-        expect(track).toBe('none');
-    });
+    // The payoff-burst classification test (a bare RUPTURE card →
+    // direct-damage) was deleted with the card purge (P1, 2026-09-27):
+    // RUPTURE has no surviving carrier.
 
     it('toCombatCard returns null for the removed Retreat id (no in-combat retreat exists)', () => {
         expect(toCombatCard('card-retreat', getCardById, lookupEffect)).toBeNull();

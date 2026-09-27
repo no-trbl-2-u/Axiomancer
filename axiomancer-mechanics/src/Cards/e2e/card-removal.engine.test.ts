@@ -34,14 +34,16 @@ import {
     addToLoadout,
     getCombatLoadout,
     getDeckPreset,
-    PRESET_LINEAGE,
+    COMBAT_DECK_PRESET_ORDER,
     COMBAT_HAND_SIZE,
 } from '../../Combat';
 import { createCharacter } from '../../index';
 import type { Character } from '../../index';
 
-// The Threadbare Office — real canon ids, so the fixtures are the shape a real
-// early-campaign save carries.
+// The Threadbare Office — historical canon ids. The removal primitive is a
+// pure deck-list operation that never resolves a card, so after the card purge
+// (P1, 2026-09-27) these stay as opaque, DISTINCT ids: the tests need many
+// different cards, and the grey office has only three.
 const OFFICE = [
     'spoiled-poultice', 'chilblain-watch', 'petty-indictment', 'first-spadeful',
     'grandmothers-psalter', 'thumbprick-oath', 'thin-hymn', 'threadbare-cope',
@@ -70,9 +72,6 @@ function deckOf(size: number): Character {
     }
     return fixture(known, rewards);
 }
-
-const sum = (r: Record<string, number>): number =>
-    Object.values(r).reduce((a, n) => a + n, 0);
 
 describe('Phase 52a — removeCardFromCombatDeck: source ordering', () => {
     it('drains combatRewardCards BEFORE knownCards when both hold the id', () => {
@@ -428,26 +427,10 @@ describe('Phase 104 — MIN_COMBAT_DECK_SIZE is DERIVED from the grey office', (
     });
 
     it('clears every shipped preset shape (no preset is born below the floor)', () => {
-        for (const id of ['threadbare', 'pilgrim', 'apostate']) {
+        expect(COMBAT_DECK_PRESET_ORDER.length).toBeGreaterThan(0);
+        for (const id of COMBAT_DECK_PRESET_ORDER) {
             expect(getDeckPreset(id)!.cardIds.length, id)
                 .toBeGreaterThanOrEqual(MIN_COMBAT_DECK_SIZE);
         }
-    });
-
-    it('the campaign presets keep their own (now-superseded) low-water mark above the floor', () => {
-        // History, not the current derivation (see MIN_COMBAT_DECK_SIZE's
-        // doc comment): the Profane Canon lineage's own tightest point —
-        // 18 − PILGRIM_REMOVED — is still a real number, just no longer the
-        // one setting the floor.
-        const threadbare = getDeckPreset('threadbare')!.cardIds.length;
-        const pilgrim = getDeckPreset('pilgrim')!.cardIds.length;
-        expect(threadbare).toBe(18);
-        expect(pilgrim).toBe(30);
-
-        const afterPilgrimCut = threadbare - sum(PRESET_LINEAGE.pilgrim.removed);
-        const afterApostateCut = pilgrim - sum(PRESET_LINEAGE.apostate.removed);
-        expect(afterPilgrimCut).toBe(12);
-        expect(afterApostateCut).toBe(22);
-        expect(Math.min(afterPilgrimCut, afterApostateCut)).toBeGreaterThan(MIN_COMBAT_DECK_SIZE);
     });
 });

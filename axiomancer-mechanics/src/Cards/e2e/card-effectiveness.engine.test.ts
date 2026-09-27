@@ -664,17 +664,15 @@ function assertCardEffective(cardId: string): void {
 
 describe('card effectiveness lint — every PAID face produces its promised observable delta', () => {
 
-    it('GENERICALLY_ASSERTED kinds in the library are exactly the canon valve die-verb '
-        + '(its strict payload still asserts; the die-verb legitimately no-ops in this fixture)', () => {
-        // PROFANE CANON (2026-08-08): one library card rides `reroll_spent`
-        // (the knucklebone-recant valve). It ALSO carries a strictly-asserted
-        // payload, so no card is generically asserted end-to-end; the die-verb
-        // portion rides the documented fixture no-op. `convert_die_color`,
-        // `strip_random_buff` and `befriend_attempt` stay unexercised.
+    it('no library card relies on a GENERICALLY_ASSERTED kind (every PAID face is strictly asserted)', () => {
+        // The card purge (P1, 2026-09-27) took the knucklebone-recant valve,
+        // the last card riding `reroll_spent`; the grey office's DEAL / GUARD /
+        // VULNERABLE are all strictly asserted. A new card authoring one of the
+        // generic kinds turns this red — give it a precise mapping first.
         const usedKinds = new Set<string>();
         for (const c of cardLibrary) for (const m of c.specialMechanics ?? []) usedKinds.add(m.kind);
         const exercisedGenerics = GENERICALLY_ASSERTED.filter(k => usedKinds.has(k)).sort();
-        expect(exercisedGenerics).toEqual(['reroll_spent']);
+        expect(exercisedGenerics).toEqual([]);
     });
 
     const strictCases = cardLibrary
@@ -686,7 +684,7 @@ describe('card effectiveness lint — every PAID face produces its promised obse
         (cardId) => { assertCardEffective(cardId); },
     );
 
-    it('every card is accounted for exactly once (strict + known-ineffective == 86, no silent drops)', () => {
+    it('every card is accounted for exactly once (strict + known-ineffective == library, no silent drops)', () => {
         expect(strictCases.length + Object.keys(KNOWN_INEFFECTIVE).length).toBe(cardLibrary.length);
     });
 });

@@ -14,6 +14,7 @@ import {
 } from '../presets';
 import { mockSequentialRng } from '../../test-utils/rng';
 import type { Consumable } from '../../Items/types';
+import { STARTING_CARD_IDS } from '../../Combat/combat.rewards';
 
 afterEach(() => {
     vi.restoreAllMocks();
@@ -45,7 +46,8 @@ describe('buildCharacterFromPreset', () => {
         expect(player.equipment.weapon?.id).toBe('relic-overwhelming');
         expect(player.equipment.armor?.id).toBe('relic-read');
         expect(player.equipment.accessories).toHaveLength(3);
-        expect(player.knownCards).toHaveLength(7); // Phase 108 — includes Befriend starting card
+        // The card purge (P1, 2026-09-27): every preset seeds the grey deck.
+        expect(player.knownCards).toEqual([...STARTING_CARD_IDS]);
         // Apprentice declares no procedural gear: inventory = 11 relics (worn-first)
         // + the 1 declared potion.
         expect(player.inventory).toHaveLength(12);
@@ -55,12 +57,12 @@ describe('buildCharacterFromPreset', () => {
         expect(player.currency).toBe(0);
     });
 
-    it('builds Wanderer with light armor and mixed-tier cards', () => {
+    it('builds Wanderer with light armor and the grey deck', () => {
         mockSequentialRng(0.5);
         const player = buildCharacterFromPreset(wandererPreset);
         expect(player.level).toBe(8);
         expect(player.baseStats).toEqual({ heart: 5, body: 4, mind: 4 });
-        expect(player.knownCards).toHaveLength(11); // spec 32 v3 recipe: 7 openers + 3 mid-tier + the synergy payoff
+        expect(player.knownCards).toEqual([...STARTING_CARD_IDS]); // the purge: grey deck at every tier
         // Phase 21 — the procedural library is retired; presets wear the relic
         // loadout and carry NO procedural gear (only relics as equipment).
         expect(player.equipment.weapon?.id).toBe('relic-overwhelming');
@@ -71,15 +73,12 @@ describe('buildCharacterFromPreset', () => {
         expect(player.currency).toBe(25);
     });
 
-    it('builds Sage with mid-tier gear and every card known', () => {
+    it('builds Sage with mid-tier gear and the grey deck', () => {
         mockSequentialRng(0.5);
         const player = buildCharacterFromPreset(sagePreset);
         expect(player.level).toBe(15);
         expect(player.baseStats).toEqual({ heart: 20, body: 30, mind: 25 });
-        expect(player.knownCards).toHaveLength(14); // spec 32 v3 recipe: all tiers + the synergy payoff
-        // Profane Canon (2026-08-08): the synergy payoff is communion-of-the-worm
-        // (RUPTURE ALL + SIPHON — the resonance-detonation successor).
-        expect(player.knownCards).toContain('communion-of-the-worm');
+        expect(player.knownCards).toEqual([...STARTING_CARD_IDS]); // the purge: grey deck at every tier
         // Phase 19 — wears the relic loadout; declared procedural gear benched.
         expect(player.equipment.weapon?.id).toBe('relic-overwhelming');
         expect(player.equipment.armor?.id).toBe('relic-read');

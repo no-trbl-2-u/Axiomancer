@@ -14,6 +14,12 @@
  *   3. `projectCardImpact` never advertises a strike number — there is none.
  *   4. QUARTER (the v3 charm-vocabulary debuff) really dampens the enemy's
  *      outgoing threat damage.
+ *
+ * Card purge (P1, 2026-09-27): the library is the grey office — colourless
+ * cards with no DoT payload — so the DoT-preview and colour-law cases run on
+ * one minimal SANDBOX card (`qa-truth-poison`, a BODY card landing POISON,
+ * the shape spoiled-poultice used to carry). The whole-roster laws run over
+ * the live library plus that fixture.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -23,6 +29,7 @@ import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
 import { GraveLarva } from '../../Enemy/enemy.library';
 import { cardLibrary } from '../../Cards/cards.library';
+import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import type { Card } from '../../Cards/types';
 import { deepClone } from '../../Utils';
 import { lookupEffect } from '../../Effects/effects.library';
@@ -38,6 +45,20 @@ import {
 import { getActiveDotTotal } from '../effect-modifiers';
 import { MAX_EFFECT_INTENSITY } from '../../Game/game-mechanics.constants';
 import type { CombatDieColor, CombatEncounterState, CombatThreatPhase } from '../combat.encounter.types';
+
+/** A minimal coloured DoT card: BODY, POISON on the foe (the colour law and
+ *  the DoT preview need both, and the grey office has neither). */
+const TRUTH_POISON = 'qa-truth-poison';
+const TRUTH_POISON_CARD: Card = {
+    id: TRUTH_POISON, name: 'QA Truth Poison', color: 'body',
+    description: 'coloured DoT fixture', tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
+    free: { damage: 1 },
+    combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 2, duration: 3 }],
+};
+registerSandboxCards([TRUTH_POISON_CARD]);
+
+/** The live library plus the sandbox fixture — the whole-roster laws' scope. */
+const ROSTER: readonly Card[] = [...cardLibrary, TRUTH_POISON_CARD];
 
 function makePlayer(cards: string[]): Character {
     const p = deepClone(Player);
@@ -86,7 +107,7 @@ function threatState(
     effects: CombatThreatPhase['threatAction']['effects'],
     opts: { playerEffects?: ActiveEffect[]; enemyEffects?: ActiveEffect[] } = {},
 ): CombatEncounterState {
-    let s = initializeCombatEncounter(makePlayer(['spoiled-poultice']), makeEnemy(500, 'body'), ['spoiled-poultice'], 7);
+    let s = initializeCombatEncounter(makePlayer([TRUTH_POISON]), makeEnemy(500, 'body'), [TRUTH_POISON], 7);
     s = rollEncounterDice(s).state;
     s = {
         ...s,
@@ -124,14 +145,13 @@ function directDamageOf(entry: Card): number {
 
 describe('P0-truth — the card preview is the applied number', () => {
     it('every DoT card previews its statuses\' REAL lifetime HP (neutral read)', () => {
-        const dotCards = cardLibrary.filter(c => {
+        const dotCards = ROSTER.filter(c => {
             const card = getCard(c.id);
             return card?.verbClass === 'direct-dot';
         });
-        // Profane-Canon library (2026-08-08): spoiled-poultice,
-        // unction-of-boils, the-sextons-bell, gangrene-gospel, the-vig at
-        // minimum — the rot/debt cores keep the DoT-seed class populated.
-        expect(dotCards.length).toBeGreaterThanOrEqual(5);
+        // After the card purge the only DoT seed is the sandbox fixture; a
+        // future library DoT card joins this sweep automatically.
+        expect(dotCards.map(c => c.id)).toContain(TRUTH_POISON);
         for (const entry of dotCards) {
             const card = getCard(entry.id)!;
             // Expected: Σ over enemy-targeted DoT payloads of floor(dpr×int)×dur
@@ -172,7 +192,7 @@ describe('P0-truth — the card preview is the applied number', () => {
         // honest general form: the preview EQUALS the card's real enemy-DoT
         // lifetime on a neutral read — never a fake "impact" number, and 0
         // whenever no enemy DoT exists.
-        for (const entry of cardLibrary) {
+        for (const entry of ROSTER) {
             const card = getCard(entry.id)!;
             let realLifetime = 0;
             for (const ce of entry.combatEffects ?? []) {
@@ -198,14 +218,13 @@ describe('P0-truth — the card preview is the applied number', () => {
     });
 
     it('an OFF-color die cannot power a card — the play fizzles honestly (the color law)', () => {
-        // Dice-law rework (2026-07-09): spoiled-poultice (the Profane-Canon
-        // poison starter) is a BODY card; a heart die may not power it at
-        // all. The old "off-color lands untouched numbers" case no longer
-        // exists — the fizzle IS the truth now.
-        let s = initializeCombatEncounter(makePlayer(['spoiled-poultice']), makeEnemy(500, 'heart'), ['spoiled-poultice'], 7);
+        // Dice-law rework (2026-07-09): the fixture is a BODY card; a heart
+        // die may not power it at all. The old "off-color lands untouched
+        // numbers" case no longer exists — the fizzle IS the truth now.
+        let s = initializeCombatEncounter(makePlayer([TRUTH_POISON]), makeEnemy(500, 'heart'), [TRUTH_POISON], 7);
         s = rollEncounterDice(s).state;
         s = setDice(s, ['heart']);
-        const entry = s.hand.find(h => h.cardId === 'spoiled-poultice')!;
+        const entry = s.hand.find(h => h.cardId === TRUTH_POISON)!;
         const res = playCombatCard(s, { uid: entry.uid }, true, s.dice[0].id);
         expect(res.events.some(e => e.kind === 'effect-fizzled' && /colors must match/.test(e.message))).toBe(true);
         expect(res.state.enemy.effects.length).toBe(0);
@@ -213,12 +232,12 @@ describe('P0-truth — the card preview is the applied number', () => {
 
     it('a color-MATCHED status play lands +1 duration (Fate Engine R7 — printed on the card)', () => {
         // body die powers the body card: printed numbers, color match → +1 turn.
-        let s = initializeCombatEncounter(makePlayer(['spoiled-poultice']), makeEnemy(500, 'body'), ['spoiled-poultice'], 7);
+        let s = initializeCombatEncounter(makePlayer([TRUTH_POISON]), makeEnemy(500, 'body'), [TRUTH_POISON], 7);
         s = rollEncounterDice(s).state;
         s = setDice(s, ['body']);
-        const entry = s.hand.find(h => h.cardId === 'spoiled-poultice')!;
+        const entry = s.hand.find(h => h.cardId === TRUTH_POISON)!;
         const after = playCombatCard(s, { uid: entry.uid }, true, s.dice[0].id).state;
-        const authored = cardLibrary.find(c => c.id === 'spoiled-poultice')!.combatEffects!
+        const authored = TRUTH_POISON_CARD.combatEffects!
             .find(e => e.appliedTo === 'opponent')!;
         const landed = after.enemy.effects.find(e => e.effectId === authored.effectId)!;
         expect(landed.intensity).toBe(authored.intensity ?? 1);
@@ -227,8 +246,8 @@ describe('P0-truth — the card preview is the applied number', () => {
     });
 
     it('projectCardImpact never advertises a strike number — the strike is dead (spec 32 v3 §1)', () => {
-        const s = initializeCombatEncounter(makePlayer(['spoiled-poultice']), makeEnemy(500, 'body'), ['spoiled-poultice'], 7);
-        for (const entry of cardLibrary) {
+        const s = initializeCombatEncounter(makePlayer([TRUTH_POISON]), makeEnemy(500, 'body'), [TRUTH_POISON], 7);
+        for (const entry of ROSTER) {
             const card = getCard(entry.id)!;
             const impact = projectCardImpact(s, card);
             expect(impact.amount, `${card.id} must not advertise an immediate-strike number`).toBe(0);

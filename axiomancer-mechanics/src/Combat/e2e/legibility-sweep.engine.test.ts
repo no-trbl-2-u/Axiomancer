@@ -1,9 +1,13 @@
 /**
  * Hermetic E2E — phase 28 (Show the Engine legibility sweep). Covers the
  * mechanics-side additions: per-card rupture projection, the Overtake 2-pip
- * gate, the shared rung-denial fix (getDisruptMeter.willDeny), the REPRISE
- * songbook player choice, the wall-math projection, and the tu-quoque
- * color-match data fix. Seeded RNG only; no disk / network / TTY.
+ * gate, the shared rung-denial fix (getDisruptMeter.willDeny), and the
+ * wall-math projection. Seeded RNG only; no disk / network / TTY.
+ *
+ * The card purge (P1, 2026-09-27) deleted the tests whose carriers were
+ * purged library cards: the plain-RUPTURE preview/gate checks
+ * (communion-of-the-worm) and the REPRISE songbook choice (shallow-grave,
+ * RECALL) — no surviving card prints either verb.
  */
 
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
@@ -98,18 +102,9 @@ function openWithDie(player: Character, enemy: Enemy, deck: string[], die: Comba
 }
 
 describe('projectRuptureBurst — per-card-accurate rupture preview (phase 28)', () => {
-    const PLAIN = 'communion-of-the-worm';   // no bonusPct/fuelPerPip (canon)
     const BONUS = FIXTURE_BONUS_RUPTURE.id;  // bonusPct 0.5, no fuelPerPip
     const PIP_FED = FIXTURE_PIP_RUPTURE.id;  // fuelPerPip 3.5, bonusPct 0.5
     beforeEach(() => { registerSandboxCards([FIXTURE_BONUS_RUPTURE, FIXTURE_PIP_RUPTURE]); });
-
-    it('matches projectRupture for a card with no card-specific rupture mechanic', () => {
-        mockSequentialRng(0.05);
-        const enemyEffects = [ae('debuff_poison', 2, 4)];
-        const state = openWithDie(makePlayer([PLAIN]), makeEnemy(300, 'heart', enemyEffects), [PLAIN], 'heart');
-        const card = state.hand.find(h => h.cardId === PLAIN)!;
-        expect(projectRuptureBurst(state, { uid: card.uid, id: PLAIN } as never)).toBe(projectRupture(state));
-    });
 
     it('adds bonusPct for the amplified detonation (undershoots without it)', () => {
         mockSequentialRng(0.05);
@@ -158,16 +153,6 @@ describe('Overtake 2-pip gate (phase 28)', () => {
         const detonated = res.events.find(e => e.kind === 'rupture-detonated');
         expect(detonated).toBeDefined();
     });
-
-    it('does not affect a plain rupture card (no fuelPerPip) below 2 pips', () => {
-        mockSequentialRng(0.05);
-        const RUP = 'communion-of-the-worm';
-        const enemyEffects = [ae('debuff_poison', 2, 4)];
-        const state = openWithDie(makePlayer([RUP]), makeEnemy(300, 'heart', enemyEffects), [RUP], 'heart');
-        const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true, DIE);
-        expect(res.events.find(e => e.kind === 'rupture-detonated')).toBeDefined();
-        expect(res.events.find(e => e.kind === 'effect-fizzled')).toBeUndefined();
-    });
 });
 
 describe('getDisruptMeter.willDeny — STAGGER-rung denial (phase 28 fix)', () => {
@@ -185,43 +170,6 @@ describe('getDisruptMeter.willDeny — STAGGER-rung denial (phase 28 fix)', () =
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', []), undefined, 7);
         const meter = getDisruptMeter(base);
         expect(meter.willDeny).toBe(false);
-    });
-});
-
-describe('REPRISE songbook choice (phase 28)', () => {
-    const REPRISE_CARD = 'shallow-grave'; // RECALL 1, heart aspect
-
-    it('returns the player-chosen discard card, not the argmax pick', () => {
-        mockSequentialRng(0.05);
-        let state = openWithDie(makePlayer([REPRISE_CARD]), makeEnemy(300, 'heart', []), [REPRISE_CARD], 'heart');
-        // A low-rank and a high-rank card in discard — argmax would pick the high-rank one.
-        state = { ...state, discard: ['spoiled-poultice', 'open-every-grave'] };
-        const uid = state.hand.find(h => h.cardId === REPRISE_CARD)!.uid;
-        const res = playCombatCard(state, { uid }, true, DIE, undefined, { reprisalCardId: 'spoiled-poultice' });
-        const reprised = res.events.find(e => e.kind === 'reprised') as { returned: string[] } | undefined;
-        expect(reprised).toBeDefined();
-        expect(reprised!.returned).toEqual(['spoiled-poultice']);
-    });
-
-    it('falls back to the highest-rank auto-pick when no choice is given', () => {
-        mockSequentialRng(0.05);
-        let state = openWithDie(makePlayer([REPRISE_CARD]), makeEnemy(300, 'heart', []), [REPRISE_CARD], 'heart');
-        state = { ...state, discard: ['spoiled-poultice', 'open-every-grave'] };
-        const uid = state.hand.find(h => h.cardId === REPRISE_CARD)!.uid;
-        const res = playCombatCard(state, { uid }, true, DIE);
-        const reprised = res.events.find(e => e.kind === 'reprised') as { returned: string[] } | undefined;
-        expect(reprised).toBeDefined();
-        expect(reprised!.returned).toEqual(['open-every-grave']); // higher rank (5 vs 1)
-    });
-
-    it('falls back to auto-pick when the chosen id is not in the discard pile', () => {
-        mockSequentialRng(0.05);
-        let state = openWithDie(makePlayer([REPRISE_CARD]), makeEnemy(300, 'heart', []), [REPRISE_CARD], 'heart');
-        state = { ...state, discard: ['spoiled-poultice', 'open-every-grave'] };
-        const uid = state.hand.find(h => h.cardId === REPRISE_CARD)!.uid;
-        const res = playCombatCard(state, { uid }, true, DIE, undefined, { reprisalCardId: 'not-in-discard' });
-        const reprised = res.events.find(e => e.kind === 'reprised') as { returned: string[] } | undefined;
-        expect(reprised!.returned).toEqual(['open-every-grave']);
     });
 });
 

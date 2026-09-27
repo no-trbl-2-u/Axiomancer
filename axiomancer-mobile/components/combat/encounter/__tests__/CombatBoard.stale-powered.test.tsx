@@ -29,10 +29,10 @@ import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 import { tapCombatDie } from '@/test-utils/tapCombatDie';
 
-// spoiled-poultice and unction-of-boils are BOTH body-stance Affliction DoTs —
-// exactly the pairing where the old re-attach showed: play A with a body die,
-// stage B (also body) → B lit up.
-const CARDS = ['spoiled-poultice', 'unction-of-boils', 'frostbitten-palisade', 'thin-hymn'];
+// Two copies of A Plain Blow (the grey office is the whole library since the
+// card purge) share one colour, 'any' — exactly the pairing where the old
+// re-attach showed: play A with a die, stage B (same colour) → B lit up.
+const CARDS = ['grey-strike', 'grey-ward', 'grey-word', 'grey-strike'];
 
 const noopDrag = (): DragController =>
     ({ begin: () => undefined, end: () => undefined, active: null, x: { value: 0 }, y: { value: 0 } } as unknown as DragController);
@@ -43,7 +43,8 @@ const boardCallbacks = () => ({
 });
 
 /** A rolled encounter whose first live tray die is a BODY mana face — legal
- *  for both A and B. Returns the state and that die's id. */
+ *  for both A and B (colourless cards take any die). Returns the state and
+ *  that die's id. */
 function openWithBodyDie(store: ReturnType<typeof withAllProviders>['store']): { s: CombatEncounterState; dieId: string } {
     const base = store.getState().player;
     const player = { ...base, knownCards: CARDS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 };
@@ -84,10 +85,11 @@ describe('CombatBoard — a die that powered card A never re-attaches to card B'
         // The die is still live after A's play (the refresh case): the VM the
         // board sees keeps it available.
         const vm = buildCombatViewModel(s);
-        const a = vm.hand.find(c => c.cardId === 'spoiled-poultice')!;
-        const b = vm.hand.find(c => c.cardId === 'unction-of-boils')!;
-        expect(a.stance).toBe('body');
-        expect(b.stance).toBe('body'); // same color — the old re-attach case
+        const [a, b] = vm.hand.filter(c => c.cardId === 'grey-strike');
+        expect(a).toBeDefined();
+        expect(b).toBeDefined();
+        expect(a.uid).not.toBe(b.uid);
+        expect(b.stance).toBe(a.stance); // same color — the old re-attach case
 
         const { cbs, restage } = mountBoard(vm, [a.uid], store);
         await tapCombatDie(dieId);
@@ -110,8 +112,7 @@ describe('CombatBoard — a die that powered card A never re-attaches to card B'
         const { store } = withAllProviders(<></>);
         const { s, dieId } = openWithBodyDie(store);
         const vm = buildCombatViewModel(s);
-        const a = vm.hand.find(c => c.cardId === 'spoiled-poultice')!;
-        const b = vm.hand.find(c => c.cardId === 'unction-of-boils')!;
+        const [a, b] = vm.hand.filter(c => c.cardId === 'grey-strike');
 
         const { cbs, restage } = mountBoard(vm, [a.uid], store);
         await tapCombatDie(dieId);

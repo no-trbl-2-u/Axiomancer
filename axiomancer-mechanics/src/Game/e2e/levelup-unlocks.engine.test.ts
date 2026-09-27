@@ -65,7 +65,7 @@ describe('character:levelup payload — cards are no longer level-gated (2026-07
     });
 
     it('having some cards already known does not surface them on level-up either', () => {
-        const someKnown = cardLibrary.find(s => s.tier === 2)!.id;
+        const someKnown = cardLibrary[0].id;
         const { store, captured } = buildStore(4, {
             experience: 4 * EXPERIENCE_PER_LEVEL + 1,
             knownCards: [someKnown],

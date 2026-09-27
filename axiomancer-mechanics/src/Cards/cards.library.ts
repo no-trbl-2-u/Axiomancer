@@ -7,9 +7,17 @@
  * body, mind and heart. New cards are designed only in a guided session with
  * T (D37), which is where this file grows again.
  *
- * The surviving constraints: every card is playable without a die (a spell
- * authors a non-empty `free`), and one tray roll per threat phase. The 5/5/5
- * aspect thirds went with the presets (D36).
+ * THE SURVIVING CONSTRAINTS (the 5/5/5 aspect thirds went with the presets in
+ * the purge, D36):
+ *   1. Every card is playable without a die: a spell authors a non-empty
+ *      `free`, an oath/hex gets an engine-derived timed FREE instance.
+ *   2. One tray roll per threat phase (a bug fix, not a design law).
+ *
+ * There is no rank band, no pricing gate, no win-rate curve and no governing
+ * objective function. Numbers are judged by playing the game.
+ *
+ * Direct damage is a first-class verb (DEAL), scaled by body (S3). Enemy
+ * VITAE falls to any authored mix of hits, statuses and reflect.
  *
  * This file is data-only. All runtime behaviour lives in
  * `src/Cards/card.engine.ts` and `src/Combat/combat.engine.ts`.
