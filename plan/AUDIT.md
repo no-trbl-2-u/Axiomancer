@@ -58,6 +58,45 @@
 
 ## Pending
 
+### [gap] Act 1 has no shop, so the relic kit the 2026-09-23 owner call put "on the road" is five maps away
+- category: gap
+- impact: 6
+- ease: 6
+- detail: filed 2026-09-27 by `/adjust-equipment` pass 21. The owner call of
+  2026-09-23 (THE VERY START) made a fresh run seed no relics. Only the
+  Suppliant's Ring comes at the first node, and "the markets sell them".
+  `nfForestMarket` (`MapEvents/content.ts` ~129, Glen Market, `nf-8`) says
+  in its comment that "the first market on the road stocks the Phase-19
+  starter kit's weapon, armor and charm, so the intended opening loadout is
+  buyable before the forest deepens". The map revamp moved that road. Across
+  the Breakwater, the Charcoal Wood, the Beacon Crags, the Lantern Deep
+  (M3a–M3d) and fishing-village, there is no `village` node and no `shop:`
+  (the only `shop:` payloads are northern-forest's and later maps'). So a
+  new game plays all of Act 1 plus fishing-village with one signature
+  (the ring). It has nowhere in Act 1 to spend its loot-cache and fight
+  currency; fishing-village's blacksmith swaps gear variants but sells no
+  relic. Glen Market is the sixth map. The Lantern Deep even has a "market grotto"
+  landmark (`ld-10`), but it is staged as a camp: "The traders let you sleep
+  behind the stalls."
+  Prior art: `kb:slay-the-spire-the-board-game/rules/actions` (src-006).
+  Shops that sell potions and relics are part of every act's map there, not
+  something saved for later acts.
+- why not shipped in the steward tick: the fix changes the kind spread of
+  maps authored under T's D21–D35 rulings, along with their e2e kind pins. That
+  makes it a cross-surface change, which is "large" under THE GROWTH FLOOR
+  ¶2. No new item, keyword or art is needed.
+- next (`/iterate`): stage one Act 1 `village` node with a merchant-less
+  `shop:` (`VillagePayload.merchants` may be empty, so D29 and the Act 1
+  people session (rows below) aren't touched). Stock it with the starter
+  kit (`relic-overwhelming`, `relic-read`, `relic-press-the-point`) plus
+  `minor-healing-potion`. There are two readings. (a) `ld-10`, the market
+  grotto: this is truest to the plate, but it comes late (map 4) and turns
+  one of three camps into a village. (b) A node in the Charcoal Wood (map 2):
+  the kit comes early, but no landmark there is named for a market. Pick
+  (a) unless a playtest shows the kit arriving too late. Update Glen
+  Market's comment and the map's kind-spread comment and test, and add an
+  e2e that pins a `shop:` reachable in Act 1 from the default start.
+
 ### [content] A pinned unique pays a full level of XP in Act 1 (the Charcoal Wood's kudan)
 - category: content
 - impact: 3

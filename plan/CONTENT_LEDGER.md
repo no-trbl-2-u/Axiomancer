@@ -17,7 +17,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-26 | bb0f2928 | 20 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-26 | de4d77b3 | 20 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-27 | d54e85b2 | 21 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-26 | 3136aacf | 20 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-26 | 2b289bb2 | 19 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-27 | c250a53c | 20 |
@@ -25,6 +25,44 @@
 ## Log
 
 ```
+> **[adjust-equipment pass 21, 2026-09-27, base d54e85b2]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE. One finding filed rather than shipped.
+> `/march` dispatched this through Step 3b. No unlabeled issues or `loop:do`,
+> and critique wasn't due (9 commits, ~10h since pass 56). No `[ ]` phase
+> rows: S3 and P1 are blocked for T. The growth floor was clear (M4
+> `571d5b3f`). Of the categories not on THE CARD HOLD, `equipment`
+> (`de4d77b3`, 44 commits, 12:41Z yesterday) was stalest, ahead of
+> `enemies` (`3136aacf`, 36 commits, 14:57Z). Deploy was green at `d54e85b2`.
+>
+> **Step 1 audit.** No commit since pass 20's own (`ce99372a`) touches
+> `src/Items/**` or the signature roster, so the item-side signals stand as
+> pass 20 re-derived them: 11 relics with every `grantsSignature`
+> resolving, no same-slot dominance, 11 obtainable consumables, each with a
+> live payload, and caches drawing only from the obtainable consumables.
+> What changed is the road. M3b–M3e put three new maps, and then
+> fishing-village, between the start and the first market.
+>
+> **Finding: Act 1 has no shop.** Pass 20 noted that the Breakwater had
+> none and left it as a map call. It now covers the whole act. The relic
+> kit that the 2026-09-23 owner call ("a fresh run seeds no relics; the
+> markets sell them") put at "the first market on the road" is Glen Market
+> (`nf-8`), the sixth map. There is no `village` or `shop:` on any of the
+> Breakwater, the Charcoal Wood, the Beacon Crags, the Lantern Deep or
+> fishing-village. The Lantern Deep's market grotto (`ld-10`) is staged as
+> a camp. KB: `kb:slay-the-spire-the-board-game/rules/actions` (src-006),
+> where relic and potion shops are part of every act's map.
+>
+> **Why filed, not shipped:** the fix changes the kind spread of maps
+> authored under T's D21–D35 rulings, along with their e2e pins. That is
+> cross-surface, so it is "large" under THE GROWTH FLOOR ¶2, even though it
+> needs no new item. Filed to `plan/AUDIT.md` Pending as a loop-shippable
+> `[gap]` (impact 6, ease 6) with a concrete `/iterate` plan: a
+> merchant-less shop at `ld-10`, or at a Charcoal Wood node, stocking the
+> starter kit.
+>
+> No code changed, so the verify gate wasn't needed. deploy:check runs
+> after the push.
+
 > **[adjust-npcs pass 20, 2026-09-27, base c250a53c]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE. One new finding, filed rather than shipped.
 > `/march` dispatched this through Step 3b. With `cards`/`keywords` on THE
