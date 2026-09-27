@@ -1,0 +1,14 @@
+{
+  "generated_by": "scripts/devlog-shots.mjs",
+  "date": "2026-09-27",
+  "since": "d03e46c4",
+  "sinceDate": "2026-09-25",
+  "shots": [
+    {
+      "screen": "character",
+      "before": true,
+      "ratio": 0.04579839591687933
+    }
+  ],
+  "catalogEvidence": true
+}
