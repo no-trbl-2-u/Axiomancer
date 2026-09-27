@@ -28,12 +28,20 @@ describe('inRange', () => {
 });
 
 describe('calculateMaxHealth', () => {
-  it('body 3 heart 4 mind 2 → 50 + (3 + 4 + 2) × 8 = 122', () => {
+  it('body 3 heart 4 mind 2 → 50 + 12·3 + 6·2 + 6·4 = 122', () => {
     expect(calculateMaxHealth(1, { body: 3, heart: 4, mind: 2 })).toBe(122);
   });
 
   it('includes every base stat in max health', () => {
-    expect(calculateMaxHealth(15, { body: 1, heart: 34, mind: 40 })).toBe(650);
+    expect(calculateMaxHealth(15, { body: 1, heart: 34, mind: 40 })).toBe(506);
+  });
+
+  it('weights body double (S3, D41): the worked builds', () => {
+    expect(calculateMaxHealth(1, { body: 5, heart: 5, mind: 5 })).toBe(170);
+    expect(calculateMaxHealth(10, { body: 32, heart: 5, mind: 5 })).toBe(494);
+    expect(calculateMaxHealth(15, { body: 47, heart: 5, mind: 5 })).toBe(674);
+    expect(calculateMaxHealth(15, { body: 19, heart: 19, mind: 19 })).toBe(506);
+    expect(calculateMaxHealth(15, { body: 26, heart: 26, mind: 5 })).toBe(548);
   });
 
   it('does not multiply health by level because stat totals already encode level budget', () => {

@@ -77,55 +77,62 @@ export type KeywordFamily =
     | 'recovery'
     | 'special';
 
+/** S3 (D40) — the stat that scales a keyword, by where its effect lands:
+ *  body = damage to the foe, mind = on you, heart = on the foe, grey = none. */
+export type KeywordStat = 'body' | 'mind' | 'heart' | 'grey';
+
 export interface KeywordMeta {
     label: string;
     family: KeywordFamily;
+    stat: KeywordStat;
     /** Value unit shown on the card face: '×' stacks · 't' turns · '%' · '' flat. */
     unit: '' | '×' | 't' | '%';
     blurb: string;
 }
 
 export const KEYWORDS = {
-    damage: { label: 'DAMAGE', family: 'direct', unit: '', blurb: 'Deal direct HP damage to the enemy.' },
-    dot: { label: 'DOT', family: 'dot', unit: '×', blurb: 'Apply a bleeding/burning stack that deals HP damage each enemy turn.' },
-    control: { label: 'CONTROL', family: 'control', unit: 't', blurb: "Apply a debuff that disrupts the enemy's next action." },
-    guard: { label: 'GUARD', family: 'defense', unit: '', blurb: "One-shot shield that absorbs the enemy's next telegraphed hit." },
-    barrier: { label: 'BARRIER', family: 'defense', unit: '', blurb: "Stacking, persistent damage-soak — doesn't expire after one hit." },
-    riposte: { label: 'RIPOSTE', family: 'special', unit: '', blurb: 'Parry: reduce the incoming hit + counter-strike for bonus damage.' },
-    rupture: { label: 'RUPTURE', family: 'special', unit: '', blurb: 'Consume all DoT stacks on the enemy for a burst of damage.' },
-    siphon: { label: 'SIPHON', family: 'recovery', unit: '%', blurb: 'Heal yourself for a % of the HP damage this card deals.' },
-    regen: { label: 'REGEN', family: 'recovery', unit: '×', blurb: 'Apply regeneration stacks that heal you each of your turns.' },
-    poison: { label: 'POISON', family: 'dot', unit: '×', blurb: 'Apply poison stacks (DoT variant, dealt each enemy turn).' },
-    bleed: { label: 'BLEED', family: 'dot', unit: '×', blurb: 'Apply bleed stacks (DoT variant with burst potential via rupture).' },
-    stun: { label: 'STUN', family: 'control', unit: 't', blurb: "Skip the enemy's next action entirely." },
-    strip_buff: { label: 'STRIP BUFF', family: 'special', unit: '', blurb: 'Remove one random buff from the enemy.' },
-    heal_self: { label: 'HEAL SELF', family: 'recovery', unit: '', blurb: 'Heal yourself for a flat amount after damage resolves.' },
+    damage: { label: 'DAMAGE', family: 'direct', stat: 'body', unit: '', blurb: 'Deal direct HP damage to the enemy.' },
+    dot: { label: 'DOT', family: 'dot', stat: 'heart', unit: '×', blurb: 'Apply a bleeding/burning stack that deals HP damage each enemy turn.' },
+    control: { label: 'CONTROL', family: 'control', stat: 'heart', unit: 't', blurb: "Apply a debuff that disrupts the enemy's next action." },
+    guard: { label: 'GUARD', family: 'defense', stat: 'mind', unit: '', blurb: "One-shot shield that absorbs the enemy's next telegraphed hit." },
+    barrier: { label: 'BARRIER', family: 'defense', stat: 'mind', unit: '', blurb: "Stacking, persistent damage-soak — doesn't expire after one hit." },
+    riposte: { label: 'RIPOSTE', family: 'special', stat: 'mind', unit: '', blurb: 'Parry: reduce the incoming hit + counter-strike for bonus damage.' },
+    rupture: { label: 'RUPTURE', family: 'special', stat: 'body', unit: '', blurb: 'Consume all DoT stacks on the enemy for a burst of damage.' },
+    siphon: { label: 'SIPHON', family: 'recovery', stat: 'mind', unit: '%', blurb: 'Heal yourself for a % of the HP damage this card deals.' },
+    regen: { label: 'REGEN', family: 'recovery', stat: 'mind', unit: '×', blurb: 'Apply regeneration stacks that heal you each of your turns.' },
+    poison: { label: 'POISON', family: 'dot', stat: 'heart', unit: '×', blurb: 'Apply poison stacks (DoT variant, dealt each enemy turn).' },
+    bleed: { label: 'BLEED', family: 'dot', stat: 'heart', unit: '×', blurb: 'Apply bleed stacks (DoT variant with burst potential via rupture).' },
+    stun: { label: 'STUN', family: 'control', stat: 'heart', unit: 't', blurb: "Skip the enemy's next action entirely." },
+    strip_buff: { label: 'STRIP BUFF', family: 'special', stat: 'heart', unit: '', blurb: 'Remove one random buff from the enemy.' },
+    heal_self: { label: 'HEAL SELF', family: 'recovery', stat: 'mind', unit: '', blurb: 'Heal yourself for a flat amount after damage resolves.' },
     // ── Spec 32 v3 — the themed-deck vocabulary ──
-    mark: { label: 'MARK', family: 'dot', unit: '×', blurb: 'Universal exposure: every DoT tick on the bearer deals +1 per stack.' },
-    stagger: { label: 'STAGGER', family: 'control', unit: '', blurb: "Remove rungs from the enemy's next telegraphed action; at 0 it is denied." },
-    backfire: { label: 'BACKFIRE', family: 'control', unit: '×', blurb: 'While active the enemy takes N per rung its actions lose.' },
-    sway: { label: 'PLEA', family: 'special', unit: '', blurb: 'Stacks on the enemy, decays 1/turn; reaching its resolve opens ACCEPT / CONTINUE.' },
-    reap: { label: 'REAP', family: 'special', unit: '', blurb: 'Spend Souls to fire the printed payoff.' },
-    soul: { label: 'SOUL', family: 'special', unit: '', blurb: 'Gained when an enemy affliction expires or is consumed; spent by REAP.' },
-    foretell: { label: 'FORETELL', family: 'special', unit: '', blurb: "Peek + reorder your deck top and glimpse the enemy's next telegraph." },
-    premise: { label: 'CHARGE', family: 'special', unit: '', blurb: 'The running tally of your argument; a Sentence spends it.' },
-    echo: { label: 'ECHO', family: 'special', unit: '', blurb: 'The printed line fires twice.' },
-    forge: { label: 'FORGE', family: 'special', unit: '', blurb: 'Create a floating die that persists across combats until spent.' },
-    tick: { label: 'TICK', family: 'dot', unit: '', blurb: 'One enemy DoT deals its per-turn damage now; duration untouched.' },
-    draw: { label: 'DRAW', family: 'special', unit: '', blurb: 'Draw cards from your deck.' },
-    oath: { label: 'OATH', family: 'special', unit: '', blurb: 'A persistent player-side passive, rest of combat. Paid only.' },
-    hex: { label: 'HEX', family: 'special', unit: '', blurb: 'A standing curse attached to the enemy, rest of combat. Paid only.' },
+    mark: { label: 'MARK', family: 'dot', stat: 'heart', unit: '×', blurb: 'Universal exposure: every DoT tick on the bearer deals +1 per stack.' },
+    stagger: { label: 'STAGGER', family: 'control', stat: 'heart', unit: '', blurb: "Remove rungs from the enemy's next telegraphed action; at 0 it is denied." },
+    backfire: { label: 'BACKFIRE', family: 'control', stat: 'heart', unit: '×', blurb: 'While active the enemy takes N per rung its actions lose.' },
+    sway: { label: 'PLEA', family: 'special', stat: 'heart', unit: '', blurb: 'Stacks on the enemy, decays 1/turn; reaching its resolve opens ACCEPT / CONTINUE.' },
+    reap: { label: 'REAP', family: 'special', stat: 'body', unit: '', blurb: 'Spend Souls to fire the printed payoff.' },
+    soul: { label: 'SOUL', family: 'special', stat: 'mind', unit: '', blurb: 'Gained when an enemy affliction expires or is consumed; spent by REAP.' },
+    foretell: { label: 'FORETELL', family: 'special', stat: 'grey', unit: '', blurb: "Peek + reorder your deck top and glimpse the enemy's next telegraph." },
+    premise: { label: 'CHARGE', family: 'special', stat: 'mind', unit: '', blurb: 'The running tally of your argument; a Sentence spends it.' },
+    echo: { label: 'ECHO', family: 'special', stat: 'mind', unit: '', blurb: 'The printed line fires twice.' },
+    forge: { label: 'FORGE', family: 'special', stat: 'grey', unit: '', blurb: 'Create a floating die that persists across combats until spent.' },
+    tick: { label: 'TICK', family: 'dot', stat: 'heart', unit: '', blurb: 'One enemy DoT deals its per-turn damage now; duration untouched.' },
+    draw: { label: 'DRAW', family: 'special', stat: 'grey', unit: '', blurb: 'Draw cards from your deck.' },
+    oath: { label: 'OATH', family: 'special', stat: 'mind', unit: '', blurb: 'A persistent player-side passive, rest of combat. Paid only.' },
+    hex: { label: 'HEX', family: 'special', stat: 'heart', unit: '', blurb: 'A standing curse attached to the enemy, rest of combat. Paid only.' },
     // ── Profane Canon (2026-08-08) — the rework vocabulary ──
-    doom: { label: 'DOOM', family: 'dot', unit: '×', blurb: 'A DoT that grows +1 intensity each time the foe acts. No calendar — ends only by consumption.' },
-    immolate: { label: 'IMMOLATE', family: 'special', unit: '', blurb: 'Burn the lowest-rank cards in hand as a cost — they leave the fight entirely.' },
-    purge: { label: 'PURGE', family: 'special', unit: '', blurb: 'This curse card exiles itself from the fight when played.' },
-    requiem: { label: 'REQUIEM', family: 'special', unit: '', blurb: 'Condition line: fires free while your discard pile holds N+ cards.' },
-    fester: { label: 'FESTER', family: 'dot', unit: '×', blurb: 'Every DoT on the enemy gains that much intensity.' },
-    prolong: { label: 'PROLONG', family: 'dot', unit: 't', blurb: 'Every DoT you have on the enemy runs that many turns longer.' },
-    recall: { label: 'RECALL', family: 'special', unit: '', blurb: 'Return cards from your discard pile to hand — highest rank first.' },
-    replay: { label: 'REPLAY', family: 'special', unit: '', blurb: "Your last spell's PAID payload fires again, that many times." },
-    mill: { label: 'MILL', family: 'special', unit: '', blurb: 'Send cards from your deck top to the discard pile.' },
-    recoil: { label: 'RECOIL', family: 'special', unit: '', blurb: 'Pay the printed VITAE as a cost — unpreventable.' },
+    doom: { label: 'DOOM', family: 'dot', stat: 'heart', unit: '×', blurb: 'A DoT that grows +1 intensity each time the foe acts. No calendar — ends only by consumption.' },
+    immolate: { label: 'IMMOLATE', family: 'special', stat: 'body', unit: '', blurb: 'Burn the lowest-rank cards in hand as a cost — they leave the fight entirely.' },
+    purge: { label: 'PURGE', family: 'special', stat: 'grey', unit: '', blurb: 'This curse card exiles itself from the fight when played.' },
+    requiem: { label: 'REQUIEM', family: 'special', stat: 'grey', unit: '', blurb: 'Condition line: fires free while your discard pile holds N+ cards.' },
+    fester: { label: 'FESTER', family: 'dot', stat: 'heart', unit: '×', blurb: 'Every DoT on the enemy gains that much intensity.' },
+    prolong: { label: 'PROLONG', family: 'dot', stat: 'heart', unit: 't', blurb: 'Every DoT you have on the enemy runs that many turns longer.' },
+    recall: { label: 'RECALL', family: 'special', stat: 'grey', unit: '', blurb: 'Return cards from your discard pile to hand — highest rank first.' },
+    replay: { label: 'REPLAY', family: 'special', stat: 'grey', unit: '', blurb: "Your last spell's PAID payload fires again, that many times." },
+    mill: { label: 'MILL', family: 'special', stat: 'grey', unit: '', blurb: 'Send cards from your deck top to the discard pile.' },
+    // S3 (D43) — the grey office's A Plain Word.
+    vulnerable: { label: 'VULNERABLE', family: 'control', stat: 'heart', unit: '%', blurb: 'The foe takes that much more damage from every hit. Stacks; re-applying refreshes the turns.' },
+    recoil: { label: 'RECOIL', family: 'special', stat: 'grey', unit: '', blurb: 'Pay the printed VITAE as a cost — unpreventable.' },
 } satisfies Record<string, KeywordMeta>;
 
 export type KeywordId = keyof typeof KEYWORDS;

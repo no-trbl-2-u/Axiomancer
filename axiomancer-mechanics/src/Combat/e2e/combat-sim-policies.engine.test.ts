@@ -71,7 +71,8 @@ const ALL_POLICY_IDS: readonly CombatSimPolicyId[] = [
 function loadout(cards: string[]): Character {
     const p = deepClone(Player);
     p.knownCards = cards.slice();
-    p.baseStats = { heart: 10, body: 10, mind: 10 };
+    // Neutral stats (S3): printed numbers land as printed.
+    p.baseStats = { heart: 5, body: 5, mind: 5 };
     p.health = 150;
     p.maxHealth = 150;
     return p;

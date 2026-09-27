@@ -18,6 +18,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
+import { previewStatAllocation } from '@mechanics';
 
 import { StanceRow, type LevelStance } from '@/components/levelup/StanceRow';
 import { pickFlavor } from '@/components/levelup/levelUpFlavor';
@@ -101,6 +102,12 @@ export function LevelUpModal({
     }, [fullyAllocated, onCommit, spent]);
 
     const flavor = useMemo(() => pickFlavor(toLevel), [toLevel]);
+    // S3 (D41) — the engine's own VITAE formula previews what the spend buys
+    // (body is worth 12 VITAE a point, mind and heart 6), never restated here.
+    // Shown as the GAIN: relic bonuses sit on top of the formula, so the gain
+    // is exact where an absolute total would not be.
+    const vitaeGain = previewStatAllocation(current, toLevel, spent).maxHealth
+        - previewStatAllocation(current, toLevel, { heart: 0, body: 0, mind: 0 }).maxHealth;
 
     const styles = useStyles();
 
@@ -168,6 +175,12 @@ export function LevelUpModal({
                             onDec={() => onDec(stance)}
                         />
                     ))}
+                </View>
+
+                {/* S3 — the VITAE this allocation buys */}
+                <View style={styles.vitaeRow} testID="levelup-modal-vitae">
+                    <Text style={styles.pointsLabel}>MAX VITAE</Text>
+                    <Text style={styles.vitaeValue}>+{vitaeGain}</Text>
                 </View>
 
                 {/* Reset link */}
@@ -379,6 +392,18 @@ const useStyles = makeStyles((AXM) => ({
         textShadowRadius: 6,
     },
     stanceRows: { marginTop: 12, gap: 6 },
+    vitaeRow: {
+        marginTop: 10,
+        paddingHorizontal: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    vitaeValue: {
+        fontFamily: FONTS.mono,
+        fontSize: 15,
+        color: AXM.sulfur,
+    },
     resetRow: { alignItems: 'flex-end', marginTop: 8 },
     resetLabel: {
         fontFamily: FONTS.serifItalic,

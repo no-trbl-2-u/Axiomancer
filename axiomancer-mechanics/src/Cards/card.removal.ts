@@ -73,7 +73,7 @@ import type {
  * below this is REFUSED, not clamped.
  *
  * **10, re-derived by Phase 104 (the grey office).** A fresh run now deals a
- * 10-card starting deck (`grey-strike` ×7, `grey-ward` ×3 — see
+ * 10-card starting deck (`grey-strike` ×5, `grey-ward` ×3, `grey-word` ×2 — see
  * `Combat/combat.rewards.ts`'s `STARTING_CARD_IDS`), the smallest shipped
  * starting shape in the tree, so the floor tracks it: **10 = 2 ×
  * `COMBAT_HAND_SIZE`** (5), the reshuffle-inside-one-round bound below which

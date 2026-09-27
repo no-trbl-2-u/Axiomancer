@@ -7,7 +7,7 @@
  * Pure reads over hand-built `ActiveEffect[]`:
  *   - getDamageTakenMultiplier   (exactly 1 without a marker — no v3 effect
  *     carries a plain damageTakenMult; the machinery is kept for enemies/tests)
- *   - getStanceVulnMult          (stance-keyed vulnerability, clamped)
+ *   - getStanceVulnMult          (stance-keyed vulnerability, uncapped)
  *   - getPendingDotTotal / consumeDotEffects / consumeAfflictions (RUPTURE fuel)
  *   - getDistinctDebuffCount / getDistinctControlCount
  *   - getActiveDotTotal / getActiveDotAmplifications  (amplification surface)
@@ -36,7 +36,6 @@ import {
     getDamageTakenMultiplier, getStanceVulnMult, getPendingDotTotal,
     consumeDotEffects, consumeAfflictions, consumeMarks,
     getDistinctDebuffCount, getDistinctControlCount,
-    VULNERABLE_MAX_MULT,
 } from '../effects';
 import { getActiveDotTotal, getActiveDotAmplifications, getTickAmplifyFlat } from '../effect-modifiers';
 
@@ -95,10 +94,9 @@ describe('getStanceVulnMult — stance-keyed vulnerability (Fate Engine P1 #17)'
         expect(getStanceVulnMult(c, 'x')).toBe(1);
     });
 
-    it('scales with intensity and clamps at VULNERABLE_MAX_MULT', () => {
+    it('scales with intensity and is uncapped (S3, D41)', () => {
         expect(getStanceVulnMult(combatant([ae('test_vuln_body', 2)]), 'body')).toBe(2.0);
-        expect(getStanceVulnMult(combatant([ae('test_vuln_body', 3)]), 'body')).toBe(VULNERABLE_MAX_MULT);
-        expect(VULNERABLE_MAX_MULT).toBe(2.0);
+        expect(getStanceVulnMult(combatant([ae('test_vuln_body', 3)]), 'body')).toBe(2.5);
     });
 });
 

@@ -252,8 +252,31 @@ const greyWard: Card = {
     tags: ['grey', 'starter'],
 };
 
-/** The two grey-office starters (Phase 104) — never a reward, never a curse. */
-export const GREY_OFFICE_CARDS: Card[] = [greyStrike, greyWard];
+// A Plain Word — T's guided S3 session, 2026-09-27 (D42, D43). The grey
+// office's heart verb: VULNERABLE lands on the foe, so heart scales its
+// percentage (`stat-scaling.ts`). Grey frame like its siblings.
+const greyWord: Card = {
+    id: 'grey-word',
+    theme: 'grey',
+    name: 'A Plain Word',
+    color: 'any',
+    description:
+        'No flourish, no colour, no argument. You tell it plainly what it ' +
+        'is, and it cannot unhear you.',
+    tier: 1, rank: 1, cardType: 'spell',
+    targetType: 'enemy',
+    paidSummary: 'VULNERABLE +25% for 2 turns.',
+    // D43: +25% for 2 turns, adds up and refreshes on re-application; FREE is
+    // the same verb at whisper volume. Both scale with heart.
+    free: { applyEffect: { effectId: 'debuff_vulnerable', intensity: 10, duration: 1 } },
+    combatEffects: [{ effectId: 'debuff_vulnerable', appliedTo: 'opponent', intensity: 25, duration: 2 }],
+    addedIn: '2026-09-27',
+    tags: ['grey', 'starter'],
+};
+
+/** The three grey-office starters (Phase 104; A Plain Word, D42) — never a
+ *  reward, never a curse. */
+export const GREY_OFFICE_CARDS: Card[] = [greyStrike, greyWard, greyWord];
 
 // ─── THE CURSES — what the world puts in your deck ───────────────────────────
 // Rank 1, theme `curse`, PAID line is PURGE (buy the deck clean for a die and

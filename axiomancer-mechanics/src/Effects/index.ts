@@ -20,6 +20,9 @@ import { MAX_EFFECT_INTENSITY, MAX_EFFECT_DURATION } from '../Game/game-mechanic
  * @property durationMode   - `reset` resets duration to effect.duration (default).
  *                            `additive` adds `durationDelta` to remaining duration.
  * @property durationDelta  - Used when `durationMode === 'additive'`. Defaults to `intensityDelta`.
+ * @property uncapped       - S3 (D41, "nothing is capped"): skip the
+ *   `MAX_EFFECT_INTENSITY` clamp. Set by the player's stat-scaled
+ *   applications; enemy applications keep the clamp.
  * @property sourceId       - Phase 38. Optional combatant / item id stamped onto
  *   the resulting `ActiveEffect.sourceId` so consumers can answer "who applied
  *   this?". On stacking, last-writer-wins: a supplied `sourceId` overrides the
@@ -29,6 +32,7 @@ export interface ApplyEffectOptions {
     intensityDelta?: number;
     durationMode?: 'reset' | 'additive';
     durationDelta?: number;
+    uncapped?: boolean;
     sourceId?: string;
 }
 
@@ -63,11 +67,12 @@ export function applyEffect(
     const intensityDelta = options?.intensityDelta ?? 1;
     const durationMode   = options?.durationMode   ?? 'reset';
     const durationDelta  = options?.durationDelta  ?? intensityDelta;
+    const intensityCap   = options?.uncapped ? Infinity : MAX_EFFECT_INTENSITY;
 
     const existing = activeEffects.find(e => e.effectId === effect.id);
 
     if (!existing) {
-        const initIntensity = Math.min(intensityDelta, MAX_EFFECT_INTENSITY);
+        const initIntensity = Math.min(intensityDelta, intensityCap);
         const initDuration  = durationMode === 'additive'
             ? Math.min(durationDelta, MAX_EFFECT_DURATION)
             : Math.min(effect.duration, MAX_EFFECT_DURATION);
@@ -98,10 +103,16 @@ export function applyEffect(
 
         case 'intensity': {
             const prev         = existing.intensity ?? 1;
-            const newIntensity = Math.min(prev + intensityDelta, MAX_EFFECT_INTENSITY);
-            const newDuration  = durationMode === 'additive'
-                ? Math.min(existing.remainingDuration + durationDelta, MAX_EFFECT_DURATION)
-                : Math.min(effect.duration, MAX_EFFECT_DURATION);
+            const newIntensity = Math.min(prev + intensityDelta, Math.max(intensityCap, prev));
+            // `refreshOnStack` (VULNERABLE, D43): a re-application adds its
+            // intensity and REFRESHES the clock to the longer of what is left
+            // and what the new application brings; it never extends past that.
+            const incoming     = durationMode === 'additive' ? durationDelta : effect.duration;
+            const newDuration  = effect.refreshOnStack
+                ? Math.min(Math.max(existing.remainingDuration, incoming), MAX_EFFECT_DURATION)
+                : durationMode === 'additive'
+                    ? Math.min(existing.remainingDuration + durationDelta, MAX_EFFECT_DURATION)
+                    : Math.min(effect.duration, MAX_EFFECT_DURATION);
 
             // POISON ramp reset (spec 32 v3): an `escalatesPerTurn` DoT restarts
             // its ramp clock on reapplication — `rampedDamagePerRound` measures

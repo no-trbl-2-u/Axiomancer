@@ -110,9 +110,9 @@ describe('createAppActions: dispatch', () => {
 
         // Every seeded starter card must resolve, verbatim copies kept.
         expect(player.knownCards).toEqual([
-            'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike',
-            'grey-strike', 'grey-strike', 'grey-strike',
+            'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike',
             'grey-ward', 'grey-ward', 'grey-ward',
+            'grey-word', 'grey-word',
         ]);
         for (const id of player.knownCards) {
             expect(getCardById(id)).toBeTruthy();
@@ -135,7 +135,9 @@ describe('createAppActions: dispatch', () => {
         expect(deck.length).toBe(10);
         expect(visible.length).toBeGreaterThanOrEqual(5);
         const distinct = new Set(visible.map(({ card }) => card.id));
-        expect(distinct).toEqual(new Set(['grey-strike', 'grey-ward']));
+        // Seed 7 deals from the 5/3/2 grey recipe (S3); every card is grey.
+        for (const id of distinct) expect(['grey-strike', 'grey-ward', 'grey-word']).toContain(id);
+        expect(distinct.has('grey-strike')).toBe(true);
         // grey-ward defends; grey-strike's plain `deal` mechanic falls to the
         // classifier's default bucket (no dedicated direct-damage class for
         // a bare hit — see `classifyVerbClass`).

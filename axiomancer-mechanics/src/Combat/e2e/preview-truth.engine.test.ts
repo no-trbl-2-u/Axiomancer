@@ -42,7 +42,8 @@ import type { CombatDieColor, CombatEncounterState, CombatThreatPhase } from '..
 function makePlayer(cards: string[]): Character {
     const p = deepClone(Player);
     p.knownCards = cards.slice();
-    p.baseStats = { heart: 8, body: 8, mind: 8 };
+    // Neutral stats (S3): printed numbers land as printed.
+    p.baseStats = { heart: 5, body: 5, mind: 5 };
     p.health = 400; p.maxHealth = 400;
     return p;
 }

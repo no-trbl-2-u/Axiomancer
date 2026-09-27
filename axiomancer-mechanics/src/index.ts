@@ -25,6 +25,7 @@ export {
     grantFirstNodeRelic, withholdFirstNodeRelic, isFirstNodeRelicPending,
     FIRST_NODE_RELIC_ID, STAND_IN_RELIC_ID, FIRST_NODE_RELIC_FLAG,
     levelLadderPresets,
+    previewStatAllocation,
 } from './Character';
 export type {
     Character, BaseStats,
@@ -54,7 +55,7 @@ export {
     heal, isDefeated,
     getActiveEffectModifiers, canAct,
     // 0.34.0 status-depth epic — HP-model selectors + tunable scalars
-    VULNERABLE_MAX_MULT, RUPTURE_CAP_FRACTION,
+    RUPTURE_CAP_FRACTION,
     DISRUPT_DENY_AT,
     CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
     healCharacter,
@@ -113,6 +114,13 @@ export {
     DEFAULT_DIE_GEAR, activeDieGear,
 } from './Combat';
 export type { UpgradeableDieGear } from './Combat';
+// S3 — stat scaling (D40–D43).
+export {
+    scaleAmount, scaleFor, statFor, scaleRider, scaleCardForStats,
+    scaleEffectIntensity, effectScaling, effectFamily,
+    MECHANIC_SCALING, RIDER_SCALING, PAYLOAD_SCALING, NEUTRAL_STAT,
+} from './Combat';
+export type { StatFamily, ScalingKind, KeywordScaling } from './Combat';
 export type {
     CombatEncounterState,
     CombatManaDie, CombatDieColor,

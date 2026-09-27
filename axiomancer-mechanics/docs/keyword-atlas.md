@@ -54,6 +54,7 @@ mid-flight. Run `npm run catalog` for the current binding.
 | **BLEED iN dM** | Each hit the bearer takes deals extra VITAE per Bleed stack, then removes a stack. | (see the catalog) |
 | **DOOM iN** | Deals VITAE per stack at the start of each round and grows a stack every time the foe acts. It ends only when consumed. | (see the catalog) |
 | **MARK iN dM** | Every damage-over-time tick on the bearer deals +1 VITAE per Mark stack. Marks hold until consumed, not until a calendar expires. | (see the catalog) |
+| **VULNERABLE +N% dM** | The foe takes N% more damage from every hit. Re-applying adds up and refreshes the turns; uncapped. Heart scales N (S3, D43). | grey-word |
 | **RUPTURE N** | Consumes the foe's afflictions and deals their remaining damage at once. ALL-spenders are uncapped. | (see the catalog) |
 | **FESTER N** | Every damage-over-time effect on the foe gains that much intensity. | (see the catalog) |
 | **PROLONG N** | Adds that many turns to every damage-over-time effect you have on the foe. | (see the catalog) |
