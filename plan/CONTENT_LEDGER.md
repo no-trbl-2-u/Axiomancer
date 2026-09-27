@@ -20,11 +20,54 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-26 | de4d77b3 | 20 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-26 | 3136aacf | 20 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-26 | 2b289bb2 | 19 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-26 | 27bd4d2d | 19 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-27 | c250a53c | 20 |
 
 ## Log
 
 ```
+> **[adjust-npcs pass 20, 2026-09-27, base c250a53c]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE. One new finding, filed rather than shipped.
+> `/march` dispatched this through Step 3b. With `cards`/`keywords` on THE
+> CARD HOLD, the three eligible categories all cleared the 15-commit bar:
+> `npcs` (`27bd4d2d`, 46 commits, last pass 06:58Z yesterday) was the
+> stalest, ahead of `equipment` (43) and `enemies` (35). No unlabeled
+> issues or `loop:do`, and critique wasn't due (8 commits, ~8h since pass
+> 56). No `[ ]` phase rows (M5 just shipped). The growth floor was clear
+> (M4 `571d5b3f`). Deploy was green: HEAD is plan-only, and
+> verify-mechanics passed at `1ec11390`.
+>
+> **Step 1 audit, run fresh.** It used a throwaway vitest script over
+> `MAP_REGISTRY`, deleted after the run. Six commits since pass 19 touch the
+> NPC/world surface: M3b–M3e, M4, and T's D30–D35 filing. None of them
+> touch `src/NPCs/**`. The dialogue structure is clean:
+> - 21 staged NPCs, with Coastal-Village's 3-NPC `unstagedNpcs` backlog
+>   unchanged (still blocked on `openShop`).
+> - No flat `DialogueMap` NPCs, no dangling `nextNodeId`, no bad roots, and
+>   no `teachCard` pointing at a missing card. Quest refs are `QuestName`,
+>   so the typecheck pins them.
+> - Every choice-less node was read and is a closing line, not a dead end.
+>
+> **The new finding: the Charcoal Wood, the Beacon Crags and the Lantern
+> Deep have 0 staged NPCs.** M3b–M3d shipped them empty, as D29 requires.
+> With the Breakwater (already filed, D34), every Act 1 map is empty of
+> people, so a new game crosses four maps before its first conversation.
+> Each map's story-overview row frames its open question as a person ("who
+> the burners are", "who keeps the beacon", "who carried the lanterns
+> down"). That makes it hard-rule-3 territory, so it went to `plan/AUDIT.md`
+> as a `[needs-user-call]` row that proposes folding it into the Breakwater
+> session: one Act 1 people session, or a D-row ruling some maps stay
+> unpeopled. The Aporia colonnade also has `npcs: []`. It was not filed:
+> W-01 specs no inhabitants, and the Labyrinth is a separate continent.
+>
+> **KB run** (receipts for the filing; there was no CREATE/UPDATE to gate).
+> `kb_search` (all scopes) for empty-region / thin-narrative complaints
+> found no dialogue prior art, an expected miss for this corpus. No
+> wishlist was filed: pass 19 logged the same miss, and the filing stands
+> without it.
+>
+> No code changed, so the verify gate wasn't needed. deploy:check runs
+> after the push.
+
 > **[adjust-equipment pass 20, 2026-09-26, base de4d77b3]** Zero-CREATE,
 > 1 UPDATE, zero-REMOVE — dispatched by `/march` Step 3b: `equipment`
 > (`4d21e8ee`, 85 commits, ~31h) was stalest; `enemies` (`be37a6a3`, 83)

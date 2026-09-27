@@ -90,6 +90,31 @@
   them (`npcs:` on the map, dialogue via `content-curator`) and point
   `quest-giver-reachable` at the default start.
 
+### [gap] The rest of Act 1 has no people either: the Charcoal Wood, the Beacon Crags, the Lantern Deep [needs-user-call]
+- category: gap
+- impact: 5
+- ease: 4
+- detail: filed 2026-09-27 by `/adjust-npcs` pass 20. M3b–M3d shipped the
+  three maps with `npcs: []`, as D29 requires ("No new enemies, NPCs or
+  events in the map PRs … a need the pools can't meet is filed to
+  `adjust-npcs`"). Each trips the steward's "map with fewer than 2 staged
+  NPCs → CREATE" signal. With the Breakwater row above, that makes all four
+  Act 1 maps empty of people. A new game crosses four maps before its first
+  conversation (fishing-village). Each map's "What happens here" in
+  `content/story/story-overview.md` names the open question as a person:
+  "Who the burners are" (Charcoal Wood), "Who keeps the beacon, and who it
+  signals" (Beacon Crags), "Who carried the lanterns down" (Lantern Deep).
+  These are personhood calls, and hard rule 3 forbids inventing them alone.
+  D34 set the precedent for the Breakwater (its own people, from a
+  story-spec session, not moved from fishing-village), so this is the same
+  shape rather than a loop phase.
+- next: fold into the Breakwater's attended `story-spec` session (one Act 1
+  people session, not four): answer each map's "who" line, draft 1–2 people
+  per map for T's sign-off, then stage them (`npcs:` on the map, dialogue via
+  `content-curator`). Or T rules that some Act 1 maps stay deliberately
+  unpeopled, and that ruling gets recorded as a D-row so the steward stops
+  re-flagging them.
+
 ### [debt] Source comments still name the retired `/deck-tuning` loop (2026-09-25)
 - category: debt
 - impact: 2
