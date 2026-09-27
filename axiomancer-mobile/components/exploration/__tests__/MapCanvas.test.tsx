@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { render, fireEvent } from '@testing-library/react-native';
 import { State } from 'react-native-gesture-handler';
 import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-handler/jest-utils';
-import { MapCanvas, computeFocusTransform, focusKeyOf, edgeStroke } from '../MapCanvas';
+import { MapCanvas, computeFocusTransform, focusKeyOf, edgeStroke, minScaleFor } from '../MapCanvas';
 import type { ExplorationNode, ExplorationEdge } from '@/state/presenters/exploration.engine';
 
 // The stock reanimated mock builds a fresh `{ value }` box on EVERY render
@@ -477,13 +477,47 @@ describe('computeFocusTransform', () => {
         expect(fit.scale).toBe(1);
     });
 
-    it('clamps to the minimum scale rather than shrinking without bound', () => {
+    it('clamps to the whole-plate floor rather than shrinking without bound', () => {
         const nodes: ExplorationNode[] = [
             { id: 'left',  label: 'Left',  kind: 'available', type: 'encounter', x: 0,   y: 0,   triggersCombat: false },
             { id: 'right', label: 'Right', kind: 'available', type: 'encounter', x: 1000, y: 1000, triggersCombat: false },
         ];
         const fit = computeFocusTransform(nodes, { w: 400, h: 800 });
-        expect(fit.scale).toBe(0.6);
+        // Legacy sheet is 936px wide: the floor is the scale that shows it whole.
+        expect(fit.scale).toBeCloseTo(400 / 936, 5);
+        expect(fit.scale).toBe(minScaleFor({ w: 400, h: 800 }));
+    });
+
+    it('fits the Breakwater start fan on a phone (2026-09-26 playthrough)', () => {
+        // A 2400px-square plate (map revamp M2+) at 394x557: the windmill and
+        // its four exits span ~840x985 canvas px. The old flat 0.6 floor left
+        // every exit off-screen; the fit must reach the ~0.37 it needs.
+        const sheet = { width: 2400, height: 2400, scale: 1 };
+        const viewport = { w: 394, h: 557 };
+        const nodes: ExplorationNode[] = [
+            { id: 'bw-1', label: 'Windmill', kind: 'current',   type: 'rest',      x: 1150, y: 1130, triggersCombat: false },
+            { id: 'bw-2', label: 'Quay',     kind: 'available', type: 'encounter', x: 1080, y: 770,  triggersCombat: false },
+            { id: 'bw-3', label: 'Gallows',  kind: 'available', type: 'hazard',    x: 1630, y: 1270, triggersCombat: false },
+            { id: 'bw-4', label: 'Pass',     kind: 'available', type: 'gather',    x: 1460, y: 1755, triggersCombat: false },
+            { id: 'bw-5', label: 'Cove',     kind: 'available', type: 'treasure',  x: 790, y: 1400, triggersCombat: false },
+        ];
+        const fit = computeFocusTransform(nodes, viewport, sheet);
+        expect(fit.scale).toBeLessThan(0.6);
+        for (const n of nodes) {
+            const sx = n.x * fit.scale + fit.tx;
+            const sy = n.y * fit.scale + fit.ty;
+            expect(sx).toBeGreaterThanOrEqual(0);
+            expect(sx).toBeLessThanOrEqual(viewport.w);
+            expect(sy).toBeGreaterThanOrEqual(0);
+            expect(sy).toBeLessThanOrEqual(viewport.h);
+        }
+    });
+
+    it('never floors below showing the whole plate', () => {
+        const sheet = { width: 2400, height: 2400, scale: 1 };
+        expect(minScaleFor({ w: 394, h: 557 }, sheet)).toBeCloseTo(394 / 2400, 5);
+        // A plate smaller than 0.6 needs keeps the familiar floor.
+        expect(minScaleFor({ w: 1200, h: 900 })).toBe(0.6);
     });
 });
 

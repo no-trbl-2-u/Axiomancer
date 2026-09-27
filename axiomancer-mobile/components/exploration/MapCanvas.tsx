@@ -49,6 +49,25 @@ export function canvasSizeOf(size: SheetSize): { w: number; h: number } {
 const MIN_SCALE = 0.6;
 const MAX_SCALE = 3;
 
+/**
+ * The zoom-out floor for this sheet in this viewport: `MIN_SCALE`, or lower
+ * if that is what it takes to see the whole plate at once — never lower.
+ *
+ * A flat 0.6 was tuned on the 936px legacy sheet, where it already shows more
+ * than a phone's width. Map revamp M2 moved to per-sheet plates (the
+ * Breakwater is 2400px square), and at 0.6 a phone sees about a quarter of
+ * one: the fit clamped there and every open node from the Breakwater's start
+ * windmill sat off-screen, with RECENTRE re-running the same clamped fit.
+ * Found by the 2026-09-26 agent playthrough.
+ *
+ * Exported for unit coverage; the fit and the pinch share it so a pinch that
+ * starts below 0.6 does not snap up.
+ */
+export function minScaleFor(viewport: { w: number; h: number }, size: SheetSize = LEGACY_SHEET_SIZE): number {
+    const canvas = canvasSizeOf(size);
+    return Math.min(MIN_SCALE, viewport.w / canvas.w, viewport.h / canvas.h);
+}
+
 // CRITIQUE.md [MED] "open map nodes just off-screen no-op silently on tap"
 // (pass, 2026-08-29): the prior initial-camera effect centred on the focus
 // nodes' centroid at a fixed scale of 1, so a wide branch (several
@@ -128,7 +147,7 @@ export function computeFocusTransform(
 
     const fitScaleX = bboxW > 0 ? (viewport.w - FIT_PADDING * 2) / bboxW : MAX_SCALE;
     const fitScaleY = bboxH > 0 ? (viewport.h - FIT_PADDING * 2) / bboxH : MAX_SCALE;
-    const scale = Math.max(MIN_SCALE, Math.min(1, fitScaleX, fitScaleY));
+    const scale = Math.max(minScaleFor(viewport, size), Math.min(1, fitScaleX, fitScaleY));
 
     return { scale, tx: viewport.w / 2 - cx * scale, ty: viewport.h / 2 - cy * scale };
 }
@@ -364,10 +383,11 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [viewport, focusKey, size.width, size.height, size.scale, commitCamera]);
 
+    const minScale = viewport ? minScaleFor(viewport, size) : MIN_SCALE;
     const pinch = Gesture.Pinch()
         .onUpdate((e) => {
             const next = savedScale.value * e.scale;
-            scale.value = Math.min(MAX_SCALE, Math.max(MIN_SCALE, next));
+            scale.value = Math.min(MAX_SCALE, Math.max(minScale, next));
         })
         .onEnd(() => {
             savedScale.value = scale.value;
