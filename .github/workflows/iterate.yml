@@ -2,8 +2,8 @@ name: iterate
 
 # One improvement tick: /iterate audits the project, picks the
 # highest-impact weakness, ships one fix end-to-end (see skills/iterate.md).
-# Dispatch-only — /march already dispatches to iterate on schedule; run
-# this directly when you want an extra quality pass without a full march.
+# Dispatch-only. During the revamp /march does not dispatch iterate (D58);
+# run this directly when you want a quality pass.
 #
 # Model tier: this standalone workflow runs Opus 5.5 at medium effort (a
 # deliberate quality pass is worth the premium model). March-dispatched
