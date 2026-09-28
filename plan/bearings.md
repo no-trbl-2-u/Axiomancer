@@ -763,6 +763,23 @@ ambiguity.)
   phase that would. `adjust-cards` and `adjust-keywords` are paused
   (`skills/march.md` §3b skips them) until T re-arms them. Enemies,
   equipment, NPCs, maps and the rest of the loop carry on.
+  **Amended 2026-09-28 (D56, D58):** before any card, card-type or keyword
+  work starts, the full card-rules inventory (Phase B4,
+  `plan/revamp/cards.md`) must be merged — card types, keyword families,
+  pricing, rarity/rank, tiers, colour, FREE/PAID anatomy, complexity budget,
+  the carrier rule and every guard that pins them. **The card process
+  plan is not picked** (three candidates, A/B/C, in
+  `plan/2026-09-27-keyword-card-revamp.plans.md`); until T picks, any agent
+  discussing card work recommends T open
+  `plan/2026-09-27-keyword-card-revamp.summary.html` to choose.
+- **THE REVAMP (T, attended session 2026-09-28, D46–D64) — RATIFIED 2026-09-28.**
+  `plan/revamp/README.md` is the main build plan; its §7 is the recommended
+  order. `/march` and `night` stay disabled until Phase R0 (attended)
+  merges. The loop ships only ratified revamp phases (plus fix-ci and
+  critique) and **creates no content of any kind** — cards, keywords,
+  enemies, relics, maps, NPCs, events or art (D58). Where this contradicts
+  older standing text in this file (THE UNSHACKLING, open keyword growth,
+  steward rotation), D58 wins; R0 reconciles the text.
 
 ## AUDIT category taxonomy (this project)
 

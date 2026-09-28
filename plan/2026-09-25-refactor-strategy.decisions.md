@@ -425,6 +425,173 @@ re-earns its row in a guided session (D37). The 19 player rows that remain
 each have a live carrier. *Rejected:* keeping words that only enemy reminder
 text named (the 2026-09-27 audit's reading).
 
+The next fifteen came from the 2026-09-28 attended audit session. T asked
+what else was unused, underused or inconsistent ("clean house before I
+start building back up"). Seven read-only audits ran (engine, mobile,
+content, tooling, core loop, content stewards, design skills), and T
+answered the findings one ballot question at a time. The plan is
+`plan/revamp/` (README = main build plan); every ruling below was PROPOSED
+there until T ratified it (D64).
+
+**D46 — THE REVAMP: reset to a small core, then rebuild in owner-led
+sessions.** (T, 2026-09-28: "a map of how to reset back to 0 while
+maintaining the core mechanics"; "each major part of the revamp should have
+its own plan file and then one main revamp build plan file".) The plan
+lives in `plan/revamp/`: `README.md` orders R-phases (reset, loop-shippable
+once ratified) and B-phases (rebuild, T's sessions). `/march` and `night`
+were disabled on GitHub the same day and stay off until ratification and
+R0. *Rejected:* flat dated files at `plan/` root; one big file.
+
+**D47 — Relics keep signatures; every signature is GUARD 5 at a flat cost,
+except The Open Hand, which becomes a real befriend.** (T: "Relics should
+still have SigSkills, 100%. I just need to do a pass to create a few
+relics"; "let's set all their effects to GUARD 5. Then we can clean up more
+keywords"; "Leave the starting ring with befriend".) Names and relics stay;
+cost is flat (≈4◆). The Suppliant's Ring's The Open Hand is rewired to open
+the mercy choice, which it never did. The Butcher's Bill's unbounded
+per-stack damage (2 × every stack; VULNERABLE 25+ bypasses the cap of 30)
+is recorded for the relic pass (B1), with no stopgap. *Rejected:* purging
+signatures; a minimal utility core; keeping current costs; one generic
+signature.
+
+**D48 — The enemy roster resets to one normal, one elite and one boss, all
+keywords and afflictions stripped.** (T: "retire all enemies except for 3
+or so"; then "1 normal enemy, 1 Elite, and 1 Boss. All with their keywords
+stripped"; "Strip afflictions from the survivors".) Float-Eye (normal, L1),
+Brine Hag (elite, L7), The Doorwarden (boss, L8). The other 76 retire,
+including the King of Revenge (D53). WOUNDING's missing card, UNSHAKEN and
+ELUSIVE's lost counter, HIDE 8 against a Blow of 5, the 22 PLEA/premise
+riders and the curse-injection code all go with them. *Rejected:* retuning
+HIDE in place; remapping riders; keeping the roster; Larva/Skull/King; a
+keyword-bearing boss.
+
+**D49 — Consumables reset to healing potions.** (T, ballot.) The 11 no-op
+consumables, Antidote, Clarity Serum and the stat buffs retire behind a save
+migration. *Rejected:* one potion; cutting only the dead ones.
+
+**D50 — Delete carrier-less engine mechanics; git history is the archive.**
+(T: "Delete; git history is the archive.") The 47 card mechanic kinds with
+no carrier, their handlers, state fields, synergy, pricing, oath/hex zones,
+empty registries and retired-verb fixtures are deleted. This supersedes the
+P1 brief's "engine mechanics stay" and the same clause in D45. Card rewards
+stay (D44), but the keyword-, theme- and rarity-focused selection logic is
+gutted, with a research note to find how rewards best steer players toward
+focused deckbuilding. *Rejected:* a `_dormant/` quarantine; keeping them
+live.
+
+**D51 — Card types are Attack, Skill and Spell.** (T: "I want to purge
+card-types as well. For now, Attack (ie. DEAL card), Skill (ie. WARD card),
+and Spell (ie. the vulnerable card) are the only 3 card types with a plan
+for more.") Replaces `spell | oath | hex`.
+
+**D52 — Hazards reset to a minimal set.** (T: "Reset hazards too. I plan on
+changing some of the fundamental mechanics of hazard.") The four rewards
+that lie (Paradox Token, Hexed, Bonus Relic, Shrine Cache) go with the
+reset; T redesigns the mechanics in B3. *Rejected:* cutting/renaming only
+those four; wiring them.
+
+**D53 — The world is Act 1 only; fishing-village and the King are purged.**
+(T: "Reset the world to Act 1 only"; then, told the King lives in
+fishing-village after Act 1: "Act 1 only, purge the king, purge the fishing
+village".) Act 1 = Breakwater, Charcoal Wood, Beacon Crags, Lantern Deep.
+Fishing-village (map, NPCs, quests, events, village goodwill) is deleted;
+northern-forest and the northern continent are parked. *Rejected:* keeping
+fishing-village as the finale; moving the King into Act 1.
+
+**D54 — The Labyrinth door is sealed and the module parked.** (T, ballot.)
+`ld-15` never opens; the code stays; a later re-theme (B9) drops the
+fallacies and the Borrowed Premise debt. *Rejected:* cutting it; keeping it
+live on the survivors.
+
+**D55 — XP and levels are retuned after the resets.** (T, ballot.) R9 sizes
+the curve so Act 1 on the three survivors yields about 3–4 level-ups,
+checked against the S3 curve. *Rejected:* a placeholder flattening now;
+leaving it.
+
+**D56 — The card editor is deleted; a card-creator workflow is built later;
+card work starts with a full rules inventory.** (T: "Delete the package. Add
+a Create Card-editor/Card-creator workflow phase to the card-creation
+build-plan"; "before we start work on cards, determine 100% what
+fixtures/rules exist around cards (ie. card types, keyword families,
+pricing, rarity, etc)".) The inventory is Phase B4 and gates every card
+session. *Rejected:* freezing or updating the editor in place.
+
+**D57 — The deck-matrix baseline is retired until the retune; the DevLog
+shows only live content.** (T: "Retire it until the retune phase"; tuning-lab
+pages archived, catalog shrunk.) The baseline measured preset/policy axes
+that no longer exist; `baseline:check`, its hook, docs and the nightly
+re-measure go. *Rejected:* reshaping it now to survivors × stage.
+
+**D58 — During the revamp the loop ships only ratified revamp phases and
+creates no content.** (T, ballot.) `/march` runs R-phases plus fix-ci and
+critique. The six content stewards, `card-expert`, `mechanics-expert`,
+`reader`, `content-curator`, `brainstorm-mechanics`, the three spec skills
+and the kb-query skill are archived; every core verb is kept and its
+doctrine fixed; only `ci-autofix` changes among the workflows. Scout and
+playtester stay. *Rejected:* staying paused for the whole revamp; the full
+loop with stewards; a slimmed verb set; a single dispatcher workflow.
+
+**D59 — The enemy revamp adds an Act Boss type and four placement tiers.**
+(T: "Normal enemies scattered; Elite enemies scattered, but fewer than
+normal; Region Bosses (block region completion); Act Bosses (block act
+completion)".) Phase B2. Overturns D30 ("Act 1 has no bosses").
+
+**D60 — Mobile: the Deck tab and card art get their own revamp phases; the
+app label is the product name.** (T: "Leave as-is for now knowing that I
+want to do a Revamp Deck Tab UI phase"; "Map the existing paintings, drop
+dead rows, AND … a card art revamp phase"; the launcher label becomes
+"Miserere Mei, Deus".) B7, B8; R8 maps placeholder art and sets `expo.name`.
+
+The last three came from the same session: T walked the plan's open calls
+(`plan/revamp/README.md` §6) one at a time.
+
+**D61 — Act 1's shape during the reset: the Doorwarden guards every
+region's door, the deep stair is sealed, and each region gets an Anvil.**
+(T: "Doorwarden ends every region"; "Sealed, like the vault door"; the Anvil
+"Re-home to exist once per region (at least for right now, and near the
+region exit)".) Float-Eye takes the normal fights and the Brine Hag is a
+rarer mid-region fight. The Doorwarden on `bw-17`, `cw-17`, `bc-15` and
+the Lantern Deep's column-5 node previews D59's region bosses and overturns
+D30 everywhere. The Lantern Deep's deep stair, which led to the purged
+fishing-village, is sealed; there is no end-of-run state. The Anvil's only
+placement was a fishing-village node (Phase 60); the existing event is
+re-homed near each region's exit. *Rejected:* the Doorwarden ending only
+Act 1; keeping D30 with the boss unplaced; a terminal end scene; looping
+back to the Breakwater; parking or cutting the Anvil.
+
+**D62 — The reset leaves the dev menu alone; a Dev Menu revamp (B10) and a
+theme-colour phase (R10) are added.** (T: "Let's go over the Dev Menu as
+well …"; after the audit: "Leave it all for the Dev Menu revamp"; the
+colours: "Yes, a small phase after the reset".) R-phases touch dev tools
+only where a deletion breaks the build; D19 stands until B10. The dev-menu
+audit (CI drives six surfaces, not D19's nine; four tools have nothing left
+to act on; ten carry dead content) is B10's input. R10 moves the surviving
+hard-coded hex colours into `theme/axm.ts` tokens with no visual change.
+*Rejected:* a content-driven dev-menu cut in R8 (amending D19); trimming
+without cutting; folding colours into B7/B8; skipping them.
+
+**D63 — The plan's other defaults are ruled as drafted.** (T, ballot.) All
+11 enemy-keyword systems are deleted, with an optional empty
+`Enemy.keywords` kept for B2. Level-up Learn Card is deleted; level-ups give
+stat points only. RELENT (PLEA/capitulation) and CONDEMN
+(premises/peroration) are both cut; befriend → mercy is the only non-lethal
+ending. The hazard reset keeps a minimal playable core. *Rejected:* keeping
+the keyword mechanics or a simple subset; keeping or repurposing Learn Card;
+keeping RELENT or both dormant; removing only the hazard lies; parking
+hazards.
+
+**D64 — THE REVAMP is ratified, in the recommended order; the card process
+plan stays unpicked.** (T, 2026-09-28: "ratify the plan … make sure the
+card revamp part of this plan acknowledges that we still haven't committed
+to a plan, there's 3 potential plans for it, and make sure future agents
+know to recommend looking at the html file".) `plan/revamp/` is RATIFIED.
+Reset order: R0 (attended) → R1 → R2 → R3 → R4 → R5 → R6 → R7 → B4 → R8 →
+R9 → R10. Rebuild order when T is ready: pick the card plan → B1 → B5 → B6
+→ B2 (before B6 if Plan C) → B3 → B10 → B7 → B8 → B9. `/march` and
+`night` are re-enabled after R0 merges. Until T picks Plan A, B or C,
+agents discussing card work recommend T open
+`plan/2026-09-27-keyword-card-revamp.summary.html`.
+
 ## Open follow-ups
 
 **D1 status at a glance (2026-09-28, after #408).** Card and keyword

@@ -14,6 +14,9 @@
 > - Do **not** create cards, keywords or card types from it (THE CARD HOLD,
 >   D37, still applies).
 > - It may be read as background and quoted as options.
+> - **Recommend that T open `plan/2026-09-27-keyword-card-revamp.summary.html`** (one tab per plan) to decide.
+>   The revamp build plan (`plan/revamp/cards.md`, D64) gates card work on
+>   this pick and on the card-rules inventory (Phase B4).
 >
 > **Ratify this note when T decides.** The session that records T's choice
 > must, in the same commit: (1) replace this banner with a
