@@ -11,6 +11,39 @@
 
 ## Pending
 
+### [ ] [score 6.5] The keyword/card revamp phase: pick one of three process plans (attended, D37) — nothing starts until T picks
+- proposed: 2026-09-27, attended session with T (PR #403); filed by the
+  ballot's defer path, not by `/expand`
+- source signals:
+  - `plan/2026-09-27-keyword-card-revamp.plans.md`: three process plans
+    (A vision first, B slice first, C threat first) for the post-purge
+    keyword, card, card-type and card-progression work, with gates, a
+    card-type test (§5), a candidate-shape inventory (§5.1), a progression
+    inventory (§5.3) and research receipts (§6).
+  - T, 2026-09-27: "Last 2 times I just jumped right into defining keywords
+    or jumping into card creation." §0 reads both previous runs (Phase 29/30
+    keywords-first; THE BIG NUMBERS REWRITE cards-first) as sharing one
+    failure: the whole library was the unit of work. T's confirmation of
+    which runs were meant was deferred (ballot 2026-09-27, no preference).
+  - Build plan rows S3 and P1 (`plan/steps/01_build_plan.md:102-103`): the
+    phase can only open after the purge lands.
+- rationale: D37 makes this an attended phase; the plan file exists so the
+  first session starts from a chosen process instead of from cards. Filing
+  it here keeps the choice visible to `/oversight` without letting any loop
+  verb start it.
+- proposed scope: attended only. Session 0 = T picks a plan (or a splice)
+  from §2–§4 and answers the three deferred calls (§7: which prior runs,
+  D8/D20 timing, progression prototypes); the answers go to
+  `plan/2026-09-25-refactor-strategy.decisions.md` as D43+. Then the chosen
+  plan's session table runs, one guided session per row. Recommended in the
+  file: Plan B with A0 and C1 spliced in (confidence 70).
+- estimated phases: 6–7 guided sessions for the first pool (any plan), plus
+  loop-shippable wiring PRs between sessions
+- conflicts: none. Respects THE CARD HOLD (D37: no card, keyword or type is
+  created by a loop verb), THE REFACTOR STRATEGY order (after S3 and P1),
+  and THE PATH's six axes (D8/D20 deferred to the ratification session by
+  the same ballot).
+
 ### [ ] [score 7.0] Finish Act 1 after the map revamp: a shop on the road, one XP spike, fishing-village's stale pointers, and tests pinned to the real start
 - proposed: 2026-09-27, expand pass 22
 - source signals:

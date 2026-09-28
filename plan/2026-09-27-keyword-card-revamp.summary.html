@@ -1,0 +1,934 @@
+<!doctype html>
+<!--
+  =============================================================================
+  Keyword / Card Revamp — Executive Summary (single-file HTML/CSS/JS)
+  =============================================================================
+  Source of truth: plan/2026-09-27-keyword-card-revamp.plans.md (branch
+  claude/keyword-card-revamp-plans-x58x1r, PR #403). This page visualises that
+  file; it adds no decisions. Every number shown is either copied from the plan
+  file or marked "illustrative" (mock UI only, not measured).
+
+  STRUCTURE (lowest abstraction first):
+    1. CSS design tokens (:root)      colours, spacing, motion; dark + light.
+    2. CSS components                  tabs, cards, timeline, ladder, bars,
+                                       flow diagram, simulator, meters.
+    3. HTML shell                      header, tablist, five tab panels.
+    4. JS data layer (PLANS, ...)      plain objects, no behaviour.
+    5. JS pure render helpers          functions: data -> HTML string.
+    6. JS effects                      tab switching, reveal-on-scroll,
+                                       bar animation, simulator state machine.
+    7. JS boot                         wires everything on DOMContentLoaded.
+
+  CONSTRAINTS HONOURED:
+    - THE CARD HOLD (D37): no real card, keyword or card type is defined here.
+      Simulator cards are placeholders ("agent draft").
+    - prefers-reduced-motion disables all animation.
+    - No external scripts; one optional Google Fonts stylesheet (falls back to
+      system serif if offline).
+  =============================================================================
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Card Revamp Plans</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===========================================================================
+   1. DESIGN TOKENS
+   All colours live here. Components reference tokens only, never raw hex.
+   Family colours mirror the game's dice palette: body red, mind blue,
+   heart purple (D40).
+   =========================================================================== */
+:root {
+  --bg: #f4efe6;            /* parchment page */
+  --surface: #fffaf1;       /* card surface */
+  --surface-2: #efe6d6;     /* recessed surface */
+  --fg: #1d1a16;            /* ink */
+  --muted: #6b6257;         /* secondary ink */
+  --line: #d8ccb8;          /* hairlines */
+  --accent: #8e1b1b;        /* blood red: primary accent */
+  --accent-soft: #8e1b1b1f;
+  --ok: #2f6b3a;            /* pass / keep */
+  --warn: #9a6a00;          /* adapt / park */
+  --bad: #9b2226;           /* fail / cut */
+  --body: #b3261e;          /* body family */
+  --mind: #1f5fa8;          /* mind family */
+  --heart: #6e3aa3;         /* heart family */
+  --planA: #1f5fa8;         /* plan A identity */
+  --planB: #b3261e;         /* plan B identity */
+  --planC: #2f6b3a;         /* plan C identity */
+  --radius: 14px;
+  --shadow: 0 1px 2px #0000000f, 0 6px 24px #0000000d;
+  --ease: cubic-bezier(.2,.8,.2,1);
+  --serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --sans: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+/* Dark tokens: applied by OS preference unless the page forces light. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121012; --surface: #1b181b; --surface-2: #242024; --fg: #ece6dc;
+    --muted: #a59c90; --line: #3a3438; --accent: #e0574f; --accent-soft: #e0574f24;
+    --ok: #6fbf7c; --warn: #e3b341; --bad: #ef6b6b;
+    --body: #e0574f; --mind: #5b9be6; --heart: #a97be0;
+    --planA: #5b9be6; --planB: #e0574f; --planC: #6fbf7c;
+    --shadow: 0 1px 2px #00000066, 0 8px 28px #00000055;
+  }
+}
+/* Explicit dark (toggle button). Same values as the media block above. */
+:root[data-theme="dark"] {
+  --bg: #121012; --surface: #1b181b; --surface-2: #242024; --fg: #ece6dc;
+  --muted: #a59c90; --line: #3a3438; --accent: #e0574f; --accent-soft: #e0574f24;
+  --ok: #6fbf7c; --warn: #e3b341; --bad: #ef6b6b;
+  --body: #e0574f; --mind: #5b9be6; --heart: #a97be0;
+  --planA: #5b9be6; --planB: #e0574f; --planC: #6fbf7c;
+  --shadow: 0 1px 2px #00000066, 0 8px 28px #00000055;
+}
+
+/* ===========================================================================
+   2. BASE + COMPONENTS
+   =========================================================================== */
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--fg); font: 15px/1.55 var(--sans);
+  -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px 80px; }
+h1, h2, h3 { font-family: var(--serif); line-height: 1.15; margin: 0 0 .4em; }
+h1 { font-size: clamp(30px, 5vw, 46px); letter-spacing: .01em; }
+h2 { font-size: clamp(24px, 3.4vw, 32px); margin-top: 1.6em; }
+h3 { font-size: 21px; }
+p { margin: 0 0 .8em; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+code { font: 12.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--surface-2); padding: 1px 5px; border-radius: 5px; }
+
+/* --- Header ---------------------------------------------------------------- */
+header.top { padding: 34px 0 10px; display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
+.eyebrow { text-transform: uppercase; letter-spacing: .14em; font-size: 11.5px; color: var(--accent); font-weight: 600; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 3px 10px; font-size: 12.5px; color: var(--muted); }
+.chip b { color: var(--fg); font-weight: 600; }
+.theme-btn { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 10px; padding: 7px 11px; cursor: pointer; font: inherit; font-size: 13px; }
+
+/* --- Tabs: sticky, horizontally scrollable on phones ---------------------- */
+.tabs { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); margin: 10px -16px 0; padding: 0 16px; }
+.tablist { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.tablist::-webkit-scrollbar { display: none; }
+.tab { position: relative; flex: 0 0 auto; border: 0; background: none; color: var(--muted); font: 600 14px var(--sans); padding: 14px 14px 13px; cursor: pointer; }
+.tab[aria-selected="true"] { color: var(--fg); }
+.tab::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: -1px; height: 3px; border-radius: 3px 3px 0 0; background: var(--tabc, var(--accent)); transform: scaleX(0); transition: transform .35s var(--ease); }
+.tab[aria-selected="true"]::after { transform: scaleX(1); }
+.tab .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--tabc, var(--accent)); margin-right: 7px; vertical-align: 1px; }
+.panel { display: none; padding-top: 22px; }
+.panel.active { display: block; animation: panelIn .45s var(--ease); }
+@keyframes panelIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* --- Cards / grids ---------------------------------------------------------- */
+.grid { display: grid; gap: 14px; }
+.g2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.g3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); }
+.card h3 { margin-bottom: .3em; }
+.kpi { font: 700 34px/1 var(--serif); }
+.kpi small { font: 500 13px var(--sans); color: var(--muted); margin-left: 4px; }
+.lead { font-size: 17px; max-width: 70ch; }
+.callout { border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 0 var(--radius) var(--radius) 0; padding: 14px 16px; }
+.conf { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); }
+.conf i { display: inline-block; width: 64px; height: 6px; background: var(--surface-2); border-radius: 6px; overflow: hidden; position: relative; }
+.conf i::after { content: ""; position: absolute; inset: 0; width: var(--v); background: var(--accent); border-radius: 6px; }
+
+/* --- Reveal on scroll ------------------------------------------------------ */
+.reveal { opacity: 0; transform: translateY(14px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+.reveal.in { opacity: 1; transform: none; }
+
+/* --- Comparison bars ------------------------------------------------------- */
+.metric { margin: 14px 0 18px; }
+.metric-head { display: flex; justify-content: space-between; gap: 10px; font-weight: 600; font-size: 14px; }
+.metric-head span { font-weight: 400; color: var(--muted); font-size: 12.5px; }
+.bar-row { display: grid; grid-template-columns: 64px 1fr 44px; gap: 10px; align-items: center; margin-top: 6px; font-size: 13px; }
+.bar { height: 12px; background: var(--surface-2); border-radius: 8px; overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 0; border-radius: 8px; background: var(--c); transition: width 1.1s var(--ease); }
+
+/* --- Timeline (per plan) --------------------------------------------------- */
+.timeline { position: relative; margin: 10px 0 0; padding-left: 34px; }
+.timeline::before { content: ""; position: absolute; left: 12px; top: 6px; bottom: 6px; width: 3px; border-radius: 3px; background: var(--line); }
+.timeline .progress { position: absolute; left: 12px; top: 6px; width: 3px; height: 0; border-radius: 3px; background: var(--pc); transition: height 1.6s var(--ease); }
+.step { position: relative; margin-bottom: 14px; opacity: 0; transform: translateX(-8px); transition: opacity .5s var(--ease), transform .5s var(--ease); }
+.step.in { opacity: 1; transform: none; }
+.step .node { position: absolute; left: -30px; top: 16px; width: 19px; height: 19px; border-radius: 50%; background: var(--surface); border: 3px solid var(--pc); }
+.step.play .node { background: var(--pc); box-shadow: 0 0 0 5px color-mix(in srgb, var(--pc) 25%, transparent); }
+.step-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 13px 15px; box-shadow: var(--shadow); cursor: pointer; }
+.step-top { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.step-id { font: 700 13px var(--sans); color: var(--pc); letter-spacing: .04em; }
+.step-name { font: 700 18px var(--serif); }
+.tag { font-size: 11.5px; border-radius: 999px; padding: 1px 8px; border: 1px solid var(--line); color: var(--muted); }
+.tag.play { border-color: var(--pc); color: var(--pc); font-weight: 600; }
+.step-more { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .35s var(--ease); }
+.step-more > div { overflow: hidden; }
+.step.open .step-more { grid-template-rows: 1fr; }
+.kv { display: grid; grid-template-columns: 90px 1fr; gap: 4px 12px; margin-top: 10px; font-size: 13.5px; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; }
+
+/* --- Ladder: ballot -> sandbox -> wired ------------------------------------ */
+.ladder { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; position: relative; }
+.rung { background: var(--surface-2); border-radius: 12px; padding: 14px 12px; min-height: 150px; position: relative; overflow: hidden; }
+.rung h4 { margin: 0 0 4px; font: 700 15px var(--sans); }
+.rung p { font-size: 12.5px; color: var(--muted); margin: 0; }
+.chipcard { position: absolute; width: 26px; height: 36px; border-radius: 4px; background: var(--surface); border: 1.5px solid var(--line); bottom: 14px; }
+.flow .chipcard { animation: flowCards 6s var(--ease) infinite; }
+@keyframes flowCards {
+  0% { transform: translateX(0) translateY(0); opacity: 1; }
+  30% { transform: translateX(0) translateY(0); opacity: 1; }
+  45% { transform: translateX(calc(100% + 120px)) translateY(-6px); opacity: 1; }
+  70% { transform: translateX(calc(100% + 120px)) translateY(-6px); opacity: 1; }
+  100% { transform: translateX(calc(200% + 240px)) translateY(-12px); opacity: 0; }
+}
+
+/* --- Session clock (build 90 min / kill 60 min) ---------------------------- */
+.clock { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; }
+.clock svg { width: 150px; height: 150px; flex: 0 0 auto; }
+.clock .seg { fill: none; stroke-width: 18; stroke-linecap: butt; transform: rotate(-90deg); transform-origin: 50% 50%; stroke-dasharray: 0 999; transition: stroke-dasharray 1.2s var(--ease); }
+.legend { display: grid; gap: 6px; font-size: 13.5px; }
+.legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 8px; vertical-align: -1px; }
+
+/* --- Vocabulary pills ------------------------------------------------------ */
+.vocab { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill { border-radius: 8px; padding: 6px 10px; font: 600 13px var(--sans); border: 1.5px solid; }
+.pill small { display: block; font-weight: 400; color: var(--muted); font-size: 11.5px; }
+
+/* --- Flow diagram (working backwards) -------------------------------------- */
+.flowrow { display: flex; align-items: stretch; gap: 0; flex-wrap: wrap; margin: 10px 0; }
+.fnode { flex: 1 1 140px; min-width: 130px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; padding: 12px; position: relative; opacity: 0; transform: scale(.96); transition: opacity .5s var(--ease), transform .5s var(--ease); }
+.fnode.in { opacity: 1; transform: none; }
+.fnode b { display: block; font-size: 14px; }
+.fnode span { font-size: 12.5px; color: var(--muted); }
+.fnode.bad { border-color: var(--bad); }
+.fnode.ok { border-color: var(--ok); }
+.fnode.warn { border-color: var(--warn); }
+.fnode .badge { position: absolute; top: -9px; right: 10px; font-size: 11px; font-weight: 700; padding: 0 7px; border-radius: 999px; background: var(--surface); border: 1.5px solid currentColor; }
+.fnode.bad .badge { color: var(--bad); } .fnode.ok .badge { color: var(--ok); } .fnode.warn .badge { color: var(--warn); }
+.arrow { flex: 0 0 26px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 18px; }
+.arrow::before { content: "→"; }
+@media (max-width: 640px) {
+  .flowrow { flex-direction: column; }
+  .arrow { flex-basis: 22px; }
+  .arrow::before { content: "↓"; }
+}
+
+/* --- Fit meter (backwards per plan) ---------------------------------------- */
+.fit { display: grid; grid-template-columns: 70px 1fr 110px; align-items: center; gap: 10px; margin: 8px 0; font-size: 13.5px; }
+.fit .track { height: 14px; background: var(--surface-2); border-radius: 10px; position: relative; overflow: hidden; }
+.fit .track i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--c); border-radius: 10px; transition: width 1.2s var(--ease); }
+
+/* --- Session simulator ----------------------------------------------------- */
+.sim { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+.sim-stages { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--line); }
+.sim-stage { padding: 10px 8px; font-size: 12.5px; text-align: center; color: var(--muted); border-right: 1px solid var(--line); position: relative; }
+.sim-stage:last-child { border-right: 0; }
+.sim-stage.on { color: var(--fg); font-weight: 600; }
+.sim-stage.on::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--pc); }
+.sim-body { padding: 16px; min-height: 280px; }
+.sim-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 16px; border-top: 1px solid var(--line); background: var(--surface-2); flex-wrap: wrap; }
+.btn { border: 1px solid var(--line); background: var(--surface); color: var(--fg); padding: 7px 13px; border-radius: 9px; cursor: pointer; font: 600 13px var(--sans); }
+.btn.primary { background: var(--pc); border-color: var(--pc); color: #fff; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.slots { display: grid; gap: 12px; }
+.slot-row { display: grid; grid-template-columns: 76px 1fr; gap: 10px; align-items: start; }
+.slot-code { font: 700 12.5px var(--sans); color: var(--pc); padding-top: 10px; }
+.cands { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.cand { border: 1.5px solid var(--line); border-radius: 10px; padding: 8px 9px; font-size: 12.5px; background: var(--bg); transition: transform .25s var(--ease), opacity .25s, border-color .25s; }
+.cand .ln { height: 6px; border-radius: 4px; background: var(--surface-2); margin: 5px 0; }
+.cand .ln.s { width: 60%; }
+.cand .who { color: var(--muted); font-size: 11px; }
+.cand .acts { display: flex; gap: 4px; margin-top: 6px; }
+.cand .acts button { flex: 1; border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 6px; font: 600 10.5px var(--sans); padding: 3px 0; cursor: pointer; }
+.cand[data-v="KEEP"] { border-color: var(--ok); }
+.cand[data-v="CUT"] { opacity: .38; transform: scale(.97); border-style: dashed; }
+.cand[data-v="PARK"] { border-color: var(--warn); }
+.cand[data-v] .acts button[data-a].sel { background: var(--fg); color: var(--bg); }
+.sheet { width: 100%; border-collapse: collapse; font-size: 13px; }
+.sheet th, .sheet td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); }
+.sheet th { color: var(--muted); font-weight: 600; font-size: 12px; }
+.flag { font-size: 11px; padding: 1px 7px; border-radius: 999px; border: 1px solid; }
+.flag.low { color: var(--warn); } .flag.ok { color: var(--ok); } .flag.high { color: var(--bad); }
+.fightbar { height: 10px; background: var(--surface-2); border-radius: 6px; overflow: hidden; margin: 6px 0 12px; }
+.fightbar i { display: block; height: 100%; width: 0; background: var(--pc); transition: width 2.4s linear; }
+.illus { font-size: 11.5px; color: var(--warn); font-weight: 600; letter-spacing: .02em; }
+
+/* --- Tables ---------------------------------------------------------------- */
+table.t { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+table.t th, table.t td { text-align: left; vertical-align: top; padding: 9px 10px; border-bottom: 1px solid var(--line); }
+table.t th { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.tscroll { overflow-x: auto; }
+
+
+/* --- UNDECIDED banner: must stay visible until T ratifies a decision ------ */
+.undecided { margin: 22px 0 6px; border: 3px solid var(--bad); border-radius: var(--radius); background: color-mix(in srgb, var(--bad) 10%, var(--surface)); padding: 18px 20px; box-shadow: var(--shadow); }
+.undecided h2 { margin: 0 0 .35em; color: var(--bad); font-size: clamp(24px, 4vw, 34px); letter-spacing: .02em; }
+.undecided p { margin: 0 0 .6em; }
+.undecided ul { margin: 0 0 .6em; padding-left: 20px; }
+.undecided .ratify { border-top: 1px dashed var(--bad); padding-top: 10px; margin-top: 10px; font-size: 13.5px; }
+
+/* --- Reduced motion: kill every animation and transition ------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .reveal, .step, .fnode { opacity: 1 !important; transform: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- =====================================================================
+       3. HTML SHELL
+       ===================================================================== -->
+  <header class="top">
+    <div>
+      <div class="eyebrow">Miserere Mei, Deus · keyword / card revamp</div>
+      <h1>Three ways to rebuild the card library</h1>
+      <div class="chips">
+        <span class="chip">Source <b>plan/2026-09-27-keyword-card-revamp.plans.md</b></span>
+        <span class="chip">PR <b>#403</b></span>
+        <span class="chip">Tree <b>3 cards · 3 live keywords</b></span>
+        <span class="chip">Research <b>~120 cited findings · 2 passes</b></span>
+      </div>
+    </div>
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle colour theme">◐ Theme</button>
+  </header>
+
+
+  <!-- =====================================================================
+       STATUS BANNER — UNDECIDED.
+       Future agents: this page shows PROPOSALS only. When T decides, replace
+       this block with a STATUS: DECIDED note (what was chosen, date, D-number)
+       in the same commit that updates the plan file's banner.
+       ===================================================================== -->
+  <aside class="undecided" role="alert" aria-label="Status: undecided">
+    <h2>⛔ STATUS: UNDECIDED</h2>
+    <p><b>Nothing on this page is ratified.</b> T has not chosen a plan, a splice, the session format, a pool size, a carrier threshold, or any progression mechanism. The 2026-09-27 ballot returned "no preference" on every call.</p>
+    <ul class="small">
+      <li>Every recommendation, verdict and score below is a proposal, not policy.</li>
+      <li>Do not start any plan, session, slice or phase from this page.</li>
+      <li>Do not cite it as a decision. The card hold (D37) still applies.</li>
+    </ul>
+    <p class="ratify"><b>Ratify this note when T decides.</b> The session that records the choice must, in the same commit, replace this banner with a <code>STATUS: DECIDED</code> note naming what T chose, the date and the D-number. It must also update the matching banner in <code>plan/2026-09-27-keyword-card-revamp.plans.md</code>.</p>
+  </aside>
+
+  <nav class="tabs" aria-label="Sections">
+    <div class="tablist" role="tablist" id="tablist">
+      <button class="tab" role="tab" id="tab-overview" aria-controls="p-overview" aria-selected="true" style="--tabc:var(--accent)"><span class="dot"></span>Overview</button>
+      <button class="tab" role="tab" id="tab-a" aria-controls="p-a" aria-selected="false" style="--tabc:var(--planA)"><span class="dot"></span>Plan A · Vision first</button>
+      <button class="tab" role="tab" id="tab-b" aria-controls="p-b" aria-selected="false" style="--tabc:var(--planB)"><span class="dot"></span>Plan B · Slice first</button>
+      <button class="tab" role="tab" id="tab-c" aria-controls="p-c" aria-selected="false" style="--tabc:var(--planC)"><span class="dot"></span>Plan C · Threat first</button>
+      <button class="tab" role="tab" id="tab-back" aria-controls="p-back" aria-selected="false" style="--tabc:var(--heart)"><span class="dot"></span>Working backwards</button>
+    </div>
+  </nav>
+
+  <!-- ===================== OVERVIEW ===================== -->
+  <section class="panel active" role="tabpanel" id="p-overview" aria-labelledby="tab-overview">
+    <p class="lead reveal">The library is purged to three grey cards. The next phase rebuilds it. Both earlier attempts made the whole library the unit of work, so nothing was playable until everything existed. All three plans below fix that with small playable slices. They differ in what comes first: a vision, a slice of cards, or the enemies.</p>
+
+    <div class="grid g3" id="execCards"></div>
+
+    <h2 class="reveal">The plans side by side</h2>
+    <p class="muted small reveal">Scores are inferences from the plan file and the second research pass, not measurements. Higher is better on every row.</p>
+    <div class="card reveal" id="compareBars"></div>
+
+    <h2 class="reveal">What never changes: how you build cards</h2>
+    <p class="reveal">The second research pass found the plans' spine sound and the owner's role missing. That role is now one session format, identical under every plan. You cull agent drafts. You never write card text.</p>
+    <div class="grid g2">
+      <div class="card reveal">
+        <h3>Three rungs, one ladder</h3>
+        <p class="muted small">Nothing reaches the real library until it survived your cull and a playtest.</p>
+        <div class="ladder flow" id="ladderDemo">
+          <div class="rung"><h4>1 · Ballot</h4><p>Agents draft 2–3× the slice, in session, as one-line text. You strike.</p></div>
+          <div class="rung"><h4>2 · Sandbox set</h4><p>Survivors run in the sim and the editor. The library is untouched.</p></div>
+          <div class="rung"><h4>3 · Wired</h4><p>Kill-session survivors promoted through the 12-step checklist.</p></div>
+        </div>
+      </div>
+      <div class="card reveal">
+        <h3>Your time per slice (≤12 cards)</h3>
+        <div class="clock">
+          <svg viewBox="0 0 100 100" id="clockSvg" aria-label="Session clock: build 90 minutes, kill 60 minutes"></svg>
+          <div class="legend" id="clockLegend"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card reveal" style="margin-top:14px">
+      <h3>Your verdict vocabulary</h3>
+      <p class="muted small">Every card gets one word. CUT is the default. Category verdicts ("every card in this batch that...") are legal.</p>
+      <div class="vocab" id="vocab"></div>
+    </div>
+
+    <h2 class="reveal">Can you work backwards?</h2>
+    <div class="callout reveal">
+      <p><b>Yes.</b> A deck idea first is exactly what a slice pitch is. One step changes: the keywords you imagine for the deck enter as <b>codenamed mechanics with sample cards</b>, not as ratified glossary rows. They get their real names after play. Ratifying keywords before cards is the step that sank Phase 29/30. Confidence 80.</p>
+      <p class="small muted" style="margin:0">Full answer on the <a href="#" data-goto="tab-back">Working backwards</a> tab. Per-plan fit is on each plan tab.</p>
+    </div>
+
+    <h2 class="reveal">Open calls for you</h2>
+    <div class="card reveal tscroll">
+      <table class="t" id="openCalls"></table>
+    </div>
+  </section>
+
+  <!-- ===================== PLAN TABS (filled by JS) ===================== -->
+  <section class="panel" role="tabpanel" id="p-a" aria-labelledby="tab-a" data-plan="A"></section>
+  <section class="panel" role="tabpanel" id="p-b" aria-labelledby="tab-b" data-plan="B"></section>
+  <section class="panel" role="tabpanel" id="p-c" aria-labelledby="tab-c" data-plan="C"></section>
+
+  <!-- ===================== WORKING BACKWARDS ===================== -->
+  <section class="panel" role="tabpanel" id="p-back" aria-labelledby="tab-back">
+    <p class="lead reveal">Your question: start with a deck idea, then build keywords, then cards. Short answer: the deck-first part is supported by every comparator. The keywords-before-cards part is the known failure. Swap it for codenames and you keep the whole intent.</p>
+
+    <h2 class="reveal">Pure backwards</h2>
+    <div class="flowrow" data-flow>
+      <div class="fnode ok"><span class="badge">sound</span><b>Deck idea</b><span>A fantasy and a family. This is a slice pitch.</span></div>
+      <div class="arrow"></div>
+      <div class="fnode bad"><span class="badge">failure mode</span><b>Ratify keywords</b><span>Glossary rows fixed before any card exists. Phase 29/30 did this.</span></div>
+      <div class="arrow"></div>
+      <div class="fnode warn"><span class="badge">forced fit</span><b>Write cards to fit</b><span>Cards bend to the words. Library outruns play.</span></div>
+    </div>
+
+    <h2 class="reveal">Adapted backwards (recommended)</h2>
+    <div class="flowrow" data-flow>
+      <div class="fnode ok"><span class="badge">you</span><b>Deck idea</b><span>You write one line: the deck's fantasy and family.</span></div>
+      <div class="arrow"></div>
+      <div class="fnode ok"><span class="badge">you + agents</span><b>Codenamed mechanics</b><span>Throwaway names, each with 3–6 sample cards. Not in the glossary.</span></div>
+      <div class="arrow"></div>
+      <div class="fnode ok"><span class="badge">agents → you</span><b>Ballot + cull</b><span>Cards drafted around the codenames. You keep, cut, park.</span></div>
+      <div class="arrow"></div>
+      <div class="fnode ok"><span class="badge">you play</span><b>Sandbox fights</b><span>The deck runs before anything is wired.</span></div>
+      <div class="arrow"></div>
+      <div class="fnode ok"><span class="badge">you ratify</span><b>Name the keywords</b><span>Only codenames on ≥3 kept cards become keywords.</span></div>
+    </div>
+
+    <div class="grid g2" style="margin-top:14px">
+      <div class="card reveal">
+        <h3>Fit per plan</h3>
+        <div id="fitMeters"></div>
+        <p class="muted small" style="margin-top:10px">Scores are inferences from each plan's session order.</p>
+      </div>
+      <div class="card reveal">
+        <h3>Why this works</h3>
+        <ul class="small" style="padding-left:18px;margin:0">
+          <li>Wizards hands off headline mechanics as codenames plus sample cards and names them late (§8 R7-02 naming).</li>
+          <li>A keyword is a count decision made after the cards exist (§8 R7-01 naming).</li>
+          <li>Roughly half of named mechanics die before print, so an early name is usually wasted (§8 R7-04 naming).</li>
+          <li>Mega Crit built each archetype as a card batch, then sculpted it from play (§8 R1-01).</li>
+          <li>Phase 29/30 fixed a 31-row keyword registry first, then fitted 70 cards to it (§0).</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2 class="reveal">What changes if you insist on real keywords first</h2>
+    <div class="card reveal">
+      <p>It still runs, with a cost. Each keyword ratified before play costs its 12 wiring steps up front, and about half are cut later. The §1 carrier rule (a keyword needs ≥3 kept cards) will then fail some of them at the kill session. Expect rework on roughly one keyword in two. Confidence 60.</p>
+    </div>
+  </section>
+
+  <p class="muted small" style="margin-top:50px">Generated from the plan file on the branch. No card, keyword or card type is defined on this page (THE CARD HOLD, D37). Simulator content is placeholder UI.</p>
+</div>
+
+<script>
+/* =============================================================================
+   4. DATA LAYER
+   Plain data copied from the plan file. Functions below never mutate it.
+   ============================================================================= */
+
+/**
+ * Executive summary tiles for the Overview tab.
+ * @type {Array<{kpi:string, unit:string, title:string, body:string}>}
+ */
+const EXEC = [
+  { kpi: "3", unit: "cards", title: "Where it stands", body: "A Plain Blow, Ward and Word. Live keywords: DEAL, GUARD, VULNERABLE. The glossary still lists 22 player rows the engine or enemies carry." },
+  { kpi: "2", unit: "failed runs", title: "Why a plan first", body: "Keywords-first in July, cards-first in September. Both made the whole library the unit of work. The second was purged 24 days later." },
+  { kpi: "B", unit: "+ A0 + C1", title: "Recommendation", body: "Slice first, with a one-page fantasy list first and the enemy threat matrix as briefing. Confidence 80 after the second pass." },
+  { kpi: "~2.5", unit: "h / slice", title: "Your role", body: "Two sittings per slice. You sign a pitch, cull agent drafts, play the sandbox, then cut and promote. You never write card text." },
+  { kpi: "~40", unit: "cards", title: "First pool (proposed)", body: "Three family slices of ≤12 plus the grey office. A soft target with ±25% flex. Your call." },
+  { kpi: "Yes", unit: "adapted", title: "Working backwards", body: "Deck idea first is supported. Keywords enter as codenames with sample cards and are named after play." },
+];
+
+/**
+ * The three plans. Each step: id, name, what happens, your role, gate.
+ * `play: true` marks the first session where you play new cards.
+ */
+const PLANS = {
+  A: {
+    key: "A", color: "var(--planA)", name: "Vision first", model: "Wizards' staged pipeline and design skeleton",
+    tagline: "Fix the player fantasies and a slot skeleton before any card exists, then fill it in waves.",
+    conf: 80, firstPlay: "Session 3", sessions: "6–7",
+    frame: { label: "Skeleton wave", code: "A-", input: "Next wave's ≤12 skeleton slots, each a one-line role drafted by agents and pruned by you." },
+    steps: [
+      { id: "A0", name: "Pillars", what: "3–5 one-line player fantasies per family, plus the grey office's job, at level 1, 8 and 15.", you: "Sign one page. Optionally dot-vote from an agent list.", gate: "Fantasy list ≤1 page, signed." },
+      { id: "A1", name: "Exploratory", what: "30–40 mechanic ideas with prior-art receipts. No wiring, no names. Rejects logged.", you: "Tag each idea to a fantasy; untagged ideas die.", gate: "Every idea tagged or cut." },
+      { id: "A2", name: "Vision doc + skeleton", what: "≤2 pages: keyword shortlist (≤8), card-type verdict, a rank × family × type slot grid. Agents draft, you prune.", you: "Strike slots, never write them. See only the next ≤12.", gate: "≤40 slots; doc expires after set design." },
+      { id: "A3", name: "Set design waves", what: "Fill 10–12 slots per session through the ballot → sandbox → wired ladder.", you: "Cull with the verdict vocabulary; play the sandbox.", gate: "All three verify gates green per wave.", play: true },
+      { id: "A4", name: "Play design", what: "Matrix and playtester agents on seeded fights; kill and replace list.", you: "Kill session: read the batch sheet, cut ≥2.", gate: "≥2 cuts per wave." },
+      { id: "A5", name: "Evergreen ratification", what: "Label keywords evergreen / deciduous / set-only; name codenamed mechanics; decide card upgrades and die growth.", you: "Ratify names and grant paths.", gate: "Atlas rows labelled; D8 and D20 decided." },
+    ],
+    strengths: ["Fantasies fixed first, so keywords are named for a role.", "The skeleton shows coverage before a card exists.", "Most natural fit for working backwards."],
+    risks: ["Slowest first playable: session 3.", "A2 asks for a keyword shortlist before play, the shape §0 blames. Mitigated by codenames and the 2-page cap.", "Second pass: fails your no-authoring constraint unless agents draft and you prune."],
+    back: { score: 90, verdict: "Native fit", text: "A0 is your deck idea. A2's keyword shortlist becomes a codename list with sample cards. A5 names them after play. No reordering needed." },
+    ownerFit: 3, coverage: 5, relevance: 2,
+  },
+  B: {
+    key: "B", color: "var(--planB)", name: "Slice first", model: "Slay the Spire's archetype batches, Balatro's prototype loop",
+    tagline: "Play a small slice of new cards in session 1; extract keywords only from text that repeats.",
+    conf: 85, firstPlay: "Session 1", sessions: "6, then 2 per slice",
+    frame: { label: "Slice pitch", code: "B1-", input: "One fantasy line, one family, ≤12 slot codes with one-line roles. Drafted by agents from the threat matrix; you sign it." },
+    steps: [
+      { id: "B1a", name: "Pitch + ballot", what: "You sign a one-page pitch. Agents draft 2–3 candidates per slot, in session, as plain rules text tagged top-down or bottom-up.", you: "Sign the pitch (10 min). Cull to ≤12 survivors (60 min).", gate: "≤36 ballot lines; ≤4 on screen; CUT is the default.", play: false },
+      { id: "B1b", name: "Sandbox play", what: "Survivors registered as one sandbox set behind a lint. They render in the editor and run in the sims. The library is untouched.", you: "Play ≥3 seeded fights with the grey deck plus the set.", gate: "Slice beats the Act 1 elite set; playtester write-up per run.", play: true },
+      { id: "B2", name: "Kill + extract + promote", what: "Batch sheet and write-ups side by side. Keywords extracted only where ≥3 kept cards share identical text. Survivors promoted in one PR.", you: "Cut ≥2 with reasons; ratify ≤2 keywords.", gate: "Ledger complete; 12-step wiring green." },
+      { id: "B3", name: "Rules note, then slice 2", what: "A ≤15-line note fixes what hit, dealt, guarded, applied and consumed mean. Then the B1–B2 shape for a mind fantasy.", you: "Ratify the note; run slice 2.", gate: "Note ratified; same gate as B1–B2." },
+      { id: "B4", name: "Slice 3 + vocabulary review", what: "A heart fantasy, then merge and rename keywords across all slices and check the rank budget.", you: "Ratify merges and renames.", gate: "Atlas consistent across slices." },
+      { id: "B5", name: "Cross-slice play", what: "Three family pairs plus three mono lanes. Keyword tiers and core/expansion labels. Reward pool re-armed. Baseline re-stamped.", you: "Decide card upgrades and die growth grants.", gate: "Baseline stamped; D8/D20 decided." },
+      { id: "B6+", name: "Repeat per fantasy", what: "Each further slice is one build session and one kill session.", you: "Two sittings per slice.", gate: "Pool-size stop rule." },
+    ],
+    strengths: ["First playable in session 1.", "Keywords extracted from real text, so every one has carriers.", "The kill gate is built into the cadence.", "Best fit for the no-authoring constraint (second pass)."],
+    risks: ["Slice-local vocabulary can collide later. B4's review fixes it.", "Plain rules text can breach the rank budget until extraction. Checked at B2."],
+    back: { score: 85, verdict: "Fits with one swap", text: "Your deck idea is the B1a pitch. Name the mechanics you imagine as codenames in the pitch; agents draft cards around them; B2 turns the ones on ≥3 kept cards into keywords." },
+    ownerFit: 5, coverage: 3, relevance: 3,
+  },
+  C: {
+    key: "C", color: "var(--planC)", name: "Threat first", model: "Cards as answers to the enemies that survived the purge",
+    tagline: "Inventory what the 78 enemies do, derive answer slots per family, then build cards Act by Act.",
+    conf: 75, firstPlay: "Session 3", sessions: "5, then 3 per Act",
+    frame: { label: "Threat row", code: "C-", input: "One pruned threat row, e.g. \"armoured foes wall chip damage\", with ≤12 answer slots across the families." },
+    steps: [
+      { id: "C1", name: "Threat matrix", what: "The 78 enemies' 11 keywords, telegraphs and statuses by Act, each row a problem. Agents prepare it.", you: "Prune to ≤25 rows.", gate: "Matrix ≤25 rows." },
+      { id: "C2", name: "Answer slots", what: "For each row, the answer shape each family could own. Capped at ≤12 slots per Act-slice.", you: "Sign the pruned list as the slice pitch.", gate: "Every Act 1 row has ≥1 slot per family." },
+      { id: "C3", name: "Slice by Act", what: "~12 cards for Act 1 answers through the ballot → sandbox ladder, played on the real Act 1 encounter pools.", you: "Cull; play the sandbox.", gate: "Matrix and playtester on Act 1; kill list.", play: true },
+      { id: "C4", name: "Fantasy pass", what: "Give each surviving card a role in a fantasy; rename; extract keywords at ≥3 carriers; promote.", you: "Kill session with the batch sheet.", gate: "Atlas; rank budget." },
+      { id: "C5", name: "Measure", what: "Baseline re-shaped to the grey deck plus the Act 1 pool and stamped; then Act 2 rows.", you: "Read the stamp.", gate: "Stamp cited in the next brief." },
+      { id: "C6+", name: "Next Act", what: "Repeat C3–C5 per Act.", you: "Three sittings per Act.", gate: "—" },
+    ],
+    strengths: ["Nothing in the pool is decorative.", "The matrix doubles as an audit of the enemy roster.", "Baseline re-shaped early."],
+    risks: ["Reactive design reads as a toolbox, not a fantasy, until C4.", "Late-game scalers arrive late; reserve one late slot per family.", "C1's prune shape is kept, but a deck idea has no natural entry."],
+    back: { score: 55, verdict: "Partial fit", text: "The enemies, not your deck idea, pick the slots. Your idea enters at C2 as a filter on which answers a family owns, or at C4 as the fantasy pass. Workable, but the idea arrives second." },
+    ownerFit: 3, coverage: 4, relevance: 5,
+  },
+};
+
+/** Metrics for the comparison bars. `max` scales each bar. */
+const METRICS = [
+  { label: "Speed to first playable", note: "session of first new-card play", get: p => ({ A: 1, B: 3, C: 1 })[p.key], max: 3, fmt: p => p.firstPlay },
+  { label: "Fit to your no-authoring rule", note: "second research pass", get: p => p.ownerFit, max: 5, fmt: p => p.ownerFit + "/5" },
+  { label: "Coverage control", note: "seeing gaps before cards exist", get: p => p.coverage, max: 5, fmt: p => p.coverage + "/5" },
+  { label: "Relevance to existing enemies", note: "cards answer real fights", get: p => p.relevance, max: 5, fmt: p => p.relevance + "/5" },
+  { label: "Working-backwards fit", note: "deck idea first", get: p => p.back.score, max: 100, fmt: p => p.back.score },
+  { label: "Plan-file confidence", note: "0–100", get: p => p.conf, max: 100, fmt: p => p.conf },
+];
+
+/** Session clock segments. Minutes; build session 0–90, kill session 0–60. */
+const CLOCK = [
+  { label: "Sign the pitch", min: 10, color: "var(--mind)" },
+  { label: "Cull the ballot", min: 60, color: "var(--accent)" },
+  { label: "Sandbox fights", min: 20, color: "var(--heart)" },
+  { label: "Kill session", min: 60, color: "var(--ok)" },
+];
+
+/** Verdict vocabulary (§1). */
+const VOCAB = [
+  { w: "KEEP", d: "survives to the sandbox", c: "var(--ok)" },
+  { w: "TWEAK", d: "one integer delta", c: "var(--mind)" },
+  { w: "CUT", d: "with one reason; default", c: "var(--bad)" },
+  { w: "PARK", d: "to outtakes, argued later", c: "var(--warn)" },
+  { w: "TRANSFORM", d: "to a relic, die face, enemy", c: "var(--heart)" },
+  { w: "REVISIT", d: "with a date", c: "var(--muted)" },
+];
+
+/** Open calls, from §7. */
+const CALLS = [
+  ["Which plan, or a splice", "Deferred (no preference)", "Plan B + A0 + C1"],
+  ["Ratify the §1 session format", "Open", "Ratify as written"],
+  ["Pool-size soft target", "Open", "~40 after three slices"],
+  ["Keyword carrier threshold", "Open (atlas ≥2, plans ≥3)", "≥3 everywhere"],
+  ["Card upgrade and die growth grants", "Held for ratification session", "Decide inside slice 1"],
+  ["Which prior runs failed", "Unconfirmed (conf. 65)", "Phase 29/30 and the big-numbers rewrite"],
+];
+
+/* =============================================================================
+   5. PURE RENDER HELPERS (data in, HTML string out; no DOM access)
+   ============================================================================= */
+
+/**
+ * Escapes text for safe HTML insertion.
+ * @param {string} s raw text
+ * @returns {string} escaped text
+ */
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+/**
+ * Renders a confidence meter.
+ * @param {number} v confidence 0–100
+ * @returns {string} HTML
+ */
+const confHTML = v => `<span class="conf">confidence ${v}<i style="--v:${v}%"></i></span>`;
+
+/**
+ * Renders one executive-summary tile.
+ * @param {{kpi:string,unit:string,title:string,body:string}} e tile data
+ * @returns {string} HTML
+ */
+const execTile = e => `<div class="card reveal"><div class="kpi">${esc(e.kpi)}<small>${esc(e.unit)}</small></div><h3 style="margin-top:8px">${esc(e.title)}</h3><p class="small muted" style="margin:0">${esc(e.body)}</p></div>`;
+
+/**
+ * Renders the comparison bar block. Widths start at 0 and are animated in
+ * later by `animateBars` reading `data-w`.
+ * @returns {string} HTML
+ */
+const compareHTML = () => METRICS.map(m => `
+  <div class="metric">
+    <div class="metric-head">${esc(m.label)} <span>${esc(m.note)}</span></div>
+    ${Object.values(PLANS).map(p => `
+      <div class="bar-row"><span>Plan ${p.key}</span>
+        <div class="bar"><i style="--c:${p.color}" data-w="${Math.round(100 * m.get(p) / m.max)}"></i></div>
+        <span class="small">${esc(m.fmt(p))}</span></div>`).join("")}
+  </div>`).join("");
+
+/**
+ * Renders one timeline step (collapsed; click expands).
+ * @param {object} s step data
+ * @returns {string} HTML
+ */
+const stepHTML = s => `
+  <div class="step${s.play ? " play" : ""}">
+    <span class="node"></span>
+    <div class="step-card" tabindex="0" role="button" aria-expanded="false">
+      <div class="step-top"><span class="step-id">${esc(s.id)}</span><span class="step-name">${esc(s.name)}</span>
+        ${s.play ? '<span class="tag play">first new-card play</span>' : ""}</div>
+      <div class="step-more"><div><dl class="kv">
+        <dt>What</dt><dd>${esc(s.what)}</dd>
+        <dt>You</dt><dd>${esc(s.you)}</dd>
+        <dt>Gate</dt><dd>${esc(s.gate)}</dd></dl></div></div>
+    </div>
+  </div>`;
+
+/**
+ * Renders a full plan tab from its data object.
+ * @param {object} p plan data from PLANS
+ * @returns {string} HTML
+ */
+const planHTML = p => `
+  <div style="--pc:${p.color}">
+    <div class="eyebrow" style="color:${p.color}">Plan ${p.key} · ${esc(p.model)}</div>
+    <h2 style="margin-top:.2em">${esc(p.name)}</h2>
+    <p class="lead">${esc(p.tagline)}</p>
+    <div class="grid g3">
+      <div class="card reveal"><div class="kpi">${esc(p.firstPlay)}</div><p class="small muted" style="margin:6px 0 0">first time you play new cards</p></div>
+      <div class="card reveal"><div class="kpi">${esc(p.sessions)}</div><p class="small muted" style="margin:6px 0 0">guided sessions for the first pool</p></div>
+      <div class="card reveal"><div class="kpi">${p.conf}</div><p class="small muted" style="margin:6px 0 0">plan-file confidence (0–100)</p></div>
+    </div>
+
+    <h2>The session sequence</h2>
+    <p class="muted small">Tap a step for what happens, your role and the gate to the next step.</p>
+    <div class="timeline"><span class="progress"></span>${p.steps.map(stepHTML).join("")}</div>
+
+    <h2>What building cards looks like here</h2>
+    <p>Every plan uses the same session format. What differs is what you look at before the ballot: here, the <b>${esc(p.frame.label.toLowerCase())}</b>. Step through a mock session below.</p>
+    <div class="sim" data-sim="${p.key}"></div>
+    <p class="illus" style="margin-top:8px">Illustrative placeholder UI. Candidate cards are blank drafts; sheet values are not measured.</p>
+
+    <div class="grid g2" style="margin-top:14px">
+      <div class="card reveal"><h3>Strengths</h3><ul class="small" style="padding-left:18px;margin:0">${p.strengths.map(s => `<li>${esc(s)}</li>`).join("")}</ul></div>
+      <div class="card reveal"><h3>Risks</h3><ul class="small" style="padding-left:18px;margin:0">${p.risks.map(s => `<li>${esc(s)}</li>`).join("")}</ul></div>
+    </div>
+
+    <h2>Working backwards in Plan ${p.key}</h2>
+    <div class="card reveal">
+      <div class="fit"><span>Plan ${p.key}</span><div class="track"><i style="--c:${p.color}" data-w="${p.back.score}"></i></div><b>${esc(p.back.verdict)}</b></div>
+      <p style="margin:10px 0 0">${esc(p.back.text)}</p>
+    </div>
+  </div>`;
+
+/* =============================================================================
+   6. EFFECTS (DOM + animation)
+   ============================================================================= */
+
+/** True when the user asked the OS for reduced motion. */
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/**
+ * Sets every bar inside `root` from 0 to its data-w width.
+ * @param {ParentNode} root container to search
+ */
+function animateBars(root) {
+  root.querySelectorAll("[data-w]").forEach(el => {
+    el.style.width = "0";
+    requestAnimationFrame(() => requestAnimationFrame(() => { el.style.width = el.dataset.w + "%"; }));
+  });
+}
+
+/**
+ * Staggers `.in` onto timeline steps and grows the progress rail.
+ * @param {ParentNode} root plan panel
+ */
+function animateTimeline(root) {
+  const tl = root.querySelector(".timeline");
+  if (!tl) return;
+  const steps = [...tl.querySelectorAll(".step")];
+  const rail = tl.querySelector(".progress");
+  steps.forEach(s => s.classList.remove("in"));
+  rail.style.height = "0";
+  steps.forEach((s, i) => setTimeout(() => s.classList.add("in"), REDUCED ? 0 : 120 + i * 140));
+  setTimeout(() => { rail.style.height = (tl.scrollHeight - 12) + "px"; }, REDUCED ? 0 : 80);
+}
+
+/**
+ * Staggers flow-diagram nodes in on the backwards tab.
+ * @param {ParentNode} root panel
+ */
+function animateFlows(root) {
+  root.querySelectorAll("[data-flow]").forEach(row => {
+    const nodes = [...row.querySelectorAll(".fnode")];
+    nodes.forEach(n => n.classList.remove("in"));
+    nodes.forEach((n, i) => setTimeout(() => n.classList.add("in"), REDUCED ? 0 : 150 + i * 220));
+  });
+}
+
+/**
+ * Draws the session-clock donut: build session (90 min) as the outer three
+ * segments, kill session (60 min) as its own segment, total 150 min.
+ */
+function drawClock() {
+  const svg = document.getElementById("clockSvg");
+  const r = 38, C = 2 * Math.PI * r, total = CLOCK.reduce((a, s) => a + s.min, 0);
+  let offset = 0;
+  svg.innerHTML = `<circle cx="50" cy="50" r="${r}" fill="none" stroke="var(--surface-2)" stroke-width="18"/>` +
+    CLOCK.map(s => {
+      const len = C * s.min / total;
+      const el = `<circle class="seg" cx="50" cy="50" r="${r}" stroke="${s.color}" data-len="${len}" data-gap="${C}" style="stroke-dashoffset:${-offset}"/>`;
+      offset += len;
+      return el;
+    }).join("") +
+    `<text x="50" y="48" text-anchor="middle" style="font:700 15px var(--serif);fill:var(--fg)">150</text>
+     <text x="50" y="61" text-anchor="middle" style="font:500 7px var(--sans);fill:var(--muted)">min / slice</text>`;
+  document.getElementById("clockLegend").innerHTML = CLOCK.map(s => `<div><i style="background:${s.color}"></i>${esc(s.label)} · ${s.min} min</div>`).join("") +
+    `<div class="small muted" style="margin-top:4px">Build ≤90 min, kill ≤60 min. No tuning in build, no new cards in kill.</div>`;
+  requestAnimationFrame(() => requestAnimationFrame(() =>
+    svg.querySelectorAll(".seg").forEach(c => { c.style.strokeDasharray = `${c.dataset.len} ${c.dataset.gap}`; })));
+}
+
+/**
+ * Places the small animated card chips inside the ladder demo.
+ */
+function seedLadder() {
+  const first = document.querySelector("#ladderDemo .rung");
+  for (let i = 0; i < 4; i++) {
+    const c = document.createElement("span");
+    c.className = "chipcard";
+    c.style.left = (14 + i * 20) + "px";
+    c.style.animationDelay = (i * 0.35) + "s";
+    c.style.borderColor = ["var(--body)", "var(--mind)", "var(--heart)", "var(--line)"][i];
+    first.appendChild(c);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Session simulator: a tiny state machine per plan tab.
+   Stages: 0 Frame -> 1 Ballot -> 2 Sandbox -> 3 Kill.
+   State is a plain object; `renderSim` redraws from state on every change.
+   --------------------------------------------------------------------------- */
+
+/** Stage labels for the simulator header. */
+const SIM_STAGES = ["1 · Frame", "2 · Ballot (cull)", "3 · Sandbox play", "4 · Kill session"];
+
+/**
+ * Builds the initial simulator state: 3 slots × 3 candidates, no verdicts.
+ * @param {string} planKey "A" | "B" | "C"
+ * @returns {{plan:string, stage:number, verdicts:Object<string,string>, fought:boolean}}
+ */
+const initSim = planKey => ({ plan: planKey, stage: 0, verdicts: {}, fought: false });
+
+/** Generator personas that tag each placeholder draft (illustrative). */
+const PERSONAS = ["top-down", "bottom-up", "top-down"];
+
+/**
+ * Returns the ids of candidates marked KEEP.
+ * @param {object} st simulator state
+ * @returns {string[]} kept candidate ids
+ */
+const kept = st => Object.keys(st.verdicts).filter(k => st.verdicts[k] === "KEEP");
+
+/**
+ * Renders the body of the current stage as HTML.
+ * @param {object} st simulator state
+ * @returns {string} HTML
+ */
+function simBody(st) {
+  const p = PLANS[st.plan];
+  if (st.stage === 0) {
+    return `<h3>${esc(p.frame.label)}</h3><p>${esc(p.frame.input)}</p>
+      <p class="small muted">Before this screen, agents prepared it from your earlier answers. You change nothing on it except striking lines. Time: ~10 minutes.</p>
+      <div class="vocab"><span class="pill" style="border-color:var(--pc)">${p.frame.code}01 · role line<small>agent draft</small></span>
+      <span class="pill" style="border-color:var(--pc)">${p.frame.code}02 · role line<small>agent draft</small></span>
+      <span class="pill" style="border-color:var(--pc)">${p.frame.code}03 · role line<small>agent draft</small></span></div>`;
+  }
+  if (st.stage === 1) {
+    const slots = [1, 2, 3].map(n => {
+      const code = `${p.frame.code}0${n}`;
+      const cands = [1, 2, 3].map(k => {
+        const id = `${code}-${k}`, v = st.verdicts[id] || "";
+        return `<div class="cand" data-id="${id}" ${v ? `data-v="${v}"` : ""}>
+          <div class="who">cand ${k} · ${PERSONAS[k - 1]}</div>
+          <div class="ln"></div><div class="ln s"></div>
+          <div class="acts">${["KEEP", "CUT", "PARK"].map(a => `<button type="button" data-a="${a}" class="${v === a ? "sel" : ""}">${a}</button>`).join("")}</div></div>`;
+      }).join("");
+      return `<div class="slot-row"><div class="slot-code">${code}</div><div class="cands">${cands}</div></div>`;
+    }).join("");
+    return `<p class="small muted" style="margin-top:0">Agents drafted 3 candidates per slot, in session. Mark each. Unmarked means CUT. Target: ≤1 KEEP per slot.</p><div class="slots">${slots}</div>
+      <p class="small" style="margin:12px 0 0"><b>${kept(st).length}</b> kept · ${Object.values(st.verdicts).filter(v => v === "PARK").length} parked</p>`;
+  }
+  if (st.stage === 2) {
+    const k = kept(st);
+    return `<h3>Sandbox set: ${k.length} card${k.length === 1 ? "" : "s"}</h3>
+      <p class="small muted">Survivors pass a lint, then register as one sandbox set. They run in the editor and the sims. The real library is untouched.</p>
+      <div class="vocab">${k.map(id => `<span class="pill" style="border-color:var(--ok)">${id}<small>sandbox</small></span>`).join("") || '<span class="muted small">Nothing kept. Go back and keep at least one.</span>'}</div>
+      <p style="margin-top:14px">Play ≥3 seeded fights with the grey deck plus the set (~20 minutes).</p>
+      <div class="fightbar"><i id="fight-${st.plan}" style="width:${st.fought ? "100%" : "0"}"></i></div>
+      <button class="btn" type="button" data-fight ${k.length ? "" : "disabled"}>${st.fought ? "3 fights played" : "Play 3 seeded fights"}</button>`;
+  }
+  const k = kept(st);
+  const flags = ["ok", "low", "ok", "high", "ok"];
+  return `<h3>Kill session: the batch sheet</h3>
+    <p class="small muted">One row per sandbox card. Flags, never grades. You read it beside the playtester write-ups, then cut ≥2 across the slice, extract keywords from text on ≥3 kept cards, and promote the rest in one PR.</p>
+    <div class="tscroll"><table class="sheet"><thead><tr><th>Card</th><th>Played</th><th>Picked vs offered</th><th>Win-cell presence</th><th>Your verdict</th></tr></thead>
+    <tbody>${k.map((id, i) => `<tr><td>${id}</td><td><span class="flag ${flags[i % 5]}">${flags[i % 5]}</span></td><td><span class="flag ok">ok</span></td><td><span class="flag ${flags[(i + 2) % 5]}">${flags[(i + 2) % 5]}</span></td><td class="muted">KEEP / TWEAK / CUT</td></tr>`).join("") || '<tr><td colspan="5" class="muted">No sandbox cards.</td></tr>'}</tbody></table></div>
+    <p class="small" style="margin-top:12px">Outcome filed in two places: rulings to the decisions file, per-card verdicts to the slice ledger. Next slice's pitch is proposed here.</p>`;
+}
+
+/**
+ * Redraws one simulator from its state and wires its buttons.
+ * @param {HTMLElement} host `.sim` element
+ * @param {object} st simulator state (mutated by handlers, then re-rendered)
+ */
+function renderSim(host, st) {
+  host.innerHTML = `
+    <div class="sim-stages">${SIM_STAGES.map((s, i) => `<div class="sim-stage${i === st.stage ? " on" : ""}">${s}</div>`).join("")}</div>
+    <div class="sim-body">${simBody(st)}</div>
+    <div class="sim-foot"><button class="btn" type="button" data-prev ${st.stage === 0 ? "disabled" : ""}>Back</button>
+      <span class="small muted">${["Agents prepared this; you strike lines.", "You cull; agents drafted.", "You play; nothing is wired yet.", "You cut, extract, promote."][st.stage]}</span>
+      <button class="btn primary" type="button" data-next>${st.stage === 3 ? "Restart" : "Next"}</button></div>`;
+
+  host.querySelector("[data-next]").onclick = () => { st.stage = st.stage === 3 ? 0 : st.stage + 1; if (st.stage === 0) Object.assign(st, initSim(st.plan)); renderSim(host, st); };
+  const prev = host.querySelector("[data-prev]");
+  if (prev) prev.onclick = () => { st.stage = Math.max(0, st.stage - 1); renderSim(host, st); };
+  host.querySelectorAll(".cand .acts button").forEach(b => b.onclick = () => {
+    const id = b.closest(".cand").dataset.id;
+    st.verdicts[id] = st.verdicts[id] === b.dataset.a ? undefined : b.dataset.a;
+    if (!st.verdicts[id]) delete st.verdicts[id];
+    renderSim(host, st);
+  });
+  const fight = host.querySelector("[data-fight]");
+  if (fight) fight.onclick = () => {
+    const bar = host.querySelector(`#fight-${st.plan}`);
+    bar.style.width = "100%";
+    setTimeout(() => { st.fought = true; renderSim(host, st); }, REDUCED ? 0 : 2400);
+  };
+}
+
+/* ---------------------------------------------------------------------------
+   Tabs: ARIA tablist with arrow-key support. Activating a panel re-runs its
+   entrance animations so each visit animates.
+   --------------------------------------------------------------------------- */
+
+/**
+ * Activates a tab and its panel, then runs that panel's animations.
+ * @param {HTMLElement} tab the tab button to activate
+ */
+function activate(tab) {
+  document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", String(t === tab)));
+  document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.id === tab.getAttribute("aria-controls")));
+  const panel = document.getElementById(tab.getAttribute("aria-controls"));
+  observeReveals(panel);
+  animateBars(panel);
+  animateTimeline(panel);
+  animateFlows(panel);
+  tab.scrollIntoView({ inline: "nearest", block: "nearest" });
+  window.scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" });
+}
+
+/** Keyboard navigation across tabs (Left/Right/Home/End). */
+function wireTabs() {
+  const tabs = [...document.querySelectorAll(".tab")];
+  tabs.forEach((t, i) => {
+    t.onclick = () => activate(t);
+    t.onkeydown = e => {
+      const n = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
+      if (n === undefined) return;
+      e.preventDefault();
+      const next = tabs[(n + tabs.length) % tabs.length];
+      next.focus(); activate(next);
+    };
+  });
+  document.querySelectorAll("[data-goto]").forEach(a => a.onclick = e => { e.preventDefault(); activate(document.getElementById(a.dataset.goto)); });
+}
+
+/**
+ * Adds `.in` to `.reveal` elements as they scroll into view.
+ * @param {ParentNode} root panel to observe
+ */
+function observeReveals(root) {
+  const els = root.querySelectorAll(".reveal:not(.in)");
+  if (REDUCED || !("IntersectionObserver" in window)) { els.forEach(e => e.classList.add("in")); return; }
+  const io = new IntersectionObserver(entries => entries.forEach(en => {
+    if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); }
+  }), { threshold: 0.12 });
+  els.forEach(e => io.observe(e));
+}
+
+/** Expand/collapse timeline steps on click or Enter/Space. */
+function wireSteps() {
+  document.addEventListener("click", e => {
+    const card = e.target.closest(".step-card");
+    if (!card) return;
+    const step = card.parentElement;
+    step.classList.toggle("open");
+    card.setAttribute("aria-expanded", String(step.classList.contains("open")));
+  });
+  document.addEventListener("keydown", e => {
+    if ((e.key === "Enter" || e.key === " ") && e.target.classList.contains("step-card")) { e.preventDefault(); e.target.click(); }
+  });
+}
+
+/** Theme toggle cycles OS default -> dark -> light, remembered per browser. */
+function wireTheme() {
+  const root = document.documentElement, KEY = "revamp-theme";
+  try { const s = localStorage.getItem(KEY); if (s) root.dataset.theme = s; } catch (_) {}
+  document.getElementById("themeBtn").onclick = () => {
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem(KEY, root.dataset.theme); } catch (_) {}
+  };
+}
+
+/* =============================================================================
+   7. BOOT
+   ============================================================================= */
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("execCards").innerHTML = EXEC.map(execTile).join("");
+  document.getElementById("compareBars").innerHTML = compareHTML();
+  document.getElementById("vocab").innerHTML = VOCAB.map(v => `<span class="pill" style="border-color:${v.c}">${v.w}<small>${esc(v.d)}</small></span>`).join("");
+  document.getElementById("openCalls").innerHTML = `<thead><tr><th>Call</th><th>Status</th><th>Recommended</th></tr></thead><tbody>${CALLS.map(r => `<tr><td>${esc(r[0])}</td><td class="muted">${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join("")}</tbody>`;
+  document.getElementById("fitMeters").innerHTML = Object.values(PLANS).map(p => `<div class="fit"><span>Plan ${p.key}</span><div class="track"><i style="--c:${p.color}" data-w="${p.back.score}"></i></div><b class="small">${esc(p.back.verdict)} · ${p.back.score}</b></div>`).join("");
+
+  document.querySelectorAll("[data-plan]").forEach(sec => { sec.innerHTML = planHTML(PLANS[sec.dataset.plan]); });
+  document.querySelectorAll("[data-sim]").forEach(host => renderSim(host, initSim(host.dataset.sim)));
+
+  drawClock();
+  seedLadder();
+  wireTabs();
+  wireSteps();
+  wireTheme();
+  activate(document.getElementById("tab-overview"));
+});
+</script>
+</body>
+</html>
