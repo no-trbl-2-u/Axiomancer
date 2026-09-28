@@ -22,7 +22,10 @@ The revamp resets Miserere Mei, Deus to a small, honest core and rebuilds
 from there in owner-led sessions. This folder is the map of both halves:
 
 - **Reset (R-phases)** — delete or park everything the core does not use.
-  Loop-shippable once ratified, one phase per PR, main green between them.
+  Loop-shippable once ratified, one phase per tick pushed to main, main
+  green between them.
+- **Checkpoint (RC)** — the Act 1 release T tags when the reset is done:
+  the point to reset to before anything grows again ([checkpoint.md](checkpoint.md)).
 - **Rebuild (B-phases)** — T's guided sessions. The loop never starts one
   (D37, D58).
 
@@ -63,6 +66,9 @@ parked unreachable with a plan file saying how it comes back.
 | [mobile.md](mobile.md) | App cleanup, card art mapping, app name, theme colours; Deck tab, art and dev-menu revamps | R8, R10, B7, B8, B10 |
 | [progression.md](progression.md) | XP / level retune | R9 |
 | [cards.md](cards.md) | Card-rules inventory, card-creator workflow, card sessions | B4, B5, B6 |
+| [checkpoint.md](checkpoint.md) | Save checkpoint in fights; the Act 1 checkpoint release | R9a, RC |
+
+Tick-by-tick walkthrough of the whole plan: [walkthrough.md](walkthrough.md).
 
 ## 4. Build order
 
@@ -79,22 +85,26 @@ starts it.
 | R4 | Relic placeholders: 10 signatures → GUARD 5 flat cost; The Open Hand becomes a real befriend | loop | R2 | relics.md |
 | R5 | Items reset: healing potions only, save migration, shops/caches/loot re-pointed | loop | R3 | items.md |
 | R6 | Hazard reset: minimal hazard deck | loop | R0 | hazards.md |
-| R7 | Engine purge: dead mechanic kinds, card types → Attack/Skill/Spell, reward steering logic, alt-win systems, carrier-less keywords | loop | R2, R4, R6 | engine.md |
-| R8 | Mobile cleanup: dead flows and glosses, grey card art, app label, VITAE/shillings copy | loop | R7 | mobile.md |
-| R9 | Progression retune: XP curve for Act 1 on the 3 survivors | loop | R3, R7 | progression.md |
+| R7a | Engine purge 1/3: mechanic kinds, handlers, dead fields, state, fixtures | loop | R2, R4, R6 | engine.md |
+| R7b | Engine purge 2/3: pricing, synergy, themes, draft, reward steering, card types → Attack/Skill/Spell | loop | R7a | engine.md |
+| R7c | Engine purge 3/3: alt-win systems, carrier-less effects, dead branches, closing carrier sweep | loop | R7b | engine.md |
+| R8 | Mobile cleanup: dead flows and glosses, grey card art, app label, VITAE/shillings copy | loop | R7c | mobile.md |
+| R9 | Progression retune: XP curve for Act 1 on the 3 survivors | loop | R3, R7c | progression.md |
+| R9a | Save checkpoint in fights: a reload mid-encounter re-offers the fight | loop | R7c, R8 | checkpoint.md |
 | R10 | Theme colours: move surviving hard-coded hex colours into named `theme/axm.ts` tokens (no visual change) | loop | R8 | mobile.md |
-| R11 | Loop content phases: revisit the loop so content creation comes back as planned phases; ends revamp mode | attended | R10 | loop.md |
-| R12 | New combat-playtest: write a fresh `/combat-playtest` command for the rebuilt game (the old one was archived in R0) | attended | R9, R11 | loop.md |
-| B1 | The relic pass: new relics and real signatures | owner | R4 | relics.md |
-| B2 | Enemy revamp: four tiers (normal, elite, region boss, **act boss**), roster regrowth, keywords with counters | owner | R9 | enemies.md |
-| B3 | Hazard mechanics redesign | owner | R6 | hazards.md |
-| B4 | Card-rules inventory (the gate before any card work) | loop | R7 | cards.md |
-| B5 | Card-creator workflow (successor to the card editor) | owner | B4 | cards.md |
-| B6 | Card sessions (pick a plan from the keyword/card revamp plans) | owner | B4, B5 | cards.md |
-| B7 | Deck tab UI revamp | owner | R8 | mobile.md |
-| B8 | Card art revamp (incl. the title wordmark) | owner | R8 | mobile.md |
-| B9 | Labyrinth re-theme | owner | B2 | labyrinth.md |
-| B10 | Dev menu revamp (the reset leaves the dev menu alone except for compile fixes) | owner | R8 | mobile.md |
+| RC | Act 1 checkpoint release: full gate, a playtester walk of all four regions, then T tags `v0.1.0-checkpoint` | attended | R1–R10, R7a–c, R9a, B4 | checkpoint.md |
+| R11 | Loop content phases: revisit the loop so content creation comes back as planned phases; ends revamp mode | attended | RC | loop.md |
+| R12 | New combat-playtest: write a fresh `/combat-playtest` command for the rebuilt game (the old one was archived in R0) | attended | RC, R11 | loop.md |
+| B1 | The relic pass: new relics and real signatures | owner | R4, RC | relics.md |
+| B2 | Enemy revamp: four tiers (normal, elite, region boss, **act boss**), roster regrowth, keywords with counters | owner | R9, RC | enemies.md |
+| B3 | Hazard mechanics redesign | owner | R6, RC | hazards.md |
+| B4 | Card-rules inventory (the gate before any card work) | loop | R7c | cards.md |
+| B5 | Card-creator workflow (successor to the card editor) | owner | B4, RC | cards.md |
+| B6 | Card sessions (pick a plan from the keyword/card revamp plans) | owner | B4, B5, RC | cards.md |
+| B7 | Deck tab UI revamp | owner | R8, RC | mobile.md |
+| B8 | Card art revamp (incl. the title wordmark) | owner | R8, RC | mobile.md |
+| B9 | Labyrinth re-theme | owner | B2, RC | labyrinth.md |
+| B10 | Dev menu revamp (the reset leaves the dev menu alone except for compile fixes) | owner | R8, RC | mobile.md |
 
 B4 is the one rebuild phase the loop may run: it writes an inventory and
 creates nothing.
@@ -135,7 +145,7 @@ T walked the agent defaults one at a time the same day. None remain open.
 
 ## 7. Roadmap — recommended order (D64)
 
-### Reset track (loop, one phase per PR)
+### Reset track (loop, one phase per tick)
 
 | Step | Phase | Why here |
 |---|---|---|
@@ -146,15 +156,20 @@ T walked the agent defaults one at a time the same day. None remain open.
 | 5 | **R4** Relic placeholders | Removes the Bill exploit and most signature carriers early; gives B1 its floor |
 | 6 | **R5** Items reset | Only Act 1's shops and caches remain to re-point |
 | 7 | **R6** Hazard reset | Independent; placed here so R7's carrier sweep sees the final hazard glossary |
-| 8 | **R7** Engine purge | Last big deletion — needs R2, R4, R6 to have removed their carriers |
+| 8 | **R7a–R7c** Engine purge, in three ticks | Last big deletion — needs R2, R4, R6 to have removed their carriers; split along engine.md's own three-way split so each tick is bounded |
 | 9 | **B4** Card-rules inventory (loop) | Straight after R7 so the inventory records the final tree and card work can start in parallel with the rest |
 | 10 | **R8** Mobile cleanup | Consumes R7's final exports |
 | 11 | **R9** Progression retune | Needs Act 1 and the engine final; its XP numbers feed B2 |
+| 11a | **R9a** Save checkpoint in fights | A reload must not skip a Doorwarden before the checkpoint is cut |
 | 12 | **R10** Theme colours | Last: R8 has already deleted about half the literals |
+| 12a | **RC** Act 1 checkpoint release (attended) | The reset point: mechanics in place, the map working, everything cleaned up. T tags it; nothing below starts before it |
 | 13 | **R11** Loop content phases (attended) | Closes the revamp: decides how the loop creates content again, as phases, now that the core is rebuilt; ends revamp mode (D58) |
 | 14 | **R12** New combat-playtest (attended) | Written once the survivors, Act 1 and the XP curve are final (R9) and the loop's content rules are set (R11), so it measures the game that exists |
 
-### Rebuild track (T's sessions, alongside the reset when ready)
+### Rebuild track (T's sessions, after RC)
+
+Every B-row requires RC (T, via `/oversight` 2026-09-28). Picking the card
+process plan (step a) is a decision, not a phase, and can happen any time.
 
 | Step | Phase / decision | Ready after | Why here |
 |---|---|---|---|

@@ -12,31 +12,20 @@
 > plausibly live. Verify each against current code before
 > shipping; re-file or drain as reality dictates.
 
-> **Bias: backlog drain (set via /oversight 2026-09-17).** `/iterate`
-> weights rows in this file 1.5x against the steward rotation until the
-> next oversight lifts it. Reason: four consecutive content-steward
-> passes shipped zero diffs (`/adjust-cards` 12, `/adjust-equipment` 12,
-> `/adjust-enemies` 12, `/adjust-npcs` 11 — all zero-CREATE,
-> zero-UPDATE, zero-REMOVE) while 131 rows here, 51 in
-> `plan/CRITIQUE.md` and 37 in `plan/PHASE_CANDIDATES.md` stayed open.
-> `/march` should prefer drain over the content-lifecycle rotation while
-> this banner stands; a real content gap waits at most one extra
-> rotation. T answered the `AskUserQuestion` ballot "Four consecutive
-> content-steward passes shipped zero diffs" with "Throttle stewards,
-> bias iterate to backlog".
->
-> **Correction, same day.** The note first written here named four
-> legacy `[needs-user-call]` rows (filed 2026-08-22) as prime targets
-> for this bias. Two of them were then read directly and are STALE, not
-> open: the transitional-library / card-authority row is superseded by
-> `plan/bearings.md:363` (the hold is LIFTED) and by `skills/digest.md`,
-> which already carries THE PIPELINE LIBERATION; the LONGER LEASH row is
-> superseded by `plan/bearings.md:471`, which is the bearings entry the
-> row says does not exist. Both are closed below. The remaining two
-> (art pipeline, growth doctrine for pinned content counts) were NOT
-> re-verified and may be stale the same way — read the current tree
-> before spending a tick on either. All of them are loop-drainable under
-> THE OPEN GATE ¶1; the tag is not a block.
+> **Bias: revamp support (set via /oversight 2026-09-28; replaces the
+> 2026-09-17 backlog-drain banner, which weighed rows against the content
+> steward rotation that R0 archived).** Until RC (the Act 1 checkpoint
+> release, `plan/revamp/checkpoint.md`) ships, `/iterate` weights
+> `[tests]`, `[debt]`, `[docs]`, `[contract]` and `[divergence]` rows 1.5x
+> and **skips `[content]` rows and content `[gap]` rows** (people, story,
+> art, new enemies/cards/relics/maps): they stay filed for R11 and the
+> owner-led B-rows, and D58 forbids the loop authoring them. A row whose
+> subject an R-phase deletes is closed by that phase, not fixed first.
+> Any `next:` line that routes to `/adjust-*`, `/forge`, `content-curator`,
+> `card-expert`, `mechanics-expert`, `reader` or the archived design skills
+> is void (archived in R0); read the row's detail and route it to the
+> R-phase that owns the subject or leave it for R11. T answered the
+> `/oversight` ballot "Revamp-support bias".
 
 > Pass narrative through the eleventh pass (2026-09-24) and resolved rows
 > moved verbatim to `plan/archive/AUDIT_2026.md` (TRIM THE FAT T4, 2026-09-25).
@@ -248,7 +237,10 @@
   a `normal` foe from the northern forest roster, or pin its XP; then add a
   "no `unique` in Act 1" case to `act1-elites.engine.test.ts`.
 
-### [gap] The Breakwater has no people of its own — an attended story-spec session (D34) [needs-user-call]
+### [gap] The Breakwater has no people of its own — an attended story-spec session (D34) [parked: R11 — via /oversight 2026-09-28]
+- parked: people, story and art are content (D58). T parked this legacy
+  `[needs-user-call]` row via `/oversight` 2026-09-28; it returns with R11
+  (people, story) or B8 (art), after RC. `/iterate` skips it.
 - category: gap
 - impact: 5
 - ease: 4
@@ -265,7 +257,10 @@
   them (`npcs:` on the map, dialogue via `content-curator`) and point
   `quest-giver-reachable` at the default start.
 
-### [gap] The rest of Act 1 has no people either: the Charcoal Wood, the Beacon Crags, the Lantern Deep [needs-user-call]
+### [gap] The rest of Act 1 has no people either: the Charcoal Wood, the Beacon Crags, the Lantern Deep [parked: R11 — via /oversight 2026-09-28]
+- parked: people, story and art are content (D58). T parked this legacy
+  `[needs-user-call]` row via `/oversight` 2026-09-28; it returns with R11
+  (people, story) or B8 (art), after RC. `/iterate` skips it.
 - category: gap
 - impact: 5
 - ease: 4
@@ -687,7 +682,10 @@ present. Row stays open until that session runs.
   purely executional — so filed here as `[content]`, not `[loop-call]`.
 - score: impact 4 x ease 5 / 10 = 2.0
 
-### [gap] Art pipeline: two queued owner calls block everything [needs-user-call]
+### [gap] Art pipeline: two queued owner calls block everything [parked: B8 — via /oversight 2026-09-28]
+- parked: people, story and art are content (D58). T parked this legacy
+  `[needs-user-call]` row via `/oversight` 2026-09-28; it returns with R11
+  (people, story) or B8 (art), after RC. `/iterate` skips it.
 - category: gap
 - impact: 8
 - ease: 9

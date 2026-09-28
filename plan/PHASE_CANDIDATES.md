@@ -11,6 +11,7 @@
 
 ## Pending
 
+
 ### [ ] [score 6.5] The keyword/card revamp phase: pick one of three process plans (attended, D37) — nothing starts until T picks
 - proposed: 2026-09-27, attended session with T (PR #403); filed by the
   ballot's defer path, not by `/expand`
@@ -43,53 +44,6 @@
   created by a loop verb), THE REFACTOR STRATEGY order (after S3 and P1),
   and THE PATH's six axes (D8/D20 deferred to the ratification session by
   the same ballot).
-
-### [ ] [score 7.0] Finish Act 1 after the map revamp: a shop on the road, one XP spike, fishing-village's stale pointers, and tests pinned to the real start
-- proposed: 2026-09-27, expand pass 22
-- source signals:
-  - `plan/AUDIT.md` `[gap]` "Act 1 has no shop" (2026-09-27, impact 6/ease 6,
-    filed by `/adjust-equipment` pass 21): no `village` node or `shop:` payload
-    across the Breakwater, the Charcoal Wood, the Beacon Crags, the Lantern Deep
-    or fishing-village, so the 2026-09-23 "the markets sell them" relic kit sits
-    five maps in, at Glen Market. The steward declined it as "large" (THE GROWTH
-    FLOOR ¶2) because it changes map kind spreads and their e2e pins.
-  - `plan/AUDIT.md` `[content]` "A pinned unique pays a full level of XP in Act 1"
-    (2026-09-26, M3e residue): `cw-7`'s kudan pays 1,000 XP at level 2, about a
-    third of all Act 1 XP. `act1-elites.engine.test.ts` has no uniques case.
-  - `plan/CRITIQUE.md` `[MED]` pass 55: fishing-village still points the player
-    at "the breakwater" (arrival scene, Old Marrow's offer, the starting quest,
-    `fv-28`), and its "You step out of the hovel" arrival reads as waking, not
-    arriving. D33 reworded only two lines.
-  - `plan/AUDIT.md` `[gap]` Breakwater people (D34) and "the rest of Act 1 has
-    no people either" (`/adjust-npcs` pass 20): `quest-giver-reachable.engine.test.ts`
-    still pins `startMap: 'fishing-village'`, so nothing checks the default start.
-  - commit pattern: M3a-M5 shipped eleven map commits in three days
-    (2026-09-25..27). Each is correct against its own brief, but together they
-    moved the player's first hours and left four rows behind across three queues
-    (AUDIT, CRITIQUE, CONTENT_LEDGER).
-- rationale: four signals from three queues point at one root cause. The map
-  revamp re-routed the start of the game, and the surfaces around it (economy,
-  XP, fishing-village copy, reachability tests) still assume the old road. Each
-  row is small, but they overlap: the shop decision changes the kind-spread pins,
-  the XP fix touches the same Act 1 test file, and the copy fix wants a "no
-  breakwater in fishing-village" guard. As one follow-through phase they cost
-  one review. Drained one at a time through `/iterate` they cost four ticks and
-  four chances to trip over each other's pins.
-- proposed scope: phase 1 (loop-shippable, no new items, NPCs or art): stage
-  the Act 1 shop at `ld-10`, the market grotto, per the AUDIT row's reading (a),
-  with the starter relic kit and `minor-healing-potion`, merchant-less so D29 and
-  the people session stay untouched. Swap or re-pin `cw-7` and add a "no `unique`
-  in Act 1" case. Finish D33 over the remaining fishing-village lines through
-  `content-curator`, with a string guard. Add a default-start reachability e2e: a
-  `shop:` is reachable in Act 1, and the quest-giver test gains a default-start
-  case that is `todo`/skipped until the people session lands. Phase 2
-  (attended, `[needs-user-call]`): the one Act 1 people session that the two
-  AUDIT people rows already describe. Its output is staged by `/adjust-npcs`.
-- estimated phases: 2 (1 loop, 1 attended)
-- conflicts: none against spec.md. Respects THE CARD HOLD (no cards or keywords),
-  D29 (no new NPCs in map work), and hard rule 3 (no invented named characters).
-  Placing the shop at map 4, not map 2, is the AUDIT row's own default. A playtest
-  showing the kit arrives too late reopens that choice.
 
 ### [ ] [score 6.0] Re-anchor spec.md and VISION.md to the post-refactor product once S3 and P1 land
 - proposed: 2026-09-27, expand pass 22
@@ -131,182 +85,6 @@
   only the factual corrections as loop work. It must not ship before P1, or it
   describes a card game that is about to be purged.
 
-### [ ] [score 6.5] Reconcile the shipped Drowned Parish opening and its legacy story threads with the new rulings
-- proposed: 2026-09-25, expand pass 21
-- source signals:
-  - `plan/AUDIT.md` `[content]` "The shipped Drowned Parish opening
-    contradicts the ruled story" (2026-09-24, impact 8/ease 3): the live
-    fishing-village map (`axiomancer-mechanics/src/World/Continents/Coastal-Village/maps.ts`,
-    `src/World/MapEvents/content.ts`) opens at the docks with Old
-    Marrow's king-of-revenge quest and three father/daughter dinner
-    dilemmas; `story-overview.md` rulings 7 and 10–12 instead open with
-    X fleeing the dead friend's house alone, the player told nothing of
-    the prologue at the start. An attended `/story-spec` session was
-    started 2026-09-24 and paused by T after four open questions (who
-    pressures X on the map, Old Marrow's fate, what the three dilemma
-    nodes become, what `fv-1` shows).
-  - `plan/AUDIT.md` `[content]` "Legacy story threads that likely
-    contradict the new rulings" (2026-09-24, impact 5/ease 3): the 21
-    `boy-*` flags (`src/World/MapEvents/content.ts`,
-    `Coastal-Village/maps.ts`) assume a child X, who is now a grown man
-    per the prologue; the ribbon/advisor-selection rite (river court
-    `cr-9`, village-green `tar-4`, the capital's Herald/Ribbon-Picker in
-    `Northern-Continent/maps.ts`) gives a different reason to reach the
-    capital than ruling 11's "last refuge from The Covenant" (confidence
-    70 it conflicts, unruled). The row's own `next` field ties the flag
-    rename to whatever the Drowned Parish session decides — same root
-    cause as the row above.
-  - design landing: `story-overview.md`'s clean-slate rewrite (10
-    commits, 2026-09-23/24) is itself the unphased design change that
-    produced both rows above.
-- rationale: two independent AUDIT rows plus the design landing that
-  caused them converge on one root cause — the shipped fishing-village
-  opening and its downstream flags predate the 2026-09-23/24 story
-  rewrite and now visibly contradict it. Real demand, not model
-  imagination: both rows are freshly filed off an attended session, and
-  the first already has an interrupted `/story-spec` session with T's
-  own four questions on record, waiting to resume. Not loop-drainable
-  as filed: THE BLANK PAGE (`axiomancer-mechanics/CLAUDE.md`) forbids
-  inventing the missing canon; the carve-out is explicit ("do not
-  reconstruct an arc from shipped text... unprompted").
-- proposed scope: an attended `/story-spec` (or `/oversight`) session
-  resuming the four paused questions and ruling the ribbon-rite's fate,
-  then implementing: the fishing-village opening rewrite, the `boy-*`
-  flag rename, and the ribbon-rite change (keep, rewrite, or cut).
-- estimated phases: 3 (attended design session; opening-map + flag-rename
-  implementation; ribbon-rite implementation if it survives in changed
-  form)
-- conflicts: none against spec.md. Respects THE BLANK PAGE's
-  no-invention carve-out by scoping the undecided design work as
-  attended, not loop-authored.
-- update (expand pass 22, 2026-09-27): the "opening" this candidate names has
-  moved. Since M3a (D31) a new game starts at the Breakwater's arrival scene,
-  and M3e placed fishing-village fifth, after all of Act 1. The Drowned Parish
-  session's four questions still stand, but "what `fv-1` shows" is no longer
-  the first screen of the game. The session should settle whether ruling 11's
-  opening lives at the Breakwater (the world-framing candidate below) or stays
-  with fishing-village. Score unchanged.
-
-### [ ] [score 6.0] Ship the opening world-framing and the Memoir "memories" section the new rulings require
-- proposed: 2026-09-25, expand pass 21
-- source signals:
-  - `plan/AUDIT.md` `[content]` "Story systems the new rulings require
-    that the game does not have" (2026-09-24, impact 7/ease 3):
-    `story-overview.md` ruling 11 (the opening tells the player The
-    Covenant occupies nearly the whole world, the capital is the last
-    bastion of hope, X is fleeing) and ruling 12 (the prologue arrives
-    later as memories, in a chronologically-organized Memoir tab
-    section) both name systems with zero representation in the build —
-    `axiomancer-mobile/app/(tabs)/memoir/` lists quests only, and there
-    is no opening-framing screen at all. The row's own `next` field:
-    "the memories section and the opening framing are systems work that
-    can be designed now... Route to `/expand` as phase candidates."
-  - `story-overview.md` rulings 10–12 (2026-09-24) are the fully-ruled
-    source text for the opening framing — no further attended decision
-    is needed to write ruling 11's framing to a screen.
-- rationale: this is the one part of the story-overview fallout the
-  loop can act on without inventing canon — ruling 11 is fully
-  specified prose, and the memories-section mechanism (a
-  chronologically-sorted, unlockable entry list) needs no narrative
-  content to scaffold, only a trigger scheme. Distinct from the
-  candidate above: that one is blocked on an attended session; this one
-  is designable now, exactly as the audit row itself says.
-- proposed scope: two phases. First, an opening-framing sequence (a
-  new-game intro using ruling 11's text) — no design session needed,
-  the ruling is the brief. Second, the Memoir "memories" section: the
-  data model and UI (chronologically-ordered, unlockable entries) plus
-  a trigger scheme for when the prologue's beats surface — open
-  question 5 ("what triggers each memory, and which parts of the
-  prologue come when") likely still needs a short attended check-in
-  before the second phase's content ships, but the systems/UI can be
-  built against a placeholder entry set.
-- estimated phases: 2
-- update (expand pass 22, 2026-09-27): the opening-framing screen now plays
-  before the Breakwater's arrival scene (D31), not before fishing-village.
-  Nothing else changes.
-- conflicts: none against spec.md non-goals. The memories section's
-  *content* (what each memory says) stays gated behind THE BLANK PAGE
-  until the Drowned Parish session (the candidate above) settles it —
-  this candidate ships the mechanism only.
-
-### [ ] [score 6.0] No single owner for save/persistence policy — a mid-encounter reload still lands the player past the fight
-- proposed: 2026-09-23, expand pass 19
-- source signals:
-  - `plan/AUDIT.md` loop-call "Two layers own save policy" (2026-09-20,
-    burn-day audit row 3.7): the engine's `DURABLE_ACTIONS` autosave
-    allowlist (`axiomancer-mechanics/src/Game/store.ts`) is unreachable
-    on mobile — `wrapDeflectingAdapter`
-    (`axiomancer-mobile/state/store.ts`) swallows every engine autosave
-    outside the explicit `store.save()` passthrough. Persistence is
-    carried entirely by 13 hand-placed `getState().save()` checkpoints
-    plus the exit flush. Nothing written down says which layer owns
-    persistence or where a new checkpoint belongs — named as the root
-    cause of Phase 99 shipping a correct fix with a rationale that
-    named the wrong owner.
-  - `plan/CRITIQUE.md` MED "a reload taken DURING a live encounter
-    still lands past the fight" (2026-09-20, burn-day audit row 3.1
-    residual): row 3.1 closed the reload-during-the-PRELUDE hole by
-    deferring `markNodeConsumed` to resolve time, but
-    `beginHazardEncounter` still clears the event slice and consumes
-    the node the instant the fight is *entered*, before it resolves —
-    a live hazard-pattern-combat turn state that a reload discards
-    outright, taking the node's onward edges with it. Worst on a boss
-    node, where the walk back is longest. The finding names two
-    candidate fixes (defer consumption to encounter-settle vs. persist
-    enough to rebuild the fight) and explicitly forbids shipping both:
-    "the choice is a design call, not a mechanical one."
-- rationale: two independent signal types (an architecture audit and a
-  player-facing critique finding) converge on the same undecided
-  question from two different angles — who owns "was this durable
-  action saved," and what does "consumed" mean for a node with a fight
-  still in flight. Neither source is loop-decidable alone: the audit
-  row is explicitly routed `next: /oversight`, and the critique row
-  says outright it is a design call. Real demand, not model
-  imagination — both are freshly filed (2026-09-20) off the same
-  2026-09-19 burn-day audit, not a single stale row re-surfaced.
-- proposed scope: two phases. First, an `/oversight`-ratified decision
-  on save ownership (pick one: fold the mobile verbs into the engine's
-  `DURABLE_ACTIONS` allowlist and drop `wrapDeflectingAdapter`, or keep
-  the wrapper and document it as the sole owner in the engine docs) —
-  the guard test `axiomancer-mobile/state/e2e/exploration.engine.test.ts`
-  ("mobile owns save timing") pins today's behavior, so whichever way
-  it goes is a deliberate choice, not a drift. Second, implement the
-  mid-encounter persistence fix in whichever shape the ownership
-  decision implies — likely deferring `markNodeConsumed` until the
-  encounter settles (victory/flee/defeat), reusing the `arrivalPending`
-  re-offer pattern row 3.1 already established, since that shape is the
-  smaller change and keeps "consumed" meaning "answered" project-wide.
-- estimated phases: 2
-- conflicts: none against spec.md non-goals. Touches
-  `axiomancer-mechanics/src/Game/store.ts`,
-  `axiomancer-mobile/state/store.ts`, and
-  `axiomancer-mechanics/src/World/MapEvents/resolve-map-event.ts` — a
-  cross-package boundary, so needs the audit's own flagged gap (the
-  cross-package impact checklist doesn't cover world/enemy surfaces
-  mobile consumes) kept in mind when scoping the brief.
-- **DECIDED via /oversight 2026-09-23 (first phase):** keep
-  `wrapDeflectingAdapter` — mobile remains the sole owner of save timing;
-  document it as the ratified rule in the engine docs. See
-  `plan/AUDIT.md`'s "Two layers own save policy" loop-call for the full
-  decision text. Routed to `/iterate` as a docs-only fix. The second phase
-  (the mid-encounter persistence fix itself) stays open, unblocked by this
-  decision but not yet scoped or shipped.
-
-### Trace or replace the UNRESOLVED art, now that a public page shows the gap
-- **signal:** the public DevLog's licence gate (`plan/AUDIT.md`, loop-call
-  2026-09-20): 90 shipped art files carry licence "UNRESOLVED" — 52 of 77 foe
-  portraits, all 19 card paintings, all 15 character portraits, all 4 treasure
-  images. They ship inside the game as a known debt; on a public page they
-  cannot be republished at all, so the catalog publishes their frames and says
-  the painting is withheld.
-- **shape:** per-directory, in the `acquire-art.mjs` pattern that already
-  produced provable plates: trace the 2026-07-06 drop's sources where possible,
-  otherwise reacquire or commission, and write a provenance record per file.
-  The card faces are the highest-value slice (19 files, and the catalog's card
-  grid is the page a curious reader lands on).
-- **size:** large; splits cleanly by directory, and each directory is
-  independently shippable.
-
 ### Self-host the DevLog's four type families
 - **signal:** `devlog/DESIGN.md` §2 and §11 residue. The public site loads
   Pirata One, IM Fell English, Bebas Neue and JetBrains Mono from Google Fonts.
@@ -316,16 +94,6 @@
   directory, drop the third-party request and the preconnect. ~120 KB, already
   inside the budget.
 - **size:** small.
-
-### Measured-balance evidence in the DevLog pipeline
-- **signal:** the publish prompt's evidence kind 5 and `devlog/DESIGN.md` §11
-  residue. A tuning change's before/after is the measured delta, and the
-  baseline's stamp and confidence must ride with any published number
-  (AGENTS.md "Measured truth"). Today the panel is authored by hand.
-- **shape:** derive the delta from `deck-matrix-baseline.json` across the day's
-  range, render it as the component's text pair, and refuse to publish a number
-  whose baseline is stale.
-- **size:** medium.
 
 ### Promote the continent-playtest rig into a committed script
 - source: THE OPEN GATE session 2026-08-28 — the live playtest that proved
@@ -344,17 +112,9 @@
   (UI-layer persistence, overlay traps, presenter adjacency) is invisible
   to the engine suites by design.
 - score: 4.0 (cheap — the script exists; the work is house-style adaptation)
-
-### Author the Parish's coastal settlements if Phase 44f's brief reads thin
-- source: filed 2026-08-08 by Phase 42 (`46b5a5d`), spec 34 §10.
-- what: spec 34 §1 establishes THE PARISH and its seven estates, but the
-  world content it inherits is one continent (`W-01`) plus the fishing
-  village. 44f renames what exists; it does not author what is missing. If
-  that phase opens and finds the map thinner than the fiction now implies,
-  the gap is settlements — and `/world-spec` is the built tool for it.
-- why not now: speculative until 44f actually runs, and 44f is blocked on
-  44a. Filed so the option is visible rather than rediscovered mid-phase.
-- score: 3.5 (low urgency, high optionality)
+  - note (via /oversight 2026-09-28): RC's playtester walk of all four Act 1
+    regions (`plan/revamp/checkpoint.md`) is this rig's natural home; the RC
+    session may promote it.
 
 ### Reconcile shipped `[x]` build-plan rows against open `loop:phase` issues
 - source: filed 2026-08-08 by Phase 48. Six issues (#83, #98, #139, #140,
@@ -428,16 +188,161 @@
   multi-seat recolor, so the pass leaves them alone rather than
   attempting the recolor.
 
-### Fate Engine P2 — statuses rewrite the enemy's turn (spec 31 §3, §5 #13-18)
-- source: spec-31
-- RE-SCOPED at Phase D1 (2026-07-17, spec 33) to the non-dice remainder:
-  Threat-Downgrade Ladder with struck-through telegraphs, combo-registry
-  rebuild + REACT detonations, status cap 5 + "The Inevitable"
-  fast-forward button. Finishes owner complaint #2 ("barely debuffs").
-  The dice-touching wiring is superseded: `blockedStances` ports unchanged
-  per spec 33 §6, and "stagger = 1 fewer die" has no referent in a fixed-4
-  pool — any stagger→dice effect is re-expressed in D2 vocabulary (e.g.
-  stagger forces one die to miss) inside the D-batch, not here.
+### [ ] [score 2.0] Consider a service layer for cross-project/external-API needs — no concrete need filed yet
+- proposed: 2026-09-23, via `/oversight` (T's own architecture question,
+  raised as the session's free-form adjustment)
+- signal: none concrete. T asked whether the four projects
+  (axiomancer-mechanics, axiomancer-mobile, devlog, the nexus loop itself)
+  need another layer — specifically a service layer that talks to outside
+  APIs. Read against the current tree: the engine is offline-first, mobile
+  persists entirely through engine autosave + hand-placed checkpoints (no
+  backend anywhere), and the public DevLog is a static site with no
+  server-side calls (per its own build notes: "the nightly has no browser
+  and no model call"). No open AUDIT/CRITIQUE/PHASE_CANDIDATES row asks for
+  cross-device saves, live-ops content pushes, or real usage analytics.
+- rationale: filed low-priority rather than designed speculatively. A
+  service layer is real infrastructure (hosting, auth, data handling) for
+  capabilities nothing currently asks for; adding one ahead of a concrete
+  need is the inverse of THE GROWTH FLOOR's ship-small discipline. This row
+  exists so the question resurfaces the moment a real trigger appears
+  (cross-device save/sync, live balance patches without an app release, or
+  actual player-usage analytics) instead of being silently forgotten.
+- proposed scope: undefined until a concrete trigger is filed. When one is,
+  scope it against that specific need (e.g. a save-sync endpoint is a much
+  smaller service than a live-ops content CDN) rather than building a
+  general-purpose layer up front.
+- estimated phases: n/a — not actionable without a concrete driving need.
+- conflicts: none against spec.md non-goals.
+
+## Promoted
+
+Earlier entries are archived verbatim in `plan/archive/PHASE_CANDIDATES_2026.md`.
+
+- **THE MAP REVAMP** [score 8.0] (proposed 2026-09-25, T5 residue). The owner
+  ballots are answered (D21–D29), M0–M3a merged (#382–#385), and M3b–M5 were
+  promoted to `plan/steps/01_build_plan.md` on 2026-09-26 at T's request
+  (brief `plan/2026-09-25-map-revamp-m3.prompt.md`).
+
+- **[score 6.0] No single owner for save/persistence policy — a mid-encounter reload still lands the player past the fight** — promoted via /oversight 2026-09-28 as Phase **R9a** (save checkpoint in fights), a gate item for RC. Brief: `plan/revamp/checkpoint.md` (decided: mobile stays the save owner, documented; a node is consumed when its encounter settles).
+
+
+## Rejected
+
+- `/world-tuning` still lists rest `healFraction` as a tuning lever: moot,
+  since `/world-tuning` was retired in trim T5 (2026-09-25, D10).
+- Card-face parity: bring the card-editor + devlog catalog onto THE PRINTED
+  PLATE: moot, since the library is the three grey cards (D36), the card
+  editor is deleted (D56), the DevLog catalog shows live content only (D57),
+  and any new card face is designed in the owner-led card sessions (D37).
+- Run/meta-progression as a wrapper over `PRESET_LINEAGE`: moot, since the
+  presets and their lineage were purged with the card library (D36).
+- The 27 damned exemplars + 81 besetting sins hiding inside Phase 44h: moot,
+  since the philosophy grid they re-skinned was removed with alignment and
+  philosophy in T6 (D39).
+- Enchant/disenchant hooks are per-card engine code: moot, since every
+  enchant/disenchant card was purged (D36), carrier-less engine mechanics are
+  deleted (D50) and no swap pool exists to grow (D37).
+- Pricing-lint paper credit on no-calendar non-DoT effects: moot, since the
+  MARK-style carriers it priced were purged (D36) and the carrier-less
+  mechanics and their pricing are deleted (D50).
+- Starter-library trim + duplication pass: moot, since the purge cut the
+  library to the three grey cards and removed the presets (D36); the
+  duplication half has nothing left to duplicate.
+- Swap-pool candidate authoring: moot, since the presets it refined were
+  purged (D36) and no card is authored outside a guided session with T (D37).
+- The Incompleteness premiseShed: moot, as the row's own 2026-09-27 note says;
+  the premise economy went with the purge (D36) and The Incompleteness retired
+  with the roster reset (D48).
+- Choice-width instrument: moot, since it was an instrument over the preset x
+  stage matrix; the presets are gone (D36) and the deck-matrix baseline is
+  retired until the retune (D57).
+- Combat challenge-gradient retune: moot, since it tracked preset win curves
+  that no longer exist (D36, D57); the tuning doc it pointed to is archived.
+- Enemy themed decks: moot, since the roster reset to three keyword-less
+  enemies (D48) and the ten-theme player library it borrowed from was purged
+  (D36).
+- Mid-game preset deck library: moot, since the preset libraries were purged
+  (D36) and card libraries are built only in guided sessions with T (D37).
+- Preset deck-budget lint: moot, since there are no presets (D36) and the
+  pricing machinery it would extend is deleted (D50).
+- Doctrine-curve check in the nightly baseline: moot, since the presets are
+  gone (D36) and the nightly baseline is retired until the retune (D57).
+- No player-applied "the foe takes more damage" debuff: met, since A Plain
+  Word applies VULNERABLE +25% to the foe (D42, D43); the rest of the row's
+  wiring plan is card-session work (D37).
+- [score 7.0] Finish Act 1 after the map revamp: a shop on the road, one XP spike, fishing-village's stale pointers, and tests pinned to the real start (rejected via /oversight 2026-09-28): absorbed by the reset: R2 retires the kudan (the XP spike), R3 purges fishing-village and re-pins the tests to the Act 1 start, R5 re-points shops and caches (where Act 1 sells potions is R5's call), and RC's walk checks potions are obtainable.
+- [score 6.5] Reconcile the shipped Drowned Parish opening and its legacy story threads with the new rulings (rejected via /oversight 2026-09-28): moot, since R3 purges fishing-village and its story threads (D53); Act 1's story returns with R11.
+- Measured-balance evidence in the DevLog pipeline (rejected via /oversight 2026-09-28): moot, since the deck-matrix baseline is retired (D57); R12 decides what gets measured.
+- Author the Parish's coastal settlements if Phase 44f's brief reads thin (rejected via /oversight 2026-09-28): moot, since the world is Act 1 only (D53) and `/world-spec` was archived in R0 (D58).
+- Fate Engine P2 — statuses rewrite the enemy's turn (spec 31 §3, §5 #13-18) (rejected via /oversight 2026-09-28): moot, since R2 strips every enemy keyword and affliction (D48) and B2 re-adds statuses one at a time with counters.
+- Affix-provenance labels on ItemCard (mobile) (rejected via /oversight 2026-09-28): moot, since items reset to healing potions and relics (D49).
+- Character-preset deprecation resolution (mechanics) (rejected via /oversight 2026-09-28): moot, since the presets were purged with the card library (D36) and R7 deletes the one-entry preset file.
+- Enemy stat rewrite to budget-curve compliance (content) (rejected via /oversight 2026-09-28): moot, since R2 cuts the roster to three foes and B2 regrows it against R9's curve.
+
+## Parked until RC
+
+Content or owner-session work filed before the revamp. It waits for RC (the
+Act 1 checkpoint release) and the phase named on each row. `/oversight`
+re-sorts this section at R11.
+
+### [ ] [score 6.0] Ship the opening world-framing and the Memoir "memories" section the new rulings require
+- proposed: 2026-09-25, expand pass 21
+- source signals:
+  - `plan/AUDIT.md` `[content]` "Story systems the new rulings require
+    that the game does not have" (2026-09-24, impact 7/ease 3):
+    `story-overview.md` ruling 11 (the opening tells the player The
+    Covenant occupies nearly the whole world, the capital is the last
+    bastion of hope, X is fleeing) and ruling 12 (the prologue arrives
+    later as memories, in a chronologically-organized Memoir tab
+    section) both name systems with zero representation in the build —
+    `axiomancer-mobile/app/(tabs)/memoir/` lists quests only, and there
+    is no opening-framing screen at all. The row's own `next` field:
+    "the memories section and the opening framing are systems work that
+    can be designed now... Route to `/expand` as phase candidates."
+  - `story-overview.md` rulings 10–12 (2026-09-24) are the fully-ruled
+    source text for the opening framing — no further attended decision
+    is needed to write ruling 11's framing to a screen.
+- rationale: this is the one part of the story-overview fallout the
+  loop can act on without inventing canon — ruling 11 is fully
+  specified prose, and the memories-section mechanism (a
+  chronologically-sorted, unlockable entry list) needs no narrative
+  content to scaffold, only a trigger scheme. Distinct from the
+  candidate above: that one is blocked on an attended session; this one
+  is designable now, exactly as the audit row itself says.
+- proposed scope: two phases. First, an opening-framing sequence (a
+  new-game intro using ruling 11's text) — no design session needed,
+  the ruling is the brief. Second, the Memoir "memories" section: the
+  data model and UI (chronologically-ordered, unlockable entries) plus
+  a trigger scheme for when the prologue's beats surface — open
+  question 5 ("what triggers each memory, and which parts of the
+  prologue come when") likely still needs a short attended check-in
+  before the second phase's content ships, but the systems/UI can be
+  built against a placeholder entry set.
+- estimated phases: 2
+- update (expand pass 22, 2026-09-27): the opening-framing screen now plays
+  before the Breakwater's arrival scene (D31), not before fishing-village.
+  Nothing else changes.
+- conflicts: none against spec.md non-goals. The memories section's
+  *content* (what each memory says) stays gated behind THE BLANK PAGE
+  until the Drowned Parish session (the candidate above) settles it —
+  this candidate ships the mechanism only.
+- parked: until R11 (story), after RC. Moved here via /oversight 2026-09-28; `/expand` does not re-file it.
+
+### Trace or replace the UNRESOLVED art, now that a public page shows the gap
+- **signal:** the public DevLog's licence gate (`plan/AUDIT.md`, loop-call
+  2026-09-20): 90 shipped art files carry licence "UNRESOLVED" — 52 of 77 foe
+  portraits, all 19 card paintings, all 15 character portraits, all 4 treasure
+  images. They ship inside the game as a known debt; on a public page they
+  cannot be republished at all, so the catalog publishes their frames and says
+  the painting is withheld.
+- **shape:** per-directory, in the `acquire-art.mjs` pattern that already
+  produced provable plates: trace the 2026-07-06 drop's sources where possible,
+  otherwise reacquire or commission, and write a provenance record per file.
+  The card faces are the highest-value slice (19 files, and the catalog's card
+  grid is the page a curious reader lands on).
+- **size:** large; splits cleanly by directory, and each directory is
+  independently shippable.
+- parked: until B8 (card art revamp), after RC. Moved here via /oversight 2026-09-28; `/expand` does not re-file it.
 
 ### Scripted first fight (content — extracted from retired Fate Engine P3)
 - source: spec-31 P3 remainder, extracted at Phase D1 (2026-07-17)
@@ -445,28 +350,20 @@
   teaches the dice→card→stance loop. Small content phase; re-scope onto
   the spec 33 model when promoted — sequencing after D6 (needs the new
   dice tray + stance chips to teach against).
+- parked: until R11 (content phases), after RC. Moved here via /oversight 2026-09-28; `/expand` does not re-file it.
 
 ### Hazard deck-thinning remove-card consumer
 - source: archive
 - mobile wiring is staged; blocked on a mechanics
   `removeAcquiredCard` action. Engine-gated — needs the mechanics
   action first.
-
-### Affix-provenance labels on ItemCard (mobile)
-- source: archive (was promoted Phase 155)
-- verify it did not already ship before promoting.
-
-### Character-preset deprecation resolution (mechanics)
-- source: archive
-- deprecation was rescinded 2026-06-12 and never re-decided:
-  blessed-permanent vs real migration of the 3 consumers. Small
-  scope; needs a decision line, then either a doc note or a
-  migration phase.
+- parked: until B3 (hazard redesign), after RC. Moved here via /oversight 2026-09-28; `/expand` does not re-file it.
 
 ### Quest-board story beats 2+ (content)
 - source: archive
 - only one board is authored; completion currently writes a flag
   nothing reads. Content + a consumer for the completion flag.
+- parked: until R11 (story), after RC. Moved here via /oversight 2026-09-28; `/expand` does not re-file it.
 
 ### In-app finding capture — dev-menu button files a pre-filled GitHub issue (mobile)
 - source: T direct, 2026-07-16 workflow session ("file the residue")
@@ -479,18 +376,7 @@
   Scope: mobile dev menu entry + issue-URL builder (GitHub new-issue
   URL with query params; no token needed on-device). Keep it out of
   production builds.
-
-### Enemy stat rewrite to budget-curve compliance (content)
-- source: `plan/AUDIT.md` [1.2], decision via `/oversight` 2026-07-08
-- decision: the `enemyStatBudget` curve is canon, not the currently
-  authored stats. The 30 authored enemies drift up to 2x the budget
-  by level 50 (authored under old constants with gear-tier scaling
-  baked into raw stats). Scope: reconstruct per-enemy gear-tier
-  inputs so raw stats comply with the budget formula through level
-  50, then unskip the assertion in
-  `src/Enemy/e2e/new-enemies.engine.test.ts`. Real content-sized
-  work (30 enemies) — promote to a build-plan phase when queue has
-  room.
+- parked: until B10 (dev menu revamp), after RC. Moved here via /oversight 2026-09-28; `/expand` does not re-file it.
 
 ### Card evolution (`[needs-user-call]` — UNPARKED, ruled design-now via /oversight 2026-08-10)
 - source: `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-card-library-improvement-plan.md` §2
@@ -518,6 +404,7 @@
   Note the V-sequence (visual redesign) and the whole-product pivot are
   currently consuming design bandwidth — sequence this session
   accordingly rather than displacing them.
+- parked: until B6 (card sessions); legacy `[needs-user-call]` parked by T via /oversight 2026-09-28, after RC. Moved here via /oversight 2026-09-28; `/expand` does not re-file it.
 
 ### [score 3.0] RAGE_UNLOCK_ROUND's self-heal escalation is unreachable — every roster enemy is authored, so the qualitative "punish attrition" phase never fires in a real fight
 - proposed: 2026-09-20, `/adjust-enemies` pass 14 (Step 1b widened KB audit)
@@ -570,86 +457,7 @@
 - estimated phases: 1
 - conflicts: none against spec.md non-goals; doesn't touch the 3
   surviving big-numbers constraints.
-
-### [ ] [score 2.0] Consider a service layer for cross-project/external-API needs — no concrete need filed yet
-- proposed: 2026-09-23, via `/oversight` (T's own architecture question,
-  raised as the session's free-form adjustment)
-- signal: none concrete. T asked whether the four projects
-  (axiomancer-mechanics, axiomancer-mobile, devlog, the nexus loop itself)
-  need another layer — specifically a service layer that talks to outside
-  APIs. Read against the current tree: the engine is offline-first, mobile
-  persists entirely through engine autosave + hand-placed checkpoints (no
-  backend anywhere), and the public DevLog is a static site with no
-  server-side calls (per its own build notes: "the nightly has no browser
-  and no model call"). No open AUDIT/CRITIQUE/PHASE_CANDIDATES row asks for
-  cross-device saves, live-ops content pushes, or real usage analytics.
-- rationale: filed low-priority rather than designed speculatively. A
-  service layer is real infrastructure (hosting, auth, data handling) for
-  capabilities nothing currently asks for; adding one ahead of a concrete
-  need is the inverse of THE GROWTH FLOOR's ship-small discipline. This row
-  exists so the question resurfaces the moment a real trigger appears
-  (cross-device save/sync, live balance patches without an app release, or
-  actual player-usage analytics) instead of being silently forgotten.
-- proposed scope: undefined until a concrete trigger is filed. When one is,
-  scope it against that specific need (e.g. a save-sync endpoint is a much
-  smaller service than a live-ops content CDN) rather than building a
-  general-purpose layer up front.
-- estimated phases: n/a — not actionable without a concrete driving need.
-- conflicts: none against spec.md non-goals.
-
-## Promoted
-
-Earlier entries are archived verbatim in `plan/archive/PHASE_CANDIDATES_2026.md`.
-
-- **THE MAP REVAMP** [score 8.0] (proposed 2026-09-25, T5 residue). The owner
-  ballots are answered (D21–D29), M0–M3a merged (#382–#385), and M3b–M5 were
-  promoted to `plan/steps/01_build_plan.md` on 2026-09-26 at T's request
-  (brief `plan/2026-09-25-map-revamp-m3.prompt.md`).
-
-## Rejected
-
-- `/world-tuning` still lists rest `healFraction` as a tuning lever: moot,
-  since `/world-tuning` was retired in trim T5 (2026-09-25, D10).
-- Card-face parity: bring the card-editor + devlog catalog onto THE PRINTED
-  PLATE: moot, since the library is the three grey cards (D36), the card
-  editor is deleted (D56), the DevLog catalog shows live content only (D57),
-  and any new card face is designed in the owner-led card sessions (D37).
-- Run/meta-progression as a wrapper over `PRESET_LINEAGE`: moot, since the
-  presets and their lineage were purged with the card library (D36).
-- The 27 damned exemplars + 81 besetting sins hiding inside Phase 44h: moot,
-  since the philosophy grid they re-skinned was removed with alignment and
-  philosophy in T6 (D39).
-- Enchant/disenchant hooks are per-card engine code: moot, since every
-  enchant/disenchant card was purged (D36), carrier-less engine mechanics are
-  deleted (D50) and no swap pool exists to grow (D37).
-- Pricing-lint paper credit on no-calendar non-DoT effects: moot, since the
-  MARK-style carriers it priced were purged (D36) and the carrier-less
-  mechanics and their pricing are deleted (D50).
-- Starter-library trim + duplication pass: moot, since the purge cut the
-  library to the three grey cards and removed the presets (D36); the
-  duplication half has nothing left to duplicate.
-- Swap-pool candidate authoring: moot, since the presets it refined were
-  purged (D36) and no card is authored outside a guided session with T (D37).
-- The Incompleteness premiseShed: moot, as the row's own 2026-09-27 note says;
-  the premise economy went with the purge (D36) and The Incompleteness retired
-  with the roster reset (D48).
-- Choice-width instrument: moot, since it was an instrument over the preset x
-  stage matrix; the presets are gone (D36) and the deck-matrix baseline is
-  retired until the retune (D57).
-- Combat challenge-gradient retune: moot, since it tracked preset win curves
-  that no longer exist (D36, D57); the tuning doc it pointed to is archived.
-- Enemy themed decks: moot, since the roster reset to three keyword-less
-  enemies (D48) and the ten-theme player library it borrowed from was purged
-  (D36).
-- Mid-game preset deck library: moot, since the preset libraries were purged
-  (D36) and card libraries are built only in guided sessions with T (D37).
-- Preset deck-budget lint: moot, since there are no presets (D36) and the
-  pricing machinery it would extend is deleted (D50).
-- Doctrine-curve check in the nightly baseline: moot, since the presets are
-  gone (D36) and the nightly baseline is retired until the retune (D57).
-- No player-applied "the foe takes more damage" debuff: met, since A Plain
-  Word applies VULNERABLE +25% to the foe (D42, D43); the rest of the row's
-  wiring plan is card-session work (D37).
+- parked: until B2 (enemy revamp), after RC. Moved here via /oversight 2026-09-28; `/expand` does not re-file it.
 
 ## Considered (below threshold)
 

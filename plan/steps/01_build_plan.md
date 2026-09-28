@@ -105,35 +105,43 @@ event-pool and layout files).
 > **THE REVAMP (D46–D64) — RATIFIED 2026-09-28.** Plan: `plan/revamp/README.md`
 > (§7 = the recommended order, which these rows follow) + one part plan per
 > row. R0 is **attended** (it edits `.claude/**`); `/march` and `night` stay
-> disabled until it merges. R1–R10 and B4 are loop-shippable in the order
-> below. The B-rows after them are T's sessions: they stay
-> `[blocked: owner-led]` and the loop never starts them. The card process
+> disabled until it merges. R1–R10, R9a and B4 are loop-shippable in the
+> order below, one phase per tick, pushed to main. **RC is the Act 1
+> checkpoint release (attended):** the loop stops there, T cuts the tag, and
+> nothing past it (content, cards, people, story, AI skills, anything beyond
+> Act 1) starts before it. The B-rows after it are T's sessions: they stay
+> `[blocked: owner-led]`, require RC, and the loop never starts them.
+> Tick-by-tick walkthrough: `plan/revamp/walkthrough.md`. The card process
 > plan (A/B/C) is **not picked**; agents recommend T open
 > `plan/2026-09-27-keyword-card-revamp.summary.html` to choose (`plan/revamp/cards.md`).
 
 - [x] Phase R0 — Loop doctrine reset (attended): stewards, forge, four agents and the design skills archived; every verb carries the revamp banner; ci-autofix, telemetry and plan hygiene fixed. `plan/revamp/loop.md` (ba658cba)
-- [ ] Phase R1 — Tooling reset: delete the card editor, retire the deck-matrix baseline, archive the tuning-lab pages, catalog shows live content only, orphan scripts. `plan/revamp/tooling.md`. Requires R0.
+- [ ] Phase R1 — Tooling reset: delete the card editor, retire the deck-matrix baseline, archive the tuning-lab pages, catalog shows live content only, orphan scripts. The `.claude/**` items the part plan names (the guard.mjs baseline block, the launch.json card-editor entry, the naming-law allowances in settings.json) are attended residue: R1 leaves them and notes them in its commit. `plan/revamp/tooling.md`. Requires R0.
 - [ ] Phase R2 — Enemy reset: 79 → Float-Eye / Brine Hag / Doorwarden, every enemy keyword and affliction stripped, PLEA/premise riders and curse code deleted. `plan/revamp/enemies.md`. Requires R0.
 - [ ] Phase R3 — World reset: Act 1 only, fishing-village purged, other continents parked, Labyrinth door and the Lantern Deep's deep stair sealed, encounters re-pointed (the Doorwarden on every region's door fight), one Anvil per region near its exit. `plan/revamp/world.md`, `labyrinth.md`. Requires R2.
 - [ ] Phase R4 — Relic placeholders: ten signatures → GUARD 5 at a flat cost; The Open Hand becomes a real befriend. `plan/revamp/relics.md`. Requires R2.
 - [ ] Phase R5 — Items reset: healing potions only, save migration, shops/caches re-pointed. `plan/revamp/items.md`. Requires R3.
 - [ ] Phase R6 — Hazard reset: minimal hazard deck, honest rewards. `plan/revamp/hazards.md`. Requires R0.
-- [ ] Phase R7 — Engine purge: carrier-less mechanic kinds, card types → Attack/Skill/Spell, reward steering logic, alt-win systems, carrier sweep. `plan/revamp/engine.md`. Requires R2, R4, R6.
-- [ ] Phase B4 — Card-rules inventory (loop; creates nothing; gates all card work). `plan/revamp/cards.md`. Requires R7.
-- [ ] Phase R8 — Mobile cleanup: dead flows and glosses, grey card art, app label, VITAE/shillings copy. `plan/revamp/mobile.md`. Requires R7.
-- [ ] Phase R9 — Progression retune: XP curve for Act 1 on the three survivors. `plan/revamp/progression.md`. Requires R3, R7.
+- [ ] Phase R7a — Engine purge 1/3: the 47 carrier-less mechanic kinds, their handlers, dead card fields, encounter-state fields and the retired-verb test fixtures. `plan/revamp/engine.md` (split (a)). Requires R2, R4, R6.
+- [ ] Phase R7b — Engine purge 2/3: pricing, synergy, themes, deck draft and presets, reward steering, card types → Attack/Skill/Spell. `plan/revamp/engine.md` (split (b)). Requires R7a.
+- [ ] Phase R7c — Engine purge 3/3: alt-win systems (keep befriend → mercy), effects with no carrier, dead `executeCard` branches, test-only modules, then the closing carrier sweep. `plan/revamp/engine.md` (split (c)). Requires R7b.
+- [ ] Phase B4 — Card-rules inventory (loop; creates nothing; gates all card work). `plan/revamp/cards.md`. Requires R7c.
+- [ ] Phase R8 — Mobile cleanup: dead flows and glosses, grey card art, app label, VITAE/shillings copy. `plan/revamp/mobile.md`. Requires R7c.
+- [ ] Phase R9 — Progression retune: XP curve for Act 1 on the three survivors. `plan/revamp/progression.md`. Requires R3, R7c.
+- [ ] Phase R9a — Save checkpoint in fights: one owner for save policy; a reload mid-encounter resumes that encounter instead of landing past it (promoted from PHASE_CANDIDATES via /oversight 2026-09-28). `plan/revamp/checkpoint.md`. Requires R7c, R8.
 - [ ] Phase R10 — Theme colours: move surviving hard-coded hex colours into named `theme/axm.ts` tokens, no visual change. `plan/revamp/mobile.md`. Requires R8.
-- [blocked: owner-led — T's session 2026-09-28] Phase B1 — The relic pass. `plan/revamp/relics.md`. Requires R4.
-- [blocked: owner-led — T's session 2026-09-28] Phase B5 — Card-creator workflow. `plan/revamp/cards.md`. Requires B4.
-- [blocked: owner-led — T's session 2026-09-28] Phase B6 — Card sessions. `plan/revamp/cards.md`. Requires B4, B5.
-- [blocked: owner-led — T's session 2026-09-28] Phase B2 — Enemy revamp: normal / elite / region boss / act boss. `plan/revamp/enemies.md`. Requires R9.
-- [blocked: owner-led — T's session 2026-09-28] Phase B3 — Hazard mechanics redesign. `plan/revamp/hazards.md`. Requires R6.
-- [blocked: owner-led — T's session 2026-09-28] Phase B10 — Dev menu revamp (the reset leaves the dev menu alone except compile fixes). `plan/revamp/mobile.md`. Requires R8.
-- [blocked: owner-led — T's session 2026-09-28] Phase B7 — Deck tab UI revamp. `plan/revamp/mobile.md`. Requires R8.
-- [blocked: owner-led — T's session 2026-09-28] Phase B8 — Card art revamp. `plan/revamp/mobile.md`. Requires R8.
-- [blocked: owner-led — T's session 2026-09-28] Phase B9 — Labyrinth re-theme. `plan/revamp/labyrinth.md`. Requires B2.
-- [ ] Phase R11 — Loop content phases (attended): revisit the loop so content creation returns as planned build-plan phases, decide per surface what the loop may create, review the R0 archive and zero-invocation verbs, and remove the revamp-mode banner (ends revamp mode, D58). `plan/revamp/loop.md`. Requires R10.
-- [ ] Phase R12 — New combat-playtest (attended): design and write a new `/combat-playtest` command for the rebuilt game (the old one was archived in R0), around the real questions after the reset: does stat growth track the Act 1 curve, are the survivors winnable and dangerous, what the matrix should measure (lowest VITAE included). Keeps the engine matrix CLI. `plan/revamp/loop.md`. Requires R9, R11.
+- [ ] Phase RC — Act 1 checkpoint release (attended): the full gate green, a playtester run from a new game through all four regions' Doorwarden fights, befriend via The Open Hand, save/reload mid-fight; then T tags `v0.1.0-checkpoint`, publishes the GitHub release and builds the EAS preview APK. The reset point before any content work. `plan/revamp/checkpoint.md`. Requires R1, R2, R3, R4, R5, R6, R7c, B4, R8, R9, R9a, R10.
+- [blocked: owner-led — T's session 2026-09-28] Phase B1 — The relic pass. `plan/revamp/relics.md`. Requires R4, RC.
+- [blocked: owner-led — T's session 2026-09-28] Phase B5 — Card-creator workflow. `plan/revamp/cards.md`. Requires B4, RC.
+- [blocked: owner-led — T's session 2026-09-28] Phase B6 — Card sessions. `plan/revamp/cards.md`. Requires B4, B5, RC.
+- [blocked: owner-led — T's session 2026-09-28] Phase B2 — Enemy revamp: normal / elite / region boss / act boss. `plan/revamp/enemies.md`. Requires R9, RC.
+- [blocked: owner-led — T's session 2026-09-28] Phase B3 — Hazard mechanics redesign. `plan/revamp/hazards.md`. Requires R6, RC.
+- [blocked: owner-led — T's session 2026-09-28] Phase B10 — Dev menu revamp (the reset leaves the dev menu alone except compile fixes). `plan/revamp/mobile.md`. Requires R8, RC.
+- [blocked: owner-led — T's session 2026-09-28] Phase B7 — Deck tab UI revamp. `plan/revamp/mobile.md`. Requires R8, RC.
+- [blocked: owner-led — T's session 2026-09-28] Phase B8 — Card art revamp. `plan/revamp/mobile.md`. Requires R8, RC.
+- [blocked: owner-led — T's session 2026-09-28] Phase B9 — Labyrinth re-theme. `plan/revamp/labyrinth.md`. Requires B2, RC.
+- [ ] Phase R11 — Loop content phases (attended): revisit the loop so content creation returns as planned build-plan phases, decide per surface what the loop may create, review the R0 archive and zero-invocation verbs, and remove the revamp-mode banner (ends revamp mode, D58). `plan/revamp/loop.md`. Requires RC.
+- [ ] Phase R12 — New combat-playtest (attended): design and write a new `/combat-playtest` command for the rebuilt game (the old one was archived in R0), around the real questions after the reset: does stat growth track the Act 1 curve, are the survivors winnable and dangerous, what the matrix should measure (lowest VITAE included). Keeps the engine matrix CLI. `plan/revamp/loop.md`. Requires RC, R11.
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics (9180fa5d)
@@ -1232,6 +1240,20 @@ See the status rows above; generate briefs on demand.
   the card part records that no card process plan is picked and points
   agents at the summary HTML. Workflows stay disabled until R0 merges.
   Confirmed T's request: yes ("ratify the plan"). Resulting commit: this one.
+
+- **2026-09-28** — actor: **T via `/oversight`** (attended session, branch
+  `claude/oversight-2026-09-28`). Action: **added Phase RC** (Act 1
+  checkpoint release, attended) after R10, and made R11, R12 and every
+  owner-led B-row require it; **added Phase R9a** (save checkpoint in
+  fights), promoted from PHASE_CANDIDATES; **split R7** into R7a/R7b/R7c
+  along `plan/revamp/engine.md`'s own three-way split so each tick ships a
+  bounded slice (downstream Requires R7 → R7c); noted on R1 that its
+  `.claude/**` items are attended residue. Confirmed T's request: yes (RC:
+  "get everything to a good checkpoint with the mechanics in place, the map
+  working, and everything cleaned up. Then we'll cut a release before we
+  start work on content"; R9a: "Promote to a phase before RC"; B-rows: "All
+  B-rows after RC"). The R7 split is the agent's alignment call under that
+  same instruction. Resulting commit: this one.
 
 ## Phase log (commit hashes)
 
