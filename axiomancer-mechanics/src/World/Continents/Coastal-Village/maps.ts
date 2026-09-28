@@ -55,10 +55,6 @@ const oldDockmasterTree: DialogueTree = {
                     text: "Leave him be.",
                     nextNodeId: undefined,
                 },
-                {
-                    text: "(Stand quietly. He looks up and sees who you have become.)",
-                    nextNodeId: 'observer_recognition',
-                },
             ],
         },
         offer: {
@@ -86,10 +82,6 @@ const oldDockmasterTree: DialogueTree = {
         accepted: {
             id: 'accepted',
             text: "Old Marrow nods slowly. “Mind the tide. The reef takes the careless.”",
-        },
-        observer_recognition: {
-            id: 'observer_recognition',
-            text: "He sets the net down. “Aye. Something's moved in you since we last spoke. The sea makes that kind of weather too — a tide that turns inside, not on the chart.” He doesn't ask which way it turned.",
         },
         thanks: {
             id: 'thanks',

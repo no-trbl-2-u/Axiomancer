@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-09-27 at commit 409b72bf
-> Pass count: 57
+> Last pass: 2026-09-27 at commit 36238fd8
+> Pass count: 58
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -125,9 +125,49 @@
 > "POIS"/"8/p"/"ay"), and the relic "Grants X" echo (Pending). Zero fresh
 > findings this pass.
 
+> **[critique pass 58, 2026-09-27, commit 36238fd8] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route still bounces to the title with no save; the
+> fixture-booted late-game hub covers that screen). 22 commits after pass
+> 57: T6 (alignment, philosophy and GRACE removed), S3 (stat scaling), P1
+> (the purge: the player library is the grey office) and the keyword
+> audit. The hand is now A Plain Blow / Ward / Word, and the hazard intro
+> says "you" (pass 56's row is Done at `9cf50a65`). Filed MED: T6 ungated
+> the four "observer recognition" replies along with the rest, so a first
+> meeting with Old Marrow offers "sees who you have become" and answers
+> "since we last spoke". Filed MED: A Plain Word, in every starting hand,
+> shows its FREE VULNERABLE as "×24" beside its paid "+60%". Checked and not
+> filed: the Brine Hag's "shakes off 4 PLEA" is live, because the starting
+> Suppliant's Ring applies PLEA; "THE LEDGER" tab is the memoir, not the
+> deleted alignment Ledger. Reconfirmed and not re-filed: the DoT/debuff
+> chip mid-token wrap (pass 49, Pending; now also desktop "VUL"/"+6"/"%" on
+> A Plain Word), fishing-village's "breakwater" lines (pass 55, Pending;
+> Marrow's offer unchanged), the doubled opening tell (pass 54, Pending),
+> and the relic "Grants X" echo (Pending).
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
+
+### [MED] combat — A Plain Word shows its FREE VULNERABLE as "×24" beside its paid "+60%"
+- pass: 58 (commit 36238fd8)
+- viewport: both (375×812 and 1280×800)
+- category: comprehension
+- observation: A Plain Word (`grey-word`) is in every starting hand since P1.
+  Both halves apply VULNERABLE, but its hand-card face prints them
+  differently. The FREE side reads "×24" and the paid side reads "+60%". A
+  first-time player reads "×24" as a 24-times multiplier. It is really
+  +24% (intensity 10, scaled by HEART under S3). `compactFree` in
+  `CombatBoard.tsx` turns the presenter's "×{intensity}" into "×24" and has
+  no percent case for VULNERABLE.
+- evidence: `.critique-artifacts/mobile/04-combat-board.txt` ("A PLAIN WORD /
+  ×24 / VULNERABLE / +60%"); `axiomancer-mobile/components/combat/encounter/CombatBoard.tsx:1678`;
+  `axiomancer-mechanics/src/Cards/library/starters.cards.ts:79-80`.
+- suggested fix: have the presenter give the FREE chip the same unit as the
+  paid chip (for VULNERABLE, "+24%"), and pin it with a presenter test on
+  `grey-word`.
+- source: critique:drive (unattended)
 
 ### [MED] fishing-village — the village still points the player at "the breakwater", which is now the first map they already walked
 - pass: 55 (commit bd517cf9)
@@ -627,6 +667,46 @@
 - source: critique-drive (unattended, §3.5)
 
 ## Done
+
+### [x] [MED] dialogue — T6 left four "you have changed" replies ungated, so a first meeting says "since we last spoke" — RESOLVED 2026-09-28 (adjust-npcs pass 21)
+- pass: 58 (commit 36238fd8)
+- viewport: both (content, not layout)
+- category: comprehension
+- observation: four trees had a reply that only showed when the player's
+  alignment cell had moved since their last talk
+  (`playerAlignmentCellChangedSince`). T6 removed the gate and kept the
+  reply, per its "ungated, not deleted" rule. Those replies now show on the
+  very first meeting. The dialogue screen this pass captured is Old
+  Marrow's greeting, which offers "(Stand quietly. He looks up and sees who
+  you have become.)" to a stranger he has just met. The reply leads to
+  "Something's moved in you since we last spoke." The same happens with
+  Captain Blackwater ("He sees how you deal differently now." -> "Your manner of
+  dealing has shifted, since we last spoke."), the fisherman's daughter
+  ("Something's different in you, since we last spoke.") and the
+  Northern-Forest Keeper. With alignment gone, nothing can make these
+  replies true.
+- evidence: `axiomancer-mechanics/src/World/Continents/Coastal-Village/maps.ts:59`
+  (Marrow, `observer_recognition`);
+  `axiomancer-mechanics/src/World/Continents/Coastal-Village/npcs.ts:30,154,192,389`;
+  `axiomancer-mechanics/src/World/Continents/Northern-Forest/npcs.ts:30`;
+  `git show 67fd0106` (the removed `requires: { playerAlignmentCellChangedSince: true }`);
+  `.critique-artifacts/mobile/06-dialogue.txt`.
+- suggested fix: delete the four recognition replies and their target nodes,
+  since they belonged to the deleted system. Or gate them on something that
+  is still true, such as having finished that NPC's quest.
+- source: critique:drive (unattended)
+- resolution: took the first suggested fix. D39 removes "the dialogue gates
+  and read-backs that use" alignment, and the observer cache was deleted in
+  T6, so these replies are that system's read-backs. The retired replies and
+  their target nodes are Old Marrow `observer_recognition`, Blackwater
+  `merchant_recognition`, the Daughter `growth_recognition`, and three the
+  row did not list: the Shrine Keeper `observer_transformation`, the
+  Chronicler `scholar_observation` and the Wandering Philosopher
+  `philosophical_recognition`. That is all six sites where T6 removed
+  `playerAlignmentCellChangedSince`. The ~30 formerly `requiresAlignment`-gated
+  topic replies stay, because they claim nothing about the past. Pinned by
+  `continents.engine.test.ts` ("no staged NPC claims to remember a change")
+  and the updated mobile `event.engine.test.ts` Blackwater case.
 
 ### [x] [MED] hazard — every hazard intro narrates the player as "he", while the rest of the game says "you" — RESOLVED 2026-09-27 (commit 9cf50a65)
 - pass: 56 (commit 16fb2990)

@@ -26,10 +26,6 @@ const captainBlackwaterTree: DialogueTree = {
                     text: "Just looking.",
                     nextNodeId: 'browsing',
                 },
-                {
-                    text: "(The captain's eyes narrow. He sees how you deal differently now.)",
-                    nextNodeId: 'merchant_recognition',
-                },
                 // Phase 53e (S-02 "the read-back web") — reads `marrow_pressed`
                 // (set at fv-2, column 1, strictly ahead of this node's column
                 // 6). The brief's table also names `starting-quest` completed
@@ -149,10 +145,6 @@ const captainBlackwaterTree: DialogueTree = {
             id: 'long_term_wisdom',
             text: "“Good, to hear wisdom recognized. Short thinking sinks more ships than storms do. The merchant who looks past the next tide weathers any tempest.”",
         },
-        merchant_recognition: {
-            id: 'merchant_recognition',
-            text: "“Your manner of dealing has shifted, since we last spoke. Experience changes what a man weighs — coin, or conscience. The wise merchant bends without breaking.”",
-        },
     },
 };
 
@@ -187,10 +179,6 @@ const fishermansDaughterTree: DialogueTree = {
                 {
                     text: "Mind your nets, child.",
                     nextNodeId: 'dismissive_response',
-                },
-                {
-                    text: "(She studies you a moment longer than she should. Something in you has changed.)",
-                    nextNodeId: 'growth_recognition',
                 },
                 // Phase 53e (S-02 "the read-back web") — the peer who is
                 // further along the same reckoning. Two mutually exclusive
@@ -383,10 +371,6 @@ const fishermansDaughterTree: DialogueTree = {
         balanced_path: {
             id: 'balanced_path',
             text: "“A path that honors both duty and my own growth. That would be the whole of it — if I can find the way.”",
-        },
-        growth_recognition: {
-            id: 'growth_recognition',
-            text: "“Something's different in you, since we last spoke. How you carry yourself. How you listen. Experience does change a person. I hope I grow with such purpose, when my time comes.”",
         },
     },
 };
