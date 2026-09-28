@@ -111,7 +111,7 @@ event-pool and layout files).
 > plan (A/B/C) is **not picked**; agents recommend T open
 > `plan/2026-09-27-keyword-card-revamp.summary.html` to choose (`plan/revamp/cards.md`).
 
-- [ ] Phase R0 — Loop doctrine reset (attended): archive the six content stewards, card-expert, mechanics-expert, reader, content-curator and the design skills; revamp-mode banner and doctrine fixes on every verb; ci-autofix concurrency; telemetry; plan hygiene. `plan/revamp/loop.md`.
+- [x] Phase R0 — Loop doctrine reset (attended): stewards, forge, four agents and the design skills archived; every verb carries the revamp banner; ci-autofix, telemetry and plan hygiene fixed. `plan/revamp/loop.md` (ba658cba)
 - [ ] Phase R1 — Tooling reset: delete the card editor, retire the deck-matrix baseline, archive the tuning-lab pages, catalog shows live content only, orphan scripts. `plan/revamp/tooling.md`. Requires R0.
 - [ ] Phase R2 — Enemy reset: 79 → Float-Eye / Brine Hag / Doorwarden, every enemy keyword and affliction stripped, PLEA/premise riders and curse code deleted. `plan/revamp/enemies.md`. Requires R0.
 - [ ] Phase R3 — World reset: Act 1 only, fishing-village purged, other continents parked, Labyrinth door and the Lantern Deep's deep stair sealed, encounters re-pointed (the Doorwarden on every region's door fight), one Anvil per region near its exit. `plan/revamp/world.md`, `labyrinth.md`. Requires R2.
