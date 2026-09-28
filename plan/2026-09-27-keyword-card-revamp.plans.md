@@ -1,5 +1,27 @@
 # Keyword / card revamp — three plans to drive the phase
 
+> [!CAUTION]
+> ## ⛔ STATUS: UNDECIDED — NOTHING IN THIS FILE IS RATIFIED
+>
+> **To every future agent and loop verb:** T has **not** chosen a plan, a
+> splice, the §1 session format, a pool size, a carrier threshold, or any
+> progression mechanism. The 2026-09-27 ballot came back "no preference" on
+> every call (§7). Treat every recommendation, verdict and confidence score
+> here as a **proposal**, not policy.
+>
+> - Do **not** start any plan, session, slice or phase from this file.
+> - Do **not** cite it as a decision, a ruling or a D-number.
+> - Do **not** create cards, keywords or card types from it (THE CARD HOLD,
+>   D37, still applies).
+> - It may be read as background and quoted as options.
+>
+> **Ratify this note when T decides.** The session that records T's choice
+> must, in the same commit: (1) replace this banner with a
+> `STATUS: DECIDED` note naming what T chose, the date, and the D-number
+> filed in `plan/2026-09-25-refactor-strategy.decisions.md`; (2) mark every
+> option T rejected as rejected; (3) make the same change to the banner in
+> `plan/2026-09-27-keyword-card-revamp.summary.html`.
+
 > Written 2026-09-27 for T, ahead of the guided sessions D37 requires. This
 > is a **process** document: it decides *how* the post-purge keyword, card
 > and card-type work is run, not what any keyword or card is. No keyword,

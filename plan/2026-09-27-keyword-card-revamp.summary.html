@@ -265,6 +265,14 @@ table.t th, table.t td { text-align: left; vertical-align: top; padding: 9px 10p
 table.t th { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
 .tscroll { overflow-x: auto; }
 
+
+/* --- UNDECIDED banner: must stay visible until T ratifies a decision ------ */
+.undecided { margin: 22px 0 6px; border: 3px solid var(--bad); border-radius: var(--radius); background: color-mix(in srgb, var(--bad) 10%, var(--surface)); padding: 18px 20px; box-shadow: var(--shadow); }
+.undecided h2 { margin: 0 0 .35em; color: var(--bad); font-size: clamp(24px, 4vw, 34px); letter-spacing: .02em; }
+.undecided p { margin: 0 0 .6em; }
+.undecided ul { margin: 0 0 .6em; padding-left: 20px; }
+.undecided .ratify { border-top: 1px dashed var(--bad); padding-top: 10px; margin-top: 10px; font-size: 13.5px; }
+
 /* --- Reduced motion: kill every animation and transition ------------------- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -291,6 +299,24 @@ table.t th { font-size: 12px; color: var(--muted); text-transform: uppercase; le
     </div>
     <button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle colour theme">◐ Theme</button>
   </header>
+
+
+  <!-- =====================================================================
+       STATUS BANNER — UNDECIDED.
+       Future agents: this page shows PROPOSALS only. When T decides, replace
+       this block with a STATUS: DECIDED note (what was chosen, date, D-number)
+       in the same commit that updates the plan file's banner.
+       ===================================================================== -->
+  <aside class="undecided" role="alert" aria-label="Status: undecided">
+    <h2>⛔ STATUS: UNDECIDED</h2>
+    <p><b>Nothing on this page is ratified.</b> T has not chosen a plan, a splice, the session format, a pool size, a carrier threshold, or any progression mechanism. The 2026-09-27 ballot returned "no preference" on every call.</p>
+    <ul class="small">
+      <li>Every recommendation, verdict and score below is a proposal, not policy.</li>
+      <li>Do not start any plan, session, slice or phase from this page.</li>
+      <li>Do not cite it as a decision. The card hold (D37) still applies.</li>
+    </ul>
+    <p class="ratify"><b>Ratify this note when T decides.</b> The session that records the choice must, in the same commit, replace this banner with a <code>STATUS: DECIDED</code> note naming what T chose, the date and the D-number. It must also update the matching banner in <code>plan/2026-09-27-keyword-card-revamp.plans.md</code>.</p>
+  </aside>
 
   <nav class="tabs" aria-label="Sections">
     <div class="tablist" role="tablist" id="tablist">
