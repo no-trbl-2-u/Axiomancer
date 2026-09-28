@@ -24,9 +24,9 @@ The caller will hand you:
 - A base URL (default `http://localhost:8081`).
 - Optional focus areas (combat, exploration, character
   management, etc.).
-- The Done section of the current
-  `axiomancer-mobile/docs/reports/PLAYTEST_REPORT.md` (if any)
-  so you don't re-surface addressed findings.
+- The most recent playtest reports (`axiomancer-mobile/docs/reports/`,
+  `axiomancer-mechanics/docs/reports/playtest-*.md`), if any, so you
+  don't re-surface addressed findings.
 - A voice cue for how the game talks about itself (the caller
   gathers this from recent reports and the package's AGENTS.md).
 
@@ -77,7 +77,7 @@ Combat, the only engine — `axiomancer-mobile/docs/combat.md`):
    threat phase resolve. Do the dice colours, card costs and the
    VITAE / status numbers tell a story you can follow?
 5. **Combat — resolution.** Play on until the outcome (VITAE is
-   the win condition; mercy and other alt-wins may be offered).
+   the win condition; befriending may be offered).
    Is it clear why the fight ended the way it did?
 6. **Aftermath.** The victory / parley / defeat panel, then CARRY
    ON. Are the spoils and the card draft understandable? Is the
@@ -157,7 +157,7 @@ what stopped you as a player — and count it in the report header's
 
 The caller may hand you URLs of the form
 `http://localhost:8081/exploration?fixture=<id>` (2026-09-08,
-`docs/state-fixtures.md`). Opening one boots the game at an authored
+`docs/state-fixtures.md` at the repo root). Opening one boots the game at an authored
 state — a named preset standing on a named node, sometimes with the
 node's event already fired so a gated screen (`/dialogue`, `/village`,
 `/cutscene`, `/rest`, `/hazard`, `/blacksmith`, `/cache`) is on screen
@@ -177,7 +177,7 @@ when the page settles. Rules of engagement:
 ## The structured log bridge (AXM Log)
 
 The app exposes its structured log at `globalThis.__AXM_LOG__` in every
-build — read it with `browser_evaluate` (see `docs/logging.md` for the
+build — read it with `browser_evaluate` (see the repo-root `docs/logging.md` for the
 full contract). No dev-tools flag needed. Use it when the UI alone
 can't explain what happened:
 

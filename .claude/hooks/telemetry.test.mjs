@@ -233,3 +233,38 @@ test('every shard carries one table header and stays parseable as a markdown tab
     assert.equal(row.split('|').length - 2, 6, `row has six cells: ${row}`)
   }
 })
+
+// /march runs its verbs by reading skills/<verb>.md, not through the Skill
+// tool. Those reads are the only trace a march-dispatched verb leaves, so
+// they are logged (R0, 2026-09-28). Rows from earlier tests can share a
+// timestamp second, so these cases count verb-read rows, not row positions.
+const verbRows = () => rows().filter((r) => r.includes('| verb-read |'))
+
+test('reading a root skills/<verb>.md logs one verb-read row per tick', () => {
+  clearTick()
+  fire('prompt', { ...base(), prompt: '/march' })
+  const before = verbRows().length
+  const read = (file_path) =>
+    fire('tool', { ...base(), tool_name: 'Read', tool_input: { file_path } })
+  read(String.raw`C:\repo\skills\ship-a-phase.md`)
+  read('/repo/skills/ship-a-phase.md') // a second chunk of the same file
+  fire('tool-end', { ...base(), tool_name: 'Read', tool_input: { file_path: '/repo/skills/ship-a-phase.md' } })
+  const added = verbRows().slice(before)
+  assert.equal(added.length, 1, `one row per verb per tick: ${added.join('\n')}`)
+  assert.match(added[0], /\| verb-read \| ship-a-phase \|/)
+})
+
+test('reads outside the root skills/ directory are not logged', () => {
+  clearTick()
+  fire('prompt', { ...base(), prompt: '/march' })
+  const before = verbRows().length
+  for (const file_path of [
+    '/repo/plan/archive/2026-09-28-revamp-r0/skills/forge.md',
+    '/repo/.claude/skills/kb-query/SKILL.md',
+    '/repo/node_modules/x/skills/y.md',
+    '/repo/skills/notes.txt',
+    '/repo/AGENTS.md',
+  ])
+    fire('tool', { ...base(), tool_name: 'Read', tool_input: { file_path } })
+  assert.equal(verbRows().length, before)
+})
