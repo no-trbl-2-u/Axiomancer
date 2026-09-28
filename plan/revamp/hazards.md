@@ -1,7 +1,7 @@
 # Revamp — hazards
 
 > Part plan of [THE REVAMP](README.md). Phases **R6** (reset, loop) and
-> **B3** (mechanics redesign, owner). Decision D52. Status: PROPOSED.
+> **B3** (mechanics redesign, owner). Decision D52. Status: RATIFIED 2026-09-28 (D64).
 
 ## Where things stand
 

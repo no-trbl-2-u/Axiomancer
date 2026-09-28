@@ -1,7 +1,7 @@
 # Revamp — progression
 
 > Part plan of [THE REVAMP](README.md). Phase **R9** (loop). Decision D55.
-> Status: PROPOSED.
+> Status: RATIFIED 2026-09-28 (D64).
 
 ## Where things stand
 

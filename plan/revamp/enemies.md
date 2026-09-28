@@ -1,7 +1,7 @@
 # Revamp — enemies
 
 > Part plan of [THE REVAMP](README.md). Phases **R2** (reset, loop) and
-> **B2** (enemy revamp, owner). Decisions D48, D59. Status: PROPOSED.
+> **B2** (enemy revamp, owner). Decisions D48, D59. Status: RATIFIED 2026-09-28 (D64).
 
 ## Why
 

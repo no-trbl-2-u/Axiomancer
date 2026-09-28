@@ -1,7 +1,7 @@
 # Revamp — tooling
 
 > Part plan of [THE REVAMP](README.md). Phase **R1** (loop). Decisions D56,
-> D57. Status: PROPOSED.
+> D57. Status: RATIFIED 2026-09-28 (D64).
 
 ## R1 — Tooling reset (loop)
 

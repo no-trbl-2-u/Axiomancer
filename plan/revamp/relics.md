@@ -1,7 +1,7 @@
 # Revamp — relics and signature skills
 
 > Part plan of [THE REVAMP](README.md). Phases **R4** (placeholders, loop)
-> and **B1** (the relic pass, owner). Decision D47. Status: PROPOSED.
+> and **B1** (the relic pass, owner). Decision D47. Status: RATIFIED 2026-09-28 (D64).
 
 ## Where things stand
 

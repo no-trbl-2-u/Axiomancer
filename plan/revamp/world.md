@@ -1,7 +1,7 @@
 # Revamp — world
 
 > Part plan of [THE REVAMP](README.md). Phase **R3** (loop). Decision D53.
-> Status: PROPOSED. The Labyrinth has its own plan ([labyrinth.md](labyrinth.md)).
+> Status: RATIFIED 2026-09-28 (D64). The Labyrinth has its own plan ([labyrinth.md](labyrinth.md)).
 
 ## Where things stand
 

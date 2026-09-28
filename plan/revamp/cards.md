@@ -2,7 +2,7 @@
 
 > Part plan of [THE REVAMP](README.md). Phases **B4** (card-rules inventory,
 > loop), **B5** (card-creator workflow, owner), **B6** (card sessions,
-> owner). Decisions D37, D44, D50, D51, D56. Status: PROPOSED.
+> owner). Decisions D37, D44, D50, D51, D56. Status: RATIFIED 2026-09-28 (D64).
 
 > [!IMPORTANT]
 > **Gate before any card work (T, 2026-09-28).** Before a card session,
@@ -12,6 +12,30 @@
 > anatomy, complexity budget, the carrier rule, and every lint, guard and
 > test that pins them. That is Phase B4. No card work begins until its
 > inventory is merged. (Also recorded in `plan/bearings.md` → THE CARD HOLD.)
+
+## The card process plan is NOT picked yet
+
+> [!WARNING]
+> T has **not** committed to a card revamp plan. There are **three
+> candidate process plans** in
+> [`plan/2026-09-27-keyword-card-revamp.plans.md`](../2026-09-27-keyword-card-revamp.plans.md)
+> (status UNDECIDED; its 2026-09-27 ballot came back "no preference"):
+>
+> - **Plan A — Vision first** (the staged pipeline: fantasies → skeleton → set → play)
+> - **Plan B — Slice first** (vertical prototypes; playable new cards in session 1) — that file's recommendation, confidence 70
+> - **Plan C — Threat first** (the player's kit derived as answers to the enemy roster)
+>
+> **Until T picks one, every agent that discusses card, keyword or
+> card-type work must recommend that T open the interactive summary
+> `plan/2026-09-27-keyword-card-revamp.summary.html`** (one tab per plan, with a working-backwards verdict) to help
+> choose. Do not start B5/B6, schedule sessions, or treat any plan's
+> recommendation as a decision. When T picks, follow the ratify instructions
+> in that file's banner, file a D-number, and update this section and the
+> README banner in the same commit.
+>
+> Note for the pick: the enemy reset (R2) leaves three foes, so Plan C's
+> threat matrix has little to derive from until B2; if T picks C, B2 moves
+> ahead of B6 (README §7).
 
 ## Where things stand
 

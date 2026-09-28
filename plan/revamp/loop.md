@@ -2,7 +2,7 @@
 
 > Part plan of [THE REVAMP](README.md). Phase **R0** (attended — it edits
 > `.claude/**`, which is classifier-blocked for unattended runs). Decision
-> D58. Status: PROPOSED.
+> D58. Status: RATIFIED 2026-09-28 (D64).
 
 ## Ruling
 

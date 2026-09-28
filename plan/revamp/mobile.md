@@ -3,7 +3,7 @@
 > Part plan of [THE REVAMP](README.md). Phases **R8** (cleanup, loop),
 > **R10** (theme colours, loop), **B7** (Deck tab revamp, owner), **B8**
 > (card art revamp, owner), **B10** (dev menu revamp, owner). Decisions
-> D60, D62. Status: PROPOSED. Paths under `axiomancer-mobile/`.
+> D60, D62. Status: RATIFIED 2026-09-28 (D64). Paths under `axiomancer-mobile/`.
 
 ## R8 — Mobile cleanup (loop)
 

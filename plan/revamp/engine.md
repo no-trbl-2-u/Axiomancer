@@ -1,7 +1,7 @@
 # Revamp — engine purge
 
 > Part plan of [THE REVAMP](README.md). Phase **R7** (loop). Decisions D50,
-> D51. Status: PROPOSED. Paths are under `axiomancer-mechanics/src/`.
+> D51. Status: RATIFIED 2026-09-28 (D64). Paths are under `axiomancer-mechanics/src/`.
 
 ## Ruling
 

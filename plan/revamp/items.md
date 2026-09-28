@@ -1,7 +1,7 @@
 # Revamp — items (consumables, shops, caches)
 
 > Part plan of [THE REVAMP](README.md). Phase **R5** (loop). Decision D49.
-> Status: PROPOSED. Relics have their own plan ([relics.md](relics.md)).
+> Status: RATIFIED 2026-09-28 (D64). Relics have their own plan ([relics.md](relics.md)).
 
 ## Where things stand
 

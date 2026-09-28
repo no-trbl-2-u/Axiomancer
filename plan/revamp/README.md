@@ -1,17 +1,20 @@
 # THE REVAMP — main build plan
 
-> [!CAUTION]
-> ## STATUS: PROPOSED — awaiting T's ratification
+> [!NOTE]
+> ## STATUS: RATIFIED 2026-09-28 (D64)
 >
-> Written 2026-09-28 from the attended audit ballot (decisions **D46–D63**
-> in `plan/2026-09-25-refactor-strategy.decisions.md`). Every `R`/`B` row in
-> `plan/steps/01_build_plan.md` is `[blocked: awaiting ratification]` until
-> T ratifies this file. `/march` and `night` are **disabled** on GitHub
-> (`gh workflow disable march night`, 2026-09-28) for the same reason.
+> T ratified this plan on 2026-09-28, after ruling every open call
+> (decisions **D46–D64** in `plan/2026-09-25-refactor-strategy.decisions.md`).
+> The R-rows and B4 in `plan/steps/01_build_plan.md` are unblocked, in the
+> order of §7; owner-led B-rows stay `[blocked: owner-led]` — the loop never
+> starts them. `/march` and `night` stay **disabled** until Phase R0
+> (attended) merges; then `gh workflow enable march night`.
 >
-> **To ratify:** in one commit, replace this banner with `STATUS: RATIFIED
-> <date>`, unblock the rows in `01_build_plan.md`, and re-enable the workflows (`gh workflow enable march
-> night`) only after Phase R0 has merged.
+> **The card part is NOT decided.** THE CARD HOLD (D37) still applies, and
+> T has not picked among the three keyword/card process plans (A, B, C) —
+> see [cards.md](cards.md). Until T picks one, any agent discussing card
+> work **recommends that T open `plan/2026-09-27-keyword-card-revamp.summary.html`** (one tab per plan, with a
+> working-backwards verdict) to choose.
 
 ## 1. What this is
 
@@ -127,3 +130,37 @@ T walked the agent defaults one at a time the same day. None remain open.
 | 7 | Hard-coded hex colours | A small loop phase **R10** after R8 (D62) |
 | + | Hazard reset depth | Minimal playable core, as drafted in hazards.md (D63) |
 | + | The Anvil (found during call 6) | Its only placement was on fishing-village; **re-home it once per region, near the exit** (D61) |
+
+## 7. Roadmap — recommended order (D64)
+
+### Reset track (loop, one phase per PR)
+
+| Step | Phase | Why here |
+|---|---|---|
+| 1 | **R0** Loop doctrine reset (attended) | The loop must stop teaching retired doctrine and routing to archived agents before it ships anything. Re-enable `march`/`night` after it merges |
+| 2 | **R1** Tooling reset | Deleting the card editor frees R7 from a third package; retiring the baseline stops every session printing a stale stamp |
+| 3 | **R2** Enemy reset | Everything downstream (world, relics' befriend data, the engine carrier sweep) keys off the three survivors |
+| 4 | **R3** World reset | Needs the survivors to re-point encounters; shrinks the world before items/shops are touched |
+| 5 | **R4** Relic placeholders | Removes the Bill exploit and most signature carriers early; gives B1 its floor |
+| 6 | **R5** Items reset | Only Act 1's shops and caches remain to re-point |
+| 7 | **R6** Hazard reset | Independent; placed here so R7's carrier sweep sees the final hazard glossary |
+| 8 | **R7** Engine purge | Last big deletion — needs R2, R4, R6 to have removed their carriers |
+| 9 | **B4** Card-rules inventory (loop) | Straight after R7 so the inventory records the final tree and card work can start in parallel with the rest |
+| 10 | **R8** Mobile cleanup | Consumes R7's final exports |
+| 11 | **R9** Progression retune | Needs Act 1 and the engine final; its XP numbers feed B2 |
+| 12 | **R10** Theme colours | Last: R8 has already deleted about half the literals |
+
+### Rebuild track (T's sessions, alongside the reset when ready)
+
+| Step | Phase / decision | Ready after | Why here |
+|---|---|---|---|
+| a | **Pick the card process plan** (A, B or C) — open `plan/2026-09-27-keyword-card-revamp.summary.html` | now | Nothing else in card work can be scheduled until it is picked; picking early lets B5/B6 follow B4 immediately |
+| b | **B1** Relic pass | R4 | Signatures are the player's only non-card actions; small, and it restores texture to fights early |
+| c | **B5** Card-creator workflow | B4 | The tool shape follows the inventory and the picked plan |
+| d | **B6** Card sessions | B4, B5 | The player's kit — the biggest rebuild |
+| e | **B2** Enemy revamp (four tiers, Act Boss) | R9 (and B6 under way) | Threats are designed against a real kit. **If T picks Plan C (threat first), move B2 before B6** |
+| f | **B3** Hazard redesign | R6 | Independent of combat; any time after R6 |
+| g | **B10** Dev menu revamp | R8, R10 | Builds on the final palette and the post-reset content |
+| h | **B7** Deck tab revamp | R8 (better after B6 adds cards) | A deck of 3 cards gives the redesign little to show |
+| i | **B8** Card art revamp | B6 | Art per card type once the types beyond Attack/Skill/Spell exist |
+| j | **B9** Labyrinth re-theme | B2 | Needs the enemy roster and tiers |

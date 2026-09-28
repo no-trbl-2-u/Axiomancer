@@ -1,7 +1,7 @@
 # Revamp — the Labyrinth (The Aporia)
 
 > Part plan of [THE REVAMP](README.md). Door sealed in **R3**; re-theme is
-> **B9** (owner). Decision D54. Status: PROPOSED.
+> **B9** (owner). Decision D54. Status: RATIFIED 2026-09-28 (D64).
 
 ## Where things stand
 

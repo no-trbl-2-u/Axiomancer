@@ -430,8 +430,8 @@ what else was unused, underused or inconsistent ("clean house before I
 start building back up"). Seven read-only audits ran (engine, mobile,
 content, tooling, core loop, content stewards, design skills), and T
 answered the findings one ballot question at a time. The plan is
-`plan/revamp/` (README = main build plan); every ruling below is PROPOSED
-there until T ratifies it.
+`plan/revamp/` (README = main build plan); every ruling below was PROPOSED
+there until T ratified it (D64).
 
 **D46 — THE REVAMP: reset to a small core, then rebuild in owner-led
 sessions.** (T, 2026-09-28: "a map of how to reset back to 0 while
@@ -579,6 +579,18 @@ ending. The hazard reset keeps a minimal playable core. *Rejected:* keeping
 the keyword mechanics or a simple subset; keeping or repurposing Learn Card;
 keeping RELENT or both dormant; removing only the hazard lies; parking
 hazards.
+
+**D64 — THE REVAMP is ratified, in the recommended order; the card process
+plan stays unpicked.** (T, 2026-09-28: "ratify the plan … make sure the
+card revamp part of this plan acknowledges that we still haven't committed
+to a plan, there's 3 potential plans for it, and make sure future agents
+know to recommend looking at the html file".) `plan/revamp/` is RATIFIED.
+Reset order: R0 (attended) → R1 → R2 → R3 → R4 → R5 → R6 → R7 → B4 → R8 →
+R9 → R10. Rebuild order when T is ready: pick the card plan → B1 → B5 → B6
+→ B2 (before B6 if Plan C) → B3 → B10 → B7 → B8 → B9. `/march` and
+`night` are re-enabled after R0 merges. Until T picks Plan A, B or C,
+agents discussing card work recommend T open
+`plan/2026-09-27-keyword-card-revamp.summary.html`.
 
 ## Open follow-ups
 
