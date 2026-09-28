@@ -89,3 +89,204 @@ T's call.
 T picks a plan (or splice) from the keyword/card revamp plans, ratifies its
 banner there, and runs the sessions. A fresh card agent is written at the
 first session. More card types beyond Attack/Skill/Spell are added here.
+
+## Card-session queue
+
+Card-mechanic gaps the loop filed before D37/D58, moved here from
+`plan/PHASE_CANDIDATES.md` in R0 (2026-09-28). They are inputs for the
+owner-led card sessions (B6), not loop work: the loop authors no card or
+keyword (D37, D58). The steward-era scoring and "ship small" language is
+kept verbatim as history; the card agent re-judges each row against the
+grey library.
+
+### [score 3.0] No card grants an in-combat/temporary card upgrade — Slay the Spire's Armaments/Apotheosis niche has no analogue
+- origin: filed by `/adjust-cards` pass 17, 2026-09-23; moved from `plan/PHASE_CANDIDATES.md` in R0 (2026-09-28).
+- proposed: 2026-09-23, `/adjust-cards` pass 17 (Step 1b widened KB
+  cross-reference; Step 1's own structural audit read zero-diff — same
+  134 cards, `pricing.engine.test.ts` 263/263, `curated-library.engine
+  .test.ts` 14/14, `deck-presets.engine.test.ts` 9/9, all byte-identical
+  to pass 16's own citation, and the only touching commit on the
+  card-authoring surface in the 40-commit window was an unrelated
+  `export` rename on `REGISTRY_DOT_IDS` in `combat.cards.ts`).
+- source signals:
+  - KB: `kb:slay-the-spire/cards/0015-armaments-armaments` (community,
+    medium) — "Gain 5 Block. Upgrade a card in your hand for the rest
+    of combat," `kb:slay-the-spire/cards/0013-apotheosis-apotheosis`
+    — "Upgrade ALL your cards for the rest of combat. Exhaust," and
+    `kb:slay-the-spire/cards/0202-lesson-learned-lessonlearned` — "Deal
+    10 damage. If Fatal, Upgrade a random card in your deck. Exhaust."
+    A genre-staple niche (temporary-for-this-fight or permanent-to-deck
+    card-granted upgrades) distinct from a player's own meta-progression
+    upgrade choice.
+  - Live-code check: Axiomancer already has a full `+`-card system
+    (`src/Cards/card-upgrades.ts` — `upgradeCard`/`getUpgradedCardById`,
+    a pure default-numeric-rule-plus-authored-patch model, exhaustively
+    switched over all 52 `CardSpecialMechanic` kinds with no `default:`
+    arm, so a missing case fails the build) but it is wired ONLY as a
+    between-run meta-progression axis (the file's own header: "Players
+    should also be able to upgrade their cards") — no
+    `CardSpecialMechanic` kind lets a card grant an upgrade to another
+    card as a COMBAT EFFECT. Confirmed via the full 52-kind
+    `CardSpecialMechanic` enumeration (`src/Cards/types.ts`) and a
+    library-wide `axio_cards`/grep sweep: no card, sandbox card, or
+    keyword-atlas row references any such verb.
+  - This is a genuine gap, not a near-synonym: our upgrade axis and
+    StS's Armaments/Apotheosis niche share the same computed-`+`
+    machinery in spirit but operate on different triggers (meta-screen
+    choice vs. a card played mid-fight) and different scopes (permanent
+    vs. this-fight-only).
+- rationale: real and KB-grounded, but not a Step 3 ship-small CREATE —
+  `upgradeCard` is pure and reusable, but a card-triggered call needs a
+  new `CardSpecialMechanic` kind (e.g. `grant_upgrade`), a targeting
+  model (self hand card / random deck card / whole hand), a
+  combat-engine hook to apply it, and — for the "this fight only" StS
+  flavor — a REVERT-at-combat-end path, a transient-state shape the
+  engine doesn't carry today (today's `+` is always permanent, computed
+  once at draft/meta time). Past that: pricing, display text, and the
+  full 12-step keyword wiring checklist (mobile gloss, card-editor
+  vocabulary, atlas row). New engine wiring plus a new keyword — past
+  this steward's ship-small ceiling (THE GROWTH FLOOR ¶2).
+- proposed scope: a `mechanics-expert`/`card-expert` design session
+  first (permanent-to-deck vs. this-fight-only, or both as separate
+  verbs; whether the revert path is worth building or the niche ships
+  permanent-only to start), then the full keyword wiring checklist for
+  the resulting verb, then 1-2 carrying cards (a natural fit for
+  grave's MILL/RECALL-adjacent "invest in the deck itself" register, or
+  debt's compounding-power theme).
+- estimated phases: 1
+- conflicts: none against spec.md non-goals; doesn't touch the 3
+  surviving big-numbers constraints or the LOCKED MECHANICS.
+
+### [ ] [score 3.0] No mechanic lets a card offer the player a choice among revealed/generated options — Slay the Spire's Discovery / Dawncaster's Delve niche has no analogue
+- origin: filed by `/adjust-cards` pass 19, 2026-09-25; moved from `plan/PHASE_CANDIDATES.md` in R0 (2026-09-28).
+- proposed: 2026-09-25, `/adjust-cards` pass 19 (Step 1b widened KB
+  cross-reference; Step 1's own structural audit read zero-diff — same
+  134 cards / 8 themes / 72 keywords, `pricing.engine.test.ts` 263/263,
+  `curated-library.engine.test.ts` 14/14, `deck-presets.engine.test.ts`
+  9/9 all green and byte-identical to pass 18's own citation; `git diff
+  f155b027..HEAD` over every card-authoring surface — `cards.library.ts`,
+  `combat.starter-deck-presets.ts`, `cards.sandbox-sets.ts`,
+  `combat.deck-draft.ts`, `cards.allies.ts`, `cards.haunts.ts`,
+  `library/*.cards.ts` — returns zero changes across the 27-commit
+  window).
+- source signals:
+  - KB: `kb:dawncaster/keywords/delve.okf.md` (src-001, community,
+    medium) — "Select 1 of 3 randomly selected cards" (Deck Management
+    function, ordinal 43 of 141).
+  - KB: `kb:slay-the-spire/cards/0111-discovery-discovery` (community)
+    — "Choose 1 of 3 random cards to add into your hand. It costs 0
+    this turn. Exhaust." A genre-staple "pick one of a revealed set"
+    primitive, distinct from our FORETELL (peek-and-reorder the deck,
+    no choice among alternatives) and RECALL (deterministic
+    highest-rank-first retrieval, no choice involved).
+  - Live-code check: a grep for choice/choose/select across
+    `src/Cards/types.ts` finds nothing on the mechanic surface (the one
+    hit is the unrelated `befriend_attempt` mercy-choice comment, see
+    below); the full `CardSpecialMechanic` union (50+ kinds) has no
+    member that presents the player a set of options to pick from, and
+    `axio_keywords`'s 72 registry rows are all single-resolution
+    effects — none branches on a player pick.
+  - This is a genuine gap, not a near-synonym for an existing keyword:
+    FORETELL/RECALL manage what's already committed (deck order,
+    discard retrieval by a fixed rule); Delve/Discovery hand the player
+    an active choice among freshly-generated or revealed alternatives —
+    a mid-resolution decision point, not a deterministic effect.
+- rationale: real and KB-grounded, but structurally large — no
+  generic "offer N options, resolve on player pick" surface exists
+  mid-card-resolution today. Building it needs a new
+  `CardSpecialMechanic` kind (e.g. `choose_one`), a transient
+  combat-state shape to hold the offered options pending a player pick,
+  a mobile UI screen/modal to present and resolve the choice (today's
+  mobile combat screen has no such component), the full 12-step keyword
+  wiring checklist (mobile gloss, card-editor vocabulary, atlas row),
+  and a card-editor authoring surface for "N options, pick 1." Past
+  this steward's ship-small ceiling by a wide margin — this reads
+  closer to a UI feature than a card content addition. Notably, the
+  engine already carries ONE player-facing mid-resolution choice state
+  (`befriend_attempt`'s mercy-choice gate, Phase 108, `CardSpecialMechanic`
+  doc comment: "opening a mercy choice state if successful") — a
+  `choose_one` primitive could plausibly reuse that plumbing rather than
+  building fresh, which is exactly the kind of call a design session
+  should make before any code is written.
+- proposed scope: a `mechanics-expert` design session first (what
+  "options" means here — 3 random cards from the reward pool, 3 cards
+  from the player's own deck/discard, or a fixed authored triplet per
+  card; whether the pick resolves synchronously at play-time or is
+  queued like the mercy-choice state; whether it reuses that state's
+  plumbing), then the full keyword/engine wiring checklist for the
+  resulting primitive, then 1-2 carrying cards once it exists (grave's
+  MILL/RECALL register or choir's harvesting register are the closest
+  thematic fits).
+- estimated phases: 1-2
+- conflicts: none against spec.md non-goals; doesn't touch the 3
+  surviving big-numbers constraints or the LOCKED MECHANICS.
+
+### [score 3.0] No card/effect pre-empts an incoming affliction — CLEANSE only removes one after the fact, nothing prevents the application
+- origin: filed by `/adjust-keywords` pass 17, 2026-09-23; moved from `plan/PHASE_CANDIDATES.md` in R0 (2026-09-28).
+- proposed: 2026-09-23, `/adjust-keywords` pass 17 (Step 1b widened KB
+  cross-reference; Step 1's own structural audit read zero-diff —
+  `combat.cards.ts`'s `mechanicText` switch still matches every
+  `CardSpecialMechanic`/`CardRider` kind 55/55 with zero silent
+  `default:` arms, `node --test scripts/content-drift.test.mjs` 11/11
+  green, and the atlas's 72 rows still match `axio_keywords`'s live
+  count exactly — the only 8 intervening commits on the keyword-surface
+  path set were the docs-audit's stale-comment corrections
+  (`f5db5ca6`/`fb1bffd5`/`adf35108`), zero schema/engine/atlas changes).
+  Spot-checked six lower-population keywords for the ≥2-carrier REMOVE
+  signal too (TWIN, IMMOLATE, PURGE, OMEN, FLAY, TICK via `axio_cards`)
+  — all clear the bar with 2-5 live carriers each; no retirement
+  candidate found.
+- source signals:
+  - KB: `kb:dawncaster/keywords/ward.okf.md` (community, confidence
+    medium) — "Whenever you gain an Affliction, prevent that Affliction
+    and lower your Ward by 1 instead. Fades at the start of the turn" —
+    a PRE-EMPTIVE stacking buff distinct from Dawncaster's own Cleanse
+    (`kb:dawncaster/keywords/cleanse.okf.md`, "Removes an Affliction" —
+    after-the-fact, same shape as our own CLEANSE). Also checked
+    Impervious (`kb:dawncaster/keywords/impervious.okf.md`) and Insight
+    (`kb:dawncaster/keywords/insight.okf.md`) as the wider
+    damage-negation family — both are DAMAGE-prevention, not
+    affliction-prevention, and our own `buff_invincibility`
+    (`defenseModifier: 99`, non-card, Signature-only) already occupies
+    that niche; Ward's axis (blocking a STATUS application, not a
+    damage instance) is the one left genuinely uncovered.
+  - Live-code check: `src/Effects/index.ts`'s `applyEffect` is the SOLE
+    application point for every buff and debuff (player and enemy
+    alike) — read start to finish, it has no interception/consult step
+    against the target's own active-effect list before stacking a new
+    one; the only related lever, `buff_cleanse`/`buff_cleanse_minor`
+    (`payload.cleanse: true`), fires as its own separate mechanic
+    AFTER an affliction already landed, never before. Grepped both
+    effect libraries (`src/Effects/{buffs,debuffs}.library.json`,
+    29 entries total) for `prevent`/`immune`/`ward` in any
+    description or payload key: zero hits outside one debuff's flavor
+    text (`debuff_curse`'s description uses "denied," unrelated). No
+    existing buff, debuff, `CardSpecialMechanic`, or `CardRider` blocks
+    an incoming affliction before it stacks.
+  - This is a genuine gap, not a near-synonym: CLEANSE (`CLEANSE N`,
+    already in the atlas) removes UP TO N afflictions you already
+    hold; the Ward axis stops one from landing in the first place —
+    different point in the sequence, same family (affliction
+    management) Dawncaster itself keeps as two separate keywords.
+- rationale: real and KB-grounded, but not a Step 3 ship-small CREATE.
+  `applyEffect` is a single, heavily-shared pure function (every
+  status application in the engine funnels through it); teaching it
+  to consult a "Ward" stack on the TARGET before stacking a new
+  debuff is a new interception hook on a load-bearing shared path, not
+  a same-tick reuse of an existing one — it would need careful
+  ordering against the resist-roll (`resistedBy`/`resistDR`) that
+  already gates whether an effect lands at all, a new
+  `EffectPayload`/buff-payload shape, a carrying card or two, pricing,
+  a hermetic e2e, and the mobile gloss/glyph. Squarely THE GROWTH
+  FLOOR ¶2's "file large" case.
+- proposed scope: a `mechanics-expert` design session first (where the
+  Ward consult sits relative to the existing resist roll — before it,
+  after it, or replacing it entirely for the one interaction — since
+  both are "does this affliction land" gates and stacking two would be
+  redundant), then the full 12-step keyword wiring checklist for the
+  resulting buff/keyword, then 1-2 carrying cards (a defensive-stance
+  vigil card or a choir ward-of-grace fit both the existing theme
+  vocabulary).
+- estimated phases: 1
+- conflicts: none against spec.md non-goals; doesn't touch the 3
+  surviving big-numbers constraints or the LOCKED MECHANICS.

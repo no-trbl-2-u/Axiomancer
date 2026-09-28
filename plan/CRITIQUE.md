@@ -225,36 +225,6 @@
   the threat sequence renders the per-phase tells.
 - source: critique-drive (unattended, §3.5)
 
-### [LOW] combat — a DoT's paid-value chip word-wraps mid-token on the small hand-card face ("8/play" → "8/p" / "ay")
-- pass: 49 (commit 94b6b96f)
-- viewport: both (375×812 and 1280×800) — reproduces at both, worse on
-  desktop where the card is otherwise unobscured by the fan overlap
-- category: visual
-- observation: on the small (non-inspect) hand-card face, a card whose
-  paid clause is a DoT (e.g. Spoiled Poultice's POISON) renders its
-  value chip as `${perTick}${unit}` (e.g. "8/play"). The chip's `Text`
-  allows `numberOfLines={2}` at small size, and the container is narrow
-  enough that RN's default word-break wraps *inside* the token instead
-  of at the "/" — "8/play" breaks to "8/p" on one line and "ay" on the
-  next, reading as a rendering glitch rather than the intended "8 per
-  play" tick. The keyword line above it clips to "POIS" for the same
-  reason. Short values ("+8", "12", "+5") never hit this because they
-  fit on one line; only the longer DoT tick strings do.
-- evidence: `axiomancer-mobile/components/combat/encounter/CombatBoard.tsx:2161-2170`
-  — `paidValue` `Text` with `numberOfLines={large ? 1 : 2}`, `styles.paidValue`
-  has no `maxWidth`/break-word override (line 2520); `axiomancer-mobile/state/presenters/combat-encounter.engine.ts:2729-2738`
-  `clauseValue()` builds the DoT string as `${c.dot.perTick}${unit}${clock}…`
-  with `unit` one of `/play | /hit | /payoff | /turn` — no non-breaking
-  join between the number and the unit. Reproduced via `critique:drive`
-  pass 49, screen `combat-board`, both viewports, card "Spoiled Poultice"
-  in a 5-card hand (`.critique-artifacts/{mobile,desktop}/04-combat-board.png`).
-- suggested fix: join the number and unit with a non-breaking space (or
-  `wordBreak: 'keep-all'`/`hyphenationFrequency: 'none'` at the RN-web
-  layer) in `clauseValue()`, or cap the chip at `numberOfLines={1}` with
-  `adjustsFontSizeToFit` like the paid-apply line above it (line 676)
-  so a too-long value shrinks instead of wrapping.
-- source: critique-drive (unattended, §3.5)
-
 ### [MED] combat — the only SUMMON carrier cannot reach wave 2, so half the spawn rule is dead on the roster
 - pass: burn-day audit 2026-09-19 (row 3.9)
 - viewport: n/a — engine reach, not layout
@@ -410,36 +380,6 @@
 - suggested fix: a token-hygiene pass folds the recurring combat/hazard colors into the AXM runtime palette; new code then has a token to reach for.
 - source: owner session 2026-07-19 (press-fate/momentum/dice PR)
 
-### [LOW] mechanics — akrasia swap-pool cleanse-while-Fallen tension knob needs matrix eyes
-- pass: swap-pool fan-out residue (PR #130, 2026-07-18)
-- viewport: n/a
-- auth_state: n/a
-- category: content
-- observation: `absolution-on-account` and `the-wound-that-teaches` (swap-akrasia) deliberately CLEANSE while Fallen — the state is checked at play time, then walked back. A real tension knob per the designer, but it can read as anti-synergy confusion in play.
-- evidence: swap-pool fan-out report §needs-user-call; designer note in the akrasia pool file.
-- suggested fix: when the swap-pool measurement pass runs, watch these two cards' usage + FALLEN uptime; if the matrix shows confusion (played then immediately un-Fallen with no payoff), redesign toward pay-then-cash ordering.
-- source: /deck-tuning fan-out session
-
-### [LOW] mechanics — fated-course engine hook survives its retired card as a test harness
-- pass: D8 ship residue (commit 10ec4fe8)
-- viewport: n/a
-- auth_state: n/a
-- category: engineering
-- observation: `combat.engine.ts` (~lines 4011/4059) still keys the telegraph-forcing hook on `fated-course`, retired from the library in D8's ten-in/ten-out ledger. Unreachable in live play (no preset/reward fields the card), but `oracle-omen-v2.engine.test.ts` depends on it as its deterministic telegraph harness — swapping the id would destroy the guaranteed-hit assertions.
-- evidence: fixture-sweep report, 2026-07-18; plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-18-d8-preset-dice-valves.md §Residue
-- suggested fix: next oracle pass ports the harness onto a live card or a test-only hook id, then deletes the dead engine branch.
-- source: ship-a-phase D8
-
-### [LOW] data — Card Ledger dashboard + preset-metrics exports measure the PRE-D8 decks
-- pass: D8 ship residue (commit 10ec4fe8)
-- viewport: n/a
-- auth_state: n/a
-- category: data
-- observation: `docs/reports/preset-metrics/2026-07-18-*.json` and the Card Ledger dashboard were measured on the pre-valve flag-on decks (and a 70-card library that no longer exists — the dead ten are retired, ten valves are live). Their triage verdicts remain historically valid but the preset rollups no longer describe the shipped decks.
-- evidence: D8 gate rerun already shows different curves (standstill 50→59 blind-early).
-- suggested fix: re-run the accumulation (both arms, two seeds) + republish the dashboard after the post-D8 curve-repair phase lands, so the next triage reads the real game.
-- source: ship-a-phase D8
-
 ### [LOW] general — AccessoryKind union must open when accessory flavors grow
 - pass: user-jot (commit 4e045d05)
 - viewport: unspecified
@@ -543,30 +483,6 @@
   engine constants.
 - source: user + session closeout
 
-### [LOW] card-editor cannot edit the three new mechanic fields
-- pass: session-closeout 2026-07-12 (commit ffadca96)
-- viewport: desktop
-- category: tooling
-- observation: the card-editor UI has no inputs for the three mechanic
-  fields added this session: `grant_pip.overflow`,
-  `spend_all_pips.markPer`, and `synergy.statePredicate`. Cards using
-  them can only be authored by hand-editing JSON/TS.
-- evidence: `axiomancer-card-editor` form components lack the fields;
-  the mechanics exist in `axiomancer-mechanics/src/Cards/types.ts`.
-- suggested fix: add the three fields to the editor's mechanic form
-  (enum/number/checkbox as appropriate).
-- source: session closeout
-
-### [MED] general — rethink early-game as canned preset-deck tutorial, defer deckbuilding to labyrinth choice
-- pass: user-jot (commit 63cfb3ba)
-- viewport: unspecified
-- auth_state: anonymous
-- category: design
-- observation: for the early game / "child" levels, potentially remove the deck-building aspect entirely. Instead each battle is a canned tutorial introducing a new preset deck, teaching each mechanic in a controlled vacuum. Pre-maze gameplay is really just the tutorial: "build a boat" -> "sail to friend" -> "go to labyrinth". The labyrinth is when the player commits to which deck they want to start the game with, which dictates their reward offering for the labyrinth. When the player completes the labyrinth and lands in the new city, they gain the ability to switch base decks post-labyrinth and trade their current deck for a new mid-game deck (since during the labyrinth they earn card rewards focused on their current deck's theme).
-- evidence: user-spotted at 2026-07-08T18:36:36Z
-- suggested fix: [user has not specified — iterate to determine]. Related: build-plan Phase 17 (quest-board tutorial) was dropped via `/oversight` 2026-07-10 because its narrow scope overlaps this rethink — the correct next step is to route this design idea through `/iterate` or a design skill and re-derive any per-minigame tutorial phases from whatever it lands on.
-- source: user
-
 ### [LOW] `web:container` dev-server script is broken
 - pass: 1 (commit 6e23724a)
 - viewport: n/a
@@ -594,20 +510,6 @@
 > only the recurring *patterns* were carried; stale one-off rows
 > were dropped. Each maps to category `external-critique`.
 
-### [LOW] small hand-card face clips authored paid text at 3 lines
-- pass: session 2026-07-17 (card-text work)
-- viewport: mobile hand card (132×194)
-- category: ui
-- observation: authored paid sentences render up to 5 lines on the
-  large/inspect face (`numberOfLines large ? 5 : 3`) but ellipsize at
-  3 lines on the small hand card; longer rares (e.g. The Closing
-  Word) are unreadable until inspected. May be acceptable (the owner
-  doctrine says the overlay is the reading surface) — filed as an
-  owner call, not a defect.
-- evidence: `CombatBoard.tsx` OutcomeText numberOfLines.
-- suggested fix: owner call — bump small-face lines to 4-5 (layout
-  risk: name/glyph crowding) or keep 3 and accept the ellipsis.
-
 ### [LOW] aftermath — the parley "Heart Opens" reward panel is a pixel-art heart, style outlier
 - pass: session-critic 2026-08-31 (Phase V8 closure `/critic-loop`
   screenshot pass, `axiomancer-mobile/screenshots/audit-2026-06/after/27-aftermath-parley.png`)
@@ -623,16 +525,6 @@
   confirm whether this is the intentional PixelEmblem exception before
   swapping).
 - source: loop
-
-### [MED] general — rebuild the retired tuning/playtest commands later
-- pass: user-jot (commit cc26613c)
-- viewport: unspecified
-- auth_state: anonymous
-- category: observation
-- observation: Rebuild the retired tuning/playtest commands (deck-tuning, hazard-tuning, world-tuning, combat-ux-tuning, critic-loop, deep-playtest, hermes-playtest, dep-upgrades — retired in trim T5, D10) once the mechanics settle: after the D4 stat hooks + damage-scaling formula and the card rework. Recover old doctrine with `git show c7de2d6d:.claude/commands/<name>.md`; rebuild fewer, merged loops, not eight.
-- evidence: user-spotted at 2026-09-25T20:06:40Z
-- suggested fix: [user has not specified — iterate to determine]
-- source: user
 
 ### [MED] village / inventory — every signet relic's flavor text restates the auto-generated "grants X" line verbatim
 - pass: 53 (commit 82bbf241)
@@ -667,6 +559,122 @@
 - source: critique-drive (unattended, §3.5)
 
 ## Done
+
+### [x] [LOW] combat — a DoT's paid-value chip word-wraps mid-token on the small hand-card face ("8/play" → "8/p" / "ay") — CLOSED 2026-09-28 (R0)
+- pass: 49 (commit 94b6b96f)
+- viewport: both (375×812 and 1280×800) — reproduces at both, worse on
+  desktop where the card is otherwise unobscured by the fan overlap
+- category: visual
+- observation: on the small (non-inspect) hand-card face, a card whose
+  paid clause is a DoT (e.g. Spoiled Poultice's POISON) renders its
+  value chip as `${perTick}${unit}` (e.g. "8/play"). The chip's `Text`
+  allows `numberOfLines={2}` at small size, and the container is narrow
+  enough that RN's default word-break wraps *inside* the token instead
+  of at the "/" — "8/play" breaks to "8/p" on one line and "ay" on the
+  next, reading as a rendering glitch rather than the intended "8 per
+  play" tick. The keyword line above it clips to "POIS" for the same
+  reason. Short values ("+8", "12", "+5") never hit this because they
+  fit on one line; only the longer DoT tick strings do.
+- evidence: `axiomancer-mobile/components/combat/encounter/CombatBoard.tsx:2161-2170`
+  — `paidValue` `Text` with `numberOfLines={large ? 1 : 2}`, `styles.paidValue`
+  has no `maxWidth`/break-word override (line 2520); `axiomancer-mobile/state/presenters/combat-encounter.engine.ts:2729-2738`
+  `clauseValue()` builds the DoT string as `${c.dot.perTick}${unit}${clock}…`
+  with `unit` one of `/play | /hit | /payoff | /turn` — no non-breaking
+  join between the number and the unit. Reproduced via `critique:drive`
+  pass 49, screen `combat-board`, both viewports, card "Spoiled Poultice"
+  in a 5-card hand (`.critique-artifacts/{mobile,desktop}/04-combat-board.png`).
+- suggested fix: join the number and unit with a non-breaking space (or
+  `wordBreak: 'keep-all'`/`hyphenationFrequency: 'none'` at the RN-web
+  layer) in `clauseValue()`, or cap the chip at `numberOfLines={1}` with
+  `adjustsFontSizeToFit` like the paid-apply line above it (line 676)
+  so a too-long value shrinks instead of wrapping.
+- source: critique-drive (unattended, §3.5)
+- **CLOSED 2026-09-28 (R0):** re-verified against the grey library. No player card carries a DoT any more: the library is A Plain Blow (Deal 5), A Plain Ward (GUARD 5) and A Plain Word (VULNERABLE +25%) (`axiomancer-mechanics/src/Cards/library/starters.cards.ts`, D36). The same unjoined number-and-unit wrap now shows on A Plain Word's "+25%" and is tracked by the `plan/AUDIT.md` row "Post-purge: a staged A Plain Word wraps +25% mid-token".
+
+### [x] [LOW] mechanics — akrasia swap-pool cleanse-while-Fallen tension knob needs matrix eyes — CLOSED 2026-09-28 (R0)
+- pass: swap-pool fan-out residue (PR #130, 2026-07-18)
+- viewport: n/a
+- auth_state: n/a
+- category: content
+- observation: `absolution-on-account` and `the-wound-that-teaches` (swap-akrasia) deliberately CLEANSE while Fallen — the state is checked at play time, then walked back. A real tension knob per the designer, but it can read as anti-synergy confusion in play.
+- evidence: swap-pool fan-out report §needs-user-call; designer note in the akrasia pool file.
+- suggested fix: when the swap-pool measurement pass runs, watch these two cards' usage + FALLEN uptime; if the matrix shows confusion (played then immediately un-Fallen with no payoff), redesign toward pay-then-cash ordering.
+- source: /deck-tuning fan-out session
+- **CLOSED 2026-09-28 (R0):** moot. Both cards and the akrasia swap pool were purged (D36), and no swap-pool pass will run (D37).
+
+### [x] [LOW] mechanics — fated-course engine hook survives its retired card as a test harness — CLOSED 2026-09-28 (R0)
+- pass: D8 ship residue (commit 10ec4fe8)
+- viewport: n/a
+- auth_state: n/a
+- category: engineering
+- observation: `combat.engine.ts` (~lines 4011/4059) still keys the telegraph-forcing hook on `fated-course`, retired from the library in D8's ten-in/ten-out ledger. Unreachable in live play (no preset/reward fields the card), but `oracle-omen-v2.engine.test.ts` depends on it as its deterministic telegraph harness — swapping the id would destroy the guaranteed-hit assertions.
+- evidence: fixture-sweep report, 2026-07-18; plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-18-d8-preset-dice-valves.md §Residue
+- suggested fix: next oracle pass ports the harness onto a live card or a test-only hook id, then deletes the dead engine branch.
+- source: ship-a-phase D8
+- **CLOSED 2026-09-28 (R0):** moot as a standalone row. R7 deletes every carrier-less engine hook and the tests that load them (D50, `plan/revamp/engine.md`).
+
+### [x] [LOW] data — Card Ledger dashboard + preset-metrics exports measure the PRE-D8 decks — CLOSED 2026-09-28 (R0)
+- pass: D8 ship residue (commit 10ec4fe8)
+- viewport: n/a
+- auth_state: n/a
+- category: data
+- observation: `docs/reports/preset-metrics/2026-07-18-*.json` and the Card Ledger dashboard were measured on the pre-valve flag-on decks (and a 70-card library that no longer exists — the dead ten are retired, ten valves are live). Their triage verdicts remain historically valid but the preset rollups no longer describe the shipped decks.
+- evidence: D8 gate rerun already shows different curves (standstill 50→59 blind-early).
+- suggested fix: re-run the accumulation (both arms, two seeds) + republish the dashboard after the post-D8 curve-repair phase lands, so the next triage reads the real game.
+- source: ship-a-phase D8
+- **CLOSED 2026-09-28 (R0):** moot. The presets are gone (D36) and the deck-matrix baseline, the tuning-lab pages and preset readings are retired until the retune (D57, R1).
+
+### [x] [LOW] card-editor cannot edit the three new mechanic fields — CLOSED 2026-09-28 (R0)
+- pass: session-closeout 2026-07-12 (commit ffadca96)
+- viewport: desktop
+- category: tooling
+- observation: the card-editor UI has no inputs for the three mechanic
+  fields added this session: `grant_pip.overflow`,
+  `spend_all_pips.markPer`, and `synergy.statePredicate`. Cards using
+  them can only be authored by hand-editing JSON/TS.
+- evidence: `axiomancer-card-editor` form components lack the fields;
+  the mechanics exist in `axiomancer-mechanics/src/Cards/types.ts`.
+- suggested fix: add the three fields to the editor's mechanic form
+  (enum/number/checkbox as appropriate).
+- source: session closeout
+- **CLOSED 2026-09-28 (R0):** moot. The card editor is deleted (D56, R1); its successor is the B5 card-creator workflow, and the three fields' mechanics are deleted in R7 (D50).
+
+### [x] [MED] general — rethink early-game as canned preset-deck tutorial, defer deckbuilding to labyrinth choice — CLOSED 2026-09-28 (R0)
+- pass: user-jot (commit 63cfb3ba)
+- viewport: unspecified
+- auth_state: anonymous
+- category: design
+- observation: for the early game / "child" levels, potentially remove the deck-building aspect entirely. Instead each battle is a canned tutorial introducing a new preset deck, teaching each mechanic in a controlled vacuum. Pre-maze gameplay is really just the tutorial: "build a boat" -> "sail to friend" -> "go to labyrinth". The labyrinth is when the player commits to which deck they want to start the game with, which dictates their reward offering for the labyrinth. When the player completes the labyrinth and lands in the new city, they gain the ability to switch base decks post-labyrinth and trade their current deck for a new mid-game deck (since during the labyrinth they earn card rewards focused on their current deck's theme).
+- evidence: user-spotted at 2026-07-08T18:36:36Z
+- suggested fix: [user has not specified — iterate to determine]. Related: build-plan Phase 17 (quest-board tutorial) was dropped via `/oversight` 2026-07-10 because its narrow scope overlaps this rethink — the correct next step is to route this design idea through `/iterate` or a design skill and re-derive any per-minigame tutorial phases from whatever it lands on.
+- source: user
+- **CLOSED 2026-09-28 (R0):** moot. The preset decks it was built around were purged (D36); every run deals the grey deck, and what the early game teaches with cards is decided in the owner-led card sessions (D37, B6).
+
+### [x] [LOW] small hand-card face clips authored paid text at 3 lines — CLOSED 2026-09-28 (R0)
+- pass: session 2026-07-17 (card-text work)
+- viewport: mobile hand card (132×194)
+- category: ui
+- observation: authored paid sentences render up to 5 lines on the
+  large/inspect face (`numberOfLines large ? 5 : 3`) but ellipsize at
+  3 lines on the small hand card; longer rares (e.g. The Closing
+  Word) are unreadable until inspected. May be acceptable (the owner
+  doctrine says the overlay is the reading surface) — filed as an
+  owner call, not a defect.
+- evidence: `CombatBoard.tsx` OutcomeText numberOfLines.
+- suggested fix: owner call — bump small-face lines to 4-5 (layout
+  risk: name/glyph crowding) or keep 3 and accept the ellipsis.
+- **CLOSED 2026-09-28 (R0):** re-verified against the grey library. The three surviving paid lines ("Deal 5.", "GUARD 5.", "VULNERABLE +25% for 2 turns.") are one line each, so nothing reaches the 3-line clip (D36). The owner call returns only if the card sessions (B6) author longer paid text.
+
+### [x] [MED] general — rebuild the retired tuning/playtest commands later — CLOSED 2026-09-28 (R0)
+- pass: user-jot (commit cc26613c)
+- viewport: unspecified
+- auth_state: anonymous
+- category: observation
+- observation: Rebuild the retired tuning/playtest commands (deck-tuning, hazard-tuning, world-tuning, combat-ux-tuning, critic-loop, deep-playtest, hermes-playtest, dep-upgrades — retired in trim T5, D10) once the mechanics settle: after the D4 stat hooks + damage-scaling formula and the card rework. Recover old doctrine with `git show c7de2d6d:.claude/commands/<name>.md`; rebuild fewer, merged loops, not eight.
+- evidence: user-spotted at 2026-09-25T20:06:40Z
+- suggested fix: [user has not specified — iterate to determine]
+- source: user
+- **CLOSED 2026-09-28 (R0):** superseded by THE REVAMP. R0 rewrote `/combat-playtest` around the S3 questions, the baseline stays retired until the retune (D57), and the XP retune is phase R9; any further tuning loop is planned after the rebuild sessions, not by the loop now (D58).
 
 ### [x] [MED] dialogue — T6 left four "you have changed" replies ungated, so a first meeting says "since we last spoke" — RESOLVED 2026-09-28 (adjust-npcs pass 21)
 - pass: 58 (commit 36238fd8)

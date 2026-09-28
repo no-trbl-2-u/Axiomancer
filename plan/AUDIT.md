@@ -366,12 +366,6 @@
 - **Still open:** write-never `MapState.hazardOutcomes` / `HazardNodeOutcome` — left in place (a v26 hop to strip a harmless field is churn; strip it the next time a save hop lands for another reason). `buff_all_stats_up` / `debuff_curse` carry only an inert `rollModifier` and nothing applies them — `/adjust-keywords` call (deprecated-effects list).
 - **Deviation from the spec, kept deliberately:** `combat.autoplay` moved to `src/test-utils/` (three surviving tests use it); `isRouteBlocked` kept (live movement check); `validateInteractions` kept (guards the live interaction registry).
 
-### [docs] Trim-the-fat spec names `.claude/agents/mechanics-expert.md` as a delete candidate, but four live skills spawn it (2026-09-25)
-
-- **Found by:** T1 of `plan/2026-09-25-trim-the-fat.spec.md` (Tier 1 "Docs" list, last bullet: "Rewrite or delete").
-- **Consumer the audit missed:** `skills/ship-a-phase.md:68,536`, `skills/iterate.md:245,399`, `skills/adjust-cards.md:216`, `skills/adjust-keywords.md:192` all name `mechanics-expert` as the design-second-opinion subagent. Deleting the agent file breaks those spawns.
-- **Action taken:** kept (standing frame ¶1). Spec row stands corrected: this is a *rewrite* (its philosophy-theme / stance-proc doctrine is retired), not a delete. Rewrite is design work, out of T1 scope.
-
 ### [content] The shipped Drowned Parish opening contradicts the ruled story — attended session needed (2026-09-24)
 - category: content
 - impact: 8
@@ -776,29 +770,6 @@ present. Row stays open until that session runs.
   a dedicated sweep or a standing lint of its own.
 - next: /iterate
 
-### [contract] New-keyword wiring drifts silently across seven surfaces
-- category: contract
-- impact: 6
-- ease: 6
-- detail: filed 2026-08-22 by the content-pipelines audit. The two
-  switches that matter (`combat.engine.ts` mech switch,
-  `combat.cards.ts` mechanicText) carry explicit defaults so a new kind
-  type-checks clean while inert; no assertNever exists in mechanics.
-  Untested sync surfaces: glyph tables triplicated across mobile
-  `glyphShapes.ts` / editor `CardFace.tsx` / `scripts/build-catalog.mjs`;
-  the editor's independent `wx.ts` KEYWORDS vocabulary (still lists dead
-  spec-32-v2 words); `axio_keywords` hand-parses `docs/keyword-atlas.md`
-  and hardcodes "/30" (unlike axio_cards/axio_effects which auto-regen);
-  mobile KW-2 iterates a hardcoded 17-kind array, not the union.
-  card-expert's keyword checklist stops at mechanics (omits mobile
-  gloss, CARD_EFFECT_SET, atlas, retheme-map.json, editor surfaces).
-  Derive the lists, add drift tests, extend the checklist.
-- next: /iterate
-- **PARTIAL 2026-08-22 (same PR):** card-expert's wiring checklist
-  extended to 12 steps covering every listed surface (with the
-  silent-`default:` warning); the drift TESTS are queued as build-plan
-  Phase 68.
-
 ### [contract] Allowlist omits the commands the skills instruct — attended ticks prompt-wall
 - category: contract
 - impact: 6
@@ -823,28 +794,6 @@ present. Row stays open until that session runs.
   Queued as build-plan Phase 72 with the exact grant list, to land
   from an attended/local session. The root `npm test` script (part of
   the gap) DID ship.
-
-### [tests] No growth doctrine for pinned content counts [needs-user-call]
-- category: tests
-- impact: 6
-- ease: 8
-- detail: filed 2026-08-22 by the content-pipelines audit. Five
-  hardcoded 57-card pins, `new-enemies.engine.test.ts`'s exactly-52
-  roster, glossary pinned at 42, and `curated-library.engine.test.ts`
-  pinning `addedIn === '2026-08-08'` for every card (a card added today
-  fails the suite). Deliberateness gates are good, but nothing documents
-  that bumping them is the expected part of a content add vs. forbidden
-  tampering — the loop must edit the test that guards growth with no
-  doctrine for when that is legitimate. Needs a one-line ruling (e.g. "a
-  content add updates its pins in the same commit, citing this ruling"),
-  then bake it into the add-a-card / add-an-enemy checklists.
-- next: /oversight
-- **RESOLVED 2026-08-22 (same PR):** THE PIPELINE LIBERATION ¶4 rules
-  it exactly so — pins are growth ledgers, updated in the same commit
-  citing the ruling; editing a pin with no content change stays
-  forbidden. The `addedIn === '2026-08-08'` pin relaxed to
-  ISO-date >= 2026-08-08 in `curated-library.engine.test.ts`; the
-  doctrine is baked into card-expert's file map note.
 
 ### [gap] `npx playwright install chromium --with-deps` hung on an unreachable apt mirror, killing a full `march` tick
 - category: gap
@@ -1000,36 +949,6 @@ present. Row stays open until that session runs.
   when the second Pages project exists — filed below as a loop-call rather
   than edited blind, because the project does not exist yet.
 
-### [docs] `skills/digest.md` §3b still reads baseline health against the win-rate doctrine curve Phase 43 retired
-- category: docs
-- impact: 5
-- ease: 8
-- detail: filed 2026-08-09 (digest). §3b instructs: "READ the new numbers
-  against the locked doctrine curve (early ~80 / mid ~50 / late 25-35 /
-  impossible 0, blind policy-pick): each band that moved gets a line in
-  the Tuning proposals panel, and a doctrine violation ... gets a
-  `plan/AUDIT.md` row." `46b5a5df` (phase 43, "objective function v2 — the
-  Combat Quality Index", 2026-08-08) retired win rate as a grading term
-  outright — "Win rate is not a term at all: the doctrine curve grades
-  WHETHER a deck should win, CQI grades HOW the fight played, and a 0%-win
-  cell scoring well is pinned as correct" — and the already-filed
-  `plan/AUDIT.md` row "`/deck-tuning` and `/combat-playtest` still name
-  `statusEngagement` as the objective function" flags the identical drift
-  in those two skills. `skills/digest.md` was outside phase 43's file
-  ownership (same as those two) and has the same problem: followed
-  literally tonight, §3b would have filed a doctrine-violation row against
-  early 54.5% / mid 8.3% / late 0% / impossible 0% — a live reading of a
-  retired law. This digest read `combatQuality.index` instead (see the
-  now-resolved CQI-baseline row above) and skipped the win-rate violation
-  filing on that basis, but the skill text itself still says otherwise for
-  next time.
-- next: repoint §3b at `combatQuality.index` (spine/arc/width/identity
-  weights, 0.40/0.25/0.20/0.15) once spec 35 or Phase 43's follow-up
-  defines what "moved" or "violates" means for CQI — there is no CQI band
-  yet to grade against, only the first stamped reading, so this may need a
-  design ruling (what CQI range is "good") before the skill text can be
-  rewritten, not just a search-and-replace of the metric name.
-
 ### [docs] Phase 44a deferred its `lexicon.json` registrations to the phases that actually rename each concept
 - category: docs
 - impact: 4
@@ -1086,70 +1005,6 @@ present. Row stays open until that session runs.
   trailer. Reword them to name the sweep, or the next reader re-derives the
   same wrong mental model this row's parent already cost five days to.
 
-### Three mobile source comments still name cards the Profane Canon deleted
-- category: docs
-- impact: 3
-- ease: 9
-- detail: filed 2026-08-08 by Phase 42's survey, scope-checked. Comments in
-  `state/combat/store-actions.ts:69`, `state/actions.ts:775` and
-  `state/selectors/combat-cards.ts:13` explain the starter path in terms of
-  `slippery-slope` and `brace-for-impact`, neither of which exists in the
-  library since `84ef85b`. **Live code is unaffected — these are comments
-  only** (checked; no runtime reference survives). Same root as the
-  `combat-sim` default-loadout row above, which IS a live defect.
-
-### `dominantCardShare` is broken post-strike-death
-- category: debt
-- impact: 7
-- ease: 5
-- detail: filed 2026-08-08 by Phase 43. The raw attribution ledger's
-  `dotDamage` is filled at SUMMARY time, so the ledger itself carries direct
-  damage only and collapses onto whichever signature burst last — it reads
-  ~100% on nearly every matrix cell. CQI's identity term routes around it
-  (cards from the sim's per-line HP swing), so the new metric is unaffected,
-  but the standalone stat is wrong wherever else it is read. Left untouched
-  because other suites consume it; repair is separate work.
-
-### `npm run combat-sim`'s default loadout no longer exists
-- category: debt
-- impact: 6
-- ease: 9
-- detail: filed 2026-08-08 by Phase 43. The default is
-  `slippery-slope,brace-for-impact` — both cards deleted by the Profane Canon
-  (`84ef85b`). Every default-invocation run therefore reports 0% win, 0%
-  statusEngagement, cqi ~29%. Pre-existing rot, not caused by Phase 43, and
-  outside its "surface the new metric additively" scope. Anyone reading a
-  bare `combat-sim` run right now is reading noise.
-
-### The Surge meter is the least-used locked system, and most rolled dice never power a line
-- category: divergence
-- impact: 5
-- ease: 3
-- detail: filed 2026-08-08 by Phase 43's first CQI reading. Chain completion
-  is 35% matrix-wide (the chain breaks ~2x for every surge), the lowest
-  locked sub-score everywhere; `dice-spent` is 29% against a 0.5 reference.
-  **Information, not work** — bearings' "the current card library is
-  transitional" rule forbids tuning against it. Re-read after the redesign.
-
-### `/combat-playtest` still names `statusEngagement` as the objective function — HALF-RESOLVED via Phase 66 (2026-08-27)
-- category: docs
-- impact: 6
-- ease: 9
-- detail: filed 2026-08-08 by Phase 43. The skill files in `skills/` and
-  `.claude/commands/` were outside that phase's ownership. They should be
-  repointed at `cqi` / spec 35, or the next tuning pass will optimise the
-  dead law the phase exists to retire.
-- update 2026-08-27 (Phase 66): `.claude/commands/deck-tuning.md` was
-  already reconciled (its §North star reads "CQI (spec 35), not the
-  retired status-dominance law"). `.claude/commands/combat-playtest.md`
-  was not, and Phase 66's `status-primacy-doctrine` row flagged it: its
-  north-star section is now repointed at CQI and its "low status-effect
-  engagement is a balance failure" closing line replaced. What remains
-  open is the §Purpose comparison table's question cell ("Is status play
-  the FUN path at every stage?") and the skill's own one-line description
-  in the harness registry — same claim, but a rewrite there changes what
-  the skill IS FOR, which wants a design call rather than a lint fix.
-
 ### The Phase-169 loadout path is dead in the shipped runtime
 - category: debt
 - impact: 5
@@ -1166,18 +1021,6 @@ present. Row stays open until that session runs.
 - ease: 10
 - detail: filed 2026-08-08 by Phase 42; the authoring agent's file ownership
   forbade editing the index. One-line add.
-
-### Dead id-keyed engine hooks survive the retired spec-32 library
-- category: debt
-- impact: 5
-- ease: 6
-- detail: filed 2026-08-08 by Phase 42. Engine hooks still keyed to
-  `achilles-and-the-tortoise`, `the-closing-word`, `circular-reasoning` —
-  cards the Profane Canon (`84ef85b`) deleted. Dead, and now actively
-  misleading: Phase 44c's build-plan row cites those same ids as its scope.
-  Related stale registry rows: `SYSTEM_TERM_COVERED_BY` names a nonexistent
-  `CLARITY` keyword, and mobile fixtures still deck `slippery-slope` /
-  `straw-mans-jab`.
 
 ### Fixture player rebuild seeds the relic kit a real new game no longer has
 - category: divergence
@@ -1331,32 +1174,6 @@ present. Row stays open until that session runs.
   6.x, make the tsconfig valid under both (e.g. module `preserve` or
   moduleResolution `node`), or install per-worktree. A task chip was
   also filed from the session.
-
-### Playtest harness has no victory-only rounds-to-victory metric
-- category: gap
-- impact: 4
-- ease: 7
-- detail: surfaced 2026-07-17 by the ultracode price-vs-win-rate
-  playtest. `CombatSimStats.avgRounds`
-  (src/Combat/combat.encounter.sim.ts) averages `state.round` over ALL
-  outcomes (defeats + retreats included), so there is no way to answer
-  "how many rounds to WIN" — the owner asked exactly that and it forced
-  a bespoke harness
-  (axiomancer-mechanics/scratch/price-experiment/price-winrate.harness.ts)
-  that re-derives it from per-run `runOneEncounter` returns. The raw
-  `rounds`+`outcome` already exist per run; they are just discarded at
-  aggregation. Add `avgRoundsToVictory` (victory-only, null when ~0
-  victories) to `CombatSimStats` + the stage summary so kill-speed is a
-  first-class witness for /deck-tuning. Related: the "Doctrine-curve
-  check in the nightly baseline" candidate (PHASE_CANDIDATES.md) would
-  absorb this harness's per-stage cells — this is the engine-side metric
-  that check depends on. (The other residue of this session — the
-  mid-collapse quartet foundry/standstill/grace/augury ≈0% mid, and the
-  tempo/alt-win pricing conclusions — is already tracked there and in
-  Phases 36a/36b, so it is not re-filed here.)
-- next: /iterate (retain victory-only rounds in
-  simulateHazardPatternCombatDetailed; surface in PlaytestStageSummary +
-  the report formatter)
 
 ### Telemetry attribution is best-effort; CI logging path unverified
 - category: debt
@@ -1589,6 +1406,200 @@ present. Row stays open until that session runs.
   a flow that is otherwise working.
 
 ## Done
+
+### [x] [docs] Trim-the-fat spec names `.claude/agents/mechanics-expert.md` as a delete candidate, but four live skills spawn it (2026-09-25) — CLOSED 2026-09-28 (R0)
+
+- **Found by:** T1 of `plan/2026-09-25-trim-the-fat.spec.md` (Tier 1 "Docs" list, last bullet: "Rewrite or delete").
+- **Consumer the audit missed:** `skills/ship-a-phase.md:68,536`, `skills/iterate.md:245,399`, `skills/adjust-cards.md:216`, `skills/adjust-keywords.md:192` all name `mechanics-expert` as the design-second-opinion subagent. Deleting the agent file breaks those spawns.
+- **Action taken:** kept (standing frame ¶1). Spec row stands corrected: this is a *rewrite* (its philosophy-theme / stance-proc doctrine is retired), not a delete. Rewrite is design work, out of T1 scope.
+- **CLOSED 2026-09-28 (R0):** addressed by R0. D58 archived `mechanics-expert` with the stewards, and R0 repointed the skills that spawned it, so there is no live consumer left to break.
+
+### [x] [contract] New-keyword wiring drifts silently across seven surfaces — CLOSED 2026-09-28 (R0)
+- category: contract
+- impact: 6
+- ease: 6
+- detail: filed 2026-08-22 by the content-pipelines audit. The two
+  switches that matter (`combat.engine.ts` mech switch,
+  `combat.cards.ts` mechanicText) carry explicit defaults so a new kind
+  type-checks clean while inert; no assertNever exists in mechanics.
+  Untested sync surfaces: glyph tables triplicated across mobile
+  `glyphShapes.ts` / editor `CardFace.tsx` / `scripts/build-catalog.mjs`;
+  the editor's independent `wx.ts` KEYWORDS vocabulary (still lists dead
+  spec-32-v2 words); `axio_keywords` hand-parses `docs/keyword-atlas.md`
+  and hardcodes "/30" (unlike axio_cards/axio_effects which auto-regen);
+  mobile KW-2 iterates a hardcoded 17-kind array, not the union.
+  card-expert's keyword checklist stops at mechanics (omits mobile
+  gloss, CARD_EFFECT_SET, atlas, retheme-map.json, editor surfaces).
+  Derive the lists, add drift tests, extend the checklist.
+- next: /iterate
+- **PARTIAL 2026-08-22 (same PR):** card-expert's wiring checklist
+  extended to 12 steps covering every listed surface (with the
+  silent-`default:` warning); the drift TESTS are queued as build-plan
+  Phase 68.
+- **CLOSED 2026-09-28 (R0):** moot. The loop no longer adds keywords (D37, D58); the card editor and its `wx.ts` vocabulary are deleted (D56); R7 deletes the carrier-less kinds the silent defaults guarded (D50). Keyword wiring is recorded for the card sessions in the B4 inventory (`plan/revamp/cards.md`).
+
+### [x] [tests] No growth doctrine for pinned content counts [needs-user-call] — CLOSED 2026-09-28 (R0)
+- category: tests
+- impact: 6
+- ease: 8
+- detail: filed 2026-08-22 by the content-pipelines audit. Five
+  hardcoded 57-card pins, `new-enemies.engine.test.ts`'s exactly-52
+  roster, glossary pinned at 42, and `curated-library.engine.test.ts`
+  pinning `addedIn === '2026-08-08'` for every card (a card added today
+  fails the suite). Deliberateness gates are good, but nothing documents
+  that bumping them is the expected part of a content add vs. forbidden
+  tampering — the loop must edit the test that guards growth with no
+  doctrine for when that is legitimate. Needs a one-line ruling (e.g. "a
+  content add updates its pins in the same commit, citing this ruling"),
+  then bake it into the add-a-card / add-an-enemy checklists.
+- next: /oversight
+- **RESOLVED 2026-08-22 (same PR):** THE PIPELINE LIBERATION ¶4 rules
+  it exactly so — pins are growth ledgers, updated in the same commit
+  citing the ruling; editing a pin with no content change stays
+  forbidden. The `addedIn === '2026-08-08'` pin relaxed to
+  ISO-date >= 2026-08-08 in `curated-library.engine.test.ts`; the
+  doctrine is baked into card-expert's file map note.
+- **CLOSED 2026-09-28 (R0):** moot. Resolved on 2026-08-22 as noted above, and the growth it governed is closed: the loop creates no content during the revamp (D58).
+
+### [x] [docs] `skills/digest.md` §3b still reads baseline health against the win-rate doctrine curve Phase 43 retired — CLOSED 2026-09-28 (R0)
+- category: docs
+- impact: 5
+- ease: 8
+- detail: filed 2026-08-09 (digest). §3b instructs: "READ the new numbers
+  against the locked doctrine curve (early ~80 / mid ~50 / late 25-35 /
+  impossible 0, blind policy-pick): each band that moved gets a line in
+  the Tuning proposals panel, and a doctrine violation ... gets a
+  `plan/AUDIT.md` row." `46b5a5df` (phase 43, "objective function v2 — the
+  Combat Quality Index", 2026-08-08) retired win rate as a grading term
+  outright — "Win rate is not a term at all: the doctrine curve grades
+  WHETHER a deck should win, CQI grades HOW the fight played, and a 0%-win
+  cell scoring well is pinned as correct" — and the already-filed
+  `plan/AUDIT.md` row "`/deck-tuning` and `/combat-playtest` still name
+  `statusEngagement` as the objective function" flags the identical drift
+  in those two skills. `skills/digest.md` was outside phase 43's file
+  ownership (same as those two) and has the same problem: followed
+  literally tonight, §3b would have filed a doctrine-violation row against
+  early 54.5% / mid 8.3% / late 0% / impossible 0% — a live reading of a
+  retired law. This digest read `combatQuality.index` instead (see the
+  now-resolved CQI-baseline row above) and skipped the win-rate violation
+  filing on that basis, but the skill text itself still says otherwise for
+  next time.
+- next: repoint §3b at `combatQuality.index` (spine/arc/width/identity
+  weights, 0.40/0.25/0.20/0.15) once spec 35 or Phase 43's follow-up
+  defines what "moved" or "violates" means for CQI — there is no CQI band
+  yet to grade against, only the first stamped reading, so this may need a
+  design ruling (what CQI range is "good") before the skill text can be
+  rewritten, not just a search-and-replace of the metric name.
+- **CLOSED 2026-09-28 (R0):** moot. The deck-matrix baseline and its nightly re-measure are retired until the retune (D57), and R0 drops CQI and the preset curve from `skills/digest.md`.
+
+### [x] Three mobile source comments still name cards the Profane Canon deleted — CLOSED 2026-09-28 (R0)
+- category: docs
+- impact: 3
+- ease: 9
+- detail: filed 2026-08-08 by Phase 42's survey, scope-checked. Comments in
+  `state/combat/store-actions.ts:69`, `state/actions.ts:775` and
+  `state/selectors/combat-cards.ts:13` explain the starter path in terms of
+  `slippery-slope` and `brace-for-impact`, neither of which exists in the
+  library since `84ef85b`. **Live code is unaffected — these are comments
+  only** (checked; no runtime reference survives). Same root as the
+  `combat-sim` default-loadout row above, which IS a live defect.
+- **CLOSED 2026-09-28 (R0):** moot as a standalone row. The purge replaced the whole library with the grey cards (D36); the surviving references to deleted ids (`state/selectors/combat-cards.ts:13` and the mobile test fixtures) are swept by R7's fixture rewrite and R8's mobile follow-through.
+
+### [x] `dominantCardShare` is broken post-strike-death — CLOSED 2026-09-28 (R0)
+- category: debt
+- impact: 7
+- ease: 5
+- detail: filed 2026-08-08 by Phase 43. The raw attribution ledger's
+  `dotDamage` is filled at SUMMARY time, so the ledger itself carries direct
+  damage only and collapses onto whichever signature burst last — it reads
+  ~100% on nearly every matrix cell. CQI's identity term routes around it
+  (cards from the sim's per-line HP swing), so the new metric is unaffected,
+  but the standalone stat is wrong wherever else it is read. Left untouched
+  because other suites consume it; repair is separate work.
+- **CLOSED 2026-09-28 (R0):** moot. The matrix it was read on is retired (D57) and the tooling reset (R1) removes the preset/policy readings; if the stat survives R1, it is dead code for R7 (D50).
+
+### [x] `npm run combat-sim`'s default loadout no longer exists — CLOSED 2026-09-28 (R0)
+- category: debt
+- impact: 6
+- ease: 9
+- detail: filed 2026-08-08 by Phase 43. The default is
+  `slippery-slope,brace-for-impact` — both cards deleted by the Profane Canon
+  (`84ef85b`). Every default-invocation run therefore reports 0% win, 0%
+  statusEngagement, cqi ~29%. Pre-existing rot, not caused by Phase 43, and
+  outside its "surface the new metric additively" scope. Anyone reading a
+  bare `combat-sim` run right now is reading noise.
+- **CLOSED 2026-09-28 (R0):** moot as filed. Its readings (statusEngagement, CQI) measure retired law (D57); R7 rewrites every fixture that decks deleted cards onto the grey cards (D50), which covers this default.
+
+### [x] The Surge meter is the least-used locked system, and most rolled dice never power a line — CLOSED 2026-09-28 (R0)
+- category: divergence
+- impact: 5
+- ease: 3
+- detail: filed 2026-08-08 by Phase 43's first CQI reading. Chain completion
+  is 35% matrix-wide (the chain breaks ~2x for every surge), the lowest
+  locked sub-score everywhere; `dice-spent` is 29% against a 0.5 reference.
+  **Information, not work** — bearings' "the current card library is
+  transitional" rule forbids tuning against it. Re-read after the redesign.
+- **CLOSED 2026-09-28 (R0):** moot. The reading came from the CQI matrix over the purged library (D36, D57); it was information, not work, and the library it described no longer exists.
+
+### [x] `/combat-playtest` still names `statusEngagement` as the objective function — HALF-RESOLVED via Phase 66 (2026-08-27) — CLOSED 2026-09-28 (R0)
+- category: docs
+- impact: 6
+- ease: 9
+- detail: filed 2026-08-08 by Phase 43. The skill files in `skills/` and
+  `.claude/commands/` were outside that phase's ownership. They should be
+  repointed at `cqi` / spec 35, or the next tuning pass will optimise the
+  dead law the phase exists to retire.
+- update 2026-08-27 (Phase 66): `.claude/commands/deck-tuning.md` was
+  already reconciled (its §North star reads "CQI (spec 35), not the
+  retired status-dominance law"). `.claude/commands/combat-playtest.md`
+  was not, and Phase 66's `status-primacy-doctrine` row flagged it: its
+  north-star section is now repointed at CQI and its "low status-effect
+  engagement is a balance failure" closing line replaced. What remains
+  open is the §Purpose comparison table's question cell ("Is status play
+  the FUN path at every stage?") and the skill's own one-line description
+  in the harness registry — same claim, but a rewrite there changes what
+  the skill IS FOR, which wants a design call rather than a lint fix.
+- **CLOSED 2026-09-28 (R0):** addressed by R0. `.claude/commands/combat-playtest.md` is rewritten around the S3 questions (stat growth against the stage curve, survivors winnable or at risk); status primacy, presets and CQI are gone from it.
+
+### [x] Dead id-keyed engine hooks survive the retired spec-32 library — CLOSED 2026-09-28 (R0)
+- category: debt
+- impact: 5
+- ease: 6
+- detail: filed 2026-08-08 by Phase 42. Engine hooks still keyed to
+  `achilles-and-the-tortoise`, `the-closing-word`, `circular-reasoning` —
+  cards the Profane Canon (`84ef85b`) deleted. Dead, and now actively
+  misleading: Phase 44c's build-plan row cites those same ids as its scope.
+  Related stale registry rows: `SYSTEM_TERM_COVERED_BY` names a nonexistent
+  `CLARITY` keyword, and mobile fixtures still deck `slippery-slope` /
+  `straw-mans-jab`.
+- **CLOSED 2026-09-28 (R0):** moot. R7 (the engine purge, D50) deletes every carrier-less mechanic, its handlers and its stale id-keyed comments; the mobile fixtures follow in R8.
+
+### [x] Playtest harness has no victory-only rounds-to-victory metric — CLOSED 2026-09-28 (R0)
+- category: gap
+- impact: 4
+- ease: 7
+- detail: surfaced 2026-07-17 by the ultracode price-vs-win-rate
+  playtest. `CombatSimStats.avgRounds`
+  (src/Combat/combat.encounter.sim.ts) averages `state.round` over ALL
+  outcomes (defeats + retreats included), so there is no way to answer
+  "how many rounds to WIN" — the owner asked exactly that and it forced
+  a bespoke harness
+  (axiomancer-mechanics/scratch/price-experiment/price-winrate.harness.ts)
+  that re-derives it from per-run `runOneEncounter` returns. The raw
+  `rounds`+`outcome` already exist per run; they are just discarded at
+  aggregation. Add `avgRoundsToVictory` (victory-only, null when ~0
+  victories) to `CombatSimStats` + the stage summary so kill-speed is a
+  first-class witness for /deck-tuning. Related: the "Doctrine-curve
+  check in the nightly baseline" candidate (PHASE_CANDIDATES.md) would
+  absorb this harness's per-stage cells — this is the engine-side metric
+  that check depends on. (The other residue of this session — the
+  mid-collapse quartet foundry/standstill/grace/augury ≈0% mid, and the
+  tempo/alt-win pricing conclusions — is already tracked there and in
+  Phases 36a/36b, so it is not re-filed here.)
+- next: /iterate (retain victory-only rounds in
+  simulateHazardPatternCombatDetailed; surface in PlaytestStageSummary +
+  the report formatter)
+- **CLOSED 2026-09-28 (R0):** moot. It served `/deck-tuning` (retired in T5) and the preset doctrine curve (retired with the presets, D36, and the baseline, D57); the retune can file a fresh row if it needs kill speed.
 
 ### [x] [tests] No Playwright journey walked a map node to node — RESOLVED 2026-09-26
 - filed 2026-09-26 (M3a residue; an attended session had walked the
