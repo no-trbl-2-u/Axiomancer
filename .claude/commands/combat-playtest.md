@@ -1,294 +1,314 @@
 ---
-description: Supercharged Hazard-Pattern Combat playtest loop — run the stage-profile x policy matrix (npm run combat-playtest) AND spawn playtester sub-agents to play real seeded encounters, then synthesize a doctrine verdict (is status play the fun path at every stage?) into a report PR. Primarily a report loop; card/deck follow-ups route to /adjust-cards, and a proven engine-constant fix may ship directly in this skill's own PR (THE OPEN GATE ¶5).
+description: Combat playtest for the revamp's S3 questions — does player stat growth track the stage curve, and are the three surviving foes (Float-Eye, Brine Hag, the Doorwarden) winnable while still putting the player at real risk? Runs the seeded stage matrix (npm run combat-playtest) and playtester sub-agents, files findings to plan/AUDIT.md, and delivers the report on one PR. Report-only.
 ---
 
-> **⚙️ Runs against the `axiomancer-mechanics` package.** Repo-relative paths below
-> (`src/…`, `automation/…`, `scripts/…`) are relative to that package — run from it (`cd axiomancer-mechanics`) or via
-> `npm run <script> -w axiomancer-mechanics`.
+> **Runs against the `axiomancer-mechanics` package.** Paths below
+> (`src/…`, `docs/…`) are relative to that package. Run from it
+> (`cd axiomancer-mechanics`) or via `npm run <script> -w axiomancer-mechanics`.
 
 # Skill: combat-playtest
 
-> **The supercharged playtest loop for the Hazard-Pattern Combat.** Two
-> layers of evidence: (1) the QUANTITATIVE stage matrix — `npm run
-> combat-playtest` sweeps stage profiles x sim policies x drafted decks and
-> reports win rates, status engagement, and per-card usage; (2) the
-> QUALITATIVE layer — `playtester` sub-agents play REAL seeded encounters
-> through the combat CLI, choose their own decks, and report what was fun,
-> what was frustrating, and whether status play carried the fight.
+> **The evidence loop for combat during the revamp.** Two layers:
+> (1) the QUANTITATIVE layer, a seeded matrix (`npm run combat-playtest`)
+> plus a seeded auto-play sweep of each survivor through the combat CLI;
+> (2) the QUALITATIVE layer, `playtester` sub-agents who fight the
+> survivors in the local expo-web build and report whether each fight was
+> winnable and whether it ever felt dangerous. Findings land in
+> `plan/AUDIT.md`; the full report rides one PR.
 
-> **Primarily a report loop.** It synthesizes quant + qual into
-> `docs/reports/playtest-<ts>.md` with a doctrine verdict (is status play the
-> fun path at every stage?). Card/deck follow-ups route to `/adjust-cards`,
-> which owns that surface; a proven engine-constant fix may ship directly in
-> this skill's own PR instead of waiting on a handoff (THE OPEN GATE ¶5,
-> 2026-08-28 — every tuning/playtest command may ship what it proves).
-> Deliver the report — and any applied engine-constant change — on ONE new
-> branch + PR. Nothing auto-lands on `main`.
+> **REVAMP MODE (D58, since 2026-09-28).** The loop ships only phases of the
+> ratified revamp build plan (`plan/steps/01_build_plan.md`; part plans in
+> `plan/revamp/`), plus `/fix-ci` and `/critique`. It creates no content of
+> any kind: cards, keywords, enemies, relics, maps, NPCs, events or art. THE
+> CARD HOLD (D37) stands: no card or keyword is made outside a guided session
+> with T. The content stewards, `/forge` and the `card-expert`,
+> `content-curator`, `mechanics-expert` and `reader` agents were archived in
+> R0; never route work to them.
 
-## Disambiguation — playtest vs the tuning loops
+## The questions
 
-| | `/combat-playtest` ← **this file** | engine-constant tuning | `/adjust-cards` |
+Since S3 (D40–D41), stats are the player's main growth: body, mind and heart
+scale every keyword family by `base × stat ÷ 5`, and VITAE is derived from
+level and stats (`calculateMaxHealth`). The player's kit is the grey office:
+A Plain Blow (DEAL), A Plain Ward (GUARD), A Plain Word (VULNERABLE). The
+enemy roster after R2 is three foes with no keywords and no afflictions
+(`plan/revamp/enemies.md`):
+
+| Foe | Slug | Level | Where it fights |
 |---|---|---|---|
-| Ships changes? | Primarily report + verdict; a proven engine-constant fix may ship directly here (THE OPEN GATE ¶5) | Numeric engine constants — open to any tuning/playtest loop with measured evidence (THE OPEN GATE ¶4) | Cards, presets, draft weights, sandbox promotions |
-| Evidence | stage matrix + qualitative agent play | `simulateHazardPatternCombat` / `npm run combat-sim` | matrix A/Bs with `--sandbox` |
-| Question it answers | "Is status play the FUN path at every stage — and where does it break down?" | "Are the HP/threat/Conviction numbers in band?" | "Is the card pool healthy — no dead cards, no spam, honest archetypes?" |
+| Float-Eye | `float-eye` | 1 | normal fights |
+| Brine Hag | `brine-hag` | 7 | the rarer mid-region fight |
+| The Doorwarden | `the-doorwarden` | 8 | every region's door fight |
 
-The legacy turn-based combat (and its playtest framework) was fully
-removed from the engine — Hazard-Pattern Combat is this skill's only
-surface.
+This skill answers two questions, and only these two:
 
-## North star — feel is a balance axis
+1. **Does player stat growth track the stage curve?** At each stage's
+   level, does the stat block a real player can reach (starting stats plus
+   `STAT_POINTS_PER_LEVEL` per level, `src/Game/game-mechanics.constants.ts`)
+   match the block the stage profile assumes
+   (`src/Combat/combat.stage-profiles.ts`)? At that body, how many Blows
+   does each survivor take to fall, and how many threat phases does the
+   player survive?
+2. **Are the three survivors winnable, and do they put the player at real
+   risk?** Each survivor should be beatable by the grey deck at the level
+   the player meets it, and none should be free: a fight the player cannot
+   lose is a finding, as is one the player cannot win. The Doorwarden should
+   be winnable but not free (`plan/revamp/progression.md`).
 
-Per `VISION.md` / `CLAUDE.md`, **combat must make its interacting systems
-legible and consequential** — status, direct damage and the mercy lines all
-compete on merit since THE UNSHACKLING (2026-08-08). HP is the only win
-condition. The tuning loops prove the NUMBERS obey CQI
-(`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/35-objective-function-v2.md`); this skill proves the EXPERIENCE does:
-
-1. **At every stage, does the deck's own engine run in the player's hands** —
-   does a line assemble across turns, is there more than one live option at
-   each powering die, and does the fight feel like the smart move rather than
-   homework?
-2. **Does the matrix agree with the hands?** A stage can pass its win-rate
-   band while a playtester reports "I just spammed one card" — that
-   disagreement is the finding.
-3. **Where is the friction?** Dead cards in hand, illegible telegraphs,
-   Conviction that never gets spent, drafts that betray their focus.
-4. **Is the impossible stage impossible for the right reasons?** Losing to
-   The Incompleteness should read as a ceiling, not as noise.
-
-A fight that scores well on CQI but reads as one-note in the hands — or the
-reverse — is the finding. Low status engagement is a diagnosis to explain
-against the library's intent, not a balance failure by itself.
+Evidence here feeds R9 (the XP/level retune) and B2 (the enemy revamp). This
+skill changes nothing itself.
 
 ## 1. Purpose
 
-`/combat-playtest` is the evidence loop that watches the whole combat
-experience across the campaign's stage profiles (`early` The Shallows, `mid`
-The Long Road, `late` The Deep Wood, `impossible` The Unprovable). It runs
-the deterministic playtest matrix, spawns playtester agents to actually play
-seeded encounters, synthesizes both into a doctrine verdict, and routes
-findings. It is primarily the eyes of the combat loops — card/deck follow-ups
-stay `/adjust-cards`'s hands — but may also ship a proven engine-constant fix
-directly (THE OPEN GATE ¶5).
+`/combat-playtest` measures the combat curve against the revamp's survivors
+and reports it. It runs the seeded quantitative layer, spawns playtester
+agents for the qualitative layer, writes a report, and files each finding as
+a `plan/AUDIT.md` row naming the revamp phase that owns it.
 
 ## 2. Invocation
 
 ```
 /combat-playtest
 /combat-playtest --focus="early"
-/combat-playtest --focus="impossible"
-/combat-playtest --focus="does control feel worth the tempo cost"
-/combat-playtest --focus="sandbox set forge-example"
-/loop 12h /combat-playtest         # periodic autonomous playtesting
+/combat-playtest --focus="the-doorwarden"
+/combat-playtest --focus="does the Brine Hag ever threaten a level-7 player"
 ```
 
-`--focus` accepts a stage id (`early|mid|late|impossible`) to concentrate
-both layers on that stage, or free text naming a feel/engagement concern.
-Without `--focus`, sweep all four stages.
+`--focus` accepts a stage id (`early|mid|late|impossible`), a survivor slug
+(`float-eye|brine-hag|the-doorwarden`), or free text naming a concern.
+Without `--focus`, cover all three survivors and every stage profile.
+
+Runs from `.github/workflows/combat-playtest.yml` (manual dispatch) or by
+hand.
 
 ## 3. Autonomy contract
 
-- **Primarily report-only; engine-constant fixes may ship when proven.** This
-  skill never edits card data, presets, draft weights, or test thresholds —
-  those stay `/adjust-cards`'s surface. Its primary write surface is the
-  report file (`docs/reports/playtest-<ts>.md`; create `docs/reports/` if it
-  doesn't exist yet). A proven engine-constant fix may be applied directly
-  in this skill's own PR (THE OPEN GATE ¶5, 2026-08-28), through the normal
-  verify + deploy gates; either way, name the target (`/adjust-cards` for
-  cards/decks, or "applied here" for an engine constant), the axis, and the
-  evidence in the report's "Handoffs" section.
-- **Quant before qual.** Run the matrix first; brief the playtester agents
-  with the cells that look suspicious so their hands land where the numbers
-  are ambiguous.
-- **Seeded and reproducible.** Every matrix run and every agent encounter
-  records its exact invocation (stage, enemy, policy, deck selection, seed,
-  runs). Identical inputs are deterministic — cite them so anyone can replay.
-- **Agents choose their decks.** Each playtester is assigned a stage and
-  seeds, but CHOOSES its own deck selection (a preset or a draft focus) and
-  must justify the choice — deck agency is part of what is being tested.
-- **Honest synthesis.** Where quant and qual disagree, say so; do not average
-  the disagreement away. Losses, boring wins, and "I never touched status"
-  confessions are first-class evidence.
-- **One PR carries the report.** The report rides a single new branch + PR,
-  ready for review, never draft, never auto-merged. No no-op PRs repeating
-  the previous tick's verdict.
-- **Standing law.** Unknown is an acceptable terminal state; false certainty
-  is not. Never fabricate a matrix cell, an agent transcript, or a verdict.
-- **Ambiguity → document and proceed.** Unclear focus: make the most
-  reasonable assumption, note it under `## Open questions`, and continue.
+- **Report-only.** No edits to engine constants, XP, stats, enemy data, card
+  data or test thresholds. Those belong to R9 (XP, level scaling of the
+  survivors) and B2 (enemies). The write surface is the report file
+  (`docs/reports/playtest-<ts>.md`) and new rows in `plan/AUDIT.md`.
+- **Quant before qual.** Run the numbers first; brief the playtesters with
+  the fights the numbers call suspicious.
+- **Seeded and reproducible.** Every quantitative result records its exact
+  invocation (stage, enemy, policy, deck, runs, seed). Every qualitative
+  fight records how it was entered (fixture id or `/dev` trigger), the
+  player's level and stats, and the foe.
+- **Honest synthesis.** Where the numbers and the hands disagree, say so and
+  lead with it. Never fabricate a cell, a transcript or a finding. "Unknown"
+  is an acceptable result; false certainty is not.
+- **One PR.** The report and the AUDIT rows ride one new branch and PR,
+  ready for review, never draft, never auto-merged. No PR that repeats the
+  previous run's findings unchanged.
+- **Ambiguity:** make the most reasonable assumption, record it under
+  `## Open questions`, and continue.
 
-## 4. Design targets (what to measure)
+## 4. What to measure
 
-**Layer 1 — the matrix (quantitative).** `npm run combat-playtest` drives
-`runPlaytestMatrix` (`src/Combat/combat.playtest.ts`): stage profiles x sim
-policies x deck selections, `runs` seeded encounters per cell. Default
-sweep: all stages, all policies, `policy-pick` decks (each policy drafts
-from its preferred focus). Record per cell: win rate, V/M/D/R split,
-`statusEngagement`, `dotHpFraction`, avg rounds; add `--cards` for the
-per-card usage table (plays, top/bottom split, status lands, discards). The
-policy roster spans the doctrine's archetypes — `greedy`/`blind` (the
-canonical ceiling/player-feel pair), `dot-weaver`, `control-lock`,
-`aggro-brute` (the deliberately weak baseline), `turtle`, `chaos`,
-`mercy-seeker` — see `docs/playtest.md` for the roster table.
+**Layer 1 — the numbers.**
 
-**Layer 2 — the hands (qualitative).** 2-4 `playtester` sub-agents
-(`.claude/agents/playtester.md`) spawned IN PARALLEL, each assigned one stage
-+ seeds (+ optionally a sandbox set or a suspicious cell from Layer 1). Each
-agent plays real encounters through the combat CLI and returns the
-structured report its agent file mandates: setup, runs table, what was fun,
-status-effect engagement, friction and dead cards, verdict + confidence.
+- *The stat curve (read from source, no simulation).* For each stage
+  profile: its `playerLevel` and `playerBaseStats`; the stat total a real
+  player reaches at that level (the fresh-start character's stats plus
+  `STAT_POINTS_PER_LEVEL` × levels gained); the player's VITAE at that
+  block (`buildStagePlayer` derives it); a Blow's damage (`5 × body ÷ 5`);
+  and each survivor's VITAE and per-phase damage from its block in
+  `src/Enemy/enemy.library.ts`. From these: Blows to kill each survivor,
+  threat phases to kill the player. Note that the stage profiles are
+  calibration anchors from the old campaign (levels 3, 20, 45, 50) while
+  Act 1 is sized for about 3–4 level-ups (`plan/revamp/progression.md`); a
+  mismatch between the two is itself a finding for R9.
+- *The matrix.* `runPlaytestMatrix` (`src/Combat/combat.playtest.ts`) over
+  stage profiles × sim policies × the grey deck, `--runs` seeded
+  encounters per cell. Read per cell: win rate, the
+  victories/mercies/defeats/retreats split, average rounds and its spread.
+  `--cards` adds per-card usage for the three grey cards.
+- *The survivors.* The matrix only fields enemies on a stage's roster.
+  Until R2 re-points the rosters in `src/Combat/combat.stage-profiles.ts`,
+  `--enemy=float-eye` (or either other survivor) fails with "not in any
+  selected stage roster". In that case sweep each survivor through the
+  combat CLI's auto-play instead, which accepts an explicit enemy with any
+  stage player: one run per seed, 20 seeds per survivor per stage, and
+  tally wins, losses and rounds yourself.
+- *Risk.* The matrix does not report the player's lowest VITAE. Read risk
+  from defeats and rounds here, and from the playtesters' lowest-VITAE
+  notes in Layer 2. If that proves too thin to answer question 2, file the
+  missing metric as a `plan/AUDIT.md` row; do not build it in this skill.
 
-Doctrine checkpoints both layers must answer, per stage: status engagement
-high and felt; DoT/control visibly out-pacing basic strikes; mercy path
-reachable where designed; no single-card spam; impossible stage losing for
-legible reasons.
+**Layer 2 — the hands.** 2–3 `playtester` sub-agents
+(`.claude/agents/playtester.md`), spawned in parallel. The agent plays the
+local expo-web build through Playwright; it has no shell and does not drive
+the CLI. Each is assigned one or two survivors and a player level, and
+returns the structured report its agent file mandates. Ask each, per fight:
+won or lost, the lowest VITAE reached, how many phases it took, and whether
+the fight ever felt dangerous or was ever hopeless.
 
 ## 5. The procedure
 
-### Step 0 — Sync & sanity
+### Step 0 — Sync and sanity
 - Clean working tree; note the base branch (usually `main`). `npm ci` if
   `node_modules` is absent.
 - Cold-run the playtest suites:
   `npx vitest run src/Combat/e2e/combat-playtest.matrix.sim.test.ts src/Combat/e2e/combat-playtest.balance-bands.sim.test.ts`.
 - If anything fails before you start, stop and report the pre-existing
   failure.
+- Read `src/Combat/combat.stage-profiles.ts` and note whether its rosters
+  already field the survivors (after R2) or still list pre-reset foes.
 
-### Step 1 — Run the quantitative matrix
-The CLI defaults to **Upgradeable Dice ON**, matching the shipped Mobile
-experience. Use `--legacy-dice` only for an explicitly labeled comparison;
-never cite that comparison as current player-balance evidence. Every text and
-JSON report declares its dice model.
+### Step 1 — The stat curve
+Work question 1 from source (§4 Layer 1, first bullet). Write it as one
+table per stage: level, assumed stats, reachable stats, VITAE, Blow damage,
+Blows to kill each survivor, phases to kill the player.
 
+### Step 2 — The matrix and the survivor sweep
 ```
-npm run combat-playtest -- --stage=all --policy=all --runs=60 --seed=1
-npm run combat-playtest -- --stage=all --policy=all --runs=60 --seed=1 --cards
-npm run combat-playtest -- --stage=<focus> --policy=blind --runs=120 --seed=1 --cards   # focused deep-dive
+npm run combat-playtest -w axiomancer-mechanics -- --stage=all --policy=greedy --deck=preset:grey --runs=60 --seed=1 --cards
+npm run combat-playtest -w axiomancer-mechanics -- --stage=all --policy=blind --deck=preset:grey --runs=60 --seed=1
 ```
-For agent consumption add `--json` (prints the raw `PlaytestReport`, nothing
-else). Flag: cells off their band (the thresholds in
-`src/Combat/e2e/combat-playtest.balance-bands.sim.test.ts` are the contract),
-stages with weak `statusEngagement` or `dotHpFraction`, cards with zero or
-dominant usage, and any greedy-vs-blind gap worth a human hand.
+`greedy` is the ceiling witness and `blind` the player-feel witness
+(`docs/playtest.md`). Add `--json` for the raw `PlaytestReport`.
 
-### Step 2 — Spawn playtester agents (parallel)
-Spawn 2-4 `playtester` sub-agents in one batch, each with:
-- a stage id (cover the focus stage plus at least one neighbor; always
-  include `impossible` on a full sweep),
-- 3-5 seeds to play,
-- the suspicious cells from Step 1 relevant to its stage,
-- optionally `--sandbox=<setId>` when the focus names a sandbox set,
-- the instruction to CHOOSE its deck (preset or draft focus, the grammar in
-  its agent file) and justify the choice.
+Per survivor, once the rosters field it:
+```
+npm run combat-playtest -w axiomancer-mechanics -- --stage=all --enemy=the-doorwarden --policy=blind --deck=preset:grey --runs=60 --seed=1
+```
 
-The agents drive `npm run combat -- --enemy <slug> --stage <stage> --deck
-<selection> --seed <n> ...` — hand-played via `--stdin --json-events` or
-`--script`, and fast-swept via `--auto --policy status`. The JSONL answer
-protocol lives in `src/CLI/io.ts` (script/stdin modes); the agent file
-documents the exact commands.
+Until then, per survivor, stage and seed:
+```
+npm run combat -w axiomancer-mechanics -- --enemy the-doorwarden --stage early --deck preset:grey --auto --policy status --seed 1 --max-turns 40 --json-events
+```
+Raise `--max-turns` (default 8) until every run resolves; a run that hits
+the cap is recorded as unresolved, not as a loss.
 
-### Step 3 — Synthesize
-Write `docs/reports/playtest-<ts>.md` (create the directory on first use):
-- the matrix tables (key cells, per-stage summaries, card coverage),
-- each agent's report verbatim (or tightly excerpted with runs tables
-  intact),
-- a per-stage doctrine scorecard: quant says / hands say / agree?,
-- **the doctrine verdict:** is status play the fun path at EVERY stage —
-  yes / no / degraded-at-<stage>, with the two or three load-bearing pieces
-  of evidence,
-- `## Handoffs`: each numeric follow-up as one line — target (`/adjust-cards`,
-  or "applied here" for an engine constant shipped in this PR), axis,
-  evidence pointer,
+Flag: any survivor the grey deck cannot beat at the level the player meets
+it; any survivor that never defeats the player at any level; any stage
+whose assumed stats a real player cannot reach (or overshoots).
+
+### Step 3 — Spawn playtester agents (parallel)
+Start the local expo-web build (`npm run web -w axiomancer-mobile`, serving
+`http://localhost:8081`) if it is not running. Then spawn 2–3 `playtester`
+sub-agents in one batch, each with:
+- the base URL and one or two survivors to fight,
+- how to reach them: read `axiomancer-mobile/docs/playtest-guides/combat.md`
+  first; enter at a state fixture
+  (`http://localhost:8081/exploration?fixture=<id>`, ids in
+  `src/Game/fixtures/state-fixture.registry.ts`) whose level matches where
+  the player meets that foe, then fire the foe from `/dev`
+  (`debug-enemy-map-<map>` then `debug-enemy-<enemyId>`),
+- the suspicious fights from Steps 1–2,
+- the per-fight questions from §4 Layer 2.
+
+### Step 4 — Synthesize and file
+Write `docs/reports/playtest-<ts>.md`:
+- the stat-curve tables (Step 1),
+- the matrix and sweep tables with their invocations (Step 2),
+- each agent's report, verbatim or tightly excerpted with its fights table
+  intact,
+- a per-survivor scorecard: numbers say / hands say / agree?,
+- **the answers**: question 1 (tracks / drifts at `<stage>` / unknown) and
+  question 2 per survivor (winnable yes/no, at risk yes/no), each with its
+  two or three load-bearing pieces of evidence,
 - `## Open questions`.
 
-### Step 4 — Deliver on ONE PR
-- **Cross-package verify** — before opening the PR, run
-  `git diff --name-only` against the changed paths; if any match the
-  cross-package impact checklist in `AGENTS.md`, run
-  `npm run verify -w axiomancer-mobile` and block the PR on failure.
+Then file each finding as a Pending row in `plan/AUDIT.md`:
+
+```markdown
+### [<category>] <one-line finding> (<YYYY-MM-DD>)
+- category: <divergence | gap | tests | ...> (`plan/bearings.md` → AUDIT category taxonomy)
+- impact: <0-10>
+- ease: <0-10>
+- evidence: docs/reports/playtest-<ts>.md; <the seeded invocation or fight>
+- owner: <R9 retune | B2 enemy revamp | an /iterate-sized fix>
+```
+
+Check `plan/AUDIT.md` first and update an existing row rather than filing a
+duplicate.
+
+### Step 5 — Deliver on ONE PR
+- **Cross-package verify:** before opening the PR, run
+  `git diff --name-only`; if any changed path matches the cross-package
+  impact checklist in `AGENTS.md`, run the consumer gates it names and block
+  the PR on failure. (A report-only PR normally matches none; check anyway.)
 - Branch off base: `git checkout -b playtest/combat-<ts>`.
-- Stage the report.
+- Stage the report and `plan/AUDIT.md`.
 - Commit: `docs(playtest): combat playtest <ts> report`.
 - Push and open a PR (ready for review): title
-  `playtest(combat): <ts> — <one-line verdict>`; body carries the doctrine
-  verdict, the scorecard, and the handoff list. Never draft, never
+  `playtest(combat): <ts> — <one-line answer>`; the body carries the two
+  answers, the scorecard and the AUDIT rows filed. Never draft, never
   auto-merge, never push `main`.
 
-### Step 5 — Report back
-One concise message: the PR URL, the doctrine verdict, and the handoffs (if
-any) with their target skills.
+### Step 6 — Report back
+One concise message: the PR URL, the two answers, and the AUDIT rows filed.
 
 ## 6. Hard rules
 
-- **No edits to card data, presets, draft weights, sandbox sets, or test
-  thresholds** — those stay `/adjust-cards`'s surface; hand those off. A
-  proven engine-constant fix may ship directly here, evidenced and through
-  the verify + deploy gates (THE OPEN GATE ¶5).
+- **Report-only.** No edits to engine constants, XP, stats, enemy data, card
+  data, sandbox sets or test thresholds. Findings are AUDIT rows for the
+  phase that owns them.
+- **No content.** Never propose a new card, keyword, enemy, relic or item
+  as a fix (D37, D58). "The grey deck cannot beat X at level N" is the
+  finding; the answer belongs to R9 or B2.
 - **Never push to `main` automatically. Never auto-merge.**
-- **Seeded runs only** — every cited encounter carries its seed and full
-  invocation; unreproducible anecdotes are not evidence.
-- **Agent reports are quoted honestly** — including losses, boredom, and
-  verdicts that contradict the matrix.
-- **Never let a healthy win rate excuse weak status engagement** — that is
-  the doctrine's core failure mode.
-- **Preserve canonical terms** (VITAE/HP, STANCE, Conviction, GUARD, Befriend
-  mercy, stage ids, policy ids).
+- **Seeded runs only** for quantitative evidence; every cited result
+  carries its full invocation.
+- **Agent reports are quoted honestly**, including losses, boredom and
+  verdicts that contradict the numbers.
+- **Preserve canonical terms** (VITAE, Conviction, GUARD, stage ids, policy
+  ids, survivor slugs).
 - **No emojis. No `Co-Authored-By:` trailers.** Commit style:
   `<type>(<scope>): <description>`.
 
 ## 7. Failure modes
 
 1. **A suite fails before any run.** Stop; report the pre-existing failure.
-2. **A playtester agent returns malformed or empty output.** Re-spawn once
-   with a tightened brief; if it fails again, proceed with the remaining
-   agents and record the gap under `## Open questions`.
-3. **Quant and qual flatly disagree.** That IS the finding — lead the report
-   with it; recommend a focused follow-up rather than picking a side.
-4. **The matrix is too slow for a full sweep.** Reduce `--runs` per cell
-   before reducing coverage; record the reduced counts.
-5. **Focus matches nothing.** Run the full sweep; note the empty focus.
+2. **`--enemy=<survivor>` rejected by the matrix.** Expected before R2; use
+   the auto-play sweep (Step 2) and say so in the report.
+3. **A playtester agent returns malformed or empty output.** Re-spawn once
+   with a tightened brief; if it fails again, proceed with the others and
+   record the gap under `## Open questions`.
+4. **The expo-web build will not start.** Deliver the quantitative layer
+   alone and record the missing qualitative layer as an open question.
+5. **Numbers and hands flatly disagree.** That is the finding; lead with it
+   and recommend a focused follow-up rather than picking a side.
+6. **The sweep is too slow.** Reduce `--runs` (or seeds) before reducing
+   coverage; record the reduced counts.
 
 ## 8. Quick reference
 
-**Layer 1 CLI:** `npm run combat-playtest` (`src/CLI/combat-playtest.cli.ts`)
-— flags `--stage=early|mid|late|impossible|all` (default all),
-`--policy=<id|all>` (default greedy), `--deck=preset:<id>|draft:<focus>|cards:a,b,c|policy-pick`
-(default policy-pick), `--enemy=<slug>`, `--runs=N` (default 60), `--seed=N`
-(default 1), `--sandbox=<setId>`, `--cards`, `--json`.
+**Matrix CLI:** `npm run combat-playtest -w axiomancer-mechanics`
+(`src/CLI/combat-playtest.cli.ts`). Flags: `--stage=early|mid|late|impossible|all`
+(default all), `--policy=<id|all>` (default greedy), `--deck=<selection>`
+(default policy-pick; the grey deck is `preset:grey`), `--enemy=<slug>`
+(must be on a selected stage's roster), `--runs=N` (default 60), `--seed=N`
+(default 1), `--sandbox=<setId>`, `--cards`, `--json`, `--log-level=<level>`,
+`--log-file=<path>`. `--upgradeable-dice` is an accepted no-op;
+`--legacy-dice` fails loudly.
 
-**Layer 2 CLI (what the agents drive):** `npm run combat` — additive flags
-`--stage <id>` (stage-profile player), `--deck <selection>` (same grammar),
-`--sandbox <setId>`, plus the existing `--enemy <slug>`, `--seed <n>`,
+**Combat CLI (auto-play sweep):** `npm run combat -w axiomancer-mechanics --`
+with `--enemy <slug>`, `--stage <id>`, `--deck <selection>`, `--preset <id>`
+(character preset; a `--stage` player is built when absent), `--seed <n>`,
 `--auto`, `--policy naive|safe|aggressive|status`, `--max-turns <n>`,
-`--script <path>`, `--stdin`, `--json-events`, `--state-log <path>`. Answer
-protocol: `src/CLI/io.ts` (script/stdin modes).
+`--json-events`, `--script <path>`, `--stdin`, `--state-log <path>`,
+`--sandbox <setId>`, `--log-level <level>`, `--log-file <path>`.
 
 **Machinery:** `runPlaytestMatrix` / `formatPlaytestReport`
-(`src/Combat/combat.playtest.ts`) · stage profiles
+(`src/Combat/combat.playtest.ts`) · stage profiles and `buildStagePlayer`
 (`src/Combat/combat.stage-profiles.ts`) · policies
 (`src/Combat/combat.sim-policies.ts`) · deck selections
-(`src/Combat/combat.deck-draft.ts`) · sandbox sets
-(`src/Cards/cards.sandbox-sets.ts`).
+(`src/Combat/combat.deck-draft.ts`) · survivors
+(`src/Enemy/enemy.library.ts`) · stat points and XP
+(`src/Game/game-mechanics.constants.ts`).
 
-**Contract tests:** bands
-`src/Combat/e2e/combat-playtest.balance-bands.sim.test.ts` · matrix
-determinism `src/Combat/e2e/combat-playtest.matrix.sim.test.ts` · card
-coverage `src/Combat/e2e/combat-playtest.card-coverage.sim.test.ts`.
+**Contract tests:** matrix determinism
+`src/Combat/e2e/combat-playtest.matrix.sim.test.ts` · smoke
+`src/Combat/e2e/combat-playtest.balance-bands.sim.test.ts` · card coverage
+`src/Combat/e2e/combat-playtest.card-coverage.sim.test.ts`.
 
 **One-page reference:** `docs/playtest.md` (stage table, policy roster, deck
-selection grammar, commands, contract-test map).
-
-**Dice model:** Upgradeable Dice is ON by default. `--legacy-dice` selects the
-pre-spec-33 comparison model. `--upgradeable-dice` remains as a redundant
-explicit-ON compatibility switch; combining both switches is an error.
+grammar, commands). Where it still teaches the old status doctrine or the
+preset win-rate curve, it is stale; the questions above govern this skill.
 
 **Sub-agent:** `.claude/agents/playtester.md`.
 
-**Doctrine:** `VISION.md` → Combat vision · `CLAUDE.md` (load-bearing
-doctrine, incl. the 2026-07-08 starter-preset win-rate curve: early ~80%,
-mid ~50%, late ~25-35%, impossible 0% — a starter preset overperforming
-this late/impossible is a dominance finding, not a success).
-
-**Handoff targets:** cards/decks → `/adjust-cards` · engine constants → ship
-directly here when proven (THE OPEN GATE ¶4/¶5), or hand to `/adjust-cards`
-if the finding is card-adjacent.
+**Plans:** `plan/revamp/enemies.md` (the survivors) ·
+`plan/revamp/progression.md` (R9, the curve target) · `plan/AUDIT.md`
+(where findings land).

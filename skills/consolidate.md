@@ -7,6 +7,19 @@
 > Curation only — meaning is never changed, decisions are never
 > re-litigated, and anything ambiguous stays put.
 
+> **REVAMP MODE (D58, since 2026-09-28).** The loop ships only phases of the
+> ratified revamp build plan (`plan/steps/01_build_plan.md`; part plans in
+> `plan/revamp/`), plus `/fix-ci` and `/critique`. It creates no content of
+> any kind: cards, keywords, enemies, relics, maps, NPCs, events or art. THE
+> CARD HOLD (D37) stands: no card or keyword is made outside a guided session
+> with T. The content stewards, `/forge` and the `card-expert`,
+> `content-curator`, `mechanics-expert` and `reader` agents were archived in
+> R0; never route work to them.
+
+For this verb that means: compaction records the revamp's
+decisions (D46–D64) as standing, and never trims a passage in a
+way that revives a retired steward, agent or content route.
+
 ## 1. Purpose
 
 Every skill's Step 0 reads `plan/bearings.md` and
@@ -41,8 +54,8 @@ own loop shape with its own cadence.
    `plan/archive/CRITIQUE_<YYYY>.md` (create on first use; one
    file per year, append-only). The `## Pending` section is
    never archived. Recurring findings (same defect observed
-   across ≥3 passes, e.g. a `[needs-user-call]` that re-fires
-   every pass) are collapsed to ONE row: keep the latest
+   across ≥3 passes, e.g. a spacing nit that re-fires every
+   pass) are collapsed to ONE row: keep the latest
    observation and the suggested fix, fold the prior
    occurrences into a single `- history:` line of pass numbers
    and commits. The metadata header (`> Last pass / Pass
@@ -94,15 +107,23 @@ own loop shape with its own cadence.
    - Skim the live doc surfaces changed since the last consolidate
      pass (`git log --since="<last pass>" --name-only -- '*.md'`,
      excluding the lexicon's own zoned paths) for claims that
-     contradict current specs/engine (e.g. spec 32 v3, the phase
-     18-23 equipment epic).
-   - **Newly-dead concept found** → add a `lexicon.json` row (+ a
-     `docs/LEXICON.md` table row if load-bearing) and fix/banner/
-     pragma the flags it produces in the same pass. The registry
-     grows via the curator, not via ad-hoc 3-day cleanups.
+     contradict the current engine or the revamp plan
+     (`plan/revamp/`; e.g. a doc still teaching the preset
+     library, enemy keywords or a steward rotation the revamp
+     removed).
+   - **Newly-dead concept found** → add a row to
+     `axiomancer-mechanics/docs/lexicon.json` (the registry
+     `check-lexicon` enforces; + a table row in
+     `axiomancer-mechanics/docs/LEXICON.md` if load-bearing) and
+     fix/banner/pragma the flags it produces in the same pass.
+     The registry grows via the curator, not via ad-hoc 3-day
+     cleanups. (`axiomancer-mechanics/docs/narrative/LEXICON.md`
+     is the narrative vocabulary guide, not the retired-terms
+     registry; this sweep does not touch it.)
    - **Dated doc posing as current law** → add a `**Status:**
-     HISTORICAL` banner (existing convention — see
-     `docs/hazard-pattern-combat-reconciliation-gaps.md`, archived 2026-09-25).
+     HISTORICAL` banner at its head (the convention is
+     `axiomancer-mechanics/docs/LEXICON.md` → "Exempt by
+     banner").
    - **Suspected-dead agent-facing file** (references a removed
      system, e.g. an engine path deleted per a lexicon row) →
      flag it as a `plan/AUDIT.md` finding. Do not delete it —
@@ -128,7 +149,8 @@ own loop shape with its own cadence.
 1. **Curation, never authorship.** This verb adds no new
    decisions, rules, findings, or opinions. Its entire output
    is the same memory, smaller. Narrow exception: the
-   terminology sweep (§3.5) may add a `lexicon.json` row or a
+   terminology sweep (§3.5) may add a
+   `axiomancer-mechanics/docs/lexicon.json` row or a
    `HISTORICAL` banner — that's recording a fact already true of
    the code (a concept is dead, a doc is dated), not authoring a
    new one.

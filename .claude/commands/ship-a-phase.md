@@ -2,6 +2,15 @@
 description: Ship the next unchecked phase of the build plan end-to-end (loop-friendly, autonomous)
 ---
 
+> **REVAMP MODE (D58, since 2026-09-28).** The loop ships only phases of the
+> ratified revamp build plan (`plan/steps/01_build_plan.md`; part plans in
+> `plan/revamp/`), plus `/fix-ci` and `/critique`. It creates no content of
+> any kind: cards, keywords, enemies, relics, maps, NPCs, events or art. THE
+> CARD HOLD (D37) stands: no card or keyword is made outside a guided session
+> with T. The content stewards, `/forge` and the `card-expert`,
+> `content-curator`, `mechanics-expert` and `reader` agents were archived in
+> R0; never route work to them.
+
 You are invoked under the `ship-a-phase` skill — full autonomy,
 no review checkpoint. Read `skills/ship-a-phase.md` end to end
 before touching anything else; that file is the single source
@@ -21,7 +30,7 @@ Failure modes: §10. Everything else — empty data, design
 ambiguity, missing brief — **resolve and ship**.
 
 Be bold about delegating: spawn `scout` for external research,
-domain specialists for prose / schema work. Main agent's job is
+`playtester` to drive the running app. Main agent's job is
 wiring + decisions.
 
 When invoked under `/loop` or `/march`, the user is not present.

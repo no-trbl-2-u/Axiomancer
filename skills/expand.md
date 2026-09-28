@@ -1,5 +1,14 @@
 # Skill: expand
 
+> **REVAMP MODE (D58, since 2026-09-28).** The loop ships only phases of the
+> ratified revamp build plan (`plan/steps/01_build_plan.md`; part plans in
+> `plan/revamp/`), plus `/fix-ci` and `/critique`. It creates no content of
+> any kind: cards, keywords, enemies, relics, maps, NPCs, events or art. THE
+> CARD HOLD (D37) stands: no card or keyword is made outside a guided session
+> with T. The content stewards, `/forge` and the `card-expert`,
+> `content-curator`, `mechanics-expert` and `reader` agents were archived in
+> R0; never route work to them.
+
 > **Plan-expansion pass.** Read accumulated signals and propose
 > new phase candidates to `plan/PHASE_CANDIDATES.md`. The build
 > plan ships well; this skill is how it *grows* well.
@@ -37,11 +46,10 @@ has overtaken the plan."
 /expand dry-run               # report candidates; do not commit
 ```
 
-`/march` invokes `/expand` periodically (rate-limited) when
-posture is **bold**. `/iterate` falls through to `/expand` when
-the audit produces no actionable findings (top score < 3.0) AND
-posture is bold — that's the "make things brilliant when delivery
-is not" path.
+`/march` invokes `/expand` when its expand gate is due, and
+`/iterate` falls through to `/expand` when its audit produces no
+actionable findings. Both gates live in one place: `skills/march.md`
+"Gates (the one home)".
 
 ## 3. Posture (read from `bearings.md`)
 
@@ -53,19 +61,17 @@ is not" path.
 - Mode: **bold** (default)
 ```
 
-Three settings:
+Two settings:
 
-- **bold** (default) — `/expand` runs at standard cadence
-  (rate-limited per §9). Candidates land in
-  `plan/PHASE_CANDIDATES.md`. `/oversight` promotes.
+- **bold** (default) — `/expand` runs when its gate is due.
+  Candidates land in `plan/PHASE_CANDIDATES.md`. `/oversight`
+  promotes.
 - **strict** — `/expand` is a **no-op**. Print
   `"expand: strict posture — skipping"` and exit 0. The
   `/march` dispatcher skips the expand gate entirely.
-- **autonomous** — `/expand` writes candidates **directly to
-  `plan/steps/01_build_plan.md`** as new pending phase rows.
-  No `/oversight` review. Use only when the loop is deeply
-  trusted and the spec is stable. **Document the choice in
-  `bearings.md` Hard Rules** so the user knows.
+
+`/expand` never writes to `plan/steps/01_build_plan.md`; only
+`/oversight` promotes a candidate to a phase.
 
 If the bearings section is missing, default to **bold** and add
 the section in the same commit (`bearings: add expand posture
@@ -96,8 +102,6 @@ GitHub issues labeled `triage:loop-queued` (or `triage:reviewed`)
 sitting in queue. Shape:
 - 4+ issues asking for the same feature → propose that feature
   as a phase.
-- Issues consistently routed to `triage:needs-user` → propose a
-  phase that removes the user gate.
 
 ### D. Spec drift
 
@@ -111,14 +115,16 @@ spec has changed since the last expand pass:
 
 ### E. Design landings
 
-New / modified files in `axiomancer-mechanics/specs/` or
-`axiomancer-mechanics/braindump/`:
+New / modified files in `axiomancer-mechanics/specs/`:
 - A spec for a mechanic / character / story beat / region that
   doesn't have a phase → propose the phase.
 - Spec modifications → check against `bearings.md`; propose
   alignment work.
-- Braindump sessions converging on a design without a spec →
-  propose speccing + shipping it.
+
+**Excluded:** `axiomancer-mechanics/braindump/` (HISTORICAL) and
+any spec marked HISTORICAL (in its own header or in the
+`axiomancer-mechanics/specs/README.md` index). They are records,
+not signals.
 
 ### F. Content growth
 
@@ -152,8 +158,8 @@ filtered by better-if label, `kb_search`) — the only route to it; no
 local snapshot exists. See AGENTS.md § Truth sources. Shape:
 - A reception complaint recurring across 3+ corpus games (e.g.
   runaway-leader, onboarding friction, dead turns) that
-  Axiomancer's shipped systems plausibly share → propose a phase
-  that addresses it before players file it themselves. Cite the
+  Miserere Mei, Deus's shipped systems plausibly share → propose a
+  phase that addresses it before players file it themselves. Cite the
   `kb:<game-slug>/<doc> (src-NNN)` receipts as the signal.
 - A wishlist gap the loop filed (a `wishlist`-labeled issue on
   `no-trbl-2-u/game-knowledge-base`) that the KB's scout has since
@@ -223,6 +229,14 @@ For each top candidate, ask:
 4. **Does the loop have the capacity to ship this?** A
    candidate that requires schema migration of 100 records
    deserves to be phase-promoted but only by `/oversight`.
+5. **Would it create content? (the D37/D58 filter)** A candidate
+   whose work is making cards, keywords, enemies, relics, maps,
+   NPCs, events or art is **not filed** as a candidate. If the
+   signal is real, note it in one line in the pass log (and the
+   commit body) as input for the owner-led rebuild track
+   (B1–B10, `plan/revamp/README.md` §7) — T picks it up in a
+   guided session. Card and keyword signals additionally wait on
+   THE CARD HOLD (D37) and the card-rules inventory (B4).
 
 After assessment, you should have **2–4 candidates**, not 3
 mechanically.
@@ -231,12 +245,6 @@ mechanically.
 
 Append under `## Pending`. Update metadata header (last pass,
 pass count).
-
-If posture is **autonomous**, instead of writing to
-`PHASE_CANDIDATES.md`, **append the new phase rows directly to
-`plan/steps/01_build_plan.md` "Status (at-a-glance)" block**.
-Pick the next free phase number. Document in commit body that
-this was autonomous (not via oversight).
 
 ### Step 5 — Commit + push
 
@@ -250,15 +258,12 @@ Top candidates:
 - [score X.Y] <one-line>
 
 Source signals: <brief — audit / critique / triage / spec / design / data / commits>.
+Held for the owner-led rebuild track (D58): <one-liners, or "none">.
 Posture: bold. Promotion gated by /oversight.
 EOF
 )"
 git push origin main
 ```
-
-(If autonomous posture: subject is `expand: pass <N> — <K>
-phases promoted (autonomous)` and the body lists which phase
-numbers + their topics.)
 
 If **zero** candidates score above threshold: still update the
 metadata header, commit `expand: pass <N> — no candidates`. The
@@ -302,6 +307,10 @@ oversight will review and promote.
 7. **No emojis. No `Co-Authored-By:`.**
 8. **Strict posture is real.** If posture is `strict`, exit 0
    with no-op. Don't sneak candidates in.
+9. **No content candidates (D37, D58).** Never file a candidate
+   that creates cards, keywords, enemies, relics, maps, NPCs,
+   events or art. Note it for the owner-led rebuild track
+   instead (§6 Step 3, question 5).
 
 ## 8. Failure modes
 
@@ -313,30 +322,12 @@ oversight will review and promote.
    exit 0.
 4. **All candidates conflict with spec.** Decide per hard rule 3
    (THE OPEN GATE): uphold or amend, file `[loop-call]` rows.
-5. **Autonomous posture but the phase number conflicts** with a
-   recently-shipped phase (race condition with concurrent
-   ship-a-phase). Stop and report.
 
 ## 9. When `/march` invokes `/expand`
 
-Conditions in `/march` Step (between critique and dispatch):
-
-1. Posture is **bold** or **autonomous** (not strict).
-2. Last expand pass was **at least 20 commits ago**, OR more
-   than **48 hours ago**, OR is "never" and at least 3 phases
-   have shipped.
-3. There's at least one signal worth examining
-   (heuristic check: `wc -l plan/AUDIT.md` > some
-   threshold, or `git log -p --since=...` shows spec/design
-   changes).
-
-If all three: dispatch to `/expand`. If any fails: fall through
-to normal phase / iterate dispatch.
-
-`/iterate` also dispatches to `/expand` when its own audit
-produces no findings scoring ≥ 3.0 — instead of stopping per
-§6 of iterate, it writes "no actionable iterate work — handing
-to expand" and runs `/expand`.
+The dispatch conditions (posture, commit/time spacing, signal
+check, and `/iterate`'s fall-through) live in `skills/march.md`
+"Gates (the one home)". Do not restate them here.
 
 ## 10. Quick reference
 
@@ -351,15 +342,14 @@ spec.md                                       # spec drift
 
 # Git diffs (signals)
 git log -p --since="<last pass>" -- spec.md
-git log -p --since="<last pass>" -- axiomancer-mechanics/specs/ axiomancer-mechanics/braindump/
+git log -p --since="<last pass>" -- axiomancer-mechanics/specs/   # skip HISTORICAL specs
 git log --since="<last pass>" --pretty=format:'%s'
 
 # Issues (signals — if gh available)
 gh issue list --repo $GH_REPO --label "triage:loop-queued" --json number,title
 
 # Write
-plan/PHASE_CANDIDATES.md                      # bold posture
-plan/steps/01_build_plan.md                   # autonomous posture only
+plan/PHASE_CANDIDATES.md                      # candidates (never the build plan)
 
 # Commit + push + confirm
 git add <files>

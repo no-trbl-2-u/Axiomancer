@@ -5,30 +5,50 @@
 > loop. Drains queues from `/critique` and `/triage` alongside
 > its own audit.
 
+> **REVAMP MODE (D58, since 2026-09-28).** The loop ships only phases of the
+> ratified revamp build plan (`plan/steps/01_build_plan.md`; part plans in
+> `plan/revamp/`), plus `/fix-ci` and `/critique`. It creates no content of
+> any kind: cards, keywords, enemies, relics, maps, NPCs, events or art. THE
+> CARD HOLD (D37) stands: no card or keyword is made outside a guided session
+> with T. The content stewards, `/forge` and the `card-expert`,
+> `content-curator`, `mechanics-expert` and `reader` agents were archived in
+> R0; never route work to them.
+
 ## 1. Purpose
 
-Phases ship the structure. After they ship, the project is
-**alive but thin**. `/iterate` is the loop that fills it in.
+A quality pass on already-shipped surfaces: bugs, drift, debt,
+docs, tests, accessibility, performance. It fills nothing in —
+new content is T's (D58), so a finding whose fix would be
+content is **filed, not shipped** (§3).
 
-Useful **during** build phases too as a separate quality pass
-on already-shipped surfaces.
+In revamp mode `/march` does not dispatch `/iterate`; T runs it
+by hand. The procedure is unchanged.
 
 ## 2. Invocation
 
 ```
 /iterate                    # full audit, ship the top finding
 /iterate audit              # audit-only; emit plan/AUDIT.md
-/iterate <focus>            # bias toward content / docs / debt / a11y / tests / perf
+/iterate <focus>            # bias toward one category (see below)
 /loop 1h /iterate           # autonomous improvement loop
 ```
+
+`<focus>` is one of the §4 category tokens: `external-critique`,
+`divergence`, `contract`, `docs`, `debt`, `gap`, `a11y`, `tests`,
+`perf`. (`content` is audited but never picked, so it is not a
+focus.)
 
 ## 3. Autonomy contract
 
 - **Many findings → one shipped fix per tick.** Multi-fix
   commits are unreviewable.
-- **Content gap → spawn `content-curator`
-  (`.claude/agents/content-curator.md`).**
-  Don't write prose from main agent.
+- **No content fixes.** A finding whose fix would create or
+  rewrite content — cards, keywords, enemies, relics, maps, NPCs,
+  events, art, dialogue or flavor prose — is written to
+  `plan/AUDIT.md` with `next: file — content (D58)` and never
+  picked. Card and keyword findings also wait on THE CARD HOLD
+  (D37). Correcting a broken reference or a typo in existing UI
+  text is a fix, not content.
 - **Trivial fix → still ships through verify.**
 
 ## 4. The audit
@@ -65,7 +85,7 @@ score, but the cap at `10` still holds).
 
 ### Audit categories
 
-#### Z. External critique (highest priority when present)
+#### Z. External critique (`external-critique`, highest priority when present)
 
 `plan/CRITIQUE.md` `## Pending` is a finding source. Each row
 maps to category `external-critique`. Severity → impact:
@@ -73,50 +93,54 @@ HIGH 8–10, MED 5–7, LOW 2–4. Ease scored from suggested-fix
 complexity. When you ship a fix, **move row Pending → Done**
 in CRITIQUE.md with `[x]` + commit hash.
 
-#### A. Content gaps
+#### A. Content (`content`, file only)
 
-- Surfaces with insufficient content (e.g., pillars under
-  threshold).
-- Tags / categories with low representation.
-- Pages with thin word counts.
+- Gaps or faults whose fix is new or rewritten content (§3).
+  Record them so T sees them; never pick one.
 
-#### B. Spec divergence / contract drift
+#### B. Spec divergence / contract drift (`divergence`, `contract`)
 
-- Implementation diverging from `axiomancer-mechanics/specs/`.
-- Cross-package contracts (types, event shapes) drifting.
+- Implementation diverging from the revamp part plans
+  (`plan/revamp/`) or a live spec in `axiomancer-mechanics/specs/`.
+  Where they disagree the revamp plan wins; a spec marked
+  HISTORICAL is not a divergence source.
+- Cross-package contracts (types, event shapes) drifting between
+  the engine and the mobile app.
 
-#### C. Docs / debt
+#### C. Docs / debt (`docs`, `debt`)
 
 - Stale or missing docs; README drift.
 - Known debt: TODO clusters, dead code, duplicated logic.
 
-#### D. Navigation / flow gaps
+#### D. Navigation / flow gaps (`gap`)
 
 - Screens or routes unreachable or dead-ended in the
   running expo-web build.
 - References to content or encounters that don't exist.
 
-#### E. Accessibility
+#### E. Accessibility (`a11y`)
 
-- Missing `alt`, contrast failures, heading order, focus rings.
+- Touchables without `accessibilityLabel` / `accessibilityRole`,
+  contrast failures, touch targets too small to hit.
 
-#### F. Tests
+#### F. Tests (`tests`)
 
 - Components without colocated tests.
 - E2E spec gaps. Untested helpers.
 
-#### G. Performance
+#### G. Performance (`perf`)
 
-- Heavy images, unused CSS, bundle size regressions.
+- Heavy image assets, bundle size regressions, slow engine or
+  simulation paths, needless re-renders in the app.
 
 ### Scoring
 
-- Impact 0–10: how many players / screens / queries affected?
-- Ease 0–10: cheap fix = 9. New article = 4. Schema migration = 1.
+- Impact 0–10: how many players / screens / packages affected?
+- Ease 0–10: cheap fix = 9. New module = 4. Save migration = 1.
 - Score = `impact × ease / 10`, clamped 0–10.
 
-Top 1 finding wins. Tie-break: cascading findings, older
-findings, cheapest-to-ship.
+Top 1 non-`content` finding wins. Tie-break: cascading
+findings, older findings, cheapest-to-ship.
 
 ## 5. Procedure
 
@@ -198,6 +222,7 @@ EOF
 #    [HIGH] → high · [MED] → med · [LOW] → low
 # 3. Map row "source" field → helper flag.
 #    user → user · playtester → reader · audit/iterate → audit · external → external
+#    ("reader" is the helper's label for critique findings, not the archived agent.)
 # 4. Map row category → helper category.
 #    visual / voice / navigation / mobile / external-critique → enhancement
 #    content (copy/content gap) → content
@@ -239,14 +264,9 @@ separately — keep tick churn low.
 ### Step 3 — Delegate or implement
 
 Default delegation:
-- Content gaps → the `content-curator` sub-agent.
-- Card / keyword / balance findings → the `card-expert`
-  sub-agent (consult mode for analysis, implement mode for the
-  fix); a contested mechanic-design call → a `mechanics-expert`
-  consult. Both carry the `kb-query` + `axio-query` MCP tools,
-  so their verdicts arrive with prior-art and engine-fact
-  receipts instead of model memory.
-- Contract / divergence / debt / docs / a11y / tests → main agent.
+- Contract / divergence / debt / docs / gap / a11y / tests → main
+  agent. The `kb-query` and `axio-query` MCP tools are callable
+  directly when a fix needs prior art or an engine fact.
 - Performance → main agent; may delegate to `scout` for
   external benchmarking.
 
@@ -263,7 +283,8 @@ Iterate up to 3 times on same root cause.
 ### Step 5 — Commit
 
 Commit subject prefixes:
-- `content:` — game content, copy, dialogue edits.
+- `content:` — corrections to existing player-facing text (typos,
+  stale names). Never new content (D58).
 - `docs:` — documentation.
 - `fix:` — bug fixes, broken flows, regressions.
 - `a11y:` — accessibility.
@@ -354,16 +375,14 @@ Return cleanly. Loop's next tick re-audits.
    OPEN GATE, `plan/bearings.md`, 2026-08-28), file the call to
    AUDIT.md as `[loop-call]` with reasoning, and ship — or, if the
    evidence genuinely cannot support a call this tick, file the
-   `[loop-call]` with the leading option named and ship next.
-6. **No actionable iterate work** (top score < 3.0). Read
-   `plan/bearings.md` "Plan expansion posture":
-   - **bold** or **autonomous** posture → dispatch to
-     `/expand` instead of stopping. "Make things brilliant
-     when delivery is not." Log "no actionable iterate work
-     — handing to expand" and execute `skills/expand.md`
-     procedure end-to-end.
-   - **strict** posture → stop and report. Site is
-     well-iterated.
+   `[loop-call]` with the leading option named and ship next. A
+   call about content or card work is never the loop's: file it
+   (§3).
+6. **No actionable iterate work** (top non-`content` score
+   < 3.0). If `/expand` is due by `skills/march.md` → "Gates (the
+   one home)" → "Expand due", log "no actionable iterate work —
+   handing to expand" and execute `skills/expand.md` end-to-end.
+   Otherwise stop and report.
 7. **`git pull` divergence.**
 
 ## 7. Hard rules
@@ -371,8 +390,8 @@ Return cleanly. Loop's next tick re-audits.
 1. **One fix per tick.**
 2. **Verify gate must pass.** No `--no-verify`.
 3. **No emojis. No `Co-Authored-By:`.**
-4. **Don't write content yourself if a curator sub-agent
-   exists** — delegate.
+4. **No content.** Content findings are filed, never shipped
+   (§3, D58); card and keyword work waits on THE CARD HOLD (D37).
 5. **Don't audit blindly when work is queued.** If
    `plan/CRITIQUE.md` has Pending rows, prefer draining those
    over a fresh audit.
@@ -394,10 +413,7 @@ plan/CRITIQUE.md                         # external-critique queue
 plan/bearings.md                         # voice + standing decisions
 
 # Sub-agents
-Agent({ subagent_type: "content-curator", prompt: "..." })
-Agent({ subagent_type: "card-expert", prompt: "..." })      # card/keyword/balance findings
-Agent({ subagent_type: "mechanics-expert", prompt: "..." }) # mechanic-design second opinion
-Agent({ subagent_type: "scout", prompt: "..." })
+Agent({ subagent_type: "scout", prompt: "..." })            # web research
 
 # Verify + commit + push + deploy
 npm run verify

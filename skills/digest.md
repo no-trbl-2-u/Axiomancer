@@ -1,20 +1,33 @@
 # Skill: digest
 
 > **The night shift.** One tick a day: take the loop's pulse,
-> append the day's briefing as a stylized, self-contained
-> DevLog entry under `devlog/` (open it raw, via the repo's
-> HTML preview, or the private hosted DevLog), run the breadth
+> append the day's briefing as a Markdown DevLog entry under
+> `devlog/entries/` (committed; `npm run site:build` renders the
+> private HTML locally and `npm run site:public` builds the public
+> site, and both outputs are gitignored), run the breadth
 > checks too slow for the per-commit path, propose gate tunings
 > as candidates — never apply them. The instrument panel,
 > delivered instead of fetched. The live unified-loop bearings are
 > `plan/bearings.md`; the retired pre-monorepo `nexus/` tree is not authority.
+
+> **REVAMP MODE (D58, since 2026-09-28).** The loop ships only phases of the
+> ratified revamp build plan (`plan/steps/01_build_plan.md`; part plans in
+> `plan/revamp/`), plus `/fix-ci` and `/critique`. It creates no content of
+> any kind: cards, keywords, enemies, relics, maps, NPCs, events or art. THE
+> CARD HOLD (D37) stands: no card or keyword is made outside a guided session
+> with T. The content stewards, `/forge` and the `card-expert`,
+> `content-curator`, `mechanics-expert` and `reader` agents were archived in
+> R0; never route work to them.
+
+During the revamp the digest reports what the reset phases
+deleted and re-pointed; it never files new-content work.
 
 ## 1. Purpose
 
 The dispatcher's ticks are visible one at a time; nobody
 reads twenty run logs. This verb compresses a day of loop
 activity — shipped ticks, no-ops, crashes — into one
-committed, phone-readable DevLog entry, and owns the
+committed DevLog entry that renders phone-readable, and owns the
 O(everything) work that must never run per-commit.
 
 ## 2. Invocation
@@ -41,8 +54,9 @@ its own cadence.
    Plus queue states: build-plan `[ ]` / `[blocked:]` counts,
    `plan/AUDIT.md` pending, `plan/CRITIQUE.md` pending + last
    pass age, `plan/PHASE_CANDIDATES.md` pending, open
-   `triage:needs-user` / `loop:do` issues, deploy state
-   (`npm run deploy:check`).
+   `loop:do` issues, deploy state (`npm run deploy:check`).
+   Name the revamp phase in flight and the next one
+   (`plan/revamp/README.md` §7).
 3. **Breadth checks** (the night-only browser legs):
 
    ```bash
@@ -52,39 +66,12 @@ its own cadence.
    Failures become HIGH `plan/AUDIT.md` rows — the digest
    files them; the next dispatcher tick fixes them.
 
-3b. **Measurement freshness** (the balance-truth leg,
-    2026-07-17):
-
-    ```bash
-    npm run baseline:check
-    ```
-
-    - **Fresh** → one line in the `While you were out` panel
-      ("deck-matrix baseline fresh at `<commit>`").
-    - **Stale** (mechanics source moved past the stamp) →
-      re-measure with the REDUCED nightly pass, then re-check:
-
-      ```bash
-      npm run baseline:regen -- --runs=30 --confidence=reduced-nightly
-      ```
-
-      Commit the regenerated
-      `deck-matrix-baseline.json` with the digest (a
-      measurement is briefing, not shipping). Then READ the
-      new numbers as directional evidence. The former ten-preset
-      curve (early ~80 / mid ~50 / late 25-35 / impossible 0)
-      is historical after the Profane Canon; do not file current
-      three-snapshot results as violations of that retired charter.
-      Report CQI and terminal outcomes separately. The
-      transitional-library hold on tuning work is LIFTED (THE PIPELINE
-      LIBERATION, 2026-08-22 — `plan/bearings.md`): a measured
-      regression MAY be filed as an `/adjust-cards` candidate again.
-      **Measure and report only** — card/deck fixes stay with
-      `/adjust-cards`; engine-constant findings route to the tuning
-      loops too (THE OPEN GATE ¶4, 2026-08-28 — the manual-only
-      wall is lifted; §4.2-4.3 rails otherwise apply). A reduced pass is directionally honest,
-      not confirmation-grade: never cite it for close calls
-      without the full 3-seed `npm run baseline:regen`.
+   There is no nightly balance re-measure. The deck-matrix
+   baseline is retired until the retune (D57; R1 in
+   `plan/revamp/tooling.md` removes its scripts). Balance
+   evidence during the revamp comes from `/combat-playtest`
+   reports and R9's own measurement; the digest only links a
+   report that landed in the window.
 
 4. **Write today's DevLog entry** — create
    `devlog/entries/DIGEST_<YYYY-MM-DD>.md`. Never overwrite a
@@ -135,9 +122,10 @@ its own cadence.
        capture.
    - **Panels** — un-bracketed `##` sections rendered as-is:
      `While you were out` (pulse table: tick, verb, outcome —
-     no-ops included), `Needs you` (blocked rows, needs-user
-     issues, `[needs-user-call]`s), `Tuning proposals` (step 5,
-     or "none"). Add `Queues now` / `Today's intent` as useful.
+     no-ops included), `Needs you` (owner-led revamp rows
+     waiting on T, open `loop:do` issues, anything the loop
+     stopped on), `Tuning proposals` (step 5, or "none"). Add
+     `Queues now` / `Today's intent` as useful.
 
      **Panels are public by default. `Needs you` is the one
      exception** — the public build withholds it, because it is
@@ -283,8 +271,8 @@ its own cadence.
       dialogue, flavour, art swaps);
     - balance and number changes;
     - minor bug fixes;
-    - all loop-internal work: steward passes, critique and audit
-      passes, tooling, CI, docs, plans, and baseline re-measures.
+    - all loop-internal work: critique and audit passes,
+      tooling, CI, docs and plans.
 
     Held items are not lost. They are in the committed entries and
     appear on the site with the next publish.
@@ -329,9 +317,12 @@ its own cadence.
 
 1. Append a new `devlog/entries/DIGEST_<date>.md` each run;
    never overwrite a past day — the DevLog is a ledger. Run
-   `npm run site:build` so the committed HTML, hub, and the
-   Cards / Enemies / Effects catalog stay in sync with the
-   entries and the engine libraries.
+   `npm run site:build` to check the entry renders: the HTML,
+   hub and Cards / Enemies / Effects catalog it writes are
+   gitignored build output (`.gitignore`, phase 57) and are
+   never committed. The commit carries the Markdown entry, any
+   `devlog/assets/<date>/**` captures and, on a publish night,
+   the `devlog/PUBLISH` line.
 2. Ship nothing else — breadth failures become findings, not
    fixes. The night shift briefs; the dispatcher ships.
 2b. The entry is public. Every work item carries a substantive
@@ -372,9 +363,8 @@ its own cadence.
 devlog/entries/DIGEST_<date>.md      # the deliverable (append, never overwrite)
 devlog/PUBLISH                       # append ONLY for a major release / UI-QOL change / play-blocking fix (§3 5b) — the sole deploy trigger
 npm run devlog:shots -- <ref> <date> # collect UI before/after/diff (if screens changed)
-npm run site:build                   # catalog (export+render) + entry HTML + hub
-npm run baseline:check               # is the deck-matrix baseline stale?
-npm run baseline:regen -- --runs=30 --confidence=reduced-nightly  # the reduced re-measure
+npm run site:build                   # catalog (export+render) + entry HTML + hub (gitignored output)
+npm run site:public                  # the public build into dist/ (gitignored)
 plan/AUDIT.md                        # breadth failures land here
 plan/PHASE_CANDIDATES.md             # tuning proposals land here
 gh run list --workflow march -L 20   # the invisible no-ops

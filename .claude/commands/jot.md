@@ -2,6 +2,15 @@
 description: Drop a quick observation into plan/CRITIQUE.md so the next /iterate tick acts on it. The user-input quickfire — decide-and-ship in seconds, no questions back.
 ---
 
+> **REVAMP MODE (D58, since 2026-09-28).** The loop ships only phases of the
+> ratified revamp build plan (`plan/steps/01_build_plan.md`; part plans in
+> `plan/revamp/`), plus `/fix-ci` and `/critique`. It creates no content of
+> any kind: cards, keywords, enemies, relics, maps, NPCs, events or art. THE
+> CARD HOLD (D37) stands: no card or keyword is made outside a guided session
+> with T. The content stewards, `/forge` and the `card-expert`,
+> `content-curator`, `mechanics-expert` and `reader` agents were archived in
+> R0; never route work to them.
+
 You are invoked under the `jot` skill — full autonomy, no
 review checkpoint. Read `skills/jot.md` end to end before
 touching anything else; that file is the single source of
@@ -14,12 +23,11 @@ push, exit. Target end-to-end <10 seconds.
 
 Argument handling:
 - Free-text observation is the body. Required.
-- `--url <path>` → URL the user was on (default: `unspecified`).
+- `--url <path>` → route the user was on (default: `unspecified`).
 - `--severity high|med|low` → severity (default: `med`).
 - `--category <cat>` → explicit category override (default:
-  inferred from observation text per §4 heuristics).
-- `--authenticated` → mark `auth_state: authenticated`
-  (default: `anonymous`).
+  inferred from observation text per the skill's §2 Step 1
+  heuristics).
 
 Hard rules:
 - **Never ask questions back.** The user provided the input;
@@ -34,8 +42,8 @@ Hard rules:
 - **Commit subject is lowercase `jot:`** followed by a ≤70
   char summary.
 
-Procedure: §4 of `skills/jot.md`. Failure modes: §7. Hard
-rules: §6.
+Procedure: §2 of `skills/jot.md`. Hard rules: §3. Failure
+modes: §4.
 
 After the push, print one short confirmation line and exit.
 The next `/iterate` (or `/march`) tick will score the new

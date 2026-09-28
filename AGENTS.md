@@ -44,7 +44,8 @@ npm-workspaces monorepo. Three packages, flat at the root:
   answers are policy — file them durably and never re-ask. Autonomous
   loop skills never ask at all — `AskUserQuestion` is reserved for
   `/oversight` there (standing rule 6 below); they decide, document
-  the call, and log genuine user decisions as `[needs-user-call]`.
+  the call, and file load-bearing calls as `[loop-call]` residue for T to
+  audit afterwards (THE OPEN GATE retired `[needs-user-call]`).
 
 ### Cross-package impact checklist
 
@@ -277,7 +278,7 @@ them; update here first.
    work that produces direction beyond what it ships — decisions made,
    work discovered, design conclusions, side-findings — files that
    residue into the loop's queues before ending: buildable ideas to
-   `plan/PHASE_CANDIDATES.md`, findings and `[needs-user-call]`
+   `plan/PHASE_CANDIDATES.md`, findings and `[loop-call]`
    decisions to `plan/AUDIT.md`, committed work as build-plan phase
    rows, observable defects to `plan/CRITIQUE.md` (jot-row format).
    Direction that lives only in a conversation is invisible to the
