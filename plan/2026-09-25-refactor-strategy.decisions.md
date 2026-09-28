@@ -412,6 +412,35 @@ fixes wait for the card agent (D37).
 
 ## Open follow-ups
 
+**D1 status at a glance (2026-09-28, after #408).** Card and keyword
+creation are excluded here: a separate card agent owns them (D37).
+
+1. **Trim the fat — DONE.** T1–T6 merged (T6 = alignment, philosophy and
+   GRACE, `67fd0106`). Left: four `plan/AUDIT.md` debt rows, all
+   loop-drainable. They are the T2a finish list, the T2b dice-flag
+   content, the T5 Tier 2 docs rewrite, and the trim spec naming
+   `mechanics-expert` as a delete candidate.
+2. **Map spread — DONE.** M0–M5 merged, and the per-map canvas (M2) took
+   the backdrop-anchored renderer (D15) with it. Left: the Act 1
+   follow-through in `plan/PHASE_CANDIDATES.md` (score 7.0). It covers the
+   Act 1 shop, the kudan XP spike, fishing-village's breakwater lines and a
+   default-start reachability test. Old Marrow's unreachable `thanks` also
+   belongs here. The Act 1 people sessions are attended
+   (`[needs-user-call]`).
+3. **Damage scaling — DONE.** S3 (#404), then the purge P1 (#406), the
+   keyword audit (#407) and the residue (#408). Left: the post-purge
+   `plan/AUDIT.md` rows (the "+2/5%" wrap, the King of Revenge at 0/40,
+   WOUNDING with no payload, the Momentum tutorial on dormant colour).
+4. **Story-dependent revamp — NOT STARTED, blocked on the story.**
+   `content/story/story-overview.md` is still "drafting". The prologue
+   is ruled, but the journey after it and the open questions are
+   T's, in attended sessions. The non-card parts waiting on it are: map
+   progression past Act 1, enemy themes and rosters per map, narration
+   and dialogue, and the rows `plan/AUDIT.md` already holds for it (the
+   Drowned Parish opening, the legacy `boy-*` threads, the story systems the
+   rulings require, and the Act 1 people). The unblocking step is an
+   attended story session with T; nothing here is loop-shippable first.
+
 - Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and
   sequencing in `plan/2026-09-25-trim-the-fat.spec.md`. **T1–T4 merged
   2026-09-25** (T1 #369, T2a #370 + fix `e073bb6e`, T2a baselines #371,
