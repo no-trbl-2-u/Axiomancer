@@ -178,6 +178,59 @@ but never render in the inspect keyword panel.
 
 ---
 
+## Wiring a keyword (the full touch-set)
+
+Folded here from the retired `card-expert` agent and `/adjust-keywords` skill
+(R0, 2026-09-28). New keywords are made only in a guided card session with T
+(D37). This is the checklist such a session follows. A keyword that misses any
+step does not ship. R1 deletes the card editor (step 11) and R7 rewrites the
+card types, so re-read the paths after those phases land.
+
+1. Status piece: a new entry in `src/Effects/{buffs,debuffs}.library.json`.
+   Add a new `EffectPayload` field in `src/Effects/types.ts` if the payload
+   shape is new, handled in `src/Effects/index.ts` / `src/Combat/effects.ts`.
+2. Verb piece: a new `{ kind: 'foo'; … }` member on `CardSpecialMechanic`
+   (or a `CardRider` field) in `src/Cards/types.ts`.
+3. Runtime: `case 'foo':` in the `src/Combat/combat.engine.ts` mech switch.
+4. Display: `case 'foo':` in `src/Combat/combat.cards.ts`. Register it in
+   `PAYOFF_KINDS` if it is an affliction payoff.
+5. Pricing: the verb cost in `src/Cards/cards.pricing.ts`, so the sanity
+   lint can score it.
+6. Carriers: the cards using it in `src/Cards/cards.library.ts`.
+7. A hermetic e2e at `src/<Module>/e2e/<feature>.engine.test.ts`, with
+   deterministic RNG from `src/test-utils/rng.ts` and
+   `vi.restoreAllMocks()` in `afterEach`.
+8. Public-surface exports from `src/Cards/index.ts` if new types ship.
+9. A new card-facing effect id goes in `CARD_EFFECT_SET` in
+   `src/Effects/e2e/deprecated-effects.engine.test.ts`. New ids are banned
+   there by default until deliberately allowed.
+10. Mobile: the keyword registry and gloss in
+    `axiomancer-mobile/state/combat/keywords.ts` (a new UPPERCASE face word
+    needs a `KEYWORD_GLOSS` entry and the pinned glossary count bumped); the
+    headline mapping in `state/presenters/combat-encounter.engine.ts`
+    (`mechanicHeadline`, `MECH_HEADLINE_PRIORITY`); a glyph in
+    `components/combat/statusGlyphs.ts` / `glyphShapes.ts`. The glyph table is
+    hand-synced in three places: mobile `glyphShapes`, the editor's
+    `CardFace.tsx`, and `scripts/build-catalog.mjs`.
+11. Card editor (until R1 deletes it): `SPECIAL_MECHANIC_KINDS` in
+    `axiomancer-card-editor/src/data/mechanics.ts` and the un-contracted
+    `wx.ts` KEYWORDS list.
+12. Registries: a row in this atlas, and the naming registry
+    `docs/retheme-map.json` at the repo root (the NL-8 collision law).
+
+Two surfaces fail silently. The `combat.engine.ts` mech switch and
+`combat.cards.ts` `mechanicText` both have `default:` arms, so a kind that
+skips steps 3–4 type-checks clean while doing nothing and printing no face
+text. A library carrier plus the card-face-honesty guard is what catches the
+omission, so never ship a kind without a carrier.
+
+A keyword that extends a type union touches every consumer of `src/Cards/**`,
+`src/Effects/**`, `src/Combat/**` and `src/index.ts`. Run
+`npm run verify -w axiomancer-mobile` (and, until R1, the card editor's
+`npm run type-check`) before it ships.
+
+---
+
 ## Known drift (2026-09-02)
 
 Rows whose reminder text in `KEYWORD_GLOSS` still carries a pre-rewrite number,
