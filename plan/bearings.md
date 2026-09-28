@@ -777,9 +777,11 @@ ambiguity.)
 - **THE REVAMP (T, attended session 2026-09-28, D46–D64) — RATIFIED 2026-09-28.**
   `plan/revamp/README.md` is the main build plan; its §7 is the recommended
   order. `/march` and `night` stay disabled until Phase R0 (attended)
-  merges. The loop ships only ratified revamp phases (plus fix-ci and
-  critique) and **creates no content of any kind** — cards, keywords,
-  enemies, relics, maps, NPCs, events or art (D58). Where this contradicts
+  merges. The loop's phase work is only ratified revamp phases; `/march`
+  keeps the upstream chain (triage → critique → phase → expand → iterate),
+  and nothing in it **creates content of any kind** — cards, keywords,
+  enemies, relics, maps, NPCs, events or art (D58). Revamp mode ends when
+  Phase R11 (the loop's content phases, attended) ships. Where this contradicts
   older standing text in this file (THE UNSHACKLING, open keyword growth,
   steward rotation), D58 wins; R0 has reconciled the text with dated
   SUPERSEDED notes on each of those entries.

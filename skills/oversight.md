@@ -1,13 +1,15 @@
 # Skill: oversight
 
-> **REVAMP MODE (D58, since 2026-09-28).** The loop ships only phases of the
-> ratified revamp build plan (`plan/steps/01_build_plan.md`; part plans in
-> `plan/revamp/`), plus `/fix-ci` and `/critique`. It creates no content of
-> any kind: cards, keywords, enemies, relics, maps, NPCs, events or art. THE
-> CARD HOLD (D37) stands: no card or keyword is made outside a guided session
-> with T. The content stewards, `/forge` and the `card-expert`,
-> `content-curator`, `mechanics-expert` and `reader` agents were archived in
-> R0; never route work to them.
+> **REVAMP MODE (D58, since 2026-09-28; ends when Phase R11 ships).** The
+> loop's phase work is only the ratified revamp build plan
+> (`plan/steps/01_build_plan.md`; part plans in `plan/revamp/`). It creates
+> no content of any kind: cards, keywords, enemies, relics, maps, NPCs, events
+> or art. `/iterate` and `/expand` still run when no phase is ready, under the
+> same no-content rule. THE CARD HOLD (D37) stands: no card or keyword is made
+> outside a guided session with T. The content stewards, `/forge` and the
+> `card-expert`, `content-curator`, `mechanics-expert` and `reader` agents
+> were archived in R0; never route work to them. R11 revisits the loop to
+> bring content phases back.
 
 > **The user-in-the-loop command.** Pause autonomy. Brief the
 > user on current state. Ask targeted questions. Adjust the

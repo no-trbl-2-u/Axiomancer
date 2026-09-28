@@ -83,6 +83,7 @@ starts it.
 | R8 | Mobile cleanup: dead flows and glosses, grey card art, app label, VITAE/shillings copy | loop | R7 | mobile.md |
 | R9 | Progression retune: XP curve for Act 1 on the 3 survivors | loop | R3, R7 | progression.md |
 | R10 | Theme colours: move surviving hard-coded hex colours into named `theme/axm.ts` tokens (no visual change) | loop | R8 | mobile.md |
+| R11 | Loop content phases: revisit the loop so content creation comes back as planned phases; ends revamp mode | attended | R10 | loop.md |
 | B1 | The relic pass: new relics and real signatures | owner | R4 | relics.md |
 | B2 | Enemy revamp: four tiers (normal, elite, region boss, **act boss**), roster regrowth, keywords with counters | owner | R9 | enemies.md |
 | B3 | Hazard mechanics redesign | owner | R6 | hazards.md |
@@ -149,6 +150,7 @@ T walked the agent defaults one at a time the same day. None remain open.
 | 10 | **R8** Mobile cleanup | Consumes R7's final exports |
 | 11 | **R9** Progression retune | Needs Act 1 and the engine final; its XP numbers feed B2 |
 | 12 | **R10** Theme colours | Last: R8 has already deleted about half the literals |
+| 13 | **R11** Loop content phases (attended) | Closes the revamp: decides how the loop creates content again, as phases, now that the core is rebuilt; ends revamp mode (D58) |
 
 ### Rebuild track (T's sessions, alongside the reset when ready)
 

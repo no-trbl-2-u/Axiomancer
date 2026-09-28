@@ -5,14 +5,16 @@
 > loop. Drains queues from `/critique` and `/triage` alongside
 > its own audit.
 
-> **REVAMP MODE (D58, since 2026-09-28).** The loop ships only phases of the
-> ratified revamp build plan (`plan/steps/01_build_plan.md`; part plans in
-> `plan/revamp/`), plus `/fix-ci` and `/critique`. It creates no content of
-> any kind: cards, keywords, enemies, relics, maps, NPCs, events or art. THE
-> CARD HOLD (D37) stands: no card or keyword is made outside a guided session
-> with T. The content stewards, `/forge` and the `card-expert`,
-> `content-curator`, `mechanics-expert` and `reader` agents were archived in
-> R0; never route work to them.
+> **REVAMP MODE (D58, since 2026-09-28; ends when Phase R11 ships).** The
+> loop's phase work is only the ratified revamp build plan
+> (`plan/steps/01_build_plan.md`; part plans in `plan/revamp/`). It creates
+> no content of any kind: cards, keywords, enemies, relics, maps, NPCs, events
+> or art. `/iterate` and `/expand` still run when no phase is ready, under the
+> same no-content rule. THE CARD HOLD (D37) stands: no card or keyword is made
+> outside a guided session with T. The content stewards, `/forge` and the
+> `card-expert`, `content-curator`, `mechanics-expert` and `reader` agents
+> were archived in R0; never route work to them. R11 revisits the loop to
+> bring content phases back.
 
 ## 1. Purpose
 
@@ -21,8 +23,8 @@ docs, tests, accessibility, performance. It fills nothing in —
 new content is T's (D58), so a finding whose fix would be
 content is **filed, not shipped** (§3).
 
-In revamp mode `/march` does not dispatch `/iterate`; T runs it
-by hand. The procedure is unchanged.
+`/march` dispatches `/iterate` as its default step when nothing
+else is due (`skills/march.md` §4 Step 5).
 
 ## 2. Invocation
 
@@ -379,10 +381,12 @@ Return cleanly. Loop's next tick re-audits.
    call about content or card work is never the loop's: file it
    (§3).
 6. **No actionable iterate work** (top non-`content` score
-   < 3.0). If `/expand` is due by `skills/march.md` → "Gates (the
-   one home)" → "Expand due", log "no actionable iterate work —
-   handing to expand" and execute `skills/expand.md` end-to-end.
-   Otherwise stop and report.
+   < 3.0). Read `plan/bearings.md` "Plan expansion posture":
+   - **bold** posture → dispatch to `/expand` instead of
+     stopping. "Make things brilliant when delivery is not."
+     Log "no actionable iterate work — handing to expand" and
+     execute `skills/expand.md` procedure end-to-end.
+   - **strict** posture → stop and report.
 7. **`git pull` divergence.**
 
 ## 7. Hard rules

@@ -204,10 +204,11 @@ The unified **nexus** harness was re-onboarded onto the monorepo on
   `critique`, `triage`, `expand`, `march`, `oversight`, `jot`, `digest`,
   `consolidate`, `fix-ci`. (Heavyweight source-of-truth files; the
   `.claude/commands/<verb>.md` pointers are the doorways.) **Revamp mode**
-  (D58, since 2026-09-28): the loop ships only phases of the ratified revamp
-  build plan (`plan/steps/01_build_plan.md`, `plan/revamp/`), plus fix-ci and
-  critique. It creates no content of any kind: cards, keywords, enemies,
-  relics, maps, NPCs, events or art.
+  (D58, since 2026-09-28, ends when Phase R11 ships): the loop's phase work is
+  only the ratified revamp build plan (`plan/steps/01_build_plan.md`,
+  `plan/revamp/`); `/march` keeps the upstream chain (triage → critique →
+  phase → expand → iterate). It creates no content of any kind: cards,
+  keywords, enemies, relics, maps, NPCs, events or art.
 - `plan/` — the loop's durable memory: `bearings.md` (standing context —
   **read this first**), `steps/01_build_plan.md` (the phase queue),
   `AUDIT.md` + `CRITIQUE.md` (the drain queues), `PHASE_CANDIDATES.md`,

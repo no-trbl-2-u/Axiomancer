@@ -1,8 +1,8 @@
 name: march
 
-# The autonomous-beast tick: /march dispatches fix-ci → triage → critique →
-# ship-a-phase and executes one tick end-to-end (see skills/march.md; in
-# revamp mode, D58, it ships only ratified revamp phases). Scheduled every 2 hours (raised from every 6 hours at
+# The autonomous-beast tick: /march dispatches triage → critique →
+# ship-a-phase → expand → iterate and executes one tick end-to-end (see
+# skills/march.md; in revamp mode, D58, phases are revamp phases only). Scheduled every 2 hours (raised from every 6 hours at
 # T's request on 2026-09-01; reason not stated); adjust or delete the cron
 # to retune, or run it by hand from the Actions tab. Ticks share
 # the nexus-loop concurrency group, so a long tick makes the next one
@@ -61,6 +61,6 @@ jobs:
       # pending phases. Grant Playwright so a march-dispatched critique runs.
       install_playwright: true
       # Pinned to Opus 5.5: /march runs every sub-skill it dispatches
-      # (fix-ci, triage, critique, ship-a-phase) inside this one session,
+      # (triage, critique, ship-a-phase, expand, iterate) inside this one session,
       # so this pin is what sets the model for the whole tick.
       model: 'claude-opus-5-5'

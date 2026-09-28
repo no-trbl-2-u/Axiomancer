@@ -4,14 +4,16 @@
 > of the shipping skills. Designed for `/loop` and the `march`
 > workflow.
 
-> **REVAMP MODE (D58, since 2026-09-28).** The loop ships only phases of the
-> ratified revamp build plan (`plan/steps/01_build_plan.md`; part plans in
-> `plan/revamp/`), plus `/fix-ci` and `/critique`. It creates no content of
-> any kind: cards, keywords, enemies, relics, maps, NPCs, events or art. THE
-> CARD HOLD (D37) stands: no card or keyword is made outside a guided session
-> with T. The content stewards, `/forge` and the `card-expert`,
-> `content-curator`, `mechanics-expert` and `reader` agents were archived in
-> R0; never route work to them.
+> **REVAMP MODE (D58, since 2026-09-28; ends when Phase R11 ships).** The
+> loop's phase work is only the ratified revamp build plan
+> (`plan/steps/01_build_plan.md`; part plans in `plan/revamp/`). It creates
+> no content of any kind: cards, keywords, enemies, relics, maps, NPCs, events
+> or art. `/iterate` and `/expand` still run when no phase is ready, under the
+> same no-content rule. THE CARD HOLD (D37) stands: no card or keyword is made
+> outside a guided session with T. The content stewards, `/forge` and the
+> `card-expert`, `content-curator`, `mechanics-expert` and `reader` agents
+> were archived in R0; never route work to them. R11 revisits the loop to
+> bring content phases back.
 
 ## 1. Purpose
 
@@ -19,30 +21,34 @@
 mode the chain is:
 
 ```
-red main (a verify-* run failed)   →  /fix-ci
-ELSE unlabeled or loop:do issues   →  /triage
+unlabeled or loop:do issues        →  /triage
 ELSE critique due (rate-limited)   →  /critique
-ELSE next pickable revamp phase    →  /ship-a-phase
-ELSE                               →  stop and report
+ELSE next pickable phase           →  /ship-a-phase
+ELSE expand due + bold posture     →  /expand
+ELSE                               →  /iterate
 ```
 
 First match wins. Every "due" and "pickable" test lives in §3,
 the one home for gate logic; other verbs point here rather than
 repeating it.
 
-What was cut, and why (THE REVAMP, D58):
+This is the upstream nexus chain (`daretodave/nexus`
+`templates/skills/march.md`) minus its `/ship-data` step, which this
+project never adopted. Red `main` is not a march step: the
+`ci-autofix` workflow runs `/fix-ci` on its own the moment a
+`verify-*` run fails on `main`.
+
+What revamp mode changes (THE REVAMP, D58), and nothing more:
 
 - **No content lifecycle and no growth step.** The `adjust-*`
-  stewards and `/forge` are archived; there is no per-category
-  ledger and no growth floor.
-- **No `/iterate` or `/expand` fallthrough.** `/march` ships only
-  revamp phases plus fix-ci and critique. When nothing is pickable
-  it stops and says why; it does not look for other work. Both
-  verbs stay whole for T to run by hand, and §3's expand gate
-  still governs `/iterate`'s hand-off to `/expand`.
-- **Triage stays.** It only labels, comments on and routes issues
-  into the plan queues. It ships nothing and cannot create
-  content, and it keeps the owner's `loop:do` lane answered.
+  stewards, `/forge`, the per-category ledger and the growth floor
+  are archived.
+- **Phase picking is revamp-aware.** Only ratified revamp rows are
+  pickable, in order, and only once their `Requires` are done (§3).
+- **`/expand` and `/iterate` create nothing.** They still run on
+  their normal turns; their own skills carry the no-content rule.
+- **When revamp mode ends** (Phase R11 ships), R11 decides how
+  content phases come back; the chain above does not change.
 
 ## 2. Invocation
 
@@ -62,18 +68,6 @@ here. `skills/critique.md`, `skills/expand.md` and
 installed or `GH_TOKEN` is missing, a `gh`-based gate reads as
 "not met": log a warning and fall through. **Don't fail the
 march** on a missing token.
-
-### Red main
-
-```bash
-gh run list --repo "$GH_REPO" --branch main --limit 30 \
-  --json databaseId,workflowName,status,conclusion,headSha
-```
-
-Main is **red** when the most recent *completed* run of any
-`verify-*` workflow on `main` concluded `failure`. A newer green
-run of the same workflow clears an older red one. Runs still in
-progress don't count either way.
 
 ### Critique due
 
@@ -95,10 +89,9 @@ Due when **all three** hold:
 
 ### Expand due
 
-`/march` does not dispatch `/expand` in revamp mode. This gate
-decides whether `/iterate` hands an empty tick to `/expand`
-(`skills/iterate.md` §6, failure mode 6) and whether a
-hand-run `/expand` has anything to do.
+Decides whether `/march` dispatches `/expand` (§4 Step 4) and
+whether `/iterate` hands an empty tick to `/expand`
+(`skills/iterate.md` §6, failure mode 6).
 
 Read `plan/bearings.md` → "Plan expansion posture", then the
 metadata header at the top of `plan/PHASE_CANDIDATES.md` (same
@@ -121,8 +114,9 @@ Open `plan/steps/01_build_plan.md` → "Status (at-a-glance)". The
 next pickable phase is the **first** `[ ]` row, in file order,
 that:
 
-1. sits in THE REVAMP block (a `[ ]` row anywhere else is not
-   ratified revamp work: report it, don't ship it);
+1. while revamp mode holds, sits in THE REVAMP block (a `[ ]` row
+   anywhere else is not ratified revamp work: report it, don't
+   ship it);
 2. is not marked **attended** (R0) — attended phases are shipped
    in a session with T;
 3. has every phase named in its `Requires …` clause ticked `[x]`
@@ -147,17 +141,7 @@ GH_REPO=${GH_REPO:-no-trbl-2-u/Axiomancer}
 
 If divergence, stop per §6.
 
-### Step 1 — Red main?
-
-Check §3 "Red main". If main is red:
-
-- Read `skills/fix-ci.md`.
-- Execute its procedure end-to-end on the failing run.
-- Return.
-
-Otherwise fall through to Step 2.
-
-### Step 2 — Triage (cheapest check)
+### Step 1 — Triage (cheapest check)
 
 Count unlabeled open issues:
 
@@ -178,9 +162,9 @@ If `urgent > 0` or `unlabeled > 0`:
 - Execute its procedure end-to-end.
 - Return.
 
-Otherwise fall through to Step 3.
+Otherwise fall through to Step 2.
 
-### Step 3 — Critique due?
+### Step 2 — Critique due?
 
 Check §3 "Critique due". If due:
 
@@ -188,9 +172,9 @@ Check §3 "Critique due". If due:
 - Execute its procedure end-to-end.
 - Return.
 
-Otherwise fall through to Step 4.
+Otherwise fall through to Step 3.
 
-### Step 4 — Next revamp phase
+### Step 3 — Next phase
 
 Find the next pickable phase per §3 "Pickable phase". If there
 is one:
@@ -201,18 +185,26 @@ is one:
   (ship-a-phase does this itself).
 - Return.
 
-### Step 5 — Nothing pickable: stop and report
+Otherwise, if a `[ ]` row exists but none is pickable, note in
+the tick's output which row is waiting and why (attended,
+`Requires` unmet, owner-led, outside THE REVAMP block), then fall
+through to Step 4.
 
-Make no commit. Print a short report:
+### Step 4 — Expand due?
 
-- the first `[ ]` row that was not pickable and the reason
-  (attended, `Requires` unmet, outside THE REVAMP block);
-- the owner-led rows now unblocked by their `Requires` (they wait
-  for T);
-- any `[ ]` row outside THE REVAMP block.
+Check §3 "Expand due". If due:
 
-Do not fall through to `/iterate`, `/expand` or any other verb.
-Return cleanly; the next tick re-checks.
+- Read `skills/expand.md`.
+- Execute its procedure end-to-end.
+- Return.
+
+Otherwise fall through to Step 5.
+
+### Step 5 — Iterate (default)
+
+- Read `skills/iterate.md`.
+- Execute its procedure end-to-end.
+- Return.
 
 ## 5. Hand-off honesty
 
@@ -242,14 +234,17 @@ plan/CRITIQUE.md                     # critique queue + last-pass metadata
 plan/PHASE_CANDIDATES.md             # expand last-pass metadata (§3 expand gate)
 
 # External signals
-gh run list --branch main ...        # red-main check
 gh issue list ...                    # unlabeled / loop:do count
 npm run deploy:check                 # green-deploy condition
 
 # Skills it dispatches into
-skills/fix-ci.md                     # Step 1 (red main)
-skills/triage.md                     # Step 2 (cheapest)
-skills/critique.md                   # Step 3 (rate-limited)
-skills/ship-a-phase.md               # Step 4 (next revamp phase)
+skills/triage.md                     # Step 1 (cheapest)
+skills/critique.md                   # Step 2 (rate-limited)
+skills/ship-a-phase.md               # Step 3 (next pickable phase)
 skills/plan-a-phase.md               # brief format, used by ship-a-phase
+skills/expand.md                     # Step 4 (rate-limited, posture-gated)
+skills/iterate.md                    # Step 5 (default)
+
+# Not a march step
+skills/fix-ci.md                     # run by the ci-autofix workflow on red main
 ```

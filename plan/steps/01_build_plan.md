@@ -132,6 +132,7 @@ event-pool and layout files).
 - [blocked: owner-led — T's session 2026-09-28] Phase B7 — Deck tab UI revamp. `plan/revamp/mobile.md`. Requires R8.
 - [blocked: owner-led — T's session 2026-09-28] Phase B8 — Card art revamp. `plan/revamp/mobile.md`. Requires R8.
 - [blocked: owner-led — T's session 2026-09-28] Phase B9 — Labyrinth re-theme. `plan/revamp/labyrinth.md`. Requires B2.
+- [ ] Phase R11 — Loop content phases (attended): revisit the loop so content creation returns as planned build-plan phases, decide per surface what the loop may create, review the R0 archive and zero-invocation verbs, and remove the revamp-mode banner (ends revamp mode, D58). `plan/revamp/loop.md`. Requires R10.
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics (9180fa5d)
