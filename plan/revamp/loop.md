@@ -22,6 +22,10 @@ T, 2026-09-28:
   and `/expand` run on their normal turns and create nothing. Red `main`
   stays with the `ci-autofix` workflow, not a march step. Revamp mode ends
   when Phase R11 (the loop's content phases) ships.
+- **Also in the R0 session (T):** `/combat-playtest` is archived (command
+  and workflow, to `plan/archive/2026-09-28-revamp-r0/`); Phase R12
+  writes a new one after R11. The engine's matrix CLI
+  (`npm run combat-playtest`) stays.
 
 Telemetry note: the hook (`.claude/hooks/telemetry.mjs:232-258`) counts only
 `Skill`/`SlashCommand` calls, so verbs `/march` dispatches by reading
@@ -138,6 +142,23 @@ because it edits `.claude/**` and sets doctrine.
 
 Requires R10 (the reset track done). Card work still follows THE CARD HOLD
 and whatever card plan T picked.
+
+## R12 — New combat-playtest (attended)
+
+Added in the R0 session (T, 2026-09-28), which archived the old
+`/combat-playtest` command and workflow. Write a new command (and, if
+wanted, a workflow) for the rebuilt game:
+
+- Decide what it measures: whether stat growth tracks the Act 1 curve,
+  whether each survivor is winnable and still dangerous, and the player's
+  lowest VITAE per fight (the old matrix never recorded it).
+- Build on the engine matrix CLI (`npm run combat-playtest`,
+  `src/Combat/combat.playtest.ts`) and the `playtester` agent; re-point the
+  stage profiles to Act 1 levels if R9 has not.
+- Findings go to `plan/AUDIT.md`; it stays report-only.
+
+The archived rewrite (`plan/archive/2026-09-28-revamp-r0/.claude/commands/combat-playtest.md`)
+is a starting draft, not a spec. Requires R9, R11.
 
 ### Exit
 

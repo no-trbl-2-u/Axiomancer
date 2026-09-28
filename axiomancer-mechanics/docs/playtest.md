@@ -6,7 +6,8 @@
 > effects are the EFFICIENT path to dropping it — the harness exists to keep
 > that true at every stage of the campaign.
 >
-> Loops that consume this: `/combat-playtest` (evidence, report only).
+> Loops that consume this: none until Phase R12 writes a new combat-playtest
+> command (the old one was archived in R0).
 > Card changes happen only in guided sessions with T (D37). Engine constants
 > are tuned manually against this harness's evidence.
 

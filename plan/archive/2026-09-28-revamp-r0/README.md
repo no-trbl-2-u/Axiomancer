@@ -13,6 +13,7 @@ guidance.
 | `.claude/agents/mechanics-expert.md` | Built on the retired Heart/Body/Mind and fallacy doctrine. |
 | `.claude/agents/reader.md` | A website auditor. There is no site (`Auth: none`). |
 | `.claude/agents/content-curator.md` | Writes content the loop may no longer create. `scripts/check-prose.mjs` still cites its voice constitution from here. |
+| `.claude/commands/combat-playtest.md` + `.github/workflows/combat-playtest.yml` | Removed by T in the R0 session; Phase R12 writes a new one. This copy is the R0 rewrite, a starting draft. |
 | `.claude/skills/{brainstorm-mechanics,character-spec,story-spec,world-spec,kb-query}/` | The RPS / fallacy / moral-meter identity, mostly shared text, wrong output paths. The `kb-query` MCP tools stay callable directly. |
 
 Folded out before archiving: the 12-step keyword wiring checklist now lives in

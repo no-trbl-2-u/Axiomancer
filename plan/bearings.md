@@ -220,14 +220,14 @@ Axiomancer/
 ├── scripts/                    # deploy-check · notify · loop-issue · check-* lints · devlog/catalog builders
 ├── .github/workflows/          # verify-* gates · march/night/triage crons · verb workflows
 ├── .claude/
-│   ├── commands/               # loop-verb pointers + combat-playtest
+│   ├── commands/               # loop-verb pointers
 │   ├── agents/                 # scout · playtester
 │   ├── hooks/                  # guard.mjs · telemetry.mjs
 │   └── settings.json           # enforcement, always on
 ```
 
 Loop verbs live in root `skills/`; `.claude/commands/` holds their doorways
-and the one domain command (`combat-playtest`). The content stewards, the
+(the `combat-playtest` command was archived in R0; R12 rebuilds it). The content stewards, the
 design skills and four agents were archived in R0 (2026-09-28, D58) to
 `plan/archive/2026-09-28-revamp-r0/`.
 

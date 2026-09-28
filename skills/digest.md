@@ -71,8 +71,8 @@ its own cadence.
    There is no nightly balance re-measure. The deck-matrix
    baseline is retired until the retune (D57; R1 in
    `plan/revamp/tooling.md` removes its scripts). Balance
-   evidence during the revamp comes from `/combat-playtest`
-   reports and R9's own measurement; the digest only links a
+   evidence during the revamp comes from R9's own measurement
+   (and, after R12, the new combat-playtest's reports); the digest only links a
    report that landed in the window.
 
 4. **Write today's DevLog entry** — create

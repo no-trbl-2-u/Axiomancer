@@ -89,10 +89,7 @@ classifier, or unknown-history changes fail closed to every journey. Run the
 consumer gates locally anyway — CI catching a break means it already reached
 `main`.
 
-The
-mechanics-only tuning command (`combat-playtest`) carries a closing step
-that references this checklist rather than re-deriving it — update it here
-first if the mechanics subsystem list changes. `rest-tuning` was
+`rest-tuning` was
 retired in Phase 52e, `quest-board-tuning` in Phase 61,
 `gathering-tuning` in Phase 76, and `loot-cache-tuning` in Phase 63,
 each along with the minigame it tuned. `deck-tuning`, `hazard-tuning`,
@@ -100,18 +97,18 @@ each along with the minigame it tuned. `deck-tuning`, `hazard-tuning`,
 `hermes-playtest` and `dep-upgrades` were retired in trim T5 (2026-09-25,
 decision D10) with zero invocations in six weeks; they are to be rebuilt
 once the mechanics settle (after the D4 stat hooks and the card rework).
-The playtest matrix stays as `npm run combat-playtest -w axiomancer-mechanics`.
+The `/combat-playtest` command was archived in R0 (2026-09-28); Phase R12
+writes a new one. The playtest matrix stays as
+`npm run combat-playtest -w axiomancer-mechanics`.
 
 ## Root `.claude/`
 
 Live, at the repo root:
-- `.claude/commands/` — domain **slash commands**: mechanics
-  `combat-playtest` (the stage matrix plus `playtester` agents). Each is
-  self-contained and carries a header naming the package it runs against (paths
-  are package-relative — `cd` there or use `-w`). `combat-tuning`,
-  `legacy-combat-tuning`, `playtest`, `resolve-playtest`, and `bump-engine`
-  (npm-pin-era engine bumps, retired with the monorepo merge) were trimmed,
-  and the eight tuning/playtest commands above went in trim T5 (D10).
+- `.claude/commands/` — the loop verbs' doorways only. No domain command is
+  live: `combat-tuning`, `legacy-combat-tuning`, `playtest`,
+  `resolve-playtest` and `bump-engine` were trimmed earlier, the eight
+  tuning/playtest commands above went in trim T5 (D10), and `combat-playtest`
+  was archived in R0 (Phase R12 rebuilds it).
 - `.claude/agents/` — `scout` (web research with citations) and
   `playtester` (plays seeded encounters via Playwright, report only).
 
@@ -243,9 +240,8 @@ harness and warn on unclean turn-ends. Personal overrides go in
 Self-test the guard any time with
 `node .claude/hooks/guard.mjs self-test`.
 
-Distinct from the domain playtest command in `.claude/commands/`
-(`combat-playtest`) — the loop verbs are a separate layer. Do not merge the
-two.
+Domain commands (none live until R12's new combat-playtest) are a separate
+layer from the loop verbs. Do not merge the two.
 
 ## Nexus standing rules (canonical)
 

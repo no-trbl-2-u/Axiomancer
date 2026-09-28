@@ -44,7 +44,6 @@ Two layers live here:
 | `triage.yml` | `/triage` | manual only (per-issue `issues:` trigger removed 2026-08) | Manual pass on a specific issue; march's triage gate is the standing sweep. |
 | `ci-autofix.yml` | `/fix-ci` | `verify-*` failure on `main` + manual | Red-main first responder. Pushes the fix to `main`. Its own job-level `ci-autofix` concurrency group (R0): skipped runs never queue, so they cannot displace a real one. |
 | `iterate.yml`, `critique.yml`, `expand.yml`, `ship-a-phase.yml`, `plan-a-phase.yml` | same-named | manual only | Direct dispatch = force one run. March dispatches these on its own. `iterate.yml` pins Opus 5.5. |
-| `combat-playtest.yml` | `/combat-playtest` | manual (monthly cron disabled 2026-07-08) | Report-only findings (stat growth vs the stage curve; are the three survivors winnable and dangerous), branch + PR. |
 | `claude.yml` | — | `@claude` mention in issues/PRs | Interactive responder. |
 
 Skills that need a human in the loop (`/oversight`, `/jot`) deliberately
