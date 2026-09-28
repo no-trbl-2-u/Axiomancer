@@ -972,12 +972,14 @@ describe('selectEventViewModel: NPC dialogue without alignment gates (D39)', () 
 
         expect(descriptions).toContain('Tell me how you deal fair.');
         expect(descriptions).toContain("What's the quickest coin to be made here?");
-        expect(descriptions).toContain(
+        // The observer read-back went with the observer cache (adjust-npcs
+        // pass 21): nothing can make "you deal differently now" true.
+        expect(descriptions).not.toContain(
             "(The captain's eyes narrow. He sees how you deal differently now.)",
         );
         // The one remaining gate is the `marrow_pressed` flag read-back.
         expect(descriptions).not.toContain("(Blackwater's eyes flick to you a beat too long.)");
-        expect(vm.choices).toHaveLength(5);
+        expect(vm.choices).toHaveLength(4);
     });
 
     it('clicking a choice fires the branch at its RAW node.choices index', () => {

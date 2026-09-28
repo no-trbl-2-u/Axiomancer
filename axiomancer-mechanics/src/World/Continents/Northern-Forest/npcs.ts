@@ -26,10 +26,6 @@ const shrineKeeperTree: DialogueTree = {
                     text: "Leave quietly.",
                     nextNodeId: undefined,
                 },
-                {
-                    text: "(The Keeper's eyes catch on you. Something in you has changed.)",
-                    nextNodeId: 'observer_transformation',
-                },
             ],
         },
         patterns: {
@@ -95,10 +91,6 @@ const shrineKeeperTree: DialogueTree = {
             id: 'dismiss_mysticism',
             text: "“Doubt doesn't erase a groove already worn. The stone doesn't care what you believe.”",
         },
-        observer_transformation: {
-            id: 'observer_transformation',
-            text: "“You've changed since we last spoke. The stone will wear a new mark for it.”",
-        },
     },
 };
 
@@ -136,10 +128,6 @@ const chroniclerTree: DialogueTree = {
                 {
                     text: "Move along without disturbing their work.",
                     nextNodeId: undefined,
-                },
-                {
-                    text: "(The Chronicler looks up. Something about you reads differently now.)",
-                    nextNodeId: 'scholar_observation',
                 },
             ],
         },
@@ -203,10 +191,6 @@ const chroniclerTree: DialogueTree = {
             id: 'documented_travels',
             text: "“Good. Dated entries are worth more than memory. Bring me the gaps you've filled.”",
         },
-        scholar_observation: {
-            id: 'scholar_observation',
-            text: "“You've changed your position since we last spoke. I'll want the reasons, not just the result.”",
-        },
     },
 };
 
@@ -241,10 +225,6 @@ const wanderingPhilosopherTree: DialogueTree = {
                 {
                     text: "I've no patience for philosophical rambling.",
                     nextNodeId: 'impatient_response',
-                },
-                {
-                    text: "(The Philosopher looks up — something about you has changed.)",
-                    nextNodeId: 'philosophical_recognition',
                 },
             ],
         },
@@ -328,10 +308,6 @@ const wanderingPhilosopherTree: DialogueTree = {
         tree_wisdom: {
             id: 'tree_wisdom',
             text: "“Patience, mostly. Roots share water underground long before either tree needs it. They rest on schedule, not on fear.”",
-        },
-        philosophical_recognition: {
-            id: 'philosophical_recognition',
-            text: "“You've changed your footing since we last talked. Good. Stillness was never the point.”",
         },
     },
 };

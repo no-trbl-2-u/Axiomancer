@@ -135,21 +135,22 @@ describe('World/Continents Engine Tests', () => {
       expect(captainBlackwater.dialogueTree!.id).toBe('captain-blackwater');
       
       const greetNode = captainBlackwater.dialogueTree!.nodes['greet'];
-      expect(greetNode.choices!).toHaveLength(6); // +1 Phase 53e marrow_pressed read-back
+      expect(greetNode.choices!).toHaveLength(5); // +1 Phase 53e marrow_pressed read-back, -1 retired observer read-back (D39)
       
       // Formerly alignment-gated (ungated by T6 / D39): fair trade choice
       const fairTradeChoice = greetNode.choices!.find(c => c.text.includes('how you deal fair'));
       expect(fairTradeChoice).toBeDefined();
     });
 
-    it("Fisherman's Daughter has mentorship-themed dialogue with growth recognition", () => {
+    it("Fisherman's Daughter has mentorship-themed dialogue", () => {
       expect(fishermansDaughter.name).toBe("Fisherman's Daughter");
       expect(fishermansDaughter.dialogueTree!.id).toBe('fishermans-daughter');
       
       const greetNode = fishermansDaughter.dialogueTree!.nodes['greet'];
       
-      // The growth-recognition branch is ungated now (T6 / D39).
-      expect(greetNode.choices!.some(c => c.nextNodeId === 'growth_recognition')).toBe(true);
+      // The growth-recognition read-back went with the observer cache (D39).
+      expect(greetNode.choices!.some(c => c.nextNodeId === 'growth_recognition')).toBe(false);
+      expect(greetNode.choices!.some(c => c.nextNodeId === 'bright_observation')).toBe(true);
     });
 
     it('Village Healer has medical ethics dilemmas with resource constraints', () => {
@@ -398,5 +399,24 @@ describe('World/Continents Engine Tests', () => {
       }
     });
 
+  });
+
+  // adjust-npcs pass 21 — T6 (D39) deleted the observer cache that let six
+  // NPCs notice "you have changed since we last spoke", but left the replies
+  // ungated, so a first meeting offered them. Nothing in the game can make
+  // that line true now, so no staged tree may claim it.
+  it('no staged NPC claims to remember a change since a previous talk', () => {
+    const trees = [
+      fishingVillage.npcs ?? [], northernForest.npcs ?? [],
+    ].flat().flatMap(n => (n.dialogueTree ? [n.dialogueTree] : []));
+    expect(trees.length).toBeGreaterThan(0);
+    for (const tree of trees) {
+      for (const node of Object.values(tree.nodes)) {
+        expect(node.text).not.toMatch(/since we last (spoke|talked)/i);
+        for (const choice of node.choices ?? []) {
+          expect(choice.text).not.toMatch(/who you have become|something in you has changed|how you deal differently now/i);
+        }
+      }
+    }
   });
 });

@@ -58,6 +58,41 @@
 
 ## Pending
 
+### [gap] Old Marrow's quest payoff can never be reached: no choice leads to `thanks`, and he stands before the boss on a forward-only map
+- category: gap
+- impact: 5
+- ease: 5
+- detail: filed 2026-09-28 by `/adjust-npcs` pass 21, from a reachability
+  walk over every staged tree (root to `nextNodeId`). The `thanks` node on
+  Old Marrow's tree (`Coastal-Village/maps.ts`, ~line 86) has four
+  `questCompleted: 'starting-quest'` replies. They pay 25 or 12 gold, set
+  `marrow_pressed`, or start `get-to-forest` via `next_steps`. No choice
+  anywhere points at `thanks`, and a pickaxe search of the history
+  (`-S"nextNodeId: 'thanks'"`) finds that none ever did. The map rules out a
+  simple link as a fix. Marrow is staged only at `fv-2` (column 1). The King
+  of Revenge is at `fv-6` (column 8), and fishing-village's graph only moves
+  forward, so the player never meets Marrow after the kill. The knock-on
+  effects: `marrow_pressed` is never set, so Captain Blackwater's Phase 53e
+  read-back (`marrow_pressed_recognition`) never shows. `get-to-forest` is
+  granted by the `fv-10` travel door instead, as `content.ts` ~990 notes.
+  The quest's own `reward` still pays on completion, so the player loses no
+  money, only the beat. This is related to pass 58's pending "the village
+  still points at the breakwater" row: Marrow's `offer` line is part of the
+  same rework.
+- why not shipped in the steward tick: this is not a small fix. It needs a
+  post-boss Marrow node on fishing-village's graph, which displaces a node
+  and changes the map's kind spread and its e2e pins. It also needs a
+  `questCompleted`-gated greet reply into `thanks` and new prose, so it is
+  cross-surface and "large" under THE GROWTH FLOOR ¶2. The alternative is
+  to retire `thanks`/`next_steps` and the Blackwater read-back as dead
+  content. Pick one once the fishing-village breakwater-line row is worked,
+  because both edit Marrow's tree.
+- next (`/iterate`): either (a) re-stage Marrow at a column-9 node beside
+  the `fv-10` door and add a gated greet reply into `thanks`
+  (`content-curator` for the line), or (b) retire `thanks`, `next_steps`
+  and `marrow_pressed_recognition` as unreachable. Pin whichever you choose
+  with a reachability test.
+
 ### [gap] Act 1 has no shop, so the relic kit the 2026-09-23 owner call put "on the road" is five maps away
 - category: gap
 - impact: 6

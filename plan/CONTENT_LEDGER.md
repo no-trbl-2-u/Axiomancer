@@ -20,11 +20,60 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-27 | d54e85b2 | 21 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-27 | 985f87c1 | 21 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-26 | 2b289bb2 | 19 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-27 | c250a53c | 20 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-28 | 00612982 | 21 |
 
 ## Log
 
 ```
+> **[adjust-npcs pass 21, 2026-09-28, base 00612982]** Zero-CREATE, one
+> UPDATE (six NPC trees), zero-REMOVE. One new finding, filed rather than
+> shipped. `/march` dispatched this through Step 3b. There were no unlabeled
+> issues or `loop:do`, and critique wasn't due (pass 58 is HEAD). No `[ ]`
+> phase rows. The growth floor was clear (`e46c99ba` touched `src/World`
+> within 7 days). With `cards`/`keywords` on THE CARD HOLD, all three
+> eligible categories cleared the 15-commit bar: `npcs` (`c250a53c`, 29
+> commits, 04:43Z yesterday) was the stalest, ahead of `equipment` (28) and
+> `enemies` (26). Deploy was green: HEAD is plan-only.
+>
+> **Step 1 audit, run fresh.** It used a throwaway vitest walk over
+> `MAP_REGISTRY`, deleted after the run. This time it included root
+> reachability, which pass 20 did not check. Three commits since pass 20
+> touch the surface: T6 (`67fd0106`), the hazard-voice fix and the purge.
+> No `teachCard` exists anywhere, there are no dangling `nextNodeId`s or
+> flat maps, and the Coastal-Village `unstagedNpcs` backlog is unchanged.
+>
+> **UPDATE, shipped: retired the six observer read-backs.** T6 deleted the
+> observer cache but left the six replies it gated
+> (`playerAlignmentCellChangedSince`) ungated. So a first meeting offered
+> "sees who you have become" and answered "since we last spoke". Critique
+> pass 58 filed four of them (MED). The walk found all six: Old Marrow
+> `observer_recognition`, Blackwater `merchant_recognition`, the Daughter
+> `growth_recognition`, the Shrine Keeper `observer_transformation`, the
+> Chronicler `scholar_observation` and the Philosopher
+> `philosophical_recognition`. D39 removes "the dialogue gates and
+> read-backs that use" alignment, so each reply and its target node was
+> deleted, not re-gated. They have no reader left, and re-gating them on
+> something else would take new prose. The ~30 formerly
+> `requiresAlignment`-gated topic replies stay, because they claim no
+> memory. Pinned by a new `continents.engine.test.ts` case, and two tests
+> were updated (the mechanics Blackwater/Daughter cases and the mobile
+> `event.engine.test.ts` Blackwater view-model). The critique row moved to
+> Done. No prose was written, so `content-curator` was not spawned.
+>
+> **The new finding (to `plan/AUDIT.md` as a `[gap]`): Old Marrow's
+> `thanks` node is unreachable.** No choice has ever pointed at it, and
+> Marrow stands at `fv-2`, ahead of the `fv-6` boss, on a forward-only
+> graph. So his reward replies, `marrow_pressed` and Blackwater's Phase 53e
+> read-back of it are all dead. Fixing it means re-staging Marrow on the
+> map (cross-surface, "large" under THE GROWTH FLOOR ¶2) or retiring the
+> nodes. Both options are listed in the row.
+>
+> **KB run.** `kb_search` (all scopes) for reactive or remembered-choice
+> dialogue returned no matches, the same corpus miss passes 19 and 20
+> logged. No wishlist was filed, following their precedent.
+>
+> Verify: green (mechanics; mobile 2974 passed, 2 skipped).
+
 > **[adjust-enemies pass 21, 2026-09-27, base 985f87c1]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE. `/march` dispatched this through Step 3b. No
 > unlabeled issues or `loop:do`, and critique wasn't due (11 commits, ~12h
@@ -584,97 +633,6 @@
 > Verify: green (mechanics 231 files/3746+ tests + build; mobile
 > lint/typecheck/jest/asset/critique-drive; card-editor type-check).
 >
-> **[adjust-npcs pass 18, 2026-09-25, commit 1d5f4bcc]** Zero-diff pass —
-> audit re-confirmed byte-identical to pass 17, no new CREATE/UPDATE/
-> REMOVE, ledger bump only. Dispatched autonomously by `/march`'s
-> content-lifecycle gate (Step 3b): `npcs` (`f3c09826`
-> 2026-09-24T04:44:05Z, 27 commits behind HEAD `13d3f1f4`
-> 2026-09-24T22:42:56Z) was the stalest qualifying category this tick —
-> `cards` (`f155b027` 2026-09-24T08:52:50Z, 25 commits), `equipment`
-> (`bdcd4c7e` 2026-09-24T10:42:53Z, 23 commits) and `enemies` (`6f13b2d0`
-> 2026-09-24T10:43:06Z, 22 commits) all qualified too but were less
-> stale; `keywords` (real commit `13d3f1f4`, ~4h old — the ledger row's
-> recorded hash `c57a7e73` is a stale self-reference from its own
-> pending-commit write) had just ticked and did not qualify. Deploy
-> confirmed green (`npm run deploy:check` at HEAD `13d3f1f4`: no gated
-> workflow yet — docs/plan-only tick, nothing to check). No phase work
-> pending (`plan/steps/01_build_plan.md` has zero `[ ]` rows). Growth
-> floor clear (`src/World` commits within 7 days, e.g. `bc4ef749`/
-> `e8369e19`/`1da16935`), so 3b-pre didn't pre-empt this dispatch. The
-> critique gate (`/march` Step 2) did not fire ahead of this tick either
-> — only 2 commits and ~8h since pass 49 (`94b6b96f`), under both the
-> 12-commit and 24h thresholds.
->
-> **Step 0:** re-read `axiomancer-mechanics/CLAUDE.md` fresh — THE STORY
-> IS THE OVERVIEW now governs (superseded THE STORY IS THE ROAD that
-> pass 17 read; T cleared the road 2026-09-18 and replaced it with an
-> over-arching story document in attended sessions 2026-09-23/24). Hard
-> rule 3 (don't invent a named character's personhood autonomously)
-> stands unchanged and is reinforced by the new doctrine's own "do not
-> invent canon beyond the overview" clause. Read the new
-> `content/story/story-overview.md` in full: T's prologue, the
-> rulings, the per-map place-and-theme table, and the ordered open
-> questions.
->
-> **Step 1 structural audit — fresh, not re-cited:** `git log
-> f3c09826..HEAD -- src/NPCs src/World/Continents src/World/MapEvents
-> src/World/types.ts specs/story specs/characters` returns zero
-> commits — none of the 27 intervening commits touch the NPC/dialogue
-> surface at all (they're story-overview rewrite, a mobile canvas-pivot
-> fix, cards/equipment/enemies/keywords steward passes, and an `/expand`
-> no-candidates tick). Ran every Step 1 signal fresh anyway:
-> - All 21 `const *: NPC` entries unchanged in count and each still
->   referenced from exactly one map's `npcs:` array — no orphan.
-> - Zero legacy `dialogue: {` (flat `DialogueMap`) usage; every NPC
->   still on `dialogueTree`.
-> - Zero `teachCard` usage in NPC content; `startQuest` names unchanged
->   from pass 17 and type-checked green by the verify gate below.
-> - Coastal-Village's 3-NPC `unstagedNpcs` backlog (Tide-Shopkeeper,
->   Dockworker's Union Leader, Merchant's Widow) unchanged — still
->   blocked on the missing `openShop`-shaped effect surface, re-confirmed
->   against the current `DialogueChoice.effect` shape in
->   `src/NPCs/types.ts`.
-> - Northern-Continent's three 1-NPC maps (`caverns`/theDelver,
->   `connecting-river`/theBoatwoman, `town-across-river`/theSweetheart)
->   unchanged; cross-referenced against the new story-overview's map
->   table, which lists "what happens on each middle map" as its own
->   **open question (6)** — this reinforces, not changes, `plan/AUDIT.md`'s
->   `[gap]` row (DECIDED via `/oversight` 2026-09-15, still needs an
->   attended `character-spec`/`story-spec` session before this steward
->   can act): the story doctrine now says explicitly, in its own words,
->   that what these maps need is undecided, not this autonomous tick's
->   call to invent.
-> - The new doctrine's "Noted" section flags ~186 legacy dialogue nodes
->   and 21 `boy-*` flags as non-canon text kept only so the build works,
->   and explicitly defers renaming/reconciliation as future engine work
->   — not a Step 1 structural signal (nothing is broken, dead-ended, or
->   misreferenced) and not this steward's call to act on unprompted.
->
-> **Step 1b widened check:** Step 1 returned nothing actionable, so ran
-> the deeper KB cross-reference before accepting zero-diff. `kb_overview`
-> confirms the corpus is unchanged (46 board/card games, 2801 okf docs).
-> Fresh-angle `kb_search` runs (`retcon|non-canon|placeholder narrative|
-> story rewrite`, scope all; `quest.giver|dialogue.branch|npc.voice`,
-> scope boardgames) returned zero matches — the corpus is card/board-game
-> reception data and doesn't carry narrative-authoring or story-retcon
-> prior art, a documented, accepted miss (skill §3 Step 2) rather than a
-> tooling failure. No CREATE/UPDATE is gated on this pass, so no wishlist
-> issue filed. Zero-diff confirmed on the widened check too.
->
-> **Verify:** green — mechanics (231 test files, 3746 tests, build) and
-> mobile (`npm run verify --workspace axiomancer-mobile`).
->
-> **Ship:** ledger bump only, no code changes on the NPC surface this
-> pass.
->
-> **Residue:** none new. The two open items both remain exactly where
-> pass 17 left them: the Coastal-Village 3-NPC unstaged backlog stays
-> blocked on the missing shop-effect surface, and Northern-Continent's
-> three 1-NPC maps stay parked on `plan/AUDIT.md`'s `[gap]` row pending
-> an attended `character-spec`/`story-spec` session — now additionally
-> cross-referenced against the story-overview rewrite's own open
-> question 6, same blocked status, no new AUDIT row warranted.
-
 > **[adjust-keywords pass 18, 2026-09-24, commit c57a7e73]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
 > content-lifecycle gate (Step 3b): `keywords` (`71648d3a`

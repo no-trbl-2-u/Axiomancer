@@ -150,34 +150,6 @@
 
 ## Pending
 
-### [MED] dialogue — T6 left four "you have changed" replies ungated, so a first meeting says "since we last spoke"
-- pass: 58 (commit 36238fd8)
-- viewport: both (content, not layout)
-- category: comprehension
-- observation: four trees had a reply that only showed when the player's
-  alignment cell had moved since their last talk
-  (`playerAlignmentCellChangedSince`). T6 removed the gate and kept the
-  reply, per its "ungated, not deleted" rule. Those replies now show on the
-  very first meeting. The dialogue screen this pass captured is Old
-  Marrow's greeting, which offers "(Stand quietly. He looks up and sees who
-  you have become.)" to a stranger he has just met. The reply leads to
-  "Something's moved in you since we last spoke." The same happens with
-  Captain Blackwater ("He sees how you deal differently now." -> "Your manner of
-  dealing has shifted, since we last spoke."), the fisherman's daughter
-  ("Something's different in you, since we last spoke.") and the
-  Northern-Forest Keeper. With alignment gone, nothing can make these
-  replies true.
-- evidence: `axiomancer-mechanics/src/World/Continents/Coastal-Village/maps.ts:59`
-  (Marrow, `observer_recognition`);
-  `axiomancer-mechanics/src/World/Continents/Coastal-Village/npcs.ts:30,154,192,389`;
-  `axiomancer-mechanics/src/World/Continents/Northern-Forest/npcs.ts:30`;
-  `git show 67fd0106` (the removed `requires: { playerAlignmentCellChangedSince: true }`);
-  `.critique-artifacts/mobile/06-dialogue.txt`.
-- suggested fix: delete the four recognition replies and their target nodes,
-  since they belonged to the deleted system. Or gate them on something that
-  is still true, such as having finished that NPC's quest.
-- source: critique:drive (unattended)
-
 ### [MED] combat — A Plain Word shows its FREE VULNERABLE as "×24" beside its paid "+60%"
 - pass: 58 (commit 36238fd8)
 - viewport: both (375×812 and 1280×800)
@@ -695,6 +667,46 @@
 - source: critique-drive (unattended, §3.5)
 
 ## Done
+
+### [x] [MED] dialogue — T6 left four "you have changed" replies ungated, so a first meeting says "since we last spoke" — RESOLVED 2026-09-28 (adjust-npcs pass 21)
+- pass: 58 (commit 36238fd8)
+- viewport: both (content, not layout)
+- category: comprehension
+- observation: four trees had a reply that only showed when the player's
+  alignment cell had moved since their last talk
+  (`playerAlignmentCellChangedSince`). T6 removed the gate and kept the
+  reply, per its "ungated, not deleted" rule. Those replies now show on the
+  very first meeting. The dialogue screen this pass captured is Old
+  Marrow's greeting, which offers "(Stand quietly. He looks up and sees who
+  you have become.)" to a stranger he has just met. The reply leads to
+  "Something's moved in you since we last spoke." The same happens with
+  Captain Blackwater ("He sees how you deal differently now." -> "Your manner of
+  dealing has shifted, since we last spoke."), the fisherman's daughter
+  ("Something's different in you, since we last spoke.") and the
+  Northern-Forest Keeper. With alignment gone, nothing can make these
+  replies true.
+- evidence: `axiomancer-mechanics/src/World/Continents/Coastal-Village/maps.ts:59`
+  (Marrow, `observer_recognition`);
+  `axiomancer-mechanics/src/World/Continents/Coastal-Village/npcs.ts:30,154,192,389`;
+  `axiomancer-mechanics/src/World/Continents/Northern-Forest/npcs.ts:30`;
+  `git show 67fd0106` (the removed `requires: { playerAlignmentCellChangedSince: true }`);
+  `.critique-artifacts/mobile/06-dialogue.txt`.
+- suggested fix: delete the four recognition replies and their target nodes,
+  since they belonged to the deleted system. Or gate them on something that
+  is still true, such as having finished that NPC's quest.
+- source: critique:drive (unattended)
+- resolution: took the first suggested fix. D39 removes "the dialogue gates
+  and read-backs that use" alignment, and the observer cache was deleted in
+  T6, so these replies are that system's read-backs. The retired replies and
+  their target nodes are Old Marrow `observer_recognition`, Blackwater
+  `merchant_recognition`, the Daughter `growth_recognition`, and three the
+  row did not list: the Shrine Keeper `observer_transformation`, the
+  Chronicler `scholar_observation` and the Wandering Philosopher
+  `philosophical_recognition`. That is all six sites where T6 removed
+  `playerAlignmentCellChangedSince`. The ~30 formerly `requiresAlignment`-gated
+  topic replies stay, because they claim nothing about the past. Pinned by
+  `continents.engine.test.ts` ("no staged NPC claims to remember a change")
+  and the updated mobile `event.engine.test.ts` Blackwater case.
 
 ### [x] [MED] hazard — every hazard intro narrates the player as "he", while the rest of the game says "you" — RESOLVED 2026-09-27 (commit 9cf50a65)
 - pass: 56 (commit 16fb2990)
