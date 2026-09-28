@@ -102,6 +102,33 @@ event-pool and layout files).
 - [x] Phase S3 — Stat scaling (refactor D1 step 3): keyword families by where the effect lands (body: damage to the foe; mind: anything on you; heart: anything on the foe), `base × stat ÷ 5` with repeating amounts at half rate and durations flat, no caps, VITAE `50 + 12·body + 6·mind + 6·heart`, coloured keywords with a stat glyph, final numbers on card faces. Brief `plan/2026-09-27-stat-scaling.prompt.md`. Requires T6 `[x]`.
 - [x] Phase P1 — The card purge (D36): purge every player card except the grey office (`grey-strike`, `grey-ward` and the VULNERABLE grey card, D42), and every player keyword except DEAL, GUARD and VULNERABLE; every run deals the grey deck; presets and the 5/5/5 thirds go (card rewards and the cache card offer stay, offering the grey cards: D44). Keyword audit follow-up merged as #407. Enemies keep their keywords. Brief `plan/2026-09-26-card-purge.prompt.md`. Requires S3 `[x]`.
 
+> **THE REVAMP (D46–D60, 2026-09-28) — PROPOSED, not ratified.** Plan:
+> `plan/revamp/README.md` (build order, "what zero is", open calls) + one
+> part plan per row. Every R/B row below is blocked until T ratifies that
+> file; `/march` and `night` are disabled on GitHub until then. R0 is
+> attended (it edits `.claude/**`); R1–R9 and B4 are loop-shippable once
+> ratified; B1–B3 and B5–B9 are T's sessions and the loop never starts them.
+
+- [blocked: awaiting ratification 2026-09-28] Phase R0 — Loop doctrine reset (attended): archive the six content stewards, card-expert, mechanics-expert, reader, content-curator and the design skills; revamp-mode banner and doctrine fixes on every verb; ci-autofix concurrency; telemetry; plan hygiene. `plan/revamp/loop.md`.
+- [blocked: awaiting ratification 2026-09-28] Phase R1 — Tooling reset: delete the card editor, retire the deck-matrix baseline, archive the tuning-lab pages, catalog shows live content only, orphan scripts. `plan/revamp/tooling.md`. Requires R0.
+- [blocked: awaiting ratification 2026-09-28] Phase R2 — Enemy reset: 79 → Float-Eye / Brine Hag / Doorwarden, every enemy keyword and affliction stripped, PLEA/premise riders and curse code deleted. `plan/revamp/enemies.md`. Requires R0.
+- [blocked: awaiting ratification 2026-09-28] Phase R3 — World reset: Act 1 only, fishing-village purged, other continents parked, Labyrinth door sealed, encounters re-pointed. `plan/revamp/world.md`, `labyrinth.md`. Requires R2.
+- [blocked: awaiting ratification 2026-09-28] Phase R4 — Relic placeholders: ten signatures → GUARD 5 at a flat cost; The Open Hand becomes a real befriend. `plan/revamp/relics.md`. Requires R2.
+- [blocked: awaiting ratification 2026-09-28] Phase R5 — Items reset: healing potions only, save migration, shops/caches re-pointed. `plan/revamp/items.md`. Requires R3.
+- [blocked: awaiting ratification 2026-09-28] Phase R6 — Hazard reset: minimal hazard deck, honest rewards. `plan/revamp/hazards.md`. Requires R0.
+- [blocked: awaiting ratification 2026-09-28] Phase R7 — Engine purge: carrier-less mechanic kinds, card types → Attack/Skill/Spell, reward steering logic, alt-win systems, carrier sweep. `plan/revamp/engine.md`. Requires R2, R4, R6.
+- [blocked: awaiting ratification 2026-09-28] Phase R8 — Mobile cleanup: dead flows and glosses, grey card art, app label, VITAE/shillings copy. `plan/revamp/mobile.md`. Requires R7.
+- [blocked: awaiting ratification 2026-09-28] Phase R9 — Progression retune: XP curve for Act 1 on the three survivors. `plan/revamp/progression.md`. Requires R3, R7.
+- [blocked: awaiting ratification 2026-09-28] Phase B4 — Card-rules inventory (loop; creates nothing; gates all card work). `plan/revamp/cards.md`. Requires R7.
+- [blocked: owner-led — T's session 2026-09-28] Phase B1 — The relic pass. `plan/revamp/relics.md`. Requires R4.
+- [blocked: owner-led — T's session 2026-09-28] Phase B2 — Enemy revamp: normal / elite / region boss / act boss. `plan/revamp/enemies.md`. Requires R9.
+- [blocked: owner-led — T's session 2026-09-28] Phase B3 — Hazard mechanics redesign. `plan/revamp/hazards.md`. Requires R6.
+- [blocked: owner-led — T's session 2026-09-28] Phase B5 — Card-creator workflow. `plan/revamp/cards.md`. Requires B4.
+- [blocked: owner-led — T's session 2026-09-28] Phase B6 — Card sessions. `plan/revamp/cards.md`. Requires B4, B5.
+- [blocked: owner-led — T's session 2026-09-28] Phase B7 — Deck tab UI revamp. `plan/revamp/mobile.md`. Requires R8.
+- [blocked: owner-led — T's session 2026-09-28] Phase B8 — Card art revamp. `plan/revamp/mobile.md`. Requires R8.
+- [blocked: owner-led — T's session 2026-09-28] Phase B9 — Labyrinth re-theme. `plan/revamp/labyrinth.md`. Requires B2.
+
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics (9180fa5d)
 
@@ -1174,6 +1201,16 @@ See the status rows above; generate briefs on demand.
   premiseShed candidate marked moot) and fixed A Plain Word's FREE value
   ("×10" → "+10%"). Confirmed T's request: yes ("file the residue, clean
   up any remaining work"). Resulting commit: this one.
+
+- **2026-09-28** — actor: **T, attended session** (branch
+  `claude/axiomancer-unused-audit-ac0db7`). Action: **added THE REVAMP**
+  (D46–D60): Phases R0–R9 (reset) and B1–B9 (rebuild), all blocked until T
+  ratifies `plan/revamp/README.md`. Seven read-only audits (engine, mobile,
+  content, tooling, core loop, content stewards, design skills) were put to
+  T one ballot question at a time. `/march` and `night` disabled on GitHub
+  the same day ("pause the /march loop until we ratify the build plan").
+  Confirmed T's request: yes ("start breaking all these down … so we can
+  update the plan"). Resulting commit: this one.
 
 ## Phase log (commit hashes)
 

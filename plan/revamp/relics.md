@@ -1,0 +1,89 @@
+# Revamp — relics and signature skills
+
+> Part plan of [THE REVAMP](README.md). Phases **R4** (placeholders, loop)
+> and **B1** (the relic pass, owner). Decision D47. Status: PROPOSED.
+
+## Where things stand
+
+Signature skills are an always-available kit outside the deck, paid in
+Conviction (◆) and granted only by the 11 signet relics
+(`Items/relic.library.ts`, `grantsSignature`; defined in
+`Combat/combat.signature.ts`). The card purge (P1) covered player cards
+only, so all 11 survived:
+
+| Signature | Relic slot | Cost | Effect today |
+|---|---|---|---|
+| Read the Entrails | armor | 1 | reveal next stance check |
+| Press Fate | charm | 4 | reroll miss faces |
+| Second Wind | armor | 4 | draw 2 + heal |
+| Cold Counsel | charm | 4 | draw 2 |
+| The Unbroken Stride | feet | 4 | surge |
+| The Butcher's Bill | weapon | 6 | 2 dmg per stack of every effect on the foe |
+| The Endless Labor | hands | 6 | permanent empower |
+| **The Open Hand** | ring (Suppliant's Ring) | 6 | QUARTER + 6 flat damage |
+| The Stilling | weapon | 8 | petrify; STAGGER vs boss/unique |
+| The Oath Kept | amulet | 8 | POISON +3, never fizzles |
+| The Mounting Dread | head | 9 | Creeping Doom +3 |
+
+## Known issue — The Butcher's Bill is unbounded (fix in B1)
+
+`combat.signature.ts:131,191`: 2 damage per stack of every effect on the
+enemy. A Plain Word lands VULNERABLE at intensity 25+ (heart-scaled), and
+player-applied statuses skip the intensity cap of 30 (`Effects/index.ts:24,70`).
+One Word → the Bill hits ≈50; two → ≈100; no ceiling, at 6◆. T ruled
+(2026-09-28): no stopgap; R4 removes it by making the Bill GUARD 5, and B1
+must not reintroduce a per-stack reader without a cap or a distinct-effect
+count. The cap bypass for player statuses is a separate latent hazard for
+any future stack-reader.
+
+## R4 — Signature placeholders (loop)
+
+T, 2026-09-28: "let's set all their effects to GUARD 5. Then we can clean up
+more keywords." Then: keep the names, flat cost.
+
+1. **Ten signatures → GUARD 5** at one flat Conviction cost (default 4◆,
+   A Plain Ward's PAID parity). Names and relics unchanged; each description
+   becomes one line ("Raise GUARD 5."). The `kind` switch collapses to
+   `guard` + `mercy`; delete the scout/reroll/sustain/draw/surge/empower/
+   control/dot/conclude branches and their constants
+   (`HARD_CONTROL_BOSS_STAGGER`, `PRESS_FATE_COST`, …).
+2. **The Open Hand stays special — it becomes a real befriend.** The
+   Suppliant's Ring is the first-node hand-over (`Character/first-node-grant.ts`)
+   and T keeps it: "Leave the starting ring with befriend." Today it applies
+   QUARTER + 6 damage and *never* opens mercy; the only door into the mercy
+   choice is the `befriend_attempt` card rider (`Cards/card.engine.ts:382`,
+   `Combat/combat.engine.ts:2674`), which no card carries. Rewire The Open
+   Hand to perform the befriend attempt itself; drop the QUARTER + damage.
+   Cost stays at the flat rate unless the phase finds befriend needs its own.
+3. **Befriend data on the survivors:** Brine Hag already has
+   `friendshipReward`, `befriendabilityConfig`, journal and pact lines.
+   Float-Eye and the Doorwarden have none. Decide per foe: befriendable
+   (author minimal data — content, so R4 only *reuses* existing Brine Hag
+   lines and marks the other two not befriendable) or not.
+4. Relic descriptions: rewrite to what the relic now does (the Suppliant's
+   Ring says "Soften the foe toward mercy" — make it true).
+5. Fix the stale header comment "combat reads no stat" (false since S3).
+6. Carrier sweep (D45): QUARTER, WRATH, CHAIN, STAGGER, PLEA, DRAW, HEAL
+   (if no consumable keeps it), BOON/PIP (if only Press Fate carried them)
+   lose their last carrier → atlas, gloss, glyph and catalog rows go.
+7. Mobile: the signature bar, equip-delta sheet and relic detail read the
+   new text; drop presenter branches for deleted kinds.
+8. Save migration: none needed (relic ids unchanged).
+
+Gates: README §5; an e2e that The Open Hand opens the mercy choice on the
+Brine Hag and that every other signature raises GUARD 5.
+
+## B1 — The relic pass (owner)
+
+T will run a guided pass to "create a few relics" and re-author signatures.
+Inputs for that session:
+
+- The Butcher's Bill note above.
+- Signatures are the player's only non-card actions; they must obey the
+  same carrier rule and the same S3 families as cards (body/mind/heart).
+- Relics' `statModifiers` now feed S3 scaling — a stat relic is a scaling
+  lever, not a flat bonus.
+- Relic identity is `grantsSignature !== undefined` (plus the `relic-`
+  prefix); a stat-only relic would need that discriminator changed.
+- Relic reward sources: the hazard deck's "Bonus Relic"/"Shrine Cache" lie
+  (they pay shillings) and go in R6; B1 can give relics a real source.
