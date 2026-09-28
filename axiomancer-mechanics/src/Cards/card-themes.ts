@@ -41,11 +41,12 @@ export const THEME_KEYWORDS: Record<CardTheme, readonly string[]> = Object.freez
     // The keyword audit (2026-09-27, after the card purge) stripped every word
     // whose gloss left the registry with the purged cards (mobile KW-6 parity
     // law). Every theme key stays; a family may be empty until a guided card
-    // session (D37) gives it carriers again.
+    // session (D37) gives it carriers again. The keyword purge (2026-09-28)
+    // removed FORETELL and RIPOSTE the same way.
     rot:   ['POISON', 'BLEED', 'DOOM', 'MARK'],
     debt:  ['DOOM', 'BLEED', 'DRAW', 'HEAL'],
-    grave: ['DOOM', 'FORETELL'],
-    vigil: ['GUARD', 'RIPOSTE', 'BLEED', 'DOOM', 'FORETELL'],
+    grave: ['DOOM'],
+    vigil: ['GUARD', 'BLEED', 'DOOM'],
     trial: ['STAGGER', 'MARK', 'DOOM'],
     choir: ['PLEA', 'QUARTER', 'DOOM', 'HEAL', 'CLEANSE'],
     curse: [],

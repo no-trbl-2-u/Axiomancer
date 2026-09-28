@@ -78,8 +78,10 @@ function primaryKeyword(card: CardDraft): { kw: KeywordId; val: number } {
                 return { kw: 'guard', val: sm.amount };
             case 'barrier':
                 return { kw: 'guard', val: sm.amount };
+            // The keyword purge (2026-09-28) retired RIPOSTE and FORETELL from
+            // the display vocabulary; their kinds project to the closest family.
             case 'riposte':
-                return { kw: 'riposte', val: sm.damage };
+                return { kw: 'guard', val: 0 };
             // The keyword audit (2026-09-27, after the card purge) retired the
             // RUPTURE / SIPHON / REAP / SOUL display rows with their cards;
             // the kinds still project to the closest live family.
@@ -99,9 +101,9 @@ function primaryKeyword(card: CardDraft): { kw: KeywordId; val: number } {
             case 'lock_stance':
                 return { kw: 'stagger', val: 0 };
             case 'foretell':
-                return { kw: 'foretell', val: sm.count };
+                return { kw: 'draw', val: sm.count };
             case 'omen':
-                return { kw: 'foretell', val: 0 };
+                return { kw: 'control', val: 0 };
             // CHARGE / ECHO / FORGE / STRIP BUFF left the display vocabulary
             // in the keyword audit (2026-09-27): generic control glyph, no value.
             case 'premise':
@@ -219,8 +221,8 @@ function freeKeyword(card: CardDraft): { kw: KeywordId | string; val: number } {
     if (f.tickOne || f.tickAllDots) return { kw: 'dot', val: 0 };
     if (f.cleanse) return { kw: 'cleanse', val: f.cleanse };
     if (f.sway) return { kw: 'sway', val: f.sway };
-    if (f.foretell) return { kw: 'foretell', val: f.foretell };
-    if (f.revealStance) return { kw: 'foretell', val: 0 };
+    if (f.foretell) return { kw: 'draw', val: f.foretell };
+    if (f.revealStance) return { kw: 'control', val: 0 };
     if (f.pips) return { kw: 'pip', val: f.pips };
     if (f.stagger) return { kw: 'stagger', val: f.stagger };
     // CHARGE / SOUL / MILL / RECOIL / REFRESH / CONVICTION riders lost their
@@ -298,7 +300,6 @@ export function KwGlyph({
                 </svg>
             );
         case 'guard':
-        case 'riposte':
             return (
                 <svg viewBox="0 0 24 24" style={s} fill={color} stroke={color} strokeWidth="1">
                     <path d="M12 2 L21 5 V12 C21 17 17 21 12 22 C7 21 3 17 3 12 V5Z" fillOpacity="0.35" />
@@ -356,12 +357,6 @@ export function KwGlyph({
             return (
                 <svg viewBox="0 0 24 24" style={s} fill={color} fillRule="evenodd">
                     <path d="M7 2 H17 A1.5 1.5 0 0 1 18.5 3.5 V20.5 A1.5 1.5 0 0 1 17 22 H7 A1.5 1.5 0 0 1 5.5 20.5 V3.5 A1.5 1.5 0 0 1 7 2 Z M8 4.5 H16 V11 H8 Z" />
-                </svg>
-            );
-        case 'foretell':
-            return (
-                <svg viewBox="0 0 24 24" style={s} fill={color} fillRule="evenodd">
-                    <path d="M12 5.5 C6 5.5 2 12 2 12 C2 12 6 18.5 12 18.5 C18 18.5 22 12 22 12 C22 12 18 5.5 12 5.5 Z M12 8.5 A3.5 3.5 0 1 0 12 15.5 A3.5 3.5 0 1 0 12 8.5 Z" />
                 </svg>
             );
         case 'sway':

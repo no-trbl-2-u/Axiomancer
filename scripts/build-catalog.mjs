@@ -134,10 +134,11 @@ const RARITY_META = {
 // keywords win the match.
 const KEYWORD_WORDS = [
   "HEAL SELF", "POISON", "BLEED", "MARK", "GUARD",
-  "RIPOSTE", "STAGGER", "PLEA", "FORETELL", "DRAW", "OATH", "HEX",
+  "STAGGER", "PLEA", "DRAW", "OATH", "HEX",
   "DOT", "CLEANSE", "PIP", "PIPS", "QUARTER", "HEAL", "DOOM",
   // S3 (D43) — A Plain Word's VULNERABLE, and the live damage family.
-  "VULNERABLE", "PIERCE", "WRATH", "CHAIN",
+  "VULNERABLE", "WRATH", "CHAIN",
+  // The keyword purge (2026-09-28) dropped RIPOSTE, FORETELL and PIERCE.
   // The keyword audit (2026-09-27, after the card purge) dropped every word
   // whose registry gloss left with the purged cards (BACKFIRE, REAP, SOUL(S),
   // CHARGE(S), ECHO, FORGE, SIPHON, RUPTURE, PROLONG, RECALL, SENTENCE,
@@ -196,7 +197,6 @@ const GLYPH_SHAPES = {
   HEAL: SHAPE_HEART,
   DRAW: SHAPE_CARD,
   CLEANSE: SHAPE_DROPLET,
-  FORETELL: SHAPE_EYE,
   OATH: SHAPE_DIAMONDS,
 };
 
