@@ -29,13 +29,12 @@ const EFFECT_ID_KEYWORD: Readonly<Record<string, string>> = Object.freeze({
 // The keyword audit (2026-09-27, after the card purge) kept only the kinds
 // whose keyword still carries a gloss in mobile's KEYWORD_GLOSS. The other
 // kinds stay in the engine union; they simply resolve to no theme keyword.
+// The keyword purge (2026-09-28) removed RIPOSTE and FORETELL the same way.
 const MECHANIC_KIND_KEYWORD: Readonly<Record<string, string>> = Object.freeze({
     barrier: 'GUARD',
     guard: 'GUARD',
-    riposte: 'RIPOSTE',
     stagger: 'STAGGER',
     lock_stance: 'STAGGER',
-    foretell: 'FORETELL',
     sway: 'PLEA',
 });
 
@@ -48,7 +47,6 @@ const RIDER_FIELD_KEYWORD: { readonly [K in keyof CardRider]?: string } = Object
     guard: 'GUARD',
     barrier: 'GUARD',
     cleanse: 'CLEANSE',
-    foretell: 'FORETELL',
     stagger: 'STAGGER',
     sway: 'PLEA',
     healHp: 'HEAL',

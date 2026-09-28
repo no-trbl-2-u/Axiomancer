@@ -136,7 +136,7 @@ export const ENEMY_KEYWORD_LABEL: Readonly<Record<EnemyKeyword['kind'], string>>
  * {@link enemyKeywordText}, so these carry an `{n}` slot rather than a figure.
  */
 export const ENEMY_KEYWORD_GLOSS: Readonly<Record<EnemyKeyword['kind'], string>> = Object.freeze({
-    hide: 'Every hit against this foe is reduced by {n}, never below 1. PIERCE ignores it.',
+    hide: 'Every hit against this foe is reduced by {n}, never below 1.',
     swift: 'Your GUARD and BARRIER count for half against this foe.',
     brutal: 'Damage this foe gets past your defenses is doubled.',
     venom: 'Damage this foe lands also poisons you for {n}.',
@@ -145,7 +145,7 @@ export const ENEMY_KEYWORD_GLOSS: Readonly<Record<EnemyKeyword['kind'], string>>
     regrow: 'This foe heals {n} at the end of each of its phases.',
     ravenous: 'This foe heals for the damage it lands on you.',
     wounding: 'An unguarded hit of {n} or more puts a WOUND in your deck.',
-    flurry: "This foe's hit lands as {n} separate strikes instead of one — RIPOSTE only blunts the first.",
+    flurry: "This foe's hit lands as {n} separate strikes instead of one.",
     summon: 'This foe fields {n} of its own. Each bites you for its printed number every phase, even while the foe is denied.',
 });
 

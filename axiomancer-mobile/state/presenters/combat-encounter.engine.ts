@@ -290,7 +290,7 @@ function freeRail(card: CombatCard, sourceCard?: Card): { freeKeyword: string | 
 // back to the generic ◆ rune.
 const FREE_KW_GLYPH: Record<string, string> = {
     GUARD: '❖', HEAL: '✚', DRAW: '⚑', PLEA: '∿',
-    FORETELL: '◉', CLEANSE: '✦', PIP: '⬡', STAGGER: '⚔',
+    CLEANSE: '✦', PIP: '⬡', STAGGER: '⚔',
 };
 /** The FREE glyph plus the KEYWORD that drives it — the key lets the face swap
  *  the text rune for the effect's SILHOUETTE (glyphShapes.ts) when one exists. */

@@ -95,7 +95,6 @@ export const KEYWORDS = {
     dot: { label: 'DOT', family: 'dot', stat: 'heart', unit: '×', blurb: 'Apply a bleeding/burning stack that deals HP damage each enemy turn.' },
     control: { label: 'CONTROL', family: 'control', stat: 'heart', unit: 't', blurb: "Apply a debuff that disrupts the enemy's next action." },
     guard: { label: 'GUARD', family: 'defense', stat: 'mind', unit: '', blurb: "One-shot shield that absorbs the enemy's next telegraphed hit." },
-    riposte: { label: 'RIPOSTE', family: 'special', stat: 'mind', unit: '', blurb: 'Parry: reduce the incoming hit + counter-strike for bonus damage.' },
     regen: { label: 'REGEN', family: 'recovery', stat: 'mind', unit: '×', blurb: 'Apply regeneration stacks that heal you each of your turns.' },
     poison: { label: 'POISON', family: 'dot', stat: 'heart', unit: '×', blurb: 'Apply poison stacks (DoT variant, dealt each enemy turn).' },
     bleed: { label: 'BLEED', family: 'dot', stat: 'heart', unit: '×', blurb: 'Apply bleed stacks (DoT variant with burst potential via rupture).' },
@@ -105,7 +104,8 @@ export const KEYWORDS = {
     mark: { label: 'MARK', family: 'dot', stat: 'heart', unit: '×', blurb: 'Universal exposure: every DoT tick on the bearer deals +1 per stack.' },
     stagger: { label: 'STAGGER', family: 'control', stat: 'heart', unit: '', blurb: "Remove rungs from the enemy's next telegraphed action; at 0 it is denied." },
     sway: { label: 'PLEA', family: 'special', stat: 'heart', unit: '', blurb: 'Stacks on the enemy, decays 1/turn; reaching its resolve opens ACCEPT / CONTINUE.' },
-    foretell: { label: 'FORETELL', family: 'special', stat: 'grey', unit: '', blurb: "Peek + reorder your deck top and glimpse the enemy's next telegraph." },
+    // The keyword purge (2026-09-28) removed the RIPOSTE and FORETELL rows:
+    // neither word has a live carrier or a glossary entry any more.
     draw: { label: 'DRAW', family: 'special', stat: 'grey', unit: '', blurb: 'Draw cards from your deck.' },
     oath: { label: 'OATH', family: 'special', stat: 'mind', unit: '', blurb: 'A persistent player-side passive, rest of combat. Paid only.' },
     hex: { label: 'HEX', family: 'special', stat: 'heart', unit: '', blurb: 'A standing curse attached to the enemy, rest of combat. Paid only.' },

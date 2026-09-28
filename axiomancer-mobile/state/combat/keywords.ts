@@ -87,7 +87,8 @@ const SUPPORT_KEYWORD: Record<string, string> = {
     // off buff_haste (see consumable.library.ts) — same closest-analogue
     // mapping as its parent effect, backfilled in the same tick this time.
     buff_haste_surge: 'Draw',
-    buff_accuracy_up: 'Foretell',
+    // The keyword purge (2026-09-28) retired FORETELL; buff_accuracy_up now
+    // falls back to its own effect name instead of a borrowed gloss.
     buff_critical_rate_up: 'Mark',
     buff_critical_damage_up: 'Mark',
     buff_status_chance_up: 'Mark',
@@ -124,8 +125,6 @@ const MECHANIC_KEYWORD: Record<string, string> = {
     // ── Control ──
     stagger: 'Stagger',
     lock_stance: 'Stagger',
-    // ── Oracle ──
-    foretell: 'Foretell',
     // ── Charm ──
     sway: 'Plea',
     // ── THE BIG NUMBERS REWRITE (2026-09-02) — direct damage and its family.
@@ -147,10 +146,12 @@ const MECHANIC_KEYWORD: Record<string, string> = {
  *
  * The keyword audit (2026-09-27, after the card purge) cut this table to the
  * words something live still prints: the grey office (DEAL/GUARD/VULNERABLE),
- * enemy threats and keyword reminders (PIERCE, RIPOSTE, PLEA, STAGGER, the
- * DoT species), the relic signature skills (WRATH, CHAIN, POISON, QUARTER,
- * DOOM), consumables (HEAL, CLEANSE, DRAW, FORETELL), the dice system (PIP,
- * BOON, HONE, TEMPER) and the two card-type labels. Git history keeps the
+ * enemy threats and keyword reminders (PLEA, STAGGER, the DoT species),
+ * the relic signature skills (WRATH, CHAIN, POISON, QUARTER, DOOM),
+ * consumables (HEAL, CLEANSE, DRAW), the dice system (PIP,
+ * BOON, HONE, TEMPER) and the two card-type labels. The keyword purge
+ * (2026-09-28) then cut PIERCE, RIPOSTE and FORETELL: no card, enemy,
+ * signature skill or item carries them. Git history keeps the
  * rest.
  *
  * 2026-07-12 (owner playtest) — TERSE GLOSSES: every gloss is ONE short
@@ -191,16 +192,10 @@ const KEYWORD_GLOSS: Record<string, string> = {
     Stagger:
         "Removes that many rungs (the steps of the foe's telegraph) from its next action. "
         + 'Strip them all and the action is denied.',
-    // ── Oracle ──
-    Foretell: "Reveals the foe's next stance and looks at that many cards of your deck, moving the best to the top.",
     // ── Charm ──
     Plea:
         'Builds on the foe and decays 1 each round. At their resolve (~35% of max VITAE), they relent.',
     Quarter: "The foe's attacks deal 10% less damage per Quarter stack.",
-    // ── Bulwark ──
-    Riposte:
-        'Armed for one threat phase: reduces the first attack by its parry (CUT) value. '
-        + 'If Guard fully blocks it, the foe takes CTR damage instead, or more if the blow was bigger.',
     // ── Die gear (spec 33 Upgradeable Dice §6, registered D4 2026-07-17) —
     // BOON is the face payload; HONE/TEMPER are the blacksmith upgrade verbs.
     // (Renamed from SPECIAL — R-8, phase 44b.) ──
@@ -208,7 +203,6 @@ const KEYWORD_GLOSS: Record<string, string> = {
     Hone: "A blacksmith upgrade: adds a mana face to a die's gear, so more of its rolls power a card.",
     Temper: "A blacksmith upgrade: turns a mana face into a BOON face. A colored die caps at 2 boon and 1 miss, gold at 1.",
     // ── THE BIG NUMBERS REWRITE (2026-09-02) — the damage family ──
-    Pierce: "This damage ignores the foe's HIDE and every effect that would reduce it.",
     Wrath: 'Every hit you land deals that much more, for the rest of the fight. It stacks and never fades.',
     Chain: 'Your next hit deals that much more. Chain fades at the end of a turn that added none.',
     // ── Card types (labels, not keywords — never rendered in the inspect

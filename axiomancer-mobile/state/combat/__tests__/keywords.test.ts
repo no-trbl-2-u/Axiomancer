@@ -81,6 +81,10 @@ describe('keyword registry — KW-3 (no dead references)', () => {
         'consume_affliction', 'siphon', 'echo', 'echo_next_spell', 'reprise',
         'extend_dots', 'boost_all_dots', 'immolate', 'purge_self', 'replay_last',
         'flay', 'twin', 'execute', 'overkill', 'soul_gain',
+        // THE KEYWORD PURGE (2026-09-28, T): FORETELL had no carrier left (no
+        // card, enemy, signature skill or item printed it), so its gloss went.
+        // The kind stays in the engine union and prints as plain rules text.
+        'foretell',
     ];
 
     it('every mechanic kind either maps to a glossed keyword or is classified', () => {
@@ -109,6 +113,15 @@ describe('keyword registry — KW-3 (no dead references)', () => {
         // Guards the gate itself: an empty or truncated enumeration would make
         // every assertion above pass vacuously.
         expect(CARD_SPECIAL_MECHANIC_KINDS.length).toBeGreaterThan(40);
+    });
+
+    it('the 2026-09-28 purge removed PIERCE, RIPOSTE and FORETELL from the glossary', () => {
+        // T, 2026-09-28: purge the remaining unused keywords. None of the three
+        // had a live carrier; their engine mechanics stay (the P1 brief's rule).
+        const stillPresent = ['Pierce', 'Riposte', 'Foretell'].filter((k) => keywordGloss(k) !== null);
+        expect(stillPresent).toEqual([]);
+        expect(keywordForMechanic('foretell')).toBeNull();
+        expect(keywordForEffect('buff_accuracy_up')).toBeNull();
     });
 
     it('retired keywords (BARRIER, CONJURE, PERORATION, TRANSMUTE, REPRISE) are gone', () => {

@@ -59,7 +59,6 @@ export const GLYPH_SHAPES: Record<string, GlyphShape> = {
     HEAL: HEART,
     DRAW: CARD_SHEET,
     CLEANSE: DROPLET,
-    FORETELL: EYE,
     OATH: DIAMONDS,
 };
 

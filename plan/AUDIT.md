@@ -63,6 +63,49 @@
 
 ## Pending
 
+### [tests] Root `npm test` is red on main: the DevLog marginalia assertion (2026-09-28)
+- category: tests
+- impact: 4
+- ease: 6
+- detail: `scripts/build-devlog-public.test.mjs:117` ("nothing that
+  carries meaning sits behind a script") fails on a clean `main` worktree
+  at `3c7e897`: the built post it picks has no `<details class="marg">`.
+  No CI workflow runs this file, so no check goes red; only the root
+  `npm test` shows it. Found by the keyword-purge PR's gate run (D45); not
+  caused by it.
+- next (`/iterate`): decide whether the newest DevLog entry should carry
+  marginalia or the test should pick a post that has them, then add the
+  file to a CI job so it cannot rot silently again.
+
+### [content] Consumable buffs borrow unrelated keyword glosses on their status chips (2026-09-28)
+- category: content
+- impact: 3
+- ease: 6
+- detail: `SUPPORT_KEYWORD` in `axiomancer-mobile/state/combat/keywords.ts`
+  maps consumable and engine buffs to the closest live keyword, so a crit
+  or status-chance buff shows a MARK chip with Mark's gloss, and haste
+  shows DRAW. The chip then explains a mechanic the buff does not have.
+  The keyword purge (D45) removed the FORETELL label from
+  `buff_accuracy_up`, which now shows its own effect name.
+- next (`/iterate` or `/adjust-equipment`): give each mapped buff its own
+  effect-name label (as `buff_accuracy_up` now does) unless it really
+  applies the keyword, and pin the mapping with a test.
+
+### [debt] Engine faces still print RIPOSTE / FORETELL / PIERCE words that have no gloss (2026-09-28)
+- category: debt
+- impact: 2
+- ease: 5
+- detail: after D45 the `riposte` and `foretell` kinds and the
+  `deal.pierce` flag stay in the engine, and the mobile presenter still
+  names them on a face (`combat-encounter.engine.ts`: the riposte face
+  kind, the foretell headline fallback, the FREE rider pairs, the
+  `VITAE · PIERCE` sub-line). No live card reaches those paths, so nothing
+  prints today. A card that returns one of them in a guided session (D37)
+  must re-add the gloss and glyph in the same PR, or the face prints an
+  undefined word.
+- next (guided card session): treat as part of re-admitting the keyword;
+  no loop action while no card carries it.
+
 ### [ui] Post-purge: a staged A Plain Word wraps "+25%" mid-token to "+2/5%" (2026-09-27)
 - category: ui
 - impact: 4

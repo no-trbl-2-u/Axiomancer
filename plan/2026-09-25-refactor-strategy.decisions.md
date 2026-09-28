@@ -410,6 +410,21 @@ Pending under the "post-purge" rows. A Plain Word's staged face wraps
 systems are dormant and the Momentum tutorial still teaches them. Card-side
 fixes wait for the card agent (D37).
 
+**D45 — Purge the remaining unused keywords.** (T, 2026-09-28: "purge the
+remaining unused keywords from the atlas and glossary".) A keyword keeps its
+atlas row and glossary entry only while something live carries it: a player
+card, an enemy deck or ability, a signature skill, an item, or the dice and
+blacksmith systems. Mentioning a word inside another keyword's reminder text,
+or borrowing it as a label for an unrelated effect, is not a carrier. Under
+that rule PIERCE, RIPOSTE and FORETELL went: their atlas rows, their mobile
+glosses and glyphs, the DevLog catalog's bold list, the editor's display
+vocabulary, the dead theme families' mentions, and the HIDE / FLURRY reminder
+clauses that named them. `buff_accuracy_up` now shows its own effect name.
+The engine mechanics behind them stay (the P1 brief's rule); a returning word
+re-earns its row in a guided session (D37). The 19 player rows that remain
+each have a live carrier. *Rejected:* keeping words that only enemy reminder
+text named (the 2026-09-27 audit's reading).
+
 ## Open follow-ups
 
 **D1 status at a glance (2026-09-28, after #408).** Card and keyword

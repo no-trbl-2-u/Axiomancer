@@ -38,7 +38,6 @@ mid-flight. Run `npm run catalog` for the current binding.
 | keyword | reminder text | carried by |
 |---|---|---|
 | **DEAL N** | Direct VITAE damage. Not a keyword — plain English on the face; a multi-hit prints `N × k` and each hit is its own damage instance. | (see the catalog) |
-| **PIERCE** | This damage ignores the foe's HIDE and every effect that would reduce it. | (see the catalog) |
 | **WRATH N** | Every hit you land deals that much more, for the rest of the fight. It stacks and never fades. | (see the catalog) |
 | **CHAIN N** | Your next hit deals that much more. Chain fades at the end of a turn that added none. | (see the catalog) |
 
@@ -57,14 +56,12 @@ mid-flight. Run `npm run catalog` for the current binding.
 | keyword | reminder text | carried by |
 |---|---|---|
 | **GUARD N** | Blocks that much incoming damage during the next threat phase. Unused Guard is lost unless the card prints "persists". | (see the catalog) |
-| **RIPOSTE iN dM** | Armed for one threat phase: reduces the first attack by its parry value, and if the blow is fully blocked the foe takes the counter instead. | (see the catalog) |
 
 ## Player keywords — tempo and control
 
 | keyword | reminder text | carried by |
 |---|---|---|
 | **STAGGER N** | Removes that many rungs (the steps of the foe's telegraph) from its next action. Strip them all and the action is denied. | (see the catalog) |
-| **FORETELL N** | Reveals the foe's next stance and looks at that many cards of your deck, moving the best to the top. | (see the catalog) |
 | **QUARTER iN dM** | The foe's attacks deal less damage per Quarter stack. | (see the catalog) |
 
 ## Player keywords — the deck as a resource
@@ -111,7 +108,7 @@ WOUNDING, BRUTAL and the rest are untouched.
 
 | keyword | reminder text | applied in | carried by |
 |---|---|---|---|
-| **HIDE N** | Every hit against this foe is reduced by N, never below 1. PIERCE ignores it. | `applyEnemyDamage` | (see the roster) |
+| **HIDE N** | Every hit against this foe is reduced by N, never below 1. | `applyEnemyDamage` | (see the roster) |
 | **SWIFT** | Your GUARD and BARRIER count for half against this foe. | `resolveThreatPhase` | (see the roster) |
 | **BRUTAL** | Damage this foe gets past your defenses is doubled. | `resolveThreatPhase` | (see the roster) |
 | **VENOM N** | Damage this foe lands also poisons you for N. | `resolveThreatPhase` | (see the roster) |
@@ -120,7 +117,7 @@ WOUNDING, BRUTAL and the rest are untouched.
 | **REGROW N** | This foe heals N at the end of each of its phases. | `processBetweenPhases` | (see the roster) |
 | **RAVENOUS** | This foe heals for the damage it lands on you. | `resolveThreatPhase` | (see the roster) |
 | **WOUNDING N** | An unguarded hit of N or more puts a WOUND in your deck. | `resolveThreatPhase` | (see the roster) |
-| **FLURRY N** | This foe's hit lands as N separate strikes instead of one — RIPOSTE only blunts the first. | `resolveThreatPhase` | (see the roster) |
+| **FLURRY N** | This foe's hit lands as N separate strikes instead of one. | `resolveThreatPhase` | (see the roster) |
 | **SUMMON N** | This foe fields N of its own. Each bites you for its printed number every phase, even while the foe is denied. | `processBetweenPhases` + `resolveThreatPhase` + `strikeAdd` | (see the roster) |
 
 HIDE is the reason one big hit beats many small ones: it is subtracted from
@@ -284,6 +281,20 @@ stale and corrected in the same pass.)
   sweep pick it up automatically — no other mobile code needed.
 
 ## Retired
+
+- **THE KEYWORD PURGE** (2026-09-28, T: "purge the remaining unused
+  keywords from the atlas and glossary") — PIERCE, RIPOSTE and FORETELL
+  left their rows here, their `KEYWORD_GLOSS` entries, their FREE and
+  silhouette glyphs and the DevLog catalog's bold list. None had a live
+  carrier: no card prints them, no enemy or signature skill applies them,
+  and no item grants them. The 2026-09-27 audit kept them because the HIDE
+  and FLURRY reminders named PIERCE and RIPOSTE and a consumable borrowed
+  the FORETELL label; those two reminder clauses were cut and
+  `buff_accuracy_up` now shows its own effect name. The engine mechanics
+  (`deal.pierce`, the `riposte` and `foretell` kinds, the `foretell` rider)
+  and the card editor's authoring vocabulary for them are untouched; a
+  returning word re-earns its row in a guided session (D37). Every row
+  still listed above has a live carrier.
 
 - **THE KEYWORD AUDIT** (2026-09-27, after the card purge P1) — the player
   library is the grey office alone (A Plain Blow DEAL, A Plain Ward GUARD, A
