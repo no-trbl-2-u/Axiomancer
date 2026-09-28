@@ -208,9 +208,20 @@ function freeLineText(card: CombatCard, sourceCard?: Card): string {
     if (card.cardType === 'oath' || card.cardType === 'hex') return persistentFreeText(card);
     // selfTargetCard: a rider crossing the card's printed target names its side
     // ('mark ×1 (enemy)' on the self-target ad-nauseam — card-clarity audit).
-    return sourceCard?.free
-        ? deabbreviateShorthand(riderText(sourceCard.free, { selfTargetCard: sourceCard.targetType === 'self' }))
-        : 'no effect';
+    if (!sourceCard?.free) return 'no effect';
+    const text = deabbreviateShorthand(riderText(sourceCard.free, { selfTargetCard: sourceCard.targetType === 'self' }));
+    const ae = sourceCard.free.applyEffect;
+    const pct = ae ? percentIntensity(ae.effectId, ae.intensity ?? 1) : null;
+    return pct ? text.replace(`×${ae!.intensity ?? 1}`, pct) : text;
+}
+
+/** A damage-taken status (VULNERABLE) counts its intensity in percentage
+ *  points (`damageTakenMult` 1.01 per point), so its value reads '+10%', the
+ *  way the PAID rail prints '+25%' — never the '×10' stack count. null for
+ *  every other effect. */
+function percentIntensity(effectId: string, intensity: number): string | null {
+    const mult = lookupEffect(effectId)?.payload?.damageTakenMult;
+    return mult && mult > 1 ? `+${Math.round((mult - 1) * 100 * intensity)}%` : null;
 }
 
 /** The barrel doesn't export CardRider — derive it from Card. */
@@ -244,7 +255,7 @@ function riderPairs(r: CardRider): [string, string][] {
         const i = r.applyEffect.intensity ?? 1;
         const d = r.applyEffect.duration;
         // De-abbreviated (audit 2026-07-12): '×1 · 1t', never the 'i1 d1' code.
-        pairs.push([kw.toUpperCase(), `×${i}${d ? ` · ${d}t` : ''}`]);
+        pairs.push([kw.toUpperCase(), `${percentIntensity(r.applyEffect.effectId, i) ?? `×${i}`}${d ? ` · ${d}t` : ''}`]);
     }
     if (r.ruptureMarks) pairs.push(['RUPTURE', `${r.ruptureMarks}/stack`]);
     if (r.intensityPerPip) pairs.push(['PIP', `+${r.intensityPerPip} int`]);

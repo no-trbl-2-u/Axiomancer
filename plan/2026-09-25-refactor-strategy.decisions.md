@@ -396,6 +396,20 @@ D41 ("no caps") stands. A separate card agent owns card, keyword, upgrade
 and transformation design from here (T, 2026-09-27); S3 touched only the
 files listed in #404.
 
+**P1 and keyword-audit residue (2026-09-27, PRs #406 and #407).** The
+purge undid most of S3's double count. The re-stamped baseline reads
+early 60%, mid 83%, late 99% and impossible 67% (stamp `c6fd758c`). The
+keyword audit (#407) removed every card-only keyword, gloss, glyph, editor
+word and effect the purge left unused, plus the per-card engine hooks keyed
+on purged ids. Enemy keywords were left alone. A live-mode playtest (the
+real map encounter, sage preset, seeds 16 and 8) won four fights. Every
+reward draft offered exactly Blow, Ward and Word, and TAKE CARD grew the
+deck from 10 to 11. What the purge left behind is filed in `plan/AUDIT.md`
+Pending under the "post-purge" rows. A Plain Word's staged face wraps
+"+25%" (its "×10" FREE value was fixed in the residue PR). The King of Revenge is 0/40. WOUNDING has no payload. The colour
+systems are dormant and the Momentum tutorial still teaches them. Card-side
+fixes wait for the card agent (D37).
+
 ## Open follow-ups
 
 - Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and
