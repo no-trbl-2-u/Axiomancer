@@ -26,7 +26,7 @@ fundamental mechanics of hazard."
 ## R6 — Hazard reset (loop)
 
 Goal: the smallest hazard deck that still plays end-to-end, so B3 starts
-from a clean floor. Defaults (T may amend at ratification):
+from a clean floor. T, 2026-09-28: the minimal playable core below (D63).
 
 1. Keep the engine loop (roll, place dice, meters, routes) and the mobile
    board untouched in shape.

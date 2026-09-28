@@ -542,6 +542,44 @@ want to do a Revamp Deck Tab UI phase"; "Map the existing paintings, drop
 dead rows, AND … a card art revamp phase"; the launcher label becomes
 "Miserere Mei, Deus".) B7, B8; R8 maps placeholder art and sets `expo.name`.
 
+The last three came from the same session: T walked the plan's open calls
+(`plan/revamp/README.md` §6) one at a time.
+
+**D61 — Act 1's shape during the reset: the Doorwarden guards every
+region's door, the deep stair is sealed, and each region gets an Anvil.**
+(T: "Doorwarden ends every region"; "Sealed, like the vault door"; the Anvil
+"Re-home to exist once per region (at least for right now, and near the
+region exit)".) Float-Eye takes the normal fights and the Brine Hag is a
+rarer mid-region fight. The Doorwarden on `bw-17`, `cw-17`, `bc-15` and
+the Lantern Deep's column-5 node previews D59's region bosses and overturns
+D30 everywhere. The Lantern Deep's deep stair, which led to the purged
+fishing-village, is sealed; there is no end-of-run state. The Anvil's only
+placement was a fishing-village node (Phase 60); the existing event is
+re-homed near each region's exit. *Rejected:* the Doorwarden ending only
+Act 1; keeping D30 with the boss unplaced; a terminal end scene; looping
+back to the Breakwater; parking or cutting the Anvil.
+
+**D62 — The reset leaves the dev menu alone; a Dev Menu revamp (B10) and a
+theme-colour phase (R10) are added.** (T: "Let's go over the Dev Menu as
+well …"; after the audit: "Leave it all for the Dev Menu revamp"; the
+colours: "Yes, a small phase after the reset".) R-phases touch dev tools
+only where a deletion breaks the build; D19 stands until B10. The dev-menu
+audit (CI drives six surfaces, not D19's nine; four tools have nothing left
+to act on; ten carry dead content) is B10's input. R10 moves the surviving
+hard-coded hex colours into `theme/axm.ts` tokens with no visual change.
+*Rejected:* a content-driven dev-menu cut in R8 (amending D19); trimming
+without cutting; folding colours into B7/B8; skipping them.
+
+**D63 — The plan's other defaults are ruled as drafted.** (T, ballot.) All
+11 enemy-keyword systems are deleted, with an optional empty
+`Enemy.keywords` kept for B2. Level-up Learn Card is deleted; level-ups give
+stat points only. RELENT (PLEA/capitulation) and CONDEMN
+(premises/peroration) are both cut; befriend → mercy is the only non-lethal
+ending. The hazard reset keeps a minimal playable core. *Rejected:* keeping
+the keyword mechanics or a simple subset; keeping or repurposing Learn Card;
+keeping RELENT or both dormant; removing only the hazard lies; parking
+hazards.
+
 ## Open follow-ups
 
 **D1 status at a glance (2026-09-28, after #408).** Card and keyword

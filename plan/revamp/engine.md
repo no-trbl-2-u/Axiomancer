@@ -33,7 +33,7 @@ needs after R4 (The Open Hand → mercy choice). Delete the rest.
 | Themes | `Cards/card-themes.ts` (six dead archetypes + `curse` in `THEME_KEYWORDS`); `Cards/card-keywords.ts` (maps neither `deal` nor `debuff_vulnerable`, so 2 of 3 grey cards report no keywords — fix) | |
 | Deck draft / presets | `Combat/combat.deck-draft.ts` (303 LOC); the one-entry `Combat/combat.starter-deck-presets.ts` → a plain grey-deck constant | |
 | Reward steering | `Combat/combat.rewards.ts:105-285` (`REWARD_THEMES`, `REWARD_OFF_THEME_RATE`, dominant-theme slot, keyword pull, rarity); `Combat/combat.reward-draft.sim.ts`; `keywordsOf` | keep the reward itself (D44, D50); fix the "grey starters are never a reward" comment |
-| Learn Card | `Cards/card.engine.ts:34` `getAvailableCards` (always empty) | README §6 call 4 |
+| Learn Card | `Cards/card.engine.ts:34` `getAvailableCards` (always empty) | deleted (D63) |
 | Alt-win systems | sway/PLEA, premises/CHARGE, capitulation (`concedeFloorFor`, `capitulateThreshold`, `selectCapitulationChoice`), peroration; friendship *increments* from cards; `regionConsequences.sparedRegions`/`exploitedRegions` (never written, `Game/game.reducer.ts:201, 290`); `buff_absolved` | keep only befriend → mercy (D47) |
 | Dead `executeCard` branches | haunt / curse / enemy-caster (`Cards/card.engine.ts:140-163`); the Phase-66 synergy branch | |
 | Effects with no live carrier | the 22 `EffectPayload` keys with no carrier (`Effects/types.ts`); `getStudyMarkIntensity`, `extendRandomBuffDuration`, `applyDrain`, `applyDispel`, `consumeDotEffects`, `projectReapAll`; player roll-modifier plumbing | coordinate with R2/R5 |

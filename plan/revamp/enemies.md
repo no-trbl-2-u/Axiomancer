@@ -33,8 +33,8 @@ and the roster was built against a 134-card library:
 | Tier | Foe | Level | Notes |
 |---|---|---|---|
 | normal | Float-Eye (`enemy-float-eye`) | 1 | 3 phases; no befriend data |
-| elite | Brine Hag (`enemy-brine-hag`) | 7 | The Breakwater's D30 door elite; **has** friendshipReward, befriendabilityConfig, journal, pactLines |
-| boss | The Doorwarden (`enemy-the-doorwarden`) | 8 | Tiered deck; was the Labyrinth's Act I boss (`Labyrinth/content/act1.content.ts:20`) — re-point its lore lightly as a region/act boss |
+| elite | Brine Hag (`enemy-brine-hag`) | 7 | Rarer mid-region fight (D61); **has** friendshipReward, befriendabilityConfig, journal, pactLines |
+| boss | The Doorwarden (`enemy-the-doorwarden`) | 8 | Every region's door fight (D61); tiered deck; was the Labyrinth's Act I boss (`Labyrinth/content/act1.content.ts:20`) — re-point its lore lightly as a region boss (no new prose) |
 
 Retired: the other 76 (incl. Grave Larva, Chattering Skull, the King of
 Revenge — T purged him with fishing-village, D53). `sandbag-01` stays as the
@@ -52,13 +52,15 @@ Work:
 3. **Strip keywords** from the survivors (the Doorwarden carries HIDE,
    UNSHAKEN, BRUTAL, SWIFT). With no carrier left, delete the resolution code
    for all 11 enemy keywords and `enemy-keywords.ts`'s glosses
-   (README §6 call 2); keep `Enemy.keywords?` as an optional empty field so
+   (D63); keep `Enemy.keywords?` as an optional empty field so
    B2 can re-add.
 4. Delete the `swayCleanse` / `premiseShed` riders, their telegraph text and
    their debuff classification; delete the curse-injection code paths.
 5. `EnemiesByMap` (`enemy.library.ts:3443`): every Act 1 map's pool becomes
-   `[FloatEye]`; door nodes pin Brine Hag; the Lantern Deep's last fight
-   pins the Doorwarden (README §6 call 1). Parked maps' pools empty.
+   Float-Eye, with the Brine Hag as a rarer mid-region fight; **every
+   region's door fight pins the Doorwarden** (`bw-17`, `cw-17`, `bc-15`, the
+   Lantern Deep's column-5 node) as a region-boss preview (D61, overturns
+   D30 everywhere). Parked maps' pools empty.
 6. Retired-foe references elsewhere: quests, dialogue gates, bestiary,
    stage profiles (`combat.stage-profiles.ts:113`), CLI defaults, the
    `impossible` stage's `TheIncompleteness`, e2e journeys. The world phase
