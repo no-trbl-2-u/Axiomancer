@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-09-27 at commit 36238fd8
-> Pass count: 58
+> Last pass: 2026-09-28 at commit 5ebc7c13
+> Pass count: 59
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -146,6 +146,30 @@
 > Marrow's offer unchanged), the doubled opening tell (pass 54, Pending),
 > and the relic "Grants X" echo (Pending).
 
+> **[critique pass 59, 2026-09-28, commit 5ebc7c13] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route still bounces to the title with no save; the
+> fixture-booted late-game hub covers that screen). 41 commits after pass
+> 58. Almost all are plan and loop work: THE REVAMP (D46-D64), R0's
+> archive of the content stewards, and the keyword purge (D45). Product
+> changes are small: the VULNERABLE percent presenter change, the purged
+> glyphs and six retired NPC lines. None of the 11 screens shows a
+> regression. Old Marrow's first meeting now offers only "WHAT NEEDS
+> DOING?" and "LEAVE HIM BE."; the observer replies are gone. Updated, not
+> re-filed: pass 58's A Plain Word row is only half-fixed. The presenter
+> now emits "+24%", but `compactFree` drops the "%", so the card face
+> reads "+24" beside the paid "+60%" at both viewports (evidence added to
+> the row). Reconfirmed and not re-filed: fishing-village's "breakwater"
+> lines (pass 55, Pending; Marrow's crab offer at `maps.ts:62` is
+> unchanged), the doubled opening tell (pass 54, Pending), the relic
+> "Grants X" echo (Pending), and the desktop "VUL"/"+6"/"%" and "GUAR"
+> wrap on the hand faces (the `plan/AUDIT.md` row "Post-purge: a staged
+> A Plain Word wraps +25% mid-token"). Checked and not filed: the rest
+> fixture greys out THE CUT for two reasons, an empty purse and a deck at
+> its floor, but prints only the floor. That state is the fixture's
+> starting point, not one a player earned. Zero fresh findings this pass.
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
@@ -167,6 +191,12 @@
 - suggested fix: have the presenter give the FREE chip the same unit as the
   paid chip (for VULNERABLE, "+24%"), and pin it with a presenter test on
   `grey-word`.
+- update (pass 59, commit 5ebc7c13): half-fixed. The presenter now emits
+  "+24%" (`percentIntensity` in `combat-encounter.engine.ts`), but the
+  board's `compactFree` (`CombatBoard.tsx:1669`) matches `^\+?(\d+)` and
+  returns "+24", dropping the unit. Both viewports now read "A PLAIN WORD /
+  +24 / VULNERABLE / +60%". Remaining fix: keep a trailing "%" in
+  `compactFree` and pin it with a test on "+24%".
 - source: critique:drive (unattended)
 
 ### [MED] fishing-village — the village still points the player at "the breakwater", which is now the first map they already walked
