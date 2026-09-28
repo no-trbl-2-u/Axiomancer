@@ -84,7 +84,8 @@ a guard; a test that fails when the game is *different* is a repealed law.
 Hazard-Pattern Combat remains the ONLY combat engine (witness:
 `simulateHazardPatternCombat`), LIVE in mobile map encounters, with the enemy's
 sole bar VITAE and `isDefeated(enemy)` the main win condition. Engine constants
-are tuned manually; **`/adjust-cards`** stewards the card pool and
+are tuned manually inside ratified revamp phases (D58); cards change only in
+guided sessions with T (D37; `/adjust-cards` was archived in R0), and
 **`/combat-playtest`** runs the stage matrix plus qualitative `playtester`
 agents (report only; see `docs/playtest.md`).
 

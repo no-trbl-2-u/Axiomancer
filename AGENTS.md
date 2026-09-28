@@ -111,14 +111,19 @@ Live, at the repo root:
   `legacy-combat-tuning`, `playtest`, `resolve-playtest`, and `bump-engine`
   (npm-pin-era engine bumps, retired with the monorepo merge) were trimmed,
   and the eight tuning/playtest commands above went in trim T5 (D10).
-- `.claude/skills/` — design skills: `brainstorm-mechanics`, `character-spec`,
-  `story-spec`, `world-spec`; plus the `kb-query` lookup skill.
-- `.claude/agents/` — `scout`, `reader`, `mechanics-expert`, `playtester`,
-  `card-expert` (card/keyword design AND implementation — the working
-  agent behind `/adjust-cards` and `/adjust-keywords`; grounded in the Dawncaster corpus — see
-  "Truth sources" below), `content-curator` (narrative
-  writer-shipper — dialogue trees, event prose, flavor — `/iterate`'s
-  content-gap worker).
+- `.claude/agents/` — `scout` (web research with citations) and
+  `playtester` (plays seeded encounters via Playwright, report only).
+
+The content stewards (`adjust-*`, `forge`), the `card-expert`,
+`mechanics-expert`, `reader` and `content-curator` agents, and the design
+skills (`brainstorm-mechanics`, `character-spec`, `story-spec`, `world-spec`,
+`kb-query`) were archived in R0 of THE REVAMP (2026-09-28, D58) to
+`plan/archive/2026-09-28-revamp-r0/`. The loop creates no content during the
+revamp; card and keyword design happens only in guided sessions with T (D37),
+which will write a fresh card agent (B6). The `kb-query` MCP tools stay
+callable directly. The keyword wiring checklist now lives in
+`axiomancer-mechanics/docs/keyword-atlas.md`; the map wiring contract in
+`axiomancer-mechanics/docs/world.md`.
 
 Commands write their reports to `<package>/docs/reports/` (created on
 demand). Each domain command is self-contained — it does not read
@@ -141,9 +146,9 @@ run and any claim from memory is marked UNGROUNDED.
 | **`kb-query` MCP** (`kb_overview` / `kb_find_games` / `kb_search` / `kb_read_doc` / `kb_cards` / `kb_keyword`) | External prior art: board-game rules + reception, Dawncaster corpus (1,692 cards / 141 keywords) — cite `kb:<game-slug>/<doc> (src-NNN)` | Live — served over HTTP by the KB's deployed Worker, current as of that repo's last deploy |
 | **Measured baselines** (`deck-matrix-baseline.json`) | Win-rate curves, status engagement, preset spreads | Only as fresh as the last sim — run `npm run baseline:check` and NAME the stamp before citing numbers |
 
-Measuring is not tuning: regenerating a baseline is briefing; acting
-on it belongs to `/adjust-cards` (cards and decks). Engine constants are open to the
-tuning loops with measured evidence (THE OPEN GATE ¶4, 2026-08-28).
+Measuring is not tuning: regenerating a baseline is briefing. During the
+revamp, card and deck changes happen only in guided sessions with T (D37);
+engine constants move only inside a ratified revamp phase (D58).
 Full protocols (consumption surfaces, wishlist, regen/confidence
 rules): [`docs/truth-sources.md`](docs/truth-sources.md). The complete
 external-system register (ownership, credentials, recovery):
@@ -195,21 +200,17 @@ The unified **nexus** harness was re-onboarded onto the monorepo on
 2026-07-03 (`chore: adopt nexus methodology`). It is now live at the repo root:
 
 - `skills/` — the loop verbs: `ship-a-phase`, `plan-a-phase`, `iterate`,
-  `critique`, `triage`, `expand`, `forge` (the content foundry — ships
-  new maps/continents/events/art every growth tick; THE OPEN GATE
-  ¶8's world/spatial engine), the `adjust-*` family (`adjust-cards`,
-  `adjust-equipment`, `adjust-enemies`, `adjust-keywords`,
-  `adjust-npcs` — per-item content lifecycle stewards, split out of
-  forge 2026-09-02: each audits its surface on a rate-limited cadence
-  and creates/updates/retires whatever the audit finds, with a
-  mandatory `kb-query` research run before any create/update is
-  written), `march`, `oversight`, `jot`, `digest`, `consolidate`.
-  (Heavyweight source-of-truth files; the `.claude/commands/<verb>.md`
-  pointers are the doorways.)
+  `critique`, `triage`, `expand`, `march`, `oversight`, `jot`, `digest`,
+  `consolidate`, `fix-ci`. (Heavyweight source-of-truth files; the
+  `.claude/commands/<verb>.md` pointers are the doorways.) **Revamp mode**
+  (D58, since 2026-09-28): the loop ships only phases of the ratified revamp
+  build plan (`plan/steps/01_build_plan.md`, `plan/revamp/`), plus fix-ci and
+  critique. It creates no content of any kind: cards, keywords, enemies,
+  relics, maps, NPCs, events or art.
 - `plan/` — the loop's durable memory: `bearings.md` (standing context —
   **read this first**), `steps/01_build_plan.md` (the phase queue),
   `AUDIT.md` + `CRITIQUE.md` (the drain queues), `PHASE_CANDIDATES.md`,
-  `CONTENT_LEDGER.md` (per-category `adjust-*` last-pass metadata),
+  `revamp/` (THE REVAMP part plans),
   `reflexes.md`, `lessons.md`, `phases/` (open + recent briefs), and
   `archive/` (rotated history, verbatim).
 - `scripts/` — `deploy-check.mjs` (CI-green deploy gate),
@@ -225,9 +226,9 @@ Full context lives in `plan/bearings.md` and the nexus kit
 (`../nexus/`).
 
 **GitHub Actions layer.** Every zero-input skill/command also runs in CI
-via `.github/workflows/` (scheduled `/march` ticks, nightly `/digest`,
-weekly tuning loops, `/fix-ci` on red main, `@claude` mentions, auto PR
-review). See `.github/workflows/README.md` for the full map, cadences,
+via `.github/workflows/` (scheduled `/march` ticks, `/digest` every other
+night, monthly `/consolidate`, weekly drift and lint checks, `/fix-ci` on red
+main, `@claude` mentions). See `.github/workflows/README.md` for the full map, cadences,
 and required secrets (`CLAUDE_CODE_OAUTH_TOKEN`, recommended `GH_PAT`).
 
 **Enforcement layer (always on).** `.claude/settings.json` is committed
@@ -240,10 +241,9 @@ harness and warn on unclean turn-ends. Personal overrides go in
 Self-test the guard any time with
 `node .claude/hooks/guard.mjs self-test`.
 
-Distinct from the domain **design** skills in `.claude/skills/`
-(brainstorm/character/story/world-spec) and the domain tuning/playtest
-commands in `.claude/commands/` — the loop verbs are a separate layer.
-Do not merge the two.
+Distinct from the domain playtest command in `.claude/commands/`
+(`combat-playtest`) — the loop verbs are a separate layer. Do not merge the
+two.
 
 ## Nexus standing rules (canonical)
 

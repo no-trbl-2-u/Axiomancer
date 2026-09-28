@@ -1,5 +1,10 @@
 # Brain Dump — Unorganized Ideas
 
+> **HISTORICAL (R0, 2026-09-28).** Written by the archived
+> `brainstorm-mechanics` skill around the retired RPS / fallacy / moral-meter
+> identity. Not a signal source for `/expand`; design lands in
+> `plan/revamp/` now.
+
 ## Brainstorm Sessions
 
 ### Skill Resource Economy — 2026-05-11

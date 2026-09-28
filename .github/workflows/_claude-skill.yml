@@ -110,7 +110,7 @@ jobs:
       #
       #   axio-query  — GRANTED below. Its server is `scripts/axio-mcp-server.mjs`,
       #                 in the repo, so it starts wherever the checkout does. Without
-      #                 it, card-expert's engine-truth grounding degrades to file
+      #                 it, engine-truth grounding degrades to file
       #                 reads on every unattended run (content-pipelines audit §6.4).
       #   kb-query    — GRANTED below (2026-08-31). Its server is a remote HTTP
       #                 endpoint the KB repo deploys: nothing to check out, no

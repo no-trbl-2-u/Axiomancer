@@ -2,9 +2,7 @@
 
 > A reusable convention for the rare moments where an agent is
 > allowed to ask the user a question. In this repo that's
-> `/oversight` (the only loop skill that may ask), the interactive
-> design skills in `.claude/skills/` (brainstorm / character / story /
-> world-spec, which interview by design), and any attended session
+> `/oversight` (the only loop skill that may ask) and any attended session
 > (root `AGENTS.md` hard rules: every question goes through
 > `AskUserQuestion`).
 >

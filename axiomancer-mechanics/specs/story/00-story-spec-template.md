@@ -1,11 +1,15 @@
 # Story Specs — Template and Conventions
 
+> **HISTORICAL (R0, 2026-09-28).** Story canon is `content/story/story-overview.md` alone (THE BLANK PAGE); story specs are no longer written. Kept as a record, not as live
+> guidance. The skill that wrote it was archived to
+> `plan/archive/2026-09-28-revamp-r0/`.
+
 Story specs live here: `specs/story/`. They follow the same principles as
 mechanic specs (one spec, one body of work, one branch, one PR) but use a
 narrative-focused template.
 
-**How to create a story spec:** invoke `/story-spec` and the skill will
-walk you through the design conversation and create the file automatically.
+**How to create a story spec:** (historical) `/story-spec` used to run
+this; it was archived in R0.
 You can also copy the template below directly if you prefer.
 
 ---

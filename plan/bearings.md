@@ -68,7 +68,7 @@ Consequences for the loop:
 **Auth:** `none`
 
 Single-player local app; no login wall, no server, no accounts.
-`/critique` and `reader`/`playtester` run against the local build
+`/critique` and `playtester` run against the local build
 with no session handshake.
 
 ## Stack (locked — do not re-litigate)
@@ -205,7 +205,8 @@ Axiomancer/
 ├── skills/                     # nexus LOOP verbs (this harness)
 ├── plan/                       # nexus state files (this dir)
 │   ├── bearings.md             # this file
-│   ├── AUDIT.md · CRITIQUE.md · PHASE_CANDIDATES.md · CONTENT_LEDGER.md
+│   ├── AUDIT.md · CRITIQUE.md · PHASE_CANDIDATES.md
+│   ├── revamp/                 # THE REVAMP part plans (D46–D64)
 │   ├── reflexes.md · lessons.md · north-star-mork-borg.md
 │   ├── steps/01_build_plan.md
 │   ├── phases/                 # template, V masterplan, open/partial + recent briefs
@@ -219,16 +220,16 @@ Axiomancer/
 ├── scripts/                    # deploy-check · notify · loop-issue · check-* lints · devlog/catalog builders
 ├── .github/workflows/          # verify-* gates · march/night/triage crons · verb workflows
 ├── .claude/
-│   ├── commands/               # loop-verb pointers + domain tuning cmds
-│   ├── agents/                 # scout · reader · mechanics-expert · playtester · content-curator · card-expert
-│   ├── skills/                 # domain DESIGN skills (brainstorm/character/story/world-spec, kb-query)
+│   ├── commands/               # loop-verb pointers + combat-playtest
+│   ├── agents/                 # scout · playtester
 │   ├── hooks/                  # guard.mjs · telemetry.mjs
 │   └── settings.json           # enforcement, always on
 ```
 
-Note the deliberate split: **nexus loop verbs live in root
-`skills/`**; **domain design skills live in `.claude/skills/`**.
-Two different things in two locations — do not merge them.
+Loop verbs live in root `skills/`; `.claude/commands/` holds their doorways
+and the one domain command (`combat-playtest`). The content stewards, the
+design skills and four agents were archived in R0 (2026-09-28, D58) to
+`plan/archive/2026-09-28-revamp-r0/`.
 
 ## Sub-agents
 
@@ -237,15 +238,11 @@ Defined under `.claude/agents/`. Spawn aggressively.
 | Agent | When to spawn | Returns |
 |---|---|---|
 | `scout` | External fact, prior-art, spec, date, signal | Structured findings with citations |
-| `reader` | Fresh-eyes observation of the local build | Findings array |
 | `playtester` | Play the game via the running expo-web build (Playwright) — the real `/critique` observer for this project | Structured playtest report |
-| `mechanics-expert` | Second opinion on a mechanic design / balance call | Structured analysis (never code) |
-| `content-curator` | Author + ship narrative content (dialogue trees, event prose, flavor) in the house voice — `/iterate`'s content-gap worker | Shipped content through the gates |
-| `card-expert` | Design + implement cards/keywords with prior-art receipts — the working agent behind the `adjust-cards` / `adjust-keywords` lifecycle | Shipped cards/keywords through the gates |
 
-For `/critique`, prefer **`playtester`** (it already drives the
-app end-to-end) over the generic `reader`; there is no hosted URL
-for `reader` to fetch.
+`reader`, `mechanics-expert`, `content-curator` and `card-expert` were
+archived in R0 (D58): the loop creates no content during the revamp, and a
+fresh card agent is written at the first card session (B6).
 
 ## Plan expansion posture
 
@@ -288,24 +285,11 @@ ambiguity.)
   keywords, VITAE pools, tiered decks and stages. Specs 32, 34 §3/§8
   and 35 and `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/profane-canon.md` are marked HISTORICAL; there is no
   governing objective function any more.
-- **THE CONTENT LIFECYCLE SPLIT (T direct, 2026-09-02/03).** Per-item
-  content (cards, equipment, enemies, keywords, NPCs/dialogue) split
-  out of `/forge` into the five `adjust-*` loop verbs
-  (`skills/adjust-<category>.md` + `.claude/commands/` doorways), each
-  a standing steward that creates, updates, AND retires its surface's
-  content — no cap per tick; whatever its structural audit finds.
-  `/forge` keeps only maps/continents/events/art. `/march` dispatches
-  via a new rate-limited content-lifecycle gate (§3b: ≥15 commits or
-  ≥36h per category, green deploy, stalest category first) reading
-  `plan/CONTENT_LEDGER.md`. Three standing laws of the family:
-  (1) every CREATE and UPDATE runs a `kb-query` MCP research pass
-  BEFORE anything is written (receipts or a documented miss; REMOVE is
-  exempt); (2) removal is retire-and-archive (ban list for
-  cards/keywords, retired sections elsewhere), never silent deletion;
-  (3) "earning its keep" is judged on structural signals only
-  (reachability, duplication, domination, wiring honesty) — never the
-  repealed CQI/win-rate machinery, and there is no runtime telemetry
-  to consult.
+- **THE CONTENT LIFECYCLE SPLIT (T direct, 2026-09-02/03) — SUPERSEDED
+  2026-09-28 by D58.** The five `adjust-*` stewards and `/forge` were
+  archived in R0 (`plan/archive/2026-09-28-revamp-r0/`, with
+  `CONTENT_LEDGER.md`). During the revamp the loop creates no content of any
+  kind; content returns through the owner-led rebuild sessions (B1–B9).
 - **Copy canon:** VITAE, STANCE. Never HEALTH / GUARD (as the stance
   name) / MORALE. GRACE (né MORALE, Phase 44h) was removed in T6 (D39,
   2026-09-27).

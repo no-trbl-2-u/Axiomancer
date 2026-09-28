@@ -4,10 +4,8 @@ World specs live here: `specs/world/`. They follow the same principles
 as mechanic specs (one spec, one body of work, one branch, one PR) but
 use a location-focused template.
 
-**How to create a world spec:** invoke `/world-spec` and the skill will
-walk you through the design conversation and create the file
-automatically. You can also copy the template below directly if you
-prefer.
+**How to create a world spec:** copy the template below in an attended
+session with T. (The `/world-spec` skill was archived in R0, 2026-09-28.)
 
 ---
 

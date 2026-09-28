@@ -134,20 +134,20 @@ test('a subagent spawn writes a start row, then an end row with its duration', (
     ...base(),
     tool_name: 'Task',
     tool_input: {
-      subagent_type: 'card-expert',
+      subagent_type: 'playtester',
       description: 'Run pass 12',
       model: 'claude-sonnet-5',
     },
   }
   fire('tool', spawn)
   const start = rows().at(-1)
-  assert.match(start, /\| subagent \| card-expert \|/)
+  assert.match(start, /\| subagent \| playtester \|/)
   assert.match(start, /claude-sonnet-5/, 'a pinned spawn model beats the transcript')
   assert.match(start, /\| - \| Run pass 12 \|$/, 'a start row carries no duration')
 
   fire('tool-end', { ...spawn, tool_response: { status: 'success' } })
   const end = rows().at(-1)
-  assert.match(end, /\| subagent-end \| card-expert \|/)
+  assert.match(end, /\| subagent-end \| playtester \|/)
   assert.match(end, /\| \d+s \|/, 'an end row carries a duration')
   assert.match(end, /\| ok \|$/)
 })

@@ -4,7 +4,7 @@
 //
 //   node scripts/check-harness-grants.mjs
 //
-// The failure this exists to stop: the `reader` agent declared a roster of
+// The failure this exists to stop: the `reader` agent (archived R0) declared a roster of
 // `mcp__claude-in-chrome__*` tools that was granted NOWHERE — not in
 // `.claude/settings.json`, not in `_claude-skill.yml`, and whose servers were
 // not in `.mcp.json` at all. Nothing failed at definition time, so it sat there
