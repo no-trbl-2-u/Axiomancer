@@ -6,9 +6,10 @@
 > effects are the EFFICIENT path to dropping it — the harness exists to keep
 > that true at every stage of the campaign.
 >
-> Loops that consume this: `/combat-playtest` (evidence + verdict, report
-> only) and `/adjust-cards` (cards/decks). Engine constants are tuned
-> manually against this harness's evidence.
+> Loops that consume this: none until Phase R12 writes a new combat-playtest
+> command (the old one was archived in R0).
+> Card changes happen only in guided sessions with T (D37). Engine constants
+> are tuned manually against this harness's evidence.
 
 ## Stage profiles
 
@@ -92,7 +93,7 @@ a loaded set is visible to the whole engine — decks, drafts, sims, CLIs.
    the card's evidence.
 3. **Promote.** A card that proves out across >= 2 stages and >= 2 policies
    without breaking the balance bands moves into `cards.library.ts` in the
-   same PR (the `/adjust-cards` steward owns this path). Sandbox content itself
+   same PR, inside a guided card session (D37). Sandbox content itself
    never ships.
 
 ## CLI cookbook

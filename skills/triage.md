@@ -5,6 +5,17 @@
 > **If there are no unlabeled issues, exit fast** — that's
 > "keep humming."
 
+> **REVAMP MODE (D58, since 2026-09-28; ends when Phase R11 ships).** The
+> loop's phase work is only the ratified revamp build plan
+> (`plan/steps/01_build_plan.md`; part plans in `plan/revamp/`). It creates
+> no content of any kind: cards, keywords, enemies, relics, maps, NPCs, events
+> or art. `/iterate` and `/expand` still run when no phase is ready, under the
+> same no-content rule. THE CARD HOLD (D37) stands: no card or keyword is made
+> outside a guided session with T. The content stewards, `/forge` and the
+> `card-expert`, `content-curator`, `mechanics-expert` and `reader` agents
+> were archived in R0; never route work to them. R11 revisits the loop to
+> bring content phases back.
+
 ## 1. Purpose
 
 GitHub issues are the user's primary inbox to the loop. Without
@@ -61,9 +72,14 @@ default pass.
 | Label | Meaning |
 |---|---|
 | `triage:loop-queued` | The loop will address. Routed into the right backlog. |
-| `triage:needs-user` | Actionable but requires user judgment. Surfaces in `oversight`. |
 | `triage:closed` | Won't fix / duplicate / spam. Issue is closed with a comment. |
 | `triage:reviewed` | Seen but no action this pass. Re-eval on `/triage all`. |
+
+There is no `triage:needs-user` route. THE OPEN GATE (2026-08-28,
+`plan/bearings.md`) abolished owner gates: the loop decides and
+documents the call. An issue still carrying the legacy
+`triage:needs-user` label is not skipped by Step 1; re-route it
+per Step 2 and remove the old label.
 
 Plus a category label paired with `triage:loop-queued`:
 
@@ -84,7 +100,7 @@ Load env, verify auth (§3). Exit 3 if missing.
 gh issue list \
   --repo "$GH_REPO" \
   --state open \
-  --search "-label:triage:loop-queued -label:triage:needs-user -label:triage:closed -label:triage:reviewed -label:loop:opened" \
+  --search "-label:triage:loop-queued -label:triage:closed -label:triage:reviewed -label:loop:opened" \
   --json number,title,body,labels,author,createdAt,updatedAt,comments \
   --limit 50
 ```
@@ -113,17 +129,29 @@ For each issue, decide:
 1. **Category**: `bug` | `enhancement` | `content` |
    `docs` | `a11y` | `perf`.
 2. **Routing**:
-   - `triage:loop-queued` if the loop can address autonomously.
-   - `triage:needs-user` if user judgment needed.
+   - `triage:loop-queued` if the loop can address it.
    - `triage:closed` if duplicate / spam / won't-fix.
-   - `triage:reviewed` if waiting on something else.
+   - `triage:reviewed` if waiting on something else, including
+     every request that would need new content (item 4).
+
+   Where a call is unclear, make the most reasonable one and say
+   why in the comment. Nothing is parked for a user decision.
 3. **Backlog target** (only `loop-queued`):
    - bug / a11y / perf / content / docs (including data-ish
      issues — game data, balance numbers) → `plan/AUDIT.md`
    - small enhancement → `plan/steps/01_build_plan.md`
      carry-overs section
-   - large / off-strategy enhancement → re-route to
-     `triage:needs-user`
+   - large / off-strategy enhancement → a candidate in
+     `plan/PHASE_CANDIDATES.md` citing the issue (`/expand`
+     and `/oversight` weigh it there)
+4. **Revamp filter (D58, D37).** A request for new content (a
+   card, keyword, enemy, relic, map, NPC, event or art) is not
+   loop work. Label it `triage:reviewed` plus its category, and
+   comment that it waits for T's owner-led revamp session,
+   naming the B-phase it belongs to where one fits
+   (`plan/revamp/README.md` §4). File no backlog row for it.
+   A fix to existing content (a wrong gloss, a broken foe) is
+   a normal `content` bug and routes to `plan/AUDIT.md`.
 
 ### Step 3 — Apply labels + comment + (close)
 
@@ -157,12 +185,13 @@ gh issue close "$NUM" --repo "$GH_REPO" --reason "not planned"
 ### Step 5 — Commit + push (if any backlog changes)
 
 ```bash
-git add plan/AUDIT.md plan/steps/01_build_plan.md
+git add plan/AUDIT.md plan/steps/01_build_plan.md plan/PHASE_CANDIDATES.md
 git commit -m "$(cat <<'EOF'
-triage: <K> issues processed (<L> queued, <M> user-call, <N> closed)
+triage: <K> issues processed (<L> queued, <M> reviewed, <N> closed)
 
 - #<num> → loop-queued (bug, plan/AUDIT.md)
-- #<num> → needs-user (enhancement)
+- #<num> → loop-queued (enhancement, plan/PHASE_CANDIDATES.md)
+- #<num> → reviewed (content request, waits for an owner-led session)
 - #<num> → closed (duplicate of #X)
 
 Labels applied. Comments posted on each.
@@ -183,30 +212,21 @@ npm run deploy:check
 ### Step 7 — Done
 
 ```
-triage processed: <K>. queued: <L>. needs-user: <M>. closed: <N>.
+triage processed: <K>. queued: <L>. reviewed: <M>. closed: <N>.
 plan/AUDIT.md +<X> rows.
 loop next: <iterate | ship-a-phase | march>.
 ```
 
 ## 6. Closing the loop (when iterate ships a fix)
 
-When a downstream skill addresses a triaged issue, it should
-update the issue:
-
-In commit body:
-
-```
-- Closes #<N>: <fix description>
-```
-
-After push, post follow-up comment:
-
-```bash
-gh issue comment <N> --repo "$GH_REPO" --body "Shipped in <commit>. Live after deploy ready."
-gh issue close <N> --repo "$GH_REPO"   # if not already auto-closed by Closes #N trailer
-```
-
-This is documented in `skills/iterate.md` §5.
+A downstream skill that addresses a triaged issue names it in
+the commit body (`- Closes #<N>: <fix description>`). Closing
+is then owned by `.github/workflows/close-trailers.yml`: on
+every push to `main` it sweeps the pushed commit range and
+closes each issue the commits name, idempotently. Read that
+workflow's header for the closing contract and why GitHub's
+native parser is not relied on. Triage adds nothing to it.
+The richer deploy comment is `skills/iterate.md`'s job.
 
 ## 7. Hard rules
 
@@ -216,10 +236,14 @@ This is documented in `skills/iterate.md` §5.
 3. **Idempotency.** Re-running with no new issues = no-op.
 4. **Honest comments.** Don't promise specific fix dates.
 5. **Never close without a comment** explaining why.
-6. **Don't over-classify.** When in doubt, `triage:needs-user`
-   beats inventing a category.
-7. **No emojis. No `Co-Authored-By:`.**
-8. **`gh` calls only.** No raw curl unless `gh` is unavailable.
+6. **Don't over-classify.** When in doubt, pick the closest
+   existing category and say so in the comment; never invent
+   one.
+7. **No content routing.** New-content requests are
+   `triage:reviewed` for T's revamp sessions (Step 2 item 4),
+   never a backlog row.
+8. **No emojis. No `Co-Authored-By:`.**
+9. **`gh` calls only.** No raw curl unless `gh` is unavailable.
 
 ## 8. Failure modes
 
@@ -228,7 +252,10 @@ This is documented in `skills/iterate.md` §5.
 2. **`GH_TOKEN` missing or rejected.** Exit 3. Loop continues.
 3. **Rate limit hit.** Exit 2. Retry next tick.
 4. **Ambiguous classification after reading title + body +
-   comments.** Default to `triage:needs-user`.
+   comments.** Make the most reasonable call and state the
+   doubt in the comment; if nothing actionable can be read
+   out of it, `triage:reviewed` with a comment asking the
+   author for the missing detail.
 5. **`gh issue edit` fails** (label doesn't exist). Auto-create
    label via `gh label create`, retry once.
 6. **Network failure mid-pass.** Persist what's done; next
@@ -243,7 +270,7 @@ check:
 
 ```bash
 gh issue list --repo "$GH_REPO" --state open \
-  --search "-label:triage:loop-queued -label:triage:needs-user -label:triage:closed -label:triage:reviewed -label:loop:opened" \
+  --search "-label:triage:loop-queued -label:triage:closed -label:triage:reviewed -label:loop:opened" \
   --json number --jq 'length'
 ```
 

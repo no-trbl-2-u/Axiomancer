@@ -1,5 +1,9 @@
 # World Spec W-01 — The Aporia (labyrinth continent)
 
+> **HISTORICAL (R0, 2026-09-28).** THE REVAMP seals the Labyrinth door
+> (R3) and re-themes the Labyrinth in B9 (`plan/revamp/labyrinth.md`). Kept
+> as a record of the shipped design, not as live guidance.
+
 > **NARRATIVE FRAMING VOID (THE BLANK PAGE, T direct 2026-09-18).**
 > There is no story canon — see `plan/bearings.md` and
 > `content/story/README.md`. Every story claim in this spec is

@@ -109,7 +109,6 @@
       "Bash(git switch:*)",
       "Bash(git push -u origin:*)",
       "Bash(git branch:*)",
-      "Bash(git stash:*)",
       "Bash(git rebase:*)",
       "Bash(git merge:*)",
       "Bash(git check-ignore:*)",
@@ -163,7 +162,7 @@
         ]
       },
       {
-        "matcher": "Skill|SlashCommand|Task|Agent",
+        "matcher": "Skill|SlashCommand|Task|Agent|Read",
         "hooks": [
           {
             "type": "command",

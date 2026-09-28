@@ -7,9 +7,11 @@ end to end before touching anything else.
 
 This skill reads issues from `no-trbl-2-u/Axiomancer` (or `$GH_REPO`),
 classifies, applies a `triage:*` label, posts a short comment,
-routes actionable issues into the right backlog (`plan/AUDIT.md`
-or a build-plan row). Already-labeled issues
-skipped — labels are the state.
+routes actionable issues into the right backlog (`plan/AUDIT.md`,
+a build-plan carry-over, or a `plan/PHASE_CANDIDATES.md` candidate).
+Already-labeled issues skipped — labels are the state. There is no
+`triage:needs-user` route (THE OPEN GATE), and new-content requests
+wait for T's revamp sessions (D58, §5 Step 2).
 
 Argument handling:
 - No argument → process all unlabeled open issues.

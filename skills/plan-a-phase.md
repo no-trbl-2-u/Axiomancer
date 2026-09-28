@@ -1,5 +1,16 @@
 # Skill: plan-a-phase
 
+> **REVAMP MODE (D58, since 2026-09-28; ends when Phase R11 ships).** The
+> loop's phase work is only the ratified revamp build plan
+> (`plan/steps/01_build_plan.md`; part plans in `plan/revamp/`). It creates
+> no content of any kind: cards, keywords, enemies, relics, maps, NPCs, events
+> or art. `/iterate` and `/expand` still run when no phase is ready, under the
+> same no-content rule. THE CARD HOLD (D37) stands: no card or keyword is made
+> outside a guided session with T. The content stewards, `/forge` and the
+> `card-expert`, `content-curator`, `mechanics-expert` and `reader` agents
+> were archived in R0; never route work to them. R11 revisits the loop to
+> bring content phases back.
+
 > **Thinking pass.** Refines or generates one phase brief.
 > Writes to `plan/phases/phase_<N>_<topic>.md`. Does NOT modify
 > code. The output is what `/ship-a-phase` reads next.
@@ -29,14 +40,19 @@ Use when:
 
 1. `plan/bearings.md` — stack, contracts, standing decisions.
 2. `plan/steps/01_build_plan.md` — phase scope row.
-3. `plan/phases/<canonical-sibling>.md` — template.
-4. `axiomancer-mechanics/specs/` — formal design specs touching
-   the phase's surface (mechanics, characters, story, world);
-   **win over bearings on conflict**.
-5. `axiomancer-mechanics/braindump/` — raw design sessions (may
-   be absent for the surface; not blocking).
-6. `<your-app-path>/<sibling-family>/` — closest already-shipped
-   sibling for code patterns.
+3. `plan/revamp/<area>.md` — the part plan the row names, plus
+   `plan/revamp/README.md` (zero-state, reset rules §5, order §7)
+   and every decision it cites in
+   `plan/2026-09-25-refactor-strategy.decisions.md` (D46–D64 and
+   earlier). For a revamp phase this is the design.
+4. `plan/phases/<canonical-sibling>.md` — template.
+5. `axiomancer-mechanics/specs/` — formal design specs touching
+   the phase's code. Specs marked HISTORICAL and
+   `axiomancer-mechanics/braindump/` are background, never
+   authority.
+6. The closest already-shipped code touching the same area
+   (`axiomancer-mechanics/src/*`, `axiomancer-mobile/`) for
+   patterns.
 7. `spec.md` — only if brief touches a surface bearings doesn't
    describe.
 8. **Truth-source MCPs** — when the brief locks card / keyword /
@@ -58,20 +74,26 @@ Use when:
 
 Mirrors `skills/ship-a-phase.md` §6. Fixed structure:
 
-- **Routes / API endpoints / CLI surface** — locked from
-  bearings contract.
-- **Content / data reads** — table of helper → call → use.
-- **Components / handlers** — list of new + reused primitives.
-- **Cross-links** — In (verify) and Out (ship) and Retro-fit.
-- **Output schema / contracts** — types, event shapes,
-  save-data shape, etc.
-- **Hero / body / sub-section composition.**
-- **Empty / loading / error states** — copy locked.
+- **Sources** — the part plan (`plan/revamp/<area>.md`, section
+  cited) and every decision number the phase rests on (e.g.
+  D47, D58). A brief that cites neither is not done.
+- **Outcome** — one line; what is true when the phase ships.
+- **Scope** — workspaces touched and the files / systems changed,
+  deleted or parked (and why "park" where the part plan says so).
+- **Consumers to update** — engine exports, mobile screens, card
+  editor (until R1), catalog/devlog exporters.
+- **Save / schema contracts** — types, save-data shape, and the
+  migration in `Game/game.migrate.ts` for anything removed from a
+  save.
+- **Carrier sweep** (R-phases) — glossary/atlas rows, glyphs,
+  glosses and editor words left without a carrier (D45).
 - **Decisions made upfront — DO NOT ASK** — every judgment
-  call resolved.
-- **Mobile reflow / responsive / paginate / output limits.**
-- **Pages × tests matrix.**
-- **Verify gate.**
+  call resolved, each tied to a D-number, the part plan, or a
+  truth-source receipt.
+- **Tests matrix** — suites added, rewritten or deleted with
+  their subjects.
+- **Verify gate** — the scoped workspace gates plus the revamp
+  gates (`plan/revamp/README.md` §5).
 - **Commit body template.**
 - **DoD.**
 - **Follow-ups (out of scope).**
@@ -113,16 +135,13 @@ Walk the brief format (§4). For each section, derive content
 from the inputs. Make decisions; document under "Decisions made
 upfront — DO NOT ASK".
 
-**Order of authority for Decisions:**
-
-1. `axiomancer-mechanics/specs/` settled decisions (highest
-   authority).
-2. `plan/bearings.md` standing decisions (project-wide).
-3. Phase-specific calls.
-
-If a spec and `bearings.md` disagree, the spec wins.
-Update `bearings.md` in a separate prior commit
-(`bearings: align with design`).
+**Order of authority for Decisions:** the source-of-truth
+hierarchy in `docs/truth-sources.md` (T's latest explicit
+decision first — for the revamp, the D-numbers and the ratified
+part plans). Phase-specific calls come last and never contradict
+a ruling. If two sources disagree, follow that file's procedure:
+surface the drift and reconcile it (a separate prior commit)
+rather than silently pick one.
 
 ### Step 4 — Reality-check against codebase
 
@@ -140,9 +159,9 @@ git add plan/phases/phase_<N>_<topic>.md
 git commit -m "$(cat <<'EOF'
 phases: brief for phase <N> — <topic>
 
-- Routes locked: <list>.
+- Part plan: plan/revamp/<area>.md (<section>).
+- Decisions cited: <D-numbers>.
 - N decisions resolved upfront (see brief).
-- Design spec: <yes / pending>.
 EOF
 )"
 git push origin main
@@ -206,6 +225,10 @@ phase entirely:
 3. **No emojis, no `Co-Authored-By:`.**
 4. **Contracts in `bearings.md` are law** — never propose
    shapes that contradict them.
+5. **No content, no owner rows.** A brief never plans the
+   creation of a card, keyword, enemy, relic, map, NPC, event or
+   art (D58, D37), and never plans an owner-led B-row — those are
+   T's sessions.
 
 ## 8. Failure modes
 
@@ -220,10 +243,12 @@ phase entirely:
 ```bash
 # Reads (in this order)
 plan/steps/01_build_plan.md          # the phase row being refined
-spec.md                              # product truth
+plan/revamp/<area>.md                # the part plan (design)
+plan/2026-09-25-refactor-strategy.decisions.md  # D-numbers to cite
 plan/bearings.md                     # contracts, standing decisions
+docs/truth-sources.md                # authority when sources disagree
+spec.md                              # product truth
 axiomancer-mechanics/specs/          # design specs, if any landed
-axiomancer-mechanics/braindump/      # raw design sessions
 plan/AUDIT.md                        # open findings that touch the phase
 
 # Writes

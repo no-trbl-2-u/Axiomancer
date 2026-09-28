@@ -98,7 +98,14 @@ content:
 2. its entry in `MAP_REGISTRY` and a `nodeIdToMapName()` prefix;
 3. its event pools in `MapEvents/content.ts`;
 4. a mobile layout registered in `axiomancer-mobile/state/exploration-maps/index.ts`;
-5. a `travel` node on some other map that leads into it.
+5. a `travel` node on some other map that leads into it;
+6. a backdrop plate with its `provenance.json`.
+
+A new continent takes all of that, plus its key in the registry and in
+`createStartingWorld()`'s world catalogue, and a travel route that reaches it.
+A new map-event *kind* takes `MapEvents/types.ts`, a handler, a mobile
+presenter, and a `GAME_STATE_VERSION` hop with a pinned migration test (a new
+kind or persisted field always rides a migration).
 
 ## Movement (D1 — frontier roaming)
 

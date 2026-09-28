@@ -36,7 +36,7 @@ import { loadRegistry } from './check-lexicon.mjs'
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 
 /**
- * The authored content surfaces, from `.claude/agents/content-curator.md`'s
+ * The authored content surfaces, from the archived `plan/archive/2026-09-28-revamp-r0/.claude/agents/content-curator.md`'s
  * own "Where narrative content lives" table. Explicit, not a glob.
  */
 export const CONTENT_SURFACES = [
@@ -59,7 +59,7 @@ export const CONTENT_SURFACES = [
 /**
  * House voice rules. Sourced from `axiomancer-mechanics/docs/narrative/
  * LEXICON.md` ("Ban from house narration") and the voice summary in
- * `.claude/agents/content-curator.md`. Each is a claim about PLAYER-FACING
+ * `plan/archive/2026-09-28-revamp-r0/.claude/agents/content-curator.md` (archived R0). Each is a claim about PLAYER-FACING
  * prose, so each is checked against string literals only.
  */
 export const VOICE_RULES = [
@@ -73,7 +73,7 @@ export const VOICE_RULES = [
     id: 'exclamation',
     re: /!/,
     fix: 'no exclamation marks in player-facing prose — let the sentence carry the weight',
-    since: '.claude/agents/content-curator.md "Voice constitution"',
+    since: 'plan/archive/2026-09-28-revamp-r0/.claude/agents/content-curator.md "Voice constitution"',
   },
   {
     id: 'scriptural-weather',

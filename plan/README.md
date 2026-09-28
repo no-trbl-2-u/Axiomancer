@@ -16,7 +16,6 @@ plan/
 ├── PHASE_CANDIDATES.md                  # phase candidates from /expand, gated by /oversight
 ├── reflexes.md                          # adopt-by-need: ≤50-line always-read core
 ├── lessons.md                           # adopt-by-need: domain-keyed corpus, read by offset
-├── CONTENT_LEDGER.md                    # per-category adjust-* last-pass metadata
 ├── steps/
 │   └── 01_build_plan.md                 # at-a-glance status block + per-phase scope
 ├── phases/
@@ -44,10 +43,11 @@ plan/
 ## Where design lands
 
 No `design/` export layer is adopted in this project (see
-`bearings.md`). Domain design happens through the design skills
-in `.claude/skills/` (brainstorm-mechanics, character-spec,
-story-spec, world-spec), which write specs into
-`axiomancer-mechanics/specs/` and `axiomancer-mechanics/braindump/`.
+`bearings.md`). During THE REVAMP, design lands in `plan/revamp/` (one part
+plan per area) and in attended sessions with T; the rebuild-track sessions
+(B1–B10) write their own outputs there. The design skills that used to write
+`axiomancer-mechanics/specs/` and `braindump/` were archived in R0
+(2026-09-28) to `plan/archive/2026-09-28-revamp-r0/`.
 
 ## How the audit works
 

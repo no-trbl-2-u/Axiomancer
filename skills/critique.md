@@ -1,12 +1,23 @@
 # Skill: critique
 
+> **REVAMP MODE (D58, since 2026-09-28; ends when Phase R11 ships).** The
+> loop's phase work is only the ratified revamp build plan
+> (`plan/steps/01_build_plan.md`; part plans in `plan/revamp/`). It creates
+> no content of any kind: cards, keywords, enemies, relics, maps, NPCs, events
+> or art. `/iterate` and `/expand` still run when no phase is ready, under the
+> same no-content rule. THE CARD HOLD (D37) stands: no card or keyword is made
+> outside a guided session with T. The content stewards, `/forge` and the
+> `card-expert`, `content-curator`, `mechanics-expert` and `reader` agents
+> were archived in R0; never route work to them. R11 revisits the loop to
+> bring content phases back.
+
 > **External observer.** Play the local expo-web build as a
 > first-time player, take notes, self-assess, append durable findings to
 > `plan/CRITIQUE.md`. `/iterate` reads CRITIQUE.md as a finding
 > source — that's the **address loop** half.
 >
-> **Rate-limited** by `/march` (≥12 commits + ≥24h spacing,
-> green-deploy required). Cap of 6 filed findings per pass.
+> **Rate-limited** by `/march` (the gate lives in `skills/march.md`
+> "Gates (the one home)"). Cap of 6 filed findings per pass.
 
 ## 1. Purpose
 
@@ -19,29 +30,14 @@ play well as a real first-time player would experience it.
 ## 2. Invocation
 
 ```
-/critique                    # full pass — see auth handling below
+/critique                    # full pass
 /critique <url>              # focused pass on one screen / route
 /critique mobile             # 375×800 only
 /critique desktop            # 1280×800 only
-/critique anonymous          # public/anonymous pass only (skip auth)
-/critique authenticated      # logged-in pass only (requires Auth: != none)
 ```
 
-**Auth handling.** Read `plan/bearings.md`'s `Auth:` line on
-entry:
-
-- `Auth: none` → single anonymous pass (the default for
-  this project — the game has no login).
-- `Auth: <other>` → default `/critique` runs **two** passes
-  in sequence: an anonymous pass, then an authenticated
-  pass. Each pass spawns its own `playtester` invocation so
-  the bot's session doesn't pollute the anonymous walk.
-- Argument `anonymous` / `authenticated` runs only that
-  pass.
-- `Auth:` field missing → exit with `[needs-user-call]`. Do
-  not guess.
-- The patterns and their env vars are tabled in
-  `.claude/agents/reader.md` (Step 0).
+The game has no login (`plan/bearings.md`: `Auth: none`), so
+every pass is a single pass with no session handshake.
 
 When invoked from `/march`, conditions are pre-checked.
 
@@ -85,9 +81,9 @@ CLI (`--fixture <id>`) and the Jest suites:
   `arrive` opens the gated screen on its own. Tell the playtester the
   state is a *starting point*, not a save it earned — first-time-player
   confusion about how it got there is not a finding.
-- Need a state nobody has authored? Add a registry entry (kebab-case
-  id, `seed`, `description`) — the engine suite builds every entry —
-  rather than scripting a click path.
+- Need a state nobody has authored? File an AUDIT row asking for a
+  registry entry (kebab-case id, `seed`, `description`) rather than
+  scripting a click path; critique never modifies code (hard rule 1).
 
 Skip screens that don't exist yet. Note in pass log.
 
@@ -133,11 +129,12 @@ transport above is the unattended fallback, not a replacement.
 
 Do not re-diagnose the MCP-grant mechanism — that path is closed.
 
-## 4. Delegate to `playtester`
+## 4. Attended passes: delegate to `playtester`
 
 The `playtester` sub-agent at `.claude/agents/playtester.md` is
-the fresh-eyes observer. **Always delegate the playthrough.**
-Reasons:
+the fresh-eyes observer. **When a user is present, always
+delegate the playthrough to it.** (Unattended passes never spawn
+it — they use the §3.5 transport.) Reasons:
 
 - It has Playwright tools (`mcp__playwright__*`) to actually
   drive the local expo-web build.
@@ -146,22 +143,13 @@ Reasons:
 
 Pass it:
 - The screen list.
-- The **pass mode** (`anonymous` or `authenticated`).
 - Voice cue from `plan/bearings.md`.
 - Current `plan/CRITIQUE.md` Done section (so it doesn't
   re-surface addressed findings).
 - Focus areas from invocation argument.
 
-It returns a JSON array of findings, each carrying
-`auth_state`. When the default invocation runs both passes,
-spawn `playtester` **twice** (once per mode) and concatenate
-results before §6 (self-assessment + filing).
-
-Findings tagged `auth_state: "auth-failed"` are filed as
-`[needs-user-call]` in `plan/CRITIQUE.md`'s Pending block —
-not scored as product bugs. The user resolves the auth
-config (refresh the session cookie, fix the login selectors,
-etc.) and the next pass re-runs.
+It returns a JSON array of findings; self-assess and file them
+per §5 Steps 3–4.
 
 ## 5. The procedure
 
@@ -176,16 +164,17 @@ If no green deploy: defer. Write a one-line entry to CRITIQUE.md
 "deferred at <date>: no green deploy" and exit 0. **Don't commit
 on no-ops.**
 
-Ensure the local expo-web build is running (serves at
+Attended: ensure the local expo-web build is running (serves at
 `http://localhost:8081`); start it if needed before spawning
-the playtester.
+the playtester. Unattended: skip Step 2 and run the §3.5
+transport instead (it exports and serves its own build).
 
 ### Step 1 — Build the screen set
 
 Default §3. Adjust based on argument, phase progress (skip
 non-existent screens), recent shipping focus.
 
-### Step 2 — Spawn `playtester`
+### Step 2 — Spawn `playtester` (attended only)
 
 ```
 Agent({
@@ -210,7 +199,8 @@ For each:
 1. **Valid?** Can evidence be re-verified? Drop session-specific
    artifacts.
 2. **Actionable?** Can a future `/iterate` tick fix with
-   resources at hand? If not, file as `[needs-user-call]`.
+   resources at hand, without creating content (D58)? If not,
+   drop it and say why in the pass log.
 3. **Duplicate?** If CRITIQUE.md has an open row for this exact
    issue, drop new + bump older's severity.
 4. **Severity match impact?** Re-rate if needed.
@@ -277,8 +267,9 @@ Return 3-line summary.
 ## 6. Hard rules
 
 1. **Never modify code, content, or data.** Findings only.
-2. **Always delegate the playthrough to `playtester`.** Don't
-   play from main agent context.
+2. **Attended: delegate the playthrough to `playtester`.** Don't
+   play from main agent context. **Unattended: never spawn
+   `playtester`;** use the §3.5 transport.
 3. **Self-assess after the playtester returns.** Don't file raw
    observations.
 4. **Cap at 6 filed findings per pass.** 8 is the playtester's
@@ -310,29 +301,16 @@ Critique findings **compete fairly** with other audit sources.
 
 ## 9. When `/march` invokes `/critique`
 
-`/march` reads metadata header at top of `plan/CRITIQUE.md`:
-
-```
-> Last pass: <ISO-date> at commit <sha>
-> Pass count: <N>
-```
-
-Conditions to dispatch:
-
-1. **At least 12 commits** after `Last pass` commit, OR
-   `Last pass` more than **24 hours** ago, OR `Last pass` is
-   "never" and at least one page-family phase has shipped.
-2. `npm run deploy:check` shows green.
-3. No pending HIGH critique already queued for iterate.
-
-If all three: `/march` calls `/critique` for that tick.
+The dispatch conditions live in `skills/march.md` "Gates (the one
+home)". They read the `Last pass` / `Pass count` metadata header
+this skill writes in §5 Step 4, so keep that header current.
 
 ## 10. Quick reference
 
 ```bash
 # State files
 plan/CRITIQUE.md                     # findings queue + last-pass metadata
-plan/bearings.md                     # voice, URL contract, Auth: field
+plan/bearings.md                     # voice, URL contract
 
 # Sub-agent
 .claude/agents/playtester.md         # the fresh-eyes observer persona
@@ -347,9 +325,3 @@ git pull --ff-only                   # Step 0
 npm run deploy:check                    # green-deploy precondition
 git commit && git push               # single critique: <summary> commit
 ```
-
-If the app ever sits behind a login wall, the playtester needs
-an auth path — see `.claude/agents/reader.md` Step 0 for the
-patterns (test-user, session-cookie, bearer-token, shared-secret,
-preview-env, magic-link). Never fall back to critiquing the
-logged-out shell silently.

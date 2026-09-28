@@ -56,23 +56,18 @@ repo execution disputes.
 `no-trbl-2-u/game-knowledge-base` is the OKF corpus of board-game rules
 and reception research (source-backed claims, per-claim confidence). It
 deploys itself as a live MCP server, which is the only way this repo
-reads it — there is no local snapshot of the corpus here. Consumers: the
-`brainstorm-mechanics`, `world-spec`, and `story-spec` skills and the
-`mechanics-expert` and `card-expert` agents pull it for prior art and
-cite `kb:<game-slug>/<doc> (src-NNN)` instead of citing reception from
-memory (`card-expert` leans on the `DigitalCardGames/dawncaster`
-corpus — 1,692 card records, 141 keywords; `world-spec` and
-`story-spec` lean on the board-game mechanics/better-if taxonomy for
-region-hazard and campaign/unlock-structure shapes respectively —
-`character-spec` is deliberately not a consumer, since personhood/voice
-has no board-game-mechanic analog in the corpus). The server is
+reads it — there is no local snapshot of the corpus here. Any agent or
+attended session may call it for prior art and cite
+`kb:<game-slug>/<doc> (src-NNN)` instead of citing reception from memory
+(the `DigitalCardGames/dawncaster` corpus carries 1,692 card records and
+141 keywords). The design skills and agents that used to be its named
+consumers were archived in R0 (2026-09-28, D58). The server is
 read-only, so coverage misses are filed as GitHub issues on the KB repo:
 `gh issue create --repo no-trbl-2-u/game-knowledge-base --label wishlist
 --title "<game or topic>" --body "<why it would help>"`. The KB's daily
 scout consumes that wishlist label.
 
-One consumption surface, metadata-first (see the `kb-query` design skill
-in `.claude/skills/kb-query/`):
+One consumption surface, metadata-first:
 
 - **MCP (only)**: `kb-query` resolves over HTTP against the Worker
   the KB repo deploys (`.mcp.json` → `kb-mcp.no-trbl-2-u.workers.dev`),
@@ -87,8 +82,7 @@ in `.claude/skills/kb-query/`):
   model memory is labeled UNGROUNDED rather than passed off as corpus
   fact.
 
-The `mechanics-expert` and `card-expert` sub-agents carry the MCP tools
-in their frontmatter and prefer them. Cloud ticks now grant the `kb_*`
+Attended sessions call the MCP tools directly. Cloud ticks grant the `kb_*`
 tools too (`.github/workflows/_claude-skill.yml`, 2026-08-31), passing
 `KB_MCP_TOKEN` through as step env — unattended runs cite receipts
 instead of memory. A preflight step probes the endpoint and warns
@@ -113,8 +107,7 @@ the libraries directly (`src/Cards/cards.library.ts`,
 facts (never stale, and never a dependency — the source files are right
 here); `kb-query` is the genre's external prior art (community sourced,
 cite with `src-NNN` receipts) and has NO local fallback — the Worker is
-the corpus's only route into this repo. The `card-expert` and
-`mechanics-expert` sub-agents carry both tool sets.
+the corpus's only route into this repo.
 
 ## Measured truth (baselines) — freshness discipline
 
@@ -149,5 +142,5 @@ Rules when citing measured numbers:
    never confirmation-grade — close calls need the full multi-seed
    pass before anyone acts on them.
 4. Measuring is not tuning: regenerating the baseline is briefing;
-   reading it into card/deck changes stays with `/adjust-cards`, and
-   engine constants stay manual.
+   card and deck changes happen only in guided sessions with T (D37),
+   and engine constants stay manual.

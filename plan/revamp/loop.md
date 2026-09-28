@@ -16,6 +16,16 @@ T, 2026-09-28:
   re-enabled only after R0 merges.
 - Keep **every** core verb and fix its doctrine; archive the content
   stewards, the design skills and most helper agents.
+- **Amended in the R0 session (T, 2026-09-28):** `/march` keeps the
+  upstream nexus chain — triage → critique → phase → expand → iterate —
+  with only the stewards, `/forge` and the growth floor removed. `/iterate`
+  and `/expand` run on their normal turns and create nothing. Red `main`
+  stays with the `ci-autofix` workflow, not a march step. Revamp mode ends
+  when Phase R11 (the loop's content phases) ships.
+- **Also in the R0 session (T):** `/combat-playtest` is archived (command
+  and workflow, to `plan/archive/2026-09-28-revamp-r0/`); Phase R12
+  writes a new one after R11. The engine's matrix CLI
+  (`npm run combat-playtest`) stays.
 
 Telemetry note: the hook (`.claude/hooks/telemetry.mjs:232-258`) counts only
 `Skill`/`SlashCommand` calls, so verbs `/march` dispatches by reading
@@ -108,6 +118,47 @@ stay as they are.
   `:228, :597` against the grey cards.
 - `plan/phases/`: archive shipped briefs 102, 103, 104, M4, M5, T6.
 - `plan/CONTENT_LEDGER.md`: drop steward rows (above).
+
+## R11 — Loop content phases (attended, last revamp phase)
+
+Added in the R0 session (T, 2026-09-28). Revamp mode has no other exit, so
+without this phase the loop would stay content-free forever. R11 is attended
+because it edits `.claude/**` and sets doctrine.
+
+- Decide how content creation returns to the loop **as phases in the build
+  plan**, not as a standing steward rotation (the archived `adjust-*` /
+  `/forge` model created content outside any plan). For each surface
+  (cards, keywords, enemies, relics, maps, NPCs, events, art) decide:
+  loop-shippable phases, owner-led sessions, or still held.
+- Review the archive in `plan/archive/2026-09-28-revamp-r0/` for anything
+  worth reviving in a new shape (a content agent, the wiring checklists
+  already folded into docs).
+- Check telemetry (`npm run telemetry`, including `verb-read` rows) and
+  the GitHub Actions run history for verbs with no invocations since R0;
+  fix how they are used or wired rather than cutting them.
+- Remove the revamp-mode banner from every verb and the doctrine files
+  (AGENTS.md, bearings, the build plan), and record the new standing
+  content rules in bearings.
+
+Requires R10 (the reset track done). Card work still follows THE CARD HOLD
+and whatever card plan T picked.
+
+## R12 — New combat-playtest (attended)
+
+Added in the R0 session (T, 2026-09-28), which archived the old
+`/combat-playtest` command and workflow. Write a new command (and, if
+wanted, a workflow) for the rebuilt game:
+
+- Decide what it measures: whether stat growth tracks the Act 1 curve,
+  whether each survivor is winnable and still dangerous, and the player's
+  lowest VITAE per fight (the old matrix never recorded it).
+- Build on the engine matrix CLI (`npm run combat-playtest`,
+  `src/Combat/combat.playtest.ts`) and the `playtester` agent; re-point the
+  stage profiles to Act 1 levels if R9 has not.
+- Findings go to `plan/AUDIT.md`; it stays report-only.
+
+The archived rewrite (`plan/archive/2026-09-28-revamp-r0/.claude/commands/combat-playtest.md`)
+is a starting draft, not a spec. Requires R9, R11.
 
 ### Exit
 

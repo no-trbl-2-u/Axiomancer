@@ -1,11 +1,9 @@
 name: combat-playtest
 
-# Supercharged combat playtest: quantitative stage matrix + playtester
-# agents on seeded encounters; doctrine-verdict report on a new branch + PR.
-# Report only, no balance changes. Monthly.
+# Combat playtest: quantitative stage matrix + playtester agents on seeded
+# encounters; a findings report on a new branch + PR. Report only, no
+# balance changes. Manual (the monthly cron is disabled).
 # See .claude/commands/combat-playtest.md. Runs against axiomancer-mechanics.
-# Scheduled weekly-staggered so at most one tuning loop runs per day;
-# adjust or delete the cron to change cadence.
 
 on:
   # schedule trigger disabled 2026-07-08 (Actions minute budget review) —

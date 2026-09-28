@@ -68,7 +68,7 @@ Consequences for the loop:
 **Auth:** `none`
 
 Single-player local app; no login wall, no server, no accounts.
-`/critique` and `reader`/`playtester` run against the local build
+`/critique` and `playtester` run against the local build
 with no session handshake.
 
 ## Stack (locked — do not re-litigate)
@@ -205,7 +205,8 @@ Axiomancer/
 ├── skills/                     # nexus LOOP verbs (this harness)
 ├── plan/                       # nexus state files (this dir)
 │   ├── bearings.md             # this file
-│   ├── AUDIT.md · CRITIQUE.md · PHASE_CANDIDATES.md · CONTENT_LEDGER.md
+│   ├── AUDIT.md · CRITIQUE.md · PHASE_CANDIDATES.md
+│   ├── revamp/                 # THE REVAMP part plans (D46–D64)
 │   ├── reflexes.md · lessons.md · north-star-mork-borg.md
 │   ├── steps/01_build_plan.md
 │   ├── phases/                 # template, V masterplan, open/partial + recent briefs
@@ -219,16 +220,16 @@ Axiomancer/
 ├── scripts/                    # deploy-check · notify · loop-issue · check-* lints · devlog/catalog builders
 ├── .github/workflows/          # verify-* gates · march/night/triage crons · verb workflows
 ├── .claude/
-│   ├── commands/               # loop-verb pointers + domain tuning cmds
-│   ├── agents/                 # scout · reader · mechanics-expert · playtester · content-curator · card-expert
-│   ├── skills/                 # domain DESIGN skills (brainstorm/character/story/world-spec, kb-query)
+│   ├── commands/               # loop-verb pointers
+│   ├── agents/                 # scout · playtester
 │   ├── hooks/                  # guard.mjs · telemetry.mjs
 │   └── settings.json           # enforcement, always on
 ```
 
-Note the deliberate split: **nexus loop verbs live in root
-`skills/`**; **domain design skills live in `.claude/skills/`**.
-Two different things in two locations — do not merge them.
+Loop verbs live in root `skills/`; `.claude/commands/` holds their doorways
+(the `combat-playtest` command was archived in R0; R12 rebuilds it). The content stewards, the
+design skills and four agents were archived in R0 (2026-09-28, D58) to
+`plan/archive/2026-09-28-revamp-r0/`.
 
 ## Sub-agents
 
@@ -237,15 +238,11 @@ Defined under `.claude/agents/`. Spawn aggressively.
 | Agent | When to spawn | Returns |
 |---|---|---|
 | `scout` | External fact, prior-art, spec, date, signal | Structured findings with citations |
-| `reader` | Fresh-eyes observation of the local build | Findings array |
 | `playtester` | Play the game via the running expo-web build (Playwright) — the real `/critique` observer for this project | Structured playtest report |
-| `mechanics-expert` | Second opinion on a mechanic design / balance call | Structured analysis (never code) |
-| `content-curator` | Author + ship narrative content (dialogue trees, event prose, flavor) in the house voice — `/iterate`'s content-gap worker | Shipped content through the gates |
-| `card-expert` | Design + implement cards/keywords with prior-art receipts — the working agent behind the `adjust-cards` / `adjust-keywords` lifecycle | Shipped cards/keywords through the gates |
 
-For `/critique`, prefer **`playtester`** (it already drives the
-app end-to-end) over the generic `reader`; there is no hosted URL
-for `reader` to fetch.
+`reader`, `mechanics-expert`, `content-curator` and `card-expert` were
+archived in R0 (D58): the loop creates no content during the revamp, and a
+fresh card agent is written at the first card session (B6).
 
 ## Plan expansion posture
 
@@ -259,15 +256,16 @@ ambiguity.)
 
 - **Which package a phase touches:** scope the verify gate to that
   workspace (`--workspace <pkg>`); if a change touches mechanics'
-  public surface, also verify mobile + card-editor.
+  public surface, also verify mobile (and card-editor until R1 deletes it).
 - **Which combat engine is canonical:** Hazard-Pattern Combat
   (`simulateHazardPatternCombat` / `initializeCombatEncounter`).
   The legacy `resolveCombatRound` driver was fully removed from
   the engine (2026-06) — never resurrect it for a combat gate or
   playtest.
 - **Win condition:** VITAE is the one bar and emptying it is the main
-  win; the authored alt-wins (Befriend, RELENT, CONDEMN) sit beside it
-  as ordinary design tools. Never reintroduce Pressure Tracks /
+  win. During the revamp the only other ending is befriending, entered
+  through The Open Hand into the mercy choice (D47, R4); RELENT and
+  CONDEMN are cut with their engine code in R7. Never reintroduce Pressure Tracks /
   `CombatPressureTracks`.
   <!-- lexicon-ok: pressure-tracks -->
 - **THE BIG NUMBERS REWRITE (T direct, 2026-09-02) — the scale reset
@@ -288,24 +286,14 @@ ambiguity.)
   keywords, VITAE pools, tiered decks and stages. Specs 32, 34 §3/§8
   and 35 and `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/profane-canon.md` are marked HISTORICAL; there is no
   governing objective function any more.
-- **THE CONTENT LIFECYCLE SPLIT (T direct, 2026-09-02/03).** Per-item
-  content (cards, equipment, enemies, keywords, NPCs/dialogue) split
-  out of `/forge` into the five `adjust-*` loop verbs
-  (`skills/adjust-<category>.md` + `.claude/commands/` doorways), each
-  a standing steward that creates, updates, AND retires its surface's
-  content — no cap per tick; whatever its structural audit finds.
-  `/forge` keeps only maps/continents/events/art. `/march` dispatches
-  via a new rate-limited content-lifecycle gate (§3b: ≥15 commits or
-  ≥36h per category, green deploy, stalest category first) reading
-  `plan/CONTENT_LEDGER.md`. Three standing laws of the family:
-  (1) every CREATE and UPDATE runs a `kb-query` MCP research pass
-  BEFORE anything is written (receipts or a documented miss; REMOVE is
-  exempt); (2) removal is retire-and-archive (ban list for
-  cards/keywords, retired sections elsewhere), never silent deletion;
-  (3) "earning its keep" is judged on structural signals only
-  (reachability, duplication, domination, wiring honesty) — never the
-  repealed CQI/win-rate machinery, and there is no runtime telemetry
-  to consult.
+  **SUPERSEDED 2026-09-28 (D36, R0).** The first surviving constraint is
+  gone: the card purge (D36) removed the presets and their 5/5/5 aspect
+  thirds; every run deals the grey deck.
+- **THE CONTENT LIFECYCLE SPLIT (T direct, 2026-09-02/03) — SUPERSEDED
+  2026-09-28 by D58.** The five `adjust-*` stewards and `/forge` were
+  archived in R0 (`plan/archive/2026-09-28-revamp-r0/`, with
+  `CONTENT_LEDGER.md`). During the revamp the loop creates no content of any
+  kind; content returns through the owner-led rebuild sessions (B1–B9).
 - **Copy canon:** VITAE, STANCE. Never HEALTH / GUARD (as the stance
   name) / MORALE. GRACE (né MORALE, Phase 44h) was removed in T6 (D39,
   2026-09-27).
@@ -343,6 +331,9 @@ ambiguity.)
      the LOCKED MECHANICS carve-out below**: cards may do anything to
      Conviction, the Surge meter and the Dice system except make them
      irrelevant.
+     **SUPERSEDED 2026-09-28 (D58/D37, R0).** No agent authors or changes
+     player cards outside a guided session with T; `/adjust-cards` is
+     archived.
   3. **Philosophy theming is retired** as the organising fiction.
      **RATIFIED the same day — the replacement is "a Dark Fantasy
      deckbuilding RPG campaign", WHOLE PRODUCT.** T's framing:
@@ -383,6 +374,8 @@ ambiguity.)
      full card authority is live against the current library: balance
      findings are work, replacement cards may be authored, tuning passes
      may open. (The superseded ruling is archived; see its stub below.)
+     **SUPERSEDED 2026-09-28 (D58/D37, R0).** Card-pool authority is
+     withdrawn; cards are made only in guided sessions with T.
   2. **Keyword and effect growth is open.** The 30-keyword proving
      gate no longer blocks new keywords: a new keyword or a new
      `specialMechanics` kind may ship WITHOUT a per-item owner
@@ -393,6 +386,8 @@ ambiguity.)
      and the cross-package verifies. Engineering rigour is the gate
      now, not the count. Keyword retirement stays deliberate
      (retired ids never renamed or resurrected).
+     **SUPERSEDED 2026-09-28 (D58/D37, R0).** Keyword growth is closed to
+     the loop; new player keywords come only from guided sessions with T.
   3. **New content items are in scope for every content surface** —
      enemies, maps, continents, MapEvent kinds, hazard cards,
      gathering sites, loot-cache layers, quest boards, dialogue
@@ -403,6 +398,9 @@ ambiguity.)
      still rides `GAME_STATE_VERSION` with a migration hop and a
      pinned migration test — that discipline is engineering, not
      design law, and stands.
+     **SUPERSEDED 2026-09-28 (D58/D37, R0).** During the revamp the loop
+     creates no new content item on any surface; content returns through
+     the owner-led rebuild sessions (B1–B9).
   4. **Count pins are growth ledgers, not walls.** Where a test pins a
      content count, a content add updates the pin in the same commit,
      citing this ruling in the commit body; editing a pin without a
@@ -659,7 +657,9 @@ ambiguity.)
 
 - **THE GROWTH FLOOR (T direct, attended `/oversight` 2026-09-17) — the
   growth mandate gets guaranteed tick budget, and stewards ship small
-  gaps instead of filing them.** THE OPEN GATE ¶8 made growth a standing
+  gaps instead of filing them.** **SUPERSEDED 2026-09-28 (D58, R0).** The
+  stewards and `/forge` are archived and the loop creates no content, so
+  there is no growth lane to guarantee. THE OPEN GATE ¶8 made growth a standing
   mandate; measurement showed the mandate had no tick budget to spend
   (`/march` Step 3 is first-match-wins and 3b re-ripens a steward category
   faster than the loop ticks, so 3c was almost never reached — evidence
@@ -695,6 +695,9 @@ ambiguity.)
   HISTORICAL); `Combat/combat.objective.ts` still computes CQI as a
   report-only reading, never a gate or a target. *(Corrected 2026-09-25,
   T4: this entry used to say combat readings judge against CQI.)*
+  **SUPERSEDED 2026-09-28 (D57/D58, R0).** `/digest` no longer reports
+  CQI; nothing in the loop reads it, and any remaining computation is
+  dead weight for the tooling reset to remove.
   Minigames: Hazard -> CDR-0006 targets. The Gathering, loot-cache (Pick
   Pool), Quest Board and Rest-posture doctrines are void with their
   retired minigames (Phases 76, 63, 61, 52e).
@@ -760,9 +763,8 @@ ambiguity.)
 - **THE CARD HOLD (T, attended session 2026-09-26, D37).** No player card
   and no player keyword is created outside a guided session with T. No
   steward, `/forge`, `/expand`, phase or brief adds one, and none plans a
-  phase that would. `adjust-cards` and `adjust-keywords` are paused
-  (`skills/march.md` §3b skips them) until T re-arms them. Enemies,
-  equipment, NPCs, maps and the rest of the loop carry on.
+  phase that would. (`adjust-cards` and `adjust-keywords` were paused
+  under this hold, then archived with the other stewards in R0, D58.)
   **Amended 2026-09-28 (D56, D58):** before any card, card-type or keyword
   work starts, the full card-rules inventory (Phase B4,
   `plan/revamp/cards.md`) must be merged — card types, keyword families,
@@ -775,16 +777,19 @@ ambiguity.)
 - **THE REVAMP (T, attended session 2026-09-28, D46–D64) — RATIFIED 2026-09-28.**
   `plan/revamp/README.md` is the main build plan; its §7 is the recommended
   order. `/march` and `night` stay disabled until Phase R0 (attended)
-  merges. The loop ships only ratified revamp phases (plus fix-ci and
-  critique) and **creates no content of any kind** — cards, keywords,
-  enemies, relics, maps, NPCs, events or art (D58). Where this contradicts
+  merges. The loop's phase work is only ratified revamp phases; `/march`
+  keeps the upstream chain (triage → critique → phase → expand → iterate),
+  and nothing in it **creates content of any kind** — cards, keywords,
+  enemies, relics, maps, NPCs, events or art (D58). Revamp mode ends when
+  Phase R11 (the loop's content phases, attended) ships. Where this contradicts
   older standing text in this file (THE UNSHACKLING, open keyword growth,
-  steward rotation), D58 wins; R0 reconciles the text.
+  steward rotation), D58 wins; R0 has reconciled the text with dated
+  SUPERSEDED notes on each of those entries.
 
 ## AUDIT category taxonomy (this project)
 
 `/iterate` and `/expand` read `plan/AUDIT.md`. Categories used
-here (extends the web-centric template set):
+here (tokens match `skills/iterate.md` §4 "Audit categories"):
 
 `contract` · `divergence` · `debt` · `gap` · `content` · `docs` ·
 `tests` · `a11y` · `perf` · `external-critique`

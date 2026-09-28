@@ -1,5 +1,16 @@
 # Skill: ship-a-phase
 
+> **REVAMP MODE (D58, since 2026-09-28; ends when Phase R11 ships).** The
+> loop's phase work is only the ratified revamp build plan
+> (`plan/steps/01_build_plan.md`; part plans in `plan/revamp/`). It creates
+> no content of any kind: cards, keywords, enemies, relics, maps, NPCs, events
+> or art. `/iterate` and `/expand` still run when no phase is ready, under the
+> same no-content rule. THE CARD HOLD (D37) stands: no card or keyword is made
+> outside a guided session with T. The content stewards, `/forge` and the
+> `card-expert`, `content-curator`, `mechanics-expert` and `reader` agents
+> were archived in R0; never route work to them. R11 revisits the loop to
+> bring content phases back.
+
 > **Full autonomy.** When invoked (manually, via `/ship-a-phase`,
 > or under `/loop` / `/march`), you have authority to ship one
 > phase of the build plan end-to-end with **no review checkpoint**:
@@ -12,9 +23,11 @@
 
 ## 1. Purpose
 
-`plan/steps/01_build_plan.md` carves the build into ~10–20 phases.
-Each phase is one self-contained slice that ships end-to-end:
-code + unit tests + e2e + commit + push (deploy follows).
+`plan/steps/01_build_plan.md` carves the build into phases. Each
+phase is one self-contained slice that ships end-to-end: code +
+tests + commit + push (the CI gate follows). During the revamp the
+pickable rows are the R-phases and B4, each backed by a part plan
+in `plan/revamp/` (order: `plan/revamp/README.md` §4 and §7).
 
 This skill drives the build **autonomously, in a loop**, so a
 single overnight run can move the project forward by several
@@ -41,7 +54,10 @@ The user's standing instruction: **"more get-it-done, less ask
 me questions."** Internalize this:
 
 - **Design / scope ambiguity → decide.** Pick the choice most
-  consistent with the canonical sibling phase + `bearings.md`.
+  consistent with the phase's part plan (`plan/revamp/<area>.md`),
+  its decisions (D-numbers in
+  `plan/2026-09-25-refactor-strategy.decisions.md`), the canonical
+  sibling phase and `bearings.md`.
   Document the call in the commit body under "Decisions". Never
   block.
 - **Empty / missing content → render the empty state and ship.**
@@ -63,63 +79,38 @@ Spawn sub-agents aggressively. They protect main-agent context
 and parallelize independent work.
 
 - **`scout`** — every external research need.
-- **Design specialists** — a phase that ships cards/keywords
-  spawns `card-expert`; a contested mechanic-design call gets a
-  `mechanics-expert` consult; narrative content spawns
-  `content-curator`. All three carry the `kb-query` (external
-  prior art, cited `kb:<game-slug>/<doc> (src-NNN)`) and
-  `axio-query` (live engine card/effect/keyword facts) MCP
-  tools — and the main agent holds the same grants. A design or
-  balance decision made inline instead of via a specialist still
-  consults those tools first (AGENTS.md § Truth sources): a
-  Decisions bullet with a reception receipt beats one argued
-  from model memory.
-- **Domain specialists** — for prose drafting, schema work,
-  observation. See `.claude/agents/`.
+- **`playtester`** — when the phase needs the running app driven
+  and observed. See `.claude/agents/` for what else exists; the
+  archived design agents (banner) are not options.
 - **Parallel calls** when work is independent.
 
-The main agent's job is wiring, code, decisions. Delegate prose
-and research.
+A design or balance decision is made inline by the main agent and
+consults the truth-source MCPs first (AGENTS.md § Truth sources):
+`axio-query` for the engine's live card/effect/keyword facts and
+`kb-query` for external prior art, cited
+`kb:<game-slug>/<doc> (src-NNN)`. A Decisions bullet with a
+receipt beats one argued from model memory.
 
-## 5. The page-family / feature-surface shape
+The main agent's job is wiring, code, decisions. Delegate
+research.
 
-Every page-family / feature-surface phase ships **all** of these,
-mirroring the canonical sibling (typically phase 4 or 5):
+## 5. The phase shape
 
-```
-<your-app-path>/<route-or-surface>/
-├── <main entry>                     # the page / endpoint / command
-├── <sub-entries>                    # detail pages, sub-routes, sub-commands
-└── <test-files>                     # colocated unit tests
+A phase touches one or more of the monorepo's workspaces:
 
-<components-or-handlers>/<family>/
-├── <Family>Section.tsx              (or equivalent for your stack)
-├── <OtherSection>.tsx
-└── __tests__/
+- `axiomancer-mechanics/` — the engine and all game data
+  (`src/Cards`, `src/Combat`, `src/Enemy`, `src/Game`, `src/World`,
+  …), vitest suites colocated.
+- `axiomancer-mobile/` — the Expo app; it reads the engine through
+  the `@mechanics` alias, jest suites colocated.
+- `axiomancer-card-editor/` — until R1 deletes it; it also imports
+  `@mechanics`.
 
-<lib-or-utils>/<family>/
-├── queries.ts | helpers.ts | etc.
-└── __tests__/
-
-<e2e>/<family>.spec.ts               # canonical render + cross-link checks
-<e2e>/mobile/<family>.mobile.spec.ts # for web projects: 375px viewport
-```
-
-Use the canonical sibling's directory as the literal template —
-copy structure, swap names + queries.
-
-### Already-built primitives
-
-After phases 1–<substrate count>, these exist and are reused:
-
-- Layout primitives (Header, Footer, Container, …)
-- Editorial atoms / UI atoms (cards, chips, etc.)
-- Content / data loaders (in shared packages)
-- Shared helpers / formatters
-- Design tokens
-
-If a primitive doesn't exist, build it inside the appropriate
-shared package; tests colocated.
+Its scope is the build-plan row plus the part plan it names. An
+R-phase follows the reset rules in `plan/revamp/README.md` §5 (see
+§8 below). Use the closest already-shipped phase touching the same
+code as the canonical sibling for patterns; build any missing
+helper in the package that owns it, tests colocated.
 
 ## 6. The procedure
 
@@ -137,7 +128,8 @@ Read the "Status (at-a-glance)" block at the top of
 `plan/steps/01_build_plan.md`. The next phase is the **first
 `[ ]` row**. If the user passed `phase N`, ship that one
 regardless of order. Skip rows marked `[skipped]` (set by
-`/oversight`).
+`/oversight`) and `[blocked: …]` rows — the owner-led B-rows are
+`[blocked: owner-led]` and the loop never starts them (D58).
 
 ### Step 2 — Read the brief
 
@@ -172,10 +164,6 @@ claimed=$(gh issue list --repo "$GH_REPO" --state open \
 
 A brief you already pushed for a phase you are yielding gets removed in
 the same tick — two briefs for one phase is worse than none.
-
-(Observed 2026-08-27: a local `/loop /march` and a CI `/march` both
-picked Phase 74 within 30 seconds. The local tick yielded, deleted its
-duplicate brief, and filed this rule.)
 
 ### Step 2.5 — Mirror the phase to GitHub
 
@@ -230,21 +218,23 @@ If the open succeeded, capture `$PHASE_ISSUE` for use in Step 10
 ### Step 3 — Read the design + canonical sibling
 
 ```bash
-# Design inputs (may not exist or be partial — that's OK)
-ls axiomancer-mechanics/specs/           # formal specs, if any touch this surface
-ls axiomancer-mechanics/braindump/       # raw design sessions
-
-# Canonical sibling — typically phase 4 or 5
-ls <repo-root>/<your-app-path>/<canonical-family>/
+# Design inputs
+cat plan/revamp/<area>.md                           # the part plan the row names
+cat plan/revamp/README.md                           # zero-state, reset rules, order
+grep -n "D<nn>" plan/2026-09-25-refactor-strategy.decisions.md   # each decision it cites
+ls axiomancer-mechanics/specs/                      # formal specs, if any touch this code
 ```
 
-If no spec or braindump covers this family, proceed using
-the brief + canonical sibling + bearings. Note in commit-body
-Decisions.
+The part plan and its decisions are the design. Specs marked
+HISTORICAL and `braindump/` are background, never authority; where
+they disagree with a ruling, `docs/truth-sources.md` § hierarchy
+decides. If nothing beyond the part plan covers the change,
+proceed on the brief + canonical sibling + bearings and note it
+in commit-body Decisions.
 
-When the phase ships game content (cards, keywords, enemies,
-maps, events, dialogue) or moves balance numbers, also pull the
-truth sources before designing: `axio_overview` / `axio_cards` /
+When the phase moves balance numbers or re-points or deletes game
+data (cards, keywords, enemies, maps, events, dialogue), also pull
+the truth sources first: `axio_overview` / `axio_cards` /
 `axio_effects` / `axio_keywords` for the engine's own current
 facts, and `kb_search` / `kb_find_games` / `kb_cards` /
 `kb_keyword` for external prior art worth citing in the brief or
@@ -255,20 +245,22 @@ absent, the prior art is UNGROUNDED and must be labeled so.
 
 ### Step 4 — Build
 
-Mirror the canonical sibling's structure into the new family.
-Reads via shared loaders (`@mechanics/content`,
-`@mechanics/data` if applicable); never reach into
-the filesystem from a leaf component.
+Follow the part plan and the canonical sibling's patterns. Game
+data and rules live in `axiomancer-mechanics/src/*`; mobile reads
+them through the `@mechanics` alias and never duplicates engine
+data in a component.
 
-For each new content / data read pattern, add a helper to the
-appropriate shared package with colocated tests.
+For each new data read pattern, add a helper to the package that
+owns the data, with colocated tests.
 
-### Step 5 — Wire the routes / surface
+### Step 5 — Wire the surface
 
-Wire the new entries per the framework's convention (Next.js
-App Router auto-discovers; Express / Fastify need explicit
-mounting; CLI commands need registration). Update
-manifest / index files as needed.
+Update every consumer of what changed: engine exports
+(`axiomancer-mechanics/src/index.ts`), mobile screens and
+navigation, the card editor while it exists, catalog/devlog
+exporters. Anything removed from a player's save ships with a
+migration in `axiomancer-mechanics/src/Game/game.migrate.ts` and a
+test (`plan/revamp/README.md` §5 rule 4).
 
 ### Step 6 — Output schema / contracts (where applicable)
 
@@ -277,30 +269,39 @@ schemas in sync per the brief's output-schema section.
 
 ### Step 7 — Tests
 
-- **Unit:** colocated `__tests__/`. Mock content / data loaders
-  at module boundaries.
-- **E2E (web):** render H1 + canonical + at least one cross-link
-  + global footer. At 375px: `scrollWidth - innerWidth ≤ 1`,
-  H1 within viewport.
-- **E2E (non-web):** equivalent end-to-end test for your domain
-  (e.g. CLI snapshot, API contract test).
+- **Mechanics:** vitest suites colocated with the code they pin.
+- **Mobile:** jest suites colocated; the `e2e:*` scripts are the
+  hermetic UI legs and run in CI (`verify-mobile.yml`).
+- **Tests go with their subjects.** A test pinned to a deleted
+  thing is deleted or rewritten to the survivors; never weaken a
+  test to keep a deleted thing alive (`plan/revamp/README.md` §5
+  rule 2).
 
-### Step 8 — Cross-link retrofit
+### Step 8 — Reset-rule pass (R-phases)
 
-When this family ships, retro-fit incoming links from
-already-shipped families. Keep retro-fits **scoped** — modify
-the chip / nav / new section, not whole pages. One retro-fit
-commit per family.
+Before verifying an R-phase, walk §8: delete rather than park
+unless the part plan says park, run the carrier sweep last, and
+confirm nothing new was authored. Non-R phases skip this step.
 
 ### Step 9 — Verify gate
 
+Scope the gate to the workspace(s) the phase touches
+(`plan/bearings.md` § Verify gate):
+
 ```bash
-npm run verify    # or your stack's equivalent
+npm run verify --workspace axiomancer-mechanics
+npm run verify --workspace axiomancer-mobile
+npm run verify --workspace axiomancer-card-editor   # until R1 deletes it
+npm run verify                                      # all three, when in doubt
 ```
 
-Runs `typecheck → test:run → data:validate → build → e2e` (or
-your project's gate composition). All hard. Iterate up to 3
-times on the same root cause; otherwise stop per §10.
+A change to mechanics' public surface also runs the mobile (and,
+until R1, card-editor) gates — the `@mechanics` alias couples
+them. An R-phase additionally runs the revamp gates
+(`plan/revamp/README.md` §5): root `npm test`,
+`npm run lint:content` and `node scripts/check-lexicon.mjs`.
+`baseline:check` is retired (D57). All legs are hard. Iterate up
+to 3 times on the same root cause; otherwise stop per §10.
 
 ### Step 10 — Commit + push (atomic)
 
@@ -316,7 +317,7 @@ the canonical ship signal on the public timeline.
 ```bash
 git add <explicit files>
 git commit -m "$(cat <<'EOF'
-feat: <family> page family — phase <N>
+<type>: <one-line summary> — phase <N>
 
 - <bullet 1>
 - <bullet 2>
@@ -354,7 +355,7 @@ npm run deploy:check
 
 Outcomes:
 
-- **Exit 0 (ready)** — site green at the pushed commit.
+- **Exit 0 (ready)** — CI green at the pushed commit.
   Continue to Step 13.
 - **Exit 1 (error)** — read the log + admin URL. Patch root
   cause. Re-run from Step 9. Up to 3 same-root-cause iterations;
@@ -380,7 +381,7 @@ The `Closes #<N>` trailer in Step 10's commit is a belt-and-suspenders
 backup only — it fires reliably solely for commits pushed **directly**
 to the default branch, so phases that reach `main` via a cross-session
 `claude/*` branch merge reconciliation would leak the mirror open
-without the explicit API close (Phase 35 fix, 2026-07-17). The close is
+without the explicit API close. The close is
 idempotent (an already-closed mirror is a no-op). Failures here are
 warnings, not blockers.
 
@@ -409,12 +410,16 @@ invocation — see §7 Hard Rule 12.
 6. **Tests alongside code** — never "add tests later".
 7. **Small, focused components in folders.** Prefer 5 small
    files over 1 dense file.
-8. **Content stays in mechanics src/* + mobile *.copy.ts.** Data stays in
-   `n/a (no data layer)`. No hardcoded copy/records in components.
+8. **Content stays in mechanics `src/*` + mobile `*.copy.ts`.** No
+   hardcoded copy/records in components.
 9. Product title is "Miserere Mei, Deus" in player/doc-facing prose (the
    `axiomancer-*` workspaces, repo and scheme keep the former title as
-   internal identifiers); VITAE/STANCE copy canon; HP is sole win condition
-   (never Pressure Tracks) <!-- lexicon-ok: pressure-tracks -->
+   internal identifiers); VITAE/STANCE copy canon. **VITAE is the one
+   bar:** emptying the foe's VITAE wins; befriending through The Open
+   Hand (the Suppliant's Ring signature, made a real befriend in R4)
+   opens the mercy choice, the only non-lethal ending (D47, D63).
+   RELENT and CONDEMN are cut (R7 deletes their engine code); never
+   reintroduce them or Pressure Tracks <!-- lexicon-ok: pressure-tracks -->
 10. **Phase issue mirror is best-effort, not gating.** If
     `loop-issue.mjs phase-open` fails, the phase still ships;
     log the stderr and continue. The mirror is a public timeline,
@@ -429,10 +434,7 @@ invocation — see §7 Hard Rule 12.
     Each loop invocation is a fresh session with no later turn to
     resume into; a backgrounded call's results are discarded when
     the runner tears down, and the next tick re-starts the same
-    research from scratch (confirmed 2026-07-16: two consecutive
-    Phase 32 Part 1b ticks each spawned a background `Explore`
-    agent and ended the turn deferring to it — zero commits, zero
-    carried research, ~$4 combined cost). If the research is
+    research from scratch. If the research is
     large enough to want backgrounding anyway, persist its
     findings to a scratch note under `plan/` before ending the
     turn, so the next tick can pick up cheaply instead of
@@ -445,25 +447,30 @@ invocation — see §7 Hard Rule 12.
     when the next row is a lettered sibling of the one just
     shipped (e.g. having just shipped `44a`, do not also ship
     `44b`), and even when the job's time budget looks like it
-    has room left. This is what turned run `31301228665`
-    (2026-08-09, phases 44a+44b chained into one tick) into a
-    `timeout_minutes` kill (Phase 92, 2026-09-18): Step 13
-    already said "return cleanly" when that run happened and it
-    did not hold, because prose is not a stop the way an
-    enumerated hard rule is (see rule 11's own precedent). The
+    has room left — chaining ends in a `timeout_minutes` kill. The
     job ceiling is deliberately a per-tick budget cap, not a
     per-phase one (`plan/bearings.md` § Operational notes: "a
     tick that genuinely needs more should be split, not have
     its cap raised silently") — the loop's next tick is the
     mechanism for continuing, not this one running longer.
 
-## 8. Cross-link retrofit policy
+## 8. Reset rules (every R-phase)
 
-When shipping family X, retro-fit links from already-shipped
-families to X. The retro-fit is part of the *same* phase commit.
-Keep edits scoped. Do not rewrite an already-shipped page's
-structure to make room — that's a follow-up commit, not a
-retro-fit.
+Canonical in `plan/revamp/README.md` §5; in short:
+
+1. **Delete, don't park, unless the part plan says park.** Git
+   history is the archive for source (D50); markdown moves to
+   `plan/archive/`.
+2. **Tests go with their subjects** (Step 7).
+3. **Carrier rule (D45) runs last.** After removing a carrier,
+   remove every glossary/atlas row, glyph, gloss and editor word
+   left without one.
+4. **Save compatibility** — a migration plus a test for anything
+   removed from a save (Step 5).
+5. **Gates** — Step 9.
+6. **No content creation.** An R-phase re-points and deletes; it
+   never authors a card, keyword, enemy, relic, map, NPC, event or
+   art (D58).
 
 ## 9. Brief generation (when missing)
 
@@ -510,11 +517,15 @@ Phase-shaped — mark `[blocked: …]`, notify, return:
 6. **The phase requires a paid service or API key that isn't
    configured.** Note which env var / runbook is missing in
    the blocked reason.
-7. **The design contradicts the URL / API / CLI contract** in a
-   way you can't reconcile by trusting the contract.
+7. **The design contradicts an engine / save contract or a
+   ruled decision (D-number)** in a way you can't reconcile by
+   trusting the contract or the ruling.
 8. **Phase scope is genuinely ambiguous after reading step 01 +
-   the brief + bearings + spec.md.** Generate a more decisive
-   brief and proceed; block only if even that fails.
+   the brief + the part plan + bearings + spec.md.** Generate a
+   more decisive brief and proceed; block only if even that fails.
+9. **The phase can only ship by creating content** (D58) or by
+   card/keyword work the hold forbids (D37). Name the missing
+   owner session in the blocked reason.
 
 For everything else: **decide, ship, document.**
 
@@ -524,25 +535,23 @@ For everything else: **decide, ship, document.**
 # Where you read
 plan/steps/01_build_plan.md                  # status + scope
 plan/phases/phase_<N>_<topic>.md             # brief
+plan/revamp/<area>.md                        # the part plan (design)
+plan/revamp/README.md                        # zero-state, reset rules, order
+plan/2026-09-25-refactor-strategy.decisions.md  # D-numbers
 plan/bearings.md                             # stack + conventions
-axiomancer-mechanics/specs/                  # design specs (optional)
-axiomancer-mechanics/braindump/              # raw design sessions (optional)
+axiomancer-mechanics/specs/                  # design specs (optional; HISTORICAL ones are background)
 spec.md                                      # product spec
-<your-app-path>/<canonical-family>/          # canonical sibling
 
 # Sub-agents
 Agent({ subagent_type: "scout", prompt: "..." })
-Agent({ subagent_type: "card-expert", prompt: "..." })      # cards/keywords (kb-query + axio-query grounded)
-Agent({ subagent_type: "mechanics-expert", prompt: "..." }) # design second opinion
-Agent({ subagent_type: "content-curator", prompt: "..." })  # narrative content
-# + your domain specialists
+Agent({ subagent_type: "playtester", prompt: "..." })
 
-# Truth-source MCPs (main agent holds the grants too)
+# Truth-source MCPs (main agent holds the grants)
 # axio-query: axio_overview / axio_cards / axio_effects / axio_keywords
 # kb-query:   kb_overview / kb_find_games / kb_search / kb_read_doc / kb_cards / kb_keyword
 
-# Verify + commit + push + deploy
-npm run verify
+# Verify (scoped) + commit + push + deploy
+npm run verify --workspace <pkg>
 git add <explicit files>
 git commit -m "<subject>"
 git push origin main

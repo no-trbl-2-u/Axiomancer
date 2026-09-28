@@ -29,6 +29,8 @@ anything closes with a `tick-end` row. So a start row with no `-end` row
 means the call never returned, and a `slash-prompt` followed straight by
 `tick-end` means the tick genuinely did nothing. A conversational turn that
 invokes no verb writes nothing at all — it is the user talking, not a tick.
+A `verb-read` row (no `-end` pair) records a loop verb that `/march`
+dispatched by reading `skills/<verb>.md`, once per verb per tick.
 A `-` in any column means the value was not knowable when the row was
 written — the hook never guesses. Behaviour is covered by
 `node .claude/hooks/telemetry.test.mjs` and

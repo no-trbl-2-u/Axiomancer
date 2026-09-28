@@ -1,5 +1,16 @@
 # Skill: oversight
 
+> **REVAMP MODE (D58, since 2026-09-28; ends when Phase R11 ships).** The
+> loop's phase work is only the ratified revamp build plan
+> (`plan/steps/01_build_plan.md`; part plans in `plan/revamp/`). It creates
+> no content of any kind: cards, keywords, enemies, relics, maps, NPCs, events
+> or art. `/iterate` and `/expand` still run when no phase is ready, under the
+> same no-content rule. THE CARD HOLD (D37) stands: no card or keyword is made
+> outside a guided session with T. The content stewards, `/forge` and the
+> `card-expert`, `content-curator`, `mechanics-expert` and `reader` agents
+> were archived in R0; never route work to them. R11 revisits the loop to
+> bring content phases back.
+
 > **The user-in-the-loop command.** Pause autonomy. Brief the
 > user on current state. Ask targeted questions. Adjust the
 > plan. Push the adjustments. Return.
@@ -32,16 +43,10 @@ resume.
 /oversight deploy           # bias toward GitHub Actions CI signal
                             # (npm run deploy:check, verify-* workflows)
 /oversight reset            # bias toward scope reduction
-/oversight audit            # READ-ONLY: print the §4 briefing, ask
-                            # nothing, change nothing, commit nothing
 ```
 
-`audit` is the one mode that is safe in non-interactive
-contexts (cloud ticks end with it so every Actions log closes
-with a state-of-the-loop snapshot). It is an instrument panel,
-not oversight — it never asks, never applies, never commits.
-Every other mode requires a present user; under `/loop` they
-are a misconfiguration (§9).
+Every mode requires a present user; under `/loop` it is a
+misconfiguration (§9).
 
 ## 3. What `oversight` reads (audit phase)
 
@@ -55,9 +60,9 @@ In parallel where independent:
 5. `plan/AUDIT.md` — open `/iterate` findings.
 6. `plan/CRITIQUE.md` — critique pending.
 7. Last 3 phase briefs — current vs. recent commits.
-8. `axiomancer-mechanics/specs/` + `axiomancer-mechanics/braindump/`
-   — has a new design input landed since the last sibling
-   commit?
+8. `axiomancer-mechanics/specs/` — has a new design input
+   landed since the last sibling commit? (Skip HISTORICAL specs
+   and `axiomancer-mechanics/braindump/`, which is HISTORICAL.)
 9. **The loop-call sweep (standing).** Grep `\[loop-call\]` and
    the legacy `\[needs-user-call\]` across `plan/` (AUDIT,
    CRITIQUE, PHASE_CANDIDATES, `plan/archive/2026-09-25-trim-t4/plan/tuning/`). Since THE OPEN
@@ -68,14 +73,15 @@ In parallel where independent:
    **open** (unreviewed) unless marked reviewed/resolved (`[x]`,
    "RESOLVED"/"RATIFIED", or moved to a resolved section). Any
    legacy `[needs-user-call]` still open is presented the same
-   way — with the loop's recommended answer attached.
+   way — with the loop's recommended answer attached. Oversight
+   reads legacy rows; it never writes new ones.
 
 ## 4. The briefing (~25 lines max)
 
 ```
 oversight — <ISO date>
 
-needs-user-call (standing — always first)
+loop-calls (standing — always first)
 - <count> open across plan/: <file>: "<one-liner>" (each)
 - (or "none open")
 
@@ -115,14 +121,14 @@ defer paths named, answers filed as policy, never re-ask). Rules:
 - **Multiple choice with recommended option marked first.**
 - **Last question is free-form** if there's room.
 
-### Standing question 0 — needs-user-call drain
+### Standing question 0 — loop-call review
 
-> <N> `[needs-user-call]` items are open. Top: "<one-liner>"
-> (<file>). Decide now?
+> <N> unreviewed `[loop-call]` (or legacy `[needs-user-call]`)
+> rows are open. Top: "<one-liner>" (<file>). Review now?
 >
 > - (recommended) Walk through them — show each item's context;
->   I decide one by one.
-> - Decide top only — resolve the highest-impact item, defer
+>   I ratify or reverse one by one.
+> - Review top only — resolve the highest-impact item, defer
 >   the rest.
 > - Defer all — leave open; they resurface next oversight.
 >
@@ -212,7 +218,7 @@ Print synthesis per §4. **No questions yet.**
 ### Step 3 — Build questionnaire
 
 Compute 1–4 questions per §5, with standing question 0
-prepended whenever the needs-user-call sweep found open items.
+prepended whenever the loop-call sweep found open items.
 If zero warranted (project healthy, no flags, sweep clean), say
 so and exit at Step 7 with no commit.
 
@@ -247,8 +253,8 @@ For each answer:
 - **"Reject candidate"** → move row from `## Pending` to
   `## Rejected` with one-line reason.
 - **"Other" (free-form)** → interpret conservatively. If clear
-  plan edit, apply. If ambiguous, write to `plan/AUDIT.md` as
-  `[needs-user-call]` and tell the user.
+  plan edit, apply. If ambiguous, apply nothing for it, quote it
+  under "Not applied" in the commit body, and tell the user.
 
 **Queue-mutation provenance** (adopted via /oversight 2026-07-30,
 issue #129): if any applied answer changes
@@ -319,8 +325,8 @@ oversight complete. <N> adjustments applied.
 1. **Invoked under `/loop`.** Misconfiguration. Stop.
 2. **`git pull` divergence.**
 3. **State files corrupted.**
-4. **"Other" with text the skill can't interpret.** Write
-   `[needs-user-call]` to AUDIT.md, no other adjustment, exit.
+4. **"Other" with text the skill can't interpret.** Apply
+   nothing for it; tell the user it was not applied.
 
 ## 10. Quick reference
 
@@ -333,8 +339,7 @@ plan/AUDIT.md
 plan/CRITIQUE.md
 plan/phases/                       # last 3 modified
 axiomancer-mechanics/specs/        # for newer-than-sibling check
-axiomancer-mechanics/braindump/
-grep -rn "\[needs-user-call\]" plan/   # standing question 0 sweep
+grep -rnE "\[(loop-call|needs-user-call)\]" plan/   # standing question 0 sweep
 
 # Tools
 AskUserQuestion                    # only place this is allowed

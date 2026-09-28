@@ -3,7 +3,7 @@
 //
 // The rules under test are the house's own, not invented here: the voice rules
 // come from `axiomancer-mechanics/docs/narrative/LEXICON.md` ("Ban from house
-// narration") and the voice summary in `.claude/agents/content-curator.md`.
+// narration") and the voice summary in `plan/archive/2026-09-28-revamp-r0/.claude/agents/content-curator.md` (archived R0).
 //
 //   node --test scripts/check-prose.test.mjs
 

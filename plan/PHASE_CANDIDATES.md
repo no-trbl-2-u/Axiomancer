@@ -327,19 +327,6 @@
   whose baseline is stale.
 - **size:** medium.
 
-### Card-face parity: bring the card-editor + devlog catalog onto THE PRINTED PLATE
-- source: THE OPEN GATE session 2026-08-28 — T dumped the #5 side-rail card
-  face ("looks dumb", full freedom granted); the loop shipped THE PRINTED
-  PLATE on the mobile combat surface (CombatCardFace: horizontal blackletter
-  name band + rarity pip, framed art plate behind a hairline rule, solid-ink
-  ledger with FREE cell | rule | die cube + KEYWORD + value).
-- what: the card-editor preview and the devlog Cards catalog still render
-  rail-era faces. Port the plate grammar to both so the three surfaces stop
-  drifting (the old #5 rule was exactly that parity). Keep the no-prose law.
-- why now: every /deck-tuning tick and catalog rebuild shows the dead design
-  to the owner; parity is how the reset sticks.
-- score: 3.8
-
 ### Promote the continent-playtest rig into a committed script
 - source: THE OPEN GATE session 2026-08-28 — the live playtest that proved
   Phases W1/W2 (and caught the missing travel checkpoint) ran as an ad-hoc
@@ -376,20 +363,6 @@
 - shape: a periodic reconciliation now that `close-trailers` is the authority
   — anything shipped-and-ticked whose issue is still open is a leak. Cheap,
   and it turns a human sweep into a witness.
-
-### Run/meta-progression as a wrapper over `PRESET_LINEAGE`
-- source: filed 2026-08-08 by Phase 42. Spec 34 §7 rules "campaign"
-  DESCRIPTIVE for the 44 series — the shipped threadbare -> pilgrim ->
-  apostate arc already is the campaign — while noting T's "opens a lot of
-  doors" argues they want the option open.
-- shape: **BLOCKED on T; do not start.** Recorded so the door stays visible.
-
-### The 27 damned exemplars + 81 besetting sins hiding inside Phase 44h
-- source: filed 2026-08-08 by Phase 42. Spec 34 §6 keeps spec 14's 27 cells
-  and re-skins `philosopher` -> damned exemplar, `literaryCharacter` ->
-  cautionary tale, `fallacies` -> besetting sins.
-- shape: that is a substantial authored-prose job, not a rename. It is the
-  clean cut if 44h runs long — split it rather than rushing the prose.
 
 ### AXM Log follow-ups — minigame engine taps, Sentry slot, native clipboard
 - source: repo-wide structured logging shipped 2026-07-20 (owner-directed,
@@ -455,158 +428,6 @@
   multi-seat recolor, so the pass leaves them alone rather than
   attempting the recolor.
 
-### Enchant/disenchant hooks are per-card engine code — generalize before those seats can grow
-- source: swap-pool fan-out 2026-07-18. The pool is spells-only because
-  every enchant/disenchant passive is a bespoke `combat.engine.ts` branch
-  keyed on the card id (`resonant-chamber`, `quagmire-of-doubt`) — a new
-  ench/dis cannot be sandbox DATA, so the recipe's two persistent seats
-  have zero swap candidates.
-- shape: a propose-first engine phase that makes persistent passives
-  data-driven (a small hook vocabulary on the card literal), then a
-  follow-up authoring pass. Directly unblocks the standing "Library
-  theme-symmetry restoration" candidate above (which needs ~6 new
-  ench/dis cards) AND future ench/dis swap pools.
-
-### Pricing-lint paper credit on no-calendar non-DoT effects
-- source: swap-pool review pass 2026-07-18 (affliction fixer; bulwark
-  shows the same drift). `statusPoints` (`cards.pricing.ts`) prices the
-  PRINTED duration of `calendarExpiry:false` non-DoT effects (e.g. MARK
-  d1/d2), but the engine never duration-decrements calendar opt-outs —
-  the printed duration is dead text and the points are paper credit.
-- shape: teach `statusPoints` the calendar law (price no-calendar
-  effects on the battle-long read or a pricing horizon), re-run the
-  pricing lint over library + swap pools, and fix the handful of cards
-  whose comments lean on the fiction.
-
-### Starter-library trim + duplication pass — ABSORBED into Phase 39 (partially) via /oversight 2026-08-08
-> **Only the DUPLICATION half is absorbed.** Trims stay PAUSED under
-> ruling R2 (see the status update at the end of this row) — Phase 39
-> must not cut cards. Do not re-promote this row separately.
-- source: owner session 2026-07-18 (metrics-slate chat; PR #119 + report
-  `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/reports/preset-sweep-2026-07-18.md`). Owner
-  intent, near-verbatim: TRIM cards first, then run DUPLICATES within each
-  preset and across presets — (1) fewer distinct cards = a tunable baseline
-  the library has never had, (2) shared cards = a more consistent experience
-  across presets.
-- evidence banked (first-ever per-preset doctrine measurement, blind,
-  30 runs/cell, seed 1, flag-off model): **mid-game cliff** — 7 of 10
-  presets at 0–17% vs the 45–55% band (foundry/standstill/grace/augury
-  ≈0%); late uniformly under-band (best 12%); early roughly honest.
-  Foundry plays ZERO statuses at every stage (real doctrine failure, not
-  the statusEngagement blind spot that explains grace's 0). 10 of 70
-  cards never played across the whole sweep (reward-pool-only:
-  achilles-and-the-tortoise, ad-nauseam, captive-audience, entropy-tax,
-  fated-course, heart-of-the-matter, memento-mori, practiced-cadence,
-  straw-mans-jab, the-tithe). Penitent carries 14 keywords, 12 of them
-  orphans (single-card vocabulary) — starter-deck cognitive-load outlier.
-- levers now measurable (PR #119): opp% (opportunity play rate — the cut
-  signal), dWR (win-rate-when-drawn delta), rounds ±σ (consistency — the
-  duplicate-more signal), orphan keywords (reinforce-or-cut), curve-dev,
-  skill-gap (complicated-but-shallow detector). Read dWR comparatively
-  (longer losing runs see more of the deck — negative bias on
-  situational cards).
-- decision shape: owner-led cuts/duplications (color-law fallout applies —
-  recolors or new cards are [needs-user-call]); execution via
-  `/deck-tuning`'s sandbox-first court. Interacts with: "Re-tune the
-  starter library against scoreCard v2" (below — same cards, pricing
-  axis), the mid-game preset library row (trim decisions shape what the
-  mid library must cover), and D-FLIP/D8 (re-measure under flag-on
-  before locking cuts that the new dice model might vindicate).
-- **status update 2026-07-18 (owner ruling R2, fan-out ballot — see
-  `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-18-card-library-fanout-synthesis.md` §A): TRIMS
-  PAUSED.** The full-matrix sweep proved all 10 never-played cards are
-  reward-pool-only — "never played" measures the instrument's reach, not
-  card quality, and every one prices in-band. `/deck-tuning` was reworded
-  the same day with a swap-variant measurement lane (temporary card swaps
-  into preset recipes, treatment-arm only) so the unreachable cards earn
-  real telemetry before any cut. The DUPLICATION half of the pass stays
-  open. Two of the 10 are identity casualties with fresh evidence
-  (entropy-tax = foundry's only status engine; heart-of-the-matter =
-  grace's SWAY finisher) — swap-measure first, recolor/reseat stays the
-  standing owner call.
-
-### Swap-pool candidate authoring — 10–15 cards/theme for preset refinement (owner-ruled 2026-07-18)
-- source: card-library fan-out ballot ruling R1
-  (`plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-18-card-library-fanout-synthesis.md` §A) + the
-  Dawncaster carrier-density gap analysis (§D: corpus ≈ 11.2 cards/keyword
-  vs our 1.6–2.4; below ~8 home carriers a hallmark is a rider, not a
-  draftable identity).
-- decision (owner, near-verbatim): more cards could muddy the water — the
-  player only starts with the 15-card presets. **Act 1 = cycle through the
-  preset decks in order to learn the mechanics; Act 2 = pick ONE deck, and
-  THAT is where reward cards unlock.** Authoring 10–15 new cards per theme
-  is approved, **used only to swap in/out during tuning runs to refine the
-  preset decks** — not a player-facing mid-library.
-- constraints (from the same ballot): compose the EXISTING 29 registry
-  keywords only (mint carriers, not mechanics — push hallmarks toward ≥8
-  home carriers), weight commons (the current pyramid is inverted at 43%
-  rare), live in sandbox sets; a candidate enters a recipe only by beating
-  the incumbent seat in swap-variant A/Bs across ≥2 stages and ≥2 policies.
-- execution: `/adjust-cards` (was `/deck-tuning`'s swap-pool candidate
-  program bullet; that command was retired in T5, D10). Interacts with the trim/duplication row above (same
-  seats) and D8 (valves move the curve the candidates are judged against).
-- promotion path (owner-ratified /oversight 2026-07-20): ruling R1
-  (pool = tuning-only, refused-by-default) is SUPERSEDED for the promotion
-  question. Pool→library promotion is now an allowed, gated outcome via the
-  standing path: measured A/B (≥2 stages ×2 policies, identical seeds) →
-  owner ballot → recolor-not-repartition → combined-matrix re-verify → pins
-  in the same PR (template: `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-19-swap-pool-promotions-residue.md`
-  §E). `/adjust-cards` may propose promotions against this path without
-  re-asking the policy.
-
-### The Incompleteness premiseShed — close the CONCEDE hole at impossible (owner-ruled 2026-07-18)
-- **MOOT (2026-09-27, card purge P1):** premises came only from player
-  cards (CHARGE riders, `spend_premises`), and every one of them was purged.
-  premiseShed has nothing left to eat, and the CONCEDE-by-tally hole this
-  row targets went with the oratory decks. Re-read only if the card agent
-  brings a premise economy back (D37).
-- source: fan-out ballot ruling R3. Evidence: oratory wins 18% flag-ON /
-  32% flag-OFF at the impossible stage (band ~0), almost purely CONCEDE
-  (flag-ON: 87 concede + 1 victory of 480) — The Incompleteness has no
-  premiseShed in its threat sequence, so a surviving deck beats the
-  unwinnable boss by tally. Pricing is NOT the problem (the-closing-word is
-  honest post-36a; the flat-8 floor bug was already fixed 2026-07-08).
-- decision: author a premise-eating action (shed 3–4) on The
-  Incompleteness's phase 3 — two lesser enemies already carry premiseShed
-  (`combat.threat-sequences.ts` ~283/~427) and the boss's flavor
-  ("incorporates your strongest argument as a new axiom") supports it.
-  Optional companion: raise the unique-tier concede floor 12 → 14. Do NOT
-  nerf the card — oratory is UNDER band late (14% vs 25–35 flag-ON).
-- scope note: enemy-content edit — outside `/deck-tuning`'s card surface;
-  ship as its own small item with the impossible-stage matrix cell as the
-  before/after witness.
-
-### Choice-width instrument — playable-set width + forced-turn rate
-- source: mechanics-expert fan-out 2026-07-18. Greedy and blind policies
-  are EXACTLY equal in all 40 flag-ON preset×stage rows (86,400
-  encounters) — dice-gated turns look near-forced, which would make the
-  observed skill-gap compression an AGENCY loss, not a variance story.
-  These demand opposite responses, and the D8 valve phase could pass its
-  win-rate bands while leaving the agency problem intact.
-- decision shape: instrument-only — log per-turn playable-set size
-  distribution and a first-class forced-turn rate (turns with ≤1 playable
-  option), reported per arm. Cheap (no engine/content change); feeds the
-  D8 evaluation and the owner's standing dislike of stacked gamble
-  mechanics. Companion instrument notes from the same sweep: blind-only
-  doctrine flag (`--doctrine-policy=blind`), and a card-holding policy to
-  make opp% discriminating (currently saturated ≥90% everywhere).
-
-### Combat challenge-gradient retune (superseded 2026-07-08 — tracked live, not a phase)
-- source: spec-31 §9 (P1 + trim shipped 2026-07-05)
-- Status per `/oversight` 2026-07-08 review: this candidate predates
-  Battle Lab round 2 and is now substantially superseded by
-  `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-08-win-path-scaling.md`, which is actively
-  executing against the same win≈1.00 symptom (4 of 7 items landed
-  same day: per-preset floors, effectiveness lint, atlas gate marks,
-  scaled burst caps). Remaining open: oratory/standstill still hit
-  1.00 late — reclassified as a BACKFIRE/damage-tuning item for
-  `/deck-tuning` forge, not an engine-threshold item; items 3
-  (persistence-by-stack DoTs) and 5 (theme pressure valve) unshipped.
-  Decision: do NOT promote this row to a build-plan phase — the work
-  is already tracked and progressing through the tuning doc's own
-  sequencing. Leave this row as a pointer; drop it once the tuning
-  doc's remaining items land or get re-scoped.
-
 ### Fate Engine P2 — statuses rewrite the enemy's turn (spec 31 §3, §5 #13-18)
 - source: spec-31
 - RE-SCOPED at Phase D1 (2026-07-17, spec 33) to the non-dice remainder:
@@ -624,14 +445,6 @@
   teaches the dice→card→stance loop. Small content phase; re-scope onto
   the spec 33 model when promoted — sequencing after D6 (needs the new
   dice tray + stance chips to teach against).
-
-### Enemy themed decks (mechanics — post spec-32 v3)
-- source: T direct decision 2026-07-07 (themed-deck-library session)
-- spec 32 v3 gives enemies persistent passives only (an enchantment
-  plus an attachable disenchant). The stated long-term goal: enemies
-  draw and play from their own themed decks built from the same
-  10-theme library. Follow-up phase after the 10 player presets prove
-  out through /combat-playtest.
 
 ### Hazard deck-thinning remove-card consumer
 - source: archive
@@ -678,72 +491,6 @@
   `src/Enemy/e2e/new-enemies.engine.test.ts`. Real content-sized
   work (30 enemies) — promote to a build-plan phase when queue has
   room.
-
-### Mid-game preset deck library (mechanics — content; the deck-progression roadmap)
-- source: T direct, 2026-07-17 chat session (starter-deck-presets rename).
-- decision (T direct, same session): the preset roadmap is THREE
-  libraries — **starter** (the shipped ten, now
-  `combat.starter-deck-presets.ts`; early/mid by design, in-game),
-  **mid-game** (in-game: what the player trades into after the
-  labyrinth, per the draft-maturation progression model), and
-  **end-game** (NOT shipped in the game — a sim/tuning fixture only,
-  so build it as a sandbox/playtest set alongside
-  `cards.sandbox-sets.ts` rather than a `src/` library carrying
-  verify-gate weight). Two standing constraints ratified in-session:
-  (1) NO rank/price-ceiling raise — mid/late libraries stay in-band
-  (clean-replace, per the 2026-07-08 deck-progression decision; the
-  price experiment proved magnitude headroom does not buy late wins),
-  the winning axes are tempo/front-load + alt-win engines (now priced
-  by 36a/36b); (2) when the second library lands, extract the shared
-  recipe machinery (the 4/4/2/2/1/1/1 recipe, Color Law partition,
-  `PRESET_COLOR_BORROWS`, `CombatDeckFocus`) into a
-  `combat.deck-recipes.ts` core so the laws are not starter-named.
-  Deps: the deck-budget lint candidate below gives mid-game presets a
-  measurable per-stage budget target; sequence it first if possible.
-
-### Preset deck-budget lint (mechanics — pricing)
-- source: T direct, 2026-07-17 chat session (price-experiment follow-up,
-  same evidence as Phases 36a/36b).
-- The pricing lint proves per-CARD rank honesty
-  (`src/Cards/e2e/pricing.engine.test.ts` bands: common 1.5-7.5 /
-  uncommon 4.5-13 / rare 7-19); nothing asserts a PRESET's total
-  budget. Once 36b (tempo term) and the 36c candidate (enchant
-  pricing) make cross-deck totals meaningful, add per-stage deck
-  budget bands — the 10 starters cluster ~71-105 total today — so
-  future mid/late preset libraries are designed to a measurable
-  budget target instead of an accident, and starters get a
-  "budget in the early band" assertion. Turns pricing from
-  honesty-lint into deck-design tooling. Deps: 36b (36c strengthens
-  it). NOT a rank/price-ceiling raise: the late library is
-  in-band, clean-replace per the 2026-07-08 deck-progression
-  decision, and the price experiment showed magnitude headroom
-  does not buy late wins (erosion late 0.04→0.12 at 4x).
-
-### Doctrine-curve check in the nightly baseline (harness promotion)
-- source: T direct, 2026-07-17 chat session (price-experiment follow-up).
-- The price-vs-winrate sweep lives in
-  `axiomancer-mechanics/scratch/price-experiment/` as a one-off
-  ultracode harness. Fold a per-preset doctrine-curve check (blind
-  policy vs the early ~80 / mid ~50 / late 25-35 / impossible 0
-  bands) — and optionally the price↔winrate correlation — into
-  `baseline:regen` / the reduced nightly pass, so curve violations
-  (e.g. the current mid-collapse quartet: foundry/standstill/grace/
-  augury ≈0% mid) and pricing drift surface automatically instead of
-  via one-off sessions. Scope: promote or absorb the scratch
-  harness's per-stage cells into the baseline metrics; keep scratch/
-  out of verify. Deps: none hard; most meaningful post-36b.
-- UPDATE 2026-07-18 (metrics-slate session, PR #119): the instrument
-  now exists IN-TREE — `npm run combat-playtest -- --deck=preset:all`
-  sweeps all ten presets and `PlaytestPresetSummary` carries the
-  doctrine-band fit (`PRESET_DOCTRINE_WIN_BANDS`), skill-gap, and
-  static complexity per preset. Scratch-harness absorption is
-  SUPERSEDED; remaining scope is just wiring: run the preset sweep in
-  `baseline:regen` / the reduced nightly pass and stamp a second
-  artifact next to `deck-matrix-baseline.json`, so preset drift is
-  watched instead of sampled. First measurement:
-  `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/reports/preset-sweep-2026-07-18.md`.
-  Sequencing note: re-stamp after D-FLIP/D8 land — the 07-18 report
-  measures the flag-off model.
 
 ### Card evolution (`[needs-user-call]` — UNPARKED, ruled design-now via /oversight 2026-08-10)
 - source: `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-card-library-improvement-plan.md` §2
@@ -824,189 +571,6 @@
 - conflicts: none against spec.md non-goals; doesn't touch the 3
   surviving big-numbers constraints.
 
-### [score 3.0] No player-applied "the foe takes more damage" debuff — every existing multiplier dampens the BEARER's own output, none amplifies damage the bearer RECEIVES
-- proposed: 2026-09-20, `/adjust-keywords` pass 14 (Step 1b widened KB
-  cross-reference; Step 1's own structural audit — carrier-count sweep
-  across every `CardSpecialMechanic`/`SynergyStatePredicate` kind against
-  every atlas row, plus a run of `node --test scripts/content-drift.test.mjs`
-  — came back 11/11 green and zero-diff, so the widened check ran).
-- source signals:
-  - KB: `kb:dawncaster/keywords/vulnerable.okf.md` (src-001, community,
-    confidence medium) — "Take 10% more damage from each Action for each
-    stack of Vulnerable. Stacks up to 100% extra damage" — a genre-standard
-    debuff that amplifies damage the AFFLICTED side later takes, stacking
-    and persistent, distinct from the "reduce the target's own outgoing
-    damage" family Dawncaster also carries separately (Weakness).
-  - Live-code check: our closest analogue is QUARTER (`debuff_quarter`,
-    payload `outgoingDamageMulPct: -10`), read by
-    `getOutgoingDamageMult(bearer)` (`src/Combat/effects.ts:351-360`) —
-    its own doc comment states it is "Applied to the enemy's telegraphed
-    threat damage and the player's powered strike," i.e. it always
-    dampens the BEARER's own hit, never amplifies a hit landing ON the
-    bearer. MARK (`tickAmplifyFlat`) is the nearest thing to an
-    amplify-incoming lever, but it only touches DoT TICKS ("+1 VITAE per
-    Mark stack" on every damage-over-time tick), not DEAL/WRATH/CHAIN/
-    EXECUTE direct-hit damage — confirmed by grepping every
-    `EffectPayload` field in `src/Effects/types.ts` and every read site
-    in `src/Combat/effects.ts`/`combat.engine.ts`: no field multiplies
-    damage a combatant is ABOUT TO RECEIVE from the other side. `EXECUTE`
-    comes closest in spirit but is a card-authored conditional
-    (foe-HP-threshold-gated, doubles that ONE card's own damage), not a
-    stacking debuff any card can apply and any other card can then hit
-    into.
-  - This is a genuine gap, not a near-synonym: QUARTER/MARK/EXECUTE/WRATH/
-    CHAIN/FLAY already cover "make MY next hit(s) bigger" (WRATH/CHAIN/
-    FLAY) and "make THEIR hits smaller" (QUARTER) and "amplify DoT ticks"
-    (MARK) and "conditionally double THIS card" (EXECUTE) — none of them
-    is "mark the foe so every future source of damage against it (mine
-    AND my teammates'-equivalent effects, i.e. any card) counts for
-    more," which is the axis Vulnerable drills.
-- rationale: real and KB-grounded, but the wiring is NOT small. It needs a
-  new `EffectPayload` field (an `incomingDamageMulPct`-shaped multiplier
-  read at the OPPOSITE end of `getOutgoingDamageMult`'s call sites — i.e.
-  a new `getIncomingDamageMult(target)` hooked into wherever
-  DEAL/WRATH/CHAIN/EXECUTE resolve damage against the enemy in
-  `combat.engine.ts`), which is core damage-math surgery that has to be
-  checked against every existing multiplier in that chain (HIDE,
-  BRUTAL, EXECUTE, WRATH/CHAIN stacking, PIERCE) for stacking/ordering
-  correctness, plus a new debuff library entry, a carrying card or two,
-  pricing, a hermetic e2e, and the mobile gloss/glyph. That is
-  cross-cutting engine wiring touching the shared damage-resolution
-  path, not a same-tick reuse of an existing hook — squarely THE GROWTH
-  FLOOR ¶2's "file large" case, not "ship small."
-- proposed scope: a `mechanics-expert` design session first (ordering
-  against HIDE/BRUTAL/EXECUTE/WRATH/CHAIN in the damage-resolution
-  chain, and whether it lives as a new debuff field or rides the
-  existing MARK verb with a widened trigger) before any engine code,
-  then the full 12-step keyword wiring checklist for the resulting
-  verb, then 1-2 carrying cards.
-- estimated phases: 1-2
-- conflicts: none against spec.md non-goals; doesn't touch the 3
-  surviving big-numbers constraints. Interacts with (but doesn't
-  conflict with) THE BIG NUMBERS REWRITE's "buff the neighbours, don't
-  shrink the card" pillar — a Vulnerable-style multiplier would need to
-  be priced generously, not as a nerf lever.
-
-### [score 3.0] No card grants an in-combat/temporary card upgrade — Slay the Spire's Armaments/Apotheosis niche has no analogue
-- proposed: 2026-09-23, `/adjust-cards` pass 17 (Step 1b widened KB
-  cross-reference; Step 1's own structural audit read zero-diff — same
-  134 cards, `pricing.engine.test.ts` 263/263, `curated-library.engine
-  .test.ts` 14/14, `deck-presets.engine.test.ts` 9/9, all byte-identical
-  to pass 16's own citation, and the only touching commit on the
-  card-authoring surface in the 40-commit window was an unrelated
-  `export` rename on `REGISTRY_DOT_IDS` in `combat.cards.ts`).
-- source signals:
-  - KB: `kb:slay-the-spire/cards/0015-armaments-armaments` (community,
-    medium) — "Gain 5 Block. Upgrade a card in your hand for the rest
-    of combat," `kb:slay-the-spire/cards/0013-apotheosis-apotheosis`
-    — "Upgrade ALL your cards for the rest of combat. Exhaust," and
-    `kb:slay-the-spire/cards/0202-lesson-learned-lessonlearned` — "Deal
-    10 damage. If Fatal, Upgrade a random card in your deck. Exhaust."
-    A genre-staple niche (temporary-for-this-fight or permanent-to-deck
-    card-granted upgrades) distinct from a player's own meta-progression
-    upgrade choice.
-  - Live-code check: Axiomancer already has a full `+`-card system
-    (`src/Cards/card-upgrades.ts` — `upgradeCard`/`getUpgradedCardById`,
-    a pure default-numeric-rule-plus-authored-patch model, exhaustively
-    switched over all 52 `CardSpecialMechanic` kinds with no `default:`
-    arm, so a missing case fails the build) but it is wired ONLY as a
-    between-run meta-progression axis (the file's own header: "Players
-    should also be able to upgrade their cards") — no
-    `CardSpecialMechanic` kind lets a card grant an upgrade to another
-    card as a COMBAT EFFECT. Confirmed via the full 52-kind
-    `CardSpecialMechanic` enumeration (`src/Cards/types.ts`) and a
-    library-wide `axio_cards`/grep sweep: no card, sandbox card, or
-    keyword-atlas row references any such verb.
-  - This is a genuine gap, not a near-synonym: our upgrade axis and
-    StS's Armaments/Apotheosis niche share the same computed-`+`
-    machinery in spirit but operate on different triggers (meta-screen
-    choice vs. a card played mid-fight) and different scopes (permanent
-    vs. this-fight-only).
-- rationale: real and KB-grounded, but not a Step 3 ship-small CREATE —
-  `upgradeCard` is pure and reusable, but a card-triggered call needs a
-  new `CardSpecialMechanic` kind (e.g. `grant_upgrade`), a targeting
-  model (self hand card / random deck card / whole hand), a
-  combat-engine hook to apply it, and — for the "this fight only" StS
-  flavor — a REVERT-at-combat-end path, a transient-state shape the
-  engine doesn't carry today (today's `+` is always permanent, computed
-  once at draft/meta time). Past that: pricing, display text, and the
-  full 12-step keyword wiring checklist (mobile gloss, card-editor
-  vocabulary, atlas row). New engine wiring plus a new keyword — past
-  this steward's ship-small ceiling (THE GROWTH FLOOR ¶2).
-- proposed scope: a `mechanics-expert`/`card-expert` design session
-  first (permanent-to-deck vs. this-fight-only, or both as separate
-  verbs; whether the revert path is worth building or the niche ships
-  permanent-only to start), then the full keyword wiring checklist for
-  the resulting verb, then 1-2 carrying cards (a natural fit for
-  grave's MILL/RECALL-adjacent "invest in the deck itself" register, or
-  debt's compounding-power theme).
-- estimated phases: 1
-- conflicts: none against spec.md non-goals; doesn't touch the 3
-  surviving big-numbers constraints or the LOCKED MECHANICS.
-
-### [ ] [score 3.0] No mechanic lets a card offer the player a choice among revealed/generated options — Slay the Spire's Discovery / Dawncaster's Delve niche has no analogue
-- proposed: 2026-09-25, `/adjust-cards` pass 19 (Step 1b widened KB
-  cross-reference; Step 1's own structural audit read zero-diff — same
-  134 cards / 8 themes / 72 keywords, `pricing.engine.test.ts` 263/263,
-  `curated-library.engine.test.ts` 14/14, `deck-presets.engine.test.ts`
-  9/9 all green and byte-identical to pass 18's own citation; `git diff
-  f155b027..HEAD` over every card-authoring surface — `cards.library.ts`,
-  `combat.starter-deck-presets.ts`, `cards.sandbox-sets.ts`,
-  `combat.deck-draft.ts`, `cards.allies.ts`, `cards.haunts.ts`,
-  `library/*.cards.ts` — returns zero changes across the 27-commit
-  window).
-- source signals:
-  - KB: `kb:dawncaster/keywords/delve.okf.md` (src-001, community,
-    medium) — "Select 1 of 3 randomly selected cards" (Deck Management
-    function, ordinal 43 of 141).
-  - KB: `kb:slay-the-spire/cards/0111-discovery-discovery` (community)
-    — "Choose 1 of 3 random cards to add into your hand. It costs 0
-    this turn. Exhaust." A genre-staple "pick one of a revealed set"
-    primitive, distinct from our FORETELL (peek-and-reorder the deck,
-    no choice among alternatives) and RECALL (deterministic
-    highest-rank-first retrieval, no choice involved).
-  - Live-code check: a grep for choice/choose/select across
-    `src/Cards/types.ts` finds nothing on the mechanic surface (the one
-    hit is the unrelated `befriend_attempt` mercy-choice comment, see
-    below); the full `CardSpecialMechanic` union (50+ kinds) has no
-    member that presents the player a set of options to pick from, and
-    `axio_keywords`'s 72 registry rows are all single-resolution
-    effects — none branches on a player pick.
-  - This is a genuine gap, not a near-synonym for an existing keyword:
-    FORETELL/RECALL manage what's already committed (deck order,
-    discard retrieval by a fixed rule); Delve/Discovery hand the player
-    an active choice among freshly-generated or revealed alternatives —
-    a mid-resolution decision point, not a deterministic effect.
-- rationale: real and KB-grounded, but structurally large — no
-  generic "offer N options, resolve on player pick" surface exists
-  mid-card-resolution today. Building it needs a new
-  `CardSpecialMechanic` kind (e.g. `choose_one`), a transient
-  combat-state shape to hold the offered options pending a player pick,
-  a mobile UI screen/modal to present and resolve the choice (today's
-  mobile combat screen has no such component), the full 12-step keyword
-  wiring checklist (mobile gloss, card-editor vocabulary, atlas row),
-  and a card-editor authoring surface for "N options, pick 1." Past
-  this steward's ship-small ceiling by a wide margin — this reads
-  closer to a UI feature than a card content addition. Notably, the
-  engine already carries ONE player-facing mid-resolution choice state
-  (`befriend_attempt`'s mercy-choice gate, Phase 108, `CardSpecialMechanic`
-  doc comment: "opening a mercy choice state if successful") — a
-  `choose_one` primitive could plausibly reuse that plumbing rather than
-  building fresh, which is exactly the kind of call a design session
-  should make before any code is written.
-- proposed scope: a `mechanics-expert` design session first (what
-  "options" means here — 3 random cards from the reward pool, 3 cards
-  from the player's own deck/discard, or a fixed authored triplet per
-  card; whether the pick resolves synchronously at play-time or is
-  queued like the mercy-choice state; whether it reuses that state's
-  plumbing), then the full keyword/engine wiring checklist for the
-  resulting primitive, then 1-2 carrying cards once it exists (grave's
-  MILL/RECALL register or choir's harvesting register are the closest
-  thematic fits).
-- estimated phases: 1-2
-- conflicts: none against spec.md non-goals; doesn't touch the 3
-  surviving big-numbers constraints or the LOCKED MECHANICS.
-
 ### [ ] [score 2.0] Consider a service layer for cross-project/external-API needs — no concrete need filed yet
 - proposed: 2026-09-23, via `/oversight` (T's own architecture question,
   raised as the session's free-form adjustment)
@@ -1033,75 +597,6 @@
 - estimated phases: n/a — not actionable without a concrete driving need.
 - conflicts: none against spec.md non-goals.
 
-### [score 3.0] No card/effect pre-empts an incoming affliction — CLEANSE only removes one after the fact, nothing prevents the application
-- proposed: 2026-09-23, `/adjust-keywords` pass 17 (Step 1b widened KB
-  cross-reference; Step 1's own structural audit read zero-diff —
-  `combat.cards.ts`'s `mechanicText` switch still matches every
-  `CardSpecialMechanic`/`CardRider` kind 55/55 with zero silent
-  `default:` arms, `node --test scripts/content-drift.test.mjs` 11/11
-  green, and the atlas's 72 rows still match `axio_keywords`'s live
-  count exactly — the only 8 intervening commits on the keyword-surface
-  path set were the docs-audit's stale-comment corrections
-  (`f5db5ca6`/`fb1bffd5`/`adf35108`), zero schema/engine/atlas changes).
-  Spot-checked six lower-population keywords for the ≥2-carrier REMOVE
-  signal too (TWIN, IMMOLATE, PURGE, OMEN, FLAY, TICK via `axio_cards`)
-  — all clear the bar with 2-5 live carriers each; no retirement
-  candidate found.
-- source signals:
-  - KB: `kb:dawncaster/keywords/ward.okf.md` (community, confidence
-    medium) — "Whenever you gain an Affliction, prevent that Affliction
-    and lower your Ward by 1 instead. Fades at the start of the turn" —
-    a PRE-EMPTIVE stacking buff distinct from Dawncaster's own Cleanse
-    (`kb:dawncaster/keywords/cleanse.okf.md`, "Removes an Affliction" —
-    after-the-fact, same shape as our own CLEANSE). Also checked
-    Impervious (`kb:dawncaster/keywords/impervious.okf.md`) and Insight
-    (`kb:dawncaster/keywords/insight.okf.md`) as the wider
-    damage-negation family — both are DAMAGE-prevention, not
-    affliction-prevention, and our own `buff_invincibility`
-    (`defenseModifier: 99`, non-card, Signature-only) already occupies
-    that niche; Ward's axis (blocking a STATUS application, not a
-    damage instance) is the one left genuinely uncovered.
-  - Live-code check: `src/Effects/index.ts`'s `applyEffect` is the SOLE
-    application point for every buff and debuff (player and enemy
-    alike) — read start to finish, it has no interception/consult step
-    against the target's own active-effect list before stacking a new
-    one; the only related lever, `buff_cleanse`/`buff_cleanse_minor`
-    (`payload.cleanse: true`), fires as its own separate mechanic
-    AFTER an affliction already landed, never before. Grepped both
-    effect libraries (`src/Effects/{buffs,debuffs}.library.json`,
-    29 entries total) for `prevent`/`immune`/`ward` in any
-    description or payload key: zero hits outside one debuff's flavor
-    text (`debuff_curse`'s description uses "denied," unrelated). No
-    existing buff, debuff, `CardSpecialMechanic`, or `CardRider` blocks
-    an incoming affliction before it stacks.
-  - This is a genuine gap, not a near-synonym: CLEANSE (`CLEANSE N`,
-    already in the atlas) removes UP TO N afflictions you already
-    hold; the Ward axis stops one from landing in the first place —
-    different point in the sequence, same family (affliction
-    management) Dawncaster itself keeps as two separate keywords.
-- rationale: real and KB-grounded, but not a Step 3 ship-small CREATE.
-  `applyEffect` is a single, heavily-shared pure function (every
-  status application in the engine funnels through it); teaching it
-  to consult a "Ward" stack on the TARGET before stacking a new
-  debuff is a new interception hook on a load-bearing shared path, not
-  a same-tick reuse of an existing one — it would need careful
-  ordering against the resist-roll (`resistedBy`/`resistDR`) that
-  already gates whether an effect lands at all, a new
-  `EffectPayload`/buff-payload shape, a carrying card or two, pricing,
-  a hermetic e2e, and the mobile gloss/glyph. Squarely THE GROWTH
-  FLOOR ¶2's "file large" case.
-- proposed scope: a `mechanics-expert` design session first (where the
-  Ward consult sits relative to the existing resist roll — before it,
-  after it, or replacing it entirely for the one interaction — since
-  both are "does this affliction land" gates and stacking two would be
-  redundant), then the full 12-step keyword wiring checklist for the
-  resulting buff/keyword, then 1-2 carrying cards (a defensive-stance
-  vigil card or a choir ward-of-grace fit both the existing theme
-  vocabulary).
-- estimated phases: 1
-- conflicts: none against spec.md non-goals; doesn't touch the 3
-  surviving big-numbers constraints or the LOCKED MECHANICS.
-
 ## Promoted
 
 Earlier entries are archived verbatim in `plan/archive/PHASE_CANDIDATES_2026.md`.
@@ -1115,6 +610,46 @@ Earlier entries are archived verbatim in `plan/archive/PHASE_CANDIDATES_2026.md`
 
 - `/world-tuning` still lists rest `healFraction` as a tuning lever: moot,
   since `/world-tuning` was retired in trim T5 (2026-09-25, D10).
+- Card-face parity: bring the card-editor + devlog catalog onto THE PRINTED
+  PLATE: moot, since the library is the three grey cards (D36), the card
+  editor is deleted (D56), the DevLog catalog shows live content only (D57),
+  and any new card face is designed in the owner-led card sessions (D37).
+- Run/meta-progression as a wrapper over `PRESET_LINEAGE`: moot, since the
+  presets and their lineage were purged with the card library (D36).
+- The 27 damned exemplars + 81 besetting sins hiding inside Phase 44h: moot,
+  since the philosophy grid they re-skinned was removed with alignment and
+  philosophy in T6 (D39).
+- Enchant/disenchant hooks are per-card engine code: moot, since every
+  enchant/disenchant card was purged (D36), carrier-less engine mechanics are
+  deleted (D50) and no swap pool exists to grow (D37).
+- Pricing-lint paper credit on no-calendar non-DoT effects: moot, since the
+  MARK-style carriers it priced were purged (D36) and the carrier-less
+  mechanics and their pricing are deleted (D50).
+- Starter-library trim + duplication pass: moot, since the purge cut the
+  library to the three grey cards and removed the presets (D36); the
+  duplication half has nothing left to duplicate.
+- Swap-pool candidate authoring: moot, since the presets it refined were
+  purged (D36) and no card is authored outside a guided session with T (D37).
+- The Incompleteness premiseShed: moot, as the row's own 2026-09-27 note says;
+  the premise economy went with the purge (D36) and The Incompleteness retired
+  with the roster reset (D48).
+- Choice-width instrument: moot, since it was an instrument over the preset x
+  stage matrix; the presets are gone (D36) and the deck-matrix baseline is
+  retired until the retune (D57).
+- Combat challenge-gradient retune: moot, since it tracked preset win curves
+  that no longer exist (D36, D57); the tuning doc it pointed to is archived.
+- Enemy themed decks: moot, since the roster reset to three keyword-less
+  enemies (D48) and the ten-theme player library it borrowed from was purged
+  (D36).
+- Mid-game preset deck library: moot, since the preset libraries were purged
+  (D36) and card libraries are built only in guided sessions with T (D37).
+- Preset deck-budget lint: moot, since there are no presets (D36) and the
+  pricing machinery it would extend is deleted (D50).
+- Doctrine-curve check in the nightly baseline: moot, since the presets are
+  gone (D36) and the nightly baseline is retired until the retune (D57).
+- No player-applied "the foe takes more damage" debuff: met, since A Plain
+  Word applies VULNERABLE +25% to the foe (D42, D43); the rest of the row's
+  wiring plan is card-session work (D37).
 
 ## Considered (below threshold)
 

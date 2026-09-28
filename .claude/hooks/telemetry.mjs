@@ -4,7 +4,7 @@
 //
 // Wired via .claude/settings.json:
 //
-//   PreToolUse  (Skill|SlashCommand|Task|Agent) → telemetry.mjs tool
+//   PreToolUse  (Skill|SlashCommand|Task|Agent|Read) → telemetry.mjs tool
 //   PostToolUse (Skill|SlashCommand|Task|Agent) → telemetry.mjs tool-end
 //   UserPromptSubmit                            → telemetry.mjs prompt
 //   Stop                                        → telemetry.mjs tick-end
@@ -22,6 +22,8 @@
 //             skill              a Skill tool call started
 //             slash-command      a SlashCommand tool call started
 //             subagent           a Task/Agent spawn started
+//             verb-read          a loop verb's skills/<verb>.md was read
+//                                (no -end row; once per verb per tick)
 //             skill-end          …and the matching call finished
 //             slash-command-end  …and the matching call finished
 //             subagent-end       …and the matching call finished
@@ -76,6 +78,14 @@
 //    (scripts/telemetry-view.mjs) prints every shard as one table. The
 //    pre-split log lives on as telemetry/legacy-to-2026-09-23.md and is
 //    never written again. Shards are uncapped: one session is small.
+//
+// 4. VERBS DISPATCHED BY READING (R0, 2026-09-28). `/march` runs its
+//    verbs by reading `skills/<verb>.md` and following it, not through
+//    the Skill tool, so those verbs never showed up here and the log
+//    undercounted the loop. A Read of a root `skills/<verb>.md` now writes
+//    one `verb-read` row per verb per tick. Only the repo's own loop-verb
+//    directory counts: `.claude/skills/`, `plan/archive/` and
+//    `node_modules/` paths are ignored.
 //
 // Zero dependencies. Newest rows last.
 
@@ -226,6 +236,19 @@ function appendRow({ sessionId, event, name, model, dur, detail }) {
 // --- event classification -------------------------------------------
 
 /**
+ * The loop verb a Read targets, or null. Matches `<root>/skills/<verb>.md`
+ * where the parent directory is the repo's top-level `skills/`, whatever
+ * checkout or worktree it sits in.
+ */
+function verbOfRead(filePath) {
+  const p = String(filePath ?? '').replace(/\\/g, '/')
+  const m = p.match(/(?:^|\/)skills\/([a-z0-9][a-z0-9-]*)\.md$/i)
+  if (!m) return null
+  if (/(?:^|\/)(?:\.claude|plan\/archive|node_modules)\//.test(p)) return null
+  return m[1].toLowerCase()
+}
+
+/**
  * Map a tool call to its telemetry identity, or null for tools we do
  * not log. Shared by PreToolUse and PostToolUse so a start row and its
  * end row always agree on event and name.
@@ -247,6 +270,11 @@ function classify(input) {
       detail: ti.command,
       pinnedModel: null,
     }
+  if (tool === 'Read') {
+    const verb = verbOfRead(ti.file_path)
+    if (!verb) return null
+    return { event: 'verb-read', name: verb, detail: '', pinnedModel: null, noEnd: true }
+  }
   if (tool === 'Task' || tool === 'Agent')
     return {
       event: 'subagent',
@@ -277,6 +305,25 @@ function toolStart(input) {
   const c = classify(input)
   if (!c) return
   const state = readState()
+  if (c.noEnd) {
+    // A verb read is a single row, once per verb per tick: a long skill
+    // file read in chunks must not log a row per chunk.
+    state.verbsRead ??= []
+    if (state.verbsRead.includes(c.name)) return
+    state.verbsRead.push(c.name)
+    state.tickStart ??= Date.now()
+    state.logged = true
+    writeState(state)
+    appendRow({
+      sessionId: input?.session_id,
+      event: c.event,
+      name: c.name,
+      model: resolveModel(input?.transcript_path) ?? '-',
+      dur: '-',
+      detail: c.detail,
+    })
+    return
+  }
   state.open ??= {}
   state.open[openKey(input?.session_id, c.event, c.name, c.detail)] = Date.now()
   state.tickStart ??= Date.now()
@@ -295,7 +342,7 @@ function toolStart(input) {
 /** PostToolUse: close the matching invocation and write its end row. */
 function toolEnd(input) {
   const c = classify(input)
-  if (!c) return
+  if (!c || c.noEnd) return
   const state = readState()
   const key = openKey(input?.session_id, c.event, c.name, c.detail)
   const started = state.open?.[key]

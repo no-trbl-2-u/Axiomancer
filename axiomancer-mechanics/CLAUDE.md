@@ -84,12 +84,13 @@ a guard; a test that fails when the game is *different* is a repealed law.
 Hazard-Pattern Combat remains the ONLY combat engine (witness:
 `simulateHazardPatternCombat`), LIVE in mobile map encounters, with the enemy's
 sole bar VITAE and `isDefeated(enemy)` the main win condition. Engine constants
-are tuned manually; **`/adjust-cards`** stewards the card pool and
-**`/combat-playtest`** runs the stage matrix plus qualitative `playtester`
-agents (report only; see `docs/playtest.md`).
+are tuned manually inside ratified revamp phases (D58); cards change only in
+guided sessions with T (D37; `/adjust-cards` was archived in R0). The
+`/combat-playtest` command was archived in R0 and is rebuilt in Phase R12;
+the stage matrix itself stays (`npm run combat-playtest`, see
+`docs/playtest.md`).
 
-Canonical: `VISION.md` → Combat vision. Echoed in `AGENTS.md` and the
-`combat-playtest` command. (`/deck-tuning` was retired in trim T5,
+Canonical: `VISION.md` → Combat vision. Echoed in `AGENTS.md`. (`/deck-tuning` was retired in trim T5,
 2026-09-25, D10, to be rebuilt once the mechanics settle.)
 
 ## Pointers

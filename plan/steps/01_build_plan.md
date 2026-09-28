@@ -111,7 +111,7 @@ event-pool and layout files).
 > plan (A/B/C) is **not picked**; agents recommend T open
 > `plan/2026-09-27-keyword-card-revamp.summary.html` to choose (`plan/revamp/cards.md`).
 
-- [ ] Phase R0 — Loop doctrine reset (attended): archive the six content stewards, card-expert, mechanics-expert, reader, content-curator and the design skills; revamp-mode banner and doctrine fixes on every verb; ci-autofix concurrency; telemetry; plan hygiene. `plan/revamp/loop.md`.
+- [x] Phase R0 — Loop doctrine reset (attended): stewards, forge, four agents and the design skills archived; every verb carries the revamp banner; ci-autofix, telemetry and plan hygiene fixed. `plan/revamp/loop.md` (ba658cba)
 - [ ] Phase R1 — Tooling reset: delete the card editor, retire the deck-matrix baseline, archive the tuning-lab pages, catalog shows live content only, orphan scripts. `plan/revamp/tooling.md`. Requires R0.
 - [ ] Phase R2 — Enemy reset: 79 → Float-Eye / Brine Hag / Doorwarden, every enemy keyword and affliction stripped, PLEA/premise riders and curse code deleted. `plan/revamp/enemies.md`. Requires R0.
 - [ ] Phase R3 — World reset: Act 1 only, fishing-village purged, other continents parked, Labyrinth door and the Lantern Deep's deep stair sealed, encounters re-pointed (the Doorwarden on every region's door fight), one Anvil per region near its exit. `plan/revamp/world.md`, `labyrinth.md`. Requires R2.
@@ -132,6 +132,8 @@ event-pool and layout files).
 - [blocked: owner-led — T's session 2026-09-28] Phase B7 — Deck tab UI revamp. `plan/revamp/mobile.md`. Requires R8.
 - [blocked: owner-led — T's session 2026-09-28] Phase B8 — Card art revamp. `plan/revamp/mobile.md`. Requires R8.
 - [blocked: owner-led — T's session 2026-09-28] Phase B9 — Labyrinth re-theme. `plan/revamp/labyrinth.md`. Requires B2.
+- [ ] Phase R11 — Loop content phases (attended): revisit the loop so content creation returns as planned build-plan phases, decide per surface what the loop may create, review the R0 archive and zero-invocation verbs, and remove the revamp-mode banner (ends revamp mode, D58). `plan/revamp/loop.md`. Requires R10.
+- [ ] Phase R12 — New combat-playtest (attended): design and write a new `/combat-playtest` command for the rebuilt game (the old one was archived in R0), around the real questions after the reset: does stat growth track the Act 1 curve, are the survivors winnable and dangerous, what the matrix should measure (lowest VITAE included). Keeps the engine matrix CLI. `plan/revamp/loop.md`. Requires R9, R11.
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics (9180fa5d)
