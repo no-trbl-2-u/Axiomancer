@@ -9,8 +9,7 @@
  *
  * Every policy plays the spec-33 four-die round (`upgradeablePlayPhase`):
  * each live die powers one paid line of its colour (gold = wild), momentum-
- * steered toward the chain successor, Press Fate on a whiffed round, banked
- * Conviction spent on Signatures, FREE tops drain the rest of the hand. The
+ * steered toward the chain successor, banked Conviction spent on Signatures, FREE tops drain the rest of the hand. The
  * policy supplies only the card/signature ranking. The full roster
  * (dot-weaver, control-lock, aggro-brute, turtle, chaos, mercy-seeker) lives in
  * `combat.sim-policies.ts`.
@@ -22,6 +21,7 @@ import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveThreatPhase, startTurn, endTurn,
     playSignatureSkill, handCards, selectMercyChoice, selectCapitulationChoice, getSignatureSkill,
+    signatureCastBlock,
     recoilXRange,
 } from './combat.engine';
 import { MOMENTUM_CHAIN_ORDER } from './combat.upgradeable-dice';
@@ -250,7 +250,7 @@ function bestSignature(s: CombatEncounterState, policy: CombatSimPolicy, rng: ()
     let bestScore = -Infinity;
     for (const id of s.signatures) {
         const sig = getSignatureSkill(id);
-        if (!sig || s.conviction < sig.cost) continue;
+        if (!sig || signatureCastBlock(s, sig)) continue;
         if (!policy.signatureKinds.includes(sig.kind)) continue;
         if (!policy.rankSignature) return id;
         const score = policy.rankSignature(s, sig, rng);
@@ -387,19 +387,6 @@ export function upgradeablePlayPhase(
     if (working.dice.length === 0 && !working.turnTakenThisPhase) {
         working = startTurn(working).state;
         if (working.phase !== 'phase-play') return { state: working, plays, statusPlays, decisionPoints, liveOptions };
-    }
-
-    // Press Fate (§4): a full-miss round rerolls its misses once for 1◆ — cast
-    // the player's `reroll` signature. Skipped silently when
-    // the loadout carries none (a starter-signature gap D4/D5 fills) or the
-    // player can't afford it.
-    const fixedUsable = () => working.dice.some(d => !d.floating && d.state === 'available' && (d.face === 'special' || d.face === 'mana'));
-    if (!fixedUsable() && working.conviction >= 1 && working.pressFateRound !== working.round) {
-        const rerollId = working.signatures.find(id => getSignatureSkill(id)?.kind === 'reroll');
-        if (rerollId) {
-            const cast = playSignatureSkill(working, rerollId);
-            if (cast.state !== working) working = cast.state;
-        }
     }
 
     // ── Powered plays: iterate the live dice, momentum-steered. ──────────────
@@ -645,7 +632,6 @@ export function runOneEncounter(
         if (ev.kind === 'backfired') mechanicBurstDamage += ev.amount;
         if (ev.kind === 'thorns-reflected') mechanicBurstDamage += ev.amount;
         if (ev.kind === 'riposte-fired') mechanicBurstDamage += ev.amount;
-        if (ev.kind === 'conclude-hit') mechanicBurstDamage += ev.amount;
     }
     // directDamageDealt includes mechanic bursts; subtract them to get pure strikes.
     const directHpDamage = Math.max(0, state.directDamageDealt - mechanicBurstDamage);

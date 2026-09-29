@@ -37,7 +37,7 @@ export type {
 
 // ─── Enemy ────────────────────────────────────────────────────────────────────
 export {
-    createEnemy,
+    createEnemy, isEnemyBefriendable,
 } from './Enemy';
 export type {
     Enemy, EnemyDifficulty,
@@ -83,7 +83,7 @@ export {
     // Spec 26b / spec 33 — turn lifecycle, Conviction, Signature Skills
     startTurn, endTurn, discardCombatCard,
     playSignatureSkill, isPhaseStanceRevealed,
-    getSignatureSkill,
+    getSignatureSkill, signatureCastBlock, signatureGuardAmount, SIGNATURE_COST, SIGNATURE_GUARD,
     READ_DAMAGE_MULT,
     colorMatchBonus,
     // 0.34.0 status-depth epic — honesty selectors + deny-threshold consts
@@ -107,7 +107,6 @@ export {
     riderText, RESERVE_MAX,
     // Spec 33 — Upgradeable Dice (THE combat dice model since the D7 flag
     // collapse): the surfaces the app/sim layers need.
-    PRESS_FATE_COST,
     SPECIAL_CONVICTION_DEFAULT, MOMENTUM_CHAIN_ORDER, MOMENTUM_SURGE_LENGTH,
     DEFAULT_DIE_GEAR, activeDieGear,
 } from './Combat';

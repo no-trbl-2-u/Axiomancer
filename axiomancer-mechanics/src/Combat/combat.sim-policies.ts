@@ -199,14 +199,11 @@ function greedyChooseX(card: CombatCard, range: { min: number; max: number }): n
     return Math.max(range.min, Math.min(range.max, usefulMax));
 }
 
-/** The legacy signature preference list (order-insensitive membership check). */
-const LEGACY_SIGNATURE_KINDS: readonly SignatureSkillKind[] =
-    Object.freeze(['dot', 'control', 'mercy', 'conclude']);
+/** Both placeholder signature kinds (phase R4): GUARD and The Open Hand. */
+const ALL_SIGNATURE_KINDS: readonly SignatureSkillKind[] = Object.freeze(['guard', 'mercy']);
 
-const ALL_SIGNATURE_KINDS: readonly SignatureSkillKind[] = Object.freeze([
-    'scout', 'reroll', 'sustain', 'control', 'dot', 'mercy', 'conclude', 'draw',
-    'empower', 'surge',
-]);
+/** The killers never offer mercy; they only raise GUARD. */
+const GUARD_ONLY: readonly SignatureSkillKind[] = Object.freeze(['guard']);
 
 /** The scripted witness roster. */
 export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
@@ -216,7 +213,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         description: 'The tuned balance witness: plays the status game — new DoTs first, payoffs on time, strikes last.',
         preferredFocus: 'balanced',
         rankCard: (s, card) => greedyRankCard(s, card),
-        signatureKinds: LEGACY_SIGNATURE_KINDS,
+        signatureKinds: ALL_SIGNATURE_KINDS,
         convictionThreshold: 7,
         mercyChoice: 'spare',
         capitulationChoice: 'continue',
@@ -228,7 +225,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         description: 'The same status-first play as greedy. Its hidden-stance difference died with the draft (D7); kept so the playtest matrix keeps its column.',
         preferredFocus: 'balanced',
         rankCard: (s, card) => greedyRankCard(s, card),
-        signatureKinds: LEGACY_SIGNATURE_KINDS,
+        signatureKinds: ALL_SIGNATURE_KINDS,
         convictionThreshold: 7,
         mercyChoice: 'spare',
         capitulationChoice: 'continue',
@@ -252,7 +249,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
             if (card.effectKind !== 'none') return BAND_EFFECT + card.bottomDamagePreview;
             return 100 + card.bottomDamagePreview;
         },
-        signatureKinds: ['dot', 'conclude'],
+        signatureKinds: GUARD_ONLY,
         convictionThreshold: 7,
         mercyChoice: 'exploit',
         capitulationChoice: 'continue',
@@ -271,7 +268,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
             if (card.verbClass === 'defend') return BAND_EFFECT;
             return 100 + card.bottomDamagePreview;
         },
-        signatureKinds: ['control', 'dot'],
+        signatureKinds: GUARD_ONLY,
         convictionThreshold: 8,
         mercyChoice: 'spare',
         capitulationChoice: 'continue',
@@ -282,7 +279,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         description: 'The doctrine\'s weak baseline: raw damage preview, no payoff timing, no status game — its underperformance IS the design.',
         preferredFocus: 'damage',
         rankCard: (_s, card) => card.bottomDamagePreview,
-        signatureKinds: ['conclude'],
+        signatureKinds: GUARD_ONLY,
         convictionThreshold: 7,
         mercyChoice: 'exploit',
         capitulationChoice: 'continue',
@@ -301,7 +298,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
             if (card.effectKind !== 'none') return BAND_EFFECT + card.bottomDamagePreview;
             return 100 + card.bottomDamagePreview;
         },
-        signatureKinds: ['sustain', 'dot', 'control'],
+        signatureKinds: GUARD_ONLY,
         convictionThreshold: 9,
         mercyChoice: 'spare',
         capitulationChoice: 'continue',
@@ -335,7 +332,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
             if (card.verbClass === 'defend') return BAND_UTILITY_LIVE;
             return 100 + card.bottomDamagePreview;
         },
-        signatureKinds: ['mercy', 'control'],
+        signatureKinds: ['mercy', 'guard'],
         convictionThreshold: 6,
         mercyChoice: 'spare',
         capitulationChoice: 'accept',

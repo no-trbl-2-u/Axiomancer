@@ -19,11 +19,14 @@
  * The two armor relics carry the first-class `'maxHp'` stat modifier (Phase 19),
  * folded onto `Character.maxHealth` by the equip reducers — no effect involved.
  *
- * Stat pool: +5 maxHp on the two armor relics, nothing else. The +2
- * body / mind / heart bumps the other eight relics carried were inert (VITAE
- * reads raw base stats; combat reads no stat) and were cut in TRIM THE FAT
- * T2a (D14, `plan/2026-09-25-refactor-strategy.decisions.md`); D4's stat
- * hooks decide what, if anything, relics add back. `defaultWorn` still names the Phase-19 kit, but that
+ * Stat pool: +5 maxHp on the two armor relics, nothing else. Any stat a relic
+ * adds back feeds S3 scaling (combat reads the stats since S3), so it is a
+ * scaling lever, not a flat bonus — that is B1's call.
+ *
+ * Phase R4 made the signatures placeholders (D47, `plan/revamp/relics.md`):
+ * ten raise GUARD 5 for 4◆ and the Suppliant's Ring's The Open Hand is the
+ * befriend. Descriptions say what the relic does; the grant itself is printed
+ * from `grantsSignature`, so they don't repeat it. `defaultWorn` still names the Phase-19 kit, but that
  * kit is no longer SEEDED into a fresh run (see `Game/game.reducer.ts`
  * `createNewGameState`, owner call 2026-09-23 — the player starts with
  * nothing, earns the ring at the first node, and buys the other ten from the
@@ -66,80 +69,73 @@ const RELIC_SPECS: readonly RelicSpec[] = [
     // ── Weapons (2) ──────────────────────────────────────────────
     {
         id: 'relic-overwhelming', name: 'Gorgon Brand',
-        description: 'A blade that turns the argument to stone. Grants The Stilling.',
+        description: 'Raise GUARD 5 for 4 Conviction.',
         slot: 'weapon', grantsSignature: 'sig-overwhelming-argument',
         defaultWorn: true,
     },
     {
         id: 'relic-conclusion', name: 'Capstone Maul',
-        description: "The finisher made manifest. Grants The Butcher's Bill.",
+        description: 'Raise GUARD 5 for 4 Conviction.',
         slot: 'weapon', grantsSignature: 'sig-rallying-blow',
         defaultWorn: false,
     },
     // ── Armor (2) — maxHp bumps ───────────────────────────────────────────────
     {
         id: 'relic-read', name: 'Coldglass Aegis',
-        description: 'See the blow before it lands. Grants Read the Entrails.',
+        description: 'Raise GUARD 5 for 4 Conviction.',
         slot: 'armor', grantsSignature: 'sig-read-opponent',
         stat: 'maxHp', value: 5, defaultWorn: true,
     },
     {
         id: 'relic-second-wind', name: 'Ashen Cuirass',
-        description: 'Rise from the ash of a dead hand. Grants Second Wind.',
+        description: 'Raise GUARD 5 for 4 Conviction.',
         slot: 'armor', grantsSignature: 'sig-second-wind',
         stat: 'maxHp', value: 5, defaultWorn: false,
     },
     // ── Accessories (4) ──────────────────────────────────
     {
-        // Benched by owner call 2026-07-18 (was default-worn): the Gambler's
-        // Knot takes this seat so every starter opens with Press Fate — the
-        // spec-33 whiff valve and the economy's only recurring ◆ sink. At 8◆,
-        // The Oath Kept was the least-castable signature under the leaner
-        // flag-on income; it waits in inventory.
         id: 'relic-conviction-strike', name: 'Venom Sigil',
-        description: 'A venom that cannot fizzle. Grants The Oath Kept.',
+        description: 'Raise GUARD 5 for 4 Conviction.',
         slot: 'accessory', accessoryKind: 'amulet', grantsSignature: 'sig-conviction-strike',
         defaultWorn: false,
     },
     {
         id: 'relic-clever-gambit', name: 'Gambit Chit',
-        description: 'Turn information into tempo. Grants Cold Counsel.',
+        description: 'Raise GUARD 5 for 4 Conviction.',
         slot: 'accessory', accessoryKind: 'charm', grantsSignature: 'sig-clever-gambit',
         defaultWorn: true,
     },
     {
         // Owner call 2026-09-23: the ring is the first-node hand-over and
-        // carries NO stat bump — it grants The Open Hand and nothing else.
+        // carries NO stat bump — it grants The Open Hand (the befriend, R4) and
+        // nothing else.
         id: 'relic-disarming-plea', name: "Suppliant's Ring",
-        description: 'Soften the foe toward mercy. Grants The Open Hand.',
+        description: 'Offer a foe that can be befriended the choice of mercy, once it is low enough.',
         slot: 'accessory', accessoryKind: 'ring', grantsSignature: 'sig-disarming-plea',
         defaultWorn: true,
     },
     {
-        // Default-worn by owner call 2026-07-18 (drains D7 report F3): Press
-        // Fate + The Open Hand (Befriend) are the two must-have starters;
-        // The Stilling keeps the weapon seat.
         id: 'relic-press-the-point', name: "Gambler's Knot",
-        description: 'Bend fate on the bad dice. Grants Press Fate.',
+        description: 'Raise GUARD 5 for 4 Conviction.',
         slot: 'accessory', accessoryKind: 'charm', grantsSignature: 'sig-press-the-point',
         defaultWorn: true,
     },
     // ── Phase 85 — head/hands/feet accessories (were empty since Phase 19) ───
     {
         id: 'relic-mounting-dread', name: "Cassandra's Circlet",
-        description: 'A dread that will not be reasoned with. Grants The Mounting Dread.',
+        description: 'Raise GUARD 5 for 4 Conviction.',
         slot: 'accessory', accessoryKind: 'head', grantsSignature: 'sig-mounting-dread',
         defaultWorn: false,
     },
     {
         id: 'relic-endless-labor', name: "Sisyphus's Grip",
-        description: 'The strength that does not rest. Grants The Endless Labor.',
+        description: 'Raise GUARD 5 for 4 Conviction.',
         slot: 'accessory', accessoryKind: 'hands', grantsSignature: 'sig-endless-labor',
         defaultWorn: false,
     },
     {
         id: 'relic-unbroken-stride', name: "Achilles' Greaves",
-        description: 'A fleetness that punishes hesitation. Grants The Unbroken Stride.',
+        description: 'Raise GUARD 5 for 4 Conviction.',
         slot: 'accessory', accessoryKind: 'feet', grantsSignature: 'sig-unbroken-stride',
         defaultWorn: false,
     },

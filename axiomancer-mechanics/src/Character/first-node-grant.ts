@@ -101,10 +101,8 @@ export const FIRST_NODE_RELIC_ID = 'relic-disarming-plea';
  * window, and displaced back to the bench when the ring lands: the Venom
  * Sigil ("The Oath Kept").
  *
- * The 2026-07-18 owner call benched this relic because The Oath Kept was the
- * least castable signature under the leaner flag-on income. That call is
- * respected: it holds the seat for exactly one node and then goes back to the
- * bench, so the loadout the player fights with is unchanged.
+ * It holds the seat for exactly one node and then goes back to the bench, so
+ * the loadout the player fights with is unchanged.
  */
 export const STAND_IN_RELIC_ID = 'relic-conviction-strike';
 

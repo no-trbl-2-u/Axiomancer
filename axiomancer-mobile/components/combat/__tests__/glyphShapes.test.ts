@@ -44,11 +44,10 @@ describe('glyphShapes — keyword canon audit (Phase V6)', () => {
     });
 
     it('every effect-backed registry keyword resolves to a silhouette', () => {
-        // debuff_poison/_bleed/_mark/_quarter/_vulnerable and the
-        // creeping_doom Doom promotion — the only ids a live card may carry
-        // on its FREE line (BACKFIRE and THORNS left with the keyword audit,
-        // 2026-09-27, when the purge deleted every card carrying them).
-        const effectBackedKeywords = ['POISON', 'BLEED', 'MARK', 'QUARTER', 'VULNERABLE', 'DOOM'];
+        // debuff_bleed/_mark/_vulnerable — the only effect-backed keywords
+        // left (BACKFIRE and THORNS left with the keyword audit, 2026-09-27;
+        // POISON, QUARTER and DOOM with the R4 signature placeholders).
+        const effectBackedKeywords = ['BLEED', 'MARK', 'VULNERABLE'];
         for (const kw of effectBackedKeywords) {
             expect(registryKeywords.has(kw)).toBe(true);
             expect(glyphShapeFor(kw)).not.toBeNull();

@@ -32,16 +32,16 @@ import { SURGE_DIE_PREFIX } from './combat.upgradeable-dice';
 /**
  * Dice-system verbs whose PRESENCE (not volume) proves the dice economy was
  * actually PLAYED rather than merely rolled: banking, ripening, forging,
- * converting, floating, refreshing, cracking, overflowing, and Pressing Fate
- * (the draft-era fate tap and THE STAKE were deleted with the D7 flag
- * collapse). A deck that only rolls-and-spends touches none
+ * converting, floating, refreshing, cracking and overflowing (the draft-era
+ * fate tap and THE STAKE went with the D7 flag collapse, Press Fate with the
+ * R4 signature placeholders). A deck that only rolls-and-spends touches none
  * of them — that is the failure mode the breadth term exists to catch.
  *
  * Order is stable so the derived breadth count is deterministic.
  */
 export const DICE_ECONOMY_VERBS = Object.freeze([
     'die-banked', 'die-ripened', 'die-forged', 'die-converted', 'die-floated',
-    'die-refreshed', 'die-cracked', 'die-overflowed', 'press-fate-rerolled',
+    'die-refreshed', 'die-cracked', 'die-overflowed',
 ] as const);
 
 const DICE_ECONOMY_VERB_SET: ReadonlySet<string> = new Set<string>(DICE_ECONOMY_VERBS);

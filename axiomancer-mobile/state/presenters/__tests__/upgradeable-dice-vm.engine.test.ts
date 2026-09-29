@@ -1,12 +1,13 @@
 /**
  * Spec 33 (Phase D6a) — combat render CORE, presenter contract.
  *
- * Pins the view-model surfaces the dice tray + Press Fate control read,
+ * Pins the view-model surfaces the dice tray + signature runes read,
  * against the REAL engine + presenter:
  *   1. the CombatDieVM face axis (special / mana / miss) + the OVERHEAT `cracked`
  *      read, and that a MISS face is DEAD (never draggable);
- *   2. the Press-Fate VM (enabled / disabled + the loud refusal reason), mirroring
- *      the engine's `playSignatureSkill` reroll gate.
+ *   2. the signature runes (castable / refused + the loud refusal reason),
+ *      mirroring the engine's `signatureCastBlock` (revamp R4 retired Press
+ *      Fate's reroll with the other signature behaviours).
  * (The flag-OFF byte-identity pins were deleted with the flag, D7.)
  */
 
@@ -69,114 +70,46 @@ describe('CombatDieVM face axis', () => {
     });
 });
 
-describe('Press Fate VM (reroll gate)', () => {
-    function stateWithMiss(): CombatEncounterState {
+describe('signature runes (R4 placeholders — the engine cast gate)', () => {
+    function withRunes(conviction: number): CombatEncounterState {
         const s = openEncounter();
-        s.dice = [facedDie('body', 'miss'), facedDie('mind', 'mana')];
-        s.signatures = ['sig-press-the-point'];
-        s.conviction = 3;
+        s.signatures = ['sig-overwhelming-argument', 'sig-disarming-plea'];
+        s.conviction = conviction;
         return s;
     }
+    const rune = (s: CombatEncounterState, id: string) =>
+        buildCombatViewModel(s).signatures.find(x => x.id === id)!;
 
-    it('is null when the loadout carries no reroll signature', () => {
-        const s = openEncounter();
-        s.dice = [facedDie('body', 'miss')];
-        s.signatures = [];
-        expect(buildCombatViewModel(s).pressFate).toBeNull();
+    it('a GUARD rune prints the flat cost and its one line, castable when funded', () => {
+        const r = rune(withRunes(4), 'sig-overwhelming-argument');
+        expect(r.cost).toBe(4);
+        expect(r.description).toBe('Raise GUARD 5.');
+        expect(r.affordable).toBe(true);
+        expect(r.reason).toBeNull();
     });
 
-    it('is ENABLED with a live miss, enough ◆, and unused this round', () => {
-        const s = stateWithMiss();
-        s.pressFateRound = undefined;
-        const pf = buildCombatViewModel(s).pressFate!;
-        expect(pf.enabled).toBe(true);
-        expect(pf.reason).toBeNull();
-        expect(pf.cost).toBe(1);
-        expect(pf.signatureId).toBe('sig-press-the-point');
+    it('a rune is refused with the reason when Conviction is short', () => {
+        const r = rune(withRunes(3), 'sig-overwhelming-argument');
+        expect(r.affordable).toBe(false);
+        expect(r.reason).toMatch(/Need 4/);
     });
 
-    it('is DISABLED at 0 ◆ with the reason', () => {
-        const s = stateWithMiss();
-        s.conviction = 0;
-        const pf = buildCombatViewModel(s).pressFate!;
-        expect(pf.enabled).toBe(false);
-        expect(pf.reason).toMatch(/Need 1/);
+    it('The Open Hand is refused, with the reason, on a foe that cannot be befriended', () => {
+        const s = withRunes(4);
+        s.enemy = { ...s.enemy, friendshipReward: undefined };
+        const r = rune(s, 'sig-disarming-plea');
+        expect(r.affordable).toBe(false);
+        expect(r.reason).toMatch(/will not be befriended/);
     });
 
-    it('is DISABLED once already pressed this round', () => {
-        const s = stateWithMiss();
-        s.pressFateRound = s.round;
-        const pf = buildCombatViewModel(s).pressFate!;
-        expect(pf.enabled).toBe(false);
-        expect(pf.reason).toMatch(/already pressed/i);
-    });
-
-    it('is DISABLED when no live miss face exists', () => {
-        const s = stateWithMiss();
-        s.dice = [facedDie('body', 'mana'), facedDie('mind', 'special')];
-        s.pressFateRound = undefined;
-        const pf = buildCombatViewModel(s).pressFate!;
-        expect(pf.enabled).toBe(false);
-        expect(pf.reason).toMatch(/no miss/i);
-    });
-
-    it('excludes a cracked miss die — a crack is not a Press-Fate target', () => {
-        const s = stateWithMiss();
-        s.dice = [facedDie('body', 'miss')];
-        s.crackedDice = [{ color: 'body', turn: s.turn }];
-        s.pressFateRound = undefined;
-        const pf = buildCombatViewModel(s).pressFate!;
-        expect(pf.enabled).toBe(false);
-        expect(pf.reason).toMatch(/no miss/i);
-    });
-});
-
-describe('Press Fate signature rune (spec-33 reshape — owner call 2026-07-19)', () => {
-    // Press Fate is cast from the rune column like any signature; its
-    // rune must present the spec-33 truth (1◆, the FULL firing gate + reason),
-    // never the printed legacy cost the engine no longer charges.
-    function stateWithRune(): CombatEncounterState {
-        const s = openEncounter();
-        s.dice = [facedDie('body', 'miss'), facedDie('mind', 'mana')];
-        s.signatures = ['sig-press-the-point'];
-        s.conviction = 3;
-        s.pressFateRound = undefined;
-        return s;
-    }
-
-    it('the rune costs 1◆ and is castable when the full gate passes', () => {
-        const rune = buildCombatViewModel(stateWithRune()).signatures.find(x => x.id === 'sig-press-the-point')!;
-        expect(rune.cost).toBe(1);
-        expect(rune.affordable).toBe(true);
-        expect(rune.reason).toBeNull();
-        expect(rune.description).toMatch(/re-roll every miss/i);
-    });
-
-    it('the rune refuses (with the reason) once pressed this round', () => {
-        const s = stateWithRune();
-        s.pressFateRound = s.round;
-        const rune = buildCombatViewModel(s).signatures.find(x => x.id === 'sig-press-the-point')!;
-        expect(rune.affordable).toBe(false);
-        expect(rune.reason).toMatch(/already pressed/i);
-    });
-
-    it('the rune refuses (with the reason) when no live miss exists', () => {
-        const s = stateWithRune();
-        s.dice = [facedDie('body', 'mana')];
-        const rune = buildCombatViewModel(s).signatures.find(x => x.id === 'sig-press-the-point')!;
-        expect(rune.affordable).toBe(false);
-        expect(rune.reason).toMatch(/no miss/i);
-    });
-});
-
-describe('inspect modal — BOON die-gear gloss (owner playtest 2026-07-18)', () => {
-    it('never rides a card inspect unprompted — a die-face rule is not card vocabulary', () => {
-        // The D6a always-on BOON push is retired: the gloss surfaces only
-        // when a card's OWN printed lines name it (via the printed sweep).
-        const hand = buildCombatViewModel(openEncounter()).hand;
-        expect(hand.length).toBeGreaterThan(0);
-        for (const card of hand) {
-            expect(card.detail.keywords.map(k => k.name)).not.toContain('BOON');
-        }
+    it('The Open Hand is castable on a befriendable foe inside its gate', () => {
+        const s = withRunes(4);
+        s.enemy = {
+            ...s.enemy, health: 1, befriendabilityConfig: { hpGate: { belowPct: 0.3 } },
+            friendshipReward: { narrative: 'spared' },
+        };
+        const r = rune(s, 'sig-disarming-plea');
+        expect(r.affordable).toBe(true);
+        expect(r.reason).toBeNull();
     });
 });

@@ -68,9 +68,7 @@ describe('keyword registry — KW-3 (no dead references)', () => {
         // needs no explaining: "Deal 24" is plain English, and the face prints
         // the number in its hero slot rather than badging the word (see
         // `MECHANIC_KEYWORD`'s own note, and `mechanicHeadline`'s `deal` case,
-        // which returns a keyword-less headline on purpose). Its FAMILY —
-        // WRATH and CHAIN still carry real rows (the relic signature skills
-        // grant them); the rest of the family is listed below.
+        // which returns a keyword-less headline on purpose).
         'deal',
         // THE KEYWORD AUDIT (2026-09-27, after the card purge): every card
         // that printed these kinds' keywords was deleted, so their glosses
@@ -85,6 +83,10 @@ describe('keyword registry — KW-3 (no dead references)', () => {
         // card, enemy, signature skill or item printed it), so its gloss went.
         // The kind stays in the engine union and prints as plain rules text.
         'foretell',
+        // REVAMP R4 (D45): the signature skills were the last carriers of
+        // STAGGER, PLEA, WRATH and CHAIN; they are GUARD placeholders now, so
+        // the glosses went. The kinds stay in the union until R7a.
+        'stagger', 'lock_stance', 'sway', 'wrath', 'chain',
     ];
 
     it('every mechanic kind either maps to a glossed keyword or is classified', () => {

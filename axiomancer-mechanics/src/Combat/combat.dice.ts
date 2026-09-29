@@ -153,7 +153,6 @@ export function hasRerollableDice(dice: readonly CombatManaDie[]): boolean {
  *
  * NOTE (D7 flag collapse, 2026-09-25): this predates spec 33 and rolls the
  * legacy bag, not the die's gear table — a re-rolled die carries no `face`.
- * Press Fate uses the honest spec-33 form (`rerollMissFacesHonest`).
  */
 export function rerollSpentDice(
     dice: readonly CombatManaDie[],

@@ -17,9 +17,8 @@
  * sequential mocks and the sim stays reproducible.
  *
  * Dice honesty (2026-07-09 law, re-affirmed at D1): NOTHING in this module
- * rigs a roll — no stance guarantee, no pity floor. Press Fate
- * (`rerollMissFacesHonest`) rerolls every miss face and accepts whatever the
- * gear tables return; the ~0.7% double-whiff residue is carried by FREE lines.
+ * rigs a roll — no stance guarantee, no pity floor; the ~0.7% double-whiff
+ * residue is carried by FREE lines.
  */
 
 import { getRng } from '../Utils/rng';
@@ -44,12 +43,8 @@ export const UPGRADEABLE_TABLE_CEILING = 7;
  *  die at a time; further grants convert to +1◆). */
 export const KINDLE_CONCURRENT_CAP = 1;
 
-/** §4 — Press Fate's price: 1◆ rerolls ALL miss faces, once/round. */
-export const PRESS_FATE_COST = 1;
-
 /** §6 — OVERHEAT: pushing an already-spent die to power a second card risks
- *  this chance that the die CRACKS (all-miss next round, excluded from that
- *  round's Press Fate). The push itself always succeeds. */
+ *  this chance that the die CRACKS (all-miss next round). The push itself always succeeds. */
 export const OVERHEAT_CRACK_CHANCE = 0.35;
 
 /**
@@ -262,36 +257,6 @@ export function advanceMomentumV2(
 }
 
 // ---------------------------------------------------------------------------
-// Press Fate (§4) — the honest reroll
-// ---------------------------------------------------------------------------
-
-/**
- * Rerolls every MISS face in the tray from its gear table — honestly: no
- * stance/mana guarantee (a stance-bearing conversion would be a rig under
- * the spec-33 law). Dice
- * whose color is cracked this round are excluded. Spent/available dice are
- * untouched — Press Fate revives the dead, it never re-rolls the living.
- */
-export function rerollMissFacesHonest(
-    dice: readonly CombatManaDie[],
-    state: Pick<CombatEncounterState, 'dieGear' | 'dieUpgradeLevel'>,
-    crackedColors: ReadonlySet<string>,
-    rng: () => number = defaultRng,
-): { dice: CombatManaDie[]; rerolledIds: string[] } {
-    const rerolledIds: string[] = [];
-    const next = dice.map(d => {
-        if (d.face !== 'miss') return d;
-        if (d.floating) return d;
-        if (crackedColors.has(d.color)) return d;
-        if (d.color === 'x') return d;
-        rerolledIds.push(d.id);
-        const face = rollUpgradeableFace(activeDieGear(state, d.color as 'heart' | 'body' | 'mind' | 'wild'), rng);
-        return { ...d, face, state: face === 'miss' ? ('locked' as const) : ('available' as const) };
-    });
-    return { dice: next, rerolledIds };
-}
-
-// ---------------------------------------------------------------------------
 // Table ceiling (§1) — materialization priority + overflow → +1◆
 // ---------------------------------------------------------------------------
 
@@ -318,8 +283,7 @@ export function crackedColorsForTurn(
 }
 
 /** Drops crack entries STRICTLY BEFORE `turn`. An entry survives through its
- *  own bitten turn — the crack must still exclude the die from THAT turn's
- *  Press Fate (§6) — and is swept by the next turn's roll. */
+ *  own bitten turn and is swept by the next turn's roll. */
 export function expireCrackedDice(
     cracked: readonly { color: 'heart' | 'body' | 'mind' | 'wild'; turn: number }[] | undefined,
     turn: number,

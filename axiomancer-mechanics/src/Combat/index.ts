@@ -15,6 +15,7 @@
  */
 
 import { BefriendabilityConfig } from '../Enemy/types';
+import { befriendHpGateOpen } from '../Enemy/befriend';
 import { FRIENDSHIP_COUNTER_MAX } from '../Game/game-mechanics.constants';
 import { CombatState } from './types';
 
@@ -81,13 +82,7 @@ function befriendabilityPredicatesPass(
     }
     const threshold = config.roundsThreshold ?? FRIENDSHIP_COUNTER_MAX;
     if (options.requirePassiveCounter && state.friendshipCounter < threshold) return false;
-    if (config.hpGate) {
-        const maxHp = state.enemy.maxHealth;
-        if (maxHp <= 0) return false;
-        const hpFraction = state.enemy.health / maxHp;
-        if (hpFraction > config.hpGate.belowPct) return false;
-    }
-    return true;
+    return befriendHpGateOpen(state.enemy);
 }
 
 /**
@@ -130,7 +125,7 @@ export {
     // Spec 26b / spec 33 — turn lifecycle + Conviction + Signature Skills
     startTurn, endTurn, discardCombatCard,
     playSignatureSkill, isPhaseStanceRevealed,
-    getSignatureSkill,
+    getSignatureSkill, signatureCastBlock, signatureGuardAmount, SIGNATURE_COST, SIGNATURE_GUARD,
     READ_DAMAGE_MULT,
     // THE BIG NUMBERS REWRITE — the LIVE colour-match rule. Mobile's presenter
     // must consume this, or the card face prints a bonus the engine does not
@@ -160,7 +155,6 @@ export type { StatFamily, ScalingKind, KeywordScaling } from './stat-scaling';
 // Spec 33 — the Upgradeable-Dice model: THE combat dice model (the flag was
 // collapsed in D7, 2026-09-25).
 export {
-    PRESS_FATE_COST,
     SPECIAL_CONVICTION_DEFAULT, MOMENTUM_CHAIN_ORDER, MOMENTUM_SURGE_LENGTH,
     DEFAULT_DIE_GEAR, activeDieGear,
 } from './combat.upgradeable-dice';

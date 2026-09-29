@@ -612,7 +612,9 @@
   swapping).
 - source: loop
 
-### [MED] village / inventory — every signet relic's flavor text restates the auto-generated "grants X" line verbatim
+## Done
+
+### [x] [MED] village / inventory — every signet relic's flavor text restates the auto-generated "grants X" line verbatim — CLOSED 2026-09-29 (R4)
 - pass: 53 (commit 82bbf241)
 - viewport: both (375×812 and 1280×800) — reproduces identically at both
 - category: voice
@@ -643,8 +645,9 @@
   already carries the grant; the flavor line should read like the
   non-relic items' (world/mood only, no restated mechanics).
 - source: critique-drive (unattended, §3.5)
-
-## Done
+- resolution: phase R4 rewrote every `RelicSpec.description` to what the
+  relic now does ("Raise GUARD 5 for 4 Conviction.", the ring's befriend line);
+  none repeats the grant the subtitle prints.
 
 ### [x] [LOW] combat — a DoT's paid-value chip word-wraps mid-token on the small hand-card face ("8/play" → "8/p" / "ay") — CLOSED 2026-09-28 (R0)
 - pass: 49 (commit 94b6b96f)

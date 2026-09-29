@@ -7,7 +7,7 @@
  *   - direct-damage cards still contribute 0 pressure
  *   - a landed status lands on the enemy; the powering die is spent
  *   - between-phases fires DoT ticks + ticks durations + draws a fresh hand
- *   - Signature Skills spend Conviction (scout / DoT / pressure) regardless of hand
+ *   - Signature Skills spend Conviction (the R4 GUARD placeholders) regardless of hand
  *   - victory by HP depletion via status play (card-sourced cards only); post-combat attribution
  *   - the Monte-Carlo sim reports per-phase Clear rates
  *
@@ -26,12 +26,12 @@ import { mockSequentialRng } from '../../test-utils/rng';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveCombatPhase, resolveThreatPhase, processBetweenPhases,
-    getCard, buildCombatSummary, isPhaseStanceRevealed,
-    playSignatureSkill, discardCombatCard, projectCardImpact, endTurn,
-    startTurn, SCRAP_CONVICTION_CAP_PER_TURN,
+    getCard, buildCombatSummary,
+    playSignatureSkill, projectCardImpact, endTurn,
+    startTurn,
 } from '../combat.engine';
-import { UPGRADEABLE_DIE_COLORS, PRESS_FATE_COST } from '../combat.upgradeable-dice';
-import { CONCLUDE_DMG_PER_STACK } from '../combat.signature';
+import { UPGRADEABLE_DIE_COLORS } from '../combat.upgradeable-dice';
+import { SIGNATURE_SKILL_LIST, SIGNATURE_COST, signatureGuardAmount } from '../combat.signature';
 import { getSignaturesForLoadout, getRelicById } from '../../Items/relic.library';
 import { equipItem } from '../../Character';
 import { rollCombatCardRewards, addRewardCard, unlockCardViaDilemma, COMBAT_REWARD_POOL } from '../combat.rewards';
@@ -43,7 +43,6 @@ import { getThreatSequence, deriveIntentType } from '../combat.threat';
 import type { CombatDieColor, CombatEncounterState, CombatEvent, CombatTransition } from '../combat.encounter.types';
 import type { ActiveEffect, Effect } from '../../Effects/types';
 import { effectsLibrary } from '../../Effects/effects.library';
-import { lookupEffect, applyEffect } from '../../Effects';
 import { registerFixtureEffects } from '../../test-utils/fixture-effects';
 
 // The keyword audit (2026-09-27) deleted buff_thorns / debuff_backfire /
@@ -374,230 +373,30 @@ describe('Spec 25 §4.5 — between-phases processing', () => {
 
 // ── Signature Skills (§4) ────────────────────────────────────────────────────
 
-describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
-    it('Read the Entrails reveals the current + next phase stance', () => {
+describe('Spec 26b §4 — Signature Skills (Conviction-funded, R4 placeholders)', () => {
+    it('every signature but The Open Hand raises GUARD for the flat cost, regardless of hand', () => {
         mockSequentialRng(0.5);
         let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(60, 'mind'), [DOT_BODY], 2);
         state = rollEncounterDice(state).state;
-        state = { ...state, conviction: 5 };
-        const r = playSignatureSkill(state, 'sig-read-opponent');
-        expect(r.state.conviction).toBe(4); // cost 1
-        expect(isPhaseStanceRevealed(r.state, 0)).toBe(true);
-        if (r.state.threatPhases.length > 1) expect(isPhaseStanceRevealed(r.state, 1)).toBe(true);
-        expect(r.events.some(e => e.kind === 'signature-cast')).toBe(true);
-    });
-
-    it('The Oath Kept applies a guaranteed DoT to the enemy', () => {
-        mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(90, 'mind'), [DOT_BODY], 4);
-        state = rollEncounterDice(state).state;
-        state = { ...state, conviction: 9 };
-        const r = playSignatureSkill(state, 'sig-conviction-strike');
-        expect(r.state.conviction).toBe(1); // cost 8 (Phase 31 repricing)
-        // The poison DoT lands on the enemy (it will tick HP each phase).
-        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_poison')).toBe(true);
-    });
-
-    // ── Phase 85 (equipment progression — head/hands/feet accessories) ───────
-    it('The Mounting Dread applies a guaranteed, open-ended DoT to the enemy', () => {
-        mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(90, 'mind'), [DOT_BODY], 4);
-        state = rollEncounterDice(state).state;
-        state = { ...state, conviction: 10 };
-        const r = playSignatureSkill(state, 'sig-mounting-dread');
-        expect(r.state.conviction).toBe(1); // cost 9
-        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_creeping_doom')).toBe(true);
-    });
-
-    it('The Endless Labor grants WRATH directly — combat-long, never fades', () => {
-        mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(90, 'mind'), [DOT_BODY], 4);
-        state = rollEncounterDice(state).state;
-        state = { ...state, conviction: 6, wrath: 1 };
-        const r = playSignatureSkill(state, 'sig-endless-labor');
-        expect(r.state.conviction).toBe(0); // cost 6
-        expect(r.state.wrath).toBe(4); // 1 + magnitude 3
-        expect(r.events.some(e => e.kind === 'wrath-gained')).toBe(true);
-    });
-
-    it('The Unbroken Stride grants CHAIN directly and feeds the current turn', () => {
-        mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(90, 'mind'), [DOT_BODY], 4);
-        state = rollEncounterDice(state).state;
-        state = { ...state, conviction: 4, chain: 0, chainFedThisTurn: false };
-        const r = playSignatureSkill(state, 'sig-unbroken-stride');
-        expect(r.state.conviction).toBe(0); // cost 4
-        expect(r.state.chain).toBe(5); // magnitude 5
-        expect(r.state.chainFedThisTurn).toBe(true);
-        expect(r.events.some(e => e.kind === 'chain-gained')).toBe(true);
-    });
-
-    it('scrapping a hand card grants +1 Conviction and discards it', () => {
-        mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY, CONTROL_CARD]), makeEnemy(60), [DOT_BODY, CONTROL_CARD], 6);
-        state = rollEncounterDice(state).state;
-        const uid = state.hand[0].uid;
-        const before = state.conviction;
-        const r = discardCombatCard(state, uid);
-        expect(r.state.conviction).toBe(before + 1);
-        expect(r.events.some(e => e.kind === 'conviction-gained'
-            && (e as { reason: string }).reason === 'scrap')).toBe(true);
-        expect(r.state.hand.find(h => h.uid === uid)).toBeUndefined();
-    });
-
-    it('scrap PAYS only the first N per turn, then cycles the card for free (WI-10)', () => {
-        mockSequentialRng(0.5);
-        const deck = Array.from({ length: 6 }, () => DOT_BODY);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(200), deck, 6);
-        state = rollEncounterDice(state).state;
-        state = { ...state, conviction: 0 };
-        const uids = state.hand.map(h => h.uid);
-        expect(uids.length).toBeGreaterThan(SCRAP_CONVICTION_CAP_PER_TURN);
-
-        // The first N scraps each pay +1◆ (reason 'scrap').
-        let r = discardCombatCard(state, uids[0]);
-        for (let i = 1; i < SCRAP_CONVICTION_CAP_PER_TURN; i++) r = discardCombatCard(r.state, uids[i]);
-        expect(r.state.conviction).toBe(SCRAP_CONVICTION_CAP_PER_TURN);
-
-        // The next scrap still removes the dead card (agency preserved) but pays nothing.
-        const capUid = uids[SCRAP_CONVICTION_CAP_PER_TURN];
-        const capped = discardCombatCard(r.state, capUid);
-        expect(capped.state.conviction).toBe(SCRAP_CONVICTION_CAP_PER_TURN); // no more pay
-        expect(capped.events.some(e => e.kind === 'conviction-gained')).toBe(false);
-        expect(capped.state.hand.find(h => h.uid === capUid)).toBeUndefined(); // still cycled
-        expect(capped.state.scrapsThisTurn).toBe(SCRAP_CONVICTION_CAP_PER_TURN + 1);
-    });
-
-    it('the scrap-pay cap resets each turn — startTurn zeroes scrapsThisTurn (WI-10)', () => {
-        mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(200), [DOT_BODY], 6);
-        state = rollEncounterDice(state).state;
-        // Simulate a turn that already spent its scrap budget, then re-arm the roll.
-        state = { ...state, scrapsThisTurn: SCRAP_CONVICTION_CAP_PER_TURN, turnTakenThisPhase: false };
-        const next = startTurn(state).state;
-        expect(next.scrapsThisTurn).toBe(0);
-    });
-
-    it('The Stilling PETRIFIES a normal foe — real hard control, not the old inert BACKFIRE (WI-8)', () => {
-        mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(90, 'heart'), [DOT_BODY], 4);
-        state = rollEncounterDice(state).state;
-        state = { ...state, conviction: 10 };
-        const r = playSignatureSkill(state, 'sig-overwhelming-argument');
-        expect(r.state.conviction).toBe(2); // cost 8
-        // The petrify lands; the old debuff_backfire lie is gone.
-        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_petrify')).toBe(true);
-        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_backfire')).toBe(false);
-        expect(r.events.some(e => e.kind === 'signature-cast')).toBe(true);
-        // OBSERVABLE enemy state change (the whole point of WI-8): the petrified
-        // foe's next telegraph is DENIED — the player takes zero, the phase marks
-        // 'clear' (hindered). The old signature let the foe attack through 4 casts.
-        const hpBefore = r.state.player.health;
-        const phase = resolveThreatPhase(r.state);
-        expect(phase.state.player.health).toBe(hpBefore);
-        expect(phase.events.some(e => e.kind === 'phase-resolved'
-            && (e as { mark: string }).mark === 'clear')).toBe(true);
-    });
-
-    it('a signature skill fizzles (no-op) when underfunded', () => {
-        mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(60), [DOT_BODY], 8);
-        state = rollEncounterDice(state).state;
-        state = { ...state, conviction: 1 };
-        const r = playSignatureSkill(state, 'sig-overwhelming-argument'); // cost 8
-        expect(r.state.conviction).toBe(1);
-        expect(r.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
-    });
-
-    // Funded-path (success) kill-path witness: the unit test above checks the
-    // isolated cast; this runs the loop — PETRIFY denies the telegraph outright
-    // (hard control, no STAGGER needed), then stacked DoT grinds to an HP-kill.
-    it('The Stilling, funded, PETRIFIES the telegraph away, en route to victory (WI-8)', () => {
-        mockSequentialRng(0.05);
-        const player = makePlayer([DOT_BODY]);
-        const enemy = makeEnemy(30, 'heart');
-        let state = initializeCombatEncounter(player, enemy, [DOT_BODY, DOT_BODY, DOT_BODY], 21);
-
-        // Turn 1 — cast the funded capstone: petrify lands guaranteed and the
-        // enemy loses its next action outright (canAct → skipTurn), no STAGGER.
-        state = rollEncounterDice(state).state;
-        state = { ...state, conviction: 10 };
-        const healthBeforeCast = state.player.health;
-        const cast = playSignatureSkill(state, 'sig-overwhelming-argument');
-        expect(cast.state.enemy.effects.some(e => e.effectId === 'debuff_petrify')).toBe(true);
-        expect(cast.events.some(e => e.kind === 'signature-cast')).toBe(true);
-        const denied = resolveThreatPhase(cast.state); // no staggerRungs injected
-        state = denied.state;
-        // Denied by the petrify alone: no player HP lost, the phase marks 'clear'.
-        expect(state.player.health).toBe(healthBeforeCast);
-        expect(denied.events.some(e => e.kind === 'phase-resolved'
-            && (e as { mark: string }).mark === 'clear')).toBe(true);
-
-        // Grind the rest out with stacked DoT to a real HP-kill outcome.
-        let guard = 0;
-        while (state.phase !== 'complete' && state.phase !== 'mercy-choice' && guard < 40) {
-            guard++;
-            const res = batchRound(state, DOT_BODY, 2);
-            expect(fizzled(res.events)).toBe(false);
-            state = res.state;
-            if (state.finalOutcome) break;
+        for (const sig of SIGNATURE_SKILL_LIST.filter(s => s.kind === 'guard')) {
+            const start = { ...state, conviction: SIGNATURE_COST, guard: 0 };
+            const r = playSignatureSkill(start, sig.id);
+            expect(r.events.some(e => e.kind === 'signature-cast')).toBe(true);
+            expect(r.state.conviction).toBe(0);
+            expect(r.state.guard).toBe(signatureGuardAmount(start, sig));
+            expect(r.state.enemy).toBe(start.enemy); // the foe is untouched
         }
-        expect(state.finalOutcome).toBe('victory');
-        const summary = buildCombatSummary(state);
-        expect(summary.outcome).toBe('victory');
     });
 
-    it('a boss RESISTS the petrify — it is STAGGERED instead of frozen (anti-permalock, WI-8)', () => {
+    it('a signature skill fizzles (no-op, nothing spent) when underfunded', () => {
         mockSequentialRng(0.5);
-        const enemy = { ...makeEnemy(200, 'heart'), difficulty: 'boss' as const };
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), enemy, [DOT_BODY], 4);
+        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(60, 'mind'), [DOT_BODY], 1);
         state = rollEncounterDice(state).state;
-        state = { ...state, conviction: 10, staggerRungs: 0 };
+        state = { ...state, conviction: SIGNATURE_COST - 1 };
         const r = playSignatureSkill(state, 'sig-overwhelming-argument');
-        expect(r.state.conviction).toBe(2); // still funded + spent
-        // No freeze on a boss; a real, observable weaken (STAGGER) lands instead.
-        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_petrify')).toBe(false);
-        expect(r.state.staggerRungs).toBeGreaterThan(0);
-        expect(r.events.some(e => e.kind === 'staggered')).toBe(true);
-    });
-
-    it('Press Fate re-rolls ONLY miss faces and keeps live and spent dice untouched (spec 33 §4)', () => {
-        mockSequentialRng(0.1); // re-rolled face → floor(0.1*6)=0 → special
-        // No seed: a seed installs its own rng stream, so the mock must
-        // govern the re-rolled face.
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(60, 'mind'), [DOT_BODY]);
-        state = rollEncounterDice(state).state;
-        // A usable heart die (KEEP) + a spent body die (KEEP) + a dead mind miss (RE-ROLL).
-        const live = { id: 't1-d0', color: 'heart' as const, state: 'available' as const, temporary: false, face: 'mana' as const };
-        const used = { id: 't1-d1', color: 'body' as const, state: 'spent' as const, temporary: false, face: 'mana' as const };
-        state = { ...state, conviction: 6, dice: [
-            live, used,
-            { id: 't1-d2', color: 'mind', state: 'locked', temporary: false, face: 'miss' },
-        ] };
-        const r = playSignatureSkill(state, 'sig-press-the-point');
-        expect(r.state.conviction).toBe(6 - PRESS_FATE_COST); // ◆ spent — work happened
-        // Press Fate revives the dead, it never re-rolls the living (or the used).
-        expect(r.state.dice.find(d => d.id === 't1-d0')).toEqual(live);
-        expect(r.state.dice.find(d => d.id === 't1-d1')).toEqual(used);
-        // The miss face was re-rolled back into play.
-        const revived = r.state.dice.find(d => d.id === 't1-d2')!;
-        expect(revived.face).toBe('special');
-        expect(revived.state).toBe('available');
-        expect(r.events.some(e => e.kind === 'press-fate-rerolled')).toBe(true);
-    });
-
-    it('Press Fate is a no-op (keeps ◆) when no die shows a miss face', () => {
-        mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(60, 'mind'), [DOT_BODY], 2);
-        state = rollEncounterDice(state).state;
-        state = { ...state, conviction: 6, dice: [
-            { id: 't1-d0', color: 'heart', state: 'available', temporary: false, face: 'mana' },
-            { id: 't1-d1', color: 'body', state: 'spent', temporary: false, face: 'mana' },
-        ] };
-        const r = playSignatureSkill(state, 'sig-press-the-point');
-        expect(r.state.conviction).toBe(6); // nothing to re-roll → ◆ not burned
+        expect(r.state.conviction).toBe(SIGNATURE_COST - 1);
+        expect(r.state.guard ?? 0).toBe(state.guard ?? 0);
         expect(r.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
-        expect(r.state.dice).toEqual(state.dice); // pool unchanged
     });
 });
 
@@ -656,47 +455,8 @@ describe('Spec 26b §B/§C/§D — archetype kit, rewards, unlock, difficulty fl
         // independent of base stats (the old archetype gate is gone).
         const swapped = equipItem(bodyPlayer, getRelicById('relic-conclusion')!);
         const s2 = initializeCombatEncounter(swapped, makeEnemy(60), [DOT_BODY], 1);
-        expect(s2.signatures).toContain('sig-rallying-blow');        // Capstone Maul grants Conclusion
+        expect(s2.signatures).toContain('sig-rallying-blow');        // Capstone Maul grants The Butcher's Bill
         expect(s2.signatures).not.toContain('sig-overwhelming-argument');
-    });
-
-    it('Conclusion (body finisher) deals per-stack damage', () => {
-        mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(200, 'mind'), [DOT_BODY], 1);
-        state = rollEncounterDice(state).state;
-        // Seed the enemy with two effects: 3 stacks of bleed + 5 stacks of poison = 8 total stacks.
-        const bleedDef = lookupEffect('debuff_bleed')!;
-        const poisonDef = lookupEffect('debuff_poison')!;
-        const { activeEffects: withBleed } = applyEffect([], bleedDef, 1, { intensityDelta: 3, sourceId: 'test' });
-        const { activeEffects: withBoth } = applyEffect(withBleed, poisonDef, 1, { intensityDelta: 5, sourceId: 'test' });
-        state = { ...state, conviction: 8, enemy: { ...state.enemy, effects: withBoth } };
-        const hpBefore = state.enemy.health;
-        const r = playSignatureSkill(state, 'sig-rallying-blow');
-        // 8 total stacks × CONCLUDE_DMG_PER_STACK(2) = 16 damage
-        expect(hpBefore - r.state.enemy.health).toBe(8 * CONCLUDE_DMG_PER_STACK);
-        expect(r.events.some(e => e.kind === 'conclude-hit')).toBe(true);
-    });
-
-    it('Conclusion deals 1 damage (floor) when enemy has no active effects', () => {
-        mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(80, 'mind'), [DOT_BODY], 1);
-        state = rollEncounterDice(state).state;
-        state = { ...state, conviction: 8, enemy: { ...state.enemy, effects: [] } };
-        const hpBefore = state.enemy.health;
-        const r = playSignatureSkill(state, 'sig-rallying-blow');
-        expect(hpBefore - r.state.enemy.health).toBe(1); // floor(max(1, 0 stacks))
-    });
-
-    it('The Open Hand (heart mercy) applies QUARTER and lands the disarming hit', () => {
-        mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([CONTROL_CARD]), makeEnemy(120, 'body'), [CONTROL_CARD], 1);
-        state = rollEncounterDice(state).state;
-        state = { ...state, conviction: 8 };
-        const hpBefore = state.enemy.health;
-        const r = playSignatureSkill(state, 'sig-disarming-plea');
-        // QUARTER (v3 mercy vocabulary) lands on the enemy and it takes the hit.
-        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_quarter')).toBe(true);
-        expect(r.state.enemy.health).toBeLessThan(hpBefore);
     });
 
     it('rollCombatCardRewards offers valid distinct card-sourced cards, biased to archetype', () => {

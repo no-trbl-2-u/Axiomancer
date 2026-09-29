@@ -14,10 +14,8 @@
  *   §3 MOMENTUM — start/advance; breaks (wrong OR same color) reset to NULL
  *      (owner-locked D1); persists across rounds; surge grants an until-spent
  *      gold die and resets to null
- *   §4 PRESS FATE — 1◆ rerolls ALL miss faces, once per round, HONESTLY (no
- *      stance/mana guarantee — an all-miss reroll result stands)
  *   §6 OVERHEAT — a spent die powers a second card; a crack forces all-miss
- *      next round and excludes the die from that round's Press Fate
+ *      next round
  *
  * All rolls are pinned via explicit sequential rng closures (no singleton
  * dependence).
@@ -33,12 +31,12 @@ import { deepClone } from '../../Utils';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
-    endTurn, playSignatureSkill, overheatSpentDie, startTurn,
+    endTurn, overheatSpentDie, startTurn,
     READ_DAMAGE_MULT, CONVICTION_CAP,
 } from '../combat.engine';
 import {
     UPGRADEABLE_DIE_COLORS, UPGRADEABLE_TABLE_CEILING,
-    PRESS_FATE_COST, SPECIAL_CONVICTION_DEFAULT, SURGE_DIE_PREFIX,
+    SPECIAL_CONVICTION_DEFAULT, SURGE_DIE_PREFIX,
 } from '../combat.upgradeable-dice';
 import type { CombatEncounterState, CombatEvent } from '../combat.encounter.types';
 
@@ -213,46 +211,6 @@ describe('spec 33 §1/§6 — the BOON payload (ratified use-triggered rule)', (
     });
 });
 
-// ── §4 — Press Fate, honest ─────────────────────────────────────────────────
-
-describe('spec 33 §4 — Press Fate (1◆, all misses, once per round, honest)', () => {
-    it('costs 1◆ and rerolls ONLY the miss faces', () => {
-        let s = open([MANA, MISS, MISS, MISS]);
-        s = { ...s, conviction: 3 };
-        const res = playSignatureSkill(s, 'sig-press-the-point', seqRng(BOON, MANA, MANA));
-        expect(res.state.conviction).toBe(3 - PRESS_FATE_COST);
-        const rerolled = events(res, 'press-fate-rerolled')[0];
-        expect(rerolled.kind === 'press-fate-rerolled' && rerolled.dieIds).toHaveLength(3);
-        // The untouched mana die keeps its face; the three misses re-rolled.
-        expect(trayDie(res.state, 'body').face).toBe('mana');
-        expect(trayDie(res.state, 'mind').face).toBe('special');
-        expect(trayDie(res.state, 'heart').face).toBe('mana');
-        expect(res.state.pressFateRound).toBe(res.state.round);
-    });
-
-    it('is HONEST — a reroll may come up all-miss again and it stands', () => {
-        let s = open([MANA, MISS, MISS, MISS]);
-        s = { ...s, conviction: 3 };
-        const res = playSignatureSkill(s, 'sig-press-the-point', seqRng(MISS, MISS, MISS));
-        expect(trayDie(res.state, 'mind').face).toBe('miss');
-        expect(trayDie(res.state, 'heart').face).toBe('miss');
-        expect(trayDie(res.state, 'wild').face).toBe('miss');
-    });
-
-    it('refuses a second press in the same round', () => {
-        let s = open([MISS, MISS, MISS, MISS]);
-        s = { ...s, conviction: 6 };
-        const first = playSignatureSkill(s, 'sig-press-the-point', seqRng(MISS, MISS, MISS, MISS));
-        const second = playSignatureSkill(first.state, 'sig-press-the-point', seqRng(MANA));
-        expect(events(second, 'signature-cast')).toHaveLength(0);
-        const fizzle = events(second, 'effect-fizzled')[0];
-        expect(fizzle.kind === 'effect-fizzled' && fizzle.message).toContain('already pressed');
-        expect(second.state.conviction).toBe(first.state.conviction);
-    });
-});
-
-// ── §2/§3 — stance-from-cards + momentum ────────────────────────────────────
-
 describe('spec 33 §2/§3 — stance-from-cards + the null-reset momentum chain', () => {
     function openAllMana(): CombatEncounterState {
         return open([MANA, MANA, MANA, MANA]);
@@ -396,7 +354,7 @@ describe('spec 33 §1 — the 7-object table ceiling (overflow → +1◆)', () =
 // ── §6 — OVERHEAT ───────────────────────────────────────────────────────────
 
 describe('spec 33 §6 — OVERHEAT (second play at 35% crack risk)', () => {
-    it('refreshes a spent die for a second play; a crack forces all-miss NEXT round and blocks its Press Fate', () => {
+    it('refreshes a spent die for a second play; a crack forces all-miss NEXT round', () => {
         let s = open([MANA, MANA, MANA, MANA]);
         const bodyDie = trayDie(s, 'body');
         s = paid(s, 'ud-body-dot', bodyDie.id).state;
@@ -422,15 +380,6 @@ describe('spec 33 §6 — OVERHEAT (second play at 35% crack risk)', () => {
         expect(trayDie(s, 'body').face).toBe('miss');
         expect(trayDie(s, 'mind').face).toBe('mana');
         expect(trayDie(s, 'heart').face).toBe('miss');
-
-        // Press Fate rerolls the honest miss (heart) but REFUSES the cracked
-        // body die — its miss is a stated consequence, not bad luck.
-        s = { ...s, conviction: 3 };
-        const pressed = playSignatureSkill(s, 'sig-press-the-point', seqRng(MANA));
-        const rerolled = events(pressed, 'press-fate-rerolled')[0];
-        expect(rerolled.kind === 'press-fate-rerolled' && rerolled.dieIds).toEqual([trayDie(s, 'heart').id]);
-        expect(trayDie(pressed.state, 'heart').face).toBe('mana');
-        expect(trayDie(pressed.state, 'body').face).toBe('miss');
     });
 
     it('a clean push (no crack) leaves the next round un-forced', () => {

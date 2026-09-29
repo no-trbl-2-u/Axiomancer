@@ -446,8 +446,7 @@ progression levers.
   its gear payload (+2◆) when USED. At end of round `endTurn` banks one unspent
   die to the Reserve. The player's stance is the stance of the last PAID card
   (`playerStance`); PAID plays build the momentum chain (heart → body → mind),
-  whose third link SURGES a temporary gold die. Press Fate (1◆, once a round)
-  rerolls every miss face honestly. The draft-era model (the 3-die stance
+  whose third link SURGES a temporary gold die. The draft-era model (the 3-die stance
   draft, the hidden read, THE STAKE, the v1 momentum wheel, the fate tap and
   X-die powering) was deleted with the flag collapse (D7, 2026-09-25).
 - **The colour match is a MECHANIC, not a law.** A die powers a card of ITS
@@ -469,11 +468,15 @@ progression levers.
 - **Conviction (◆).** The generic token pool: it accrues from BOON (special)
   faces used to power a card, answered stance-check yields, table-ceiling
   overflow, scraps and card effects (capped at `CONVICTION_CAP`). It funds
-  Signature Skills and Press Fate.
-- **Signature Skills.** A small, **always-available** kit (`SIGNATURE_SKILLS`,
-  `SIGNATURE_KITS`, biased per `playerArchetype`) independent of the shuffled
-  deck — the reliable plan through a bad draw. Played via `playSignatureSkill`,
-  gated on Conviction.
+  Signature Skills.
+- **Signature Skills.** A small, **always-available** kit (`SIGNATURE_SKILLS`)
+  granted by the worn signet relics, independent of the shuffled deck. Since
+  revamp R4 (D47) they are placeholders at one flat cost (`SIGNATURE_COST`,
+  4◆): ten raise GUARD 5 (mind-scaled, `signatureGuardAmount`) and The Open
+  Hand (the Suppliant's Ring) is the befriend — on a foe that carries a
+  `friendshipReward` and is inside its `befriendabilityConfig.hpGate`, it opens
+  the spare/exploit mercy choice. Played via `playSignatureSkill`, gated by
+  `signatureCastBlock` (a refused cast spends nothing).
 - **Deckbuilding.** After a won combat, `rollCombatCardRewards` offers a
   1-of-N card draft (archetype-biased) that `addRewardCard` appends to the
   player's persistent collection. New *cards* (a new card type) are unlocked
@@ -487,8 +490,8 @@ progression levers.
 | `isPhaseStanceRevealed` / `revealedCurrentStance` | Whether (and what) the enemy's phase stance is now known. |
 | `projectCardImpact` | UI preview — kept for the mobile presenter contract; `amount` is always 0 (the strike is dead). |
 | `discardCombatCard` | Discard a card from hand (tempo/sculpting). |
-| `playSignatureSkill(state, id, ...)` / `getSignatureSkill` | Spend Conviction on an always-available Signature Skill. |
-| `SIGNATURE_SKILLS` / `SIGNATURE_SKILL_LIST` / `SIGNATURE_KITS` / `signaturesForArchetype` / `playerArchetype` | The signature kit catalogue + per-archetype selection. |
+| `playSignatureSkill(state, id)` / `getSignatureSkill` / `signatureCastBlock` | Spend Conviction on an always-available Signature Skill; the gate names why a cast is refused. |
+| `SIGNATURE_SKILLS` / `SIGNATURE_SKILL_LIST` / `SIGNATURE_COST` / `SIGNATURE_GUARD` / `signatureGuardAmount` / `playerArchetype` | The signature kit catalogue, the flat cost, the placeholder GUARD. |
 | `rollCombatCardRewards` / `addRewardCard` / `COMBAT_REWARD_POOL` | Post-combat deckbuilder draft + persist. |
 | `unlockSkillViaDilemma` / `STARTING_SKILL_ID` / `STARTING_SKILL_IDS` | Forward hook for ethical-dilemma card unlocks; the new-player starting card (`STARTING_SKILL_ID = 'slippery-slope'`). `STARTING_SKILL_IDS` is the preferred array (`['slippery-slope', 'brace-for-impact']`) that also grants the baseline GUARD defense card — use this to seed `knownSkills` for a new character. |
 | `READ_DAMAGE_MULT`, `colorMatchBonus` / `COLOR_MATCH_BONUS_PCT` / `COLOR_MATCH_BONUS_MIN`, `CONVICTION_CAP` | Tuning constants. `READ_DAMAGE_MULT` = 1.5 / 1.0 / 0.5 — the stance-check rails (punished / neutral / yielded), `CONVICTION_CAP` = 12. The colour-match reward is `colorMatchBonus(base)` = +25%, minimum +2 (2026-09-02); `COLOR_MATCH_DAMAGE_BONUS = 3` is a deprecated flat alias. |
@@ -496,7 +499,7 @@ progression levers.
 | `AUTHORED_THREAT_ENEMY_IDS` | Read-only array of every enemy slug with a deterministic authored threat sequence — the keys of `AUTHORED_THREAT_SEQUENCES`, which is now compiled from `ENEMY_DECKS` (`combat.enemy-decks.ts`) rather than hand-authored, so it is exactly "every enemy that has a deck". Read the array; do not pin its length. |
 | `getThreatSequence(enemy)` | Returns the threat phase sequence for an enemy: explicit `enemy.threatSequence` wins; otherwise an authored sequence keyed by enemy id; otherwise the generated default. |
 | `generateDefaultThreatSequence(enemy)` | Generates a 3-phase fallback threat sequence from the enemy's dominant stance, rotating through Heart / Body / Mind. Used automatically by `getThreatSequence` when no authored sequence exists. |
-| `rerollSpentDice(state, rng?)` / `hasRerollableDice(state)` / `dieIsRerollable(die)` | The `reroll_spent` card mechanic's partial re-roll: re-rolls only spent/exhausted + dead `x`-face dice from the legacy face bag, leaving usable dice in play. (Press Fate itself uses spec 33's honest `rerollMissFacesHonest`.) |
+| `rerollSpentDice(state, rng?)` / `hasRerollableDice(state)` / `dieIsRerollable(die)` | The `reroll_spent` card mechanic's partial re-roll: re-rolls only spent/exhausted + dead `x`-face dice from the legacy face bag, leaving usable dice in play. |
 | `THREAT_WEAKEN_PER_ROLL` / `THREAT_DENY_AT` / `THREAT_WEAKEN_FLOOR` | Soft-control and stat-debuff threat tunables (0.33.0). Each point of enemy roll penalty (from confusion, fear, blind, slow, accuracy/attack-down etc.) reduces the incoming hit by `THREAT_WEAKEN_PER_ROLL` (default 0.06). When the cumulative roll penalty reaches `THREAT_DENY_AT` (default 8), the turn is fully denied (same as hard control). `THREAT_WEAKEN_FLOOR` (default 0.4) clamps the minimum damage multiplier for a weakened-but-not-denied enemy. Read these to display soft-control thresholds in the UI. |
 | `COMBAT_DECK_PRESETS` / `COMBAT_DECK_PRESET_ORDER` / `listDeckPresets()` / `getDeckPreset(id)` / `buildPresetDeck(id)` | The three campaign-stage preset decks (`src/Combat/combat.starter-deck-presets.ts`): `threadbare` ("The Threadbare Office", early), `pilgrim` ("The Pilgrim's Burden", mid), `apostate` ("The Apostate's Canon", late), plus `PRESET_LINEAGE` describing the removals/additions that walk one rung to the next. **The one surviving deck law is exact aspect thirds** — every preset splits evenly across body/mind/heart by `color`. Deck sizes, copy limits and the lineage multiset are no longer laws (2026-09-02). `buildPresetDeck` appends no escape card — there is no in-combat retreat — and is ready to feed `initializeCombatEncounter`. |
 | `CombatDeckPreset`, `CombatDeckFocus` | `CombatDeckPreset` describes a single named preset deck entry (id, name, theme, focus, description, cardIds). `CombatDeckFocus` is the discriminated string union of the (now six) coarse design-lever tags used by draft/sim-policy consumers — `'dot' \| 'control' \| 'utility' \| 'damage' \| 'rush-execute' \| 'balanced'` (not the old per-preset name union). Both are importable as `import type { CombatDeckPreset, CombatDeckFocus } from 'axiomancer-mechanics'`. |
@@ -661,8 +664,7 @@ status-primacy doctrine; **that doctrine was repealed 2026-09-02** and none of
 them is a pass/fail target any more. They survive as *descriptive* telemetry —
 "where did the VITAE go" — for reading a playtest, not for grading one. Phase 168
 adds the AMPLIFY burst mechanic (reads pending DoT × multiplier without consuming
-effects). The Conclusion sig-card redesign adds `CONCLUDE_DMG_PER_STACK` for the
-BODY archetype's stack-based finisher.
+effects).
 
 #### CombatSimStats extensions (Phase 167)
 
@@ -693,7 +695,8 @@ consumes DoTs; AMPLIFY is the build-then-detonate path.
 
 | Constant | Default | Description |
 |----------|---------|-------------|
-| `CONCLUDE_DMG_PER_STACK` | `2` | Damage dealt per stack of any active effect on the enemy when the Conclusion Signature Skill fires. `sig-conclusion` (BODY archetype capstone, cost 6) deals `CONCLUDE_DMG_PER_STACK × Σ(effect.intensity)` damage — the more intensely status-loaded the enemy, the harder Conclusion hits. |
+| `SIGNATURE_COST` | `4` | The flat Conviction price of every signature skill (revamp R4, A Plain Ward's paid parity). |
+| `SIGNATURE_GUARD` | `5` | The GUARD a placeholder signature raises before mind scales it. |
 
 ## Pending
 

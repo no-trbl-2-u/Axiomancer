@@ -152,8 +152,8 @@ export const VERB_POINTS = Object.freeze({
     /** REFRESH — the powering die returns to `available` (one extra colored
      *  play from the same die). */
     refreshDie: 2,
-    /** REROLL — reroll this card's MISS faces (spec 33 §4 valve 3; the honest,
-     *  no-guarantee library sibling of Press Fate). ~2.17 misses/round at stock
+    /** REROLL — reroll this card's MISS faces (spec 33 §4 valve 3, honest and
+     *  no-guarantee). ~2.17 misses/round at stock
      *  gear reroll to ~1 extra usable die — held at 2. */
     rerollSpent: 2,
     /** BANK — the powering die goes to the Reserve (ports unchanged, §6). */

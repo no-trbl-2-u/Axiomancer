@@ -70,7 +70,7 @@ export const RollingDie = React.memo(function RollingDie({
     // still on the tray line, unlike the overlay dice that hover mid-screen.
     const fall = useSharedValue(1);
 
-    // The signature the cast was last run for — so a Press-Fate reroll (a new
+    // The signature the cast was last run for — so a reroll (a new
     // face on THIS die) replays the ritual, while an unrelated board re-render
     // (a drag elsewhere) does not.
     const sig = dieRollSignature(die);

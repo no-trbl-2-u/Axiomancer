@@ -24,7 +24,8 @@
  * Card purge (P1, 2026-09-27): the pinned pool is the grey office, which
  * carries no reward theme, so the themed candidates are SANDBOX fixtures fed
  * through the roll's own `extraPool` hook (WS6.2): three ROT cards landing
- * POISON and three VIGIL cards printing GUARD. The roll under test is
+ * MARK and three VIGIL cards printing GUARD (MARK since R4 swept POISON from
+ * the rot family, D45). The roll under test is
  * unchanged; only its candidates are synthetic.
  */
 
@@ -70,7 +71,7 @@ function fixture(id: string, theme: CardTheme): Card {
     return theme === 'rot'
         ? {
             ...base, color: 'body', targetType: 'enemy', free: { damage: 1 },
-            combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 2, duration: 3 }],
+            combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'opponent', intensity: 2, duration: 3 }],
         }
         : {
             ...base, color: 'heart', targetType: 'self', free: { guard: 1 },
@@ -100,7 +101,7 @@ describe('Phase 104 — below REWARD_RANDOM_PICKS: every slot is uniform', () =>
         for (let seed = 1; seed <= 200; seed++) for (const id of roll(player, seed)) seen.add(id);
         for (const id of EXTRA) expect(seen.has(id), id).toBe(true);
         expect(seen.has('grey-strike')).toBe(true);
-        for (const id of rotIds) expect(keywordsOf(id)).toContain('POISON');
+        for (const id of rotIds) expect(keywordsOf(id)).toContain('MARK');
         for (const id of vigilIds) expect(keywordsOf(id)).toContain('GUARD');
     });
 
@@ -147,7 +148,7 @@ describe('Phase 104 — at REWARD_RANDOM_PICKS: slot 0 is guaranteed', () => {
         const counts = deckThemeCounts(player);
         expect(counts.rot).toBeGreaterThan(0);
 
-        const rotFamily: readonly string[] = ['POISON', 'BLEED', 'DOOM', 'MARK'];
+        const rotFamily: readonly string[] = ['BLEED', 'MARK'];
         for (let seed = 1; seed <= 200; seed++) {
             const [slot0] = roll(player, seed);
             const kws = keywordsOf(slot0);
@@ -180,11 +181,11 @@ describe('Phase 104 — at REWARD_RANDOM_PICKS: slot 0 is guaranteed', () => {
         expect(counts.rot).toBe(counts.vigil); // a genuine tie
         expect(REWARD_THEMES.indexOf('rot')).toBeLessThan(REWARD_THEMES.indexOf('vigil'));
 
-        // POISON is rot-exclusive here (vigil's family never claims it) —
+        // MARK is rot-exclusive here (vigil's family never claims it) —
         // every slot 0 carrying it proves the tie resolved to rot.
         for (let seed = 1; seed <= 150; seed++) {
             const [slot0] = roll(player, seed);
-            expect(keywordsOf(slot0), `seed ${seed}: ${slot0}`).toContain('POISON');
+            expect(keywordsOf(slot0), `seed ${seed}: ${slot0}`).toContain('MARK');
         }
     });
 

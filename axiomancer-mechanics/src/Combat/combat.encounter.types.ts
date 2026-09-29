@@ -178,19 +178,11 @@ export interface CardPlay {
  *  rails for the open stance checks (`resolveThreatPhase`). */
 export type CombatReadResult = 'advantage' | 'neutral' | 'disadvantage' | 'none';
 
-/** What a signature skill does (drives the engine dispatch + the UI icon). */
+/** What a signature skill does (drives the engine dispatch + the UI icon).
+ *  Phase R4 left two placeholders until the owner re-authors them (B1). */
 export type SignatureSkillKind =
-    | 'scout'          // reveal current + next enemy stance
-    | 'reroll'         // re-roll only the SPENT / blocked-X dice, keeping usable ones (Press Fate)
-    | 'sustain'        // draw cards + small heal
-    | 'control'        // apply a control debuff to the enemy (hinders its turn)
-    | 'dot'            // guaranteed DoT application at boosted intensity
-    | 'mercy'          // disarming hit that softens a low-HP foe toward mercy (heart)
-    | 'conclude'       // finisher: damage = sum of (intensity × per-stack weight) across all enemy effects (body)
-    | 'draw'           // draw cards + refund Conviction (mind economy)
-    // Phase 85 (equipment progression — head/hands/feet accessories):
-    | 'empower'        // grant WRATH: every future hit lands harder, for the rest of the fight, never fades (body)
-    | 'surge';         // grant CHAIN: the next hit lands harder, fades if the turn adds no more (body)
+    | 'guard'          // raise GUARD (mind-scaled, like a card's GUARD)
+    | 'mercy';         // The Open Hand: open the mercy choice on a befriendable foe
 
 export type SignatureSkillId =
     | 'sig-read-opponent'
@@ -220,11 +212,7 @@ export interface SignatureSkill {
     /** Conviction (◆) cost. */
     cost: number;
     kind: SignatureSkillKind;
-    /** Which effect-kind a `control`/`dot` card applies (default of the kind). */
-    effectKind?: CardEffectKind;
-    /** Effect id a `control`/`dot` card applies to the enemy. */
-    effectId?: string;
-    /** Magnitude knob (intensity / heal / draw count). */
+    /** The GUARD a `guard` signature raises (unused by `mercy`). */
     magnitude: number;
 }
 
@@ -481,7 +469,6 @@ export type CombatEvent =
     // Master Spec §4 — wild-die permanent-growth mechanic. `grant_permanent_wild_die`
     // cards fire this when powered by a die (weak plays never touch the pool).
     | { kind: 'permanent-wild-die-granted'; wildAdded: number; deadAdded: number; totalWild: number }
-    | { kind: 'conclude-hit'; amount: number; totalStacks: number }
     // ── Fate Engine P1 (spec 31 §1) — dice-layer events ──────────────────────
     | { kind: 'die-banked'; dieId: string; color: CombatDieColor; pips: number }
     | { kind: 'die-ripened'; dieId: string; pips: number }
@@ -636,14 +623,12 @@ export type CombatEvent =
     // A BOON face fired its gear payload because its die was USED to power a
     // card (the owner-ratified use-triggered rule).
     | { kind: 'special-fired'; dieId: string; conviction: number; total: number }
-    // Press Fate: 1 Conviction rerolled ALL miss faces, honestly.
-    | { kind: 'press-fate-rerolled'; dieIds: string[]; cost: number }
     // The phase's open stance check resolved at phase end.
     | { kind: 'stance-check-resolved'; phaseIndex: number; outcome: 'punished' | 'yielded' | 'none'; stance: Stance | null }
     // The 7-object table ceiling refused a die grant; it converted to +1◆.
     | { kind: 'die-overflowed'; source: 'surge' | 'kindle' | 'materialize' | 'coveted'; total: number }
     // An OVERHEAT push armed a second play but cracked the die: all-miss next
-    // round, excluded from that round's Press Fate.
+    // round.
     | { kind: 'die-cracked'; dieId: string; color: CombatDieColor }
     // Phase 33c — a boss/unique phase's coveted die was claimed: its telegraph
     // was denied (STAGGER-to-0), fully blocked, or its open stance check was
@@ -935,13 +920,9 @@ export interface CombatEncounterState {
      *  Breaks reset to NULL (owner-locked D1); persists across rounds; surge
      *  (length 3) grants the temp gold die and resets to null. */
     momentumV2?: { color: WheelStance; length: number } | null;
-    /** §4 — the round Press Fate (1◆ rerolls all miss faces) was
-     *  last used, gating it to once per round. Absent = never used. */
-    pressFateRound?: number;
     /** §6 OVERHEAT — dice cracked by an overheat push: each entry forces that
      *  color's NEXT roll to all-miss (`turn` = the turn the crack bites; under
-     *  the round-turn law one turn == one round) and excludes it from that
-     *  turn's Press Fate. Entries are consumed by the bitten turn's roll. */
+     *  the round-turn law one turn == one round). Entries are consumed by the bitten turn's roll. */
     crackedDice?: { color: 'heart' | 'body' | 'mind' | 'wild'; turn: number }[];
     /** §6 — the die-gear loadout driving the four dice's face tables + special
      *  payloads. ABSENT in D2 (the engine falls back to the hardcoded default

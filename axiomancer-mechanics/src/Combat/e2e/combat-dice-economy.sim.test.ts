@@ -133,14 +133,6 @@ describe('spec 33 D3 — realized-play invariants', () => {
         // the axis has stopped reaching the roll again.
         expect(p.usablePerRound).toBeGreaterThan(stockRun.pooled.usablePerRound);
     });
-
-    // F3 DRAINED (owner call 2026-07-18): the Gambler's Knot is default-worn,
-    // so every starter loadout carries the reroll signature and the greedy
-    // policy actually casts it on whiff-heavy rounds. The old `=== 0` canary
-    // flipped exactly as designed; this now pins the sink STAYING live.
-    it('F3 drained: Press Fate is castable from the starter loadout (sink live)', () => {
-        expect(p.pressFatePerRound).toBeGreaterThan(0);
-    });
 });
 
 describe('spec 33 D7 — ratified economy envelope', () => {
@@ -167,14 +159,5 @@ describe('spec 33 D7 — ratified economy envelope', () => {
         // The yield floor (> 0.12) went with the coloured cards: the grey
         // office sets no chain stance, so no stance check can be YIELDED
         // (measured 0). See the realized-play block above.
-    });
-
-    // ── D7 canaries, post-flip status (2026-07-18, owner call): ──────────────
-    //    F3 flipped as designed — the Gambler's Knot is now default-worn, so the
-    //    Press Fate sink is LIVE (re-measured 0.060 casts/round at seeds 1-8;
-    //    realized income 1.533◆ stays in band). The re-run below ratifies the
-    //    sink's activity instead of its absence.
-    it('F3 drained: the ◆ sink (Press Fate) is ACTIVE from the starter loadout', () => {
-        expect(p.pressFatePerRound).toBeGreaterThan(0);
     });
 });

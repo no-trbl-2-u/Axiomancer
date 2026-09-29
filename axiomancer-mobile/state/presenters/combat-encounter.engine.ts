@@ -30,8 +30,8 @@ import {
     // Playtest fix 2026-09-04 — the turn-boundary PLEA decay is narrated in
     // the combat log with the engine's own constant, never a copied literal.
     SWAY_DECAY_PER_TURN,
-    // Spec 33 (Phase D6a) — the Press Fate reroll price.
-    PRESS_FATE_COST,
+    // Revamp R4 — the signature bar reads the engine's own cast gate.
+    signatureCastBlock,
     // Spec 33 (Phase D6b) — the momentum chain, stance-check telegraph, and
     // die-gear rail.
     MOMENTUM_CHAIN_ORDER, MOMENTUM_SURGE_LENGTH, activeDieGear, DEFAULT_DIE_GEAR,
@@ -431,8 +431,7 @@ export interface CombatDieVM {
      *  (GHOST / forged / Reserve) — those power by colour alone. */
     face?: 'special' | 'mana' | 'miss';
     /** Spec 33 §6 (Phase D6a) — an OVERHEAT crack forced this die's color
-     *  all-miss this round; it reads as a distinct struck-out state and is
-     *  excluded from Press Fate. */
+     *  all-miss this round; it reads as a distinct struck-out state. */
     cracked?: boolean;
 }
 /**
@@ -640,9 +639,9 @@ export interface CombatCardVM {
 }
 export interface CombatSignatureVM {
     id: string; name: string; description: string; cost: number; affordable: boolean; icon: string;
-    /** The refusal reason while the rune can't fire (null when castable). Only
-     *  the Press Fate rune carries reasons beyond affordability (once
-     *  per round / no miss dice) — see `signaturesVM`'s spec-33 reshape. */
+    /** The refusal reason while the rune can't fire (null when castable):
+     *  the engine's `signatureCastBlock` — Conviction short, or The Open Hand
+     *  on a foe that can't be befriended yet. */
     reason?: string | null;
 }
 /** phase 28 — the Charge track + CONDEMN beat (Sentence theme). Was fully
@@ -656,22 +655,6 @@ export interface CombatPerorationVM {
      *  by enemy difficulty; null if the declared card carries no concede line. */
     concedeAt: number | null;
     cardName: string;
-}
-/**
- * Spec 33 §4 (Phase D6a) — the Press Fate control: a 1◆ reroll of every live
- * miss face, once per round (the `sig-press-the-point` reroll). Owner-UI doctrine: the control is never hidden — when it can't fire
- * it renders DISABLED with the reason, so the illegal action is refused loudly.
- * `null` when the loadout carries no reroll signature to cast.
- */
-export interface CombatPressFateVM {
-    /** The reroll signature the board casts (via `playSignatureSkill`). */
-    signatureId: string;
-    /** The price (`PRESS_FATE_COST`, 1◆). */
-    cost: number;
-    /** True only when the reroll can actually fire right now. */
-    enabled: boolean;
-    /** The refusal reason to show when disabled; null when enabled. */
-    reason: string | null;
 }
 /**
  * Spec 33 §3 (Phase D6b) — the momentum chain chip. Spec-33 momentum is a
@@ -762,9 +745,6 @@ export interface CombatViewModel {
     discardCards: { id: string; name: string }[];
     /** phase 28 — the Premise track + CONDEMN beat. */
     peroration: CombatPerorationVM;
-    /** Spec 33 §4 — the Press Fate reroll affordance, or null when the
-     *  loadout carries no reroll signature. */
-    pressFate: CombatPressFateVM | null;
     /** Spec 33 §3 (Phase D6b) — the momentum chain chip. */
     momentumV2: CombatMomentumV2VM;
     /** Spec 33 §2 (Phase D6b) — the player's current-stance chip. */
@@ -2663,41 +2643,24 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
     });
 }
 
-const SIG_ICON: Record<string, string> = {
-    scout: '👁', reroll: '🎲', sustain: '✚', control: '⛓', dot: '☠', mercy: '🕊', strike: '⚔', draw: '🎴',
-    // Phase 85 — head/hands/feet accessory signatures.
-    empower: '🔥', surge: '⚡',
+const SIG_ICON: Record<SignatureSkill['kind'], string> = {
+    guard: '🛡', mercy: '🕊',
 };
 
 function signaturesVM(state: CombatEncounterState): CombatSignatureVM[] {
-    // The player's per-archetype kit (Spec 26b §B), resolved on the encounter.
-    // Spec 33 §4 — Press Fate is a SIGNATURE, cast from this rune column like
-    // any other (owner call 2026-07-19: no separate board control). The
-    // reroll rune must present the spec-33 truth the engine enforces
-    // (`playSignatureSkill`'s v2Reroll branch): cost PRESS_FATE_COST (1◆, not
-    // the printed legacy 4), the honest reroll text, and the full firing gate
-    // (◆ / once per round / a live miss face) with its refusal reason.
-    const pf = pressFateVM(state);
+    // The worn relics' signatures (Phase 19). Castability and its reason come
+    // from the engine's own gate, so the rune never offers what
+    // `playSignatureSkill` would refuse.
     return state.signatures
         .map(id => getSignatureSkill(id))
         .filter((s): s is SignatureSkill => !!s)
         .map((s: SignatureSkill) => {
-            if (pf && s.id === pf.signatureId) {
-                return {
-                    id: s.id, name: s.name,
-                    description: 'Bend fate — re-roll every miss die from its own faces. Once per round.',
-                    cost: pf.cost,
-                    affordable: pf.enabled,
-                    icon: SIG_ICON[s.kind] ?? '◆',
-                    reason: pf.reason,
-                };
-            }
-            const affordable = state.conviction >= s.cost;
+            const reason = signatureCastBlock(state, s);
             return {
                 id: s.id, name: s.name, description: s.description, cost: s.cost,
-                affordable,
+                affordable: reason === null,
                 icon: SIG_ICON[s.kind] ?? '◆',
-                reason: affordable ? null : `Need ${s.cost} ◆ Conviction`,
+                reason,
             };
         });
 }
@@ -2762,28 +2725,6 @@ function perorationVM(state: CombatEncounterState): CombatPerorationVM {
         : null;
     const card = getCardById(decl.cardId);
     return { active: true, premises: state.premises ?? 0, at: decl.at, concedeAt, cardName: card?.name ?? '' };
-}
-
-// ── Spec 33 §4 — Press Fate (the reroll affordance) ─────────────────────────
-
-/**
- * Mirrors `playSignatureSkill`'s reroll gate (combat.engine.ts) exactly so the
- * control's enabled/disabled verdict — and its reason — can never lie about
- * the live one: cost (1◆) first, then once-per-round, then "a live
- * non-cracked miss face must exist to revive". Returns null when the loadout
- * carries no reroll signature (nothing to cast).
- */
-function pressFateVM(state: CombatEncounterState): CombatPressFateVM | null {
-    const signatureId = (state.signatures ?? []).find(id => getSignatureSkill(id)?.kind === 'reroll');
-    if (!signatureId) return null;
-    const cost = PRESS_FATE_COST;
-    const cracked = new Set<string>((state.crackedDice ?? []).filter(c => c.turn === state.turn).map(c => c.color));
-    const hasLiveMiss = state.dice.some(d => d.face === 'miss' && !d.floating && !cracked.has(d.color));
-    let reason: string | null = null;
-    if (state.conviction < cost) reason = `Need ${cost} ◆ Conviction`;
-    else if (state.pressFateRound === state.round) reason = 'Already pressed this round';
-    else if (!hasLiveMiss) reason = 'No miss dice to re-roll';
-    return { signatureId, cost, enabled: reason === null, reason };
 }
 
 // ── Spec 33 §3 — the momentum chain chip ─────────────────────────────────────
@@ -2917,7 +2858,6 @@ export function buildCombatViewModel(state: CombatEncounterState): CombatViewMod
         discardCount: state.discard.length,
         discardCards: state.discard.map((id) => ({ id, name: getCardById(id)?.name ?? id })),
         peroration: perorationVM(state),
-        pressFate: pressFateVM(state),
         momentumV2: momentumV2VM(state),
         playerStance: playerStanceVM(state),
         dieGear: dieGearRailVM(state),

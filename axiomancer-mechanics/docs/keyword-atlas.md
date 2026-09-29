@@ -38,16 +38,12 @@ mid-flight. Run `npm run catalog` for the current binding.
 | keyword | reminder text | carried by |
 |---|---|---|
 | **DEAL N** | Direct VITAE damage. Not a keyword — plain English on the face; a multi-hit prints `N × k` and each hit is its own damage instance. | (see the catalog) |
-| **WRATH N** | Every hit you land deals that much more, for the rest of the fight. It stacks and never fades. | (see the catalog) |
-| **CHAIN N** | Your next hit deals that much more. Chain fades at the end of a turn that added none. | (see the catalog) |
 
 ## Player keywords — afflictions and their payoffs
 
 | keyword | reminder text | carried by |
 |---|---|---|
-| **POISON iN dM** | Each time a card is played, the foe loses VITAE per Poison stack. The longer it holds, the harder it bites. | (see the catalog) |
 | **BLEED iN dM** | Each hit the bearer takes deals extra VITAE per Bleed stack, then removes a stack. | (see the catalog) |
-| **DOOM iN** | Deals VITAE per stack at the start of each round and grows a stack every time the foe acts. It ends only when consumed. | (see the catalog) |
 | **MARK iN dM** | Every damage-over-time tick on the bearer deals +1 VITAE per Mark stack. Marks hold until consumed, not until a calendar expires. | (see the catalog) |
 | **VULNERABLE +N% dM** | The foe takes N% more damage from every hit. Re-applying adds up and refreshes the turns; uncapped. Heart scales N (S3, D43). | grey-word |
 
@@ -55,26 +51,18 @@ mid-flight. Run `npm run catalog` for the current binding.
 
 | keyword | reminder text | carried by |
 |---|---|---|
-| **GUARD N** | Blocks that much incoming damage during the next threat phase. Unused Guard is lost unless the card prints "persists". | (see the catalog) |
-
-## Player keywords — tempo and control
-
-| keyword | reminder text | carried by |
-|---|---|---|
-| **STAGGER N** | Removes that many rungs (the steps of the foe's telegraph) from its next action. Strip them all and the action is denied. | (see the catalog) |
-| **QUARTER iN dM** | The foe's attacks deal less damage per Quarter stack. | (see the catalog) |
+| **GUARD N** | Blocks that much incoming damage during the next threat phase. Unused Guard is lost unless the card prints "persists". | grey-ward, every signature skill (R4) |
 
 ## Player keywords — the deck as a resource
 
 | keyword | reminder text | carried by |
 |---|---|---|
-| **DRAW N** | Draw that many cards from your deck, up to your hand limit. | consumables, signature skills |
+| **DRAW N** | Draw that many cards from your deck, up to your hand limit. | consumables |
 
 ## Player keywords — resolve and mercy
 
 | keyword | reminder text | carried by |
 |---|---|---|
-| **PLEA N** | Builds on the foe and decays each round. At their resolve, they relent. | (see the catalog) |
 | **HEAL N** | Restores that much VITAE, up to your maximum. | (see the catalog) |
 | **CLEANSE N** | Removes up to that many afflictions from you. | (see the catalog) |
 
@@ -276,6 +264,15 @@ stale and corrected in the same pass.)
   sweep pick it up automatically — no other mobile code needed.
 
 ## Retired
+
+- **THE SIGNATURE PLACEHOLDERS** (2026-09-29, revamp phase R4, D45, D47) —
+  ten signature skills became GUARD 5 placeholders and The Open Hand a plain
+  befriend, so WRATH, CHAIN, POISON, DOOM, QUARTER, STAGGER and PLEA lost
+  their last carrier (no card, enemy, hazard or item applies them). Their rows
+  left this file, `KEYWORD_GLOSS`, the FREE-glyph silhouettes (with PETRIFY),
+  the DevLog catalog's bold list and the theme families. The engine code
+  behind them (the WRATH/CHAIN state, the effect definitions, the mechanic
+  kinds) is R7a's to delete. DRAW and HEAL stay: consumables print them.
 
 - **THE ENEMY RESET** (2026-09-29, revamp phase R2b, D63) — the eleven enemy
   keywords HIDE, SWIFT, BRUTAL, VENOM, UNSHAKEN, ELUSIVE, REGROW, RAVENOUS,

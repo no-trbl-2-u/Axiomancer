@@ -54,9 +54,10 @@ test('the glyph parsers found a real table, not an empty one', () => {
   // Without this the two assertions above pass vacuously the moment either
   // file is reformatted past its extractor.
   // Floors lowered to the tables' true size after the keyword audit
-  // (2026-09-27, after the card purge): 14 keys each.
-  assert.ok(mobileGlyphTable().size >= 12)
-  assert.ok(catalogGlyphTable().size >= 12)
+  // (2026-09-27, after the card purge) and the R4 carrier sweep (2026-09-29,
+  // which took POISON, DOOM, PETRIFY and QUARTER): 9 keys each.
+  assert.ok(mobileGlyphTable().size >= 8)
+  assert.ok(catalogGlyphTable().size >= 8)
 })
 
 // ── The keyword atlas vs the live registry ───────────────────────────────────
@@ -68,7 +69,6 @@ test('the glyph parsers found a real table, not an empty one', () => {
  */
 const REGISTRY_WITHOUT_ATLAS_ROW = new Set([
   'OATH', 'HEX',                                   // card TYPES, not keywords
-  'DOOM',                                          // Profane Canon word below the row bar
 ])
 
 /**
@@ -121,8 +121,9 @@ test('the exemption list holds no keyword that left the registry', () => {
 test('the keyword parsers found real tables', () => {
   // Floors lowered to the tables' true size after the keyword audit
   // (2026-09-27, after the card purge) and the enemy reset (R2b, 2026-09-29,
-  // which took the eleven enemy keywords out of the atlas): registry 20,
-  // atlas 23.
-  assert.ok(keys(mobileRegistryKeywords()).length >= 18)
-  assert.ok(keys(atlasKeywords()).length >= 20)
+  // which took the eleven enemy keywords out of the atlas) and the R4
+  // carrier sweep (2026-09-29, seven signature-only words): registry 13,
+  // atlas 16.
+  assert.ok(keys(mobileRegistryKeywords()).length >= 12)
+  assert.ok(keys(atlasKeywords()).length >= 14)
 })

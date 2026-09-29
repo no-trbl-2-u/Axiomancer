@@ -36,18 +36,12 @@
 /** Effect id → keyword (Title-Case). The CARD vocabulary (spec 32 v3 §3). */
 const EFFECT_KEYWORD: Record<string, string> = {
     // ── The effect-backed keywords ──
-    debuff_poison: 'Poison',
     debuff_bleed: 'Bleed',
     debuff_mark: 'Mark',
-    debuff_quarter: 'Quarter',
     // S3 (D43) — rebuilt for the grey office's A Plain Word.
     debuff_vulnerable: 'Vulnerable',
-    // ── DOOM — the inevitability DoT (Profane Canon rework, 2026-08-08). The
-    // Mounting Dread signature skill still applies it. ──
-    debuff_creeping_doom: 'Doom',
-    // The keyword audit (2026-09-27, after the card purge) deleted
-    // debuff_backfire, buff_thorns, debuff_kindling_ember, debuff_nettle_sting
-    // and buff_grace_momentum with the cards that carried them.
+    // Revamp R4 (D45) deleted Poison, Quarter and Doom: the signature skills
+    // were their last carriers, and are GUARD placeholders now.
 };
 
 /**
@@ -112,37 +106,24 @@ const VERB_KEYWORD: Record<string, string> = {
  * KW-3 lint lists each one with its reason.
  */
 const MECHANIC_KEYWORD: Record<string, string> = {
-    // ── Control ──
-    stagger: 'Stagger',
-    lock_stance: 'Stagger',
-    // ── Charm ──
-    sway: 'Plea',
-    // ── THE BIG NUMBERS REWRITE (2026-09-02) — direct damage and its family.
-    //    `deal` deliberately has NO keyword row: "Deal 24" is plain English
-    //    and shouting it would spend the face-term budget on the one verb
-    //    that needs no explanation (MTG's rule: keyword what compresses).
-    //    WRATH and CHAIN keep their rows: the relic signature skills (The
-    //    Endless Labor, The Unbroken Stride) still grant them. ──
-    wrath: 'Wrath',
-    chain: 'Chain',
-    // The keyword audit (2026-09-27, after the card purge) removed every row
-    // whose keyword lost its gloss with the purged cards. Those kinds stay in
-    // the engine union and are listed in KINDS_WITHOUT_MECHANIC_KEYWORD.
+    // `deal` deliberately has NO keyword row: "Deal 24" is plain English (MTG's
+    // rule: keyword what compresses). The keyword audit (2026-09-27) removed
+    // every row whose keyword lost its gloss with the purged cards, and revamp
+    // R4 (D45) the last four (Stagger, Plea, Wrath, Chain) with the signature
+    // skills that carried them. Those kinds stay in the engine union until
+    // R7a and are listed in KINDS_WITHOUT_MECHANIC_KEYWORD.
 };
 
 /**
  * Keyword → a short, general definition (the glossary rule). The card's own
  * numbers live on the face/preview; this explains the keyword.
  *
- * The keyword audit (2026-09-27, after the card purge) cut this table to the
- * words something live still prints: the grey office (DEAL/GUARD/VULNERABLE),
- * enemy threats and keyword reminders (PLEA, STAGGER, the DoT species),
- * the relic signature skills (WRATH, CHAIN, POISON, QUARTER, DOOM),
- * consumables (HEAL, CLEANSE, DRAW), the dice system (PIP,
- * BOON, HONE, TEMPER) and the two card-type labels. The keyword purge
- * (2026-09-28) then cut PIERCE, RIPOSTE and FORETELL: no card, enemy,
- * signature skill or item carries them. Git history keeps the
- * rest.
+ * The table holds only words something live still prints: the grey office
+ * (GUARD/VULNERABLE), the signature skills (GUARD), consumables (HEAL,
+ * CLEANSE, DRAW, MARK), a map hazard (BLEED), the dice system (PIP, BOON,
+ * HONE, TEMPER) and the two card-type labels. Revamp R4 (D45) cut POISON,
+ * DOOM, QUARTER, STAGGER, PLEA, WRATH and CHAIN when the signature skills,
+ * their last carriers, became GUARD placeholders. Git history keeps the rest.
  *
  * 2026-07-12 (owner playtest) — TERSE GLOSSES: every gloss is ONE short
  * sentence in the Dawncaster register ("Cards with Lifedrain restore health
@@ -162,39 +143,20 @@ const KEYWORD_GLOSS: Record<string, string> = {
     Cleanse: 'Removes up to that many afflictions from you.',
     Heal: 'Restores that much VITAE, up to your maximum.',
     // ── Affliction ──
-    Poison:
-        'Each time a card is played, the foe loses 2 VITAE per Poison stack. The longer it holds, the harder it bites.',
     Bleed: 'Each hit the bearer takes deals 3 more VITAE per Bleed stack, then removes a stack.',
     Vulnerable:
         'The foe takes that much more damage from every hit. Adding more stacks it and refreshes the turns.',
-    Doom:
-        'Deals 1 VITAE per stack at the start of each round and grows a stack every time the foe acts. '
-        + 'It ends only when consumed.',
     // ── Dice ──
     Pip:
         'Each threat phase a Reserve die survives, it gains one pip, capped at 2 '
         + '(some cards can push past the cap and risk a bust). '
         + 'Each pip spent adds +1 intensity, or +2 Guard on a defend card.',
-    // ── Control ──
-    // 2026-07-12 (card-wording audit) — the old "2 rungs / 3 on a boss" clause
-    // stated how many rungs an action HAS (the RUNGS system term), not how many
-    // Stagger removes, and so contradicted every `STAGGER 1` face.
-    Stagger:
-        "Removes that many rungs (the steps of the foe's telegraph) from its next action. "
-        + 'Strip them all and the action is denied.',
-    // ── Charm ──
-    Plea:
-        'Builds on the foe and decays 1 each round. At their resolve (~35% of max VITAE), they relent.',
-    Quarter: "The foe's attacks deal 10% less damage per Quarter stack.",
     // ── Die gear (spec 33 Upgradeable Dice §6, registered D4 2026-07-17) —
     // BOON is the face payload; HONE/TEMPER are the blacksmith upgrade verbs.
     // (Renamed from SPECIAL — R-8, phase 44b.) ──
     Boon: "A die's BOON face powers a card of its color and grants Conviction. Its equipped gear sets how much (2 by default).",
     Hone: "A blacksmith upgrade: adds a mana face to a die's gear, so more of its rolls power a card.",
     Temper: "A blacksmith upgrade: turns a mana face into a BOON face. A colored die caps at 2 boon and 1 miss, gold at 1.",
-    // ── THE BIG NUMBERS REWRITE (2026-09-02) — the damage family ──
-    Wrath: 'Every hit you land deals that much more, for the rest of the fight. It stacks and never fades.',
-    Chain: 'Your next hit deals that much more. Chain fades at the end of a turn that added none.',
     // ── Card types (labels, not keywords — never rendered in the inspect
     // keyword panel since 2026-07-12; kept for help surfaces + the KW lints) ──
     Oath: 'A passive on your side: 3 rounds when played free, permanent when paid with a die.',
@@ -254,8 +216,8 @@ export function keywordForVerb(verbClass: string | null | undefined): string | n
     return VERB_KEYWORD[verbClass] ?? null;
 }
 
-/** The keyword a special-mechanic kind headlines (e.g. stagger → Stagger), or
- *  null for kinds that carry their own face kind (guard/rupture/forge/…). */
+/** The keyword a special-mechanic kind headlines, or null for kinds that
+ *  carry their own face kind (guard/rupture/forge/…) or no keyword at all. */
 export function keywordForMechanic(kind: string | null | undefined): string | null {
     if (!kind) return null;
     return MECHANIC_KEYWORD[kind] ?? null;
@@ -323,7 +285,6 @@ const SYSTEM_TERM_MATCH: Record<string, RegExp> = {
  *  (owner directive 2026-07-12: each term explained at most once per overlay). */
 const SYSTEM_TERM_COVERED_BY: Record<string, readonly string[]> = {
     'RESERVE & PIPS': ['PIP'],  // the Pip gloss defines the Reserve
-    'RUNGS': ['STAGGER'],       // the Stagger gloss defines rungs
 };
 
 /**

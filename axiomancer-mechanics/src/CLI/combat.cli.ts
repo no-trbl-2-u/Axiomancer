@@ -60,7 +60,7 @@ import {
     revealedCurrentStance,
     firstLegalPoweringDie,
     buildCombatSummary,
-    getSignatureSkill,
+    getSignatureSkill, signatureCastBlock,
     selectMercyChoice,
     selectCapitulationChoice,
 } from '../Combat/combat.engine';
@@ -270,8 +270,8 @@ function rankedAutoCards(s: CombatEncounterState, policy: CombatAutoPolicyId) {
 function bestAutoSignature(s: CombatEncounterState): string | null {
     for (const id of s.signatures) {
         const sig = getSignatureSkill(id);
-        if (!sig || s.conviction < sig.cost) continue;
-        if (['dot', 'control'].includes(sig.kind)) return id;
+        if (!sig || signatureCastBlock(s, sig)) continue;
+        if (sig.kind === 'guard') return id;
     }
     return null;
 }
@@ -407,7 +407,7 @@ async function promptCardChoice(state: CombatEncounterState): Promise<{ uid: str
 async function promptSignatureChoice(state: CombatEncounterState): Promise<string | null> {
     const affordable = state.signatures
         .map(id => getSignatureSkill(id))
-        .filter((s): s is NonNullable<ReturnType<typeof getSignatureSkill>> => s !== undefined && state.conviction >= s.cost);
+        .filter((s): s is NonNullable<ReturnType<typeof getSignatureSkill>> => s !== undefined && !signatureCastBlock(state, s));
     if (affordable.length === 0) return null;
     const { choice } = await prompt<{ choice: string }>([{
         type: 'rawlist', name: 'choice',

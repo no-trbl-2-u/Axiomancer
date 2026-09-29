@@ -67,7 +67,7 @@ import {
     rollUpgradeableDice, rollGoldLeadPair,
     crackedColorsForTurn, expireCrackedDice, advanceMomentumV2, resolveStanceCheck,
     isChainStance, activeDieGear, tableHasRoom,
-    UPGRADEABLE_TABLE_CEILING, KINDLE_CONCURRENT_CAP, PRESS_FATE_COST,
+    UPGRADEABLE_TABLE_CEILING, KINDLE_CONCURRENT_CAP,
     OVERHEAT_CRACK_CHANCE, SPECIAL_FIRES_ON_USE, SURGE_DIE_PREFIX, COVETED_DIE_PREFIX,
 } from './combat.upgradeable-dice';
 import {
@@ -80,7 +80,7 @@ import { recordAttribution } from './combat.attribution';
 import { scaleFor, scaleEffectIntensity, scaleCardForStats } from './stat-scaling';
 import { canAct, getActiveEffectModifiers, getActiveDotTotal, dotRoundClockPhase } from './effect-modifiers';
 import { getThreatSequence, commitThreatBranch } from './combat.threat';
-import { getSignatureSkill, applySignatureSkill, playerArchetype } from './combat.signature';
+import { getSignatureSkill, applySignatureSkill, signatureCastBlock, playerArchetype } from './combat.signature';
 import { getSignaturesForLoadout } from '../Items/relic.library';
 import type {
     CombatCard, CombatDieColor, CombatEncounterState, CombatEvent, CardPlay,
@@ -547,7 +547,7 @@ export function endTurn(state: CombatEncounterState): CombatTransition {
  * Spec 33 §6 — OVERHEAT, reinterpreted: push an already-SPENT
  * tray die back to `available` so it can power a SECOND card this round. The
  * push always succeeds; the RISK is the crack — `OVERHEAT_CRACK_CHANCE` that
- * the die is all-miss NEXT round (and excluded from that round's Press Fate).
+ * the die is all-miss NEXT round.
  * The second play is a normal paid play: it moves stance and momentum. Any
  * die may be overheated, gold included. Cards carry this verb from D4; the
  * engine primitive ships here so D3's policies can exercise it.
@@ -1575,7 +1575,7 @@ function playBottomAction(
         const events: CombatEvent[] = [{
             kind: 'effect-fizzled', cardId: card.id, effectId: '',
             message: tray?.face === 'miss'
-                ? 'a miss face is dead — Press Fate or a card can revive it'
+                ? 'a miss face is dead — it powers nothing this round'
                 : 'that die cannot power this card',
         }];
         return { state: withLog(state, events), events };
@@ -3987,44 +3987,27 @@ export function selectMercyChoice(
 
 /**
  * Casts a signature skill, spending Conviction (◆). Always available regardless
- * of the hand. Fizzles (no-op + event) when underfunded. Can trigger an
- * immediate outcome (e.g. The Butcher's Bill finishing the foe).
+ * of the hand. Refused (no-op + a fizzle event, nothing spent) when
+ * `signatureCastBlock` names a reason: too little Conviction, or The Open Hand
+ * on a foe that can't be befriended yet.
  */
 export function playSignatureSkill(
     state: CombatEncounterState,
     signatureId: string,
-    rng: () => number = defaultRng,
 ): CombatTransition {
     if (state.phase !== 'phase-play') return { state, events: [] };
     const skill = getSignatureSkill(signatureId);
     if (!skill) return { state, events: [] };
-    // Spec 33 §4 [owner-locked] — Press Fate's price is spec-fixed at
-    // PRESS_FATE_COST (1◆): the recurring sink of the leaner economy. Every
-    // other signature keeps its data cost.
-    const isReroll = skill.kind === 'reroll';
-    const cost = isReroll ? PRESS_FATE_COST : skill.cost;
-    if (state.conviction < cost) {
-        const events: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: skill.id, effectId: '', message: `need ${cost} ◆ Conviction (have ${state.conviction})` }];
+    const block = signatureCastBlock(state, skill);
+    if (block) {
+        const events: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: skill.id, effectId: '', message: block }];
         return { state: withLog(state, events), events };
     }
-    if (isReroll) {
-        // Once per round (§4), and only when a live miss face exists to revive
-        // (cracked dice are excluded — their miss is a stated consequence).
-        if (state.pressFateRound === state.round) {
-            const events: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: skill.id, effectId: '', message: 'fate already pressed this round' }];
-            return { state: withLog(state, events), events };
-        }
-        const cracked = crackedColorsForTurn(state, state.turn);
-        if (!state.dice.some(d => d.face === 'miss' && !d.floating && !cracked.has(d.color))) {
-            const events: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: skill.id, effectId: '', message: 'no miss faces to re-roll' }];
-            return { state: withLog(state, events), events };
-        }
-    }
 
-    const spent: CombatEncounterState = { ...state, conviction: state.conviction - cost };
-    const applied = applySignatureSkill(spent, skill, rng);
+    const spent: CombatEncounterState = { ...state, conviction: state.conviction - skill.cost };
+    const applied = applySignatureSkill(spent, skill);
     const events: CombatEvent[] = [
-        { kind: 'signature-cast', signatureId: skill.id, name: skill.name, cost },
+        { kind: 'signature-cast', signatureId: skill.id, name: skill.name, cost: skill.cost },
         ...applied.events,
     ];
     const next = withLog(applied.state, events);
@@ -4032,7 +4015,10 @@ export function playSignatureSkill(
 }
 
 /** The baseline signature kit (for the presenter / UI bar). */
-export { SIGNATURE_SKILLS, SIGNATURE_SKILL_LIST, getSignatureSkill } from './combat.signature';
+export {
+    SIGNATURE_SKILLS, SIGNATURE_SKILL_LIST, getSignatureSkill,
+    signatureCastBlock, signatureGuardAmount, SIGNATURE_COST, SIGNATURE_GUARD,
+} from './combat.signature';
 
 // ── Summary (§7.7) ───────────────────────────────────────────────────────────
 

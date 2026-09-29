@@ -250,6 +250,7 @@ export function createEnemy(options: CreateEnemyOptions): Enemy {
     };
 }
 
+export { isEnemyBefriendable, befriendHpGateOpen } from './befriend';
 export type { EnemyKeyword } from './enemy-keywords';
 
 export type {

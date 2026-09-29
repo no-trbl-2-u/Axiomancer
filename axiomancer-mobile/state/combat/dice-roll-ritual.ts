@@ -57,7 +57,7 @@ export interface RollTimingLike {
 
 /**
  * A stable signature of a die's RESULT (face + cracked). A round-start roll
- * changes every die's signature; a Press-Fate reroll changes only the rerolled
+ * changes every die's signature; a reroll changes only the rerolled
  * miss dice — so diffing signatures tells the ritual exactly which dice replay
  * the tumble (the cracked dice, unchanged, correctly sit it out).
  */

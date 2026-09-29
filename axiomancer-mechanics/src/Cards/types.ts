@@ -138,8 +138,8 @@ export type CardSpecialMechanic =
     | { kind: 'riposte'; damage: number; reduce: number }
     // ── Fate Engine P1 (spec 31 §4.1) — die-manipulation verbs, all combat-engine
     //    owned (the card engine no-ops them, mirroring guard/rupture). ──────────
-    /** REROLL_SPENT — re-roll every spent/blocked die in the tray (the library
-     *  sibling of the Press Fate signature). Floating dice are exempt. */
+    /** REROLL_SPENT — re-roll every spent/blocked die in the tray. Floating
+     *  dice are exempt. */
     | { kind: 'reroll_spent' }
     /** REFRESH_DIE — the powering die returns to `available` after this play
      *  (independent of the variety-chain rule). */

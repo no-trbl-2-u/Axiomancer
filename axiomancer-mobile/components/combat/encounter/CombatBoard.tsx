@@ -351,7 +351,7 @@ function DiceRow({
     const reducedMotion = useReducedMotion();
     const mode = resolveRollMode({ reducedMotion, instantSettle: shouldInstantSettleDice() });
     // Previous roll's face signatures — diffed so a round-start roll re-tumbles
-    // everything while a Press-Fate reroll re-tumbles ONLY the rerolled dice.
+    // everything while a reroll re-tumbles ONLY the rerolled dice.
     const prevSigRef = useRef<Record<string, string> | null>(null);
     const plansById = useMemo<Record<string, DieRollPlan>>(() => {
         const plans = planDiceRoll(vm.dice, prevSigRef.current, mode, DICE_ROLL_TIMING);
@@ -1454,10 +1454,6 @@ export const CombatBoard = React.memo(function CombatBoard({
                         no die matches your hand — FREE plays still work · END rolls fresh dice
                     </Text>
                 ) : null}
-                {/* Spec 33 §4 — Press Fate has NO board control of its own (owner
-                    call 2026-07-19): it is a signature, cast from the rune column
-                    like every other. The presenter reshapes its rune
-                    (1◆ cost + the full firing gate + refusal reason). */}
                 {/* The tray outranks the rune column in z-order (2026-09-13,
                     re-fixed 2026-09-13). `sigTop` keeps the column clear of the
                     tray whenever there is room, but it is derived from THREE

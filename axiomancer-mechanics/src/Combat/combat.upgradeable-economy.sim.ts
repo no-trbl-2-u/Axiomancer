@@ -19,7 +19,7 @@
 import { setSeed } from '../Utils/rng';
 import {
     initializeCombatEncounter, rollEncounterDice, resolveThreatPhase,
-    selectMercyChoice, selectCapitulationChoice, getSignatureSkill,
+    selectMercyChoice, selectCapitulationChoice,
 } from './combat.engine';
 import { playSimPhase } from './combat.encounter.sim';
 import {
@@ -105,7 +105,7 @@ export interface UpgradeableEconomyStats {
     usablePerRound: number;
     whiffRate: number;
     perColorAccess: Record<ChainColor, number>;
-    /** Whiffed rounds entered with 0◆ (Press Fate impossible) — the FREE-only
+    /** Whiffed rounds entered with 0◆ — the FREE-only
      *  dead round the brief asks to measure (no band yet). */
     deadRoundRate: number;
     // ── Realized ◆ economy ───────────────────────────────────────────────────
@@ -121,7 +121,6 @@ export interface UpgradeableEconomyStats {
     // ── Momentum / surge ─────────────────────────────────────────────────────
     surgePerRound: number;
     momentumBreakPerRound: number;
-    pressFatePerRound: number;
     // ── Outcome context (NOT a D7 win-curve read) ────────────────────────────
     winRate: number;
     avgRounds: number;
@@ -153,7 +152,6 @@ interface EconomyAccumulator {
     overflowIncome: number;
     surges: number;
     breaks: number;
-    pressFates: number;
     wins: number;
     totalRounds: number;
 }
@@ -163,7 +161,7 @@ function emptyAcc(): EconomyAccumulator {
         encounters: 0, rounds: 0, usable: 0, whiff: 0, deadRounds: 0,
         colorHits: { body: 0, mind: 0, heart: 0 },
         grossSpecials: 0, specialIncome: 0, yieldIncome: 0, overflowIncome: 0,
-        surges: 0, breaks: 0, pressFates: 0, wins: 0, totalRounds: 0,
+        surges: 0, breaks: 0, wins: 0, totalRounds: 0,
     };
 }
 
@@ -173,7 +171,7 @@ function isWin(outcome: CombatOutcome | null): boolean {
 
 /** Folds a slice of transcript events into `acc`. The `turn-dice-rolled` in the
  *  slice (if any) is the fresh roll for one phase; `convBefore` is the player's
- *  Conviction entering that phase (a whiffed round with 0◆ can't Press Fate — a
+ *  Conviction entering that phase (a whiffed round with 0◆ is a
  *  dead round). Income/surge/break events are folded regardless. */
 function foldEvents(acc: EconomyAccumulator, events: readonly CombatEncounterState['log'][number][], convBefore: number): void {
     const roll = events.find(e => e.kind === 'turn-dice-rolled');
@@ -191,23 +189,6 @@ function foldEvents(acc: EconomyAccumulator, events: readonly CombatEncounterSta
             if (fixed.some(d => (d.color === c || d.color === 'wild') && (d.face === 'special' || d.face === 'mana'))) acc.colorHits[c]++;
         }
     }
-    // Press Fate mints new faces MID-round (F3 drained 2026-07-18: the reroll
-    // rides every starter loadout). The fresh-roll gates above stay a
-    // round-START reading, but ◆ conservation must fold the specials the
-    // reroll minted into the gross — otherwise realized spend can exceed the
-    // rolled gross (the >100% spend-rate the invariant guards). The reroll
-    // emits its own `turn-dice-rolled` with the post-reroll tray; only the
-    // dice named by `press-fate-rerolled` are new mints (kept faces were
-    // already counted at round start).
-    const pressed = events.find(e => e.kind === 'press-fate-rerolled');
-    if (pressed && pressed.kind === 'press-fate-rerolled') {
-        const after = [...events].reverse().find(e => e.kind === 'turn-dice-rolled');
-        if (after && after.kind === 'turn-dice-rolled' && after !== roll) {
-            const rerolled = new Set(pressed.dieIds);
-            acc.grossSpecials += rolledDice(after.dice)
-                .filter(d => rerolled.has(d.id) && d.face === 'special').length;
-        }
-    }
     for (const ev of events) {
         // Same filter as the gross (see ROLLED_DIE_ID): a special fired off a
         // die the gross never counted would break conservation by definition.
@@ -216,7 +197,6 @@ function foldEvents(acc: EconomyAccumulator, events: readonly CombatEncounterSta
         else if (ev.kind === 'momentum-broken') acc.breaks++;
         else if (ev.kind === 'die-overflowed') acc.overflowIncome += 1;
         else if (ev.kind === 'stance-check-resolved' && ev.outcome === 'yielded') acc.yieldIncome += 1;
-        else if (ev.kind === 'signature-cast' && getSignatureSkill(ev.signatureId)?.kind === 'reroll') acc.pressFates++;
     }
 }
 
@@ -310,7 +290,6 @@ function finalize(acc: EconomyAccumulator): UpgradeableEconomyStats {
         totalIncomePerRound: (acc.specialIncome + acc.yieldIncome + acc.overflowIncome) / r,
         surgePerRound: acc.surges / r,
         momentumBreakPerRound: acc.breaks / r,
-        pressFatePerRound: acc.pressFates / r,
         winRate: acc.encounters > 0 ? acc.wins / acc.encounters : 0,
         avgRounds: acc.encounters > 0 ? acc.totalRounds / acc.encounters : 0,
     };
@@ -379,7 +358,6 @@ export function formatUpgradeableEconomyReport(result: ReturnType<typeof simulat
     lines.push(`      yield              = ${num(pooled.yieldIncomePerRound)}   overflow = ${num(pooled.overflowIncomePerRound)}`);
     lines.push(`  surge frequency      = ${num(pooled.surgePerRound)}/round   (momentum breaks ${num(pooled.momentumBreakPerRound)}/round)`);
     lines.push(`  dead rounds (0◆ FREE-only) = ${pct(pooled.deadRoundRate)}   (no band — measured only)`);
-    lines.push(`  Press Fate casts     = ${num(pooled.pressFatePerRound)}/round`);
     lines.push('');
     lines.push('OVERHEAT (constant, not policy-exercised): crack chance = ' + `${(OVERHEAT_CRACK_CHANCE * 100).toFixed(0)}%`);
     lines.push('');
