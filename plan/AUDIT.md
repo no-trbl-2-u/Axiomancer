@@ -52,7 +52,33 @@
 
 ## Pending
 
-### [tests] Root `npm test` is red on main: the DevLog marginalia assertion (2026-09-28)
+### [infra] A reconciled merge commit reached main with no verify-* run, tripping the deploy gate fail-closed (2026-09-29)
+- category: infra
+- impact: 5
+- ease: 5
+- detail: HEAD `19446f42` ("merge: reconcile with concurrent skip-comment
+  gate fix", #417) touches gated paths but no `verify-mechanics` /
+  `verify-mobile` workflow ever ran for it — only `ci-autofix` (skipped),
+  `deploy-comment` and `close-trailers` did. `npm run deploy:check` fails
+  closed against it ("grace window" expired, no gated workflow found),
+  with its own hint: a push made with the default `GITHUB_TOKEN` (as
+  opposed to the repo's `GH_PAT`) never triggers further workflow runs.
+  Not new to tonight — `709d6c2d` (PR #412's merge commit) shows the same
+  gap in `gh run list`, while `9dd4512e` (PR #411) got a full verify set —
+  so this looks like an intermittent gap around merge commits specifically
+  (a manual `git merge` conflict-resolution push, per the root CLAUDE.md's
+  PR check-in convention, rather than a `gh pr merge`), not a one-off.
+  The underlying commits (`aa12ff58`, `f47fb4c9`) were each verified green
+  before the merge, and this digest's own `npm run verify` (§3 step 6)
+  covers the same tree, so nothing is unverified in substance — only the
+  merge commit's own CI record is missing.
+- next (`/iterate` or `/fix-ci`): find why some merge-commit pushes don't
+  trigger `verify-*` (token identity used for the push, branch-protection
+  required-checks config, or a workflow trigger filter) and either fix the
+  trigger or teach `deploy:check` to treat a merge commit whose parents
+  are both already green as satisfied without its own run.
+
+### [x] [tests] Root `npm test` is red on main: the DevLog marginalia assertion (2026-09-28) — CLOSED 2026-09-29 (confirmed by this digest)
 - category: tests
 - impact: 4
 - ease: 6
@@ -65,6 +91,12 @@
 - next (`/iterate`): decide whether the newest DevLog entry should carry
   marginalia or the test should pick a post that has them, then add the
   file to a CI job so it cannot rot silently again.
+- **CLOSED 2026-09-29:** fixed as a side effect of phase R1 (`0cfea70c`,
+  "the marginalia case picked the front page ... instead of a post");
+  this digest re-ran root `npm test` clean on current `main` (213 pass, 0
+  fail) to confirm before closing. The "add it to a CI job" half of
+  `next:` is still undone — no workflow runs the root suite, so a similar
+  regression would rot silently again.
 
 ### [content] Consumable buffs borrow unrelated keyword glosses on their status chips (2026-09-28)
 - category: content

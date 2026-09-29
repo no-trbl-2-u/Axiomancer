@@ -1,0 +1,5 @@
+{
+  "id": "buff_accuracy_up",
+  "before": "Bertrand's Precision — FORETELL — Type buff · Category advantage · Tier 2 · Duration 3 rounds · Stacking intensity",
+  "after": "Bertrand's Precision — ACCURACY_UP — Type buff · Category advantage · Tier 2 · Duration 3 rounds · Stacking intensity"
+}
