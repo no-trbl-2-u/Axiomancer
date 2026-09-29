@@ -121,7 +121,7 @@ event-pool and layout files).
 - [x] Phase R2b — Enemy reset 2/2, the code: the eleven enemy-keyword systems, SUMMON's adds, the PLEA/premise riders and curse injection deleted; carrier sweep (872de5a7)
 - [x] Phase R3a — World reset 1/3, seal and park: the Lantern Deep's deep stair (`ld-18`) and the Labyrinth vault door (`ld-15`) become sealed cutscenes; the northern maps parked (pools emptied, code kept); saves off Act 1 migrate onto the Lantern Deep. `plan/revamp/world.md`, `labyrinth.md`; brief `plan/phases/phase_R3_world_reset.md`. Split from R3 on 2026-09-29, like R2. Requires R2a. (f47fb4c9)
 - [x] Phase R3b — World reset 2/3, purge fishing-village and re-home the Anvil (25a6c5e7, 45bb8334)
-- [ ] Phase R3c — World reset 3/3, hygiene: unstartable quests and unread dialogue flags go, "shillings" the only currency, narrative reachability and the e2e map walk re-pinned to Act 1. Brief `plan/phases/phase_R3_world_reset.md`. Requires R3b.
+- [x] Phase R3c — World reset 3/3, hygiene: unstartable quests and unread flags gone, shillings the one currency, reachability pinned to Act 1 (b901c094)
 - [ ] Phase R4 — Relic placeholders: ten signatures → GUARD 5 at a flat cost; The Open Hand becomes a real befriend. `plan/revamp/relics.md`. Requires R2a.
 - [ ] Phase R5 — Items reset: healing potions only, save migration, shops/caches re-pointed. `plan/revamp/items.md`. Requires R3c.
 - [ ] Phase R6 — Hazard reset: minimal hazard deck, honest rewards. `plan/revamp/hazards.md`. Requires R0.
