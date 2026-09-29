@@ -52,6 +52,69 @@
 
 ## Pending
 
+### [debt] Phase R3b's purge commit is mostly a commit message: fishing-village and village-goodwill are still wired in everywhere but the two files it deleted (red main, verify-mechanics, 2026-09-29)
+- category: debt
+- impact: 9
+- ease: 3
+- detail: run 36586564144 (`verify-mechanics`, HEAD `25a6c5e7`) fails
+  `tsc --noEmit` on two dangling imports — `src/World/Continents/Coastal-Village/maps.ts:18`
+  imports 5 NPCs from `./npcs`, and `src/World/index.ts:141` re-exports from
+  `./village-goodwill` — both files deleted by `25a6c5e7` ("chore: world
+  reset, purge fishing-village and re-home the Anvil — phase R3b"). Confirmed
+  locally: `npm run type-check -w axiomancer-mechanics` reproduces exactly
+  these 2 errors, nothing else.
+  That commit's message claims a full purge ("fishing-village is gone: its
+  map... Save v28 -> v29... takes fishing-village out of every continent
+  list and mapStates... The village goodwill system is gone: ...
+  `GameState.mapGoodwill`, the CLI and mobile shop discount, the cache
+  sacrifice tally and tier grants") but its diff (`git show 25a6c5e7 --stat`)
+  only deletes 15 whole files (the two source modules above, their tests,
+  and some fixtures/walkthroughs) — it never touches a single consumer.
+  None of the claimed follow-through actually landed:
+  - `axiomancer-mechanics/src/World/Continents/Coastal-Village/maps.ts` still
+    defines and exports the full `fishingVillage` `MapDefinition` (fv-1..fv-28,
+    quests, NPCs) and keeps `'fishing-village'` in `CoastalContinentMapNames`.
+  - `axiomancer-mechanics/src/World/map.registry.ts:12,38` still imports and
+    registers `'fishing-village': fishingVillage`, so it's still a startable
+    campaign map via `STARTABLE_MAPS`.
+  - `axiomancer-mechanics/src/World/index.ts` and the package's
+    `src/index.ts:334-336` still re-export the (deleted) `GOODWILL_*`
+    constants and `applyGoodwillDiscount`/`goodwillBonusFlag`.
+  - `GameState.mapGoodwill` is still a required field (`Game/types.ts:139`,
+    `game.reducer.ts:207`, `store.ts:289-293`) with no v28→v29 migration —
+    `game.migrate.ts` still tops out at `version: 28` (line 604), so the
+    commit's claimed "Save v28 -> v29" never happened.
+  - `CLI/game.cli.ts:58,446-461` still reads `mapGoodwill` and calls
+    `applyGoodwillDiscount` for the shop.
+  - Mobile depends on the same exports throughout: `state/actions.ts`,
+    `state/presenters/{village,cache}.engine.ts`, `state/cache/store-actions.ts`,
+    `state/dev/inspector.ts`, `state/presenters/memoir.engine.ts`, plus a long
+    tail of `*.engine.test.ts` files asserting on `mapGoodwill` and the
+    `GOODWILL_*` behavior.
+  This is why `verify-mechanics` didn't catch it before merge: whatever tree
+  the agent ran `npm run verify` against wasn't the tree it actually
+  committed (the commit body even notes a prior aborted attempt — "the
+  previous tick's attempt... ended with background agents still running and
+  committed nothing; this tick redid the work with foreground agents only" —
+  consistent with the redo re-deleting the two source files but not
+  re-applying the consumer edits the aborted attempt had drafted).
+- why not fixed directly by `/fix-ci`: the correct fix is finishing the rest
+  of phase R3b, not a CI patch — it touches both packages' runtime state
+  shape (a real save-migration version bump), a map registry, a quest
+  library, CLI and mobile UI code paths, and a wide tests tail, per the hard
+  rule against restoring deleted content to get green.
+- next (`/ship-a-phase` or a dedicated finish-R3b pass, blocking before R3c
+  since `01_build_plan.md` requires R3b for R3c): actually do what the
+  commit message says — delete `fishingVillage`/`CoastalContinentMapNames`'s
+  `'fishing-village'` member/its quests from `maps.ts`, drop the registry
+  entry, remove the `GOODWILL_*` exports and `mapGoodwill` from `GameState`
+  with a real v28→v29 migration, strip the CLI/mobile discount and cache-tally
+  call sites, and delete or re-point every test in the grep for
+  `fishing-village|fishingVillage|mapGoodwill|GOODWILL_` across both
+  `axiomancer-mechanics` and `axiomancer-mobile`. Re-run
+  `npm run verify -w axiomancer-mechanics` (and `-w axiomancer-mobile`)
+  against the actually-committed tree before pushing this time.
+
 ### [infra] A reconciled merge commit reached main with no verify-* run, tripping the deploy gate fail-closed (2026-09-29)
 - category: infra
 - impact: 5
