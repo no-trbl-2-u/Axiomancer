@@ -132,6 +132,14 @@ main, and every commit is its own checkpoint in git history.
   gone, and the engine is final for everything after it. Split into three
   so no single tick is too big to verify.
 
+### R7d — Stance removal
+- **Tick:** deletes the rock/paper/scissors layer spec 33 left behind: the
+  player's stance, the phase-end punish/yield check, enemy phase stances,
+  and every stance-keyed mechanic, status, keyword and UI piece (D65). Card
+  colour, dice colour, the Color Law and colour match stay. The brief asks
+  you whether the momentum chain goes with it.
+- **Accomplishes:** colour means one thing: which dice can pay for a card.
+
 ### B4 — Card-rules inventory (the one loop B-row)
 - **Tick:** writes `plan/revamp/card-rules-inventory.md`: every card rule or
   fixture, where it lives, what enforces it, and whether it is live, dormant
@@ -168,9 +176,22 @@ main, and every commit is its own checkpoint in git history.
   `verify:visual` must show no diff.
 - **Accomplishes:** one palette file for every later UI session.
 
+### R10b — Doctrine rewrite
+- **Tick:** writes `docs/game-model.md`, rewrites `spec.md` and bearings to
+  the post-revamp game, retires specs 33/34, sweeps the plan queues, tags
+  and removes `plan/archive/`, and makes `check-lexicon` fail retired terms
+  (D66, D67).
+- **Accomplishes:** no agent can learn the old game from a live file.
+
+### R10c — Comments and docs truth pass (two ticks)
+- **Tick:** mechanics, then mobile: bannered docs rewritten or deleted,
+  history stripped from comments, every rule of play in a live doc, and a
+  guard for retired terms in comments (D67).
+- **Accomplishes:** comments and docs describe the code that exists.
+
 ## The stop: RC (attended)
 
-The loop cannot pick RC. Once R10 is ticked, `/march` has no pickable phase
+The loop cannot pick RC. Once R10c is ticked, `/march` has no pickable phase
 and runs `/iterate`, `/expand` and `/critique` under the revamp rules until
 you open the RC session. Nothing past this line starts before RC.
 

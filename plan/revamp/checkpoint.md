@@ -12,7 +12,7 @@ before we start work on content, cards, people, story, AI skills, anything
 past Act 1, etc. This way, if I want to pump the brakes, we can reset to
 this release version."
 
-So RC sits between the reset (R1–R10, R9a, B4) and everything that grows
+So RC sits between the reset (R1–R10c, R7d, R9a, B4) and everything that grows
 the game again: every owner-led B-row, R11 (loop content phases) and R12
 (new combat-playtest) require it.
 
@@ -54,7 +54,7 @@ until T opens the session.
 
 ### Gate (all must hold before tagging)
 
-1. **Rows:** R1–R10, R7a–R7c, R9a and B4 are `[x]` on main.
+1. **Rows:** R1–R10, R7a–R7d, R9a, R10b, R10c and B4 are `[x]` on main.
 2. **Checks:** the root `npm test`, mechanics `verify`, mobile `verify`,
    `lint:content`, `check-lexicon`, and every `verify-*` workflow on the
    tagged commit are green.
@@ -71,6 +71,8 @@ until T opens the session.
    - about 3–4 level-ups across the clear (R9's target);
    - a reload mid-fight re-offers that fight (R9a);
    - no keyword, gloss or glyph on screen without a live carrier;
+   - no stance chip, punish/yield line or stance readout anywhere (R7d);
+     dice still power only their own colour of card;
    - no console errors.
 4. **Findings:** anything small is fixed in the session; anything larger
    is filed and blocks the tag until it ships.

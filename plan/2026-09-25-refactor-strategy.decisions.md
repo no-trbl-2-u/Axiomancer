@@ -592,6 +592,41 @@ R9 → R10. Rebuild order when T is ready: pick the card plan → B1 → B5 → 
 agents discussing card work recommend T open
 `plan/2026-09-27-keyword-card-revamp.summary.html`.
 
+**D65 — The rock/paper/scissors stance layer is removed; card colour, dice
+colour, the Color Law and colour match stay.** (T, 2026-09-29: "I want the
+rock/paper/scissors aspect of the game gone"; "100% keep dice color and
+they are used to power the same color card. This is like the main fun
+mechanic"; "I only want the RPS gone"; the stance keywords "should either
+be removed or slotted for removal".) Spec 33 retired only the hidden read;
+the open stance check (player stance from the last paid card, punish ×1.5 /
+yield ×0.5), enemy phase stances and every stance-keyed mechanic, status and
+keyword survived. New Phase **R7d** (after R7c, before B4 and R8) deletes
+them. The momentum chain's fate is asked at the R7d brief. Colour is a
+payment constraint, not a faction: no deck may assume one colour, because
+the tray's colours are rolled, not built. *Rejected:* removing the Color Law
+with the stance; removing the stance check only and leaving enemy stance
+mechanics dormant.
+
+**D66 — `plan/archive/` leaves the tree.** (T, ballot, 2026-09-29.) The
+archive teaches the pre-revamp game and nothing stops an agent reading it.
+R10b tags the pre-removal commit `archive-pre-revamp`, deletes
+`plan/archive/` from main and fixes every live pointer; history is read
+through the tag only when T asks. *Rejected:* keeping it behind a read-ban
+rule; keeping it as is.
+
+**D67 — Two reset phases own doctrine and truth, and gate RC.** (T,
+ballot, 2026-09-29: "I thought we already did a cleanup of code comments
+and doc inconsistencies … we'll need a follow-up phase".) The 2026-09-23
+pass (#363, #364) skipped mobile comments and bannered six docs instead of
+rewriting them, and no revamp phase rewrote doctrine. **R10b** rewrites
+spec.md and bearings, adds `docs/game-model.md`, retires specs 33/34, sweeps
+the plan queues, removes the archive (D66) and extends `check-lexicon`.
+**R10c** (two ticks) rewrites the bannered docs, strips history from code
+comments, puts every rule of play in a live doc, and adds a comment guard.
+Both run after R10 and are required by RC. Part plan:
+`plan/revamp/doctrine.md`. *Rejected:* running R10b now; folding the work
+into each R-phase.
+
 ## Open follow-ups
 
 **D1 status at a glance (2026-09-28, after #408).** Card and keyword

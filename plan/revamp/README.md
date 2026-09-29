@@ -62,11 +62,12 @@ parked unreachable with a plan file saying how it comes back.
 | [relics.md](relics.md) | GUARD 5 placeholders, The Open Hand befriend, the relic pass | R4, B1 |
 | [items.md](items.md) | Consumables → healing potions, shops, caches | R5 |
 | [hazards.md](hazards.md) | Minimal hazard set; T's mechanics redesign | R6, B3 |
-| [engine.md](engine.md) | The 47 dead mechanic kinds, card types, reward logic, alt-wins | R7 |
+| [engine.md](engine.md) | The 47 dead mechanic kinds, card types, reward logic, alt-wins, the stance layer | R7, R7d |
 | [mobile.md](mobile.md) | App cleanup, card art mapping, app name, theme colours; Deck tab, art and dev-menu revamps | R8, R10, B7, B8, B10 |
 | [progression.md](progression.md) | XP / level retune | R9 |
 | [cards.md](cards.md) | Card-rules inventory, card-creator workflow, card sessions | B4, B5, B6 |
 | [checkpoint.md](checkpoint.md) | Save checkpoint in fights; the Act 1 checkpoint release | R9a, RC |
+| [doctrine.md](doctrine.md) | Doctrine rewrite, archive removal, comments and docs truth pass | R10b, R10c |
 
 Tick-by-tick walkthrough of the whole plan: [walkthrough.md](walkthrough.md).
 
@@ -89,11 +90,14 @@ starts it.
 | R7a | Engine purge 1/3: mechanic kinds, handlers, dead fields, state, fixtures | loop | R2b, R4, R6 | engine.md |
 | R7b | Engine purge 2/3: pricing, synergy, themes, draft, reward steering, card types → Attack/Skill/Spell | loop | R7a | engine.md |
 | R7c | Engine purge 3/3: alt-win systems, carrier-less effects, dead branches, closing carrier sweep | loop | R7b | engine.md |
-| R8 | Mobile cleanup: dead flows and glosses, grey card art, app label, VITAE/shillings copy | loop | R7c | mobile.md |
+| R7d | Stance removal: the rock/paper/scissors layer goes; card and dice colour, the Color Law and colour match stay (D65) | loop | R7c | engine.md |
+| R8 | Mobile cleanup: dead flows and glosses, grey card art, app label, VITAE/shillings copy | loop | R7d | mobile.md |
 | R9 | Progression retune: XP curve for Act 1 on the 3 survivors | loop | R3, R7c | progression.md |
 | R9a | Save checkpoint in fights: a reload mid-encounter re-offers the fight | loop | R7c, R8 | checkpoint.md |
 | R10 | Theme colours: move surviving hard-coded hex colours into named `theme/axm.ts` tokens (no visual change) | loop | R8 | mobile.md |
-| RC | Act 1 checkpoint release: full gate, a playtester walk of all four regions, then T tags `v0.1.0-checkpoint` | attended | R1–R10, R7a–c, R9a, B4 | checkpoint.md |
+| R10b | Doctrine rewrite: spec.md, bearings, a one-page game model; specs 33/34 retired; plan queues swept; `plan/archive/` tagged and removed from the tree (D66, D67) | loop | R10 | doctrine.md |
+| R10c | Comments and docs truth pass (mechanics, then mobile): bannered docs rewritten, history stripped from comments, every rule of play in a live doc, a comment guard (D67) | loop | R10b | doctrine.md |
+| RC | Act 1 checkpoint release: full gate, a playtester walk of all four regions, then T tags `v0.1.0-checkpoint` | attended | R1–R10c, R7a–d, R9a, B4 | checkpoint.md |
 | R11 | Loop content phases: revisit the loop so content creation comes back as planned phases; ends revamp mode | attended | RC | loop.md |
 | R12 | New combat-playtest: write a fresh `/combat-playtest` command for the rebuilt game (the old one was archived in R0) | attended | RC, R11 | loop.md |
 | B1 | The relic pass: new relics and real signatures | owner | R4, RC | relics.md |
@@ -158,11 +162,14 @@ T walked the agent defaults one at a time the same day. None remain open.
 | 6 | **R5** Items reset | Only Act 1's shops and caches remain to re-point |
 | 7 | **R6** Hazard reset | Independent; placed here so R7's carrier sweep sees the final hazard glossary |
 | 8 | **R7a–R7c** Engine purge, in three ticks | Last big deletion — needs R2, R4, R6 to have removed their carriers; split along engine.md's own three-way split so each tick is bounded |
+| 8a | **R7d** Stance removal | The RPS layer is engine + mobile wiring left over from spec 33; it goes before B4 so the inventory never records it (D65) |
 | 9 | **B4** Card-rules inventory (loop) | Straight after R7 so the inventory records the final tree and card work can start in parallel with the rest |
 | 10 | **R8** Mobile cleanup | Consumes R7's final exports |
 | 11 | **R9** Progression retune | Needs Act 1 and the engine final; its XP numbers feed B2 |
 | 11a | **R9a** Save checkpoint in fights | A reload must not skip a Doorwarden before the checkpoint is cut |
 | 12 | **R10** Theme colours | Last: R8 has already deleted about half the literals |
+| 12b | **R10b** Doctrine rewrite | After every deletion, so spec.md, bearings and the game model are written once against the final tree; removes `plan/archive/` so the old game cannot be grepped back in (D66, D67) |
+| 12c | **R10c** Comments and docs truth pass | Last: comments and docs describe the code that survived; the 2026-09-23 pass left mobile comments and six bannered docs undone (D67) |
 | 12a | **RC** Act 1 checkpoint release (attended) | The reset point: mechanics in place, the map working, everything cleaned up. T tags it; nothing below starts before it |
 | 13 | **R11** Loop content phases (attended) | Closes the revamp: decides how the loop creates content again, as phases, now that the core is rebuilt; ends revamp mode (D58) |
 | 14 | **R12** New combat-playtest (attended) | Written once the survivors, Act 1 and the XP curve are final (R9) and the loop's content rules are set (R11), so it measures the game that exists |

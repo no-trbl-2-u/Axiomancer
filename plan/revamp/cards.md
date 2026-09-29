@@ -64,6 +64,30 @@ clan pairs, Dawncaster's talent/card gating, Balatro's shop steering,
 Inscryption's totem/sigil drafting. Output: options with trade-offs, not a
 decision.
 
+## Deck model — T's answers so far (2026-09-29, in progress)
+
+Answered by T through `AskUserQuestion` while working out what a "deck"
+is before choosing a card process plan. These are the owner's answers, not
+a pick among Plans A/B/C, and they create no cards.
+
+| Question | T's answer |
+|---|---|
+| How a player comes to own a deck identity | Grey start, then commit to a **lane** during the run |
+| When the first lane opens | **At run start** |
+| What one deck pitch produces | A **10–12 card lane** that sits on top of the grey cards and mixes with other lanes |
+| Keyword ownership | Each lane owns **1–2 signature keywords**; all other keywords are shared |
+| Mixing lanes | **Pairs are the goal** (two lanes per run) |
+| First shippable pool | **3 lanes** (~36 cards + grey) |
+| Lanes and colour | **Colour-free.** A lane is a play style and spans colours. A mono-colour deck cannot work: the tray's dice colours are rolled and the Color Law lets a die power only its own colour of card (D65) |
+
+**Still open (T to circle back):** what opens a lane. T's idea: stat
+thresholds open lanes (the reward pool grows as stats rise, e.g. 5/5/5 →
+5/5/8 adds a set), cards may belong to several lanes, and the post-fight
+reward is random / random / lane-focused, the focused slot drawn from any
+lane the player has opened. The problem T named: how to let a player build
+a focused deck without depending on pure randomness, and without locking
+them out of a pool because of a stat choice.
+
 ## B4 — Card-rules inventory (loop; creates nothing)
 
 Runs after R7 so it records the post-purge tree. Produces

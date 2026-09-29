@@ -105,7 +105,7 @@ event-pool and layout files).
 > **THE REVAMP (D46–D64) — RATIFIED 2026-09-28.** Plan: `plan/revamp/README.md`
 > (§7 = the recommended order, which these rows follow) + one part plan per
 > row. R0 is **attended** (it edits `.claude/**`); `/march` and `night` stay
-> disabled until it merges. R1–R10, R9a and B4 are loop-shippable in the
+> disabled until it merges. R1–R10c, R9a and B4 are loop-shippable in the
 > order below, one phase per tick, pushed to main. **RC is the Act 1
 > checkpoint release (attended):** the loop stops there, T cuts the tag, and
 > nothing past it (content, cards, people, story, AI skills, anything beyond
@@ -128,12 +128,15 @@ event-pool and layout files).
 - [ ] Phase R7a — Engine purge 1/3: the 47 carrier-less mechanic kinds, their handlers, dead card fields, encounter-state fields and the retired-verb test fixtures. `plan/revamp/engine.md` (split (a)). Requires R2b, R4, R6.
 - [ ] Phase R7b — Engine purge 2/3: pricing, synergy, themes, deck draft and presets, reward steering, card types → Attack/Skill/Spell. `plan/revamp/engine.md` (split (b)). Requires R7a.
 - [ ] Phase R7c — Engine purge 3/3: alt-win systems (keep befriend → mercy), effects with no carrier, dead `executeCard` branches, test-only modules, then the closing carrier sweep. `plan/revamp/engine.md` (split (c)). Requires R7b.
-- [ ] Phase B4 — Card-rules inventory (loop; creates nothing; gates all card work). `plan/revamp/cards.md`. Requires R7c.
-- [ ] Phase R8 — Mobile cleanup: dead flows and glosses, grey card art, app label, VITAE/shillings copy. `plan/revamp/mobile.md`. Requires R7c.
+- [ ] Phase R7d — Stance removal: the rock/paper/scissors layer goes (player stance, the phase-end punish/yield check, enemy phase stances, and every mechanic, status, keyword and UI piece that reads them). Card colour, dice colour, the Color Law and the colour-match bonus STAY (D65). The momentum chain's fate is decided in the brief. `plan/revamp/engine.md` (R7d). Requires R7c.
+- [ ] Phase B4 — Card-rules inventory (loop; creates nothing; gates all card work). `plan/revamp/cards.md`. Requires R7d.
+- [ ] Phase R8 — Mobile cleanup: dead flows and glosses, grey card art, app label, VITAE/shillings copy. `plan/revamp/mobile.md`. Requires R7d.
 - [ ] Phase R9 — Progression retune: XP curve for Act 1 on the three survivors. `plan/revamp/progression.md`. Requires R3c, R7c.
 - [ ] Phase R9a — Save checkpoint in fights: one owner for save policy; a reload mid-encounter resumes that encounter instead of landing past it (promoted from PHASE_CANDIDATES via /oversight 2026-09-28). `plan/revamp/checkpoint.md`. Requires R7c, R8.
 - [ ] Phase R10 — Theme colours: move surviving hard-coded hex colours into named `theme/axm.ts` tokens, no visual change. `plan/revamp/mobile.md`. Requires R8.
-- [ ] Phase RC — Act 1 checkpoint release (attended): the full gate green, a playtester run from a new game through all four regions' Doorwarden fights, befriend via The Open Hand, save/reload mid-fight; then T tags `v0.1.0-checkpoint`, publishes the GitHub release and builds the EAS preview APK. The reset point before any content work. `plan/revamp/checkpoint.md`. Requires R1, R2a, R2b, R3a, R3b, R3c, R4, R5, R6, R7c, B4, R8, R9, R9a, R10.
+- [ ] Phase R10b — Doctrine rewrite: `spec.md`, `plan/bearings.md` and a new one-page `docs/game-model.md` describe only the post-revamp game; specs 33 and 34 retired; the live plan queues swept of preset / colour-law / stance rows; `plan/archive/` tagged `archive-pre-revamp` and removed from the tree, every pointer to it fixed; `check-lexicon` fails retired terms in live docs (D66, D67). `plan/revamp/doctrine.md`. Requires R10.
+- [ ] Phase R10c — Comments and docs truth pass, two ticks (mechanics, then mobile): the Superseded-bannered docs rewritten or deleted; history narration stripped from code comments (git is the history); every rule of play stated in a live doc; a guard for retired terms in comments (D67). `plan/revamp/doctrine.md`. Requires R10b.
+- [ ] Phase RC — Act 1 checkpoint release (attended): the full gate green, a playtester run from a new game through all four regions' Doorwarden fights, befriend via The Open Hand, save/reload mid-fight; then T tags `v0.1.0-checkpoint`, publishes the GitHub release and builds the EAS preview APK. The reset point before any content work. `plan/revamp/checkpoint.md`. Requires R1, R2a, R2b, R3a, R3b, R3c, R4, R5, R6, R7c, R7d, B4, R8, R9, R9a, R10, R10b, R10c.
 - [blocked: owner-led — T's session 2026-09-28] Phase B1 — The relic pass. `plan/revamp/relics.md`. Requires R4, RC.
 - [blocked: owner-led — T's session 2026-09-28] Phase B5 — Card-creator workflow. `plan/revamp/cards.md`. Requires B4, RC.
 - [blocked: owner-led — T's session 2026-09-28] Phase B6 — Card sessions. `plan/revamp/cards.md`. Requires B4, B5, RC.

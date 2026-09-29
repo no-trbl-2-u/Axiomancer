@@ -59,3 +59,51 @@ effects. Keep main green between them.
 **Carrier sweep (D45)** closes the phase: after R2/R4/R5/R6/R7 the atlas
 should hold DEAL, GUARD, VULNERABLE, the befriend word, and dice/blacksmith
 words with a live source (PIP, BOON, HONE, TEMPER — re-verify each).
+
+## R7d — Stance removal (loop)
+
+T, 2026-09-29 (D65): "I only want the RPS gone, card-colour/dice-colour
+stay." Spec 33 retired the hidden stance *read* (the player guessing the
+enemy's stance), but left an open stance layer in its place. R7d deletes
+that layer across the engine and mobile in one phase, so main stays green.
+
+**Goes** (the RPS layer, and everything keyed to it):
+
+| Block | Where (2026-09-29 map, re-verify after R7a–c) |
+|---|---|
+| Player stance | `applyStanceAndMomentumV2` sets `playerStance = card.stance` after every paid play (`Combat/combat.engine.ts:653-713`); `isChainStance` (`Combat/combat.upgradeable-dice.ts:353`); the `stance-shifted` event |
+| The phase-end check | `resolveStanceCheck` (`combat.upgradeable-dice.ts:340-350`), called from `resolveThreatPhase` (`combat.engine.ts:3106-3117`); ×1.5 punish / ×0.5 yield at :3254-3256; the yield's +1◆ (:3437-3444) and Coveted Die `'yield'` claim (:3455-3459); `READ_DAMAGE_MULT` (:102) |
+| Threat-phase stances | `stanceCheck` (`Combat/combat.threat.ts:81`, `combat.encounter.types.ts:298, 365`, events :627, :642); `defaultStanceCheck` and its backfill (`combat.threat.ts:434-502`); generated-enemy stance rotation (:231-249); `DECK_STANCE_CHECKS` (`combat.enemy-decks.ts:139`, empty) |
+| Enemy stances | `stance` / `stanceHint` on every enemy card (`combat.enemy-cards.ts:40-210`) → `enemyStance` per phase (`combat.enemy-decks.ts:114, 175`) |
+| Stance-keyed mechanics, statuses and keywords | `currentPhaseStance` and charm `forcedStance` (`combat.engine.ts:280-289`); `canAct` blocked stances (`effect-modifiers.ts:190-312`); `lock_stance` and its STAGGER keyword mapping (`card-keywords.ts:37`); ROOT `lockedStance`, CONFUSION `blursStanceHints` (`Effects/types.ts:87-88, 138, 208, 216`; `effects.ts:431-433, 675-690`); `revealedStances` / `isPhaseStanceRevealed` / `revealedCurrentStance`; omen claims (`combat.engine.ts:2063-2088, 3655-3700`); `getStanceVulnMult` (`effects.ts:415`); `revealStance` in text and stat scaling. Anything R7a–c already deleted is skipped; anything left is removed here, never parked (T: "removed or slotted for removal") |
+| Types | the RPS doc comment on `Stance` (`Combat/types.ts:5-8`), `Advantage` (:23-27), `choosing_stance` (:61), and their re-exports — or the types themselves if nothing but colour needs them (see "Stays") |
+| Mobile | `stanceCheckVM` and the `stance-check-resolved` log line (`state/presenters/combat-encounter.engine.ts:837-879, 1206-1214`); `playerStanceVM` (:2851-2863); the enemy "stance ?" readout (:1294-1327, `CombatCombatantPane.tsx:785-789`, `CombatEncounterPanel.tsx:801, 846`); punish/yield lines in `IntentIcon.tsx`; `StanceChip` (`CombatBoard.tsx:739-760, 1412`); the dead "▲ won read" legend (:2505) and lock/foretell/omen copy (:1931-1965); guard/barrier ▲/▼ previews on `READ_DAMAGE_MULT` (:2330, :2342); "CHOOSE A STANCE" canon copy (`spec.md:18, 153`, `axiomancer-mobile/AGENTS.md:17`) |
+| Tests | the ~9 stance-check suites and the ~20 enemy-stance / reveal / lock / omen / charm suites are deleted with their subjects or rewritten to the survivors |
+
+**Stays** (T, D65: "100% keep dice color … this is like the main fun
+mechanic"):
+
+- card colour (`card.color`, heart/body/mind, grey `any`) and dice colour;
+- **the Color Law** — a die powers only a card of its own colour, wild
+  powers any, grey accepts any (`dieSatisfiesColorLaw`, `combat.engine.ts:269`,
+  :1589-1595, `firstLegalPoweringDie`) and its mobile mirror;
+- **the colour-match bonus** (`colorMatch` / `colorMatchBonus`, :110-124);
+- the stat glyphs and stat-family display (`StanceGlyph.tsx`,
+  `presenters/stances.ts`). Where a surviving identifier says "stance" but
+  means colour (`cardStanceColor`, `card.stance`, `STANCE_COLORS`,
+  `StanceGlyph`), the brief decides whether to rename it to colour in this
+  phase; the word "stance" must not survive in player-facing copy.
+
+**Decided in the brief (T):** the momentum chain (`advanceMomentumV2`) runs
+off the same `card.stance` update. The brief reports what momentum feeds
+(Conviction, the Coveted Die, anything else) and asks T whether it goes
+with the stance or is kept on card colour.
+
+**Save migration:** if `playerStance`, `stanceCheck` or any removed field is
+persisted in a save, drop it with a migration hop and a test.
+
+**Relic note:** Read the Entrails' signature ("reveal next stance check")
+is replaced by the GUARD 5 placeholder in R4 before R7d runs.
+
+**Carrier sweep (D45)** closes R7d: STAGGER, ROOT, CONFUSION, charm and any
+stance word with no carrier leave the atlas, glossary and glyph registries.
