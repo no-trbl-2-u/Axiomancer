@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-09-29 at commit 2d918845
-> Pass count: 60
+> Last pass: 2026-09-29 at commit 0be3bb1c
+> Pass count: 61
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -195,9 +195,60 @@
 > the desktop "VUL"/"+6"/"%" wrap on the hand faces (the `plan/AUDIT.md`
 > post-purge row).
 
+> **[critique pass 61, 2026-09-29, commit 0be3bb1c] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route still bounces to the title with no save). 12
+> commits after pass 60: R3b (fishing-village purged), R3c (Act 1 hygiene,
+> shillings) and R4 (ten GUARD 5 signature placeholders, The Open Hand
+> befriend). The rest and late-game-hub fixtures now stand on the
+> Breakwater, and both render cleanly at both viewports. Filed MED: the
+> Breakwater's two inn rests (`bw-9`, `bw-13`) are described as paid
+> lodging, but the rest screen offers REST as "Sleep where you stand.
+> Free." Updated, not re-filed: pass 60's fixture row is half addressed
+> (dialogue, village, cutscene and hazard still boot onto parked maps);
+> pass 58's A Plain Word row still reads "+24" beside "+60%". Checked and
+> not filed: the village shop now sells three relics under three different
+> "GRANTS ..." names that all "RAISE GUARD 5 FOR 4 CONVICTION." at 35s to
+> 45s. That is D47's deliberate placeholder ("keep the names, flat cost",
+> `plan/revamp/relics.md` R4), and B1 (owner-led) replaces it. Every
+> relic-selling market sits on a parked map, which the `plan/AUDIT.md` row
+> "Act 1 has no shop" already tracks. The pass 55 fishing-village
+> "breakwater" row is now moot, since R3b deleted the map; `/iterate` can
+> close it. Reconfirmed and not re-filed: the doubled opening tell (pass
+> 54, Pending).
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
+
+### [MED] rest — the Breakwater's inns are described as paid rooms, but REST reads "Sleep where you stand. Free."
+- pass: 61 (commit 0be3bb1c)
+- viewport: both (375x812 and 1280x800)
+- category: voice
+- observation: `bw-9` is the first rest node a new run reaches. Its line
+  reads "The customs house lets rooms by the night. The clerk takes
+  shillings, not names." Directly under it, the REST offer reads "SLEEP
+  WHERE YOU STAND. FREE. RESTORES 44 VITAE." `bw-13` has the same
+  contradiction ("An inn above the harbour. Warm, loud, and paid for in
+  advance."). The node promises a bed you pay for, and the button offers
+  bare ground at no cost. The player can't tell whether the inn charged
+  them, or whether there is a better paid option they missed. Both nodes
+  are built by `innRestPool` (`shelter: 'inn'`). The rest-choice copy
+  doesn't read `shelter`, so it words every rest as a camp. That matches
+  the heal (T, 2026-08-15: no shelter distinction in the heal) but not
+  the prose.
+- evidence: `.critique-artifacts/mobile/09-rest.txt` and
+  `desktop/09-rest.png` (fixture `apprentice-bw-rest`);
+  `axiomancer-mechanics/src/World/MapEvents/content.ts:698-701`;
+  `axiomancer-mobile/state/presenters/rest.copy.ts:20`.
+- suggested fix: make the REST description shelter-aware in
+  `rest.copy.ts` (keep "Sleep where you stand. Free." for camps; give inns
+  a line like "A bed for the night, on the house.") and pass `shelter`
+  through the rest-choice presenter. Or reword the two inn lines so they
+  don't name a price. Either way it is a copy change with no new content,
+  so pin it with a presenter test on an inn node.
+- source: critique:drive (unattended)
 
 ### [MED] tooling / critique — after R3a, every state fixture boots off Act 1, so critique's gated screens show places no player can reach
 - pass: 60 (commit 2d918845)
@@ -226,6 +277,15 @@
   in R3b alongside the fishing-village purge, or as a named R3b/R3c scope
   line, with `critique-drive.mjs` and `smoke-screens.mjs` following the
   new ids. Uses existing nodes only, so no content is created.
+- update (pass 61, commit 0be3bb1c): half addressed. `apprentice-bw-rest`
+  and `sage-bw-door-gate` now stand on the Breakwater, and the `fv-` ids are
+  gone. Four fixture screens still boot onto parked maps: dialogue
+  (`apprentice-nf-interaction`, nf-3), village (`wanderer-nf-village`,
+  nf-8), cutscene (`wanderer-nf-cutscene`, nf-17) and hazard
+  (`l30-caverns-hazard-arrive`, nc-17). Hazard can move now (the Breakwater
+  has `bw-3` and `bw-12`), and so can the cutscene, using a sealed door.
+  Dialogue and village have no Act 1 node of their kind yet (the registry
+  comment says so, and so does the `plan/AUDIT.md` row "Act 1 has no shop").
 - source: critique:drive (unattended)
 
 ### [MED] combat — A Plain Word shows its FREE VULNERABLE as "×24" beside its paid "+60%"
@@ -252,6 +312,8 @@
   +24 / VULNERABLE / +60%". Remaining fix: keep a trailing "%" in
   `compactFree` and pin it with a test on "+24%".
 - update (pass 60, commit 2d918845): unchanged. Both viewports still read
+  "A PLAIN WORD / +24 / VULNERABLE / +60%".
+- update (pass 61, commit 0be3bb1c): unchanged. Both viewports still read
   "A PLAIN WORD / +24 / VULNERABLE / +60%".
 - source: critique:drive (unattended)
 
