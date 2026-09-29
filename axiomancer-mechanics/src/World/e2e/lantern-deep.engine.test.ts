@@ -3,13 +3,13 @@
  *
  * Pins what the map revamp decided for the last Act 1 map:
  * - on `northern-continent` (D28): the Beacon Crags' glacier shrine goes down
- *   into it, and this map's deep stair leads on into fishing-village (D27),
- *   where the shipped chain resumes;
+ *   into it, and this map's deep stair is sealed (THE REVAMP R3a, D61): there
+ *   is no end-of-run state;
  * - the map borrows the shipped builders, the caverns' roster and its iron
  *   (D29), with one authored event on every node;
  * - the caverns' roster is level 13 and up, so every fight here is pinned low;
- * - the vault door (`ld-15`) is the Labyrinth's (D24, M4): open on arrival,
- *   never consumed, and it names the act the durable progress is on.
+ * - the vault door (`ld-15`) was the Labyrinth's (D24, M4); the Labyrinth is
+ *   parked (D54), so the door is sealed and never opens in play.
  *
  * The generic gauntlet invariants (no strands, column law, ribs, distinct
  * coordinates) run over this map in `map-traversal.engine.test.ts` like every
@@ -20,7 +20,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-    getMapDefinition, createMapState, resolveMapEvent, getNodeEventPool, createLabyrinthProgress,
+    getMapDefinition, createMapState, resolveMapEvent, getNodeEventPool,
 } from '../index';
 import { auditMapTraversal } from '../world.reducer';
 import { createNewGameState } from '../../Game/game.reducer';
@@ -60,8 +60,8 @@ describe('the Lantern Deep map', () => {
         expect(audit.terminalNodes).toEqual(['ld-18']);
     });
 
-    it('borrows the caverns\' enemy pool whole (D29)', () => {
-        expect(EnemiesByMap['lantern-deep']).toBe(EnemiesByMap['caverns']);
+    it('draws the Act 1 pool (D61)', () => {
+        expect(EnemiesByMap['lantern-deep']).toBe(EnemiesByMap['breakwater']);
     });
 });
 
@@ -79,11 +79,11 @@ describe('the Lantern Deep\'s events (D29)', () => {
         expect(Object.keys(kinds)).toHaveLength(18);
     });
 
-    it('spreads 7 encounters, 3 rests, a loot cache, 2 gatherings, 2 hazards, an arrival, the Labyrinth door and a stair', () => {
+    it('spreads 7 encounters, 3 rests, a loot cache, 2 gatherings, 2 hazards, an arrival and two sealed doors', () => {
         const tally: Record<string, number> = {};
         for (const k of Object.values(kinds)) tally[k] = (tally[k] ?? 0) + 1;
         expect(tally).toEqual({
-            encounter: 7, rest: 3, 'loot-cache': 1, gathering: 2, hazard: 2, cutscene: 1, labyrinth: 1, travel: 1,
+            encounter: 7, rest: 3, 'loot-cache': 1, gathering: 2, hazard: 2, cutscene: 3,
         });
     });
 
@@ -113,38 +113,55 @@ describe('the Lantern Deep\'s events (D29)', () => {
         expect(items).toEqual(['iron-ore', 'iron-ore']);
     });
 
-    it('opens the Labyrinth at the vault door on arrival, with no gate (D24)', () => {
-        const before = standingOn('ld-15');
-        const r = resolveMapEvent(before);
-        expect(r.event).toMatchObject({ kind: 'labyrinth', act: 'act1' });
-        // The engine only names the act; the host swaps the world.
+    it('seals the vault door: the Labyrinth never opens in play (THE REVAMP R3a, D54)', () => {
+        const r = resolveMapEvent(standingOn('ld-15'));
+        expect(r.event).toEqual({ kind: 'cutscene', lines: ['The round door is sealed.'] });
         expect(r.state.world.currentMap.name).toBe('lantern-deep');
         expect(r.state.world.currentMap.currentNode).toBe('ld-15');
     });
 
-    it('keeps the vault door a door: never consumed, and the way on opens', () => {
+    it('keeps the way on open past the sealed vault door', () => {
         const r = resolveMapEvent(standingOn('ld-15'));
-        expect(r.state.world.currentMap.consumedNodes).not.toContain('ld-15');
         for (const next of ['ld-16', 'ld-17']) {
             expect(r.state.world.currentMap.availableNodes).toContain(next);
         }
-        expect(resolveMapEvent(r.state).event.kind).toBe('labyrinth');
     });
 
-    it('opens the act the player left, not act I, on a return', () => {
-        const base = standingOn('ld-15');
-        const r = resolveMapEvent({
-            ...base,
-            labyrinth: { ...createLabyrinthProgress(), currentAct: 'act2' },
-        });
-        expect(r.event).toMatchObject({ kind: 'labyrinth', act: 'act2' });
-    });
-
-    it('leaves down the deep stair into fishing-village, where the shipped chain resumes (D27)', () => {
+    it('seals the deep stair: it leads nowhere and the map stays put (D61)', () => {
         const r = resolveMapEvent(standingOn('ld-18'));
-        expect(r.event.kind).toBe('travel');
-        expect(r.state.world.currentContinent.name).toBe('coastal-continent');
-        expect(r.state.world.currentMap.name).toBe('fishing-village');
-        expect(r.state.world.currentMap.currentNode).toBe('fv-1');
+        expect(r.event).toEqual({ kind: 'cutscene', lines: ['The deep stair is sealed.'] });
+        expect(r.state.world.currentContinent.name).toBe('northern-continent');
+        expect(r.state.world.currentMap.name).toBe('lantern-deep');
+        expect(r.state.world.currentMap.currentNode).toBe('ld-18');
+    });
+});
+
+describe('Act 1 is the whole world (THE REVAMP R3a, D53)', () => {
+    const ACT1 = [
+        ['coastal-continent', 'breakwater'],
+        ['coastal-continent', 'charcoal-wood'],
+        ['northern-continent', 'beacon-crags'],
+        ['northern-continent', 'lantern-deep'],
+    ] as const;
+
+    it('no Act 1 door leads off Act 1, and none opens the Labyrinth', () => {
+        const act1Names: readonly string[] = ACT1.map(([, m]) => m);
+        for (const [continent, map] of ACT1) {
+            for (const node of getMapDefinition(continent, map).nodes) {
+                const pool = getNodeEventPool(continent, map, node.id);
+                for (const entry of pool?.entries ?? []) {
+                    expect(entry.kind, `${node.id}`).not.toBe('labyrinth');
+                    if (entry.payload.kind === 'travel') {
+                        expect(act1Names, `${node.id}`).toContain(entry.payload.destinationMap);
+                    }
+                }
+            }
+        }
+    });
+
+    it('parks the northern maps: their pools are empty', () => {
+        for (const map of ['northern-forest', 'caverns', 'northern-city', 'connecting-river', 'town-across-river', 'the-capital'] as const) {
+            expect(EnemiesByMap[map], map).toEqual([]);
+        }
     });
 });

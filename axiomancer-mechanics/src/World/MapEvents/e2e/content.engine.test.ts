@@ -312,7 +312,7 @@ describe('Phase 37 shop content', () => {
 });
 
 describe('caverns content (2026-08-28 — inter-map travel)', () => {
-    it('each authored node resolves to its declared MapEventKind', () => {
+    it.skip('each authored node resolves to its declared MapEventKind — parked (D53)', () => {
         mockSequentialRng(0.5);
         const expected: Array<[string, string]> = [
             ['nc-1',  'cutscene'],    // the arrival — the dark takes you in
@@ -366,7 +366,7 @@ describe('caverns content (2026-08-28 — inter-map travel)', () => {
         }
     });
 
-    it('a wandering encounter draws from the caverns pool via the nc- prefix', () => {
+    it.skip('a wandering encounter draws from the caverns pool via the nc- prefix — parked (D53)', () => {
         mockSequentialRng(0.5);
         const result = resolveMapEvent({
             ...freshWorldAt('caverns'),
@@ -385,7 +385,7 @@ describe('caverns content (2026-08-28 — inter-map travel)', () => {
 });
 
 describe('northern-city content (Phase W3)', () => {
-    it('each authored node resolves to its declared MapEventKind — the urban spread', () => {
+    it.skip('each authored node resolves to its declared MapEventKind — the urban spread — parked (D53)', () => {
         mockSequentialRng(0.5);
         const expected: Array<[string, string]> = [
             ['ncy-1',  'cutscene'],    // the arrival — up into lamplight
@@ -456,7 +456,7 @@ describe('northern-city content (Phase W3)', () => {
         }
     });
 
-    it('a wandering encounter draws from the northern-city pool via the ncy- prefix', () => {
+    it.skip('a wandering encounter draws from the northern-city pool via the ncy- prefix — parked (D53)', () => {
         mockSequentialRng(0.5);
         const result = resolveMapEvent({
             ...freshWorldAt('northern-city'),
@@ -496,7 +496,7 @@ describe('northern-city content (Phase W3)', () => {
 });
 
 describe('connecting-river content (Phase W4)', () => {
-    it('each authored node resolves to its declared MapEventKind', () => {
+    it.skip('each authored node resolves to its declared MapEventKind — parked (D53)', () => {
         mockSequentialRng(0.5);
         const expected: Array<[string, string]> = [
             ['cr-1',  'cutscene'],     // the current takes the boat
@@ -537,7 +537,7 @@ describe('connecting-river content (Phase W4)', () => {
         }
     });
 
-    it('a wandering encounter draws from the connecting-river pool via the cr- prefix', () => {
+    it.skip('a wandering encounter draws from the connecting-river pool via the cr- prefix — parked (D53)', () => {
         mockSequentialRng(0.5);
         const result = resolveMapEvent({
             ...freshWorldAt('connecting-river'),
@@ -579,7 +579,7 @@ describe('connecting-river content (Phase W4)', () => {
 });
 
 describe('town-across-river content (Phase W4)', () => {
-    it('each authored node resolves to its declared MapEventKind', () => {
+    it.skip('each authored node resolves to its declared MapEventKind — parked (D53)', () => {
         mockSequentialRng(0.5);
         const expected: Array<[string, string]> = [
             ['tar-1', 'cutscene'],    // arrival on the far bank
@@ -679,10 +679,12 @@ describe('the capital — cap-5, The Ribbon-Picker (adjust-npcs pass 5)', () => 
 });
 
 describe('every MapEventKind is covered by the authored content', () => {
-    it('each kind appears at least once across the six maps', () => {
+    it('each kind appears at least once across the maps that still fight', () => {
         mockSequentialRng(0.5);
         const kinds = new Set<string>();
-        for (const map of ['fishing-village', 'northern-forest', 'caverns', 'northern-city', 'connecting-river', 'town-across-river'] as const) {
+        // THE REVAMP R3a: the northern continent is parked (D53), its pools
+        // empty, so its wandering fights no longer resolve.
+        for (const map of ['fishing-village', 'northern-forest'] as const) {
             const def = getMapDefinition(CONTINENT_OF[map], map);
             for (const node of def.nodes) {
                 // Fresh state per node — a threaded walk would cross a
@@ -721,13 +723,7 @@ describe('Phase 52f — guaranteed per-act shilling income (the calibration inpu
     // future content edit that changes a loot-cache amount (or adds/removes
     // one) is forced to revisit the pricing constants instead of silently
     // drifting past them.
-    it.each([
-        ['fishing-village', 26],
-        ['northern-forest', 18],
-        ['caverns', 35],
-        // Phase W3 — city coin runs richer than cavern coin (16+12+14).
-        ['northern-city', 42],
-    ] as const)('%s grants exactly %d guaranteed shillings on a full walk', (map, expectedCurrency) => {
+    const walk = (map: AuthoredMap, expectedCurrency: number) => {
         mockSequentialRng(0.5);
         let state = freshWorldAt(map);
         const def = getMapDefinition(CONTINENT_OF[map], map);
@@ -739,5 +735,14 @@ describe('Phase 52f — guaranteed per-act shilling income (the calibration inpu
             state = visit(state, node.id).state;
         }
         expect(state.player.currency).toBe(expectedCurrency);
-    });
+    };
+    it.each([
+        ['fishing-village', 26],
+        ['northern-forest', 18],
+    ] as const)('%s grants exactly %d guaranteed shillings on a full walk', walk);
+    it.skip.each([
+        ['caverns', 35],
+        // Phase W3 — city coin runs richer than cavern coin (16+12+14).
+        ['northern-city', 42],
+    ] as const)('%s grants exactly %d guaranteed shillings on a full walk — parked (D53)', walk);
 });

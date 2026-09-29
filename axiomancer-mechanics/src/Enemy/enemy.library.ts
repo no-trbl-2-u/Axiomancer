@@ -21,6 +21,7 @@ import { createEnemy, enemyStatBudget } from './index';
 import { LootTableEntry } from './types';
 import { consumableLibrary, getConsumableById } from '../Items/consumable.library';
 import { Consumable } from '../Items/types';
+import { Enemy } from './types';
 
 // ─── Loot helpers ─────────────────────────────────────────────────────────────
 
@@ -232,23 +233,31 @@ export const EnemyLibrary = [FloatEye, BrineHag, TheDoorwarden] as const;
 const ACT1_POOL = [FloatEye];
 
 /**
- * Per-map enemy pools used by the encounter generator. The parked and
- * to-be-purged maps hold Float-Eye until R3 parks them (an empty pool makes
- * `generateEncounter` throw on a map that is still reachable).
+ * A parked map's pool (THE REVAMP R3a, D53): empty. No Act 1 door leads to
+ * a parked map, so nothing draws from it in play.
+ */
+const PARKED_POOL: readonly Enemy[] = [];
+
+/**
+ * Per-map enemy pools used by the encounter generator. Act 1 draws Float-Eye;
+ * the parked northern maps are empty. Fishing-village keeps Float-Eye until
+ * R3b purges it; the Labyrinth (parked, D54) keeps it so its parked tests run.
  */
 export const EnemiesByMap = {
     'breakwater': ACT1_POOL,
     'charcoal-wood': ACT1_POOL,
     'beacon-crags': ACT1_POOL,
     'lantern-deep': ACT1_POOL,
-    // Parked until R3.
+    // Purged in R3b.
     'fishing-village': ACT1_POOL,
-    'northern-forest': ACT1_POOL,
-    'caverns': ACT1_POOL,
-    'northern-city': ACT1_POOL,
-    'connecting-river': ACT1_POOL,
-    'town-across-river': ACT1_POOL,
-    'the-capital': ACT1_POOL,
+    // Parked (D53).
+    'northern-forest': PARKED_POOL,
+    'caverns': PARKED_POOL,
+    'northern-city': PARKED_POOL,
+    'connecting-river': PARKED_POOL,
+    'town-across-river': PARKED_POOL,
+    'the-capital': PARKED_POOL,
+    // Parked (D54); unreachable since the vault door is sealed.
     'aporia-colonnade': ACT1_POOL,
     'aporia-archive': ACT1_POOL,
     'aporia-proof': ACT1_POOL,

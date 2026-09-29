@@ -23,8 +23,9 @@
  * the alignment grid and GRACE, rename a card's `philosophicalAspect` to
  * `color`), and v26 → v27 (2026-09-29, THE REVAMP R2 / D48: a staged
  * encounter naming a retired foe re-points to Float-Eye, and survivors lose
- * their stripped keywords). The hops chain, so a v11 save lands at v27 in
- * one `migrate` call. Every other version mismatch still rejects.
+ * their stripped keywords), and v27 → v28 (2026-09-29, THE REVAMP R3a: a
+ * save standing off Act 1 moves onto the Lantern Deep). The hops chain, so a
+ * v11 save lands at v28 in one `migrate` call. Every other version mismatch still rejects.
  */
 
 import { GameState } from './types';
@@ -40,6 +41,10 @@ import { GAME_STATE_VERSION } from './game.reducer';
 import { COMBAT_LOADOUT_FLAG_PREFIX } from '../Combat/combat.loadout';
 import { FIRST_NODE_RELIC_FLAG } from '../Character/first-node-grant';
 import { FloatEye, LIVE_ENEMY_IDS } from '../Enemy/enemy.library';
+import type { MapState, WorldState } from '../World/types';
+import type { MapName } from '../World/map.library';
+import { createMapState, getMapDefinition } from '../World/map.registry';
+import { changeContinent, changeMap, placeOnNode, unlockMap } from '../World/world.reducer';
 
 /**
  * v11 → v12 (Phase 18): fold the player's 7-slot equipment record into the
@@ -583,6 +588,52 @@ function migrateV26ToV27(raw: Record<string, unknown>): Record<string, unknown> 
     return out;
 }
 
+/** The four Act 1 maps: the only world THE REVAMP keeps in play (D53). */
+const ACT1_MAPS: ReadonlySet<string> = new Set(['breakwater', 'charcoal-wood', 'beacon-crags', 'lantern-deep']);
+
+/**
+ * v27 → v28 (2026-09-29, THE REVAMP R3a, D53/D54/D61): the world is Act 1.
+ * A save standing off Act 1 moves to the Lantern Deep: onto the sealed vault
+ * door (`ld-15`) from inside the Labyrinth, onto the sealed deep stair
+ * (`ld-18`) from fishing-village or a parked map. The save's own Lantern Deep
+ * state is reused when it has one (from the Labyrinth's `returnWorld` first),
+ * and the player is PLACED, not arrived. A staged encounter from the old map
+ * is dropped. An Act 1 save passes through with only its version stamped.
+ */
+function migrateV27ToV28(raw: Record<string, unknown>): Record<string, unknown> {
+    const out: Record<string, unknown> = { ...raw, version: 28 };
+    const world = raw.world as WorldState | undefined;
+    const current = world?.currentMap;
+    if (!world || !current || typeof current.name !== 'string' || ACT1_MAPS.has(current.name)) return out;
+
+    const fromLabyrinth = current.continent === 'labyrinth-continent';
+    const labyrinth = raw.labyrinth as { returnWorld?: WorldState } | undefined;
+    const base = fromLabyrinth && labyrinth?.returnWorld?.currentMap ? labyrinth.returnWorld : world;
+    const target = fromLabyrinth ? 'ld-15' : 'ld-18';
+
+    let next: WorldState;
+    if (base.currentMap.name === 'lantern-deep') {
+        next = base;
+    } else {
+        const preserved: Partial<Record<MapName, MapState>> = { ...(base.mapStates ?? {}) };
+        if (base.currentMap.continent !== 'labyrinth-continent') {
+            preserved[base.currentMap.name] = base.currentMap;
+        }
+        const deep = preserved['lantern-deep']
+            ?? createMapState(getMapDefinition('northern-continent', 'lantern-deep'));
+        delete preserved['lantern-deep'];
+        next = unlockMap(changeContinent(base, 'northern-continent'), 'lantern-deep');
+        next = { ...changeMap(next, deep), mapStates: preserved };
+    }
+    out.world = placeOnNode(next, target);
+    delete out.currentEncounter;
+    if (labyrinth && typeof labyrinth === 'object' && 'returnWorld' in labyrinth) {
+        const { returnWorld: _r, ...kept } = labyrinth;
+        out.labyrinth = kept;
+    }
+    return out;
+}
+
 /**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
@@ -618,8 +669,9 @@ export function migrate(
     // v23 strips the curated-loadout seed flags; v23 → v24 stamps the
     // first-node relic grant settled; v24 → v25 strips the retired derived
     // stats and stat lines; v25 → v26 strips the alignment grid and GRACE;
-    // v26 → v27 re-points retired foes in a staged encounter to Float-Eye.
-    // Chained so a v11 save lands at v27 in one call.
+    // v26 → v27 re-points retired foes in a staged encounter to Float-Eye;
+    // v27 → v28 moves a save off Act 1 onto the Lantern Deep.
+    // Chained so a v11 save lands at v28 in one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
@@ -683,6 +735,10 @@ export function migrate(
     if (version === 26 && toVersion >= 27) {
         working = migrateV26ToV27(working);
         version = 27;
+    }
+    if (version === 27 && toVersion >= 28) {
+        working = migrateV27ToV28(working);
+        version = 28;
     }
 
     if (version !== toVersion) {

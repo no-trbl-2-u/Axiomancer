@@ -1472,8 +1472,9 @@ const BEACON_CRAGS_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> 
 // arrival lines are new, placed on the plate's landmarks (see
 // `Continents/Northern-Continent/lantern-deep.ts`).
 //
-// Kind spread over 18 nodes: 7 encounter, 3 rest, 2 loot-cache, 2 gathering,
-// 2 hazard, 1 arrival cutscene (D31), 1 travel. No boss; one elite on the last
+// Kind spread over 18 nodes: 7 encounter, 3 rest, 1 loot-cache, 2 gathering,
+// 2 hazard, 1 arrival cutscene (D31), 2 sealed doors (the vault door and the
+// deep stair, THE REVAMP R3a). No boss; one elite on the last
 // fight column (D30). Every fight pinned low (M3b's rule), level with the
 // Beacon Crags: 3 above the aqueducts, 4 below them.
 
@@ -1535,34 +1536,35 @@ const LD_LOOT_NODES: Record<string, { currency: number; description: string }> =
 };
 
 /**
- * The vault door — the Labyrinth's (map revamp M4, D24). Open on arrival, no
- * gate: the round door turns, and the Aporia is behind it. Never consumed,
- * so the door can be used again.
+ * The vault door — the Labyrinth's (map revamp M4, D24). Sealed in THE REVAMP
+ * R3a (D54): the Labyrinth is parked, so the door is sealed scenery (the
+ * `nc-16` pattern) and `LabyrinthGate` never opens in play.
  */
 const ldVaultDoor: MapEventPool = {
-    id: 'ld-15.labyrinth',
+    id: 'ld-15.cutscene',
     entries: [{
-        kind: 'labyrinth', weight: 1,
+        kind: 'cutscene', weight: 1,
         payload: {
-            kind: 'labyrinth',
-            description: 'The round door turns when you touch it. Behind it is a corridor of columns, and it goes on further than the cavern does.',
+            kind: 'cutscene',
+            lines: ['The round door is sealed.'],
+            description: 'The sealed vault door.',
         },
     }],
 };
 
 /**
- * The deep stair — the Lantern Deep's door. D27: the last Act 1 map's door
- * leads into the shipped chain at fishing-village.
+ * The deep stair — the Lantern Deep's door. It led to fishing-village (D27)
+ * until THE REVAMP purged it; sealed like the vault door in R3a (D61). There
+ * is no end-of-run state: the column is terminal.
  */
 const ldDeepStair: MapEventPool = {
-    id: 'ld-18.travel',
+    id: 'ld-18.cutscene',
     entries: [{
-        kind: 'travel', weight: 1,
+        kind: 'cutscene', weight: 1,
         payload: {
-            kind: 'travel',
-            destinationContinent: 'coastal-continent',
-            destinationMap: 'fishing-village',
-            description: 'The stair goes down past the last lantern. It comes out, a long way on, on a shore above a fishing village.',
+            kind: 'cutscene',
+            lines: ['The deep stair is sealed.'],
+            description: 'The sealed deep stair.',
         },
     }],
 };

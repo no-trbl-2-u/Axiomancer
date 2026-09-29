@@ -51,8 +51,8 @@ describe('the Charcoal Wood map', () => {
         expect(audit.terminalNodes).toEqual(['cw-20']);
     });
 
-    it('borrows the northern forest\'s enemy pool whole (D29)', () => {
-        expect(EnemiesByMap['charcoal-wood']).toBe(EnemiesByMap['northern-forest']);
+    it('draws the Act 1 pool (D61)', () => {
+        expect(EnemiesByMap['charcoal-wood']).toBe(EnemiesByMap['breakwater']);
     });
 });
 

@@ -19,7 +19,7 @@ import { FloatEye, ENEMY_REGISTRY } from '../Enemy/enemy.library';
 import { MapNode } from './types';
 
 const fishingNode: MapNode = { id: 'fv-2', location: [0, 0], connectedNodes: [] };
-const forestNode:  MapNode = { id: 'nf-3', location: [0, 0], connectedNodes: [] };
+const forestNode:  MapNode = { id: 'cw-3', location: [0, 0], connectedNodes: [] };
 const unknownNode: MapNode = { id: 'zz-1', location: [0, 0], connectedNodes: [] };
 
 describe('DIFFICULTY_LEVEL_BANDS', () => {
@@ -100,8 +100,12 @@ describe('generateEncounter', () => {
     });
 
     it('honours an explicit options.mapName for non-prefixed nodes', () => {
-        const enc = generateEncounter(unknownNode, 1, { mapName: 'northern-forest' });
-        expect(enc.origin).toBe('northern-forest:zz-1');
+        const enc = generateEncounter(unknownNode, 1, { mapName: 'breakwater' });
+        expect(enc.origin).toBe('breakwater:zz-1');
+    });
+
+    it('draws nothing on a parked map: its pool is empty (THE REVAMP R3a, D53)', () => {
+        expect(() => generateEncounter({ id: 'nf-3', location: [0, 0], connectedNodes: [] }, 1)).toThrow();
     });
 
     it('honours options.difficulty as a filter', () => {

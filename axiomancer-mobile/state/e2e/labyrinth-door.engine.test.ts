@@ -13,6 +13,10 @@
  *     (the slot load and the cold boot both), and its exit still returns
  *     to the door
  *   - a second visit opens the act the player left
+ *
+ * THE REVAMP R3a (D54) sealed the door: the Labyrinth is parked, code kept,
+ * so the door's entry journeys skip `parked (D54)` and the one live pin is
+ * that arriving on the sealed door opens no visit.
  */
 
 import { describe, expect, it } from '@jest/globals';
@@ -46,7 +50,19 @@ function lastSave(adapter: MemoryAdapter): GameState {
 
 const AT_THE_DOOR = { continent: 'northern-continent', map: 'lantern-deep', node: 'ld-15' };
 
-describe('the Labyrinth door (M4, D24)', () => {
+describe('the sealed vault door (THE REVAMP R3a, D54)', () => {
+    it('arriving on the vault door opens no visit and leaves the player at the door', () => {
+        const { store, actions } = seatAtVaultDoor();
+
+        actions.resolveCurrentMapEvent();
+
+        expect(store.getState().labyrinthUi.session).toBeNull();
+        expect(where(store)).toEqual(AT_THE_DOOR);
+        expect(store.getState().labyrinth?.returnWorld).toBeUndefined();
+    });
+});
+
+describe.skip('the Labyrinth door (M4, D24) — parked (D54)', () => {
     it('arriving on the vault door enters act I of the Aporia', () => {
         const { store, actions } = seatAtVaultDoor();
 

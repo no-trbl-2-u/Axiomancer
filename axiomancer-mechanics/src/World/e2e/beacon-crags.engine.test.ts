@@ -56,8 +56,8 @@ describe('the Beacon Crags map', () => {
         expect(audit.terminalNodes).toEqual(['bc-17']);
     });
 
-    it('borrows the caverns\' enemy pool whole (D29)', () => {
-        expect(EnemiesByMap['beacon-crags']).toBe(EnemiesByMap['caverns']);
+    it('draws the Act 1 pool (D61)', () => {
+        expect(EnemiesByMap['beacon-crags']).toBe(EnemiesByMap['breakwater']);
     });
 });
 

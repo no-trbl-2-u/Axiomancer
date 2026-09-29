@@ -152,8 +152,10 @@ import { generateRunId } from './run-loop';
  * 2026-09-29 — bumped 26 → 27: THE REVAMP R2 (D48). The roster is three
  *   foes; the hop re-points a staged encounter's retired foe to Float-Eye
  *   and strips survivors' keywords.
+ * 2026-09-29 — bumped 27 → 28: THE REVAMP R3a (D53/D54/D61). The world is
+ *   Act 1; the hop moves a save standing off Act 1 onto the Lantern Deep.
  */
-export const GAME_STATE_VERSION = 27;
+export const GAME_STATE_VERSION = 28;
 
 /**
  * Builds a brand-new GameState with default player and world.
