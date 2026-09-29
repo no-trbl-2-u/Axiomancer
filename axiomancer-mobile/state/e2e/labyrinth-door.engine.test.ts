@@ -62,6 +62,7 @@ describe('the sealed vault door (THE REVAMP R3a, D54)', () => {
     });
 });
 
+// SKIP-ISSUE: #417
 describe.skip('the Labyrinth door (M4, D24) — parked (D54)', () => {
     it('arriving on the vault door enters act I of the Aporia', () => {
         const { store, actions } = seatAtVaultDoor();

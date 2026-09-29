@@ -312,6 +312,7 @@ describe('Phase 37 shop content', () => {
 });
 
 describe('caverns content (2026-08-28 — inter-map travel)', () => {
+    // SKIP-ISSUE: #417
     it.skip('each authored node resolves to its declared MapEventKind — parked (D53)', () => {
         mockSequentialRng(0.5);
         const expected: Array<[string, string]> = [
@@ -366,6 +367,7 @@ describe('caverns content (2026-08-28 — inter-map travel)', () => {
         }
     });
 
+    // SKIP-ISSUE: #417
     it.skip('a wandering encounter draws from the caverns pool via the nc- prefix — parked (D53)', () => {
         mockSequentialRng(0.5);
         const result = resolveMapEvent({
@@ -385,6 +387,7 @@ describe('caverns content (2026-08-28 — inter-map travel)', () => {
 });
 
 describe('northern-city content (Phase W3)', () => {
+    // SKIP-ISSUE: #417
     it.skip('each authored node resolves to its declared MapEventKind — the urban spread — parked (D53)', () => {
         mockSequentialRng(0.5);
         const expected: Array<[string, string]> = [
@@ -456,6 +459,7 @@ describe('northern-city content (Phase W3)', () => {
         }
     });
 
+    // SKIP-ISSUE: #417
     it.skip('a wandering encounter draws from the northern-city pool via the ncy- prefix — parked (D53)', () => {
         mockSequentialRng(0.5);
         const result = resolveMapEvent({
@@ -496,6 +500,7 @@ describe('northern-city content (Phase W3)', () => {
 });
 
 describe('connecting-river content (Phase W4)', () => {
+    // SKIP-ISSUE: #417
     it.skip('each authored node resolves to its declared MapEventKind — parked (D53)', () => {
         mockSequentialRng(0.5);
         const expected: Array<[string, string]> = [
@@ -537,6 +542,7 @@ describe('connecting-river content (Phase W4)', () => {
         }
     });
 
+    // SKIP-ISSUE: #417
     it.skip('a wandering encounter draws from the connecting-river pool via the cr- prefix — parked (D53)', () => {
         mockSequentialRng(0.5);
         const result = resolveMapEvent({
@@ -579,6 +585,7 @@ describe('connecting-river content (Phase W4)', () => {
 });
 
 describe('town-across-river content (Phase W4)', () => {
+    // SKIP-ISSUE: #417
     it.skip('each authored node resolves to its declared MapEventKind — parked (D53)', () => {
         mockSequentialRng(0.5);
         const expected: Array<[string, string]> = [
@@ -740,6 +747,7 @@ describe('Phase 52f — guaranteed per-act shilling income (the calibration inpu
         ['fishing-village', 26],
         ['northern-forest', 18],
     ] as const)('%s grants exactly %d guaranteed shillings on a full walk', walk);
+    // SKIP-ISSUE: #417
     it.skip.each([
         ['caverns', 35],
         // Phase W3 — city coin runs richer than cavern coin (16+12+14).
