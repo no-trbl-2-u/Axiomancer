@@ -28,7 +28,7 @@ export const ASSERTION_POINTS = 1;
 export const BORROWED_PREMISE_THRESHOLDS = [1, 6, 12] as const;
 /** Hard cap (softlock-proofing; see W-01 finale doctrine). */
 export const BORROWED_PREMISE_CAP = 3;
-/** Coin per debt point at the Fourth Ledger (the Sophist's Study). */
+/** Shillings per debt point at the Fourth Ledger (the Sophist's Study). */
 export const SETTLE_PRICE_PER_POINT = 30;
 
 /** The Sophist's real name — the finale mercy key (C-01). Never rendered

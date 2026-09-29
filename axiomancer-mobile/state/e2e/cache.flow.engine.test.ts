@@ -2,9 +2,9 @@
  * Hermetic E2E Tests — Loot-cache-choice encounter ("The Reliquary", Phase
  * 63, replacing the retired Pick Pool minigame) store flow. Drives caches
  * through the store action layer: begin → offer → outcome → claim, for
- * each of the three offers (card / item / sacrifice), and verifies the
- * claim applies the right grant (or none, for sacrifice) to the real
- * GameState.
+ * both offers (card / item), and verifies the claim applies the right
+ * grant to the real GameState. The sacrifice offer granted nothing after
+ * R3b and was removed in R3c.
  * Seeded; no timers, no network.
  */
 
@@ -75,24 +75,12 @@ describe('cache store flow (three-offer choice)', () => {
         expect(after.player.currency).toBe(beforeCurrency + 12);
     });
 
-    it('sacrifice offer: grants nothing and clears the slice', () => {
+    it('offers card and item only: the retired sacrifice offer is a no-op', () => {
         const { store, actions } = makeStoreAndActions();
-        const before = store.getState() as unknown as GameState;
-        const beforeInventory = before.player.inventory.length;
-        const beforeCurrency = before.player.currency;
-
         actions.beginLootCacheChoice({ tier: 'modest', currency: 25, seed: 7 });
-        actions.chooseLootCacheChoiceOffer('sacrifice');
-        const outcome = store.getState().cache!.session!.outcome!;
-        expect(outcome.sacrificed).toBe(true);
-
-        const result = actions.claimLootCacheChoiceOutcome();
-        expect(result.applied).toBe(true);
-
-        const after = store.getState() as unknown as GameState;
-        expect(after.player.inventory.length).toBe(beforeInventory);
-        expect(after.player.currency).toBe(beforeCurrency);
-        expect(store.getState().cache?.session).toBeNull();
+        actions.chooseLootCacheChoiceOffer('sacrifice' as never);
+        expect(store.getState().cache!.session!.phase).toBe('offer');
+        expect(store.getState().cache!.session!.outcome).toBeNull();
     });
 
     it('cannot claim before an offer is chosen', () => {

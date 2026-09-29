@@ -290,7 +290,7 @@ export function selectVillageVM(
         villageName: event.villageName,
         body:
             'Roofs and smoke and the particular noise of people who all know ' +
-            'each other. Coin is welcome. Strangers are tolerated, provided ' +
+            'each other. Shillings are welcome. Strangers are tolerated, provided ' +
             'they become customers promptly.',
         merchants,
         hasShop: event.shop !== undefined,

@@ -6,20 +6,18 @@
 import type { LootCacheChoiceOfferId } from '@mechanics';
 
 export const CACHE_CHOICE_EYEBROW = 'A FIND, UNCLAIMED';
-export const CACHE_CHOICE_TITLE = 'THREE WAYS TO LEAVE IT';
+export const CACHE_CHOICE_TITLE = 'TWO WAYS TO LEAVE IT';
 export const CACHE_CHOICE_INTRO =
     'The node is spent the moment you stopped here. Pick one — there is no walking back out.';
 
 export const CACHE_CHOICE_OFFER_LABEL: Record<LootCacheChoiceOfferId, string> = Object.freeze({
     card: 'TAKE A CARD',
     item: 'TAKE THE GOODS',
-    sacrifice: 'LEAVE IT FOR THE VILLAGE',
 });
 
 export const CACHE_CHOICE_OFFER_DESC: Record<LootCacheChoiceOfferId, string> = Object.freeze({
     card: 'One card, straight into the deck.',
     item: "Whatever's inside, plus what it's worth.",
-    sacrifice: "Take nothing. It's noted.",
 });
 
 export const CACHE_OUTCOME_EYEBROW = 'SETTLED';

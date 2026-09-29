@@ -20,15 +20,14 @@ const looksLikeSlug = (s: string) => /[a-z0-9]+[-_][a-z0-9]+/.test(s);
 
 describe('engine-id-copy', () => {
     it('gives the walked quest an authored title, not its slug', () => {
-        expect(questTitle('starting-quest')).toBe('The King of Revenge');
-        expect(looksLikeSlug(questTitle('starting-quest'))).toBe(false);
+        expect(questTitle('gather-wood')).toBe('Deadfall');
+        expect(looksLikeSlug(questTitle('gather-wood'))).toBe(false);
     });
 
     it('titles every quest-log id in the engine union', () => {
         const ids = [
-            'starting-quest', 'get-to-forest', 'gather-wood', 'get-to-cave',
-            'gather-iron', 'get-to-northern-city', 'find-blacksmith', 'build-boat',
-            'kill-some-time', 'get-to-connecting-river', 'find-islanders',
+            'gather-wood', 'get-to-cave',
+            'gather-iron', 'get-to-northern-city', 'get-to-connecting-river', 'find-islanders',
             'join-islanders-for-ritual', 'get-to-town-across-river', 'get-to-the-capital',
         ];
         for (const id of ids) {
@@ -73,10 +72,10 @@ describe('consequenceLabel (FE-002 branches)', () => {
         ({ kind, label, amount }) as EventConsequence;
 
     it('names the errand instead of printing the quest slug', () => {
-        expect(consequenceLabel(q('quest-start', 'starting-quest')))
-            .toBe('new errand · The King of Revenge');
-        expect(consequenceLabel(q('quest-progress', 'get-to-forest')))
-            .toBe('errand · The Coast Road North');
+        expect(consequenceLabel(q('quest-start', 'gather-wood')))
+            .toBe('new errand · Deadfall');
+        expect(consequenceLabel(q('quest-progress', 'get-to-cave')))
+            .toBe('errand · The Mouth in the Hill');
     });
 
     it('draws no chip for a story flag', () => {
@@ -95,7 +94,7 @@ describe('consequenceLabel (FE-002 branches)', () => {
 
     it('no labelled consequence leaks a slug', () => {
         const all: EventConsequence[] = [
-            q('quest-start', 'starting-quest'),
+            q('quest-start', 'gather-wood'),
             q('quest-progress', 'join-islanders-for-ritual'),
             q('card-learn', 'thin-hymn'),
             q('flag', 'chronicler_met'),

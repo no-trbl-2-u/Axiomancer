@@ -50,7 +50,7 @@ export const cavernsLayout: MapLayout = {
         // ── c8 ──
         { id: 'nc-16', x: 90,  y: 95,  label: 'The Sealed Stair', description: 'The way to the city, packed shut with rockfall.' },
         { id: 'nc-9',  x: 180, y: 95,  label: 'The Last Camp', description: 'A hollow behind a fallen slab. The last quiet.' },
-        { id: 'nc-23', x: 270, y: 95,  label: 'The Spilled Purse', description: 'Coin where a purse hit rock. Nobody came back down.' },
+        { id: 'nc-23', x: 270, y: 95,  label: 'The Spilled Purse', description: 'Shillings where a purse hit rock. Nobody came back down.' },
         // ── c9 — the Under-Gate ──
         { id: 'nc-25', x: 180, y: 60,  label: 'The Under-Gate', description: 'Something has kept this gate too long. It stands up.' },
         // ── c10 — the door up to the city (Phase W3) ──

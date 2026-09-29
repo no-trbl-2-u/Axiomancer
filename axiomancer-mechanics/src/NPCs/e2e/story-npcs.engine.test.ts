@@ -82,16 +82,14 @@ describe('Shrine Keeper — belief-vs-skepticism NPC', () => {
         expect(skepticChoice).toBeTruthy();
     });
 
-    it('provides crystal gift interaction for faith path', () => {
+    it('offers no crystal that grants nothing (R3c)', () => {
         const veilNode = getDialogueNode(tree, 'veil_thin');
         expect(veilNode.text).toContain('crystalline fragment');
 
+        // "Accept the crystal." set an unread flag and granted nothing; R3c
+        // removed it. The refusal stays.
         const choices = visibleChoices(veilNode, emptyCtx);
-        expect(choices).toHaveLength(2);
-
-        const acceptChoice = choices.find(c => c.text.includes('Accept the crystal'));
-        expect(acceptChoice).toBeTruthy();
-        expect(acceptChoice!.effect?.setFlag).toBe('shrine_keeper_crystal_gift');
+        expect(choices.map(c => c.text)).toEqual(["I can't take something this valuable."]);
     });
 
 });
@@ -108,7 +106,7 @@ describe('Chronicler — Scholarly NPC with Chronicle integration', () => {
         const choices = visibleChoices(greetNode, emptyCtx);
         const contributeChoice = choices.find(c => c.text.includes('strange things in my travels'));
         expect(contributeChoice).toBeTruthy();
-        expect(contributeChoice!.effect?.setFlag).toBe('chronicler_met');
+        expect(contributeChoice!.effect).toBeUndefined(); // R3c: its unread flag went
     });
 
     it('provides scholarly responsibility acceptance', () => {
@@ -117,7 +115,7 @@ describe('Chronicler — Scholarly NPC with Chronicle integration', () => {
 
         const acceptChoice = choices.find(c => c.text.includes('scholarly responsibility'));
         expect(acceptChoice).toBeTruthy();
-        expect(acceptChoice!.effect?.setFlag).toBe('chronicler_scholarly_mission');
+        expect(acceptChoice!.effect).toBeUndefined(); // R3c: its unread flag went
     });
 
     it('gates present-focus choice by low scope alignment', () => {
@@ -182,7 +180,7 @@ describe('Wandering Philosopher — Multi-perspective philosophical dialogue', (
 
         const uncertainChoice = choices.find(c => c.text.includes('not sure'));
         expect(uncertainChoice).toBeTruthy();
-        expect(uncertainChoice!.effect?.setFlag).toBe('philosopher_appreciates_honesty');
+        expect(uncertainChoice!.effect).toBeUndefined(); // R3c: its unread flag went
     });
 });
 
@@ -219,7 +217,7 @@ describe('Phase 128 NPCs — Talk + choice structure', () => {
             const mutualChoices = visibleChoices(happenedNode, mutualCtx);
             const honestChoice = mutualChoices.find(c => c.text.includes('honest action'));
             expect(honestChoice).toBeDefined();
-            expect(honestChoice!.effect?.setFlag).toBe('trader_honest_helper');
+            expect(honestChoice!.effect?.grantCurrency).toBe(-5);
         });
     });
 

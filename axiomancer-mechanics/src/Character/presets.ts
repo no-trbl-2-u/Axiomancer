@@ -84,7 +84,7 @@ export const apprenticePreset: CharacterPreset = {
 export const wandererPreset: CharacterPreset = {
     id: 'wanderer',
     name: 'Wanderer',
-    summary: 'Mid-game — light armor, mixed-tier cards, a pouch of coin.',
+    summary: 'Mid-game — light armor, mixed-tier cards, a pouch of shillings.',
     level: 8,
     baseStats: { heart: 5, body: 4, mind: 4 },
     equipment: [

@@ -32,15 +32,10 @@ import { getCardById } from '@mechanics';
  * package that cannot fix it.
  */
 const QUEST_TITLES: Readonly<Record<string, string>> = Object.freeze({
-    'starting-quest': 'The King of Revenge',
-    'get-to-forest': 'The Coast Road North',
     'gather-wood': 'Deadfall',
     'get-to-cave': 'The Mouth in the Hill',
     'gather-iron': 'Iron Out of the Dark',
     'get-to-northern-city': 'The City Beyond',
-    'find-blacksmith': 'A Smith Who Answers',
-    'build-boat': 'Keel and Plank',
-    'kill-some-time': 'An Hour to Spend',
     'get-to-connecting-river': 'The Water Between',
     'find-islanders': 'Those Who Stayed',
     'join-islanders-for-ritual': 'Kneel With Them',

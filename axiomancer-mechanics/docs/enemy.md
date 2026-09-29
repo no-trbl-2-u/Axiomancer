@@ -1,6 +1,6 @@
 # Enemy
 
-> **Superseded (2026-09-23):** the 15-enemy library, `src/Enemy/enemy.logic.ts`, the six AI strategies and `decideEnemyAction` described below are retired — no `enemy.logic.ts` or `decideEnemyAction` exists and the roster holds 79 `createEnemy(` entries — live truth: src/Enemy/enemy.library.ts, src/Enemy/types.ts, src/Combat/combat.engine.ts. Body kept as a historical record pending rewrite (plan/AUDIT.md).
+> **Superseded (2026-09-23):** the 15-enemy library, `src/Enemy/enemy.logic.ts`, the six AI strategies and `decideEnemyAction` described below are retired — no `enemy.logic.ts` or `decideEnemyAction` exists and since R2a the roster holds three foes (Float-Eye, Brine Hag, the Doorwarden); every fishing-village placement below was purged in R3b — live truth: src/Enemy/enemy.library.ts, src/Enemy/types.ts, src/Combat/combat.engine.ts. Body kept as a historical record pending rewrite (plan/AUDIT.md).
 
 > **Status:** Spec 07 shipped. Type, factory, six AI strategies, a 15-enemy
 > library, weighted loot tables, and a per-map encounter generator are wired

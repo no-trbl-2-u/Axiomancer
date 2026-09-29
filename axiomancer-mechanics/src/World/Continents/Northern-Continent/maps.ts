@@ -89,7 +89,7 @@ const delverTree: DialogueTree = {
         },
         offer: {
             id: 'offer',
-            text: "“The city up the stair buys every fist of it. The stair is shut. I stockpile and I wait.” She weighs a lump of ore and sets it down. “Cut me two fists from the seam and I will pay in coin you can spend somewhere with a roof.”",
+            text: "“The city up the stair buys every fist of it. The stair is shut. I stockpile and I wait.” She weighs a lump of ore and sets it down. “Cut me two fists from the seam and I will pay in shillings you can spend somewhere with a roof.”",
             choices: [
                 {
                     text: "Agreed. (Accept the quest.)",
@@ -135,7 +135,7 @@ const theDelver: NPC = {
 // that had no authored Quest object until now.
 const gatherIronQuest: Quest = {
     name: 'gather-iron',
-    description: "Cut two fists of iron ore from the seam. The Delver pays in coin.",
+    description: "Cut two fists of iron ore from the seam. The Delver pays in shillings.",
     mapName: 'caverns',
     status: 'available',
     objectives: [
@@ -305,9 +305,7 @@ const gateClerkTree: DialogueTree = {
     },
 };
 
-// The Shipwright works the harbor yard where a boat could be built — the
-// `build-boat` seam (`quest.library.ts`, still dangling until its phase).
-// She prices the hull in the same materials the map lets you gather.
+// The Shipwright works the harbor yard where a boat could be built. She prices the hull in the same materials the map lets you gather.
 const shipwrightTree: DialogueTree = {
     id: 'the-shipwright',
     rootId: 'greet',
@@ -469,9 +467,8 @@ const northernCity: MapDefinition = {
     npcs: [theGateClerk, theShipwright],
     enemies: [],
     uniqueEvents: [],
-    // The city's own remaining declared quests ('find-blacksmith',
-    // 'build-boat', 'kill-some-time') stay dangling — a future phase
-    // authors them. `get-to-connecting-river` is authored this phase (W4).
+    // `get-to-connecting-river` is authored this phase (W4). The city's
+    // three unstartable quest names went in R3c.
     // `get-to-northern-city` lives on the caverns, its granting map, per
     // the get-to-forest precedent.
     quests: [getToConnectingRiverQuest],

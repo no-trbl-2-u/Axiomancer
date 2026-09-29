@@ -81,9 +81,9 @@ export const breakwaterLayout: MapLayout = {
         { id: 'bw-5',  ...at('bw-5'),  label: 'Smugglers’ Cove', description: 'Boats beached under the cliff. Their owners are elsewhere.' },
         // ── c2 ──
         { id: 'bw-6',  ...at('bw-6'),  label: 'The Sea Fort', description: 'A ruin on a tidal island. Something keeps its wall.' },
-        { id: 'bw-7',  ...at('bw-7'),  label: 'The South Pier', description: 'Ships at their moorings. Coin in the pilings.' },
+        { id: 'bw-7',  ...at('bw-7'),  label: 'The South Pier', description: 'Ships at their moorings. Shillings in the pilings.' },
         { id: 'bw-8',  ...at('bw-8'),  label: 'The North Pier', description: 'A beacon at the end. A voice on a mooring post.' },
-        { id: 'bw-9',  ...at('bw-9'),  label: 'The Customs House', description: 'Rooms by the night. The clerk takes coin, not names.' },
+        { id: 'bw-9',  ...at('bw-9'),  label: 'The Customs House', description: 'Rooms by the night. The clerk takes shillings, not names.' },
         { id: 'bw-10', ...at('bw-10'), label: 'The Walled Manor', description: 'A bell rings in the yard. Nobody is at service.' },
         // ── c3 ──
         { id: 'bw-11', ...at('bw-11'), label: 'The Wreck', description: 'Kelp has taken her. Cut what you can carry.' },

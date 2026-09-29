@@ -3,7 +3,7 @@
  *
  *   +50S / +500S — grant shillings (floored at zero).
  *   BROKE        — set the wallet to zero to test poverty branches
- *                  (shop refusals, the Reliquary's sacrifice offer, the
+ *                  (shop refusals, the
  *                  Anvil's price gate).
  *
  * Writes `player.currency` directly — the engine has no grant action.

@@ -296,7 +296,7 @@ export type {
     RestChoiceOfferId, RestChoiceSession,
 } from './World/RestChoice';
 // Loot-cache-choice encounter ("The Reliquary") — the cache node's one
-// irreversible choice of `card` / `item` / `sacrifice`. Replaced the
+// irreversible choice of `card` / `item`. Replaced the
 // former Pick Pool dice-pool minigame, retired in Phase 63.
 export {
     createLootCacheChoiceSession, chooseLootCacheChoiceOffer,

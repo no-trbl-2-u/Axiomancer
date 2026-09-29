@@ -2,10 +2,10 @@
  * Loot-cache choice encounter ("The Reliquary") — engine types (Phase 63,
  * replacing the retired Pick Pool dice-pool minigame).
  *
- * A loot-cache node is one irreversible choice of three — `card` (a rolled
- * reward card), `item` (a tier-scaled consumable haul + the node's
- * currency), or `sacrifice` (nothing to the player; the per-map goodwill
- * tally it fed was purged in R3b). Two-way like every minigame here: the engine
+ * A loot-cache node is one irreversible choice of two — `card` (a rolled
+ * reward card) or `item` (a tier-scaled consumable haul + the node's
+ * currency). The third offer, `sacrifice`, fed the per-map goodwill tally;
+ * it granted nothing once R3b purged goodwill and R3c removed it. Two-way like every minigame here: the engine
  * never reads `GameState`, and the host settles the outcome against the
  * real `Character` at claim time. Unlike `RestChoice`'s `cut`, no offer
  * here needs a sub-picker — the `card`/`item` candidates are rolled by the
@@ -16,11 +16,11 @@
 import type { SeedInput } from '../seed';
 import type { Item } from '../../Items/types';
 
-/** The three offers on the table. Exactly one may be committed; all three are always live. */
-export type LootCacheChoiceOfferId = 'card' | 'item' | 'sacrifice';
+/** The two offers on the table. Exactly one may be committed; both are always live. */
+export type LootCacheChoiceOfferId = 'card' | 'item';
 
 export type LootCacheChoicePhase =
-    | 'offer'      // three offers on the table
+    | 'offer'      // two offers on the table
     | 'outcome'    // the settled ledger
     | 'done';      // host claimed
 
@@ -33,8 +33,6 @@ export interface LootCacheChoiceOutcome {
     items: readonly Item[];
     /** The authored node's currency to grant — >0 iff `chosen === 'item'`. */
     currency: number;
-    /** True iff `chosen === 'sacrifice'` — grants nothing since R3b purged goodwill. */
-    sacrificed: boolean;
 }
 
 export interface LootCacheChoiceSession {

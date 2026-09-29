@@ -5,7 +5,7 @@
  * The pure engine lives in `axiomancer-mechanics` (World/LootCacheChoice);
  * these wrappers thread the cache node's one irreversible choice — `card`
  * (a rolled reward card) / `item` (a tier-scaled consumable haul + the
- * node's currency) / `sacrifice` (nothing to the player) — through the
+ * node's currency) — through the
  * mobile `cache` slice. The engine
  * never reads `GameState`; both candidates (the card to offer, the items to
  * offer) are rolled here, before the session opens, exactly mirroring how
@@ -29,8 +29,8 @@ import { EMPTY_CACHE_SLICE, type AppStore } from '../store';
 
 /**
  * Flag prefix banking a keeper's keepsake. Historical only — the retired
- * Pick Pool engine minted these on its deepest layer; the sacrifice offer
- * does not mint a new one.
+ * Pick Pool engine minted these on its deepest layer; nothing mints a new
+ * one.
  * `/memoir`'s REMAINS section still reads old ones back.
  */
 export const CACHE_KEEPSAKE_FLAG_PREFIX = 'cache-keepsake:';
@@ -81,7 +81,7 @@ export function beginLootCacheChoiceAction(store: AppStore, options: BeginLootCa
     return true;
 }
 
-/** offer -> outcome. Commits ONE offer — the other two vanish. */
+/** offer -> outcome. Commits ONE offer — the other vanishes. */
 export function chooseLootCacheChoiceOfferAction(store: AppStore, offer: LootCacheChoiceOfferId): void {
     const s = store.getState().cache?.session;
     if (!s) return;
@@ -101,8 +101,7 @@ const NOOP_CLAIM: ClaimLootCacheChoiceResult = Object.freeze({
 /**
  * Confirms the outcome ledger and applies the cache node to the engine
  * `GameState`: `card` appends the rolled card to the deck, `item` appends
- * the rolled items + currency to the inventory, `sacrifice` grants
- * nothing. Clears the slice and persists.
+ * the rolled items + currency to the inventory. Clears the slice and persists.
  */
 export function claimLootCacheChoiceOutcomeAction(store: AppStore): ClaimLootCacheChoiceResult {
     const s = store.getState().cache?.session;

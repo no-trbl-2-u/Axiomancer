@@ -84,7 +84,7 @@ function describeEvent(event: ResolvedEvent): string {
     switch (event.kind) {
         case 'encounter':   return `Something is here: ${event.encounter.enemies.map(e => e.name).join(', ')}${event.isBoss ? ' (a warden of the house)' : ''}.`;
         case 'hazard':      return `The building fights you. (-${event.damage} VITAE${event.effects.length > 0 ? `, ${event.effects.length} effect${event.effects.length === 1 ? '' : 's'}` : ''})`;
-        case 'loot-cache':  return `A cache: ${event.items.length} item${event.items.length === 1 ? '' : 's'}, ${event.currency} coin.`;
+        case 'loot-cache':  return `A cache: ${event.items.length} item${event.items.length === 1 ? '' : 's'}, ${event.currency} shillings.`;
         case 'gathering':   return `You gather ${event.items.map(i => i.name).join(', ')}.`;
         case 'rest':        return `You rest. (+${event.healed} VITAE)`;
         case 'narration': {
@@ -484,11 +484,11 @@ export async function runLabyrinthCli(rawArgs = process.argv.slice(2)): Promise<
                 const p = getProgress(store);
                 const currency = store.getState().player.currency;
                 const { tier } = await prompt<{ tier: '1' | '2' | '3' | '0' }>([{
-                    type: 'rawlist', name: 'tier', message: `The Sophist charges. (You hold ${currency} coin.)`,
+                    type: 'rawlist', name: 'tier', message: `The Sophist charges. (You hold ${currency} shillings.)`,
                     choices: [
-                        { name: `A Nudge — ${hintPrice(p, 1)} coin`, value: '1' },
-                        { name: `A Reading — ${hintPrice(p, 2)} coin`, value: '2' },
-                        { name: `A Conclusion — ${hintPrice(p, 3)} coin`, value: '3' },
+                        { name: `A Nudge — ${hintPrice(p, 1)} shillings`, value: '1' },
+                        { name: `A Reading — ${hintPrice(p, 2)} shillings`, value: '2' },
+                        { name: `A Conclusion — ${hintPrice(p, 3)} shillings`, value: '3' },
                         { name: 'never mind', value: '0' },
                     ],
                 }]);
@@ -496,7 +496,7 @@ export async function runLabyrinthCli(rawArgs = process.argv.slice(2)): Promise<
                 const t = Number(tier) as 1 | 2 | 3;
                 const price = hintPrice(p, t);
                 if (currency < price) {
-                    log(`The Sophist: "Credit is a premise I no longer extend." (${price} coin needed.)`);
+                    log(`The Sophist: "Credit is a premise I no longer extend." (${price} shillings needed.)`);
                     break;
                 }
                 const before = store.getState();
@@ -514,10 +514,10 @@ export async function runLabyrinthCli(rawArgs = process.argv.slice(2)): Promise<
                 const pricePerPoint = SETTLE_PRICE_PER_POINT;
                 const currency = store.getState().player.currency;
                 const affordable = Math.min(outstanding, Math.floor(currency / pricePerPoint));
-                if (affordable === 0) { log(`Settling costs ${pricePerPoint} coin a point. You cannot afford one.`); break; }
+                if (affordable === 0) { log(`Settling costs ${pricePerPoint} shillings a point. You cannot afford one.`); break; }
                 const { points } = await prompt<{ points: number }>([{
                     type: 'number', name: 'points',
-                    message: `Settle how many debt points? (${outstanding} owed, ${pricePerPoint} coin each, ${affordable} affordable)`,
+                    message: `Settle how many debt points? (${outstanding} owed, ${pricePerPoint} shillings each, ${affordable} affordable)`,
                     default: affordable,
                 }]);
                 const settle = Math.max(0, Math.min(points, affordable));
@@ -533,7 +533,7 @@ export async function runLabyrinthCli(rawArgs = process.argv.slice(2)): Promise<
                 const p = getProgress(store);
                 const s = store.getState();
                 log(`Act: ${act.title}. Room: ${room.display} (${room.name}).`);
-                log(`VITAE ${s.player.health}/${s.player.maxHealth}. Coin ${s.player.currency}.`);
+                log(`VITAE ${s.player.health}/${s.player.maxHealth}. Shillings ${s.player.currency}.`);
                 log(`Debt ${debtPoints(p)} (Borrowed Premise x${borrowedPremiseStacks(p)}). Waystone: ${p.waystones.length > 0 ? getRoom(act, lastWaystone(act, p)).display : '(none this act)'}.`);
                 break;
             }

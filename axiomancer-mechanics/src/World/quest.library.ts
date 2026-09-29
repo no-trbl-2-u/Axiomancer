@@ -7,9 +7,6 @@ type CavernsQuests =
     'get-to-northern-city';
 
 type NorthernCityQuests =
-    'find-blacksmith' |
-    'build-boat' |
-    'kill-some-time' |
     'get-to-connecting-river';
 
 type ConnectingRiverQuests =

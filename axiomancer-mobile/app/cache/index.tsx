@@ -2,9 +2,9 @@
  * /cache — the loot-cache-choice screen ("The Reliquary", Phase 63,
  * replacing the retired Pick Pool dice-pool minigame).
  *
- * One irreversible choice of three: TAKE A CARD (a rolled reward card),
- * TAKE THE GOODS (a tier-scaled consumable haul + the node's currency), or
- * LEAVE IT FOR THE VILLAGE (nothing to the player). `resolveMapEvent` consumes the node on entry,
+ * One irreversible choice of two: TAKE A CARD (a rolled reward card) or
+ * TAKE THE GOODS (a tier-scaled consumable haul + the node's currency).
+ * `resolveMapEvent` consumes the node on entry,
  * before any choice — there is no back-out: no header back, no
  * swipe-dismiss (`gestureEnabled: false` in the root layout), no Android
  * hardware-back (`<HardwareBackHandler>`). All rules live in

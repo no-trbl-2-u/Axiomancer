@@ -64,9 +64,10 @@ describe('nf-12 "The Crowning Witnessed"', () => {
 
     it.each([
         ['witnessed', 'boy-witnessed-the-crowning'],
-        ['ignored', 'boy-ignored-the-crowning'],
-        ['marked', 'boy-marked-the-crowning'],
-    ])('setting choice leading to %s sets flag %s, advances to a leaf, and advances', (nextNodeId, flag) => {
+        // R3c: these two flags were never read and went.
+        ['ignored', null],
+        ['marked', null],
+    ] as const)('setting choice leading to %s sets flag %s and advances to a leaf', (nextNodeId, flag: string | null) => {
         const payload = nf12Payload();
         const tree = payload.dialogue;
         const root = tree.nodes[tree.rootId]!;
@@ -74,10 +75,8 @@ describe('nf-12 "The Crowning Witnessed"', () => {
         expect(choice).toBeDefined();
 
         const state = createNewGameState();
-        expect(state.flags).not.toContain(flag);
-
         const result = applyDialogueChoice(state, tree, choice);
-        expect(result.gameState.flags).toContain(flag);
+        expect(result.gameState.flags).toEqual(flag === null ? state.flags : [...state.flags, flag]);
 
         const nextNode: DialogueNode = tree.nodes[choice.nextNodeId!]!;
         expect(nextNode.choices).toBeUndefined(); // each outcome is a leaf

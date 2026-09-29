@@ -1,10 +1,10 @@
 [
   { "presetId": "apprentice" },
   { "tab": "map" },
-  { "target": "fv-2" },
+  { "target": "bw-4" },
   { "tab": "save" },
   { "tab": "map" },
-  { "target": "fv-3" },
+  { "target": "bw-5" },
   { "tab": "load" },
   { "tab": "quit" }
 ]

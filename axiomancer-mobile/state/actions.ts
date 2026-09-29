@@ -467,12 +467,12 @@ export interface AppActions {
 
     // -----------------------------------------------------------------
     // Loot-cache-choice encounter ("The Reliquary" — see state/cache/,
-    // Phase 63). One irreversible choice of three: card / item / sacrifice.
+    // Phase 63). One irreversible choice of two: card / item.
     // -----------------------------------------------------------------
 
     /** Start a cache from the authored payload. Returns false if one is open. */
     beginLootCacheChoice: (options?: BeginLootCacheChoiceOptions) => boolean;
-    /** Commit one offer — the other two vanish. */
+    /** Commit one offer — the other vanishes. */
     chooseLootCacheChoiceOffer: (offer: LootCacheChoiceOfferId) => void;
     /** Confirm the ledger; applies the grant (if any) and persists. */
     claimLootCacheChoiceOutcome: () => ClaimLootCacheChoiceResult;

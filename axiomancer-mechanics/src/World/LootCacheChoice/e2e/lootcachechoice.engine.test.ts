@@ -1,5 +1,5 @@
 /**
- * Loot-cache-choice engine ("card" / "item" / "sacrifice") — hermetic unit
+ * Loot-cache-choice engine ("card" / "item") — hermetic unit
  * suite (Phase 63).
  *
  * No RNG stub needed: every transition here is deterministic by
@@ -16,7 +16,7 @@ import {
     claimLootCacheChoiceOutcome,
     consumableLibrary,
 } from '../../../index';
-import type { LootCacheChoiceSession, Item } from '../../../index';
+import type { LootCacheChoiceOfferId, LootCacheChoiceSession, Item } from '../../../index';
 
 const ITEMS: Item[] = consumableLibrary.slice(0, 1).map(item => ({ ...item, quantity: 1 }));
 
@@ -71,7 +71,6 @@ describe('loot-cache-choice — card offer', () => {
             rewardCardId: 'spoiled-poultice',
             items: [],
             currency: 0,
-            sacrificed: false,
         });
     });
 });
@@ -86,7 +85,6 @@ describe('loot-cache-choice — item offer', () => {
             rewardCardId: null,
             items: ITEMS,
             currency: 4,
-            sacrificed: false,
         });
     });
 
@@ -94,26 +92,23 @@ describe('loot-cache-choice — item offer', () => {
         const s = offerSession({ itemCandidates: [], currencyCandidate: 0 });
         const outcome = chooseLootCacheChoiceOffer(s, 'item');
         expect(outcome.outcome).toEqual({
-            chosen: 'item', rewardCardId: null, items: [], currency: 0, sacrificed: false,
+            chosen: 'item', rewardCardId: null, items: [], currency: 0,
         });
     });
 });
 
-describe('loot-cache-choice — sacrifice offer', () => {
-    it('offer -> outcome, granting nothing but flagging sacrificed', () => {
+describe('loot-cache-choice — the retired sacrifice offer (R3c)', () => {
+    it('is no longer an offer: committing it is a silent no-op', () => {
+        // It granted nothing once R3b purged goodwill; R3c removed it.
         const s = offerSession();
-        const outcome = chooseLootCacheChoiceOffer(s, 'sacrifice');
-        expect(outcome.phase).toBe('outcome');
-        expect(outcome.outcome).toEqual({
-            chosen: 'sacrifice', rewardCardId: null, items: [], currency: 0, sacrificed: true,
-        });
+        expect(chooseLootCacheChoiceOffer(s, 'sacrifice' as LootCacheChoiceOfferId)).toBe(s);
     });
 });
 
 describe('loot-cache-choice — claim', () => {
     it('outcome -> done', () => {
         const s = offerSession();
-        const outcome = chooseLootCacheChoiceOffer(s, 'sacrifice');
+        const outcome = chooseLootCacheChoiceOffer(s, 'card');
         const done = claimLootCacheChoiceOutcome(outcome);
         expect(done.phase).toBe('done');
         expect(done.outcome).toEqual(outcome.outcome);

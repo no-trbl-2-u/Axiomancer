@@ -66,7 +66,7 @@ export const LABYRINTH_COPY = Object.freeze({
     pocketEmpty: 'Empty of words.',
     pocketSource: (display: string) => `found in ${display}`,
     hintsLabel: 'ASK THE SOPHIST',
-    hintPriceSuffix: 'coin',
+    hintPriceSuffix: 'shillings',
     hintBroke: 'He looks at your purse and does not finish the sentence.',
     fragmentPickup: (word: string) => `You take the word: ${word}.`,
     secretReveal: (display: string) => `A door that was not there is there. It leads to ${display}.`,
@@ -82,7 +82,7 @@ export const LABYRINTH_COPY = Object.freeze({
     socketEmpty: '·',
     settleLabel: 'THE FOURTH LEDGER',
     settleLine: (outstanding: number, price: number) =>
-        `Debt stands at ${outstanding}. The house takes ${price} coin a point.`,
+        `Debt stands at ${outstanding}. The house takes ${price} shillings a point.`,
     settleNothingOwed: 'Nothing owed. How unlike a visitor.',
     settleButton: 'SETTLE A POINT',
     settledLine: 'Paid in part, the house accepts. It knows how arguments end.',
@@ -167,7 +167,7 @@ export interface LabyrinthHintVM {
     tier: 1 | 2 | 3;
     label: string;
     desc: string;
-    /** Real units — coin (real-units-or-no-number rule). */
+    /** Real units — shillings (real-units-or-no-number rule). */
     price: number;
     affordable: boolean;
 }

@@ -158,3 +158,27 @@ Doorwarden on `bw-17`, `cw-17`, `bc-15`, `ld-16`. R3 only checks it.
 
 - R5 re-points shops and caches; R9 retunes the quest XP; B9 re-themes the
   Labyrinth; B10 cuts the dev menu's travel rows.
+- R3c carry-overs: `docs/enemy.md` and the remaining CLI walkthroughs
+  (`boss-encounter`, `endgame-loadout`, `stat-allocation`,
+  `coastal-tyrant-befriend`, `skills-in-combat`, `tier2-skill-chain`,
+  `synergy-skills-chain`) still describe or debug-spawn enemies retired in
+  R2a; R2's docs debt, not the world's. The shop walkthrough returns once R5
+  gives Act 1 a shop.
+
+## R3c — what shipped (2026-09-29)
+
+- Scope 7 read as "kept" = every map still in the tree (Act 1 and parked),
+  since the part plan's audit named findings on parked maps. Deleted: the
+  three unstartable quest names (`find-blacksmith`, `build-boat`,
+  `kill-some-time`) and 20 of the 25 dialogue `setFlag`s nothing reads (the
+  five read ones stay). "Accept the crystal" (granted nothing) is removed;
+  the refusal stays. The loot-cache `sacrifice` offer (granted nothing since
+  R3b) is removed: the cache is now card or item.
+- Scope 8: coin / coppers / coin-purse became shillings in kept content, the
+  Anvil tooltip, the Labyrinth presenter and CLI. "Gold" as the wild die's
+  colour is not currency and stays.
+- Scope 9: the narrative-reachability suite pins the four Act 1 maps (clean
+  audit, no roster, no quest, no story flag written); the map walk already
+  walked the Breakwater. CLI walkthroughs `map-events` and `save-load`
+  re-pointed to `bw-4` / `bw-5`; `shop` and `codex-unlock` deleted with their
+  subjects.

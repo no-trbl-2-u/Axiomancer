@@ -1,12 +1,13 @@
 /**
- * Loot-cache choice engine ("card" / "item" / "sacrifice") — pure engine
+ * Loot-cache choice engine ("card" / "item") — pure engine
  * transitions (Phase 63).
  *
  * Replaces The Reliquary's Pick Pool dice-pool session with T's ruling
  * (2026-08-15: "Card reward, item reward, or sacrifice reward.") — a
- * loot-cache node is one irreversible choice of three. State machine:
+ * loot-cache node is one irreversible choice of two (the sacrifice offer
+ * granted nothing after R3b and went in R3c). State machine:
  *
- *   offer ──chooseLootCacheChoiceOffer('card'|'item'|'sacrifice')──▶ outcome
+ *   offer ──chooseLootCacheChoiceOffer('card'|'item')──▶ outcome
  *                                                                        │
  *                                                          claimLootCacheChoiceOutcome
  *                                                                        ▼
@@ -66,7 +67,7 @@ function sealOutcome(s: LootCacheChoiceSession, outcome: LootCacheChoiceOutcome)
 // ---------------------------------------------------------------------------
 
 /**
- * offer → outcome. Commits ONE offer — the other two vanish. An invalid
+ * offer → outcome. Commits ONE offer — the other vanishes. An invalid
  * phase or unknown offer id is an invalid call: silent no-op (matches the
  * sibling engines' unknown-id contract).
  */
@@ -78,17 +79,12 @@ export function chooseLootCacheChoiceOffer(
 
     if (offer === 'card') {
         return sealOutcome(s, {
-            chosen: 'card', rewardCardId: s.cardCandidate, items: [], currency: 0, sacrificed: false,
+            chosen: 'card', rewardCardId: s.cardCandidate, items: [], currency: 0,
         });
     }
     if (offer === 'item') {
         return sealOutcome(s, {
-            chosen: 'item', rewardCardId: null, items: s.itemCandidates, currency: s.currencyCandidate, sacrificed: false,
-        });
-    }
-    if (offer === 'sacrifice') {
-        return sealOutcome(s, {
-            chosen: 'sacrifice', rewardCardId: null, items: [], currency: 0, sacrificed: true,
+            chosen: 'item', rewardCardId: null, items: s.itemCandidates, currency: s.currencyCandidate,
         });
     }
     return s;

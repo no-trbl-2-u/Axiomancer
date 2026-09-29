@@ -299,9 +299,10 @@ describe('northern-city content (Phase W3)', () => {
             expect(tree.id).toBe('ncy-advisor-rumor');
             const root = tree.nodes[tree.rootId];
             expect(root!.choices).toHaveLength(3);
-            for (const choice of root!.choices!) {
-                expect(choice.effect?.setFlag).toBeTruthy();
-            }
+            // Only the chase is read downstream (the river court); R3c removed
+            // the other two branches' unread flags.
+            expect(root!.choices!.map(c => c.effect?.setFlag ?? null))
+                .toEqual(['boy-chased-the-rumor', null, null]);
         }
     });
 });

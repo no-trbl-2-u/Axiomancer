@@ -4,7 +4,7 @@
  * World/LootCacheChoice) onto a render-ready view-model. Pure: no store
  * writes, no rolls, no rule decisions.
  *
- * All three offers are always enabled — unlike `RestChoiceOffer`, nothing
+ * Both offers are always enabled — unlike `RestChoiceOffer`, nothing
  * here can be unaffordable or capped, so there is no `disabledReason` to
  * shape.
  */
@@ -51,7 +51,7 @@ export interface CacheChoiceVM {
 // Composition
 // ---------------------------------------------------------------------------
 
-const OFFER_IDS: readonly LootCacheChoiceOfferId[] = Object.freeze(['card', 'item', 'sacrifice']);
+const OFFER_IDS: readonly LootCacheChoiceOfferId[] = Object.freeze(['card', 'item']);
 
 const OFFERS: readonly CacheChoiceOfferVM[] = Object.freeze(OFFER_IDS.map(id => ({
     id,

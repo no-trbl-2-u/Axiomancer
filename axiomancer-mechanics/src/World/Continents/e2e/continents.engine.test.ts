@@ -85,10 +85,10 @@ describe('World/Continents Engine Tests', () => {
       expect(purposeNode.text).toContain('forgotten histories');
       expect(purposeNode.text).toContain('Pre-coastal civilizations');
       
-      // Test contribution offer with flag setting
+      // Test contribution offer (its unread flag went in R3c)
       const contributionNode = chronicler.dialogueTree!.nodes['contribution_offer'];
       const acceptChoice = contributionNode.choices![0];
-      expect(acceptChoice.effect?.setFlag).toBe('chronicler_scholarly_mission');
+      expect(acceptChoice.effect).toBeUndefined(); // R3c: its unread flag went
     });
 
     it('Wandering Philosopher has diverse philosophical perspectives with Socratic dialogue', () => {
@@ -117,7 +117,7 @@ describe('World/Continents Engine Tests', () => {
       const sustainableChoice = dutiesNode.choices!.find(c =>
         c.text.includes('sustainable forest trades')
       );
-      expect(sustainableChoice?.effect?.setFlag).toBe('forest_conservation_supporter');
+      expect(sustainableChoice?.effect?.grantCurrency).toBe(-25);
 
       // Phase 8 — get-to-cave quest grant, appended to greet.
       const caveChoice = forestRanger.dialogueTree!.nodes['greet'].choices!.find(c =>
@@ -136,11 +136,11 @@ describe('World/Continents Engine Tests', () => {
       expect(solitudeNode.text).toContain('wisdom earned in isolation');
       expect(solitudeNode.text).toContain('enlightenment selfish');
       
-      // Test balanced sharing choice with bridge flag
+      // Test balanced sharing choice (its unread flag went in R3c)
       const balancedChoice = solitudeNode.choices!.find(c =>
         c.text.includes('share your wisdom while preserving')
       );
-      expect(balancedChoice?.effect?.setFlag).toBe('hermit_wisdom_bridge');
+      expect(balancedChoice?.effect?.grantCurrency).toBe(-10);
 
       // Phase 8 — gather-wood quest grant, appended to greet.
       const firewoodChoice = hermitSage.dialogueTree!.nodes['greet'].choices!.find(c =>
@@ -163,7 +163,7 @@ describe('World/Continents Engine Tests', () => {
       const honestChoice = happenedNode.choices!.find(c => 
         c.text.includes('honest action')
       );
-      expect(honestChoice?.effect?.setFlag).toBe('trader_honest_helper');
+      expect(honestChoice?.effect?.grantCurrency).toBe(-5);
     });
   });
 

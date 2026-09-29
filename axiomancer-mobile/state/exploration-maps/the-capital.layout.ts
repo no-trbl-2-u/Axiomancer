@@ -25,7 +25,7 @@ export const theCapitalLayout: MapLayout = {
         { id: 'cap-4', x: 180, y: 239, label: 'The Waiting Room', description: 'Paid by the hour. Petitioners sleep here the way they queue — in shifts.' },
         { id: 'cap-5', x: 270, y: 239, label: 'The Refused Petitions', description: 'Refused petitions pile against the wall, ribbons still tied to the corners.' },
         // ── c3 ──
-        { id: 'cap-6', x: 90,  y: 171, label: 'The Petitioners\' Row', description: 'Everything the provinces don\'t stock, priced for people with nothing left to lose but coin.' },
+        { id: 'cap-6', x: 90,  y: 171, label: 'The Petitioners\' Row', description: 'Everything the provinces don\'t stock, priced for people with nothing left to lose but shillings.' },
         { id: 'cap-7', x: 270, y: 171, label: 'The Dropped Purse', description: 'A purse, dropped and not missed — or missed and not worth the line to reclaim.' },
         // ── c4 — the court convenes ──
         { id: 'cap-8', x: 180, y: 103, label: 'The Court Hall', description: 'A dais, a bell, and a Factor with a ledger heavier than every ribbon-road that fed it.' },

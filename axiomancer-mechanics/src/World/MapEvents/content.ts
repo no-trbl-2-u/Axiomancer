@@ -250,12 +250,10 @@ const nfCrowningWitnessedDialogue: MapEventPool = {
                             {
                                 text: 'Look away. Keep resting. It is none of your business.',
                                 nextNodeId: 'ignored',
-                                effect: { setFlag: 'boy-ignored-the-crowning' },
                             },
                             {
                                 text: 'Mark the spot. Leave. Mean to tell someone in the city.',
                                 nextNodeId: 'marked',
-                                effect: { setFlag: 'boy-marked-the-crowning' },
                             },
                         ],
                     },
@@ -397,17 +395,14 @@ const nfFrightenedFriendDialogue: MapEventPool = {
                             {
                                 text: 'Climb up. Pull him down. Ask nothing.',
                                 nextNodeId: 'helped',
-                                effect: { setFlag: 'boy-helped-pell' },
                             },
                             {
                                 text: 'Call down directions. Let him find his own way.',
                                 nextNodeId: 'coached',
-                                effect: { setFlag: 'boy-coached-pell' },
                             },
                             {
                                 text: 'He is not your trouble. Keep walking.',
                                 nextNodeId: 'left',
-                                effect: { setFlag: 'boy-left-pell' },
                             },
                         ],
                     },
@@ -607,11 +602,11 @@ function hazardPool(nodeId: string, description: string): MapEventPool {
     };
 }
 
-// Low-risk coastal scavenging — a few coins the tide or a dead sailor left.
+// Low-risk coastal scavenging — a few shillings the tide or a dead sailor left.
 const COAST_LOOT_CACHES: ReadonlyArray<{ currency: number; description: string }> = [
-    { currency: 8,  description: 'A coin-purse snagged in the netting, its owner long gone.' },
+    { currency: 8,  description: 'A purse of shillings snagged in the netting, its owner long gone.' },
     { currency: 12, description: 'A waterlogged strongbox wedged under the pilings.' },
-    { currency: 6,  description: 'Loose coppers spill from a cracked jar in the rocks.' },
+    { currency: 6,  description: 'Loose shillings spill from a cracked jar in the rocks.' },
 ];
 function lootCachePool(nodeId: string, cache: { currency: number; description: string }): MapEventPool {
     return {
@@ -701,7 +696,7 @@ const BW_ELITE: ActOneFoe = { slug: 'brine-hag', level: BW_ELITE_LEVEL };
 const BW_DOOR: ActOneFoe = { slug: 'the-doorwarden', level: BW_ELITE_LEVEL, isBoss: true };
 
 const BW_REST_NODES: Record<string, string> = {
-    'bw-9':  'The customs house lets rooms by the night. The clerk takes coin, not names.',
+    'bw-9':  'The customs house lets rooms by the night. The clerk takes shillings, not names.',
     'bw-13': 'An inn above the harbour. Warm, loud, and paid for in advance.',
 };
 
@@ -868,7 +863,7 @@ const CW_HAZARD_NODES: Record<string, string> = {
 
 const CW_LOOT_NODES: Record<string, { currency: number; description: string }> = {
     'cw-2':  { currency: 8,  description: 'A strongbox under the tower\'s fallen stair. The lock rusted before its owner came back.' },
-    'cw-6':  { currency: 6,  description: 'Coppers in a niche at the cave mouth. Someone paid the dark and left.' },
+    'cw-6':  { currency: 6,  description: 'Shillings in a niche at the cave mouth. Someone paid the dark and left.' },
     'cw-13': { currency: 12, description: 'The hermit is gone. His purse is under the hearthstone, where they all keep it.' },
 };
 
@@ -1378,7 +1373,7 @@ const CAVERNS_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> = [
     { nodeId: 'nc-9',  pool: ncCampPool('nc-9',  'A hollow behind a fallen slab. The last quiet before the gate.') },
     { nodeId: 'nc-10', pool: ncIronVeinPool('nc-10', 'The seam runs high along the wall, dark and clean. You cut what you can carry.') },
     { nodeId: 'nc-11', pool: ncIronVeinPool('nc-11', 'The seam again, thicker. The pick-marks of earlier hands stop halfway.') },
-    { nodeId: 'nc-12', pool: ncLootPool('nc-12', 14, 'A dead delver\'s satchel, wedged under slate. The coin kept better than the delver.') },
+    { nodeId: 'nc-12', pool: ncLootPool('nc-12', 14, 'A dead delver\'s satchel, wedged under slate. The shillings kept better than the delver.') },
     { nodeId: 'nc-13', pool: ncEncounterPool('nc-13', 'The lamp catches eyes at the seam\'s edge. More than two.') },
     { nodeId: 'nc-14', pool: ncLootPool('nc-14', 11, 'A toll-box bolted to the rock, pried open long ago. Not emptied.') },
     { nodeId: 'nc-15', pool: ncEncounterPool('nc-15', 'The seam ends at a face of raw rock. Something is mining it from the other side.') },
@@ -1389,7 +1384,7 @@ const CAVERNS_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> = [
     { nodeId: 'nc-20', pool: ncHazardPool('nc-20', 3, 'The props above you decide, quietly, that they are done. Not all of the roof misses.') },
     { nodeId: 'nc-21', pool: ncCampPool('nc-21', 'A dry shelf above the waterline. You wring out what you can and breathe.') },
     { nodeId: 'nc-22', pool: ncHazardPool('nc-22', 2, 'The lamp gutters. For eleven steps the dark owns you. It takes its toll on the way through.') },
-    { nodeId: 'nc-23', pool: ncLootPool('nc-23', 10, 'Coin scattered where a purse hit rock. Nobody came back down for it.') },
+    { nodeId: 'nc-23', pool: ncLootPool('nc-23', 10, 'Shillings scattered where a purse hit rock. Nobody came back down for it.') },
     { nodeId: 'nc-24', pool: ncOldDelve },
     { nodeId: 'nc-25', pool: ncUnderGateBoss },
     { nodeId: 'nc-26', pool: ncGateStandsOpen },
@@ -1478,12 +1473,10 @@ const ncyAdvisorRumor: MapEventPool = {
                             {
                                 text: 'Note it, and keep walking.',
                                 nextNodeId: 'noted',
-                                effect: { setFlag: 'boy-noted-the-rumor' },
                             },
                             {
                                 text: 'Kings bury their own. Not your street.',
                                 nextNodeId: 'shrugged',
-                                effect: { setFlag: 'boy-shrugged-the-rumor' },
                             },
                         ],
                     },
@@ -2199,7 +2192,7 @@ const capMarket: MapEventPool = {
                     { itemId: 'phoenix-tear',             price: 65 },
                 ],
             },
-            description: 'Everything the provinces don\'t stock, priced for people with nothing left to lose but coin.',
+            description: 'Everything the provinces don\'t stock, priced for people with nothing left to lose but shillings.',
         },
     }],
 };
@@ -2239,12 +2232,10 @@ const capCourtConvenes: MapEventPool = {
                                 text: 'Find her in the line.',
                                 nextNodeId: 'found_her',
                                 requires: { flag: 'sweetheart-was-nominated' },
-                                effect: { setFlag: 'capital-selection-witnessed' },
                             },
                             {
                                 text: 'Watch the proceedings.',
                                 nextNodeId: 'watched_anyway',
-                                effect: { setFlag: 'capital-selection-witnessed' },
                             },
                         ],
                     },

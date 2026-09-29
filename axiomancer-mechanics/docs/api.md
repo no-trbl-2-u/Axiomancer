@@ -141,7 +141,8 @@ preserve / reset matrix and lifecycle.
 **CLI consumer surfaces (Phase 82).** `game.cli.ts` extended with
 Codex tab (renders `state.codex.unlockedEntries` via enemy library
 lookup) and Begin Again tab (`store.resetRun({ keepCharacter })`).
-Agent-graded walkthrough at `automation/scripts/walkthroughs/codex-unlock.*`.
+Its agent-graded walkthrough (`codex-unlock`) was deleted in R3c with its
+subject, the retired Mournful Gull.
 
 **Per-module quickstart pages (Phase 87).** Four focused guides with
 runnable code samples: [`quickstart-character.md`](./quickstart-character.md),

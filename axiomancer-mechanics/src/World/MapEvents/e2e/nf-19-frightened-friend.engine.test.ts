@@ -60,10 +60,11 @@ describe('nf-19 "The Frightened Friend"', () => {
     });
 
     it.each([
-        ['helped', 'boy-helped-pell'],
-        ['coached', 'boy-coached-pell'],
-        ['left', 'boy-left-pell'],
-    ])('setting choice leading to %s sets flag %s, advances to a leaf, and advances', (nextNodeId, flag) => {
+        // R3c: the three outcome flags were never read and went.
+        ['helped', null],
+        ['coached', null],
+        ['left', null],
+    ] as const)('setting choice leading to %s sets flag %s and advances to a leaf', (nextNodeId, flag: string | null) => {
         const payload = nf19Payload();
         const tree = payload.dialogue;
         const root = tree.nodes[tree.rootId]!;
@@ -71,10 +72,8 @@ describe('nf-19 "The Frightened Friend"', () => {
         expect(choice).toBeDefined();
 
         const state = createNewGameState();
-        expect(state.flags).not.toContain(flag);
-
         const result = applyDialogueChoice(state, tree, choice);
-        expect(result.gameState.flags).toContain(flag);
+        expect(result.gameState.flags).toEqual(flag === null ? state.flags : [...state.flags, flag]);
 
         const nextNode: DialogueNode = tree.nodes[choice.nextNodeId!]!;
         expect(nextNode.choices).toBeUndefined(); // each outcome is a leaf

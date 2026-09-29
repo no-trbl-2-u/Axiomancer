@@ -54,13 +54,6 @@ const shrineKeeperTree: DialogueTree = {
             text: "“You're not the first to feel it. Take this, and judge for yourself.” The Keeper presses a crystalline fragment into your palm. It is heavier than it looks.",
             choices: [
                 {
-                    text: "Accept the crystal.",
-                    nextNodeId: undefined,
-                    effect: {
-                        setFlag: 'shrine_keeper_crystal_gift',
-                    },
-                },
-                {
                     text: "I can't take something this valuable.",
                     nextNodeId: undefined,
                 },
@@ -77,9 +70,6 @@ const shrineKeeperTree: DialogueTree = {
                 {
                     text: "Will you teach me to read them?",
                     nextNodeId: undefined,
-                    effect: {
-                        setFlag: 'shrine_keeper_teaching_offered',
-                    },
                 },
             ],
         },
@@ -117,9 +107,6 @@ const chroniclerTree: DialogueTree = {
                 {
                     text: "I've seen strange things in my travels.",
                     nextNodeId: 'share_observations',
-                    effect: {
-                        setFlag: 'chronicler_met'
-                    },
                 },
                 {
                     text: "I don't have time for scholarly pursuits.",
@@ -138,9 +125,6 @@ const chroniclerTree: DialogueTree = {
                 {
                     text: "How can I contribute to this work?",
                     nextNodeId: 'contribution_offer',
-                    effect: {
-                        setFlag: 'chronicle_contributor'
-                    },
                 },
                 {
                     text: "Why preserve the past? Focus on the present.",
@@ -173,9 +157,6 @@ const chroniclerTree: DialogueTree = {
                 {
                     text: "I accept this scholarly responsibility.",
                     nextNodeId: undefined,
-                    effect: {
-                        setFlag: 'chronicler_scholarly_mission',
-                    },
                 },
             ],
         },
@@ -247,9 +228,6 @@ const wanderingPhilosopherTree: DialogueTree = {
                 {
                     text: "I'm not sure. That's why I'm searching.",
                     nextNodeId: 'uncertain_seeker',
-                    effect: {
-                        setFlag: 'philosopher_appreciates_honesty'
-                    },
                 },
             ],
         },
@@ -365,16 +343,14 @@ const forestRangerTree: DialogueTree = {
                     text: "I'll fund sustainable forest trades for the loggers.",
                     nextNodeId: 'sustainable_alternatives',
                     effect: {
-                        grantCurrency: -25,
-                        setFlag: 'forest_conservation_supporter'
+                        grantCurrency: -25
                     },
                 },
                 {
                     text: "Trees grow back. Let them cut. People eat today.",
                     nextNodeId: 'pragmatic_exploitation',
                     effect: {
-                        grantCurrency: 35,
-                        setFlag: 'forest_exploitation_supporter'
+                        grantCurrency: 35
                     },
                 },
             ],
@@ -451,16 +427,14 @@ const hermitSageTree: DialogueTree = {
                     text: "I'll help you share your wisdom while preserving your solitude.",
                     nextNodeId: 'balanced_sharing',
                     effect: {
-                        grantCurrency: -10,
-                        setFlag: 'hermit_wisdom_bridge'
+                        grantCurrency: -10
                     },
                 },
                 {
                     text: "Keep your secrets. Your example teaches more than your advice would.",
                     nextNodeId: 'wisdom_through_example',
                     effect: {
-                        grantCurrency: 15,
-                        setFlag: 'hermit_isolation_supporter'
+                        grantCurrency: 15
                     },
                 },
             ],
@@ -516,7 +490,7 @@ const lostTraderTree: DialogueTree = {
         },
         talk_what_happened: {
             id: 'talk_what_happened',
-            text: "“Bandits took everything. Horses, cargo, my coin purse. Left me for dead, they thought. One item's still hidden — worth enough to feed my family a year. I can't carry it alone, and I won't last out here. Would you trust a desperate man? More to the point — should I trust you?”",
+            text: "“Bandits took everything. Horses, cargo, my purse. Left me for dead, they thought. One item's still hidden — worth enough to feed my family a year. I can't carry it alone, and I won't last out here. Would you trust a desperate man? More to the point — should I trust you?”",
             choices: [
                 {
                     text: "Providence put us on the same road. That's a bond worth honoring.",
@@ -526,16 +500,14 @@ const lostTraderTree: DialogueTree = {
                     text: "I'll help you carry it. Trust is built through honest action.",
                     nextNodeId: 'honest_mutual_aid',
                     effect: {
-                        grantCurrency: -5,
-                        setFlag: 'trader_honest_helper'
+                        grantCurrency: -5
                     },
                 },
                 {
                     text: "Show me the item first. Then we'll talk terms.",
                     nextNodeId: 'pragmatic_verification',
                     effect: {
-                        grantCurrency: 20,
-                        setFlag: 'trader_pragmatic_partner'
+                        grantCurrency: 20
                     },
                 },
             ],

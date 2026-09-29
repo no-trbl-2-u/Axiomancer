@@ -89,9 +89,8 @@ npm run game -- --script automation/scripts/walkthroughs/<name>.json  # direct r
 | `character-sheet` | Character tab rendering (Phase 26 unit 3) | apprentice | — |
 | `endgame-loadout` | **Phase 64** — Tier 3 card (`bootstrap-paradox`) + boss combat | sage | coastal-tyrant |
 | `item-use` | In-combat `item` action consuming a `healing-potion` | wanderer | sandbag (debug) |
-| `map-events` | Map tab + `resolveMapEvent` dispatcher firing on `fv-2` | apprentice | — |
-| `save-load` | Save / Load tabs + `--save-file` slot + Phase 31 fv-1 → fv-2 → fv-3 rollback | apprentice | — |
-| `shop` | Phase 37 `buyItem` / `sellItem` round-trip + `defaultSellPrice` invariant | wanderer | — |
+| `map-events` | Map tab + `resolveMapEvent` dispatcher firing on `bw-4` (a gathering) | apprentice | — |
+| `save-load` | Save / Load tabs + `--save-file` slot + bw-1 → bw-4 → bw-5 rollback | apprentice | — |
 | `skill-learning` | Character-tab Learn prompt (Phase 30 unit 3) | wanderer | — |
 | `skills-in-combat` | In-combat `card` action with `ad-hominem-strike` | wanderer | wet-hound (debug) |
 | `stat-allocation` | Phase 29 stat-allocation prompt loop driven by post-combat level-ups | sage | coastal-tyrant |
@@ -135,12 +134,10 @@ the full inventory + exit expectations.
    (`hpGate { belowPct: 0.4 }`, `requiredStances: ['heart']`,
    `roundsThreshold: 5`).
 
-Two normal-tier befriendable enemies ship authored content today
-(Phase 60 + 65) — both default to the Phase 36 mechanic:
-
-- **MournfulGull** at `fv-15` (gull crag, harbor district dead-end
-  via `fv-11` → `fv-14`).
-- **HollowEyedBeggar** at `fv-18` (back alley, inland streets).
+The befriendable enemies this section once listed (MournfulGull,
+HollowEyedBeggar, on fishing-village nodes) were retired in R2a with the
+roster, and their map was purged in R3b. The Open Hand becomes the one real
+befriend in R4.
 
 CoastalTyrant ships only the Phase 68 predicate today; the matching
 `friendshipReward` content (multi-paragraph narrative + boss-tier

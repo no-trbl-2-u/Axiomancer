@@ -8,6 +8,11 @@
  * this way before this phase. `auditNarrativeReachability` is the
  * structural guard; this file is the hermetic invariant test over the
  * whole registry, mirroring `e2e/map-traversal.engine.test.ts`.
+ *
+ * R3c pinned it to Act 1 (D53): the four Act 1 maps are the playable world,
+ * they carry no NPC roster, and nothing on them starts a quest or sets a
+ * story flag. The parked maps (northern-forest and the northern continent)
+ * stay registered and audited, code kept.
  */
 
 import { describe, expect, it } from 'vitest';
@@ -24,10 +29,43 @@ const ALL_MAPS: MapDefinition[] = Object.values(MAP_REGISTRY)
     .flatMap(maps => Object.values(maps))
     .filter((def): def is MapDefinition => def !== undefined);
 
-describe('narrative reachability — registry-wide invariant', () => {
-    it('registers at least the two coastal maps', () => {
-        expect(ALL_MAPS.map(d => d.name)).toEqual(expect.arrayContaining(['breakwater', 'northern-forest']));
+const ACT1_MAPS = ['breakwater', 'charcoal-wood', 'beacon-crags', 'lantern-deep'] as const;
+
+describe('narrative reachability — pinned to Act 1 (R3c)', () => {
+    it('registers the four Act 1 maps', () => {
+        expect(ALL_MAPS.map(d => d.name)).toEqual(expect.arrayContaining([...ACT1_MAPS]));
     });
+
+    for (const name of ACT1_MAPS) {
+        describe(name, () => {
+            const def = ALL_MAPS.find(d => d.name === name)!;
+
+            it('audits clean: no unresolved interaction, lost NPC or scenery-as-people', () => {
+                const audit = auditNarrativeReachability(def);
+                expect(audit.unresolvedInteractions).toEqual([]);
+                expect(audit.unreachableNpcs).toEqual([]);
+                expect(audit.sceneryAsPeople).toEqual([]);
+            });
+
+            it('carries no NPC roster and no quests', () => {
+                expect(def.npcs ?? []).toEqual([]);
+                expect(def.quests ?? []).toEqual([]);
+            });
+
+            it('no node event starts a quest or sets a story flag', () => {
+                // R3c deleted the unstartable quests and unread flags; in Act 1
+                // there are none left to read, so none may be written.
+                for (const node of def.nodes) {
+                    const pool = getNodeEventPool(def.continent, def.name, node.id);
+                    const text = JSON.stringify(pool?.entries ?? []);
+                    expect(text, `${name} ${node.id}`).not.toMatch(/"(startQuest|setFlag)"/);
+                }
+            });
+        });
+    }
+});
+
+describe('narrative reachability — registry-wide invariant', () => {
 
     for (const def of ALL_MAPS) {
         describe(def.name, () => {
@@ -48,7 +86,7 @@ describe('narrative reachability — registry-wide invariant', () => {
     }
 });
 
-describe('northern-forest — Phase 53a mismatch repairs', () => {
+describe('northern-forest (parked, D53) — Phase 53a mismatch repairs', () => {
     it('nf-7 resolves to Hermit Sage with a dialogue tree attached', () => {
         const pool = getNodeEventPool('coastal-continent', 'northern-forest', 'nf-7');
         const entry = pool?.entries.find(e => e.payload.kind === 'interaction');

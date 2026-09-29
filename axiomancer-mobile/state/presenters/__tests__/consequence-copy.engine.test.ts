@@ -37,15 +37,15 @@ describe('consequenceLabel', () => {
         expect(consequenceLabel({ kind: 'flag', label: 'marrow_pressed' })).toBe('');
     });
 
-    it('renders quest-start — the chip Old Marrow\'s accept reply needs', () => {
-        expect(consequenceLabel({ kind: 'quest-start', label: 'starting-quest' })).toBe(
-            'new errand · The King of Revenge',
+    it('renders quest-start as the errand\'s title', () => {
+        expect(consequenceLabel({ kind: 'quest-start', label: 'gather-wood' })).toBe(
+            'new errand · Deadfall',
         );
     });
 
     it('renders quest-progress and card-learn without echoing the id', () => {
-        expect(consequenceLabel({ kind: 'quest-progress', label: 'starting-quest' })).toBe(
-            'errand · The King of Revenge',
+        expect(consequenceLabel({ kind: 'quest-progress', label: 'gather-wood' })).toBe(
+            'errand · Deadfall',
         );
         expect(consequenceLabel({ kind: 'card-learn', label: 'thin-hymn' })).toBe(
             'new card · Thin Hymn',

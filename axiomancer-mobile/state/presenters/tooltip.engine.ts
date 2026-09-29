@@ -200,8 +200,8 @@ const MAP_NODE_CONTENT: Record<string, TooltipContent> = {
     },
     blacksmith: {
         title: 'THE ANVIL',
-        body: 'a smith for your dice. pay to hone a face, temper a payload, or swap gear; the forge takes coin and gives no refunds.',
-        footnote: 'no combat · costs coin',
+        body: 'a smith for your dice. pay to hone a face, temper a payload, or swap gear; the forge takes shillings and gives no refunds.',
+        footnote: 'no combat · costs shillings',
     },
     village: {
         title: 'VILLAGE',
