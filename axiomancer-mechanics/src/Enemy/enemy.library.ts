@@ -248,8 +248,6 @@ export const EnemiesByMap = {
     'charcoal-wood': ACT1_POOL,
     'beacon-crags': ACT1_POOL,
     'lantern-deep': ACT1_POOL,
-    // Purged in R3b.
-    'fishing-village': ACT1_POOL,
     // Parked (D53).
     'northern-forest': PARKED_POOL,
     'caverns': PARKED_POOL,

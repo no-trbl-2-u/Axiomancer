@@ -2,9 +2,12 @@
  * MapEvents 'travel' kind (2026-08-28 — inter-map travel) — hermetic e2e
  * at the highest public entry point.
  *
- * The doors under test are the two authored in `content.ts`:
- *   fv-10 (the coast road out of the village)  → coastal / northern-forest
+ * The doors under test are authored in `content.ts`:
+ *   bw-18 (the Breakwater's river bridge)       → coastal / charcoal-wood
  *   nf-10 (the cave mouth at the forest's edge) → northern / caverns
+ * and the parked northern chain beyond it. The parked arc (northern-forest
+ * onward) is entered by starting a game on northern-forest: no Act 1 door
+ * leads there since fishing-village was purged (R3b).
  *
  * The design call, decided: the world is a PLACE the player moves around
  * in. Departing a map preserves its runtime `MapState` under
@@ -36,94 +39,83 @@ function seatAt(state: GameState, nodeId: string): GameState {
     };
 }
 
-/** A fresh game standing on the fv-10 door. */
-function atCoastRoad(): GameState {
+/** A fresh game standing on the Breakwater's river bridge (bw-18). */
+function atRiverBridge(): GameState {
     mockSequentialRng(0.5);
-    return seatAt({ ...createNewGameState(), world: createStartingWorld('fishing-village') }, 'fv-10');
+    return seatAt({ ...createNewGameState(), world: createStartingWorld('breakwater') }, 'bw-18');
 }
 
-describe("the fv-10 door — village → northern-forest (same continent)", () => {
-    it('crosses the world to northern-forest and reports where it led', () => {
-        const result = resolveMapEvent(atCoastRoad());
+/** A fresh game started on the parked northern-forest, at its treeline. */
+function inForest(): GameState {
+    mockSequentialRng(0.5);
+    return { ...createNewGameState(), world: createStartingWorld('northern-forest') };
+}
+
+describe("the bw-18 door — Breakwater → Charcoal Wood (same continent)", () => {
+    it('crosses the world to the Charcoal Wood and reports where it led', () => {
+        const result = resolveMapEvent(atRiverBridge());
 
         expect(result.event.kind).toBe('travel');
         if (result.event.kind === 'travel') {
             expect(result.event.destinationContinent).toBe('coastal-continent');
-            expect(result.event.destinationMap).toBe('northern-forest');
+            expect(result.event.destinationMap).toBe('charcoal-wood');
             expect(result.event.description).toBeTruthy();
         }
 
         const world = result.state.world;
-        expect(world.currentMap.name).toBe('northern-forest');
-        expect(world.currentMap.currentNode).toBe('nf-1');
+        expect(world.currentMap.name).toBe('charcoal-wood');
+        expect(world.currentMap.currentNode).toBe('cw-1');
         expect(world.currentContinent.name).toBe('coastal-continent');
     });
 
-    it('marks the departed village completed and unlocks the forest — catalogue in sync', () => {
-        const { state } = resolveMapEvent(atCoastRoad());
+    it('marks the departed Breakwater completed and unlocks the wood — catalogue in sync', () => {
+        const { state } = resolveMapEvent(atRiverBridge());
 
-        expect(state.world.currentContinent.completedMaps).toContain('fishing-village');
-        expect(state.world.currentContinent.availableMaps).toContain('northern-forest');
-        expect(state.world.currentContinent.lockedMaps).not.toContain('northern-forest');
+        expect(state.world.currentContinent.completedMaps).toContain('breakwater');
+        expect(state.world.currentContinent.availableMaps).toContain('charcoal-wood');
+        expect(state.world.currentContinent.lockedMaps).not.toContain('charcoal-wood');
 
         // The catalogue entry and currentContinent must agree.
         const catalogued = state.world.world.find(c => c.name === 'coastal-continent')!;
         expect(catalogued).toEqual(state.world.currentContinent);
     });
 
-    it('preserves the departed MapState — the village is a place, not a checklist', () => {
-        const before = atCoastRoad();
+    it('preserves the departed MapState — the Breakwater is a place, not a checklist', () => {
+        const before = atRiverBridge();
         const departed = before.world.currentMap;
         const { state } = resolveMapEvent(before);
 
-        const preserved = state.world.mapStates?.['fishing-village'];
+        const preserved = state.world.mapStates?.['breakwater'];
         expect(preserved).toBeDefined();
         expect(preserved).toEqual(departed);
         // The door itself was never consumed — repeatable by design.
-        expect(preserved!.consumedNodes).not.toContain('fv-10');
+        expect(preserved!.consumedNodes).not.toContain('bw-18');
     });
 
     it('is repeatable — standing on the preserved door and resolving travels again', () => {
-        const first = resolveMapEvent(atCoastRoad());
-        const preserved = first.state.world.mapStates!['fishing-village'] as MapState;
+        const first = resolveMapEvent(atRiverBridge());
+        const preserved = first.state.world.mapStates!['breakwater'] as MapState;
 
-        // Put the player back on the preserved village (as a future
+        // Put the player back on the preserved Breakwater (as a future
         // return-door would) and resolve the door node again.
         const back: GameState = {
             ...first.state,
             world: {
                 ...first.state.world,
                 currentMap: preserved,
-                mapStates: { ...first.state.world.mapStates, 'fishing-village': undefined },
+                mapStates: { ...first.state.world.mapStates, 'breakwater': undefined },
             },
         };
         const second = resolveMapEvent(back);
         expect(second.event.kind).toBe('travel');
-        expect(second.state.world.currentMap.name).toBe('northern-forest');
-    });
-
-    it("completes get-to-forest: the door makes reach/nf-1 tick on arrival's own resolution", () => {
-        const fresh = atCoastRoad();
-        const quest = getMapDefinition('coastal-continent', 'fishing-village')
-            .quests!.find(q => q.name === 'get-to-forest')!;
-        const questing: GameState = { ...fresh, quests: startQuest(fresh.quests, quest) };
-
-        const travelled = resolveMapEvent(questing).state;
-        expect(travelled.quests.completed).not.toContain('get-to-forest');
-
-        // Arriving on nf-1 (unconsumed on the fresh forest) resolves the
-        // arrival cutscene; the reach objective ticks before the pool roll.
-        const arrived = resolveMapEvent(travelled);
-        expect(arrived.state.quests.completed).toContain('get-to-forest');
+        expect(second.state.world.currentMap.name).toBe('charcoal-wood');
     });
 });
 
 describe('the nf-10 door — forest → caverns (cross-continent)', () => {
     function atCaveMouth(): GameState {
-        // Walk the real arc: through the fv-10 door first, then seat on the
-        // forest's cave mouth.
-        const throughVillage = resolveMapEvent(atCoastRoad()).state;
-        return seatAt(throughVillage, 'nf-10');
+        // Start on the forest, then seat on its cave mouth.
+        return seatAt(inForest(), 'nf-10');
     }
 
     it('switches continent, unlocks the caverns, and lands on nc-1', () => {
@@ -141,14 +133,11 @@ describe('the nf-10 door — forest → caverns (cross-continent)', () => {
         const { state } = resolveMapEvent(atCaveMouth());
 
         const coastal = state.world.world.find(c => c.name === 'coastal-continent')!;
-        expect(coastal.completedMaps).toEqual(
-            expect.arrayContaining(['fishing-village', 'northern-forest']),
-        );
+        expect(coastal.completedMaps).toContain('northern-forest');
         const northern = state.world.world.find(c => c.name === 'northern-continent')!;
         expect(northern).toEqual(state.world.currentContinent);
 
-        // Both departed maps ride along, preserved.
-        expect(state.world.mapStates?.['fishing-village']?.name).toBe('fishing-village');
+        // The departed forest rides along, preserved.
         expect(state.world.mapStates?.['northern-forest']?.currentNode).toBe('nf-10');
     });
 
@@ -161,7 +150,7 @@ describe('the nf-10 door — forest → caverns (cross-continent)', () => {
         expect(loaded.version).toBe(GAME_STATE_VERSION);
         expect(loaded.world.currentContinent.name).toBe('northern-continent');
         expect(loaded.world.currentMap.name).toBe('caverns');
-        expect(loaded.world.mapStates?.['fishing-village']).toBeDefined();
+        expect(loaded.world.mapStates?.['northern-forest']).toBeDefined();
         expect(loaded.world.world.map(c => c.name)).toEqual(
             ['coastal-continent', 'northern-continent'],
         );
@@ -169,10 +158,9 @@ describe('the nf-10 door — forest → caverns (cross-continent)', () => {
 });
 
 describe('the nc-26 door — caverns → northern-city (Phase W3)', () => {
-    /** Walk the real arc through both earlier doors, then seat on nc-26. */
+    /** Walk the real arc through the forest's door, then seat on nc-26. */
     function atUnderGate(): GameState {
-        const throughVillage = resolveMapEvent(atCoastRoad()).state;
-        const throughForest = resolveMapEvent(seatAt(throughVillage, 'nf-10')).state;
+        const throughForest = resolveMapEvent(seatAt(inForest(), 'nf-10')).state;
         return seatAt(throughForest, 'nc-26');
     }
 
@@ -235,8 +223,7 @@ describe('the nc-26 door — caverns → northern-city (Phase W3)', () => {
 describe('the ncy-26 door — northern-city → connecting-river (Phase W4)', () => {
     /** Walk the real arc through every earlier door, then seat on ncy-26. */
     function atWaterGate(): GameState {
-        const throughVillage = resolveMapEvent(atCoastRoad()).state;
-        const throughForest = resolveMapEvent(seatAt(throughVillage, 'nf-10')).state;
+        const throughForest = resolveMapEvent(seatAt(inForest(), 'nf-10')).state;
         const throughCaverns = resolveMapEvent(seatAt(throughForest, 'nc-26')).state;
         return seatAt(throughCaverns, 'ncy-26');
     }
@@ -270,8 +257,7 @@ describe('the ncy-26 door — northern-city → connecting-river (Phase W4)', ()
 
 describe('the cr-13 door — connecting-river → town-across-river (Phase W4)', () => {
     function atFarBankGate(): GameState {
-        const throughVillage = resolveMapEvent(atCoastRoad()).state;
-        const throughForest = resolveMapEvent(seatAt(throughVillage, 'nf-10')).state;
+        const throughForest = resolveMapEvent(seatAt(inForest(), 'nf-10')).state;
         const throughCaverns = resolveMapEvent(seatAt(throughForest, 'nc-26')).state;
         const throughCity = resolveMapEvent(seatAt(throughCaverns, 'ncy-26')).state;
         return seatAt(throughCity, 'cr-13');
@@ -306,8 +292,7 @@ describe('the cr-13 door — connecting-river → town-across-river (Phase W4)',
 
 describe('the tar-7 door — town-across-river → the-capital (Phase W5)', () => {
     function atRibbonRoad(): GameState {
-        const throughVillage = resolveMapEvent(atCoastRoad()).state;
-        const throughForest = resolveMapEvent(seatAt(throughVillage, 'nf-10')).state;
+        const throughForest = resolveMapEvent(seatAt(inForest(), 'nf-10')).state;
         const throughCaverns = resolveMapEvent(seatAt(throughForest, 'nc-26')).state;
         const throughCity = resolveMapEvent(seatAt(throughCaverns, 'ncy-26')).state;
         const throughRiver = resolveMapEvent(seatAt(throughCity, 'cr-13')).state;

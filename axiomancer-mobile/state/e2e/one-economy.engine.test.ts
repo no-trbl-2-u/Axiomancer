@@ -33,7 +33,7 @@ function makeEnemy(level = 1) {
         description: 'Stub for tests.',
         level,
         baseStats: { heart: 1, body: 1, mind: 1 },
-        mapName: 'fishing-village' as never,
+        mapName: 'breakwater',
         logic: 'random' as never,
     });
 }

@@ -43,7 +43,7 @@ describe('Phase 51 — autosave throttling restricts adapter.save to DURABLE_ACT
         mockAlternatingRng();
 
         const adapter = countingAdapter();
-        const store = createGameStore(adapter, { player: Player, world: createStartingWorld('fishing-village') });
+        const store = createGameStore(adapter, { player: Player, world: createStartingWorld('breakwater') });
 
         // START_COMBAT — not in durable set.
         store.getState().dispatch({
@@ -64,7 +64,7 @@ describe('Phase 51 — autosave throttling restricts adapter.save to DURABLE_ACT
 
     it('START_COMBAT alone is not a durable action — saves stays 0', () => {
         const adapter = countingAdapter();
-        const store = createGameStore(adapter, { player: Player, world: createStartingWorld('fishing-village') });
+        const store = createGameStore(adapter, { player: Player, world: createStartingWorld('breakwater') });
 
         // Enter combat (not a durable action — saves stays 0).
         store.getState().dispatch({
@@ -76,13 +76,13 @@ describe('Phase 51 — autosave throttling restricts adapter.save to DURABLE_ACT
 
     it('MOVE_TO_NODE and SAVE_GAME both trigger adapter.save; LOAD_GAME does not', () => {
         const adapter = countingAdapter();
-        const store = createGameStore(adapter, { player: Player, world: createStartingWorld('fishing-village') });
+        const store = createGameStore(adapter, { player: Player, world: createStartingWorld('breakwater') });
 
-        // MOVE_TO_NODE — durable. fv-2 is the only node adjacent to the
-        // Coastal-Village starting node (fv-1).
+        // MOVE_TO_NODE — durable. bw-4 (a gathering node) is adjacent to
+        // the Breakwater starting node (bw-1).
         store.getState().dispatch({
             type: 'MOVE_TO_NODE',
-            payload: { nodeId: 'fv-2' },
+            payload: { nodeId: 'bw-4' },
         });
         expect(adapter.saves).toBe(1);
 
@@ -107,7 +107,7 @@ describe('Phase 51 — autosave throttling restricts adapter.save to DURABLE_ACT
             ...Player,
             experience: 10000,
         };
-        const store = createGameStore(adapter, { player: seededPlayer, world: createStartingWorld('fishing-village') });
+        const store = createGameStore(adapter, { player: seededPlayer, world: createStartingWorld('breakwater') });
 
         // LEVEL_UP — durable.
         store.getState().dispatch({ type: 'LEVEL_UP' });
@@ -126,7 +126,7 @@ describe('Phase 51 — autosave throttling restricts adapter.save to DURABLE_ACT
 
     it('explicit store.save() verb writes unconditionally (bypasses DURABLE_ACTIONS)', () => {
         const adapter = countingAdapter();
-        const store = createGameStore(adapter, { player: Player, world: createStartingWorld('fishing-village') });
+        const store = createGameStore(adapter, { player: Player, world: createStartingWorld('breakwater') });
 
         // No actions dispatched — saves stays 0.
         expect(adapter.saves).toBe(0);

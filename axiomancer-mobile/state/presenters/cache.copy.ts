@@ -36,7 +36,3 @@ export function cacheOutcomeItemChip(itemName: string): string {
 export function cacheOutcomeCurrencyChip(currency: number): string {
     return `+${currency} SHILLINGS`;
 }
-
-export function cacheOutcomeGoodwillChip(mapLabel: string, count: number): string {
-    return `HELPED ${mapLabel.toUpperCase()} ${count} TIME${count === 1 ? '' : 'S'}`;
-}

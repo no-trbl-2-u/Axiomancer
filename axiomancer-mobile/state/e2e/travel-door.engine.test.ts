@@ -8,7 +8,7 @@
  * continent in the same stride.
  *
  * Pinned here, mirroring the minigame-routing suite:
- *   - fv-10 (the fishing-village door) → northern-forest; event slice
+ *   - bw-18 (the Breakwater's river bridge) → charcoal-wood; event slice
  *     stays empty, no paced /event route, arrival toast fires
  *   - the arrival map's start node is NOT consumed by the mobile-side
  *     consume bookkeeping (the engine dispatcher already short-circuits
@@ -38,15 +38,15 @@ function seatAt(continent: ContinentName, map: MapName, node: string, adapter = 
 }
 
 describe('inter-map travel doors (Phase W1)', () => {
-    it('fv-10 walks the run onto northern-forest with a toast, no event card, and a checkpoint save', () => {
+    it('bw-18 walks the run onto charcoal-wood with a toast, no event card, and a checkpoint save', () => {
         const adapter = createMemoryAdapter();
-        const { store, actions } = seatAt('coastal-continent', 'fishing-village', 'fv-10', adapter);
+        const { store, actions } = seatAt('coastal-continent', 'breakwater', 'bw-18', adapter);
         const savesBefore = adapter.saveCount;
 
         expect(actions.resolveCurrentMapEvent('travel')).toBe(true);
 
         const after = store.getState();
-        expect(after.world.currentMap.name).toBe('northern-forest');
+        expect(after.world.currentMap.name).toBe('charcoal-wood');
         expect(selectHasActiveEvent(after)).toBe(false);
         expect(selectPacedEventRoute(after)).toBeNull();
         expect(after.notifications?.toast?.text).toMatch(/You cross into/);
@@ -56,12 +56,12 @@ describe('inter-map travel doors (Phase W1)', () => {
     });
 
     it('the arrival map start node is not consumed by the crossing', () => {
-        const { store, actions } = seatAt('coastal-continent', 'fishing-village', 'fv-10');
+        const { store, actions } = seatAt('coastal-continent', 'breakwater', 'bw-18');
 
         actions.resolveCurrentMapEvent('travel');
 
         const map = store.getState().world.currentMap;
-        expect(map.name).toBe('northern-forest');
+        expect(map.name).toBe('charcoal-wood');
         expect(map.consumedNodes ?? []).not.toContain(map.currentNode);
     });
 

@@ -28,13 +28,13 @@ import type { Consumable } from '../types';
 // Pool registration lives in `content.ts`; import for side effect.
 import '../../World/MapEvents/content';
 
-// The starting map (fishing-village) is now a combat gauntlet with no shop;
-// the surviving authored village/shop is northern-forest's Glen Market (nf-8).
+// No Act 1 map carries a village; the surviving authored village/shop is the
+// parked northern-forest's Glen Market (nf-8).
 function freshWorldAt(
-    mapName: 'fishing-village' | 'northern-forest' = 'northern-forest',
+    mapName: 'northern-forest' = 'northern-forest',
     nodeId = 'nf-8',
 ): GameState {
-    const base: GameState = { ...createNewGameState(), world: createStartingWorld('fishing-village') };
+    const base: GameState = { ...createNewGameState(), world: createStartingWorld('northern-forest') };
     const def = getMapDefinition('coastal-continent', mapName);
     const map: MapState = createMapState(def);
     const player = createCharacter({

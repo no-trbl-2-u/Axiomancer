@@ -6,7 +6,7 @@ An encounter node resolves to a `combat-prelude` event that renders **in place o
 
 ## 2. Enter it directly
 
-- Fixture: `/exploration?fixture=sage-fv-boss-gate` — Sage L15 on fv-9, boss node **fv-24** one step away (tutorial flags set). No `arrive`, so you land on the map; tap `node-fv-24` → `node-confirm-go`. `fresh-start` gives the untutored first fight (tap the first glowing node).
+- Fixture: `/exploration?fixture=sage-bw-door-gate` — Sage L15 on bw-15, door fight **bw-17** one step away (tutorial flags set). No `arrive`, so you land on the map; tap `node-bw-17` → `node-confirm-go`. `fresh-start` gives the untutored first fight (tap the first glowing node).
 - `/dev` → `debug-trigger-encounter-encounter` (gentlest foe) or `debug-trigger-encounter-boss`; `debug-enemy-map-<map>` then `debug-enemy-<enemyId>` for a specific foe. Both push `/(tabs)/exploration` and fire the prelude.
 - Sandbox: `/combat-encounter?seed=N&tutorial=1` (mock foe, nothing persists; `debug-combat-encounter-button` / `debug-combat-tutorial-button`). Renders `combat-encounter-empty` if the sandbox cannot build.
 - Aftermath panels alone: `/devaftermath?panel=defeat|parley` (`devaftermath-panel`).

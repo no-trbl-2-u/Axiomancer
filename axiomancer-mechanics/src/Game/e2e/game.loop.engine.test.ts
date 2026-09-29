@@ -9,7 +9,7 @@
  *   3. the Hazard-Pattern driver decides the fight outside the store
  *   4. endCombat('victory') — loot + XP applied
  *   5. LEVEL_UP — confirms the placeholder level-up reducer (Phase 09 brief)
- *   6. MOVE_TO_NODE to fv-2
+ *   6. MOVE_TO_NODE to bw-4
  *   7. SAVE_GAME (via the memory adapter)
  *   8. LOAD_GAME — round-trip through `migrate()`
  *
@@ -58,7 +58,7 @@ describe('Game loop — full transcript through gameReducer', () => {
             ...Player,
             experience: Player.experienceToNextLevel - 1,
         };
-        const store = createGameStore(adapter, { player: seededPlayer, world: createStartingWorld('fishing-village') }, emitter);
+        const store = createGameStore(adapter, { player: seededPlayer, world: createStartingWorld('breakwater') }, emitter);
 
         // 1. START_COMBAT — stages the encounter in the store.
         store.getState().dispatch({
@@ -86,12 +86,12 @@ describe('Game loop — full transcript through gameReducer', () => {
         expect(store.getState().player.availableStatPoints)
             .toBe(pointsBefore + expectedGrant);
 
-        // 5. MOVE_TO_NODE to fv-2 (the adjacent quest-giver node).
+        // 5. MOVE_TO_NODE to bw-4 (a gathering node adjacent to the bw-1 start).
         store.getState().dispatch({
             type: 'MOVE_TO_NODE',
-            payload: { nodeId: 'fv-2' },
+            payload: { nodeId: 'bw-4' },
         });
-        expect(store.getState().world.currentMap.currentNode).toBe('fv-2');
+        expect(store.getState().world.currentMap.currentNode).toBe('bw-4');
 
         // 6. Snapshot for round-trip.
         const preSave: GameState = JSON.parse(JSON.stringify({
@@ -104,7 +104,6 @@ describe('Game loop — full transcript through gameReducer', () => {
             rngState:   store.getState().rngState,
             codex:      store.getState().codex,
             regionConsequences: store.getState().regionConsequences,
-            mapGoodwill: store.getState().mapGoodwill,
         }));
 
         // 7. SAVE_GAME (autosave already fired through the dispatch chain).
@@ -127,7 +126,7 @@ describe('Game loop — full transcript through gameReducer', () => {
 
 describe('gameReducer — pure path (no store)', () => {
     it('SAVE_GAME refreshes rngState; LOAD_GAME is a reducer-level no-op', () => {
-        const s = createNewGameState({ startMap: 'fishing-village' });
+        const s = createNewGameState({ startMap: 'breakwater' });
         // SAVE_GAME stamps a fresh `rngState` snapshot (Phase 11) — every other
         // field passes through unchanged.
         const afterSave = gameReducer(s, { type: 'SAVE_GAME' });
@@ -137,9 +136,9 @@ describe('gameReducer — pure path (no store)', () => {
     });
 
     it('MOVE_TO_NODE returns a new WorldState while keeping unrelated state intact', () => {
-        const s = createNewGameState({ startMap: 'fishing-village' });
-        const next = gameReducer(s, { type: 'MOVE_TO_NODE', payload: { nodeId: 'fv-2' } });
-        expect(next.world.currentMap.currentNode).toBe('fv-2');
+        const s = createNewGameState({ startMap: 'breakwater' });
+        const next = gameReducer(s, { type: 'MOVE_TO_NODE', payload: { nodeId: 'bw-4' } });
+        expect(next.world.currentMap.currentNode).toBe('bw-4');
         expect(next.player).toBe(s.player);
         expect(next.quests).toBe(s.quests);
     });
@@ -147,13 +146,13 @@ describe('gameReducer — pure path (no store)', () => {
 
 describe('migrate — version handling', () => {
     it('passes through a current-version payload unchanged', () => {
-        const s = createNewGameState({ startMap: 'fishing-village' });
+        const s = createNewGameState({ startMap: 'breakwater' });
         const out = migrate(s, GAME_STATE_VERSION, GAME_STATE_VERSION);
         expect(out).toEqual(s);
     });
 
     it('refuses payloads from a non-current runtime version', () => {
-        const s = createNewGameState({ startMap: 'fishing-village' });
+        const s = createNewGameState({ startMap: 'breakwater' });
         expect(() => migrate(s, GAME_STATE_VERSION + 1, GAME_STATE_VERSION))
             .toThrow(/not supported/);
     });

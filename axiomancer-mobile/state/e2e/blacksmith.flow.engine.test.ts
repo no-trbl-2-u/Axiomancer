@@ -53,27 +53,28 @@ function setCurrency(store: AppStore, currency: number): void {
     store.setState({ player: { ...state.player, currency } } as never);
 }
 
-/** Seat the player on `nodeId` of fishing-village, mirroring a reachable tap. */
+/** Seat the player on `nodeId` of the Breakwater, mirroring a reachable tap. */
 function seatAt(store: AppStore, nodeId: string): void {
     const base = store.getState() as unknown as GameState;
-    const map = createMapState(getMapDefinition('coastal-continent', 'fishing-village'));
+    const map = createMapState(getMapDefinition('coastal-continent', 'breakwater'));
     store.setState({
         world: { ...base.world, currentMap: { ...map, currentNode: nodeId } },
     } as never);
 }
 
 function firstBlacksmithNode(): string {
-    const def = getMapDefinition('coastal-continent', 'fishing-village');
+    const def = getMapDefinition('coastal-continent', 'breakwater');
     const node = def.nodes.find(
-        (n) => getNodePrimaryEventKind('coastal-continent', 'fishing-village', n.id) === 'blacksmith',
+        (n) => getNodePrimaryEventKind('coastal-continent', 'breakwater', n.id) === 'blacksmith',
     );
-    if (!node) throw new Error('no blacksmith node on fishing-village');
+    if (!node) throw new Error('no blacksmith node on the Breakwater');
     return node.id;
 }
 
 describe('blacksmith map interception', () => {
-    it('the authored fishing-village node opens "The Anvil", not a paced /event', () => {
+    it('the authored Breakwater node (bw-16) opens "The Anvil", not a paced /event', () => {
         const { store, actions } = makeStoreAndActions();
+        expect(firstBlacksmithNode()).toBe('bw-16');
         seatAt(store, firstBlacksmithNode());
 
         expect(actions.resolveCurrentMapEvent('blacksmith')).toBe(true);
@@ -86,9 +87,9 @@ describe('blacksmith map interception', () => {
     });
 
     it('there is exactly ONE blacksmith node on the first map (no invented cadence)', () => {
-        const def = getMapDefinition('coastal-continent', 'fishing-village');
+        const def = getMapDefinition('coastal-continent', 'breakwater');
         const count = def.nodes.filter(
-            (n) => getNodePrimaryEventKind('coastal-continent', 'fishing-village', n.id) === 'blacksmith',
+            (n) => getNodePrimaryEventKind('coastal-continent', 'breakwater', n.id) === 'blacksmith',
         ).length;
         expect(count).toBe(1);
     });

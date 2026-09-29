@@ -135,7 +135,7 @@ describe('DebugWorldTravel: travel', () => {
 
     it('offers every campaign map, marking the default start', () => {
         const tree = render(withProvider(makeStore(), <DebugWorldTravel />));
-        for (const m of ['breakwater', 'fishing-village', 'northern-forest', 'caverns', 'the-capital']) {
+        for (const m of ['breakwater', 'northern-forest', 'caverns', 'the-capital']) {
             expect(tree.queryByTestId(`debug-new-game-on-${m}`)).not.toBeNull();
         }
         expect(tree.queryByTestId('debug-new-game-on-aporia-colonnade')).toBeNull();

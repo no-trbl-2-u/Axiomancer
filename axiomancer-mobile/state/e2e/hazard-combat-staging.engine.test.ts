@@ -27,7 +27,7 @@ function encounterEvent(): ResolveMapEventResult {
         state: undefined as never,
         event: {
             kind: 'encounter',
-            encounter: { enemies: [createMockEncounterEnemy()], origin: 'fishing-village:fv-3' },
+            encounter: { enemies: [createMockEncounterEnemy()], origin: 'breakwater:bw-2' },
             isBoss: false,
         } as never,
     };

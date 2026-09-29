@@ -74,7 +74,7 @@ describe('mostRecentSlot — what CONTINUE resumes', () => {
 
 describe('display helpers', () => {
     it('formatMapName title-cases a map id', () => {
-        expect(formatMapName('fishing-village')).toBe('Fishing Village');
+        expect(formatMapName('charcoal-wood')).toBe('Charcoal Wood');
         expect(formatMapName('the-capital')).toBe('The Capital');
         expect(formatMapName(null)).toBe('Unknown Lands');
     });

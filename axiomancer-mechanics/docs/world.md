@@ -2,8 +2,8 @@
 
 > **Status:** frontier roaming (D1, 2026-09-21) and the map revamp (M3a–M4,
 > 2026-09-26/27) are live. A new game starts on the Breakwater, walks the
-> four Act 1 maps (Breakwater, Charcoal Wood, Beacon Crags, Lantern Deep),
-> and comes out at fishing-village. Every map lives in the continent-keyed
+> four Act 1 maps (Breakwater, Charcoal Wood, Beacon Crags, Lantern Deep).
+> fishing-village was purged in THE REVAMP R3b. Every map lives in the continent-keyed
 > registry, and node events are rolled from weighted pools
 > (`src/World/MapEvents/content.ts`). The branching dialogue and the
 > per-objective quest engine are unchanged from Spec 08.
@@ -72,7 +72,7 @@ interface GameState {
 
   | Continent | Maps |
   |---|---|
-  | `coastal-continent` | `breakwater`, `charcoal-wood`, `fishing-village`, `northern-forest` |
+  | `coastal-continent` | `breakwater`, `charcoal-wood`, `northern-forest` |
   | `northern-continent` | `beacon-crags`, `lantern-deep`, `caverns`, `northern-city`, `connecting-river`, `town-across-river`, `the-capital` |
   | `labyrinth-continent` | `aporia-colonnade`, `aporia-archive`, `aporia-proof` (THE APORIA, W-01) |
 
@@ -323,7 +323,8 @@ map, so the way on opens once the map is walked:
 
 ```
 breakwater (bw-18) → charcoal-wood (cw-20) → beacon-crags (bc-17)
-  → lantern-deep (ld-18) → fishing-village (fv-10) → northern-forest (nf-10)
+  → lantern-deep (ld-18, the deep stair — sealed since R3a)
+  [parked: northern-forest (nf-10)]
   → caverns (nc-26) → northern-city (ncy-26) → connecting-river (cr-13)
   → town-across-river (tar-7) → the-capital
 ```
@@ -345,11 +346,11 @@ overworld, `LabyrinthProgress.returnWorld` makes the snapshot durable so a
 save taken inside resumes there, and leaving puts the player back on
 `ld-15`. The node is never consumed, so the door can be used again.
 
-**Fishing-village** was the starting map before the revamp. It now comes
-after Act 1 and was retuned for that place in M3e. Its node-by-node history
-(Phases 23–65) is in git and in `plan/archive/`. Read live event content
-from `MapEvents/content.ts`, not from the static templates in
-`Continents/Coastal-Village/maps.ts`.
+**Fishing-village** was the starting map before the revamp, came after Act 1
+from M3e, and was purged in R3b (D53) with its NPCs, quests, event pools and
+the village goodwill system; save v29 scrubs it from old saves. Its
+node-by-node history (Phases 23–65) is in git and in `plan/archive/`. Read
+live event content from `MapEvents/content.ts`.
 
 ## MapEvents (Spec 23)
 
@@ -387,7 +388,7 @@ only node-event dispatcher.
   RNGs via `mockSequentialRng` / `mockFixedRng`.
 - **Migration.** Spec 23 shipped `resolveMapEvent` alongside the
   existing `processNode`. Phase 24 (commit `4b12e27`) migrated the
-  `fishing-village` + `northern-forest` content into per-node pool
+  `fishing-village` (purged in R3b) + `northern-forest` content into per-node pool
   overrides — see `src/World/MapEvents/content.ts` for the 20-node
   authoring map. Phase 25 removed the legacy `processNode` surface,
   the `MapEvent` / `MapEventType` types, and the `nodeEvents` /
@@ -396,18 +397,11 @@ only node-event dispatcher.
   authored source for map-event content; it registers through one
   idempotent `registerMapEventContent()` (self-invoked on import).
   Node overrides are **last-write-wins**, so two blocks authoring the
-  same `continent:map:node` silently diverge. `fishing-village` had
-  exactly that: a rich legacy block (Phase 23/24/65/115 — shops,
-  shrines, ferry slips) that the 2026-06 "new-player" override block
-  clobbered at module load, so the legacy `village`/`cutscene`/
-  `interaction` pools could never fire even via the CLI. Phase 161
-  removed the dead legacy fishing-village block — the **new-player
-  layout is the canonical fishing-village map** (combat-focused:
-  encounters + rest/gather/hazard + the pinned fv-6 boss; fv-15 was the
-  quest-board hook until Phase 61 retired it back to an encounter).
-  `northern-forest` is unshadowed and stays live; it carries
-  the `village`/`cutscene`/`interaction`/`loot-cache` kinds
-  fishing-village no longer authors, so the all-8-`MapEventKind`
+  same `continent:map:node` silently diverge (fishing-village's legacy
+  block was once clobbered that way; Phase 161 removed it, and R3b purged
+  the map). `northern-forest` is unshadowed and stays registered (parked);
+  it carries the `village`/`cutscene`/`interaction` kinds no Act 1 map
+  authors, so the all-`MapEventKind`
   invariant still holds. A no-shadow guard
   (`getShadowedNodeOverrideKeys()` +
   `src/World/MapEvents/e2e/content-parity.engine.test.ts`) fails the

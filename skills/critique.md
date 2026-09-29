@@ -66,12 +66,12 @@ CLI (`--fixture <id>`) and the Jest suites:
 
 | Screen | Fixture id | Lands on |
 |---|---|---|
-| NPC dialogue | `apprentice-fv-interaction` | `/dialogue` |
+| NPC dialogue | `apprentice-nf-interaction` | `/dialogue` |
 | Settlement + shop | `wanderer-nf-village` | `/village` |
 | Forest omen (cutscene) | `wanderer-nf-cutscene` | `/cutscene` |
-| Night-watch rest | `apprentice-fv-rest` | `/rest` |
+| Night-watch rest | `apprentice-bw-rest` | `/rest` |
 | Hazard minigame (late kit) | `l30-caverns-hazard-arrive` | `/hazard` |
-| Mid-campaign exploration hub | `sage-fv-boss-gate` | `/exploration` |
+| Mid-campaign exploration hub | `sage-bw-door-gate` | `/exploration` |
 
 - **Unattended transport** (`critique:drive`, §3.5) already carries
   these as `SCREENS` entries with a `fixture` key — nothing to do.

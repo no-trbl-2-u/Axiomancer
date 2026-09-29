@@ -2,7 +2,7 @@
  * Spec 07 — Encounter generator tests.
  *
  * Verifies:
- *   - Per-map node resolution (`fv-*` → fishing-village, `nf-*` → northern-forest).
+ *   - Per-map node resolution (`bw-*` → breakwater, `cw-*` → charcoal-wood).
  *   - Adaptive scaling bands per difficulty tier.
  *   - Difficulty filtering.
  *   - Encounter cloning (no canonical-library mutation).
@@ -18,7 +18,7 @@ import { Enemy } from '../Enemy/types';
 import { FloatEye, ENEMY_REGISTRY } from '../Enemy/enemy.library';
 import { MapNode } from './types';
 
-const fishingNode: MapNode = { id: 'fv-2', location: [0, 0], connectedNodes: [] };
+const coastNode:   MapNode = { id: 'bw-2', location: [0, 0], connectedNodes: [] };
 const forestNode:  MapNode = { id: 'cw-3', location: [0, 0], connectedNodes: [] };
 const unknownNode: MapNode = { id: 'zz-1', location: [0, 0], connectedNodes: [] };
 
@@ -88,11 +88,11 @@ describe('scaleEnemyToLevel', () => {
 
 describe('generateEncounter', () => {
     it('picks an enemy from the resolved map and stamps origin', () => {
-        const enc = generateEncounter(fishingNode, 1);
+        const enc = generateEncounter(coastNode, 1);
         expect(enc.enemies).toHaveLength(1);
-        // Parked maps hold the Act 1 pool (Float-Eye) until R3.
+        // The Act 1 pool is Float-Eye only (R2).
         expect(enc.enemies[0].id).toBe(FloatEye.id);
-        expect(enc.origin).toBe('fishing-village:fv-2');
+        expect(enc.origin).toBe('breakwater:bw-2');
     });
 
     it('throws for nodes whose map cannot be resolved', () => {
@@ -116,24 +116,24 @@ describe('generateEncounter', () => {
     });
 
     it('throws when the difficulty filter empties the pool', () => {
-        // No simple enemies on the fishing village beyond crab/wisp; pick a
-        // difficulty that doesn't exist there (`unique`).
-        expect(() => generateEncounter(fishingNode, 5, { difficulty: 'unique' })).toThrow();
+        // No unique enemy sits in the Breakwater's pool; filtering on
+        // `unique` empties it.
+        expect(() => generateEncounter(coastNode, 5, { difficulty: 'unique' })).toThrow();
     });
 
     it('the returned enemy is a fresh clone — combat mutations don\'t bleed back', () => {
-        const enc = generateEncounter(fishingNode, 1);
+        const enc = generateEncounter(coastNode, 1);
         const picked = enc.enemies[0];
         picked.health = 0;
-        const enc2 = generateEncounter(fishingNode, 1);
+        const enc2 = generateEncounter(coastNode, 1);
         expect(enc2.enemies[0].health).toBeGreaterThan(0);
     });
 
     it('every map pool draws a normal foe (the R2 pools are Float-Eye only)', () => {
         // Sanity check the library indices used by the generator.
-        const fishing = generateEncounter(fishingNode, 5, { difficulty: 'normal' });
+        const coast   = generateEncounter(coastNode, 5, { difficulty: 'normal' });
         const forest  = generateEncounter(forestNode,  5, { difficulty: 'normal' });
-        expect(fishing.enemies[0].difficulty).toBe('normal');
+        expect(coast.enemies[0].difficulty).toBe('normal');
         expect(forest.enemies[0].difficulty).toBe('normal');
     });
 });

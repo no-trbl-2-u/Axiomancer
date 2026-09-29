@@ -6,8 +6,7 @@
  * three drafts (D26). The first Act 1 map under `northern-continent` (D28): the
  * Charcoal Wood's stair cave crosses into it the way the shipped chain's
  * `nf-10` cave mouth crosses into the caverns, with a plain `travel` event. The
- * glacier shrine is the door on to fishing-village until the Act 1 underworld
- * ships (D27).
+ * glacier shrine is the door down into the Lantern Deep (M3d).
  *
  * One node per landmark on the plate (D25, `act1-landmarks.json`), and no
  * others. The engine graph is abstract (columns and lanes); the mobile layout

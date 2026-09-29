@@ -143,5 +143,18 @@ Doorwarden on `bw-17`, `cw-17`, `bc-15`, `ld-16`. R3 only checks it.
 
 ## Follow-ups (out of scope)
 
+- R3b carry-overs for R3c (hygiene): the loot-cache `sacrifice` offer now
+  grants nothing and its label still says "for the village" (a reward that
+  grants nothing: remove or re-point); the CLI walkthroughs `shop.json`,
+  `save-load.json`, `map-events.json`, `codex-unlock.json` and their goal
+  docs still route through `fv-*` nodes; `docs/quickstart.md` and
+  `docs/enemy.md` still describe purged befriend placements.
+- R3b carry-overs elsewhere: the Drowned Parish combat arena plate
+  (`assets/images/combat/coastal-village.webp`, its arena row, provenance,
+  art-sources and art-catalog entries) has no live region (R8, mobile
+  cleanup); `unlockCardViaDilemma` and the Ally registry lost their only
+  grant path (R7c, dead code); `.claude/agents/playtester.md` still names the
+  old `-fv-` fixture ids (attended residue).
+
 - R5 re-points shops and caches; R9 retunes the quest XP; B9 re-themes the
   Labyrinth; B10 cuts the dev menu's travel rows.

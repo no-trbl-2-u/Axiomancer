@@ -1,9 +1,10 @@
 /**
- * MapEvent pool content for fishing-village + northern-forest (Spec 24)
- * and, since 2026-08-28 (inter-map travel), the northern continent's maps
- * (caverns, northern-city, connecting-river, town-across-river, the-capital).
+ * MapEvent pool content for the Act 1 maps (breakwater, charcoal-wood,
+ * beacon-crags, lantern-deep), the parked northern-forest (Spec 24) and the
+ * parked northern continent's maps (caverns, northern-city,
+ * connecting-river, town-across-river, the-capital).
  *
- * Each authored node (fv-N / nf-N / nc-N / ncy-N / cr-N / tar-N / cap-N) gets a single-entry pool override
+ * Each authored node (bw-N / cw-N / bc-N / ld-N / nf-N / nc-N / ncy-N / cr-N / tar-N / cap-N) gets a single-entry pool override
  * so the dispatcher reproduces (and extends) the authored events
  * `processNode` used to fire. Every `MapEventKind` value is covered
  * at least once across the shipped maps.
@@ -220,8 +221,8 @@ const nfMossyClearing: MapEventPool = {
 
 // Phase 53d (S-01) — "The Crowning Witnessed", the third of S-01's four
 // dilemmas. Displaces the `jeweled-tree` encounter that formerly held this
-// node (dropped outright — no flag or pricing dependency, same call as
-// fv-16/fv-4 in `content.ts`'s fishing-village block). Northern-forest is
+// node (dropped outright — no flag or pricing dependency, the same call made
+// for fishing-village's fv-16/fv-4, purged in R3b). Northern-forest is
 // unreachable until inter-map travel exists, so this dilemma has no reader
 // yet; it ships anyway per S-01's answered ruling — splitting the spec
 // across two phases to chase reachability would leave it half-shipped
@@ -519,15 +520,9 @@ const nfMistPools: MapEventPool = {
 
 // ─── register everything on module load ───────────────────────────────────────
 //
-// Phase 161 — fishing-village content has ONE source of truth: the new-player
-// override block below. The legacy fishing-village pools (Phase 23/24/65/115
-// era) were registered here first and then silently clobbered by that block
-// (overrides are last-write-wins), so they could never fire even via the CLI.
-// They were removed; the new-player block is the authored fishing-village map.
-// northern-forest is unshadowed and remains the live source for its nodes — and
-// carries the only `village` kind (fishing-village authors the other kinds,
-// including `narration` and, since Phase 60, `blacksmith`). Together the two
-// maps cover every MapEventKind, preserving the all-kinds invariant.
+// northern-forest is parked (D53) but its pools stay registered; it carries the
+// `village` and `narration` kinds, and the Act 1 maps carry `blacksmith` since
+// R3b re-homed the anvil. Every MapEventKind stays covered across the maps.
 
 const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> = [
     // Existing pools (preserved)
@@ -559,90 +554,12 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
     { nodeId: 'nf-25', pool: nfMistPools        },
 ];
 
-// ─── New-player fishing-village override (2026-06, rebalanced for variety) ────
+// ─── Shared builders (Act 1) ─────────────────────────────────────────────────
 //
-// The first continent's STARTING map is combat-FOCUSED but no longer "all
-// battle" — a flat wall of identical encounters with no recovery was both
-// monotonous and unwinnable in playtests. The map now spreads 28 nodes across
-// a real mix:
-//   - 7 ENCOUNTER nodes  (3 regular + the fv-6 boss + THE THREE GATES
-//                         fv-26/27/28, 2026-09-21 — every route fights
-//                         three times before the breakwater; fv-15
-//                         rejoined this count in Phase 61, see below),
-//   - 4 REST nodes       (recover HP — the rest-choice node), one on the
-//                         spine just before the boss,
-//   - 2 GATHERING nodes  (low-risk materials — "The Gleaning"; was 3 until
-//                         adjust-npcs pass 12 staged the Village Healer
-//                         onto fv-22, see below),
-//   - 1 HAZARD node      (light risk — the hazard minigame; was 2 until
-//                         2026-08-28 turned fv-10, the terminal barnacle
-//                         hazard, into the coast-road DOOR — see TRAVEL),
-//   - 3 LOOT-CACHE nodes (a few coins the tide left behind),
-//   - 3 NARRATION nodes  (Phase 53d/S-01 — fv-14 "What Do I Tell Father?",
-//                         fv-16 "The Borrowed Hook", fv-4 "The Stranger's
-//                         Net"; each a dialogue-backed branching dilemma),
-//   - 5 INTERACTION nodes (Phase 53c — Old Marrow at fv-2, the Coastal
-//                         Beggar at fv-7, Captain Blackwater at fv-18, the
-//                         Fisherman's Daughter at fv-19; adjust-npcs pass 12
-//                         — the Village Healer at fv-22),
-//   - 1 CUTSCENE node    (fv-1, the arrival — see `fvArrival` below),
-//   - 1 BLACKSMITH node  (fv-21, Phase 60 — the re-homed anvil, post-boss
-//                         and past every loot-cache reward so the visit is
-//                         actually funded),
-//   - 1 TRAVEL node      (fv-10, the coast-road door north, 2026-08-28), and
-//   - 1 BOSS node        (fv-6, the region climax — an encounter w/ isBoss).
-// Phase 61 retired the Quest Board minigame ("The Boy's Almanac") and with
-// it fv-15's `quest` kind — no map carries that kind any more. fv-15
-// rejoins the encounter roster instead (see `FV_ENCOUNTER_FOES`'s fv-15
-// entry): the cleanest reversal of the very displacement Phase 53c/60
-// documented (an authored non-encounter kind always came FROM an encounter
-// slot; this is the first one going back). Interaction is now the map's
-// single largest kind at 5, rest and encounter tied behind it at 4 — Phase
-// 53d (S-01) spent two of the map's encounter surplus on dilemmas, Phase 60
-// spent a third (fv-21) on the anvil, and adjust-npcs pass 12 spent a
-// gathering slot (fv-22) on the Village Healer (see the spec's answered
-// Open Question 1: displacing an `encounter` node is the only reassignment
-// that doesn't grow the grid or merge two payloads onto one node — pass 12
-// displaced a `gathering` node instead, for the same reason: no roster foe
-// or flag/pricing dependency to orphan). This block supersedes the legacy
-// authored pools above (kept in source for reference). Foes stay
-// on the gentlest coastal roster, pinned at `FV_FIGHT_LEVEL`; the boss is
-// pinned at `FV_BOSS_LEVEL` (M3e: the map follows all of Act 1 now).
+// The builders the Act 1 maps share. They were fishing-village's until R3b
+// purged that map (D53); the pools and lines they build are unchanged.
 
-// Foes, assigned per node and ordered ALONG THE MAP rather than by node id.
-//
-// Pre-2026-08-08 this was a bare list consumed by a `foeIdx++` fall-through in
-// node-id order, so which foe a player met where was an accident of numbering:
-// the gentlest enemy sat on the start node nobody could reach, and the ramp
-// through the village ran backwards in places. The first-map audit made the
-// assignment explicit and monotonic — column 1 is the softest thing in the
-// village, column 9 the hardest thing short of the breakwater itself.
-const FV_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description?: string }> = {
-    // THE THREE GATES (2026-09-21, the grey office rebalance) — one choke
-    // before each open column. R2 (D48): every fight is Float-Eye until R3
-    // purges the map.
-    'fv-26': { slug: 'float-eye' },
-    'fv-27': { slug: 'float-eye',        description: 'A lidless thing drifts over the salt flats at head height, and it has already seen you.' },
-    'fv-28': { slug: 'float-eye' },
-    'fv-13': { slug: 'float-eye' },
-    'fv-15': { slug: 'float-eye' },
-    // c9 — the last thing between the player and the coast road.
-    'fv-24': { slug: 'float-eye' },
-};
-
-// Phase 60 — the re-homed anvil (see `BlacksmithPayload`'s doc comment in
-// `types.ts`). fv-21 sits post-boss (column 7 of 9, per `maps.ts`'s graph)
-// with real content still ahead of it (fv-24's encounter, two more columns
-// of texture) so an upgraded die gets used, and after every loot-cache /
-// quest-reward node on the map so the "roughly a full act's income" anvil
-// purchase (Phase 52f shilling calibration) is actually affordable by the
-// time the player reaches it. A single fixed placement, not a cadence —
-// mirrors the D6c precedent and the owner ruling recorded in `types.ts`.
-const FV_BLACKSMITH_NODES: Record<string, string> = {
-    'fv-21': 'A lean-to forge, coals still breathing. The smith looks up from the anvil and nods at your dice.',
-};
-
-function fvEncounterPool(nodeId: string, foe: { slug: EnemySlug; description?: string }): MapEventPool {
+function plainEncounterPool(nodeId: string, foe: { slug: EnemySlug; description?: string }): MapEventPool {
     return {
         id: `${nodeId}.encounter`,
         entries: [{
@@ -653,24 +570,23 @@ function fvEncounterPool(nodeId: string, foe: { slug: EnemySlug; description?: s
 }
 
 /**
- * Fishing-village rest nodes are the game's INNS (Phase 52b): tended,
- * paid shelter inside a settlement, and the only rests that mend
- * hazard-scarred max-VITAE.
+ * Inn rests (Phase 52b): tended, paid shelter inside a settlement, and the
+ * only rests that mend hazard-scarred max-VITAE.
  */
-function fvRestPool(nodeId: string, description: string): MapEventPool {
+function innRestPool(nodeId: string, description: string): MapEventPool {
     return {
         id: `${nodeId}.rest`,
         entries: [{ kind: 'rest', weight: 1, payload: { kind: 'rest', shelter: 'inn', description } }],
     };
 }
 
-const FV_GATHER_MATERIALS: ReadonlyArray<{ id: string; name: string; description: string }> = [
+const COAST_GATHER_MATERIALS: ReadonlyArray<{ id: string; name: string; description: string }> = [
     { id: 'driftwood',  name: 'Driftwood',       description: 'Salt-bleached and brittle, but burns clean.' },
     { id: 'tide-shell', name: 'Tide Shell',      description: 'Spiral and chalk-pale; the inside still smells of salt.' },
     { id: 'salt-fish',  name: 'Salt-Fish Strip', description: 'Cured hard; chewy, salty, will keep for the road.' },
     { id: 'kelp-frond', name: 'Kelp Frond',      description: 'Rubbery and green-black; useful steeped or dried.' },
 ];
-function fvGatheringPool(nodeId: string, mat: { id: string; name: string; description: string }, description: string): MapEventPool {
+function gatheringPool(nodeId: string, mat: { id: string; name: string; description: string }, description: string): MapEventPool {
     return {
         id: `${nodeId}.gathering`,
         entries: [{
@@ -684,7 +600,7 @@ function fvGatheringPool(nodeId: string, mat: { id: string; name: string; descri
     };
 }
 
-function fvHazardPool(nodeId: string, description: string): MapEventPool {
+function hazardPool(nodeId: string, description: string): MapEventPool {
     return {
         id: `${nodeId}.hazard`,
         entries: [{ kind: 'hazard', weight: 1, payload: { kind: 'hazard', damage: 2, description } }],
@@ -692,23 +608,22 @@ function fvHazardPool(nodeId: string, description: string): MapEventPool {
 }
 
 // Low-risk coastal scavenging — a few coins the tide or a dead sailor left.
-const FV_LOOT_CACHES: ReadonlyArray<{ currency: number; description: string }> = [
+const COAST_LOOT_CACHES: ReadonlyArray<{ currency: number; description: string }> = [
     { currency: 8,  description: 'A coin-purse snagged in the netting, its owner long gone.' },
     { currency: 12, description: 'A waterlogged strongbox wedged under the pilings.' },
     { currency: 6,  description: 'Loose coppers spill from a cracked jar in the rocks.' },
 ];
-function fvLootCachePool(nodeId: string, cache: { currency: number; description: string }): MapEventPool {
+function lootCachePool(nodeId: string, cache: { currency: number; description: string }): MapEventPool {
     return {
         id: `${nodeId}.loot-cache`,
         entries: [{ kind: 'loot-cache', weight: 1, payload: { kind: 'loot-cache', currency: cache.currency, description: cache.description } }],
     };
 }
 
-// Phase 60 — the re-homed anvil. A single fixed placement (owner-ruled, not a
-// cadence — mirrors the D6c precedent). Budget is a placeholder; the mobile
+// Phase 60 — the anvil's pool. Budget is a placeholder; the mobile
 // interceptor re-derives the real spend cap from the player's wallet
 // (`state/blacksmith/store-actions.ts`) the moment this event fires.
-function fvBlacksmithPool(nodeId: string, description: string): MapEventPool {
+function blacksmithPool(nodeId: string, description: string): MapEventPool {
     return {
         id: `${nodeId}.blacksmith`,
         entries: [{
@@ -718,378 +633,34 @@ function fvBlacksmithPool(nodeId: string, description: string): MapEventPool {
     };
 }
 
-function fvInteractionPool(nodeId: string, npcName: string, description: string): MapEventPool {
-    return {
-        id: `${nodeId}.interaction`,
-        entries: [{ kind: 'interaction', weight: 1, payload: { kind: 'interaction', npcName, description } }],
-    };
-}
-
-// A narration node (the dialogue-backed shell kind). "What Do I Tell Father?"
-// — the boy overhears Father counting coin for the boat, then faces a small
-// but real dilemma at dinner: tell the truth about the cost, spare him the
-// worry, or deflect with a joke. No choice is flagged "correct" by the
-// engine; each sets a flag a future Northern Forest node can react to.
-const fvFatherWorryDialogue: MapEventPool = {
-    id: 'fv-14.narration',
-    entries: [{
-        kind: 'narration', weight: 1,
-        payload: {
-            kind: 'narration',
-            description: 'Through the cottage wall, you hear Father counting coin under his breath.',
-            dialogue: {
-                id: 'fv-father-worry',
-                rootId: 'overhear',
-                nodes: {
-                    overhear: {
-                        id: 'overhear',
-                        text: '"Pitch, cloth, nails, a plank—sound enough to trust the lake..." Father\'s voice trails off through the wall. He is tired in a way you do not like. At dinner he asks, too lightly, "So. This boat of yours. What will it take, exactly?"',
-                        choices: [
-                            {
-                                text: 'Tell him everything — the whole plan, cost and all.',
-                                nextNodeId: 'told-truth',
-                                effect: { setFlag: 'boy-told-father-truth' },
-                            },
-                            {
-                                text: '"Oh, not much. I\'ll manage most of it myself."',
-                                nextNodeId: 'spared-worry',
-                                effect: { setFlag: 'boy-spared-father-worry' },
-                            },
-                            {
-                                text: '"A boat fit for a king, obviously." (grin)',
-                                nextNodeId: 'deflected',
-                                effect: { setFlag: 'boy-deflected-father' },
-                            },
-                        ],
-                    },
-                    'told-truth': {
-                        id: 'told-truth',
-                        text: 'Father listens all the way through, jaw tight, then nods slowly. "Then we\'ll find it. All of it." He doesn\'t smile, but he doesn\'t look away either.',
-                    },
-                    'spared-worry': {
-                        id: 'spared-worry',
-                        text: 'His shoulders ease, just slightly — the lie has done its work. "Good lad," he says, and you hate a little how relieved he sounds.',
-                    },
-                    deflected: {
-                        id: 'deflected',
-                        text: 'He barks a laugh despite himself, shakes his head, and lets the question go. Whatever he was carrying, he carries it alone a while longer.',
-                    },
-                },
-            },
-        },
-    }],
-};
-
-// ─── Phase 53d (S-01) — "The Borrowed Hook" and "The Stranger's Net" ─────────
+// ─── The Anvil, once per region (D61) ────────────────────────────────────────
 //
-// The other two of S-01's four dilemmas, authored to the same standard as
-// fv-14 above and shipped in spec 34 §2's ratified register from the first
-// draft (terse, present tense, one clause per line, no exclamation marks, no
-// explanatory parentheticals, no thee/thou). Both displace a plain
-// `encounter` node — the only kind either map carries a surplus of, per the
-// spec's answered Open Question 1 — and both sit strictly ahead of the
-// post-boss column (fv-18/fv-7/fv-19, column 6) that will read their flags
-// once Phase 53e lands the read-back web. Flags only.
-const fvBorrowedHookDialogue: MapEventPool = {
-    id: 'fv-16.narration',
-    entries: [{
-        kind: 'narration', weight: 1,
-        payload: {
-            kind: 'narration',
-            description: 'A brass hook glints half-buried in the tideline sand.',
-            dialogue: {
-                id: 'fv-borrowed-hook',
-                rootId: 'find',
-                nodes: {
-                    find: {
-                        id: 'find',
-                        text: 'A brass hook lies half-buried in the sand. No footprint near it but your own. It is worth more than anything in your house.',
-                        choices: [
-                            {
-                                text: 'Pocket it. No one will know.',
-                                nextNodeId: 'kept',
-                                effect: { setFlag: 'boy-kept-the-hook' },
-                            },
-                            {
-                                text: 'Leave it exactly where it lies.',
-                                nextNodeId: 'left',
-                                effect: { setFlag: 'boy-left-the-hook' },
-                            },
-                            {
-                                text: 'Carry it to Old Marrow. He will know whose it is.',
-                                nextNodeId: 'reported',
-                                effect: { setFlag: 'boy-reported-the-hook' },
-                            },
-                        ],
-                    },
-                    kept: {
-                        id: 'kept',
-                        text: 'The hook rides warm in your pocket the whole walk home. Every time you use it after, you check over your shoulder first.',
-                    },
-                    left: {
-                        id: 'left',
-                        text: 'You walk on. The sand closes over it behind you. Something in your chest sits a little straighter for the rest of the day.',
-                    },
-                    reported: {
-                        id: 'reported',
-                        text: 'Marrow turns the hook over in his hands, then nods once. He will ask along the docks. You leave with empty palms and a straighter back.',
-                    },
-                },
-            },
-        },
-    }],
+// R3b re-homes the one anvil fishing-village carried (`fv-21`, Phase 60) onto
+// one node near each Act 1 region's exit, a step from its door fight: the
+// Breakwater's fishing hamlet, the Charcoal Wood's well, the Beacon Crags'
+// falls and the Lantern Deep's forge (column 4). Same engine, budget, witness
+// variants and line; each replaces a gathering or hazard node.
+const ANVIL_LINE = 'A lean-to forge, coals still breathing. The smith looks up from the anvil and nods at your dice.';
+export const ACT1_ANVIL_NODES: Readonly<Record<string, string>> = {
+    'breakwater':    'bw-16',
+    'charcoal-wood': 'cw-18',
+    'beacon-crags':  'bc-12',
+    'lantern-deep':  'ld-14',
 };
-
-const fvStrangersNetDialogue: MapEventPool = {
-    id: 'fv-4.narration',
-    entries: [{
-        kind: 'narration', weight: 1,
-        payload: {
-            kind: 'narration',
-            description: 'A net has snagged on the rocks below the quay, someone else\'s catch still tangled in it.',
-            dialogue: {
-                id: 'fv-strangers-net',
-                rootId: 'find',
-                nodes: {
-                    find: {
-                        id: 'find',
-                        text: 'A net has drifted loose and caught on the rocks. Fish still tangle in the mesh, silver and real. The owner is nowhere in sight.',
-                        choices: [
-                            {
-                                text: 'Free the net. Carry it to whoever is missing it.',
-                                nextNodeId: 'returned',
-                                effect: { setFlag: 'boy-returned-the-net' },
-                            },
-                            {
-                                text: 'Take a few fish. Leave the rest. Say nothing.',
-                                nextNodeId: 'skimmed',
-                                effect: { setFlag: 'boy-skimmed-the-net' },
-                            },
-                            {
-                                text: 'Take the whole catch. Finders keepers.',
-                                nextNodeId: 'took',
-                                effect: { setFlag: 'boy-took-the-net' },
-                            },
-                        ],
-                    },
-                    returned: {
-                        id: 'returned',
-                        text: 'You ask along the quay until a hollow-cheeked woman from upriver claims it. She presses one fish back into your hands before you can refuse it.',
-                    },
-                    skimmed: {
-                        id: 'skimmed',
-                        text: 'Dinner is a little better that night. No one asks where it came from. You do not offer to say.',
-                    },
-                    took: {
-                        id: 'took',
-                        text: 'You eat well and nothing comes of it. Somewhere upriver a stranger returns to an empty net, and you do not think about that part for long.',
-                    },
-                },
-            },
-        },
-    }],
-};
-
-// The map's opening beat, on the node the player starts standing on.
-//
-// Pre-2026-08-08 the start node fell through to a regular ENCOUNTER pool that
-// no player ever saw: `createMapState` puts the player ON fv-1, and events
-// only resolve on ARRIVAL at a node, so fv-1's authored content was dead. The
-// first-map audit reclaimed the slot as the arrival cutscene — a kind that is
-// safe to fire the moment the map opens, unlike a fight the player has had no
-// chance to prepare for. Mobile resolves it on first mount of the exploration
-// screen; the CLI's `--resolve-start` flag has always done the same.
-const fvArrival: MapEventPool = {
-    id: 'fv-1.cutscene',
-    entries: [{
-        kind: 'cutscene', weight: 1,
-        payload: {
-            kind: 'cutscene',
-            lines: [
-                'Salt in the boards, salt in the bread, salt working its slow way into everything that stays.',
-                'The village lies along the water the way a rope lies where it was dropped. Nobody here has hauled a full net since the breakwater went quiet.',
-                // Phase 53c — the former closing line ("Three ways out of
-                // the yard…") moved into Old Marrow's greeting at fv-2; a
-                // man pointing at roads beats a narrator listing them.
-                'Whichever way you go, the breakwater is at the end of it.',
-            ],
-            description: 'You step out of the hovel into the grey of it.',
-        },
-    }],
-};
-
-// M3e (D35, 2026-09-26) — fishing-village now comes after all of Act 1, so it
-// follows the Act 1 elites (level 3-4) instead of dipping below them. Every
-// fight is pinned at 4, the late band of the Beacon Crags and the Lantern
-// Deep; the King at 5, one above the last Act 1 elite. Measured before the
-// move (grey office + 3 card rewards, greedy and blind, player level 3 at
-// 7/7/7, the level a full Act 1 clear banks): the six fights stay 100% at 4;
-// the King goes 99% at 3 to 91% at 5. The bare grey office loses to him at
-// every level from 3 to 6, so the pin does not move that floor.
-// `World/e2e/fishing-village-after-act1.engine.test.ts` pins the ordering.
-const FV_FIGHT_LEVEL = 4;
-const FV_BOSS_LEVEL = 5;
-const fvGauntletBoss: MapEventPool = {
-    id: 'fv-6.encounter-boss',
-    entries: [{
-        kind: 'encounter', weight: 1,
-        payload: {
-            kind: 'encounter',
-            enemySlug: 'the-doorwarden',
-            isBoss: true,
-            level: FV_BOSS_LEVEL,
-        },
-    }],
-};
-
-// Per-node kind assignment. Rest sits at fv-3 (spine, before the fv-6 boss) so
-// the player can heal before the climax; the rest of the kinds salt the map for
-// variety. Every node fv-1..fv-25 is assigned exactly once; anything not named
-// in these maps (and not the boss/quest/narration/interaction/arrival nodes)
-// must carry an explicit entry in `FV_ENCOUNTER_FOES` above — an unassigned
-// node now throws on import rather than silently drawing a rotation foe.
-const FV_REST_NODES: Record<string, string> = {
-    'fv-3':  'A fisher’s lean-to, the embers still warm. You stop to bind your wounds.',
-    'fv-9':  'A roofless cottage out of the wind. Enough shelter to catch your breath.',
-    'fv-20': 'A dry hollow under an upturned hull. You rest a while.',
-    'fv-25': 'A tide-pool grotto, still and warm. You let the quiet mend you.',
-};
-// adjust-npcs pass 12 (2026-09-18) — fv-22 (kelp-frond, idx 3) is dropped
-// from this table; see `fvVillageHealerInteraction` below.
-const FV_GATHER_NODES: Record<string, number> = { 'fv-5': 0, 'fv-8': 1 };
-// 2026-08-28 — fv-10, the spine's terminal "coast road out", was a hazard
-// (jagged barnacles); it is now the map's DOOR. fv-23 keeps the map's one
-// remaining hazard node.
-const FV_HAZARD_NODES: Record<string, string> = {
-    'fv-23': 'A gull-slick ledge crumbles underfoot above the rocks.',
-};
-
-// 2026-08-28 — inter-map travel. The door sits in the terminal column
-// (column 9), four columns past the fv-6 breakwater boss, so it opens only
-// after the fv-6 boss is dealt with — the same beat where Old Marrow
-// grants `get-to-forest`. Resolving it walks the player onto
-// northern-forest, whose start node nf-1 completes the quest's reach
-// objective on its own resolution.
-const fvCoastRoadNorth: MapEventPool = {
-    id: 'fv-10.travel',
-    entries: [{
-        kind: 'travel', weight: 1,
-        payload: {
-            kind: 'travel',
-            destinationContinent: 'coastal-continent',
-            destinationMap: 'northern-forest',
-            description: 'The coast road runs out of village to run out of. North, past the last shacks, the pines take it. You follow.',
-        },
-    }],
-};
-// Phase 53c — fv-2's loot cache (idx 0) moves to fv-12, one of the two
-// nodes column 1 displaces, so the map's guaranteed shilling income
-// (`card.removal.pricing.ts`'s calibration anchor) is unchanged.
-const FV_LOOT_NODES: Record<string, number> = { 'fv-12': 0, 'fv-11': 1, 'fv-17': 2 };
-
-// ─── Phase 53c (S-02) — the four homed coastal NPCs ───────────────────────────
-//
-// fv-2 (Old Marrow), fv-7 (Coastal Beggar), and fv-18 (Captain Blackwater)
-// each displace a prior encounter/hazard node; fv-19 (Fisherman's Daughter)
-// reclaims the one node that already carried an `interaction` payload — the
-// 'Weathered Fisher' who named nobody in `fishingVillage.npcs` (Phase 53a's
-// one accepted exception, now resolved).
-const fvOldMarrowInteraction = fvInteractionPool(
-    'fv-2',
-    'Old Marrow',
-    'A weather-worn dockmaster mends a net at the plank crossing.',
-);
-const fvCoastalBeggarInteraction = fvInteractionPool(
-    'fv-7',
-    'Coastal Beggar',
-    'A haggard figure sits against the weathered wall, an empty bowl at their feet.',
-);
-const fvCaptainBlackwaterInteraction = fvInteractionPool(
-    'fv-18',
-    'Captain Blackwater',
-    'A weathered captain checks a ledger against crates stacked on the wharf.',
-);
-const fvFishermansDaughterInteraction = fvInteractionPool(
-    'fv-19',
-    "Fisherman's Daughter",
-    'A young woman mends nets on the quay, watching the water more than her hands.',
-);
-
-// adjust-npcs pass 12 (2026-09-18) — the Village Healer carried a full
-// dialogue tree since Phase 128 and sat in `unstagedNpcs` waiting on the
-// rest rebuild (phases 52c/52d, since shipped). Staged here rather than
-// re-filed: fv-22 (a `gathering` node, kelp-frond) shares column 8 with
-// fv-9, one of the map's four rest nodes ("A roofless cottage out of the
-// wind") — the same waypoint cluster, without touching any rest node
-// (pacing) or pinned-encounter node (would orphan an enemy — every regular
-// `encounter` slot on this map carries a roster foe with no other reachable
-// home; see `FV_ENCOUNTER_FOES`). No flag or pricing dependency reads
-// fv-22's prior gathering payload.
-const fvVillageHealerInteraction = fvInteractionPool(
-    'fv-22',
-    'Village Healer',
-    'A canvas lean-to strung between two posts, herbs drying along the ridge line — the closest thing to a clinic this stretch of coast has.',
-);
-
-const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
-    (() => {
-        const out: Array<{ nodeId: string; pool: MapEventPool }> = [];
-        for (let i = 1; i <= 28; i++) {
-            const nodeId = `fv-${i}`;
-            if (nodeId === 'fv-1') {
-                out.push({ nodeId, pool: fvArrival });
-            } else if (nodeId === 'fv-2') {
-                out.push({ nodeId, pool: fvOldMarrowInteraction });
-            } else if (nodeId === 'fv-6') {
-                out.push({ nodeId, pool: fvGauntletBoss });
-            } else if (nodeId === 'fv-7') {
-                out.push({ nodeId, pool: fvCoastalBeggarInteraction });
-            } else if (nodeId === 'fv-14') {
-                out.push({ nodeId, pool: fvFatherWorryDialogue });
-            } else if (nodeId === 'fv-16') {
-                out.push({ nodeId, pool: fvBorrowedHookDialogue });
-            } else if (nodeId === 'fv-4') {
-                out.push({ nodeId, pool: fvStrangersNetDialogue });
-            } else if (nodeId === 'fv-18') {
-                out.push({ nodeId, pool: fvCaptainBlackwaterInteraction });
-            } else if (nodeId === 'fv-19') {
-                out.push({ nodeId, pool: fvFishermansDaughterInteraction });
-            } else if (nodeId === 'fv-22') {
-                out.push({ nodeId, pool: fvVillageHealerInteraction });
-            } else if (nodeId === 'fv-10') {
-                out.push({ nodeId, pool: fvCoastRoadNorth });
-            } else if (FV_REST_NODES[nodeId]) {
-                out.push({ nodeId, pool: fvRestPool(nodeId, FV_REST_NODES[nodeId]!) });
-            } else if (nodeId in FV_GATHER_NODES) {
-                out.push({ nodeId, pool: fvGatheringPool(nodeId, FV_GATHER_MATERIALS[FV_GATHER_NODES[nodeId]!]!, 'You crouch to gather what the tide left behind.') });
-            } else if (FV_HAZARD_NODES[nodeId]) {
-                out.push({ nodeId, pool: fvHazardPool(nodeId, FV_HAZARD_NODES[nodeId]!) });
-            } else if (nodeId in FV_LOOT_NODES) {
-                out.push({ nodeId, pool: fvLootCachePool(nodeId, FV_LOOT_CACHES[FV_LOOT_NODES[nodeId]!]!) });
-            } else if (FV_BLACKSMITH_NODES[nodeId]) {
-                out.push({ nodeId, pool: fvBlacksmithPool(nodeId, FV_BLACKSMITH_NODES[nodeId]!) });
-            } else {
-                const foe = FV_ENCOUNTER_FOES[nodeId];
-                if (!foe) throw new Error(`fishing-village: ${nodeId} has no authored event kind or foe.`);
-                out.push({ nodeId, pool: cwEncounterPool(nodeId, { ...foe, level: FV_FIGHT_LEVEL }) });
-            }
-        }
-        return out;
-    })();
+const ANVIL_NODE_IDS: ReadonlySet<string> = new Set(Object.values(ACT1_ANVIL_NODES));
 
 // ─── The Breakwater (Act 1, map 1 — map revamp M3a) ──────────────────────────
 //
 // D29: Act 1 borrows the nearest shipped pools. The Breakwater is built from
-// fishing-village's builders and roster above (its foes, inn rests,
-// materials, hazard and loot caches); nothing here is a new enemy, NPC or
+// the shared builders above (inn rests, coast materials, hazard and loot
+// caches — fishing-village's until R3b); nothing here is a new enemy, NPC or
 // event kind. Only the one-line descriptions are new, placed on the plate's
 // landmarks (see `Continents/Coastal-Village/breakwater.ts` for the node map).
 //
-// Kind spread over 18 nodes: 6 encounter, 3 rest, 3 loot-cache,
-// 3 gathering, 2 hazard, 1 arrival cutscene, 1 travel. No boss (D30): the
-// watchtower (bw-17), the one node every run crosses before the door, is the
-// region's elite fight. The other foes ramp ring by ring in fishing-village's
-// own order.
+// Kind spread over 18 nodes: 6 encounter, 2 rest, 3 loot-cache,
+// 2 gathering, 2 hazard, 1 blacksmith (the Anvil, bw-16), 1 arrival
+// cutscene, 1 travel. The watchtower (bw-17), the one node every run crosses
+// before the door, holds the region's door fight (D61).
 
 /**
  * The windmill is where a new game starts (D27). D31: it opens on a short
@@ -1134,11 +705,10 @@ const BW_REST_NODES: Record<string, string> = {
     'bw-13': 'An inn above the harbour. Warm, loud, and paid for in advance.',
 };
 
-/** Index into `FV_GATHER_MATERIALS`, and the line said on arrival. */
+/** Index into `COAST_GATHER_MATERIALS`, and the line said on arrival. */
 const BW_GATHER_NODES: Record<string, { mat: number; description: string }> = {
     'bw-4':  { mat: 0, description: 'Storm wrack piles at the foot of the pass. Some of it burns.' },
     'bw-11': { mat: 3, description: 'Kelp has taken the wreck. You cut what you can carry.' },
-    'bw-16': { mat: 2, description: 'Split fish dry on the hamlet racks. Nobody is watching them.' },
 };
 
 const BW_HAZARD_NODES: Record<string, string> = {
@@ -1146,7 +716,7 @@ const BW_HAZARD_NODES: Record<string, string> = {
     'bw-12': 'The tide comes into the sea cave faster than you leave it.',
 };
 
-/** Index into `FV_LOOT_CACHES`. */
+/** Index into `COAST_LOOT_CACHES`. */
 const BW_LOOT_NODES: Record<string, number> = { 'bw-5': 1, 'bw-7': 2, 'bw-15': 0 };
 
 /**
@@ -1179,19 +749,21 @@ const BREAKWATER_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
                 out.push({ nodeId, pool: cwEncounterPool(nodeId, BW_DOOR) });
             } else if (nodeId === 'bw-18') {
                 out.push({ nodeId, pool: bwRiverBridge });
+            } else if (ANVIL_NODE_IDS.has(nodeId)) {
+                out.push({ nodeId, pool: blacksmithPool(nodeId, ANVIL_LINE) });
             } else if (BW_REST_NODES[nodeId]) {
-                out.push({ nodeId, pool: fvRestPool(nodeId, BW_REST_NODES[nodeId]!) });
+                out.push({ nodeId, pool: innRestPool(nodeId, BW_REST_NODES[nodeId]!) });
             } else if (BW_GATHER_NODES[nodeId]) {
                 const g = BW_GATHER_NODES[nodeId]!;
-                out.push({ nodeId, pool: fvGatheringPool(nodeId, FV_GATHER_MATERIALS[g.mat]!, g.description) });
+                out.push({ nodeId, pool: gatheringPool(nodeId, COAST_GATHER_MATERIALS[g.mat]!, g.description) });
             } else if (BW_HAZARD_NODES[nodeId]) {
-                out.push({ nodeId, pool: fvHazardPool(nodeId, BW_HAZARD_NODES[nodeId]!) });
+                out.push({ nodeId, pool: hazardPool(nodeId, BW_HAZARD_NODES[nodeId]!) });
             } else if (nodeId in BW_LOOT_NODES) {
-                out.push({ nodeId, pool: fvLootCachePool(nodeId, FV_LOOT_CACHES[BW_LOOT_NODES[nodeId]!]!) });
+                out.push({ nodeId, pool: lootCachePool(nodeId, COAST_LOOT_CACHES[BW_LOOT_NODES[nodeId]!]!) });
             } else {
                 const foe = BW_ENCOUNTER_FOES[nodeId];
                 if (!foe) throw new Error(`breakwater: ${nodeId} has no authored event kind or foe.`);
-                out.push({ nodeId, pool: fvEncounterPool(nodeId, foe) });
+                out.push({ nodeId, pool: plainEncounterPool(nodeId, foe) });
             }
         }
         return out;
@@ -1200,18 +772,17 @@ const BREAKWATER_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
 // ─── The Charcoal Wood (Act 1, map 2 — map revamp M3b) ───────────────────────
 //
 // D29: Act 1 borrows the nearest shipped pools. The Charcoal Wood uses the
-// shipped builders (fishing-village's gathering, hazard and loot builders, the
+// shipped builders (the shared gathering, hazard and loot builders, the
 // caverns' camp), the northern forest's roster and its three materials.
 // Nothing here is a new enemy, NPC, item or event kind; only the one-line
 // descriptions and the two arrival lines are new, placed on the plate's
 // landmarks (see `Continents/Coastal-Village/charcoal-wood.ts`).
 //
 // Kind spread over 20 nodes: 7 encounter, 3 rest, 3 loot-cache,
-// 3 gathering, 2 hazard, 1 arrival cutscene, 1 travel. No boss: the wood sits
-// between the Breakwater and fishing-village, whose boss is still
-// ahead. The northern forest's roster is level 9 and up, so every fight here
-// is pinned to a low absolute level (the fv-6 precedent), ramping ring by ring
-// and never above fishing-village's own boss.
+// 3 gathering, 1 hazard, 1 blacksmith (the Anvil, cw-18), 1 arrival
+// cutscene, 1 travel. The northern forest's roster is level 9 and up, so
+// every fight here is pinned to a low absolute level (the fv-6 precedent),
+// ramping ring by ring from 2 to 3.
 
 /**
  * One pinned Act 1 fight. R2 (D48, D61): Float-Eye takes the normal fights,
@@ -1293,7 +864,6 @@ const CW_GATHER_NODES: Record<string, { mat: { id: string; name: string; descrip
 
 const CW_HAZARD_NODES: Record<string, string> = {
     'cw-3':  'The shrine floor is rotten over the crypt. It gives under you.',
-    'cw-18': 'The well cover is rotten through. The drop is longer than the rope.',
 };
 
 const CW_LOOT_NODES: Record<string, { currency: number; description: string }> = {
@@ -1330,15 +900,17 @@ const CHARCOAL_WOOD_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }>
                 out.push({ nodeId, pool: cwArrival });
             } else if (nodeId === 'cw-20') {
                 out.push({ nodeId, pool: cwStairCave });
+            } else if (ANVIL_NODE_IDS.has(nodeId)) {
+                out.push({ nodeId, pool: blacksmithPool(nodeId, ANVIL_LINE) });
             } else if (CW_CAMP_NODES[nodeId]) {
                 out.push({ nodeId, pool: ncCampPool(nodeId, CW_CAMP_NODES[nodeId]!) });
             } else if (CW_GATHER_NODES[nodeId]) {
                 const g = CW_GATHER_NODES[nodeId]!;
-                out.push({ nodeId, pool: fvGatheringPool(nodeId, g.mat, g.description) });
+                out.push({ nodeId, pool: gatheringPool(nodeId, g.mat, g.description) });
             } else if (CW_HAZARD_NODES[nodeId]) {
-                out.push({ nodeId, pool: fvHazardPool(nodeId, CW_HAZARD_NODES[nodeId]!) });
+                out.push({ nodeId, pool: hazardPool(nodeId, CW_HAZARD_NODES[nodeId]!) });
             } else if (CW_LOOT_NODES[nodeId]) {
-                out.push({ nodeId, pool: fvLootCachePool(nodeId, CW_LOOT_NODES[nodeId]!) });
+                out.push({ nodeId, pool: lootCachePool(nodeId, CW_LOOT_NODES[nodeId]!) });
             } else {
                 const foe = CW_ENCOUNTER_FOES[nodeId];
                 if (!foe) throw new Error(`charcoal-wood: ${nodeId} has no authored event kind or foe.`);
@@ -1356,11 +928,11 @@ const CHARCOAL_WOOD_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }>
 // two arrival lines are new, placed on the plate's landmarks (see
 // `Continents/Northern-Continent/beacon-crags.ts`).
 //
-// Kind spread over 17 nodes: 6 encounter, 3 rest, 2 loot-cache, 2 gathering,
-// 2 hazard, 1 arrival cutscene, 1 travel. No boss: fishing-village's King of
-// Revenge is still ahead. The caverns' roster is level 13 and up, so every
-// fight is pinned low (M3b's rule), one step above the Charcoal Wood: 3 on the
-// upper mountain, 4 below the gorge.
+// Kind spread over 17 nodes: 6 encounter, 3 rest, 2 loot-cache, 1 gathering,
+// 2 hazard, 1 blacksmith (the Anvil, bc-12), 1 arrival cutscene, 1 travel.
+// The caverns' roster is level 13 and up, so every fight is pinned low (M3b's
+// rule), one step above the Charcoal Wood: 3 on the upper mountain, 4 below
+// the gorge.
 
 const BC_FIGHT_LEVEL_EARLY = 3;
 const BC_FIGHT_LEVEL_LATE = 4;
@@ -1405,7 +977,6 @@ const BC_CAMP_NODES: Record<string, string> = {
 /** The caverns' one material (`ncIronVeinPool`). */
 const BC_GATHER_NODES: Record<string, string> = {
     'bc-7':  'The delvers left ore in the spoil heap. Nobody weighs the tailings.',
-    'bc-12': 'The falls have cut the seam open. The iron is wet and free, if you can reach it.',
 };
 
 const BC_HAZARD_NODES: Record<string, { damage: number; description: string }> = {
@@ -1445,6 +1016,8 @@ const BEACON_CRAGS_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> 
                 out.push({ nodeId, pool: bcArrival });
             } else if (nodeId === 'bc-17') {
                 out.push({ nodeId, pool: bcGlacierShrine });
+            } else if (ANVIL_NODE_IDS.has(nodeId)) {
+                out.push({ nodeId, pool: blacksmithPool(nodeId, ANVIL_LINE) });
             } else if (BC_CAMP_NODES[nodeId]) {
                 out.push({ nodeId, pool: ncCampPool(nodeId, BC_CAMP_NODES[nodeId]!) });
             } else if (BC_GATHER_NODES[nodeId]) {
@@ -1472,10 +1045,10 @@ const BEACON_CRAGS_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> 
 // arrival lines are new, placed on the plate's landmarks (see
 // `Continents/Northern-Continent/lantern-deep.ts`).
 //
-// Kind spread over 18 nodes: 7 encounter, 3 rest, 1 loot-cache, 2 gathering,
-// 2 hazard, 1 arrival cutscene (D31), 2 sealed doors (the vault door and the
-// deep stair, THE REVAMP R3a). No boss; one elite on the last
-// fight column (D30). Every fight pinned low (M3b's rule), level with the
+// Kind spread over 18 nodes: 7 encounter, 3 rest, 1 loot-cache, 1 gathering,
+// 2 hazard, 1 blacksmith (the Anvil, ld-14), 1 arrival cutscene (D31), 2
+// sealed doors (the vault door and the deep stair, THE REVAMP R3a). No boss;
+// one elite on the last fight column (D30). Every fight pinned low (M3b's rule), level with the
 // Beacon Crags: 3 above the aqueducts, 4 below them.
 
 const LD_FIGHT_LEVEL_EARLY = 3;
@@ -1523,7 +1096,6 @@ const LD_CAMP_NODES: Record<string, string> = {
 /** The caverns' one material (`ncIronVeinPool`). */
 const LD_GATHER_NODES: Record<string, string> = {
     'ld-7':  'Iron runs through the crystal. Up top the crystal is worth nothing. The iron is worth something.',
-    'ld-14': 'The forge left its slag heap full of unmelted ore. Nobody down here weighs it.',
 };
 
 const LD_HAZARD_NODES: Record<string, { damage: number; description: string }> = {
@@ -1580,6 +1152,8 @@ const LANTERN_DEEP_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> 
                 out.push({ nodeId, pool: ldVaultDoor });
             } else if (nodeId === 'ld-18') {
                 out.push({ nodeId, pool: ldDeepStair });
+            } else if (ANVIL_NODE_IDS.has(nodeId)) {
+                out.push({ nodeId, pool: blacksmithPool(nodeId, ANVIL_LINE) });
             } else if (LD_CAMP_NODES[nodeId]) {
                 out.push({ nodeId, pool: ncCampPool(nodeId, LD_CAMP_NODES[nodeId]!) });
             } else if (LD_GATHER_NODES[nodeId]) {
@@ -2721,9 +2295,8 @@ const THE_CAPITAL_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
 //
 // Phase 161 — both maps register through one idempotent function so the
 // content-parity guard (`getShadowedNodeOverrideKeys`) can replay registration
-// against a freshly-cleared registry deterministically. fishing-village has
-// exactly ONE block (the new-player override above); northern-forest is
-// unshadowed. No node is authored twice.
+// against a freshly-cleared registry deterministically. Every map has exactly
+// one block. No node is authored twice.
 
 /**
  * Registers every authored map-event pool + node override for the coastal
@@ -2751,10 +2324,6 @@ export function registerMapEventContent(): void {
     for (const { nodeId, pool } of LANTERN_DEEP_POOLS) {
         registerMapEventPool(pool);
         setNodeEventPoolOverride('northern-continent', 'lantern-deep', nodeId, pool.id);
-    }
-    for (const { nodeId, pool } of FISHING_VILLAGE_NEW_PLAYER_POOLS) {
-        registerMapEventPool(pool);
-        setNodeEventPoolOverride('coastal-continent', 'fishing-village', nodeId, pool.id);
     }
     for (const { nodeId, pool } of CAVERNS_POOLS) {
         registerMapEventPool(pool);

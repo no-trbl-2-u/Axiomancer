@@ -1,8 +1,8 @@
 /**
  * Dev-only DIALOGUE jump — into the REAL authored NPC trees.
  *
- * Every staged NPC with a conversation (Captain Blackwater, the Hermit
- * Sage, the Forest Ranger, …) across every map is a chip. A tap seeds
+ * Every staged NPC with a conversation (the Hermit Sage, the Forest
+ * Ranger, …) across every map is a chip. A tap seeds
  * the event slice with an `interaction` + a cursor at the tree root
  * (`openNpcDialogue`, state/dev/story-catalog.ts); `<EventGate>` pushes
  * `/dialogue`, and choices apply through the live path — quest starts,

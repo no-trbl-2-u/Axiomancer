@@ -1,6 +1,6 @@
 /**
  * nf-12 "The Crowning Witnessed" — hermetic coverage for the last of S-01's
- * four dilemmas (Phase 53d). Mirrors `fv-14-father-worry.engine.test.ts`'s
+ * four dilemmas (Phase 53d). Mirrors the (purged) fv-14 dilemma suite's
  * shape: pool wiring, all three flags settable, each choice a terminating
  * leaf. Unlike the other three, branch 3 carries the spec's one permitted
  * `alignmentDelta` — "note the spot, mean to tell someone" names a
@@ -27,7 +27,7 @@ import type { MapState } from '../../types';
 import '../content';
 
 function nf12Payload(): NarrationPayload {
-    const base = { ...createNewGameState(), world: createStartingWorld('fishing-village') };
+    const base = { ...createNewGameState(), world: createStartingWorld('breakwater') };
     const def = getMapDefinition('coastal-continent', 'northern-forest');
     const map: MapState = createMapState(def);
     const state: GameState = { ...base, world: { ...base.world, currentMap: map } };

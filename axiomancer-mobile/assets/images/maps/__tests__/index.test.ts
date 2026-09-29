@@ -13,12 +13,10 @@ import { describe, expect, it } from '@jest/globals';
 
 import { MAP_PLATES } from '@/assets/images/maps';
 import { ALL_MAP_LAYOUTS, getMapLayout } from '@/state/exploration-maps';
-import { FALLBACK_SHEET } from '@/state/exploration-maps/sheet';
 
 describe('map layouts name their plates', () => {
     it('keeps the plate each shipped map rendered under the region regex', () => {
         const expected: Record<string, number> = {
-            'fishing-village': MAP_PLATES.wentworthStreet,
             'northern-forest': MAP_PLATES.forestDark,
             'caverns': MAP_PLATES.thePit,
             'northern-city': MAP_PLATES.ludgateHill,
@@ -29,10 +27,6 @@ describe('map layouts name their plates', () => {
         for (const [mapId, plate] of Object.entries(expected)) {
             expect({ mapId, plate: getMapLayout(mapId)?.sheet.backdrop }).toEqual({ mapId, plate });
         }
-    });
-
-    it('gives the coastal village ("the Drowned Parish") its own plate, not the forest fallback', () => {
-        expect(getMapLayout('fishing-village')?.sheet.backdrop).not.toEqual(FALLBACK_SHEET.backdrop);
     });
 
     it('gives every layout a plate', () => {

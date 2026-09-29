@@ -80,8 +80,8 @@ export interface GatheringPayload {
  * the labyrinth the house forgot to make uncomfortable.
  *
  * This replaces the retired `healFraction >= 1.0` heuristic, which was
- * wrong on the authored content: `nf-4`, `nf-24` and every `fvRestPool`
- * node were all authored at 1.0, so two forest springs mended scars like
+ * wrong on the authored content: `nf-4`, `nf-24` and every fishing-village
+ * inn (the pool builder now named `innRestPool`) were all authored at 1.0, so two forest springs mended scars like
  * a paid shelter. "Is this an inn?" is now authored, never inferred.
  */
 export type RestShelter = 'camp' | 'inn';
@@ -159,8 +159,9 @@ export interface NarrationPayload {
  * 59 dropped that offer (T direct, 2026-08-15) and Phase 60 re-homed the
  * anvil to its own placed `blacksmith` node — a single fixed placement at
  * fishing-village `fv-21`, mirroring the D6c precedent (one owner-ruled
- * node, not a repeating cadence). See `MapEvents/content.ts`'s
- * `FV_BLACKSMITH_NODES`.
+ * node, not a repeating cadence). R3b (D61) purged that map and placed one
+ * Anvil per Act 1 region near its exit instead. See `MapEvents/content.ts`'s
+ * `ACT1_ANVIL_NODES`.
  */
 export interface BlacksmithPayload {
     kind: 'blacksmith';

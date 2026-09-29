@@ -57,7 +57,7 @@ const enemy = createEnemy({
   description: '',
   level: 1,
   baseStats: { heart: 1, body: 2, mind: 1 },
-  mapName: 'fishing-village',
+  mapName: 'breakwater',
   logic: 'random',
 });
 
@@ -148,8 +148,8 @@ with the mobile app (`?fixture=<id>` / `__AXM_FIXTURE__`) and its Jest +
 Playwright harnesses, so one fixture proves a feature on every surface.
 
 ```bash
-npm run game -- --fixture sage-fv-boss-gate --route fv-24 --auto-combat --json-events
-npm run game -- --fixture ./my-fixture.json --route-audit fishing-village
+npm run game -- --fixture sage-bw-door-gate --route bw-17 --auto-combat --json-events
+npm run game -- --fixture ./my-fixture.json --route-audit breakwater
 ```
 
 Full guide: [`../docs/state-fixtures.md`](../docs/state-fixtures.md).

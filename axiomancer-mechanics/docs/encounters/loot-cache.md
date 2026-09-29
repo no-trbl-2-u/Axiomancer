@@ -18,10 +18,10 @@ of three offers:
   rarity weighting as a post-combat card reward).
 - **Item** — a tier-scaled consumable haul (`rollCacheReward`, unchanged
   from the retired engine) plus the node's authored currency.
-- **Sacrifice** — nothing to the player. Instead, the current map's
-  **goodwill** tally (`GameState.mapGoodwill`) increments by one. Invisible
-  this phase; Phase 64 renders it on the Memoir tab as "Helped `<map>` N
-  times," and Phase 65 spends it on village rewards.
+- **Sacrifice** — nothing to the player; the choice is simply consumed.
+  (It used to tick a per-map goodwill tally, `GameState.mapGoodwill`, spent
+  on village rewards; the goodwill system was purged in THE REVAMP R3b and
+  save v29 drops the tally.)
 
 ## Core loop
 
@@ -37,8 +37,7 @@ of three offers:
    candidates were already rolled in step 2.
 4. `claimLootCacheChoiceOutcome` → `done`. The host applies the ledger:
    `card` appends the rolled card id to the deck; `item` appends the
-   rolled items + currency to the inventory; `sacrifice` increments
-   `mapGoodwill[currentMap]`.
+   rolled items + currency to the inventory; `sacrifice` grants nothing.
 
 ## Engine contract
 
@@ -54,4 +53,4 @@ The dice-pool "Pick Pool" mechanic — layers, jams, Insight charges, trap
 bites — is retired entirely along with `World/LootCache/`, its CLI driver
 (`npm run loot-cache`), and the `loot-cache-tuning` skill/workflow. The
 cache can no longer bite VITAE or spoil loot; every visit ends in a grant
-(card or item) or a goodwill tick (sacrifice).
+(card or item) or nothing at all (sacrifice).

@@ -43,7 +43,7 @@ declare global {
     var __AXM_FIXTURE__: string | StateFixture | undefined;
 }
 
-/** The URL query key: `/exploration?fixture=sage-fv-boss-gate`. */
+/** The URL query key: `/exploration?fixture=sage-bw-door-gate`. */
 export const FIXTURE_QUERY_PARAM = 'fixture';
 
 export type FixtureRequestSource = 'global' | 'url';

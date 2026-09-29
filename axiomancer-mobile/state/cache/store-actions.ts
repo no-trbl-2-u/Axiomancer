@@ -5,8 +5,8 @@
  * The pure engine lives in `axiomancer-mechanics` (World/LootCacheChoice);
  * these wrappers thread the cache node's one irreversible choice — `card`
  * (a rolled reward card) / `item` (a tier-scaled consumable haul + the
- * node's currency) / `sacrifice` (nothing to the player; increments the
- * per-map goodwill tally) — through the mobile `cache` slice. The engine
+ * node's currency) / `sacrifice` (nothing to the player) — through the
+ * mobile `cache` slice. The engine
  * never reads `GameState`; both candidates (the card to offer, the items to
  * offer) are rolled here, before the session opens, exactly mirroring how
  * `state/rest/store-actions.ts` rolls `deckCardIds` before creating a
@@ -22,12 +22,6 @@ import {
     createLootCacheChoiceSession,
     rollCacheReward,
     rollCombatCardRewards,
-    unlockCardViaDilemma,
-    goodwillBonusFlag,
-    GOODWILL_ALLY_CARD_ID,
-    GOODWILL_ALLY_THRESHOLD,
-    GOODWILL_BONUS_CURRENCY,
-    GOODWILL_BONUS_THRESHOLD,
 } from '@mechanics';
 import type { CacheLootTier, LootCacheChoiceOfferId, LootCacheChoiceOutcome, LootCacheChoiceSession } from '@mechanics';
 import { resolveMinigameSeed } from '../minigame-seeds';
@@ -36,7 +30,7 @@ import { EMPTY_CACHE_SLICE, type AppStore } from '../store';
 /**
  * Flag prefix banking a keeper's keepsake. Historical only — the retired
  * Pick Pool engine minted these on its deepest layer; the sacrifice offer
- * does not mint a new one (the goodwill counter itself is the record).
+ * does not mint a new one.
  * `/memoir`'s REMAINS section still reads old ones back.
  */
 export const CACHE_KEEPSAKE_FLAG_PREFIX = 'cache-keepsake:';
@@ -97,21 +91,18 @@ export function chooseLootCacheChoiceOfferAction(store: AppStore, offer: LootCac
 export interface ClaimLootCacheChoiceResult {
     applied: boolean;
     outcome: LootCacheChoiceOutcome | null;
-    /** The current map's new goodwill tally — set only when `outcome.sacrificed`. */
-    goodwill: number | null;
 }
 
 const NOOP_CLAIM: ClaimLootCacheChoiceResult = Object.freeze({
     applied: false,
     outcome: null,
-    goodwill: null,
 });
 
 /**
  * Confirms the outcome ledger and applies the cache node to the engine
  * `GameState`: `card` appends the rolled card to the deck, `item` appends
- * the rolled items + currency to the inventory, `sacrifice` increments the
- * current map's goodwill tally. Clears the slice and persists.
+ * the rolled items + currency to the inventory, `sacrifice` grants
+ * nothing. Clears the slice and persists.
  */
 export function claimLootCacheChoiceOutcomeAction(store: AppStore): ClaimLootCacheChoiceResult {
     const s = store.getState().cache?.session;
@@ -122,7 +113,6 @@ export function claimLootCacheChoiceOutcomeAction(store: AppStore): ClaimLootCac
     const outcome = s.outcome;
     const state = store.getState() as unknown as GameState;
     let player: Character = state.player;
-    let goodwill: number | null = null;
 
     if (outcome.chosen === 'card' && outcome.rewardCardId) {
         player = addRewardCard(player, outcome.rewardCardId);
@@ -134,38 +124,10 @@ export function claimLootCacheChoiceOutcomeAction(store: AppStore): ClaimLootCac
         };
     }
 
-    const patch: Record<string, unknown> = {
+    store.setState({
         player,
         cache: EMPTY_CACHE_SLICE,
-    };
-
-    if (outcome.chosen === 'sacrifice') {
-        const mapName = state.world?.currentMap?.name;
-        const prevGoodwill = state.mapGoodwill ?? {};
-        goodwill = mapName ? (prevGoodwill[mapName] ?? 0) + 1 : null;
-        if (mapName) {
-            patch.mapGoodwill = { ...prevGoodwill, [mapName]: goodwill };
-
-            // Phase 65 — Tier 2/3 village goodwill rewards. `>=` + idempotent
-            // guards (knownCards-includes / flags-includes), not `===`, so a
-            // save that already held a qualifying tally before this shipped
-            // self-heals on its next sacrifice claim.
-            if (GOODWILL_ALLY_CARD_ID && goodwill! >= GOODWILL_ALLY_THRESHOLD && !player.knownCards.includes(GOODWILL_ALLY_CARD_ID)) {
-                player = unlockCardViaDilemma(player, GOODWILL_ALLY_CARD_ID);
-            }
-
-            const bonusFlag = goodwillBonusFlag(mapName);
-            const flags = state.flags ?? [];
-            if (goodwill! >= GOODWILL_BONUS_THRESHOLD && !flags.includes(bonusFlag)) {
-                player = { ...player, currency: player.currency + GOODWILL_BONUS_CURRENCY };
-                patch.flags = [...flags, bonusFlag];
-            }
-
-            patch.player = player;
-        }
-    }
-
-    store.setState(patch as never);
+    } as never);
 
     try {
         store.getState().save();
@@ -173,5 +135,5 @@ export function claimLootCacheChoiceOutcomeAction(store: AppStore): ClaimLootCac
         // Persistence failures must not strand the player on the ledger.
     }
 
-    return { applied: true, outcome, goodwill };
+    return { applied: true, outcome };
 }

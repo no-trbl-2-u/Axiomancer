@@ -21,7 +21,7 @@ const testRegionBoss: Enemy = {
     health: 100,
     maxHealth: 100,
     baseStats: { body: 6, mind: 3, heart: 4 },
-    mapName: 'fishing-village', // Same region as elite
+    mapName: 'breakwater', // Same region as elite
     difficulty: 'boss',
     logic: 'boss',
     effects: [],
@@ -52,7 +52,7 @@ describe('Phase 109 — Region consequences for befriend choices', () => {
                 player,
                 regionConsequences: {
                     exploitedRegions: [],
-                    sparedRegions: ['fishing-village']
+                    sparedRegions: ['breakwater']
                 }
             });
 
@@ -74,7 +74,7 @@ describe('Phase 109 — Region consequences for befriend choices', () => {
                 player,
                 regionConsequences: {
                     exploitedRegions: [],
-                    sparedRegions: ['fishing-village']
+                    sparedRegions: ['breakwater']
                 }
             });
 

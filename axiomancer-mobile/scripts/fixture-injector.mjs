@@ -3,7 +3,7 @@
 // Node ESM scripts. Sibling of minigame-seed-injector.mjs.
 //
 //   import { injectStateFixture } from './fixture-injector.mjs'
-//   await injectStateFixture(context, 'sage-fv-boss-gate')          // registry id
+//   await injectStateFixture(context, 'sage-bw-door-gate')          // registry id
 //   await injectStateFixture(context, { id: 'x', seed: 1, ... })     // inline fixture
 //
 // The app honours the global only when dev tools are enabled, so the

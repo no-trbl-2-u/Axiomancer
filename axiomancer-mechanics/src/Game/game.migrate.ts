@@ -41,7 +41,7 @@ import { GAME_STATE_VERSION } from './game.reducer';
 import { COMBAT_LOADOUT_FLAG_PREFIX } from '../Combat/combat.loadout';
 import { FIRST_NODE_RELIC_FLAG } from '../Character/first-node-grant';
 import { FloatEye, LIVE_ENEMY_IDS } from '../Enemy/enemy.library';
-import type { MapState, WorldState } from '../World/types';
+import type { Continent, MapState, QuestLog, WorldState } from '../World/types';
 import type { MapName } from '../World/map.library';
 import { createMapState, getMapDefinition } from '../World/map.registry';
 import { changeContinent, changeMap, placeOnNode, unlockMap } from '../World/world.reducer';
@@ -634,6 +634,58 @@ function migrateV27ToV28(raw: Record<string, unknown>): Record<string, unknown> 
     return out;
 }
 
+/** The fishing-village quests R3b purges with the map (D53). */
+const PURGED_QUESTS: ReadonlySet<string> = new Set(['starting-quest', 'get-to-forest']);
+const PURGED_MAP: string = 'fishing-village';
+/** Phase 65's one-time goodwill bonus flag prefix, retired with the system. */
+const GOODWILL_FLAG_PREFIX = 'village-goodwill-bonus:';
+
+/**
+ * v28 → v29 (2026-09-29, THE REVAMP R3b, D53): fishing-village and the
+ * village goodwill system are purged. Drops `mapGoodwill` and the goodwill
+ * bonus flags, takes fishing-village out of every continent's map lists and
+ * `mapStates`, and drops its two quests from the quest log. v28 already moved
+ * every save off fishing-village, so no position changes. Idempotent and pure
+ * over a raw save payload.
+ */
+function migrateV28ToV29(raw: Record<string, unknown>): Record<string, unknown> {
+    const { mapGoodwill: _goodwill, ...rest } = raw;
+    const out: Record<string, unknown> = { ...rest, version: 29 };
+    if (Array.isArray(raw.flags)) {
+        out.flags = (raw.flags as unknown[]).filter(f => !(typeof f === 'string' && f.startsWith(GOODWILL_FLAG_PREFIX)));
+    }
+    const world = raw.world as WorldState | undefined;
+    if (world && typeof world === 'object') {
+        const scrub = (c: Continent): Continent => ({
+            ...c,
+            availableMaps: (c.availableMaps ?? []).filter(m => m !== PURGED_MAP),
+            lockedMaps: (c.lockedMaps ?? []).filter(m => m !== PURGED_MAP),
+            completedMaps: (c.completedMaps ?? []).filter(m => m !== PURGED_MAP),
+        });
+        const next: WorldState = {
+            ...world,
+            world: Array.isArray(world.world) ? world.world.map(scrub) : world.world,
+            currentContinent: world.currentContinent ? scrub(world.currentContinent) : world.currentContinent,
+        };
+        if (world.mapStates && typeof world.mapStates === 'object') {
+            const states = { ...world.mapStates } as Record<string, MapState>;
+            delete states[PURGED_MAP];
+            next.mapStates = states as Partial<Record<MapName, MapState>>;
+        }
+        out.world = next;
+    }
+    const quests = raw.quests as QuestLog | undefined;
+    if (quests && typeof quests === 'object') {
+        out.quests = {
+            ...quests,
+            available: (quests.available ?? []).filter(q => !PURGED_QUESTS.has(q.name)),
+            active: (quests.active ?? []).filter(q => !PURGED_QUESTS.has(q.name)),
+            completed: (quests.completed ?? []).filter(n => !PURGED_QUESTS.has(n)),
+        };
+    }
+    return out;
+}
+
 /**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
@@ -670,8 +722,9 @@ export function migrate(
     // first-node relic grant settled; v24 → v25 strips the retired derived
     // stats and stat lines; v25 → v26 strips the alignment grid and GRACE;
     // v26 → v27 re-points retired foes in a staged encounter to Float-Eye;
-    // v27 → v28 moves a save off Act 1 onto the Lantern Deep.
-    // Chained so a v11 save lands at v28 in one call.
+    // v27 → v28 moves a save off Act 1 onto the Lantern Deep; v28 → v29
+    // drops fishing-village, its quests and the goodwill tally.
+    // Chained so a v11 save lands at v29 in one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
@@ -739,6 +792,10 @@ export function migrate(
     if (version === 27 && toVersion >= 28) {
         working = migrateV27ToV28(working);
         version = 28;
+    }
+    if (version === 28 && toVersion >= 29) {
+        working = migrateV28ToV29(working);
+        version = 29;
     }
 
     if (version !== toVersion) {

@@ -29,7 +29,7 @@
  * slice-seeding behavior. Nothing pinned the actual minigame launch,
  * so the debug panel silently dead-ended at "NO EVENT".
  *
- * (Phase 61 — fv-15's quest-board node retired; the earlier "one
+ * (Phase 61 — the quest-board node retired; the earlier "one
  * quest node" coverage went with it, see `content.engine.test.ts`.
  * Phase 76 — the gathering node's minigame session assertion below
  * was rewritten to an inline-grant assertion; the node itself and its
@@ -57,7 +57,7 @@ function makeStoreAndActions() {
     return { store, actions: createAppActions(store) };
 }
 
-type CoastalMap = 'fishing-village' | 'northern-forest';
+type CoastalMap = 'northern-forest';
 
 /** Seat the player on `nodeId` of `mapName`, mirroring a reachable tap. */
 function seatAt(store: AppStore, mapName: CoastalMap, nodeId: string) {
@@ -78,8 +78,7 @@ function firstNodeOfKind(mapName: CoastalMap, kind: MapEventKind): string {
     return node.id;
 }
 
-// The varied minigame kinds live on northern-forest; fishing-village is the
-// new-player combat gauntlet.
+// The varied minigame kinds live on northern-forest.
 describe('map encounter → minigame routing (northern-forest)', () => {
     it('loot-cache node opens the loot-cache, not a paced /event', () => {
         const { store, actions } = makeStoreAndActions();
@@ -123,36 +122,5 @@ describe('map encounter → minigame routing (northern-forest)', () => {
         // minigame coming back.
         expect(selectHasActiveCache(store.getState())).toBe(false);
         expect(selectHasActiveRest(store.getState())).toBe(false);
-    });
-});
-
-describe('fishing-village gauntlet routing', () => {
-    it('is varied with a balanced node mix: interaction and encounter the largest kinds, plus texture/narration nodes', () => {
-        const def = getMapDefinition('coastal-continent', 'fishing-village');
-        const kinds = def.nodes.map((n) =>
-            getNodePrimaryEventKind('coastal-continent', 'fishing-village', n.id),
-        );
-        const count = (k: string) => kinds.filter((x) => x === k).length;
-        // Balanced variety (owner-requested), re-tuned by Phase 53c/53d/60/61
-        // (four NPCs homed onto former encounter/hazard nodes; two more
-        // encounters spent on dilemmas; a third on the re-homed anvil; one
-        // given back — the retired quest-board node rejoined the encounter
-        // roster) and adjust-npcs pass 12 (2026-09-18, a fifth NPC — the
-        // Village Healer — homed onto a former gathering node): encounter
-        // and rest tie at 4, interaction is now the single largest kind at
-        // 5 — no kind dominates, and a real spread of recovery / texture /
-        // narration nodes remains.
-        // 2026-09-21 — THE THREE GATES (fv-26/27/28, the grey office rebalance):
-        // encounter 4 → 7, now the map's largest kind.
-        expect(count('encounter')).toBe(7);
-        expect(count('interaction')).toBe(5);
-        expect(count('rest')).toBe(4);
-        expect(count('gathering')).toBeGreaterThanOrEqual(1);
-        expect(count('hazard')).toBeGreaterThanOrEqual(1);
-        expect(count('loot-cache')).toBeGreaterThanOrEqual(1);
-        expect(count('narration')).toBe(3);
-        // Phase 60 — exactly one authored blacksmith node (fv-21,
-        // owner-decided single placement, NOT a cadence).
-        expect(count('blacksmith')).toBe(1);
     });
 });

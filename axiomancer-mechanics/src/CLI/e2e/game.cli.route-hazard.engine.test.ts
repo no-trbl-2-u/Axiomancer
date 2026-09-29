@@ -26,14 +26,12 @@ afterEach(() => {
 });
 
 describe('Game CLI route walkthrough → Hazard-Pattern combat', () => {
-    it('walks Fishing Village to the Market encounter and runs Hazard combat', async () => {
-        const logPath = tmpPath('fv-market');
+    it('walks the Breakwater to its first encounter and runs Hazard combat', async () => {
+        const logPath = tmpPath('bw-encounter');
 
-        // fv-16 converted from an `encounter` to a Phase 53d/S-01 narration
-        // dilemma ("The Borrowed Hook"); fv-11 -> fv-13 is
-        // now the nearest surviving column-3 encounter from fv-2.
+        // bw-2 is a Float-Eye encounter one step from the bw-1 start.
         await runGameCli([
-            '--start-map', 'fishing-village', '--route', 'fv-2,fv-26,fv-11,fv-27,fv-13',
+            '--start-map', 'breakwater', '--route', 'bw-2',
             '--auto-combat',
             '--combat-policy', 'status',
             '--combat-seed', '42',
@@ -53,8 +51,7 @@ describe('Game CLI route walkthrough → Hazard-Pattern combat', () => {
             .filter(r => r.action === 'resolveMapEvent')
             .map(r => r.event as { kind?: string; encounter?: { enemies?: Array<{ name?: string }> } })
             .find(event => event.kind === 'encounter');
-        // THE THREE GATES (2026-09-21): the first encounter on any route is
-        // now the first gate, fv-26 (Float-Eye since the R2 roster reset).
+        // bw-2's encounter pool is the Float-Eye (R2 roster reset).
         expect(encounterEvent?.encounter?.enemies?.[0]?.name).toBe('Float-Eye');
 
         const end = logs.find(r => r.action === 'hazardCombat:end');

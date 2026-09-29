@@ -3,13 +3,13 @@
  *
  * Map events fire on ARRIVAL at a node, and the player never arrives at the
  * node `createMapState` places them on — so whatever a map authored for its
- * starting node was unreachable content. On fishing-village that silently
- * swallowed fv-1's whole pool for the entire life of the map.
+ * starting node was unreachable content.
  *
- * The fix has two halves and this file pins both: the engine re-authored fv-1
- * as the village's arrival CUTSCENE (a kind that is safe to fire the moment
- * the map opens, unlike a fight nobody has had a chance to prepare for), and
- * `ExplorationScreen` resolves the start node once on entry.
+ * The fix has two halves and this file pins both: a map's start node is
+ * authored as an arrival CUTSCENE (a kind that is safe to fire the moment
+ * the map opens, unlike a fight nobody has had a chance to prepare for) —
+ * the Breakwater's bw-1 today — and `ExplorationScreen` resolves the start
+ * node once on entry.
  *
  * Hermetic = self-contained + deterministic + isolated. See `docs/testing.md`.
  */
@@ -56,7 +56,7 @@ afterEach(() => {
 });
 
 function makeStore(): AppStore {
-    return createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
+    return createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('breakwater') } });
 }
 
 function mountExploration(store: AppStore) {
@@ -81,11 +81,11 @@ describe('start-node arrival: the map resolves the node it puts you on', () => {
         const store = makeStore();
         const vm = selectExplorationViewModel(store.getState());
 
-        expect(vm.currentNodeId).toBe('fv-1');
+        expect(vm.currentNodeId).toBe('bw-1');
         expect(vm.startNodePending).toBe(true);
     });
 
-    it('resolves fv-1 into a live cutscene event when the map screen mounts', () => {
+    it('resolves bw-1 into a live cutscene event when the map screen mounts', () => {
         const store = makeStore();
         mountExploration(store);
 
@@ -98,7 +98,7 @@ describe('start-node arrival: the map resolves the node it puts you on', () => {
         const store = makeStore();
         mountExploration(store);
 
-        expect(store.getState().world.currentMap.consumedNodes).toContain('fv-1');
+        expect(store.getState().world.currentMap.consumedNodes).toContain('bw-1');
         expect(selectExplorationViewModel(store.getState()).startNodePending).toBe(false);
     });
 
@@ -118,7 +118,7 @@ describe('start-node arrival: the map resolves the node it puts you on', () => {
 
         // The cache session is untouched and no cutscene was armed.
         expect(store.getState().event?.pending ?? null).toBeNull();
-        expect(store.getState().world.currentMap.consumedNodes).not.toContain('fv-1');
+        expect(store.getState().world.currentMap.consumedNodes).not.toContain('bw-1');
         expect(selectHasAnyActiveSession(store.getState())).toBe(true);
     });
 
@@ -142,7 +142,7 @@ describe('start-node arrival: the map resolves the node it puts you on', () => {
         act(() => { jest.advanceTimersByTime(1); });
 
         expect(store.getState().event?.pending ?? null).toBeNull();
-        expect(store.getState().world.currentMap.consumedNodes).not.toContain('fv-1');
+        expect(store.getState().world.currentMap.consumedNodes).not.toContain('bw-1');
     });
 
     it('does not fire again on a re-mount of the same map', () => {
@@ -172,30 +172,26 @@ describe('start-node arrival: the map resolves the node it puts you on', () => {
 describe('an arrival the player never answered survives a reload', () => {
     it('engages the encounter when the map screen remounts on the saved node', () => {
         const adapter = createMemoryAdapter();
-        const store = createAppStore({ adapter, overrides: { world: createStartingWorld('fishing-village') } });
+        const store = createAppStore({ adapter, overrides: { world: createStartingWorld('breakwater') } });
         const actions = createAppActions(store);
-        actions.moveTo('fv-2');
-        actions.moveTo('fv-26');
-        actions.moveTo('fv-11');
-        actions.moveTo('fv-27');
-        actions.moveTo('fv-13'); // engine kind `encounter`
+        actions.moveTo('bw-2'); // engine kind `encounter`
 
         // The player reloads before answering the prelude: rebuild the app
         // from the bytes the move checkpointed.
         const reloaded = createAppStore({ adapter });
-        expect(reloaded.getState().world.currentMap.currentNode).toBe('fv-13');
-        expect(reloaded.getState().world.currentMap.consumedNodes).not.toContain('fv-13');
+        expect(reloaded.getState().world.currentMap.currentNode).toBe('bw-2');
+        expect(reloaded.getState().world.currentMap.consumedNodes).not.toContain('bw-2');
 
         const tree = mountExploration(reloaded);
 
         // The arrival is answered ...
-        expect(reloaded.getState().world.currentMap.consumedNodes).toContain('fv-13');
+        expect(reloaded.getState().world.currentMap.consumedNodes).toContain('bw-2');
         // ... and the fight the player was owed is actually on screen. Do NOT
         // assert `event.pending` here: `EncounterModalOverlay` auto-engages on
         // mount and `beginHazardEncounter` clears the event slice on the way
         // in, so `pending` is null by the time this line runs — before AND
         // after the fix. The sibling start-node case can assert `pending`
-        // only because fv-1 is a CUTSCENE, which has no auto-engage.
+        // only because bw-1 is a CUTSCENE, which has no auto-engage.
         expect(reloaded.getState().currentEncounter).not.toBeNull();
         expect(tree.queryByTestId('encounter-modal-hazard-combat')).not.toBeNull();
     });

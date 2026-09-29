@@ -329,12 +329,6 @@ export type { RestShelter } from './World';
 export {
     DEFAULT_REST_SHELTER, isInnShelter,
 } from './World';
-// Phase 65 — village goodwill reward tiers (discount / Ally grant / bonus).
-export {
-    GOODWILL_ALLY_THRESHOLD, GOODWILL_ALLY_CARD_ID,
-    GOODWILL_BONUS_THRESHOLD, GOODWILL_BONUS_CURRENCY,
-    applyGoodwillDiscount, goodwillBonusFlag,
-} from './World';
 // W-01 — The Labyrinth (THE APORIA). Additive surface for the mobile
 // dev-menu entry + labyrinth presenters.
 export {

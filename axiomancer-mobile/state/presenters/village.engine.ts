@@ -14,7 +14,6 @@
  */
 
 import {
-    applyGoodwillDiscount,
     consumableLibrary,
     defaultSellPrice,
     getRelicById,
@@ -46,12 +45,8 @@ export interface VillageWareVM {
      * presenter can state; the row then prints its flavour line alone.
      */
     effect: string;
-    /** Post-discount price — the actual amount charged. */
+    /** The ware's price — the amount charged. */
     price: number;
-    /** Undiscounted price, for strikethrough display when `discounted`. */
-    basePrice: number;
-    /** True iff Phase 65's goodwill discount lowered `price` below `basePrice`. */
-    discounted: boolean;
     affordable: boolean;
 }
 
@@ -234,20 +229,18 @@ export function wareEffectLine(item: Item): string {
  * Compose the settlement screen's view-model from the pending event.
  *
  * @param state - the event slice (for the pending `village` payload), the
- *   player (purse + inventory), and the map goodwill tally + current map that
- *   Phase 65's discount reads.
+ *   player (purse + inventory).
  * @returns the render-ready `VillageVM`, or the inactive `EMPTY_VM` when no
  *   village event is pending. Each ware now carries an `effect` line beside
  *   its price (cluster S5-talk-C04); every other field is unchanged.
  */
 export function selectVillageVM(
-    state: Pick<AppStoreState, 'event' | 'player' | 'mapGoodwill' | 'world'>,
+    state: Pick<AppStoreState, 'event' | 'player'>,
 ): VillageVM {
     const pending = state.event?.pending;
     if (!pending || pending.event.kind !== 'village') return EMPTY_VM;
     const event = pending.event;
     const currency = state.player?.currency ?? 0;
-    const goodwillCount = state.mapGoodwill?.[state.world?.currentMap?.name ?? ''] ?? 0;
 
     const merchants: VillageMerchantVM[] = event.merchants.map(npc => {
         const tree = npc.dialogueTree;
@@ -265,16 +258,13 @@ export function selectVillageVM(
         .map(ware => {
             const item = resolveWareItem(ware);
             if (!item) return null;
-            const price = applyGoodwillDiscount(ware.price, goodwillCount);
             return {
                 itemId: ware.itemId,
                 name: item.name,
                 description: item.description ?? '',
                 effect: wareEffectLine(item),
-                price,
-                basePrice: ware.price,
-                discounted: price !== ware.price,
-                affordable: currency >= price,
+                price: ware.price,
+                affordable: currency >= ware.price,
             };
         })
         .filter((w): w is VillageWareVM => w !== null);

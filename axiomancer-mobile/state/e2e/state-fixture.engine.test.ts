@@ -45,8 +45,8 @@ describe('readFixtureRequest: channels + precedence', () => {
     });
 
     it('the global outranks the URL and may be an inline object', () => {
-        globalThis.__AXM_FIXTURE__ = 'sage-fv-boss-gate';
-        expect(readFixtureRequest('?fixture=fresh-start')).toEqual({ source: 'global', ref: 'sage-fv-boss-gate' });
+        globalThis.__AXM_FIXTURE__ = 'sage-bw-door-gate';
+        expect(readFixtureRequest('?fixture=fresh-start')).toEqual({ source: 'global', ref: 'sage-bw-door-gate' });
         const inline = { id: 'inline', seed: 1 };
         globalThis.__AXM_FIXTURE__ = inline;
         expect(readFixtureRequest('')).toEqual({ source: 'global', ref: inline });
@@ -69,13 +69,13 @@ describe('resolveBootFixture: gate + fallback', () => {
     });
 
     it('ignores the request when dev tools are disabled (production)', () => {
-        expect(resolveBootFixture({ request: { source: 'url', ref: 'sage-fv-boss-gate' }, devToolsEnabled: false })).toBeNull();
+        expect(resolveBootFixture({ request: { source: 'url', ref: 'sage-bw-door-gate' }, devToolsEnabled: false })).toBeNull();
         expect(getBootFixture()).toBeNull();
     });
 
     it('falls back to a normal boot on an unknown or invalid fixture', () => {
         expect(resolveBootFixture({ request: { source: 'url', ref: 'nope' }, devToolsEnabled: true })).toBeNull();
-        expect(resolveBootFixture({ request: { source: 'global', ref: { id: 'x', world: { continent: 'coastal-continent', map: 'fishing-village', node: 'zz' } } }, devToolsEnabled: true })).toBeNull();
+        expect(resolveBootFixture({ request: { source: 'global', ref: { id: 'x', world: { continent: 'coastal-continent', map: 'breakwater', node: 'zz' } } }, devToolsEnabled: true })).toBeNull();
     });
 
     it('compiles a registry fixture and memoises it for the boot', () => {
@@ -89,14 +89,14 @@ describe('resolveBootFixture: gate + fallback', () => {
 
 describe('store boot through the fixture adapter', () => {
     it('boots the app store from the fixture state and keeps saves in memory', () => {
-        const boot = resolveBootFixture({ request: { source: 'global', ref: 'sage-fv-boss-gate' }, devToolsEnabled: true })!;
+        const boot = resolveBootFixture({ request: { source: 'global', ref: 'sage-bw-door-gate' }, devToolsEnabled: true })!;
         const adapter = createFixtureBootAdapter(boot.state);
         const store = createAppStore({ adapter });
         const s = store.getState();
         expect(s.version).toBe(GAME_STATE_VERSION);
         expect(s.player.level).toBe(15);
-        expect(s.world.currentMap.name).toBe('fishing-village');
-        expect(s.world.currentMap.currentNode).toBe('fv-9');
+        expect(s.world.currentMap.name).toBe('breakwater');
+        expect(s.world.currentMap.currentNode).toBe('bw-15');
         // Mobile-only slices are still layered on.
         expect(s.event.pending).toBeNull();
 
@@ -107,7 +107,7 @@ describe('store boot through the fixture adapter', () => {
     });
 
     it('`arrive` fixtures resolve the current node so <EventGate> has a paced route', () => {
-        const fixture = getStateFixtureById('apprentice-fv-interaction')!;
+        const fixture = getStateFixtureById('apprentice-nf-interaction')!;
         expect(fixture.arrive).toBe(true);
         const boot = resolveBootFixture({ request: { source: 'url', ref: fixture.id }, devToolsEnabled: true })!;
         const store = createAppStore({ adapter: createFixtureBootAdapter(boot.state) });
@@ -130,9 +130,9 @@ describe('store boot through the fixture adapter', () => {
 
 describe('createFixtureStore + arriveFromFixture (test-utils/fixtureStore.ts)', () => {
     it('boots from a registry id with a zero-save memory adapter', () => {
-        const h = createFixtureStore('sage-fv-boss-gate');
-        expect(h.fixture.id).toBe('sage-fv-boss-gate');
-        expect(h.store.getState().world.currentMap.currentNode).toBe('fv-9');
+        const h = createFixtureStore('sage-bw-door-gate');
+        expect(h.fixture.id).toBe('sage-bw-door-gate');
+        expect(h.store.getState().world.currentMap.currentNode).toBe('bw-15');
         expect(h.adapter.saveCount).toBe(0);
         expect(h.state.runId).toBe(h.store.getState().runId);
     });
@@ -140,12 +140,12 @@ describe('createFixtureStore + arriveFromFixture (test-utils/fixtureStore.ts)', 
     it('accepts an inline fixture and a caller-supplied adapter', () => {
         const adapter = createMemoryAdapter();
         const h = createFixtureStore(
-            { id: 'inline-seat', seed: 11, world: { continent: 'coastal-continent', map: 'fishing-village', node: 'fv-10' } },
+            { id: 'inline-seat', seed: 11, world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-18' } },
             { adapter },
         );
         expect(h.adapter).toBe(adapter);
         expect(adapter.saveCount).toBe(1);
-        expect(h.store.getState().world.currentMap.currentNode).toBe('fv-10');
+        expect(h.store.getState().world.currentMap.currentNode).toBe('bw-18');
     });
 
     it('rejects unknown ids and invalid inline documents', () => {
@@ -157,12 +157,12 @@ describe('createFixtureStore + arriveFromFixture (test-utils/fixtureStore.ts)', 
     // browser harnesses can open these cold; pin here that each `arrive`
     // lands the store in the state its gate routes on.
     it.each([
-        ['apprentice-fv-interaction', (s: ReturnType<AppStore['getState']>) => selectPacedEventRoute(s) === '/dialogue'],
+        ['apprentice-nf-interaction', (s: ReturnType<AppStore['getState']>) => selectPacedEventRoute(s) === '/dialogue'],
         ['wanderer-nf-village', (s: ReturnType<AppStore['getState']>) => selectPacedEventRoute(s) === '/village'],
         ['wanderer-nf-cutscene', (s: ReturnType<AppStore['getState']>) => selectPacedEventRoute(s) === '/cutscene'],
-        ['apprentice-fv-rest', (s: ReturnType<AppStore['getState']>) => s.rest.session !== null],
-        ['apprentice-fv-cache', (s: ReturnType<AppStore['getState']>) => s.cache.session !== null],
-        ['wanderer-fv-blacksmith', (s: ReturnType<AppStore['getState']>) => s.blacksmith.session !== null],
+        ['apprentice-bw-rest', (s: ReturnType<AppStore['getState']>) => s.rest.session !== null],
+        ['apprentice-bw-cache', (s: ReturnType<AppStore['getState']>) => s.cache.session !== null],
+        ['wanderer-bw-blacksmith', (s: ReturnType<AppStore['getState']>) => s.blacksmith.session !== null],
         ['l30-caverns-hazard-arrive', (s: ReturnType<AppStore['getState']>) => s.hazard.session !== null],
     ])('"%s": arrive lands the state its gate routes on', (id, landed) => {
         const h = createFixtureStore(id);

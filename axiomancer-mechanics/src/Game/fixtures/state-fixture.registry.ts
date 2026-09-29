@@ -2,9 +2,9 @@
  * Committed state fixtures — the shared vocabulary between the CLI, Jest,
  * and the browser harnesses. Reference one by id from any surface:
  *
- *   npm run game -- --fixture sage-fv-boss-gate
- *   http://localhost:8081/exploration?fixture=sage-fv-boss-gate
- *   buildStateFromFixture(getStateFixtureById('sage-fv-boss-gate')!)
+ *   npm run game -- --fixture sage-bw-door-gate
+ *   http://localhost:8081/exploration?fixture=sage-bw-door-gate
+ *   buildStateFromFixture(getStateFixtureById('sage-bw-door-gate')!)
  *
  * Authoring rules:
  *   - ids are kebab-case and unique (the registry test enforces both)
@@ -27,20 +27,20 @@ export const STATE_FIXTURES: readonly StateFixture[] = Object.freeze([
         seed: 'fixture-fresh-start',
     },
     {
-        id: 'apprentice-fv-interaction',
-        description: 'Apprentice standing on the first NPC node of the fishing village; `arrive` fires the dialogue so /dialogue is reachable cold.',
-        seed: 'fixture-apprentice-fv-interaction',
+        id: 'apprentice-nf-interaction',
+        description: 'Apprentice standing on the Shrine Keeper\'s node of the parked northern forest (nf-3; no Act 1 map stages an NPC); `arrive` fires the dialogue so /dialogue is reachable cold.',
+        seed: 'fixture-apprentice-nf-interaction',
         preset: 'apprentice',
-        world: { continent: 'coastal-continent', map: 'fishing-village', node: 'fv-2' },
+        world: { continent: 'coastal-continent', map: 'northern-forest', node: 'nf-3' },
         flags: ['combat-tutorial-done'],
         arrive: true,
     },
     {
-        id: 'sage-fv-boss-gate',
-        description: 'Sage (L15) on fishing-village fv-9, one step from the boss node (fv-24, encounter) and the travel door (fv-10). Combat + travel surfaces.',
-        seed: 'fixture-sage-fv-boss-gate',
+        id: 'sage-bw-door-gate',
+        description: 'Sage (L15) on the Breakwater\'s bw-15, one step from the door fight (bw-17, the Doorwarden) and two from the river bridge (bw-18). Combat + travel surfaces.',
+        seed: 'fixture-sage-bw-door-gate',
         preset: 'sage',
-        world: { continent: 'coastal-continent', map: 'fishing-village', node: 'fv-9' },
+        world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-15' },
         flags: ['combat-tutorial-done', 'hazard-tutorial-done'],
     },
     {
@@ -52,7 +52,6 @@ export const STATE_FIXTURES: readonly StateFixture[] = Object.freeze([
             continent: 'coastal-continent',
             map: 'northern-forest',
             node: 'nf-8',
-            completedMaps: ['fishing-village'],
         },
         player: { currency: 240 },
         arrive: true,
@@ -71,11 +70,11 @@ export const STATE_FIXTURES: readonly StateFixture[] = Object.freeze([
         flags: ['combat-tutorial-done', 'hazard-tutorial-done'],
     },
     {
-        id: 'broke-l1-fv-rest',
-        description: 'Fresh L1 with zero shillings and 1 vitae on the fishing-village rest node (fv-3). Rest-choice + empty-wallet surfaces.',
-        seed: 'fixture-broke-l1-fv-rest',
+        id: 'broke-l1-bw-rest',
+        description: 'Fresh L1 with zero shillings and 1 vitae on the Breakwater\'s first rest node (bw-9, an inn). Rest-choice + empty-wallet surfaces.',
+        seed: 'fixture-broke-l1-bw-rest',
         preset: 'kid-l1',
-        world: { continent: 'coastal-continent', map: 'fishing-village', node: 'fv-3' },
+        world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-9' },
         player: { currency: 0, health: 1 },
     },
     // ── Arrival fixtures (2026-09-08) — one per state-gated screen ────────
@@ -87,35 +86,35 @@ export const STATE_FIXTURES: readonly StateFixture[] = Object.freeze([
         description: 'Wanderer (L8) on a mid-forest omen node (nf-17, cutscene); `arrive` pushes /cutscene. (Not the map start node: the exploration screen fires a start node\'s own arrival on landing, and a second resolve would bounce the screen.)',
         seed: 'fixture-wanderer-nf-cutscene',
         preset: 'wanderer',
-        world: { continent: 'coastal-continent', map: 'northern-forest', node: 'nf-17', completedMaps: ['fishing-village'] },
+        world: { continent: 'coastal-continent', map: 'northern-forest', node: 'nf-17' },
         flags: ['combat-tutorial-done'],
         arrive: true,
     },
     {
-        id: 'apprentice-fv-rest',
-        description: 'Apprentice on the first fishing-village rest node (fv-3), hurt; `arrive` starts the night-watch session → /rest.',
-        seed: 'fixture-apprentice-fv-rest',
+        id: 'apprentice-bw-rest',
+        description: 'Apprentice on the Breakwater\'s first rest node (bw-9), hurt; `arrive` starts the night-watch session → /rest.',
+        seed: 'fixture-apprentice-bw-rest',
         preset: 'apprentice',
-        world: { continent: 'coastal-continent', map: 'fishing-village', node: 'fv-3' },
+        world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-9' },
         player: { health: 20 },
         flags: ['combat-tutorial-done'],
         arrive: true,
     },
     {
-        id: 'apprentice-fv-cache',
-        description: 'Apprentice on the first fishing-village loot-cache node (fv-11); `arrive` starts the cache session → /cache.',
-        seed: 'fixture-apprentice-fv-cache',
+        id: 'apprentice-bw-cache',
+        description: 'Apprentice on the Breakwater\'s first loot-cache node (bw-5); `arrive` starts the cache session → /cache.',
+        seed: 'fixture-apprentice-bw-cache',
         preset: 'apprentice',
-        world: { continent: 'coastal-continent', map: 'fishing-village', node: 'fv-11' },
+        world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-5' },
         flags: ['combat-tutorial-done'],
         arrive: true,
     },
     {
-        id: 'wanderer-fv-blacksmith',
-        description: 'Wanderer (L8) with shillings on the fishing-village blacksmith node (fv-21); `arrive` starts the forge session → /blacksmith.',
-        seed: 'fixture-wanderer-fv-blacksmith',
+        id: 'wanderer-bw-blacksmith',
+        description: 'Wanderer (L8) with shillings on the Breakwater\'s anvil node (bw-16); `arrive` starts the forge session → /blacksmith.',
+        seed: 'fixture-wanderer-bw-blacksmith',
         preset: 'wanderer',
-        world: { continent: 'coastal-continent', map: 'fishing-village', node: 'fv-21' },
+        world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-16' },
         player: { currency: 180 },
         flags: ['combat-tutorial-done', 'blacksmith-tutorial-done'],
         arrive: true,

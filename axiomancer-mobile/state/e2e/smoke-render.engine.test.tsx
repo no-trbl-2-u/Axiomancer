@@ -95,7 +95,7 @@ const ENCOUNTER_EVENT: ResolveMapEventResult = {
         kind: 'encounter',
         encounter: {
             enemies: [createMockEncounterEnemy()],
-            origin: 'fishing-village:fv-3',
+            origin: 'breakwater:bw-2',
         },
         isBoss: false,
     } as never,

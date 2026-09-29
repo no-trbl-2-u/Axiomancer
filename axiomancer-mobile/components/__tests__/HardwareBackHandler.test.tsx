@@ -207,7 +207,7 @@ function combatPrelude(): ResolveMapEventResult {
         state: undefined as never,
         event: {
             kind: 'encounter',
-            encounter: { enemies: [enemy], origin: 'fishing-village:fv-3' } as never,
+            encounter: { enemies: [enemy], origin: 'breakwater:bw-2' } as never,
             isBoss: false,
         },
     };

@@ -5,80 +5,13 @@
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { restoreOriginalRng } from '../../../test-utils/rng';
-import { fishingVillage, northernForest } from '../Coastal-Village/maps';
-import { forwardEdges } from '../../world.reducer';
-import { captainBlackwater, fishermansDaughter, villageHealer, unionLeader, merchantWidow } from '../Coastal-Village/npcs';
+import { northernForest } from '../Coastal-Village/maps';
 import { shrineKeeper, chronicler, wanderingPhilosopher, forestRanger, hermitSage, lostTrader } from '../Northern-Forest/npcs';
 
 describe('World/Continents Engine Tests', () => {
   afterEach(() => {
     vi.restoreAllMocks();
     restoreOriginalRng();
-  });
-
-  describe('Coastal Village Map Definition', () => {
-    it('has valid map structure with all required properties', () => {
-      expect(fishingVillage.name).toBe('fishing-village');
-      expect(fishingVillage.continent).toBe('coastal-continent');
-      expect(fishingVillage.description).toContain('home town');
-      expect(fishingVillage.startingNode.id).toBe('fv-1');
-      expect(fishingVillage.nodes).toHaveLength(28); // Phase 65 expanded grid + the three gates (2026-09-21)
-      expect(fishingVillage.npcs).toHaveLength(8); // All coastal NPCs
-      expect(fishingVillage.quests).toHaveLength(2); // starting-quest + get-to-forest (Phase 8)
-    });
-
-    it('has properly connected node network', () => {
-      // The 2026-08-08 first-map audit re-layered the village into three
-      // lanes across ten columns; Phase 53c (S-02) then narrowed column 1
-      // to fv-2 alone (Old Marrow, the quest-giver) so the map's premise
-      // is guaranteed on every route. fv-12 and fv-13, displaced from
-      // column 1, re-home into column 3. The property under test: the
-      // start opens onto Old Marrow's single node, he opens onto every
-      // column-2 lane, a mid-map spine node keeps a spine exit plus both
-      // flanks, and the map has an authored end.
-      const fv1 = fishingVillage.nodes.find(n => n.id === 'fv-1');
-      expect(fv1?.connectedNodes).toEqual(['fv-2']);
-
-      // THE THREE GATES (2026-09-21): Old Marrow opens onto the first gate,
-      // and the gate onto every column-3 lane; each lane funnels into the
-      // next gate.
-      const fv2 = fishingVillage.nodes.find(n => n.id === 'fv-2');
-      expect(fv2?.connectedNodes).toEqual(['fv-26']);
-      const gate1 = fishingVillage.nodes.find(n => n.id === 'fv-26');
-      expect(gate1?.connectedNodes).toContain('fv-16');  // wharf lane
-      expect(gate1?.connectedNodes).toContain('fv-3');   // spine
-      expect(gate1?.connectedNodes).toContain('fv-11');  // inland lane
-
-      // D1 (2026-09-21) gave each open column lateral lane ribs, so a lane
-      // node's raw edge list now carries its neighbours as well. The funnel
-      // property is about PROGRESSION, so it is read off the forward
-      // skeleton — the ribs never reach forward.
-      expect([...(forwardEdges(fishingVillage).get('fv-3') ?? [])]).toEqual(['fv-27']);
-      const fv3 = fishingVillage.nodes.find(n => n.id === 'fv-3');
-      expect(fv3?.connectedNodes).toEqual(expect.arrayContaining(['fv-27', 'fv-16', 'fv-11']));
-
-      // Terminal column — the only place a run is allowed to run out of moves.
-      const fv10 = fishingVillage.nodes.find(n => n.id === 'fv-10');
-      expect(fv10?.connectedNodes).toHaveLength(0);
-    });
-
-    it('has valid starting quest with proper structure', () => {
-      const startingQuest = fishingVillage.quests![0];
-      expect(startingQuest.name).toBe('starting-quest');
-      expect(startingQuest.mapName).toBe('fishing-village');
-      expect(startingQuest.objectives).toHaveLength(1);
-      expect(startingQuest.objectives[0].type).toBe('kill');
-      expect(startingQuest.objectives[0].target).toBe('The Doorwarden');
-    });
-
-    it('has a get-to-forest quest gating on the mid-game gate (Phase 8)', () => {
-      const getToForest = fishingVillage.quests!.find(q => q.name === 'get-to-forest');
-      expect(getToForest).toBeDefined();
-      expect(getToForest!.mapName).toBe('fishing-village');
-      expect(getToForest!.objectives).toHaveLength(1);
-      expect(getToForest!.objectives[0].type).toBe('reach');
-      expect(getToForest!.objectives[0].target).toBe('nf-1');
-    });
   });
 
   describe('Northern Forest Map Definition', () => {
@@ -126,80 +59,6 @@ describe('World/Continents Engine Tests', () => {
       const nf15 = northernForest.nodes.find(n => n.id === 'nf-15');
       expect(nf15?.connectedNodes).toContain('nf-7');
       expect(nf15?.connectedNodes).toContain('nf-16');
-    });
-  });
-
-  describe('Coastal Village NPCs', () => {
-    it('Captain Blackwater has valid dialogue tree with alignment-gated choices', () => {
-      expect(captainBlackwater.name).toBe('Captain Blackwater');
-      expect(captainBlackwater.dialogueTree!.id).toBe('captain-blackwater');
-      
-      const greetNode = captainBlackwater.dialogueTree!.nodes['greet'];
-      expect(greetNode.choices!).toHaveLength(5); // +1 Phase 53e marrow_pressed read-back, -1 retired observer read-back (D39)
-      
-      // Formerly alignment-gated (ungated by T6 / D39): fair trade choice
-      const fairTradeChoice = greetNode.choices!.find(c => c.text.includes('how you deal fair'));
-      expect(fairTradeChoice).toBeDefined();
-    });
-
-    it("Fisherman's Daughter has mentorship-themed dialogue", () => {
-      expect(fishermansDaughter.name).toBe("Fisherman's Daughter");
-      expect(fishermansDaughter.dialogueTree!.id).toBe('fishermans-daughter');
-      
-      const greetNode = fishermansDaughter.dialogueTree!.nodes['greet'];
-      
-      // The growth-recognition read-back went with the observer cache (D39).
-      expect(greetNode.choices!.some(c => c.nextNodeId === 'growth_recognition')).toBe(false);
-      expect(greetNode.choices!.some(c => c.nextNodeId === 'bright_observation')).toBe(true);
-    });
-
-    it('Village Healer has medical ethics dilemmas with resource constraints', () => {
-      expect(villageHealer.name).toBe('Village Healer');
-      expect(villageHealer.dialogueTree!.id).toBe('village-healer');
-      
-      const situationNode = villageHealer.dialogueTree!.nodes['talk_situation'];
-      // Case-insensitive: this asserts the healer NAMES her constraints, not
-      // where a sentence happens to break. The phase 75 re-voice split the line
-      // and "fever spreads" became sentence-initial — content unchanged, casing
-      // not. A content assertion should not fail on a full stop moving.
-      expect(situationNode.text.toLowerCase()).toContain('fever spreads');
-      expect(situationNode.text).toContain('hoarded in the wealthy district');
-      
-      // Formerly alignment-gated (ungated by T6 / D39): providence choice
-      const providenceChoice = situationNode.choices!.find(c => 
-        c.text.includes('Trust to providence')
-      );
-      expect(providenceChoice).toBeDefined();
-    });
-
-    it('Union Leader has labor rights themes with collective action choices', () => {
-      expect(unionLeader.name).toBe("Dockworker's Union Leader");
-      expect(unionLeader.dialogueTree!.id).toBe('union-leader');
-      
-      const situationNode = unionLeader.dialogueTree!.nodes['talk_workers_situation'];
-      expect(situationNode.text).toContain('calling a strike');
-      
-      // Test solidarity choice with flag setting
-      const solidarityChoice = situationNode.choices!.find(c => 
-        c.text.includes('stand with you')
-      );
-      expect(solidarityChoice?.effect?.setFlag).toBe('union_supporter');
-      expect(solidarityChoice?.effect?.grantCurrency).toBe(-20);
-    });
-
-    it('Merchant Widow has grief and justice themes with moral complexity', () => {
-      expect(merchantWidow.name).toBe("Merchant's Widow");
-      expect(merchantWidow.dialogueTree!.id).toBe('merchant-widow');
-      
-      const troublesNode = merchantWidow.dialogueTree!.nodes['talk_troubles'];
-      expect(troublesNode.text).toContain('husband was murdered');
-      expect(troublesNode.text).toContain('tempering with mercy');
-      
-      // Test justice with mercy choice
-      const mercyChoice = troublesNode.choices!.find(c => 
-        c.text.includes('both justice and mercy')
-      );
-      expect(mercyChoice?.effect?.setFlag).toBe('widow_mediator');
     });
   });
 
@@ -308,106 +167,13 @@ describe('World/Continents Engine Tests', () => {
     });
   });
 
-  describe('Dialogue Runtime Integration', () => {
-    it('has alignment-gated choices with proper requirements', () => {
-      const greetNode = captainBlackwater.dialogueTree!.nodes['greet'];
-      const fairTradeChoice = greetNode.choices!.find(c => c.text.includes('how you deal fair'));
-      expect(fairTradeChoice).toBeDefined();
-      
-      // Choice should require scope >= 20
-    });
-
-    it('has choices with alignment delta effects', () => {
-      // Test choice that modifies alignment
-      const greetNode = fishermansDaughter.dialogueTree!.nodes['greet'];
-      const wisdomChoice = greetNode.choices!.find(c => 
-        c.text.includes('seen much of the world')
-      );
-      expect(wisdomChoice).toBeDefined();
-      
-    });
-
-    it('handles flag-gated choices and flag setting', () => {
-      // Test choice that sets a flag
-      const situationNode = unionLeader.dialogueTree!.nodes['talk_workers_situation'];
-      const solidarityChoice = situationNode.choices!.find(c => 
-        c.text.includes('stand with you')
-      );
-      
-      expect(solidarityChoice?.effect?.setFlag).toBe('union_supporter');
-
-    });
-
-    it('handles currency effects correctly', () => {
-      // Test positive currency grant
-      const showWaresNode = captainBlackwater.dialogueTree!.nodes['show_wares'];
-      const valuesChoice = showWaresNode.choices![0];
-      expect(valuesChoice.effect?.grantCurrency).toBe(5);
-      
-      // Test negative currency cost  
-      const situationNode = villageHealer.dialogueTree!.nodes['talk_situation'];
-      const helpChoice = situationNode.choices!.find(c => c.text.includes("I'll help you"));
-      expect(helpChoice?.effect?.grantCurrency).toBe(-15);
-    });
-
-    it('keeps the choices that once carried moral effects', () => {
-      // These choices shifted GRACE until T6 (D39); they remain on offer.
-      const wisdomNode = fishermansDaughter.dialogueTree!.nodes['worldly_wisdom'];
-      const stayTrueChoice = wisdomNode.choices!.find(c => c.text.includes('Hold to what you are'));
-      expect(stayTrueChoice).toBeDefined();
-      
-      const troublesNode = merchantWidow.dialogueTree!.nodes['talk_troubles'];
-      const vengeanceChoice = troublesNode.choices!.find(c => c.text.includes('hire the best hunters'));
-      expect(vengeanceChoice).toBeDefined();
-    });
-  });
-
-  describe('Quest Integration', () => {
-    it('has quest completion requirements in dialogue', () => {
-      // Test quest completion requirement in Old Marrow's thanks node
-      const oldMarrowTree = fishingVillage.npcs!.find(npc => npc.name === 'Old Marrow')?.dialogueTree;
-      if (oldMarrowTree) {
-        const thanksNode = oldMarrowTree.nodes['thanks'];
-        thanksNode.choices!.forEach(choice => {
-          expect(choice.requires?.questCompleted).toBe('starting-quest');
-        });
-      }
-    });
-
-    it('has quest start effects in dialogue', () => {
-      // Test quest start effect in Old Marrow's offer node
-      const oldMarrowTree = fishingVillage.npcs!.find(npc => npc.name === 'Old Marrow')?.dialogueTree;
-      if (oldMarrowTree) {
-        const offerNode = oldMarrowTree.nodes['offer'];
-        const acceptChoice = offerNode.choices!.find(c => c.text.includes('Accept the quest'));
-        expect(acceptChoice?.effect?.startQuest).toBe('starting-quest');
-      }
-    });
-  });
-
-  describe('Cross-NPC Flag Integration', () => {
-    it('has flag-gated content referencing other NPCs', () => {
-      // Test beggar's bell recognition (requires befriended-little-belle flag)
-      const beggarTree = fishingVillage.npcs!.find(npc => npc.name === 'Coastal Beggar')?.dialogueTree;
-      if (beggarTree) {
-        const greetNode = beggarTree.nodes['greet'];
-        const gullChoice = greetNode.choices!.find(c => 
-          c.requires?.flag === 'befriended-little-belle'
-        );
-        expect(gullChoice).toBeDefined();
-        expect(gullChoice?.text).toContain('gone quiet');
-      }
-    });
-
-  });
-
   // adjust-npcs pass 21 — T6 (D39) deleted the observer cache that let six
   // NPCs notice "you have changed since we last spoke", but left the replies
   // ungated, so a first meeting offered them. Nothing in the game can make
   // that line true now, so no staged tree may claim it.
   it('no staged NPC claims to remember a change since a previous talk', () => {
     const trees = [
-      fishingVillage.npcs ?? [], northernForest.npcs ?? [],
+      northernForest.npcs ?? [],
     ].flat().flatMap(n => (n.dialogueTree ? [n.dialogueTree] : []));
     expect(trees.length).toBeGreaterThan(0);
     for (const tree of trees) {

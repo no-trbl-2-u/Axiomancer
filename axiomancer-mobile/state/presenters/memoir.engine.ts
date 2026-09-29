@@ -30,7 +30,6 @@ import {
 import { hazardDeathCount } from '../hazard/store-actions';
 import { REST_KEEPSAKE_FLAG_PREFIX } from '../rest/store-actions';
 import { CACHE_KEEPSAKE_FLAG_PREFIX } from '../cache/store-actions';
-import { getMapLayout } from '../exploration-maps';
 import { questTitle } from './engine-id-copy';
 
 /**
@@ -124,10 +123,6 @@ export interface MemoirRemainsViewModel {
      *  convention as `deathLine`; gains a milestone epithet past a
      *  recognition tier (Phase 32 part 1c). */
     soulsLine: string;
-    /** Phase 64 — formatted "Helped <map> N times." lines, one per map
-     *  with a positive `GameState.mapGoodwill` entry, descending by
-     *  count then ascending by map key. */
-    goodwill: readonly string[];
 }
 
 export interface MemoirViewModel {
@@ -143,8 +138,6 @@ export interface MemoirViewModel {
     /** REMAINS section eyebrows (Phase 6). */
     remainsEyebrow: string;
     remainsKeepsakesEyebrow: string;
-    /** REMAINS sub-group eyebrow for the goodwill tally (Phase 64). */
-    remainsGoodwillEyebrow: string;
     /** Chronicle section — Tick D populates from `_recentEvents`. */
     chronicle: ReadonlyArray<ChronicleEntry>;
     /** Quest sections — Tick B populates from `state.quests`. */
@@ -160,8 +153,6 @@ export interface MemoirViewModel {
     emptyQuests: string;
     /** Phase 6 — shown when `remains.keepsakes` is empty. */
     emptyKeepsakes: string;
-    /** Phase 64 — shown when `remains.goodwill` is empty. */
-    emptyGoodwill: string;
 }
 
 /**
@@ -317,7 +308,6 @@ const DEFAULT_REMAINS: MemoirRemainsViewModel = Object.freeze({
     keepsakes: Object.freeze([]) as readonly string[],
     bankedSouls: 0,
     soulsLine: 'the jar is empty.',
-    goodwill: Object.freeze([]) as readonly string[],
 }) as MemoirRemainsViewModel;
 
 const FALLBACK_VM: MemoirViewModel = Object.freeze({
@@ -330,7 +320,6 @@ const FALLBACK_VM: MemoirViewModel = Object.freeze({
     questsForgottenEyebrow: '✠ FORGOTTEN',
     remainsEyebrow: '✠ REMAINS',
     remainsKeepsakesEyebrow: '✠ KEEPSAKES',
-    remainsGoodwillEyebrow: '✠ GOODWILL',
     chronicle: Object.freeze([]) as ReadonlyArray<ChronicleEntry>,
     quests: Object.freeze({
         active: Object.freeze([]) as ReadonlyArray<MemoirQuestRow>,
@@ -341,7 +330,6 @@ const FALLBACK_VM: MemoirViewModel = Object.freeze({
     emptyChronicle: 'the page is bare.',
     emptyQuests: 'no errands written here.',
     emptyKeepsakes: 'nothing kept.',
-    emptyGoodwill: 'nothing given.',
 }) as MemoirViewModel;
 
 /**
@@ -535,38 +523,12 @@ function extractKeepsakes(flags: unknown): ReadonlyArray<string> {
 }
 
 /**
- * Formats Phase 63's `GameState.mapGoodwill` tally into display lines
- * (Phase 64). Filters to positive counts (defensive — the sacrifice offer
- * only ever writes `+1`, but a zero entry should never render, matching
- * "it counts, it does not latch" from the Phase 63 brief), sorts
- * count-descending with an ascending map-key tie-break for deterministic
- * output, and resolves each map's display label via the same
- * `getMapLayout(...).region` helper `exploration.engine.ts` uses for the
- * on-screen region name — unauthored map keys fall back to the raw key.
- */
-function buildGoodwill(rawMapGoodwill: unknown): ReadonlyArray<string> {
-    if (typeof rawMapGoodwill !== 'object' || rawMapGoodwill === null) {
-        return Object.freeze([]) as readonly string[];
-    }
-    const entries = Object.entries(rawMapGoodwill as Record<string, unknown>)
-        .filter((entry): entry is [string, number] => typeof entry[1] === 'number' && entry[1] > 0)
-        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-    const lines = entries.map(([mapName, count]) => {
-        const label = getMapLayout(mapName)?.region ?? mapName;
-        return count === 1 ? `Helped ${label} once.` : `Helped ${label} ${count} times.`;
-    });
-    return Object.freeze(lines) as readonly string[];
-}
-
-/**
- * Composes the REMAINS section VM from raw `state.flags` (Phase 6),
- * `player.bankedSouls` (Phase 32 part 1b), and `state.mapGoodwill`
- * (Phase 64 read-back of Phase 63's sacrifice tally).
+ * Composes the REMAINS section VM from raw `state.flags` (Phase 6) and
+ * `player.bankedSouls` (Phase 32 part 1b).
  */
 function buildRemains(
     flags: unknown,
     rawBankedSouls: unknown,
-    rawMapGoodwill: unknown,
 ): MemoirRemainsViewModel {
     const safeFlags: readonly string[] = Array.isArray(flags)
         ? (flags.filter((f): f is string => typeof f === 'string') as readonly string[])
@@ -581,7 +543,6 @@ function buildRemains(
         keepsakes: extractKeepsakes(flags),
         bankedSouls,
         soulsLine: buildSoulsLine(bankedSouls),
-        goodwill: buildGoodwill(rawMapGoodwill),
     }) as MemoirRemainsViewModel;
 }
 
@@ -618,9 +579,6 @@ function buildRemains(
  *   de-duplicated list via `extractKeepsakes`. `bankedSouls` reads
  *   `state.player.bankedSouls` (Harvest's persistent Soul jar, written
  *   back by `CombatEncounterPanel.applyHazardOutcome` at combat end).
- *   `goodwill` (Phase 64) reads `state.mapGoodwill` (Phase 63's per-map
- *   sacrifice tally) via `buildGoodwill`, formatting one "Helped <map> N
- *   times." line per helped map, count-descending.
  *
  * The view-model shape is pinned by `state/e2e/memoir.engine.test.ts`;
  * extensions to any section must keep the contract stable.
@@ -654,7 +612,7 @@ export function selectMemoirViewModel(state: MemoirStateInput): MemoirViewModel 
     const active = buildActiveRows(log?.active);
     const completed = buildCompletedRows(log?.completed);
     const chronicle = buildChronicle(state._recentEvents);
-    const remains = buildRemains(state.flags, player?.bankedSouls, state.mapGoodwill);
+    const remains = buildRemains(state.flags, player?.bankedSouls);
     return freezeViewModel({
         ...FALLBACK_VM,
         headerSubline: subline,

@@ -168,8 +168,8 @@ describe('wareEffectLine states the mechanical read (S5-talk-C04)', () => {
 describe('the village VM carries an effect line per ware (S5-talk-C04)', () => {
     it('fills `effect` from the resolved library item', () => {
         const store = villageStore(HEAL_WARE.id);
-        const { event, player, mapGoodwill, world } = store.getState();
-        const vm = selectVillageVM({ event, player, mapGoodwill, world } as never);
+        const { event, player } = store.getState();
+        const vm = selectVillageVM({ event, player });
 
         expect(vm.wares).toHaveLength(1);
         expect(vm.wares[0]!.effect).toBe(wareEffectLine(HEAL_WARE));

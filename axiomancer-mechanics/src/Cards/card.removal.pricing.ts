@@ -10,9 +10,9 @@
  * The counter is PER RUN (`Character.cardRemovals`), not per node and not
  * lifetime-across-runs.
  *
- * PRICES ARE RATIFIED (Phase 52f) against MEASURED income: the fishing-village
- * act's three authored loot-cache nodes grant a guaranteed 26 shillings on a
- * full walk (`src/World/MapEvents/content.ts`'s `FV_LOOT_CACHES`), and shop
+ * PRICES ARE RATIFIED (Phase 52f) against MEASURED income: a map's three
+ * authored loot-cache nodes grant a guaranteed 26 shillings on a full walk
+ * (`src/World/MapEvents/content.ts`'s `COAST_LOOT_CACHES`, the Breakwater's), and shop
  * wares run ~1-12. `base` sits well under a single loot-cache find so the
  * first cut is obviously affordable early; `step` is sized so the fourth/fifth
  * cut (20 / 25) approaches a full act's income — a real sacrifice, not a

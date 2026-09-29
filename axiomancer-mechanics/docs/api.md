@@ -129,8 +129,8 @@ method + supporting exports:
   Phase 35 character-id generation pattern. Supply your own rng for
   deterministic tests, or pass `() => getRng().random()` for the
   global seeded source.
-- `STARTING_REGION: MapName = 'fishing-village'` — canonical
-  starting region for `resetRun`; the hearth concept reuses
+- `STARTING_REGION: MapName` — canonical starting region (`STARTING_MAP`,
+  the Breakwater since map revamp M3a; it was fishing-village until then) for `resetRun`; the hearth concept reuses
   `MapDefinition.startingNode` (no new "hearth" type primitive).
 - `GAME_STATE_VERSION` bumped 5 → 6; `migrateV5toV6` defaults `runId`
   on legacy v5 saves.

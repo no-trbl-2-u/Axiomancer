@@ -4,8 +4,7 @@
  *
  * One irreversible choice of three: TAKE A CARD (a rolled reward card),
  * TAKE THE GOODS (a tier-scaled consumable haul + the node's currency), or
- * LEAVE IT FOR THE VILLAGE (nothing to the player; increments the current
- * map's goodwill tally). `resolveMapEvent` consumes the node on entry,
+ * LEAVE IT FOR THE VILLAGE (nothing to the player). `resolveMapEvent` consumes the node on entry,
  * before any choice — there is no back-out: no header back, no
  * swipe-dismiss (`gestureEnabled: false` in the root layout), no Android
  * hardware-back (`<HardwareBackHandler>`). All rules live in
@@ -31,7 +30,6 @@ import {
     CACHE_OUTCOME_EYEBROW,
     cacheOutcomeCardChip,
     cacheOutcomeCurrencyChip,
-    cacheOutcomeGoodwillChip,
     cacheOutcomeItemChip,
 } from '@/state/presenters/cache.copy';
 import { FONTS, TYPE } from '@/theme/axm';
@@ -59,14 +57,7 @@ export default function CacheScreen() {
     const styles = useStyles();
     const AXM = usePalette();
     const slice = useGameState((s) => s.cache);
-    const mapGoodwill = useGameState((s) => s.mapGoodwill);
-    const world = useGameState((s) => s.world);
-    const player = useGameState((s) => s.player);
-    const flags = useGameState((s) => s.flags);
-    const vm = useMemo(
-        () => selectCacheVM({ cache: slice, mapGoodwill, world, player, flags }),
-        [slice, mapGoodwill, world, player, flags],
-    );
+    const vm = useMemo(() => selectCacheVM({ cache: slice }), [slice]);
     const actions = useGameActions();
     const router = useRouter();
 
@@ -131,17 +122,6 @@ export default function CacheScreen() {
                             ))}
                             {vm.outcome.currency > 0 && (
                                 <Text style={styles.chip}>{cacheOutcomeCurrencyChip(vm.outcome.currency)}</Text>
-                            )}
-                            {vm.outcome.goodwillPreview !== null && (
-                                <Text style={styles.chip}>
-                                    {cacheOutcomeGoodwillChip(world?.currentMap?.name ?? 'this place', vm.outcome.goodwillPreview)}
-                                </Text>
-                            )}
-                            {vm.outcome.allyGrantPreview !== null && (
-                                <Text style={styles.chip}>{cacheOutcomeCardChip(vm.outcome.allyGrantPreview)}</Text>
-                            )}
-                            {vm.outcome.bonusPreview !== null && (
-                                <Text style={styles.chip}>{cacheOutcomeCurrencyChip(vm.outcome.bonusPreview)}</Text>
                             )}
                         </View>
                         <TouchableOpacity

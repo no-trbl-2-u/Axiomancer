@@ -93,7 +93,7 @@ interface Encounter {
 ```
 
 `generateEncounter(mapNode, playerLevel, options?)` ([`World/encounter.ts`](../src/World/encounter.ts))
-resolves the node's owning map (`fv-*` → fishing-village, `nf-*` → northern-forest),
+resolves the node's owning map (`bw-*` → breakwater, `nf-*` → northern-forest, …),
 filters the per-map pool by `options.difficulty` (if supplied), picks an
 enemy uniformly, scales their level via the Q6 bands:
 

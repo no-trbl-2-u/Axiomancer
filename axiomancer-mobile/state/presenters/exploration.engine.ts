@@ -117,8 +117,8 @@ export interface ExplorationViewModel {
      * The ONE placement the game deliberately treats as an arrival. Events
      * fire on arrival, and the player never arrives at the node they are
      * placed on, so a map's starting-node content used to be unreachable
-     * (2026-08-08 first-map audit) — on fishing-village that silently
-     * swallowed fv-1's whole pool. The exploration screen pays this on entry,
+     * (2026-08-08 first-map audit) — on the then-first map that silently
+     * swallowed the start node's whole pool. The exploration screen pays this on entry,
      * as the CLI's `--resolve-start` does
      * (`state/e2e/start-node-arrival.engine.test.tsx`).
      *
@@ -145,7 +145,7 @@ export interface ExplorationViewModel {
      * `placeOnNode` (state fixtures, `/dev` JUMP) even un-consumes the node
      * it places you on, so the inference read every placement as an
      * unanswered arrival and fired it on mount: the fixture deep link
-     * `/exploration?fixture=sage-fv-boss-gate` engaged the fv-9 boss instead
+     * `/exploration?fixture=sage-bw-door-gate` engaged the boss instead
      * of drawing the map (row 3.1 follow-up). The record rides the save, so
      * the debt is legible off the bytes on disk.
      */
@@ -671,7 +671,7 @@ function computeExplorationViewModel(state: GameStore): ExplorationViewModel {
             //
             // Counting the array the pips are drawn from makes the label a
             // description of the map rather than a second opinion about it.
-            // `fishing-village.layout.ts` records an EARLIER disagreement with
+            // A retired map layout recorded an EARLIER disagreement with
             // this same counter (critique pass 19), so this surface has bitten
             // before — hence the test that pins label against pips directly.
             right: `${nodes.length} nodes · ${nodes.filter((n) => n.kind === 'locked').length} sealed`,

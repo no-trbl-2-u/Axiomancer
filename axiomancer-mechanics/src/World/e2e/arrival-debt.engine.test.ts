@@ -28,13 +28,13 @@ import { createNewGameState } from '../../Game/game.reducer';
 import { mockSequentialRng } from '../../test-utils/rng';
 import type { GameState } from '../../Game/types';
 import type { WorldState } from '../types';
-// Import for side effect — registers the coastal pools (fv-13 encounter,
-// fv-10 door) that the dispatcher rolls from.
+// Import for side effect — registers the Breakwater pools (bw-14 encounter,
+// bw-18 door) that the dispatcher rolls from.
 import '../MapEvents/content';
 
 afterEach(() => vi.restoreAllMocks());
 
-const freshWorld = (): WorldState => createStartingWorld('fishing-village');
+const freshWorld = (): WorldState => createStartingWorld('breakwater');
 
 function gameOn(world: WorldState): GameState {
     mockSequentialRng(0.5);
@@ -61,33 +61,33 @@ describe('the arrival verb records what the player is owed', () => {
     });
 
     it('moveToNode owes the node it walked onto', () => {
-        const walked = moveToNode(freshWorld(), 'fv-2');
+        const walked = moveToNode(freshWorld(), 'bw-2');
 
-        expect(walked.currentMap.currentNode).toBe('fv-2');
-        expect(walked.currentMap.pendingArrival).toBe('fv-2');
+        expect(walked.currentMap.currentNode).toBe('bw-2');
+        expect(walked.currentMap.pendingArrival).toBe('bw-2');
     });
 
     it('each further move owes only the node under the player', () => {
-        const walked = moveToNode(walk(freshWorld(), 'fv-2'), 'fv-26');
+        const walked = moveToNode(walk(freshWorld(), 'bw-2'), 'bw-7');
 
-        expect(walked.currentMap.pendingArrival).toBe('fv-26');
+        expect(walked.currentMap.pendingArrival).toBe('bw-7');
     });
 });
 
 describe('the placement verbs owe nothing — being placed is not arriving', () => {
     it('placeOnNode clears a debt the walk had recorded', () => {
-        const walked = moveToNode(freshWorld(), 'fv-2');
-        expect(walked.currentMap.pendingArrival).toBe('fv-2');
+        const walked = moveToNode(freshWorld(), 'bw-2');
+        expect(walked.currentMap.pendingArrival).toBe('bw-2');
 
-        const placed = placeOnNode(walked, 'fv-9');
+        const placed = placeOnNode(walked, 'bw-9');
 
-        expect(placed.currentMap.currentNode).toBe('fv-9');
+        expect(placed.currentMap.currentNode).toBe('bw-9');
         expect(placed.currentMap.pendingArrival ?? null).toBeNull();
         // The condition the old inference fired on is still true: placement
         // deliberately un-consumes the node so its content stays live for the
         // tester who jumped there. That is precisely why it cannot stand in
         // for the debt.
-        expect(placed.currentMap.consumedNodes).not.toContain('fv-9');
+        expect(placed.currentMap.consumedNodes).not.toContain('bw-9');
     });
 
     it('teleportToNode clears it too — the Oubliette ejects, it does not walk', () => {
@@ -115,8 +115,8 @@ describe('the placement verbs owe nothing — being placed is not arriving', () 
 
 describe('resolving the arrival is what answers it', () => {
     it('clears the debt for the node it resolved', () => {
-        const before = gameOn(walk(freshWorld(), 'fv-2', 'fv-26', 'fv-11', 'fv-27', 'fv-13'));
-        expect(before.world.currentMap.pendingArrival).toBe('fv-13');
+        const before = gameOn(walk(freshWorld(), 'bw-2', 'bw-7', 'bw-11', 'bw-14'));
+        expect(before.world.currentMap.pendingArrival).toBe('bw-14');
 
         const { state } = resolveMapEvent(before);
 
@@ -128,24 +128,24 @@ describe('resolving the arrival is what answers it', () => {
         // cannot say whether it was answered — the debt can. It has to be
         // paid before the handler runs: the crossing swaps `currentMap` for
         // the destination and files the departed map under `mapStates`, so a
-        // clear applied afterwards would leave the village owing its door
+        // clear applied afterwards would leave the Breakwater owing its door
         // forever and returning through it would cross again with no input.
-        const before = gameOn(placeOnNode(freshWorld(), 'fv-9'));
-        const walked = { ...before, world: moveToNode(before.world, 'fv-10') };
-        expect(walked.world.currentMap.pendingArrival).toBe('fv-10');
+        const before = gameOn(placeOnNode(freshWorld(), 'bw-17'));
+        const walked = { ...before, world: moveToNode(before.world, 'bw-18') };
+        expect(walked.world.currentMap.pendingArrival).toBe('bw-18');
 
         const { state, event } = resolveMapEvent(walked);
 
         expect(event.kind).toBe('travel');
-        expect(state.world.currentMap.name).toBe('northern-forest');
-        expect(state.world.mapStates?.['fishing-village']?.pendingArrival ?? null).toBeNull();
+        expect(state.world.currentMap.name).toBe('charcoal-wood');
+        expect(state.world.mapStates?.['breakwater']?.pendingArrival ?? null).toBeNull();
     });
 
     it('clears a stale debt on a node that was already consumed', () => {
-        const walked = walk(freshWorld(), 'fv-2', 'fv-26', 'fv-11', 'fv-27', 'fv-13');
+        const walked = walk(freshWorld(), 'bw-2', 'bw-7', 'bw-11', 'bw-14');
         const consumed: WorldState = {
             ...walked,
-            currentMap: { ...walked.currentMap, consumedNodes: ['fv-13'] },
+            currentMap: { ...walked.currentMap, consumedNodes: ['bw-14'] },
         };
 
         const { state, event } = resolveMapEvent(gameOn(consumed));

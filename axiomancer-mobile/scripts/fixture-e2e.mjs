@@ -7,13 +7,13 @@
 // sees, so the UI half of `docs/state-fixtures.md` is evidenced by the
 // same registry the CLI's `--fixture` flag boots from:
 //
-//   A. URL deep link  `/exploration?fixture=sage-fv-boss-gate` (dev tools
-//      forced) → the exploration map opens with fv-9 as the live node.
+//   A. URL deep link  `/exploration?fixture=sage-bw-door-gate` (dev tools
+//      forced) → the exploration map opens with bw-15 as the live node.
 //   B. Init-script global with an INLINE fixture carrying `arrive: true`
 //      → `<FixtureBoot>` fires the node event and `<EventGate>` lands on
 //      `/dialogue` cold.
 //   C. Fallback: an unknown id (`?fixture=no-such-fixture`) is ignored →
-//      the fresh-game map opens with fv-9 NOT live and no runtime error.
+//      the fresh-game map opens with bw-15 NOT live and no runtime error.
 //
 // The production gate (`isDevToolsEnabled()` false → any request ignored)
 // is pinned by the Jest suite `state/e2e/state-fixture.engine.test.ts`; a
@@ -155,11 +155,11 @@ async function caseUrlDeepLink(browser, baseUrl) {
         await forceDevTools(context)
         const page = await context.newPage()
         trackErrors(page, errors)
-        await page.goto(`${baseUrl}/exploration?fixture=sage-fv-boss-gate`, { waitUntil: 'networkidle', timeout: 30000 })
-        await expectLiveNode(page, 'fv-9', 'A (url deep link)')
+        await page.goto(`${baseUrl}/exploration?fixture=sage-bw-door-gate`, { waitUntil: 'networkidle', timeout: 30000 })
+        await expectLiveNode(page, 'bw-15', 'A (url deep link)')
         // Neighbours were unlocked by placeOnNode: the boss node is open.
-        const boss = await page.getByTestId('node-fv-24').getAttribute('aria-label')
-        if (!boss || !boss.includes('open')) fail(`A: fv-24 should be open after placement (aria-label: ${boss})`)
+        const boss = await page.getByTestId('node-bw-17').getAttribute('aria-label')
+        if (!boss || !boss.includes('open')) fail(`A: bw-17 should be open after placement (aria-label: ${boss})`)
     } finally {
         await context.close()
     }
@@ -174,7 +174,7 @@ async function caseInlineArrive(browser, baseUrl) {
             id: 'e2e-inline-arrive',
             seed: 'fixture-e2e-inline',
             preset: 'apprentice',
-            world: { continent: 'coastal-continent', map: 'fishing-village', node: 'fv-2' },
+            world: { continent: 'coastal-continent', map: 'northern-forest', node: 'nf-3' },
             flags: ['combat-tutorial-done'],
             arrive: true,
         })
@@ -204,9 +204,9 @@ async function caseUnknownIdFallback(browser, baseUrl) {
         await page.waitForTimeout(1500)
         const text = await page.evaluate(() => document.body?.innerText?.trim() ?? '')
         if (text.length === 0) fail('C (unknown id): the app rendered nothing')
-        const fv9 = page.getByTestId('node-fv-9')
-        const aria = (await fv9.count()) > 0 ? await fv9.first().getAttribute('aria-label') : null
-        if (aria && aria.includes('here')) fail(`C (unknown id): a fixture was applied (fv-9 aria-label: ${aria})`)
+        const bw15 = page.getByTestId('node-bw-15')
+        const aria = (await bw15.count()) > 0 ? await bw15.first().getAttribute('aria-label') : null
+        if (aria && aria.includes('here')) fail(`C (unknown id): a fixture was applied (bw-15 aria-label: ${aria})`)
         log('C (unknown id → fresh game): request ignored, app painted, no crash ✔')
     } finally {
         await context.close()

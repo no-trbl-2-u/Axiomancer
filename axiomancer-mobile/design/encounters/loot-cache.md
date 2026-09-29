@@ -31,7 +31,7 @@ onto the screen — no sub-flows, no picker sheets:
 | Engine phase | Screen state |
 |---|---|
 | `offer` | Three offer buttons: TAKE A CARD / TAKE THE GOODS / LEAVE IT FOR THE VILLAGE |
-| `outcome` | Outcome panel with the settled grant (or goodwill tick) + a claim button |
+| `outcome` | Outcome panel with the settled grant (none for sacrifice) + a claim button |
 | `done` | *(auto-exit)* |
 
 ---
@@ -64,10 +64,6 @@ Shown at `outcome` phase (`testID="cache-outcome"`). Renders
 - `cardName` — set iff `card` was chosen; rendered as a `+ CARD NAME` chip
 - `itemNames` / `currency` — set iff `item` was chosen; one `+ ITEM NAME`
   chip per item, plus a `+N SHILLINGS` chip if currency > 0
-- `goodwillPreview` — set iff `sacrifice` was chosen; the current map's
-  tally AFTER this claim (`state.mapGoodwill[currentMap] + 1`, computed by
-  the presenter since the pure engine doesn't know the map or the running
-  count), rendered as a `HELPED <MAP> N TIMES` chip
 
 CTA (`cache-claim`) → `claimLootCacheChoiceOutcome()`.
 
@@ -75,10 +71,8 @@ CTA (`cache-claim`) → `claimLootCacheChoiceOutcome()`.
 
 ## Presenter — CacheChoiceVM
 
-Entry: `selectCacheVM({ cache, mapGoodwill, world })` in
-`state/presenters/cache.engine.ts` — reads more of the store than
-`selectRestVM` does, specifically to preview the sacrifice offer's goodwill
-tally before claim.
+Entry: `selectCacheVM({ cache })` in
+`state/presenters/cache.engine.ts`.
 
 ```typescript
 CacheChoiceOfferVM {
@@ -92,7 +86,6 @@ CacheChoiceOutcomeVM {
   cardName                      // string | null — set iff chosen === 'card'
   itemNames                     // readonly string[] — non-empty iff chosen === 'item'
   currency                      // >0 iff chosen === 'item'
-  goodwillPreview                // number | null — set iff chosen === 'sacrifice'
 }
 
 CacheChoiceVM {
@@ -112,7 +105,7 @@ CacheChoiceVM {
 ```
 beginLootCacheChoiceAction(currency?, description?, tier?, seed?)  ← called by resolveCurrentMapEvent; rolls both candidates, seeds session
 chooseLootCacheChoiceOfferAction(offer)                            ← offer -> outcome
-claimLootCacheChoiceOutcomeAction()                                ← apply the grant (or goodwill tick), clear session, persist
+claimLootCacheChoiceOutcomeAction()                                ← apply the grant (if any), clear session, persist
 ```
 
 **State restoration:** the engine's `resolveMapEvent` applies the authored

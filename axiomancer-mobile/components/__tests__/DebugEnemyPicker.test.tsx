@@ -36,7 +36,7 @@ describe('DebugEnemyPicker: DEV gate', () => {
     it('renders the current map roster by default', () => {
         const store = makeStore();
         const tree = render(withProvider(store, <DebugEnemyPicker />));
-        const first = listEnemies('fishing-village')[0];
+        const first = listEnemies('breakwater')[0];
         expect(tree.queryByTestId(`debug-enemy-${first.enemy.id}`)).not.toBeNull();
         expect(tree.queryByTestId('debug-enemy-map-aporia-proof')).not.toBeNull();
     });

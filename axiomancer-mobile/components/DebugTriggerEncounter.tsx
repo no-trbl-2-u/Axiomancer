@@ -61,7 +61,7 @@ import { FONTS } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 
 type MapKey = keyof typeof EnemiesByMap;
-const DEFAULT_MAP: MapKey = 'fishing-village';
+const DEFAULT_MAP: MapKey = 'breakwater';
 
 /** All encounters exposed as trigger buttons. `kind` doubles as the
  * `sourceNodeType` stamped on the event slice. */

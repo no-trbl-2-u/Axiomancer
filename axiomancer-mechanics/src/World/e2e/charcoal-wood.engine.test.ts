@@ -3,9 +3,10 @@
  *
  * Pins what the map revamp decided for the second Act 1 map:
  * - the Breakwater's river bridge leads here, and this map's stair cave leads
- *   on into the Beacon Crags (M3c; it led to fishing-village until then);
+ *   on into the Beacon Crags (M3c);
  * - the map borrows the shipped builders, the northern forest's roster and
- *   its materials (D29), with one authored event on every node;
+ *   its materials (D29), with one authored event on every node and one
+ *   Anvil near its exit (D61, R3b);
  * - the forest roster is level 9 and up, so every fight here is pinned low.
  *
  * The generic gauntlet invariants (no strands, column law, ribs, distinct
@@ -70,19 +71,23 @@ describe('the Charcoal Wood\'s events (D29)', () => {
         expect(Object.keys(kinds)).toHaveLength(20);
     });
 
-    it('spreads 7 encounters, 3 rests, 3 loot caches, 3 gatherings, 2 hazards, an arrival and a door', () => {
+    it('spreads 7 encounters, 3 rests, 3 loot caches, 3 gatherings, 1 hazard, 1 Anvil, an arrival and a door', () => {
         const tally: Record<string, number> = {};
         for (const k of Object.values(kinds)) tally[k] = (tally[k] ?? 0) + 1;
         expect(tally).toEqual({
-            encounter: 7, rest: 3, 'loot-cache': 3, gathering: 3, hazard: 2, cutscene: 1, travel: 1,
+            encounter: 7, rest: 3, 'loot-cache': 3, gathering: 3, hazard: 1, blacksmith: 1, cutscene: 1, travel: 1,
         });
+    });
+
+    it('keeps its Anvil at the well, cw-18 (D61, R3b)', () => {
+        expect(kinds['cw-18']).toBe('blacksmith');
     });
 
     it('opens on the arrival over the river bridge', () => {
         expect(kinds['cw-1']).toBe('cutscene');
     });
 
-    it('pins every fight to a low level, never above fishing-village\'s boss (3)', () => {
+    it('pins every fight to a low level, never above the Act 1 door fight\'s level (3)', () => {
         const fights = payloads.filter(p => p.kind === 'encounter');
         expect(fights).toHaveLength(7);
         for (const payload of fights) {

@@ -5,7 +5,8 @@
  * `World/LootCacheChoice`'s three-offer choice. Pins that a v19 save loads
  * clean at v20: a live cache session riding along in the raw payload's
  * mobile-only `cache` key is cleared rather than carried forward in the old
- * shape, and the new required `mapGoodwill` slice defaults to `{}`.
+ * shape. (The hop also defaulted the `mapGoodwill` slice; the village
+ * goodwill system was purged in R3b, v29, so those cases went with it.)
  */
 
 import { describe, it, expect } from 'vitest';
@@ -15,8 +16,7 @@ import { GAME_STATE_VERSION } from '../game.reducer';
 /** A v19 save: a fresh state stamped back to v19. */
 function v19Save(): Record<string, unknown> {
     const fresh = createNewGameState();
-    const { mapGoodwill: _mapGoodwill, ...withoutGoodwill } = fresh as unknown as Record<string, unknown>;
-    return { ...withoutGoodwill, version: 19 };
+    return { ...fresh, version: 19 };
 }
 
 describe('migrate v19 → v20 — retire the loot-cache Pick Pool minigame', () => {
@@ -39,28 +39,11 @@ describe('migrate v19 → v20 — retire the loot-cache Pick Pool minigame', () 
         expect(migrated.cache).toBeUndefined();
     });
 
-    it('defaults mapGoodwill to {} for a save that predates it', () => {
-        const raw = v19Save();
-        expect((raw as { mapGoodwill?: unknown }).mapGoodwill).toBeUndefined();
-
-        const migrated = migrate(raw, 19, 20);
-        expect(migrated.mapGoodwill).toEqual({});
-    });
-
-    it('preserves an existing mapGoodwill tally if one is somehow already present', () => {
-        const raw = v19Save();
-        (raw as { mapGoodwill?: unknown }).mapGoodwill = { 'coastal-village': 3 };
-
-        const migrated = migrate(raw, 19, 20);
-        expect(migrated.mapGoodwill).toEqual({ 'coastal-village': 3 });
-    });
-
     it('chains a v18 save straight to v20 in one call', () => {
         const fresh = createNewGameState();
         const raw = { ...fresh, version: 18 };
 
         const migrated = migrate(raw, 18, 20);
         expect(migrated.version).toBe(20);
-        expect(migrated.mapGoodwill).toEqual({});
     });
 });

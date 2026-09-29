@@ -222,10 +222,9 @@ async function runRoundTrip(page, baseUrl) {
 
     // With the encounter out of the way the screen is idle again, which lets
     // the exploration screen's ARRIVAL event for the map's start node resolve
-    // (2026-08-08) — on fishing-village that was an omen cutscene; since map
-    // revamp M3a the new game starts on the Breakwater, whose windmill (bw-1)
-    // arrives as a REST. Both are full-screen ROUTES with no tab bar of their
-    // own. Neither is the tab LOCK, so play them out before reading the bar,
+    // (2026-08-08) — the new game starts on the Breakwater, whose bw-1
+    // arrives as a full-screen ROUTE with no tab bar of its own. It is not
+    // the tab LOCK, so play it out before reading the bar,
     // or this harness measures the wrong thing.
     //
     // RACE FIXED 2026-09-19. This used to sample `cutscene-advance` ONCE, the

@@ -41,7 +41,7 @@ const befriendableEnemy = createEnemy({
     description: 'Enemy for testing befriending',
     level: 1,
     baseStats: { heart: 5, body: 5, mind: 5 },
-    mapName: 'fishing-village',
+    mapName: 'breakwater',
     logic: 'random',
     befriendabilityConfig: {
         hpGate: { belowPct: 0.5 }, // Can befriend when below 50% HP

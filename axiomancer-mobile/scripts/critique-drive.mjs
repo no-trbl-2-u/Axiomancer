@@ -130,7 +130,7 @@ const SCREENS = [
     {
         name: 'dialogue',
         path: '/(tabs)/exploration',
-        fixture: 'apprentice-fv-interaction',
+        fixture: 'apprentice-nf-interaction',
         waitForPath: '/dialogue',
         why: 'The NPC dialogue shell — voice, choice legibility, and how a conversation reads to a first-time player.',
     },
@@ -151,7 +151,7 @@ const SCREENS = [
     {
         name: 'rest',
         path: '/(tabs)/exploration',
-        fixture: 'apprentice-fv-rest',
+        fixture: 'apprentice-bw-rest',
         waitForPath: '/rest',
         why: 'The night-watch rest choice — a hurt player deciding how to spend the night.',
     },
@@ -165,7 +165,7 @@ const SCREENS = [
     {
         name: 'late-game-hub',
         path: '/(tabs)/exploration',
-        fixture: 'sage-fv-boss-gate',
+        fixture: 'sage-bw-door-gate',
         why: 'The exploration hub as a mid-campaign player sees it — a walked map, the boss node and the door one step away.',
     },
 ]

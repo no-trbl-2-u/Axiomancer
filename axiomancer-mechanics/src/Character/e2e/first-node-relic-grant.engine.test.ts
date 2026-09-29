@@ -224,7 +224,7 @@ describe('the reducer floor — nobody fights with the grant still pending', () 
         id: 'test-foe', name: 'Test Foe', description: '', level: 1,
         baseStats: { heart: 3, body: 3, mind: 3 },
         health: 20, maxHealth: 20, effects: [], difficulty: 'normal',
-        mapName: 'fishing-village', experienceReward: 1, lootTable: [],
+        mapName: 'breakwater', experienceReward: 1, lootTable: [],
     } as unknown as Enemy;
 
     it('START_COMBAT settles the grant before staging the encounter', () => {

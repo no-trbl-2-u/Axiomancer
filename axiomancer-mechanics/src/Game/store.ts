@@ -286,11 +286,11 @@ function logGameEventSanitized(event: GameEvent): void {
 function durableSlice(next: GameState): GameState {
     const {
         version, runId, player, world, quests, flags,
-        rngState, codex, regionConsequences, mapGoodwill, labyrinth,
+        rngState, codex, regionConsequences, labyrinth,
     } = next;
     return {
         version, runId, player, world, quests, flags,
-        rngState, codex, regionConsequences, mapGoodwill,
+        rngState, codex, regionConsequences,
         ...(labyrinth ? { labyrinth } : {}),
     };
 }

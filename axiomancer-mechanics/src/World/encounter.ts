@@ -8,7 +8,7 @@
  * canonical library.
  *
  * Map node → map name resolution comes from `nodeIdToMapName`: today every
- * authored node id starts with a per-map prefix (`fv-*` / `nf-*`); when
+ * authored node id starts with a per-map prefix (`bw-*` / `cw-*` / …); when
  * unknown the generator falls back to the player's currently authored
  * `mapName` if supplied via options.
  */
@@ -35,7 +35,7 @@ export const DIFFICULTY_LEVEL_BANDS: Record<EnemyDifficulty, { min: number; max:
     unique: 'authored',
 };
 
-/** Resolves a node id (e.g. `'fv-2'`) into the owning `MapName`. */
+/** Resolves a node id (e.g. `'bw-2'`) into the owning `MapName`. */
 function nodeIdToMapName(nodeId: string): MapName | undefined {
     // Map revamp M3a — Act 1's coast (D28: a prefix distinct from every shipped one).
     if (nodeId.startsWith('bw-')) return 'breakwater';
@@ -45,7 +45,6 @@ function nodeIdToMapName(nodeId: string): MapName | undefined {
     if (nodeId.startsWith('bc-')) return 'beacon-crags';
     // Map revamp M3d — Act 1's underworld (northern continent).
     if (nodeId.startsWith('ld-')) return 'lantern-deep';
-    if (nodeId.startsWith('fv-')) return 'fishing-village';
     if (nodeId.startsWith('nf-')) return 'northern-forest';
     // Northern continent (2026-08-28 inter-map travel) — the iron caverns
     // and (Phase W3) the city above them. `ncy-` is checked before `nc-`

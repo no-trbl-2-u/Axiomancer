@@ -374,12 +374,12 @@ describe('labyrinth traversal mode (world reducer)', () => {
         world = teleportToNode(world, 'ap1-6');
         expect(world.currentMap.currentNode).toBe('ap1-6');
 
-        const gauntlet = getMapDefinition('coastal-continent', 'fishing-village');
+        const gauntlet = getMapDefinition('coastal-continent', 'breakwater');
         const gauntletWorld: WorldState = {
             ...world,
             currentMap: createMapState(gauntlet),
         };
-        expect(() => teleportToNode(gauntletWorld, 'fv-3')).toThrow(IllegalMoveError);
+        expect(() => teleportToNode(gauntletWorld, 'bw-3')).toThrow(IllegalMoveError);
     });
 });
 

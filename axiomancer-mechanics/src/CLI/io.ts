@@ -56,7 +56,7 @@ export interface CliFlags {
     resolveStart: boolean;
     /**
      * Phase 14 — non-mutating full-map coverage witness. Names a
-     * registered map (e.g. `fishing-village`); reports every authored
+     * registered map (e.g. `breakwater`); reports every authored
      * node's primary event kind via read-only introspection instead of
      * walking a single legal route. Mutually exclusive in practice with
      * `route` (route wins if both are somehow passed).
@@ -157,7 +157,7 @@ export function parseArgv(args: string[]): CliFlags {
         } else if (arg === '--start-map') {
             const next = args[i + 1];
             if (next === undefined || next.startsWith('--')) {
-                throw new Error('--start-map requires a map name (e.g. breakwater, fishing-village, caverns).');
+                throw new Error('--start-map requires a map name (e.g. breakwater, charcoal-wood, caverns).');
             }
             flags.startMap = next.trim();
             i += 2;

@@ -68,7 +68,7 @@ describe('buildStateFromFixture', () => {
     });
 
     it('is deterministic when seeded (run id included)', () => {
-        const fixture = getStateFixtureById('sage-fv-boss-gate')!;
+        const fixture = getStateFixtureById('sage-bw-door-gate')!;
         const a = buildStateFromFixture(fixture);
         const b = buildStateFromFixture(fixture);
         expect(a).toEqual(b);
@@ -106,13 +106,13 @@ describe('buildStateFromFixture', () => {
         const state = buildStateFromFixture({
             id: 'world',
             seed: 3,
-            world: { continent: 'coastal-continent', map: 'northern-forest', node: 'nf-8', completedMaps: ['fishing-village'] },
+            world: { continent: 'coastal-continent', map: 'northern-forest', node: 'nf-8', completedMaps: ['breakwater'] },
         });
         const { currentContinent, currentMap } = state.world;
         expect(currentContinent.name).toBe('coastal-continent');
         expect(currentContinent.availableMaps).toContain('northern-forest');
         expect(currentContinent.lockedMaps).not.toContain('northern-forest');
-        expect(currentContinent.completedMaps).toEqual(['fishing-village']);
+        expect(currentContinent.completedMaps).toEqual(['breakwater']);
         expect(currentMap.currentNode).toBe('nf-8');
         expect(currentMap.availableNodes).toContain('nf-8');
         expect(currentMap.discoveredNodes).toContain('nf-8');
@@ -142,7 +142,7 @@ describe('validateStateFixture', () => {
         id: 'Not Kebab',
         preset: 'no-such-preset',
         player: { level: 0, baseStats: { heart: 'x' } },
-        world: { continent: 'coastal-continent', map: 'fishing-village', node: 'zz-99', completedMaps: ['nowhere'] },
+        world: { continent: 'coastal-continent', map: 'breakwater', node: 'zz-99', completedMaps: ['nowhere'] },
         flags: 'oops',
         arrive: 'yes',
     };
@@ -179,10 +179,10 @@ describe('validateStateFixture', () => {
 
 describe('createFixtureGameStore (src/test-utils/fixture-store.ts)', () => {
     it('boots a hermetic store from a registry id', () => {
-        const { store, state, fixture } = createFixtureGameStore('sage-fv-boss-gate');
-        expect(fixture.id).toBe('sage-fv-boss-gate');
+        const { store, state, fixture } = createFixtureGameStore('sage-bw-door-gate');
+        expect(fixture.id).toBe('sage-bw-door-gate');
         expect(store.getState().runId).toBe(state.runId);
-        expect(store.getState().world.currentMap.currentNode).toBe('fv-9');
+        expect(store.getState().world.currentMap.currentNode).toBe('bw-15');
     });
 
     it('accepts an inline fixture and rejects bad refs', () => {

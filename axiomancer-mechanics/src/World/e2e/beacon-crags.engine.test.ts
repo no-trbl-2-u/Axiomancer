@@ -4,7 +4,7 @@
  * Pins what the map revamp decided for the third Act 1 map:
  * - the first Act 1 map on `northern-continent` (D28): the Charcoal Wood's
  *   stair cave crosses into it, and this map's glacier shrine leads on down
- *   into the Lantern Deep (M3d; it led to fishing-village until then);
+ *   into the Lantern Deep (M3d);
  * - the map borrows the shipped builders, the caverns' roster and its iron
  *   (D29), with one authored event on every node;
  * - the caverns' roster is level 13 and up, so every fight here is pinned low.
@@ -75,12 +75,16 @@ describe('the Beacon Crags\' events (D29)', () => {
         expect(Object.keys(kinds)).toHaveLength(17);
     });
 
-    it('spreads 6 encounters, 3 rests, 2 loot caches, 2 gatherings, 2 hazards, an arrival and a door', () => {
+    it('spreads 6 encounters, 3 rests, 2 loot caches, 1 gathering, 2 hazards, 1 Anvil, an arrival and a door', () => {
         const tally: Record<string, number> = {};
         for (const k of Object.values(kinds)) tally[k] = (tally[k] ?? 0) + 1;
         expect(tally).toEqual({
-            encounter: 6, rest: 3, 'loot-cache': 2, gathering: 2, hazard: 2, cutscene: 1, travel: 1,
+            encounter: 6, rest: 3, 'loot-cache': 2, gathering: 1, hazard: 2, blacksmith: 1, cutscene: 1, travel: 1,
         });
+    });
+
+    it('keeps its Anvil at the falls, bc-12 (D61, R3b)', () => {
+        expect(kinds['bc-12']).toBe('blacksmith');
     });
 
     it('opens on the arrival up the stair, at the top pass', () => {
@@ -106,7 +110,7 @@ describe('the Beacon Crags\' events (D29)', () => {
 
     it('gathers only the caverns\' own iron', () => {
         const items = payloads.flatMap(p => (p.kind === 'gathering' ? p.items.map(i => i.id) : []));
-        expect(items).toEqual(['iron-ore', 'iron-ore']);
+        expect(items).toEqual(['iron-ore']);
     });
 
     it('goes down under the glacier shrine into the Lantern Deep (Act 1, map 4)', () => {

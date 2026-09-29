@@ -92,7 +92,8 @@ outcome.
 **Phase 81 catalog expansion (2026-05-24).** Three new walkthroughs
 ship for Phase 65 / 80 / 68 coverage: `fishing-village-exploration`
 (Apprentice Harbor District traversal → MournfulGull encounter at
-fv-15, Phase 60 befriendable placement), `tier2-skill-chain`
+fv-15, Phase 60 befriendable placement; deleted with the map in THE
+REVAMP R3b), `tier2-skill-chain`
 (Wanderer casts Tier 2 `eternal-regress` two-effect compound under
 the **Phase 80 always-land contract**; closes one of Phase 78's MED
 zero-coverage primitives at the player-experience tier), and
@@ -278,7 +279,7 @@ nullAdapter, { player, world })` by hand:
 ```ts
 import { createFixtureGameStore } from '../../test-utils/fixture-store';
 
-const { store, state, emitter } = createFixtureGameStore('sage-fv-boss-gate');
+const { store, state, emitter } = createFixtureGameStore('sage-bw-door-gate');
 // inline works too — seed it: createFixtureGameStore({ id: 'x', seed: 1, preset: 'wanderer', world: {...} })
 ```
 

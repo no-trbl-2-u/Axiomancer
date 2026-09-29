@@ -1,7 +1,3 @@
-type FishingVillageQuests =
-    'starting-quest' |
-    'get-to-forest';
-
 type NorthernForestQuests =
     'gather-wood' |
     'get-to-cave';
@@ -37,7 +33,6 @@ type TownAcrossRiverQuests =
  * @todo: Keep QuestName updated with new quest-log quests.
  */
 export type QuestName =
-    FishingVillageQuests |
     NorthernForestQuests |
     CavernsQuests |
     NorthernCityQuests |

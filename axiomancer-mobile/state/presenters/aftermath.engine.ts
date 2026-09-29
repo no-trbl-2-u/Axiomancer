@@ -169,8 +169,8 @@ export type AftermathViewModel =
  * Resolve a node ID to human-readable name via map layout lookup.
  * Fallback to the original node ID if map layout or node lookup fails.
  * 
- * Phase 93 — fix F10 playtest finding where "deepest node: fv-14"
- * shows internal ID instead of "Tide Pool".
+ * Phase 93 — fix F10 playtest finding where "deepest node" showed the
+ * internal node ID instead of the node's name.
  */
 function resolveNodeIdToHumanName(nodeId: string | null, mapId: string | null): string {
     if (nodeId === null) return '·';

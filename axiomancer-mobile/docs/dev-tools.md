@@ -14,7 +14,7 @@ known game state instead of the persisted save:
 
 | Channel | Example | Notes |
 |---|---|---|
-| URL deep link (web) | `/exploration?fixture=sage-fv-boss-gate` | Hand-typable; any route works, the fixture applies before the store mounts |
+| URL deep link (web) | `/exploration?fixture=sage-bw-door-gate` | Hand-typable; any route works, the fixture applies before the store mounts |
 | Init-script global | `globalThis.__AXM_FIXTURE__ = 'wanderer-nf-village'` or an inline fixture object | `scripts/fixture-injector.mjs` → `injectStateFixture(context, …)` |
 
 Ids come from the engine registry (`STATE_FIXTURES`;
@@ -87,7 +87,7 @@ read the log.** Section container ids are `dev-section-<key>`.
 
 | Leaf | Helper | What it does |
 |---|---|---|
-| `DebugStateInspector` | `state/dev/inspector.ts` → `selectInspectorSections` | Live read-only key/value view. Groups: RUN (run id, save version, rng, open session), PLAYER (level/xp/points, vitae, stats, shillings, souls, effects), DECK & GEAR (known/reward cards, removals, hazard deck, dice, die gear, worn relics, inventory), WORLD (continent/map/node, node counts, maps done/open/locked, goodwill, exploited/spared), STORY (quests, journal, flags), THE APORIA (act, acts done, completed, pocket, gates, debt, waystones, boss outcomes). Tap a chip to expand a group. |
+| `DebugStateInspector` | `state/dev/inspector.ts` → `selectInspectorSections` | Live read-only key/value view. Groups: RUN (run id, save version, rng, open session), PLAYER (level/xp/points, vitae, stats, shillings, souls, effects), DECK & GEAR (known/reward cards, removals, hazard deck, dice, die gear, worn relics, inventory), WORLD (continent/map/node, node counts, maps done/open/locked, exploited/spared), STORY (quests, journal, flags), THE APORIA (act, acts done, completed, pocket, gates, debt, waystones, boss outcomes). Tap a chip to expand a group. |
 
 ### PLAYER — `dev-section-player`
 

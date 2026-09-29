@@ -21,7 +21,6 @@ import { getMapLayout } from '../index';
 // Each shipped map, with the engine registry keys the presenter resolves it by
 // (`world.currentMap.continent` / `world.currentMap.name`).
 const MAPS = [
-    { mapId: 'fishing-village', continent: 'coastal-continent' },
     { mapId: 'northern-forest', continent: 'coastal-continent' },
     { mapId: 'caverns', continent: 'northern-continent' },
     { mapId: 'northern-city', continent: 'northern-continent' },

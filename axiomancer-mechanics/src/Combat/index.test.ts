@@ -20,7 +20,7 @@ const makePlayer = () => createCharacter({ name: 'Test', level: 1, baseStats: { 
 const makeEnemy = () => createEnemy({
   id: 'e1', name: 'Foe', description: '', level: 1,
   baseStats: { heart: 1, body: 1, mind: 1 },
-  mapName: 'fishing-village', logic: 'random',
+  mapName: 'breakwater', logic: 'random',
 });
 
 describe('applyDamage', () => {

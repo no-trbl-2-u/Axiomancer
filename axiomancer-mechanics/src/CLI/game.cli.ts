@@ -55,7 +55,7 @@ import { createNodeAdapter } from '../Game/persistence/node.adapter';
 import type { PersistenceAdapter } from '../Game/persistence/types';
 import type { TypedLevelUpEvent } from '../Game/events.types';
 import { getMapDefinition } from '../World/map.registry';
-import { resolveMapEvent, MAP_REGISTRY, getNodePrimaryEventKind, applyGoodwillDiscount } from '../World';
+import { resolveMapEvent, MAP_REGISTRY, getNodePrimaryEventKind } from '../World';
 import type { ResolvedEvent, ContinentName, MapName } from '../World';
 import { getCardById } from '../Cards/cards.library';
 import { getAvailableCards } from '../Cards/card.engine';
@@ -441,12 +441,9 @@ async function shopLoop(store: GameStoreHandle, shop: { wares: ReadonlyArray<{ i
         if (action === 'leave') return;
 
         if (action === 'buy') {
-            // Phase 65 — village goodwill discount: a map the player has
-            // sacrificed loot-cache rewards for sells at 10% off.
-            const goodwillCount = store.getState().mapGoodwill?.[store.getState().world.currentMap.name] ?? 0;
             const choices = shop.wares.map(w => {
                 const item = getConsumableById(w.itemId);
-                const price = applyGoodwillDiscount(w.price, goodwillCount);
+                const price = w.price;
                 const label = item ? `${item.name} — ${price}` : `${w.itemId} — ${price} (unknown)`;
                 return { name: label, value: w.itemId };
             });
@@ -458,7 +455,7 @@ async function shopLoop(store: GameStoreHandle, shop: { wares: ReadonlyArray<{ i
             const ware = shop.wares.find(w => w.itemId === wareId)!;
             const item = getConsumableById(ware.itemId);
             if (!item) { log(`Unknown item: ${ware.itemId}`); continue; }
-            const price = applyGoodwillDiscount(ware.price, goodwillCount);
+            const price = ware.price;
             const before = store.getState();
             const next = buyItem(before.player, item, price);
             if (next === before.player) {

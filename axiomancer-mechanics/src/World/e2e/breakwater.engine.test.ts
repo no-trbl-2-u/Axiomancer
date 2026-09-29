@@ -4,8 +4,9 @@
  * Pins what the map revamp decided for the first Act 1 map:
  * - a new game starts here (D27), and any campaign map can be started on
  *   instead (the dev "start on any map" tools);
- * - the map borrows fishing-village's pools and roster (D29), with one
- *   authored event on every node and a door on to the Charcoal Wood (M3b);
+ * - the map borrows the shipped pool builders (D29), with one authored
+ *   event on every node, one Anvil near its exit (D61, R3b) and a door on
+ *   to the Charcoal Wood (M3b);
  * - every run ends at the river bridge, through the watchtower, where the
  *   region's elite waits (D30); the start is an arrival scene (D31).
  *
@@ -24,7 +25,6 @@ import {
 import { auditMapTraversal } from '../world.reducer';
 import { createNewGameState } from '../../Game/game.reducer';
 import { STARTING_REGION } from '../../Game/run-loop';
-import { EnemiesByMap } from '../../Enemy/enemy.library';
 import type { GameState } from '../../Game/types';
 
 const breakwater = getMapDefinition('coastal-continent', 'breakwater');
@@ -54,7 +54,7 @@ describe('the new-game start (D27)', () => {
     it('lists the Breakwater available and every other campaign map locked', () => {
         const [coastal, northern] = createStartingWorld().world;
         expect(coastal!.availableMaps).toEqual(['breakwater']);
-        expect(coastal!.lockedMaps).toEqual(['charcoal-wood', 'fishing-village', 'northern-forest']);
+        expect(coastal!.lockedMaps).toEqual(['charcoal-wood', 'northern-forest']);
         expect(northern!.availableMaps).toEqual([]);
         expect(northern!.lockedMaps).toEqual([
             'beacon-crags', 'lantern-deep', 'caverns', 'northern-city', 'connecting-river', 'town-across-river', 'the-capital',
@@ -65,7 +65,7 @@ describe('the new-game start (D27)', () => {
 describe('starting on any map (dev tools)', () => {
     it('offers every campaign map and no labyrinth act', () => {
         expect([...STARTABLE_MAPS].sort()).toEqual([
-            'beacon-crags', 'breakwater', 'caverns', 'charcoal-wood', 'connecting-river', 'fishing-village',
+            'beacon-crags', 'breakwater', 'caverns', 'charcoal-wood', 'connecting-river',
             'lantern-deep', 'northern-city', 'northern-forest', 'the-capital', 'town-across-river',
         ]);
     });
@@ -101,10 +101,6 @@ describe('the Breakwater map', () => {
         const watchtower = breakwater.nodes.find(n => n.id === 'bw-17')!;
         expect(watchtower.connectedNodes).toEqual(['bw-18']);
     });
-
-    it('borrows fishing-village\'s enemy pool whole (D29)', () => {
-        expect(EnemiesByMap['breakwater']).toBe(EnemiesByMap['fishing-village']);
-    });
 });
 
 describe('the Breakwater\'s events (D29)', () => {
@@ -117,12 +113,17 @@ describe('the Breakwater\'s events (D29)', () => {
         expect(Object.keys(kinds)).toHaveLength(18);
     });
 
-    it('spreads 6 encounters, 2 rests, 3 loot caches, 3 gatherings, 2 hazards, an arrival and 1 door', () => {
+    it('spreads 6 encounters, 2 rests, 3 loot caches, 2 gatherings, 2 hazards, 1 Anvil, an arrival and 1 door', () => {
         const tally: Record<string, number> = {};
         for (const k of Object.values(kinds)) tally[k] = (tally[k] ?? 0) + 1;
         expect(tally).toEqual({
-            encounter: 6, rest: 2, 'loot-cache': 3, gathering: 3, hazard: 2, cutscene: 1, travel: 1,
+            encounter: 6, rest: 2, 'loot-cache': 3, gathering: 2, hazard: 2, blacksmith: 1, cutscene: 1, travel: 1,
         });
+    });
+
+    it('keeps its Anvil at the fishing hamlet, a step from the door fight (D61, R3b)', () => {
+        expect(kinds['bw-16']).toBe('blacksmith');
+        expect(breakwater.nodes.find(n => n.id === 'bw-16')!.connectedNodes).toContain('bw-17');
     });
 
     it('opens on an arrival scene at the windmill, not a rest screen (D31)', () => {

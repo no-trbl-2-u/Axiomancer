@@ -6,7 +6,7 @@ Paced (narrative-choice) events sit in the event slice and `<EventGate>` (`compo
 
 ## 2. Enter it directly
 
-- Dialogue: `/exploration?fixture=apprentice-fv-interaction` (`arrive` → `/dialogue`, first NPC on fv-2). `/dev`: `debug-dialogue-<map>-<npc-slug>` opens any staged tree.
+- Dialogue: `/exploration?fixture=apprentice-nf-interaction` (`arrive` → `/dialogue`, the Shrine Keeper on northern-forest nf-3). `/dev`: `debug-dialogue-<map>-<npc-slug>` opens any staged tree.
 - Village: `/exploration?fixture=wanderer-nf-village` (`arrive` → `/village`, 240 shillings). `/dev`: `debug-trigger-encounter-village` (synthetic two-merchant village); `debug-currency-large-grant` first if you want to buy.
 - Cutscene: `/exploration?fixture=wanderer-nf-cutscene` (`arrive` → `/cutscene`, nf-17). `/dev`: `debug-trigger-encounter-cutscene`. Map start nodes also fire their own omen on landing (`fresh-start`).
 - Narration: no dedicated fixture or dev trigger; reached by walking onto a narration node (see `DebugWorldTravel`'s `debug-travel-node-<id>` chips, which fire the node's authored event).

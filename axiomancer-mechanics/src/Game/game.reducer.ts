@@ -154,8 +154,11 @@ import { generateRunId } from './run-loop';
  *   and strips survivors' keywords.
  * 2026-09-29 — bumped 27 → 28: THE REVAMP R3a (D53/D54/D61). The world is
  *   Act 1; the hop moves a save standing off Act 1 onto the Lantern Deep.
+ * 2026-09-29 — bumped 28 → 29: THE REVAMP R3b (D53). fishing-village and the
+ *   village goodwill system are purged; the hop drops `mapGoodwill`, the
+ *   goodwill flags, fishing-village's map entries and its two quests.
  */
-export const GAME_STATE_VERSION = 28;
+export const GAME_STATE_VERSION = 29;
 
 /**
  * Builds a brand-new GameState with default player and world.
@@ -204,7 +207,6 @@ export function createNewGameState(opts: { startMap?: MapName } = {}): GameState
         rngState: getRng().getState(),
         codex: { unlockedEntries: [] },
         regionConsequences: { exploitedRegions: [], sparedRegions: [] },
-        mapGoodwill: {},
     };
 }
 
@@ -530,9 +532,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 rngState: state.rngState,
                 codex: state.codex,
                 regionConsequences: state.regionConsequences,
-                // mapGoodwill (Phase 63) carries forward — village goodwill
-                // is player-knowledge-shaped, not run-scoped.
-                mapGoodwill: state.mapGoodwill,
             };
         }
 

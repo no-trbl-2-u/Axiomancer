@@ -116,7 +116,7 @@ describe('hazard scar recovery at inn rest', () => {
         const scarredMax = (store.getState() as unknown as GameState).player.maxHealth;
         expect(scarredMax).toBe(baseline - scar);
 
-        // Inn rest: the authored paid shelter (fishing-village rest nodes).
+        // Inn rest: the authored paid shelter (the Breakwater's rest nodes).
         expect(actions.beginRest({ seed: 7, shelter: 'inn' })).toBe(true);
         playRestToDawn(store, actions);
         const result = actions.claimRestOutcome();
@@ -181,9 +181,9 @@ describe('hazard scar recovery at inn rest', () => {
         expect((store.getState() as unknown as GameState).player.maxHealth).toBe(baseline);
     });
 
-    it('the fishing-village inn node routes an inn rest through the live interceptor', () => {
+    it('the Breakwater inn node routes an inn rest through the live interceptor', () => {
         // End-to-end witness that the AUTHORED marker (not a heal number)
-        // is what reaches the claim: fv-3 is an `fvRestPool` node.
+        // is what reaches the claim: bw-9 is an `innRestPool` node.
         const { store, actions } = makeStoreAndActions();
         const scar = scarThePlayer(store, actions);
 
@@ -194,8 +194,8 @@ describe('hazard scar recovery at inn rest', () => {
                 currentMap: {
                     ...before.world.currentMap,
                     continent: 'coastal-continent',
-                    name: 'fishing-village',
-                    currentNode: 'fv-3',
+                    name: 'breakwater',
+                    currentNode: 'bw-9',
                 },
             },
         } as never);

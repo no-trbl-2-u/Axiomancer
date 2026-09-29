@@ -35,28 +35,28 @@ afterEach(() => {
 });
 
 describe('Phase 14 — route survivorship vs coverage-audit classification', () => {
-    it('--route-audit reports all 28 Fishing Village nodes without mutating a single life', async () => {
+    it('--route-audit reports all 18 Breakwater nodes without mutating a single life', async () => {
         const logPath = tmpPath('coverage');
 
-        await runGameCli(['--route-audit', 'fishing-village', '--state-log', logPath]);
+        await runGameCli(['--route-audit', 'breakwater', '--state-log', logPath]);
 
         const summary = routeEnd(logPath);
         expect(summary.classification).toBe('coverage-audit');
         expect(summary.survived).toBe(true);
         expect(summary.unvisitedNodeIds).toEqual([]);
-        expect((summary.visitedNodeIds as string[]).length).toBe(28);
-        expect((summary.resolvedNodeIds as string[]).length).toBe(28);
+        expect((summary.visitedNodeIds as string[]).length).toBe(18);
+        expect((summary.resolvedNodeIds as string[]).length).toBe(18);
         expect(summary.combatOutcomes).toEqual({});
 
-        // fv-6 is the authored boss node; fv-1 is the arrival cutscene
-        // (2026-08-08 first-map audit) — the audit inspects wiring, it never
-        // fights anyone. fv-10, the terminal-column coast road, is the
-        // northern-forest DOOR as of 2026-08-28 — the read-only audit sees
-        // its kind without walking through it.
+        // bw-17 is the Doorwarden's door fight; bw-1 is the arrival cutscene
+        // — the audit inspects wiring, it never fights anyone. bw-18 is the
+        // door to charcoal-wood — the read-only audit sees its kind without
+        // walking through it. bw-16 is the region's Anvil.
         const eventKinds = summary.eventKinds as Record<string, string>;
-        expect(eventKinds['fv-1']).toBe('cutscene');
-        expect(eventKinds['fv-6']).toBe('encounter');
-        expect(eventKinds['fv-10']).toBe('travel');
+        expect(eventKinds['bw-1']).toBe('cutscene');
+        expect(eventKinds['bw-17']).toBe('encounter');
+        expect(eventKinds['bw-18']).toBe('travel');
+        expect(eventKinds['bw-16']).toBe('blacksmith');
 
         const actions = readLog(logPath).map(r => r.action);
         expect(actions).not.toContain('hazardCombat:start');
@@ -170,47 +170,30 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
     it('a scripted route stops at a combat defeat and downgrades to "blocked" — never reports post-defeat traversal as survivorship', async () => {
         const logPath = tmpPath('defeat-stop');
 
-        // The fv-6 combat is forced against a ceiling enemy — since the enemy
-        // roster reset (R2) retired `the-incompleteness`, a test-only
-        // registry entry: the Doorwarden scaled to L110 — so it is a DETERMINISTIC defeat regardless of
-        // card balance. A normal fv-6 boss becomes winnable once the preset decks
-        // are tuned, which repeatedly broke a seed-pinned fixture (seed 7, then
-        // seed 32); the impossible enemy decouples this classifier test from
+        // The bw-8 combat (the Brine Hag's elite node) is forced against a
+        // ceiling enemy — a test-only registry entry: the Doorwarden scaled
+        // to L110 — so it is a DETERMINISTIC defeat regardless of card
+        // balance. The impossible enemy decouples this classifier test from
         // balance for good.
         //
-        // PROFANE CANON (2026-08-08): the intermediate encounter is also
-        // decoupled from balance now. `--combat-max-turns 4` is chosen so the
-        // fodder fight (Float-Eye since R2) hits the turn cap UNRESOLVED (outcome
-        // null — not a defeat, so the route continues), while the L110 ceiling
-        // at fv-6 still kills within the cap. Only a real `defeat` blocks the
-        // route; a capped, undecided combat must not. fv-7 is a route target
-        // but must never be reached once fv-6 ends in defeat.
-        //
-        // Playtest fix 2026-09-04: FREE-line plays now advance the card-played
-        // DoT clock, so the naive policy closes Little Belle (capitulate) by
-        // turn 3 — the cap drops to 2 to keep fv-13 UNRESOLVED. The L110
-        // ceiling still kills inside two turns.
-        //
-        // Phase 53d (S-01) converted fv-4 from an `encounter` into a
-        // narration dilemma ("The Stranger's Net"), so the route now runs
-        // through fv-11 -> fv-13 instead of fv-3 -> fv-4 to
-        // reach the pre-boss fodder fight.
-        //
-        // D7 flag collapse (2026-09-25): the CLI auto-player finally makes
-        // spec-33 PAID plays (it used to wait on a stance draft that never
-        // came, so it only ever played FREE lines), which closed Little Belle
-        // inside the cap on seed 32. Seed 1 keeps fv-13 UNRESOLVED at the cap.
+        // The intermediate encounter is decoupled from balance too:
+        // `--combat-max-turns 2` is chosen so the bw-2 fodder fight
+        // (Float-Eye) hits the turn cap UNRESOLVED (outcome null — not a
+        // defeat, so the route continues), while the L110 ceiling at bw-8
+        // still kills within the cap. Only a real `defeat` blocks the route;
+        // a capped, undecided combat must not. bw-12 is a route target but
+        // must never be reached once bw-8 ends in defeat.
         const registry = ENEMY_REGISTRY as Record<string, unknown>;
         registry['test-ceiling'] = scaleEnemyToLevel(TheDoorwarden, 110);
         try {
             await runGameCli([
-                '--start-map', 'fishing-village', '--route', 'fv-2,fv-26,fv-11,fv-27,fv-13,fv-28,fv-5,fv-6,fv-7',
+                '--start-map', 'breakwater', '--route', 'bw-2,bw-8,bw-12',
                 '--auto-combat',
                 '--combat-policy', 'naive',
                 '--combat-seed', '1',
                 '--combat-max-turns', '2',
                 '--combat-enemy', 'test-ceiling',
-                '--combat-enemy-node', 'fv-6',
+                '--combat-enemy-node', 'bw-8',
                 '--state-log', logPath,
             ]);
         } finally {
@@ -220,20 +203,20 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         const summary = routeEnd(logPath);
         expect(summary.classification).toBe('blocked');
         expect(summary.survived).toBe(false);
-        expect(summary.blockedAtNodeId).toBe('fv-6');
+        expect(summary.blockedAtNodeId).toBe('bw-8');
         expect(summary.blockerReason).toBe('combat defeat');
-        expect((summary.combatOutcomes as Record<string, string>)['fv-6']).toBe('defeat');
-        // The capped fv-13 combat resolved to no outcome — it must be
+        expect((summary.combatOutcomes as Record<string, string>)['bw-8']).toBe('defeat');
+        // The capped bw-2 combat resolved to no outcome — it must be
         // recorded as neither a defeat nor a phantom victory.
-        expect(summary.combatOutcomes as Record<string, string>).not.toHaveProperty('fv-13');
-        expect(summary.visitedNodeIds).not.toContain('fv-7');
-        expect(summary.unvisitedNodeIds).toContain('fv-7');
+        expect(summary.combatOutcomes as Record<string, string>).not.toHaveProperty('bw-2');
+        expect(summary.visitedNodeIds).not.toContain('bw-12');
+        expect(summary.unvisitedNodeIds).toContain('bw-12');
     });
 
-    it('--resolve-start resolves fv-1\'s own arrival cutscene before walking the route; without it, the start node is explicitly unresolved', async () => {
+    it('--resolve-start resolves bw-1\'s own arrival cutscene before walking the route; without it, the start node is explicitly unresolved', async () => {
         const withFlag = tmpPath('resolve-start-on');
         await runGameCli([
-            '--start-map', 'fishing-village', '--route', 'fv-2',
+            '--start-map', 'breakwater', '--route', 'bw-2',
             '--resolve-start',
             '--auto-combat',
             '--combat-policy', 'status',
@@ -242,24 +225,23 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
             '--state-log', withFlag,
         ]);
         const onSummary = routeEnd(withFlag);
-        expect(onSummary.startNode).toMatchObject({ nodeId: 'fv-1', resolved: true });
-        expect(onSummary.resolvedNodeIds).toContain('fv-1');
+        expect(onSummary.startNode).toMatchObject({ nodeId: 'bw-1', resolved: true });
+        expect(onSummary.resolvedNodeIds).toContain('bw-1');
 
-        // The 2026-08-08 first-map audit re-authored fv-1 from a Grave Larva
-        // encounter (which no player could reach — events fire on ARRIVAL, and
-        // the map places the player ON fv-1) into the village's arrival
-        // cutscene, a kind that is safe to fire the moment the map opens.
+        // bw-1 is the Breakwater's arrival cutscene — the start node holds a
+        // kind that is safe to fire the moment the map opens (events fire on
+        // ARRIVAL, and the map places the player ON bw-1).
         const onLogs = readLog(withFlag);
-        const fv1Event = onLogs
+        const bw1Event = onLogs
             .filter(r => r.action === 'resolveMapEvent')
             .map(r => r.event as { kind?: string; lines?: readonly string[] })
             .find(e => e.kind === 'cutscene');
-        expect(fv1Event).toBeDefined();
-        expect(fv1Event?.lines?.length ?? 0).toBeGreaterThan(0);
+        expect(bw1Event).toBeDefined();
+        expect(bw1Event?.lines?.length ?? 0).toBeGreaterThan(0);
 
         const withoutFlag = tmpPath('resolve-start-off');
         await runGameCli([
-            '--start-map', 'fishing-village', '--route', 'fv-2',
+            '--start-map', 'breakwater', '--route', 'bw-2',
             '--auto-combat',
             '--combat-policy', 'status',
             '--combat-seed', '1',
@@ -267,8 +249,8 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
             '--state-log', withoutFlag,
         ]);
         const offSummary = routeEnd(withoutFlag);
-        expect(offSummary.startNode).toMatchObject({ nodeId: 'fv-1', resolved: false });
-        expect(offSummary.resolvedNodeIds).not.toContain('fv-1');
+        expect(offSummary.startNode).toMatchObject({ nodeId: 'bw-1', resolved: false });
+        expect(offSummary.resolvedNodeIds).not.toContain('bw-1');
     });
 
     it('reports the exact unvisited nodes for a partial legal route', async () => {
@@ -279,14 +261,8 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         // unresolved (not a defeat), so the walk stays survivorship no matter
         // how the untuned decks trade. This test proves the visited/unvisited
         // ACCOUNTING, not combat strength.
-        //
-        // Route retargeted fv-12 -> fv-16 by the 2026-08-08 first-map audit,
-        // then fv-16 -> fv-11,fv-13 by Phase 53d (S-01): fv-16 converted from
-        // an `encounter` into a narration dilemma ("The Borrowed Hook"), and
-        // fv-13 is the nearest surviving column-3 encounter
-        // reachable from fv-2 via fv-11.
         await runGameCli([
-            '--start-map', 'fishing-village', '--route', 'fv-2,fv-26,fv-11,fv-27,fv-13',
+            '--start-map', 'breakwater', '--route', 'bw-4,bw-10',
             '--auto-combat',
             '--combat-policy', 'status',
             '--combat-seed', '42',
@@ -297,9 +273,9 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         const summary = routeEnd(logPath);
         expect(summary.classification).toBe('survivorship');
         expect(summary.survived).toBe(true);
-        expect(summary.visitedNodeIds).toEqual(['fv-1', 'fv-2', 'fv-26', 'fv-11', 'fv-27', 'fv-13']);
+        expect(summary.visitedNodeIds).toEqual(['bw-1', 'bw-4', 'bw-10']);
         const unvisited = summary.unvisitedNodeIds as string[];
-        expect(unvisited).toContain('fv-25');
-        expect(unvisited.length).toBe(22); // 28 nodes − the 6 visited
+        expect(unvisited).toContain('bw-18');
+        expect(unvisited.length).toBe(15); // 18 nodes − the 3 visited
     });
 });

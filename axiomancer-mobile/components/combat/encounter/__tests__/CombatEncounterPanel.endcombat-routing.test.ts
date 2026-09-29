@@ -82,16 +82,16 @@ describe('applyHazardOutcome: routes through endCombat (phase 54)', () => {
     it('befriending a kill-objective target completes its quest and grants the quest reward', () => {
         const store = createAppStore({ adapter: createMemoryAdapter() });
         const boss = ENEMY_REGISTRY['brine-hag'];
-        // The authored starting-quest, its kill objective re-aimed at a live
+        // The authored gather-wood quest, its objective re-aimed at a live
         // foe (objectives match on the enemy's display name).
-        const authored = getMapDefinition('coastal-continent', 'fishing-village').quests!.find((q) => q.name === 'starting-quest')!;
+        const authored = getMapDefinition('coastal-continent', 'northern-forest').quests!.find((q) => q.name === 'gather-wood')!;
         const startingQuest = {
             ...authored,
             objectives: [{ ...authored.objectives[0], type: 'kill' as const, target: boss.name, requiredCount: 1, currentCount: 0 }],
         };
         const reward = authored.reward as { kind?: string; amount?: number } | undefined;
         if (reward?.kind !== 'currency' || typeof reward.amount !== 'number') {
-            throw new Error('starting-quest no longer pays currency');
+            throw new Error('gather-wood no longer pays currency');
         }
         store.setState({ quests: startQuest(emptyQuestLog(), startingQuest) });
         store.getState().startCombat(boss);
@@ -104,7 +104,7 @@ describe('applyHazardOutcome: routes through endCombat (phase 54)', () => {
         applyHazardOutcome(store, 'capitulate' as CombatOutcome, finalState, boss);
 
         const state = store.getState();
-        expect(state.quests.completed).toContain('starting-quest');
+        expect(state.quests.completed).toContain('gather-wood');
         expect(state.player!.currency).toBe(currencyBefore + reward.amount);
         expect(state.flags).toContain(boss.friendshipReward!.flagSet);
     });

@@ -33,7 +33,7 @@ function makeTestEnemy(id: string = 'test-retrigger-foe') {
         description: 'A test enemy for re-trigger scenarios',
         level: 1,
         baseStats: { heart: 1, body: 1, mind: 1 },
-        mapName: 'fishing-village',
+        mapName: 'breakwater',
         logic: 'random',
     });
 }

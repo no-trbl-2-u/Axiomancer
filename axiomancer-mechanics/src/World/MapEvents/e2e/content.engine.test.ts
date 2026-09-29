@@ -1,7 +1,7 @@
 /**
  * Hermetic e2e — Phase 24 content.
  *
- * Walks the fishing-village and northern-forest pools authored in
+ * Walks the Breakwater, northern-forest and parked northern pools authored in
  * `src/World/MapEvents/content.ts` and asserts the expected event
  * kind fires at each node. Verifies the side-effect import path
  * registers the pools and that the dispatcher routes each authored
@@ -21,10 +21,10 @@ import type { ContinentName } from '../../map.library';
 // Import for side effect — registers the pools when the test loads.
 import '../content';
 
-type AuthoredMap = 'fishing-village' | 'northern-forest' | 'caverns' | 'northern-city' | 'connecting-river' | 'town-across-river' | 'the-capital';
+type AuthoredMap = 'breakwater' | 'northern-forest' | 'caverns' | 'northern-city' | 'connecting-river' | 'town-across-river' | 'the-capital';
 
 const CONTINENT_OF: Record<AuthoredMap, ContinentName> = {
-    'fishing-village': 'coastal-continent',
+    'breakwater': 'coastal-continent',
     'northern-forest': 'coastal-continent',
     'caverns': 'northern-continent',
     'northern-city': 'northern-continent',
@@ -34,27 +34,10 @@ const CONTINENT_OF: Record<AuthoredMap, ContinentName> = {
 };
 
 function freshWorldAt(mapName: AuthoredMap): GameState {
-    const base = { ...createNewGameState(), world: createStartingWorld('fishing-village') };
+    const base = { ...createNewGameState(), world: createStartingWorld('breakwater') };
     const def = getMapDefinition(CONTINENT_OF[mapName], mapName);
     const map: MapState = createMapState(def);
     return { ...base, world: { ...base.world, currentMap: map } };
-}
-
-/**
- * Walks every authored node on `mapName` from a FRESH state each visit and
- * tallies the resolved kinds. Fresh-per-node matters since the travel kind
- * landed (2026-08-28): resolving a door node moves the whole world to the
- * destination map, so a threaded walk would resolve every later node
- * against the wrong map.
- */
-function kindTally(mapName: AuthoredMap): Record<string, number> {
-    const def = getMapDefinition(CONTINENT_OF[mapName], mapName);
-    const counts: Record<string, number> = {};
-    for (const node of def.nodes) {
-        const r = visit(freshWorldAt(mapName), node.id);
-        counts[r.kind] = (counts[r.kind] ?? 0) + 1;
-    }
-    return counts;
 }
 
 function visit(state: GameState, nodeId: string): { state: GameState; kind: string } {
@@ -68,181 +51,6 @@ function visit(state: GameState, nodeId: string): { state: GameState; kind: stri
 
 afterEach(() => {
     vi.restoreAllMocks();
-});
-
-describe('fishing-village content — new-player map', () => {
-    // The starting map is combat-focused but varied: a real spread of kinds
-    // (rest / gathering / hazard / loot-cache / narration / interaction) for
-    // recovery + texture, encounters/interaction/rest tied for largest, and
-    // ONE boss node (fv-6, an `encounter` with isBoss). See the new-player
-    // override block in `content.ts`.
-    it('is a balanced spread, encounter the largest kind since the three gates, one boss', () => {
-        mockSequentialRng(0.5);
-        const counts = kindTally('fishing-village');
-
-        // 4 encounter-kind nodes (3 regular + the fv-6 boss). Phase 53c
-        // converted three regular encounters (fv-2, fv-7, fv-18) into
-        // homed-NPC interactions and dropped fv-12's grave-larva as it
-        // re-homed to carry fv-2's displaced loot-cache instead (see
-        // `content.ts`'s `FV_ENCOUNTER_FOES`/`FV_LOOT_NODES` comments);
-        // little-belle moved fv-7 -> fv-13 to stay reachable ahead of the
-        // Beggar's new column. Phase 53d (S-01) then converted two more
-        // (fv-16, fv-4) into narration dilemmas, Phase 60 converted a third
-        // (fv-21) into the re-homed blacksmith node, and Phase 61 gave one
-        // back — fv-15's retired quest-board node rejoined the encounter
-        // roster as foot-stealer. 2026-08-28 (inter-map travel): fv-10, the
-        // terminal-column barnacle hazard, became the coast-road DOOR to
-        // northern-forest — hazard drops 2 → 1, travel appears at 1.
-        // 2026-09-21 — THE THREE GATES (fv-26/27/28): every route fights three
-        // times before the breakwater: 4 → 7.
-        expect(counts.encounter).toBe(7);
-        expect(counts.cutscene).toBe(1);
-        expect(counts.rest).toBe(4);
-        // adjust-npcs pass 12 (2026-09-18) — fv-22 (kelp-frond) staged the
-        // Village Healer instead: gathering drops 3 → 2.
-        expect(counts.gathering).toBe(2);
-        expect(counts.hazard).toBe(1);
-        expect(counts.travel).toBe(1);
-        expect(counts['loot-cache']).toBe(3);
-        // fv-14 "What Do I Tell Father?" (Phase 24), fv-16 "The Borrowed
-        // Hook" and fv-4 "The Stranger's Net" (both Phase 53d/S-01).
-        expect(counts.narration).toBe(3);
-        // Phase 53c — four homed NPCs: Old Marrow (fv-2), the Coastal Beggar
-        // (fv-7), Captain Blackwater (fv-18), and the Fisherman's Daughter
-        // (fv-19, was the unrostered 'Weathered Fisher'). adjust-npcs
-        // pass 12 (2026-09-18) staged a fifth: the Village Healer (fv-22,
-        // was a `gathering` node — no roster foe or flag/pricing dependency
-        // to orphan, unlike every remaining `encounter` slot).
-        expect(counts.interaction).toBe(5);
-        // Phase 60 — the re-homed anvil, a single fixed placement at fv-21
-        // (not a cadence — see `content.ts`'s `FV_BLACKSMITH_NODES`).
-        expect(counts.blacksmith).toBe(1);
-        // Encounter is the map's largest kind since the three gates
-        // (2026-09-21); interaction follows, then rest.
-        const maxCount = Math.max(...Object.values(counts));
-        expect(counts.encounter).toBe(maxCount);
-        expect(counts.interaction).toBe(5);
-        expect(counts.rest).toBe(4);
-        // Every node resolved to a real kind.
-        expect(Object.values(counts).reduce((a, b) => a + b, 0)).toBe(28);
-    });
-
-    it('fv-21 is the re-homed blacksmith node, offering the witness swap variant', () => {
-        mockSequentialRng(0.5);
-        const state = freshWorldAt('fishing-village');
-        const result = resolveMapEvent({
-            ...state,
-            world: { ...state.world, currentMap: { ...state.world.currentMap, currentNode: 'fv-21', consumedNodes: [] } },
-        });
-        expect(result.event.kind).toBe('blacksmith');
-        if (result.event.kind === 'blacksmith') {
-            expect(result.event.variants.map((v) => v.id)).toContain('die-gear-heart-rich-payload');
-            expect(result.event.budget).toBeGreaterThan(0);
-        }
-    });
-
-    it('fv-15 is an encounter node (Float-Eye since R2, Phase 61 — retired quest-board node)', () => {
-        mockSequentialRng(0.5);
-        const state = freshWorldAt('fishing-village');
-        const result = resolveMapEvent({
-            ...state,
-            world: { ...state.world, currentMap: { ...state.world.currentMap, currentNode: 'fv-15', consumedNodes: [] } },
-        });
-        expect(result.event.kind).toBe('encounter');
-        if (result.event.kind === 'encounter') {
-            expect(result.event.encounter.enemies[0].name).toBe('Float-Eye');
-        }
-    });
-
-    it('fv-14 is a narration node carrying the "What Do I Tell Father?" branching dialogue', () => {
-        mockSequentialRng(0.5);
-        const state = freshWorldAt('fishing-village');
-        const result = resolveMapEvent({
-            ...state,
-            world: { ...state.world, currentMap: { ...state.world.currentMap, currentNode: 'fv-14', consumedNodes: [] } },
-        });
-        expect(result.event.kind).toBe('narration');
-        if (result.event.kind === 'narration') {
-            const tree = result.event.dialogue;
-            expect(tree.id).toBe('fv-father-worry');
-            expect(tree.rootId).toBeTruthy();
-            const root = tree.nodes[tree.rootId];
-            expect(root).toBeDefined();
-            // Unlike the original monologue placeholder, this narration node
-            // is a real dilemma: the root offers three unflagged choices,
-            // each ending in its own leaf outcome.
-            expect(root!.choices).toHaveLength(3);
-            expect(Object.keys(tree.nodes).length).toBeGreaterThanOrEqual(4);
-        }
-    });
-
-    it('boss flag is set on fv-6, pinned to the authored override level (not the enemy L6)', () => {
-        mockSequentialRng(0.5);
-        const state = freshWorldAt('fishing-village');
-        const r = visit(state, 'fv-6');
-        expect(r.kind).toBe('encounter');
-        const result = resolveMapEvent({
-            ...state,
-            world: { ...state.world, currentMap: { ...state.world.currentMap, currentNode: 'fv-6', consumedNodes: [] } },
-        });
-        if (result.event.kind === 'encounter') {
-            expect(result.event.isBoss).toBe(true);
-            // The Doorwarden since R2 (the King was retired); the encounter
-            // `level` override pins it one above the last Act 1 elite (M3e).
-            const boss = result.event.encounter.enemies[0];
-            expect(boss.level).toBe(5);
-            expect(boss.name).toBe('The Doorwarden');
-        }
-    });
-
-    // Phase 87 — the two CRITIQUE rows that proposed this phase (an elite,
-    // multi-phase Brine Hag as a fresh save's first fight; the Ash Mire
-    // boss reachable with zero prior encounters) were independently
-    // re-verified RESOLVED-STALE on 2026-09-10 (`plan/CRITIQUE.md`,
-    // `plan/AUDIT.md`): the Phase 53c/60/61 gauntlet rebuild already fixed
-    // both before this phase was promoted. These tests convert the
-    // now-true-by-accident invariants into a tested contract so a future
-    // content pass can't silently reintroduce either bug.
-    it('keeps every pre-boss combat foe non-elite, zero-keyword, and single-phase', () => {
-        mockSequentialRng(0.5);
-        const preBossEncounterNodes = ['fv-13', 'fv-15']; // Float-Eye since R2
-        for (const nodeId of preBossEncounterNodes) {
-            const state = freshWorldAt('fishing-village');
-            const result = resolveMapEvent({
-                ...state,
-                world: { ...state.world, currentMap: { ...state.world.currentMap, currentNode: nodeId, consumedNodes: [] } },
-            });
-            expect(result.event.kind).toBe('encounter');
-            if (result.event.kind === 'encounter') {
-                const foe = result.event.encounter.enemies[0];
-                expect(foe.difficulty, `${nodeId}'s foe (${foe.name}) must not be elite/boss`).toBe('normal');
-                expect(foe.keywords, `${nodeId}'s foe (${foe.name}) must carry no keywords`).toEqual([]);
-                expect(foe.stages, `${nodeId}'s foe (${foe.name}) must be single-phase`).toEqual([]);
-            }
-        }
-    });
-
-    it('never assigns Brine Hag (or any elite) to a fishing-village node', () => {
-        // Brine Hag stays in `EnemiesByMap['fishing-village']` (Enemy/index.ts)
-        // but every node's event pool carries an explicit pinned `enemySlug`
-        // (content.ts) — the map's own random-draw branch is unreachable, so
-        // she should never appear at any node, pre-boss or otherwise.
-        mockSequentialRng(0.5);
-        const def = getMapDefinition('coastal-continent', 'fishing-village');
-        for (const node of def.nodes) {
-            const state = freshWorldAt('fishing-village');
-            const result = resolveMapEvent({
-                ...state,
-                world: { ...state.world, currentMap: { ...state.world.currentMap, currentNode: node.id, consumedNodes: [] } },
-            });
-            if (result.event.kind === 'encounter') {
-                expect(result.event.encounter.enemies[0].name).not.toBe('Brine Hag');
-                if (!result.event.isBoss) {
-                    expect(result.event.encounter.enemies[0].difficulty).not.toBe('elite');
-                }
-            }
-        }
-    });
 });
 
 describe('northern-forest content (Phase 24)', () => {
@@ -275,9 +83,8 @@ describe('northern-forest content (Phase 24)', () => {
 });
 
 describe('Phase 37 shop content', () => {
-    // The starting map (fishing-village) is now a combat gauntlet with no
-    // village/shop node — the surviving authored shop lives on
-    // northern-forest (nf-8, Glen Market).
+    // No Act 1 map carries a village/shop node — the surviving authored
+    // shop lives on the parked northern-forest (nf-8, Glen Market).
     it('the authored village payload carries a shop inventory with consumable IDs that resolve', async () => {
         mockSequentialRng(0.5);
         const { getConsumableById } = await import('../../../Items/consumable.library');
@@ -691,7 +498,7 @@ describe('every MapEventKind is covered by the authored content', () => {
         const kinds = new Set<string>();
         // THE REVAMP R3a: the northern continent is parked (D53), its pools
         // empty, so its wandering fights no longer resolve.
-        for (const map of ['fishing-village', 'northern-forest'] as const) {
+        for (const map of ['breakwater', 'northern-forest'] as const) {
             const def = getMapDefinition(CONTINENT_OF[map], map);
             for (const node of def.nodes) {
                 // Fresh state per node — a threaded walk would cross a
@@ -700,10 +507,12 @@ describe('every MapEventKind is covered by the authored content', () => {
             }
         }
         // The original eight kinds plus the three later additions —
-        // 'narration' (fv-14), 'blacksmith' (fv-21, Phase 60), and
-        // 'travel' (fv-10 / nf-10, 2026-08-28 inter-map travel). 'quest'
-        // (fv-15) was retired in Phase 61 along with the Quest Board
-        // minigame it launched.
+        // 'narration' (nf-12 / nf-19), 'blacksmith' (Phase 60; the
+        // Breakwater's Anvil at bw-16 since R3b), and 'travel' (bw-18 /
+        // nf-10, 2026-08-28 inter-map travel). 'quest' was retired in
+        // Phase 61 along with the Quest Board minigame it launched. The
+        // Act 1 maps carry no NPC, village or narration node, so those
+        // kinds come from the parked northern-forest.
         const required = [
             'encounter', 'interaction', 'gathering', 'rest',
             'village', 'cutscene', 'hazard', 'loot-cache',
@@ -720,7 +529,7 @@ describe('Phase 52f — guaranteed per-act shilling income (the calibration inpu
     // is the flat `loot-cache` MapEvent kind (`resolveLootCache` grants
     // `payload.currency` with no RNG). The deep `World/Hazard` and
     // `World/Gathering` minigame packages have their own shilling economies,
-    // but neither is wired to a fishing-village or northern-forest node (the
+    // but neither is wired to a Breakwater or northern-forest node (the
     // map-level 'hazard'/'gathering' kinds here resolve to flat damage /
     // items only — see `resolveHazard`/`resolveGathering`). Combat victory
     // grants XP + loot items but no currency
@@ -735,7 +544,7 @@ describe('Phase 52f — guaranteed per-act shilling income (the calibration inpu
         let state = freshWorldAt(map);
         const def = getMapDefinition(CONTINENT_OF[map], map);
         for (const node of def.nodes) {
-            // Skip the travel doors (fv-10 / nf-10, 2026-08-28): resolving
+            // Skip the travel doors (bw-18 / nf-10, 2026-08-28): resolving
             // one moves the whole world to the destination map, and a door
             // grants no shillings anyway.
             if (getNodePrimaryEventKind(CONTINENT_OF[map], map, node.id) === 'travel') continue;
@@ -744,7 +553,7 @@ describe('Phase 52f — guaranteed per-act shilling income (the calibration inpu
         expect(state.player.currency).toBe(expectedCurrency);
     };
     it.each([
-        ['fishing-village', 26],
+        ['breakwater', 26],
         ['northern-forest', 18],
     ] as const)('%s grants exactly %d guaranteed shillings on a full walk', walk);
     // SKIP-ISSUE: #417

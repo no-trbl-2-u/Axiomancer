@@ -288,8 +288,8 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
      * PLAYTEST_BUGS_2026-09-18 BUG-04: the camera fitted once at mount and never
      * again (`initialized.current` latched on first run), so after the player
      * moved, the newly-opened branch could sit entirely off both edges. Measured
-     * at the Crossing on a 414px viewport: of the three onward paths, `fv-16`
-     * landed at x = -49 and `fv-11` at x = 419 — two of three choices invisible,
+     * at a three-way crossing on a 414px viewport: of the three onward paths,
+     * one landed at x = -49 and one at x = 419 — two of three choices invisible,
      * 19 of 25 nodes off-screen, with nothing on screen saying more existed.
      *
      * Keying the fit on THIS rather than on `nodes` is what makes the fix safe.

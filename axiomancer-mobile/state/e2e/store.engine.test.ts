@@ -38,7 +38,7 @@ function makeEnemy() {
         baseStats: { heart: 1, body: 1, mind: 1 },
         // The map.library types are unreachable from the published dist;
         // cast is fine — this is test scaffolding, not production data.
-        mapName: 'fishing-village' as never,
+        mapName: 'breakwater',
         logic: 'random' as never,
     });
 }

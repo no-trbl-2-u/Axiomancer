@@ -1,6 +1,6 @@
 /**
  * Dev-only manual blacksmith trigger. Blacksmith map events fire "The
- * Anvil" organically (one authored fishing-village node), but tuning and
+ * Anvil" organically (one authored node per Act 1 region), but tuning and
  * visual work need an immediate entry: tap → `actions.beginBlacksmith()`
  * → `<BlacksmithGate>` routes to `/blacksmith`. GO offers the witness
  * swap variant so the swap path is reachable from the dev menu. Renders

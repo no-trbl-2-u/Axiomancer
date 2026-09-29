@@ -4,8 +4,8 @@
  *
  * A loot-cache node is one irreversible choice of three — `card` (a rolled
  * reward card), `item` (a tier-scaled consumable haul + the node's
- * currency), or `sacrifice` (nothing to the player; the host tallies a
- * per-map goodwill counter). Two-way like every minigame here: the engine
+ * currency), or `sacrifice` (nothing to the player; the per-map goodwill
+ * tally it fed was purged in R3b). Two-way like every minigame here: the engine
  * never reads `GameState`, and the host settles the outcome against the
  * real `Character` at claim time. Unlike `RestChoice`'s `cut`, no offer
  * here needs a sub-picker — the `card`/`item` candidates are rolled by the
@@ -33,7 +33,7 @@ export interface LootCacheChoiceOutcome {
     items: readonly Item[];
     /** The authored node's currency to grant — >0 iff `chosen === 'item'`. */
     currency: number;
-    /** True iff `chosen === 'sacrifice'` — the host increments its goodwill tally. */
+    /** True iff `chosen === 'sacrifice'` — grants nothing since R3b purged goodwill. */
     sacrificed: boolean;
 }
 

@@ -75,8 +75,8 @@ export default function ExplorationScreen() {
     // 2026-08-08 first-map audit — the original case was the START node.
     // Events fire on ARRIVAL at a node, and the player never "arrives" at
     // the node they are placed on, so whatever the map authored for its
-    // starting node was dead content: on fishing-village that silently
-    // swallowed fv-1's entire pool. The mechanics CLI has resolved the start
+    // starting node was dead content: on the then-first map that silently
+    // swallowed the start node's entire pool. The mechanics CLI has resolved the start
     // node behind `--resolve-start` since Phase 14; this is the app's
     // equivalent.
     //
@@ -95,7 +95,7 @@ export default function ExplorationScreen() {
     // a node; `startNodePending` is the map placing you on its first one.
     // Being PLACED somewhere else — a state fixture, a `/dev` JUMP — is
     // neither, and owes nothing: firing on the fixture's placement is what
-    // made `/exploration?fixture=sage-fv-boss-gate` engage the fv-9 boss
+    // made `/exploration?fixture=sage-bw-door-gate` engage the boss
     // instead of drawing the map.
     //
     // Two guards, and CI taught me both of them.

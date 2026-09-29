@@ -73,35 +73,6 @@ describe('Phase 62 — quest-branch wire-in on outcome === friendship', () => {
         store.getState().endCombat('victory');
         expect(store.getState().flags).not.toContain('befriended-brine-hag');
     });
-
-    it('Coastal Beggar bell-recognition branch is hidden pre-friendship + visible post-friendship', async () => {
-        const { visibleChoices } = await import('../../NPCs');
-        const { getMapDefinition } = await import('../../World/map.registry');
-        const fishingVillage = getMapDefinition('coastal-continent', 'fishing-village');
-        const beggar = fishingVillage.npcs!.find(npc => npc.name === 'Coastal Beggar')!;
-        const greetNode = beggar.dialogueTree!.nodes.greet;
-
-        const baseCtx = {
-            activeQuests: new Set<string>(),
-            completedQuests: new Set<string>(),
-        };
-
-        // Pre-friendship: gull_recognition choice should be hidden.
-        const visibleBefore = visibleChoices(greetNode, {
-            ...baseCtx,
-            flags: new Set<string>(),
-        });
-        expect(visibleBefore.find(c => c.nextNodeId === 'gull_recognition')).toBeUndefined();
-
-        // Post-friendship: with the flag set, the choice surfaces.
-        const visibleAfter = visibleChoices(greetNode, {
-            ...baseCtx,
-            flags: new Set(['befriended-little-belle']),
-        });
-        const bellChoice = visibleAfter.find(c => c.nextNodeId === 'gull_recognition');
-        expect(bellChoice).toBeDefined();
-        expect(bellChoice!.text).toMatch(/quiet/);
-    });
 });
 
 describe('Phase 102 — Befriendable-enemy Tier-2 expansion', () => {

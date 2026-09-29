@@ -14,7 +14,7 @@
  *   emptySlotSummary(id)            the summary of a slot nothing was written to
  *   summarizeSlot(id, envelope, state)  what a menu row shows for a slot
  *   mostRecentSlot(summaries)       the slot CONTINUE should resume
- *   formatMapName(mapName)          'fishing-village' → 'Fishing Village'
+ *   formatMapName(mapName)          'charcoal-wood' → 'Charcoal Wood'
  *   describeSavedAt(savedAt, now)   'moments ago' / '3 hours ago' / a date
  */
 
@@ -67,7 +67,7 @@ export interface SaveSlotSummary {
     readonly savedAt: number | null;
     /** `player.level`, `null` unless `saved`. */
     readonly level: number | null;
-    /** `world.currentMap.name` (a map id like `fishing-village`), `null` unless `saved`. */
+    /** `world.currentMap.name` (a map id like `charcoal-wood`), `null` unless `saved`. */
     readonly mapName: string | null;
     /** `GameState.runId`, `null` unless `saved`. */
     readonly runId: string | null;
@@ -125,7 +125,7 @@ export function mostRecentSlot(summaries: readonly SaveSlotSummary[]): SaveSlotI
     return best?.id ?? null;
 }
 
-/** `'fishing-village'` → `'Fishing Village'`; unknown/empty → `'Unknown Lands'`. */
+/** `'charcoal-wood'` → `'Charcoal Wood'`; unknown/empty → `'Unknown Lands'`. */
 export function formatMapName(mapName: string | null): string {
     if (!mapName) return 'Unknown Lands';
     return mapName

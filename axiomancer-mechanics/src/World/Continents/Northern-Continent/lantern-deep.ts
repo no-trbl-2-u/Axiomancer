@@ -5,8 +5,8 @@
  * (`axiomancer-mobile/assets/images/maps/act1-underworld.webp`). Named by T
  * from three drafts (D26). Under `northern-continent` (D28): the Beacon Crags'
  * glacier shrine is a stair down into the ice, and it comes out here at the
- * surface stair. The deep stair is the door on to fishing-village, where the
- * shipped chain resumes (D27).
+ * surface stair. The deep stair led on to fishing-village (D27) until THE
+ * REVAMP purged that map; it is sealed, like the vault door (R3a).
  *
  * One node per landmark on the plate (D25, `act1-landmarks.json`), and no
  * others. The engine graph is abstract (columns and lanes); the mobile layout

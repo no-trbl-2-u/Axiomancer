@@ -26,7 +26,7 @@ const ALL_MAPS: MapDefinition[] = Object.values(MAP_REGISTRY)
 
 describe('narrative reachability — registry-wide invariant', () => {
     it('registers at least the two coastal maps', () => {
-        expect(ALL_MAPS.map(d => d.name)).toEqual(expect.arrayContaining(['fishing-village', 'northern-forest']));
+        expect(ALL_MAPS.map(d => d.name)).toEqual(expect.arrayContaining(['breakwater', 'northern-forest']));
     });
 
     for (const def of ALL_MAPS) {
@@ -34,10 +34,10 @@ describe('narrative reachability — registry-wide invariant', () => {
             const audit = auditNarrativeReachability(def);
 
             it('names only rostered NPCs from interaction nodes', () => {
-                // Phase 53a's one accepted exception (fv-19's 'Weathered
-                // Fisher', naming nobody in the roster) is resolved as of
-                // Phase 53c — fv-19 now names the rostered Fisherman's
-                // Daughter, so there are no exceptions left to declare.
+                // Phase 53a's one accepted exception (a fishing-village node
+                // naming nobody in the roster) was resolved in Phase 53c, and
+                // the map itself was purged in R3b, so there are no
+                // exceptions left to declare.
                 expect(audit.unresolvedInteractions, JSON.stringify(audit.unresolvedInteractions)).toEqual([]);
             });
 

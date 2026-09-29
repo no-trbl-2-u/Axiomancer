@@ -24,13 +24,13 @@ import type { QuestName } from '../../quest.library';
 // Fabricated quest name for the reach-objective tests below. It is not part
 // of the QuestName union (the quest engine only compares names), so cast once
 // and reuse.
-const REACH_FV2 = 'reach-fv2' as QuestName;
+const REACH_BW2 = 'reach-bw2' as QuestName;
 
 // Fabricated quest name for the collect-objective tests below (Phase 8).
 const COLLECT_DRIFTWOOD = 'collect-driftwood' as QuestName;
 
 function freshState(): GameState {
-    return { ...createNewGameState(), world: createStartingWorld('fishing-village') };
+    return { ...createNewGameState(), world: createStartingWorld('breakwater') };
 }
 
 function withPool(state: GameState, pool: MapEventPool): GameState {
@@ -276,22 +276,23 @@ describe('resolveMapEvent — Phase 31 traversal fix', () => {
         const startId = state.world.currentMap.currentNode;
         const startNode = state.world.currentMap;
 
-        // Before resolution: fv-1's adjacent (fv-2) is already available,
-        // but fv-3 is locked.
-        expect(startNode.availableNodes).toContain('fv-2');
-        expect(startNode.lockedNodes).toContain('fv-3');
+        // Before resolution: bw-1's adjacent (bw-2) is already available,
+        // but bw-7 is locked.
+        expect(startNode.availableNodes).toContain('bw-2');
+        expect(startNode.lockedNodes).toContain('bw-7');
 
-        const afterFv1 = resolveMapEvent(state).state.world.currentMap;
-        expect(afterFv1.consumedNodes).toContain(startId);
-        // fv-2 was already available — still there; no regression.
-        expect(afterFv1.availableNodes).toContain('fv-2');
-        // fv-1's only adjacent IS fv-2 (no new unlock from fv-1 itself).
-        expect(afterFv1.lockedNodes).toContain('fv-3');
+        const afterBw1 = resolveMapEvent(state).state.world.currentMap;
+        expect(afterBw1.consumedNodes).toContain(startId);
+        // bw-2 was already available — still there; no regression.
+        expect(afterBw1.availableNodes).toContain('bw-2');
+        // bw-1's adjacents are bw-2..bw-5, all already available; bw-7 is
+        // two steps out (no new unlock from bw-1 itself).
+        expect(afterBw1.lockedNodes).toContain('bw-7');
     });
 
     it('unlocks the next-step adjacent when the player resolves the just-walked node', () => {
         mockSequentialRng(0.5);
-        // Reach fv-2 by moving (legal — fv-2 is in initial availableNodes).
+        // Reach bw-2 by moving (legal — bw-2 is in initial availableNodes).
         let state = withPool(freshState(), {
             id: 'pool.cutscene',
             entries: [{
@@ -299,17 +300,17 @@ describe('resolveMapEvent — Phase 31 traversal fix', () => {
                 payload: { kind: 'cutscene', lines: ['…'] },
             }],
         });
-        state = { ...state, world: { ...state.world, currentMap: { ...state.world.currentMap, currentNode: 'fv-2' } } };
+        state = { ...state, world: { ...state.world, currentMap: { ...state.world.currentMap, currentNode: 'bw-2' } } };
 
-        // Before resolving fv-2: fv-26 is locked.
-        expect(state.world.currentMap.lockedNodes).toContain('fv-26');
-        expect(state.world.currentMap.availableNodes).not.toContain('fv-26');
+        // Before resolving bw-2: bw-7 is locked.
+        expect(state.world.currentMap.lockedNodes).toContain('bw-7');
+        expect(state.world.currentMap.availableNodes).not.toContain('bw-7');
 
-        const afterFv2 = resolveMapEvent(state).state.world.currentMap;
+        const afterBw2 = resolveMapEvent(state).state.world.currentMap;
 
-        // After resolving fv-2: fv-26 has moved from locked → available.
-        expect(afterFv2.availableNodes).toContain('fv-26');
-        expect(afterFv2.lockedNodes).not.toContain('fv-26');
+        // After resolving bw-2: bw-7 has moved from locked → available.
+        expect(afterBw2.availableNodes).toContain('bw-7');
+        expect(afterBw2.lockedNodes).not.toContain('bw-7');
     });
 
     it('idempotent — re-resolving a consumed node does not re-promote unlocked adjacents', () => {
@@ -332,15 +333,15 @@ describe('resolveMapEvent — Phase 31 traversal fix', () => {
         mockSequentialRng(0.5);
         const state = freshState();
         _clearMapEventPoolRegistry();
-        // Move to fv-2 first (legal — fv-2 is already available; no pool needed
+        // Move to bw-2 first (legal — bw-2 is already available; no pool needed
         // to move).
-        const atFv2 = { ...state, world: { ...state.world, currentMap: { ...state.world.currentMap, currentNode: 'fv-2' } } };
-        expect(atFv2.world.currentMap.lockedNodes).toContain('fv-26');
-        const result = resolveMapEvent(atFv2);
+        const atBw2 = { ...state, world: { ...state.world, currentMap: { ...state.world.currentMap, currentNode: 'bw-2' } } };
+        expect(atBw2.world.currentMap.lockedNodes).toContain('bw-7');
+        const result = resolveMapEvent(atBw2);
         expect(result.event.kind).toBe('none');
         // Discovery + traversal both advance even without a pool.
-        expect(result.state.world.currentMap.availableNodes).toContain('fv-26');
-        expect(result.state.world.currentMap.lockedNodes).not.toContain('fv-26');
+        expect(result.state.world.currentMap.availableNodes).toContain('bw-7');
+        expect(result.state.world.currentMap.lockedNodes).not.toContain('bw-7');
     });
 });
 
@@ -353,8 +354,8 @@ describe('resolveMapEvent — Phase 31 traversal fix', () => {
 describe('resolveMapEvent — reach-objective auto-advance', () => {
     function seedReachQuest(state: GameState, targetNodeId: string): GameState {
         const reachQuest: Quest = {
-            name: REACH_FV2,
-            description: 'Arrive at fv-2.',
+            name: REACH_BW2,
+            description: 'Arrive at bw-2.',
             mapName: state.world.currentMap.name,
             objectives: [{
                 id: 'arrive',
@@ -375,14 +376,14 @@ describe('resolveMapEvent — reach-objective auto-advance', () => {
 
     it('completes a reach quest when the player resolves the target node (no pool)', () => {
         const base = freshState();
-        const atFv2 = { ...base, world: { ...base.world, currentMap: { ...base.world.currentMap, currentNode: 'fv-2' } } };
-        const state = seedReachQuest(atFv2, 'fv-2');
+        const atBw2 = { ...base, world: { ...base.world, currentMap: { ...base.world.currentMap, currentNode: 'bw-2' } } };
+        const state = seedReachQuest(atBw2, 'bw-2');
 
         const result = resolveMapEvent(state);
         expect(result.event.kind).toBe('none');
         // Reach completed → quest moves from active to completed (single-objective).
-        expect(result.state.quests.active.some(q => q.name === REACH_FV2)).toBe(false);
-        expect(result.state.quests.completed).toContain('reach-fv2');
+        expect(result.state.quests.active.some(q => q.name === REACH_BW2)).toBe(false);
+        expect(result.state.quests.completed).toContain('reach-bw2');
     });
 
     it('completes a reach quest alongside the pool-driven event handler', () => {
@@ -395,23 +396,23 @@ describe('resolveMapEvent — reach-objective auto-advance', () => {
                 payload: { kind: 'rest', shelter: 'camp' },
             }],
         });
-        const atFv2 = { ...base, world: { ...base.world, currentMap: { ...base.world.currentMap, currentNode: 'fv-2' } } };
-        const state = seedReachQuest(atFv2, 'fv-2');
+        const atBw2 = { ...base, world: { ...base.world, currentMap: { ...base.world.currentMap, currentNode: 'bw-2' } } };
+        const state = seedReachQuest(atBw2, 'bw-2');
 
         const result = resolveMapEvent(state);
         expect(result.event.kind).toBe('rest');
-        expect(result.state.quests.completed).toContain('reach-fv2');
+        expect(result.state.quests.completed).toContain('reach-bw2');
     });
 
     it('is a silent no-op when no active reach objective targets this node', () => {
         const base = freshState();
-        const atFv2 = { ...base, world: { ...base.world, currentMap: { ...base.world.currentMap, currentNode: 'fv-2' } } };
-        const state = seedReachQuest(atFv2, 'fv-5'); // targets a different node
+        const atBw2 = { ...base, world: { ...base.world, currentMap: { ...base.world.currentMap, currentNode: 'bw-2' } } };
+        const state = seedReachQuest(atBw2, 'bw-5'); // targets a different node
 
         const result = resolveMapEvent(state);
-        // Quest stays active — fv-5 wasn't reached.
-        expect(result.state.quests.active.some(q => q.name === REACH_FV2)).toBe(true);
-        expect(result.state.quests.completed).not.toContain('reach-fv2');
+        // Quest stays active — bw-5 wasn't reached.
+        expect(result.state.quests.active.some(q => q.name === REACH_BW2)).toBe(true);
+        expect(result.state.quests.completed).not.toContain('reach-bw2');
     });
 });
 

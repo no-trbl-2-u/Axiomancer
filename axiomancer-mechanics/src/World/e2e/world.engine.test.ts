@@ -6,12 +6,12 @@
  *   - Per-objective quest engine (start / progress / complete).
  *   - resolveMapEvent dispatch for every kind the demo map exercises
  *     (post-Phase 25 — processNode + the legacy MapEvent surface removed).
- *   - End-to-end flow through fishing-village from start to boss-kill.
+ *   - End-to-end flow through the Breakwater from start to its door fight.
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import {
-    createStartingWorld, moveToNode, completeCurrentNode, IllegalMoveError, forwardEdges,
+    createStartingWorld, moveToNode, completeCurrentNode, IllegalMoveError,
     resolveMapEvent, applyDialogueChoice, getMapDefinition, createMapState,
     emptyQuestLog, startQuest, progressQuest, isQuestComplete, completeQuest,
 } from '../index';
@@ -21,11 +21,12 @@ import { mockSequentialRng } from '../../test-utils/rng';
 
 afterEach(() => vi.restoreAllMocks());
 
-const startingState = (): GameState => createNewGameState({ startMap: 'fishing-village' });
+const startingState = (): GameState => createNewGameState({ startMap: 'breakwater' });
 
-// fishing-village is now a combat-only new-player gauntlet, so the varied
-// MapEvent kinds (interaction / village / loot-cache) are exercised against
-// northern-forest, which retains the authored content. Sets currentNode
+// The Act 1 maps carry no NPC, village or quest, so the varied MapEvent kinds
+// (interaction / village / loot-cache) and the quest/dialogue mechanics are
+// exercised against the parked northern-forest, which retains the authored
+// content. Sets currentNode
 // directly — resolveMapEvent works off currentNode regardless of traversal.
 const nfStateAt = (nodeId: string): GameState => {
     const base = startingState();
@@ -40,36 +41,36 @@ const nfStateAt = (nodeId: string): GameState => {
 
 describe('moveToNode', () => {
     it('moves to a connected, unlocked, uncompleted node', () => {
-        const world = createStartingWorld('fishing-village');
-        const next = moveToNode(world, 'fv-2');
-        expect(next.currentMap.currentNode).toBe('fv-2');
+        const world = createStartingWorld('breakwater');
+        const next = moveToNode(world, 'bw-2');
+        expect(next.currentMap.currentNode).toBe('bw-2');
     });
 
     it('rejects non-adjacent nodes', () => {
-        const world = createStartingWorld('fishing-village');
-        expect(() => moveToNode(world, 'fv-5')).toThrow(IllegalMoveError);
+        const world = createStartingWorld('breakwater');
+        expect(() => moveToNode(world, 'bw-12')).toThrow(IllegalMoveError);
     });
 
     it('rejects locked nodes', () => {
-        const world = createStartingWorld('fishing-village');
-        // fv-26 (the first gate) starts locked (only fv-2 is adjacent to start).
-        expect(world.currentMap.lockedNodes).toContain('fv-26');
-        expect(() => moveToNode(world, 'fv-26')).toThrow(IllegalMoveError);
+        const world = createStartingWorld('breakwater');
+        // bw-7 (the south pier) starts locked (only bw-2..bw-5 touch the windmill).
+        expect(world.currentMap.lockedNodes).toContain('bw-7');
+        expect(() => moveToNode(world, 'bw-7')).toThrow(IllegalMoveError);
     });
 
     it('locks completed nodes against back-travel (Q2)', () => {
-        let world = createStartingWorld('fishing-village');
-        world = moveToNode(world, 'fv-2');
+        let world = createStartingWorld('breakwater');
+        world = moveToNode(world, 'bw-2');
         world = completeCurrentNode(world);
-        // After completing fv-2, the first gate (fv-26) becomes available.
-        expect(world.currentMap.availableNodes).toContain('fv-26');
-        world = moveToNode(world, 'fv-26');
-        // Can't go back to the completed fv-2.
-        expect(() => moveToNode(world, 'fv-2')).toThrow(IllegalMoveError);
+        // After completing bw-2, the south pier (bw-7) becomes available.
+        expect(world.currentMap.availableNodes).toContain('bw-7');
+        world = moveToNode(world, 'bw-7');
+        // Can't go back to the completed bw-2.
+        expect(() => moveToNode(world, 'bw-2')).toThrow(IllegalMoveError);
     });
 
     it('returns the same state when target equals current node', () => {
-        const world = createStartingWorld('fishing-village');
+        const world = createStartingWorld('breakwater');
         const same = moveToNode(world, world.currentMap.currentNode);
         expect(same).toBe(world);
     });
@@ -78,10 +79,10 @@ describe('moveToNode', () => {
 // ── Quest engine (Q7B) ──────────────────────────────────────────────────────
 
 describe('per-objective quest engine', () => {
-    const fishingDef = () => getMapDefinition('coastal-continent', 'fishing-village');
+    const forestDef = () => getMapDefinition('coastal-continent', 'northern-forest');
 
     it('starts a quest and tracks objectives', () => {
-        const quest = fishingDef().quests!.find(q => q.name === 'starting-quest')!;
+        const quest = forestDef().quests!.find(q => q.name === 'gather-wood')!;
         const log = startQuest(emptyQuestLog(), quest);
         expect(log.active).toHaveLength(1);
         expect(log.active[0].status).toBe('active');
@@ -89,19 +90,21 @@ describe('per-objective quest engine', () => {
     });
 
     it('progressQuest advances counters and auto-completes when filled', () => {
-        const quest = fishingDef().quests!.find(q => q.name === 'starting-quest')!;
+        const quest = forestDef().quests!.find(q => q.name === 'gather-wood')!;
         let log = startQuest(emptyQuestLog(), quest);
-        const res = progressQuest(log, 'starting-quest', 'kill-tyrant', 1);
+        const partial = progressQuest(log, 'gather-wood', 'collect-oak-branch', 2);
+        expect(partial.log.completed).not.toContain('gather-wood');
+        const res = progressQuest(partial.log, 'gather-wood', 'collect-oak-branch', 1);
         log = res.log;
-        expect(log.completed).toContain('starting-quest');
-        expect(res.completedName).toBe('starting-quest');
+        expect(log.completed).toContain('gather-wood');
+        expect(res.completedName).toBe('gather-wood');
     });
 
     it('completeQuest moves the quest to completed list', () => {
-        const quest = fishingDef().quests!.find(q => q.name === 'starting-quest')!;
+        const quest = forestDef().quests!.find(q => q.name === 'gather-wood')!;
         let log = startQuest(emptyQuestLog(), quest);
-        log = completeQuest(log, 'starting-quest');
-        expect(log.completed).toContain('starting-quest');
+        log = completeQuest(log, 'gather-wood');
+        expect(log.completed).toContain('gather-wood');
         expect(log.active).toHaveLength(0);
     });
 });
@@ -131,11 +134,8 @@ describe('resolveMapEvent dispatch', () => {
     it('returns kind=encounter on encounter nodes', () => {
         mockSequentialRng(0.5);
         let state = startingState();
-        // fv-26 is the first of the three gates (2026-09-21): the nearest
-        // encounter from fv-2, and on every route.
-        state = { ...state, world: moveToNode(state.world, 'fv-2') };
-        state = { ...state, world: completeCurrentNode(state.world) };
-        state = { ...state, world: moveToNode(state.world, 'fv-26') };
+        // bw-2 (the crane quay) is a Float-Eye fight one step from the windmill.
+        state = { ...state, world: moveToNode(state.world, 'bw-2') };
         const result = resolveMapEvent(state);
         expect(result.event.kind).toBe('encounter');
         if (result.event.kind === 'encounter') {
@@ -159,9 +159,10 @@ describe('resolveMapEvent dispatch', () => {
     it('returns kind=encounter with isBoss=true on the boss node', () => {
         mockSequentialRng(0.5);
         let state = startingState();
-        for (const target of ['fv-2', 'fv-26', 'fv-3', 'fv-27', 'fv-4', 'fv-28', 'fv-5', 'fv-6'] as const) {
+        // The watchtower (bw-17) holds the Breakwater's door fight.
+        for (const target of ['bw-2', 'bw-7', 'bw-11', 'bw-14', 'bw-17'] as const) {
             state = { ...state, world: moveToNode(state.world, target) };
-            if (target !== 'fv-6') state = { ...state, world: completeCurrentNode(state.world) };
+            if (target !== 'bw-17') state = { ...state, world: completeCurrentNode(state.world) };
         }
         const result = resolveMapEvent(state);
         expect(result.event.kind).toBe('encounter');
@@ -175,135 +176,38 @@ describe('resolveMapEvent dispatch', () => {
 // ── Dialogue (Q9) ──────────────────────────────────────────────────────────
 
 describe('applyDialogueChoice', () => {
-    // Old Marrow's NPC + dialogue tree still lives in the fishing-village map
-    // DEFINITION (only the event-pool wiring at fv-2 changed to the new-player
-    // gauntlet), so the dialogue mechanics are exercised against that tree
-    // fetched from the map def.
-    const oldMarrowTree = () =>
-        getMapDefinition('coastal-continent', 'fishing-village').npcs!.find(
-            n => n.name === 'Old Marrow',
+    // No Act 1 map carries an NPC, so the dialogue mechanics are exercised
+    // against the Forest Ranger's tree on the parked northern-forest, with
+    // the player standing there (a quest starts only if the CURRENT map
+    // defines it).
+    const rangerTree = () =>
+        getMapDefinition('coastal-continent', 'northern-forest').npcs!.find(
+            n => n.name === 'Forest Ranger',
         )!.dialogueTree!;
 
     it('starts a quest when a choice carries startQuest', () => {
         mockSequentialRng(0.5);
-        const state = startingState();
-        const tree = oldMarrowTree();
+        const state = nfStateAt('nf-1');
+        const tree = rangerTree();
         const root = tree.nodes[tree.rootId];
-        // Pick "What needs doing?" → leads to 'offer'
-        const offerChoice = root.choices!.find(c => c.text.startsWith('What needs'));
-        expect(offerChoice).toBeDefined();
-        const step1 = applyDialogueChoice(state, tree, offerChoice!);
-        expect(step1.nextNode?.id).toBe('offer');
-        // Pick "Consider it done" → starts the quest
-        const accept = step1.nextNode!.choices!.find(c => c.effect?.startQuest);
-        const step2 = applyDialogueChoice(step1.gameState, tree, accept!);
-        expect(step2.effects.startedQuest).toBe('starting-quest');
-        expect(step2.gameState.quests.active.find(q => q.name === 'starting-quest')).toBeDefined();
+        // "What's past the tree line?" → starts get-to-cave
+        const ask = root.choices!.find(c => c.effect?.startQuest);
+        expect(ask).toBeDefined();
+        const step = applyDialogueChoice(state, tree, ask!);
+        expect(step.nextNode?.id).toBe('ranger_cave_directions');
+        expect(step.effects.startedQuest).toBe('get-to-cave');
+        expect(step.gameState.quests.active.find(q => q.name === 'get-to-cave')).toBeDefined();
     });
 
     it('grants currency when a choice carries grantCurrency', () => {
         mockSequentialRng(0.5);
-        const state = startingState();
-        const tree = oldMarrowTree();
-        const thanksNode = tree.nodes.thanks;
-        const choice = thanksNode.choices![0];
+        const state = nfStateAt('nf-1');
+        const tree = rangerTree();
+        const choice = tree.nodes.talk_duties.choices!.find(c => (c.effect?.grantCurrency ?? 0) > 0)!;
         const before = state.player.currency;
         const step = applyDialogueChoice(state, tree, choice);
-        expect(step.gameState.player.currency).toBe(before + 25);
-    });
-});
-
-describe('Phase 65 — expanded fishing-village layout', () => {
-    const fv = () => getMapDefinition('coastal-continent', 'fishing-village');
-
-    it('grows from 10 to 28 nodes (spine + 3 sub-areas + the three gates)', () => {
-        expect(fv().nodes.length).toBe(28);
-    });
-
-    it('preserves the spine fv-1..fv-10 along y=0', () => {
-        const map = fv();
-        for (let i = 1; i <= 10; i++) {
-            const node = map.nodes.find(n => n.id === `fv-${i}`);
-            expect(node, `fv-${i} should exist`).toBeDefined();
-            expect(node!.location[1], `fv-${i} should be on y=0`).toBe(0);
-        }
-    });
-
-    it('every gate opens onto its whole next column, and every lane funnels into the next gate', () => {
-        // THE THREE GATES (2026-09-21): the lanes are what they were, but a
-        // gate sits before each open column. A gate opens onto every lane;
-        // every lane's nodes lead only to the next gate — so no route can
-        // skip a fight, and every route can still choose its lane.
-        //
-        // Read against the FORWARD SKELETON, not raw `connectedNodes`: D1
-        // (same day) added lateral ribs between neighbouring lanes, which are
-        // sideways traversal and never a way onward. The gate guarantee is a
-        // statement about progression, so it is measured on progression edges.
-        const map = fv();
-        const forward = forwardEdges(map);
-        const onward = (id: string) => [...(forward.get(id) ?? [])].sort();
-        expect(onward('fv-2')).toEqual(['fv-26']);
-        expect(onward('fv-26')).toEqual(['fv-11', 'fv-16', 'fv-3']);
-        for (const id of ['fv-16', 'fv-3', 'fv-11']) expect(onward(id)).toEqual(['fv-27']);
-        expect(onward('fv-27')).toEqual(['fv-12', 'fv-13', 'fv-14', 'fv-17', 'fv-4']);
-        for (const id of ['fv-17', 'fv-4', 'fv-14', 'fv-12', 'fv-13']) expect(onward(id)).toEqual(['fv-28']);
-        expect(onward('fv-28')).toEqual(['fv-15', 'fv-20', 'fv-5']);
-        for (const id of ['fv-15', 'fv-5', 'fv-20']) expect(onward(id)).toEqual(['fv-6']);
-    });
-
-    it('ribs every open lane column sideways without giving a lane a second way onward (D1)', () => {
-        // The ribs are the half of D1 that shows on the canvas: each open
-        // column is walkable end to end, so a hazard that blocks one approach
-        // cannot orphan a lane. They must not add PROGRESSION, though — the
-        // gate guarantee above depends on a lane having exactly one way
-        // onward, and a rib that reached forward would break it silently.
-        const map = fv();
-        const node = (id: string) => map.nodes.find(n => n.id === id)!;
-        const columnOf = (id: string) => node(id).location[0];
-        for (const [a, b] of [['fv-16', 'fv-3'], ['fv-3', 'fv-11'],
-                              ['fv-12', 'fv-17'], ['fv-17', 'fv-4'], ['fv-4', 'fv-14'], ['fv-14', 'fv-13'],
-                              ['fv-15', 'fv-5'], ['fv-5', 'fv-20']] as const) {
-            expect(columnOf(a), `${a}/${b} must share a column`).toBe(columnOf(b));
-            expect(node(a).connectedNodes, `${a} -> ${b}`).toContain(b);
-            expect(node(b).connectedNodes, `${b} -> ${a}`).toContain(a);
-        }
-    });
-
-    it('leaves no dead-end spurs off the lanes', () => {
-        // These three assertions replace the Phase 65 tests that REQUIRED
-        // fv-15, fv-25 and the fv-17/fv-19 loop to be dead ends. Under the
-        // gauntlet's completed-node lock those spurs were soft-locks, not
-        // level design: entering fv-15 ended the run outright, four nodes in.
-        const map = fv();
-        const terminal = map.nodes.filter(n => n.connectedNodes.length === 0);
-        // D1's ribs never touch the terminal column, so raw-edge terminality
-        // still names exactly the authored ends of the map.
-        expect(terminal.map(n => n.id).sort()).toEqual(['fv-10', 'fv-24']);
-        for (const id of ['fv-15', 'fv-25', 'fv-17', 'fv-19']) {
-            const node = map.nodes.find(n => n.id === id)!;
-            expect(node.connectedNodes.length, `${id} must keep a way onward`).toBeGreaterThan(0);
-        }
-    });
-
-    it('all 25 nodes have a registered MapEventPool', () => {
-        // Drive resolveMapEvent against each node id; expect every one to
-        // surface a non-null event (i.e. the registered pool fired).
-        const map = fv();
-        for (const node of map.nodes) {
-            const state = createNewGameState({ startMap: 'fishing-village' });
-            state.world = {
-                ...state.world,
-                currentMap: {
-                    ...state.world.currentMap,
-                    currentNode: node.id,
-                    availableNodes: [node.id],
-                    discoveredNodes: [node.id],
-                    consumedNodes: [],
-                },
-            };
-            const result = resolveMapEvent(state);
-            expect(result.event, `fv ${node.id} should have a registered pool`).not.toBeNull();
-        }
+        expect(step.gameState.player.currency).toBe(before + choice.effect!.grantCurrency!);
+        expect(choice.effect!.grantCurrency).toBe(35);
     });
 });
 
@@ -340,7 +244,7 @@ describe('Phase 117 — expanded northern-forest layout', () => {
         // surface a non-null event (i.e. the registered pool fired).
         const map = nf();
         for (const node of map.nodes) {
-            const state = createNewGameState({ startMap: 'fishing-village' });
+            const state = createNewGameState({ startMap: 'breakwater' });
             state.world = {
                 ...state.world,
                 currentMap: {

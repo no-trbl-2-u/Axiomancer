@@ -25,7 +25,7 @@ canonical entry points. Cross-link to the per-module doc for depth.
 | **Items** | `addItem` / shop reducers (`buyItem`/`sellItem`/`defaultSellPrice` — Phase 37), set items engine (Phase 54), `previewTemplateAtRarity` UI-tier preview helper (Phase 75 — closes the user-jot for mobile item-library mod-visibility), `previewTemplateAtAllRarities` batch wrapper (Phase 76 — UI tooltip / item-detail rarity-strip views in a single call) | 5, 5b, 37, 54, 75, 76 | [items.md](./items.md), [equipment.md](./equipment.md) |
 | **NPCs** | `getDialogueNode` + `visibleChoices`, quest / flag gates | 14, 22 | [npcs.md](./npcs.md) |
 | **Cards** | `executeCard` caster-agnostic (Phase 49), `learnCard` + runtime learning (Phase 30), Tier 1-3 card library + combat-state synergy clauses | 4, 4b, 30, 33, 44, 49, 66 | cards.md |
-| **World** | `createStartingWorld` + per-continent maps, MapEvents engine (`resolveMapEvent`, eleven-kind pool taxonomy — Phase 23/24; the Phase 137 'quest' kind was later retired), expanded fishing-village (Phase 65 — 25 nodes, 3 sub-areas) | 8, 23, 24, 25, 31, 65 | [world.md](./world.md) |
+| **World** | `createStartingWorld` + per-continent maps, MapEvents engine (`resolveMapEvent`, eleven-kind pool taxonomy — Phase 23/24; the Phase 137 'quest' kind was later retired), the four Act 1 maps (Breakwater → Lantern Deep; fishing-village purged in R3b) | 8, 23, 24, 25, 31, 65 | [world.md](./world.md) |
 | **Utils** | RNG harness, max VITAE, dice / type guards | 11 | — |
 
 Marquee mechanics shipped end-to-end: set

@@ -283,7 +283,7 @@ store.resetRun({ keepCharacter: true }): GameState
 | `player.effects` | cleared (defensive — already empty between combats) | empty |
 | `rngState` | preserved (don't reset mid-session — breaks deterministic replay) | preserved |
 | `runId` | NEW (always bumped) | NEW |
-| `world` | `createStartingWorld()` (back to fishing-village `fv-1`) | `createStartingWorld()` |
+| `world` | `createStartingWorld()` (back to the Breakwater `bw-1`) | `createStartingWorld()` |
 | `combat` | `null` | `null` |
 | `currentEncounter` | `undefined` | `undefined` |
 | `quests` | `emptyQuestLog()` | `emptyQuestLog()` |
@@ -292,12 +292,11 @@ store.resetRun({ keepCharacter: true }): GameState
 ### Starting hearth
 
 The "hearth" reuses `MapDefinition.startingNode` — no new type
-primitive. `STARTING_REGION: MapName = 'fishing-village'` constant
+primitive. `STARTING_REGION: MapName` (= `STARTING_MAP`, the Breakwater)
 names the canonical run-start region; `resetRun` routes the world
 through `createStartingWorld()` which already lands on that region's
-starting node (`fv-1`). Per-region custom hearths defer to a future
-phase when regions other than fishing-village become viable
-start points.
+starting node (`bw-1`). Per-region custom hearths defer to a future
+phase when other regions become viable start points.
 
 ### runId
 

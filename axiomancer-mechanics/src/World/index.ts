@@ -33,7 +33,7 @@ function continentOf(map: MapName): ContinentName {
  *
  * `startMap` defaults to `STARTING_MAP`. Any other campaign map builds the
  * same two-continent world placed on that map instead:
- * - tests that exercise one map's content (fishing-village, most of them)
+ * - tests that exercise one map's content (the Breakwater, most of them)
  *   say so here rather than silently following wherever a new game starts;
  * - the dev "start on any map" tools (CLI `--start-map`, mobile dev menu)
  *   build a fresh game on the map T wants to test.
@@ -133,12 +133,6 @@ export {
     DEFAULT_REST_SHELTER, isInnShelter,
 } from './MapEvents/rest-shelter';
 
-// Phase 65 — village goodwill reward tiers (discount / Ally grant / bonus).
-export {
-    GOODWILL_ALLY_THRESHOLD, GOODWILL_ALLY_CARD_ID,
-    GOODWILL_BONUS_THRESHOLD, GOODWILL_BONUS_CURRENCY,
-    applyGoodwillDiscount, goodwillBonusFlag,
-} from './village-goodwill';
 
 export {
     applyDialogueChoice,

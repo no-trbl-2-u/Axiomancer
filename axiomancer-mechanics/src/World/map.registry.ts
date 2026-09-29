@@ -9,7 +9,7 @@
 
 import { MapDefinition, MapState, NodeId, UniqueEvent } from './types';
 import { ContinentName, MapName } from './map.library';
-import { fishingVillage, northernForest } from './Continents/Coastal-Village/maps';
+import { northernForest } from './Continents/Coastal-Village/maps';
 import { breakwater } from './Continents/Coastal-Village/breakwater';
 import { charcoalWood } from './Continents/Coastal-Village/charcoal-wood';
 import { beaconCrags } from './Continents/Northern-Continent/beacon-crags';
@@ -35,7 +35,6 @@ export const MAP_REGISTRY: Record<ContinentName, Partial<Record<MapName, MapDefi
         'breakwater': breakwater,
         // Map revamp M3b — Act 1's forest, past the Breakwater's bridge.
         'charcoal-wood': charcoalWood,
-        'fishing-village': fishingVillage,
         'northern-forest': northernForest,
     },
     // 2026-08-28 — inter-map travel: the iron caverns, first map of the

@@ -17,7 +17,6 @@ import {
     buyItem as engineBuyItem,
     sellItem as engineSellItem,
     defaultSellPrice as engineDefaultSellPrice,
-    applyGoodwillDiscount,
     buildCharacterFromPreset,
     getAvailableCards,
     learnCard as engineLearnCard,
@@ -475,7 +474,7 @@ export interface AppActions {
     beginLootCacheChoice: (options?: BeginLootCacheChoiceOptions) => boolean;
     /** Commit one offer — the other two vanish. */
     chooseLootCacheChoiceOffer: (offer: LootCacheChoiceOfferId) => void;
-    /** Confirm the ledger; applies the grant (or goodwill tick) and persists. */
+    /** Confirm the ledger; applies the grant (if any) and persists. */
     claimLootCacheChoiceOutcome: () => ClaimLootCacheChoiceResult;
 
     // -----------------------------------------------------------------
@@ -1159,7 +1158,7 @@ function moveToAction(store: AppStore, nodeId: string): MoveToResult {
     // life (burn-day audit 2026-09-19 row 3.1). Resolving the arrival marks
     // the node consumed whatever its kind (`resolve-map-event.ts`), so a
     // fight that has been answered is NOT re-offered on a second visit —
-    // measured: a second arrival at fv-13 fires nothing.
+    // measured: a second arrival at an answered encounter fires nothing.
     const nodeKind = getNodePrimaryEventKind(map.continent, map.name, nodeId);
     const isEncounterNode = nodeKind === 'encounter';
 
@@ -1858,9 +1857,7 @@ function buyVillageWareAction(store: AppStore, itemId: string): boolean {
         const item = resolveWareItem(ware);
         if (!item) return false;
         const player = (state as unknown as GameState).player;
-        const goodwillCount = state.mapGoodwill?.[state.world?.currentMap?.name ?? ''] ?? 0;
-        const price = applyGoodwillDiscount(ware.price, goodwillCount);
-        const next = engineBuyItem(player, item, price);
+        const next = engineBuyItem(player, item, ware.price);
         if (next === player) return false;
         store.setState({ player: next } as never);
         return true;

@@ -79,12 +79,16 @@ describe('the Lantern Deep\'s events (D29)', () => {
         expect(Object.keys(kinds)).toHaveLength(18);
     });
 
-    it('spreads 7 encounters, 3 rests, a loot cache, 2 gatherings, 2 hazards, an arrival and two sealed doors', () => {
+    it('spreads 7 encounters, 3 rests, a loot cache, 1 gathering, 2 hazards, 1 Anvil, an arrival and two sealed doors', () => {
         const tally: Record<string, number> = {};
         for (const k of Object.values(kinds)) tally[k] = (tally[k] ?? 0) + 1;
         expect(tally).toEqual({
-            encounter: 7, rest: 3, 'loot-cache': 1, gathering: 2, hazard: 2, cutscene: 3,
+            encounter: 7, rest: 3, 'loot-cache': 1, gathering: 1, hazard: 2, blacksmith: 1, cutscene: 3,
         });
+    });
+
+    it('keeps its Anvil at the forge landmark, ld-14 (D61, R3b)', () => {
+        expect(kinds['ld-14']).toBe('blacksmith');
     });
 
     it('opens on the arrival down the stair, at the surface stair (D31)', () => {
@@ -110,7 +114,7 @@ describe('the Lantern Deep\'s events (D29)', () => {
 
     it('gathers only the caverns\' own iron', () => {
         const items = payloads.flatMap(p => (p.kind === 'gathering' ? p.items.map(i => i.id) : []));
-        expect(items).toEqual(['iron-ore', 'iron-ore']);
+        expect(items).toEqual(['iron-ore']);
     });
 
     it('seals the vault door: the Labyrinth never opens in play (THE REVAMP R3a, D54)', () => {

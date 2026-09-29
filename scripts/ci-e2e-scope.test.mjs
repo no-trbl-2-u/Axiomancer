@@ -129,7 +129,7 @@ test('mobile map layouts and canvas run the full mobile suite', () => {
     // The map revamp (D2/D16) rewrites these; the layout-engine parity and
     // legibility tests ride the mobile gate, so a layout-only PR must run it.
     for (const path of [
-        'axiomancer-mobile/state/exploration-maps/fishing-village.layout.ts',
+        'axiomancer-mobile/state/exploration-maps/breakwater.layout.ts',
         'axiomancer-mobile/state/exploration-maps/index.ts',
         'axiomancer-mobile/components/exploration/MapCanvas.tsx',
         'axiomancer-mobile/assets/images/maps/provenance.json',

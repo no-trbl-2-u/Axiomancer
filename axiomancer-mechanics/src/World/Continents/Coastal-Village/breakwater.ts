@@ -4,7 +4,7 @@
  * The first of the four Act 1 maps built from T's plates
  * (`axiomancer-mobile/assets/images/maps/act1-coast.webp`). Named by T from
  * three drafts (D26). A new game starts here (D27); the river bridge is the
- * door on to fishing-village until the Act 1 forest ships.
+ * door on to the Charcoal Wood (M3b).
  *
  * One node per landmark on the plate (D25, `act1-landmarks.json`), and no
  * others. The engine graph is abstract (columns and lanes); the mobile layout
@@ -21,8 +21,8 @@
  *   c6  the river bridge                               (the door, terminal)
  *
  * Lanes run in plate order around each ring, so every lateral rib (D1) joins
- * two landmarks that are neighbours on the plate. Events borrow
- * fishing-village's pools and roster (D29): see `MapEvents/content.ts`.
+ * two landmarks that are neighbours on the plate. Events use the shared
+ * Act 1 pool builders (D29): see `MapEvents/content.ts`.
  */
 
 import { MapDefinition } from '../../types';

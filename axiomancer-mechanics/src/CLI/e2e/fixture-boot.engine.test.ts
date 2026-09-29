@@ -20,7 +20,7 @@ afterEach(() => vi.restoreAllMocks());
 
 describe('parseArgv --fixture', () => {
     it('accepts both spellings and the list sentinel', () => {
-        expect(parseArgv(['--fixture', 'sage-fv-boss-gate']).fixture).toBe('sage-fv-boss-gate');
+        expect(parseArgv(['--fixture', 'sage-bw-door-gate']).fixture).toBe('sage-bw-door-gate');
         expect(parseArgv(['--fixture=./f.json']).fixture).toBe('./f.json');
         expect(parseArgv(['--fixture', FIXTURE_LIST_REF]).fixture).toBe('list');
     });
@@ -47,21 +47,21 @@ describe('resolveStateFixture', () => {
     });
 
     it('reads + validates a JSON document through the injected reader', () => {
-        const read = vi.fn(() => JSON.stringify({ id: 'file-fixture', seed: 9, preset: 'sage', world: { continent: 'coastal-continent', map: 'fishing-village', node: 'fv-6' } }));
+        const read = vi.fn(() => JSON.stringify({ id: 'file-fixture', seed: 9, preset: 'sage', world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-17' } }));
         const fixture = resolveStateFixture('./file-fixture.json', read);
         expect(read).toHaveBeenCalledWith('./file-fixture.json');
         expect(fixture.id).toBe('file-fixture');
-        expect(() => resolveStateFixture('./bad.json', () => JSON.stringify({ id: 'bad', world: { continent: 'coastal-continent', map: 'fishing-village', node: 'zz' } })))
+        expect(() => resolveStateFixture('./bad.json', () => JSON.stringify({ id: 'bad', world: { continent: 'coastal-continent', map: 'breakwater', node: 'zz' } })))
             .toThrow(StateFixtureError);
     });
 });
 
 describe('boot path', () => {
     it('bootStateFromFixture feeds createGameStore as full overrides', () => {
-        const initial = bootStateFromFixture('sage-fv-boss-gate');
+        const initial = bootStateFromFixture('sage-bw-door-gate');
         const store = createGameStore(nullAdapter, initial);
         expect(store.getState().player.level).toBe(15);
-        expect(store.getState().world.currentMap.currentNode).toBe('fv-9');
+        expect(store.getState().world.currentMap.currentNode).toBe('bw-15');
     });
 
     it('describeFixtures lists every registry id', () => {

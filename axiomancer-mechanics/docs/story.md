@@ -26,30 +26,7 @@
 
 ## Characters
 
-### Old Marrow (Fishing Village, `fv-2`)
-
-A weather-worn dockmaster on the player's home dock. His reward branch
-(after the starting "Coastal Tyrant" quest) offers three responses:
-
-| Choice                                          | Currency | Side effect       |
-|-------------------------------------------------|---------:|-------------------|
-| "Take it — coin keeps a man fed."               | +25      | —                 |
-| "Take only half — your need is greater."        | +12      | —                 |
-| "This nearly killed me. Pay double or keep it." | +25      | sets `marrow_pressed` |
-
-The offer node also exposes a polite refusal that doesn't start the
-quest. The moral meter these choices once moved was removed 2026-09-27
-(T6, D39). Voice is laconic and weather-worn — no exclamation
-points, no speeches; choices read in the Boy's village-direct cadence.
-
-See `src/World/Continents/Coastal-Village/maps.ts` for the dialogue
-tree, `src/Game/e2e/oldmarrow.engine.test.ts` for the hermetic e2e
-covering all three reward paths.
-
-### Hollow-Eyed Beggar (Fishing Village)
-
-The original Spec-10 demonstration NPC for the moral meter, which was
-removed 2026-09-27 (T6, D39). Its choices now carry only their
-currency and flag effects.
+(Old Marrow and the Hollow-Eyed Beggar, the fishing-village NPCs this
+section once described, were purged with the map in THE REVAMP R3b.)
 
 ## Progression

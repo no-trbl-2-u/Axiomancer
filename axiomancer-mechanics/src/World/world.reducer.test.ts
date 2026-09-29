@@ -9,7 +9,7 @@ import { createStartingWorld } from './index';
 import { getMapDefinition } from './map.registry';
 import type { MapState, WorldState } from './types';
 
-const world = () => createStartingWorld('fishing-village');
+const world = () => createStartingWorld('breakwater');
 
 /** Test fixture: block the route between two nodes (either direction). The
  *  engine's own blocker (`blockMapRoute`) was deleted in TRIM THE FAT T2a;
@@ -19,9 +19,9 @@ const withBlockedRoute = (map: MapState, from: string, to: string, reason: strin
     blockedRoutes: [...map.blockedRoutes, { from, to, reason }],
 });
 
-/** A fishing-village world with the runtime map fields overridden. */
-const fvWorld = (patch: Partial<MapState>): WorldState => {
-    const w = createStartingWorld('fishing-village');
+/** A Breakwater world with the runtime map fields overridden. */
+const bwWorld = (patch: Partial<MapState>): WorldState => {
+    const w = createStartingWorld('breakwater');
     return { ...w, currentMap: { ...w.currentMap, ...patch } };
 };
 
@@ -52,13 +52,13 @@ describe('createStartingWorld', () => {
 
 describe('completeMap', () => {
     it('adds to completedMaps', () => {
-        const w = completeMap(world(), 'fishing-village');
-        expect(w.currentContinent.completedMaps).toContain('fishing-village');
+        const w = completeMap(world(), 'breakwater');
+        expect(w.currentContinent.completedMaps).toContain('breakwater');
     });
     it('idempotent', () => {
-        const w1 = completeMap(world(), 'fishing-village');
-        const w2 = completeMap(w1, 'fishing-village');
-        expect(w2.currentContinent.completedMaps.filter(m => m === 'fishing-village')).toHaveLength(1);
+        const w1 = completeMap(world(), 'breakwater');
+        const w2 = completeMap(w1, 'breakwater');
+        expect(w2.currentContinent.completedMaps.filter(m => m === 'breakwater')).toHaveLength(1);
     });
 });
 
@@ -77,16 +77,16 @@ describe('unlockMap', () => {
 
 describe('completeNode', () => {
     it('adds to completedNodes', () => {
-        const w = completeNode(world(), 'fv-2');
-        expect(w.currentMap.completedNodes).toContain('fv-2');
+        const w = completeNode(world(), 'bw-2');
+        expect(w.currentMap.completedNodes).toContain('bw-2');
     });
 });
 
 describe('unlockNode', () => {
     it('moves from locked to available', () => {
-        const w = unlockNode(world(), 'fv-3');
-        expect(w.currentMap.lockedNodes).not.toContain('fv-3');
-        expect(w.currentMap.availableNodes).toContain('fv-3');
+        const w = unlockNode(world(), 'bw-7');
+        expect(w.currentMap.lockedNodes).not.toContain('bw-7');
+        expect(w.currentMap.availableNodes).toContain('bw-7');
     });
 });
 
@@ -100,10 +100,10 @@ describe('changeContinent', () => {
     });
 
     it('writes the outgoing continent back into the catalogue before switching', () => {
-        const w1 = completeMap(world(), 'fishing-village');
+        const w1 = completeMap(world(), 'breakwater');
         const w2 = changeContinent(w1, 'northern-continent');
         const coastal = w2.world.find(c => c.name === 'coastal-continent')!;
-        expect(coastal.completedMaps).toContain('fishing-village');
+        expect(coastal.completedMaps).toContain('breakwater');
     });
 
     it('still no-ops for an uncatalogued continent (the labyrinth stays dev-only)', () => {
@@ -126,58 +126,65 @@ describe('completeUniqueEvent', () => {
 // SPENT and cannot be re-entered; every unvisited node joined by an unblocked
 // edge to ANY visited node is a legal destination, not merely the ones
 // adjacent to where the player stands; and the boss becomes unavoidable only
-// once the frontier runs out.
+// once the frontier runs out. Staged on the Breakwater (the new-game map):
+// bw-1 (the windmill) fans out to bw-2..bw-5; bw-17 is the door fight and
+// bw-18 the terminal door behind it.
+
+/** Every node id on the Breakwater, in definition order. */
+const allBreakwaterNodes = (): string[] => {
+    const map = world().currentMap;
+    return getMapDefinition(map.continent, map.name).nodes.map(n => n.id);
+};
 
 describe('D1 — the frontier', () => {
     it('opens with the start node\'s neighbours and nothing else', () => {
         const map = world().currentMap;
-        // fv-1 is a singleton column with one way onward.
-        expect(frontierNodes(map)).toEqual(['fv-2']);
-        expect(legalMovesFrom(map)).toEqual(['fv-2']);
+        // bw-1 (the windmill) opens on the four c1 landmarks.
+        expect(frontierNodes(map)).toEqual(['bw-2', 'bw-3', 'bw-4', 'bw-5']);
+        expect(legalMovesFrom(map)).toEqual(['bw-2', 'bw-3', 'bw-4', 'bw-5']);
         expect(isFrontierExhausted(map)).toBe(false);
         expect(isStranded(map)).toBe(false);
     });
 
     it('offers a lane hanging off a node the player left three moves ago', () => {
-        // THE HEART OF D1. After clearing the first gate (fv-26) and taking
-        // the wharf lane (fv-16), the inland lane fv-11 is NOT adjacent to
-        // where the player stands — its only edges run to fv-26, fv-27 and
-        // its lane neighbour fv-3. Under the old adjacency rule it was gone
-        // for the rest of the run. It now stays open because fv-26, which it
+        // THE HEART OF D1. After taking bw-5 → bw-6 → bw-11, the lane bw-4 is
+        // NOT adjacent to where the player stands — its edges run to bw-1,
+        // bw-3, bw-5 and bw-10. Under the old adjacency rule it was gone for
+        // the rest of the run. It now stays open because bw-5, which it
         // touches, has been visited.
         let w = world();
-        w = advance(w, 'fv-2');
-        w = advance(w, 'fv-26');
-        w = advance(w, 'fv-16');
+        w = advance(w, 'bw-5');
+        w = advance(w, 'bw-6');
+        w = advance(w, 'bw-11');
 
-        expect(w.currentMap.currentNode).toBe('fv-16');
-        // fv-11 shares no edge with the node the player stands on…
+        expect(w.currentMap.currentNode).toBe('bw-11');
+        // bw-4 shares no edge with the node the player stands on…
         const def = getMapDefinition(w.currentMap.continent, w.currentMap.name);
-        expect(def.nodes.find(n => n.id === 'fv-16')!.connectedNodes).not.toContain('fv-11');
-        // …and is offered anyway, because it touches the visited fv-26.
-        expect(frontierNodes(w.currentMap)).toContain('fv-11');
-        expect(legalMovesFrom(w.currentMap)).toContain('fv-11');
+        expect(def.nodes.find(n => n.id === 'bw-11')!.connectedNodes).not.toContain('bw-4');
+        // …and is offered anyway, because it touches the visited bw-5.
+        expect(frontierNodes(w.currentMap)).toContain('bw-4');
+        expect(legalMovesFrom(w.currentMap)).toContain('bw-4');
 
         // And the move itself is legal, not merely advertised.
-        const roamed = moveToNode(w, 'fv-11');
-        expect(roamed.currentMap.currentNode).toBe('fv-11');
-        expect(roamed.currentMap.pendingArrival).toBe('fv-11');
+        const roamed = moveToNode(w, 'bw-4');
+        expect(roamed.currentMap.currentNode).toBe('bw-4');
+        expect(roamed.currentMap.pendingArrival).toBe('bw-4');
     });
 
     it('spends a resolved node — it leaves the frontier and refuses re-entry', () => {
         let w = world();
-        w = advance(w, 'fv-2');
-        w = advance(w, 'fv-26');
+        w = advance(w, 'bw-2');
+        w = advance(w, 'bw-7');
 
-        expect(isNodeSpent(w.currentMap, 'fv-2')).toBe(true);
-        // fv-1 is deliberately absent: `advance` answers the node it arrives
-        // at, and the player never answered the shore before walking off it.
-        // In play `resolveMapEvent` consumes the start node, which seals it
-        // the same way — see the RESOLUTION-not-departure case below.
-        expect(visitedNodes(w.currentMap).sort()).toEqual(['fv-2', 'fv-26']);
-        expect(frontierNodes(w.currentMap)).not.toContain('fv-2');
-        expect(() => moveToNode(w, 'fv-2')).toThrow(IllegalMoveError);
-        expect(() => moveToNode(w, 'fv-2')).toThrow(/spent/);
+        expect(isNodeSpent(w.currentMap, 'bw-2')).toBe(true);
+        // bw-1 is deliberately absent: `advance` answers the node it arrives
+        // at, and the player never answered the windmill before walking off
+        // it. In play `resolveMapEvent` consumes the start node, which seals
+        // it the same way — see the RESOLUTION-not-departure case below.
+        expect(visitedNodes(w.currentMap).sort()).toEqual(['bw-2', 'bw-7']);
+        expect(frontierNodes(w.currentMap)).not.toContain('bw-2');
+        expect(() => moveToNode(w, 'bw-2')).toThrow(IllegalMoveError);
+        expect(() => moveToNode(w, 'bw-2')).toThrow(/spent/);
     });
 
     it('spends a node on RESOLUTION, not on departure', () => {
@@ -185,51 +192,47 @@ describe('D1 — the frontier', () => {
         // drops back onto the frontier and can be returned to. Only
         // completing (or consuming) it seals it.
         let w = world();
-        w = moveToNode(w, 'fv-2');          // arrive, do not resolve
-        expect(isNodeSpent(w.currentMap, 'fv-1')).toBe(false);
-        expect(frontierNodes(w.currentMap)).toContain('fv-1');
-        w = completeCurrentNode(w);          // now resolve fv-2 and move on
-        w = advance(w, 'fv-26');
-        expect(frontierNodes(w.currentMap)).toContain('fv-1');
+        w = moveToNode(w, 'bw-2');          // arrive, do not resolve
+        expect(isNodeSpent(w.currentMap, 'bw-1')).toBe(false);
+        expect(frontierNodes(w.currentMap)).toContain('bw-1');
+        w = completeCurrentNode(w);          // now resolve bw-2 and move on
+        w = advance(w, 'bw-7');
+        expect(frontierNodes(w.currentMap)).toContain('bw-1');
     });
 
     it('never re-farms a spent node: completing it twice is a no-op', () => {
         let w = world();
-        w = advance(w, 'fv-2');
-        const once = w.currentMap.completedNodes.filter(id => id === 'fv-2');
-        w = completeNode(w, 'fv-2');
-        expect(w.currentMap.completedNodes.filter(id => id === 'fv-2')).toEqual(once);
+        w = advance(w, 'bw-2');
+        const once = w.currentMap.completedNodes.filter(id => id === 'bw-2');
+        w = completeNode(w, 'bw-2');
+        expect(w.currentMap.completedNodes.filter(id => id === 'bw-2')).toEqual(once);
     });
 
     it('forces the boss only once the frontier is exhausted', () => {
-        // Everything up to and including the third gate's lane column is
-        // spent. fv-6 (the breakwater) is the one thing left touching the
-        // explored region — the post-boss columns hang off fv-6 alone, so
-        // they are not on the frontier yet.
-        const spent = [
-            'fv-1', 'fv-2', 'fv-26', 'fv-16', 'fv-3', 'fv-11', 'fv-27',
-            'fv-17', 'fv-4', 'fv-14', 'fv-12', 'fv-13', 'fv-28',
-            'fv-15', 'fv-5', 'fv-20',
-        ];
-        const w = fvWorld({ currentNode: 'fv-20', completedNodes: spent });
-        expect(frontierNodes(w.currentMap)).toEqual(['fv-6']);
-        expect(legalMovesFrom(w.currentMap)).toEqual(['fv-6']);
+        // Everything before the watchtower is spent. bw-17 (the door fight)
+        // is the one thing left touching the explored region — the door
+        // behind it (bw-18) hangs off bw-17 alone, so it is not on the
+        // frontier yet.
+        const spent = allBreakwaterNodes().filter(id => id !== 'bw-17' && id !== 'bw-18');
+        const w = bwWorld({ currentNode: 'bw-16', completedNodes: spent });
+        expect(frontierNodes(w.currentMap)).toEqual(['bw-17']);
+        expect(legalMovesFrom(w.currentMap)).toEqual(['bw-17']);
         expect(isFrontierExhausted(w.currentMap)).toBe(false);
 
-        // Up to that point the player was never cornered into it: one column
-        // earlier, three lanes were still open beside the boss's approach.
-        const earlier = fvWorld({
-            currentNode: 'fv-28',
-            completedNodes: ['fv-1', 'fv-2', 'fv-26', 'fv-16', 'fv-3', 'fv-11', 'fv-27', 'fv-4'],
+        // Up to that point the player was never cornered into it: two columns
+        // earlier, three lanes were still open ahead of the boss's approach.
+        const earlier = bwWorld({
+            currentNode: 'bw-12',
+            completedNodes: ['bw-1', 'bw-2', 'bw-3', 'bw-4', 'bw-5', 'bw-6', 'bw-7', 'bw-8', 'bw-9', 'bw-10', 'bw-11'],
         });
         expect(frontierNodes(earlier.currentMap).length).toBeGreaterThan(1);
-        expect(frontierNodes(earlier.currentMap)).not.toContain('fv-6');
+        expect(frontierNodes(earlier.currentMap)).not.toContain('bw-17');
     });
 
     it('reports an exhausted frontier as the end of the walk, not a strand', () => {
-        const everything = fvWorld({
-            currentNode: 'fv-10',
-            completedNodes: createStartingWorld('fishing-village').currentMap.lockedNodes.concat(['fv-1', 'fv-2']),
+        const everything = bwWorld({
+            currentNode: 'bw-18',
+            completedNodes: allBreakwaterNodes(),
         });
         expect(isFrontierExhausted(everything.currentMap)).toBe(true);
         expect(isStranded(everything.currentMap)).toBe(true);
@@ -240,37 +243,43 @@ describe('D1 — the frontier', () => {
 describe('D1 — blocked routes still block', () => {
     it('drops a node whose only approach is blocked off the frontier', () => {
         const w = world();
-        const blocked = { ...w, currentMap: withBlockedRoute(w.currentMap, 'fv-1', 'fv-2', 'Test blockage') };
-        expect(frontierNodes(blocked.currentMap)).toEqual([]);
-        expect(isFrontierExhausted(blocked.currentMap)).toBe(true);
+        const blocked = { ...w, currentMap: withBlockedRoute(w.currentMap, 'bw-1', 'bw-2', 'Test blockage') };
+        // bw-2's only visited neighbour is the windmill; with that edge cut
+        // it leaves the frontier.
+        expect(frontierNodes(blocked.currentMap)).toEqual(['bw-3', 'bw-4', 'bw-5']);
         // And the refusal names the blockage rather than the frontier.
-        expect(() => moveToNode(blocked, 'fv-2')).toThrow(/blocked — Test blockage/);
+        expect(() => moveToNode(blocked, 'bw-2')).toThrow(/blocked — Test blockage/);
+
+        // Cut every approach and the frontier is empty.
+        let sealed = blocked.currentMap;
+        for (const to of ['bw-3', 'bw-4', 'bw-5']) sealed = withBlockedRoute(sealed, 'bw-1', to, 'Test blockage');
+        expect(frontierNodes(sealed)).toEqual([]);
+        expect(isFrontierExhausted(sealed)).toBe(true);
     });
 
     it('keeps a node whose lane rib offers another approach', () => {
-        // D1's lateral ribs earn their keep here: with the gate's approach to
-        // fv-3 collapsed, fv-3 is still reachable sideways from its visited
-        // lane neighbour fv-16, so a hazard cannot orphan authored content.
+        // D1's lateral ribs earn their keep here: with bw-2's approach to
+        // bw-8 collapsed, bw-8 is still reachable sideways from its visited
+        // lane neighbour bw-7, so a hazard cannot orphan authored content.
         let w = world();
-        w = advance(w, 'fv-2');
-        w = advance(w, 'fv-26');
-        w = advance(w, 'fv-16');
-        const blocked = { ...w, currentMap: withBlockedRoute(w.currentMap, 'fv-26', 'fv-3', 'The tide-line gave way') };
-        expect(frontierNodes(blocked.currentMap)).toContain('fv-3');
-        expect(moveToNode(blocked, 'fv-3').currentMap.currentNode).toBe('fv-3');
+        w = advance(w, 'bw-2');
+        w = advance(w, 'bw-7');
+        const blocked = { ...w, currentMap: withBlockedRoute(w.currentMap, 'bw-2', 'bw-8', 'The quay gave way') };
+        expect(frontierNodes(blocked.currentMap)).toContain('bw-8');
+        expect(moveToNode(blocked, 'bw-8').currentMap.currentNode).toBe('bw-8');
     });
 });
 
 describe('D1 — the legacy unlock lists follow the frontier', () => {
     it('promotes every frontier node out of lockedNodes when a node is resolved', () => {
         let w = world();
-        expect(w.currentMap.lockedNodes).toContain('fv-26');
-        w = advance(w, 'fv-2');
-        expect(w.currentMap.availableNodes).toContain('fv-26');
-        expect(w.currentMap.lockedNodes).not.toContain('fv-26');
+        expect(w.currentMap.lockedNodes).toContain('bw-7');
+        w = advance(w, 'bw-2');
+        expect(w.currentMap.availableNodes).toContain('bw-7');
+        expect(w.currentMap.lockedNodes).not.toContain('bw-7');
         // Everything still out of reach stays locked — the sync promotes the
         // frontier, not the map.
-        expect(w.currentMap.lockedNodes).toContain('fv-6');
+        expect(w.currentMap.lockedNodes).toContain('bw-17');
     });
 
     it('leaves a lane available after the player walks past it', () => {
@@ -278,10 +287,10 @@ describe('D1 — the legacy unlock lists follow the frontier', () => {
         // column the player had moved beyond read as locked on the map even
         // though D1 makes it a legal destination.
         let w = world();
-        w = advance(w, 'fv-2');
-        w = advance(w, 'fv-26');
-        w = advance(w, 'fv-16');
-        for (const id of ['fv-3', 'fv-11']) {
+        w = advance(w, 'bw-5');
+        w = advance(w, 'bw-6');
+        w = advance(w, 'bw-11');
+        for (const id of ['bw-4', 'bw-7']) {
             expect(w.currentMap.availableNodes, `${id} should stay offered`).toContain(id);
             expect(w.currentMap.lockedNodes, `${id} should not read as sealed`).not.toContain(id);
         }

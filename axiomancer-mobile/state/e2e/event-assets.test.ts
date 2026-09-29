@@ -18,7 +18,7 @@ describe('selectEventArtSlug', () => {
     it('maps non-boss encounter to "encounter"', () => {
         const ev: ResolvedEvent = {
             kind: 'encounter',
-            encounter: { enemies: [{ name: 'x' }], origin: 'fishing-village:fv-3' } as never,
+            encounter: { enemies: [{ name: 'x' }], origin: 'breakwater:bw-2' } as never,
             isBoss: false,
         };
         expect(selectEventArtSlug(ev)).toBe('encounter');
@@ -27,7 +27,7 @@ describe('selectEventArtSlug', () => {
     it('maps boss encounter to "boss"', () => {
         const ev: ResolvedEvent = {
             kind: 'encounter',
-            encounter: { enemies: [{ name: 'x' }], origin: 'fishing-village:fv-3' } as never,
+            encounter: { enemies: [{ name: 'x' }], origin: 'breakwater:bw-2' } as never,
             isBoss: true,
         };
         expect(selectEventArtSlug(ev)).toBe('boss');
@@ -70,8 +70,8 @@ describe('selectEventArtSlug', () => {
 
     it('every returned slug is a known EVENT_ART_SLUGS member', () => {
         const cases: ResolvedEvent[] = [
-            { kind: 'encounter', encounter: { enemies: [{ name: 'x' }], origin: 'fishing-village:fv-3' } as never, isBoss: false },
-            { kind: 'encounter', encounter: { enemies: [{ name: 'x' }], origin: 'fishing-village:fv-3' } as never, isBoss: true },
+            { kind: 'encounter', encounter: { enemies: [{ name: 'x' }], origin: 'breakwater:bw-2' } as never, isBoss: false },
+            { kind: 'encounter', encounter: { enemies: [{ name: 'x' }], origin: 'breakwater:bw-2' } as never, isBoss: true },
             { kind: 'rest', healed: 1, shelter: 'camp' },
             { kind: 'gathering', items: [] },
             { kind: 'loot-cache', items: [], currency: 0 },

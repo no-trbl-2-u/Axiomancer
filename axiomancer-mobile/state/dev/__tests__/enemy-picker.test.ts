@@ -46,7 +46,7 @@ describe('enemy-picker dev helpers', () => {
 
     it('stageEncounter can force isBoss and tags the origin', () => {
         const store = createAppStore();
-        const grunt = listEnemies('fishing-village').find((r) => !r.isBoss)!;
+        const grunt = listEnemies('breakwater').find((r) => !r.isBoss)!;
         stageEncounter(store, grunt.enemy, 'dev:test', true);
         const slice = store.getState().event;
         expect(slice.sourceNodeType).toBe('boss');

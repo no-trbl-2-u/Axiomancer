@@ -454,7 +454,7 @@ describe('EncounterModalOverlay: combat → aftermath swap (defeat)', () => {
                     },
                     characterName: 'Worm-Eaten Pilgrim',
                     finalBlow: { cardName: 'AXE-FALL', damage: 28, descriptor: 'cleaves the rib' },
-                    runSummary: { roundsEndured: 4, encountersFaced: 12, deepestNodeId: 'iii.b', currentMapId: 'fishing-village' },
+                    runSummary: { roundsEndured: 4, encountersFaced: 12, deepestNodeId: 'iii.b', currentMapId: 'breakwater' },
                 });
             }, [exitCombatWith]);
             return null;
@@ -558,7 +558,7 @@ describe('EncounterModalOverlay: combat → aftermath swap (defeat)', () => {
                     },
                     characterName: 'Worm-Eaten Pilgrim',
                     finalBlow: { cardName: 'AXE-FALL', damage: 28, descriptor: 'cleaves the rib' },
-                    runSummary: { roundsEndured: 4, encountersFaced: 12, deepestNodeId: 'iii.b', currentMapId: 'fishing-village' },
+                    runSummary: { roundsEndured: 4, encountersFaced: 12, deepestNodeId: 'iii.b', currentMapId: 'breakwater' },
                 });
             }, [exitCombatWith]);
             return null;

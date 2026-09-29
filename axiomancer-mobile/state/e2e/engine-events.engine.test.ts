@@ -27,7 +27,7 @@ function makeEnemy() {
         description: 'A foe for engine-event tests.',
         level: 1,
         baseStats: { heart: 5, body: 5, mind: 5 },
-        mapName: 'fishing-village' as never,
+        mapName: 'breakwater',
         logic: 'random' as never,
     });
 }

@@ -26,14 +26,14 @@ describe('story-catalog dev helpers', () => {
         const npcs = listNpcs();
         expect(npcs.length).toBeGreaterThan(0);
         expect(new Set(npcs.map((n) => n.key)).size).toBe(npcs.length);
-        expect(npcs.some((n) => n.map === 'fishing-village')).toBe(true);
+        expect(npcs.some((n) => n.map === 'northern-forest')).toBe(true);
         for (const n of npcs) expect(n.tree.nodes[n.tree.rootId]).toBeDefined();
     });
 
-    it('lists the authored quest line starting with starting-quest', () => {
+    it('lists the authored quest line starting with gather-wood', () => {
         const quests = listQuests();
-        expect(quests[0]?.key).toBe('starting-quest');
-        expect(quests.map((q) => q.key)).toEqual(expect.arrayContaining(['get-to-forest', 'gather-wood']));
+        expect(quests[0]?.key).toBe('gather-wood');
+        expect(quests.map((q) => q.key)).toEqual(expect.arrayContaining(['gather-wood', 'get-to-cave']));
     });
 
     it('openNpcDialogue seeds an interaction with a cursor at the root', () => {

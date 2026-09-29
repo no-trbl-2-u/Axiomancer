@@ -6,9 +6,9 @@
  *      and variety. They append to `Character.combatRewardCards`, which
  *      `buildCombatDeck` stacks on top of the learned-card baseline.
  *   2. CARD UNLOCKS (rare, via ethical-dilemma events) add a NEW card type.
- *      `unlockCardViaDilemma` is the hook those events call (mobile's village
- *      goodwill 'sacrifice' claim, `state/cache/store-actions.ts`, already does); it bypasses the normal learning requirements (the dilemma IS the
- *      gate), unlike `learnCard`.
+ *      `unlockCardViaDilemma` is the hook those events call; it bypasses the
+ *      normal learning requirements (the dilemma IS the gate), unlike
+ *      `learnCard`. No live caller since R3b purged village goodwill.
  *
  * Pure: rolling takes an explicit `rng`. The mobile aftermath offers the 1-of-N
  * and persists the pick.
@@ -291,7 +291,7 @@ export function addRewardCard(player: Character, cardId: string): Character {
  * Spec 26b §D — unlock a NEW card from an ethical-dilemma event. Bypasses the
  * normal `learnCard` requirement gates (level/stat/prereq) because the dilemma
  * choice is itself the gate. No-op (same ref) when already known or unknown id.
- * Live caller: mobile's village-goodwill 'sacrifice' claim (Phase 65).
+ * No live caller since R3b purged village goodwill (its only caller).
  */
 export function unlockCardViaDilemma(player: Character, cardId: string): Character {
     if (player.knownCards.includes(cardId)) return player;

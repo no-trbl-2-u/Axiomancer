@@ -1,7 +1,7 @@
 /**
  * Hermetic E2E Tests — Story Content NPCs Dialogue Trees (Phase 115)
  *
- * Tests the 5 new story NPCs' dialogue trees and choice consequences. Covers
+ * Tests the story NPCs' dialogue trees and choice consequences. Covers
  * the golden path for each NPC plus flag setting. (The alignment gates and
  * observer branches were removed with the alignment grid, T6 / D39; the
  * choices they hid are now always offered.)
@@ -10,9 +10,11 @@
  *   1. Shrine Keeper: mystical dialogue, crystal gift choice
  *   2. Chronicler: scholarly dialogue, chronicle integration flags, knowledge contribution
  *   3. Wandering Philosopher: philosophical discourse, diverse perspectives
- *   4. Captain Blackwater: trade ethics, merchant philosophy, guild support flags
- *   5. Fisherman's Daughter: mentorship dynamics, growth encouragement choices
- *   6. Flag setting: quest-adjacent integration via effect.setFlag
+ *   4. Phase 128 northern-forest NPCs: Talk + choice structure
+ *
+ * (The fishing-village NPCs — Captain Blackwater, the Fisherman's Daughter,
+ * the Village Healer, the Union Leader, the Merchant Widow — and their cases
+ * were purged with the map in THE REVAMP R3b.)
  */
 
 import { describe, it, expect } from 'vitest';
@@ -23,7 +25,6 @@ import {
     type DialogueContext,
 } from '../dialogue';
 import { shrineKeeper, chronicler, wanderingPhilosopher, forestRanger, hermitSage, lostTrader } from '../../World/Continents/Northern-Forest/npcs';
-import { captainBlackwater, fishermansDaughter, villageHealer, unionLeader, merchantWidow } from '../../World/Continents/Coastal-Village/npcs';
 
 // ─── Test helpers ─────────────────────────────────────────────────────────────
 
@@ -185,183 +186,10 @@ describe('Wandering Philosopher — Multi-perspective philosophical dialogue', (
     });
 });
 
-// ─── Captain Blackwater Tests ─────────────────────────────────────────────────
-
-describe('Captain Blackwater — Pragmatic merchant with ethics', () => {
-    const tree = captainBlackwater.dialogueTree!;
-
-    it('discusses fair trade practices', () => {
-        const greetNode = getDialogueNode(tree, 'greet');
-        const choices = visibleChoices(greetNode, emptyCtx);
-
-        // Formerly gated on high scope alignment; ungated by T6 / D39.
-        const fairTradeChoice = choices.find(c => c.text.includes('how you deal fair'));
-        expect(fairTradeChoice).toBeTruthy();
-    });
-
-    it('shows quick profit option for low scope alignment', () => {
-        const ctx = ctxAny(0, 0, -15); // Low scope (individualist)
-        const greetNode = getDialogueNode(tree, 'greet');
-        const choices = visibleChoices(greetNode, ctx);
-
-        const profitChoice = choices.find(c => c.text.includes('quickest coin'));
-        expect(profitChoice).toBeTruthy();
-    });
-
-    it('provides guild support interaction', () => {
-        const fairTradeNode = getDialogueNode(tree, 'fair_trade');
-        const choices = visibleChoices(fairTradeNode, emptyCtx);
-
-        const guildChoice = choices.find(c => c.text.includes('stand behind a guild'));
-        expect(guildChoice).toBeTruthy();
-        expect(guildChoice!.effect?.setFlag).toBe('guild_support_secured');
-    });
-
-    it('responds to harsh necessity with moral challenge', () => {
-        const harshNode = getDialogueNode(tree, 'harsh_necessity');
-        expect(harshNode.text).toContain('choosing which soul you keep');
-        expect(harshNode.text).toContain('poor and whole than rich and ashamed');
-    });
-});
-
-// ─── Fisherman's Daughter Tests ───────────────────────────────────────────────
-
-describe("Fisherman's Daughter — Young idealist seeking guidance", () => {
-    const tree = fishermansDaughter.dialogueTree!;
-
-    it('responds positively to encouraging mentorship', () => {
-        const greetNode = getDialogueNode(tree, 'greet');
-        const ctx = ctxAny(0, 0, 15); // High scope for bright observation
-        const choices = visibleChoices(greetNode, ctx);
-
-        const brightChoice = choices.find(c => c.text.includes('too sharp an eye for net-mending'));
-        expect(brightChoice).toBeTruthy();
-    });
-
-    it('shows dismissive option for pessimistic outlook', () => {
-        const ctx = ctxAny(0, -20, 0); // Low outlook (pessimistic)
-        const greetNode = getDialogueNode(tree, 'greet');
-        const choices = visibleChoices(greetNode, ctx);
-
-        const dismissiveChoice = choices.find(c => c.text.includes('Mind your nets, child'));
-        expect(dismissiveChoice).toBeTruthy();
-    });
-
-    it('encourages dreams for optimistic outlook', () => {
-        const storyNode = getDialogueNode(tree, 'story_interest');
-        const ctx = ctxAny(0, 20, 0); // High outlook (optimistic)
-        const choices = visibleChoices(storyNode, ctx);
-
-        const encourageChoice = choices.find(c => c.text.includes('Dream past this harbor'));
-        expect(encourageChoice).toBeTruthy();
-    });
-
-    it('provides mentorship wisdom options', () => {
-        const wisdomNode = getDialogueNode(tree, 'worldly_wisdom');
-        const choices = visibleChoices(wisdomNode, emptyCtx);
-
-        expect(choices).toHaveLength(4);
-        const wisdomTexts = choices.map(c => c.text);
-        expect(wisdomTexts).toContain('Every soul carries wisdom worth the hearing.');
-        expect(wisdomTexts).toContain('Hold to what you are, whatever leans against you.');
-        expect(wisdomTexts).toContain('Trust yourself. Test what others tell you.');
-
-        const wisdomChoice = choices.find(c => c.text.includes('Every soul carries wisdom'));
-        expect(wisdomChoice!.effect?.setFlag).toBe('mentored_fishermans_daughter_wisdom');
-    });
-
-    it('validates learning and knowledge pursuit', () => {
-        const knowledgeNode = getDialogueNode(tree, 'knowledge_validation');
-        expect(knowledgeNode.text).toContain('Knowledge can serve more than my own curiosity');
-
-        const brightNode = getDialogueNode(tree, 'bright_observation');
-        const choices = visibleChoices(brightNode, emptyCtx);
-        const validateChoice = choices.find(c => c.text.includes('Knowledge is worth the reaching'));
-        expect(validateChoice!.effect?.setFlag).toBe('encouraged_daughters_learning');
-    });
-});
-
 // ─── Cross-NPC Observer Pattern Tests ─────────────────────────────────────────
 
 describe('Phase 128 NPCs — Talk + choice structure', () => {
     // ─── Phase 128 NPCs (Talk + Choice Structure) ─────────────────────────────
-
-    describe('Village Healer (Phase 128)', () => {
-        it('provides Talk option that reveals situation without ending encounter', () => {
-            const greetNode = getDialogueNode(villageHealer.dialogueTree!, 'greet');
-            const choices = visibleChoices(greetNode, emptyCtx);
-            
-            const talkOption = choices.find(c => c.text.includes('*Talk'));
-            expect(talkOption).toBeDefined();
-            expect(talkOption!.nextNodeId).toBe('talk_situation');
-            
-            const situationNode = getDialogueNode(villageHealer.dialogueTree!, 'talk_situation');
-            // Need alignment context to see alignment-gated choices
-            const alignCtx = ctxAny(20, -10, 15); // High epistemology, low outlook, high scope
-            const followUpChoices = visibleChoices(situationNode, alignCtx);
-            expect(followUpChoices.length).toBeGreaterThanOrEqual(3);
-        });
-
-        it('implements consequence shape categories correctly', () => {
-            const situationNode = getDialogueNode(villageHealer.dialogueTree!, 'talk_situation');
-            
-            // Divine providence (alignment-only)
-            const divineCtx = ctxAny(20, 0, 0);
-            const divineChoices = visibleChoices(situationNode, divineCtx);
-            const divineChoice = divineChoices.find(c => c.text.includes('Trust to providence'));
-            expect(divineChoice).toBeDefined();
-            expect(divineChoice!.effect?.grantCurrency).toBeUndefined();
-            
-            // Self-sacrificial (help + cost)
-            const collectiveCtx = ctxAny(0, 0, 15);
-            const collectiveChoices = visibleChoices(situationNode, collectiveCtx);
-            const helpChoice = collectiveChoices.find(c => c.text.includes('I\'ll help you'));
-            expect(helpChoice).toBeDefined();
-            expect(helpChoice!.effect?.grantCurrency).toBeLessThan(0);
-            
-            // Self-interested (gain + pragmatic)
-            const pragmaticCtx = ctxAny(0, -10, 0);
-            const pragmaticChoices = visibleChoices(situationNode, pragmaticCtx);
-            const takeChoice = pragmaticChoices.find(c => c.text.includes('Take what you need'));
-            expect(takeChoice).toBeDefined();
-            expect(takeChoice!.effect?.grantCurrency).toBeGreaterThan(0);
-        });
-    });
-
-    describe('Dockworker\'s Union Leader (Phase 128)', () => {
-        it('demonstrates Talk + choice structure with labor rights theme', () => {
-            const greetNode = getDialogueNode(unionLeader.dialogueTree!, 'greet');
-            const choices = visibleChoices(greetNode, emptyCtx);
-            
-            const talkOption = choices.find(c => c.text.includes('*Talk'));
-            expect(talkOption).toBeDefined();
-            
-            const situationNode = getDialogueNode(unionLeader.dialogueTree!, 'talk_workers_situation');
-            // Every follow-up is visible now that the alignment gates are gone.
-            const followUpChoices = visibleChoices(situationNode, emptyCtx);
-            expect(followUpChoices.length).toEqual(situationNode.choices!.length);
-        });
-
-        it('implements T-specified consequence patterns for collective action', () => {
-            const situationNode = getDialogueNode(unionLeader.dialogueTree!, 'talk_workers_situation');
-            
-            // Solidarity support (self-sacrificial)
-            const solidarityCtx = ctxAny(0, 0, 20);
-            const solidarityChoices = visibleChoices(situationNode, solidarityCtx);
-            const supportChoice = solidarityChoices.find(c => c.text.includes('stand with you'));
-            expect(supportChoice).toBeDefined();
-            expect(supportChoice!.effect?.grantCurrency).toBeLessThan(0);
-            expect(supportChoice!.effect?.setFlag).toBe('union_supporter');
-            
-            // Strike breaking (self-interested)
-            const individualistCtx = ctxAny(0, 0, -15);
-            const individualistChoices = visibleChoices(situationNode, individualistCtx);
-            const undermineChoice = individualistChoices.find(c => c.text.includes('cross your line'));
-            expect(undermineChoice).toBeDefined();
-            expect(undermineChoice!.effect?.grantCurrency).toBeGreaterThan(0);
-            expect(undermineChoice!.effect?.setFlag).toBe('strike_breaker');
-        });
-    });
 
     describe('Lost Trader (Phase 128)', () => {
         it('presents trust and deception crisis scenario', () => {
@@ -397,7 +225,7 @@ describe('Phase 128 NPCs — Talk + choice structure', () => {
 
     describe('Phase 128 Talk + Choice Structure Validation', () => {
         it('validates all new NPCs implement Talk option pattern', () => {
-            const phase128NPCs = [villageHealer, unionLeader, merchantWidow, forestRanger, hermitSage, lostTrader];
+            const phase128NPCs = [forestRanger, hermitSage, lostTrader];
             
             for (const npc of phase128NPCs) {
                 const greetNode = getDialogueNode(npc.dialogueTree!, 'greet');
@@ -409,28 +237,18 @@ describe('Phase 128 NPCs — Talk + choice structure', () => {
             }
         });
 
-        it('validates consequence shape diversity across all new NPCs', () => {
+        it('validates the self-interested consequence shape on the surviving NPCs', () => {
             const testCases = [
-                // Self-sacrificial consequences (negative currency or positive moral)
-                { npc: unionLeader, nodeId: 'talk_workers_situation', alignCtx: ctxAny(0, 0, 20), isSelfSacrificial: true },
-                { npc: merchantWidow, nodeId: 'talk_troubles', alignCtx: ctxAny(0, 0, 15), isSelfSacrificial: true },
-                
                 // Self-interested consequences (positive currency)
-                { npc: forestRanger, nodeId: 'talk_duties', alignCtx: ctxAny(0, 0, -10), isSelfInterested: true },
-                { npc: lostTrader, nodeId: 'talk_what_happened', alignCtx: ctxAny(0, -5, 0), isSelfInterested: true },
+                { npc: forestRanger, nodeId: 'talk_duties', alignCtx: ctxAny(0, 0, -10) },
+                { npc: lostTrader, nodeId: 'talk_what_happened', alignCtx: ctxAny(0, -5, 0) },
             ];
 
             for (const testCase of testCases) {
                 const node = getDialogueNode(testCase.npc.dialogueTree!, testCase.nodeId);
                 const choices = visibleChoices(node, testCase.alignCtx);
-                
-                if (testCase.isSelfSacrificial) {
-                    const sacrificeChoice = choices.find(c => c.effect?.grantCurrency && c.effect.grantCurrency < 0);
-                    expect(sacrificeChoice, `${testCase.npc.name} should have self-sacrificial choice`).toBeDefined();
-                } else if (testCase.isSelfInterested) {
-                    const gainChoice = choices.find(c => c.effect?.grantCurrency && c.effect.grantCurrency > 0);
-                    expect(gainChoice, `${testCase.npc.name} should have self-interested choice`).toBeDefined();
-                }
+                const gainChoice = choices.find(c => c.effect?.grantCurrency && c.effect.grantCurrency > 0);
+                expect(gainChoice, `${testCase.npc.name} should have self-interested choice`).toBeDefined();
             }
         });
     });

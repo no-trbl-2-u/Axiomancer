@@ -3,7 +3,7 @@
  *
  * "Is this an inn?" used to mean `healFraction >= 1.0`. That heuristic
  * was wrong on the authored content — `nf-4` (cold spring), `nf-24`
- * (hidden grove) and every `fvRestPool` node were all authored at 1.0,
+ * (hidden grove) and every fishing-village inn were all authored at 1.0,
  * so two wilderness springs mended hazard-scarred max-VITAE exactly like
  * a paid shelter. `RestPayload.shelter` replaces the inference with an
  * authored marker; this module is the single place the default and the

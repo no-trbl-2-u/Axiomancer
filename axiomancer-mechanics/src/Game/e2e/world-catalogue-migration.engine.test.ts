@@ -82,11 +82,9 @@ describe('migrate v20 → v21 — seed the continent catalogue (inter-map travel
     it('chains a v19 save straight to v21 in one call', () => {
         const raw = v20Save();
         raw.version = 19;
-        const { mapGoodwill: _mapGoodwill, ...withoutGoodwill } = raw;
 
-        const migrated = migrate(withoutGoodwill, 19, 21);
+        const migrated = migrate(raw, 19, 21);
         expect(migrated.version).toBe(21);
-        expect(migrated.mapGoodwill).toEqual({});
         expect(migrated.world.world.map(c => c.name)).toEqual(
             ['coastal-continent', 'northern-continent'],
         );

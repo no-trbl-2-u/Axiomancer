@@ -74,7 +74,7 @@ function makeEncounterResult(opts: { isBoss?: boolean } = {}): ResolveMapEventRe
         state: undefined as never,
         event: {
             kind: 'encounter',
-            encounter: { enemies: [enemy], origin: 'fishing-village:fv-3' } as never,
+            encounter: { enemies: [enemy], origin: 'breakwater:bw-2' } as never,
             isBoss: opts.isBoss ?? false,
         },
     };
@@ -925,19 +925,19 @@ describe('selectEventViewModel: invariants', () => {
 // Before Phase 53b the presenter built its DialogueContext by hand and
 // silently dropped fields, so gated choices evaluated hidden forever. The
 // alignment gates it was fixed for are gone (D39) — every choice they hid is
-// now simply shown. These tests drive the real Captain Blackwater tree
-// (`coastal-continent` / `fishing-village`); a synthetic tree would pass
+// now simply shown. These tests drive the real Hermit Sage tree
+// (`coastal-continent` / `northern-forest`); a synthetic tree would pass
 // while the shipped content stayed broken.
 // ---------------------------------------------------------------------------
 
-function loadBlackwaterTree() {
-    const fishingVillage = getMapDefinition('coastal-continent', 'fishing-village');
-    const npc = fishingVillage.npcs!.find((n) => n.name === 'Captain Blackwater')!;
+function loadHermitSageTree() {
+    const northernForest = getMapDefinition('coastal-continent', 'northern-forest');
+    const npc = northernForest.npcs!.find((n) => n.name === 'Hermit Sage')!;
     return npc.dialogueTree!;
 }
 
 function setDialogueCursor(store: AppStore, nodeId: string) {
-    const tree = loadBlackwaterTree();
+    const tree = loadHermitSageTree();
     store.setState({
         event: {
             ...EMPTY_EVENT_SLICE,
@@ -963,25 +963,6 @@ describe('buildDialogueContext: field completeness (Phase 53b regression witness
 });
 
 describe('selectEventViewModel: NPC dialogue without alignment gates (D39)', () => {
-    it('shows the formerly alignment-gated Blackwater branches to every player', () => {
-        const store = makeStore();
-        setDialogueCursor(store, 'greet');
-
-        const vm = selectEventViewModel(store.getState());
-        const descriptions = vm.choices.map((c) => c.description);
-
-        expect(descriptions).toContain('Tell me how you deal fair.');
-        expect(descriptions).toContain("What's the quickest coin to be made here?");
-        // The observer read-back went with the observer cache (adjust-npcs
-        // pass 21): nothing can make "you deal differently now" true.
-        expect(descriptions).not.toContain(
-            "(The captain's eyes narrow. He sees how you deal differently now.)",
-        );
-        // The one remaining gate is the `marrow_pressed` flag read-back.
-        expect(descriptions).not.toContain("(Blackwater's eyes flick to you a beat too long.)");
-        expect(vm.choices).toHaveLength(4);
-    });
-
     it('clicking a choice fires the branch at its RAW node.choices index', () => {
         // Regression for the id-derivation bug Phase 53b closed:
         // composeNpcDialogue used to derive `id` from the choice's index
@@ -993,12 +974,12 @@ describe('selectEventViewModel: NPC dialogue without alignment gates (D39)', () 
         setDialogueCursor(store, 'greet');
 
         const vm = selectEventViewModel(store.getState());
-        const justLooking = vm.choices.find((c) => c.description === 'Just looking.')!;
-        expect(justLooking.id).toBe('3');
+        const askNeed = vm.choices.find((c) => c.description === 'Is there anything you need, out here alone?')!;
+        expect(askNeed.id).toBe('3');
 
-        actions.pickEventChoice(justLooking.id);
+        actions.pickEventChoice(askNeed.id);
 
-        // "Just looking." routes to the 'browsing' leaf node.
-        expect(store.getState().event.dialogueCursor?.nodeId).toBe('browsing');
+        // The fourth greeting choice routes to the 'hermit_firewood' leaf node.
+        expect(store.getState().event.dialogueCursor?.nodeId).toBe('hermit_firewood');
     });
 });

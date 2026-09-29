@@ -49,7 +49,7 @@ bindSandboxLibraryGuard(id => registry.get(id));
 /** O(1) lookup by card id; sandbox-aware. Chain (WS2.1, extended phase 62):
  *  sandbox first (so experiments can shadow anything), then the Haunt
  *  registry (CONJURE targets — real cards, deliberately outside the pinned
- *  library), then the Ally registry (village-goodwill grants — also
+ *  library), then the Ally registry (granted cards — also
  *  deliberately outside the pinned library), then the curated library. */
 export function getCardById(id: string): Card | undefined {
     const direct = getSandboxCard(id) ?? getHauntById(id) ?? getAllyById(id) ?? registry.get(id);

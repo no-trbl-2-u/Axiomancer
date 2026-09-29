@@ -1,6 +1,6 @@
 /**
  * nf-19 "The Frightened Friend" — hermetic coverage for the third of S-01's
- * four dilemmas (Phase 53d). Mirrors `fv-14-father-worry.engine.test.ts`'s
+ * four dilemmas (Phase 53d). Mirrors the (purged) fv-14 dilemma suite's
  * shape: pool wiring, all three flags settable, each choice a terminating
  * leaf. Northern-forest is unreachable in play until
  * inter-map travel exists, so this dilemma has no in-game reader yet — see
@@ -24,7 +24,7 @@ import type { MapState } from '../../types';
 import '../content';
 
 function nf19Payload(): NarrationPayload {
-    const base = { ...createNewGameState(), world: createStartingWorld('fishing-village') };
+    const base = { ...createNewGameState(), world: createStartingWorld('breakwater') };
     const def = getMapDefinition('coastal-continent', 'northern-forest');
     const map: MapState = createMapState(def);
     const state: GameState = { ...base, world: { ...base.world, currentMap: map } };

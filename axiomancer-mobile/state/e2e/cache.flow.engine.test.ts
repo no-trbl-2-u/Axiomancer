@@ -3,7 +3,8 @@
  * 63, replacing the retired Pick Pool minigame) store flow. Drives caches
  * through the store action layer: begin → offer → outcome → claim, for
  * each of the three offers (card / item / sacrifice), and verifies the
- * claim applies the right grant (or goodwill tick) to the real GameState.
+ * claim applies the right grant (or none, for sacrifice) to the real
+ * GameState.
  * Seeded; no timers, no network.
  */
 
@@ -74,13 +75,11 @@ describe('cache store flow (three-offer choice)', () => {
         expect(after.player.currency).toBe(beforeCurrency + 12);
     });
 
-    it('sacrifice offer: grants nothing, increments the current map goodwill tally', () => {
+    it('sacrifice offer: grants nothing and clears the slice', () => {
         const { store, actions } = makeStoreAndActions();
         const before = store.getState() as unknown as GameState;
         const beforeInventory = before.player.inventory.length;
         const beforeCurrency = before.player.currency;
-        const mapName = before.world.currentMap.name;
-        expect(before.mapGoodwill[mapName] ?? 0).toBe(0);
 
         actions.beginLootCacheChoice({ tier: 'modest', currency: 25, seed: 7 });
         actions.chooseLootCacheChoiceOffer('sacrifice');
@@ -89,28 +88,11 @@ describe('cache store flow (three-offer choice)', () => {
 
         const result = actions.claimLootCacheChoiceOutcome();
         expect(result.applied).toBe(true);
-        expect(result.goodwill).toBe(1);
 
         const after = store.getState() as unknown as GameState;
-        expect(after.mapGoodwill[mapName]).toBe(1);
         expect(after.player.inventory.length).toBe(beforeInventory);
         expect(after.player.currency).toBe(beforeCurrency);
-    });
-
-    it('sacrificing twice on the same map accumulates the tally', () => {
-        const { store, actions } = makeStoreAndActions();
-        const mapName = (store.getState() as unknown as GameState).world.currentMap.name;
-
-        actions.beginLootCacheChoice({ tier: 'modest', seed: 1 });
-        actions.chooseLootCacheChoiceOffer('sacrifice');
-        actions.claimLootCacheChoiceOutcome();
-        expect((store.getState() as unknown as GameState).mapGoodwill[mapName]).toBe(1);
-
-        actions.beginLootCacheChoice({ tier: 'modest', seed: 2 });
-        actions.chooseLootCacheChoiceOffer('sacrifice');
-        const result = actions.claimLootCacheChoiceOutcome();
-        expect(result.goodwill).toBe(2);
-        expect((store.getState() as unknown as GameState).mapGoodwill[mapName]).toBe(2);
+        expect(store.getState().cache?.session).toBeNull();
     });
 
     it('cannot claim before an offer is chosen', () => {
@@ -119,56 +101,5 @@ describe('cache store flow (three-offer choice)', () => {
         const result = actions.claimLootCacheChoiceOutcome();
         expect(result.applied).toBe(false);
         expect(store.getState().cache?.session).not.toBeNull();
-    });
-
-    function sacrificeOnce(actions: AppActions, seed: number): void {
-        actions.beginLootCacheChoice({ tier: 'modest', seed });
-        actions.chooseLootCacheChoiceOffer('sacrifice');
-        actions.claimLootCacheChoiceOutcome();
-    }
-
-    describe('Phase 65 — village goodwill reward tiers', () => {
-        it('grants neither the Ally nor the bonus below Tier 2', () => {
-            const { store, actions } = makeStoreAndActions();
-            sacrificeOnce(actions, 1);
-
-            const after = store.getState() as unknown as GameState;
-            expect(after.mapGoodwill[after.world.currentMap.name]).toBe(1);
-            expect(after.player.knownCards).not.toContain('the-sworn-second');
-        });
-
-        it('grants the one-time +25 currency bonus and sets the flag once the tally hits Tier 3', () => {
-            const { store, actions } = makeStoreAndActions();
-            const beforeCurrency = (store.getState() as unknown as GameState).player.currency;
-
-            sacrificeOnce(actions, 1);
-            sacrificeOnce(actions, 2);
-            sacrificeOnce(actions, 3);
-
-            const after = store.getState() as unknown as GameState;
-            const mapName = after.world.currentMap.name;
-            expect(after.mapGoodwill[mapName]).toBe(3);
-            expect(after.player.currency).toBe(beforeCurrency + 25);
-            expect(after.flags).toContain(`village-goodwill-bonus:${mapName}`);
-        });
-
-        it('does not re-grant the Ally or the bonus on a further sacrifice past Tier 3', () => {
-            const { store, actions } = makeStoreAndActions();
-
-            sacrificeOnce(actions, 1);
-            sacrificeOnce(actions, 2);
-            sacrificeOnce(actions, 3);
-            const afterTier3Currency = (store.getState() as unknown as GameState).player.currency;
-            const afterTier3AllyCount = (store.getState() as unknown as GameState).player.knownCards
-                .filter(id => id === 'the-sworn-second').length;
-
-            sacrificeOnce(actions, 4);
-
-            const after = store.getState() as unknown as GameState;
-            expect(after.mapGoodwill[after.world.currentMap.name]).toBe(4);
-            expect(after.player.currency).toBe(afterTier3Currency);
-            expect(after.player.knownCards.filter(id => id === 'the-sworn-second').length)
-                .toBe(afterTier3AllyCount);
-        });
     });
 });

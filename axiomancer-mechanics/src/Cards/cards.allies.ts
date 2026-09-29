@@ -21,10 +21,8 @@
  * `cardLibrary` alone. Unlike a Haunt (reached only via a `conjure_card`
  * play, one-use, never entering a deck), an Ally is meant to be GRANTED
  * once into the player's permanent collection and then fought with like any
- * other owned card — Phase 65's village-goodwill payout is the intended
- * grant path. That grant mechanism (the per-map goodwill counter, the shop
- * discount, the actual "add this id to the player's collection" call) is
- * Phase 65's job, not built here; this phase ships the schema, the
+ * other owned card. Phase 65's village-goodwill payout was the intended
+ * grant path; R3b purged it, so no grant path exists today; this phase ships the schema, the
  * registry, one concrete Ally as a reference implementation wired all the
  * way through combat, and the primitives (`getAllyById`, `isAllyCard`)
  * Phase 65 needs to recognize one.
@@ -56,8 +54,8 @@ export function getAllyById(id: string): Card | undefined {
     return registry.get(id);
 }
 
-/** True when `id` names a granted Ally — the gate Phase 65's goodwill payout
- *  (or any future grant surface) should check before adding an id to a
+/** True when `id` names a granted Ally — the gate any grant surface
+ *  should check before adding an id to a
  *  player's collection under the ally fiction. */
 export function isAllyCard(id: string): boolean {
     return registry.has(id);

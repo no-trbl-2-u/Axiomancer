@@ -118,10 +118,13 @@ describe('arenaBackdropFor', () => {
         expect(new Set(plates).size).toBe(PLATED_REGIONS.length);
         // Pinned as two numbers, not one: a dropped plate and a dropped map are
         // different failures and neither may hide behind the other.
-        expect(PLATED_REGIONS).toHaveLength(6);
+        // Revamp R3b purged the fishing-village map (the Drowned Parish), so its
+        // plated region left the live set (6 → 5).
+        expect(PLATED_REGIONS).toHaveLength(5);
         // Map revamp M3a added the Breakwater (7 → 8), M3b the Charcoal Wood (→ 9),
-        // M3c the Beacon Crags (→ 10), M3d the Lantern Deep (→ 11).
-        expect(LIVE_REGIONS).toHaveLength(11);
+        // M3c the Beacon Crags (→ 10), M3d the Lantern Deep (→ 11); R3b's
+        // fishing-village purge took it back to 10.
+        expect(LIVE_REGIONS).toHaveLength(10);
     });
 
     it("matches the village on `sweetheart` alone, so the apostrophe cannot break it", () => {

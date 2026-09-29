@@ -234,7 +234,7 @@ const { store, actions } = createFixtureStore('wanderer-nf-village');
 // … or an inline one (give it a seed — determinism is the point).
 const h = createFixtureStore({
     id: 'my-suite-door', seed: 'my-suite-door',
-    world: { continent: 'coastal-continent', map: 'fishing-village', node: 'fv-10' },
+    world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-18' },
 });
 expect(arriveFromFixture(h)).toBe(true); // what <FixtureBoot> does for `arrive`
 ```

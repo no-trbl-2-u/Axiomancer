@@ -35,7 +35,7 @@ function freshHandle() {
 }
 
 function gentlestFoe() {
-    return listEnemies('fishing-village').find((c) => !c.isBoss)!.enemy;
+    return listEnemies('breakwater').find((c) => !c.isBoss)!.enemy;
 }
 
 function player(store: ReturnType<typeof createAppStore>) {
@@ -213,11 +213,11 @@ describe('skipCurrentEvent — paced events and idle', () => {
     });
 
     it('fires an owed arrival on a fixture rest node, then resolves it', () => {
-        // `apprentice-fv-rest` places a hurt Apprentice on fv-3 (rest) with
+        // `apprentice-bw-rest` places a hurt Apprentice on bw-9 (rest) with
         // `arrive: true`, which the app fires from <FixtureBoot>; here nothing
         // has fired it yet, so the node under the player is the start-style
         // owed arrival only if the map records one — pin via pendingArrival.
-        const handle = createFixtureStore('apprentice-fv-rest');
+        const handle = createFixtureStore('apprentice-bw-rest');
         const { store, actions } = handle;
         const map = store.getState().world.currentMap;
         store.setState({ world: { ...store.getState().world, currentMap: { ...map, pendingArrival: map.currentNode } } } as never);

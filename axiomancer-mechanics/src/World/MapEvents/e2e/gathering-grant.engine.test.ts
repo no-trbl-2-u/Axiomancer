@@ -9,8 +9,8 @@
  * nothing, and so a later content pass that authors an empty `items: []`
  * pool fails here rather than silently shipping a node that gives nothing.
  *
- * Walked over every gathering-primary node in `MAP_REGISTRY` (12 today,
- * across fishing-village / northern-forest / caverns / northern-city /
+ * Walked over every gathering-primary node in `MAP_REGISTRY` (the Act 1
+ * maps plus the parked northern-forest / caverns / northern-city /
  * connecting-river / the-capital):
  *   - the resolved event carries at least one NAMED item;
  *   - resolving appends exactly those items to `player.inventory`,
@@ -189,10 +189,10 @@ describe('gathering nodes grant real, named items', () => {
 describe('gathering — the coastal opener, by name', () => {
     // One spot-check in plain words, so a reader learns what a gathering node
     // actually hands the player without running the sweeps above.
-    it('fv-5 hands the player Driftwood', () => {
+    it('bw-4 hands the player Driftwood', () => {
         pinRoll();
         const result = resolveMapEvent(
-            seatedAt({ continent: 'coastal-continent', mapName: 'fishing-village', nodeId: 'fv-5' }),
+            seatedAt({ continent: 'coastal-continent', mapName: 'breakwater', nodeId: 'bw-4' }),
         );
         expect(result.event.kind).toBe('gathering');
         if (result.event.kind !== 'gathering') return;

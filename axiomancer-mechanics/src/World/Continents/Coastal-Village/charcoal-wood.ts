@@ -4,7 +4,7 @@
  * The second Act 1 map, built on T's forest plate
  * (`axiomancer-mobile/assets/images/maps/act1-forest.webp`). Named by T from
  * three drafts (D26). The Breakwater's river bridge leads here; the stair cave
- * is the door on to fishing-village until the Act 1 mountains ship (D27).
+ * is the door on to the Beacon Crags (M3c).
  *
  * One node per landmark on the plate (D25, `act1-landmarks.json`), and no
  * others. The engine graph is abstract (columns and lanes); the mobile layout

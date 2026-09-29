@@ -6,7 +6,7 @@
  *   - One button per encounter kind mounts
  *   - COMBAT seeds a combat-prelude encounter event with the
  *     lowest-level standard foe on the current map (level 1 on
- *     fishing-village) and navigates to the WILDS tab
+ *     the Breakwater) and navigates to the WILDS tab
  *   - BOSS seeds an isBoss encounter with a boss-tier foe
  *   - HAZARD / REST / TREASURE launch their REAL minigame session
  *     (and crucially leave NO paced /event route, so they can never

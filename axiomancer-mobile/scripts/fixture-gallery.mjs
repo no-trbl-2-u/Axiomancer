@@ -43,7 +43,7 @@ const log = (m) => console.log(`fixture-gallery: ${m}`)
 // ---------------------------------------------------------------------------
 
 const SAGE = { preset: 'sage', flags: ['combat-tutorial-done', 'hazard-tutorial-done'] }
-const coastal = (map, node) => ({ continent: 'coastal-continent', map, node, completedMaps: map === 'fishing-village' ? [] : ['fishing-village'] })
+const coastal = (map, node) => ({ continent: 'coastal-continent', map, node, completedMaps: map === 'breakwater' ? [] : ['breakwater'] })
 const northern = (map, node, done = []) => ({ continent: 'northern-continent', map, node, completedMaps: done })
 
 export const GALLERY = [
@@ -69,32 +69,32 @@ export const GALLERY = [
     // Entering an act fires the entrance narration (a paced event → /dialogue);
     // leaving it lands in the room.
     { name: 'labyrinth-entrance', why: 'Entering Act I of THE APORIA — the entrance narration.',
-      fixture: { id: 'g-lab-entrance', seed: 'g9', ...SAGE, world: coastal('fishing-village', 'fv-9') }, path: '/labyrinth',
+      fixture: { id: 'g-lab-entrance', seed: 'g9', ...SAGE, world: coastal('breakwater', 'bw-15') }, path: '/labyrinth',
       steps: [{ click: 'labyrinth-act-act1' }, { waitForPath: '/dialogue' }, { settle: 400 }] },
     { name: 'labyrinth-room', why: 'Inside Act I of THE APORIA — the room view.',
-      fixture: { id: 'g-lab-room', seed: 'g9', ...SAGE, world: coastal('fishing-village', 'fv-9') }, path: '/labyrinth',
+      fixture: { id: 'g-lab-room', seed: 'g9', ...SAGE, world: coastal('breakwater', 'bw-15') }, path: '/labyrinth',
       steps: [{ click: 'labyrinth-act-act1' }, { waitForPath: '/dialogue' }, { click: 'dialogue-leave' }, { waitFor: 'labyrinth-room' }, { settle: 600 }] },
     { name: 'labyrinth-map', why: 'The Act I map overlay.',
-      fixture: { id: 'g-lab-map', seed: 'g10', ...SAGE, world: coastal('fishing-village', 'fv-9') }, path: '/labyrinth',
+      fixture: { id: 'g-lab-map', seed: 'g10', ...SAGE, world: coastal('breakwater', 'bw-15') }, path: '/labyrinth',
       steps: [{ click: 'labyrinth-act-act1' }, { waitForPath: '/dialogue' }, { click: 'dialogue-leave' }, { waitFor: 'labyrinth-room' }, { click: 'labyrinth-map-toggle' }, { settle: 600 }] },
 
     // ── Minigames + services ─────────────────────────────────────────────
     { name: 'blacksmith-intro', why: 'The forge, on arrival.',
-      fixture: 'wanderer-fv-blacksmith', path: '/exploration', waitForPath: '/blacksmith' },
+      fixture: 'wanderer-bw-blacksmith', path: '/exploration', waitForPath: '/blacksmith' },
     { name: 'blacksmith-forging', why: 'The forge, mid-session (budget + card).',
-      fixture: 'wanderer-fv-blacksmith', path: '/exploration', waitForPath: '/blacksmith',
+      fixture: 'wanderer-bw-blacksmith', path: '/exploration', waitForPath: '/blacksmith',
       steps: [{ jsClick: 'blacksmith-begin' }, { settle: 1500 }] },
     { name: 'rest-cut-sheet', why: 'Card removal — THE CUT at a night watch, with shillings to pay for it.',
       // THE CUT is disabled at the 12-card floor — a Sage's kit is deep enough to thin.
       // The combat deck is the `combat-loadout-card:<id>` flag set (the engine
       // seeds 4 starters) plus reward cards; THE CUT is offered only above the
       // 12-card floor, so a dozen extra loadout flags make a 16-card deck.
-      fixture: { id: 'g-rest-cut', seed: 'g11', ...SAGE, player: { currency: 40, health: 20 }, world: coastal('fishing-village', 'fv-3'), arrive: true,
+      fixture: { id: 'g-rest-cut', seed: 'g11', ...SAGE, player: { currency: 40, health: 20 }, world: coastal('breakwater', 'bw-9'), arrive: true,
         flags: [...SAGE.flags, ...['unction-of-boils', 'salt-in-the-font', 'vinegar-and-gall', 'the-sextons-bell', 'the-blister-rosary', 'the-surgeons-absence', 'the-long-lent', 'alms-of-bad-bread', 'the-inventory-of-wounds', 'gangrene-gospel', 'the-lazars-kiss', 'communion-of-the-worm'].map((c) => `combat-loadout-card:${c}`)] },
       path: '/exploration', waitForPath: '/rest',
       steps: [{ jsClick: 'rest-choice-offer-cut' }, { settle: 1200 }] },
     { name: 'loot-cache', why: 'The loot-cache choice.',
-      fixture: 'apprentice-fv-cache', path: '/exploration', waitForPath: '/cache' },
+      fixture: 'apprentice-bw-cache', path: '/exploration', waitForPath: '/cache' },
     { name: 'hazard-intro', why: 'A hazard, before the first card — late-game kit.',
       fixture: 'l30-caverns-hazard-arrive', path: '/exploration', waitForPath: '/hazard' },
     { name: 'hazard-routes', why: 'Choosing a route — the safe crawl or the leap — hand fanned above.',
@@ -105,11 +105,11 @@ export const GALLERY = [
       steps: [{ click: 'hazard-intro-continue' }, { settle: 800 }, { clickText: 'TAKE SAFE ROUTE' }, { waitFor: 'hazard-board' }, { settle: 1000 }] },
 
     // ── Combat at the boss gate ──────────────────────────────────────────
-    { name: 'boss-reveal', why: 'The fishing-village boss encounter — the REVEAL over the map.',
-      fixture: { id: 'g-boss-reveal', seed: 'g12', ...SAGE, world: coastal('fishing-village', 'fv-24'), arrive: true }, path: '/exploration',
+    { name: 'boss-reveal', why: 'The Breakwater door fight — the REVEAL over the map.',
+      fixture: { id: 'g-boss-reveal', seed: 'g12', ...SAGE, world: coastal('breakwater', 'bw-17'), arrive: true }, path: '/exploration',
       steps: [{ waitFor: 'combat-reveal' }, { settle: 600 }] },
     { name: 'boss-board', why: 'The live board against the boss, L15 kit.',
-      fixture: { id: 'g-boss-board', seed: 'g12', ...SAGE, world: coastal('fishing-village', 'fv-24'), arrive: true }, path: '/exploration',
+      fixture: { id: 'g-boss-board', seed: 'g12', ...SAGE, world: coastal('breakwater', 'bw-17'), arrive: true }, path: '/exploration',
       steps: [{ waitFor: 'combat-reveal' }, { click: 'combat-enter' }, { waitFor: 'combat-board' }, { settle: 1200 }] },
 
     // ── Late-game tabs ───────────────────────────────────────────────────
@@ -121,7 +121,7 @@ export const GALLERY = [
     // ── Dev-only panels that have no organic capture path ────────────────
     { name: 'aftermath-defeat', why: 'The DEFEAT aftermath panel.', fixture: 'fresh-start', path: '/devaftermath?panel=defeat', waitFor: 'devaftermath-panel' },
     { name: 'aftermath-parley', why: 'The PARLEY aftermath panel.', fixture: 'fresh-start', path: '/devaftermath?panel=parley', waitFor: 'devaftermath-panel' },
-    { name: 'dev-menu', why: 'The /dev route.', fixture: 'sage-fv-boss-gate', path: '/dev' },
+    { name: 'dev-menu', why: 'The /dev route.', fixture: 'sage-bw-door-gate', path: '/dev' },
 ]
 
 // ---------------------------------------------------------------------------

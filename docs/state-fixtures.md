@@ -34,9 +34,9 @@ current-version state every time it runs.
 
 ```jsonc
 {
-  "id": "sage-fv-boss-gate",          // kebab-case; the CLI flag / URL param / registry key
+  "id": "sage-bw-door-gate",          // kebab-case; the CLI flag / URL param / registry key
   "description": "…",                 // shown by `--fixture list`
-  "seed": "fixture-sage-fv-boss-gate",// engine RNG seed → reproducible run id + rolls
+  "seed": "fixture-sage-bw-door-gate",// engine RNG seed → reproducible run id + rolls
   "preset": "sage",                   // apprentice | wanderer | sage | kid-l1 | kid-l15 | kid-l30 | kid-l50
   "player": { "level": 7, "baseStats": { "body": 9 }, "health": 5, "currency": 33, "knownCards": ["thin-hymn"], "name": "Tester" },
   "world": { "continent": "coastal-continent", "map": "fishing-village", "node": "fv-9", "completedMaps": [] },
@@ -61,7 +61,7 @@ Semantics worth knowing:
 
 ```bash
 npm run game -- --fixture list
-npm run game -- --fixture sage-fv-boss-gate --route fv-24 --auto-combat --json-events
+npm run game -- --fixture sage-bw-door-gate --route fv-24 --auto-combat --json-events
 npm run game -- --fixture ./my-fixture.json --route-audit fishing-village
 ```
 
@@ -76,7 +76,7 @@ const store = createAppStore({ adapter: createFixtureBootAdapter(boot.state) });
 **Web (dev build / preview export)**
 
 ```
-http://localhost:8081/exploration?fixture=sage-fv-boss-gate
+http://localhost:8081/exploration?fixture=sage-bw-door-gate
 ```
 
 **Playwright**

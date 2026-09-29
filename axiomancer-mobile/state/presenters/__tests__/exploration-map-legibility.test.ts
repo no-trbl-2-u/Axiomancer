@@ -29,7 +29,7 @@ import {
     MAP_LEGEND_LEFT,
 } from '@/state/presenters/exploration.engine';
 
-const freshStore = () => createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('fishing-village') } });
+const freshStore = () => createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('breakwater') } });
 
 // ---------------------------------------------------------------------------
 // D1 — SPENT IS NOT SEALED
@@ -68,42 +68,42 @@ describe('D1: a consumed node reads as TRODDEN, never as SEALED', () => {
     it('classifies a consumed-but-not-completed node as completed', () => {
         const store = freshStore();
         const actions = createAppActions(store);
-        actions.moveTo('fv-2');
-        actions.moveTo('fv-26');
+        actions.moveTo('bw-4');
+        actions.moveTo('bw-10');
 
-        // fv-1 is the shore the player woke on and has now left behind.
-        consumeOnly(store, 'fv-1');
+        // bw-1 is the Breakwater arrival the player has now left behind.
+        consumeOnly(store, 'bw-1');
 
         const vm = selectExplorationViewModel(store.getState());
-        const fv1 = vm.nodes.find((n) => n.id === 'fv-1');
-        expect(fv1).toBeDefined();
+        const bw1 = vm.nodes.find((n) => n.id === 'bw-1');
+        expect(bw1).toBeDefined();
         // THE REGRESSION: this read 'locked' before the spent union landed.
-        expect(fv1!.kind).toBe('completed');
+        expect(bw1!.kind).toBe('completed');
     });
 
     it('keeps the engine and the screen agreeing on what is still shut', () => {
         const store = freshStore();
         const actions = createAppActions(store);
-        actions.moveTo('fv-2');
-        consumeOnly(store, 'fv-1');
+        actions.moveTo('bw-4');
+        consumeOnly(store, 'bw-1');
 
         const vm = selectExplorationViewModel(store.getState());
         // A node the player resolved is not a legal destination, but it is
         // also not sealed — those are different sentences and the chart now
         // draws them differently.
-        expect(vm.nodes.filter((n) => n.kind === 'locked').map((n) => n.id)).not.toContain('fv-1');
-        expect(vm.options.map((o) => o.nodeId)).not.toContain('fv-1');
+        expect(vm.nodes.filter((n) => n.kind === 'locked').map((n) => n.id)).not.toContain('bw-1');
+        expect(vm.options.map((o) => o.nodeId)).not.toContain('bw-1');
     });
 
     it('stops the legend counting a walked node among the sealed', () => {
         const store = freshStore();
         const actions = createAppActions(store);
-        actions.moveTo('fv-2');
+        actions.moveTo('bw-4');
 
         const before = selectExplorationViewModel(store.getState());
         const sealedBefore = before.nodes.filter((n) => n.kind === 'locked').length;
 
-        consumeOnly(store, 'fv-1');
+        consumeOnly(store, 'bw-1');
         const after = selectExplorationViewModel(store.getState());
         const sealedAfter = after.nodes.filter((n) => n.kind === 'locked').length;
 
@@ -116,16 +116,16 @@ describe('D1: a consumed node reads as TRODDEN, never as SEALED', () => {
     it('marks a road travelled once BOTH its ends are spent, by either list', () => {
         const store = freshStore();
         const actions = createAppActions(store);
-        actions.moveTo('fv-2');
-        actions.moveTo('fv-26');
-        consumeOnly(store, 'fv-1');
+        actions.moveTo('bw-4');
+        actions.moveTo('bw-10');
+        consumeOnly(store, 'bw-1');
 
         const vm = selectExplorationViewModel(store.getState());
-        const fv1fv2 = vm.edges.find(
-            (e) => (e.fromId === 'fv-1' && e.toId === 'fv-2') || (e.fromId === 'fv-2' && e.toId === 'fv-1'),
+        const bw1bw4 = vm.edges.find(
+            (e) => (e.fromId === 'bw-1' && e.toId === 'bw-4') || (e.fromId === 'bw-4' && e.toId === 'bw-1'),
         );
-        expect(fv1fv2).toBeDefined();
-        expect(fv1fv2!.traveled).toBe(true);
+        expect(bw1bw4).toBeDefined();
+        expect(bw1bw4!.traveled).toBe(true);
     });
 });
 
@@ -144,7 +144,7 @@ describe('D1: the chart separates lateral ribs from forward roads', () => {
     });
 
     it('calls an edge lateral exactly when the engine does not call it forward', () => {
-        const def = getMapDefinition('coastal-continent', 'fishing-village');
+        const def = getMapDefinition('coastal-continent', 'breakwater');
         const forward = forwardEdges(def);
         const isForward = (a: string, b: string) =>
             (forward.get(a) ?? []).includes(b) || (forward.get(b) ?? []).includes(a);
@@ -159,7 +159,7 @@ describe('D1: the chart separates lateral ribs from forward roads', () => {
         // rather than off the engine's own invariant test — if the presenter
         // ever mislabels an edge, the canvas draws a sideways step as
         // progress.
-        const def = getMapDefinition('coastal-continent', 'fishing-village');
+        const def = getMapDefinition('coastal-continent', 'breakwater');
         const columnOf = new Map(def.nodes.map((n) => [n.id, n.location[0]] as const));
 
         for (const e of vmEdges()) {

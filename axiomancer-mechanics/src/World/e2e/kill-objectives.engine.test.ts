@@ -1,49 +1,59 @@
 /**
  * Kill-objective progression (2026-08-08 first-map audit).
  *
- * The first map's whole quest chain hangs off one kill: `starting-quest` asks
- * the player to put down the King of Revenge at the breakwater, Old Marrow's
- * every reward branch is gated on `questCompleted: 'starting-quest'`, and the
- * `get-to-forest` quest is only granted from inside those branches. (The
- * King was retired in the enemy roster reset, R2; fishing-village is parked
- * until R3, so the contract is pinned on the objective's display name.)
+ * The audit found fishing-village's quest chain dead in the app: the legacy
+ * engine `endCombat` advanced kill objectives inline, but the live
+ * hazard-pattern combat never routes through it, so the boss died and the
+ * counter stayed at 0/1 forever. `advanceKillObjectives` is the reusable
+ * reducer both paths can call.
  *
- * The audit found that chain dead in the app. The legacy engine `endCombat`
- * advanced kill objectives inline, but the live hazard-pattern combat never
- * routes through it, so the boss died and the counter stayed at 0/1 forever.
- * `advanceKillObjectives` is the reusable reducer both paths can call; these
- * tests pin its contract against the real authored quest and the real enemy.
+ * fishing-village and its `starting-quest` were purged in R3b (D53), and no
+ * authored quest carries a kill objective any more, so the reducer's contract
+ * is pinned on a fixture quest whose target is a real rostered foe (the
+ * Doorwarden, every Act 1 region's door fight).
  */
 
 import { describe, expect, it } from 'vitest';
 
 import { advanceKillObjectives, startQuest, emptyQuestLog } from '../quest.engine';
-import { fishingVillage } from '../Continents/Coastal-Village/maps';
+import { ENEMY_REGISTRY } from '../../Enemy/enemy.library';
 import type { Quest, QuestLog } from '../types';
 
-const STARTING_QUEST = fishingVillage.quests!.find(q => q.name === 'starting-quest')!;
-/** The display name the quest's kill objective targets. Its foe was retired
- *  in the enemy roster reset (R2); the reducer contract is pinned on the name. */
-const BOSS_NAME = STARTING_QUEST.objectives.find(o => o.type === 'kill')!.target!;
+/** The door fight's display name — the kill the fixture quest asks for. */
+const BOSS_NAME = ENEMY_REGISTRY['the-doorwarden'].name;
 
-function logWithStartingQuest(): QuestLog {
-    return startQuest(emptyQuestLog(), STARTING_QUEST);
+/** A one-kill fixture quest (any `QuestName` will do; the reducer keys on it). */
+const DOOR_QUEST: Quest = {
+    name: 'gather-wood',
+    description: 'test fixture',
+    mapName: 'breakwater',
+    status: 'available',
+    objectives: [{
+        id: 'kill-door', type: 'kill', target: BOSS_NAME,
+        description: 'Put down the Doorwarden.',
+        requiredCount: 1, currentCount: 0,
+    }],
+    reward: { kind: 'currency', amount: 1 },
+};
+
+function logWithDoorQuest(): QuestLog {
+    return startQuest(emptyQuestLog(), DOOR_QUEST);
 }
 
 describe('advanceKillObjectives', () => {
-    it('completes starting-quest when its target falls', () => {
-        const before = logWithStartingQuest();
-        expect(before.active.map(q => q.name)).toContain('starting-quest');
+    it('completes the quest when its target falls', () => {
+        const before = logWithDoorQuest();
+        expect(before.active.map(q => q.name)).toContain('gather-wood');
 
         const { log, completed } = advanceKillObjectives(before, BOSS_NAME);
 
-        expect(completed).toEqual(['starting-quest']);
-        expect(log.completed).toContain('starting-quest');
-        expect(log.active.map(q => q.name)).not.toContain('starting-quest');
+        expect(completed).toEqual(['gather-wood']);
+        expect(log.completed).toContain('gather-wood');
+        expect(log.active.map(q => q.name)).not.toContain('gather-wood');
     });
 
     it('leaves the log untouched for an unrelated kill', () => {
-        const before = logWithStartingQuest();
+        const before = logWithDoorQuest();
         const { log, completed } = advanceKillObjectives(before, 'Float-Eye');
 
         expect(completed).toEqual([]);
@@ -51,18 +61,18 @@ describe('advanceKillObjectives', () => {
     });
 
     it('is idempotent once the quest has completed', () => {
-        const once = advanceKillObjectives(logWithStartingQuest(), BOSS_NAME);
+        const once = advanceKillObjectives(logWithDoorQuest(), BOSS_NAME);
         const twice = advanceKillObjectives(once.log, BOSS_NAME);
 
         expect(twice.completed).toEqual([]);
-        expect(twice.log.completed.filter(n => n === 'starting-quest')).toHaveLength(1);
+        expect(twice.log.completed.filter(n => n === 'gather-wood')).toHaveLength(1);
     });
 
     it('advances a multi-kill objective one kill at a time', () => {
         const hunt: Quest = {
-            name: 'starting-quest',
+            name: 'gather-wood',
             description: 'test fixture',
-            mapName: 'fishing-village',
+            mapName: 'breakwater',
             status: 'available',
             objectives: [{
                 id: 'cull', type: 'kill', target: 'Float-Eye',
@@ -75,9 +85,9 @@ describe('advanceKillObjectives', () => {
         for (let i = 0; i < 2; i++) log = advanceKillObjectives(log, 'Float-Eye').log;
 
         expect(log.active[0]!.objectives[0]!.currentCount).toBe(2);
-        expect(log.completed).not.toContain('starting-quest');
+        expect(log.completed).not.toContain('gather-wood');
 
         const third = advanceKillObjectives(log, 'Float-Eye');
-        expect(third.completed).toEqual(['starting-quest']);
+        expect(third.completed).toEqual(['gather-wood']);
     });
 });

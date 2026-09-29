@@ -17,7 +17,7 @@ One PNG per route, named after the route's stable `name` in
 | `combat-encounter.png` | `/combat-encounter` | `app/combat-encounter/index.tsx` |
 | `memoir.png` | `/memoir` | `app/(tabs)/memoir/index.tsx` |
 | `labyrinth.png` | `/labyrinth` | `app/labyrinth/index.tsx` |
-| `dialogue.png` | `/exploration` + fixture `apprentice-fv-interaction` → `/dialogue` | `app/dialogue/index.tsx` |
+| `dialogue.png` | `/exploration` + fixture `apprentice-nf-interaction` → `/dialogue` | `app/dialogue/index.tsx` |
 | `village.png` | `/exploration` + fixture `wanderer-nf-village` → `/village` | `app/village/index.tsx` |
 | `cutscene.png` | `/exploration` + fixture `wanderer-nf-cutscene` → `/cutscene` | `app/cutscene/index.tsx` |
 
