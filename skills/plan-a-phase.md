@@ -80,8 +80,8 @@ Mirrors `skills/ship-a-phase.md` §6. Fixed structure:
 - **Outcome** — one line; what is true when the phase ships.
 - **Scope** — workspaces touched and the files / systems changed,
   deleted or parked (and why "park" where the part plan says so).
-- **Consumers to update** — engine exports, mobile screens, card
-  editor (until R1), catalog/devlog exporters.
+- **Consumers to update** — engine exports, mobile screens,
+  catalog/devlog exporters.
 - **Save / schema contracts** — types, save-data shape, and the
   migration in `Game/game.migrate.ts` for anything removed from a
   save.

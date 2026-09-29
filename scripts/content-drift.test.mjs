@@ -2,9 +2,8 @@
 // tables (phase 68, from the 2026-08-22 content-pipelines audit §2 rec 10).
 //
 // Each case below covers a surface the audit found drifting with NO failing
-// test: the glyph table copied between two runtimes, the card-editor's
-// independent keyword vocabulary, and the keyword atlas that feeds the
-// `axio_keywords` MCP tool. The mechanic-kind surface is gated in TypeScript
+// test: the glyph table copied between two runtimes and the keyword atlas
+// that feeds the `axio_keywords` MCP tool. The mechanic-kind surface is gated in TypeScript
 // instead — see `CARD_SPECIAL_MECHANIC_KINDS` in axiomancer-mechanics and the
 // KW-2 lint in axiomancer-mobile.
 //
@@ -14,7 +13,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
-  atlasKeywords, catalogGlyphTable, editorGlyphCases, editorVocabulary,
+  atlasKeywords, catalogGlyphTable,
   enemyRegistryKeywords, systemGlossaryTerms,
   mobileGlyphTable, mobileRegistryKeywords, PATHS,
 } from './content-drift.mjs'
@@ -58,58 +57,6 @@ test('the glyph parsers found a real table, not an empty one', () => {
   // (2026-09-27, after the card purge): 14 keys each.
   assert.ok(mobileGlyphTable().size >= 12)
   assert.ok(catalogGlyphTable().size >= 12)
-})
-
-// ── The card-editor's independent display vocabulary ─────────────────────────
-
-/**
- * Editor-local words with no registry row, and why each one is legitimate.
- * The editor's `KEYWORDS` table is a *display* vocabulary for the card face
- * and dummy sim (see the module doc in `wx.ts`); these are the generic
- * mechanical families it speaks in, not game keywords the player reads.
- *
- * Anything NOT on this list must exist in the mobile keyword registry — which
- * is what caught COMPOUND / EXECUTE / SLOW / CONFUSION / SILENCE, five
- * spec-32-v2 words the editor still offered after the mechanics behind them
- * were deleted.
- */
-const EDITOR_LOCAL_LABELS = new Set([
-  'DAMAGE',     // the generic direct-damage family, legal again since THE UNSHACKLING
-  'DOT',        // the family name; the registry names the species (Bleed, Poison...)
-  'CONTROL',    // the family name for stance/turn denial
-  'REGEN',      // effect species, glossed by effect id rather than a keyword row
-  'STUN',       // effect species, same
-  'HEAL SELF',  // a rider shape, not a keyword
-])
-
-test('every editor keyword label is a live registry keyword or explicitly editor-local', () => {
-  const registry = mobileRegistryKeywords()
-  const strays = [...editorVocabulary().values()]
-    .map((label) => label.toUpperCase())
-    .filter((label) => !registry[label] && !EDITOR_LOCAL_LABELS.has(label))
-  assert.deepEqual(strays, [], `dead words in ${PATHS.editorVocab}`)
-})
-
-test('the editor-local list holds no label the editor stopped using', () => {
-  const live = new Set([...editorVocabulary().values()].map((l) => l.toUpperCase()))
-  assert.deepEqual([...EDITOR_LOCAL_LABELS].filter((l) => !live.has(l)), [])
-})
-
-test('every editor glyph case names something the project actually has', () => {
-  // `KwGlyph`'s switch runs ahead of the editor's own vocabulary in places —
-  // it draws CLEANSE / PIP / QUARTER / REVEAL / CONVICTION / REFRESH, which the
-  // face can receive even though the authoring table has no row for them. That
-  // is forward coverage, not drift. What IS drift is a case for a word that
-  // exists nowhere: not an editor keyword, not a registry keyword, not a glyph
-  // the mobile table draws. That is the arm this asserts away.
-  const vocab = editorVocabulary()
-  const registry = mobileRegistryKeywords()
-  const glyphs = mobileGlyphTable()
-  const orphaned = keys(editorGlyphCases()).filter((id) => {
-    const upper = id.toUpperCase()
-    return !vocab.has(id) && !registry[upper] && !glyphs.has(upper)
-  })
-  assert.deepEqual(orphaned, [], `glyph cases naming nothing in ${PATHS.editorFace}`)
 })
 
 // ── The keyword atlas vs the live registry ───────────────────────────────────
@@ -173,8 +120,7 @@ test('the exemption list holds no keyword that left the registry', () => {
 
 test('the keyword parsers found real tables', () => {
   // Floors lowered to the tables' true size after the keyword audit
-  // (2026-09-27, after the card purge): registry 23, atlas 37, editor 19.
+  // (2026-09-27, after the card purge): registry 23, atlas 37.
   assert.ok(keys(mobileRegistryKeywords()).length >= 20)
   assert.ok(keys(atlasKeywords()).length > 25)
-  assert.ok(editorVocabulary().size >= 15)
 })

@@ -165,7 +165,7 @@ request from a public page. Until then the page is correct with the CDN blocked
 
 The app's `SPACING` scale (4 / 8 / 16 / 24 / 32) carries over unchanged as the
 rhythm; the web adds two larger steps for page-level bands (54, 90). Column
-widths: 700px (about, tuning lab), 760px (post, landing), 880px (index),
+widths: 700px (about), 760px (post, landing), 880px (index),
 1080px (catalog grid and the header). Everything is fluid below those caps —
 there are no fixed pixel widths on text containers.
 
@@ -356,7 +356,6 @@ every page carries alt text, and that the two halves of a pair never share it.
 | Post index | chronological, filterable by the five categories, each row a date, title, one-line summary, category chips and a thumbnail; paginated at twenty | enough of each post to choose one |
 | Post | roman-numeral header, lede, work-item cards (what / why / pair / commits), marginalia | the **why** is the headline field, never the commits |
 | Catalog | cards, foes, afflictions; card plates drawn as the game draws them | browsable enough to get interested, not a data dump |
-| Tuning Lab | the report index — hand-authored reports listed by their own titles | it is a list; it does not need a design |
 | About | what the game is, how an entry is made, what is withheld, licences | the licence attributions render here |
 
 ### The panels — the ruling
@@ -399,7 +398,7 @@ build measures it and `--strict` refuses to publish a page that blows it.
 | Post index | **400 KB** | one thumbnail per row, derived at 320px and lazy — never the full capture. Twenty rows per page, then paginate; fifty-four entries never load at once. |
 | Post | **1.4 MB** | every pair after the first is lazy; captures are served at 2x the rendered box and no larger. A post with more than six pairs is a post that needed two entries. |
 | Catalog | **1.1 MB** | art is 1:1 and small (the app's own art is 8-40 KB WebP); the grid is lazy below the fold; filtering is client-side over already-loaded plates, never a refetch. |
-| About / Tuning Lab | **200 KB** | text and rules only. |
+| About | **200 KB** | text and rules only. |
 
 Fonts: four families, one weight each, `display=swap` — ~120 KB total, cached
 across every page and counted against every page's budget. This is the single

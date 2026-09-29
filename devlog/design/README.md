@@ -27,11 +27,11 @@ one command.)
 | `prototype-hero.html` | the landing hero in three scroll treatments — parallax (shipped), bloom, lift | only one treatment ships, and the comparison is the record of why |
 
 **Every page type's prototype is the build itself.** The design prompt asked
-for working prototypes of all six page types using real content, and the build
-renders exactly that from the fifty-four committed entries — landing, post
-index, post, catalog, tuning lab, about. A separate hand-written copy of six
-pages would be six pages of lorem with extra steps, and it would be wrong
-within a week.
+for working prototypes of every page type using real content, and the build
+renders exactly that from the committed entries — landing, post index, post,
+catalog, about (a sixth, the tuning lab, was retired in R1). A separate
+hand-written copy of those pages would be lorem with extra steps, and it would
+be wrong within a week.
 
 ## The marks, for anyone editing these
 

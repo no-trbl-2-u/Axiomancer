@@ -14,15 +14,16 @@ committed, so publishing stays a deliberate act.
 
 **The private index** (`npm run site:build`) is the internal tool this file
 originally described, unchanged: a self-contained set of pages opened from the
-filesystem. `index.html` is a **hub** with three links:
+filesystem. `index.html` is a **hub** with two links:
 
 - **Catalog** (`catalog.html`) — one HTML file containing every combat card,
   enemy, and live status effect, with inline CSS and inline JavaScript. It has no
   separate catalog page, script file, or stylesheet.
 - **DevLog** (`log.html`) — the accumulating, one-visual-entry-per-day
   development log.
-- **Tuning Lab** (`tuning-lab/index.html`) — a list of the hand-authored tuning
-  reports living in `tuning-lab/`.
+
+The Tuning Lab (hand-authored balance reports) was retired in revamp phase R1;
+its three reports sit in `plan/archive/tuning-lab/`.
 
 The **catalog** (`catalog.html`) is generated from the game's canonical
 libraries; the **DevLog** is one **visual** entry per day: a headline,
@@ -33,9 +34,8 @@ nightly `/digest` skill authors a structured markdown entry into
 self-contained styled HTML page at `entries/DIGEST_<date>.html` — markdown
 source and built HTML live side by side in `entries/`.
 Only the markdown source, the dated captures (screens, card and foe plates,
-world plates, rules pairs), and the hand-authored tuning-lab reports are
-committed. The built HTML, the catalog JSON/art, and the tuning-lab index are
-generated output, gitignored, and rebuilt on demand by `npm run site:build` —
+world plates, rules pairs) are committed. The built HTML and the catalog
+JSON/art are generated output, gitignored, and rebuilt on demand by `npm run site:build` —
 the game's Cloudflare Pages project serves whatever `main`'s tree contains, so
 nothing generated here is committed to it (phase 57, still in force). The
 public DevLog is a separate Pages project that runs its own build; see
@@ -101,16 +101,6 @@ pages refresh automatically on the next digest commit (no manual step).
 - `## [<category>] <title>` → a **card** (`mechanics | ui | content | infra |
   balance`, each color-coded).
 - `## <title>` (no bracket) → a **panel**, rendered as-is (tables/lists/prose).
-
-## Tuning Lab (`tuning-lab/`)
-
-Each file in `tuning-lab/` (other than `index.html`) is a hand-authored,
-self-contained tuning report — e.g. a Battle Lab playtest ledger from
-the retired `/deck-tuning` or a similar balance pass. `scripts/build-devlog.mjs` doesn't
-parse or restyle them; it just lists every `*.html` file in the folder (using
-each file's own `<title>`) on `tuning-lab/index.html`, linked from the hub.
-Drop a new report file in `tuning-lab/` and the next `npm run devlog:build`
-picks it up automatically.
 
 ## UI before/after screenshots
 

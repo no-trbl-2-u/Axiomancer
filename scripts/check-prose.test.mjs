@@ -1,5 +1,4 @@
-// scripts/check-prose.test.mjs — witness for the shipped-content prose lint
-// and the naming-law sweep (phase 70).
+// scripts/check-prose.test.mjs — witness for the shipped-content prose lint (phase 70).
 //
 // The rules under test are the house's own, not invented here: the voice rules
 // come from `axiomancer-mechanics/docs/narrative/LEXICON.md` ("Ban from house
@@ -15,7 +14,6 @@ import {
   CONTENT_SURFACES, MB1_MAX_WORDS, PROSE_FIELDS, PROSE_RULES, VOICE_RULES,
   exemptionsIn, fieldFor, scanSource, stringLiterals,
 } from './check-prose.mjs'
-import { idsIn, sweep } from './check-naming-law.mjs'
 
 const retired = loadRegistry().filter((r) => r.type === 'identifier')
 const rules = (findings) => findings.map((f) => f.rule)
@@ -144,23 +142,4 @@ test('a prose-ok pragma exempts a register rule too', () => {
   const long = `word `.repeat(MB1_MAX_WORDS + 3).trim()
   const src = ['// prose-ok: mb1-long-sentence — quoted from a period document', `    scene: '${long}.',`].join('\n')
   assert.deepEqual(scanSource(src, retired), [])
-})
-
-// ── the id-hygiene sweep (naming-law repeal, 2026-09-02) ────────────────────
-// The NL-8/NL-4/NL-5/V-1 display-name lint (collision, format, philosophy
-// register) was repealed with the rest of the content laws (big-numbers
-// overhaul §3 L28, §10). What survives is a bug detector over machine ids.
-
-test('ids are parsed out of a library source, both quote styles', () => {
-  const src = [
-    "    id: 'first-spadeful',",
-    '    id: "the-sextons-bell",',
-  ].join('\n')
-  assert.deepEqual(idsIn(src), ['first-spadeful', 'the-sextons-bell'])
-})
-
-test('the sweep reads real shipped ids and finds them clean', () => {
-  const { findings, checked } = sweep()
-  assert.ok(checked > 50, 'the sweep found almost no ids — the parser has drifted')
-  assert.deepEqual(findings, [])
 })

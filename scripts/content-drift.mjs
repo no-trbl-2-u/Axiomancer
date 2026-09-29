@@ -3,11 +3,11 @@
 // test. Zero dependencies; pure functions over file text so the same parsers
 // serve the drift test and any future report.
 //
-// Why parsers and not imports: the four tables live in three different
-// runtimes (React Native + TS, React DOM + TS, a Node HTML generator) across
-// three npm workspaces. A test that imported them would have to run inside one
+// Why parsers and not imports: the tables live in different runtimes (React
+// Native + TS, a Node HTML generator, markdown) across the npm workspaces and
+// the repo root. A test that imported them would have to run inside one
 // workspace, and would then only fire on that workspace's CI path triggers —
-// which is exactly how an editor-only or catalog-only edit drifts unseen.
+// which is exactly how a catalog-only edit drifts unseen.
 //
 // EVERY extractor here self-checks: it throws when it finds nothing. A silent
 // zero would make the drift gate pass vacuously the first time someone
@@ -23,8 +23,6 @@ export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 export const PATHS = {
   mobileGlyphs: 'axiomancer-mobile/components/combat/glyphShapes.ts',
   catalogGlyphs: 'scripts/build-catalog.mjs',
-  editorFace: 'axiomancer-card-editor/src/components/CardFace.tsx',
-  editorVocab: 'axiomancer-card-editor/src/theme/wx.ts',
   mobileKeywords: 'axiomancer-mobile/state/combat/keywords.ts',
   keywordAtlas: 'axiomancer-mechanics/docs/keyword-atlas.md',
   enemyKeywords: 'axiomancer-mechanics/src/Enemy/enemy-keywords.ts',
@@ -86,28 +84,6 @@ export const catalogGlyphTable = () =>
     shapeRe: /const (SHAPE_[A-Z_]+) = \{ d: "([^"]+)"/g,
     tableAnchor: 'const GLYPH_SHAPES',
   })
-
-/** Keys of the editor's `KEYWORDS` display vocabulary → its printed label. */
-export function editorVocabulary() {
-  const text = read(PATHS.editorVocab)
-  const body = braceBlock(text, text.indexOf('export const KEYWORDS'))
-  const out = new Map()
-  for (const m of body.matchAll(/^\s{4}([a-z_]+):\s*\{[^}]*label:\s*'([^']+)'/gm)) {
-    out.set(m[1], m[2])
-  }
-  return nonEmpty(out, 'editor KEYWORDS vocabulary')
-}
-
-/** The keyword ids the editor's `KwGlyph` switch draws a silhouette for. */
-export function editorGlyphCases() {
-  const text = read(PATHS.editorFace)
-  const start = text.indexOf('export function KwGlyph')
-  const rest = text.slice(start + 10)
-  const next = rest.search(/\nexport (function|const) /)
-  const body = next < 0 ? rest : rest.slice(0, next)
-  const ids = new Set([...body.matchAll(/case '([a-z_]+)'/g)].map((m) => m[1]))
-  return nonEmpty(ids.size ? Object.fromEntries([...ids].map((i) => [i, true])) : {}, 'editor glyph cases')
-}
 
 /** Registry keyword names (Title-Case keys of the mobile `KEYWORD_GLOSS`). */
 export function mobileRegistryKeywords() {

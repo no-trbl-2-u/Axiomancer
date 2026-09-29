@@ -10,7 +10,6 @@ product's former title, "Axiomancer", as internal identifiers.)
 |---|---|---|
 | [`axiomancer-mechanics/`](./axiomancer-mechanics) | `axiomancer-mechanics` | The engine: combat, world, cards, encounters (TypeScript library). |
 | [`axiomancer-mobile/`](./axiomancer-mobile) | `axiomancer-mobile` | The Expo/React Native app. Consumes mechanics locally via the `@mechanics/*` path alias. |
-| [`axiomancer-card-editor/`](./axiomancer-card-editor) | `axiomancer-card-editor` | Local dev tool: web-based card (Action) editor. Reads/writes mechanics' `src/Cards/cards.library.ts` in place. |
 
 ## Layout
 
@@ -21,7 +20,6 @@ Axiomancer/
   package.json            # workspaces root + verify/deploy:check
   axiomancer-mechanics/
   axiomancer-mobile/
-  axiomancer-card-editor/
   .github/workflows/      # path-scoped CI per package
   skills/  plan/  scripts/ # nexus autonomous-loop harness (root)
   .claude/                # loop + domain commands, agents, design skills

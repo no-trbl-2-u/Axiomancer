@@ -15,10 +15,10 @@ description of Miserere Mei, Deus. Read once at session start. The TL;DR:
 > rules engine, where what you owe, and to whom, is a mechanical
 > input rather than flavor.
 
-Three-package npm-workspaces monorepo: a pure rules **engine**
-(`axiomancer-mechanics`), an Expo/React-Native **app**
-(`axiomancer-mobile`) that consumes the engine as local source,
-and a local **card-editor** dev tool. Status effects remain a major
+Two-package npm-workspaces monorepo: a pure rules **engine**
+(`axiomancer-mechanics`) and an Expo/React-Native **app**
+(`axiomancer-mobile`) that consumes the engine as local source (the
+card-editor dev tool was deleted in R1, D56). Status effects remain a major
 authored tool but no route is protected. THE BIG NUMBERS REWRITE repealed
 all governing combat objective functions, including CQI; simulations retain
 bug detectors and a wide sanity envelope. Morally charged choices carry
@@ -127,7 +127,6 @@ one of these — then decide it deliberately and file the call as
 | mobile test | **Jest** (jest-expo) | no build leg — Metro bundles at runtime |
 | mobile lint | `eslint app components` | |
 | mobile e2e | Playwright (expo-web) + per-minigame scripts | `scripts/*-e2e.mjs` |
-| **card-editor** | Vite + React (local dev tool) | `verify` = type-check + lint + vitest + build; not published |
 | Structured data | **none** — content is in-repo TS libraries | no gh-as-db; `/ship-data` not adopted; no `data/BACKLOG.md` |
 | Design layer | **none** — no `design/` export dir | design happens via the `.claude/skills/` design skills into `axiomancer-mechanics/specs/` |
 | Deploy (mobile) | EAS Build (manual, release-time) | not per-push |
@@ -135,14 +134,12 @@ one of these — then decide it deliberately and file the call as
 
 ### The `@mechanics` alias (load-bearing)
 
-Mobile and card-editor consume mechanics as **local TypeScript
-source** via `@mechanics` / `@mechanics/*` → `../axiomancer-mechanics/src`.
-Mobile's Metro transpiles mechanics TS directly; card-editor
-reads/writes `src/Cards/cards.library.ts` in place. **A mechanics
-rename/removal can silently break both consumers** — when
-changing mechanics' public surface, verify the dependent package
-(`npm run verify --workspace axiomancer-mobile` and
-`npm run type-check --workspace axiomancer-card-editor`).
+Mobile consumes mechanics as **local TypeScript source** via
+`@mechanics` / `@mechanics/*` → `../axiomancer-mechanics/src`.
+Mobile's Metro transpiles mechanics TS directly. **A mechanics
+rename/removal can silently break it** — when changing mechanics'
+public surface, verify mobile
+(`npm run verify --workspace axiomancer-mobile`).
 
 ## URL / API / CLI contract (locked)
 
@@ -160,8 +157,7 @@ npm run combat-playtest        # stage x policy matrix
 
 ### `@mechanics` public export barrel (`src/index.ts`)
 
-The barrel is the **locked public contract** for mobile +
-card-editor. Additive exports are fine; a rename/removal is a
+The barrel is the **locked public contract** for mobile. Additive exports are fine; a rename/removal is a
 deliberate, semver-major phase that migrates the consumers in the
 same change. No deprecated aliases remain: the former
 `skillLibrary`->`cardLibrary`, `getSkillById`->`getCardById` and
@@ -201,7 +197,6 @@ Axiomancer/
 ├── package.json                # workspaces + root verify/deploy:check
 ├── axiomancer-mechanics/       # engine + CLI (has its own AGENTS/CLAUDE)
 ├── axiomancer-mobile/          # Expo-hosted RN app (has its own AGENTS/CLAUDE)
-├── axiomancer-card-editor/     # local dev tool
 ├── skills/                     # nexus LOOP verbs (this harness)
 ├── plan/                       # nexus state files (this dir)
 │   ├── bearings.md             # this file
@@ -256,7 +251,7 @@ ambiguity.)
 
 - **Which package a phase touches:** scope the verify gate to that
   workspace (`--workspace <pkg>`); if a change touches mechanics'
-  public surface, also verify mobile (and card-editor until R1 deletes it).
+  public surface, also verify mobile.
 - **Which combat engine is canonical:** Hazard-Pattern Combat
   (`simulateHazardPatternCombat` / `initializeCombatEncounter`).
   The legacy `resolveCombatRound` driver was fully removed from
@@ -835,11 +830,10 @@ npm run verify
 # scoped (preferred — pick the package the phase touches)
 npm run verify --workspace axiomancer-mechanics   # type-check + type-check:tests + type-check:cli + lint + vitest + build
 npm run verify --workspace axiomancer-mobile      # lint + typecheck + jest + assets:check + art:test + critique-drive:test
-npm run verify --workspace axiomancer-card-editor # type-check + lint + vitest + build
 ```
 
 Mechanics changes to the public surface must ALSO run the mobile
-+ card-editor gates (the `@mechanics` alias couples them).
+gate (the `@mechanics` alias couples them).
 
 Each leg is a hard gate. There is **no `data:validate` leg**
 (no structured data layer). Mobile has **no build leg** (Metro
@@ -877,8 +871,7 @@ stay a deliberate manual step — **not** part of the per-tick
 gate.
 
 **Cards-only carve-out (CI):** a change confined to
-`axiomancer-mechanics/src/Cards/cards.library.ts` (card DATA edits
-from the card editor) still runs the full mechanics gate + mobile
+`axiomancer-mechanics/src/Cards/cards.library.ts` (card DATA edits) still runs the full mechanics gate + mobile
 lint/typecheck/jest + bundler smoke, but `verify-mobile.yml` skips
 its slow Playwright `e2e:*` steps (the `scope` step, via
 `scripts/ci-e2e-scope.mjs`, gates them per journey; defaults to

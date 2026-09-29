@@ -70,10 +70,9 @@ test('mobile docs and hermetic tests do not launch browser evidence', () => {
     assert.equal(result.run_integration, false)
 })
 
-test('mechanics Cards changes select combat and the editor contract', () => {
+test('mechanics Cards changes select combat', () => {
     const result = classify('mechanics', ['axiomancer-mechanics/src/Cards/cards.library.ts'])
     assert.equal(result.mobile, true)
-    assert.equal(result.editor, true)
     assert.equal(result.combat, true)
     assert.equal(result.hazard, false)
     assert.equal(result.full, false)
@@ -90,7 +89,6 @@ test('mechanics quest/rest/loot changes select encounter routing', () => {
     const result = classify('mechanics', ['axiomancer-mechanics/src/World/QuestBoard/quests.ts'])
     assert.equal(result.encounters, true)
     assert.equal(result.hazard, false)
-    assert.equal(result.editor, false)
 })
 
 test('mechanics enemy roster changes select combat and encounter routing', () => {
@@ -98,7 +96,6 @@ test('mechanics enemy roster changes select combat and encounter routing', () =>
     assert.equal(result.combat, true)
     assert.equal(result.encounters, true)
     assert.equal(result.hazard, false)
-    assert.equal(result.editor, false)
     assert.equal(result.full, false)
 })
 
@@ -146,7 +143,6 @@ test('mobile map layouts and canvas run the full mobile suite', () => {
 test('uncoupled mechanics source remains mechanics-only', () => {
     const result = classify('mechanics', ['axiomancer-mechanics/src/Inventory/inventory.ts'])
     assert.equal(result.mobile, false)
-    assert.equal(result.editor, false)
     assert.equal(result.run_integration, false)
 })
 

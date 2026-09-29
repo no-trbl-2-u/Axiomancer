@@ -2,7 +2,7 @@
 
 Turn-based RPG engine with a Heart / Body / Mind combat system. Status effects, skills, and enemies are themed around logical fallacies and philosophical paradoxes.
 
-This package is the **non-UI engine** only — a workspace package in the Axiomancer monorepo, consumed as local source via the `@mechanics` alias by `axiomancer-mobile` and `axiomancer-card-editor`. All logic is exposed through the package barrel at [`src/index.ts`](./src/index.ts).
+This package is the **non-UI engine** only — a workspace package in the Axiomancer monorepo, consumed as local source via the `@mechanics` alias by `axiomancer-mobile`. All logic is exposed through the package barrel at [`src/index.ts`](./src/index.ts).
 
 **Looking for a tour?** See [`docs/quickstart.md`](./docs/quickstart.md) —
 a single-page entry point covering what's shipped, how to drive
@@ -27,7 +27,7 @@ architecture and product decisions that govern mechanics work.
 
 The package is **not published to npm** — it lives in the Axiomancer
 monorepo and is consumed as local source via the `@mechanics` alias by
-`axiomancer-mobile` and `axiomancer-card-editor`.
+`axiomancer-mobile`.
 
 For local engine development (from the repo root):
 

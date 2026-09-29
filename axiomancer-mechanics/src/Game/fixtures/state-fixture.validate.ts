@@ -26,7 +26,7 @@ export class StateFixtureError extends Error {
     }
 }
 
-/** Same rule `scripts/check-naming-law.mjs` applies to content ids. */
+/** Content ids are kebab-case. */
 const KEBAB_CASE = /^[a-z][a-z0-9-]*$/;
 
 const STAT_AXES = ['heart', 'body', 'mind'] as const;

@@ -1,9 +1,9 @@
 name: verify-mechanics
 
-# Sole owner for mechanics and root dependency changes. Mobile and the card
-# editor consume mechanics as local source, so this job detects the documented
-# cross-package impact paths and runs the affected consumer gates in the same
-# installed environment. Each known subsystem selects its own browser journey;
+# Sole owner for mechanics and root dependency changes. Mobile consumes
+# mechanics as local source, so this job detects the documented cross-package
+# impact paths and runs the affected consumer gate in the same installed
+# environment. Each known subsystem selects its own browser journey;
 # shared, lockfile, workflow, classifier, and unknown-history changes fail
 # closed to the full suite.
 
@@ -14,10 +14,6 @@ on:
       - 'axiomancer-mechanics/**'
       - 'scripts/ci-e2e-scope.mjs'
       - 'scripts/ci-e2e-scope.test.mjs'
-      - 'scripts/check-baseline-freshness.mjs'
-      - 'scripts/check-baseline-freshness.test.mjs'
-      - 'scripts/regen-deck-matrix-baseline.mjs'
-      - 'scripts/regen-deck-matrix-baseline.test.mjs'
       - '.github/workflows/verify-mechanics.yml'
       - 'package-lock.json'
   pull_request:
@@ -26,10 +22,6 @@ on:
       - 'axiomancer-mechanics/**'
       - 'scripts/ci-e2e-scope.mjs'
       - 'scripts/ci-e2e-scope.test.mjs'
-      - 'scripts/check-baseline-freshness.mjs'
-      - 'scripts/check-baseline-freshness.test.mjs'
-      - 'scripts/regen-deck-matrix-baseline.mjs'
-      - 'scripts/regen-deck-matrix-baseline.test.mjs'
       - '.github/workflows/verify-mechanics.yml'
       - 'package-lock.json'
 
@@ -93,18 +85,6 @@ jobs:
             printf '%s\n' "$changed" | node scripts/ci-e2e-scope.mjs mechanics | tee -a "$GITHUB_OUTPUT"
           fi
 
-      - name: Baseline freshness (soft warning)
-        run: node scripts/check-baseline-freshness.mjs
-
-      # Burn-day audit 2026-09-19 row 3.6: these two guard the baseline's
-      # STAMP — the alarm's relevance filter, and the regen script's refusal
-      # to measure a working tree the stamped commit does not contain. They
-      # were reachable only through the root `npm test`, which no workflow
-      # invokes, so neither could ever go red on main. The `paths:` filters
-      # above carry the same four files for the same reason.
-      - name: Test baseline stamp guards
-        run: node --test scripts/check-baseline-freshness.test.mjs scripts/regen-deck-matrix-baseline.test.mjs
-
       - name: Check retired terminology
         run: node scripts/check-lexicon.mjs
 
@@ -121,10 +101,6 @@ jobs:
       - name: Verify mobile against affected mechanics
         if: steps.impact.outputs.mobile == 'true'
         run: npm run verify --workspace axiomancer-mobile
-
-      - name: Type-check card editor against affected mechanics
-        if: steps.impact.outputs.editor == 'true'
-        run: npm run type-check --workspace axiomancer-card-editor
 
       - name: Export and inspect the affected mobile bundle once
         if: steps.impact.outputs.run_integration == 'true'

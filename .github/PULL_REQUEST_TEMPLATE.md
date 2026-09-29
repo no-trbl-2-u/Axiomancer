@@ -9,7 +9,6 @@
 <!-- Check all that apply. Drives which verify gate + callouts are relevant. -->
 - [ ] `axiomancer-mechanics` — the TypeScript game engine + CLI (rules, state transitions, deterministic RNG, content libraries, balance/tuning, hermetic engine tests)
 - [ ] `axiomancer-mobile` — the React Native / Expo app (screens, navigation, theming, presenters, visual verification). Consumes mechanics as local source via `@mechanics`.
-- [ ] `axiomancer-card-editor` — local dev tool that reads/writes mechanics' `src/Cards/cards.library.ts`
 - [ ] Root / tooling / CI
 
 ## Change Type
@@ -38,7 +37,6 @@
 - [ ] `npm run verify --workspace axiomancer-mechanics` (type-check + tests + build)
 - [ ] `npm run verify --workspace axiomancer-mobile` (lint + typecheck + jest)
 - [ ] `npm run verify:visual --workspace axiomancer-mobile` when UI changes
-- [ ] `npm run type-check --workspace axiomancer-card-editor` when the editor / its mechanics coupling changes
 
 Completed in this PR:
 ```bash
@@ -61,7 +59,7 @@ Completed in this PR:
 <!-- Put sharp edges here. -->
 - **mechanics:** all randomness must use injected RNG helpers, not `Math.random()`; status-effect combat doctrine is load-bearing; don't tune numbers to mask engine gaps.
 - **mobile:** don't duplicate mechanics rules in presenters; preserve canonical player terms (e.g. `VITAE`, `STANCE`); if a mechanics export is missing/stale, call it out rather than reimplementing.
-- **cross-package:** mobile & card-editor consume mechanics via the `@mechanics` alias — a mechanics rename/removal can break them; verify the dependent package.
+- **cross-package:** mobile consumes mechanics via the `@mechanics` alias — a mechanics rename/removal can break it; verify mobile.
 
 Additional callouts:
 -

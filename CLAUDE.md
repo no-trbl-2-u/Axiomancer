@@ -6,12 +6,12 @@ The autonomous **nexus** loop is live at the repo root: read
 the loop verbs (`/ship-a-phase`, `/march`, `/iterate`, `/oversight`, …). Domain
 **design** skills and tuning/playtest commands live in `.claude/`.
 
-Answering a **balance/measurement** question (win rates, engagement, preset
-spreads)? Run `npm run baseline:check` first and cite the baseline's stamp —
-see AGENTS.md → "Truth sources" and `docs/truth-sources.md` →
-"Measured truth (baselines)". Source-of-rules questions
-(cards, pricing, keywords) read the current tree and need no such check.
-(A SessionStart hook prints baseline freshness at open.)
+Answering a **balance/measurement** question (win rates, engagement)? There
+is no current measured baseline: the deck-matrix baseline was retired in
+revamp phase R1 (D57) and returns when R9/B2 need numbers. Say so rather than
+cite the archived one (`plan/archive/baselines/`) — see
+`docs/truth-sources.md` → "Measured truth". Source-of-rules questions (cards,
+pricing, keywords) read the current tree.
 
 `telemetry/` is an append-only invocation log written by
 `.claude/hooks/telemetry.mjs` (skills, slash commands, subagent spawns) —

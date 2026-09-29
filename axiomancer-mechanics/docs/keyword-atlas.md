@@ -183,8 +183,8 @@ but never render in the inspect keyword panel.
 Folded here from the retired `card-expert` agent and `/adjust-keywords` skill
 (R0, 2026-09-28). New keywords are made only in a guided card session with T
 (D37). This is the checklist such a session follows. A keyword that misses any
-step does not ship. R1 deletes the card editor (step 11) and R7 rewrites the
-card types, so re-read the paths after those phases land.
+step does not ship. R1 deleted the card editor and the naming registry, and
+R7 rewrites the card types, so re-read the paths after R7 lands.
 
 1. Status piece: a new entry in `src/Effects/{buffs,debuffs}.library.json`.
    Add a new `EffectPayload` field in `src/Effects/types.ts` if the payload
@@ -210,13 +210,9 @@ card types, so re-read the paths after those phases land.
     headline mapping in `state/presenters/combat-encounter.engine.ts`
     (`mechanicHeadline`, `MECH_HEADLINE_PRIORITY`); a glyph in
     `components/combat/statusGlyphs.ts` / `glyphShapes.ts`. The glyph table is
-    hand-synced in three places: mobile `glyphShapes`, the editor's
-    `CardFace.tsx`, and `scripts/build-catalog.mjs`.
-11. Card editor (until R1 deletes it): `SPECIAL_MECHANIC_KINDS` in
-    `axiomancer-card-editor/src/data/mechanics.ts` and the un-contracted
-    `wx.ts` KEYWORDS list.
-12. Registries: a row in this atlas, and the naming registry
-    `docs/retheme-map.json` at the repo root (the NL-8 collision law).
+    hand-synced in two places: mobile `glyphShapes` and
+    `scripts/build-catalog.mjs` (the drift gate pins them together).
+11. Registries: a row in this atlas.
 
 Two surfaces fail silently. The `combat.engine.ts` mech switch and
 `combat.cards.ts` `mechanicText` both have `default:` arms, so a kind that
@@ -226,8 +222,7 @@ omission, so never ship a kind without a carrier.
 
 A keyword that extends a type union touches every consumer of `src/Cards/**`,
 `src/Effects/**`, `src/Combat/**` and `src/index.ts`. Run
-`npm run verify -w axiomancer-mobile` (and, until R1, the card editor's
-`npm run type-check`) before it ships.
+`npm run verify -w axiomancer-mobile` before it ships.
 
 ---
 

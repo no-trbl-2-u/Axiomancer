@@ -13,13 +13,12 @@ choices carry lasting world consequences. Full product spec: `spec.md`.
 work → that package's `AGENTS.md`; design/balance/content work →
 `axiomancer-mechanics/VISION.md` + `spec.md`.
 
-npm-workspaces monorepo. Three packages, flat at the root:
+npm-workspaces monorepo. Two packages, flat at the root:
 
 | Package | Role |
 |---|---|
 | `axiomancer-mechanics` | TypeScript game engine + CLI. Owns rules, state transitions, deterministic RNG, content libraries, balance/tuning, hermetic engine tests. |
 | `axiomancer-mobile` | Expo / React Native app. Consumes mechanics as **local source** via the `@mechanics` alias (`→ ../axiomancer-mechanics/src`). Owns screens, navigation, theming, presenters. |
-| `axiomancer-card-editor` | Local dev tool. Reads/writes mechanics' `src/Cards/cards.library.ts` in place via the `@mechanics` alias. |
 
 ## Hard rules
 
@@ -29,9 +28,9 @@ npm-workspaces monorepo. Three packages, flat at the root:
   successor is the unified root harness (see "Nexus — the autonomous loop"
   below). Do not resurrect its stale pre-monorepo assumptions (npm-publish /
   engine-pin model, Pressure Tracks) from git history.
-- Mobile and card-editor consume mechanics via `@mechanics` — a mechanics
-  rename/removal can break them. When changing mechanics' public surface, verify
-  the dependent package.
+- Mobile consumes mechanics via `@mechanics` — a mechanics rename/removal can
+  break it. When changing mechanics' public surface, verify mobile. (The card
+  editor, the other consumer, was deleted in revamp phase R1, D56.)
 - Rules/state/RNG belong in `axiomancer-mechanics`, never duplicated in mobile
   presenters.
 - **Asking the user questions.** In attended sessions, every question
@@ -69,19 +68,10 @@ be verified against it before a PR lands:
 If a diff matches any of the above, run
 `npm run verify -w axiomancer-mobile` and block the PR on failure.
 
-`axiomancer-card-editor` couples to a subset of the same paths
-(`src/Cards/**`, `src/Effects/**`, `src/Combat/**`, `src/index.ts` — it
-imports the card/effect libraries, their type unions, and the combat card
-projections). A diff touching any of those must ALSO run
-`npm run type-check -w axiomancer-card-editor` and block on failure.
-Witness: edba726 shipped mechanics + mobile green but broke the
-editor's `SpecialMechanicKind` union, leaving `verify-card-editor` red
-on `main` for half a day.
-
 This checklist is also mechanized in CI: the owning job in
 `.github/workflows/verify-mechanics.yml` diffs the pushed range against
-the impact paths above and runs the mobile verify / editor type-check
-in the same installed environment. Browser evidence is routed by subsystem:
+the impact paths above and runs the mobile verify in the same installed
+environment. Browser evidence is routed by subsystem:
 Combat/Cards/Effects → Combat; Enemy → Combat + Encounter; Hazard →
 Hazard; every other `World/**` path and
 `NPCs/**` → Encounter routing. Shared, lockfile, workflow,
@@ -142,13 +132,12 @@ run and any claim from memory is marked UNGROUNDED.
 |---|---|---|
 | **`axio-query` MCP** (`axio_overview` / `axio_cards` / `axio_effects` / `axio_keywords`) | The engine's OWN card/enemy/effect/keyword facts, generated from the live libraries | As current as the working tree — never stale |
 | **`kb-query` MCP** (`kb_overview` / `kb_find_games` / `kb_search` / `kb_read_doc` / `kb_cards` / `kb_keyword`) | External prior art: board-game rules + reception, Dawncaster corpus (1,692 cards / 141 keywords) — cite `kb:<game-slug>/<doc> (src-NNN)` | Live — served over HTTP by the KB's deployed Worker, current as of that repo's last deploy |
-| **Measured baselines** (`deck-matrix-baseline.json`) | Win-rate curves, status engagement, preset spreads | Only as fresh as the last sim — run `npm run baseline:check` and NAME the stamp before citing numbers |
+| **Measured baselines** | Win-rate curves, status engagement | **Retired** (D57, R1): none is current until R9/B2 re-measure; the last one is archived in `plan/archive/baselines/` and describes a pre-revamp engine |
 
-Measuring is not tuning: regenerating a baseline is briefing. During the
+Measuring is not tuning: a measurement is briefing. During the
 revamp, card and deck changes happen only in guided sessions with T (D37);
 engine constants move only inside a ratified revamp phase (D58).
-Full protocols (consumption surfaces, wishlist, regen/confidence
-rules): [`docs/truth-sources.md`](docs/truth-sources.md). The complete
+Full protocols (consumption surfaces, wishlist, measured truth): [`docs/truth-sources.md`](docs/truth-sources.md). The complete
 external-system register (ownership, credentials, recovery):
 [`docs/external-architecture.md`](docs/external-architecture.md) —
 update it whenever the product gains a hosted service, sibling repo,
@@ -182,9 +171,6 @@ store, and deep-links the web build (`?fixture=<id>` /
 - `npm run verify --workspace axiomancer-mechanics` — type-check + lint + tests + build
 - `npm run verify --workspace axiomancer-mobile` — lint + typecheck + jest +
   asset-provenance / art / critique-drive tests
-- `npm run verify --workspace axiomancer-card-editor` — type-check (incl. the
-  `mechanics.contract.ts` drift assertions) + lint + tests + build
-  (`type-check` alone remains the fast cross-package gate)
 - **Fresh `.claude/worktrees/*` checkouts**: run `npm install` at the
   worktree root before verifying. A worktree has no per-workspace
   `node_modules`, so `tsc` resolves the hoisted root TypeScript instead

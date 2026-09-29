@@ -44,9 +44,10 @@ walk(OUT)
 test.after(() => rmSync(OUT, { recursive: true, force: true }))
 
 test('every page type renders', () => {
-    for (const rel of ['index.html', 'log/index.html', 'catalog/index.html', 'about/index.html', 'tuning-lab/index.html', 'feed.xml']) {
+    for (const rel of ['index.html', 'log/index.html', 'catalog/index.html', 'about/index.html', 'feed.xml']) {
         assert.ok(existsSync(join(OUT, rel)), `${rel} is missing`)
     }
+    assert.ok(!existsSync(join(OUT, 'tuning-lab')), 'the Tuning Lab was retired in R1')
     const newest = readEntries()[0]
     assert.ok(existsSync(join(OUT, 'log', newest.date, 'index.html')), 'the newest post is missing')
     assert.ok(pages.length >= report.entries, 'every entry should have a post')
@@ -115,8 +116,11 @@ test('every image carries alt text, and the halves of a pair never share it', ()
 })
 
 test('nothing that carries meaning sits behind a script', () => {
-    const post = pages.find((p) => /class="ba /.test(read(p)))
-    const html = read(post || 'index.html')
+    // A post, not the front page: the front page features the newest pair
+    // but carries no marginalia.
+    const post = pages.find((p) => /^log\/\d{4}-\d{2}-\d{2}\//.test(p) && /class="ba /.test(read(p)))
+    assert.ok(post, 'at least one post should carry a before/after pair')
+    const html = read(post)
     // The pair is plain markup; the marginalia are <details>; the controls that
     // need script ship hidden and are revealed by site.js.
     assert.match(read('log/index.html'), /<div class="filters" data-filters hidden>/)
@@ -139,7 +143,7 @@ test('nothing this build AUTHORS carries an emoji', () => {
     const MARKS_IN_USE = /[\u2720\u25C7\u25C2\u25B8\u2190\u2192\u2212]/gu
 
     // Pages built entirely from the site's own words.
-    for (const rel of ['about/index.html', 'tuning-lab/index.html']) {
+    for (const rel of ['about/index.html']) {
         const found = read(rel).replace(MARKS_IN_USE, '').match(emoji)
         assert.equal(found, null, `${rel} carries an emoji: ${found && found[0]}`)
     }

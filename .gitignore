@@ -38,12 +38,11 @@ web-build/
 # contains, and this content was never meant to be public — phase 57,
 # plan/archive/2026-09-25-trim-t4/plan/phases/phase_57_devlog_pages_scopedown.md). Rebuild locally with
 # `npm run site:build`; source inputs (entries/*.md, dated screenshots,
-# hand-authored tuning-lab reports, README.md) stay tracked.
+# README.md) stay tracked.
 devlog/index.html
 devlog/log.html
 devlog/catalog.html
 devlog/entries/*.html
-devlog/tuning-lab/index.html
 devlog/data/
 devlog/assets/catalog/
 

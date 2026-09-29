@@ -502,7 +502,6 @@ pre { border: 1px solid var(--ash); background: var(--panelBg); padding: 12px 14
 const NAV = [
   { href: "/log/", label: "The Log", key: "log" },
   { href: "/catalog/", label: "Catalog", key: "catalog" },
-  { href: "/tuning-lab/", label: "Tuning Lab", key: "lab" },
   { href: "/about/", label: "About", key: "about" },
 ];
 

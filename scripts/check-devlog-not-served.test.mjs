@@ -16,14 +16,12 @@ const SOURCE_PATHS = [
   'devlog/assets/2026-08-11/combat-encounter.after.png',
   'devlog/assets/2026-08-11/combat-encounter.before.png',
   'devlog/assets/2026-08-11/combat-encounter.diff.png',
-  'devlog/tuning-lab/tuning-lab-1.html',
 ]
 
 const GENERATED_PATHS = [
   'devlog/index.html',
   'devlog/log.html',
   'devlog/catalog.html',
-  'devlog/tuning-lab/index.html',
   'devlog/entries/DIGEST_2026-08-11.html',
   'devlog/data/cards.json',
   'devlog/data/effects.json',
@@ -49,11 +47,6 @@ test('a mixed tree flags only the generated members', () => {
 test('isGeneratedDevlogPath — entries/*.md source is not flagged, entries/*.html output is', () => {
   assert.equal(isGeneratedDevlogPath('devlog/entries/DIGEST_2026-01-01.md'), false)
   assert.equal(isGeneratedDevlogPath('devlog/entries/DIGEST_2026-01-01.html'), true)
-})
-
-test('isGeneratedDevlogPath — tuning-lab reports are source, tuning-lab/index.html is generated', () => {
-  assert.equal(isGeneratedDevlogPath('devlog/tuning-lab/tuning-lab-3.html'), false)
-  assert.equal(isGeneratedDevlogPath('devlog/tuning-lab/index.html'), true)
 })
 
 test('isGeneratedDevlogPath — dated screenshot dirs are source, assets/catalog/** is generated', () => {

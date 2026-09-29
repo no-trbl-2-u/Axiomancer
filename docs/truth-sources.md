@@ -109,7 +109,7 @@ here); `kb-query` is the genre's external prior art (community sourced,
 cite with `src-NNN` receipts) and has NO local fallback — the Worker is
 the corpus's only route into this repo.
 
-## Measured truth (baselines) — freshness discipline
+## Measured truth — retired during the revamp (D57)
 
 Two kinds of truth answer game questions, and they go stale
 differently:
@@ -120,27 +120,22 @@ differently:
   the guard tests pin every player-facing surface to the payloads. The
   catalog page carries a stamp (`from engine source <commit>`) so a
   stale render is visible on sight.
-- **Measured truth** (win-rate curves, status engagement, preset
-  spreads) is only as fresh as the last sim run. The canonical
-  measurement is
-  `axiomancer-mechanics/docs/reports/baselines/deck-matrix-baseline.json`,
-  meta-stamped with the commit it measured.
+- **Measured truth** (win-rate curves, status engagement) is only as
+  fresh as the last sim run. **There is none current.** The deck-matrix
+  baseline and its tooling (`baseline:check`, `baseline:regen`, the CI
+  freshness warning, the digest's nightly re-measure) were retired in
+  revamp phase R1 (D57): after the card purge every cell was the grey
+  deck, so the file measured nothing a decision could use. The last one
+  is archived at `plan/archive/baselines/deck-matrix-baseline.json`
+  (stamp `be808d2`) and describes a pre-revamp engine.
 
-Rules when citing measured numbers:
+Rules until measurement returns (R9's own measurement, then R12's new
+combat-playtest):
 
-1. Run `npm run baseline:check` first (soft alarm: compares the
-   baseline's stamp against `axiomancer-mechanics/src` history). CI
-   runs the same check as a warning on mechanics pushes; the nightly
-   digest re-measures with a reduced pass when stale
-   (`npm run baseline:regen -- --runs=30 --confidence=reduced-nightly`).
-2. Every balance claim NAMES its baseline stamp ("as of `<commit>`,
-   `<date>`"). A claim citing a stale baseline must say the tree has
-   moved since — mechanics changes after the stamp make the numbers
-   historical, not current.
-3. `npm run baseline:regen` (full: runs=60) re-measures and re-stamps.
-   A `confidence: reduced-nightly` baseline is directionally honest,
-   never confirmation-grade — close calls need the full multi-seed
-   pass before anyone acts on them.
-4. Measuring is not tuning: regenerating the baseline is briefing;
-   card and deck changes happen only in guided sessions with T (D37),
-   and engine constants stay manual.
+1. A balance question gets "not measured" as its answer, not a number
+   from the archived baseline.
+2. When a measurement lands, every claim citing it NAMES the commit it
+   measured ("as of `<commit>`, `<date>`").
+3. Measuring is not tuning: a measurement is briefing; card and deck
+   changes happen only in guided sessions with T (D37), and engine
+   constants move only inside a ratified revamp phase (D58).

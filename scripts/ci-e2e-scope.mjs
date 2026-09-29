@@ -5,7 +5,7 @@
  * mechanics and mobile verify workflows.
  *
  * Unknown mobile runtime paths fail closed to the full suite. Mechanics paths
- * outside the documented mobile/editor coupling remain mechanics-only. The
+ * outside the documented mobile coupling remain mechanics-only. The
  * caller may force the full suite when history is unavailable or for the
  * weekly/manual backstop.
  */
@@ -15,7 +15,6 @@ const SUITES = ['hazard', 'encounters', 'combat']
 function emptyResult() {
     return {
         mobile: false,
-        editor: false,
         run_integration: false,
         full: false,
         hazard: false,
@@ -24,9 +23,8 @@ function emptyResult() {
     }
 }
 
-function enableFull(result, { editor = false } = {}) {
+function enableFull(result) {
     result.mobile = true
-    result.editor = editor
     result.run_integration = true
     result.full = true
     for (const suite of SUITES) result[suite] = true
@@ -108,13 +106,12 @@ function classifyMechanicsPath(path, result) {
         || path === 'scripts/ci-e2e-scope.mjs'
         || path === 'axiomancer-mechanics/src/index.ts'
     ) {
-        enableFull(result, { editor: true })
+        enableFull(result)
         return
     }
 
     if (/^axiomancer-mechanics\/src\/(?:Combat|Cards|Effects)\//.test(path)) {
         markMobileSuite(result, 'combat')
-        result.editor = true
         return
     }
     // Enemy content renders in both the combat presenter (portraits,
@@ -148,7 +145,7 @@ export function classifyE2EScope({ owner, files, forceFull = false }) {
 
     const result = emptyResult()
     if (forceFull) {
-        enableFull(result, { editor: owner === 'mechanics' })
+        enableFull(result)
         return result
     }
 

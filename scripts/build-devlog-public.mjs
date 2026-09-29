@@ -27,8 +27,8 @@
 //      the enhancement script
 //   3. derive web media: WebP captures at 2x the rendered box, 320px index
 //      thumbnails, licence-gated catalog art
-//   4. render landing / index (paginated) / post / catalog / tuning lab /
-//      about, plus an Atom feed
+//   4. render landing / index (paginated) / post / catalog / about, plus an
+//      Atom feed
 //   5. report the payload budget per page type and, with --strict, fail on a
 //      page that blows it
 //
@@ -56,7 +56,6 @@ const DEVLOG = join(ROOT, 'devlog')
 const ENTRIES = join(DEVLOG, 'entries')
 const CAPTURES = join(DEVLOG, 'assets')
 const DATA = join(DEVLOG, 'data')
-const TUNING_LAB = join(DEVLOG, 'tuning-lab')
 const ART = join(ROOT, 'axiomancer-mobile', 'assets', 'images')
 
 /** The default build directory. Never committed; see .gitignore and the guard. */
@@ -81,7 +80,6 @@ const BUDGETS = {
     post: 1.4 * 1024 * 1024,
     catalog: 1.1 * 1024 * 1024,
     about: 200 * 1024,
-    lab: 200 * 1024,
 }
 
 /**
@@ -731,37 +729,6 @@ async function renderCatalog(media, out, warnings) {
     return { result: { page: 'catalog/', type: 'catalog', bytes: bytes + imageBytes }, attributions }
 }
 
-/** The Tuning Lab: the hand-authored reports, listed by their own titles. */
-function renderLab(out) {
-    const root = rootFor(1)
-    const files = existsSync(TUNING_LAB)
-        ? readdirSync(TUNING_LAB).filter((f) => /^(?!index\.html$).+\.html$/.test(f)).sort()
-        : []
-    let copied = 0
-    const rows = files.map((file) => {
-        const source = readFileSync(join(TUNING_LAB, file), 'utf8')
-        const title = (source.match(/<title>([^<]*)<\/title>/i) || [])[1]?.trim() || file
-        copied += write(join(out, 'tuning-lab', file), source)
-        return `<li><a href="${escapeHtml(file)}">${escapeHtml(title)}</a></li>`
-    })
-
-    const body = `<div class="band band-narrow">
-  ${eyebrow('The tuning lab')}
-  <h1>The measured reports</h1>
-  <p class="dim">Hand-authored reports from the balance passes: what was measured, what it said, and what was changed because of it. It is a list; it does not need a design.</p>
-  <ul class="entries">${rows.join('\n') || '<li class="mono">No reports yet.</li>'}</ul>
-</div>`
-    // The reports are separate pages a reader opens one at a time; copying
-    // them does not put their weight on this index (`copied` is reported, not
-    // budgeted).
-    const bytes = write(join(out, 'tuning-lab', 'index.html'), page({
-        title: 'The tuning lab — Miserere Mei, Deus',
-        description: 'Measured balance reports from Miserere Mei, Deus.',
-        body, current: 'lab', root, themes: THEME_IDS,
-    }))
-    return { page: 'tuning-lab/', type: 'lab', bytes, reports: files.length, reportBytes: copied }
-}
-
 /** About: what the game is, how an entry is made, what is withheld, licences. */
 function renderAbout(attributions, out) {
     const root = rootFor(1)
@@ -931,7 +898,6 @@ export async function build({ out = DEFAULT_OUT, strict = false, origin = 'https
     for (const entry of entries) results.push(await renderPost(entry, entries, media, out, warnings))
     const catalog = await renderCatalog(media, out, warnings)
     results.push(catalog.result)
-    results.push(renderLab(out))
     results.push(renderAbout(catalog.attributions, out))
     renderFeed(entries, out, origin.replace(/\/$/, ''))
 

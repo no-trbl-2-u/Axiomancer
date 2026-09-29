@@ -33,6 +33,13 @@ describe('profane canon — shape contract', () => {
         expect(new Set(ids).size).toBe(ids.length);
     });
 
+    // Moved here from the root naming-law sweep when R1 deleted it: a
+    // malformed id breaks lookups, so this is a bug detector, not a style law.
+    it('every card id is kebab-case', () => {
+        const malformed = cardLibrary.map(c => c.id).filter(id => !/^[a-z][a-z0-9-]*$/.test(id));
+        expect(malformed).toEqual([]);
+    });
+
     it('every card carries exactly one of the seven theme tags', () => {
         for (const card of cardLibrary) {
             expect(themeOf(card), `${card.id} must carry exactly one theme tag`).toBeDefined();

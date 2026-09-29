@@ -4,8 +4,8 @@
 // serves from `main`'s tree. Phase 57 (plan/archive/2026-09-25-trim-t4/plan/phases/phase_57_devlog_pages_scopedown.md)
 // untracked these paths because the built site's own header reads "A private
 // index of the game's content and the nightly development log" — the source
-// inputs (entries/*.md, dated screenshots, hand-authored tuning-lab reports)
-// stay tracked; only the regenerable output is gitignored.
+// inputs (entries/*.md, dated screenshots) stay tracked; only the
+// regenerable output is gitignored.
 //
 // The public DevLog (2026-09-20) does NOT weaken this. It builds to
 // `dist/devlog-public/`, which is gitignored and listed here as generated too:
@@ -31,7 +31,6 @@ export function isGeneratedDevlogPath(rel) {
   // The public site's build directory — every byte of it is generated.
   if (rel === 'dist' || rel.startsWith('dist/')) return true
   if (rel === 'devlog/index.html' || rel === 'devlog/log.html' || rel === 'devlog/catalog.html') return true
-  if (rel === 'devlog/tuning-lab/index.html') return true
   if (/^devlog\/entries\/.*\.html$/.test(rel)) return true
   if (rel.startsWith('devlog/data/')) return true
   if (rel.startsWith('devlog/assets/catalog/')) return true

@@ -9,7 +9,7 @@ name: ci-autofix
 
 on:
   workflow_run:
-    workflows: [verify-mechanics, verify-mobile, verify-card-editor]
+    workflows: [verify-mechanics, verify-mobile]
     types: [completed]
   workflow_dispatch:
 

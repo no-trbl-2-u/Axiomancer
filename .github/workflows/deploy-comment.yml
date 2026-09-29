@@ -33,7 +33,7 @@ name: deploy-comment
 
 on:
   workflow_run:
-    workflows: [verify-mechanics, verify-mobile, verify-card-editor]
+    workflows: [verify-mechanics, verify-mobile]
     types: [completed]
 
 permissions:

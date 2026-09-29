@@ -1,9 +1,9 @@
 name: verify-drift
 
-# The content-drift gate (phase 68). The tables it compares live in three
-# different workspaces, so no single package's verify job can own it: an
-# editor-only or catalog-only edit would not trigger verify-mobile, and a
-# mobile-only edit would not trigger the editor's. This lane triggers on every
+# The content-drift gate (phase 68). The tables it compares live in more than
+# one workspace, so no single package's verify job can own it: a catalog-only
+# edit would not trigger verify-mobile, and a mobile-only edit would not
+# trigger the catalog's. This lane triggers on every
 # path the test reads, which is the whole point of hosting it at the root.
 
 on:
@@ -12,8 +12,6 @@ on:
     paths:
       - 'axiomancer-mobile/components/combat/glyphShapes.ts'
       - 'axiomancer-mobile/state/combat/keywords.ts'
-      - 'axiomancer-card-editor/src/components/CardFace.tsx'
-      - 'axiomancer-card-editor/src/theme/wx.ts'
       - 'axiomancer-mechanics/docs/keyword-atlas.md'
       - 'axiomancer-mechanics/src/Enemy/enemy-keywords.ts'
       - 'scripts/build-catalog.mjs'
@@ -30,8 +28,6 @@ on:
     paths:
       - 'axiomancer-mobile/components/combat/glyphShapes.ts'
       - 'axiomancer-mobile/state/combat/keywords.ts'
-      - 'axiomancer-card-editor/src/components/CardFace.tsx'
-      - 'axiomancer-card-editor/src/theme/wx.ts'
       - 'axiomancer-mechanics/docs/keyword-atlas.md'
       - 'axiomancer-mechanics/src/Enemy/enemy-keywords.ts'
       - 'scripts/build-catalog.mjs'

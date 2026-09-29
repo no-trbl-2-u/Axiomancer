@@ -98,9 +98,6 @@ web-build/
 # ── From /axiomancer-mechanics/automation/playtest/reports/.gitignore ──────
 /axiomancer-mechanics/automation/playtest/reports/*.json
 
-# /axiomancer-card-editor/.gitignore holds only node_modules/ and dist/,
-# both already covered repo-wide above.
-
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 2 — Build-irrelevant trees (the actual size savings)
 # ─────────────────────────────────────────────────────────────────────────────

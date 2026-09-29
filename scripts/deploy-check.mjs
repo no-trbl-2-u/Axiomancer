@@ -155,7 +155,7 @@ else if (PROVIDER === 'github-actions') {
   const REPO = process.env.GH_REPO ?? 'no-trbl-2-u/Axiomancer'
   const WORKFLOWS = (
     process.env.DEPLOY_WORKFLOWS ??
-    'verify-mechanics.yml,verify-mobile.yml,verify-card-editor.yml'
+    'verify-mechanics.yml,verify-mobile.yml'
   )
     .split(',')
     .map((w) => w.trim())
@@ -202,7 +202,7 @@ else if (PROVIDER === 'github-actions') {
       // gated path, zero runs means the gate is broken, not green.
       const gatedPaths = (
         process.env.DEPLOY_GATED_PATHS ??
-        'axiomancer-mechanics/,axiomancer-mobile/,axiomancer-card-editor/,package-lock.json'
+        'axiomancer-mechanics/,axiomancer-mobile/,package-lock.json'
       )
         .split(',')
         .map((p) => p.trim())

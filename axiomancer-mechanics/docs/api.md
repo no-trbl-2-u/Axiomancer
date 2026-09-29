@@ -13,9 +13,9 @@ unchanged, but the absolute semver guarantee starts at 1.0.
 ## Core Exports (from `'axiomancer-mechanics'`)
 
 > **Barrel pruned 2026-09-25 (TRIM THE FAT).** `src/index.ts` now carries only
-> the names a consumer outside the engine imports (axiomancer-mobile,
-> axiomancer-card-editor, root scripts). Names listed below that are no longer
-> on the barrel are still exported from their defining module under `src/`;
+> the names a consumer outside the engine imports (axiomancer-mobile, root
+> scripts; the card editor was deleted in R1). Names listed below that are no
+> longer on the barrel are still exported from their defining module under `src/`;
 > import them from there. Symbols that had no consumer at all were deleted and
 > are struck from this page.
 

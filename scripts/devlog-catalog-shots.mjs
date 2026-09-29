@@ -42,7 +42,7 @@ const DATA = join(ROOT, 'devlog', 'data')
 const ASSETS = join(ROOT, 'devlog', 'assets')
 
 /** Workspaces whose own node_modules a worktree must borrow (see the header). */
-const WORKSPACES = ['axiomancer-mechanics', 'axiomancer-mobile', 'axiomancer-card-editor']
+const WORKSPACES = ['axiomancer-mechanics', 'axiomancer-mobile']
 
 /**
  * The significance gate, per kind: the fields a READER can see.

@@ -19,8 +19,9 @@ consequential stance, not a role-play veneer.
 
 The core loop: explore a map → resolve authored node encounters
 (combat, minigames, dialogue, cutscenes) → make morally charged
-choices that shift quests, flags, and faction reputation → carry
-those consequences into future world, boss, and region state.
+choices that shift quests and flags → carry those consequences
+into future world, boss, and region state. (Faction reputation was
+retired; `game.migrate.ts` strips its old save slice.)
 THE OATHS (the 3-axis alignment cube) and GRACE (the moral meter)
 were removed 2026-09-27 (T6, D39).
 

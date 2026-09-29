@@ -8,7 +8,7 @@
  * Imports are organised by domain.
  *
  * The barrel carries only what a consumer outside the engine imports
- * (axiomancer-mobile, axiomancer-card-editor, root scripts). Engine-internal
+ * (axiomancer-mobile, root scripts). Engine-internal
  * helpers and test-only symbols are imported from their defining module
  * (pruned 2026-09-25, TRIM THE FAT).
  */

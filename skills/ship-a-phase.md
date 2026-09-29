@@ -103,8 +103,6 @@ A phase touches one or more of the monorepo's workspaces:
   …), vitest suites colocated.
 - `axiomancer-mobile/` — the Expo app; it reads the engine through
   the `@mechanics` alias, jest suites colocated.
-- `axiomancer-card-editor/` — until R1 deletes it; it also imports
-  `@mechanics`.
 
 Its scope is the build-plan row plus the part plan it names. An
 R-phase follows the reset rules in `plan/revamp/README.md` §5 (see
@@ -257,8 +255,7 @@ owns the data, with colocated tests.
 
 Update every consumer of what changed: engine exports
 (`axiomancer-mechanics/src/index.ts`), mobile screens and
-navigation, the card editor while it exists, catalog/devlog
-exporters. Anything removed from a player's save ships with a
+navigation, catalog/devlog exporters. Anything removed from a player's save ships with a
 migration in `axiomancer-mechanics/src/Game/game.migrate.ts` and a
 test (`plan/revamp/README.md` §5 rule 4).
 
@@ -291,13 +288,11 @@ Scope the gate to the workspace(s) the phase touches
 ```bash
 npm run verify --workspace axiomancer-mechanics
 npm run verify --workspace axiomancer-mobile
-npm run verify --workspace axiomancer-card-editor   # until R1 deletes it
-npm run verify                                      # all three, when in doubt
+npm run verify                                      # both, when in doubt
 ```
 
-A change to mechanics' public surface also runs the mobile (and,
-until R1, card-editor) gates — the `@mechanics` alias couples
-them. An R-phase additionally runs the revamp gates
+A change to mechanics' public surface also runs the mobile gate
+— the `@mechanics` alias couples them. An R-phase additionally runs the revamp gates
 (`plan/revamp/README.md` §5): root `npm test`,
 `npm run lint:content` and `node scripts/check-lexicon.mjs`.
 `baseline:check` is retired (D57). All legs are hard. Iterate up

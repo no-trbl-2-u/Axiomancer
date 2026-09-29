@@ -117,11 +117,15 @@ after}` snapshots) is unchanged and complementary.
 **Sweep replay index:** on `npm run combat-playtest`, `--log-file` at
 the default info level writes one `rng/seed-set` entry per simulated run
 plus one `cli/playtest-cell` summary per cell (stage, enemy, policy,
-deck, seed, winRate, statusEngagement, dotHpFraction, avgRounds):
+deck, seed, winRate, dotHpFraction, avgRounds, and the diagnostic
+statusEngagement):
 
 ```bash
-npm run combat-playtest -- --stage=late --deck=preset:all --json --log-file scratch/sweep-index.jsonl
+npm run combat-playtest -- --stage=late --json --log-file scratch/sweep-index.jsonl
 ```
+
+Since the card purge (P1) every run deals the grey deck, so a deck sweep
+has one cell per stage; R7b deletes the presets.
 
 Find the anomalous cell in the index, take its seed, and zoom in with
 `npm run combat -- --seed <n> ... --log-level debug --log-file ...` for

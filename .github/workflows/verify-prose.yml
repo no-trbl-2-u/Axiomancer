@@ -17,7 +17,6 @@ on:
       - 'axiomancer-mobile/state/presenters/*.copy.ts'
       - 'scripts/check-prose.mjs'
       - 'scripts/check-prose.test.mjs'
-      - 'scripts/check-naming-law.mjs'
       - '.github/workflows/verify-prose.yml'
   pull_request:
     branches: [main]
@@ -29,7 +28,6 @@ on:
       - 'axiomancer-mobile/state/presenters/*.copy.ts'
       - 'scripts/check-prose.mjs'
       - 'scripts/check-prose.test.mjs'
-      - 'scripts/check-naming-law.mjs'
       - '.github/workflows/verify-prose.yml'
   schedule:
     - cron: '53 7 * * 0'
@@ -50,7 +48,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: House-voice lint over shipped content
         run: node scripts/check-prose.mjs
-      - name: Naming law over shipped names
-        run: node scripts/check-naming-law.mjs --sweep
       - name: Lint unit tests
         run: node --test scripts/check-prose.test.mjs
