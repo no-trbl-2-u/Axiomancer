@@ -45,9 +45,8 @@ and which verbs a FREE line was allowed to use are repealed. A FREE line
 nobody would ever choose is still a design failure — dead cards are bugs — but
 it is a failure to be fixed by making the line better, not by a lint.
 
-**Enemies escalate and telegraph big.** An enemy is a creature with keywords
-(HIDE, SWIFT, BRUTAL, VENOM, UNSHAKEN, ELUSIVE, REGROW, RAVENOUS, WOUNDING),
-its own VITAE pool, a tiered deck that never reshuffles backwards, and — for
+**Enemies escalate and telegraph big.** An enemy is a creature with its own
+VITAE pool, a tiered deck that never reshuffles backwards, and — for
 bosses and uniques — stages that change the fight mid-fight. A telegraph prints
 a digit, not an adjective.
 

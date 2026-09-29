@@ -82,13 +82,10 @@ export function EnemyActionCard({
         transform: [{ translateY: lift.value }],
     }));
 
-    // One a11y sentence carrying everything the card says visually. "Denied"
-    // is the foe's OWN blow being held, never "nothing landed" — the brood
-    // bites through a hindered phase, and the sentence has to say so
-    // (burn-day audit 3.3).
+    // One a11y sentence carrying everything the card says visually.
     const a11y = [
         vm.denied
-            ? `${enemyName}'s action was denied${vm.addDealt > 0 ? `, but its brood bit you for ${vm.addDealt}` : ''}`
+            ? `${enemyName}'s action was denied`
             : `${enemyName} ${vm.label.toLowerCase()}`,
         vm.actionText,
         vm.lines.map((l) => l.text).join(', '),
@@ -117,10 +114,6 @@ export function EnemyActionCard({
                         PHASE {vm.phaseIndex}
                     </Text>
                     <Text style={[styles.glyph, { color: accent }]} allowFontScaling={false}>{vm.icon}</Text>
-                    {/* Never a bare DENIED while the brood is still biting —
-                        the same honesty rule `IntentIcon`'s wall-math readout
-                        follows. `adjustsFontSizeToFit` because the honest form
-                        is the long one. */}
                     <Text
                         style={[styles.label, { color: accent }]}
                         numberOfLines={1}
@@ -128,7 +121,7 @@ export function EnemyActionCard({
                         minimumFontScale={0.6}
                         allowFontScaling={false}
                     >
-                        {vm.denied ? (vm.addDealt > 0 ? `DENIED · BROOD −${vm.addDealt}` : 'DENIED') : vm.label}
+                        {vm.denied ? 'DENIED' : vm.label}
                     </Text>
                     <Text style={styles.action} numberOfLines={3}>{vm.actionText}</Text>
                     {vm.lines.length > 0 && (
@@ -136,7 +129,7 @@ export function EnemyActionCard({
                             {vm.lines.map((l, i) => (
                                 <Text
                                     key={`${l.text}-${i}`}
-                                    style={[styles.line, { color: l.color, borderColor: `${l.color}66` }, vm.denied && l.source === 'telegraph' && styles.lineDenied]}
+                                    style={[styles.line, { color: l.color, borderColor: `${l.color}66` }, vm.denied && styles.lineDenied]}
                                     numberOfLines={1}
                                     allowFontScaling={false}
                                 >
@@ -147,9 +140,7 @@ export function EnemyActionCard({
                     )}
                     {vm.denied && (
                         <Text style={[styles.deniedNote, { color: AXM.sulfur }]} numberOfLines={2}>
-                            {vm.addDealt > 0
-                                ? 'your control held — its brood bit anyway'
-                                : 'your control held — none of it landed'}
+                            your control held — none of it landed
                         </Text>
                     )}
                 </View>

@@ -47,7 +47,6 @@ An encounter node resolves to a `combat-prelude` event that renders **in place o
 | `combat-end-consequence` | Consequence line shown at end phase |
 | `combat-log-toggle` / `combat-log` / `combat-log-close` | Ledger overlay |
 | `combat-card-detail` / `combat-card-detail-close` | Card detail modal (deliberate; has a dismiss) |
-| `combat-add-confirm` / `combat-add-strike` / `combat-add-wait` | Confirm sheet when adding a strike |
 | `combat-reprisal-picker` / `combat-reprisal-option-<i>-<id>` / `combat-reprisal-skip` | Reprisal choice |
 | `combat-mercy` / `combat-mercy-spare` / `combat-mercy-exploit` | Mercy choice when the foe breaks |
 | `combat-capitulation` / `combat-capitulation-accept` / `combat-capitulation-continue` | Foe offers to yield |

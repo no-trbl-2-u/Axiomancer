@@ -31,7 +31,6 @@ import { lookupEffect, applyEffect } from '../Effects';
 import type { Effect, ActiveEffect } from '../Effects/types';
 import type { Character } from '../Character/types';
 import type { Enemy } from '../Enemy/types';
-import { findEnemyKeyword, hasEnemyKeyword, enemyKeywordText } from '../Enemy/enemy-keywords';
 import { getCardById } from '../Cards/cards.library';
 import { executeCard } from '../Cards/card.engine';
 import { checkStatePredicate } from '../Cards/synergy-predicates';
@@ -87,7 +86,6 @@ import type {
     CombatCard, CombatDieColor, CombatEncounterState, CombatEvent, CardPlay,
     CombatManaDie, CombatPhaseResult, CombatTransition, LandedEffect, CombatReadResult,
     CombatThreatEffect,
-    CombatAdd,
 } from './combat.encounter.types';
 
 // ── Tunable constants (HP model) ─────────────────────────────────────────────
@@ -223,40 +221,6 @@ export const PIP_GUARD_BONUS = 5;
 export const COLOR_MATCH_STATUS_DURATION_BONUS = 1;
 
 // ── THE BIG NUMBERS REWRITE (2026-09-02) — the damage-scaler constants ───────
-
-/**
- * WOUNDING's payload — the curse card a hard unguarded blow shoves into the
- * player's deck. Authored in the curse pool of `cards.library.ts`; an absent
- * id makes the keyword a silent no-op (the resolve-filter law).
- */
-export const WOUND_CARD_ID = 'the-wound';
-
-/** BRUTAL — the multiplier on whatever a foe's threat gets past your soak. */
-export const BRUTAL_DAMAGE_MULT = 1.5;
-
-// ── Phase 102 (SUMMON) — the brood's constants ──────────────────────────────
-
-/** Waves a single combat may ever spawn. Adds NEVER respawn on emptiness:
- *  clearing a wave is progress the player keeps, because a respawn that the
- *  player's own clear CAUSES is a tax, not a decision. Prior art runs the same
- *  way on both sides — Aeon's End minions come from a finite nemesis deck
- *  (kb:aeons-end/rules/scoring-endgame), STS-BG summons from a finite per-Act
- *  Summon deck (kb:slay-the-spire-the-board-game/rules/setup, src-002). Every
- *  add fight players tolerate has FINITE adds. */
-export const ADD_WAVE_CAP = 2;
-/** A spawned add's FLAT per-phase bite, as a fraction of the foe's level and
- *  snapshotted at spawn (floor 2). Sized so a full wave lands well under the
- *  foe's OWN printed telegraph — an L22 elite telegraphs ~31 per phase
- *  (`combat.threat.ts`), against which 2 adds x 4 = 8 is ~26%. Adds must read
- *  as a modifier on the wall, never as a second wall. The add term sits
- *  OUTSIDE the escalation stack (THREAT_ESCALATION_MAX), so a long fight does
- *  not double it. */
-export const ADD_BITE_PER_LEVEL = 0.2;
-/** `strikeAdd`'s Conviction price. CONVICTION_CAP is 12 and signatures run
- *  1-9 (`combat.signature.ts`), so clearing a full 2-add wave costs 4 — one
- *  Press Fate, a third of the cap. Real opportunity cost, never a lockout.
- *  A free, mandatory, repeating tap is the canonical resented add shape. */
-export const STRIKE_ADD_COST = 2;
 
 /** The most every STAGE a foe has entered can add to its later phases,
  *  combined. Stage bonuses stack on top of the escalation clock, so this is
@@ -854,21 +818,6 @@ function applyEnemyDamage(
 }
 
 /**
- * THE BIG NUMBERS REWRITE (2026-09-02) — the foe's effective HIDE.
- *
- * HIDE N subtracts N from every hit, to a floor of 1 (Mage Knight's armour
- * floor: a hit always scratches). ELUSIVE doubles it until the player has
- * landed a rung of STAGGER on the foe this round — the control answer to the
- * armour answer. PIERCE skips this call entirely.
- */
-export function effectiveHide(enemy: Enemy, staggeredThisRound: boolean): number {
-    const hide = findEnemyKeyword(enemy.keywords, 'hide')?.n ?? 0;
-    if (hide <= 0) return 0;
-    const elusive = hasEnemyKeyword(enemy.keywords, 'elusive') && !staggeredThisRound;
-    return elusive ? hide * 2 : hide;
-}
-
-/**
  * THE BIG NUMBERS REWRITE (2026-09-02) — the scalers a single player hit picks
  * up on its way to the foe, folded in one place so every damage source (the
  * `deal` mechanic, a rider's `damage`, a payoff burst) reads the same rules.
@@ -882,10 +831,6 @@ export function effectiveHide(enemy: Enemy, staggeredThisRound: boolean): number
  *   6. EXECUTE — doubled while the foe is at or below the printed threshold
  *   7. VULNERABLE — the foe's incoming-damage multiplier (S3, D41: last of
  *      the multipliers, uncapped). The caller scales `base` by body first.
- *   8. HIDE — subtracted last, floor 1, unless the hit PIERCEs
- *
- * Multiplicative steps run before the flat armour subtraction so HIDE is a
- * genuine floor on small hits rather than a percentage tax on big ones.
  */
 export interface PlayerHitParams {
     base: number;
@@ -895,25 +840,12 @@ export interface PlayerHitParams {
     chain: number;
     flay: boolean;
     execute: boolean;
-    hide: number;
-    pierce: boolean;
     /** VULNERABLE on the foe (`getDamageTakenMultiplier`); 1 when absent. */
     vulnMult?: number;
 }
 
 export function scalePlayerHit(params: PlayerHitParams): number {
-    return scalePlayerHitDetailed(params).dmg;
-}
-
-/**
- * `scalePlayerHit` plus the receipt: how much of the hit HIDE actually soaked
- * (bounded by the floor-1 rule, so it can be less than the printed N on a
- * small hit). Callers emit it as an `enemy-keyword-fired` HIDE popup — the
- * only enemy keyword that changed the arithmetic silently until the
- * 2026-09-04 playtest (a 5-VITAE swing per hit with no on-screen witness).
- */
-export function scalePlayerHitDetailed(params: PlayerHitParams): { dmg: number; hideSoaked: number } {
-    if (params.base <= 0) return { dmg: 0, hideSoaked: 0 };
+    if (params.base <= 0) return 0;
     let dmg = Math.round(params.base * params.readMult);
     if (params.colorMatch) dmg += colorMatchBonus(dmg);
     dmg += params.wrath;
@@ -921,13 +853,7 @@ export function scalePlayerHitDetailed(params: PlayerHitParams): { dmg: number; 
     if (params.flay) dmg = Math.round(dmg * FLAY_DAMAGE_MULT);
     if (params.execute) dmg = Math.round(dmg * EXECUTE_DAMAGE_MULT);
     if (params.vulnMult !== undefined && params.vulnMult !== 1) dmg = Math.round(dmg * params.vulnMult);
-    let hideSoaked = 0;
-    if (!params.pierce && params.hide > 0) {
-        const armoured = Math.max(1, dmg - params.hide);
-        hideSoaked = Math.max(0, dmg - armoured);
-        dmg = armoured;
-    }
-    return { dmg: Math.max(0, dmg), hideSoaked };
+    return Math.max(0, dmg);
 }
 
 /**
@@ -1230,7 +1156,7 @@ function applyRiderToState(
     // ── THE BIG NUMBERS REWRITE — the damage family on a rider ───────────────
     // A rider fires on the FREE line and from condition payoffs, both OUTSIDE
     // the PAID line's read/colour-match scaling, so a rider hit takes WRATH,
-    // CHAIN, FLAY, HIDE and PIERCE but no read multiplier: `readMult: 1`,
+    // CHAIN and FLAY but no read multiplier: `readMult: 1`,
     // `colorMatch: false`. The printed number is the number, plus the scalers
     // the player has visibly banked.
     let wrath = next.wrath ?? 0;
@@ -1244,8 +1170,7 @@ function applyRiderToState(
     let attribution = next.attribution;
     const cardName = lookupCard(cardId)?.name ?? cardId;
     if (r.damage) {
-        const hideBefore = effectiveHide(enemy, (next.staggerRungs ?? 0) > 0);
-        const hit0 = scalePlayerHitDetailed({
+        const dmg = scalePlayerHit({
             base: scaleFor(r.damage, stats, 'body', 'one-shot'),
             readMult: 1,
             colorMatch: false,
@@ -1253,14 +1178,8 @@ function applyRiderToState(
             chain,
             flay: flayStacks > 0,
             execute: false,
-            hide: hideBefore,
-            pierce: r.pierce === true,
             vulnMult: getDamageTakenMultiplier(enemy),
         });
-        const dmg = hit0.dmg;
-        if (hit0.hideSoaked > 0) {
-            events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'HIDE', amount: hit0.hideSoaked });
-        }
         if (chain > 0) chain = 0;
         if (flayStacks > 0) flayStacks -= 1;
         if (dmg > 0) {
@@ -1881,8 +1800,6 @@ function playBottomAction(
         m => m.kind === 'execute' && enemy.maxHealth > 0
             && enemy.health <= m.atPct * enemy.maxHealth,
     );
-    /** ELUSIVE lifts once the foe has been staggered this round. */
-    const staggeredThisRound = (state.staggerRungs ?? 0) > 0;
     let reserve = reserveIn;
     let floatingDice = (state.floatingDice ?? []).slice();
     let souls = state.souls ?? 0;
@@ -1962,9 +1879,9 @@ function playBottomAction(
      * on the first hit, one FLAY stack per hit). Returns the excess damage
      * beyond lethal so an OVERKILL clause can convert it.
      */
-    const landHit = (base: number, pierce: boolean, label: string): number => {
+    const landHit = (base: number, label: string): number => {
         const healthBefore = enemy.health;
-        const scaled = scalePlayerHitDetailed({
+        const dmg = scalePlayerHit({
             base: scaleFor(base, stats, 'body', 'one-shot'),
             readMult: 1,
             colorMatch,
@@ -1972,14 +1889,8 @@ function playBottomAction(
             chain,
             flay: flayStacks > 0,
             execute: executeArmed,
-            hide: effectiveHide(enemy, staggeredThisRound),
-            pierce,
             vulnMult,
         });
-        const dmg = scaled.dmg;
-        if (scaled.hideSoaked > 0) {
-            events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'HIDE', amount: scaled.hideSoaked });
-        }
         if (chain > 0) { chain = 0; }
         if (flayStacks > 0) { flayStacks -= 1; }
         if (dmg <= 0) return 0;
@@ -2003,20 +1914,19 @@ function playBottomAction(
             // ── THE BIG NUMBERS REWRITE — direct damage and its family ──────
             case 'deal': {
                 // Each hit is its own damage instance: BLEED-class DoTs fire
-                // once per hit and HIDE is subtracted from each, which is the
-                // whole reason `7 x 4` and `28 x 1` play differently.
+                // once per hit, which is why `7 x 4` and `28 x 1` play
+                // differently.
                 //
                 // ECHO/TWIN multiply the HIT COUNT, not the per-hit magnitude:
-                // an echoed `7 x 4` is eight instances of 7, so HIDE is paid
-                // eight times and a BLEED clock fires eight times. Doubling the
-                // amount instead would have made ECHO strictly better against
-                // armour than the card says. (The second `executeCard` pass
+                // an echoed `7 x 4` is eight instances of 7, so a BLEED clock
+                // fires eight times. Doubling the amount instead would have
+                // changed what the card says. (The second `executeCard` pass
                 // only re-applies `combatEffects`, so without this DEAL was a
                 // printed keyword with zero effect — caught 2026-09-02.)
                 const hits = Math.max(1, mech.hits ?? 1) * echoFactor;
                 for (let i = 0; i < hits; i++) {
                     if (isDefeated(enemy)) break;
-                    overkillExcess += landHit(mech.amount, mech.pierce === true, card.id);
+                    overkillExcess += landHit(mech.amount, card.id);
                 }
                 break;
             }
@@ -2712,21 +2622,15 @@ function playBottomAction(
         // a pip overflow, 20 cards in all — showed the player a figure the
         // engine never applied. Caught 2026-09-02 by the effectiveness pass.
         if (r.damage) {
-            const scaled = scalePlayerHitDetailed({
+            const dmg = scalePlayerHit({
                 base: scaleFor(r.damage, stats, 'body', 'one-shot'),
                 readMult: 1,
                 colorMatch,
                 wrath, chain,
                 flay: flayStacks > 0,
                 execute: executeArmed,
-                hide: effectiveHide(enemy, staggeredThisRound),
-                pierce: r.pierce === true,
                 vulnMult,
             });
-            const dmg = scaled.dmg;
-            if (scaled.hideSoaked > 0) {
-                events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'HIDE', amount: scaled.hideSoaked });
-            }
             if (chain > 0) chain = 0;
             if (flayStacks > 0) flayStacks -= 1;
             if (dmg > 0) {
@@ -3158,84 +3062,32 @@ function computeRungDenial(state: CombatEncounterState): {
         : (isBossTier ? THREAT_RUNGS_BOSS : THREAT_RUNGS);
     const rungGrowth = isBossTier ? Math.min(state.bossRungGrowth ?? 0, bossRungGrowthCap(naturalRungsTotal)) : 0;
     const rungsTotal = naturalRungsTotal + rungGrowth;
-    // UNSHAKEN (THE BIG NUMBERS REWRITE) — some things were never going to
-    // flinch: no rung of this foe's telegraph can be denied, whatever STAGGER
-    // and BACKFIRE have banked. The ledger still accrues (TURNABOUT can cash
-    // it); it simply buys nothing against THIS foe's ladder.
-    const unshaken = hasEnemyKeyword(state.enemy.keywords, 'unshaken');
-    const rungsLost = unshaken ? 0 : Math.min(rungsTotal, (state.staggerRungs ?? 0));
-    const rungDenied = !unshaken && rungsLost >= rungsTotal;
+    const rungsLost = Math.min(rungsTotal, (state.staggerRungs ?? 0));
+    const rungDenied = rungsLost >= rungsTotal;
     return { rungsTotal, rungsLost, rungDenied, naturalRungsTotal, rungGrowth };
 }
 
 /**
- * FLURRY's split: `total` divided into `hits` same-sum pieces, remainder
- * spread across the first pieces (so a 31-damage FLURRY-3 lands 11/10/10, not
- * a dropped point). Never zero-length and never a 0-damage piece for a
- * positive total.
- */
-function splitFlurryDamage(total: number, hits: number): number[] {
-    const base = Math.floor(total / hits);
-    const remainder = total - base * hits;
-    return Array.from({ length: hits }, (_, i) => base + (i < remainder ? 1 : 0));
-}
-
-/**
- * Phase 102 (SUMMON) — the soak arithmetic for a FLAT hit that is NOT part of
- * the foe's telegraph: armor, then GUARD, then BARRIER, with SWIFT's half
- * divisor (the wall absorbs half its face value and is consumed at the full
- * rate, exactly as in the telegraph loop).
- *
- * This is the SINGLE definition of the wall arithmetic shared by
- * `resolveThreatPhase`'s add block and BOTH of `projectIncomingThreat`'s terms
- * — the foe's own telegraphed hit as well as the add term — so the on-screen
- * wall math cannot drift from what the engine actually does. The design panel
- * named that drift the worst class of lie a telegraph can tell, and audit 3.2
- * is how it happened anyway: the projection kept a third, divergent inline copy
- * for its own telegraph soak, missing this helper's SWIFT divisor and armor
- * subtraction, and the add term inherited the bad leftover wall. If you need
- * this arithmetic anywhere, call this function.
- *
- * Deliberately EXCLUDES riposte (a parry on the foe's own swing, one-shot per
- * phase) and BRUTAL (a property of the foe's blow), and it
- * never touches `attacksLanded`/`attacksFullyBlocked`: an add's bite is not an
- * "attack" for any ledger that the authored telegraph reads.
+ * The soak arithmetic for one flat hit: armor, then GUARD, then BARRIER. The
+ * SINGLE definition of the wall arithmetic `projectIncomingThreat` shares with
+ * the engine, so the on-screen wall math cannot drift from what the engine
+ * actually does. Deliberately EXCLUDES riposte (a parry on the foe's own
+ * swing, one-shot per phase).
  */
 function soakFlatHit(
     raw: number,
-    o: { armor: number; guard: number; barrier: number; swift: boolean },
+    o: { armor: number; guard: number; barrier: number },
 ): { dealt: number; guard: number; barrier: number } {
     let dmg = Math.max(0, raw - o.armor);
-    const div = o.swift ? 2 : 1;
     let guard = o.guard;
     let barrier = o.barrier;
-    const g = Math.min(Math.floor(guard / div), dmg);
-    guard -= g * div;
+    const g = Math.min(guard, dmg);
+    guard -= g;
     dmg -= g;
-    const b = Math.min(Math.floor(barrier / div), dmg);
-    barrier -= b * div;
+    const b = Math.min(barrier, dmg);
+    barrier -= b;
     dmg -= b;
     return { dealt: dmg, guard, barrier };
-}
-
-/**
- * Phase 102 — a wave of SUMMON adds, snapshotted off the foe's level at spawn
- * time so a later STAGE cannot silently re-price a body already on the board.
- *
- * DETERMINISTIC BY CONSTRUCTION: no `rng()` call. `rng` is consumed by THE
- * CLOCK and the hand refill inside the same `processBetweenPhases` pass, so a
- * single stray draw here would shift every downstream seeded result — the
- * whole e2e suite and the combat-playtest matrix move at once. Keep it pure.
- */
-function spawnAddWave(enemy: Enemy, n: number, wave: number, name: string): CombatAdd[] {
-    const bite = Math.max(2, Math.round(enemy.level * ADD_BITE_PER_LEVEL));
-    return Array.from({ length: n }, (_, i) => ({
-        id: `add-${enemy.id}-${wave}-${i}`,
-        name,
-        vitae: 1,
-        maxVitae: 1,
-        bite,
-    }));
 }
 
 /**
@@ -3330,15 +3182,6 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
 
     let player = state.player;
     let enemy = state.enemy;
-    // Phase 33a — hoisted above the effect loop so the loop's swayCleanse
-    // hook can mutate the same locals PLEA reads/writes further down.
-    let sway = state.sway ?? 0;
-    let swayMilestoneWaveringFired = state.swayMilestoneWaveringFired;
-    let swayMilestoneFalteringFired = state.swayMilestoneFalteringFired;
-    let premises = state.premises ?? 0;
-    // Profane-canon rework — curse cards this phase's threat shuffles into the
-    // player's combat deck cycle (the deck-contamination vector).
-    const injectedCurses: string[] = [];
     // GUARD (one-shot, per-phase) absorbs first; BARRIER (persistent, stacking)
     // soaks the remainder; RIPOSTE parries and — spec 32 v3 — counters ONLY when
     // the attack was FULLY blocked (reflect class). All no-op when unset.
@@ -3389,32 +3232,10 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     // A lethal BACKFIRE drip (above) can drop the enemy to 0 before it swings —
     // guard the telegraph so an already-defeated enemy does not still hit the
     // player this phase (the victory check runs after this block).
-    // ── THE BIG NUMBERS REWRITE — the foe's keywords change this phase's maths ──
-    // SWIFT halves what a wall is worth, BRUTAL doubles what gets through,
-    // VENOM poisons on contact, RAVENOUS feeds on what it lands, and WOUNDING
-    // shoves a curse into the deck when a single blow lands hard enough.
-    const foeSwift = hasEnemyKeyword(enemy.keywords, 'swift');
-    const foeBrutal = hasEnemyKeyword(enemy.keywords, 'brutal');
-    const foeVenom = findEnemyKeyword(enemy.keywords, 'venom')?.n ?? 0;
-    const foeRavenous = hasEnemyKeyword(enemy.keywords, 'ravenous');
-    const foeWounding = findEnemyKeyword(enemy.keywords, 'wounding')?.n ?? 0;
-    // FLURRY N — splits each damage effect into N same-total-budget strikes,
-    // each its own damage instance (RIPOSTE's one-shot parry only blunts the
-    // first; VENOM/RAVENOUS/WOUNDING riders fire once per landed strike).
-    // Non-damage effects (debuffs, heals, riders) are untouched and still
-    // fire once. Same doctrine as the player-side DEAL family ("each hit is
-    // its own damage instance"), applied to the enemy's own telegraph.
-    const foeFlurry = findEnemyKeyword(enemy.keywords, 'flurry')?.n ?? 0;
-    const threatEffects = foeFlurry > 1
-        ? phase.threatAction.effects.flatMap((eff) => (
-            eff.damage && eff.damage > 0 ? splitFlurryDamage(eff.damage, foeFlurry).map((damage) => ({ damage })) : [eff]
-        ))
-        : phase.threatAction.effects;
-
     if (!hindered && !isDefeated(enemy)) {
         // The enemy attacks: its telegraphed threat action fires on the player.
         const playerTakenMult = getDamageTakenMultiplier(state.player);
-        for (const eff of threatEffects) {
+        for (const eff of phase.threatAction.effects) {
             if (eff.damage && eff.damage > 0) {
                 attacksLanded += 1;
                 // weakenMult folds soft-control AND partial rung loss.
@@ -3445,65 +3266,18 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     riposteFired = true;
                 }
                 // GUARD soaks first (one-shot, clamped), then BARRIER (persistent).
-                // SWIFT (THE BIG NUMBERS REWRITE): a wall counts for HALF against
-                // this foe — it absorbs half its face value and is consumed at
-                // the full rate, so the wall still helps but stops being the
-                // whole answer.
-                const soakDivisor = foeSwift ? 2 : 1;
-                const guardAbsorbed = Math.min(Math.floor(guard / soakDivisor), dmg);
-                guard -= guardAbsorbed * soakDivisor;
+                const guardAbsorbed = Math.min(guard, dmg);
+                guard -= guardAbsorbed;
                 dmg -= guardAbsorbed;
-                const barrierAbsorbed = Math.min(Math.floor(barrier / soakDivisor), dmg);
+                const barrierAbsorbed = Math.min(barrier, dmg);
                 if (barrierAbsorbed > 0) {
-                    barrier -= barrierAbsorbed * soakDivisor;
+                    barrier -= barrierAbsorbed;
                     dmg -= barrierAbsorbed;
                     events.push({ kind: 'barrier-absorbed', amount: barrierAbsorbed });
-                }
-                if (foeSwift && guardAbsorbed + barrierAbsorbed > 0) {
-                    events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'SWIFT' });
-                }
-                // BRUTAL: whatever gets past the wall hits harder. Mage Knight's
-                // reading is "take it TWICE", which is right at Mage Knight's
-                // numbers — doubling a 6 is a lesson. Doubling a late-campaign
-                // 150 against walls that top out near 60 is a one-shot the
-                // player has no legal answer to, so it lands at +50% here.
-                if (foeBrutal && dmg > 0) {
-                    dmg = Math.round(dmg * BRUTAL_DAMAGE_MULT);
-                    events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'BRUTAL', amount: dmg });
                 }
                 if (dmg > 0) {
                     player = applyDamage(player, dmg);
                     enemyDamageDealt += dmg;
-                    // RAVENOUS: it heals for what it lands on you.
-                    if (foeRavenous) {
-                        const hpBefore = enemy.health;
-                        enemy = heal(enemy, dmg);
-                        const healed = enemy.health - hpBefore;
-                        events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'RAVENOUS', amount: healed });
-                        if (healed > 0) events.push({ kind: 'enemy-healed', enemyId: enemy.id, source: 'RAVENOUS', amount: healed });
-                    }
-                    // VENOM: contact poisons. Routed through the same
-                    // `applyEffect` path as an authored threat rider, so the
-                    // stacking and duration rules are identical.
-                    if (foeVenom > 0) {
-                        const venomDef = lookupEffectDef('debuff_poison');
-                        if (venomDef) {
-                            const res = applyEffect(player.effects, venomDef, state.round, {
-                                intensityDelta: foeVenom, sourceId: enemy.id,
-                            });
-                            player = { ...player, effects: res.activeEffects };
-                            events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'VENOM', amount: foeVenom });
-                        }
-                    }
-                    // WOUNDING: a single blow of N or more puts a WOUND in the
-                    // deck (Mage Knight's wounds). Reuses the curse-injection
-                    // channel — an unknown id is a silent no-op, per the
-                    // resolve-filter law.
-                    if (foeWounding > 0 && dmg >= foeWounding && getCard(WOUND_CARD_ID)) {
-                        injectedCurses.push(WOUND_CARD_ID);
-                        events.push({ kind: 'curse-injected', phaseIndex: phase.index, cardId: WOUND_CARD_ID });
-                        events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'WOUNDING', amount: dmg });
-                    }
                     // WS3.3 'damage-instance' clock, player bearer — a threat
                     // hit that LANDS advances every damage-instance-clocked
                     // DoT the player carries (enemy threat riders land
@@ -3572,32 +3346,6 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     });
                 }
             }
-            // Phase 33a — enemy counterplay against the two alt-win tracks.
-            // Flat amount, floored at 0 (never negative, never more-gone-
-            // than-exists); milestone flags / premiseMilestoneTotal untouched —
-            // only the live counters move.
-            if (eff.swayCleanse && eff.swayCleanse > 0 && !doubtId) {
-                const before = sway;
-                sway = Math.max(0, sway - eff.swayCleanse);
-                if (sway < before) {
-                    events.push({ kind: 'threat-sway-cleansed', phaseIndex: phase.index, amount: before - sway });
-                }
-            }
-            if (eff.premiseShed && eff.premiseShed > 0 && !doubtId) {
-                const before = premises;
-                premises = Math.max(0, premises - eff.premiseShed);
-                if (premises < before) {
-                    events.push({ kind: 'threat-premise-shed', phaseIndex: phase.index, amount: before - premises });
-                }
-            }
-            // Profane-canon rework — CURSE INJECTION: the curse joins the
-            // player's combat deck cycle (collected here; shuffled into the
-            // draw pile at assembly below). Persistent collection untouched;
-            // an unknown id is a silent no-op (the resolve-filter law).
-            if (eff.curseCardId && !doubtId && getCard(eff.curseCardId)) {
-                injectedCurses.push(eff.curseCardId);
-                events.push({ kind: 'curse-injected', phaseIndex: phase.index, cardId: eff.curseCardId });
-            }
             penaltiesApplied.push(eff);
         }
         // A fired DOUBT / OVEREXTENDED is spent on the phase it bent (consumedOnUse).
@@ -3627,10 +3375,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
             directDamage += amount + hit.clockDamage;
             events.push({ kind: 'thorns-reflected', amount, target: 'enemy' });
         }
-        // The log gets the RESOLVED effects (post-FLURRY-split), not the
-        // authored single-number telegraph — a flurry foe's combat log
-        // reads as three separate strikes, not one combined number.
-        events.push({ kind: 'threat-fired', phaseIndex: phase.index, description: phase.threatAction.description, effects: threatEffects });
+        events.push({ kind: 'threat-fired', phaseIndex: phase.index, description: phase.threatAction.description, effects: phase.threatAction.effects });
         // WS3.2 Doom growth (spec 32 §12 #3, card-local species): enemy-borne
         // `growth: 'per-enemy-action'` DoTs deepen by 1 each time the enemy
         // actually acts — a hindered (denied) turn never feeds the Doom.
@@ -3638,47 +3383,6 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         if (doomGrowth.grown.length > 0) {
             enemy = doomGrowth.combatant;
             events.push({ kind: 'dots-boosted', intensity: 1, affected: doomGrowth.grown });
-        }
-    }
-
-    // ── Phase 102 (SUMMON) — the brood bites. DELIBERATELY OUTSIDE the
-    // telegraph loop above, and outside its `!hindered` gate:
-    //  · bodies act, so staggering or denying the FOE does not silence them;
-    //  · the printed bite is the bite — none of the loop's multiplier terms
-    //    (escalation, weaken, stage bonus, outgoing/taken mults, the stance
-    //    check) touches it, so the number on the chip cannot lie;
-    //  · `attacksLanded` / `attacksFullyBlocked` / `blockedBlowTotal` are NOT
-    //    incremented, so `lastThreatFullyBlocked`, the authored
-    //    'prior-threat-fully-blocked' branch condition, THE COVETED DIE's
-    //    'block' payout and RIPOSTE's counter gate all read exactly what they
-    //    would read with no brood on the board. The rejected design — a
-    //    synthetic entry appended to `threatEffects` — corrupts all four, and
-    //    no existing fixture fails when it does;
-    //  · `threat-fired` and `penaltiesApplied` keep reporting ONLY the foe's
-    //    authored telegraph; the brood gets its own `add-bit` event;
-    //  · no RAVENOUS, VENOM, WOUNDING, BRUTAL or RIPOSTE rides on it: the
-    //    foe's one protected bar never climbs off a body the player did not
-    //    clear, and no curse arrives from a hit the telegraph never printed.
-    // The wall DOES answer it (armor -> GUARD -> BARRIER, SWIFT's divisor),
-    // which is the second honest line of the design: eat it behind a wall you
-    // re-buy every phase, or pay STRIKE_ADD_COST once and be done with it.
-    const livingAdds = state.adds ?? [];
-    if (livingAdds.length > 0 && !isDefeated(enemy)) {
-        const rawBite = livingAdds.reduce((s, a) => s + a.bite, 0);
-        if (rawBite > 0) {
-            const soaked = soakFlatHit(rawBite, { armor: playerArmor, guard, barrier, swift: foeSwift });
-            guard = soaked.guard;
-            barrier = soaked.barrier;
-            if (soaked.dealt > 0) {
-                player = applyDamage(player, soaked.dealt);
-                // The ledger DOES count it: the player really took it from the
-                // foe's side of the table, and `enemyDamageThisTurn` has to
-                // reconcile against actual VITAE lost. This is the one ledger
-                // the brood is allowed to touch, and it is a decision on
-                // record rather than an omission.
-                enemyDamageDealt += soaked.dealt;
-            }
-            events.push({ kind: 'add-bit', addIds: livingAdds.map(a => a.id), raw: rawBite, dealt: soaked.dealt });
         }
     }
 
@@ -3709,31 +3413,10 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         events.push({ kind: 'rung-regrown', rungs: BOSS_RUNG_REGROWTH, total: nextBossRungGrowth });
     }
 
-    // Profane-canon rework — CURSE INJECTION lands in the deck cycle: each
-    // injected curse joins the persistent combat deck list AND the draw pile
-    // at an rng-chosen depth (seeded-deterministic; never the persistent
-    // collection — the contamination dies with the encounter).
-    let contaminatedDeck = state.deck;
-    let contaminatedDrawPile = state.drawPile;
-    if (injectedCurses.length > 0) {
-        contaminatedDeck = [...state.deck, ...injectedCurses];
-        contaminatedDrawPile = [...state.drawPile];
-        for (const curseId of injectedCurses) {
-            const at = Math.floor(rng() * (contaminatedDrawPile.length + 1));
-            contaminatedDrawPile.splice(at, 0, curseId);
-        }
-    }
-
     let next: CombatEncounterState = {
         ...state,
         player,
         enemy,
-        sway,
-        swayMilestoneWaveringFired,
-        swayMilestoneFalteringFired,
-        premises,
-        deck: contaminatedDeck,
-        drawPile: contaminatedDrawPile,
         directDamageDealt: directDamage,
         guard: 0,                       // brace is spent on this phase's threat; resets each phase
         barrier,                        // persistent soak — carries the unspent remainder across phases
@@ -3825,9 +3508,6 @@ export function processBetweenPhases(
     bonusDraw: number = 0,
 ): CombatTransition {
     const events: CombatEvent[] = [];
-    /** Curses a STAGE shoves into the deck as it opens (THE BIG NUMBERS
-     *  REWRITE); shuffled into the draw pile with the rest at assembly. */
-    const injectedCursesFromStage: string[] = [];
 
     // 1. Per-effect DoT ticks (labeled, §7.5) — computed before processing.
     //    Round-threaded so escalating DoTs (POISON ramp) tick their real value.
@@ -3891,18 +3571,7 @@ export function processBetweenPhases(
     //    epic) is always reachable — byte-identical to the old one-liner.
     const resolvedRound = state.round + 1;
 
-    // ── THE BIG NUMBERS REWRITE — REGROW and STAGES resolve at the boundary ──
-    // REGROW: a printed healing floor the player has to out-pace. Applied
-    // before the stage check so a stage's own threshold reads the post-heal
-    // pool (a foe that heals back over the line does not trip its stage).
-    const regrow = findEnemyKeyword(enemy.keywords, 'regrow')?.n ?? 0;
-    if (regrow > 0 && !isDefeated(enemy)) {
-        const hpBefore = enemy.health;
-        enemy = heal(enemy, regrow);
-        const healed = enemy.health - hpBefore;
-        events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'REGROW', amount: healed });
-        if (healed > 0) events.push({ kind: 'enemy-healed', enemyId: enemy.id, source: 'REGROW', amount: healed });
-    }
+    // ── THE BIG NUMBERS REWRITE — STAGES resolve at the boundary ──
     // STAGES: the moment a fight becomes a different fight. Each stage fires at
     // most once; `stagesEntered` is the per-combat ledger. Authored order wins
     // ties, so a boss that crosses two thresholds in one blow enters the first
@@ -3922,12 +3591,6 @@ export function processBetweenPhases(
         if (pending) {
             stagesEntered.push((enemy.stages ?? []).indexOf(pending));
             events.push({ kind: 'stage-entered', enemyId: enemy.id, name: pending.name, text: pending.text });
-            if (pending.gain?.length) {
-                enemy = { ...enemy, keywords: [...(enemy.keywords ?? []), ...pending.gain] };
-                for (const k of pending.gain) {
-                    events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: enemyKeywordText(k) });
-                }
-            }
             if (pending.cleanse) {
                 // Everything the player invested in afflicting it is gone. The
                 // cruellest stage effect, and the reason a DoT deck needs a
@@ -3948,39 +3611,6 @@ export function processBetweenPhases(
                 }
             }
             if (pending.threatBonus) stageThreatBonus += pending.threatBonus;
-            if (pending.curseCardId && getCard(pending.curseCardId)) {
-                injectedCursesFromStage.push(pending.curseCardId);
-                events.push({ kind: 'curse-injected', phaseIndex: state.currentPhaseIndex, cardId: pending.curseCardId });
-            }
-        }
-    }
-
-    // ── Phase 102 (SUMMON) — the brood spawns AFTER the stage block, so a
-    // stage whose `gain` grants SUMMON fires its own first wave on the very
-    // boundary it is entered rather than a phase late. Wave 1 at the FIRST
-    // boundary of the combat; every later wave needs a STAGE to fire. NEVER on
-    // emptiness: an emptiness check makes the player's own clear cause the
-    // respawn, which is a tax rather than a decision — the shape every add
-    // fight players resent has in common. A stage's `cleanse` (above) wipes
-    // `enemy.effects` and leaves the brood standing: bodies are not
-    // afflictions. `spawnAddWave` consumes no RNG, so inserting this between
-    // THE CLOCK and the hand refill shifts no seeded draw.
-    const summon = findEnemyKeyword(enemy.keywords, 'summon');
-    let adds = state.adds ?? [];
-    let addWavesSpawned = state.addWavesSpawned ?? 0;
-    if (summon && summon.n > 0 && !isDefeated(enemy) && addWavesSpawned < ADD_WAVE_CAP) {
-        const stageFiredNow = stagesEntered.length > (state.stagesEntered ?? []).length;
-        if (addWavesSpawned === 0 || stageFiredNow) {
-            const wave = spawnAddWave(enemy, summon.n, addWavesSpawned, summon.addName ?? `${enemy.name} Brood`);
-            adds = [...adds, ...wave];
-            addWavesSpawned += 1;
-            events.push({
-                kind: 'add-spawned',
-                enemyId: enemy.id,
-                wave: addWavesSpawned,
-                addIds: wave.map(a => a.id),
-                bite: wave[0].bite,
-            });
         }
     }
 
@@ -4180,18 +3810,9 @@ export function processBetweenPhases(
         // Gate 0 (round-turn law) — the phase boundary re-arms the one legal
         // tray roll for the incoming phase.
         turnTakenThisPhase: false,
-        // THE BIG NUMBERS REWRITE — the STAGE ledgers, and any curse a stage
-        // opened with (shuffled into the draw pile alongside the threat's own).
+        // THE BIG NUMBERS REWRITE — the STAGE ledgers.
         stagesEntered,
         stageThreatBonus,
-        // Phase 102 (SUMMON) — the brood ledgers. Bare function-level locals,
-        // exactly like `stagesEntered`: `...omenState` does NOT carry them, and
-        // they survive the later `next` rebuilds by spread.
-        adds,
-        addWavesSpawned,
-        ...(injectedCursesFromStage.length > 0
-            ? { drawPile: [...draw.drawPile, ...injectedCursesFromStage] }
-            : {}),
     };
     next = withLog(next, events);
     // WI-1 — the round is closed: zero the enemy-DoT accumulator AFTER logging
@@ -4410,53 +4031,6 @@ export function playSignatureSkill(
     return checkImmediateOutcome(next, events);
 }
 
-/**
- * Phase 102 (SUMMON) — strike one add off the board. Dieless and PRICED: the
- * phase gate and the Conviction debit are `playSignatureSkill`'s shape: a
- * free, mandatory, repeating tap is the canonical resented add shape.
- *
- * Three outcomes, deliberately distinct:
- *  · wrong phase, or an id that names no living add → a SILENT identity no-op
- *    returning the SAME object reference (asserted with `toBe`), so a stale tap from the UI can never churn the log;
- *  · a Conviction shortfall → one `effect-fizzled` event that DOES reach the
- *    log, so the player's refused action stays attributable rather than
- *    reading as a dead chip;
- *  · success → exactly one add removed and `add-struck` emitted.
- *
- * It can never end a fight: `checkImmediateOutcome` reads `state.enemy` alone,
- * so clearing the whole brood is progress with no win attached. No
- * `swayOffersCapitulation` check either — the verb pushes no SWAY, unlike
- * `playCombatCard`.
- */
-export function strikeAdd(
-    state: CombatEncounterState,
-    addId: string,
-    _rng: () => number = defaultRng,
-): CombatTransition {
-    if (state.phase !== 'phase-play') return { state, events: [] };
-    const add = (state.adds ?? []).find(a => a.id === addId);
-    if (!add) return { state, events: [] };
-    if (state.conviction < STRIKE_ADD_COST) {
-        const events: CombatEvent[] = [{
-            kind: 'effect-fizzled',
-            cardId: add.id,
-            effectId: '',
-            message: `need ${STRIKE_ADD_COST} ◆ Conviction (have ${state.conviction})`,
-        }];
-        return { state: withLog(state, events), events };
-    }
-    const events: CombatEvent[] = [
-        { kind: 'add-struck', addId: add.id, name: add.name, cost: STRIKE_ADD_COST },
-    ];
-    let next: CombatEncounterState = {
-        ...state,
-        conviction: state.conviction - STRIKE_ADD_COST,
-        adds: (state.adds ?? []).filter(a => a.id !== addId),
-    };
-    next = withLog(next, events);
-    return checkImmediateOutcome(next, events);
-}
-
 /** The baseline signature kit (for the presenter / UI bar). */
 export { SIGNATURE_SKILLS, SIGNATURE_SKILL_LIST, getSignatureSkill } from './combat.signature';
 
@@ -4672,22 +4246,12 @@ export function projectReapAll(state: CombatEncounterState, card: CombatCard): {
  * closing them moves the on-screen number for every existing foe and is its own
  * tuning change, not a side effect of adding a keyword. The boss term here
  * omits `enemyThreatMult` (`getOutgoingThreatDamageMult`),
- * `state.stageThreatBonus`, BRUTAL, and — while the Upgradeable-Dice flag is
- * on — an authored phase's `stanceCheck.mult`, so against a staged, BRUTAL or
- * stance-punished foe it UNDERSTATES, and the wall it reports as left over
- * after the telegraph is correspondingly optimistic.
+ * `state.stageThreatBonus`, and — while the Upgradeable-Dice flag is
+ * on — an authored phase's `stanceCheck.mult`, so against a staged or
+ * stance-punished foe it UNDERSTATES.
  *
- * Audit 3.2: the flat `playerArmor` soak and the SWIFT soak divisor were on
- * that list and are no longer — both terms now run through the same
- * `soakFlatHit` the engine applies. So the leftover wall handed to the Phase
- * 102 add term, and therefore `addNetDamage` and `totalNetDamage`, are EXACT
- * for a single-damaging-effect telegraph from an unstaged foe with no
- * outgoing-threat-damage rider and no firing stance check. They remain
- * APPROXIMATE — strictly closer than before, not closed — for a staged foe,
- * a foe carrying `getOutgoingThreatDamageMult !== 1`, a multi-effect or FLURRY
- * phase (the engine soaks per effect, this projection soaks the sum once), and
- * a firing `stanceCheck`. `summon.engine.test.ts`'s wall matrix pins the exact
- * case and names those preconditions as its construction.
+ * Audit 3.2: the flat `playerArmor` soak runs through the same `soakFlatHit`
+ * the engine applies.
  */
 export function projectIncomingThreat(state: CombatEncounterState): {
     rawDamage: number; projectedDamage: number; willDeny: boolean; guard: number; barrier: number; netDamage: number;
@@ -4695,14 +4259,6 @@ export function projectIncomingThreat(state: CombatEncounterState): {
      *  presenter can show rung magnitude (1-4) instead of leaving it
      *  invisible. `rungsTotal` reflects any authored `phase.rungs` override. */
     rungsTotal: number; rungsLost: number;
-    /** Phase 102 (SUMMON) — the brood's printed bite total, and what survives
-     *  the SAME `soakFlatHit` the engine applies, against the wall that is left
-     *  after the foe's own telegraph has eaten its share. `netDamage`
-     *  deliberately EXCLUDES the add term so `projectEnemyHealPerRound`'s
-     *  RAVENOUS estimate keeps reading the foe's own telegraph alone (a
-     *  RAVENOUS summoner's bar must never appear to climb off its brood); the
-     *  HUD wall-math readout reads `totalNetDamage`. */
-    addDamage: number; addNetDamage: number; totalNetDamage: number;
 } {
     const idx = Math.min(state.currentPhaseIndex, state.threatPhases.length - 1);
     const phase = state.threatPhases[idx];
@@ -4737,45 +4293,17 @@ export function projectIncomingThreat(state: CombatEncounterState): {
     const barrier = state.barrier ?? 0;
     const riposte = state.riposte ?? null;
     const playerArmor = Math.max(0, getActiveEffectModifiers(state.player.effects as ActiveEffect[]).defenseDelta);
-    const foeSwift = hasEnemyKeyword(state.enemy.keywords, 'swift');
     let remaining = projectedDamage;
     if (riposte && riposte.reduce > 0) remaining = Math.max(0, remaining - riposte.reduce);
-    // Audit 3.2 — the foe's own hit goes through the SAME `soakFlatHit` the
-    // engine applies, so this function no longer keeps a second, divergent
-    // inline copy of the wall arithmetic. The copy that stood here dropped both
-    // the SWIFT divisor and the flat armor soak, which OVERSTATED the leftover
-    // wall handed to the add term below and so UNDER-reported `addNetDamage` —
-    // measured wrong in 35 of 324 wall cells, and the printed HUD total wrong
-    // in 112. RIPOSTE stays outside the helper (a one-shot parry on the foe's
-    // own swing, deliberately excluded there); applying it before armor is
-    // arithmetically identical to the engine's armor-then-riposte order, since
-    // both reduce to `max(0, d - armor - reduce)` over non-negative terms.
-    //
-    // The absorption stays an explicit soak rather than `Math.max(0, remaining
-    // - x)` because Phase 102's add term needs the wall that SURVIVES the foe's
-    // own hit, and deriving it from `projectedDamage - remaining` would wrongly
-    // charge riposte's parry and barrier's share against GUARD.
-    const soaked = soakFlatHit(remaining, { armor: playerArmor, guard, barrier, swift: foeSwift });
-    remaining = soaked.dealt;
-
-    // Phase 102 (SUMMON) — the brood, through the same helper
-    // `resolveThreatPhase` uses, so the printed wall math and the applied wall
-    // math are one definition. NOT zeroed by `willDeny`: denying the FOE does
-    // not deny its brood, and a telegraph reading 0 while the adds bit would be
-    // the worst class of lie this selector can tell.
-    const addDamage = (state.adds ?? []).reduce((s, a) => s + a.bite, 0);
-    const addNetDamage = addDamage > 0
-        ? soakFlatHit(addDamage, {
-            armor: playerArmor,
-            guard: soaked.guard,
-            barrier: soaked.barrier,
-            swift: foeSwift,
-        }).dealt
-        : 0;
+    // Audit 3.2 — the foe's hit goes through the SAME `soakFlatHit` the engine
+    // applies. RIPOSTE stays outside the helper (a one-shot parry on the foe's
+    // own swing); applying it before armor is arithmetically identical to the
+    // engine's armor-then-riposte order, since both reduce to
+    // `max(0, d - armor - reduce)` over non-negative terms.
+    remaining = soakFlatHit(remaining, { armor: playerArmor, guard, barrier }).dealt;
 
     return {
         rawDamage, projectedDamage, willDeny, guard, barrier, netDamage: remaining, rungsTotal, rungsLost,
-        addDamage, addNetDamage, totalNetDamage: remaining + addNetDamage,
     };
 }
 
@@ -4798,33 +4326,11 @@ export interface CombatOutcomeProjection {
     roundsToKill: number | null;
     isLethalInFlight: boolean;
     finishers: FinisherProjection[];
-    /** The VITAE the foe is expected to recover per round boundary (REGROW's
-     *  printed floor plus a RAVENOUS foe's projected drain off the current
-     *  telegraph). `roundsToKill` is already netted against it; surfaced so
-     *  the meter can say WHY the stack is not lethal. */
-    healPerRound: number;
-}
-
-/**
- * Playtest fix 2026-09-04 — the projection used to be blind to healing: a
- * RAVENOUS Brine Hag read "LETHAL IN 3" every round while its bar climbed.
- * REGROW is the printed number; RAVENOUS is estimated as what the CURRENT
- * telegraph would net through the player's live GUARD/BARRIER (the same
- * figure the intent icon shows), which is exactly what it will heal for if
- * nothing changes. A projection, not a promise: guarding harder shrinks it.
- */
-export function projectEnemyHealPerRound(state: CombatEncounterState): number {
-    const regrow = findEnemyKeyword(state.enemy.keywords, 'regrow')?.n ?? 0;
-    const ravenous = hasEnemyKeyword(state.enemy.keywords, 'ravenous')
-        ? projectIncomingThreat(state).netDamage
-        : 0;
-    return regrow + ravenous;
 }
 
 export function projectCombatOutcome(state: CombatEncounterState): CombatOutcomeProjection {
     const pendingDot = getPendingDotTotal(state.enemy, state.round).total;
-    const healPerRound = projectEnemyHealPerRound(state);
-    const roundsToKill = computeRoundsToKill(state.enemy, state.round, healPerRound);
+    const roundsToKill = computeRoundsToKill(state.enemy, state.round);
     const finishers: FinisherProjection[] = [];
     for (const { uid, card } of handCards(state)) {
         const sourceCard = lookupCard(card.id);
@@ -4840,7 +4346,7 @@ export function projectCombatOutcome(state: CombatEncounterState): CombatOutcome
             finishers.push({ uid, cardId: card.id, mechanic: 'reap', ready, amount });
         }
     }
-    return { pendingDot, roundsToKill, isLethalInFlight: roundsToKill !== null, finishers, healPerRound };
+    return { pendingDot, roundsToKill, isLethalInFlight: roundsToKill !== null, finishers };
 }
 
 /** Re-export for presenters that need to check die affordability directly. */

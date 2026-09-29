@@ -16,7 +16,7 @@
 import { Enemy, EnemyDifficulty } from '../Enemy/types';
 import { deepClone } from '../Utils';
 import { EnemiesByMap } from '../Enemy/enemy.library';
-import { DEFAULT_XP_BY_DIFFICULTY, applyHideRamp, enemyVitae } from '../Enemy';
+import { DEFAULT_XP_BY_DIFFICULTY, enemyVitae } from '../Enemy';
 import { MapName } from './map.library';
 import { MapNode, Encounter } from './types';
 import type { BaseStats } from '../Character/types';
@@ -130,10 +130,6 @@ export function scaleEnemyToLevel(source: Enemy, targetLevel: number): Enemy {
         : undefined;
     scaled.maxHealth = enemyVitae(level, source.difficulty, authored);
     scaled.health = scaled.maxHealth;
-    // THE EARLY HIDE RAMP (see `Enemy/index.ts`): a foe pinned or scaled
-    // down to the opening levels sheds the HIDE its home-level kit authored —
-    // a level-3 boss fights bare-skinned.
-    scaled.keywords = applyHideRamp(scaled.keywords ?? [], level);
 
     // Rescale XP when the source XP looked like the default multiplier.
     if (source.difficulty) {

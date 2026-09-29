@@ -14,7 +14,7 @@ import test from 'node:test'
 
 import {
   atlasKeywords, catalogGlyphTable,
-  enemyRegistryKeywords, systemGlossaryTerms,
+  systemGlossaryTerms,
   mobileGlyphTable, mobileRegistryKeywords, PATHS,
 } from './content-drift.mjs'
 
@@ -88,11 +88,11 @@ test('every keyword the atlas registers has a gloss in a live registry', () => {
   // read as current law. A row for a word the game no longer glosses publishes
   // a keyword that does not exist.
   //
-  // TWO registries count. Card keywords live in mobile's `KEYWORD_GLOSS`; the
-  // ENEMY keywords live in mechanics' `ENEMY_KEYWORD_GLOSS`, kept separate
-  // on purpose so the mobile KW lints stay card-only.
+  // Card keywords live in mobile's `KEYWORD_GLOSS`; system terms in its
+  // `SYSTEM_GLOSSARY`. (The ENEMY keyword registry was deleted with the
+  // keywords in revamp phase R2b, D63.)
   const registry = {
-    ...mobileRegistryKeywords(), ...enemyRegistryKeywords(), ...systemGlossaryTerms(),
+    ...mobileRegistryKeywords(), ...systemGlossaryTerms(),
   }
   const orphans = keys(atlasKeywords())
     .filter((k) => !registry[k] && !ATLAS_WITHOUT_REGISTRY_ROW.has(k))
@@ -101,7 +101,7 @@ test('every keyword the atlas registers has a gloss in a live registry', () => {
 
 test('the atlas exemption list holds no word the registries actually gloss', () => {
   const registry = {
-    ...mobileRegistryKeywords(), ...enemyRegistryKeywords(), ...systemGlossaryTerms(),
+    ...mobileRegistryKeywords(), ...systemGlossaryTerms(),
   }
   assert.deepEqual([...ATLAS_WITHOUT_REGISTRY_ROW].filter((k) => registry[k]), [])
 })
@@ -120,7 +120,9 @@ test('the exemption list holds no keyword that left the registry', () => {
 
 test('the keyword parsers found real tables', () => {
   // Floors lowered to the tables' true size after the keyword audit
-  // (2026-09-27, after the card purge): registry 23, atlas 37.
-  assert.ok(keys(mobileRegistryKeywords()).length >= 20)
-  assert.ok(keys(atlasKeywords()).length > 25)
+  // (2026-09-27, after the card purge) and the enemy reset (R2b, 2026-09-29,
+  // which took the eleven enemy keywords out of the atlas): registry 20,
+  // atlas 23.
+  assert.ok(keys(mobileRegistryKeywords()).length >= 18)
+  assert.ok(keys(atlasKeywords()).length >= 20)
 })

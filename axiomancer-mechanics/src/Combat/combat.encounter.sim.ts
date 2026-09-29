@@ -23,9 +23,6 @@ import {
     resolveThreatPhase, startTurn, endTurn,
     playSignatureSkill, handCards, selectMercyChoice, selectCapitulationChoice, getSignatureSkill,
     recoilXRange,
-    // Phase 102 (SUMMON) — the witness has to be TAUGHT the brood; a policy
-    // that cannot see `strikeAdd` measures a fight no player would play.
-    strikeAdd, STRIKE_ADD_COST, projectIncomingThreat,
 } from './combat.engine';
 import { MOMENTUM_CHAIN_ORDER } from './combat.upgradeable-dice';
 import { getRng } from '../Utils/rng';
@@ -467,42 +464,6 @@ export function upgradeablePlayPhase(
         plays++;
         bumpUsage(usage, resT.card, 'top');
     }
-    // Phase 102 (SUMMON) — strikeAddsAt, settled AFTER the card pass and the
-    // wind-down, the last thing before the turn ends. The threshold reads
-    // "clear whatever the brood still gets through", and the only wall that
-    // question can honestly be asked against is the one this phase actually
-    // ends holding. Audit 3.8: this block used to sit in the powered-play
-    // preamble, ahead of every play, so the witness read a stale wall and could
-    // spend ◆ on a body the very next card answered for free. Striking here is
-    // still in time — the brood bites in `resolveThreatPhase`, which runs after
-    // this function returns.
-    //
-    // Highest-bite add wins; ties resolve to `state.adds` order — deterministic,
-    // no RNG. The projection is re-read
-    // after every strike, so the witness stops paying the moment what is left
-    // of the brood is soaked. Bounded like the drain above.
-    let strikes = 0;
-    while (
-        policy.strikeAddsAt !== undefined
-        && working.phase === 'phase-play'
-        && !working.finalOutcome
-        && !working.mercyChoiceActive
-        && working.conviction >= STRIKE_ADD_COST
-        && strikes < 30
-    ) {
-        strikes++;
-        const living = working.adds ?? [];
-        if (living.length === 0) break;
-        if (projectIncomingThreat(working).addNetDamage < policy.strikeAddsAt) break;
-        let target = living[0];
-        for (const a of living) {
-            if (a.bite > target.bite) target = a;
-        }
-        const struck = strikeAdd(working, target.id, rng);
-        if (struck.state === working) break;
-        working = struck.state;
-    }
-
     if (working.phase === 'phase-play' && !working.finalOutcome && working.turnTakenThisPhase) {
         working = endTurn(working).state;
     }

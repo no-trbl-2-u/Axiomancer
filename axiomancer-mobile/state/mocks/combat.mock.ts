@@ -11,22 +11,10 @@ import { ENEMY_REGISTRY, deepClone, type Enemy } from '@mechanics';
  *
  * Playtest fix 2026-09-04 — it then became a second hand-typed copy of the
  * library's `enemy-brine-hag` that had already drifted (a truncated
- * description, no threat/proc/loot tables). It now CLONES the library entry, so
- * the only thing the mock owns is the one deliberate divergence below.
- *
- * Deliberate divergence — KEYWORDS. The library Brine Hag prints none; the
- * mock wears HIDE 4 + RAVENOUS (the elite allowance, §6.4) so the enemy pane's
- * keyword chips, their reminder-text plaques, the HIDE receipt and the RAVENOUS
- * heal line are exercised the moment the placeholder renders. A real map
- * encounter of hers will NOT show them. (The map route also doubles the foe's
- * VITAE via `ENCOUNTER_ENEMY_HP_MULTIPLIER`; the placeholder does not, so its
- * bar is a rehearsal figure too.)
+ * description, no threat/proc/loot tables). It now CLONES the library entry;
+ * the mock owns nothing of its own: the revamp (R2b, D63) deleted the enemy
+ * keywords it once wore to rehearse the keyword chips.
  */
 export function createMockEncounterEnemy(): Enemy {
-    const foe = deepClone(ENEMY_REGISTRY['brine-hag']);
-    // HIDE is the armour floor that makes one heavy blow beat four light
-    // ones; RAVENOUS is the bargain in mechanical form — what she takes off
-    // you, she keeps.
-    foe.keywords = [{ kind: 'hide', n: 4 }, { kind: 'ravenous' }];
-    return foe;
+    return deepClone(ENEMY_REGISTRY['brine-hag']);
 }

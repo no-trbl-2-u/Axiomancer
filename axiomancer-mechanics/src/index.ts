@@ -83,8 +83,6 @@ export {
     // Spec 26b / spec 33 — turn lifecycle, Conviction, Signature Skills
     startTurn, endTurn, discardCombatCard,
     playSignatureSkill, isPhaseStanceRevealed,
-    // Phase 102 — SUMMON: the dieless-but-priced add clear, and its constants
-    strikeAdd, ADD_WAVE_CAP, STRIKE_ADD_COST,
     getSignatureSkill,
     READ_DAMAGE_MULT,
     colorMatchBonus,
@@ -132,8 +130,6 @@ export type {
     SignatureSkill,
     // The three chain/stance colours (spec 33 momentum chain + stance checks)
     WheelStance,
-    // Phase 102 — SUMMON's brood: one member of an add wave
-    CombatAdd,
 } from './Combat';
 
 // ─── Sandbox cards — the deck-forge experimentation surface ───────────────────

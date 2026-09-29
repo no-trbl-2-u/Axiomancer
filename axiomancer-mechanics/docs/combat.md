@@ -326,8 +326,7 @@ card library files themselves, not duplicated here):
   2026-09-02).** `DEAL` is a real `CardSpecialMechanic`
   (`{ kind: 'deal'; amount; hits?; pierce? }`) that scales with the read, the
   colour match and the combat-long scalers like every other verb; `hits`
-  makes it a multi-hit whose instances each trigger damage-instance DoTs and
-  each eat the foe's HIDE. The historical `basePower` / `chipHp` fields stay
+  makes it a multi-hit whose instances each trigger damage-instance DoTs. The historical `basePower` / `chipHp` fields stay
   deleted <!-- lexicon-ok: base-power, chip-hp --> — `DEAL` replaces them, it
   does not restore them. `calculateSkillDamage` is kept only for call-site
   compatibility (sim policies / projections still call it) and unconditionally
@@ -470,7 +469,7 @@ progression levers.
 - **Conviction (◆).** The generic token pool: it accrues from BOON (special)
   faces used to power a card, answered stance-check yields, table-ceiling
   overflow, scraps and card effects (capped at `CONVICTION_CAP`). It funds
-  Signature Skills, Press Fate and `strikeAdd`.
+  Signature Skills and Press Fate.
 - **Signature Skills.** A small, **always-available** kit (`SIGNATURE_SKILLS`,
   `SIGNATURE_KITS`, biased per `playerArchetype`) independent of the shuffled
   deck — the reliable plan through a bad draw. Played via `playSignatureSkill`,

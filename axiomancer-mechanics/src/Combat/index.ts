@@ -121,8 +121,6 @@ export type {
     WheelStance,
     // Spec 33 (Phase D2) — the die-gear interface (D5 makes it a real rail)
     UpgradeableDieGear,
-    // Phase 102 — SUMMON's brood: one member of an add wave
-    CombatAdd,
 } from './combat.encounter.types';
 export {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
@@ -132,8 +130,6 @@ export {
     // Spec 26b / spec 33 — turn lifecycle + Conviction + Signature Skills
     startTurn, endTurn, discardCombatCard,
     playSignatureSkill, isPhaseStanceRevealed,
-    // Phase 102 — SUMMON: the dieless-but-priced add clear, and its constants
-    strikeAdd, ADD_WAVE_CAP, STRIKE_ADD_COST,
     getSignatureSkill,
     READ_DAMAGE_MULT,
     // THE BIG NUMBERS REWRITE — the LIVE colour-match rule. Mobile's presenter

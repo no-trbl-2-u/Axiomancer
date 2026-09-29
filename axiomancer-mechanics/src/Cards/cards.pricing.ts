@@ -207,8 +207,8 @@ export const VERB_POINTS = Object.freeze({
     // no longer gates what may ship.
     /** DEAL, per HP of direct damage. */
     damagePerHp: 1 / 3,
-    /** PIERCE, flat: ignoring HIDE is worth about one Ash hit against the
-     *  armoured foes it is printed for. */
+    /** PIERCE, flat. Carrier-less since the enemy reset deleted HIDE (R2b);
+     *  R7 purges it with the pricing module. */
     pierce: 1.5,
     /** WRATH, per point: applies to every remaining hit. `expectedHitsLeft`
      *  hits at 1 HP each, priced through `damagePerHp`. */

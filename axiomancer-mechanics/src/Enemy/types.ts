@@ -272,11 +272,9 @@ export interface Enemy {
      */
     stanceHint?: string;
     /**
-     * THE BIG NUMBERS REWRITE (2026-09-02) — the foe's combat keywords. These
-     * change the arithmetic of the fight (HIDE, SWIFT, BRUTAL, …) rather than
-     * its size, and are printed with reminder text on the enemy pane. See
-     * {@link EnemyKeyword}. Budget: 0-1 at simple/normal, 1-2 at elite, 2-3 at
-     * boss/unique.
+     * The foe's combat keywords. Empty since the revamp deleted all eleven
+     * (D63); the optional slot stays so B2 can re-add them. See
+     * {@link EnemyKeyword}.
      */
     keywords?: EnemyKeyword[];
     /**

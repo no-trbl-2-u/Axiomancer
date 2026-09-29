@@ -293,10 +293,9 @@ export type CardSpecialMechanic =
      *  like everything else.
      *  - `amount` is the per-hit magnitude BEFORE read/colour/scaler bonuses.
      *  - `hits` (default 1) makes it a multi-hit: each hit is a separate damage
-     *    instance, so damage-instance DoTs (BLEED) fire once per hit and HIDE
-     *    is subtracted from each — the reason `7 × 4` and `28 × 1` play
-     *    differently against an armoured foe.
-     *  - `pierce` ignores the foe's HIDE and every damage-reduction effect. */
+     *    instance, so damage-instance DoTs (BLEED) fire once per hit.
+     *  - `pierce` is carrier-less since the enemy reset deleted HIDE (R2b);
+     *    R7 purges it. */
     | { kind: 'deal'; amount: number; hits?: number; pierce?: boolean }
     /** WRATH N — combat-long: every hit you land deals +N. Stacks additively
      *  (Slay the Spire's Strength, Dawncaster's Anger). The scaler that turns a
@@ -479,7 +478,7 @@ export interface CardRider {
     /** Deal N direct VITAE damage. The verb that lets a FREE line be worth
      *  playing without a die; scales with WRATH/CHAIN/FLAY like any hit. */
     damage?: number;
-    /** This rider's `damage` ignores HIDE and all damage reduction. */
+    /** Carrier-less since the enemy reset deleted HIDE (R2b); R7 purges it. */
     pierce?: boolean;
     /** +N WRATH (combat-long damage bonus per hit). */
     wrath?: number;

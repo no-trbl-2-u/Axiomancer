@@ -20,11 +20,11 @@ gone. A `kb:` receipt is welcome in the notes; it is not required.
   guard verb and never a trigger condition; **Splinter/Rib** carry ≤2 and may
   carry one condition; **Skull/Saint** are unbudgeted.
 
-**Sources of truth.** Player reminder text lives in
-`axiomancer-mobile/state/combat/keywords.ts` (`KEYWORD_GLOSS`); enemy reminder
-text lives in `axiomancer-mechanics/src/Enemy/enemy-keywords.ts`
-(`ENEMY_KEYWORD_GLOSS`). This file is the index, not the source — when a row
-disagrees with the code, the code wins and the row is the bug.
+**Sources of truth.** Reminder text lives in
+`axiomancer-mobile/state/combat/keywords.ts` (`KEYWORD_GLOSS`). No enemy
+keyword exists since revamp phase R2b (D63). This file is the index, not the
+source — when a row disagrees with the code, the code wins and the row is the
+bug.
 
 **Carriers.** The card library and the enemy roster are being rewritten in
 parallel with this pass, so the carrier column says `(see the catalog)` for
@@ -89,72 +89,19 @@ mid-flight. Run `npm run catalog` for the current binding.
 
 ---
 
-## Enemy keywords (11)
+## Enemy keywords (none)
 
-New with THE BIG NUMBERS REWRITE. An enemy carries 0–1 at simple/normal, 1–2
-at elite, 2–3 plus a STAGE at boss/unique. They print on the enemy pane with
-popups. Glosses below are copied from `src/Enemy/enemy-keywords.ts`
-(`ENEMY_KEYWORD_GLOSS`); `{n}` is substituted with the instance's own number,
-so one foe can carry HIDE 3 and another HIDE 12.
-
-**The early HIDE ramp (2026-09-20).** HIDE is capped by the foe's LEVEL at
-`max(0, level − 3)` (`hideCapForLevel`, `Enemy/index.ts`), applied to the
-difficulty defaults, to authored lists in `createEnemy`, and to every live
-encounter in `scaleEnemyToLevel`. A level-1..3 foe carries no HIDE at all —
-the fishing village's pinned level-3 King of Revenge fights bare-skinned
-against the grey office — and the cap only reaches the authored mid-tier
-values (HIDE 3 at level 6) where those kits already sit. Only HIDE ramps;
-WOUNDING, BRUTAL and the rest are untouched.
-
-| keyword | reminder text | applied in | carried by |
-|---|---|---|---|
-| **HIDE N** | Every hit against this foe is reduced by N, never below 1. | `applyEnemyDamage` | (see the roster) |
-| **SWIFT** | Your GUARD and BARRIER count for half against this foe. | `resolveThreatPhase` | (see the roster) |
-| **BRUTAL** | Damage this foe gets past your defenses is doubled. | `resolveThreatPhase` | (see the roster) |
-| **VENOM N** | Damage this foe lands also poisons you for N. | `resolveThreatPhase` | (see the roster) |
-| **UNSHAKEN** | This foe cannot be staggered. Its rungs never fall. | `computeRungDenial` | (see the roster) |
-| **ELUSIVE** | This foe's HIDE counts double until you stagger it this round. | `applyEnemyDamage` | (see the roster) |
-| **REGROW N** | This foe heals N at the end of each of its phases. | `processBetweenPhases` | (see the roster) |
-| **RAVENOUS** | This foe heals for the damage it lands on you. | `resolveThreatPhase` | (see the roster) |
-| **WOUNDING N** | An unguarded hit of N or more puts a WOUND in your deck. | `resolveThreatPhase` | (see the roster) |
-| **FLURRY N** | This foe's hit lands as N separate strikes instead of one. | `resolveThreatPhase` | (see the roster) |
-| **SUMMON N** | This foe fields N of its own. Each bites you for its printed number every phase, even while the foe is denied. | `processBetweenPhases` + `resolveThreatPhase` + `strikeAdd` | (see the roster) |
-
-HIDE is the reason one big hit beats many small ones: it is subtracted from
-each damage instance, so `7 × 4` and `28 × 1` play differently against armour.
-
-FLURRY splits the SAME threat-damage budget into N strikes rather than
-inflating it — GUARD/BARRIER are additive pools that drain to the same total
-either way (order-invariant), so FLURRY doesn't punish a stacked wall the way
-HIDE punishes a spread-out attack. What it does change: RIPOSTE's flat,
-one-shot parry only blunts the FIRST strike (the rest land clean), and any
-VENOM/RAVENOUS/WOUNDING this foe also carries fires once per landed strike
-instead of once per phase — a flurry foe paired with VENOM stacks poison
-fast. Prior art: StS-BG's Buffer, `kb:slay-the-spire-the-board-game/rules/
-edge-cases-faq` (src-002) — "triggers separately per hit of a multi-attack."
-
-SUMMON is the one enemy keyword that changes a fight's SIZE rather than only
-its arithmetic, and it is a deliberate exception. Its brood spawns once at a
-phase boundary (and once more on a STAGE), never on emptiness — clearing a wave
-is progress you keep. Each add's bite is FLAT: no escalation, stage bonus,
-weaken or stance term touches it, so the number on the chip is the number you
-take. Your armour, GUARD and BARRIER soak it; RIPOSTE, BRUTAL, RAVENOUS, VENOM
-and WOUNDING do not ride it, and a STAGE's cleanse does not clear it (a body is
-not an affliction). Staggering the foe does not silence its brood — not even
-stripping every rung to deny its action outright: bodies act on their own. But
-killing the foe ends the fight regardless of it — a deliberate divergence from
-`kb:slay-the-spire-the-board-game/rules/edge-cases-faq` (src-002), where
-"Summons don't 'flee' combat when the enemy that summoned them is killed."
-Adds are never a win condition: clearing the brood cannot end a fight, because
-`checkImmediateOutcome` reads the foe's VITAE alone. Clear them with the
-dieless STRIKE action for 2 Conviction, or hold a wall and eat them.
+THE REVAMP deleted all eleven enemy keywords (HIDE, SWIFT, BRUTAL, VENOM,
+UNSHAKEN, ELUSIVE, REGROW, RAVENOUS, WOUNDING, FLURRY, SUMMON) and the code
+that resolved them in phase R2b (D63): the roster is three plain-damage foes
+(D48) and none carried one. `Enemy.keywords` stays as an optional empty slot;
+B2 re-adds keywords one at a time, each with a live counter (D45).
 
 ### STAGE (boss/unique only)
 
 Not a keyword — a boss/unique data structure (`EnemyStage`). At a printed VITAE
 fraction or round the foe changes shape: a name shouted into the log, a
-telegraphed line, keywords gained, an optional cleanse, heal, threat bonus or
-curse injection. Every boss authors ≥2 stages; every unique ≥3. The numbers on
+telegraphed line, an optional cleanse, heal or threat bonus. The numbers on
 the pane must visibly jump when one fires.
 
 ---
@@ -329,6 +276,16 @@ stale and corrected in the same pass.)
   sweep pick it up automatically — no other mobile code needed.
 
 ## Retired
+
+- **THE ENEMY RESET** (2026-09-29, revamp phase R2b, D63) — the eleven enemy
+  keywords HIDE, SWIFT, BRUTAL, VENOM, UNSHAKEN, ELUSIVE, REGROW, RAVENOUS,
+  WOUNDING, FLURRY and SUMMON left this file, their engine resolution code,
+  `ENEMY_KEYWORD_GLOSS`, the enemy-pane chips and glyphs and the combat-log
+  lines. The D45 sweep also checked POISON, BLEED, MARK and DOOM, which the
+  roster no longer applies: each keeps a carrier (POISON and DOOM a
+  signature skill, BLEED a map hazard, MARK the consumables mobile labels
+  with it), so their rows stay. A returning enemy keyword re-earns its row in
+  B2.
 
 - **THE KEYWORD PURGE** (2026-09-28, T: "purge the remaining unused
   keywords from the atlas and glossary") — PIERCE, RIPOSTE and FORETELL

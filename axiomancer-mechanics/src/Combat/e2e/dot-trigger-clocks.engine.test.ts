@@ -407,16 +407,6 @@ describe('fuel math — expected-trigger counts per clock', () => {
         const legacy = { ...base, health: 24, effects: [ae('ws3x_legacy', 2, 4)] };
         expect(computeRoundsToKill(legacy)).toBe(4);   // 6 HP per round — old walk
     });
-
-    // Playtest fix 2026-09-04 — the walk nets a per-round heal.
-    it('computeRoundsToKill nets healPerRound off each round, never banking below zero', () => {
-        const base = stateWithEnemyEffects([]).enemy;
-        const foe = { ...base, health: 20, effects: [ae('ws3x_card_played', 1, 6)] }; // 6 HP/round
-        expect(computeRoundsToKill(foe)).toBe(4);           // 6, 12, 18, 24
-        expect(computeRoundsToKill(foe, undefined, 3)).toBe(6); // 3, 6, 9, 12, 15, 21
-        expect(computeRoundsToKill(foe, undefined, 6)).toBeNull(); // treads water
-        expect(computeRoundsToKill(foe, undefined, 99)).toBeNull(); // never negative-banks
-    });
 });
 
 // ── 7. Legacy parity — untagged DoTs are byte-identical to before ────────────

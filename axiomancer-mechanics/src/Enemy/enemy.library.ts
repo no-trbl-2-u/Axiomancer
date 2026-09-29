@@ -65,9 +65,6 @@ export const FloatEye = createEnemy({
     baseStats: { body: 1, mind: 1, heart: 1 },
     mapName: 'breakwater',
     difficulty: 'normal',
-    // No keywords (D48): an explicit empty list, so `createEnemy` does not
-    // fill in its difficulty defaults.
-    keywords: [],
     logic: 'balanced',
     loot: [none(70), drop('minor-healing-potion', 25), drop('healing-potion', 5)],
     finalBlowLines: {
@@ -94,9 +91,6 @@ export const BrineHag = createEnemy({
     baseStats: enemyStatBudget(7, { heart: 4, body: 1, mind: 2 }),
     mapName: 'breakwater',
     difficulty: 'elite',
-    // No keywords (D48): an explicit empty list, so `createEnemy` does not
-    // fill in its difficulty defaults.
-    keywords: [],
     logic: 'strategic',
     loot: [none(80), drop('healing-potion', 20)],
     befriendabilityConfig: {
@@ -158,9 +152,6 @@ export const TheDoorwarden = createEnemy({
     baseStats: enemyStatBudget(8, { heart: 1, body: 3, mind: 2 }),
     mapName: 'lantern-deep',
     difficulty: 'boss',
-    // No keywords (D48): an explicit empty list, so `createEnemy` does not
-    // fill in its difficulty defaults.
-    keywords: [],
     logic: 'boss',
     vitae: 220,
     stages: [

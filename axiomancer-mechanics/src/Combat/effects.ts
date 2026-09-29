@@ -521,15 +521,8 @@ export function getPendingDotTotal(bearer: Combatant, currentRound?: number): { 
  * `EXPECTED_TRIGGERS_PER_ROUND` ticks each round, so the two figures never
  * diverge. Returns `null` when the DoT alone won't finish the bearer over its
  * remaining duration. Pure.
- *
- * `healPerRound` (playtest fix 2026-09-04): the VITAE the bearer is expected
- * to recover each round boundary (REGROW's printed floor, a RAVENOUS foe's
- * projected drain). Netted against that round's ticks BEFORE the lethal
- * check, and the running total never dips below zero (a heal cannot bank
- * surplus VITAE above the bar). Without it the meter read "LETHAL IN 3"
- * against a foe that healed more per round than the stack ticked.
  */
-export function computeRoundsToKill(bearer: Combatant, currentRound?: number, healPerRound = 0): number | null {
+export function computeRoundsToKill(bearer: Combatant, currentRound?: number): number | null {
     const dotAmp = getDotAmplificationByEffect(bearer.effects);
     const dotEffects = bearer.effects
         .map(ae => {
@@ -567,7 +560,6 @@ export function computeRoundsToKill(bearer: Combatant, currentRound?: number, he
             }
         }
         if (cumulative >= bearer.health) return k + 1;
-        if (healPerRound > 0) cumulative = Math.max(0, cumulative - healPerRound);
     }
     return null;
 }

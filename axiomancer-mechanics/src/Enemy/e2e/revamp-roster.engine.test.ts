@@ -3,9 +3,10 @@
  *
  * Pins the post-reset roster: exactly three live foes (Float-Eye, the Brine
  * Hag, the Doorwarden) plus the `sandbag` fixture; no survivor carries a
- * keyword or a stage `gain` list; no enemy card carries an affliction, a
- * counterplay rider or a curse; every Act 1 map draws Float-Eye; each Act 1
- * region pins the Brine Hag mid-region and the Doorwarden as its door boss.
+ * keyword or a stage `gain` list; no enemy card carries an affliction; every
+ * Act 1 map draws Float-Eye; each Act 1 region pins the Brine Hag mid-region
+ * and the Doorwarden as its door boss. R2b: the keyword, rider, curse and
+ * SUMMON code is gone from the engine's surface.
  */
 
 import { describe, expect, it } from 'vitest';
@@ -18,6 +19,8 @@ import { ENEMY_CARD_LIBRARY, type EnemyCardFace } from '../../Combat/combat.enem
 import { ENEMY_DECKS, deckCardIds } from '../../Combat/combat.enemy-decks';
 import { getThreatSequence } from '../../Combat/combat.threat';
 import { getNodeEventPool } from '../../World';
+import * as engine from '../../Combat/combat.engine';
+import * as mechanics from '../../index';
 
 const SURVIVOR_IDS = ['enemy-float-eye', 'enemy-brine-hag', 'enemy-the-doorwarden'];
 
@@ -48,14 +51,14 @@ describe('the R2 roster', () => {
 });
 
 describe('the R2 enemy cards', () => {
-    const RIDERS = ['effectId', 'intensity', 'swayCleanse', 'premiseShed', 'curseCardId'] as const;
+    const RIDERS = ['effectId', 'intensity'] as const;
     const bare = (where: string, face: Partial<EnemyCardFace>): void => {
         for (const field of RIDERS) {
             expect(face[field], `${where}.${field}`).toBeUndefined();
         }
     };
 
-    it('no card (or branch face) carries an affliction, a rider or a curse', () => {
+    it('no card (or branch face) carries an affliction', () => {
         for (const [id, card] of Object.entries(ENEMY_CARD_LIBRARY)) {
             bare(id, card);
             if (card.branch) {
@@ -105,5 +108,30 @@ describe('the R2 Act 1 pools and pins (D61)', () => {
         const payload = encounterAt(continent, map, elite);
         expect(payload.enemySlug).toBe('brine-hag');
         expect(payload.isBoss ?? false).toBe(false);
+    });
+});
+
+describe('R2b — the enemy keyword code is gone (D63)', () => {
+    it('the engine exports none of the deleted keyword, SUMMON or curse surface', () => {
+        const gone = [
+            'strikeAdd', 'ADD_WAVE_CAP', 'STRIKE_ADD_COST', 'ADD_BITE_PER_LEVEL',
+            'effectiveHide', 'scalePlayerHitDetailed', 'BRUTAL_DAMAGE_MULT',
+            'WOUND_CARD_ID', 'projectEnemyHealPerRound',
+        ];
+        for (const name of gone) {
+            expect(name in engine, `combat.engine exports ${name}`).toBe(false);
+            expect(name in mechanics, `the package exports ${name}`).toBe(false);
+        }
+    });
+
+    it('no survivor telegraph prints a PLEA, premise or curse rider', () => {
+        for (const enemy of EnemyLibrary) {
+            for (const phase of getThreatSequence(enemy)) {
+                const faces = phase.branch ? [phase.branch.then, phase.branch.else] : [phase];
+                for (const face of faces) {
+                    expect(face.threatAction.description, enemy.id).not.toMatch(/PLEA|premise|curse/i);
+                }
+            }
+        }
     });
 });

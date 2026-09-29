@@ -177,6 +177,7 @@ describe('Spec 26 §2 — intent derivation', () => {
         expect(deriveIntentType([{ damage: 5 }])).toBe('damage');
         expect(deriveIntentType([{ effectId: 'debuff_bleed' }])).toBe('debuff');
         expect(deriveIntentType([{ enemyHeal: 6 }])).toBe('buff');
+        expect(deriveIntentType([{ enemyCleanse: 1 }])).toBe('debuff');
         expect(deriveIntentType([{ damage: 5, effectId: 'debuff_bleed' }])).toBe('combo');
         expect(deriveIntentType([{}])).toBe('pass');
     });

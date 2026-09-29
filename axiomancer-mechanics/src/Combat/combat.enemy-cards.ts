@@ -10,9 +10,9 @@
  * Since the enemy roster reset (revamp phase R2) the library holds only the
  * 14 cards the three live foes play — Float-Eye, the Brine Hag and the
  * Doorwarden. Every card deals plain damage: no card carries a debuff
- * (`effectId`/`intensity`), a counterplay rider (`swayCleanse`/`premiseShed`)
- * or a curse (`curseCardId`). The payload fields stay on the types because
- * the resolver still reads them; nothing in the library sets them.
+ * (`effectId`/`intensity`). The debuff fields stay on the types because the
+ * resolver still reads them (B2 decides whether afflictions return); nothing
+ * in the library sets them.
  *
  * `threatDamageBudget` is round((6 + 0.8·level) · DIFFICULTY_MULT ·
  * (1 + 0.2·phaseIndex) · damageWeight); weights sit in the bands
@@ -45,9 +45,6 @@ export interface EnemyCardFace {
      *  the card's own fields). */
     enemyHeal?: number;
     enemyCleanse?: number;
-    swayCleanse?: number;
-    premiseShed?: number;
-    curseCardId?: string;
     actionText: string;
     stanceHint: string;
 }
@@ -70,16 +67,12 @@ export interface EnemyCard {
     /** Escalation / counterplay riders (same semantics as AuthoredThreatPhase). */
     enemyHeal?: number;
     enemyCleanse?: number;
-    swayCleanse?: number;
-    premiseShed?: number;
     /** Variable-rung telegraph sizing (1-4). */
     rungs?: number;
     /** THE COVETED DIE — legal only on the SECOND card of a boss/unique deck. */
     stake?: boolean;
     /** Locked until this round (escalation cards). */
     unlockAfterRound?: number;
-    /** CURSE INJECTION — shuffles this curse into the player's combat deck. */
-    curseCardId?: string;
     /** A branch card: the condition commits one of two faces at phase start. */
     branch?: { condition: ThreatBranchCondition; then: EnemyCardFace; else: EnemyCardFace };
     actionText: string;

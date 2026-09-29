@@ -80,10 +80,9 @@ const LINGERING_ROW_ID = '__lingering_afflictions__';
 /**
  * Every point of VITAE the enemy lost across the fight: the bar's net drop
  * PLUS everything it healed back. Heals show as negative `damage-dealt` (card
- * mechanics) or as `enemy-healed` (RAVENOUS / REGROW / STAGE / threat
- * `enemyHeal`, playtest fix 2026-09-04 — before that event existed those
- * heals were invisible here, so a RAVENOUS fight reported "Direct damage: 0"
- * and tripped the WI-9 reconciliation warning).
+ * mechanics) or as `enemy-healed` (STAGE / threat `enemyHeal`, playtest fix
+ * 2026-09-04 — before that event existed those heals were invisible here and
+ * tripped the WI-9 reconciliation warning).
  */
 function enemyHpLost(state: CombatEncounterState): number {
     let enemyHealed = 0;

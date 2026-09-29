@@ -25,7 +25,6 @@ export const PATHS = {
   catalogGlyphs: 'scripts/build-catalog.mjs',
   mobileKeywords: 'axiomancer-mobile/state/combat/keywords.ts',
   keywordAtlas: 'axiomancer-mechanics/docs/keyword-atlas.md',
-  enemyKeywords: 'axiomancer-mechanics/src/Enemy/enemy-keywords.ts',
 }
 
 export const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf-8')
@@ -96,24 +95,6 @@ export function mobileRegistryKeywords() {
     names.add((m[2] ?? m[3]).toUpperCase())
   }
   return nonEmpty(Object.fromEntries([...names].map((n) => [n, true])), 'mobile keyword registry')
-}
-
-/**
- * ENEMY keyword names from `ENEMY_KEYWORD_GLOSS`, upper-cased.
- *
- * THE BIG NUMBERS REWRITE (2026-09-02): the atlas covers TWO vocabularies now
- * — the card keywords a player's own cards print (mobile `KEYWORD_GLOSS`) and
- * the keywords a FOE carries. The enemy set is deliberately kept out of
- * `KEYWORD_GLOSS` so the mobile KW lints, which iterate card keywords, stay
- * untouched; it lives in mechanics beside the union it glosses. Both are real
- * registries, so both count when asking "does this atlas row gloss anywhere".
- */
-export function enemyRegistryKeywords() {
-  const text = read(PATHS.enemyKeywords)
-  const body = braceBlock(text, text.indexOf('ENEMY_KEYWORD_GLOSS'))
-  const names = new Set()
-  for (const m of body.matchAll(/^ {4}([a-z_]+):/gm)) names.add(m[1].toUpperCase())
-  return nonEmpty(Object.fromEntries([...names].map((n) => [n, true])), 'enemy keyword registry')
 }
 
 /**

@@ -44,21 +44,12 @@ import {
     type Card, type CardCombatEffects, type EnemyDifficulty,
     type UpgradeableDieGear,
     type WheelStance,
-    // Phase 102 (SUMMON) — the brood. `STRIKE_ADD_COST` is imported rather than
-    // restated: a price the UI hardcodes is a price that drifts from the engine
-    // that charges it, and the confirm sheet quotes this number to the player.
-    STRIKE_ADD_COST,
 } from '@mechanics';
-// THE BIG NUMBERS REWRITE — the enemy-keyword module is NOT re-exported through
-// the top-level `@mechanics` barrel, so its type comes in on the subpath alias
-// (same workaround as `CardSpecialMechanic` below). The player-facing LABEL and
-// GLOSS are adapted in `state/combat/keywords.ts`, never read raw here.
-import type { EnemyKeyword } from '@mechanics/Enemy';
 // W3 (2026-09-21, owner finding 4) — the card-text projection. The detail
 // panel's printed clauses are DERIVED here, in mechanics, from the effect
 // data; this presenter only formats them (keyword casing, separators,
-// de-abbreviation). It never decides what is in the list. Sub-path alias,
-// like `@mechanics/Enemy` above: the module is deliberately not re-exported
+// de-abbreviation). It never decides what is in the list. Sub-path alias:
+// the module is deliberately not re-exported
 // through the top-level barrel, which several workers are editing in parallel.
 import { paidClauses, type CardClause } from '@mechanics/Combat/combat.card-text';
 import { momentumV2A11y } from '@/state/combat/momentum';
@@ -69,7 +60,7 @@ import { rarityFor, RARITY_LABEL, RARITY_PIPS, RARITY_COLOR } from '@/state/pres
 /** The barrel doesn't re-export the union, so derive it from Card. */
 type CardSpecialMechanic = NonNullable<Card['specialMechanics']>[number];
 import { effectGlyph, GLYPH_COLORS, type StatusGlyph } from '@/components/combat/statusGlyphs';
-import { enemyKeywordChip, enemyKeywordGlossForToken, keywordForEffect, keywordForVerb, keywordForMechanic, keywordGloss, keywordsInPersistentText, persistentVerbKeyword, systemTermsForCard } from '@/state/combat/keywords';
+import { keywordForEffect, keywordForVerb, keywordForMechanic, keywordGloss, keywordsInPersistentText, persistentVerbKeyword, systemTermsForCard } from '@/state/combat/keywords';
 import { AXM } from '@/theme/axm';
 
 // ── Stance palette (Heart/Body/Mind/Wild/X/Any) ──────────────────────────────
@@ -115,35 +106,6 @@ const ENCHANT_COLOR = '#7fb3a6';
 // A single gold accent (matches `STANCE_COLORS.wild`, the existing "charged
 // token" identity) — the Signature line in the combat log.
 const GOLD_ACCENT = '#d9b44a';
-
-// Phase 102 — SUMMON's brood. A colour of its own, deliberately NOT
-// `ENEMY_KEYWORD_COLOR` (iron grey, "a property of the thing you are hitting")
-// and NOT `GOLD_ACCENT` (gold, "a charged token of yours"): an add is a live
-// THING ON THE BOARD that acts against you, so it borrows the threat register.
-export const ADD_COLOR = '#b4543f';
-const ADD_GLYPH = '•';
-
-/** THE BIG NUMBERS REWRITE — a silhouette per ENEMY keyword, so the foe's
- *  pane reads as a shape before it reads as a word (the same doctrine the card
- *  glyphs follow). Iron grey throughout: these are properties of the thing you
- *  are hitting, not statuses anyone applied. */
-const ENEMY_KEYWORD_GLYPHS: Record<EnemyKeyword['kind'], string> = Object.freeze({
-    hide: '⛨',       // a hide of plate — the armour floor
-    swift: '↯',      // it moves before your wall does
-    brutal: '⚒',     // whatever gets through lands twice
-    venom: '☣',      // the wound goes bad
-    unshaken: '⛰',   // it does not flinch
-    elusive: '≈',    // the armour doubles until you pin it
-    regrow: '❦',     // it closes at every phase boundary
-    ravenous: '☾',   // it feeds on what it lands
-    wounding: '✚',   // a big hit puts a WOUND in your deck
-    flurry: '⁂',     // one telegraph, several strikes
-    // Phase 102 — SUMMON. Five dots rather than the asterism FLURRY uses: both
-    // mean "more than one", but FLURRY means more strikes from ONE body and
-    // SUMMON means more BODIES, so they must not read as the same mark.
-    summon: '⁙',
-});
-const ENEMY_KEYWORD_COLOR = GLYPH_COLORS.thorns;
 
 /**
  * Canon combat copy is VITAE (mobile CLAUDE.md — "copy regressions to the
@@ -369,15 +331,6 @@ export interface CombatIntentVM {
     wallMath: {
         projectedDamage: number; netDamage: number; willDeny: boolean; guard: number; barrier: number;
         rungsTotal: number; rungsLost: number;
-        /** Phase 102 (SUMMON) — the brood's own arithmetic, carried SEPARATELY
-         *  from the foe's telegraph rather than folded into `netDamage`.
-         *  `netDamage` must keep meaning "what this telegraphed hit deals", or
-         *  every existing readout that reads it starts lying about the foe.
-         *  `totalNetDamage` is what the player actually loses this phase, and
-         *  it is what the HUD prints: a DENIED telegraph with a living brood
-         *  still costs VITAE, and showing bare "DENIED" there would be the
-         *  worst lie this readout can tell. */
-        addDamage: number; addNetDamage: number; totalNetDamage: number;
     };
     /** Spec 33 §5 (Phase D6b) — the OPEN stance-check telegraph for this
      *  phase (D6e authored `punishes`/`yields` on every threat phase): what
@@ -428,10 +381,6 @@ export interface CombatEnemyPaneVM {
      *  (so a whole-plan-is-PLEA preset like GRACE sees the track from turn 1). */
     sway: number; swayTarget: number; swayVisible: boolean;
     premises: number; premiseAt: number; premiseVisible: boolean;
-    /** THE BIG NUMBERS REWRITE — the foe's printed keywords (HIDE 6, BRUTAL …)
-     *  as tappable chips. Same VM as a status chip, so the existing plaque
-     *  explains them; empty when the foe carries none. */
-    keywords: CombatEffectChipVM[];
     /** THE BIG NUMBERS REWRITE — FLAY stacks riding the FOE (each spends on one
      *  of your next hits, landing it half again as hard). Same visibility rule
      *  as the alt-win meters: shown once it has a value, or once the deck holds
@@ -445,45 +394,8 @@ export interface CombatEnemyPaneVM {
      *  damage the foe's CURRENT stacks will deal if nothing else happens;
      *  `roundsToKill` is null unless that alone clears remaining HP, in which
      *  case `isLethalInFlight` is true. Engine truth (`projectCombatOutcome`),
-     *  this presenter only forwards it. `healPerRound` (playtest fix
-     *  2026-09-04) is the foe's projected REGROW/RAVENOUS recovery the
-     *  kill-round walk already nets out — surfaced so the meter can say WHY a
-     *  fat pending stack is not yet a kill. */
-    pendingDot: number; roundsToKill: number | null; isLethalInFlight: boolean; healPerRound: number;
-    /** Phase 102 (SUMMON) — the foe's living brood, one chip per body. Empty
-     *  for every foe that does not summon, which is all but one of them, so
-     *  this row simply does not render in the ordinary fight. On the ENEMY
-     *  pane and not the player's: an add is a body of THEIRS that you
-     *  remove. */
-    adds: CombatAddVM[];
-    /** What one `strikeAdd` costs in Conviction, and whether the player can
-     *  pay it right now. Forwarded from the engine constant rather than
-     *  restated here — a price the UI hardcodes is a price that drifts. */
-    strikeAddCost: number; canStrikeAdd: boolean;
-}
-/**
- * Phase 102 (SUMMON) — one renderable member of a foe's brood.
- *
- * `bite` is the FLAT number the engine applies, not a projection: the engine
- * resolves adds outside the threat loop's multiplier stack precisely so the
- * number on this chip is the number the player takes. It is printed as-is, and
- * that is only honest because of where the engine put it.
- *
- * `affordable` is a snapshot of `conviction >= STRIKE_ADD_COST` at build time.
- * The chip stays TAPPABLE when it is false — the confirm sheet then shows the
- * price greyed with the shortfall named, because a chip that silently refuses
- * a tap teaches the player nothing about why.
- */
-export interface CombatAddVM {
-    id: string;
-    name: string;
-    bite: number;
-    vitae: number;
-    maxVitae: number;
-    glyph: string;
-    color: string;
-    cost: number;
-    affordable: boolean;
+     *  this presenter only forwards it. */
+    pendingDot: number; roundsToKill: number | null; isLethalInFlight: boolean;
 }
 export interface CombatPlayerPaneVM {
     name: string; hp: number; maxHp: number; hpPct: number; guard: number; effects: CombatEffectChipVM[];
@@ -910,35 +822,6 @@ function standingChips(
     });
 }
 
-/**
- * THE BIG NUMBERS REWRITE (2026-09-02) — the foe's own keywords, as chips.
- *
- * HIDE / SWIFT / BRUTAL / VENOM / UNSHAKEN / ELUSIVE / REGROW / RAVENOUS /
- * WOUNDING change the arithmetic of the fight before a single card is played,
- * and a player who cannot see them is doing sums with a hidden term. They ride
- * the SAME chip VM as a status (and so the same tap-to-explain plaque): the
- * label is the engine's printed token, the gloss its reminder text with this
- * foe's own number already in it.
- *
- * `standing` is set for the valueless words (BRUTAL, SWIFT) so no meaningless
- * "1" badge renders; a numbered keyword (HIDE 6) carries its number as the
- * badge, exactly as an intensity would.
- */
-function enemyKeywordChips(enemy: { keywords?: readonly EnemyKeyword[] }): CombatEffectChipVM[] {
-    return (enemy.keywords ?? []).map((k) => {
-        const { label, gloss } = enemyKeywordChip(k);
-        const n = 'n' in k ? k.n : null;
-        return {
-            effectId: `enemy-keyword-${k.kind}`,
-            intensity: n ?? 1,
-            duration: 0,
-            standing: n === null,
-            glyph: { glyph: ENEMY_KEYWORD_GLYPHS[k.kind], color: ENEMY_KEYWORD_COLOR, kind: 'statdown' as const, label },
-            gloss,
-        };
-    });
-}
-
 /** WS9 — maps a phase's branch payload to the fork telegraph (null if linear). */
 function branchVM(phase: CombatThreatPhase | undefined): CombatIntentBranchVM | null {
     const b = phase?.branch;
@@ -998,12 +881,10 @@ function stanceCheckVM(
 
 // ── The enemy's played "card" (the after-the-fact reveal) ────────────────────
 
-/** One structured line off the resolved threat action ("6 DAMAGE", "POISON ×2").
- *  `source` says whose payload it is: a `telegraph` line is the foe's OWN
- *  announced action (struck through on the card when the player denied it), a
- *  `brood` line is what the adds took anyway. The brood bites outside the
- *  engine's `!hindered` gate, so a brood line must never read as averted. */
-export interface EnemyActionLineVM { text: string; color: string; source: 'telegraph' | 'brood' }
+/** One structured line off the resolved threat action ("6 DAMAGE", "POISON ×2"):
+ *  the foe's OWN announced action (struck through on the card when the player
+ *  denied it). */
+export interface EnemyActionLineVM { text: string; color: string; source: 'telegraph' }
 
 /**
  * What the enemy just did, shaped as a card the player can read for a beat
@@ -1022,15 +903,8 @@ export interface EnemyActionCardVM {
      *  payload is the `lines` below, so printing both reads as a stutter). */
     actionText: string;
     lines: EnemyActionLineVM[];
-    /** The foe's OWN blow never fired — the player's control held it. This is
-     *  narrower than "nothing landed": the brood bites OUTSIDE the engine's
-     *  `!hindered` gate, so `addDealt` below can still be positive on a denied
-     *  phase. `telegraph` lines read as what was averted; `brood` lines read as
-     *  what landed regardless. */
+    /** The foe's OWN blow never fired — the player's control held it. */
     denied: boolean;
-    /** VITAE the brood took during this phase — 0 when there was no brood on
-     *  the board, or when the wall soaked all of it. */
-    addDealt: number;
 }
 
 /** `buildThreatAction` prints `${actionText} (${parts}).` — keep the sentence,
@@ -1058,9 +932,6 @@ function enemyActionLines(effects: readonly CombatThreatEffect[]): EnemyActionLi
         }
         if (e.enemyHeal && e.enemyHeal > 0) lines.push({ text: `HEALS ${e.enemyHeal}`, color: INTENT_ICONS.buff.color, source: 'telegraph' });
         if (e.enemyCleanse && e.enemyCleanse > 0) lines.push({ text: `SHEDS ${e.enemyCleanse}`, color: INTENT_ICONS.buff.color, source: 'telegraph' });
-        if (e.swayCleanse && e.swayCleanse > 0) lines.push({ text: `−${e.swayCleanse} PLEA`, color: INTENT_ICONS.debuff.color, source: 'telegraph' });
-        if (e.premiseShed && e.premiseShed > 0) lines.push({ text: `−${e.premiseShed} PREMISE`, color: INTENT_ICONS.debuff.color, source: 'telegraph' });
-        if (e.curseCardId) lines.push({ text: 'CURSES YOUR DECK', color: INTENT_ICONS.debuff.color, source: 'telegraph' });
     }
     return lines;
 }
@@ -1090,13 +961,7 @@ export function selectEnemyActionCard(
     if (description.length === 0) return null;
     const effects = fired ? fired.effects : phase?.threatAction.effects ?? [];
     const meta = INTENT_ICONS[(phase?.intentType ?? 'pass') as CombatIntentType];
-    // Phase 102 — the brood bites in its own `add-bit` event, outside the
-    // engine's `!hindered` gate. A card built from the telegraph alone called
-    // a phase that cost real VITAE "denied — none of it landed" (burn-day
-    // audit 3.3), so the bite rides here as a line of its own.
-    const addDealt = events.reduce((n, e) => (e.kind === 'add-bit' ? n + e.dealt : n), 0);
     const lines = enemyActionLines(effects);
-    if (addDealt > 0) lines.push({ text: `BROOD −${addDealt}`, color: ADD_COLOR, source: 'brood' });
     return {
         phaseIndex,
         icon: meta.icon,
@@ -1105,7 +970,6 @@ export function selectEnemyActionCard(
         actionText: stripThreatPayload(description),
         lines,
         denied,
-        addDealt,
     };
 }
 
@@ -1114,9 +978,8 @@ export function selectEnemyActionCard(
  * rewrite's own events.
  *
  * Everything the engine emits should be legible, and the seven new ledgers
- * (WRATH / CHAIN / FLAY / TWIN / OVERKILL) plus the two ENEMY beats (a foe
- * changing STAGE, a foe's keyword changing the arithmetic) were landing
- * silently: the numbers moved and the player was never told which word moved
+ * (WRATH / CHAIN / FLAY / TWIN / OVERKILL) plus the ENEMY beat (a foe
+ * changing STAGE) were landing silently: the numbers moved and the player was never told which word moved
  * them. This is the mapping, and the only place the words live.
  *
  * `text` is the log sentence; `float` is the short token the battlefield rises
@@ -1125,16 +988,11 @@ export function selectEnemyActionCard(
  * status applications) and are deliberately absent rather than duplicated.
  *
  * Corrected 2026-09-20 (burn-day audit 3.4): that last sentence was read as
- * blanket permission, and four kinds the engine emits were handled NOWHERE
- * else — the brood's `add-spawned` / `add-bit` / `add-struck` and the strike's
- * `effect-fizzled` all fell to `default:` and vanished from the log, the
- * history and the float layer at once. "Absent because it is handled
- * elsewhere" is only honest when the other surface actually exists and can be
- * named. `add-bit` is the shape of the exception: it belongs in the LOG,
- * which nothing else writes, and NOT in the float layer, which the pilgrim's
- * medallion and the pane's `DENIED · BROOD −N` already own (audit 3.3) —
- * hence a line with `float: null`. A kind with no arm at all must be one no
- * surface narrates.
+ * blanket permission, and kinds the engine emits (`effect-fizzled` among
+ * them) fell to `default:` and vanished from the log, the history and the
+ * float layer at once. "Absent because it is handled elsewhere" is only
+ * honest when the other surface actually exists and can be named. A kind with
+ * no arm at all must be one no surface narrates.
  */
 export interface CombatLogLineVM {
     kind: CombatEvent['kind'];
@@ -1160,19 +1018,6 @@ export function selectCombatLogLines(events: readonly CombatEvent[]): CombatLogL
                     float: `‡ ${e.name.toUpperCase()} ‡`,
                 });
                 break;
-            // The foe's own vocabulary, firing. `keyword` is the printed token
-            // ('SWIFT', 'HIDE 6'); its reminder text rides along so the log
-            // teaches the word the first time it bites.
-            case 'enemy-keyword-fired': {
-                const gloss = enemyKeywordGlossForToken(e.keyword);
-                const bite = e.amount === undefined ? '' : ` for ${e.amount}`;
-                out.push({
-                    kind: e.kind, side: 'enemy', color: ENEMY_KEYWORD_COLOR,
-                    text: `${e.keyword} answers${bite}.${gloss ? ` ${gloss}` : ''}`,
-                    float: `${e.keyword}${bite}`,
-                });
-                break;
-            }
             case 'wrath-gained':
                 out.push({
                     kind: e.kind, side: 'player', color: GLYPH_COLORS.dot,
@@ -1222,16 +1067,12 @@ export function selectCombatLogLines(events: readonly CombatEvent[]): CombatLogL
                     float: `OVERKILL ${e.excess}`,
                 });
                 break;
-            // Playtest fix 2026-09-04 — three silent ledgers. The foe's bar
-            // climbed with no line saying WHY, and the PLEA tally fell twice a
-            // round (a THREAT cleanse, then the turn-boundary decay) with no
-            // narration of either. Zero-amount heals (RAVENOUS at full VITAE)
-            // never emit, so no guard is needed here.
+            // Playtest fix 2026-09-04 — silent ledgers. The foe's bar climbed
+            // with no line saying WHY, and the PLEA tally decayed at the turn
+            // boundary with no narration. Zero-amount heals never emit, so no
+            // guard is needed here.
             case 'enemy-healed': {
-                const why = e.source === 'RAVENOUS' ? 'RAVENOUS. It drinks what it dealt'
-                    : e.source === 'REGROW' ? 'REGROW. It knits'
-                    : e.source === 'STAGE' ? 'The new STAGE restores'
-                    : 'Its threat restores';
+                const why = e.source === 'STAGE' ? 'The new STAGE restores' : 'Its threat restores';
                 out.push({
                     kind: e.kind, side: 'enemy', color: GLYPH_COLORS.regen,
                     text: `${why} — VITAE +${e.amount}.`,
@@ -1239,67 +1080,11 @@ export function selectCombatLogLines(events: readonly CombatEvent[]): CombatLogL
                 });
                 break;
             }
-            case 'threat-sway-cleansed':
-                out.push({
-                    kind: e.kind, side: 'enemy', color: GLYPH_COLORS.statdown,
-                    text: `The foe shakes off your plea. PLEA −${e.amount}.`,
-                    float: `PLEA −${e.amount}`,
-                });
-                break;
             case 'sway-decayed':
                 out.push({
                     kind: e.kind, side: 'enemy', color: GLYPH_COLORS.thorns,
                     text: `Your plea fades between turns. PLEA −${SWAY_DECAY_PER_TURN} (${e.total} holds).`,
                     float: null,
-                });
-                break;
-            // ── Phase 102 (SUMMON) — the brood, narrated (burn-day audit 3.4)
-            //
-            // The engine emitted all three of these plus the strike's refusal
-            // into `state.log` and this switch had no arm for any of them, so
-            // they fell to `default:` and the log, the history and the float
-            // layer went silent together. A player ate a bite, watched VITAE
-            // fall, and found nothing anywhere naming what took it.
-            //
-            // Deliberately NOT led by the word SUMMON: a STAGE that grants the
-            // keyword emits `enemy-keyword-fired` with the face string
-            // `SUMMON 2` on the very boundary this wave spawns on, and two
-            // sentences opening on the same word is the duplication this
-            // docblock forbids.
-            case 'add-spawned': {
-                const n = e.addIds.length;
-                out.push({
-                    kind: e.kind, side: 'enemy', color: ADD_COLOR,
-                    text: `The foe fields ${n} more ${n === 1 ? 'body' : 'bodies'}. Each bites you for ${e.bite} every phase, even while the foe is denied.`,
-                    float: `BROOD +${n}`,
-                });
-                break;
-            }
-            // Both numbers, because the wall math is the decision the readout
-            // is asking the player to make. LOG-ONLY on purpose: the bite's
-            // float already lives on the pilgrim's own medallion, in this
-            // colour, and rides the pane's `DENIED · BROOD −N` composite
-            // (audit 3.3) — a token here would be a third shout for one bite,
-            // pushed over the FOE's pane at that.
-            case 'add-bit': {
-                const soaked = Math.max(0, e.raw - e.dealt);
-                out.push({
-                    kind: e.kind, side: 'player', color: ADD_COLOR,
-                    text: soaked > 0
-                        ? `The brood bites for ${e.raw} — your wall eats ${soaked}. You take ${e.dealt}.`
-                        : `The brood bites for ${e.raw}. You take ${e.dealt}.`,
-                    float: null,
-                });
-                break;
-            }
-            // `e.cost` is the engine's `STRIKE_ADD_COST` riding on the event —
-            // read off the event, never restated here, so a re-price moves the
-            // sentence with it.
-            case 'add-struck':
-                out.push({
-                    kind: e.kind, side: 'enemy', color: ADD_COLOR,
-                    text: `${e.name} is struck down. ◆${e.cost} spent.`,
-                    float: 'STRUCK',
                 });
                 break;
             // A refused action, in the engine's OWN words (`need 2 ◆ Conviction
@@ -1330,7 +1115,7 @@ export function selectCombatLogLines(events: readonly CombatEvent[]): CombatLogL
 // grouped by turn.
 //
 // It reuses `selectCombatLogLines` for every event kind that already has a
-// ledger sentence (stage-entered, enemy-keyword-fired, the WRATH/FLAY/CHAIN/
+// ledger sentence (stage-entered, the WRATH/FLAY/CHAIN/
 // TWIN/OVERKILL ledgers, enemy-healed, the PLEA lines, ...) and adds the
 // kinds that function deliberately omits — the raw damage/DoT/card/threat/
 // stance-check beats a FLOAT already carries but the log never wrote down.
@@ -1358,17 +1143,11 @@ export function selectCombatLogHistory(state: CombatEncounterState): CombatLogHi
     const out: CombatLogHistoryEntryVM[] = [];
     let seq = 0;
     let lastTurn: number | null = null;
-    // Phase 102 — the engine pushes `add-bit` immediately before the phase's
-    // own `phase-resolved`, so anything seen since the last phase boundary
-    // belongs to the phase about to be marked. Scoped, never cumulative: a
-    // bite in an earlier phase must not colour a later DENIED (audit 3.3).
-    let biteThisPhase = 0;
     const push = (side: CombatLogHistoryEntryVM['side'], color: string, text: string) => {
         seq += 1;
         out.push({ id: `log-${seq}`, side, color, text });
     };
     for (const e of events) {
-        if (e.kind === 'add-bit') biteThisPhase += e.dealt;
         switch (e.kind) {
             // A turn boundary — the divider, then the tray's own dice summary.
             // Derived off the same event: `startTurn` emits exactly one of
@@ -1417,15 +1196,10 @@ export function selectCombatLogHistory(state: CombatEncounterState): CombatLogHi
                 break;
             // 'overwhelmed' phases already read through 'threat-fired'; the
             // DENIED half of the story (mark === 'clear') is otherwise silent.
-            // DENIED means the foe's OWN blow was held — never "nothing
-            // landed", because a live brood bites through a hindered phase.
             case 'phase-resolved':
                 if (e.mark === 'clear') {
-                    push('player', GLYPH_COLORS.statup, biteThisPhase > 0
-                        ? `PHASE ${e.phaseIndex} — DENIED, but the brood bit you for ${biteThisPhase}.`
-                        : `PHASE ${e.phaseIndex} — DENIED.`);
+                    push('player', GLYPH_COLORS.statup, `PHASE ${e.phaseIndex} — DENIED.`);
                 }
-                biteThisPhase = 0;
                 break;
             // Same wording the open stance-check telegraph resolves to
             // (`stanceCheckVM` above) — one vocabulary, never two.
@@ -1462,7 +1236,7 @@ export function selectCombatLogHistory(state: CombatEncounterState): CombatLogHi
                 break;
             default: {
                 // Every kind `selectCombatLogLines` already narrates (stage
-                // entries, enemy keywords, the ledgers, the PLEA lines, ...)
+                // entries, the ledgers, the PLEA lines, ...)
                 // — one source of copy, never a forked duplicate.
                 const [line] = selectCombatLogLines([e]);
                 if (line) push(line.side, line.color, line.text);
@@ -1496,11 +1270,6 @@ function intentVM(state: CombatEncounterState): CombatIntentVM {
             projectedDamage: threat.projectedDamage, netDamage: threat.netDamage,
             willDeny: threat.willDeny, guard: threat.guard, barrier: threat.barrier,
             rungsTotal: threat.rungsTotal, rungsLost: threat.rungsLost,
-            // Engine truth, forwarded — `projectIncomingThreat` runs the brood
-            // through the SAME `soakFlatHit` that `resolveThreatPhase` applies,
-            // so this readout cannot drift from what actually happens.
-            addDamage: threat.addDamage, addNetDamage: threat.addNetDamage,
-            totalNetDamage: threat.totalNetDamage,
         },
         stanceCheck,
     };
@@ -1563,34 +1332,12 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
         // peroration track (combat-peroration) owns the premises/at readout.
         premiseVisible: !state.peroration
             && (premises > 0 || deckFeedsMechanic(state, ['premise', 'peroration', 'spend_premises'])),
-        keywords: enemyKeywordChips(e),
         flay, flayVisible: flay > 0 || deckFeedsMechanic(state, ['flay']),
         stagesEntered: (state.stagesEntered ?? []).length,
         pendingDot: lethality.pendingDot,
         roundsToKill: lethality.roundsToKill,
         isLethalInFlight: lethality.isLethalInFlight,
-        healPerRound: lethality.healPerRound,
-        adds: addsVM(state),
-        strikeAddCost: STRIKE_ADD_COST,
-        canStrikeAdd: state.conviction >= STRIKE_ADD_COST,
     };
-}
-
-/**
- * Phase 102 — maps the engine's brood to renderable chips.
- *
- * Nothing is computed here beyond affordability: `bite` is forwarded verbatim
- * because the engine applies it verbatim (it resolves adds outside the threat
- * loop's multiplier stack for exactly this reason), and a presenter that
- * "helpfully" scaled it would reintroduce the drift the engine went out of its
- * way to make impossible.
- */
-function addsVM(state: CombatEncounterState): CombatAddVM[] {
-    const affordable = state.conviction >= STRIKE_ADD_COST;
-    return (state.adds ?? []).map((a) => ({
-        id: a.id, name: a.name, bite: a.bite, vitae: a.vitae, maxVitae: a.maxVitae,
-        glyph: ADD_GLYPH, color: ADD_COLOR, cost: STRIKE_ADD_COST, affordable,
-    }));
 }
 
 function playerPane(state: CombatEncounterState): CombatPlayerPaneVM {

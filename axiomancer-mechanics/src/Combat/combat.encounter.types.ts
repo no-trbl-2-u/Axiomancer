@@ -249,26 +249,6 @@ export interface CombatThreatEffect {
      *  afflictions when the action fires (spec 29 guardrail: a fraction,
      *  never the last one). Written only by the threat-branch resolver. */
     enemyCleanse?: number;
-    /** Phase 33a — enemy counterplay against the player's PLEA
-     *  (charm/grace RELENT) track: reduces the live `sway` value by
-     *  this flat amount, floored at 0. Never resets the milestone-fired
-     *  flags (`swayMilestoneWaveringFired`/`swayMilestoneFalteringFired`)
-     *  — only the raw counter moves. Authorable on any threat phase,
-     *  branch or linear. */
-    swayCleanse?: number;
-    /** Phase 33a — enemy counterplay against the player's Premise
-     *  (peroration/oratory CONDEMN) track: reduces the live, spendable
-     *  `premises` tally by this flat amount, floored at 0. Never touches
-     *  `premiseMilestoneTotal` (the lifetime milestone-drip counter).
-     *  Authorable on any threat phase, branch or linear. */
-    premiseShed?: number;
-    /** Profane-canon rework — CURSE INJECTION (the StS/Arkham deck-
-     *  contamination vector): when the action fires, this curse card is
-     *  shuffled into the player's COMBAT deck cycle (persistent collection
-     *  untouched; the injection dies with the encounter). The player answers
-     *  with PURGE (playing the curse exiles it) or IMMOLATE (burning it as
-     *  fuel). Mirrors `swayCleanse`/`premiseShed`'s authoring shape. */
-    curseCardId?: string;
 }
 
 export interface CombatThreatAction {
@@ -580,17 +560,14 @@ export type CombatEvent =
     | { kind: 'overkill-cashed'; cardId: string; excess: number }
     /** A foe crossed one of its STAGE thresholds and became another fight. */
     | { kind: 'stage-entered'; enemyId: string; name: string; text: string }
-    /** An enemy keyword changed the arithmetic of a resolved threat. */
-    | { kind: 'enemy-keyword-fired'; enemyId: string; keyword: string; amount?: number }
     /**
      * The foe's VITAE went UP (playtest fix 2026-09-04). `amount` is the HP
      * ACTUALLY restored after the max-VITAE clamp — never the printed figure —
      * so the attribution ledger can reconcile "HP lost" against damage dealt.
-     * Every enemy-heal site (RAVENOUS, REGROW, a STAGE's `heal`, a threat's
-     * `enemyHeal`) emits one; `enemy-keyword-fired` stays the popup, this is
-     * the ledger row.
+     * Every enemy-heal site (a STAGE's `heal`, a threat's `enemyHeal`) emits
+     * one.
      */
-    | { kind: 'enemy-healed'; enemyId: string; source: 'RAVENOUS' | 'REGROW' | 'STAGE' | 'THREAT'; amount: number }
+    | { kind: 'enemy-healed'; enemyId: string; source: 'STAGE' | 'THREAT'; amount: number }
     | { kind: 'reaped'; cardId: string; soulsSpent: number; amount: number }
     // Phase 32 part 1 (Harvest — REAP attacks MAXIMUM HP): fires alongside
     // 'reaped' whenever a REAP verb (single or ALL) permanently lowers the
@@ -638,16 +615,8 @@ export type CombatEvent =
     | { kind: 'threat-branch'; phaseIndex: number; conditionText: string; taken: 'then' | 'else' }
     // WS9 — the enemy's reactive cleanse shed some of its own afflictions.
     | { kind: 'threat-cleansed'; phaseIndex: number; effectIds: string[] }
-    // Phase 33a — the enemy's reactive counterplay shed the player's live
-    // PLEA / spendable Premise tally (never their milestone flags / the
-    // lifetime premiseMilestoneTotal counter).
-    | { kind: 'threat-sway-cleansed'; phaseIndex: number; amount: number }
-    | { kind: 'threat-premise-shed'; phaseIndex: number; amount: number }
-    // Profane-canon rework — deck contamination + its answers. `curse-injected`
-    // fires when an enemy action shuffles a curse into the player's combat
-    // deck cycle; `immolated` when a play burns hand cards as fuel (they leave
-    // the combat); `purged` when a curse card exiles itself on play.
-    | { kind: 'curse-injected'; phaseIndex: number; cardId: string }
+    // Profane-canon rework — `immolated` when a play burns hand cards as fuel
+    // (they leave the combat); `purged` when a curse card exiles itself on play.
     | { kind: 'immolated'; cardId: string; burned: string[] }
     | { kind: 'purged'; cardId: string }
     | { kind: 'hand-drawn'; cards: string[] }
@@ -681,34 +650,7 @@ export type CombatEvent =
     // answered with a yield. `dieId` is absent when the table was full and the
     // payout converted to +1◆ instead (see the paired `die-overflowed` event).
     | { kind: 'coveted-die-stolen'; phaseIndex: number; method: 'stagger' | 'block' | 'yield'; dieId?: string }
-    // Phase 102 (SUMMON) — the brood. Own events, never folded into
-    // `threat-fired`/`penaltiesApplied`: the authored telegraph must keep
-    // reporting only what the foe itself announced.
-    | { kind: 'add-spawned'; enemyId: string; wave: number; addIds: string[]; bite: number }
-    /** `raw` is the printed sum of bites; `dealt` is what survived armor /
-     *  GUARD / BARRIER. Deliberately NOT counted in `attacksLanded`. */
-    | { kind: 'add-bit'; addIds: string[]; raw: number; dealt: number }
-    | { kind: 'add-struck'; addId: string; name: string; cost: number }
     | { kind: 'combat-ended'; outcome: CombatOutcome };
-
-/**
- * Phase 102 (SUMMON) — one member of a foe's brood. Deliberately NOT an
- * `Enemy`: no threat sequence, no stages, no keywords, no loot, no art, no
- * prose (cf. `Enemy/types.ts`, which is exactly the weight that makes literal
- * multi-enemy combat an XL job). `bite` is FLAT: the number printed on the
- * chip is the number the engine applies — it is resolved OUTSIDE the threat
- * loop's multiplier stack, so no escalation, stage bonus, weaken or stance
- * term ever touches it. Every shipped add is 1/1 VITAE (one `strikeAdd` kills
- * it); the vitae fields exist so the chip can show pips and a future
- * multi-strike add is representable without a state migration.
- */
-export interface CombatAdd {
-    id: string;
-    name: string;
-    vitae: number;
-    maxVitae: number;
-    bite: number;
-}
 
 // ---------------------------------------------------------------------------
 // Top-level encounter state (Spec 25 §4.1)
@@ -784,19 +726,6 @@ export interface CombatEncounterState {
      *  PAID play of the same card promotes it to the permanent `persistentZone`.
      *  Optional for back-compat (absent = none). */
     tempZone?: { cardId: string; roundsLeft: number }[];
-    /** Phase 102 (SUMMON) — the foe's living brood. Optional, "absent = none"
-     *  back-compat (the same convention as `tempZone`). NEVER part of
-     *  the win condition: `checkImmediateOutcome` and `pendingOutcome` read
-     *  `state.enemy` alone, so clearing every add can never end a fight. Spawned at a phase boundary, bites once per
-     *  threat phase, cleared by the dieless-but-priced `strikeAdd`. A STAGE's
-     *  `cleanse` does NOT clear it — cleanse wipes `enemy.effects`, and a body
-     *  is not an affliction. */
-    adds?: CombatAdd[];
-    /** Phase 102 — waves spawned this combat, capped at `ADD_WAVE_CAP`. Adds
-     *  NEVER respawn on emptiness: clearing a wave is progress the player
-     *  keeps, because "spawn when none are alive" makes clearing CAUSE the
-     *  respawn, which is a tax rather than a decision. */
-    addWavesSpawned?: number;
     /** Spec 32 v4 §2.1 — TEMPORARY enemy-attached disenchants from the FREE line;
      *  the timed mirror of `enemyAttachments`. Same tick/promote rules as
      *  {@link tempZone}. Optional (absent = none). */

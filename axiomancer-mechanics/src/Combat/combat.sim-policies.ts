@@ -18,8 +18,8 @@
  * DoT/debuff thresholds, Befriend-at-lowHp, new-status-first,
  * status-over-strike, damage preview) — never consumes rng, so the seeded
  * engine stream is untouched there. Since the D7 flag collapse (2026-09-25)
- * deleted the hidden-stance draft and THE STAKE, `greedy` and `blind` differ
- * only in `strikeAddsAt` (whatever the entries below set).
+ * deleted the hidden-stance draft and THE STAKE, `greedy` and `blind` play
+ * identically; `blind` is kept so the playtest matrix keeps its column.
  */
 
 import { getCardById } from '../Cards/cards.library';
@@ -80,25 +80,6 @@ export interface CombatSimPolicy {
      * absent the sim plays the printed minimum. Only `chaos` consumes `rng`.
      */
     chooseX?(state: CombatEncounterState, card: CombatCard, range: { min: number; max: number }, rng: () => number): number;
-    /**
-     * Phase 102 (SUMMON) — the minimum PROJECTED post-soak add damage that
-     * justifies paying `STRIKE_ADD_COST`. Once
-     * `projectIncomingThreat(state).addNetDamage >= strikeAddsAt` and
-     * Conviction covers the price, the witness strikes the highest-bite living
-     * add. Absent = never strikes — the strict default, so every policy
-     * without this field is byte-identical to its pre-Phase-102 behavior.
-     *
-     * The threshold reads "clear whatever the brood still gets through the
-     * wall": a turtle behind a live wall projects `addNetDamage === 0` and
-     * correctly declines to pay, which is the designed decision TAUGHT rather
-     * than hard-coded. Audit 3.8 — "a live wall" means the wall the phase ENDS
-     * holding, not the one it started with: the decision is settled after the
-     * card pass and the wind-down, because a witness that reads the opening
-     * wall can buy a body its own next play would have answered for free.
-     * Ties on bite resolve to `state.adds` order — no RNG.
-     * Read by `upgradeablePlayPhase`.
-     */
-    strikeAddsAt?: number;
 }
 
 // ─── Score bands ─────────────────────────────────────────────────────────────
@@ -240,7 +221,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         mercyChoice: 'spare',
         capitulationChoice: 'continue',
         chooseX: (_s, card, range) => greedyChooseX(card, range),
-        strikeAddsAt: 1,
     },
     blind: {
         id: 'blind',
@@ -253,7 +233,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         mercyChoice: 'spare',
         capitulationChoice: 'continue',
         chooseX: (_s, card, range) => greedyChooseX(card, range),
-        strikeAddsAt: 1,
     },
     'dot-weaver': {
         id: 'dot-weaver',
@@ -277,7 +256,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         convictionThreshold: 7,
         mercyChoice: 'exploit',
         capitulationChoice: 'continue',
-        strikeAddsAt: 1,
     },
     'control-lock': {
         id: 'control-lock',
@@ -297,7 +275,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         convictionThreshold: 8,
         mercyChoice: 'spare',
         capitulationChoice: 'continue',
-        strikeAddsAt: 1,
     },
     'aggro-brute': {
         id: 'aggro-brute',
@@ -330,7 +307,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         capitulationChoice: 'continue',
         // The outlast temperament commits the least blood the card allows.
         chooseX: (_s, _card, range) => range.min,
-        strikeAddsAt: 1,
     },
     chaos: {
         id: 'chaos',

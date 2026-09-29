@@ -36,9 +36,9 @@ import { ARENA_PLATES_SHOWN, BLACK_ARENA_ALT, arenaAltTextFor, arenaBackdropFor 
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
-    CombatEnemyPaneVM, CombatPlayerPaneVM, CombatEffectChipVM, CombatAddVM,
+    CombatEnemyPaneVM, CombatPlayerPaneVM, CombatEffectChipVM,
 } from '@/state/presenters/combat-encounter.engine';
-import { ADD_COLOR, selectCombatLogLines } from '@/state/presenters/combat-encounter.engine';
+import { selectCombatLogLines } from '@/state/presenters/combat-encounter.engine';
 import { getCardById, type CombatEvent } from '@mechanics';
 import { effectGlyph } from '@/components/combat/statusGlyphs';
 import { keywordForEffect } from '@/state/combat/keywords';
@@ -265,74 +265,6 @@ export function EffectChips({ effects, onChip, align = 'flex-start' }: {
     );
 }
 
-// ── Add chips (Phase 102 — SUMMON's brood) ──────────────────────────────────
-
-/**
- * One chip per living add, on the ENEMY side of the board.
- *
- * ## Why not a status chip
- *
- * `EffectChips` renders statuses and keywords, which are arithmetic rather than things. An add is
- * neither: it is a body standing on the foe's side that acts on its own every
- * phase until the player removes it. So it gets the threat-register colour, a
- * solid-dot glyph (a body, not a mark), and its own row — merging it into the
- * status strip would file "there are two more enemies" under "the foe has a
- * debuff", which is the miscue the whole chip system exists to prevent.
- *
- * ## The badge is the bite, not the health
- *
- * Every shipped add is 1/1 VITAE, so a health badge would read `1/1` on every
- * chip forever and tell the player nothing. The number that changes their
- * decision is what it does to them each phase, so the badge prints the bite.
- * Health is carried in the a11y label, where it costs no space.
- *
- * ## Unaffordable chips still open the sheet
- *
- * `affordable` dims the chip but does NOT block the tap. A chip that silently
- * refuses is indistinguishable from a broken one; the confirm sheet states the
- * price and the shortfall, which is the only place the player can learn why.
- */
-export function AddChips({ adds, onAdd }: {
-    adds: CombatAddVM[] | undefined;
-    onAdd?: (a: CombatAddVM) => void;
-}) {
-    const styles = useStyles();
-    // `?? []` rather than `adds.length` — `CombatEncounterState.adds` is
-    // optional on the engine's explicit "absent = none" convention, and a VM
-    // built before this field existed (or cast through `unknown`, as the
-    // alt-win fixture is) hands us undefined. A missing brood is the ordinary
-    // case for every foe in the game but one; it must render nothing, never
-    // throw. Caught exactly this way: a fixture omission became a crash.
-    const living = adds ?? [];
-    if (living.length === 0) return null;
-    return (
-        <View style={styles.chipRow} pointerEvents="box-none" testID="combat-add-row">
-            {living.map((a) => (
-                <Pressable
-                    key={a.id}
-                    onPress={() => onAdd?.(a)}
-                    style={[styles.chip, { borderColor: a.color, opacity: a.affordable ? 1 : 0.55 }]}
-                    hitSlop={6}
-                    testID={`combat-add-${a.id}`}
-                    accessibilityRole="button"
-                    accessibilityLabel={
-                        `${a.name}, ${a.vitae} of ${a.maxVitae} VITAE, bites you for ${a.bite} every phase. `
-                        + (a.affordable
-                            ? `Tap to strike it down for ${a.cost} Conviction.`
-                            : `You cannot strike it down yet — it costs ${a.cost} Conviction.`)
-                    }
-                >
-                    <View style={[StyleSheet.absoluteFill, { backgroundColor: a.color, opacity: 0.16 }]} />
-                    <Text style={[styles.chipGlyph, { color: a.color, textShadowColor: a.color }]}>{a.glyph}</Text>
-                    <View style={styles.chipBadge}>
-                        <Text style={styles.chipBadgeText} allowFontScaling={false}>−{a.bite}</Text>
-                    </View>
-                </Pressable>
-            ))}
-        </View>
-    );
-}
-
 // ── Player medallion (bottom-left corner chrome) ─────────────────────────────
 
 /**
@@ -390,18 +322,11 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
         if (!fx || fx.seq === 0 || fx.seq === lastSeq.current) return;
         lastSeq.current = fx.seq;
         let dmg = 0;
-        // Phase 102 — the brood's bite is its OWN event, and it lands outside
-        // the engine's `!hindered` gate: a denied phase can still cost VITAE.
-        // Kept SEPARATE from `dmg` on purpose — `blocked` below is the foe's
-        // telegraph arithmetic, and folding a bite into it would print a
-        // BLOCKED number the foe never promised (burn-day audit 3.3).
-        let bite = 0;
         let threatFired = false;
         const ticks: number[] = [];
         const statuses: { text: string; color: string }[] = [];
         for (const e of fx.events) {
             if (e.kind === 'damage-dealt' && e.target === 'self') dmg += e.amount;
-            else if (e.kind === 'add-bit') bite += e.dealt;
             else if (e.kind === 'dot-tick' && e.target === 'self') ticks.push(e.amount);
             else if (e.kind === 'threat-fired') threatFired = true;
             else if (e.kind === 'effect-landed' && e.target === 'self') {
@@ -413,9 +338,8 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
             }
         }
         const IMPACT = 100;
-        const total = dmg + bite;
-        if (total > 0) {
-            const norm = Math.min(1, total / Math.max(1, player.maxHp));
+        if (dmg > 0) {
+            const norm = Math.min(1, dmg / Math.max(1, player.maxHp));
             const blocked = enemyIntentDamage - dmg;
             if (!reduceMotion.current) {
                 const recoil = 4 + norm * 8;
@@ -429,16 +353,8 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
             impact.value = 0;
             impact.value = withDelay(IMPACT, withTiming(1, { duration: 1 }, (fin) => { if (fin) runOnJS(landHit)(dmg, blocked, threatFired); }));
         }
-        // The brood's float is pushed HERE, not from `landHit`: the bite is a
-        // second actor, not the foe's telegraphed blow landing at its impact
-        // apex, so it does not wait on the telegraph's 100ms delay. One buzz
-        // per phase — `landHit` already fires one when the foe's blow landed.
-        if (bite > 0) {
-            push(`-${bite}`, ADD_COLOR, -28);
-            if (dmg === 0) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => undefined);
-        }
         ticks.forEach((t, k) => push(`-${t}`, '#a86bdc', (k % 2 === 0 ? -1 : 1) * (20 + Math.floor(k / 2) * 16)));
-        const hadFloat = dmg > 0 || bite > 0 || ticks.length > 0;
+        const hadFloat = dmg > 0 || ticks.length > 0;
         statuses.forEach((s, k) => { if (!hadFloat) push(s.text, s.color, (k % 2 === 0 ? 1 : -1) * 30); });
         if (statuses.length > 0) setStatusPulseKey((k) => k + 1);
     }, [fx, player.maxHp, enemyIntentDamage, shift, flash, squash, contact, impact, landHit, push]);
@@ -509,15 +425,11 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
 // ── The overlay ──────────────────────────────────────────────────────────────
 
 export const CombatCombatantPane = React.memo(function CombatCombatantPane({
-    enemy, player, onChip, onAdd, fx, topInset = 0, metaLine, onHudLayout, region,
+    enemy, player, onChip, fx, topInset = 0, metaLine, onHudLayout, region,
 }: {
     enemy: CombatEnemyPaneVM;
     player: CombatPlayerPaneVM;
     onChip?: (e: CombatEffectChipVM) => void;
-    /** Phase 102 (SUMMON) — tap an add chip to open the strike confirm sheet.
-     *  Optional for the same reason `onChip` is: the dev sandbox mounts this
-     *  pane read-only, and a foe with no brood renders no chips at all. */
-    onAdd?: (a: CombatAddVM) => void;
     fx?: CombatFx;
     /** Safe-area insets, passed by the board (the overlay is absolute-fill). */
     topInset?: number;
@@ -577,10 +489,6 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
         if (!fx || fx.seq === 0 || fx.seq === lastSeq.current) return;
         lastSeq.current = fx.seq;
         let playerDmg = 0;
-        // Phase 102 — VITAE the brood took this phase. Its own event, because
-        // the engine resolves the bite outside the `!hindered` gate: a phase
-        // the player denied can still cost health (burn-day audit 3.3).
-        let addBite = 0;
         let enemyDmg = 0;
         let denied = false;
         let threatFired = false;
@@ -591,8 +499,6 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
         for (const e of fx.events) {
             if (e.kind === 'damage-dealt') {
                 if (e.target === 'self') playerDmg += e.amount; else enemyDmg += e.amount;
-            } else if (e.kind === 'add-bit') {
-                addBite += e.dealt;
             } else if (e.kind === 'dot-tick') {
                 ticks.push({ side: e.target === 'self' ? 'player' : 'enemy', amount: e.amount });
             } else if (e.kind === 'phase-resolved' && e.mark === 'clear') {
@@ -622,8 +528,8 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                 pushEnemy(`FORETOLD: ${name.toUpperCase()}`, '#4f7fd6', 0);
             }
         }
-        // THE BIG NUMBERS REWRITE — the new ledgers and the two enemy beats
-        // (STAGE, a foe keyword firing) were landing silently: the numbers
+        // THE BIG NUMBERS REWRITE — the new ledgers and the enemy's STAGE beat
+        // were landing silently: the numbers
         // moved and nothing on the board said which word moved them. The
         // wording lives ONCE, in the presenter's `selectCombatLogLines`, so
         // this float and the log line can never drift apart.
@@ -635,15 +541,11 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
         //     (100ms — the shared delay baked into the shake/flash hook calls
         //     below). The medallion-side beats (recoil/flash/squash/slash/
         //     float/haptic) fire in `PlayerMedallion` off the same event stream.
-        const playerTook = playerDmg + addBite;
-        if (playerTook > 0) {
+        if (playerDmg > 0) {
             // Normalise the hit to its share of max HP so a 4-dmg chip and a 40-dmg
             // crusher no longer feel identical — every beat scales off `norm`.
-            const norm = Math.min(1, playerTook / Math.max(1, player.maxHp));
-            if (!reduceMotion.current && playerDmg > 0) {
-                // The lunge belongs to the FOE's own blow. A denied foe did not
-                // lunge — its brood bit — so a bite-only phase shakes the board
-                // without animating a swing that never happened.
+            const norm = Math.min(1, playerDmg / Math.max(1, player.maxHp));
+            if (!reduceMotion.current) {
                 const lunge = 8 + norm * 10;        // 8–18px enemy lunge apex
                 enemyScale.value = withSequence(withTiming(0.97, { duration: 90 }), withTiming(1 + norm * 0.08, { duration: 120 }), withTiming(1, { duration: 200 }));
                 enemyShift.value = withSequence(withTiming(-6, { duration: 90 }), withTiming(lunge, { duration: 120 }), withTiming(0, { duration: 220 }));
@@ -652,13 +554,6 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
             // gate their own reduced-motion internally, so this call is
             // unconditional (the hook no-ops when appropriate).
             setDamageTick((prev) => ({ key: prev.key + 1, norm }));
-            // The foe's own blow was held but the brood still took VITAE: the
-            // word DENIED is still true and still worth knowing, and it must
-            // never stand alone. Same honesty rule `IntentIcon`'s wall-math
-            // readout follows (burn-day audit 3.3).
-            if (playerDmg === 0 && (denied || (threatFired && enemy.intent.damage > 0))) {
-                pushEnemy(`DENIED · BROOD −${addBite}`, '#d9b44a', 0);
-            }
         } else if (denied || (threatFired && enemy.intent.damage > 0)) {
             // (b) the turn resolved with no damage to the player at all → DENIED
             //     flourish over the enemy (teaches "variety / guard denies the turn").
@@ -835,7 +730,7 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                     meters. Measured on its own because the enemy figure anchors
                     under it: these are the rows that lie edge to edge across the
                     painting, while `hudUnderBar` below is a narrow right-hand chip
-                    column (the brood's chips included) that the top scrim already
+                    column that the top scrim already
                     carries. Anchoring the figure to the WHOLE HUD instead would
                     drag its top down past that column and collapse the foe to a
                     thumbnail. `onHudLayout` above still reports the whole HUD —
@@ -869,15 +764,13 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                         a plain pending tally once stacks land, a "LETHAL IN N" call
                         once they alone clear remaining HP. Playtest fix 2026-09-04:
                         the tally prints the REAL pending figure (the fill bar clamps
-                        on its own — "45/45" while 240 was queued hid the surplus),
-                        and a foe whose REGROW/RAVENOUS keeps the stack from ever
-                        crossing says so instead of a bare, misleading DOT PENDING. */}
+                        on its own — "45/45" while 240 was queued hid the surplus). */}
                     {enemy.pendingDot > 0 ? (
                         <AltWinMeter
                             glyph="☠"
                             label={enemy.isLethalInFlight
                                 ? `LETHAL IN ${enemy.roundsToKill}`
-                                : enemy.healPerRound > 0 ? `DOT PENDING · HEALS ${enemy.healPerRound}/RD` : 'DOT PENDING'}
+                                : 'DOT PENDING'}
                             value={enemy.pendingDot}
                             target={enemy.hp}
                             color={AXM.blood}
@@ -897,17 +790,7 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                     </Text>
                     <View style={styles.hudRight} pointerEvents="box-none">
                         <IntentIcon intent={enemy.intent} />
-                        {/* THE BIG NUMBERS REWRITE — the foe's OWN keywords (HIDE 6,
-                            BRUTAL, VENOM 4). They change the arithmetic before a card
-                            is played, so they print on their own row above the
-                            statuses, and tap the same plaque a status chip does. */}
-                        <EffectChips effects={enemy.keywords} onChip={onChip} align="flex-end" />
                         <EffectChips effects={enemy.effects} onChip={onChip} align="flex-end" />
-                        {/* Phase 102 — the brood, LAST in this column and so
-                            nearest the battlefield: the chips sit between the
-                            foe's own printed properties and the ground the
-                            bodies are standing on. */}
-                        <AddChips adds={enemy.adds} onAdd={onAdd} />
                     </View>
                 </View>
                 {/* enemy floats rise from under the crest, over the figure */}

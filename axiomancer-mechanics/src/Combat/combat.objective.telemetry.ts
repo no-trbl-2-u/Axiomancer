@@ -61,10 +61,10 @@ export interface CombatObjectiveTelemetry {
     /** Σ `conviction-gained`.amount — every income source (BOON, yield,
      *  overflow, scrap, card effects). */
     convictionGained: number;
-    /** Σ `signature-cast`.cost + `add-struck`.cost — Conviction actually
-     *  CONVERTED into a play, across both sinks the powered sim can reach.
+    /** Σ `signature-cast`.cost — Conviction actually CONVERTED into a play
+     *  by the sink the powered sim can reach.
      *  KNOWN GAP (audit 3.8, filed rather than fixed here): `omen-declared`
-     *  .ante is a third live sink — two shipped trial cards carry
+     *  .ante is a second live sink — two shipped trial cards carry
      *  `anteConviction` — and is not folded yet, so a deck that antes omens
      *  still under-reports its spend. */
     convictionSpent: number;
@@ -240,12 +240,6 @@ export function foldObjectiveEvents(
         else if (ev.kind === 'signature-cast') {
             into.convictionSpent += ev.cost;
             into.signatureCasts++;
-        } else if (ev.kind === 'add-struck') {
-            // Audit 3.8 — Phase 102's strike tap is a Conviction SINK
-            // (`strikeAdd`, `combat.engine.ts`), and the event carries the
-            // price it charged. It is a spend, NOT a cast: `signatureCasts`
-            // stays the `signature-cast` count on purpose.
-            into.convictionSpent += ev.cost;
         } else if (ev.kind === 'special-fired') into.specialsFired++;
 
         // ── Surge / momentum (both dice models) ─────────────────────────────
