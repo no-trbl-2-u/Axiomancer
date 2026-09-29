@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-09-28 at commit 5ebc7c13
-> Pass count: 59
+> Last pass: 2026-09-29 at commit 2d918845
+> Pass count: 60
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -170,9 +170,63 @@
 > its floor, but prints only the floor. That state is the fixture's
 > starting point, not one a player earned. Zero fresh findings this pass.
 
+> **[critique pass 60, 2026-09-29, commit 2d918845] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route still bounces to the title with no save; the
+> fixture-booted late-game hub covers that screen). 16 commits after pass
+> 59: R1 (tooling reset), R2a/R2b (the enemy roster down to three foes,
+> the keyword code gone) and R3a (deep stair and vault door sealed,
+> northern maps parked). The unfixtured fight is the Brine Hag, one of
+> the three survivors, and her preview and board render cleanly at both
+> viewports. None of the 11 screens shows a regression. Filed MED: after
+> R3a, every state fixture except `fresh-start` boots onto fishing-village
+> or a parked map. So five of the six fixture-booted screens show places
+> no player can reach, and none shows Act 1. Three of those fixtures sit on
+> the map R3b deletes. Updated, not re-filed: pass 58's A Plain Word row
+> still reads "+24" beside "+60%" at both viewports (`compactFree`
+> unchanged). Checked and not filed: the village shop's Clarity Serum
+> ("CLEARS AFFLICTIONS") has nothing to clear now that R2a stripped the
+> afflictions, and the relics' "GRANTS …" lines point at purged keywords.
+> The ratified item and relic phases own both (`plan/revamp/items.md`
+> carrier sweep; R4). Reconfirmed and not re-filed: the doubled opening tell
+> (pass 54, Pending), fishing-village's "breakwater" lines (pass 55,
+> Pending; R3b deletes the map), the relic "Grants X" echo (Pending), and
+> the desktop "VUL"/"+6"/"%" wrap on the hand faces (the `plan/AUDIT.md`
+> post-purge row).
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
+
+### [MED] tooling / critique — after R3a, every state fixture boots off Act 1, so critique's gated screens show places no player can reach
+- pass: 60 (commit 2d918845)
+- viewport: both (coverage, not layout)
+- category: navigation
+- observation: R3a parked the northern maps and left fishing-village for
+  R3b to delete, and v28 migrates any real save off those maps onto the
+  Lantern Deep. The state-fixture registry was not touched. Of its 11
+  fixtures, every one but `fresh-start` sits on `fishing-village` (6) or a
+  parked map (`northern-forest` 2, `caverns` 2). Fixtures bypass the
+  migration, so critique's dialogue, village, cutscene, rest, hazard and
+  late-game-hub captures all show a map the player can no longer reach
+  (for example "the Drowned Parish · Map i of ii" and Old Marrow). No
+  fixture stands on the Breakwater, Charcoal Wood, Beacon Crags or the
+  Lantern Deep, so the critique lens has not seen Act 1's gated screens or
+  R3a's two sealed-door cutscenes. The R3 brief never mentions fixtures,
+  and R3b deletes the map that `apprentice-fv-interaction`,
+  `apprentice-fv-rest` and `sage-fv-boss-gate` stand on.
+- evidence: `axiomancer-mechanics/src/Game/fixtures/state-fixture.registry.ts:34,43,53,67,78,90,99,109,118,128`;
+  `.critique-artifacts/mobile/06-dialogue.txt` (Old Marrow),
+  `11-late-game-hub.txt` ("the Drowned Parish"), `10-hazard.txt`
+  (caverns' Flooded Undercroft); `plan/phases/phase_R3_world_reset.md`
+  (no fixture item in R3a-R3c).
+- suggested fix: re-point the fixtures at Act 1 nodes carrying the same
+  screen kinds, including one on a sealed door (`ld-15` or `ld-18`). Do it
+  in R3b alongside the fishing-village purge, or as a named R3b/R3c scope
+  line, with `critique-drive.mjs` and `smoke-screens.mjs` following the
+  new ids. Uses existing nodes only, so no content is created.
+- source: critique:drive (unattended)
 
 ### [MED] combat — A Plain Word shows its FREE VULNERABLE as "×24" beside its paid "+60%"
 - pass: 58 (commit 36238fd8)
@@ -197,6 +251,8 @@
   returns "+24", dropping the unit. Both viewports now read "A PLAIN WORD /
   +24 / VULNERABLE / +60%". Remaining fix: keep a trailing "%" in
   `compactFree` and pin it with a test on "+24%".
+- update (pass 60, commit 2d918845): unchanged. Both viewports still read
+  "A PLAIN WORD / +24 / VULNERABLE / +60%".
 - source: critique:drive (unattended)
 
 ### [MED] fishing-village — the village still points the player at "the breakwater", which is now the first map they already walked
