@@ -25,7 +25,7 @@ import { describe, it, expect } from 'vitest';
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
-import { GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
@@ -49,7 +49,7 @@ function makePlayer(cards: string[], floatingDice: ('heart' | 'body' | 'mind' | 
 }
 
 function makeEnemy(hp: number): Enemy {
-    const e = deepClone(GraveLarva);
+    const e = deepClone(FloatEye);
     e.id = 'enemy-float-persistence-dummy';
     e.health = hp; e.maxHealth = hp; e.effects = [];
     return e;

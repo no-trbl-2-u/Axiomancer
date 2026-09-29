@@ -24,7 +24,7 @@ afterEach(() => {
 
 describe('node event-kind read API', () => {
     it('reports the authored kind for a known node without rolling', () => {
-        // nf-6 is authored as a wichtlein encounter.
+        // nf-6 is authored as an encounter.
         expect(getNodePrimaryEventKind('coastal-continent', 'northern-forest', 'nf-6')).toBe(
             'encounter',
         );
@@ -61,7 +61,7 @@ describe('node event-kind read API', () => {
                     weight: 9,
                     payload: {
                         kind: 'encounter',
-                        enemySlug: 'wichtlein',
+                        enemySlug: 'float-eye',
                         isBoss: false,
                     },
                 },

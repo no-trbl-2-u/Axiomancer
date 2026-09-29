@@ -1,14 +1,14 @@
 /**
  * Dev-only ENEMY PICKER helpers.
  *
- * Lets a tester fight ANY authored foe from ANY map — including every
- * late-game boss (Rawhead Rex, The Harbormaster, The Doorwarden, The
- * Index, The Sophist) — by staging the same `combat-prelude` event the
+ * Lets a tester fight ANY authored foe from ANY map — including the
+ * region boss (The Doorwarden), which no map pool draws (it is pinned
+ * per-node), so the `library` roster lists every production foe — by staging the same `combat-prelude` event the
  * live exploration path produces, so `<EncounterModalOverlay>` picks it
  * up and pays out real rewards through `endCombat`.
  *
  * Functions:
- *   listEnemyMaps()               map keys with a roster
+ *   listEnemyMaps()               map keys with a roster, then `library`
  *   listEnemies(mapKey)           roster sorted by level, bosses flagged
  *   stageEncounter(store, enemy)  seed `event.pending` with a combat
  *                                 prelude for `enemy`
@@ -17,13 +17,16 @@
  * shape; `DebugTriggerEncounter` reuses it.
  */
 
-import { EnemiesByMap } from '@mechanics';
+import { EnemiesByMap, EnemyLibrary } from '@mechanics';
 import type { Enemy } from '@mechanics';
 
 import { EMPTY_EVENT_SLICE, type AppStore } from '@/state/store';
 
-/** A map key that has an enemy roster. */
-export type EnemyMapKey = keyof typeof EnemiesByMap;
+/** The pseudo-roster holding every production foe (`EnemyLibrary`). */
+export const LIBRARY_ROSTER = 'library' as const;
+
+/** A map key that has an enemy roster, or the whole-library roster. */
+export type EnemyMapKey = keyof typeof EnemiesByMap | typeof LIBRARY_ROSTER;
 
 /** One selectable foe. */
 export interface EnemyChoice {
@@ -33,9 +36,9 @@ export interface EnemyChoice {
     readonly label: string;
 }
 
-/** Map keys with a roster, in library order. */
+/** Map keys with a roster, in library order, then the whole-library roster. */
 export function listEnemyMaps(): readonly EnemyMapKey[] {
-    return Object.keys(EnemiesByMap) as EnemyMapKey[];
+    return [...(Object.keys(EnemiesByMap) as EnemyMapKey[]), LIBRARY_ROSTER];
 }
 
 /** Whether a foe is boss-tier (drives the KNEEL / STRIKE prelude chrome). */
@@ -43,7 +46,8 @@ export const isBossEnemy = (e: Enemy): boolean => e.difficulty === 'boss';
 
 /** Roster for `mapKey`, lowest level first, bosses last within a level. */
 export function listEnemies(mapKey: EnemyMapKey): readonly EnemyChoice[] {
-    const roster = EnemiesByMap[mapKey] ?? [];
+    const roster: readonly Enemy[] =
+        mapKey === LIBRARY_ROSTER ? EnemyLibrary : (EnemiesByMap[mapKey] ?? []);
     return [...roster]
         .sort((a, b) => a.level - b.level || Number(isBossEnemy(a)) - Number(isBossEnemy(b)) || a.health - b.health)
         .map((enemy) => ({ enemy, isBoss: isBossEnemy(enemy), label: `${enemy.name} · L${enemy.level}` }));

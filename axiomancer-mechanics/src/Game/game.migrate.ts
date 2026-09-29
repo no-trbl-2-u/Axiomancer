@@ -21,8 +21,10 @@
  * Suppliant's Ring), v24 → v25 (2026-09-25, strip the retired derived
  * stats and non-maxHp stat lines), and v25 → v26 (2026-09-27, T6 / D39: strip
  * the alignment grid and GRACE, rename a card's `philosophicalAspect` to
- * `color`). The hops chain, so a v11 save lands at v26 in one
- * `migrate` call. Every other version mismatch still rejects.
+ * `color`), and v26 → v27 (2026-09-29, THE REVAMP R2 / D48: a staged
+ * encounter naming a retired foe re-points to Float-Eye, and survivors lose
+ * their stripped keywords). The hops chain, so a v11 save lands at v27 in
+ * one `migrate` call. Every other version mismatch still rejects.
  */
 
 import { GameState } from './types';
@@ -37,6 +39,7 @@ import { concreteDefaultRail } from '../Character/dieGear.reducer';
 import { GAME_STATE_VERSION } from './game.reducer';
 import { COMBAT_LOADOUT_FLAG_PREFIX } from '../Combat/combat.loadout';
 import { FIRST_NODE_RELIC_FLAG } from '../Character/first-node-grant';
+import { FloatEye, LIVE_ENEMY_IDS } from '../Enemy/enemy.library';
 
 /**
  * v11 → v12 (Phase 18): fold the player's 7-slot equipment record into the
@@ -545,6 +548,42 @@ function migrateV25ToV26(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
+ * v26 → v27 (2026-09-29, THE REVAMP R2 / D48): the roster is three foes. A
+ * staged encounter carries its enemies whole, so one naming a retired foe
+ * re-points to a fresh Float-Eye (the reload lands on a live foe), and a
+ * survivor saved before R2 drops the keywords and stage `gain` lists R2
+ * stripped. Befriend flags and codex entries for retired foes stay as inert
+ * strings. Idempotent and pure over a raw save payload.
+ */
+function migrateV26ToV27(raw: Record<string, unknown>): Record<string, unknown> {
+    const out: Record<string, unknown> = { ...raw, version: 27 };
+    const enc = raw.currentEncounter as Record<string, unknown> | null | undefined;
+    if (enc && typeof enc === 'object' && Array.isArray(enc.enemies)) {
+        out.currentEncounter = {
+            ...enc,
+            enemies: (enc.enemies as unknown[]).map(e => {
+                if (!e || typeof e !== 'object') return e;
+                const enemy = e as Record<string, unknown>;
+                if (typeof enemy.id !== 'string' || !LIVE_ENEMY_IDS.has(enemy.id)) {
+                    return structuredClone(FloatEye);
+                }
+                const rest: Record<string, unknown> = { ...enemy, keywords: [] };
+                if (!Array.isArray(rest.stages)) return rest;
+                return {
+                    ...rest,
+                    stages: (rest.stages as unknown[]).map(st => {
+                        if (!st || typeof st !== 'object') return st;
+                        const { gain: _g, ...kept } = st as Record<string, unknown>;
+                        return kept;
+                    }),
+                };
+            }),
+        };
+    }
+    return out;
+}
+
+/**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
  * game). The name/signature is kept so the persistence layer's call site is
@@ -578,8 +617,9 @@ export function migrate(
     // appends the Phase 85 head/hands/feet signet relics to inventory; v22 →
     // v23 strips the curated-loadout seed flags; v23 → v24 stamps the
     // first-node relic grant settled; v24 → v25 strips the retired derived
-    // stats and stat lines; v25 → v26 strips the alignment grid and GRACE.
-    // Chained so a v11 save lands at v26 in one call.
+    // stats and stat lines; v25 → v26 strips the alignment grid and GRACE;
+    // v26 → v27 re-points retired foes in a staged encounter to Float-Eye.
+    // Chained so a v11 save lands at v27 in one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
@@ -639,6 +679,10 @@ export function migrate(
     if (version === 25 && toVersion >= 26) {
         working = migrateV25ToV26(working);
         version = 26;
+    }
+    if (version === 26 && toVersion >= 27) {
+        working = migrateV26ToV27(working);
+        version = 27;
     }
 
     if (version !== toVersion) {

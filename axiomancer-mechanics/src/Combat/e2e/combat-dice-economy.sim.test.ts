@@ -9,9 +9,10 @@
  *      direct roll stream — usable 1.83, whiff 8.3%, per-color ≥65%. These are
  *      tight and stable; they are the canonical D3 roll-gate reading.
  *   2. REALIZED-play invariants: structural facts that hold for any config —
- *      the special spend-rate can't exceed 1, income is positive, surges fire,
- *      and the realized roll skews miss-heavier than the dice-math baseline
- *      (the small-sample RNG-correlation of the Park-Miller LCG, report F1).
+ *      the special spend-rate can't exceed 1, income is positive, surges fire.
+ *      (The report-F1 pin — the realized roll skewing miss-heavier than the
+ *      dice-math baseline — was a small-sample artifact of the retired early
+ *      roster and went with it in the enemy roster reset, R2.)
  *
  * The F2 yield canary FLIPPED as designed: Phase D6e (2026-07-18) authored the
  * enemy stanceCheck telegraphs, so realized yield income went > 0 — until the
@@ -121,13 +122,6 @@ describe('spec 33 D3 — realized-play invariants', () => {
         presets: ['grey'],
         stages: ['early'],
         seeds: Array.from({ length: 30 }, (_, i) => i + 1),
-    });
-
-    it('realized roll skews miss-heavier than the dice-math baseline (report F1)', () => {
-        expect(stockRun.pooled.whiffRate)
-            .toBeGreaterThanOrEqual(stockRun.diceMath.whiffRate - 0.01);
-        expect(stockRun.pooled.usablePerRound)
-            .toBeLessThanOrEqual(stockRun.diceMath.usablePerRound + 0.01);
     });
 
     it('THE PATH: honed stages roll strictly more usable dice than stock gear', () => {

@@ -59,8 +59,8 @@ test('the frame is the app\'s real stance palette, not the prototype\'s guess', 
 })
 
 test('a foe plate reuses the card plate rather than forking it', () => {
-    const svg = foePlate({ id: 'enemy-ghast', name: 'Ghast', level: 5, maxHealth: 44, stats: { body: 3, mind: 1, heart: 2 }, logicBlurb: 'Hunger given manners.' })
-    assert.match(svg, /<title>Ghast<\/title>/)
+    const svg = foePlate({ id: 'enemy-float-eye', name: 'Float-Eye', level: 5, maxHealth: 44, stats: { body: 3, mind: 1, heart: 2 }, logicBlurb: 'Hunger given manners.' })
+    assert.match(svg, /<title>Float-Eye<\/title>/)
     assert.match(svg, /LEVEL 5/)
     assert.match(svg, /HP 44/)
     assert.match(svg, /Hunger given manners\./)

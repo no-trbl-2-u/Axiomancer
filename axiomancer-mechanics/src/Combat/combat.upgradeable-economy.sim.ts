@@ -327,7 +327,7 @@ export function simulateUpgradeableEconomy(options: UpgradeableEconomyOptions = 
     config: { presets: readonly string[]; stages: readonly CombatStageId[]; seeds: readonly number[]; policy: CombatSimPolicyId };
 } {
     const presets = options.presets ?? COMBAT_DECK_PRESET_ORDER;
-    const stages = options.stages ?? COMBAT_STAGE_ORDER.filter(s => s !== 'impossible');
+    const stages = options.stages ?? COMBAT_STAGE_ORDER;
     const seeds = options.seeds ?? [1, 2, 3, 4, 5];
     const policy = options.policy ?? 'greedy';
 

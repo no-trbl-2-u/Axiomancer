@@ -25,7 +25,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
-import { GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import type { Enemy } from '../../Enemy/types';
 import { deepClone } from '../../Utils';
 import { initializeCombatEncounter, rollEncounterDice, resolveThreatPhase } from '../combat.engine';
@@ -51,7 +51,7 @@ function makePlayer(): Character {
  *  `capitulateThreshold` (0.35×maxHealth, floored at 10) never trips
  *  RELENT mid-test. */
 function makeEnemy(hp = 300): Enemy {
-    const e = deepClone(GraveLarva);
+    const e = deepClone(FloatEye);
     e.id = 'enemy-reactive-hooks-dummy';
     e.health = hp; e.maxHealth = hp; e.effects = [];
     e.baseStats = { heart: 2, body: 2, mind: 6 };

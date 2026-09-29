@@ -2,14 +2,15 @@
  * Hermetic tests — dev enemy-picker helpers.
  *
  * Pins:
- *   - Every roster map is listed and every late-game boss is reachable.
+ *   - Every roster map is listed, plus the whole-library roster, so the
+ *     pinned (never-drawn) boss is reachable.
  *   - `listEnemies` sorts by level and flags boss-tier foes.
  *   - `stageEncounter` seeds a combat prelude whose `isBoss` follows the
  *     foe's tier, can be forced, and that `selectHasActiveCombatPrelude`
  *     recognises.
  */
 
-import { EnemiesByMap } from '@mechanics';
+import { EnemiesByMap, EnemyLibrary } from '@mechanics';
 
 import { listEnemies, listEnemyMaps, stageEncounter } from '@/state/dev/enemy-picker';
 import { selectHasActiveCombatPrelude } from '@/state/presenters/event.engine';
@@ -17,12 +18,13 @@ import { createAppStore } from '@/state/store';
 
 describe('enemy-picker dev helpers', () => {
     it('lists every roster map including the labyrinth acts', () => {
-        expect(listEnemyMaps()).toEqual(Object.keys(EnemiesByMap));
+        expect(listEnemyMaps()).toEqual([...Object.keys(EnemiesByMap), 'library']);
         expect(listEnemyMaps()).toEqual(expect.arrayContaining(['aporia-proof', 'northern-city']));
     });
 
     it('sorts by level and flags bosses', () => {
-        const roster = listEnemies('aporia-proof');
+        const roster = listEnemies('library');
+        expect(roster.map((r) => r.enemy.id)).toEqual(expect.arrayContaining(EnemyLibrary.map((e) => e.id)));
         const levels = roster.map((r) => r.enemy.level);
         expect([...levels].sort((a, b) => a - b)).toEqual(levels);
         expect(roster.some((r) => r.isBoss)).toBe(true);
@@ -31,7 +33,7 @@ describe('enemy-picker dev helpers', () => {
 
     it('stageEncounter seeds a boss prelude for a boss foe', () => {
         const store = createAppStore();
-        const boss = listEnemies('caverns').find((r) => r.isBoss)!;
+        const boss = listEnemies('library').find((r) => r.isBoss)!;
         stageEncounter(store, boss.enemy);
         const slice = store.getState().event;
         expect(selectHasActiveCombatPrelude(store.getState())).toBe(true);

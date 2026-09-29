@@ -18,7 +18,7 @@ import { describe, it, expect } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
-import { LittleBelle } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { simulateHazardPatternCombat } from '../combat.encounter.sim';
 
@@ -48,7 +48,7 @@ const LOADOUTS: ReadonlyArray<[string, string[]]> = [
 describe('profane canon — the payoff-loadout sim machinery survives the rework (armed)', () => {
     for (const [name, cards] of LOADOUTS) {
         it(`the ${name} loadout terminates and accounts for every run`, () => {
-            const s = simulateHazardPatternCombat(loadout(cards), LittleBelle, RUNS, SEED);
+            const s = simulateHazardPatternCombat(loadout(cards), FloatEye, RUNS, SEED);
             expect(s.runs).toBe(RUNS);
             expect(s.victories + s.mercies + s.defeats + s.retreats).toBe(RUNS);
         });

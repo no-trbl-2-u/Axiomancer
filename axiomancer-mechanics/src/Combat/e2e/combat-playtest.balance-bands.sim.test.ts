@@ -33,7 +33,7 @@ function mainReport(): PlaytestReport {
     return cachedMain;
 }
 
-const STAGES: readonly CombatStageId[] = ['early', 'mid', 'late', 'impossible'];
+const STAGES: readonly CombatStageId[] = ['early', 'mid', 'late'];
 
 describe('playtest matrix smoke test — the harness runs and accounts exactly', () => {
     it('every stage produces cells; every cell terminates all its runs with a finite win rate', () => {

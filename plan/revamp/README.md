@@ -80,12 +80,13 @@ starts it.
 |---|---|---|---|---|
 | R0 | Loop doctrine reset: archive the stewards and design skills, fix every verb's doctrine, fix ci-autofix, telemetry, plan hygiene | attended | — | loop.md |
 | R1 | Tooling reset: delete the card editor, retire the baseline, archive the tuning-lab pages, catalog shows live content only | loop | R0 | tooling.md |
-| R2 | Enemy reset: 79 → 3 foes, every enemy keyword and affliction stripped, dead riders and curse code deleted | loop | R0 | enemies.md |
-| R3 | World reset: Act 1 only, fishing-village purged, other continents parked, Labyrinth door and deep stair sealed, encounters re-pointed, one Anvil per region | loop | R2 | world.md, labyrinth.md |
-| R4 | Relic placeholders: 10 signatures → GUARD 5 flat cost; The Open Hand becomes a real befriend | loop | R2 | relics.md |
+| R2a | Enemy reset 1/2: 79 → 3 foes, their data stripped of keywords and afflictions, pools and door pins, save migration | loop | R0 | enemies.md |
+| R2b | Enemy reset 2/2: enemy-keyword systems, riders and curse code deleted, carrier sweep | loop | R2a | enemies.md |
+| R3 | World reset: Act 1 only, fishing-village purged, other continents parked, Labyrinth door and deep stair sealed, encounters re-pointed, one Anvil per region | loop | R2a | world.md, labyrinth.md |
+| R4 | Relic placeholders: 10 signatures → GUARD 5 flat cost; The Open Hand becomes a real befriend | loop | R2a | relics.md |
 | R5 | Items reset: healing potions only, save migration, shops/caches/loot re-pointed | loop | R3 | items.md |
 | R6 | Hazard reset: minimal hazard deck | loop | R0 | hazards.md |
-| R7a | Engine purge 1/3: mechanic kinds, handlers, dead fields, state, fixtures | loop | R2, R4, R6 | engine.md |
+| R7a | Engine purge 1/3: mechanic kinds, handlers, dead fields, state, fixtures | loop | R2b, R4, R6 | engine.md |
 | R7b | Engine purge 2/3: pricing, synergy, themes, draft, reward steering, card types → Attack/Skill/Spell | loop | R7a | engine.md |
 | R7c | Engine purge 3/3: alt-win systems, carrier-less effects, dead branches, closing carrier sweep | loop | R7b | engine.md |
 | R8 | Mobile cleanup: dead flows and glosses, grey card art, app label, VITAE/shillings copy | loop | R7c | mobile.md |
@@ -151,7 +152,7 @@ T walked the agent defaults one at a time the same day. None remain open.
 |---|---|---|
 | 1 | **R0** Loop doctrine reset (attended) | The loop must stop teaching retired doctrine and routing to archived agents before it ships anything. Re-enable `march`/`night` after it merges |
 | 2 | **R1** Tooling reset | Deleting the card editor frees R7 from a third package; retiring the baseline stops every session printing a stale stamp |
-| 3 | **R2** Enemy reset | Everything downstream (world, relics' befriend data, the engine carrier sweep) keys off the three survivors |
+| 3 | **R2a–R2b** Enemy reset, in two ticks (data, then code) | Everything downstream (world, relics' befriend data, the engine carrier sweep) keys off the three survivors |
 | 4 | **R3** World reset | Needs the survivors to re-point encounters; shrinks the world before items/shops are touched |
 | 5 | **R4** Relic placeholders | Removes the Bill exploit and most signature carriers early; gives B1 its floor |
 | 6 | **R5** Items reset | Only Act 1's shops and caches remain to re-point |

@@ -9,7 +9,8 @@
  *               seeded with the LOWEST-level standard foe on the
  *               current map so the fight is the gentlest available.
  *   - BOSS     → combat-prelude with the lowest-level boss foe on
- *               the current map (KNEEL / STRIKE chrome, no flee).
+ *               the current map, else in the library (KNEEL / STRIKE
+ *               chrome, no flee).
  *   - HAZARD / REST / TREASURE → the real minigame session, launched
  *               through the same `begin*` actions the live map path
  *               uses, so the matching gate (`<HazardGate>` →
@@ -46,6 +47,7 @@ import { Pressable, Text, View } from 'react-native';
 import { useRouter } from '@/lib/platform/router';
 import {
     EnemiesByMap,
+    EnemyLibrary,
     consumableLibrary,
     type Enemy,
 } from '@mechanics';
@@ -173,10 +175,14 @@ export function DebugTriggerEncounter() {
                 return;
             }
             case 'boss': {
-                // Lowest-level boss foe; fall back to the gentlest foe if
-                // the map somehow has no boss-tier entry.
+                // Lowest-level boss foe on the map; bosses are pinned
+                // per-node rather than drawn from map pools, so fall back to
+                // the library's lowest-level boss, then the gentlest foe.
+                const libraryBoss = [...EnemyLibrary]
+                    .filter((e) => e.difficulty === 'boss')
+                    .sort((a, b) => a.level - b.level || a.health - b.health)[0];
                 const enemy =
-                    lowestFoe((e) => e.difficulty === 'boss') ?? lowestFoe(() => true);
+                    lowestFoe((e) => e.difficulty === 'boss') ?? libraryBoss ?? lowestFoe(() => true);
                 if (!enemy) return;
                 stageEncounter(store, enemy, 'dev:trigger-boss', true);
                 return;

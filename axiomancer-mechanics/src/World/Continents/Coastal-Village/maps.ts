@@ -303,15 +303,15 @@ const coastalBeggar: NPC = {
 
 const startingQuest: Quest = {
     name: 'starting-quest',
-    description: "Slay the King of Revenge holding court at the breakwater. Old Marrow will reward you.",
+    description: "Slay the Doorwarden holding the door at the breakwater. Old Marrow will reward you.",
     mapName: 'fishing-village',
     status: 'available',
     objectives: [
         {
             id: 'kill-tyrant',
             type: 'kill',
-            target: 'The King of Revenge',
-            description: "Defeat the King of Revenge.",
+            target: 'The Doorwarden',
+            description: "Defeat the Doorwarden.",
             requiredCount: 1,
             currentCount: 0,
         },
@@ -430,7 +430,7 @@ const fishingVillage: MapDefinition = {
     // and the INLAND LANE (y=-1). Lanes drift — a node at y reaches every
     // next-column node within one step of y — so a route is a real
     // sequence of choices rather than a committed corridor. Column 5 holds
-    // fv-6 alone, so every single run now fights the King of Revenge.
+    // fv-6 alone, so every single run now fights its boss (the Doorwarden since R2).
     // Spine ids fv-1..fv-10 stay on y=0 at x=0..9 (Phase 65 D1).
     //
     // 2026-08-17 Phase 53c (S-02) — column 1 narrows to fv-2 alone: Old
@@ -459,7 +459,7 @@ const fishingVillage: MapDefinition = {
         //        draft treats as the free look before the keyword pull.
         //        The lanes between the gates are exactly what they were;
         //        a gate simply opens onto the whole next column.
-        // ── c2 — GATE 1: the tide-line (grave-larva, level 1) ────────
+        // ── c2 — GATE 1: the tide-line (float-eye, level 1) ─────────
         { id: 'fv-26', location: [2, 0], connectedNodes: ['fv-16', 'fv-3', 'fv-11'] },
         // ── c3 — narration / rest / loot ─────────────────────────────
         { id: 'fv-16', location: [3, 1], connectedNodes: ['fv-27', 'fv-3'] },
@@ -477,7 +477,7 @@ const fishingVillage: MapDefinition = {
         { id: 'fv-14', location: [5, -1], connectedNodes: ['fv-28', 'fv-4', 'fv-13'] },
         { id: 'fv-12', location: [5, 2], connectedNodes: ['fv-28', 'fv-17'] },
         { id: 'fv-13', location: [5, -2], connectedNodes: ['fv-28', 'fv-14'] },
-        // ── c6 — GATE 3: the breakwater steps (chattering-skull, level 2) ─
+        // ── c6 — GATE 3: the breakwater steps (float-eye, level 2) ─────────
         { id: 'fv-28', location: [6, 0], connectedNodes: ['fv-15', 'fv-5', 'fv-20'] },
         // ── c7 — the last breath: encounter / gathering / REST ───────
         // (fv-15 was the quest-board node pre-Phase-61; retired to an

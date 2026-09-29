@@ -51,7 +51,7 @@ describe('resolveMapEvent — description passthrough', () => {
             entries: [{
                 kind: 'encounter',
                 weight: 1,
-                payload: { kind: 'encounter', enemySlug: 'grave-larva', description: 'A larva stirs in the cairn-mud.' },
+                payload: { kind: 'encounter', enemySlug: 'float-eye', description: 'A larva stirs in the cairn-mud.' },
             }],
         });
         const result = resolveMapEvent(state);

@@ -42,7 +42,7 @@ function sandboxDotCard(id: string, overrides: Partial<Card> = {}): Card {
 
 /** Small matrix reused across assertions: 1 enemy per stage, 8 runs per cell. */
 const SMALL: PlaytestMatrixOptions = {
-    stages: ['early', 'impossible'],
+    stages: ['early', 'late'],
     policies: ['greedy', 'chaos'],
     enemiesPerStage: 1,
     runsPerCell: 8,
@@ -69,7 +69,7 @@ describe('playtest matrix — determinism', () => {
     it('runPlaytestCell is deterministic for an identical spec', () => {
         const spec = {
             stage: 'early' as const,
-            enemySlug: 'grave-larva',
+            enemySlug: 'float-eye',
             policyId: 'dot-weaver' as const,
             deck: { kind: 'policy-pick' as const },
             runs: 6,
@@ -109,7 +109,7 @@ describe('playtest matrix — cell invariants', () => {
 
     it('stage summaries cover exactly the stages run, weighted over their cells', () => {
         const report = smallReport();
-        expect(report.stageSummaries.map(s => s.stage)).toEqual(['early', 'impossible']);
+        expect(report.stageSummaries.map(s => s.stage)).toEqual(['early', 'late']);
         for (const summary of report.stageSummaries) {
             expect(summary.cells).toBe(2);
             expect(summary.winRate).toBeGreaterThanOrEqual(0);
@@ -159,7 +159,7 @@ describe('playtest report formatting', () => {
         expect(text).toContain('Stage summaries');
         expect(text).toContain('Card coverage:');
         expect(text).toContain('early');
-        expect(text).toContain('impossible');
+        expect(text).toContain('late');
         expect(text).not.toContain('Per-card usage');
     }, 60_000);
 
@@ -186,7 +186,7 @@ describe('playtest harness — honest failures', () => {
         // maturity gate lives in DRAFTING, not the engine knownCards check).
         registerSandboxCards([sandboxDotCard('qa-tier3-dot', { tier: 3, rank: 5 })]);
         const cell = runPlaytestCell({
-            stage: 'early', enemySlug: 'grave-larva', policyId: 'greedy',
+            stage: 'early', enemySlug: 'float-eye', policyId: 'greedy',
             deck: { kind: 'cards', cardIds: ['qa-tier3-dot', 'qa-tier3-dot', 'grey-strike', 'grey-ward'] },
             runs: 2, seed: 1,
         });

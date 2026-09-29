@@ -16,7 +16,7 @@ export const ACT2: LabyrinthActDef = {
     entry: 'ap2-1',
     questRoom: 'ap2-8',
     bossRoom: 'ap2-9',
-    bossSlug: 'the-index',
+    bossSlug: 'the-doorwarden',
     descent: 'act3',
     riddle: ACT2_RIDDLE,
     gates: [

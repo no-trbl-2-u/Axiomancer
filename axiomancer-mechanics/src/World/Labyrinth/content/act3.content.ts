@@ -20,7 +20,7 @@ export const ACT3: LabyrinthActDef = {
     entry: 'ap3-1',
     questRoom: 'ap3-8',
     bossRoom: 'ap3-9',
-    bossSlug: 'the-sophist',
+    bossSlug: 'the-doorwarden',
     descent: 'exit',
     riddle: 'What argument has no first premise?',
     gates: [

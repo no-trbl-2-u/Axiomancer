@@ -37,7 +37,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
-import { GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import type { Enemy } from '../../Enemy/types';
 import { deepClone } from '../../Utils';
 import { mockSequentialRng } from '../../test-utils/rng';
@@ -92,7 +92,7 @@ function makePlayer(cards: string[]): Character {
 /** A non-boss enemy — `computeRungDenial`'s `naturalRungsTotal` is the plain
  *  `THREAT_RUNGS`, not `THREAT_RUNGS_BOSS`. */
 function makeEnemy(hp: number): Enemy {
-    const e = deepClone(GraveLarva);
+    const e = deepClone(FloatEye);
     e.id = 'enemy-turnabout-dummy';
     e.health = hp; e.maxHealth = hp; e.effects = [];
     e.baseStats = { heart: 2, body: 2, mind: 6 };
@@ -225,7 +225,7 @@ describe('rungsDeniedTotal ledger — per-combat scope', () => {
         for (const policy of COMBAT_SIM_POLICY_ORDER) {
             for (const seed of [1, 2, 3, 11]) {
                 const p = makeSimPlayer();
-                const e = deepClone(GraveLarva);
+                const e = deepClone(FloatEye);
                 const run = runOneEncounter(p, e, seed, policy, { deck: standstillDeck });
                 expect(run.outcome).toBeDefined();
             }

@@ -15,9 +15,10 @@
 // per-directory provenance.json files):
 //
 //   maps/ combat/ splatter/   Public domain              -> publish
-//   enemies/ (26 of 77)       CC BY 3.0, artist named    -> publish WITH the
+//   enemies/ (1 of 3)         CC BY 3.0, artist named    -> publish WITH the
 //                                                           attribution rendered
-//   enemies/ (51 of 77)       UNRESOLVED                 -> EXCLUDE
+//   enemies/ (2 of 3)         UNRESOLVED                 -> EXCLUDE
+//     (enemy counts re-audited at the phase R2 roster reset, 2026-09-29)
 //   cards/ (19)               UNRESOLVED                 -> EXCLUDE
 //   portraits/ (15)           UNRESOLVED                 -> EXCLUDE
 //   treasure/ (4)             UNRESOLVED                 -> EXCLUDE
@@ -138,7 +139,7 @@ export function readProvenance(dir) {
  * The gate, for one shipped art file.
  *
  * @param {string} dir       e.g. "enemies"
- * @param {string} filename  e.g. "ghast.webp"
+ * @param {string} filename  e.g. "hag.webp"
  */
 export function verdictFor(dir, filename, records = readProvenance(dir)) {
     const record = recordFor(records, filename)

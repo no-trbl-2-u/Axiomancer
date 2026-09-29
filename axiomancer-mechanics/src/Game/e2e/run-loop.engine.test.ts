@@ -12,7 +12,7 @@ import { nullAdapter } from '../persistence/null.adapter';
 import { createNewGameState } from '../game.reducer';
 import { STARTING_REGION } from '../run-loop';
 import { getMapDefinition } from '../../World';
-import { GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 
 describe('Phase 72 — run-loop semantics', () => {
     it('createNewGameState assigns a fresh 16-char hex runId', () => {
@@ -45,7 +45,7 @@ describe('Phase 72 — run-loop semantics', () => {
         const store = createGameStore(nullAdapter, {
             flags: ['pre-reset-flag'],
         });
-        store.getState().startCombat(GraveLarva);
+        store.getState().startCombat(FloatEye);
         expect(store.getState().currentEncounter).toBeDefined();
         const next = store.getState().resetRun({ keepCharacter: true });
         expect(next.currentEncounter).toBeUndefined();

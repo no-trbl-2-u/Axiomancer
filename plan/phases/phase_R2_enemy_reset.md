@@ -123,3 +123,16 @@ scripts; `scripts/content-drift.mjs`.
 
 - R3 empties the parked maps' pools and seals the Labyrinth / deep stair.
 - R5 re-points survivor loot; B2 regrows the roster and retunes the survivors.
+
+## Split (2026-09-29)
+
+One tick could not hold the whole reset, so the row splits in two, like R7:
+
+- **R2a — the data.** Scope 1, 2, 5, 6, 7, the Doorwarden's keywords and
+  stage `gain` lists (scope 3's data half), and the save migration's
+  retired-foe re-point. The keyword resolution code stays, carrier-less, for
+  one tick.
+- **R2b — the code.** Scope 3's code half (every `EnemyKeyword` member and
+  resolution site, SUMMON's `adds` state with its save migration,
+  `strikeAdd`), scope 4 (riders and curse paths) and scope 8 (the carrier
+  sweep).

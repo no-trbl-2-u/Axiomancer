@@ -3,7 +3,7 @@ import { createGameStore } from '../store';
 import { nullAdapter } from '../persistence/null.adapter';
 import { createEventEmitter } from '../events';
 import type { GameEvent } from '../events';
-import { FloatEye, GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import {
     isCombatStartedEvent,
     isCombatEndedEvent,
@@ -90,7 +90,7 @@ describe('Events engine', () => {
         testEvents.length = 0;
 
         // Start another combat - should not receive event
-        store.getState().startCombat(GraveLarva);
+        store.getState().startCombat(FloatEye);
         expect(testEvents).toHaveLength(0);
     });
 

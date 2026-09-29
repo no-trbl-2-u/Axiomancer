@@ -28,16 +28,16 @@ import {
 const GENERIC_LABEL =
     'Combat encounter illustration showing a horned creature in a moonlit clearing';
 
-/** A representative enemy id per bespoke (non-generic, non-tyrant) archetype. */
+/** A representative enemy id (a live foe where one fits, else a synthetic key) per bespoke (non-generic, non-tyrant) archetype. */
 const BESPOKE_SAMPLES: ReadonlyArray<readonly [string, EnemyArchetype]> = [
-    ['grave-larva', 'vermin'],
+    ['bilge-rat', 'vermin'],
     ['tidepool-crab', 'crustacean'],
-    ['water-holger', 'spirit'],
-    ['rawhead-rex', 'beast'],
+    ['drowned-wraith', 'spirit'],
+    ['grey-wolf', 'beast'],
     ['mournful-gull', 'avian'],
-    ['jeweled-tree', 'flora'],
+    ['bramble-sprite', 'flora'],
     ['brine-hag', 'zealot'],
-    ['the-abortive', 'eldritch'],
+    ['float-eye', 'eldritch'],
 ];
 
 describe('EnemyIllustration', () => {
@@ -83,7 +83,7 @@ describe('EnemyIllustration', () => {
     });
 
     it('routes a tyrant boss to the crowned CreatureScene', () => {
-        const key = 'king-of-revenge';
+        const key = 'the-doorwarden';
         expect(resolveEnemyArchetype(key, true)).toBe('tyrant');
         const tree = render(<EnemyIllustration enemyArtKey={key} isBoss />);
         const scene = tree.getByLabelText(/Combat encounter illustration showing /);
@@ -92,7 +92,7 @@ describe('EnemyIllustration', () => {
     });
 
     it('routes a tyrant non-boss to the same crowned CreatureScene as a boss', () => {
-        const key = 'king-of-revenge';
+        const key = 'hill-giant';
         expect(resolveEnemyArchetype(key, false)).toBe('tyrant');
         const bossTree = render(<EnemyIllustration enemyArtKey={key} isBoss />);
         const nonBossTree = render(<EnemyIllustration enemyArtKey={key} isBoss={false} />);

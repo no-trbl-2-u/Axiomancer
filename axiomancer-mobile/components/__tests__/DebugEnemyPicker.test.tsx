@@ -58,8 +58,8 @@ describe('DebugEnemyPicker: staging', () => {
     it('a map chip switches the roster and a foe chip stages that foe', () => {
         const store = makeStore();
         const tree = render(withProvider(store, <DebugEnemyPicker />));
-        fireEvent.press(tree.getByTestId('debug-enemy-map-aporia-proof'));
-        const boss = listEnemies('aporia-proof').find((r) => r.isBoss)!;
+        fireEvent.press(tree.getByTestId('debug-enemy-map-library'));
+        const boss = listEnemies('library').find((r) => r.isBoss)!;
         fireEvent.press(tree.getByTestId(`debug-enemy-${boss.enemy.id}`));
         expect(mockPush).toHaveBeenCalledWith('/(tabs)/exploration');
         expect(selectHasActiveCombatPrelude(store.getState())).toBe(true);

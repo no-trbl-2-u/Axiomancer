@@ -15,7 +15,8 @@ import { describe, it, expect } from 'vitest';
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
-import { GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
+import { ENEMY_DECKS, deckCardIds } from '../combat.enemy-decks';
 import { deepClone } from '../../Utils';
 import {
     initializeCombatEncounter, processBetweenPhases, resolveThreatPhase,
@@ -37,7 +38,7 @@ function makePlayer(): Character {
 
 /** A generated-sequence enemy — id deliberately absent from AUTHORED_THREAT_SEQUENCES. */
 function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'body'): Enemy {
-    const e = deepClone(GraveLarva);
+    const e = deepClone(FloatEye);
     e.id = 'enemy-rage-test-dummy';
     e.health = hp;
     e.maxHealth = hp;
@@ -68,9 +69,12 @@ describe('Phase 3 — generateDefaultThreatSequence appends a locked rage phase'
         expect(rage.intentType).toBe('combo');
     });
 
-    it('an authored enemy (GraveLarva) is untouched — no phase is rage-gated', () => {
-        const seq = getThreatSequence(GraveLarva);
-        expect(seq.every(p => p.unlockAfterRound === undefined)).toBe(true);
+    it('an authored enemy (FloatEye) is untouched — no phase is rage-gated', () => {
+        // Float-Eye's third card carries its deck's derived tier-2 gate
+        // (round-keyed deck tiers); nothing is appended or held to the rage round.
+        const seq = getThreatSequence(FloatEye);
+        expect(seq).toHaveLength(deckCardIds(ENEMY_DECKS['enemy-float-eye']!).length);
+        expect(seq.every(p => p.unlockAfterRound !== RAGE_UNLOCK_ROUND)).toBe(true);
     });
 });
 

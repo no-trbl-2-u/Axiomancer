@@ -129,9 +129,14 @@ describe('the Breakwater\'s events (D29)', () => {
         expect(kinds['bw-1']).toBe('cutscene');
     });
 
-    it('fights the region\'s elite at the watchtower, pinned low, the last fight before the door (D30)', () => {
+    it('fights the Doorwarden at the watchtower, pinned low, the last fight before the door (D61)', () => {
         const payload = getNodeEventPool('coastal-continent', 'breakwater', 'bw-17')!.entries[0]!.payload;
-        expect(payload).toMatchObject({ kind: 'encounter', enemySlug: 'brine-hag', isBoss: false, level: 3 });
+        expect(payload).toMatchObject({ kind: 'encounter', enemySlug: 'the-doorwarden', isBoss: true, level: 3 });
+    });
+
+    it('fights the region\'s elite, the Brine Hag, mid-region (D61)', () => {
+        const payload = getNodeEventPool('coastal-continent', 'breakwater', 'bw-8')!.entries[0]!.payload;
+        expect(payload).toMatchObject({ kind: 'encounter', enemySlug: 'brine-hag', isBoss: false });
     });
 
     it('crosses the river bridge into the Charcoal Wood (Act 1, map 2)', () => {

@@ -22,7 +22,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
-import { GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { getCardById } from '../../Cards/cards.library';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
@@ -82,7 +82,7 @@ function makePlayer(cards: string[]): Character {
 }
 
 function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'heart'): Enemy {
-    const e = deepClone(GraveLarva);
+    const e = deepClone(FloatEye);
     e.id = 'enemy-helper-dummy';
     e.health = hp;
     e.maxHealth = hp;

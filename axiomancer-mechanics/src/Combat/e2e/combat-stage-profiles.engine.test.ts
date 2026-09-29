@@ -1,7 +1,7 @@
 /**
  * Hermetic e2e — playtest stage profiles (`combat.stage-profiles`).
  *
- * Verifies the four campaign stages are well-formed (order, roster slugs
+ * Verifies the three campaign stages are well-formed (order, roster slugs
  * resolve in ENEMY_REGISTRY), the eligible card pool respects each stage's
  * tier/level maturity gate, `buildStagePlayer` produces a ready-to-fight
  * Character, and the pool grows with the campaign (early < late).
@@ -24,8 +24,8 @@ import type { Card } from '../../Cards/types';
 afterEach(() => vi.restoreAllMocks());
 
 describe('stage roster shape', () => {
-    it('defines exactly the four canonical stages, in campaign order', () => {
-        expect(COMBAT_STAGE_ORDER).toEqual(['early', 'mid', 'late', 'impossible']);
+    it('defines exactly the three canonical stages, in campaign order', () => {
+        expect(COMBAT_STAGE_ORDER).toEqual(['early', 'mid', 'late']);
         expect(Object.keys(COMBAT_STAGE_PROFILES).sort()).toEqual([...COMBAT_STAGE_ORDER].sort());
         for (const id of COMBAT_STAGE_ORDER) {
             const profile = COMBAT_STAGE_PROFILES[id];

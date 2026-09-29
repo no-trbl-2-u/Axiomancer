@@ -21,7 +21,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
-import { GraveLarva, LittleBelle } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { mockSequentialRng } from '../../test-utils/rng';
 import type { ActiveEffect } from '../../Effects/types';
@@ -56,7 +56,7 @@ function makePlayer(cards: string[]): Character {
 }
 
 function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'mind', effects: ActiveEffect[] = []): Enemy {
-    const e = deepClone(GraveLarva);
+    const e = deepClone(FloatEye);
     e.id = 'enemy-themed-dummy';
     e.health = hp; e.maxHealth = hp; e.effects = effects;
     e.baseStats = { heart: stance === 'heart' ? 6 : 2, body: stance === 'body' ? 6 : 2, mind: stance === 'mind' ? 6 : 2 };
@@ -251,7 +251,7 @@ describe('preset ignition — every themed deck reaches its engine within a few 
         (presetId) => {
             const deck = buildPresetDeck(presetId);
             const player = makePlayer(deck.filter(id => id !== 'card-retreat'));
-            const enemy = deepClone(LittleBelle);
+            const enemy = deepClone(FloatEye);
             // Enough HP that slower engines (Souls-from-expiry) get their runway.
             enemy.health = 150; enemy.maxHealth = 150;
             const r = runHazardCombatAutoEncounter(player, enemy, {

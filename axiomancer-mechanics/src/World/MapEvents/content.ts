@@ -100,9 +100,8 @@ const nfSprite: MapEventPool = {
         kind: 'encounter', weight: 1,
         payload: {
             kind: 'encounter',
-            enemySlug: 'wichtlein',
+            enemySlug: 'float-eye',
             isBoss: false,
-            description: 'A small red-hooded figure knocks three times on the roots.',
         },
     }],
 };
@@ -618,38 +617,17 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
 // through the village ran backwards in places. The first-map audit made the
 // assignment explicit and monotonic — column 1 is the softest thing in the
 // village, column 9 the hardest thing short of the breakwater itself.
-const FV_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description: string }> = {
+const FV_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description?: string }> = {
     // THE THREE GATES (2026-09-21, the grey office rebalance) — one choke
-    // before each open column, so every route to the breakwater fights
-    // three times and carries three rewards into the King. Every fight on
-    // this map is pinned at `FV_FIGHT_LEVEL` (M3e; they used to ramp
-    // 1 / 1 / 2 by the foes' own levels, when this was the opening map).
-    'fv-26': { slug: 'grave-larva',      description: 'Something pale turns over in the wet sand where the drowned are buried, and keeps turning.' },
+    // before each open column. R2 (D48): every fight is Float-Eye until R3
+    // purges the map.
+    'fv-26': { slug: 'float-eye' },
     'fv-27': { slug: 'float-eye',        description: 'A lidless thing drifts over the salt flats at head height, and it has already seen you.' },
-    'fv-28': { slug: 'chattering-skull', description: 'On the breakwater steps a skull talks to itself about the tide. It stops when you come near.' },
-    // c3 — Phase 53c: little-belle moves off fv-7 (now Coastal Beggar's
-    // node) onto fv-13, one of column 1's two displaced nodes. Must stay
-    // ahead of the Beggar's column so `befriended-little-belle` can be set
-    // before her flag-gated branch reads it (the forward-only gauntlet
-    // law — see S-02 "the law a gauntlet imposes"). fv-12, its sibling,
-    // takes fv-2's displaced loot-cache instead (see `FV_LOOT_NODES`) so
-    // the map's guaranteed shilling income is unchanged — grave-larva,
-    // fv-12's prior foe, is dropped (no flag or pricing dependency).
-    'fv-13': { slug: 'little-belle',     description: 'A small orange vesper rings a bell for a service no one held.' },
-    // c4 — Phase 61: fv-15 (formerly the quest-board node, retired) takes
-    // foot-stealer back from fv-21 — its Phase 60 displacement left the
-    // slug orphaned with no flag or pricing dependency, and its own level 3
-    // (fv-24's water-holger's tier) was the pre-boss weight this lane
-    // wanted, one column ahead of the breakwater. Pinned at FV_FIGHT_LEVEL
-    // since M3e, like every fight here.
-    'fv-15': { slug: 'foot-stealer',     description: 'It collects footing. Yours is next on the list; balance, it maintains, is a possession like any other.' },
+    'fv-28': { slug: 'float-eye' },
+    'fv-13': { slug: 'float-eye' },
+    'fv-15': { slug: 'float-eye' },
     // c9 — the last thing between the player and the coast road.
-    'fv-24': { slug: 'water-holger',     description: 'A drowned deckhand wades up the strand, still standing his watch.' },
-    // Phase 53d (S-01) — fv-16 (c2, float-eye) and fv-4 (c3,
-    // chattering-skull) are dropped from this table: both displaced by
-    // "The Borrowed Hook" and "The Stranger's Net" (see the fv-16/fv-4
-    // narration pools above). Neither foe carries a flag or pricing
-    // dependency, so nothing else needs to know they left.
+    'fv-24': { slug: 'float-eye' },
 };
 
 // Phase 60 — the re-homed anvil (see `BlacksmithPayload`'s doc comment in
@@ -664,7 +642,7 @@ const FV_BLACKSMITH_NODES: Record<string, string> = {
     'fv-21': 'A lean-to forge, coals still breathing. The smith looks up from the anvil and nods at your dice.',
 };
 
-function fvEncounterPool(nodeId: string, foe: { slug: EnemySlug; description: string }): MapEventPool {
+function fvEncounterPool(nodeId: string, foe: { slug: EnemySlug; description?: string }): MapEventPool {
     return {
         id: `${nodeId}.encounter`,
         entries: [{
@@ -957,10 +935,9 @@ const fvGauntletBoss: MapEventPool = {
         kind: 'encounter', weight: 1,
         payload: {
             kind: 'encounter',
-            enemySlug: 'king-of-revenge',
+            enemySlug: 'the-doorwarden',
             isBoss: true,
             level: FV_BOSS_LEVEL,
-            description: 'The King of Revenge rises from the harbour wall.',
         },
     }],
 };
@@ -989,7 +966,7 @@ const FV_HAZARD_NODES: Record<string, string> = {
 
 // 2026-08-28 — inter-map travel. The door sits in the terminal column
 // (column 9), four columns past the fv-6 breakwater boss, so it opens only
-// after the King of Revenge is dealt with — the same beat where Old Marrow
+// after the fv-6 boss is dealt with — the same beat where Old Marrow
 // grants `get-to-forest`. Resolving it walks the player onto
 // northern-forest, whose start node nf-1 completes the quest's reach
 // objective on its own resolution.
@@ -1136,23 +1113,21 @@ const bwWindmillArrival: MapEventPool = {
 /** D30: the Breakwater's elite, pinned low like every Act 1 fight (brief §3b). */
 const BW_ELITE_LEVEL = 3;
 
-const BW_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description: string }> = {
+const BW_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description?: string }> = {
     // c1 — the crane quay
-    'bw-2':  { slug: 'grave-larva',      description: 'Something pale works loose from the mud under the cranes.' },
+    'bw-2':  { slug: 'float-eye' },
     // c2 — the sea fort, the north pier, the walled manor
     'bw-6':  { slug: 'float-eye',        description: 'A lidless thing hangs over the fort wall. It has already seen you.' },
-    'bw-8':  { slug: 'chattering-skull', description: 'A skull on a mooring post talks about the tide. It stops when you come near.' },
-    'bw-10': { slug: 'little-belle',     description: 'A small orange vesper rings a bell in the manor yard.' },
+    'bw-10': { slug: 'float-eye' },
     // c4 — the lighthouse
-    'bw-14': { slug: 'foot-stealer',     description: 'Something on the lighthouse stair collects footing. Yours is next.' },
+    'bw-14': { slug: 'float-eye' },
 };
 
-/** D30: the watchtower, the chokepoint before the bridge, holds the region's elite. */
-const BW_ELITE = {
-    slug: 'brine-hag' as EnemySlug,
-    level: BW_ELITE_LEVEL,
-    description: 'The watchtower lamp is lit. The hag who keeps it has been watching the road.',
-};
+/** D61: the Brine Hag, a rarer mid-region fight on the north pier. */
+const BW_ELITE: ActOneFoe = { slug: 'brine-hag', level: BW_ELITE_LEVEL };
+
+/** D61: the watchtower, the chokepoint before the bridge, holds the door fight. */
+const BW_DOOR: ActOneFoe = { slug: 'the-doorwarden', level: BW_ELITE_LEVEL, isBoss: true };
 
 const BW_REST_NODES: Record<string, string> = {
     'bw-9':  'The customs house lets rooms by the night. The clerk takes coin, not names.',
@@ -1198,8 +1173,10 @@ const BREAKWATER_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
             const nodeId = `bw-${i}`;
             if (nodeId === 'bw-1') {
                 out.push({ nodeId, pool: bwWindmillArrival });
-            } else if (nodeId === 'bw-17') {
+            } else if (nodeId === 'bw-8') {
                 out.push({ nodeId, pool: cwEncounterPool(nodeId, BW_ELITE) });
+            } else if (nodeId === 'bw-17') {
+                out.push({ nodeId, pool: cwEncounterPool(nodeId, BW_DOOR) });
             } else if (nodeId === 'bw-18') {
                 out.push({ nodeId, pool: bwRiverBridge });
             } else if (BW_REST_NODES[nodeId]) {
@@ -1231,10 +1208,18 @@ const BREAKWATER_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
 //
 // Kind spread over 20 nodes: 7 encounter, 3 rest, 3 loot-cache,
 // 3 gathering, 2 hazard, 1 arrival cutscene, 1 travel. No boss: the wood sits
-// between the Breakwater and fishing-village, whose King of Revenge is still
+// between the Breakwater and fishing-village, whose boss is still
 // ahead. The northern forest's roster is level 9 and up, so every fight here
 // is pinned to a low absolute level (the fv-6 precedent), ramping ring by ring
 // and never above fishing-village's own boss.
+
+/**
+ * One pinned Act 1 fight. R2 (D48, D61): Float-Eye takes the normal fights,
+ * the Brine Hag one mid-region node, the Doorwarden every region's door
+ * fight. A node whose line described a retired foe lost it (D58: no new prose);
+ * the encounter falls back to the foe's own description.
+ */
+interface ActOneFoe { slug: EnemySlug; level: number; description?: string; isBoss?: boolean }
 
 const CW_FIGHT_LEVEL_EARLY = 2;
 const CW_FIGHT_LEVEL_LATE = 3;
@@ -1255,29 +1240,29 @@ const cwArrival: MapEventPool = {
     }],
 };
 
-function cwEncounterPool(nodeId: string, foe: { slug: EnemySlug; level: number; description: string }): MapEventPool {
+function cwEncounterPool(nodeId: string, foe: ActOneFoe): MapEventPool {
     return {
         id: `${nodeId}.encounter`,
         entries: [{
             kind: 'encounter', weight: 1,
-            payload: { kind: 'encounter', enemySlug: foe.slug, isBoss: false, level: foe.level, description: foe.description },
+            payload: { kind: 'encounter', enemySlug: foe.slug, isBoss: foe.isBoss ?? false, level: foe.level, description: foe.description },
         }],
     };
 }
 
-const CW_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; level: number; description: string }> = {
+const CW_ENCOUNTER_FOES: Record<string, ActOneFoe> = {
     // c1 — the gibbet
-    'cw-5':  { slug: 'bull-begger',   level: CW_FIGHT_LEVEL_EARLY, description: 'Something under the gibbet cage holds out a fist. It wants you to refuse.' },
+    'cw-5':  { slug: 'float-eye', level: CW_FIGHT_LEVEL_EARLY },
     // c2 — the stone circle, the footbridge
-    'cw-7':  { slug: 'kudan',         level: CW_FIGHT_LEVEL_EARLY, description: 'A calf with a man\'s face lies on the slab. It has one thing to tell you.' },
-    'cw-10': { slug: 'weeping-head',  level: CW_FIGHT_LEVEL_EARLY, description: 'Something weeps under the footbridge. The stream runs faster where it cries.' },
-    // c3 — the root graveyard
-    'cw-12': { slug: 'pale-brood',    level: CW_FIGHT_LEVEL_LATE,  description: 'Something pale pushes up between the roots. The graves here were not dug deep enough.' },
+    'cw-7':  { slug: 'float-eye', level: CW_FIGHT_LEVEL_EARLY },
+    'cw-10': { slug: 'float-eye', level: CW_FIGHT_LEVEL_EARLY },
+    // c3 — the root graveyard: D61, the Brine Hag mid-region
+    'cw-12': { slug: 'brine-hag', level: CW_FIGHT_LEVEL_LATE },
     // c4 — the rock chapel, the wayside cross, the east cave
-    'cw-16': { slug: 'goblin-shaman', level: CW_FIGHT_LEVEL_LATE,  description: 'A goblin in the chapel door rattles three borrowed gods. It is collecting the tithe.' },
-    // D30: the region's elite, on the centre lane of the last ring.
-    'cw-17': { slug: 'cursed-paladin', level: CW_FIGHT_LEVEL_LATE, description: 'A knight in rusted plate keeps the wayside cross. The oath outlived the faith. He still keeps the fork.' },
-    'cw-19': { slug: 'wichtlein',     level: CW_FIGHT_LEVEL_LATE,  description: 'Something small and red knocks in the cave mouth. Twice, so far.' },
+    'cw-16': { slug: 'float-eye', level: CW_FIGHT_LEVEL_LATE },
+    // D61: the door fight, on the centre lane of the last ring.
+    'cw-17': { slug: 'the-doorwarden', level: CW_FIGHT_LEVEL_LATE, isBoss: true },
+    'cw-19': { slug: 'float-eye', level: CW_FIGHT_LEVEL_LATE },
 };
 
 /**
@@ -1397,17 +1382,17 @@ const bcArrival: MapEventPool = {
 };
 
 /** Every Beacon Crags fight, pinned (`cwEncounterPool` builds the pool). */
-const BC_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; level: number; description: string }> = {
+const BC_ENCOUNTER_FOES: Record<string, ActOneFoe> = {
     // c1 — the summit beacon
-    'bc-2':  { slug: 'tri-eyes',          level: BC_FIGHT_LEVEL_EARLY, description: 'Something keeps the beacon. It has three sockets, and it has already counted you.' },
-    // c3 — the ruined chapel, the toll gate
-    'bc-8':  { slug: 'vampire-thrall',    level: BC_FIGHT_LEVEL_EARLY, description: 'Something rings the chapel bell for a master who never comes. It will take you instead.' },
-    'bc-10': { slug: 'seam-tick',         level: BC_FIGHT_LEVEL_EARLY, description: 'Something fist-sized clings under the gatehouse arch. The last collector\'s collar lies in the road.' },
+    'bc-2':  { slug: 'float-eye', level: BC_FIGHT_LEVEL_EARLY },
+    // c3 — the ruined chapel (D61, the Brine Hag mid-region), the toll gate
+    'bc-8':  { slug: 'brine-hag', level: BC_FIGHT_LEVEL_EARLY },
+    'bc-10': { slug: 'float-eye', level: BC_FIGHT_LEVEL_EARLY },
     // c4 — the arch bridge, the quarry
-    'bc-11': { slug: 'ninth-rung-spider', level: BC_FIGHT_LEVEL_LATE,  description: 'Something hangs under the arch. It does not chase. You have to cross.' },
-    'bc-13': { slug: 'prop-wight',        level: BC_FIGHT_LEVEL_LATE,  description: 'Something lives in the crane\'s rotten timbers. It holds the blocks up out of spite.' },
-    // c5 — the stone gate: D30, the region's elite, on the centre lane of the last ring
-    'bc-15': { slug: 'mabadi',            level: BC_FIGHT_LEVEL_LATE,  description: 'A withered duelist waits between the statues. The gate is his, and so is the cane.' },
+    'bc-11': { slug: 'float-eye', level: BC_FIGHT_LEVEL_LATE },
+    'bc-13': { slug: 'float-eye', level: BC_FIGHT_LEVEL_LATE },
+    // c5 — the stone gate: D61, the door fight, on the centre lane of the last ring
+    'bc-15': { slug: 'the-doorwarden', level: BC_FIGHT_LEVEL_LATE, isBoss: true },
 };
 
 /** All three rests are CAMPS: Phase 52b keeps inns inside settlements. */
@@ -1512,19 +1497,19 @@ const ldArrival: MapEventPool = {
 };
 
 /** Every Lantern Deep fight, pinned (`cwEncounterPool` builds the pool). */
-const LD_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; level: number; description: string }> = {
+const LD_ENCOUNTER_FOES: Record<string, ActOneFoe> = {
     // c1 — the drowned temple, the cathedral
-    'ld-3':  { slug: 'sump-maren',        level: LD_FIGHT_LEVEL_EARLY, description: 'Something waits in the flooded nave with its hair spread on the water. It asks you to stay.' },
-    'ld-5':  { slug: 'pale-brood',        level: LD_FIGHT_LEVEL_EARLY, description: 'Something pale has hatched in the font. It has not been fed, and it knows you are food.' },
-    // c2 — the central aqueduct
-    'ld-8':  { slug: 'wichtlein',         level: LD_FIGHT_LEVEL_EARLY, description: 'Something small and red knocks three times on the aqueduct stones. The chasm is under the third.' },
+    'ld-3':  { slug: 'float-eye', level: LD_FIGHT_LEVEL_EARLY },
+    'ld-5':  { slug: 'float-eye', level: LD_FIGHT_LEVEL_EARLY },
+    // c2 — the central aqueduct: D61, the Brine Hag mid-region
+    'ld-8':  { slug: 'brine-hag', level: LD_FIGHT_LEVEL_EARLY },
     // c3 — the mushroom forest, the ossuary
-    'ld-11': { slug: 'tri-eyes',          level: LD_FIGHT_LEVEL_LATE,  description: 'Something watches from between the stalks. Three sockets, and none of them blink.' },
-    'ld-12': { slug: 'vampire-thrall',    level: LD_FIGHT_LEVEL_LATE,  description: 'Something tends the giant\'s bones for a master buried under them. It has been told to keep visitors.' },
+    'ld-11': { slug: 'float-eye', level: LD_FIGHT_LEVEL_LATE },
+    'ld-12': { slug: 'float-eye', level: LD_FIGHT_LEVEL_LATE },
     // c4 — the fortress gate
-    'ld-13': { slug: 'ninth-rung-spider', level: LD_FIGHT_LEVEL_LATE,  description: 'Something hangs in the portcullis. It does not chase. The gate is the only way through.' },
-    // c5 — the ruined city: D30, the region's elite, on the last fight column
-    'ld-16': { slug: 'bone-wizard',       level: LD_FIGHT_LEVEL_LATE,  description: 'A robed skeleton reads in the flooded square. It studied its way out of the flesh, and it wants an examiner.' },
+    'ld-13': { slug: 'float-eye', level: LD_FIGHT_LEVEL_LATE },
+    // c5 — the ruined city: D61, the door fight, on the last fight column
+    'ld-16': { slug: 'the-doorwarden', level: LD_FIGHT_LEVEL_LATE, isBoss: true },
 };
 
 /** All three rests are CAMPS: Phase 52b keeps inns inside settlements. */
@@ -1780,7 +1765,7 @@ const ncUnderGateBoss: MapEventPool = {
         kind: 'encounter', weight: 1,
         payload: {
             kind: 'encounter',
-            enemySlug: 'rawhead-rex',
+            enemySlug: 'the-doorwarden',
             isBoss: true,
             level: NC_BOSS_LEVEL,
             description: 'Something has kept this gate longer than the city above remembers. It stands up to keep it now.',
@@ -2109,10 +2094,9 @@ const ncyHarbormasterBoss: MapEventPool = {
         kind: 'encounter', weight: 1,
         payload: {
             kind: 'encounter',
-            enemySlug: 'the-harbormaster',
+            enemySlug: 'the-doorwarden',
             isBoss: true,
             level: NCY_BOSS_LEVEL,
-            description: 'Nothing leaves this city by water unweighed. The one who does the weighing is waiting for you.',
         },
     }],
 };
@@ -2364,7 +2348,7 @@ const crWaterreeveBoss: MapEventPool = {
         kind: 'encounter', weight: 1,
         payload: {
             kind: 'encounter',
-            enemySlug: 'the-waterreeve',
+            enemySlug: 'the-doorwarden',
             isBoss: true,
             level: CR_BOSS_LEVEL,
             description: 'The crossing has a keeper, and the keeper has a ledger. Nothing crosses unweighed.',
@@ -2508,10 +2492,9 @@ const tarPortreeveBoss: MapEventPool = {
         kind: 'encounter', weight: 1,
         payload: {
             kind: 'encounter',
-            enemySlug: 'the-portreeve',
+            enemySlug: 'the-doorwarden',
             isBoss: true,
             level: TAR_BOSS_LEVEL,
-            description: 'The town\'s chief officer rules on every dispute it has. Yours is next.',
         },
     }],
 };
@@ -2713,10 +2696,9 @@ const capTheFactorBoss: MapEventPool = {
         kind: 'encounter', weight: 1,
         payload: {
             kind: 'encounter',
-            enemySlug: 'the-factor',
+            enemySlug: 'the-doorwarden',
             isBoss: true,
             level: CAP_BOSS_LEVEL,
-            description: 'He buys positions, not fights. Yours is the last one on today\'s ledger.',
         },
     }],
 };

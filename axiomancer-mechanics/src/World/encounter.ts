@@ -132,7 +132,7 @@ export function scaleEnemyToLevel(source: Enemy, targetLevel: number): Enemy {
     scaled.health = scaled.maxHealth;
     // THE EARLY HIDE RAMP (see `Enemy/index.ts`): a foe pinned or scaled
     // down to the opening levels sheds the HIDE its home-level kit authored —
-    // the fishing village's level-3 King of Revenge fights bare-skinned.
+    // a level-3 boss fights bare-skinned.
     scaled.keywords = applyHideRamp(scaled.keywords ?? [], level);
 
     // Rescale XP when the source XP looked like the default multiplier.

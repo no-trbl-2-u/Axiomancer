@@ -75,5 +75,5 @@ event stream):**
   content, so combat never starts and the rollback semantics stay
   clean. Phase 53d converted fv-4 to the "Stranger's Net" narration
   dilemma; the nearest early encounter from fv-2 is now reached via
-  fv-11 → fv-13 (Little Belle). This walkthrough deliberately stops
+  fv-11 → fv-13 (Float-Eye). This walkthrough deliberately stops
   before branching because it tests snapshot rollback, not combat.

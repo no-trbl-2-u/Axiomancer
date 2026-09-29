@@ -69,8 +69,8 @@ export interface CliFlags {
     combatSeed?: number;
     /** Test/debug: force a specific `ENEMY_REGISTRY` slug at the node named by
      *  `combatEnemyNode`, overriding that node's authored encounter enemy. Used
-     *  by the route-audit e2e to guarantee a deterministic combat DEFEAT (the
-     *  impossible-tier enemy) independent of card balance. */
+     *  by the route-audit e2e to guarantee a deterministic combat DEFEAT (a
+     *  test-registered ceiling enemy) independent of card balance. */
     combatEnemy?: string;
     combatEnemyNode?: string;
     /** AXM Log: enables the structured logger at this minimum level. */

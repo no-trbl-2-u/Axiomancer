@@ -29,7 +29,7 @@ import { MIN_COMBAT_DECK_SIZE, removeCardFromCombatDeck } from '../../Cards/card
 import { executeCard } from '../../Cards/card.engine';
 import { getCardById } from '../../Cards/cards.library';
 import { buildPresetDeck } from '../../Combat/combat.starter-deck-presets';
-import { GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import type { CombatState } from '../../Combat/types';
 
 // Phase 104 (2026-09-20) repurposed `STARTING_CARD_IDS` for the grey-office
@@ -138,7 +138,7 @@ describe('migrate v22 → v23 — strip the starting-loadout seed', () => {
         // … which the ownership guard then rejects mid-combat.
         const shim: CombatState = {
             active: true, phase: 'resolving', round: 1, friendshipCounter: 0,
-            player, enemy: { ...GraveLarva }, playerChoice: {}, enemyChoice: {},
+            player, enemy: { ...FloatEye }, playerChoice: {}, enemyChoice: {},
         };
         expect(() => executeCard(shim, 'thin-hymn', getCardById)).toThrow(/not known/);
 

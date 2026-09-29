@@ -33,7 +33,7 @@ import type { Enemy } from '../../Enemy/types';
 import { EnemyLibrary } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { initializeCombatEncounter, processBetweenPhases } from '../combat.engine';
-import { ENEMY_CARD_LIBRARY } from '../combat.enemy-cards';
+import { ENEMY_CARD_LIBRARY, type EnemyCard } from '../combat.enemy-cards';
 import {
     ENEMY_DECKS, ENEMY_DECK_IDS, compileEnemyDeck, deckCardIds, isTieredDeck,
     planDeckTiers, TIER1_MIN_CARDS, TIER2_DEFAULT_ROUND, TIER3_DEFAULT_ROUND,
@@ -121,7 +121,9 @@ describe('round-keyed deck tiers — a flat deck still compiles to what it alway
 
     it('the 2-3 card majority gains NO delay it did not already author on a card', () => {
         const short = FLAT_DECK_IDS.filter(id => deckCardIds(ENEMY_DECKS[id]).length <= 3);
-        expect(short.length).toBeGreaterThan(20); // this shape really is the majority
+        // Was `> 20` ("this shape really is the majority") on the pre-R2
+        // roster; the reset left one flat deck, and it is short.
+        expect(short.length).toBeGreaterThan(0);
         for (const id of short) {
             const cardIds = deckCardIds(ENEMY_DECKS[id]);
             compileEnemyDeck(id).forEach((step, i) => {
@@ -150,11 +152,11 @@ describe('round-keyed deck tiers — a flat deck still compiles to what it alway
         }
     });
 
-    it('a flat all-common opening (Ghast) compiles ungated, exactly as before', () => {
-        const steps = compileEnemyDeck('enemy-ghast');
+    it('a flat common opening (Float-Eye) compiles ungated, exactly as before', () => {
+        const steps = compileEnemyDeck('enemy-float-eye');
         expect(steps.map(gateOf)).toEqual([undefined, undefined, TIER2_DEFAULT_ROUND]);
         // Round 3 is where the pointer reaches index 2 anyway — a floor, not a hold.
-        expect(pointerByRound(enemyById('enemy-ghast'), 5)).toEqual([0, 1, 2, 2, 2]);
+        expect(pointerByRound(enemyById('enemy-float-eye'), 5)).toEqual([0, 1, 2, 2, 2]);
     });
 });
 
@@ -162,7 +164,8 @@ describe('round-keyed deck tiers — a flat deck still compiles to what it alway
 
 describe('round-keyed deck tiers — an authored tiered deck opens its tiers by round', () => {
     it('every boss/unique that hand-authored tiers gates exactly by tier', () => {
-        expect(TIERED_DECK_IDS.length).toBeGreaterThanOrEqual(21);
+        // Was `>= 21` on the pre-R2 roster; the Doorwarden is the one left.
+        expect(TIERED_DECK_IDS).toEqual(['enemy-the-doorwarden']);
         for (const id of TIERED_DECK_IDS) {
             const plan = planDeckTiers(id)!;
             expect(plan.authored).toBe(true);
@@ -196,32 +199,24 @@ describe('round-keyed deck tiers — an authored tiered deck opens its tiers by 
         expect(tierAtRound[8]).toBe(3);
     });
 
-    it('a 5-card boss (the Sophist) reaches tier 3 at its shortened round-5 gate', () => {
-        const plan = planDeckTiers('enemy-the-sophist')!;
-        expect(plan.tierRounds[3]).toBe(5);
-        const walk = pointerByRound(enemyById('enemy-the-sophist'), 7);
-        const tierAtRound = walk.map(i => plan.tiers[i]);
-        expect(tierAtRound.indexOf(3) + 1).toBe(5);
-    });
-
-    it('Tezcatlipoca keeps his BRANCH card in an ungated tier 1 — the read is his opening', () => {
-        const plan = planDeckTiers('enemy-tezcatlipoca')!;
-        const branchIndex = plan.cardIds.indexOf('smoke-through-the-seams');
-        expect(plan.tiers[branchIndex]).toBe(1);
-        const step = compileEnemyDeck('enemy-tezcatlipoca')[branchIndex];
-        expect(isBranchStep(step)).toBe(true);
-        if (!isBranchStep(step)) return;
-        // Ungated, so the fork still commits at the phase boundary as shipped.
-        expect(step.branch.then.unlockAfterRound).toBeUndefined();
-        expect(step.branch.else.unlockAfterRound).toBeUndefined();
-    });
-
     it('a branch card sitting in a GATED tier carries the gate on both of its forks', () => {
+        // No live card is a branch since the R2 reset, so the fixture
+        // registers its own for the duration of the test.
         const FIXTURE = 'enemy-tier-fixture';
+        const BRANCH = 'fixture-branch-card';
+        (ENEMY_CARD_LIBRARY as Record<string, EnemyCard>)[BRANCH] = {
+            name: 'Fixture Fork', archetype: 'drowned-parish', grade: 'escalation', stance: 'body',
+            branch: {
+                condition: { kind: 'prior-threat-fully-blocked' },
+                then: { stance: 'mind', actionText: 'then', stanceHint: 'then' },
+                else: { stance: 'body', actionText: 'else', stanceHint: 'else' },
+            },
+            actionText: 'fork', stanceHint: 'fork',
+        };
         (ENEMY_DECKS as Record<string, unknown>)[FIXTURE] = {
-            tier1: ['the-tally-mark', 'the-kept-reflection'],
-            tier2: ['smoke-through-the-seams'],
-            tier3: ['oc-the-thread-cut-short'],
+            tier1: ['dp-first-bell', 'dp-undertow-grip'],
+            tier2: [BRANCH],
+            tier3: ['what-shuts-stays-shut'],
         };
         try {
             const step = compileEnemyDeck(FIXTURE)[2];
@@ -235,6 +230,7 @@ describe('round-keyed deck tiers — an authored tiered deck opens its tiers by 
             expect(gateOf(compileEnemyDeck(FIXTURE)[3])).toBe(TIER3_DEFAULT_ROUND);
         } finally {
             delete (ENEMY_DECKS as Record<string, unknown>)[FIXTURE];
+            delete (ENEMY_CARD_LIBRARY as Record<string, EnemyCard>)[BRANCH];
         }
     });
 });

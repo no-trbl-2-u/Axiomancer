@@ -63,7 +63,7 @@ const PLAYABLE_LIBRARY = cardLibrary.filter(c => c.theme !== 'curse');
  * pinned high here so the probe measures reachability and nothing else.
  */
 const WEAK_ENEMY: Enemy = (() => {
-    const e = deepClone((ENEMY_REGISTRY as Record<string, Enemy>)['grave-larva']);
+    const e = deepClone((ENEMY_REGISTRY as Record<string, Enemy>)['float-eye']);
     e.health = 20_000;
     e.maxHealth = 20_000;
     // No armour and no stage escalation: reachability, not arithmetic.

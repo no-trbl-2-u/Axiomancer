@@ -23,7 +23,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
-import { LittleBelle } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { runOneEncounter, simulateHazardPatternCombatDetailed } from '../combat.encounter.sim';
 import { runPlaytestMatrix, type PlaytestReport } from '../combat.playtest';
@@ -62,7 +62,7 @@ function report(): PlaytestReport {
 
 describe('objective v2 — one encounter carries its own telemetry', () => {
     it('runOneEncounter reports mergeable objective telemetry for the run', () => {
-        const r = runOneEncounter(loadout(DECK), deepClone(LittleBelle), 11, 'greedy');
+        const r = runOneEncounter(loadout(DECK), deepClone(FloatEye), 11, 'greedy');
         expect(r.objective.runs).toBe(1);
         expect(r.objective.rounds).toBe(r.rounds);
         // Decision width is sampled at powered plays, so it cannot exceed plays.
@@ -79,8 +79,8 @@ describe('objective v2 — one encounter carries its own telemetry', () => {
     }, 30_000);
 
     it('instrumenting the metric did not perturb the seeded run', () => {
-        const a = runOneEncounter(loadout(DECK), deepClone(LittleBelle), 11, 'greedy');
-        const b = runOneEncounter(loadout(DECK), deepClone(LittleBelle), 11, 'greedy');
+        const a = runOneEncounter(loadout(DECK), deepClone(FloatEye), 11, 'greedy');
+        const b = runOneEncounter(loadout(DECK), deepClone(FloatEye), 11, 'greedy');
         expect(b).toEqual(a);
     }, 30_000);
 });
@@ -159,7 +159,7 @@ describe('objective v2 — reported BESIDE statusEngagement, never instead of it
         }
     }, 120_000);
 
-    it('statusEngagement is still non-zero on the non-impossible stages (unchanged meaning)', () => {
+    it('statusEngagement is still non-zero on every stage (unchanged meaning)', () => {
         for (const stage of ['early', 'mid', 'late'] as const) {
             const summary = report().stageSummaries.find(s => s.stage === stage);
             expect(summary, `no summary for '${stage}'`).toBeDefined();
@@ -210,14 +210,14 @@ describe('objective v2 — rollups pool telemetry and re-score', () => {
 
     it('a cell stat pools exactly its own runs', () => {
         const { stats } = simulateHazardPatternCombatDetailed({
-            player: loadout(DECK), enemy: deepClone(LittleBelle), runs: 5, startSeed: 3, policy: 'greedy',
+            player: loadout(DECK), enemy: deepClone(FloatEye), runs: 5, startSeed: 3, policy: 'greedy',
         });
         expect(stats.objectiveTelemetry.runs).toBe(5);
         expect(stats.combatQuality).toEqual(scoreCombatObjective(stats.objectiveTelemetry));
         // Hand-pooling the same five runs reproduces the cell exactly.
         const manual = emptyObjectiveTelemetry();
         const parts = [0, 1, 2, 3, 4].map(i =>
-            runOneEncounter(loadout(DECK), deepClone(LittleBelle), 3 + i, 'greedy').objective);
+            runOneEncounter(loadout(DECK), deepClone(FloatEye), 3 + i, 'greedy').objective);
         expect(poolObjectiveTelemetry([manual, ...parts])).toEqual(stats.objectiveTelemetry);
     }, 60_000);
 });
@@ -225,7 +225,7 @@ describe('objective v2 — rollups pool telemetry and re-score', () => {
 describe('objective v2 — determinism + hermeticity', () => {
     it('identical seeds produce an identical score', () => {
         const run = (): number => simulateHazardPatternCombatDetailed({
-            player: loadout(DECK), enemy: deepClone(LittleBelle), runs: 4, startSeed: 7, policy: 'blind',
+            player: loadout(DECK), enemy: deepClone(FloatEye), runs: 4, startSeed: 7, policy: 'blind',
         }).stats.combatQuality.index;
         expect(run()).toBe(run());
     }, 60_000);

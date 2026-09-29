@@ -25,7 +25,7 @@ import {
 } from './figures';
 
 export interface EnemyIllustrationProps {
-    /** Enemy art key (e.g. "king-of-revenge" / "grave-larva"). */
+    /** Enemy art key (e.g. "the-doorwarden" / "float-eye"). */
     enemyArtKey?: string | null;
     isBoss?: boolean;
 }

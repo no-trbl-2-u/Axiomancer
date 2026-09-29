@@ -23,7 +23,6 @@ import { cardLibrary } from '../Cards/cards.library';
 import { UPGRADE_SUFFIX } from '../Cards/card-upgrades';
 import { Player } from '../Character/characters.mock';
 import { deepClone, calculateMaxHealth } from '../Utils';
-import { MAX_DIE_UPGRADE_LEVEL } from './combat.dice';
 
 /**
  * Deck-MATURITY level implied by a card's RANK (the quality ladder Ash 1 …
@@ -38,8 +37,8 @@ export function rankMaturityLevel(rank: CardRank): number {
     return ({ 1: 1, 2: 2, 3: 4, 4: 6, 5: 10, 6: 12 } as Record<CardRank, number>)[rank];
 }
 
-/** The four campaign moments the playtest matrix measures. */
-export type CombatStageId = 'early' | 'mid' | 'late' | 'impossible';
+/** The three campaign moments the playtest matrix measures. */
+export type CombatStageId = 'early' | 'mid' | 'late';
 
 /** A frozen campaign moment: player power + deck maturity + enemy roster. */
 export interface CombatStageProfile {
@@ -85,9 +84,9 @@ export interface CombatStageProfile {
     enemySlugs: readonly string[];
 }
 
-/** Canonical stage order — early campaign first, the unwinnable ceiling last. */
+/** Canonical stage order — early campaign first. */
 export const COMBAT_STAGE_ORDER: readonly CombatStageId[] = Object.freeze([
-    'early', 'mid', 'late', 'impossible',
+    'early', 'mid', 'late',
 ]);
 
 /**
@@ -108,10 +107,7 @@ export const COMBAT_STAGE_PROFILES: Record<CombatStageId, CombatStageProfile> = 
         bonusBaseDice: 0,
         dieUpgradeLevel: 0,
         upgradedCardShare: 0,
-        enemySlugs: [
-            'grave-larva', 'foot-stealer', 'little-belle',
-            'water-holger', 'the-butcher', 'king-of-revenge',
-        ],
+        enemySlugs: ['float-eye', 'brine-hag', 'the-doorwarden'],
     },
     mid: {
         id: 'mid',
@@ -134,10 +130,7 @@ export const COMBAT_STAGE_PROFILES: Record<CombatStageId, CombatStageProfile> = 
         bonusBaseDice: 1,
         dieUpgradeLevel: 2,
         upgradedCardShare: 0.33,
-        enemySlugs: [
-            'tri-eyes', 'mirac', 'hasshaku-sama',
-            'jeweled-tree', 'rawhead-rex',
-        ],
+        enemySlugs: ['brine-hag', 'the-doorwarden'],
     },
     late: {
         id: 'late',
@@ -154,28 +147,7 @@ export const COMBAT_STAGE_PROFILES: Record<CombatStageId, CombatStageProfile> = 
         bonusBaseDice: 2,
         dieUpgradeLevel: 3,
         upgradedCardShare: 0.66,
-        enemySlugs: [
-            'fire-giant', 'rangda', 'tezcatlipoca',
-            'arch-demon', 'death', 'the-abortive',
-        ],
-    },
-    impossible: {
-        id: 'impossible',
-        name: 'The Unprovable',
-        description: 'The ceiling: a maxed player against The Unfinished. Losing here is the design — the profile exists to prove the top of the curve stays out of reach.',
-        // PLAYTEST-CALIBRATION — the L50 ladder preset's exact stat block
-        // (src/Character/presets.ts ladderL50Preset), HP = stat sum x 5.
-        playerLevel: 50,
-        playerBaseStats: { heart: 40, body: 44, mind: 42 },
-        playerMaxHealth: 630,
-        maxCardTier: 3,
-        // Everything the campaign can give — six dice, the honed ceiling, every
-        // card upgraded. If The Unfinished is still out of reach HERE, it is
-        // out of reach by design.
-        bonusBaseDice: 3,
-        dieUpgradeLevel: MAX_DIE_UPGRADE_LEVEL,
-        upgradedCardShare: 1,
-        enemySlugs: ['the-incompleteness'],
+        enemySlugs: ['the-doorwarden'],
     },
 };
 

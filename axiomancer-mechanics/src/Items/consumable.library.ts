@@ -112,7 +112,7 @@ export const consumableLibrary: Consumable[] = [
         category: 'consumable',
         // adjust-equipment pass 14 (2026-09-20): previously shared
         // `buff_damage_reduction` (tier 2) with iron-skin-draught, so the
-        // Cursed Paladin's loot table printed two byte-identical "GUARD" lines
+        // Cursed Paladin's (retired R2) loot table printed two identical "GUARD" lines
         // at the same 25% weight — same shop/reward-pool-effect-duplication bug
         // class as issue #307 (philosopher-tea/void-essence) and pass 11
         // (antidote/clarity-serum), surfaced here in a reward table rather than

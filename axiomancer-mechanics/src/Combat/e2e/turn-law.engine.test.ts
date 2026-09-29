@@ -21,7 +21,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
-import { GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import {
@@ -72,7 +72,7 @@ function makePlayer(cards: string[], floating: ('heart' | 'body' | 'mind' | 'wil
 }
 
 function makeEnemy(): Enemy {
-    const e = deepClone(GraveLarva);
+    const e = deepClone(FloatEye);
     e.id = 'enemy-turn-law-dummy';
     e.health = 500; e.maxHealth = 500; e.effects = [];
     return e;
@@ -198,7 +198,7 @@ describe('Gate 0 — the round-turn law (one tray roll per threat phase)', () =>
         for (const policy of COMBAT_SIM_POLICY_ORDER) {
             for (const seed of [1, 2, 3, 11]) {
                 const p = deepClone(Player);
-                const e = deepClone(GraveLarva);
+                const e = deepClone(FloatEye);
                 const run = runOneEncounter(p, e, seed, policy);
                 expect(run.outcome).toBeDefined();
                 // The law never binds on legal play — the guards exist, the

@@ -49,7 +49,7 @@ npm run combat -- [flags]             # convenience alias
 
 | Flag | Effect |
 | --- | --- |
-| `--enemy <slug>` | Enemy from the registry (default `little-belle`). |
+| `--enemy <slug>` | Enemy from the registry (default `float-eye`). |
 | `--preset <id>` | Character preset id (default `apprentice`). |
 | `--seed <n>` | Deterministic RNG seed — same seed → same dice, same outcome. |
 | `--auto` | Run a bot policy without TTY (no prompts). |
@@ -63,11 +63,11 @@ npm run combat -- [flags]             # convenience alias
 **Examples:**
 ```bash
 # Deterministic auto run (status-focused bot, reproducible)
-npm run combat -- --auto --policy status --enemy little-belle --seed 42 \
+npm run combat -- --auto --policy status --enemy float-eye --seed 42 \
   --max-turns 12 --json-events --state-log /tmp/combat.jsonl
 
 # Interactive TTY play
-npm run combat -- --enemy foot-stealer --preset wanderer
+npm run combat -- --enemy brine-hag --preset wanderer
 ```
 
 **State-log records** (for agentic consumers):
@@ -90,7 +90,7 @@ balance tuning — not player-facing.
 ```bash
 npm run combat-sim
 npm run combat-sim -- --blind
-npm run combat-sim -- --enemy=KingOfRevenge
+npm run combat-sim -- --enemy=BrineHag
 npm run combat-sim -- --loadout=slippery-slope,eternal-regress,befriend
 npm run combat-sim -- --runs=300 --seed=1 --blind
 ```
@@ -100,7 +100,7 @@ npm run combat-sim -- --runs=300 --seed=1 --blind
 | Flag | Effect |
 | --- | --- |
 | `--blind` | Runs the `blind` policy. Since the D7 flag collapse (2026-09-25) deleted the stance draft, it plays identically to the default `greedy` witness; kept so old commands still run. |
-| `--enemy <Name>` | Run against one enemy only (e.g. `KingOfRevenge`, `FateSpinner`). Omit to run the full tier sweep. |
+| `--enemy <Name>` | Run against one enemy only (e.g. `BrineHag`, `TheDoorwarden`). Omit to run the full tier sweep. |
 | `--loadout <ids>` | Comma-separated card IDs for the player's deck (default `slippery-slope`). |
 | `--runs <n>` | Number of Monte-Carlo playthroughs (default `200`). |
 | `--seed <n>` | Deterministic RNG seed for reproducible runs (default `1`). |

@@ -13,14 +13,14 @@
  *   `npm run combat-sim`    → Monte-Carlo balance witness (not player-facing)
  *
  * Combat flags:
- *   --enemy <slug>       enemy from the registry (default little-belle)
+ *   --enemy <slug>       enemy from the registry (default float-eye)
  *   --preset <id>        character preset id (default apprentice)
  *   --seed <n>           deterministic RNG seed
  *   --auto               run a bot policy (no TTY required)
  *   --policy naive|safe|aggressive|status
  *                        bot policy for --auto (default status)
  *   --max-turns <n>      stop auto play after this many phases (default 8)
- *   --stage <id>         playtest stage profile (early|mid|late|impossible);
+ *   --stage <id>         playtest stage profile (early|mid|late);
  *                        builds the stage player when no explicit --preset is
  *                        given, scopes --deck drafting to the stage pool, and
  *                        defaults the enemy to the stage's roster when no
@@ -156,7 +156,7 @@ const COMBAT_USAGE =
     'Usage: npm run combat -- ' +
     '[--enemy <slug>] [--preset <id>] [--seed <n>] ' +
     '[--auto] [--policy naive|safe|aggressive|status] [--max-turns <n>] ' +
-    '[--stage early|mid|late|impossible] ' +
+    '[--stage early|mid|late] ' +
     '[--deck preset:<id>[+swap:<out>/<in>,...]|draft:<focus>|cards:a,b,c|policy-pick] ' +
     '[--sandbox <setId>] ' +
     '[--script <path>] [--stdin] [--json-events] [--state-log <path>] ' +
@@ -175,7 +175,7 @@ function takeValue(args: string[], i: number, flag: string): [string, number] {
 
 export function parseCombatArgv(args: string[]): CombatCliFlags {
     const flags: CombatCliFlags = {
-        enemySlug: 'little-belle',
+        enemySlug: 'float-eye',
         enemyExplicit: false,
         presetId: 'apprentice',
         presetExplicit: false,
@@ -708,7 +708,7 @@ export async function runCombatCli(rawArgs: string[]): Promise<void> {
     attachCliLogSinks(flags);
 
     // --stage without --enemy fights the STAGE'S roster, not the default
-    // little-belle (Gate 0 §2, 2026-07-10 — a stage-scaled player against a
+    // float-eye (Gate 0 §2, 2026-07-10 — a stage-scaled player against a
     // 40-HP early enemy is a stomp that reads as engagement). Seeded runs
     // pick deterministically from the roster; unseeded runs pick at random.
     if (flags.stage !== undefined && !flags.enemyExplicit) {

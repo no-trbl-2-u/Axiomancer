@@ -149,8 +149,11 @@ import { generateRunId } from './run-loop';
  *   its observer cache and the GRACE meter (`moralMeter`) are removed, and a
  *   card's `philosophicalAspect` is renamed `color`; the hop strips and
  *   renames them in loaded saves.
+ * 2026-09-29 — bumped 26 → 27: THE REVAMP R2 (D48). The roster is three
+ *   foes; the hop re-points a staged encounter's retired foe to Float-Eye
+ *   and strips survivors' keywords.
  */
-export const GAME_STATE_VERSION = 26;
+export const GAME_STATE_VERSION = 27;
 
 /**
  * Builds a brand-new GameState with default player and world.

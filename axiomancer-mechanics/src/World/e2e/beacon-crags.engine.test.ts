@@ -20,7 +20,7 @@ import { describe, expect, it } from 'vitest';
 import { getMapDefinition, createMapState, resolveMapEvent, getNodeEventPool } from '../index';
 import { auditMapTraversal } from '../world.reducer';
 import { createNewGameState } from '../../Game/game.reducer';
-import { EnemiesByMap } from '../../Enemy/enemy.library';
+import { EnemiesByMap, EnemyLibrary } from '../../Enemy/enemy.library';
 import type { GameState } from '../../Game/types';
 
 const beaconCrags = getMapDefinition('northern-continent', 'beacon-crags');
@@ -93,7 +93,7 @@ describe('the Beacon Crags\' events (D29)', () => {
         for (const payload of fights) {
             if (payload.kind !== 'encounter') continue;
             expect(payload.enemySlug).toBeDefined();
-            expect(EnemiesByMap['caverns'].map(e => e.portraitAsset)).toContain(payload.enemySlug);
+            expect(EnemyLibrary.map(e => e.portraitAsset)).toContain(payload.enemySlug);
             expect(payload.level).toBeGreaterThanOrEqual(3);
             expect(payload.level).toBeLessThanOrEqual(4);
         }

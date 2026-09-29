@@ -8,7 +8,7 @@
  * Usage:
  *   npm run combat-sim                              # 'greedy' witness
  *   npm run combat-sim -- --blind                  # 'blind' witness (identical play since D7)
- *   npm run combat-sim -- --enemy=KingOfRevenge    # one enemy only
+ *   npm run combat-sim -- --enemy=BrineHag         # one enemy only
  *   npm run combat-sim -- --loadout=slippery-slope,festering-argument,soft-word
  *   npm run combat-sim -- --runs=300 --seed=1 --blind
  *
@@ -21,7 +21,7 @@
 import { Player } from '../Character/characters.mock';
 import type { Character } from '../Character/types';
 import type { Enemy } from '../Enemy/types';
-import { LittleBelle, TheFerryman, KingOfRevenge, FateSpinner } from '../Enemy/enemy.library';
+import { FloatEye, BrineHag, TheDoorwarden } from '../Enemy/enemy.library';
 import { deepClone } from '../Utils';
 import { simulateHazardPatternCombat, type CombatSimPolicyId } from '../Combat/combat.encounter.sim';
 // Combat Quality Index — printed as a diagnostic beside the legacy
@@ -29,7 +29,7 @@ import { simulateHazardPatternCombat, type CombatSimPolicyId } from '../Combat/c
 // (THE BIG NUMBERS REWRITE, 2026-09-02).
 import { formatCombatQuality } from '../Combat/combat.objective';
 
-export const ENEMIES: Record<string, Enemy> = { LittleBelle, TheFerryman, KingOfRevenge, FateSpinner };
+export const ENEMIES: Record<string, Enemy> = { FloatEye, BrineHag, TheDoorwarden };
 
 if (require.main === module) {
     const flag = (k: string): string | undefined => {

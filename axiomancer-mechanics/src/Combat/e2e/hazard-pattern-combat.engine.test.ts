@@ -20,7 +20,7 @@ import { describe, it, expect, afterEach, afterAll, beforeAll, vi } from 'vitest
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
-import { GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { mockSequentialRng } from '../../test-utils/rng';
 import {
@@ -117,7 +117,7 @@ function makePlayer(cards: string[]): Character {
 }
 
 function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'heart'): Enemy {
-    const e = deepClone(GraveLarva);
+    const e = deepClone(FloatEye);
     e.id = 'enemy-test-dummy';
     e.health = hp;
     e.maxHealth = hp;
@@ -185,7 +185,7 @@ describe('Spec 26 §2 — intent derivation', () => {
         for (const p of seq) expect(p.intentType).toBeDefined();
     });
     it('authored phases carry a thematic stance tell', () => {
-        const tyrant = deepClone(GraveLarva); tyrant.id = 'enemy-king-of-revenge';
+        const tyrant = deepClone(FloatEye);
         const seq = getThreatSequence(tyrant);
         expect(seq[0].stanceHint && seq[0].stanceHint.length).toBeGreaterThan(0);
     });

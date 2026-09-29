@@ -29,7 +29,7 @@
 
 import { Player } from '../Character/characters.mock';
 import type { Character } from '../Character/types';
-import { GraveLarva } from '../Enemy/enemy.library';
+import { FloatEye } from '../Enemy/enemy.library';
 import type { Enemy } from '../Enemy/types';
 import { deepClone } from '../Utils';
 import { initializeCombatEncounter } from '../Combat/combat.engine';
@@ -62,7 +62,7 @@ export function buildFixtureState(options: { clean?: boolean } = {}): CombatEnco
         { effectId: 'debuff_bleed', remainingDuration: 3, intensity: 2, appliedAt: 0, tier: 2 },
     ];
 
-    const enemy: Enemy = deepClone(GraveLarva);
+    const enemy: Enemy = deepClone(FloatEye);
     enemy.id = 'fixture-enemy';
     enemy.maxHealth = 1000;
     enemy.health = 1000;

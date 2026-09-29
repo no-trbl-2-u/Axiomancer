@@ -6,6 +6,8 @@ import { randomUUID } from 'crypto';
 
 import { runGameCli } from '../game.cli';
 import { setStateLogPath, setOutputMode } from '../io';
+import { ENEMY_REGISTRY, TheDoorwarden } from '../../Enemy/enemy.library';
+import { scaleEnemyToLevel } from '../../World/encounter';
 
 const tmpFiles: string[] = [];
 function tmpPath(suffix: string): string {
@@ -168,8 +170,9 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
     it('a scripted route stops at a combat defeat and downgrades to "blocked" — never reports post-defeat traversal as survivorship', async () => {
         const logPath = tmpPath('defeat-stop');
 
-        // The fv-6 combat is forced against the impossible-tier enemy
-        // (`the-incompleteness`) so it is a DETERMINISTIC defeat regardless of
+        // The fv-6 combat is forced against a ceiling enemy — since the enemy
+        // roster reset (R2) retired `the-incompleteness`, a test-only
+        // registry entry: the Doorwarden scaled to L110 — so it is a DETERMINISTIC defeat regardless of
         // card balance. A normal fv-6 boss becomes winnable once the preset decks
         // are tuned, which repeatedly broke a seed-pinned fixture (seed 7, then
         // seed 32); the impossible enemy decouples this classifier test from
@@ -177,7 +180,7 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         //
         // PROFANE CANON (2026-08-08): the intermediate encounter is also
         // decoupled from balance now. `--combat-max-turns 4` is chosen so the
-        // fodder fight (Little Belle) hits the turn cap UNRESOLVED (outcome
+        // fodder fight (Float-Eye since R2) hits the turn cap UNRESOLVED (outcome
         // null — not a defeat, so the route continues), while the L110 ceiling
         // at fv-6 still kills within the cap. Only a real `defeat` blocks the
         // route; a capped, undecided combat must not. fv-7 is a route target
@@ -190,23 +193,29 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         //
         // Phase 53d (S-01) converted fv-4 from an `encounter` into a
         // narration dilemma ("The Stranger's Net"), so the route now runs
-        // through fv-11 -> fv-13 (little-belle) instead of fv-3 -> fv-4 to
+        // through fv-11 -> fv-13 instead of fv-3 -> fv-4 to
         // reach the pre-boss fodder fight.
         //
         // D7 flag collapse (2026-09-25): the CLI auto-player finally makes
         // spec-33 PAID plays (it used to wait on a stance draft that never
         // came, so it only ever played FREE lines), which closed Little Belle
         // inside the cap on seed 32. Seed 1 keeps fv-13 UNRESOLVED at the cap.
-        await runGameCli([
-            '--start-map', 'fishing-village', '--route', 'fv-2,fv-26,fv-11,fv-27,fv-13,fv-28,fv-5,fv-6,fv-7',
-            '--auto-combat',
-            '--combat-policy', 'naive',
-            '--combat-seed', '1',
-            '--combat-max-turns', '2',
-            '--combat-enemy', 'the-incompleteness',
-            '--combat-enemy-node', 'fv-6',
-            '--state-log', logPath,
-        ]);
+        const registry = ENEMY_REGISTRY as Record<string, unknown>;
+        registry['test-ceiling'] = scaleEnemyToLevel(TheDoorwarden, 110);
+        try {
+            await runGameCli([
+                '--start-map', 'fishing-village', '--route', 'fv-2,fv-26,fv-11,fv-27,fv-13,fv-28,fv-5,fv-6,fv-7',
+                '--auto-combat',
+                '--combat-policy', 'naive',
+                '--combat-seed', '1',
+                '--combat-max-turns', '2',
+                '--combat-enemy', 'test-ceiling',
+                '--combat-enemy-node', 'fv-6',
+                '--state-log', logPath,
+            ]);
+        } finally {
+            delete registry['test-ceiling'];
+        }
 
         const summary = routeEnd(logPath);
         expect(summary.classification).toBe('blocked');
@@ -274,7 +283,7 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         // Route retargeted fv-12 -> fv-16 by the 2026-08-08 first-map audit,
         // then fv-16 -> fv-11,fv-13 by Phase 53d (S-01): fv-16 converted from
         // an `encounter` into a narration dilemma ("The Borrowed Hook"), and
-        // fv-13 (little-belle) is the nearest surviving column-3 encounter
+        // fv-13 is the nearest surviving column-3 encounter
         // reachable from fv-2 via fv-11.
         await runGameCli([
             '--start-map', 'fishing-village', '--route', 'fv-2,fv-26,fv-11,fv-27,fv-13',

@@ -15,7 +15,7 @@ import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
-import { GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { mockSequentialRng } from '../../test-utils/rng';
 import type { ActiveEffect } from '../../Effects/types';
@@ -83,7 +83,7 @@ function makePlayer(cards: string[]): Character {
 }
 
 function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'mind', effects: ActiveEffect[] = []): Enemy {
-    const e = deepClone(GraveLarva);
+    const e = deepClone(FloatEye);
     e.id = 'enemy-test-dummy';
     e.health = hp; e.maxHealth = hp; e.effects = effects;
     e.baseStats = { heart: stance === 'heart' ? 6 : 2, body: stance === 'body' ? 6 : 2, mind: stance === 'mind' ? 6 : 2 };
@@ -157,7 +157,7 @@ describe('Overtake 2-pip gate (phase 28)', () => {
 
 describe('getDisruptMeter.willDeny — STAGGER-rung denial (phase 28 fix)', () => {
     it('reports willDeny=true when accumulated STAGGER alone denies the turn (previously false)', () => {
-        // GraveLarva is 'simple' difficulty -> THREAT_RUNGS (2), no boss growth.
+        // FloatEye is 'simple' difficulty -> THREAT_RUNGS (2), no boss growth.
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', []), undefined, 7);
         const state = { ...base, staggerRungs: 2 }; // rungsLost (2) >= rungsTotal (2)
         const meter = getDisruptMeter(state);

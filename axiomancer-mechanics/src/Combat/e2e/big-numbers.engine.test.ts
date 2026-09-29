@@ -18,7 +18,7 @@ import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
 import type { EnemyKeyword, EnemyStage } from '../../Enemy/enemy-keywords';
-import { GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { enemyVitae } from '../../Enemy';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
@@ -120,7 +120,7 @@ function makePlayer(): Character {
 }
 
 function makeEnemy(over: Partial<Enemy> = {}): Enemy {
-    const e = deepClone(GraveLarva);
+    const e = deepClone(FloatEye);
     e.id = 'enemy-big-numbers-dummy';
     e.health = 1000; e.maxHealth = 1000; e.effects = [];
     e.keywords = undefined; e.stages = undefined;

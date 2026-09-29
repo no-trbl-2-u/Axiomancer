@@ -682,7 +682,7 @@ function learnCardAction(store: AppStore, cardId: string): boolean {
  * longer and there's more time to exercise a deck's status-effect play. Applied
  * only at the mobile `beginHazardEncounter` chokepoint (below), NOT in the
  * engine's `createEnemy` — the hermetic engine tests assert exact authored
- * `maxHealth` values (e.g. Grave Larva 25, Disatree 15) and must stay untouched.
+ * `maxHealth` values (e.g. every survivor's `maxHealth` in `enemy.library.ts`) and must stay untouched.
  * Set to 1 to restore stock HP.
  */
 export const ENCOUNTER_ENEMY_HP_MULTIPLIER = 2;

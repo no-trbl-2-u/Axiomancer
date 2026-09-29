@@ -124,8 +124,8 @@ export interface PlaytestStageSummary {
 /**
  * The starter-preset doctrine win-rate curve (load-bearing doctrine
  * 2026-07-08, canonical in VISION.md → Combat vision) expressed as BANDS the
- * instrument can measure against: early ~80%, mid ~50%, late 25-35%,
- * impossible 0%. The ±5pt tolerance on early/mid is an instrument default
+ * instrument can measure against: early ~80%, mid ~50%, late 25-35% (the
+ * `impossible` stage went with its only foe in revamp phase R2). The ±5pt tolerance on early/mid is an instrument default
  * reading of the doctrine's "~", not a doctrine change; late is the doctrine's
  * own printed band.
  */
@@ -134,7 +134,6 @@ export const PRESET_DOCTRINE_WIN_BANDS: Readonly<Record<CombatStageId, readonly 
         early: [0.75, 0.85] as const,
         mid: [0.45, 0.55] as const,
         late: [0.25, 0.35] as const,
-        impossible: [0, 0.02] as const,
     });
 
 /** One preset × stage rollup row (runs-weighted over the matching cells). */

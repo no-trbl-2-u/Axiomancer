@@ -15,7 +15,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
-import { LittleBelle, KingOfRevenge, GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye, TheDoorwarden } from '../../Enemy/enemy.library';
 import { getCardById } from '../../Cards/cards.library';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import { lookupEffect } from '../../Effects';
@@ -105,7 +105,7 @@ const forbiddenRng = (): number => {
 };
 
 function freshState(seed = 5): CombatEncounterState {
-    return initializeCombatEncounter(loadout(MIX), deepClone(GraveLarva), undefined, seed);
+    return initializeCombatEncounter(loadout(MIX), deepClone(FloatEye), undefined, seed);
 }
 
 describe('policy roster — every id resolves', () => {
@@ -251,10 +251,13 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // Re-measured after the card purge (P1, 2026-09-27): MIX is the grey
     // office (see the MIX comment above) — a five-round victory, 24 plays,
     // 5 VULNERABLE lands, all from A Plain Word.
-    it('seed 11 vs LittleBelle: a status victory', () => {
-        const r = runOneEncounter(loadout(MIX), LittleBelle, 11, 'greedy');
+    //
+    // Re-pointed at Float-Eye in the enemy roster reset (R2): its foe was
+    // retired. Re-measured: a five-round victory, 22 plays, 5 lands.
+    it('seed 11 vs FloatEye: a status victory', () => {
+        const r = runOneEncounter(loadout(MIX), FloatEye, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 5, plays: 24, statusPlays: 5 });
+            .toEqual({ outcome: 'victory', rounds: 5, plays: 22, statusPlays: 5 });
         expect(r.cardUsage['grey-word']).toEqual({
             cardId: 'grey-word', plays: 6, bottomPlays: 5, topPlays: 1, statusLands: 5, discards: 0,
         });
@@ -273,7 +276,7 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // reveal-stance deposit. This is a narrow fidelity pin on `greedy`'s
     // decision sequence, not a balance gate (that's the win-rate-curve
     // suite). post-Phase-30 merge re-pin 2026-07-12 against the merged tree.
-    // Re-pinned 2026-07-13 (keep-hand rule, see the LittleBelle pin above).
+    // Re-pinned 2026-07-13 (keep-hand rule, see the FloatEye pin above).
     // Re-pinned 2026-07-14: POISON ramp now resets on reapplication (spec 32 v3
     // — `applyEffect` re-stamps `appliedAt` for `escalatesPerTurn` DoTs), so a
     // reapplied poison ticks slightly less and the greedy line spent one more
@@ -282,33 +285,35 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // still in the library) lost its color-match +1-intensity dieBonus, its
     // bleed landed one point weaker, and the greedy line spent one more play
     // (16→17, statusPlays 11→12) for the same four-round status victory.
-    // Re-pinned 2026-07-18 (Phase D8, see the LittleBelle pin above):
+    // Re-pinned 2026-07-18 (Phase D8, see the FloatEye pin above):
     // recurring-symptom now holds the second MIX seat — still a four-round
     // status victory (plays 17→18, statusPlays 12→11).
-    // Re-pinned 2026-08-08 (Profane Canon, see the LittleBelle pin above).
+    // Re-pinned 2026-08-08 (Profane Canon, see the FloatEye pin above).
     // Re-measured 2026-09-02 (THE BIG NUMBERS REWRITE + its tuning pass): the
     // same seeded line now closes in 3 rounds instead of 4 because the starter
     // office deals real damage. These figures are a FIDELITY MEASUREMENT of a
     // deterministic sequence, never a target — re-measure them after any
     // tuning change rather than treating a move as a regression.
-    // Re-measured 2026-09-04 (free-line card-played clock, see the LittleBelle
+    // Re-measured 2026-09-04 (free-line card-played clock, see the FloatEye
     // pin above): one fewer play (8→7, statusPlays 6→5) for the same
     // two-round status victory.
-    // Re-measured 2026-09-25 (D7 flag collapse, see the LittleBelle pin
+    // Re-measured 2026-09-25 (D7 flag collapse, see the FloatEye pin
     // above): the first spec-33 measurement of this line — a three-round
     // victory (plays 11, statusPlays 2).
     // Re-measured after the card purge (P1, 2026-09-27): the grey MIX at 5/5/5
     // loses this line in four rounds (plays 20, statusPlays 4). A fidelity
     // pin, not a balance gate — the grey office is the deck you outgrow.
-    it('seed 11 vs KingOfRevenge: the pinned sequence (Gate 0 law: one tray per phase)', () => {
-        const r = runOneEncounter(loadout(MIX), KingOfRevenge, 11, 'greedy');
+    // Re-pointed at the Doorwarden in the enemy roster reset (R2): its boss
+    // was retired. Re-measured: a four-round defeat (plays 20, statusPlays 4).
+    it('seed 11 vs TheDoorwarden: the pinned sequence (Gate 0 law: one tray per phase)', () => {
+        const r = runOneEncounter(loadout(MIX), TheDoorwarden, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
             .toEqual({ outcome: 'defeat', rounds: 4, plays: 20, statusPlays: 4 });
         // Determinism, not balance: the same seed must reproduce the same
         // sequence byte-for-byte. (The exact figures above are a fidelity
         // measurement of the CURRENT library + engine and are expected to be
         // re-measured whenever either moves — they are not a target.)
-        const again = runOneEncounter(loadout(MIX), KingOfRevenge, 11, 'greedy');
+        const again = runOneEncounter(loadout(MIX), TheDoorwarden, 11, 'greedy');
         expect({ outcome: again.outcome, rounds: again.rounds, plays: again.plays, statusPlays: again.statusPlays })
             .toEqual({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays });
         expect(again.cardUsage).toEqual(r.cardUsage);
@@ -329,21 +334,21 @@ describe('chaos — randomness flows only through the injected seeded rng', () =
 
     it('a full chaos encounter never touches Math.random (hermeticity)', () => {
         const spy = vi.spyOn(Math, 'random');
-        const r = runOneEncounter(loadout(MIX), LittleBelle, 9, 'chaos');
+        const r = runOneEncounter(loadout(MIX), FloatEye, 9, 'chaos');
         expect(spy).not.toHaveBeenCalled();
         expect(['victory', 'mercy', 'defeat', 'retreat']).toContain(r.outcome);
     }, 30_000);
 
     it('chaos runs are seed-deterministic', () => {
-        const a = runOneEncounter(loadout(MIX), LittleBelle, 9, 'chaos');
-        const b = runOneEncounter(loadout(MIX), LittleBelle, 9, 'chaos');
+        const a = runOneEncounter(loadout(MIX), FloatEye, 9, 'chaos');
+        const b = runOneEncounter(loadout(MIX), FloatEye, 9, 'chaos');
         expect(b).toEqual(a);
     }, 30_000);
 });
 
 describe('per-card telemetry — cardUsage is consistent with the aggregate counters', () => {
     it('usage sums match plays / bottom+top / statusPlays', () => {
-        const r = runOneEncounter(loadout(MIX), LittleBelle, 3, 'greedy');
+        const r = runOneEncounter(loadout(MIX), FloatEye, 3, 'greedy');
         const rows = Object.values(r.cardUsage);
         const totalPlays = rows.reduce((n, row) => n + row.plays, 0);
         const totalBottom = rows.reduce((n, row) => n + row.bottomPlays, 0);
@@ -358,7 +363,7 @@ describe('per-card telemetry — cardUsage is consistent with the aggregate coun
     it('respects an explicit deck: only its ids appear in usage', () => {
         const deck = ['grey-word', 'grey-word', 'grey-ward'];
         const allowed = new Set(deck);
-        const r = runOneEncounter(loadout(MIX), LittleBelle, 4, 'greedy', { deck });
+        const r = runOneEncounter(loadout(MIX), FloatEye, 4, 'greedy', { deck });
         expect(Object.keys(r.cardUsage).length).toBeGreaterThan(0);
         for (const key of Object.keys(r.cardUsage)) {
             expect(allowed.has(key), `unexpected card '${key}' in usage`).toBe(true);
@@ -369,7 +374,7 @@ describe('per-card telemetry — cardUsage is consistent with the aggregate coun
         // Greedy would normally power the status card before the guard; the
         // focus boost must force the guard into play (the card-coverage lever).
         const deck = ['grey-word', 'grey-ward', 'grey-ward', 'grey-strike'];
-        const r = runOneEncounter(loadout(deck), LittleBelle, 6, 'greedy', {
+        const r = runOneEncounter(loadout(deck), FloatEye, 6, 'greedy', {
             deck, focusCardIds: ['grey-ward'],
         });
         expect(r.cardUsage['grey-ward']?.plays ?? 0).toBeGreaterThanOrEqual(1);
@@ -377,7 +382,7 @@ describe('per-card telemetry — cardUsage is consistent with the aggregate coun
     });
 
     it('throws on an unknown policy id (honest failure, no silent fallback)', () => {
-        expect(() => runOneEncounter(loadout(MIX), LittleBelle, 1, 'nope' as CombatSimPolicyId))
+        expect(() => runOneEncounter(loadout(MIX), FloatEye, 1, 'nope' as CombatSimPolicyId))
             .toThrow(/Unknown combat sim policy/);
     });
 });
@@ -423,7 +428,7 @@ describe('strikeAddsAt decision seam — upgradeablePlayPhase (combat.encounter.
         over: Partial<CombatEncounterState> = {},
         deck: string[] = MIX,
     ): CombatEncounterState {
-        const initial = initializeCombatEncounter(loadout(deck), deepClone(GraveLarva), deck, 5);
+        const initial = initializeCombatEncounter(loadout(deck), deepClone(FloatEye), deck, 5);
         return {
             ...rollEncounterDice(initial).state,
             conviction: 12,

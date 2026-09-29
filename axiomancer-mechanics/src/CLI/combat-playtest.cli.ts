@@ -20,11 +20,11 @@
  *   npm run combat-playtest -- --stage=early --policy=all
  *   npm run combat-playtest -- --policy=dot-weaver --deck=draft:dot
  *   npm run combat-playtest -- --deck=preset:threadbare --runs=100 --seed=7
- *   npm run combat-playtest -- --enemy=king-of-revenge --cards
+ *   npm run combat-playtest -- --enemy=brine-hag --cards
  *   npm run combat-playtest -- --sandbox=forge-example --json
  *
  * Flags (house style: `--k=v` for values, bare `--k` for switches):
- *   --stage=early|mid|late|impossible|all   stages to sweep (default all)
+ *   --stage=early|mid|late|all   stages to sweep (default all)
  *   --policy=<id|all>                       sim policy roster (default greedy)
  *   --deck=preset:<id>|draft:<focus>|cards:a,b,c|policy-pick
  *                                           deck selection (default policy-pick)

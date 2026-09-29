@@ -35,5 +35,5 @@ event stream):**
   interaction dispatcher and one-shot consumption, not route combat.
   Phase 53d converted fv-4 to the "Stranger's Net" narration dilemma;
   the nearest early encounter from fv-2 is now reached through
-  fv-11 → fv-13 (Little Belle). Combat witnesses belong in the
+  fv-11 → fv-13 (Float-Eye). Combat witnesses belong in the
   route-Hazard harness, not this deterministic dispatcher walkthrough.

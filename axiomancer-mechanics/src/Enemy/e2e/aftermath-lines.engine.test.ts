@@ -3,7 +3,7 @@
  *
  * Pins the registration shape (`finalBlowLines` + `causeLines` on the
  * authored set; `pactLines` only on befriendable enemies that carry a
- * `friendshipReward`); voice signatures spot-checked on the early trio;
+ * `friendshipReward`); voice signatures spot-checked on the Brine Hag;
  * the Sandbag_01 regression pins that the fields stay strictly undefined
  * for the un-authored test sandbox so the consumer-side fallback path
  * stays intact.
@@ -22,42 +22,17 @@ import { describe, it, expect } from 'vitest';
 import { EnemyLibrary } from '../enemy.library';
 import {
     // Befriendable — full line set incl. pactLines.
-    LittleBelle,
-    WaterHolger,
-    KingOfRevenge,
     BrineHag,
-    TheFerryman,
-    HasshakuSama,
-    FateSpinner,
-    LadyGabriella,
-    Rangda,
     // Sweep — finalBlowLines + causeLines (no pactLines).
     FloatEye,
-    Kudan,
-    Mirac,
-    RawheadRex,
-    RaAminKa,
-    ZomaAscendant,
-    ElderFireGiant,
-    Tezcatlipoca,
-    ArchDemon,
-    Beelzebub,
-    Death,
-    TheAbortive,
+    TheDoorwarden,
     // Un-authored regression — test sandbox per Phase 74 D1.
     Sandbag_01,
 } from '../enemy.library';
 
 describe('per-foe aftermath narrative lines (art-driven roster)', () => {
-    const befriendable = [
-        LittleBelle, WaterHolger, KingOfRevenge,
-        BrineHag, TheFerryman, HasshakuSama, FateSpinner, LadyGabriella, Rangda,
-    ];
-    const sweepOnly = [
-        FloatEye, Kudan, Mirac, RawheadRex, RaAminKa,
-        ZomaAscendant, ElderFireGiant, Tezcatlipoca, ArchDemon, Beelzebub,
-        Death, TheAbortive,
-    ];
+    const befriendable = [BrineHag];
+    const sweepOnly = [FloatEye, TheDoorwarden];
     const authored = [...befriendable, ...sweepOnly];
 
     it('all authored enemies carry finalBlowLines + causeLines shape', () => {
@@ -124,24 +99,9 @@ describe('per-foe aftermath narrative lines (art-driven roster)', () => {
         }
     });
 
-    it('voice signatures pin per enemy', () => {
-        expect(LittleBelle.pactLines!.quiet).toMatch(/bell/);
-        expect(WaterHolger.pactLines!.heavy).toMatch(/Carried these/);
-        expect(KingOfRevenge.pactLines!.heavy).toMatch(/grievance without a crown/);
-    });
-
     it('befriendable enemies carry pactLines + journalEntry voice pairs', () => {
         expect(BrineHag.pactLines!.heavy).toMatch(/sold my face/);
         expect(BrineHag.journalEntry!.title).toMatch(/Face Broker/);
-
-        expect(TheFerryman.pactLines!.heavy).toMatch(/toll/i);
-        expect(TheFerryman.journalEntry!.title).toMatch(/Crossing Nobody Ordered/);
-
-        expect(HasshakuSama.pactLines!.heavy).toMatch(/chose you/);
-        expect(HasshakuSama.journalEntry!.title).toMatch(/Offer Made Too Tall/);
-
-        expect(FateSpinner.pactLines!.heavy).toMatch(/not knowing/);
-        expect(FateSpinner.journalEntry!.title).toMatch(/Loose Thread/);
     });
 
     it('un-authored enemies (Sandbag_01 — test sandbox per Phase 74 D1) have all three fields undefined', () => {
@@ -164,12 +124,12 @@ describe('per-foe aftermath narrative lines (art-driven roster)', () => {
             return 'quiet';
         };
 
-        // Drive each variant against Little Belle's authored lines.
-        expect(LittleBelle.finalBlowLines![pickFinalBlowVariant({ overkillRatio: 3 })])
-            .toMatch(/rings again/);     // brutal
-        expect(LittleBelle.finalBlowLines![pickFinalBlowVariant({ overkillRatio: 1 })])
-            .toMatch(/finished grief/);  // quiet
-        expect(LittleBelle.finalBlowLines![pickFinalBlowVariant({ sourceIsSelf: true })])
-            .toMatch(/summoned/);        // ironic
+        // Drive each variant against Float-Eye's authored lines.
+        expect(FloatEye.finalBlowLines![pickFinalBlowVariant({ overkillRatio: 3 })])
+            .toMatch(/does not reopen/); // brutal
+        expect(FloatEye.finalBlowLines![pickFinalBlowVariant({ overkillRatio: 1 })])
+            .toMatch(/blinks once/);     // quiet
+        expect(FloatEye.finalBlowLines![pickFinalBlowVariant({ sourceIsSelf: true })])
+            .toMatch(/disagreed/);       // ironic
     });
 });

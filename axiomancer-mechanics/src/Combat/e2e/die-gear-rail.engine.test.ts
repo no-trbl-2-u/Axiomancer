@@ -16,7 +16,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
-import { GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import {
@@ -58,7 +58,7 @@ function makePlayer(mutate?: (c: Character) => void): Character {
     return p;
 }
 function makeEnemy(): Enemy {
-    const e = deepClone(GraveLarva);
+    const e = deepClone(FloatEye);
     e.id = 'enemy-dg-dummy';
     e.health = 500; e.maxHealth = 500; e.effects = [];
     return e;

@@ -58,7 +58,7 @@ test('the shipped tree still says what the About page claims: card art is withhe
     assert.equal(verdictFor('cards', 'freeze.webp').publish, false, 'card art must not publish while its licence is UNRESOLVED')
     const records = readProvenance('enemies')
     assert.ok(records.length > 1, 'the enemies directory should carry per-file records')
-    const licensed = verdictFor('enemies', 'the-sophist.webp', records)
+    const licensed = verdictFor('enemies', 'the-doorwarden.webp', records)
     assert.equal(licensed.publish, true)
     assert.equal(licensed.tier, 'attribution')
     assert.ok(licensed.attribution.length > 0)

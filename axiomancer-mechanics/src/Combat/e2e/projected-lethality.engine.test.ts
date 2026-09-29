@@ -15,7 +15,7 @@ import { describe, it, expect } from 'vitest';
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
-import { GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import type { ActiveEffect } from '../../Effects/types';
 import {
@@ -35,7 +35,7 @@ function makePlayer(cards: string[]): Character {
 }
 
 function makeEnemy(hp: number, effects: ActiveEffect[] = []): Enemy {
-    const e = deepClone(GraveLarva);
+    const e = deepClone(FloatEye);
     e.id = 'enemy-test-dummy';
     e.health = hp; e.maxHealth = hp; e.effects = effects;
     e.baseStats = { heart: 2, body: 2, mind: 6 };

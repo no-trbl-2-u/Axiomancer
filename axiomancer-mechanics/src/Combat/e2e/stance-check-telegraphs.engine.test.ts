@@ -15,7 +15,7 @@
 
 import { describe, it, expect } from 'vitest';
 
-import { FloatEye, GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import type { Enemy } from '../../Enemy/types';
 import { deepClone } from '../../Utils';
 import { defaultStanceCheck, getThreatSequence } from '../combat.threat';
@@ -40,7 +40,7 @@ describe('spec 33 §2 D6e — getThreatSequence backfill', () => {
     it('every phase of an unauthored-check witness enemy carries the uniform default', () => {
         // FloatEye carries an AUTHORED_THREAT_SEQUENCES entry with no phase
         // authoring a stanceCheck (Phase D9 left it untouched) — the backfill
-        // must reach every one of its phases. (GraveLarva now authors its own
+        // must reach every one of its phases. (FloatEye now authors its own
         // partial checks per D9 and is covered by phase-d9-stance-check-variety
         // instead — it no longer exercises the pure-backfill path.)
         const seq = getThreatSequence(FloatEye);
@@ -56,7 +56,7 @@ describe('spec 33 §2 D6e — getThreatSequence backfill', () => {
         // check on one phase — the backfill must leave it untouched and only
         // fill the phase that authored none.
         const authored = { punishes: 'mind', yields: 'heart' } as const;
-        const enemy = deepClone(GraveLarva) as Enemy & {
+        const enemy = deepClone(FloatEye) as Enemy & {
             threatSequence?: Array<Record<string, unknown>>;
         };
         enemy.threatSequence = [

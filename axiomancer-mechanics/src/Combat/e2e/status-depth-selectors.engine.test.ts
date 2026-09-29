@@ -26,7 +26,7 @@ import type { Combatant } from '../types';
 import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
 import { Player } from '../../Character/characters.mock';
-import { GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { getCardById } from '../../Cards/cards.library';
 import { executeCard } from '../../Cards/card.engine';
@@ -277,7 +277,7 @@ describe('card engine — every combat-engine-owned mechanic kind is a NO-OP thr
             player.knownCards = ['test-mech-card'];
             player.effects = [];
             player.baseStats = { body: 0, mind: 0, heart: 0 };
-            const enemy = deepClone(GraveLarva) as Enemy;
+            const enemy = deepClone(FloatEye) as Enemy;
             enemy.health = 100; enemy.maxHealth = 100; enemy.effects = [ae('debuff_poison', 3)];
 
             const state: CombatState = {

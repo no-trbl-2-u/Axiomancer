@@ -20,7 +20,7 @@ import { STARTING_CARD_IDS } from '../combat.rewards';
 import { getCardById } from '../../Cards/cards.library';
 import { initializeCombatEncounter, rollEncounterDice } from '../combat.engine';
 import { Player } from '../../Character/characters.mock';
-import { GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 
 describe('deck presets — the grey deck', () => {
@@ -54,7 +54,7 @@ describe('deck presets — the grey deck', () => {
     it('a preset deck drives a real encounter end to end', () => {
         const player = deepClone(Player);
         player.knownCards = [...new Set(getDeckPreset('grey')!.cardIds)];
-        const enemy = deepClone(GraveLarva);
+        const enemy = deepClone(FloatEye);
         let state = initializeCombatEncounter(player, enemy, buildPresetDeck('grey'));
         state = rollEncounterDice(state).state;
         expect(state.hand.length).toBeGreaterThan(0);

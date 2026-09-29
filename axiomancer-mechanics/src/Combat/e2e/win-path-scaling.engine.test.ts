@@ -19,7 +19,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
 import type { Enemy, EnemyDifficulty } from '../../Enemy/types';
-import { GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { mockSequentialRng } from '../../test-utils/rng';
 import {
@@ -46,7 +46,7 @@ function makeEnemy(
     difficulty?: EnemyDifficulty,
     currentHp?: number,
 ): Enemy {
-    const e = deepClone(GraveLarva);
+    const e = deepClone(FloatEye);
     e.id = 'enemy-wps-dummy';
     e.maxHealth = hp;
     e.health = currentHp ?? hp;
@@ -110,7 +110,7 @@ describe('boss/unique rung REGROWTH (item 1c, anti-permalock)', () => {
     });
 
     it('a normal (non-boss/unique) enemy never accrues rung growth', () => {
-        const normal = makeEnemy(500, 'mind'); // GraveLarva difficulty: 'simple'
+        const normal = makeEnemy(500, 'mind'); // FloatEye difficulty: 'simple'
         const phases = customPhases(['mind', 'mind', 'mind']);
         let state = baseState(normal, phases);
         for (let i = 0; i < 3; i++) {

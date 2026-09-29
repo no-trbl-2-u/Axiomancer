@@ -60,9 +60,10 @@ function riderClause(description: string): string | undefined {
 }
 
 describe('S2-preview-C03 — the threat preview names the PLEA meter PLEA', () => {
-    it('the roster authors at least one PLEA-shedding telegraph (the guard has teeth)', () => {
-        expect(pleaShedPreviews(allThreatActions()).length).toBeGreaterThan(0);
-    });
+    // The "guard has teeth" pin (the roster authors >= 1 PLEA-shedding
+    // telegraph) went with phase R2's roster reset: every foe that shed PLEA
+    // was retired, and no survivor's deck carries `swayCleanse`. The guards
+    // below stay armed for the first card that does (B2 regrows the roster).
 
     it('every PLEA-shedding preview names PLEA, the board label', () => {
         for (const description of pleaShedPreviews(allThreatActions())) {

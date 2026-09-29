@@ -25,7 +25,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
-import { GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { MAX_DIE_UPGRADE_LEVEL } from '../combat.dice';
 import { initializeCombatEncounter, rollEncounterDice } from '../combat.engine';
@@ -46,7 +46,7 @@ function playerWith(over: Partial<Character>): Character {
 
 function openWith(over: Partial<Character>): ReturnType<typeof rollEncounterDice>['state'] {
     const s = initializeCombatEncounter(
-        playerWith(over), deepClone(GraveLarva), ['spoiled-poultice'], 7,
+        playerWith(over), deepClone(FloatEye), ['spoiled-poultice'], 7,
     );
     return rollEncounterDice(s, rng).state;
 }
@@ -104,7 +104,7 @@ describe('THE PATH under the SHIPPED dice model (spec 33)', () => {
             let usable = 0;
             for (let k = 0; k < 6; k++) {
                 const state = initializeCombatEncounter(
-                    playerWith({ dieUpgradeLevel: level }), deepClone(GraveLarva), ['spoiled-poultice'], 7,
+                    playerWith({ dieUpgradeLevel: level }), deepClone(FloatEye), ['spoiled-poultice'], 7,
                 );
                 const opened = rollEncounterDice(state, () => k / 6).state;
                 usable += opened.dice.filter(d => d.state === 'available').length;
@@ -123,7 +123,7 @@ describe('THE PATH under the SHIPPED dice model (spec 33)', () => {
             const stage = COMBAT_STAGE_PROFILES[id];
             const player = buildStagePlayer(stage);
             const opened = rollEncounterDice(
-                initializeCombatEncounter(player, deepClone(GraveLarva), player.knownCards.slice(0, 12), 7),
+                initializeCombatEncounter(player, deepClone(FloatEye), player.knownCards.slice(0, 12), 7),
                 rng,
             ).state;
             expect(opened.dieUpgradeLevel, `${id} upgrade level lost`).toBe(stage.dieUpgradeLevel);
@@ -134,7 +134,7 @@ describe('THE PATH under the SHIPPED dice model (spec 33)', () => {
 });
 
 describe('the stage profiles carry the campaign, not just the level', () => {
-    it('every axis is monotone across early -> mid -> late -> impossible', () => {
+    it('every axis is monotone across early -> mid -> late', () => {
         const stages = COMBAT_STAGE_ORDER.map(id => COMBAT_STAGE_PROFILES[id]);
         for (let i = 1; i < stages.length; i++) {
             const prev = stages[i - 1];
@@ -180,7 +180,6 @@ describe('the stage profiles carry the campaign, not just the level', () => {
     it('the ladder reaches the bands the owner asked for', () => {
         // "3 or 4 upgrades" is only expressible if the ladder goes that far.
         expect(MAX_DIE_UPGRADE_LEVEL).toBeGreaterThanOrEqual(4);
-        expect(COMBAT_STAGE_PROFILES.impossible.dieUpgradeLevel).toBe(MAX_DIE_UPGRADE_LEVEL);
     });
 
     it('buildStagePlayer hands the dice axes to the encounter', () => {
@@ -190,7 +189,7 @@ describe('the stage profiles carry the campaign, not just the level', () => {
             expect(player.bonusTurnDice, `${id} bonus dice`).toBe(stage.bonusBaseDice);
             expect(player.dieUpgradeLevel, `${id} die upgrades`).toBe(stage.dieUpgradeLevel);
             const opened = rollEncounterDice(
-                initializeCombatEncounter(player, deepClone(GraveLarva), player.knownCards.slice(0, 12), 7),
+                initializeCombatEncounter(player, deepClone(FloatEye), player.knownCards.slice(0, 12), 7),
                 rng,
             ).state;
             expect(opened.dice, `${id} tray size`).toHaveLength(UPGRADEABLE_DIE_COLORS.length + stage.bonusBaseDice);

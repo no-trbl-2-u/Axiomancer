@@ -36,13 +36,13 @@ const DEFEAT_VM: AftermathDefeatViewModel = {
     kind: 'defeat',
     characterName: 'WORM-EATEN PILGRIM',
     killer: {
-        name: 'Grave Larva',
-        epithet: 'the bilge’s long patience',
+        name: 'Brine Hag',
+        epithet: 'traded her reflection to the tide',
         finalCard: 'STRIKE',
         damage: 6,
     },
     causePhrase:
-        'The ditch beside the road was full of those it had done it to. You were not, in the end, the exception.',
+        'You catch your reflection in her tide pool and it does not follow you home.',
     runSummary: { rounds: 4, encountersFaced: 3, deepestNodeId: 'DOCK' },
 };
 

@@ -68,7 +68,7 @@ describe('World/Continents Engine Tests', () => {
       expect(startingQuest.mapName).toBe('fishing-village');
       expect(startingQuest.objectives).toHaveLength(1);
       expect(startingQuest.objectives[0].type).toBe('kill');
-      expect(startingQuest.objectives[0].target).toBe('The King of Revenge');
+      expect(startingQuest.objectives[0].target).toBe('The Doorwarden');
     });
 
     it('has a get-to-forest quest gating on the mid-game gate (Phase 8)', () => {

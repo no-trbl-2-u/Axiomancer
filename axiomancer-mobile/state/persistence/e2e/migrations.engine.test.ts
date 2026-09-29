@@ -171,7 +171,8 @@ describe('migrations.engine', () => {
 
             const result = unwrap({ schemaVersion: CURRENT_SCHEMA_VERSION, state: v25 });
 
-            expect(GAME_STATE_VERSION).toBe(26);
+            // v27 (phase R2): the retired-foe re-point hop chains after T6's.
+            expect(GAME_STATE_VERSION).toBe(27);
             expect(result.version).toBe(GAME_STATE_VERSION);
         });
     });

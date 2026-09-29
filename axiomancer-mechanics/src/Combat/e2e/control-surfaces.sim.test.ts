@@ -18,7 +18,7 @@ import { describe, it, expect, afterEach, afterAll, beforeAll, vi } from 'vitest
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
-import { GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { mockSequentialRng } from '../../test-utils/rng';
 import { effectsLibrary } from '../../Effects/effects.library';
@@ -61,7 +61,7 @@ function makeEnemy(
     threatSequence?: CombatThreatPhase[],
     effects: ActiveEffect[] = [],
 ): Enemy {
-    const e = deepClone(GraveLarva);
+    const e = deepClone(FloatEye);
     e.id = 'enemy-surface-fixture';
     e.health = hp; e.maxHealth = hp; e.effects = effects;
     if (threatSequence) {
@@ -88,7 +88,7 @@ function phase(
 
 describe('WS8.2 — EXHAUSTION owns the telegraph-DAMAGE surface', () => {
     it('getOutgoingThreatDamageMult reads -25%/stack, clamped, exactly 1 unmarked', () => {
-        const bearer = (fx: ActiveEffect[]) => ({ ...deepClone(GraveLarva), effects: fx });
+        const bearer = (fx: ActiveEffect[]) => ({ ...deepClone(FloatEye), effects: fx });
         expect(getOutgoingThreatDamageMult(bearer([]))).toBe(1);
         expect(getOutgoingThreatDamageMult(bearer([ae('test_exhaustion', 1)]))).toBe(0.75);
         expect(getOutgoingThreatDamageMult(bearer([ae('test_exhaustion', 2)]))).toBe(0.5);

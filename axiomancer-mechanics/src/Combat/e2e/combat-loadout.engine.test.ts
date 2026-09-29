@@ -23,7 +23,7 @@ import { getCardById } from '../../Cards/cards.library';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import { lookupEffect } from '../../Effects';
 import { createCharacter } from '../../Character';
-import { GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import type { ActiveEffect } from '../../Effects/types';
 
 // The card purge (P1, 2026-09-27): the grey office is the whole library, so
@@ -134,21 +134,21 @@ describe('initializeCombatEncounter — loadout flags reachability (Phase 93)', 
         let flags: string[] = [];
         flags = addToLoadout(flags, CARD_A);
         flags = addToLoadout(flags, CARD_B);
-        const state = initializeCombatEncounter(playerWithCards, GraveLarva, undefined, 1, flags);
+        const state = initializeCombatEncounter(playerWithCards, FloatEye, undefined, 1, flags);
         expect(state.deck).toContain(CARD_A);
         expect(state.deck).toContain(CARD_B);
         expect(state.deck).not.toContain(EXTRA);
     });
 
     it('falls back to knownCards when flags is omitted (pre-Phase-93 behavior unchanged)', () => {
-        const state = initializeCombatEncounter(playerWithCards, GraveLarva, undefined, 1);
+        const state = initializeCombatEncounter(playerWithCards, FloatEye, undefined, 1);
         expect(state.deck).toContain(EXTRA);
     });
 
     it('an explicit playerDeck still wins over loadout flags', () => {
         let flags: string[] = [];
         flags = addToLoadout(flags, CARD_A);
-        const state = initializeCombatEncounter(playerWithCards, GraveLarva, [EXTRA], 1, flags);
+        const state = initializeCombatEncounter(playerWithCards, FloatEye, [EXTRA], 1, flags);
         expect(state.deck).toEqual([EXTRA]);
     });
 });

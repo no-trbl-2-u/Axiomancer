@@ -50,7 +50,7 @@ afterEach(() => {
 describe('Combat CLI — flag parsing', () => {
     it('parses new-combat flags', () => {
         const flags = parseCombatArgv([
-            '--enemy', 'little-belle',
+            '--enemy', 'float-eye',
             '--preset', 'apprentice',
             '--seed', '42',
             '--auto',
@@ -60,7 +60,7 @@ describe('Combat CLI — flag parsing', () => {
             '--state-log', 'trace.jsonl',
         ]);
         expect(flags).toMatchObject({
-            enemySlug: 'little-belle',
+            enemySlug: 'float-eye',
             presetId: 'apprentice',
             seed: 42,
             auto: true,
@@ -72,8 +72,8 @@ describe('Combat CLI — flag parsing', () => {
     });
 
     it('supports --flag=value form', () => {
-        const flags = parseCombatArgv(['--enemy=foot-stealer', '--auto']);
-        expect(flags.enemySlug).toBe('foot-stealer');
+        const flags = parseCombatArgv(['--enemy=brine-hag', '--auto']);
+        expect(flags.enemySlug).toBe('brine-hag');
         expect(flags.auto).toBe(true);
         expect(flags.policy).toBe('status');
         expect(flags.maxTurns).toBe(8);
@@ -82,8 +82,8 @@ describe('Combat CLI — flag parsing', () => {
     it('marks enemyExplicit only when --enemy was actually passed (phase 26)', () => {
         expect(parseCombatArgv([]).enemyExplicit).toBe(false);
         expect(parseCombatArgv(['--stage', 'early']).enemyExplicit).toBe(false);
-        expect(parseCombatArgv(['--enemy', 'foot-stealer']).enemyExplicit).toBe(true);
-        expect(parseCombatArgv(['--stage', 'early', '--enemy', 'foot-stealer']).enemyExplicit).toBe(true);
+        expect(parseCombatArgv(['--enemy', 'brine-hag']).enemyExplicit).toBe(true);
+        expect(parseCombatArgv(['--stage', 'early', '--enemy', 'brine-hag']).enemyExplicit).toBe(true);
     });
 
     it('rejects unknown flags', () => {
@@ -109,7 +109,7 @@ describe('Combat CLI — deterministic auto playthrough', () => {
             const logPath = tmpPath('auto');
             await runCombatCli([
                 '--auto', '--policy', 'status',
-                '--enemy', 'little-belle',
+                '--enemy', 'float-eye',
                 '--preset', 'apprentice',
                 '--seed', '42',
                 '--max-turns', '12',
@@ -134,7 +134,7 @@ describe('Combat CLI — deterministic auto playthrough', () => {
         const logPath = tmpPath('phases');
         await runCombatCli([
             '--auto', '--policy', 'status',
-            '--enemy', 'little-belle',
+            '--enemy', 'float-eye',
             '--preset', 'apprentice',
             '--seed', '7',
             '--max-turns', '6',
@@ -160,9 +160,9 @@ describe('Combat CLI — deterministic auto playthrough', () => {
         const enemyName = after?.enemy?.name;
         const roster = COMBAT_STAGE_PROFILES.mid.enemySlugs;
         const rosterNames = roster.map(s => ENEMY_REGISTRY[s as EnemySlug].name);
-        // The enemy comes from the MID roster (not the little-belle default)…
+        // The enemy comes from the MID roster (not the float-eye default)…
         expect(rosterNames).toContain(enemyName);
-        expect(enemyName).not.toBe(ENEMY_REGISTRY['little-belle'].name);
+        expect(enemyName).not.toBe(ENEMY_REGISTRY['float-eye'].name);
         // …and the pick is a pure function of the seed.
         expect(enemyName).toBe(ENEMY_REGISTRY[roster[2 % roster.length] as EnemySlug].name);
     });
@@ -172,7 +172,7 @@ describe('Combat CLI — deterministic auto playthrough', () => {
         await runCombatCli([
             '--auto', '--policy', 'status',
             '--stage', 'mid',
-            '--enemy', 'little-belle',
+            '--enemy', 'float-eye',
             '--seed', '2',
             '--max-turns', '3',
             '--state-log', logPath,
@@ -180,7 +180,7 @@ describe('Combat CLI — deterministic auto playthrough', () => {
         const logs = readLog(logPath);
         const start = logs.find(r => r.action === 'hazardCombat:start');
         const after = start?.after as { enemy?: { name?: string } } | undefined;
-        expect(after?.enemy?.name).toBe(ENEMY_REGISTRY['little-belle'].name);
+        expect(after?.enemy?.name).toBe(ENEMY_REGISTRY['float-eye'].name);
     });
 
     it('all four auto policies complete without throwing', async () => {
@@ -188,7 +188,7 @@ describe('Combat CLI — deterministic auto playthrough', () => {
             const logPath = tmpPath(`policy-${policy}`);
             await expect(runCombatCli([
                 '--auto', '--policy', policy,
-                '--enemy', 'foot-stealer',
+                '--enemy', 'brine-hag',
                 '--preset', 'apprentice',
                 '--seed', '1',
                 '--max-turns', '8',
@@ -203,7 +203,7 @@ describe('Combat CLI — deterministic auto playthrough', () => {
         const logPath = tmpPath('turn-law');
         await runCombatCli([
             '--auto', '--policy', 'status',
-            '--enemy', 'little-belle',
+            '--enemy', 'float-eye',
             '--preset', 'apprentice',
             '--seed', '42',
             '--max-turns', '12',
@@ -233,7 +233,7 @@ describe('Combat CLI — phase 26: auto mode emits a per-phase JSON transcript',
 
         await runCombatCli([
             '--auto', '--policy', 'status', '--json-events',
-            '--enemy', 'little-belle',
+            '--enemy', 'float-eye',
             '--preset', 'apprentice',
             '--seed', '42',
             '--max-turns', '12',
@@ -254,7 +254,7 @@ describe('Combat CLI — auto mode per-play transcript (Gate 0 §2)', () => {
         try {
             await runCombatCli([
                 '--auto', '--policy', 'status',
-                '--enemy', 'little-belle',
+                '--enemy', 'float-eye',
                 '--preset', 'apprentice',
                 '--seed', '42',
                 '--max-turns', '6',

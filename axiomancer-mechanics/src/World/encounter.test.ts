@@ -15,7 +15,7 @@ import {
     DIFFICULTY_LEVEL_BANDS,
 } from './encounter';
 import { Enemy } from '../Enemy/types';
-import { GraveLarva, Kudan, ENEMY_REGISTRY } from '../Enemy/enemy.library';
+import { FloatEye, ENEMY_REGISTRY } from '../Enemy/enemy.library';
 import { MapNode } from './types';
 
 const fishingNode: MapNode = { id: 'fv-2', location: [0, 0], connectedNodes: [] };
@@ -34,7 +34,7 @@ describe('DIFFICULTY_LEVEL_BANDS', () => {
 
 describe('scaledEncounterLevel', () => {
     it('clamps the floor to 1 when scaling simple enemies for a low-level player', () => {
-        const simple: Enemy = { ...GraveLarva };
+        const simple: Enemy = { ...FloatEye, difficulty: 'simple' };
         // Player level 1, simple band = [-1, 0] → either 0 (clamped to 1) or 1.
         for (let i = 0; i < 20; i++) {
             const level = scaledEncounterLevel(simple, 1);
@@ -44,12 +44,14 @@ describe('scaledEncounterLevel', () => {
     });
 
     it('unique enemies ignore player level — they stay at authored level', () => {
-        const level = scaledEncounterLevel(Kudan, 50);
-        expect(level).toBe(Kudan.level);
+        // No roster foe is unique since the R2 reset — a unique-tier fixture.
+        const unique: Enemy = { ...FloatEye, difficulty: 'unique', level: 30 };
+        const level = scaledEncounterLevel(unique, 50);
+        expect(level).toBe(unique.level);
     });
 
     it('boss band stays in [+2, +3] relative to the player', () => {
-        const boss = ENEMY_REGISTRY['king-of-revenge'];
+        const boss = ENEMY_REGISTRY['the-doorwarden'];
         for (let i = 0; i < 50; i++) {
             const level = scaledEncounterLevel(boss, 5);
             expect(level).toBeGreaterThanOrEqual(7);
@@ -60,27 +62,27 @@ describe('scaledEncounterLevel', () => {
 
 describe('scaleEnemyToLevel', () => {
     it('returns a clone — does not mutate the source', () => {
-        const before = JSON.stringify(GraveLarva);
-        scaleEnemyToLevel(GraveLarva, 5);
-        expect(JSON.stringify(GraveLarva)).toBe(before);
+        const before = JSON.stringify(FloatEye);
+        scaleEnemyToLevel(FloatEye, 5);
+        expect(JSON.stringify(FloatEye)).toBe(before);
     });
 
     it('recomputes maxHealth and resets HP to full', () => {
-        const scaled = scaleEnemyToLevel(GraveLarva, 5);
+        const scaled = scaleEnemyToLevel(FloatEye, 5);
         expect(scaled.level).toBe(5);
         expect(scaled.health).toBe(scaled.maxHealth);
-        expect(scaled.maxHealth).toBeGreaterThan(GraveLarva.maxHealth);
+        expect(scaled.maxHealth).toBeGreaterThan(FloatEye.maxHealth);
     });
 
     it('clamps the target level to a floor of 1', () => {
-        const scaled = scaleEnemyToLevel(GraveLarva, -5);
+        const scaled = scaleEnemyToLevel(FloatEye, -5);
         expect(scaled.level).toBe(1);
     });
 
     it('rescales xpReward when the source used the default multiplier', () => {
-        const scaled = scaleEnemyToLevel(GraveLarva, 4);
-        // GraveLarva is simple; default = 4 × 10 = 40.
-        expect(scaled.xpReward).toBe(40);
+        const scaled = scaleEnemyToLevel(FloatEye, 4);
+        // FloatEye is normal; default = 4 × 20 = 80.
+        expect(scaled.xpReward).toBe(80);
     });
 });
 
@@ -88,7 +90,8 @@ describe('generateEncounter', () => {
     it('picks an enemy from the resolved map and stamps origin', () => {
         const enc = generateEncounter(fishingNode, 1);
         expect(enc.enemies).toHaveLength(1);
-        expect(enc.enemies[0].mapName).toBe('fishing-village');
+        // Parked maps hold the Act 1 pool (Float-Eye) until R3.
+        expect(enc.enemies[0].id).toBe(FloatEye.id);
         expect(enc.origin).toBe('fishing-village:fv-2');
     });
 
@@ -98,13 +101,13 @@ describe('generateEncounter', () => {
 
     it('honours an explicit options.mapName for non-prefixed nodes', () => {
         const enc = generateEncounter(unknownNode, 1, { mapName: 'northern-forest' });
-        expect(enc.enemies[0].mapName).toBe('northern-forest');
+        expect(enc.origin).toBe('northern-forest:zz-1');
     });
 
     it('honours options.difficulty as a filter', () => {
         for (let i = 0; i < 20; i++) {
-            const enc = generateEncounter(forestNode, 5, { difficulty: 'boss' });
-            expect(enc.enemies[0].difficulty).toBe('boss');
+            const enc = generateEncounter(forestNode, 5, { difficulty: 'normal' });
+            expect(enc.enemies[0].difficulty).toBe('normal');
         }
     });
 
@@ -122,11 +125,11 @@ describe('generateEncounter', () => {
         expect(enc2.enemies[0].health).toBeGreaterThan(0);
     });
 
-    it('every map pool contains at least one enemy at every authored difficulty', () => {
+    it('every map pool draws a normal foe (the R2 pools are Float-Eye only)', () => {
         // Sanity check the library indices used by the generator.
         const fishing = generateEncounter(fishingNode, 5, { difficulty: 'normal' });
-        const forest  = generateEncounter(forestNode,  5, { difficulty: 'elite' });
+        const forest  = generateEncounter(forestNode,  5, { difficulty: 'normal' });
         expect(fishing.enemies[0].difficulty).toBe('normal');
-        expect(forest.enemies[0].difficulty).toBe('elite');
+        expect(forest.enemies[0].difficulty).toBe('normal');
     });
 });

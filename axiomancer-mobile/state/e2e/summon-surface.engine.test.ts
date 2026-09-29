@@ -25,9 +25,8 @@ import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 
 const CARDS = ['shallow-grave', 'spoiled-poultice'];
 
-/** The mock foe, retrofitted with SUMMON 2 — the same shape The Jeweled Tree
- *  now authors, but local so this suite does not break when that enemy is
- *  retuned. */
+/** The mock foe, retrofitted with SUMMON 2 — local, so this suite does not
+ *  depend on any authored enemy carrying the keyword. */
 function summoner(): Enemy {
     const base = createMockEncounterEnemy();
     return { ...base, level: 20, keywords: [{ kind: 'summon', n: 2, addName: 'Brier Shoot' }] } as Enemy;

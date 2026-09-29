@@ -124,8 +124,8 @@ export function collectObjectives(log: QuestLog, itemId: string): Array<{
  * updated log plus the quests that completed as a result.
  *
  * Matching is on the enemy's DISPLAY NAME (`Enemy.name`), which is what the
- * authored objectives carry — e.g. fishing-village's `starting-quest` targets
- * "The King of Revenge", not the `king-of-revenge` slug.
+ * authored objectives carry — e.g. an objective targets "The Doorwarden",
+ * not the `the-doorwarden` slug.
  *
  * The engine's legacy `endCombat` has always done this inline. It lives here
  * as a reusable reducer because the live hazard-pattern combat (Spec 26b)

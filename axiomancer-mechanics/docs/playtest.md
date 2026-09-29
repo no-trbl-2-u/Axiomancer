@@ -21,14 +21,13 @@ cards, filtered by `tier <= maxCardTier` and learning level).
 
 | Id | Name | Player | HP | Max tier | Enemy roster (slugs) |
 |---|---|---|---|---|---|
-| `early` | The Shallows | level 3, 5/5/5 | 90 | 1 | grave-larva, foot-stealer, little-belle, water-holger, the-butcher, king-of-revenge |
-| `mid` | The Long Road | level 20, 17/17/17 | 255 | 3 | tri-eyes, mirac, hasshaku-sama, jeweled-tree, rawhead-rex |
-| `late` | The Deep Wood | level 45, 37/39/38 | 570 | 3 | fire-giant, rangda, tezcatlipoca, arch-demon, death, the-abortive |
-| `impossible` | The Unprovable | level 50, 40/44/42 | 630 | 3 | the-incompleteness |
+| `early` | The Shallows | level 3, 5/5/5 | 90 | 1 | float-eye, brine-hag, the-doorwarden |
+| `mid` | The Long Road | level 20, 17/17/17 | 255 | 3 | brine-hag, the-doorwarden |
+| `late` | The Deep Wood | level 45, 37/39/38 | 570 | 3 | the-doorwarden |
 
-The `impossible` stage is a ceiling probe: The Incompleteness never appears
-in random map encounters and losing to it is the design — the bands assert a
-LOW win rate there, not a high one.
+The rosters are the three foes left after the enemy roster reset (revamp
+R2); the `impossible` ceiling stage went with its only foe. The rosters
+regrow in B2.
 
 ## Sim-policy roster
 
@@ -118,18 +117,15 @@ npm run combat-playtest -- --stage=mid --policy=dot-weaver --runs=60 --seed=1 --
 # sandbox candidate (control = the same line without +swap:.../--sandbox)
 npm run combat-playtest -- --stage=early --policy=blind --runs=60 --seed=1 --sandbox=<setId> "--deck=preset:grey+swap:grey-strike/<candidate-id>"
 
-# The ceiling probe: greedy should still lose to The Incompleteness
-npm run combat-playtest -- --stage=impossible --policy=greedy --runs=60 --seed=1
-
 # A single auto-played encounter through the interactive CLI (fast qualitative sweep)
-npm run combat -- --enemy mournful-gull --auto --policy status --seed 5 --deck preset:grey --max-turns 6
+npm run combat -- --enemy float-eye --auto --policy status --seed 5 --deck preset:grey --max-turns 6
 
 # A hand-playable encounter: stage player, drafted deck, JSONL answers on stdin
-npm run combat -- --enemy audit-sentinel --stage mid --deck draft:dot --seed 11 --stdin --json-events
+npm run combat -- --enemy brine-hag --stage mid --deck draft:dot --seed 11 --stdin --json-events
 ```
 
 The `combat-playtest` CLI (`src/CLI/combat-playtest.cli.ts`) accepts
-`--stage=early|mid|late|impossible|all`, `--policy=<id|all>`,
+`--stage=early|mid|late|all`, `--policy=<id|all>`,
 `--deck=<grammar above>`, `--enemy=<slug>`, `--runs=N`, `--seed=N`,
 `--sandbox=<setId>`, `--cards`, `--json`. Every sweep runs spec 33's
 Upgradeable Dice — the only combat model since the flag collapse (D7,
@@ -152,11 +148,11 @@ finite win rate. Companion witnesses:
 playable — dead cards fail the build).
 
 **Starter-preset win-rate curve (load-bearing doctrine, set 2026-07-08 — see
-`VISION.md` → Combat vision):** early ~80%, mid ~50%, late ~25-35%,
-impossible 0%. The current placeholder bands above (esp. the late win-rate
-ceiling and the `winRate <= 0.15` impossible ceiling) predate this doctrine
+`VISION.md` → Combat vision):** early ~80%, mid ~50%, late ~25-35%.
+The current placeholder bands above (esp. the late win-rate ceiling) predate
+this doctrine
 and should tighten toward it as calibration runs land — a starter preset
-clearing late/impossible well above this curve is a dominance finding, not a
+clearing late well above this curve is a dominance finding, not a
 success, since starter presets are early/mid-game decks by design (the
 player trades into a new mid-game deck after the labyrinth). Correction
 history: `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-08-win-path-scaling.md`.

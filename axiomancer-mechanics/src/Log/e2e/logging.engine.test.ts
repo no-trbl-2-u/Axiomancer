@@ -18,7 +18,7 @@ import { deepClone } from '../../Utils';
 import { setSeed } from '../../Utils/rng';
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
-import { GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import { simulateHazardPatternCombat } from '../../Combat/combat.encounter.sim';
 import { createGameStore } from '../../Game/store';
 import { nullAdapter } from '../../Game/persistence/null.adapter';
@@ -48,7 +48,7 @@ describe('AXM Log — disabled by default', () => {
     it('is off until configured and engine paths add zero entries', () => {
         expect(isLoggingEnabled()).toBe(false);
         setSeed(7);
-        simulateHazardPatternCombat(makePlayer(), deepClone(GraveLarva), 1, 7);
+        simulateHazardPatternCombat(makePlayer(), deepClone(FloatEye), 1, 7);
         expect(getLogger().entries()).toHaveLength(0);
         expect(getLogger().stats().total).toBe(0);
     });
@@ -60,7 +60,7 @@ describe('AXM Log — disabled by default', () => {
         expect(captured).toBeGreaterThan(0);
         configureLogging({ enabled: false });
         setSeed(13);
-        simulateHazardPatternCombat(makePlayer(), deepClone(GraveLarva), 1, 13);
+        simulateHazardPatternCombat(makePlayer(), deepClone(FloatEye), 1, 13);
         expect(getLogger().stats().total).toBe(captured);
     });
 });
@@ -70,7 +70,7 @@ describe('AXM Log — disabled by default', () => {
 describe('AXM Log — combat event stream', () => {
     it('mirrors CombatEvents from a seeded encounter into the combat domain', () => {
         configureLogging({ enabled: true, capacity: 5000 });
-        simulateHazardPatternCombat(makePlayer(), deepClone(GraveLarva), 1, 42);
+        simulateHazardPatternCombat(makePlayer(), deepClone(FloatEye), 1, 42);
         const combat = getLogger().entries({ domains: ['combat'] });
         expect(combat.length).toBeGreaterThan(0);
         // Every entry mirrors a CombatEvent: kind matches the event's kind.
@@ -91,7 +91,7 @@ describe('AXM Log — game store events', () => {
         configureLogging({ enabled: true });
         const emitter = createEventEmitter();
         const store = createGameStore(nullAdapter, { player: makePlayer() }, emitter);
-        store.getState().startCombat(deepClone(GraveLarva));
+        store.getState().startCombat(deepClone(FloatEye));
 
         const game = getLogger().entries({ domains: ['game'], minLevel: 'info' });
         const started = game.find(e => e.kind === 'combat:started');
@@ -107,7 +107,7 @@ describe('AXM Log — game store events', () => {
     it('traces dispatched actions at debug level', () => {
         configureLogging({ enabled: true });
         const store = createGameStore(nullAdapter, { player: makePlayer() });
-        store.getState().startCombat(deepClone(GraveLarva));
+        store.getState().startCombat(deepClone(FloatEye));
         const actions = getLogger().entries({ domains: ['game'] })
             .filter(e => e.kind.startsWith('action:'));
         expect(actions.some(e => e.kind === 'action:START_COMBAT')).toBe(true);

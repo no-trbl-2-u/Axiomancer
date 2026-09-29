@@ -190,7 +190,7 @@ async function resolveCurrentNodeEvent(
         if (!enemy) throw new Error(`Encounter at '${nodeLabel}' had no enemy.`);
         // Test/debug override: force a specific ENEMY_REGISTRY enemy at the node
         // named by `--combat-enemy-node`. The route-audit e2e uses this to fight
-        // the impossible-tier enemy at fv-6 — a deterministic combat DEFEAT that
+        // a test-registered ceiling enemy at fv-6 — a deterministic combat DEFEAT that
         // exercises the "defeat → blocked" classifier without depending on card
         // balance (a normal boss is winnable once the decks are tuned).
         if (flags.combatEnemy && flags.combatEnemyNode === nodeLabel) {

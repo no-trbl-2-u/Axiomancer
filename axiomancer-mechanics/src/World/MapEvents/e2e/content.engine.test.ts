@@ -141,7 +141,7 @@ describe('fishing-village content — new-player map', () => {
         }
     });
 
-    it('fv-15 is an encounter node (foot-stealer, Phase 61 — retired quest-board node)', () => {
+    it('fv-15 is an encounter node (Float-Eye since R2, Phase 61 — retired quest-board node)', () => {
         mockSequentialRng(0.5);
         const state = freshWorldAt('fishing-village');
         const result = resolveMapEvent({
@@ -150,7 +150,7 @@ describe('fishing-village content — new-player map', () => {
         });
         expect(result.event.kind).toBe('encounter');
         if (result.event.kind === 'encounter') {
-            expect(result.event.encounter.enemies[0].name).toBe('Foot-Stealer');
+            expect(result.event.encounter.enemies[0].name).toBe('Float-Eye');
         }
     });
 
@@ -187,11 +187,11 @@ describe('fishing-village content — new-player map', () => {
         });
         if (result.event.kind === 'encounter') {
             expect(result.event.isBoss).toBe(true);
-            // king-of-revenge is mid-tier (L6); the encounter `level`
-            // override pins him one above the last Act 1 elite (M3e).
+            // The Doorwarden since R2 (the King was retired); the encounter
+            // `level` override pins it one above the last Act 1 elite (M3e).
             const boss = result.event.encounter.enemies[0];
             expect(boss.level).toBe(5);
-            expect(boss.name).toBe('The King of Revenge');
+            expect(boss.name).toBe('The Doorwarden');
         }
     });
 
@@ -205,7 +205,7 @@ describe('fishing-village content — new-player map', () => {
     // content pass can't silently reintroduce either bug.
     it('keeps every pre-boss combat foe non-elite, zero-keyword, and single-phase', () => {
         mockSequentialRng(0.5);
-        const preBossEncounterNodes = ['fv-13', 'fv-15']; // little-belle, foot-stealer
+        const preBossEncounterNodes = ['fv-13', 'fv-15']; // Float-Eye since R2
         for (const nodeId of preBossEncounterNodes) {
             const state = freshWorldAt('fishing-village');
             const result = resolveMapEvent({
@@ -348,7 +348,7 @@ describe('caverns content (2026-08-28 — inter-map travel)', () => {
         }
     });
 
-    it('the Under-Gate boss is pinned to a winnable level (rawhead-rex is L25 elsewhere)', () => {
+    it('the Under-Gate boss is pinned to a winnable level (the Doorwarden since R2)', () => {
         mockSequentialRng(0.5);
         const result = resolveMapEvent({
             ...freshWorldAt('caverns'),
@@ -361,7 +361,7 @@ describe('caverns content (2026-08-28 — inter-map travel)', () => {
         if (result.event.kind === 'encounter') {
             expect(result.event.isBoss).toBe(true);
             const boss = result.event.encounter.enemies[0];
-            expect(boss.name).toBe('Rawhead Rex');
+            expect(boss.name).toBe('The Doorwarden');
             expect(boss.level).toBe(6);
         }
     });
@@ -412,7 +412,7 @@ describe('northern-city content (Phase W3)', () => {
             ['ncy-22', 'encounter'],
             ['ncy-23', 'cutscene'],    // the sealed river-gate (still scenery)
             ['ncy-24', 'cutscene'],    // the drowned slip
-            ['ncy-25', 'encounter'],   // the Harbormaster boss
+            ['ncy-25', 'encounter'],   // the district boss (the Doorwarden since R2)
             ['ncy-26', 'travel'],      // Phase W4 — the door to connecting-river
         ];
         for (const [node, kind] of expected) {
@@ -438,7 +438,7 @@ describe('northern-city content (Phase W3)', () => {
         }
     });
 
-    it('the Harbormaster is pinned to a winnable level (he is L18 in the library)', () => {
+    it('the district boss (the Doorwarden since R2) is pinned to a winnable level', () => {
         mockSequentialRng(0.5);
         const result = resolveMapEvent({
             ...freshWorldAt('northern-city'),
@@ -451,7 +451,7 @@ describe('northern-city content (Phase W3)', () => {
         if (result.event.kind === 'encounter') {
             expect(result.event.isBoss).toBe(true);
             const boss = result.event.encounter.enemies[0];
-            expect(boss.name).toBe('The Harbormaster');
+            expect(boss.name).toBe('The Doorwarden');
             expect(boss.level).toBe(9);
         }
     });
@@ -510,7 +510,7 @@ describe('connecting-river content (Phase W4)', () => {
             ['cr-9',  'narration'],    // the river court — the ritual
             ['cr-10', 'village'],      // The Landing
             ['cr-11', 'encounter'],
-            ['cr-12', 'encounter'],    // the Waterreeve boss
+            ['cr-12', 'encounter'],    // the river boss (the Doorwarden since R2)
             ['cr-13', 'travel'],       // the door to town-across-river
         ];
         for (const [node, kind] of expected) {
@@ -519,7 +519,7 @@ describe('connecting-river content (Phase W4)', () => {
         }
     });
 
-    it('the Waterreeve is pinned to a winnable level', () => {
+    it('the river boss (the Doorwarden since R2) is pinned to a winnable level', () => {
         mockSequentialRng(0.5);
         const result = resolveMapEvent({
             ...freshWorldAt('connecting-river'),
@@ -532,7 +532,7 @@ describe('connecting-river content (Phase W4)', () => {
         if (result.event.kind === 'encounter') {
             expect(result.event.isBoss).toBe(true);
             const boss = result.event.encounter.enemies[0];
-            expect(boss.name).toBe('The Waterreeve');
+            expect(boss.name).toBe('The Doorwarden');
             expect(boss.level).toBe(10);
         }
     });
@@ -587,7 +587,7 @@ describe('town-across-river content (Phase W4)', () => {
             ['tar-3', 'rest'],        // The Miller's Rest — an INN
             ['tar-4', 'narration'],   // the village court — the ritual, mirrored
             ['tar-5', 'encounter'],
-            ['tar-6', 'encounter'],   // the Portreeve boss
+            ['tar-6', 'encounter'],   // the town boss (the Doorwarden since R2)
         ];
         for (const [node, kind] of expected) {
             const r = visit(freshWorldAt('town-across-river'), node);
@@ -595,7 +595,7 @@ describe('town-across-river content (Phase W4)', () => {
         }
     });
 
-    it('the Portreeve is pinned to a winnable level', () => {
+    it('the town boss (the Doorwarden since R2) is pinned to a winnable level', () => {
         mockSequentialRng(0.5);
         const result = resolveMapEvent({
             ...freshWorldAt('town-across-river'),
@@ -608,7 +608,7 @@ describe('town-across-river content (Phase W4)', () => {
         if (result.event.kind === 'encounter') {
             expect(result.event.isBoss).toBe(true);
             const boss = result.event.encounter.enemies[0];
-            expect(boss.name).toBe('The Portreeve');
+            expect(boss.name).toBe('The Doorwarden');
             expect(boss.level).toBe(12);
         }
     });

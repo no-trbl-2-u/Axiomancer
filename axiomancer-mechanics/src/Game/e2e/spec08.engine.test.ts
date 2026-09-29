@@ -2,7 +2,7 @@
  * Spec 08 e2e — full exploration loop through fishing-village.
  *
  * Demo scenario: enter map → talk to Old Marrow (accept quest) → traverse
- * encounter / treasure / boss nodes → defeat the King of Revenge → quest
+ * encounter / treasure / boss nodes → defeat the Doorwarden (the King of Revenge until R2) → quest
  * completes → currency reward granted, XP banked, loot in inventory.
  */
 
@@ -74,7 +74,7 @@ describe('Spec 08 e2e — fishing-village exploration loop', () => {
         expect(bossRes.event.kind).toBe('encounter');
         if (bossRes.event.kind !== 'encounter') throw new Error('expected encounter');
         expect(bossRes.event.isBoss).toBe(true);
-        expect(bossRes.event.encounter.enemies[0].name).toBe('The King of Revenge');
+        expect(bossRes.event.encounter.enemies[0].name).toBe('The Doorwarden');
         const xpBefore = store.getState().player.experience;
         store.getState().startCombat(bossRes.event.encounter);
         const bossReport = store.getState().endCombat('victory');

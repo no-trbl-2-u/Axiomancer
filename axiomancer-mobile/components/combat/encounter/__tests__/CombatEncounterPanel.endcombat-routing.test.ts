@@ -62,27 +62,37 @@ describe('applyHazardOutcome: routes through endCombat (phase 54)', () => {
 
     it('a merciful win maps to the reducer\'s friendship outcome and activates authored friendshipReward content', () => {
         const store = createAppStore({ adapter: createMemoryAdapter() });
-        // Little Belle: friendshipReward carries items, xpBonus, flagSet
+        // Brine Hag: friendshipReward carries items, xpBonus, flagSet
         // and journalEntry — real authored content, not a test
         // fixture, previously unreachable from live hazard combat.
-        const littleBelle = ENEMY_REGISTRY['little-belle'];
-        store.getState().startCombat(littleBelle);
-        const finalState = openEncounter(littleBelle);
+        const brineHag = ENEMY_REGISTRY['brine-hag'];
+        store.getState().startCombat(brineHag);
+        const finalState = openEncounter(brineHag);
 
-        applyHazardOutcome(store, 'mercy' as CombatOutcome, finalState, littleBelle);
+        applyHazardOutcome(store, 'mercy' as CombatOutcome, finalState, brineHag);
 
         const state = store.getState();
         expect(state.currentEncounter).toBeUndefined();
-        expect(state.flags).toContain(littleBelle.friendshipReward!.flagSet);
-        expect(state.codex.unlockedEntries).toContain(littleBelle.journalEntry!.id);
-        const expectedXp = Math.floor((littleBelle.xpReward ?? 0) * 0.5) + (littleBelle.friendshipReward!.xpBonus ?? 0);
+        expect(state.flags).toContain(brineHag.friendshipReward!.flagSet);
+        expect(state.codex.unlockedEntries).toContain(brineHag.journalEntry!.id);
+        const expectedXp = Math.floor((brineHag.xpReward ?? 0) * 0.5) + (brineHag.friendshipReward!.xpBonus ?? 0);
         expect(state.player!.experience).toBe(expectedXp);
     });
 
-    it('befriending the King of Revenge completes starting-quest and grants its currency reward', () => {
+    it('befriending a kill-objective target completes its quest and grants the quest reward', () => {
         const store = createAppStore({ adapter: createMemoryAdapter() });
-        const boss = ENEMY_REGISTRY['king-of-revenge'];
-        const startingQuest = getMapDefinition('coastal-continent', 'fishing-village').quests!.find((q) => q.name === 'starting-quest')!;
+        const boss = ENEMY_REGISTRY['brine-hag'];
+        // The authored starting-quest, its kill objective re-aimed at a live
+        // foe (objectives match on the enemy's display name).
+        const authored = getMapDefinition('coastal-continent', 'fishing-village').quests!.find((q) => q.name === 'starting-quest')!;
+        const startingQuest = {
+            ...authored,
+            objectives: [{ ...authored.objectives[0], type: 'kill' as const, target: boss.name, requiredCount: 1, currentCount: 0 }],
+        };
+        const reward = authored.reward as { kind?: string; amount?: number } | undefined;
+        if (reward?.kind !== 'currency' || typeof reward.amount !== 'number') {
+            throw new Error('starting-quest no longer pays currency');
+        }
         store.setState({ quests: startQuest(emptyQuestLog(), startingQuest) });
         store.getState().startCombat(boss);
         const finalState = openEncounter(boss);
@@ -95,7 +105,7 @@ describe('applyHazardOutcome: routes through endCombat (phase 54)', () => {
 
         const state = store.getState();
         expect(state.quests.completed).toContain('starting-quest');
-        expect(state.player!.currency).toBe(currencyBefore + 25);
+        expect(state.player!.currency).toBe(currencyBefore + reward.amount);
         expect(state.flags).toContain(boss.friendshipReward!.flagSet);
     });
 });

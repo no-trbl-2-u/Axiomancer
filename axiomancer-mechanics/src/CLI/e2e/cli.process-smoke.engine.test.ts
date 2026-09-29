@@ -51,7 +51,7 @@ describe('CLI process-level smoke (real ts-node startup)', () => {
             NPX,
             [
                 'ts-node', 'src/CLI/game.cli.ts', 'combat',
-                '--auto', '--policy', 'status', '--enemy', 'little-belle',
+                '--auto', '--policy', 'status', '--enemy', 'float-eye',
                 '--seed', '42', '--max-turns', '12',
                 '--json-events', '--state-log', logPath,
             ],
@@ -105,7 +105,7 @@ describe('CLI process-level smoke (real ts-node startup)', () => {
             [
                 'ts-node', 'src/CLI/game.cli.ts',
                 // fv-16 converted from an `encounter` to a Phase 53d/S-01
-                // narration dilemma; fv-11 -> fv-13 (little-belle) is the
+                // narration dilemma; fv-11 -> fv-13 is the
                 // nearest surviving column-3 encounter from fv-2.
                 '--start-map', 'fishing-village', '--route', 'fv-2,fv-26,fv-11,fv-27,fv-13', '--auto-combat',
                 '--combat-policy', 'status', '--combat-seed', '42',
