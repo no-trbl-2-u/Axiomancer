@@ -627,6 +627,35 @@ Both run after R10 and are required by RC. Part plan:
 `plan/revamp/doctrine.md`. *Rejected:* running R10b now; folding the work
 into each R-phase.
 
+**D68 — Relics open lanes.** (T, 2026-09-29: "relics open lanes.
+Whichever relics a player has equipped will dictate the reward pool for
+combat rewards. Card rewards outside of combat are not effected by
+relics.") The equipped relics decide which lanes feed the combat card
+reward pool; non-combat card rewards ignore relics. How a relic names its
+lanes, the run-start lane and the reward slot mix are still open
+(`plan/revamp/cards.md` → Deck model). *Rejected:* stat thresholds
+opening lanes (a stat choice could lock a player out of a pool).
+
+**D69 — Five card types; EXILE is a keyword.** (T, ballot, 2026-09-29.)
+A type is a lifecycle rule. Types: Attack, Skill, Spell (play, then
+discard), **Global** (stays in play, affects the whole combat) and
+**Curse** (a dead card with negative effects that stays in hand;
+discarding it costs the player, playing it PAID exiles it but hurts the
+player). **EXILE** is a shared keyword on a line meaning the card leaves
+combat instead of going to discard. Amends D51 (Attack/Skill/Spell
+only). Details in `plan/revamp/cards.md` → Card types. *Rejected:* one
+base type (Deed); separate on-you / on-foe lasting types (Vow/Anathema,
+Oath/Hex); "Wound", "Burden" as the dead-card name; EXILE as a type.
+
+**D70 — Global and Curse rules; the hand carries over.** (T, ballot,
+2026-09-29.) A Global's FREE line puts it in play for a few turns and its
+PAID line for the rest of combat; any number may be in play but each must
+be unique (an experiment); only a card effect removes one. A Curse is a
+dead card for now; "While in your hand:" effects may come later. Cards
+neither played nor discarded stay in hand for the next round (the
+engine's current refill-to-5 rule, kept). *Rejected:* a Global cap of 3 or
+1; Curses that tick each turn; never-removable Globals.
+
 ## Open follow-ups
 
 **D1 status at a glance (2026-09-28, after #408).** Card and keyword

@@ -80,13 +80,42 @@ a pick among Plans A/B/C, and they create no cards.
 | First shippable pool | **3 lanes** (~36 cards + grey) |
 | Lanes and colour | **Colour-free.** A lane is a play style and spans colours. A mono-colour deck cannot work: the tray's dice colours are rolled and the Color Law lets a die power only its own colour of card (D65) |
 
-**Still open (T to circle back):** what opens a lane. T's idea: stat
-thresholds open lanes (the reward pool grows as stats rise, e.g. 5/5/5 →
-5/5/8 adds a set), cards may belong to several lanes, and the post-fight
-reward is random / random / lane-focused, the focused slot drawn from any
-lane the player has opened. The problem T named: how to let a player build
-a focused deck without depending on pure randomness, and without locking
-them out of a pool because of a stat choice.
+**Locked (D68): relics open lanes.** The relics a player has equipped
+decide the reward pool for **combat** card rewards. Card rewards outside
+combat (events, shops, other non-combat sources) are not affected by
+relics. This replaces the stat-threshold idea. Still open: how a relic
+names its lane(s), how the first lane is opened at run start (a starting
+relic is the natural reading, not yet decided), the post-fight slot mix
+(T's random / random / lane-focused idea), and cards in several lanes.
+
+## Card types — T's answers (2026-09-29, D69)
+
+A type is a lifecycle rule. Five types:
+
+| Type | Lifecycle |
+|---|---|
+| **Attack** | Play, then discard |
+| **Skill** | Play, then discard |
+| **Spell** | Play, then discard |
+| **Global** | Stays in play and affects the combat (either side; there is no separate on-you / on-foe type). FREE: in play for a few turns. PAID: in play for the rest of combat. No cap, but each Global in play must be unique (T: an experiment, may change). Removed only by a card effect |
+| **Curse** | A dead card: it does nothing and holds a hand slot. Discarding it costs the player something; playing it PAID exiles it for the rest of combat but hurts the player. Later Curses may add "While in your hand:" effects; the first ones are dead only |
+
+**EXILE** is a shared keyword on a card line: the card does not go to the
+discard pile and is gone for the rest of combat. It is the word for every
+"doesn't go to discard" effect. A card can EXILE on its PAID line only,
+so the weak line keeps the card and the big line spends it.
+
+Attack, Skill and Spell share a lifecycle and stay as separate types (T).
+The old `oath`/`hex` literals are not reused; Global replaces both.
+
+**The hand carries over.** Cards you neither play nor discard stay in your
+hand for the next round; the hand refills up to `COMBAT_HAND_SIZE` (5).
+This is the current engine rule (`combat.engine.ts`, the boundary refill)
+and T confirmed it stays. So a Curse costs a card every round until cleared.
+
+**Still open:** the exact Curse discard cost and PAID hurt, the FREE
+Global duration. A trial lane session (self-sacrifice, codename
+SACRIFICE) paused at its first stage until the types were set.
 
 ## B4 — Card-rules inventory (loop; creates nothing)
 
