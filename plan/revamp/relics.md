@@ -25,6 +25,10 @@ only, so all 11 survived:
 | The Oath Kept | amulet | 8 | POISON +3, never fizzles |
 | The Mounting Dread | head | 9 | Creeping Doom +3 |
 
+> **D72 (2026-09-30):** phase R7e deletes the ten non-starter relics. For
+> the Act 1 checkpoint, the Suppliant's Ring is the only relic. The table
+> below is the pre-R7e record that B1 starts from.
+
 ## Known issue — The Butcher's Bill is unbounded (fix in B1)
 
 `combat.signature.ts:131,191`: 2 damage per stack of every effect on the

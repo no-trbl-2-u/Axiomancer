@@ -670,6 +670,29 @@ played. Further Curses come from card
 sessions. Detail and open points in `plan/revamp/cards.md` and
 `plan/revamp/relics.md`.
 
+**D72 — The checkpoint is scaffolding; R7e strips the parked content.**
+(T, attended ballot, 2026-09-30: RC is "engine and UI scaffolding. No
+cards or relics yet (other than the starters), no real story implemented,
+no content. Just a good starting point in case another revamp is due.")
+
+- The parked world's content is deleted: northern-forest and the northern
+  continent, meaning their maps, map events, 13 NPC trees, 9 quests and 7
+  shops. The dialogue, shop, quest and equipment plumbing stays, each
+  witnessed by one neutral test fixture.
+- Relics shrink to the Suppliant's Ring (The Open Hand, D47). The other ten
+  are deleted. This is the checkpoint floor only: D71's lane relics (no
+  starting lane relic) still govern B1.
+- The Labyrinth stays parked and untouched (unchanged from D54).
+- Act 1 keeps all four regions and its prose, as the scaffold's test bed.
+
+New loop phase **R7e** (after R7d, before B4 and R8; RC requires it). Part
+plan: `plan/revamp/content-strip.md`.
+
+*Rejected:* keeping the parked world parked; deleting the dialogue, shop
+and quest plumbing with the content; deleting the Labyrinth module;
+keeping the ten placeholder relics or one per slot; blanking Act 1 prose;
+cutting Act 1 to one region.
+
 ## Open follow-ups
 
 **D1 status at a glance (2026-09-28, after #408).** Card and keyword

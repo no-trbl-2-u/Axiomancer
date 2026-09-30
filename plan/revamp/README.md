@@ -38,10 +38,10 @@ Each major part has its own plan file. This README orders them.
 | Player cards | The grey office: A Plain Blow (DEAL), A Plain Ward (GUARD), A Plain Word (VULNERABLE). Card types **Attack / Skill / Spell** (D51) |
 | Player keywords | DEAL, GUARD, VULNERABLE — plus whatever the befriend path prints |
 | Combat engine | Tray dice, one roll per threat phase, FREE/PAID lines, reads, VITAE, Conviction, S3 stat scaling (`base × stat ÷ 5`) |
-| Relics | 11 signet relics keep their names and signatures; every signature is **GUARD 5 at a flat cost**, except the Suppliant's Ring's **The Open Hand = befriend** (D47) |
+| Relics | The **Suppliant's Ring** only, with **The Open Hand = befriend** (D47); R4 made the other ten GUARD 5 placeholders and R7e deletes them (D72) |
 | Enemies | **Float-Eye** (normal fights), **Brine Hag** (rarer mid-region elite), **The Doorwarden** (every region's door fight) — no keywords, no afflictions; the 11 enemy-keyword systems are deleted (D48, D61) |
 | Mercy | Befriend → mercy choice, entered only through The Open Hand (D47) |
-| World | Act 1 only: Breakwater → Charcoal Wood → Beacon Crags → Lantern Deep. Fishing-village is purged; the other continents and the Labyrinth are parked; the Lantern Deep's deep stair is sealed; one Anvil per region near its exit (D53, D54, D61) |
+| World | Act 1 only: Breakwater → Charcoal Wood → Beacon Crags → Lantern Deep. Fishing-village is purged; the other continents' content is deleted in R7e with its plumbing kept (D72); the Labyrinth is parked; the Lantern Deep's deep stair is sealed; one Anvil per region near its exit (D53, D54, D61) |
 | Items | Healing potions (D49); relics |
 | Rewards | Post-fight card reward from the grey pool (D44); no theme/keyword steering (D50) |
 | Hazards | A minimal set, pending T's redesign (D52) |
@@ -63,6 +63,7 @@ parked unreachable with a plan file saying how it comes back.
 | [items.md](items.md) | Consumables → healing potions, shops, caches | R5 |
 | [hazards.md](hazards.md) | Minimal hazard set; T's mechanics redesign | R6, B3 |
 | [engine.md](engine.md) | The 47 dead mechanic kinds, card types, reward logic, alt-wins, the stance layer | R7, R7d |
+| [content-strip.md](content-strip.md) | Parked world content, the ten non-starter relics; plumbing kept with fixtures | R7e |
 | [mobile.md](mobile.md) | App cleanup, card art mapping, app name, theme colours; Deck tab, art and dev-menu revamps | R8, R10, B7, B8, B10 |
 | [progression.md](progression.md) | XP / level retune | R9 |
 | [cards.md](cards.md) | Card-rules inventory, card-creator workflow, card sessions | B4, B5, B6 |
@@ -92,13 +93,14 @@ starts it.
 | R7c | Engine purge 3/3: the alt-win systems (PLEA, CHARGE, capitulation, region consequences) | loop | R7b | engine.md |
 | R7c2 | Engine purge 3b: friendship increments, carrier-less effects, the rung ladder, dead branches, closing carrier sweep (split from R7c, 2026-09-30) | loop | R7c | engine.md |
 | R7d | Stance removal: the rock/paper/scissors layer goes; card and dice colour, the Color Law and colour match stay (D65) | loop | R7c2 | engine.md |
-| R8 | Mobile cleanup: dead flows and glosses, grey card art, app label, VITAE/shillings copy | loop | R7d | mobile.md |
+| R7e | Content strip: parked world content deleted (maps, events, NPCs, quests, shops), plumbing kept with neutral fixtures; relics → the Suppliant's Ring only; the Labyrinth stays parked (D72) | loop | R7d | content-strip.md |
+| R8 | Mobile cleanup: dead flows and glosses, grey card art, app label, VITAE/shillings copy | loop | R7e | mobile.md |
 | R9 | Progression retune: XP curve for Act 1 on the 3 survivors | loop | R3, R7c2 | progression.md |
 | R9a | Save checkpoint in fights: a reload mid-encounter re-offers the fight | loop | R7c2, R8 | checkpoint.md |
 | R10 | Theme colours: move surviving hard-coded hex colours into named `theme/axm.ts` tokens (no visual change) | loop | R8 | mobile.md |
 | R10b | Doctrine rewrite: spec.md, bearings, a one-page game model; specs 33/34 retired; plan queues swept; `plan/archive/` tagged and removed from the tree (D66, D67) | loop | R10 | doctrine.md |
 | R10c | Comments and docs truth pass (mechanics, then mobile): bannered docs rewritten, history stripped from comments, every rule of play in a live doc, a comment guard (D67) | loop | R10b | doctrine.md |
-| RC | Act 1 checkpoint release: full gate, a playtester walk of all four regions, then T tags `v0.1.0-checkpoint` | attended | R1–R10c, R7a–d, R9a, B4 | checkpoint.md |
+| RC | Act 1 checkpoint release: full gate, a playtester walk of all four regions, then T tags `v0.1.0-checkpoint` | attended | R1–R10c, R7a–e (with R7c2), R9a, B4 | checkpoint.md |
 | R11 | Loop content phases: revisit the loop so content creation comes back as planned phases; ends revamp mode | attended | RC | loop.md |
 | R12 | New combat-playtest: write a fresh `/combat-playtest` command for the rebuilt game (the old one was archived in R0) | attended | RC, R11 | loop.md |
 | B1 | The relic pass: new relics and real signatures | owner | R4, RC | relics.md |
@@ -164,6 +166,7 @@ T walked the agent defaults one at a time the same day. None remain open.
 | 7 | **R6** Hazard reset | Independent; placed here so R7's carrier sweep sees the final hazard glossary |
 | 8 | **R7a–R7c2** Engine purge, in four ticks | Last big deletion — needs R2, R4, R6 to have removed their carriers; split along engine.md's own three-way split so each tick is bounded |
 | 8a | **R7d** Stance removal | The RPS layer is engine + mobile wiring left over from spec 33; it goes before B4 so the inventory never records it (D65) |
+| 8b | **R7e** Content strip | T's checkpoint is scaffolding only (D72): the parked world's content and the ten non-starter relics go before B4, so the inventory records the stripped tree; the plumbing stays, witnessed by fixtures |
 | 9 | **B4** Card-rules inventory (loop) | Straight after R7 so the inventory records the final tree and card work can start in parallel with the rest |
 | 10 | **R8** Mobile cleanup | Consumes R7's final exports |
 | 11 | **R9** Progression retune | Needs Act 1 and the engine final; its XP numbers feed B2 |
