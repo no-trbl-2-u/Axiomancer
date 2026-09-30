@@ -257,12 +257,8 @@ const SLOT_CONTENT: Record<string, TooltipContent> = {
 
 interface EffectPayloadLike {
     damageOverTime?: { damagePerRound: number; damageType: string };
-    regeneration?: { healthPerRound?: number };
     actionRestriction?: { forcedStance?: string; blockedStances?: string[]; skipTurn?: boolean };
     advantageModifier?: { grantAdvantage?: string[]; grantDisadvantage?: string[] };
-    rollModifier?: number;
-    defenseModifier?: number;
-    reflectDamage?: number;
 }
 
 function sign(n: number): string {
@@ -284,8 +280,8 @@ export function accentForStat(stat: string): TooltipAccent {
 
 /**
  * Format `Effect.payload` as a short stat-effect line. Picks the
- * single most-informative summand (regeneration first, then DOT, then action restriction, then roll /
- * defense / reflect modifiers). Returns the engine `description`
+ * single most-informative summand (DOT first, then action restriction, then
+ * advantage). Returns the engine `description`
  * fallback when no payload data is present — defensive only;
  * Tier-1+ engine effects all carry payload.
  */
@@ -294,9 +290,6 @@ export function formatEffectStatEffect(
     fallback: string,
 ): string {
     if (!payload) return fallback;
-    if (payload.regeneration?.healthPerRound !== undefined) {
-        return `${sign(payload.regeneration.healthPerRound)} hp / round`;
-    }
     if (payload.damageOverTime !== undefined) {
         return `${sign(-payload.damageOverTime.damagePerRound)} hp / round`;
     }
@@ -313,15 +306,6 @@ export function formatEffectStatEffect(
     if (payload.advantageModifier?.grantDisadvantage?.length) {
         const list = payload.advantageModifier.grantDisadvantage.join(' / ');
         return `disadvantage on ${list}`;
-    }
-    if (payload.rollModifier !== undefined && payload.rollModifier !== 0) {
-        return `${sign(payload.rollModifier)} to rolls`;
-    }
-    if (payload.defenseModifier !== undefined && payload.defenseModifier !== 0) {
-        return `${sign(payload.defenseModifier)} defense`;
-    }
-    if (payload.reflectDamage !== undefined && payload.reflectDamage !== 0) {
-        return `reflects ${payload.reflectDamage} damage`;
     }
     return fallback;
 }

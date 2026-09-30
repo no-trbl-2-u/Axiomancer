@@ -19,9 +19,7 @@ export type {
 
 export { applyDamage, heal, isAlive, isDefeated, getHealthPercentage } from './health';
 export {
-    getStudyMarkIntensity, getActiveRollModifier, getThornsReflect,
     updateEffectDuration, tickAllEffects,
-    removeRandomBuff, extendRandomBuffDuration,
     // 0.34.0 status-depth epic — HP-model selectors + tunable scalars
     DISRUPT_DENY_AT,
 } from './effects';

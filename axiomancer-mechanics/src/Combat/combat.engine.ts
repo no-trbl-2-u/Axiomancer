@@ -37,10 +37,10 @@ import type { Card, CardAspect, CardRider } from '../Cards/types';
 import type { CombatState, Stance } from './types';
 import { applyDamage, heal, isDefeated, erodeMaxHealth } from './health';
 import {
-    processRoundStartEffects, processRoundEndEffects, getActiveRollModifier,
-    getThornsReflect, getDamageTakenMultiplier, getPendingDotTotal,
+    processRoundStartEffects, processRoundEndEffects,
+    getDamageTakenMultiplier, getPendingDotTotal,
     getDistinctControlCount,
-    getHealingReceivedMult, getOutgoingDamageMult, getOutgoingThreatDamageMult, decayDotsOnHeal, consumeEffect,
+    getOutgoingDamageMult,
     hasPayloadFlag, getStanceVulnMult, computeRoundsToKill,
     fireDotTrigger, growPerEnemyActionDots,
     applyCleanse,
@@ -66,7 +66,7 @@ import {
 } from './combat.cards';
 import { recordAttribution } from './combat.attribution';
 import { scaleFor, scaleEffectIntensity, scaleCardForStats } from './stat-scaling';
-import { canAct, getActiveEffectModifiers, getActiveDotTotal, dotRoundClockPhase } from './effect-modifiers';
+import { canAct, getActiveEffectModifiers, getActiveDotTotal, ticksOnRoundClock } from './effect-modifiers';
 import { getThreatSequence, commitThreatBranch } from './combat.threat';
 import { getSignatureSkill, applySignatureSkill, signatureCastBlock, playerArchetype } from './combat.signature';
 import { getSignaturesForLoadout } from '../Items/relic.library';
@@ -118,25 +118,6 @@ export function colorMatchBonus(base: number): number {
  * once nothing references it.
  */
 export const THREAT_DAMAGE_SCALE = 1;
-/**
- * Soft control "weakens" the enemy's telegraphed attack. Each point of NEGATIVE
- * roll modifier on the enemy — the universal marker of the soft-control /
- * accuracy / attack-down bucket (confusion -5, fear -4, daze -3, slow -2,
- * blind -5, accuracy/attack-down …) — shaves THREAT_WEAKEN_PER_ROLL off the
- * incoming hit. Once the enemy's cumulative roll penalty reaches THREAT_DENY_AT
- * it loses the turn outright — reached by a VARIETY of soft-controls
- * (e.g. confusion + fear = 9), NOT by stacking one (the roll penalty is flat per
- * effect), which keeps hard control (stun/sleep/petrify — a guaranteed skipTurn)
- * distinct. THREAT_WEAKEN_FLOOR is a safety clamp: a weakened-but-not-denied
- * enemy still lands at least this fraction (it does not bind at the current
- * tunables — deny triggers first — but guards against future deep stacks).
- * Tuned by /combat-playtest (engine constants) and /deck-tuning. Exported so the mobile presenter can state the honest
- * "-X% enemy attack" a control card actually delivers. (Until 0.33.0 the HP
- * engine never read these mods, so ~24 control/stat debuffs were inert.)
- */
-export const THREAT_WEAKEN_PER_ROLL = 0.06;
-export const THREAT_DENY_AT = 8;
-export const THREAT_WEAKEN_FLOOR = 0.4;
 /** Conviction is capped so a long grind can't bank a Signature spam. */
 export const CONVICTION_CAP = 12;
 /** WI-10 — how many scraps per turn PAY +1 Conviction. The hand refills to
@@ -1176,7 +1157,7 @@ function endCombat(state: CombatEncounterState, outcome: CombatEncounterState['f
 // ── Phase resolution + between-phases (§4.4, §4.5, §9) ───────────────────────
 
 /**
- * The soak arithmetic for one flat hit: armor, then GUARD, then BARRIER. The
+ * The soak arithmetic for one flat hit: GUARD, then BARRIER. The
  * SINGLE definition of the wall arithmetic `projectIncomingThreat` shares with
  * the engine, so the on-screen wall math cannot drift from what the engine
  * actually does. Deliberately EXCLUDES riposte (a parry on the foe's own
@@ -1184,9 +1165,9 @@ function endCombat(state: CombatEncounterState, outcome: CombatEncounterState['f
  */
 function soakFlatHit(
     raw: number,
-    o: { armor: number; guard: number; barrier: number },
+    o: { guard: number; barrier: number },
 ): { dealt: number; guard: number; barrier: number } {
-    let dmg = Math.max(0, raw - o.armor);
+    let dmg = Math.max(0, raw);
     let guard = o.guard;
     let barrier = o.barrier;
     const g = Math.min(guard, dmg);
@@ -1225,22 +1206,12 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     }
 
     // Control on the enemy hinders its turn. HARD control (skipTurn) denies it
-    // outright via canAct; SOFT control (confusion/fear/daze/slow/blind/accuracy-
-    // & attack-down) carries a negative roll modifier that WEAKENS the telegraphed
-    // hit, and a committed VARIETY of soft-controls (cumulative penalty ≥
-    // THREAT_DENY_AT) denies the turn too. This is what finally makes the
-    // soft-control / stat-debuff bucket DO something — the aggregators always
-    // computed the penalty; the HP engine just never read it (pre-0.33.0).
+    // outright via canAct; DISRUPT — a VARIETY of >= DISRUPT_DENY_AT DISTINCT
+    // controls — cancels the telegraphed turn too.
     const act = canAct(state.enemy.effects as ActiveEffect[], phase.enemyStance);
-    const rollPenalty = Math.max(0, -getActiveRollModifier(state.enemy));
-    // DISRUPT — an ADDITIVE deny path on top of the legacy roll-penalty deny: a
-    // VARIETY of >= DISRUPT_DENY_AT DISTINCT controls cancels the telegraphed turn
-    // even before the cumulative penalty reaches THREAT_DENY_AT.
     const controlPips = getDistinctControlCount(state.enemy);
     const disruptDenied = controlPips >= DISRUPT_DENY_AT;
     const isBossTier = state.enemy.difficulty === 'boss' || state.enemy.difficulty === 'unique';
-    const denied = rollPenalty >= THREAT_DENY_AT || disruptDenied;
-    const weakenMult = Math.max(THREAT_WEAKEN_FLOOR, Math.min(1, 1 - rollPenalty * THREAT_WEAKEN_PER_ROLL));
     // THE CLOCK (depth epic): the telegraphed hit escalates each round past the grace
     // window, so a drawn-out fight turns lethal. 1.0 on round ≤ grace (a fast kill is
     // unpunished → those fights are byte-identical to pre-epic).
@@ -1249,36 +1220,18 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     // dragging normal fight — makes finishing bosses quickly (DoT/control) the clear
     // efficient path.
     const escalationRate = THREAT_ESCALATION_PER_ROUND * (isBossTier ? THREAT_ESCALATION_BOSS_MULT : 1);
-    // SENSORY NULL on the enemy (P0-truth `blocksAdvantage` wiring): its
-    // escalation clock is FROZEN — the null blinds it to the fight's momentum.
-    const escalation = hasPayloadFlag(state.enemy, 'blocksAdvantage')
-        ? 1
-        : Math.min(
-            THREAT_ESCALATION_MAX,
-            1 + escalationRate * Math.max(0, state.round - THREAT_ESCALATION_GRACE),
-        );
+    const escalation = Math.min(
+        THREAT_ESCALATION_MAX,
+        1 + escalationRate * Math.max(0, state.round - THREAT_ESCALATION_GRACE),
+    );
     // Same clock, applied to STATUS intensity instead of raw damage: the
     // longer the fight drags, the harder the enemy's telegraphed status lands
     // too. Derived from `escalation` so it shares its boss-speedup and its
     // cap — no separate ramp to keep in sync.
     const effectIntensityBonus = Math.floor((escalation - 1) / THREAT_EFFECT_ESCALATION_STEP);
-    // Enemy-borne outgoing-damage statuses (SEPTIC / REGRESS FATIGUE) dampen its
-    // telegraphed hit; OVEREXTENDED halves its next fired phase outright, then is
-    // consumed (interim rung of the P2 threat-downgrade ladder).
+    // Enemy-borne outgoing-damage statuses (QUARTER) dampen its telegraphed hit.
     const enemyOutgoingMult = getOutgoingDamageMult(state.enemy);
-    // WS8.2 telegraph-DAMAGE surface (spec 32 §12 #6): EXHAUSTION's
-    // `outgoingThreatDamageMulPct` softens the budgeted hit for its duration.
-    const enemyThreatMult = getOutgoingThreatDamageMult(state.enemy);
-    const overextendedId = hasPayloadFlag(state.enemy, 'forcesWeakTierNextPlay');
-    // DOUBT on the enemy (P0-truth `restrictsSurgeAccess` re-spec): its next fired
-    // threat loses its RIDERS (status application + self-heal), then the doubt is
-    // consumed — prevention the player can schedule.
-    const doubtId = hasPayloadFlag(state.enemy, 'restrictsSurgeAccess');
-    // WS8.2 RIDER surface: BLIND's `suppressesThreatRiders` erases the phase's
-    // `threatEffectId` for as long as it holds (damage + self-heal still land —
-    // narrower than DOUBT, but persistent rather than consumed).
-    const riderSuppressId = hasPayloadFlag(state.enemy, 'suppressesThreatRiders');
-    const hindered = !act.canAct || denied;
+    const hindered = !act.canAct || disruptDenied;
     if (disruptDenied) events.push({ kind: 'disrupt-denied', pips: controlPips });
 
     let player = state.player;
@@ -1303,13 +1256,6 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     let directDamage = state.directDamageDealt;
     const penaltiesApplied: CombatThreatEffect[] = [];
 
-    // ARMOR (defenseModifier) — flat per-hit reduction of the incoming telegraph.
-    // No effect in the library carries a defenseModifier since R5 retired the
-    // armor consumables; R7a removes the soak. Player-only and clamped ≥0, so
-    // no enemy-borne or negative payload can amplify the hit. Applied before
-    // parry/guard/barrier soak, like armor.
-    const playerArmor = Math.max(0, getActiveEffectModifiers(state.player.effects as ActiveEffect[]).defenseDelta);
-
     // An already-defeated enemy does not still hit the player this phase (the
     // victory check runs after this block).
     if (!hindered && !isDefeated(enemy)) {
@@ -1318,10 +1264,9 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         for (const eff of phase.threatAction.effects) {
             if (eff.damage && eff.damage > 0) {
                 attacksLanded += 1;
-                // weakenMult folds soft-control AND partial rung loss.
                 let dmg = Math.round(
-                    eff.damage * THREAT_DAMAGE_SCALE * weakenMult * escalation
-                    * enemyOutgoingMult * enemyThreatMult
+                    eff.damage * THREAT_DAMAGE_SCALE * escalation
+                    * enemyOutgoingMult
                     // THE BIG NUMBERS REWRITE — every STAGE this foe has
                     // entered adds its printed weight to every later phase,
                     // CLAMPED: stage bonuses multiply on top of the escalation
@@ -1330,13 +1275,11 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     // six. A stage should change the shape of a fight, not end
                     // it before the deck can answer.
                     * (1 + Math.min(STAGE_THREAT_BONUS_CAP, state.stageThreatBonus ?? 0))
-                    * (overextendedId ? 0.5 : 1) * playerTakenMult
+                    * playerTakenMult
                     // Spec 33 §2 — the open stance check's rail (1 when no check
                     // is authored or the player is stance-less).
                     * stanceCheck.mult,
                 );
-                // Flat armor soak (defenseModifier).
-                dmg = Math.max(0, dmg - playerArmor);
                 const preSoakDmg = dmg;
                 // RIPOSTE parry reduces the incoming hit once this phase.
                 if (riposte && !riposteFired && riposte.reduce > 0) {
@@ -1376,15 +1319,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     blockedBlowTotal += preSoakDmg;
                 }
             }
-            if (eff.effectId && !doubtId && riderSuppressId) {
-                // WS8.2: the rider is ERASED, honestly logged — the phase still
-                // fired, but its `threatEffectId` cannot land while BLIND holds.
-                events.push({
-                    kind: 'effect-fizzled', cardId: riderSuppressId, effectId: eff.effectId,
-                    message: 'threat rider suppressed — information erased',
-                });
-            }
-            if (eff.effectId && !doubtId && !riderSuppressId) {
+            if (eff.effectId) {
                 const def = lookupEffectDef(eff.effectId);
                 if (def) {
                     const res = applyEffect(player.effects, def, state.round, {
@@ -1400,16 +1335,16 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     // follow-up Bucket B #16 — the face is the contract).
                 }
             }
-            if (eff.enemyHeal && eff.enemyHeal > 0 && !doubtId) {
-                const healAmt = Math.round(eff.enemyHeal * getHealingReceivedMult(enemy));
+            if (eff.enemyHeal && eff.enemyHeal > 0) {
+                const healAmt = Math.round(eff.enemyHeal);
                 if (healAmt > 0) {
                     const hpBefore = enemy.health;
-                    enemy = decayDotsOnHeal(heal(enemy, healAmt)).combatant;
+                    enemy = heal(enemy, healAmt);
                     const healed = enemy.health - hpBefore;
                     if (healed > 0) events.push({ kind: 'enemy-healed', enemyId: enemy.id, source: 'THREAT', amount: healed });
                 }
             }
-            if (eff.enemyCleanse && eff.enemyCleanse > 0 && !doubtId) {
+            if (eff.enemyCleanse && eff.enemyCleanse > 0) {
                 // WS9 reactive cleanse — spec 29 guardrail: telegraphed, and it
                 // sheds a FRACTION, never the last affliction. `applyCleanse`
                 // names the cleansable set; only the first `enemyCleanse` of it
@@ -1427,9 +1362,6 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
             }
             penaltiesApplied.push(eff);
         }
-        // A fired DOUBT / OVEREXTENDED is spent on the phase it bent (consumedOnUse).
-        if (doubtId) enemy = consumeEffect(enemy, doubtId);
-        if (overextendedId) enemy = consumeEffect(enemy, overextendedId);
         // RIPOSTE counter — spec 32 v3: fires only when your Guard/Barrier FULLY
         // blocked an attack this phase (reflect class, §1 source 4). Spec 32
         // §2 PA-3: the counter reflects the prevented blow's actual size, not
@@ -1444,15 +1376,6 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                 directDamage += counter + hit.clockDamage;
                 events.push({ kind: 'riposte-fired', amount: counter });
             }
-        }
-        // THORNS reflect — punishes the swing whenever the enemy attacked.
-        const reflect = getThornsReflect(state.player);
-        if (reflect > 0 && attacksLanded > 0) {
-            const amount = Math.round(reflect * getDamageTakenMultiplier(enemy));
-            const hit = applyEnemyDamage(enemy, amount, state.round, events);
-            enemy = hit.enemy;
-            directDamage += amount + hit.clockDamage;
-            events.push({ kind: 'thorns-reflected', amount, target: 'enemy' });
         }
         events.push({ kind: 'threat-fired', phaseIndex: phase.index, description: phase.threatAction.description, effects: phase.threatAction.effects });
         // WS3.2 Doom growth (spec 32 §12 #3, card-local species): enemy-borne
@@ -1576,12 +1499,9 @@ export function processBetweenPhases(
     //    (the status damage engine; no track, the HP loss is the win progress).
     const enemyStart = processRoundStartEffects(state.enemy, state.round);
     const tithedExpired: ActiveEffect[] = [];
-    const enemyEnd = processRoundEndEffects(enemyStart.target, state.round);
+    const enemyEnd = processRoundEndEffects(enemyStart.target);
     let enemy = enemyEnd.target as Enemy;
-    const enemyDotTicks = clampDotTickBreakdown(
-        projectedEnemyDotTicks,
-        enemyStart.dotDamage + enemyEnd.dotDamage,
-    );
+    const enemyDotTicks = clampDotTickBreakdown(projectedEnemyDotTicks, enemyStart.dotDamage);
 
     // SOUL economy (spec 32 v3 T7): every enemy affliction instance that
     // EXPIRES yields 1 Soul (consumption-side Souls are granted at the verbs).
@@ -1589,7 +1509,7 @@ export function processBetweenPhases(
     // they owe the same Soul, so Harvest never starves when calendars go.
     const expiredAfflictions = [...enemyEnd.expired, ...tithedExpired]
         .filter(ae => lookupEffectDef(ae.effectId)?.type === 'debuff').length
-        + soulWorthyWashouts([...enemyStart.dotWashedOut, ...enemyEnd.washedOut]);
+        + soulWorthyWashouts(enemyStart.dotWashedOut);
 
 
     // VULNERABLE DoT surcharge: the natural tick above lands at ×1 (already
@@ -1600,7 +1520,7 @@ export function processBetweenPhases(
     let vulnSurcharge = 0;
     if (enemyVulnMult > 1) {
         const mods = getActiveEffectModifiers(state.enemy.effects, state.round);
-        const naturalDot = mods.dotStart + mods.dotEnd;
+        const naturalDot = mods.dotStart;
         vulnSurcharge = Math.min(
             Math.round(naturalDot * (enemyVulnMult - 1)),
             enemy.health,
@@ -1608,14 +1528,11 @@ export function processBetweenPhases(
         if (vulnSurcharge > 0) enemy = applyDamage(enemy, vulnSurcharge);
     }
 
-    // 3. Process a full round of effects on the player (DoT / regen / drain).
+    // 3. Process a full round of effects on the player (DoT, then expiry).
     const playerStart = processRoundStartEffects(state.player, state.round);
-    const playerEnd = processRoundEndEffects(playerStart.target, state.round, 'player');
+    const playerEnd = processRoundEndEffects(playerStart.target, 'player');
     let player = playerEnd.target as Character;
-    const playerDotTicks = clampDotTickBreakdown(
-        projectedPlayerDotTicks,
-        playerStart.dotDamage + playerEnd.dotDamage,
-    );
+    const playerDotTicks = clampDotTickBreakdown(projectedPlayerDotTicks, playerStart.dotDamage);
 
     for (const t of enemyDotTicks) events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
     if (vulnSurcharge > 0) events.push({ kind: 'dot-tick', effectId: 'vulnerable-surcharge', label: 'Vulnerable', amount: vulnSurcharge, target: 'enemy' });
@@ -1797,7 +1714,7 @@ function dotTickBreakdown(effects: readonly ActiveEffect[], currentRound?: numbe
     return getActiveDotTotal(effects as ActiveEffect[], currentRound).perEffect
         .filter(e => {
             const dot = lookupEffectDef(e.effectId)?.payload.damageOverTime;
-            return !dot || dotRoundClockPhase(dot) !== null;
+            return !dot || ticksOnRoundClock(dot);
         })
         .map(e => ({ effectId: e.effectId, label: e.label, amount: e.amount }));
 }
@@ -2041,20 +1958,18 @@ export function getEnemyIncomingDamageMultiplier(state: CombatEncounterState): n
 
 /**
  * DISRUPT meter (the engine owns the threshold; mobile must NOT hard-code it):
- * the live DISTINCT-control pip count, the deny threshold, the cumulative roll
- * penalty, and whether the next telegraphed turn WILL be denied (matching the
- * resolved phase mark === 'clear': hard skip, legacy roll-penalty deny, the
- * or the additive distinct-control deny).
+ * the live DISTINCT-control pip count, the deny threshold, and whether the
+ * next telegraphed turn WILL be denied (matching the resolved phase mark ===
+ * 'clear': hard skip or the distinct-control deny).
  */
 export function getDisruptMeter(state: CombatEncounterState): {
-    pips: number; threshold: number; rollPenalty: number; willDeny: boolean;
+    pips: number; threshold: number; willDeny: boolean;
 } {
     const enemy = state.enemy;
     const pips = getDistinctControlCount(enemy);
-    const rollPenalty = Math.max(0, -getActiveRollModifier(enemy));
     const act = canAct(enemy.effects as ActiveEffect[], currentPhaseStance(state));
-    const willDeny = !act.canAct || rollPenalty >= THREAT_DENY_AT || pips >= DISRUPT_DENY_AT;
-    return { pips, threshold: DISRUPT_DENY_AT, rollPenalty, willDeny };
+    const willDeny = !act.canAct || pips >= DISRUPT_DENY_AT;
+    return { pips, threshold: DISRUPT_DENY_AT, willDeny };
 }
 
 /**
@@ -2062,7 +1977,7 @@ export function getDisruptMeter(state: CombatEncounterState): {
  * telegraphed hit would actually deal right now, netted against live
  * guard/barrier. `IntentIcon` today shows only the raw, unscaled
  * `phase.threatAction.effects` damage sum; this selector runs that same raw
- * total through the live `weakenMult` / escalation / outgoing-damage
+ * total through the live escalation / outgoing-damage
  * multiplier stack `resolveThreatPhase` applies, then nets guard/barrier —
  * the actual number the player is about to take, or 0 if the turn will be
  * denied outright. Approximates a phase's damage as a single hit (matching
@@ -2073,12 +1988,11 @@ export function getDisruptMeter(state: CombatEncounterState): {
  * KNOWN DIVERGENCES from `resolveThreatPhase`, documented rather than closed —
  * closing them moves the on-screen number for every existing foe and is its own
  * tuning change, not a side effect of adding a keyword. The boss term here
- * omits `enemyThreatMult` (`getOutgoingThreatDamageMult`),
- * `state.stageThreatBonus`, and — while the Upgradeable-Dice flag is
+ * omits `state.stageThreatBonus`, and — while the Upgradeable-Dice flag is
  * on — an authored phase's `stanceCheck.mult`, so against a staged or
  * stance-punished foe it UNDERSTATES.
  *
- * Audit 3.2: the flat `playerArmor` soak runs through the same `soakFlatHit`
+ * Audit 3.2: the guard / barrier soak runs through the same `soakFlatHit`
  * the engine applies.
  */
 export function projectIncomingThreat(state: CombatEncounterState): {
@@ -2089,39 +2003,28 @@ export function projectIncomingThreat(state: CombatEncounterState): {
     const rawDamage = phase.threatAction.effects.reduce((s, e) => s + (e.damage ?? 0), 0);
 
     const act = canAct(state.enemy.effects as ActiveEffect[], phase.enemyStance);
-    const rollPenalty = Math.max(0, -getActiveRollModifier(state.enemy));
     const controlPips = getDistinctControlCount(state.enemy);
-    const disruptDenied = controlPips >= DISRUPT_DENY_AT;
     const isBossTier = state.enemy.difficulty === 'boss' || state.enemy.difficulty === 'unique';
-    const denied = rollPenalty >= THREAT_DENY_AT || disruptDenied;
-    const willDeny = !act.canAct || denied;
+    const willDeny = !act.canAct || controlPips >= DISRUPT_DENY_AT;
 
-    const weakenMult = Math.max(THREAT_WEAKEN_FLOOR, Math.min(1, 1 - rollPenalty * THREAT_WEAKEN_PER_ROLL));
     const escalationRate = THREAT_ESCALATION_PER_ROUND * (isBossTier ? THREAT_ESCALATION_BOSS_MULT : 1);
-    const escalation = hasPayloadFlag(state.enemy, 'blocksAdvantage')
-        ? 1
-        : Math.min(THREAT_ESCALATION_MAX, 1 + escalationRate * Math.max(0, state.round - THREAT_ESCALATION_GRACE));
+    const escalation = Math.min(THREAT_ESCALATION_MAX, 1 + escalationRate * Math.max(0, state.round - THREAT_ESCALATION_GRACE));
     const enemyOutgoingMult = getOutgoingDamageMult(state.enemy);
-    const overextendedId = hasPayloadFlag(state.enemy, 'forcesWeakTierNextPlay');
     const playerTakenMult = getDamageTakenMultiplier(state.player);
 
     const projectedDamage = willDeny ? 0 : Math.round(
-        rawDamage * THREAT_DAMAGE_SCALE * weakenMult * escalation
-        * enemyOutgoingMult * (overextendedId ? 0.5 : 1) * playerTakenMult,
+        rawDamage * THREAT_DAMAGE_SCALE * escalation * enemyOutgoingMult * playerTakenMult,
     );
 
     const guard = state.guard ?? 0;
     const barrier = state.barrier ?? 0;
     const riposte = state.riposte ?? null;
-    const playerArmor = Math.max(0, getActiveEffectModifiers(state.player.effects as ActiveEffect[]).defenseDelta);
     let remaining = projectedDamage;
     if (riposte && riposte.reduce > 0) remaining = Math.max(0, remaining - riposte.reduce);
     // Audit 3.2 — the foe's hit goes through the SAME `soakFlatHit` the engine
     // applies. RIPOSTE stays outside the helper (a one-shot parry on the foe's
-    // own swing); applying it before armor is arithmetically identical to the
-    // engine's armor-then-riposte order, since both reduce to
-    // `max(0, d - armor - reduce)` over non-negative terms.
-    remaining = soakFlatHit(remaining, { armor: playerArmor, guard, barrier }).dealt;
+    // own swing), applied first as the engine does.
+    remaining = soakFlatHit(remaining, { guard, barrier }).dealt;
 
     return {
         rawDamage, projectedDamage, willDeny, guard, barrier, netDamage: remaining,

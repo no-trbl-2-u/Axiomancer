@@ -46,7 +46,6 @@ describe('getDisruptMeter.willDeny', () => {
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', [PETRIFY]), undefined, 7);
         const meter = getDisruptMeter(base);
         expect(meter.pips).toBeLessThan(meter.threshold);   // no distinct-control deny
-        expect(meter.rollPenalty).toBe(0);                  // no roll-penalty deny
         expect(meter.willDeny).toBe(true);
     });
 

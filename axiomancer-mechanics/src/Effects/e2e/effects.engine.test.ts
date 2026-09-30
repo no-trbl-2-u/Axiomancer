@@ -6,11 +6,6 @@ afterEach(() => {
 });
 import { ActiveEffect, Effect } from '../types';
 import { lookupEffect } from '../effects.library';
-import { registerFixtureEffects } from '../../test-utils/fixture-effects';
-
-// The library carries no buffs (R5 deleted the support buffs, R7c the last
-// one, `buff_absolved`); the buff channels run through the `fixture_*` effects.
-registerFixtureEffects();
 
 const makeEffect = (overrides: Partial<Effect> = {}): Effect => ({
     id: 'test_effect',
@@ -126,34 +121,29 @@ describe('removeEffect', () => {
 });
 
 describe('removeEffectsByType', () => {
+    // The library carries no buffs (R7c deleted the last one), so the tiers
+    // run over the live debuffs: MARK (1), POISON (2), PETRIFY (3).
     const effects: ActiveEffect[] = [
-        // a Tier 2 buff
-        { effectId: 'fixture_roll_up',    remainingDuration: 4, intensity: 1, appliedAt: 1, tier: 2 },
-        // a Tier 2 debuff (v3 card vocabulary)
-        { effectId: 'debuff_poison',      remainingDuration: 3, intensity: 1, appliedAt: 1, tier: 2 },
-        // a Tier 1 buff
-        { effectId: 'fixture_thorns',     remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 1 },
-        // a Tier 3 buff
-        { effectId: 'fixture_armor',      remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 3 },
+        { effectId: 'debuff_poison',  remainingDuration: 3, intensity: 1, appliedAt: 1, tier: 2 },
+        { effectId: 'debuff_mark',    remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 1 },
+        { effectId: 'debuff_petrify', remainingDuration: 1, intensity: 1, appliedAt: 1, tier: 3 },
     ];
 
-    it('strips all buffs when no tier cap', () => {
-        const { activeEffects, removed } = removeEffectsByType(effects, 'buff');
-        expect(removed.map(r => r.effectId).sort()).toEqual(['fixture_armor', 'fixture_roll_up', 'fixture_thorns']);
-        expect(activeEffects).toHaveLength(1);
-        expect(activeEffects[0].effectId).toBe('debuff_poison');
+    it('strips all debuffs when no tier cap', () => {
+        const { activeEffects, removed } = removeEffectsByType(effects, 'debuff');
+        expect(removed.map(r => r.effectId).sort()).toEqual(['debuff_mark', 'debuff_petrify', 'debuff_poison']);
+        expect(activeEffects).toHaveLength(0);
     });
 
-    it('respects maxTier — Tier 2 dispel does not touch Tier 3', () => {
-        const { activeEffects, removed } = removeEffectsByType(effects, 'buff', 2);
-        expect(removed.map(r => r.effectId).sort()).toEqual(['fixture_roll_up', 'fixture_thorns']);
-        expect(activeEffects.find(e => e.effectId === 'fixture_armor')).toBeDefined();
-    });
-
-    it('strips debuffs without touching buffs', () => {
+    it('respects maxTier — a Tier 2 strip does not touch Tier 3', () => {
         const { activeEffects, removed } = removeEffectsByType(effects, 'debuff', 2);
-        expect(removed).toHaveLength(1);
-        expect(removed[0].effectId).toBe('debuff_poison');
+        expect(removed.map(r => r.effectId).sort()).toEqual(['debuff_mark', 'debuff_poison']);
+        expect(activeEffects.map(e => e.effectId)).toEqual(['debuff_petrify']);
+    });
+
+    it('strips buffs without touching debuffs', () => {
+        const { activeEffects, removed } = removeEffectsByType(effects, 'buff');
+        expect(removed).toHaveLength(0);
         expect(activeEffects).toHaveLength(3);
     });
 });

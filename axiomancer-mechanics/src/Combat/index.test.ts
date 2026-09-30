@@ -1,20 +1,12 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
   applyDamage, heal, tickAllEffects,
   isAlive, isDefeated, getHealthPercentage,
-  removeRandomBuff, extendRandomBuffDuration, updateEffectDuration,
-  getStudyMarkIntensity, getThornsReflect, getActiveRollModifier,
+  updateEffectDuration,
 } from './index';
 import { createCharacter } from '../Character';
 import { createEnemy } from '../Enemy';
 import { ActiveEffect } from '../Effects/types';
-import { setSeed } from '../Utils/rng';
-import { registerFixtureEffects } from '../test-utils/fixture-effects';
-
-// The keyword audit (2026-09-27) deleted buff_thorns / debuff_backfire /
-// the round-clock DoT species from the library; their engine channels are
-// exercised through the `fixture_*` effects instead.
-registerFixtureEffects();
 
 const makePlayer = () => createCharacter({ name: 'Test', level: 1, baseStats: { heart: 4, body: 3, mind: 2 } });
 const makeEnemy = () => createEnemy({
@@ -56,76 +48,6 @@ describe('getHealthPercentage', () => {
   it('50% at half health', () => {
     const p = makePlayer();
     expect(getHealthPercentage({ ...p, health: p.maxHealth / 2 })).toBe(50);
-  });
-});
-
-const BUFF_ID = 'fixture_roll_up'; // R5 re-pin: the library's support buffs were deleted with the consumables
-const DEBUFF_ID = 'debuff_poison'; // spec 32 v3 re-pin: surviving affliction debuff
-const makeActiveBuff = (overrides: Partial<ActiveEffect> = {}): ActiveEffect => ({
-  effectId: BUFF_ID, remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 1, ...overrides,
-});
-const makeActiveDebuff = (): ActiveEffect => ({
-  effectId: DEBUFF_ID, remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 1,
-});
-
-describe('removeRandomBuff', () => {
-  beforeEach(() => { setSeed('remove-buff-test'); });
-
-  it('returns null removed when no active effects', () => {
-    const p = makePlayer();
-    const { target, removed } = removeRandomBuff(p);
-    expect(removed).toBeNull();
-    expect(target.effects).toHaveLength(0);
-  });
-
-  it('returns null removed when only debuffs are active', () => {
-    const p = { ...makePlayer(), effects: [makeActiveDebuff()] };
-    const { target, removed } = removeRandomBuff(p);
-    expect(removed).toBeNull();
-    expect(target.effects).toHaveLength(1);
-  });
-
-  it('removes the buff and returns it when one buff is active', () => {
-    const buff = makeActiveBuff();
-    const p = { ...makePlayer(), effects: [buff] };
-    const { target, removed } = removeRandomBuff(p);
-    expect(removed).not.toBeNull();
-    expect(removed?.effectId).toBe(BUFF_ID);
-    expect(target.effects).toHaveLength(0);
-  });
-});
-
-describe('extendRandomBuffDuration', () => {
-  beforeEach(() => { setSeed('extend-buff-test'); });
-
-  it('returns null extended when no active effects', () => {
-    const p = makePlayer();
-    const { target, extended } = extendRandomBuffDuration(p, 2);
-    expect(extended).toBeNull();
-    expect(target.effects).toHaveLength(0);
-  });
-
-  it('returns null extended when only debuffs are active', () => {
-    const p = { ...makePlayer(), effects: [makeActiveDebuff()] };
-    const { target, extended } = extendRandomBuffDuration(p, 2);
-    expect(extended).toBeNull();
-    expect(target.effects).toHaveLength(1);
-  });
-
-  it('extends the buff duration when one buff is active', () => {
-    const buff = makeActiveBuff({ remainingDuration: 3 });
-    const p = { ...makePlayer(), effects: [buff] };
-    const { target, extended } = extendRandomBuffDuration(p, 2);
-    expect(extended).not.toBeNull();
-    expect(extended?.remainingDuration).toBe(5);
-    expect(target.effects[0].remainingDuration).toBe(5);
-  });
-
-  it('caps extended duration at MAX_EFFECT_DURATION (10)', () => {
-    const buff = makeActiveBuff({ remainingDuration: 9 });
-    const p = { ...makePlayer(), effects: [buff] };
-    const { extended } = extendRandomBuffDuration(p, 5);
-    expect(extended?.remainingDuration).toBe(10);
   });
 });
 
@@ -177,69 +99,5 @@ describe('tickAllEffects', () => {
     const { target, expired } = tickAllEffects(p);
     expect(target.effects).toHaveLength(1);
     expect(expired).toHaveLength(0);
-  });
-});
-
-describe('getStudyMarkIntensity', () => {
-  it('returns 0 when no effects are present', () => {
-    expect(getStudyMarkIntensity(makePlayer())).toBe(0);
-  });
-
-  it('returns the intensity of the mind studying mark when present', () => {
-    const mark: ActiveEffect = { effectId: 'tier1_mind_mark', remainingDuration: 2, intensity: 3, appliedAt: 0, tier: 1 };
-    const p = { ...makePlayer(), effects: [mark] };
-    expect(getStudyMarkIntensity(p)).toBe(3);
-  });
-
-  it('returns 0 when only a non-mark effect is present', () => {
-    const other: ActiveEffect = { effectId: 'debuff_poison', remainingDuration: 2, intensity: 2, appliedAt: 0, tier: 1 };
-    const p = { ...makePlayer(), effects: [other] };
-    expect(getStudyMarkIntensity(p)).toBe(0);
-  });
-});
-
-describe('getThornsReflect', () => {
-  it('returns 0 when no effects are present', () => {
-    expect(getThornsReflect(makePlayer())).toBe(0);
-  });
-
-  it('returns reflectDamage × intensity (fixture_thorns, reflectDamage: 1)', () => {
-    const thorns: ActiveEffect = { effectId: 'fixture_thorns', remainingDuration: 3, intensity: 2, appliedAt: 0, tier: 1 };
-    const p = { ...makePlayer(), effects: [thorns] };
-    expect(getThornsReflect(p)).toBe(2);
-  });
-
-  it('returns 0 for an effect with no reflectDamage payload', () => {
-    const burn: ActiveEffect = { effectId: 'debuff_poison', remainingDuration: 2, intensity: 4, appliedAt: 0, tier: 1 };
-    const p = { ...makePlayer(), effects: [burn] };
-    expect(getThornsReflect(p)).toBe(0);
-  });
-});
-
-describe('getActiveRollModifier', () => {
-  it('returns 0 when no effects are present', () => {
-    expect(getActiveRollModifier(makePlayer())).toBe(0);
-  });
-
-  it('returns flat rollModifier for an effect with a flat modifier (fixture_curse: -2)', () => {
-    const curse: ActiveEffect = { effectId: 'fixture_curse', remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 2 };
-    const p = { ...makePlayer(), effects: [curse] };
-    expect(getActiveRollModifier(p)).toBe(-2);
-  });
-
-  it('a flat rollModifier is intensity-independent (fixture_curse: -2 at intensity 3)', () => {
-    // spec 32 v3 re-pin: no library effect carries rollModifierPerIntensity any
-    // more — flat modifiers must NOT scale with intensity.
-    const curse: ActiveEffect = { effectId: 'fixture_curse', remainingDuration: 2, intensity: 3, appliedAt: 0, tier: 2 };
-    const p = { ...makePlayer(), effects: [curse] };
-    expect(getActiveRollModifier(p)).toBe(-2);
-  });
-
-  it('sums flat rollModifier contributions across multiple effects', () => {
-    // fixture_curse rollModifier -2 + fixture_roll_up rollModifier +3 = +1
-    const curse: ActiveEffect = { effectId: 'fixture_curse', remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 2 };
-    const statusChance: ActiveEffect = { effectId: 'fixture_roll_up', remainingDuration: 2, intensity: 1, appliedAt: 0, tier: 2 };
-    const p = { ...makePlayer(), effects: [curse, statusChance] };
-    expect(getActiveRollModifier(p)).toBe(1);
   });
 });

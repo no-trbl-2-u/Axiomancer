@@ -110,10 +110,6 @@ export function resolveWareItem(ware: ShopWare): Item | null {
  * shipped shop consumables actually set. Cluster: S5-talk-C04.
  */
 interface WarePayload {
-    cleanse?: boolean;
-    regeneration?: { healthPerRound?: number };
-    defenseModifier?: number;
-    rollModifier?: number;
     advantageModifier?: { grantAdvantage?: readonly string[] };
 }
 
@@ -164,13 +160,8 @@ function modWords(mod: { stat: string; value: number }): string {
 function effectWords(effect: Effect): string {
     const payload = (effect.payload ?? {}) as WarePayload;
     const parts: string[] = [];
-    const regen = payload.regeneration?.healthPerRound ?? 0;
-    if (regen !== 0) parts.push(`${signed(regen)} VITAE / round`);
-    if (payload.defenseModifier) parts.push(`${signed(payload.defenseModifier)} defense`);
-    if (payload.rollModifier) parts.push(`${signed(payload.rollModifier)} to rolls`);
     const advantage = payload.advantageModifier?.grantAdvantage ?? [];
     if (advantage.length > 0) parts.push(`advantage on ${advantage.join(' / ')}`);
-    if (payload.cleanse) parts.push('clears afflictions');
     if (parts.length === 0) return '';
     const rounds = effect.duration > 0
         ? `, ${effect.duration} ${effect.duration === 1 ? 'round' : 'rounds'}`

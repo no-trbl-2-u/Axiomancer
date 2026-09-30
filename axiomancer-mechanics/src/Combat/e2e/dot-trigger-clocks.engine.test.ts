@@ -14,10 +14,10 @@
  * Covered:
  *   1. `fireDotTrigger` unit semantics — trigger matching, exact no-op,
  *      POISON ramp, MARK flat amplification, BLEED `decaysPerTick` washout.
- *   2. The two round-clock aliases ('round-start'/'round-end' ≡ `tickPhase`).
+ *   2. The round clock: an untagged DoT ticks at round start only.
  *   3. Engine call sites: 'card-played' fires on a PLAYER spell play (PAID
  *      bottom or FREE top — the FREE site was missing until 2026-09-04);
- *      'damage-instance' fires on the shared enemy-damage funnel (THORNS).
+ *      'damage-instance' fires on the shared enemy-damage funnel (a card hit).
  *      (The card purge, P1 2026-09-27, deleted the 'payoff' call-site test —
  *      RUPTURE has no surviving carrier — and the card-landed fresh-stack /
  *      play-site Soul tests: no surviving card lands a DoT.)
@@ -48,15 +48,9 @@ import type { CombatEncounterState, CombatEvent } from '../combat.encounter.type
 import {
     fireDotTrigger, growPerEnemyActionDots, EXPECTED_TRIGGERS_PER_ROUND,
     getPendingDotTotal, computeRoundsToKill, tickAllEffects,
-    processRoundStartEffects, processRoundEndEffects, processDamageOverTime,
+    processRoundStartEffects, processRoundEndEffects,
 } from '../effects';
 import { rampedDamagePerRound, getDotAmplificationByEffect } from '../effect-modifiers';
-import { registerFixtureEffects } from '../../test-utils/fixture-effects';
-
-// The keyword audit (2026-09-27) deleted buff_thorns / debuff_backfire /
-// the round-clock DoT species from the library; their engine channels are
-// exercised through the `fixture_*` effects instead.
-registerFixtureEffects();
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -77,9 +71,6 @@ const SYNTHETICS: readonly Effect[] = [
     syntheticDot('ws3x_card_played', { damagePerRound: 3, damageType: 'body', trigger: 'card-played' }),
     syntheticDot('ws3x_damage_instance', { damagePerRound: 2, damageType: 'body', trigger: 'damage-instance' }),
     syntheticDot('ws3x_payoff', { damagePerRound: 4, damageType: 'body', trigger: 'payoff' }),
-    // The two round-clock aliases.
-    syntheticDot('ws3x_round_start', { damagePerRound: 3, damageType: 'body', trigger: 'round-start' }),
-    syntheticDot('ws3x_round_end', { damagePerRound: 3, damageType: 'body', trigger: 'round-end' }),
     // BLEED-shaped event DoT with no calendar: decays per tick, washes out.
     syntheticDot('ws3x_cp_decay', { damagePerRound: 5, damageType: 'body', trigger: 'card-played' },
         { decaysPerTick: true, calendarExpiry: false }),
@@ -210,27 +201,22 @@ describe('fireDotTrigger — per-clock tick semantics', () => {
     });
 });
 
-// ── 2. Round-clock aliases ────────────────────────────────────────────────────
+// ── 2. The round clock ────────────────────────────────────────────────────────
 
-describe("round-clock aliases — 'round-start'/'round-end' ≡ tickPhase", () => {
-    it("'round-start' ticks at round start and not at round end", () => {
-        const enemy = stateWithEnemyEffects([ae('ws3x_round_start', 2, 3)]).enemy;
-        expect(processRoundStartEffects(enemy, 1).dotDamage).toBe(6);
-        expect(processRoundEndEffects(enemy, 1).dotDamage).toBe(0);
+describe('round clock — an untagged DoT ticks at round start', () => {
+    it('an untagged DoT ticks at round start; round end only counts down', () => {
+        const enemy = stateWithEnemyEffects([ae('ws3x_legacy', 2, 3)]).enemy;
+        const start = processRoundStartEffects(enemy, 1);
+        expect(start.dotDamage).toBe(6);
+        const end = processRoundEndEffects(enemy);
+        expect(end.target.health).toBe(enemy.health);
     });
 
-    it("'round-end' ticks at round end and not at round start", () => {
-        const enemy = stateWithEnemyEffects([ae('ws3x_round_end', 2, 3)]).enemy;
-        expect(processRoundStartEffects(enemy, 1).dotDamage).toBe(0);
-        expect(processRoundEndEffects(enemy, 1).dotDamage).toBe(6);
-    });
-
-    it('event-clocked DoTs never tick at either round boundary', () => {
+    it('event-clocked DoTs never tick at the round boundary', () => {
         const enemy = stateWithEnemyEffects([
             ae('ws3x_card_played', 2, 4), ae('ws3x_damage_instance', 2, 4), ae('ws3x_payoff', 2, 4),
         ]).enemy;
         expect(processRoundStartEffects(enemy, 1).dotDamage).toBe(0);
-        expect(processRoundEndEffects(enemy, 1).dotDamage).toBe(0);
     });
 });
 
@@ -291,24 +277,18 @@ describe("engine call site — 'card-played' (player-side plays only, ratified)"
 });
 
 describe("engine call site — 'damage-instance' (shared enemy-damage funnel)", () => {
-    it('a THORNS reflect instance advances the damage-instance clock', () => {
+    it('a card hit on the enemy advances the damage-instance clock', () => {
         mockSequentialRng(0.5);
-        const base = stateWithEnemyEffects([ae('ws3x_damage_instance', 2, 4)]);
-        const before: CombatEncounterState = {
-            ...base,
-            player: { ...base.player, effects: [ae('fixture_thorns', 2, 3)] }, // reflect 1 × 2
-        };
-        const { state: after, events } = resolveThreatPhase(before);
+        const before = stateWithEnemyEffects(
+            [ae('ws3x_damage_instance', 2, 4)],
+            [{ uid: 't1', cardId: 'grey-strike' }],
+        );
+        const { state: after, events } = playCombatCard(before, { uid: 't1' }, true, 'fx-die');
 
-        const [reflected] = findEvents(events, 'thorns-reflected');
-        expect(reflected.amount).toBe(2);
         const ticks = findEvents(events, 'dot-tick').filter(e => e.effectId === 'ws3x_damage_instance');
         expect(ticks).toEqual([{ kind: 'dot-tick', effectId: 'ws3x_damage_instance', label: 'ws3x_damage_instance', amount: 4, target: 'enemy' }]);
-        // Reflect (2) + clock tick (4) is the WHOLE enemy delta — the event-
-        // clocked DoT did NOT also tick at the round boundary.
-        expect(before.enemy.health - after.enemy.health).toBe(6);
-        // Its calendar was kept (no calendarExpiry opt-out): 4 → 3.
-        expect(after.enemy.effects.find(e => e.effectId === 'ws3x_damage_instance')?.remainingDuration).toBe(3);
+        // The hit plus the clock tick (4) is the WHOLE enemy delta.
+        expect(before.enemy.health - after.enemy.health).toBe(directDamageToEnemy(events) + 4);
     });
 });
 
@@ -438,11 +418,10 @@ describe('legacy parity — an untagged DoT keeps exactly the old behavior', () 
             return total;
         };
 
-        // Real STILL-LEGACY library DoTs (WS3.3 moved poison/bleed onto event
-        // clocks — the round-clocked card-local species and the support hex
-        // are the remaining untagged witnesses).
+        // The untagged witnesses (WS3.3 moved poison/bleed onto event clocks):
+        // the library's Creeping Doom and the synthetic legacy DoT.
         const enemy = stateWithEnemyEffects([
-            ae('fixture_ember', 3, 4), ae('fixture_nettle', 3, 3), ae('debuff_hex', 2, 2),
+            ae('debuff_creeping_doom', 3, 4), ae('ws3x_legacy', 3, 3),
         ]).enemy;
         expect(getPendingDotTotal(enemy, 2).total).toBe(legacyPending(enemy, 2));
         expect(getPendingDotTotal(enemy).total).toBe(legacyPending(enemy));
@@ -466,15 +445,13 @@ describe('legacy parity — an untagged DoT keeps exactly the old behavior', () 
 
     it('round clocks + calendars are unchanged for untagged DoTs', () => {
         const enemy = stateWithEnemyEffects([ae('ws3x_legacy', 2, 4)]).enemy;
-        // Default tickPhase 'start' — ticks at round start for 3 × 2.
+        // Untagged — ticks at round start for 3 × 2.
         const start = processRoundStartEffects(enemy, 1);
         expect(start.dotDamage).toBe(6);
         expect(start.dotWashedOut).toEqual([]);
         // Round end: no tick, one calendar decrement.
-        const end = processRoundEndEffects(start.target, 1);
-        expect(end.dotDamage).toBe(0);
+        const end = processRoundEndEffects(start.target);
+        expect(end.target.health).toBe(start.target.health);
         expect(end.target.effects[0].remainingDuration).toBe(3);
-        // processDamageOverTime keeps its exact-no-tick contract too.
-        expect(processDamageOverTime(enemy, 'end', 1).damage).toBe(0);
     });
 });

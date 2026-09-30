@@ -8,7 +8,7 @@
  *   - getDamageTakenMultiplier   (exactly 1 without a marker — no v3 effect
  *     carries a plain damageTakenMult; the machinery is kept for enemies/tests)
  *   - getStanceVulnMult          (stance-keyed vulnerability, uncapped)
- *   - getPendingDotTotal / consumeDotEffects / consumeAfflictions (RUPTURE fuel)
+ *   - getPendingDotTotal (RUPTURE fuel)
  *   - getDistinctDebuffCount / getDistinctControlCount
  *   - getActiveDotTotal / getActiveDotAmplifications  (amplification surface)
  *   - getTickAmplifyFlat         (MARK)
@@ -34,16 +34,9 @@ import type { Card, CardSpecialMechanic } from '../../Cards/types';
 import type { CombatState } from '../types';
 import {
     getDamageTakenMultiplier, getStanceVulnMult, getPendingDotTotal,
-    consumeDotEffects,
     getDistinctDebuffCount, getDistinctControlCount,
 } from '../effects';
 import { getActiveDotTotal, getActiveDotAmplifications, getTickAmplifyFlat } from '../effect-modifiers';
-import { registerFixtureEffects } from '../../test-utils/fixture-effects';
-
-// The keyword audit (2026-09-27) deleted buff_thorns / debuff_backfire /
-// the round-clock DoT species from the library; their engine channels are
-// exercised through the `fixture_*` effects instead.
-registerFixtureEffects();
 
 // v3 debuff base values:
 //   debuff_poison 2/round (start, ramps +floor(0.5×turnsActive) when a round is
@@ -59,25 +52,16 @@ const combatant = (effects: ActiveEffect[]): Combatant => {
 };
 
 // The spec 32 v3 keyword reset deleted the stance-keyed VULNERABLE debuff and
-// the negative-roll / action-restriction control debuffs. No surviving library
+// the stance-keyed control debuffs (R7d removes their channels). No surviving library
 // effect carries those shapes, so the stance-vuln and distinct-control machinery
 // is driven by test-only fixtures registered into the shared registry (the same
 // lookup the selectors read). Never touches the library JSON.
 const SELECTOR_FIXTURES: Effect[] = [
     { id: 'test_vuln_body', name: 'test vuln body', description: 'stance-keyed vulnerable body ×1.5', type: 'debuff', category: 'stat', duration: 4, stacking: 'intensity', tier: 2, payload: { damageTakenMultForStance: { stance: 'body', mult: 1.5 } } },
-    { id: 'test_ctrl_confusion', name: 'test confusion', description: 'control -5', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -5 } },
     { id: 'test_charm', name: 'test charm', description: 'forcedStance heart', type: 'debuff', category: 'control', duration: 4, stacking: 'none', tier: 2, payload: { actionRestriction: { forcedStance: 'heart' } } },
     { id: 'test_silence', name: 'test silence', description: 'blockedStances heart', type: 'debuff', category: 'control', duration: 4, stacking: 'none', tier: 2, payload: { actionRestriction: { blockedStances: ['heart'] } } },
-    // Post-Phase-30 merge 2026-07-12: the zero-producer sweep deleted the
-    // legacy control vocabulary — the WS8.2 surface shapes live on as
-    // test-only fixtures, one per DISRUPT surface.
-    { id: 'test_ctrl_fear', name: 'test fear', description: 'control roll -4', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -4 } },
-    { id: 'test_ctrl_knockdown', name: 'test knockdown', description: 'control roll -3', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -3 } },
-    { id: 'test_ctrl_slow', name: 'test slow', description: 'control roll -2', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -2 } },
-    { id: 'test_root', name: 'test root', description: 'stance lock', type: 'debuff', category: 'control', duration: 4, stacking: 'none', tier: 2, payload: { defenseModifier: -2, lockedStance: true } },
-    { id: 'test_blind', name: 'test blind', description: 'rider suppress', type: 'debuff', category: 'control', duration: 4, stacking: 'none', tier: 2, payload: { suppressesThreatRiders: true } },
+    { id: 'test_root', name: 'test root', description: 'stance lock', type: 'debuff', category: 'control', duration: 4, stacking: 'none', tier: 2, payload: { lockedStance: true } },
     { id: 'test_confusion_blur', name: 'test stance blur', description: 'blursStanceHints', type: 'debuff', category: 'control', duration: 4, stacking: 'none', tier: 2, payload: { blursStanceHints: true } },
-    { id: 'test_exhaustion', name: 'test exhaustion', description: 'threat-damage -25%', type: 'debuff', category: 'stat', duration: 4, stacking: 'intensity', tier: 2, payload: { outgoingThreatDamageMulPct: -25 } },
 ];
 beforeAll(() => { for (const e of SELECTOR_FIXTURES) effectsLibrary.registry.set(e.id, e); });
 afterAll(() => { for (const e of SELECTOR_FIXTURES) effectsLibrary.registry.delete(e.id); });
@@ -106,7 +90,7 @@ describe('getStanceVulnMult — stance-keyed vulnerability (Fate Engine P1 #17)'
     });
 });
 
-describe('getPendingDotTotal / consumeDotEffects (RUPTURE fuel)', () => {
+describe('getPendingDotTotal (RUPTURE fuel)', () => {
     it('sums each DoT over its remaining lifetime (amplification- and decay-aware)', () => {
         // WS3.3: poison rides the card-played clock — 2 expected ticks/round.
         // i2, 4 rounds, NO round threaded → flat floor(2×2) × 8 ticks = 32.
@@ -137,18 +121,12 @@ describe('getPendingDotTotal / consumeDotEffects (RUPTURE fuel)', () => {
     });
 
     it('ignores non-DoT effects and treats permanent DoT as one round of expected ticks', () => {
-        expect(getPendingDotTotal(combatant([ae('test_ctrl_confusion', 1)])).total).toBe(0);
+        expect(getPendingDotTotal(combatant([ae('test_charm', 1)])).total).toBe(0);
         // remainingDuration -1 (permanent) → max(1, -1) = 1 round → 2 expected
         // card-played ticks × floor(2×1) = 4.
         expect(getPendingDotTotal(combatant([ae('debuff_poison', 1, -1)])).total).toBe(4);
     });
 
-    it('consumeDotEffects strips ONLY DoT effects and reports the ids', () => {
-        const c = combatant([ae('debuff_poison', 2), ae('fixture_curse', 1), ae('debuff_bleed', 1)]);
-        const { combatant: stripped, consumed } = consumeDotEffects(c);
-        expect(consumed.sort()).toEqual(['debuff_bleed', 'debuff_poison']);
-        expect(stripped.effects.map(e => e.effectId)).toEqual(['fixture_curse']);
-    });
 });
 
 describe('getDistinctDebuffCount (FALLEN / variety payoffs)', () => {
@@ -156,39 +134,26 @@ describe('getDistinctDebuffCount (FALLEN / variety payoffs)', () => {
         expect(getDistinctDebuffCount(combatant([
             ae('debuff_poison', 1), ae('debuff_poison', 2), ae('debuff_bleed', 1), ae('debuff_mark', 1),
         ]))).toBe(3);
-        // buffs do not count toward debuff variety.
-        expect(getDistinctDebuffCount(combatant([ae('fixture_thorns', 1)]))).toBe(0);
+        expect(getDistinctDebuffCount(combatant([]))).toBe(0);
     });
 });
 
 describe('getDistinctControlCount (DISRUPT meter — WS8.3 counts SURFACES, not ids)', () => {
     it('counts distinct control SURFACES; same-surface ids collapse to one pip', () => {
-        // Five control ids on THREE surfaces: charm + silence share 'action',
-        // knockdown + slow share 'roll', root owns 'stance' (WS8.2
-        // lockedStance). (daze folded into confusion, WS8.1 KW-2.)
+        // Four control ids on TWO surfaces: petrify + charm + silence share
+        // 'action', root owns 'stance' (WS8.2 lockedStance).
         expect(getDistinctControlCount(combatant([
+            ae('debuff_petrify', 1),              // skipTurn        → action
             ae('test_charm', 1),                  // forcedStance    → action
             ae('test_silence', 1),                // blockedStances  → action
-            ae('test_ctrl_knockdown', 1),         // roll -3         → roll
-            ae('test_ctrl_slow', 1),              // roll -2         → roll
             ae('test_root', 1),                   // lockedStance    → stance
             ae('debuff_poison', 1),               // DoT — NOT control
             ae('debuff_mark', 1),                 // exposure — NOT control
-        ]))).toBe(3);
-        // Three ids of the SAME grip are ONE pip (the WS8.3 design intent).
-        expect(getDistinctControlCount(combatant([
-            ae('test_ctrl_fear', 1), ae('test_ctrl_slow', 1), ae('test_ctrl_knockdown', 1),
-        ]))).toBe(1);
+        ]))).toBe(2);
         expect(getDistinctControlCount(combatant([]))).toBe(0);
     });
 
-    it('classifies the WS8.2 re-payloaded surfaces (threat-damage / rider-suppress / stance)', () => {
-        expect(getDistinctControlCount(combatant([
-            ae('test_exhaustion', 1),             // outgoingThreatDamageMulPct → threat-damage
-            ae('test_blind', 1),                  // suppressesThreatRiders     → rider-suppress
-            ae('test_confusion_blur', 1),         // blursStanceHints           → stance
-        ]))).toBe(3);
-        // ROOT (lock) and CONFUSION (blur) are the same stance surface.
+    it('ROOT (lock) and CONFUSION (blur) are the same stance surface', () => {
         expect(getDistinctControlCount(combatant([
             ae('test_root', 1), ae('test_confusion_blur', 1),
         ]))).toBe(1);

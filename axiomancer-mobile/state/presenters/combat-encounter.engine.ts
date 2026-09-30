@@ -362,18 +362,10 @@ export function dieCanPowerCardVM(
 }
 
 export type CombatCardKind =
-    | 'dot' | 'stun' | 'regen' | 'guard' | 'weaken' | 'inert' | 'befriend'
+    | 'dot' | 'stun' | 'guard' | 'weaken' | 'inert' | 'befriend'
     // ── mechanics 0.34.0 — newly REAL in the HP engine ──
     | 'vulnerable'   // debuff_vulnerable / debuff_vulnerability_* — foe takes +N% damage
     | 'mark'         // spec 32 v3 — universal exposure: +N per DoT tick per stack
-    | 'thorns'       // reflect attacker damage back
-    // ── card-overhaul (2026-07-03) — 6 new status effects the honesty gate missed ──
-    | 'exposure'      // debuff_exposure → real -N DEF number
-    | 'doubt'         // debuff_doubt → forces the foe's next play to weak-tier (qualitative)
-    | 'sensoryNull'   // debuff_sensory_null → blocks advantage reads / dulls control (qualitative)
-    | 'isolated'      // debuff_isolated → denies ally-buff targeting (qualitative)
-    | 'overextended'  // debuff_overextended → self-cost: your next play is weakened (qualitative)
-    | 'clarity'       // buff_clarity → next die counts as WILD
     | 'resolute'      // buff_resolute → real -N% damage-taken reduction (the inverse of vulnerable)
     // ── card-honesty (2026-07-10) — the generic MECHANIC-LED face ──
     | 'mechanic';     // a specialMechanics verb (DEAL / GUARD) or a
@@ -834,7 +826,7 @@ export function selectCombatLogLines(events: readonly CombatEvent[]): CombatLogL
             case 'enemy-healed': {
                 const why = e.source === 'STAGE' ? 'The new STAGE restores' : 'Its threat restores';
                 out.push({
-                    kind: e.kind, side: 'enemy', color: GLYPH_COLORS.regen,
+                    kind: e.kind, side: 'enemy', color: GLYPH_COLORS.statup,
                     text: `${why} — VITAE +${e.amount}.`,
                     float: `+${e.amount}`,
                 });
@@ -847,7 +839,7 @@ export function selectCombatLogLines(events: readonly CombatEvent[]): CombatLogL
             // signature), and a float would carpet the board on every mis-tap.
             case 'effect-fizzled':
                 out.push({
-                    kind: e.kind, side: 'player', color: GLYPH_COLORS.thorns,
+                    kind: e.kind, side: 'player', color: GUARD_COLOR,
                     text: `Refused — ${e.message}.`,
                     float: null,
                 });
@@ -965,7 +957,7 @@ export function selectCombatLogHistory(state: CombatEncounterState): CombatLogHi
                             : 'No stance — neither, ×1';
                 const color = e.outcome === 'punished' ? INTENT_ICONS.damage.color
                     : e.outcome === 'yielded' ? GLYPH_COLORS.statup
-                        : GLYPH_COLORS.thorns;
+                        : GUARD_COLOR;
                 push('player', color, text);
                 break;
             }
@@ -974,9 +966,6 @@ export function selectCombatLogHistory(state: CombatEncounterState): CombatLogHi
                 break;
             case 'barrier-absorbed':
                 push('player', GUARD_COLOR, `Barrier absorbs ${e.amount}.`);
-                break;
-            case 'thorns-reflected':
-                push('enemy', GLYPH_COLORS.thorns, `Thorns reflect ${e.amount} back.`);
                 break;
             default: {
                 // Every kind `selectCombatLogLines` already narrates (stage
@@ -1103,33 +1092,19 @@ function diceVM(state: CombatEncounterState): CombatDieVM[] {
 type EffectPayloadLike = {
     damageOverTime?: { damagePerRound: number; trigger?: string };
     actionRestriction?: { skipTurn?: boolean };
-    regeneration?: { healthPerRound?: number };
-    rollModifier?: number;
-    rollModifierPerIntensity?: number;
     // ── mechanics 0.34.0 ──
-    reflectDamage?: number;     // the THORNS reflect channel (no live library carrier)
     damageTakenMult?: number;   // debuff_vulnerable / debuff_vulnerability_* → Vulnerable (>1) / buff_resolute → Resolute (<1)
     // ── spec 32 v3 — the themed-deck payload keys ──
     tickAmplifyFlat?: number;      // debuff_mark → +N per DoT tick per stack
     outgoingDamageMulPct?: number; // debuff_quarter → the enemy deals N% less damage (<0)
-    // ── card-overhaul (2026-07-03) ──
-    defenseModifier?: number;          // debuff_exposure → real -N DEF number
-    restrictsSurgeAccess?: boolean;    // debuff_doubt → forces the foe's next play to weak-tier
-    blocksAdvantage?: boolean;         // debuff_sensory_null → blocks advantage reads
-    reducesControlAccuracy?: boolean;  // debuff_sensory_null → dulls control accuracy
-    deniesAllyBuffTargeting?: boolean; // debuff_isolated → denies ally-buff targeting
-    forcesWeakTierNextPlay?: boolean;  // debuff_overextended → self-cost weak next play
-    forceWildOnNextDie?: boolean;      // buff_clarity → next die counts as Wild
 };
 
 /** THE single forward-compat honesty gate: the kind of HONEST, engine-read effect,
  *  or null for effects the live HP engine still doesn't quantify (→ greyed, number-
- *  less). Widened for mechanics 0.33.0: a negative roll modifier now weakens (and a
- *  variety denies) the enemy's turn, so it counts as 'weaken'. */
+ *  less). */
 export function engineHonestKind(
     effectId: string | null | undefined,
-): 'dot' | 'stun' | 'regen' | 'weaken' | 'vulnerable' | 'thorns' | 'mark'
-    | 'exposure' | 'doubt' | 'sensoryNull' | 'isolated' | 'overextended' | 'clarity' | 'resolute'
+): 'dot' | 'stun' | 'weaken' | 'vulnerable' | 'mark' | 'resolute'
     | null {
     if (!effectId) return null;
     const e = lookupEffect(effectId);
@@ -1137,28 +1112,16 @@ export function engineHonestKind(
     const p = (e.payload ?? {}) as EffectPayloadLike;
     if (p.damageOverTime) return 'dot';
     if (p.actionRestriction?.skipTurn) return 'stun';
-    if ((p.regeneration?.healthPerRound ?? 0) > 0) return 'regen';
     // Spec 32 v3 — the themed-deck payloads, all engine-read (honest):
     // MARK amplifies every DoT tick; QUARTER
     // (negative outgoing-damage %) weakens the enemy's hits.
     if ((p.tickAmplifyFlat ?? 0) > 0) return 'mark';
     if ((p.outgoingDamageMulPct ?? 0) < 0) return 'weaken';
-    // 0.34.0: reflect + damage-amp are now read by the live HP engine, so they're honest.
-    if ((p.reflectDamage ?? 0) > 0) return 'thorns';
+    // 0.34.0: damage-amp is read by the live HP engine, so it's honest.
     if ((p.damageTakenMult ?? 1) > 1) return 'vulnerable';
     // Fate Engine P1: STANCE-KEYED vulnerability (+N% only from that color die).
     if ((p as { damageTakenMultForStance?: { mult: number } }).damageTakenMultForStance) return 'vulnerable';
-    // card-overhaul (2026-07-03): the 6 gaps in the whitelist — every one of these
-    // is a real, engine-read payload, so each gets an honest kind rather than
-    // falling through to 'inert'.
-    if ((p.damageTakenMult ?? 1) < 1) return 'resolute';      // buff_resolute — real % dmg-taken reduction
-    if ((p.defenseModifier ?? 0) < 0) return 'exposure';      // debuff_exposure — real -N DEF
-    if (p.restrictsSurgeAccess) return 'doubt';               // debuff_doubt — forces weak-tier next play
-    if (p.blocksAdvantage || p.reducesControlAccuracy) return 'sensoryNull'; // debuff_sensory_null
-    if (p.deniesAllyBuffTargeting) return 'isolated';         // debuff_isolated
-    if (p.forcesWeakTierNextPlay) return 'overextended';      // debuff_overextended (self-cost)
-    if (p.forceWildOnNextDie) return 'clarity';               // buff_clarity — next die is Wild
-    if ((p.rollModifier ?? 0) < 0 || (p.rollModifierPerIntensity ?? 0) < 0) return 'weaken';
+    if ((p.damageTakenMult ?? 1) < 1) return 'resolute';      // real % dmg-taken reduction
     return null;
 }
 
@@ -1199,17 +1162,10 @@ export function resolvePrimary(card: CombatCard, sourceCard: Card | undefined): 
     }
     if (vc === 'buff-self') {
         const self = (sourceCard?.combatEffects ?? []).filter(e => e.appliedTo === 'self');
-        // 0.34.0: a self-buff that reflects (Thorns) is now real.
-        const thorns = self.find(s => engineHonestKind(s.effectId) === 'thorns');
-        if (thorns) return { kind: 'thorns', ce: thorns, guardAmount: null, riders: self.filter(s => s !== thorns), mech: null };
-        // card-overhaul (2026-07-03): a self-buff that reduces damage taken (Resolute)
-        // or arms the next die as Wild (Clarity) is now real too.
+        // card-overhaul (2026-07-03): a self-buff that reduces damage taken
+        // (Resolute) is real.
         const resolute = self.find(s => engineHonestKind(s.effectId) === 'resolute');
         if (resolute) return { kind: 'resolute', ce: resolute, guardAmount: null, riders: self.filter(s => s !== resolute), mech: null };
-        const clarity = self.find(s => engineHonestKind(s.effectId) === 'clarity');
-        if (clarity) return { kind: 'clarity', ce: clarity, guardAmount: null, riders: self.filter(s => s !== clarity), mech: null };
-        const regenFx = self.find(s => engineHonestKind(s.effectId) === 'regen');
-        if (regenFx) return { kind: 'regen', ce: regenFx, guardAmount: null, riders: self.filter(s => s !== regenFx), mech: null };
         // Not a recognised self-EFFECT — headline the driving MECHANIC. The
         // self effects (e.g. a self-cost MARK) ride along as keyword chips.
         const led = headlineMechanic(mechs);
@@ -1233,11 +1189,7 @@ export function resolvePrimary(card: CombatCard, sourceCard: Card | undefined): 
                 : k === 'weaken' ? 'weaken'
                     : k === 'vulnerable' ? 'vulnerable'
                         : k === 'mark' ? 'mark'
-                            : k === 'exposure' ? 'exposure'
-                                    : k === 'doubt' ? 'doubt'
-                                        : k === 'sensoryNull' ? 'sensoryNull'
-                                            : k === 'isolated' ? 'isolated'
-                                                : 'inert';
+                            : 'inert';
     // A card classified by verb (DEAL, GUARD) with no
     // engine-honest opponent EFFECT lands here as 'inert'. Headline its driving
     // MECHANIC instead of the ambiguous fallback; the effects ride as chips.
@@ -1267,10 +1219,8 @@ interface CardCalc extends PrimaryResolution {
     dotGrowsOnEnemyAction: boolean;
     // ── 0.34.0 authored statics (real units; live swings stay live) ──
     vulnPct: number;       // +N% damage taken (from damageTakenMult)
-    reflectN: number;      // thorns reflect per hit (reflectDamage × intensity)
     markAmp: number;       // MARK: +N per DoT tick per application (tickAmplifyFlat × intensity)
     // ── card-overhaul (2026-07-03) ──
-    exposureDelta: number; // real -N DEF (defenseModifier, negative)
     resolutePct: number;   // real -N% dmg taken (the inverse of vulnPct, negative)
     // ── P0-truth read triplet (the deterministic ±1 rule, exact numbers) ──
     totalAdv: number;      // DoT lifetime on a WON read (+1 intensity)
@@ -1288,9 +1238,9 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
         perTurn: 0, turns: 0, total: 0, freePerTurn: 0, freeTurns: 0, freeTotal: 0,
         skips: 0, dpr: 0, intensity: 1, stacks: false, dotTrigger: null,
         dotGrowsOnEnemyAction: false,
-        vulnPct: 0, reflectN: 0,
+        vulnPct: 0,
         markAmp: 0,
-        exposureDelta: 0, resolutePct: 0,
+        resolutePct: 0,
         totalAdv: 0, totalDis: 0, vulnPctAdv: 0,
     };
     const eff = pr.ce ? lookupEffect(pr.ce.effectId) : undefined;
@@ -1328,21 +1278,6 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
             out.glyph = pr.ce ? glyphFor(pr.ce.effectId) : '🔥';
             out.categoryColor = GLYPH_COLORS.dot;
             out.stacks = eff?.stacking === 'intensity';
-            break;
-        }
-        case 'regen': {
-            const p = (eff?.payload ?? {}) as EffectPayloadLike;
-            out.intensity = pr.ce?.intensity ?? 1;
-            out.turns = pr.ce?.duration ?? eff?.duration ?? 0;
-            out.dpr = p.regeneration?.healthPerRound ?? 0;
-            out.perTurn = out.dpr * out.intensity;
-            out.total = out.perTurn * out.turns;
-            out.freePerTurn = out.dpr;
-            out.freeTurns = eff?.duration ?? 0;
-            out.freeTotal = out.dpr * out.freeTurns;
-            out.keyword = keywordForEffect(pr.ce?.effectId);
-            out.glyph = pr.ce ? glyphFor(pr.ce.effectId) : '✚';
-            out.categoryColor = GLYPH_COLORS.regen;
             break;
         }
         case 'stun': {
@@ -1386,62 +1321,6 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
             out.glyph = pr.ce ? glyphFor(pr.ce.effectId) : '◎';
             out.categoryColor = GLYPH_COLORS.statdown;
             out.stacks = eff?.stacking === 'intensity';
-            break;
-        }
-        case 'thorns': {
-            const p = (eff?.payload ?? {}) as EffectPayloadLike;
-            out.intensity = pr.ce?.intensity ?? 1;
-            out.turns = pr.ce?.duration ?? eff?.duration ?? 0;
-            out.reflectN = (p.reflectDamage ?? 0) * out.intensity;
-            out.keyword = keywordForEffect(pr.ce?.effectId) ?? 'Thorns';
-            out.glyph = pr.ce ? glyphFor(pr.ce.effectId) : '✷';
-            out.categoryColor = GLYPH_COLORS.thorns;
-            break;
-        }
-        // ── card-overhaul (2026-07-03) — the 6 previously-blank effects ──
-        case 'exposure': {
-            const p = (eff?.payload ?? {}) as EffectPayloadLike;
-            out.turns = pr.ce?.duration ?? eff?.duration ?? 0;
-            out.exposureDelta = p.defenseModifier ?? 0;
-            out.keyword = keywordForEffect(pr.ce?.effectId) ?? 'Expose';
-            out.glyph = pr.ce ? glyphFor(pr.ce.effectId) : '◈';
-            out.categoryColor = GLYPH_COLORS.statdown;
-            out.stacks = eff?.stacking === 'intensity';
-            break;
-        }
-        case 'doubt': {
-            out.turns = pr.ce?.duration ?? eff?.duration ?? 0;
-            out.keyword = keywordForEffect(pr.ce?.effectId) ?? 'Doubt';
-            out.glyph = pr.ce ? glyphFor(pr.ce.effectId) : '❓';
-            out.categoryColor = GLYPH_COLORS.control;
-            break;
-        }
-        case 'sensoryNull': {
-            out.turns = pr.ce?.duration ?? eff?.duration ?? 0;
-            out.keyword = keywordForEffect(pr.ce?.effectId) ?? 'Numb';
-            out.glyph = pr.ce ? glyphFor(pr.ce.effectId) : '⁇';
-            out.categoryColor = GLYPH_COLORS.control;
-            break;
-        }
-        case 'isolated': {
-            out.turns = pr.ce?.duration ?? eff?.duration ?? 0;
-            out.keyword = keywordForEffect(pr.ce?.effectId) ?? 'Isolated';
-            out.glyph = pr.ce ? glyphFor(pr.ce.effectId) : '⛓';
-            out.categoryColor = GLYPH_COLORS.control;
-            break;
-        }
-        case 'overextended': {
-            out.turns = pr.ce?.duration ?? eff?.duration ?? 0;
-            out.keyword = keywordForEffect(pr.ce?.effectId) ?? 'Overextended';
-            out.glyph = pr.ce ? glyphFor(pr.ce.effectId) : '▽';
-            out.categoryColor = GLYPH_COLORS.statdown;
-            break;
-        }
-        case 'clarity': {
-            out.turns = pr.ce?.duration ?? eff?.duration ?? 0;
-            out.keyword = keywordForEffect(pr.ce?.effectId) ?? 'Clarity';
-            out.glyph = pr.ce ? glyphFor(pr.ce.effectId) : '✦';
-            out.categoryColor = GLYPH_COLORS.advantage;
             break;
         }
         case 'resolute': {
@@ -1599,18 +1478,10 @@ export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM
         case 'stun': return { ...base, kind: 'stun', keyword: kw, heroText: `skip ${c.skips} turns`, heroSub: null, freeHeroText: free, freeHeroSub: null, verbLine: "the foe can't act", powerRail: c.keyword ?? 'Stun', readDependent: false, inert: false, guardBase: null };
         case 'weaken': return { ...base, kind: 'weaken', keyword: kw, heroText: '', heroSub: c.turns > 0 ? `hits softer · ${c.turns} turns` : 'weakens its hits', freeHeroText: free, freeHeroSub: null, verbLine: "weakens the foe's hits", powerRail: c.keyword ?? 'Weaken', readDependent: false, inert: false, guardBase: null };
         case 'mark': return { ...base, kind: 'mark', keyword: kw, heroText: `+${c.markAmp}/tick`, heroSub: `${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'every DoT tick on the foe bites harder', powerRail: c.keyword ?? 'Mark', readDependent: false, inert: false, guardBase: null };
-        case 'regen': return { ...base, kind: 'regen', keyword: kw, heroText: `${c.total}`, heroSub: `over ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'heal yourself each turn', powerRail: c.keyword ?? 'Regen', readDependent: false, inert: false, guardBase: null };
         case 'guard': { const b = c.guardAmount ?? 0; return { ...base, kind: 'guard', keyword: 'GUARD', heroText: `Guard ${b}`, heroSub: null, freeHeroText: free, freeHeroSub: null, verbLine: 'block the next hit', powerRail: `${b} ↑read`, readDependent: true, inert: false, guardBase: b }; }
         case 'befriend': return { ...base, kind: 'befriend', keyword: 'SPARE', heroText: '', heroSub: 'spare a near-dead foe', freeHeroText: 'mercy', freeHeroSub: null, verbLine: 'spare a near-dead foe', powerRail: 'mercy', readDependent: false, inert: false, guardBase: null };
         case 'vulnerable': return { ...base, kind: 'vulnerable', keyword: kw, heroText: `+${c.vulnPct}%`, heroSub: `dmg taken · ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'foe takes more damage', powerRail: c.keyword ?? 'Vulnerable', readDependent: true, inert: false, guardBase: null, statusBase: c.vulnPct, statusAdv: c.vulnPctAdv, statusDis: c.vulnPct };
-        case 'thorns': return { ...base, kind: 'thorns', keyword: kw, heroText: `Reflect ${c.reflectN}`, heroSub: `${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'reflect damage to attackers', powerRail: c.keyword ?? 'Thorns', readDependent: false, inert: false, guardBase: null };
         // ── card-overhaul (2026-07-03) — the 6 previously-blank effects ──
-        case 'exposure': return { ...base, kind: 'exposure', keyword: kw, heroText: `${c.exposureDelta} DEF`, heroSub: `${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'foe defends softer', powerRail: c.keyword ?? 'Exposure', readDependent: false, inert: false, guardBase: null };
-        case 'doubt': return { ...base, kind: 'doubt', keyword: kw, heroText: '', heroSub: 'forces weak tier next play', freeHeroText: free, freeHeroSub: null, verbLine: "the foe's next play is forced to weak tier", powerRail: c.keyword ?? 'Doubt', readDependent: false, inert: false, guardBase: null };
-        case 'sensoryNull': return { ...base, kind: 'sensoryNull', keyword: kw, heroText: '', heroSub: 'blocks advantage · dulls control', freeHeroText: free, freeHeroSub: null, verbLine: "blocks the foe's advantage reads and dulls its control", powerRail: c.keyword ?? 'Sensory Null', readDependent: false, inert: false, guardBase: null };
-        case 'isolated': return { ...base, kind: 'isolated', keyword: kw, heroText: '', heroSub: 'denies ally-buff targeting', freeHeroText: free, freeHeroSub: null, verbLine: 'denies the foe ally-buff targeting (solo: denies its own self-buff)', powerRail: c.keyword ?? 'Isolated', readDependent: false, inert: false, guardBase: null };
-        case 'overextended': return { ...base, kind: 'overextended', keyword: kw, heroText: '', heroSub: 'your next play is weakened', freeHeroText: free, freeHeroSub: null, verbLine: 'a self-cost: your next play is forced to weak tier', powerRail: c.keyword ?? 'Overextended', readDependent: false, inert: false, guardBase: null };
-        case 'clarity': return { ...base, kind: 'clarity', keyword: kw, heroText: 'WILD', heroSub: 'next die', freeHeroText: free, freeHeroSub: null, verbLine: 'your next die counts as Wild', powerRail: c.keyword ?? 'Clarity', readDependent: false, inert: false, guardBase: null };
         case 'resolute': return { ...base, kind: 'resolute', keyword: kw, heroText: `${c.resolutePct}%`, heroSub: `dmg taken · ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'you take less damage', powerRail: c.keyword ?? 'Resolute', readDependent: false, inert: false, guardBase: null, statusBase: c.resolutePct };
         // A keyword-less headline (DEAL — "Deal 24" needs no badge) leaves the
         // verb slot empty on purpose; the power rail then carries the hero
@@ -1673,18 +1544,10 @@ function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
         case 'stun': return { subtitle: `${Title} the enemy — it loses its turns.`, metaChip, outcomeLine: `Apply ${Title} ${c.skips} turn${c.skips === 1 ? '' : 's'}.`, outcomeStats: [{ label: 'SKIPS', value: `${c.skips} turns` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${Title} — the foe skips its next ${c.skips} actions.`, readNote: `The read is exact: ▲ won read changes nothing (skips are duration-driven), ▼ lost read shortens the skip by ${READ_DISADVANTAGE_DURATION_PENALTY} turn (floor 1).`, mathLine: `skip ${c.skips}t = ${Title.toLowerCase()} duration ${c.skips} (each turn it would act is cancelled).`, keywords };
         case 'weaken': return { subtitle: `${Title} the enemy — its attacks hit softer.`, metaChip, outcomeLine: c.turns > 0 ? `Apply ${Title} · ${c.turns} turns.` : `Apply ${Title}.`, outcomeStats: c.turns > 0 ? [{ label: 'TURNS', value: `${c.turns}` }] : [], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — the foe's hits land softer while it holds.`, readNote: `${Title} weakens the enemy's blows.`, mathLine: `${Title} reduces the enemy's outgoing damage while active (real engine units).`, keywords };
         case 'mark': return { subtitle: `${Title} the enemy — the flaw is named.`, metaChip, outcomeLine: `Apply ${Title} +${c.markAmp}/tick · ${c.turns} turns.`, outcomeStats: [{ label: 'PER TICK', value: `+${c.markAmp}` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — every DoT tick and payoff hit on the foe deals +${c.markAmp} while it holds.`, readNote: `${Title} counts as an affliction — RUPTURE, SOUL, and REAP all feed on it.`, mathLine: `+${c.markAmp}/tick = tickAmplifyFlat × intensity, for ${c.turns} turns.`, keywords };
-        case 'regen': return { subtitle: 'Heal yourself over time.', metaChip, outcomeLine: `${Title || 'Regenerate'} ${c.total} over ${c.turns} turns.`, outcomeStats: [{ label: 'PER TURN', value: `${c.perTurn}` }, { label: 'TURNS', value: `${c.turns}` }, { label: 'TOTAL', value: `${c.total}` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: regenerate ${c.perTurn} VITAE/turn for ${c.turns} turns (${c.total} total). Needs a ${STANCE} or WILD die.`, readNote: `Heals YOU — no read needed; ${c.total} is exact.`, mathLine: `${c.perTurn}/turn = ${c.dpr} base × ${c.intensity} intensity · ${c.turns} turns · ${c.total} total.`, keywords };
         case 'guard': { const b = c.guardAmount ?? 0; const adv = Math.max(1, Math.round(b * READ_DAMAGE_MULT.advantage)); const dis = Math.max(1, Math.round(b * READ_DAMAGE_MULT.disadvantage)); return { subtitle: 'Guard yourself — soak the next hit.', metaChip, outcomeLine: `Gain ${Title} ${b}.`, outcomeStats: [{ label: 'GUARD', value: `${b} (▲${adv} · —${b} · ▼${dis})` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: Guard ${b}; ▲ read raises it to ${adv}, ▼ read drops it to ${dis}; +${colorMatchBonus(b)} if a ${STANCE} die matches.`, readNote: `The read scales this: ▲ advantage ×${READ_DAMAGE_MULT.advantage}, ▼ disadvantage ×${READ_DAMAGE_MULT.disadvantage}.`, mathLine: `POWER = round(${b} × read) + ${colorMatchBonus(b)} on a colour match.`, keywords }; }
         case 'befriend': return { subtitle: 'Spare a near-dead foe.', metaChip, outcomeLine: 'Spare a near-dead foe — end combat peacefully.', outcomeStats: [], stacksText: null, freeLine, powerLine: '◆ WITH A DIE: if the enemy VITAE is low, end combat peacefully (befriend).', readNote: 'Watch the enemy VITAE bar — befriend lands only when it is low.', mathLine: 'No fixed number — a conditional outcome gated on low enemy VITAE.', keywords };
         case 'vulnerable': { return { subtitle: `${Title} the enemy — it takes more damage.`, metaChip, outcomeLine: `Apply ${Title} +${c.vulnPct}% · ${c.turns} turns.`, outcomeStats: [{ label: 'DMG TAKEN', value: `+${c.vulnPct}%` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: 'Stacks without limit.', freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — +${c.vulnPct}% damage taken for ${c.turns} turns.`, readNote: `The read is exact: ▲ won read lands +${READ_ADVANTAGE_INTENSITY_BONUS} intensity (+${c.vulnPctAdv}%), ▼ lost read −${READ_DISADVANTAGE_DURATION_PENALTY} turn; +${c.vulnPct}% on an even read.`, mathLine: `+${c.vulnPct}% = (damageTakenMult − 1) × 100 × intensity on an even read; combined Vulnerable is uncapped.`, keywords }; }
-        case 'thorns': return { subtitle: `${Title} — attackers take damage back.`, metaChip, outcomeLine: `Gain ${Title} ${c.reflectN} · ${c.turns} turns.`, outcomeStats: [{ label: 'REFLECT', value: `${c.reflectN}` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.intensity > 1 || (lookupEffect(c.ce?.effectId ?? '')?.stacking === 'intensity') ? 'Stacks.' : null, freeLine, powerLine: `◆ WITH A DIE: gain ${Title} (Reflect ${c.reflectN}).`, readNote: 'Your reflect takes no read — Reflect is exact (a self-buff, not scaled by the stance read).', mathLine: `Reflect ${c.reflectN} returned per enemy hit, ${c.turns} turns; stacking raises the reflect.`, keywords };
         // ── card-overhaul (2026-07-03) — the 6 previously-blank effects ──
-        case 'exposure': return { subtitle: `${Title} the enemy — its defenses give.`, metaChip, outcomeLine: `Apply ${Title} ${c.exposureDelta} DEF · ${c.turns} turns.`, outcomeStats: [{ label: 'DEF', value: `${c.exposureDelta}` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — ${c.exposureDelta} DEF for ${c.turns} turns.`, readNote: `${Title} is a flat defense cut — it does not scale with the read.`, mathLine: `${c.exposureDelta} DEF = defenseModifier on an even application${c.stacks ? '; stacks by intensity' : ''}.`, keywords };
-        case 'doubt': return { subtitle: `${Title} the enemy — its next play is forced weak.`, metaChip, outcomeLine: `Apply ${Title} · ${c.turns} turn${c.turns === 1 ? '' : 's'}.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — the foe's next card play is forced to weak-tier even if it spends a die.`, readNote: `${Title} is consumed on the foe's next play — a one-shot tax, not a scaling number.`, mathLine: `${Title} forces weak-tier resolution on the foe's next play, then is consumed — no fixed number (real-units-or-no-number).`, keywords };
-        case 'sensoryNull': return { subtitle: `${Title} the enemy — its reads and controls dull.`, metaChip, outcomeLine: `Apply ${Title} · ${c.turns} turns.`, outcomeStats: [{ label: 'TURNS', value: `${c.turns}` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — blocks the foe's advantage reads and dulls its control accuracy for ${c.turns} turns.`, readNote: `${Title} denies the foe's own read/control edge — no fabricated number, just the blocked mechanic.`, mathLine: `${Title} blocks advantage-read access and reduces control accuracy for ${c.turns} turns.`, keywords };
-        case 'isolated': return { subtitle: `${Title} the enemy — no help is coming.`, metaChip, outcomeLine: `Apply ${Title} · ${c.turns} turn${c.turns === 1 ? '' : 's'}.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — denies the foe ally-buff targeting (solo fights deny its own self-buff card instead) for ${c.turns} turn${c.turns === 1 ? '' : 's'}.`, readNote: `${Title} denies a targeting option, not a number — real-units-or-no-number.`, mathLine: `${Title} denies ally-buff targeting (or, solo, denies a self-buff card) for ${c.turns} turn${c.turns === 1 ? '' : 's'}.`, keywords };
-        case 'overextended': return { subtitle: `${Title} — a self-cost for reaching too far.`, metaChip, outcomeLine: `Take ${Title} · ${c.turns} turn${c.turns === 1 ? '' : 's'}.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: this play also costs you ${Title} — your own next card play is forced to weak-tier, then consumed.`, readNote: `${Title} is consumed on your own next play — the price of this card's payoff.`, mathLine: `${Title} forces your own next play to weak-tier, then is consumed — no fixed number (real-units-or-no-number).`, keywords };
-        case 'clarity': return { subtitle: `${Title} — your next die is Wild.`, metaChip, outcomeLine: `Gain ${Title} — next die: WILD.`, outcomeStats: [{ label: 'NEXT DIE', value: 'WILD' }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: gain ${Title} — your next die counts as Wild.`, readNote: `${Title} is exact — the next die is Wild, full stop, then consumed.`, mathLine: `${Title}: next die → Wild (forceWildOnNextDie), consumed on use.`, keywords };
         case 'resolute': return { subtitle: `${Title} — you take less damage.`, metaChip, outcomeLine: `Gain ${Title} ${c.resolutePct}% · ${c.turns} turns.`, outcomeStats: [{ label: 'DMG TAKEN', value: `${c.resolutePct}%` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: gain ${Title} — ${c.resolutePct}% damage taken for ${c.turns} turns.`, readNote: `Your damage reduction takes no read — ${Title} is exact (a self-buff, not scaled by the stance read).`, mathLine: `${c.resolutePct}% = (damageTakenMult − 1) × 100 on an even application${c.stacks ? '; stacks by intensity' : ''}.`, keywords };
         // A keyword-less mechanic headline (DEAL) has no Title to lead with —
         // every line below falls back to the headline's own words rather than
@@ -1876,13 +1739,11 @@ export function armedReadValue(face: CombatCardFaceVM, read: CombatReadResult, c
  * Keywords not listed are grey: no colour, no glyph.
  */
 const KEYWORD_FAMILY: Record<string, StatFamily> = {
-    DEAL: 'body', RUPTURE: 'body', REAP: 'body', IMMOLATE: 'body', EXECUTE: 'body', OVERKILL: 'body',
-    GUARD: 'mind', BARRIER: 'mind', RIPOSTE: 'mind', THORNS: 'mind', REGEN: 'mind', HEAL: 'mind',
-    SIPHON: 'mind', WRATH: 'mind', CHAIN: 'mind', SOUL: 'mind',
+    DEAL: 'body',
+    GUARD: 'mind', BARRIER: 'mind', RIPOSTE: 'mind', HEAL: 'mind', SOUL: 'mind',
     RESOLUTE: 'mind',
     POISON: 'heart', BLEED: 'heart', DOOM: 'heart', MARK: 'heart', QUARTER: 'heart',
-    VULNERABLE: 'heart', FLAY: 'heart', STUN: 'heart', FESTER: 'heart',
-    PROLONG: 'heart', TICK: 'heart', KINDLE: 'heart', WEAKEN: 'heart',
+    VULNERABLE: 'heart', STUN: 'heart', TICK: 'heart', KINDLE: 'heart', WEAKEN: 'heart',
 };
 
 /**

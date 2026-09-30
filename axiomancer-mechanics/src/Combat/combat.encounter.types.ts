@@ -430,7 +430,6 @@ export type CombatEvent =
     | { kind: 'dot-tick'; effectId: string; label: string; amount: number; target: 'self' | 'enemy' }
     // ── 0.34.0 status-depth epic — new card-mechanic events ──────────────────
     | { kind: 'disrupt-denied'; pips: number }
-    | { kind: 'thorns-reflected'; amount: number; target: 'enemy' }
     | { kind: 'barrier-absorbed'; amount: number }
     | { kind: 'riposte-fired'; amount: number }
     // ── Fate Engine P1 (spec 31 §1) — dice-layer events ──────────────────────

@@ -230,12 +230,6 @@ with the legacy driver.)
 | `heal(entity, amount)` (alias `healCharacter`) | Restores HP (clamps to max) |
 | `resolveEffectApplication(target, effect, type, heart, equip)` | Effect application (Tier 2 buff fumble/crit; Tier 2 debuff + Tier 3 always land) |
 | `tickAllEffects(target)` | Decrements all effect durations |
-| `getStudyMarkIntensity(target)` | Mind mark bonus for damage |
-| `getThornsReflect(bearer)` | Thorns reflect damage total |
-| `removeRandomBuff(target)` | Strips one random buff |
-| `extendRandomBuffDuration(target, amount)` | Extends one random buff |
-| `applyRegen(target)` | Sums and applies all regen effects |
-| `getActiveRollModifier(target)` | Sums all `rollModifier` + `rollModifierPerIntensity × intensity` across active effects — flat roll-mod total consumed by the combat engine |
 | `canAct(effects, requestedStance?)` | Action-restriction gate — returns `{ canAct, resolvedStance, reason }` reflecting forced/blocked-stance and skipTurn constraints |
 | `isAlive(combatant)` | True if `health > 0` |
 | `isDefeated(combatant)` | True if `health <= 0` — the main win condition for Hazard-Pattern Combat |
@@ -458,7 +452,6 @@ progression levers.
 | `getThreatSequence(enemy)` | Returns the threat phase sequence for an enemy: explicit `enemy.threatSequence` wins; otherwise an authored sequence keyed by enemy id; otherwise the generated default. |
 | `generateDefaultThreatSequence(enemy)` | Generates a 3-phase fallback threat sequence from the enemy's dominant stance, rotating through Heart / Body / Mind. Used automatically by `getThreatSequence` when no authored sequence exists. |
 | `rerollSpentDice(state, rng?)` / `hasRerollableDice(state)` / `dieIsRerollable(die)` | The `reroll_spent` card mechanic's partial re-roll: re-rolls only spent/exhausted + dead `x`-face dice from the legacy face bag, leaving usable dice in play. |
-| `THREAT_WEAKEN_PER_ROLL` / `THREAT_DENY_AT` / `THREAT_WEAKEN_FLOOR` | Soft-control and stat-debuff threat tunables (0.33.0). Each point of enemy roll penalty (from confusion, fear, blind, slow, accuracy/attack-down etc.) reduces the incoming hit by `THREAT_WEAKEN_PER_ROLL` (default 0.06). When the cumulative roll penalty reaches `THREAT_DENY_AT` (default 8), the turn is fully denied (same as hard control). `THREAT_WEAKEN_FLOOR` (default 0.4) clamps the minimum damage multiplier for a weakened-but-not-denied enemy. Read these to display soft-control thresholds in the UI. |
 | `CombatIntentType`, `CombatReadResult`, `SignatureSkill`, `SignatureSkillId`, `SignatureSkillKind`, `PlayerArchetype` | The depth-layer type family. |
 
 ### Phase 169 — Curated Combat Loadout
@@ -573,7 +566,6 @@ EXECUTE, VULNERABLE, SIPHON) and by mobile for hit-preview rendering.
 |---------------------|-------------|
 | `getDamageTakenMultiplier(target)` | Incoming-damage multiplier for a combatant, given active Vulnerable or similar effects. |
 | `getPendingDotTotal(target)` | Sums pending DoT damage across all active DoT effects — the raw value used by AMPLIFY burst. |
-| `consumeDotEffects(target)` | Removes all active DoT effects and returns the total damage consumed. Used by RUPTURE to convert stacked DoT into a single burst. |
 | `getDistinctDebuffCount(target)` | Counts the number of distinct active debuff effect types on the target. Drives COMPOUND damage scaling (capped at `COMPOUND_COUNT_CAP`). |
 | `getDistinctControlCount(target)` | Counts the number of distinct active control effects. Drives DISRUPT — when ≥ `DISRUPT_DENY_AT` the target's next action is denied. |
 | `RUPTURE_CAP_FRACTION` / `ruptureBurstCap(maxHp)` | RUPTURE burst cap: `round(fraction × enemy max VITAE)`. **The cap is repealed** (2026-09-02) — payoffs are uncapped by design; the constant is `Number.POSITIVE_INFINITY` in `src/Combat/effects.ts`, matching doctrine. |

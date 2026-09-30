@@ -216,12 +216,10 @@ describe('effect deprecation contract (spec 32 v3 §3) — the ban list', () => 
         for (const id of CARD_EFFECT_SET) {
             const def = lookupEffect(id)!;
             const p = def.payload;
-            const real = !!(p.damageOverTime || p.regeneration || p.actionRestriction
-                || (p.rollModifier ?? 0) !== 0 || (p.rollModifierPerIntensity ?? 0) !== 0
+            const real = !!(p.damageOverTime || p.actionRestriction
                 || p.damageTakenMult !== undefined || p.damageTakenMultForStance
-                || p.reflectDamage || p.revealsStance
-                || p.outgoingDamageMulPct !== undefined || p.powerMulPct !== undefined
-                || p.healingReceivedMulPct !== undefined || p.dotModifiers
+                || p.revealsStance
+                || p.outgoingDamageMulPct !== undefined || p.dotModifiers
                 || (p as { tickAmplifyFlat?: number }).tickAmplifyFlat);
             expect(real, `${id} is a card effect with no engine-read channel`).toBe(true);
         }

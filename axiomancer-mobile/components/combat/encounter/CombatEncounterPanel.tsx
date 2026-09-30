@@ -237,7 +237,6 @@ function keywordTypeTag(kind: string, index: number): string {
         case 'stun':
         case 'weaken': return 'CONTROL';
         case 'guard': return 'GUARD';
-        case 'regen': return 'REGEN';
         case 'befriend': return 'MERCY';
         default: return 'EFFECT';
     }
@@ -245,7 +244,7 @@ function keywordTypeTag(kind: string, index: number): string {
 
 // Reference-style coloured type tags (right-aligned on the keyword panels).
 const TAG_COLORS: Record<string, string> = {
-    DOT: '#e2543b', CONTROL: '#a86bdc', GUARD: '#9aa0a6', REGEN: '#5bbf6a',
+    DOT: '#e2543b', CONTROL: '#a86bdc', GUARD: '#9aa0a6',
     MERCY: '#5bbf6a', EFFECT: '#8a8273',
     DICE: '#d9c66a',
 };
@@ -256,12 +255,9 @@ function effectCategory(kind: string, color: string): { label: string; color: st
         case 'dot': return { label: 'AFFLICTION', color: '#e2543b' };
         case 'control': return { label: 'CONTROL', color: '#a86bdc' };
         case 'statdown':
-        case 'drain':
         case 'mark': return { label: 'HEX', color: '#e08a3b' };
         case 'statup':
-        case 'regen':
-        case 'advantage':
-        case 'thorns': return { label: 'BLESSING', color: '#5bbf6a' };
+        case 'advantage': return { label: 'BLESSING', color: '#5bbf6a' };
         default: return { label: 'EFFECT', color };
     }
 }

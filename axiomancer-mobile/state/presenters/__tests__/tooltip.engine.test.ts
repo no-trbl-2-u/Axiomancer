@@ -324,12 +324,6 @@ describe('accentForStat', () => {
 });
 
 describe('formatEffectStatEffect', () => {
-    it('formats regeneration as "+N hp / round"', () => {
-        expect(
-            formatEffectStatEffect({ regeneration: { healthPerRound: 2 } }, 'fallback'),
-        ).toBe('+2 hp / round');
-    });
-
     it('formats damage-over-time as "-N hp / round"', () => {
         expect(
             formatEffectStatEffect(
@@ -360,10 +354,6 @@ describe('formatEffectStatEffect', () => {
                 'fallback',
             ),
         ).toBe('advantage on body');
-    });
-
-    it('formats rollModifier', () => {
-        expect(formatEffectStatEffect({ rollModifier: 2 }, 'fallback')).toBe('+2 to rolls');
     });
 
     it('falls back to the description string when no payload field is present', () => {

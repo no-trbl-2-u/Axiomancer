@@ -3,8 +3,6 @@
  * ratified 2026-07-11 #6).
  *
  * Engine coverage for the WS8.2 re-payloads, each on its own surface:
- *       EXHAUSTION → telegraph damage (`outgoingThreatDamageMulPct`)
- *       BLIND      → rider suppression (`suppressesThreatRiders`)
  *       ROOT       → stance LOCK (`lockedStance`, the `lock_stance` twin)
  *       CONFUSION  → stance BLUR (`blursStanceHints`, player-borne fog)
  *
@@ -27,7 +25,6 @@ import {
     initializeCombatEncounter, rollEncounterDice, resolveThreatPhase,
     isPhaseStanceRevealed, revealedCurrentStance, isStanceReadoutBlurred,
 } from '../combat.engine';
-import { getOutgoingThreatDamageMult } from '../effects';
 import type { CombatEncounterState, CombatThreatPhase } from '../combat.encounter.types';
 
 afterEach(() => { vi.restoreAllMocks(); });
@@ -37,9 +34,7 @@ afterEach(() => { vi.restoreAllMocks(); });
 // surface shapes live on as test-only fixtures registered into the shared
 // registry (the same lookup the threat engine reads).
 const SURFACE_FIXTURES: Effect[] = [
-    { id: 'test_exhaustion', name: 'test exhaustion', description: 'threat-damage -25%/stack', type: 'debuff', category: 'stat', duration: 3, stacking: 'intensity', tier: 2, payload: { outgoingThreatDamageMulPct: -25 } },
-    { id: 'test_blind', name: 'test blind', description: 'rider suppress', type: 'debuff', category: 'control', duration: 2, stacking: 'none', tier: 2, payload: { suppressesThreatRiders: true } },
-    { id: 'test_root', name: 'test root', description: 'stance lock', type: 'debuff', category: 'control', duration: 2, stacking: 'none', tier: 2, payload: { defenseModifier: -2, lockedStance: true } },
+    { id: 'test_root', name: 'test root', description: 'stance lock', type: 'debuff', category: 'control', duration: 2, stacking: 'none', tier: 2, payload: { lockedStance: true } },
     { id: 'test_confusion_blur', name: 'test stance blur', description: 'blursStanceHints', type: 'debuff', category: 'control', duration: 3, stacking: 'none', tier: 2, payload: { blursStanceHints: true, advantageModifier: { grantDisadvantage: ['body', 'mind', 'heart'] } } },
 ];
 beforeAll(() => { for (const e of SURFACE_FIXTURES) effectsLibrary.registry.set(e.id, e); });
@@ -85,64 +80,6 @@ function phase(
 }
 
 // ─── WS8.2 — each re-payloaded control edits its OWN surface ─────────────────
-
-describe('WS8.2 — EXHAUSTION owns the telegraph-DAMAGE surface', () => {
-    it('getOutgoingThreatDamageMult reads -25%/stack, clamped, exactly 1 unmarked', () => {
-        const bearer = (fx: ActiveEffect[]) => ({ ...deepClone(FloatEye), effects: fx });
-        expect(getOutgoingThreatDamageMult(bearer([]))).toBe(1);
-        expect(getOutgoingThreatDamageMult(bearer([ae('test_exhaustion', 1)]))).toBe(0.75);
-        expect(getOutgoingThreatDamageMult(bearer([ae('test_exhaustion', 2)]))).toBe(0.5);
-        // clamp floor 0.1 — even absurd stacks never fully zero the telegraph.
-        expect(getOutgoingThreatDamageMult(bearer([ae('test_exhaustion', 8)]))).toBe(0.1);
-    });
-
-    it('softens the landed telegraph hit without denying the turn', () => {
-        mockSequentialRng(0.05);
-        const seq = [phase(1, 'mind', [{ damage: 10 }], true)];
-        const hpLoss = (fx: ActiveEffect[]): { loss: number; fired: boolean } => {
-            const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, seq, fx), undefined, 7);
-            const state = rollEncounterDice(base).state;
-            const res = resolveThreatPhase(state);
-            return {
-                loss: state.player.health - res.state.player.health,
-                fired: res.events.some(e => e.kind === 'threat-fired'),
-            };
-        };
-        const clean = hpLoss([]);
-        const softened = hpLoss([ae('test_exhaustion', 1)]);
-        expect(clean.fired).toBe(true);
-        expect(softened.fired).toBe(true);       // softer, never a deny by itself
-        expect(softened.loss).toBeGreaterThan(0);
-        expect(softened.loss).toBeLessThan(clean.loss);
-    });
-});
-
-describe('WS8.2 — BLIND owns the RIDER surface (the phase rider cannot land)', () => {
-    const seq = [phase(1, 'mind', [{ damage: 10 }, { effectId: 'debuff_poison', intensity: 2 }], true)];
-
-    it('suppresses the telegraphed threatEffectId while active; damage still lands', () => {
-        mockSequentialRng(0.05);
-        const base = initializeCombatEncounter(
-            makePlayer([]), makeEnemy(300, seq, [ae('test_blind', 1, 2)]), undefined, 7);
-        const state = rollEncounterDice(base).state;
-        const res = resolveThreatPhase(state);
-        expect(res.events.some(e => e.kind === 'threat-fired')).toBe(true);
-        expect(res.state.player.health).toBeLessThan(200);            // the hit landed
-        expect(res.state.player.effects.some(e => e.effectId === 'debuff_poison')).toBe(false);
-        const fizzled = res.events.find(e => e.kind === 'effect-fizzled') as
-            { cardId: string; effectId: string } | undefined;
-        expect(fizzled).toBeDefined();                                // honestly logged
-        expect(fizzled!.cardId).toBe('test_blind');
-        expect(fizzled!.effectId).toBe('debuff_poison');
-    });
-
-    it('without BLIND the same rider lands (isolation control)', () => {
-        mockSequentialRng(0.05);
-        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, seq), undefined, 7);
-        const res = resolveThreatPhase(rollEncounterDice(base).state);
-        expect(res.state.player.effects.some(e => e.effectId === 'debuff_poison')).toBe(true);
-    });
-});
 
 describe('WS8.2 — ROOT owns the STANCE surface (LOCK: the next phase keeps this stance)', () => {
     const seq = [

@@ -272,6 +272,39 @@ The tick that took R7c2 split it once more, like R2, R3 and R7c:
 4. **The closing carrier sweep (D45)**: every glossary / atlas row, glyph,
    family entry and gloss left without a carrier, both workspaces.
 
+### As shipped (R7c3, 2026-09-30)
+
+- **Payload keys gone**: `regeneration`, `rollModifier`,
+  `rollModifierPerIntensity`, `defenseModifier`, `reflectDamage`,
+  `dotModifiers.decayOnHeal`, `outgoingThreatDamageMulPct`,
+  `suppressesThreatRiders`, `powerMulPct`, `healingReceivedMulPct`,
+  `consumedOnUse`, `nextDotTierUpgrade`, `restrictsSurgeAccess`,
+  `forcesWeakTierNextPlay`, `blocksAdvantage`, `reducesControlAccuracy`,
+  `deniesAllyBuffTargeting`, `soloFightFallback`, `forceWildOnNextDie`,
+  `colorChoice`, `cleanse`. With them: the roll-penalty weaken/deny
+  (`THREAT_WEAKEN_*`, `THREAT_DENY_AT`, `getActiveRollModifier`), the armor
+  soak, THORNS (`getThornsReflect`, the `thorns-reflected` event), regen and
+  drain, the heal multiplier, the threat-damage multiplier, DOUBT /
+  OVEREXTENDED / BLIND riders and `consumeEffect`, the consumable cleanse
+  branch, and the unread helpers (`getStudyMarkIntensity`, `removeRandomBuff`,
+  `extendRandomBuffDuration`, `applyDispel`, `consumeDotEffects`).
+- **The round clock is round start only.** No library DoT printed `tickPhase`
+  or a `round-start` / `round-end` trigger; Creeping Doom (no trigger) is the
+  round-clock carrier. `tickPhase`, the two round triggers, `dotEnd` and the
+  round-end DoT tick went; `processRoundEndEffects` only counts down.
+- **`fixture-effects.ts` is deleted.** Suites moved to library effects
+  (Creeping Doom, Mark, Petrify, the live debuff tiers); stance-keyed shapes
+  stay as test-local fixtures until R7d.
+- **DISRUPT stays for R7d.** Its surfaces are now action and stance, so
+  `DISRUPT_DENY_AT` (3) is out of reach; R7d removes the stance surface and
+  the meter with it. The unreachable deny test went; the below-threshold one
+  stays.
+- **Carrier sweep**: mobile's honest kinds regen / thorns / exposure / doubt /
+  sensoryNull / isolated / overextended / clarity, the regen / drain / thorns
+  glyph kinds, the dead tooltip and shop-ware payload lines, and the
+  `KEYWORD_FAMILY` rows no engine carrier prints. `docs/effects.md` keeps its
+  Superseded banner for R10c.
+
 ## Out of scope for R7a (named so it is not mistaken for a miss)
 
 - `synergy` and `synergy-predicates.ts`, themes, draft, presets,

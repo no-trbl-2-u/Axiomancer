@@ -7,13 +7,6 @@ import { restoreOriginalRng } from '../../test-utils/rng';
 import { executeCard } from '../card.engine';
 import { Card } from '../types';
 import { CombatState } from '../../Combat/types';
-import { registerFixtureEffects } from '../../test-utils/fixture-effects';
-
-// The keyword audit (2026-09-27) deleted buff_thorns / debuff_backfire /
-// the round-clock DoT species from the library; their engine channels are
-// exercised through the `fixture_*` effects instead.
-registerFixtureEffects();
-
 afterEach(() => {
     vi.restoreAllMocks();
     restoreOriginalRng();
@@ -47,7 +40,7 @@ const buffCard: Card = {
     cardType: 'spell',
     targetType: 'self',
     free: { guard: 2 },
-    combatEffects: [{ effectId: 'fixture_thorns', appliedTo: 'self', intensity: 1, duration: 2 }],
+    combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'self', intensity: 1, duration: 2 }],
 };
 
 const debuffCard: Card = {
@@ -99,7 +92,7 @@ describe('executeCard — no direct HP movement (spec 32 v3)', () => {
         expect(next.enemy.effects.some(e => e.effectId === 'debuff_bleed')).toBe(true);
     });
 
-    it('a self-target card no longer heals from stats; it lands its buff', () => {
+    it('a self-target card no longer heals from stats; it lands its status', () => {
         mockSequentialRng(0.5);
         const player = fixturePlayer();
         const state = combatState({ ...player, health: player.maxHealth - 10 }, fixtureEnemy());
@@ -107,7 +100,7 @@ describe('executeCard — no direct HP movement (spec 32 v3)', () => {
         const { state: next } = executeCard(state, buffCard.id, lookup);
 
         expect(next.player.health).toBe(hpBefore); // no stat-scaled self-heal
-        expect(next.player.effects.some(e => e.effectId === 'fixture_thorns')).toBe(true);
+        expect(next.player.effects.some(e => e.effectId === 'debuff_mark')).toBe(true);
     });
 });
 

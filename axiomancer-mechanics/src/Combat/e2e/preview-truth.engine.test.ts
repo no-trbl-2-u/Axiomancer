@@ -40,7 +40,7 @@ import {
     THREAT_DAMAGE_SCALE,
 } from '../combat.engine';
 import {
-    getDamageTakenMultiplier, getHealingReceivedMult, getOutgoingDamageMult,
+    getDamageTakenMultiplier, getOutgoingDamageMult,
 } from '../effects';
 import { getActiveDotTotal } from '../effect-modifiers';
 import { MAX_EFFECT_INTENSITY } from '../../Game/game-mechanics.constants';
@@ -275,7 +275,6 @@ describe('P0-truth — dice/DoT-side laws', () => {
     it('multiplier helpers are exactly 1 for unmarked bearers (byte-compat)', () => {
         const p = makePlayer([]);
         expect(getDamageTakenMultiplier(p)).toBe(1);
-        expect(getHealingReceivedMult(p)).toBe(1);
         expect(getOutgoingDamageMult(p)).toBe(1);
     });
 });

@@ -22,10 +22,6 @@ describe('statusGlyphs — classification', () => {
     it('classifies a buff as statup', () => {
         expect(classifyGlyphKind({ id: 'buff_x', type: 'buff', category: 'stat', payload: { statModifiers: [{ value: 2 }] } })).toBe('statup');
     });
-    it('classifies regen and drain by sign', () => {
-        expect(classifyGlyphKind({ id: 'buff_regen', type: 'buff', category: 'regeneration', payload: { regeneration: { healthPerRound: 3 } } })).toBe('regen');
-        expect(classifyGlyphKind({ id: 'debuff_drain', type: 'debuff', category: 'regeneration', payload: { regeneration: { healthPerRound: -3 } } })).toBe('drain');
-    });
 });
 
 describe('statusGlyphs — resolution', () => {

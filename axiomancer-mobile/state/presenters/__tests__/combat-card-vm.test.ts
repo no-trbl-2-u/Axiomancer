@@ -22,19 +22,24 @@
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import {
     getCard, getCardById, READ_DAMAGE_MULT, colorMatchBonus,
-    registerSandboxCards, clearSandboxCards,
+    registerSandboxCards, clearSandboxCards, effectsLibrary,
 } from '@mechanics';
-import type { Card } from '@mechanics';
+import type { Card, Effect } from '@mechanics';
 import {
     faceStats, detailStats, engineHonestKind, resolvePrimary, armedReadValue,
 } from '@/state/presenters/combat-encounter.engine';
-import { registerFixtureEffects } from '@mechanics/test-utils/fixture-effects';
 
 /**
- * The Profane Canon prints no round-clock DoT: POISON ticks per card played,
- * BLEED per hit taken, DOOM grows per enemy action. The "N over M turns" face
- * is still a live presenter branch, so a synthetic ember carrier exercises it.
+ * The Profane Canon prints no plain round-clock DoT: POISON ticks per card
+ * played, BLEED per hit taken, DOOM grows per enemy action. The "N over M
+ * turns" face is still a live presenter branch, so a test-local ember effect
+ * and card exercise it.
  */
+const FX_EMBER_EFFECT: Effect = {
+    id: 'fx_ember', name: 'Kindling Ember', description: 'Test effect: a round-clock DoT.',
+    type: 'debuff', category: 'damage', duration: 3, stacking: 'intensity', tier: 1,
+    payload: { damageOverTime: { damagePerRound: 1, damageType: 'mind' } },
+};
 const FX_EMBER: Card = {
     id: 'fx-ember',
     name: 'Ember (fixture)',
@@ -44,18 +49,18 @@ const FX_EMBER: Card = {
     targetType: 'enemy',
     paidSummary: 'Inflict KINDLING EMBER 1 for 3 turns.',
     free: { guard: 1 },
-    combatEffects: [{ effectId: 'fixture_ember', appliedTo: 'opponent', intensity: 1, duration: 3 }],
+    combatEffects: [{ effectId: 'fx_ember', appliedTo: 'opponent', intensity: 1, duration: 3 }],
     addedIn: '2026-08-08',
     tags: ['rot'],
 };
-// The keyword audit (2026-09-27) deleted debuff_kindling_ember
-// and buff_thorns from the effects library; the mechanics `fixture_*` effects
-// carry their payloads so the presenter branches stay under test.
 beforeAll(() => {
-    registerFixtureEffects();
+    effectsLibrary.registry.set(FX_EMBER_EFFECT.id, FX_EMBER_EFFECT);
     registerSandboxCards([FX_EMBER]);
 });
-afterAll(() => clearSandboxCards());
+afterAll(() => {
+    clearSandboxCards();
+    effectsLibrary.registry.delete(FX_EMBER_EFFECT.id);
+});
 
 const cardOf = (id: string) => {
     const card = getCard(id);
@@ -70,7 +75,6 @@ describe('engineHonestKind — the honesty gate', () => {
         expect(engineHonestKind('debuff_bleed')).toBe('dot');
         expect(engineHonestKind('debuff_mark')).toBe('mark');           // tickAmplifyFlat
         expect(engineHonestKind('debuff_quarter')).toBe('weaken');      // outgoingDamageMulPct < 0
-        expect(engineHonestKind('fixture_thorns')).toBe('thorns');      // reflectDamage
         expect(engineHonestKind(null)).toBeNull();
     });
 });

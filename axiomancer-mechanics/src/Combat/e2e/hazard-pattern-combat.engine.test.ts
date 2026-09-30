@@ -15,7 +15,7 @@
  * are the witness that this driver did not perturb them.
  */
 
-import { describe, it, expect, afterEach, afterAll, beforeAll, vi } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
@@ -41,14 +41,6 @@ import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import { simulateHazardPatternCombat } from '../combat.encounter.sim';
 import { getThreatSequence, deriveIntentType } from '../combat.threat';
 import type { CombatDieColor, CombatEncounterState, CombatEvent, CombatTransition } from '../combat.encounter.types';
-import type { ActiveEffect, Effect } from '../../Effects/types';
-import { effectsLibrary } from '../../Effects/effects.library';
-import { registerFixtureEffects } from '../../test-utils/fixture-effects';
-
-// The keyword audit (2026-09-27) deleted buff_thorns / debuff_backfire /
-// the round-clock DoT species from the library; their engine channels are
-// exercised through the `fixture_*` effects instead.
-registerFixtureEffects();
 
 afterEach(() => {
     vi.restoreAllMocks();
@@ -58,11 +50,8 @@ afterEach(() => {
 
 // Spec 32 v3: basePower is deleted at the schema level — no card can strike.
 // The "damage class" fixture is a bare body DEAL.
-// Profane Canon (2026-08-08): the round-clock DoT lost its library carrier
-// (nettle-cloak retired; poison/bleed ride EVENT clocks), so the round-boundary
-// witness is a SYNTHETIC carrier of the round-end DoT fixture (`fixture_nettle`,
-// the old nettle sting — deleted from the library in the keyword audit,
-// 2026-09-27; carrier-less-verb policy: engine behavior stays under test).
+// Poison/bleed ride EVENT clocks, so the round-boundary witness is a SYNTHETIC
+// card carrying the library's round-clock DoT, Creeping Doom.
 registerSandboxCards([{
     id: 'qa-body-deal',
     name: 'QA Body Deal (test fixture)',
@@ -77,12 +66,12 @@ registerSandboxCards([{
     id: 'qa-round-dot',
     name: 'QA Round-Clock DoT (test fixture)',
     color: 'body',
-    description: 'Test-only fixture: a round-end-clock DoT carrier (nettle sting).',
+    description: 'Test-only fixture: a round-clock DoT carrier (Creeping Doom).',
     tier: 1,
     rank: 1,
     cardType: 'spell',
     targetType: 'enemy',
-    combatEffects: [{ effectId: 'fixture_nettle', appliedTo: 'opponent', intensity: 1, duration: 2 }],
+    combatEffects: [{ effectId: 'debuff_creeping_doom', appliedTo: 'opponent', intensity: 1, duration: 2 }],
 }, {
     // The card purge (P1, 2026-09-27): spoiled-poultice is gone and the grey
     // office is colourless with no DoT, so this SYNTHETIC mirror of its exact
@@ -278,11 +267,10 @@ describe('Spec 26b §1 — status landing + the color law', () => {
 // ── Between-phases: DoT ticks + duration tick + hand refill (§4.5) ────────────
 
 describe('Spec 25 §4.5 — between-phases processing', () => {
-    it('fires enemy DoT ticks (erodes HP), ticks effect durations, refills the hand', () => {
+    it('fires enemy DoT ticks (erodes HP) and refills the hand', () => {
         mockSequentialRng(0.05);
         // WS3.3: poison/bleed ride EVENT clocks now — the round-boundary
-        // witness is the synthetic nettle-sting carrier (round-end round
-        // clock); its library carrier retired with the Profane Canon.
+        // witness is the synthetic Creeping Doom carrier (round clock).
         const NETTLE = 'qa-round-dot';
         let state = initializeCombatEncounter(makePlayer([NETTLE]), makeEnemy(80, 'mind'), [NETTLE], 5);
         state = rollEncounterDice(state).state;
@@ -290,17 +278,16 @@ describe('Spec 25 §4.5 — between-phases processing', () => {
         const played = playWithDie(state, NETTLE);
         expect(fizzled(played.events!)).toBe(false);
         state = played.state;
-        const dotBefore = state.enemy.effects.find(e => e.effectId === 'fixture_nettle');
+        const dotBefore = state.enemy.effects.find(e => e.effectId === 'debuff_creeping_doom');
         expect(dotBefore).toBeDefined();
         const hpBefore = state.enemy.health;
-        const durBefore = dotBefore!.remainingDuration;
 
         const bp = processBetweenPhases(state);
         const after = bp.state;
         expect(after.enemy.health).toBeLessThan(hpBefore);
         expect(bp.events.some(e => e.kind === 'dot-tick' && e.target === 'enemy')).toBe(true);
-        const dotAfter = after.enemy.effects.find(e => e.effectId === 'fixture_nettle');
-        if (dotAfter) expect(dotAfter.remainingDuration).toBeLessThan(durBefore);
+        // Doom opts out of the calendar: it persists on the enemy.
+        expect(after.enemy.effects.some(e => e.effectId === 'debuff_creeping_doom')).toBe(true);
         expect(after.hand.length).toBe(COMBAT_HAND_SIZE);
         // A new phase clears the tray so the next turn rolls fresh.
         expect(after.dice.length).toBe(0);
@@ -529,97 +516,6 @@ describe('Spec 25 §9 — resolveCombatPhase batch entry point', () => {
         expect(fizzled(res.events)).toBe(false);
         const played = res.events.find(e => e.kind === 'card-played');
         expect(played && played.kind === 'card-played' && played.dieId).toBe('rsv-body');
-    });
-});
-
-// ── Soft-control de-inert (0.33.0) ───────────────────────────────────────────
-// The HP engine now READS the enemy's aggregated roll penalty (it always
-// computed it; the engine just never consulted it). Soft control weakens the
-// telegraphed hit, and a committed VARIETY denies it — making ~24 previously
-// inert debuffs actually do something.
-describe('0.33.0 — soft control weakens & denies the enemy threat', () => {
-    // The spec 32 v3 keyword reset deleted the negative-rollModifier control
-    // debuffs (Confusion -5, Fear -4). No surviving library effect carries a
-    // roll penalty deep enough to test the weaken-vs-VARIETY-deny split, so we
-    // register two test-only control fixtures into the shared registry (the
-    // same lookup the threat engine's roll-penalty sum reads). Never touches the
-    // library JSON.
-    const CONTROL_FIXTURES: Effect[] = [
-        {
-            id: 'test_ctrl_confusion', name: 'test confusion', description: 'test control -5',
-            type: 'debuff', category: 'control', duration: 3, stacking: 'intensity', tier: 2,
-            payload: { rollModifier: -5 },
-        },
-        {
-            id: 'test_ctrl_fear', name: 'test fear', description: 'test control -4',
-            type: 'debuff', category: 'control', duration: 3, stacking: 'intensity', tier: 2,
-            payload: { rollModifier: -4 },
-        },
-        {
-            id: 'test_ctrl_knockdown', name: 'test knockdown', description: 'test control -3',
-            type: 'debuff', category: 'control', duration: 3, stacking: 'intensity', tier: 2,
-            payload: { rollModifier: -3 },
-        },
-        {
-            id: 'test_ctrl_slow', name: 'test slow', description: 'test control -2',
-            type: 'debuff', category: 'control', duration: 3, stacking: 'intensity', tier: 2,
-            payload: { rollModifier: -2 },
-        },
-        {
-            id: 'test_exhaustion', name: 'test exhaustion', description: 'test threat-damage -25%',
-            type: 'debuff', category: 'stat', duration: 3, stacking: 'intensity', tier: 2,
-            payload: { outgoingThreatDamageMulPct: -25 },
-        },
-    ];
-    beforeAll(() => { for (const e of CONTROL_FIXTURES) effectsLibrary.registry.set(e.id, e); });
-    afterAll(() => { for (const e of CONTROL_FIXTURES) effectsLibrary.registry.delete(e.id); });
-
-    const ae = (effectId: string): ActiveEffect => ({
-        effectId, remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 1,
-    });
-    // A state parked at phase-play with a known 10-damage threat on the current
-    // phase and the given effects on the enemy; resolveThreatPhase then fires.
-    function threatState(enemyEffects: ActiveEffect[]): CombatEncounterState {
-        let s = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(200, 'heart'), [DOT_BODY], 7);
-        s = rollEncounterDice(s).state;
-        const idx = Math.min(s.currentPhaseIndex, s.threatPhases.length - 1);
-        const threatPhases = s.threatPhases.map((p, i) =>
-            i === idx ? { ...p, threatAction: { ...p.threatAction, effects: [{ damage: 10 }] } } : p);
-        return { ...s, phase: 'phase-play', guard: 0, threatPhases, enemy: { ...s.enemy, effects: enemyEffects } };
-    }
-    const hpLoss = (effects: ActiveEffect[]): number => {
-        const s = threatState(effects);
-        return s.player.health - resolveThreatPhase(s).state.player.health;
-    };
-
-    it('a clean enemy lands its full telegraphed hit', () => {
-        expect(hpLoss([])).toBeGreaterThan(0);
-    });
-
-    // WS8.2 (spec 32 §12 #6): confusion/blind moved OFF the roll surface —
-    // FEAR (-4) is the heavy roll hammer now; knockdown (-3) + slow (-2) fill
-    // the cumulative-deny witness. All three share the 'roll' surface, so the
-    // deny below is the LEGACY cumulative path, not the DISRUPT variety path.
-    it('one soft-control (Fear, roll -4) WEAKENS the hit but does not deny it', () => {
-        const clean = hpLoss([]);
-        const weakened = hpLoss([ae('test_ctrl_fear')]);
-        expect(weakened).toBeGreaterThan(0);   // a single soft-control only reduces
-        expect(weakened).toBeLessThan(clean);  // ~24% weaker telegraphed hit
-    });
-
-    it('a heavy roll-shred pile (Fear -4 + Knockdown -3 + Slow -2 = 9 ≥ deny) denies the turn', () => {
-        expect(hpLoss([ae('test_ctrl_fear'), ae('test_ctrl_knockdown'), ae('test_ctrl_slow')])).toBe(0);
-    });
-
-    it('a VARIETY of soft-controls (Confusion -5 + Fear -4 = 9 ≥ deny) denies the turn', () => {
-        expect(hpLoss([ae('test_ctrl_confusion'), ae('test_ctrl_fear')])).toBe(0);
-    });
-
-    it('WS8.2 — Exhaustion softens the telegraphed hit on the threat-damage surface', () => {
-        const clean = hpLoss([]);
-        const softened = hpLoss([ae('test_exhaustion')]);
-        expect(softened).toBeGreaterThan(0);   // -25% softens, never denies alone
-        expect(softened).toBeLessThan(clean);
     });
 });
 

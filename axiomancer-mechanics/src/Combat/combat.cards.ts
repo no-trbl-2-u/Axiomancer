@@ -43,9 +43,7 @@ function isControl(effect: Effect): boolean {
 /** True if the effect is an exposure / soft debuff (MARK / QUARTER class). */
 function isStatDebuff(effect: Effect): boolean {
     if (effect.type !== 'debuff') return false;
-    return (effect.payload.rollModifier ?? 0) < 0
-        || (effect.payload.defenseModifier ?? 0) < 0
-        || (effect.payload.damageTakenMult ?? 1) > 1
+    return (effect.payload.damageTakenMult ?? 1) > 1
         || (effect.payload.tickAmplifyFlat ?? 0) > 0
         || (effect.payload.outgoingDamageMulPct ?? 0) < 0;
 }
