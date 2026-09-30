@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-09-30 at commit 3293e959
-> Pass count: 62
+> Last pass: 2026-09-30 at commit aea7593b
+> Pass count: 63
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -232,9 +232,56 @@
 > reward screen has not been seen by the critique lens), pass 58's A Plain
 > Word "+24" beside "+60%", and pass 54's doubled opening tell.
 
+> **[critique pass 63, 2026-09-30, commit aea7593b] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route still bounces to the title with no save). 14
+> commits after pass 62: R6b (the minimal hazard deck) and the engine
+> purge R7a-R7c, plus the R7e plan row. No screen shows a regression from
+> the purge. Filed LOW: on the 375-wide phone the two corner medallions
+> cover the effect rows of the fan's two end cards, which are the only
+> cards the fan does not cover. Reconfirmed and not re-filed: pass 62's
+> phase ledger column, pass 61's inn-rest wording, pass 60's fixture row,
+> pass 58's A Plain Word "+24" beside "+60%", and pass 54's doubled
+> opening tell. Checked and not filed: on desktop the hand faces of A Plain
+> Ward and A Plain Word wrap their paid chips mid-token ("GUAR" / "12",
+> "+6" / "%"). That is the `plan/AUDIT.md` row "Post-purge: a staged A
+> Plain Word wraps +25% mid-token", seen here on the hand face as well as
+> the staged card, so its fix should cover both. The combat preview's
+> "they telegraph WHAT, not their stance", the board's "NO STANCE" and
+> "Punishes HEART / Yields to BODY" chips are stance UI that R7d removes.
+> The Glen Market's three GUARD 5 relics are R4's placeholders, and R7e
+> strips them.
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
+
+### [LOW] combat / mobile — on a 375-wide phone the corner medallions cover the effect rows of the fan's two end cards
+- pass: 63 (commit aea7593b)
+- viewport: mobile (375x812); desktop (1280x800) seats the fan between the corners and is clear
+- category: mobile
+- observation: a five-card opening hand does not fit the band between the
+  corners, so `handFanLayout` lays it across the whole board (12 to 363)
+  and lets the corner chrome float over it. The two end cards are the only
+  ones no neighbour covers, yet the END disc sits over the rightmost card's
+  effect row ("Deal 12" reads "Dea") and the player medallion sits over the
+  leftmost card's chip row. The first-time player sees whole cards but not
+  what the two end ones do until they tap one. The fan comment already
+  accepts "the last card landed half under the END disc" as the price of a
+  readable fan. The cost is the one line that tells the player what the
+  card does.
+- evidence: `.critique-artifacts/mobile/04-combat-board.png` (bottom right,
+  "Dea" under END; bottom left, the Ward's chip under the portrait);
+  `axiomancer-mobile/components/combat/encounter/CombatBoard.tsx:238-334`
+  (`END_CORNER_FOOTPRINT_W`, `handFanLayout` board-band fallback) and
+  `:2066` (`endWrap` 80x80).
+- suggested fix: keep the full-board fan, but when it takes the board band
+  lift the two corner stacks above the card tops (or shrink them to a
+  compact size), so no end card's effect row sits under chrome. Pin it with
+  a layout test at 375 with five cards: the END and player-medallion
+  rects must not intersect any card's effect row.
+- source: critique:drive (unattended)
 
 ### [MED] combat / mobile — on a 375-wide phone the phase ledger stacks as a five-mark vertical column under the hand
 - pass: 62 (commit 3293e959)
@@ -258,6 +305,8 @@
   shrink the marks (`LedgerMark size`) on narrow widths, or move the
   ledger to its own centred line above the rail when it can't fit. Pin
   it with a layout test that measures the ledger as one row at 375.
+- update (pass 63, commit aea7593b): unchanged. The ledger still stacks as a
+  five-mark column under the hand at 375.
 - source: critique:drive (unattended)
 
 ### [MED] rest — the Breakwater's inns are described as paid rooms, but REST reads "Sleep where you stand. Free."
@@ -352,6 +401,8 @@
 - update (pass 60, commit 2d918845): unchanged. Both viewports still read
   "A PLAIN WORD / +24 / VULNERABLE / +60%".
 - update (pass 61, commit 0be3bb1c): unchanged. Both viewports still read
+  "A PLAIN WORD / +24 / VULNERABLE / +60%".
+- update (pass 63, commit aea7593b): unchanged. Both viewports still read
   "A PLAIN WORD / +24 / VULNERABLE / +60%".
 - source: critique:drive (unattended)
 
