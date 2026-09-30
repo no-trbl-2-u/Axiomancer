@@ -139,8 +139,10 @@ not set. Further Curses are defined in card sessions.
 **SACRIFICE** (lose n VITAE, unscaled) is now carried by a real card, so
 it is a live keyword candidate rather than only the trial's codename.
 A Curse cannot be scrapped (the discard-for-Conviction action refuses
-it, loudly, per the UI doctrine); playing it is the only way out. Still
-open: whether SACRIFICE can take the player below 1 VITAE.
+it, loudly, per the UI doctrine); playing it is the only way out. **SACRIFICE is a cost, paid in VITAE (T).** It never takes the player
+below 1 VITAE: a line whose SACRIFICE would leave less than 1 VITAE cannot
+be played, the same as lacking a die, and the game says so. So at low
+VITAE a Curse can be stuck in hand until the player heals.
 
 A trial lane session (self-sacrifice, codename SACRIFICE) paused at its
 first stage; the trial skill lives outside the repo until T adopts it.

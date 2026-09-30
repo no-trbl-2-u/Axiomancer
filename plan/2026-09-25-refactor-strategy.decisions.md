@@ -662,7 +662,9 @@ opens. Relics come, for now, from quests (designated rewards) and elites
 (a low chance of a random relic). The combat card reward is 2 random
 cards and 1 guaranteed lane card. A FREE Global lasts 3 turns. Curses carry no extra discard cost
 or in-hand effect for now; the first Curse is a grey dead card, FREE:
-SACRIFICE 5, PAID: SACRIFICE 10, EXILE. Curses cannot be scrapped. Further Curses come from card
+SACRIFICE 5, PAID: SACRIFICE 10, EXILE. Curses cannot be scrapped. SACRIFICE is a cost paid in VITAE and never
+takes the player below 1: a line the player cannot afford cannot be
+played. Further Curses come from card
 sessions. Detail and open points in `plan/revamp/cards.md` and
 `plan/revamp/relics.md`.
 
