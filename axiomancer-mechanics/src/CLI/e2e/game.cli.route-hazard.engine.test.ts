@@ -55,6 +55,6 @@ describe('Game CLI route walkthrough → Hazard-Pattern combat', () => {
         expect(encounterEvent?.encounter?.enemies?.[0]?.name).toBe('Float-Eye');
 
         const end = logs.find(r => r.action === 'hazardCombat:end');
-        expect((end?.event as { outcome?: string })?.outcome).toMatch(/victory|defeat|mercy|capitulate|concede|retreat/);
+        expect((end?.event as { outcome?: string })?.outcome).toMatch(/victory|defeat|mercy|retreat/);
     });
 });

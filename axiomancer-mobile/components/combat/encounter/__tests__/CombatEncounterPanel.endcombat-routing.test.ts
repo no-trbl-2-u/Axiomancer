@@ -98,10 +98,9 @@ describe('applyHazardOutcome: routes through endCombat (phase 54)', () => {
         const finalState = openEncounter(boss);
         const currencyBefore = store.getState().player!.currency;
 
-        // capitulate is one of the three merciful outcomes (mercy / capitulate
-        // / concede) — the audit's F3 finding named exactly this class of win
-        // as the one that never advanced kill objectives live.
-        applyHazardOutcome(store, 'capitulate' as CombatOutcome, finalState, boss);
+        // The audit's F3 finding named the merciful win as the one that never
+        // advanced kill objectives live.
+        applyHazardOutcome(store, 'mercy' as CombatOutcome, finalState, boss);
 
         const state = store.getState();
         expect(state.quests.completed).toContain('gather-wood');

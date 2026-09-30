@@ -45,7 +45,7 @@ const hop32 = (raw: Record<string, unknown>): GameState => migrate(raw, 31, 32);
 
 describe('migrate v31 → v32 (THE REVAMP R6b / D52: the minimal hazard deck)', () => {
     it('lands at the current version', () => {
-        expect(GAME_STATE_VERSION).toBe(32);
+        expect(GAME_STATE_VERSION).toBeGreaterThanOrEqual(32);
         expect(hop32(v31WithHazardDeck()).version).toBe(32);
     });
 

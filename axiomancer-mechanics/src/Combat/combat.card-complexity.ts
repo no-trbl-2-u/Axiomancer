@@ -31,12 +31,12 @@ import { getCardById } from '../Cards/cards.library';
  *  (mirrors the honesty test's structural set). */
 const STRUCTURAL_UPPER: ReadonlySet<string> = new Set([
     'FREE', 'PAID', 'ALL', 'WILD', 'VITAE', 'HP', 'DOT', 'DOTS',
-    'CONDEMN', 'SENTENCE', 'OPENING', 'X',
+    'OPENING', 'X',
 ]);
 
 /** Plural face-forms → the singular registry keyword. */
 const PLURAL_TO_SINGULAR: Readonly<Record<string, string>> = Object.freeze({
-    PREMISES: 'CHARGE', SOULS: 'SOUL', PIPS: 'PIP',
+    SOULS: 'SOUL', PIPS: 'PIP',
 });
 
 /** Rider verb fields → the keyword they imply even when no prose prints it. */

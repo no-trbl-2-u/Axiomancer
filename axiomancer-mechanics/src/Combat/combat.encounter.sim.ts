@@ -20,7 +20,7 @@ import type { Enemy } from '../Enemy/types';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveThreatPhase, startTurn, endTurn,
-    playSignatureSkill, handCards, selectMercyChoice, selectCapitulationChoice, getSignatureSkill,
+    playSignatureSkill, handCards, selectMercyChoice, getSignatureSkill,
     signatureCastBlock,
 } from './combat.engine';
 import { MOMENTUM_CHAIN_ORDER } from './combat.upgradeable-dice';
@@ -47,11 +47,8 @@ export type { CombatSimPolicyId } from './combat.sim-policies';
 
 /**
  * The UN-COLLAPSED win-path distribution: a raw count per `CombatOutcome`
- * across the sim's runs. The legacy `victories`/`mercies` counters fold the
- * three merciful resolutions (mercy + capitulate + concede) into one bucket
- * (`mercies = mercy + capitulate + concede`); this record keeps them apart so a
- * theme's OWN win path is visible — Charm wins via `capitulate`, Peroration via
- * `concede`, Befriend via `mercy`. deck-tuning free-metrics tier (2026-07-08).
+ * across the sim's runs. Sums to the run count; `mercies` is its
+ * `mercy` cell (a Befriend through The Open Hand).
  */
 export type WinPathCounts = Record<CombatOutcome, number>;
 
@@ -63,9 +60,7 @@ export interface CombatSimStats {
     retreats: number;
     /** Win rate = (victories + mercies) / runs. */
     winRate: number;
-    /** Un-collapsed win-path mix (victory / mercy / capitulate / concede /
-     *  defeat / retreat) — `mercies` folds mercy+capitulate+concede; this keeps
-     *  each path visible. Sums to `runs`. */
+    /** Win-path mix (victory / mercy / defeat / retreat). Sums to `runs`. */
     winPathCounts: WinPathCounts;
     avgRounds: number;
     /** Population std-dev of rounds across the runs (metrics slate 2026-07-18):
@@ -547,11 +542,6 @@ export function runOneEncounter(
 
     while (state.phase !== 'complete' && loopGuard < 200) {
         loopGuard++;
-        if (state.capitulationChoiceActive) {
-            state = selectCapitulationChoice(state, policyObj.capitulationChoice).state;
-            if (state.phase === 'complete' || state.finalOutcome) break;
-            continue;
-        }
         if (state.mercyChoiceActive) {
             state = selectMercyChoice(state, policyObj.mercyChoice).state;
             if (state.phase === 'complete' || state.finalOutcome) break;
@@ -566,11 +556,6 @@ export function runOneEncounter(
             decisionPoints += r.decisionPoints;
             liveOptions += r.liveOptions;
             if (state.finalOutcome) break;
-            if (state.capitulationChoiceActive) {
-                state = selectCapitulationChoice(state, policyObj.capitulationChoice).state;
-                if (state.phase === 'complete' || state.finalOutcome) break;
-                continue;
-            }
             if (state.mercyChoiceActive) {
                 state = selectMercyChoice(state, policyObj.mercyChoice).state;
                 if (state.phase === 'complete' || state.finalOutcome) break;
@@ -713,7 +698,7 @@ function aggUsageRow(cardUsage: Record<string, CombatCardUsage>, cardId: string)
 
 /** A zeroed win-path tally with every `CombatOutcome` key present. */
 function emptyWinPathCounts(): WinPathCounts {
-    return { victory: 0, mercy: 0, capitulate: 0, concede: 0, defeat: 0, retreat: 0 };
+    return { victory: 0, mercy: 0, defeat: 0, retreat: 0 };
 }
 
 /** The card with the largest share of total attributed enemy-HP damage. */
@@ -781,13 +766,10 @@ export function simulateHazardPatternCombatDetailed(
         winPathCounts[r.outcome]++;
         addObjectiveTelemetry(objectiveTelemetry, r.objective);
         if (r.outcome === 'victory') victories++;
-        // Spec 32 v3 §9 — RELENT (PLEA) and CONDEMN (Peroration) are
-        // merciful resolutions: they count with the mercy wins.
-        else if (r.outcome === 'mercy' || r.outcome === 'capitulate' || r.outcome === 'concede') mercies++;
+        else if (r.outcome === 'mercy') mercies++;
         else if (r.outcome === 'retreat') retreats++;
         else defeats++;
-        const won = r.outcome === 'victory' || r.outcome === 'mercy'
-            || r.outcome === 'capitulate' || r.outcome === 'concede';
+        const won = r.outcome === 'victory' || r.outcome === 'mercy';
         // Metrics slate — fold the run's draw ledger into the aggregated rows.
         // With an explicit deck, restrict to its cards so a synthetic/conjured
         // id can never violate the "usage ⊆ deck" matrix invariant.

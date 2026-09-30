@@ -2,17 +2,15 @@
  * Hermetic presenter tests — `selectCombatLogLines` (playtest fix 2026-09-04).
  *
  * The playthrough found engine ledgers the log never narrated: a foe's bar
- * climbing (a STAGE or THREAT heal) with no line saying why, and the PLEA
- * tally decaying at the turn boundary in silence. This pins that every one of
- * them now has a sentence, that the sentence carries the engine's number, and
- * that the decay line quotes the engine's own constant rather than a copied
- * literal.
+ * climbing (a STAGE or THREAT heal) with no line saying why. This pins that
+ * every one of them now has a sentence and that the sentence carries the
+ * engine's number.
  *
  * Hermetic = self-contained + deterministic + isolated. See docs/testing.md.
  */
 
 import { describe, expect, it } from '@jest/globals';
-import { SWAY_DECAY_PER_TURN, type CombatEvent } from '@mechanics';
+import type { CombatEvent } from '@mechanics';
 
 import { selectCombatLogLines } from '@/state/presenters/combat-encounter.engine';
 
@@ -30,17 +28,6 @@ describe('selectCombatLogLines — enemy healing is narrated with its source', (
         expect(line.text).toContain(word);
         expect(line.text).toContain('VITAE +13');
         expect(line.float).toBe('+13');
-    });
-});
-
-describe('selectCombatLogLines — PLEA decay is narrated', () => {
-    it('the turn-boundary decay is log-only and quotes the engine constant + the remainder', () => {
-        const events: CombatEvent[] = [{ kind: 'sway-decayed', total: 6 }];
-        const [line] = selectCombatLogLines(events);
-        expect(line.kind).toBe('sway-decayed');
-        expect(line.text).toContain(`PLEA −${SWAY_DECAY_PER_TURN}`);
-        expect(line.text).toContain('6 holds');
-        expect(line.float).toBeNull();
     });
 });
 

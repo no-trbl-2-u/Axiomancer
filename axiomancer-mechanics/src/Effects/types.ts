@@ -262,14 +262,6 @@ export interface EffectPayload {
      * the library carries it (R5 retired the cleanse consumables).
      */
     cleanse?: boolean;
-    /**
-     * Grace Momentum (spec, 2026-07-08 Grace rebalance) — every PLEA the bearer
-     * gains is multiplied by `1 + (outgoingSwayGainMulPct/100) × intensity`.
-     * Read in `gainSway` (`src/Combat/combat.engine.ts`). Declared here so the
-     * field is discoverable from the payload shape rather than only via a local
-     * cast at the read site.
-     */
-    outgoingSwayGainMulPct?: number;
     /** Die color this buff's `forceWildOnNextDie` applies to. Inlined as a
      *  literal union (rather than importing `CombatDieColor`) to avoid a
      *  Combat → Effects → Combat import cycle. */

@@ -103,7 +103,6 @@ describe('Game loop — full transcript through gameReducer', () => {
             flags:      store.getState().flags,
             rngState:   store.getState().rngState,
             codex:      store.getState().codex,
-            regionConsequences: store.getState().regionConsequences,
         }));
 
         // 7. SAVE_GAME (autosave already fired through the dispatch chain).

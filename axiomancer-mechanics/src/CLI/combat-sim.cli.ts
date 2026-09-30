@@ -58,7 +58,7 @@ if (require.main === module) {
     const names = only ? [only] : Object.keys(ENEMIES);
     process.stdout.write(
         `\nHazard combat sim — policy=${policy} runs=${runs} seed=${seed} loadout=[${loadout.join(', ')}]\n`
-        + `(win = enemy HP→0 or a merciful resolution (befriend/capitulate/concede); `
+        + `(win = enemy HP→0 or a befriend's mercy ending; `
         + `V/M/D/R = victory/merciful/defeat/retreat)\n`
         + '(cqi = OBJECTIVE FUNCTION v2, Combat/combat.objective.ts: spine = the LOCKED systems\n'
         + '  con/sur/dic = Conviction / Surge meter / Dice; arc = per-turn shape; wid = decision\n'

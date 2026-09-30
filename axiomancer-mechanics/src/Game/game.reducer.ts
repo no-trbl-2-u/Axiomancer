@@ -163,8 +163,10 @@ import { generateRunId } from './run-loop';
  *   they say; the hop drops the Paradox Token and Hexed flags.
  * 2026-09-30 — bumped 31 → 32: THE REVAMP R6b (D52/D63). The hazard deck is
  *   the core ten; the hop drops acquired deck cards that were deleted.
+ * 2026-09-30 — bumped 32 → 33: THE REVAMP R7c (D47/D50). The alt-win systems
+ *   are gone; the hop drops the write-only `regionConsequences` slice.
  */
-export const GAME_STATE_VERSION = 32;
+export const GAME_STATE_VERSION = 33;
 
 /**
  * Builds a brand-new GameState with default player and world.
@@ -212,7 +214,6 @@ export function createNewGameState(opts: { startMap?: MapName } = {}): GameState
         flags,
         rngState: getRng().getState(),
         codex: { unlockedEntries: [] },
-        regionConsequences: { exploitedRegions: [], sparedRegions: [] },
     };
 }
 
@@ -295,31 +296,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             // The Phase 92 moral-meter stat scaling that stood here was a
             // provable no-op (uniform scaling never changes the argmax
             // stance, and combat reads no stat) — deleted in TRIM THE FAT T2a.
-            const enemy = encounter.enemies[0]!;
-            let scaledEnemy = { ...enemy };
-            
-            // Phase 109 — Apply 'open-minded' status to region bosses when the region was spared
-            const isBoss = enemy.difficulty === 'boss';
-            const regionSpared = staged.regionConsequences.sparedRegions.includes(enemy.mapName);
-            if (isBoss && regionSpared) {
-                const openMindedEffect = lookupEffect('buff_absolved');
-                if (openMindedEffect) {
-                    scaledEnemy = {
-                        ...scaledEnemy,
-                        effects: [...scaledEnemy.effects, {
-                            effectId: openMindedEffect.id,
-                            intensity: 1,
-                            remainingDuration: -1, // Permanent
-                            sourceId: 'region-mercy-consequence',
-                            appliedAt: 0,
-                            tier: openMindedEffect.tier,
-                            resistedBy: openMindedEffect.resistedBy,
-                            resistDR: openMindedEffect.resistDR,
-                        }],
-                    };
-                }
-            }
-            
+            const scaledEnemy = { ...encounter.enemies[0]! };
+
             // The store no longer drives combat — it only stages the (scaled)
             // encounter. The Hazard-Pattern engine runs the fight outside the
             // store; `END_COMBAT` consumes `currentEncounter` to grant rewards.
@@ -537,7 +515,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 flags: [],
                 rngState: state.rngState,
                 codex: state.codex,
-                regionConsequences: state.regionConsequences,
             };
         }
 

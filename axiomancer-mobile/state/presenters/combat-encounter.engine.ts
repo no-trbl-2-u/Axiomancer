@@ -22,13 +22,9 @@ import {
     DISRUPT_DENY_AT,
     // phase 28 — legibility sweep
     projectIncomingThreat,
-    capitulateThreshold, concedeFloorFor,
     // phase 2 — projected-lethality readout (spec 30): the status kill-path
     // foresight, wired into the board's HUD by this pass.
     projectCombatOutcome,
-    // Playtest fix 2026-09-04 — the turn-boundary PLEA decay is narrated in
-    // the combat log with the engine's own constant, never a copied literal.
-    SWAY_DECAY_PER_TURN,
     // Revamp R4 — the signature bar reads the engine's own cast gate.
     signatureCastBlock,
     // Spec 33 (Phase D6b) — the momentum chain, stance-check telegraph, and
@@ -40,7 +36,7 @@ import {
     type CombatEncounterState, type CombatCard, type CombatManaDie, type CombatEvent,
     type CombatThreatPhase, type CombatThreatEffect, type CombatIntentType, type CombatReadResult,
     type CombatSummary, type SignatureSkill, type Stance,
-    type Card, type CardCombatEffects, type CardType, type EnemyDifficulty,
+    type Card, type CardCombatEffects, type CardType,
     type UpgradeableDieGear,
     type WheelStance,
 } from '@mechanics';
@@ -182,13 +178,12 @@ function freeRail(sourceCard?: Card): { freeKeyword: string | null; freeValue: s
 }
 
 // FREE-effect glyph — the hero mark for the dieless play. Affliction riders use
-// their effect's board glyph; currency riders (guard/draw/premise…) map to a
+// their effect's board glyph; currency riders (guard/draw…) map to a
 // terse rune. '' when the card has no free line.
 // The keyword audit (2026-09-27, after the card purge) kept only the live
-// registry words; CHARGE / SOUL / TICK / RECOIL / MILL / RUPTURE riders fall
-// back to the generic ◆ rune.
+// registry words; any other rider falls back to the generic ◆ rune.
 const FREE_KW_GLYPH: Record<string, string> = {
-    GUARD: '❖', HEAL: '✚', DRAW: '⚑', PLEA: '∿',
+    GUARD: '❖', HEAL: '✚', DRAW: '⚑',
     CLEANSE: '✦', PIP: '⬡', STAGGER: '⚔',
 };
 /** The FREE glyph plus the KEYWORD that drives it — the key lets the face swap
@@ -301,14 +296,6 @@ export interface CombatEnemyPaneVM {
     stanceColor: string;      // accent (revealed stance colour, else neutral)
     stanceLabel: string;      // 'HEART' / '?' …
     stanceHint: string;       // the thematic tell (always shown)
-    /** WI-5 — the invisible alt-win currencies, now surfaced as slim meters
-     *  under the VITAE bar. `sway`/`swayTarget` drive the RELENT track
-     *  (PLEA ≥ target at a turn boundary ends the fight); `premises`/`premiseAt`
-     *  drive the ORATORY track (a declared SENTENCE fires on its tally). Each
-     *  meter renders when its value > 0 OR the player holds a card that feeds it
-     *  (so a whole-plan-is-PLEA preset like GRACE sees the track from turn 1). */
-    sway: number; swayTarget: number; swayVisible: boolean;
-    premises: number; premiseAt: number; premiseVisible: boolean;
     /** The count of STAGE thresholds this foe has already crossed (0 for
      *  anything that does not escalate). The loud announcement is the combat
      *  log's `stage-entered` line — this is the standing "it has changed" mark. */
@@ -533,18 +520,6 @@ export interface CombatSignatureVM {
      *  on a foe that can't be befriended yet. */
     reason?: string | null;
 }
-/** phase 28 — the Charge track + CONDEMN beat (Sentence theme). Was fully
- *  engine-side state with zero combat-UI rendering before this phase. */
-export interface CombatPerorationVM {
-    active: boolean;
-    premises: number;
-    /** Charge count at which the declared card's rider fires (tally resets). */
-    at: number;
-    /** Charge count at which the fight ends outright (CONDEMN) — tier-floored
-     *  by enemy difficulty; null if the declared card carries no concede line. */
-    concedeAt: number | null;
-    cardName: string;
-}
 /**
  * Spec 33 §3 (Phase D6b) — the momentum chain chip. Spec-33 momentum is a
  * single chain `{ color, length }`. A BREAK collapses it to null and the chip must
@@ -632,8 +607,6 @@ export interface CombatViewModel {
     discardCount: number;
     /** phase 28 — discard-pile card ids + names, for the REPRISE songbook picker. */
     discardCards: { id: string; name: string }[];
-    /** phase 28 — the Premise track + CONDEMN beat. */
-    peroration: CombatPerorationVM;
     /** Spec 33 §3 (Phase D6b) — the momentum chain chip. */
     momentumV2: CombatMomentumV2VM;
     /** Spec 33 §2 (Phase D6b) — the player's current-stance chip. */
@@ -871,13 +844,6 @@ export function selectCombatLogLines(events: readonly CombatEvent[]): CombatLogL
                 });
                 break;
             }
-            case 'sway-decayed':
-                out.push({
-                    kind: e.kind, side: 'enemy', color: GLYPH_COLORS.thorns,
-                    text: `Your plea fades between turns. PLEA −${SWAY_DECAY_PER_TURN} (${e.total} holds).`,
-                    float: null,
-                });
-                break;
             // A refused action, in the engine's OWN words (`need 2 ◆ Conviction
             // (have 0)`) — never re-worded or re-cased here, or the two
             // vocabularies drift. Log-only: this fires from two dozen sites
@@ -1057,19 +1023,6 @@ function intentVM(state: CombatEncounterState): CombatIntentVM {
     };
 }
 
-/** WI-5 — does any card the player can still draw feed one of these alt-win
- *  currencies? Scans the whole combat deck (not just the current hand) so a
- *  whole-plan-is-PLEA preset like GRACE shows its meter from turn 1, before the
- *  first sway card is drawn. */
-function deckFeedsMechanic(state: CombatEncounterState, kinds: readonly string[]): boolean {
-    const ids = new Set<string>([...state.deck, ...state.hand.map(h => h.cardId)]);
-    for (const id of ids) {
-        const src = getCardById(id);
-        if (src?.specialMechanics?.some(m => kinds.includes(m.kind))) return true;
-    }
-    return false;
-}
-
 function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
     const e = state.enemy;
     const cur = currentPhase(state);
@@ -1077,11 +1030,6 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
     const stance = revealed ? cur?.enemyStance ?? null : null;
     const isBoss = e.difficulty === 'boss' || e.difficulty === 'unique'
         || (e.tags ?? []).includes('boss') || (e.tags ?? []).includes('unique');
-    // WI-5 — the alt-win meters. PLEA target is the engine-owned capitulate
-    // threshold; the CHARGE target is a declared SENTENCE's tally (0 until one
-    // is declared). Each meter shows when it has a value OR the deck feeds it.
-    const sway = state.sway ?? 0;
-    const premises = state.premises ?? 0;
     // Phase 2 (spec 30) — pure selector, no state mutation; safe to call once
     // per render off the same encounter state the rest of the pane reads.
     const lethality = projectCombatOutcome(state);
@@ -1098,13 +1046,6 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
         stanceColor: stance ? STANCE_COLORS[stance] : '#6b6257',
         stanceLabel: stance ? STANCE_LABELS[stance] : '?',
         stanceHint: cur?.stanceHint ?? (e as { stanceHint?: string }).stanceHint ?? '',
-        sway, swayTarget: capitulateThreshold(e),
-        swayVisible: sway > 0 || deckFeedsMechanic(state, ['sway']),
-        premises, premiseAt: state.peroration?.at ?? 0,
-        // Only the UNDECLARED tally: once a SENTENCE is declared, the existing
-        // peroration track (combat-peroration) owns the premises/at readout.
-        premiseVisible: !state.peroration
-            && (premises > 0 || deckFeedsMechanic(state, ['premise', 'peroration', 'spend_premises'])),
         stagesEntered: (state.stagesEntered ?? []).length,
         pendingDot: lethality.pendingDot,
         roundsToKill: lethality.roundsToKill,
@@ -1638,7 +1579,7 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc, sourceCard?: Card): 
 }
 
 /** Honest card FACE view-model (the 5-zone hand card). */
-export function faceStats(card: CombatCard, sourceCard?: Card, enemyDifficulty?: EnemyDifficulty): CombatCardFaceVM {
+export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM {
     const c = cardCalc(card, sourceCard);
     const stanceColor = STANCE_COLORS[card.stance] ?? '#888';
     const kw = c.keyword ? c.keyword.toUpperCase() : null;
@@ -1702,7 +1643,7 @@ export function faceStats(card: CombatCard, sourceCard?: Card, enemyDifficulty?:
 }
 
 /** Honest card DETAIL view-model CORE (everything but the pill table). */
-function detailCore(card: CombatCard, sourceCard?: Card, enemyDifficulty?: EnemyDifficulty): DetailCore {
+function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
     const c = cardCalc(card, sourceCard);
     const Title = c.keyword ?? '';
     const STANCE = STANCE_LABELS[card.stance] ?? card.stance.toUpperCase();
@@ -1857,8 +1798,8 @@ function paidLine(sourceCard?: Card): string | null {
  *  fields. 2026-07-12 (card-wording audit): the NO-DIE pill (a pure duplicate
  *  of the face's ◇ rail) is gone; the +DIE row carries only what the face
  *  can't — the FULL paid line and the exact read triplet. */
-export function detailStats(card: CombatCard, sourceCard?: Card, enemyDifficulty?: EnemyDifficulty): CombatCardDetailVM {
-    const core = detailCore(card, sourceCard, enemyDifficulty);
+export function detailStats(card: CombatCard, sourceCard?: Card): CombatCardDetailVM {
+    const core = detailCore(card, sourceCard);
     const c = cardCalc(card, sourceCard);
     const STANCE = STANCE_LABELS[card.stance] ?? card.stance.toUpperCase();
     // The free (die-optional) value — the ENGINE's own free line, not the
@@ -1959,10 +1900,10 @@ export function armedReadValue(face: CombatCardFaceVM, read: CombatReadResult, c
 const KEYWORD_FAMILY: Record<string, StatFamily> = {
     DEAL: 'body', RUPTURE: 'body', REAP: 'body', IMMOLATE: 'body', EXECUTE: 'body', OVERKILL: 'body',
     GUARD: 'mind', BARRIER: 'mind', RIPOSTE: 'mind', THORNS: 'mind', REGEN: 'mind', HEAL: 'mind',
-    SIPHON: 'mind', WRATH: 'mind', CHAIN: 'mind', CHARGE: 'mind', SOUL: 'mind',
+    SIPHON: 'mind', WRATH: 'mind', CHAIN: 'mind', SOUL: 'mind',
     RESOLUTE: 'mind',
     POISON: 'heart', BLEED: 'heart', DOOM: 'heart', MARK: 'heart', BACKFIRE: 'heart', QUARTER: 'heart',
-    VULNERABLE: 'heart', STAGGER: 'heart', PLEA: 'heart', FLAY: 'heart', STUN: 'heart', FESTER: 'heart',
+    VULNERABLE: 'heart', STAGGER: 'heart', FLAY: 'heart', STUN: 'heart', FESTER: 'heart',
     PROLONG: 'heart', TICK: 'heart', KINDLE: 'heart', WEAKEN: 'heart',
 };
 
@@ -2009,12 +1950,9 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
         const libraryCard = getCardById(card.id);
         const stats = state.player.baseStats;
         const sourceCard = libraryCard ? scaleCardForStats(libraryCard, stats) : libraryCard;
-        // WI-6 — the hand is IN combat, so the live enemy difficulty is known:
-        // a CONDEMN face resolves its tier-floored threshold ("concede at 10 vs
-        // this foe") instead of the raw authored 8.
-        const scaledFace = faceStats(card, sourceCard, state.enemy.difficulty);
+        const scaledFace = faceStats(card, sourceCard);
         const printedCard = getCard(card.id);
-        const printedFace = printedCard ? faceStats(printedCard, libraryCard, state.enemy.difficulty) : scaledFace;
+        const printedFace = printedCard ? faceStats(printedCard, libraryCard) : scaledFace;
         const face = { ...scaledFace, ...familyFace(scaledFace, printedFace) };
         return {
             uid, cardId: card.id, name: card.name, stance: card.stance,
@@ -2027,7 +1965,7 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
             topActionText: vitaeCopy(card.topActionText), bottomActionText: vitaeCopy(card.bottomActionText),
             bottomDamagePreview: card.bottomDamagePreview,
             face,
-            detail: detailStats(card, sourceCard, state.enemy.difficulty),
+            detail: detailStats(card, sourceCard),
             flavor: sourceCard?.description ?? null,
         };
     });
@@ -2096,22 +2034,6 @@ export function rewardCardVMs(ids: readonly string[]): CombatCardVM[] {
         });
     }
     return out;
-}
-
-// ── phase 28 — Charge track + CONDEMN beat ──────────────────────────────────
-
-/** Mirrors `gainPremises`'s tier-floor exactly (combat.engine.ts) so the
- *  displayed CONDEMN threshold never lies about the live one. */
-function perorationVM(state: CombatEncounterState): CombatPerorationVM {
-    const decl = state.peroration;
-    if (!decl) return { active: false, premises: 0, at: 0, concedeAt: null, cardName: '' };
-    // WI-6 — the tier floor is the engine's own `concedeFloorFor`, never a
-    // presenter-local copy that can drift from the live concede resolution.
-    const concedeAt = decl.concedeAt !== undefined
-        ? Math.max(decl.concedeAt, concedeFloorFor(state.enemy.difficulty))
-        : null;
-    const card = getCardById(decl.cardId);
-    return { active: true, premises: state.premises ?? 0, at: decl.at, concedeAt, cardName: card?.name ?? '' };
 }
 
 // ── Spec 33 §3 — the momentum chain chip ─────────────────────────────────────
@@ -2244,7 +2166,6 @@ export function buildCombatViewModel(state: CombatEncounterState): CombatViewMod
         deckCount: state.drawPile.length,
         discardCount: state.discard.length,
         discardCards: state.discard.map((id) => ({ id, name: getCardById(id)?.name ?? id })),
-        peroration: perorationVM(state),
         momentumV2: momentumV2VM(state),
         playerStance: playerStanceVM(state),
         dieGear: dieGearRailVM(state),

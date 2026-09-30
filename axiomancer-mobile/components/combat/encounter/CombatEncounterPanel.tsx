@@ -34,7 +34,7 @@ import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
     startTurn, endTurn, discardCombatCard, playSignatureSkill,
     getFloatingDiceColors,
-    selectEncounterMercyChoice, selectCapitulationChoice, buildCombatSummary,
+    selectEncounterMercyChoice, buildCombatSummary,
     getLogger,
     type CombatEncounterState, type CombatOutcome, type Character, type Enemy, type CombatEvent,
 } from '@mechanics';
@@ -137,18 +137,16 @@ export interface CombatEncounterPanelProps {
 
 type StoreLike = ReturnType<typeof useGameStore>;
 
-/** Spec 32 v3 §9 — the merciful resolutions. Befriend (mercy), RELENT
- *  (PLEA ≥ enemy VITAE) and CONDEMN (the 8-Charge Sentence) all reward like
- *  mercy: XP flows, no corpse loot. */
+/** The merciful win: a befriend through The Open Hand, spared (D47). It
+ *  rewards like mercy: XP flows, no corpse loot. */
 function isMercifulWin(outcome: CombatOutcome): boolean {
-    return outcome === 'mercy' || outcome === 'capitulate' || outcome === 'concede';
+    return outcome === 'mercy';
 }
 
 /**
- * Phase 54 — translate the hazard-pattern engine's 6-way `CombatOutcome`
+ * Phase 54 — translate the hazard-pattern engine's `CombatOutcome`
  * into the vocabulary `game.reducer.ts`'s `END_COMBAT` case understands.
- * The merciful wins (mercy / capitulate / concede — "won without killing")
- * map onto the legacy engine's `'friendship'` outcome, which is exactly the
+ * The merciful win (mercy — "won without killing") maps onto the legacy engine's `'friendship'` outcome, which is exactly the
  * "spared the foe" branch already-authored `Enemy.friendshipReward` data
  * targets. `'retreat'` is dead (`combat.encounter.types.ts` — no in-combat
  * retreat exists) and maps to `'flee'` only so this function stays total.
@@ -600,7 +598,6 @@ export function CombatEncounterPanel({
         resolveTimer.current = setTimeout(endResolving, RESOLVE_LOCK_MS);
     }, [apply, endResolving]);
     const onMercy = useCallback((choice: 'spare' | 'exploit') => apply((s) => selectEncounterMercyChoice(s, choice).state), [apply]);
-    const onCapitulation = useCallback((choice: 'accept' | 'continue') => apply((s) => selectCapitulationChoice(s, choice).state), [apply]);
     // Stable resolution-feedback payload — recomputed only when a new resolve bumps
     // the seq (captures the events stashed in fxRef just before).
     const fx = useMemo<CombatFx>(() => ({ seq: fxSeq, events: fxRef.current }), [fxSeq]);
@@ -694,8 +691,7 @@ export function CombatEncounterPanel({
     }
 
     const summary = live.finalOutcome ? buildCombatSummary(live) : null;
-    const capitulation = live.phase === 'mercy-choice' && !!live.capitulationChoiceActive && !live.finalOutcome;
-    const mercy = live.phase === 'mercy-choice' && !live.capitulationChoiceActive && !live.finalOutcome;
+    const mercy = live.phase === 'mercy-choice' && !live.finalOutcome;
     const showReveal = live.phase === 'reveal';
     // Playtest fix 2026-09-04 — the log toggle/sheet never shows over the
     // reveal (nothing has happened yet) or once the fight is over (the
@@ -875,20 +871,6 @@ export function CombatEncounterPanel({
                     revealKey={enemyAction.key}
                     onDone={onEnemyActionDone}
                 />
-            )}
-
-            {/* PLEA opens a yield; the player, not the threshold, authors the outcome. */}
-            {capitulation && (
-                <View style={styles.backdrop} testID="combat-capitulation">
-                    <View style={[styles.modal, { borderColor: AXM.sulfur }]}>
-                        <Text style={styles.modalTitle}>{live.enemy.name} yields.</Text>
-                        <Text style={styles.modalSub}>Accept the yield, or continue the fight.</Text>
-                        <View style={styles.modalBtns}>
-                            <Pressable onPress={() => onCapitulation('accept')} testID="combat-capitulation-accept" accessibilityRole="button" accessibilityLabel="Accept the yield" style={[styles.modalBtn, { borderColor: '#5bbf6a' }]}><Text style={[styles.modalBtnText, { color: '#5bbf6a' }]}>ACCEPT</Text></Pressable>
-                            <Pressable onPress={() => onCapitulation('continue')} testID="combat-capitulation-continue" accessibilityRole="button" accessibilityLabel="Continue fighting" style={[styles.modalBtn, { borderColor: AXM.blood }]}><Text style={[styles.modalBtnText, { color: AXM.blood }]}>CONTINUE</Text></Pressable>
-                        </View>
-                    </View>
-                </View>
             )}
 
             {/* mercy choice */}

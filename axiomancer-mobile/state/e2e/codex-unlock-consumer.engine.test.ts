@@ -106,8 +106,8 @@ describe('actions.endCombat: returns engine CombatEndReport (Phase 78)', () => {
     // exercised so a regression in the effects library shape surfaces
     // here, not at runtime. Phase 78 doesn't change that surface.
     it('engine effects library is non-empty (smoke pin)', () => {
-        expect(effectsLibrary.buffs.length).toBeGreaterThan(0);
-        const { activeEffects } = applyEffect([], effectsLibrary.buffs[0], 1);
+        expect(effectsLibrary.debuffs.length).toBeGreaterThan(0);
+        const { activeEffects } = applyEffect([], effectsLibrary.debuffs[0], 1);
         expect(activeEffects).toHaveLength(1);
     });
 });

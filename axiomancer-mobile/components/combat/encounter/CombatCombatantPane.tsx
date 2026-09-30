@@ -158,20 +158,11 @@ function EnemyHpBar({ pct, value, max }: { pct: number; value: number; max: numb
     );
 }
 
-/** WI-5 — a slim alt-win meter under the VITAE bar (PLEA → RELENT, CHARGE
- *  → ORATORY). These currencies used to accumulate with NO combat surface: a
- *  GRACE run could play its whole plan and die with zero feedback on progress.
- *  `target` 0 renders the tally with no fill bar (an undeclared charge count). */
-function AltWinMeter({ glyph, label, value, target, color, testID, outcome }: {
+/** A slim meter under the VITAE bar: a tally with a fill bar toward
+ *  `target` (the DoT kill-path foresight). `target` 0 renders the tally with
+ *  no fill bar. */
+function HudMeter({ glyph, label, value, target, color, testID }: {
     glyph: string; label: string; value: number; target: number; color: string; testID: string;
-    /**
-     * What filling this meter DOES (FE-022) — 'RELENT', 'CONDEMN'. A meter
-     * drawn as a second full-width bar directly under the enemy's VITAE bar
-     * sits where genre convention puts armour, so without naming its payoff a
-     * player cannot tell whether filling it helps them or the foe. Omitted by
-     * the meters that have no target to fill toward (FLAY, the DoT tally).
-     */
-    outcome?: string;
 }) {
     const styles = useStyles();
     const pct = target > 0 ? Math.max(0, Math.min(1, value / target)) : 0;
@@ -181,12 +172,11 @@ function AltWinMeter({ glyph, label, value, target, color, testID, outcome }: {
             testID={testID}
             accessible
             accessibilityRole="progressbar"
-            accessibilityLabel={`${label} ${value}${target > 0 ? ` of ${target}` : ''}${outcome ? `. Fill it to ${outcome}.` : ''}`}
+            accessibilityLabel={`${label} ${value}${target > 0 ? ` of ${target}` : ''}`}
             accessibilityValue={{ min: 0, max: target || Math.max(1, value), now: value }}
         >
             <Text style={styles.altMeterLabel} allowFontScaling={false} numberOfLines={1}>
                 {glyph} {label} {value}{target > 0 ? `/${target}` : ''}
-                {outcome && target > 0 ? <Text style={styles.altMeterOutcome}>{`  → ${outcome}`}</Text> : null}
             </Text>
             {target > 0 ? (
                 <View style={styles.altMeterTrack}>
@@ -728,13 +718,6 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                         {metaLine ? <Text style={styles.hudMeta} allowFontScaling={false}>{metaLine}</Text> : null}
                     </View>
                     <EnemyHpBar pct={enemy.hpPct} value={enemy.hp} max={enemy.maxHp} />
-                    {/* WI-5 — alt-win meters (PLEA → relent, CHARGE → oratory) */}
-                    {enemy.swayVisible ? (
-                        <AltWinMeter glyph="🕊" label="PLEA" value={enemy.sway} target={enemy.swayTarget} color={AXM.sulfur} testID="combat-sway-meter" outcome="RELENT" />
-                    ) : null}
-                    {enemy.premiseVisible ? (
-                        <AltWinMeter glyph="☞" label="CHARGE" value={enemy.premises} target={enemy.premiseAt} color={AXM.sulfur} testID="combat-premise-meter" outcome="CONDEMN" />
-                    ) : null}
                     {/* Phase 2 (spec 30) — the status kill-path foresight. Makes the
                         DoT win path foreseeable instead of invisible accumulation:
                         a plain pending tally once stacks land, a "LETHAL IN N" call
@@ -742,7 +725,7 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                         the tally prints the REAL pending figure (the fill bar clamps
                         on its own — "45/45" while 240 was queued hid the surplus). */}
                     {enemy.pendingDot > 0 ? (
-                        <AltWinMeter
+                        <HudMeter
                             glyph="☠"
                             label={enemy.isLethalInFlight
                                 ? `LETHAL IN ${enemy.roundsToKill}`
@@ -826,14 +809,13 @@ const useStyles = makeStyles((AXM) => ({
     },
     crestMax: { fontFamily: FONTS.mono, fontSize: 9, lineHeight: 10, color: AXM.bone, marginTop: -1 },
 
-    // WI-5 — slim alt-win meters under the VITAE bar (PLEA / CHARGE).
+    // Slim meters under the VITAE bar (the DoT kill-path foresight).
     altMeter: { marginTop: 4 },
     altMeterLabel: {
         fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 1, color: AXM.bone,
         textShadowColor: '#000', textShadowRadius: 3, textShadowOffset: { width: 0, height: 1 },
     },
     // FE-022 — the payoff word rides quieter than the tally it follows.
-    altMeterOutcome: { color: AXM.sulfur, letterSpacing: 1.4 },
     altMeterTrack: {
         marginTop: 2, height: 5, borderRadius: 3, backgroundColor: 'rgba(0,0,0,0.6)',
         borderWidth: 1, borderColor: 'rgba(0,0,0,0.9)', overflow: 'hidden',

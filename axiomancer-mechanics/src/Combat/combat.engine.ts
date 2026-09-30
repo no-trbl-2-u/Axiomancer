@@ -47,7 +47,6 @@ import {
     applyCleanse,
     DISRUPT_DENY_AT,
     THREAT_RUNGS, THREAT_RUNGS_BOSS, BOSS_RUNG_REGROWTH, bossRungGrowthCap,
-    capitulateThreshold,
 } from './effects';
 import {
     dieHasStance,
@@ -152,10 +151,6 @@ export const SCRAP_CONVICTION_CAP_PER_TURN = 2;
 // schema (`basePower` no longer exists), so there is no auto-derived strike
 // path to weight. Direct damage exists only as the authored `deal` family
 // (THE BIG NUMBERS REWRITE), scaled by `scalePlayerHit`.
-
-/** Spec 32 v3 T8 — PLEA decays this much at every turn boundary (the
- *  tension knob, ratified A2). Tunable. */
-export const SWAY_DECAY_PER_TURN = 1;
 
 // ── Depth epic (combat-depth-epic) ───────────────────────────────────────────
 
@@ -340,19 +335,7 @@ export function initializeCombatEncounter(
         discard: draw.discard,
         hand,
         floatingDice,
-        premises: 0,
-        // Phase 32 part 4b (Oratory — milestone drip): per-COMBAT lifetime
-        // Premise total, like `souls` — never resets when
-        // `premises` itself resets on a Peroration payoff or CONDEMN.
-        premiseMilestoneTotal: 0,
-        peroration: null,
         souls: 0,
-        sway: 0,
-        // Phase 32 part 4e (Charm — Resolve milestones): per-COMBAT, like
-        // `souls` — a milestone already paid never un-fires,
-        // even if the enemy's live resolve later shrinks below it.
-        swayMilestoneWaveringFired: false,
-        swayMilestoneFalteringFired: false,
         spellsPlayedThisTurn: 0,
         // Spec 32 §12 #4 — the combat ledgers start empty.
         enemyDamageThisTurn: 0,
@@ -784,30 +767,6 @@ function gainSouls(
     return { ...state, souls };
 }
 
-function swayOffersCapitulation(state: CombatEncounterState): boolean {
-    // A DEFEATED enemy cannot yield — HP 0 is victory. A rejected yield is a
-    // permanent player decision for this encounter; do not ambush them with the
-    // same modal after every later play.
-    return !state.capitulationDeclined
-        && !state.capitulationChoiceActive
-        && (state.sway ?? 0) > 0
-        && !isDefeated(state.enemy)
-        && (state.sway ?? 0) >= capitulateThreshold(state.enemy);
-}
-
-function offerCapitulation(state: CombatEncounterState, events: CombatEvent[]): CombatTransition {
-    const offered: CombatEvent = {
-        kind: 'capitulation-offered',
-        threshold: capitulateThreshold(state.enemy),
-    };
-    const choosing: CombatEncounterState = {
-        ...state,
-        phase: 'mercy-choice',
-        capitulationChoiceActive: true,
-    };
-    return { state: withLog(choosing, [offered]), events: [...events, offered] };
-}
-
 /**
  * Applies a `CardRider` against the encounter state — the executor for FREE
  * lines. Every field is a real engine unit.
@@ -956,7 +915,6 @@ function playTopAction(
     }
     next = fireFreePlayClock(next, enemyPrePlay, playerPrePlay, events);
     next = withLog(next, events);
-    if (swayOffersCapitulation(next)) return offerCapitulation(next, events);
     return checkImmediateOutcome(next, events);
 }
 
@@ -1199,7 +1157,6 @@ function playBottomAction(
     };
     next = discardEntry(next, uid);
     next = withLog(next, events);
-    if (swayOffersCapitulation(next)) return offerCapitulation(next, events);
     return checkImmediateOutcome(next, events);
 }
 
@@ -1653,8 +1610,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
 
     next = withLog(next, events);
 
-    // Outcome checks after the threat action (HP + capitulation).
-    if (swayOffersCapitulation(next)) return offerCapitulation(next, events);
+    // Outcome checks after the threat action.
     const outcome = pendingOutcome(next);
     if (outcome) return endCombat(next, outcome, events);
 
@@ -1832,14 +1788,6 @@ export function processBetweenPhases(
         omenState = gainSouls(omenState, expiredAfflictions, 'expiry', events);
     }
 
-    // PLEA decays at the turn boundary (ratified A2).
-    let sway = omenState.sway ?? 0;
-    if (sway > 0) {
-        sway = Math.max(0, sway - SWAY_DECAY_PER_TURN);
-        events.push({ kind: 'sway-decayed', total: sway });
-    }
-    omenState = { ...omenState, sway };
-
     // Fate Engine P1 R2 — RESERVE dice RIPEN: +1 pip per threat phase survived
     // (cap RESERVE_PIP_CAP). Holding a die through a telegraph is the gamble.
     let reserve = omenState.reserve ?? [];
@@ -1895,8 +1843,7 @@ export function processBetweenPhases(
     // this covers back-to-back `processBetweenPhases` calls in tests.
     next = { ...next, enemyDotDamageThisRound: 0 };
 
-    // 6. Outcome checks after ticks (HP + capitulation).
-    if (swayOffersCapitulation(next)) return offerCapitulation(next, [...priorEvents, ...events]);
+    // 6. Outcome checks after ticks.
     const outcome = pendingOutcome(next);
     if (outcome) return endCombat(next, outcome, [...priorEvents, ...events]);
 
@@ -2002,26 +1949,6 @@ export function resolveCombatPhase(
     if (working.phase !== 'phase-play') return { state: working, events: allEvents };
     const resolved = resolveThreatPhase(working, rng);
     return { state: resolved.state, events: [...allEvents, ...resolved.events] };
-}
-
-// ── Capitulation + mercy choices ──────────────────────────────────────────────
-
-/** PLEA makes the foe's yield available; only the player can author the end. */
-export function selectCapitulationChoice(
-    state: CombatEncounterState,
-    choice: 'accept' | 'continue',
-): CombatTransition {
-    if (!state.capitulationChoiceActive) return { state, events: [] };
-    const resumed: CombatEncounterState = {
-        ...state,
-        phase: 'phase-play',
-        capitulationChoiceActive: false,
-    };
-    if (choice === 'accept') return endCombat(resumed, 'capitulate', []);
-
-    const declined: CombatEncounterState = { ...resumed, capitulationDeclined: true };
-    const event: CombatEvent = { kind: 'capitulation-declined' };
-    return { state: withLog(declined, [event]), events: [event] };
 }
 
 // ── Mercy choice (Phase 112 / §3) ────────────────────────────────────────────

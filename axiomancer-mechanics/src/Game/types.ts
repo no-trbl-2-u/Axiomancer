@@ -66,27 +66,6 @@ export interface CodexState {
     unlockedEntries: string[];
 }
 
-/**
- * Phase 109 — region-level consequences for befriend exploit/spare choices
- * against elite/miniboss enemies. Tracks the player's mercy decisions to
- * affect region boss behavior: exploiting blocks friendship counters,
- * sparing grants 'open-minded' status.
- */
-export interface RegionConsequences {
-    /** 
-     * Regions where the player exploited a Befriend opening against an 
-     * elite/miniboss. The region boss in these areas cannot gather 
-     * friendship counters.
-     */
-    exploitedRegions: string[];
-    
-    /** 
-     * Regions where the player spared an elite/miniboss through Befriend.
-     * The region boss in these areas starts combat with 'open-minded' status.
-     */
-    sparedRegions: string[];
-}
-
 export interface GameState {
     version: number;
     /**
@@ -112,13 +91,6 @@ export interface GameState {
      * v11 are rejected by `migrate`.)
      */
     codex: CodexState;
-    /**
-     * Phase 109 — region-level consequences tracking for befriend
-     * exploit/spare choices against elite/miniboss enemies. Required
-     * state slice; defaults to `{ exploitedRegions: [], sparedRegions: [] }`
-     * on new games.
-     */
-    regionConsequences: RegionConsequences;
     /**
      * W-01 — cross-act labyrinth (The Aporia) progress: pocket of
      * fragments, opened gates, revealed secrets, the debt ledger, and

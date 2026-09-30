@@ -403,8 +403,6 @@ export interface CombatSummary {
 export type CombatOutcome =
     | 'victory'    // enemy HP → 0 (DoT erosion + status payoffs)
     | 'mercy'      // spared a low-HP foe via Befriend (the friendship path)
-    | 'capitulate' // PLEA reached live resolve and the player explicitly accepted the yield
-    | 'concede'    // spec 32 v3 §9 — an 8-Premise Peroration wins the argument
     | 'defeat'     // player HP → 0
     | 'retreat';   // dead — no in-combat retreat exists; combat resolves only
                    // by winning or losing. Kept in the union (see
@@ -453,15 +451,6 @@ export type CombatEvent =
     | { kind: 'pips-cashed'; cardId: string; pips: number; bonus: 'intensity' | 'guard'; amount: number }
     // ── Spec 32 v3 — ghost-die and oratory events ────────────────────────────
     | { kind: 'floating-die-spent'; dieId: string; color: CombatDieColor; poolSize: number }
-    | { kind: 'premise-gained'; amount: number; total: number }
-    // Phase 32 part 4b (Oratory — milestone drip): fires alongside
-    // 'premise-gained' whenever a NEW lifetime Premise milestone is crossed —
-    // own event (not a field on 'premise-gained') so existing consumers are
-    // unaffected.
-    // 'total' is the lifetime `premiseMilestoneTotal`, not the (resettable)
-    // spendable Premise tally 'premise-gained' reports.
-    | { kind: 'premise-milestone'; tiersCrossed: number; rungs: number; total: number }
-    | { kind: 'peroration-fired'; cardId: string; premisesSpent: number }
     | { kind: 'backfired'; amount: number; rungs: number }
     | { kind: 'rung-regrown'; rungs: number; total: number }
     | { kind: 'stance-locked'; phaseIndex: number; stance: Stance }
@@ -476,21 +465,6 @@ export type CombatEvent =
      * one.
      */
     | { kind: 'enemy-healed'; enemyId: string; source: 'STAGE' | 'THREAT'; amount: number }
-    | { kind: 'sway-gained'; amount: number; total: number }
-    // Phase 32 part 4e (Charm — Resolve milestones): fires alongside
-    // 'sway-gained' whenever PLEA crosses a NEW named fractional waypoint of
-    // the enemy's live `capitulateThreshold` — own event (not a field on
-    // 'sway-gained') so existing 'sway-gained' consumers are unaffected,
-    // matching 'premise-milestone' precedent. 'threshold'
-    // is the live waypoint value crossed (see `swayResolveMilestoneThresholds`);
-    // 'total' is the PLEA total AFTER this milestone's own dividend (the
-    // Faltering bonus PLEA included). Discriminated by 'milestone' so each
-    // variant's own payoff field is real, not a shared/optional guess.
-    | { kind: 'sway-milestone'; milestone: 'wavering'; threshold: number; total: number; effectId: string; intensity: number }
-    | { kind: 'sway-milestone'; milestone: 'faltering'; threshold: number; total: number; bonus: number }
-    | { kind: 'sway-decayed'; total: number }
-    | { kind: 'capitulation-offered'; threshold: number }
-    | { kind: 'capitulation-declined' }
     | { kind: 'dots-boosted'; intensity: number; affected: string[] }
     | { kind: 'phase-resolved'; phaseIndex: number; mark: 'clear' | 'overwhelmed' }
     | { kind: 'threat-fired'; phaseIndex: number; description: string; effects: CombatThreatEffect[] }
@@ -601,18 +575,6 @@ export interface CombatEncounterState {
      *  `initializeCombatEncounter`. Optional for back-compat (absent = none
      *  claimed yet). */
     covetedDiceClaimed?: number[];
-    /** Spec 32 v3 T2 — the CHARGE tally (Peroration theme). Optional. */
-    premises?: number;
-    /** Phase 32 part 4b (Oratory — milestone drip): cumulative Premises EVER
-     *  gained THIS COMBAT — every source that feeds `gainPremises`. Per-combat,
-     *  like `souls` — reset to 0 in `initializeCombatEncounter`
-     *  only. UNLIKE the spendable `premises` tally above, this does NOT reset
-     *  when a Peroration pays off or CONDEMN fires, so a milestone already
-     *  crossed stays crossed. Optional (absent = 0, back-compat with existing
-     *  state literals). */
-    premiseMilestoneTotal?: number;
-    /** Spec 32 v3 T2 — the declared SENTENCE (one in play at a time). */
-    peroration?: { cardId: string; at: number; concedeAt?: number } | null;
     /** Spec 32 v3 T5 — STAGGER rungs accumulated against the enemy's NEXT
      *  telegraphed action (consumed at threat resolution). Optional. */
     staggerRungs?: number;
@@ -626,29 +588,6 @@ export interface CombatEncounterState {
     bossRungGrowth?: number;
     /** Spec 32 v3 T7 — the SOUL bank (Harvest currency). Optional. */
     souls?: number;
-    /** Spec 32 v3 T8 — PLEA on the enemy (decays 1/turn; ≥ enemy HP at a turn
-     *  boundary → RELENT). Optional. */
-    sway?: number;
-    /** Phase 32 part 4e (Charm — Resolve milestones): has the Wavering
-     *  waypoint (PLEA ≥ {@link swayResolveMilestoneThresholds}'s `wavering`,
-     *  a fraction of the LIVE `capitulateThreshold`) already paid its
-     *  one-time QUARTER dividend THIS COMBAT? Per-combat, like `souls` —
-     *  reset to `false` in `initializeCombatEncounter` only.
-     *  Once true, NEVER reset back to false even if the live resolve later
-     *  shrinks below the threshold that was crossed (a milestone already
-     *  paid stays paid). Optional (absent = false, back-compat with
-     *  existing state literals). */
-    swayMilestoneWaveringFired?: boolean;
-    /** Phase 32 part 4e (Charm — Resolve milestones): the Faltering waypoint
-     *  sibling of {@link swayMilestoneWaveringFired} (pays a bonus-PLEA
-     *  dividend instead of QUARTER). Same per-combat, never-claws-back
-     *  lifecycle. Optional (absent = false). */
-    swayMilestoneFalteringFired?: boolean;
-    /** PLEA has broken the foe's will; the player must accept the yield or
-     * continue fighting. Never resolves combat on threshold alone. */
-    capitulationChoiceActive?: boolean;
-    /** The player rejected this foe's yield; do not reopen the same offer. */
-    capitulationDeclined?: boolean;
     /** THE PATH — extra dice added to every turn's tray (act-reward dice),
      *  seeded from `Character.bonusTurnDice`. Absent = 0. */
     bonusTurnDice?: number;
