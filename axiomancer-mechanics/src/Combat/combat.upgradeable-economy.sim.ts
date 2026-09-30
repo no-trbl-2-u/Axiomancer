@@ -19,7 +19,7 @@
 import { setSeed } from '../Utils/rng';
 import {
     initializeCombatEncounter, rollEncounterDice, resolveThreatPhase,
-    selectMercyChoice, selectCapitulationChoice,
+    selectMercyChoice,
 } from './combat.engine';
 import { playSimPhase } from './combat.encounter.sim';
 import {
@@ -164,7 +164,7 @@ function emptyAcc(): EconomyAccumulator {
 }
 
 function isWin(outcome: CombatOutcome | null): boolean {
-    return outcome === 'victory' || outcome === 'mercy' || outcome === 'capitulate' || outcome === 'concede';
+    return outcome === 'victory' || outcome === 'mercy';
 }
 
 /** Folds a slice of transcript events into `acc`. The `turn-dice-rolled` in the
@@ -233,7 +233,6 @@ function accumulateEncounter(
     let loopGuard = 0;
     while (state.phase !== 'complete' && !state.finalOutcome && loopGuard < 200) {
         loopGuard++;
-        if (state.capitulationChoiceActive) { state = selectCapitulationChoice(state, 'accept').state; break; }
         if (state.mercyChoiceActive) {
             state = selectMercyChoice(state, policy.mercyChoice).state;
             if (state.phase === 'complete' || state.finalOutcome) break;
@@ -247,7 +246,6 @@ function accumulateEncounter(
         cursor = state.log.length;
 
         if (state.finalOutcome) break;
-        if (state.capitulationChoiceActive) { state = selectCapitulationChoice(state, 'accept').state; break; }
         if (state.mercyChoiceActive) {
             state = selectMercyChoice(state, policy.mercyChoice).state;
             if (state.phase === 'complete' || state.finalOutcome) break;

@@ -36,8 +36,7 @@
  *     does not provide, and the sim policies are instruments, not players, so a
  *     "comeback" would measure the driver's guard counters, not the design.
  *   - *Win-path diversity* — already first-class as `winPathCounts`, and it is
- *     a property of the LIBRARY, not of a fight's quality: rot should not be
- *     penalised for never reaching RELENT.
+ *     a property of the LIBRARY, not of a fight's quality.
  * Both remain reported elsewhere; neither is part of the objective.
  *
  * ─── The locked-mechanics guard ─────────────────────────────────────────────

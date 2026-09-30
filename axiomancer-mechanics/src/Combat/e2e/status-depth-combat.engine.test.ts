@@ -35,7 +35,8 @@ import {
 import { classifyVerbClass, toCombatCard } from '../combat.cards';
 import { getActiveDotTotal, getActiveDotAmplifications } from '../effect-modifiers';
 import { COMBAT_REWARD_POOL } from '../combat.rewards';
-import type { CombatEvent } from '../combat.encounter.types';
+import type { CombatEvent } from '../combat.encounter.types';
+
 import { registerFixtureEffects } from '../../test-utils/fixture-effects';
 
 // The keyword audit (2026-09-27) deleted buff_thorns / debuff_backfire /
@@ -289,7 +290,7 @@ describe('INVARIANT — no new behavior fires without its marker', () => {
     const NEW_KINDS = new Set([
         'rupture-detonated', 'disrupt-denied', 'thorns-reflected',
         'barrier-absorbed', 'riposte-fired', 'backfired', 'reaped', 'staggered',
-        'sway-gained', 'soul-gained', 'premise-gained',
+        'soul-gained',
     ]);
 
     it('a plain enemy + plain player emit ZERO new-kind events and un-amplified DoT', () => {

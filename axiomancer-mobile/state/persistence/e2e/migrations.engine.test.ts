@@ -176,8 +176,9 @@ describe('migrations.engine', () => {
             // v29 (phase R3b): the fishing-village / goodwill purge hop after that;
             // v30 (phase R5): the retired-consumable purge hop;
             // v31 (phase R6a): the hazard token / hex flag hop;
-            // v32 (phase R6b): the deleted hazard deck card hop.
-            expect(GAME_STATE_VERSION).toBe(32);
+            // v32 (phase R6b): the deleted hazard deck card hop;
+            // v33 (phase R7c): the region-consequences slice hop.
+            expect(GAME_STATE_VERSION).toBe(33);
             expect(result.version).toBe(GAME_STATE_VERSION);
         });
     });

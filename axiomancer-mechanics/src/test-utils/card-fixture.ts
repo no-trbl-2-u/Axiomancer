@@ -7,7 +7,7 @@
  *
  *   - RICH (default, `{ clean: false }`) — the effectiveness lint's
  *     precondition buffet: enemy afflictions with DoT fuel + MARK stacks,
- *     Souls, Premises, discard fodder, reserve/floating dice with pip
+ *     Souls, discard fodder, reserve/floating dice with pip
  *     headroom, a pre-damaged Fallen player, a banked TURNABOUT denial
  *     ledger. Every library card's PAID-face preconditions are
  *     satisfiable here.
@@ -99,9 +99,6 @@ export function buildFixtureState(options: { clean?: boolean } = {}): CombatEnco
         guard: clean ? 0 : 4,
         barrier: clean ? 0 : 4,
         souls: clean ? 0 : 12,
-        premises: 3,
-        peroration: null, // tallied but undeclared — a 'premise' gain never trips CONDEMN mid-assertion
-        sway: 0,
         staggerRungs: 0,
         revealedStances: [],
         spellsPlayedThisTurn: 0,

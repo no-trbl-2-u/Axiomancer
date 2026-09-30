@@ -52,17 +52,6 @@ export interface CombatSimPolicy {
     /** How a Befriend-opened mercy choice resolves. */
     mercyChoice: 'spare' | 'exploit';
     /**
-     * How a PLEA-opened capitulation offer (RELENT) resolves: `accept` ends
-     * the fight in the enemy's yield; `continue` declines and keeps fighting
-     * for this witness's own preferred win condition. A static per-policy
-     * stance, not a lookahead — mirrors `mercyChoice`'s shape. Only
-     * `mercy-seeker` (mercy is its entire identity) and `chaos` (the
-     * non-optimizing noise floor) accept; every other witness plays through
-     * the offer, since RELENT is one alt-win among several that compete on
-     * merit (CLAUDE.md), not a default exit.
-     */
-    capitulationChoice: 'accept' | 'continue';
-    /**
      * OPTIONAL (extension beyond the base contract): rank affordable signatures;
      * highest wins. When absent the sim takes the FIRST affordable signature in
      * `state.signatures` order whose kind is in `signatureKinds` — the legacy
@@ -131,7 +120,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         signatureKinds: ALL_SIGNATURE_KINDS,
         convictionThreshold: 7,
         mercyChoice: 'spare',
-        capitulationChoice: 'continue',
     },
     blind: {
         id: 'blind',
@@ -141,7 +129,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         signatureKinds: ALL_SIGNATURE_KINDS,
         convictionThreshold: 7,
         mercyChoice: 'spare',
-        capitulationChoice: 'continue',
     },
     'dot-weaver': {
         id: 'dot-weaver',
@@ -160,7 +147,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         signatureKinds: GUARD_ONLY,
         convictionThreshold: 7,
         mercyChoice: 'exploit',
-        capitulationChoice: 'continue',
     },
     'control-lock': {
         id: 'control-lock',
@@ -178,7 +164,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         signatureKinds: GUARD_ONLY,
         convictionThreshold: 8,
         mercyChoice: 'spare',
-        capitulationChoice: 'continue',
     },
     'aggro-brute': {
         id: 'aggro-brute',
@@ -188,7 +173,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         signatureKinds: GUARD_ONLY,
         convictionThreshold: 7,
         mercyChoice: 'exploit',
-        capitulationChoice: 'continue',
     },
     turtle: {
         id: 'turtle',
@@ -206,7 +190,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         signatureKinds: GUARD_ONLY,
         convictionThreshold: 9,
         mercyChoice: 'spare',
-        capitulationChoice: 'continue',
     },
     chaos: {
         id: 'chaos',
@@ -216,7 +199,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         signatureKinds: ALL_SIGNATURE_KINDS,
         convictionThreshold: 7,
         mercyChoice: 'exploit',
-        capitulationChoice: 'accept',
         rankSignature: (_s, _sig, rng) => rng(),
     },
     'mercy-seeker': {
@@ -234,7 +216,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         signatureKinds: ['mercy', 'guard'],
         convictionThreshold: 6,
         mercyChoice: 'spare',
-        capitulationChoice: 'accept',
     },
 };
 

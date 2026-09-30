@@ -56,7 +56,6 @@ export {
     getActiveEffectModifiers, canAct,
     // 0.34.0 status-depth epic — HP-model selectors + tunable scalars
     DISRUPT_DENY_AT,
-    CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
     healCharacter,
 } from './Combat';
 export type {
@@ -65,13 +64,13 @@ export type {
 } from './Combat';
 
 // ─── Spec 25 — Hazard-Pattern Combat ──────────────────────────────────────────
-// Card-and-dice combat: VITAE (`isDefeated`) is the main win condition beside
-// the alt-wins (Befriend, RELENT, CONDEMN); status play and direct damage
-// compete on merit (THE BIG NUMBERS REWRITE, 2026-09-02).
+// Card-and-dice combat: emptying the foe's VITAE (`isDefeated`) wins; a
+// befriend through The Open Hand opens the mercy choice, the only non-lethal
+// ending (D47, D63).
 export {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveThreatPhase, processBetweenPhases,
-    selectEncounterMercyChoice, selectCapitulationChoice, getCard,
+    selectEncounterMercyChoice, getCard,
     handCards, buildCombatSummary,
     combatDieCanPower,
     toCombatCard, buildCombatDeck,
@@ -87,12 +86,8 @@ export {
     projectIncomingThreat,
     // Phase 2 — projected-lethality readout (spec 30)
     projectCombatOutcome,
-    // Spec 32 v3 — floating dice save-back + sway decay knob
-    getFloatingDiceColors, SWAY_DECAY_PER_TURN,
-    // RELENT (PLEA) resolve threshold — the sway meter's target (WI-5)
-    capitulateThreshold,
-    // CONDEMN Premise floor per difficulty — the concede-ladder source (WI-6)
-    concedeFloorFor,
+    // Spec 32 v3 — floating dice save-back
+    getFloatingDiceColors,
     // Spec 26b tuning §B/§C/§D
     COMBAT_REWARD_POOL, STARTING_CARD_IDS, rollCombatCardRewards, addRewardCard,
     unlockCardViaDilemma,

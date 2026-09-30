@@ -47,7 +47,6 @@ An encounter node resolves to a `combat-prelude` event that renders **in place o
 | `combat-log-toggle` / `combat-log` / `combat-log-close` | Ledger overlay |
 | `combat-card-detail` / `combat-card-detail-close` | Card detail modal (deliberate; has a dismiss) |
 | `combat-mercy` / `combat-mercy-spare` / `combat-mercy-exploit` | Mercy choice when the foe breaks |
-| `combat-capitulation` / `combat-capitulation-accept` / `combat-capitulation-continue` | Foe offers to yield |
 | `combat-rewards` / `combat-reward-<cardId>` / `combat-reward-preview` / `combat-reward-preview-select` / `combat-reward-preview-close` / `combat-reward-confirm` / `combat-reward-skip` | SPOILS card pick |
 | `combat-summary` / `combat-summary-close` | Post-fight summary; Continue closes the encounter |
 | `combat-victory-panel` / `combat-victory-panel-carry-on` | Victory seal → CARRY ON returns to the map |
@@ -63,7 +62,7 @@ An encounter node resolves to a `combat-prelude` event that renders **in place o
 4. **Drag** a `combat-die-<id>` whose colour matches the card onto `combat-staged-<uid>`; success shows `combat-staged-die`. A die whose aria-label says `MISS face` powers nothing — pick another. A wrong colour flashes `combat-drop-reject`. Use real pointer moves (down → several moves → up); `scripts/combat-round-e2e.mjs` `dragTo` is the reference.
 5. Press `combat-apply-<uid>`. Repeat 3–5 while dice remain, or discard via `combat-trash`.
 6. Press `combat-end-phase`; the enemy acts (`combat-enemy-action-card`), the tray re-rolls.
-7. Repeat until the foe breaks. Answer `combat-mercy-spare`/`-exploit` or `combat-capitulation-*` if asked.
+7. Repeat until the foe breaks. Answer `combat-mercy-spare`/`-exploit` if asked.
 8. Pick a reward (`combat-reward-<cardId>` → `combat-reward-confirm`) or `combat-reward-skip`; close `combat-summary-close`; press `combat-victory-panel-carry-on` (or the friendship/defeat exit). You are back on the map.
 
 ## 5. Looks stuck but isn't

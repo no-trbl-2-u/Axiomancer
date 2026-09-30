@@ -27,9 +27,10 @@
  * save standing off Act 1 moves onto the Lantern Deep), v28 → v29 (R3b:
  * fishing-village purged), v29 → v30 (2026-09-30, R5: the retired
  * consumables and their effects dropped), v30 → v31 (2026-09-30, R6a: the
- * hazard token and hex flags dropped) and v31 → v32 (2026-09-30, R6b: hazard
- * deck cards outside the core ten dropped). The hops chain, so a v11 save
- * lands at v32 in one `migrate` call. Every other version mismatch still rejects.
+ * hazard token and hex flags dropped), v31 → v32 (2026-09-30, R6b: hazard
+ * deck cards outside the core ten dropped) and v32 → v33 (2026-09-30, R7c:
+ * the write-only `regionConsequences` slice dropped). The hops chain, so a
+ * v11 save lands at v33 in one `migrate` call. Every other version mismatch still rejects.
  */
 
 import { GameState } from './types';
@@ -785,6 +786,17 @@ function migrateV31ToV32(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
+ * v32 → v33 (2026-09-30, THE REVAMP R7c, D47/D50): the alt-win systems are
+ * gone. Drops the `regionConsequences` slice: nothing ever wrote a region into
+ * it, and its only reader (the spared-region boss buff) is deleted.
+ * Idempotent and pure over a raw save payload.
+ */
+function migrateV32ToV33(raw: Record<string, unknown>): Record<string, unknown> {
+    const { regionConsequences: _dropped, ...rest } = raw;
+    return { ...rest, version: 33 };
+}
+
+/**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
  * game). The name/signature is kept so the persistence layer's call site is
@@ -823,8 +835,9 @@ export function migrate(
     // v27 → v28 moves a save off Act 1 onto the Lantern Deep; v28 → v29
     // drops fishing-village, its quests and the goodwill tally; v29 → v30
     // drops the retired consumables and their effects; v30 → v31 drops the
-    // hazard token and hex flags; v31 → v32 drops deleted hazard deck cards.
-    // Chained so a v11 save lands at v32 in one call.
+    // hazard token and hex flags; v31 → v32 drops deleted hazard deck cards;
+    // v32 → v33 drops the write-only region-consequences slice.
+    // Chained so a v11 save lands at v33 in one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
@@ -908,6 +921,10 @@ export function migrate(
     if (version === 31 && toVersion >= 32) {
         working = migrateV31ToV32(working);
         version = 32;
+    }
+    if (version === 32 && toVersion >= 33) {
+        working = migrateV32ToV33(working);
+        version = 33;
     }
 
     if (version !== toVersion) {

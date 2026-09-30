@@ -254,7 +254,7 @@ function summarizeStage(stage: CombatStageId, cells: readonly PlaytestCellResult
     const mine = cells.filter(c => c.spec.stage === stage);
     let runs = 0, win = 0, engagement = 0, dot = 0, rounds = 0, roundsSd = 0, util = 0, entropy = 0;
     const winPathCounts: WinPathCounts = {
-        victory: 0, mercy: 0, capitulate: 0, concede: 0, defeat: 0, retreat: 0,
+        victory: 0, mercy: 0, defeat: 0, retreat: 0,
     };
     // Dominant card at the stage level: the biggest per-card share seen in any
     // of the stage's cells (the worst-case single-card concentration).
@@ -325,7 +325,7 @@ function summarizeDecks(cells: readonly PlaytestCellResult[]): PlaytestDeckSumma
             if (stageCells.length === 0) continue;
             let runs = 0, win = 0, engagement = 0, rounds = 0, roundsSd = 0, util = 0, entropy = 0;
             const winPathCounts: WinPathCounts = {
-                victory: 0, mercy: 0, capitulate: 0, concede: 0, defeat: 0, retreat: 0,
+                victory: 0, mercy: 0, defeat: 0, retreat: 0,
             };
             const policyRuns = new Map<string, number>();
             const policyWins = new Map<string, number>();
@@ -532,17 +532,15 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
         );
     }
 
-    // Un-collapsed win-path mix per cell (V/M/D/R folds the three merciful
-    // resolutions — this exposes the theme's OWN win path: capitulate / concede).
+    // Win-path mix per cell.
     lines.push('');
-    lines.push('Win-path mix (per cell — victory/mercy/capitulate/concede/defeat):');
+    lines.push('Win-path mix (per cell — victory/mercy/defeat):');
     for (const cell of report.cells) {
         const w = cell.stats.winPathCounts;
         lines.push(
             `  ${cell.spec.stage.padEnd(11)}${cell.spec.enemySlug.padEnd(26)}${cell.spec.policyId.padEnd(13)}`
             + `${deckLabel(cell.spec.deck).padEnd(22)}`
             + `vic=${String(w.victory).padStart(3)} mer=${String(w.mercy).padStart(3)} `
-            + `cap=${String(w.capitulate).padStart(3)} con=${String(w.concede).padStart(3)} `
             + `def=${String(w.defeat).padStart(3)}`,
         );
     }
@@ -559,8 +557,7 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
             + `  dom=${pct(summary.dominantCardShare)}${summary.dominantCardId ? `(${summary.dominantCardId})` : ''}`,
         );
         lines.push(
-            `             win-path: vic=${w.victory} mer=${w.mercy} cap=${w.capitulate}`
-            + ` con=${w.concede} def=${w.defeat}`,
+            `             win-path: vic=${w.victory} mer=${w.mercy} def=${w.defeat}`,
         );
         lines.push(`             ${formatCombatQuality(summary.combatQuality)}`);
     }

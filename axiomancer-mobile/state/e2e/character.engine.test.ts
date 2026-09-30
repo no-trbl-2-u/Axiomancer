@@ -13,6 +13,7 @@ import {
     createNewGameState,
     applyEffect,
     effectsLibrary,
+    type Effect,
 } from '@mechanics';
 
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
@@ -24,6 +25,15 @@ import {
 afterEach(() => {
     jest.restoreAllMocks();
 });
+
+/** The effects library carries no buffs since R7c deleted `buff_absolved`, so
+ *  the buff mapping runs on a test-local buff registered into the live
+ *  registry (the mechanics `fixture-effects` pattern; jest isolates files). */
+const TEST_BUFF: Effect = {
+    id: 'fixture_test_buff', name: 'Test Buff', description: 'Test fixture: no payload.',
+    type: 'buff', category: 'stat', duration: 3, stacking: 'none', tier: 1, payload: {},
+};
+effectsLibrary.registry.set(TEST_BUFF.id, TEST_BUFF);
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -248,7 +258,7 @@ describe('selectCharacterViewModel: boundary conditions', () => {
 
 describe('selectCharacterViewModel: effects', () => {
     it('maps a buff effect to kind="buff" and tint="buff"', () => {
-        const buff = effectsLibrary.buffs[0];
+        const buff = TEST_BUFF;
         const base = createCharacter({ name: 'Hero', level: 1, baseStats: { heart: 1, body: 1, mind: 1 } });
         const { activeEffects } = applyEffect(base.effects, buff, 1);
         const player = { ...base, effects: activeEffects };
@@ -266,7 +276,7 @@ describe('selectCharacterViewModel: effects', () => {
     it('threads the engine effectId onto vm.effects[i].effectId (Phase 74 walkthrough Tick 1)', () => {
         // The SELF tooltip wrapper needs the engine id to look up
         // the kind:'effect' tooltip content. Pin the threading.
-        const buff = effectsLibrary.buffs[0];
+        const buff = TEST_BUFF;
         const base = createCharacter({ name: 'Hero', level: 1, baseStats: { heart: 1, body: 1, mind: 1 } });
         const { activeEffects } = applyEffect(base.effects, buff, 1);
         const player = { ...base, effects: activeEffects };
@@ -293,8 +303,8 @@ describe('selectCharacterViewModel: effects', () => {
     it('preserves effect ordering from player.effects', () => {
         const base = createCharacter({ name: 'Hero', level: 1, baseStats: { heart: 1, body: 1, mind: 1 } });
         let effects = base.effects;
-        // R5 left one library buff; debuffs fill out the three.
-        const usedBuffs = [...effectsLibrary.buffs, ...effectsLibrary.debuffs].slice(0, 3);
+        // The test buff, then two library debuffs.
+        const usedBuffs = [TEST_BUFF, ...effectsLibrary.debuffs].slice(0, 3);
         usedBuffs.forEach((buff, round) => {
             ({ activeEffects: effects } = applyEffect(effects, buff, round + 1));
         });
@@ -310,7 +320,7 @@ describe('selectCharacterViewModel: effects', () => {
     });
 
     it('effect duration matches activeEffect.remainingDuration', () => {
-        const buff = effectsLibrary.buffs[0];
+        const buff = TEST_BUFF;
         const base = createCharacter({ name: 'Hero', level: 1, baseStats: { heart: 1, body: 1, mind: 1 } });
         const { activeEffects } = applyEffect(base.effects, buff, 1);
         const player = { ...base, effects: activeEffects };

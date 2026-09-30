@@ -31,7 +31,7 @@ const KNOWN_UPPER = new Set([
     // (2026-09-27, after the card purge), with the stale CURDLE / OPENING /
     // PIPS / SOULS / CHARGES / TOLL forms that no longer print anywhere.
     'DRAW', 'GUARD', 'MARK', 'CLEANSE', 'HEAL', 'POISON', 'BLEED', 'DOOM',
-    'PIP', 'STAGGER', 'FORETELL', 'PLEA', 'QUARTER', 'RIPOSTE',
+    'PIP', 'STAGGER', 'FORETELL', 'QUARTER', 'RIPOSTE',
     // THE BIG NUMBERS REWRITE (2026-09-02) — direct damage and its family.
     'DEAL', 'PIERCE', 'WRATH', 'CHAIN', 'BARRIER',
     // S3 (D43) — VULNERABLE, rebuilt for the grey office's A Plain Word.

@@ -44,7 +44,7 @@ import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
     CombatViewModel, CombatCardVM, CombatDieVM,
-    CombatSignatureVM, CombatEffectChipVM, CombatPerorationVM,
+    CombatSignatureVM, CombatEffectChipVM,
     CombatMomentumV2VM, CombatStanceChipVM,
 } from '@/state/presenters/combat-encounter.engine';
 import { armedReadValue, dieCanPowerCardVM, STANCE_COLORS } from '@/state/presenters/combat-encounter.engine';
@@ -725,30 +725,6 @@ function StanceChip({ vm }: { vm: CombatStanceChipVM }) {
     );
 }
 
-// ── Charge track + CONDEMN beat (phase 28) ──────────────────────────────────
-
-/** Peroration was fully engine-side state with zero combat-UI rendering
- *  before phase 28 — "the deck's whole win condition is invisible." */
-function PerorationTrack({ peroration }: { peroration: CombatPerorationVM }) {
-    const AXM = usePalette();
-    const styles = useStyles();
-    if (!peroration.active) return null;
-    const pct = peroration.at > 0 ? Math.min(1, peroration.premises / peroration.at) : 0;
-    const a11y = `Sentence declared: ${peroration.cardName}. Charge ${peroration.premises} of ${peroration.at}`
-        + (peroration.concedeAt ? `, condemns the fight outright at ${peroration.concedeAt} Charges.` : '.');
-    return (
-        <View style={styles.perorationTrack} testID="combat-peroration" accessible accessibilityRole="text" accessibilityLabel={a11y}>
-            <Text style={styles.perorationLabel} numberOfLines={1} allowFontScaling={false}>
-                ☞ {peroration.cardName.toUpperCase()} · {peroration.premises}/{peroration.at}
-                {peroration.concedeAt ? ` · CONDEMN ${peroration.concedeAt}` : ''}
-            </Text>
-            <View style={styles.perorationBarTrack}>
-                <View style={[styles.perorationBarFill, { width: `${pct * 100}%`, backgroundColor: AXM.sulfur }]} />
-            </View>
-        </View>
-    );
-}
-
 // ── END PHASE medallion ──────────────────────────────────────────────────────
 
 function EndPhaseMedallion({ onPress, consequence = null, disabled = false }: {
@@ -1316,9 +1292,6 @@ export const CombatBoard = React.memo(function CombatBoard({
 
                 {/* Spec 33 §2 — the player's current-stance chip. */}
                 <StanceChip vm={vm.playerStance} />
-
-                {/* Charge track + CONDEMN beat (phase 28) — the Sentence theme's win condition */}
-                <PerorationTrack peroration={vm.peroration} />
 
                 {/* player status strip — IN FLOW (not floated over the fan, where the
                     hand's gesture area swallowed the taps) so every tile stays tappable.
@@ -2087,12 +2060,6 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
         backgroundColor: 'rgba(0,0,0,0.7)', borderWidth: 1, borderColor: '#6fb3e055', borderRadius: 4,
         paddingHorizontal: 5, paddingVertical: 2, overflow: 'hidden',
     },
-
-    // ── Charge track (phase 28) ──
-    perorationTrack: { paddingHorizontal: 12, paddingBottom: 6, gap: 3 },
-    perorationLabel: { fontFamily: FONTS.sans, fontSize: 10, color: '#d9b44a', letterSpacing: 0.4 },
-    perorationBarTrack: { height: 4, borderRadius: 2, backgroundColor: 'rgba(0,0,0,0.6)', overflow: 'hidden' },
-    perorationBarFill: { height: '100%', borderRadius: 2 },
 
     // ── corner medallions ──
     cornerStack: { position: 'absolute', right: 10, alignItems: 'center', gap: 8, zIndex: 40 },

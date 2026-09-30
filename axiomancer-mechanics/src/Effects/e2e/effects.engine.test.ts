@@ -8,8 +8,8 @@ import { ActiveEffect, Effect } from '../types';
 import { lookupEffect } from '../effects.library';
 import { registerFixtureEffects } from '../../test-utils/fixture-effects';
 
-// R5 deleted the library's support buffs with the consumables; the buff
-// channels run through the `fixture_*` effects and `buff_absolved`.
+// The library carries no buffs (R5 deleted the support buffs, R7c the last
+// one, `buff_absolved`); the buff channels run through the `fixture_*` effects.
 registerFixtureEffects();
 
 const makeEffect = (overrides: Partial<Effect> = {}): Effect => ({
@@ -134,12 +134,12 @@ describe('removeEffectsByType', () => {
         // a Tier 1 buff
         { effectId: 'fixture_thorns',     remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 1 },
         // a Tier 3 buff
-        { effectId: 'buff_absolved',      remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 3 },
+        { effectId: 'fixture_armor',      remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 3 },
     ];
 
     it('strips all buffs when no tier cap', () => {
         const { activeEffects, removed } = removeEffectsByType(effects, 'buff');
-        expect(removed.map(r => r.effectId).sort()).toEqual(['buff_absolved', 'fixture_roll_up', 'fixture_thorns']);
+        expect(removed.map(r => r.effectId).sort()).toEqual(['fixture_armor', 'fixture_roll_up', 'fixture_thorns']);
         expect(activeEffects).toHaveLength(1);
         expect(activeEffects[0].effectId).toBe('debuff_poison');
     });
@@ -147,7 +147,7 @@ describe('removeEffectsByType', () => {
     it('respects maxTier — Tier 2 dispel does not touch Tier 3', () => {
         const { activeEffects, removed } = removeEffectsByType(effects, 'buff', 2);
         expect(removed.map(r => r.effectId).sort()).toEqual(['fixture_roll_up', 'fixture_thorns']);
-        expect(activeEffects.find(e => e.effectId === 'buff_absolved')).toBeDefined();
+        expect(activeEffects.find(e => e.effectId === 'fixture_armor')).toBeDefined();
     });
 
     it('strips debuffs without touching buffs', () => {
@@ -159,12 +159,6 @@ describe('removeEffectsByType', () => {
 });
 
 describe('effectsLibrary', () => {
-    it('lookupEffect finds buffs', () => {
-        const effect = lookupEffect('buff_absolved');
-        expect(effect).toBeDefined();
-        expect(effect?.name).toBe('Absolved');
-    });
-
     it('lookupEffect finds debuffs', () => {
         const effect = lookupEffect('debuff_mark');
         expect(effect).toBeDefined();

@@ -77,7 +77,7 @@ describe('CombatSummaryModal', () => {
     });
 
     it('CONTINUE closes, on every outcome', () => {
-        for (const outcome of ['victory', 'defeat', 'mercy', 'capitulate', 'concede'] as const) {
+        for (const outcome of ['victory', 'defeat', 'mercy'] as const) {
             const onClose = jest.fn();
             const view = renderSummary({ ...SUMMARY, outcome }, onClose as () => void);
             fireEvent.press(screen.getByTestId('combat-summary-close'));

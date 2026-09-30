@@ -36,7 +36,6 @@ function loadout(cards: string[]): Character {
 // Profane Canon loadouts (2026-08-08 rework, old ids retired):
 const DOT = ['spoiled-poultice', 'the-long-lent', 'unction-of-boils']; // rot seed + PROLONG + tier-2 poison
 const CONTROL = ['scolds-bridle', 'petty-indictment'];                 // STAGGER + BACKFIRE, CHARGE chip
-const CHARM = ['thin-hymn', 'alms-of-breath', 'the-offertory-plate'];  // PLEA toward capitulation
 const TURTLE = ['chilblain-watch', 'hoarfrost-teeth', 'spoiled-poultice']; // wall + thorns + DoT
 
 describe('HP combat — combats terminate for every loadout family (structural, armed)', () => {
@@ -60,10 +59,6 @@ describe('HP combat — combats terminate for every loadout family (structural, 
         expect(s.victories + s.mercies + s.defeats + s.retreats).toBe(RUNS);
     });
 
-    it('a CHARM loadout terminates every run', () => {
-        const s = simulateHazardPatternCombat(loadout(CHARM), FloatEye, RUNS, SEED);
-        expect(s.victories + s.mercies + s.defeats + s.retreats).toBe(RUNS);
-    });
 });
 
 describe('HP combat — engagement metrics stay coherent (structural, armed)', () => {
@@ -81,7 +76,7 @@ describe('HP combat — no degenerate stalemates (the safety cap never binds in 
     it('a wall-heavy TURTLE loadout still terminates every seeded boss run within the round cap', () => {
         for (let i = 0; i < 25; i++) {
             const r = runOneEncounter(loadout(TURTLE), TheDoorwarden, SEED + i, 'turtle');
-            expect(['victory', 'mercy', 'capitulate', 'concede', 'defeat', 'retreat']).toContain(r.outcome);
+            expect(['victory', 'mercy', 'defeat', 'retreat']).toContain(r.outcome);
             expect(r.rounds).toBeLessThanOrEqual(61);
         }
     });

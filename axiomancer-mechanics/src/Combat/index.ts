@@ -30,13 +30,6 @@ export {
     removeRandomBuff, extendRandomBuffDuration,
     // 0.34.0 status-depth epic — HP-model selectors + tunable scalars
     DISRUPT_DENY_AT,
-    CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
-    // CONDEMN Premise floor per enemy difficulty — the single source the engine
-    // AND every presenter/catalog surface share (WI-6 concede ladder).
-    concedeFloorFor,
-    // RELENT (PLEA) resolve threshold — presenters read the live target off
-    // this instead of duplicating the rule (WI-5 sway meter).
-    capitulateThreshold,
 } from './effects';
 
 export {
@@ -119,7 +112,7 @@ export type {
 export {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveThreatPhase, processBetweenPhases,
-    selectMercyChoice as selectEncounterMercyChoice, selectCapitulationChoice, getCard,
+    selectMercyChoice as selectEncounterMercyChoice, getCard,
     handCards, buildCombatSummary,
     // Spec 26b / spec 33 — turn lifecycle + Conviction + Signature Skills
     startTurn, endTurn, discardCombatCard,
@@ -136,8 +129,8 @@ export {
     projectIncomingThreat,
     // Phase 2 — projected-lethality readout (spec 30); heal-aware since 2026-09-04
     projectCombatOutcome,
-    // Spec 32 v3 — floating dice save-back + sway decay knob
-    getFloatingDiceColors, SWAY_DECAY_PER_TURN,
+    // Spec 32 v3 — floating dice save-back
+    getFloatingDiceColors,
 } from './combat.engine';
 // S3 — stat scaling (D40–D43): the formula, the keyword families, and the
 // display-only stat-scaled card the hand prints.

@@ -54,7 +54,7 @@ until T opens the session.
 
 ### Gate (all must hold before tagging)
 
-1. **Rows:** R1–R10, R7a–R7e, R9a, R10b, R10c and B4 are `[x]` on main.
+1. **Rows:** R1–R10, R7a–R7e (with R7c2), R9a, R10b, R10c and B4 are `[x]` on main.
 2. **Checks:** the root `npm test`, mechanics `verify`, mobile `verify`,
    `lint:content`, `check-lexicon`, and every `verify-*` workflow on the
    tagged commit are green.

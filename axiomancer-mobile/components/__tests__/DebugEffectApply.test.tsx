@@ -4,7 +4,8 @@
  * Pins:
  *   - DEV gate (true / simulated-false)
  *   - One chip per buff and per debuff in the engine library
- *   - A chip runs the engine's applyEffect onto player.effects
+ *   - A chip runs the engine's applyEffect onto player.effects (the library
+ *     carries no buffs since R7c, so the debuff chip is the witness)
  *   - CLEAR empties player.effects
  */
 
@@ -24,7 +25,6 @@ afterEach(() => {
 
 const makeStore = (): AppStore => createAppStore({ adapter: createMemoryAdapter() });
 const withProvider = (store: AppStore, child: React.ReactNode) => <GameStoreProvider store={store}>{child}</GameStoreProvider>;
-const BUFF = effectsLibrary.buffs[0];
 const DEBUFF = effectsLibrary.debuffs[0];
 
 describe('DebugEffectApply: DEV gate', () => {
@@ -50,13 +50,6 @@ describe('DebugEffectApply: DEV gate', () => {
 });
 
 describe('DebugEffectApply: apply + clear', () => {
-    it('a buff chip adds that effect to player.effects', () => {
-        const store = makeStore();
-        const tree = render(withProvider(store, <DebugEffectApply />));
-        fireEvent.press(tree.getByTestId(`debug-effect-${BUFF.id}`));
-        expect(store.getState().player.effects.map((e) => e.effectId)).toContain(BUFF.id);
-    });
-
     it('a debuff chip adds that effect too, and CLEAR wipes the list', () => {
         const store = makeStore();
         const tree = render(withProvider(store, <DebugEffectApply />));

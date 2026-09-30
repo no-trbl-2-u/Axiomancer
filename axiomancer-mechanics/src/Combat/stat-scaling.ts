@@ -111,7 +111,6 @@ export const PAYLOAD_SCALING: Record<keyof EffectPayload, ScalingKind> = {
     outgoingThreatDamageMulPct: 'one-shot',
     powerMulPct: 'one-shot',
     healingReceivedMulPct: 'one-shot',
-    outgoingSwayGainMulPct: 'one-shot',
     actionRestriction: 'flat',
     advantageModifier: 'flat',
     rollModifier: 'flat',
