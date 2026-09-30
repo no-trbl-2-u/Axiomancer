@@ -63,28 +63,6 @@ export const RESOLUTE_MIN_MULT = 0.5;
 /** DISRUPT — distinct-control pip threshold that DENIES the enemy's telegraphed
  *  turn (an ADDITIVE OR path on top of the legacy roll-penalty deny). Tunable. */
 export const DISRUPT_DENY_AT = 3;
-/** STAGGER (spec 32 v3) — rungs a normal telegraphed action carries; removing
- *  all of them denies the turn. Bosses/uniques carry one more. Tunable. */
-export const THREAT_RUNGS = 2;
-export const THREAT_RUNGS_BOSS = 3;
-/** Boss/unique rung REGROWTH (anti-permalock, plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-08-
- *  win-path-scaling.md item 1c): a denial deck (Standstill) that reliably
- *  meets THREAT_RUNGS_BOSS every single round previously locked a boss out
- *  of acting for the whole fight, at every stage, regardless of how tough
- *  the boss nominally was — Battle Lab round 2's 100%-every-stage finding.
- *  Every enemy turn a boss/unique's telegraph was denied or weakened
- *  (rungs removed), it regrows BOSS_RUNG_REGROWTH rungs of resilience on
- *  top of its natural THREAT_RUNGS_BOSS count, capped at doubling that
- *  natural count (`bossRungGrowthCap`) — so a fight-long denial strategy
- *  eventually needs more rungs of STAGGER per round than it can reliably
- *  produce. Normal/elite enemies never accrue this. Tunable. */
-export const BOSS_RUNG_REGROWTH = 1;
-/** Ceiling on accrued `bossRungGrowth` — never lets a boss's effective rung
- *  total exceed double its natural (`THREAT_RUNGS_BOSS`) count. */
-export function bossRungGrowthCap(naturalRungs: number): number {
-    return naturalRungs;
-}
-
 /**
  * VULNERABLE / RESOLUTE multiplier — the damage multiplier the HP engine applies
  * to every HP source landing on this bearer. Aggregated additively across the
@@ -368,15 +346,6 @@ export function consumeDotEffects<T extends Combatant>(bearer: T): { combatant: 
         return true;
     });
     return { combatant: { ...bearer, effects: remaining }, consumed };
-}
-
-/** BACKFIRE (spec 32 v3) — HP the bearer takes PER RUNG its telegraphed action
- *  loses: Σ (backfirePerRung × intensity). 0 when unafflicted. Pure. */
-export function getBackfirePerRung(bearer: Combatant): number {
-    return bearer.effects.reduce((total, ae) => {
-        const per = lookupEffect(ae.effectId)?.payload.backfirePerRung ?? 0;
-        return total + per * (ae.intensity ?? 1);
-    }, 0);
 }
 
 /** Count of DISTINCT debuff effect ids on the bearer — variety payoffs' scaler. Pure. */

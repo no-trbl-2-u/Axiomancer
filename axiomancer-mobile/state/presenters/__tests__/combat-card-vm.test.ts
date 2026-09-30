@@ -48,7 +48,7 @@ const FX_EMBER: Card = {
     addedIn: '2026-08-08',
     tags: ['rot'],
 };
-// The keyword audit (2026-09-27) deleted debuff_kindling_ember, debuff_backfire
+// The keyword audit (2026-09-27) deleted debuff_kindling_ember
 // and buff_thorns from the effects library; the mechanics `fixture_*` effects
 // carry their payloads so the presenter branches stay under test.
 beforeAll(() => {
@@ -69,7 +69,6 @@ describe('engineHonestKind — the honesty gate', () => {
         expect(engineHonestKind('debuff_poison')).toBe('dot');
         expect(engineHonestKind('debuff_bleed')).toBe('dot');
         expect(engineHonestKind('debuff_mark')).toBe('mark');           // tickAmplifyFlat
-        expect(engineHonestKind('fixture_backfire')).toBe('backfire');  // backfirePerRung
         expect(engineHonestKind('debuff_quarter')).toBe('weaken');      // outgoingDamageMulPct < 0
         expect(engineHonestKind('fixture_thorns')).toBe('thorns');      // reflectDamage
         expect(engineHonestKind(null)).toBeNull();

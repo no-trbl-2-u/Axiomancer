@@ -172,12 +172,6 @@ export interface EffectPayload {
      * effect counts as an affliction for RUPTURE / SOUL / REAP payoffs.
      */
     tickAmplifyFlat?: number;
-    /**
-     * BACKFIRE (spec 32 v3, Control theme) — engine-gated drip: the bearer takes
-     * `backfirePerRung` × intensity HP per rung its telegraphed action loses
-     * (STAGGER rungs, quagmire attachments, crumbling resolve).
-     */
-    backfirePerRung?: number;
     /** Outgoing-damage multiplier applied to damage the bearer DEALS (Septic's
      *  necrotic seep is the first user) — additive across stacks, -X% each. */
     outgoingDamageMulPct?: number;

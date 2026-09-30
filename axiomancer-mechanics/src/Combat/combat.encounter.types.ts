@@ -264,10 +264,6 @@ export interface CombatThreatBranchOutcome {
     threatAction: CombatThreatAction;
     intentType?: CombatIntentType;
     stanceHint?: string;
-    /** Phase 33b — this fork's authored STAGGER-rung count (1-4), overriding
-     *  the flat `THREAT_RUNGS`/`THREAT_RUNGS_BOSS` default. Undefined = the
-     *  fork carries the enemy's natural rung count. */
-    rungs?: number;
     /** Phase D9 (spec 33 §2) — this fork's authored open stance check, if any.
      *  Carried onto the committed phase by `commitThreatBranch`. Undefined =
      *  no authored check on this fork (the `getThreatSequence` backfill fills
@@ -324,13 +320,6 @@ export interface CombatThreatPhase {
      *  committed at phase START (`commitThreatBranch`). Undefined on every
      *  linear phase — byte-identical to before. */
     branch?: CombatThreatBranch;
-
-    /** Phase 33b — variable-rung telegraph: this phase's authored STAGGER-rung
-     *  count (1-4), overriding the flat `THREAT_RUNGS`/`THREAT_RUNGS_BOSS`
-     *  default (`computeRungDenial`, `combat.engine.ts`). Undefined = the
-     *  phase carries the enemy's natural (difficulty-derived) rung count —
-     *  every phase authored before this epic behaves exactly as before. */
-    rungs?: number;
 
     /** Spec 33 §2 (Upgradeable Dice) — the phase's OPEN stance
      *  check, resolved against the player's stance-from-cards at phase END
@@ -451,8 +440,6 @@ export type CombatEvent =
     | { kind: 'pips-cashed'; cardId: string; pips: number; bonus: 'intensity' | 'guard'; amount: number }
     // ── Spec 32 v3 — ghost-die and oratory events ────────────────────────────
     | { kind: 'floating-die-spent'; dieId: string; color: CombatDieColor; poolSize: number }
-    | { kind: 'backfired'; amount: number; rungs: number }
-    | { kind: 'rung-regrown'; rungs: number; total: number }
     | { kind: 'stance-locked'; phaseIndex: number; stance: Stance }
     | { kind: 'soul-gained'; amount: number; total: number; reason: 'expiry' | 'consumed' | 'granted' }
     /** A foe crossed one of its STAGE thresholds and became another fight. */
@@ -499,7 +486,7 @@ export type CombatEvent =
     // was denied (STAGGER-to-0), fully blocked, or its open stance check was
     // answered with a yield. `dieId` is absent when the table was full and the
     // payout converted to +1◆ instead (see the paired `die-overflowed` event).
-    | { kind: 'coveted-die-stolen'; phaseIndex: number; method: 'stagger' | 'block' | 'yield'; dieId?: string }
+    | { kind: 'coveted-die-stolen'; phaseIndex: number; method: 'block' | 'yield'; dieId?: string }
     | { kind: 'combat-ended'; outcome: CombatOutcome };
 
 // ---------------------------------------------------------------------------
@@ -575,17 +562,6 @@ export interface CombatEncounterState {
      *  `initializeCombatEncounter`. Optional for back-compat (absent = none
      *  claimed yet). */
     covetedDiceClaimed?: number[];
-    /** Spec 32 v3 T5 — STAGGER rungs accumulated against the enemy's NEXT
-     *  telegraphed action (consumed at threat resolution). Optional. */
-    staggerRungs?: number;
-    /** plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-08-win-path-scaling.md item 1c — boss/unique
-     *  anti-permalock: rungs a boss/unique has REGROWN back after a phase
-     *  where its telegraph was denied/weakened by STAGGER. Raises the
-     *  effective rung total (`THREAT_RUNGS_BOSS` + this, capped at double)
-     *  so a denial deck that reliably meets the flat threshold every round
-     *  cannot lock a boss out of acting for the whole fight. Normal enemies
-     *  never accrue this. Optional (absent = 0, byte-identical to before). */
-    bossRungGrowth?: number;
     /** Spec 32 v3 T7 — the SOUL bank (Harvest currency). Optional. */
     souls?: number;
     /** THE PATH — extra dice added to every turn's tray (act-reward dice),

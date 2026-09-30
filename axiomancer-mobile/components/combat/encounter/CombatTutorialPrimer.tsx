@@ -39,8 +39,7 @@ const PANELS: PrimerPanel[] = [
         eyebrow: 'BLEED & BIND',
         title: 'POISON, STEAL THEIR TURN, OR JUST HIT HARD',
         body:
-            'A DoT (POISON, BLEED) drains their VITAE every turn. STAGGER strips rungs from ' +
-            'their telegraphed action: at zero it is denied outright. A strike takes VITAE ' +
+            'A DoT (POISON, BLEED) drains their VITAE every turn. A strike takes VITAE ' +
             'straight off the top — no wrong answer. Befriend a low-VITAE foe to spare it.',
     },
     {

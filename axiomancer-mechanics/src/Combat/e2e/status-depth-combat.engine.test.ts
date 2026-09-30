@@ -289,7 +289,7 @@ describe('RIPOSTE — counters only when Guard/Barrier fully blocked the attack'
 describe('INVARIANT — no new behavior fires without its marker', () => {
     const NEW_KINDS = new Set([
         'rupture-detonated', 'disrupt-denied', 'thorns-reflected',
-        'barrier-absorbed', 'riposte-fired', 'backfired', 'reaped', 'staggered',
+        'barrier-absorbed', 'riposte-fired', 'reaped', 'staggered',
         'soul-gained',
     ]);
 

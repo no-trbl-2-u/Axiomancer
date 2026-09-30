@@ -192,7 +192,6 @@ Core balance values are defined in `game-mechanics.constants.ts`:
 | `STAT_POINTS_PER_LEVEL` | `3` | Stat points gained per level |
 | `MAX_EFFECT_INTENSITY` | `30` | Maximum effect stack intensity |
 | `MAX_EFFECT_DURATION` | `10` | Maximum effect duration in rounds |
-| `FRIENDSHIP_COUNTER_MAX` | `3` | Befriend attempts before success |
 
 ## Run Loop and State Management
 

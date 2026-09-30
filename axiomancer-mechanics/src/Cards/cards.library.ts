@@ -25,7 +25,6 @@
 
 import { Card } from './types';
 import { bindSandboxLibraryGuard, getSandboxCard } from './cards.sandbox';
-import { getHauntById } from './cards.haunts';
 import { getUpgradedCardById, isUpgradedCardId } from './card-upgrades';
 import { GREY_OFFICE_CARDS } from './library/starters.cards';
 
@@ -45,12 +44,10 @@ const registry = new Map<string, Card>(cardLibrary.map(card => [card.id, card]))
 // take precedence over the curated library at lookup time.
 bindSandboxLibraryGuard(id => registry.get(id));
 
-/** O(1) lookup by card id; sandbox-aware. Chain (WS2.1): sandbox first (so
- *  experiments can shadow anything), then the Haunt registry (CONJURE
- *  targets — real cards, deliberately outside the pinned library), then the
- *  curated library. */
+/** O(1) lookup by card id; sandbox-aware: the sandbox first (so experiments
+ *  can shadow anything), then the curated library. */
 export function getCardById(id: string): Card | undefined {
-    const direct = getSandboxCard(id) ?? getHauntById(id) ?? registry.get(id);
+    const direct = getSandboxCard(id) ?? registry.get(id);
     if (direct) return direct;
     // THE PATH — card upgrades (Slay the Spire's model). An upgraded copy sits
     // in a deck as a plain id string, `some-card+`, and resolves here by

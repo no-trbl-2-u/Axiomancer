@@ -20,7 +20,7 @@
  *     leftover pip would let e.g. the-overtake chip 5 HP legitimately), AND
  *     the TURNABOUT ledger (a leftover bank would let it legitimately chip)
  *     — so every doctrinally legal payoff (RUPTURE fuel 0, REAP 0 souls,
- *     TURNABOUT 0 rungs, tick nothing) must chip NOTHING and any enemy-HP
+ *     tick nothing) must chip NOTHING and any enemy-HP
  *     delta is direct damage, i.e. a strike in disguise.
  *
  * Excluded from the published build via `tsconfig.json` `exclude`
@@ -99,7 +99,6 @@ export function buildFixtureState(options: { clean?: boolean } = {}): CombatEnco
         guard: clean ? 0 : 4,
         barrier: clean ? 0 : 4,
         souls: clean ? 0 : 12,
-        staggerRungs: 0,
         revealedStances: [],
         spellsPlayedThisTurn: 0,
         discard: ['grey-strike', 'grey-ward', 'grey-word'],

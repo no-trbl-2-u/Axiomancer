@@ -492,12 +492,6 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                 const kw = (keywordForEffect(e.effectId) ?? e.effectKind ?? 'effect').toUpperCase();
                 const color = e.effect ? effectGlyph(e.effect as Parameters<typeof effectGlyph>[0]).color : (side === 'player' ? '#a86bdc' : '#d9b44a');
                 statusFloats.push({ side, text: kw, color });
-            } else if (e.kind === 'backfired') {
-                // phase 28 — BACKFIRE previously had NO fx case at all (its HP
-                // loss was completely unrendered, not merely unlabeled). Always
-                // targets the enemy; a distinct gold "BACKFIRE -N" float, never
-                // folded into the generic damage color.
-                pushEnemy(`BACKFIRE -${e.amount}`, '#d9b44a', 0);
             }
         }
         // THE BIG NUMBERS REWRITE — the new ledgers and the enemy's STAGE beat

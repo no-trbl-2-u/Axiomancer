@@ -3,11 +3,11 @@
  * library carriers were deleted by the keyword audit (2026-09-27, after the
  * card purge).
  *
- * `buff_thorns`, `debuff_backfire`, `debuff_kindling_ember` and
+ * `buff_thorns`, `debuff_kindling_ember` and
  * `debuff_nettle_sting` left `buffs.library.json` / `debuffs.library.json`
  * with the cards that applied them. The engine CHANNELS they exercised stay
- * implemented and under test: `reflectDamage` (the THORNS reflect),
- * `backfirePerRung` (the BACKFIRE drip), and the ROUND-CLOCK DoT tick phases
+ * implemented and under test: `reflectDamage` (the THORNS reflect) and the
+ * ROUND-CLOCK DoT tick phases
  * (`tickPhase: 'start'` / `'end'` — every live library DoT is event-clocked or
  * no-calendar). These fixtures carry the deleted definitions' payloads under
  * `fixture_*` ids, so no retired id is ever resurrected. R5 added the curse,
@@ -37,23 +37,6 @@ export const FIXTURE_THORNS: Effect = {
     stacking: 'intensity',
     payload: { reflectDamage: 1 },
     tier: 1,
-    addedIn: '2026-07-08',
-    tags: ['fixture'],
-} as Effect;
-
-/** The old `debuff_backfire`: 1 VITAE per stack per rung the bearer's telegraph loses. */
-export const FIXTURE_BACKFIRE: Effect = {
-    id: 'fixture_backfire',
-    name: 'Backfire',
-    description: 'Test fixture: bills the bearer per denied rung.',
-    type: 'debuff',
-    category: 'control',
-    duration: 2,
-    stacking: 'intensity',
-    resistedBy: 'mind',
-    resistDR: 12,
-    payload: { backfirePerRung: 1 },
-    tier: 2,
     addedIn: '2026-07-08',
     tags: ['fixture'],
 } as Effect;
@@ -138,7 +121,7 @@ export const FIXTURE_ARMOR: Effect = {
 } as Effect;
 
 export const FIXTURE_EFFECTS: readonly Effect[] = [
-    FIXTURE_THORNS, FIXTURE_BACKFIRE, FIXTURE_EMBER, FIXTURE_NETTLE,
+    FIXTURE_THORNS, FIXTURE_EMBER, FIXTURE_NETTLE,
     FIXTURE_CURSE, FIXTURE_ROLL_UP, FIXTURE_ARMOR,
 ];
 

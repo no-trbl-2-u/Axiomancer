@@ -15,24 +15,10 @@ import type { EnemyKeyword, EnemyStage } from './enemy-keywords';
 export type { EnemyKeyword, EnemyStage };
 
 /**
- * Phase 68 — per-enemy override on the Phase 36 friendship-eligibility
- * predicate. ALL present predicates AND-compose; eligibility requires
- * every named predicate to pass simultaneously. When the field is
- * absent, the Phase 36 mechanic stays unchanged
- * (`friendshipCounter >= FRIENDSHIP_COUNTER_MAX` -> friendship).
- *
- * Authors leave predicates undefined when they don't apply (e.g. low-tier
- * enemies that only need the rounds threshold drop the other fields).
+ * Per-enemy befriend gate, read by The Open Hand (`befriendHpGateOpen`,
+ * `Enemy/befriend.ts`). Absent = the foe is always open to a befriend.
  */
 export interface BefriendabilityConfig {
-    /**
-     * Override for the both-defend round count required. Defaults to the
-     * global `FRIENDSHIP_COUNTER_MAX` (Phase 36) when absent. Setting this
-     * to a lower value makes the enemy easier to befriend on the counter
-     * axis; a higher value makes it harder. Negative or zero values are
-     * not validated; authors are responsible for sensible thresholds.
-     */
-    roundsThreshold?: number;
     /**
      * Friendship eligibility requires `enemy.health / enemy.maxHealth`
      * to be at or below `belowPct` at the eligibility check. Pure
@@ -40,14 +26,6 @@ export interface BefriendabilityConfig {
      * eligibility. Range [0, 1].
      */
     hpGate?: { belowPct: number };
-    /**
-     * Explicit "fall through to Phase 36 mechanic". When set, the engine
-     * treats this config as if the field were absent — useful for
-     * authoring clarity ("this enemy was explicitly considered and uses
-     * defaults"). Other fields on the same config are ignored when this
-     * is set.
-     */
-    defaultFallback?: 'both-defend-cap';
 }
 
 /**
@@ -212,13 +190,7 @@ export interface Enemy {
      * mechanical (Phase 36 base only: half-XP + weighted-loot roll).
      */
     friendshipReward?: FriendshipReward;
-    /**
-     * Phase 68 — optional per-enemy override of the Phase 36
-     * friendship-eligibility predicate (`friendshipCounter >=
-     * FRIENDSHIP_COUNTER_MAX`). See {@link BefriendabilityConfig}.
-     * When undefined, the Phase 36 mechanic stays unchanged; when
-     * present, ALL named predicates AND-compose.
-     */
+    /** The befriend gate The Open Hand reads. See {@link BefriendabilityConfig}. */
     befriendabilityConfig?: BefriendabilityConfig;
     /**
      * Phase 71 — optional per-foe victory final-blow chronicle

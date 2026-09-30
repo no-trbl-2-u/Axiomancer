@@ -66,10 +66,6 @@ export interface AuthoredThreatPhase {
      *  a gated candidate by HOLDING the pointer at the last reachable phase
      *  rather than advancing past it. */
     unlockAfterRound?: number;
-    /** Phase 33b — variable-rung telegraph: this phase's authored STAGGER-rung
-     *  count (1-4). Undefined = the enemy's natural (difficulty-derived) flat
-     *  default (`THREAT_RUNGS`/`THREAT_RUNGS_BOSS`). */
-    rungs?: number;
     /** Phase D9 (spec 33 §2) — the open stance check this phase telegraphs.
      *  `punishes: X` → ending the phase in stance X takes the hit at ×1.5;
      *  `yields: X` → ending in X blunts it ×0.5 AND pays +1◆. Both optional and
@@ -351,7 +347,6 @@ function resolveBranchOutcome(
         threatAction,
         intentType: deriveIntentType(threatAction.effects),
         stanceHint: p.stanceHint ?? enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[p.enemyStance],
-        rungs: p.rungs,
         stanceCheck: p.stanceCheck,
         stake: p.stake,
     };
@@ -396,7 +391,6 @@ function resolveAuthored(enemy: Enemy, authored: AuthoredThreatStep[]): CombatTh
             isFinalPhase: p.isFinalPhase ?? i === authored.length - 1,
             stanceHint: p.stanceHint ?? enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[p.enemyStance],
             unlockAfterRound: p.unlockAfterRound,
-            rungs: p.rungs,
             stanceCheck: p.stanceCheck,
             stake: p.stake,
         });

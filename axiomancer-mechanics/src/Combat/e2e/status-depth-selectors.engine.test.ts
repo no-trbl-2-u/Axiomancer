@@ -253,10 +253,10 @@ describe('card engine — every combat-engine-owned mechanic kind is a NO-OP thr
             enemy.health = 100; enemy.maxHealth = 100; enemy.effects = [ae('debuff_poison', 3)];
 
             const state: CombatState = {
-                active: true, phase: 'resolving', round: 1, friendshipCounter: 0,
+                active: true, phase: 'resolving', round: 1,
                 player, enemy, playerChoice: {}, enemyChoice: {},
             };
-            const res = executeCard(state, 'test-mech-card', id => id === 'test-mech-card' ? card : getCardById(id), 'player');
+            const res = executeCard(state, 'test-mech-card', id => id === 'test-mech-card' ? card : getCardById(id));
 
             // No effect events from the mechanic itself.
             expect(res.events.some(e => e.kind === 'effect-applied')).toBe(false);

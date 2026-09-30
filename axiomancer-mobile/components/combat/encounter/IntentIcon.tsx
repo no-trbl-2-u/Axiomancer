@@ -27,17 +27,12 @@ export function IntentIcon({ intent, onPress }: { intent: CombatIntentVM; onPres
     // phase 28 — wall-math: the raw `damage` stake above is face value only;
     // `wallMath` is what actually lands right now, netted against live
     // guard/barrier/modifiers. State the REAL outcome in a11y, not the raw one.
-    const { willDeny, netDamage, rungsTotal, rungsLost } = intent.wallMath;
+    const { willDeny, netDamage } = intent.wallMath;
     const wallMathLabel = willDeny
         ? ' This turn will be DENIED — no damage lands.'
         : intent.damage > 0
             ? ` ${netDamage} will actually land through your current guard.`
             : '';
-    // Phase 33b — the rung count was previously invisible entirely; state it
-    // so STAGGER reads as a sized answer to a sized threat.
-    const rungsRemaining = Math.max(0, rungsTotal - rungsLost);
-    const rungLabel = ` Carries ${rungsTotal} STAGGER rung${rungsTotal === 1 ? '' : 's'}`
-        + (rungsLost > 0 ? `, ${rungsRemaining} remaining.` : '.');
     // Spec 33 §5 — the OPEN stance-check telegraph: what this hit does
     // to the player's current stance, plus the last resolved outcome.
     const sc = intent.stanceCheck ?? null;
@@ -50,7 +45,6 @@ export function IntentIcon({ intent, onPress }: { intent: CombatIntentVM; onPres
         + (intent.damage > 0 ? ` Deals ${intent.damage} damage.` : '')
         + (intent.debuffs ? ' Applies a debuff.' : '')
         + wallMathLabel
-        + rungLabel
         + stanceA11y
         + (intent.branch ? branchA11y(intent.branch) : '')
         + (intent.next ? ` Next: ${intent.next.label}.` : '')
@@ -87,16 +81,6 @@ export function IntentIcon({ intent, onPress }: { intent: CombatIntentVM; onPres
             ) : intent.damage > 0 && netDamage !== intent.damage ? (
                 <Text style={styles.wallMathNet} testID="combat-intent-wallmath" allowFontScaling={false}>→{netDamage}</Text>
             ) : null}
-            {/* Phase 33b — variable-rung telegraph: STAGGER's sized cost, made
-                visible. Filled pip = a rung still standing; hollow = already
-                stripped by accumulated STAGGER. */}
-            <View style={styles.rungRow} testID="combat-intent-rungs">
-                {Array.from({ length: rungsTotal }, (_unused, i) => (
-                    <Text key={i} style={i < rungsRemaining ? styles.rungFilled : styles.rungHollow} allowFontScaling={false}>
-                        {i < rungsRemaining ? '●' : '○'}
-                    </Text>
-                ))}
-            </View>
             {/* Spec 33 §5 — the open stance-check telegraph. No hidden
                 information: both branches print, and the resolved outcome shows. */}
             {sc ? (
@@ -143,9 +127,6 @@ const useStyles = makeStyles((AXM) => ({
     debuffMark: { fontFamily: FONTS.sans, fontSize: 10, color: '#a86bdc' },
     wallMathDenied: { fontFamily: FONTS.sans, fontSize: 9, color: '#d9b44a', marginTop: 1, letterSpacing: 0.5 },
     wallMathNet: { fontFamily: FONTS.mono, fontSize: 9, color: '#8a8273', marginTop: 1 },
-    rungRow: { flexDirection: 'row', gap: 1, marginTop: 1 },
-    rungFilled: { fontFamily: FONTS.sans, fontSize: 6, color: '#d9b44a' },
-    rungHollow: { fontFamily: FONTS.sans, fontSize: 6, color: '#8a8273' },
     // Spec 33 §5 — the open stance-check telegraph, terse and always visible.
     // Playtest 2026-09-04 — 8pt ash-on-dark was unreadable on a 390pt phone;
     // 10pt with a bone neutral for the "neither" line.

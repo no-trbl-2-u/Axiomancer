@@ -16,7 +16,7 @@ import { afterEach, describe, it, expect, vi } from 'vitest';
 import { mockSequentialRng } from '../../test-utils/rng';
 import { createCharacter } from '../../Character';
 import { createEnemy } from '../../Enemy';
-import { initializeCombat } from '../../Combat/combat.reducer';
+import type { CombatState } from '../../Combat/types';
 import { executeCard } from '../../Cards/card.engine';
 import type { Card } from '../../Cards/types';
 import { registerFixtureEffects } from '../../test-utils/fixture-effects';
@@ -25,6 +25,10 @@ import { registerFixtureEffects } from '../../test-utils/fixture-effects';
 // the round-clock DoT species from the library; their engine channels are
 // exercised through the `fixture_*` effects instead.
 registerFixtureEffects();
+
+const combatState = (player: CombatState['player'], enemy: CombatState['enemy']): CombatState => ({
+    active: true, phase: 'resolving', round: 1, player, enemy, playerChoice: {}, enemyChoice: {},
+});
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -82,7 +86,7 @@ describe('Phase 38 — player card applies debuff onto enemy', () => {
         mockSequentialRng(0.05);
         const player = fixturePlayer();
         const enemy = fixtureEnemy();
-        const base = initializeCombat(player, enemy);
+        const base = combatState(player, enemy);
         const state = base;
 
         const { state: next } = executeCard(state, debuffCard.id, lookup(debuffCard));
@@ -98,7 +102,7 @@ describe('Phase 38 — player card applies buff onto self', () => {
         mockSequentialRng(0.5);
         const player = fixturePlayer();
         const enemy = fixtureEnemy();
-        const base = initializeCombat(player, enemy);
+        const base = combatState(player, enemy);
         const state = base;
 
         const { state: next } = executeCard(state, buffCard.id, lookup(buffCard));
@@ -114,7 +118,7 @@ describe('Phase 38 — sourceId round-trips through JSON serialization (save/loa
         mockSequentialRng(0.05);
         const player = fixturePlayer();
         const enemy = fixtureEnemy();
-        const base = initializeCombat(player, enemy);
+        const base = combatState(player, enemy);
         const state = base;
         const { state: applied } = executeCard(state, debuffCard.id, lookup(debuffCard));
 

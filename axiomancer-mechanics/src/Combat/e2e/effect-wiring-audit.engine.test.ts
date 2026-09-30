@@ -25,7 +25,6 @@ import type { ActiveEffect } from '../../Effects/types';
 import {
     initializeCombatEncounter, rollEncounterDice, resolveThreatPhase,
 } from '../combat.engine';
-import type { CombatEvent } from '../combat.encounter.types';
 import { registerFixtureEffects } from '../../test-utils/fixture-effects';
 
 // The keyword audit (2026-09-27) deleted buff_thorns / debuff_backfire /
@@ -54,7 +53,6 @@ function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'mind', effec
     return e;
 }
 
-const has = (events: readonly CombatEvent[], kind: string): boolean => events.some(e => e.kind === kind);
 
 // ── ARMOR (defenseModifier) ──────────────────────────────────────────────────
 
@@ -81,25 +79,6 @@ describe('ARMOR — defenseModifier soaks the incoming telegraph', () => {
         const armoredLoss = 200 - armored;
         expect(controlLoss).toBeGreaterThan(0);                 // control took a hit
         expect(armoredLoss).toBe(Math.max(0, controlLoss - 5)); // …armor removed 5 of it
-    });
-});
-
-// ── BACKFIRE lethal-ordering guard ───────────────────────────────────────────
-
-describe('BACKFIRE — a lethal drip cancels the enemy swing this phase', () => {
-    it('an enemy killed by backfire does not still hit the player', () => {
-        mockSequentialRng(0.05);
-        // 1-HP enemy carrying backfire; one rung staggered (not fully denied) so
-        // it WOULD act — but the 1-HP backfire drip kills it before the swing.
-        const enemy = makeEnemy(1, 'mind', [ae('fixture_backfire', 1, 2)]);
-        const base = initializeCombatEncounter(makePlayer(), enemy, undefined, 7);
-        const state = { ...rollEncounterDice(base).state, staggerRungs: 1 };
-        const res = resolveThreatPhase(state);
-        expect(has(res.events, 'backfired')).toBe(true);
-        expect(res.state.enemy.health).toBe(0);
-        expect(res.state.finalOutcome).toBe('victory');
-        expect(res.state.player.health).toBe(200);      // the swing never landed
-        expect(has(res.events, 'threat-fired')).toBe(false);
     });
 });
 

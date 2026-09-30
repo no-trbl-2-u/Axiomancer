@@ -62,14 +62,6 @@ export const RESOURCE_GENERATION = {
     DEFEND:      5,
 } as const;
 
-// ============================================================================
-// COMBAT — FRIENDSHIP MECHANIC
-// ============================================================================
-// When both combatants choose 'defend' on the same turn the friendship
-// counter increments.  Reaching the maximum ends combat peacefully.
-
-export const FRIENDSHIP_COUNTER_MAX = 3;
-
 // Phase 150 — probability that an enemy answers a player's HOSTILE card with
 // a card of its own ("answer power with power"). Distinct from the Phase 49
 // lead-with-card cadence (`ENEMY_CARD_PICK_CHANCE`): this dial governs the

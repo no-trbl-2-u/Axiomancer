@@ -1000,7 +1000,7 @@ export function CombatEncounterPanel({
                             {detailCard.detail.stacksText ? <Text style={styles.detailStacks}>{detailCard.detail.stacksText}</Text> : null}
 
                             {/* KW-7 (phase 29, re-scoped 2026-07-12) — system-term definitions
-                                (Conviction, Resonance, Reserve/Pips, Floating, rungs, WILD/X):
+                                (Conviction, Resonance, Reserve/Pips, Floating, WILD/X):
                                 ONLY the entries THIS card's printed lines reference, derived
                                 per-card by the presenter (systemTermsForCard). The wholesale
                                 six-entry dump made every inspect a scrolling wall (owner
@@ -1324,7 +1324,7 @@ const useStyles = makeStyles((AXM) => ({
     detailFreeBox: { alignSelf: 'stretch', marginBottom: 8 },
     detailFreeLine: { fontFamily: FONTS.serif, fontSize: 12.5, color: AXM.bone, lineHeight: 17, marginBottom: 5 },
     detailPowerLine: { fontFamily: FONTS.serif, fontSize: 12.5, lineHeight: 17, marginBottom: 5 },
-    // KW-7 (phase 29) — systems glossary (Conviction/Resonance/Reserve+Pips/Floating/rungs/WILD-X).
+    // KW-7 (phase 29) — systems glossary (Conviction/Resonance/Reserve+Pips/Floating/WILD-X).
     systemsGlossary: { alignSelf: 'stretch', marginTop: 6, marginBottom: 4, paddingTop: 6, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)' },
     systemsGlossaryLine: { fontFamily: FONTS.sans, fontSize: 9.5, color: AXM.bone, opacity: 0.65, lineHeight: 15, marginBottom: 3 },
     systemsGlossaryTerm: { fontFamily: FONTS.sans, fontSize: 9.5, letterSpacing: 1, color: AXM.ash, opacity: 1 },

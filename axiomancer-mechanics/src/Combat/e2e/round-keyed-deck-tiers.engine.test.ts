@@ -111,7 +111,6 @@ describe('round-keyed deck tiers — a flat deck still compiles to what it alway
                 expect(step.enemyStance, `${id}[${i}] stance`).toBe(card.stance);
                 expect(step.damageWeight, `${id}[${i}] weight`).toBe(card.damageWeight);
                 expect(step.threatEffectId, `${id}[${i}] effect`).toBe(card.effectId);
-                expect(step.rungs, `${id}[${i}] rungs`).toBe(card.rungs);
                 expect(step.actionText).toContain(card.name);
                 expect(step.isFinalPhase, `${id}[${i}] final`).toBe(i === cardIds.length - 1);
             });

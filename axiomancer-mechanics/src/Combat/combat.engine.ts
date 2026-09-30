@@ -43,10 +43,8 @@ import {
     getHealingReceivedMult, getOutgoingDamageMult, getOutgoingThreatDamageMult, decayDotsOnHeal, consumeEffect,
     hasPayloadFlag, getStanceVulnMult, computeRoundsToKill,
     fireDotTrigger, growPerEnemyActionDots,
-    getBackfirePerRung,
     applyCleanse,
     DISRUPT_DENY_AT,
-    THREAT_RUNGS, THREAT_RUNGS_BOSS, BOSS_RUNG_REGROWTH, bossRungGrowthCap,
 } from './effects';
 import {
     dieHasStance,
@@ -234,7 +232,6 @@ function cardShim(enc: CombatEncounterState): CombatState {
         active: true,
         phase: 'resolving',
         round: enc.round,
-        friendshipCounter: 0,
         player: enc.player,
         enemy: enc.enemy,
         playerChoice: {},
@@ -996,7 +993,7 @@ function playBottomAction(
 
     // 3. Execute the card (unchanged effect machinery) against a shim.
     const before = intensityMap(state.enemy.effects);
-    const res = executeCard(cardShim(state), sourceCard.id, lookupCard, 'player');
+    const res = executeCard(cardShim(state), sourceCard.id, lookupCard);
 
     let player = res.state.player as Character;
     // VULNERABLE — the foe's incoming-damage multiplier, read from state.enemy
@@ -1179,37 +1176,6 @@ function endCombat(state: CombatEncounterState, outcome: CombatEncounterState['f
 // ── Phase resolution + between-phases (§4.4, §4.5, §9) ───────────────────────
 
 /**
- * STAGGER-rung denial (spec 32 v3 T5), extracted so `resolveThreatPhase` and
- * `getDisruptMeter` read the exact same math instead of drifting — the two
- * used to disagree (`getDisruptMeter.willDeny` never saw a pure-rung deny;
- * phase 28 fixed that by sharing this helper instead of patching the symptom
- * in two places). Boss/unique rung REGROWTH
- * (plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-08-win-path-scaling.md item 1c, anti-permalock):
- * accrued resilience from prior rounds where this boss's telegraph was
- * denied/weakened.
- */
-function computeRungDenial(state: CombatEncounterState): {
-    rungsTotal: number; rungsLost: number; rungDenied: boolean; naturalRungsTotal: number; rungGrowth: number;
-} {
-    const isBossTier = state.enemy.difficulty === 'boss' || state.enemy.difficulty === 'unique';
-    // Phase 33b — variable-rung telegraphs: the current phase may author its
-    // own rung count (1-4, `CombatThreatPhase.rungs`), overriding the flat
-    // difficulty-derived default so STAGGER reads as a sized answer to a
-    // sized threat. Unauthored phases fall back to the original flat
-    // behavior byte-identical.
-    const idx = Math.min(state.currentPhaseIndex, state.threatPhases.length - 1);
-    const authoredRungs = state.threatPhases[idx]?.rungs;
-    const naturalRungsTotal = authoredRungs !== undefined
-        ? Math.max(1, Math.min(4, authoredRungs))
-        : (isBossTier ? THREAT_RUNGS_BOSS : THREAT_RUNGS);
-    const rungGrowth = isBossTier ? Math.min(state.bossRungGrowth ?? 0, bossRungGrowthCap(naturalRungsTotal)) : 0;
-    const rungsTotal = naturalRungsTotal + rungGrowth;
-    const rungsLost = Math.min(rungsTotal, (state.staggerRungs ?? 0));
-    const rungDenied = rungsLost >= rungsTotal;
-    return { rungsTotal, rungsLost, rungDenied, naturalRungsTotal, rungGrowth };
-}
-
-/**
  * The soak arithmetic for one flat hit: armor, then GUARD, then BARRIER. The
  * SINGLE definition of the wall arithmetic `projectIncomingThreat` shares with
  * the engine, so the on-screen wall math cannot drift from what the engine
@@ -1273,15 +1239,8 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     const controlPips = getDistinctControlCount(state.enemy);
     const disruptDenied = controlPips >= DISRUPT_DENY_AT;
     const isBossTier = state.enemy.difficulty === 'boss' || state.enemy.difficulty === 'unique';
-    // STAGGER RUNGS (spec 32 v3 T5) — the telegraphed action carries
-    // THREAT_RUNGS rungs (bosses one more); accumulated STAGGER removes
-    // rungs. At 0 the turn is DENIED; partial removal weakens the hit
-    // proportionally, and each rung lost feeds BACKFIRE.
-    const { rungsTotal, rungsLost, rungDenied, naturalRungsTotal, rungGrowth } = computeRungDenial(state);
-    const denied = rollPenalty >= THREAT_DENY_AT || disruptDenied || rungDenied;
-    const rungMult = rungDenied ? 0 : (rungsTotal - rungsLost) / rungsTotal;
-    const weakenMult = Math.max(THREAT_WEAKEN_FLOOR, Math.min(1, 1 - rollPenalty * THREAT_WEAKEN_PER_ROLL))
-        * (rungsLost > 0 && !rungDenied ? rungMult : 1);
+    const denied = rollPenalty >= THREAT_DENY_AT || disruptDenied;
+    const weakenMult = Math.max(THREAT_WEAKEN_FLOOR, Math.min(1, 1 - rollPenalty * THREAT_WEAKEN_PER_ROLL));
     // THE CLOCK (depth epic): the telegraphed hit escalates each round past the grace
     // window, so a drawn-out fight turns lethal. 1.0 on round ≤ grace (a fast kill is
     // unpunished → those fights are byte-identical to pre-epic).
@@ -1344,19 +1303,6 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     let directDamage = state.directDamageDealt;
     const penaltiesApplied: CombatThreatEffect[] = [];
 
-    // BACKFIRE (spec 32 v3 T5, engine-gated drip): the enemy takes its
-    // backfire-per-rung total × the rungs its action lost this phase (a fully
-    // denied action counts every rung).
-    const backfirePer = getBackfirePerRung(state.enemy);
-    const rungsForBackfire = hindered ? rungsTotal : rungsLost;
-    if (backfirePer > 0 && rungsForBackfire > 0) {
-        const drip = backfirePer * rungsForBackfire;
-        const hit = applyEnemyDamage(enemy, drip, state.round, events);
-        enemy = hit.enemy;
-        directDamage += drip + hit.clockDamage;
-        events.push({ kind: 'backfired', amount: drip, rungs: rungsForBackfire });
-    }
-
     // ARMOR (defenseModifier) — flat per-hit reduction of the incoming telegraph.
     // No effect in the library carries a defenseModifier since R5 retired the
     // armor consumables; R7a removes the soak. Player-only and clamped ≥0, so
@@ -1364,9 +1310,8 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     // parry/guard/barrier soak, like armor.
     const playerArmor = Math.max(0, getActiveEffectModifiers(state.player.effects as ActiveEffect[]).defenseDelta);
 
-    // A lethal BACKFIRE drip (above) can drop the enemy to 0 before it swings —
-    // guard the telegraph so an already-defeated enemy does not still hit the
-    // player this phase (the victory check runs after this block).
+    // An already-defeated enemy does not still hit the player this phase (the
+    // victory check runs after this block).
     if (!hindered && !isDefeated(enemy)) {
         // The enemy attacks: its telegraphed threat action fires on the player.
         const playerTakenMult = getDamageTakenMultiplier(state.player);
@@ -1534,19 +1479,6 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     const threatMarks = state.threatMarks.slice();
     if (idx < threatMarks.length) threatMarks[idx] = mark;
 
-
-    // Boss/unique rung REGROWTH write-back (item 1c): this turn's telegraph
-    // lost at least one rung (partial weaken or full denial) → the boss
-    // regrows BOSS_RUNG_REGROWTH rungs of resilience for future phases,
-    // capped so it can never more than double its natural rung count.
-    // Normal/elite enemies (isBossTier false) never accrue this.
-    const nextBossRungGrowth = isBossTier && rungsLost > 0
-        ? Math.min(bossRungGrowthCap(naturalRungsTotal), rungGrowth + BOSS_RUNG_REGROWTH)
-        : rungGrowth;
-    if (nextBossRungGrowth > rungGrowth) {
-        events.push({ kind: 'rung-regrown', rungs: BOSS_RUNG_REGROWTH, total: nextBossRungGrowth });
-    }
-
     let next: CombatEncounterState = {
         ...state,
         player,
@@ -1555,8 +1487,6 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         guard: 0,                       // brace is spent on this phase's threat; resets each phase
         barrier,                        // persistent soak — carries the unspent remainder across phases
         riposte: undefined,             // cleared each phase (like guard)
-        staggerRungs: 0,                // consumed this phase
-        bossRungGrowth: nextBossRungGrowth,
         // Spec 32 §12 #4 — the enemy-damage ledger (rolled over between phases)
         // and the full-block verdict (persists until the NEXT threat resolves;
         // a hindered/denied threat was never blocked).
@@ -1576,18 +1506,16 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
 
     // Phase 33c (spec 33 §1) — THE COVETED DIE: a boss/unique phase authored
     // `stake: true` converts to a temp gold die the moment its telegraph is
-    // denied (STAGGER-to-0), fully blocked, or its open stance check is
-    // answered with a yield. Resolved AFTER `next` above so the yield's own
+    // fully blocked or its open stance check is answered with a yield. Resolved AFTER `next` above so the yield's own
     // +1◆ payout composes first. One-time per phase index this combat
     // (`covetedDiceClaimed`) — a repeating/locked final phase can't be farmed
-    // on every loop. Priority when more than one condition holds: stagger >
-    // block > yield (a single event, never a double-payout for one phase).
+    // on every loop. Priority when more than one condition holds: block >
+    // yield (a single event, never a double-payout for one phase).
     if (phase.stake && !(state.covetedDiceClaimed ?? []).includes(phase.index)) {
-        const method: 'stagger' | 'block' | 'yield' | null =
-            rungDenied ? 'stagger'
-                : (attacksLanded > 0 && attacksFullyBlocked === attacksLanded) ? 'block'
-                    : stanceCheck.yielded ? 'yield'
-                        : null;
+        const method: 'block' | 'yield' | null =
+            (attacksLanded > 0 && attacksFullyBlocked === attacksLanded) ? 'block'
+                : stanceCheck.yielded ? 'yield'
+                    : null;
         if (method) {
             next = { ...next, covetedDiceClaimed: [...(next.covetedDiceClaimed ?? []), phase.index] };
             if (tableHasRoom(next)) {
@@ -2116,9 +2044,7 @@ export function getEnemyIncomingDamageMultiplier(state: CombatEncounterState): n
  * the live DISTINCT-control pip count, the deny threshold, the cumulative roll
  * penalty, and whether the next telegraphed turn WILL be denied (matching the
  * resolved phase mark === 'clear': hard skip, legacy roll-penalty deny, the
- * additive distinct-control deny, OR a STAGGER-rung deny — phase 28 fix: this
- * used to omit the rung path entirely, so a turn denied purely by accumulated
- * STAGGER reported `willDeny: false`).
+ * or the additive distinct-control deny).
  */
 export function getDisruptMeter(state: CombatEncounterState): {
     pips: number; threshold: number; rollPenalty: number; willDeny: boolean;
@@ -2127,8 +2053,7 @@ export function getDisruptMeter(state: CombatEncounterState): {
     const pips = getDistinctControlCount(enemy);
     const rollPenalty = Math.max(0, -getActiveRollModifier(enemy));
     const act = canAct(enemy.effects as ActiveEffect[], currentPhaseStance(state));
-    const { rungDenied } = computeRungDenial(state);
-    const willDeny = !act.canAct || rollPenalty >= THREAT_DENY_AT || pips >= DISRUPT_DENY_AT || rungDenied;
+    const willDeny = !act.canAct || rollPenalty >= THREAT_DENY_AT || pips >= DISRUPT_DENY_AT;
     return { pips, threshold: DISRUPT_DENY_AT, rollPenalty, willDeny };
 }
 
@@ -2137,7 +2062,7 @@ export function getDisruptMeter(state: CombatEncounterState): {
  * telegraphed hit would actually deal right now, netted against live
  * guard/barrier. `IntentIcon` today shows only the raw, unscaled
  * `phase.threatAction.effects` damage sum; this selector runs that same raw
- * total through the live `weakenMult` / rung / escalation / outgoing-damage
+ * total through the live `weakenMult` / escalation / outgoing-damage
  * multiplier stack `resolveThreatPhase` applies, then nets guard/barrier —
  * the actual number the player is about to take, or 0 if the turn will be
  * denied outright. Approximates a phase's damage as a single hit (matching
@@ -2158,10 +2083,6 @@ export function getDisruptMeter(state: CombatEncounterState): {
  */
 export function projectIncomingThreat(state: CombatEncounterState): {
     rawDamage: number; projectedDamage: number; willDeny: boolean; guard: number; barrier: number; netDamage: number;
-    /** Phase 33b — the current phase's live STAGGER-rung total/lost, so the
-     *  presenter can show rung magnitude (1-4) instead of leaving it
-     *  invisible. `rungsTotal` reflects any authored `phase.rungs` override. */
-    rungsTotal: number; rungsLost: number;
 } {
     const idx = Math.min(state.currentPhaseIndex, state.threatPhases.length - 1);
     const phase = state.threatPhases[idx];
@@ -2172,13 +2093,10 @@ export function projectIncomingThreat(state: CombatEncounterState): {
     const controlPips = getDistinctControlCount(state.enemy);
     const disruptDenied = controlPips >= DISRUPT_DENY_AT;
     const isBossTier = state.enemy.difficulty === 'boss' || state.enemy.difficulty === 'unique';
-    const { rungsTotal, rungsLost, rungDenied } = computeRungDenial(state);
-    const denied = rollPenalty >= THREAT_DENY_AT || disruptDenied || rungDenied;
+    const denied = rollPenalty >= THREAT_DENY_AT || disruptDenied;
     const willDeny = !act.canAct || denied;
 
-    const rungMult = rungDenied ? 0 : (rungsTotal - rungsLost) / rungsTotal;
-    const weakenMult = Math.max(THREAT_WEAKEN_FLOOR, Math.min(1, 1 - rollPenalty * THREAT_WEAKEN_PER_ROLL))
-        * (rungsLost > 0 && !rungDenied ? rungMult : 1);
+    const weakenMult = Math.max(THREAT_WEAKEN_FLOOR, Math.min(1, 1 - rollPenalty * THREAT_WEAKEN_PER_ROLL));
     const escalationRate = THREAT_ESCALATION_PER_ROUND * (isBossTier ? THREAT_ESCALATION_BOSS_MULT : 1);
     const escalation = hasPayloadFlag(state.enemy, 'blocksAdvantage')
         ? 1
@@ -2206,7 +2124,7 @@ export function projectIncomingThreat(state: CombatEncounterState): {
     remaining = soakFlatHit(remaining, { armor: playerArmor, guard, barrier }).dealt;
 
     return {
-        rawDamage, projectedDamage, willDeny, guard, barrier, netDamage: remaining, rungsTotal, rungsLost,
+        rawDamage, projectedDamage, willDeny, guard, barrier, netDamage: remaining,
     };
 }
 

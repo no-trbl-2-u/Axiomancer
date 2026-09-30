@@ -178,7 +178,6 @@ function cardToStep(
         threatIntensity: card.intensity,
         enemyHeal: card.enemyHeal,
         enemyCleanse: card.enemyCleanse,
-        rungs: card.rungs,
         stake: stake || undefined,
         stanceCheck,
         unlockAfterRound,

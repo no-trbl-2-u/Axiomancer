@@ -96,7 +96,6 @@ export const BrineHag = createEnemy({
     loot: [none(80), drop('healing-potion', 20)],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.3 },
-        roundsThreshold: 4,
     },
     friendshipReward: {
         items: [

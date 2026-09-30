@@ -278,12 +278,6 @@ export interface Card {
     combatEffects?: CardCombatEffects[];
     specialMechanics?: CardSpecialMechanic[];
     /**
-     * Phase 91 — Optional friendship counter increment. When present, executeCard
-     * increments the combat friendship counter by this amount after damage/effects
-     * but before resource costs. Does not require defend stance.
-     */
-    incrementsFriendship?: number;
-    /**
      * Content-provenance metadata (originally consumed by the since-retired
      * tuning `--focus` filter). `addedIn` is an ISO date / phase tag;
      * `tags` are freeform labels (e.g. `'mid-game'`, `'damage'`). Both

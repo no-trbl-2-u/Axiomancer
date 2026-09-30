@@ -222,8 +222,7 @@ describe('effect deprecation contract (spec 32 v3 §3) — the ban list', () => 
                 || p.reflectDamage || p.revealsStance
                 || p.outgoingDamageMulPct !== undefined || p.powerMulPct !== undefined
                 || p.healingReceivedMulPct !== undefined || p.dotModifiers
-                || (p as { tickAmplifyFlat?: number }).tickAmplifyFlat
-                || (p as { backfirePerRung?: number }).backfirePerRung);
+                || (p as { tickAmplifyFlat?: number }).tickAmplifyFlat);
             expect(real, `${id} is a card effect with no engine-read channel`).toBe(true);
         }
     });

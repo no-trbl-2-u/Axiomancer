@@ -137,7 +137,7 @@ describe('migrate v22 → v23 — strip the starting-loadout seed', () => {
         expect(legacyDeck).toContain('thin-hymn');
         // … which the ownership guard then rejects mid-combat.
         const shim: CombatState = {
-            active: true, phase: 'resolving', round: 1, friendshipCounter: 0,
+            active: true, phase: 'resolving', round: 1,
             player, enemy: { ...FloatEye }, playerChoice: {}, enemyChoice: {},
         };
         expect(() => executeCard(shim, 'thin-hymn', getCardById)).toThrow(/not known/);

@@ -9,15 +9,9 @@
  *   health.ts           — applyDamage / heal / status checks
  *   effects.ts          — combatant-side effect manipulations
  *   resist.ts           — tier 2/3 effect application resolver
- *   combat.reducer.ts   — small state-shape mutations on CombatState
  *
  * Round-resolution pure helpers also live here.
  */
-
-import { BefriendabilityConfig } from '../Enemy/types';
-import { befriendHpGateOpen } from '../Enemy/befriend';
-import { FRIENDSHIP_COUNTER_MAX } from '../Game/game-mechanics.constants';
-import { CombatState } from './types';
 
 export type {
     Stance,
@@ -38,54 +32,6 @@ export {
 export type {
     AggregatedEffectModifiers,
 } from './effect-modifiers';
-
-// `CombatState` constructor — shared by the card / effects / equipment engines
-// (and the Hazard-Pattern shim builds the same shape inline). The legacy
-// turn-based driver verbs that lived alongside it were removed.
-export { initializeCombat } from './combat.reducer';
-
-/**
- * Phase 68 — friendship-eligibility predicate. Returns true when the
- * current `CombatState` satisfies the active enemy's `BefriendabilityConfig`
- * (all named predicates AND-compose). When the enemy has no config OR the
- * config sets `defaultFallback: 'both-defend-cap'`, falls through to the
- * Phase 36 mechanic (`friendshipCounter >= FRIENDSHIP_COUNTER_MAX`).
- *
- * Not exported from the public barrel — internal helper for
- * `isBefriendAttemptEligible`, the explicit Befriend-attempt check the shared
- * card engine consults via `executeCard`. (The legacy combat-end predicates
- * that also consumed it — `determineCombatEnd` / `isCombatOngoing` /
- * `isFriendshipEligible` — were removed with the legacy turn-based driver.)
- *
- * Remaining predicates are the passive both-defend counter, `roundsThreshold`,
- * and `hpGate`. The former per-round history predicates (`requiredStances` /
- * `requiredCardUse`) were removed with the legacy `CombatState.log`: the
- * Hazard-Pattern engine never populated that log, so they were inert.
- */
-function befriendabilityPredicatesPass(
-    state: CombatState,
-    options: { requirePassiveCounter: boolean },
-): boolean {
-    const config: BefriendabilityConfig | undefined = state.enemy.befriendabilityConfig;
-    if (!config || config.defaultFallback === 'both-defend-cap') {
-        return options.requirePassiveCounter
-            ? state.friendshipCounter >= FRIENDSHIP_COUNTER_MAX
-            : true;
-    }
-    const threshold = config.roundsThreshold ?? FRIENDSHIP_COUNTER_MAX;
-    if (options.requirePassiveCounter && state.friendshipCounter < threshold) return false;
-    return befriendHpGateOpen(state.enemy);
-}
-
-/**
- * Phase 112 — returns true when the enemy is vulnerable to an explicit
- * Befriend attempt. HP gates and the `roundsThreshold` still matter, but
- * passive both-defend counter pressure is not, by itself, a combat end or a
- * mercy decision.
- */
-export function isBefriendAttemptEligible(state: CombatState): boolean {
-    return befriendabilityPredicatesPass(state, { requirePassiveCounter: false });
-}
 
 // Legacy export name retained for backward compatibility with any older code
 // that imported `applyDamage` and `healCharacter` separately.

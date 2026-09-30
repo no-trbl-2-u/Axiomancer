@@ -246,18 +246,18 @@ describe('applyCleanse / applyDispel (Q10)', () => {
     it('Tier 2 cleanse strips Tier 1 + 2 debuffs', () => {
         const t = fixture([
             { effectId: 'debuff_poison', intensity: 1, remainingDuration: 3, appliedAt: 1, tier: 2 },
-            { effectId: 'fixture_backfire', intensity: 1, remainingDuration: 2, appliedAt: 1, tier: 3 },
+            { effectId: 'debuff_petrify', intensity: 1, remainingDuration: 2, appliedAt: 1, tier: 3 },
         ]);
         const r = applyCleanse(t, 2);
         expect(r.removed.map(e => e.effectId)).toEqual(['debuff_poison']);
         // Tier 3 survives
-        expect(r.target.effects.some(e => e.effectId === 'fixture_backfire')).toBe(true);
+        expect(r.target.effects.some(e => e.effectId === 'debuff_petrify')).toBe(true);
     });
 
     it('Tier 3 cleanse strips everything', () => {
         const t = fixture([
             { effectId: 'debuff_poison',  intensity: 1, remainingDuration: 3, appliedAt: 1, tier: 2 },
-            { effectId: 'fixture_backfire', intensity: 1, remainingDuration: 2, appliedAt: 1, tier: 3 },
+            { effectId: 'debuff_petrify', intensity: 1, remainingDuration: 2, appliedAt: 1, tier: 3 },
         ]);
         const r = applyCleanse(t, 3);
         expect(r.removed).toHaveLength(2);

@@ -3,8 +3,8 @@
  *
  * The enemy uses cards too. Every foe fights as an ordered DECK of enemy
  * cards (`combat.enemy-decks.ts`); each card compiles to one telegraphed
- * threat phase, so the Hazard-Pattern resolution machinery (stances, rungs,
- * the escalation clock, branches, the coveted die) reads the card as its
+ * threat phase, so the Hazard-Pattern resolution machinery (stances, the
+ * escalation clock, branches, the coveted die) reads the card as its
  * authored intent. The telegraph reads as the enemy PLAYING a named card.
  *
  * Since the enemy roster reset (revamp phase R2) the library holds only the
@@ -67,8 +67,6 @@ export interface EnemyCard {
     /** Escalation / counterplay riders (same semantics as AuthoredThreatPhase). */
     enemyHeal?: number;
     enemyCleanse?: number;
-    /** Variable-rung telegraph sizing (1-4). */
-    rungs?: number;
     /** THE COVETED DIE — legal only on the SECOND card of a boss/unique deck. */
     stake?: boolean;
     /** Locked until this round (escalation cards). */
@@ -122,7 +120,6 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         grade: 'escalation',
         stance: 'body',
         damageWeight: 1.3,
-        rungs: 3,
         actionText: 'The sea breaks over the whole argument at once and drags you three times across the shingle',
         stanceHint: 'Past patience, past liturgy — the water throws its entire opinion at the matter.',
     },
@@ -187,7 +184,6 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         grade: 'signature',
         stance: 'mind',
         damageWeight: 1.6,
-        rungs: 4,
         actionText: 'It completes the proof it began when you walked in; the conclusion is six lines long and every line is about you',
         stanceHint: 'Every move you made was a lemma. It has been grateful the entire time.',
     },

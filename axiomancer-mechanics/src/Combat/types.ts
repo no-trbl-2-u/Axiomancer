@@ -73,8 +73,6 @@ export type CombatPhase =
  * @property active            - True while combat is in progress.
  * @property phase             - Current step within the round.
  * @property round             - 1-indexed round number.
- * @property friendshipCounter - Incremented by the shared card engine (`executeCard`)
- *                               for cards that carry `incrementsFriendship`.
  * @property playerChoice      - Player's choice for the current round (built up over phases).
  * @property enemyChoice       - Enemy's choice for the current round.
  */
@@ -82,7 +80,6 @@ export interface CombatState {
     active: boolean;
     phase: CombatPhase;
     round: number;
-    friendshipCounter: number;
     player: Character;
     enemy: Enemy;
     playerChoice: Partial<CombatAction>;

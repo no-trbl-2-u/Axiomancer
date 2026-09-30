@@ -95,7 +95,6 @@ in `SYSTEM_GLOSSARY` (mobile).
 |---|---|
 | CONVICTION ◆ | A spend-anytime resource banked from unspent dice and overflow. It never decays. |
 | RESERVE & PIPS | Dice held between phases instead of played, ripening a pip per phase. |
-| RUNGS | The steps of the foe's telegraphed action. Losing all of them denies the action. |
 | WILD / X | A WILD die counts as any color. A dead X die powers nothing. |
 
 **OATH** and **HEX** are card *types*, not keywords: a passive on your side and
