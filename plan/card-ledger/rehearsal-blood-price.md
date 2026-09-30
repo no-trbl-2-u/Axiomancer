@@ -18,6 +18,7 @@
 | Other family fantasies (The Vigil, Rot and Omen, Loaded Dice) | Not picked; still open |
 | §1 session rules | Not ratified; the rehearsal tests them |
 | Scrap floor (T) | Scrapping any card gives 1 Conviction, so every card line must be worth more than that: no line gives only "gain 1 Conviction". Seven ballot candidates were revised to meet it (P-08a, P-08c, E-01a, E-01c, M-05a, M-05b, M-05c) |
+| Global text template (T) | The duration is shown as badges (FREE ⏳3, PAID ∞), the text opens with a trigger from a closed set (⟳ turn start, 🩸 SACRIFICE, 📜 Curse played), and a PAID line shows only what changes. Applied to all 12 Global candidates (P-10, E-03, E-09, M-08). Details in `plan/revamp/cards.md` |
 
 ## Sub-lane pitches (draft slot roles, plain text)
 

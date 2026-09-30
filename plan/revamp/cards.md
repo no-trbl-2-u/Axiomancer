@@ -146,6 +146,12 @@ first stage; the trial skill lives outside the repo until T adopts it.
 every card line must be worth more than scrapping it. A line that only gives
 1 Conviction is dead text.
 
+**Global card text template (T, 2026-09-30).**
+- The duration is printed on the frame as two badges, FREE ⏳3 (in play 3 turns) and PAID ∞ (rest of combat, D69), never in the rules text.
+- The text opens with its trigger, taken from a closed set: ⟳ "Start of your turn:", 🩸 "When you SACRIFICE n:", 📜 "When you play a Curse:".
+- A PAID line prints only what changes ("DEAL n instead.", "Also gain 1 Conviction."); if nothing changes, there is no PAID line.
+- Each trigger phrase becomes a keyword candidate once 3 or more kept cards use it (Plan B's extraction rule).
+
 ## B4 — Card-rules inventory (loop; creates nothing)
 
 Runs after R7 so it records the post-purge tree. Produces

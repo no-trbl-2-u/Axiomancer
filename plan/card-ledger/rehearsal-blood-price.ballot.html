@@ -92,6 +92,9 @@
   .tag.paid { background: var(--paid); }
   .kw { font-variant: small-caps; font-weight: bold; }
   .kw.sac { color: var(--blood); }
+  .dur { display: flex; gap: 4px; margin: 2px 0 4px; }
+  .dur .tag { min-width: 0; }
+  .trig .ticon { display: inline-block; width: 1.3em; }
   .why { margin-top: auto; padding-top: 8px; font-size: .8rem; color: var(--muted); font-style: italic; }
   .pick { position: absolute; top: 8px; right: 8px; width: 20px; height: 20px; accent-color: var(--sel); }
   .top { padding-right: 26px; }
@@ -127,6 +130,8 @@
     <b>SACRIFICE n</b>: lose n VITAE (never below 1). <b>DEAL</b>: damage. <b>GUARD</b>: block.
     <b>VULNERABLE</b>: the foe takes more damage. Numbers are base values before stat scaling.
     For reference, A Plain Blow is FREE DEAL 2 / PAID DEAL 5.
+    <b>Globals:</b> FREE ⏳3 = in play 3 turns, PAID ∞ = rest of combat. The line starts with its trigger
+    (⟳ start of your turn, 🩸 when you SACRIFICE, 📜 when you play a Curse); a PAID line shows only what changes.<br>
     <b>Scrap floor:</b> scrapping any card gives 1 Conviction, so no line gives only "gain 1 Conviction".
   </p>
 </header>
@@ -231,9 +236,9 @@ const CARDS = [
   { id: 'P-09b', type: 'Spell', free: 'SACRIFICE 4; the foe loses 4 VITAE.', paid: 'SACRIFICE 8; the foe loses 8 VITAE, VULNERABLE +25% for 1 turn.', why: 'Even trade, plus a setup on PAID.' },
   { id: 'P-09c', type: 'Spell', free: 'DEAL 3.', paid: 'SACRIFICE 5; the foe loses 15 VITAE, ignoring GUARD.', why: 'Safe FREE; PAID is a 1:3 trade.' },
   // P-10
-  { id: 'P-10a', type: 'Global', free: 'In play 3 turns: whenever you SACRIFICE, the foe loses that much VITAE.', paid: 'Same, for the rest of combat.', why: 'The lane\'s engine piece in its simplest form.' },
-  { id: 'P-10b', type: 'Global', free: 'In play 3 turns: whenever you SACRIFICE, DEAL half that.', paid: 'Rest of combat: whenever you SACRIFICE, DEAL all of it.', why: 'Routes through DEAL, so GUARD and VULNERABLE apply.' },
-  { id: 'P-10c', type: 'Global', free: 'In play 3 turns: whenever you SACRIFICE, GUARD that much.', paid: 'Rest of combat: whenever you SACRIFICE, DEAL that much instead.', why: 'Defensive FREE, offensive PAID.' },
+  { id: 'P-10a', type: 'Global', trig: 'sac', body: 'The foe loses n VITAE.', paidDelta: null, why: 'The lane\'s engine piece in its simplest form.' },
+  { id: 'P-10b', type: 'Global', trig: 'sac', body: 'DEAL n÷2.', paidDelta: 'DEAL n instead.', why: 'Routes through DEAL, so GUARD and VULNERABLE apply.' },
+  { id: 'P-10c', type: 'Global', trig: 'sac', body: 'GUARD n.', paidDelta: 'DEAL n instead.', why: 'Defensive FREE, offensive PAID.' },
   // E-01
   { id: 'E-01a', type: 'Spell', free: 'Add a grey Curse to your hand. Gain 2 Conviction.', paid: 'Add 2 grey Curses to your hand. Gain 3 Conviction.', why: 'Pure fuel: Curses in, Conviction out.' },
   { id: 'E-01b', type: 'Spell', free: 'Add a grey Curse to your hand. DEAL 4.', paid: 'Add a grey Curse to your hand. Gain 2 Conviction, DEAL 8.', why: 'Never a blank turn: it always hits.' },
@@ -243,9 +248,9 @@ const CARDS = [
   { id: 'E-02b', type: 'Skill', free: 'SACRIFICE 1, twice. GUARD 2.', paid: 'SACRIFICE 2, three times. GUARD 5.', why: 'Counts and blocks.' },
   { id: 'E-02c', type: 'Skill', free: 'SACRIFICE 2.', paid: 'SACRIFICE 1 for each card in your hand (max 5).', why: 'Scales with hand size; Curses in hand help.' },
   // E-03
-  { id: 'E-03a', type: 'Global', free: 'In play 3 turns: at the start of your turn, SACRIFICE 2.', paid: 'Same, for the rest of combat.', why: 'The simplest steady drip.' },
-  { id: 'E-03b', type: 'Global', free: 'In play 3 turns: at the start of your turn, SACRIFICE 2, gain 1 Conviction.', paid: 'Rest of combat: at the start of your turn, SACRIFICE 3, gain 1 Conviction.', why: 'The drip pays for itself.' },
-  { id: 'E-03c', type: 'Global', free: 'In play 3 turns: at the start of your turn, SACRIFICE 3, GUARD 3.', paid: 'Same, for the rest of combat.', why: 'The drip is partly covered by the block.' },
+  { id: 'E-03a', type: 'Global', trig: 'turn', body: 'SACRIFICE 2.', paidDelta: null, why: 'The simplest steady drip.' },
+  { id: 'E-03b', type: 'Global', trig: 'turn', body: 'SACRIFICE 2, gain 1 Conviction.', paidDelta: 'SACRIFICE 3 instead.', why: 'The drip pays for itself.' },
+  { id: 'E-03c', type: 'Global', trig: 'turn', body: 'SACRIFICE 3, GUARD 3.', paidDelta: null, why: 'The drip is partly covered by the block.' },
   // E-04
   { id: 'E-04a', type: 'Spell', free: 'Your next SACRIFICE this turn costs no VITAE but still counts.', paid: 'Your SACRIFICES this turn cost no VITAE but still count.', why: 'PAID is a free-for-all turn.' },
   { id: 'E-04b', type: 'Spell', free: 'Your next SACRIFICE this turn costs half.', paid: 'Your next 2 SACRIFICES this turn cost no VITAE but still count.', why: 'Bounded: at most 2 free sacrifices.' },
@@ -267,9 +272,9 @@ const CARDS = [
   { id: 'E-08b', type: 'Skill', free: 'Return a Curse from your discard to your hand. GUARD 3.', paid: 'Return a Curse from your discard to your hand. GUARD 8.', why: 'Recycles and blocks.' },
   { id: 'E-08c', type: 'Skill', free: 'Return a Curse from your discard to your hand.', paid: 'Return a Curse from your discard and play it at no VITAE cost.', why: 'Straight from discard into play.' },
   // E-09
-  { id: 'E-09a', type: 'Global', free: 'In play 3 turns: whenever you play a Curse, gain 1 Conviction.', paid: 'Same, for the rest of combat.', why: 'Curses become an economy.' },
-  { id: 'E-09b', type: 'Global', free: 'In play 3 turns: whenever you play a Curse, GUARD 4.', paid: 'Rest of combat: whenever you play a Curse, GUARD 4 and gain 1 Conviction.', why: 'Curses become defence.' },
-  { id: 'E-09c', type: 'Global', free: 'In play 3 turns: whenever you play a Curse, DEAL 4.', paid: 'Rest of combat: whenever you play a Curse, DEAL 6.', why: 'Curses become damage.' },
+  { id: 'E-09a', type: 'Global', trig: 'curse', body: 'Gain 1 Conviction.', paidDelta: null, why: 'Curses become an economy.' },
+  { id: 'E-09b', type: 'Global', trig: 'curse', body: 'GUARD 4.', paidDelta: 'Also gain 1 Conviction.', why: 'Curses become defence.' },
+  { id: 'E-09c', type: 'Global', trig: 'curse', body: 'DEAL 4.', paidDelta: 'DEAL 6 instead.', why: 'Curses become damage.' },
   // E-10
   { id: 'E-10a', type: 'Spell', free: 'SACRIFICE any amount (max 5).', paid: 'SACRIFICE any amount (max 15).', why: 'A pure dial; only useful with payoffs out.' },
   { id: 'E-10b', type: 'Spell', free: 'SACRIFICE any amount (max 6); GUARD that much.', paid: 'SACRIFICE any amount (max 15); gain 1 Conviction per 5 paid.', why: 'The dial has its own reward.' },
@@ -303,9 +308,9 @@ const CARDS = [
   { id: 'M-07b', type: 'Spell', free: 'For 1 turn, heal 1 whenever you damage the foe.', paid: 'For 3 turns, heal 2 whenever you damage the foe.', why: 'A pure drain mark.' },
   { id: 'M-07c', type: 'Spell', free: 'VULNERABLE +10% for 1 turn.', paid: 'VULNERABLE +20% for 2 turns. Heal 5.', why: 'Simple: setup and a flat heal.' },
   // M-08
-  { id: 'M-08a', type: 'Global', free: 'In play 3 turns: at the start of your turn, heal 2.', paid: 'Rest of combat: at the start of your turn, heal 3.', why: 'Steady regen.' },
-  { id: 'M-08b', type: 'Global', free: 'In play 3 turns: at the start of your turn, heal 3.', paid: 'Rest of combat: at the start of your turn, heal 2 and GUARD 2.', why: 'Regen plus block.' },
-  { id: 'M-08c', type: 'Global', free: 'In play 3 turns: at the start of your turn, heal 1 per Curse in your hand.', paid: 'Rest of combat: at the start of your turn, heal 2 per Curse in your hand (max 6).', why: 'Curses in hand become sustain.' },
+  { id: 'M-08a', type: 'Global', trig: 'turn', body: 'Heal 2.', paidDelta: 'Heal 3 instead.', why: 'Steady regen.' },
+  { id: 'M-08b', type: 'Global', trig: 'turn', body: 'Heal 3.', paidDelta: 'Heal 2 and GUARD 2 instead.', why: 'Regen plus block.' },
+  { id: 'M-08c', type: 'Global', trig: 'turn', body: 'Heal 1 per Curse in your hand.', paidDelta: 'Heal 2 per Curse in your hand (max 6) instead.', why: 'Curses in hand become sustain.' },
   // M-09
   { id: 'M-09a', type: 'Skill', free: 'Heal 4; healing past max VITAE becomes GUARD.', paid: 'Heal 10; healing past max VITAE becomes GUARD.', why: 'Never a wasted heal.' },
   { id: 'M-09b', type: 'Skill', free: 'GUARD 3.', paid: 'For the rest of combat, healing past max VITAE becomes GUARD. EXILE.', why: 'A rule-changer, once per combat.' },
@@ -315,6 +320,15 @@ const CARDS = [
   { id: 'M-10b', type: 'Spell', free: 'DEAL 3.', paid: 'DEAL equal to the damage you took last turn (max 20).', why: 'Goes through DEAL, so GUARD and VULNERABLE apply.' },
   { id: 'M-10c', type: 'Spell', free: 'VULNERABLE +10% for 1 turn.', paid: 'The foe loses half the VITAE you lost this combat (max 15). EXILE.', why: 'A once-per-combat revenge.' },
 ];
+
+/* Global template (T, 2026-09-30): duration lives on the frame as badges
+   (FREE = 3 turns, PAID = rest of combat, D69), the trigger opens the text
+   from a closed set, and PAID prints only what changes. */
+const TRIGGERS = {
+  turn:  { icon: '⟳', text: 'Start of your turn:' },
+  sac:   { icon: '🩸', text: 'When you SACRIFICE n:' },
+  curse: { icon: '📜', text: 'When you play a Curse:' },
+};
 
 /* =====================================================================
    RENDER — pure helpers that turn data into DOM nodes.
@@ -329,14 +343,27 @@ const markKeywords = (s) =>
     .replace(/\bSACRIFICE(D)?\b/g, (m) => `<span class="kw sac">${m}</span>`)
     .replace(/\b(DEAL|GUARD|VULNERABLE|EXILE)\b/g, '<span class="kw">$1</span>');
 
+/** Body of a Global card: duration badges, trigger line, optional PAID delta. */
+const globalBody = (card) => {
+  const t = TRIGGERS[card.trig];
+  return `
+    <div class="dur"><span class="tag free">FREE ⏳3</span><span class="tag paid">PAID ∞</span></div>
+    <div class="line trig"><span class="ticon" aria-hidden="true">${t.icon}</span><b>${markKeywords(t.text)}</b> ${markKeywords(card.body)}</div>
+    ${card.paidDelta ? `<div class="line"><span class="tag paid">PAID</span>${markKeywords(card.paidDelta)}</div>` : ''}`;
+};
+
+/** FREE and PAID lines for every non-Global card. */
+const plainBody = (card) => `
+    <div class="line"><span class="tag free">FREE</span>${markKeywords(card.free)}</div>
+    <div class="line"><span class="tag paid">PAID</span>${markKeywords(card.paid)}</div>`;
+
 /** Build one card face as an HTML string. */
 const cardHtml = (card, glyph) => `
   <label class="card" data-id="${card.id}">
     <input class="pick" type="checkbox" value="${card.id}" aria-label="Keep ${card.id}">
     <div class="top"><span class="name">${card.id}</span><span class="type">${card.type} · grey</span></div>
     <div class="art" aria-hidden="true">${glyph}</div>
-    <div class="line"><span class="tag free">FREE</span>${markKeywords(card.free)}</div>
-    <div class="line"><span class="tag paid">PAID</span>${markKeywords(card.paid)}</div>
+    ${card.type === 'Global' ? globalBody(card) : plainBody(card)}
     <div class="why">${esc(card.why)}</div>
   </label>`;
 
