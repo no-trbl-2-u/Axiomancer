@@ -177,6 +177,14 @@ first session. The Global and Curse types (D69–D71) are built here: the
 `CardType` union, Global play/expiry and uniqueness, the Curse slot, the
 EXILE and SACRIFICE keywords, and the first Curse.
 
+**Must be decided in the first card session (before any lane is authored):**
+
+- **Lane granularity:** how big a lane is, and whether lanes group into
+  families. This sets what a relic names (a lane or a family, D71) and what
+  the guaranteed reward slot draws from.
+- **Multi-lane cards:** whether a card can belong to several lanes, and how
+  the reward slot treats one.
+
 ## Card-session queue
 
 Card-mechanic gaps the loop filed before D37/D58, moved here from

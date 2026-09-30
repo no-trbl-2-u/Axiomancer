@@ -140,7 +140,7 @@ event-pool and layout files).
 - [ ] Phase RC — Act 1 checkpoint release (attended): the full gate green, a playtester run from a new game through all four regions' Doorwarden fights, befriend via The Open Hand, save/reload mid-fight; then T tags `v0.1.0-checkpoint`, publishes the GitHub release and builds the EAS preview APK. The reset point before any content work. `plan/revamp/checkpoint.md`. Requires R1, R2a, R2b, R3a, R3b, R3c, R4, R5, R6a, R6b, R7c, R7d, B4, R8, R9, R9a, R10, R10b, R10c.
 - [blocked: owner-led — T's session 2026-09-28] Phase B1 — The relic pass. `plan/revamp/relics.md`. Requires R4, RC.
 - [blocked: owner-led — T's session 2026-09-28] Phase B5 — Card-creator workflow. `plan/revamp/cards.md`. Requires B4, RC.
-- [blocked: owner-led — T's session 2026-09-28] Phase B6 — Card sessions. `plan/revamp/cards.md`. Requires B4, B5, RC.
+- [blocked: owner-led — T's session 2026-09-28] Phase B6 — Card sessions. The first session decides lane granularity (lanes vs families) and multi-lane cards before any lane is authored (D71). `plan/revamp/cards.md`. Requires B4, B5, RC.
 - [blocked: owner-led — T's session 2026-09-28] Phase B2 — Enemy revamp: normal / elite / region boss / act boss. `plan/revamp/enemies.md`. Requires R9, RC.
 - [blocked: owner-led — T's session 2026-09-28] Phase B3 — Hazard mechanics redesign. `plan/revamp/hazards.md`. Requires R6b, RC.
 - [blocked: owner-led — T's session 2026-09-28] Phase B10 — Dev menu revamp (the reset leaves the dev menu alone except compile fixes). `plan/revamp/mobile.md`. Requires R8, RC.
