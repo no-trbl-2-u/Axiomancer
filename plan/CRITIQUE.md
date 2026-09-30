@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-09-29 at commit 0be3bb1c
-> Pass count: 61
+> Last pass: 2026-09-30 at commit 3293e959
+> Pass count: 62
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -218,9 +218,47 @@
 > close it. Reconfirmed and not re-filed: the doubled opening tell (pass
 > 54, Pending).
 
+> **[critique pass 62, 2026-09-30, commit 3293e959] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route still bounces to the title with no save). 15
+> commits after pass 61: R5 (healing potions only) and R6a (hazard reset),
+> plus plan rows for D68-D71. The Glen Market's stall now carries only the
+> Minor Healing Potion among consumables, with VITAE copy that reads
+> cleanly. Filed MED: on the 375-wide phone the combat rail's five-mark
+> phase ledger stacks as a vertical column under the hand. Reconfirmed and
+> not re-filed: pass 61's inn-rest wording, pass 60's fixture row (the
+> hazard capture is still caverns' Flooded Undercroft, so R6a's honest
+> reward screen has not been seen by the critique lens), pass 58's A Plain
+> Word "+24" beside "+60%", and pass 54's doubled opening tell.
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
+
+### [MED] combat / mobile — on a 375-wide phone the phase ledger stacks as a five-mark vertical column under the hand
+- pass: 62 (commit 3293e959)
+- viewport: mobile (375x812); desktop (1280x800) renders the same five marks as one row
+- category: mobile
+- observation: the bottom rail shows the fight's five-phase ledger (one
+  mark per Brine Hag phase). On desktop the marks sit as one row between
+  "160 / 160" and the deck piles. On the phone they stack one above the
+  other, a column of five empty circles running from under the hand's
+  middle card down to the screen's bottom edge, so it reads as stray
+  chrome rather than "phase 1 of 5". The rail pads 104 left and 92 right
+  for the two medallions, which leaves 179pt. The VITAE readout and the
+  piles never shrink, so the ledger, the one flexible cell, gets roughly
+  one mark's width and `flexWrap: 'wrap'` breaks after every mark. The
+  style comment expects "a second row on a narrow phone", not five.
+- evidence: `.critique-artifacts/mobile/04-combat-board.png` (bottom
+  centre, below the third card) vs `desktop/04-combat-board.png` (bottom
+  centre, one row); `axiomancer-mobile/components/combat/encounter/CombatBoard.tsx:1585`
+  (ledger render) and `:2181-2189` (`rail` paddings, `railLedger` wrap).
+- suggested fix: keep the ledger on one row at 375: drop `flexWrap` and
+  shrink the marks (`LedgerMark size`) on narrow widths, or move the
+  ledger to its own centred line above the rail when it can't fit. Pin
+  it with a layout test that measures the ledger as one row at 375.
+- source: critique:drive (unattended)
 
 ### [MED] rest — the Breakwater's inns are described as paid rooms, but REST reads "Sleep where you stand. Free."
 - pass: 61 (commit 0be3bb1c)
