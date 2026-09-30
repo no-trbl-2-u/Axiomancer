@@ -11,16 +11,16 @@
 | Call | Ruling |
 |---|---|
 | First family | **Blood Price**: "I pay in my own blood for power." |
-| Family shape | **One family, three sub-lanes, about 10 cards each**: Heal, Payoff (benefits for sacrificing), Engine (helps trigger SACRIFICE) |
+| Family shape | **One family, three sub-lanes, about 10 cards each**: Payoff (benefits for sacrificing), Engine (helps trigger SACRIFICE), Misc (related utility; replaces the earlier Heal sub-lane) |
 | First pool target | **30 cards** (3 × 10) plus grey. This replaces D73's "3 families × 1 lane" (≈36); the D73 amendment is filed in the decisions log |
 | Bridges | Bridge cards join sub-lanes within a family (D73), so Blood Price can have them as soon as two sub-lanes exist |
-| First slice | **Payoff** |
+| First slice | ~~Payoff~~ → **all three sub-lanes on one ballot** (T, 2026-09-30): 3 tabs × 10 slots × 3 candidates = 90 candidates, about 30 survivors |
 | Other family fantasies (The Vigil, Rot and Omen, Loaded Dice) | Not picked; still open |
 | §1 session rules | Not ratified; the rehearsal tests them |
 
 ## Sub-lane pitches (draft slot roles, plain text)
 
-### Payoff (slice 1: being balloted)
+### Payoff (being balloted)
 
 | Slot | Type | Role |
 |---|---|---|
@@ -35,7 +35,7 @@
 | P-09 | Spell | SACRIFICE n, the foe loses n (ignores GUARD) |
 | P-10 | Global | Each SACRIFICE also hurts the foe |
 
-### Engine (not yet balloted)
+### Engine (being balloted; ballot slot roles refined)
 
 | Slot | Type | Role |
 |---|---|---|
@@ -50,25 +50,28 @@
 | E-09 | Global | When you play a Curse, gain 1 Conviction |
 | E-10 | Spell | SACRIFICE any amount you choose (X) |
 
-### Heal (not yet balloted)
+### Misc (replaces Heal, T 2026-09-30)
+
+Related utility that is neither payoff nor engine.
 
 | Slot | Type | Role |
 |---|---|---|
-| H-01 | Skill | Heal n |
-| H-02 | Attack | DEAL; heal half the damage dealt |
-| H-03 | Skill | GUARD; also heal if at half VITAE or less |
-| H-04 | Spell | VULNERABLE; heal when you hit a VULNERABLE foe |
-| H-05 | Global | At the start of your turn, heal n |
-| H-06 | Skill | Heal equal to VITAE sacrificed this turn (capped) |
-| H-07 | Attack | DEAL; heal if it kills |
-| H-08 | Skill | Heal more the lower your VITAE (capped) |
-| H-09 | Spell | EXILE a Curse from hand; heal |
-| H-10 | Skill | Healing past max VITAE becomes GUARD |
+| M-01 | Skill | Plain healing |
+| M-02 | Attack | DEAL and heal from it |
+| M-03 | Skill | Stronger defence at low VITAE |
+| M-04 | Spell | Get rid of a Curse |
+| M-05 | Skill | Conviction for being at low VITAE |
+| M-06 | Skill | Last stand: cannot drop below 1 |
+| M-07 | Spell | Mark the foe; heal when you hurt it |
+| M-08 | Global | Heal each turn |
+| M-09 | Skill | Healing past max becomes GUARD |
+| M-10 | Spell | Return the pain you took (capped) |
 
-## Payoff ballot
+## Ballot
 
-- **Ballot sheet:** [`rehearsal-blood-price-payoff.ballot.html`](rehearsal-blood-price-payoff.ballot.html)
-  (30 candidates, 10 slots × 3).
+- **Ballot sheet:** [`rehearsal-blood-price.ballot.html`](rehearsal-blood-price.ballot.html).
+  It has three tabs (Payoff, Engine, Misc) with 10 slots × 3 candidates each,
+  90 candidates in all.
 - **Format change from T:** on 2026-09-30 T replaced the one-question-per-slot
   ballot with this sheet: a card image per candidate, a checkbox, and a
   Generate button that produces the verdict text.

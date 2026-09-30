@@ -727,18 +727,20 @@ one lane per card, free multi-lane tags, bridges across families.
 (T, attended paper rehearsal, 2026-09-30.) Amends D73's first pool.
 
 - The first family is **Blood Price** ("I pay in my own blood for power").
-- It has **three sub-lanes of about 10 cards each**: Heal, Payoff (benefits
-  for sacrificing) and Engine (helps trigger SACRIFICE).
+- It has **three sub-lanes of about 10 cards each**: Payoff (benefits for
+  sacrificing), Engine (helps trigger SACRIFICE) and Misc (related utility).
+  Misc replaced an earlier Heal sub-lane in the same session.
 - The first pool target is **30 cards** (3 × 10) plus grey. This replaces
   D73's "3 families × 1 lane" (≈36).
 - Bridge cards (within a family, D73) are possible from the start.
-- Payoff is the first slice. The rehearsal ballot uses a checkbox sheet
-  (T's format) instead of per-slot questions.
+- All three sub-lanes are balloted together on one checkbox sheet (T's
+  format): 3 tabs × 10 slots × 3 candidates = 90 candidates, with about 30
+  surviving.
 - Everything stays on paper until B4, B5 and RC.
 - Ledger: `plan/card-ledger/rehearsal-blood-price.md`.
 
 *Rejected:* 36 exactly (12 per lane); three separate families for the
-first pool. The other fantasies (The Vigil, Rot and Omen, Loaded Dice)
+first pool; a Heal sub-lane (folded into Misc). The other fantasies (The Vigil, Rot and Omen, Loaded Dice)
 stay open, not rejected.
 
 ## Open follow-ups

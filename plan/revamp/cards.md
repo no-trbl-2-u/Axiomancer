@@ -23,7 +23,7 @@ with these amendments:
 |---|---|
 | Slice unit | **One lane** per slice (one build session plus one kill session); no colour order |
 | Lane grouping | **Families of sub-lanes.** A relic names a family; the guaranteed reward card comes from any lane in the family |
-| First pool | ~~3 families × 1 lane~~ → **D74: one family, Blood Price, with 3 sub-lanes (Heal, Payoff, Engine) of ~10 cards = 30 + grey**. Rehearsal ledger: `plan/card-ledger/rehearsal-blood-price.md` |
+| First pool | ~~3 families × 1 lane~~ → **D74: one family, Blood Price, with 3 sub-lanes (Payoff, Engine, Misc) of ~10 cards = 30 + grey**. Rehearsal ledger: `plan/card-ledger/rehearsal-blood-price.md` |
 | Multi-lane cards | **Bridge cards within a family**, built at the cross-slice session once a family has 2+ lanes (so the first pool has none) |
 | §1 session rules | **Not ratified**; reviewed later |
 | Still open | C1 threat matrix; §7 D8/D20 and progression calls; B5's tool shape |

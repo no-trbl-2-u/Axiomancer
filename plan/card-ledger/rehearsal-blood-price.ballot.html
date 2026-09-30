@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Blood Price Ballot</title>
 <!--
-  Blood Price — Payoff sub-lane ballot (paper rehearsal, D73).
+  Blood Price ballot (paper rehearsal, D73/D74): Payoff, Engine and Misc tabs, 90 candidates.
   Self-contained: no network, no storage. Open in any browser.
 
   How it works:
@@ -96,6 +96,14 @@
   .pick { position: absolute; top: 8px; right: 8px; width: 20px; height: 20px; accent-color: var(--sel); }
   .top { padding-right: 26px; }
 
+  /* ---- Tabs ---- */
+  .tabs { max-width: 1100px; margin: 0 auto; display: flex; gap: 6px; flex-wrap: wrap;
+          position: sticky; top: 0; background: var(--bg); padding: 8px 0; z-index: 2; }
+  .tabs button { margin: 0; background: transparent; color: var(--ink); border: 2px solid var(--edge); }
+  .tabs button[aria-selected="true"] { background: var(--btn); color: var(--btn-ink); }
+  .tabs .n { font-size: .8rem; opacity: .8; margin-left: 4px; }
+  .panel[hidden] { display: none; }
+  .blurb { color: var(--muted); margin: 10px 0 0; }
   /* ---- Footer / output ---- */
   footer { margin-top: 28px; padding-top: 12px; border-top: 2px solid var(--edge); }
   textarea { width: 100%; font: 13px/1.4 ui-monospace, Menlo, Consolas, monospace;
@@ -111,8 +119,8 @@
 <body>
 <header>
   <button class="theme" id="themeBtn" type="button" aria-label="Toggle colour theme">◐</button>
-  <h1>Blood Price — Payoff sub-lane ballot</h1>
-  <p class="sub">Paper rehearsal (D73). Family: Blood Price. Sub-lane: Payoff, "benefits for sacrificing". 10 slots × 3 candidates; the target is 10 survivors.</p>
+  <h1>Blood Price — ballot</h1>
+  <p class="sub">Paper rehearsal (D73, D74). Family: Blood Price. Three sub-lanes, one per tab: Payoff, Engine, Misc. Each has 10 slots × 3 candidates (90 cards in all); the target is about 1 survivor per slot, 30 in all.</p>
   <p class="legend">
     <b>Tick</b> each card you keep. Ticking two in one slot means "merge". <b>Unticked = CUT</b>.
     Use a slot's note box for a TWEAK (one number) or a merge rule.<br>
@@ -122,6 +130,7 @@
   </p>
 </header>
 
+<nav class="tabs" id="tabs" role="tablist" aria-label="Sub-lanes"></nav>
 <main id="slots"></main>
 
 <footer>
@@ -141,7 +150,14 @@
    glyph: placeholder art; free / paid: the two rules lines (plain text);
    why: the drafter's one-line rationale.
    ===================================================================== */
+const TABS = [
+  { key: 'P', name: 'Payoff', blurb: 'Benefits for sacrificing.' },
+  { key: 'E', name: 'Engine', blurb: 'Helps you trigger SACRIFICE: Curses as fuel, repeat and free sacrifices.' },
+  { key: 'M', name: 'Misc', blurb: 'Related utility that is neither payoff nor engine: healing, Curse handling, low-VITAE defence, threshold rewards.' },
+];
+
 const SLOTS = [
+  // Payoff
   { slot: 'P-01', role: 'Attack — pay a little VITAE for a big DEAL', glyph: '🗡' },
   { slot: 'P-02', role: 'Skill — pay VITAE for a big GUARD', glyph: '🛡' },
   { slot: 'P-03', role: 'Attack — DEAL more while at half VITAE or less', glyph: '🩸' },
@@ -152,6 +168,28 @@ const SLOTS = [
   { slot: 'P-08', role: 'Skill — turn VITAE into Conviction', glyph: '✠' },
   { slot: 'P-09', role: 'Spell — your blood becomes the foe\'s wound (ignores GUARD)', glyph: '⚱' },
   { slot: 'P-10', role: 'Global — every SACRIFICE also hurts the foe', glyph: '☩' },
+  // Engine
+  { slot: 'E-01', role: 'Spell — put the grey Curse in your hand for Conviction', glyph: '🕯' },
+  { slot: 'E-02', role: 'Skill — many small sacrifices (each one counts)', glyph: '🔪' },
+  { slot: 'E-03', role: 'Global — sacrifice automatically each turn', glyph: '⏳' },
+  { slot: 'E-04', role: 'Spell — a SACRIFICE that costs nothing but still counts', glyph: '🜍' },
+  { slot: 'E-05', role: 'Skill — play a Curse from hand cheaply', glyph: '📜' },
+  { slot: 'E-06', role: 'Attack — hit, then bleed', glyph: '🪓' },
+  { slot: 'E-07', role: 'Spell — double your next SACRIFICE', glyph: '♊' },
+  { slot: 'E-08', role: 'Skill — bring a Curse back from discard', glyph: '⚰' },
+  { slot: 'E-09', role: 'Global — reward for playing Curses', glyph: '⛧' },
+  { slot: 'E-10', role: 'Spell — SACRIFICE any amount you choose (X)', glyph: '⚖' },
+  // Misc
+  { slot: 'M-01', role: 'Skill — plain healing', glyph: '✚' },
+  { slot: 'M-02', role: 'Attack — DEAL and heal from it', glyph: '🦇' },
+  { slot: 'M-03', role: 'Skill — stronger defence at low VITAE', glyph: '🏰' },
+  { slot: 'M-04', role: 'Spell — get rid of a Curse', glyph: '🔥' },
+  { slot: 'M-05', role: 'Skill — Conviction for being at low VITAE', glyph: '✦' },
+  { slot: 'M-06', role: 'Skill — last stand: cannot drop below 1', glyph: '⚓' },
+  { slot: 'M-07', role: 'Spell — mark the foe; heal when you hurt it', glyph: '🎯' },
+  { slot: 'M-08', role: 'Global — heal each turn', glyph: '🌿' },
+  { slot: 'M-09', role: 'Skill — healing past max becomes GUARD', glyph: '🫀' },
+  { slot: 'M-10', role: 'Spell — return the pain you took (capped)', glyph: '🪞' },
 ];
 
 const CARDS = [
@@ -195,6 +233,86 @@ const CARDS = [
   { id: 'P-10a', type: 'Global', free: 'In play 3 turns: whenever you SACRIFICE, the foe loses that much VITAE.', paid: 'Same, for the rest of combat.', why: 'The lane\'s engine piece in its simplest form.' },
   { id: 'P-10b', type: 'Global', free: 'In play 3 turns: whenever you SACRIFICE, DEAL half that.', paid: 'Rest of combat: whenever you SACRIFICE, DEAL all of it.', why: 'Routes through DEAL, so GUARD and VULNERABLE apply.' },
   { id: 'P-10c', type: 'Global', free: 'In play 3 turns: whenever you SACRIFICE, GUARD that much.', paid: 'Rest of combat: whenever you SACRIFICE, DEAL that much instead.', why: 'Defensive FREE, offensive PAID.' },
+  // E-01
+  { id: 'E-01a', type: 'Spell', free: 'Add a grey Curse to your hand. Gain 1 Conviction.', paid: 'Add 2 grey Curses to your hand. Gain 3 Conviction.', why: 'Pure fuel: Curses in, Conviction out.' },
+  { id: 'E-01b', type: 'Spell', free: 'Add a grey Curse to your hand. DEAL 4.', paid: 'Add a grey Curse to your hand. Gain 2 Conviction, DEAL 8.', why: 'Never a blank turn: it always hits.' },
+  { id: 'E-01c', type: 'Spell', free: 'Gain 1 Conviction.', paid: 'Add a grey Curse to your hand. Gain 3 Conviction. EXILE.', why: 'Safe FREE; the Curse only on PAID, once per combat.' },
+  // E-02
+  { id: 'E-02a', type: 'Skill', free: 'SACRIFICE 1, twice.', paid: 'SACRIFICE 1, four times.', why: 'Cheapest way to count many sacrifices.' },
+  { id: 'E-02b', type: 'Skill', free: 'SACRIFICE 1, twice. GUARD 2.', paid: 'SACRIFICE 2, three times. GUARD 5.', why: 'Counts and blocks.' },
+  { id: 'E-02c', type: 'Skill', free: 'SACRIFICE 2.', paid: 'SACRIFICE 1 for each card in your hand (max 5).', why: 'Scales with hand size; Curses in hand help.' },
+  // E-03
+  { id: 'E-03a', type: 'Global', free: 'In play 3 turns: at the start of your turn, SACRIFICE 2.', paid: 'Same, for the rest of combat.', why: 'The simplest steady drip.' },
+  { id: 'E-03b', type: 'Global', free: 'In play 3 turns: at the start of your turn, SACRIFICE 2, gain 1 Conviction.', paid: 'Rest of combat: at the start of your turn, SACRIFICE 3, gain 1 Conviction.', why: 'The drip pays for itself.' },
+  { id: 'E-03c', type: 'Global', free: 'In play 3 turns: at the start of your turn, SACRIFICE 3, GUARD 3.', paid: 'Same, for the rest of combat.', why: 'The drip is partly covered by the block.' },
+  // E-04
+  { id: 'E-04a', type: 'Spell', free: 'Your next SACRIFICE this turn costs no VITAE but still counts.', paid: 'Your SACRIFICES this turn cost no VITAE but still count.', why: 'PAID is a free-for-all turn.' },
+  { id: 'E-04b', type: 'Spell', free: 'Your next SACRIFICE this turn costs half.', paid: 'Your next 2 SACRIFICES this turn cost no VITAE but still count.', why: 'Bounded: at most 2 free sacrifices.' },
+  { id: 'E-04c', type: 'Spell', free: 'GUARD 3.', paid: 'Your next SACRIFICE this turn costs no VITAE but still counts. Gain 1 Conviction.', why: 'Safe FREE line.' },
+  // E-05
+  { id: 'E-05a', type: 'Skill', free: 'Play a Curse from your hand on its FREE line at no VITAE cost.', paid: 'Play a Curse from your hand on its PAID line at no VITAE cost.', why: 'Direct: clears Curses for free.' },
+  { id: 'E-05b', type: 'Skill', free: 'Play a Curse from your hand; its SACRIFICE is halved.', paid: 'Play every Curse in your hand; their SACRIFICE is halved.', why: 'Mass clear at a discount.' },
+  { id: 'E-05c', type: 'Skill', free: 'DEAL 3.', paid: 'Play a Curse from your hand on its PAID line at no VITAE cost; it still counts as a SACRIFICE.', why: 'Safe FREE; PAID feeds payoffs.' },
+  // E-06
+  { id: 'E-06a', type: 'Attack', free: 'DEAL 5, then SACRIFICE 2.', paid: 'DEAL 12, then SACRIFICE 3.', why: 'Hits above Blow; the bleed comes after.' },
+  { id: 'E-06b', type: 'Attack', free: 'DEAL 4, then SACRIFICE 2.', paid: 'DEAL 7, twice; SACRIFICE 2 after each.', why: 'Two hits, two sacrifices.' },
+  { id: 'E-06c', type: 'Attack', free: 'DEAL 3.', paid: 'SACRIFICE 3, DEAL 10, then SACRIFICE 3 again.', why: 'Bleeds on both sides of the hit.' },
+  // E-07
+  { id: 'E-07a', type: 'Spell', free: 'Your next SACRIFICE this turn counts twice.', paid: 'Your next SACRIFICE this turn counts three times.', why: 'Multiplies payoffs, not the cost.' },
+  { id: 'E-07b', type: 'Spell', free: 'Your next SACRIFICE this turn is doubled (its cost and its payoffs).', paid: 'Same, and gain 2 Conviction.', why: 'Honest: double cost for double reward.' },
+  { id: 'E-07c', type: 'Spell', free: 'GUARD 3.', paid: 'Your SACRIFICES this turn count twice (you pay once).', why: 'Safe FREE; a big PAID turn.' },
+  // E-08
+  { id: 'E-08a', type: 'Skill', free: 'Return a Curse from your discard to your hand.', paid: 'Return every Curse from your discard to your hand. Gain 1 Conviction each.', why: 'Recycles fuel.' },
+  { id: 'E-08b', type: 'Skill', free: 'Return a Curse from your discard to your hand. GUARD 3.', paid: 'Return a Curse from your discard to your hand. GUARD 8.', why: 'Recycles and blocks.' },
+  { id: 'E-08c', type: 'Skill', free: 'Return a Curse from your discard to your hand.', paid: 'Return a Curse from your discard and play it at no VITAE cost.', why: 'Straight from discard into play.' },
+  // E-09
+  { id: 'E-09a', type: 'Global', free: 'In play 3 turns: whenever you play a Curse, gain 1 Conviction.', paid: 'Same, for the rest of combat.', why: 'Curses become an economy.' },
+  { id: 'E-09b', type: 'Global', free: 'In play 3 turns: whenever you play a Curse, GUARD 4.', paid: 'Rest of combat: whenever you play a Curse, GUARD 4 and gain 1 Conviction.', why: 'Curses become defence.' },
+  { id: 'E-09c', type: 'Global', free: 'In play 3 turns: whenever you play a Curse, DEAL 4.', paid: 'Rest of combat: whenever you play a Curse, DEAL 6.', why: 'Curses become damage.' },
+  // E-10
+  { id: 'E-10a', type: 'Spell', free: 'SACRIFICE any amount (max 5).', paid: 'SACRIFICE any amount (max 15).', why: 'A pure dial; only useful with payoffs out.' },
+  { id: 'E-10b', type: 'Spell', free: 'SACRIFICE any amount (max 6); GUARD that much.', paid: 'SACRIFICE any amount (max 15); gain 1 Conviction per 5 paid.', why: 'The dial has its own reward.' },
+  { id: 'E-10c', type: 'Spell', free: 'SACRIFICE 3.', paid: 'SACRIFICE any amount (max 20); it counts as one SACRIFICE per 5 paid.', why: 'One big payment reads as several.' },
+  // M-01
+  { id: 'M-01a', type: 'Skill', free: 'Heal 3.', paid: 'Heal 10.', why: 'The plain heal.' },
+  { id: 'M-01b', type: 'Skill', free: 'GUARD 2.', paid: 'Heal 8. GUARD 4.', why: 'Heal plus a block.' },
+  { id: 'M-01c', type: 'Skill', free: 'Heal 4.', paid: 'Heal 12. EXILE.', why: 'A big heal, once per combat.' },
+  // M-02
+  { id: 'M-02a', type: 'Attack', free: 'DEAL 3; heal 1.', paid: 'DEAL 8; heal half the damage dealt.', why: 'Classic lifesteal.' },
+  { id: 'M-02b', type: 'Attack', free: 'DEAL 2.', paid: 'DEAL 6; heal all the damage dealt (max 8).', why: 'A full drain, capped.' },
+  { id: 'M-02c', type: 'Attack', free: 'DEAL 4.', paid: 'DEAL 8; heal 4 if you are at half VITAE or less.', why: 'Heals only when you need it.' },
+  // M-03
+  { id: 'M-03a', type: 'Skill', free: 'GUARD 3, or 6 at half VITAE or less.', paid: 'GUARD 6, or 14 at half VITAE or less.', why: 'The shared half-VITAE threshold.' },
+  { id: 'M-03b', type: 'Skill', free: 'GUARD 2.', paid: 'GUARD 5; at half VITAE or less, this GUARD also lasts into your next turn.', why: 'A lasting block when low.' },
+  { id: 'M-03c', type: 'Skill', free: 'GUARD 3.', paid: 'GUARD 8; heal 3 at half VITAE or less.', why: 'Block, plus a heal when low.' },
+  // M-04
+  { id: 'M-04a', type: 'Spell', free: 'EXILE a Curse from your hand.', paid: 'EXILE a Curse from your hand. Gain 2 Conviction.', why: 'Clean removal.' },
+  { id: 'M-04b', type: 'Spell', free: 'Discard a Curse from your hand at no cost.', paid: 'EXILE every Curse in your hand; heal 3 for each.', why: 'Mass clear that heals.' },
+  { id: 'M-04c', type: 'Spell', free: 'GUARD 3.', paid: 'EXILE a Curse from your hand. DEAL 10.', why: 'Removal that hits.' },
+  // M-05
+  { id: 'M-05a', type: 'Skill', free: 'At half VITAE or less: gain 1 Conviction.', paid: 'At half VITAE or less: gain 3 Conviction.', why: 'Pure threshold reward; blank when you are healthy.' },
+  { id: 'M-05b', type: 'Skill', free: 'GUARD 2.', paid: 'Gain 1 Conviction, or 3 at half VITAE or less.', why: 'Never blank.' },
+  { id: 'M-05c', type: 'Skill', free: 'Gain 1 Conviction.', paid: 'At one-third VITAE or less: gain 4 Conviction. EXILE.', why: 'A deep-threshold burst.' },
+  // M-06
+  { id: 'M-06a', type: 'Skill', free: 'GUARD 3.', paid: 'This turn, your VITAE cannot drop below 1. EXILE.', why: 'A once-per-combat save.' },
+  { id: 'M-06b', type: 'Skill', free: 'At half VITAE or less: GUARD 4.', paid: 'Until your next turn, damage cannot take you below 1 VITAE.', why: 'Repeatable, but costs a die.' },
+  { id: 'M-06c', type: 'Skill', free: 'Heal 2.', paid: 'This turn, damage cannot take you below 1 VITAE; heal 5 next turn. EXILE.', why: 'Save, then recover.' },
+  // M-07
+  { id: 'M-07a', type: 'Spell', free: 'VULNERABLE +10% for 1 turn.', paid: 'VULNERABLE +25% for 2 turns; heal 2 each time you damage the foe while it lasts.', why: 'Setup plus sustain.' },
+  { id: 'M-07b', type: 'Spell', free: 'For 1 turn, heal 1 whenever you damage the foe.', paid: 'For 3 turns, heal 2 whenever you damage the foe.', why: 'A pure drain mark.' },
+  { id: 'M-07c', type: 'Spell', free: 'VULNERABLE +10% for 1 turn.', paid: 'VULNERABLE +20% for 2 turns. Heal 5.', why: 'Simple: setup and a flat heal.' },
+  // M-08
+  { id: 'M-08a', type: 'Global', free: 'In play 3 turns: at the start of your turn, heal 2.', paid: 'Rest of combat: at the start of your turn, heal 3.', why: 'Steady regen.' },
+  { id: 'M-08b', type: 'Global', free: 'In play 3 turns: at the start of your turn, heal 3.', paid: 'Rest of combat: at the start of your turn, heal 2 and GUARD 2.', why: 'Regen plus block.' },
+  { id: 'M-08c', type: 'Global', free: 'In play 3 turns: at the start of your turn, heal 1 per Curse in your hand.', paid: 'Rest of combat: at the start of your turn, heal 2 per Curse in your hand (max 6).', why: 'Curses in hand become sustain.' },
+  // M-09
+  { id: 'M-09a', type: 'Skill', free: 'Heal 4; healing past max VITAE becomes GUARD.', paid: 'Heal 10; healing past max VITAE becomes GUARD.', why: 'Never a wasted heal.' },
+  { id: 'M-09b', type: 'Skill', free: 'GUARD 3.', paid: 'For the rest of combat, healing past max VITAE becomes GUARD. EXILE.', why: 'A rule-changer, once per combat.' },
+  { id: 'M-09c', type: 'Skill', free: 'Heal 3.', paid: 'Heal 8; GUARD equal to the healing done.', why: 'Heal and block together.' },
+  // M-10
+  { id: 'M-10a', type: 'Spell', free: 'The foe loses VITAE equal to the damage you took last turn (max 5).', paid: 'Same, max 15.', why: 'An eye for an eye, capped.' },
+  { id: 'M-10b', type: 'Spell', free: 'DEAL 3.', paid: 'DEAL equal to the damage you took last turn (max 20).', why: 'Goes through DEAL, so GUARD and VULNERABLE apply.' },
+  { id: 'M-10c', type: 'Spell', free: 'VULNERABLE +10% for 1 turn.', paid: 'The foe loses half the VITAE you lost this combat (max 15). EXILE.', why: 'A once-per-combat revenge.' },
 ];
 
 /* =====================================================================
@@ -230,7 +348,29 @@ const slotHtml = (s) => `
     <input class="note" type="text" data-note="${s.slot}" placeholder="Note for ${s.slot}: TWEAK / merge rule (optional)">
   </section>`;
 
-document.getElementById('slots').innerHTML = SLOTS.map(slotHtml).join('');
+/** One tab panel: blurb + its 10 slots. Hidden unless it is the active tab. */
+const panelHtml = (t, i) => `
+  <div class="panel" id="panel-${t.key}" role="tabpanel" ${i ? 'hidden' : ''}>
+    <p class="blurb"><b>${t.name}</b>: ${esc(t.blurb)}</p>
+    ${SLOTS.filter((s) => s.slot.startsWith(t.key + '-')).map(slotHtml).join('')}
+  </div>`;
+
+/** Tab button with a live "kept / total" counter. */
+const tabHtml = (t, i) =>
+  `<button type="button" role="tab" data-tab="${t.key}" aria-selected="${i === 0}">${t.name}<span class="n" data-n="${t.key}"></span></button>`;
+
+document.getElementById('slots').innerHTML = TABS.map(panelHtml).join('');
+document.getElementById('tabs').innerHTML = TABS.map(tabHtml).join('');
+
+/** Show one tab's panel, hide the others. */
+const showTab = (key) => {
+  document.querySelectorAll('[data-tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === key)));
+  TABS.forEach((t) => { document.getElementById(`panel-${t.key}`).hidden = t.key !== key; });
+};
+document.getElementById('tabs').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-tab]');
+  if (b) showTab(b.dataset.tab);
+});
 
 /* =====================================================================
    STATE — read straight from the DOM (no stored state).
@@ -244,6 +384,11 @@ const refresh = () => {
   document.querySelectorAll('label.card').forEach((l) =>
     l.classList.toggle('on', l.querySelector('.pick').checked));
   document.getElementById('count').textContent = `${kept().length} kept of ${CARDS.length}`;
+  TABS.forEach((t) => {
+    const total = CARDS.filter((c) => c.id.startsWith(t.key + '-')).length;
+    const k = kept().filter((id) => id.startsWith(t.key + '-')).length;
+    document.querySelector(`[data-n="${t.key}"]`).textContent = `${k}/${total}`;
+  });
 };
 document.getElementById('slots').addEventListener('change', refresh);
 refresh();
@@ -271,9 +416,12 @@ const sheet = () => {
   const k = kept();
   const general = document.getElementById('general').value.trim();
   return [
-    'BALLOT — Blood Price / Payoff (rehearsal, D73)',
+    'BALLOT — Blood Price (rehearsal, D73/D74)',
     `kept ${k.length} of ${CARDS.length}`,
-    ...SLOTS.map((s) => slotLine(s, k)),
+    ...TABS.flatMap((t) => [
+      `-- ${t.name} --`,
+      ...SLOTS.filter((s) => s.slot.startsWith(t.key + '-')).map((s) => slotLine(s, k)),
+    ]),
     general ? `general: ${general}` : null,
   ].filter(Boolean).join('\n');
 };
