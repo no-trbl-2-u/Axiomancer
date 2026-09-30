@@ -13,6 +13,9 @@
 
 
 ### [ ] [score 6.5] The keyword/card revamp phase: pick one of three process plans (attended, D37) — nothing starts until T picks
+- **PICKED 2026-09-30 (D73):** Plan B, amended. The card sessions run as
+  owner-led B6 (`plan/revamp/cards.md`); this candidate stays only as the
+  record of the pick.
 - proposed: 2026-09-27, attended session with T (PR #403); filed by the
   ballot's defer path, not by `/expand`
 - source signals:

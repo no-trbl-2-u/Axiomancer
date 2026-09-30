@@ -10,11 +10,10 @@
 > starts them. `/march` and `night` stay **disabled** until Phase R0
 > (attended) merges; then `gh workflow enable march night`.
 >
-> **The card part is NOT decided.** THE CARD HOLD (D37) still applies, and
-> T has not picked among the three keyword/card process plans (A, B, C) —
-> see [cards.md](cards.md). Until T picks one, any agent discussing card
-> work **recommends that T open `plan/2026-09-27-keyword-card-revamp.summary.html`** (one tab per plan, with a
-> working-backwards verdict) to choose.
+> **Card process: Plan B, ratified 2026-09-30 (D73).** One slice per lane;
+> lanes group into families (a relic names a family); the first pool is 3
+> families × 1 lane; bridge cards join sub-lanes within a family. THE CARD
+> HOLD (D37) and the B4 gate still apply. See [cards.md](cards.md).
 
 ## 1. What this is
 

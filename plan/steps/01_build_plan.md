@@ -112,8 +112,8 @@ event-pool and layout files).
 > Act 1) starts before it. The B-rows after it are T's sessions: they stay
 > `[blocked: owner-led]`, require RC, and the loop never starts them.
 > Tick-by-tick walkthrough: `plan/revamp/walkthrough.md`. The card process
-> plan (A/B/C) is **not picked**; agents recommend T open
-> `plan/2026-09-27-keyword-card-revamp.summary.html` to choose (`plan/revamp/cards.md`).
+> is **Plan B, ratified 2026-09-30 (D73)**: one slice per lane, families of
+> sub-lanes, a first pool of 3 families × 1 lane (`plan/revamp/cards.md`).
 
 - [x] Phase R0 — Loop doctrine reset (attended): stewards, forge, four agents and the design skills archived; every verb carries the revamp banner; ci-autofix, telemetry and plan hygiene fixed. `plan/revamp/loop.md` (ba658cba)
 - [x] Phase R1 — Tooling reset: delete the card editor, retire the deck-matrix baseline, archive the tuning-lab pages, catalog shows live content only, orphan scripts. The `.claude/**` items the part plan names (the guard.mjs baseline block, the launch.json card-editor entry, the naming-law allowances in settings.json) are attended residue: R1 leaves them and notes them in its commit. `plan/revamp/tooling.md`. Requires R0. (0cfea70c)
@@ -142,7 +142,7 @@ event-pool and layout files).
 - [ ] Phase RC — Act 1 checkpoint release (attended): the full gate green, a playtester run from a new game through all four regions' Doorwarden fights, befriend via The Open Hand, save/reload mid-fight; then T tags `v0.1.0-checkpoint`, publishes the GitHub release and builds the EAS preview APK. The reset point before any content work. `plan/revamp/checkpoint.md`. Requires R1, R2a, R2b, R3a, R3b, R3c, R4, R5, R6a, R6b, R7c, R7c2, R7d, R7e, B4, R8, R9, R9a, R10, R10b, R10c.
 - [blocked: owner-led — T's session 2026-09-28] Phase B1 — The relic pass. `plan/revamp/relics.md`. Requires R4, RC.
 - [blocked: owner-led — T's session 2026-09-28] Phase B5 — Card-creator workflow. `plan/revamp/cards.md`. Requires B4, RC.
-- [blocked: owner-led — T's session 2026-09-28] Phase B6 — Card sessions. The first session decides lane granularity (lanes vs families) and multi-lane cards before any lane is authored (D71). `plan/revamp/cards.md`. Requires B4, B5, RC.
+- [blocked: owner-led — T's session 2026-09-28] Phase B6 — Card sessions. Plan B, one slice per lane; families of sub-lanes and bridge cards within a family (D73). `plan/revamp/cards.md`. Requires B4, B5, RC.
 - [blocked: owner-led — T's session 2026-09-28] Phase B2 — Enemy revamp: normal / elite / region boss / act boss. `plan/revamp/enemies.md`. Requires R9, RC.
 - [blocked: owner-led — T's session 2026-09-28] Phase B3 — Hazard mechanics redesign. `plan/revamp/hazards.md`. Requires R6b, RC.
 - [blocked: owner-led — T's session 2026-09-28] Phase B10 — Dev menu revamp (the reset leaves the dev menu alone except compile fixes). `plan/revamp/mobile.md`. Requires R8, RC.
