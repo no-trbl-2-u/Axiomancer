@@ -54,7 +54,7 @@ until T opens the session.
 
 ### Gate (all must hold before tagging)
 
-1. **Rows:** R1–R10, R7a–R7d, R9a, R10b, R10c and B4 are `[x]` on main.
+1. **Rows:** R1–R10, R7a–R7e, R9a, R10b, R10c and B4 are `[x]` on main.
 2. **Checks:** the root `npm test`, mechanics `verify`, mobile `verify`,
    `lint:content`, `check-lexicon`, and every `verify-*` workflow on the
    tagged commit are green.
@@ -66,6 +66,8 @@ until T opens the session.
    - The Open Hand opens the mercy choice on the Brine Hag;
    - an Anvil near each region's exit;
    - healing potions obtainable and usable; shillings the only currency;
+   - the Suppliant's Ring is the only relic in play, and no parked-world
+     NPC, quest or shop is reachable (R7e, D72);
    - the vault door and the deep stair both sealed, with no crash or
      dead end past them;
    - about 3–4 level-ups across the clear (R9's target);
