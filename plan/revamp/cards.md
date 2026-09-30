@@ -93,11 +93,12 @@ relics. This replaces the stat-threshold idea.
 - **Relic sources, for now:** quests (a designated relic as the quest
   reward) and elites (a low chance of a random relic).
 - **The combat card reward** offers 3 cards: 2 completely random and 1 guaranteed lane card, drawn from a lane an equipped relic
-  opens.
+  opens. With no lane relic equipped, all 3 options are random.
 
 **Still open:** how the first lane opens at run start (a starting relic
 is the natural reading; relics otherwise come only from quests and
-elites), what the guaranteed slot offers with no lane relic equipped,
+elites; D71 makes a relic-less start all-random, which conflicts with the
+earlier "first lane at run start" answer unless a starting relic exists),
 whether lanes group into families, and cards in several lanes.
 
 ## Card types — T's answers (2026-09-29, D69)
