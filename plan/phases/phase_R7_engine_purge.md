@@ -175,6 +175,56 @@ Scope 1–7 landed, with these calls made against the tree:
   blurbs are gone.
 - **`cards.haunts.ts` waits for R7c** with the `executeCard` haunt branch.
 
+## Scope — R7c (refined against the tree R7b left, 2026-09-30)
+
+R7a already deleted every WRITER of the alt-win currencies (`gainSway`,
+`gainPremises`, the PLEA / CHARGE / SENTENCE kinds), so what is left is
+state, a decay, an offer and readouts. The tick that took R7c found the
+row too big for one tick (the alt-wins across both workspaces, plus the
+effects, the rung ladder, `executeCard` and the test-only modules) and split
+it, like R2 and R3:
+
+- **R7c — the alt-win systems.**
+  1. **Engine state and events**: `sway`, `premises`, `premiseMilestoneTotal`,
+     `peroration`, `swayMilestone*Fired`, `capitulationChoiceActive`,
+     `capitulationDeclined`; the `premise-*`, `peroration-fired`, `sway-*`
+     and `capitulation-*` events; the PLEA decay and `SWAY_DECAY_PER_TURN`.
+  2. **The outcomes**: `CombatOutcome` loses `capitulate` and `concede`;
+     `selectCapitulationChoice` and the capitulation offer go. Befriend →
+     mercy (`selectMercyChoice`) is the only non-lethal ending (D47, D63).
+  3. **Constants**: `capitulateThreshold`, `concedeFloorFor`, the
+     `CONCEDE_PREMISES_*` ladder, the sway milestones and the premise
+     milestones (`Combat/effects.ts`); `outgoingSwayGainMulPct`.
+  4. **Sims and CLI**: the per-policy `capitulationChoice`, the
+     capitulate/concede win-path columns, the CLI yield prompt.
+  5. **Region consequences**: `GameState.regionConsequences` (never written)
+     and its only reader, the spared-region boss buff `buff_absolved`, go;
+     save hop v32 → v33 drops the slice.
+  6. **Mobile**: the PLEA / CHARGE meters, the Sentence track, the
+     capitulation modal, the PLEA-decay log line, the capitulate / concede
+     summary hues, the CONDEMN face difficulty plumbing, and the PLEA /
+     CHARGE glyph and family entries.
+- **R7c2 — the rest of the row**: friendship increments (`incrementsFriendship`
+  and the `executeCard` friendship branch), the carrier-less effects and
+  `fixture-effects.ts`, the STAGGER rung ladder (`staggerRungs`,
+  `computeRungDenial`, boss rung growth, BACKFIRE), the dead `executeCard`
+  branches (haunt / curse / enemy-caster, `cards.haunts.ts`), the test-only
+  modules (`World/quest-reward.ts`, `initializeCombat`) and the closing
+  carrier sweep (D45).
+
+### As shipped (R7c, 2026-09-30)
+
+- **The Labyrinth's Borrowed Premise stays.** It is a Labyrinth debt ledger
+  (`labyrinth.engine.ts`), not the combat CHARGE tally, and never fed it.
+- **`buffs.library.json` is empty, not deleted.** The loader and the
+  buff/debuff split stay; tests that needed a buff use a fixture
+  (`fixture_armor` in mechanics, a test-local buff in mobile).
+- **The DoT foresight meter keeps its component**, renamed `HudMeter` with
+  the alt-win `outcome` label gone; the FE-022 suite that pinned the PLEA /
+  CHARGE labels went with its subject.
+- **The CLI and sims keep the befriend path**: `mercies` now counts the
+  `mercy` cell only.
+
 ## Out of scope for R7a (named so it is not mistaken for a miss)
 
 - `synergy` and `synergy-predicates.ts`, themes, draft, presets,

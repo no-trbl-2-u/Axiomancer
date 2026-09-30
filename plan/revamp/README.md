@@ -89,11 +89,12 @@ starts it.
 | R6 | Hazard reset: minimal hazard deck | loop | R0 | hazards.md |
 | R7a | Engine purge 1/3: mechanic kinds, handlers, dead fields, state, fixtures | loop | R2b, R4, R6 | engine.md |
 | R7b | Engine purge 2/3: pricing, synergy, themes, draft, reward steering, card types → Attack/Skill/Spell | loop | R7a | engine.md |
-| R7c | Engine purge 3/3: alt-win systems, carrier-less effects, dead branches, closing carrier sweep | loop | R7b | engine.md |
-| R7d | Stance removal: the rock/paper/scissors layer goes; card and dice colour, the Color Law and colour match stay (D65) | loop | R7c | engine.md |
+| R7c | Engine purge 3/3: the alt-win systems (PLEA, CHARGE, capitulation, region consequences) | loop | R7b | engine.md |
+| R7c2 | Engine purge 3b: friendship increments, carrier-less effects, the rung ladder, dead branches, closing carrier sweep (split from R7c, 2026-09-30) | loop | R7c | engine.md |
+| R7d | Stance removal: the rock/paper/scissors layer goes; card and dice colour, the Color Law and colour match stay (D65) | loop | R7c2 | engine.md |
 | R8 | Mobile cleanup: dead flows and glosses, grey card art, app label, VITAE/shillings copy | loop | R7d | mobile.md |
-| R9 | Progression retune: XP curve for Act 1 on the 3 survivors | loop | R3, R7c | progression.md |
-| R9a | Save checkpoint in fights: a reload mid-encounter re-offers the fight | loop | R7c, R8 | checkpoint.md |
+| R9 | Progression retune: XP curve for Act 1 on the 3 survivors | loop | R3, R7c2 | progression.md |
+| R9a | Save checkpoint in fights: a reload mid-encounter re-offers the fight | loop | R7c2, R8 | checkpoint.md |
 | R10 | Theme colours: move surviving hard-coded hex colours into named `theme/axm.ts` tokens (no visual change) | loop | R8 | mobile.md |
 | R10b | Doctrine rewrite: spec.md, bearings, a one-page game model; specs 33/34 retired; plan queues swept; `plan/archive/` tagged and removed from the tree (D66, D67) | loop | R10 | doctrine.md |
 | R10c | Comments and docs truth pass (mechanics, then mobile): bannered docs rewritten, history stripped from comments, every rule of play in a live doc, a comment guard (D67) | loop | R10b | doctrine.md |
@@ -161,7 +162,7 @@ T walked the agent defaults one at a time the same day. None remain open.
 | 5 | **R4** Relic placeholders | Removes the Bill exploit and most signature carriers early; gives B1 its floor |
 | 6 | **R5** Items reset | Only Act 1's shops and caches remain to re-point |
 | 7 | **R6** Hazard reset | Independent; placed here so R7's carrier sweep sees the final hazard glossary |
-| 8 | **R7a–R7c** Engine purge, in three ticks | Last big deletion — needs R2, R4, R6 to have removed their carriers; split along engine.md's own three-way split so each tick is bounded |
+| 8 | **R7a–R7c2** Engine purge, in four ticks | Last big deletion — needs R2, R4, R6 to have removed their carriers; split along engine.md's own three-way split so each tick is bounded |
 | 8a | **R7d** Stance removal | The RPS layer is engine + mobile wiring left over from spec 33; it goes before B4 so the inventory never records it (D65) |
 | 9 | **B4** Card-rules inventory (loop) | Straight after R7 so the inventory records the final tree and card work can start in parallel with the rest |
 | 10 | **R8** Mobile cleanup | Consumes R7's final exports |
