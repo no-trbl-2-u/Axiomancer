@@ -90,7 +90,7 @@ Inputs for that session:
   relics decide the combat card-reward pool, so B1 and the card sessions
   (B6) are coupled: a lane relic needs its lane's cards.
 - **Relic sources (D71), for now:** quests give designated relics;
-  elites have a low chance of dropping a random relic. How the run-start
-  lane is opened is still open (see `cards.md` → Deck model).
+  elites have a low chance of dropping a random relic. There is no starting relic:
+  the first lane opens with the first lane relic (D71).
 - Relic reward sources: the hazard deck's "Bonus Relic"/"Shrine Cache" lie
   (they pay shillings) and go in R6; B1 can give relics a real source.

@@ -73,7 +73,7 @@ a pick among Plans A/B/C, and they create no cards.
 | Question | T's answer |
 |---|---|
 | How a player comes to own a deck identity | Grey start, then commit to a **lane** during the run |
-| When the first lane opens | **At run start** |
+| When the first lane opens | **With the first lane relic** (D71; replaces "at run start"). The run starts grey with all-random rewards |
 | What one deck pitch produces | A **10–12 card lane** that sits on top of the grey cards and mixes with other lanes |
 | Keyword ownership | Each lane owns **1–2 signature keywords**; all other keywords are shared |
 | Mixing lanes | **Pairs are the goal** (two lanes per run) |
@@ -95,11 +95,12 @@ relics. This replaces the stat-threshold idea.
 - **The combat card reward** offers 3 cards: 2 completely random and 1 guaranteed lane card, drawn from a lane an equipped relic
   opens. With no lane relic equipped, all 3 options are random.
 
-**Still open:** how the first lane opens at run start (a starting relic
-is the natural reading; relics otherwise come only from quests and
-elites; D71 makes a relic-less start all-random, which conflicts with the
-earlier "first lane at run start" answer unless a starting relic exists),
-whether lanes group into families, and cards in several lanes.
+**The first lane opens with the first lane relic** (T, D71). There is no
+starting relic; until a quest or elite gives one, the deck is grey plus
+random rewards.
+
+**Left for a card session:** how big a lane is and whether lanes group
+into families; cards in several lanes.
 
 ## Card types — T's answers (2026-09-29, D69)
 

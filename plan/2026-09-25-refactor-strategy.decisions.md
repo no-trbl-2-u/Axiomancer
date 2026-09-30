@@ -661,7 +661,8 @@ engine's current refill-to-5 rule, kept). *Rejected:* a Global cap of 3 or
 opens. Relics come, for now, from quests (designated rewards) and elites
 (a low chance of a random relic). The combat card reward is 2 random
 cards and 1 guaranteed lane card; with no lane relic equipped, all 3 are
-random. A FREE Global lasts 3 turns. Curses carry no extra discard cost
+random. There is no starting relic: the first lane opens with the first
+lane relic, replacing the earlier "at run start" answer. A FREE Global lasts 3 turns. Curses carry no extra discard cost
 or in-hand effect for now; the first Curse is a grey dead card, FREE:
 SACRIFICE 5, PAID: SACRIFICE 10, EXILE. Curses cannot be scrapped. SACRIFICE is a cost paid in VITAE and never
 takes the player below 1: a line the player cannot afford cannot be
