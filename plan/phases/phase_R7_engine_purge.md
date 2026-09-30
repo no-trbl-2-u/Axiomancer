@@ -225,6 +225,53 @@ it, like R2 and R3:
 - **The CLI and sims keep the befriend path**: `mercies` now counts the
   `mercy` cell only.
 
+### As shipped (R7c2, 2026-09-30)
+
+The tick that took R7c2 split it once more, like R2, R3 and R7c:
+
+- **Shipped in R7c2**: the STAGGER rung ladder (`computeRungDenial`,
+  `staggerRungs`, `bossRungGrowth`, the rung constants, authored `rungs` on
+  threat phases and enemy cards, the `rung-regrown` event, the coveted die's
+  `stagger` method) and BACKFIRE (`backfirePerRung`, its drip and event,
+  `fixture_backfire`); friendship increments and the counter's whole
+  predicate (`incrementsFriendship`, `friendshipCounter`,
+  `isBefriendAttemptEligible`, `FRIENDSHIP_COUNTER_MAX`, `roundsThreshold`,
+  `defaultFallback`), leaving `hpGate` as The Open Hand's one gate; the dead
+  `executeCard` branches (haunt ownership, enemy caster, `cards.haunts.ts`);
+  the test-only modules `World/quest-reward.ts` and `combat.reducer.ts`.
+  Mobile lost the intent rung pips, the RUNGS system term, the BACKFIRE face
+  kind and float, and the tutorial copy teaching rungs; the atlas lost RUNGS.
+- **Learn Card stays.** `getAvailableCards` / `learnCard` feed the mobile
+  level-up modal; the part plan's "always empty" note predates it.
+- **Suites rewritten, not weakened**: the deny and weaken cases that leaned
+  on STAGGER now use live library effects (Petrify's skip-turn, Quarter's
+  outgoing damage).
+
+## Scope — R7c3 (the rest of R7c2)
+
+1. **Payload keys with no library carrier** (`Effects/types.ts`), with their
+   readers, aggregators and helpers in `Combat/effects.ts`,
+   `effect-modifiers.ts`, `combat.engine.ts`, `stat-scaling.ts` and the
+   mobile presenter's honest kinds: e.g. `regeneration`, `rollModifier`,
+   `rollModifierPerIntensity`, `defenseModifier`, `reflectDamage`,
+   `decayOnHeal`, `outgoingThreatDamageMulPct`, `suppressesThreatRiders`,
+   `powerMulPct`, `healingReceivedMulPct`, `consumedOnUse`,
+   `nextDotTierUpgrade`, `restrictsSurgeAccess`, `forcesWeakTierNextPlay`,
+   `blocksAdvantage`, `reducesControlAccuracy`, `deniesAllyBuffTargeting`,
+   `soloFightFallback`, `forceWildOnNextDie`, `colorChoice`, `cleanse`.
+   Re-verify each against `debuffs.library.json` first: a key a library
+   effect prints stays. The part plan's named helpers
+   (`getStudyMarkIntensity`, `extendRandomBuffDuration`, `applyDrain`,
+   `applyDispel`, `consumeDotEffects`) go if still unread.
+2. **Stance-keyed keys stay for R7d**: `actionRestriction.forcedStance` /
+   `blockedStances`, `advantageModifier`, `revealsStance`,
+   `damageTakenMultForStance`, `blursStanceHints`, `lockedStance`.
+3. **`test-utils/fixture-effects.ts`** goes with the channels only it
+   exercises; suites that used a fixture for a surviving channel move to a
+   library effect.
+4. **The closing carrier sweep (D45)**: every glossary / atlas row, glyph,
+   family entry and gloss left without a carrier, both workspaces.
+
 ## Out of scope for R7a (named so it is not mistaken for a miss)
 
 - `synergy` and `synergy-predicates.ts`, themes, draft, presets,
