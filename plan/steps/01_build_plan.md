@@ -124,7 +124,7 @@ event-pool and layout files).
 - [x] Phase R3c — World reset 3/3, hygiene: unstartable quests and unread flags gone, shillings the one currency, reachability pinned to Act 1 (b901c094)
 - [x] Phase R4 — Relic placeholders: ten signatures → GUARD 5 at a flat cost; The Open Hand becomes a real befriend (9110c7be)
 - [x] Phase R5 — Items reset: healing potions only, save migration, shops/caches re-pointed (b2f91e00)
-- [ ] Phase R6a — Hazard reset 1/2, honest rewards: Shrine Cache, Bonus Relic, Paradox Token, Sundered and Hexed deleted (two literal shilling chips and the heal remain), sub-quests deleted, token/hexed flags migrated away. `plan/revamp/hazards.md`; brief `plan/phases/phase_R6_hazard_reset.md`. Split from R6 on 2026-09-30, like R2 and R3. Requires R0.
+- [x] Phase R6a — Hazard reset 1/2, honest rewards: Shrine Cache, Bonus Relic, Paradox Token, Sundered and Hexed deleted (two literal shilling chips and the heal remain), sub-quests deleted, token/hexed flags migrated away (ab9e5378)
 - [ ] Phase R6b — Hazard reset 2/2, the minimal deck: the prototype ten cards, the reward-card pool gone (the offer draws core cards), engine code for carrier-less hazard mechanics deleted, glossary and tooltip chips swept, tuning/sim shrunk, deck-flag migration. Brief `plan/phases/phase_R6_hazard_reset.md`. Requires R6a.
 - [ ] Phase R7a — Engine purge 1/3: the 47 carrier-less mechanic kinds, their handlers, dead card fields, encounter-state fields and the retired-verb test fixtures. `plan/revamp/engine.md` (split (a)). Requires R2b, R4, R6b.
 - [ ] Phase R7b — Engine purge 2/3: pricing, synergy, themes, deck draft and presets, reward steering, card types → Attack/Skill/Spell. `plan/revamp/engine.md` (split (b)). Requires R7a.
