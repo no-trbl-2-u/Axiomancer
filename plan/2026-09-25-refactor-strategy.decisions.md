@@ -656,6 +656,17 @@ neither played nor discarded stay in hand for the next round (the
 engine's current refill-to-5 rule, kept). *Rejected:* a Global cap of 3 or
 1; Curses that tick each turn; never-removable Globals.
 
+**D71 — Lane relics, reward slots, the first Curse, Global duration.**
+(T, 2026-09-29.) A relic's detail view shows the lane (or lane family) it
+opens. Relics come, for now, from quests (designated rewards) and elites
+(a low chance of a random relic). The combat card reward is 2 random
+cards and 1 guaranteed lane card (T wrote "2 complete rares"; read as
+random). A FREE Global lasts 3 turns. Curses carry no extra discard cost
+or in-hand effect for now; the first Curse is a grey dead card, FREE:
+SACRIFICE 5, PAID: SACRIFICE 10, EXILE. Further Curses come from card
+sessions. Detail and open points in `plan/revamp/cards.md` and
+`plan/revamp/relics.md`.
+
 ## Open follow-ups
 
 **D1 status at a glance (2026-09-28, after #408).** Card and keyword

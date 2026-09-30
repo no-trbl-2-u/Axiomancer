@@ -83,10 +83,24 @@ a pick among Plans A/B/C, and they create no cards.
 **Locked (D68): relics open lanes.** The relics a player has equipped
 decide the reward pool for **combat** card rewards. Card rewards outside
 combat (events, shops, other non-combat sources) are not affected by
-relics. This replaces the stat-threshold idea. Still open: how a relic
-names its lane(s), how the first lane is opened at run start (a starting
-relic is the natural reading, not yet decided), the post-fight slot mix
-(T's random / random / lane-focused idea), and cards in several lanes.
+relics. This replaces the stat-threshold idea.
+
+**Locked (D71): how relics and rewards carry lanes.**
+
+- **A relic names its lane.** The relic's detail view shows the name of
+  the lane, or of a lane family if lanes end up grouped (how granular a
+  lane is has not been fixed).
+- **Relic sources, for now:** quests (a designated relic as the quest
+  reward) and elites (a low chance of a random relic).
+- **The combat card reward** offers 3 cards: 2 completely random (T's
+  words: "2 complete rares", read as random; confirm if rarity was
+  meant) and 1 guaranteed lane card, drawn from a lane an equipped relic
+  opens.
+
+**Still open:** how the first lane opens at run start (a starting relic
+is the natural reading; relics otherwise come only from quests and
+elites), what the guaranteed slot offers with no lane relic equipped,
+whether lanes group into families, and cards in several lanes.
 
 ## Card types — T's answers (2026-09-29, D69)
 
@@ -97,8 +111,8 @@ A type is a lifecycle rule. Five types:
 | **Attack** | Play, then discard |
 | **Skill** | Play, then discard |
 | **Spell** | Play, then discard |
-| **Global** | Stays in play and affects the combat (either side; there is no separate on-you / on-foe type). FREE: in play for a few turns. PAID: in play for the rest of combat. No cap, but each Global in play must be unique (T: an experiment, may change). Removed only by a card effect |
-| **Curse** | A dead card: it does nothing and holds a hand slot. Discarding it costs the player something; playing it PAID exiles it for the rest of combat but hurts the player. Later Curses may add "While in your hand:" effects; the first ones are dead only |
+| **Global** | Stays in play and affects the combat (either side; there is no separate on-you / on-foe type). FREE: in play for 3 turns. PAID: in play for the rest of combat. No cap, but each Global in play must be unique (T: an experiment, may change). Removed only by a card effect |
+| **Curse** | A dead card that holds a hand slot until played. No extra discard cost and no "While in your hand:" effect for now; later Curses may add them. The first Curse (D71) is below |
 
 **EXILE** is a shared keyword on a card line: the card does not go to the
 discard pile and is gone for the rest of combat. It is the word for every
@@ -113,9 +127,25 @@ hand for the next round; the hand refills up to `COMBAT_HAND_SIZE` (5).
 This is the current engine rule (`combat.engine.ts`, the boundary refill)
 and T confirmed it stays. So a Curse costs a card every round until cleared.
 
-**Still open:** the exact Curse discard cost and PAID hurt, the FREE
-Global duration. A trial lane session (self-sacrifice, codename
-SACRIFICE) paused at its first stage until the types were set.
+**The first Curse (D71, T's text).** Grey (any die), type Curse:
+
+| Line | Text |
+|---|---|
+| FREE | SACRIFICE 5 (lose 5 VITAE) |
+| PAID | SACRIFICE 10 (lose 10 VITAE). EXILE |
+
+Playing it FREE clears the hand slot for now but the card cycles back;
+playing it PAID pays double to be rid of it for the combat. Its name is
+not set. Further Curses are defined in card sessions.
+
+**SACRIFICE** (lose n VITAE, unscaled) is now carried by a real card, so
+it is a live keyword candidate rather than only the trial's codename.
+Still open: whether SACRIFICE can take the player below 1 VITAE; whether
+the scrap action (discard for Conviction) should cost extra on a Curse,
+since a free scrap would clear one at no cost.
+
+A trial lane session (self-sacrifice, codename SACRIFICE) paused at its
+first stage; the trial skill lives outside the repo until T adopts it.
 
 ## B4 — Card-rules inventory (loop; creates nothing)
 
@@ -141,7 +171,9 @@ T's call.
 
 T picks a plan (or splice) from the keyword/card revamp plans, ratifies its
 banner there, and runs the sessions. A fresh card agent is written at the
-first session. More card types beyond Attack/Skill/Spell are added here.
+first session. The Global and Curse types (D69–D71) are built here: the
+`CardType` union, Global play/expiry and uniqueness, the Curse slot, the
+EXILE and SACRIFICE keywords, and the first Curse.
 
 ## Card-session queue
 

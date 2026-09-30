@@ -85,5 +85,12 @@ Inputs for that session:
   lever, not a flat bonus.
 - Relic identity is `grantsSignature !== undefined` (plus the `relic-`
   prefix); a stat-only relic would need that discriminator changed.
+- **Relics open lanes (D68, D71).** Every relic B1 authors names the lane
+  (or lane family) it opens; its detail view shows that name. Equipped
+  relics decide the combat card-reward pool, so B1 and the card sessions
+  (B6) are coupled: a lane relic needs its lane's cards.
+- **Relic sources (D71), for now:** quests give designated relics;
+  elites have a low chance of dropping a random relic. How the run-start
+  lane is opened is still open (see `cards.md` → Deck model).
 - Relic reward sources: the hazard deck's "Bonus Relic"/"Shrine Cache" lie
   (they pay shillings) and go in R6; B1 can give relics a real source.
