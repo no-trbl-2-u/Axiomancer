@@ -260,8 +260,8 @@ describe('hazard screen — outcome and rewards', () => {
         expect(screen.getByText('GUARANTEED RARE · CHOOSE ONE OR SKIP')).toBeTruthy();
         expect(screen.getByTestId('hazard-rewards-skip')).toBeTruthy();
         // tooltips: tapping a boon chip reveals its explainer copy
-        fireEvent.press(screen.getByTestId('hazard-reward-cache'));
-        expect(screen.getByText(/sealed cache/)).toBeTruthy();
+        fireEvent.press(screen.getByTestId('hazard-reward-shillings'));
+        expect(screen.getAllByText(/\+12 shillings/).length).toBeGreaterThan(0);
         // confirm requires a pick when an offer exists
         fireEvent.press(screen.getByTestId('hazard-rewards-confirm'));
         expect(store.getState().hazard.session).not.toBeNull();

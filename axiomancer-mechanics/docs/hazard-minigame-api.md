@@ -37,10 +37,8 @@ import {
   HAZARD_REWARD_CARDS,
   HAZARD_REWARDS,
   HAZARD_CONSEQUENCES,
-  HAZARD_SUBQUESTS,
   HAZARD_LIBRARY,
   getHazardCardDef,
-  getHazardSubquestDef,
   getHazardDef,
   hazardStarterBag,
   decodeAcquiredCards,
@@ -63,15 +61,12 @@ import {
   applyHazardCard,
   discardHazardCard,
   resolveHazardRound,
-  hazardSubquestStatus,
-  hazardSubquestResults,
   continueHazardAfterResolve,
   hazardTierOf,
   acknowledgeHazardOutcome,
   claimHazardRewards,
   simulateHazard,
   // Phase 149 - Engagement mechanics
-  selectSubquestFromDraft,
   getHazardDeckIdentity,
   removeHazardDeckCard,
   // 2026-06-25 — Foretell resolution
@@ -79,8 +74,6 @@ import {
   classifyDeckFocus,
   calculateDeckScars,
   generateRewardOffer,
-  generateSubquestDraft,
-  chooseSubquest,
   generateDeckIdentity,
   removeCardFromDeck,
   type HazardSessionState,
@@ -90,15 +83,11 @@ import {
   type HazardDie,
   type HazardHandEntry,
   type HazardOutcome,
-  type HazardSubquestDef,
-  type HazardSubquestState,
-  type HazardQuestMetrics,
   // Phase 149 types
   type HazardDeckFocus,
   type HazardDeckScars,
   type HazardDeckIdentity,
   type HazardRewardOffer,
-  type HazardSubquestDraft,
 } from 'axiomancer-mechanics';
 ```
 
@@ -148,7 +137,7 @@ Mechanics owns:
 
 - `HazardDef`: scenario, safe/risk route definitions, thresholds, rewards, consequences.
 - `HazardCardDef`: action card identities, colors, rarity, top/free row, powered row, utility effects, salvage, keywords, expansion-card rules, and reward-card pool.
-- `HazardSessionState`: phase, route, hand, play area, dice, RNG state, marks, momentum, modifiers, subquests, outcome, and acquired reward options.
+- `HazardSessionState`: phase, route, hand, play area, dice, RNG state, marks, momentum, modifiers, outcome, and acquired reward options.
 - Deck persistence: acquired cards encoded in `GameState.flags` via `hazard-card:<id>:<n>`.
 - Balance evidence: `simulateHazard` and the hazard balance test matrix.
 
@@ -178,7 +167,6 @@ Mobile may derive labels and visual hints from mechanics data:
 - Use `HAZARD_KEYWORDS` for readable keyword explanations.
 - Use `hazardProjectedProgress(session)` to preview staged progress.
 - Use `hazardCardPowerColors(def)` / `dieCanPowerCard(die.kind, def)` to show legal die drops.
-- Use `hazardSubquestStatus(session, subquest)` and `hazardSubquestResults(session, final)` for optional objective display.
 
 Mobile must not maintain a parallel card library or hidden route-threshold table once the mechanics package version containing this surface is installed.
 
@@ -218,19 +206,6 @@ if (offer.removeCardOption.available) {
 
 // Execute deck card removal
 const updatedDeck = removeHazardDeckCard(currentDeck, chosenCardId);
-```
-
-### Sub-quest Drafting
-
-Players now choose from 2-3 candidate sub-quests before route selection:
-
-```ts
-// Access draft candidates from session state
-const candidates = session.subquestDraft.candidates;
-const chosen = session.subquestDraft.chosen;
-
-// Let player select a sub-quest
-const updatedSession = selectSubquestFromDraft(session, chosenSubquestId);
 ```
 
 ### Deck Scars

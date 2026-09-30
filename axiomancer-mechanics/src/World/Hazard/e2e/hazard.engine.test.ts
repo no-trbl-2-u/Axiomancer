@@ -20,7 +20,6 @@ import {
     hazardCardValue,
     hazardProjectedProgress,
     hazardStagedProgress,
-    hazardSubquestStatus,
     hazardTierOf,
     powerHazardCard,
     resolveHazardRound,
@@ -31,21 +30,20 @@ import {
 import {
     getHazardCardDef,
     getHazardDef,
+    HAZARD_CONSEQUENCES,
     HAZARD_CRACK_CARD,
     HAZARD_DECK,
     HAZARD_LIBRARY,
     HAZARD_REWARD_CARDS,
-    HAZARD_SUBQUESTS,
+    HAZARD_REWARDS,
 } from '../hazard.content';
 import { HAZARD_TUNING } from '../hazard.tuning';
 import { appendAcquiredCard, decodeAcquiredCards, hazardDeckBag, hazardStarterBag } from '../hazard.deck-flags';
 import {
-    EMPTY_HAZARD_QUEST_METRICS,
     HAZARD_DICE_COUNT,
     HAZARD_HAND_SIZE,
     HAZARD_MOMENTUM_CAP,
     type HazardHandEntry,
-    type HazardQuestMetrics,
     type HazardSessionState,
 } from '../hazard.types';
 
@@ -613,7 +611,7 @@ describe('outcome and rewards', () => {
         expect(o.canSkip).toBe(true);
         expect(o.offerCards).toHaveLength(3);
         expect(o.offerCards[0].rarity).toBe('rare');
-        expect(o.rewards).toEqual(['cache', 'relic', 'token']);
+        expect(o.rewards).toEqual(['riskShillings', 'vitae']);
         expect(o.penaltyVitae).toBe(0);
     });
 
@@ -622,10 +620,64 @@ describe('outcome and rewards', () => {
         const o = s.outcome!;
         expect(o.tier).toBe('failure');
         expect(o.offerCards).toEqual([]);
-        expect(o.consequences).toEqual(['minhp', 'maxhp', 'deadcard', 'curse']);
+        expect(o.consequences).toEqual(['minhp', 'maxhp', 'deadcard']);
         expect(o.canSkip).toBe(false);
         const def = getHazardDef(HAZARD_ID);
         expect(o.penaltyVitae).toBe(def.risk.penaltyVitae * 3);
+    });
+
+    /** Clears the rounds marked true (six SURE FOOTINGs) and fails the rest (a CRACK). */
+    function runPattern(route: 'safe' | 'risk', clears: boolean[]): HazardSessionState {
+        let s = playingSession(9, route);
+        clears.forEach((clear, round) => {
+            const hand = clear
+                ? Array.from({ length: 6 }, (_, i) => entry(`p${round}h${i}`, 'footing'))
+                : [entry(`p${round}h0`, HAZARD_CRACK_CARD.id)];
+            s = rig(s, { hand, play: [] });
+            for (const h of s.hand.slice()) s = stageHazardCard(s, h.uid, BAG);
+            s = resolveHazardRound(s);
+            s = continueHazardAfterResolve(s, BAG);
+        });
+        return s;
+    }
+
+    it.each([
+        ['safe', [true, true, true], ['shillings', 'vitae']],
+        ['safe', [true, true, false], ['vitae']],
+        ['safe', [true, false, false], ['vitae']],
+        ['safe', [false, false, false], []],
+        ['risk', [true, true, true], ['riskShillings', 'vitae']],
+        ['risk', [true, true, false], ['riskShillings']],
+        ['risk', [true, false, false], ['shillings']],
+        ['risk', [false, false, false], []],
+    ] as const)('spoils table: %s route, clears %j → %j', (route, clears, rewards) => {
+        const o = runPattern(route, [...clears]).outcome!;
+        expect(o.rewards).toEqual(rewards);
+    });
+
+    it.each([
+        [[true, true, true], []],
+        [[true, true, false], []],
+        [[true, false, false], ['maxhp', 'deadcard']],
+        [[false, false, false], ['minhp', 'maxhp', 'deadcard']],
+    ] as const)('consequences by rounds lost: clears %j → %j', (clears, consequences) => {
+        const o = runPattern('safe', [...clears]).outcome!;
+        expect(o.consequences).toEqual(consequences);
+    });
+
+    it('a one-loss run still pays the route penalty', () => {
+        const o = runPattern('safe', [true, true, false]).outcome!;
+        expect(o.consequences).toEqual([]);
+        expect(o.penaltyVitae).toBe(getHazardDef(HAZARD_ID).safe.penaltyVitae);
+    });
+
+    it('every reward and consequence chip states its own payout', () => {
+        expect(HAZARD_REWARDS.shillings.desc).toContain(`+${HAZARD_TUNING.rewards.shillings} shillings`);
+        expect(HAZARD_REWARDS.riskShillings.desc).toContain(`+${HAZARD_TUNING.rewards.riskShillings} shillings`);
+        expect(HAZARD_REWARDS.vitae.desc).toContain(`${HAZARD_TUNING.rewards.vitae} VITAE`);
+        expect(Object.keys(HAZARD_REWARDS).sort()).toEqual(['riskShillings', 'shillings', 'vitae']);
+        expect(Object.keys(HAZARD_CONSEQUENCES).sort()).toEqual(['deadcard', 'maxhp', 'minhp']);
+        for (const h of HAZARD_LIBRARY) expect(h.risk.rewardLabel).not.toMatch(/relic|cache/i);
     });
 
     it('single-win complete: no rare offers (0% rare on one win)', () => {
@@ -937,137 +989,6 @@ describe('enchant momentum (only when cards are played, never banked into carry)
         expect(s.resolveInfo?.cleared).toBe(false);
         expect(s.resolveInfo?.carryForce).toBe(0); // failed round → no carry
         void nF;
-    });
-});
-
-describe('sub-quests — selection', () => {
-    it('rolls exactly pickCount distinct objectives from the catalogue', () => {
-        const s = freshSession();
-        expect(s.subquests).toHaveLength(HAZARD_TUNING.subquests.pickCount);
-        const ids = s.subquests.map((q) => q.id);
-        expect(new Set(ids).size).toBe(ids.length); // distinct
-        for (const id of ids) {
-            expect(HAZARD_SUBQUESTS.some((q) => q.id === id)).toBe(true);
-        }
-    });
-
-    it('is deterministic for a fixed seed and independent of the card stream', () => {
-        const a = createHazardSession(42, BAG, HAZARD_ID);
-        const b = createHazardSession(42, BAG, HAZARD_ID);
-        expect(a.subquests).toEqual(b.subquests);
-        // The opening hand is unchanged by quest selection (independent stream).
-        expect(a.hand.map((h) => h.cardId)).toEqual(b.hand.map((h) => h.cardId));
-    });
-});
-
-describe('sub-quests — metric accrual', () => {
-    it('counts salvaged, committed, and powered cards plus final dice', () => {
-        let s = playingSession(5, 'safe');
-        s = rig(s, {
-            hand: [entry('h1', 'steps'), entry('h2', 'grip')],
-            play: [],
-            dice: [{ id: 'dr', kind: 'red', state: 'available' }],
-            questMetrics: { ...EMPTY_HAZARD_QUEST_METRICS, roundsCleared: [] },
-        });
-        s = discardHazardCard(s, 'h1'); // salvage one
-        expect(s.questMetrics.cardsSalvaged).toBe(1);
-        s = stageHazardCard(s, 'h2', BAG);
-        s = powerHazardCard(s, 'h2', 'dr', BAG);
-        s = resolveHazardRound(s);
-        expect(s.questMetrics.cardsCommitted).toBe(1);
-        expect(s.questMetrics.cardsPowered).toBe(1);
-        expect(s.questMetrics.roundsCleared[0]).toBe(s.resolveInfo?.cleared);
-        expect(s.questMetrics.handEmptied).toBe(true); // hand was emptied at resolve
-    });
-
-    it('tallies re-cast / convert effects for STORMCALLER', () => {
-        let s = playingSession(5, 'safe');
-        s = rig(s, { hand: [entry('p', 'pole')], play: [], dice: [], questMetrics: { ...EMPTY_HAZARD_QUEST_METRICS, roundsCleared: [] } });
-        s = stageHazardCard(s, 'p', BAG); // BALANCE POLE — recast
-        s = applyHazardCard(s, 'p', BAG);
-        expect(s.questMetrics.recastConvertApplied).toBe(1);
-    });
-});
-
-describe('sub-quests — status logic', () => {
-    const Q = HAZARD_TUNING.subquests;
-    const m = (over: Partial<HazardQuestMetrics> = {}): HazardQuestMetrics => ({
-        ...EMPTY_HAZARD_QUEST_METRICS,
-        roundsCleared: [],
-        ...over,
-    });
-
-    it('TRAVEL LIGHT fails the moment the cap is exceeded', () => {
-        expect(hazardSubquestStatus('travel-light', m({ cardsCommitted: Q.travelLightCap }), 3, false)).toBe('active');
-        expect(hazardSubquestStatus('travel-light', m({ cardsCommitted: Q.travelLightCap + 1 }), 3, false)).toBe('failed');
-        expect(hazardSubquestStatus('travel-light', m({ cardsCommitted: 5 }), 3, true)).toBe('done');
-    });
-
-    it('SURGE MASTER is done as soon as the count is hit, else fails at the end', () => {
-        expect(hazardSubquestStatus('surge-master', m({ cardsPowered: Q.surgeMasterCount }), 3, false)).toBe('done');
-        expect(hazardSubquestStatus('surge-master', m({ cardsPowered: 1 }), 3, false)).toBe('active');
-        expect(hazardSubquestStatus('surge-master', m({ cardsPowered: 1 }), 3, true)).toBe('failed');
-    });
-
-    it('FLAWLESS fails on the first lost round; FINISHER tracks the last', () => {
-        expect(hazardSubquestStatus('flawless', m({ roundsCleared: [true, false] }), 3, false)).toBe('failed');
-        expect(hazardSubquestStatus('flawless', m({ roundsCleared: [true, true, true] }), 3, true)).toBe('done');
-        expect(hazardSubquestStatus('finisher', m({ roundsCleared: [true, true, true] }), 3, true)).toBe('done');
-        expect(hazardSubquestStatus('finisher', m({ roundsCleared: [true, true, false] }), 3, true)).toBe('failed');
-    });
-
-    it('DICE IN RESERVE is judged from the recorded final dice count', () => {
-        expect(hazardSubquestStatus('dice-reserve', m({ finalDiceAvailable: Q.diceReserveCount }), 3, true)).toBe('done');
-        expect(hazardSubquestStatus('dice-reserve', m({ finalDiceAvailable: 1 }), 3, true)).toBe('failed');
-        expect(hazardSubquestStatus('dice-reserve', m({ finalDiceAvailable: -1 }), 3, false)).toBe('active');
-    });
-});
-
-describe('sub-quests — outcome payout', () => {
-    it('pays a completed objective on a survived crossing', () => {
-        // SCAVENGER (salvage 2) — rig the metric mid-run by salvaging, then clear.
-        let s = playingSession(7, 'safe');
-        s = rig(s, { subquests: [{ id: 'scavenger' }] });
-        for (let round = 0; round < 3; round++) {
-            const need = getHazardDef(HAZARD_ID).safe.thresholds[round];
-            const copies = Math.ceil(need / 5) + 1;
-            const hand = [
-                ...Array.from({ length: copies }, (_, i) => entry(`r${round}-${i}`, 'grip')),
-                entry(`s${round}-a`, 'steps'),
-                entry(`s${round}-b`, 'steps'),
-            ];
-            s = rig(s, { hand, play: [] });
-            if (round === 0) {
-                s = discardHazardCard(s, `s0-a`);
-                s = discardHazardCard(s, `s0-b`);
-            }
-            for (const h of s.hand.filter((h) => h.cardId === 'grip')) s = stageHazardCard(s, h.uid, BAG);
-            s = resolveHazardRound(s);
-            s = continueHazardAfterResolve(s, BAG);
-        }
-        expect(s.phase).toBe('outcome');
-        expect(s.outcome?.tier).toBe('perfect');
-        const scav = s.outcome?.subquests.find((q) => q.id === 'scavenger');
-        expect(scav?.status).toBe('done');
-        expect(s.outcome?.questVitae).toBe(HAZARD_TUNING.subquests.vitae);
-    });
-
-    it('forfeits objective bonuses on a total failure', () => {
-        let s = playingSession(7, 'safe');
-        s = rig(s, { subquests: [{ id: 'scavenger' }] });
-        for (let round = 0; round < 3; round++) {
-            // salvage 2 each round (quest satisfied) but never clear a round.
-            s = rig(s, { hand: [entry(`s${round}-a`, 'steps'), entry(`s${round}-b`, 'steps'), entry(`c${round}`, HAZARD_CRACK_CARD.id)], play: [] });
-            s = discardHazardCard(s, `s${round}-a`);
-            s = discardHazardCard(s, `s${round}-b`);
-            s = stageHazardCard(s, `c${round}`, BAG); // CRACK = 0 → round fails
-            s = resolveHazardRound(s);
-            s = continueHazardAfterResolve(s, BAG);
-        }
-        expect(s.outcome?.tier).toBe('failure');
-        const scav = s.outcome?.subquests.find((q) => q.id === 'scavenger');
-        expect(scav?.status).toBe('done'); // achieved…
-        expect(s.outcome?.questVitae).toBe(0); // …but forfeit on a failure
     });
 });
 

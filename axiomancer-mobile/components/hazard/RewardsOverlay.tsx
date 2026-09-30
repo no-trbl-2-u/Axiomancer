@@ -145,48 +145,17 @@ export function RewardsOverlay({
                                     />
                                 ))}
                             </View>
-                            {rewards.penaltyNote !== null && (
-                                <Text style={styles.penaltyNote}>{rewards.penaltyNote}</Text>
-                            )}
                         </>
-                    ) : (
+                    ) : rewards.penaltyNote === null ? (
                         <Text style={styles.flawless}>— flawless. no consequences befall you —</Text>
+                    ) : null}
+                    {/* The route penalty stands on its own: a one-loss run has
+                        a penalty and no consequence chip. */}
+                    {rewards.penaltyNote !== null && (
+                        <Text style={styles.penaltyNote} testID="hazard-rewards-penalty">{rewards.penaltyNote}</Text>
                     )}
                     <Text style={styles.tapHint}>TAP AN ICON TO READ IT</Text>
                 </View>
-
-                {/* sub-quest objectives ledger */}
-                {rewards.subquests.length > 0 && (
-                    <View style={styles.questLedger} testID="hazard-rewards-subquests">
-                        <Text style={[styles.ledgerLabel, { color: AXM.sulfur }]}>✷ OBJECTIVES</Text>
-                        {rewards.subquests.map((q) => {
-                            const tone =
-                                q.status === 'done' ? HZ.acid : q.status === 'failed' ? AXM.bone : AXM.parchment;
-                            return (
-                                <View key={q.id} style={styles.questLine} testID={`hazard-rewards-subquest-${q.id}`}>
-                                    <Text style={[styles.questMark, { color: tone }]}>
-                                        {q.status === 'done' ? '✓' : '✕'}
-                                    </Text>
-                                    <View style={{ flex: 1 }}>
-                                        <Text style={[styles.questLineName, { color: tone }]}>{q.name}</Text>
-                                        <Text style={styles.questLineDesc}>{q.desc}</Text>
-                                    </View>
-                                    <Text
-                                        style={[
-                                            styles.questLineReward,
-                                            { color: q.status === 'done' ? HZ.gold : AXM.ash },
-                                        ]}
-                                    >
-                                        {q.rewardLabel}
-                                    </Text>
-                                </View>
-                            );
-                        })}
-                        {rewards.questBonusNote !== null && (
-                            <Text style={styles.questBonus}>✦ {rewards.questBonusNote}</Text>
-                        )}
-                    </View>
-                )}
 
                 {/* card reward pick */}
                 <View style={{ paddingHorizontal: 12, paddingTop: 10 }}>
@@ -341,13 +310,6 @@ const useStyles = makeStyles((AXM) => ({
     tooltip: { position: 'absolute', bottom: '108%', left: -60, width: 168, zIndex: 5, backgroundColor: 'rgba(6,5,5,0.98)', borderWidth: 1, paddingHorizontal: 9, paddingVertical: 7 },
     tooltipName: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 1.4 },
     tooltipDesc: { fontFamily: FONTS.serif, fontSize: 13, color: AXM.parchment, lineHeight: 17, marginTop: 2 },
-    questLedger: { marginHorizontal: 14, marginTop: 10, paddingHorizontal: 12, paddingVertical: 10, backgroundColor: 'rgba(0,0,0,0.4)', borderWidth: 1, borderColor: AXM.ash },
-    questLine: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
-    questMark: { fontFamily: FONTS.gothic, fontSize: 14, width: 16, textAlign: 'center' },
-    questLineName: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 0.8 },
-    questLineDesc: { fontFamily: FONTS.mono, fontSize: 11, color: AXM.bone, letterSpacing: 0.2, marginTop: 1 },
-    questLineReward: { fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 0.4 },
-    questBonus: { fontFamily: FONTS.mono, fontSize: 12, color: HZ.gold, letterSpacing: 0.8, marginTop: 4 },
     reserveNote: { fontFamily: FONTS.mono, fontSize: 12, color: HZ.gold, letterSpacing: 0.8, marginTop: 8 },
     penaltyNote: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.blood, letterSpacing: 0.8, marginTop: 8 },
     flawless: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 13, color: HZ.acid, marginTop: 4 },

@@ -26,8 +26,6 @@ describe('hazardDeathCount', () => {
     it('ignores unrelated flag families', () => {
         const flags = [
             'hazard-scar:6',
-            'hazard-token-banked:abc',
-            'hazard-hexed',
             `${HAZARD_DEATH_FLAG_PREFIX}1700000000000`,
             'hazard-card:some-card',
         ];

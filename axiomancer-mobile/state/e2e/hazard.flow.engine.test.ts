@@ -14,7 +14,6 @@ import { createAppActions, type AppActions } from '@/state/actions';
 import { createAppStore, type AppStore } from '@/state/store';
 import { HAZARD_CRACK_CARD, getHazardDef } from '@mechanics';
 import { decodeAcquiredCards } from '@mechanics';
-import { HAZARD_HEXED_FLAG } from '@/state/hazard/store-actions';
 import type { HazardHandEntry, HazardSessionState } from '@mechanics';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 
@@ -107,7 +106,7 @@ describe('hazard store flow', () => {
         expect(session(store).dice[0].state).toBe('available');
     });
 
-    it('perfect run claim: vitae, shillings, token flag, picked card persists to deck flags, session clears, save fires', () => {
+    it('perfect run claim: vitae, shillings, picked card persists to deck flags, session clears, save fires', () => {
         const { store, actions } = makeStoreAndActions();
         const save = jest.spyOn(store.getState(), 'save');
         store.setState({ player: { ...store.getState().player, health: 5 } } as never);
@@ -132,20 +131,18 @@ describe('hazard store flow', () => {
 
         expect(result.applied).toBe(true);
         const state = store.getState() as unknown as GameState;
-        // safe perfect rewards: cache (+12 shillings) + vitae (+6) + token,
-        // plus 1 reserve die (d1; the hex never counts), plus any completed
-        // sub-quest bonuses (objectives roll per seed).
-        expect(state.player.currency).toBe(currencyBefore + 12 + outcome.questShillings);
-        expect(state.player.health).toBe(
-            Math.min(state.player.maxHealth, 5 + 6 + 1 + outcome.questVitae),
-        );
-        expect(state.flags.some((f) => f.startsWith('hazard-token-banked:'))).toBe(true);
+        // safe perfect rewards: shillings (+12) + vitae (+6), plus 1 reserve
+        // die (d1; the hex never counts). No flag records a reward.
+        expect(outcome.rewards).toEqual(['shillings', 'vitae']);
+        expect(state.player.currency).toBe(currencyBefore + 12);
+        expect(state.player.health).toBe(Math.min(state.player.maxHealth, 5 + 6 + 1));
+        expect(state.flags.some((f) => f.startsWith('hazard-token-banked:'))).toBe(false);
         expect(decodeAcquiredCards(state.flags)).toContain(offered.id);
         expect(store.getState().hazard.session).toBeNull();
         expect(save).toHaveBeenCalled();
     });
 
-    it('failure claim: penalty + consequences hit VITAE/max VITAE, CRACK joins the deck, hexed flag set, vitae floors at 1', () => {
+    it('failure claim: penalty + consequences hit VITAE/max VITAE, CRACK joins the deck, no hex flag, vitae floors at 1', () => {
         const { store, actions } = makeStoreAndActions();
         // Phase 130 — this case probes the maim-to-1 floor + scar, which
         // requires SURVIVING the crossing on exactly 1 VITAE. The −20 VITAE
@@ -172,28 +169,47 @@ describe('hazard store flow', () => {
         expect(state.player.maxHealth).toBe(maxBefore - 5); // Scarred
         expect(state.player.health).toBe(1); // maimed, never killed
         expect(decodeAcquiredCards(state.flags)).toContain(HAZARD_CRACK_CARD.id);
-        expect(state.flags).toContain(HAZARD_HEXED_FLAG);
+        expect(state.flags).not.toContain('hazard-hexed');
         expect(store.getState().hazard.session).toBeNull();
     });
 
-    it('tokens consequence clears previously banked token flags', () => {
+    it('risk route perfect claim pays the larger purse and the heal', () => {
         const { store, actions } = makeStoreAndActions();
-        store.setState({
-            flags: [...(store.getState() as unknown as GameState).flags, 'hazard-token-banked:test'],
-        } as never);
+        store.setState({ player: { ...store.getState().player, health: 5 } } as never);
+        const currencyBefore = (store.getState() as unknown as GameState).player.currency;
         actions.beginHazard({ seed: 9, hazardId: 'cracked-cliff' });
-        actions.selectHazardRoute('safe');
+        actions.selectHazardRoute('risk');
         actions.finishHazardRolling();
-        // win round 1 only → complete with 2 losses → maxhp+deadcard…
-        // 1 loss = tokens. Win rounds 1 and 2, lose round 3.
-        playRound(store, actions, 'grip', 6);
-        playRound(store, actions, 'grip', 6);
-        playRound(store, actions, null);
-        expect(session(store).outcome?.consequences).toEqual(['tokens']);
+        rigDice(store, []);
+        for (let r = 0; r < 3; r++) playRound(store, actions, 'footing', 6);
+        expect(session(store).outcome?.rewards).toEqual(['riskShillings', 'vitae']);
         actions.acknowledgeHazardOutcome();
         actions.claimHazardRewards(session(store).outcome!.offerCards[0].id);
         const state = store.getState() as unknown as GameState;
-        expect(state.flags.some((f) => f.startsWith('hazard-token-banked:'))).toBe(false);
+        expect(state.player.currency).toBe(currencyBefore + 32);
+        expect(state.player.health).toBe(Math.min(state.player.maxHealth, 5 + 6));
+    });
+
+    it('one lost round costs only the route penalty', () => {
+        const { store, actions } = makeStoreAndActions();
+        const before = (store.getState() as unknown as GameState).player;
+        actions.beginHazard({ seed: 9, hazardId: 'cracked-cliff' });
+        actions.selectHazardRoute('safe');
+        actions.finishHazardRolling();
+        rigDice(store, []);
+        playRound(store, actions, 'grip', 6);
+        playRound(store, actions, 'grip', 6);
+        playRound(store, actions, null);
+        const outcome = session(store).outcome!;
+        expect(outcome.consequences).toEqual([]);
+        expect(outcome.rewards).toEqual(['vitae']);
+        actions.acknowledgeHazardOutcome();
+        actions.claimHazardRewards(outcome.offerCards[0].id);
+        const state = store.getState() as unknown as GameState;
+        expect(state.player.maxHealth).toBe(before.maxHealth);
+        expect(state.player.health).toBe(
+            Math.min(before.maxHealth, before.health + 6 - getHazardDef('cracked-cliff').safe.penaltyVitae),
+        );
     });
 
     it('acquired cards from previous hazards appear in the next session draw bag', () => {
@@ -249,10 +265,6 @@ describe('hazard store flow', () => {
                         vitaeCost: 0,
                         vitaeRestore: 4,
                         bountyShillings: 8,
-                        subquests: [],
-                        questShillings: 0,
-                        questVitae: 0,
-                        questTokens: 0,
                     },
                 },
                 tutorial: false,

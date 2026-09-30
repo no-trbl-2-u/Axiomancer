@@ -21,24 +21,19 @@
 import {
     getHazardCardDef,
     getHazardDef,
-    getHazardSubquestDef,
     HAZARD_CRACK_CARD,
     HAZARD_DIE_FACES,
     HAZARD_REWARD_CARDS,
-    HAZARD_SUBQUESTS,
 } from './hazard.content';
 import {
     generateRewardOffer,
-    generateSubquestDraft,
     generateDeckIdentity,
     removeCardFromDeck,
 } from './hazard.engagement';
-import { HAZARD_TUNING } from './hazard.tuning';
 import { nextInt, seedRng, shuffle, type HazardRngState } from './hazard.rng';
-import { branchMinigameSeed, type SeedInput } from '../seed';
+import type { SeedInput } from '../seed';
 import {
     EMPTY_HAZARD_MODIFIERS,
-    EMPTY_HAZARD_QUEST_METRICS,
     HAZARD_DICE_COUNT,
     HAZARD_HAND_SIZE,
     HAZARD_MOMENTUM_CAP,
@@ -53,14 +48,10 @@ import {
     type HazardOutcome,
     type HazardOutcomeTier,
     type HazardProgressKey,
-    type HazardQuestMetrics,
     type HazardResolveInfo,
     type HazardRewardId,
     type HazardRouteKey,
     type HazardSessionState,
-    type HazardSubquestResult,
-    type HazardSubquestState,
-    type HazardSubquestStatus,
 } from './hazard.types';
 
 /** Card colours (besides the wild gold die) whose dice can power `def`. */
@@ -244,20 +235,6 @@ function hazardProjectedProgressRaw(s: HazardSessionState): { force: number; esc
 // ---------------------------------------------------------------------------
 
 /**
- * Rolls the hazard's sub-quests off an INDEPENDENT seeded stream (branched
- * from the session seed) so objective selection never perturbs the card /
- * dice RNG — the play stream stays byte-for-byte identical to a quest-less
- * session, keeping the balance sim and deterministic tests stable.
- */
-function rollSubquests(seed: SeedInput): HazardSubquestState[] {
-    const rng = seedRng(branchMinigameSeed(seed, 0x5175e57));
-    const ids = HAZARD_SUBQUESTS.map((q) => q.id);
-    const shuffled = shuffle(rng, ids).value;
-    const n = Math.min(HAZARD_TUNING.subquests.pickCount, shuffled.length);
-    return shuffled.slice(0, n).map((id) => ({ id }));
-}
-
-/**
  * Creates a fresh session in `route-select`: opening hand drawn (the
  * player sees their 5 cards BEFORE committing to a route), dice not
  * yet cast.
@@ -286,9 +263,6 @@ export function createHazardSession(
         dice: [],
         progressBase: { force: 0, escape: 0 },
         modifiers: { ...EMPTY_HAZARD_MODIFIERS },
-        subquests: rollSubquests(seed),
-        subquestDraft: generateSubquestDraft(HAZARD_SUBQUESTS, rng),
-        questMetrics: { ...EMPTY_HAZARD_QUEST_METRICS, roundsCleared: [] },
         goldVow: null,
         momentumCap: HAZARD_MOMENTUM_CAP,
         vitaeCost: 0,
@@ -696,16 +670,6 @@ export function applyHazardCard(
         if (def.effect) ns = applyUtilityEffect(ns, def, card.dieId !== null, deckBag);
         // Riders fire alongside the main effect (SAINT'S PATIENCE: draw + cap).
         if (def.momentumBonus) ns = { ...ns, momentumCap: ns.momentumCap + def.momentumBonus };
-        // STORMCALLER sub-quest: tally re-cast / convert effects as they fire.
-        if (def.effect === 'recast' || def.effect === 'convert') {
-            ns = {
-                ...ns,
-                questMetrics: {
-                    ...ns.questMetrics,
-                    recastConvertApplied: ns.questMetrics.recastConvertApplied + 1,
-                },
-            };
-        }
         // JEOPARDY: bonus progress when ≥1 round mark is already 'X'.
         const inJeopardy = ns.marks.some((m) => m === 'X');
         if (inJeopardy) {
@@ -748,7 +712,6 @@ export function discardHazardCard(s: HazardSessionState, uid: string): HazardSes
         ...s,
         hand: s.hand.filter((h) => h.uid !== uid),
         discardPile: [...s.discardPile, card.cardId],
-        questMetrics: { ...s.questMetrics, cardsSalvaged: s.questMetrics.cardsSalvaged + 1 },
     };
     const def = getHazardCardDef(card.cardId);
     if (def.salvage?.type === 'progress') {
@@ -842,22 +805,7 @@ export function resolveHazardRound(s: HazardSessionState, deckBag: readonly stri
     const marks = s.marks.slice();
     marks[s.round - 1] = info.cleared ? 'O' : 'X';
 
-    // Accrue sub-quest metrics for this resolved round (display + outcome).
-    const roundsCleared = s.questMetrics.roundsCleared.slice();
-    roundsCleared[s.round - 1] = info.cleared;
-    const questMetrics: typeof s.questMetrics = {
-        ...s.questMetrics,
-        cardsCommitted: s.questMetrics.cardsCommitted + s.play.length,
-        cardsPowered: s.questMetrics.cardsPowered + s.play.filter((e) => e.dieId !== null).length,
-        handEmptied: s.questMetrics.handEmptied || s.hand.length === 0,
-        momentumCarries:
-            s.questMetrics.momentumCarries + (info.carryForce + info.carryEscape > 0 ? 1 : 0),
-        roundsCleared,
-        finalDiceAvailable: lastRound
-            ? s.dice.filter((d) => d.kind !== 'hex' && d.state === 'available').length
-            : s.questMetrics.finalDiceAvailable,
-    };
-    return { ...s, phase: 'resolve-flash', marks, resolveInfo: info, questMetrics };
+    return { ...s, phase: 'resolve-flash', marks, resolveInfo: info };
 }
 
 // ---------------------------------------------------------------------------
@@ -869,70 +817,6 @@ export function hazardTierOf(marks: readonly HazardMark[]): HazardOutcomeTier {
     if (wins === marks.length) return 'perfect';
     if (wins >= 1) return 'complete';
     return 'failure';
-}
-
-/**
- * Judges a single sub-quest against the rolling metrics. `final` is true once
- * the hazard is over (outcome/rewards) — only then can a "reach N by the end"
- * objective be declared failed; mid-hazard such an objective stays `active`
- * (still reachable). Invariant breaks (hand emptied, cap exceeded, a round
- * lost) flip to `failed` the moment they happen, so the board can grey them out.
- */
-export function hazardSubquestStatus(
-    id: string,
-    metrics: HazardQuestMetrics,
-    totalRounds: number,
-    final: boolean,
-): HazardSubquestStatus {
-    const Q = HAZARD_TUNING.subquests;
-    const cleared = metrics.roundsCleared;
-    const reachable = (met: boolean): HazardSubquestStatus => (met ? 'done' : final ? 'failed' : 'active');
-    switch (id) {
-        case 'travel-light':
-            if (metrics.cardsCommitted > Q.travelLightCap) return 'failed';
-            return final ? 'done' : 'active';
-        case 'dice-reserve':
-            if (!final) return 'active';
-            return metrics.finalDiceAvailable >= Q.diceReserveCount ? 'done' : 'failed';
-        case 'steady-hand':
-            if (metrics.handEmptied) return 'failed';
-            return final ? 'done' : 'active';
-        case 'flawless':
-            if (cleared.some((c) => c === false)) return 'failed';
-            return final ? 'done' : 'active';
-        case 'surge-master':
-            return reachable(metrics.cardsPowered >= Q.surgeMasterCount);
-        case 'stormcaller':
-            return reachable(metrics.recastConvertApplied >= Q.stormcallerCount);
-        case 'scavenger':
-            return reachable(metrics.cardsSalvaged >= Q.scavengerCount);
-        case 'momentum':
-            return reachable(metrics.momentumCarries >= 1);
-        case 'fast-start':
-            if (cleared[0] === true) return 'done';
-            if (cleared[0] === false) return 'failed';
-            return 'active';
-        case 'finisher':
-            if (cleared[totalRounds - 1] === true) return 'done';
-            if (cleared[totalRounds - 1] === false) return 'failed';
-            return final ? 'failed' : 'active';
-        default:
-            return 'active';
-    }
-}
-
-/** Judges every rolled sub-quest for the rewards ledger. */
-export function hazardSubquestResults(s: HazardSessionState, final: boolean): HazardSubquestResult[] {
-    return s.subquests.map((q) => {
-        const def = getHazardSubquestDef(q.id);
-        return {
-            id: q.id,
-            name: def.name,
-            desc: def.desc,
-            status: hazardSubquestStatus(q.id, s.questMetrics, s.totalRounds, final),
-            reward: def.reward,
-        };
-    });
 }
 
 function rollRewardCards(
@@ -993,12 +877,27 @@ function ensureNotRare(card: HazardCardDef): HazardCardDef {
     return alternatives[0] ?? card; // Fallback to original if no alternatives
 }
 
+/** Consequences by rounds lost. One loss costs only the route penalty. */
 const CONSEQUENCES_BY_LOSS: Record<number, HazardConsequenceId[]> = {
     0: [],
-    1: ['tokens'],
+    1: [],
     2: ['maxhp', 'deadcard'],
-    3: ['minhp', 'maxhp', 'deadcard', 'curse'],
+    3: ['minhp', 'maxhp', 'deadcard'],
 };
+
+/**
+ * The spoils table. Every reward pays exactly what its chip says: the risk
+ * route's premium is the larger purse (`riskShillings`), and a perfect run
+ * adds a heal on either route.
+ */
+function rewardsFor(route: HazardRouteKey, tier: HazardOutcomeTier, wins: number): HazardRewardId[] {
+    if (tier === 'failure') return [];
+    if (route === 'risk') {
+        if (tier === 'perfect') return ['riskShillings', 'vitae'];
+        return wins >= 2 ? ['riskShillings'] : ['shillings'];
+    }
+    return tier === 'perfect' ? ['shillings', 'vitae'] : ['vitae'];
+}
 
 function computeOutcome(s: HazardSessionState, deckBag: readonly string[] = []): { outcome: HazardOutcome; rng: HazardRngState } {
     const def = getHazardDef(s.hazardId);
@@ -1006,12 +905,7 @@ function computeOutcome(s: HazardSessionState, deckBag: readonly string[] = []):
     const losses = s.marks.length - wins;
     const tier = hazardTierOf(s.marks);
     const routeKey = s.route ?? 'safe';
-    let rewards: HazardRewardId[] = [];
-    if (tier === 'perfect') {
-        rewards = routeKey === 'risk' ? ['cache', 'relic', 'token'] : ['cache', 'vitae', 'token'];
-    } else if (tier === 'complete') {
-        rewards = routeKey === 'risk' ? (wins >= 2 ? ['cache', 'relic'] : ['cache']) : ['vitae'];
-    }
+    const rewards = rewardsFor(routeKey, tier, wins);
     const consequences = CONSEQUENCES_BY_LOSS[Math.min(losses, 3)] ?? [];
     let offerCards: HazardCardDef[] = [];
     let rng = s.rng;
@@ -1025,21 +919,7 @@ function computeOutcome(s: HazardSessionState, deckBag: readonly string[] = []):
             ? 0
             : s.dice.filter((d) => d.kind !== 'hex' && d.state === 'available').length;
     const route = routeKey === 'risk' ? def.risk : def.safe;
-    // Sub-quests: judged at the end; bonuses pay out only on a survived
-    // crossing (a total failure forfeits them along with the spoils).
-    const subquests = hazardSubquestResults(s, true);
     const survived = tier !== 'failure';
-    let questShillings = 0;
-    let questVitae = 0;
-    let questTokens = 0;
-    if (survived) {
-        for (const q of subquests) {
-            if (q.status !== 'done') continue;
-            if (q.reward.kind === 'shillings') questShillings += q.reward.amount;
-            else if (q.reward.kind === 'vitae') questVitae += q.reward.amount;
-            else if (q.reward.kind === 'token') questTokens += q.reward.amount;
-        }
-    }
     const outcome: HazardOutcome = {
         tier,
         wins,
@@ -1053,14 +933,10 @@ function computeOutcome(s: HazardSessionState, deckBag: readonly string[] = []):
         penaltyVitae: Math.max(0, route.penaltyVitae * losses - s.wardPenaltyReduction),
         vitaeCost: s.vitaeCost,
         // MEND and BOUNTY pay only on a survived crossing (a total
-        // failure forfeits them, like the sub-quest bonuses); SACRIFICE
+        // failure forfeits them); SACRIFICE
         // is charged regardless — the blood was already spent.
         vitaeRestore: survived ? s.vitaeRestore : 0,
         bountyShillings: survived ? s.bountyShillings : 0,
-        subquests,
-        questShillings,
-        questVitae,
-        questTokens,
     };
     return { outcome, rng };
 }
@@ -1189,27 +1065,6 @@ export function confirmHazardForetell(
 // ---------------------------------------------------------------------------
 // Phase 149 — Engagement functions
 // ---------------------------------------------------------------------------
-
-/**
- * Select a sub-quest from the draft candidates.
- */
-export function selectSubquestFromDraft(
-    s: HazardSessionState,
-    subquestId: string
-): HazardSessionState {
-    if (s.phase !== 'route-select') return s;
-    
-    const chosen = s.subquestDraft.candidates.find(sq => sq.id === subquestId);
-    if (!chosen) return s;
-    
-    return {
-        ...s,
-        subquestDraft: {
-            ...s.subquestDraft,
-            chosen,
-        }
-    };
-}
 
 /**
  * Generate deck identity summary for the current persistent deck.

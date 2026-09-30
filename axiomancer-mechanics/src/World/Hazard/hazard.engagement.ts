@@ -1,7 +1,7 @@
 /**
  * Hazard Minigame — Phase 149 engagement mechanics.
  *
- * Deck focus classification, three-choice rewards, sub-quest drafting,
+ * Deck focus classification, three-choice rewards,
  * deck scars tracking, and identity summaries. Makes Hazard deck growth
  * and failure memory readable, strategic, and player-owned.
  */
@@ -15,8 +15,6 @@ import type {
     HazardDeckIdentity,
     HazardDeckScars,
     HazardRewardOffer,
-    HazardSubquestDraft,
-    HazardSubquestDef,
 } from './hazard.types';
 
 // ---------------------------------------------------------------------------
@@ -160,43 +158,6 @@ function isCardAlignedWithFocus(card: HazardCardDef, focus: HazardDeckFocus): bo
         case 'mixed':
             return true; // All cards align with mixed focus
     }
-}
-
-// ---------------------------------------------------------------------------
-// Sub-quest Drafting
-// ---------------------------------------------------------------------------
-
-/**
- * Generate 2-3 candidate sub-quests for player choice before route selection.
- * Preserves deterministic seeding while offering strategic choice.
- */
-export function generateSubquestDraft(
-    availableSubquests: readonly HazardSubquestDef[],
-    rngState: HazardRngState,
-    count: number = 3
-): HazardSubquestDraft {
-    const shuffled = shuffle(rngState, availableSubquests);
-    const candidates = shuffled.value.slice(0, Math.min(count, availableSubquests.length));
-    
-    return {
-        candidates,
-        chosen: null,
-    };
-}
-
-/**
- * Select a sub-quest from the draft candidates.
- */
-export function chooseSubquest(
-    draft: HazardSubquestDraft,
-    chosenId: string
-): HazardSubquestDraft {
-    const chosen = draft.candidates.find(sq => sq.id === chosenId) ?? null;
-    
-    return {
-        ...draft,
-        chosen,
-    };
 }
 
 // ---------------------------------------------------------------------------

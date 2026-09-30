@@ -84,8 +84,6 @@ const mockRewardsVM: HazardRewardsVM = {
         sacrificeNote: null,
         mendNote: null,
         bountyNote: null,
-        subquests: [],
-        questBonusNote: null,
 };
 
 describe('RewardsOverlay', () => {
@@ -114,6 +112,20 @@ describe('RewardsOverlay', () => {
     it('renders consequence items', () => {
         const { getByLabelText } = render(<RewardsOverlay {...mockProps} />);
         expect(getByLabelText('-3 VITAE. Blood cost')).toBeTruthy();
+    });
+
+    it('shows the route penalty on a run with no consequence chip, and no flawless line', () => {
+        const rewards = { ...mockRewardsVM, consequences: [], consequencesLabel: null, penaltyNote: '−2 VITAE — route penalty' };
+        const { getByTestId, queryByText } = render(<RewardsOverlay rewards={rewards} onConfirm={jest.fn()} />);
+        expect(getByTestId('hazard-rewards-penalty')).toBeTruthy();
+        expect(queryByText(/flawless/)).toBeNull();
+    });
+
+    it('shows the flawless line only with no consequence and no penalty', () => {
+        const rewards = { ...mockRewardsVM, consequences: [], consequencesLabel: null, penaltyNote: null };
+        const { getByText, queryByTestId } = render(<RewardsOverlay rewards={rewards} onConfirm={jest.fn()} />);
+        expect(getByText(/flawless/)).toBeTruthy();
+        expect(queryByTestId('hazard-rewards-penalty')).toBeNull();
     });
 
     it('renders card offers', () => {

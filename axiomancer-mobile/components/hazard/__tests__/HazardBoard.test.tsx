@@ -117,7 +117,6 @@ const mockHazardViewModel: HazardViewModel = {
     meterDetail: null,
     momentumNote: null,
     enchantments: [],
-    subquests: [],
     goldVowNote: null,
     rewards: null,
     foretellPending: null,

@@ -43,14 +43,6 @@ export interface HazardRewardOffer {
     };
 }
 
-/** Sub-quest drafting choice before route selection. */
-export interface HazardSubquestDraft {
-    /** 2-3 candidate sub-quests to choose from. */
-    candidates: HazardSubquestDef[];
-    /** Player's chosen sub-quest (null = none selected yet). */
-    chosen: HazardSubquestDef | null;
-}
-
 /** Deck identity summary for post-Hazard reporting. */
 export interface HazardDeckIdentity {
     focus: HazardDeckFocus;
@@ -361,79 +353,6 @@ export interface HazardHandEntry {
 }
 
 // ---------------------------------------------------------------------------
-// Sub-quests (optional per-hazard objectives)
-// ---------------------------------------------------------------------------
-
-/** What a completed sub-quest pays out (on a survived crossing). */
-export type HazardSubquestRewardKind = 'shillings' | 'vitae' | 'token';
-
-export interface HazardSubquestReward {
-    kind: HazardSubquestRewardKind;
-    amount: number;
-}
-
-/** A sub-quest definition in the catalogue. Pure data — the engine owns the
- *  per-id evaluation logic (see `hazardSubquestStatus`). */
-export interface HazardSubquestDef {
-    id: string;
-    name: string;
-    /** Short objective copy, e.g. "Salvage 2+ cards to the bin." */
-    desc: string;
-    reward: HazardSubquestReward;
-}
-
-export type HazardSubquestStatus = 'active' | 'done' | 'failed';
-
-/** The rolled set member tracked on the session. */
-export interface HazardSubquestState {
-    id: string;
-}
-
-/**
- * Rolling metrics the engine accrues so sub-quests can be judged without the
- * objectives reaching into raw play state. Updated at the resolve / discard /
- * apply seams; never alters game rules or progress.
- */
-export interface HazardQuestMetrics {
-    /** Cards committed into play across the whole hazard (counted at resolve). */
-    cardsCommitted: number;
-    /** Committed cards that carried a die (powered). */
-    cardsPowered: number;
-    /** Cards dragged to the bin for salvage. */
-    cardsSalvaged: number;
-    /** Re-cast / convert utility effects fired. */
-    recastConvertApplied: number;
-    /** Rounds that carried momentum (>0 surplus) into the next round. */
-    momentumCarries: number;
-    /** True once the hand was emptied at a round resolve (invariant break). */
-    handEmptied: boolean;
-    /** Per-round cleared flag, set as each round resolves. */
-    roundsCleared: boolean[];
-    /** Non-hex dice still available at the final resolve (−1 until recorded). */
-    finalDiceAvailable: number;
-}
-
-export const EMPTY_HAZARD_QUEST_METRICS: HazardQuestMetrics = Object.freeze({
-    cardsCommitted: 0,
-    cardsPowered: 0,
-    cardsSalvaged: 0,
-    recastConvertApplied: 0,
-    momentumCarries: 0,
-    handEmptied: false,
-    roundsCleared: [],
-    finalDiceAvailable: -1,
-});
-
-/** A judged sub-quest at outcome time (for the rewards ledger). */
-export interface HazardSubquestResult {
-    id: string;
-    name: string;
-    desc: string;
-    status: HazardSubquestStatus;
-    reward: HazardSubquestReward;
-}
-
-// ---------------------------------------------------------------------------
 // Routes & hazards
 // ---------------------------------------------------------------------------
 
@@ -510,9 +429,9 @@ export interface HazardResolveInfo {
 
 export type HazardOutcomeTier = 'perfect' | 'complete' | 'failure';
 
-export type HazardRewardId = 'cache' | 'relic' | 'vitae' | 'token';
+export type HazardRewardId = 'shillings' | 'riskShillings' | 'vitae';
 
-export type HazardConsequenceId = 'tokens' | 'deadcard' | 'maxhp' | 'minhp' | 'curse';
+export type HazardConsequenceId = 'deadcard' | 'maxhp' | 'minhp';
 
 export interface HazardOutcome {
     tier: HazardOutcomeTier;
@@ -540,14 +459,6 @@ export interface HazardOutcome {
     vitaeRestore: number;
     /** Shillings banked by BOUNTY cards (0 on a failure), applied at claim. */
     bountyShillings: number;
-    /** Rolled sub-quests, each judged done/failed/active at outcome. */
-    subquests: HazardSubquestResult[];
-    /** Bonus shillings from completed sub-quests (0 on a failure). */
-    questShillings: number;
-    /** Bonus vitae from completed sub-quests (0 on a failure). */
-    questVitae: number;
-    /** Bonus paradox tokens from completed sub-quests (0 on a failure). */
-    questTokens: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -582,12 +493,6 @@ export interface HazardSessionState {
     progressBase: { force: number; escape: number };
     /** Persistent enchantment modifiers (auras) — rest-of-hazard. */
     modifiers: HazardModifiers;
-    /** Sub-quests rolled for this hazard (objective ids). */
-    subquests: HazardSubquestState[];
-    /** Sub-quest drafting state (Phase 149). */
-    subquestDraft: HazardSubquestDraft;
-    /** Rolling metrics that judge the sub-quests. */
-    questMetrics: HazardQuestMetrics;
     /** Primed one-shot bonus consumed by the next gold die used to power. */
     goldVow: { force: number; escape: number } | null;
     /** Per-session momentum cap (starts at HAZARD_MOMENTUM_CAP; cards raise it). */

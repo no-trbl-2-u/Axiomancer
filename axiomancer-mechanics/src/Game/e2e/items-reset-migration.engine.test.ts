@@ -35,7 +35,7 @@ const ids = (items: { id: string }[]): string[] => items.map(i => i.id);
 
 describe('migrate v29 → v30 (THE REVAMP R5 / D49: healing potions only)', () => {
     it('lands at the current version', () => {
-        expect(GAME_STATE_VERSION).toBe(30);
+        expect(GAME_STATE_VERSION).toBeGreaterThanOrEqual(30);
         expect(hop30(v29WithRetiredItems()).version).toBe(30);
     });
 

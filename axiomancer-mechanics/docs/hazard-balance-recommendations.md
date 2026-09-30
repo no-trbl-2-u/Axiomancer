@@ -36,9 +36,6 @@ Two companion changes shipped alongside:
   is PLAYED. Momentum carry is taken from the raw (un-enchanted) surplus, so an
   aura is no longer banked into the carry and re-counted in later rounds'
   totals. (`engine.ts` `hazardProjectedProgressRaw`.)
-- **Sub-quests** — each hazard rolls 3 of 10 optional objectives
-  (`HAZARD_SUBQUESTS`) that pay a bonus on a survived crossing. See the
-  divergence doc's "Sub-quests" section.
 
 ---
 

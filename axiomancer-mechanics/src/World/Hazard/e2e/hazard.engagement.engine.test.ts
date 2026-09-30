@@ -1,7 +1,7 @@
 /**
  * Hazard Engagement (Phase 149) — hermetic e2e tests.
  *
- * Tests deck focus classification, three-choice rewards, sub-quest drafting,
+ * Tests deck focus classification, three-choice rewards,
  * deck scars tracking, and deck identity summaries. Validates all acceptance
  * criteria from the phase brief.
  */
@@ -11,16 +11,11 @@ import {
     classifyDeckFocus,
     calculateDeckScars,
     generateRewardOffer,
-    generateSubquestDraft,
-    chooseSubquest,
     generateDeckIdentity,
     removeCardFromDeck,
-    createHazardSession,
-    selectSubquestFromDraft,
     getHazardDeckIdentity,
     removeHazardDeckCard,
     seedRng,
-    HAZARD_SUBQUESTS,
 } from '../index';
 
 describe('Hazard Engagement (Phase 149)', () => {
@@ -139,59 +134,6 @@ describe('Hazard Engagement (Phase 149)', () => {
         });
     });
 
-    describe('Sub-quest Drafting', () => {
-        it('generates candidate sub-quests for choice', () => {
-            const rng = seedRng('test-seed');
-            const draft = generateSubquestDraft(HAZARD_SUBQUESTS, rng, 3);
-            
-            expect(draft.candidates.length).toBe(3);
-            expect(draft.chosen).toBe(null);
-            
-            // Ensure all candidates are unique
-            const candidateIds = draft.candidates.map(sq => sq.id);
-            const uniqueIds = new Set(candidateIds);
-            expect(uniqueIds.size).toBe(candidateIds.length);
-        });
-
-        it('limits candidates to available sub-quests', () => {
-            const rng = seedRng('test-seed');
-            const limitedSubquests = HAZARD_SUBQUESTS.slice(0, 2);
-            const draft = generateSubquestDraft(limitedSubquests, rng, 5);
-            
-            expect(draft.candidates.length).toBe(2); // Limited by available
-        });
-
-        it('chooseSubquest — stamps the chosen candidate by id', () => {
-            const rng = seedRng('test-seed');
-            const draft = generateSubquestDraft(HAZARD_SUBQUESTS, rng, 3);
-            const candidateId = draft.candidates[0].id;
-
-            const result = chooseSubquest(draft, candidateId);
-
-            expect(result.chosen).not.toBeNull();
-            expect(result.chosen!.id).toBe(candidateId);
-        });
-
-        it('chooseSubquest — preserves candidates list unchanged', () => {
-            const rng = seedRng('test-seed');
-            const draft = generateSubquestDraft(HAZARD_SUBQUESTS, rng, 3);
-
-            const result = chooseSubquest(draft, draft.candidates[2].id);
-
-            expect(result.candidates).toEqual(draft.candidates);
-            expect(result.candidates.length).toBe(3);
-        });
-
-        it('chooseSubquest — unknown id sets chosen to null', () => {
-            const rng = seedRng('test-seed');
-            const draft = generateSubquestDraft(HAZARD_SUBQUESTS, rng, 3);
-
-            const result = chooseSubquest(draft, 'not-a-real-subquest-id');
-
-            expect(result.chosen).toBeNull();
-        });
-    });
-
     describe('Deck Identity Summary', () => {
         it('generates comprehensive deck identity', () => {
             const mixedDeck = ['steps', 'scram', 'oath', 'windread', 'crack'];
@@ -255,41 +197,6 @@ describe('Hazard Engagement (Phase 149)', () => {
     });
 
     describe('Engine Integration', () => {
-        it('creates session with sub-quest draft initialized', () => {
-            const seed = 'test-seed-123';
-            const deckBag = ['steps', 'scram', 'haul', 'grip', 'leap'];
-            const session = createHazardSession(seed, deckBag, 'cracked-cliff');
-            
-            expect(session.subquestDraft).toBeDefined();
-            expect(session.subquestDraft.candidates.length).toBeGreaterThan(0);
-            expect(session.subquestDraft.chosen).toBe(null);
-        });
-
-        it('allows sub-quest selection from draft', () => {
-            const seed = 'test-seed-123';
-            const deckBag = ['steps', 'scram', 'haul'];
-            const session = createHazardSession(seed, deckBag, 'cracked-cliff');
-            const candidateId = session.subquestDraft.candidates[0].id;
-            
-            const updatedSession = selectSubquestFromDraft(session, candidateId);
-            
-            expect(updatedSession.subquestDraft.chosen).toBeDefined();
-            expect(updatedSession.subquestDraft.chosen!.id).toBe(candidateId);
-        });
-
-        it('rejects sub-quest selection when not in route-select phase', () => {
-            const seed = 'test-seed-123';
-            const deckBag = ['steps', 'scram', 'haul'];
-            const session = createHazardSession(seed, deckBag, 'cracked-cliff');
-            const candidateId = session.subquestDraft.candidates[0].id;
-            
-            // Change phase away from route-select
-            const playingSession = { ...session, phase: 'playing' as const };
-            const unchangedSession = selectSubquestFromDraft(playingSession, candidateId);
-            
-            expect(unchangedSession.subquestDraft.chosen).toBe(null);
-        });
-
         it('generates deck identity from persistent deck', () => {
             const deckCardIds = ['steps', 'scram', 'oath', 'windread'];
             const identity = getHazardDeckIdentity(deckCardIds);
@@ -353,31 +260,6 @@ describe('Hazard Engagement (Phase 149)', () => {
             
             expect(scars.crackCount).toBe(2);
             expect(scars.scarRatio).toBe(0.5);
-        });
-
-        it('sub-quest drafting lets player choose from candidates', () => {
-            const rng = seedRng('test-seed');
-            const draft = generateSubquestDraft(HAZARD_SUBQUESTS, rng, 3);
-            
-            expect(draft.candidates.length).toBe(3);
-            expect(draft.chosen).toBe(null);
-            
-            // Player can choose any candidate
-            const candidateId = draft.candidates[1].id;
-            const updatedDraft = { ...draft, chosen: draft.candidates[1] };
-            expect(updatedDraft.chosen!.id).toBe(candidateId);
-        });
-
-        it('chooseSubquest stamps chosen candidate onto draft', () => {
-            const rng = seedRng('test-seed');
-            const draft = generateSubquestDraft(HAZARD_SUBQUESTS, rng, 3);
-            const candidateId = draft.candidates[1].id;
-
-            const chosen = chooseSubquest(draft, candidateId);
-
-            expect(chosen.chosen).not.toBeNull();
-            expect(chosen.chosen!.id).toBe(candidateId);
-            expect(chosen.candidates).toEqual(draft.candidates);
         });
 
         it('hazard state exposes data mobile needs without rule simulation', () => {

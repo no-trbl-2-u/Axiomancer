@@ -22,7 +22,6 @@ A hazard node starts a hazard session (`state/actions.ts` → `beginHazardAction
 | `hazard-dice-roll` | Dice-roll overlay (auto-finishes → `finishHazardRolling`) |
 | `hazard-board` | The board |
 | `hazard-meters` | Meters strip |
-| `hazard-subquests` / `hazard-subquest-<id>` | Sub-quest chips |
 | `hazard-enchantments` | Active enchantments |
 | `hazard-deck-counts` | Draw/discard counts |
 | `hazard-dice-tray` / `hazard-die-<id>` | Dice |
@@ -39,7 +38,7 @@ A hazard node starts a hazard session (`state/actions.ts` → `beginHazardAction
 | `hazard-ledger` | Ledger |
 | `hazard-outcome` / `hazard-outcome-continue` | Outcome overlay; CONTINUE |
 | `hazard-rewards` / `hazard-offer-<cardId>` / `hazard-card-preview` / `hazard-preview-confirm` / `hazard-preview-cancel` / `hazard-rewards-confirm` / `hazard-rewards-skip` | Reward pick |
-| `hazard-reward-<id>` / `hazard-consequence-<id>` / `hazard-rewards-subquest-<id>` | Reward / consequence rows |
+| `hazard-reward-<id>` / `hazard-consequence-<id>` / `hazard-rewards-penalty` | Reward / consequence rows, route-penalty line |
 | `hazard-tutorial` / `hazard-tutorial-skip` | Tutorial coach |
 | `hazard-stat-key` | Stat key legend |
 | `hazard-remove-grid` / `hazard-remove-tile-<cardId>` / `hazard-remove-confirm` / `hazard-remove-close` / `hazard-remove-blocked` / `hazard-remove-blocked-dismiss` | Deck-thinning grid (from `/hazard-deck`, `hazard-deck-open-remove`) |

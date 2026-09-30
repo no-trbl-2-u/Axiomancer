@@ -247,7 +247,7 @@ describe('hazard presenter — outcome and rewards', () => {
         expect(vm.outcome?.ctaLabel).toContain('FACE THE COST');
         const rewardsVM = vmOf({ ...s, phase: 'rewards' }).rewards!;
         expect(rewardsVM.offerCards).toEqual([]);
-        expect(rewardsVM.consequences.map((c) => c.id)).toEqual(['minhp', 'maxhp', 'deadcard', 'curse']);
+        expect(rewardsVM.consequences.map((c) => c.id)).toEqual(['minhp', 'maxhp', 'deadcard']);
         for (const c of rewardsVM.consequences) expect(c.desc.length).toBeGreaterThan(10);
         expect(rewardsVM.penaltyNote).toContain('route penalty');
     });

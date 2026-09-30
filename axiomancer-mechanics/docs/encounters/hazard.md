@@ -104,47 +104,31 @@ Phase 131 — Live.
 
 ### Reward catalogue
 
+Every reward pays exactly what its chip says (THE REVAMP R6a, D52).
+
 | ID | Name | Description |
 |---|---|---|
-| `cache` | Shrine Cache | +12 shillings |
-| `relic` | Bonus Relic | +20 shillings (Risk-route exclusive) |
+| `shillings` | Shillings | +12 shillings |
+| `riskShillings` | Shillings | +32 shillings (the risk route's purse) |
 | `vitae` | Restored Vitae | +6 VITAE |
-| `token` | Paradox Token | +1 paradox token for next combat |
+
+| Tier | Safe route | Risk route |
+|---|---|---|
+| Perfect | `shillings`, `vitae` | `riskShillings`, `vitae` |
+| Complete, 2+ wins | `vitae` | `riskShillings` |
+| Complete, 1 win | `vitae` | `shillings` |
+| Failure | none | none |
 
 ### Consequence catalogue
 
 | ID | Name | Description |
 |---|---|---|
-| `tokens` | Sundered | Lose all banked Paradox & Fallacy tokens |
 | `deadcard` | Dead Weight | CRACK card shuffled into the persistent deck |
 | `maxhp` | Scarred | −5 Maximum VITAE until next inn rest |
 | `minhp` | Bleeding | −8 VITAE immediately |
-| `curse` | Hexed | Begin next combat with a hostile Curse die |
 
----
-
-## Sub-quests
-
-10 optional objectives in the catalogue; current shipped behavior rolls N per hazard (per
-`HAZARD_TUNING.subquests.pickCount`). Accepted next doctrine (Phase 149) changes this
-to **sub-quest drafting**: offer 2–3 candidate objectives and let the player choose one
-before/around route commitment. Completing the chosen sub-quest on a **survived crossing**
-pays the listed bonus; a **failed crossing** forfeits sub-quest rewards.
-
-| ID | Name | Condition | Reward |
-|---|---|---|---|
-| `travel-light` | Travel Light | Commit ≤ cap cards total | Vitae |
-| `dice-reserve` | Dice in Reserve | Hold N+ dice unspent at final round | Shillings |
-| `steady-hand` | Steady Hand | Never empty hand at a round resolve | Shillings |
-| `flawless` | Flawless | Clear every round | Paradox token |
-| `surge-master` | Surge Master | Power N+ cards with dice | Shillings |
-| `stormcaller` | Stormcaller | Fire N+ recast/convert effects | Shillings |
-| `scavenger` | Scavenger | Salvage N+ cards to the bin | Vitae |
-| `momentum` | Momentum | Carry surplus into a later round | Shillings |
-| `fast-start` | Fast Start | Clear the first round | Shillings |
-| `finisher` | Finisher | Clear the final round | Vitae |
-
-Exact N values live in `HAZARD_TUNING.subquests` in `hazard.tuning.ts`.
+By rounds lost: one loss costs only the route penalty; two add Scarred and
+Dead Weight; three add Bleeding as well.
 
 ---
 
@@ -185,8 +169,6 @@ hand / play      HazardHandEntry[]
 dice             HazardDie[]
 progressBase     { force, escape }        — momentum carried in
 modifiers        HazardModifiers          — active aura bonuses
-subquests        HazardSubquestState[]
-questMetrics     HazardQuestMetrics
 goldVow          { force, escape } | null
 momentumCap      number                   — raised by SAINT'S PATIENCE
 vitaeCost        number                   — sacrifice debt
@@ -213,7 +195,6 @@ powerHazardCard(state, uid, dieId)
 applyHazardCard(state, uid, bagCardIds)           // fires utility effect
 resolveHazardRound(state, bagCardIds)             // O / X judgement
 continueHazardAfterResolve(state, bagCardIds)     // advance to next round
-hazardSubquestStatus(state, subquestId)           // 'active' | 'done' | 'failed'
 claimHazardRewards(state, pickedCardId | null)    // → 'done'
 ```
 

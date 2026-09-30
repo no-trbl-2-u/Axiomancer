@@ -30,14 +30,14 @@ import {
     confirmHazardForetell as engineConfirmForetell,
 } from '@mechanics';
 import {
-    HAZARD_CACHE_SHILLINGS,
     HAZARD_CRACK_CARD,
     HAZARD_DECK,
     HAZARD_LIBRARY,
     HAZARD_MAXHP_SCAR,
     HAZARD_MINHP_LOSS,
-    HAZARD_RELIC_SHILLINGS,
     HAZARD_REWARD_CARDS,
+    HAZARD_RISK_SHILLINGS_REWARD,
+    HAZARD_SHILLINGS_REWARD,
     HAZARD_VITAE_REWARD,
 } from '@mechanics';
 import { appendAcquiredCard, HAZARD_CARD_FLAG_PREFIX, hazardDeckBag } from '@mechanics';
@@ -74,10 +74,6 @@ import { HAZARD_TUTORIAL_FLAG, isTutorialDone } from '../tutorials';
 export const HAZARD_TUTORIAL_SEED = 3;
 export const HAZARD_TUTORIAL_ID = 'cracked-cliff';
 
-/** Flag set by the `curse` consequence — future combat integration hook. */
-export const HAZARD_HEXED_FLAG = 'hazard-hexed';
-/** Flag prefix for banked paradox tokens granted by the `token` reward. */
-export const HAZARD_TOKEN_FLAG_PREFIX = 'hazard-token-banked:';
 /**
  * Flag prefix recording an unhealed max-VITAE scar from the `maxhp`
  * consequence. The suffix is the magnitude of max-VITAE lost. The scar
@@ -453,9 +449,6 @@ export interface ClaimHazardRewardsResult {
     shillings: number;
     cardAdded: string | null;
     crackAdded: boolean;
-    tokensBanked: number;
-    tokensLost: boolean;
-    hexed: boolean;
     /**
      * Phase 130 — true when the crossing was fatal: the net VITAE swing
      * would have dropped the player to `health <= 0` (engine `isDefeated`
@@ -473,9 +466,6 @@ const NOOP_CLAIM: ClaimHazardRewardsResult = Object.freeze({
     shillings: 0,
     cardAdded: null,
     crackAdded: false,
-    tokensBanked: 0,
-    tokensLost: false,
-    hexed: false,
     died: false,
 });
 
@@ -483,13 +473,10 @@ const NOOP_CLAIM: ClaimHazardRewardsResult = Object.freeze({
  * Confirms the rewards modal and applies the whole outcome to the
  * engine `GameState`:
  *
- *  rewards     — `vitae` heals; `cache`/`relic` grant shillings;
- *                `token` banks a paradox-token flag.
+ *  rewards     — `vitae` heals; `shillings`/`riskShillings` pay shillings.
  *  reserves    — +1 VITAE per unspent non-hex die (REC#3).
  *  consequences— `minhp` damages; `maxhp` scars max VITAE;
- *                `deadcard` shuffles a CRACK into the deck flags;
- *                `tokens` clears banked token flags; `curse` sets the
- *                hexed flag.
+ *                `deadcard` shuffles a CRACK into the deck flags.
  *  penalty     — route penaltyVitae × lost rounds.
  *  card pick   — appended to the persistent deck flags.
  *
@@ -508,30 +495,14 @@ export function claimHazardRewardsAction(store: AppStore, cardId: string | null)
     let vitaeDelta = 0;
     let maxVitaeDelta = 0;
     let shillings = 0;
-    let tokensBanked = 0;
-    let tokensLost = false;
-    let hexed = false;
     let crackAdded = false;
 
     for (const reward of outcome.rewards) {
         if (reward === 'vitae') vitaeDelta += HAZARD_VITAE_REWARD;
-        if (reward === 'cache') shillings += HAZARD_CACHE_SHILLINGS;
-        if (reward === 'relic') shillings += HAZARD_RELIC_SHILLINGS;
-        if (reward === 'token') {
-            tokensBanked += 1;
-            flags = [...flags, `${HAZARD_TOKEN_FLAG_PREFIX}${Date.now()}-${flags.length}`];
-        }
+        if (reward === 'shillings') shillings += HAZARD_SHILLINGS_REWARD;
+        if (reward === 'riskShillings') shillings += HAZARD_RISK_SHILLINGS_REWARD;
     }
     vitaeDelta += outcome.reserveBonus;
-
-    // Sub-quest bonuses (0 on a failure, see computeOutcome) ride on top of
-    // the main spoils.
-    shillings += outcome.questShillings;
-    vitaeDelta += outcome.questVitae;
-    for (let i = 0; i < outcome.questTokens; i++) {
-        tokensBanked += 1;
-        flags = [...flags, `${HAZARD_TOKEN_FLAG_PREFIX}${Date.now()}-q${flags.length}`];
-    }
 
     for (const consequence of outcome.consequences) {
         if (consequence === 'minhp') vitaeDelta -= HAZARD_MINHP_LOSS;
@@ -539,14 +510,6 @@ export function claimHazardRewardsAction(store: AppStore, cardId: string | null)
         if (consequence === 'deadcard') {
             flags = appendAcquiredCard(flags, HAZARD_CRACK_CARD.id);
             crackAdded = true;
-        }
-        if (consequence === 'tokens') {
-            tokensLost = true;
-            flags = flags.filter((f) => !f.startsWith(HAZARD_TOKEN_FLAG_PREFIX));
-        }
-        if (consequence === 'curse') {
-            hexed = true;
-            if (!flags.includes(HAZARD_HEXED_FLAG)) flags = [...flags, HAZARD_HEXED_FLAG];
         }
     }
     vitaeDelta -= outcome.penaltyVitae;
@@ -595,9 +558,6 @@ export function claimHazardRewardsAction(store: AppStore, cardId: string | null)
             shillings: 0,
             cardAdded: null,
             crackAdded: false,
-            tokensBanked: 0,
-            tokensLost: false,
-            hexed: false,
             died: true,
         };
     }
@@ -637,9 +597,6 @@ export function claimHazardRewardsAction(store: AppStore, cardId: string | null)
         shillings,
         cardAdded: done.pickedRewardCardId,
         crackAdded,
-        tokensBanked,
-        tokensLost,
-        hexed,
         died: false,
     };
 }

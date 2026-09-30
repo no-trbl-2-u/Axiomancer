@@ -175,39 +175,14 @@ export const HAZARD_TUNING = {
     rewards: {
         /** Vitae restored by the `vitae` reward. */
         vitae: 6,
-        /** Shillings granted by the `cache` reward. */
-        cacheShillings: 12,
-        /** Shillings granted by the `relic` reward. */
-        relicShillings: 20,
+        /** Shillings granted by the `shillings` reward. */
+        shillings: 12,
+        /** Shillings granted by the `riskShillings` reward (the risk route's premium). */
+        riskShillings: 32,
         /** Vitae lost to the `minhp` consequence. */
         minhpLoss: 8,
         /** Maximum-vitae reduction from the `maxhp` consequence. */
         maxhpScar: 5,
-    },
-
-    // -- sub-quests (optional per-hazard objectives) ----------------------
-    // Each hazard rolls `pickCount` objectives from the catalogue
-    // (`HAZARD_SUBQUESTS`). Completing one on a survived crossing pays its
-    // bonus on top of the main spoils. Bonuses are forfeit on a failure.
-    subquests: {
-        /** How many objectives are rolled per hazard. */
-        pickCount: 3,
-        /** Shillings paid by a `shillings`-reward objective. */
-        shillings: 9,
-        /** Vitae restored by a `vitae`-reward objective. */
-        vitae: 4,
-        /** Paradox tokens banked by a `token`-reward objective. */
-        token: 1,
-        /** TRAVEL LIGHT: commit no more than this many cards all hazard. */
-        travelLightCap: 12,
-        /** SURGE MASTER: power at least this many cards with dice. */
-        surgeMasterCount: 3,
-        /** STORMCALLER: fire at least this many re-cast / convert effects. */
-        stormcallerCount: 2,
-        /** SCAVENGER: salvage at least this many cards to the bin. */
-        scavengerCount: 2,
-        /** DICE IN RESERVE: hold at least this many dice at the final resolve. */
-        diceReserveCount: 2,
     },
 
     // -- fanned-hand geometry ---------------------------------------------

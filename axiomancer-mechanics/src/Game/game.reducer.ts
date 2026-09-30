@@ -159,8 +159,10 @@ import { generateRunId } from './run-loop';
  *   goodwill flags, fishing-village's map entries and its two quests.
  * 2026-09-30 — bumped 29 → 30: THE REVAMP R5 (D49). Items are the healing
  *   potions; the hop drops retired consumable stacks and their effects.
+ * 2026-09-30 — bumped 30 → 31: THE REVAMP R6a (D52). Hazard rewards do what
+ *   they say; the hop drops the Paradox Token and Hexed flags.
  */
-export const GAME_STATE_VERSION = 30;
+export const GAME_STATE_VERSION = 31;
 
 /**
  * Builds a brand-new GameState with default player and world.

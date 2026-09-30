@@ -25,9 +25,10 @@
  * encounter naming a retired foe re-points to Float-Eye, and survivors lose
  * their stripped keywords), v27 → v28 (2026-09-29, THE REVAMP R3a: a
  * save standing off Act 1 moves onto the Lantern Deep), v28 → v29 (R3b:
- * fishing-village purged) and v29 → v30 (2026-09-30, R5: the retired
- * consumables and their effects dropped). The hops chain, so a v11 save lands
- * at v30 in one `migrate` call. Every other version mismatch still rejects.
+ * fishing-village purged), v29 → v30 (2026-09-30, R5: the retired
+ * consumables and their effects dropped) and v30 → v31 (2026-09-30, R6a: the
+ * hazard token and hex flags dropped). The hops chain, so a v11 save lands
+ * at v31 in one `migrate` call. Every other version mismatch still rejects.
  */
 
 import { GameState } from './types';
@@ -734,6 +735,25 @@ function migrateV29ToV30(raw: Record<string, unknown>): Record<string, unknown> 
     return out;
 }
 
+/** The flags R6a deleted with the Paradox Token and Hexed hazard outcomes. */
+const RETIRED_HAZARD_TOKEN_FLAG_PREFIX = 'hazard-token-banked:';
+const RETIRED_HAZARD_HEXED_FLAG = 'hazard-hexed';
+
+/**
+ * v30 → v31 (2026-09-30, THE REVAMP R6a, D52): hazard rewards do what they
+ * say. Drops every banked Paradox Token flag and the Hexed flag; nothing ever
+ * read either. Idempotent and pure over a raw save payload.
+ */
+function migrateV30ToV31(raw: Record<string, unknown>): Record<string, unknown> {
+    const out: Record<string, unknown> = { ...raw, version: 31 };
+    if (Array.isArray(raw.flags)) {
+        out.flags = (raw.flags as unknown[]).filter(flag =>
+            !(typeof flag === 'string' &&
+                (flag.startsWith(RETIRED_HAZARD_TOKEN_FLAG_PREFIX) || flag === RETIRED_HAZARD_HEXED_FLAG)));
+    }
+    return out;
+}
+
 /**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
@@ -772,8 +792,9 @@ export function migrate(
     // v26 → v27 re-points retired foes in a staged encounter to Float-Eye;
     // v27 → v28 moves a save off Act 1 onto the Lantern Deep; v28 → v29
     // drops fishing-village, its quests and the goodwill tally; v29 → v30
-    // drops the retired consumables and their effects.
-    // Chained so a v11 save lands at v30 in one call.
+    // drops the retired consumables and their effects; v30 → v31 drops the
+    // hazard token and hex flags.
+    // Chained so a v11 save lands at v31 in one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
@@ -849,6 +870,10 @@ export function migrate(
     if (version === 29 && toVersion >= 30) {
         working = migrateV29ToV30(working);
         version = 30;
+    }
+    if (version === 30 && toVersion >= 31) {
+        working = migrateV30ToV31(working);
+        version = 31;
     }
 
     if (version !== toVersion) {

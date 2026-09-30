@@ -15,8 +15,6 @@ export type {
     HazardProgressKey,
     HazardCardDef,
     HazardHandEntry,
-    HazardSubquestReward,
-    HazardSubquestStatus,
     HazardRouteKey,
     HazardDef,
     HazardMark,
@@ -40,10 +38,9 @@ export {
     getHazardCardDef,
     HAZARD_REWARDS,
     HAZARD_CONSEQUENCES,
-    HAZARD_SUBQUESTS,
     HAZARD_VITAE_REWARD,
-    HAZARD_CACHE_SHILLINGS,
-    HAZARD_RELIC_SHILLINGS,
+    HAZARD_SHILLINGS_REWARD,
+    HAZARD_RISK_SHILLINGS_REWARD,
     HAZARD_MINHP_LOSS,
     HAZARD_MAXHP_SCAR,
     HAZARD_LIBRARY,
@@ -79,12 +76,10 @@ export {
     discardHazardCard,
     // resolve / outcome / rewards
     resolveHazardRound,
-    hazardSubquestResults,
     continueHazardAfterResolve,
     acknowledgeHazardOutcome,
     claimHazardRewards,
     // Phase 149 functions
-    selectSubquestFromDraft,
     getHazardDeckIdentity,
     removeHazardDeckCard,
     // Foretell resolution (2026-06-25)
@@ -96,8 +91,6 @@ export {
     classifyDeckFocus,
     calculateDeckScars,
     generateRewardOffer,
-    generateSubquestDraft,
-    chooseSubquest,
     generateDeckIdentity,
     removeCardFromDeck,
 } from './hazard.engagement';

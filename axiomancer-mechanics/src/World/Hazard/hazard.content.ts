@@ -16,7 +16,6 @@ import type {
     HazardDef,
     HazardKeywordId,
     HazardRewardId,
-    HazardSubquestDef,
 } from './hazard.types';
 
 /** Card stat bands — the magnitudes the library draws from (see tuning). */
@@ -26,8 +25,6 @@ const U = C.utility;
 const X = C.expansion;
 /** Codex-library magnitudes (2026-06-13 — the 150-card roster). */
 const CX = C.codex;
-/** Sub-quest tuning (reward magnitudes + thresholds). */
-const Q = HAZARD_TUNING.subquests;
 
 // ---------------------------------------------------------------------------
 // Keyword glossary (tap-to-read detail)
@@ -461,59 +458,23 @@ export function getHazardCardDef(cardId: string): HazardCardDef {
 // ---------------------------------------------------------------------------
 
 export const HAZARD_REWARDS: Record<HazardRewardId, { name: string; icon: string; desc: string }> = {
-    cache: { name: 'Shrine Cache', icon: 'chest', desc: 'A sealed cache of relics and coin from across the split. +12 shillings.' },
-    relic: { name: 'Bonus Relic', icon: 'relic', desc: 'A rare relic — risk-route exclusive. +20 shillings.' },
-    vitae: { name: 'Restored Vitae', icon: 'heart', desc: 'Recover 6 Vitae as the danger passes.' },
-    token: { name: 'Paradox Token', icon: 'paradox', desc: '+1 banked Paradox token for your next combat.' },
+    shillings: { name: 'Shillings', icon: 'chest', desc: `+${HAZARD_TUNING.rewards.shillings} shillings.` },
+    riskShillings: { name: 'Shillings', icon: 'chest', desc: `+${HAZARD_TUNING.rewards.riskShillings} shillings.` },
+    vitae: { name: 'Restored Vitae', icon: 'heart', desc: `Recover ${HAZARD_TUNING.rewards.vitae} VITAE as the danger passes.` },
 };
 
 export const HAZARD_CONSEQUENCES: Record<HazardConsequenceId, { name: string; icon: string; desc: string }> = {
-    tokens: { name: 'Sundered', icon: 'tokens', desc: 'Lose all banked Paradox & Fallacy tokens.' },
     deadcard: { name: 'Dead Weight', icon: 'deadcard', desc: 'A useless CRACK card is shuffled into your deck.' },
-    maxhp: { name: 'Scarred', icon: 'maxhp', desc: '−5 Maximum Vitae until you next rest at an inn.' },
-    minhp: { name: 'Bleeding', icon: 'minhp', desc: 'Lose 8 Vitae immediately.' },
-    curse: { name: 'Hexed', icon: 'curse', desc: 'Begin your next combat with a hostile Curse die.' },
+    maxhp: { name: 'Scarred', icon: 'maxhp', desc: `−${HAZARD_TUNING.rewards.maxhpScar} Maximum Vitae until you next rest at an inn.` },
+    minhp: { name: 'Bleeding', icon: 'minhp', desc: `Lose ${HAZARD_TUNING.rewards.minhpLoss} Vitae immediately.` },
 };
-
-// ---------------------------------------------------------------------------
-// Sub-quest catalogue — optional per-hazard objectives.
-//
-// Each hazard rolls `HAZARD_TUNING.subquests.pickCount` of these (seeded,
-// independent of the card/dice stream). Completing one on a SURVIVED crossing
-// pays its bonus on top of the spoils; a failed crossing forfeits them. The
-// engine owns each id's pass/fail logic (`hazardSubquestStatus`); this table
-// is pure data.
-// ---------------------------------------------------------------------------
-
-const SHILLINGS_REWARD = { kind: 'shillings', amount: Q.shillings } as const;
-const VITAE_REWARD = { kind: 'vitae', amount: Q.vitae } as const;
-const TOKEN_REWARD = { kind: 'token', amount: Q.token } as const;
-
-export const HAZARD_SUBQUESTS: HazardSubquestDef[] = [
-    { id: 'travel-light', name: 'TRAVEL LIGHT', desc: `Commit no more than ${Q.travelLightCap} cards all crossing.`, reward: VITAE_REWARD },
-    { id: 'dice-reserve', name: 'DICE IN RESERVE', desc: `Hold ${Q.diceReserveCount}+ dice unspent at the final round.`, reward: SHILLINGS_REWARD },
-    { id: 'steady-hand', name: 'STEADY HAND', desc: 'Never empty your hand at a round resolve.', reward: SHILLINGS_REWARD },
-    { id: 'flawless', name: 'FLAWLESS', desc: 'Clear every round of the crossing.', reward: TOKEN_REWARD },
-    { id: 'surge-master', name: 'SURGE MASTER', desc: `Power ${Q.surgeMasterCount}+ cards with dice.`, reward: SHILLINGS_REWARD },
-    { id: 'stormcaller', name: 'STORMCALLER', desc: `Fire ${Q.stormcallerCount}+ re-cast or convert effects.`, reward: SHILLINGS_REWARD },
-    { id: 'scavenger', name: 'SCAVENGER', desc: `Salvage ${Q.scavengerCount}+ cards to the bin.`, reward: VITAE_REWARD },
-    { id: 'momentum', name: 'MOMENTUM', desc: 'Carry surplus momentum into a later round.', reward: SHILLINGS_REWARD },
-    { id: 'fast-start', name: 'FAST START', desc: 'Clear the first round.', reward: SHILLINGS_REWARD },
-    { id: 'finisher', name: 'FINISHER', desc: 'Clear the final round.', reward: VITAE_REWARD },
-];
-
-export function getHazardSubquestDef(id: string): HazardSubquestDef {
-    const def = HAZARD_SUBQUESTS.find((q) => q.id === id);
-    if (!def) throw new Error(`Unknown hazard sub-quest id: ${id}`);
-    return def;
-}
 
 /** Vitae restored by the `vitae` reward. */
 export const HAZARD_VITAE_REWARD = HAZARD_TUNING.rewards.vitae;
-/** Shillings granted by the `cache` reward. */
-export const HAZARD_CACHE_SHILLINGS = HAZARD_TUNING.rewards.cacheShillings;
-/** Shillings granted by the `relic` reward. */
-export const HAZARD_RELIC_SHILLINGS = HAZARD_TUNING.rewards.relicShillings;
+/** Shillings granted by the `shillings` reward. */
+export const HAZARD_SHILLINGS_REWARD = HAZARD_TUNING.rewards.shillings;
+/** Shillings granted by the `riskShillings` reward. */
+export const HAZARD_RISK_SHILLINGS_REWARD = HAZARD_TUNING.rewards.riskShillings;
 /** Vitae lost to the `minhp` consequence. */
 export const HAZARD_MINHP_LOSS = HAZARD_TUNING.rewards.minhpLoss;
 /** Maximum-vitae reduction from the `maxhp` consequence. */
@@ -557,7 +518,7 @@ export const HAZARD_LIBRARY: HazardDef[] = [
         riskRouteDesc: 'Two meters, both required each round — split your hand between FORCE and ESCAPE.',
         rounds: 3,
         safe: { key: 'safe', dual: false, thresholds: [20, 23, 25], rewardLabel: 'Normal reward', penaltyVitae: 2 },
-        risk: { key: 'risk', dual: true, thresholds: [[9, 9], [11, 11], [12, 12]], rewardLabel: 'Shrine cache + bonus relic', penaltyVitae: 4 },
+        risk: { key: 'risk', dual: true, thresholds: [[9, 9], [11, 11], [12, 12]], rewardLabel: 'More shillings', penaltyVitae: 4 },
     },
     {
         id: 'flooded-undercroft',
@@ -573,7 +534,7 @@ export const HAZARD_LIBRARY: HazardDef[] = [
         riskRouteDesc: 'Force the door and out-swim the surge. Both meters, every round.',
         rounds: 3,
         safe: { key: 'safe', dual: false, thresholds: [19, 23, 26], rewardLabel: 'Normal reward', penaltyVitae: 2 },
-        risk: { key: 'risk', dual: true, thresholds: [[8, 10], [10, 12], [11, 13]], rewardLabel: 'Reliquary haul + bonus relic', penaltyVitae: 4 },
+        risk: { key: 'risk', dual: true, thresholds: [[8, 10], [10, 12], [11, 13]], rewardLabel: 'More shillings', penaltyVitae: 4 },
     },
     {
         id: 'ashfall-crossing',
@@ -589,7 +550,7 @@ export const HAZARD_LIBRARY: HazardDef[] = [
         riskRouteDesc: 'A dead sprint under falling ash. Both meters, and the last round is the worst.',
         rounds: 3,
         safe: { key: 'safe', dual: false, thresholds: [22, 23, 25], rewardLabel: 'Normal reward', penaltyVitae: 2 },
-        risk: { key: 'risk', dual: true, thresholds: [[10, 8], [11, 11], [13, 11]], rewardLabel: 'Ember hoard + bonus relic', penaltyVitae: 4 },
+        risk: { key: 'risk', dual: true, thresholds: [[10, 8], [11, 11], [13, 11]], rewardLabel: 'More shillings', penaltyVitae: 4 },
     },
     {
         id: 'famine-march',
@@ -605,7 +566,7 @@ export const HAZARD_LIBRARY: HazardDef[] = [
         riskRouteDesc: 'March straight through on an empty belly. Both meters, every round, or the road keeps you.',
         rounds: 3,
         safe: { key: 'safe', dual: false, thresholds: [20, 23, 25], rewardLabel: 'Normal reward', penaltyVitae: 2 },
-        risk: { key: 'risk', dual: true, thresholds: [[9, 9], [11, 11], [12, 12]], rewardLabel: 'Cached provisions + bonus relic', penaltyVitae: 4 },
+        risk: { key: 'risk', dual: true, thresholds: [[9, 9], [11, 11], [12, 12]], rewardLabel: 'More shillings', penaltyVitae: 4 },
     },
     {
         id: 'bandit-hunt',
@@ -621,7 +582,7 @@ export const HAZARD_LIBRARY: HazardDef[] = [
         riskRouteDesc: 'Run straight at the thinnest point of the cordon. Both meters, every round — hesitate and they close.',
         rounds: 3,
         safe: { key: 'safe', dual: false, thresholds: [19, 23, 26], rewardLabel: 'Normal reward', penaltyVitae: 2 },
-        risk: { key: 'risk', dual: true, thresholds: [[8, 10], [10, 12], [11, 13]], rewardLabel: 'Bandit spoils + bonus relic', penaltyVitae: 4 },
+        risk: { key: 'risk', dual: true, thresholds: [[8, 10], [10, 12], [11, 13]], rewardLabel: 'More shillings', penaltyVitae: 4 },
     },
     {
         id: 'fever-rot',
@@ -637,7 +598,7 @@ export const HAZARD_LIBRARY: HazardDef[] = [
         riskRouteDesc: 'Outrun the rot to clean air and high ground. Both meters, every round, on failing legs.',
         rounds: 3,
         safe: { key: 'safe', dual: false, thresholds: [22, 23, 25], rewardLabel: 'Normal reward', penaltyVitae: 2 },
-        risk: { key: 'risk', dual: true, thresholds: [[10, 8], [11, 11], [13, 11]], rewardLabel: 'Hermit tinctures + bonus relic', penaltyVitae: 4 },
+        risk: { key: 'risk', dual: true, thresholds: [[10, 8], [11, 11], [13, 11]], rewardLabel: 'More shillings', penaltyVitae: 4 },
     },
 ];
 

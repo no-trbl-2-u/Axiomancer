@@ -61,13 +61,18 @@ describe('LedgerMark', () => {
 });
 
 describe('BoonIcon', () => {
-    const boonTypes = ['chest', 'relic', 'heart', 'paradox', 'tokens', 'deadcard', 'maxhp', 'minhp', 'curse'] as const;
+    const boonTypes = ['chest', 'heart', 'deadcard', 'maxhp', 'minhp'] as const;
 
     it('renders all boon icon types', () => {
         boonTypes.forEach(icon => {
             const { root } = render(<BoonIcon icon={icon} />);
             expect(root).toBeTruthy();
         });
+    });
+
+    it('draws nothing for an icon no reward or consequence carries', () => {
+        const { toJSON } = render(<BoonIcon icon="relic" />);
+        expect(toJSON()).toBeNull();
     });
 
     it('renders with custom size', () => {

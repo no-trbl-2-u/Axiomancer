@@ -171,23 +171,9 @@ export function BoonIcon({
             // V6 glyph unification — the registry already curates this exact
             // mark (Phase V1); draw it instead of a second hand-authored chest.
             return <AxmIcon name="action-chest" size={size} color={color} />;
-        case 'relic':
-            return wrap(<Path d="M12 2 L15 8 L21 9 L16 14 L17 21 L12 17 L7 21 L8 14 L3 9 L9 8 Z" {...s} />);
         case 'heart':
             return wrap(
                 <Path d="M12 21 C4 14 3 8 7 6 C10 4.5 11.5 6.5 12 8 C12.5 6.5 14 4.5 17 6 C21 8 20 14 12 21 Z" fill={color} stroke={color} />,
-            );
-        case 'paradox':
-            return wrap(
-                <Path d="M4 12 C4 9 6 7 8 7 C10 7 11 9 12 12 C13 15 14 17 16 17 C18 17 20 15 20 12 C20 9 18 7 16 7 C14 7 13 9 12 12 C11 15 10 17 8 17 C6 17 4 15 4 12 Z" {...s} />,
-            );
-        case 'tokens':
-            return wrap(
-                <>
-                    <Circle cx={9} cy={9} r={5} {...s} />
-                    <Circle cx={15} cy={15} r={5} {...s} />
-                    <Path d="M5.5 12.5 L12.5 5.5" stroke={AXM.blood} strokeWidth={1.6} />
-                </>,
             );
         case 'deadcard':
             return wrap(
@@ -211,8 +197,6 @@ export function BoonIcon({
                     <Path d="M12 12 q2 3 0 5 q-2 -2 0 -5Z" fill={AXM.blood} stroke={AXM.blood} />
                 </>,
             );
-        case 'curse':
-            return wrap(<Path d="M16 4 A9 9 0 1 0 16 20 A7 7 0 1 1 16 4 Z" {...s} fill={color} fillOpacity={0.3} />);
         default:
             return null;
     }

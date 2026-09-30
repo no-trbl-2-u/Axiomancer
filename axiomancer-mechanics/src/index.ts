@@ -253,19 +253,19 @@ export {
 export {
     HAZARD_TUNING, HAZARD_KEYWORDS, HAZARD_DECK, HAZARD_CRACK_CARD,
     HAZARD_REWARD_CARDS, getHazardCardDef, HAZARD_REWARDS, HAZARD_CONSEQUENCES,
-    HAZARD_VITAE_REWARD, HAZARD_CACHE_SHILLINGS, HAZARD_RELIC_SHILLINGS,
+    HAZARD_VITAE_REWARD, HAZARD_SHILLINGS_REWARD, HAZARD_RISK_SHILLINGS_REWARD,
     HAZARD_MINHP_LOSS, HAZARD_MAXHP_SCAR, HAZARD_LIBRARY, getHazardDef,
     HAZARD_CARD_FLAG_PREFIX, hazardStarterBag, decodeAcquiredCards,
     hazardDeckBag, appendAcquiredCard, hazardCardPowerColors,
     hazardProjectedProgress, dieCanPowerCard, createHazardSession,
     selectHazardRoute, finishHazardRolling, stageHazardCard, unstageHazardCard,
     powerHazardCard, chooseHazardCardKey, applyHazardCard, discardHazardCard,
-    resolveHazardRound, hazardSubquestResults, continueHazardAfterResolve,
+    resolveHazardRound, continueHazardAfterResolve,
     acknowledgeHazardOutcome, claimHazardRewards, confirmHazardForetell,
 } from './World/Hazard';
 export type {
     HazardColor, HazardDieKind, HazardProgressKey, HazardCardDef,
-    HazardHandEntry, HazardSubquestReward, HazardSubquestStatus, HazardRouteKey,
+    HazardHandEntry, HazardRouteKey,
     HazardMark, HazardOutcomeTier, HazardPhase, HazardSessionState,
 } from './World/Hazard';
 

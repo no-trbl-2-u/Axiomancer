@@ -30,13 +30,13 @@ describe('Hazard deck presets', () => {
 
     it('baseline clears acquired hazard cards and leaves other flags intact', () => {
         const store = makeStore();
-        store.setState({ flags: ['hazard-card:r_grip:1', 'hazard-token-banked:test'] } as never);
+        store.setState({ flags: ['hazard-card:r_grip:1', 'combat-tutorial-done'] } as never);
 
         const result = applyHazardDeckPresetAction(store, 'starter-baseline');
 
         expect(result.presetId).toBe('starter-baseline');
         expect(result.cardIds).toEqual([]);
-        expect(store.getState().flags).toEqual(['hazard-token-banked:test']);
+        expect(store.getState().flags).toEqual(['combat-tutorial-done']);
     });
 
     it('applies deterministic acquired cards for early and late straightforward presets', () => {
