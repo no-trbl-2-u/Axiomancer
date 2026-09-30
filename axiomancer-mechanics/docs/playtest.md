@@ -32,8 +32,8 @@ regrow in B2.
 ## Sim-policy roster
 
 Defined in `src/Combat/combat.sim-policies.ts`; consult
-`COMBAT_SIM_POLICIES` for each policy's exact `preferredFocus` (used by
-`policy-pick` deck selection), signature list, and Conviction threshold.
+`COMBAT_SIM_POLICIES` for each policy's signature list and Conviction
+threshold.
 
 | Id | Sees hidden stances? | Plays like |
 |---|---|---|
@@ -54,51 +54,28 @@ doctrine assertions against the archetype pairs (e.g. `dot-weaver` must beat
 
 One grammar shared by `npm run combat-playtest --deck=...`,
 `npm run combat -- --deck ...`, and `CombatDeckSelection`
-(`src/Combat/combat.deck-draft.ts`):
+(`src/Combat/combat.playtest.ts`):
 
 | Form | Meaning |
 |---|---|
-| `preset:<id>` | A curated preset: `grey` — the fresh-run grey deck, the only preset since the card purge (D36; `src/Combat/combat.starter-deck-presets.ts`) |
-| `preset:<id>+swap:<out>/<in>,...` | The preset with measurement-seat swaps: every copy of `<out>` replaced by `<in>` (copy count = the seat). Loud-failure: `<out>` must be in the resolved deck and `<in>` must resolve — pair with `--sandbox=<setId>` when `<in>` is a sandbox swap-pool card |
-| `draft:<focus>` | Seeded weighted draft from the eligible pool: `dot`, `control`, `utility`, `damage`, `balanced` (focus-fitting verb classes at 4x weight; default size 10, max 2 copies; always >= 1 defend and >= 1 status card when the pool allows) |
+| `grey` | The fresh-run grey deck (`STARTING_CARD_IDS`: Blow 5 / Ward 3 / Word 2) — the default |
 | `cards:a,b,c` | An explicit card-id list (invalid ids dropped) |
-| `policy-pick` | The harness drafts from the running policy's `preferredFocus` — the default |
 
-No escape card is appended — there is no in-combat retreat; a fight resolves
-only by winning or losing. Drafts are deterministic
-for a given seed.
+The preset table, the seeded drafts, `policy-pick`, the measurement-seat
+swaps and the named sandbox sets went in revamp R7b (D50): with a three-card
+library there was nothing left to draft, swap or A/B. No escape card is
+appended — there is no in-combat retreat; a fight resolves only by winning or
+losing. Deck resolution is not random.
 
-## Sandbox card workflow (register → A/B → promote)
-
-Experimental cards and numeric overrides live OUTSIDE the shipped library in
-`src/Cards/cards.sandbox-sets.ts` (registry mechanics:
-`src/Cards/cards.sandbox.ts`). `getCardById` consults the sandbox first, so
-a loaded set is visible to the whole engine — decks, drafts, sims, CLIs.
-
-```
-  cards.sandbox-sets.ts                 combat-playtest matrix              cards.library.ts
- +---------------------+   --sandbox=  +----------------------+  proven    +----------------+
- | SandboxCardSet      | ------------> | same seeds, with vs  | ---------> | literal moved  |
- |  new Card literals  |    <setId>    | without the set:     |  >=2 stages| into library,  |
- |  + {cardId, patch}  |               | winRate / statusEng  |  >=2 pols  | same PR, with  |
- |    overrides        |               | / per-card usage     |  bands OK  | evidence table |
- +---------------------+               +----------------------+            +----------------+
-```
-
-1. **Register.** Add a named `SandboxCardSet` (new cards must have NEW ids;
-   overrides patch existing library cards). Example set: `forge-example`.
-2. **A/B.** Run the identical matrix invocation with and without
-   `--sandbox=<setId>` — same stages, policies, runs, seeds. The delta is
-   the card's evidence.
-3. **Promote.** A card that proves out across >= 2 stages and >= 2 policies
-   without breaking the balance bands moves into `cards.library.ts` in the
-   same PR, inside a guided card session (D37). Sandbox content itself
-   never ships.
+A sandbox card (`src/Cards/cards.sandbox.ts`, `registerSandboxCards`) still
+resolves through `getCardById`, so a test can register one and name it in a
+`cards:` deck. Sandbox content never ships; a new card enters the library
+only in a guided card session (D37).
 
 ## CLI cookbook
 
 ```bash
-# Full matrix: all stages, greedy policy, policy-pick decks, 60 runs/cell, seed 1
+# Full matrix: all stages, greedy policy, the grey deck, 60 runs/cell, seed 1
 npm run combat-playtest
 
 # One stage under the player-feel witness, with the per-card usage table
@@ -107,27 +84,20 @@ npm run combat-playtest -- --stage=early --policy=blind --runs=100 --seed=7 --ca
 # Every policy on the late stage (doctrine check: dot-weaver vs aggro-brute)
 npm run combat-playtest -- --stage=late --policy=all --runs=60 --seed=1
 
-# A curated preset against one enemy, machine-readable for agents
-npm run combat-playtest -- --stage=mid --enemy=audit-sentinel --deck=preset:grey --json
-
-# Sandbox A/B treatment arm (run the same line without --sandbox for control)
-npm run combat-playtest -- --stage=mid --policy=dot-weaver --runs=60 --seed=1 --sandbox=forge-example
-
-# Measurement-seat swap: the grey preset with one seat's copies replaced by a
-# sandbox candidate (control = the same line without +swap:.../--sandbox)
-npm run combat-playtest -- --stage=early --policy=blind --runs=60 --seed=1 --sandbox=<setId> "--deck=preset:grey+swap:grey-strike/<candidate-id>"
+# An explicit card list against one enemy, machine-readable for agents
+npm run combat-playtest -- --stage=mid --enemy=brine-hag --deck=cards:grey-strike,grey-strike,grey-ward --json
 
 # A single auto-played encounter through the interactive CLI (fast qualitative sweep)
-npm run combat -- --enemy float-eye --auto --policy status --seed 5 --deck preset:grey --max-turns 6
+npm run combat -- --enemy float-eye --auto --policy status --seed 5 --deck grey --max-turns 6
 
-# A hand-playable encounter: stage player, drafted deck, JSONL answers on stdin
-npm run combat -- --enemy brine-hag --stage mid --deck draft:dot --seed 11 --stdin --json-events
+# A hand-playable encounter: stage player, the grey deck, JSONL answers on stdin
+npm run combat -- --enemy brine-hag --stage mid --deck grey --seed 11 --stdin --json-events
 ```
 
 The `combat-playtest` CLI (`src/CLI/combat-playtest.cli.ts`) accepts
 `--stage=early|mid|late|all`, `--policy=<id|all>`,
 `--deck=<grammar above>`, `--enemy=<slug>`, `--runs=N`, `--seed=N`,
-`--sandbox=<setId>`, `--cards`, `--json`. Every sweep runs spec 33's
+`--cards`, `--json`. Every sweep runs spec 33's
 Upgradeable Dice — the only combat model since the flag collapse (D7,
 2026-09-25). `--upgradeable-dice` is still accepted as a no-op for old
 scripts; `--legacy-dice` fails loudly (that model was deleted), and the report
@@ -147,12 +117,12 @@ finite win rate. Companion witnesses:
 `combat-playtest.card-coverage.sim.test.ts` (every library card must be
 playable — dead cards fail the build).
 
-**Starter-preset win-rate curve (load-bearing doctrine, set 2026-07-08 — see
+**Starter-deck win-rate curve (load-bearing doctrine, set 2026-07-08 — see
 `VISION.md` → Combat vision):** early ~80%, mid ~50%, late ~25-35%.
 The current placeholder bands above (esp. the late win-rate ceiling) predate
 this doctrine
-and should tighten toward it as calibration runs land — a starter preset
+and should tighten toward it as calibration runs land — a starter deck
 clearing late well above this curve is a dominance finding, not a
-success, since starter presets are early/mid-game decks by design (the
+success, since starter decks are early/mid-game decks by design (the
 player trades into a new mid-game deck after the labyrinth). Correction
 history: `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-08-win-path-scaling.md`.

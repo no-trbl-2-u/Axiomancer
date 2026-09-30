@@ -139,8 +139,6 @@ function effectIdsReferencedBy(card: Card): string[] {
     };
     for (const ce of card.combatEffects ?? []) ids.push(ce.effectId);
     fromRider(card.free);
-    fromRider(card.synergy?.rider);
-    if (card.synergy?.predicate) ids.push(card.synergy.predicate.effectId);
     return ids;
 }
 

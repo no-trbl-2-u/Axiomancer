@@ -5,7 +5,7 @@
  * ## Why this module exists
  *
  * `combat.cards.ts` already generates the card's printed STRINGS
- * (`topActionText` / `bottomActionText` / `dieLines`). Mobile's combat card
+ * (`topActionText` / `bottomActionText`). Mobile's combat card
  * detail panel did not use them: it re-derived its own `◆ +DIE` line by
  * walking `specialMechanics` a second time, in a second order, with a second
  * (partial) set of cases. That second walk is where the owner's finding 4
@@ -192,15 +192,8 @@ export function riderClauses(r: CardRider, opts?: { selfTargetCard?: boolean }):
     return out;
 }
 
-/**
- * Every clause the card's FREE (no-die) play fires.
- *
- * An `oath` / `hex` has no rider: its FREE play is a timed instance of the
- * passive, which the card's own `persistentEffect` summary states, so the list
- * is empty and the presenter prints that summary instead.
- */
+/** Every clause the card's FREE (no-die) play fires. */
 export function freeClauses(card: Card): CardClause[] {
-    if (card.cardType === 'oath' || card.cardType === 'hex') return [];
     if (!card.free) return [];
     return riderClauses(card.free, { selfTargetCard: card.targetType === 'self' });
 }

@@ -38,20 +38,24 @@ afterEach(() => vi.restoreAllMocks());
 const GREY_IDS = ['grey-strike', 'grey-ward'] as const;
 
 describe('Phase 104 — the grey office: card shape', () => {
-    it('both grey cards resolve with the colourless aspect and the grey theme', () => {
+    it('both grey cards resolve with the colourless aspect', () => {
         for (const id of GREY_IDS) {
             const card = getCardById(id);
             expect(card, id).toBeDefined();
             expect(card!.color, id).toBe('any');
-            expect(card!.theme, id).toBe('grey');
             expect(card!.tier, id).toBe(1);
             expect(card!.rank, id).toBe(1);
-            expect(card!.cardType, id).toBe('spell');
             expect(card!.tags, id).toContain('grey');
             expect(card!.tags, id).toContain('starter');
         }
         expect(getCardById('grey-strike')!.targetType).toBe('enemy');
         expect(getCardById('grey-ward')!.targetType).toBe('self');
+    });
+
+    it('D51 — Blow is an Attack, Ward a Skill, Word a Spell', () => {
+        expect(getCardById('grey-strike')!.cardType).toBe('attack');
+        expect(getCardById('grey-ward')!.cardType).toBe('skill');
+        expect(getCardById('grey-word')!.cardType).toBe('spell');
     });
 
     it('the grey office is the whole reward pool (D44, the card purge)', () => {

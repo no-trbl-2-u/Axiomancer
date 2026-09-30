@@ -12,14 +12,13 @@
  * overhaul).
  */
 
-import { MAX_EFFECT_INTENSITY, FREE_ENCHANT_ROUNDS } from '../Game/game-mechanics.constants';
-import type { Effect, ActiveEffect } from '../Effects/types';
-import type { Card, CardAspect, CardCombatEffects, CardRider, CardSpecialMechanic, SynergyStatePredicate } from '../Cards/types';
+import { MAX_EFFECT_INTENSITY } from '../Game/game-mechanics.constants';
+import type { Effect } from '../Effects/types';
+import type { Card, CardAspect, CardCombatEffects, CardRider, CardSpecialMechanic } from '../Cards/types';
 import { rankToRarity, CARD_RANK_NAMES } from '../Cards/types';
 import type {
     CombatCard, CombatVerbClass, CardEffectKind,
 } from './combat.encounter.types';
-import { getCardById } from '../Cards/cards.library';
 
 export type EffectLookup = (effectId: string) => Effect | undefined;
 export type CardLookup = (cardId: string) => Card | undefined;
@@ -92,16 +91,12 @@ export function cardStanceColor(card: Card): CardAspect {
 
 /**
  * Classifies a card into a verb class + the effect kind its PAID action
- * advances. Priority: oath/hex > defend > DoT > control > exposure >
- * damage > utility.
+ * advances. Priority: defend > DoT > control > exposure > damage > utility.
  */
 export function classifyVerbClass(
     card: Card,
     lookupEffect: EffectLookup,
 ): { verbClass: CombatVerbClass; track: CardEffectKind } {
-    if (card.cardType === 'oath') return { verbClass: 'oath', track: 'none' };
-    if (card.cardType === 'hex') return { verbClass: 'hex', track: 'control' };
-
     const mechs = card.specialMechanics ?? [];
     if (mechs.some(m => m.kind === 'guard')) {
         return { verbClass: 'defend', track: 'none' };
@@ -216,50 +211,6 @@ export function riderText(r: CardRider, opts?: { selfTargetCard?: boolean }): st
     return parts.join(' · ');
 }
 
-/**
- * WS4.2 / WS5.2 — human text for a combat-state synergy predicate (the
- * printed condition line; P0-truth: the text IS the evaluated condition).
- *
- * Face-term budget (card-keyword doctrine, WS5.2-era): originally OPENING was
- * the microset's one shared face term, deliberately card-local and
- * "registered nowhere". THE BIG NUMBERS REWRITE (2026-09-02) promoted `opening`/`finale` to
- * real turn-shape registry keywords alongside FLOW/REQUIEM (see
- * `docs/keyword-atlas.md` § "Player keywords — turn shape": AMBUSH, FLOW,
- * FINALE, REQUIEM, FALLEN) — `paid-summary-honesty.engine.test.ts` already
- * allowlisted AMBUSH as one of "the turn-shape conditions promoted to face
- * terms" — but the print text here was never updated to match, so AMBUSH
- * never actually appeared on a card face and FINALE never printed its own
- * name at all. Fixed 2026-09-07 (`/adjust-keywords` pass 2): both now print
- * their registry name, matching FLOW/REQUIEM's shape.
- */
-export function statePredicateText(p: SynergyStatePredicate): string {
-    switch (p.kind) {
-        case 'enemy-dealt-no-damage-last-round':
-            return 'UNMOVED (the enemy dealt you no damage last round)';
-        case 'opening':
-            return p.maxPriorSpells === 0
-                ? 'AMBUSH (your first spell this turn)'
-                : `AMBUSH (within your first ${p.maxPriorSpells + 1} spells this turn)`;
-        case 'finale':
-            return `FINALE ${p.cardsLeftAtMost} (${p.cardsLeftAtMost} or fewer cards left in hand after this)`;
-        case 'recoil-paid-this-turn':
-            return 'blood already paid (you paid RECOIL earlier this turn)';
-        case 'enemy-drew-blood':
-            return 'the enemy drew blood since your last turn';
-        case 'requiem':
-            return `REQUIEM ${p.n} (${p.n}+ cards in your discard pile)`;
-        // THE BIG NUMBERS REWRITE — the mirror of OPENING: the turn that keeps
-        // going. FLOW is registry vocabulary (Dawncaster's Flow), so it prints
-        // as a face term with its threshold spelled out.
-        case 'flow':
-            return `FLOW ${p.minPriorSpells} (${p.minPriorSpells}+ spells already played this turn)`;
-        // EVENTIDE (`/adjust-keywords` pass 11) — the Chaos-family drill: a
-        // parity read on the player's own draw pile, not a turn-position gate.
-        case 'eventide':
-            return 'EVENTIDE (an even number of cards left in your draw pile)';
-    }
-}
-
 /** Human text for one special mechanic (PAID line clauses, real units). */
 export function mechanicText(m: CardSpecialMechanic): string | null {
     switch (m.kind) {
@@ -319,28 +270,19 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
 
     const { verbClass, track } = classifyVerbClass(card, lookupEffect);
     const preview = bottomDamagePreview(card, lookupEffect);
-    const persistent = card.cardType === 'oath' || card.cardType === 'hex';
 
-    // 2026-07-16 — an authored `paidSummary` (spells only) replaces the
-    // generated telegraphese wholesale; the honesty guard pins its numbers
-    // and keywords to the payload, so the authored sentence IS the truth
-    // surface (no auto dot-suffix gets appended on top of it).
-    const authored = !persistent ? card.paidSummary : undefined;
+    // 2026-07-16 — an authored `paidSummary` replaces the generated
+    // telegraphese wholesale; the honesty guard pins its numbers and keywords
+    // to the payload, so the authored sentence IS the truth surface (no auto
+    // dot-suffix gets appended on top of it).
+    const authored = card.paidSummary;
     const paid = authored ?? paidText(card, lookupEffect);
-    // Spec 32 v4 — an oath/hex's passive lives in engine hooks, so its
-    // authored one-line summary (`persistentEffect`) is what the card prints; fall
-    // back to the effect-derived text only if a card is missing the summary.
-    const passive = persistent ? (card.persistentEffect ?? paid) : paid;
 
-    // FREE line — the authored dieless rider (spells only). Spec 32 v4: persistent
-    // cards get a dieless FREE line that grants a TIMED (FREE_ENCHANT_ROUNDS-round)
-    // instance of the same passive; the PAID line makes it permanent.
+    // FREE line — the authored dieless rider.
     const riderOpts = { selfTargetCard: card.targetType === 'self' };
-    const topActionText = persistent
-        ? `FREE (${FREE_ENCHANT_ROUNDS} rounds) — ${passive} (${rankLabel(card)})`
-        : card.free
-            ? `FREE — ${riderText(card.free, riderOpts)}. (${rankLabel(card)})`
-            : `FREE — no effect. (${rankLabel(card)})`;
+    const topActionText = card.free
+        ? `FREE — ${riderText(card.free, riderOpts)}. (${rankLabel(card)})`
+        : `FREE — no effect. (${rankLabel(card)})`;
 
     // WI-2 — an event DoT (poison/bleed) prints its per-event bite ("2/play"),
     // never a round-clock lifetime; only a true round-clock DoT keeps "N over
@@ -352,19 +294,9 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
         return !!def?.payload.damageOverTime && !REGISTRY_DOT_IDS.has(def.id);
     });
     const dotSuffix = authored ? '' : dotFace ? ` (${dotFace})` : preview > 0 && !speciesGlossed ? ` (${preview} over its run)` : '';
-    const bottomActionText = persistent
-        ? `PAID (rest of combat) — ${passive} Costs 1 die.${card.cardType === 'hex' ? ' Attaches to the enemy.' : ''}`
-        : authored
-            ? `PAID — ${authored} Costs 1 die.`
-            : `PAID — ${paid}${dotSuffix}. Costs 1 die.`;
-
-    // Printed DIE LINES, generated from the riders in real units.
-    const dieLines: string[] = [];
-    // WS4.2 — combat-state synergy condition (dieless, ledger-read): printed
-    // exactly as evaluated (P0-truth).
-    if (card.synergy?.statePredicate && card.synergy.rider) {
-        dieLines.push(`◆ ${statePredicateText(card.synergy.statePredicate)}: ${riderText(card.synergy.rider, riderOpts)}`);
-    }
+    const bottomActionText = authored
+        ? `PAID — ${authored} Costs 1 die.`
+        : `PAID — ${paid}${dotSuffix}. Costs 1 die.`;
 
     return {
         id: card.id,
@@ -377,10 +309,9 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
         rarity: rankToRarity(card.rank),
         cardType: card.cardType,
         topActionText,
-        bottomActionText: dieLines.length ? `${bottomActionText} ${dieLines.join(' · ')}` : bottomActionText,
+        bottomActionText,
         bottomDamagePreview: preview,
         primaryEffectId: primaryEnemyEffectId(card, lookupEffect),
-        ...(dieLines.length ? { dieLines } : {}),
     };
 }
 
@@ -393,25 +324,4 @@ export function projectDeck(
     return cardIds
         .map(id => toCombatCard(id, lookupCard, lookupEffect))
         .filter((c): c is CombatCard => c !== null);
-}
-
-/**
- * Phase 169 — Returns `true` when the card's backing card has a
- * `CardSynergy.predicate` whose target-side (`on === 'target'`) condition is
- * currently satisfied by `enemyActiveEffects`. Pure read-only preview helper.
- */
-export function isCombatSynergySatisfied(
-    card: CombatCard,
-    enemyActiveEffects: readonly ActiveEffect[],
-): boolean {
-    const sourceCard = getCardById(card.id);
-    if (!sourceCard?.synergy?.predicate) return false;
-    const { predicate } = sourceCard.synergy;
-    if (predicate.on !== 'target') return false;
-    return enemyActiveEffects.some((ae) => {
-        if (ae.effectId !== predicate.effectId) return false;
-        if (predicate.intensityMin !== undefined && ae.intensity < predicate.intensityMin) return false;
-        if (predicate.durationMin !== undefined && ae.remainingDuration < predicate.durationMin) return false;
-        return true;
-    });
 }

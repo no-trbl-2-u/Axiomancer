@@ -63,12 +63,13 @@ describe('DeckScreen: the list', () => {
     });
 
     it('sections the list by card type', () => {
-        mount([BLOW, WARD, WORD]);
+        mount([BLOW, WORD]);
 
-        // Every surviving card is a spell; a type the deck lacks gets no section.
+        // A Plain Blow is an attack, A Plain Word a spell; a type the deck
+        // lacks (skill) gets no section.
+        expect(screen.getByTestId('deck-group-attack')).toBeTruthy();
         expect(screen.getByTestId('deck-group-spell')).toBeTruthy();
-        expect(screen.queryByTestId('deck-group-oath')).toBeNull();
-        expect(screen.queryByTestId('deck-group-hex')).toBeNull();
+        expect(screen.queryByTestId('deck-group-skill')).toBeNull();
     });
 
     it('renders the headline tallies and the rarity distribution', () => {

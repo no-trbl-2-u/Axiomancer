@@ -30,7 +30,7 @@ function makeStore(): AppStore {
 const playerOf = (store: AppStore): NonNullable<GameState['player']> =>
     (store.getState() as unknown as GameState).player!;
 
-/** A store with a loaded character carrying a themed deck. */
+/** A store with a loaded character carrying a deck. */
 function storeWithPlayer(): AppStore {
     const store = makeStore();
     const player = playerOf(store);
@@ -46,15 +46,13 @@ describe('combat reward draft — store actions', () => {
         expect(store.getState().combatReward).toEqual({ offers: [], claimed: false });
     });
 
-    it('rolls three distinct, resolvable, never-cursed offers into the store', () => {
+    it('rolls three distinct, resolvable offers into the store', () => {
         const store = storeWithPlayer();
         const offers = rollCombatRewardAction(store);
         expect(offers.length).toBe(COMBAT_REWARD_OFFER_COUNT);
         expect(new Set(offers).size).toBe(COMBAT_REWARD_OFFER_COUNT);
         for (const id of offers) {
-            const card = getCardById(id);
-            expect(card).toBeTruthy();
-            expect(card?.theme).not.toBe('curse');
+            expect(getCardById(id)).toBeTruthy();
         }
         expect(store.getState().combatReward.offers).toEqual(offers);
         expect(store.getState().combatReward.claimed).toBe(false);

@@ -133,7 +133,6 @@ export default function DeckScreen() {
                                     <SectionLabel size={10}>{`✠ ${group.label}`}</SectionLabel>
                                     <Text style={styles.groupCount}>{group.count}</Text>
                                 </View>
-                                <Text style={styles.groupBlurb}>{group.blurb}</Text>
                                 <View style={styles.groupList}>
                                     {group.cards.map((card) => (
                                         <DeckCardTile key={card.cardId} card={card} onPress={openCard} />
@@ -195,6 +194,5 @@ const useStyles = makeStyles((AXM) => ({
     tallyValue: { fontFamily: FONTS.gothic, fontSize: 16, color: AXM.parchment },
     groupHead: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
     groupCount: { fontFamily: FONTS.mono, fontSize: 11, color: AXM.bone },
-    groupBlurb: { fontFamily: FONTS.serif, fontSize: 12, lineHeight: 16, color: AXM.bone, marginTop: 2 },
     groupList: { marginTop: 8 },
 }));

@@ -215,6 +215,5 @@ export function scaleCardForStats(card: Card, stats: BaseStats | undefined): Car
         });
     }
     if (card.free) out.free = scaleRider(card.free, stats);
-    if (card.synergy?.rider) out.synergy = { ...card.synergy, rider: scaleRider(card.synergy.rider, stats) };
     return out;
 }

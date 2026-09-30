@@ -4,8 +4,8 @@
  *
  * A playtest CELL freezes one measurement: a campaign stage (player power +
  * enemy roster from `combat.stage-profiles.ts`), one enemy, one scripted
- * policy (`combat.sim-policies.ts`), one deck selection
- * (`combat.deck-draft.ts`), a run count, and a seed. The MATRIX sweeps cells
+ * policy (`combat.sim-policies.ts`), one deck selection (the grey deck
+ * or an explicit card list), a run count, and a seed. The MATRIX sweeps cells
  * across stages/policies/decks and aggregates stage summaries plus card
  * coverage, so the balance loops can see the whole campaign at once.
  *
@@ -15,16 +15,12 @@
  * to `winRate` in every summary, and the deliberately weak `aggro-brute`
  * baseline is expected to underperform the status policies.
  *
- * Sandbox cards: any content registered via `src/Cards/cards.sandbox` is live
- * here automatically — `listSandboxCards()` is merged into stage pools, deck
- * drafts, and the coverage universe, so `/deck-tuning` A/B runs need no extra
- * plumbing.
+ * Sandbox cards: any content registered via `src/Cards/cards.sandbox` joins
+ * the coverage universe and resolves in a `cards:` deck.
  *
  * Determinism: identical specs produce identical results. Per-run engine
- * seeds are `spec.seed + runIndex` (via the sim); deck resolution draws from a
- * LOCAL Park-Miller LCG derived from `spec.seed` — it never touches the global
- * RNG singleton and never calls `Math.random`, so drafting a deck can never
- * perturb the seeded encounter stream (or another cell).
+ * seeds are `spec.seed + runIndex` (via the sim); deck resolution is not
+ * random at all.
  */
 
 import { listSandboxCards } from '../Cards/cards.sandbox';
@@ -34,16 +30,12 @@ import type { Enemy } from '../Enemy/types';
 import { deepClone } from '../Utils';
 import {
     COMBAT_STAGE_ORDER, COMBAT_STAGE_PROFILES, buildStagePlayer, stageEligibleCardIds,
-    type CombatStageId, type CombatStageProfile,
+    type CombatStageId,
 } from './combat.stage-profiles';
-import {
-    draftCombatDeck, resolveDeckSelection, type CombatDeckSelection,
-} from './combat.deck-draft';
-import {
-    COMBAT_DECK_PRESET_ORDER, getDeckPreset, type CombatDeckFocus,
-} from './combat.starter-deck-presets';
-import { presetComplexity, type PresetComplexity } from './combat.card-complexity';
-import { COMBAT_SIM_POLICIES, type CombatSimPolicy, type CombatSimPolicyId } from './combat.sim-policies';
+import { getCardById } from '../Cards/cards.library';
+import { STARTING_CARD_IDS } from './combat.rewards';
+import { deckComplexity, type DeckComplexity } from './combat.card-complexity';
+import { COMBAT_SIM_POLICIES, type CombatSimPolicyId } from './combat.sim-policies';
 import {
     simulateHazardPatternCombatDetailed,
     type CombatCardUsage, type CombatSimStats, type WinPathCounts,
@@ -52,14 +44,23 @@ import {
 import { poolObjectiveTelemetry } from './combat.objective.telemetry';
 import { formatCombatQuality, scoreCombatObjective, type CombatQualityScore } from './combat.objective';
 
+/**
+ * How a playtest cell (or CLI invocation) names the deck it wants: the grey
+ * deck every fresh run opens with (`STARTING_CARD_IDS`), or an explicit card
+ * list. The preset table, the seeded drafts and the measurement-seat swaps
+ * went in R7b (D50): with one card library of three cards there was nothing
+ * left to draft or swap.
+ */
+export type CombatDeckSelection =
+    | { kind: 'grey' }
+    | { kind: 'cards'; cardIds: readonly string[] };
+
 /** One frozen measurement: stage × enemy × policy × deck × runs × seed. */
 export interface PlaytestCellSpec {
     stage: CombatStageId;
     /** Key of `ENEMY_REGISTRY`. */
     enemySlug: string;
     policyId: CombatSimPolicyId;
-    /** 'policy-pick' is resolved HERE: a draft with the policy's
-     *  `preferredFocus`, seeded from `seed`. */
     deck: CombatDeckSelection;
     runs: number;
     seed: number;
@@ -79,7 +80,7 @@ export interface PlaytestMatrixOptions {
     stages?: readonly CombatStageId[];
     /** Default: the two tuned balance witnesses `['greedy', 'blind']`. */
     policies?: readonly CombatSimPolicyId[];
-    /** Default: `[{ kind: 'policy-pick' }]`. */
+    /** Default: `[{ kind: 'grey' }]`. */
     decks?: readonly CombatDeckSelection[];
     /** Cap the enemy roster per stage; default: the whole roster. */
     enemiesPerStage?: number;
@@ -90,7 +91,7 @@ export interface PlaytestMatrixOptions {
     /** Default 60. */
     runsPerCell?: number;
     /** Default 1. Every cell gets the same base seed (cells stay independent —
-     *  each derives its own deck rng and per-run engine seeds from it). */
+     *  each derives its per-run engine seeds from it). */
     seed?: number;
 }
 
@@ -122,28 +123,28 @@ export interface PlaytestStageSummary {
 }
 
 /**
- * The starter-preset doctrine win-rate curve (load-bearing doctrine
+ * The doctrine win-rate curve (load-bearing doctrine
  * 2026-07-08, canonical in VISION.md → Combat vision) expressed as BANDS the
  * instrument can measure against: early ~80%, mid ~50%, late 25-35% (the
  * `impossible` stage went with its only foe in revamp phase R2). The ±5pt tolerance on early/mid is an instrument default
  * reading of the doctrine's "~", not a doctrine change; late is the doctrine's
  * own printed band.
  */
-export const PRESET_DOCTRINE_WIN_BANDS: Readonly<Record<CombatStageId, readonly [number, number]>> =
+export const DOCTRINE_WIN_BANDS: Readonly<Record<CombatStageId, readonly [number, number]>> =
     Object.freeze({
         early: [0.75, 0.85] as const,
         mid: [0.45, 0.55] as const,
         late: [0.25, 0.35] as const,
     });
 
-/** One preset × stage rollup row (runs-weighted over the matching cells). */
-export interface PlaytestPresetStageRow {
+/** One deck × stage rollup row (runs-weighted over the matching cells). */
+export interface PlaytestDeckStageRow {
     stage: CombatStageId;
     cells: number;
     winRate: number;
     /** Warning light (the voided status doctrine) — kept, not the objective. */
     statusEngagement: number;
-    /** **THE OBJECTIVE FUNCTION (Phase 43)** for this preset × stage, scored
+    /** **THE OBJECTIVE FUNCTION (Phase 43)** for this deck × stage, scored
      *  from the row's POOLED objective telemetry. */
     combatQuality: CombatQualityScore;
     avgRounds: number;
@@ -155,19 +156,17 @@ export interface PlaytestPresetStageRow {
     /** Signed distance from the doctrine band: 0 inside the band, else the
      *  gap to the nearest edge (negative = under-performing the band). */
     doctrineDelta: number;
-    /** Runs-weighted win rate per policy that measured this preset+stage. */
+    /** Runs-weighted win rate per policy that measured this deck+stage. */
     policyWinRates: Record<string, number>;
 }
 
-/**
- * Per-preset rollup across the matrix (metrics slate 2026-07-18) — the
- * starter library finally measured as PRESETS, not drafts.
- */
-export interface PlaytestPresetSummary {
-    presetId: string;
-    stages: PlaytestPresetStageRow[];
-    /** **THE OBJECTIVE FUNCTION (Phase 43)** for this preset across every stage
-     *  it was measured on, scored from the preset's POOLED telemetry. One deck,
+/** Per-deck rollup across the matrix (metrics slate 2026-07-18). */
+export interface PlaytestDeckSummary {
+    /** The deck's label (`deckLabel`): `grey` or `cards(N)`. */
+    deckLabel: string;
+    stages: PlaytestDeckStageRow[];
+    /** **THE OBJECTIVE FUNCTION (Phase 43)** for this deck across every stage
+     *  it was measured on, scored from the deck's POOLED telemetry. One deck,
      *  so the IDENTITY component is meaningful here (see `combat.objective.ts`)
      *  — this is the row `/deck-tuning` should rank decks by. */
     combatQuality: CombatQualityScore;
@@ -175,15 +174,14 @@ export interface PlaytestPresetSummary {
      *  off the doctrine curve is this deck?" (0 = every stage in-band). */
     curveDeviation: number;
     /** DYNAMIC complexity (skill ceiling): best-policy minus worst-policy
-     *  runs-weighted win rate across the preset's cells. Null when fewer than
+     *  runs-weighted win rate across the deck's cells. Null when fewer than
      *  two policies measured it. Near-zero = the deck plays itself; pair with
      *  the static `complexity` score to spot complicated-but-shallow decks. */
     skillGap: number | null;
     bestPolicyId: string;
     worstPolicyId: string;
-    /** Static complexity (vocabulary/mechanics load) — null if the preset id
-     *  no longer resolves. */
-    complexity: PresetComplexity | null;
+    /** Static complexity (vocabulary/mechanics load) of the resolved deck. */
+    complexity: DeckComplexity;
 }
 
 export interface PlaytestReport {
@@ -195,9 +193,8 @@ export interface PlaytestReport {
     combatQuality: CombatQualityScore;
     /** Aggregated over cells, weighted by runs. */
     stageSummaries: PlaytestStageSummary[];
-    /** Per-preset rollups over every `preset`-deck cell in the matrix (empty
-     *  when the sweep ran no preset decks — e.g. the policy-pick baseline). */
-    presetSummaries: PlaytestPresetSummary[];
+    /** Per-deck rollups over every cell in the matrix, one per deck label. */
+    deckSummaries: PlaytestDeckSummary[];
     /** Coverage vs the union of eligible pools (library + sandbox) of the
      *  stages run: which cards were ever played vs never touched. `deadCardRate`
      *  is `neverPlayed / (exercised + neverPlayed)` — the dead-card witness as a
@@ -205,44 +202,18 @@ export interface PlaytestReport {
     cardCoverage: { exercised: string[]; neverPlayed: string[]; deadCardRate: number };
 }
 
-/**
- * A tiny local Park-Miller LCG (same constants as `src/Utils/rng.ts`), used
- * ONLY for deck resolution. Local by design: drafting must not consume or
- * reseed the global RNG singleton, so a cell's deck is a pure function of its
- * seed and the engine's per-run streams stay untouched. Never `Math.random`.
- */
-function makeDeckRng(seed: number): () => number {
-    let state = Math.abs(Math.floor(seed)) % 2147483647 || 1;
-    return () => {
-        state = (state * 48271) % 2147483647;
-        return state / 2147483647;
-    };
-}
-
-/** Resolves a cell's deck selection, merging registered sandbox cards into
- *  draft pools ('policy-pick' + 'draft'). Preset/cards selections see sandbox
- *  content through `getCardById` (the sandbox hook) without extra plumbing. */
-function resolveCellDeck(
-    selection: CombatDeckSelection,
-    stage: CombatStageProfile,
-    policy: CombatSimPolicy,
-    rng: () => number,
-): string[] {
-    const extraCards = listSandboxCards();
-    if (selection.kind === 'policy-pick') {
-        return draftCombatDeck({ focus: policy.preferredFocus, stage, rng, extraCards });
-    }
-    if (selection.kind === 'draft') {
-        return draftCombatDeck({ focus: selection.focus, size: selection.size, stage, rng, extraCards });
-    }
-    return resolveDeckSelection(selection, stage, rng);
+/** Resolves a cell's deck selection into a playable card-id list; ids that
+ *  do not resolve (library or registered sandbox card) are dropped. */
+export function resolveDeckSelection(selection: CombatDeckSelection): string[] {
+    const ids = selection.kind === 'grey' ? STARTING_CARD_IDS : selection.cardIds;
+    return ids.filter(id => !!getCardById(id));
 }
 
 /**
  * Grants every non-synthetic card in `deckCardIds` to the player's
  * `knownCards` (in place, duplicates removed). The engine's `executeCard`
  * refuses to fire a card the player does not know, and an explicit deck
- * selection (preset / draft / sandbox cards) may reach beyond what the player
+ * selection (a `cards:` list, sandbox cards) may reach beyond what the player
  * has learned — the maturity gate belongs to deck SELECTION, not the engine
  * check, so every deck consumer (harness cells, the combat CLI's `--deck`)
  * grants the deck before the encounter.
@@ -258,18 +229,15 @@ export function grantDeckKnowledge(player: Character, deckCardIds: readonly stri
 export function runPlaytestCell(spec: PlaytestCellSpec): PlaytestCellResult {
     const stage = COMBAT_STAGE_PROFILES[spec.stage];
     if (!stage) throw new Error(`Unknown combat stage '${String(spec.stage)}'`);
-    const policy = COMBAT_SIM_POLICIES[spec.policyId];
-    if (!policy) throw new Error(`Unknown combat sim policy '${String(spec.policyId)}'`);
+    if (!COMBAT_SIM_POLICIES[spec.policyId]) throw new Error(`Unknown combat sim policy '${String(spec.policyId)}'`);
     const enemyBase = (ENEMY_REGISTRY as Record<string, Enemy>)[spec.enemySlug];
     if (!enemyBase) throw new Error(`Unknown enemy slug '${spec.enemySlug}' (not in ENEMY_REGISTRY)`);
 
-    const deckCardIds = resolveCellDeck(spec.deck, stage, policy, makeDeckRng(spec.seed));
+    const deckCardIds = resolveDeckSelection(spec.deck);
     const player = buildStagePlayer(stage);
     // The player must KNOW every card in the resolved deck or the engine
-    // refuses to play it: explicit selections (preset/cards) may reach above
-    // the stage's learned pool, and drafted sandbox cards are never in it.
-    // The stage maturity gate lives in DRAFTING (the pool), not in the
-    // engine's knownCards check — so grant the deck's non-synthetic cards.
+    // refuses to play it: a `cards:` list may reach above the stage's
+    // learned pool, and sandbox cards are never in it.
     grantDeckKnowledge(player, deckCardIds);
     const enemy = deepClone(enemyBase);
     const { stats, cardUsage } = simulateHazardPatternCombatDetailed({
@@ -338,28 +306,20 @@ function bandDelta(winRate: number, band: readonly [number, number]): number {
     return 0;
 }
 
-/** Groups the matrix's `preset`-deck cells into per-preset × stage rollups
- *  (metrics slate 2026-07-18). Cells with non-preset decks contribute nothing. */
-function summarizePresets(cells: readonly PlaytestCellResult[]): PlaytestPresetSummary[] {
-    const byPreset = new Map<string, PlaytestCellResult[]>();
+/** Groups the matrix's cells into per-deck × stage rollups (metrics slate
+ *  2026-07-18), one per deck label, in first-seen order. */
+function summarizeDecks(cells: readonly PlaytestCellResult[]): PlaytestDeckSummary[] {
+    const byDeck = new Map<string, PlaytestCellResult[]>();
     for (const cell of cells) {
-        if (cell.spec.deck.kind !== 'preset') continue;
-        const id = cell.spec.deck.presetId;
-        const bucket = byPreset.get(id) ?? [];
+        const label = deckLabel(cell.spec.deck);
+        const bucket = byDeck.get(label) ?? [];
         bucket.push(cell);
-        byPreset.set(id, bucket);
+        byDeck.set(label, bucket);
     }
 
-    const order = [
-        ...COMBAT_DECK_PRESET_ORDER.filter(id => byPreset.has(id)),
-        ...[...byPreset.keys()].filter(id => !COMBAT_DECK_PRESET_ORDER.includes(id)).sort(),
-    ];
-
-    const summaries: PlaytestPresetSummary[] = [];
-    for (const presetId of order) {
-        const mine = byPreset.get(presetId)!;
-
-        const stages: PlaytestPresetStageRow[] = [];
+    const summaries: PlaytestDeckSummary[] = [];
+    for (const [label, mine] of byDeck) {
+        const stages: PlaytestDeckStageRow[] = [];
         for (const stage of COMBAT_STAGE_ORDER) {
             const stageCells = mine.filter(c => c.spec.stage === stage);
             if (stageCells.length === 0) continue;
@@ -404,13 +364,13 @@ function summarizePresets(cells: readonly PlaytestCellResult[]): PlaytestPresetS
                 deckUtilization: util / denom,
                 usageEntropy: entropy / denom,
                 winPathCounts,
-                doctrineDelta: bandDelta(winRate, PRESET_DOCTRINE_WIN_BANDS[stage]),
+                doctrineDelta: bandDelta(winRate, DOCTRINE_WIN_BANDS[stage]),
                 policyWinRates,
             });
         }
 
         // Dynamic complexity (skill ceiling): per-policy runs-weighted win rate
-        // over ALL the preset's cells; the gap between the best and worst
+        // over ALL the deck's cells; the gap between the best and worst
         // policy is how much play quality matters in this deck.
         const overallPolicyRuns = new Map<string, number>();
         const overallPolicyWins = new Map<string, number>();
@@ -435,7 +395,7 @@ function summarizePresets(cells: readonly PlaytestCellResult[]): PlaytestPresetS
             : 0;
 
         summaries.push({
-            presetId,
+            deckLabel: label,
             stages,
             combatQuality: scoreCombatObjective(
                 poolObjectiveTelemetry(mine.map(c => c.stats.objectiveTelemetry)),
@@ -444,7 +404,7 @@ function summarizePresets(cells: readonly PlaytestCellResult[]): PlaytestPresetS
             skillGap,
             bestPolicyId,
             worstPolicyId,
-            complexity: presetComplexity(presetId),
+            complexity: deckComplexity(mine[0].deckCardIds),
         });
     }
     return summaries;
@@ -457,7 +417,7 @@ function summarizePresets(cells: readonly PlaytestCellResult[]): PlaytestPresetS
 export function runPlaytestMatrix(options: PlaytestMatrixOptions = {}): PlaytestReport {
     const stages = options.stages ?? COMBAT_STAGE_ORDER;
     const policies: readonly CombatSimPolicyId[] = options.policies ?? ['greedy', 'blind'];
-    const decks: readonly CombatDeckSelection[] = options.decks ?? [{ kind: 'policy-pick' }];
+    const decks: readonly CombatDeckSelection[] = options.decks ?? [{ kind: 'grey' }];
     const runsPerCell = options.runsPerCell ?? 60;
     const seed = options.seed ?? 1;
 
@@ -506,21 +466,13 @@ export function runPlaytestMatrix(options: PlaytestMatrixOptions = {}): Playtest
             poolObjectiveTelemetry(cells.map(c => c.stats.objectiveTelemetry)),
         ),
         stageSummaries,
-        presetSummaries: summarizePresets(cells),
+        deckSummaries: summarizeDecks(cells),
         cardCoverage: { exercised, neverPlayed, deadCardRate },
     };
 }
 
 function deckLabel(selection: CombatDeckSelection): string {
-    switch (selection.kind) {
-        case 'preset':
-            return selection.swaps && selection.swaps.length > 0
-                ? `preset:${selection.presetId}+${selection.swaps.length}sw`
-                : `preset:${selection.presetId}`;
-        case 'draft': return `draft:${selection.focus}`;
-        case 'cards': return `cards(${selection.cardIds.length})`;
-        case 'policy-pick': return 'policy-pick';
-    }
+    return selection.kind === 'grey' ? 'grey' : `cards(${selection.cardIds.length})`;
 }
 
 const pct = (n: number): string => `${(n * 100).toFixed(0).padStart(3)}%`;
@@ -547,7 +499,7 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
     lines.push('  Surge meter, the Dice (spine, weight 0.40 — a spine-blind deck cannot score well).');
     lines.push(`  matrix ${formatCombatQuality(report.combatQuality)}`);
     lines.push('  (idn is a PER-DECK reading — pooling several decks dilutes the dominant share and');
-    lines.push('   inflates it. Read idn off a cell or a preset row, not off a multi-deck matrix.)');
+    lines.push('   inflates it. Read idn off a cell or a deck row, not off a multi-deck matrix.)');
     {
         const r = report.combatQuality.readings;
         lines.push(
@@ -613,24 +565,22 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
         lines.push(`             ${formatCombatQuality(summary.combatQuality)}`);
     }
 
-    if (report.presetSummaries.length > 0) {
+    if (report.deckSummaries.length > 0) {
         lines.push('');
-        lines.push('Preset summaries (doctrine bands: early 75-85% / mid 45-55% / late 25-35% / imp ~0;');
+        lines.push('Deck summaries (doctrine bands: early 75-85% / mid 45-55% / late 25-35%;');
         lines.push(' dev = signed gap to the band edge, 0% = in-band; curve-dev = mean |dev| over stages;');
         lines.push(' skill-gap = best-policy minus worst-policy win rate (dynamic complexity);');
         lines.push(' cx = static complexity score, kw = distinct keywords, orph = single-card keywords)');
-        for (const preset of report.presetSummaries) {
-            const cx = preset.complexity;
-            const cxNote = cx
-                ? `cx=${cx.score.toFixed(1)} (kw=${cx.distinctKeywords.length}, orph=${cx.orphanKeywords.length},`
-                    + ` heaviest=${cx.maxCardId} ${cx.maxCardScore})`
-                : 'cx=?';
-            const gapNote = preset.skillGap !== null
-                ? `skill-gap=${pct(preset.skillGap)} (${preset.bestPolicyId} > ${preset.worstPolicyId})`
+        for (const deck of report.deckSummaries) {
+            const cx = deck.complexity;
+            const cxNote = `cx=${cx.score.toFixed(1)} (kw=${cx.distinctKeywords.length}, orph=${cx.orphanKeywords.length},`
+                + ` heaviest=${cx.maxCardId} ${cx.maxCardScore})`;
+            const gapNote = deck.skillGap !== null
+                ? `skill-gap=${pct(deck.skillGap)} (${deck.bestPolicyId} > ${deck.worstPolicyId})`
                 : 'skill-gap=n/a (one policy)';
-            lines.push(`  ${preset.presetId.padEnd(11)}curve-dev=${pct(preset.curveDeviation)}  ${gapNote}  ${cxNote}`);
-            lines.push(`    ${formatCombatQuality(preset.combatQuality)}  <- rank decks by this`);
-            for (const row of preset.stages) {
+            lines.push(`  ${deck.deckLabel.padEnd(11)}curve-dev=${pct(deck.curveDeviation)}  ${gapNote}  ${cxNote}`);
+            lines.push(`    ${formatCombatQuality(deck.combatQuality)}  <- rank decks by this`);
+            for (const row of deck.stages) {
                 const sign = row.doctrineDelta > 0 ? '+' : '';
                 lines.push(
                     `    ${row.stage.padEnd(11)}cells=${String(row.cells).padEnd(4)}`
@@ -641,7 +591,7 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
                 );
                 lines.push(`      ${formatCombatQuality(row.combatQuality)}`);
             }
-            if (cx && cx.orphanKeywords.length > 0) {
+            if (cx.orphanKeywords.length > 0) {
                 lines.push(`    orphan keywords: ${cx.orphanKeywords.join(', ')}`);
             }
         }
@@ -746,66 +696,17 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
 // ─── CLI-facing helpers (UI-free logic the CLIs delegate to) ─────────────────
 
 /** The deck-selection flag grammar shared by `npm run combat-playtest` and
- *  `npm run combat -- --deck`. The `+swap:` suffix runs a preset with
- *  measurement-seat substitutions (every copy of `out` replaced by `in`) —
- *  the `/deck-tuning` A/B surface for swap-pool candidates; swap-ins that
- *  live in a sandbox set need that set applied (`--sandbox=<setId>`). */
-export const DECK_SELECTION_GRAMMAR =
-    'preset:<id>[+swap:<out>/<in>,...] | draft:<focus> | cards:<id,id,...> | policy-pick';
-
-/** Every draftable focus (the `CombatDeckFocus` union, as data for parsing). */
-const DECK_DRAFT_FOCUSES: readonly CombatDeckFocus[] = Object.freeze([
-    'dot', 'control', 'utility', 'damage', 'balanced',
-]);
+ *  `npm run combat -- --deck`. */
+export const DECK_SELECTION_GRAMMAR = 'grey | cards:<id,id,...>';
 
 /**
  * Parses the CLI deck-selection grammar into a `CombatDeckSelection`.
- * Throws an `Error` with a corrective message (grammar + known values) on any
- * invalid input — preset ids and draft focuses are validated eagerly so a typo
- * fails loudly instead of silently falling back to `buildCombatDeck`.
+ * Throws an `Error` with a corrective message (the grammar) on any invalid
+ * input, so a typo fails loudly instead of silently falling back.
  */
 export function parseDeckSelectionArg(raw: string): CombatDeckSelection {
     const value = raw.trim();
-    if (value === 'policy-pick') return { kind: 'policy-pick' };
-    if (value.startsWith('preset:')) {
-        const rest = value.slice('preset:'.length).trim();
-        const swapMarker = '+swap:';
-        const markerAt = rest.indexOf(swapMarker);
-        const presetId = (markerAt === -1 ? rest : rest.slice(0, markerAt)).trim();
-        if (!getDeckPreset(presetId)) {
-            throw new Error(
-                `Unknown deck preset '${presetId}'. Known presets: ${COMBAT_DECK_PRESET_ORDER.join(', ')}`,
-            );
-        }
-        if (markerAt === -1) return { kind: 'preset', presetId };
-        const swaps = rest.slice(markerAt + swapMarker.length)
-            .split(',').map(s => s.trim()).filter(Boolean)
-            .map(pair => {
-                const parts = pair.split('/').map(p => p.trim());
-                if (parts.length !== 2 || !parts[0] || !parts[1]) {
-                    throw new Error(
-                        `Bad swap pair '${pair}' — expected <out>/<in>. Grammar: ${DECK_SELECTION_GRAMMAR}`,
-                    );
-                }
-                return { out: parts[0], in: parts[1] };
-            });
-        if (swaps.length === 0) {
-            throw new Error(`'+swap:' needs at least one <out>/<in> pair. Grammar: ${DECK_SELECTION_GRAMMAR}`);
-        }
-        // Swap-in ids are validated at RESOLVE time (`applyDeckSwaps`), not
-        // here — a sandbox swap-in is only registered once the CLI applies
-        // its `--sandbox` set, which happens after flag parsing.
-        return { kind: 'preset', presetId, swaps };
-    }
-    if (value.startsWith('draft:')) {
-        const focus = value.slice('draft:'.length).trim();
-        if (!(DECK_DRAFT_FOCUSES as readonly string[]).includes(focus)) {
-            throw new Error(
-                `Unknown draft focus '${focus}'. Known focuses: ${DECK_DRAFT_FOCUSES.join(', ')}`,
-            );
-        }
-        return { kind: 'draft', focus: focus as CombatDeckFocus };
-    }
+    if (value === 'grey') return { kind: 'grey' };
     if (value.startsWith('cards:')) {
         const cardIds = value.slice('cards:'.length).split(',').map(s => s.trim()).filter(Boolean);
         if (cardIds.length === 0) {
@@ -814,14 +715,4 @@ export function parseDeckSelectionArg(raw: string): CombatDeckSelection {
         return { kind: 'cards', cardIds };
     }
     throw new Error(`Unknown deck selection '${raw}'. Grammar: ${DECK_SELECTION_GRAMMAR}`);
-}
-
-/**
- * A seeded rng for deck resolution OUTSIDE the matrix (the interactive combat
- * CLI's `--deck` + `--seed`): the same local Park-Miller stream the playtest
- * cells use, so a CLI-drafted deck is a pure function of the seed and never
- * touches (or reseeds) the global RNG singleton the encounter itself draws on.
- */
-export function createDeckSelectionRng(seed: number): () => number {
-    return makeDeckRng(seed);
 }

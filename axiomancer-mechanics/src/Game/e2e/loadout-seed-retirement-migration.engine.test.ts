@@ -25,10 +25,10 @@ import {
     COMBAT_LOADOUT_FLAG_PREFIX, addToLoadout, getCombatLoadout,
 } from '../../Combat/combat.loadout';
 import { buildCombatDeck } from '../../Combat/combat.deck';
+import { STARTING_CARD_IDS } from '../../Combat/combat.rewards';
 import { MIN_COMBAT_DECK_SIZE, removeCardFromCombatDeck } from '../../Cards/card.removal';
 import { executeCard } from '../../Cards/card.engine';
 import { getCardById } from '../../Cards/cards.library';
-import { buildPresetDeck } from '../../Combat/combat.starter-deck-presets';
 import { FloatEye } from '../../Enemy/enemy.library';
 import type { CombatState } from '../../Combat/types';
 
@@ -68,7 +68,7 @@ describe('createNewGameState — no starting-loadout seed (v23)', () => {
 
     it('the dealt deck is exactly the starter bundle written to knownCards', () => {
         const fresh = createNewGameState();
-        const bundle = buildPresetDeck('grey');
+        const bundle = [...STARTING_CARD_IDS];
         expect(bundle.length).toBeGreaterThanOrEqual(MIN_COMBAT_DECK_SIZE);
         const player = { ...fresh.player, knownCards: bundle, combatRewardCards: [] };
         expect(buildCombatDeck(player, fresh.flags)).toEqual(bundle);
@@ -81,7 +81,7 @@ describe('createNewGameState — no starting-loadout seed (v23)', () => {
     it('a rest-node CUT is legal once the bundle holds one reward (the seed no longer shadows it)', () => {
         const fresh = createNewGameState();
         const player = {
-            ...fresh.player, knownCards: buildPresetDeck('grey'), combatRewardCards: ['grey-strike'],
+            ...fresh.player, knownCards: [...STARTING_CARD_IDS], combatRewardCards: ['grey-strike'],
         };
         const cut = removeCardFromCombatDeck(player, 'grey-strike', fresh.flags);
         expect(cut.ok).toBe(true);
@@ -124,7 +124,7 @@ describe('migrate v22 → v23 — strip the starting-loadout seed', () => {
 
     it('REPRO: the seed dealt a starter the bundle lacked and executeCard threw; v23 does not', () => {
         // The grey bundle does NOT contain the seeded `thin-hymn`.
-        const bundle = buildPresetDeck('grey');
+        const bundle = [...STARTING_CARD_IDS];
         expect(bundle.length).toBeGreaterThan(0);
         expect(bundle).not.toContain('thin-hymn');
         expect(LEGACY_V22_SEED_IDS).toContain('thin-hymn');

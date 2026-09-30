@@ -21,9 +21,6 @@
  *     "unmapped mechanic kind".
  *   - The FREE line (`CardRider`) is proven field by field in
  *     `assertRiderPromise`.
- *   - `oath` / `hex` cards short-circuit the spell pipeline in the engine
- *     (the die is spent and the card joins its zone with no card execution),
- *     so their sole promise is zone membership.
  *
  * Card-state-construction pattern (hand/dice/draft) follows
  * `hazard-pattern-combat.engine.test.ts`; the sandbox-fixture-card and
@@ -165,15 +162,6 @@ function assertCardEffective(cardId: string): void {
     // entry) or the card is genuinely broken (move it to KNOWN_INEFFECTIVE).
     const fizzle = events.find(e => e.kind === 'effect-fizzled');
     expect(fizzle, `${cardId}: unexpected fizzle`).toBeUndefined();
-
-    if (card!.cardType === 'oath') {
-        expect(after.persistentZone, cardId).toContain(cardId);
-        return;
-    }
-    if (card!.cardType === 'hex') {
-        expect(after.enemyAttachments ?? [], cardId).toContain(cardId);
-        return;
-    }
 
     for (const ce of card!.combatEffects ?? []) {
         assertCombatEffectLanded(cardId, ce, before, after);

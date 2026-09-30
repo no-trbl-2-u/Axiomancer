@@ -9,14 +9,13 @@
  * disagreed with the shipped data — which is exactly the class of bug
  * (finding 4) this whole change exists to stop repeating.
  *
- *   grey-strike   A Plain Blow  rank 1 'any' spell
- *   grey-ward     A Plain Ward  rank 1 'any' spell
+ *   grey-strike   A Plain Blow  rank 1 'any' attack
+ *   grey-ward     A Plain Ward  rank 1 'any' skill
  *   grey-word     A Plain Word  rank 1 'any' spell
  *
- * After the card purge (2026-09-27) the grey office is the whole library:
- * one card type (spell) and one rarity band (common). The multi-group,
- * rank-ordering and multi-band tests went with the purged oath/hex and
- * higher-rank cards; they return when guided sessions add such cards.
+ * The grey office is the whole library: one card per type and one rarity
+ * band (common). Rank-ordering and multi-band tests return when guided
+ * sessions add higher-rank cards.
  *
  * Hermetic = self-contained + deterministic + isolated.
  * See docs/testing.md for the full standard.
@@ -126,30 +125,22 @@ describe('selectDeckViewModel: grouping by card type', () => {
     it('sorts a card into the group its engine card type names', () => {
         const vm = selectDeckViewModel(runWith([BLOW, WARD, WORD]));
 
-        expect(vm.groups.map((g) => g.key)).toEqual(['spell']);
-        expect(vm.groups.map((g) => g.label)).toEqual(['SPELLS']);
+        expect(vm.groups.map((g) => g.key)).toEqual(['attack', 'skill', 'spell']);
+        expect(vm.groups.map((g) => g.label)).toEqual(['ATTACKS', 'SKILLS', 'SPELLS']);
         for (const group of vm.groups) {
             for (const card of group.cards) {
                 expect(card.cardType).toBe(group.key);
-                expect(getCardById(card.cardId)?.cardType ?? 'spell').toBe(group.key);
+                expect(getCardById(card.cardId)?.cardType).toBe(group.key);
             }
         }
     });
 
     it('counts group totals in COPIES, not rows', () => {
         const vm = selectDeckViewModel(runWith([BLOW, BLOW, WORD]));
-        const spells = vm.groups.find((g) => g.key === 'spell');
+        const attacks = vm.groups.find((g) => g.key === 'attack');
 
-        expect(spells?.cards).toHaveLength(2);
-        expect(spells?.count).toBe(3);
-    });
-
-    it('gives every group a blurb naming how that type behaves', () => {
-        const vm = selectDeckViewModel(runWith([BLOW, WARD, WORD]));
-
-        for (const group of vm.groups) {
-            expect(group.blurb.length).toBeGreaterThan(0);
-        }
+        expect(attacks?.cards).toHaveLength(1);
+        expect(attacks?.count).toBe(2);
     });
 });
 
@@ -218,7 +209,6 @@ describe('selectDeckViewModel: printed text is shared, not forked', () => {
             expect(card.freeText).toBe(detail.freePill);
             expect(card.paidText).toBe(detail.diePaidLine);
             expect(card.keywords).toEqual(detail.keywords);
-            expect(card.dieLines).toEqual(projected!.dieLines ?? []);
         }
     });
 
@@ -230,12 +220,6 @@ describe('selectDeckViewModel: printed text is shared, not forked', () => {
             expect(card.outcomeLine.length).toBeGreaterThan(0);
             if (card.paidText !== null) expect(card.paidText.length).toBeGreaterThan(0);
         }
-    });
-
-    it('gives spells no free-vs-permanent footer (persistent cards were purged)', () => {
-        const vm = selectDeckViewModel(runWith([BLOW, WARD, WORD]));
-
-        for (const id of [BLOW, WARD, WORD]) expect(findCard(vm, id).durationFooter).toBeNull();
     });
 });
 

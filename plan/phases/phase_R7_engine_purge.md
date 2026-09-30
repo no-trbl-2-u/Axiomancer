@@ -124,6 +124,57 @@ Scope 1–7 landed, with these calls made against the tree:
   for deleted verbs (the PIP numbers now match the engine's
   `PIP_INTENSITY_BONUS` 2 / `PIP_GUARD_BONUS` 5).
 
+## Scope — R7b (refined against the tree R7a left, 2026-09-30)
+
+1. **Synergy**: the `CardSynergy` / `SynergyPredicate` /
+   `SynergyStatePredicate` types, `Card.synergy`, `CardUpgrade.synergy`,
+   `synergy-predicates.ts`, `statePredicateText`, `isCombatSynergySatisfied`
+   and the printed synergy line (`CombatCard.dieLines`, whose only producer it
+   was).
+2. **Themes**: `card-themes.ts`, `Card.theme`, `THEME_KEYWORDS` and the
+   theme reads in upgrades, stage profiles, `executeCard`'s curse ownership
+   leg and the catalog export.
+3. **Card types → Attack / Skill / Spell (D51)**: `CardType` becomes
+   `'attack' | 'skill' | 'spell'`; Blow is an Attack, Ward a Skill, Word a
+   Spell. The oath / hex zones go whole: `persistentZone`, `enemyAttachments`,
+   the timed `tempZone` / `enemyTempAttachments`, `enemyEnchantments`,
+   `playerAttachments`, `playFreeEnchant`, the PAID zone routing, the timed
+   tick, their events, `FREE_ENCHANT_ROUNDS`, `Card.persistentEffect` and the
+   `oath` / `hex` verb classes.
+4. **Deck draft and presets**: `combat.deck-draft.ts`,
+   `combat.starter-deck-presets.ts` (the grey deck is `STARTING_CARD_IDS`),
+   the sims' `preferredFocus`, the CLI `draft:` / `preset:` / `+swap:` /
+   `policy-pick` grammar and `--sandbox`, and `cards.sandbox-sets.ts`.
+5. **Reward steering**: the theme pull, the dominant-theme keyword guarantee,
+   the rarity weights, the random-picks gate, `extraPool`,
+   `combat.reward-draft.sim.ts`, `card-keywords.ts` and `keywordsOf`. The
+   reward itself stays (D44): a uniform draw over the library.
+6. **Empty registry**: `cards.allies.ts` (no ally, no grant path).
+7. **Mobile follow-through** (type-check requires it) and the carrier sweep:
+   OATH and HEX leave the mobile keyword glosses and both glyph tables.
+
+### As shipped (R7b, 2026-09-30)
+
+- **`card-keywords.ts` went, not fixed.** The part plan asked for a fix
+  (it mapped neither DEAL nor VULNERABLE); its only consumer was the reward
+  keyword pull, so with the pull gone it had no reader. Mobile keeps its own
+  presentation mapping (`state/combat/keywords.ts`), and B4 records the
+  keyword surface.
+- **The playtest matrix keeps its shape on two deck kinds**: `grey` (the
+  default) and `cards:`. Per-preset rollups became per-deck rollups
+  (`deckSummaries`, `deckComplexity`); `PRESET_DOCTRINE_WIN_BANDS` is
+  `DOCTRINE_WIN_BANDS`. The dice-economy sim runs the grey deck per stage.
+- **`cards.sandbox.ts` stays**: dozens of suites register test cards
+  through it. Only the named-set layer and the CLI `--sandbox` flag went.
+- **The die-economy canary flipped back to a guard.** The matrix now runs the
+  full 10-card grey deck instead of 6-card drafts, and its longer fights bank
+  and ripen Reserve dice (2 verbs); the objective suite asserts `> 0` again.
+- **Mobile**: the starter bundle is one literal (the save's `bundle:grey`
+  flag names it); the deck screen groups ATTACKS / SKILLS / SPELLS; the oath
+  / hex face kinds, standing chips, duration footers, die lines and group
+  blurbs are gone.
+- **`cards.haunts.ts` waits for R7c** with the `executeCard` haunt branch.
+
 ## Out of scope for R7a (named so it is not mistaken for a miss)
 
 - `synergy` and `synergy-predicates.ts`, themes, draft, presets,

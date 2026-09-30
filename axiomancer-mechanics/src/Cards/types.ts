@@ -5,8 +5,6 @@
  * `specs/README.md`); the live design is spec 32 + THE BIG NUMBERS REWRITE.
  */
 
-import type { CardTheme } from './card-themes';
-
 /**
  * A stat colour (body / mind / heart). A card's `color` is one of these or
  * 'any' (see `CardAspect`); the dice and the colour-match bonus read it.
@@ -53,16 +51,11 @@ export function rankToRarity(rank: CardRank): CardRarity {
 }
 
 /**
- * Spec 32 v3 — card type. Open enum (more types to come). Spec 34 R-9/R-10:
- * `enchantment`/`disenchant` renamed to `oath`/`hex` (display + literal).
- * - `spell` — play → discard; recycled by the reshuffle law.
- * - `oath`  — POSITIVE passive, player-side. Spec 32 v4: FREE line = a TIMED
- *             instance (3 rounds, dieless); PAID line = the same passive made
- *             permanent (rest of combat, unique, leaves the deck cycle).
- * - `hex`   — NEGATIVE passive attached to the ENEMY. Same FREE-timed / PAID-
- *             permanent split as `oath`.
+ * A card's type (D51): Attack (the DEAL card), Skill (the GUARD card) and
+ * Spell (the VULNERABLE card). More types arrive only in a card session with
+ * T (D37). Every type plays the same way: FREE or PAID, then discard.
  */
-export type CardType = 'spell' | 'oath' | 'hex';
+export type CardType = 'attack' | 'skill' | 'spell';
 
 /**
  * Targeting scope for a card effect.
@@ -177,8 +170,7 @@ export interface CardRider {
 export type UpgradableRiderField = 'damage' | 'guard';
 
 /**
- * An additive patch over a {@link CardRider} — the FREE line, or the
- * `synergy` rider.
+ * An additive patch over a {@link CardRider} — the FREE line.
  */
 export interface CardRiderUpgrade extends Partial<Record<UpgradableRiderField, number>> {
     /** Deltas on the rider's `applyEffect` payload. `intensity` is clamped to
@@ -227,8 +219,6 @@ export interface CardUpgrade {
      * P0-truth law — `src/Combat/e2e/paid-summary-honesty.engine.test.ts`).
      */
     paidSummary?: string;
-    /** Replacement passive summary for an `oath` / `hex`. */
-    persistentEffect?: string;
     /** Deltas on `specialMechanics`. */
     mechanics?: CardMechanicUpgrade[];
     /** Deltas on `combatEffects`. */
@@ -236,115 +226,6 @@ export interface CardUpgrade {
     /** Deltas on the FREE line. Applies even when the base card has no
      *  `free` rider (the deltas become the rider). */
     free?: CardRiderUpgrade;
-    /** Deltas on the synergy rider. The state predicate itself is not
-     *  patchable: relaxing a gate is a rework, not a `+`. */
-    synergy?: CardRiderUpgrade;
-}
-
-/**
- * Phase 66 — synergy predicate. The matched ActiveEffect on `on`
- * satisfies the predicate when its `effectId` matches AND its
- * `intensity` >= `intensityMin` (if set) AND its `remainingDuration`
- * >= `durationMin` (if set).
- */
-export interface SynergyPredicate {
-    effectId: string;
-    on: 'caster' | 'target';
-    intensityMin?: number;
-    durationMin?: number;
-}
-
-/**
- * WS4.2 (spec 32 §12 item 4) — a COMBAT-STATE synergy predicate: instead of
- * matching an ActiveEffect, it reads one of the ratified encounter ledgers at
- * play time. A closed union — extend it here (the existing synergy machinery
- * is the ONE conditional gate; do not grow a parallel one).
- *
- * Evaluation timing (all kinds): `playBottomAction` checks the predicate
- * against the INCOMING state — before this play increments
- * `spellsPlayedThisTurn`, before its own recoil posts to
- * `recoilPaidThisTurn`, and before the played card leaves `hand`. PAID face
- * only (the FREE line never evaluates conditions).
- *
- * - `enemy-dealt-no-damage-last-round` — true when `enemyDamageLastRound`
- *   (post-soak HP the enemy's threat landed between the player's turns) is 0:
- *   fully blocked, denied, or the enemy simply did not act. Vacuously true on
- *   the opening turn (no prior round exists) — deterministic and printable.
- *
- * WS5.2 (sequencing grammar, plan §WS5) — the turn-SHAPE conditions:
- * - `opening` — at most `maxPriorSpells` PAID spells have resolved this turn
- *   (0 = this is the turn's first spell; 1 = first or second). FREE plays
- *   never consume the opening (they don't increment the counter).
- * - `finale` — playing this card leaves at most `cardsLeftAtMost` cards in
- *   hand (the eval-time hand still CONTAINS this card, so the check is
- *   `hand.length - 1 <= cardsLeftAtMost`). "≤ 2 left behind" fires on the
- *   third PAID play of a standard 5-card, 3-die turn.
- * - `recoil-paid-this-turn` — a PRIOR play this turn paid a blood price
- *   (`recoilPaidThisTurn > 0`; this play's own recoil does not count — the
- *   Frenzy shape needs the cost already on the ledger).
- * - `enemy-drew-blood` — the enemy landed damage since the start of the
- *   player's previous turn (`enemyDamageThisTurn > 0` OR
- *   `enemyDamageLastRound > 0`). The enemy hits BETWEEN player turns, so at
- *   play time the live leg is the rollover; the this-turn leg is included so
- *   the predicate stays honest if mid-turn enemy damage ever exists.
- */
-export type SynergyStatePredicate =
-    | { kind: 'enemy-dealt-no-damage-last-round' }
-    | { kind: 'opening'; maxPriorSpells: number }
-    | { kind: 'finale'; cardsLeftAtMost: number }
-    | { kind: 'recoil-paid-this-turn' }
-    | { kind: 'enemy-drew-blood' }
-    /** REQUIEM N (profane-canon rework) — true when the player's discard pile
-     *  holds ≥ `n` cards at play time (the delirium/threshold read: the dead
-     *  remember). Prices at the threshold ×0.5 condition discount. */
-    | { kind: 'requiem'; n: number }
-    /** FLOW N (THE BIG NUMBERS REWRITE, from Dawncaster's Flow) — true when at
-     *  least `minPriorSpells` PAID spells have already resolved this turn. The
-     *  mirror of `opening`: the reward for a turn that keeps going, where
-     *  `opening` (`maxPriorSpells: 0`) is AMBUSH, the reward for leading with
-     *  it. */
-    | { kind: 'flow'; minPriorSpells: number }
-    /** EVENTIDE (`/adjust-keywords` pass 11, drilling Dawncaster's Balance/
-     *  Order "Chaos" family — AUDIT.md loop-call, DECIDED via /oversight
-     *  2026-09-15) — true when the player's draw pile holds an EVEN number of
-     *  cards at play time. A genuinely different axis from every other
-     *  turn-shape predicate: those gate on position-in-turn or hand/discard
-     *  SIZE; this gates on a PARITY property of the deck the player is
-     *  already playing, unrelated to when in the turn the card lands. One
-     *  drilled keyword rather than Dawncaster's two (Balance/Order) — an
-     *  even-only check covers the design niche without minting a near-
-     *  synonym pair. */
-    | { kind: 'eventide' };
-
-/**
- * Synergy clause on a `Card`. Every library synergy is a combat-state
- * gate: `statePredicate` is read by `playCombatCard` and, when it holds,
- * `rider` fires FREE.
- *
- * The Phase 66 effect-matching payload (bonus damage, damage multipliers,
- * consume / clear-all / apply-on-fire side effects) and the `executeCard`
- * branch that evaluated it were deleted in TRIM THE FAT T2a: no library card
- * carried them. `predicate` survives because the Phase 169 preview helper
- * `isCombatSynergySatisfied` still reads it.
- */
-export interface CardSynergy {
-    /** Optional predicate. If absent, the synergy fires unconditionally
-     *  when the card is cast (used by Resonance Detonation per D6). */
-    predicate?: SynergyPredicate;
-    /**
-     * WS4.2 — a combat-STATE predicate (encounter-ledger read; see
-     * {@link SynergyStatePredicate}). Hazard-Pattern-combat-owned: the legacy
-     * card engine no-ops a synergy clause that carries one (mirroring how it
-     * no-ops `specialMechanics`). Evaluated by `playCombatCard` at play time;
-     * when it holds, {@link CardSynergy.rider} fires FREE. Prices at the
-     * `threshold` ×0.5 condition discount (`CONDITION_DISCOUNTS`).
-     */
-    statePredicate?: SynergyStatePredicate;
-    /**
-     * WS4.2 — the rider fired (free, real units) when `statePredicate` holds.
-     * Post-v3 vocabulary: state-gated synergies speak `CardRider`.
-     */
-    rider?: CardRider;
 }
 
 /**
@@ -376,57 +257,26 @@ export interface Card {
      * common = 1-2, uncommon = 3-4, rare = 5-6. Orthogonal to `tier` (resist).
      */
     rank: CardRank;
-    /**
-     * Spec 32 v3 — card type. `spell` plays → discard (FREE + PAID lines).
-     * Spec 32 v4 — `oath` / `hex` now carry BOTH lines: the FREE
-     * (dieless) line grants a TIMED instance of the passive (3 rounds); the PAID
-     * line makes the same passive permanent (rest of combat), unique-in-play, and
-     * leaves the deck cycle. The oath sits player-side; the hex
-     * attaches to the ENEMY as a standing curse.
-     */
+    /** Attack / Skill / Spell (D51). See {@link CardType}. */
     cardType: CardType;
     /**
-     * Spec 32 — the card's THEME (one of eight). A theme is a family of keywords
-     * ({@link CardTheme} / `THEME_KEYWORDS`): the two hallmark keywords plus the utility
-     * keywords it synergises with. Drives the catalog's theme/keyword search.
-     * Every library card declares one; optional only so throwaway test fixtures
-     * need not (the curated-library suite asserts real cards carry it).
-     */
-    theme?: CardTheme;
-    /**
-     * Spec 32 v3 — the authored FREE (dieless) line for SPELLS. Budget law:
-     * FREE ≈ 25-35% of the card's total points.
-     * Spec 32 v4 — oath/hex carry NO authored `free` rider: their FREE
-     * line is engine-derived (a timed instance of the same hooked passive), so this
-     * field stays undefined for them.
+     * Spec 32 v3 — the authored FREE (dieless) line. Budget law: FREE ≈
+     * 25-35% of the card's total points.
      */
     free?: CardRider;
     /**
-     * Spec 32 v4 — a one-line mechanical summary of an oath/hex's
-     * HOOKED passive (the effect lives in the engine, not in `combatEffects`, so
-     * it is otherwise invisible to the catalog and the card UI). Rendered on both
-     * lines: FREE grants it for a few rounds (timed), PAID makes it permanent —
-     * same effect, only the duration differs. Required for oath/hex;
-     * ignored for spells.
-     */
-    persistentEffect?: string;
-    /**
      * 2026-07-16 (SIDE RAIL follow-up) — the authored, human-readable PAID
-     * sentence for SPELLS. The face's paid line got room to breathe under the
+     * sentence. The face's paid line got room to breathe under the
      * #5 rail design, so a card may print prose ("Apply POISON 2 for 3 turns,
      * then PROLONG every DoT by 1.") instead of the generated telegraphese.
      * The P0-truth law still holds: every number the engine applies must
      * appear verbatim in this text, and every UPPERCASE token must be a real
      * keyword — both enforced by `paid-summary-honesty.engine.test.ts`.
      * Absent → the projection falls back to the generated `paidText`.
-     * Ignored for oath/hex (their authored line is
-     * `persistentEffect`).
      */
     paidSummary?: string;
     combatEffects?: CardCombatEffects[];
     specialMechanics?: CardSpecialMechanic[];
-    /** Synergy clause — a combat-state gate plus the rider it fires. See {@link CardSynergy}. */
-    synergy?: CardSynergy;
     /**
      * Phase 91 — Optional friendship counter increment. When present, executeCard
      * increments the combat friendship counter by this amount after damage/effects

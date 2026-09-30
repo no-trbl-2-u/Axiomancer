@@ -32,8 +32,8 @@
  *
  * A rendered number is legal when it is either authored on the card, or
  * printed by the engine's own generated lines for that card (`topActionText` /
- * `bottomActionText` / `dieLines`, all of which are generated FROM the effect
- * data by `combat.cards.ts`). Anything else is a presenter invention.
+ * `bottomActionText`, both generated FROM the effect data by
+ * `combat.cards.ts`). Anything else is a presenter invention.
  */
 
 import { describe, it, expect } from '@jest/globals';
@@ -134,7 +134,6 @@ describe('card detail agreement (finding 4 — the detail must match the card)',
         for (const authored of cardLibrary) {
             const projected = getCard(authored.id);
             if (!projected) continue;
-            if (authored.cardType === 'oath' || authored.cardType === 'hex') continue;
             const d = detailStats(projected, authored);
             const free: Rider | undefined = authored.free;
             if (!free) {
@@ -171,8 +170,7 @@ describe('card detail agreement (finding 4 — the detail must match the card)',
             const projected = getCard(authored.id);
             if (!projected) continue;
             const hasPayload = (authored.combatEffects?.length ?? 0) > 0
-                || (authored.specialMechanics?.length ?? 0) > 0
-                || !!authored.persistentEffect;
+                || (authored.specialMechanics?.length ?? 0) > 0;
             if (!hasPayload) continue;
             if (detailStats(projected, authored).diePaidLine === null) fallbacks.push(authored.id);
         }
@@ -241,7 +239,6 @@ describe('card detail agreement (finding 4 — the detail must match the card)',
                 effects: authored.combatEffects ?? [],
                 mechs: authored.specialMechanics ?? [],
                 free: authored.free ?? null,
-                synergy: authored.synergy ?? null,
             });
             // Durations that fall back to the effect library's own default are
             // authored data too — just one indirection away.
@@ -266,7 +263,7 @@ describe('card detail agreement (finding 4 — the detail must match the card)',
             // The engine's own generated lines are derived from the same data;
             // a number it prints is by construction legal.
             for (const n of renderedNumbers([
-                projected.topActionText, projected.bottomActionText, ...(projected.dieLines ?? []),
+                projected.topActionText, projected.bottomActionText,
             ].join(' '))) legal.add(n);
             for (const n of renderedNumbers(row)) {
                 if (!legal.has(n)) {

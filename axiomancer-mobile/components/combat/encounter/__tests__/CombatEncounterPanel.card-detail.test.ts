@@ -10,9 +10,8 @@
  *   must not exist here. It is not deleted from the data: `CombatCardVM.flavor`
  *   still carries `card.description`, and the DECK screen renders it.
  * - **finding 5** — the keyword definitions render ABOVE the card face.
- * - **finding 3** — the three standing prose rows under the fork (the ▲/—/▼
- *   legend, the persistent duration footer, the colour-match hint) no longer
- *   render as rows. They survive as VM fields for the out-of-combat DECK
+ * - **finding 3** — the prose rows under the fork (the ▲/—/▼ legend and the
+ *   colour-match hint) no longer render as rows. They survive as VM fields for the out-of-combat DECK
  *   screen; the combat overlay folds their content into the row each one
  *   qualifies.
  * - **D4** — the rarity band renders, from the wave-0 module.
@@ -62,9 +61,9 @@ describe('combat card detail — overlay shape', () => {
         expect(keywords).toBeLessThan(face);
     });
 
-    it('spends no row on the three folded prose footers (finding 3)', () => {
+    it('spends no row on the folded prose footers (finding 3)', () => {
         const overlay = detailOverlaySource();
-        for (const field of ['detail.readLegend', 'detail.durationFooter', 'detail.colorMatchHint']) {
+        for (const field of ['detail.readLegend', 'detail.colorMatchHint']) {
             expect(overlay).not.toContain(`detailCard.${field}`);
         }
         // The facts themselves did not go away — they ride the rows they qualify.

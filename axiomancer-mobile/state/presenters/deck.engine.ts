@@ -49,6 +49,7 @@ import {
     type Card,
     type CardAspect,
     type CardRarity,
+    type CardType,
     type CombatCard,
     type GameState,
 } from '@mechanics';
@@ -89,8 +90,8 @@ export interface DeckCardVM {
     stance: CardAspect;
     stanceLabel: string;
     stanceColor: string;
-    /** spell / oath / hex. */
-    cardType: 'spell' | 'oath' | 'hex';
+    /** attack / skill / spell. */
+    cardType: CardType;
     /** Rank ladder position, 1 (Ash) .. 6 (Saint); null on a card with none. */
     rank: number | null;
     rarity: DeckRarityVM;
@@ -104,10 +105,6 @@ export interface DeckCardVM {
     paidText: string | null;
     /** 'Stacks by intensity.' and friends; null when the card does not stack. */
     stacksText: string | null;
-    /** Printed die-interaction lines (threshold / die bonus / fate), in real units. */
-    dieLines: string[];
-    /** Oath/hex only: the free-timed vs paid-permanent fork, as one line. */
-    durationFooter: string | null;
     /** Keyword ledger — FIRST in the detail, per finding 5. */
     keywords: { name: string; def: string; minor: boolean }[];
     /** Authored prose (`Card.description`). The reason this screen exists. */
@@ -118,11 +115,9 @@ export interface DeckCardVM {
 
 /** A card-type section of the list. */
 export interface DeckGroupVM {
-    key: 'spell' | 'oath' | 'hex';
-    /** 'SPELLS' | 'OATHS' | 'HEXES'. */
+    key: CardType;
+    /** 'ATTACKS' | 'SKILLS' | 'SPELLS'. */
     label: string;
-    /** One line saying how this type behaves in a fight. */
-    blurb: string;
     /** Distinct cards in the group, sorted for display. */
     cards: DeckCardVM[];
     /** Total COPIES in the group (not distinct rows). */
@@ -170,36 +165,15 @@ export interface DeckViewModel {
 
 /**
  * Group order. This is the engine `CardType` union's own declaration order
- * (`'spell' | 'oath' | 'hex'`, `axiomancer-mechanics/src/Cards/types.ts`),
- * mirrored rather than invented, and it happens to be the useful one: spells
- * are the cards that cycle, oaths and hexes are the standing passives.
+ * (`'attack' | 'skill' | 'spell'`, `axiomancer-mechanics/src/Cards/types.ts`),
+ * mirrored rather than invented.
  */
-const CARD_TYPE_ORDER: readonly ('spell' | 'oath' | 'hex')[] = ['spell', 'oath', 'hex'];
+const CARD_TYPE_ORDER: readonly CardType[] = ['attack', 'skill', 'spell'];
 
-const CARD_TYPE_LABEL: Readonly<Record<'spell' | 'oath' | 'hex', string>> = Object.freeze({
+const CARD_TYPE_LABEL: Readonly<Record<CardType, string>> = Object.freeze({
+    attack: 'ATTACKS',
+    skill: 'SKILLS',
     spell: 'SPELLS',
-    oath: 'OATHS',
-    hex: 'HEXES',
-});
-
-/** Singular form, for the screen-reader sentence on a single tile. Spelled out
- *  rather than de-pluralised from the label above, because 'HEXES' de-pluralises
- *  to 'hexe'. */
-const CARD_TYPE_SINGULAR: Readonly<Record<'spell' | 'oath' | 'hex', string>> = Object.freeze({
-    spell: 'spell',
-    oath: 'oath',
-    hex: 'hex',
-});
-
-/**
- * Player-facing blurbs. Each names the one behaviour that makes the type worth
- * grouping by — why a spell is not an oath at the table, not what the words
- * mean. Terms match the engine's own (`Cards/types.ts`, spec 32 v4).
- */
-const CARD_TYPE_BLURB: Readonly<Record<'spell' | 'oath' | 'hex', string>> = Object.freeze({
-    spell: 'Played, then discarded — they come back around the reshuffle.',
-    oath: 'Standing vows on you. Free for a few rounds, permanent with a die.',
-    hex: 'Standing curses on the foe. Free for a few rounds, permanent with a die.',
 });
 
 const STANCE_LABEL: Readonly<Record<string, string>> = Object.freeze({
@@ -298,7 +272,7 @@ function deckCardVM(cardId: string, count: number): DeckCardVM | null {
     const rarity = rarityVM(band);
     const stance = projected.stance;
     const stanceLabel = STANCE_LABEL[stance] ?? String(stance).toUpperCase();
-    const cardType = projected.cardType ?? 'spell';
+    const cardType = projected.cardType ?? sourceCard.cardType;
     const copies = count > 1 ? `, ${count} copies` : '';
 
     return {
@@ -316,11 +290,9 @@ function deckCardVM(cardId: string, count: number): DeckCardVM | null {
         freeText: detail.freePill,
         paidText: detail.diePaidLine,
         stacksText: detail.stacksText,
-        dieLines: projected.dieLines ? [...projected.dieLines] : [],
-        durationFooter: detail.durationFooter,
         keywords: detail.keywords.map((k) => ({ ...k })),
         flavor: sourceCard.description ?? null,
-        a11yLabel: `${projected.name}, ${rarity.label}, ${stanceLabel} ${CARD_TYPE_SINGULAR[cardType]}${copies}`,
+        a11yLabel: `${projected.name}, ${rarity.label}, ${stanceLabel} ${cardType}${copies}`,
     };
 }
 
@@ -382,7 +354,6 @@ export function selectDeckViewModel(
         groups.push({
             key,
             label: CARD_TYPE_LABEL[key],
-            blurb: CARD_TYPE_BLURB[key],
             cards: inGroup,
             count: inGroup.reduce((sum, c) => sum + c.count, 0),
         });

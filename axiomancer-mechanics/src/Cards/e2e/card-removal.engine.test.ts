@@ -33,9 +33,8 @@ import {
     buildCombatDeck,
     addToLoadout,
     getCombatLoadout,
-    getDeckPreset,
-    COMBAT_DECK_PRESET_ORDER,
     COMBAT_HAND_SIZE,
+    STARTING_CARD_IDS,
 } from '../../Combat';
 import { createCharacter } from '../../index';
 import type { Character } from '../../index';
@@ -426,11 +425,7 @@ describe('Phase 104 — MIN_COMBAT_DECK_SIZE is DERIVED from the grey office', (
         expect(MIN_COMBAT_DECK_SIZE).toBe(10);
     });
 
-    it('clears every shipped preset shape (no preset is born below the floor)', () => {
-        expect(COMBAT_DECK_PRESET_ORDER.length).toBeGreaterThan(0);
-        for (const id of COMBAT_DECK_PRESET_ORDER) {
-            expect(getDeckPreset(id)!.cardIds.length, id)
-                .toBeGreaterThanOrEqual(MIN_COMBAT_DECK_SIZE);
-        }
+    it('the grey deck is not born below the floor', () => {
+        expect(STARTING_CARD_IDS.length).toBeGreaterThanOrEqual(MIN_COMBAT_DECK_SIZE);
     });
 });

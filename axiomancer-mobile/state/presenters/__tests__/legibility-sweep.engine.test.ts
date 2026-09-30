@@ -1,12 +1,7 @@
 /**
  * Phase 28 (Show the Engine legibility sweep) — presenter coverage for the
- * mobile-side surfaces: discard-pile names, the projected-lethality readout,
- * the wall-math intent projection, and the standing-chip guard.
- *
- * The card purge (2026-09-27) retired the card-only surfaces this file also
- * pinned — the Premise/CONDEMN track, the PLEA/CHARGE meters, the REPRISE
- * flag, the RUPTURE face and the oath/hex standing chips — with the cards
- * that printed them. The grey office is the fixture now.
+ * mobile-side surfaces: discard-pile names, the projected-lethality readout
+ * and the wall-math intent projection. The grey office is the fixture.
  */
 
 import { describe, it, expect } from '@jest/globals';
@@ -91,16 +86,5 @@ describe('CombatIntentVM.wallMath — the telegraph readout (phase 28)', () => {
         expect(vm.enemy.intent.wallMath).toBeDefined();
         expect(typeof vm.enemy.intent.wallMath.willDeny).toBe('boolean');
         expect(vm.enemy.intent.wallMath.netDamage).toBeLessThanOrEqual(vm.enemy.intent.wallMath.projectedDamage);
-    });
-});
-
-// Card-wording audit (2026-07-12) — a persistent card's standing passive is
-// gated by card id at its engine trigger sites, never an applied effect id, so
-// the board used to show NOTHING while an enchantment/curse was attached.
-describe('standing enchant/curse chips (card-wording audit 2026-07-12)', () => {
-    it('no zones → no standing chips (and never a crash on missing ids)', () => {
-        const vm = buildCombatViewModel({ ...openState(), enemyAttachments: ['not-a-card'] });
-        expect(vm.player.effects.every(e => !e.standing)).toBe(true);
-        expect(vm.enemy.effects.find(e => e.effectId === 'not-a-card')).toBeUndefined();
     });
 });

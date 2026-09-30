@@ -232,9 +232,6 @@ export function applyHazardOutcome(
 
 // Per-keyword type tag for the inspect-modal definition panels. The PRIMARY keyword
 // (index 0) maps to the card's face kind; riders read as a generic EFFECT.
-// 2026-07-12 (owner directive) — the panel carries PAYLOAD keywords only, so
-// a persistent card's first chip is its passive's keyword: it tags EFFECT,
-// never the type word (ENCHANT/CURSE read on the card frame's type strip).
 function keywordTypeTag(kind: string, index: number): string {
     if (index > 0) return 'EFFECT';
     switch (kind) {
@@ -251,7 +248,7 @@ function keywordTypeTag(kind: string, index: number): string {
 // Reference-style coloured type tags (right-aligned on the keyword panels).
 const TAG_COLORS: Record<string, string> = {
     DOT: '#e2543b', CONTROL: '#a86bdc', GUARD: '#9aa0a6', REGEN: '#5bbf6a',
-    MERCY: '#5bbf6a', ENCHANT: '#7fb3a6', CURSE: '#a86bdc', EFFECT: '#8a8273',
+    MERCY: '#5bbf6a', EFFECT: '#8a8273',
     DICE: '#d9c66a',
 };
 
@@ -648,10 +645,9 @@ export function CombatEncounterPanel({
         if (persistOutcome) applyHazardOutcome(store, live.finalOutcome, live, enemy);
     }, [live.finalOutcome, live, persistOutcome, store, enemy]);
 
-    // Roll the deckbuilder reward once, on victory. The roll is engine truth
-    // (theme-aware: weighted toward what the deck already plays, with a real
-    // off-theme pivot); the action is idempotent, so a remount re-reads the
-    // SAME offer rather than rerolling it.
+    // Roll the deckbuilder reward once, on victory. The roll is engine truth;
+    // the action is idempotent, so a remount re-reads the SAME offer rather
+    // than rerolling it.
     useEffect(() => {
         if (live.finalOutcome === 'victory') rollCombatRewardAction(store);
     }, [live.finalOutcome, store]);
@@ -1007,9 +1003,6 @@ export function CombatEncounterPanel({
                                             base={styles.detailPlayText}
                                             bold={[styles.detailPlayText, styles.detailPlayBold, { color: detailCard.face.categoryColor }]}
                                         />
-                                        {detailCard.dieLines?.length ? (
-                                            <Text style={styles.detailDieLine}>{detailCard.dieLines.join(' · ')}</Text>
-                                        ) : null}
                                         {detailCard.detail.dieTriplet ? (
                                             <Text style={styles.detailDieLine}>{detailCard.detail.dieTriplet}</Text>
                                         ) : null}
@@ -1018,11 +1011,9 @@ export function CombatEncounterPanel({
                             </View>
                             {/* STACKS survives the 2026-09-21 declutter: whether a status
                                 stacks is exactly why a player replays a card mid-fight.
-                                The three prose rows that stood here — the ▲/—/▼ legend,
-                                the persistent duration footer and the colour-match hint —
-                                are gone: the legend now rides the triplet itself and the
-                                other two ride the ◇/◆ tags of the rows they qualify. The
-                                VM still carries all three for the DECK screen, which is
+                                The ▲/—/▼ legend rides the triplet itself and the
+                                colour-match hint rides the ◆ tag of the row it qualifies.
+                                The VM still carries both for the DECK screen, which is
                                 read out of combat and can afford full sentences. */}
                             {detailCard.detail.stacksText ? <Text style={styles.detailStacks}>{detailCard.detail.stacksText}</Text> : null}
 
@@ -1090,12 +1081,8 @@ export function CombatEncounterPanel({
                                 {tipEffect.glyph.label.toUpperCase()}
                             </Text>
                             {tipEffect.gloss && <Text style={styles.tipGloss}>{tipEffect.gloss}</Text>}
-                            {/* A standing enchant/curse chip has no intensity — it shows its
-                                clock (or permanence) instead (card-wording audit 2026-07-12). */}
                             <Text style={styles.tipMeta}>
-                                {tipEffect.standing
-                                    ? (tipEffect.duration > 0 ? `${tipEffect.duration} rounds left` : 'rest of combat')
-                                    : `intensity ${tipEffect.intensity} · ${tipEffect.duration} turns left`}
+                                {`intensity ${tipEffect.intensity} · ${tipEffect.duration} turns left`}
                             </Text>
                             <View style={styles.tipBadgeWrap} pointerEvents="none">
                                 <Svg width={128} height={30} viewBox="0 0 128 30">

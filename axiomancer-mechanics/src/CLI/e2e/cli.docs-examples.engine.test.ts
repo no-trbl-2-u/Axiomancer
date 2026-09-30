@@ -12,7 +12,7 @@ import path from 'path';
 
 import { ENEMY_REGISTRY } from '../../Enemy/enemy.library';
 import { ENEMIES as COMBAT_SIM_ENEMIES } from '../combat-sim.cli';
-import { COMBAT_DECK_PRESETS } from '../../Combat/combat.starter-deck-presets';
+import { parseDeckSelectionArg } from '../../Combat/combat.playtest';
 import { HAZARD_LIBRARY } from '../../World/Hazard/hazard.content';
 
 const DOCS_PATH = path.resolve(__dirname, '../../../docs/cli.md');
@@ -94,21 +94,19 @@ describe('docs/cli.md — --hazard examples stay in sync with HAZARD_LIBRARY', (
     });
 });
 
-describe('docs/playtest.md — preset:<id> examples stay in sync with COMBAT_DECK_PRESETS', () => {
-    it('every documented preset:<id> resolves in COMBAT_DECK_PRESETS', () => {
+describe('docs/playtest.md — --deck examples parse', () => {
+    it('every documented --deck value parses under the deck-selection grammar', () => {
         const docs = readPlaytestDocs();
-        const presetIds = new Set(Object.keys(COMBAT_DECK_PRESETS));
-
-        const presetPattern = /preset:([a-z][a-z0-9-]*)/g;
+        const deckPattern = /--deck[=\s]+([a-z][a-z0-9:,-]*)/g;
         const found = new Set<string>();
         let match: RegExpExecArray | null;
-        while ((match = presetPattern.exec(docs)) !== null) {
+        while ((match = deckPattern.exec(docs)) !== null) {
             found.add(match[1]);
         }
 
         expect(found.size).toBeGreaterThan(0);
-        for (const id of found) {
-            expect(presetIds.has(id), `docs/playtest.md references unknown preset id "${id}"`).toBe(true);
+        for (const value of found) {
+            expect(() => parseDeckSelectionArg(value), `docs/playtest.md: --deck ${value}`).not.toThrow();
         }
     });
 });

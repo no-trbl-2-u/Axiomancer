@@ -96,16 +96,8 @@ export function DeckCardDetailOverlay({ card, onClose }: DeckCardDetailOverlayPr
                             <Text style={styles.lineText}>{card.paidText}</Text>
                         </View>
                     )}
-                    {card.dieLines.map((dl) => (
-                        <View key={dl} style={styles.line}>
-                            <Text style={styles.lineText}>{dl}</Text>
-                        </View>
-                    ))}
                     {card.stacksText !== null && (
                         <Text style={styles.footnote}>{card.stacksText}</Text>
-                    )}
-                    {card.durationFooter !== null && (
-                        <Text style={styles.footnote}>{card.durationFooter}</Text>
                     )}
                 </View>
 

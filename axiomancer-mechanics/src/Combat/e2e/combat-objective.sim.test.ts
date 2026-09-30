@@ -52,7 +52,7 @@ let cached: PlaytestReport | null = null;
 function report(): PlaytestReport {
     cached = cached ?? runPlaytestMatrix({
         policies: ['greedy', 'blind'],
-        decks: [{ kind: 'policy-pick' }],
+        decks: [{ kind: 'grey' }],
         enemiesPerStage: 2,
         runsPerCell: 8,
         seed: 5,
@@ -105,21 +105,18 @@ describe('objective v2 — the LOCKED systems are exercised in real play', () =>
         expect(pooled.momentumAdvances, 'the momentum chain advances again — restore the > 0 guard').toBe(0);
         expect(pooled.surges, 'a chain surges again — restore the > 0 guard').toBe(0);
 
-        // Dice — rolled and spent. The die ECONOMY is a CANARY since the
-        // signature placeholders (R4, 2026-09-29): Press Fate's reroll was
-        // the only economy verb the grey office touched (measured 0 without
-        // it). When a card or signature banks, forges or rerolls again this
-        // goes red: flip it back to `> 0` (the pre-R4 guard).
+        // Dice — rolled, spent, and the economy live: since R7b the matrix
+        // runs the full 10-card grey deck (not a 6-card draft), and its
+        // longer fights bank and ripen Reserve dice (measured: 2 verbs).
         expect(pooled.diceRolled).toBeGreaterThan(0);
         expect(pooled.diceSpent, 'rolled dice never power a line').toBeGreaterThan(0);
-        expect(diceEconomyBreadth(pooled), 'the die economy is played again — restore the > 0 guard').toBe(0);
+        expect(diceEconomyBreadth(pooled), 'the die economy is dead').toBeGreaterThan(0);
 
         // …and therefore every locked sub-score is live rather than structurally
-        // 0 — except 'surge' and 'dice', dead with the coloured cards and
-        // Press Fate (canaries above).
+        // 0 — except 'surge', dead with the coloured cards (canary above).
         const score = scoreCombatObjective(pooled);
         for (const term of LOCKED_MECHANIC_TERMS) {
-            if (term === 'surge' || term === 'dice') {
+            if (term === 'surge') {
                 expect(score.spineComponents[term], `${term} is live again — restore the > 0 guard`).toBe(0);
                 continue;
             }

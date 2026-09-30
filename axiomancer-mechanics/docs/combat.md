@@ -341,9 +341,8 @@ card library files themselves, not duplicated here):
 - **Rank / rarity / card-type axes (Spec 32 v3; spec 34 R-9/R-10/R-14).**
   Every card carries a `rank: CardRank` (1 Ash · 2 Tooth · 3 Splinter ·
   4 Rib · 5 Skull · 6 Saint — quality axis, orthogonal to `tier` which
-  stays the resist axis) and a `cardType: CardType` (`'spell' | 'oath' |
-  'hex'` — `spell` plays straight to discard; `oath` /
-  `hex` carry both a FREE and a PAID line). `rankToRarity(rank)`
+  stays the resist axis) and a `cardType: CardType` (`'attack' | 'skill' |
+  'spell'`, D51 — every type plays FREE or PAID, then discards). `rankToRarity(rank)`
   derives the display rarity band (`common` = 1-2, `uncommon` = 3-4,
   `rare` = 5-6) consumed by mobile via `CARD_RANK_NAMES`. This axis family
   replaced the old ad hoc "gold card" list (`GOLD_CARD_IDS` / `isGoldCard`
@@ -501,8 +500,6 @@ progression levers.
 | `generateDefaultThreatSequence(enemy)` | Generates a 3-phase fallback threat sequence from the enemy's dominant stance, rotating through Heart / Body / Mind. Used automatically by `getThreatSequence` when no authored sequence exists. |
 | `rerollSpentDice(state, rng?)` / `hasRerollableDice(state)` / `dieIsRerollable(die)` | The `reroll_spent` card mechanic's partial re-roll: re-rolls only spent/exhausted + dead `x`-face dice from the legacy face bag, leaving usable dice in play. |
 | `THREAT_WEAKEN_PER_ROLL` / `THREAT_DENY_AT` / `THREAT_WEAKEN_FLOOR` | Soft-control and stat-debuff threat tunables (0.33.0). Each point of enemy roll penalty (from confusion, fear, blind, slow, accuracy/attack-down etc.) reduces the incoming hit by `THREAT_WEAKEN_PER_ROLL` (default 0.06). When the cumulative roll penalty reaches `THREAT_DENY_AT` (default 8), the turn is fully denied (same as hard control). `THREAT_WEAKEN_FLOOR` (default 0.4) clamps the minimum damage multiplier for a weakened-but-not-denied enemy. Read these to display soft-control thresholds in the UI. |
-| `COMBAT_DECK_PRESETS` / `COMBAT_DECK_PRESET_ORDER` / `listDeckPresets()` / `getDeckPreset(id)` / `buildPresetDeck(id)` | The three campaign-stage preset decks (`src/Combat/combat.starter-deck-presets.ts`): `threadbare` ("The Threadbare Office", early), `pilgrim` ("The Pilgrim's Burden", mid), `apostate` ("The Apostate's Canon", late), plus `PRESET_LINEAGE` describing the removals/additions that walk one rung to the next. **The one surviving deck law is exact aspect thirds** — every preset splits evenly across body/mind/heart by `color`. Deck sizes, copy limits and the lineage multiset are no longer laws (2026-09-02). `buildPresetDeck` appends no escape card — there is no in-combat retreat — and is ready to feed `initializeCombatEncounter`. |
-| `CombatDeckPreset`, `CombatDeckFocus` | `CombatDeckPreset` describes a single named preset deck entry (id, name, theme, focus, description, cardIds). `CombatDeckFocus` is the discriminated string union of the (now six) coarse design-lever tags used by draft/sim-policy consumers — `'dot' \| 'control' \| 'utility' \| 'damage' \| 'rush-execute' \| 'balanced'` (not the old per-preset name union). Both are importable as `import type { CombatDeckPreset, CombatDeckFocus } from 'axiomancer-mechanics'`. |
 | `CombatIntentType`, `CombatReadResult`, `SignatureSkill`, `SignatureSkillId`, `SignatureSkillKind`, `PlayerArchetype` | The depth-layer type family. |
 
 ### Phase 169 — Curated Combat Loadout

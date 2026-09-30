@@ -25,7 +25,6 @@
 import type {
     CombatCard, CombatEncounterState, SignatureSkill, SignatureSkillKind,
 } from './combat.encounter.types';
-import type { CombatDeckFocus } from './combat.starter-deck-presets';
 import { getPendingDotTotal } from './effects';
 
 /** Every scripted witness the sim can drive. */
@@ -43,8 +42,6 @@ export interface CombatSimPolicy {
     name: string;
     /** One line, doctrine-aware: what this witness proves about status play. */
     description: string;
-    /** Deck focus used when a playtest cell says `{ kind: 'policy-pick' }`. */
-    preferredFocus: CombatDeckFocus;
     /** Rank candidate powered plays; highest first. Receives the same candidate
      *  info the legacy `bestCard` used. Only `chaos` consumes `rng`. */
     rankCard(state: CombatEncounterState, card: CombatCard, rng: () => number): number;
@@ -130,7 +127,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         id: 'greedy',
         name: 'Greedy (omniscient witness)',
         description: 'The tuned balance witness: plays the status game — new DoTs first, payoffs on time, strikes last.',
-        preferredFocus: 'balanced',
         rankCard: (s, card) => greedyRankCard(s, card),
         signatureKinds: ALL_SIGNATURE_KINDS,
         convictionThreshold: 7,
@@ -141,7 +137,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         id: 'blind',
         name: 'Blind (player-feel witness)',
         description: 'The same status-first play as greedy. Its hidden-stance difference died with the draft (D7); kept so the playtest matrix keeps its column.',
-        preferredFocus: 'balanced',
         rankCard: (s, card) => greedyRankCard(s, card),
         signatureKinds: ALL_SIGNATURE_KINDS,
         convictionThreshold: 7,
@@ -152,7 +147,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         id: 'dot-weaver',
         name: 'DoT Weaver',
         description: 'All-in on erosion: fresh DoTs above all; utility only once the foe is already bleeding.',
-        preferredFocus: 'dot',
         rankCard: (s, card) => {
             const pendingDot = getPendingDotTotal(s.enemy).total;
             if (card.verbClass === 'direct-dot') {
@@ -172,7 +166,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         id: 'control-lock',
         name: 'Control Lock',
         description: 'Denial play: control and stat-debuff locks first (fresh ones for the combo), aiming to erase the enemy\'s telegraphed turns.',
-        preferredFocus: 'control',
         rankCard: (s, card) => {
             if (isControlClass(card)) {
                 return (isNewStatus(s, card) ? BAND_PRIMARY : BAND_SECONDARY)
@@ -191,7 +184,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         id: 'aggro-brute',
         name: 'Aggro Brute',
         description: 'The doctrine\'s weak baseline: raw damage preview, no payoff timing, no status game — its underperformance IS the design.',
-        preferredFocus: 'damage',
         rankCard: (_s, card) => card.bottomDamagePreview,
         signatureKinds: GUARD_ONLY,
         convictionThreshold: 7,
@@ -202,7 +194,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         id: 'turtle',
         name: 'Turtle',
         description: 'Outlast play: guard/barrier walls first, DoT erosion second — status still does the killing, just from behind a shield.',
-        preferredFocus: 'utility',
         rankCard: (s, card) => {
             if (card.verbClass === 'defend') return BAND_PRIMARY + card.bottomDamagePreview;
             if (card.verbClass === 'buff-self') return BAND_PRIMARY / 2 + card.bottomDamagePreview;
@@ -221,7 +212,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         id: 'chaos',
         name: 'Chaos',
         description: 'A seeded coin-flipper: uniform-random plays and signatures (blind) — the floor any deliberate status play must beat.',
-        preferredFocus: 'balanced',
         rankCard: (_s, _card, rng) => rng(),
         signatureKinds: ALL_SIGNATURE_KINDS,
         convictionThreshold: 7,
@@ -233,7 +223,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         id: 'mercy-seeker',
         name: 'Mercy Seeker',
         description: 'The spare path: control status to survive, Befriend at the first opening, and always choose mercy over the kill.',
-        preferredFocus: 'utility',
         rankCard: (s, card) => {
             if (card.verbClass === 'befriend') return BAND_BEFRIEND_LOW_HP;
             if (isControlClass(card)) {

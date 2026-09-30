@@ -159,10 +159,6 @@ export {
     RESERVE_MAX,
 } from './combat.dice';
 export { COMBAT_HAND_SIZE, buildCombatDeck } from './combat.deck';
-export {
-    COMBAT_DECK_PRESETS, COMBAT_DECK_PRESET_ORDER,
-    listDeckPresets, getDeckPreset,
-} from './combat.starter-deck-presets';
 
 export {
     toCombatCard,

@@ -33,9 +33,7 @@ import { execSync } from 'node:child_process';
 import { cardLibrary, getCardById } from '../src/Cards/cards.library';
 import { toCombatCard } from '../src/Combat/combat.cards';
 import { CARD_RANK_NAMES, rankToRarity } from '../src/Cards/types';
-import { FREE_ENCHANT_ROUNDS } from '../src/Game/game-mechanics.constants';
 import { STARTING_CARD_IDS } from '../src/Combat/combat.rewards';
-import { THEME_KEYWORDS, type CardTheme } from '../src/Cards/card-themes';
 import { mechanicText, riderText } from '../src/Combat/combat.cards';
 import { EnemyLibrary } from '../src/Enemy/enemy.library';
 import { effectsLibrary, lookupEffect } from '../src/Effects/effects.library';
@@ -179,15 +177,10 @@ function effectKw(effectId: string): string {
 // the effect-shaped silhouette downstream), ② the authored PAID sentence
 // (composed through the real engine, keywords bolded downstream).
 function cardFace(c: any): { freeGlyph: string; freeKw: string | null; freeVal: string | null; paid: string } {
-    const persistent = c.cardType === 'oath' || c.cardType === 'hex';
     let freeGlyph = '';
     let freeKw: string | null = null;
     let freeVal: string | null = null;
-    if (persistent) {
-        freeGlyph = c.cardType === 'hex' ? '☠' : '❖';
-        freeKw = c.cardType === 'hex' ? 'HEX' : 'OATH';
-        freeVal = `${FREE_ENCHANT_ROUNDS}r`;
-    } else if (c.free?.applyEffect?.effectId) {
+    if (c.free?.applyEffect?.effectId) {
         const eff = lookupEffect(c.free.applyEffect.effectId);
         if (eff) {
             freeGlyph = effectGlyph({ id: eff.id, name: eff.name, type: eff.type, category: eff.category, payload: eff.payload }).glyph;
@@ -205,12 +198,7 @@ function cardFace(c: any): { freeGlyph: string; freeKw: string | null; freeVal: 
     let paid = '';
     const cc = toCombatCard(c.id, getCardById, lookupEffect);
     if (cc) {
-        let s = cc.bottomActionText || '';
-        if (cc.dieLines?.length) {
-            const suffix = ' ' + cc.dieLines.join(' · ');
-            if (s.endsWith(suffix)) s = s.slice(0, -suffix.length);
-        }
-        paid = s.replace(/^PAID(\s*\([^)]*\))?\s*—\s*/i, '').replace(/\s*Costs\s+1\s+die\.?\s*$/i, '').trim();
+        paid = (cc.bottomActionText || '').replace(/^PAID(\s*\([^)]*\))?\s*—\s*/i, '').replace(/\s*Costs\s+1\s+die\.?\s*$/i, '').trim();
     }
     return { freeGlyph, freeKw, freeVal, paid };
 }
@@ -268,25 +256,10 @@ function cardStats(c: any): { chips: Chip[]; lines: string[] } {
     ];
     chips.push({ k: 'Rank', v: `${CARD_RANK_NAMES[c.rank as 1] ?? c.rank} (${rankToRarity(c.rank)})` });
     chips.push({ k: 'Kind', v: c.cardType });
-    if (c.theme) {
-        chips.push({ k: 'Theme', v: c.theme });
-        const kws = THEME_KEYWORDS[c.theme as CardTheme];
-        if (kws && kws.length) chips.push({ k: 'Keywords', v: kws.join(' · ') });
-    }
     // Since the card purge (D44) every card is both a starter and a reward.
     chips.push({ k: 'Source', v: STARTING_CARD_IDS.includes(c.id) ? 'starter' : 'reward' });
 
     const lines: string[] = [];
-    // Spec 32 v4 — enchant/disenchant passives live in engine hooks; their authored
-    // `persistentEffect` summary is the only card-facing description. Render it on
-    // both lines: FREE grants it timed (a few rounds), PAID makes it permanent.
-    if ((c.cardType === 'oath' || c.cardType === 'hex') && c.persistentEffect) {
-        const target = c.cardType === 'hex' ? ' (attaches to the enemy)' : '';
-        // The FREE line matches the glyph's "3r" badge (a timed run of the
-        // passive) instead of restating the card's printed text twice.
-        lines.push(`FREE — the printed passive for ${FREE_ENCHANT_ROUNDS} rounds.`);
-        lines.push(`PAID (rest of combat) — ${c.persistentEffect}${target}`);
-    }
     if (c.free) lines.push(`FREE — ${riderProse(c.free, { selfTargetCard: c.targetType === 'self' })}.`);
     for (const ce of c.combatEffects ?? []) {
         const nm = lookupEffect(ce.effectId)?.name ?? ce.effectId;
@@ -295,11 +268,6 @@ function cardStats(c: any): { chips: Chip[]; lines: string[] } {
         lines.push(`Applies ${nm} ×${ce.intensity ?? 1}${dur} → ${who}`);
     }
     for (const sm of c.specialMechanics ?? []) lines.push(specialMechanicLabel(sm));
-    if (c.threshold) lines.push(`Threshold: ${c.threshold.count}× ${c.threshold.color} die fires a rider`);
-    if (c.dieBonus) lines.push(`Die bonus: powering die ${c.dieBonus.onColor} fires a rider`);
-    if (c.fate) lines.push(`Fate: playable by an X die${c.fate.recoilHp ? ` (recoil ${c.fate.recoilHp} HP)` : ''}`);
-    if (c.fallen) lines.push(`Fallen: ${riderProse(c.fallen.rider, { selfTargetCard: c.targetType === 'self' })}`);
-    if (c.synergy) lines.push('Synergy clause (stance-switch payoff)');
     return { chips, lines };
 }
 

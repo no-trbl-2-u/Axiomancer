@@ -12,16 +12,9 @@
  *
  * Coverage counts fizzle-drains honestly: the sim drains a token-gated or
  * resource-starved bottom via the card's free top action (a real play).
- * Enchant/disenchant carry a FREE line too (a timed instance of the
- * passive), so their top action is a real play; the PAID line is permanent +
- * unique-in-play, so a second PAID copy drains as a fizzle.
  *
- * COVERAGE UNIVERSE: the live library MINUS the theme-'curse' class. Curses
- * are enemy-INJECTED junk — no deck, preset, or reward screen ever hands one
- * to the player voluntarily, so a sim that never receives one legitimately
- * never plays it. They are excluded from the dead-card universe by design,
- * not because they are dead. There is no synthetic retreat card (no
- * in-combat retreat exists).
+ * COVERAGE UNIVERSE: the whole live library. There is no synthetic retreat
+ * card (no in-combat retreat exists).
  *
  * The exact library size is NOT pinned here (repealed 2026-09-02, big-numbers
  * overhaul §3 L18/§10) — the universe is derived live from `cardLibrary`.
@@ -47,9 +40,8 @@ const SEED_OFFSETS = [0, 1000, 2000] as const;
  *  PROLONG keep the encounter honest while the focused card takes the lead). */
 const SUPPORT_KIT = ['chilblain-watch', 'spoiled-poultice', 'the-long-lent'] as const;
 
-/** The dead-card universe: every library card the player can legitimately
- *  hold. Theme-'curse' cards are enemy-injected junk — see the header. */
-const PLAYABLE_LIBRARY = cardLibrary.filter(c => c.theme !== 'curse');
+/** The dead-card universe: every library card. */
+const PLAYABLE_LIBRARY = cardLibrary;
 
 /**
  * The coverage dummy. Deliberately a SPONGE, not a weakling: this suite asks

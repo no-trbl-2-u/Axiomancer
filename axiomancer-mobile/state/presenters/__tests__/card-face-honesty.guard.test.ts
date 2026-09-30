@@ -17,7 +17,7 @@
 import { describe, it, expect } from '@jest/globals';
 import { getCard, getCardById, cardLibrary, lookupEffect } from '@mechanics';
 import { faceStats, detailStats } from '@/state/presenters/combat-encounter.engine';
-import { keywordsInPersistentText, keywordForEffect, keywordForVerb, keywordGloss, SYSTEM_GLOSSARY } from '@/state/combat/keywords';
+import { keywordsInText, keywordForEffect, keywordForVerb, keywordGloss, SYSTEM_GLOSSARY } from '@/state/combat/keywords';
 import { glyphShapeFor } from '@/components/combat/glyphShapes';
 
 describe('card-face honesty guard', () => {
@@ -35,44 +35,6 @@ describe('card-face honesty guard', () => {
             if (ambiguous) {
                 const mechs = (getCardById(id)?.specialMechanics ?? []).map(m => m.kind).join(',') || 'none';
                 offenders.push(`${id} (verbClass=${card.verbClass}, mechs=${mechs})`);
-            }
-        }
-        expect(offenders).toEqual([]);
-    });
-
-    it("no persistent card lies about its FREE line — 'PAID only' is dead (spec 32 v4)", () => {
-        // The engine prints BOTH lines on oath/hex cards: the FREE
-        // play is a TIMED instance ('FREE (3 rounds) — <passive>'), the PAID
-        // play is permanent. A presenter surface that claims 'PAID only' (the
-        // 2026-07-11 playtest report) or drops the timed truth is the lie this
-        // guard exists to catch. It also enforces the chip doctrine: the
-        // keyword-explainer slot must resolve at least one PAYLOAD keyword
-        // beyond the card-type label (via combatEffects or the persistentEffect
-        // summary — KW-5 guarantees the words are there to find).
-        const offenders: string[] = [];
-        for (const { id } of cardLibrary) {
-            const card = getCard(id);
-            if (!card || (card.cardType !== 'oath' && card.cardType !== 'hex')) continue;
-            const f = faceStats(card, getCardById(id));
-            const d = detailStats(card, getCardById(id));
-            const surfaces = [f.freeHeroText, f.freeValue ?? '', d.freeLine, d.freePill, d.outcomeLine, d.readNote];
-            if (surfaces.some(s => /paid only/i.test(s))) offenders.push(`${id} → still claims 'PAID only'`);
-            const rounds = card.topActionText.match(/^FREE \((\d+ rounds?)\)/)?.[1];
-            if (!rounds || !f.freeHeroText.includes(rounds) || f.freeValue !== rounds) {
-                offenders.push(`${id} → FREE surface missing the engine's timed '${rounds ?? '(n rounds)'}' truth`);
-            }
-            // 2026-07-12 (owner directive, REVERSING the earlier type-chip-first
-            // order) — the inspect panel is PAYLOAD keywords ONLY: the type
-            // already reads on the frame's type strip, so a type chip in the
-            // panel is the regression this guard now blocks.
-            const typeChips = d.keywords.filter(k => k.name === 'OATH' || k.name === 'HEX');
-            if (typeChips.length > 0) offenders.push(`${id} → type chip '${typeChips[0].name}' rendered in the keyword panel`);
-            const payload = d.keywords.filter(k => k.name !== 'OATH' && k.name !== 'HEX');
-            if (payload.length === 0) offenders.push(`${id} → no payload keyword chip resolved from its passive`);
-            // The face's verb slot must lead with a PAYLOAD keyword (what the
-            // card DOES), never the bare type word, whenever a payload resolves.
-            if (payload.length > 0 && (f.keyword === 'OATH' || f.keyword === 'HEX')) {
-                offenders.push(`${id} → verb slot shows the bare type word despite payload '${payload[0].name}'`);
             }
         }
         expect(offenders).toEqual([]);
@@ -98,7 +60,7 @@ describe('card-face honesty guard', () => {
             // 2026-07-12 (card-wording audit) — the presenter scans the printed
             // lines PLUS the overlay's own free/stacks lines (INTENSITY/FREE
             // live there); this reference check mirrors that scan basis.
-            const printed = [card.topActionText, card.bottomActionText, ...(card.dieLines ?? []), d.freeLine, d.stacksText ?? ''].join(' ');
+            const printed = [card.topActionText, card.bottomActionText, d.freeLine, d.stacksText ?? ''].join(' ');
             if (d.systemTerms.length === SYSTEM_GLOSSARY.length) offenders.push(`${id} → full systems dump rendered`);
             if (d.systemTerms.length > 0 && !/conviction|⬡|resonance|reserve|pip|floating|rung|wild|X die|peroration|concede|free|intensit|×\d|\bi\d\b/i.test(printed)) {
                 offenders.push(`${id} → systems entries without any printed reference`);
@@ -198,8 +160,8 @@ describe('card-face honesty guard', () => {
             if (!card || !src) continue;
             const d = detailStats(card, src);
             const chips = new Set(d.keywords.filter(k => k.def).map(k => k.name));
-            const printed = [card.topActionText, card.bottomActionText, ...(card.dieLines ?? [])].join(' ');
-            for (const kw of keywordsInPersistentText(printed)) {
+            const printed = [card.topActionText, card.bottomActionText].join(' ');
+            for (const kw of keywordsInText(printed)) {
                 if (!chips.has(kw.toUpperCase())) offenders.push(`${id} → prints ${kw.toUpperCase()} but renders no defined chip`);
             }
             for (const ce of src.combatEffects ?? []) {

@@ -82,7 +82,6 @@ describe('card upgrades — structure', () => {
             if (up.rank !== card.rank) offenders.push(`${card.id}: rank`);
             if (up.tier !== card.tier) offenders.push(`${card.id}: tier`);
             if (up.cardType !== card.cardType) offenders.push(`${card.id}: cardType`);
-            if (up.theme !== card.theme) offenders.push(`${card.id}: theme`);
             if (up.targetType !== card.targetType) offenders.push(`${card.id}: targetType`);
             if (up.color !== card.color) offenders.push(`${card.id}: aspect`);
             // The FREE-line law (constraint 2) survives the upgrade.
@@ -143,12 +142,8 @@ describe('card upgrades — a + never subtracts', () => {
     });
 
     it('the default rule raises SOMETHING on every card that has a number to raise', () => {
-        // The documented exceptions: a curse is all price (nothing a + could
-        // honestly raise), and an oath/hex keeps its whole payload in an engine
-        // hook, so it has no data number at all. Everything else must move.
         const inert = LIBRARY
             .filter(c => !changedSomething(c, upgradeCard(c)))
-            .filter(c => c.theme !== 'curse' && c.cardType === 'spell')
             .map(c => c.id);
         expect(inert).toEqual([]);
     });
@@ -288,14 +283,6 @@ describe('card upgrades — the default rule numbers', () => {
             combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: MAX_EFFECT_INTENSITY }],
         }));
         expect(up.combatEffects?.[0].intensity).toBe(MAX_EFFECT_INTENSITY);
-    });
-
-    it('raises the synergy rider too, never its gate', () => {
-        const up = upgradeCard(fixture({
-            synergy: { statePredicate: { kind: 'flow', minPriorSpells: 2 }, rider: { damage: 10 } },
-        }));
-        expect(up.synergy?.rider).toEqual({ damage: 14 });
-        expect(up.synergy?.statePredicate).toEqual({ kind: 'flow', minPriorSpells: 2 });
     });
 });
 

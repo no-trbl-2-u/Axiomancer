@@ -52,11 +52,6 @@ export const STAT_POINTS_PER_LEVEL = 3;
 export const MAX_EFFECT_INTENSITY = 30;
 export const MAX_EFFECT_DURATION  = 10;
 
-// Spec 32 v4 §2.1 — the FREE (dieless) enchant/disenchant line grants a TIMED
-// instance of the card's passive that stays active this many combat rounds before
-// it ticks out. The PAID line makes the same passive permanent (rest of combat).
-export const FREE_ENCHANT_ROUNDS = 3;
-
 // ============================================================================
 // CARDS — SCALING & RESOURCE GENERATION
 

@@ -16,29 +16,21 @@
  * print beside it as warning lights, never as a target.
  *
  * Usage:
- *   npm run combat-playtest                                        # all stages, greedy witness, policy-pick decks
+ *   npm run combat-playtest                                        # all stages, greedy witness, the grey deck
  *   npm run combat-playtest -- --stage=early --policy=all
- *   npm run combat-playtest -- --policy=dot-weaver --deck=draft:dot
- *   npm run combat-playtest -- --deck=preset:threadbare --runs=100 --seed=7
+ *   npm run combat-playtest -- --deck=cards:grey-strike,grey-ward --runs=100 --seed=7
  *   npm run combat-playtest -- --enemy=brine-hag --cards
- *   npm run combat-playtest -- --sandbox=forge-example --json
+ *   npm run combat-playtest -- --json
  *
  * Flags (house style: `--k=v` for values, bare `--k` for switches):
  *   --stage=early|mid|late|all   stages to sweep (default all)
  *   --policy=<id|all>                       sim policy roster (default greedy)
- *   --deck=preset:<id>|draft:<focus>|cards:a,b,c|policy-pick
- *                                           deck selection (default policy-pick)
- *   --deck=preset:<id>+swap:<out>/<in>,...  preset with measurement-seat swaps —
- *                                           every copy of <out> replaced by <in>
- *                                           (pair with --sandbox when <in> is a
- *                                           sandbox swap-pool card)
- *   --deck=preset:all                       sweep ALL presets (`COMBAT_DECK_PRESET_ORDER`) in one matrix and
- *                                           print the per-preset x stage rollups
+ *   --deck=grey|cards:a,b,c                 deck selection (default grey); the
+ *                                           report prints a per-deck x stage rollup
  *                                           (doctrine-band fit, skill gap, complexity)
  *   --enemy=<slug>                          restrict rosters to one enemy
  *   --runs=N                                runs per cell (default 60)
  *   --seed=N                                base seed (default 1)
- *   --sandbox=<setId[,setId...]>            apply sandbox card set(s) before running
  *   (dice model: always spec 33's Upgradeable Dice — the only combat model
  *    since the D7 flag collapse. `--upgradeable-dice` is accepted as a no-op
  *    for old scripts; `--legacy-dice` fails: that model was deleted.)
@@ -64,7 +56,6 @@
  * `src/Combat/combat.playtest.ts`.
  */
 
-import { applySandboxSet, listSandboxSets } from '../Cards/cards.sandbox-sets';
 import { ENEMY_REGISTRY } from '../Enemy/enemy.library';
 import {
     COMBAT_STAGE_ORDER, COMBAT_STAGE_PROFILES, isCombatStageId,
@@ -74,10 +65,9 @@ import {
     COMBAT_SIM_POLICY_ORDER, getSimPolicy,
     type CombatSimPolicyId,
 } from '../Combat/combat.sim-policies';
-import { COMBAT_DECK_PRESET_ORDER } from '../Combat/combat.starter-deck-presets';
-import type { CombatDeckSelection } from '../Combat/combat.deck-draft';
 import {
     formatPlaytestReport, parseDeckSelectionArg, runPlaytestMatrix,
+    type CombatDeckSelection,
 } from '../Combat/combat.playtest';
 import { getLogger, isLoggingEnabled } from '../Log';
 import { attachCliLogSinks } from './io';
@@ -128,12 +118,8 @@ function main(): void {
 
     let stages = parseStages(flag('stage') ?? 'all');
     const policies = parsePolicies(flag('policy') ?? 'greedy');
-    const deckArg = flag('deck') ?? 'policy-pick';
-    // Metrics slate (2026-07-18) — 'preset:all' sweeps the whole starter
-    // library in one matrix, feeding the per-preset x stage rollups.
-    const decks: CombatDeckSelection[] = deckArg === 'preset:all'
-        ? COMBAT_DECK_PRESET_ORDER.map(presetId => ({ kind: 'preset', presetId }))
-        : [parseDeck(deckArg)];
+    const deckArg = flag('deck') ?? 'grey';
+    const decks: CombatDeckSelection[] = [parseDeck(deckArg)];
 
     const runs = Number(flag('runs') ?? '60');
     if (!Number.isInteger(runs) || runs < 1) fail('--runs must be a positive integer.');
@@ -148,20 +134,6 @@ function main(): void {
         stages = stages.filter(id => COMBAT_STAGE_PROFILES[id].enemySlugs.includes(enemySlug));
         if (stages.length === 0) {
             fail(`Enemy '${enemySlug}' is not in any selected stage roster. Pick a stage that fields it (--stage=all to search every roster).`);
-        }
-    }
-
-    // Comma-separated: `--sandbox=swap-affliction,swap-echo` applies each set
-    // in order (distinct sets never share card ids; a collision throws loudly).
-    const sandboxId = flag('sandbox');
-    let sandboxNote = '';
-    if (sandboxId !== undefined) {
-        for (const oneId of sandboxId.split(',').map(s => s.trim()).filter(Boolean)) {
-            const set = applySandboxSet(oneId);
-            if (!set) {
-                fail(`Unknown sandbox set '${oneId}'. Known sets: ${listSandboxSets().map(s => s.id).join(', ')}`);
-            }
-            sandboxNote += `Sandbox set applied: ${set.id} (${set.cards.length} cards, ${set.overrides?.length ?? 0} overrides)\n`;
         }
     }
 
@@ -215,7 +187,6 @@ function main(): void {
         `\nHazard combat playtest — stages=[${stages.join(', ')}] policies=[${policies.join(', ')}]`
         + ` deck=${deckArg}${enemySlug !== undefined ? ` enemy=${enemySlug}` : ''} runs=${runs} seed=${seed}\n`,
     );
-    if (sandboxNote) process.stdout.write(sandboxNote);
     process.stdout.write('\n');
     process.stdout.write(formatPlaytestReport(report, { perCard }));
 }

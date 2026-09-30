@@ -5,9 +5,6 @@
  *   - register / lookup / clear lifecycle, `hasSandboxContent`
  *   - collision safety (library ids and duplicate sandbox ids throw; atomic)
  *   - library-card overrides: shallow merge visible through `getCardById`
- *   - the set registry (empty: the pre-v3 experiment sets were cleared by
- *     the reset, and the GLYPHS_51_PILOT set went with the GLYPHS cut, trim
- *     T5 2026-09-25)
  *   - a registered sandbox card speaks the v3 vocabulary: its effect ids
  *     resolve in the Effects library and it projects through `toCombatCard`
  *
@@ -24,7 +21,6 @@ import {
     registerSandboxCards, registerSandboxOverride, clearSandboxCards,
     getSandboxCard, listSandboxCards, hasSandboxContent,
 } from '../cards.sandbox';
-import { SANDBOX_CARD_SETS, listSandboxSets, applySandboxSet } from '../cards.sandbox-sets';
 import { toCombatCard } from '../../Combat/combat.cards';
 
 afterEach(() => {
@@ -140,26 +136,6 @@ describe('sandbox registry — library-card overrides', () => {
         expect(merged?.rank).toBe(3);
         expect(merged?.tier).toBe(3);
         expect(listSandboxCards().map(c => c.id)).toEqual(['grey-word']);
-    });
-});
-
-// ── Set registry (post-v3 reset) ─────────────────────────────────────────────
-
-describe('sandbox sets — the registry after the post-v3 reset', () => {
-    // PROFANE CANON (2026-08-08): the wholesale card rework retired the
-    // 86-card themed library, so every experiment set and swap pool that
-    // referenced it was cleared (same clean-reset rule spec 32 v3 applied
-    // to ITS predecessors; the retired sets live in git history).
-    // The GLYPHS cut (trim T5, 2026-09-25) removed the only post-reset set.
-    it('is empty', () => {
-        expect(Object.keys(SANDBOX_CARD_SETS)).toEqual([]);
-        expect(listSandboxSets()).toEqual([]);
-    });
-
-    it('applySandboxSet returns undefined for an unknown id and registers nothing', () => {
-        expect(applySandboxSet('forge-example')).toBeUndefined();
-        expect(applySandboxSet('no-such-set')).toBeUndefined();
-        expect(hasSandboxContent()).toBe(false);
     });
 });
 

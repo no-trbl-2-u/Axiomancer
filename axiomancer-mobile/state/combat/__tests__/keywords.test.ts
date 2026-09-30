@@ -7,7 +7,7 @@
  * permanent regression gate instead of a one-time fix.
  */
 import { describe, expect, it } from '@jest/globals';
-import { cardLibrary, CARD_SPECIAL_MECHANIC_KINDS, THEME_KEYWORDS } from '@mechanics';
+import { cardLibrary, CARD_SPECIAL_MECHANIC_KINDS } from '@mechanics';
 
 import {
     allRegistryKeywords, keywordForEffect, keywordForMechanic, keywordGloss,
@@ -168,32 +168,5 @@ describe('keyword registry — card-text grammar (phase 40, 2026-08-23)', () => 
             if (/\benemy\b/i.test(def)) offenders.push(`system:${term}`);
         }
         expect(offenders).toEqual([]);
-    });
-});
-
-describe('keyword registry — KW-6 (card-themes.ts family parity)', () => {
-    it('every keyword a theme family claims resolves in the mobile glossary', () => {
-        const broken: string[] = [];
-        for (const [theme, keywords] of Object.entries(THEME_KEYWORDS)) {
-            for (const kw of keywords) {
-                // THEME_KEYWORDS is upper-case; the glossary is Title-Case.
-                const titleCase = kw.charAt(0) + kw.slice(1).toLowerCase();
-                if (!keywordGloss(titleCase)) broken.push(`${theme}: ${kw}`);
-            }
-        }
-        expect(broken).toEqual([]);
-    });
-});
-
-describe('keyword registry — KW-5 (persistent-card keyword reach)', () => {
-    it('every enchantment/disenchant persistentEffect names a live registry keyword in caps', () => {
-        const registry = allRegistryKeywords();
-        const silent: string[] = [];
-        for (const card of cardLibrary.filter(c => c.cardType !== 'spell')) {
-            const text = card.persistentEffect ?? '';
-            const hit = registry.some(kw => text.includes(kw.toUpperCase()));
-            if (!hit) silent.push(card.id);
-        }
-        expect(silent).toEqual([]);
     });
 });

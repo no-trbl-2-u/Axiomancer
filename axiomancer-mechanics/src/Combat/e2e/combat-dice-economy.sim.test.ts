@@ -61,12 +61,11 @@ describe('spec 33 D3 — dice-math gates (authoritative face-table witness)', ()
 
 describe('spec 33 D3 — realized-play invariants', () => {
     // A small, fast slice — invariants hold for any config.
-    // Re-measured after the card purge (P1, 2026-09-27): one preset ('grey')
-    // survives, so the slice runs 15 seeds to keep 30 encounters (74 rounds,
+    // Re-measured after the card purge (P1, 2026-09-27): the grey deck is
+    // the only deck, so the slice runs 15 seeds to keep 30 encounters (74 rounds,
     // spend-rate 0.86, income 1.30◆/round, Press Fate 0.04/round).
     const SEEDS_1_15 = Array.from({ length: 15 }, (_, i) => i + 1);
     const result = simulateUpgradeableEconomy({
-        presets: ['grey'],
         stages: ['early', 'mid'],
         seeds: SEEDS_1_15,
     });
@@ -119,7 +118,6 @@ describe('spec 33 D3 — realized-play invariants', () => {
     // within one whiff of the baseline (0.01) rather than 0.005, which was
     // finer than a single roll at this sample size.
     const stockRun = simulateUpgradeableEconomy({
-        presets: ['grey'],
         stages: ['early'],
         seeds: Array.from({ length: 30 }, (_, i) => i + 1),
     });
@@ -136,7 +134,7 @@ describe('spec 33 D3 — realized-play invariants', () => {
 });
 
 describe('spec 33 D7 — ratified economy envelope', () => {
-    // The D7 witness config: the full preset roster over the three graded
+    // The D7 witness config: the grey deck over the three graded
     // stages, seeds 1-8 (enough that the F1 RNG-skew has converged — the
     // realized income reads 1.15 at 5 seeds, 1.48 at 8, trending to the
     // dice-math baseline). Kept to one shared run.

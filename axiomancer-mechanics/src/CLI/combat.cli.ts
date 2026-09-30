@@ -22,13 +22,9 @@
  *   --max-turns <n>      stop auto play after this many phases (default 8)
  *   --stage <id>         playtest stage profile (early|mid|late);
  *                        builds the stage player when no explicit --preset is
- *                        given, scopes --deck drafting to the stage pool, and
- *                        defaults the enemy to the stage's roster when no
+ *                        given, and defaults the enemy to the stage's roster when no
  *                        explicit --enemy is given (seed-deterministic pick)
- *   --deck <selection>   preset:<id>[+swap:<out>/<in>,...] | draft:<focus> | cards:a,b,c | policy-pick
- *                        (policy-pick drafts with the --policy's natural focus;
- *                        status → dot)
- *   --sandbox <setId[,setId...]>  apply sandbox card set(s) (cards.sandbox-sets) first
+ *   --deck <selection>   grey | cards:a,b,c
  *   --script <path>      JSON answer array (shared io.ts layer). Play steps
  *                        answer the card prompt as `top:<uid>` or `bot:<uid>`;
  *                        a chosen-X card (WS7.2 `recoil_x`) takes an optional
@@ -77,11 +73,7 @@ import {
     COMBAT_STAGE_ORDER, buildStagePlayer, getStageProfile, isCombatStageId,
 } from '../Combat/combat.stage-profiles';
 import type { CombatStageId } from '../Combat/combat.stage-profiles';
-import { resolveDeckSelection } from '../Combat/combat.deck-draft';
-import type { CombatDeckSelection } from '../Combat/combat.deck-draft';
-import type { CombatDeckFocus } from '../Combat/combat.starter-deck-presets';
-import { createDeckSelectionRng, grantDeckKnowledge, parseDeckSelectionArg } from '../Combat/combat.playtest';
-import { applySandboxSet, listSandboxSets } from '../Cards/cards.sandbox-sets';
+import { grantDeckKnowledge, parseDeckSelectionArg, resolveDeckSelection } from '../Combat/combat.playtest';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -104,8 +96,6 @@ export interface CombatCliFlags {
     stage?: CombatStageId;
     /** Raw --deck selection string (parsed by `parseDeckSelectionArg`). */
     deck?: string;
-    /** Sandbox card-set id (--sandbox), applied before the encounter. */
-    sandbox?: string;
     scriptPath?: string;
     stdin: boolean;
     jsonEvents: boolean;
@@ -141,24 +131,12 @@ export interface RunHazardCombatCliResult {
 
 const AUTO_POLICIES: readonly CombatAutoPolicyId[] = ['naive', 'safe', 'aggressive', 'status'];
 
-/** `--deck policy-pick` drafts with the auto policy's natural focus. The
- *  default (status → dot) pairs the status policy with the DoT draft; no
- *  doctrine protects status play any more (THE BIG NUMBERS REWRITE,
- *  2026-09-02 — see `docs/lexicon.json` `status-primacy-doctrine`). */
-const AUTO_POLICY_DECK_FOCUS: Record<CombatAutoPolicyId, CombatDeckFocus> = {
-    status: 'dot',
-    aggressive: 'damage',
-    safe: 'utility',
-    naive: 'balanced',
-};
-
 const COMBAT_USAGE =
     'Usage: npm run combat -- ' +
     '[--enemy <slug>] [--preset <id>] [--seed <n>] ' +
     '[--auto] [--policy naive|safe|aggressive|status] [--max-turns <n>] ' +
     '[--stage early|mid|late] ' +
-    '[--deck preset:<id>[+swap:<out>/<in>,...]|draft:<focus>|cards:a,b,c|policy-pick] ' +
-    '[--sandbox <setId>] ' +
+    '[--deck grey|cards:a,b,c] ' +
     '[--script <path>] [--stdin] [--json-events] [--state-log <path>] ' +
     '[--log-level <trace|debug|info|warn|error>] [--log-file <path>]';
 
@@ -229,8 +207,6 @@ export function parseCombatArgv(args: string[]): CombatCliFlags {
             flags.stage = v; i = ni;
         } else if (arg.startsWith('--deck')) {
             const [v, ni] = takeValue(args, i, '--deck'); flags.deck = v; i = ni;
-        } else if (arg.startsWith('--sandbox')) {
-            const [v, ni] = takeValue(args, i, '--sandbox'); flags.sandbox = v; i = ni;
         } else {
             throw new Error(`Unknown combat CLI flag: '${arg}'.\n${COMBAT_USAGE}`);
         }
@@ -718,32 +694,9 @@ export async function runCombatCli(rawArgs: string[]): Promise<void> {
         throw new Error(`Unknown enemy slug: '${flags.enemySlug}'. Valid: ${valid}`);
     }
 
-    // Sandbox set(s) go live BEFORE deck resolution so drafted / preset decks
-    // see the experimental cards and overrides. Comma-separated ids apply in
-    // order (distinct sets never share card ids; a collision throws loudly).
-    if (flags.sandbox !== undefined) {
-        for (const oneId of flags.sandbox.split(',').map(s => s.trim()).filter(Boolean)) {
-            const set = applySandboxSet(oneId);
-            if (!set) {
-                const valid = listSandboxSets().map(s => s.id).join(', ');
-                throw new Error(`Unknown sandbox set: '${oneId}'. Valid: ${valid}`);
-            }
-        }
-    }
-
-    // Deck selection: --stage scopes drafting to the stage's eligible pool;
-    // 'policy-pick' drafts with the auto policy's natural focus. Seeded runs
-    // resolve the deck from a LOCAL seeded rng so the deck is a pure function
-    // of --seed and the encounter's own RNG stream stays untouched.
     let deck: string[] | undefined;
     if (flags.deck !== undefined) {
-        const selection = parseDeckSelectionArg(flags.deck);
-        const effective: CombatDeckSelection = selection.kind === 'policy-pick'
-            ? { kind: 'draft', focus: AUTO_POLICY_DECK_FOCUS[flags.policy] }
-            : selection;
-        const stageProfile = flags.stage !== undefined ? getStageProfile(flags.stage) : undefined;
-        const rng = flags.seed !== undefined ? createDeckSelectionRng(flags.seed) : undefined;
-        deck = resolveDeckSelection(effective, stageProfile, rng);
+        deck = resolveDeckSelection(parseDeckSelectionArg(flags.deck));
     }
 
     await runHazardCombatCliEncounter({
@@ -755,7 +708,7 @@ export async function runCombatCli(rawArgs: string[]): Promise<void> {
         maxTurns: flags.maxTurns,
         deck,
         // A stage player only replaces the preset player when --preset was not
-        // asked for explicitly (the stage still scoped drafting above).
+        // asked for explicitly.
         stage: flags.presetExplicit ? undefined : flags.stage,
     });
 }

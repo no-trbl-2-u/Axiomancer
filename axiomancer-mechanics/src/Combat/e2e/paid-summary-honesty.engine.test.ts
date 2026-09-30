@@ -1,7 +1,7 @@
 /**
  * GUARD — authored PAID summaries stay honest (2026-07-16, SIDE RAIL follow-up).
  *
- * A spell may carry an authored `paidSummary`: human prose that REPLACES the
+ * A card may carry an authored `paidSummary`: human prose that REPLACES the
  * generated telegraphese on the card face. Two bug detectors survive the
  * 2026-09-02 repeal (big-numbers overhaul §3 L22, §10) — the ≤130-char
  * budget, the em-dash/semicolon ban, the terminal-punctuation rule, and the
@@ -41,16 +41,8 @@ const KNOWN_UPPER = new Set([
 ]);
 
 const summaried = cardLibrary.filter(c => c.paidSummary !== undefined);
-const passived = cardLibrary.filter(c => c.persistentEffect !== undefined);
 
 describe('authored paidSummary honesty', () => {
-    it('only spells carry an authored paidSummary', () => {
-        const offenders = summaried
-            .filter(c => c.cardType !== 'spell')
-            .map(c => `${c.id} (${c.cardType})`);
-        expect(offenders).toEqual([]);
-    });
-
     it('every number the engine applies appears verbatim in the authored text', () => {
         const offenders: string[] = [];
         for (const card of summaried) {
@@ -81,8 +73,8 @@ describe('authored paidSummary honesty', () => {
 
     it('phase 40 — no card face prints a raw decimal (every printed number is a whole unit)', () => {
         const offenders: string[] = [];
-        for (const card of [...summaried, ...passived]) {
-            const s = (card.paidSummary ?? card.persistentEffect) as string;
+        for (const card of summaried) {
+            const s = card.paidSummary as string;
             if (/\d+\.\d+/.test(s)) offenders.push(card.id);
         }
         expect(offenders).toEqual([]);

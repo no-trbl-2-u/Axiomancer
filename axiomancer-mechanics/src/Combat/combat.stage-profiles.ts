@@ -188,10 +188,7 @@ export function stageEligibleCardIds(
     // THE PATH — CARD UPGRADES (axis 3). By this stage the player has spent
     // `upgradedCardShare` of their rest-site beats on `+` copies. Applied
     // DETERMINISTICALLY (every Nth id in a stable order), never by rng, so a
-    // seeded cell stays reproducible. Oath and hex are skipped: their passives
-    // are engine hooks with nothing numeric to raise, and curses are prices —
-    // both are no-ops under `upgradeCard` anyway, so upgrading them would only
-    // make the ids noisier.
+    // seeded cell stays reproducible.
     const share = Math.max(0, Math.min(1, stage.upgradedCardShare));
     if (share <= 0) return ids;
     ids.sort();
@@ -199,7 +196,7 @@ export function stageEligibleCardIds(
     return ids.map((id, i) => {
         if (i % step !== 0) return id;
         const card = pool.get(id);
-        if (!card || card.cardType !== 'spell' || card.theme === 'curse') return id;
+        if (!card) return id;
         return `${id}${UPGRADE_SUFFIX}`;
     });
 }

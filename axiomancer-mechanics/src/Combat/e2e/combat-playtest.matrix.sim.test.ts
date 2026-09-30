@@ -3,12 +3,9 @@
  *
  * Verifies the matrix is fully seed-deterministic (identical options →
  * deeply-equal reports), every cell's outcome accounting is exact
- * (V+M+D+R === runs, fractions in [0,1]), 'policy-pick' decks resolve
- * per-policy (a dot-weaver cell drafts a different deck than an aggro-brute
- * cell under the same seed — status play gets its own tools), and per-card
- * usage never names a card outside the resolved deck. Doctrine: the matrix is
- * the instrument that proves status play stays the efficient path at every
- * campaign stage.
+ * (V+M+D+R === runs, fractions in [0,1]), per-card usage never names a
+ * card outside the resolved deck, and the report carries one per-deck
+ * rollup per deck label.
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
@@ -25,12 +22,11 @@ afterEach(() => {
     clearSandboxCards();
 });
 
-/** A minimal sandbox DoT card (the card purge, P1, 2026-09-27): the grey
- *  office prints no DoT and its 3 × 2 copies cannot fill a 10-card draft, so
- *  per-policy drafting is only observable with a wider pool. */
+/** A minimal sandbox DoT card (the card purge, P1, 2026-09-27): a card the
+ *  early-stage player has not learned, for the knowledge-grant check. */
 function sandboxDotCard(id: string, overrides: Partial<Card> = {}): Card {
     return {
-        id, theme: 'rot', name: id, color: 'body',
+        id, name: id, color: 'body',
         description: 'QA fixture: a plain poison.',
         tier: 1, rank: 1, cardType: 'spell', targetType: 'enemy',
         free: { damage: 1 },
@@ -71,7 +67,7 @@ describe('playtest matrix — determinism', () => {
             stage: 'early' as const,
             enemySlug: 'float-eye',
             policyId: 'dot-weaver' as const,
-            deck: { kind: 'policy-pick' as const },
+            deck: { kind: 'grey' as const },
             runs: 6,
             seed: 11,
         };
@@ -123,33 +119,15 @@ describe('playtest matrix — cell invariants', () => {
     }, 60_000);
 });
 
-describe('playtest matrix — policy-pick decks resolve per-policy', () => {
-    it('dot-weaver and aggro-brute cells draft different decks under the same seed', () => {
-        // Rewritten after the card purge (P1, 2026-09-27): three sandbox DoT
-        // cards widen the pool past the draft size so the policy focus shows.
-        const DOTS = ['qa-dot-a', 'qa-dot-b', 'qa-dot-c'];
-        registerSandboxCards(DOTS.map(id => sandboxDotCard(id)));
-        const report = runPlaytestMatrix({
-            stages: ['early'],
-            policies: ['dot-weaver', 'aggro-brute'],
-            enemiesPerStage: 1,
-            runsPerCell: 4,
-            seed: 1,
-        });
-        expect(report.cells.length).toBe(2);
-        const [weaver, brute] = report.cells;
-        expect(weaver.spec.policyId).toBe('dot-weaver');
-        expect(brute.spec.policyId).toBe('aggro-brute');
-        expect(weaver.deckCardIds).not.toEqual(brute.deckCardIds);
-        // …and the difference is the focus: the weaver leans DoT, the brute
-        // leans on the plain damage card.
-        const count = (deck: readonly string[], pred: (id: string) => boolean): number =>
-            deck.filter(pred).length;
-        expect(count(weaver.deckCardIds, id => DOTS.includes(id)))
-            .toBeGreaterThan(count(brute.deckCardIds, id => DOTS.includes(id)));
-        expect(count(brute.deckCardIds, id => id === 'grey-strike'))
-            .toBeGreaterThan(count(weaver.deckCardIds, id => id === 'grey-strike'));
-    }, 30_000);
+describe('playtest matrix — per-deck rollups', () => {
+    it('the default grey deck gets one rollup covering every stage run', () => {
+        const report = smallReport();
+        expect(report.deckSummaries.map(d => d.deckLabel)).toEqual(['grey']);
+        const [grey] = report.deckSummaries;
+        expect(grey.stages.map(r => r.stage)).toEqual(['early', 'late']);
+        expect(grey.complexity.uniqueCards).toBe(3);
+        expect(grey.skillGap).not.toBeNull();
+    }, 60_000);
 });
 
 describe('playtest report formatting', () => {
@@ -174,7 +152,7 @@ describe('playtest harness — honest failures', () => {
     it('throws on an unknown enemy slug', () => {
         expect(() => runPlaytestCell({
             stage: 'early', enemySlug: 'no-such-foe', policyId: 'greedy',
-            deck: { kind: 'policy-pick' }, runs: 1, seed: 1,
+            deck: { kind: 'grey' }, runs: 1, seed: 1,
         })).toThrow(/Unknown enemy slug/);
     });
 
@@ -182,8 +160,7 @@ describe('playtest harness — honest failures', () => {
         // Rewritten after the card purge (P1, 2026-09-27): the tier-3 preset
         // card (communion-of-the-worm) is gone, so a sandbox tier-3 card the
         // early-stage player has not learned stands in. The harness grants
-        // deck knowledge so the cell still runs and the card is PLAYED (the
-        // maturity gate lives in DRAFTING, not the engine knownCards check).
+        // deck knowledge so the cell still runs and the card is PLAYED.
         registerSandboxCards([sandboxDotCard('qa-tier3-dot', { tier: 3, rank: 5 })]);
         const cell = runPlaytestCell({
             stage: 'early', enemySlug: 'float-eye', policyId: 'greedy',

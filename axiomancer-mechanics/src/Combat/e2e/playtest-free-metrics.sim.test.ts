@@ -23,12 +23,11 @@ const RUNS = 30;
 const SEED = 1;
 const STAGE: CombatStageId = 'early';
 
-// One deterministic matrix over a real preset (erosion — a DoT deck that
-// reliably wins, ticks HP, and leaves some cards unplayed on the early pool).
+// One deterministic matrix over the grey deck.
 const report = runPlaytestMatrix({
     stages: [STAGE],
     policies: ['greedy'],
-    decks: [{ kind: 'preset', presetId: 'erosion' }],
+    decks: [{ kind: 'grey' }],
     enemiesPerStage: 2,
     runsPerCell: RUNS,
     seed: SEED,

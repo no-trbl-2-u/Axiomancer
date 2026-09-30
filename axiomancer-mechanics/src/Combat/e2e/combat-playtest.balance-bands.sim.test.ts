@@ -25,7 +25,7 @@ let cachedMain: PlaytestReport | null = null;
 function mainReport(): PlaytestReport {
     cachedMain = cachedMain ?? runPlaytestMatrix({
         policies: ['greedy', 'blind'],
-        decks: [{ kind: 'policy-pick' }],
+        decks: [{ kind: 'grey' }],
         enemiesPerStage: 2,
         runsPerCell: RUNS_PER_CELL,
         seed: SEED,

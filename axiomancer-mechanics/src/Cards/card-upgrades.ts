@@ -43,17 +43,8 @@
  * generates the face from `combatEffects` + `specialMechanics` only, so:
  * whenever an upgrade changes either of those payloads, `paidSummary` is
  * CLEARED and the face falls back to the generated (therefore honest) text. An
- * upgrade that only touches the FREE line or the synergy rider keeps the
- * authored sentence, because `paidText` never read those numbers. An authored
+ * upgrade that only touches the FREE line keeps the authored sentence, because `paidText` never read those numbers. An authored
  * patch may supply its own `paidSummary`, and then it owns the honesty.
- *
- * ─── KNOWN HAZARD: oath / hex ───────────────────────────────────────────────
- *
- * An `oath` / `hex` passive is hooked in the combat engine BY LITERAL CARD ID
- * (`zoneHas(state, 'every-stone-an-oath')`), so an upgraded `...-oath+` would
- * find no hook and lose its passive entirely. Callers wiring upgrades into the
- * engine must resolve hooks through {@link baseCardId}. Not fixed here: the
- * engine is outside this module's ownership.
  *
  * This file is pure. `upgradeCard` deep-copies before it touches anything and
  * never mutates its input.
@@ -228,19 +219,14 @@ function applyPatch(card: Card, patch: CardUpgrade): void {
         card.free = card.free ?? {};
         applyRiderPatch(card.free, patch.free);
     }
-    if (patch.synergy && card.synergy?.rider) applyRiderPatch(card.synergy.rider, patch.synergy);
 }
 
 // ─── The default rule, whole-card ───────────────────────────────────────────
 
 function applyDefaultRule(card: Card): void {
-    // Every number on a curse is a price. There is nothing a `+` can raise.
-    if (card.theme === 'curse') return;
-
     for (const ce of card.combatEffects ?? []) upgradeCombatEffectDefault(ce);
     for (const m of card.specialMechanics ?? []) upgradeMechanicDefault(m);
     if (card.free) upgradeRiderDefault(card.free);
-    if (card.synergy?.rider) upgradeRiderDefault(card.synergy.rider);
 }
 
 // ─── The public verb ────────────────────────────────────────────────────────
@@ -278,11 +264,6 @@ export function upgradeCard(card: Card): Card {
     const paidChanged = paidPayloadSignature(up) !== beforePaid;
     if (patch?.paidSummary) up.paidSummary = patch.paidSummary;
     else if (paidChanged && up.paidSummary !== undefined) delete up.paidSummary;
-
-    // `persistentEffect` describes an ENGINE-HOOKED passive (see the oath/hex
-    // hazard note at the top): no data patch can change what it says, so it is
-    // never auto-cleared — only an authored patch may rewrite it.
-    if (patch?.persistentEffect) up.persistentEffect = patch.persistentEffect;
 
     // The upgraded copy carries no patch of its own: one upgrade level.
     delete up.upgrade;

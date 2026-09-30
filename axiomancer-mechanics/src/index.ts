@@ -75,8 +75,6 @@ export {
     handCards, buildCombatSummary,
     combatDieCanPower,
     toCombatCard, buildCombatDeck,
-    COMBAT_DECK_PRESETS, COMBAT_DECK_PRESET_ORDER,
-    listDeckPresets,
     getThreatSequence,
     mechanicText,
     // Spec 26b / spec 33 — turn lifecycle, Conviction, Signature Skills
@@ -191,7 +189,6 @@ export type {
 export type {
     Card, CardAspect, CardTier, CardTarget,
     CardCombatEffects, CardSpecialMechanic,
-    CardSynergy,
     // Spec 32 v3 — the rank ladder / rarity / card-type axes
     CardRank, CardRarity, CardType, CardRider,
 } from './Cards';
@@ -200,13 +197,10 @@ export {
     CARD_RANK_NAMES, rankToRarity,
     getAvailableCards, learnCard,
     cardLibrary, getCardById,
-    // Spec 32 §3/§6 — card themes + keyword families (phase 29 parity lint)
-    THEME_KEYWORDS,
     // Phase 68 — runtime enumeration of the CardSpecialMechanic union, bound to
     // the type by compile-time assertions. Mobile KW-2 walks this list.
     CARD_SPECIAL_MECHANIC_KINDS,
 } from './Cards';
-export type { CardTheme } from './Cards';
 
 // ─── Game (state, store, persistence, constants) ──────────────────────────────
 export {

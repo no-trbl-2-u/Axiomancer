@@ -1,17 +1,17 @@
 /**
- * Static complexity — the cognitive-load instrument for cards and presets
+ * Static complexity — the cognitive-load instrument for cards and decks
  * (metrics-slate item 4, 2026-07-18).
  *
  * PURE STATIC ANALYSIS: no sim runs. A card's complexity is what a player must
  * hold in their head to play it — its keyword vocabulary, its mechanical
- * moving parts, and its conditional gates. A preset's complexity adds the
- * vocabulary-load view: how many distinct keywords the preset deck asks the
+ * moving parts. A deck's complexity adds the
+ * vocabulary-load view: how many distinct keywords the deck asks the
  * player to know, and how many of those are ORPHANS (carried by exactly one
  * unique card — pure cognitive load with no in-deck reinforcement).
  *
  * Keyword extraction follows the card-keyword doctrine ("every mechanic is a
  * keyword", 2026-07-10): UPPERCASE runs in the authored face text
- * (`paidSummary` / `persistentEffect`) are keywords unless they are known
+ * (`paidSummary`) are keywords unless they are known
  * structural words — the same convention `paid-summary-honesty.engine.test.ts`
  * enforces — plus the keywords implied by rider verbs on the FREE line (a FREE "draw 1" is DRAW even when the prose never prints it). An
  * exclusion list (not an allowlist) keeps the instrument honest as the
@@ -19,14 +19,13 @@
  * card ships.
  *
  * The SCORES are deliberately simple additive heuristics (v1) — meant for
- * RANKING cards/presets against each other, not as absolute truth. Pair with
- * the dynamic skill-ceiling metric (`PlaytestPresetSummary.skillGap`): high
+ * RANKING cards/decks against each other, not as absolute truth. Pair with
+ * the dynamic skill-ceiling metric (`PlaytestDeckSummary.skillGap`): high
  * static + low dynamic = complicated but shallow, the prime trim target.
  */
 
 import type { Card, CardRider } from '../Cards/types';
 import { getCardById } from '../Cards/cards.library';
-import { getDeckPreset } from './combat.starter-deck-presets';
 
 /** Structural / system words the faces print in caps that are NOT keywords
  *  (mirrors the honesty test's structural set). */
@@ -64,12 +63,9 @@ export interface CardComplexityRow {
     cardId: string;
     /** Distinct keywords on the face (text + rider-implied), sorted. */
     keywords: string[];
-    /** Mechanical moving parts: combat-effect payloads + special mechanics +
-     *  synergy clause + persistent hook. */
+    /** Mechanical moving parts: combat-effect payloads + special mechanics. */
     mechanicCount: number;
-    /** Conditional gates (the synergy predicate). */
-    conditionalCount: number;
-    /** keywords + mechanics + conditionals — the additive v1 heuristic. */
+    /** keywords + mechanics — the additive v1 heuristic. */
     score: number;
 }
 
@@ -77,28 +73,22 @@ export interface CardComplexityRow {
 export function cardComplexity(card: Card): CardComplexityRow {
     const kws = new Set<string>();
     collectTextKeywords(card.paidSummary, kws);
-    collectTextKeywords(card.persistentEffect, kws);
     collectRiderKeywords(card.free, kws);
 
-    const conditionalCount = card.synergy ? 1 : 0;
     const mechanicCount = (card.combatEffects?.length ?? 0)
-        + (card.specialMechanics?.length ?? 0)
-        + (card.persistentEffect ? 1 : 0)
-        + conditionalCount;
+        + (card.specialMechanics?.length ?? 0);
 
     const keywords = [...kws].sort();
     return {
         cardId: card.id,
         keywords,
         mechanicCount,
-        conditionalCount,
-        score: keywords.length + mechanicCount + conditionalCount,
+        score: keywords.length + mechanicCount,
     };
 }
 
-/** One preset's static-complexity rollup. */
-export interface PresetComplexity {
-    presetId: string;
+/** One deck's static-complexity rollup. */
+export interface DeckComplexity {
     /** Unique cards that resolved against the library. */
     uniqueCards: number;
     /** Mean card score over the unique cards. */
@@ -106,7 +96,7 @@ export interface PresetComplexity {
     /** The single heaviest card and its score. */
     maxCardScore: number;
     maxCardId: string;
-    /** Union of keywords across the preset's unique cards, sorted. */
+    /** Union of keywords across the deck's unique cards, sorted. */
     distinctKeywords: string[];
     /** Keywords carried by exactly ONE unique card — unreinforced vocabulary. */
     orphanKeywords: string[];
@@ -115,16 +105,14 @@ export interface PresetComplexity {
 }
 
 /**
- * Static complexity of a preset deck (null for an unknown preset id).
+ * Static complexity of a deck (card ids; ids that do not resolve are skipped).
  * Duplicates collapse — complexity is about VOCABULARY, and the 4th copy of a
  * common teaches nothing new; duplication actually LOWERS a deck's real
  * cognitive load, which shows up here as fewer unique cards sharing the same
  * keyword set.
  */
-export function presetComplexity(presetId: string): PresetComplexity | null {
-    const preset = getDeckPreset(presetId);
-    if (!preset) return null;
-    const uniqueIds = [...new Set(preset.cardIds)];
+export function deckComplexity(cardIds: readonly string[]): DeckComplexity {
+    const uniqueIds = [...new Set(cardIds)];
     const rows: CardComplexityRow[] = [];
     for (const id of uniqueIds) {
         const card = getCardById(id);
@@ -145,7 +133,6 @@ export function presetComplexity(presetId: string): PresetComplexity | null {
         if (row.score > maxCardScore) { maxCardScore = row.score; maxCardId = row.cardId; }
     }
     return {
-        presetId,
         uniqueCards: rows.length,
         avgCardScore,
         maxCardScore,

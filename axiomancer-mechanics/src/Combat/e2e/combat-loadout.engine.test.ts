@@ -6,9 +6,6 @@
  *  2. Max-capacity guard.
  *  3. buildCombatDeck — curated loadout when flags present.
  *  4. buildCombatDeck — fallback to knownCards when no loadout flags.
- *  5. isCombatSynergySatisfied — target-side predicate (true / false).
- *  6. isCombatSynergySatisfied — caster-side predicate always false.
- *  7. isCombatSynergySatisfied — synthetic card always false.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -18,13 +15,8 @@ import {
 } from '../combat.loadout';
 import { buildCombatDeck } from '../combat.deck';
 import { initializeCombatEncounter } from '../combat.engine';
-import { isCombatSynergySatisfied, toCombatCard } from '../combat.cards';
-import { getCardById } from '../../Cards/cards.library';
-import { registerSandboxCards } from '../../Cards/cards.sandbox';
-import { lookupEffect } from '../../Effects';
 import { createCharacter } from '../../Character';
 import { FloatEye } from '../../Enemy/enemy.library';
-import type { ActiveEffect } from '../../Effects/types';
 
 // The card purge (P1, 2026-09-27): the grey office is the whole library, so
 // its three cards hold the fixture seats (A Plain Blow / Ward / Word).
@@ -150,100 +142,5 @@ describe('initializeCombatEncounter — loadout flags reachability (Phase 93)', 
         flags = addToLoadout(flags, CARD_A);
         const state = initializeCombatEncounter(playerWithCards, FloatEye, [EXTRA], 1, flags);
         expect(state.deck).toEqual([EXTRA]);
-    });
-});
-
-describe('isCombatSynergySatisfied', () => {
-    const buildCard = (cardId: string) => toCombatCard(cardId, getCardById, lookupEffect);
-
-    // spec 32 v3: no library card carries a synergy clause any more — the
-    // machinery survives for sandbox/tuning experiments, so the fixtures are
-    // sandbox-only cards (no basePower; the strike is dead at the schema level).
-    registerSandboxCards([{
-        id: 'qa-target-synergy',
-        name: 'QA Target Synergy (test fixture)',
-        color: 'body',
-        description: 'Test-only: target-side synergy predicate on bleed.',
-        tier: 2,
-        rank: 2,
-        cardType: 'spell',
-        targetType: 'enemy',
-        synergy: { predicate: { effectId: 'debuff_bleed', on: 'target', intensityMin: 1, durationMin: 2 } },
-    }]);
-
-    it('returns true when target-side predicate is satisfied', () => {
-        const card = buildCard('qa-target-synergy');
-        expect(card).not.toBeNull();
-        const enemyEffects: ActiveEffect[] = [
-            {
-                effectId: 'debuff_bleed',
-                intensity: 2,
-                remainingDuration: 3,
-                sourceId: 'test',
-                appliedAt: 0,
-                tier: 1,
-                resistedBy: 'body',
-                resistDR: 0,
-            },
-        ];
-        expect(isCombatSynergySatisfied(card!, enemyEffects)).toBe(true);
-    });
-
-    it('returns false when the required effect is absent', () => {
-        const card = buildCard('qa-target-synergy');
-        expect(isCombatSynergySatisfied(card!, [])).toBe(false);
-    });
-
-    it('returns false when durationMin is not met', () => {
-        const card = buildCard('qa-target-synergy');
-        const enemyEffects: ActiveEffect[] = [
-            {
-                effectId: 'debuff_bleed',
-                intensity: 2,
-                remainingDuration: 1,
-                sourceId: 'test',
-                appliedAt: 0,
-                tier: 1,
-                resistedBy: 'body',
-                resistDR: 0,
-            },
-        ];
-        expect(isCombatSynergySatisfied(card!, enemyEffects)).toBe(false);
-    });
-
-    it('returns false for a caster-side predicate (on: caster)', () => {
-        registerSandboxCards([{
-            id: 'qa-caster-synergy',
-            name: 'QA Caster Synergy (test fixture)',
-            color: 'mind',
-            description: 'Test-only: caster-side synergy predicate.',
-            tier: 2,
-            rank: 3,
-            cardType: 'spell',
-            targetType: 'enemy',
-            synergy: { predicate: { effectId: 'fixture_roll_up', on: 'caster', intensityMin: 1 } },
-        }]);
-        const card = buildCard('qa-caster-synergy');
-        expect(card).not.toBeNull();
-        const enemyEffects: ActiveEffect[] = [
-            {
-                effectId: 'fixture_roll_up',
-                intensity: 1,
-                remainingDuration: 2,
-                sourceId: 'test',
-                appliedAt: 0,
-                tier: 2,
-                resistedBy: 'heart',
-                resistDR: 0,
-            },
-        ];
-        expect(isCombatSynergySatisfied(card!, enemyEffects)).toBe(false);
-    });
-
-    it('returns false for a synthetic card with no library backing', () => {
-        const card = toCombatCard(CARD_A, getCardById, lookupEffect);
-        expect(card).not.toBeNull();
-        const syntheticCard = { ...card!, id: 'card-retreat' };
-        expect(isCombatSynergySatisfied(syntheticCard, [])).toBe(false);
     });
 });

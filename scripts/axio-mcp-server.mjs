@@ -149,7 +149,7 @@ const TOOLS = [
   {
     name: 'axio_overview',
     description:
-      'Counts (cards/enemies/effects), per-theme card counts, rank distribution, keyword-registry coverage, and doctrine one-liners (direct-damage legality, locked systems) sourced from the live libraries. Start here.',
+      'Counts (cards/enemies/effects), rank distribution, keyword-registry coverage, and doctrine one-liners (direct-damage legality, locked systems) sourced from the live libraries. Start here.',
     inputSchema: { type: 'object', properties: {}, additionalProperties: false },
     run() {
       const cards = loadJson(CARDS_JSON) ?? []
@@ -157,11 +157,8 @@ const TOOLS = [
       const effects = loadJson(EFFECTS_JSON) ?? []
       const buffs = effects.filter((e) => e.type === 'buff').length
       const debuffs = effects.filter((e) => e.type === 'debuff').length
-      const themeCounts = new Map()
       const rankCounts = new Map()
       for (const c of cards) {
-        const theme = chipValue(c, 'Theme')
-        if (theme) themeCounts.set(theme, (themeCounts.get(theme) ?? 0) + 1)
         const rank = chipValue(c, 'Rank')
         if (rank) rankCounts.set(rank, (rankCounts.get(rank) ?? 0) + 1)
       }
@@ -169,7 +166,6 @@ const TOOLS = [
       const lines = [
         `# Library — ${cards.length} cards, ${enemies.length} enemies, ${effects.length} effects (${buffs} buff / ${debuffs} debuff)`,
         `# Keyword registry — ${keywordRows.length} rows (${keywordRows.filter((r) => r.type === 'hallmark').length} theme hallmarks, ${keywordRows.filter((r) => r.type === 'utility').length} other), growable since THE PIPELINE LIBERATION`,
-        `# Themes — ${themeCounts.size}: ${[...themeCounts.entries()].map(([t, n]) => `${t}(${n})`).join(', ') || '(none)'}`,
         `# Ranks — ${[...rankCounts.entries()].map(([r, n]) => `${r}:${n}`).join(', ') || '(none)'}`,
         ...extractDoctrine().map((p) => `# Doctrine — ${p}`),
       ]
@@ -179,24 +175,22 @@ const TOOLS = [
   {
     name: 'axio_cards',
     description:
-      'Search the live card library by name / keyword / theme / rank. Returns pricing arithmetic (the "// pts:" comment) + rules text, always as current as the working tree.',
+      'Search the live card library by name / keyword / rank. Returns pricing arithmetic (the "// pts:" comment) + rules text, always as current as the working tree.',
     inputSchema: {
       type: 'object',
       properties: {
         query: { type: 'string', description: 'case-insensitive substring over name, keywords, and rules text' },
-        theme: { type: 'string', description: 'exact theme slug, e.g. affliction' },
         rank: { type: 'string', description: 'rank name or number substring, e.g. Axiom or 5' },
         limit: { type: 'number', description: 'default 15' },
       },
       additionalProperties: false,
     },
-    run({ query, theme, rank, limit = 15 }) {
+    run({ query, rank, limit = 15 }) {
       const cards = loadJson(CARDS_JSON)
       if (!cards) return withStaleness('cards.json not found — run "npm run catalog:export".')
       const q = query?.toLowerCase()
       const rankQ = rank != null ? String(rank).toLowerCase() : null
       const hits = cards.filter((c) => {
-        if (theme && (chipValue(c, 'Theme') ?? '').toLowerCase() !== theme.toLowerCase()) return false
         if (rankQ && !(chipValue(c, 'Rank') ?? '').toLowerCase().includes(rankQ)) return false
         if (q) {
           const haystack = [c.name, chipValue(c, 'Keywords') ?? '', ...(c.lines ?? [])].join(' ').toLowerCase()

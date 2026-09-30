@@ -105,8 +105,6 @@ export function buildFixtureState(options: { clean?: boolean } = {}): CombatEnco
         staggerRungs: 0,
         revealedStances: [],
         spellsPlayedThisTurn: 0,
-        persistentZone: [],
-        enemyAttachments: [],
         discard: ['grey-strike', 'grey-ward', 'grey-word'],
         drawPile: FIXTURE_FILLER.slice(),
         deck: FIXTURE_FILLER.slice(),

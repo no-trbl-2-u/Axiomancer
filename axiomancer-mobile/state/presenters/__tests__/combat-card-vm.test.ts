@@ -37,7 +37,6 @@ import { registerFixtureEffects } from '@mechanics/test-utils/fixture-effects';
  */
 const FX_EMBER: Card = {
     id: 'fx-ember',
-    theme: 'rot',
     name: 'Ember (fixture)',
     color: 'mind',
     description: 'Test carrier: a genuine round-clock DoT.',
@@ -123,12 +122,12 @@ describe('faceStats — honest real-unit faces', () => {
 });
 
 describe('Option A split rail — freeKeyword/freeValue + typeStrip (owner-picked 2026-07-09)', () => {
-    it('A Plain Ward → ◇ GUARD · 2 (the authored free rider, never halved) | ANY · SPELL foot strip', () => {
+    it('A Plain Ward → ◇ GUARD · 2 (the authored free rider, never halved) | ANY · SKILL foot strip', () => {
         const { card, sourceCard } = cardOf('grey-ward');
         const f = faceStats(card, sourceCard);
         expect(f.freeKeyword).toBe('GUARD');
         expect(f.freeValue).toBe('2');
-        expect(f.typeStrip).toBe('ANY · SPELL');
+        expect(f.typeStrip).toBe('ANY · SKILL');
     });
     it("A Plain Word → ◇ VULNERABLE · ×10 · 1t, never the 'i10 d1' code", () => {
         // 2026-07-12 (card-wording audit): '×N · Mt', never the 'iN dM' code.
@@ -196,12 +195,6 @@ describe('card-wording audit (2026-07-12) — the +DIE row carries only what the
         expect(d.diePaidLine).toContain('DEAL 5');
         expect(d.dieTriplet).toBeNull();
         expect(d.readLegend).toBeNull();
-    });
-    it('spells carry no persistent duration footer', () => {
-        for (const id of ['grey-strike', 'grey-ward', 'grey-word']) {
-            const spell = cardOf(id);
-            expect(detailStats(spell.card, spell.sourceCard).durationFooter).toBeNull();
-        }
     });
     it('INTENSITY and FREE never render as system terms (retired, owner 2026-07-18)', () => {
         // Both read plainly enough in context; their rows padded every inspect.

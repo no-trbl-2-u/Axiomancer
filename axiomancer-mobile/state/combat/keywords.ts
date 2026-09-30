@@ -58,8 +58,6 @@ const SUPPORT_KEYWORD: Record<string, string> = {
 /** Verb class → keyword for cards whose action is the keyword itself. */
 const VERB_KEYWORD: Record<string, string> = {
     defend: 'Guard',
-    oath: 'Oath',
-    hex: 'Hex',
 };
 
 /**
@@ -119,51 +117,25 @@ const KEYWORD_GLOSS: Record<string, string> = {
     Boon: "A die's BOON face powers a card of its color and grants Conviction. Its equipped gear sets how much (2 by default).",
     Hone: "A blacksmith upgrade: adds a mana face to a die's gear, so more of its rolls power a card.",
     Temper: "A blacksmith upgrade: turns a mana face into a BOON face. A colored die caps at 2 boon and 1 miss, gold at 1.",
-    // ── Card types (labels, not keywords — never rendered in the inspect
-    // keyword panel since 2026-07-12; kept for help surfaces + the KW lints) ──
-    Oath: 'A passive on your side: 3 rounds when played free, permanent when paid with a die.',
-    Hex: 'A standing curse on the foe: 3 rounds when played free, permanent when paid with a die.',
 };
 
 /**
- * 2026-07-11 card-face-truth fix — PAYLOAD keywords for a persistent card.
- *
- * An oath/hex's passive lives in ENGINE HOOKS keyed by card id (no
- * effect id ever reaches mobile), so the payload keyword is recovered from the
- * card's authored one-line summary (`Card.persistentEffect`), which prints its
- * mechanics as UPPERCASE registry words ('Every BLEED or POISON you apply…' —
- * the KW-5 lint guarantees at least one resolves for every library card).
- * Returns Title-Case registry keywords in text order, deduped; [] when nothing
- * resolves (callers keep the type-label-only fallback). The card-TYPE labels
- * (Oath/Hex) are types, not payloads, and are never returned.
+ * The registry keywords a printed line names in UPPERCASE. Returns
+ * Title-Case registry keywords in text order, deduped; [] when nothing
+ * resolves.
  */
-export function keywordsInPersistentText(text: string | null | undefined): string[] {
+export function keywordsInText(text: string | null | undefined): string[] {
     if (!text) return [];
     const out: string[] = [];
     const seen = new Set<string>();
     for (const run of text.match(/[A-Z]{2,}/g) ?? []) {
         const title = run.charAt(0) + run.slice(1).toLowerCase();
         const kw = KEYWORD_GLOSS[title] ? title : null;
-        if (!kw || kw === 'Oath' || kw === 'Hex' || seen.has(kw)) continue;
+        if (!kw || seen.has(kw)) continue;
         seen.add(kw);
         out.push(kw);
     }
     return out;
-}
-
-/**
- * The persistent card's VERB-slot keyword (owner directive 2026-07-12: the
- * face's ◆ line leads with what the card DOES — Entropy Tax leads MARK — while
- * the type word stays on the type strip / type chip). Authored summaries put
- * the outcome LAST ('Every KINDLEd or FORGEd die you spend MARKs the enemy.'),
- * so the last keyword mentioned wins; a summary that OPENS with its keyword
- * ('DRAW 1 card each time…') is already leading with the verb and wins outright.
- */
-export function persistentVerbKeyword(text: string | null | undefined): string | null {
-    const kws = keywordsInPersistentText(text);
-    if (kws.length === 0) return null;
-    if (text && text.toUpperCase().startsWith(kws[0].toUpperCase())) return kws[0];
-    return kws[kws.length - 1];
 }
 
 /** The keyword for an engine effect id, or null if unmapped. */

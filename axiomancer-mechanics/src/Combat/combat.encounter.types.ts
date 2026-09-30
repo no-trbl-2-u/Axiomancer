@@ -20,7 +20,7 @@ import type { Character } from '../Character/types';
 import type { Enemy } from '../Enemy/types';
 import type { Effect, ActiveEffect } from '../Effects/types';
 import type { Stance } from './types';
-import type { CardAspect } from '../Cards/types';
+import type { CardAspect, CardType } from '../Cards/types';
 
 // ---------------------------------------------------------------------------
 // Dice — the stance-color economy (Spec 25 §4.2)
@@ -94,8 +94,6 @@ export type CombatVerbClass =
     | 'direct-damage'     // status-payoff bursts (RUPTURE / REAP) — never raw strikes
     | 'befriend'          // Befriend card → opens the mercy choice (§6 Q6)
     | 'defend'            // Guard/defense card → shields against the enemy's next threat
-    | 'oath'              // spec 32 v3 — persistent player-side passive (spec 34 R-9: renamed from enchant)
-    | 'hex'               // spec 32 v3 — persistent curse attached to the enemy (spec 34 R-10: renamed from disenchant)
     | 'retreat';          // dead — no card ever produces this verb class any more.
                            // No in-combat retreat exists; combat resolves only
                            // by winning or losing. Kept in the union rather than
@@ -129,8 +127,8 @@ export interface CombatCard {
     rarity?: 'common' | 'uncommon' | 'rare';
     /** Spec 32 v3 — rank 1-6 (Ash → Saint); printed on the face. */
     rank?: 1 | 2 | 3 | 4 | 5 | 6;
-    /** Spec 32 v3 — card type (spell / oath / hex). */
-    cardType?: 'spell' | 'oath' | 'hex';
+    /** The card's type: attack / skill / spell (D51). */
+    cardType?: CardType;
     /** Human-readable description of the FREE top action. */
     topActionText: string;
     /** Human-readable description of the powered BOTTOM action. */
@@ -141,12 +139,6 @@ export interface CombatCard {
     /** The id of the primary enemy effect this card applies (for the projection
      *  preview's diminishing-returns lookup). Null for damage/buff/synthetic. */
     primaryEffectId: string | null;
-    /**
-     * Fate Engine P1 — the card's printed DIE LINES (threshold / dieBonus /
-     * fate / die-manipulation), generated from the card's riders in REAL units
-     * (printed == applied). Absent for cards with no dice interaction.
-     */
-    dieLines?: string[];
 }
 
 /** A physical card instance in hand / play (uid-tracked, like Hazard). */
@@ -459,15 +451,8 @@ export type CombatEvent =
     | { kind: 'die-ripened'; dieId: string; pips: number }
     | { kind: 'resonance-gained'; color: 'heart' | 'body' | 'mind'; total: number }
     | { kind: 'pips-cashed'; cardId: string; pips: number; bonus: 'intensity' | 'guard'; amount: number }
-    // ── Spec 32 v3 — themed-deck events ──────────────────────────────────────
+    // ── Spec 32 v3 — ghost-die and oratory events ────────────────────────────
     | { kind: 'floating-die-spent'; dieId: string; color: CombatDieColor; poolSize: number }
-    // Spec 32 v4 — `temporary`/`roundsLeft` are set when the card entered play via
-    // the FREE (dieless) line (a timed instance); absent/false = the PAID permanent
-    // play (rest of combat).
-    | { kind: 'enchant-played'; cardId: string; name: string; temporary?: boolean; roundsLeft?: number }
-    | { kind: 'disenchant-attached'; cardId: string; name: string; temporary?: boolean; roundsLeft?: number }
-    // Spec 32 v4 — a FREE-line temporary enchant/disenchant ticked out of its zone.
-    | { kind: 'enchant-expired'; cardId: string; name: string; side: 'player' | 'enemy' }
     | { kind: 'premise-gained'; amount: number; total: number }
     // Phase 32 part 4b (Oratory — milestone drip): fires alongside
     // 'premise-gained' whenever a NEW lifetime Premise milestone is crossed —
@@ -607,24 +592,6 @@ export interface CombatEncounterState {
     drawPile: string[];                    // remaining draw order
     discard: string[];                     // used / discarded card ids
     hand: CombatHandEntry[];               // current hand (up to 5)
-    persistentZone: string[];              // player-side ENCHANTMENTS (spec 32 v3 §2.1)
-    /** Spec 32 v3 §2.1 — DISENCHANTS the player attached to the ENEMY (standing
-     *  curses, rest of combat). Optional for back-compat (absent = none). */
-    enemyAttachments?: string[];
-    /** Spec 32 v4 §2.1 — TEMPORARY player-side enchantments from the FREE (dieless)
-     *  line: the same themed passive as the PAID version, but timed. `roundsLeft`
-     *  ticks down each round in `processBetweenPhases`; the entry drops at 0. A
-     *  PAID play of the same card promotes it to the permanent `persistentZone`.
-     *  Optional for back-compat (absent = none). */
-    tempZone?: { cardId: string; roundsLeft: number }[];
-    /** Spec 32 v4 §2.1 — TEMPORARY enemy-attached disenchants from the FREE line;
-     *  the timed mirror of `enemyAttachments`. Same tick/promote rules as
-     *  {@link tempZone}. Optional (absent = none). */
-    enemyTempAttachments?: { cardId: string; roundsLeft: number }[];
-    /** Spec 32 v3 §10 — the enemy's own persistent passives (seeded from the
-     *  bestiary) + disenchants IT attached to the player live here. Optional. */
-    enemyEnchantments?: string[];
-    playerAttachments?: string[];
     /** Spec 32 v3 §5 — the GHOST die pool (live tray): merged into every
      *  turn's dice, exempt from rerolls, persists across combats. Optional. */
     floatingDice?: CombatManaDie[];

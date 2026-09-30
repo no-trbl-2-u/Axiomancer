@@ -14,7 +14,7 @@ import { describe, expect, it } from 'vitest';
 import { getCardById } from '../../Cards/cards.library';
 import { lookupEffect } from '../../Effects';
 import { toCombatCard } from '../combat.cards';
-import { getDeckPreset } from '../combat.starter-deck-presets';
+import { STARTING_CARD_IDS } from '../combat.rewards';
 
 // Re-derived after the card purge (P1, 2026-09-27): the grey office's lines.
 // The intent of the pin is unchanged — the production projection is the
@@ -26,11 +26,8 @@ const EXPECTED_PAID_LINES: Readonly<Record<string, string>> = {
 };
 
 describe('Starter (grey deck) paid-effect wording', () => {
-    it('covers every unique card of the starting preset', () => {
-        const preset = getDeckPreset('grey');
-        expect(preset).toBeDefined();
-
-        const scope = new Set(preset?.cardIds ?? []);
+    it('covers every unique card of the grey deck', () => {
+        const scope = new Set(STARTING_CARD_IDS);
 
         expect([...scope].sort()).toEqual(Object.keys(EXPECTED_PAID_LINES).sort());
     });

@@ -130,14 +130,7 @@ export function executeCard(
         // ownership provenance. The tag lives on the registry record
         // (`cards.haunts.ts`), not on player state.
         const haunt = (lookupCard(cardId)?.tags ?? []).includes('haunt');
-        // PROFANE CANON (2026-08-08): a CURSE is never learned and never a
-        // reward — an enemy hexed it into the combat deck (curse injection,
-        // deleted in the enemy reset, R2b), and the whole point of PURGE is
-        // that the player can play it back out.
-        // The hex IS its ownership provenance, exactly as the conjuring play is
-        // a Haunt's.
-        const cursed = lookupCard(cardId)?.theme === 'curse';
-        const owned = haunt || cursed
+        const owned = haunt
             || playerCaster.knownCards.includes(cardId)
             || (playerCaster.combatRewardCards ?? []).includes(cardId);
         if (!owned) {

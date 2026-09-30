@@ -2,7 +2,7 @@
  * Spec 33 — Upgradeable Dice: the D3 economy witness.
  *
  * Runs encounters through the real engine + policy driver
- * (`upgradeablePlayPhase`) across the starter presets × stage profiles ×
+ * (`upgradeablePlayPhase`) with the grey deck across stage profiles ×
  * seeds, then reads the recorded transcript to measure spec 33 §7's **D3 gate
  * table**: E[usable dice/round], whiff rate, per-color access, dead rounds,
  * realized ◆ income (specials-on-use + yield + overflow), surge frequency and
@@ -28,7 +28,7 @@ import {
 import {
     COMBAT_STAGE_PROFILES, COMBAT_STAGE_ORDER, buildStagePlayer, type CombatStageId,
 } from './combat.stage-profiles';
-import { buildPresetDeck, COMBAT_DECK_PRESET_ORDER } from './combat.starter-deck-presets';
+import { STARTING_CARD_IDS } from './combat.rewards';
 import { ENEMY_REGISTRY } from '../Enemy/enemy.library';
 import { COMBAT_SIM_POLICIES, type CombatSimPolicyId } from './combat.sim-policies';
 import type {
@@ -127,13 +127,11 @@ export interface UpgradeableEconomyStats {
 }
 
 export interface UpgradeableEconomyCell {
-    preset: string;
     stage: CombatStageId;
     stats: UpgradeableEconomyStats;
 }
 
 export interface UpgradeableEconomyOptions {
-    presets?: readonly string[];
     stages?: readonly CombatStageId[];
     seeds?: readonly number[];
     policy?: CombatSimPolicyId;
@@ -206,14 +204,13 @@ function foldEvents(acc: EconomyAccumulator, events: readonly CombatEncounterSta
  *  a per-phase `logStart` produced by dropping round 1's roll. */
 function accumulateEncounter(
     acc: EconomyAccumulator,
-    presetId: string,
     stageId: CombatStageId,
     seed: number,
     policyId: CombatSimPolicyId,
 ): void {
     const stage = COMBAT_STAGE_PROFILES[stageId];
     const enemy = ENEMY_REGISTRY[stage.enemySlugs[0] as keyof typeof ENEMY_REGISTRY];
-    const deck = buildPresetDeck(presetId);
+    const deck = [...STARTING_CARD_IDS];
     const player = buildStagePlayer(stage);
     player.knownCards = deck.slice();
     const policy = COMBAT_SIM_POLICIES[policyId];
@@ -296,16 +293,15 @@ function finalize(acc: EconomyAccumulator): UpgradeableEconomyStats {
 }
 
 /**
- * The D3 economy witness: encounters across presets × stages × seeds,
+ * The D3 economy witness: grey-deck encounters across stages × seeds,
  * measured from the transcript. Returns the pooled stats plus per-cell rows.
  */
 export function simulateUpgradeableEconomy(options: UpgradeableEconomyOptions = {}): {
     diceMath: DiceMathWitness;
     pooled: UpgradeableEconomyStats;
     cells: UpgradeableEconomyCell[];
-    config: { presets: readonly string[]; stages: readonly CombatStageId[]; seeds: readonly number[]; policy: CombatSimPolicyId };
+    config: { stages: readonly CombatStageId[]; seeds: readonly number[]; policy: CombatSimPolicyId };
 } {
-    const presets = options.presets ?? COMBAT_DECK_PRESET_ORDER;
     const stages = options.stages ?? COMBAT_STAGE_ORDER;
     const seeds = options.seeds ?? [1, 2, 3, 4, 5];
     const policy = options.policy ?? 'greedy';
@@ -314,18 +310,16 @@ export function simulateUpgradeableEconomy(options: UpgradeableEconomyOptions = 
 
     const pooledAcc = emptyAcc();
     const cells: UpgradeableEconomyCell[] = [];
-    for (const preset of presets) {
-        for (const stage of stages) {
-            const cellAcc = emptyAcc();
-            for (const seed of seeds) {
-                accumulateEncounter(pooledAcc, preset, stage, seed, policy);
-                accumulateEncounter(cellAcc, preset, stage, seed, policy);
-            }
-            cells.push({ preset, stage, stats: finalize(cellAcc) });
+    for (const stage of stages) {
+        const cellAcc = emptyAcc();
+        for (const seed of seeds) {
+            accumulateEncounter(pooledAcc, stage, seed, policy);
+            accumulateEncounter(cellAcc, stage, seed, policy);
         }
+        cells.push({ stage, stats: finalize(cellAcc) });
     }
     const pooled = finalize(pooledAcc);
-    return { diceMath, pooled, cells, config: { presets, stages, seeds, policy } };
+    return { diceMath, pooled, cells, config: { stages, seeds, policy } };
 }
 
 /** Aligned text report of the pooled gates + per-cell rows + derived-constant
@@ -338,7 +332,7 @@ export function formatUpgradeableEconomyReport(result: ReturnType<typeof simulat
     const geq = (v: number, lo: number) => (v >= lo ? 'PASS' : 'MISS');
     const lines: string[] = [];
     lines.push(`Upgradeable-Dice D3 economy witness — policy=${config.policy} seeds=[${config.seeds.join(',')}]`);
-    lines.push(`presets=${config.presets.length} stages=[${config.stages.join(',')}] rounds=${pooled.rounds} encounters=${pooled.encounters}`);
+    lines.push(`stages=[${config.stages.join(',')}] rounds=${pooled.rounds} encounters=${pooled.encounters}`);
     lines.push('');
     lines.push('D3 ROLL GATES — DICE-MATH WITNESS (direct roll stream, N=' + diceMath.rolls + ', stock gear)');
     lines.push('  This is the authoritative reading: it measures the face tables (§1), decoupled from encounter RNG.');
@@ -361,10 +355,10 @@ export function formatUpgradeableEconomyReport(result: ReturnType<typeof simulat
     lines.push('');
     lines.push('OVERHEAT (constant, not policy-exercised): crack chance = ' + `${(OVERHEAT_CRACK_CHANCE * 100).toFixed(0)}%`);
     lines.push('');
-    lines.push('PER-CELL (preset × stage): usable / whiff / income◆ / surge / winRate / rounds');
+    lines.push('PER-CELL (stage): usable / whiff / income◆ / surge / winRate / rounds');
     for (const c of cells) {
         lines.push(
-            `  ${c.preset.padEnd(11)} ${c.stage.padEnd(6)} `
+            `  ${c.stage.padEnd(6)} `
             + `u=${num(c.stats.usablePerRound)} w=${pct(c.stats.whiffRate).padStart(6)} `
             + `inc=${num(c.stats.totalIncomePerRound)} surge=${num(c.stats.surgePerRound)} `
             + `win=${pct(c.stats.winRate).padStart(6)} rounds=${c.stats.avgRounds.toFixed(1)}`,

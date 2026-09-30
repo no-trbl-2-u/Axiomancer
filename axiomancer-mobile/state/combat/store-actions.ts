@@ -5,15 +5,14 @@
  * `/combat-encounter` screen holds it in local React state, so unlike the
  * gathering/hazard slices there is no mobile combat session slice here. This
  * module carries the *first-fight tutorial* flag plus the deck-identity layer:
- * the pre-run starter-bundle picker, sourced from the engine's themed preset
- * decks (spec 32 v3 §8). Mobile invents no cards, costs, or tuning — every
- * id comes from the engine's own preset table.
+ * the one starter bundle, the grey deck. Mobile invents no cards, costs, or
+ * tuning — every id comes from the engine's `STARTING_CARD_IDS`.
  */
 
 import {
     addRewardCard,
-    listDeckPresets,
     rollCombatCardRewards,
+    STARTING_CARD_IDS,
     type GameState,
 } from '@mechanics';
 
@@ -51,21 +50,11 @@ export function completeCombatTutorialAction(store: AppStore, skipped: boolean):
     void skipped;
 }
 
-/** The three campaign preset ids (the Profane Canon rework, 2026-08-08) —
- *  snapshots of ONE deck evolving early → mid → late, in campaign order. */
-/** The engine's preset ids. Only the grey office since the card purge (D36). */
-export type ThemedDeckId = 'grey';
-
 // ---------------------------------------------------------------------------
-// Starter bundles (deck identity) — the pre-run "choose your path" decks.
-//
-// A bundle is one of the engine's themed preset decks plus a HIDDEN archetype
-// tag. The tag is never shown to the player. It no longer steers card rewards
-// — the reward draft reads the deck's THEMES directly (2026-08-08), which is
-// both finer-grained and works on the neutral Threadbare Office where the
-// archetype read was simply null. The tag survives as a run-identity marker.
-// Mobile authors only presentation (accent + the theme's two hallmark-keyword
-// pills) — every card id is engine truth.
+// Starter bundles (deck identity). One bundle since the card purge (D36): the
+// grey deck. The engine's preset table went in R7b; the bundle keeps its id
+// because a save's `bundle:grey` flag names it. Mobile authors only
+// presentation (name, pitch, accent, pills) — every card id is engine truth.
 // ---------------------------------------------------------------------------
 
 export type StarterArchetype = 'bleeder' | 'guardian' | 'controller';
@@ -75,16 +64,14 @@ export interface StarterBundle {
     name: string;
     description: string;
     /**
-     * Hidden archetype tag — never surfaced in the UI, and no longer a reward
-     * lever (the draft reads deck THEMES now). Kept as the run-identity marker
-     * the bundle flag records. `null` for themes that map onto none of the
-     * three archetypes.
+     * Hidden archetype tag — never surfaced in the UI and no reward lever.
+     * Kept as the run-identity marker the bundle flag records. `null` for
+     * the grey deck.
      */
     archetype: StarterArchetype | null;
-    /** Tile accent colour. A per-theme hue, decoupled from stance colour so
-     *  every deck reads distinct on the picker. */
+    /** Tile accent colour. */
     accent: string;
-    /** The theme's two hallmark keywords (spec 32 v3 §3), shown as pills. */
+    /** The deck's glossed keywords, shown as pills. */
     pills: readonly string[];
     /** The seeded knownCards deck (the engine recipe — duplicates intended). */
     cardIds: string[];
@@ -95,33 +82,21 @@ export const BUNDLE_CHOSEN_FLAG = 'starter-bundle-chosen';
 const BUNDLE_FLAG_PREFIX = 'bundle:';
 const ARCHETYPE_FLAG_PREFIX = 'archetype:';
 
-/** Mobile presentation + reward-skew tag per campaign preset (the Profane
- *  Canon): a stage accent and the snapshot's leading keywords. The early
- *  Office skews nowhere (it is deliberately neutral chaff); the mid Burden
- *  leans rot/debt (bleeder); the late Canon adds the wall (guardian). */
-const BUNDLE_CHROME: Record<ThemedDeckId, { accent: string; pills: readonly string[]; archetype: StarterArchetype | null }> = {
-    // DEAL has no gloss row (it reads as plain text), so the pills name the
-    // grey office's two glossed keywords.
-    grey: { accent: '#8a8273', pills: ['GUARD', 'VULNERABLE'], archetype: null },
-};
-
-// One bundle per themed preset deck, in the engine's display order. Each
-// carries its theme's reward-skew archetype so wins bias rewards toward the
-// same family.
-export const STARTER_BUNDLES: readonly StarterBundle[] = Object.freeze(
-    listDeckPresets().map((preset): StarterBundle => {
-        const chrome = BUNDLE_CHROME[preset.id as ThemedDeckId];
-        return {
-            id: preset.id,
-            name: preset.name,
-            description: preset.description,
-            archetype: chrome?.archetype ?? null,
-            accent: chrome?.accent ?? '#8a8273',
-            pills: chrome?.pills ?? [],
-            cardIds: [...preset.cardIds],
-        };
-    }),
-);
+// DEAL has no gloss row (it reads as plain text), so the pills name the
+// grey deck's two glossed keywords.
+export const STARTER_BUNDLES: readonly StarterBundle[] = Object.freeze([
+    {
+        id: 'grey',
+        name: 'The Grey Office',
+        description:
+            'No flourish, no colour, no argument: a plain blow, a plain ward, '
+            + 'and a plain word. Everything else is earned.',
+        archetype: null,
+        accent: '#8a8273',
+        pills: ['GUARD', 'VULNERABLE'],
+        cardIds: [...STARTING_CARD_IDS],
+    },
+]);
 
 export function starterBundleById(id: string): StarterBundle | null {
     return STARTER_BUNDLES.find((b) => b.id === id) ?? null;
@@ -171,14 +146,11 @@ export function seedStarterBundleAction(store: AppStore, bundleId: string): void
 }
 
 // ---------------------------------------------------------------------------
-// Post-combat card reward — the theme-aware 1-of-3 draft.
+// Post-combat card reward — the 1-of-3 draft.
 //
-// The ROLL is engine truth (`rollCombatCardRewards` reads the player's actual
-// deck themes and weights offers toward them, keeping an off-theme pivot open
-// — see `REWARD_OFF_THEME_RATE`). Mobile owns exactly two things: WHEN the
-// draft opens, and persisting the claim. The old mobile-side archetype skew
-// (`skewRewardsByArchetype`) is gone — it re-sorted the engine's weighted roll
-// behind its back and did nothing at all on the neutral Threadbare Office.
+// The ROLL is engine truth (`rollCombatCardRewards` draws uniformly from
+// `COMBAT_REWARD_POOL`). Mobile owns exactly two things: WHEN the draft
+// opens, and persisting the claim.
 // ---------------------------------------------------------------------------
 
 /** Offers shown per reward screen. */
