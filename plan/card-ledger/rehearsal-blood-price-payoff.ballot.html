@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blood Price Ballot</title>
+<!--
+  Blood Price — Payoff sub-lane ballot (paper rehearsal, D73).
+  Self-contained: no network, no storage. Open in any browser.
+
+  How it works:
+    1. Every candidate card is rendered from the CARDS array below.
+    2. Tick the checkbox on each card you KEEP (any number per slot;
+       ticking two in one slot reads as "merge these").
+    3. Optional: type a per-slot note (a TWEAK number, a merge rule).
+    4. Press "Generate" — a plain-text verdict sheet appears; copy it
+       and paste it back to Claude.
+  Unticked cards are CUT by default (plans §1: CUT is the default).
+-->
+<style>
+  /* ---- Colour tokens (light default, dark via media query or toggle) ---- */
+  :root {
+    --bg: #efe9dc;          /* page: aged paper */
+    --ink: #1b1714;         /* body text */
+    --muted: #6b6259;       /* secondary text */
+    --card: #fbf7ee;        /* card face */
+    --edge: #2a2420;        /* card border */
+    --blood: #8e1b1b;       /* SACRIFICE accent */
+    --free: #3d5a40;        /* FREE line accent */
+    --paid: #7a5a12;        /* PAID line accent */
+    --art: #d9cfbd;         /* art box fill */
+    --sel: #8e1b1b;         /* selected card ring */
+    --btn: #1b1714;
+    --btn-ink: #fbf7ee;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141110; --ink: #ece4d6; --muted: #a39887; --card: #1f1a17;
+      --edge: #ece4d6; --blood: #e0504a; --free: #8fbf8f; --paid: #e0b54a;
+      --art: #2c2521; --sel: #e0504a; --btn: #ece4d6; --btn-ink: #141110;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141110; --ink: #ece4d6; --muted: #a39887; --card: #1f1a17;
+    --edge: #ece4d6; --blood: #e0504a; --free: #8fbf8f; --paid: #e0b54a;
+    --art: #2c2521; --sel: #e0504a; --btn: #ece4d6; --btn-ink: #141110;
+  }
+
+  /* ---- Layout ---- */
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 16px; background: var(--bg); color: var(--ink);
+    font: 15px/1.45 Georgia, "Times New Roman", serif;
+  }
+  header, main, footer { max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; letter-spacing: .02em; }
+  .sub { color: var(--muted); margin: 0 0 12px; }
+  .legend { font-size: .9rem; color: var(--muted); margin-bottom: 16px; }
+  .legend b { color: var(--ink); }
+  .theme { float: right; }
+
+  /* One slot = heading + role + row of candidate cards + note field */
+  .slot { margin: 22px 0 8px; padding-top: 10px; border-top: 2px solid var(--edge); }
+  .slot h2 { font-size: 1.1rem; margin: 0; }
+  .slot .role { color: var(--muted); margin: 2px 0 10px; }
+  .row { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+  .note { width: 100%; margin-top: 8px; padding: 6px 8px; font: inherit;
+          background: var(--card); color: var(--ink); border: 1px solid var(--muted); border-radius: 4px; }
+
+  /* ---- Card face ---- */
+  label.card {
+    display: flex; flex-direction: column; cursor: pointer;
+    background: var(--card); border: 2px solid var(--edge); border-radius: 10px;
+    padding: 10px; min-height: 300px; position: relative;
+    transition: box-shadow .12s, transform .12s;
+  }
+  label.card:hover { transform: translateY(-2px); }
+  label.card.on { box-shadow: 0 0 0 4px var(--sel); }
+  .top { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+  .name { font-weight: bold; }
+  .type { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .art {
+    margin: 8px 0; height: 96px; border: 1px solid var(--edge); border-radius: 6px;
+    background: repeating-linear-gradient(45deg, var(--art) 0 6px, transparent 6px 12px);
+    display: grid; place-items: center; font-size: 2.6rem;
+  }
+  .line { margin: 4px 0; font-size: .92rem; }
+  .tag { display: inline-block; min-width: 42px; font-size: .7rem; font-weight: bold;
+         letter-spacing: .08em; padding: 1px 5px; border-radius: 3px; margin-right: 4px;
+         color: var(--card); vertical-align: 1px; }
+  .tag.free { background: var(--free); }
+  .tag.paid { background: var(--paid); }
+  .kw { font-variant: small-caps; font-weight: bold; }
+  .kw.sac { color: var(--blood); }
+  .why { margin-top: auto; padding-top: 8px; font-size: .8rem; color: var(--muted); font-style: italic; }
+  .pick { position: absolute; top: 8px; right: 8px; width: 20px; height: 20px; accent-color: var(--sel); }
+  .top { padding-right: 26px; }
+
+  /* ---- Footer / output ---- */
+  footer { margin-top: 28px; padding-top: 12px; border-top: 2px solid var(--edge); }
+  textarea { width: 100%; font: 13px/1.4 ui-monospace, Menlo, Consolas, monospace;
+             background: var(--card); color: var(--ink); border: 1px solid var(--muted);
+             border-radius: 4px; padding: 8px; }
+  #general { min-height: 60px; }
+  #out { min-height: 220px; margin-top: 10px; }
+  button { font: inherit; padding: 8px 18px; border-radius: 6px; border: 0;
+           background: var(--btn); color: var(--btn-ink); cursor: pointer; margin: 8px 8px 0 0; }
+  .count { color: var(--muted); margin-left: 6px; }
+</style>
+</head>
+<body>
+<header>
+  <button class="theme" id="themeBtn" type="button" aria-label="Toggle colour theme">◐</button>
+  <h1>Blood Price — Payoff sub-lane ballot</h1>
+  <p class="sub">Paper rehearsal (D73). Family: Blood Price. Sub-lane: Payoff, "benefits for sacrificing". 10 slots × 3 candidates; the target is 10 survivors.</p>
+  <p class="legend">
+    <b>Tick</b> each card you keep. Ticking two in one slot means "merge". <b>Unticked = CUT</b>.
+    Use a slot's note box for a TWEAK (one number) or a merge rule.<br>
+    <b>SACRIFICE n</b>: lose n VITAE (never below 1). <b>DEAL</b>: damage. <b>GUARD</b>: block.
+    <b>VULNERABLE</b>: the foe takes more damage. Numbers are base values before stat scaling.
+    For reference, A Plain Blow is FREE DEAL 2 / PAID DEAL 5.
+  </p>
+</header>
+
+<main id="slots"></main>
+
+<footer>
+  <label for="general"><b>General notes</b> (optional)</label>
+  <textarea id="general" placeholder="Anything about the lane as a whole…"></textarea>
+  <button id="gen" type="button">Generate</button>
+  <button id="copy" type="button">Copy</button>
+  <span class="count" id="count"></span>
+  <textarea id="out" readonly placeholder="Press Generate, then copy this text back to Claude."></textarea>
+</footer>
+
+<script>
+/* =====================================================================
+   DATA — the ballot. One entry per candidate card.
+   slot: slot code; role: the slot's one-line job (shown once per slot);
+   id: slot + candidate letter; type: Attack | Skill | Spell | Global;
+   glyph: placeholder art; free / paid: the two rules lines (plain text);
+   why: the drafter's one-line rationale.
+   ===================================================================== */
+const SLOTS = [
+  { slot: 'P-01', role: 'Attack — pay a little VITAE for a big DEAL', glyph: '🗡' },
+  { slot: 'P-02', role: 'Skill — pay VITAE for a big GUARD', glyph: '🛡' },
+  { slot: 'P-03', role: 'Attack — DEAL more while at half VITAE or less', glyph: '🩸' },
+  { slot: 'P-04', role: 'Attack — a huge hit that only works at low VITAE', glyph: '⚔' },
+  { slot: 'P-05', role: 'Spell — VULNERABLE that grows with VITAE lost (capped)', glyph: '👁' },
+  { slot: 'P-06', role: 'Skill — GUARD that grows with VITAE lost (capped)', glyph: '⛨' },
+  { slot: 'P-07', role: 'Attack — finisher fed by what you have paid (capped)', glyph: '☠' },
+  { slot: 'P-08', role: 'Skill — turn VITAE into Conviction', glyph: '✠' },
+  { slot: 'P-09', role: 'Spell — your blood becomes the foe\'s wound (ignores GUARD)', glyph: '⚱' },
+  { slot: 'P-10', role: 'Global — every SACRIFICE also hurts the foe', glyph: '☩' },
+];
+
+const CARDS = [
+  // P-01
+  { id: 'P-01a', type: 'Attack', free: 'SACRIFICE 2, DEAL 5.', paid: 'SACRIFICE 4, DEAL 12.', why: 'Always costs blood; beats Blow on both lines.' },
+  { id: 'P-01b', type: 'Attack', free: 'DEAL 3.', paid: 'SACRIFICE 5, DEAL 14.', why: 'Safe FREE line; the price is only on the big line.' },
+  { id: 'P-01c', type: 'Attack', free: 'SACRIFICE 3, DEAL 8.', paid: 'SACRIFICE 3, DEAL 8, twice.', why: 'PAID counts as two sacrifices, which feeds per-SACRIFICE payoffs.' },
+  // P-02
+  { id: 'P-02a', type: 'Skill', free: 'SACRIFICE 2, GUARD 5.', paid: 'SACRIFICE 4, GUARD 12.', why: 'Always costs blood.' },
+  { id: 'P-02b', type: 'Skill', free: 'GUARD 3.', paid: 'SACRIFICE 5, GUARD 14.', why: 'Mirrors P-01b; the lane\'s two basics read the same.' },
+  { id: 'P-02c', type: 'Skill', free: 'SACRIFICE 3, GUARD 7.', paid: 'SACRIFICE 6, GUARD 10, DEAL 5.', why: 'Blocks and hits; the most text.' },
+  // P-03
+  { id: 'P-03a', type: 'Attack', free: 'DEAL 3, or 6 at half VITAE or less.', paid: 'DEAL 6, or 14 at half VITAE or less.', why: 'One clear threshold on both lines.' },
+  { id: 'P-03b', type: 'Attack', free: 'DEAL 2.', paid: 'DEAL 5, doubled at half VITAE or less.', why: 'Shortest text; weak FREE line.' },
+  { id: 'P-03c', type: 'Attack', free: 'DEAL 3.', paid: 'DEAL 5, +1 per 10 VITAE missing (max +10).', why: 'Scales smoothly, but needs arithmetic.' },
+  // P-04
+  { id: 'P-04a', type: 'Attack', free: 'Only at one-third VITAE or less: DEAL 10.', paid: 'Only at one-third VITAE or less: DEAL 25.', why: 'The purest version; dead in hand most of the fight.' },
+  { id: 'P-04b', type: 'Attack', free: 'DEAL 2.', paid: 'Only at half VITAE or less: DEAL 20.', why: 'FREE is always playable, so it never jams your hand.' },
+  { id: 'P-04c', type: 'Attack', free: 'Only at half VITAE or less: DEAL 8.', paid: 'Only at half VITAE or less: DEAL 18. EXILE.', why: 'A one-shot finisher per combat.' },
+  // P-05
+  { id: 'P-05a', type: 'Spell', free: 'VULNERABLE +10% for 1 turn.', paid: 'VULNERABLE +1% per VITAE missing (max +50%) for 2 turns.', why: 'Pure scaling reader, capped.' },
+  { id: 'P-05b', type: 'Spell', free: 'SACRIFICE 3, VULNERABLE +15% for 1 turn.', paid: 'SACRIFICE 6, VULNERABLE +40% for 2 turns.', why: 'Pay up front, no tracking.' },
+  { id: 'P-05c', type: 'Spell', free: 'VULNERABLE +10% for 1 turn.', paid: 'VULNERABLE +25% for 2 turns, or +50% at half VITAE or less.', why: 'Same threshold as P-03a.' },
+  // P-06
+  { id: 'P-06a', type: 'Skill', free: 'GUARD 3.', paid: 'GUARD 1 per 5 VITAE missing (max 20).', why: 'Scales with the wound; capped.' },
+  { id: 'P-06b', type: 'Skill', free: 'GUARD 2.', paid: 'GUARD 5, or 15 at half VITAE or less.', why: 'The shared half-VITAE threshold.' },
+  { id: 'P-06c', type: 'Skill', free: 'GUARD equal to VITAE you lost last turn (max 10).', paid: 'GUARD equal to VITAE you lost last turn (max 25).', why: 'Answers the last hit; needs a "lost last turn" tracker.' },
+  // P-07
+  { id: 'P-07a', type: 'Attack', free: 'DEAL 3.', paid: 'DEAL equal to the VITAE you SACRIFICED this combat (max 30).', why: 'Pays off the lane\'s own cost, not enemy damage.' },
+  { id: 'P-07b', type: 'Attack', free: 'DEAL half the VITAE you lost this combat (max 10).', paid: 'DEAL all the VITAE you lost this combat (max 30). EXILE.', why: 'Counts every loss; a once-per-combat finisher.' },
+  { id: 'P-07c', type: 'Attack', free: 'DEAL 2.', paid: 'DEAL 5, +1 per SACRIFICE you made this combat (max +15).', why: 'Counts sacrifices, not VITAE; rewards many small payments.' },
+  // P-08
+  { id: 'P-08a', type: 'Skill', free: 'SACRIFICE 3, gain 1 Conviction.', paid: 'SACRIFICE 5, gain 3 Conviction.', why: 'A straight VITAE-to-Conviction exchange.' },
+  { id: 'P-08b', type: 'Skill', free: 'SACRIFICE 4, gain 2 Conviction.', paid: 'SACRIFICE 4, gain 2 Conviction, GUARD 5.', why: 'PAID adds a block to the exchange.' },
+  { id: 'P-08c', type: 'Skill', free: 'Gain 1 Conviction.', paid: 'SACRIFICE any amount; gain 1 Conviction per 4 paid (max 4).', why: 'You choose the price; an X cost.' },
+  // P-09
+  { id: 'P-09a', type: 'Spell', free: 'SACRIFICE 3; the foe loses 3 VITAE.', paid: 'SACRIFICE 6; the foe loses 12 VITAE.', why: 'PAID doubles your blood into their wound.' },
+  { id: 'P-09b', type: 'Spell', free: 'SACRIFICE 4; the foe loses 4 VITAE.', paid: 'SACRIFICE 8; the foe loses 8 VITAE, VULNERABLE +25% for 1 turn.', why: 'Even trade, plus a setup on PAID.' },
+  { id: 'P-09c', type: 'Spell', free: 'DEAL 3.', paid: 'SACRIFICE 5; the foe loses 15 VITAE, ignoring GUARD.', why: 'Safe FREE; PAID is a 1:3 trade.' },
+  // P-10
+  { id: 'P-10a', type: 'Global', free: 'In play 3 turns: whenever you SACRIFICE, the foe loses that much VITAE.', paid: 'Same, for the rest of combat.', why: 'The lane\'s engine piece in its simplest form.' },
+  { id: 'P-10b', type: 'Global', free: 'In play 3 turns: whenever you SACRIFICE, DEAL half that.', paid: 'Rest of combat: whenever you SACRIFICE, DEAL all of it.', why: 'Routes through DEAL, so GUARD and VULNERABLE apply.' },
+  { id: 'P-10c', type: 'Global', free: 'In play 3 turns: whenever you SACRIFICE, GUARD that much.', paid: 'Rest of combat: whenever you SACRIFICE, DEAL that much instead.', why: 'Defensive FREE, offensive PAID.' },
+];
+
+/* =====================================================================
+   RENDER — pure helpers that turn data into DOM nodes.
+   ===================================================================== */
+
+/** Escape text for safe insertion as HTML. */
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/** Wrap the known keywords in styled spans (SACRIFICE gets the blood colour). */
+const markKeywords = (s) =>
+  esc(s)
+    .replace(/\bSACRIFICE(D)?\b/g, (m) => `<span class="kw sac">${m}</span>`)
+    .replace(/\b(DEAL|GUARD|VULNERABLE|EXILE)\b/g, '<span class="kw">$1</span>');
+
+/** Build one card face as an HTML string. */
+const cardHtml = (card, glyph) => `
+  <label class="card" data-id="${card.id}">
+    <input class="pick" type="checkbox" value="${card.id}" aria-label="Keep ${card.id}">
+    <div class="top"><span class="name">${card.id}</span><span class="type">${card.type} · grey</span></div>
+    <div class="art" aria-hidden="true">${glyph}</div>
+    <div class="line"><span class="tag free">FREE</span>${markKeywords(card.free)}</div>
+    <div class="line"><span class="tag paid">PAID</span>${markKeywords(card.paid)}</div>
+    <div class="why">${esc(card.why)}</div>
+  </label>`;
+
+/** Build one slot section: heading, role, its candidate cards, a note box. */
+const slotHtml = (s) => `
+  <section class="slot" data-slot="${s.slot}">
+    <h2>${s.slot}</h2>
+    <p class="role">${esc(s.role)}</p>
+    <div class="row">${CARDS.filter((c) => c.id.startsWith(s.slot)).map((c) => cardHtml(c, s.glyph)).join('')}</div>
+    <input class="note" type="text" data-note="${s.slot}" placeholder="Note for ${s.slot}: TWEAK / merge rule (optional)">
+  </section>`;
+
+document.getElementById('slots').innerHTML = SLOTS.map(slotHtml).join('');
+
+/* =====================================================================
+   STATE — read straight from the DOM (no stored state).
+   ===================================================================== */
+
+/** Ids of every ticked card. */
+const kept = () => [...document.querySelectorAll('.pick:checked')].map((i) => i.value);
+
+/** Update the selected-card ring and the running count. */
+const refresh = () => {
+  document.querySelectorAll('label.card').forEach((l) =>
+    l.classList.toggle('on', l.querySelector('.pick').checked));
+  document.getElementById('count').textContent = `${kept().length} kept of ${CARDS.length}`;
+};
+document.getElementById('slots').addEventListener('change', refresh);
+refresh();
+
+/* =====================================================================
+   OUTPUT — build the plain-text verdict sheet from the current picks.
+   ===================================================================== */
+
+/** One line per slot: KEEP / MERGE / CUT, the cut candidates, the note. */
+const slotLine = (s, keptIds) => {
+  const ids = CARDS.filter((c) => c.id.startsWith(s.slot)).map((c) => c.id);
+  const keep = ids.filter((id) => keptIds.includes(id));
+  const cut = ids.filter((id) => !keptIds.includes(id));
+  const note = document.querySelector(`[data-note="${s.slot}"]`).value.trim();
+  const verdict = keep.length === 0 ? 'CUT slot'
+    : keep.length === 1 ? `KEEP ${keep[0]}`
+    : `MERGE ${keep.join(' + ')}`;
+  return `${s.slot}: ${verdict}` +
+    (keep.length ? ` | cut: ${cut.join(', ') || '-'}` : '') +
+    (note ? ` | note: ${note}` : '');
+};
+
+/** The whole sheet: header, one line per slot, general notes. */
+const sheet = () => {
+  const k = kept();
+  const general = document.getElementById('general').value.trim();
+  return [
+    'BALLOT — Blood Price / Payoff (rehearsal, D73)',
+    `kept ${k.length} of ${CARDS.length}`,
+    ...SLOTS.map((s) => slotLine(s, k)),
+    general ? `general: ${general}` : null,
+  ].filter(Boolean).join('\n');
+};
+
+document.getElementById('gen').addEventListener('click', () => {
+  document.getElementById('out').value = sheet();
+});
+
+document.getElementById('copy').addEventListener('click', async () => {
+  const out = document.getElementById('out');
+  if (!out.value) out.value = sheet();
+  try { await navigator.clipboard.writeText(out.value); }
+  catch { out.select(); document.execCommand && document.execCommand('copy'); }
+});
+
+/* Theme toggle: flips data-theme on <html>; no storage. */
+document.getElementById('themeBtn').addEventListener('click', () => {
+  const root = document.documentElement;
+  const dark = root.dataset.theme
+    ? root.dataset.theme === 'dark'
+    : matchMedia('(prefers-color-scheme: dark)').matches;
+  root.dataset.theme = dark ? 'light' : 'dark';
+});
+</script>
+</body>
+</html>
