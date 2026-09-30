@@ -127,6 +127,7 @@
     <b>SACRIFICE n</b>: lose n VITAE (never below 1). <b>DEAL</b>: damage. <b>GUARD</b>: block.
     <b>VULNERABLE</b>: the foe takes more damage. Numbers are base values before stat scaling.
     For reference, A Plain Blow is FREE DEAL 2 / PAID DEAL 5.
+    <b>Scrap floor:</b> scrapping any card gives 1 Conviction, so no line gives only "gain 1 Conviction".
   </p>
 </header>
 
@@ -222,9 +223,9 @@ const CARDS = [
   { id: 'P-07b', type: 'Attack', free: 'DEAL half the VITAE you lost this combat (max 10).', paid: 'DEAL all the VITAE you lost this combat (max 30). EXILE.', why: 'Counts every loss; a once-per-combat finisher.' },
   { id: 'P-07c', type: 'Attack', free: 'DEAL 2.', paid: 'DEAL 5, +1 per SACRIFICE you made this combat (max +15).', why: 'Counts sacrifices, not VITAE; rewards many small payments.' },
   // P-08
-  { id: 'P-08a', type: 'Skill', free: 'SACRIFICE 3, gain 1 Conviction.', paid: 'SACRIFICE 5, gain 3 Conviction.', why: 'A straight VITAE-to-Conviction exchange.' },
+  { id: 'P-08a', type: 'Skill', free: 'SACRIFICE 3, gain 2 Conviction.', paid: 'SACRIFICE 5, gain 3 Conviction.', why: 'A straight VITAE-to-Conviction exchange.' },
   { id: 'P-08b', type: 'Skill', free: 'SACRIFICE 4, gain 2 Conviction.', paid: 'SACRIFICE 4, gain 2 Conviction, GUARD 5.', why: 'PAID adds a block to the exchange.' },
-  { id: 'P-08c', type: 'Skill', free: 'Gain 1 Conviction.', paid: 'SACRIFICE any amount; gain 1 Conviction per 4 paid (max 4).', why: 'You choose the price; an X cost.' },
+  { id: 'P-08c', type: 'Skill', free: 'SACRIFICE 2, gain 2 Conviction.', paid: 'SACRIFICE any amount; gain 1 Conviction per 4 paid (max 4).', why: 'You choose the price; an X cost.' },
   // P-09
   { id: 'P-09a', type: 'Spell', free: 'SACRIFICE 3; the foe loses 3 VITAE.', paid: 'SACRIFICE 6; the foe loses 12 VITAE.', why: 'PAID doubles your blood into their wound.' },
   { id: 'P-09b', type: 'Spell', free: 'SACRIFICE 4; the foe loses 4 VITAE.', paid: 'SACRIFICE 8; the foe loses 8 VITAE, VULNERABLE +25% for 1 turn.', why: 'Even trade, plus a setup on PAID.' },
@@ -234,9 +235,9 @@ const CARDS = [
   { id: 'P-10b', type: 'Global', free: 'In play 3 turns: whenever you SACRIFICE, DEAL half that.', paid: 'Rest of combat: whenever you SACRIFICE, DEAL all of it.', why: 'Routes through DEAL, so GUARD and VULNERABLE apply.' },
   { id: 'P-10c', type: 'Global', free: 'In play 3 turns: whenever you SACRIFICE, GUARD that much.', paid: 'Rest of combat: whenever you SACRIFICE, DEAL that much instead.', why: 'Defensive FREE, offensive PAID.' },
   // E-01
-  { id: 'E-01a', type: 'Spell', free: 'Add a grey Curse to your hand. Gain 1 Conviction.', paid: 'Add 2 grey Curses to your hand. Gain 3 Conviction.', why: 'Pure fuel: Curses in, Conviction out.' },
+  { id: 'E-01a', type: 'Spell', free: 'Add a grey Curse to your hand. Gain 2 Conviction.', paid: 'Add 2 grey Curses to your hand. Gain 3 Conviction.', why: 'Pure fuel: Curses in, Conviction out.' },
   { id: 'E-01b', type: 'Spell', free: 'Add a grey Curse to your hand. DEAL 4.', paid: 'Add a grey Curse to your hand. Gain 2 Conviction, DEAL 8.', why: 'Never a blank turn: it always hits.' },
-  { id: 'E-01c', type: 'Spell', free: 'Gain 1 Conviction.', paid: 'Add a grey Curse to your hand. Gain 3 Conviction. EXILE.', why: 'Safe FREE; the Curse only on PAID, once per combat.' },
+  { id: 'E-01c', type: 'Spell', free: 'GUARD 3.', paid: 'Add a grey Curse to your hand. Gain 3 Conviction. EXILE.', why: 'Safe FREE; the Curse only on PAID, once per combat.' },
   // E-02
   { id: 'E-02a', type: 'Skill', free: 'SACRIFICE 1, twice.', paid: 'SACRIFICE 1, four times.', why: 'Cheapest way to count many sacrifices.' },
   { id: 'E-02b', type: 'Skill', free: 'SACRIFICE 1, twice. GUARD 2.', paid: 'SACRIFICE 2, three times. GUARD 5.', why: 'Counts and blocks.' },
@@ -290,9 +291,9 @@ const CARDS = [
   { id: 'M-04b', type: 'Spell', free: 'Discard a Curse from your hand at no cost.', paid: 'EXILE every Curse in your hand; heal 3 for each.', why: 'Mass clear that heals.' },
   { id: 'M-04c', type: 'Spell', free: 'GUARD 3.', paid: 'EXILE a Curse from your hand. DEAL 10.', why: 'Removal that hits.' },
   // M-05
-  { id: 'M-05a', type: 'Skill', free: 'At half VITAE or less: gain 1 Conviction.', paid: 'At half VITAE or less: gain 3 Conviction.', why: 'Pure threshold reward; blank when you are healthy.' },
-  { id: 'M-05b', type: 'Skill', free: 'GUARD 2.', paid: 'Gain 1 Conviction, or 3 at half VITAE or less.', why: 'Never blank.' },
-  { id: 'M-05c', type: 'Skill', free: 'Gain 1 Conviction.', paid: 'At one-third VITAE or less: gain 4 Conviction. EXILE.', why: 'A deep-threshold burst.' },
+  { id: 'M-05a', type: 'Skill', free: 'At half VITAE or less: gain 2 Conviction.', paid: 'At half VITAE or less: gain 4 Conviction.', why: 'Pure threshold reward; blank when you are healthy.' },
+  { id: 'M-05b', type: 'Skill', free: 'GUARD 2.', paid: 'Gain 2 Conviction, or 4 at half VITAE or less.', why: 'Never blank.' },
+  { id: 'M-05c', type: 'Skill', free: 'GUARD 3.', paid: 'At one-third VITAE or less: gain 4 Conviction. EXILE.', why: 'A deep-threshold burst.' },
   // M-06
   { id: 'M-06a', type: 'Skill', free: 'GUARD 3.', paid: 'This turn, your VITAE cannot drop below 1. EXILE.', why: 'A once-per-combat save.' },
   { id: 'M-06b', type: 'Skill', free: 'At half VITAE or less: GUARD 4.', paid: 'Until your next turn, damage cannot take you below 1 VITAE.', why: 'Repeatable, but costs a die.' },

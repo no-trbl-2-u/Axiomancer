@@ -142,6 +142,10 @@ VITAE a Curse can be stuck in hand until the player heals.
 A trial lane session (self-sacrifice, codename SACRIFICE) paused at its
 first stage; the trial skill lives outside the repo until T adopts it.
 
+**Scrap floor (T, 2026-09-30).** Scrapping any card gives 1 Conviction, so
+every card line must be worth more than scrapping it. A line that only gives
+1 Conviction is dead text.
+
 ## B4 — Card-rules inventory (loop; creates nothing)
 
 Runs after R7 so it records the post-purge tree. Produces

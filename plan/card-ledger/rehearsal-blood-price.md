@@ -17,6 +17,7 @@
 | First slice | ~~Payoff~~ → **all three sub-lanes on one ballot** (T, 2026-09-30): 3 tabs × 10 slots × 3 candidates = 90 candidates, about 30 survivors |
 | Other family fantasies (The Vigil, Rot and Omen, Loaded Dice) | Not picked; still open |
 | §1 session rules | Not ratified; the rehearsal tests them |
+| Scrap floor (T) | Scrapping any card gives 1 Conviction, so every card line must be worth more than that: no line gives only "gain 1 Conviction". Seven ballot candidates were revised to meet it (P-08a, P-08c, E-01a, E-01c, M-05a, M-05b, M-05c) |
 
 ## Sub-lane pitches (draft slot roles, plain text)
 
