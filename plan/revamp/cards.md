@@ -92,9 +92,7 @@ relics. This replaces the stat-threshold idea.
   lane is has not been fixed).
 - **Relic sources, for now:** quests (a designated relic as the quest
   reward) and elites (a low chance of a random relic).
-- **The combat card reward** offers 3 cards: 2 completely random (T's
-  words: "2 complete rares", read as random; confirm if rarity was
-  meant) and 1 guaranteed lane card, drawn from a lane an equipped relic
+- **The combat card reward** offers 3 cards: 2 completely random and 1 guaranteed lane card, drawn from a lane an equipped relic
   opens.
 
 **Still open:** how the first lane opens at run start (a starting relic
