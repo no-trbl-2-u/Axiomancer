@@ -82,11 +82,6 @@ const EFFECT_GLYPHS: Record<string, string> = {
     debuff_quarter: '☙',
     // S3 (D43) — A Plain Word's affliction: the foe's guard is open.
     debuff_vulnerable: '▼',
-    debuff_curse: '🧿',
-    // ── Regen / advantage (buffs) ──
-    buff_regeneration: '✚',
-    buff_critical_rate_up: '✷',
-    buff_all_stats_up: '⬆',
 };
 
 /** Category fallback glyphs. */

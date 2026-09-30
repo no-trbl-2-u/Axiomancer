@@ -44,13 +44,14 @@ export const THEME_KEYWORDS: Record<CardTheme, readonly string[]> = Object.freez
     // session (D37) gives it carriers again. The keyword purge (2026-09-28)
     // removed FORETELL and RIPOSTE the same way, and revamp R4 (D45) POISON,
     // DOOM, STAGGER, PLEA and QUARTER when the signature skills stopped
-    // carrying them. R7b deletes the themes themselves.
-    rot:   ['BLEED', 'MARK'],
-    debt:  ['BLEED', 'DRAW', 'HEAL'],
+    // carrying them, and R5 MARK, DRAW and CLEANSE with the consumables. R7b
+    // deletes the themes themselves.
+    rot:   ['BLEED'],
+    debt:  ['BLEED', 'HEAL'],
     grave: [],
     vigil: ['GUARD', 'BLEED'],
-    trial: ['MARK'],
-    choir: ['HEAL', 'CLEANSE'],
+    trial: [],
+    choir: ['HEAL'],
     curse: [],
     // The grey office carries no archetype keywords by design (Phase 104).
     grey: [],

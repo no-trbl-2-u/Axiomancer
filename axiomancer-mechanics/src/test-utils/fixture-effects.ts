@@ -10,7 +10,9 @@
  * `backfirePerRung` (the BACKFIRE drip), and the ROUND-CLOCK DoT tick phases
  * (`tickPhase: 'start'` / `'end'` — every live library DoT is event-clocked or
  * no-calendar). These fixtures carry the deleted definitions' payloads under
- * `fixture_*` ids, so no retired id is ever resurrected.
+ * `fixture_*` ids, so no retired id is ever resurrected. R5 added the curse,
+ * roll-up and armor fixtures when the items reset deleted the last effects carrying
+ * a flat `rollModifier` or a `defenseModifier` (R7a deletes those channels).
  *
  * Tests call {@link registerFixtureEffects} at module scope; it inserts the
  * fixtures into the live effect registry (`effectsLibrary.registry`, which
@@ -93,8 +95,51 @@ export const FIXTURE_NETTLE: Effect = {
     tags: ['fixture'],
 } as Effect;
 
+/** The old `debuff_curse` (deleted in R5, no applier): a flat -2 roll modifier. */
+export const FIXTURE_CURSE: Effect = {
+    id: 'fixture_curse',
+    name: 'Curse',
+    description: 'Test fixture: a flat negative roll modifier.',
+    type: 'debuff',
+    category: 'stat',
+    duration: 5,
+    stacking: 'none',
+    payload: { rollModifier: -2 },
+    tier: 2,
+    tags: ['fixture'],
+} as Effect;
+
+/** The old `buff_status_chance_up` (deleted in R5 with its consumable): a flat +3 roll modifier. */
+export const FIXTURE_ROLL_UP: Effect = {
+    id: 'fixture_roll_up',
+    name: 'Roll Up',
+    description: 'Test fixture: a flat positive roll modifier on a buff.',
+    type: 'buff',
+    category: 'advantage',
+    duration: 4,
+    stacking: 'none',
+    payload: { rollModifier: 3 },
+    tier: 2,
+    tags: ['fixture'],
+} as Effect;
+
+/** The old `buff_damage_reduction` (deleted in R5 with Iron Skin): 5 flat armor. */
+export const FIXTURE_ARMOR: Effect = {
+    id: 'fixture_armor',
+    name: 'Armor',
+    description: 'Test fixture: soaks 5 off each incoming hit.',
+    type: 'buff',
+    category: 'defense',
+    duration: 3,
+    stacking: 'none',
+    payload: { defenseModifier: 5 },
+    tier: 2,
+    tags: ['fixture'],
+} as Effect;
+
 export const FIXTURE_EFFECTS: readonly Effect[] = [
     FIXTURE_THORNS, FIXTURE_BACKFIRE, FIXTURE_EMBER, FIXTURE_NETTLE,
+    FIXTURE_CURSE, FIXTURE_ROLL_UP, FIXTURE_ARMOR,
 ];
 
 /** Registers every fixture effect into the live registry. Idempotent. */

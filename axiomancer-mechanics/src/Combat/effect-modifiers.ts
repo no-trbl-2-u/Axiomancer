@@ -184,8 +184,6 @@ export function getActiveDotAmplifications(effects: ActiveEffect[]): ActiveDotAm
  */
 export interface AggregatedEffectModifiers {
     defenseDelta: number;
-    advantageGrants: Set<Stance>;
-    advantageDenies: Set<Stance>;
     skipTurn: boolean;
     forcedStance: Stance | null;
     blockedStances: Set<Stance>;
@@ -197,8 +195,6 @@ export interface AggregatedEffectModifiers {
 
 const emptyAgg = (): AggregatedEffectModifiers => ({
     defenseDelta:    0,
-    advantageGrants: new Set(),
-    advantageDenies: new Set(),
     skipTurn:        false,
     forcedStance:    null,
     blockedStances:  new Set(),
@@ -227,13 +223,6 @@ export function getActiveEffectModifiers(effects: ActiveEffect[], currentRound?:
 
         if (payload.defenseModifier) {
             agg.defenseDelta += payload.defenseModifier * intensity;
-        }
-
-        if (payload.advantageModifier?.grantAdvantage) {
-            for (const s of payload.advantageModifier.grantAdvantage) agg.advantageGrants.add(s);
-        }
-        if (payload.advantageModifier?.grantDisadvantage) {
-            for (const s of payload.advantageModifier.grantDisadvantage) agg.advantageDenies.add(s);
         }
 
         const restriction = payload.actionRestriction;

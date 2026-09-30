@@ -144,10 +144,10 @@ describe('getPendingDotTotal / consumeDotEffects (RUPTURE fuel)', () => {
     });
 
     it('consumeDotEffects strips ONLY DoT effects and reports the ids', () => {
-        const c = combatant([ae('debuff_poison', 2), ae('debuff_curse', 1), ae('debuff_bleed', 1)]);
+        const c = combatant([ae('debuff_poison', 2), ae('fixture_curse', 1), ae('debuff_bleed', 1)]);
         const { combatant: stripped, consumed } = consumeDotEffects(c);
         expect(consumed.sort()).toEqual(['debuff_bleed', 'debuff_poison']);
-        expect(stripped.effects.map(e => e.effectId)).toEqual(['debuff_curse']);
+        expect(stripped.effects.map(e => e.effectId)).toEqual(['fixture_curse']);
     });
 
     it('consumeAfflictions strips EVERY debuff and counts non-DoT stacks (v3 RUPTURE)', () => {

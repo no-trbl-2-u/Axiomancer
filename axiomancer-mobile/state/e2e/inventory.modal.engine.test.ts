@@ -121,19 +121,19 @@ describe('selectItemModalViewModel: consumable preview (Q2)', () => {
         expect(vm.confirmPrompt).toMatch(/potion/i);
     });
 
-    it('shows the HP delta in the preview lines', () => {
+    it('shows the VITAE delta in the preview lines', () => {
         const store = makeStore([potion]);
 
         const vm = selectItemModalViewModel(store.getState(), 'phial')!;
 
         expect(vm.previewLines.some((l) => /\+6/.test(l))).toBe(true);
-        expect(vm.previewLines.some((l) => /HP/.test(l))).toBe(true);
+        expect(vm.previewLines.some((l) => /VITAE/.test(l))).toBe(true);
     });
 
-    it('reports "No HP change." when the effect is non-healing', () => {
+    it('reports "No VITAE change." when the effect is non-healing', () => {
         // Intentionally exercises the legacy `effectId` fallback: a free-form
         // non-healing effect should round-trip through `parseHealAmount → 0`
-        // and surface the "No HP change." preview line.
+        // and surface the "No VITAE change." preview line.
         const odd: Consumable = {
             ...potion,
             id: 'wine',
@@ -144,7 +144,7 @@ describe('selectItemModalViewModel: consumable preview (Q2)', () => {
 
         const vm = selectItemModalViewModel(store.getState(), 'wine')!;
 
-        expect(vm.previewLines.join(' ')).toMatch(/No HP change/i);
+        expect(vm.previewLines.join(' ')).toMatch(/No VITAE change/i);
     });
 });
 
@@ -179,10 +179,10 @@ describe('selectItemModalViewModel: the desperation band (Phase 96)', () => {
         const vm = selectItemModalViewModel(store.getState(), 'banded-phial')!;
 
         const lines = vm.previewLines.join(' ');
-        expect(lines).toMatch(/Heal 9 HP/);
+        expect(lines).toMatch(/Heal 9 VITAE/);
         expect(lines).toMatch(/badly wounded/i);
         // The flat number must NOT be the headline while the band is active.
-        expect(vm.previewLines[0]).not.toMatch(/Heal 6 HP/);
+        expect(vm.previewLines[0]).not.toMatch(/Heal 6 VITAE/);
     });
 
     it('previews the flat heal AND advertises the band when the player is healthy', () => {
@@ -196,8 +196,8 @@ describe('selectItemModalViewModel: the desperation band (Phase 96)', () => {
         // This advertisement is the lever's whole job: a player at full health
         // has to be able to SEE that the flask is worth more later, or they will
         // keep hoarding it.
-        expect(lines).toMatch(/Heal 6 HP/);
-        expect(lines).toMatch(/9 HP instead when below half/i);
+        expect(lines).toMatch(/Heal 6 VITAE/);
+        expect(lines).toMatch(/9 VITAE instead when below half/i);
         expect(lines).not.toMatch(/badly wounded/i);
     });
 
@@ -206,7 +206,7 @@ describe('selectItemModalViewModel: the desperation band (Phase 96)', () => {
         const vm = selectItemModalViewModel(store.getState(), 'phial')!;
 
         const lines = vm.previewLines.join(' ');
-        expect(lines).toMatch(/Heal 6 HP/);
+        expect(lines).toMatch(/Heal 6 VITAE/);
         expect(lines).not.toMatch(/below half/i);
         expect(lines).not.toMatch(/badly wounded/i);
     });
@@ -363,7 +363,7 @@ describe('selectItemModalViewModel: equipment preview (Q5)', () => {
             expect(delta.after - delta.before).toBe(delta.delta);
         }
         // Rune Blade adds +5 max health over the plain blade.
-        const hp = vm.statDeltas.find((d) => d.label === 'MAX HP');
+        const hp = vm.statDeltas.find((d) => d.label === 'MAX VITAE');
         expect(hp).toBeDefined();
         expect(hp!.delta).toBe(5);
     });
@@ -387,7 +387,7 @@ describe('selectItemModalViewModel: equipment preview (Q5)', () => {
         const vm = selectItemModalViewModel(store.getState(), 'rune-blade')!;
 
         const labels = vm.itemModifiers.map((m) => m.label);
-        expect(labels).toContain('+5 MAX HP');
+        expect(labels).toContain('+5 MAX VITAE');
     });
 
     // A plain common item (no modifiers) exposes an empty modifier list.
@@ -405,8 +405,8 @@ describe('selectItemModalViewModel: equipment preview (Q5)', () => {
 
         const vm = selectItemModalViewModel(store.getState(), 'fraction-blade')!;
 
-        const hp = vm.itemModifiers.find((m) => m.label.includes('MAX HP'));
-        expect(hp?.label).toBe('+1.6 MAX HP');
+        const hp = vm.itemModifiers.find((m) => m.label.includes('MAX VITAE'));
+        expect(hp?.label).toBe('+1.6 MAX VITAE');
     });
 
     it('rounds a fractional stat delta to one decimal', () => {
@@ -416,7 +416,7 @@ describe('selectItemModalViewModel: equipment preview (Q5)', () => {
 
         const vm = selectItemModalViewModel(store.getState(), 'fraction-blade')!;
 
-        const hp = vm.statDeltas.find((d) => d.label === 'MAX HP');
+        const hp = vm.statDeltas.find((d) => d.label === 'MAX VITAE');
         expect(hp).toBeDefined();
         // Every surfaced number carries at most one decimal place.
         for (const n of [hp!.before, hp!.after, hp!.delta]) {

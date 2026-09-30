@@ -95,7 +95,6 @@ export const wandererPreset: CharacterPreset = {
     knownCards: [...TIER_1_CARDS, ...TIER_2_CARDS, ...TIER_2_SYNERGY_CARDS],
     consumables: [
         { id: 'healing-potion', quantity: 5 },
-        { id: 'antidote', quantity: 2 },
     ],
     currency: 25,
 };
@@ -114,7 +113,6 @@ export const sagePreset: CharacterPreset = {
     knownCards: [...TIER_1_CARDS, ...TIER_2_CARDS, ...TIER_3_CARDS, ...TIER_2_SYNERGY_CARDS],
     consumables: [
         { id: 'healing-potion', quantity: 6 },
-        { id: 'clarity-serum', quantity: 2 },
     ],
     currency: 75,
 };
@@ -163,7 +161,6 @@ export const ladderL15Preset: CharacterPreset = {
     knownCards: [...TIER_1_CARDS, ...TIER_2_CARDS, ...TIER_2_SYNERGY_CARDS],
     consumables: [
         { id: 'healing-potion', quantity: 5 },
-        { id: 'antidote', quantity: 2 },
     ],
     currency: 50,
 };
@@ -191,7 +188,6 @@ export const ladderL30Preset: CharacterPreset = {
     ],
     consumables: [
         { id: 'greater-healing-potion', quantity: 6 },
-        { id: 'clarity-serum', quantity: 3 },
     ],
     currency: 250,
 };
@@ -221,9 +217,7 @@ export const ladderL50Preset: CharacterPreset = {
         ...TIER_2_SYNERGY_CARDS,
     ],
     consumables: [
-        { id: 'supreme-healing-potion', quantity: 8 },
-        { id: 'regeneration-tonic', quantity: 3 },
-        { id: 'phoenix-tear', quantity: 2 },
+        { id: 'greater-healing-potion', quantity: 8 },
     ],
     currency: 1000,
 };

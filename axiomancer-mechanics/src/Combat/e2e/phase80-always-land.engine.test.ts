@@ -86,7 +86,7 @@ describe('Phase 80 — Tier 2 debuff always lands (target-resist removed)', () =
 describe('Phase 80 — Tier 3 always lands (Nat-20 escape removed)', () => {
     it('lands even at the legacy-miraculous-escape Nat-20 roll', () => {
         const target = minimalCombatant();
-        const effect = buildActiveEffect('debuff_curse', 3, 1, 3);
+        const effect = buildActiveEffect('fixture_curse', 3, 1, 3);
 
         mockSequentialRng(0.99); // legacy d20 = 20 → would have been "miraculous escape"
 
@@ -107,7 +107,7 @@ describe('Phase 80 — Tier 3 always lands (Nat-20 escape removed)', () => {
 describe('D12 — Tier 2 buffs apply as printed (no hidden d20)', () => {
     it('lands where the old roll was a Nat 1 (no fizzle)', () => {
         const target = minimalCombatant();
-        const effect = buildActiveEffect('buff_haste', 2, 1, 3);
+        const effect = buildActiveEffect('fixture_roll_up', 2, 1, 3);
 
         mockSequentialRng(0.0); // old d20 = 1 → fumble
 
@@ -120,7 +120,7 @@ describe('D12 — Tier 2 buffs apply as printed (no hidden d20)', () => {
 
     it('keeps printed intensity where the old roll was a Nat 20 (no doubling)', () => {
         const target = minimalCombatant();
-        const effect = buildActiveEffect('buff_haste', 2, 2, 3);
+        const effect = buildActiveEffect('fixture_roll_up', 2, 2, 3);
 
         mockSequentialRng(0.99); // old d20 = 20 → crit ×2
 

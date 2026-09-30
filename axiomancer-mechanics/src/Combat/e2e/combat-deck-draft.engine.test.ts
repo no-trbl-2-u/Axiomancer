@@ -202,7 +202,7 @@ describe('draftCombatDeck newcomer-visibility guarantee (GH #163)', () => {
         id: 'draft-test-newcomer-a', name: 'Newcomer A',
         color: 'mind', description: 'test-only off-focus newcomer', tier: 1,
         targetType: 'self', rank: 1, cardType: 'spell',
-        combatEffects: [{ effectId: 'buff_regeneration', appliedTo: 'self', intensity: 1, duration: 2 }],
+        combatEffects: [{ effectId: 'fixture_roll_up', appliedTo: 'self', intensity: 1, duration: 2 }],
     };
     const offFocusNewcomerB: Card = { ...offFocusNewcomerA, id: 'draft-test-newcomer-b' };
 

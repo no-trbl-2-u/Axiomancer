@@ -3,8 +3,9 @@
  * payload surface that was previously INERT (or mis-timed) in Hazard-Pattern
  * Combat and is now read by the live engine:
  *
- *   - `defenseModifier` → flat armor soak on the incoming telegraph
- *     (buff_damage_reduction / buff_invincibility / buff_phoenix_vigor's guard).
+ *   - `defenseModifier` → flat armor soak on the incoming telegraph (no
+ *     library effect carries it since R5; `fixture_armor` keeps it pinned
+ *     until R7a deletes the channel).
  *   - BACKFIRE lethal-ordering guard — an enemy the backfire drip kills does
  *     not still complete its telegraphed swing that phase.
  *   - POISON ramp reset on reapplication (`escalatesPerTurn` → `appliedAt`
@@ -55,7 +56,7 @@ function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'mind', effec
 
 const has = (events: readonly CombatEvent[], kind: string): boolean => events.some(e => e.kind === kind);
 
-// ── ARMOR (defenseModifier) — the live home for the defensive potions ─────────
+// ── ARMOR (defenseModifier) ──────────────────────────────────────────────────
 
 describe('ARMOR — defenseModifier soaks the incoming telegraph', () => {
     it('a plain player takes telegraph damage (control)', () => {
@@ -65,22 +66,14 @@ describe('ARMOR — defenseModifier soaks the incoming telegraph', () => {
         expect(res.state.player.health).toBeLessThan(200);
     });
 
-    it('buff_invincibility (defenseModifier 99) fully soaks the same hit', () => {
-        mockSequentialRng(0.05);
-        const player = makePlayer([ae('buff_invincibility', 1, 1, 3)]);
-        const base = initializeCombatEncounter(player, makeEnemy(300, 'mind'), undefined, 7);
-        const res = resolveThreatPhase(rollEncounterDice(base).state);
-        expect(res.state.player.health).toBe(200); // 99 armor zeroes any realistic hit
-    });
-
-    it('buff_damage_reduction (defenseModifier 5) shaves 5 off the control hit', () => {
+    it('fixture_armor (defenseModifier 5) shaves 5 off the control hit', () => {
         mockSequentialRng(0.05);
         const control = resolveThreatPhase(
             rollEncounterDice(initializeCombatEncounter(makePlayer(), makeEnemy(300, 'mind'), undefined, 7)).state,
         ).state.player.health;
         const armored = resolveThreatPhase(
             rollEncounterDice(initializeCombatEncounter(
-                makePlayer([ae('buff_damage_reduction', 1, 3)]), makeEnemy(300, 'mind'), undefined, 7,
+                makePlayer([ae('fixture_armor', 1, 3)]), makeEnemy(300, 'mind'), undefined, 7,
             )).state,
         ).state.player.health;
         // Same seed / same hit; armor shaves up to 5 off whatever the hit was.

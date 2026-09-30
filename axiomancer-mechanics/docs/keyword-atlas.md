@@ -44,7 +44,6 @@ mid-flight. Run `npm run catalog` for the current binding.
 | keyword | reminder text | carried by |
 |---|---|---|
 | **BLEED iN dM** | Each hit the bearer takes deals extra VITAE per Bleed stack, then removes a stack. | (see the catalog) |
-| **MARK iN dM** | Every damage-over-time tick on the bearer deals +1 VITAE per Mark stack. Marks hold until consumed, not until a calendar expires. | (see the catalog) |
 | **VULNERABLE +N% dM** | The foe takes N% more damage from every hit. Re-applying adds up and refreshes the turns; uncapped. Heart scales N (S3, D43). | grey-word |
 
 ## Player keywords — walls and reprisal
@@ -53,18 +52,11 @@ mid-flight. Run `npm run catalog` for the current binding.
 |---|---|---|
 | **GUARD N** | Blocks that much incoming damage during the next threat phase. Unused Guard is lost unless the card prints "persists". | grey-ward, every signature skill (R4) |
 
-## Player keywords — the deck as a resource
-
-| keyword | reminder text | carried by |
-|---|---|---|
-| **DRAW N** | Draw that many cards from your deck, up to your hand limit. | consumables |
-
 ## Player keywords — resolve and mercy
 
 | keyword | reminder text | carried by |
 |---|---|---|
-| **HEAL N** | Restores that much VITAE, up to your maximum. | (see the catalog) |
-| **CLEANSE N** | Removes up to that many afflictions from you. | (see the catalog) |
+| **HEAL N** | Restores that much VITAE, up to your maximum. | the healing potions (R5) |
 
 ## Player keywords — the dice
 
@@ -264,6 +256,16 @@ stale and corrected in the same pass.)
   sweep pick it up automatically — no other mobile code needed.
 
 ## Retired
+
+- **THE ITEMS RESET** (2026-09-30, revamp phase R5, D49, D45) — the
+  consumable library is the three healing potions, so CLEANSE, DRAW and MARK
+  lost their last carrier: the cleanse consumables, and the haste and
+  critical buffs whose combat-log labels borrowed DRAW and MARK. Their rows
+  left this file, `KEYWORD_GLOSS`, the FREE-glyph silhouettes and the DevLog
+  catalog's bold list. The hazard deck's own DRAW (`HAZARD_KEYWORDS`) is a
+  separate glossary and stays. HEAL stays: every potion prints it. The engine
+  code behind the swept words (card `cleanse` / `drawCards` riders,
+  `applyCleanse`, the Mark amplification) is R7a's to delete.
 
 - **THE SIGNATURE PLACEHOLDERS** (2026-09-29, revamp phase R4, D45, D47) —
   ten signature skills became GUARD 5 placeholders and The Open Hand a plain

@@ -108,7 +108,6 @@ const PACED_EXTRAS: readonly { id: string; label: string; event: unknown }[] = [
             shop: {
                 wares: [
                     { itemId: 'minor-healing-potion', price: 12 },
-                    { itemId: 'antidote', price: 8 },
                 ],
             },
         },

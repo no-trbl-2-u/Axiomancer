@@ -168,13 +168,10 @@ export function useConsumableEffect(
     };
 
     const runEffect = (effect: Effect): void => {
-        // CLEANSE consumables (antidote → `buff_cleanse` tier 2, clarity-serum →
-        // `buff_cleanse_minor` tier 1) carry a payload-less instant whose job is
-        // to STRIP debuffs, not to persist. Route it to `removeEffectsByType`
-        // scoped by the effect's tier (a tier-2 cleanse sheds tier 1+2 debuffs,
-        // a tier-1 cleanse sheds tier 1 only) instead of adding an inert
-        // instance — otherwise the item advertises "purges venoms" and does
-        // nothing.
+        // A cleanse instant is payload-less: its job is to STRIP debuffs, not to
+        // persist. Route it to `removeEffectsByType` scoped by the effect's tier
+        // (a tier-2 cleanse sheds tier 1+2 debuffs, a tier-1 cleanse sheds tier
+        // 1 only) instead of adding an inert instance.
         if (effect.payload.cleanse) {
             const { activeEffects } = removeEffectsByType(next.effects, 'debuff', effect.tier);
             next = { ...next, effects: activeEffects };

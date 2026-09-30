@@ -67,7 +67,7 @@ export interface ModalEffectDelta {
 
 /**
  * One line of an item's *intrinsic* modifier block — the stat lines the
- * item itself grants (independent of equip state), e.g. "+5 MAX HP".
+ * item itself grants (independent of equip state), e.g. "+5 MAX VITAE".
  */
 export interface ItemModifierLine {
     label: string;
@@ -177,24 +177,24 @@ function buildConsumableModal(player: Character, item: Item): ItemModalViewModel
         // one drink instead of inferring it from a number that changed.
         previewLines.push(
             desperate
-                ? `Heal ${resolvedHeal} HP (badly wounded)`
-                : `Heal ${resolvedHeal} HP`,
+                ? `Heal ${resolvedHeal} VITAE (badly wounded)`
+                : `Heal ${resolvedHeal} VITAE`,
         );
         // Not currently desperate, but the item HAS a band: advertise the
         // upside. This is the anti-hoarding lever's whole job — the player must
         // be able to see, at full health, that the flask is worth more later.
         if (!desperate && (consumable.healAmountBelowHalf ?? 0) > 0) {
             previewLines.push(
-                `Heal ${consumable.healAmountBelowHalf} HP instead when below half HP`,
+                `Heal ${consumable.healAmountBelowHalf} VITAE instead when below half VITAE`,
             );
         }
     } else if (legacyEffect) {
         previewLines.push(legacyEffect);
     }
     if (hpDelta > 0) {
-        previewLines.push(`HP ${player.health} → ${projectedHp} (+${hpDelta})`);
+        previewLines.push(`VITAE ${player.health} → ${projectedHp} (+${hpDelta})`);
     } else if (legacyEffect && heal === 0) {
-        previewLines.push('No HP change.');
+        previewLines.push('No VITAE change.');
     }
 
     return freezeViewModel({
@@ -329,7 +329,8 @@ function buildEquipmentModal(player: Character, item: Item): ItemModalViewModel 
  * new stat.
  */
 const STAT_LABELS: Record<string, string> = {
-    maxHealth: 'MAX HP',
+    maxHp: 'MAX VITAE',
+    maxHealth: 'MAX VITAE',
 };
 
 function statLabelFor(key: string): string {

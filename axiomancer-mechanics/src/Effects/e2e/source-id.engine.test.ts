@@ -143,12 +143,12 @@ describe('Phase 20 — equipment applies no effect, so equipment never sources a
             tier: 1,
             rarity: 'common' as const,
             requiredLevel: 1,
-            passiveEffects: ['buff_regeneration'],
+            passiveEffects: ['fixture_roll_up'],
         };
 
         const equipped = equipItem(player, passiveEquipment);
         // Phase 20 — equipment is stat-only; no effect (and thus no sourceId) is added.
         expect(equipped.effects.some(e => e.sourceId === 'eq_regen_band')).toBe(false);
-        expect(equipped.effects.some(e => e.effectId === 'buff_regeneration')).toBe(false);
+        expect(equipped.effects.some(e => e.effectId === 'fixture_roll_up')).toBe(false);
     });
 });

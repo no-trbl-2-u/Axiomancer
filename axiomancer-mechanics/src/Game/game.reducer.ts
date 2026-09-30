@@ -157,8 +157,10 @@ import { generateRunId } from './run-loop';
  * 2026-09-29 — bumped 28 → 29: THE REVAMP R3b (D53). fishing-village and the
  *   village goodwill system are purged; the hop drops `mapGoodwill`, the
  *   goodwill flags, fishing-village's map entries and its two quests.
+ * 2026-09-30 — bumped 29 → 30: THE REVAMP R5 (D49). Items are the healing
+ *   potions; the hop drops retired consumable stacks and their effects.
  */
-export const GAME_STATE_VERSION = 29;
+export const GAME_STATE_VERSION = 30;
 
 /**
  * Builds a brand-new GameState with default player and world.

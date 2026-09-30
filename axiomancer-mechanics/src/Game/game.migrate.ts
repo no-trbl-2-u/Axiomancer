@@ -23,9 +23,11 @@
  * the alignment grid and GRACE, rename a card's `philosophicalAspect` to
  * `color`), and v26 → v27 (2026-09-29, THE REVAMP R2 / D48: a staged
  * encounter naming a retired foe re-points to Float-Eye, and survivors lose
- * their stripped keywords), and v27 → v28 (2026-09-29, THE REVAMP R3a: a
- * save standing off Act 1 moves onto the Lantern Deep). The hops chain, so a
- * v11 save lands at v28 in one `migrate` call. Every other version mismatch still rejects.
+ * their stripped keywords), v27 → v28 (2026-09-29, THE REVAMP R3a: a
+ * save standing off Act 1 moves onto the Lantern Deep), v28 → v29 (R3b:
+ * fishing-village purged) and v29 → v30 (2026-09-30, R5: the retired
+ * consumables and their effects dropped). The hops chain, so a v11 save lands
+ * at v30 in one `migrate` call. Every other version mismatch still rejects.
  */
 
 import { GameState } from './types';
@@ -686,6 +688,52 @@ function migrateV28ToV29(raw: Record<string, unknown>): Record<string, unknown> 
     return out;
 }
 
+/** The nineteen consumables R5 retired (D49): only the healing potions stay. */
+const RETIRED_CONSUMABLE_IDS: ReadonlySet<string> = new Set([
+    'antidote', 'clarity-serum', 'focus-vial', 'heart-draught', 'body-elixir',
+    'berserker-brew', 'philosopher-tea', 'resonance-crystal', 'revive-crystal',
+    'void-essence', 'supreme-healing-potion', 'regeneration-tonic',
+    'iron-skin-draught', 'whetstone-oil', 'hunters-elixir', 'quicksilver-vial',
+    'phoenix-tear', 'war-horn-draught', 'greater-resonance-crystal',
+]);
+
+/** The effects R5 deleted with those consumables (and the applier-less curse). */
+const RETIRED_EFFECT_IDS: ReadonlySet<string> = new Set([
+    'buff_accuracy_up', 'buff_critical_rate_up', 'buff_critical_damage_up',
+    'buff_haste', 'buff_haste_surge', 'buff_status_chance_up', 'buff_liars_gambit',
+    'buff_abyssal_presence', 'buff_all_stats_up', 'buff_regeneration',
+    'buff_damage_reduction', 'buff_invincibility', 'buff_phoenix_vigor',
+    'buff_stoic_resolve', 'buff_cleanse', 'buff_cleanse_minor', 'debuff_curse',
+]);
+
+/**
+ * v29 → v30 (2026-09-30, THE REVAMP R5, D49): items are the healing potions.
+ * Drops every inventory stack of a retired consumable and every active effect
+ * on the player whose definition was deleted with them. Nothing is refunded:
+ * the retired items were no-ops or had no target. Idempotent and pure over a
+ * raw save payload.
+ */
+function migrateV29ToV30(raw: Record<string, unknown>): Record<string, unknown> {
+    const out: Record<string, unknown> = { ...raw, version: 30 };
+    const player = raw.player as Record<string, unknown> | undefined;
+    if (!player || typeof player !== 'object') return out;
+    const next: Record<string, unknown> = { ...player };
+    if (Array.isArray(player.inventory)) {
+        next.inventory = (player.inventory as unknown[]).filter(item => {
+            const id = (item as { id?: unknown } | null)?.id;
+            return !(typeof id === 'string' && RETIRED_CONSUMABLE_IDS.has(id));
+        });
+    }
+    if (Array.isArray(player.effects)) {
+        next.effects = (player.effects as unknown[]).filter(effect => {
+            const id = (effect as { effectId?: unknown } | null)?.effectId;
+            return !(typeof id === 'string' && RETIRED_EFFECT_IDS.has(id));
+        });
+    }
+    out.player = next;
+    return out;
+}
+
 /**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
@@ -723,8 +771,9 @@ export function migrate(
     // stats and stat lines; v25 → v26 strips the alignment grid and GRACE;
     // v26 → v27 re-points retired foes in a staged encounter to Float-Eye;
     // v27 → v28 moves a save off Act 1 onto the Lantern Deep; v28 → v29
-    // drops fishing-village, its quests and the goodwill tally.
-    // Chained so a v11 save lands at v29 in one call.
+    // drops fishing-village, its quests and the goodwill tally; v29 → v30
+    // drops the retired consumables and their effects.
+    // Chained so a v11 save lands at v30 in one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
@@ -796,6 +845,10 @@ export function migrate(
     if (version === 28 && toVersion >= 29) {
         working = migrateV28ToV29(working);
         version = 29;
+    }
+    if (version === 29 && toVersion >= 30) {
+        working = migrateV29ToV30(working);
+        version = 30;
     }
 
     if (version !== toVersion) {

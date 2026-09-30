@@ -172,8 +172,8 @@ export const TheDoorwarden = createEnemy({
     ],
     loot: [
         drop('healing-potion', 40),
-        drop('iron-skin-draught', 25),
-        drop('clarity-serum', 20),
+        drop('greater-healing-potion', 25),
+        drop('minor-healing-potion', 20),
     ],
     finalBlowLines: {
         brutal: 'The hinge-priest comes apart at every joint at once. Ten thousand doors, unheld, swing open somewhere.',

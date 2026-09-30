@@ -37,11 +37,11 @@
 const EFFECT_KEYWORD: Record<string, string> = {
     // ── The effect-backed keywords ──
     debuff_bleed: 'Bleed',
-    debuff_mark: 'Mark',
     // S3 (D43) — rebuilt for the grey office's A Plain Word.
     debuff_vulnerable: 'Vulnerable',
     // Revamp R4 (D45) deleted Poison, Quarter and Doom: the signature skills
-    // were their last carriers, and are GUARD placeholders now.
+    // were their last carriers, and are GUARD placeholders now. R5 deleted
+    // Mark: nothing applies it once the consumables that borrowed it retired.
 };
 
 /**
@@ -50,39 +50,9 @@ const EFFECT_KEYWORD: Record<string, string> = {
  * the 30-keyword glossary; mapped so the combat log never prints a raw id.
  */
 const SUPPORT_KEYWORD: Record<string, string> = {
-    // No live applier since the threat-clock enchant was trimmed (T2a);
-    // mapped so a legacy save's combat log never prints the raw id.
-    debuff_curse: 'Mark',
-    // Consumable / engine buffs that still resolve. (BARRIER merged into GUARD
-    // in phase 29, so buff_invincibility maps to Guard.)
-    buff_regeneration: 'Heal',
-    buff_phoenix_vigor: 'Heal',
-    buff_cleanse: 'Cleanse',
-    buff_absolved: 'Cleanse',
-    // adjust-equipment pass 11 (2026-09-15) split clarity-serum onto this tier-1
-    // cleanse but never added the mapping here — clarity-serum's combat log
-    // silently printed no keyword ever since. Backfilled adjust-equipment pass 14.
-    buff_cleanse_minor: 'Cleanse',
-    buff_damage_reduction: 'Guard',
-    buff_all_stats_up: 'Guard',
-    buff_invincibility: 'Guard',
-    buff_haste: 'Draw',
-    // adjust-equipment pass 15 (2026-09-21): war-horn-draught's tier-3 split
-    // off buff_haste (see consumable.library.ts) — same closest-analogue
-    // mapping as its parent effect, backfilled in the same tick this time.
-    buff_haste_surge: 'Draw',
-    // The keyword purge (2026-09-28) retired FORETELL; buff_accuracy_up now
-    // falls back to its own effect name instead of a borrowed gloss.
-    buff_critical_rate_up: 'Mark',
-    buff_critical_damage_up: 'Mark',
-    buff_status_chance_up: 'Mark',
-    // issue #307: single-stance split of buff_critical_damage_up (philosopher-tea
-    // / void-essence no longer share an effect) — same closest-analogue mapping.
-    buff_liars_gambit: 'Mark',
-    buff_abyssal_presence: 'Mark',
-    // adjust-equipment pass 14 (2026-09-20): tier-1 split of buff_damage_reduction
-    // (body-elixir vs iron-skin-draught, same byte-identical-effect bug class).
-    buff_stoic_resolve: 'Guard',
+    // Revamp R5 (D49) retired every consumable but the healing potions, and
+    // with them every support effect this table labelled. `buff_absolved`
+    // (the region-consequence status) shows its own effect name.
 };
 
 /** Verb class → keyword for cards whose action is the keyword itself. */
@@ -119,11 +89,12 @@ const MECHANIC_KEYWORD: Record<string, string> = {
  * numbers live on the face/preview; this explains the keyword.
  *
  * The table holds only words something live still prints: the grey office
- * (GUARD/VULNERABLE), the signature skills (GUARD), consumables (HEAL,
- * CLEANSE, DRAW, MARK), a map hazard (BLEED), the dice system (PIP, BOON,
- * HONE, TEMPER) and the two card-type labels. Revamp R4 (D45) cut POISON,
- * DOOM, QUARTER, STAGGER, PLEA, WRATH and CHAIN when the signature skills,
- * their last carriers, became GUARD placeholders. Git history keeps the rest.
+ * (GUARD/VULNERABLE), the signature skills (GUARD), the healing potions
+ * (HEAL), a map hazard (BLEED), the dice system (PIP, BOON, HONE, TEMPER) and
+ * the two card-type labels. Revamp R4 (D45) cut POISON, DOOM, QUARTER,
+ * STAGGER, PLEA, WRATH and CHAIN when the signature skills, their last
+ * carriers, became GUARD placeholders; R5 cut CLEANSE, DRAW and MARK with the
+ * consumables that printed them. Git history keeps the rest.
  *
  * 2026-07-12 (owner playtest) — TERSE GLOSSES: every gloss is ONE short
  * sentence in the Dawncaster register ("Cards with Lifedrain restore health
@@ -133,14 +104,9 @@ const MECHANIC_KEYWORD: Record<string, string> = {
  */
 const KEYWORD_GLOSS: Record<string, string> = {
     // ── Utility ──
-    Draw: 'Draw that many cards from your deck, up to your hand limit.',
     Guard:
         'Blocks that much incoming attack damage during the next threat phase. '
         + 'Unused Guard is lost unless the card prints "persists".',
-    Mark:
-        'Every damage-over-time tick on the bearer deals +1 VITAE per Mark stack. '
-        + 'Marks hold until consumed.',
-    Cleanse: 'Removes up to that many afflictions from you.',
     Heal: 'Restores that much VITAE, up to your maximum.',
     // ── Affliction ──
     Bleed: 'Each hit the bearer takes deals 3 more VITAE per Bleed stack, then removes a stack.',

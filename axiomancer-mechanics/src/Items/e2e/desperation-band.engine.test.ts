@@ -16,7 +16,7 @@
  *   - a consumable with no band behaves exactly as it did pre-Phase-96;
  *   - the clamp to `maxHealth` still wins over the larger amount;
  *   - degenerate records (`maxHealth <= 0`) never read as desperate;
- *   - the shipped library's five healing potions all carry the 1.5x band.
+ *   - the shipped library's three healing potions all carry the 1.5x band.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -219,13 +219,11 @@ describe('useConsumableEffect — desperation band', () => {
 // ─── The shipped library ─────────────────────────────────────────────────────
 
 describe('consumable library — every healing potion carries the band', () => {
-    /** Phase 96 retuned exactly these five; the ratio is uniform on purpose. */
+    /** The three potions R5 kept; the ratio is uniform on purpose. */
     const HEALERS = [
         'healing-potion',
         'minor-healing-potion',
         'greater-healing-potion',
-        'supreme-healing-potion',
-        'phoenix-tear',
     ];
 
     it.each(HEALERS)('%s pays 1.5x its flat heal below half', id => {
@@ -233,7 +231,7 @@ describe('consumable library — every healing potion carries the band', () => {
         expect(item, `${id} missing from the library`).toBeDefined();
         const flat = item!.healAmount!;
         expect(flat).toBeGreaterThan(0);
-        // One rule the player learns once, not five numbers to memorise.
+        // One rule the player learns once, not three numbers to memorise.
         expect(item!.healAmountBelowHalf).toBe(flat * 1.5);
     });
 

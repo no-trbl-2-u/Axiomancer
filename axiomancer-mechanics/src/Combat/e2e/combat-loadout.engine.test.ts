@@ -221,13 +221,13 @@ describe('isCombatSynergySatisfied', () => {
             rank: 3,
             cardType: 'spell',
             targetType: 'enemy',
-            synergy: { predicate: { effectId: 'buff_regeneration', on: 'caster', intensityMin: 1 } },
+            synergy: { predicate: { effectId: 'fixture_roll_up', on: 'caster', intensityMin: 1 } },
         }]);
         const card = buildCard('qa-caster-synergy');
         expect(card).not.toBeNull();
         const enemyEffects: ActiveEffect[] = [
             {
-                effectId: 'buff_regeneration',
+                effectId: 'fixture_roll_up',
                 intensity: 1,
                 remainingDuration: 2,
                 sourceId: 'test',

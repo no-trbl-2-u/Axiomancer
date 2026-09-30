@@ -111,8 +111,8 @@ test('axio_keywords returns the full registry when term is omitted', async () =>
   const text = replies.get(1)?.result?.content?.[0]?.text ?? ''
   // The registry is growable (THE PIPELINE LIBERATION, 2026-08-22) — assert
   // a healthy roster, not a pinned count. The floor follows the revamp's
-  // carrier sweeps (R2b, R4), which left 16 atlas rows.
-  assert.ok(text.split('\n').filter(Boolean).length >= 14)
+  // carrier sweeps (R2b, R4, R5), which left 13 atlas rows.
+  assert.ok(text.split('\n').filter(Boolean).length >= 11)
 })
 
 test('a mid-session export deletion is re-detected on the next call, not just the process-first one', async () => {

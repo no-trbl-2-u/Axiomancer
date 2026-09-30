@@ -142,7 +142,7 @@ describe('inventory screen: item-modal stat rows (Phase 80a)', () => {
 
         // The changed stat renders as a labelled before → after row.
         const maxHealth = store.getState().player.maxHealth;
-        expect(tree.getByText('MAX HP')).toBeTruthy();
+        expect(tree.getByText('MAX VITAE')).toBeTruthy();
         expect(tree.getByText(`${maxHealth} → ${maxHealth + 5} (+5)`)).toBeTruthy();
     });
 });

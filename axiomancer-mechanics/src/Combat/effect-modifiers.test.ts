@@ -26,14 +26,14 @@ registerFixtureEffects();
 
 /**
  * The spec 32 v3 keyword reset deleted the library effects that used to carry
- * negative-regen drain, grant-disadvantage, and action-restriction payloads.
+ * negative-regen drain and action-restriction payloads.
  * No surviving library effect carries those shapes, so — rather than weaken
  * the machinery coverage those shapes exercise — we register test-only
  * `Effect` fixtures into the shared registry (the same lookup
  * `getActiveEffectModifiers` / `canAct` / the effect helpers resolve
  * through). These ids never touch the library JSON. Payloads that a surviving
- * effect DOES cover (defenseModifier, regeneration, advantage-grant, DoT) are
- * repointed to those real survivors. (Effect stat modifiers were deleted
+ * effect DOES cover (DoT) are repointed to those real survivors; R5 deleted
+ * the last regeneration buff, so regen runs through `test_regen`. (Effect stat modifiers were deleted
  * outright by TRIM THE FAT T2a / D14, so they have no fixture here.)
  */
 const mk = (id: string, type: 'buff' | 'debuff', payload: Effect['payload']): Effect => ({
@@ -49,6 +49,8 @@ const mk = (id: string, type: 'buff' | 'debuff', payload: Effect['payload']): Ef
 });
 
 const TEST_EFFECTS: Effect[] = [
+    // Positive regen (the shape R5's deleted buff_regeneration carried).
+    mk('test_regen', 'buff', { regeneration: { healthPerRound: 4 } }),
     // Negative-regen drain shapes.
     mk('test_drain1', 'debuff', { regeneration: { healthPerRound: -1 } }),
     mk('test_drain2', 'debuff', { regeneration: { healthPerRound: -2 } }),
@@ -56,10 +58,6 @@ const TEST_EFFECTS: Effect[] = [
     mk('test_disease', 'debuff', {
         damageOverTime: { damagePerRound: 2, damageType: 'body', tickPhase: 'start' },
         regeneration: { healthPerRound: -1 },
-    }),
-    // grant-disadvantage on all three stances.
-    mk('test_disadv_all', 'debuff', {
-        advantageModifier: { grantDisadvantage: ['body', 'mind', 'heart'] },
     }),
     // grant-advantage on body only.
     mk('test_adv_body', 'buff', {
@@ -117,23 +115,12 @@ describe('getActiveEffectModifiers', () => {
 
     it('separates regen from drain (Q6)', () => {
         const mods = getActiveEffectModifiers([
-            ae('buff_regeneration', 2),  // healthPerRound 4 × 2 = 8 (Phase 124 buff)
+            ae('test_regen',        2),  // healthPerRound 4 × 2 = 8
             ae('test_drain1',       1),  // healthPerRound -1 × 1 = drain 1
             ae('test_drain2',       1),  // healthPerRound -2 × 1 = drain 2
         ]);
         expect(mods.healthRegen).toBe(8);
         expect(mods.healthDrain).toBe(3);
-    });
-
-    it('collects advantage grants and denies as sets', () => {
-        const mods = getActiveEffectModifiers([
-            ae('buff_haste'),          // grantAdvantage [body, mind, heart]
-            ae('test_disadv_all'),     // grantDisadvantage [body, mind, heart]
-        ]);
-        expect(mods.advantageGrants.has('body')).toBe(true);
-        expect(mods.advantageGrants.has('mind')).toBe(true);
-        expect(mods.advantageGrants.has('heart')).toBe(true);
-        expect(mods.advantageDenies.size).toBe(3);
     });
 
     it('collects action restrictions', () => {
@@ -213,8 +200,8 @@ describe('DoT and drain HP changes', () => {
     });
 
     it('applyRegen scales with intensity (Q2)', () => {
-        const damaged = { ...fixture([ae('buff_regeneration', 2)]), health: 10 };
-        // healthPerRound 4 × intensity 2 = 8 (Phase 124 buff)
+        const damaged = { ...fixture([ae('test_regen', 2)]), health: 10 };
+        // healthPerRound 4 × intensity 2 = 8
         const r = applyRegen(damaged);
         expect(r.healed).toBe(8);
         expect(r.target.health).toBe(18);
@@ -278,11 +265,11 @@ describe('applyCleanse / applyDispel (Q10)', () => {
 
     it('Tier 2 dispel strips Tier 1 + 2 buffs but leaves Tier 3', () => {
         const t = fixture([
-            { effectId: 'buff_regeneration', intensity: 1, remainingDuration: 3, appliedAt: 1, tier: 2 },
-            { effectId: 'buff_haste',        intensity: 1, remainingDuration: 2, appliedAt: 1, tier: 3 },
+            { effectId: 'test_regen',    intensity: 1, remainingDuration: 3, appliedAt: 1, tier: 2 },
+            { effectId: 'test_adv_body', intensity: 1, remainingDuration: 2, appliedAt: 1, tier: 3 },
         ]);
         const r = applyDispel(t, 2);
-        expect(r.removed.map(e => e.effectId)).toEqual(['buff_regeneration']);
+        expect(r.removed.map(e => e.effectId)).toEqual(['test_regen']);
     });
 });
 

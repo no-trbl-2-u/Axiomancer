@@ -3221,12 +3221,11 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         events.push({ kind: 'backfired', amount: drip, rungs: rungsForBackfire });
     }
 
-    // ARMOR (defenseModifier) — flat per-hit reduction of the incoming telegraph,
-    // the live home for buff_damage_reduction (Iron Skin), buff_invincibility
-    // (Revive Crystal) and buff_phoenix_vigor's guard. Inert until now under the
-    // HP model (the aggregator computed `defenseDelta` but no combat path read
-    // it). Player-only and clamped ≥0, so no enemy-borne or negative payload can
-    // amplify the hit. Applied before parry/guard/barrier soak, like armor.
+    // ARMOR (defenseModifier) — flat per-hit reduction of the incoming telegraph.
+    // No effect in the library carries a defenseModifier since R5 retired the
+    // armor consumables; R7a removes the soak. Player-only and clamped ≥0, so
+    // no enemy-borne or negative payload can amplify the hit. Applied before
+    // parry/guard/barrier soak, like armor.
     const playerArmor = Math.max(0, getActiveEffectModifiers(state.player.effects as ActiveEffect[]).defenseDelta);
 
     // A lethal BACKFIRE drip (above) can drop the enemy to 0 before it swings —
@@ -3255,8 +3254,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     // is authored or the player is stance-less).
                     * stanceCheck.mult,
                 );
-                // Flat armor soak (defenseModifier). buff_invincibility's 99 zeroes
-                // any realistic hit; Iron Skin's 5 / phoenix's 1 shave it.
+                // Flat armor soak (defenseModifier).
                 dmg = Math.max(0, dmg - playerArmor);
                 const preSoakDmg = dmg;
                 // RIPOSTE parry reduces the incoming hit once this phase.

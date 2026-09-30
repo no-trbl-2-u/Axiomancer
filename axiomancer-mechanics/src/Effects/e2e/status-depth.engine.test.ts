@@ -239,7 +239,7 @@ describe('Status Effect Depth Engine', () => {
             const statusEffects: ActiveEffect[] = [
                 { effectId: 'debuff_poison', intensity: 2, remainingDuration: 5, appliedAt: 1, tier: 2 },
                 { effectId: 'debuff_bleed', intensity: 2, remainingDuration: 4, appliedAt: 1, tier: 2 },
-                { effectId: 'buff_regeneration', intensity: 2, remainingDuration: 6, appliedAt: 1, tier: 1 },
+                { effectId: 'fixture_roll_up', intensity: 2, remainingDuration: 6, appliedAt: 1, tier: 1 },
                 { effectId: 'buff_focus', intensity: 2, remainingDuration: 3, appliedAt: 1, tier: 2 },
                 { effectId: 'debuff_confusion', intensity: 1, remainingDuration: 3, appliedAt: 1, tier: 2 }
             ];

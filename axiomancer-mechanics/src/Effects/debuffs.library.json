@@ -122,25 +122,6 @@
       ]
     },
     {
-      "id": "debuff_curse",
-      "name": "Grelling's Malediction",
-      "description": "This curse is heterological—it does not describe itself. But then it does describe itself. The contradiction festers in your soul.",
-      "type": "debuff",
-      "category": "stat",
-      "duration": 5,
-      "stacking": "none",
-      "resistedBy": "body",
-      "resistDR": 14,
-      "payload": {
-        "rollModifier": -2
-      },
-      "tier": 2,
-      "tags": [
-        "support",
-        "non-card"
-      ]
-    },
-    {
       "id": "debuff_creeping_doom",
       "name": "Creeping Doom",
       "description": "It is not the argument that ruins them — it is every answer they attempt. The doom keeps their own effort as interest, and it never forgets the principal.",

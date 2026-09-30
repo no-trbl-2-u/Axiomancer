@@ -134,7 +134,6 @@ const nfForestMarket: MapEventPool = {
             shop: {
                 wares: [
                     { itemId: 'minor-healing-potion', price: 12 },
-                    { itemId: 'clarity-serum',        price: 28 },
                     // Signet relics (owner call 2026-09-23 — a fresh run seeds
                     // no relics; the markets sell them). The first market on
                     // the road stocks the Phase-19 starter kit's weapon, armor
@@ -359,8 +358,6 @@ const nfHerbTrader: MapEventPool = {
             shop: {
                 wares: [
                     { itemId: 'minor-healing-potion', price: 10 },
-                    { itemId: 'antidote',             price: 15 },
-                    { itemId: 'clarity-serum',        price: 25 },
                     // Signet relics — the two benched Phase-19 pieces.
                     { itemId: 'relic-conclusion',     price: 40 },
                     { itemId: 'relic-second-wind',    price: 40 },
@@ -1280,8 +1277,6 @@ const ncLedgerCamp: MapEventPool = {
             shop: {
                 wares: [
                     { itemId: 'minor-healing-potion', price: 14 },
-                    { itemId: 'antidote',             price: 16 },
-                    { itemId: 'clarity-serum',        price: 30 },
                     // Signet relics — underground prices.
                     { itemId: 'relic-conviction-strike', price: 40 },
                     { itemId: 'relic-mounting-dread', price: 45 },
@@ -1510,8 +1505,6 @@ const ncyIronMarket: MapEventPool = {
                 wares: [
                     { itemId: 'minor-healing-potion', price: 12 },
                     { itemId: 'healing-potion',       price: 30 },
-                    { itemId: 'antidote',             price: 14 },
-                    { itemId: 'clarity-serum',        price: 26 },
                     // Signet relics — the iron trade stocks the weapon and armor.
                     { itemId: 'relic-conclusion',     price: 50 },
                     { itemId: 'relic-second-wind',    price: 50 },
@@ -1534,7 +1527,6 @@ const ncyChandlery: MapEventPool = {
             shop: {
                 wares: [
                     { itemId: 'minor-healing-potion', price: 11 },
-                    { itemId: 'body-elixir',          price: 22 },
                     // Signet relics — a chandler's odd lots.
                     { itemId: 'relic-unbroken-stride', price: 45 },
                     { itemId: 'relic-overwhelming',   price: 50 },
@@ -1897,8 +1889,6 @@ const crTheLanding: MapEventPool = {
                 wares: [
                     { itemId: 'minor-healing-potion', price: 11 },
                     { itemId: 'healing-potion',       price: 28 },
-                    { itemId: 'antidote',             price: 13 },
-                    { itemId: 'body-elixir',          price: 20 },
                     // Signet relics — what the islanders trade off passing crews.
                     { itemId: 'relic-press-the-point', price: 40 },
                     { itemId: 'relic-mounting-dread', price: 45 },
@@ -2188,8 +2178,6 @@ const capMarket: MapEventPool = {
             shop: {
                 wares: [
                     { itemId: 'greater-healing-potion', price: 45 },
-                    { itemId: 'supreme-healing-potion',  price: 80 },
-                    { itemId: 'phoenix-tear',             price: 65 },
                 ],
             },
             description: 'Everything the provinces don\'t stock, priced for people with nothing left to lose but shillings.',

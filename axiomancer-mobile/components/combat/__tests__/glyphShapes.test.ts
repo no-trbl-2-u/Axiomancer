@@ -44,10 +44,11 @@ describe('glyphShapes — keyword canon audit (Phase V6)', () => {
     });
 
     it('every effect-backed registry keyword resolves to a silhouette', () => {
-        // debuff_bleed/_mark/_vulnerable — the only effect-backed keywords
-        // left (BACKFIRE and THORNS left with the keyword audit, 2026-09-27;
-        // POISON, QUARTER and DOOM with the R4 signature placeholders).
-        const effectBackedKeywords = ['BLEED', 'MARK', 'VULNERABLE'];
+        // debuff_bleed/_vulnerable — the only effect-backed keywords left
+        // (BACKFIRE and THORNS left with the keyword audit, 2026-09-27;
+        // POISON, QUARTER and DOOM with the R4 signature placeholders; MARK
+        // with the R5 consumables).
+        const effectBackedKeywords = ['BLEED', 'VULNERABLE'];
         for (const kw of effectBackedKeywords) {
             expect(registryKeywords.has(kw)).toBe(true);
             expect(glyphShapeFor(kw)).not.toBeNull();

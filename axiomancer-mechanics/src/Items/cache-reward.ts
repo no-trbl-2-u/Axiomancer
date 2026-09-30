@@ -5,8 +5,8 @@
  * no longer mint random equipment. This replaces the old `rollCacheLoot`
  * equipment generator: The Reliquary (and any other cache surface) now yields a
  * deterministic set of **consumables** scaled by tier. Currency is handled by
- * the caller (the cache session carries its own currency reward); relics are a
- * fixed starting kit, never loot.
+ * the caller (the cache session carries its own currency reward). Relics are
+ * never cache loot.
  *
  * Determinism: same `seed` + inputs → same rewards (a caller-supplied cache
  * seed drives a self-contained PRNG).
@@ -18,7 +18,7 @@
  * Re-tuning the mix, if ever needed, is a manual follow-up.
  */
 
-import { obtainableConsumables } from './consumable.library';
+import { consumableLibrary } from './consumable.library';
 import type { Item } from './types';
 
 /** Reward depth. `modest` = early locales, `rich` = deeper locales. */
@@ -64,14 +64,14 @@ function rollInt(rng: () => number, min: number, max: number): number {
 
 /**
  * Roll a deterministic set of consumable rewards for a loot cache. Draws a
- * tier-scaled count of consumables from `obtainableConsumables` — never one of
- * the no-op `UNOBTAINABLE_CONSUMABLE_IDS` — cloned at `quantity: 1` so the
- * shared library is never mutated. Never throws; returns `[]` only if the pool
+ * tier-scaled count of consumables from `consumableLibrary` (the healing
+ * potions, R5), cloned at `quantity: 1` so the shared library is never
+ * mutated. Never throws; returns `[]` only if the pool
  * is somehow empty.
  */
 export function rollCacheReward(opts: RollCacheRewardOptions): Item[] {
     const rng = mulberry32(opts.seed);
-    const pool = obtainableConsumables;
+    const pool = consumableLibrary;
     if (pool.length === 0) return [];
 
     const count = rollInt(rng, ...CACHE_REWARD_TUNING[opts.tier].count);

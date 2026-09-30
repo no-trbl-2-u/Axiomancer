@@ -19,7 +19,6 @@ import React from 'react';
 
 import {
     consumableLibrary,
-    lookupEffect,
     relicLibrary,
     type Consumable,
     type Item,
@@ -42,28 +41,7 @@ jest.mock('@/lib/platform/router', () => ({
     }),
 }));
 
-/** Payload fields the assertions below look for, read loosely off the library. */
-type LoosePayload = {
-    cleanse?: boolean;
-    advantageModifier?: { grantAdvantage?: string[] };
-};
-
-/** The first shipped consumable whose referenced effect satisfies `pred`. */
-function consumableWhoseEffect(
-    pred: (payload: LoosePayload, duration: number) => boolean,
-): Consumable | undefined {
-    return consumableLibrary.find((c) => {
-        const effect = c.effectId ? lookupEffect(c.effectId) : undefined;
-        if (!effect) return false;
-        return pred(effect.payload as LoosePayload, effect.duration);
-    });
-}
-
 const HEAL_WARE = consumableLibrary.find((c) => (c.healAmount ?? 0) > 0)!;
-const CLEANSE_WARE = consumableWhoseEffect((p) => p.cleanse === true)!;
-const TIMED_WARE = consumableWhoseEffect(
-    (p, duration) => duration > 0 && (p.advantageModifier?.grantAdvantage?.length ?? 0) > 0,
-)!;
 // A relic that still carries a stat line (since TRIM THE FAT T2a only the two
 // armor relics do — their +maxHp), so the stat-bump clause has something to state.
 const RELIC = relicLibrary.find((r) => (r.statModifiers ?? []).length > 0)!;
@@ -129,20 +107,6 @@ describe('wareEffectLine states the mechanical read (S5-talk-C04)', () => {
         const line = wareEffectLine(flat);
         expect(line).toContain(`restores ${flat.healAmount} VITAE`);
         expect(line).not.toContain('below half');
-    });
-
-    it('states a cleanse as what it clears', () => {
-        expect(CLEANSE_WARE).toBeDefined();
-        expect(wareEffectLine(CLEANSE_WARE)).toContain('clears afflictions');
-    });
-
-    it('states a timed effect with the rounds it lasts', () => {
-        expect(TIMED_WARE).toBeDefined();
-        const effect = lookupEffect(TIMED_WARE.effectId!)!;
-        const line = wareEffectLine(TIMED_WARE);
-
-        expect(line).toContain('advantage on');
-        expect(line).toContain(`${effect.duration} rounds`);
     });
 
     it('states a relic as its stat bump and the signature it grants', () => {

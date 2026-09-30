@@ -49,7 +49,7 @@ import { freezeViewModel } from './freeze';
 /**
  * One row of the item's stat block, already formatted for display.
  *
- * @property label - Chrome label for the stat ("BODY", "MAX HP", "MIND").
+ * @property label - Chrome label for the stat ("BODY", "MAX VITAE", "MIND").
  * @property value - Signed display value ("+2") or multiplier ("×1.5").
  * @property id    - Raw engine stat key, kept for testIDs / future tooltips.
  */
@@ -111,8 +111,8 @@ const STAT_LABELS: Record<string, string> = {
     body: 'BODY',
     mind: 'MIND',
     heart: 'HEART',
-    maxHp: 'MAX HP',
-    maxHealth: 'MAX HP',
+    maxHp: 'MAX VITAE',
+    maxHealth: 'MAX VITAE',
     physicalAttack: 'PHYS ATK',
     physicalDefense: 'PHYS DEF',
     mentalAttack: 'MENT ATK',
@@ -137,7 +137,7 @@ const SLOT_LABELS: Record<Equipment['slot'], string> = {
  * upper-case rendering so an unknown key is never silently dropped.
  *
  * @param key - Engine stat key, e.g. `'maxHp'`.
- * @returns Display label, e.g. `'MAX HP'`.
+ * @returns Display label, e.g. `'MAX VITAE'`.
  */
 function statLabelFor(key: string): string {
     return (

@@ -57,7 +57,7 @@ registerSandboxCards([
         id: 'ud-mind-dot', name: 'UD Mind DoT',
         color: 'mind', description: 'mind fixture', tier: 1,
         targetType: 'enemy', rank: 1, cardType: 'spell',
-        combatEffects: [{ effectId: 'debuff_curse', appliedTo: 'opponent', intensity: 1, duration: 2 }],
+        combatEffects: [{ effectId: 'fixture_curse', appliedTo: 'opponent', intensity: 1, duration: 2 }],
     },
     {
         id: 'ud-heart-dot', name: 'UD Heart DoT',

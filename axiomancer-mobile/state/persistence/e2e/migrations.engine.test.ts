@@ -173,8 +173,9 @@ describe('migrations.engine', () => {
 
             // v27 (phase R2): the retired-foe re-point hop chains after T6's;
             // v28 (phase R3a): the Act 1 relocation hop chains after it;
-            // v29 (phase R3b): the fishing-village / goodwill purge hop after that.
-            expect(GAME_STATE_VERSION).toBe(29);
+            // v29 (phase R3b): the fishing-village / goodwill purge hop after that;
+            // v30 (phase R5): the retired-consumable purge hop.
+            expect(GAME_STATE_VERSION).toBe(30);
             expect(result.version).toBe(GAME_STATE_VERSION);
         });
     });

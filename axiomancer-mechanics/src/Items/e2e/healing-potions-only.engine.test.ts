@@ -1,14 +1,10 @@
 /**
- * Hermetic engine test — TRIM THE FAT Tier 0 item 2
- * (`plan/2026-09-25-trim-the-fat.spec.md`): the eleven no-op consumables are
- * unobtainable.
+ * Hermetic engine test — THE REVAMP R5 (D49): items are the healing potions.
  *
- * Each of these grants only a roll modifier or an advantage grant the combat
- * engine never reads for the player (or a stat line on a stat nothing reads),
- * so drinking one does nothing. The standing frame for T2 says: remove them
- * from shops and enemy kits until the stat hooks (D4) exist; do not invent a
- * new effect to make them work. Their library definitions stay so a saved
- * inventory that already holds one still resolves.
+ * The consumable library holds minor, normal and greater healing potions and
+ * nothing else. Every grant surface (enemy loot, friendship rewards, debug
+ * presets, shops including the parked maps', loot caches) may only name an id
+ * the library has, so no surface hands out an item that no longer exists.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -16,15 +12,11 @@ import { EnemiesByMap } from '../../Enemy/enemy.library';
 import { characterPresets, levelLadderPresets } from '../../Character/presets';
 import { listRegisteredMapEventPools } from '../../World/MapEvents/resolve-map-event';
 import { registerMapEventContent } from '../../World/MapEvents/content';
-import { getConsumableById, UNOBTAINABLE_CONSUMABLE_IDS } from '../consumable.library';
+import { consumableLibrary, getConsumableById } from '../consumable.library';
 import { rollCacheReward, type CacheLootTier } from '../cache-reward';
 
-const NOOP_CONSUMABLES = [
-    'focus-vial', 'hunters-elixir', 'heart-draught', 'berserker-brew', 'quicksilver-vial',
-    'war-horn-draught', 'philosopher-tea', 'void-essence', 'whetstone-oil',
-    'resonance-crystal', 'greater-resonance-crystal',
-] as const;
-const NOOP = new Set<string>(NOOP_CONSUMABLES);
+const POTIONS = ['healing-potion', 'minor-healing-potion', 'greater-healing-potion'];
+const isPotion = (id: string): boolean => POTIONS.includes(id);
 
 /** Every enemy on every map, deduplicated by id. */
 function allEnemies() {
@@ -46,46 +38,49 @@ function allShopWareIds(): string[] {
     return out;
 }
 
-describe('Tier 0 item 2 — the no-op consumables are unobtainable', () => {
-    it('the library\'s exported set names exactly these eleven', () => {
-        expect([...UNOBTAINABLE_CONSUMABLE_IDS].sort()).toEqual([...NOOP_CONSUMABLES].sort());
+describe('R5 — the consumable library is the healing potions', () => {
+    it('holds exactly minor, normal and greater healing potions', () => {
+        expect(consumableLibrary.map(c => c.id).sort()).toEqual([...POTIONS].sort());
     });
 
-    it('the definitions still resolve (old saves keep working)', () => {
-        for (const id of NOOP_CONSUMABLES) expect(getConsumableById(id), id).toBeDefined();
+    it('every potion heals and says VITAE, not HP', () => {
+        for (const c of consumableLibrary) {
+            expect(c.healAmount, c.id).toBeGreaterThan(0);
+            expect(c.effectId, c.id).toBeUndefined();
+            expect(c.description, c.id).toMatch(/VITAE/);
+            expect(c.description, c.id).not.toMatch(/\bHP\b/);
+        }
     });
 
-    it('no enemy loot table drops one', () => {
+    it('no enemy loot table drops anything else', () => {
         const hits = allEnemies().flatMap(e => (e.loot ?? [])
-            .filter(entry => entry.item && NOOP.has(entry.item.id))
+            .filter(entry => entry.item && entry.item.category === 'consumable' && !isPotion(entry.item.id))
             .map(entry => `${e.id}: ${entry.item!.id}`));
         expect(hits).toEqual([]);
     });
 
-    it('no friendship reward grants one', () => {
+    it('no friendship reward grants anything else', () => {
         const hits = allEnemies().flatMap(e => (e.friendshipReward?.items ?? [])
-            .filter(it => NOOP.has(it.id))
+            .filter(it => it.category === 'consumable' && !isPotion(it.id))
             .map(it => `${e.id}: ${it.id}`));
         expect(hits).toEqual([]);
     });
 
-    it('no preset starts with one', () => {
+    it('no preset starts with anything else', () => {
         const hits = [...characterPresets, ...levelLadderPresets].flatMap(p => p.consumables
-            .filter(c => NOOP.has(c.id))
+            .filter(c => !isPotion(c.id))
             .map(c => `${p.id}: ${c.id}`));
         expect(hits).toEqual([]);
     });
 
-    it('no shop sells one', () => {
+    it('no shop sells a consumable the library lacks', () => {
         const wares = allShopWareIds();
         expect(wares.length).toBeGreaterThan(0); // the shops are actually being read
-        expect(wares.filter(id => NOOP.has(id))).toEqual([]);
+        const consumableWares = wares.filter(id => !id.startsWith('relic-'));
+        expect(consumableWares.filter(id => !getConsumableById(id))).toEqual([]);
     });
 
-    it('no loot cache rolls one', () => {
-        // adjust-equipment pass 20: rollCacheReward drew uniformly over the
-        // whole library, so half of every Reliquary / loot-cache item offer
-        // was inert after Tier 0 item 2 closed the other grant surfaces.
+    it('a loot cache only rolls potions', () => {
         const tiers: CacheLootTier[] = ['modest', 'rich'];
         const hits: string[] = [];
         let rolled = 0;
@@ -93,7 +88,7 @@ describe('Tier 0 item 2 — the no-op consumables are unobtainable', () => {
             for (let seed = 1; seed <= 500; seed++) {
                 for (const item of rollCacheReward({ playerLevel: 3, seed, tier })) {
                     rolled++;
-                    if (NOOP.has(item.id)) hits.push(`${tier}/${seed}: ${item.id}`);
+                    if (!isPotion(item.id)) hits.push(`${tier}/${seed}: ${item.id}`);
                 }
             }
         }

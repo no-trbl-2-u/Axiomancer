@@ -163,8 +163,8 @@ describe('combat depth epic — H6 retired: no threat-clock enchant or curse', (
         it(`the old cadence round (resolvedRound 5) applies nothing on ${label}`, () => {
             const s = stateAtRound(4); // resolvedRound = 5, the retired cadence
             const res = resolveThreatPhase(s, () => roll);
-            expect(res.state.enemy.effects.some(e => e.effectId === 'buff_all_stats_up')).toBe(false);
-            expect(res.state.player.effects.some(e => e.effectId === 'debuff_curse')).toBe(false);
+            expect(res.state.enemy.effects.some(e => e.effectId === 'fixture_roll_up')).toBe(false);
+            expect(res.state.player.effects.some(e => e.effectId === 'fixture_curse')).toBe(false);
             expect(res.events.some(e => (e as { kind: string }).kind === 'threat-clock-enchant')).toBe(false);
         });
     }

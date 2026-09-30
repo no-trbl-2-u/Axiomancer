@@ -293,7 +293,8 @@ describe('selectCharacterViewModel: effects', () => {
     it('preserves effect ordering from player.effects', () => {
         const base = createCharacter({ name: 'Hero', level: 1, baseStats: { heart: 1, body: 1, mind: 1 } });
         let effects = base.effects;
-        const usedBuffs = effectsLibrary.buffs.slice(0, 3);
+        // R5 left one library buff; debuffs fill out the three.
+        const usedBuffs = [...effectsLibrary.buffs, ...effectsLibrary.debuffs].slice(0, 3);
         usedBuffs.forEach((buff, round) => {
             ({ activeEffects: effects } = applyEffect(effects, buff, round + 1));
         });

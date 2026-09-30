@@ -59,7 +59,7 @@ describe('getHealthPercentage', () => {
   });
 });
 
-const BUFF_ID = 'buff_accuracy_up'; // spec 32 v3 re-pin: tier1_* card effects retired; support-tagged buff
+const BUFF_ID = 'fixture_roll_up'; // R5 re-pin: the library's support buffs were deleted with the consumables
 const DEBUFF_ID = 'debuff_poison'; // spec 32 v3 re-pin: surviving affliction debuff
 const makeActiveBuff = (overrides: Partial<ActiveEffect> = {}): ActiveEffect => ({
   effectId: BUFF_ID, remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 1, ...overrides,
@@ -221,26 +221,24 @@ describe('getActiveRollModifier', () => {
     expect(getActiveRollModifier(makePlayer())).toBe(0);
   });
 
-  it('returns flat rollModifier for an effect with a flat modifier (debuff_curse: -2)', () => {
-    const curse: ActiveEffect = { effectId: 'debuff_curse', remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 2 };
+  it('returns flat rollModifier for an effect with a flat modifier (fixture_curse: -2)', () => {
+    const curse: ActiveEffect = { effectId: 'fixture_curse', remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 2 };
     const p = { ...makePlayer(), effects: [curse] };
     expect(getActiveRollModifier(p)).toBe(-2);
   });
 
-  it('a flat rollModifier is intensity-independent (debuff_curse: -2 at intensity 3)', () => {
+  it('a flat rollModifier is intensity-independent (fixture_curse: -2 at intensity 3)', () => {
     // spec 32 v3 re-pin: no library effect carries rollModifierPerIntensity any
     // more — flat modifiers must NOT scale with intensity.
-    const curse: ActiveEffect = { effectId: 'debuff_curse', remainingDuration: 2, intensity: 3, appliedAt: 0, tier: 2 };
+    const curse: ActiveEffect = { effectId: 'fixture_curse', remainingDuration: 2, intensity: 3, appliedAt: 0, tier: 2 };
     const p = { ...makePlayer(), effects: [curse] };
     expect(getActiveRollModifier(p)).toBe(-2);
   });
 
   it('sums flat rollModifier contributions across multiple effects', () => {
-    // debuff_curse rollModifier -2 + buff_status_chance_up rollModifier +3 = +1
-    // (buff_accuracy_up was re-themed off rollModifier onto advantageModifier;
-    // buff_status_chance_up still carries the +3 flat roll payload.)
-    const curse: ActiveEffect = { effectId: 'debuff_curse', remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 2 };
-    const statusChance: ActiveEffect = { effectId: 'buff_status_chance_up', remainingDuration: 2, intensity: 1, appliedAt: 0, tier: 2 };
+    // fixture_curse rollModifier -2 + fixture_roll_up rollModifier +3 = +1
+    const curse: ActiveEffect = { effectId: 'fixture_curse', remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 2 };
+    const statusChance: ActiveEffect = { effectId: 'fixture_roll_up', remainingDuration: 2, intensity: 1, appliedAt: 0, tier: 2 };
     const p = { ...makePlayer(), effects: [curse, statusChance] };
     expect(getActiveRollModifier(p)).toBe(1);
   });
