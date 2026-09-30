@@ -110,7 +110,7 @@ A type is a lifecycle rule. Five types:
 | **Skill** | Play, then discard |
 | **Spell** | Play, then discard |
 | **Global** | Stays in play and affects the combat (either side; there is no separate on-you / on-foe type). FREE: in play for 3 turns. PAID: in play for the rest of combat. No cap, but each Global in play must be unique (T: an experiment, may change). Removed only by a card effect |
-| **Curse** | A dead card that holds a hand slot until played. No extra discard cost and no "While in your hand:" effect for now; later Curses may add them. The first Curse (D71) is below |
+| **Curse** | A dead card that holds a hand slot until played. It cannot be scrapped. No extra discard cost and no "While in your hand:" effect for now; later Curses may add them. The first Curse (D71) is below |
 
 **EXILE** is a shared keyword on a card line: the card does not go to the
 discard pile and is gone for the rest of combat. It is the word for every
@@ -138,9 +138,9 @@ not set. Further Curses are defined in card sessions.
 
 **SACRIFICE** (lose n VITAE, unscaled) is now carried by a real card, so
 it is a live keyword candidate rather than only the trial's codename.
-Still open: whether SACRIFICE can take the player below 1 VITAE; whether
-the scrap action (discard for Conviction) should cost extra on a Curse,
-since a free scrap would clear one at no cost.
+A Curse cannot be scrapped (the discard-for-Conviction action refuses
+it, loudly, per the UI doctrine); playing it is the only way out. Still
+open: whether SACRIFICE can take the player below 1 VITAE.
 
 A trial lane session (self-sacrifice, codename SACRIFICE) paused at its
 first stage; the trial skill lives outside the repo until T adopts it.
