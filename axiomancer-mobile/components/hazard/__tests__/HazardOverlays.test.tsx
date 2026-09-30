@@ -39,7 +39,7 @@ const mockCard: HazardCardVM = {
     dieAvailable: true,
     poweredByDieId: null,
     applied: false,
-    salvageLabel: null, powerColors: ['red'], choose: false, chosenKey: null, vowBonus: null,
+    salvageLabel: null,
 };
 
 const mockDice: HazardDieVM[] = [

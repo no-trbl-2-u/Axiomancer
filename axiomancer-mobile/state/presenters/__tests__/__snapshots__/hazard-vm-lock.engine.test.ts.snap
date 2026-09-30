@@ -1,38 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`hazard view-model lock-in new surface copy is frozen (enchantments / vow / choose): expansion-copy 1`] = `
-{
-  "choose": {
-    "choose": true,
-    "chosenKey": "escape",
-    "powered": {
-      "escape": 15,
-      "force": 7,
-    },
-    "vowBonus": {
-      "escape": 7,
-      "force": 7,
-    },
-  },
-  "enchantments": [
-    {
-      "id": "auraForce",
-      "label": "+2 FORCE / card",
-    },
-    {
-      "id": "auraEscape",
-      "label": "+1 ESCAPE / card",
-    },
-    {
-      "id": "surge",
-      "label": "+2 to surge numbers",
-    },
-  ],
-  "goldVowNote": "VOW PRIMED — next gold die +7/+7",
-}
-`;
-
-exports[`hazard view-model lock-in round-play VM contract is frozen (with every new surface populated): round-play-shape 1`] = `
+exports[`hazard view-model lock-in round-play VM contract is frozen (a staged, powered card on the board): round-play-shape 1`] = `
 {
   "active": "boolean",
   "boardHeadline": "string",
@@ -52,20 +20,10 @@ exports[`hazard view-model lock-in round-play VM contract is frozen (with every 
   ],
   "diceReady": "number",
   "discardCount": "number",
-  "enchantments": [
-    {
-      "id": "string",
-      "label": "string",
-    },
-  ],
-  "foretellPending": "null",
-  "goldVowNote": "string",
   "hand": [
     {
       "applied": "boolean",
       "cardId": "string",
-      "choose": "boolean",
-      "chosenKey": "null",
       "dead": "boolean",
       "dieAvailable": "boolean",
       "flavor": "string",
@@ -73,7 +31,7 @@ exports[`hazard view-model lock-in round-play VM contract is frozen (with every 
         "escape": "number",
         "force": "number",
       },
-      "freeEffectLabel": "null",
+      "freeEffectLabel": "string",
       "keywords": [
         {
           "desc": "string",
@@ -83,20 +41,16 @@ exports[`hazard view-model lock-in round-play VM contract is frozen (with every 
       ],
       "kind": "string",
       "name": "string",
-      "powerColors": [
-        "string",
-      ],
       "powered": {
         "escape": "number",
         "force": "number",
       },
       "poweredByDieId": "null",
-      "poweredEffectLabel": "null",
+      "poweredEffectLabel": "string",
       "rarity": "string",
       "salvageLabel": "string",
       "uid": "string",
       "utility": "boolean",
-      "vowBonus": "null",
     },
   ],
   "hazardId": "string",
@@ -122,8 +76,6 @@ exports[`hazard view-model lock-in round-play VM contract is frozen (with every 
     {
       "applied": "boolean",
       "cardId": "string",
-      "choose": "boolean",
-      "chosenKey": "string",
       "dead": "boolean",
       "dieAvailable": "boolean",
       "flavor": "string",
@@ -131,7 +83,7 @@ exports[`hazard view-model lock-in round-play VM contract is frozen (with every 
         "escape": "number",
         "force": "number",
       },
-      "freeEffectLabel": "null",
+      "freeEffectLabel": "string",
       "keywords": [
         {
           "desc": "string",
@@ -141,23 +93,16 @@ exports[`hazard view-model lock-in round-play VM contract is frozen (with every 
       ],
       "kind": "string",
       "name": "string",
-      "powerColors": [
-        "string",
-      ],
       "powered": {
         "escape": "number",
         "force": "number",
       },
       "poweredByDieId": "string",
-      "poweredEffectLabel": "null",
+      "poweredEffectLabel": "string",
       "rarity": "string",
       "salvageLabel": "string",
       "uid": "string",
       "utility": "boolean",
-      "vowBonus": {
-        "escape": "number",
-        "force": "number",
-      },
     },
   ],
   "resolveEnabled": "boolean",
@@ -196,15 +141,10 @@ exports[`hazard view-model lock-in route-select VM contract is frozen: route-sel
   "dice": [],
   "diceReady": "number",
   "discardCount": "number",
-  "enchantments": [],
-  "foretellPending": "null",
-  "goldVowNote": "null",
   "hand": [
     {
       "applied": "boolean",
       "cardId": "string",
-      "choose": "boolean",
-      "chosenKey": "null",
       "dead": "boolean",
       "dieAvailable": "boolean",
       "flavor": "string",
@@ -212,7 +152,7 @@ exports[`hazard view-model lock-in route-select VM contract is frozen: route-sel
         "escape": "number",
         "force": "number",
       },
-      "freeEffectLabel": "null",
+      "freeEffectLabel": "string",
       "keywords": [
         {
           "desc": "string",
@@ -222,20 +162,16 @@ exports[`hazard view-model lock-in route-select VM contract is frozen: route-sel
       ],
       "kind": "string",
       "name": "string",
-      "powerColors": [
-        "string",
-      ],
       "powered": {
         "escape": "number",
         "force": "number",
       },
       "poweredByDieId": "null",
-      "poweredEffectLabel": "null",
+      "poweredEffectLabel": "string",
       "rarity": "string",
       "salvageLabel": "string",
       "uid": "string",
       "utility": "boolean",
-      "vowBonus": "null",
     },
   ],
   "hazardId": "string",

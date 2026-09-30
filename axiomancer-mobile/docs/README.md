@@ -32,7 +32,7 @@ upgrade guides were removed (git history preserves them).
 
 ## Hazard minigame documentation
 
-The hazard docs live in `axiomancer-mechanics/docs/` (`hazard-balance-recommendations.md`, `hazard-card-expansion-2026-06-11-spec.md`, `hazard-playtest-2026-06-10-spec.md`); the mobile copies and `hazard-v2-vs-mechanics-divergence.md` were archived 2026-09-25 to `plan/archive/2026-09-25-trim-t1/`.
+The hazard docs live in `axiomancer-mechanics/docs/` (`encounters/hazard.md`, `hazard-minigame-api.md`, `hazard-playtest-2026-06-10-spec.md`); the balance-recommendations and card-expansion docs were archived 2026-09-30 to `plan/archive/2026-09-30-revamp-r6b/`; the mobile copies and `hazard-v2-vs-mechanics-divergence.md` were archived 2026-09-25 to `plan/archive/2026-09-25-trim-t1/`.
 
 ## Design and UX documentation
 

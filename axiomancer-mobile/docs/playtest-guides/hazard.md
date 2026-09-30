@@ -22,18 +22,15 @@ A hazard node starts a hazard session (`state/actions.ts` → `beginHazardAction
 | `hazard-dice-roll` | Dice-roll overlay (auto-finishes → `finishHazardRolling`) |
 | `hazard-board` | The board |
 | `hazard-meters` | Meters strip |
-| `hazard-enchantments` | Active enchantments |
 | `hazard-deck-counts` | Draw/discard counts |
 | `hazard-dice-tray` / `hazard-die-<id>` | Dice |
 | `hazard-hand` / `hazard-hand-<uid>` | Hand; tap to stage |
 | `hazard-play-area` / `hazard-staged-<uid>` | Stage area and the staged card |
-| `hazard-choose-<uid>` / `hazard-choose-<uid>-<key>` | Choice picker on choice cards |
 | `hazard-apply-<uid>` | APPLY the powered card |
 | `hazard-applied-<uid>` | A card already applied this round |
 | `hazard-trash` | Discard target |
 | `hazard-play-button` | PLAY — resolve the round |
 | `hazard-resolve-flash` | Resolve flash overlay |
-| `hazard-foretell` / `hazard-foretell-confirm` | Foretell ordering overlay |
 | `hazard-card-detail` | Card detail modal |
 | `hazard-ledger` | Ledger |
 | `hazard-outcome` / `hazard-outcome-continue` | Outcome overlay; CONTINUE |
@@ -49,7 +46,7 @@ A hazard node starts a hazard session (`state/actions.ts` → `beginHazardAction
 2. `hazard-route-select` → `hazard-route-safe` (safest happy path).
 3. Wait for `hazard-dice-roll` to finish and `hazard-board` to appear.
 4. Tap `hazard-hand-<uid>` → `hazard-staged-<uid>`; drag/tap a `hazard-die-<id>` onto it; `hazard-apply-<uid>`. If `hazard-tutorial` is up, follow it or `hazard-tutorial-skip`.
-5. `hazard-play-button`; wait through `hazard-resolve-flash`. Answer `hazard-foretell-confirm` if a foretell appears.
+5. `hazard-play-button`; wait through `hazard-resolve-flash`.
 6. Repeat 4–5 until `hazard-outcome`; `hazard-outcome-continue`.
 7. `hazard-rewards`: tap `hazard-offer-<cardId>` → `hazard-preview-confirm` → `hazard-rewards-confirm` (or `hazard-rewards-skip`). You return to the map.
 
@@ -75,6 +72,6 @@ Record: hazard id (intro title), route, round number, meters (`hazard-meters` te
 ## 7. Read the log
 
 `__AXM_LOG__.tail(50, { domains: ['action', 'minigame', 'game'] })` (debug level for `action`):
-- `action/beginHazard`, `action/selectHazardRoute`, `action/finishHazardRolling`, `action/stageHazardCard`, `action/powerHazardCard`, `action/applyHazardCard`, `action/resolveHazardRound`, `action/continueHazardAfterResolve`, `action/confirmHazardForetell`, `action/acknowledgeHazardOutcome`, `action/claimHazardRewards`, `action/completeHazardTutorial`.
+- `action/beginHazard`, `action/selectHazardRoute`, `action/finishHazardRolling`, `action/stageHazardCard`, `action/powerHazardCard`, `action/applyHazardCard`, `action/resolveHazardRound`, `action/continueHazardAfterResolve`, `action/acknowledgeHazardOutcome`, `action/claimHazardRewards`, `action/completeHazardTutorial`.
 - `nav/route-changed {pathname:'/hazard'}` then back to `/exploration`.
 - `game/world:processed` when the node is consumed.

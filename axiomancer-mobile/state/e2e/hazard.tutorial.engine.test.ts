@@ -58,12 +58,12 @@ describe('the pinned tutorial session', () => {
         expect(store.getState().hazard.tutorial).toBe(true);
 
         // The opening hand: every card's colour matches a die once cast.
-        expect(s.hand.map((h) => h.cardId)).toEqual(['ironwill', 'footing', 'footing', 'refrain', 'spite']);
+        expect(s.hand.map((h) => h.cardId)).toEqual(['haul', 'windread', 'leap', 'grip', 'footing']);
 
         actions.selectHazardRoute('safe');
         actions.finishHazardRolling();
         const diceKinds = session(store).dice.map((d) => d.kind);
-        expect(diceKinds).toEqual(['purple', 'red', 'purple', 'red']);
+        expect(diceKinds).toEqual(['red', 'purple', 'blue', 'red']);
         expect(diceKinds).not.toContain('hex');
     });
 });
@@ -80,7 +80,7 @@ describe('the step script', () => {
         // 1: stage
         expect(HAZARD_TUTORIAL_STEPS[stepIndex(store)].id).toBe('stage');
         actions.finishHazardRolling();
-        const first = session(store).hand[0]; // ironwill (red)
+        const first = session(store).hand[0]; // haul (red)
         actions.stageHazardCard(first.uid);
 
         // 2: power

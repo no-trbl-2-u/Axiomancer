@@ -117,15 +117,6 @@ export function RewardsOverlay({
                     {rewards.reserveNote !== null && (
                         <Text style={styles.reserveNote}>⟜ {rewards.reserveNote}</Text>
                     )}
-                    {rewards.mendNote !== null && (
-                        <Text style={styles.reserveNote}>⟜ {rewards.mendNote}</Text>
-                    )}
-                    {rewards.bountyNote !== null && (
-                        <Text style={styles.reserveNote}>⟜ {rewards.bountyNote}</Text>
-                    )}
-                    {rewards.sacrificeNote !== null && (
-                        <Text style={styles.penaltyNote}>{rewards.sacrificeNote}</Text>
-                    )}
                     {rewards.consequences.length > 0 ? (
                         <>
                             <Text style={[styles.ledgerLabel, { color: AXM.blood, marginTop: rewards.rewards.length ? 12 : 0 }]}>

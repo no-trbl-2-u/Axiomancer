@@ -1,7 +1,7 @@
 /**
- * Dev-only hazard deck controls. The named presets give the Kid deterministic
- * strategy decks: starter baseline, early/late straightforward, early/late
- * enchantment, and early/late utility. The randomizer remains as a chaos pass.
+ * Dev-only hazard deck controls. The named presets give deterministic test
+ * decks from the core cards: starter baseline, straightforward (number cards)
+ * and utility. The randomizer remains as a chaos pass.
  * Renders null outside dev builds.
  */
 
@@ -36,7 +36,7 @@ export function DebugHazardDeckRandomize() {
     const status = lastPreset
         ? `${lastPreset.label}: ${lastPreset.cardIds.length} acquired cards`
         : lastGrant === null
-          ? 'choose a preset or random acquired cards from the full pool'
+          ? 'choose a preset or random acquired cards from the core deck'
           : `granted: ${lastGrant.join(', ')}`;
 
     return (
@@ -50,7 +50,7 @@ export function DebugHazardDeckRandomize() {
                     style={styles.button}
                     onPress={onRandomize}
                     accessibilityRole="button"
-                    accessibilityLabel="Randomize the hazard deck from the full card pool"
+                    accessibilityLabel="Randomize the hazard deck from the core cards"
                     testID="debug-hazard-deck-randomize"
                 >
                     <Text style={styles.buttonLabel}>SHUFFLE FATE</Text>

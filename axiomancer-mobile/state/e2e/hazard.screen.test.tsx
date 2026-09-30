@@ -133,14 +133,14 @@ describe('hazard screen — round play board', () => {
         expect(screen.getByLabelText(/Trash bin/)).toBeTruthy();
         act(() => {
             rigHand(store, [
-                { uid: 'h1', cardId: 'steps' },
+                { uid: 'h1', cardId: 'grip' },
                 { uid: 'h2', cardId: 'scram' },
             ]);
             actions.discardHazardCard('h1'); // salvage: +1 FORCE this round
         });
         const session = store.getState().hazard.session!;
         expect(session.hand.map((h) => h.uid)).toEqual(['h2']);
-        expect(session.discardPile).toContain('steps');
+        expect(session.discardPile).toContain('grip');
         expect(session.progressBase.force).toBe(1);
         expect(screen.getByText(/DISCARD 1/)).toBeTruthy();
     });

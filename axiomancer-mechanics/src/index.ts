@@ -252,16 +252,16 @@ export {
 // See `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/hazard-v2-vs-mechanics-divergence.md` (archived 2026-09-25).
 export {
     HAZARD_TUNING, HAZARD_KEYWORDS, HAZARD_DECK, HAZARD_CRACK_CARD,
-    HAZARD_REWARD_CARDS, getHazardCardDef, HAZARD_REWARDS, HAZARD_CONSEQUENCES,
+    getHazardCardDef, HAZARD_REWARDS, HAZARD_CONSEQUENCES,
     HAZARD_VITAE_REWARD, HAZARD_SHILLINGS_REWARD, HAZARD_RISK_SHILLINGS_REWARD,
     HAZARD_MINHP_LOSS, HAZARD_MAXHP_SCAR, HAZARD_LIBRARY, getHazardDef,
     HAZARD_CARD_FLAG_PREFIX, hazardStarterBag, decodeAcquiredCards,
-    hazardDeckBag, appendAcquiredCard, hazardCardPowerColors,
+    hazardDeckBag, appendAcquiredCard,
     hazardProjectedProgress, dieCanPowerCard, createHazardSession,
     selectHazardRoute, finishHazardRolling, stageHazardCard, unstageHazardCard,
-    powerHazardCard, chooseHazardCardKey, applyHazardCard, discardHazardCard,
+    powerHazardCard, applyHazardCard, discardHazardCard,
     resolveHazardRound, continueHazardAfterResolve,
-    acknowledgeHazardOutcome, claimHazardRewards, confirmHazardForetell,
+    acknowledgeHazardOutcome, claimHazardRewards,
 } from './World/Hazard';
 export type {
     HazardColor, HazardDieKind, HazardProgressKey, HazardCardDef,

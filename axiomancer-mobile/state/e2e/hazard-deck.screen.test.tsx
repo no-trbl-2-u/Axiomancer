@@ -49,16 +49,16 @@ describe('hazard deck screen — library', () => {
 
     it('surfaces acquired cards with a copy pip and the colour distribution', () => {
         const { store } = mount();
-        rigFlags(store, ['r_grip', 'r_grip']);
-        expect(screen.getByTestId('hazard-deck-card-r_grip')).toBeTruthy();
+        rigFlags(store, ['grip', 'grip']);
+        expect(screen.getByTestId('hazard-deck-card-grip')).toBeTruthy();
         // ACQUIRED tally reflects the two reward cards
         expect(screen.getByText('ACQUIRED')).toBeTruthy();
     });
 
     it('tapping a card opens the detail overlay', () => {
         const { store } = mount();
-        rigFlags(store, ['r_grip']);
-        fireEvent.press(screen.getByTestId('hazard-deck-card-r_grip'));
+        rigFlags(store, ['grip']);
+        fireEvent.press(screen.getByTestId('hazard-deck-card-grip'));
         expect(screen.getByTestId('hazard-card-detail')).toBeTruthy();
     });
 
@@ -79,18 +79,18 @@ describe('hazard deck screen — library', () => {
 describe('hazard deck screen — remove-card grid', () => {
     it('opens the grid and shows acquired cards as cuttable', () => {
         const { store } = mount();
-        rigFlags(store, ['r_grip']);
+        rigFlags(store, ['grip']);
         fireEvent.press(screen.getByTestId('hazard-deck-open-remove'));
         expect(screen.getByTestId('hazard-remove-grid')).toBeTruthy();
-        expect(screen.getByTestId('hazard-remove-tile-r_grip')).toBeTruthy();
+        expect(screen.getByTestId('hazard-remove-tile-grip')).toBeTruthy();
     });
 
     it('confirming a removal surfaces the blocked notice, NOT a mutation', () => {
         const { store } = mount();
-        rigFlags(store, ['r_grip']);
+        rigFlags(store, ['grip']);
         const before = store.getState().flags;
         fireEvent.press(screen.getByTestId('hazard-deck-open-remove'));
-        fireEvent.press(screen.getByTestId('hazard-remove-tile-r_grip'));
+        fireEvent.press(screen.getByTestId('hazard-remove-tile-grip'));
         fireEvent.press(screen.getByTestId('hazard-remove-confirm'));
         // blocked banner shows; save is untouched
         expect(screen.getByTestId('hazard-remove-blocked')).toBeTruthy();

@@ -51,9 +51,9 @@ describe('S7-hazard-C04 — hazard deck stat key', () => {
     it('carries the key into the card detail overlay', () => {
         const { store } = mount();
         act(() => {
-            store.setState({ flags: appendAcquiredCard([], 'r_grip') } as never);
+            store.setState({ flags: appendAcquiredCard([], 'grip') } as never);
         });
-        fireEvent.press(screen.getByTestId('hazard-deck-card-r_grip'));
+        fireEvent.press(screen.getByTestId('hazard-deck-card-grip'));
         const detail = screen.getByTestId('hazard-card-detail');
         const key = within(detail).getByTestId('hazard-stat-key');
         expect(within(key).getByText('FORCE')).toBeTruthy();

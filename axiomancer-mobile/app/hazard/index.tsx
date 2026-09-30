@@ -19,7 +19,6 @@ import { HazardDie } from '@/components/hazard/HazardDie';
 import {
     CardDetailOverlay,
     DiceRollOverlay,
-    ForetellOverlay,
     OutcomeOverlay,
     ResolveFlashOverlay,
 } from '@/components/hazard/HazardOverlays';
@@ -130,7 +129,6 @@ export default function HazardScreen() {
                     onPower={(uid, dieId) => actions.powerHazardCard(uid, dieId)}
                     onApply={(uid) => actions.applyHazardCard(uid)}
                     onDiscard={(uid) => actions.discardHazardCard(uid)}
-                    onChoose={(uid, key) => actions.chooseHazardCardKey(uid, key)}
                     onResolve={() => actions.resolveHazardRound()}
                     onInspect={setDetailCard}
                 />
@@ -166,13 +164,6 @@ export default function HazardScreen() {
                 <ResolveFlashOverlay
                     flash={vm.resolveFlash}
                     onDone={() => actions.continueHazardAfterResolve()}
-                />
-            )}
-
-            {vm.phase === 'foretell-pending' && vm.foretellPending !== null && (
-                <ForetellOverlay
-                    foretell={vm.foretellPending}
-                    onConfirm={(orderedIds) => actions.confirmHazardForetell(orderedIds)}
                 />
             )}
 

@@ -47,7 +47,7 @@ const mockViewModel: HazardViewModel = {
             dieAvailable: true,
             poweredByDieId: null,
             applied: false,
-            salvageLabel: null, powerColors: ['red'], choose: false, chosenKey: null, vowBonus: null,
+            salvageLabel: null,
         },
         {
             uid: 'hand-2',
@@ -66,7 +66,7 @@ const mockViewModel: HazardViewModel = {
             dieAvailable: true,
             poweredByDieId: null,
             applied: false,
-            salvageLabel: null, powerColors: ['red'], choose: false, chosenKey: null, vowBonus: null,
+            salvageLabel: null,
         },
     ],
     play: [],
@@ -85,10 +85,7 @@ const mockViewModel: HazardViewModel = {
     meters: [],
     meterDetail: null,
     momentumNote: null,
-    enchantments: [],
-    goldVowNote: null,
     rewards: null,
-    foretellPending: null,
 };
 
 describe('RouteSelect', () => {

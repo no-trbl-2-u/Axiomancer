@@ -52,13 +52,13 @@ describe('hazard deck presenter — starter bag baseline', () => {
 describe('hazard deck presenter — acquired cards', () => {
     it('folds acquired reward cards into counts and marks them removable', () => {
         let flags: string[] = [];
-        flags = appendAcquiredCard(flags, 'r_grip');
-        flags = appendAcquiredCard(flags, 'r_grip');
+        flags = appendAcquiredCard(flags, 'grip');
+        flags = appendAcquiredCard(flags, 'grip');
         const vm = vmOf(flags);
 
         expect(vm.acquiredCards).toBe(2);
         expect(vm.totalCards).toBe(hazardStarterBag().length + 2);
-        const grip = vm.entries.find((e) => e.cardId === 'r_grip');
+        const grip = vm.entries.find((e) => e.cardId === 'grip');
         expect(grip).toBeTruthy();
         expect(grip!.acquiredCount).toBe(2);
         expect(grip!.removable).toBe(true);
@@ -77,7 +77,7 @@ describe('hazard deck presenter — acquired cards', () => {
 
     it('keyword tally weights by copy count and sorts by frequency', () => {
         let flags: string[] = [];
-        flags = appendAcquiredCard(flags, 'r_grip');
+        flags = appendAcquiredCard(flags, 'grip');
         const vm = vmOf(flags);
         // tally is descending by count
         for (let i = 1; i < vm.keywordTally.length; i++) {

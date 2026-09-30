@@ -7,8 +7,7 @@
 > - [`docs/hazard-minigame-tdd.md`](./hazard-minigame-tdd.md) — Technical architecture, types, state machine, and integration points
 > - [`docs/hazard-minigame-bdd.md`](./hazard-minigame-bdd.md) — Behavior-driven test scenarios (maps to hermetic e2e cases)
 > - [`docs/hazard-minigame-api.md`](./hazard-minigame-api.md) — Consumer/export guide for mobile and other hosts
-> - [`docs/hazard-card-expansion-2026-06-11-spec.md`](./hazard-card-expansion-2026-06-11-spec.md) — Expanded card roster and advanced keyword rules ported from mobile
-> - [`docs/hazard-balance-recommendations.md`](./hazard-balance-recommendations.md) — Tuning evidence and current balance bands
+> - [`docs/encounters/hazard.md`](./encounters/hazard.md) — Current rules, deck, and hazard library
 > - [`docs/hazard-playtest-2026-06-10-spec.md`](./hazard-playtest-2026-06-10-spec.md) — Playtest findings from the mobile/prototype pass
 
 Date: 2026-06-10

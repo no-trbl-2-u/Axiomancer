@@ -175,8 +175,9 @@ describe('migrations.engine', () => {
             // v28 (phase R3a): the Act 1 relocation hop chains after it;
             // v29 (phase R3b): the fishing-village / goodwill purge hop after that;
             // v30 (phase R5): the retired-consumable purge hop;
-            // v31 (phase R6a): the hazard token / hex flag hop.
-            expect(GAME_STATE_VERSION).toBe(31);
+            // v31 (phase R6a): the hazard token / hex flag hop;
+            // v32 (phase R6b): the deleted hazard deck card hop.
+            expect(GAME_STATE_VERSION).toBe(32);
             expect(result.version).toBe(GAME_STATE_VERSION);
         });
     });

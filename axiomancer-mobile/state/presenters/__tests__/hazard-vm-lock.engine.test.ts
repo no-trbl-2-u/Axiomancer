@@ -3,12 +3,10 @@
  *
  * The hazard view-model is the entire contract the screen renders. This
  * suite freezes its STRUCTURE (every field + nested element shape) across
- * the route-select and round-play phases, plus the copy of the newer
- * surfaces (enchantments / vow / choose). Any change to the hazard UI/UX
+ * the route-select and round-play phases. Any change to the hazard UI/UX
  * contract — a renamed field, a dropped surface, a new view affordance —
  * trips these snapshots so it is surfaced and consciously re-blessed
- * (`jest -u`) with a note in `axiomancer-mechanics/docs/hazard-card-expansion-2026-06-11-spec.md`,
- * never slipped in silently.
+ * (`jest -u`) with a note in the commit body, never slipped in silently.
  *
  * It locks the SHAPE, not the numbers, so deliberate balance tweaks do not
  * trip it — only contract drift does.
@@ -49,43 +47,16 @@ describe('hazard view-model lock-in', () => {
         expect(shapeOf(vmOf(s))).toMatchSnapshot('route-select-shape');
     });
 
-    it('round-play VM contract is frozen (with every new surface populated)', () => {
+    it('round-play VM contract is frozen (a staged, powered card on the board)', () => {
         const base = finishHazardRolling(selectHazardRoute(createHazardSession(7, BAG, 'cracked-cliff'), 'risk', BAG));
-        // Hand-rig a session that exercises ALL of the expansion surfaces so
-        // their element shapes are part of the locked contract: active
-        // enchantments, a primed gold vow, and a staged CHOOSE card carrying
-        // a vow bonus.
         const rich: HazardSessionState = {
             ...base,
-            modifiers: { auraForce: 2, auraEscape: 1, surgeForce: 2, surgeEscape: 0 },
-            goldVow: { force: 7, escape: 7 },
             dice: [
                 { id: 'dg', kind: 'gold', state: 'spent' },
                 { id: 'dx', kind: 'hex', state: 'available' },
             ],
-            play: [
-                { uid: 'p1', cardId: 'r_twin', dieId: 'dg', applied: false, chosenKey: 'force', vowBonus: { force: 7, escape: 7 } },
-            ],
+            play: [{ uid: 'p1', cardId: 'oath', dieId: 'dg', applied: false }],
         };
         expect(shapeOf(vmOf(rich))).toMatchSnapshot('round-play-shape');
-    });
-
-    it('new surface copy is frozen (enchantments / vow / choose)', () => {
-        const base = finishHazardRolling(selectHazardRoute(createHazardSession(7, BAG, 'cracked-cliff'), 'risk', BAG));
-        const rich: HazardSessionState = {
-            ...base,
-            modifiers: { auraForce: 2, auraEscape: 1, surgeForce: 2, surgeEscape: 0 },
-            goldVow: { force: 7, escape: 7 },
-            play: [
-                { uid: 'p1', cardId: 'r_twin', dieId: 'dg', applied: false, chosenKey: 'escape', vowBonus: { force: 7, escape: 7 } },
-            ],
-            dice: [{ id: 'dg', kind: 'gold', state: 'spent' }],
-        };
-        const vm = vmOf(rich);
-        expect({
-            enchantments: vm.enchantments,
-            goldVowNote: vm.goldVowNote,
-            choose: { choose: vm.play[0].choose, chosenKey: vm.play[0].chosenKey, vowBonus: vm.play[0].vowBonus, powered: vm.play[0].powered },
-        }).toMatchSnapshot('expansion-copy');
     });
 });

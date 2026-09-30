@@ -40,7 +40,7 @@ import { cardVMFromId, type HazardCardVM } from '@/state/presenters/hazard.engin
 
 /** One distinct card in the deck, with how many copies are held and where they came from. */
 export interface HazardDeckEntryVM {
-    /** Engine card id (`steps`, `r_grip`, `crack`, …). */
+    /** Engine card id (`haul`, `grip`, `crack`, …). */
     cardId: string;
     /** Display card view-model (same stock the encounter hand renders). */
     card: HazardCardVM;

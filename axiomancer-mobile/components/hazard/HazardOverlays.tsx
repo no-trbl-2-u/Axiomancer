@@ -23,7 +23,6 @@ import Animated, {
 import type {
     HazardCardVM,
     HazardDieVM,
-    HazardForetellVM,
     HazardResolveFlashVM,
     HazardOutcomeVM,
 } from '@/state/presenters/hazard.engine';
@@ -273,85 +272,6 @@ export function CardDetailOverlay({ card, onClose }: { card: HazardCardVM; onClo
     );
 }
 
-// ---------------------------------------------------------------------------
-// FORETELL / SCOUR overlay — player reviews revealed cards, optionally discards
-// ---------------------------------------------------------------------------
-
-export function ForetellOverlay({
-    foretell,
-    onConfirm,
-}: {
-    foretell: HazardForetellVM;
-    onConfirm: (orderedIds: string[]) => void;
-}) {
-    const AXM = usePalette();
-    const styles = useStyles();
-    const [discarded, setDiscarded] = React.useState<Set<number>>(new Set());
-
-    function toggleDiscard(index: number) {
-        setDiscarded((prev) => {
-            const next = new Set(prev);
-            if (next.has(index)) next.delete(index);
-            else next.add(index);
-            return next;
-        });
-    }
-
-    function handleConfirm() {
-        const kept = foretell.revealed
-            .filter((_, i) => !discarded.has(i))
-            .map((c) => c.cardId);
-        onConfirm(kept);
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
-    }
-
-    return (
-        <Animated.View entering={FadeIn.duration(200)} style={styles.foretellRoot} testID="hazard-foretell">
-            <Text style={styles.foretellTitle}>{foretell.scour ? 'SCOUR' : 'FORETELL'}</Text>
-            <Text style={styles.foretellSub}>
-                {foretell.scour
-                    ? 'Tap cards to permanently discard them — what remains returns to your draw pile.'
-                    : 'These cards are returned to the top of your draw pile.'}
-            </Text>
-            {foretell.drawCount > 0 && (
-                <Text style={[styles.foretellSub, { color: AXM.sulfur }]}>
-                    Then draw {foretell.drawCount} card{foretell.drawCount > 1 ? 's' : ''}.
-                </Text>
-            )}
-            <View style={styles.foretellCards}>
-                {foretell.revealed.map((card, i) => {
-                    const isDiscarded = discarded.has(i);
-                    return (
-                        <Pressable
-                            key={i}
-                            onPress={() => foretell.scour && toggleDiscard(i)}
-                            style={[
-                                styles.foretellCardRow,
-                                isDiscarded && styles.foretellCardDiscarded,
-                            ]}
-                        >
-                            <Text style={[styles.foretellCardName, isDiscarded && { opacity: 0.35 }]}>
-                                {card.name}
-                            </Text>
-                            {isDiscarded && (
-                                <Text style={styles.foretellDiscardTag}>DISCARD</Text>
-                            )}
-                        </Pressable>
-                    );
-                })}
-            </View>
-            <Pressable
-                onPress={handleConfirm}
-                accessibilityRole="button"
-                testID="hazard-foretell-confirm"
-                style={[styles.foretellCta, { borderColor: AXM.sulfur }]}
-            >
-                <Text style={[styles.foretellCtaText, { color: AXM.sulfur }]}>CONFIRM ›</Text>
-            </Pressable>
-        </Animated.View>
-    );
-}
-
 const useStyles = makeStyles((AXM) => ({
     rollRoot: { ...StyleSheet.absoluteFillObject, zIndex: 55, backgroundColor: '#0a0908', alignItems: 'center' },
     rollBadge: { fontFamily: FONTS.sans, fontSize: 14, letterSpacing: 2, color: AXM.bg, paddingHorizontal: 12, paddingVertical: 3, overflow: 'hidden' },
@@ -384,14 +304,4 @@ const useStyles = makeStyles((AXM) => ({
     keywordTag: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 2, color: AXM.bone },
     keywordDesc: { fontFamily: FONTS.serif, fontSize: 14, color: AXM.parchment, lineHeight: 18, marginTop: 3 },
 
-    foretellRoot: { ...StyleSheet.absoluteFillObject, zIndex: 63, backgroundColor: 'rgba(5,4,3,0.97)', padding: 24, justifyContent: 'center' },
-    foretellTitle: { fontFamily: FONTS.gothic, fontSize: 28, letterSpacing: 2, color: AXM.sulfur, textAlign: 'center', marginBottom: 8 },
-    foretellSub: { fontFamily: FONTS.serif, fontSize: 14, color: AXM.bone, textAlign: 'center', lineHeight: 20, marginBottom: 6 },
-    foretellCards: { marginTop: 16, gap: 8 },
-    foretellCardRow: { paddingHorizontal: 16, paddingVertical: 10, backgroundColor: 'rgba(20,18,14,0.9)', borderWidth: 1, borderColor: AXM.ash, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    foretellCardDiscarded: { borderColor: AXM.blood, opacity: 0.6 },
-    foretellCardName: { fontFamily: FONTS.gothic, fontSize: 15, letterSpacing: 1, color: AXM.parchment },
-    foretellDiscardTag: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 2, color: AXM.blood },
-    foretellCta: { marginTop: 28, alignSelf: 'center', paddingHorizontal: 32, paddingVertical: 12, borderWidth: 2, backgroundColor: AXM.bg },
-    foretellCtaText: { fontFamily: FONTS.gothic, fontSize: 17, letterSpacing: 2.5 },
 }));

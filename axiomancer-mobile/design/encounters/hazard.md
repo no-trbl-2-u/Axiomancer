@@ -5,7 +5,6 @@
 >
 > Mechanics rules (engine, card library, thresholds) live in the mechanics repo:
 > - `docs/encounters/hazard.md` — rules source of truth
-> - `docs/encounters/hazard-card-library.md` — full card catalogue (the only copy)
 >
 > Design history:
 > - `design/hazard-minigame-mobile.md` — original UX brief (still canonical for layout intent)
@@ -263,7 +262,6 @@ unstageHazardCard(uid)
 powerHazardCard(uid, dieId)
 applyHazardCard(uid)
 discardHazardCard(uid)         ← salvage to bin
-chooseHazardCardKey(uid, key)  ← CHOOSE mechanic
 selectHazardRoute(route)
 finishHazardRolling()
 resolveHazardRound()
@@ -283,5 +281,4 @@ claimHazardRewards(cardId)     ← null = skip
 
 ## Card library
 
-See `axiomancer-mechanics/docs/encounters/hazard-card-library.md` for the full card catalogue
-(IDs, names, colors, free/surge actions, mechanics, roles, balancing notes).
+See the deck table in `axiomancer-mechanics/docs/encounters/hazard.md` for the card catalogue.

@@ -29,18 +29,10 @@ afterEach(() => {
 });
 
 describe('DebugHazardDeckRandomize: preset controls', () => {
-    it('renders baseline plus six Kid strategy deck preset buttons', () => {
+    it('renders baseline plus the two core-deck preset buttons', () => {
         const tree = render(withProviders(makeStore(), <DebugHazardDeckRandomize />));
 
-        for (const id of [
-            'starter-baseline',
-            'early-straightforward',
-            'late-straightforward',
-            'early-enchantment',
-            'late-enchantment',
-            'early-utility',
-            'late-utility',
-        ]) {
+        for (const id of ['starter-baseline', 'straightforward', 'utility']) {
             expect(tree.queryByTestId(`debug-hazard-deck-preset-${id}`)).not.toBeNull();
         }
     });
@@ -49,16 +41,16 @@ describe('DebugHazardDeckRandomize: preset controls', () => {
         const store = makeStore();
         const tree = render(withProviders(store, <DebugHazardDeckRandomize />));
 
-        fireEvent.press(tree.getByTestId('debug-hazard-deck-preset-early-utility'));
+        fireEvent.press(tree.getByTestId('debug-hazard-deck-preset-utility'));
 
         const acquired = decodeAcquiredCards(store.getState().flags);
         expect(acquired.length).toBeGreaterThan(0);
-        expect(tree.getByText(/Early utility: \d+ acquired cards/i)).toBeTruthy();
+        expect(tree.getByText(/Utility: \d+ acquired cards/i)).toBeTruthy();
     });
 
     it('baseline preset clears acquired hazard cards', () => {
         const store = makeStore();
-        store.setState({ flags: ['hazard-card:r_grip:1'] } as never);
+        store.setState({ flags: ['hazard-card:grip:1'] } as never);
         const tree = render(withProviders(store, <DebugHazardDeckRandomize />));
 
         fireEvent.press(tree.getByTestId('debug-hazard-deck-preset-starter-baseline'));

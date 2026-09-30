@@ -8,7 +8,6 @@ import { describe, expect, it } from 'vitest';
 import {
     acknowledgeHazardOutcome,
     applyHazardCard,
-    chooseHazardCardKey,
     claimHazardRewards,
     continueHazardAfterResolve,
     createHazardSession,
@@ -16,10 +15,8 @@ import {
     dieCanPowerCard,
     discardHazardCard,
     finishHazardRolling,
-    hazardCardPowerColors,
     hazardCardValue,
     hazardProjectedProgress,
-    hazardStagedProgress,
     hazardTierOf,
     powerHazardCard,
     resolveHazardRound,
@@ -33,8 +30,8 @@ import {
     HAZARD_CONSEQUENCES,
     HAZARD_CRACK_CARD,
     HAZARD_DECK,
+    HAZARD_KEYWORDS,
     HAZARD_LIBRARY,
-    HAZARD_REWARD_CARDS,
     HAZARD_REWARDS,
 } from '../hazard.content';
 import { HAZARD_TUNING } from '../hazard.tuning';
@@ -127,7 +124,7 @@ describe('staging and unstaging', () => {
     it('the play area is uncapped — the whole hand can be staged', () => {
         let s = playingSession();
         // rig a 7-card hand of plain cards
-        const hand = Array.from({ length: 7 }, (_, i) => entry(`h${i}`, 'steps'));
+        const hand = Array.from({ length: 7 }, (_, i) => entry(`h${i}`, 'haul'));
         s = rig(s, { hand, play: [] });
         for (const h of hand) s = stageHazardCard(s, h.uid, BAG);
         expect(s.play).toHaveLength(7);
@@ -137,7 +134,7 @@ describe('staging and unstaging', () => {
     it('unstage returns the card and frees its die', () => {
         let s = playingSession();
         s = rig(s, {
-            hand: [entry('h1', 'steps')],
+            hand: [entry('h1', 'haul')],
             play: [],
             dice: [{ id: 'dx', kind: 'red', state: 'available' }],
         });
@@ -164,18 +161,18 @@ describe('powering cards with dice (SURGE)', () => {
     }
 
     it('matching colour powers the card and spends the die', () => {
-        const s = powerHazardCard(poweringSetup('steps', 'red'), 'h1', 'dx', BAG);
+        const s = powerHazardCard(poweringSetup('haul', 'red'), 'h1', 'dx', BAG);
         expect(s.play[0].dieId).toBe('dx');
         expect(s.dice[0].state).toBe('spent');
     });
 
     it('mismatched colour is rejected', () => {
-        const before = poweringSetup('steps', 'blue');
+        const before = poweringSetup('haul', 'blue');
         expect(powerHazardCard(before, 'h1', 'dx', BAG)).toBe(before);
     });
 
     it('hex dice are blocked', () => {
-        const before = poweringSetup('steps', 'hex');
+        const before = poweringSetup('haul', 'hex');
         expect(powerHazardCard(before, 'h1', 'dx', BAG)).toBe(before);
     });
 
@@ -197,7 +194,7 @@ describe('powering cards with dice (SURGE)', () => {
     it('re-powering with a new die frees the old one', () => {
         let s = playingSession();
         s = rig(s, {
-            hand: [entry('h1', 'steps')],
+            hand: [entry('h1', 'haul')],
             play: [],
             dice: [
                 { id: 'd1', kind: 'red', state: 'available' },
@@ -213,9 +210,9 @@ describe('powering cards with dice (SURGE)', () => {
     });
 
     it('card values follow free vs powered rows', () => {
-        const def = getHazardCardDef('steps');
-        expect(hazardCardValue(entry('x', 'steps'))).toEqual({ force: def.f, escape: def.e });
-        expect(hazardCardValue(entry('x', 'steps', 'd1'))).toEqual({ force: def.fp, escape: def.ep });
+        const def = getHazardCardDef('haul');
+        expect(hazardCardValue(entry('x', 'haul'))).toEqual({ force: def.f, escape: def.e });
+        expect(hazardCardValue(entry('x', 'haul', 'd1'))).toEqual({ force: def.fp, escape: def.ep });
     });
 });
 
@@ -223,14 +220,14 @@ describe('utility card effects (fire on APPLY, not on stage/power)', () => {
     it('the wild gold die powers a card of ANY colour', () => {
         let s = playingSession();
         s = rig(s, {
-            hand: [entry('h1', 'steps')],
+            hand: [entry('h1', 'haul')],
             play: [],
             dice: [{ id: 'dg', kind: 'gold', state: 'available' }],
         });
         s = stageHazardCard(s, 'h1', BAG);
         s = powerHazardCard(s, 'h1', 'dg', BAG);
         expect(s.play[0].dieId).toBe('dg');
-        const def = getHazardCardDef('steps');
+        const def = getHazardCardDef('haul');
         expect(hazardCardValue(s.play[0])).toEqual({ force: def.fp, escape: 0 });
     });
 
@@ -255,7 +252,7 @@ describe('utility card effects (fire on APPLY, not on stage/power)', () => {
     it('apply is one-way: re-apply, unstage, power, and discard are all refused', () => {
         let s = playingSession();
         s = rig(s, {
-            hand: [entry('h1', 'steps')],
+            hand: [entry('h1', 'haul')],
             play: [],
             dice: [{ id: 'dr', kind: 'red', state: 'available' }],
         });
@@ -445,7 +442,7 @@ describe('between rounds — the dice do NOT re-cast', () => {
     it('advances the round: same dice pool, PLAYED cards discard, the unplayed hand is KEPT, draw tops up to 5', () => {
         let s = playingSession(5, 'safe');
         const diceBefore = s.dice;
-        s = rig(s, { hand: [entry('h1', 'steps'), entry('h2', 'scram')], play: [] });
+        s = rig(s, { hand: [entry('h1', 'haul'), entry('h2', 'scram')], play: [] });
         s = stageHazardCard(s, 'h1', BAG);
         s = resolveHazardRound(s);
         s = continueHazardAfterResolve(s, BAG);
@@ -453,7 +450,7 @@ describe('between rounds — the dice do NOT re-cast', () => {
         expect(s.round).toBe(2);
         expect(s.dice).toEqual(diceBefore); // identity of the cast preserved
         // played card discarded; the held SCRAMBLE survives the boundary
-        expect(s.discardPile).toEqual(['steps']);
+        expect(s.discardPile).toEqual(['haul']);
         expect(s.hand.map((h) => h.uid)).toContain('h2');
         // drew back up to exactly HAZARD_HAND_SIZE
         expect(s.hand).toHaveLength(HAZARD_HAND_SIZE);
@@ -463,7 +460,7 @@ describe('between rounds — the dice do NOT re-cast', () => {
     it('a draw-inflated hand keeps everything and draws nothing', () => {
         let s = playingSession(5, 'safe');
         const seven = Array.from({ length: 7 }, (_, i) => entry(`k${i}`, 'footing'));
-        s = rig(s, { hand: [...seven, entry('p1', 'steps')], play: [] });
+        s = rig(s, { hand: [...seven, entry('p1', 'haul')], play: [] });
         s = stageHazardCard(s, 'p1', BAG);
         s = resolveHazardRound(s);
         s = continueHazardAfterResolve(s, BAG);
@@ -474,7 +471,7 @@ describe('between rounds — the dice do NOT re-cast', () => {
     it('spent dice stay spent across rounds', () => {
         let s = playingSession(5, 'safe');
         s = rig(s, {
-            hand: [entry('h1', 'steps')],
+            hand: [entry('h1', 'haul')],
             play: [],
             dice: [
                 { id: 'd1', kind: 'red', state: 'available' },
@@ -493,10 +490,10 @@ describe('between rounds — the dice do NOT re-cast', () => {
 describe('discard to the trash bin (salvage)', () => {
     it('progress salvage adds to the CURRENT round only', () => {
         let s = playingSession(5, 'safe');
-        s = rig(s, { hand: [entry('h1', 'steps'), entry('h2', 'haul')], play: [], progressBase: { force: 0, escape: 0 } });
-        s = discardHazardCard(s, 'h1'); // STONE STEPS salvage: +1 FORCE this round
+        s = rig(s, { hand: [entry('h1', 'grip'), entry('h2', 'haul')], play: [], progressBase: { force: 0, escape: 0 } });
+        s = discardHazardCard(s, 'h1'); // IRON GRIP salvage: +1 FORCE this round
         expect(s.hand.map((h) => h.uid)).toEqual(['h2']);
-        expect(s.discardPile).toContain('steps');
+        expect(s.discardPile).toContain('grip');
         expect(s.progressBase.force).toBe(1);
         expect(hazardProjectedProgress(s).force).toBe(1);
         // the round advance overwrites the base — salvage does not persist
@@ -768,20 +765,33 @@ describe('deck flags codec', () => {
 
     it('round-trips acquired cards including duplicates', () => {
         let flags: string[] = ['unrelated-flag'];
-        flags = appendAcquiredCard(flags, 'r_grip');
-        flags = appendAcquiredCard(flags, 'r_grip');
+        flags = appendAcquiredCard(flags, 'grip');
+        flags = appendAcquiredCard(flags, 'grip');
         flags = appendAcquiredCard(flags, HAZARD_CRACK_CARD.id);
-        expect(decodeAcquiredCards(flags)).toEqual(['r_grip', 'r_grip', 'crack']);
+        expect(decodeAcquiredCards(flags)).toEqual(['grip', 'grip', 'crack']);
         expect(hazardDeckBag(flags)).toHaveLength(hazardStarterBag().length + 3);
         expect(flags).toContain('unrelated-flag');
     });
 });
 
 describe('content integrity', () => {
-    it('every deck and reward card resolves through getHazardCardDef', () => {
-        for (const c of [...HAZARD_DECK, ...HAZARD_REWARD_CARDS]) {
-            expect(getHazardCardDef(c.id).name).toBe(c.name);
+    const CORE_IDS = ['haul', 'grip', 'scram', 'runner', 'leap', 'footing', 'windread', 'pole', 'oath', 'blessing'];
+
+    it('the deck is exactly the ten core cards, each resolving through getHazardCardDef', () => {
+        expect(HAZARD_DECK.map((c) => c.id)).toEqual(CORE_IDS);
+        for (const c of HAZARD_DECK) expect(getHazardCardDef(c.id).name).toBe(c.name);
+        expect(getHazardCardDef(HAZARD_CRACK_CARD.id)).toBe(HAZARD_CRACK_CARD);
+        expect(() => getHazardCardDef('r_pivot')).toThrow();
+    });
+
+    it('every printed keyword is in the glossary, and every glossary word is printed', () => {
+        const printed = new Set<string>();
+        for (const c of [...HAZARD_DECK, HAZARD_CRACK_CARD]) {
+            for (const k of c.keywords) printed.add(k);
+            if (c.salvage) printed.add('salvage');
         }
+        for (const k of printed) expect(HAZARD_KEYWORDS).toHaveProperty(k);
+        expect(Object.keys(HAZARD_KEYWORDS).sort()).toEqual([...printed].sort());
     });
 
     it('all hazards have 3 rounds, matching threshold ladders, and both routes', () => {
@@ -802,193 +812,21 @@ describe('content integrity', () => {
         }
     });
 
-    it('expansion roster is reward-pool only (never in the starter bag)', () => {
-        const starterIds = new Set(HAZARD_DECK.map((c) => c.id));
-        const expansionIds = [
-            'r_pivot', 'r_drop', 'r_last', 'r_heave', 'r_skitter', 'r_path', 'r_windcall',
-            'r_stone', 'r_tide', 'r_aggr', 'r_swift', 'r_zeal', 'r_martyr', 'r_relic',
-            'r_vow', 'r_serk', 'r_bolt', 'r_warcry', 'r_blood', 'r_pwrath', 'r_twin', 'r_saint',
-        ];
-        for (const id of expansionIds) {
-            expect(starterIds.has(id)).toBe(false);
-            expect(getHazardCardDef(id).id).toBe(id); // resolves through the registry
+    it('the card offer draws three distinct core cards across seeds', () => {
+        const coreIds = new Set(CORE_IDS);
+        for (let seed = 1; seed <= 20; seed++) {
+            let s = playingSession(seed, 'safe');
+            for (let round = 0; round < 3; round++) {
+                s = rig(s, { hand: Array.from({ length: 6 }, (_, i) => entry(`o${round}h${i}`, 'footing')), play: [] });
+                for (const h of s.hand.slice()) s = stageHazardCard(s, h.uid, BAG);
+                s = resolveHazardRound(s);
+                s = continueHazardAfterResolve(s, BAG);
+            }
+            const ids = s.outcome!.offerCards.map((c) => c.id);
+            expect(ids).toHaveLength(3);
+            expect(new Set(ids).size).toBe(3);
+            for (const id of ids) expect(coreIds.has(id)).toBe(true);
         }
-    });
-
-    it('two-tone cards are uncommon or rare, never common', () => {
-        for (const c of HAZARD_REWARD_CARDS) {
-            if (c.colors && c.colors.length > 1) expect(c.rarity).not.toBe('common');
-        }
-    });
-});
-
-describe('expansion mechanics', () => {
-    it('two-tone pivot accepts EITHER a red or a blue die and swaps meters', () => {
-        for (const dieKind of ['red', 'blue'] as const) {
-            let s = playingSession();
-            s = rig(s, { hand: [entry('h1', 'r_pivot')], play: [], dice: [{ id: 'dx', kind: dieKind, state: 'available' }] });
-            s = stageHazardCard(s, 'h1', BAG);
-            expect(hazardCardValue(s.play[0])).toEqual({ force: 4, escape: 0 }); // free → FORCE
-            s = powerHazardCard(s, 'h1', 'dx', BAG);
-            expect(s.play[0].dieId).toBe('dx');
-            expect(hazardCardValue(s.play[0])).toEqual({ force: 0, escape: 7 }); // surge → ESCAPE
-        }
-    });
-
-    it('two-tone pivot rejects an off-colour (purple) die', () => {
-        let s = playingSession();
-        s = rig(s, { hand: [entry('h1', 'r_pivot')], play: [], dice: [{ id: 'dp', kind: 'purple', state: 'available' }] });
-        s = stageHazardCard(s, 'h1', BAG);
-        expect(powerHazardCard(s, 'h1', 'dp', BAG)).toBe(s);
-    });
-
-    it('AGGRESSION enchants every FORCE card with +2 for the rest of the hazard', () => {
-        let s = playingSession();
-        s = rig(s, { hand: [entry('a', 'r_aggr'), entry('g', 'grip')], play: [], dice: [] });
-        s = stageHazardCard(s, 'a', BAG);
-        s = stageHazardCard(s, 'g', BAG);
-        s = applyHazardCard(s, 'a', BAG); // sets auraForce +2
-        expect(s.modifiers.auraForce).toBe(2);
-        // r_aggr free 3 (+2) = 5; IRON GRIP free 5 (+2) = 7 → 12 force, no escape
-        const proj = hazardProjectedProgress(s);
-        expect(proj.force).toBe(12);
-        expect(proj.escape).toBe(0);
-    });
-
-    it('RELIC OF FURY lifts only POWERED contributions by +2', () => {
-        let s = playingSession();
-        s = rig(s, {
-            hand: [entry('r', 'r_relic'), entry('g', 'grip')],
-            play: [],
-            dice: [{ id: 'dr', kind: 'red', state: 'available' }],
-        });
-        s = stageHazardCard(s, 'r', BAG);
-        s = stageHazardCard(s, 'g', BAG);
-        s = applyHazardCard(s, 'r', BAG); // gold majorEffect → surge +2 for free
-        expect(s.modifiers.surgeForce).toBe(2);
-        expect(hazardStagedProgress(s).force).toBe(5); // grip UNPOWERED 5, no surge boost
-        s = powerHazardCard(s, 'g', 'dr', BAG);
-        expect(hazardStagedProgress(s).force).toBe(11); // grip powered 9 + surge 2
-    });
-
-    it('BERSERK bursts +5 FORCE this round (and +8 when powered)', () => {
-        let s = playingSession(5, 'safe');
-        s = rig(s, { hand: [entry('b', 'r_serk')], play: [], dice: [], progressBase: { force: 0, escape: 0 } });
-        s = stageHazardCard(s, 'b', BAG);
-        s = applyHazardCard(s, 'b', BAG);
-        expect(s.progressBase.force).toBe(5);
-
-        let p = playingSession(5, 'safe');
-        p = rig(p, { hand: [entry('b', 'r_serk')], play: [], dice: [{ id: 'dr', kind: 'red', state: 'available' }], progressBase: { force: 0, escape: 0 } });
-        p = stageHazardCard(p, 'b', BAG);
-        p = powerHazardCard(p, 'b', 'dr', BAG);
-        p = applyHazardCard(p, 'b', BAG);
-        expect(p.progressBase.force).toBe(8);
-    });
-
-    it('WAR-CRY bursts +1 FORCE per unspent non-hex die', () => {
-        let s = playingSession(5, 'safe');
-        s = rig(s, {
-            hand: [entry('w', 'r_warcry')],
-            play: [],
-            dice: [
-                { id: 'd1', kind: 'red', state: 'available' },
-                { id: 'd2', kind: 'blue', state: 'available' },
-                { id: 'd3', kind: 'hex', state: 'available' },
-                { id: 'd4', kind: 'gold', state: 'spent' },
-            ],
-            progressBase: { force: 0, escape: 0 },
-        });
-        s = stageHazardCard(s, 'w', BAG);
-        s = applyHazardCard(s, 'w', BAG);
-        expect(s.progressBase.force).toBe(2); // d1 + d2 only
-    });
-
-    it('BLOODPRICE bursts +8 FORCE and accrues a VITAE cost', () => {
-        let s = playingSession(5, 'safe');
-        s = rig(s, { hand: [entry('b', 'r_blood')], play: [], dice: [], progressBase: { force: 0, escape: 0 } });
-        s = stageHazardCard(s, 'b', BAG);
-        s = applyHazardCard(s, 'b', BAG);
-        expect(s.progressBase.force).toBe(8);
-        expect(s.vitaeCost).toBe(4);
-    });
-
-    it('GILDED VOW rides the next GOLD die for +7/+7, once', () => {
-        let s = playingSession();
-        s = rig(s, { hand: [entry('v', 'r_vow'), entry('g', 'grip')], play: [], dice: [{ id: 'dg', kind: 'gold', state: 'available' }] });
-        s = stageHazardCard(s, 'v', BAG);
-        s = applyHazardCard(s, 'v', BAG);
-        expect(s.goldVow).toEqual({ force: 7, escape: 7 });
-        s = stageHazardCard(s, 'g', BAG);
-        s = powerHazardCard(s, 'g', 'dg', BAG);
-        expect(s.goldVow).toBeNull(); // consumed
-        // IRON GRIP powered by wild gold = 9 force; +7/+7 vow → 16 / 7
-        expect(hazardCardValue(s.play.find((p) => p.cardId === 'grip')!)).toEqual({ force: 16, escape: 7 });
-    });
-
-    it('TWIN PATHS feeds the chosen meter when powered by a gold die', () => {
-        let s = playingSession();
-        s = rig(s, { hand: [entry('t', 'r_twin')], play: [], dice: [{ id: 'dg', kind: 'gold', state: 'available' }] });
-        s = stageHazardCard(s, 't', BAG);
-        s = powerHazardCard(s, 't', 'dg', BAG);
-        expect(hazardCardValue(s.play[0])).toEqual({ force: 8, escape: 0 }); // default FORCE
-        s = chooseHazardCardKey(s, 't', 'escape');
-        expect(hazardCardValue(s.play[0])).toEqual({ force: 0, escape: 8 });
-    });
-
-    it("SAINT'S PATIENCE raises the momentum cap by 2 and draws 2", () => {
-        let s = playingSession();
-        expect(s.momentumCap).toBe(HAZARD_MOMENTUM_CAP);
-        s = rig(s, { hand: [entry('p', 'r_saint')], play: [], dice: [] });
-        s = stageHazardCard(s, 'p', BAG);
-        const before = s.hand.length;
-        s = applyHazardCard(s, 'p', BAG);
-        expect(s.momentumCap).toBe(HAZARD_MOMENTUM_CAP + 2);
-        expect(s.hand.length).toBe(before + 2);
-    });
-});
-
-describe('enchant momentum (only when cards are played, never banked into carry)', () => {
-    it('a clear cleared by an aura carries only the RAW surplus forward', () => {
-        let s = playingSession(3, 'safe');
-        // +2 FORCE / card aura active; play 5 × IRON GRIP (raw 5F each = 25).
-        s = rig(s, {
-            hand: Array.from({ length: 5 }, (_, i) => entry(`g${i}`, 'grip')),
-            play: [],
-            modifiers: { auraForce: 2, auraEscape: 0, surgeForce: 0, surgeEscape: 0 },
-            progressBase: { force: 0, escape: 0 },
-        });
-        for (const h of s.hand.slice()) s = stageHazardCard(s, h.uid, BAG);
-        s = resolveHazardRound(s);
-        // The round is judged on the ENCHANTED total (25 raw + 5×2 aura = 35).
-        expect(s.resolveInfo?.combined).toBe(35);
-        expect(s.resolveInfo?.cleared).toBe(true);
-        // …but momentum carries the RAW surplus only: (25 − 20) / 2 = 2,
-        // NOT the enchanted (35 − 20) / 2 = 7 (capped 3). The aura is not
-        // re-counted in the next round's running total.
-        expect(s.resolveInfo?.carryForce).toBe(2);
-    });
-
-    it('risk-route carry also excludes the aura on each meter', () => {
-        const def = getHazardDef(HAZARD_ID);
-        const [nF] = def.risk.thresholds[0]; // 9
-        let s = playingSession(3, 'risk');
-        // Clear FORCE only with aura; ESCAPE stays 0 (round will not clear, but
-        // carry math is still computed per meter from the raw projected total).
-        s = rig(s, {
-            hand: Array.from({ length: 3 }, (_, i) => entry(`g${i}`, 'grip')),
-            play: [],
-            modifiers: { auraForce: 2, auraEscape: 0, surgeForce: 0, surgeEscape: 0 },
-            progressBase: { force: 0, escape: 0 },
-        });
-        for (const h of s.hand.slice()) s = stageHazardCard(s, h.uid, BAG);
-        s = resolveHazardRound(s);
-        // raw force = 15, enchanted = 21. Round fails (ESCAPE 0 < need), so carry
-        // is 0 regardless — but the force meter still reports the enchanted total.
-        expect(s.resolveInfo?.force).toBe(15 + 6);
-        expect(s.resolveInfo?.cleared).toBe(false);
-        expect(s.resolveInfo?.carryForce).toBe(0); // failed round → no carry
-        void nF;
     });
 });
 
@@ -1016,51 +854,20 @@ describe('dieCanPower — die-kind × card-color affordance', () => {
     });
 });
 
-describe('dieCanPowerCard — two-tone colors[] variant', () => {
-    const singleRed = getHazardCardDef('steps')!;
-    const twoToneRB = getHazardCardDef('r_pivot')!;
+describe('dieCanPowerCard — the card colour plus the wild gold die', () => {
+    const red = getHazardCardDef('haul');
 
-    it('single-color card: matching die powers it', () => {
-        expect(dieCanPowerCard('red', singleRed)).toBe(true);
+    it('matching die powers it', () => {
+        expect(dieCanPowerCard('red', red)).toBe(true);
     });
-    it('single-color card: mismatched die does not power it', () => {
-        expect(dieCanPowerCard('blue', singleRed)).toBe(false);
-        expect(dieCanPowerCard('purple', singleRed)).toBe(false);
+    it('mismatched die does not power it', () => {
+        expect(dieCanPowerCard('blue', red)).toBe(false);
+        expect(dieCanPowerCard('purple', red)).toBe(false);
     });
-    it('single-color card: gold die (wild) powers it', () => {
-        expect(dieCanPowerCard('gold', singleRed)).toBe(true);
+    it('gold die (wild) powers it', () => {
+        expect(dieCanPowerCard('gold', red)).toBe(true);
     });
-    it('single-color card: hex die never powers it', () => {
-        expect(dieCanPowerCard('hex', singleRed)).toBe(false);
-    });
-    it('two-tone card: first color powers it', () => {
-        expect(dieCanPowerCard('red', twoToneRB)).toBe(true);
-    });
-    it('two-tone card: second color also powers it', () => {
-        expect(dieCanPowerCard('blue', twoToneRB)).toBe(true);
-    });
-    it('two-tone card: unrelated color does not power it', () => {
-        expect(dieCanPowerCard('purple', twoToneRB)).toBe(false);
-    });
-    it('two-tone card: gold die powers it', () => {
-        expect(dieCanPowerCard('gold', twoToneRB)).toBe(true);
-    });
-    it('two-tone card: hex die never powers it', () => {
-        expect(dieCanPowerCard('hex', twoToneRB)).toBe(false);
-    });
-});
-
-describe('hazardCardPowerColors — colors[] vs kind fallback', () => {
-    it('single-color card returns [kind]', () => {
-        const def = getHazardCardDef('steps')!;
-        expect(hazardCardPowerColors(def)).toEqual([def.kind]);
-    });
-    it('two-tone card returns its colors array', () => {
-        const def = getHazardCardDef('r_pivot')!;
-        expect(hazardCardPowerColors(def)).toEqual(['red', 'blue']);
-    });
-    it('two-tone red/purple card returns its colors array', () => {
-        const def = getHazardCardDef('x_brawlerfeint')!;
-        expect(hazardCardPowerColors(def)).toEqual(['red', 'purple']);
+    it('hex die never powers it', () => {
+        expect(dieCanPowerCard('hex', red)).toBe(false);
     });
 });

@@ -11,48 +11,6 @@ import type { SeedInput } from '../seed';
 import type { HazardRngState } from './hazard.rng';
 
 // ---------------------------------------------------------------------------
-// Phase 149 — Deck focus, scars, and engagement
-// ---------------------------------------------------------------------------
-
-/** Deck archetype classification based on card composition and distribution. */
-export type HazardDeckFocus = 
-    | 'force-heavy'
-    | 'escape-heavy' 
-    | 'gold-utility'
-    | 'hex-control'
-    | 'scarred'
-    | 'mixed';
-
-/** Deck scar summary — tracks burden/dead-weight from CRACK cards. */
-export interface HazardDeckScars {
-    crackCount: number;
-    totalCards: number;
-    scarRatio: number;
-}
-
-/** Three-choice reward offer structure (Phase 149 doctrine). */
-export interface HazardRewardOffer {
-    /** Obvious benefit to current deck focus. */
-    focusBenefit: HazardCardDef;
-    /** Stronger card outside current deck focus. */
-    offFocusTemptation: HazardCardDef;
-    /** Remove-card option data for deck editing. */
-    removeCardOption: {
-        available: boolean;
-        eligibleCardIds: string[];
-    };
-}
-
-/** Deck identity summary for post-Hazard reporting. */
-export interface HazardDeckIdentity {
-    focus: HazardDeckFocus;
-    scars: HazardDeckScars;
-    cardCount: number;
-    dominantColors: HazardColor[];
-    utilityRatio: number;
-}
-
-// ---------------------------------------------------------------------------
 // Colours, progress, dice
 // ---------------------------------------------------------------------------
 
@@ -86,25 +44,7 @@ export interface HazardDie {
 
 export type HazardCardRarity = 'common' | 'uncommon' | 'rare';
 
-export type HazardUtilityEffect =
-    | 'draw'
-    | 'recast'
-    | 'convert'
-    | 'aura'
-    | 'burst'
-    | 'goldvow'
-    // ── codex-library mechanics (2026-06-13 expansion) ──
-    | 'purge'
-    | 'transmute'
-    | 'mend'
-    | 'bounty'
-    | 'ward'
-    | 'anchor'
-    // ── keyword expansion (2026-06-25) ──
-    | 'foretell'
-    // ── MTG expansion (2026-06-25) ──
-    | 'echo'
-    | 'scour';
+export type HazardUtilityEffect = 'draw' | 'recast' | 'convert';
 
 export type HazardKeywordId =
     | 'surge'
@@ -115,55 +55,7 @@ export type HazardKeywordId =
     | 'recast'
     | 'gilded'
     | 'salvage'
-    | 'crack'
-    | 'twotone'
-    | 'enchant'
-    | 'burst'
-    | 'rally'
-    | 'sacrifice'
-    | 'vow'
-    | 'choose'
-    // ── codex-library mechanics (2026-06-13 expansion) ──
-    | 'purge'
-    | 'transmute'
-    | 'mend'
-    | 'bounty'
-    | 'ward'
-    | 'anchor'
-    // ── keyword expansion (2026-06-25) ──
-    | 'foretell'
-    // ── MTG expansion (2026-06-25) ──
-    | 'echo'
-    | 'scour'
-    // ── heavy card library swap (2026-06-26) ──
-    | 'jeopardy'
-    | 'miracle'
-    | 'buyback'
-    | 'delve';
-
-/**
- * Persistent enchantment modifiers (auras). Accumulated on the session by
- * `effect: 'aura'` cards and applied to every qualifying card contribution
- * for the rest of the hazard.
- *  - `auraForce`/`auraEscape`: +X to EVERY played card that contributes that
- *    meter (per card — the user's framing: "added to every card played that
- *    generates that specific value").
- *  - `surgeForce`/`surgeEscape`: +X to every POWERED card's contribution of
- *    that meter (RELIC OF FURY — buffs the surge row, not the meter total).
- */
-export interface HazardModifiers {
-    auraForce: number;
-    auraEscape: number;
-    surgeForce: number;
-    surgeEscape: number;
-}
-
-export const EMPTY_HAZARD_MODIFIERS: HazardModifiers = Object.freeze({
-    auraForce: 0,
-    auraEscape: 0,
-    surgeForce: 0,
-    surgeEscape: 0,
-});
+    | 'crack';
 
 /**
  * Salvage — the discard benefit. Dragging a card to the trash bin
@@ -180,17 +72,11 @@ export type HazardSalvage =
 export interface HazardCardDef {
     id: string;
     name: string;
-    /** Card colour — primary identity (display tint, salvage colour). For a
-     *  two-tone card it is also the FIRST of its `colors`. */
+    /** Card colour — its identity (display tint, salvage colour) and the
+     *  die colour that powers it, besides the wild gold die. */
     kind: HazardColor;
-    /**
-     * Die colours (besides the wild gold die) that can power this card.
-     * Omitted = `[kind]`. Two-tone cards list two colours — e.g. a red/blue
-     * pivot powered by EITHER a red or a blue die.
-     */
-    colors?: HazardColor[];
     rarity: HazardCardRarity;
-    /** Relative frequency in the starter draw pile (reward cards omit it). */
+    /** Relative frequency in the starter draw pile. */
     weight?: number;
     /** FREE (top) action values — contributed the moment the card is staged. */
     f: number;
@@ -198,12 +84,6 @@ export interface HazardCardDef {
     /** MANA (bottom / SURGE) action values, used once a die is applied. */
     fp?: number;
     ep?: number;
-    /**
-     * CHOOSE card: when powered, the single powered value (`fp` === `ep`)
-     * feeds ONE meter the player picks at apply-time. `entry.chosenKey`
-     * carries the choice (default 'force').
-     */
-    choose?: boolean;
     /**
      * Optional utility, fired once when the card is APPLIED (powered tier
      * if a die is attached, else base). A card may carry BOTH numbers and
@@ -221,107 +101,6 @@ export interface HazardCardDef {
     majorEffect?: boolean;
     drawBase?: number;
     drawPowered?: number;
-    /**
-     * ENCHANT (`effect: 'aura'`) payload. `auraBase` is added to the session
-     * modifiers at the minor tier; `auraPowered` at the major tier (powered,
-     * or a gold `majorEffect` card). Persists for the rest of the hazard.
-     */
-    auraBase?: Partial<HazardModifiers>;
-    auraPowered?: Partial<HazardModifiers>;
-    /**
-     * BURST (`effect: 'burst'`) payload — progress added to THIS round only
-     * (rides `progressBase`). `burstPowered` is the bigger powered tier.
-     */
-    burstBase?: { force?: number; escape?: number };
-    burstPowered?: { force?: number; escape?: number };
-    /** WAR-CRY: +force per unspent non-hex die in the pool, fired on apply. */
-    burstPerUnspentDieForce?: number;
-    /** TIDE TURNS: +escape per unspent non-hex die in the pool, fired on apply. */
-    burstPerUnspentDieEscape?: number;
-    /** SACRIFICE (BLOODPRICE): VITAE spent on apply (accrues to session). */
-    vitaeCost?: number;
-    /** GILDED VOW (`effect: 'goldvow'`): one-shot bonus primed onto the next
-     *  gold die the player spends powering any card. */
-    goldVow?: { force: number; escape: number };
-    /** Rider: raise the session momentum cap on apply (SAINT'S PATIENCE). */
-    momentumBonus?: number;
-    /**
-     * MEND (`effect: 'mend'`): VITAE restored at claim on a survived
-     * crossing (the opposite ledger line to SACRIFICE's `vitaeCost`).
-     */
-    mendBase?: number;
-    mendPowered?: number;
-    /** BOUNTY (`effect: 'bounty'`): shillings banked at claim on a
-     *  survived crossing. */
-    bountyBase?: number;
-    bountyPowered?: number;
-    /** WARD (`effect: 'ward'`): flat reduction of the route's total
-     *  VITAE penalty at the outcome (floored at 0). */
-    wardBase?: number;
-    wardPowered?: number;
-    /**
-     * ANCHOR (`effect: 'anchor'`): raises the session's momentum FLOOR —
-     * the minimum total carry banked into the next round, even off a
-     * failed round (insurance). Capped by the session momentum cap.
-     */
-    anchorBase?: number;
-    anchorPowered?: number;
-    /**
-     * FORETELL (`effect: 'foretell'`): reveal top N cards, reorder freely.
-     * At powered tier the player may also discard one of the revealed cards.
-     * When `foretellScour` is true the player may discard ANY number of
-     * revealed cards (Surveil-equivalent — permanent deck thinning).
-     */
-    foretellBase?: number;
-    foretellPowered?: number;
-    foretellScour?: boolean;
-    /** Draw N cards after the FORETELL resolves (awarded in confirmHazardForetell). */
-    foretellDrawCount?: number;
-    /**
-     * ECHO (`effect: 'burst'` variant inspired by MTG Storm): +force/escape for
-     * each card ALREADY applied this round. Rewards playing ECHO last in a chain.
-     * Powered tier doubles the per-card bonus.
-     */
-    echoPerCardForce?: number;
-    echoPerCardEscape?: number;
-    /**
-     * PURGE combo: after a PURGE effect fires, draw this many cards.
-     * Rewards the "cut dead weight, draw fresh options" pattern.
-     */
-    purgeDrawCount?: number;
-    /**
-     * MEND rider alongside a BURST effect: queues a vitae restoration at claim.
-     * Lets sacrifice-burst cards offset their vitae cost with a mend promise.
-     */
-    burstMendBase?: number;
-    burstMendPowered?: number;
-    /**
-     * JEOPARDY (MTG Spectacle analogue): bonus force/escape when ≥1 round
-     * mark is 'X' (i.e. the player has already lost a round). Encourages
-     * comeback plays — the cards get better the worse things are going.
-     */
-    jeopardyForce?: number;
-    jeopardyEscape?: number;
-    /**
-     * MIRACLE (MTG Miracle analogue): bonus force/escape when this is the
-     * FIRST card applied this round (no prior applied cards in s.play).
-     * Rewards leading with the miracle card instead of saving it.
-     */
-    firstPlayForce?: number;
-    firstPlayEscape?: number;
-    /**
-     * BUYBACK (MTG Buyback analogue): when powered by a die, this card
-     * returns to hand instead of the discard pile after the round resolves.
-     * The engine handles this in continueHazardAfterResolve.
-     */
-    buyback?: boolean;
-    /**
-     * DELVE (MTG Delve analogue): +N force/escape for EACH card already
-     * in the discard pile when applied. Scales with how much of the deck
-     * has been spent — rewards late-round or multi-round commitment.
-     */
-    delveForce?: number;
-    delveEscape?: number;
     /**
      * Dead cards (consequence CRACK cards) cannot be powered and
      * contribute nothing — they only clog the hand.
@@ -346,10 +125,6 @@ export interface HazardHandEntry {
      * resolved once every staged card is applied.
      */
     applied?: boolean;
-    /** CHOOSE card: which meter the powered value feeds (default 'force'). */
-    chosenKey?: HazardProgressKey;
-    /** GILDED VOW bonus locked onto this card when a gold die powered it. */
-    vowBonus?: { force: number; escape: number };
 }
 
 // ---------------------------------------------------------------------------
@@ -449,16 +224,8 @@ export interface HazardOutcome {
      * dice you didn't burn are worth something.
      */
     reserveBonus: number;
-    /** Vitae lost to the route penalty: penaltyVitae × lost rounds,
-     *  reduced by accrued WARD (floored at 0). */
+    /** Vitae lost to the route penalty: penaltyVitae × lost rounds. */
     penaltyVitae: number;
-    /** Vitae spent in-run by SACRIFICE cards (BLOODPRICE), applied at claim. */
-    vitaeCost: number;
-    /** Vitae restored by MEND cards (0 on a failure — the cure needs a
-     *  survivor), applied at claim. */
-    vitaeRestore: number;
-    /** Shillings banked by BOUNTY cards (0 on a failure), applied at claim. */
-    bountyShillings: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -469,7 +236,6 @@ export type HazardPhase =
     | 'route-select'
     | 'rolling'
     | 'playing'
-    | 'foretell-pending'
     | 'resolve-flash'
     | 'outcome'
     | 'rewards'
@@ -491,29 +257,8 @@ export interface HazardSessionState {
     dice: HazardDie[];
     /** Momentum carried into the current round (REC#1). */
     progressBase: { force: number; escape: number };
-    /** Persistent enchantment modifiers (auras) — rest-of-hazard. */
-    modifiers: HazardModifiers;
-    /** Primed one-shot bonus consumed by the next gold die used to power. */
-    goldVow: { force: number; escape: number } | null;
-    /** Per-session momentum cap (starts at HAZARD_MOMENTUM_CAP; cards raise it). */
+    /** Per-session momentum cap (HAZARD_MOMENTUM_CAP). */
     momentumCap: number;
-    /** VITAE spent by sacrifice cards this hazard, applied at claim. */
-    vitaeCost: number;
-    /** VITAE restored by MEND cards (paid at claim on a survived crossing). */
-    vitaeRestore: number;
-    /** Shillings banked by BOUNTY cards (paid at claim on a survived crossing). */
-    bountyShillings: number;
-    /** Flat reduction of the route's total VITAE penalty (WARD cards). */
-    wardPenaltyReduction: number;
-    /** Momentum FLOOR: minimum total carry banked into the next round,
-     *  even off a failed round (ANCHOR cards). Respects `momentumCap`. */
-    carryFloor: number;
-    /**
-     * FORETELL pending state: revealed card ids, powered flag, scour mode
-     * (allows discarding any number, not just one), and optional draw reward
-     * after the player confirms their ordering.
-     */
-    foretellPending: { revealed: string[]; powered: boolean; scour: boolean; drawCount: number } | null;
     resolveInfo: HazardResolveInfo | null;
     outcome: HazardOutcome | null;
     /** Reward card picked in the rewards phase (null = skipped / none). */

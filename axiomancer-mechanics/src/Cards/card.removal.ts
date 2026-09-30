@@ -1,9 +1,7 @@
 /**
  * Phase 52a — DECK REMOVAL: the engine's first way to take a card OUT.
  *
- * The engine had no card removal at all before this. (`removeCardFromDeck` in
- * `World/Hazard/hazard.engagement.ts` is a HAZARD-deck helper for a different
- * subsystem — it is not this, and nothing here imports it.) This module is the
+ * The engine had no card removal at all before this. This module is the
  * pure primitive; the rest-choice engine (52c) and the picker screen (52d)
  * sit on top. No player-facing surface lands here.
  *

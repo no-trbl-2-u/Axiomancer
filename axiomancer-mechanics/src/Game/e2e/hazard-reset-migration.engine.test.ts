@@ -33,7 +33,7 @@ const hop31 = (raw: Record<string, unknown>): GameState => migrate(raw, 30, 31);
 
 describe('migrate v30 → v31 (THE REVAMP R6a / D52: honest hazard rewards)', () => {
     it('lands at the current version', () => {
-        expect(GAME_STATE_VERSION).toBe(31);
+        expect(GAME_STATE_VERSION).toBeGreaterThanOrEqual(31);
         expect(hop31(v30WithHazardFlags()).version).toBe(31);
     });
 

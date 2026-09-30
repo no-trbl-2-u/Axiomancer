@@ -89,7 +89,7 @@ describe('hazard presenter — affordability', () => {
         s = {
             ...s,
             hand: [
-                { uid: 'h-red', cardId: 'steps', dieId: null },
+                { uid: 'h-red', cardId: 'grip', dieId: null },
                 { uid: 'h-gold', cardId: 'oath', dieId: null },
             ],
             dice: [{ id: 'd1', kind: 'red', state: 'available' }],
@@ -104,7 +104,7 @@ describe('hazard presenter — affordability', () => {
         s = {
             ...s,
             hand: [
-                { uid: 'h-prog', cardId: 'steps', dieId: null }, // +1 FORCE
+                { uid: 'h-prog', cardId: 'grip', dieId: null }, // +1 FORCE
                 { uid: 'h-mana', cardId: 'haul', dieId: null }, // conjure red die
                 { uid: 'h-none', cardId: HAZARD_CRACK_CARD.id, dieId: null }, // no salvage
             ],
@@ -177,7 +177,7 @@ describe('hazard presenter — resolve and ledger', () => {
         expect(idle.resolveEnabled).toBe(false);
         expect(idle.resolveSubLabel).toBe('STAGE A CARD');
         let s = playingSession('safe');
-        s = { ...s, hand: entries('steps', 1), play: [] };
+        s = { ...s, hand: entries('grip', 1), play: [] };
         s = stageHazardCard(s, 'h0', BAG);
         // staged — armed immediately; PLAY commits un-applied cards itself
         const staged = vmOf(s);

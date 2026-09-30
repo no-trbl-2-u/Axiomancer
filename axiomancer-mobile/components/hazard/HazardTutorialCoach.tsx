@@ -10,7 +10,7 @@
  * completion (the parent owns the dispatch).
  *
  * Renders `null` outside `route-select` / `playing` — every other phase
- * (`rolling`, `resolve-flash`, `foretell-pending`, `outcome`, `rewards`)
+ * (`rolling`, `resolve-flash`, `outcome`, `rewards`)
  * is already a full-screen opaque overlay with its own single-CTA
  * "continue" affordance, so there is nothing for the coach to add and no
  * safe z-index slot to add it in.

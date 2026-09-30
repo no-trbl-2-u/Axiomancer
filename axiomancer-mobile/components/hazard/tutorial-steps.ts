@@ -8,10 +8,10 @@
  * whose predicate is unmet — stateless progression, so a player who
  * runs ahead of the script simply skips the steps they already proved.
  *
- * The tutorial session is pinned (seed 3, hazard `cracked-cliff` — see
+ * The tutorial session is pinned (seed 887, hazard `cracked-cliff` — see
  * `HAZARD_TUTORIAL_SEED` / `HAZARD_TUTORIAL_ID`): the opening hand is
- * `ironwill`, `footing` ×2, `refrain`, `spite`, and the dice roll is
- * `purple, red, purple, red` — zero blocked (`hex`) dice, and every hand
+ * `haul`, `windread`, `leap`, `grip`, `footing`, and the dice roll is
+ * `red, purple, blue, red` — zero blocked (`hex`) dice, and every hand
  * card's colour has a matching die. Predicates are written against
  * `route` / `play` / `dice` / `round` only — never the specific
  * route/card/die the player picks — so a player who ignores the

@@ -8,7 +8,7 @@ import type { HazardCardVM } from '@/state/presenters/hazard.engine';
 function cardVM(overrides: Partial<HazardCardVM> = {}): HazardCardVM {
     return {
         uid: 'uid-1',
-        cardId: 'r_grip',
+        cardId: 'grip',
         name: 'Reaver Grip',
         kind: 'red',
         rarity: 'common',
@@ -24,17 +24,13 @@ function cardVM(overrides: Partial<HazardCardVM> = {}): HazardCardVM {
         poweredByDieId: null,
         applied: false,
         salvageLabel: null,
-        powerColors: ['red'],
-        choose: false,
-        chosenKey: null,
-        vowBonus: null,
         ...overrides,
     };
 }
 
 function entry(overrides: Partial<HazardDeckEntryVM> = {}): HazardDeckEntryVM {
     return {
-        cardId: 'r_grip',
+        cardId: 'grip',
         card: cardVM(),
         count: 1,
         starterCount: 0,
@@ -69,7 +65,7 @@ describe('HazardRemoveGrid', () => {
                 onConfirm={jest.fn()}
             />,
         );
-        expect(getByTestId('hazard-remove-tile-r_grip')).toBeTruthy();
+        expect(getByTestId('hazard-remove-tile-grip')).toBeTruthy();
         expect(getByTestId('hazard-remove-tile-b_ward')).toBeTruthy();
     });
 
@@ -89,7 +85,7 @@ describe('HazardRemoveGrid', () => {
 
     it('selecting a card enables confirm and swaps the label', () => {
         const { getByTestId, getByText } = render(<HazardRemoveGrid {...baseProps} onClose={jest.fn()} onConfirm={jest.fn()} />);
-        fireEvent.press(getByTestId('hazard-remove-tile-r_grip'));
+        fireEvent.press(getByTestId('hazard-remove-tile-grip'));
         const confirm = getByTestId('hazard-remove-confirm');
         expect(confirm.props.accessibilityState).toEqual({ disabled: false });
         expect(getByText('CUT THIS CARD')).toBeTruthy();
@@ -97,7 +93,7 @@ describe('HazardRemoveGrid', () => {
 
     it('marks the selected tile via accessibilityState and a CUT badge', () => {
         const { getByTestId, getByText } = render(<HazardRemoveGrid {...baseProps} onClose={jest.fn()} onConfirm={jest.fn()} />);
-        const tile = getByTestId('hazard-remove-tile-r_grip');
+        const tile = getByTestId('hazard-remove-tile-grip');
         fireEvent.press(tile);
         expect(tile.props.accessibilityState).toEqual({ selected: true });
         expect(getByText('CUT')).toBeTruthy();
@@ -105,7 +101,7 @@ describe('HazardRemoveGrid', () => {
 
     it('tapping a selected tile again deselects it', () => {
         const { getByTestId, queryByText } = render(<HazardRemoveGrid {...baseProps} onClose={jest.fn()} onConfirm={jest.fn()} />);
-        const tile = getByTestId('hazard-remove-tile-r_grip');
+        const tile = getByTestId('hazard-remove-tile-grip');
         fireEvent.press(tile);
         fireEvent.press(tile);
         expect(tile.props.accessibilityState).toEqual({ selected: false });
@@ -115,9 +111,9 @@ describe('HazardRemoveGrid', () => {
     it('confirms with the selected card id when not blocked', () => {
         const onConfirm = jest.fn();
         const { getByTestId } = render(<HazardRemoveGrid {...baseProps} onClose={jest.fn()} onConfirm={onConfirm} />);
-        fireEvent.press(getByTestId('hazard-remove-tile-r_grip'));
+        fireEvent.press(getByTestId('hazard-remove-tile-grip'));
         fireEvent.press(getByTestId('hazard-remove-confirm'));
-        expect(onConfirm).toHaveBeenCalledWith('r_grip');
+        expect(onConfirm).toHaveBeenCalledWith('grip');
     });
 
     it('does not confirm when no card is selected', () => {
@@ -133,7 +129,7 @@ describe('HazardRemoveGrid', () => {
             <HazardRemoveGrid {...baseProps} blocked onConfirm={onConfirm} onClose={jest.fn()} />,
         );
         expect(queryByTestId('hazard-remove-blocked')).toBeNull();
-        fireEvent.press(getByTestId('hazard-remove-tile-r_grip'));
+        fireEvent.press(getByTestId('hazard-remove-tile-grip'));
         fireEvent.press(getByTestId('hazard-remove-confirm'));
         expect(onConfirm).not.toHaveBeenCalled();
         expect(getByTestId('hazard-remove-blocked')).toBeTruthy();
@@ -144,7 +140,7 @@ describe('HazardRemoveGrid', () => {
         const { getByTestId, queryByTestId } = render(
             <HazardRemoveGrid {...baseProps} blocked onConfirm={jest.fn()} onClose={jest.fn()} />,
         );
-        fireEvent.press(getByTestId('hazard-remove-tile-r_grip'));
+        fireEvent.press(getByTestId('hazard-remove-tile-grip'));
         fireEvent.press(getByTestId('hazard-remove-confirm'));
         expect(getByTestId('hazard-remove-blocked')).toBeTruthy();
         fireEvent.press(getByTestId('hazard-remove-blocked-dismiss'));

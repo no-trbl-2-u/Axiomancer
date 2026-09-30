@@ -95,7 +95,7 @@ describe('hazard store flow', () => {
         actions.beginHazard({ seed: 7, hazardId: 'cracked-cliff' });
         actions.selectHazardRoute('safe');
         actions.finishHazardRolling();
-        rigHand(store, [{ uid: 'h1', cardId: 'steps' }]);
+        rigHand(store, [{ uid: 'h1', cardId: 'haul' }]);
         rigDice(store, [{ id: 'dr', kind: 'red', state: 'available' }]);
         actions.stageHazardCard('h1');
         expect(session(store).play).toHaveLength(1);
@@ -214,16 +214,16 @@ describe('hazard store flow', () => {
 
     it('acquired cards from previous hazards appear in the next session draw bag', () => {
         const { store, actions } = makeStoreAndActions();
-        // Seed the deck with 20 copies of a reward card via flags.
+        // Seed the deck with 20 acquired copies of a card via flags.
         let flags = (store.getState() as unknown as GameState).flags;
-        for (let i = 0; i < 20; i++) flags = [...flags, `hazard-card:r_crown:${i + 1}`];
+        for (let i = 0; i < 20; i++) flags = [...flags, `hazard-card:blessing:${i + 1}`];
         store.setState({ flags } as never);
         actions.beginHazard({ seed: 3, hazardId: 'cracked-cliff' });
-        // Starter bag is 28; with 20 r_crown copies the opening hand of 5
-        // statistically contains one — assert via pile + hand contents.
+        // The starter bag holds one BLESSING; the 20 acquired copies join it —
+        // assert via pile + hand contents.
         const s = session(store);
         const all = [...s.drawPile, ...s.hand.map((h) => h.cardId)];
-        expect(all.filter((c) => c === 'r_crown').length).toBe(20);
+        expect(all.filter((c) => c === 'blessing').length).toBe(21);
     });
 
     it('abandonHazard clears the session with no state changes', () => {
@@ -233,48 +233,6 @@ describe('hazard store flow', () => {
         actions.abandonHazard();
         expect(store.getState().hazard.session).toBeNull();
         expect((store.getState() as unknown as GameState).player.health).toBe(healthBefore);
-    });
-
-    it('claim applies MEND vitae and BOUNTY shillings (codex 0.18.0)', () => {
-        const { store, actions } = makeStoreAndActions();
-        const before = store.getState() as unknown as GameState;
-        const player = before.player;
-        store.setState({
-            player: { ...player, health: Math.max(1, player.maxHealth - 10) },
-        } as never);
-        const healthBefore = (store.getState() as unknown as GameState).player.health;
-        const currencyBefore = player.currency;
-
-        actions.beginHazard({ seed: 9, hazardId: 'cracked-cliff' });
-        const s = session(store);
-        store.setState({
-            hazard: {
-                session: {
-                    ...s,
-                    phase: 'rewards',
-                    outcome: {
-                        tier: 'complete',
-                        wins: 1,
-                        losses: 2,
-                        rewards: [],
-                        consequences: [],
-                        offerCards: [],
-                        canSkip: false,
-                        reserveBonus: 0,
-                        penaltyVitae: 0,
-                        vitaeCost: 0,
-                        vitaeRestore: 4,
-                        bountyShillings: 8,
-                    },
-                },
-                tutorial: false,
-            },
-        });
-        const result = actions.claimHazardRewards(null);
-        expect(result.applied).toBe(true);
-        const after = store.getState() as unknown as GameState;
-        expect(after.player.health).toBe(healthBefore + 4);
-        expect(after.player.currency).toBe(currencyBefore + 8);
     });
 });
 

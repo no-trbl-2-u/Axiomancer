@@ -161,8 +161,10 @@ import { generateRunId } from './run-loop';
  *   potions; the hop drops retired consumable stacks and their effects.
  * 2026-09-30 — bumped 30 → 31: THE REVAMP R6a (D52). Hazard rewards do what
  *   they say; the hop drops the Paradox Token and Hexed flags.
+ * 2026-09-30 — bumped 31 → 32: THE REVAMP R6b (D52/D63). The hazard deck is
+ *   the core ten; the hop drops acquired deck cards that were deleted.
  */
-export const GAME_STATE_VERSION = 31;
+export const GAME_STATE_VERSION = 32;
 
 /**
  * Builds a brand-new GameState with default player and world.

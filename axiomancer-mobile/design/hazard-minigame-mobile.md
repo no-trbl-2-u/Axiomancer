@@ -411,7 +411,7 @@ The screen should answer the immediate question first: **what do I need, what ca
 - **Implemented (2026-06-11):** the `aura` effect adds session `modifiers` for the
   rest of the hazard; the board renders an `ENCHANTMENTS` strip (chips) below the
   meter listing each active modifier, plus a primed gold-VOW chip. See
-  `axiomancer-mechanics/docs/hazard-card-expansion-2026-06-11-spec.md`.
+  `plan/archive/2026-09-30-revamp-r6b/axiomancer-mechanics/docs/hazard-card-expansion-2026-06-11-spec.md` (archived 2026-09-30).
 
 ### Two-Tone (Multi-Colour) — added 2026-06-11
 

@@ -26,9 +26,10 @@
  * their stripped keywords), v27 → v28 (2026-09-29, THE REVAMP R3a: a
  * save standing off Act 1 moves onto the Lantern Deep), v28 → v29 (R3b:
  * fishing-village purged), v29 → v30 (2026-09-30, R5: the retired
- * consumables and their effects dropped) and v30 → v31 (2026-09-30, R6a: the
- * hazard token and hex flags dropped). The hops chain, so a v11 save lands
- * at v31 in one `migrate` call. Every other version mismatch still rejects.
+ * consumables and their effects dropped), v30 → v31 (2026-09-30, R6a: the
+ * hazard token and hex flags dropped) and v31 → v32 (2026-09-30, R6b: hazard
+ * deck cards outside the core ten dropped). The hops chain, so a v11 save
+ * lands at v32 in one `migrate` call. Every other version mismatch still rejects.
  */
 
 import { GameState } from './types';
@@ -755,6 +756,35 @@ function migrateV30ToV31(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
+ * The hazard deck R6b kept: the prototype's ten cards plus the CRACK a
+ * failed crossing deals. Frozen here so the hop means the same thing after
+ * B3 changes the live deck.
+ */
+const R6B_HAZARD_CARD_IDS: ReadonlySet<string> = new Set([
+    'haul', 'grip', 'scram', 'runner', 'leap',
+    'footing', 'windread', 'pole', 'oath', 'blessing', 'crack',
+]);
+const HAZARD_CARD_FLAG = 'hazard-card:';
+
+/**
+ * v31 → v32 (2026-09-30, THE REVAMP R6b, D52/D63): the hazard deck is the
+ * minimal core. Drops every acquired-card flag (`hazard-card:<id>:<n>`) whose
+ * card was deleted; no refund. Idempotent and pure over a raw save payload.
+ */
+function migrateV31ToV32(raw: Record<string, unknown>): Record<string, unknown> {
+    const out: Record<string, unknown> = { ...raw, version: 32 };
+    if (Array.isArray(raw.flags)) {
+        out.flags = (raw.flags as unknown[]).filter(flag => {
+            if (typeof flag !== 'string' || !flag.startsWith(HAZARD_CARD_FLAG)) return true;
+            const rest = flag.slice(HAZARD_CARD_FLAG.length);
+            const sep = rest.lastIndexOf(':');
+            return R6B_HAZARD_CARD_IDS.has(sep === -1 ? rest : rest.slice(0, sep));
+        });
+    }
+    return out;
+}
+
+/**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
  * game). The name/signature is kept so the persistence layer's call site is
@@ -793,8 +823,8 @@ export function migrate(
     // v27 → v28 moves a save off Act 1 onto the Lantern Deep; v28 → v29
     // drops fishing-village, its quests and the goodwill tally; v29 → v30
     // drops the retired consumables and their effects; v30 → v31 drops the
-    // hazard token and hex flags.
-    // Chained so a v11 save lands at v31 in one call.
+    // hazard token and hex flags; v31 → v32 drops deleted hazard deck cards.
+    // Chained so a v11 save lands at v32 in one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
@@ -874,6 +904,10 @@ export function migrate(
     if (version === 30 && toVersion >= 31) {
         working = migrateV30ToV31(working);
         version = 31;
+    }
+    if (version === 31 && toVersion >= 32) {
+        working = migrateV31ToV32(working);
+        version = 32;
     }
 
     if (version !== toVersion) {

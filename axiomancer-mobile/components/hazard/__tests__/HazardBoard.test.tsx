@@ -76,7 +76,7 @@ const mockHazardViewModel: HazardViewModel = {
             dieAvailable: true,
             poweredByDieId: null,
             applied: false,
-            salvageLabel: null, powerColors: ['red'], choose: false, chosenKey: null, vowBonus: null,
+            salvageLabel: null,
         },
     ],
     play: [],
@@ -116,10 +116,7 @@ const mockHazardViewModel: HazardViewModel = {
     ],
     meterDetail: null,
     momentumNote: null,
-    enchantments: [],
-    goldVowNote: null,
     rewards: null,
-    foretellPending: null,
 };
 
 const mockDragController: DragController = {
@@ -137,7 +134,6 @@ describe('HazardBoard', () => {
         onUnstage: jest.fn(),
         onPower: jest.fn(),
         onDiscard: jest.fn(),
-        onChoose: jest.fn(),
         onResolve: jest.fn(),
         onApply: jest.fn(),
         onInspect: jest.fn(),

@@ -184,11 +184,7 @@ export const HazardCard = React.memo(function HazardCard({
     const c = DIE[card.kind];
     const rar = RARITY_UI[card.rarity];
     const powered = card.poweredByDieId !== null;
-    // Two-tone cards can be powered by either of two colours — surface both.
-    const powerLabel =
-        card.powerColors.length > 1
-            ? card.powerColors.map((k) => DIE[k].label).join(' / ')
-            : DIE[card.kind].label;
+    const powerLabel = DIE[card.kind].label;
     const W = mode === 'detail' ? 234 : mode === 'play' ? 70 : mode === 'offer' ? 96 : 90;
     const H = mode === 'detail' ? 330 : mode === 'play' ? 112 : mode === 'offer' ? 132 : 136;
 

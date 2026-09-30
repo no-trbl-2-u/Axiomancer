@@ -55,7 +55,7 @@ const mockRewardsVM: HazardRewardsVM = {
             dieAvailable: true,
             poweredByDieId: null,
             applied: false,
-            salvageLabel: null, powerColors: ['red'], choose: false, chosenKey: null, vowBonus: null,
+            salvageLabel: null,
         },
         {
             uid: 'offer-2',
@@ -74,16 +74,13 @@ const mockRewardsVM: HazardRewardsVM = {
             dieAvailable: true,
             poweredByDieId: null,
             applied: false,
-            salvageLabel: null, powerColors: ['red'], choose: false, chosenKey: null, vowBonus: null,
+            salvageLabel: null,
         },
     ],
     offerSubLabel: 'Choose one card',
     canSkip: true,
     reserveNote: '+2 VITAE — unspent dice',
     penaltyNote: null,
-        sacrificeNote: null,
-        mendNote: null,
-        bountyNote: null,
 };
 
 describe('RewardsOverlay', () => {

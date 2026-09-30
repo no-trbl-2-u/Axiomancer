@@ -12,7 +12,7 @@
  *  - `deck`     — draw-bag sizing (the starter deck size multiplier).
  *  - `dice`     — the die-face bag, i.e. colour spread + hex (✕) odds.
  *  - `cards`    — per-colour number bands + utility base/powered amounts.
- *  - `rewards`  — reward / consequence payouts and reward-rarity odds.
+ *  - `rewards`  — reward / consequence payouts.
  *  - `hand`     — the fanned-hand arch geometry.
  *
  * The authored hazard thresholds stay in `hazard.content.ts` (they are
@@ -63,8 +63,6 @@ export const HAZARD_TUNING = {
         redBlue: {
             common: { free: 3, powered: 6 },
             uncommon: { free: 5, powered: 9 },
-            /** Reward-tier red/blue. */
-            reward: { free: 4, powered: 7 },
         },
         /** Purple low DUAL number (per meter); the die upgrades the utility,
          *  not the number, so powered == free here by design. */
@@ -79,95 +77,6 @@ export const HAZARD_TUNING = {
             drawMinorPowered: 2,
             /** Gold's free draw is already "major" and does not grow on power. */
             drawMajor: 2,
-        },
-        /**
-         * Reward-pool EXPANSION magnitudes (2026-06-11 roster). These cards
-         * are acquired, never in the starter bag, so they do not move the
-         * balance sim — but they still read every number from here.
-         */
-        expansion: {
-            /** Two-tone pivots: free one meter, surge the other (bigger). */
-            pivot: { uncFree: 4, uncPowered: 7, rareFree: 5, rarePowered: 10 },
-            /** Lopsided purple duals (strong/weak meter split). */
-            dual: { strong: 5, strongPowered: 7, weak: 2, weakPowered: 3 },
-            /** Number+utility hybrids. */
-            hybrid: {
-                /** PATHFINDER / WINDCALLER: flat number, die upgrades the utility. */
-                flatNumber: 5,
-                /** STONE/TIDEREADER: number grows on power, draw grows too. */
-                drawFree: 3,
-                drawPowered: 5,
-            },
-            /** Enchantments (auras). */
-            aura: {
-                redBlueFree: 3,
-                redBluePowered: 6,
-                redBlueAmount: 2,
-                purpleNumber: 2,
-                purpleMinor: 1,
-                purpleMajor: 2,
-                goldNumber: 6,
-                goldAmount: 3,
-                /** RELIC OF FURY surge-row boost. */
-                surgeBoost: 2,
-            },
-            /** Bursts (this-round-only). */
-            burst: {
-                base: 5,
-                powered: 8,
-                warcryPerDie: 1,
-                bloodForce: 8,
-                bloodPowered: 12,
-                bloodVitae: 4,
-                goldDual: 4,
-                goldNumber: 6,
-            },
-            /** GILDED VOW one-shot. */
-            vow: { force: 7, escape: 7 },
-            /** TWIN PATHS choose value. */
-            choose: 8,
-            /** SAINT'S PATIENCE. */
-            saint: { number: 3, draw: 2, momentum: 2 },
-        },
-        /**
-         * CODEX LIBRARY magnitudes (2026-06-13 — the 150-card roster).
-         * All codex cards live in the reward pool, so the starter-bag
-         * balance sim is untouched; these numbers shape the acquired-card
-         * power curve instead.
-         */
-        codex: {
-            /** Single-meter number ladder [free, powered] per rarity. */
-            numbers: {
-                common: { free: 3, powered: 6 },
-                uncommon: { free: 4, powered: 8 },
-                rare: { free: 5, powered: 10 },
-            },
-            /** Dual (both-meter) ladder per rarity. */
-            dual: {
-                common: { free: 2, powered: 3 },
-                uncommon: { free: 2, powered: 4 },
-                rare: { free: 3, powered: 5 },
-            },
-            /** Two-tone pivot ladder (free one meter, surge the other). */
-            pivot: { uncommon: { free: 4, powered: 7 }, rare: { free: 5, powered: 9 } },
-            /** PURGE cards: numbers carried alongside the cut. */
-            purge: { number: 2, rareNumber: 4 },
-            /** TRANSMUTE cards. */
-            transmute: { number: 2, rareNumber: 4 },
-            /** MEND: vitae restored at claim (minor / major tier). */
-            mend: { minor: 2, major: 4, rareMajor: 6 },
-            /** BOUNTY: shillings banked at claim (minor / major tier). */
-            bounty: { minor: 4, major: 8, rareMajor: 12 },
-            /** WARD: route-penalty reduction (minor / major tier). */
-            ward: { minor: 2, major: 4 },
-            /** ANCHOR: momentum floor raised (minor / major tier). */
-            anchor: { minor: 1, major: 2 },
-            /** JEOPARDY: bonus progress per meter when ≥1 mark is 'X'. */
-            jeopardy: { minor: 2, major: 3 },
-            /** MIRACLE (first-play): bonus progress per meter when played first. */
-            miracle: { minor: 2, major: 3 },
-            /** DELVE: bonus per discard-pile card per meter. */
-            delve: { minor: 1, major: 2 },
         },
     },
 

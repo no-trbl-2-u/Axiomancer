@@ -34,7 +34,6 @@ export {
     HAZARD_KEYWORDS,
     HAZARD_DECK,
     HAZARD_CRACK_CARD,
-    HAZARD_REWARD_CARDS,
     getHazardCardDef,
     HAZARD_REWARDS,
     HAZARD_CONSEQUENCES,
@@ -59,7 +58,6 @@ export {
 // ── Pure engine transitions ─────────────────────────────────────────────────
 export {
     // selectors
-    hazardCardPowerColors,
     hazardCardValue,
     hazardProjectedProgress,
     dieCanPowerCard,
@@ -71,7 +69,6 @@ export {
     stageHazardCard,
     unstageHazardCard,
     powerHazardCard,
-    chooseHazardCardKey,
     applyHazardCard,
     discardHazardCard,
     // resolve / outcome / rewards
@@ -79,18 +76,4 @@ export {
     continueHazardAfterResolve,
     acknowledgeHazardOutcome,
     claimHazardRewards,
-    // Phase 149 functions
-    getHazardDeckIdentity,
-    removeHazardDeckCard,
-    // Foretell resolution (2026-06-25)
-    confirmHazardForetell,
 } from './hazard.engine';
-
-// ── Phase 149 — Engagement mechanics ───────────────────────────────────────
-export {
-    classifyDeckFocus,
-    calculateDeckScars,
-    generateRewardOffer,
-    generateDeckIdentity,
-    removeCardFromDeck,
-} from './hazard.engagement';
