@@ -123,7 +123,7 @@ event-pool and layout files).
 - [x] Phase R3b — World reset 2/3, purge fishing-village and re-home the Anvil (25a6c5e7, 45bb8334)
 - [x] Phase R3c — World reset 3/3, hygiene: unstartable quests and unread flags gone, shillings the one currency, reachability pinned to Act 1 (b901c094)
 - [x] Phase R4 — Relic placeholders: ten signatures → GUARD 5 at a flat cost; The Open Hand becomes a real befriend (9110c7be)
-- [ ] Phase R5 — Items reset: healing potions only, save migration, shops/caches re-pointed. `plan/revamp/items.md`. Requires R3c.
+- [x] Phase R5 — Items reset: healing potions only, save migration, shops/caches re-pointed (b2f91e00)
 - [ ] Phase R6 — Hazard reset: minimal hazard deck, honest rewards. `plan/revamp/hazards.md`. Requires R0.
 - [ ] Phase R7a — Engine purge 1/3: the 47 carrier-less mechanic kinds, their handlers, dead card fields, encounter-state fields and the retired-verb test fixtures. `plan/revamp/engine.md` (split (a)). Requires R2b, R4, R6.
 - [ ] Phase R7b — Engine purge 2/3: pricing, synergy, themes, deck draft and presets, reward steering, card types → Attack/Skill/Spell. `plan/revamp/engine.md` (split (b)). Requires R7a.
