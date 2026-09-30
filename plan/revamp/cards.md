@@ -13,29 +13,22 @@
 > test that pins them. That is Phase B4. No card work begins until its
 > inventory is merged. (Also recorded in `plan/bearings.md` → THE CARD HOLD.)
 
-## The card process plan is NOT picked yet
+## The card process: Plan B, ratified 2026-09-30 (D73)
 
-> [!WARNING]
-> T has **not** committed to a card revamp plan. There are **three
-> candidate process plans** in
-> [`plan/2026-09-27-keyword-card-revamp.plans.md`](../2026-09-27-keyword-card-revamp.plans.md)
-> (status UNDECIDED; its 2026-09-27 ballot came back "no preference"):
->
-> - **Plan A — Vision first** (the staged pipeline: fantasies → skeleton → set → play)
-> - **Plan B — Slice first** (vertical prototypes; playable new cards in session 1) — that file's recommendation, confidence 70
-> - **Plan C — Threat first** (the player's kit derived as answers to the enemy roster)
->
-> **Until T picks one, every agent that discusses card, keyword or
-> card-type work must recommend that T open the interactive summary
-> `plan/2026-09-27-keyword-card-revamp.summary.html`** (one tab per plan, with a working-backwards verdict) to help
-> choose. Do not start B5/B6, schedule sessions, or treat any plan's
-> recommendation as a decision. When T picks, follow the ratify instructions
-> in that file's banner, file a D-number, and update this section and the
-> README banner in the same commit.
->
-> Note for the pick: the enemy reset (R2) leaves three foes, so Plan C's
-> threat matrix has little to derive from until B2; if T picks C, B2 moves
-> ahead of B6 (README §7).
+T ratified **Plan B (Slice first)** from
+[`plan/2026-09-27-keyword-card-revamp.plans.md`](../2026-09-27-keyword-card-revamp.plans.md),
+with these amendments:
+
+| Call | Ruling |
+|---|---|
+| Slice unit | **One lane** per slice (one build session plus one kill session); no colour order |
+| Lane grouping | **Families of sub-lanes.** A relic names a family; the guaranteed reward card comes from any lane in the family |
+| First pool | **3 families × 1 lane** (≈36 cards + grey) |
+| Multi-lane cards | **Bridge cards within a family**, built at the cross-slice session once a family has 2+ lanes (so the first pool has none) |
+| §1 session rules | **Not ratified**; reviewed later |
+| Still open | C1 threat matrix; §7 D8/D20 and progression calls; B5's tool shape |
+
+Plans A and C are rejected. THE CARD HOLD (D37) and the B4 gate stand.
 
 ## Where things stand
 
@@ -47,7 +40,7 @@
 - Card types: purged to **Attack / Skill / Spell** (D51, shipped in R7).
 - The keyword/card revamp process plans:
   [`plan/2026-09-27-keyword-card-revamp.plans.md`](../2026-09-27-keyword-card-revamp.plans.md)
-  and its summary — **UNDECIDED**; B6 is where T picks one.
+  and its summary — **Plan B ratified, amended (D73)**.
 - The card editor package is deleted in R1 (D56); B5 replaces it.
 - `card-expert` is archived in R0 (D58); a fresh card agent is written at
   the first card session.
@@ -99,8 +92,8 @@ relics. This replaces the stat-threshold idea.
 starting relic; until a quest or elite gives one, the deck is grey plus
 random rewards.
 
-**Left for a card session:** how big a lane is and whether lanes group
-into families; cards in several lanes.
+**Settled by D73:** lanes group into families, a relic names a family, and
+bridge cards join sub-lanes within a family.
 
 ## Card types — T's answers (2026-09-29, D69)
 
@@ -171,19 +164,13 @@ T's call.
 
 ## B6 — Card sessions (owner)
 
-T picks a plan (or splice) from the keyword/card revamp plans, ratifies its
-banner there, and runs the sessions. A fresh card agent is written at the
+T runs Plan B's sessions as amended by D73, one lane per slice. A fresh card agent is written at the
 first session. The Global and Curse types (D69–D71) are built here: the
 `CardType` union, Global play/expiry and uniqueness, the Curse slot, the
 EXILE and SACRIFICE keywords, and the first Curse.
 
-**Must be decided in the first card session (before any lane is authored):**
-
-- **Lane granularity:** how big a lane is, and whether lanes group into
-  families. This sets what a relic names (a lane or a family, D71) and what
-  the guaranteed reward slot draws from.
-- **Multi-lane cards:** whether a card can belong to several lanes, and how
-  the reward slot treats one.
+**Decided (D73):** lanes group into families (a relic names a family) and
+bridge cards join sub-lanes within a family. Each slice builds one lane.
 
 ## Card-session queue
 

@@ -693,6 +693,36 @@ and quest plumbing with the content; deleting the Labyrinth module;
 keeping the ten placeholder relics or one per slot; blanking Act 1 prose;
 cutting Act 1 to one region.
 
+**D73 — Card process: Plan B, one slice per lane, families of sub-lanes.**
+(T, attended ballot, 2026-09-30.)
+
+- **Plan B (Slice first) is ratified** as the card process.
+- **One slice = one lane**, built in one build session plus one kill
+  session. This replaces Plan B's colour-ordered slices (body, then mind,
+  then heart); lanes are colour-free (D65).
+- **Lanes group into families.** A relic names a family (D71 allowed this).
+  The guaranteed reward card is drawn from any lane in an equipped relic's
+  family.
+- **The first pool is 3 families × 1 lane** (≈36 cards + grey). More lanes
+  join a family later without changing any relic text.
+- **Bridge cards join sub-lanes within a family.** They are built at the
+  cross-slice session once a family has two or more lanes. The first pool
+  therefore has no bridges.
+- **Not ratified (reviewed later):** the plans file's §1 session rules
+  (verdict words, ballot limits, the sandbox-set rung, the clock, the batch
+  sheet, per-slice ledgers).
+- **Still open:** the Plan C threat matrix (C1) as briefing material; the
+  §7 calls on D8/D20 and progression prototypes; B5's tool shape.
+- **A paper rehearsal was requested next:** session 0 and one lane's pitch
+  and ballot, recorded as a rehearsal ledger, with nothing wired. THE CARD
+  HOLD (D37) and RC's no-content rule both still hold.
+- Resolves open calls D71 left: lane granularity (families) and multi-lane
+  cards (bridges within a family).
+
+*Rejected:* Plan A (vision first), Plan C (threat first), a slice per
+family, keeping colour slices, tight lanes with no families, loose lanes,
+one lane per card, free multi-lane tags, bridges across families.
+
 ## Open follow-ups
 
 **D1 status at a glance (2026-09-28, after #408).** Card and keyword

@@ -1,29 +1,17 @@
 # Keyword / card revamp — three plans to drive the phase
 
-> [!CAUTION]
-> ## ⛔ STATUS: UNDECIDED — NOTHING IN THIS FILE IS RATIFIED
+> [!NOTE]
+> ## ✅ STATUS: DECIDED 2026-09-30 (D73)
 >
-> **To every future agent and loop verb:** T has **not** chosen a plan, a
-> splice, the §1 session format, a pool size, a carrier threshold, or any
-> progression mechanism. The 2026-09-27 ballot came back "no preference" on
-> every call (§7). Treat every recommendation, verdict and confidence score
-> here as a **proposal**, not policy.
->
-> - Do **not** start any plan, session, slice or phase from this file.
-> - Do **not** cite it as a decision, a ruling or a D-number.
-> - Do **not** create cards, keywords or card types from it (THE CARD HOLD,
->   D37, still applies).
-> - It may be read as background and quoted as options.
-> - **Recommend that T open `plan/2026-09-27-keyword-card-revamp.summary.html`** (one tab per plan) to decide.
->   The revamp build plan (`plan/revamp/cards.md`, D64) gates card work on
->   this pick and on the card-rules inventory (Phase B4).
->
-> **Ratify this note when T decides.** The session that records T's choice
-> must, in the same commit: (1) replace this banner with a
-> `STATUS: DECIDED` note naming what T chose, the date, and the D-number
-> filed in `plan/2026-09-25-refactor-strategy.decisions.md`; (2) mark every
-> option T rejected as rejected; (3) make the same change to the banner in
-> `plan/2026-09-27-keyword-card-revamp.summary.html`.
+> T ratified **Plan B (Slice first)**, amended: **one slice = one lane**
+> (lanes are colour-free, so the colour-ordered slices are gone); lanes
+> group into **families**, and a relic names a family; the first pool is
+> **3 families × 1 lane**; **bridge cards** join sub-lanes within a family.
+> **Plans A and C are rejected.** §1's session rules are **not ratified**
+> (reviewed later); C1's threat matrix, the §7 D8/D20 and progression calls,
+> and B5's tool shape stay open. THE CARD HOLD (D37) and the B4 inventory
+> gate still apply: no card is created outside a guided session with T.
+> The full ruling is D73 in `plan/2026-09-25-refactor-strategy.decisions.md`.
 
 > Written 2026-09-27 for T, ahead of the guided sessions D37 requires. This
 > is a **process** document: it decides *how* the post-purge keyword, card
@@ -129,7 +117,7 @@ lets it die before the next slice starts.
   revisions (each TWEAK; a card is replaced at its third revision). The next
   slice's brief is proposed by this slice's kill session (§6 R2-03, R2-11).
 
-## 2. Plan A — Vision first (the staged pipeline)
+## 2. Plan A — Vision first (the staged pipeline) — REJECTED (D73)
 
 Model: Wizards' four-stage process (exploratory → vision → set → play
 design) and the "design skeleton" (§6 A1–A4). Best when T wants the
@@ -155,7 +143,7 @@ Risks: the vision doc becomes the ~35-law regime again — mitigated by the
 2-page cap and the expiry rule; slowest first playable (session 3).
 Sessions: 6–7. Confidence the sequence fits this repo: 80.
 
-## 3. Plan B — Slice first (vertical prototypes)
+## 3. Plan B — Slice first (vertical prototypes) — RATIFIED, amended (D73)
 
 Model: Slay the Spire's weekly early-access loop, Balatro's prototype
 timeline, Hearthstone's "a keyword only when many cards already say it"
@@ -184,7 +172,7 @@ rules text on Ash cards can breach the rank budget until extraction — the
 budget is checked at B2, not B1.
 Sessions: 6 for three fantasies, then 2 per added fantasy. Confidence: 85.
 
-## 4. Plan C — Threat first (answers to the roster)
+## 4. Plan C — Threat first (answers to the roster) — REJECTED (D73)
 
 Model: the enemies survived the purge; the player's toolkit is derived from
 what they do. Slay the Spire designed enemies as tests of specific deck

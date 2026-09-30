@@ -765,10 +765,9 @@ ambiguity.)
   `plan/revamp/cards.md`) must be merged — card types, keyword families,
   pricing, rarity/rank, tiers, colour, FREE/PAID anatomy, complexity budget,
   the carrier rule and every guard that pins them. **The card process
-  plan is not picked** (three candidates, A/B/C, in
-  `plan/2026-09-27-keyword-card-revamp.plans.md`); until T picks, any agent
-  discussing card work recommends T open
-  `plan/2026-09-27-keyword-card-revamp.summary.html` to choose.
+  is Plan B, ratified 2026-09-30 (D73):** one slice per lane, lanes grouped
+  into families (a relic names a family), a first pool of 3 families × 1
+  lane, and bridge cards within a family. See `plan/revamp/cards.md`.
 - **THE REVAMP (T, attended session 2026-09-28, D46–D64) — RATIFIED 2026-09-28.**
   `plan/revamp/README.md` is the main build plan; its §7 is the recommended
   order. `/march` and `night` stay disabled until Phase R0 (attended)
