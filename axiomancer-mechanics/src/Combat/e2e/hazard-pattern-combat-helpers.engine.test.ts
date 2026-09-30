@@ -7,7 +7,7 @@
  * deliberate focus on the doctrine-critical surface:
  *
  *   - the self-reinforcing status-loop dice primitives (`combatDieCanPower` /
- *     `refreshOneDie` / `rollCombatDieColor`) — HP is the sole win condition
+ *     `refreshOneDie`) — HP is the sole win condition
  *     (2026-06-22); DoT/control cards deplete HP far faster than the weak
  *     basic strike; `dotErosionReached` / `controlSaturationReached` were
  *     removed with the old Pressure-Track model;
@@ -40,8 +40,7 @@ import {
 import { recordAttribution, buildCombatSummary } from '../combat.attribution';
 import type { CombatAttributionRow, LandedEffect } from '../combat.encounter.types';
 import {
-    rollCombatDieColor, combatDieCanPower, refreshOneDie,
-    dieIsRerollable, hasRerollableDice, rerollSpentDice,
+    combatDieCanPower, refreshOneDie,
 } from '../combat.dice';
 import { buildCombatDeck, COMBAT_HAND_SIZE } from '../combat.deck';
 import { classifyVerbClass, toCombatCard, projectDeck } from '../combat.cards';
@@ -99,20 +98,7 @@ function die(id: string, color: CombatManaDie['color'], state: CombatManaDie['st
     return { id, color, state, temporary: false };
 }
 
-/** A fixed-value RNG for the dice bag (deterministic, no Math.random spy). */
-const fixed = (v: number) => (): number => v;
-
 // ── Dice primitives (§4.2 / §4.7) — the self-reinforcing status loop ─────────
-
-describe('Spec 25 §4.2 — rollCombatDieColor (the legacy bag behind `reroll_spent`)', () => {
-    it('reads the 6-face bag [heart, body, mind, wild, x, x] by rng index', () => {
-        expect(rollCombatDieColor(fixed(0))).toBe('heart');
-        expect(rollCombatDieColor(fixed(3 / 6))).toBe('wild');
-        expect(rollCombatDieColor(fixed(5 / 6))).toBe('x');
-        // rng()=1 clamps to the last face rather than indexing past the bag.
-        expect(rollCombatDieColor(fixed(1))).toBe('x');
-    });
-});
 
 describe('Spec 25 §4.2 — combatDieCanPower', () => {
     it('a matching available colored die powers its card', () => {
@@ -272,111 +258,6 @@ describe('Spec 25 §7.6 — selectEncounterMercyChoice', () => {
 });
 
 // ── Press Fate partial re-roll (PR #190 / Spec 26b §4) ─────────────────────
-
-describe('Spec 26b §4 — dieIsRerollable', () => {
-    it('spent and exhausted dice are rerollable', () => {
-        expect(dieIsRerollable(die('a', 'body', 'spent'))).toBe(true);
-        expect(dieIsRerollable(die('b', 'heart', 'exhausted'))).toBe(true);
-    });
-
-    it('x-color dice are rerollable regardless of state', () => {
-        expect(dieIsRerollable(die('c', 'x', 'locked'))).toBe(true);
-        expect(dieIsRerollable(die('d', 'x', 'available'))).toBe(true);
-    });
-
-    it('available non-x dice are NOT rerollable (left alone by Press Fate)', () => {
-        expect(dieIsRerollable(die('e', 'body', 'available'))).toBe(false);
-        expect(dieIsRerollable(die('f', 'wild', 'available'))).toBe(false);
-        expect(dieIsRerollable(die('g', 'mind', 'available'))).toBe(false);
-    });
-});
-
-describe('Spec 26b §4 — hasRerollableDice', () => {
-    it('returns false when every die is available and non-x', () => {
-        const pool = [
-            die('a', 'body', 'available'),
-            die('b', 'heart', 'available'),
-            die('c', 'wild', 'available'),
-        ];
-        expect(hasRerollableDice(pool)).toBe(false);
-    });
-
-    it('returns true when at least one die is spent', () => {
-        const pool = [die('a', 'body', 'available'), die('b', 'mind', 'spent')];
-        expect(hasRerollableDice(pool)).toBe(true);
-    });
-
-    it('returns true when at least one die is x-color (locked)', () => {
-        const pool = [die('a', 'heart', 'available'), die('b', 'x', 'locked')];
-        expect(hasRerollableDice(pool)).toBe(true);
-    });
-
-    it('returns false for an empty pool', () => {
-        expect(hasRerollableDice([])).toBe(false);
-    });
-});
-
-describe('Spec 26b §4 — rerollSpentDice', () => {
-    it('only re-rolls spent/exhausted/x dice; available non-x dice are preserved', () => {
-        const pool = [
-            die('a', 'heart', 'available'),
-            die('b', 'body', 'spent'),
-            die('c', 'x', 'locked'),
-        ];
-        // fixed(0) → always rolls index 0 of the bag → 'heart'
-        const { dice, rerolledIds } = rerollSpentDice(pool, fixed(0));
-        expect(rerolledIds).toEqual(['b', 'c']);
-        const preserved = dice.find(d => d.id === 'a')!;
-        expect(preserved.color).toBe('heart');
-        expect(preserved.state).toBe('available');
-    });
-
-    it('rerolled die ids are preserved (same object identity key)', () => {
-        const pool = [die('x1', 'body', 'spent'), die('x2', 'mind', 'exhausted')];
-        const { dice, rerolledIds } = rerollSpentDice(pool, fixed(0));
-        expect(rerolledIds).toHaveLength(2);
-        expect(dice.map(d => d.id)).toEqual(['x1', 'x2']);
-    });
-
-    it('an x re-roll result stays locked; a stance/wild result becomes available', () => {
-        // fixed(5/6) → always rolls index 5 → 'x'
-        // Include a preserved stance die so the at-least-one-stance guard does NOT fire.
-        const poolX = [die('a', 'body', 'spent'), die('b', 'heart', 'available')];
-        const { dice: diceX } = rerollSpentDice(poolX, fixed(5 / 6));
-        expect(diceX[0].color).toBe('x');
-        expect(diceX[0].state).toBe('locked');
-        expect(diceX[1].color).toBe('heart'); // preserved
-
-        // fixed(0) → always rolls index 0 → 'heart'
-        const poolH = [die('c', 'body', 'spent')];
-        const { dice: diceH } = rerollSpentDice(poolH, fixed(0));
-        expect(diceH[0].color).toBe('heart');
-        expect(diceH[0].state).toBe('available');
-    });
-
-    it('guarantees at least one stance-bearing die when all re-rolled results are x', () => {
-        // All three dice are rerollable; fixed(5/6) → every roll → 'x'.
-        // The guard must convert the last re-rolled die to a stance color.
-        const pool = [
-            die('a', 'body', 'spent'),
-            die('b', 'mind', 'spent'),
-            die('c', 'x', 'locked'),
-        ];
-        const { dice } = rerollSpentDice(pool, fixed(5 / 6));
-        const stanceDice = dice.filter(d => d.color === 'heart' || d.color === 'body' || d.color === 'mind');
-        expect(stanceDice.length).toBeGreaterThanOrEqual(1);
-    });
-
-    it('returns empty rerolledIds and unchanged dice when nothing is rerollable', () => {
-        const pool = [die('a', 'body', 'available'), die('b', 'heart', 'available')];
-        const { dice, rerolledIds } = rerollSpentDice(pool, fixed(0));
-        expect(rerolledIds).toEqual([]);
-        expect(dice.map(d => d.state)).toEqual(['available', 'available']);
-        expect(dice.map(d => d.color)).toEqual(['body', 'heart']);
-    });
-});
-
-// ── Constants ────────────────────────────────────────────────────────────────
 
 describe('Spec 25 — constants', () => {
     it('COMBAT_HAND_SIZE is the draw cap', () => {

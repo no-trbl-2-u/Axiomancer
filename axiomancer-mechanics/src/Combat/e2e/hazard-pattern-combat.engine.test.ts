@@ -57,22 +57,22 @@ afterEach(() => {
 // ── Fixtures ─────────────────────────────────────────────────────────────────
 
 // Spec 32 v3: basePower is deleted at the schema level — no card can strike.
-// The "damage class" fixture is a bare RUPTURE payoff (affliction-gated burst).
+// The "damage class" fixture is a bare body DEAL.
 // Profane Canon (2026-08-08): the round-clock DoT lost its library carrier
 // (nettle-cloak retired; poison/bleed ride EVENT clocks), so the round-boundary
 // witness is a SYNTHETIC carrier of the round-end DoT fixture (`fixture_nettle`,
 // the old nettle sting — deleted from the library in the keyword audit,
 // 2026-09-27; carrier-less-verb policy: engine behavior stays under test).
 registerSandboxCards([{
-    id: 'qa-payoff-burst',
-    name: 'QA Payoff Burst (test fixture)',
+    id: 'qa-body-deal',
+    name: 'QA Body Deal (test fixture)',
     color: 'body',
-    description: 'Test-only fixture: a bare RUPTURE payoff with no status payload.',
+    description: 'Test-only fixture: a bare body DEAL with no status payload.',
     tier: 1,
     rank: 1,
     cardType: 'spell',
     targetType: 'enemy',
-    specialMechanics: [{ kind: 'rupture' }],
+    specialMechanics: [{ kind: 'deal', amount: 6 }],
 }, {
     id: 'qa-round-dot',
     name: 'QA Round-Clock DoT (test fixture)',
@@ -104,7 +104,7 @@ registerSandboxCards([{
 
 const DOT_BODY = 'qa-poultice-dot';      // body, applies debuff_poison (card-played-clock DoT) — sandbox
 const CONTROL_CARD = 'grey-word';        // colourless, control track (VULNERABLE, stat-debuff)
-const DAMAGE_BODY = 'qa-payoff-burst';   // body, tier 1, RUPTURE payoff (sandbox fixture)
+const DAMAGE_BODY = 'qa-body-deal';      // body, tier 1, DEAL 6 (sandbox fixture)
 
 function makePlayer(cards: string[]): Character {
     const p = deepClone(Player);
@@ -206,11 +206,11 @@ describe('Spec 25 §6 — card classification', () => {
         expect(card.effectKind).toBe('control');
         expect(['direct-control', 'stat-debuff']).toContain(card.verbClass);
     });
-    it('a payoff-burst card is direct-damage with 0 preview (no strike number exists)', () => {
+    it('a DEAL card is direct-damage and previews its printed number', () => {
         const card = getCard(DAMAGE_BODY)!;
         expect(card.verbClass).toBe('direct-damage');
         expect(card.effectKind).toBe('none');
-        expect(card.bottomDamagePreview).toBe(0);
+        expect(card.bottomDamagePreview).toBe(6);
     });
 });
 
@@ -240,42 +240,6 @@ describe('Spec 33 §1 — initialization + the four-die tray', () => {
             expect(p.threatAction.effects.length).toBeGreaterThan(0);
             expect(p.threatAction.effects.some(e => (e.damage ?? 0) > 0)).toBe(true);
         }
-    });
-});
-
-// ── Payoff bursts are affliction-gated (HP model, spec 32 v3) ────────────────
-
-describe('HP model — a payoff card bursts only off afflictions and spends the die', () => {
-    it('a RUPTURE bottom on an afflicted foe bursts HP (no status landed → die spent, no chain)', () => {
-        mockSequentialRng(0.05);
-        let state = initializeCombatEncounter(makePlayer([DAMAGE_BODY]), makeEnemy(80, 'mind'), [DAMAGE_BODY], 7);
-        state = rollEncounterDice(state).state;
-        state = setDice(state, ['body', 'heart']);
-        // Seed the fuel: the burst exists ONLY because the affliction does.
-        state = {
-            ...state,
-            enemy: { ...state.enemy, effects: [{ effectId: 'debuff_poison', intensity: 2, remainingDuration: 3, appliedAt: 1, tier: 2 }] },
-        };
-        const hpBefore = state.enemy.health;
-        const r = playWithDie(state, DAMAGE_BODY);
-        expect(r.played).toBe(true);
-        expect(fizzled(r.events!)).toBe(false);
-        expect(r.state.enemy.health).toBeLessThan(hpBefore);
-        expect(r.state.directDamageDealt).toBeGreaterThan(0);
-        // No status landed → the powering die is spent (no chain).
-        expect(r.state.dice.find(d => d.id === r.dieId)?.state).toBe('spent');
-    });
-
-    it('the same RUPTURE on a clean foe bursts 0 — no fuel, no damage (never a raw strike)', () => {
-        mockSequentialRng(0.05);
-        let state = initializeCombatEncounter(makePlayer([DAMAGE_BODY]), makeEnemy(80, 'mind'), [DAMAGE_BODY], 7);
-        state = rollEncounterDice(state).state;
-        state = setDice(state, ['body', 'heart']);
-        const hpBefore = state.enemy.health;
-        const r = playWithDie(state, DAMAGE_BODY);
-        expect(r.played).toBe(true);
-        expect(fizzled(r.events!)).toBe(false); // it LANDED — the 0 is the fuel, not a fizzle
-        expect(r.state.enemy.health).toBe(hpBefore);
     });
 });
 

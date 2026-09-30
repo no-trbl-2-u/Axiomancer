@@ -91,36 +91,23 @@ export function buildFixtureState(options: { clean?: boolean } = {}): CombatEnco
         phase: 'phase-play',
         turn: 1,
         dice: [wildDie],
-        // 1 of RESERVE_MAX(2) slots used, with 1 pip (<RESERVE_PIP_CAP(2)) —
-        // room for create_temporary_die/reap-kindle/bank_spent_die to add one
-        // more, and for grant_pip to ripen further. CLEAN zeroes the pip:
-        // banked pips are printed RUPTURE fuel (`fuelPerPip`).
+        // 1 of RESERVE_MAX(2) slots used, with 1 pip (<RESERVE_PIP_CAP(2)).
+        // CLEAN zeroes the pip.
         reserve: [{ id: 'fx-reserve-0', color: 'heart', state: 'available', temporary: false, pips: clean ? 0 : 1 }],
-        // 1 of FLOATING_DICE_CAP(3) slots used — room for forge_floating_die.
+        // 1 of FLOATING_DICE_CAP(3) slots used.
         floatingDice: [{ id: 'fx-float-0', color: 'wild', state: 'available', temporary: false, floating: true, pips: 0 }],
         guard: clean ? 0 : 4,
         barrier: clean ? 0 : 4,
-        souls: clean ? 0 : 12, // clean: REAP must have zero souls to consume
-        // Phase 32 part 4a (Control — TURNABOUT ledger): clean: TURNABOUT
-        // must have zero rungs banked to consume (same doctrine as souls).
-        rungsDeniedTotal: clean ? 0 : 20,
+        souls: clean ? 0 : 12,
         premises: 3,
         peroration: null, // tallied but undeclared — a 'premise' gain never trips CONDEMN mid-assertion
         sway: 0,
         staggerRungs: 0,
         revealedStances: [],
-        pendingOmens: [],
-        omenHits: 0,
-        echoNextSpell: false,
         spellsPlayedThisTurn: 0,
-        lastSpellCardId: 'grey-strike', // a real, different, replayable spell (REPLAY fodder)
-        // Phase 39 (2026-08-08): REPLAY_LAST's precondition-width
-        // retune requires `lastSpellRound === round` ("landed THIS turn") —
-        // the fixture's `round` is 1 (initializeCombatEncounter's default).
-        lastSpellRound: 1,
         persistentZone: [],
         enemyAttachments: [],
-        discard: ['grey-strike', 'grey-ward', 'grey-word'], // RECALL fodder (the grey office since the purge)
+        discard: ['grey-strike', 'grey-ward', 'grey-word'],
         drawPile: FIXTURE_FILLER.slice(),
         deck: FIXTURE_FILLER.slice(),
         hand: [],

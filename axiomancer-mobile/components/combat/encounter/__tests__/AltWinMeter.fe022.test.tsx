@@ -24,7 +24,6 @@ import { withAllProviders } from '@/test-utils/withAllProviders';
 
 const PLAYER: CombatPlayerPaneVM = {
     name: 'Pilgrim', hp: 40, maxHp: 50, hpPct: 0.8, guard: 0, effects: [],
-    wrath: 0, wrathVisible: false, chain: 0, chainVisible: false, twinArmed: false,
 };
 
 /** A minimal enemy pane VM with every meter off; tests switch one on. */
@@ -37,7 +36,6 @@ const BASE_ENEMY = {
     },
     sway: 0, swayTarget: 42, swayVisible: false,
     premises: 0, premiseAt: 5, premiseVisible: false,
-    flay: 0, flayVisible: false,
     pendingDot: 0, roundsToKill: 0, isLethalInFlight: false,
     stanceKnown: false, stance: null, traits: [],
 } as unknown as CombatEnemyPaneVM;
@@ -62,11 +60,5 @@ describe('FE-022: alt-win meters name their payoff', () => {
         renderPane({ premiseVisible: true, premises: 1, premiseAt: 5 } as Partial<CombatEnemyPaneVM>);
         const meter = screen.getByTestId('combat-premise-meter');
         expect(meter.props.accessibilityLabel).toMatch(/CONDEMN/);
-    });
-
-    it('a meter with no target to fill toward names no payoff', () => {
-        renderPane({ flayVisible: true, flay: 3 } as Partial<CombatEnemyPaneVM>);
-        const meter = screen.getByTestId('combat-flay-meter');
-        expect(meter.props.accessibilityLabel).not.toMatch(/RELENT|CONDEMN/);
     });
 });

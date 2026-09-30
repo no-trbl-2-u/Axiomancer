@@ -13,8 +13,7 @@
  * keyword", 2026-07-10): UPPERCASE runs in the authored face text
  * (`paidSummary` / `persistentEffect`) are keywords unless they are known
  * structural words — the same convention `paid-summary-honesty.engine.test.ts`
- * enforces — plus the keywords implied by rider verbs on FREE / die-interaction
- * lines (a FREE "draw 1" is DRAW even when the prose never prints it). An
+ * enforces — plus the keywords implied by rider verbs on the FREE line (a FREE "draw 1" is DRAW even when the prose never prints it). An
  * exclusion list (not an allowlist) keeps the instrument honest as the
  * vocabulary grows: a new keyword shows up in the counts the day its first
  * card ships.
@@ -43,12 +42,7 @@ const PLURAL_TO_SINGULAR: Readonly<Record<string, string>> = Object.freeze({
 
 /** Rider verb fields → the keyword they imply even when no prose prints it. */
 const RIDER_KEYWORDS: readonly (readonly [keyof CardRider, string])[] = [
-    ['drawCards', 'DRAW'], ['guard', 'GUARD'], ['barrier', 'GUARD'],
-    ['healHp', 'HEAL'], ['cleanse', 'CLEANSE'], ['premises', 'CHARGE'],
-    ['sway', 'PLEA'], ['souls', 'SOUL'], ['foretell', 'FORETELL'],
-    ['tickOne', 'TICK'], ['tickAllDots', 'TICK'], ['stagger', 'STAGGER'],
-    ['pips', 'PIP'], ['intensityPerPip', 'PIP'], ['recoil', 'RECOIL'],
-    ['millCards', 'MILL'], ['ruptureMarks', 'RUPTURE'],
+    ['guard', 'GUARD'],
 ];
 
 function collectTextKeywords(text: string | undefined, into: Set<string>): void {
@@ -71,9 +65,9 @@ export interface CardComplexityRow {
     /** Distinct keywords on the face (text + rider-implied), sorted. */
     keywords: string[];
     /** Mechanical moving parts: combat-effect payloads + special mechanics +
-     *  synergy clause + die-interaction lines + persistent hook. */
+     *  synergy clause + persistent hook. */
     mechanicCount: number;
-    /** Conditional gates (synergy predicate, threshold, dieBonus, fallen). */
+    /** Conditional gates (the synergy predicate). */
     conditionalCount: number;
     /** keywords + mechanics + conditionals — the additive v1 heuristic. */
     score: number;
@@ -85,17 +79,11 @@ export function cardComplexity(card: Card): CardComplexityRow {
     collectTextKeywords(card.paidSummary, kws);
     collectTextKeywords(card.persistentEffect, kws);
     collectRiderKeywords(card.free, kws);
-    collectRiderKeywords(card.threshold?.rider, kws);
-    collectRiderKeywords(card.dieBonus?.rider, kws);
-    collectRiderKeywords(card.fate?.rider, kws);
-    collectRiderKeywords(card.fallen?.rider, kws);
 
-    const conditionalCount = (card.synergy ? 1 : 0) + (card.threshold ? 1 : 0)
-        + (card.dieBonus ? 1 : 0) + (card.fallen ? 1 : 0);
+    const conditionalCount = card.synergy ? 1 : 0;
     const mechanicCount = (card.combatEffects?.length ?? 0)
         + (card.specialMechanics?.length ?? 0)
         + (card.persistentEffect ? 1 : 0)
-        + (card.fate ? 1 : 0)
         + conditionalCount;
 
     const keywords = [...kws].sort();

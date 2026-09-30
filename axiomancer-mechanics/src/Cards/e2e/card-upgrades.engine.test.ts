@@ -153,20 +153,6 @@ describe('card upgrades — a + never subtracts', () => {
         expect(inert).toEqual([]);
     });
 
-    it('never raises a printed COST (recoil / ante / reap cost / burn count)', () => {
-        const costPaths = /(\.recoil$|\.hp$|anteConviction|\.cost$|recoilHp)/;
-        const offenders: string[] = [];
-        for (const card of LIBRARY) {
-            const before = numericLeaves(card);
-            const after = numericLeaves(upgradeCard(card));
-            for (const [path, n] of before) {
-                if (!costPaths.test(path)) continue;
-                if ((after.get(path) ?? n) !== n) offenders.push(`${card.id} → ${path} raised`);
-            }
-        }
-        expect(offenders).toEqual([]);
-    });
-
     it('never raises a self-inflicted debuff (a cost wearing an effect)', () => {
         const offenders: string[] = [];
         for (const card of LIBRARY) {
@@ -225,15 +211,12 @@ describe('card upgrades — paidSummary never lies', () => {
         const card: Card = {
             id: 'fixture-free-only', name: 'Fixture', color: 'mind',
             description: 'x', tier: 1, rank: 1, cardType: 'spell', targetType: 'enemy',
-            paidSummary: 'STAGGER 1.',
-            free: { drawCards: 1 },
-            specialMechanics: [{ kind: 'lock_stance' }, { kind: 'stagger', rungs: 1 }],
+            paidSummary: 'Nothing more.',
+            free: { damage: 2 },
         };
-        // stagger IS printed, so bump only the FREE line by removing stagger.
-        const freeOnly: Card = { ...card, specialMechanics: [{ kind: 'lock_stance' }], paidSummary: 'Lock the stance.' };
-        const up = upgradeCard(freeOnly);
-        expect(up.free?.drawCards).toBe(2);
-        expect(up.paidSummary).toBe('Lock the stance.');
+        const up = upgradeCard(card);
+        expect(up.free?.damage).toBe(4);
+        expect(up.paidSummary).toBe('Nothing more.');
     });
 });
 
@@ -291,48 +274,13 @@ describe('card upgrades — the default rule numbers', () => {
         }
     });
 
-    it('RATE is +25%, at least +1', () => {
-        const cases: [number, number][] = [[2, 3], [4, 5], [8, 10], [12, 15]];
-        for (const [from, to] of cases) {
-            const up = upgradeCard(fixture({ specialMechanics: [{ kind: 'reap_all', burstPerSoul: from }] }));
-            expect([from, (up.specialMechanics?.[0] as { burstPerSoul: number }).burstPerSoul]).toEqual([from, to]);
-        }
-    });
-
-    it('COUNT is +1 and DoT intensity is +1 (duration untouched)', () => {
+    it('DoT intensity is +1 (duration untouched); a FREE line grows by MAGNITUDE', () => {
         const up = upgradeCard(fixture({
-            free: { drawCards: 1, cleanse: 1, souls: 2, premises: 2, recoil: 3 },
+            free: { damage: 2, guard: 5 },
             combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 4, duration: 3 }],
-            specialMechanics: [{ kind: 'premise', count: 3 }, { kind: 'stagger', rungs: 1 }],
         }));
-        expect(up.free).toEqual({ drawCards: 2, cleanse: 2, souls: 3, premises: 3, recoil: 3 });
+        expect(up.free).toEqual({ damage: 4, guard: 7 });
         expect(up.combatEffects?.[0]).toMatchObject({ intensity: 5, duration: 3 });
-        expect(up.specialMechanics).toEqual([{ kind: 'premise', count: 4 }, { kind: 'stagger', rungs: 2 }]);
-    });
-
-    it('FRACTION is ×1.25 to 2 dp, capped at 1', () => {
-        const cases: [number, number][] = [[0.35, 0.44], [0.45, 0.56], [0.5, 0.63], [1, 1]];
-        for (const [from, to] of cases) {
-            const up = upgradeCard(fixture({ specialMechanics: [{ kind: 'siphon', pct: from }] }));
-            expect([from, (up.specialMechanics?.[0] as { pct: number }).pct]).toEqual([from, to]);
-        }
-    });
-
-    it('never moves deal.hits, a divisor, or a gate', () => {
-        const up = upgradeCard(fixture({
-            specialMechanics: [
-                { kind: 'deal', amount: 7, hits: 4 },
-                { kind: 'spend_premises', markPer: 2, drawPer: 3 },
-                { kind: 'peroration', at: 12, rider: { damage: 20 }, concedeAt: 30 },
-                { kind: 'overkill', per: 5, conviction: 1 },
-            ],
-        }));
-        expect(up.specialMechanics).toEqual([
-            { kind: 'deal', amount: 10, hits: 4 },
-            { kind: 'spend_premises', markPer: 2, drawPer: 3 },
-            { kind: 'peroration', at: 12, rider: { damage: 28 }, concedeAt: 30 },
-            { kind: 'overkill', per: 5, conviction: 2 },
-        ]);
     });
 
     it('clamps a DoT at MAX_EFFECT_INTENSITY rather than printing past it', () => {
@@ -342,19 +290,11 @@ describe('card upgrades — the default rule numbers', () => {
         expect(up.combatEffects?.[0].intensity).toBe(MAX_EFFECT_INTENSITY);
     });
 
-    it('raises the condition-line riders too', () => {
+    it('raises the synergy rider too, never its gate', () => {
         const up = upgradeCard(fixture({
-            threshold: { color: 'body', count: 3, rider: { damage: 10 } },
-            dieBonus: { onColor: 'match', rider: { guard: 8 } },
-            fate: { rider: { drawCards: 1 }, recoilHp: 4 },
-            fallen: { rider: { wrath: 2 } },
-            synergy: { statePredicate: { kind: 'flow', minPriorSpells: 2 }, rider: { chain: 4 } },
+            synergy: { statePredicate: { kind: 'flow', minPriorSpells: 2 }, rider: { damage: 10 } },
         }));
-        expect(up.threshold).toEqual({ color: 'body', count: 3, rider: { damage: 14 } });
-        expect(up.dieBonus).toEqual({ onColor: 'match', rider: { guard: 11 } });
-        expect(up.fate).toEqual({ rider: { drawCards: 2 }, recoilHp: 4 });
-        expect(up.fallen).toEqual({ rider: { wrath: 3 } });
-        expect(up.synergy?.rider).toEqual({ chain: 5 });
+        expect(up.synergy?.rider).toEqual({ damage: 14 });
         expect(up.synergy?.statePredicate).toEqual({ kind: 'flow', minPriorSpells: 2 });
     });
 });
@@ -363,24 +303,24 @@ describe('card upgrades — an authored patch wins over the default', () => {
     const base: Card = {
         id: 'authored', name: 'Authored', color: 'heart', description: 'x',
         tier: 2, rank: 3, cardType: 'spell', targetType: 'enemy',
-        paidSummary: 'Deal 7 four times. Inflict BLEED 4 for 2 turns.',
+        paidSummary: 'Deal 7. Inflict BLEED 4 for 2 turns.',
         free: { damage: 4 },
         combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 4, duration: 2 }],
-        specialMechanics: [{ kind: 'deal', amount: 7, hits: 4 }],
+        specialMechanics: [{ kind: 'deal', amount: 7 }],
         upgrade: {
-            mechanics: [{ kind: 'deal', fields: { hits: 1 } }],
+            mechanics: [{ kind: 'deal', fields: { amount: 1 } }],
             effects: [{ effectId: 'debuff_bleed', duration: 1 }],
-            paidSummary: 'Deal 7 five times. Inflict BLEED 4 for 3 turns.',
+            paidSummary: 'Deal 8. Inflict BLEED 4 for 3 turns.',
         },
     };
 
     it('applies the patch instead of the default rule', () => {
         const up = upgradeCard(base);
         // The default would have raised `amount` to 10 and intensity to 5.
-        expect(up.specialMechanics?.[0]).toEqual({ kind: 'deal', amount: 7, hits: 5 });
+        expect(up.specialMechanics?.[0]).toEqual({ kind: 'deal', amount: 8 });
         expect(up.combatEffects?.[0]).toMatchObject({ intensity: 4, duration: 3 });
         expect(up.free).toEqual({ damage: 4 });
-        expect(up.paidSummary).toBe('Deal 7 five times. Inflict BLEED 4 for 3 turns.');
+        expect(up.paidSummary).toBe('Deal 8. Inflict BLEED 4 for 3 turns.');
         expect(up.id).toBe('authored+');
         expect(up.name).toBe('Authored+');
     });

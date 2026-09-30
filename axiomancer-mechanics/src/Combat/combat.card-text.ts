@@ -99,12 +99,6 @@ export interface CardClause {
      * or the player reads their own price as harm to the foe.
      */
     cross?: string;
-    /**
-     * Sub-clauses, for a clause whose whole printed text IS a rider (the
-     * `rider` mechanic). `parts.map(p => p.text).join(' · ') === text`, so a
-     * presenter may format the parts terse-ly without inventing anything.
-     */
-    parts?: CardClause[];
 }
 
 /** Numbers a printed clause shows the player. */
@@ -114,50 +108,27 @@ function numbersIn(text: string): number[] {
 
 /**
  * Engine words for the mechanics whose printed text does not START with an
- * all-caps keyword. Not new vocabulary: each is the word that mechanic's own
- * `mechanicText` output already uses (`Guard 8`, `Deal 20`, `+2 Charges`).
- * Kinds absent here print as a full sentence with an empty label, which is
- * the honest answer for a card-local rules clause.
+ * all-caps keyword: each is the word that mechanic's own `mechanicText`
+ * output already uses (`Guard 8`, `Deal 20`).
  */
-const MECHANIC_LABEL: Readonly<Record<string, string>> = Object.freeze({
+const MECHANIC_LABEL: Readonly<Record<CardSpecialMechanic['kind'], string>> = Object.freeze({
     guard: 'GUARD',
     deal: 'DEAL',
-    premise: 'CHARGE',
-    spend_premises: 'CHARGE',
-    spend_all_pips: 'PIP',
-    grant_pip: 'PIP',
-    soul_gain: 'SOUL',
-    echo_next_spell: 'ECHO',
-    strip_random_buff: 'CLEANSE',
 });
 
 /** Split a printed mechanic clause into its headline word and the rest. */
-function splitLabel(kind: string, text: string): { label: string; value: string } {
+function splitLabel(kind: CardSpecialMechanic['kind'], text: string): { label: string; value: string } {
     const caps = text.match(/^([A-Z][A-Z]+)\s*/);
     if (caps) return { label: caps[1], value: text.slice(caps[0].length).trim() };
     const word = MECHANIC_LABEL[kind];
-    if (!word) return { label: '', value: text };
     // `Deal 20` / `Guard 8` — strip the word the label already says.
     const lead = new RegExp(`^${word}\\s*`, 'i');
     return { label: word, value: text.replace(lead, '').trim() };
 }
 
-/** Which side a special mechanic's payload lands on. Self-costs and
- *  self-buffs must read as costs, never as things done to the foe. */
+/** Which side a special mechanic's payload lands on. */
 function mechanicSide(m: CardSpecialMechanic): ClauseSide {
-    switch (m.kind) {
-        case 'guard': case 'barrier': case 'riposte': case 'recoil': case 'recoil_x':
-        case 'soul_gain': case 'premise': case 'spend_premises': case 'spend_all_pips':
-        case 'grant_pip': case 'overheat': case 'forge_floating_die': case 'float_x_die':
-        case 'create_temporary_die': case 'bank_spent_die': case 'convert_die_color':
-        case 'refresh_die': case 'reroll_spent': case 'reprise': case 'replay_last':
-        case 'echo': case 'echo_next_spell': case 'twin': case 'conjure_card':
-        case 'immolate': case 'purge_self': case 'foretell': case 'omen':
-        case 'wrath': case 'chain':
-            return 'self';
-        default:
-            return 'enemy';
-    }
+    return m.kind === 'guard' ? 'self' : 'enemy';
 }
 
 /** DoT facts for an authored status payload, or `undefined` when it does not tick. */
@@ -195,33 +166,7 @@ export function riderClauses(r: CardRider, opts?: { selfTargetCard?: boolean }):
     const push = (id: string, side: ClauseSide, label: string, value: string, text: string) => {
         out.push({ source: 'rider', id, side, label, value, text, numbers: numbersIn(text) });
     };
-    if (r.bonusIntensity || r.bonusDuration) {
-        const boost: string[] = [];
-        if (r.bonusIntensity) boost.push(`+${r.bonusIntensity} intensity`);
-        if (r.bonusDuration) boost.push(`+${r.bonusDuration} turn${r.bonusDuration === 1 ? '' : 's'}`);
-        const text = `${boost.join(' · ')} to this card's statuses`;
-        const id = r.bonusIntensity && r.bonusDuration ? 'boost'
-            : r.bonusIntensity ? 'bonusIntensity' : 'bonusDuration';
-        const label = r.bonusIntensity && r.bonusDuration ? 'BOOST'
-            : r.bonusIntensity ? 'INTENSITY' : 'DURATION';
-        const value = r.bonusIntensity && r.bonusDuration
-            ? `+${r.bonusIntensity} · +${r.bonusDuration}t`
-            : r.bonusIntensity ? `+${r.bonusIntensity}` : `+${r.bonusDuration}t`;
-        push(id, 'enemy', label, value, text);
-    }
     if (r.guard) push('guard', 'self', 'GUARD', `${r.guard}`, `Guard ${r.guard}`);
-    if (r.conviction) push('conviction', 'self', 'CONVICTION', `+${r.conviction}`, `+${r.conviction} Conviction`);
-    if (r.refreshDie) push('refreshDie', 'self', 'REFRESH', 'die', 'refresh the die');
-    if (r.revealStance) push('revealStance', 'self', 'REVEAL', 'stance', 'reveal the next stance');
-    if (r.tickAllDots) push('tickAllDots', 'enemy', 'TICK', 'all DoTs', 'tick every DoT now');
-    if (r.tickOne) push('tickOne', 'enemy', 'TICK', '1', 'tick');
-    if (r.cleanse) push('cleanse', 'self', 'CLEANSE', `${r.cleanse}`, `cleanse ${r.cleanse}`);
-    if (r.healHp) push('healHp', 'self', 'HEAL', `${r.healHp}`, `heal ${r.healHp}`);
-    if (r.drawCards) push('drawCards', 'self', 'DRAW', `${r.drawCards}`, `draw ${r.drawCards}`);
-    if (r.premises) push('premises', 'self', 'CHARGE', `+${r.premises}`, `+${r.premises} Charge${r.premises === 1 ? '' : 's'}`);
-    if (r.sway) push('sway', 'enemy', 'PLEA', `${r.sway}`, `PLEA ${r.sway}`);
-    if (r.souls) push('souls', 'self', 'SOUL', `+${r.souls}`, `+${r.souls} Soul${r.souls === 1 ? '' : 's'}`);
-    if (r.foretell) push('foretell', 'self', 'FORETELL', `${r.foretell}`, `FORETELL ${r.foretell}`);
     if (r.applyEffect) {
         const label = r.applyEffect.effectId === 'debuff_creeping_doom'
             ? 'DOOM'
@@ -237,23 +182,13 @@ export function riderClauses(r: CardRider, opts?: { selfTargetCard?: boolean }):
             text, numbers: numbersIn(text), intensity: i, duration: d,
         });
     }
-    if (r.ruptureMarks) push('ruptureMarks', 'enemy', 'RUPTURE', `${r.ruptureMarks}/stack`, `consume all marks — ${r.ruptureMarks} damage per stack`);
-    if (r.intensityPerPip) push('intensityPerPip', 'enemy', 'PIP', `+${r.intensityPerPip} intensity`, `+${r.intensityPerPip} intensity to one DoT per pip`);
-    if (r.pips) push('pips', 'self', 'PIP', `+${r.pips}`, `+${r.pips} pip${r.pips === 1 ? '' : 's'} to every Reserve die`);
-    if (r.stagger) push('stagger', 'enemy', 'STAGGER', `${r.stagger}`, `STAGGER ${r.stagger}`);
-    if (r.barrier) push('barrier', 'self', 'GUARD', `${r.barrier} (persists)`, `GUARD ${r.barrier} (persists)`);
-    if (r.recoil) push('recoil', 'self', 'RECOIL', `${r.recoil}`, `RECOIL ${r.recoil}`);
-    if (r.millCards) push('millCards', 'self', 'MILL', `${r.millCards}`, `mill ${r.millCards} to discard`);
     if (r.damage) {
-        const text = `Deal ${r.damage}${r.pierce ? ' (PIERCE)' : ''}`;
+        const text = `Deal ${r.damage}`;
         out.unshift({
             source: 'rider', id: 'damage', side: 'enemy', label: 'DEAL',
-            value: `${r.damage}${r.pierce ? ' (PIERCE)' : ''}`, text, numbers: numbersIn(text),
+            value: `${r.damage}`, text, numbers: numbersIn(text),
         });
     }
-    if (r.wrath) push('wrath', 'self', 'WRATH', `${r.wrath}`, `WRATH ${r.wrath}`);
-    if (r.chain) push('chain', 'self', 'CHAIN', `${r.chain}`, `CHAIN ${r.chain}`);
-    if (r.flay) push('flay', 'enemy', 'FLAY', `${r.flay}`, `FLAY ${r.flay}`);
     return out;
 }
 
@@ -305,7 +240,6 @@ export function paidClauses(card: Card, lookupEffect: EffectLookup): CardClause[
             ...(dot ? { dot } : {}),
         });
     }
-    const riderOpts = { selfTargetCard: card.targetType === 'self' };
     for (const m of card.specialMechanics ?? []) {
         const text = mechanicText(m);
         if (!text) continue;
@@ -313,11 +247,6 @@ export function paidClauses(card: Card, lookupEffect: EffectLookup): CardClause[
         out.push({
             source: 'mechanic', id: m.kind, side: mechanicSide(m),
             label, value, text, numbers: numbersIn(text),
-            // A bare `rider` mechanic prints nothing but its rider, so its
-            // parts ARE its text — handing them over lets a presenter print
-            // `HEAL 16` instead of the engine's lowercase prose, with no
-            // second derivation anywhere.
-            ...(m.kind === 'rider' ? { parts: riderClauses(m.rider, riderOpts) } : {}),
         });
     }
     return out;

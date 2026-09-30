@@ -30,11 +30,9 @@ import { toCombatCard } from '../combat.cards';
 import type { CombatCard, CombatEncounterState } from '../combat.encounter.types';
 
 // Spec 32 v3: basePower is deleted at the schema level — the "no status game"
-// card is a statusless utility fixture, and the Befriend lever (no library
-// card carries `befriend_attempt` any more; the mercy path lives on the heart
-// signature) is a sandbox fixture too.
+// card is a statusless utility fixture. (The Befriend card verb went in R7a;
+// the mercy path lives on The Open Hand signature.)
 const QA_STATUSLESS = 'qa-statusless-utility';
-const QA_BEFRIEND = 'qa-befriend';
 registerSandboxCards([
     {
         id: QA_STATUSLESS,
@@ -45,17 +43,6 @@ registerSandboxCards([
         rank: 1,
         cardType: 'spell',
         targetType: 'enemy',
-    },
-    {
-        id: QA_BEFRIEND,
-        name: 'QA Befriend (test fixture)',
-        color: 'heart',
-        description: 'Test-only fixture: the Befriend verb for the mercy-turn ranking law.',
-        tier: 1,
-        rank: 1,
-        cardType: 'spell',
-        targetType: 'enemy',
-        specialMechanics: [{ kind: 'befriend_attempt' }],
     },
 ]);
 
@@ -164,18 +151,6 @@ describe('greedy rankCard — the legacy ordering as scores (doctrine: status > 
         ];
         const repeatScore = COMBAT_SIM_POLICIES.greedy.rankCard(applied, dot, forbiddenRng);
         expect(freshScore).toBeGreaterThan(repeatScore);
-    });
-
-    it('ranks Befriend above everything once the foe is low-HP (the mercy turn)', () => {
-        const s = freshState();
-        const low = deepClone(s);
-        low.enemy.health = 1;
-        const greedy = COMBAT_SIM_POLICIES.greedy;
-        expect(greedy.rankCard(low, card(QA_BEFRIEND), forbiddenRng))
-            .toBeGreaterThan(greedy.rankCard(low, card(STATUS_CARD), forbiddenRng));
-        // ...but NOT before that (status play stays the default game).
-        expect(greedy.rankCard(s, card(QA_BEFRIEND), forbiddenRng))
-            .toBeLessThan(greedy.rankCard(s, card(STATUS_CARD), forbiddenRng));
     });
 });
 

@@ -52,7 +52,7 @@ export function getThornsReflect(bearer: Combatant): number {
 }
 
 // ─── 0.34.0 status-depth epic — HP-model selectors + tunable scalars ──────────
-// These power the new card mechanics (VULNERABLE / RUPTURE / COMPOUND / DISRUPT)
+// These power VULNERABLE / DISRUPT
 // and the mobile honesty layer. Pure reads over a combatant's `effects`; the HP
 // behavior itself is owned by `combat.engine.ts`. Kept here (a writable,
 // non-engine home) so the tuning loops can rebalance them by simulation.
@@ -61,82 +61,6 @@ export function getThornsReflect(bearer: Combatant): number {
  *  bearer (a fully-stacked protective mult still lets half the hit through).
  *  P0-truth: protective (`damageTakenMult < 1`) payloads are REAL now. Tunable. */
 export const RESOLUTE_MIN_MULT = 0.5;
-/** RUPTURE cap fraction (spec 32 §12 item 5 — flat cap floors retired): the
- *  burst cap is a PURE fraction of the enemy's max HP, with NO flat floor.
- *  RUPTURE keeps a cap because it consumes enemy-side state the player seeded
- *  cheaply; ALL-spenders (REAP-ALL, spend-all-pips payoffs) are UNCAPPED —
- *  emptying the whole bank IS the price.
- *  // PLAYTEST-CALIBRATION (swept 2026-07-12, spec 32 §12 item 5): the ratified
- *  //  sweep F ∈ {0.25, 0.35, 0.45, 0.60} ran the full matrix + Foundry/Tithe
- *  //  preset probes at seeds 1-2 (docs/reports/rebaseline-scratch/sweep-F*, raw output deleted 2026-09-25; findings archived under plan/archive/2026-09-25-trim-t1/).
- *  //  0.60 WON: Foundry (the RUPTURE preset) lifts monotonically with F
- *  //  (greedy early 57.8→64.8%, mid 0→1.4%) while the policy-pick matrix is
- *  //  F-invariant (early 85.1% at every F — in band) and dominance never
- *  //  moves (Foundry's dominant card is sketch-of-a-thought at every F; the
- *  //  Overtake payoff grows with F without taking over). Tithe is flat across
- *  //  F — its REAP-ALL is uncapped, so it serves as the control. Removing the
- *  //  old 80-HP floor LOWERED early caps (the floor WAS early behavior), so F
- *  //  rose as the floor fell: 0.60 × ~100-HP early enemies = 60, still under
- *  //  the retired floor — a mild early nerf, honest to the thesis. */
-/**
- * THE BIG NUMBERS REWRITE (2026-09-02) — THE CAP IS REPEALED.
- *
- * RUPTURE used to clamp at 0.60 x the foe's maximum VITAE. That ceiling was
- * the whole reason the affliction theme could never cash what it built: a deck
- * that spent five turns stacking poison hit the same wall as one that spent
- * two. Payoffs are uncapped now — RUPTURE, REAP ALL, BACKFIRE ALL and the
- * mark-detonators all pay what the player actually banked, and a fed rot deck
- * reaching 200-300 is the intended top of the curve, not an exploit.
- *
- * The function survives so the call sites keep reading as "the cap", and so a
- * future ceiling has one place to live. It currently imposes none.
- */
-export const RUPTURE_CAP_FRACTION = Number.POSITIVE_INFINITY;
-export function ruptureBurstCap(enemyMaxHealth: number): number {
-    void enemyMaxHealth;
-    return Number.POSITIVE_INFINITY;
-}
-/** REAP (single, `the-gleaners-due`) maxHealth erosion rate — phase 32 part 1
- *  (Harvest — REAP attacks MAXIMUM HP, plan/archive/2026-09-25-trim-t4/plan/phases/phase_32_theme_deep_work.md
- *  §Part 1): the small utility REAP has no current-HP burst of its own, but
- *  every REAP that spends Souls now also erodes the enemy's ceiling a little,
- *  so the mechanic reads consistently across both Harvest REAP cards — the
- *  capstone (`the-reaping`, `reap_all`) shrinks it by a lot via
- *  `burstPerSoul`, this one shrinks it a little via `cost`. Erosion =
- *  round(cost × REAP_EROSION_PER_SOUL); sized at the same per-Soul rate as
- *  the capstone's burst conversion so both cards speak one formula. A cost-2
- *  REAP erodes 4 max HP — roughly a tenth of the capstone's smallest
- *  realistic burst, keeping the utility card's erosion clearly secondary.
- *  Tunable. */
-export const REAP_EROSION_PER_SOUL = 2;
-/** Phase 32 part 3 (Akrasia — DEBT ledger, plan/archive/2026-09-25-trim-t4/plan/phases/phase_32_theme_deep_work.md
- *  §Part 3): every RECOIL HP the player pays THIS COMBAT (the `recoil` /
- *  `recoil_x` mechanics, the printed `CardRider.recoil` field on both the FREE
- *  and PAID lines, and `fate.recoilHp`) accrues into `CombatEncounterState.
- *  akrasiaDebt`. Every {@link AKRASIA_DEBT_TIER_HP} HP paid crosses one ledger
- *  TIER. Sized close to `self-flagellant`'s printed RECOIL (5) so a single big
- *  blood price crosses roughly one tier on its own, while `pact-of-akrasia`'s
- *  smaller incidental FREE-line recoil (1 HP) needs several plays to bank one
- *  — the ledger rewards sustained sin, not a single spike. Tunable. */
-export const AKRASIA_DEBT_TIER_HP = 6;
-/** GUARD granted per DEBT tier crossed while FALLEN (spec 32 v3 T4 — the
- *  theme-state condition line). Same "blood buys armor" idiom
- *  `pact-of-akrasia` already prints on its own FREE line (1 HP → 2 Guard),
- *  but at roughly a third of that rate: this is a PASSIVE dividend riding
- *  EVERY akrasia RECOIL source (not a single authored trade the player
- *  opts into per-card), so it must stay a modest ledger bonus rather than a
- *  new dominant Guard engine. Tunable. */
-export const AKRASIA_DEBT_TIER_GUARD = 1;
-/** Pure tier-crossing arithmetic: how many NEW {@link AKRASIA_DEBT_TIER_HP}
- *  boundaries `after` clears that `before` had not already crossed. Both
- *  floored at 0 (a ledger never goes negative, and a same-or-shrinking total
- *  crosses nothing new — the ledger has no cash-out path yet, see the
- *  Absolution-fork follow-up). */
-export function akrasiaDebtTiersCrossed(before: number, after: number): number {
-    const b = Math.max(0, Math.floor(before / AKRASIA_DEBT_TIER_HP));
-    const a = Math.max(0, Math.floor(after / AKRASIA_DEBT_TIER_HP));
-    return Math.max(0, a - b);
-}
 /** Phase 32 part 4b (Oratory — milestone drip, plan/archive/2026-09-25-trim-t4/plan/phases/phase_32_theme_deep_work.md
  *  §Part 4b): every {@link PREMISE_MILESTONE_EVERY}rd Premise the player has EVER
  *  gained this combat (tracked by `CombatEncounterState.premiseMilestoneTotal`, a
@@ -148,12 +72,11 @@ export function akrasiaDebtTiersCrossed(before: number, after: number): number {
  *  reliably does. Tunable. */
 export const PREMISE_MILESTONE_EVERY = 3;
 /** STAGGER rungs granted per Premise milestone crossed — a PASSIVE dividend riding
- *  every Premise source (own-card, borrowed FREE rider, or a future cross-theme
- *  omen grant alike), same "modest ledger bonus, not a new dominant engine" idiom
- *  as {@link AKRASIA_DEBT_TIER_GUARD}. Tunable. */
+ *  every Premise source, a modest ledger bonus rather than a new dominant
+ *  engine. Tunable. */
 export const PREMISE_MILESTONE_RUNGS = 1;
-/** Pure tier-crossing arithmetic — identical shape to {@link akrasiaDebtTiersCrossed},
- *  parameterized by {@link PREMISE_MILESTONE_EVERY} instead of a fixed HP tier. */
+/** Pure tier-crossing arithmetic: how many NEW {@link PREMISE_MILESTONE_EVERY}
+ *  boundaries `after` clears that `before` had not already crossed. */
 export function premiseMilestonesCrossed(before: number, after: number): number {
     const b = Math.max(0, Math.floor(before / PREMISE_MILESTONE_EVERY));
     const a = Math.max(0, Math.floor(after / PREMISE_MILESTONE_EVERY));
@@ -245,7 +168,7 @@ export const SWAY_FALTERING_FRACTION = 0.8;
  *  "small dividend" speaking Charm's OWN vocabulary, not a borrowed one. */
 export const SWAY_WAVERING_RAPPORT = 1;
 /** Faltering dividend — a small BONUS PLEA nudge (a flat ledger
- *  dividend, not a re-scaled gain, same "modest ledger bonus" idiom as `AKRASIA_DEBT_TIER_GUARD`/
+ *  dividend, not a re-scaled gain, same "modest ledger bonus" idiom as
  *  `PREMISE_MILESTONE_RUNGS`). Commitment breeds more commitment as their
  *  will visibly breaks — the two-stage arc escalates from softening THEM
  *  (Wavering/QUARTER) to accelerating YOUR OWN climb (Faltering/PLEA).
@@ -267,9 +190,6 @@ export function swayResolveMilestoneThresholds(resolve: number): { wavering: num
         faltering: Math.max(1, Math.round(SWAY_FALTERING_FRACTION * resolve)),
     };
 }
-/** RUPTURE — flat burst per NON-DoT affliction stack consumed (marks, backfire,
- *  rapport). Spec 32 v3 §3. Tunable. */
-export const RUPTURE_PER_AFFLICTION_STACK = 3;
 /** DISRUPT — distinct-control pip threshold that DENIES the enemy's telegraphed
  *  turn (an ADDITIVE OR path on top of the legacy roll-penalty deny). Tunable. */
 export const DISRUPT_DENY_AT = 3;
@@ -580,54 +500,6 @@ export function consumeDotEffects<T extends Combatant>(bearer: T): { combatant: 
     return { combatant: { ...bearer, effects: remaining }, consumed };
 }
 
-/**
- * Spec 32 v3 RUPTURE — strips EVERY affliction (debuff) from the bearer.
- * Returns the updated combatant, the consumed effect ids (one entry per
- * instance — the SOUL economy counts these), and the total intensity stacks of
- * the consumed NON-DoT afflictions (marks etc. — worth
- * `RUPTURE_PER_AFFLICTION_STACK` each on the detonation). Pure.
- */
-export function consumeAfflictions<T extends Combatant>(bearer: T): {
-    combatant: T; consumed: string[]; nonDotStacks: number;
-} {
-    const consumed: string[] = [];
-    let nonDotStacks = 0;
-    const remaining = bearer.effects.filter(ae => {
-        const def = lookupEffect(ae.effectId);
-        if (def?.type !== 'debuff') return true;
-        consumed.push(ae.effectId);
-        if (!def.payload.damageOverTime) nonDotStacks += ae.intensity ?? 1;
-        return false;
-    });
-    return { combatant: { ...bearer, effects: remaining }, consumed, nonDotStacks };
-}
-
-/**
- * WINNOWING (spec 32 v3, Harvest) — consumes ONE affliction early: the DoT with
- * the most remaining fuel (falling back to any affliction). Returns the fuel
- * that should tick NOW (0 for a non-DoT) and the consumed id (null if the
- * bearer carries no affliction). Pure.
- */
-export function consumeOneAffliction<T extends Combatant>(bearer: T, currentRound?: number): {
-    combatant: T; consumed: string | null; fuel: number;
-} {
-    const pending = getPendingDotTotal(bearer, currentRound).perEffect;
-    let pick: ActiveEffect | undefined;
-    if (pending.length > 0) {
-        const best = pending.reduce((a, b) => (b.amount > a.amount ? b : a));
-        pick = bearer.effects.find(ae => ae.effectId === best.effectId);
-    } else {
-        pick = bearer.effects.find(ae => lookupEffect(ae.effectId)?.type === 'debuff');
-    }
-    if (!pick) return { combatant: bearer, consumed: null, fuel: 0 };
-    const fuel = pending.find(p => p.effectId === pick!.effectId)?.amount ?? 0;
-    return {
-        combatant: { ...bearer, effects: bearer.effects.filter(ae => ae !== pick) },
-        consumed: pick.effectId,
-        fuel,
-    };
-}
-
 /** BACKFIRE (spec 32 v3) — HP the bearer takes PER RUNG its telegraphed action
  *  loses: Σ (backfirePerRung × intensity). 0 when unafflicted. Pure. */
 export function getBackfirePerRung(bearer: Combatant): number {
@@ -635,19 +507,6 @@ export function getBackfirePerRung(bearer: Combatant): number {
         const per = lookupEffect(ae.effectId)?.payload.backfirePerRung ?? 0;
         return total + per * (ae.intensity ?? 1);
     }, 0);
-}
-
-/** Consumes every MARK-class effect on the bearer, returning the stacks removed. */
-export function consumeMarks<T extends Combatant>(bearer: T): { combatant: T; stacks: number } {
-    let stacks = 0;
-    const remaining = bearer.effects.filter(ae => {
-        if ((lookupEffect(ae.effectId)?.payload.tickAmplifyFlat ?? 0) > 0) {
-            stacks += ae.intensity ?? 1;
-            return false;
-        }
-        return true;
-    });
-    return { combatant: { ...bearer, effects: remaining }, stacks };
 }
 
 /** Count of DISTINCT debuff effect ids on the bearer — variety payoffs' scaler. Pure. */

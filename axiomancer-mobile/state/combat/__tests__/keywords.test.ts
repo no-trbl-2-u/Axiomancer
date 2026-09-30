@@ -45,48 +45,15 @@ describe('keyword registry — KW-3 (no dead references)', () => {
      * hardcoded 17 while `MECHANIC_KEYWORD` already held 22.
      */
     const KINDS_WITHOUT_MECHANIC_KEYWORD: readonly string[] = [
-        // Combat-engine verbs the face prints as their own word in the paid
-        // summary (GUARD 4, RUPTURE, REAP ALL...), so the badge would double it.
-        'guard', 'barrier', 'rupture', 'reap', 'reap_all', 'riposte',
-        // Die-gear verbs: the face prints FORGE / KINDLE / PIP / OVERHEAT and
-        // the SYSTEM_GLOSSARY explains the dice system behind them.
-        'forge_floating_die', 'float_x_die', 'create_temporary_die', 'grant_pip',
-        'overheat', 'reroll_spent', 'refresh_die', 'convert_die_color',
-        'bank_spent_die', 'spend_all_pips',
-        // Card-local one-offs with no repeated vocabulary to register (the
-        // atlas's own "≥2 cards or ≥2 enemies" discipline).
-        'strip_random_buff', 'befriend_attempt', 'conjure_card', 'peroration',
-        // CURDLE demoted 2026-09-05 (/adjust-keywords pass 1): its sole
-        // carrier (The Lazar's Kiss) never earned a second, so the badge
-        // retires per the atlas's own "one-card mechanic stays as plain
-        // rules text" escape hatch. `convert_dots` still functions; it just
-        // no longer prints a keyword word.
-        'convert_dots',
-        // A carrier, not a mechanic: `rider` executes an ordinary card rider.
-        'rider',
-        // THE BIG NUMBERS REWRITE (2026-09-02) — DEAL is the one verb that
-        // needs no explaining: "Deal 24" is plain English, and the face prints
-        // the number in its hero slot rather than badging the word (see
-        // `MECHANIC_KEYWORD`'s own note, and `mechanicHeadline`'s `deal` case,
-        // which returns a keyword-less headline on purpose).
+        // GUARD prints as its own word in the paid summary (GUARD 4), so the
+        // badge would double it.
+        'guard',
+        // DEAL is the one verb that needs no explaining: "Deal 24" is plain
+        // English, and the face prints the number in its hero slot rather than
+        // badging the word (see `MECHANIC_KEYWORD`'s own note, and
+        // `mechanicHeadline`'s `deal` case, which returns a keyword-less
+        // headline on purpose).
         'deal',
-        // THE KEYWORD AUDIT (2026-09-27, after the card purge): every card
-        // that printed these kinds' keywords was deleted, so their glosses
-        // went too. The kinds stay in the engine union (out of the audit's
-        // scope) and print as plain rules text if a new card ever uses one;
-        // a returning keyword re-earns its row in a guided session (D37).
-        'turnabout', 'omen', 'premise', 'spend_premises', 'recoil', 'recoil_x',
-        'consume_affliction', 'siphon', 'echo', 'echo_next_spell', 'reprise',
-        'extend_dots', 'boost_all_dots', 'immolate', 'purge_self', 'replay_last',
-        'flay', 'twin', 'execute', 'overkill', 'soul_gain',
-        // THE KEYWORD PURGE (2026-09-28, T): FORETELL had no carrier left (no
-        // card, enemy, signature skill or item printed it), so its gloss went.
-        // The kind stays in the engine union and prints as plain rules text.
-        'foretell',
-        // REVAMP R4 (D45): the signature skills were the last carriers of
-        // STAGGER, PLEA, WRATH and CHAIN; they are GUARD placeholders now, so
-        // the glosses went. The kinds stay in the union until R7a.
-        'stagger', 'lock_stance', 'sway', 'wrath', 'chain',
     ];
 
     it('every mechanic kind either maps to a glossed keyword or is classified', () => {
@@ -113,8 +80,9 @@ describe('keyword registry — KW-3 (no dead references)', () => {
 
     it('the union is walked, not a copy of it', () => {
         // Guards the gate itself: an empty or truncated enumeration would make
-        // every assertion above pass vacuously.
-        expect(CARD_SPECIAL_MECHANIC_KINDS.length).toBeGreaterThan(40);
+        // every assertion above pass vacuously. Revamp R7a (D50) cut the union
+        // to the verbs a live card prints.
+        expect([...CARD_SPECIAL_MECHANIC_KINDS].sort()).toEqual(['deal', 'guard']);
     });
 
     it('the 2026-09-28 purge removed PIERCE, RIPOSTE and FORETELL from the glossary', () => {

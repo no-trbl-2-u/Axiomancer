@@ -1,9 +1,9 @@
 /**
  * Hermetic E2E — THE BIG NUMBERS REWRITE (2026-09-02).
  *
- * The damage family (DEAL / WRATH / CHAIN / FLAY / TWIN / EXECUTE / OVERKILL)
- * plus boss STAGES. The enemy keywords this suite once pinned were deleted in
- * revamp phase R2b (D63).
+ * DEAL, the hit scaler, and boss STAGES. The enemy keywords this suite once
+ * pinned were deleted in revamp phase R2b (D63); WRATH, CHAIN, FLAY, TWIN,
+ * EXECUTE, OVERKILL and ECHO in R7a (D50).
  *
  * These are BUG DETECTORS, not balance laws: every assertion checks that the
  * number the engine applies is the number the rules say it applies. None of
@@ -25,7 +25,7 @@ import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveThreatPhase,
-    scalePlayerHit, FLAY_DAMAGE_MULT, EXECUTE_DAMAGE_MULT,
+    scalePlayerHit,
 } from '../combat.engine';
 import type { CombatEncounterState } from '../combat.encounter.types';
 
@@ -33,8 +33,7 @@ afterEach(() => vi.restoreAllMocks());
 
 const rng = (): number => 0.5;
 
-// Fixtures: one card per verb under test. All BODY so a single body die can
-// power any of them, and all rank 1 so IMMOLATE-style rank picks stay stable.
+// Fixture: one BODY DEAL card, so a single body die can power it.
 registerSandboxCards([
     {
         id: 'qa-bn-deal', name: 'QA Deal', color: 'body',
@@ -42,64 +41,9 @@ registerSandboxCards([
         free: { damage: 3 },
         specialMechanics: [{ kind: 'deal', amount: 20 }],
     },
-    {
-        id: 'qa-bn-multi', name: 'QA Multi', color: 'body',
-        description: 'multi-hit fixture', tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
-        free: { damage: 2 },
-        specialMechanics: [{ kind: 'deal', amount: 10, hits: 3 }],
-    },
-    {
-        id: 'qa-bn-wrath', name: 'QA Wrath', color: 'body',
-        description: 'wrath fixture', tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
-        free: { wrath: 5 },
-        specialMechanics: [{ kind: 'wrath', amount: 5 }],
-    },
-    {
-        id: 'qa-bn-chain', name: 'QA Chain', color: 'body',
-        description: 'chain fixture', tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
-        free: { chain: 4 },
-        specialMechanics: [{ kind: 'chain', amount: 4 }],
-    },
-    {
-        id: 'qa-bn-flay', name: 'QA Flay', color: 'body',
-        description: 'flay fixture', tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
-        free: { flay: 1 },
-        specialMechanics: [{ kind: 'flay', stacks: 2 }],
-    },
-    {
-        id: 'qa-bn-execute', name: 'QA Execute', color: 'body',
-        description: 'execute fixture', tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
-        free: { damage: 1 },
-        specialMechanics: [{ kind: 'execute', atPct: 0.5 }, { kind: 'deal', amount: 20 }],
-    },
-    {
-        id: 'qa-bn-overkill', name: 'QA Overkill', color: 'body',
-        description: 'overkill fixture', tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
-        free: { damage: 1 },
-        specialMechanics: [
-            { kind: 'deal', amount: 200 },
-            { kind: 'overkill', per: 10, conviction: 1 },
-        ],
-    },
-    {
-        id: 'qa-bn-echo-deal', name: 'QA Echo Deal', color: 'body',
-        description: 'echo+deal fixture', tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
-        free: { damage: 1 },
-        specialMechanics: [{ kind: 'deal', amount: 10 }, { kind: 'echo' }],
-    },
-    {
-        id: 'qa-bn-twin', name: 'QA Twin', color: 'body',
-        description: 'twin fixture', tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
-        free: { damage: 1 },
-        specialMechanics: [{ kind: 'twin' }],
-    },
 ]);
 
-const DECK = [
-    'qa-bn-deal', 'qa-bn-multi', 'qa-bn-wrath',
-    'qa-bn-chain', 'qa-bn-flay', 'qa-bn-execute', 'qa-bn-overkill', 'qa-bn-twin',
-    'qa-bn-echo-deal',
-];
+const DECK = ['qa-bn-deal'];
 
 function makePlayer(): Character {
     const p = deepClone(Player);
@@ -138,37 +82,16 @@ function seat(state: CombatEncounterState, cardId: string): CombatEncounterState
 }
 
 describe('scalePlayerHit — the scaler pipeline is exactly as printed', () => {
-    it('applies read, colour match, WRATH, CHAIN, FLAY, EXECUTE in order', () => {
-        // Base 10, neutral read, no bonuses at all.
-        expect(scalePlayerHit({
-            base: 10, readMult: 1, colorMatch: false, wrath: 0, chain: 0,
-            flay: false, execute: false,
-        })).toBe(10);
-
-        // WRATH and CHAIN are FLAT and additive, after the multiplicative half.
-        expect(scalePlayerHit({
-            base: 10, readMult: 1, colorMatch: false, wrath: 5, chain: 3,
-            flay: false, execute: false,
-        })).toBe(18);
-
-        // FLAY multiplies what the flat bonuses left.
-        expect(scalePlayerHit({
-            base: 10, readMult: 1, colorMatch: false, wrath: 0, chain: 0,
-            flay: true, execute: false,
-        })).toBe(Math.round(10 * FLAY_DAMAGE_MULT));
-
-        // EXECUTE multiplies on top of FLAY.
-        expect(scalePlayerHit({
-            base: 10, readMult: 1, colorMatch: false, wrath: 0, chain: 0,
-            flay: true, execute: true,
-        })).toBe(Math.round(Math.round(10 * FLAY_DAMAGE_MULT) * EXECUTE_DAMAGE_MULT));
+    it('applies the read, then colour match, then VULNERABLE', () => {
+        expect(scalePlayerHit({ base: 10, readMult: 1, colorMatch: false })).toBe(10);
+        // Colour match: +25%, at least +2.
+        expect(scalePlayerHit({ base: 10, readMult: 1, colorMatch: true })).toBe(13);
+        // VULNERABLE multiplies what the rest left.
+        expect(scalePlayerHit({ base: 10, readMult: 1, colorMatch: true, vulnMult: 1.5 })).toBe(Math.round(13 * 1.5));
     });
 
     it('never invents damage from a zero base', () => {
-        expect(scalePlayerHit({
-            base: 0, readMult: 1.5, colorMatch: true, wrath: 9, chain: 9,
-            flay: true, execute: true,
-        })).toBe(0);
+        expect(scalePlayerHit({ base: 0, readMult: 1.5, colorMatch: true, vulnMult: 2 })).toBe(0);
     });
 
     it('a FREE-line hit is credited to its card in the attribution ledger', () => {
@@ -178,7 +101,7 @@ describe('scalePlayerHit — the scaler pipeline is exactly as printed', () => {
     });
 });
 
-describe('the DEAL family lands the printed number', () => {
+describe('DEAL lands the printed number', () => {
     it('a FREE line deals its printed damage with no die spent', () => {
         const s = open();
         const before = s.enemy.health;
@@ -186,66 +109,17 @@ describe('the DEAL family lands the printed number', () => {
         expect(before - after.enemy.health).toBe(3);
     });
 
-    it('a multi-hit lands every one of its hits', () => {
+    it('a PAID line deals its printed damage, colour match on top', () => {
         const s = open();
-        const seated = seat(s, 'qa-bn-multi');
-        const die = seated.dice.find(d => d.state === 'available' && d.color === 'body');
+        const seated = seat(s, 'qa-bn-deal');
+        const die = seated.dice.find(d => d.state === 'available' && (d.color === 'body' || d.color === 'wild'));
         if (!die) return; // colour-legal die not in this tray; the unit test above covers the maths
-        const entry = seated.hand.find(h => h.cardId === 'qa-bn-multi')!;
-        const before = seated.enemy.health;
-        const after = playCombatCard(seated, { uid: entry.uid }, true, die.id, rng).state;
-        // Three hits of 10 (plus any colour-match bonus) — never fewer.
-        expect(before - after.enemy.health).toBeGreaterThanOrEqual(30);
-    });
-
-    it('WRATH persists across plays and adds to every later hit', () => {
-        let s = open();
-        s = playFree(seat(s, 'qa-bn-wrath'), 'qa-bn-wrath');
-        expect(s.wrath).toBe(5);
-        const before = s.enemy.health;
-        s = playFree(seat(s, 'qa-bn-deal'), 'qa-bn-deal');
-        // The FREE line's printed 3, plus the 5 WRATH already banked.
-        expect(before - s.enemy.health).toBe(8);
-    });
-
-    it('CHAIN is spent by the next hit and fades on a turn that does not feed it', () => {
-        let s = open();
-        s = playFree(seat(s, 'qa-bn-chain'), 'qa-bn-chain');
-        expect(s.chain).toBe(4);
-        expect(s.chainFedThisTurn).toBe(true);
-        const before = s.enemy.health;
-        s = playFree(seat(s, 'qa-bn-deal'), 'qa-bn-deal');
-        expect(before - s.enemy.health).toBe(7); // printed 3 + CHAIN 4
-        expect(s.chain).toBe(0);                 // and the stack is spent
-    });
-
-    it('FLAY spends one stack per damage instance', () => {
-        let s = open();
-        s = playFree(seat(s, 'qa-bn-flay'), 'qa-bn-flay');
-        expect(s.flay).toBe(1);
-        const before = s.enemy.health;
-        s = playFree(seat(s, 'qa-bn-deal'), 'qa-bn-deal');
-        // 3 printed, x1.5 from the one FLAY stack.
-        expect(before - s.enemy.health).toBe(Math.round(3 * FLAY_DAMAGE_MULT));
-        expect(s.flay).toBe(0);
-    });
-});
-
-describe('ECHO multiplies the hit COUNT, not the per-hit magnitude', () => {
-    it('an echoed DEAL lands twice, as two damage instances', () => {
-        // ECHO used to skip `deal` entirely — the card printed the keyword and
-        // did nothing.
-        const s = open();
-        const seated = seat(s, 'qa-bn-echo-deal');
-        const die = seated.dice.find(d => d.state === 'available' && d.color === 'body');
-        if (!die) return; // no colour-legal die in this tray; the unit maths is covered above
-        const entry = seated.hand.find(h => h.cardId === 'qa-bn-echo-deal')!;
+        const entry = seated.hand.find(h => h.cardId === 'qa-bn-deal')!;
         const before = seated.enemy.health;
         const res = playCombatCard(seated, { uid: entry.uid }, true, die.id, rng);
-        const hits = res.events.filter(e => e.kind === 'damage-dealt'
-            && (e as { target?: string }).target === 'enemy');
-        expect(hits.length, 'an echoed DEAL must emit two damage instances').toBe(2);
-        expect(before - res.state.enemy.health).toBeGreaterThan(0);
+        const hits = res.events.filter(e => e.kind === 'damage-dealt' && e.target === 'enemy');
+        expect(hits).toHaveLength(1);
+        expect(before - res.state.enemy.health).toBeGreaterThanOrEqual(scalePlayerHit({ base: 20, readMult: 1, colorMatch: true }));
     });
 });
 

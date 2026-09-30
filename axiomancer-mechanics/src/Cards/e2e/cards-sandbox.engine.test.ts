@@ -45,7 +45,7 @@ function testDotCard(id = 'sandbox-test-rot'): Card {
         rank: 1,
         cardType: 'spell',
         targetType: 'enemy',
-        free: { tickOne: true },
+        free: { damage: 1 },
         combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 3 }],
     };
 }
@@ -127,7 +127,7 @@ describe('sandbox registry — library-card overrides', () => {
         // Untouched fields survive the merge; the id is immutable.
         expect(merged?.id).toBe('grey-word');
         expect(merged?.name).toBe(base?.name);
-        expect(merged?.dieBonus).toEqual(base?.dieBonus);
+        expect(merged?.free).toEqual(base?.free);
         expect(merged?.rank).toBe(base?.rank);
     });
 

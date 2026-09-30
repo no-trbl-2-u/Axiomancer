@@ -14,16 +14,14 @@
  * balance witnesses.
  *
  * Behavior guarantee: `greedy` and `blind`'s `rankCard`/`bestSignature`
- * ordering encodes EXACTLY the legacy per-card score (payoff cards at
- * DoT/debuff thresholds, Befriend-at-lowHp, new-status-first,
+ * ordering encodes EXACTLY the legacy per-card score (Befriend-at-lowHp,
+ * new-status-first,
  * status-over-strike, damage preview) — never consumes rng, so the seeded
  * engine stream is untouched there. Since the D7 flag collapse (2026-09-25)
  * deleted the hidden-stance draft and THE STAKE, `greedy` and `blind` play
  * identically; `blind` is kept so the playtest matrix keeps its column.
  */
 
-import { getCardById } from '../Cards/cards.library';
-import { MAX_EFFECT_INTENSITY } from '../Game/game-mechanics.constants';
 import type {
     CombatCard, CombatEncounterState, SignatureSkill, SignatureSkillKind,
 } from './combat.encounter.types';
@@ -74,22 +72,12 @@ export interface CombatSimPolicy {
      * behavior `greedy`/`blind` rely on. Only `chaos` uses this (random pick).
      */
     rankSignature?(state: CombatEncounterState, signature: SignatureSkill, rng: () => number): number;
-    /**
-     * OPTIONAL (WS7.2 chosen X-costs): pick the X for a chosen-X mechanic
-     * (`recoil_x`), given the engine's own clamp range (`recoilXRange`). When
-     * absent the sim plays the printed minimum. Only `chaos` consumes `rng`.
-     */
-    chooseX?(state: CombatEncounterState, card: CombatCard, range: { min: number; max: number }, rng: () => number): number;
 }
 
 // ─── Score bands ─────────────────────────────────────────────────────────────
 // Additive bands keep the per-card score a faithful encoding of a lexicographic
 // sort: each band dwarfs everything below it (bottomDamagePreview stays well
-// under BAND_EFFECT). Payoff picks return a FLAT band value so ties between two
-// payoff cards resolve by hand order — exactly like the legacy `cards.find`.
-const BAND_PAYOFF_RUPTURE = 3e15;
-const BAND_PAYOFF_REAP = 2e15;
-const BAND_PAYOFF_PREMISES = 1e15;
+// under BAND_EFFECT).
 const BAND_BEFRIEND_LOW_HP = 1e12;
 const BAND_PRIMARY = 2e8;
 const BAND_SECONDARY = 1e7;
@@ -97,20 +85,8 @@ const BAND_NEW_STATUS = 1e8;
 const BAND_EFFECT = 1e4;
 const BAND_UTILITY_LIVE = 1e6;
 
-/** Legacy payoff thresholds (mirrors the pre-roster `bestCard` preamble). */
-const RUPTURE_PENDING_DOT_AT = 12;
-/** Spec 32 v3 payoff gates: REAP-all cashes a funded Soul bank; a premise
- *  spend cashes a built tally. */
-const REAP_SOULS_AT = 4;
-const SPEND_PREMISES_AT = 4;
 /** Legacy low-HP gate for the Befriend/mercy turn. */
 const LOW_HP_FRACTION = 0.30;
-
-/** The special-mechanic kinds a card's backing card carries (0.34.0 payoffs). */
-function cardMechKinds(card: CombatCard): Set<string> {
-    const sourceCard = getCardById(card.id);
-    return new Set((sourceCard?.specialMechanics ?? []).map(m => m.kind));
-}
 
 function enemyLowHp(s: CombatEncounterState): boolean {
     return s.enemy.health <= s.enemy.maxHealth * LOW_HP_FRACTION;
@@ -130,73 +106,16 @@ function isUtilityClass(card: CombatCard): boolean {
 }
 
 /**
- * WS8.4 — does the enemy's UPCOMING telegraphed run carry a rider (a status
- * effect riding the damage, not just the damage itself)? Read from the
- * omniscient `threatPhases` (control-lock is never blind), from the current
- * phase onward, so a rider two phases out still counts.
- */
-function upcomingThreatHasRider(s: CombatEncounterState): boolean {
-    return s.threatPhases
-        .slice(s.currentPhaseIndex)
-        .some(p => p.threatAction.effects.some(e => !!e.effectId));
-}
-
-/**
- * WS8.4 falsifiable probe (spec 32 §12 #6) — the control-lock policy's pick
- * should be a matchup read, not a fixed rotation. Against a clean or
- * compounding threat, the rung denial itself IS the win — rank on STAGGER
- * rungs (rungsTotal on the card's `stagger` special mechanic) first, with
- * stance-lock as a certainty tiebreak. Against a threat that carries a
- * RIDER, denying rungs alone doesn't erase it (only the WS8.2 BLIND surface
- * does), so no control surface scores. (BACKFIRE, the rider-proof punish
- * this probe once preferred there, left with its cards in the keyword audit,
- * 2026-09-27; `debuff_backfire` no longer exists, so its score was always 0.)
- */
-function controlSurfaceBonus(s: CombatEncounterState, card: CombatCard): number {
-    const source = getCardById(card.id);
-    if (!source) return 0;
-    const staggerRungs = source.specialMechanics
-        ?.find((m): m is { kind: 'stagger'; rungs: number } => m.kind === 'stagger')?.rungs ?? 0;
-    const locksStance = source.specialMechanics?.some(m => m.kind === 'lock_stance') ?? false;
-
-    if (upcomingThreatHasRider(s)) return 0;
-    return staggerRungs * 1000 + (locksStance ? 10 : 0);
-}
-
-/**
  * The legacy `bestCard` ordering as a pure per-card score (bit-identical
- * argmax): payoff cash-ins first (never on a low-HP mercy turn), Befriend when
- * the foe is low, then new-status > any-status > damage preview.
+ * argmax): Befriend when the foe is low, then new-status > any-status >
+ * damage preview.
  */
 function greedyRankCard(s: CombatEncounterState, card: CombatCard): number {
-    if (!enemyLowHp(s)) {
-        const kinds = cardMechKinds(card);
-        const pendingDot = getPendingDotTotal(s.enemy).total;
-        // Flat returns: ties between payoff cards fall back to hand order,
-        // exactly like the legacy first-match `cards.find`.
-        if (kinds.has('rupture') && pendingDot >= RUPTURE_PENDING_DOT_AT) return BAND_PAYOFF_RUPTURE;
-        if (kinds.has('reap_all') && (s.souls ?? 0) >= REAP_SOULS_AT) return BAND_PAYOFF_REAP;
-        if (kinds.has('spend_premises') && (s.premises ?? 0) >= SPEND_PREMISES_AT) return BAND_PAYOFF_PREMISES;
-    }
     let score = card.bottomDamagePreview;
     if (enemyLowHp(s) && card.verbClass === 'befriend') score += BAND_BEFRIEND_LOW_HP;
     if (isNewStatus(s, card)) score += BAND_NEW_STATUS;
     if (card.effectKind !== 'none') score += BAND_EFFECT;
     return score;
-}
-
-/**
- * WS7.2 — greedy's chosen X: the max AFFORDABLE-USEFUL X. Affordable is the
- * engine's clamp (the passed range); useful stops where extra X buys nothing
- * (poison intensity is capped at MAX_EFFECT_INTENSITY).
- */
-function greedyChooseX(card: CombatCard, range: { min: number; max: number }): number {
-    const sourceCard = getCardById(card.id);
-    const mech = (sourceCard?.specialMechanics ?? []).find(m => m.kind === 'recoil_x') as
-        { kind: 'recoil_x'; min: number; poisonPerX: number } | undefined;
-    if (!mech || mech.poisonPerX <= 0) return range.max;
-    const usefulMax = Math.ceil(MAX_EFFECT_INTENSITY / mech.poisonPerX);
-    return Math.max(range.min, Math.min(range.max, usefulMax));
 }
 
 /** Both placeholder signature kinds (phase R4): GUARD and The Open Hand. */
@@ -217,7 +136,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         convictionThreshold: 7,
         mercyChoice: 'spare',
         capitulationChoice: 'continue',
-        chooseX: (_s, card, range) => greedyChooseX(card, range),
     },
     blind: {
         id: 'blind',
@@ -229,18 +147,14 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         convictionThreshold: 7,
         mercyChoice: 'spare',
         capitulationChoice: 'continue',
-        chooseX: (_s, card, range) => greedyChooseX(card, range),
     },
     'dot-weaver': {
         id: 'dot-weaver',
         name: 'DoT Weaver',
-        description: 'All-in on erosion: fresh DoTs and rupture/reap payoffs above all; utility only once the foe is already bleeding.',
+        description: 'All-in on erosion: fresh DoTs above all; utility only once the foe is already bleeding.',
         preferredFocus: 'dot',
         rankCard: (s, card) => {
-            const kinds = cardMechKinds(card);
             const pendingDot = getPendingDotTotal(s.enemy).total;
-            if (kinds.has('rupture') && pendingDot >= RUPTURE_PENDING_DOT_AT) return BAND_PAYOFF_RUPTURE;
-            if (kinds.has('reap_all') && (s.souls ?? 0) >= REAP_SOULS_AT) return BAND_PAYOFF_REAP;
             if (card.verbClass === 'direct-dot') {
                 return (isNewStatus(s, card) ? BAND_PRIMARY : BAND_SECONDARY) + card.bottomDamagePreview;
             }
@@ -262,7 +176,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         rankCard: (s, card) => {
             if (isControlClass(card)) {
                 return (isNewStatus(s, card) ? BAND_PRIMARY : BAND_SECONDARY)
-                    + card.bottomDamagePreview + controlSurfaceBonus(s, card);
+                    + card.bottomDamagePreview;
             }
             if (card.verbClass === 'direct-dot') return BAND_EFFECT * 10 + card.bottomDamagePreview;
             if (card.verbClass === 'defend') return BAND_EFFECT;
@@ -302,8 +216,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         convictionThreshold: 9,
         mercyChoice: 'spare',
         capitulationChoice: 'continue',
-        // The outlast temperament commits the least blood the card allows.
-        chooseX: (_s, _card, range) => range.min,
     },
     chaos: {
         id: 'chaos',
@@ -316,8 +228,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         mercyChoice: 'exploit',
         capitulationChoice: 'accept',
         rankSignature: (_s, _sig, rng) => rng(),
-        // Seeded-uniform X across the whole legal range (inclusive).
-        chooseX: (_s, _card, range, rng) => range.min + Math.floor(rng() * (range.max - range.min + 1)),
     },
     'mercy-seeker': {
         id: 'mercy-seeker',

@@ -26,31 +26,13 @@ const EFFECT_ID_KEYWORD: Readonly<Record<string, string>> = Object.freeze({
     debuff_quarter: 'QUARTER',
 });
 
-// The keyword audit (2026-09-27, after the card purge) kept only the kinds
-// whose keyword still carries a gloss in mobile's KEYWORD_GLOSS. The other
-// kinds stay in the engine union; they simply resolve to no theme keyword.
-// The keyword purge (2026-09-28) removed RIPOSTE and FORETELL the same way.
 const MECHANIC_KIND_KEYWORD: Readonly<Record<string, string>> = Object.freeze({
-    barrier: 'GUARD',
     guard: 'GUARD',
-    stagger: 'STAGGER',
-    lock_stance: 'STAGGER',
-    sway: 'PLEA',
 });
 
-/**
- * `CardRider` field → keyword. Covers the rider verbs whose keyword still
- * carries a gloss (the keyword audit, 2026-09-27, dropped MILL, SOUL, CHARGE
- * and RECOIL with the purged cards).
- */
+/** `CardRider` field → keyword. */
 const RIDER_FIELD_KEYWORD: { readonly [K in keyof CardRider]?: string } = Object.freeze({
     guard: 'GUARD',
-    barrier: 'GUARD',
-    cleanse: 'CLEANSE',
-    stagger: 'STAGGER',
-    sway: 'PLEA',
-    healHp: 'HEAL',
-    drawCards: 'DRAW',
 });
 
 function riderKeywords(rider: CardRider | undefined, out: Set<string>): void {
@@ -63,7 +45,7 @@ function riderKeywords(rider: CardRider | undefined, out: Set<string>): void {
 /**
  * The keywords a specific card actually carries, in the same UPPERCASE
  * vocabulary `THEME_KEYWORDS` uses. Not every mechanic resolves to one (e.g.
- * `deal`, `wrath`, `twin` — real verbs, just not members of any theme's
+ * `deal` — a real verb, just not a member of any theme's
  * printed family, so they can never steer the dominant-theme pull).
  */
 export function cardKeywords(card: Card): readonly string[] {
@@ -75,11 +57,7 @@ export function cardKeywords(card: Card): readonly string[] {
     for (const sm of card.specialMechanics ?? []) {
         const kw = MECHANIC_KIND_KEYWORD[sm.kind];
         if (kw) out.add(kw);
-        if (sm.kind === 'rider') riderKeywords(sm.rider, out);
     }
     riderKeywords(card.free, out);
-    riderKeywords(card.threshold?.rider, out);
-    riderKeywords(card.dieBonus?.rider, out);
-    riderKeywords(card.fate?.rider, out);
     return [...out];
 }

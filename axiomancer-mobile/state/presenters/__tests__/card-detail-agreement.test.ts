@@ -241,10 +241,6 @@ describe('card detail agreement (finding 4 — the detail must match the card)',
                 effects: authored.combatEffects ?? [],
                 mechs: authored.specialMechanics ?? [],
                 free: authored.free ?? null,
-                threshold: authored.threshold ?? null,
-                dieBonus: authored.dieBonus ?? null,
-                fate: authored.fate ?? null,
-                fallen: authored.fallen ?? null,
                 synergy: authored.synergy ?? null,
             });
             // Durations that fall back to the effect library's own default are

@@ -39,7 +39,7 @@ import type {
     CombatEnemyPaneVM, CombatPlayerPaneVM, CombatEffectChipVM,
 } from '@/state/presenters/combat-encounter.engine';
 import { selectCombatLogLines } from '@/state/presenters/combat-encounter.engine';
-import { getCardById, type CombatEvent } from '@mechanics';
+import { type CombatEvent } from '@mechanics';
 import { effectGlyph } from '@/components/combat/statusGlyphs';
 import { keywordForEffect } from '@/state/combat/keywords';
 import { IntentIcon } from './IntentIcon';
@@ -333,8 +333,6 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
                 const kw = (keywordForEffect(e.effectId) ?? e.effectKind ?? 'effect').toUpperCase();
                 const color = e.effect ? effectGlyph(e.effect as Parameters<typeof effectGlyph>[0]).color : '#a86bdc';
                 statuses.push({ text: kw, color });
-            } else if (e.kind === 'buff-stripped' && e.target === 'self') {
-                statuses.push({ text: e.effectName ? `STRIP ${e.effectName.toUpperCase()}` : 'STRIP', color: '#a86bdc' });
             }
         }
         const IMPACT = 100;
@@ -510,22 +508,12 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                 const kw = (keywordForEffect(e.effectId) ?? e.effectKind ?? 'effect').toUpperCase();
                 const color = e.effect ? effectGlyph(e.effect as Parameters<typeof effectGlyph>[0]).color : (side === 'player' ? '#a86bdc' : '#d9b44a');
                 statusFloats.push({ side, text: kw, color });
-            } else if (e.kind === 'buff-stripped') {
-                // strip_random_buff surfaced (0.36.0): float the removed buff over the affected side.
-                const side = e.target === 'self' ? 'player' : 'enemy';
-                const label = e.effectName ? `STRIP ${e.effectName.toUpperCase()}` : 'STRIP';
-                statusFloats.push({ side, text: label, color: side === 'player' ? '#a86bdc' : '#d9b44a' });
             } else if (e.kind === 'backfired') {
                 // phase 28 — BACKFIRE previously had NO fx case at all (its HP
                 // loss was completely unrendered, not merely unlabeled). Always
                 // targets the enemy; a distinct gold "BACKFIRE -N" float, never
                 // folded into the generic damage color.
                 pushEnemy(`BACKFIRE -${e.amount}`, '#d9b44a', 0);
-            } else if (e.kind === 'foretold' && e.topCardId) {
-                // phase 28 — the engine reorders the draw pile but never told
-                // the player what it saw; surface the winner as a toast.
-                const name = getCardById(e.topCardId)?.name ?? e.topCardId;
-                pushEnemy(`FORETOLD: ${name.toUpperCase()}`, '#4f7fd6', 0);
             }
         }
         // THE BIG NUMBERS REWRITE — the new ledgers and the enemy's STAGE beat
@@ -752,12 +740,6 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                     ) : null}
                     {enemy.premiseVisible ? (
                         <AltWinMeter glyph="☞" label="CHARGE" value={enemy.premises} target={enemy.premiseAt} color={AXM.sulfur} testID="combat-premise-meter" outcome="CONDEMN" />
-                    ) : null}
-                    {/* THE BIG NUMBERS REWRITE — FLAY rides the FOE: how open it is
-                        to the next few hits. No target to fill toward, so the tally
-                        renders bare (the AltWinMeter's target-0 shape). */}
-                    {enemy.flayVisible ? (
-                        <AltWinMeter glyph="✂" label="FLAY" value={enemy.flay} target={0} color={AXM.rust} testID="combat-flay-meter" />
                     ) : null}
                     {/* Phase 2 (spec 30) — the status kill-path foresight. Makes the
                         DoT win path foreseeable instead of invisible accumulation:

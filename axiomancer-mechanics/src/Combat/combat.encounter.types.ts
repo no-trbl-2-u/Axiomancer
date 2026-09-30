@@ -164,9 +164,6 @@ export interface CardPlay {
     useBottom: boolean;
     /** Die spent to power the bottom action (ignored for top actions). */
     dieId?: string;
-    /** Chosen X for a chosen-X mechanic (`recoil_x`, WS7.2); the engine clamps
-     *  it to [min, affordable]. Absent → the printed minimum. */
-    chosenX?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -448,52 +445,21 @@ export type CombatEvent =
     | { kind: 'effect-landed'; cardId: string; effectId: string; target: 'self' | 'enemy';
         effectKind: CardEffectKind; intensity: number; effect: Effect }
     | { kind: 'effect-fizzled'; cardId: string; effectId: string; message: string }
-    // A `strip_random_buff` mechanic (e.g. Ad Hominem Strike) removed one buff
-    // from a combatant. `effectId`/`effectName` are null when there was no buff
-    // to strip. Surfaced so the live combat log can show the harassment landing.
-    | { kind: 'buff-stripped'; cardId: string; target: 'self' | 'enemy';
-        effectId: string | null; effectName: string | null }
     | { kind: 'damage-dealt'; cardId: string; target: 'self' | 'enemy'; amount: number }
     | { kind: 'die-refreshed'; dieId: string; color: CombatDieColor }
     | { kind: 'die-spent'; dieId: string; color: CombatDieColor }
     | { kind: 'dot-tick'; effectId: string; label: string; amount: number; target: 'self' | 'enemy' }
     // ── 0.34.0 status-depth epic — new card-mechanic events ──────────────────
-    | { kind: 'rupture-detonated'; amount: number; consumed: string[] }
-    | { kind: 'amplify-detonated'; amount: number; pendingDot: number }
-    | { kind: 'compound-hit'; amount: number; debuffs: number }
     | { kind: 'disrupt-denied'; pips: number }
     | { kind: 'thorns-reflected'; amount: number; target: 'enemy' }
     | { kind: 'barrier-absorbed'; amount: number }
     | { kind: 'riposte-fired'; amount: number }
-    | { kind: 'execute-fired'; amount: number; recoil: number }
-    // Master Spec §4 — wild-die permanent-growth mechanic. `grant_permanent_wild_die`
-    // cards fire this when powered by a die (weak plays never touch the pool).
-    | { kind: 'permanent-wild-die-granted'; wildAdded: number; deadAdded: number; totalWild: number }
     // ── Fate Engine P1 (spec 31 §1) — dice-layer events ──────────────────────
     | { kind: 'die-banked'; dieId: string; color: CombatDieColor; pips: number }
     | { kind: 'die-ripened'; dieId: string; pips: number }
-    // Phase 32 part 4c (Forge — OVERHEAT): a pip pushed past `RESERVE_PIP_CAP`
-    // busted — the targeted die's pips are HALVED (floored), not zeroed (a
-    // partial setback, not a wipeout — Quacks' own bust cost is "choose
-    // points or coins, not both," never total loss). A SUCCESSFUL overheat
-    // push still reuses 'die-ripened' (the pip count simply now exceeds the
-    // safe cap); this event exists only for the bust half of the gamble, own
-    // event so 'die-ripened' consumers are unaffected, matching
-    // 'debt-tier-payoff'/'max-hp-eroded' precedent.
-    | { kind: 'overheat-bust'; dieId: string; cardId: string; pips: number }
     | { kind: 'resonance-gained'; color: 'heart' | 'body' | 'mind'; total: number }
-    | { kind: 'threshold-fired'; cardId: string; color: 'heart' | 'body' | 'mind'; count: number; riderText: string }
-    | { kind: 'die-bonus-fired'; cardId: string; riderText: string }
-    // WS4.1 — `bonus: 'mark'` = spend_all_pips `markPer` (amount = MARK stacks
-    // landed); `pips-overflowed` = grant_pip pips that found no room and fired
-    // the printed overflow rider instead (Slag Runoff class).
-    | { kind: 'pips-cashed'; cardId: string; pips: number; bonus: 'intensity' | 'guard' | 'mark'; amount: number }
-    | { kind: 'pips-overflowed'; cardId: string; pips: number; riderText: string }
-    | { kind: 'react-detonated'; cardId: string; amount: number; consumed: string[] }
-    | { kind: 'die-forged'; dieId: string; color: CombatDieColor; destination: 'reserve' | 'conviction' }
-    | { kind: 'die-converted'; dieId: string; color: CombatDieColor }
+    | { kind: 'pips-cashed'; cardId: string; pips: number; bonus: 'intensity' | 'guard'; amount: number }
     // ── Spec 32 v3 — themed-deck events ──────────────────────────────────────
-    | { kind: 'die-floated'; dieId: string; color: CombatDieColor; poolSize: number }
     | { kind: 'floating-die-spent'; dieId: string; color: CombatDieColor; poolSize: number }
     // Spec 32 v4 — `temporary`/`roundsLeft` are set when the card entered play via
     // the FREE (dieless) line (a timed instance); absent/false = the PAID permanent
@@ -506,45 +472,15 @@ export type CombatEvent =
     // Phase 32 part 4b (Oratory — milestone drip): fires alongside
     // 'premise-gained' whenever a NEW lifetime Premise milestone is crossed —
     // own event (not a field on 'premise-gained') so existing consumers are
-    // unaffected, matching 'debt-tier-payoff's precedent from Part 3.
+    // unaffected.
     // 'total' is the lifetime `premiseMilestoneTotal`, not the (resettable)
     // spendable Premise tally 'premise-gained' reports.
     | { kind: 'premise-milestone'; tiersCrossed: number; rungs: number; total: number }
-    | { kind: 'peroration-declared'; cardId: string; at: number }
     | { kind: 'peroration-fired'; cardId: string; premisesSpent: number }
-    | { kind: 'premises-spent'; spent: number; marks: number; drawn: number }
-    | { kind: 'staggered'; rungs: number; total: number }
     | { kind: 'backfired'; amount: number; rungs: number }
     | { kind: 'rung-regrown'; rungs: number; total: number }
     | { kind: 'stance-locked'; phaseIndex: number; stance: Stance }
-    | { kind: 'foretold'; count: number; topCardId: string | null }
-    // Phase 32 part 4d (Oracle — OMEN v2): `window` and `ante` are the
-    // player's resolved CLAIM (window clamped to the card's printed
-    // `maxWindow`; ante already deducted from Conviction in this same play,
-    // clamped to what was affordable — see `omenClaim` on `playCombatCard`).
-    | { kind: 'omen-declared'; cardId: string; stance: CombatDieColor; phaseIndex: number; window: number; ante: number }
-    | { kind: 'omen-hit'; cardId: string; phaseIndex: number; riderText: string }
-    // `expired: true` — the window is now exhausted (0 tries left); the
-    // pending claim is gone for good, its ante already sunk. `expired: false`
-    // — a wider claim missed THIS boundary but still has tries left and
-    // stays in `pendingOmens`.
-    | { kind: 'omen-missed'; cardId: string; phaseIndex: number; expired: boolean }
     | { kind: 'soul-gained'; amount: number; total: number; reason: 'expiry' | 'consumed' | 'granted' }
-    // ── THE BIG NUMBERS REWRITE (2026-09-02) — the damage-scaler ledgers ─────
-    /** WRATH gained: a combat-long flat bonus to every hit the player lands. */
-    | { kind: 'wrath-gained'; cardId: string; amount: number; total: number }
-    /** FLAY stacks applied to the foe (each spends on one of the next hits). */
-    | { kind: 'flay-applied'; cardId: string; amount: number; total: number }
-    /** CHAIN gained: a bonus to the player's NEXT hit, spent on landing. */
-    | { kind: 'chain-gained'; cardId: string; amount: number; total: number }
-    /** CHAIN faded at the turn boundary: no play fed it this turn. */
-    | { kind: 'chain-faded'; from: number }
-    /** TWIN armed: the next PAID spell this turn resolves twice. */
-    | { kind: 'twin-armed'; cardId: string }
-    /** TWIN fired: this spell's PAID payload resolved a second time. */
-    | { kind: 'twin-fired'; cardId: string }
-    /** OVERKILL converted the damage that overshot the foe's last VITAE. */
-    | { kind: 'overkill-cashed'; cardId: string; excess: number }
     /** A foe crossed one of its STAGE thresholds and became another fight. */
     | { kind: 'stage-entered'; enemyId: string; name: string; text: string }
     /**
@@ -555,19 +491,12 @@ export type CombatEvent =
      * one.
      */
     | { kind: 'enemy-healed'; enemyId: string; source: 'STAGE' | 'THREAT'; amount: number }
-    | { kind: 'reaped'; cardId: string; soulsSpent: number; amount: number }
-    // Phase 32 part 1 (Harvest — REAP attacks MAXIMUM HP): fires alongside
-    // 'reaped' whenever a REAP verb (single or ALL) permanently lowers the
-    // enemy's ceiling. Own event rather than a field on 'reaped' so existing
-    // 'reaped' consumers are unaffected and the erosion gets its own legible
-    // telemetry hook (e.g. a future mobile toast).
-    | { kind: 'max-hp-eroded'; cardId: string; amount: number; newMax: number }
     | { kind: 'sway-gained'; amount: number; total: number }
     // Phase 32 part 4e (Charm — Resolve milestones): fires alongside
     // 'sway-gained' whenever PLEA crosses a NEW named fractional waypoint of
     // the enemy's live `capitulateThreshold` — own event (not a field on
     // 'sway-gained') so existing 'sway-gained' consumers are unaffected,
-    // matching 'premise-milestone'/'debt-tier-payoff' precedent. 'threshold'
+    // matching 'premise-milestone' precedent. 'threshold'
     // is the live waypoint value crossed (see `swayResolveMilestoneThresholds`);
     // 'total' is the PLEA total AFTER this milestone's own dividend (the
     // Faltering bonus PLEA included). Discriminated by 'milestone' so each
@@ -577,37 +506,14 @@ export type CombatEvent =
     | { kind: 'sway-decayed'; total: number }
     | { kind: 'capitulation-offered'; threshold: number }
     | { kind: 'capitulation-declined' }
-    | { kind: 'echoed'; cardId: string }
-    | { kind: 'reprised'; cardId: string; returned: string[] }
-    | { kind: 'dots-extended'; turns: number; affected: string[] }
-    | { kind: 'dots-converted'; from: string; to: string; intensity: number }
     | { kind: 'dots-boosted'; intensity: number; affected: string[] }
-    | { kind: 'affliction-consumed'; effectId: string; fuel: number }
-    | { kind: 'recoil-paid'; cardId: string; amount: number }
-    // Phase 32 part 3 (Akrasia — DEBT ledger): fires alongside 'recoil-paid'
-    // whenever RECOIL HP posts to the per-combat ledger — own event (not a
-    // field on 'recoil-paid') so existing 'recoil-paid' consumers are
-    // unaffected, matching 'max-hp-eroded's precedent from Part 1.
-    | { kind: 'debt-paid'; amount: number; total: number }
-    // The tiered payoff: fires only when a NEW debt tier is crossed WHILE
-    // FALLEN — 'tiersCrossed' lets a single big RECOIL cross more than one.
-    | { kind: 'debt-tier-payoff'; tiersCrossed: number; guard: number; total: number }
-    // Phase 32 part 4a (Control — TURNABOUT): the ledger cashed out — every
-    // rung STAGGER/BACKFIRE ever denied this combat converts to one burst,
-    // then `rungsDeniedTotal` resets to 0 in the SAME call (no stale read).
-    | { kind: 'turnabout-fired'; cardId: string; rungsSpent: number; amount: number }
     | { kind: 'phase-resolved'; phaseIndex: number; mark: 'clear' | 'overwhelmed' }
     | { kind: 'threat-fired'; phaseIndex: number; description: string; effects: CombatThreatEffect[] }
     // WS9 (spec 32 §12 #7) — a branch phase committed its fork at phase START.
     | { kind: 'threat-branch'; phaseIndex: number; conditionText: string; taken: 'then' | 'else' }
     // WS9 — the enemy's reactive cleanse shed some of its own afflictions.
     | { kind: 'threat-cleansed'; phaseIndex: number; effectIds: string[] }
-    // Profane-canon rework — `immolated` when a play burns hand cards as fuel
-    // (they leave the combat); `purged` when a curse card exiles itself on play.
-    | { kind: 'immolated'; cardId: string; burned: string[] }
-    | { kind: 'purged'; cardId: string }
     | { kind: 'hand-drawn'; cards: string[] }
-    | { kind: 'cards-milled'; cards: string[] }
     | { kind: 'mercy-opened'; message: string }
     // ── Spec 33 (Upgradeable Dice) — the shipped dice model's events. ──────
     // The player's stance shifted (stance = the last PAID card's stance).
@@ -732,7 +638,7 @@ export interface CombatEncounterState {
     premises?: number;
     /** Phase 32 part 4b (Oratory — milestone drip): cumulative Premises EVER
      *  gained THIS COMBAT — every source that feeds `gainPremises`. Per-combat,
-     *  like `souls`/`akrasiaDebt` — reset to 0 in `initializeCombatEncounter`
+     *  like `souls` — reset to 0 in `initializeCombatEncounter`
      *  only. UNLIKE the spendable `premises` tally above, this does NOT reset
      *  when a Peroration pays off or CONDEMN fires, so a milestone already
      *  crossed stays crossed. Optional (absent = 0, back-compat with existing
@@ -751,20 +657,6 @@ export interface CombatEncounterState {
      *  cannot lock a boss out of acting for the whole fight. Normal enemies
      *  never accrue this. Optional (absent = 0, byte-identical to before). */
     bossRungGrowth?: number;
-    /** Spec 32 v3 T5 — arrow-paradox: the NEXT phase keeps the current stance. */
-    stanceLockedNext?: boolean;
-    /** Phase 32 part 4d (Oracle — OMEN v2 rework, spec 32 v3 T6): pending
-     *  OMEN claims awaiting resolution. `windowRemaining` counts down by 1
-     *  every phase boundary (`resolveThreatPhase`) until it either matches
-     *  the incoming stance (a HIT — the entry is removed) or reaches 0
-     *  without matching (a MISS — also removed; the ante was already spent
-     *  at cast). `claimScale` (fixed at cast time, independent of the
-     *  countdown) is the 1/window payoff multiplier applied to the card's
-     *  printed rider on a hit. No more absolute `phaseIndex` — a wider claim
-     *  is checked at EVERY boundary while pending, not just one. */
-    pendingOmens?: { cardId: string; stance: 'heart' | 'body' | 'mind'; windowRemaining: number; claimScale: number }[];
-    /** Spec 32 v3 T6 — omens that CAME TRUE this combat (Oracle payoff fuel). */
-    omenHits?: number;
     /** Spec 32 v3 T7 — the SOUL bank (Harvest currency). Optional. */
     souls?: number;
     /** Spec 32 v3 T8 — PLEA on the enemy (decays 1/turn; ≥ enemy HP at a turn
@@ -773,8 +665,8 @@ export interface CombatEncounterState {
     /** Phase 32 part 4e (Charm — Resolve milestones): has the Wavering
      *  waypoint (PLEA ≥ {@link swayResolveMilestoneThresholds}'s `wavering`,
      *  a fraction of the LIVE `capitulateThreshold`) already paid its
-     *  one-time QUARTER dividend THIS COMBAT? Per-combat, like `souls`/
-     *  `akrasiaDebt` — reset to `false` in `initializeCombatEncounter` only.
+     *  one-time QUARTER dividend THIS COMBAT? Per-combat, like `souls` —
+     *  reset to `false` in `initializeCombatEncounter` only.
      *  Once true, NEVER reset back to false even if the live resolve later
      *  shrinks below the threshold that was crossed (a milestone already
      *  paid stays paid). Optional (absent = false, back-compat with
@@ -790,26 +682,6 @@ export interface CombatEncounterState {
     capitulationChoiceActive?: boolean;
     /** The player rejected this foe's yield; do not reopen the same offer. */
     capitulationDeclined?: boolean;
-    /** Spec 32 v3 T10 — the next spell played this turn gains ECHO. */
-    echoNextSpell?: boolean;
-    // ── THE BIG NUMBERS REWRITE (2026-09-02) — the damage-scaler ledgers ──────
-    /** WRATH — a combat-long flat bonus added to EVERY hit the player lands
-     *  (Slay the Spire's Strength). Never decays; only grows. Absent = 0. */
-    wrath?: number;
-    /** CHAIN — a bonus added to the player's NEXT hit, then spent. Fades to 0
-     *  at the end of any turn in which no play added to it, so the payoff
-     *  belongs to a deck that keeps swinging (Dawncaster's Chain). Absent = 0. */
-    chain?: number;
-    /** CHAIN bookkeeping — set when a play added CHAIN this turn; read and
-     *  cleared at the turn boundary to decide whether CHAIN fades. */
-    chainFedThisTurn?: boolean;
-    /** FLAY — stacks on the FOE: each of the player's next N damage instances
-     *  deals +50%, consuming one stack (Dawncaster's Vulnerable, front-loaded
-     *  rather than percentage-per-stack). Absent = 0. */
-    flay?: number;
-    /** TWIN — armed: the next PAID spell this turn resolves twice. Cleared when
-     *  it fires, so it never chains into the copy it created. */
-    twinArmed?: boolean;
     /** THE PATH — extra dice added to every turn's tray (act-reward dice),
      *  seeded from `Character.bonusTurnDice`. Absent = 0. */
     bonusTurnDice?: number;
@@ -824,39 +696,6 @@ export interface CombatEncounterState {
     stageThreatBonus?: number;
     /** Spec 32 v3 T10 — spells played this turn (resonant-chamber's gate). */
     spellsPlayedThisTurn?: number;
-    /** Spec 32 v3 T10 — the last PAID spell that LANDED A STATUS this combat
-     *  (ouroboros's replay target). Phase 32 part 4f: a PAID spell that
-     *  resolves without increasing any effect intensity on the enemy (a
-     *  fizzle, a pure-mechanic burst, a dieless/no-op play) does NOT
-     *  overwrite this — it stays pinned to the most recent status-landing
-     *  spell so an intervening no-status play can never "steal" the echo. */
-    lastSpellCardId?: string | null;
-    /** Phase 39 (2026-08-08) — the `state.round` `lastSpellCardId` was last set
-     *  on. Ouroboros's precondition-width retune (target ~25% fizz, was 3-10%
-     *  — `lastSpellCardId` never reset across turns, so it almost never
-     *  fizzled after the first status-landing spell of the whole combat)
-     *  narrows REPLAY_LAST to "landed THIS turn", not "ever this combat". */
-    lastSpellRound?: number;
-    /** Spec 32 §12 #4 (combat ledgers) — RECOIL HP paid this turn (`recoil`
-     *  mechanic + fate recoil). Reset with `spellsPlayedThisTurn` at turn start. */
-    recoilPaidThisTurn?: number;
-    /** Phase 32 part 3 (Akrasia — DEBT ledger): cumulative RECOIL HP paid THIS
-     *  COMBAT — every `recoil`/`recoil_x` mechanic, `CardRider.recoil` (FREE or
-     *  PAID line), and `fate.recoilHp`. Per-combat, like `souls` — unlike
-     *  `recoilPaidThisTurn` this does NOT reset at `startTurn`. No cash-out
-     *  path exists yet (Absolution-fork follow-up); it only ever grows this
-     *  combat. Optional (absent = 0, back-compat with existing state literals). */
-    akrasiaDebt?: number;
-    /** Phase 32 part 4a (Control — TURNABOUT ledger): cumulative STAGGER/
-     *  BACKFIRE rung-denial THIS COMBAT — every phase's `rungsForBackfire`
-     *  (the same quantity BACKFIRE's per-phase drip already reads), whether or
-     *  not BACKFIRE itself is live. Per-combat, like `souls`/`akrasiaDebt` —
-     *  reset to 0 in `initializeCombatEncounter` only. UNLIKE those two, this
-     *  ledger is CONSUMED (zeroed) the moment a `turnabout` mechanic cashes it
-     *  — the one place this differs structurally from the Souls/DEBT
-     *  precedent. Optional (absent = 0, back-compat with existing state
-     *  literals). */
-    rungsDeniedTotal?: number;
     /** Spec 32 §12 #4 — HP the enemy's threat dealt the player this turn
      *  (post-soak budget); rolls into `enemyDamageLastRound` between phases. */
     enemyDamageThisTurn?: number;
@@ -871,7 +710,7 @@ export interface CombatEncounterState {
     scrapsThisTurn?: number;
     /** WI-1 (2026-07-12) — the REAL DoT damage the enemy has taken from
      *  event-triggered ticks so far THIS round (poison `card-played`, bleed
-     *  `damage-instance`, fate-tap, TICK riders). Folded in `withLog` at every
+     *  `damage-instance`). Folded in `withLog` at every
      *  enemy `dot-tick` emission, reset each turn in `startTurn`, and consumed
      *  by `suppurating-curse` in `processBetweenPhases` (which adds the
      *  round-clock ticks on top) so the curse can double the round's true DoT
@@ -882,8 +721,6 @@ export interface CombatEncounterState {
      *  budgeted hit soaked to 0 by riposte/guard/barrier). Persists until the
      *  next threat resolves (WS9 `prior-threat-fully-blocked` branch fuel). */
     lastThreatFullyBlocked?: boolean;
-    /** Spec 32 v3 — uids of CONJURED one-use Haunts (removed on play). */
-    conjuredUids?: string[];
     threatPhases: CombatThreatPhase[];     // enemy's authored / generated threat sequence
     threatMarks: CombatThreatMark[];       // O / X ledger per phase (hindered / acted)
     currentPhaseIndex: number;             // 0-indexed into threatPhases

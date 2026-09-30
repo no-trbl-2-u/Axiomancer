@@ -44,7 +44,7 @@ const FX_EMBER: Card = {
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'enemy',
     paidSummary: 'Inflict KINDLING EMBER 1 for 3 turns.',
-    free: { foretell: 1 },
+    free: { guard: 1 },
     combatEffects: [{ effectId: 'fixture_ember', appliedTo: 'opponent', intensity: 1, duration: 3 }],
     addedIn: '2026-08-08',
     tags: ['rot'],

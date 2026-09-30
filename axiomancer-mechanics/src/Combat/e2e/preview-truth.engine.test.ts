@@ -125,20 +125,13 @@ const BASE_HIT = Math.round(10 * THREAT_DAMAGE_SCALE); // round 1 = grace → es
 /**
  * THE BIG NUMBERS REWRITE (2026-09-02) — the direct-damage half of the
  * preview. `bottomDamagePreview` counts what the PAID line takes off the foe:
- * the `deal` mechanic (multi-hit aware), a rider that carries `damage`, and
- * the condition riders at face value. Re-derived here from the card data so
- * the test computes the same truth independently of the implementation.
+ * the `deal` mechanic. Re-derived here from the card data so the test
+ * computes the same truth independently of the implementation.
  */
 function directDamageOf(entry: Card): number {
     let total = 0;
     for (const m of entry.specialMechanics ?? []) {
-        if (m.kind === 'deal') total += m.amount * Math.max(1, m.hits ?? 1);
-        else if (m.kind === 'rider') total += m.rider.damage ?? 0;
-        else if (m.kind === 'immolate') total += m.rider.damage ?? 0;
-    }
-    for (const r of [entry.threshold?.rider, entry.dieBonus?.rider, entry.fate?.rider,
-        entry.fallen?.rider, entry.synergy?.rider]) {
-        total += r?.damage ?? 0;
+        if (m.kind === 'deal') total += m.amount;
     }
     return total;
 }

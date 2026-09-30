@@ -77,11 +77,8 @@ const VERB_KEYWORD: Record<string, string> = {
  */
 const MECHANIC_KEYWORD: Record<string, string> = {
     // `deal` deliberately has NO keyword row: "Deal 24" is plain English (MTG's
-    // rule: keyword what compresses). The keyword audit (2026-09-27) removed
-    // every row whose keyword lost its gloss with the purged cards, and revamp
-    // R4 (D45) the last four (Stagger, Plea, Wrath, Chain) with the signature
-    // skills that carried them. Those kinds stay in the engine union until
-    // R7a and are listed in KINDS_WITHOUT_MECHANIC_KEYWORD.
+    // rule: keyword what compresses), and GUARD prints as its own word in the
+    // paid line. Both are listed in KINDS_WITHOUT_MECHANIC_KEYWORD.
 };
 
 /**
@@ -106,7 +103,7 @@ const KEYWORD_GLOSS: Record<string, string> = {
     // ── Utility ──
     Guard:
         'Blocks that much incoming attack damage during the next threat phase. '
-        + 'Unused Guard is lost unless the card prints "persists".',
+        + 'Unused Guard is lost.',
     Heal: 'Restores that much VITAE, up to your maximum.',
     // ── Affliction ──
     Bleed: 'Each hit the bearer takes deals 3 more VITAE per Bleed stack, then removes a stack.',
@@ -114,9 +111,8 @@ const KEYWORD_GLOSS: Record<string, string> = {
         'The foe takes that much more damage from every hit. Adding more stacks it and refreshes the turns.',
     // ── Dice ──
     Pip:
-        'Each threat phase a Reserve die survives, it gains one pip, capped at 2 '
-        + '(some cards can push past the cap and risk a bust). '
-        + 'Each pip spent adds +1 intensity, or +2 Guard on a defend card.',
+        'Each threat phase a Reserve die survives, it gains one pip, capped at 2. '
+        + 'Each pip spent adds +2 intensity, or +5 Guard on a defend card.',
     // ── Die gear (spec 33 Upgradeable Dice §6, registered D4 2026-07-17) —
     // BOON is the face payload; HONE/TEMPER are the blacksmith upgrade verbs.
     // (Renamed from SPECIAL — R-8, phase 44b.) ──

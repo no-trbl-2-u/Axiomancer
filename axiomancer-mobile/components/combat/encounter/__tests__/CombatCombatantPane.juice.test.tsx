@@ -31,7 +31,6 @@ const PLAYER: CombatPlayerPaneVM = {
     name: 'Pilgrim', hp: 40, maxHp: 50, hpPct: 0.8, guard: 0, effects: [],
     // THE BIG NUMBERS REWRITE — the damage-scaler ledgers; idle here (this
     // witness is about the juice call sites, not the ledgers).
-    wrath: 0, wrathVisible: false, chain: 0, chainVisible: false, twinArmed: false,
 };
 
 const fx = (events: CombatEvent[]): CombatFx => ({ seq: 1, events });

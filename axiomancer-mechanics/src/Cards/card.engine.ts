@@ -10,16 +10,11 @@ import { BaseStats, Character } from '../Character/types';
 import { Enemy } from '../Enemy/types';
 import { ActiveEffect, Effect } from '../Effects/types';
 import { lookupEffect, applyEffect } from '../Effects';
-import { removeRandomBuff } from '../Combat/effects';
 import { resolveEffectApplication } from '../Combat/resist';
 import { incrementFriendship } from '../Combat/combat.reducer';
-import { isBefriendAttemptEligible } from '../Combat/index';
 import { Combatant, CombatState } from '../Combat/types';
 import { scaleEffectIntensity } from '../Combat/stat-scaling';
-import {
-    Card, CardCombatEffects,
-    CardSpecialMechanic,
-} from './types';
+import { Card, CardCombatEffects } from './types';
 import { cardLibrary, getCardById } from './cards.library';
 
 // ─── Card Learning (Phase 30) ───────────────────────────────────────────────
@@ -63,28 +58,18 @@ export type CardEvent =
         appliedTo: 'self' | 'enemy';
         effect: Effect;
         message: string }
-    | { kind: 'buff-stripped';
-        cardId: string;
-        target: 'self' | 'enemy';
-        effect: Effect | null }
     | { kind: 'buff-converted';
         cardId: string;
         effect: Effect | null;
         message: string }
     | { kind: 'friendship-incremented'; 
         cardId: string; 
-        amount: number }
-    | { kind: 'befriend-attempted';
-        cardId: string;
-        successful: boolean;
-        message: string };
+        amount: number };
 
 /** Result of `executeCard`. */
 export interface CardResolution {
     state: CombatState;
     events: CardEvent[];
-    /** Phase 108 - when true, indicates the card triggered mercy choice activation */
-    activateMercyChoice?: boolean;
 }
 
 /** Lookup helper used by `executeCard` to resolve a card ID against an actor. */
@@ -99,7 +84,8 @@ export interface CardLookup {
  *      in the enemy's rotation.
  *   2. Resolve each `combatEffects` payload through `resolveEffectApplication`
  *      (every effect lands as printed — D12).
- *   3. Resolve `specialMechanics` and the friendship increment.
+ *   3. Resolve the friendship increment. `specialMechanics` (DEAL, GUARD)
+ *      are the combat engine's: this engine never reads them.
  *
  * The card engine deals no direct damage: direct damage is the combat
  * engine's `deal` mechanic (THE BIG NUMBERS REWRITE), and the Phase 66
@@ -184,15 +170,6 @@ export function executeCard(
         events.push(...result.events);
     }
 
-    for (const mechanic of card.specialMechanics ?? []) {
-        const result = applySpecialMechanic(
-            mechanic, card, workingCaster, workingTarget, state.round, state,
-        );
-        workingCaster = result.caster;
-        workingTarget = result.target;
-        events.push(...result.events);
-    }
-
     // Phase 91 — friendship increment processing
     let workingState = {
         ...state,
@@ -213,12 +190,6 @@ export function executeCard(
     const nextPlayer = (isPlayerCaster ? workingCaster : workingTarget) as Character;
     const nextEnemy  = (isPlayerCaster ? workingTarget : workingCaster) as Enemy;
 
-    // Phase 108 — Check for successful befriend attempts to activate mercy choice
-    const successfulBefriend = events.find(
-        e => e.kind === 'befriend-attempted' && e.successful
-    );
-    const activateMercyChoice = Boolean(successfulBefriend);
-
     return {
         state: {
             ...workingState,
@@ -226,7 +197,6 @@ export function executeCard(
             enemy:  nextEnemy,
         },
         events,
-        activateMercyChoice,
     };
 }
 
@@ -340,76 +310,3 @@ function buildActiveEffect(
     };
 }
 
-// ─── Special Mechanics ───────────────────────────────────────────────────────
-
-/**
- * Resolves a `CardSpecialMechanic` (buff-strip, conversion, secondary heal,
- * etc.) against the current working player / enemy snapshots and returns the
- * updated snapshots plus any `CardEvent`s the resolver should forward to
- * the combat event stream.
- *
- * Mechanics run AFTER `combatEffects` so that, for example, Ship of Theseus
- * sees the same buff list a player can observe in the CLI before this round
- * resolves.
- */
-function applySpecialMechanic(
-    mechanic: CardSpecialMechanic,
-    card: Card,
-    caster: Combatant,
-    target: Combatant,
-    round: number,
-    state: CombatState,
-): CardEffectResult {
-    const events: CardEvent[] = [];
-
-    switch (mechanic.kind) {
-        case 'strip_random_buff': {
-            if (mechanic.appliedTo === 'enemy') {
-                const { target: nextTarget, removed } = removeRandomBuff(target);
-                events.push({
-                    kind: 'buff-stripped', cardId: card.id, target: 'enemy',
-                    effect: removed ? lookupEffect(removed.effectId) ?? null : null,
-                });
-                return { caster, target: nextTarget, events };
-            }
-            const { target: nextCaster, removed } = removeRandomBuff(caster);
-            events.push({
-                kind: 'buff-stripped', cardId: card.id, target: 'self',
-                effect: removed ? lookupEffect(removed.effectId) ?? null : null,
-            });
-            return { caster: nextCaster, target, events };
-        }
-
-        case 'befriend_attempt': {
-            // Phase 108 — Check if befriend attempt is valid
-            const isEligible = isBefriendAttemptEligible(state);
-            
-            if (!isEligible) {
-                events.push({
-                    kind: 'befriend-attempted',
-                    cardId: card.id,
-                    successful: false,
-                    message: 'Befriend failed: enemy not yet vulnerable to mercy.',
-                });
-                return { caster, target, events };
-            }
-
-            // Successful befriend attempt - opens mercy choice
-            events.push({
-                kind: 'befriend-attempted',
-                cardId: card.id,
-                successful: true,
-                message: 'Befriend successful! Choose mercy or exploitation.',
-            });
-            return { caster, target, events };
-        }
-
-        // ── Hazard-Pattern / spec 32 v3 card mechanics ───────────────────────
-        // Every other mechanic kind is COMBAT-ENGINE OWNED: the card engine
-        // no-ops it (so the shared effect machinery stays untouched) and the
-        // HP-model combat engine reads the mechanic at its `playBottomAction` /
-        // `resolveThreatPhase` / `processBetweenPhases` call sites.
-        default:
-            return { caster, target, events };
-    }
-}

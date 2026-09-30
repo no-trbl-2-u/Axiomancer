@@ -83,7 +83,7 @@ cards and hazard cards do not use `CardSpecialMechanic`.
    only writer was a deleted mechanic or rider: `echoNextSpell`, `wrath`,
    `chain`, `chainFedThisTurn`, `flay`, `twinArmed`, `lastSpellCardId`,
    `lastSpellRound`, `recoilPaidThisTurn`, `akrasiaDebt`, `rungsDeniedTotal`,
-   `staggerRungs`, `stanceLockedNext`, `pendingOmens`, `conjuredUids`, and
+   `stanceLockedNext`, `pendingOmens`, `conjuredUids`, `omenHits`, and
    their events (`twin-fired`, `echoed`, `threshold-fired`, `die-bonus-fired`,
    …) and scaler params (`scalePlayerHit`'s wrath / chain / flay / execute).
 5. **Fixtures**: `test-utils/retired-verb-cards.ts` is deleted. Each suite
@@ -99,9 +99,34 @@ cards and hazard cards do not use `CardSpecialMechanic`.
 7. **Carrier sweep (D45), last**: any glossary / atlas row, glyph or gloss
    left printing only a deleted kind or rider goes (both workspaces).
 
+### As shipped (R7a, 2026-09-30)
+
+Scope 1–7 landed, with these calls made against the tree:
+
+- **`staggerRungs` stays** with the rung ladder (`computeRungDenial`, boss
+  rung growth, BACKFIRE's drip, the mobile rungs readout and the RUNGS
+  system term). STAGGER was its only feeder, so the whole ladder is now
+  carrier-less; R7c deletes it with the other carrier-less effects.
+- **Pricing went whole** (`Cards/cards.pricing.ts` and its suite), pulled
+  forward from R7b: it had no live importer and 131 compile errors to patch
+  otherwise.
+- **The PAID-line rider collector went whole**, synergy's firing included
+  (it fed the same collector; no live card carries a synergy). R7b deletes
+  the `synergy` type, `synergy-predicates.ts` and the printed synergy line.
+- **Handler-only helpers went with their handlers**: the RUPTURE cap and
+  per-stack fuel, REAP erosion, the DEBT tiers, `consumeAfflictions` /
+  `consumeOneAffliction` / `consumeMarks`, OVERHEAT (`overheatReserve`), the
+  REROLL bag (`rerollSpentDice`, `rollCombatDieColor`), `gainPremises`,
+  `gainSway`, `applyForetell`, the chain settle and the omen boundary.
+- **Mobile**: the X-cost stepper, the REPRISE picker, the WRATH / CHAIN /
+  TWIN / FLAY readouts and the BARRIER / RIPOSTE / SIPHON / RUPTURE / REAP /
+  FORGE face kinds are gone; the GUARD and PIP glosses lost their clauses
+  for deleted verbs (the PIP numbers now match the engine's
+  `PIP_INTENSITY_BONUS` 2 / `PIP_GUARD_BONUS` 5).
+
 ## Out of scope for R7a (named so it is not mistaken for a miss)
 
-- `synergy` and `synergy-predicates.ts`, pricing, themes, draft, presets,
+- `synergy` and `synergy-predicates.ts`, themes, draft, presets,
   reward steering, card types, the oath / hex zones and `persistentEffect`
   → R7b.
 - `sway`, `premises`, `peroration`, capitulation state and helpers,

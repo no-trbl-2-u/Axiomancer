@@ -33,48 +33,39 @@ import type { Character } from '../Character/types';
 import type { Enemy } from '../Enemy/types';
 import { getCardById } from '../Cards/cards.library';
 import { executeCard } from '../Cards/card.engine';
-import { checkStatePredicate } from '../Cards/synergy-predicates';
-import type { Card, CardAspect, CardRider, CardSpecialMechanic } from '../Cards/types';
-import type { CombatState, Combatant, Stance } from './types';
+import type { Card, CardAspect, CardRider } from '../Cards/types';
+import type { CombatState, Stance } from './types';
 import { applyDamage, heal, isDefeated, erodeMaxHealth } from './health';
 import {
     processRoundStartEffects, processRoundEndEffects, getActiveRollModifier,
     getThornsReflect, getDamageTakenMultiplier, getPendingDotTotal,
-    getDistinctDebuffCount, getDistinctControlCount,
+    getDistinctControlCount,
     getHealingReceivedMult, getOutgoingDamageMult, getOutgoingThreatDamageMult, decayDotsOnHeal, consumeEffect,
     hasPayloadFlag, getStanceVulnMult, computeRoundsToKill,
     fireDotTrigger, growPerEnemyActionDots,
-    consumeAfflictions, consumeOneAffliction, getBackfirePerRung, consumeMarks,
+    getBackfirePerRung,
     applyCleanse,
-    RUPTURE_PER_AFFLICTION_STACK, DISRUPT_DENY_AT,
-    ruptureBurstCap,
-    REAP_EROSION_PER_SOUL,
-    AKRASIA_DEBT_TIER_GUARD, akrasiaDebtTiersCrossed,
-    PREMISE_MILESTONE_RUNGS, premiseMilestonesCrossed,
+    DISRUPT_DENY_AT,
     THREAT_RUNGS, THREAT_RUNGS_BOSS, BOSS_RUNG_REGROWTH, bossRungGrowthCap,
-    concedeFloorFor,
     capitulateThreshold,
-    SWAY_WAVERING_RAPPORT, SWAY_FALTERING_BONUS, swayResolveMilestoneThresholds,
 } from './effects';
 import {
     dieHasStance,
     combatDieCanPower, availableDiceFor, spendDice, availableDieCount,
-    hasRerollableDice, rerollSpentDice,
-    RESERVE_MAX, ripenReserve, FLOATING_DICE_CAP, materializeFloatingDice,
-    overheatReserve,
+    RESERVE_MAX, ripenReserve, materializeFloatingDice,
 } from './combat.dice';
 import {
     rollUpgradeableDice, rollGoldLeadPair,
     crackedColorsForTurn, expireCrackedDice, advanceMomentumV2, resolveStanceCheck,
     isChainStance, activeDieGear, tableHasRoom,
-    UPGRADEABLE_TABLE_CEILING, KINDLE_CONCURRENT_CAP,
+    UPGRADEABLE_TABLE_CEILING,
     OVERHEAT_CRACK_CHANCE, SPECIAL_FIRES_ON_USE, SURGE_DIE_PREFIX, COVETED_DIE_PREFIX,
 } from './combat.upgradeable-dice';
 import {
     COMBAT_HAND_SIZE, buildCombatDeck, drawCombatCards, shuffleCombatDeck,
 } from './combat.deck';
 import {
-    toCombatCard, cardStanceColor, effectImpact, riderText, statePredicateText,
+    toCombatCard, cardStanceColor, effectImpact, riderText,
 } from './combat.cards';
 import { recordAttribution } from './combat.attribution';
 import { scaleFor, scaleEffectIntensity, scaleCardForStats } from './stat-scaling';
@@ -227,12 +218,6 @@ export const COLOR_MATCH_STATUS_DURATION_BONUS = 1;
  *  what keeps a staged boss escalating instead of detonating. */
 export const STAGE_THREAT_BONUS_CAP = 0.5;
 
-/** FLAY — the multiplier one spent stack applies to a single hit. */
-export const FLAY_DAMAGE_MULT = 1.5;
-/** EXECUTE — the multiplier while the foe sits at or below the card's
- *  printed threshold. A double, not an instant kill: a boss's STAGE
- *  thresholds stay the dramatic beats rather than being skipped over. */
-export const EXECUTE_DAMAGE_MULT = 2;
 
 const defaultRng = (): number => getRng().random();
 
@@ -366,34 +351,22 @@ export function initializeCombatEncounter(
         floatingDice,
         premises: 0,
         // Phase 32 part 4b (Oratory — milestone drip): per-COMBAT lifetime
-        // Premise total, like `souls`/`akrasiaDebt` — never resets when
+        // Premise total, like `souls` — never resets when
         // `premises` itself resets on a Peroration payoff or CONDEMN.
         premiseMilestoneTotal: 0,
         peroration: null,
         souls: 0,
         sway: 0,
         // Phase 32 part 4e (Charm — Resolve milestones): per-COMBAT, like
-        // `souls`/`akrasiaDebt` — a milestone already paid never un-fires,
+        // `souls` — a milestone already paid never un-fires,
         // even if the enemy's live resolve later shrinks below it.
         swayMilestoneWaveringFired: false,
         swayMilestoneFalteringFired: false,
-        omenHits: 0,
-        pendingOmens: [],
         spellsPlayedThisTurn: 0,
-        lastSpellCardId: null,
         // Spec 32 §12 #4 — the combat ledgers start empty.
-        recoilPaidThisTurn: 0,
         enemyDamageThisTurn: 0,
         enemyDamageLastRound: 0,
-        // Phase 32 part 3 (Akrasia — DEBT ledger): per-COMBAT, like `souls` —
-        // does NOT reset at `startTurn` (unlike `recoilPaidThisTurn` above).
-        akrasiaDebt: 0,
-        // Phase 32 part 4a (Control — TURNABOUT ledger): per-COMBAT, like
-        // `souls`/`akrasiaDebt` — accrues every threat phase regardless of
-        // FALLEN/etc gating, consumed (zeroed) only by a `turnabout` play.
-        rungsDeniedTotal: 0,
         lastThreatFullyBlocked: false,
-        conjuredUids: [],
         threatPhases,
         threatMarks: threatPhases.map(() => 'pending'),
         currentPhaseIndex: 0,
@@ -500,21 +473,16 @@ export function startTurn(
         events.push({ kind: 'die-overflowed', source: 'materialize', total: conviction });
         events.push({ kind: 'conviction-gained', amount: 1, total: conviction, reason: 'effect' });
     }
-    const chainCarry = settleChainAtTurnBoundary(state, events);
     const next: CombatEncounterState = {
         ...state, dice, reserve, floatingDice, conviction, turn,
         crackedDice: expireCrackedDice(state.crackedDice, turn),
-        spellsPlayedThisTurn: 0, echoNextSpell: false,
-        // Spec 32 §12 #4 — the per-turn RECOIL ledger resets with the turn.
+        spellsPlayedThisTurn: 0,
         // WI-1 — the enemy-DoT accumulator is per-round; a fresh turn zeroes it
         // so `suppurating-curse` only doubles THIS round's real DoT total.
         // WI-10 — the per-turn scrap-pay counter resets with the turn.
-        recoilPaidThisTurn: 0, enemyDotDamageThisRound: 0, scrapsThisTurn: 0,
+        enemyDotDamageThisRound: 0, scrapsThisTurn: 0,
         // Gate 0 — this phase's one legal tray roll is now taken.
         turnTakenThisPhase: true,
-        // THE BIG NUMBERS REWRITE — CHAIN fades unless the closing turn fed
-        // it; TWIN never survives the turn that armed it.
-        ...chainCarry,
     };
     events.push({ kind: 'turn-dice-rolled', turn, dice });
     events.push({ kind: 'dice-rolled', dice });
@@ -599,15 +567,6 @@ function withLog(state: CombatEncounterState, events: CombatEvent[]): CombatEnco
  * Plays one card from hand. `useBottom` powers the full effect (costs the named
  * die, executes the card, drives impact + the die-refresh loop); the free top
  * action fires the card's authored FREE rider with no die.
- *
- * `play.chosenX` (WS7.2, spec 32 §12 item 5) — the player-chosen X for a
- * chosen-X mechanic (`recoil_x`); the engine clamps it to [min, affordable].
- * Absent, the mechanic resolves at its printed minimum.
- *
- * `play.omenClaim` (phase 32 part 4d — OMEN v2) — the player-chosen
- * stance/window claim for an `omen` mechanic; the engine clamps `window` to
- * [1, the card's printed `maxWindow`]. Absent, the mechanic falls back to
- * `window: 1` and the pre-v2 die-derived stance (see `playBottomAction`).
  */
 export function playCombatCard(
     state: CombatEncounterState,
@@ -615,12 +574,6 @@ export function playCombatCard(
     useBottom: boolean,
     dieId?: string,
     rng: () => number = defaultRng,
-    /** Per-play choices. `chosenX` — WS7.2 chosen-X recoil. `reprisalCardId`
-     *  — REPRISE songbook choice (phase 28), see `playBottomAction`.
-     *  `omenClaim` — phase 32 part 4d OMEN v2 stance/window claim. All
-     *  optional and additive; omitted callers keep the pre-existing
-     *  defaults. */
-    play?: { chosenX?: number; reprisalCardId?: string; omenClaim?: { stance: Stance; window: number } },
 ): CombatTransition {
     if (state.phase !== 'phase-play') return { state, events: [] };
 
@@ -633,7 +586,7 @@ export function playCombatCard(
     if (!card) return { state, events: [] };
 
     const transition = useBottom
-        ? playBottomAction(state, entry.uid, card, dieId, rng, play?.chosenX, play?.reprisalCardId, play?.omenClaim)
+        ? playBottomAction(state, entry.uid, card, dieId, rng)
         : playTopAction(state, entry.uid, card, rng);
     // Spec 33 — stance-from-cards + the null-reset momentum chain; FREE plays
     // never touch either (§3 rule 5).
@@ -731,17 +684,10 @@ export function discardCombatCard(state: CombatEncounterState, uid: string): Com
     const scrapsThisTurn = state.scrapsThisTurn ?? 0;
     const pays = scrapsThisTurn < SCRAP_CONVICTION_CAP_PER_TURN;
     const conviction = pays ? Math.min(CONVICTION_CAP, state.conviction + 1) : state.conviction;
-    // WS2.1: scrapping a conjured Haunt (when it pays) still earns its +1
-    // Conviction, but the one-use token leaves the combat — it never joins the
-    // discard cycle (where a reshuffle would resurrect it as a permanent card).
-    const conjured = (state.conjuredUids ?? []).includes(uid);
     const next: CombatEncounterState = {
         ...state,
         hand: state.hand.filter(h => h.uid !== uid),
-        discard: conjured ? state.discard : [...state.discard, entry.cardId],
-        conjuredUids: conjured
-            ? (state.conjuredUids ?? []).filter(u => u !== uid)
-            : state.conjuredUids,
+        discard: [...state.discard, entry.cardId],
         conviction,
         scrapsThisTurn: scrapsThisTurn + 1,
     };
@@ -759,21 +705,6 @@ function discardEntry(state: CombatEncounterState, uid: string): CombatEncounter
         ...state,
         hand: state.hand.filter(h => h.uid !== uid),
         discard: [...state.discard, entry.cardId],
-    };
-}
-
-/**
- * Removes a played hand entry honoring the CONJURE one-use law (spec 32 v3,
- * WS2.1): a conjured Haunt leaves the combat ENTIRELY — it never enters
- * the discard pile, so it can never reshuffle back into the deck cycle.
- * Anything else discards normally.
- */
-function removePlayedEntry(state: CombatEncounterState, uid: string): CombatEncounterState {
-    if (!(state.conjuredUids ?? []).includes(uid)) return discardEntry(state, uid);
-    return {
-        ...state,
-        hand: state.hand.filter(h => h.uid !== uid),
-        conjuredUids: (state.conjuredUids ?? []).filter(u => u !== uid),
     };
 }
 
@@ -818,28 +749,18 @@ function applyEnemyDamage(
 }
 
 /**
- * THE BIG NUMBERS REWRITE (2026-09-02) — the scalers a single player hit picks
- * up on its way to the foe, folded in one place so every damage source (the
- * `deal` mechanic, a rider's `damage`, a payoff burst) reads the same rules.
- *
- * Order matters and is authored, not incidental:
- *   1. the READ multiplier (winning the read makes the hit bite)
+ * The scalers a single player hit picks up on its way to the foe, folded in
+ * one place so every damage source (the `deal` mechanic, a FREE-line
+ * `damage`) reads the same rules. Order is authored:
+ *   1. the READ multiplier
  *   2. the colour-match bonus, as a percentage of what the read left
- *   3. WRATH — flat, every hit, all combat
- *   4. CHAIN — flat, the next hit only (the caller spends it)
- *   5. FLAY — +50%, consuming one stack (the caller spends it)
- *   6. EXECUTE — doubled while the foe is at or below the printed threshold
- *   7. VULNERABLE — the foe's incoming-damage multiplier (S3, D41: last of
+ *   3. VULNERABLE — the foe's incoming-damage multiplier (S3, D41: last of
  *      the multipliers, uncapped). The caller scales `base` by body first.
  */
 export interface PlayerHitParams {
     base: number;
     readMult: number;
     colorMatch: boolean;
-    wrath: number;
-    chain: number;
-    flay: boolean;
-    execute: boolean;
     /** VULNERABLE on the foe (`getDamageTakenMultiplier`); 1 when absent. */
     vulnMult?: number;
 }
@@ -848,36 +769,8 @@ export function scalePlayerHit(params: PlayerHitParams): number {
     if (params.base <= 0) return 0;
     let dmg = Math.round(params.base * params.readMult);
     if (params.colorMatch) dmg += colorMatchBonus(dmg);
-    dmg += params.wrath;
-    dmg += params.chain;
-    if (params.flay) dmg = Math.round(dmg * FLAY_DAMAGE_MULT);
-    if (params.execute) dmg = Math.round(dmg * EXECUTE_DAMAGE_MULT);
     if (params.vulnMult !== undefined && params.vulnMult !== 1) dmg = Math.round(dmg * params.vulnMult);
     return Math.max(0, dmg);
-}
-
-/**
- * THE BIG NUMBERS REWRITE (2026-09-02) — settle the per-turn damage-scaler
- * ledgers at a turn boundary.
- *
- * CHAIN fades to nothing unless a play in the turn just ended fed it — the
- * Dawncaster rule that makes CHAIN belong to the deck that keeps swinging
- * rather than to the deck that banked one stack and sat on it. TWIN never
- * outlives the turn that armed it. WRATH and FLAY are untouched: WRATH is
- * combat-long by design, and FLAY sits on the foe until the hits spend it.
- */
-function settleChainAtTurnBoundary(
-    state: CombatEncounterState,
-    events: CombatEvent[],
-): Pick<CombatEncounterState, 'chain' | 'chainFedThisTurn' | 'twinArmed'> {
-    const held = state.chain ?? 0;
-    const fed = state.chainFedThisTurn === true;
-    if (held > 0 && !fed) events.push({ kind: 'chain-faded', from: held });
-    return {
-        chain: fed ? held : 0,
-        chainFedThisTurn: false,
-        twinArmed: false,
-    };
 }
 
 /** WS3.2 Soul economy — decay-consumed instances of NO-CALENDAR debuffs
@@ -891,33 +784,6 @@ function soulWorthyWashouts(washedOut: readonly ActiveEffect[]): number {
     }).length;
 }
 
-/** Manual TICK verbs (fate-tap 'dot-tick', the `tickOne` / `tickAllDots`
- *  riders) share the clock-owned tick body's decay rule: a `decaysPerTick`
- *  DoT loses 1 intensity each time it ticks and washes out at 0 — exactly
- *  what `processDamageOverTime` / `fireDotTrigger` enforce. Front-loaded
- *  fuel (BLEED) must pay its stacks on manual ticks too, and the washouts
- *  are reported so the Soul economy sees expiry-by-decay on these paths. */
-function decayManuallyTickedDots<T extends Combatant>(
-    bearer: T,
-    tickedEffectIds: readonly string[],
-): { bearer: T; washedOut: ActiveEffect[] } {
-    if (tickedEffectIds.length === 0) return { bearer, washedOut: [] };
-    const washedOut: ActiveEffect[] = [];
-    let changed = false;
-    const effects = bearer.effects.reduce<ActiveEffect[]>((acc, ae) => {
-        const p = lookupEffectDef(ae.effectId)?.payload;
-        if (tickedEffectIds.includes(ae.effectId) && p?.dotModifiers?.decaysPerTick) {
-            changed = true;
-            if (ae.intensity > 1) acc.push({ ...ae, intensity: ae.intensity - 1 });
-            else washedOut.push(ae); // intensity 1 → the instance is spent
-        } else {
-            acc.push(ae);
-        }
-        return acc;
-    }, []);
-    return changed ? { bearer: { ...bearer, effects }, washedOut } : { bearer, washedOut };
-}
-
 /** SOUL gain (Harvest): bumps the bank (spec 32 v3 §1 source 3). */
 function gainSouls(
     state: CombatEncounterState,
@@ -929,77 +795,6 @@ function gainSouls(
     const souls = (state.souls ?? 0) + amount;
     events.push({ kind: 'soul-gained', amount, total: souls, reason });
     return { ...state, souls };
-}
-
-/** PLEA gain (spec 32 v3 §9, reworked by plan/archive/2026-09-25-trim-t4/plan/tuning/
- *  2026-07-08-win-path-scaling.md item 1a to a Dawncaster Charmed-style
- *  `resolve` threshold — see `capitulateThreshold`): PLEA ≥ the enemy's
- *  resolve opens an explicit ACCEPT / CONTINUE choice. It never resolves the
- *  outcome by itself. Eligibility is checked after gains and at boundaries.
- *
- *  Phase 32 part 4e (Charm — Resolve milestones): the SINGLE insertion point
- *  every PLEA source funnels through (mirrors `gainPremises` being Oratory's
- *  one insertion point in Part 4b) — so the Wavering/Faltering dividends
- *  below are universal across every PLEA source, not scoped to a single
- *  card. Checked AFTER the scaled gain lands, against the LIVE
- *  `capitulateThreshold` (resolve can itself shrink as the enemy's HP
- *  falls) — see `swayResolveMilestoneThresholds`. */
-function gainSway(
-    state: CombatEncounterState,
-    amount: number,
-    events: CombatEvent[],
-): CombatEncounterState {
-    if (amount <= 0) return state;
-    // (The buff_grace_momentum PLEA multiplier left with its cards in the
-    // keyword audit, 2026-09-27.)
-    let sway = (state.sway ?? 0) + amount;
-    events.push({ kind: 'sway-gained', amount, total: sway });
-
-    // Resolve milestones: each waypoint fires AT MOST ONCE this combat — a
-    // milestone already paid stays paid even if a later call's LIVE resolve
-    // (recomputed every time, since the enemy's HP can fall between gains)
-    // shrinks back below the threshold that was crossed.
-    let enemy = state.enemy;
-    let waveringFired = state.swayMilestoneWaveringFired ?? false;
-    let falteringFired = state.swayMilestoneFalteringFired ?? false;
-    const resolve = capitulateThreshold(state.enemy);
-    const { wavering, faltering } = swayResolveMilestoneThresholds(resolve);
-    if (!waveringFired && sway >= wavering) {
-        waveringFired = true;
-        // Wavering — one stack of QUARTER on the enemy, Charm's own
-        // rapport-building idiom (soft-word / disarming-smile /
-        // common-ground / the-olive-branch's exact payload).
-        const def = lookupEffectDef('debuff_quarter');
-        let landedIntensity = SWAY_WAVERING_RAPPORT;
-        if (def) {
-            const applied = applyEffect(enemy.effects, def, state.round, {
-                intensityDelta: SWAY_WAVERING_RAPPORT,
-                sourceId: 'sway-resolve-milestone',
-            });
-            enemy = { ...enemy, effects: applied.activeEffects };
-            landedIntensity = applied.result.activeEffect?.intensity ?? SWAY_WAVERING_RAPPORT;
-        }
-        events.push({
-            kind: 'sway-milestone', milestone: 'wavering', threshold: wavering, total: sway,
-            effectId: 'debuff_quarter', intensity: landedIntensity,
-        });
-    }
-    if (!falteringFired && sway >= faltering) {
-        falteringFired = true;
-        // Faltering — a small bonus PLEA nudge (unscaled by momentum; see
-        // SWAY_FALTERING_BONUS's own doc comment for why GUARD/heal were
-        // rejected in favor of PLEA at this call site).
-        sway += SWAY_FALTERING_BONUS;
-        events.push({ kind: 'sway-milestone', milestone: 'faltering', threshold: faltering, total: sway, bonus: SWAY_FALTERING_BONUS });
-    }
-
-    return {
-        ...state,
-        sway,
-        enemy,
-        swayMilestoneWaveringFired: waveringFired,
-        swayMilestoneFalteringFired: falteringFired,
-    };
 }
 
 function swayOffersCapitulation(state: CombatEncounterState): boolean {
@@ -1026,165 +821,44 @@ function offerCapitulation(state: CombatEncounterState, events: CombatEvent[]): 
     return { state: withLog(choosing, [offered]), events: [...events, offered] };
 }
 
-/** CHARGE gain + the SENTENCE trigger (spec 32 v3 T2). When the declared
- *  conclusion's threshold is met the rider fires FREE and the tally resets;
- *  reaching `concedeAt` first wins the argument outright (CONDEMN). */
-function gainPremises(
-    state: CombatEncounterState,
-    amount: number,
-    events: CombatEvent[],
-    rng: () => number,
-): { state: CombatEncounterState; concede: boolean } {
-    if (amount <= 0) return { state, concede: false };
-    const milestoneBefore = state.premiseMilestoneTotal ?? 0;
-    const milestoneAfter = milestoneBefore + amount;
-    let next: CombatEncounterState = {
-        ...state,
-        premises: (state.premises ?? 0) + amount,
-        premiseMilestoneTotal: milestoneAfter,
-    };
-    events.push({ kind: 'premise-gained', amount, total: next.premises ?? 0 });
-    // Phase 32 part 4b (Oratory — milestone drip): the lifetime counter never
-    // resets, so a milestone already paid stays paid even after a Peroration
-    // zeroes the spendable `premises` tally below.
-    const milestoneTiersCrossed = premiseMilestonesCrossed(milestoneBefore, milestoneAfter);
-    if (milestoneTiersCrossed > 0) {
-        const milestoneRungs = milestoneTiersCrossed * PREMISE_MILESTONE_RUNGS;
-        next = { ...next, staggerRungs: (next.staggerRungs ?? 0) + milestoneRungs };
-        events.push({
-            kind: 'premise-milestone',
-            tiersCrossed: milestoneTiersCrossed,
-            rungs: milestoneRungs,
-            total: milestoneAfter,
-        });
-    }
-    const decl = next.peroration;
-    if (!decl) return { state: next, concede: false };
-    const total = next.premises ?? 0;
-    // Win-path scaling (plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-08-win-path-scaling.md item 1a):
-    // the-closing-word's flat concedeAt (8) let Oratory land CONDEMN
-    // identically against a 100 HP early wolf and a 1,500+ HP late boss —
-    // Battle Lab round 2 clocked it at 100% win rate on EVERY stage. The
-    // required Premise count now floors at the enemy's own `difficulty`
-    // classification (a real bestiary field, not stage-id string-matching):
-    // simple/normal enemies keep the card-authored concedeAt; elite/boss/
-    // unique enemies raise the bar to CONCEDE_PREMISES_ELITE/_BOSS. Replaces
-    // the narrower per-level bump that only ever fired against the
-    // Impossible-tier ceiling probe.
-    const concedeTierFloor = concedeFloorFor(next.enemy.difficulty);
-    const effectiveConcedeAt = decl.concedeAt !== undefined ? Math.max(decl.concedeAt, concedeTierFloor) : undefined;
-    if (effectiveConcedeAt !== undefined && total >= effectiveConcedeAt) {
-        events.push({ kind: 'peroration-fired', cardId: decl.cardId, premisesSpent: total });
-        return { state: { ...next, premises: 0, peroration: null }, concede: true };
-    }
-    if (total >= decl.at) {
-        const declCard = lookupCard(decl.cardId);
-        const mech = (declCard?.specialMechanics ?? []).find(m => m.kind === 'peroration') as
-            Extract<CardSpecialMechanic, { kind: 'peroration' }> | undefined;
-        events.push({ kind: 'peroration-fired', cardId: decl.cardId, premisesSpent: total });
-        next = { ...next, premises: 0 };
-        if (mech) next = applyRiderToState(next, decl.cardId, mech.rider, events, rng);
-    }
-    return { state: next, concede: false };
-}
-
-/** FORETELL (spec 32 v3 T6): glimpse the enemy's next telegraph + reorder the
- *  top N of the deck — the engine deterministically floats the highest-rank
- *  card to the top (the "you chose the best future" read, no picker needed). */
-function applyForetell(
-    state: CombatEncounterState,
-    count: number,
-    events: CombatEvent[],
-): CombatEncounterState {
-    let revealedStances = state.revealedStances;
-    const nIdx = Math.min(state.currentPhaseIndex + 1, state.threatPhases.length - 1);
-    if (!revealedStances.includes(nIdx)) {
-        revealedStances = [...revealedStances, nIdx];
-        events.push({ kind: 'stance-revealed', phaseIndex: nIdx, stance: state.threatPhases[nIdx].enemyStance });
-    }
-    let drawPile = state.drawPile;
-    if (drawPile.length > 1 && count > 1) {
-        const top = drawPile.slice(0, count);
-        const rest = drawPile.slice(count);
-        const rankOf = (id: string): number => lookupCard(id)?.rank ?? 0;
-        const bestIdx = top.reduce((best, id, i) => (rankOf(id) > rankOf(top[best]) ? i : best), 0);
-        const reordered = [top[bestIdx], ...top.filter((_, i) => i !== bestIdx)];
-        drawPile = [...reordered, ...rest];
-    }
-    events.push({ kind: 'foretold', count, topCardId: drawPile[0] ?? null });
-    return { ...state, revealedStances, drawPile };
-}
-
 /**
- * Applies a `CardRider` against the encounter state — the shared executor for
- * FREE lines, threshold/dieBonus/fate riders, omen payoffs, and Peroration
- * conclusions. Every field is a real engine unit. (Play-scoped fields —
- * bonusIntensity / bonusDuration / refreshDie / intensityPerPip — are handled
- * inside `playBottomAction`, which owns the powering die and the landed-status
- * delta; they no-op here. `pips` — the RIPEN rider — is board-scoped and IS
- * handled here since WS2.2: the Phase 30 forge conversions put it on FREE
- * lines, which resolve through this executor.)
+ * Applies a `CardRider` against the encounter state — the executor for FREE
+ * lines. Every field is a real engine unit.
  */
 function applyRiderToState(
     state: CombatEncounterState,
     cardId: string,
     r: CardRider,
     events: CombatEvent[],
-    rng: () => number,
 ): CombatEncounterState {
-    let next = state;
-    let player = next.player;
-    let enemy = next.enemy;
-    let directDamage = next.directDamageDealt;
-    let conviction = next.conviction;
-    let guard = next.guard ?? 0;
-    let souls = next.souls ?? 0;
-    // Phase 32 part 3 (Akrasia — DEBT ledger): per-combat running total; see
-    // the `r.recoil` block below for the accrual + tiered payoff.
-    let akrasiaDebt = next.akrasiaDebt ?? 0;
-    // Manual-tick washouts (decaysPerTick instances spent by tickOne /
-    // tickAllDots) — soul-worthy ones yield their expiry Soul below.
+    let player = state.player;
+    let enemy = state.enemy;
+    let directDamage = state.directDamageDealt;
+    let guard = state.guard ?? 0;
+    let souls = state.souls ?? 0;
     const washedOutHere: ActiveEffect[] = [];
     // S3 (D40–D41) — every number a rider prints scales by the stat of where
-    // it lands: damage by body, guard/barrier/heal by mind, a status by heart
-    // (on the foe) or mind (on you). See `stat-scaling.ts`.
+    // it lands: damage by body, guard by mind, a status by heart (on the foe)
+    // or mind (on you). See `stat-scaling.ts`.
     const stats = player.baseStats;
 
     if (r.guard) guard += scaleFor(r.guard, stats, 'mind', 'one-shot');
-    let barrier = next.barrier ?? 0;
-    if (r.barrier) barrier += scaleFor(r.barrier, stats, 'mind', 'one-shot');
-    // ── THE BIG NUMBERS REWRITE — the damage family on a rider ───────────────
-    // A rider fires on the FREE line and from condition payoffs, both OUTSIDE
-    // the PAID line's read/colour-match scaling, so a rider hit takes WRATH,
-    // CHAIN and FLAY but no read multiplier: `readMult: 1`,
-    // `colorMatch: false`. The printed number is the number, plus the scalers
-    // the player has visibly banked.
-    let wrath = next.wrath ?? 0;
-    let chain = next.chain ?? 0;
-    let chainFedThisTurn = next.chainFedThisTurn ?? false;
-    let flayStacks = next.flay ?? 0;
-    // Attribution ledger (playtest fix 2026-09-04): the FREE line never
-    // recorded provenance, so every free-line DoT tick and free-line hit fell
-    // into the "Lingering afflictions" bucket and the defeat screen named the
-    // bucket as the best card. Same `recordAttribution` calls as the PAID path.
-    let attribution = next.attribution;
+    // Attribution ledger (playtest fix 2026-09-04): the FREE line records
+    // provenance with the same `recordAttribution` calls as the PAID path.
+    let attribution = state.attribution;
     const cardName = lookupCard(cardId)?.name ?? cardId;
     if (r.damage) {
+        // A FREE-line hit takes no colour match: the printed number is the
+        // number, scaled by body and VULNERABLE.
         const dmg = scalePlayerHit({
             base: scaleFor(r.damage, stats, 'body', 'one-shot'),
             readMult: 1,
             colorMatch: false,
-            wrath,
-            chain,
-            flay: flayStacks > 0,
-            execute: false,
             vulnMult: getDamageTakenMultiplier(enemy),
         });
-        if (chain > 0) chain = 0;
-        if (flayStacks > 0) flayStacks -= 1;
         if (dmg > 0) {
             const hpBefore = enemy.health;
-            const hit = applyEnemyDamage(enemy, dmg, next.round, events);
+            const hit = applyEnemyDamage(enemy, dmg, state.round, events);
             enemy = hit.enemy;
             directDamage += dmg + hit.clockDamage;
             washedOutHere.push(...hit.washedOut);
@@ -1192,107 +866,12 @@ function applyRiderToState(
             events.push({ kind: 'damage-dealt', cardId, target: 'enemy', amount: dmg });
         }
     }
-    if (r.wrath) {
-        wrath += r.wrath;
-        events.push({ kind: 'wrath-gained', cardId, amount: r.wrath, total: wrath });
-    }
-    if (r.chain) {
-        chain += r.chain;
-        chainFedThisTurn = true;
-        events.push({ kind: 'chain-gained', cardId, amount: r.chain, total: chain });
-    }
-    if (r.flay) {
-        flayStacks += r.flay;
-        events.push({ kind: 'flay-applied', cardId, amount: r.flay, total: flayStacks });
-    }
-    if (r.conviction) conviction = Math.min(CONVICTION_CAP, conviction + r.conviction);
-    if (r.healHp) {
-        const healAmt = Math.round(scaleFor(r.healHp, stats, 'mind', 'one-shot') * getHealingReceivedMult(player));
-        if (healAmt > 0) {
-            player = heal(player, healAmt);
-            events.push({ kind: 'damage-dealt', cardId, target: 'self', amount: -healAmt });
-        }
-    }
-    if (r.recoil) {
-        // AKRASIA — the printed blood price (unpreventable, mirrors the PAID 'recoil' mechanic).
-        player = applyDamage(player, r.recoil);
-        events.push({ kind: 'recoil-paid', cardId, amount: r.recoil });
-        // Phase 32 part 3 — this blood price posts to the per-combat DEBT
-        // ledger (covers the FREE-line recoil, e.g. `pact-of-akrasia`, and any
-        // fired rider carrying `recoil`). Tiers pay GUARD only while FALLEN —
-        // gated on the player's debuffs BEFORE this rider's own effects (none
-        // of `r`'s other fields land a debuff), matching the FALLEN check
-        // `playBottomAction` already uses for `sourceCard.fallen`.
-        const debtBefore = akrasiaDebt;
-        akrasiaDebt += r.recoil;
-        events.push({ kind: 'debt-paid', amount: r.recoil, total: akrasiaDebt });
-        const tiersCrossed = akrasiaDebtTiersCrossed(debtBefore, akrasiaDebt);
-        if (tiersCrossed > 0 && getDistinctDebuffCount(player) >= 2) {
-            const tierGuard = tiersCrossed * AKRASIA_DEBT_TIER_GUARD;
-            guard += tierGuard;
-            events.push({ kind: 'debt-tier-payoff', tiersCrossed, guard: tierGuard, total: akrasiaDebt });
-        }
-    }
-    if (r.cleanse) {
-        let remaining = r.cleanse;
-        player = {
-            ...player,
-            effects: player.effects.filter(ae => {
-                if (remaining > 0 && lookupEffectDef(ae.effectId)?.type === 'debuff') {
-                    remaining -= 1;
-                    return false;
-                }
-                return true;
-            }),
-        };
-    }
-    if (r.tickOne) {
-        // TICK — the strongest enemy DoT deals its per-turn damage now.
-        const ticks = getActiveDotTotal(enemy.effects, next.round).perEffect;
-        const strongest = ticks.reduce<typeof ticks[number] | null>(
-            (best, t) => (best === null || t.amount > best.amount ? t : best), null);
-        if (strongest) {
-            enemy = applyDamage(enemy, strongest.amount);
-            directDamage += strongest.amount;
-            events.push({ kind: 'dot-tick', effectId: strongest.effectId, label: strongest.label, amount: strongest.amount, target: 'enemy' });
-            const decayed = decayManuallyTickedDots(enemy, [strongest.effectId]);
-            enemy = decayed.bearer;
-            washedOutHere.push(...decayed.washedOut);
-        }
-    }
-    if (r.tickAllDots) {
-        const ticks = getActiveDotTotal(enemy.effects, next.round);
-        if (ticks.total > 0) {
-            enemy = applyDamage(enemy, ticks.total);
-            directDamage += ticks.total;
-            for (const t of ticks.perEffect) {
-                events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
-            }
-            const decayed = decayManuallyTickedDots(enemy, ticks.perEffect.map(t => t.effectId));
-            enemy = decayed.bearer;
-            washedOutHere.push(...decayed.washedOut);
-        }
-    }
-    if (r.ruptureMarks) {
-        // The conclusion lands: consume all marks, burst per stack (payoff class).
-        const consumed = consumeMarks(enemy);
-        if (consumed.stacks > 0) {
-            enemy = consumed.combatant;
-            const burst = Math.min(ruptureBurstCap(enemy.maxHealth), r.ruptureMarks * consumed.stacks);
-            const hpBefore = enemy.health;
-            const hit = applyEnemyDamage(enemy, burst, next.round, events);
-            enemy = hit.enemy;
-            directDamage += burst + hit.clockDamage;
-            attribution = recordAttribution(attribution, cardId, cardName, null, burst, hpBefore);
-            events.push({ kind: 'damage-dealt', cardId, target: 'enemy', amount: burst });
-        }
-    }
     if (r.applyEffect) {
         const def = lookupEffectDef(r.applyEffect.effectId);
         if (def) {
             const toSelf = r.applyEffect.to === 'self';
             const bearer = toSelf ? player : enemy;
-            const applied = applyEffect(bearer.effects, def, next.round, {
+            const applied = applyEffect(bearer.effects, def, state.round, {
                 intensityDelta: scaleEffectIntensity(def, r.applyEffect.intensity ?? 1, toSelf, stats),
                 uncapped: true,
                 ...(r.applyEffect.duration !== undefined
@@ -1316,76 +895,13 @@ function applyRiderToState(
             }
         }
     }
-    if (r.revealStance) {
-        const nIdx = Math.min(next.currentPhaseIndex + 1, next.threatPhases.length - 1);
-        if (!next.revealedStances.includes(nIdx)) {
-            next = { ...next, revealedStances: [...next.revealedStances, nIdx] };
-            events.push({ kind: 'stance-revealed', phaseIndex: nIdx, stance: next.threatPhases[nIdx].enemyStance });
-        }
-    }
 
     const washSouls = soulWorthyWashouts(washedOutHere);
     if (washSouls > 0) {
         souls += washSouls;
         events.push({ kind: 'soul-gained', amount: washSouls, total: souls, reason: 'expiry' });
     }
-    next = {
-        ...next, player, enemy, directDamageDealt: directDamage, conviction, guard, barrier, souls, akrasiaDebt, attribution,
-        // THE BIG NUMBERS REWRITE — the damage-scaler ledgers this rider fed
-        // or spent (a FREE line can both land a hit and bank WRATH).
-        wrath, chain, chainFedThisTurn, flay: flayStacks,
-    };
-
-    if (r.foretell) next = applyForetell(next, r.foretell, events);
-    if (r.drawCards) {
-        const room = Math.max(0, COMBAT_HAND_SIZE - next.hand.length);
-        const n = Math.min(r.drawCards, room);
-        if (n > 0) {
-            const draw = drawCombatCards(next.drawPile, next.discard, next.deck, n, rng);
-            next = {
-                ...next,
-                drawPile: draw.drawPile,
-                discard: draw.discard,
-                hand: [...next.hand, ...draw.drawn.map((cid, i) => ({ uid: `cr${next.log.length + i}-${cardId}`, cardId: cid }))],
-            };
-            events.push({ kind: 'hand-drawn', cards: draw.drawn });
-        }
-    }
-    if (r.millCards) {
-        // ECHO — advance the loop: cards go straight to discard, never to hand.
-        const mill = drawCombatCards(next.drawPile, next.discard, next.deck, r.millCards, rng);
-        next = { ...next, drawPile: mill.drawPile, discard: [...mill.discard, ...mill.drawn] };
-        events.push({ kind: 'cards-milled', cards: mill.drawn });
-    }
-    if (r.souls) next = gainSouls(next, r.souls, 'granted', events);
-    if (r.sway) next = gainSway(next, r.sway, events);
-    if (r.premises) {
-        const res = gainPremises(next, r.premises, events, rng);
-        next = res.state;
-        if (res.concede) next = { ...next, phase: 'complete', finalOutcome: 'concede' };
-    }
-    if (r.stagger) {
-        const total = (next.staggerRungs ?? 0) + r.stagger;
-        next = { ...next, staggerRungs: total };
-        events.push({ kind: 'staggered', rungs: r.stagger, total });
-    }
-    if (r.pips) {
-        // RIPEN — +1 pip per point to every Reserve die (WS2.2: the forge
-        // FREE-line currency; same walk as the PAID-path rider at
-        // `playBottomAction` §4).
-        let reserve = next.reserve ?? [];
-        if (reserve.length > 0) {
-            for (let i = 0; i < r.pips; i++) {
-                const rp = ripenReserve(reserve);
-                reserve = rp.reserve;
-                for (const id of rp.ripenedIds) {
-                    events.push({ kind: 'die-ripened', dieId: id, pips: reserve.find(d => d.id === id)?.pips ?? 0 });
-                }
-            }
-            next = { ...next, reserve };
-        }
-    }
-    return next;
+    return { ...state, player, enemy, directDamageDealt: directDamage, guard, souls, attribution };
 }
 
 /**
@@ -1485,7 +1001,7 @@ function playTopAction(
     state: CombatEncounterState,
     uid: string,
     card: CombatCard,
-    rng: () => number,
+    _rng: () => number,
 ): CombatTransition {
     const sourceCard = lookupCard(card.id);
     if (sourceCard && sourceCard.cardType !== 'spell') {
@@ -1494,11 +1010,7 @@ function playTopAction(
     const events: CombatEvent[] = [
         { kind: 'card-played', cardId: card.id, useBottom: false, dieId: null, advantage: 'neutral' },
     ];
-    // Discard the played card BEFORE the free rider fires so a printed
-    // "draw N" is never blocked by the card's own hand slot (P0-truth).
-    // WS2.1: a conjured Haunt is one-use on EITHER face — a FREE play
-    // removes it from the combat instead of feeding the discard cycle.
-    let next = removePlayedEntry(state, uid);
+    let next = discardEntry(state, uid);
     // WS3.3 pre-play stack snapshot: only stacks that existed BEFORE this
     // play are on the 'card-played' clock (a FREE line's own fresh POISON
     // never ticks itself). Taken before the rider so a free-line apply is
@@ -1506,12 +1018,9 @@ function playTopAction(
     const enemyPrePlay = intensityMap(state.enemy.effects);
     const playerPrePlay = intensityMap(state.player.effects);
     if (sourceCard?.free) {
-        next = applyRiderToState(next, card.id, sourceCard.free, events, rng);
+        next = applyRiderToState(next, card.id, sourceCard.free, events);
     }
     next = fireFreePlayClock(next, enemyPrePlay, playerPrePlay, events);
-    if (next.finalOutcome === 'concede') {
-        return endCombat({ ...withLog(next, events), phase: 'phase-play', finalOutcome: null }, 'concede', events);
-    }
     next = withLog(next, events);
     if (swayOffersCapitulation(next)) return offerCapitulation(next, events);
     return checkImmediateOutcome(next, events);
@@ -1529,21 +1038,6 @@ function playBottomAction(
     card: CombatCard,
     dieId: string | undefined,
     _rng: () => number,
-    chosenX?: number,
-    /** REPRISE songbook choice (phase 28) — the FIRST card a `reprise`
-     *  mechanic returns, when given and still present in `state.discard`.
-     *  Any additional returns (a `count > 1` reprise) still auto-pick by
-     *  rank — mobile ships the picker for every `reprise` card (both
-     *  `second-thoughts` and `circular-reasoning`), gated on
-     *  `needsReprisalChoice`, not hardcoded to one card id. Omitted/invalid
-     *  falls back to the pre-existing highest-rank auto-pick, so every
-     *  non-mobile caller is unaffected. */
-    reprisalCardId?: string,
-    /** Phase 32 part 4d (Oracle — OMEN v2) — the player's chosen stance/
-     *  window claim for an `omen` mechanic. Absent (or an invalid stance)
-     *  falls back to `window: 1` and the pre-v2 die-derived stance — see the
-     *  `'omen'` case below. */
-    omenClaim?: { stance: Stance; window: number },
 ): CombatTransition {
     const sourceCard = lookupCard(card.id);
     if (!sourceCard) return { state, events: [] };
@@ -1602,12 +1096,9 @@ function playBottomAction(
     const colorMatch = card.stance !== 'any' && (powering.color === 'wild' || powering.color === card.stance);
     const poweringPips = powering.pips ?? 0;
     // S3 (D40–D41) — the player's stats scale this play's printed numbers
-    // (`stat-scaling.ts`): DEAL by body, GUARD/barrier/heal by mind, statuses
-    // by where they land. Colour match and VULNERABLE stack on top.
+    // (`stat-scaling.ts`): DEAL by body, GUARD by mind, statuses by where
+    // they land. Colour match and VULNERABLE stack on top.
     const stats = state.player.baseStats;
-    // Tracks blood-price HP taken THIS play (the recoil mechanics) for the
-    // Akrasia DEBT ledger below (Phase 32 part 3).
-    let recoilTaken = 0;
 
     const events: CombatEvent[] = [{ kind: 'card-played', cardId: card.id, useBottom: true, dieId: powering.id, advantage: 'neutral', colorMatch }];
 
@@ -1656,51 +1147,23 @@ function playBottomAction(
     }
 
     // 3. Execute the card (unchanged effect machinery) against a shim.
-    //    ECHO (spec 32 v3 T10): the PAID payload fires twice when the card
-    //    carries ECHO or an `echo_next_spell` charge is pending.
-    const mechsAll = sourceCard.specialMechanics ?? [];
-    const echoCharge = state.echoNextSpell === true;
-    // THE BIG NUMBERS REWRITE — TWIN is the armed sibling of ECHO: a prior
-    // play in this turn armed it, and THIS spell resolves twice. It is consumed
-    // here (the local `twinArmed` is reset below), so a twinned spell that
-    // itself arms TWIN cannot re-arm from its own second resolution.
-    const twinCharge = state.twinArmed === true;
-    const echoed = mechsAll.some(m => m.kind === 'echo') || echoCharge || twinCharge;
-    if (twinCharge) events.push({ kind: 'twin-fired', cardId: sourceCard.id });
-
     const before = intensityMap(state.enemy.effects);
-    let shimState: CombatState = cardShim(state);
-    let res = executeCard(shimState, sourceCard.id, lookupCard, 'player');
-    let allCardEvents = [...res.events];
-    if (echoed) {
-        // Second pass re-applies the card's status payloads (stacking rules
-        // apply). Runs against the folded state so intensities accumulate.
-        shimState = {
-            ...shimState,
-            player: res.state.player, enemy: res.state.enemy,
-        };
-        res = executeCard(shimState, sourceCard.id, lookupCard, 'player');
-        allCardEvents = [...allCardEvents, ...res.events];
-        events.push({ kind: 'echoed', cardId: card.id });
-    }
+    const res = executeCard(cardShim(state), sourceCard.id, lookupCard, 'player');
 
     let player = res.state.player as Character;
     // VULNERABLE — the foe's incoming-damage multiplier, read from state.enemy
-    // BEFORE this card's own debuff lands. Scales payoff bursts (there is no
-    // strike any more). Composed with the STANCE-KEYED vulnerability (P1 #17).
+    // BEFORE this card's own debuff lands. Composed with the STANCE-KEYED
+    // vulnerability (P1 #17).
     const vulnMult = getDamageTakenMultiplier(state.enemy)
         * getStanceVulnMult(state.enemy, powering.color);
     let enemy = res.state.enemy as Enemy;
     let attribution = state.attribution;
     let directDamage = state.directDamageDealt;
-    let landedOnEnemy = false;
-    let mercyOpened = res.activateMercyChoice === true;
 
-    // ── Fate Engine P1 — resonance, thresholds, die riders, pips (spec 31 §1) ──
+    // ── Fate Engine P1 — resonance and pips (spec 31 §1) ──
     // Spending the powering die feeds the TOLL tally (R1): its own color,
     // or the card's stance for a Wild.
     let resonance = { heart: 0, body: 0, mind: 0, ...(state.resonance ?? {}) };
-    let conviction = state.conviction;
     const resonanceColor: 'heart' | 'body' | 'mind' | null =
         dieHasStance(powering.color) ? (powering.color as 'heart' | 'body' | 'mind')
             : powering.color === 'wild' && card.stance !== 'any' && dieHasStance(card.stance) ? (card.stance as 'heart' | 'body' | 'mind')
@@ -1709,54 +1172,12 @@ function playBottomAction(
         resonance = { ...resonance, [resonanceColor]: resonance[resonanceColor] + 1 };
         events.push({ kind: 'resonance-gained', color: resonanceColor, total: resonance[resonanceColor] });
     }
-    // Collect this play's fired riders: THRESHOLD (tally ≥ count — checked with
-    // this spend already counted: one spend, two payoffs) and DIE BONUS
-    // (powering color matches the card's line).
-    const firedRiders: CardRider[] = [];
-    if (sourceCard.threshold && resonance[sourceCard.threshold.color] >= sourceCard.threshold.count) {
-        firedRiders.push(sourceCard.threshold.rider);
-        events.push({
-            kind: 'threshold-fired', cardId: card.id, color: sourceCard.threshold.color,
-            count: sourceCard.threshold.count, riderText: riderText(sourceCard.threshold.rider),
-        });
-    }
-    if (sourceCard.dieBonus) {
-        const on = sourceCard.dieBonus.onColor;
-        const hit = on === 'match' ? colorMatch
-            : on === 'off' ? (dieHasStance(powering.color) && powering.color !== card.stance)
-                : powering.color === on;
-        if (hit) {
-            firedRiders.push(sourceCard.dieBonus.rider);
-            events.push({ kind: 'die-bonus-fired', cardId: card.id, riderText: riderText(sourceCard.dieBonus.rider) });
-        }
-    }
-    // FALLEN (spec 32 v3 T4) — the theme-state condition line: fires free while
-    // the player carries >= 2 distinct self-debuffs at play time.
-    const wasFallen = getDistinctDebuffCount(state.player) >= 2;
-    if (sourceCard.fallen && wasFallen) {
-        firedRiders.push(sourceCard.fallen.rider);
-        events.push({ kind: 'die-bonus-fired', cardId: card.id, riderText: `FALLEN: ${riderText(sourceCard.fallen.rider)}` });
-    }
-    // WS4.2 (spec 32 §12 item 4) — CardSynergy combat-STATE predicate: reads
-    // the ratified encounter ledgers (enemyDamageLastRound et al.) at play
-    // time; when it holds, the synergy rider fires FREE — same firedRiders
-    // path as threshold/dieBonus/fate/fallen (ONE conditional gate, extended).
-    if (sourceCard.synergy?.statePredicate && sourceCard.synergy.rider
-        && checkStatePredicate(sourceCard.synergy.statePredicate, state)) {
-        firedRiders.push(sourceCard.synergy.rider);
-        events.push({
-            kind: 'die-bonus-fired', cardId: card.id,
-            riderText: `${statePredicateText(sourceCard.synergy.statePredicate)}: ${riderText(sourceCard.synergy.rider)}`,
-        });
-    }
-    // Landed-status adjustments in one pass, all REAL units: rider intensity /
-    // duration bonuses, RIPENED pips (+1 intensity per pip on a non-defend play,
-    // R2), and the color-match +1 duration on status cards (R7). Spec 32 v3 §7.
+    // Landed-status adjustments in one pass, all REAL units: RIPENED pips (+1
+    // intensity per pip on a non-defend play, R2), and the color-match +1
+    // duration on status cards (R7). Spec 32 v3 §7.
     const isDefendPlay = card.verbClass === 'defend';
-    const bonusIntensity = firedRiders.reduce((n, r) => n + (r.bonusIntensity ?? 0), 0)
-        + (isDefendPlay ? 0 : poweringPips * PIP_INTENSITY_BONUS);
-    const bonusDuration = firedRiders.reduce((n, r) => n + (r.bonusDuration ?? 0), 0)
-        + (colorMatch && card.effectKind !== 'none' ? COLOR_MATCH_STATUS_DURATION_BONUS : 0);
+    const bonusIntensity = isDefendPlay ? 0 : poweringPips * PIP_INTENSITY_BONUS;
+    const bonusDuration = colorMatch && card.effectKind !== 'none' ? COLOR_MATCH_STATUS_DURATION_BONUS : 0;
     if (bonusIntensity > 0 || bonusDuration > 0) {
         let touched = false;
         enemy = {
@@ -1776,829 +1197,72 @@ function playBottomAction(
         }
     }
 
-    // ── Spec 32 v3 — the themed-deck mechanic chain ───────────────────────────
-    // HP behavior owned here (the card engine no-ops every mechanic kind).
-    // Payoff verbs read state.enemy (pre-card) so a card's own fresh status
-    // never self-counts. Every HP source below is affliction- or engine-gated.
     const mechs = sourceCard.specialMechanics ?? [];
-    const echoFactor = echoed ? 2 : 1;
-    let mechanicDamage = 0;
-    // ── THE BIG NUMBERS REWRITE — the damage-scaler ledgers, read here so this
-    //    play both CONSUMES (chain/flay/twin) and FEEDS (wrath/chain) them. ──
-    let wrath = state.wrath ?? 0;
-    let chain = state.chain ?? 0;
-    let chainFedThisTurn = state.chainFedThisTurn ?? false;
-    let flayStacks = state.flay ?? 0;
-    // A pending TWIN charge is consumed by THIS play (mirrors `echoNextSpell`);
-    // a `twin` mechanic below re-arms it for the NEXT one.
-    let twinArmed = false;
-    /** VITAE this play drove past the foe's last point, for an OVERKILL clause. */
-    let overkillExcess = 0;
-    /** EXECUTE is evaluated ONCE, before this card's hits land, so a multi-hit
-     *  card cannot flip its own threshold partway through the swing. */
-    const executeArmed = (sourceCard.specialMechanics ?? []).some(
-        m => m.kind === 'execute' && enemy.maxHealth > 0
-            && enemy.health <= m.atPct * enemy.maxHealth,
-    );
-    let reserve = reserveIn;
-    let floatingDice = (state.floatingDice ?? []).slice();
     let souls = state.souls ?? 0;
-    // Phase 32 part 4a (Control — TURNABOUT ledger): read here so a
-    // `turnabout` play can CONSUME (zero) it in this same execution — the
-    // ledger itself is accrued in `resolveThreatPhase`, not here.
-    let rungsDeniedTotal = state.rungsDeniedTotal ?? 0;
-    let staggerRungs = state.staggerRungs ?? 0;
-    let stanceLockedNext = state.stanceLockedNext ?? false;
-    let pendingOmens = (state.pendingOmens ?? []).slice();
-    let echoNextSpell = false; // a pending charge is consumed by THIS play
-    let premisesGained = 0;
-    let swayGained = 0;
-    let foretellCount = 0;
-    let perorationDecl = state.peroration ?? null;
-    let spendPremisesMech: Extract<CardSpecialMechanic, { kind: 'spend_premises' }> | null = null;
-    let hand = state.hand;
-    let drawPile = state.drawPile;
-    let discard = state.discard;
-    let conjuredUids = (state.conjuredUids ?? []).slice();
-    let pipsSpentThisPlay = 0;
-    let pipGuardExtra = 0;
-    const reprisedFreeRiders: CardRider[] = [];
-    // IMMOLATE (profane-canon rework): card ids burned from hand this play —
-    // they leave the combat entirely (hand now, deck cycle at assembly).
-    const immolatedIds: string[] = [];
-    // PURGE (profane-canon rework): this play exiles ITSELF from the combat
-    // (the curse-card self-removal law; honored at the discard-routing site).
-    let purgeSelf = false;
-    // FORGE (spec 32 v3 §5): a freshly forged floating die joins the TRAY NOW —
-    // collected here and merged into `dice` after the powering-die spend.
-    const forgedFloating: CombatManaDie[] = [];
-    // TRANSMUTE (dice-law 2026-07-09): X dice consumed by `float_x_die` this
-    // play — removed from the tray after the powering-die spend.
-    const transmutedXIds: string[] = [];
-
-    // Local SOUL gain.
-    const gainSoulsLocal = (n: number, reason: 'expiry' | 'consumed' | 'granted'): void => {
+    const gainSoulsLocal = (n: number): void => {
         if (n <= 0) return;
         souls += n;
-        events.push({ kind: 'soul-gained', amount: n, total: souls, reason });
+        events.push({ kind: 'soul-gained', amount: n, total: souls, reason: 'expiry' });
     };
 
-    // WS3.2 event clocks (spec 32 §12 #3): 'card-played' fires once per
-    // PLAYER-side card play (ratified — enemy actions never advance it);
-    // 'payoff' fires inside the payoff verbs (rupture / consume_affliction /
-    // reap_all). The tick is DoT-clock damage — direct-damage tally only,
-    // never `mechanicDamage` (SIPHON heals off payoff bursts, not clocks).
-    // WS3.3 eligibility: only STACKS that existed BEFORE this play are on
-    // the clock — a play's own fresh stacks never tick themselves (doctrine
-    // witness: a PAID line must not chip a clean enemy). With 'intensity'
-    // merge-stacking a re-application raises the ONE existing instance, so
-    // the gate is an intensity CAP (the pre-play stack count), not a boolean;
-    // the cap is re-clamped to the LIVE intensity before each clock fire so
-    // stacks consumed mid-play (RUPTURE / cleanse / decay) leave the clock
-    // and a consumed-then-reapplied instance counts as genuinely fresh.
-    const clockCap: Record<string, number> = { ...before };
-    const fireClock = (trigger: 'card-played' | 'payoff'): void => {
-        for (const id of Object.keys(clockCap)) {
-            const live = enemy.effects.find(e => e.effectId === id)?.intensity ?? 0;
-            clockCap[id] = Math.min(clockCap[id], live);
-        }
-        const clock = fireDotTrigger(enemy, trigger, state.round,
-            ae => Math.min(ae.intensity ?? 1, clockCap[ae.effectId] ?? 0));
-        if (clock.damage <= 0) return;
-        enemy = clock.target;
-        directDamage += clock.damage;
-        for (const t of clock.perEffect) {
-            events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
-        }
-        gainSoulsLocal(soulWorthyWashouts(clock.washedOut), 'expiry');
-    };
-
-    /**
-     * THE BIG NUMBERS REWRITE — land one player hit on the foe, folding every
-     * scaler through `scalePlayerHit` and spending the one-shot ledgers (CHAIN
-     * on the first hit, one FLAY stack per hit). Returns the excess damage
-     * beyond lethal so an OVERKILL clause can convert it.
-     */
-    const landHit = (base: number, label: string): number => {
+    // DEAL — each hit folds the scalers through `scalePlayerHit`.
+    for (const mech of mechs) {
+        if (mech.kind !== 'deal') continue;
+        if (isDefeated(enemy)) break;
         const healthBefore = enemy.health;
         const dmg = scalePlayerHit({
-            base: scaleFor(base, stats, 'body', 'one-shot'),
+            base: scaleFor(mech.amount, stats, 'body', 'one-shot'),
             readMult: 1,
             colorMatch,
-            wrath,
-            chain,
-            flay: flayStacks > 0,
-            execute: executeArmed,
             vulnMult,
         });
-        if (chain > 0) { chain = 0; }
-        if (flayStacks > 0) { flayStacks -= 1; }
-        if (dmg <= 0) return 0;
+        if (dmg <= 0) continue;
         const hit = applyEnemyDamage(enemy, dmg, state.round, events);
         enemy = hit.enemy;
-        mechanicDamage += dmg;
         directDamage += dmg + hit.clockDamage;
-        // Credit the CARD. Without this the DEAL verb was invisible to the
-        // attribution ledger, so every report — the per-card telemetry, the
-        // dominance reading, the deck-tuning tables — credited the damage to
-        // whatever last attributed, which was the player's signature skill.
-        // Every stage read `dom=100%(signature)` while the library did the work.
+        // Credit the CARD, so per-card telemetry sees the DEAL verb.
         attribution = recordAttribution(attribution, card.id, card.name, null, dmg, healthBefore);
-        gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
-        events.push({ kind: 'damage-dealt', cardId: label, target: 'enemy', amount: dmg });
-        return Math.max(0, dmg - healthBefore);
-    };
-
-    for (const mech of mechs) {
-        switch (mech.kind) {
-            // ── THE BIG NUMBERS REWRITE — direct damage and its family ──────
-            case 'deal': {
-                // Each hit is its own damage instance: BLEED-class DoTs fire
-                // once per hit, which is why `7 x 4` and `28 x 1` play
-                // differently.
-                //
-                // ECHO/TWIN multiply the HIT COUNT, not the per-hit magnitude:
-                // an echoed `7 x 4` is eight instances of 7, so a BLEED clock
-                // fires eight times. Doubling the amount instead would have
-                // changed what the card says. (The second `executeCard` pass
-                // only re-applies `combatEffects`, so without this DEAL was a
-                // printed keyword with zero effect — caught 2026-09-02.)
-                const hits = Math.max(1, mech.hits ?? 1) * echoFactor;
-                for (let i = 0; i < hits; i++) {
-                    if (isDefeated(enemy)) break;
-                    overkillExcess += landHit(mech.amount, card.id);
-                }
-                break;
-            }
-            case 'wrath': {
-                wrath += mech.amount * echoFactor;
-                events.push({ kind: 'wrath-gained', cardId: card.id, amount: mech.amount, total: wrath });
-                break;
-            }
-            case 'flay': {
-                flayStacks += mech.stacks * echoFactor;
-                events.push({ kind: 'flay-applied', cardId: card.id, amount: mech.stacks, total: flayStacks });
-                break;
-            }
-            case 'chain': {
-                chain += mech.amount * echoFactor;
-                chainFedThisTurn = true;
-                events.push({ kind: 'chain-gained', cardId: card.id, amount: mech.amount, total: chain });
-                break;
-            }
-            case 'twin': {
-                twinArmed = true;
-                events.push({ kind: 'twin-armed', cardId: card.id });
-                break;
-            }
-
-            case 'execute':
-                // Read at the top of this play into `executeArmed`; the clause
-                // itself lands no effect of its own.
-                break;
-            case 'overkill': {
-                // Conversion of damage that was going to be wasted anyway. The
-                // excess is whatever THIS card's hits drove past 0 VITAE.
-                if (overkillExcess > 0 && mech.per > 0) {
-                    const units = Math.floor(overkillExcess / mech.per);
-                    if (mech.conviction && units > 0) {
-                        conviction = Math.min(CONVICTION_CAP, conviction + units * mech.conviction);
-                    }
-                    if (mech.souls && units > 0) gainSoulsLocal(units * mech.souls, 'granted');
-                    if (mech.healPct) {
-                        const healed = Math.round(overkillExcess * mech.healPct);
-                        if (healed > 0) player = heal(player, healed);
-                    }
-                    events.push({ kind: 'overkill-cashed', cardId: card.id, excess: overkillExcess });
-                }
-                break;
-            }
-            case 'rider': {
-                // The generic unconditional PAID verb carrier (draw/heal/…).
-                firedRiders.push(mech.rider);
-                break;
-            }
-            case 'immolate': {
-                // IMMOLATE (profane-canon rework) — burn the `count` lowest-
-                // rank OTHER cards in hand as a printed cost; each burned card
-                // leaves the combat entirely (never reshuffles back). The
-                // rider fires only if at least one card burned — the pyre must
-                // be fed. CONJURED tokens burn like anything else (they were
-                // leaving anyway); a curse is usually the cheapest fuel.
-                const rankOf = (id: string): number => lookupCard(id)?.rank ?? 0;
-                const burned: string[] = [];
-                for (let i = 0; i < mech.count; i++) {
-                    const candidates = hand.filter(h => h.uid !== uid);
-                    if (candidates.length === 0) break;
-                    const lowest = candidates.reduce((best, h) =>
-                        (rankOf(h.cardId) < rankOf(best.cardId) ? h : best), candidates[0]);
-                    hand = hand.filter(h => h.uid !== lowest.uid);
-                    conjuredUids = conjuredUids.filter(u => u !== lowest.uid);
-                    immolatedIds.push(lowest.cardId);
-                    burned.push(lowest.cardId);
-                }
-                if (burned.length > 0) {
-                    events.push({ kind: 'immolated', cardId: card.id, burned });
-                    firedRiders.push(mech.rider);
-                } else {
-                    events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'nothing in hand to burn' });
-                }
-                break;
-            }
-            case 'purge_self': {
-                // PURGE (profane-canon rework) — the played card exiles itself
-                // from the combat (curse self-removal). Routed at the discard
-                // site below, mirroring the CONJURE one-use law.
-                purgeSelf = true;
-                events.push({ kind: 'purged', cardId: card.id });
-                break;
-            }
-            case 'recoil': {
-                // AKRASIA — the printed blood price (unpreventable).
-                player = applyDamage(player, mech.hp);
-                recoilTaken += mech.hp;
-                events.push({ kind: 'recoil-paid', cardId: card.id, amount: mech.hp });
-                break;
-            }
-            case 'recoil_x': {
-                // RECOIL X (WS7.2, spec 32 §12 item 5 — the first chosen
-                // X-cost): pay X VITAE of the player's choosing, clamped to
-                // [min, affordable] (affordable = live HP − 1: the printed
-                // minimum is the floor even at death's door, matching plain
-                // RECOIL's unpreventable printed price), then land POISON at
-                // ceil(X × poisonPerX) intensity — the same blood-price +
-                // affliction pattern as `recoil` + a landed DoT application.
-                const affordable = Math.max(mech.min, player.health - 1);
-                const x = Math.min(Math.max(chosenX ?? mech.min, mech.min), affordable);
-                player = applyDamage(player, x);
-                recoilTaken += x;
-                events.push({ kind: 'recoil-paid', cardId: card.id, amount: x });
-                const stacks = Math.ceil(x * mech.poisonPerX);
-                const def = lookupEffectDef('debuff_poison');
-                if (def && stacks > 0) {
-                    const applied = applyEffect(enemy.effects, def, state.round, { intensityDelta: stacks, sourceId: card.id });
-                    enemy = { ...enemy, effects: applied.activeEffects };
-                    events.push({
-                        kind: 'effect-landed', cardId: card.id, effectId: def.id, target: 'enemy',
-                        effectKind: 'dot',
-                        intensity: applied.result.activeEffect?.intensity ?? stacks, effect: def,
-                    });
-                }
-                break;
-            }
-            case 'stagger': {
-                staggerRungs += mech.rungs;
-                events.push({ kind: 'staggered', rungs: mech.rungs, total: staggerRungs });
-                break;
-            }
-            case 'lock_stance': {
-                stanceLockedNext = true;
-                const nIdx = Math.min(state.currentPhaseIndex + 1, state.threatPhases.length - 1);
-                events.push({ kind: 'stance-locked', phaseIndex: nIdx, stance: currentPhaseStance(state) });
-                break;
-            }
-            case 'foretell': foretellCount += mech.count; break;
-            case 'omen': {
-                // Phase 32 part 4d — OMEN v2: the player STAKES a claim
-                // instead of the engine silently deriving one. `omenClaim`
-                // absent (no mobile picker yet, or a caller that hasn't
-                // opted in) falls back to the pre-v2 die-derived stance at
-                // `window: 1` — byte-compatible with every pre-existing
-                // caller/test that never supplies the new option.
-                const maxWindow = Math.max(1, mech.maxWindow);
-                const legacyStance: Stance = dieHasStance(powering.color)
-                    ? (powering.color as Stance)
-                    : card.stance !== 'any' && dieHasStance(card.stance) ? (card.stance as Stance) : 'heart';
-                const stance: Stance = omenClaim && dieHasStance(omenClaim.stance)
-                    ? omenClaim.stance
-                    : legacyStance;
-                const window = Math.min(Math.max(1, Math.round(omenClaim?.window ?? 1)), maxWindow);
-                // Bigger (bolder) claims narrow the window and pay MORE: the
-                // claimScale is 1/window — window 1 (the boldest, single-
-                // boundary bet) pays the full printed rider; a wider hedge
-                // pays (and costs) a fraction of it, in exchange for more
-                // tries at the phase boundary. `Math.ceil` on the ante keeps
-                // even a maximally-hedged claim a real (nonzero) wager.
-                const claimScale = 1 / window;
-                const rawAnte = mech.anteConviction * claimScale;
-                const ante = Math.max(0, Math.min(Math.ceil(rawAnte), conviction));
-                conviction -= ante;
-                const nIdx = Math.min(state.currentPhaseIndex + 1, state.threatPhases.length - 1);
-                pendingOmens.push({ cardId: card.id, stance, windowRemaining: window, claimScale });
-                events.push({ kind: 'omen-declared', cardId: card.id, stance, phaseIndex: nIdx, window, ante });
-                break;
-            }
-            case 'premise': premisesGained += mech.count * echoFactor; break;
-            case 'peroration': {
-                perorationDecl = { cardId: card.id, at: mech.at, concedeAt: mech.concedeAt };
-                events.push({ kind: 'peroration-declared', cardId: card.id, at: mech.at });
-                break;
-            }
-            case 'spend_premises': spendPremisesMech = mech; break;
-            case 'spend_all_pips': {
-                // Zero every pip (powering die + Reserve + floating bank); each
-                // grants Guard and feeds a paired RUPTURE via `fuelPerPip`.
-                let pips = poweringPips;
-                reserve = reserve.map(d => {
-                    pips += d.pips ?? 0;
-                    return (d.pips ?? 0) > 0 ? { ...d, pips: 0 } : d;
-                });
-                // Foundry engagement fix (2026-07-08): a persistent GHOST die
-                // (forged by Ex Nihilo) sitting in the tray previously never
-                // counted toward this spend — only Reserve pips did, decoupling
-                // the deck's two signature mechanics from each other. Floating
-                // dice that are NOT this cast's own powering die (already
-                // folded into poweringPips above) now also contribute their
-                // pips, zeroed the same way Reserve pips are.
-                floatingDice = floatingDice.map(d => {
-                    if (d.id === powering.id) return d;
-                    pips += d.pips ?? 0;
-                    return (d.pips ?? 0) > 0 ? { ...d, pips: 0 } : d;
-                });
-                if (pips > 0 && mech.guardPerPip) {
-                    pipGuardExtra += pips * mech.guardPerPip;
-                    events.push({ kind: 'pips-cashed', cardId: card.id, pips, bonus: 'guard', amount: pips * mech.guardPerPip });
-                }
-                // WS4.1 (Ingot of Ruin class) — +1 MARK stack per `markPer`
-                // pips spent, UNCAPPED (spec 32 §12 item 5: the ALL-spender's
-                // price is emptying the bank, not a ceiling).
-                if (pips > 0 && mech.markPer) {
-                    const markStacks = Math.floor(pips / mech.markPer);
-                    const markDef = markStacks > 0 ? lookupEffectDef('debuff_mark') : undefined;
-                    if (markDef) {
-                        const applied = applyEffect(enemy.effects, markDef, state.round, { intensityDelta: markStacks, sourceId: card.id });
-                        enemy = { ...enemy, effects: applied.activeEffects };
-                        events.push({ kind: 'pips-cashed', cardId: card.id, pips, bonus: 'mark', amount: markStacks });
-                    }
-                }
-                pipsSpentThisPlay += pips;
-                break;
-            }
-            case 'rupture': {
-                // Overtake 2-pip gate (phase 28, CONFIRMED in
-                // plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-theme-identity.md — "the Overtake
-                // fires for 18 on turn 1 because nothing marks a CHARGED
-                // Overtake"). Scoped to fuelPerPip-paired rupture only (only
-                // `the-overtake` carries fuelPerPip today) — a plain rupture
-                // card (resonance-detonation, peroratio-interrupta,
-                // prophecy-fulfilled) is untouched. Below 2 spent pips the
-                // whole payoff no-ops (a gate, not a taper) — mirrors the
-                // existing effect-fizzled convention used for empty-discard
-                // REPRISE / no-Premises spend elsewhere in this switch.
-                if (mech.fuelPerPip && pipsSpentThisPlay < 2) {
-                    events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'needs 2+ spent pips to detonate' });
-                    break;
-                }
-                // WS3.2 'payoff' clock — payoff-clocked DoTs tick as the verb
-                // fires, BEFORE the consume strips them.
-                fireClock('payoff');
-                // RUPTURE v3 — consume ALL afflictions: 1.5x... no — burst =
-                // (pending DoT fuel + flat per non-DoT stack + pip/omen fuel),
-                // read + vulnerable scaled, capped. Consumed instances feed SOULS.
-                // Fuel is priced off the LIVE enemy (same as WINNOWING's
-                // consumeOneAffliction), not the play-start snapshot — fuel
-                // that already ticked out or washed out earlier in this play
-                // (e.g. the payoff tick above) was paid once and must not be
-                // re-paid by the burst.
-                const pending = getPendingDotTotal(enemy, state.round).total;
-                const consumedRes = consumeAfflictions(enemy);
-                enemy = consumedRes.combatant;
-                const fuel = pending
-                    + RUPTURE_PER_AFFLICTION_STACK * consumedRes.nonDotStacks
-                    + (mech.fuelPerPip ?? 0) * pipsSpentThisPlay
-                    + (mech.fuelPerOmenHit ?? 0) * (state.omenHits ?? 0);
-                const burst = Math.min(
-                    ruptureBurstCap(enemy.maxHealth),
-                    Math.round(fuel * (1 + (mech.bonusPct ?? 0)) * vulnMult),
-                );
-                if (burst > 0) {
-                    const hpBefore = enemy.health;
-                    const hit = applyEnemyDamage(enemy, burst, state.round, events);
-                    enemy = hit.enemy;
-                    mechanicDamage += burst;
-                    directDamage += burst + hit.clockDamage;
-                    gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
-                    attribution = recordAttribution(attribution, card.id, card.name, null, burst, hpBefore);
-                }
-                events.push({ kind: 'rupture-detonated', amount: burst, consumed: consumedRes.consumed });
-                gainSoulsLocal(consumedRes.consumed.length, 'consumed');
-                break;
-            }
-            case 'consume_affliction': {
-                // WS3.2 'payoff' clock — ticks before the scythe consumes.
-                fireClock('payoff');
-                // WINNOWING — the scythe: one affliction's remaining fuel ticks NOW.
-                const res2 = consumeOneAffliction(enemy, state.round);
-                if (res2.consumed) {
-                    enemy = res2.combatant;
-                    if (res2.fuel > 0) {
-                        const dmg = Math.round(res2.fuel * vulnMult);
-                        const hpBefore = enemy.health;
-                        const hit = applyEnemyDamage(enemy, dmg, state.round, events);
-                        enemy = hit.enemy;
-                        mechanicDamage += dmg;
-                        directDamage += dmg + hit.clockDamage;
-                        gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
-                        attribution = recordAttribution(attribution, card.id, card.name, null, dmg, hpBefore);
-                    }
-                    events.push({ kind: 'affliction-consumed', effectId: res2.consumed, fuel: res2.fuel });
-                    gainSoulsLocal(mech.souls, 'consumed');
-                } else {
-                    events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'no affliction to consume' });
-                }
-                break;
-            }
-            case 'soul_gain': gainSoulsLocal(mech.count * echoFactor, 'granted'); break;
-            case 'reap': {
-                if (souls < mech.cost) {
-                    events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: `need ${mech.cost} Souls (have ${souls})` });
-                    break;
-                }
-                souls -= mech.cost;
-                // Phase 32 part 1 (Harvest — REAP attacks MAXIMUM HP): every
-                // REAP that spends Souls also erodes the enemy's ceiling a
-                // little, before the existing kindle/rider logic. This card
-                // deals no current-HP damage otherwise — the erosion is a
-                // NEW effect, not a modification of an existing burst.
-                const erosion = Math.round(mech.cost * REAP_EROSION_PER_SOUL);
-                if (erosion > 0) {
-                    enemy = erodeMaxHealth(enemy, erosion);
-                    events.push({ kind: 'max-hp-eroded', cardId: card.id, amount: erosion, newMax: enemy.maxHealth });
-                }
-                if (mech.rider) firedRiders.push(mech.rider);
-                if (mech.kindle) {
-                    const forged: CombatManaDie = {
-                        id: `forge-${state.turn}-${state.log.length + events.length}`, color: mech.kindle,
-                        state: 'available', temporary: true,
-                        pips: 0,
-                    };
-                    if (reserve.length < RESERVE_MAX) {
-                        reserve = [...reserve, forged];
-                        events.push({ kind: 'die-forged', dieId: forged.id, color: forged.color, destination: 'reserve' });
-                    } else {
-                        conviction = Math.min(CONVICTION_CAP, conviction + 1);
-                        events.push({ kind: 'die-forged', dieId: forged.id, color: forged.color, destination: 'conviction' });
-                    }
-                }
-                events.push({ kind: 'reaped', cardId: card.id, soulsSpent: mech.cost, amount: 0 });
-                break;
-            }
-            case 'reap_all': {
-                // WS3.2 'payoff' clock — the capstone is a payoff verb too.
-                fireClock('payoff');
-                // THE REAPING — spend every Soul: a payoff burst per Soul.
-                // UNCAPPED (spec 32 §12 item 5): an ALL-spender's input
-                // opportunity cost — emptying the whole bank — IS its price.
-                const spent = souls;
-                const burst = Math.round(mech.burstPerSoul * spent * vulnMult);
-                souls = 0;
-                if (burst > 0) {
-                    const hpBefore = enemy.health;
-                    // Phase 32 part 1: erode == true sources the SAME
-                    // current-HP subtraction (unchanged output) through
-                    // erodeMaxHealth instead of applyDamage, so `maxHealth`
-                    // drops by the identical `burst` amount in this ONE
-                    // call — no second damage instance, clock unmoved.
-                    const hit = applyEnemyDamage(enemy, burst, state.round, events, true);
-                    enemy = hit.enemy;
-                    mechanicDamage += burst;
-                    directDamage += burst + hit.clockDamage;
-                    gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
-                    attribution = recordAttribution(attribution, card.id, card.name, null, burst, hpBefore);
-                    events.push({ kind: 'max-hp-eroded', cardId: card.id, amount: burst, newMax: enemy.maxHealth });
-                }
-                events.push({ kind: 'reaped', cardId: card.id, soulsSpent: spent, amount: burst });
-                break;
-            }
-            case 'turnabout': {
-                // TURNABOUT (Control capstone) — cash the WHOLE denial ledger:
-                // burstPerRung HP per rung STAGGER/BACKFIRE have EVER denied
-                // this combat. Mirrors reap_all's shape (compute from the
-                // live bank, apply as direct damage, zero the bank) but
-                // CONSUMES rather than reads a still-growing counter — the
-                // burst is computed BEFORE the ledger resets, in this one
-                // call, so there is no double-count / stale-read risk.
-                const rungsSpent = rungsDeniedTotal;
-                const burst = Math.round(mech.burstPerRung * rungsSpent * vulnMult);
-                rungsDeniedTotal = 0;
-                if (burst > 0) {
-                    const hpBefore = enemy.health;
-                    const hit = applyEnemyDamage(enemy, burst, state.round, events);
-                    enemy = hit.enemy;
-                    mechanicDamage += burst;
-                    directDamage += burst + hit.clockDamage;
-                    gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
-                    attribution = recordAttribution(attribution, card.id, card.name, null, burst, hpBefore);
-                }
-                // Always fires (mirrors reap_all): a 0-rung bank is a legal,
-                // non-fizzling play that simply banks nothing — matches
-                // reap_all's "amount: burst" (0 allowed) precedent exactly.
-                events.push({ kind: 'turnabout-fired', cardId: card.id, rungsSpent, amount: burst });
-                break;
-            }
-            case 'sway': swayGained += mech.amount * echoFactor; break;
-            case 'extend_dots': {
-                const affected: string[] = [];
-                enemy = {
-                    ...enemy,
-                    effects: enemy.effects.map(ae => {
-                        const def = lookupEffectDef(ae.effectId);
-                        if (def?.type === 'debuff' && def.payload.damageOverTime && ae.remainingDuration !== -1) {
-                            affected.push(ae.effectId);
-                            return { ...ae, remainingDuration: ae.remainingDuration + mech.turns };
-                        }
-                        return ae;
-                    }),
-                };
-                events.push({ kind: 'dots-extended', turns: mech.turns, affected });
-                break;
-            }
-            case 'convert_dots': {
-                // CURRY'S CONVERSION — the wound becomes the argument: every enemy
-                // bleed becomes poison and vice versa, +N intensity each.
-                let converted = false;
-                enemy = {
-                    ...enemy,
-                    effects: enemy.effects.map(ae => {
-                        const to = ae.effectId === 'debuff_bleed' ? 'debuff_poison'
-                            : ae.effectId === 'debuff_poison' ? 'debuff_bleed' : null;
-                        if (!to) return ae;
-                        converted = true;
-                        events.push({ kind: 'dots-converted', from: ae.effectId, to, intensity: ae.intensity + mech.bonusIntensity });
-                        return {
-                            ...ae, effectId: to,
-                            intensity: Math.min(MAX_EFFECT_INTENSITY, ae.intensity + mech.bonusIntensity),
-                            appliedAt: state.round,
-                        };
-                    }),
-                };
-                if (!converted) events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'no bleed or poison to convert' });
-                break;
-            }
-            case 'boost_all_dots': {
-                const affected: string[] = [];
-                enemy = {
-                    ...enemy,
-                    effects: enemy.effects.map(ae => {
-                        const def = lookupEffectDef(ae.effectId);
-                        if (def?.type === 'debuff' && def.payload.damageOverTime) {
-                            affected.push(ae.effectId);
-                            return { ...ae, intensity: Math.min(MAX_EFFECT_INTENSITY, ae.intensity + mech.intensity) };
-                        }
-                        return ae;
-                    }),
-                };
-                events.push({ kind: 'dots-boosted', intensity: mech.intensity, affected });
-                break;
-            }
-            case 'echo_next_spell': echoNextSpell = true; break;
-            case 'reprise': {
-                // Return the discard(s) to hand — the player's songbook choice
-                // (phase 28) for the first return if given and still in the
-                // discard pile, else the pre-existing highest-rank auto-pick
-                // for every subsequent return (and for callers that never pass
-                // a choice). Optionally fires the reprised card's FREE line
-                // immediately.
-                const returned: string[] = [];
-                for (let i = 0; i < mech.count * echoFactor && discard.length > 0; i++) {
-                    const rankOf = (id: string): number => lookupCard(id)?.rank ?? 0;
-                    const chosenIdx = i === 0 && reprisalCardId ? discard.indexOf(reprisalCardId) : -1;
-                    const bestIdx = chosenIdx >= 0 ? chosenIdx
-                        : discard.reduce((best, id, j) => (rankOf(id) > rankOf(discard[best]) ? j : best), 0);
-                    const cid = discard[bestIdx];
-                    discard = discard.filter((_, j) => j !== bestIdx);
-                    hand = [...hand, { uid: `rp${state.log.length + events.length}-${i}`, cardId: cid }];
-                    returned.push(cid);
-                    const freeRider = lookupCard(cid)?.free;
-                    if (mech.fireFree && freeRider) reprisedFreeRiders.push(freeRider);
-                }
-                if (returned.length > 0) {
-                    events.push({ kind: 'reprised', cardId: card.id, returned });
-                } else {
-                    events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'the discard pile is empty' });
-                }
-                break;
-            }
-            case 'replay_last': {
-                // OUROBOROS — the argument repeats: the last spell that LANDED A
-                // STATUS on the enemy (phase 32 part 4f — `lastSpellCardId` skips
-                // over any no-status play in between) says itself again, `times`
-                // times. Never chains into another replay.
-                // Phase 39 (2026-08-08) precondition-width retune: `lastSpellCardId`
-                // never reset across turns, so once ANY spell had landed a status
-                // this whole combat, ouroboros essentially never fizzled again
-                // (measured 3-10% — far under the ~25% doctrine target). Narrowed
-                // via `lastSpellRound` to "the argument you just made THIS TURN"
-                // (round is the turn counter) — the FIRST spell of a turn, with
-                // nothing said yet THIS turn to repeat, is now a real fizzle.
-                const lastId = state.lastSpellCardId;
-                const lastCard = lastId && lastId !== sourceCard.id ? lookupCard(lastId) : undefined;
-                const replayable = lastCard
-                    && lastCard.cardType === 'spell'
-                    && state.lastSpellRound === state.round
-                    && !(lastCard.specialMechanics ?? []).some(m2 => m2.kind === 'replay_last');
-                if (replayable && lastCard) {
-                    for (let i = 0; i < mech.times; i++) {
-                        const shim2: CombatState = { ...cardShim(state), player, enemy };
-                        try {
-                            const replay = executeCard(shim2, lastCard.id, lookupCard, 'player');
-                            player = replay.state.player as Character;
-                            enemy = replay.state.enemy as Enemy;
-                            allCardEvents = [...allCardEvents, ...replay.events];
-                        } catch { break; }
-                    }
-                    events.push({ kind: 'echoed', cardId: lastCard.id });
-                } else {
-                    events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'no prior spell to replay' });
-                }
-                break;
-            }
-            case 'conjure_card': {
-                const cj = { uid: `cj${state.log.length + events.length}`, cardId: mech.cardId };
-                hand = [...hand, cj];
-                conjuredUids = [...conjuredUids, cj.uid];
-                events.push({ kind: 'hand-drawn', cards: [mech.cardId] });
-                break;
-            }
-            case 'forge_floating_die': {
-                // FORGE (spec 32 v3 §5) — the floating die joins the tray NOW.
-                const color: 'heart' | 'body' | 'mind' | 'wild' = mech.color === 'wild'
-                    ? 'wild'
-                    : dieHasStance(powering.color)
-                        ? (powering.color as 'heart' | 'body' | 'mind')
-                        : card.stance !== 'any' && dieHasStance(card.stance) ? (card.stance as 'heart' | 'body' | 'mind') : 'wild';
-                if (floatingDice.length >= FLOATING_DICE_CAP) {
-                    conviction = Math.min(CONVICTION_CAP, conviction + 1);
-                    events.push({ kind: 'conviction-gained', amount: 1, total: conviction, reason: 'effect' });
-                } else {
-                    const die: CombatManaDie = {
-                        id: `float-${state.turn}-${state.log.length + events.length}`,
-                        color, state: 'available', temporary: false, floating: true,
-                        pips: 0,
-                    };
-                    floatingDice = [...floatingDice, die];
-                    forgedFloating.push(die);
-                    events.push({ kind: 'die-floated', dieId: die.id, color, poolSize: floatingDice.length });
-                }
-                break;
-            }
-            case 'float_x_die': {
-                // TRANSMUTE (dice-law 2026-07-09) — a dead X face in the tray
-                // becomes a GHOST WILD die: dead fate turned live. Falls back
-                // to +1 Conviction (printed) with no X or at the floating cap.
-                const xDie = state.dice.find(d =>
-                    d.color === 'x' && d.state !== 'spent' && !d.floating && !transmutedXIds.includes(d.id));
-                if (!xDie || floatingDice.length >= FLOATING_DICE_CAP) {
-                    conviction = Math.min(CONVICTION_CAP, conviction + 1);
-                    events.push({ kind: 'conviction-gained', amount: 1, total: conviction, reason: 'effect' });
-                } else {
-                    transmutedXIds.push(xDie.id);
-                    const die: CombatManaDie = {
-                        id: `float-${state.turn}-${state.log.length + events.length}`,
-                        color: 'wild', state: 'available', temporary: false, floating: true,
-                        pips: 0,
-                    };
-                    floatingDice = [...floatingDice, die];
-                    forgedFloating.push(die);
-                    events.push({ kind: 'die-floated', dieId: die.id, color: 'wild', poolSize: floatingDice.length });
-                }
-                break;
-            }
-            case 'create_temporary_die': {
-                // KINDLE — a temporary die (this combat only) joins the Reserve.
-                // Spec 33 §1/§6: cap ONE kindled die concurrent,
-                // and the 7-object table ceiling applies — either refusal
-                // converts the grant to +1◆ (nothing silently dropped).
-                const forged: CombatManaDie = {
-                    id: `forge-${state.turn}-${state.log.length + events.length}`, color: mech.color,
-                    state: 'available', temporary: true, face: 'mana',
-                    pips: 0,
-                };
-                const kindleBlocked = reserve.filter(d => d.temporary).length >= KINDLE_CONCURRENT_CAP
-                    || state.dice.length + reserve.length >= UPGRADEABLE_TABLE_CEILING;
-                if (!kindleBlocked && reserve.length < RESERVE_MAX) {
-                    reserve = [...reserve, forged];
-                    events.push({ kind: 'die-forged', dieId: forged.id, color: forged.color, destination: 'reserve' });
-                } else {
-                    conviction = Math.min(CONVICTION_CAP, conviction + 1);
-                    if (kindleBlocked) events.push({ kind: 'die-overflowed', source: 'kindle', total: conviction });
-                    events.push({ kind: 'die-forged', dieId: forged.id, color: forged.color, destination: 'conviction' });
-                }
-                break;
-            }
-            case 'grant_pip': {
-                // WS4.1 — pip OVERFLOW (Slag Runoff class): each granted pip
-                // that finds no room (Reserve empty, or a die already at
-                // RESERVE_PIP_CAP when its wave arrives) fires the printed
-                // overflow rider once instead of vanishing. Without an
-                // `overflow` rider the wasted pips are simply lost (legacy).
-                let overflowPips = 0;
-                if (reserve.length === 0) {
-                    // No die to hold ANY wave: the full grant overflows.
-                    overflowPips = mech.count;
-                } else {
-                    for (let i = 0; i < mech.count; i++) {
-                        const r = ripenReserve(reserve);
-                        reserve = r.reserve;
-                        overflowPips += reserve.length - r.ripenedIds.length;
-                        for (const id of r.ripenedIds) {
-                            events.push({ kind: 'die-ripened', dieId: id, pips: reserve.find(d => d.id === id)?.pips ?? 0 });
-                        }
-                    }
-                }
-                if (overflowPips > 0 && mech.overflow) {
-                    for (let i = 0; i < overflowPips; i++) firedRiders.push(mech.overflow);
-                    events.push({
-                        kind: 'pips-overflowed', cardId: card.id,
-                        pips: overflowPips, riderText: riderText(mech.overflow),
-                    });
-                }
-                break;
-            }
-            case 'overheat': {
-                // Phase 32 part 4c — the press-your-luck knob: push past
-                // RESERVE_PIP_CAP, one wave per printed pip, each wave risking
-                // OVERHEAT_BUST_CHANCE per die already at/above the cap. A die
-                // still below the cap ripens for free (no risk) exactly like
-                // `ripenReserve` — OVERHEAT only prices the overage.
-                for (let i = 0; i < mech.pips; i++) {
-                    const r = overheatReserve(reserve, _rng);
-                    reserve = r.reserve;
-                    for (const id of r.ripenedIds) {
-                        events.push({ kind: 'die-ripened', dieId: id, pips: reserve.find(d => d.id === id)?.pips ?? 0 });
-                    }
-                    for (const id of r.bustedIds) {
-                        events.push({ kind: 'overheat-bust', dieId: id, cardId: card.id, pips: reserve.find(d => d.id === id)?.pips ?? 0 });
-                    }
-                }
-                break;
-            }
-            case 'reroll_spent': {
-                if (hasRerollableDice(state.dice)) {
-                    const rerolled = rerollSpentDice(state.dice, _rng);
-                    state = { ...state, dice: rerolled.dice };
-                    events.push({ kind: 'dice-rolled', dice: rerolled.dice });
-                }
-                break;
-            }
-            case 'siphon': {
-                // SIPHON — heal a fraction of the HP this card's payoffs eroded.
-                const healAmt = Math.round(mechanicDamage * mech.pct * getHealingReceivedMult(state.player));
-                if (healAmt > 0) {
-                    player = heal(player, healAmt);
-                    events.push({ kind: 'damage-dealt', cardId: card.id, target: 'self', amount: -healAmt });
-                }
-                break;
-            }
-            default: break; // guard/barrier/riposte/echo/befriend etc. handled elsewhere
-        }
+        gainSoulsLocal(soulWorthyWashouts(hit.washedOut));
+        events.push({ kind: 'damage-dealt', cardId: card.id, target: 'enemy', amount: dmg });
     }
-    const reactFired = false;
-    const permanentWildDice = state.permanentWildDice ?? 0;
-    const permanentDeadDice = state.permanentDeadDice ?? 0;
 
     // 4. Fold the card's effect-applications: DoT + control LAND on the enemy.
     //    DoT will tick real HP each phase (the status damage engine); control gates
     //    the enemy's turn via `canAct`. Attribute projected DoT for the summary.
-    for (const ev of allCardEvents) {
-        if (ev.kind === 'effect-applied') {
-            const def = ev.effect;
-            const target: 'self' | 'enemy' = ev.appliedTo;
-            const sideEffects = target === 'enemy' ? enemy.effects : player.effects;
-            const active = sideEffects.find(a => a.effectId === def.id);
-            if (active && target === 'enemy') {
-                const landed: LandedEffect = { effectId: def.id, effect: def, active, target };
-                const cls = effectImpact(def, active.intensity, active.remainingDuration).track;
-                attribution = recordAttribution(attribution, card.id, card.name, landed, 0, enemy.health);
-                events.push({ kind: 'effect-landed', cardId: card.id, effectId: def.id, target: 'enemy', effectKind: cls, intensity: active.intensity, effect: def });
-                // Meaningful land = intensity increased over the snapshot (or new).
-                if ((before[def.id] ?? 0) < active.intensity) landedOnEnemy = true;
-            } else if (active) {
-                events.push({ kind: 'effect-landed', cardId: card.id, effectId: def.id, target, effectKind: 'none', intensity: active.intensity, effect: def });
-            }
-        } else if (ev.kind === 'buff-stripped') {
-            events.push({
-                kind: 'buff-stripped', cardId: card.id, target: ev.target,
-                effectId: ev.effect?.id ?? null, effectName: ev.effect?.name ?? null,
-            });
-        } else if (ev.kind === 'befriend-attempted' && ev.successful) {
-            mercyOpened = true;
+    for (const ev of res.events) {
+        if (ev.kind !== 'effect-applied') continue;
+        const def = ev.effect;
+        const target: 'self' | 'enemy' = ev.appliedTo;
+        const sideEffects = target === 'enemy' ? enemy.effects : player.effects;
+        const active = sideEffects.find(a => a.effectId === def.id);
+        if (active && target === 'enemy') {
+            const landed: LandedEffect = { effectId: def.id, effect: def, active, target };
+            const cls = effectImpact(def, active.intensity, active.remainingDuration).track;
+            attribution = recordAttribution(attribution, card.id, card.name, landed, 0, enemy.health);
+            events.push({ kind: 'effect-landed', cardId: card.id, effectId: def.id, target: 'enemy', effectKind: cls, intensity: active.intensity, effect: def });
+        } else if (active) {
+            events.push({ kind: 'effect-landed', cardId: card.id, effectId: def.id, target, effectKind: 'none', intensity: active.intensity, effect: def });
         }
     }
 
     // WS3.2 'card-played' clock (spec 32 §12 #3) — a PLAYER-side card play
     // advances every card-played-clocked DoT on the enemy. Enemy actions
-    // never fire this (ratified: player plays only), and — WS3.3 — this
-    // play's own fresh stacks are NOT on the clock (`preExisting` gate): they
-    // start paying from the NEXT play (doctrine witness).
-    fireClock('card-played');
+    // never fire this, and — WS3.3 — only STACKS that existed BEFORE this
+    // play are on the clock: a play's own fresh stacks never tick themselves.
+    const clock = fireDotTrigger(enemy, 'card-played', state.round,
+        ae => Math.min(ae.intensity ?? 1, Math.min(before[ae.effectId] ?? 0, ae.intensity ?? 1)));
+    if (clock.damage > 0) {
+        enemy = clock.target;
+        directDamage += clock.damage;
+        for (const t of clock.perEffect) {
+            events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
+        }
+        gainSoulsLocal(soulWorthyWashouts(clock.washedOut));
+    }
 
     // WS3.3 — the same clock advances card-played-clocked DoTs the PLAYER
-    // bears (enemy threat riders land `debuff_poison` on the player): the
-    // clock is the player's own play, wherever the DoT sits. Same
-    // pre-existing STACK cap (a self-applied fresh debuff — or fresh stacks
-    // merged onto an existing one — never self-ticks), and player-borne
-    // washouts never earn Souls (SOUL counts ENEMY afflictions only).
+    // bears: the clock is the player's own play, wherever the DoT sits. Same
+    // pre-existing STACK cap, and player-borne washouts never earn Souls.
     const playerPrePlay = intensityMap(state.player.effects);
     const selfClock = fireDotTrigger(player, 'card-played', state.round,
         ae => Math.min(ae.intensity ?? 1, playerPrePlay[ae.effectId] ?? 0));
@@ -2609,410 +1273,41 @@ function playBottomAction(
         }
     }
 
-    // ── Rider payloads (threshold / dieBonus / fate / fallen / reap), exact units ──
-    let revealedStances = state.revealedStances;
-    let riderGuard = 0;
-    let riderRefresh = false;
-    for (const r of firedRiders) {
-        // ── THE BIG NUMBERS REWRITE — the damage family on a PAID-line rider.
-        // There are TWO rider executors: `applyRiderToState` (the FREE line and
-        // the state path) and this one (the PAID line's `firedRiders`). Teaching
-        // only the first meant every condition payoff that printed a number —
-        // IMMOLATE's rider, a FALLEN clause, a FATE line, a dieBonus, a synergy,
-        // a pip overflow, 20 cards in all — showed the player a figure the
-        // engine never applied. Caught 2026-09-02 by the effectiveness pass.
-        if (r.damage) {
-            const dmg = scalePlayerHit({
-                base: scaleFor(r.damage, stats, 'body', 'one-shot'),
-                readMult: 1,
-                colorMatch,
-                wrath, chain,
-                flay: flayStacks > 0,
-                execute: executeArmed,
-                vulnMult,
-            });
-            if (chain > 0) chain = 0;
-            if (flayStacks > 0) flayStacks -= 1;
-            if (dmg > 0) {
-                const hpBeforeRider = enemy.health;
-                const hit = applyEnemyDamage(enemy, dmg, state.round, events);
-                enemy = hit.enemy;
-                mechanicDamage += dmg;
-                directDamage += dmg + hit.clockDamage;
-                attribution = recordAttribution(attribution, card.id, card.name, null, dmg, hpBeforeRider);
-                gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
-                events.push({ kind: 'damage-dealt', cardId: card.id, target: 'enemy', amount: dmg });
-            }
-        }
-        if (r.wrath) {
-            wrath += r.wrath;
-            events.push({ kind: 'wrath-gained', cardId: card.id, amount: r.wrath, total: wrath });
-        }
-        if (r.chain) {
-            chain += r.chain;
-            chainFedThisTurn = true;
-            events.push({ kind: 'chain-gained', cardId: card.id, amount: r.chain, total: chain });
-        }
-        if (r.flay) {
-            flayStacks += r.flay;
-            events.push({ kind: 'flay-applied', cardId: card.id, amount: r.flay, total: flayStacks });
-        }
-        if (r.guard) riderGuard += scaleFor(r.guard, stats, 'mind', 'one-shot');
-        if (r.conviction) conviction = Math.min(CONVICTION_CAP, conviction + r.conviction);
-        if (r.refreshDie) riderRefresh = true;
-        if (r.revealStance) {
-            const nIdx = Math.min(state.currentPhaseIndex + 1, state.threatPhases.length - 1);
-            if (!revealedStances.includes(nIdx)) {
-                revealedStances = [...revealedStances, nIdx];
-                events.push({ kind: 'stance-revealed', phaseIndex: nIdx, stance: state.threatPhases[nIdx].enemyStance });
-            }
-        }
-        if (r.tickAllDots) {
-            const ticks = getActiveDotTotal(enemy.effects, state.round);
-            if (ticks.total > 0) {
-                const hpBefore = enemy.health;
-                enemy = applyDamage(enemy, ticks.total);
-                directDamage += ticks.total;
-                attribution = recordAttribution(attribution, card.id, card.name, null, ticks.total, hpBefore);
-                for (const t of ticks.perEffect) {
-                    events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
-                }
-                const decayed = decayManuallyTickedDots(enemy, ticks.perEffect.map(t => t.effectId));
-                enemy = decayed.bearer;
-                gainSoulsLocal(soulWorthyWashouts(decayed.washedOut), 'expiry');
-            }
-        }
-        if (r.tickOne) {
-            const ticks = getActiveDotTotal(enemy.effects, state.round).perEffect;
-            const strongest = ticks.reduce<typeof ticks[number] | null>(
-                (best, t) => (best === null || t.amount > best.amount ? t : best), null);
-            if (strongest) {
-                const hpBefore = enemy.health;
-                enemy = applyDamage(enemy, strongest.amount);
-                directDamage += strongest.amount;
-                attribution = recordAttribution(attribution, card.id, card.name, null, strongest.amount, hpBefore);
-                events.push({ kind: 'dot-tick', effectId: strongest.effectId, label: strongest.label, amount: strongest.amount, target: 'enemy' });
-                const decayed = decayManuallyTickedDots(enemy, [strongest.effectId]);
-                enemy = decayed.bearer;
-                gainSoulsLocal(soulWorthyWashouts(decayed.washedOut), 'expiry');
-            }
-        }
-        if (r.ruptureMarks) {
-            // WS3.2 — the mark-conclusion is a payoff verb (rider-carried).
-            fireClock('payoff');
-            const consumed = consumeMarks(enemy);
-            if (consumed.stacks > 0) {
-                enemy = consumed.combatant;
-                const burst = Math.min(ruptureBurstCap(enemy.maxHealth), Math.round(r.ruptureMarks * consumed.stacks * vulnMult));
-                const hpBefore = enemy.health;
-                const hit = applyEnemyDamage(enemy, burst, state.round, events);
-                enemy = hit.enemy;
-                mechanicDamage += burst;
-                directDamage += burst + hit.clockDamage;
-                gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
-                attribution = recordAttribution(attribution, card.id, card.name, null, burst, hpBefore);
-                events.push({ kind: 'damage-dealt', cardId: card.id, target: 'enemy', amount: burst });
-            }
-        }
-        if (r.intensityPerPip && pipsSpentThisPlay > 0) {
-            // +1 intensity to ONE enemy DoT per pip spent (the-overtake class).
-            const dotAe = enemy.effects.find(ae => lookupEffectDef(ae.effectId)?.payload.damageOverTime);
-            if (dotAe) {
-                enemy = {
-                    ...enemy,
-                    effects: enemy.effects.map(ae => ae === dotAe
-                        ? { ...ae, intensity: Math.min(MAX_EFFECT_INTENSITY, ae.intensity + r.intensityPerPip! * pipsSpentThisPlay) }
-                        : ae),
-                };
-                events.push({ kind: 'pips-cashed', cardId: card.id, pips: pipsSpentThisPlay, bonus: 'intensity', amount: r.intensityPerPip * pipsSpentThisPlay });
-            }
-        }
-        if (r.applyEffect) {
-            const def = lookupEffectDef(r.applyEffect.effectId);
-            if (def) {
-                const toSelf = r.applyEffect.to === 'self';
-                const bearer = toSelf ? player : enemy;
-                const applied = applyEffect(bearer.effects, def, state.round, {
-                    intensityDelta: scaleEffectIntensity(def, r.applyEffect.intensity ?? 1, toSelf, stats),
-                    uncapped: true,
-                    ...(r.applyEffect.duration !== undefined
-                        ? { durationMode: 'additive' as const, durationDelta: r.applyEffect.duration }
-                        : {}),
-                    sourceId: card.id,
-                });
-                if (toSelf) player = { ...player, effects: applied.activeEffects };
-                else enemy = { ...enemy, effects: applied.activeEffects };
-            }
-        }
-        if (r.cleanse) {
-            let remaining = r.cleanse;
-            player = {
-                ...player,
-                effects: player.effects.filter(ae => {
-                    if (remaining > 0 && lookupEffectDef(ae.effectId)?.type === 'debuff') {
-                        remaining -= 1;
-                        return false;
-                    }
-                    return true;
-                }),
-            };
-        }
-        if (r.healHp) {
-            const healAmt = Math.round(scaleFor(r.healHp, stats, 'mind', 'one-shot') * getHealingReceivedMult(state.player));
-            if (healAmt > 0) {
-                player = heal(player, healAmt);
-                events.push({ kind: 'damage-dealt', cardId: card.id, target: 'self', amount: -healAmt });
-            }
-        }
-        if (r.drawCards) {
-            // The PLAYED card leaves the hand right after this play resolves —
-            // it must not occupy draw room, or a printed "draw N" under-delivers
-            // whenever the hand is full (P0-truth: printed == applied).
-            const room = Math.max(0, COMBAT_HAND_SIZE - (hand.length - 1));
-            const n = Math.min(r.drawCards, room);
-            if (n > 0) {
-                const draw = drawCombatCards(drawPile, discard, state.deck, n, _rng);
-                drawPile = draw.drawPile;
-                discard = draw.discard;
-                hand = [...hand, ...draw.drawn.map((cardId, i) => ({ uid: `cr${state.log.length + i}-${uid}`, cardId }))];
-                events.push({ kind: 'hand-drawn', cards: draw.drawn });
-            }
-        }
-        if (r.millCards) {
-            // MILL — the cards go straight to the discard, never to hand (the
-            // grave's own draw). The profane canon prints MILL on PAID riders
-            // (first-spadeful, spadework), so the in-play applier has to
-            // deliver it too — printed == applied.
-            const mill = drawCombatCards(drawPile, discard, state.deck, r.millCards, _rng);
-            drawPile = mill.drawPile;
-            discard = [...mill.discard, ...mill.drawn];
-            events.push({ kind: 'cards-milled', cards: mill.drawn });
-        }
-        if (r.premises) premisesGained += r.premises;
-        if (r.sway) swayGained += r.sway;
-        if (r.souls) gainSoulsLocal(r.souls, 'granted');
-        if (r.foretell) foretellCount += r.foretell;
-        if (r.stagger) {
-            staggerRungs += r.stagger;
-            events.push({ kind: 'staggered', rungs: r.stagger, total: staggerRungs });
-        }
-        if (r.pips && reserve.length > 0) {
-            for (let i = 0; i < r.pips; i++) {
-                const rp = ripenReserve(reserve);
-                reserve = rp.reserve;
-                for (const id of rp.ripenedIds) {
-                    events.push({ kind: 'die-ripened', dieId: id, pips: reserve.find(d => d.id === id)?.pips ?? 0 });
-                }
-            }
-        }
-    }
-
-    // 5. Die spend / refresh — the powering die's fate. A refresh rider/
-    //    mechanic (a card that PRINTS the refresh) always refreshes; CONVERT
-    //    returns it as WILD; BANK_SPENT_DIE parks it in the Reserve. A GHOST
-    //    die is GONE FOREVER when spent (spec 32 v3 §5) — refresh effects
-    //    cannot save it. (Spec 33 retired the draft-era variety-chain
-    //    auto-refresh: every usable die already powers its own play.)
-    const convertMech = mechs.some(m => m.kind === 'convert_die_color');
-    const bankSpentMech = mechs.some(m => m.kind === 'bank_spent_die');
-    const refreshed = reactFired || riderRefresh
-        || mechs.some(m => m.kind === 'refresh_die') || convertMech;
-    // TRANSMUTE — X dice consumed by `float_x_die` leave the tray (their wild
-    // floating successors join it below via `forgedFloating`).
-    let dice = transmutedXIds.length > 0
-        ? state.dice.filter(d => !transmutedXIds.includes(d.id))
-        : state.dice;
+    // 5. Die spend — the powering die's fate. A GHOST die is GONE FOREVER when
+    //    spent (spec 32 v3 §5).
+    let dice = state.dice;
+    let reserve = reserveIn;
+    let floatingDice = state.floatingDice ?? [];
     if (poweringSource === 'floating') {
         dice = dice.filter(d => d.id !== powering.id);
         floatingDice = floatingDice.filter(d => d.id !== powering.id);
         events.push({ kind: 'floating-die-spent', dieId: powering.id, color: powering.color, poolSize: floatingDice.length });
-        events.push({ kind: 'die-spent', dieId: powering.id, color: powering.color });
     } else if (poweringSource === 'reserve') {
-        if (refreshed || bankSpentMech) {
-            // Refreshed (rider/mechanic) OR BANK_SPENT_DIE: the die stays in the
-            // Reserve, its pips cashed by this play. `bank_spent_die` on a
-            // Reserve-powered play ("the hand that struck it goes back in the
-            // tray, unspent") was previously ignored here — the die was spent.
-            reserve = reserve.map(d => (d.id === powering.id ? { ...d, pips: 0 } : d));
-            events.push(refreshed
-                ? { kind: 'die-refreshed', dieId: powering.id, color: powering.color }
-                : { kind: 'die-banked', dieId: powering.id, color: powering.color, pips: 0 });
-        } else {
-            reserve = reserve.filter(d => d.id !== powering.id);
-            events.push({ kind: 'die-spent', dieId: powering.id, color: powering.color });
-        }
-    } else if (convertMech) {
-        // "Still your die?" — the spent die returns refreshed as WILD.
-        dice = dice.map(d => (d.id === powering.id ? { ...d, color: 'wild' as const, state: 'available' as const } : d));
-        events.push({ kind: 'die-converted', dieId: powering.id, color: 'wild' });
-    } else if (bankSpentMech && reserve.length < RESERVE_MAX) {
-        dice = spendDice(dice, [powering.id]);
-        reserve = [...reserve, { ...powering, state: 'available', pips: 0 }];
-        events.push({ kind: 'die-banked', dieId: powering.id, color: powering.color, pips: 0 });
-    } else if (refreshed) {
-        events.push({ kind: 'die-refreshed', dieId: powering.id, color: powering.color });
+        reserve = reserve.filter(d => d.id !== powering.id);
     } else {
         dice = spendDice(dice, [powering.id]);
-        events.push({ kind: 'die-spent', dieId: powering.id, color: powering.color });
     }
-    // FORGE (spec 32 v3 §5) — the forged floating die joins the tray NOW, so it
-    // can power a play THIS turn (the "bigger turns" intent).
-    if (forgedFloating.length > 0) dice = [...dice, ...forgedFloating];
+    events.push({ kind: 'die-spent', dieId: powering.id, color: powering.color });
 
     // Defense card → GUARD (printed + color-match + pips). Absorbed in
     // `resolveThreatPhase`.
-    const guardMech = (sourceCard.specialMechanics ?? []).find(m => m.kind === 'guard') as { amount: number } | undefined;
+    const guardMech = mechs.find(m => m.kind === 'guard');
     const pipGuard = isDefendPlay ? poweringPips * PIP_GUARD_BONUS : 0;
     if (pipGuard > 0) {
         events.push({ kind: 'pips-cashed', cardId: card.id, pips: poweringPips, bonus: 'guard', amount: pipGuard });
     }
-    const guardGain = (guardMech
-        ? (() => { const b = scaleFor(Math.max(1, Math.round(guardMech.amount)), stats, 'mind', 'one-shot'); return b + (colorMatch ? colorMatchBonus(b) : 0); })()
-        : 0) + riderGuard + pipGuard + pipGuardExtra;
-    // BARRIER — a STACKING, persistent soak (distinct from one-shot guard).
-    const barrierMech = mechs.find(m => m.kind === 'barrier') as { kind: 'barrier'; amount: number } | undefined;
-    const barrierGain = barrierMech
-        ? (() => { const b = scaleFor(Math.max(1, Math.round(barrierMech.amount)), stats, 'mind', 'one-shot'); return b + (colorMatch ? colorMatchBonus(b) : 0); })()
-        : 0;
-    // RIPOSTE — arm the counter-stance (spec 32 v3: fires only on a FULL block —
-    // see `resolveThreatPhase`); a prior arming this phase survives.
-    const riposteMech = mechs.find(m => m.kind === 'riposte') as { kind: 'riposte'; damage: number; reduce: number } | undefined;
-    const riposteArmed = riposteMech
-        ? {
-            damage: Math.max(1, Math.round(riposteMech.damage)),
-            reduce: Math.max(0, Math.round(riposteMech.reduce)),
-          }
-        : state.riposte;
-
-    // Phase 32 part 3 (Akrasia — DEBT ledger): `recoilTaken` already sums this
-    // play's PAID-line blood price (the `recoil`/`recoil_x` mechanics and
-    // `fate.recoilHp` — see its declaration above); post it to the per-combat
-    // ledger the same way `recoilPaidThisTurn` folds it in below. The FREE-line
-    // `CardRider.recoil` path (`pact-of-akrasia`) posts separately inside
-    // `applyRiderToState`, so this is additive, not a duplicate of that site.
-    const akrasiaDebtBefore = state.akrasiaDebt ?? 0;
-    const akrasiaDebt = akrasiaDebtBefore + recoilTaken;
-    let tierGuardBonus = 0;
-    if (recoilTaken > 0) {
-        events.push({ kind: 'debt-paid', amount: recoilTaken, total: akrasiaDebt });
-        const tiersCrossed = akrasiaDebtTiersCrossed(akrasiaDebtBefore, akrasiaDebt);
-        if (tiersCrossed > 0 && wasFallen) {
-            tierGuardBonus = tiersCrossed * AKRASIA_DEBT_TIER_GUARD;
-            events.push({ kind: 'debt-tier-payoff', tiersCrossed, guard: tierGuardBonus, total: akrasiaDebt });
-        }
-    }
-
-    // IMMOLATE / PURGE (profane-canon rework) — burned cards leave the deck
-    // cycle: one instance per burned id is struck from the persistent deck
-    // list so no reshuffle resurrects them this combat.
-    let deckAfterBurn = state.deck;
-    if (immolatedIds.length > 0 || purgeSelf) {
-        deckAfterBurn = [...state.deck];
-        const strike = purgeSelf ? [...immolatedIds, sourceCard.id] : immolatedIds;
-        for (const id of strike) {
-            const at = deckAfterBurn.indexOf(id);
-            if (at >= 0) deckAfterBurn.splice(at, 1);
-        }
-    }
+    const guardBase = guardMech ? scaleFor(Math.max(1, Math.round(guardMech.amount)), stats, 'mind', 'one-shot') : 0;
+    const guardGain = guardBase + (guardMech && colorMatch ? colorMatchBonus(guardBase) : 0) + pipGuard;
 
     let next: CombatEncounterState = {
-        ...state, player, enemy, dice, reserve, resonance, conviction,
-        deck: deckAfterBurn,
-        revealedStances, hand, drawPile, discard, attribution,
-        guard: (state.guard ?? 0) + guardGain + tierGuardBonus,
-        barrier: (state.barrier ?? 0) + barrierGain,
-        akrasiaDebt,
-        // Phase 32 part 4a (Control — TURNABOUT ledger): rolls forward
-        // unchanged from every OTHER mechanic's play; a `turnabout` case
-        // above already zeroed the local var before this assembly reads it.
-        rungsDeniedTotal,
-        riposte: riposteArmed,
+        ...state, player, enemy, dice, reserve, resonance, attribution,
+        guard: (state.guard ?? 0) + guardGain,
         directDamageDealt: directDamage,
-        permanentWildDice,
-        permanentDeadDice,
         floatingDice,
         souls,
-        staggerRungs,
-        stanceLockedNext,
-        pendingOmens,
-        peroration: perorationDecl,
-        echoNextSpell,
-        conjuredUids,
-        // THE BIG NUMBERS REWRITE — the damage-scaler ledgers.
-        wrath,
-        chain,
-        chainFedThisTurn,
-        flay: flayStacks,
-        twinArmed,
         spellsPlayedThisTurn: (state.spellsPlayedThisTurn ?? 0) + 1,
-        // Phase 32 part 4f — only a spell that actually landed/deepened a
-        // status on the enemy (`landedOnEnemy`, computed above from the
-        // merged `allCardEvents`, which already includes any replay's own
-        // events) becomes ouroboros's replay target. A no-status play
-        // (fizzle, pure-mechanic burst like TURNABOUT/RUPTURE, a dieless
-        // no-op) leaves the prior status-landing spell in place instead of
-        // overwriting it with a card that has nothing to re-land.
-        lastSpellCardId: landedOnEnemy ? sourceCard.id : state.lastSpellCardId,
-        // Phase 39 (2026-08-08) — the round-stamp ouroboros's precondition-
-        // width retune reads (see `replay_last` below): only set alongside
-        // `lastSpellCardId`, on the SAME condition.
-        lastSpellRound: landedOnEnemy ? state.round : state.lastSpellRound,
-        // Spec 32 §12 #4 — both blood-price sites (the `recoil` mech case and
-        // the fate-recoil pay) accumulate into `recoilTaken` above.
-        recoilPaidThisTurn: (state.recoilPaidThisTurn ?? 0) + recoilTaken,
     };
-    // Discard the played card — a CONJURED Haunt is one-use: it leaves
-    // the combat entirely instead of entering the discard pile. A PURGED card
-    // (profane-canon rework: the curse buying itself out) leaves the same way
-    // — its deck-cycle instance was already struck above.
-    if (purgeSelf || conjuredUids.includes(uid)) {
-        next = {
-            ...next,
-            hand: next.hand.filter(h => h.uid !== uid),
-            conjuredUids: conjuredUids.filter(u => u !== uid),
-        };
-    } else {
-        next = discardEntry(next, uid);
-    }
-
-    // ── Post-payload state verbs (foretell / premises / sway / spend) ─────────
-    if (foretellCount > 0) next = applyForetell(next, foretellCount, events);
-    if (spendPremisesMech) {
-        const spent = next.premises ?? 0;
-        if (spent > 0) {
-            const markStacks = Math.floor(spent / spendPremisesMech.markPer);
-            const draws = Math.floor(spent / spendPremisesMech.drawPer);
-            if (markStacks > 0) {
-                const markDef = lookupEffectDef('debuff_mark');
-                if (markDef) {
-                    const applied = applyEffect(next.enemy.effects, markDef, next.round, { intensityDelta: markStacks, sourceId: card.id });
-                    next = { ...next, enemy: { ...next.enemy, effects: applied.activeEffects } };
-                }
-            }
-            events.push({ kind: 'premises-spent', spent, marks: markStacks, drawn: draws });
-            next = { ...next, premises: 0 };
-            if (draws > 0) next = applyRiderToState(next, card.id, { drawCards: draws }, events, _rng);
-        } else {
-            events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'no Premises to spend' });
-        }
-    }
-    if (premisesGained > 0) {
-        const resP = gainPremises(next, premisesGained, events, _rng);
-        next = resP.state;
-        if (resP.concede) {
-            next = withLog(next, events);
-            return endCombat(next, 'concede', events);
-        }
-    }
-    if (swayGained > 0) next = gainSway(next, swayGained, events);
-    for (const fr of reprisedFreeRiders) {
-        next = applyRiderToState(next, card.id, fr, events, _rng);
-    }
-
-    if (mercyOpened) {
-        next = { ...next, mercyChoiceActive: true };
-        events.push({ kind: 'mercy-opened', message: `${enemy.name} falters — spare or exploit?` });
-    }
+    next = discardEntry(next, uid);
     next = withLog(next, events);
     if (swayOffersCapitulation(next)) return offerCapitulation(next, events);
     return checkImmediateOutcome(next, events);
@@ -3207,12 +1502,6 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     // denied action counts every rung).
     const backfirePer = getBackfirePerRung(state.enemy);
     const rungsForBackfire = hindered ? rungsTotal : rungsLost;
-    // Phase 32 part 4a (Control — TURNABOUT ledger): accrue the SAME
-    // rungs-denied-this-phase quantity BACKFIRE reads above, whether or not
-    // BACKFIRE itself is live this combat (a phase with nothing denied
-    // contributes 0, so plain accumulation is safe with no extra gating).
-    // `turnabout` consumes this later; it only ever grows here.
-    const rungsDeniedTotal = (state.rungsDeniedTotal ?? 0) + rungsForBackfire;
     if (backfirePer > 0 && rungsForBackfire > 0) {
         const drip = backfirePer * rungsForBackfire;
         const hit = applyEnemyDamage(enemy, drip, state.round, events);
@@ -3421,9 +1710,6 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         riposte: undefined,             // cleared each phase (like guard)
         staggerRungs: 0,                // consumed this phase
         bossRungGrowth: nextBossRungGrowth,
-        // Phase 32 part 4a (Control — TURNABOUT ledger): rolled forward every
-        // phase; a `turnabout` play zeroes it in the SAME call it reads it.
-        rungsDeniedTotal,
         // Spec 32 §12 #4 — the enemy-damage ledger (rolled over between phases)
         // and the full-block verdict (persists until the NEXT threat resolves;
         // a hindered/denied threat was never blocked).
@@ -3617,11 +1903,9 @@ export function processBetweenPhases(
     const rageGated = candidatePhase.unlockAfterRound !== undefined && resolvedRound < candidatePhase.unlockAfterRound;
     const nextIndex = rageGated ? state.currentPhaseIndex : candidateIndex;
 
-    // ARROW PARADOX (spec 32 v3 T5, `lock_stance`) — the next phase keeps the
-    // CURRENT stance: motion frozen mid-flight. The lock is revealed and spent.
-    // WS8.2 STANCE surface (spec 32 §12 #6): ROOT's `lockedStance` payload is
-    // the status twin — while the enemy carries it, every phase advance keeps
-    // the current (revealed) stance. Read off the PRE-tick enemy: the lock
+    // WS8.2 STANCE surface (spec 32 §12 #6): while the enemy carries ROOT's
+    // `lockedStance` payload, every phase advance keeps the current
+    // (revealed) stance. Read off the PRE-tick enemy: the lock
     // held when this phase resolved, so it still binds this advance.
     const statusLockId = hasPayloadFlag(state.enemy, 'lockedStance');
     let threatPhases = state.threatPhases;
@@ -3642,77 +1926,16 @@ export function processBetweenPhases(
             conditionText: branchCommit.conditionText, taken: branchCommit.taken,
         });
     }
-    if ((state.stanceLockedNext || statusLockId !== null) && nextIndex !== state.currentPhaseIndex) {
+    if (statusLockId !== null && nextIndex !== state.currentPhaseIndex) {
         const lockedStance = currentPhaseStance(state);
         threatPhases = threatPhases.map((p, i) => (i === nextIndex ? { ...p, enemyStance: lockedStance } : p));
         if (!revealedStances.includes(nextIndex)) revealedStances = [...revealedStances, nextIndex];
         events.push({ kind: 'stance-locked', phaseIndex: nextIndex, stance: lockedStance });
     }
 
-    // OMENS resolve at the phase boundary (spec 32 v3 T6, phase 32 part 4d
-    // — OMEN v2): a claim that matches the INCOMING phase's stance HITS —
-    // its rider fires free, scaled by the claim's `claimScale`. A wider
-    // claim (`windowRemaining` > 1) that does NOT match is still pending —
-    // it stays in `pendingOmens` with one fewer try, and gets re-checked at
-    // every subsequent boundary until it hits or the window reaches 0 (a
-    // final MISS — its ante was already spent at cast, never refunded).
-    let omenHits = state.omenHits ?? 0;
     let omenState: CombatEncounterState = {
         ...state, player, enemy, threatPhases, revealedStances,
     };
-    // Cards an omen rider draws are folded into the boundary refill below —
-    // they raise the refill target, so an omen hit nets EXTRA cards on top of
-    // the kept hand instead of being capped by pre-refill hand room.
-    let omenBonusDraw = 0;
-    const pendingOmens = state.pendingOmens ?? [];
-    if (pendingOmens.length > 0) {
-        const incomingStance = threatPhases[nextIndex]?.enemyStance;
-        const remaining: typeof pendingOmens = [];
-        for (const omen of pendingOmens) {
-            if (incomingStance !== undefined && omen.stance === incomingStance) {
-                omenHits += 1;
-                const omenCard = lookupCard(omen.cardId);
-                const omenMech = (omenCard?.specialMechanics ?? []).find(m => m.kind === 'omen') as
-                    Extract<CardSpecialMechanic, { kind: 'omen' }> | undefined;
-                if (omenMech) {
-                    // A scaled-down hedge rider never rounds all the way to 0
-                    // on a REAL hit — the smallest legal payoff is 1 of
-                    // whatever unit it prints.
-                    const amp = (n: number | undefined): number | undefined =>
-                        n === undefined ? undefined : Math.max(1, Math.ceil(n * omen.claimScale));
-                    const rider: CardRider = {
-                        ...omenMech.rider,
-                        guard: amp(omenMech.rider.guard),
-                        healHp: amp(omenMech.rider.healHp),
-                        drawCards: amp(omenMech.rider.drawCards),
-                        sway: amp(omenMech.rider.sway),
-                        souls: amp(omenMech.rider.souls),
-                        premises: amp(omenMech.rider.premises),
-                        applyEffect: omenMech.rider.applyEffect
-                            ? { ...omenMech.rider.applyEffect, intensity: amp(omenMech.rider.applyEffect.intensity) }
-                            : undefined,
-                    };
-                    events.push({ kind: 'omen-hit', cardId: omen.cardId, phaseIndex: nextIndex, riderText: riderText(rider) });
-                    // drawCards rides the boundary refill (below) — raising
-                    // the refill target guarantees the omen's cards land on
-                    // top of the kept hand, uncapped by hand room.
-                    omenBonusDraw += rider.drawCards ?? 0;
-                    omenState = applyRiderToState(
-                        omenState, omen.cardId, { ...rider, drawCards: undefined }, events, rng,
-                    );
-                }
-            } else {
-                const windowRemaining = omen.windowRemaining - 1;
-                events.push({ kind: 'omen-missed', cardId: omen.cardId, phaseIndex: nextIndex, expired: windowRemaining <= 0 });
-                if (windowRemaining > 0) remaining.push({ ...omen, windowRemaining });
-            }
-        }
-        omenState = { ...omenState, pendingOmens: remaining };
-        // An omen-granted Premise may complete a CONDEMN-grade Peroration.
-        if (omenState.finalOutcome === 'concede') {
-            return { state: withLog(omenState, events), events: [...priorEvents, ...events] };
-        }
-    }
 
     // SOULS from expiry (base law: 1 per expired enemy affliction instance).
     if (expiredAfflictions > 0) {
@@ -3742,18 +1965,9 @@ export function processBetweenPhases(
     //    unplayed cards STAY in hand and occupy draw room, so holding a card
     //    is a real cost — a dead card clogs the hand until it is played or
     //    scrapped. `bonusDraw` lets a caller raise the refill target (no
-    //    live caller does today); omen-hit draws raise it too (see
-    //    omenBonusDraw). WS2.1 one-use law still holds: an unplayed CONJURED Haunt
-    //    leaves the combat ENTIRELY at the boundary — it never enters the
-    //    hand-carryover (or the discard pile, where a reshuffle would
-    //    resurrect it as a permanent deck card) and its uid is released from
-    //    the one-use ledger.
-    const conjuredLedger = omenState.conjuredUids ?? [];
-    const sweptConjuredUids = omenState.hand
-        .filter(h => conjuredLedger.includes(h.uid))
-        .map(h => h.uid);
-    const keptHand = omenState.hand.filter(h => !conjuredLedger.includes(h.uid));
-    const refillTarget = COMBAT_HAND_SIZE + bonusDraw + omenBonusDraw;
+    //    live caller does today).
+    const keptHand = omenState.hand;
+    const refillTarget = COMBAT_HAND_SIZE + bonusDraw;
     const draw = drawCombatCards(
         omenState.drawPile, omenState.discard, omenState.deck,
         Math.max(0, refillTarget - keptHand.length), rng,
@@ -3788,13 +2002,10 @@ export function processBetweenPhases(
     let next: CombatEncounterState = {
         ...omenState,
         reserve,
-        omenHits,
-        stanceLockedNext: false,
         currentPhaseIndex: nextIndex,
         drawPile: draw.drawPile,
         discard: draw.discard,
         hand,
-        conjuredUids: conjuredLedger.filter(u => !sweptConjuredUids.includes(u)),
         phase: 'phase-play',
         round: state.round + 1,
         tempZone: tickedTempZone,
@@ -3918,7 +2129,6 @@ export function resolveCombatPhase(
         }
         const res = playCombatCard(
             working, { uid: play.uid, cardId: play.cardId }, play.useBottom, dieId, rng,
-            play.chosenX !== undefined ? { chosenX: play.chosenX } : undefined,
         );
         working = res.state;
         allEvents.push(...res.events);
@@ -4131,89 +2341,6 @@ export function getDisruptMeter(state: CombatEncounterState): {
 }
 
 /**
- * RUPTURE projection — the live amplified detonate total a rupture card would
- * deal RIGHT NOW (pending DoT × vulnerable, capped). For the card glow.
- * Uses bonusPct 0 (the per-card bonus is added on top in `playBottomAction`).
- */
-export function projectRupture(state: CombatEncounterState): number {
-    const pending = getPendingDotTotal(state.enemy, state.round).total;
-    return Math.min(
-        ruptureBurstCap(state.enemy.maxHealth),
-        Math.round(pending * getDamageTakenMultiplier(state.enemy)),
-    );
-}
-
-/**
- * Chosen-X range for a card carrying a `recoil_x` mechanic (WS7.2): the engine
- * owns the clamp rule — X ∈ [min, affordable] where affordable = the player's
- * live HP − 1, floored at min (the printed minimum is unavoidable, like plain
- * RECOIL). Null when the card carries no chosen-X mechanic. Presenters and sim
- * policies read this instead of hard-coding the rule.
- */
-export function recoilXRange(
-    state: CombatEncounterState,
-    card: Pick<CombatCard, 'id'>,
-): { min: number; max: number } | null {
-    const sourceCard = lookupCard(card.id);
-    const mech = (sourceCard?.specialMechanics ?? []).find(m => m.kind === 'recoil_x') as
-        Extract<CardSpecialMechanic, { kind: 'recoil_x' }> | undefined;
-    if (!mech) return null;
-    return { min: mech.min, max: Math.max(mech.min, state.player.health - 1) };
-}
-
-/**
- * Per-card RUPTURE projection (phase 28) — `projectRupture` above uses
- * `bonusPct 0` (the per-card bonus is applied separately in
- * `playBottomAction`), which undershoots any card with its own `bonusPct` or
- * `fuelPerPip` (`resonance-detonation`, `the-overtake`, others). Mirrors the
- * `projectSiphonHeal` convention: look up the card's own mechanic and scale
- * accordingly. `fuelPerPip` fuel is approximated off *currently banked*
- * Reserve + floating pips (a preview can't know a not-yet-chosen die's
- * hypothetical spend) — the "if you cashed in everything banked right now"
- * reading. Falls back to the flat `projectRupture(state)` for cards with no
- * card-specific rupture mechanic.
- */
-export function projectRuptureBurst(state: CombatEncounterState, card: CombatCard): number {
-    const sourceCard = lookupCard(card.id);
-    const mech = (sourceCard?.specialMechanics ?? []).find(m => m.kind === 'rupture') as
-        Extract<CardSpecialMechanic, { kind: 'rupture' }> | undefined;
-    if (!mech) return projectRupture(state);
-    const pending = getPendingDotTotal(state.enemy, state.round).total;
-    const nonDotStacks = consumeAfflictions(state.enemy).nonDotStacks;
-    const bankedPips = (state.reserve ?? []).reduce((n, die) => n + (die.pips ?? 0), 0)
-        + (state.floatingDice ?? []).reduce((n, die) => n + (die.pips ?? 0), 0);
-    const fuel = pending
-        + RUPTURE_PER_AFFLICTION_STACK * nonDotStacks
-        + (mech.fuelPerPip ?? 0) * bankedPips
-        + (mech.fuelPerOmenHit ?? 0) * (state.omenHits ?? 0);
-    return Math.min(
-        ruptureBurstCap(state.enemy.maxHealth),
-        Math.round(fuel * (1 + (mech.bonusPct ?? 0)) * getDamageTakenMultiplier(state.enemy)),
-    );
-}
-
-/** SIPHON projection — the heal a siphon card would grant if powered now (off
- *  the projected payoff burst). */
-export function projectSiphonHeal(state: CombatEncounterState, card: CombatCard): number {
-    const sourceCard = lookupCard(card.id);
-    const mech = (sourceCard?.specialMechanics ?? []).find(m => m.kind === 'siphon') as
-        { kind: 'siphon'; pct: number } | undefined;
-    if (!mech) return 0;
-    return Math.round(projectRupture(state) * mech.pct * getHealingReceivedMult(state.player));
-}
-
-/** REAP-ALL projection — the burst the Harvest capstone would deal right now. */
-export function projectReapAll(state: CombatEncounterState, card: CombatCard): { ready: boolean; amount: number } {
-    const sourceCard = lookupCard(card.id);
-    const mech = (sourceCard?.specialMechanics ?? []).find(m => m.kind === 'reap_all') as
-        Extract<CardSpecialMechanic, { kind: 'reap_all' }> | undefined;
-    if (!mech) return { ready: false, amount: 0 };
-    // UNCAPPED (spec 32 §12 item 5) — the ALL-spender's price is its emptied bank.
-    const amount = Math.round(mech.burstPerSoul * (state.souls ?? 0) * getDamageTakenMultiplier(state.enemy));
-    return { ready: amount > 0, amount };
-}
-
-/**
  * Wall-math projection (phase 28 / Gate 1 §4) — what the CURRENTLY
  * telegraphed hit would actually deal right now, netted against live
  * guard/barrier. `IntentIcon` today shows only the raw, unscaled
@@ -4291,46 +2418,20 @@ export function projectIncomingThreat(state: CombatEncounterState): {
     };
 }
 
-/** One hand card's finisher (rupture / reap) readiness, for
- *  `projectCombatOutcome`. */
-export interface FinisherProjection {
-    uid: string;
-    cardId: string;
-    mechanic: 'rupture' | 'reap';
-    ready: boolean;
-    amount: number;
-}
-
 /** The consolidated status kill-path readout (spec 30, build-plan phase 2):
- *  pending DoT, whether it alone kills the foe and in how many rounds, and
- *  which hand cards are ready to detonate the stack right now. Pure selector
- *  no `CombatEvent`, no state mutation; call it on demand from a presenter. */
+ *  pending DoT, and whether it alone kills the foe and in how many rounds.
+ *  Pure selector — no `CombatEvent`, no state mutation; call it on demand
+ *  from a presenter. */
 export interface CombatOutcomeProjection {
     pendingDot: number;
     roundsToKill: number | null;
     isLethalInFlight: boolean;
-    finishers: FinisherProjection[];
 }
 
 export function projectCombatOutcome(state: CombatEncounterState): CombatOutcomeProjection {
     const pendingDot = getPendingDotTotal(state.enemy, state.round).total;
     const roundsToKill = computeRoundsToKill(state.enemy, state.round);
-    const finishers: FinisherProjection[] = [];
-    for (const { uid, card } of handCards(state)) {
-        const sourceCard = lookupCard(card.id);
-        const mech = (sourceCard?.specialMechanics ?? []).find(
-            m => m.kind === 'rupture' || m.kind === 'reap_all',
-        );
-        if (!mech) continue;
-        if (mech.kind === 'rupture') {
-            const amount = projectRupture(state);
-            finishers.push({ uid, cardId: card.id, mechanic: 'rupture', ready: amount > 0, amount });
-        } else {
-            const { ready, amount } = projectReapAll(state, card);
-            finishers.push({ uid, cardId: card.id, mechanic: 'reap', ready, amount });
-        }
-    }
-    return { pendingDot, roundsToKill, isLethalInFlight: roundsToKill !== null, finishers };
+    return { pendingDot, roundsToKill, isLethalInFlight: roundsToKill !== null };
 }
 
 /** Re-export for presenters that need to check die affordability directly. */

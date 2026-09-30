@@ -1,11 +1,9 @@
 /**
  * Hermetic E2E — spec 32 §12 item 4 (Ratified 2026-07-11): the COMBAT LEDGERS.
  *
- * Four `CombatEncounterState` fields feed the WS5 sequencing conditions and the
- * WS9 threat-branch condition, in real units:
+ * Three `CombatEncounterState` fields feed the WS5 sequencing conditions and
+ * the WS9 threat-branch condition, in real units:
  *
- *   - `recoilPaidThisTurn` — every blood price this turn (the `recoil` mech
- *     case) accumulates; resets with `spellsPlayedThisTurn` at `startTurn`.
  *   - `enemyDamageThisTurn` — post-soak HP the enemy's threat landed on the
  *     player, written in `resolveThreatPhase`.
  *   - `enemyDamageLastRound` — the rollover in `processBetweenPhases`
@@ -25,29 +23,16 @@ import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
 import { FloatEye } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
-import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import {
-    initializeCombatEncounter, rollEncounterDice, playCombatCard,
+    initializeCombatEncounter, rollEncounterDice,
     startTurn, resolveThreatPhase, processBetweenPhases,
     THREAT_DAMAGE_SCALE,
 } from '../combat.engine';
 import type {
-    CombatDieColor, CombatEncounterState, CombatThreatPhase,
+    CombatEncounterState, CombatThreatPhase,
 } from '../combat.encounter.types';
 
 afterEach(() => vi.restoreAllMocks());
-
-// A sandbox fixture isolates the recoil WRITE site (the curated library's
-// recoil cards carry extra payoff mechanics; a fixture pins the LEDGER rule).
-registerSandboxCards([
-    {
-        id: 'qa-ledger-recoil', name: 'QA Ledger Recoil',
-        color: 'body', description: 'recoil-mech ledger fixture',
-        tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
-        combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 }],
-        specialMechanics: [{ kind: 'recoil', hp: 4 }],
-    },
-]);
 
 const rng = (): number => 0.5;
 
@@ -66,16 +51,6 @@ function makeEnemy(stance: 'heart' | 'body' | 'mind' = 'body'): Enemy {
     e.health = 500; e.maxHealth = 500; e.effects = [];
     e.baseStats = { heart: stance === 'heart' ? 6 : 2, body: stance === 'body' ? 6 : 2, mind: stance === 'mind' ? 6 : 2 };
     return e;
-}
-
-function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
-    const turn = state.turn || 1;
-    const dice = colors.map((c, i) => ({
-        id: `t${turn}-d${i}`, color: c,
-        state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
-        face: c === 'x' ? ('miss' as const) : ('mana' as const),
-    }));
-    return { ...state, dice, turn };
 }
 
 /** A single authored damage-only threat phase (loops as the final phase). */
@@ -111,36 +86,6 @@ function openWithThreat(damage: number, guard: number): CombatEncounterState {
 // Round 1 is inside the escalation grace window and the fixture enemy carries
 // no controls/rungs, so the landed budget is exactly the raw scale.
 const scaled = (damage: number): number => Math.round(damage * THREAT_DAMAGE_SCALE);
-
-// ── recoilPaidThisTurn ───────────────────────────────────────────────────────
-
-describe('combat ledgers — recoilPaidThisTurn', () => {
-    it('accumulates across every blood price this turn, then resets at startTurn', () => {
-        let s = open(['qa-ledger-recoil', 'qa-ledger-recoil']);
-        s = setDice(s, ['body', 'body']);
-        expect(s.recoilPaidThisTurn ?? 0).toBe(0);
-
-        // First pay — the `recoil` mech case (printed blood price 4).
-        const [first, second] = s.hand.filter(h => h.cardId === 'qa-ledger-recoil');
-        let hpBefore = s.player.health;
-        s = playCombatCard(s, { uid: first.uid }, true, s.dice[0].id).state;
-        expect(hpBefore - s.player.health).toBe(4);
-        expect(s.recoilPaidThisTurn).toBe(4);
-
-        // Second pay, same turn — the ledger accumulates.
-        hpBefore = s.player.health;
-        s = playCombatCard(s, { uid: second.uid }, true, s.dice[1].id).state;
-        expect(hpBefore - s.player.health).toBe(4);
-        expect(s.recoilPaidThisTurn).toBe(4 + 4);
-
-        // The ledger resets with the turn — same lifecycle hook as
-        // `spellsPlayedThisTurn` (startTurn after the phase boundary).
-        s = resolveThreatPhase(s, rng).state;
-        s = startTurn(s, rng).state;
-        expect(s.spellsPlayedThisTurn).toBe(0);
-        expect(s.recoilPaidThisTurn).toBe(0);
-    });
-});
 
 // ── enemyDamageThisTurn / enemyDamageLastRound ──────────────────────────────
 

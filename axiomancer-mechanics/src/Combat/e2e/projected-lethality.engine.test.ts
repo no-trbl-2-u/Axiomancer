@@ -43,13 +43,12 @@ function makeEnemy(hp: number, effects: ActiveEffect[] = []): Enemy {
 }
 
 describe('projectCombatOutcome — the consolidated status kill-path readout', () => {
-    it('no DoT on the foe — nothing pending, no foreseeable kill, no finishers', () => {
+    it('no DoT on the foe — nothing pending, no foreseeable kill', () => {
         const state = initializeCombatEncounter(makePlayer([]), makeEnemy(300), undefined, 7);
         const projection = projectCombatOutcome(state);
         expect(projection.pendingDot).toBe(0);
         expect(projection.roundsToKill).toBeNull();
         expect(projection.isLethalInFlight).toBe(false);
-        expect(projection.finishers).toEqual([]);
     });
 
     it('a decaying bleed that outpaces a low-HP foe is lethal in N rounds', () => {
@@ -93,13 +92,5 @@ describe('projectCombatOutcome — the consolidated status kill-path readout', (
         // cumulative per round: 15, 27, ... — crosses 25 on round 2.
         expect(projection.roundsToKill).toBe(2);
         expect(projection.isLethalInFlight).toBe(true);
-    });
-
-    it('a hand with no finisher-mechanic cards reports no finishers', () => {
-        const enemy = makeEnemy(300, [ae('debuff_bleed', 1, 2)]);
-        const deck = ['grey-ward']; // a real, playable, non-finisher card
-        const state = initializeCombatEncounter(makePlayer(['grey-ward']), enemy, deck, 7);
-        const projection = projectCombatOutcome(state);
-        expect(projection.finishers).toEqual([]);
     });
 });

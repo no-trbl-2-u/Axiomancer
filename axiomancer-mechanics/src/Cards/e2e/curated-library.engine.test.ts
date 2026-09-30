@@ -46,14 +46,6 @@ describe('profane canon — shape contract', () => {
         }
     });
 
-    it('every curse is rank-1 junk with a PURGE exit', () => {
-        for (const curse of cardLibrary.filter(c => c.theme === 'curse')) {
-            expect(curse.rank, curse.id).toBe(1);
-            expect(curse.cardType, curse.id).toBe('spell');
-            expect((curse.specialMechanics ?? []).some(m => m.kind === 'purge_self'), curse.id).toBe(true);
-        }
-    });
-
     it('every rank is a named rung on the ladder', () => {
         for (const card of cardLibrary) {
             expect(CARD_RANK_NAMES[card.rank], `${card.id} rank ${card.rank}`).toBeTruthy();

@@ -34,7 +34,7 @@ const dotCard: Card = {
     rank: 1,
     cardType: 'spell',
     targetType: 'enemy',
-    free: { tickOne: true },
+    free: { damage: 1 },
     combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 2 }],
 };
 
@@ -60,7 +60,7 @@ const debuffCard: Card = {
     rank: 1,
     cardType: 'spell',
     targetType: 'enemy',
-    free: { drawCards: 1 },
+    free: { damage: 2 },
     combatEffects: [
         { effectId: 'debuff_poison', appliedTo: 'opponent' },
     ],

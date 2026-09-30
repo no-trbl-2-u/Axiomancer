@@ -38,7 +38,6 @@ An encounter node resolves to a `combat-prelude` event that renders **in place o
 | `combat-play-area` | Stage area |
 | `combat-staged-<uid>` | The staged card |
 | `combat-staged-die` | The die socket on the staged card |
-| `combat-choose-x-<uid>` / `combat-choose-x-plus-<uid>` / `combat-choose-x-minus-<uid>` | X-value picker on X cards |
 | `combat-apply-<uid>` | APPLY the powered card |
 | `combat-trash` | Discard target |
 | `combat-drop-reject` | Flash when a die is dropped on a wrong-colour card |
@@ -47,7 +46,6 @@ An encounter node resolves to a `combat-prelude` event that renders **in place o
 | `combat-end-consequence` | Consequence line shown at end phase |
 | `combat-log-toggle` / `combat-log` / `combat-log-close` | Ledger overlay |
 | `combat-card-detail` / `combat-card-detail-close` | Card detail modal (deliberate; has a dismiss) |
-| `combat-reprisal-picker` / `combat-reprisal-option-<i>-<id>` / `combat-reprisal-skip` | Reprisal choice |
 | `combat-mercy` / `combat-mercy-spare` / `combat-mercy-exploit` | Mercy choice when the foe breaks |
 | `combat-capitulation` / `combat-capitulation-accept` / `combat-capitulation-continue` | Foe offers to yield |
 | `combat-rewards` / `combat-reward-<cardId>` / `combat-reward-preview` / `combat-reward-preview-select` / `combat-reward-preview-close` / `combat-reward-confirm` / `combat-reward-skip` | SPOILS card pick |

@@ -18,11 +18,10 @@ import {
     isPhaseStanceRevealed, getSignatureSkill,
     lookupEffect, READ_DAMAGE_MULT, colorMatchBonus,
     RESERVE_MAX,
-    RUPTURE_CAP_FRACTION, recoilXRange, riderText,
+    riderText,
     DISRUPT_DENY_AT,
     // phase 28 — legibility sweep
-    projectRuptureBurst, projectIncomingThreat,
-    CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
+    projectIncomingThreat,
     capitulateThreshold, concedeFloorFor,
     // phase 2 — projected-lethality readout (spec 30): the status kill-path
     // foresight, wired into the board's HUD by this pass.
@@ -196,21 +195,7 @@ type CardRider = NonNullable<Card['free']>;
  *  freePill remains the full-truth line). Never a fabricated number. */
 function riderPairs(r: CardRider): [string, string][] {
     const pairs: [string, string][] = [];
-    if (r.bonusIntensity) pairs.push(['INTENSITY', `+${r.bonusIntensity}`]);
-    if (r.bonusDuration) pairs.push(['DURATION', `+${r.bonusDuration}t`]);
     if (r.guard) pairs.push(['GUARD', `${r.guard}`]);
-    if (r.conviction) pairs.push(['CONVICTION', `+${r.conviction} ◆`]);
-    if (r.refreshDie) pairs.push(['REFRESH', 'die']);
-    if (r.revealStance) pairs.push(['REVEAL', 'stance']);
-    if (r.tickAllDots) pairs.push(['TICK', 'all DoTs']);
-    if (r.tickOne) pairs.push(['TICK', '1']);
-    if (r.cleanse) pairs.push(['CLEANSE', `${r.cleanse}`]);
-    if (r.healHp) pairs.push(['HEAL', `${r.healHp}`]);
-    if (r.drawCards) pairs.push(['DRAW', `${r.drawCards}`]);
-    if (r.premises) pairs.push(['CHARGE', `+${r.premises}`]);
-    if (r.sway) pairs.push(['PLEA', `${r.sway}`]);
-    if (r.souls) pairs.push(['SOUL', `+${r.souls}`]);
-    if (r.foretell) pairs.push(['FORETELL', `${r.foretell}`]);
     if (r.applyEffect) {
         const kw = keywordForEffect(r.applyEffect.effectId)
             ?? r.applyEffect.effectId.replace(/^(debuff|buff)_/, '');
@@ -219,14 +204,6 @@ function riderPairs(r: CardRider): [string, string][] {
         // De-abbreviated (audit 2026-07-12): '×1 · 1t', never the 'i1 d1' code.
         pairs.push([kw.toUpperCase(), `${percentIntensity(r.applyEffect.effectId, i) ?? `×${i}`}${d ? ` · ${d}t` : ''}`]);
     }
-    if (r.ruptureMarks) pairs.push(['RUPTURE', `${r.ruptureMarks}/stack`]);
-    if (r.intensityPerPip) pairs.push(['PIP', `+${r.intensityPerPip} int`]);
-    if (r.pips) pairs.push(['PIP', `+${r.pips}`]);
-    if (r.stagger) pairs.push(['STAGGER', `${r.stagger}`]);
-    // phase 30 — FREE-currency riders.
-    if (r.barrier) pairs.push(['GUARD', `${r.barrier}`]);
-    if (r.recoil) pairs.push(['RECOIL', `${r.recoil}`]);
-    if (r.millCards) pairs.push(['MILL', `${r.millCards}`]);
     return pairs;
 }
 
@@ -381,11 +358,6 @@ export interface CombatEnemyPaneVM {
      *  (so a whole-plan-is-PLEA preset like GRACE sees the track from turn 1). */
     sway: number; swayTarget: number; swayVisible: boolean;
     premises: number; premiseAt: number; premiseVisible: boolean;
-    /** THE BIG NUMBERS REWRITE — FLAY stacks riding the FOE (each spends on one
-     *  of your next hits, landing it half again as hard). Same visibility rule
-     *  as the alt-win meters: shown once it has a value, or once the deck holds
-     *  a card that feeds it. */
-    flay: number; flayVisible: boolean;
     /** The count of STAGE thresholds this foe has already crossed (0 for
      *  anything that does not escalate). The loud announcement is the combat
      *  log's `stage-entered` line — this is the standing "it has changed" mark. */
@@ -399,15 +371,6 @@ export interface CombatEnemyPaneVM {
 }
 export interface CombatPlayerPaneVM {
     name: string; hp: number; maxHp: number; hpPct: number; guard: number; effects: CombatEffectChipVM[];
-    /** THE BIG NUMBERS REWRITE — the damage-scaler ledgers, surfaced on the
-     *  same terms as the alt-win meters (a value, or a deck that feeds one).
-     *  WRATH is combat-long and never fades; CHAIN loads the NEXT hit and
-     *  slackens at the end of any turn that fed it nothing; TWIN is armed for
-     *  the next spell of this turn only. Invisible accumulation is the bug
-     *  these exist to close. */
-    wrath: number; wrathVisible: boolean;
-    chain: number; chainVisible: boolean;
-    twinArmed: boolean;
 }
 export interface CombatDieVM {
     id: string; color: string; colorHex: string; glyph: string; stanceLabel: string;
@@ -469,15 +432,9 @@ export type CombatCardKind =
     | 'vulnerable'   // debuff_vulnerable / debuff_vulnerability_* — foe takes +N% damage
     | 'mark'         // spec 32 v3 — universal exposure: +N per DoT tick per stack
     | 'backfire'     // spec 32 v3 — the enemy takes N per action rung it loses
-    | 'rupture'      // detonate stored afflictions (live total → a word, no fabricated number)
-    | 'reap'         // spec 32 v3 — spend Souls for a burst (live total → a word)
     | 'oath'         // spec 32 v3 — persistent player-side passive (rest of combat; spec 34 R-9: was 'enchant')
     | 'hex'          // spec 32 v3 — standing curse attached to the enemy (spec 34 R-10: was 'disenchant')
-    | 'forge'        // die-manipulation verbs (FORGE / KINDLE / PIP / TRANSMUTE)
-    | 'barrier'      // stacking soak shield on YOU
     | 'thorns'       // reflect attacker damage back
-    | 'siphon'       // heal for a % of the damage dealt
-    | 'riposte'      // counter the next hit + reduce it
     // ── card-overhaul (2026-07-03) — 6 new status effects the honesty gate missed ──
     | 'exposure'      // debuff_exposure → real -N DEF number
     | 'doubt'         // debuff_doubt → forces the foe's next play to weak-tier (qualitative)
@@ -627,15 +584,6 @@ export interface CombatCardVM {
     /** Authored flavor prose (`Card.description`) — overlay BOTTOM only, never
      *  on the face (owner directive 2026-07-09: the face is purely functional). */
     flavor: string | null;
-    /** WS7.2 chosen X-cost (`recoil_x`): the ENGINE's live clamp range
-     *  (`recoilXRange` — min = printed floor, max = affordable). Non-null only
-     *  when the card carries an X mechanic; the board shows the stepper off
-     *  this and passes the pick through the play call as `chosenX`. */
-    chooseX: { min: number; max: number } | null;
-    /** phase 28 — true for a `reprise`-mechanic card: APPLYing it should prompt
-     *  the discard-pile songbook picker instead of going straight to the
-     *  engine's default highest-rank auto-pick. */
-    needsReprisalChoice: boolean;
 }
 export interface CombatSignatureVM {
     id: string; name: string; description: string; cost: number; affordable: boolean; icon: string;
@@ -998,55 +946,6 @@ export function selectCombatLogLines(events: readonly CombatEvent[]): CombatLogL
                     float: `‡ ${e.name.toUpperCase()} ‡`,
                 });
                 break;
-            case 'wrath-gained':
-                out.push({
-                    kind: e.kind, side: 'player', color: GLYPH_COLORS.dot,
-                    text: `WRATH +${e.amount}. Every blow you land now carries ${e.total} more, and it will not fade.`,
-                    float: `WRATH +${e.amount}`,
-                });
-                break;
-            case 'flay-applied':
-                out.push({
-                    kind: e.kind, side: 'enemy', color: GLYPH_COLORS.statdown,
-                    text: `FLAY +${e.amount}. The foe is open to your next ${e.total} hit${e.total === 1 ? '' : 's'}.`,
-                    float: `FLAY +${e.amount}`,
-                });
-                break;
-            case 'chain-gained':
-                out.push({
-                    kind: e.kind, side: 'player', color: GLYPH_COLORS.advantage,
-                    text: `CHAIN +${e.amount}. Your next hit lands ${e.total} heavier.`,
-                    float: `CHAIN +${e.amount}`,
-                });
-                break;
-            case 'chain-faded':
-                out.push({
-                    kind: e.kind, side: 'player', color: GLYPH_COLORS.thorns,
-                    text: `The chain slackens. ${e.from} went unspent and is gone.`,
-                    float: 'CHAIN LOST',
-                });
-                break;
-            case 'twin-armed':
-                out.push({
-                    kind: e.kind, side: 'player', color: GLYPH_COLORS.control,
-                    text: 'TWIN. The next word you say this turn is said twice.',
-                    float: 'TWIN',
-                });
-                break;
-            case 'twin-fired':
-                out.push({
-                    kind: e.kind, side: 'enemy', color: GLYPH_COLORS.control,
-                    text: 'The word is said twice.',
-                    float: 'TWINNED',
-                });
-                break;
-            case 'overkill-cashed':
-                out.push({
-                    kind: e.kind, side: 'player', color: PAYOFF_COLOR,
-                    text: `OVERKILL. ${e.excess} past the killing blow, and none of it wasted.`,
-                    float: `OVERKILL ${e.excess}`,
-                });
-                break;
             // Playtest fix 2026-09-04 — silent ledgers. The foe's bar climbed
             // with no line saying WHY, and the PLEA tally decayed at the turn
             // boundary with no narration. Zero-amount heals never emit, so no
@@ -1205,15 +1104,6 @@ export function selectCombatLogHistory(state: CombatEncounterState): CombatLogHi
             case 'thorns-reflected':
                 push('enemy', GLYPH_COLORS.thorns, `Thorns reflect ${e.amount} back.`);
                 break;
-            case 'rupture-detonated':
-                push('enemy', PAYOFF_COLOR, `RUPTURE detonates for ${e.amount}.`);
-                break;
-            case 'amplify-detonated':
-                push('enemy', PAYOFF_COLOR, `AMPLIFY detonates for ${e.amount}${e.pendingDot > 0 ? ` (+${e.pendingDot} DoT queued)` : ''}.`);
-                break;
-            case 'compound-hit':
-                push('enemy', PAYOFF_COLOR, `COMPOUND hits for ${e.amount}${e.debuffs > 0 ? ` (×${e.debuffs} debuffs)` : ''}.`);
-                break;
             default: {
                 // Every kind `selectCombatLogLines` already narrates (stage
                 // entries, the ledgers, the PLEA lines, ...)
@@ -1280,9 +1170,6 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
     // is declared). Each meter shows when it has a value OR the deck feeds it.
     const sway = state.sway ?? 0;
     const premises = state.premises ?? 0;
-    // THE BIG NUMBERS REWRITE — FLAY sits on the FOE (it is how open the thing
-    // is, not something you carry), so it reads on this pane beside its VITAE.
-    const flay = state.flay ?? 0;
     // Phase 2 (spec 30) — pure selector, no state mutation; safe to call once
     // per render off the same encounter state the rest of the pane reads.
     const lethality = projectCombatOutcome(state);
@@ -1312,7 +1199,6 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
         // peroration track (combat-peroration) owns the premises/at readout.
         premiseVisible: !state.peroration
             && (premises > 0 || deckFeedsMechanic(state, ['premise', 'peroration', 'spend_premises'])),
-        flay, flayVisible: flay > 0 || deckFeedsMechanic(state, ['flay']),
         stagesEntered: (state.stagesEntered ?? []).length,
         pendingDot: lethality.pendingDot,
         roundsToKill: lethality.roundsToKill,
@@ -1322,11 +1208,6 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
 
 function playerPane(state: CombatEncounterState): CombatPlayerPaneVM {
     const p = state.player;
-    // THE BIG NUMBERS REWRITE — the two ledgers you carry. Same visibility law
-    // as the alt-win meters (WI-5): a live value, or a deck that can feed one,
-    // so a WRATH deck sees its track from turn 1 instead of after the fact.
-    const wrath = state.wrath ?? 0;
-    const chain = state.chain ?? 0;
     return {
         name: p.name ?? 'You', hp: Math.max(0, p.health), maxHp: p.maxHealth,
         hpPct: p.maxHealth > 0 ? Math.max(0, p.health) / p.maxHealth : 0,
@@ -1336,9 +1217,6 @@ function playerPane(state: CombatEncounterState): CombatPlayerPaneVM {
             ...chips(p.effects),
             ...standingChips(state.persistentZone ?? [], state.tempZone ?? [], 'enchant'),
         ],
-        wrath, wrathVisible: wrath > 0 || deckFeedsMechanic(state, ['wrath']),
-        chain, chainVisible: chain > 0 || deckFeedsMechanic(state, ['chain']),
-        twinArmed: state.twinArmed === true,
     };
 }
 
@@ -1458,8 +1336,8 @@ interface PrimaryResolution {
     ce: CardCombatEffects | null;
     guardAmount: number | null;
     riders: CardCombatEffects[];
-    /** The driving special mechanic for the mechanic-led kinds (barrier/riposte/
-     *  siphon/rupture/reap); null for effect- or verb-driven kinds. */
+    /** The driving special mechanic for the mechanic-led kind; null for
+     *  effect- or verb-driven kinds. */
     mech: CardSpecialMechanic | null;
 }
 
@@ -1473,12 +1351,6 @@ export function resolvePrimary(card: CombatCard, sourceCard: Card | undefined): 
         mechs.find(m => m.kind === k) as Extract<CardSpecialMechanic, { kind: K }> | undefined;
 
     if (vc === 'defend') {
-        // 0.34.0: a defend card can carry barrier (stacking soak) or riposte (counter)
-        // instead of / on top of plain Guard. Headline the richer mechanic.
-        const barrier = findMech('barrier');
-        if (barrier) return { kind: 'barrier', ce: null, guardAmount: null, riders: [], mech: barrier };
-        const riposte = findMech('riposte');
-        if (riposte) return { kind: 'riposte', ce: null, guardAmount: findMech('guard')?.amount ?? null, riders: [], mech: riposte };
         const g = findMech('guard');
         return { kind: 'guard', ce: null, guardAmount: g?.amount ?? 0, riders: [], mech: null };
     }
@@ -1488,27 +1360,12 @@ export function resolvePrimary(card: CombatCard, sourceCard: Card | undefined): 
     if (vc === 'oath') return { kind: 'oath', ce: null, guardAmount: null, riders: [], mech: null };
     if (vc === 'hex') return { kind: 'hex', ce: null, guardAmount: null, riders: [], mech: null };
     if (vc === 'direct-damage') {
-        // Spec 32 v3 — 'direct-damage' is the status-payoff class ONLY (the strike
-        // is dead): RUPTURE detonates afflictions, REAP spends Souls. Their live
-        // swing is never headlined as a number.
-        const rupture = findMech('rupture');
-        if (rupture) return { kind: 'rupture', ce: null, guardAmount: null, riders: [], mech: rupture };
-        const reap = findMech('reap_all') ?? findMech('reap');
-        if (reap) return { kind: 'reap', ce: null, guardAmount: null, riders: [], mech: reap };
-        const siphon = findMech('siphon');
-        if (siphon) return { kind: 'siphon', ce: null, guardAmount: null, riders: [], mech: siphon };
+        // DEAL is the card's paid identity: headline the mechanic.
         const led = headlineMechanic(mechs);
         if (led) return { kind: 'mechanic', ce: null, guardAmount: null, riders: [], mech: led };
         return { kind: 'inert', ce: null, guardAmount: null, riders: [], mech: null };
     }
     if (vc === 'buff-self') {
-        // Dice-verb cards (FORGE / TRANSMUTE / KINDLE / PIP) headline their die
-        // mechanic — previously they fell through to 'inert' and printed the
-        // ambiguous "DEBUFF · buff yourself" (owner directive 2026-07-09).
-        const dieMech = findMech('forge_floating_die') ?? findMech('float_x_die')
-            ?? findMech('create_temporary_die') ?? findMech('grant_pip')
-            ?? findMech('spend_all_pips') ?? findMech('reroll_spent');
-        if (dieMech) return { kind: 'forge', ce: null, guardAmount: null, riders: [], mech: dieMech };
         const self = (sourceCard?.combatEffects ?? []).filter(e => e.appliedTo === 'self');
         // 0.34.0: a self-buff that reflects (Thorns) is now real.
         const thorns = self.find(s => engineHonestKind(s.effectId) === 'thorns');
@@ -1521,21 +1378,13 @@ export function resolvePrimary(card: CombatCard, sourceCard: Card | undefined): 
         if (clarity) return { kind: 'clarity', ce: clarity, guardAmount: null, riders: self.filter(s => s !== clarity), mech: null };
         const regenFx = self.find(s => engineHonestKind(s.effectId) === 'regen');
         if (regenFx) return { kind: 'regen', ce: regenFx, guardAmount: null, riders: self.filter(s => s !== regenFx), mech: null };
-        // Not a recognised self-EFFECT — headline the driving MECHANIC (FORGE
-        // was handled above; DRAW/HEAL riders, ECHO, etc. resolve here). The
+        // Not a recognised self-EFFECT — headline the driving MECHANIC. The
         // self effects (e.g. a self-cost MARK) ride along as keyword chips.
         const led = headlineMechanic(mechs);
         if (led) return { kind: 'mechanic', ce: null, guardAmount: null, riders: self, mech: led };
         const primary = self[0] ?? null;
         return { kind: 'inert', ce: primary, guardAmount: null, riders: self.filter(s => s !== primary), mech: null };
     }
-    // PROFANE CANON (2026-08-08): a declared SENTENCE outranks whatever
-    // status the same card also lands. The Black Cap prints DOOM 2 alongside
-    // its verdict, and a DOOM headline would bury the alt-win (and the
-    // tier-floored CONDEMN readout) behind a routine DoT face.
-    const peroration = findMech('peroration');
-    if (peroration) return { kind: 'mechanic', ce: null, guardAmount: null, riders: (sourceCard?.combatEffects ?? []), mech: peroration };
-
     // direct-dot | direct-control | stat-debuff → opponent effects
     const opp = (sourceCard?.combatEffects ?? []).filter(e => e.appliedTo === 'opponent');
     // card-overhaul (2026-07-03): a self-cost/self-buff effect riding a card
@@ -1588,12 +1437,6 @@ interface CardCalc extends PrimaryResolution {
     // ── 0.34.0 authored statics (real units; live swings stay live) ──
     vulnPct: number;       // +N% damage taken (from damageTakenMult)
     reflectN: number;      // thorns reflect per hit (reflectDamage × intensity)
-    barrierAmt: number;    // soak granted (barrier.amount, base read)
-    siphonPct: number;     // % of damage healed (siphon.pct)
-    riposteDmg: number;    // counter damage (riposte.damage, base read)
-    riposteReduce: number; // incoming reduction (riposte.reduce, base read)
-    reapCost: number;      // Souls a REAP spends (0 = spends ALL, reap_all)
-    reapPerSoul: number;   // burst per Soul (reap_all.burstPerSoul)
     markAmp: number;       // MARK: +N per DoT tick per application (tickAmplifyFlat × intensity)
     backfireN: number;     // BACKFIRE: N per denied rung (backfirePerRung × intensity)
     // ── card-overhaul (2026-07-03) ──
@@ -1615,8 +1458,7 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
         perTurn: 0, turns: 0, total: 0, freePerTurn: 0, freeTurns: 0, freeTotal: 0,
         skips: 0, dpr: 0, intensity: 1, stacks: false, dotTrigger: null,
         dotGrowsOnEnemyAction: false,
-        vulnPct: 0, reflectN: 0, barrierAmt: 0, siphonPct: 0,
-        riposteDmg: 0, riposteReduce: 0, reapCost: 0, reapPerSoul: 0,
+        vulnPct: 0, reflectN: 0,
         markAmp: 0, backfireN: 0,
         exposureDelta: 0, resolutePct: 0,
         totalAdv: 0, totalDis: 0, vulnPctAdv: 0,
@@ -1793,49 +1635,6 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
             out.stacks = eff?.stacking === 'intensity';
             break;
         }
-        case 'barrier': {
-            // KW-2 (phase 29): BARRIER merged into GUARD — the one card that
-            // carries it (the-adamant-wall) now headlines GUARD, "persists".
-            const m = pr.mech?.kind === 'barrier' ? pr.mech : undefined;
-            out.barrierAmt = m?.amount ?? 0;
-            out.keyword = 'Guard'; out.glyph = '⬡'; out.categoryColor = GUARD_COLOR;
-            break;
-        }
-        case 'riposte': {
-            const m = pr.mech?.kind === 'riposte' ? pr.mech : undefined;
-            out.riposteDmg = m?.damage ?? 0;
-            out.riposteReduce = m?.reduce ?? 0;
-            out.keyword = 'Riposte'; out.glyph = '⚔'; out.categoryColor = GUARD_COLOR;
-            break;
-        }
-        case 'siphon': {
-            const m = pr.mech?.kind === 'siphon' ? pr.mech : undefined;
-            out.siphonPct = Math.round((m?.pct ?? 0) * 100);
-            out.keyword = 'Siphon'; out.glyph = glyphFor('buff_life_steal'); out.categoryColor = GLYPH_COLORS.drain;
-            break;
-        }
-        case 'rupture': {
-            // Live-only value (detonates the foe's afflictions) → a word, never a number.
-            out.keyword = 'Rupture'; out.glyph = '✸'; out.categoryColor = GLYPH_COLORS.dot;
-            break;
-        }
-        case 'reap': {
-            // Spec 32 v3 T7 — spend Souls; the burst is live (never headlined).
-            const m = pr.mech?.kind === 'reap' ? pr.mech : undefined;
-            const all = pr.mech?.kind === 'reap_all' ? pr.mech : undefined;
-            out.reapCost = m?.cost ?? 0;
-            out.reapPerSoul = all?.burstPerSoul ?? 0;
-            out.keyword = 'Reap'; out.glyph = '☠'; out.categoryColor = GLYPH_COLORS.dot;
-            break;
-        }
-        case 'forge': {
-            // Die-verb cards: FORGE / TRANSMUTE / KINDLE headline as FORGE;
-            // pip manipulation headlines as PIP. Word, never a number.
-            const mk = pr.mech?.kind;
-            out.keyword = mk === 'grant_pip' || mk === 'spend_all_pips' ? 'Pip' : 'Forge';
-            out.glyph = '⚒'; out.categoryColor = PAYOFF_COLOR;
-            break;
-        }
         // 2026-07-12 (owner directive) — the persistent card's verb slot leads
         // with its PAYLOAD keyword (what the passive DOES: Entropy Tax leads
         // MARK); the type word stays on the type strip / type chip. An
@@ -1855,14 +1654,8 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
         case 'mechanic': {
             const h = mechanicHeadline(pr.mech);
             out.keyword = h?.keyword ?? null;
-            const mk = pr.mech?.kind;
-            const control = mk === 'stagger' || mk === 'lock_stance' || mk === 'sway'
-                || mk === 'omen' || mk === 'foretell' || mk === 'peroration'
-                || mk === 'premise' || mk === 'spend_premises';
-            const affliction = mk === 'extend_dots' || mk === 'convert_dots'
-                || mk === 'boost_all_dots' || mk === 'consume_affliction' || mk === 'soul_gain';
-            out.glyph = control ? '✦' : affliction ? '☠' : '◆';
-            out.categoryColor = control ? GLYPH_COLORS.control : affliction ? GLYPH_COLORS.dot : PAYOFF_COLOR;
+            out.glyph = '◆';
+            out.categoryColor = PAYOFF_COLOR;
             break;
         }
         case 'inert':
@@ -1875,233 +1668,37 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
     return out;
 }
 
-/** Exact one-line clause for a die-verb card's face/detail (no vibes). */
-function forgeClause(mech: CardSpecialMechanic | null): string | null {
-    switch (mech?.kind) {
-        case 'forge_floating_die':
-            return `forge a ${mech.color === 'wild' ? 'WILD' : 'matching'} GHOST die`;
-        case 'float_x_die':
-            return 'dead X die → WILD GHOST die (no X: +1 ◆)';
-        case 'create_temporary_die':
-            return `KINDLE a ${mech.color} die to the Reserve`;
-        case 'grant_pip':
-            return `+${mech.count} pip to every Reserve die`;
-        case 'spend_all_pips':
-            return 'spend ALL pips for their printed payoff';
-        case 'reroll_spent':
-            return 're-roll every spent or dead die';
-        default:
-            return null;
-    }
-}
-
 /** A headline-able special mechanic → its face keyword + real-unit value. THE
  *  generic honesty path: any specialMechanics verb that isn't a self-standing
- *  face kind (guard/rupture/forge/…) resolves here to `KEYWORD · value` instead
+ *  face kind (guard) resolves here to `KEYWORD · value` instead
  *  of falling through to the ambiguous "DEBUFF / buff yourself" fallback.
  *  `keyword` is Title-Case (matches the glossary); returns null for kinds with
  *  no player headline (pure die-plumbing riders never reach here as primary). */
 interface MechHeadline { keyword: string | null; heroText: string; heroSub: string | null; verbLine: string }
-function mechanicHeadline(mech: CardSpecialMechanic | null, enemyDifficulty?: EnemyDifficulty): MechHeadline | null {
+function mechanicHeadline(mech: CardSpecialMechanic | null): MechHeadline | null {
     if (!mech) return null;
     const kw = keywordForMechanic(mech.kind);
     switch (mech.kind) {
-        case 'stagger':
-            return { keyword: kw ?? 'Stagger', heroText: `−${mech.rungs}`, heroSub: `rung${mech.rungs === 1 ? '' : 's'} · next action`, verbLine: "weaken the foe's next telegraphed action" };
-        case 'lock_stance':
-            return { keyword: kw ?? 'Stagger', heroText: '', heroSub: "lock the foe's next stance", verbLine: "the foe's next stance is locked and revealed" };
-        case 'sway':
-            return { keyword: kw ?? 'Plea', heroText: `+${mech.amount}`, heroSub: 'toward relenting', verbLine: 'push the foe toward relenting' };
-        case 'peroration': {
-            // KW-2 (phase 29): SENTENCE demoted — its sole carrier
-            // (the-closing-word) headlines under CHARGE, the keyword whose
-            // gloss already explains the payoff-trigger mechanic.
-            // WI-6 — the concede threshold tier-FLOORS against the live foe
-            // (base 8 / elite 10 / boss 12). The old face printed the raw
-            // authored 8 unconditionally, a lie against an elite/boss. In combat
-            // (difficulty known) show the effective threshold; in the static
-            // catalog show the whole ladder.
-            const authored = mech.concedeAt;
-            const concedeSub = authored === undefined
-                ? 'fires free'
-                : enemyDifficulty
-                    ? `condemn at ${Math.max(authored, concedeFloorFor(enemyDifficulty))} vs this foe`
-                    : `condemn ${Math.max(authored, CONCEDE_PREMISES_BASE)}`
-                        + `/${Math.max(authored, CONCEDE_PREMISES_ELITE)} elite`
-                        + `/${Math.max(authored, CONCEDE_PREMISES_BOSS)} boss`;
-            return { keyword: kw ?? 'Charge', heroText: `at ${mech.at}`, heroSub: concedeSub, verbLine: 'a declared conclusion that fires on your Charge tally' };
-        }
-        case 'premise':
-            return { keyword: kw ?? 'Charge', heroText: `+${mech.count}`, heroSub: 'to the tally', verbLine: 'add to your Charge tally' };
-        case 'spend_premises':
-            return { keyword: kw ?? 'Charge', heroText: '', heroSub: 'spend the tally', verbLine: 'spend your whole Charge tally' };
-        case 'foretell':
-            return { keyword: kw ?? 'Foretell', heroText: `${mech.count}`, heroSub: 'look ahead', verbLine: "reveal the foe's next stance and reorder your deck" };
-        // Phase 32 part 4d — OMEN v2: a staked stance/window claim, not a
-        // silent die-derived guess. No picker UI yet (follow-up), so no
-        // live claim number to headline here — same "no live number, static
-        // copy" shape oath/hex already use.
-        case 'omen':
-            return { keyword: kw ?? 'Omen', heroText: '', heroSub: `ante ${mech.anteConviction}◆ at window 1`, verbLine: 'stake a stance/window claim — a hit fires the payoff free, a miss keeps the ante' };
-        case 'soul_gain':
-            return { keyword: kw ?? 'Soul', heroText: `+${mech.count}`, heroSub: `Soul${mech.count === 1 ? '' : 's'}`, verbLine: 'gain Souls' };
-        case 'consume_affliction':
-            // KW-2 (phase 29): re-mapped Soul→Rupture — extends RUPTURE's
-            // printed sense ("consume N afflictions") instead of a redundant
-            // CONSUME word; the Soul gain stays a printed rider.
-            return { keyword: kw ?? 'Rupture', heroText: `+${mech.souls}`, heroSub: `Soul${mech.souls === 1 ? '' : 's'} · consume 1 affliction`, verbLine: 'consume an affliction — its fuel ticks now — for Souls' };
-        case 'reprise':
-            return { keyword: kw ?? 'Recall', heroText: `${mech.count}`, heroSub: mech.fireFree ? 'from discard · fires free' : 'from discard', verbLine: 'return your highest-rank discards to hand' };
-        case 'echo':
-            return { keyword: kw ?? 'Echo', heroText: '', heroSub: 'paid line fires twice', verbLine: 'the paid line fires twice' };
-        case 'echo_next_spell':
-            return { keyword: kw ?? 'Echo', heroText: '', heroSub: 'your next spell', verbLine: 'your next spell this turn gains Echo' };
-        case 'replay_last':
-            // KW-3 (phase 29): the replay_last→Echo mapping is deleted —
-            // ouroboros (its sole, 1-of-rare carrier) gets no keyword badge;
-            // this heroText/heroSub still carry its card-local rules text.
-            return { keyword: kw ?? null, heroText: `×${mech.times}`, heroSub: 'your last spell', verbLine: 'your last spell resolves again' };
-        case 'recoil':
-            return { keyword: kw ?? 'Recoil', heroText: `${mech.hp}`, heroSub: 'VITAE cost', verbLine: 'pay VITAE as an unpreventable cost' };
-        case 'recoil_x': {
-            const per = Math.max(1, Math.round(1 / mech.poisonPerX));
-            return { keyword: kw ?? 'Recoil', heroText: `X (min ${mech.min})`, heroSub: `VITAE · POISON per ${per}`, verbLine: `pay X VITAE of your choosing — POISON the foe 1 per ${per} paid` };
-        }
-        case 'extend_dots':
-            return { keyword: kw ?? 'Prolong', heroText: `+${mech.turns}`, heroSub: 'turns · all your DoTs', verbLine: 'extend every damage-over-time you hold on the foe' };
-        case 'boost_all_dots':
-            return { keyword: kw ?? 'Prolong', heroText: `+${mech.intensity}`, heroSub: 'intensity · all DoTs', verbLine: "amplify every affliction on the foe" };
-        case 'convert_dots':
-            return { keyword: kw ?? 'Curdle', heroText: `+${mech.bonusIntensity}`, heroSub: 'intensity · bleed ↔ poison', verbLine: "flip the foe's Bleed and Poison, each landing harder" };
-        case 'strip_random_buff':
-            return { keyword: 'Cleanse', heroText: '', heroSub: mech.appliedTo === 'enemy' ? 'strip a foe buff' : 'strip a buff', verbLine: 'strip a random buff' };
-        case 'rider': {
-            const pairs = riderPairs(mech.rider);
-            if (!pairs.length) return null;
-            const [rk, rv] = pairs[0];
-            const title = rk.charAt(0) + rk.slice(1).toLowerCase();
-            return { keyword: title, heroText: rv, heroSub: pairs.length > 1 ? 'and more' : null, verbLine: 'the printed rider' };
-        }
-        // Phase 32 part 4a — TURNABOUT cashes the whole STAGGER/BACKFIRE
-        // denial ledger banked THIS combat (`rungsDeniedTotal`, live-only —
-        // never headlined as a fabricated number here, same convention as
-        // REAP's live Soul-spend).
-        case 'turnabout':
-            return { keyword: kw ?? 'Backfire', heroText: `${mech.burstPerRung}×`, heroSub: 'per rung ever denied', verbLine: 'cash the whole denial ledger — then it resets' };
-        // Profane Canon (2026-08-08) — the rework's two new printed costs.
-        case 'immolate':
-            return {
-                keyword: kw ?? 'Immolate',
-                heroText: `${mech.count}`,
-                heroSub: `card${mech.count === 1 ? '' : 's'} · burned from hand`,
-                verbLine: `burn your ${mech.count} lowest-rank other card${mech.count === 1 ? '' : 's'} as a cost — then the rider fires`,
-            };
-        case 'purge_self':
-            return {
-                keyword: kw ?? 'Purge',
-                heroText: '',
-                heroSub: 'exile this curse',
-                verbLine: 'this curse leaves the fight entirely — hand, discard and deck',
-            };
-        // ── THE BIG NUMBERS REWRITE (2026-09-02) — direct damage and its
-        //    family. Every face below prints the AUTHORED number, never a
-        //    live-scaled one: WRATH, CHAIN, FLAY, EXECUTE and the read all land
-        //    on top of it inside `scalePlayerHit`, and a face that guessed at
-        //    the sum would be a lie the moment a ledger moved.
-        case 'deal': {
+        case 'deal':
             // DEAL carries NO keyword badge on purpose (`MECHANIC_KEYWORD` has
             // no `deal` row): "Deal 24" is plain English, and shouting it would
             // spend the face's one keyword slot on the verb that needs no
-            // explaining. The hero slot says the whole thing instead.
-            const hits = Math.max(1, mech.hits ?? 1);
-            const each = hits > 1 ? ` × ${hits}` : '';
+            // explaining. The hero slot says the whole thing instead. The face
+            // prints the AUTHORED number; stat and colour scaling land on top.
             return {
                 keyword: kw ?? null,
-                heroText: `Deal ${mech.amount}${each}`,
-                heroSub: mech.pierce
-                    ? (hits > 1 ? 'VITAE a hit · PIERCE' : 'VITAE · PIERCE')
-                    : (hits > 1 ? 'VITAE a hit' : 'VITAE'),
-                verbLine: hits > 1
-                    ? `strike ${hits} times for ${mech.amount} VITAE each${mech.pierce ? ', past hide and every shield' : ''}`
-                    : `strike for ${mech.amount} VITAE${mech.pierce ? ', past hide and every shield' : ''}`,
+                heroText: `Deal ${mech.amount}`,
+                heroSub: 'VITAE',
+                verbLine: `strike for ${mech.amount} VITAE`,
             };
-        }
-        case 'wrath':
-            return {
-                keyword: kw ?? 'Wrath',
-                heroText: `+${mech.amount}`,
-                heroSub: 'every hit · rest of combat',
-                verbLine: 'every hit you land from here deals more, and it never fades',
-            };
-        case 'flay':
-            return {
-                keyword: kw ?? 'Flay',
-                heroText: `${mech.stacks}`,
-                heroSub: `stack${mech.stacks === 1 ? '' : 's'} · half again a hit`,
-                verbLine: `flay the foe open — your next ${mech.stacks} hit${mech.stacks === 1 ? '' : 's'} land half again as hard`,
-            };
-        case 'twin':
-            return {
-                keyword: kw ?? 'Twin',
-                heroText: '',
-                heroSub: 'next spell fires twice',
-                verbLine: 'the next spell you play this turn says its paid line twice',
-            };
-        case 'chain':
-            return {
-                keyword: kw ?? 'Chain',
-                heroText: `+${mech.amount}`,
-                heroSub: 'to your next hit',
-                verbLine: 'load the next hit — the chain slackens on a turn that feeds it nothing',
-            };
-        case 'execute':
-            return {
-                keyword: kw ?? 'Execute',
-                heroText: `≤ ${Math.round(mech.atPct * 100)}%`,
-                heroSub: 'VITAE · damage doubled',
-                verbLine: `while the foe sits at or under ${Math.round(mech.atPct * 100)}% VITAE, this card's damage doubles`,
-            };
-        case 'overkill': {
-            const cash = mech.conviction ? `+${mech.conviction} ◆`
-                : mech.souls ? `+${mech.souls} Soul${mech.souls === 1 ? '' : 's'}`
-                    : mech.healPct ? `heal ${Math.round(mech.healPct * 100)}%`
-                        : 'converts';
-            return {
-                keyword: kw ?? 'Overkill',
-                heroText: cash,
-                heroSub: mech.healPct && !mech.conviction && !mech.souls
-                    ? 'of the excess'
-                    : `per ${mech.per} past lethal`,
-                verbLine: 'damage driven past the killing blow is not wasted — it converts at the printed rate',
-            };
-        }
         default:
             return null;
     }
 }
 
-/** Priority order for WHICH mechanic a multi-mechanic card headlines: the
- *  identity/payoff verb wins over its modifiers (ECHO doubles PLEA → headline
- *  PLEA), and a plain `rider` verb is the last resort. */
-const MECH_HEADLINE_PRIORITY: readonly string[] = [
-    'peroration', 'sway', 'turnabout', 'stagger', 'lock_stance', 'reprise', 'replay_last',
-    'omen', 'consume_affliction', 'soul_gain', 'spend_premises', 'premise',
-    // THE BIG NUMBERS REWRITE — a card that DEALS leads with the number it
-    // deals: that is the whole point of the rescale, and burying 45 damage
-    // behind a `WRATH +2` badge would be the old lie in a new coat. The
-    // scalers rank next, so a pure-scaler card (no `deal`) still headlines its
-    // own verb; every one of them also renders as a keyword chip regardless.
-    'deal', 'execute', 'wrath', 'flay', 'chain', 'twin', 'overkill',
-    // (`conjure_card` stays: cloud phase 29 retired CONJURE off zero library
-    // carriers, but this session's WS2.1 Haunt work ships live sandbox
-    // conjure cards — the mechanic is card-local vocabulary, not a ghost.)
-    'foretell', 'extend_dots', 'convert_dots', 'boost_all_dots', 'recoil_x', 'recoil',
-    // Profane Canon: PURGE is the whole card (a curse's only reason to exist),
-    // so it outranks IMMOLATE's printed cost, which in turn outranks the plain
-    // rider it pays for.
-    'purge_self', 'immolate',
-    'conjure_card', 'strip_random_buff', 'echo', 'echo_next_spell', 'rider',
-];
+/** Priority order for WHICH mechanic a multi-mechanic card headlines. GUARD
+ *  never headlines here: a defend card is its own face kind. */
+const MECH_HEADLINE_PRIORITY: readonly string[] = ['deal'];
 
 /** The single mechanic a card should headline (highest-priority headline-able
  *  entry), or null when none of its mechanics carries a player headline. */
@@ -2140,7 +1737,6 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc, sourceCard?: Card): 
         for (const kw of keywordsInPersistentText(sourceCard?.persistentEffect)) push(kw, false);
     } else push(c.keyword, c.kind === 'inert');
     // A riposte card also grants Guard — surface it as a secondary keyword.
-    if (c.kind === 'riposte' && c.guardAmount) push(keywordForVerb('defend'), false);
     // A rider is "minor" only if the engine still doesn't read it (engineHonestKind null).
     for (const r of c.riders) push(keywordForEffect(r.effectId), engineHonestKind(r.effectId) === null);
     // 2026-07-12 (owner directive: EVERY keyword a card prints must pop a
@@ -2149,12 +1745,7 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc, sourceCard?: Card): 
     // registry word on the engine lines. The keyword panel IS the popup; a
     // printed keyword without a chip is unexplained vocabulary.
     for (const ce of sourceCard?.combatEffects ?? []) push(keywordForEffect(ce.effectId), false);
-    for (const m of sourceCard?.specialMechanics ?? []) {
-        push(keywordForMechanic(m.kind), false);
-        // SENTENCE is card-local (demoted, phase 29): the CHARGE gloss
-        // explains its trigger; the word itself pops via the system glossary.
-        if (m.kind === 'peroration') push('Charge', false);
-    }
+    for (const m of sourceCard?.specialMechanics ?? []) push(keywordForMechanic(m.kind), false);
     const printed = [card.topActionText, card.bottomActionText, ...(card.dieLines ?? []), freeLineText(card, sourceCard)].join(' ');
     for (const kw of keywordsInPersistentText(printed)) push(kw, false);
     // D-fix (card-wording audit 2026-07-12): a FREE-line rider is applied by
@@ -2229,12 +1820,6 @@ export function faceStats(card: CombatCard, sourceCard?: Card, enemyDifficulty?:
         case 'overextended': return { ...base, kind: 'overextended', keyword: kw, heroText: '', heroSub: 'your next play is weakened', freeHeroText: free, freeHeroSub: null, verbLine: 'a self-cost: your next play is forced to weak tier', powerRail: c.keyword ?? 'Overextended', readDependent: false, inert: false, guardBase: null };
         case 'clarity': return { ...base, kind: 'clarity', keyword: kw, heroText: 'WILD', heroSub: 'next die', freeHeroText: free, freeHeroSub: null, verbLine: 'your next die counts as Wild', powerRail: c.keyword ?? 'Clarity', readDependent: false, inert: false, guardBase: null };
         case 'resolute': return { ...base, kind: 'resolute', keyword: kw, heroText: `${c.resolutePct}%`, heroSub: `dmg taken · ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'you take less damage', powerRail: c.keyword ?? 'Resolute', readDependent: false, inert: false, guardBase: null, statusBase: c.resolutePct };
-        case 'barrier': return { ...base, kind: 'barrier', keyword: 'GUARD', heroText: `Guard ${c.barrierAmt}`, heroSub: 'persists', freeHeroText: free, freeHeroSub: null, verbLine: 'soak incoming damage', powerRail: c.keyword ?? 'Guard', readDependent: false, inert: false, guardBase: null };
-        case 'riposte': return { ...base, kind: 'riposte', keyword: 'RIPOSTE', heroText: `CTR ${c.riposteDmg} · CUT ${c.riposteReduce}`, heroSub: 'counter · reduce', freeHeroText: free, freeHeroSub: null, verbLine: 'counter the next hit', powerRail: c.keyword ?? 'Riposte', readDependent: false, inert: false, guardBase: null };
-        case 'siphon': return { ...base, kind: 'siphon', keyword: 'SIPHON', heroText: `Heal ${c.siphonPct}%`, heroSub: 'of the burst', freeHeroText: free, freeHeroSub: null, verbLine: 'heal from the harm you cash in', powerRail: c.keyword ?? 'Siphon', readDependent: false, inert: false, guardBase: null };
-        case 'rupture': return { ...base, kind: 'rupture', keyword: 'RUPTURE', heroText: 'detonate', heroSub: 'all afflictions', freeHeroText: free, freeHeroSub: null, verbLine: "consume the foe's afflictions and detonate them", powerRail: c.keyword ?? 'Rupture', readDependent: false, inert: false, guardBase: null };
-        case 'reap': return { ...base, kind: 'reap', keyword: 'REAP', heroText: c.reapCost > 0 ? `${c.reapCost} Souls` : 'all Souls', heroSub: c.reapPerSoul > 0 ? `${c.reapPerSoul} per Soul` : 'spend the bank', freeHeroText: free, freeHeroSub: null, verbLine: 'spend Souls for the printed payoff', powerRail: c.keyword ?? 'Reap', readDependent: false, inert: false, guardBase: null };
-        case 'forge': { const clause = forgeClause(c.mech) ?? 'shape your dice'; return { ...base, kind: 'forge', keyword: kw, heroText: '', heroSub: clause, freeHeroText: free, freeHeroSub: null, verbLine: clause, powerRail: c.keyword ?? 'Forge', readDependent: false, inert: false, guardBase: null }; }
         // 2026-07-12 — the verb slot is the PAYLOAD keyword (cardCalc), never
         // the bare type word unless no payload resolves; the type stays on the
         // type strip (OATH / HEX) and the type chip.
@@ -2243,7 +1828,7 @@ export function faceStats(card: CombatCard, sourceCard?: Card, enemyDifficulty?:
         // A keyword-less headline (DEAL — "Deal 24" needs no badge) leaves the
         // verb slot empty on purpose; the power rail then carries the hero
         // number rather than the em-dash placeholder, so the card still reads.
-        case 'mechanic': { const h = mechanicHeadline(c.mech, enemyDifficulty); return { ...base, kind: 'mechanic', keyword: kw, heroText: h?.heroText ?? '', heroSub: h?.heroSub ?? null, freeHeroText: free, freeHeroSub: null, verbLine: h?.verbLine ?? '', powerRail: c.keyword ?? h?.heroText ?? '—', readDependent: false, inert: false, guardBase: null }; }
+        case 'mechanic': { const h = mechanicHeadline(c.mech); return { ...base, kind: 'mechanic', keyword: kw, heroText: h?.heroText ?? '', heroSub: h?.heroSub ?? null, freeHeroText: free, freeHeroSub: null, verbLine: h?.verbLine ?? '', powerRail: c.keyword ?? h?.heroText ?? '—', readDependent: false, inert: false, guardBase: null }; }
         case 'inert':
         default: return { ...base, kind: 'inert', keyword: kw ?? 'DEBUFF', heroText: '', heroSub: card.verbClass === 'buff-self' ? 'buff yourself' : 'weakens the foe', freeHeroText: free, freeHeroSub: null, verbLine: card.verbClass === 'buff-self' ? 'buff yourself' : 'weakens the foe', powerRail: c.keyword ?? '—', readDependent: false, inert: true, guardBase: null };
     }
@@ -2319,22 +1904,6 @@ function detailCore(card: CombatCard, sourceCard?: Card, enemyDifficulty?: Enemy
         case 'overextended': return { subtitle: `${Title} — a self-cost for reaching too far.`, metaChip, outcomeLine: `Take ${Title} · ${c.turns} turn${c.turns === 1 ? '' : 's'}.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: this play also costs you ${Title} — your own next card play is forced to weak-tier, then consumed.`, readNote: `${Title} is consumed on your own next play — the price of this card's payoff.`, mathLine: `${Title} forces your own next play to weak-tier, then is consumed — no fixed number (real-units-or-no-number).`, keywords };
         case 'clarity': return { subtitle: `${Title} — your next die is Wild.`, metaChip, outcomeLine: `Gain ${Title} — next die: WILD.`, outcomeStats: [{ label: 'NEXT DIE', value: 'WILD' }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: gain ${Title} — your next die counts as Wild.`, readNote: `${Title} is exact — the next die is Wild, full stop, then consumed.`, mathLine: `${Title}: next die → Wild (forceWildOnNextDie), consumed on use.`, keywords };
         case 'resolute': return { subtitle: `${Title} — you take less damage.`, metaChip, outcomeLine: `Gain ${Title} ${c.resolutePct}% · ${c.turns} turns.`, outcomeStats: [{ label: 'DMG TAKEN', value: `${c.resolutePct}%` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: gain ${Title} — ${c.resolutePct}% damage taken for ${c.turns} turns.`, readNote: `Your damage reduction takes no read — ${Title} is exact (a self-buff, not scaled by the stance read).`, mathLine: `${c.resolutePct}% = (damageTakenMult − 1) × 100 on an even application${c.stacks ? '; stacks by intensity' : ''}.`, keywords };
-        case 'barrier': { const b = c.barrierAmt; const adv = Math.max(1, Math.round(b * READ_DAMAGE_MULT.advantage)); const dis = Math.max(1, Math.round(b * READ_DAMAGE_MULT.disadvantage)); return { subtitle: 'Barrier — a stacking shield that soaks damage.', metaChip, outcomeLine: `Gain ${Title} ${b}.`, outcomeStats: [{ label: 'SOAK', value: `${b} (▲${adv} · —${b} · ▼${dis})` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: gain Barrier ${b}; ▲ read raises it to ${adv}, ▼ drops it to ${dis}; +${colorMatchBonus(b)} on a ${STANCE} match.`, readNote: `The read scales the Barrier granted: ▲ ×${READ_DAMAGE_MULT.advantage}, ▼ ×${READ_DAMAGE_MULT.disadvantage}.`, mathLine: `Soak ${b} base × read + ${colorMatchBonus(b)} on a colour match; barriers stack.`, keywords }; }
-        case 'riposte': { const guardLine = c.guardAmount ? ` · Guard ${c.guardAmount}` : ''; const stats = [{ label: 'COUNTER', value: `${c.riposteDmg}` }, { label: 'REDUCE', value: `-${c.riposteReduce}` }]; if (c.guardAmount) stats.push({ label: 'GUARD', value: `${c.guardAmount}` }); return { subtitle: 'Riposte — counter the next hit and blunt it.', metaChip, outcomeLine: `Arm ${Title} — Counter ${c.riposteDmg} · Cut ${c.riposteReduce}${guardLine}.`, outcomeStats: stats, stacksText: null, freeLine, powerLine: `◆ WITH A DIE: arm Riposte — counter ${c.riposteDmg}, reduce ${c.riposteReduce}${c.guardAmount ? `, +Guard ${c.guardAmount}` : ''}; the read scales it.`, readNote: 'The read scales both the counter damage and the reduction.', mathLine: `Counter ${c.riposteDmg} & reduce ${c.riposteReduce}, each × read (+${colorMatchBonus(c.riposteDmg)} counter on a colour match).`, keywords }; }
-        case 'siphon': return { subtitle: 'Siphon — heal for part of the harm you cash in.', metaChip, outcomeLine: `${Title} ${c.siphonPct}%.`, outcomeStats: [{ label: 'LIFESTEAL', value: `${c.siphonPct}%` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: heal ${c.siphonPct}% of the VITAE this card's payoff erodes.`, readNote: `The burst is live; the ${c.siphonPct}% rate is exact.`, mathLine: `Heal = ${c.siphonPct}% × (the payoff burst) — the burst is live, so no fixed heal number.`, keywords };
-        case 'rupture': {
-            // THE BIG NUMBERS REWRITE — the cap is REPEALED, so the fraction is
-            // Infinity. Rendering it printed "max Infinity% of the foe's max
-            // VITAE" on the one detonator in the library; the cap row is simply
-            // dropped when there is no cap.
-            const capped = Number.isFinite(RUPTURE_CAP_FRACTION);
-            const capPct = capped ? Math.round(RUPTURE_CAP_FRACTION * 100) : 0;
-            const capClause = capped ? ` · max ${capPct}% of the foe's max VITAE` : ' · uncapped';
-            return { subtitle: "Rupture — consume the foe's afflictions and detonate them.", metaChip, outcomeLine: `${Title}${capClause}.`, outcomeStats: [{ label: 'BURST', value: 'live total' }, ...(capped ? [{ label: 'CAP', value: `${capPct}% max VITAE` }] : [{ label: 'CAP', value: 'none' }])], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: consume ALL the foe's afflictions — burst = their remaining harm${capped ? ` (up to ${capPct}% of the foe's max VITAE)` : ', uncapped'}.`, readNote: 'Stack afflictions first — the burst equals what they still owed, so it has no fixed number until you fire it.', mathLine: `Burst = remaining affliction fuel${capped ? ` (capped at ${capPct}% of the foe's max VITAE)` : ' — UNCAPPED'} — live, so no fixed number (real-units-or-no-number).`, keywords };
-        }
-        case 'reap': return { subtitle: 'Reap — spend Souls for the printed payoff.', metaChip, outcomeLine: c.reapCost > 0 ? `${Title} ${c.reapCost} Souls.` : `${Title} ALL Souls${c.reapPerSoul > 0 ? ` — ${c.reapPerSoul} per Soul` : ''}.`, outcomeStats: c.reapPerSoul > 0 ? [{ label: 'PER SOUL', value: `${c.reapPerSoul}` }, { label: 'CAP', value: 'none' }] : [{ label: 'COST', value: `${c.reapCost} Souls` }], stacksText: null, freeLine, powerLine: c.reapPerSoul > 0 ? `◆ WITH A DIE: spend EVERY Soul — burst ${c.reapPerSoul} per Soul spent, uncapped.` : `◆ WITH A DIE: spend ${c.reapCost} Souls to fire the printed effect (fizzles when underfunded).`, readNote: 'Souls come from expiring or consumed enemy afflictions — fill the bank first.', mathLine: c.reapPerSoul > 0 ? `Burst = ${c.reapPerSoul} × Souls spent (live, UNCAPPED — the emptied bank is the price).` : `Costs ${c.reapCost} Souls — the payoff is the printed line, in real units.`, keywords };
-        case 'forge': { const clause = forgeClause(c.mech) ?? 'shape your dice'; return { subtitle: `${Title} — dice are the resource.`, metaChip, outcomeLine: `${clause.charAt(0).toUpperCase()}${clause.slice(1)}.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${vitaeCopy(card.bottomActionText)}`, readNote: 'Die-forging takes no read — the printed line is exact.', mathLine: 'A die-economy verb — the printed line is the applied effect.', keywords };
-        }
         // Spec 32 v4 — persistent cards carry BOTH lines: the FREE play is a
         // timed instance of the passive; the PAID play makes it permanent,
         // unique in play, and pulls the card out of the deck cycle.
@@ -2343,7 +1912,7 @@ function detailCore(card: CombatCard, sourceCard?: Card, enemyDifficulty?: Enemy
         // A keyword-less mechanic headline (DEAL) has no Title to lead with —
         // every line below falls back to the headline's own words rather than
         // opening with a dangling dash or an empty stat label.
-        case 'mechanic': { const h = mechanicHeadline(c.mech, enemyDifficulty); const verb = h?.verbLine ?? 'a special mechanic'; const val = [h?.heroText, h?.heroSub].filter(Boolean).join(' '); const lead = Title || h?.heroText || 'This card'; const statLabel = (Title || 'PAID').toUpperCase(); return { subtitle: Title ? `${Title} — ${verb}.` : `${verb.charAt(0).toUpperCase()}${verb.slice(1)}.`, metaChip, outcomeLine: Title ? (val ? `${Title} ${val}.` : `${Title}.`) : `${val || verb}.`, outcomeStats: h?.heroText ? [{ label: statLabel, value: h.heroText }] : [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${vitaeCopy(card.bottomActionText)}`, readNote: `${lead} takes no read — the printed line is the applied effect.`, mathLine: `${lead}: ${vitaeCopy(h?.verbLine ?? card.bottomActionText)}.`, keywords }; }
+        case 'mechanic': { const h = mechanicHeadline(c.mech); const verb = h?.verbLine ?? 'a special mechanic'; const val = [h?.heroText, h?.heroSub].filter(Boolean).join(' '); const lead = Title || h?.heroText || 'This card'; const statLabel = (Title || 'PAID').toUpperCase(); return { subtitle: Title ? `${Title} — ${verb}.` : `${verb.charAt(0).toUpperCase()}${verb.slice(1)}.`, metaChip, outcomeLine: Title ? (val ? `${Title} ${val}.` : `${Title}.`) : `${val || verb}.`, outcomeStats: h?.heroText ? [{ label: statLabel, value: h.heroText }] : [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${vitaeCopy(card.bottomActionText)}`, readNote: `${lead} takes no read — the printed line is the applied effect.`, mathLine: `${lead}: ${vitaeCopy(h?.verbLine ?? card.bottomActionText)}.`, keywords }; }
         case 'inert':
         default: return { subtitle: `${Title || 'Effect'} — minor right now.`, metaChip, outcomeLine: `${Title || 'This effect'} — minor for now.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${vitaeCopy(card.bottomActionText)}`, readNote: 'The engine text above is the whole truth for this card.', mathLine: `${Title || 'This effect'} carries no headline number — the printed line is the applied effect.`, keywords };
     }
@@ -2365,13 +1934,6 @@ function detailCore(card: CombatCard, sourceCard?: Card, enemyDifficulty?: Enemy
  */
 function formatPaidClause(c: CardClause): string {
     const registry = c.source === 'effect' ? keywordForEffect(c.id) : keywordForMechanic(c.id);
-    // A bare `rider` mechanic is nothing BUT its rider, and mechanics hands the
-    // sub-clauses over already joined-equal to its own text — so formatting
-    // them gives 'HEAL 16' instead of the engine's lowercase 'heal 16', with
-    // no derivation happening twice.
-    if (!registry && c.parts?.length) {
-        return c.parts.map(formatPaidClause).join(' · ');
-    }
     const word = (registry ?? c.label).toUpperCase();
     if (!word) return deabbreviateShorthand(vitaeCopy(c.text));
     const value = clauseValue(c);
@@ -2455,8 +2017,8 @@ export function detailStats(card: CombatCard, sourceCard?: Card, enemyDifficulty
     const freePill = freeLineText(card, sourceCard);
     // The exact ▲/—/▼ read triplet for the read-scaled kinds.
     let dieTriplet: string | null = null;
-    if (c.kind === 'guard' || c.kind === 'barrier') {
-        const b = c.kind === 'guard' ? (c.guardAmount ?? 0) : c.barrierAmt;
+    if (c.kind === 'guard') {
+        const b = c.guardAmount ?? 0;
         const adv = Math.max(1, Math.round(b * READ_DAMAGE_MULT.advantage));
         const dis = Math.max(1, Math.round(b * READ_DAMAGE_MULT.disadvantage));
         dieTriplet = `▲${adv} · —${b} · ▼${dis}`;
@@ -2611,17 +2173,7 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
         const scaledFace = faceStats(card, sourceCard, state.enemy.difficulty);
         const printedCard = getCard(card.id);
         const printedFace = printedCard ? faceStats(printedCard, libraryCard, state.enemy.difficulty) : scaledFace;
-        const rawFace = { ...scaledFace, ...familyFace(scaledFace, printedFace) };
-        // phase 28 — RUPTURE's live burst is an honest, already-computed engine
-        // number (projectRuptureBurst); the word-only "detonate" face predates
-        // that selector's existence. Real-units-or-no-number, now with a number.
-        const face = rawFace.kind === 'rupture'
-            ? { ...rawFace, heroText: `${projectRuptureBurst(state, card)}`, heroSub: 'now, if detonated' }
-            : rawFace;
-        // phase 28 — REPRISE songbook choice: cards carrying a `reprise`
-        // mechanic prompt a discard-pile picker on APPLY instead of the
-        // engine's default highest-rank auto-pick.
-        const needsReprisalChoice = (sourceCard?.specialMechanics ?? []).some(m => m.kind === 'reprise');
+        const face = { ...scaledFace, ...familyFace(scaledFace, printedFace) };
         return {
             uid, cardId: card.id, name: card.name, stance: card.stance,
             stanceColor: STANCE_COLORS[card.stance] ?? '#888',
@@ -2636,9 +2188,6 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
             face,
             detail: detailStats(card, sourceCard, state.enemy.difficulty),
             flavor: sourceCard?.description ?? null,
-            // WS7.2 — the engine's live chosen-X clamp range (null = no X mechanic).
-            chooseX: recoilXRange(state, card),
-            needsReprisalChoice,
         };
     });
 }
@@ -2704,8 +2253,6 @@ export function rewardCardVMs(ids: readonly string[]): CombatCardVM[] {
             face: faceStats(card, sourceCard),
             detail: detailStats(card, sourceCard),
             flavor: sourceCard?.description ?? null,
-            chooseX: null,
-            needsReprisalChoice: false,
         });
     }
     return out;

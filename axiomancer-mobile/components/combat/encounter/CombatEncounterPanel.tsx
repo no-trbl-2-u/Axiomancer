@@ -244,7 +244,6 @@ function keywordTypeTag(kind: string, index: number): string {
         case 'guard': return 'GUARD';
         case 'regen': return 'REGEN';
         case 'befriend': return 'MERCY';
-        case 'forge': return 'DICE';
         default: return 'EFFECT';
     }
 }
@@ -382,11 +381,6 @@ export function CombatEncounterPanel({
     // Signature-rune info popup (long-press / unaffordable tap) + pilgrim modal.
     const [sigInfo, setSigInfo] = useState<CombatSignatureVM | null>(null);
     const [pilgrimOpen, setPilgrimOpen] = useState(false);
-    // phase 28 — REPRISE songbook picker: set by CombatBoard's onReprisalNeeded
-    // when a staged reprise-mechanic card is APPLYd with a non-empty discard.
-    // The prompt HOLDS the deferred play (including the WS7.2 chosen X) — the
-    // board committed nothing yet, so dismissing the prompt is a clean cancel.
-    const [reprisalPrompt, setReprisalPrompt] = useState<{ uid: string; dieId: string | null; power: boolean; chosenX?: number } | null>(null);
     // Deckbuilder reward (Spec 26b §C) — rolled once on victory, claimed before
     // the summary. The offer lives in the STORE, not here: panel-local state
     // meant navigating away mid-draft silently threw away an earned reward.
@@ -547,58 +541,22 @@ export function CombatEncounterPanel({
     // Fate Engine P1 R3, recut 2026-07-18 (owner) — the spare/bank toggle chip
     // is GONE from the tray: the spare die always burns for +1◆ (the default).
     // The Reserve still fills through cards (KINDLE / bank_spent_die).
-    // Per-play choices threaded to `playCombatCard`: WS7.2 `chosenX` (the
-    // X-cost stepper's pick) and phase 28 `reprisalCardId` (the REPRISE
-    // songbook discard-pile pick — omitted/skipped falls back to the engine's
-    // pre-existing highest-rank auto-pick).
-    const onApply = useCallback((uid: string, dieId: string | null, power: boolean, choices?: { chosenX?: number; reprisalCardId?: string }) => {
+    const onApply = useCallback((uid: string, dieId: string | null, power: boolean) => {
         if (resolvingRef.current) return; // WI-3 — a drag must not land mid-resolution
         apply((s) => {
             // Spec 33 — every dropped die (fresh tray face, Reserve, or GHOST)
             // is its OWN power source and is forwarded as the explicit `dieId`:
             // the engine's `playBottomAction` REQUIRES one (no dieId fizzles
-            // "choose a die to power this card").
-            // WS7.2 chosenX + phase 28 reprisalCardId ride through to the
-            // engine (which clamps X to [min, affordable] and validates the
-            // reprisal pick against the live discard pile). Phase 31 — the
-            // engine's `playCombatCard` also advances the momentum wheel and
-            // grants its die internally now; the panel no longer does either.
-            const t = playCombatCard(
-                s, { uid }, power, dieId ?? undefined, undefined,
-                choices && (choices.chosenX !== undefined || choices.reprisalCardId !== undefined)
-                    ? choices
-                    : undefined,
-            );
+            // "choose a die to power this card"). Phase 31 — the engine's
+            // `playCombatCard` also advances the momentum wheel and grants its
+            // die internally now; the panel no longer does either.
+            const t = playCombatCard(s, { uid }, power, dieId ?? undefined);
             fxRef.current = t.events;
             return t.state;
         });
         setFxSeq((n) => n + 1);
         unstageUid(uid);
     }, [apply, unstageUid]);
-    // phase 28 — opens the songbook picker instead of applying immediately.
-    // `chosenX` (WS7.2) rides the prompt so the deferred play still resolves
-    // at the stepper's pick, not the printed min.
-    const onReprisalNeeded = useCallback((uid: string, dieId: string | null, power: boolean, chosenX?: number) => {
-        setReprisalPrompt({ uid, dieId, power, chosenX });
-    }, []);
-    // A tap on a discard entry commits that choice; `null` (the skip row)
-    // omits it — falls back to the engine's highest-rank auto-pick.
-    const onReprisalPick = useCallback((cardId: string | null) => {
-        if (!reprisalPrompt) return;
-        const { uid, dieId, power, chosenX } = reprisalPrompt;
-        setReprisalPrompt(null);
-        const choices = {
-            ...(chosenX !== undefined ? { chosenX } : {}),
-            ...(cardId ? { reprisalCardId: cardId } : {}),
-        };
-        onApply(uid, dieId, power, chosenX !== undefined || cardId ? choices : undefined);
-    }, [reprisalPrompt, onApply]);
-    // Backdrop tap = CANCEL, not commit (every other backdrop in this panel
-    // dismisses without action). The board held the play — nothing reached
-    // the engine — so dropping the prompt restores the exact pre-APPLY
-    // staging: card still staged, pending die and chosen X intact. Auto-pick
-    // stays available as the explicit skip row.
-    const onReprisalCancel = useCallback(() => setReprisalPrompt(null), []);
     const onDiscard = useCallback((uid: string) => { apply((s) => discardCombatCard(s, uid).state); unstageUid(uid); }, [apply, unstageUid]);
     const onSignature = useCallback((id: string) => apply((s) => playSignatureSkill(s, id).state), [apply]);
     const onEndPhase = useCallback(() => {
@@ -768,7 +726,6 @@ export function CombatEncounterPanel({
                     onPlayerInspect={onPlayerInspect}
                     onMomentumInfo={onMomentumInfo}
                     fx={fx}
-                    onReprisalNeeded={onReprisalNeeded}
                     onHudLayout={setHudBottom}
                     region={region}
                 />
@@ -1219,53 +1176,6 @@ export function CombatEncounterPanel({
                 </Pressable>
             )}
 
-            {/* phase 28 — REPRISE songbook picker: choose which discarded card
-                returns to hand (the engine's default is the highest-rank one).
-                Backdrop = cancel (the play is still held, staged, uncommitted);
-                the skip row is the explicit auto-pick. Rows/testIDs are keyed
-                by INDEX-qualified id — the discard pile can hold duplicates. */}
-            {reprisalPrompt && (
-                <Pressable
-                    style={styles.backdrop}
-                    testID="combat-reprisal-picker"
-                    accessibilityLabel="Cancel — keep the card staged, decide later"
-                    onPress={onReprisalCancel}
-                >
-                    <View style={[styles.tipPlaque, { borderColor: `${AXM.sulfur}66` }]} onStartShouldSetResponder={() => true}>
-                        <View style={[styles.tipCorner, styles.tipCornerTl, { borderColor: AXM.sulfur }]} pointerEvents="none" />
-                        <View style={[styles.tipCorner, styles.tipCornerTr, { borderColor: AXM.sulfur }]} pointerEvents="none" />
-                        <View style={[styles.tipCorner, styles.tipCornerBl, { borderColor: AXM.sulfur }]} pointerEvents="none" />
-                        <View style={[styles.tipCorner, styles.tipCornerBr, { borderColor: AXM.sulfur }]} pointerEvents="none" />
-                        <GlyphBurst color={AXM.sulfur} glyph="↺" />
-                        <Text style={[styles.tipName, { color: AXM.sulfur, textShadowColor: AXM.sulfur }]}>REPRISE — CHOOSE</Text>
-                        <Text style={styles.tipGloss}>Return one discarded card to your hand.</Text>
-                        <View style={styles.reprisalList}>
-                            {vm.discardCards.map((c, i) => (
-                                <Pressable
-                                    key={`${i}-${c.id}`}
-                                    style={styles.reprisalRow}
-                                    testID={`combat-reprisal-option-${i}-${c.id}`}
-                                    onPress={() => onReprisalPick(c.id)}
-                                    accessibilityRole="button"
-                                    accessibilityLabel={`Return ${c.name} to hand`}
-                                >
-                                    <Text style={styles.reprisalRowText}>{c.name}</Text>
-                                </Pressable>
-                            ))}
-                            <Pressable
-                                style={[styles.reprisalRow, styles.reprisalSkipRow]}
-                                testID="combat-reprisal-skip"
-                                onPress={() => onReprisalPick(null)}
-                                accessibilityRole="button"
-                                accessibilityLabel="Skip — the engine picks the highest-rank card"
-                            >
-                                <Text style={[styles.reprisalRowText, { color: AXM.bone }]}>skip · let it pick the best</Text>
-                            </Pressable>
-                        </View>
-                    </View>
-                </Pressable>
-            )}
-
             {/* pilgrim modal — tap the player medallion: base stats, XP + status effects */}
             {pilgrimOpen && (() => {
                 const p = live.player;
@@ -1481,14 +1391,6 @@ const useStyles = makeStyles((AXM) => ({
     },
     tipGloss: { fontFamily: FONTS.serif, fontSize: 14, lineHeight: 20, color: AXM.parchmentDim, textAlign: 'center', marginTop: 8 },
     tipMeta: { fontFamily: FONTS.sans, fontSize: 11, color: AXM.bone, letterSpacing: 0.6, marginTop: 10 },
-    // ── REPRISE songbook picker (phase 28) ──
-    reprisalList: { width: '100%', marginTop: 14, gap: 6 },
-    reprisalRow: {
-        borderWidth: 1, borderColor: AXM.ash, borderRadius: 6, paddingVertical: 10, paddingHorizontal: 12,
-        backgroundColor: 'rgba(0,0,0,0.35)',
-    },
-    reprisalSkipRow: { borderStyle: 'dashed', marginTop: 4 },
-    reprisalRowText: { fontFamily: FONTS.sans, fontSize: 13, color: AXM.parchment, textAlign: 'center' },
     tipBadgeWrap: { position: 'absolute', bottom: -15, alignSelf: 'center', width: 128, height: 30 },
     tipBadgeInner: { flex: 1, alignItems: 'center', justifyContent: 'center' },
     tipBadgeText: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 2 },

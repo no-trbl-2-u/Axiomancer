@@ -29,7 +29,6 @@ export {
     updateEffectDuration, tickAllEffects,
     removeRandomBuff, extendRandomBuffDuration,
     // 0.34.0 status-depth epic — HP-model selectors + tunable scalars
-    RUPTURE_CAP_FRACTION,
     DISRUPT_DENY_AT,
     CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
     // CONDEMN Premise floor per enemy difficulty — the single source the engine
@@ -133,12 +132,8 @@ export {
     colorMatchBonus,
     // Fate Engine P1 (spec 31) — the dice get a second read
     riderText,
-    // 0.34.0 status-depth epic — honesty selectors
-    projectRuptureBurst,
     // phase 28 — legibility sweep
     projectIncomingThreat,
-    // WS7.2 — chosen X-cost clamp range (`recoil_x`), engine-owned
-    recoilXRange,
     // Phase 2 — projected-lethality readout (spec 30); heal-aware since 2026-09-04
     projectCombatOutcome,
     // Spec 32 v3 — floating dice save-back + sway decay knob

@@ -428,13 +428,6 @@ async function playRound(page, sink, seed, round) {
             else acted.powerMissed++
         }
 
-        // Nudge a RECOIL X picker so the X path is exercised too.
-        const xPlus = page.getByTestId(`combat-choose-x-plus-${card.uid}`)
-        if (await has(xPlus)) {
-            await xPlus.click({ force: true, timeout: 1500 }).catch(() => {})
-            await assertAlive(page, sink, at(`raising RECOIL X on "${card.name}"`))
-        }
-
         // APPLY — powered or free.
         const apply = page.getByTestId(`combat-apply-${card.uid}`)
         if (!(await has(apply))) break

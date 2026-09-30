@@ -104,17 +104,4 @@ describe('card-text projection', () => {
         expect(deal!.value).toBe('20');
         expect(clauses.some(c => c.source === 'effect' && c.id === 'debuff_vulnerable')).toBe(true);
     });
-
-    it('a bare rider clause hands over its own parts, joining back to its text', () => {
-        const drift: string[] = [];
-        for (const card of cardLibrary) {
-            for (const c of paidClauses(card, lookupEffect)) {
-                if (c.id !== 'rider') continue;
-                if (!c.parts) { drift.push(`${card.id}: rider clause carries no parts`); continue; }
-                const rejoined = clausesText(c.parts);
-                if (rejoined !== c.text) drift.push(`${card.id}: "${rejoined}" !== "${c.text}"`);
-            }
-        }
-        expect(drift).toEqual([]);
-    });
 });

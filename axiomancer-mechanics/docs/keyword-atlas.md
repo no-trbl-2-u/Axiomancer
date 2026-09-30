@@ -37,7 +37,7 @@ mid-flight. Run `npm run catalog` for the current binding.
 
 | keyword | reminder text | carried by |
 |---|---|---|
-| **DEAL N** | Direct VITAE damage. Not a keyword — plain English on the face; a multi-hit prints `N × k` and each hit is its own damage instance. | (see the catalog) |
+| **DEAL N** | Direct VITAE damage. Not a keyword — plain English on the face. | grey-strike |
 
 ## Player keywords — afflictions and their payoffs
 
@@ -50,7 +50,7 @@ mid-flight. Run `npm run catalog` for the current binding.
 
 | keyword | reminder text | carried by |
 |---|---|---|
-| **GUARD N** | Blocks that much incoming damage during the next threat phase. Unused Guard is lost unless the card prints "persists". | grey-ward, every signature skill (R4) |
+| **GUARD N** | Blocks that much incoming damage during the next threat phase. Unused Guard is lost. | grey-ward, every signature skill (R4) |
 
 ## Player keywords — resolve and mercy
 

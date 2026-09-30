@@ -34,7 +34,7 @@ import type { Card, CardSpecialMechanic } from '../../Cards/types';
 import type { CombatState } from '../types';
 import {
     getDamageTakenMultiplier, getStanceVulnMult, getPendingDotTotal,
-    consumeDotEffects, consumeAfflictions, consumeMarks,
+    consumeDotEffects,
     getDistinctDebuffCount, getDistinctControlCount,
 } from '../effects';
 import { getActiveDotTotal, getActiveDotAmplifications, getTickAmplifyFlat } from '../effect-modifiers';
@@ -149,24 +149,6 @@ describe('getPendingDotTotal / consumeDotEffects (RUPTURE fuel)', () => {
         expect(consumed.sort()).toEqual(['debuff_bleed', 'debuff_poison']);
         expect(stripped.effects.map(e => e.effectId)).toEqual(['fixture_curse']);
     });
-
-    it('consumeAfflictions strips EVERY debuff and counts non-DoT stacks (v3 RUPTURE)', () => {
-        const c = combatant([
-            ae('debuff_poison', 2), ae('debuff_mark', 3), ae('debuff_quarter', 1),
-            ae('fixture_thorns', 2),
-        ]);
-        const { combatant: stripped, consumed, nonDotStacks } = consumeAfflictions(c);
-        expect(consumed.sort()).toEqual(['debuff_mark', 'debuff_poison', 'debuff_quarter']);
-        expect(nonDotStacks).toBe(4); // mark 3 + rapport 1 (poison is DoT)
-        expect(stripped.effects.map(e => e.effectId)).toEqual(['fixture_thorns']);
-    });
-
-    it('consumeMarks removes only MARK-class stacks (the conclusion fuel)', () => {
-        const c = combatant([ae('debuff_mark', 3), ae('debuff_poison', 2)]);
-        const { combatant: stripped, stacks } = consumeMarks(c);
-        expect(stacks).toBe(3);
-        expect(stripped.effects.map(e => e.effectId)).toEqual(['debuff_poison']);
-    });
 });
 
 describe('getDistinctDebuffCount (FALLEN / variety payoffs)', () => {
@@ -250,18 +232,8 @@ describe('getActiveDotTotal / getActiveDotAmplifications (amplification surface)
 // ── card-engine no-op (the HP behavior lives in combat.engine) ──────────────
 
 const ENGINE_OWNED_KINDS: CardSpecialMechanic[] = [
-    { kind: 'rupture' },
-    { kind: 'siphon', pct: 0.5 },
-    { kind: 'barrier', amount: 10 },
-    { kind: 'riposte', damage: 8, reduce: 6 },
-    { kind: 'reap_all', burstPerSoul: 2 },
-    { kind: 'sway', amount: 3 },
-    { kind: 'stagger', rungs: 1 },
-    { kind: 'recoil', hp: 4 },
-    { kind: 'soul_gain', count: 1 },
-    { kind: 'premise', count: 2 },
-    { kind: 'echo' },
-    { kind: 'reprise', count: 1 },
+    { kind: 'deal', amount: 5 },
+    { kind: 'guard', amount: 5 },
 ];
 
 describe('card engine — every combat-engine-owned mechanic kind is a NO-OP through executeCard', () => {

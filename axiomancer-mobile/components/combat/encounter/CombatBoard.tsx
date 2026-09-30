@@ -457,7 +457,7 @@ function DiceRow({
 
 export const StagedCard = React.memo(function StagedCard({
     card, assignedDie, onApply, gesture, register, compact = false, popKey = 0, socketPulse = false,
-    dropIneligible = false, chosenX = null, onChangeX, rejectKey = 0, freeProminent = false,
+    dropIneligible = false, rejectKey = 0, freeProminent = false,
 }: {
     card: CombatCardVM;
     assignedDie: CombatDieVM | null;
@@ -467,11 +467,6 @@ export const StagedCard = React.memo(function StagedCard({
     /** Stable registrar — (uid, node) for the die drop-target measurement. */
     register: (uid: string, node: View | null) => void;
     compact?: boolean;
-    /** WS7.2 chosen X-cost — the current pick (null → the card's printed min).
-     *  Rendered only when `card.chooseX` is non-null (the card has an X mech). */
-    chosenX?: number | null;
-    /** Stable dispatcher — (uid, x) steps the chosen X. */
-    onChangeX?: (uid: string, x: number) => void;
     /** Rising nonce: when it changes (>0) this card just received a dropped die →
      *  a brief 1.05 scale-pop confirms the drop landed HERE (and only here). */
     popKey?: number;
@@ -578,39 +573,6 @@ export const StagedCard = React.memo(function StagedCard({
                   </Animated.View>
                 </Animated.View>
             </GestureDetector>
-            {/* WS7.2 chosen X-cost — the amount picker, only on a card with an
-                X mechanic. The range is the ENGINE's live clamp (vm.chooseX). */}
-            {card.chooseX ? (() => {
-                const range = card.chooseX;
-                const x = Math.min(Math.max(chosenX ?? range.min, range.min), range.max);
-                return (
-                    <View style={[styles.xRow, { width: cardW }]} testID={`combat-choose-x-${card.uid}`}>
-                        <Pressable
-                            onPress={() => onChangeX?.(card.uid, Math.max(range.min, x - 1))}
-                            disabled={x <= range.min}
-                            hitSlop={6}
-                            style={[styles.xStepBtn, x <= range.min && { opacity: 0.35 }]}
-                            accessibilityRole="button"
-                            accessibilityLabel={`Pay less: RECOIL ${Math.max(range.min, x - 1)}`}
-                            testID={`combat-choose-x-minus-${card.uid}`}
-                        >
-                            <Text style={styles.xStepGlyph}>−</Text>
-                        </Pressable>
-                        <Text style={styles.xValue} accessibilityLabel={`RECOIL X = ${x}`}>X {x}</Text>
-                        <Pressable
-                            onPress={() => onChangeX?.(card.uid, Math.min(range.max, x + 1))}
-                            disabled={x >= range.max}
-                            hitSlop={6}
-                            style={[styles.xStepBtn, x >= range.max && { opacity: 0.35 }]}
-                            accessibilityRole="button"
-                            accessibilityLabel={`Pay more: RECOIL ${Math.min(range.max, x + 1)}`}
-                            testID={`combat-choose-x-plus-${card.uid}`}
-                        >
-                            <Text style={styles.xStepGlyph}>+</Text>
-                        </Pressable>
-                    </View>
-                );
-            })() : null}
             <Pressable
                 onPress={() => { Haptics.impactAsync(armed ? Haptics.ImpactFeedbackStyle.Heavy : Haptics.ImpactFeedbackStyle.Medium).catch(() => undefined); onApply(card.uid); }}
                 testID={`combat-apply-${card.uid}`}
@@ -852,10 +814,8 @@ export interface CombatBoardProps {
     stagedUids: string[];
     /** Commit the staged card. `power` true → power it with `dieId` (the die the
      *  player dropped on it); `power` false → the FREE base action, no die
-     *  (hazard model — the die is optional). `choices.chosenX` (WS7.2)
-     *  rides along only when the card carries an X mechanic and the stepper was
-     *  touched; `choices.reprisalCardId` (phase 28) carries the songbook pick. */
-    onApply: (uid: string, dieId: string | null, power: boolean, choices?: { chosenX?: number; reprisalCardId?: string }) => void;
+     *  (hazard model — the die is optional). */
+    onApply: (uid: string, dieId: string | null, power: boolean) => void;
     onStage: (uid: string) => void;
     onUnstage: (uid: string) => void;
     onDiscard: (uid: string) => void;
@@ -875,17 +835,6 @@ export interface CombatBoardProps {
     onMomentumInfo?: () => void;
     /** Latest resolved engine events (drives enemy/player resolution feedback). */
     fx?: CombatFx;
-    /** phase 28 — REPRISE songbook choice. Called INSTEAD of `onApply` when the
-     *  card being APPLYd carries a `reprise` mechanic and the discard pile is
-     *  non-empty; the panel opens its picker and calls `onApply` itself once
-     *  the player chooses (or skips, which omits the choice — auto-pick).
-     *  `chosenX` (WS7.2) rides along so a deferred X-card still resolves at
-     *  the stepper's pick, not the printed min. The deferral is a HELD play,
-     *  not a commit: the board keeps the card staged and its pending die /
-     *  chosen X untouched, so the panel's backdrop can CANCEL back to the
-     *  exact pre-APPLY staging. Not consulted from the END PHASE auto-apply
-     *  batch (never pop a picker mid-batch — that path always auto-picks). */
-    onReprisalNeeded?: (uid: string, dieId: string | null, power: boolean, chosenX?: number) => void;
     /** Reports the enemy HUD's measured bottom edge (screen-top-relative) on
      *  every layout pass, so panel-level siblings anchored under the same HUD
      *  (the LOG toggle, the tutorial coach) can track its real height instead
@@ -899,7 +848,7 @@ export interface CombatBoardProps {
 
 export const CombatBoard = React.memo(function CombatBoard({
     vm, drag, stagedUids, onApply, onStage, onUnstage, onDiscard, onSignature, onEndPhase, resolving = false, onInspect, onChip, onSignatureInfo, onPlayerInspect, onMomentumInfo, fx,
-    onReprisalNeeded, onHudLayout, region,
+    onHudLayout, region,
 }: CombatBoardProps) {
     const AXM = usePalette();
     const styles = useStyles();
@@ -926,14 +875,6 @@ export const CombatBoard = React.memo(function CombatBoard({
     // but not yet APPLYd. Local UI state — selecting/re-selecting is free; APPLY is
     // the commit. Each staged card shows exactly the die dragged onto it.
     const [pendingDieByUid, setPendingDieByUid] = useState<Record<string, string>>({});
-    // WS7.2 chosen X-cost: the stepper pick per staged X card (absent → the
-    // card's printed min). Local UI state; APPLY forwards it as `chosenX`.
-    const [chosenXByUid, setChosenXByUid] = useState<Record<string, number>>({});
-    const chosenXRef = useRef(chosenXByUid);
-    chosenXRef.current = chosenXByUid;
-    const onChangeX = useCallback((uid: string, x: number) => {
-        setChosenXByUid((prev) => ({ ...prev, [uid]: x }));
-    }, []);
     // Rising drop-confirmation nonce for the card a die just landed on (scale-pop).
     const [dropPop, setDropPop] = useState<{ uid: string; n: number }>({ uid: '', n: 0 });
     // Loud rejection (owner directive 2026-07-12): a rejected die drop shakes
@@ -948,19 +889,11 @@ export const CombatBoard = React.memo(function CombatBoard({
     const stagedKey = stagedUids.join(',');
     // Clear pending selections when the turn's dice change…
     useEffect(() => { setPendingDieByUid({}); }, [vm.turnLabel]);
-    // …and drop entries for cards that are no longer staged. Covers chosen X
-    // too: a REPRISE-deferred play skips handleApply's own cleanup (it must —
-    // the songbook can cancel back to the staging), so the unstage that
-    // follows its eventual commit is what prunes both maps.
+    // …and drop entries for cards that are no longer staged.
     useEffect(() => {
         setPendingDieByUid((prev) => {
             const next: Record<string, string> = {};
             for (const uid of stagedUids) if (prev[uid]) next[uid] = prev[uid];
-            return next;
-        });
-        setChosenXByUid((prev) => {
-            const next: Record<string, number> = {};
-            for (const uid of stagedUids) if (prev[uid] !== undefined) next[uid] = prev[uid];
             return next;
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1247,15 +1180,8 @@ export const CombatBoard = React.memo(function CombatBoard({
     // mirrors display (the stale-powered fix, 2026-07-12).
     // Latest-closure ref + a stable dispatcher so memoized StagedCards never
     // re-render just because the board did.
-    // `autoResolve` (phase 28) — true only from the END PHASE batch below: a
-    // staged REPRISE card must still land (never silently dropped), but
-    // there's no player present mid-batch to answer a picker, so it always
-    // auto-picks (the engine's pre-existing highest-rank default) instead of
-    // calling `onReprisalNeeded`.
-    const handleApplyRef = useRef<(uid: string, autoResolve?: boolean) => void>(() => undefined);
-    handleApplyRef.current = (uid: string, autoResolve = false) => {
-        // WS7.2 — forward the stepper's chosen X (absent = no X mechanic).
-        const chosenX = chosenXRef.current[uid];
+    const handleApplyRef = useRef<(uid: string) => void>(() => undefined);
+    handleApplyRef.current = (uid: string) => {
         // THE COLOR LAW at commit (engine: playCombatCard's gate): an
         // off-color die must never be routed at a card — the engine would
         // fizzle the play. `assignedDieFor` applies the same gate the display
@@ -1263,26 +1189,8 @@ export const CombatBoard = React.memo(function CombatBoard({
         const armedDie = assignedDieFor(uid);
         const dieId: string | null = armedDie ? armedDie.id : null;
         const power = armedDie !== null;
-        const card = handMapRef.current.get(uid);
-        if (!autoResolve && power && card?.needsReprisalChoice && vm.discardCards.length > 0 && onReprisalNeeded) {
-            // DEFER, don't commit: the songbook backdrop may CANCEL this play,
-            // so return before the cleanup below — the staged card, its pending
-            // die, and its chosen X must all survive exactly as they were.
-            // `chosenX` rides the prompt so the eventual pick/skip re-enters
-            // `onApply` with it (the deferred play must not fall to min X);
-            // once that commit unstages the card, the stagedKey effects above
-            // prune the pending-die and chosen-X entries.
-            onReprisalNeeded(uid, dieId, power, chosenX);
-            return;
-        }
-        if (chosenX !== undefined) {
-            // WS7.2 — arity preserved when no X was chosen (see the multistage pins).
-            onApply(uid, dieId, power, { chosenX });
-        } else {
-            onApply(uid, dieId, power);
-        }
+        onApply(uid, dieId, power);
         setPendingDieByUid((prev) => { const next = { ...prev }; delete next[uid]; return next; });
-        setChosenXByUid((prev) => { const next = { ...prev }; delete next[uid]; return next; });
     };
     const handleApply = useCallback((uid: string) => handleApplyRef.current(uid), []);
     // Stable staged-frame registrar (drop-target measurement).
@@ -1297,7 +1205,7 @@ export const CombatBoard = React.memo(function CombatBoard({
     // cards land before the enemy acts.
     const handleEndPhase = () => {
         if (resolving) return; // WI-3 — a phase is already resolving; ignore the tap
-        for (const uid of stagedUids) handleApplyRef.current(uid, true);
+        for (const uid of stagedUids) handleApplyRef.current(uid);
         onEndPhase();
     };
 
@@ -1377,8 +1285,6 @@ export const CombatBoard = React.memo(function CombatBoard({
                                         socketPulse={dieDragLive && dropEligible}
                                         dropIneligible={dieDragLive && !dropEligible}
                                         freeProminent={deadTray}
-                                        chosenX={chosenXByUid[card.uid] ?? null}
-                                        onChangeX={onChangeX}
                                     />
                                 );
                             })}
@@ -1418,30 +1324,9 @@ export const CombatBoard = React.memo(function CombatBoard({
                     hand's gesture area swallowed the taps) so every tile stays tappable.
                     RIGHT-aligned (owner playtest 2026-07-18): the left edge belongs to
                     the signature-rune column, which was hiding these tiles. */}
-                {(vm.player.effects.length > 0 || vm.player.guard > 0
-                    || vm.player.wrathVisible || vm.player.chainVisible || vm.player.twinArmed) && (
+                {(vm.player.effects.length > 0 || vm.player.guard > 0) && (
                     <View style={styles.statusStrip} pointerEvents="box-none">
                         {vm.player.guard > 0 ? <Text style={styles.guardChip} testID="combat-guard">🛡 {vm.player.guard}</Text> : null}
-                        {/* THE BIG NUMBERS REWRITE — the damage-scaler ledgers. They
-                            rode invisibly before: WRATH is combat-long, CHAIN dies at
-                            the end of a turn that fed it nothing, and neither was on
-                            the board. Same rail as GUARD, same visibility law as the
-                            alt-win meters (a value, or a deck that feeds one). */}
-                        {vm.player.wrathVisible ? (
-                            <Text style={[styles.ledgerChip, { color: AXM.blood, borderColor: AXM.bloodMed }]} testID="combat-wrath">
-                                ⚔ WRATH {vm.player.wrath}
-                            </Text>
-                        ) : null}
-                        {vm.player.chainVisible ? (
-                            <Text style={[styles.ledgerChip, { color: AXM.sulfur, borderColor: AXM.sulfurMed }]} testID="combat-chain">
-                                ⛓ CHAIN {vm.player.chain}
-                            </Text>
-                        ) : null}
-                        {vm.player.twinArmed ? (
-                            <Text style={[styles.ledgerChip, { color: AXM.parchment, borderColor: AXM.divider }]} testID="combat-twin">
-                                ‡ TWIN
-                            </Text>
-                        ) : null}
                         <EffectChips effects={vm.player.effects} onChip={onChip} align="flex-end" />
                     </View>
                 )}
@@ -2060,14 +1945,6 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
         paddingVertical: 5, alignItems: 'center',
     },
     applyText: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 1.5 },
-    // WS7.2 chosen X-cost — the amount picker row on a staged X card.
-    xRow: {
-        marginTop: -2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-        borderWidth: 1.5, borderTopWidth: 0, borderColor: AXM.bone, backgroundColor: 'rgba(0,0,0,0.55)',
-    },
-    xStepBtn: { paddingHorizontal: 10, paddingVertical: 3 },
-    xStepGlyph: { fontFamily: FONTS.sans, fontSize: 14, color: AXM.parchment },
-    xValue: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 1, color: AXM.sulfur, minWidth: 34, textAlign: 'center' },
 
     // ── signature rune column ──
     sigColumn: { position: 'absolute', left: 6, top: SIG_COLUMN_TOP, alignItems: 'center', gap: 8, zIndex: 30 },
@@ -2208,13 +2085,6 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
     guardChip: {
         fontFamily: FONTS.sans, fontSize: 11, color: '#6fb3e0', letterSpacing: 0.5,
         backgroundColor: 'rgba(0,0,0,0.7)', borderWidth: 1, borderColor: '#6fb3e055', borderRadius: 4,
-        paddingHorizontal: 5, paddingVertical: 2, overflow: 'hidden',
-    },
-    // THE BIG NUMBERS REWRITE — WRATH / CHAIN / TWIN, cut to GUARD's chip so
-    // the whole rail reads as one ledger row. Colour comes from the call site.
-    ledgerChip: {
-        fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 0.5,
-        backgroundColor: AXM.backdrop, borderWidth: 1, borderRadius: 4,
         paddingHorizontal: 5, paddingVertical: 2, overflow: 'hidden',
     },
 

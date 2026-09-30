@@ -375,7 +375,7 @@ function autoPlayPhase(
 
 // ── New Hazard-style combat loop (interactive) ───────────────────────────────
 
-async function promptCardChoice(state: CombatEncounterState): Promise<{ uid: string; useBottom: boolean; chosenX?: number } | null> {
+async function promptCardChoice(state: CombatEncounterState): Promise<{ uid: string; useBottom: boolean } | null> {
     const cards = handCards(state);
     if (cards.length === 0) return null;
     const choices = cards.flatMap(({ uid, card }) => {
@@ -396,12 +396,9 @@ async function promptCardChoice(state: CombatEncounterState): Promise<{ uid: str
     }]);
     if (action === '__resolve__') return null;
     if (action === '__end__') return { uid: '__end__', useBottom: false };
-    // Play-step grammar: `top:<uid>` | `bot:<uid>` | `bot:<uid>:<X>` — the
-    // optional third segment is the chosen X for a chosen-X card (WS7.2);
-    // interactive picks omit it, --script answers may carry it.
-    const [mode, uid, xArg] = action.split(':') as [string, string, string | undefined];
-    const chosenX = xArg !== undefined && Number.isFinite(Number(xArg)) ? Number(xArg) : undefined;
-    return { uid, useBottom: mode === 'bot', ...(chosenX !== undefined ? { chosenX } : {}) };
+    // Play-step grammar: `top:<uid>` | `bot:<uid>`.
+    const [mode, uid] = action.split(':') as [string, string];
+    return { uid, useBottom: mode === 'bot' };
 }
 
 async function promptSignatureChoice(state: CombatEncounterState): Promise<string | null> {
@@ -500,14 +497,10 @@ async function interactiveHazardCombatLoop(
             const dieId = cardChoice.useBottom && chosen
                 ? firstLegalPoweringDie(s, chosen.card)?.id
                 : undefined;
-            const res = playCombatCard(
-                s, { uid: cardChoice.uid }, cardChoice.useBottom, dieId, undefined,
-                cardChoice.chosenX !== undefined ? { chosenX: cardChoice.chosenX } : undefined,
-            );
+            const res = playCombatCard(s, { uid: cardChoice.uid }, cardChoice.useBottom, dieId);
             s = res.state;
             logState('hazardCombat:playCard', beforeCard, s, {
                 uid: cardChoice.uid, useBottom: cardChoice.useBottom,
-                ...(cardChoice.chosenX !== undefined ? { chosenX: cardChoice.chosenX } : {}),
                 events: res.events.map(e => e.kind),
             });
             emit({ type: 'hazardCombat:card', payload: { events: res.events } });

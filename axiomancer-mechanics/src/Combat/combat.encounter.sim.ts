@@ -22,7 +22,6 @@ import {
     resolveThreatPhase, startTurn, endTurn,
     playSignatureSkill, handCards, selectMercyChoice, selectCapitulationChoice, getSignatureSkill,
     signatureCastBlock,
-    recoilXRange,
 } from './combat.engine';
 import { MOMENTUM_CHAIN_ORDER } from './combat.upgradeable-dice';
 import { getRng } from '../Utils/rng';
@@ -376,13 +375,6 @@ export function upgradeablePlayPhase(
     let guard = 0;
     const fizzledUids = new Set<string>();
 
-    const chosenXFor = (card: CombatCard): { chosenX: number } | undefined => {
-        const range = recoilXRange(working, card);
-        if (!range) return undefined;
-        const x = policy.chooseX ? policy.chooseX(working, card, range, rng) : range.min;
-        return { chosenX: x };
-    };
-
     // ── The ONE legal tray roll for this phase (rolls the four fixed dice). ───
     if (working.dice.length === 0 && !working.turnTakenThisPhase) {
         working = startTurn(working).state;
@@ -420,7 +412,7 @@ export function upgradeablePlayPhase(
             // Phase 43 — decision width, sampled where the driver actually chose.
             decisionPoints++;
             liveOptions += countLiveOptions(working, fizzledUids, src.color);
-            const res = playCombatCard(working, { uid: card.uid }, true, src.dieId, undefined, chosenXFor(card.card));
+            const res = playCombatCard(working, { uid: card.uid }, true, src.dieId);
             if (res.events.some(e => e.kind === 'effect-fizzled')) {
                 lineRow(lines, card.card.id).fizzles++;
                 fizzledUids.add(card.uid);
@@ -611,7 +603,7 @@ export function runOneEncounter(
     const convictionSpent = Math.max(0, state.turn - state.conviction);
 
     // Metrics slate — every draw after the opening deal rides a `hand-drawn`
-    // event in the transcript (draw riders, conjure, phase-boundary refills).
+    // event in the transcript (phase-boundary refills).
     for (const ev of state.log) {
         if (ev.kind !== 'hand-drawn') continue;
         for (const cardId of ev.cards) {
@@ -624,11 +616,8 @@ export function runOneEncounter(
     let mechanicBurstDamage = 0;
     for (const ev of state.log) {
         if (ev.kind === 'dot-tick' && ev.target === 'enemy') dotHpDamage += ev.amount;
-        // Spec 32 v3 — the payoff-burst vocabulary: RUPTURE / REAP bursts, the
-        // conclusion classes, plus the engine-gated drips (BACKFIRE, thorns,
-        // riposte are credited via their own events).
-        if (ev.kind === 'rupture-detonated') mechanicBurstDamage += ev.amount;
-        if (ev.kind === 'reaped') mechanicBurstDamage += ev.amount;
+        // The engine-gated drips (BACKFIRE, thorns, riposte) are credited via
+        // their own events.
         if (ev.kind === 'backfired') mechanicBurstDamage += ev.amount;
         if (ev.kind === 'thorns-reflected') mechanicBurstDamage += ev.amount;
         if (ev.kind === 'riposte-fired') mechanicBurstDamage += ev.amount;

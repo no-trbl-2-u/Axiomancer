@@ -45,11 +45,10 @@ afterEach(() => vi.restoreAllMocks());
 // but a fixture pins the RULE, not any one card's tuning).
 registerSandboxCards([
     {
-        id: 'qa-threshold-dot', name: 'QA Threshold DoT',
-        color: 'body', description: 'threshold fixture', tier: 1,
+        id: 'qa-bleed-card', name: 'QA Bleed Card',
+        color: 'body', description: 'status fixture', tier: 1,
         targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 }],
-        threshold: { color: 'body', count: 1, rider: { conviction: 2, guard: 4 } },
     },
     {
         id: 'qa-guard-card', name: 'QA Guard Card',
@@ -93,28 +92,19 @@ function open(cards: string[], enemyStance: 'heart' | 'body' | 'mind' = 'body', 
     return s;
 }
 
-describe('R1 TOLL + thresholds', () => {
-    it('spent dice tally their color and a met threshold fires its rider FREE, in real units', () => {
-        let s = open(['qa-threshold-dot'], 'body');
-        s = setDice(s, ['body', 'heart']);
-        const convBefore = s.conviction;
-        const guardBefore = s.guard ?? 0;
-        const entry = s.hand.find(h => h.cardId === 'qa-threshold-dot')!;
+describe('R1 TOLL', () => {
+    it('a spent die tallies its color', () => {
+        let s = open(['qa-guard-card'], 'body');
+        s = setDice(s, ['heart', 'body']);
+        const entry = s.hand.find(h => h.cardId === 'qa-guard-card')!;
         const res = playCombatCard(s, { uid: entry.uid }, true, s.dice[0].id);
-        // The powering body die tallies body 1 ≥ count 1 → rider fires:
-        // +2 Conviction, +4 Guard (real units — no chip exists in v3).
-        expect(res.state.resonance?.body).toBe(1);
-        expect(res.events.some(e => e.kind === 'threshold-fired')).toBe(true);
-        expect(res.state.conviction).toBe(Math.min(12, convBefore + 2));
-        expect((res.state.guard ?? 0) - guardBefore).toBe(4);
-        // The strike is dead: only the bleed will erode HP, later.
-        expect(res.state.enemy.health).toBe(500);
+        expect(res.state.resonance?.heart).toBe(1);
     });
 });
 
 describe('R2 RESERVE — bank, ripen, cash', () => {
     it('a Reserve die ripens +1 pip per threat phase, capped at RESERVE_PIP_CAP', () => {
-        let s = open(['qa-threshold-dot'], 'body');
+        let s = open(['qa-bleed-card'], 'body');
         s = { ...s, reserve: [{ id: 'bank-1', color: 'body', state: 'available', temporary: false, pips: 0 }] };
         for (let i = 0; i < RESERVE_PIP_CAP + 2; i++) {
             s = resolveThreatPhase(s).state;
@@ -124,12 +114,12 @@ describe('R2 RESERVE — bank, ripen, cash', () => {
     });
 
     it('pips cash as +PIP_INTENSITY_BONUS intensity per pip on a status play (R8: the dieId is honored)', () => {
-        let s = open(['qa-threshold-dot'], 'heart');
+        let s = open(['qa-bleed-card'], 'heart');
         s = setDice(s, ['heart', 'mind']);
         // BODY reserve die — the color law (2026-07-09) demands the powering die
         // match the body card; every spec-33 play lands at read 'none'.
         s = { ...s, reserve: [{ id: 'bank-2', color: 'body', state: 'available', temporary: false, pips: 2 }] };
-        const entry = s.hand.find(h => h.cardId === 'qa-threshold-dot')!;
+        const entry = s.hand.find(h => h.cardId === 'qa-bleed-card')!;
         const res = playCombatCard(s, { uid: entry.uid }, true, 'bank-2');
         const bleed = res.state.enemy.effects.find(e => e.effectId === 'debuff_bleed')!;
         // authored i1 + 2 pips × PIP_INTENSITY_BONUS (no read bonus)
@@ -151,7 +141,7 @@ describe('R2 RESERVE — bank, ripen, cash', () => {
     });
 
     it('ONE unspent tray die banks at endTurn while the Reserve has room, else it simply expires', () => {
-        let s = open(['qa-threshold-dot'], 'body');
+        let s = open(['qa-bleed-card'], 'body');
         s = setDice(s, ['heart', 'mind']);
         const banked = endTurn(s).state;
         expect(banked.reserve!.map(d => d.id)).toEqual([s.dice[0].id]); // one die, not both
@@ -171,9 +161,9 @@ describe('R2 RESERVE — bank, ripen, cash', () => {
 
 describe('R7 COLOR MATCH — +1 turn on status plays', () => {
     it('a matched die extends the landed status by COLOR_MATCH_STATUS_DURATION_BONUS', () => {
-        let s = open(['qa-threshold-dot'], 'body'); // body card, body die, body stance (neutral read)
+        let s = open(['qa-bleed-card'], 'body'); // body card, body die, body stance (neutral read)
         s = setDice(s, ['body', 'heart']);
-        const entry = s.hand.find(h => h.cardId === 'qa-threshold-dot')!;
+        const entry = s.hand.find(h => h.cardId === 'qa-bleed-card')!;
         const res = playCombatCard(s, { uid: entry.uid }, true, s.dice[0].id);
         const bleed = res.state.enemy.effects.find(e => e.effectId === 'debuff_bleed')!;
         expect(bleed.remainingDuration).toBe(2 + COLOR_MATCH_STATUS_DURATION_BONUS);
@@ -182,9 +172,9 @@ describe('R7 COLOR MATCH — +1 turn on status plays', () => {
 
 describe('R8 — a bogus dieId is an explicit fizzle', () => {
     it('fizzles without touching state', () => {
-        let s = open(['qa-threshold-dot'], 'body');
+        let s = open(['qa-bleed-card'], 'body');
         s = setDice(s, ['body', 'heart']);
-        const entry = s.hand.find(h => h.cardId === 'qa-threshold-dot')!;
+        const entry = s.hand.find(h => h.cardId === 'qa-bleed-card')!;
         const res = playCombatCard(s, { uid: entry.uid }, true, 'no-such-die');
         expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
         expect(res.state.enemy.effects.length).toBe(0);

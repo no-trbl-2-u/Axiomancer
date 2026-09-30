@@ -6,9 +6,9 @@
  * decided by WHERE THE EFFECT LANDS, never by the card's colour:
  *
  *   body  — immediate damage to the foe (DEAL)
- *   mind  — anything that sits on you (GUARD, barrier, heal, THORNS, self-buffs)
+ *   mind  — anything that sits on you (GUARD, THORNS, self-buffs)
  *   heart — anything that sits on the foe (VULNERABLE, POISON, BLEED, STUN)
- *   grey  — everything else (dice, draw, card handling, costs): unscaled
+ *   grey  — everything else: unscaled
  *
  * and HOW MUCH is decided by the scaling kind:
  *
@@ -17,8 +17,7 @@
  *   repeating — `base × (1 + (stat − 5) ÷ 10)`: half rate, because it fires
  *               again and again (DoT per tick, THORNS per hit, regen).
  *   flat      — never scales: on/off effects and every duration (no
- *               stun-lock), and the long tail of kinds the card purge (P1,
- *               D36) deletes.
+ *               stun-lock).
  *
  * Nothing is capped (D41). Enemies never use this: their numbers stay
  * authored. No engine state, safe to import from presenters.
@@ -78,56 +77,18 @@ export function scaleFor(
 
 const BODY_ONE_SHOT: KeywordScaling = { family: 'body', scaling: 'one-shot' };
 const MIND_ONE_SHOT: KeywordScaling = { family: 'mind', scaling: 'one-shot' };
-const body: KeywordScaling = { family: 'body', scaling: 'flat' };
-const mind: KeywordScaling = { family: 'mind', scaling: 'flat' };
-const heart: KeywordScaling = { family: 'heart', scaling: 'flat' };
-const grey: KeywordScaling = { family: 'grey', scaling: 'flat' };
 
-/**
- * Every PAID mechanic kind. Only DEAL, GUARD and barrier scale: they are the
- * numbers that survive the card purge (P1, D36). The rest carry their D40
- * family (so a guided session that revives one knows its stat) but stay
- * `flat` until someone wires them.
- */
+/** Every PAID mechanic kind. */
 export const MECHANIC_SCALING: Record<CardSpecialMechanic['kind'], KeywordScaling> = {
     deal: BODY_ONE_SHOT,
     guard: MIND_ONE_SHOT,
-    barrier: MIND_ONE_SHOT,
-    // body: immediate damage to the foe
-    rupture: body, reap: body, reap_all: body, immolate: body,
-    overkill: body, execute: body, recoil_x: body,
-    // mind: sits on you
-    riposte: mind, wrath: mind, chain: mind, twin: mind, echo: mind,
-    foretell: mind, premise: mind, soul_gain: mind, siphon: mind,
-    // heart: sits on the foe
-    flay: heart, stagger: heart, lock_stance: heart, sway: heart,
-    extend_dots: heart, convert_dots: heart, boost_all_dots: heart,
-    strip_random_buff: heart, befriend_attempt: heart,
-    consume_affliction: heart, turnabout: heart,
-    // grey: dice, cards, costs, containers
-    reroll_spent: grey, refresh_die: grey, convert_die_color: grey,
-    create_temporary_die: grey, grant_pip: grey, overheat: grey,
-    bank_spent_die: grey, forge_floating_die: grey, float_x_die: grey,
-    omen: grey, peroration: grey, spend_premises: grey, spend_all_pips: grey,
-    recoil: grey, echo_next_spell: grey, reprise: grey, replay_last: grey,
-    conjure_card: grey, purge_self: grey, rider: grey,
 };
 
-/** Every rider field (FREE lines and PAID riders). */
+/** Every FREE-line rider field. */
 export const RIDER_SCALING: Record<keyof CardRider, KeywordScaling> = {
     damage: BODY_ONE_SHOT,
     guard: MIND_ONE_SHOT,
-    barrier: MIND_ONE_SHOT,
-    healHp: MIND_ONE_SHOT,
     applyEffect: { family: 'by-target', scaling: 'one-shot' },
-    // the long tail, family only
-    ruptureMarks: body, pierce: body,
-    wrath: mind, chain: mind, conviction: mind, premises: mind, souls: mind,
-    foretell: mind, cleanse: mind,
-    flay: heart, stagger: heart, sway: heart, revealStance: heart,
-    tickAllDots: heart, tickOne: heart, bonusIntensity: heart, bonusDuration: heart,
-    intensityPerPip: heart,
-    refreshDie: grey, drawCards: grey, pips: grey, recoil: grey, millCards: grey,
 };
 
 // ─── Applied statuses ────────────────────────────────────────────────────────
@@ -209,8 +170,6 @@ export function scaleRider(r: CardRider, stats: BaseStats | undefined): CardRide
     const out: CardRider = { ...r };
     if (r.damage) out.damage = scaleFor(r.damage, stats, 'body', 'one-shot');
     if (r.guard) out.guard = scaleFor(r.guard, stats, 'mind', 'one-shot');
-    if (r.barrier) out.barrier = scaleFor(r.barrier, stats, 'mind', 'one-shot');
-    if (r.healHp) out.healHp = scaleFor(r.healHp, stats, 'mind', 'one-shot');
     if (r.applyEffect) {
         const def = lookupEffect(r.applyEffect.effectId);
         if (def) {
@@ -240,12 +199,6 @@ export function scaleCardForStats(card: Card, stats: BaseStats | undefined): Car
         switch (m.kind) {
             case 'deal': return { ...m, amount: scaleFor(m.amount, stats, 'body', 'one-shot') };
             case 'guard': return { ...m, amount: scaleFor(m.amount, stats, 'mind', 'one-shot') };
-            case 'barrier': return { ...m, amount: scaleFor(m.amount, stats, 'mind', 'one-shot') };
-            case 'rider': case 'omen': case 'peroration': case 'immolate':
-                return { ...m, rider: scaleRider(m.rider, stats) };
-            case 'reap': return m.rider ? { ...m, rider: scaleRider(m.rider, stats) } : m;
-            case 'grant_pip': return m.overflow ? { ...m, overflow: scaleRider(m.overflow, stats) } : m;
-            default: return m;
         }
     };
     const out: Card = { ...card };
@@ -262,10 +215,6 @@ export function scaleCardForStats(card: Card, stats: BaseStats | undefined): Car
         });
     }
     if (card.free) out.free = scaleRider(card.free, stats);
-    if (card.threshold) out.threshold = { ...card.threshold, rider: scaleRider(card.threshold.rider, stats) };
-    if (card.dieBonus) out.dieBonus = { ...card.dieBonus, rider: scaleRider(card.dieBonus.rider, stats) };
-    if (card.fate) out.fate = { ...card.fate, rider: scaleRider(card.fate.rider, stats) };
-    if (card.fallen) out.fallen = { ...card.fallen, rider: scaleRider(card.fallen.rider, stats) };
     if (card.synergy?.rider) out.synergy = { ...card.synergy, rider: scaleRider(card.synergy.rider, stats) };
     return out;
 }
