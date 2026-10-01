@@ -61,17 +61,6 @@ export const STANCE_COLORS: Record<string, string> = {
     // (never a literal, unlike the fixed dice-identity hexes above).
     any: AXM.bone,
 };
-// RESIDUE (D7 flag collapse, 2026-09-25). The hidden-stance READ is retired
-// in the shipped spec-33 model — every play lands at read 'none' — and the
-// engine deleted `READ_ADVANTAGE_INTENSITY_BONUS` /
-// `READ_DISADVANTAGE_DURATION_PENALTY` with the legacy draft path. The card
-// face / detail copy below still prints the old ▲/▼ read triplets; that copy
-// is a separate honesty pass (it re-lays every status card face). Until it
-// lands, the two numbers are frozen here at their last engine values so the
-// faces render unchanged. Delete these with the triplet copy — do not reuse.
-const READ_ADVANTAGE_INTENSITY_BONUS = 1;
-const READ_DISADVANTAGE_DURATION_PENALTY = 1;
-
 const DIE_GLYPHS: Record<string, string> = { heart: '♥', body: '⚡', mind: '★', wild: '✦', x: '✕', any: '✦' };
 const STANCE_LABELS: Record<string, string> = { heart: 'HEART', body: 'BODY', mind: 'MIND', wild: 'WILD', x: 'X', any: 'ANY' };
 
@@ -376,15 +365,10 @@ export interface CombatCardFaceVM {
     typeStrip: string;
     verbLine: string;              // plain who/what
     powerRail: string;
-    readDependent: boolean;        // the read scales this: guard/strike (damage mult) AND
-                                   // dot/vulnerable (status mult — the read now bites status)
+    armable: boolean;              // the staged face reprints its number at commit (`armedValue`)
     inert: boolean;                // engine doesn't read it yet → greyed, no number
     guardBase: number | null;
-    statusBase: number | null;     // read-scalable status number (DoT total / Vulnerable %) — armed display
-    /** P0-truth: the EXACT armed values under the deterministic read rule
-     *  (▲ +1 intensity / ▼ −1 turn) — no multiplier approximations. */
-    statusAdv: number | null;
-    statusDis: number | null;
+    statusBase: number | null;     // the status number (DoT total / Vulnerable %) — armed display
 }
 
 /** Render-ready card DETAIL (the inspect modal) — the SAME numbers as the face. */
@@ -1088,10 +1072,6 @@ interface CardCalc extends PrimaryResolution {
     markAmp: number;       // MARK: +N per DoT tick per application (tickAmplifyFlat × intensity)
     // ── card-overhaul (2026-07-03) ──
     resolutePct: number;   // real -N% dmg taken (the inverse of vulnPct, negative)
-    // ── P0-truth read triplet (the deterministic ±1 rule, exact numbers) ──
-    totalAdv: number;      // DoT lifetime on a WON read (+1 intensity)
-    totalDis: number;      // DoT lifetime on a LOST read (−1 turn, floor 1)
-    vulnPctAdv: number;    // Vulnerable % on a WON read (+1 intensity, capped)
 }
 
 /** Single source of the numbers — faceStats AND detailStats both read this, so the
@@ -1107,7 +1087,6 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
         vulnPct: 0,
         markAmp: 0,
         resolutePct: 0,
-        totalAdv: 0, totalDis: 0, vulnPctAdv: 0,
     };
     const eff = pr.ce ? lookupEffect(pr.ce.effectId) : undefined;
     switch (pr.kind) {
@@ -1136,10 +1115,6 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
                 return sum;
             };
             out.total = lifetime(out.intensity, out.turns);
-            // P0-truth read triplet — the engine's deterministic rule, exactly:
-            // ▲ +1 intensity for the full run; ▼ printed intensity, 1 turn shorter.
-            out.totalAdv = lifetime(out.intensity + READ_ADVANTAGE_INTENSITY_BONUS, out.turns);
-            out.totalDis = lifetime(out.intensity, Math.max(1, out.turns - READ_DISADVANTAGE_DURATION_PENALTY));
             out.keyword = keywordForEffect(pr.ce?.effectId);
             out.glyph = pr.ce ? glyphFor(pr.ce.effectId) : '🔥';
             out.categoryColor = GLYPH_COLORS.dot;
@@ -1177,12 +1152,8 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
             out.turns = pr.ce?.duration ?? eff?.duration ?? 0;
             // P0-truth: the % shown is the engine's real intensity-scaled delta
             // (mult = 1 + (dtm−1) × intensity, uncapped since S3) — not the per-stack figure.
-            const keyed = (p as { damageTakenMultForStance?: { mult: number } }).damageTakenMultForStance;
-            const dtm = p.damageTakenMult ?? keyed?.mult ?? 1;
-            const pct = (i: number): number =>
-                Math.round((dtm - 1) * i * 100);
-            out.vulnPct = pct(out.intensity);
-            out.vulnPctAdv = pct(out.intensity + READ_ADVANTAGE_INTENSITY_BONUS);
+            const dtm = p.damageTakenMult ?? 1;
+            out.vulnPct = Math.round((dtm - 1) * out.intensity * 100);
             out.keyword = keywordForEffect(pr.ce?.effectId) ?? 'Vulnerable';
             out.glyph = pr.ce ? glyphFor(pr.ce.effectId) : '◎';
             out.categoryColor = GLYPH_COLORS.statdown;
@@ -1313,7 +1284,7 @@ export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM
     const freeGlyph = freeGlyphMeta(sourceCard);
     const base = {
         glyph: c.glyph, categoryColor: c.categoryColor, stanceColor,
-        statusBase: null, statusAdv: null, statusDis: null,
+        statusBase: null,
         ...freeRail(sourceCard), freeGlyph: freeGlyph.glyph, freeGlyphKey: freeGlyph.key,
         typeStrip: typeStripText(card),
     };
@@ -1321,10 +1292,7 @@ export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM
         case 'dot': {
             // WI-2 — trigger-aware face. Event DoTs (poison/bleed) tick per game
             // event, never at the round boundary, so the round-clock "total over
-            // Nt" face was a lie for them (passive play deals literally 0). The
-            // read triplet still applies to the PER-TICK swing (▲ +1 intensity
-            // hits harder; ▼ −1 turn shortens the window, per-tick unchanged).
-            const perTickAdv = Math.floor(c.dpr * (c.intensity + READ_ADVANTAGE_INTENSITY_BONUS));
+            // Nt" face was a lie for them (passive play deals literally 0).
             const evt = c.dotTrigger === 'card-played'
                 ? { hero: `${c.perTurn}/play`, sub: `per card you play · ${c.turns}t`, verb: 'foe loses VITAE each card you play' }
                 : c.dotTrigger === 'damage-instance'
@@ -1332,29 +1300,29 @@ export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM
                     : c.dotTrigger === 'payoff'
                         ? { hero: `${c.perTurn}/payoff`, sub: `per payoff you detonate · ${c.turns}t`, verb: 'foe loses VITAE each payoff you detonate' }
                         : null;
-            if (evt) return { ...base, kind: 'dot', keyword: kw, heroText: evt.hero, heroSub: evt.sub, freeHeroText: free, freeHeroSub: null, verbLine: evt.verb, powerRail: c.keyword ?? 'DoT', readDependent: true, inert: false, guardBase: null, statusBase: c.perTurn, statusAdv: perTickAdv, statusDis: c.perTurn };
+            if (evt) return { ...base, kind: 'dot', keyword: kw, heroText: evt.hero, heroSub: evt.sub, freeHeroText: free, freeHeroSub: null, verbLine: evt.verb, powerRail: c.keyword ?? 'DoT', armable: true, inert: false, guardBase: null, statusBase: c.perTurn };
             // DOOM: no calendar, and the stack grows every time the foe acts —
             // print the per-turn bite and the growth clause, never a lifetime.
             if (c.dotGrowsOnEnemyAction) {
-                return { ...base, kind: 'dot', keyword: kw, heroText: `${c.perTurn}/turn`, heroSub: 'grows each time the foe acts', freeHeroText: free, freeHeroSub: null, verbLine: 'foe loses VITAE each turn, and the doom deepens as it acts', powerRail: c.keyword ?? 'DoT', readDependent: true, inert: false, guardBase: null, statusBase: c.perTurn, statusAdv: Math.floor(c.dpr * (c.intensity + READ_ADVANTAGE_INTENSITY_BONUS)), statusDis: c.perTurn };
+                return { ...base, kind: 'dot', keyword: kw, heroText: `${c.perTurn}/turn`, heroSub: 'grows each time the foe acts', freeHeroText: free, freeHeroSub: null, verbLine: 'foe loses VITAE each turn, and the doom deepens as it acts', powerRail: c.keyword ?? 'DoT', armable: true, inert: false, guardBase: null, statusBase: c.perTurn };
             }
             // Round-clock DoT: the honest "total over N turns" face stands.
-            return { ...base, kind: 'dot', keyword: kw, heroText: `${c.total}`, heroSub: `over ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'foe loses VITAE each turn', powerRail: c.keyword ?? 'DoT', readDependent: true, inert: false, guardBase: null, statusBase: c.total, statusAdv: c.totalAdv, statusDis: c.totalDis };
+            return { ...base, kind: 'dot', keyword: kw, heroText: `${c.total}`, heroSub: `over ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'foe loses VITAE each turn', powerRail: c.keyword ?? 'DoT', armable: true, inert: false, guardBase: null, statusBase: c.total };
         }
-        case 'stun': return { ...base, kind: 'stun', keyword: kw, heroText: `skip ${c.skips} turns`, heroSub: null, freeHeroText: free, freeHeroSub: null, verbLine: "the foe can't act", powerRail: c.keyword ?? 'Stun', readDependent: false, inert: false, guardBase: null };
-        case 'weaken': return { ...base, kind: 'weaken', keyword: kw, heroText: '', heroSub: c.turns > 0 ? `hits softer · ${c.turns} turns` : 'weakens its hits', freeHeroText: free, freeHeroSub: null, verbLine: "weakens the foe's hits", powerRail: c.keyword ?? 'Weaken', readDependent: false, inert: false, guardBase: null };
-        case 'mark': return { ...base, kind: 'mark', keyword: kw, heroText: `+${c.markAmp}/tick`, heroSub: `${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'every DoT tick on the foe bites harder', powerRail: c.keyword ?? 'Mark', readDependent: false, inert: false, guardBase: null };
-        case 'guard': { const b = c.guardAmount ?? 0; return { ...base, kind: 'guard', keyword: 'GUARD', heroText: `Guard ${b}`, heroSub: null, freeHeroText: free, freeHeroSub: null, verbLine: 'block the next hit', powerRail: `${b} ↑read`, readDependent: true, inert: false, guardBase: b }; }
-        case 'befriend': return { ...base, kind: 'befriend', keyword: 'SPARE', heroText: '', heroSub: 'spare a near-dead foe', freeHeroText: 'mercy', freeHeroSub: null, verbLine: 'spare a near-dead foe', powerRail: 'mercy', readDependent: false, inert: false, guardBase: null };
-        case 'vulnerable': return { ...base, kind: 'vulnerable', keyword: kw, heroText: `+${c.vulnPct}%`, heroSub: `dmg taken · ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'foe takes more damage', powerRail: c.keyword ?? 'Vulnerable', readDependent: true, inert: false, guardBase: null, statusBase: c.vulnPct, statusAdv: c.vulnPctAdv, statusDis: c.vulnPct };
+        case 'stun': return { ...base, kind: 'stun', keyword: kw, heroText: `skip ${c.skips} turns`, heroSub: null, freeHeroText: free, freeHeroSub: null, verbLine: "the foe can't act", powerRail: c.keyword ?? 'Stun', armable: false, inert: false, guardBase: null };
+        case 'weaken': return { ...base, kind: 'weaken', keyword: kw, heroText: '', heroSub: c.turns > 0 ? `hits softer · ${c.turns} turns` : 'weakens its hits', freeHeroText: free, freeHeroSub: null, verbLine: "weakens the foe's hits", powerRail: c.keyword ?? 'Weaken', armable: false, inert: false, guardBase: null };
+        case 'mark': return { ...base, kind: 'mark', keyword: kw, heroText: `+${c.markAmp}/tick`, heroSub: `${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'every DoT tick on the foe bites harder', powerRail: c.keyword ?? 'Mark', armable: false, inert: false, guardBase: null };
+        case 'guard': { const b = c.guardAmount ?? 0; return { ...base, kind: 'guard', keyword: 'GUARD', heroText: `Guard ${b}`, heroSub: null, freeHeroText: free, freeHeroSub: null, verbLine: 'block the next hit', powerRail: `${b}`, armable: true, inert: false, guardBase: b }; }
+        case 'befriend': return { ...base, kind: 'befriend', keyword: 'SPARE', heroText: '', heroSub: 'spare a near-dead foe', freeHeroText: 'mercy', freeHeroSub: null, verbLine: 'spare a near-dead foe', powerRail: 'mercy', armable: false, inert: false, guardBase: null };
+        case 'vulnerable': return { ...base, kind: 'vulnerable', keyword: kw, heroText: `+${c.vulnPct}%`, heroSub: `dmg taken · ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'foe takes more damage', powerRail: c.keyword ?? 'Vulnerable', armable: true, inert: false, guardBase: null, statusBase: c.vulnPct };
         // ── card-overhaul (2026-07-03) — the 6 previously-blank effects ──
-        case 'resolute': return { ...base, kind: 'resolute', keyword: kw, heroText: `${c.resolutePct}%`, heroSub: `dmg taken · ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'you take less damage', powerRail: c.keyword ?? 'Resolute', readDependent: false, inert: false, guardBase: null, statusBase: c.resolutePct };
+        case 'resolute': return { ...base, kind: 'resolute', keyword: kw, heroText: `${c.resolutePct}%`, heroSub: `dmg taken · ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'you take less damage', powerRail: c.keyword ?? 'Resolute', armable: false, inert: false, guardBase: null, statusBase: c.resolutePct };
         // A keyword-less headline (DEAL — "Deal 24" needs no badge) leaves the
         // verb slot empty on purpose; the power rail then carries the hero
         // number rather than the em-dash placeholder, so the card still reads.
-        case 'mechanic': { const h = mechanicHeadline(c.mech); return { ...base, kind: 'mechanic', keyword: kw, heroText: h?.heroText ?? '', heroSub: h?.heroSub ?? null, freeHeroText: free, freeHeroSub: null, verbLine: h?.verbLine ?? '', powerRail: c.keyword ?? h?.heroText ?? '—', readDependent: false, inert: false, guardBase: null }; }
+        case 'mechanic': { const h = mechanicHeadline(c.mech); return { ...base, kind: 'mechanic', keyword: kw, heroText: h?.heroText ?? '', heroSub: h?.heroSub ?? null, freeHeroText: free, freeHeroSub: null, verbLine: h?.verbLine ?? '', powerRail: c.keyword ?? h?.heroText ?? '—', armable: false, inert: false, guardBase: null }; }
         case 'inert':
-        default: return { ...base, kind: 'inert', keyword: kw ?? 'DEBUFF', heroText: '', heroSub: card.verbClass === 'buff-self' ? 'buff yourself' : 'weakens the foe', freeHeroText: free, freeHeroSub: null, verbLine: card.verbClass === 'buff-self' ? 'buff yourself' : 'weakens the foe', powerRail: c.keyword ?? '—', readDependent: false, inert: true, guardBase: null };
+        default: return { ...base, kind: 'inert', keyword: kw ?? 'DEBUFF', heroText: '', heroSub: card.verbClass === 'buff-self' ? 'buff yourself' : 'weakens the foe', freeHeroText: free, freeHeroSub: null, verbLine: card.verbClass === 'buff-self' ? 'buff yourself' : 'weakens the foe', powerRail: c.keyword ?? '—', armable: false, inert: true, guardBase: null };
     }
 }
 
@@ -1390,7 +1358,6 @@ function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
             // / TOTAL" table is a lie for them. Print "PER TICK / TRIGGER /
             // DURATION" and describe the real trigger instead.
             if (c.dotTrigger) {
-                const perTickAdv = Math.floor(c.dpr * (c.intensity + READ_ADVANTAGE_INTENSITY_BONUS));
                 const evt = c.dotTrigger === 'card-played' ? { noun: 'card you play', trig: 'per card played', dur: { label: 'DURATION', value: `${c.turns}t` } }
                     : c.dotTrigger === 'damage-instance' ? { noun: 'time it is struck', trig: 'per hit taken', dur: { label: 'STACKS', value: `${c.intensity}` } }
                         : { noun: 'payoff you detonate', trig: 'per payoff', dur: { label: 'DURATION', value: `${c.turns}t` } };
@@ -1400,25 +1367,25 @@ function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
                     outcomeStats: [{ label: 'PER TICK', value: `${c.perTurn}` }, { label: 'TRIGGER', value: evt.trig }, evt.dur],
                     stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine,
                     powerLine: `◆ WITH A DIE: apply ${Title} — ${c.perTurn} VITAE each ${evt.noun} while it holds.`,
-                    readNote: `The read scales the PER-TICK bite: ▲ won read lands +${READ_ADVANTAGE_INTENSITY_BONUS} intensity (${perTickAdv}/tick), ▼ lost read −${READ_DISADVANTAGE_DURATION_PENALTY} turn of duration.`,
+                    readNote: `Lands as printed: ${c.perTurn} VITAE each ${evt.noun}.`,
                     mathLine: `${c.perTurn}/tick = ${c.dpr} base × ${c.intensity} intensity, ${evt.trig}${c.stacks ? ' · stacks by intensity' : ''}.`,
                     keywords,
                 };
             }
-            return { subtitle: `${Title} the enemy — damage over time.`, metaChip, outcomeLine: `Apply ${Title} ${c.total} over ${c.turns} turns.`, outcomeStats: [{ label: 'PER TURN', value: `${c.perTurn}` }, { label: 'TURNS', value: `${c.turns}` }, { label: 'TOTAL', value: `${c.total}` }], stacksText: c.stacks ? 'Stacks up to 10×.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — ${c.perTurn} VITAE/turn for ${c.turns} turns (${c.total} total).`, readNote: `The read is exact: ▲ won read lands +${READ_ADVANTAGE_INTENSITY_BONUS} intensity (${c.totalAdv} total), ▼ lost read −${READ_DISADVANTAGE_DURATION_PENALTY} turn (${c.totalDis} total); ${c.total} on an even read.`, mathLine: `${c.perTurn}/turn = ${c.dpr} base × ${c.intensity} intensity · ${c.turns} turns · ${c.total} VITAE total on an even read${c.stacks ? ' · stacks to 10×' : ''}.`, keywords };
+            return { subtitle: `${Title} the enemy — damage over time.`, metaChip, outcomeLine: `Apply ${Title} ${c.total} over ${c.turns} turns.`, outcomeStats: [{ label: 'PER TURN', value: `${c.perTurn}` }, { label: 'TURNS', value: `${c.turns}` }, { label: 'TOTAL', value: `${c.total}` }], stacksText: c.stacks ? 'Stacks up to 10×.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — ${c.perTurn} VITAE/turn for ${c.turns} turns (${c.total} total).`, readNote: `Lands as printed: ${c.total} VITAE over ${c.turns} turns.`, mathLine: `${c.perTurn}/turn = ${c.dpr} base × ${c.intensity} intensity · ${c.turns} turns · ${c.total} VITAE total${c.stacks ? ' · stacks to 10×' : ''}.`, keywords };
         }
-        case 'stun': return { subtitle: `${Title} the enemy — it loses its turns.`, metaChip, outcomeLine: `Apply ${Title} ${c.skips} turn${c.skips === 1 ? '' : 's'}.`, outcomeStats: [{ label: 'SKIPS', value: `${c.skips} turns` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${Title} — the foe skips its next ${c.skips} actions.`, readNote: `The read is exact: ▲ won read changes nothing (skips are duration-driven), ▼ lost read shortens the skip by ${READ_DISADVANTAGE_DURATION_PENALTY} turn (floor 1).`, mathLine: `skip ${c.skips}t = ${Title.toLowerCase()} duration ${c.skips} (each turn it would act is cancelled).`, keywords };
+        case 'stun': return { subtitle: `${Title} the enemy — it loses its turns.`, metaChip, outcomeLine: `Apply ${Title} ${c.skips} turn${c.skips === 1 ? '' : 's'}.`, outcomeStats: [{ label: 'SKIPS', value: `${c.skips} turns` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${Title} — the foe skips its next ${c.skips} actions.`, readNote: `Lands as printed: the foe skips ${c.skips} turn${c.skips === 1 ? '' : 's'}.`, mathLine: `skip ${c.skips}t = ${Title.toLowerCase()} duration ${c.skips} (each turn it would act is cancelled).`, keywords };
         case 'weaken': return { subtitle: `${Title} the enemy — its attacks hit softer.`, metaChip, outcomeLine: c.turns > 0 ? `Apply ${Title} · ${c.turns} turns.` : `Apply ${Title}.`, outcomeStats: c.turns > 0 ? [{ label: 'TURNS', value: `${c.turns}` }] : [], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — the foe's hits land softer while it holds.`, readNote: `${Title} weakens the enemy's blows.`, mathLine: `${Title} reduces the enemy's outgoing damage while active (real engine units).`, keywords };
         case 'mark': return { subtitle: `${Title} the enemy — the flaw is named.`, metaChip, outcomeLine: `Apply ${Title} +${c.markAmp}/tick · ${c.turns} turns.`, outcomeStats: [{ label: 'PER TICK', value: `+${c.markAmp}` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — every DoT tick and payoff hit on the foe deals +${c.markAmp} while it holds.`, readNote: `${Title} counts as an affliction — RUPTURE, SOUL, and REAP all feed on it.`, mathLine: `+${c.markAmp}/tick = tickAmplifyFlat × intensity, for ${c.turns} turns.`, keywords };
         case 'guard': { const b = c.guardAmount ?? 0; return { subtitle: 'Guard yourself — soak the next hit.', metaChip, outcomeLine: `Gain ${Title} ${b}.`, outcomeStats: [{ label: 'GUARD', value: `${b}` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: Guard ${b}; +${colorMatchBonus(b)} if a ${STANCE} die matches.`, readNote: `Lands as printed; a colour-matched die adds +${colorMatchBonus(b)}.`, mathLine: `POWER = ${b} + ${colorMatchBonus(b)} on a colour match.`, keywords }; }
         case 'befriend': return { subtitle: 'Spare a near-dead foe.', metaChip, outcomeLine: 'Spare a near-dead foe — end combat peacefully.', outcomeStats: [], stacksText: null, freeLine, powerLine: '◆ WITH A DIE: if the enemy VITAE is low, end combat peacefully (befriend).', readNote: 'Watch the enemy VITAE bar — befriend lands only when it is low.', mathLine: 'No fixed number — a conditional outcome gated on low enemy VITAE.', keywords };
-        case 'vulnerable': { return { subtitle: `${Title} the enemy — it takes more damage.`, metaChip, outcomeLine: `Apply ${Title} +${c.vulnPct}% · ${c.turns} turns.`, outcomeStats: [{ label: 'DMG TAKEN', value: `+${c.vulnPct}%` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: 'Stacks without limit.', freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — +${c.vulnPct}% damage taken for ${c.turns} turns.`, readNote: `The read is exact: ▲ won read lands +${READ_ADVANTAGE_INTENSITY_BONUS} intensity (+${c.vulnPctAdv}%), ▼ lost read −${READ_DISADVANTAGE_DURATION_PENALTY} turn; +${c.vulnPct}% on an even read.`, mathLine: `+${c.vulnPct}% = (damageTakenMult − 1) × 100 × intensity on an even read; combined Vulnerable is uncapped.`, keywords }; }
+        case 'vulnerable': { return { subtitle: `${Title} the enemy — it takes more damage.`, metaChip, outcomeLine: `Apply ${Title} +${c.vulnPct}% · ${c.turns} turns.`, outcomeStats: [{ label: 'DMG TAKEN', value: `+${c.vulnPct}%` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: 'Stacks without limit.', freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — +${c.vulnPct}% damage taken for ${c.turns} turns.`, readNote: `Lands as printed: +${c.vulnPct}% damage taken for ${c.turns} turns.`, mathLine: `+${c.vulnPct}% = (damageTakenMult − 1) × 100 × intensity; combined Vulnerable is uncapped.`, keywords }; }
         // ── card-overhaul (2026-07-03) — the 6 previously-blank effects ──
-        case 'resolute': return { subtitle: `${Title} — you take less damage.`, metaChip, outcomeLine: `Gain ${Title} ${c.resolutePct}% · ${c.turns} turns.`, outcomeStats: [{ label: 'DMG TAKEN', value: `${c.resolutePct}%` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: gain ${Title} — ${c.resolutePct}% damage taken for ${c.turns} turns.`, readNote: `Your damage reduction takes no read — ${Title} is exact (a self-buff, not scaled by the stance read).`, mathLine: `${c.resolutePct}% = (damageTakenMult − 1) × 100 on an even application${c.stacks ? '; stacks by intensity' : ''}.`, keywords };
+        case 'resolute': return { subtitle: `${Title} — you take less damage.`, metaChip, outcomeLine: `Gain ${Title} ${c.resolutePct}% · ${c.turns} turns.`, outcomeStats: [{ label: 'DMG TAKEN', value: `${c.resolutePct}%` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: gain ${Title} — ${c.resolutePct}% damage taken for ${c.turns} turns.`, readNote: `Lands as printed: ${Title} is a self-buff.`, mathLine: `${c.resolutePct}% = (damageTakenMult − 1) × 100${c.stacks ? '; stacks by intensity' : ''}.`, keywords };
         // A keyword-less mechanic headline (DEAL) has no Title to lead with —
         // every line below falls back to the headline's own words rather than
         // opening with a dangling dash or an empty stat label.
-        case 'mechanic': { const h = mechanicHeadline(c.mech); const verb = h?.verbLine ?? 'a special mechanic'; const val = [h?.heroText, h?.heroSub].filter(Boolean).join(' '); const lead = Title || h?.heroText || 'This card'; const statLabel = (Title || 'PAID').toUpperCase(); return { subtitle: Title ? `${Title} — ${verb}.` : `${verb.charAt(0).toUpperCase()}${verb.slice(1)}.`, metaChip, outcomeLine: Title ? (val ? `${Title} ${val}.` : `${Title}.`) : `${val || verb}.`, outcomeStats: h?.heroText ? [{ label: statLabel, value: h.heroText }] : [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${vitaeCopy(card.bottomActionText)}`, readNote: `${lead} takes no read — the printed line is the applied effect.`, mathLine: `${lead}: ${vitaeCopy(h?.verbLine ?? card.bottomActionText)}.`, keywords }; }
+        case 'mechanic': { const h = mechanicHeadline(c.mech); const verb = h?.verbLine ?? 'a special mechanic'; const val = [h?.heroText, h?.heroSub].filter(Boolean).join(' '); const lead = Title || h?.heroText || 'This card'; const statLabel = (Title || 'PAID').toUpperCase(); return { subtitle: Title ? `${Title} — ${verb}.` : `${verb.charAt(0).toUpperCase()}${verb.slice(1)}.`, metaChip, outcomeLine: Title ? (val ? `${Title} ${val}.` : `${Title}.`) : `${val || verb}.`, outcomeStats: h?.heroText ? [{ label: statLabel, value: h.heroText }] : [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${vitaeCopy(card.bottomActionText)}`, readNote: `${lead} lands as printed — the printed line is the applied effect.`, mathLine: `${lead}: ${vitaeCopy(h?.verbLine ?? card.bottomActionText)}.`, keywords }; }
         case 'inert':
         default: return { subtitle: `${Title || 'Effect'} — minor right now.`, metaChip, outcomeLine: `${Title || 'This effect'} — minor for now.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${vitaeCopy(card.bottomActionText)}`, readNote: 'The engine text above is the whole truth for this card.', mathLine: `${Title || 'This effect'} carries no headline number — the printed line is the applied effect.`, keywords };
     }
@@ -1545,7 +1512,7 @@ export function detailStats(card: CombatCard, sourceCard?: Card): CombatCardDeta
 /** The hero value at the moment of commit — StagedCard only. Guard adds the
  *  colour-match bonus; DoT total and Vulnerable % land as printed. null for
  *  kinds with no number to arm (stun's skip count is duration-driven). */
-export function armedReadValue(face: CombatCardFaceVM, colorMatch: boolean): number | null {
+export function armedValue(face: CombatCardFaceVM, colorMatch: boolean): number | null {
     if (face.kind === 'guard' && face.guardBase != null) {
         // THE BIG NUMBERS REWRITE — the colour-match reward is a PERCENTAGE
         // (+25%, min +2). `colorMatchBonus` IS the engine's rule, imported,

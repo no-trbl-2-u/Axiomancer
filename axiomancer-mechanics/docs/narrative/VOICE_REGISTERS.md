@@ -87,7 +87,7 @@ Those are examples, not universal assignments.
 
 **Purpose:** make the next valid action unmistakable.
 
-- Use labels, not lore: `CHOOSE A STANCE`, `Lose 3 VITAE`, `Applies ROOT (2)`.
+- Use labels, not lore: `END PHASE`, `Lose 3 VITAE`, `Applies POISON (2)`.
 - Use one term for one mechanic; follow the canonical project lexicon.
 - State costs before confirmation and results after resolution.
 - Use numerals for quantities and rounds.

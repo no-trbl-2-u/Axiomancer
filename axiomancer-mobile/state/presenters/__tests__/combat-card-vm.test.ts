@@ -1,6 +1,6 @@
 /**
  * Hermetic unit tests for the honest card view-model helpers
- * (engineHonestKind / resolvePrimary / faceStats / detailStats / armedReadValue).
+ * (engineHonestKind / resolvePrimary / faceStats / detailStats / armedValue).
  *
  * Fixtures are live library cards, read live from the sibling engine so the
  * assertions stay true to real data. After the card purge (2026-09-27) the
@@ -26,7 +26,7 @@ import {
 } from '@mechanics';
 import type { Card, Effect } from '@mechanics';
 import {
-    faceStats, detailStats, engineHonestKind, resolvePrimary, armedReadValue,
+    faceStats, detailStats, engineHonestKind, resolvePrimary, armedValue,
 } from '@/state/presenters/combat-encounter.engine';
 
 /**
@@ -99,7 +99,7 @@ describe('faceStats — honest real-unit faces', () => {
         // phase 30: BARRIER merged into GUARD — the FREE line lays a
         // persistent brick, not a fading chip.
         expect(f.freeHeroText).toBe('Guard 2');
-        expect(f.readDependent).toBe(true);
+        expect(f.armable).toBe(true);
         expect(f.guardBase).toBe(5);
     });
     it('A Plain Blow (DEAL) → the printed number, no read — never a fabricated one', () => {
@@ -107,8 +107,8 @@ describe('faceStats — honest real-unit faces', () => {
         const f = faceStats(card, sourceCard);
         expect(f.heroText).toBe('Deal 5');
         expect(f.freeHeroText).toBe('Deal 2');
-        // DEAL takes no read: the printed line IS the applied effect.
-        expect(f.readDependent).toBe(false);
+        // DEAL arms nothing: the printed line IS the applied effect.
+        expect(f.armable).toBe(false);
         expect(f.inert).toBe(false);
     });
     it('A Plain Word (VULNERABLE +25% 2t) → a real percentage, real turns', () => {
@@ -118,7 +118,7 @@ describe('faceStats — honest real-unit faces', () => {
         expect(f.keyword).toBe('VULNERABLE');
         expect(f.heroText).toBe('+25%');
         expect(f.heroSub).toBe('dmg taken · 2 turns');
-        expect(f.readDependent).toBe(true);
+        expect(f.armable).toBe(true);
         expect(f.statusBase).toBe(25);
         expect(f.inert).toBe(false);
     });
@@ -198,26 +198,26 @@ describe('card-wording audit (2026-07-12) — the +DIE row carries only what the
     });
 });
 
-describe('resolvePrimary + armedReadValue', () => {
+describe('resolvePrimary + armedValue', () => {
     it('resolvePrimary routes by verb-class + honesty (the v3 shapes)', () => {
         expect(resolvePrimary(getCard('grey-ward')!, getCardById('grey-ward')).kind).toBe('guard');
         expect(resolvePrimary(getCard('grey-word')!, getCardById('grey-word')).kind).toBe('vulnerable');
         expect(resolvePrimary(getCard('grey-strike')!, getCardById('grey-strike')).kind).toBe('mechanic');
     });
-    it('armedReadValue prints Guard as printed (+colour match)', () => {
+    it('armedValue prints Guard as printed (+colour match)', () => {
         const guard = faceStats(getCard('grey-ward')!, getCardById('grey-ward'));
         const base = guard.guardBase!;
         expect(base).toBe(5);
-        expect(armedReadValue(guard, false)).toBe(base);
+        expect(armedValue(guard, false)).toBe(base);
         // The presenter consumes the ENGINE's rule, not a restatement of it:
         // colorMatchBonus() = max(2, 25% of the base), which here (2) differs
         // from the old flat +3 — the printed-not-applied bug this catches.
-        expect(armedReadValue(guard, true)).toBe(base + colorMatchBonus(base));
+        expect(armedValue(guard, true)).toBe(base + colorMatchBonus(base));
         expect(colorMatchBonus(base)).not.toBe(3);
     });
-    it('armedReadValue reads a ROUND-CLOCK DoT as its ramp-aware lifetime (exact)', () => {
+    it('armedValue reads a ROUND-CLOCK DoT as its ramp-aware lifetime (exact)', () => {
         // Sketch of a Thought: kindling ember dpr 1, i1, 3 turns, no ramp → 3.
         const dot = faceStats(getCard('fx-ember')!, getCardById('fx-ember'));
-        expect(armedReadValue(dot, false)).toBe(3);          // 1+1+1
+        expect(armedValue(dot, false)).toBe(3);          // 1+1+1
     });
 });

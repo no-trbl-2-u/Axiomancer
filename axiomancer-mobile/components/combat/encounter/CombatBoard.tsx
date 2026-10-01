@@ -47,7 +47,7 @@ import type {
     CombatSignatureVM, CombatEffectChipVM,
     CombatMomentumV2VM,
 } from '@/state/presenters/combat-encounter.engine';
-import { armedReadValue, dieCanPowerCardVM, STANCE_COLORS } from '@/state/presenters/combat-encounter.engine';
+import { armedValue, dieCanPowerCardVM, STANCE_COLORS } from '@/state/presenters/combat-encounter.engine';
 // D4 (2026-09-21) — the ONE mobile source for the rarity band. The face never
 // re-bands a rank and never re-types a rarity hue; see `card-rarity.engine.ts`.
 import { rarityFor, RARITY_LABEL, RARITY_PIPS, RARITY_COLOR } from '@/state/presenters/card-rarity.engine';
@@ -497,7 +497,7 @@ export const StagedCard = React.memo(function StagedCard({
     const popStyle = useJuicePulse(popKey, 0.4);
     const shakeStyle = useJuiceShake(rejectKey, 'low');
     const armed = assignedDie !== null;
-    const readColor = armed ? ARMED_ACCENT : AXM.bone;
+    const armedColor = armed ? ARMED_ACCENT : AXM.bone;
     // Option A rail needs width: staged faces track the hand-card proportion
     // (shaved with it in the 2026-07-19 declutter pass).
     const cardW = compact ? 92 : 112;
@@ -506,11 +506,11 @@ export const StagedCard = React.memo(function StagedCard({
     // printed plus the colour-match bonus the armed die earns — so the staged
     // number is exact at commit.
     let heroOverride: string | undefined;
-    if (armed && f.readDependent) {
+    if (armed && f.armable) {
         // Phase 104 — a grey card's colour-match bonus is neutral, even off wild.
         const colorMatch = card.stance !== 'any'
             && (assignedDie!.color === card.stance || assignedDie!.color === 'wild');
-        const g = armedReadValue(f, colorMatch);
+        const g = armedValue(f, colorMatch);
         // Commit value: Guard NN / +NN% Vulnerable / NN DoT total.
         if (g != null) heroOverride = f.kind === 'guard' ? `Guard ${g}` : f.kind === 'vulnerable' ? `+${g}%` : `${g}`;
     }
@@ -548,7 +548,7 @@ export const StagedCard = React.memo(function StagedCard({
                         card={card}
                         width={cardW}
                         height={cardH}
-                        accent={armed ? readColor : null}
+                        accent={armed ? armedColor : null}
                         heroOverride={heroOverride}
                     />
                     {/* die socket notched into the top-right corner: dashed target while
@@ -581,14 +581,14 @@ export const StagedCard = React.memo(function StagedCard({
                 hitSlop={8}
                 style={[
                     styles.applyRibbon,
-                    { borderColor: armed ? readColor : AXM.bone, backgroundColor: armed ? 'rgba(91,191,106,0.16)' : 'rgba(0,0,0,0.55)', width: cardW },
+                    { borderColor: armed ? armedColor : AXM.bone, backgroundColor: armed ? 'rgba(91,191,106,0.16)' : 'rgba(0,0,0,0.55)', width: cardW },
                     // Dead-tray telegraph: the FREE line is the live out — the
                     // ribbon lights sulfur so it reads as THE button to press.
                     !armed && freeProminent && { borderColor: AXM.sulfur, backgroundColor: 'rgba(212,192,38,0.16)' },
                     compact && { paddingVertical: 3 },
                 ]}
             >
-                <Text style={[styles.applyText, { color: armed ? readColor : freeProminent ? AXM.sulfur : AXM.parchment }, compact && { fontSize: 10 }]} numberOfLines={1} adjustsFontSizeToFit>
+                <Text style={[styles.applyText, { color: armed ? armedColor : freeProminent ? AXM.sulfur : AXM.parchment }, compact && { fontSize: 10 }]} numberOfLines={1} adjustsFontSizeToFit>
                     {applyLabel}
                 </Text>
             </Pressable>

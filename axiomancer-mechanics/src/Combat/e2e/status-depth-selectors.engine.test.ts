@@ -163,10 +163,7 @@ describe('card engine — every combat-engine-owned mechanic kind is a NO-OP thr
             const enemy = deepClone(FloatEye) as Enemy;
             enemy.health = 100; enemy.maxHealth = 100; enemy.effects = [ae('debuff_poison', 3)];
 
-            const state: CombatState = {
-                active: true, phase: 'resolving', round: 1,
-                player, enemy, playerChoice: {}, enemyChoice: {},
-            };
+            const state: CombatState = { round: 1, player, enemy };
             const res = executeCard(state, 'test-mech-card', id => id === 'test-mech-card' ? card : getCardById(id));
 
             // No effect events from the mechanic itself.

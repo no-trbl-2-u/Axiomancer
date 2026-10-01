@@ -8,7 +8,7 @@
  *
  * Coverage areas:
  *   1. Stat derivation: calculateMaxHealth
- *   2. Die rolling: createDie, createDieRoll, determineRollAdvantageModifier
+ *   2. Die rolling: createDie
  *   3. Math utilities: clamp, randomInt, deepClone, average, sum, max, min, inRange
  *   4. String utilities: capitalize, formatPercent
  *
@@ -34,8 +34,6 @@ import {
   
   // Die rolling
   createDie,
-  createDieRoll,
-  determineRollAdvantageModifier,
   
   // Stat derivation
   calculateMaxHealth
@@ -140,33 +138,12 @@ describe('Utils engine', () => {
 
     it('creates multi-die rolls with aggregation functions', () => {
       mockFixedRng([0.0, 0.5]); // Two dice rolls
-      const d20Advantage = createDie(20, 2, max);
+      const d20Best = createDie(20, 2, max);
       
       // First roll: 0.0 * 20 = 0 -> floor(0) + 1 = 1
       // Second roll: 0.5 * 20 = 10 -> floor(10) + 1 = 11
       // max(1, 11) = 11
-      expect(d20Advantage()).toBe(11);
-    });
-
-    it('creates advantage/disadvantage d20 rolls', () => {
-      const advantageRoll = createDieRoll('advantage');
-      const disadvantageRoll = createDieRoll('disadvantage');
-      const neutralRoll = createDieRoll('neutral');
-      
-      // Should create 2d20 keep highest for advantage
-      expect(typeof advantageRoll).toBe('function');
-      expect(typeof disadvantageRoll).toBe('function');
-      expect(typeof neutralRoll).toBe('function');
-    });
-
-    it('determines roll advantage modifiers', () => {
-      const advMod = determineRollAdvantageModifier('advantage');
-      const disMod = determineRollAdvantageModifier('disadvantage');
-      const neuMod = determineRollAdvantageModifier('neutral');
-      
-      expect(advMod([10, 15])).toBe(15); // max
-      expect(disMod([10, 15])).toBe(10); // min
-      expect(neuMod([10, 15])).toBe(25); // sum
+      expect(d20Best()).toBe(11);
     });
   });
 

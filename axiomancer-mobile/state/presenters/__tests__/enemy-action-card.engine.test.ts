@@ -27,7 +27,6 @@ function stateWithPhases(): CombatEncounterState {
         threatPhases: [
             {
                 index: 1,
-                enemyStance: 'body',
                 intentType: 'damage',
                 threatAction: {
                     description: 'Cairn-rot presses the attack (+6 damage).',
@@ -37,7 +36,6 @@ function stateWithPhases(): CombatEncounterState {
             },
             {
                 index: 2,
-                enemyStance: 'mind',
                 intentType: 'combo',
                 intentLabel: 'CHARGES UP',
                 threatAction: {

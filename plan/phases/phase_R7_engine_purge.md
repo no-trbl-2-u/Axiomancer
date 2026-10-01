@@ -415,6 +415,38 @@ stays green between rows):
   surviving comments and docs (`docs/combat.md`, `docs/effects.md`,
   `docs/enemy.md`, spec 33).
 
+### As shipped (R7d2, 2026-10-01)
+
+- **Legacy types**: `Action`, `Advantage`, `CombatAction`,
+  `PlayerCombatAction` and `CombatPhase` (with `choosing_stance`) are gone;
+  `CombatState` is the slice `executeCard` reads (`round`, `player`,
+  `enemy`). The advantage die helpers (`createDieRoll`,
+  `determineRollAdvantageModifier`) went with `Advantage`. `scalePlayerHit`
+  lost its always-1 `readMult`. `EnemyLogic`'s doc no longer describes the
+  removed stance AI; the `Stance` doc names the three stat families.
+- **Player-facing copy**: the card detail's read lines ("▲ won read / ▼ lost
+  read", "takes no read") now say what lands; the face VM lost `statusAdv`,
+  `statusDis`, the frozen `READ_*` constants and the dead
+  `damageTakenMultForStance` reader; `readDependent` / `armedReadValue` are
+  `armable` / `armedValue`; guard's power rail drops "↑read". The tutorial
+  step, primer, summary coach line, momentum tip and a11y line, stat
+  tooltips, card tooltip footnote and the stat-glyph labels say "colour"
+  where they said "stance".
+- **Canon copy**: "CHOOSE A STANCE" / STANCE canon is out of `spec.md`,
+  `axiomancer-mobile/AGENTS.md` and `CLAUDE.md`, `plan/bearings.md`, the
+  ship-a-phase hard rule and the narrative lexicon, style and voice docs.
+- **Carrier sweep**: the `advantage` glyph kind (and its `advantageModifier`
+  reader and BLESSING case), the `advantage` effect category and the
+  `grant_advantage` interaction trigger. STAGGER, ROOT, CONFUSION, charm and
+  DISRUPT had no row left in the atlas, glossary or glyph registries; they
+  survive only in historical prose and in `deprecated-effects` (which pins
+  their absence).
+- **Left for R10c**: the word "stance" in code comments and in surviving
+  identifiers that mean colour (`card.stance`, `StanceGlyph`, `STANCE_COLORS`,
+  per the R7d decision); `docs/combat.md`, `docs/effects.md`, `docs/enemy.md`
+  and spec 33 prose; test fixtures that use `debuff_confusion` as an
+  arbitrary unknown effect id.
+
 ## Out of scope for R7a (named so it is not mistaken for a miss)
 
 - `synergy` and `synergy-predicates.ts`, themes, draft, presets,

@@ -30,7 +30,7 @@ export function CombatSummaryModal({ summary, onClose }: { summary: CombatSummar
                     {summary.rows.length === 0 && (
                         <>
                             <Text style={styles.noRows}>No status effects contributed.</Text>
-                            <Text style={styles.coach}>Draft a stance die each turn, then POWER a status card — DoT wears the enemy down and control skips its turns. Basic strikes alone will not close it.</Text>
+                            <Text style={styles.coach}>POWER a status card with a die each turn — DoT wears the enemy down and control skips its turns. Basic strikes alone will not close it.</Text>
                         </>
                     )}
                     {summary.rows.slice(0, 6).map(row => (

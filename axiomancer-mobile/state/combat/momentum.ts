@@ -26,11 +26,11 @@ export function momentumV2A11y(m: {
         return 'Momentum SURGED — a wild momentum die waits in your tray; the chain resets.';
     }
     if (m.broke) {
-        return 'Momentum BROKEN — the chain collapsed to nothing. Play the right next stance to rebuild it.';
+        return 'Momentum BROKEN — the chain collapsed to nothing. Play the right next colour to rebuild it.';
     }
     if (m.color === null || m.length === 0) {
-        return 'No momentum — play any stance to start the chain.';
+        return 'No momentum — play any coloured card to start the chain.';
     }
     return `Momentum ${m.length} of ${m.surgeAt} — chain on ${m.color.toUpperCase()};`
-        + ` next stance ${m.next?.toUpperCase() ?? ''} to advance.`;
+        + ` next colour ${m.next?.toUpperCase() ?? ''} to advance.`;
 }

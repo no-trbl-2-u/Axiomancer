@@ -67,7 +67,7 @@ export interface CreateEnemyOptions {
  * (2026-09-02).
  *
  * Enemies no longer borrow the player's per-stat health formula: `baseStats`
- * still drives stance procs, derived combat stats and befriend logic, but the
+ * still drives derived combat stats and befriend logic, but the
  * pool is its own number so the difficulty bands separate cleanly and a boss
  * can be a wall without a grotesque stat budget.
  *

@@ -64,18 +64,18 @@ export interface TooltipContent {
 const STAT_CONTENT: Record<string, TooltipContent> = {
     HEART: {
         title: 'HEART',
-        body: "the will to stay with what's difficult. governs willpower and the heart-stance damage curve.",
+        body: "the will to stay with what's difficult. governs willpower and the keywords that scale by heart.",
         accent: 'heart',
     },
     BODY: {
         title: 'BODY',
-        body: 'the weight you carry in the world. governs hp, physical attack, defense, and body-stance damage curves.',
+        body: 'the weight you carry in the world. governs hp, physical attack, defense, and the keywords that scale by body.',
         footnote: '+1 hp per body point',
         accent: 'body',
     },
     MIND: {
         title: 'MIND',
-        body: 'the discipline of attention. governs focus, card cost recovery, and mind-stance damage curves.',
+        body: 'the discipline of attention. governs focus, card cost recovery, and the keywords that scale by mind.',
         footnote: '+1 focus per mind point',
         accent: 'mind',
     },
@@ -363,7 +363,7 @@ export function selectTooltipContentFor(
         return {
             title: card.name,
             body: card.description,
-            footnote: `stance ${card.stance.toUpperCase()}`,
+            footnote: `colour ${card.stance.toUpperCase()}`,
             accent: accentForStat(card.stance),
         };
     }

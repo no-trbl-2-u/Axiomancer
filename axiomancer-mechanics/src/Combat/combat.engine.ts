@@ -198,17 +198,9 @@ export function getCard(cardId: string): CombatCard | null {
 
 // ── Internal helpers ─────────────────────────────────────────────────────────
 
-/** Builds the legacy `CombatState` shim `executeCard` needs. */
+/** Builds the `CombatState` slice `executeCard` reads. */
 function cardShim(enc: CombatEncounterState): CombatState {
-    return {
-        active: true,
-        phase: 'resolving',
-        round: enc.round,
-        player: enc.player,
-        enemy: enc.enemy,
-        playerChoice: {},
-        enemyChoice: {},
-    };
+    return { round: enc.round, player: enc.player, enemy: enc.enemy };
 }
 
 /** THE COLOR LAW (dice-law rework 2026-07-09): a die powers only a card of ITS
@@ -674,14 +666,12 @@ function applyEnemyDamage(
  * The scalers a single player hit picks up on its way to the foe, folded in
  * one place so every damage source (the `deal` mechanic, a FREE-line
  * `damage`) reads the same rules. Order is authored:
- *   1. the READ multiplier
- *   2. the colour-match bonus, as a percentage of what the read left
- *   3. VULNERABLE — the foe's incoming-damage multiplier (S3, D41: last of
+ *   1. the colour-match bonus, as a percentage of the base
+ *   2. VULNERABLE — the foe's incoming-damage multiplier (S3, D41: last of
  *      the multipliers, uncapped). The caller scales `base` by body first.
  */
 export interface PlayerHitParams {
     base: number;
-    readMult: number;
     colorMatch: boolean;
     /** VULNERABLE on the foe (`getDamageTakenMultiplier`); 1 when absent. */
     vulnMult?: number;
@@ -689,7 +679,7 @@ export interface PlayerHitParams {
 
 export function scalePlayerHit(params: PlayerHitParams): number {
     if (params.base <= 0) return 0;
-    let dmg = Math.round(params.base * params.readMult);
+    let dmg = Math.round(params.base);
     if (params.colorMatch) dmg += colorMatchBonus(dmg);
     if (params.vulnMult !== undefined && params.vulnMult !== 1) dmg = Math.round(dmg * params.vulnMult);
     return Math.max(0, dmg);
@@ -750,7 +740,6 @@ function applyRiderToState(
         // number, scaled by body and VULNERABLE.
         const dmg = scalePlayerHit({
             base: scaleFor(r.damage, stats, 'body', 'one-shot'),
-            readMult: 1,
             colorMatch: false,
             vulnMult: getDamageTakenMultiplier(enemy),
         });
@@ -1010,7 +999,6 @@ function playBottomAction(
         const healthBefore = enemy.health;
         const dmg = scalePlayerHit({
             base: scaleFor(mech.amount, stats, 'body', 'one-shot'),
-            readMult: 1,
             colorMatch,
             vulnMult,
         });

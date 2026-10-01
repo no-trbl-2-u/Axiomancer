@@ -29,7 +29,7 @@ export type EffectTier = 1 | 2 | 3;
 
 /** Thematic grouping for UI / library queries. */
 export type EffectCategory =
-    | 'stat' | 'damage' | 'defense' | 'control' | 'regeneration' | 'advantage';
+    | 'stat' | 'damage' | 'defense' | 'control' | 'regeneration';
 
 /**
  * A persistent stat line on a piece of equipment. The only stat an item can
@@ -62,7 +62,7 @@ export type DotTriggerClock = 'card-played' | 'damage-instance' | 'payoff';
  */
 export interface DamageOverTime {
     damagePerRound: number;
-    /** Which stance the damage reads as. Informational (UI accent only). */
+    /** Which stat family the damage reads as. Informational (UI accent only). */
     damageType: Stance;
     /** WS3 event clock. Absent = the round clock (ticks at round start).
      *  Event-clocked DoTs never tick at the round boundary — the engine
@@ -128,7 +128,7 @@ export interface EffectPayload {
  * @property id          - Unique identifier used for lookups.
  * @property duration    - Base duration in rounds (-1 permanent, 0 instant).
  * @property tier        - Application/resist tier (1-3).
- * @property resistedBy  - Which stance resists this effect. Absent for tier 1.
+ * @property resistedBy  - Which stat family resists this effect. Absent for tier 1.
  * @property resistDR    - Base difficulty for a resist roll. Absent for tier 1.
  * @property payload     - Mechanical modifiers applied to the bearer.
  */

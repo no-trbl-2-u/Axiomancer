@@ -29,22 +29,10 @@ export interface BefriendabilityConfig {
 }
 
 /**
- * Decision-making strategy used by an enemy each round (Spec 07). Retained as
- * data only: the legacy turn-based AI driver that branched on it was removed
- * (the Hazard-Pattern engine drives foes via authored threat sequences).
- *
- * - `random`     — picks any stance and any action uniformly.
- * - `aggressive` — attacks ~75% of the time; favours the stance that beats
- *                  the player's last stance (rock-paper-scissors counter).
- * - `defensive`  — defends until HP > 50% of max; then attacks the stance
- *                  the player has the *lowest* base stat in.
- * - `balanced`   — attacks while HP > 50%; defends below that threshold.
- * - `strategic`  — inspects the player's active effects and exploits
- *                  matching debuffs (e.g. a Body-stat debuff pulls Body
- *                  attacks). Falls back to `aggressive` heuristics
- *                  when no exploit is on the board.
- * - `boss`       — deterministic phase script keyed off `state.round`. Used
- *                  by `bossLogic` enemies for telegraphed signature patterns.
+ * Decision-making label an enemy carries (Spec 07). Data only: nothing reads
+ * it. The Hazard-Pattern engine drives every foe through its authored threat
+ * sequence, and the legacy turn-based AI that branched on this label (and on
+ * the player's stance) was removed with that driver.
  */
 export type EnemyLogic =
     | 'random' | 'aggressive' | 'defensive' | 'balanced' | 'strategic' | 'boss';

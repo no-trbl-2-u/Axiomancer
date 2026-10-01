@@ -208,7 +208,7 @@ describe('selectTooltipContentFor', () => {
     });
 
     describe('kind: card (Phase 75)', () => {
-        it('returns engine-sourced name + description + stance for a known card id', () => {
+        it('returns engine-sourced name + description + colour for a known card id', () => {
             // Pick any known engine card — the first one is stable.
             const first = cardLibrary[0];
             const content = selectTooltipContentFor('card', first.id, EMPTY_STATE);
@@ -217,8 +217,8 @@ describe('selectTooltipContentFor', () => {
             expect(content?.title).toBe(first.name.toUpperCase());
             expect(content?.body).toBe(first.description);
             // The grey office is colourless ('any') — the footnote names that too.
-            expect(content?.footnote).toMatch(/^stance (HEART|BODY|MIND|ANY)$/);
-            expect(content?.footnote).toBe(`stance ${first.color.toUpperCase()}`);
+            expect(content?.footnote).toMatch(/^colour (HEART|BODY|MIND|ANY)$/);
+            expect(content?.footnote).toBe(`colour ${first.color.toUpperCase()}`);
         });
 
         it('returns null for an unknown card id', () => {

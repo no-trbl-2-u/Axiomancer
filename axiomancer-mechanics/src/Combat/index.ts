@@ -2,10 +2,6 @@
  * Combat barrel.
  *
  * Combat-specific logic is split across focused modules:
- *   advantage.ts        — type-advantage relationships and modifiers
- *   stats.ts            — stat lookups for combatants
- *   dice.ts             — crit detection
- *   damage.ts           — final damage and attack outcome
  *   health.ts           — applyDamage / heal / status checks
  *   effects.ts          — combatant-side effect manipulations
  *   resist.ts           — tier 2/3 effect application resolver

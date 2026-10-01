@@ -174,8 +174,9 @@ references them.
 `devaftermath`, `devart`). The `gathering` and `quest` routes are
 retired; `app/_layout.tsx` + `lib/platform/router.ts` are the
 registration truth.
-Canon combat copy: **VITAE** (not HEALTH), **STANCE / CHOOSE A
-STANCE** (not GUARD) — copy regressions are rejected.
+Canon combat copy: **VITAE** (not HEALTH) — copy regressions are
+rejected. The stance layer is gone (D65, R7d); no player-facing copy
+says "stance".
 
 ### Deterministic seeded-RNG invariants
 
@@ -289,8 +290,8 @@ ambiguity.)
   archived in R0 (`plan/archive/2026-09-28-revamp-r0/`, with
   `CONTENT_LEDGER.md`). During the revamp the loop creates no content of any
   kind; content returns through the owner-led rebuild sessions (B1–B9).
-- **Copy canon:** VITAE, STANCE. Never HEALTH / GUARD (as the stance
-  name) / MORALE. GRACE (né MORALE, Phase 44h) was removed in T6 (D39,
+- **Copy canon:** VITAE. Never HEALTH / MORALE; never "stance" (the
+  layer was removed, D65). GRACE (né MORALE, Phase 44h) was removed in T6 (D39,
   2026-09-27).
 - **Content location:** engine content in mechanics `src/*`
   libraries; player-facing strings in mobile presenters /

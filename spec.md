@@ -15,7 +15,7 @@ backed by a deterministic TypeScript rules engine. Its thesis —
 stated in `axiomancer-mechanics/VISION.md` — is that **what you
 owe, and to whom, is a mechanical input, not flavor**: mercy,
 honesty, restraint, and skill are each a mechanically
-consequential stance, not a role-play veneer.
+consequential choice, not a role-play veneer.
 
 The core loop: explore a map → resolve authored node encounters
 (combat, minigames, dialogue, cutscenes) → make morally charged
@@ -150,5 +150,5 @@ theme; four period display fonts; SVG placeholder art system.
 See `plan/bearings.md` § "URL / API / CLI contract" for the
 enumerated, locked surface: the mechanics CLI subcommands, the
 `@mechanics` public export barrel (`src/index.ts`), the mobile
-routes, the canon combat copy (VITAE / STANCE), and the
+routes, the canon combat copy (VITAE), and the
 deterministic seeded-RNG invariants.

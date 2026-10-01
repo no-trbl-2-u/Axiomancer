@@ -82,16 +82,16 @@ function seat(state: CombatEncounterState, cardId: string): CombatEncounterState
 }
 
 describe('scalePlayerHit — the scaler pipeline is exactly as printed', () => {
-    it('applies the read, then colour match, then VULNERABLE', () => {
-        expect(scalePlayerHit({ base: 10, readMult: 1, colorMatch: false })).toBe(10);
+    it('applies colour match, then VULNERABLE', () => {
+        expect(scalePlayerHit({ base: 10, colorMatch: false })).toBe(10);
         // Colour match: +25%, at least +2.
-        expect(scalePlayerHit({ base: 10, readMult: 1, colorMatch: true })).toBe(13);
+        expect(scalePlayerHit({ base: 10, colorMatch: true })).toBe(13);
         // VULNERABLE multiplies what the rest left.
-        expect(scalePlayerHit({ base: 10, readMult: 1, colorMatch: true, vulnMult: 1.5 })).toBe(Math.round(13 * 1.5));
+        expect(scalePlayerHit({ base: 10, colorMatch: true, vulnMult: 1.5 })).toBe(Math.round(13 * 1.5));
     });
 
     it('never invents damage from a zero base', () => {
-        expect(scalePlayerHit({ base: 0, readMult: 1.5, colorMatch: true, vulnMult: 2 })).toBe(0);
+        expect(scalePlayerHit({ base: 0, colorMatch: true, vulnMult: 2 })).toBe(0);
     });
 
     it('a FREE-line hit is credited to its card in the attribution ledger', () => {
@@ -119,7 +119,7 @@ describe('DEAL lands the printed number', () => {
         const res = playCombatCard(seated, { uid: entry.uid }, true, die.id, rng);
         const hits = res.events.filter(e => e.kind === 'damage-dealt' && e.target === 'enemy');
         expect(hits).toHaveLength(1);
-        expect(before - res.state.enemy.health).toBeGreaterThanOrEqual(scalePlayerHit({ base: 20, readMult: 1, colorMatch: true }));
+        expect(before - res.state.enemy.health).toBeGreaterThanOrEqual(scalePlayerHit({ base: 20, colorMatch: true }));
     });
 });
 

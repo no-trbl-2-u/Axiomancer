@@ -409,7 +409,7 @@ invocation — see §7 Hard Rule 12.
    hardcoded copy/records in components.
 9. Product title is "Miserere Mei, Deus" in player/doc-facing prose (the
    `axiomancer-*` workspaces, repo and scheme keep the former title as
-   internal identifiers); VITAE/STANCE copy canon. **VITAE is the one
+   internal identifiers); VITAE copy canon. **VITAE is the one
    bar:** emptying the foe's VITAE wins; befriending through The Open
    Hand (the Suppliant's Ring signature, made a real befriend in R4)
    opens the mercy choice, the only non-lethal ending (D47, D63).

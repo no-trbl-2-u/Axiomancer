@@ -256,8 +256,7 @@ function effectCategory(kind: string, color: string): { label: string; color: st
         case 'control': return { label: 'CONTROL', color: '#a86bdc' };
         case 'statdown':
         case 'mark': return { label: 'HEX', color: '#e08a3b' };
-        case 'statup':
-        case 'advantage': return { label: 'BLESSING', color: '#5bbf6a' };
+        case 'statup': return { label: 'BLESSING', color: '#5bbf6a' };
         default: return { label: 'EFFECT', color };
     }
 }
@@ -1116,12 +1115,12 @@ export function CombatEncounterPanel({
                         <GlyphBurst color={AXM.sulfur} glyph="✦" />
                         <Text style={[styles.tipName, { color: AXM.sulfur, textShadowColor: AXM.sulfur }]}>MOMENTUM</Text>
                         <Text style={styles.tipGloss}>
-                            Play stances around the wheel — HEART, then BODY, then MIND (starting on any of
-                            them). Each right stance lights the next node; a wrong stance resets the wheel.
+                            Play cards around the wheel — HEART, then BODY, then MIND (starting on any of
+                            them). Each right colour lights the next node; a wrong colour resets the wheel.
                             Light all three and you forge a wild ✦ MOMENTUM die — drag it onto ANY card,
                             regardless of colour, to power it.
                         </Text>
-                        <Text style={styles.tipMeta}>wrong stance resets · the wild die lasts until spent or the turn ends</Text>
+                        <Text style={styles.tipMeta}>wrong colour resets · the wild die lasts until spent or the turn ends</Text>
                         <View style={styles.tipBadgeWrap} pointerEvents="none">
                             <Svg width={128} height={30} viewBox="0 0 128 30">
                                 <Polygon points="14,1 114,1 127,15 114,29 14,29 1,15" fill={AXM.panelBg} stroke={AXM.sulfur} strokeWidth={1.5} />

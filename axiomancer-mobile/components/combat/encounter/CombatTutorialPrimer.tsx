@@ -33,7 +33,7 @@ const PANELS: PrimerPanel[] = [
         // the board never draws; MOMENTUM is the chip that is actually there.
         body:
             'The enemy has ONE bar: VITAE. Wear it to nothing — strikes, statuses, Conviction, ' +
-            'MOMENTUM and your dice all compete on merit. A clever read turns the fight.',
+            'MOMENTUM and your dice all compete on merit. A clever play turns the fight.',
     },
     {
         eyebrow: 'BLEED & BIND',

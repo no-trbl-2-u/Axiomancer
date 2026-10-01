@@ -67,11 +67,11 @@ function makePlayer(cards: string[]): Character {
     return p;
 }
 
-function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind', effects: ActiveEffect[] = []): Enemy {
+function makeEnemy(hp: number, strong: 'heart' | 'body' | 'mind', effects: ActiveEffect[] = []): Enemy {
     const e = deepClone(FloatEye);
     e.id = 'enemy-fate-dummy';
     e.health = hp; e.maxHealth = hp; e.effects = effects;
-    e.baseStats = { heart: stance === 'heart' ? 6 : 2, body: stance === 'body' ? 6 : 2, mind: stance === 'mind' ? 6 : 2 };
+    e.baseStats = { heart: strong === 'heart' ? 6 : 2, body: strong === 'body' ? 6 : 2, mind: strong === 'mind' ? 6 : 2 };
     return e;
 }
 
@@ -86,8 +86,8 @@ function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatE
     return { ...state, dice, turn };
 }
 
-function open(cards: string[], enemyStance: 'heart' | 'body' | 'mind' = 'body', enemyEffects: ActiveEffect[] = []): CombatEncounterState {
-    let s = initializeCombatEncounter(makePlayer(cards), makeEnemy(500, enemyStance, enemyEffects), cards, 7);
+function open(cards: string[], enemyStat: 'heart' | 'body' | 'mind' = 'body', enemyEffects: ActiveEffect[] = []): CombatEncounterState {
+    let s = initializeCombatEncounter(makePlayer(cards), makeEnemy(500, enemyStat, enemyEffects), cards, 7);
     s = rollEncounterDice(s).state;
     return s;
 }
@@ -161,7 +161,7 @@ describe('R2 RESERVE — bank, ripen, cash', () => {
 
 describe('R7 COLOR MATCH — +1 turn on status plays', () => {
     it('a matched die extends the landed status by COLOR_MATCH_STATUS_DURATION_BONUS', () => {
-        let s = open(['qa-bleed-card'], 'body'); // body card, body die, body stance (neutral read)
+        let s = open(['qa-bleed-card'], 'body'); // body card, body die, body-heavy foe
         s = setDice(s, ['body', 'heart']);
         const entry = s.hand.find(h => h.cardId === 'qa-bleed-card')!;
         const res = playCombatCard(s, { uid: entry.uid }, true, s.dice[0].id);

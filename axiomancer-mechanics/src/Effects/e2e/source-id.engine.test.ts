@@ -20,7 +20,7 @@ import type { CombatState } from '../../Combat/types';
 import { executeCard } from '../../Cards/card.engine';
 import type { Card } from '../../Cards/types';
 const combatState = (player: CombatState['player'], enemy: CombatState['enemy']): CombatState => ({
-    active: true, phase: 'resolving', round: 1, player, enemy, playerChoice: {}, enemyChoice: {},
+    round: 1, player, enemy,
 });
 
 afterEach(() => vi.restoreAllMocks());

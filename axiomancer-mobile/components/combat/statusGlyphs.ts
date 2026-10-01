@@ -19,7 +19,7 @@
  */
 
 export type StatusGlyphKind =
-    | 'dot' | 'control' | 'statdown' | 'statup' | 'advantage' | 'mark';
+    | 'dot' | 'control' | 'statdown' | 'statup' | 'mark';
 
 /** Minimal shape this module reads from an engine Effect (structural typing). */
 export interface EffectLike {
@@ -31,7 +31,6 @@ export interface EffectLike {
         damageOverTime?: unknown;
         actionRestriction?: unknown;
         statModifiers?: { value: number }[];
-        advantageModifier?: unknown;
     };
 }
 
@@ -43,14 +42,13 @@ export interface StatusGlyph {
     label: string;
 }
 
-/** Category colours (spec §7.3/§7.6). Aligned to the stance palette where it
+/** Category colours (spec §7.3/§7.6). Aligned to the colour palette where it
  *  reads naturally; tuned for dark-board contrast. */
 export const GLYPH_COLORS: Record<StatusGlyphKind, string> = {
     dot: '#e2543b',        // flame red — erosion
     control: '#a86bdc',    // chain purple
     statdown: '#e08a3c',   // arrow-down amber
     statup: '#5bbf6a',     // arrow-up green
-    advantage: '#4f9ddb',  // insight blue
     mark: '#d9c66a',       // tracking gold
 };
 
@@ -83,7 +81,6 @@ const KIND_GLYPHS: Record<StatusGlyphKind, string> = {
     control: '⛓',
     statdown: '▼',
     statup: '▲',
-    advantage: '◆',
     mark: '◎',
 };
 
@@ -92,7 +89,6 @@ export function classifyGlyphKind(effect: EffectLike): StatusGlyphKind {
     const p = effect.payload ?? {};
     if (p.damageOverTime) return 'dot';
     if (p.actionRestriction || effect.category === 'control') return 'control';
-    if (p.advantageModifier) return 'advantage';
     if (effect.id?.endsWith('_mark')) return 'mark';
     const isDebuff = effect.type === 'debuff';
     const hasNegStat = (p.statModifiers ?? []).some(m => m.value < 0);
