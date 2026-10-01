@@ -48,7 +48,7 @@ describe('DebugWorldTravel: DEV gate', () => {
     it('renders map chips, node chips, and the act buttons', () => {
         const store = makeStore();
         const tree = render(withProvider(store, <DebugWorldTravel />));
-        expect(tree.queryByTestId('debug-travel-map-northern-city')).not.toBeNull();
+        expect(tree.queryByTestId('debug-travel-map-lantern-deep')).not.toBeNull();
         expect(tree.queryByTestId(`debug-travel-node-${store.getState().world.currentMap.currentNode}`)).not.toBeNull();
         expect(tree.queryByTestId('debug-map-reset-button')).not.toBeNull();
         expect(tree.queryByTestId('debug-aporia-act3')).not.toBeNull();
@@ -71,11 +71,11 @@ describe('DebugWorldTravel: travel', () => {
     it('a map chip travels to that map on its continent', () => {
         const store = makeStore();
         const tree = render(withProvider(store, <DebugWorldTravel />));
-        fireEvent.press(tree.getByTestId('debug-travel-map-caverns'));
+        fireEvent.press(tree.getByTestId('debug-travel-map-beacon-crags'));
         const world = store.getState().world;
         expect(world.currentContinent.name).toBe('northern-continent');
-        expect(world.currentMap.name).toBe('caverns');
-        expect(world.currentMap.currentNode).toBe(getMapDefinition('northern-continent', 'caverns').startingNode.id);
+        expect(world.currentMap.name).toBe('beacon-crags');
+        expect(world.currentMap.currentNode).toBe(getMapDefinition('northern-continent', 'beacon-crags').startingNode.id);
     });
 
     it('a node chip jumps to WILDS, moves the cursor, and fires the authored event', () => {
@@ -123,11 +123,11 @@ describe('DebugWorldTravel: travel', () => {
         slots.selectSlot(2);
         const tree = render(withProvider(store, <DebugWorldTravel />, slots));
         const before = store.getState().runId;
-        fireEvent.press(tree.getByTestId('debug-new-game-on-caverns'));
+        fireEvent.press(tree.getByTestId('debug-new-game-on-beacon-crags'));
         const world = store.getState().world;
-        expect(world.currentMap.name).toBe('caverns');
+        expect(world.currentMap.name).toBe('beacon-crags');
         expect(world.currentContinent.name).toBe('northern-continent');
-        expect(world.currentMap.currentNode).toBe(getMapDefinition('northern-continent', 'caverns').startingNode.id);
+        expect(world.currentMap.currentNode).toBe(getMapDefinition('northern-continent', 'beacon-crags').startingNode.id);
         expect(store.getState().runId).not.toBe(before);
         expect(slots.getActiveSlot()).toBe(2);
         expect(mockPush).toHaveBeenCalledWith('/(tabs)/exploration');
@@ -135,7 +135,7 @@ describe('DebugWorldTravel: travel', () => {
 
     it('offers every campaign map, marking the default start', () => {
         const tree = render(withProvider(makeStore(), <DebugWorldTravel />));
-        for (const m of ['breakwater', 'northern-forest', 'caverns', 'the-capital']) {
+        for (const m of ['breakwater', 'charcoal-wood', 'beacon-crags', 'lantern-deep']) {
             expect(tree.queryByTestId(`debug-new-game-on-${m}`)).not.toBeNull();
         }
         expect(tree.queryByTestId('debug-new-game-on-aporia-colonnade')).toBeNull();

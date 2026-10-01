@@ -17,9 +17,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { MAP_REGISTRY } from '../map.registry';
-import { auditMapTraversal, auditRouteCoverage, forwardEdges } from '../world.reducer';
-import { northernForest } from '../Continents/Coastal-Village/maps';
-import { caverns, northernCity, connectingRiver, townAcrossRiver, theCapital } from '../Continents/Northern-Continent/maps';
+import { auditMapTraversal } from '../world.reducer';
 import type { MapDefinition } from '../types';
 
 /** Every registered gauntlet map, flattened. Labyrinth maps are exempt. */
@@ -28,10 +26,9 @@ const GAUNTLET_MAPS: MapDefinition[] = Object.values(MAP_REGISTRY)
     .filter((def): def is MapDefinition => def !== undefined && def.traversal !== 'labyrinth');
 
 describe('gauntlet map traversal invariants', () => {
-    it('registers the three coastal maps plus the seven northern maps as gauntlets', () => {
+    it('registers the four Act 1 maps as gauntlets', () => {
         expect(GAUNTLET_MAPS.map(d => d.name).sort()).toEqual([
-            'beacon-crags', 'breakwater', 'caverns', 'charcoal-wood', 'connecting-river', 'lantern-deep',
-            'northern-city', 'northern-forest', 'the-capital', 'town-across-river',
+            'beacon-crags', 'breakwater', 'charcoal-wood', 'lantern-deep',
         ]);
     });
 
@@ -172,175 +169,9 @@ describe('gauntlet map traversal invariants', () => {
                     widths.set(node.location[0], (widths.get(node.location[0]) ?? 0) + 1);
                 }
                 const branching = [...widths.values()].filter(w => w > 1).length;
-                // Phase W3/W4/W5 — caverns, northern-city, connecting-river,
-                // town-across-river, and the-capital all tolerate a FOURTH
-                // singleton: arrival, quest-giver/npc, boss/pre-boss
-                // convergence, and the door column the travel phase
-                // appended past the boss (the door is a chokepoint by
-                // design, exactly like the boss it follows). the-capital
-                // additionally narrows a pre-boss convergence column
-                // (cap-8) to a singleton on purpose — the court-convenes
-                // narration is the guaranteed final beat before the climax.
-                const FOUR_SINGLETON_MAPS = [
-                    'caverns', 'northern-city', 'connecting-river',
-                    'town-across-river', 'the-capital',
-                ];
-                const singletonTolerance = FOUR_SINGLETON_MAPS.includes(def.name) ? 4 : 3;
+                const singletonTolerance = 3;
                 expect(branching).toBeGreaterThanOrEqual(widths.size - singletonTolerance);
             });
         });
     }
-});
-
-describe('northern-forest', () => {
-    it('ends at the cave mouth the get-to-cave quest reaches for', () => {
-        const nf10 = northernForest.nodes.find(n => n.id === 'nf-10')!;
-        expect(nf10.connectedNodes).toEqual([]);
-        const maxX = Math.max(...northernForest.nodes.map(n => n.location[0]));
-        expect(nf10.location[0]).toBe(maxX);
-    });
-});
-
-describe('caverns — first map of the northern continent (2026-08-28)', () => {
-    const audit = auditMapTraversal(caverns);
-    const coverage = auditRouteCoverage(caverns);
-
-    it('guarantees the arrival, the Delver, the Under-Gate boss, and the door on every route', () => {
-        // The deliberate singleton columns — the same shape the village
-        // settled on: the premise (nc-2, the quest-giver), the climax
-        // (nc-25), and — Phase W3 — the door up to the city (nc-26) are
-        // structural, never a coin flip.
-        expect(coverage.shareOfRoutes['nc-1']).toBe(1);
-        expect(coverage.shareOfRoutes['nc-2']).toBe(1);
-        expect(coverage.shareOfRoutes['nc-25']).toBe(1);
-        expect(coverage.shareOfRoutes['nc-26']).toBe(1);
-    });
-
-    it('walks a full eleven-beat run every time, strand-free', () => {
-        // Phase W3 added the door column: 10 → 11 beats.
-        expect(audit.longestRoute).toBe(11);
-        expect(audit.strands).toEqual([]);
-        expect(audit.unreachableNodes).toEqual([]);
-    });
-
-    it('ends at the door alone — every run leaves through the Under-Gate (Phase W3)', () => {
-        // The boss is no longer terminal: nc-26, one column past it, is
-        // the travel door to northern-city (the bw-18 pattern — the way
-        // out opens only after the climax).
-        expect(audit.terminalNodes).toEqual(['nc-26']);
-        const boss = caverns.nodes.find(n => n.id === 'nc-25')!;
-        expect(boss.connectedNodes).toEqual(['nc-26']);
-    });
-});
-
-describe('northern-city — map 2 of the northern continent (Phase W3)', () => {
-    const audit = auditMapTraversal(northernCity);
-    const coverage = auditRouteCoverage(northernCity);
-
-    it('guarantees the arrival, the Gate-Clerk, the Harbormaster, and the door on every route', () => {
-        // The four deliberate singleton columns, the settled shape: the
-        // city's first face (ncy-2), the climax (ncy-25), and — Phase W4 —
-        // the water-gate door (ncy-26) are structural, never a coin flip.
-        expect(coverage.shareOfRoutes['ncy-1']).toBe(1);
-        expect(coverage.shareOfRoutes['ncy-2']).toBe(1);
-        expect(coverage.shareOfRoutes['ncy-25']).toBe(1);
-        expect(coverage.shareOfRoutes['ncy-26']).toBe(1);
-    });
-
-    it('walks a full eleven-beat run every time, strand-free', () => {
-        // Phase W4 added the door column: 10 → 11 beats.
-        expect(audit.longestRoute).toBe(11);
-        expect(audit.strands).toEqual([]);
-        expect(audit.unreachableNodes).toEqual([]);
-    });
-
-    it('ends at the door alone — every run leaves through the water-gate (Phase W4)', () => {
-        // The boss is no longer terminal: ncy-26, one column past it, is
-        // the travel door to connecting-river (the nc-26 pattern — the way
-        // out opens only after the climax). ncy-23 stays sealed scenery.
-        expect(audit.terminalNodes).toEqual(['ncy-26']);
-        const boss = northernCity.nodes.find(n => n.id === 'ncy-25')!;
-        expect(boss.connectedNodes).toEqual(['ncy-26']);
-        const seam = northernCity.nodes.find(n => n.id === 'ncy-23')!;
-        expect(seam.location[0]).toBe(8);
-        // Forward skeleton, not raw edges — D1 gave ncy-23 a lateral rib to
-        // its lane neighbour, which is traversal, not progression.
-        expect(forwardEdges(northernCity).get('ncy-23')).toEqual(['ncy-25']);
-    });
-});
-
-describe('connecting-river — map 3 of the northern continent (Phase W4)', () => {
-    const audit = auditMapTraversal(connectingRiver);
-    const coverage = auditRouteCoverage(connectingRiver);
-
-    it('guarantees the arrival, the Boatwoman, the Waterreeve, and the door on every route', () => {
-        expect(coverage.shareOfRoutes['cr-1']).toBe(1);
-        expect(coverage.shareOfRoutes['cr-2']).toBe(1);
-        expect(coverage.shareOfRoutes['cr-12']).toBe(1);
-        expect(coverage.shareOfRoutes['cr-13']).toBe(1);
-    });
-
-    it('walks a full seven-beat run every time, strand-free', () => {
-        expect(audit.longestRoute).toBe(7);
-        expect(audit.strands).toEqual([]);
-        expect(audit.unreachableNodes).toEqual([]);
-    });
-
-    it('ends at the door alone — every run leaves through the water-gate', () => {
-        expect(audit.terminalNodes).toEqual(['cr-13']);
-        const boss = connectingRiver.nodes.find(n => n.id === 'cr-12')!;
-        expect(boss.connectedNodes).toEqual(['cr-13']);
-    });
-});
-
-describe('town-across-river — map 4 of the northern continent (Phase W4)', () => {
-    const audit = auditMapTraversal(townAcrossRiver);
-    const coverage = auditRouteCoverage(townAcrossRiver);
-
-    it('guarantees the arrival, the Sweetheart, the Portreeve, and the door on every route', () => {
-        expect(coverage.shareOfRoutes['tar-1']).toBe(1);
-        expect(coverage.shareOfRoutes['tar-2']).toBe(1);
-        expect(coverage.shareOfRoutes['tar-6']).toBe(1);
-        expect(coverage.shareOfRoutes['tar-7']).toBe(1);
-    });
-
-    it('walks a full five-beat run every time, strand-free', () => {
-        // Phase W5 added the door column: 4 → 5 beats.
-        expect(audit.longestRoute).toBe(5);
-        expect(audit.strands).toEqual([]);
-        expect(audit.unreachableNodes).toEqual([]);
-    });
-
-    it('ends at the door alone — every run leaves through the ribbon-road (Phase W5)', () => {
-        // The boss is no longer terminal: tar-7, one column past it, is
-        // the travel door to the-capital (the nc-26 pattern — the way out
-        // opens only after the climax).
-        expect(audit.terminalNodes).toEqual(['tar-7']);
-        const boss = townAcrossRiver.nodes.find(n => n.id === 'tar-6')!;
-        expect(boss.connectedNodes).toEqual(['tar-7']);
-    });
-});
-
-describe('the-capital — map 5 of the northern continent (Phase W5)', () => {
-    const audit = auditMapTraversal(theCapital);
-    const coverage = auditRouteCoverage(theCapital);
-
-    it('guarantees the arrival, the Herald, the court, and the Factor on every route', () => {
-        expect(coverage.shareOfRoutes['cap-1']).toBe(1);
-        expect(coverage.shareOfRoutes['cap-2']).toBe(1);
-        expect(coverage.shareOfRoutes['cap-8']).toBe(1);
-        expect(coverage.shareOfRoutes['cap-9']).toBe(1);
-    });
-
-    it('walks a full six-beat run every time, strand-free', () => {
-        expect(audit.longestRoute).toBe(6);
-        expect(audit.strands).toEqual([]);
-        expect(audit.unreachableNodes).toEqual([]);
-    });
-
-    it('ends at the Factor alone — no door onward yet', () => {
-        // The next continent is not shipped; the-capital is the current
-        // frontier, same shape town-across-river had before Phase W5.
-        expect(audit.terminalNodes).toEqual(['cap-9']);
-    });
 });

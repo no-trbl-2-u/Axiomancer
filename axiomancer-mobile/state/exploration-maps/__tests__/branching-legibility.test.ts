@@ -46,12 +46,6 @@ const MAPS = [
     { mapId: 'charcoal-wood', continent: 'coastal-continent' },
     { mapId: 'beacon-crags', continent: 'northern-continent' },
     { mapId: 'lantern-deep', continent: 'northern-continent' },
-    { mapId: 'northern-forest', continent: 'coastal-continent' },
-    { mapId: 'caverns', continent: 'northern-continent' },
-    { mapId: 'northern-city', continent: 'northern-continent' },
-    { mapId: 'connecting-river', continent: 'northern-continent' },
-    { mapId: 'town-across-river', continent: 'northern-continent' },
-    { mapId: 'the-capital', continent: 'northern-continent' },
 ] as const;
 
 interface DrawnEdge { a: string; b: string; lateral: boolean; length: number; }
@@ -136,7 +130,7 @@ describe('exploration map: the sheet can carry the branching graph', () => {
         });
     }
 
-    it('accounts for all 101 ribs: 55 from D1 across the surviving pre-revamp maps, 11 on the Breakwater, 14 on the Charcoal Wood, 10 on the Beacon Crags, 11 on the Lantern Deep', () => {
+    it('accounts for all 46 ribs: 11 on the Breakwater, 14 on the Charcoal Wood, 10 on the Beacon Crags, 11 on the Lantern Deep', () => {
         // A total, not a per-map count: this is the one number that catches a
         // whole map's ribs disappearing in a refactor of the forward-skeleton
         // read, which no per-map "> 0" assertion would notice.
@@ -148,6 +142,7 @@ describe('exploration map: the sheet can carry the branching graph', () => {
         // M3b: the Charcoal Wood's four carry 4 + 3 + 3 + 4.
         // M3c: the Beacon Crags' five three-lane bands carry 2 each.
         // M3d: the Lantern Deep's five bands carry 3 + 3 + 2 + 2 + 1.
-        expect(total).toBe(55 + 11 + 14 + 10 + 11);
+        // R7e deleted the 55 pre-revamp ribs with the parked maps.
+        expect(total).toBe(11 + 14 + 10 + 11);
     });
 });

@@ -55,7 +55,11 @@ export function applyDialogueChoice(
                 gameState.world.currentMap.continent,
                 gameState.world.currentMap.name,
             );
-            const quest = def.quests?.find(q => q.name === e.startQuest);
+            // The current map's quests first, then one already offered in the
+            // log (`available`): R7e left no map carrying quests, and the
+            // fixture quest is seeded into the log.
+            const quest = def.quests?.find(q => q.name === e.startQuest)
+                ?? quests.available.find(q => q.name === e.startQuest);
             if (quest) {
                 if (!quests.active.some(q => q.name === quest.name) && !quests.completed.includes(quest.name)) {
                     quests = discoverQuest(quests, quest);

@@ -72,6 +72,27 @@ signatures, sims, CLI flags, item picker). One tick cannot hold both:
    and its probe go; the CLI route audit, catalog and capture scripts lose
    their parked-map rows.
 
+### As shipped (R7e, 2026-10-01)
+
+- **Engine**: the six maps, their event blocks (about 1,580 lines of
+  `content.ts`), 13 NPC trees, 9 quests and six enemy-pool rows are gone.
+  Lantern Deep's four shared builders moved into the Act 1 shared builders
+  under neutral names (`ironVeinPool`, `campRestPool`, `damageHazardPool`,
+  `currencyLootPool`). `auditRouteCoverage` went: its only callers were the
+  parked maps' route-coverage tests.
+- **Fixtures**: `Game/fixtures/fixture-content.ts` holds `FIXTURE_NPC`,
+  `FIXTURE_SHOP`, `FIXTURE_QUEST` and three staged payloads;
+  `resolveMapEvent(state, rng, staged?)` and mobile's
+  `resolveCurrentMapEvent(sourceNodeType, staged?)` resolve them.
+  `applyDialogueChoice`'s `startQuest` also finds a quest already offered
+  in the log, since no map carries quests.
+- **Mobile**: six layouts, the five parked arena plates (with provenance,
+  art-sources and art-catalogue rows), the `QUEST_TITLES` entries and the
+  northern-forest `rich` cache branch. The `rich` tier stays: the dev
+  rewards menu still rolls it (D62). The map plates stay: the screen
+  backgrounds use them.
+- **Save v34**: the brief's hop, as written.
+
 ## Keep (plumbing), each witnessed by one neutral fixture
 
 - **Dialogue**: `NPCs/` (tree walker, types), `dialogue.runtime.ts`, the

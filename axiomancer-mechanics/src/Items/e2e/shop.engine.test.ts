@@ -15,7 +15,6 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { resolveMapEvent } from '../../World/MapEvents/resolve-map-event';
 import { mockSequentialRng } from '../../test-utils/rng';
-import { createStartingWorld } from '../../World';
 import { createNewGameState } from '../../Game/game.reducer';
 import { getMapDefinition, createMapState } from '../../World/map.registry';
 import { getConsumableById } from '../consumable.library';
@@ -24,18 +23,14 @@ import { createCharacter } from '../../Character';
 import type { GameState } from '../../Game/types';
 import type { MapState } from '../../World/types';
 import type { Consumable } from '../types';
+import { FIXTURE_VILLAGE_EVENT } from '../../Game/fixtures/fixture-content';
 
-// Pool registration lives in `content.ts`; import for side effect.
-import '../../World/MapEvents/content';
 
-// No Act 1 map carries a village; the surviving authored village/shop is the
-// parked northern-forest's Glen Market (nf-8).
-function freshWorldAt(
-    mapName: 'northern-forest' = 'northern-forest',
-    nodeId = 'nf-8',
-): GameState {
-    const base: GameState = { ...createNewGameState(), world: createStartingWorld('northern-forest') };
-    const def = getMapDefinition('coastal-continent', mapName);
+// No Act 1 map carries a village (R7e, D72): the fixture shop is staged on
+// the Breakwater's bw-2, never registered in the live world.
+function freshWorldAt(nodeId = 'bw-2'): GameState {
+    const base: GameState = createNewGameState();
+    const def = getMapDefinition('coastal-continent', 'breakwater');
     const map: MapState = createMapState(def);
     const player = createCharacter({
         id: 'char-shopper',
@@ -51,6 +46,8 @@ function freshWorldAt(
     };
 }
 
+const resolveShop = (state: GameState) => resolveMapEvent(state, undefined, FIXTURE_VILLAGE_EVENT);
+
 afterEach(() => {
     vi.restoreAllMocks();
 });
@@ -58,8 +55,8 @@ afterEach(() => {
 describe('Phase 37 — shop economy through resolveMapEvent', () => {
     it('village resolution surfaces the authored shop on the event', () => {
         mockSequentialRng(0.5);
-        const state = freshWorldAt('northern-forest', 'nf-8');
-        const result = resolveMapEvent(state);
+        const state = freshWorldAt();
+        const result = resolveShop(state);
 
         expect(result.event.kind).toBe('village');
         if (result.event.kind !== 'village') return;
@@ -73,10 +70,10 @@ describe('Phase 37 — shop economy through resolveMapEvent', () => {
 
     it('buy / sell round-trip through a shop ware leaves the character net even', () => {
         mockSequentialRng(0.5);
-        const state = freshWorldAt('northern-forest', 'nf-8');
-        const result = resolveMapEvent(state);
+        const state = freshWorldAt();
+        const result = resolveShop(state);
         if (result.event.kind !== 'village' || !result.event.shop) {
-            throw new Error('nf-8 village must carry a shop');
+            throw new Error('the fixture village must carry a shop');
         }
 
         const ware = result.event.shop.wares.find(w => w.itemId === 'minor-healing-potion');
@@ -96,11 +93,11 @@ describe('Phase 37 — shop economy through resolveMapEvent', () => {
 
     it('buying with insufficient currency leaves the resolved character untouched', () => {
         mockSequentialRng(0.5);
-        const state = freshWorldAt('northern-forest', 'nf-8');
+        const state = freshWorldAt();
         const broke: GameState = { ...state, player: { ...state.player, currency: 0 } };
-        const result = resolveMapEvent(broke);
+        const result = resolveShop(broke);
         if (result.event.kind !== 'village' || !result.event.shop) {
-            throw new Error('nf-8 village must carry a shop');
+            throw new Error('the fixture village must carry a shop');
         }
         const ware = result.event.shop.wares[0];
         const item = getConsumableById(ware.itemId)!;
@@ -110,10 +107,10 @@ describe('Phase 37 — shop economy through resolveMapEvent', () => {
 
     it('purchased items are deep-cloned — mutating one does not bleed into the catalogue', () => {
         mockSequentialRng(0.5);
-        const state = freshWorldAt('northern-forest', 'nf-8');
-        const result = resolveMapEvent(state);
+        const state = freshWorldAt();
+        const result = resolveShop(state);
         if (result.event.kind !== 'village' || !result.event.shop) {
-            throw new Error('nf-8 village must carry a shop');
+            throw new Error('the fixture village must carry a shop');
         }
         const ware = result.event.shop.wares.find(w => w.itemId === 'minor-healing-potion')!;
         const item = getConsumableById(ware.itemId)!;

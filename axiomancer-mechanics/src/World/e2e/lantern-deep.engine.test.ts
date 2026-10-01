@@ -162,10 +162,4 @@ describe('Act 1 is the whole world (THE REVAMP R3a, D53)', () => {
             }
         }
     });
-
-    it('parks the northern maps: their pools are empty', () => {
-        for (const map of ['northern-forest', 'caverns', 'northern-city', 'connecting-river', 'town-across-river', 'the-capital'] as const) {
-            expect(EnemiesByMap[map], map).toEqual([]);
-        }
-    });
 });

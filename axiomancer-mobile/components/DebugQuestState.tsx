@@ -1,9 +1,8 @@
 /**
  * Dev-only QUEST controls — over the REAL authored quests.
  *
- * Every quest the engine authors on a `MapDefinition.quests[]` (the
- * campaign's quest-log line: starting-quest → get-to-forest → … →
- * get-to-town-across-river) is a chip showing its live status. Tap a
+ * Every quest the engine authors on a `MapDefinition.quests[]` is a chip
+ * showing its live status (none since R7e, D72, so the row renders nothing). Tap a
  * chip to select it, then START / ADVANCE / COMPLETE it through the
  * engine's `startQuest` / `progressQuest` / `completeQuest` reducers
  * (state/dev/story-catalog.ts). The Ledger tab and dialogue gates

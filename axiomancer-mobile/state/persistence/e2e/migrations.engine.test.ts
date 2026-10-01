@@ -178,7 +178,7 @@ describe('migrations.engine', () => {
             // v31 (phase R6a): the hazard token / hex flag hop;
             // v32 (phase R6b): the deleted hazard deck card hop;
             // v33 (phase R7c): the region-consequences slice hop.
-            expect(GAME_STATE_VERSION).toBe(33);
+            expect(GAME_STATE_VERSION).toBe(34);
             expect(result.version).toBe(GAME_STATE_VERSION);
         });
     });

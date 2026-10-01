@@ -46,12 +46,10 @@ import {
     selectPacedEventRoute,
 } from '@/state/presenters/event.engine';
 
-type CoastalMap = 'breakwater' | 'northern-forest';
+type CoastalMap = 'breakwater' | 'charcoal-wood';
 
 /**
- * bw-4 and nf-2 are single-entry gathering pools, so no RNG pinning is
- * needed here. (`cap-5` is the one weighted gathering node — it carries the
- * Ribbon-Picker on a lighter entry — and is covered engine-side instead.)
+ * Act 1's gathering pools are single-entry, so no RNG pinning is needed here.
  */
 const BW_GATHER = 'bw-4';
 const BW_GATHER_ITEM = 'Driftwood';
@@ -177,8 +175,8 @@ describe('gathering node — the acknowledgement the player can read', () => {
 
     it('works the same on the forest gather node (not a one-map fix)', () => {
         const { store, actions } = makeHarness();
-        const nodeId = firstNodeOfKind('northern-forest', 'gathering');
-        seatAt(store, 'northern-forest', nodeId);
+        const nodeId = firstNodeOfKind('charcoal-wood', 'gathering');
+        seatAt(store, 'charcoal-wood', nodeId);
         const before = inventoryNames(store).length;
 
         actions.resolveCurrentMapEvent('gather');

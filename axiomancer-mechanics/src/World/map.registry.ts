@@ -9,12 +9,10 @@
 
 import { MapDefinition, MapState, NodeId, UniqueEvent } from './types';
 import { ContinentName, MapName } from './map.library';
-import { northernForest } from './Continents/Coastal-Village/maps';
 import { breakwater } from './Continents/Coastal-Village/breakwater';
 import { charcoalWood } from './Continents/Coastal-Village/charcoal-wood';
 import { beaconCrags } from './Continents/Northern-Continent/beacon-crags';
 import { lanternDeep } from './Continents/Northern-Continent/lantern-deep';
-import { caverns, northernCity, connectingRiver, townAcrossRiver, theCapital } from './Continents/Northern-Continent/maps';
 import { aporiaColonnade, aporiaArchive, aporiaProof } from './Labyrinth/maps';
 
 /** Thrown when navigating to a map that isn't registered. */
@@ -35,23 +33,12 @@ export const MAP_REGISTRY: Record<ContinentName, Partial<Record<MapName, MapDefi
         'breakwater': breakwater,
         // Map revamp M3b — Act 1's forest, past the Breakwater's bridge.
         'charcoal-wood': charcoalWood,
-        'northern-forest': northernForest,
     },
-    // 2026-08-28 — inter-map travel: the iron caverns, first map of the
-    // second continent, and (Phase W3, same day) the northern city behind
-    // the Under-Gate. Phase W4 (2026-08-31) ships the river crossing and
-    // the town beyond it.
     'northern-continent': {
         // Map revamp M3c — Act 1's mountains, past the Charcoal Wood's stair cave.
         'beacon-crags': beaconCrags,
         // Map revamp M3d — Act 1's underworld, below the Beacon Crags' glacier shrine.
         'lantern-deep': lanternDeep,
-        'caverns': caverns,
-        'northern-city': northernCity,
-        'connecting-river': connectingRiver,
-        'town-across-river': townAcrossRiver,
-        // W5 (2026-09-10) — the capital, where every ribbon-road ends.
-        'the-capital': theCapital,
     },
     // W-01 — The Aporia (dev-menu + CLI access only until the last
     // continent exists; see specs/world/W-01).

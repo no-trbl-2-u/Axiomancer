@@ -15,7 +15,7 @@ known game state instead of the persisted save:
 | Channel | Example | Notes |
 |---|---|---|
 | URL deep link (web) | `/exploration?fixture=sage-bw-door-gate` | Hand-typable; any route works, the fixture applies before the store mounts |
-| Init-script global | `globalThis.__AXM_FIXTURE__ = 'wanderer-nf-village'` or an inline fixture object | `scripts/fixture-injector.mjs` → `injectStateFixture(context, …)` |
+| Init-script global | `globalThis.__AXM_FIXTURE__ = 'wanderer-staged-village'` or an inline fixture object | `scripts/fixture-injector.mjs` → `injectStateFixture(context, …)` |
 
 Ids come from the engine registry (`STATE_FIXTURES`;
 `npm run game -w axiomancer-mechanics -- --fixture list`). The run is

@@ -20,9 +20,6 @@
  *   - rest node → rest session
  *   - gather node → items land in inventory inline, no session, and the
  *     paced /event acknowledgement card
- * plus the design invariant:
- *   - the lone northern-forest quest interaction shows real mobile
- *     dialogue (forgotten-pilgrim), never the empty "A figure waits."
  *
  * The previous gap (2026-06-14): the only coverage of these kinds was
  * `DebugTriggerEncounter.test.tsx`, which asserted the BROKEN
@@ -57,7 +54,7 @@ function makeStoreAndActions() {
     return { store, actions: createAppActions(store) };
 }
 
-type CoastalMap = 'northern-forest';
+type CoastalMap = 'breakwater' | 'charcoal-wood';
 
 /** Seat the player on `nodeId` of `mapName`, mirroring a reachable tap. */
 function seatAt(store: AppStore, mapName: CoastalMap, nodeId: string) {
@@ -78,11 +75,11 @@ function firstNodeOfKind(mapName: CoastalMap, kind: MapEventKind): string {
     return node.id;
 }
 
-// The varied minigame kinds live on northern-forest.
-describe('map encounter → minigame routing (northern-forest)', () => {
+// The varied minigame kinds, on the Charcoal Wood.
+describe('map encounter → minigame routing (charcoal-wood)', () => {
     it('loot-cache node opens the loot-cache, not a paced /event', () => {
         const { store, actions } = makeStoreAndActions();
-        seatAt(store, 'northern-forest', firstNodeOfKind('northern-forest', 'loot-cache'));
+        seatAt(store, 'charcoal-wood', firstNodeOfKind('charcoal-wood', 'loot-cache'));
 
         expect(actions.resolveCurrentMapEvent('treasure')).toBe(true);
 
@@ -93,7 +90,7 @@ describe('map encounter → minigame routing (northern-forest)', () => {
 
     it('rest node opens the rest-choice session, not a paced /event', () => {
         const { store, actions } = makeStoreAndActions();
-        seatAt(store, 'northern-forest', firstNodeOfKind('northern-forest', 'rest'));
+        seatAt(store, 'charcoal-wood', firstNodeOfKind('charcoal-wood', 'rest'));
 
         expect(actions.resolveCurrentMapEvent('rest')).toBe(true);
 
@@ -110,7 +107,7 @@ describe('map encounter → minigame routing (northern-forest)', () => {
     // `gathering-acknowledgement.engine.test.ts`.
     it('gather node grants its items and opens the paced /event acknowledgement, with no session', () => {
         const { store, actions } = makeStoreAndActions();
-        seatAt(store, 'northern-forest', firstNodeOfKind('northern-forest', 'gathering'));
+        seatAt(store, 'charcoal-wood', firstNodeOfKind('charcoal-wood', 'gathering'));
         const before = store.getState().player.inventory.length;
 
         expect(actions.resolveCurrentMapEvent('gather')).toBe(true);

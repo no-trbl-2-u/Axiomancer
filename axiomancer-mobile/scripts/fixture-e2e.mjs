@@ -174,9 +174,13 @@ async function caseInlineArrive(browser, baseUrl) {
             id: 'e2e-inline-arrive',
             seed: 'fixture-e2e-inline',
             preset: 'apprentice',
-            world: { continent: 'coastal-continent', map: 'northern-forest', node: 'nf-3' },
+            world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-2' },
             flags: ['combat-tutorial-done'],
             arrive: true,
+            stagedEvent: {
+                kind: 'narration',
+                dialogue: { rootId: 'start', nodes: { start: { id: 'start', text: 'A placeholder line.' } } },
+            },
         })
         const page = await context.newPage()
         trackErrors(page, errors)

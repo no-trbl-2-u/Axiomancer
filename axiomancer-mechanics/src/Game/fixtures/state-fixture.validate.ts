@@ -115,6 +115,7 @@ export function problemsFor(raw: unknown): string[] {
         ...worldProblems(raw.world),
         ...optional(raw.flags, isStringArray, 'flags', 'an array of strings'),
         ...optional(raw.arrive, v => typeof v === 'boolean', 'arrive', 'a boolean'),
+        ...optional(raw.stagedEvent, v => isRecord(v) && typeof v.kind === 'string', 'stagedEvent', 'a map event payload'),
     ];
 }
 

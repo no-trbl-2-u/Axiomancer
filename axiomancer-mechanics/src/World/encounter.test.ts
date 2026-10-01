@@ -104,10 +104,6 @@ describe('generateEncounter', () => {
         expect(enc.origin).toBe('breakwater:zz-1');
     });
 
-    it('draws nothing on a parked map: its pool is empty (THE REVAMP R3a, D53)', () => {
-        expect(() => generateEncounter({ id: 'nf-3', location: [0, 0], connectedNodes: [] }, 1)).toThrow();
-    });
-
     it('honours options.difficulty as a filter', () => {
         for (let i = 0; i < 20; i++) {
             const enc = generateEncounter(forestNode, 5, { difficulty: 'normal' });

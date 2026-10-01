@@ -165,8 +165,11 @@ import { generateRunId } from './run-loop';
  *   the core ten; the hop drops acquired deck cards that were deleted.
  * 2026-09-30 — bumped 32 → 33: THE REVAMP R7c (D47/D50). The alt-win systems
  *   are gone; the hop drops the write-only `regionConsequences` slice.
+ * 2026-10-01 — bumped 33 → 34: THE REVAMP R7e (D72). The parked world's
+ *   content is deleted; the hop moves a save off a deleted map onto the
+ *   Lantern Deep and drops the deleted maps, quests and story flags.
  */
-export const GAME_STATE_VERSION = 33;
+export const GAME_STATE_VERSION = 34;
 
 /**
  * Builds a brand-new GameState with default player and world.

@@ -67,7 +67,7 @@ const fixturePlayer = () => createCharacter({
 const fixtureEnemy = () => createEnemy({
     id: 'e1', name: 'E', description: 'd', level: 1,
     baseStats: { heart: 3, body: 3, mind: 3 },
-    mapName: 'northern-city', logic: 'random',
+    mapName: 'breakwater', logic: 'random',
 });
 
 const combatState = (player: CombatState['player'], enemy: CombatState['enemy']): CombatState => ({

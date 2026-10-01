@@ -66,11 +66,11 @@ CLI (`--fixture <id>`) and the Jest suites:
 
 | Screen | Fixture id | Lands on |
 |---|---|---|
-| NPC dialogue | `apprentice-nf-interaction` | `/dialogue` |
-| Settlement + shop | `wanderer-nf-village` | `/village` |
-| Forest omen (cutscene) | `wanderer-nf-cutscene` | `/cutscene` |
+| NPC dialogue | `apprentice-staged-dialogue` | `/dialogue` |
+| Settlement + shop | `wanderer-staged-village` | `/village` |
+| Forest omen (cutscene) | `wanderer-staged-cutscene` | `/cutscene` |
 | Night-watch rest | `apprentice-bw-rest` | `/rest` |
-| Hazard minigame (late kit) | `l30-caverns-hazard-arrive` | `/hazard` |
+| Hazard minigame (late kit) | `l30-bw-hazard-arrive` | `/hazard` |
 | Mid-campaign exploration hub | `sage-bw-door-gate` | `/exploration` |
 
 - **Unattended transport** (`critique:drive`, §3.5) already carries

@@ -206,6 +206,8 @@ export {
     buildStateFromFixture,
     validateStateFixture,
     getStateFixtureById, listStateFixtureIds,
+    FIXTURE_NPC, FIXTURE_SHOP, FIXTURE_QUEST,
+    FIXTURE_DIALOGUE_EVENT, FIXTURE_VILLAGE_EVENT, FIXTURE_CUTSCENE_EVENT,
 } from './Game';
 export type {
     StateFixture,
@@ -301,7 +303,7 @@ export {
 } from './World';
 export type {
     MapEventKind,
-    ResolvedEvent, ResolveMapEventResult,
+    MapEventPayload, ResolvedEvent, ResolveMapEventResult,
 } from './World';
 // Phase 52b — rest shelter classification (retires the healFraction >= 1.0
 // inn heuristic). Mobile gates the hazard-scar max-VITAE mend on this.

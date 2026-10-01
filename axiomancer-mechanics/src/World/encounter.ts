@@ -45,18 +45,6 @@ function nodeIdToMapName(nodeId: string): MapName | undefined {
     if (nodeId.startsWith('bc-')) return 'beacon-crags';
     // Map revamp M3d — Act 1's underworld (northern continent).
     if (nodeId.startsWith('ld-')) return 'lantern-deep';
-    if (nodeId.startsWith('nf-')) return 'northern-forest';
-    // Northern continent (2026-08-28 inter-map travel) — the iron caverns
-    // and (Phase W3) the city above them. `ncy-` is checked before `nc-`
-    // for clarity; the prefixes cannot actually collide ('nc-' requires
-    // the dash as its third character).
-    if (nodeId.startsWith('ncy-')) return 'northern-city';
-    if (nodeId.startsWith('nc-')) return 'caverns';
-    // Phase W4 (2026-08-31) — the river crossing and the town beyond it.
-    if (nodeId.startsWith('cr-')) return 'connecting-river';
-    if (nodeId.startsWith('tar-')) return 'town-across-river';
-    // Phase W5 (2026-09-10) — the capital, where every ribbon-road ends.
-    if (nodeId.startsWith('cap-')) return 'the-capital';
     // W-01 — The Aporia's three acts.
     if (nodeId.startsWith('ap1-')) return 'aporia-colonnade';
     if (nodeId.startsWith('ap2-')) return 'aporia-archive';

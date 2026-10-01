@@ -19,24 +19,6 @@ import type { EventConsequence } from '../event.engine';
 const looksLikeSlug = (s: string) => /[a-z0-9]+[-_][a-z0-9]+/.test(s);
 
 describe('engine-id-copy', () => {
-    it('gives the walked quest an authored title, not its slug', () => {
-        expect(questTitle('gather-wood')).toBe('Deadfall');
-        expect(looksLikeSlug(questTitle('gather-wood'))).toBe(false);
-    });
-
-    it('titles every quest-log id in the engine union', () => {
-        const ids = [
-            'gather-wood', 'get-to-cave',
-            'gather-iron', 'get-to-northern-city', 'get-to-connecting-river', 'find-islanders',
-            'join-islanders-for-ritual', 'get-to-town-across-river', 'get-to-the-capital',
-        ];
-        for (const id of ids) {
-            const title = questTitle(id);
-            expect(title.length).toBeGreaterThan(0);
-            expect(looksLikeSlug(title)).toBe(false);
-        }
-    });
-
     it('humanizes an unknown id rather than echoing it', () => {
         expect(questTitle('some-future-quest')).toBe('Some Future Quest');
         expect(humanizeEngineId('shrine_keeper_recognizes_seeker')).toBe('Shrine Keeper Recognizes Seeker');
@@ -72,10 +54,11 @@ describe('consequenceLabel (FE-002 branches)', () => {
         ({ kind, label, amount }) as EventConsequence;
 
     it('names the errand instead of printing the quest slug', () => {
-        expect(consequenceLabel(q('quest-start', 'gather-wood')))
-            .toBe('new errand · Deadfall');
-        expect(consequenceLabel(q('quest-progress', 'get-to-cave')))
-            .toBe('errand · The Mouth in the Hill');
+        // No quest is authored since R7e (D72), so the title is the humanized id.
+        expect(consequenceLabel(q('quest-start', 'fixture-quest')))
+            .toBe('new errand · Fixture Quest');
+        expect(consequenceLabel(q('quest-progress', 'fixture-quest')))
+            .toBe('errand · Fixture Quest');
     });
 
     it('draws no chip for a story flag', () => {
@@ -94,8 +77,8 @@ describe('consequenceLabel (FE-002 branches)', () => {
 
     it('no labelled consequence leaks a slug', () => {
         const all: EventConsequence[] = [
-            q('quest-start', 'gather-wood'),
-            q('quest-progress', 'join-islanders-for-ritual'),
+            q('quest-start', 'fixture-quest'),
+            q('quest-progress', 'fixture-quest'),
             q('card-learn', 'thin-hymn'),
             q('flag', 'chronicler_met'),
             q('currency', undefined, 3),

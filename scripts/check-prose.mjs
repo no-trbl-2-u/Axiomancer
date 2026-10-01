@@ -47,7 +47,6 @@ export const CONTENT_SURFACES = [
   'axiomancer-mechanics/src/World/Hazard/hazard.content.ts',
   'axiomancer-mechanics/src/World/RestChoice/restchoice.content.ts',
   'axiomancer-mechanics/src/World/Blacksmith/blacksmith.content.ts',
-  'axiomancer-mechanics/src/World/Continents/Northern-Forest/npcs.ts',
   'axiomancer-mechanics/src/World/quest.library.ts',
   'axiomancer-mechanics/src/Enemy/enemy.library.ts',
   'axiomancer-mechanics/src/Cards/cards.library.ts',

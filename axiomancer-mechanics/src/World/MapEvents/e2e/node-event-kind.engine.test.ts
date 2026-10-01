@@ -24,25 +24,25 @@ afterEach(() => {
 
 describe('node event-kind read API', () => {
     it('reports the authored kind for a known node without rolling', () => {
-        // nf-6 is authored as an encounter.
-        expect(getNodePrimaryEventKind('coastal-continent', 'northern-forest', 'nf-6')).toBe(
+        // bw-2 is authored as an encounter.
+        expect(getNodePrimaryEventKind('coastal-continent', 'breakwater', 'bw-2')).toBe(
             'encounter',
         );
-        expect(getNodeEventKinds('coastal-continent', 'northern-forest', 'nf-6')).toContain(
+        expect(getNodeEventKinds('coastal-continent', 'breakwater', 'bw-2')).toContain(
             'encounter',
         );
-        const pool = getNodeEventPool('coastal-continent', 'northern-forest', 'nf-6');
+        const pool = getNodeEventPool('coastal-continent', 'breakwater', 'bw-2');
         expect(pool?.entries.length).toBeGreaterThan(0);
     });
 
     it('returns empty / undefined for an unregistered node', () => {
-        expect(getNodeEventKinds('coastal-continent', 'northern-forest', 'nf-does-not-exist')).toEqual(
+        expect(getNodeEventKinds('coastal-continent', 'breakwater', 'bw-does-not-exist')).toEqual(
             [],
         );
         expect(
-            getNodePrimaryEventKind('coastal-continent', 'northern-forest', 'nf-does-not-exist'),
+            getNodePrimaryEventKind('coastal-continent', 'breakwater', 'bw-does-not-exist'),
         ).toBeUndefined();
-        expect(getNodeEventPool('coastal-continent', 'northern-forest', 'nf-does-not-exist')).toBeUndefined();
+        expect(getNodeEventPool('coastal-continent', 'breakwater', 'bw-does-not-exist')).toBeUndefined();
     });
 
     it('primary kind follows the highest-weight entry; distinct kinds preserve order', () => {

@@ -299,24 +299,24 @@ describe('changeMap action: map transition', () => {
         const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('breakwater') } });
         const actions = createAppActions(store);
 
-        actions.changeMap('northern-forest');
+        actions.changeMap('charcoal-wood');
 
         const vm = selectExplorationViewModel(store.getState());
-        expect(vm.mapId).toBe('northern-forest');
-        expect(vm.currentNodeId).toBe('nf-1');
-        expect(store.getState().world.currentMap.name).toBe('northern-forest');
+        expect(vm.mapId).toBe('charcoal-wood');
+        expect(vm.currentNodeId).toBe('cw-1');
+        expect(store.getState().world.currentMap.name).toBe('charcoal-wood');
     });
 
     it('loads the new layout fixture so node positions and labels update', () => {
         const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('breakwater') } });
         const actions = createAppActions(store);
 
-        actions.changeMap('northern-forest');
+        actions.changeMap('charcoal-wood');
 
         const vm = selectExplorationViewModel(store.getState());
         const ids = vm.nodes.map((n) => n.id);
-        expect(ids).toEqual(expect.arrayContaining(['nf-1', 'nf-2', 'nf-3']));
-        expect(ids.every((id) => id.startsWith('nf-'))).toBe(true);
+        expect(ids).toEqual(expect.arrayContaining(['cw-1', 'cw-2', 'cw-3']));
+        expect(ids.every((id) => id.startsWith('cw-'))).toBe(true);
     });
 
     it('also accepts the MapState built from getMapDefinition+createMapState as a sanity hint', () => {
@@ -326,9 +326,9 @@ describe('changeMap action: map transition', () => {
         // `createMapState(getMapDefinition(continent, name))`; the returned
         // `MapState` carries the definition's `startingNode.id` as
         // `currentNode` on a fresh map.
-        const map = createMapState(getMapDefinition('coastal-continent', 'northern-forest'));
-        expect(map.name).toBe('northern-forest');
-        expect(map.currentNode).toBe('nf-1');
+        const map = createMapState(getMapDefinition('coastal-continent', 'charcoal-wood'));
+        expect(map.name).toBe('charcoal-wood');
+        expect(map.currentNode).toBe('cw-1');
     });
 });
 

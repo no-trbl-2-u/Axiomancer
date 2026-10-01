@@ -6,7 +6,7 @@ A hazard node starts a hazard session (`state/actions.ts` → `beginHazardAction
 
 ## 2. Enter it directly
 
-- Fixture: `/exploration?fixture=l30-caverns-hazard-arrive` — L30 kit on caverns nc-17, `arrive: true` → lands on `/hazard`. `l30-caverns-hazard` is the same spot without `arrive` (you are on the map; the node is already consumed as "here", so use a neighbour or the dev button).
+- Fixture: `/exploration?fixture=l30-bw-hazard-arrive` — L30 kit on the Breakwater's bw-3, `arrive: true` → lands on `/hazard`. `l30-bw-hazard` is the same spot without `arrive` (you are on the map; the node is already consumed as "here", so use a neighbour or the dev button).
 - `/dev` → `debug-hazard-button` (BRAVE IT) or `debug-hazard-tutorial-button` (pinned tutorial crossing); `debug-trigger-encounter-hazard`; `debug-hazard-id-<id>` for a specific authored hazard; `debug-hazard-deck-preset-<id>` / `debug-hazard-deck-randomize` to shape the deck first.
 - Globals: `__AXM_MINIGAME_SEEDS__.hazard = { seed, hazardId }` or legacy `__AXM_HAZARD_SEED__` / `__AXM_HAZARD_ID__` (harness default `424242`, `cracked-cliff`); `__AXM_JUICE_INSTANT__`.
 

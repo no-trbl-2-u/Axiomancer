@@ -1,8 +1,8 @@
 /**
  * Combat arena backdrops — Phase 83 (Woodcut Codex, V-series follow-up),
- * extended in Phases 101 and 103. Not the whole region set: the Northern
- * Forest has no plate and falls back. The count is pinned by this module's
- * test against the map registry, never restated here.
+ * extended in Phases 101 and 103. R7e (D72) deleted the parked regions'
+ * five plates with their maps; no Act 1 region has a plate yet. The count is
+ * pinned by this module's test against the map registry, never restated here.
  *
  * `CombatCombatantPane`'s full-bleed battlefield scene, region-keyed the same
  * way `assets/images/maps/index.ts` keys the exploration-map backdrop: an
@@ -51,11 +51,6 @@
 
 const ARENA_DESOLATION = require('./arena-desolation.webp');
 const ARENA_COASTAL_VILLAGE = require('./coastal-village.webp');
-const ARENA_NORTHERN_CITY = require('./arena-northern-city.webp');
-const ARENA_CONNECTING_RIVER = require('./arena-connecting-river.webp');
-const ARENA_SWEETHEARTS_VILLAGE = require('./arena-sweethearts-village.webp');
-const ARENA_CAVERNS = require('./arena-caverns.webp');
-const ARENA_THE_CAPITAL = require('./arena-the-capital.webp');
 
 /**
  * One arena: the region it answers, the plate, and what a screen-reader user is
@@ -98,60 +93,6 @@ const REGION_ARENAS: readonly ArenaPlate[] = [
         pattern: /drowned parish/i,
         art: ARENA_COASTAL_VILLAGE,
         alt: 'Fishermen crowd a moored boat’s rigging, masts forested against a backlit dockside sky',
-    },
-    // Phase 101 — the northern continent's three settled regions. All three are
-    // plates from the SAME edition as the coastal arena above (Doré's "London:
-    // A Pilgrimage", 1872, via the Gallica scans on Commons), which is what
-    // makes the set read as one hand rather than four borrowed pictures.
-    {
-        // "Over London by Rail". A city grim by ordinary congestion, not by
-        // monsters — the register the northern city is written in.
-        pattern: /northern city/i,
-        art: ARENA_NORTHERN_CITY,
-        alt: 'Tenement backyards and chimney stacks crowd beneath a railway viaduct, seen through a dark brick arch',
-    },
-    {
-        // A landing rather than a view of open water: the region is a crossing
-        // you arrive at. Deliberately not the maps registry's Charon plate —
-        // the player has just walked over that one to get here.
-        pattern: /connecting river/i,
-        art: ARENA_CONNECTING_RIVER,
-        alt: 'A crowd presses at a dock gate under a low sun, a forest of ships’ masts massed behind',
-    },
-    {
-        // "Dudley Street, Seven Dials". Matched on `sweetheart` alone: the live
-        // display string carries an apostrophe ("The Sweetheart's Village") and
-        // a pattern that spans it would break on a straight/curly swap.
-        pattern: /sweetheart/i,
-        art: ARENA_SWEETHEARTS_VILLAGE,
-        alt: 'A slum lane of low terraces with children in the roadway and second-hand wares laid out on the stones',
-    },
-    // Phase 103 — the two regions the earlier pass could not reach, now that the
-    // acquisition pipeline can crop a plate off a scanned page. Both are Doré
-    // Dante plates rather than London ones: neither the caverns nor the capital
-    // has a documentary-London equivalent, and the brief for this phase records
-    // that deliberate break from the single-source rule.
-    {
-        // "Abandon all hope ye who enter here" — a gate cut into a rock face,
-        // two figures at the threshold, a lit horizon band behind. The region
-        // BEGINS underground, so its arena wants the moment of going in rather
-        // than a cave interior. Distinct from the maps registry's Titans plate,
-        // which the player crossed to get here.
-        pattern: /cavern/i,
-        art: ARENA_CAVERNS,
-        alt: 'A vast gateway cut into a rock face, two small figures at its threshold beneath a lit horizon',
-    },
-    {
-        // The Empyrean Rose. The capital is where the advisor-selection payoff
-        // lands, so its arena is the one place that dwarfs the player: a court
-        // that is vast, ranked and wholly indifferent. The two supplicants at
-        // the base of the frame are exactly the player's position.
-        //
-        // Ordered AFTER the other rules but its pattern is narrow, so position
-        // is not load-bearing — see the ordering note above.
-        pattern: /the capital/i,
-        art: ARENA_THE_CAPITAL,
-        alt: 'Two small figures stand on a rock before an immense spiralling host of winged forms circling a blinding light',
     },
 ];
 

@@ -54,19 +54,16 @@ describe('the new-game start (D27)', () => {
     it('lists the Breakwater available and every other campaign map locked', () => {
         const [coastal, northern] = createStartingWorld().world;
         expect(coastal!.availableMaps).toEqual(['breakwater']);
-        expect(coastal!.lockedMaps).toEqual(['charcoal-wood', 'northern-forest']);
+        expect(coastal!.lockedMaps).toEqual(['charcoal-wood']);
         expect(northern!.availableMaps).toEqual([]);
-        expect(northern!.lockedMaps).toEqual([
-            'beacon-crags', 'lantern-deep', 'caverns', 'northern-city', 'connecting-river', 'town-across-river', 'the-capital',
-        ]);
+        expect(northern!.lockedMaps).toEqual(['beacon-crags', 'lantern-deep']);
     });
 });
 
 describe('starting on any map (dev tools)', () => {
     it('offers every campaign map and no labyrinth act', () => {
         expect([...STARTABLE_MAPS].sort()).toEqual([
-            'beacon-crags', 'breakwater', 'caverns', 'charcoal-wood', 'connecting-river',
-            'lantern-deep', 'northern-city', 'northern-forest', 'the-capital', 'town-across-river',
+            'beacon-crags', 'breakwater', 'charcoal-wood', 'lantern-deep',
         ]);
     });
 

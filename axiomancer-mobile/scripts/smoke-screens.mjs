@@ -51,9 +51,9 @@ export const ROUTES = [
     // unreachable today — every paced kind has a dedicated screen.)
     // Fixture routes run in a second browser context with dev tools
     // forced, so the plain routes above keep their unforced baselines.
-    { name: 'dialogue', path: '/exploration', fixture: 'apprentice-nf-interaction', waitForPath: '/dialogue' },
-    { name: 'village', path: '/exploration', fixture: 'wanderer-nf-village', waitForPath: '/village' },
-    { name: 'cutscene', path: '/exploration', fixture: 'wanderer-nf-cutscene', waitForPath: '/cutscene' },
+    { name: 'dialogue', path: '/exploration', fixture: 'apprentice-staged-dialogue', waitForPath: '/dialogue' },
+    { name: 'village', path: '/exploration', fixture: 'wanderer-staged-village', waitForPath: '/village' },
+    { name: 'cutscene', path: '/exploration', fixture: 'wanderer-staged-cutscene', waitForPath: '/cutscene' },
 ]
 
 // 0.5% of pixels may differ before a route is flagged. Bumps catch

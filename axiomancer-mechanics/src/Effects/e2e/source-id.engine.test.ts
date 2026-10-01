@@ -69,7 +69,7 @@ function fixtureEnemy() {
         description: 'd',
         level: 1,
         baseStats: { heart: 3, body: 3, mind: 3 },
-        mapName: 'northern-city',
+        mapName: 'breakwater',
         logic: 'random',
     });
 }

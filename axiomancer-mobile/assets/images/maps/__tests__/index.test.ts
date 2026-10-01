@@ -11,24 +11,9 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { MAP_PLATES } from '@/assets/images/maps';
-import { ALL_MAP_LAYOUTS, getMapLayout } from '@/state/exploration-maps';
+import { ALL_MAP_LAYOUTS } from '@/state/exploration-maps';
 
 describe('map layouts name their plates', () => {
-    it('keeps the plate each shipped map rendered under the region regex', () => {
-        const expected: Record<string, number> = {
-            'northern-forest': MAP_PLATES.forestDark,
-            'caverns': MAP_PLATES.thePit,
-            'northern-city': MAP_PLATES.ludgateHill,
-            'connecting-river': MAP_PLATES.charonCrossing,
-            'town-across-river': MAP_PLATES.wentworthStreet,
-            'the-capital': MAP_PLATES.ludgateHill,
-        };
-        for (const [mapId, plate] of Object.entries(expected)) {
-            expect({ mapId, plate: getMapLayout(mapId)?.sheet.backdrop }).toEqual({ mapId, plate });
-        }
-    });
-
     it('gives every layout a plate', () => {
         for (const layout of ALL_MAP_LAYOUTS) {
             // A `require()` handle: a number under Metro, a module object under

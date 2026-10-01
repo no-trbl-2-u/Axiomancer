@@ -79,10 +79,10 @@ describe('resolveBootFixture: gate + fallback', () => {
     });
 
     it('compiles a registry fixture and memoises it for the boot', () => {
-        const boot = resolveBootFixture({ request: { source: 'url', ref: 'l30-caverns-hazard' }, devToolsEnabled: true });
-        expect(boot?.fixture.id).toBe('l30-caverns-hazard');
+        const boot = resolveBootFixture({ request: { source: 'url', ref: 'l30-bw-hazard' }, devToolsEnabled: true });
+        expect(boot?.fixture.id).toBe('l30-bw-hazard');
         expect(boot?.state.player.level).toBe(30);
-        expect(boot?.state.world.currentMap.currentNode).toBe('nc-17');
+        expect(boot?.state.world.currentMap.currentNode).toBe('bw-3');
         expect(getBootFixture()).toBe(boot);
     });
 });
@@ -107,7 +107,7 @@ describe('store boot through the fixture adapter', () => {
     });
 
     it('`arrive` fixtures resolve the current node so <EventGate> has a paced route', () => {
-        const fixture = getStateFixtureById('apprentice-nf-interaction')!;
+        const fixture = getStateFixtureById('apprentice-staged-dialogue')!;
         expect(fixture.arrive).toBe(true);
         const boot = resolveBootFixture({ request: { source: 'url', ref: fixture.id }, devToolsEnabled: true })!;
         const store = createAppStore({ adapter: createFixtureBootAdapter(boot.state) });
@@ -115,14 +115,14 @@ describe('store boot through the fixture adapter', () => {
         expect(selectPacedEventRoute(store.getState())).toBeNull();
 
         // What <FixtureBoot> does once navigation is ready.
-        expect(actions.resolveCurrentMapEvent()).toBe(true);
+        expect(actions.resolveCurrentMapEvent(undefined, boot.fixture.stagedEvent)).toBe(true);
         expect(selectPacedEventRoute(store.getState())).toBe('/dialogue');
     });
 
-    it('`wanderer-nf-village` arrives on the village screen', () => {
-        const boot = resolveBootFixture({ request: { source: 'url', ref: 'wanderer-nf-village' }, devToolsEnabled: true })!;
+    it('`wanderer-staged-village` arrives on the village screen', () => {
+        const boot = resolveBootFixture({ request: { source: 'url', ref: 'wanderer-staged-village' }, devToolsEnabled: true })!;
         const store = createAppStore({ adapter: createFixtureBootAdapter(boot.state) });
-        createAppActions(store).resolveCurrentMapEvent();
+        createAppActions(store).resolveCurrentMapEvent(undefined, boot.fixture.stagedEvent);
         expect(selectPacedEventRoute(store.getState())).toBe('/village');
         expect(store.getState().player.currency).toBe(240);
     });
@@ -157,13 +157,13 @@ describe('createFixtureStore + arriveFromFixture (test-utils/fixtureStore.ts)', 
     // browser harnesses can open these cold; pin here that each `arrive`
     // lands the store in the state its gate routes on.
     it.each([
-        ['apprentice-nf-interaction', (s: ReturnType<AppStore['getState']>) => selectPacedEventRoute(s) === '/dialogue'],
-        ['wanderer-nf-village', (s: ReturnType<AppStore['getState']>) => selectPacedEventRoute(s) === '/village'],
-        ['wanderer-nf-cutscene', (s: ReturnType<AppStore['getState']>) => selectPacedEventRoute(s) === '/cutscene'],
+        ['apprentice-staged-dialogue', (s: ReturnType<AppStore['getState']>) => selectPacedEventRoute(s) === '/dialogue'],
+        ['wanderer-staged-village', (s: ReturnType<AppStore['getState']>) => selectPacedEventRoute(s) === '/village'],
+        ['wanderer-staged-cutscene', (s: ReturnType<AppStore['getState']>) => selectPacedEventRoute(s) === '/cutscene'],
         ['apprentice-bw-rest', (s: ReturnType<AppStore['getState']>) => s.rest.session !== null],
         ['apprentice-bw-cache', (s: ReturnType<AppStore['getState']>) => s.cache.session !== null],
         ['wanderer-bw-blacksmith', (s: ReturnType<AppStore['getState']>) => s.blacksmith.session !== null],
-        ['l30-caverns-hazard-arrive', (s: ReturnType<AppStore['getState']>) => s.hazard.session !== null],
+        ['l30-bw-hazard-arrive', (s: ReturnType<AppStore['getState']>) => s.hazard.session !== null],
     ])('"%s": arrive lands the state its gate routes on', (id, landed) => {
         const h = createFixtureStore(id);
         expect(h.fixture.arrive).toBe(true);

@@ -28,7 +28,7 @@ import { applyPayload } from './handlers';
 import { reachableObjectives, collectObjectives, progressQuest } from '../quest.engine';
 import type { QuestLog, NodeId } from '../types';
 import type {
-    MapEventPool, MapEventPoolEntry, MapEventKind, ResolveMapEventResult, ResolvedEvent,
+    MapEventPayload, MapEventPool, MapEventPoolEntry, MapEventKind, ResolveMapEventResult, ResolvedEvent,
 } from './types';
 
 /**
@@ -235,10 +235,16 @@ function answerArrival(state: GameState, nodeId: NodeId): GameState {
 
 /**
  * Resolves the MapEvent for the player's current node. See file header.
+ *
+ * `staged` resolves that payload in place of the node's pool. It exists for
+ * the state fixtures (`StateFixture.stagedEvent`, R7e): Act 1 stages no NPC
+ * or shop, so a fixture stages one on an Act 1 node without registering it
+ * in the live world.
  */
 export function resolveMapEvent(
     state: GameState,
     rng: () => number = () => getRng().random(),
+    staged?: MapEventPayload,
 ): ResolveMapEventResult {
     const map = state.world.currentMap;
     const nodeId = map.currentNode;
@@ -273,8 +279,10 @@ export function resolveMapEvent(
     // and so carries the cleared debt the same way.
     const answeredMap = answered.world.currentMap;
 
-    // 2. Find the active pool.
-    const pool = lookupPool(answeredMap.continent, answeredMap.name, nodeId);
+    // 2. Find the active pool (a staged payload stands in for it).
+    const pool: MapEventPool | undefined = staged
+        ? { id: `${nodeId}.staged`, entries: [{ kind: staged.kind, weight: 1, payload: staged }] }
+        : lookupPool(answeredMap.continent, answeredMap.name, nodeId);
     if (!pool) {
         // No pool registered — reveal + unlock adjacents + consume to advance
         // discovery and traversal, but produce no event.

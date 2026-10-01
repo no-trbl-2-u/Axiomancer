@@ -13,7 +13,7 @@
  *   - the arrival map's start node is NOT consumed by the mobile-side
  *     consume bookkeeping (the engine dispatcher already short-circuits
  *     its own consume step for travel; this pins the mobile mirror)
- *   - nf-10 (the cave mouth) → caverns on the NORTHERN continent —
+ *   - cw-20 (the stair cave) → beacon-crags on the NORTHERN continent —
  *     the continent crossing the world catalogue exists to serve
  */
 
@@ -65,67 +65,15 @@ describe('inter-map travel doors (Phase W1)', () => {
         expect(map.consumedNodes ?? []).not.toContain(map.currentNode);
     });
 
-    it('nf-10 crosses the continent into the caverns', () => {
-        const { store, actions } = seatAt('coastal-continent', 'northern-forest', 'nf-10');
+    it('cw-20 crosses the continent onto the Beacon Crags', () => {
+        const { store, actions } = seatAt('coastal-continent', 'charcoal-wood', 'cw-20');
 
         expect(actions.resolveCurrentMapEvent('travel')).toBe(true);
 
         const after = store.getState();
-        expect(after.world.currentMap.name).toBe('caverns');
+        expect(after.world.currentMap.name).toBe('beacon-crags');
         expect(after.world.currentContinent.name).toBe('northern-continent');
-        expect(after.notifications?.toast?.text).toBe('You cross into The Caverns.');
-        expect(selectPacedEventRoute(after)).toBeNull();
-    });
-
-    it('nc-26 climbs out of the caverns into the northern city (Phase W3)', () => {
-        const { store, actions } = seatAt('northern-continent', 'caverns', 'nc-26');
-
-        expect(actions.resolveCurrentMapEvent('travel')).toBe(true);
-
-        const after = store.getState();
-        expect(after.world.currentMap.name).toBe('northern-city');
-        expect(after.world.currentContinent.name).toBe('northern-continent');
-        expect(after.world.currentMap.currentNode).toBe('ncy-1');
-        expect(after.notifications?.toast?.text).toBe('You cross into The Northern City.');
-        expect(selectPacedEventRoute(after)).toBeNull();
-    });
-
-    it('ncy-26 crosses the water-gate into connecting-river (Phase W4)', () => {
-        const { store, actions } = seatAt('northern-continent', 'northern-city', 'ncy-26');
-
-        expect(actions.resolveCurrentMapEvent('travel')).toBe(true);
-
-        const after = store.getState();
-        expect(after.world.currentMap.name).toBe('connecting-river');
-        expect(after.world.currentContinent.name).toBe('northern-continent');
-        expect(after.world.currentMap.currentNode).toBe('cr-1');
-        expect(after.notifications?.toast?.text).toBe('You cross into The Connecting River.');
-        expect(selectPacedEventRoute(after)).toBeNull();
-    });
-
-    it('cr-13 crosses the river into town-across-river (Phase W4)', () => {
-        const { store, actions } = seatAt('northern-continent', 'connecting-river', 'cr-13');
-
-        expect(actions.resolveCurrentMapEvent('travel')).toBe(true);
-
-        const after = store.getState();
-        expect(after.world.currentMap.name).toBe('town-across-river');
-        expect(after.world.currentContinent.name).toBe('northern-continent');
-        expect(after.world.currentMap.currentNode).toBe('tar-1');
-        expect(after.notifications?.toast?.text).toBe('You cross into The Sweetheart\'s Village.');
-        expect(selectPacedEventRoute(after)).toBeNull();
-    });
-
-    it('tar-7 crosses the ribbon-road into the-capital (Phase W5)', () => {
-        const { store, actions } = seatAt('northern-continent', 'town-across-river', 'tar-7');
-
-        expect(actions.resolveCurrentMapEvent('travel')).toBe(true);
-
-        const after = store.getState();
-        expect(after.world.currentMap.name).toBe('the-capital');
-        expect(after.world.currentContinent.name).toBe('northern-continent');
-        expect(after.world.currentMap.currentNode).toBe('cap-1');
-        expect(after.notifications?.toast?.text).toBe('You cross into The Capital.');
+        expect(after.notifications?.toast?.text).toBe('You cross into The Beacon Crags.');
         expect(selectPacedEventRoute(after)).toBeNull();
     });
 });

@@ -28,9 +28,10 @@
  * fishing-village purged), v29 → v30 (2026-09-30, R5: the retired
  * consumables and their effects dropped), v30 → v31 (2026-09-30, R6a: the
  * hazard token and hex flags dropped), v31 → v32 (2026-09-30, R6b: hazard
- * deck cards outside the core ten dropped) and v32 → v33 (2026-09-30, R7c:
- * the write-only `regionConsequences` slice dropped). The hops chain, so a
- * v11 save lands at v33 in one `migrate` call. Every other version mismatch still rejects.
+ * deck cards outside the core ten dropped), v32 → v33 (2026-09-30, R7c:
+ * the write-only `regionConsequences` slice dropped) and v33 → v34
+ * (2026-10-01, R7e: the parked world's maps, quests and flags dropped). The
+ * hops chain, so a v11 save lands at v34 in one `migrate` call. Every other version mismatch still rejects.
  */
 
 import { GameState } from './types';
@@ -796,6 +797,82 @@ function migrateV32ToV33(raw: Record<string, unknown>): Record<string, unknown> 
     return { ...rest, version: 33 };
 }
 
+/** The six parked maps R7e deletes (D72). */
+const R7E_DELETED_MAPS: ReadonlySet<string> = new Set([
+    'northern-forest', 'caverns', 'northern-city', 'connecting-river', 'town-across-river', 'the-capital',
+]);
+
+/** Their nine quests. */
+const R7E_DELETED_QUESTS: ReadonlySet<string> = new Set([
+    'gather-wood', 'get-to-cave', 'gather-iron', 'get-to-northern-city', 'get-to-connecting-river',
+    'find-islanders', 'join-islanders-for-ritual', 'get-to-town-across-river', 'get-to-the-capital',
+]);
+
+/** The story flags their dialogue trees set. */
+const R7E_DELETED_FLAGS: ReadonlySet<string> = new Set([
+    'boy-chased-the-rumor', 'boy-witnessed-the-crowning', 'boy-witnessed-the-river-ritual',
+    'sweetheart-was-nominated', 'shrine_keeper_recognizes_seeker',
+]);
+
+/** A flag keyed to a node of a deleted map (`nf-3`, `ncy-12`, …). */
+const R7E_NODE_FLAG = /(^|[^a-z])(nf|nc|ncy|cr|tar|cap)-\d+/;
+
+/**
+ * v33 → v34 (2026-10-01, THE REVAMP R7e, D72): the parked world's content is
+ * deleted. A save standing on a deleted map (only dev travel reaches one since
+ * v28) moves onto the Lantern Deep's sealed deep stair (`ld-18`) by the v28
+ * move, dropping a staged encounter; a Labyrinth save is left alone (D54). The
+ * deleted maps leave every continent's lists and `mapStates` (the v29 scrub),
+ * their quests leave the log and their story and node flags drop. Idempotent
+ * and pure over a raw save payload.
+ */
+function migrateV33ToV34(raw: Record<string, unknown>): Record<string, unknown> {
+    let out: Record<string, unknown> = { ...raw, version: 34 };
+    const world = raw.world as WorldState | undefined;
+    const current = world?.currentMap;
+    if (world && current && typeof current.name === 'string' && R7E_DELETED_MAPS.has(current.name)) {
+        // The v28 move. The save is not in the Labyrinth, so its Labyrinth
+        // slice is kept out of the move and passes through untouched.
+        const { labyrinth, ...rest } = raw;
+        out = { ...migrateV27ToV28(rest), version: 34 };
+        if (labyrinth !== undefined) out.labyrinth = labyrinth;
+    }
+    const moved = out.world as WorldState | undefined;
+    if (moved && typeof moved === 'object') {
+        const scrub = (c: Continent): Continent => ({
+            ...c,
+            availableMaps: (c.availableMaps ?? []).filter(m => !R7E_DELETED_MAPS.has(m)),
+            lockedMaps: (c.lockedMaps ?? []).filter(m => !R7E_DELETED_MAPS.has(m)),
+            completedMaps: (c.completedMaps ?? []).filter(m => !R7E_DELETED_MAPS.has(m)),
+        });
+        const next: WorldState = {
+            ...moved,
+            world: Array.isArray(moved.world) ? moved.world.map(scrub) : moved.world,
+            currentContinent: moved.currentContinent ? scrub(moved.currentContinent) : moved.currentContinent,
+        };
+        if (moved.mapStates && typeof moved.mapStates === 'object') {
+            const states = { ...moved.mapStates } as Record<string, MapState>;
+            for (const m of R7E_DELETED_MAPS) delete states[m];
+            next.mapStates = states as Partial<Record<MapName, MapState>>;
+        }
+        out.world = next;
+    }
+    const quests = raw.quests as QuestLog | undefined;
+    if (quests && typeof quests === 'object') {
+        out.quests = {
+            ...quests,
+            available: (quests.available ?? []).filter(q => !R7E_DELETED_QUESTS.has(q.name)),
+            active: (quests.active ?? []).filter(q => !R7E_DELETED_QUESTS.has(q.name)),
+            completed: (quests.completed ?? []).filter(n => !R7E_DELETED_QUESTS.has(n)),
+        };
+    }
+    if (Array.isArray(raw.flags)) {
+        out.flags = (raw.flags as unknown[]).filter(f =>
+            !(typeof f === 'string' && (R7E_DELETED_FLAGS.has(f) || R7E_NODE_FLAG.test(f))));
+    }
+    return out;
+}
+
 /**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
@@ -836,8 +913,9 @@ export function migrate(
     // drops fishing-village, its quests and the goodwill tally; v29 → v30
     // drops the retired consumables and their effects; v30 → v31 drops the
     // hazard token and hex flags; v31 → v32 drops deleted hazard deck cards;
-    // v32 → v33 drops the write-only region-consequences slice.
-    // Chained so a v11 save lands at v33 in one call.
+    // v32 → v33 drops the write-only region-consequences slice; v33 → v34
+    // drops the parked world's maps, quests and flags.
+    // Chained so a v11 save lands at v34 in one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
@@ -925,6 +1003,10 @@ export function migrate(
     if (version === 32 && toVersion >= 33) {
         working = migrateV32ToV33(working);
         version = 33;
+    }
+    if (version === 33 && toVersion >= 34) {
+        working = migrateV33ToV34(working);
+        version = 34;
     }
 
     if (version !== toVersion) {

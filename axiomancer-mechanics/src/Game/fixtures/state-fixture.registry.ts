@@ -19,6 +19,7 @@
  */
 
 import type { StateFixture } from './state-fixture.types';
+import { FIXTURE_CUTSCENE_EVENT, FIXTURE_DIALOGUE_EVENT, FIXTURE_VILLAGE_EVENT } from './fixture-content';
 
 export const STATE_FIXTURES: readonly StateFixture[] = Object.freeze([
     {
@@ -27,13 +28,14 @@ export const STATE_FIXTURES: readonly StateFixture[] = Object.freeze([
         seed: 'fixture-fresh-start',
     },
     {
-        id: 'apprentice-nf-interaction',
-        description: 'Apprentice standing on the Shrine Keeper\'s node of the parked northern forest (nf-3; no Act 1 map stages an NPC); `arrive` fires the dialogue so /dialogue is reachable cold.',
-        seed: 'fixture-apprentice-nf-interaction',
+        id: 'apprentice-staged-dialogue',
+        description: 'Apprentice on the Breakwater\'s bw-2 with the fixture NPC staged on it (Act 1 stages no NPC, R7e); `arrive` pushes /dialogue.',
+        seed: 'fixture-apprentice-staged-dialogue',
         preset: 'apprentice',
-        world: { continent: 'coastal-continent', map: 'northern-forest', node: 'nf-3' },
+        world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-2' },
         flags: ['combat-tutorial-done'],
         arrive: true,
+        stagedEvent: FIXTURE_DIALOGUE_EVENT,
     },
     {
         id: 'sage-bw-door-gate',
@@ -44,28 +46,21 @@ export const STATE_FIXTURES: readonly StateFixture[] = Object.freeze([
         flags: ['combat-tutorial-done', 'hazard-tutorial-done'],
     },
     {
-        id: 'wanderer-nf-village',
-        description: 'Wanderer (L8) on the northern-forest village node (nf-8); `arrive` pushes /village. Village + shop surfaces.',
-        seed: 'fixture-wanderer-nf-village',
+        id: 'wanderer-staged-village',
+        description: 'Wanderer (L8) on the Breakwater\'s bw-2 with the fixture shop staged on it (Act 1 stages no shop, R7e); `arrive` pushes /village. Village + shop surfaces.',
+        seed: 'fixture-wanderer-staged-village',
         preset: 'wanderer',
-        world: {
-            continent: 'coastal-continent',
-            map: 'northern-forest',
-            node: 'nf-8',
-        },
+        world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-2' },
         player: { currency: 240 },
         arrive: true,
+        stagedEvent: FIXTURE_VILLAGE_EVENT,
     },
     {
-        id: 'l30-caverns-hazard',
-        description: 'L30 ladder kit at the first caverns hazard node (nc-17) on the northern continent, low on vitae. Hazard + late-kit surfaces.',
-        seed: 'fixture-l30-caverns-hazard',
+        id: 'l30-bw-hazard',
+        description: 'L30 ladder kit at the Breakwater\'s first hazard node (bw-3), low on vitae. Hazard + late-kit surfaces.',
+        seed: 'fixture-l30-bw-hazard',
         preset: 'kid-l30',
-        world: {
-            continent: 'northern-continent',
-            map: 'caverns',
-            node: 'nc-17',
-        },
+        world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-3' },
         player: { health: 12 },
         flags: ['combat-tutorial-done', 'hazard-tutorial-done'],
     },
@@ -82,13 +77,14 @@ export const STATE_FIXTURES: readonly StateFixture[] = Object.freeze([
     // `/critique`'s drive, `verify:visual`, and the Playwright harnesses
     // open the gated screen cold. Kinds per `getNodePrimaryEventKind`.
     {
-        id: 'wanderer-nf-cutscene',
-        description: 'Wanderer (L8) on a mid-forest omen node (nf-17, cutscene); `arrive` pushes /cutscene. (Not the map start node: the exploration screen fires a start node\'s own arrival on landing, and a second resolve would bounce the screen.)',
-        seed: 'fixture-wanderer-nf-cutscene',
+        id: 'wanderer-staged-cutscene',
+        description: 'Wanderer (L8) on the Breakwater\'s bw-2 with a placeholder cutscene staged on it (Act 1\'s cutscenes are start-node arrivals, which the screen fires on landing); `arrive` pushes /cutscene.',
+        seed: 'fixture-wanderer-staged-cutscene',
         preset: 'wanderer',
-        world: { continent: 'coastal-continent', map: 'northern-forest', node: 'nf-17' },
+        world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-2' },
         flags: ['combat-tutorial-done'],
         arrive: true,
+        stagedEvent: FIXTURE_CUTSCENE_EVENT,
     },
     {
         id: 'apprentice-bw-rest',
@@ -120,11 +116,11 @@ export const STATE_FIXTURES: readonly StateFixture[] = Object.freeze([
         arrive: true,
     },
     {
-        id: 'l30-caverns-hazard-arrive',
-        description: 'L30 ladder kit on the first caverns hazard node (nc-17); `arrive` starts the hazard minigame → /hazard.',
-        seed: 'fixture-l30-caverns-hazard-arrive',
+        id: 'l30-bw-hazard-arrive',
+        description: 'L30 ladder kit on the Breakwater\'s first hazard node (bw-3); `arrive` starts the hazard minigame → /hazard.',
+        seed: 'fixture-l30-bw-hazard-arrive',
         preset: 'kid-l30',
-        world: { continent: 'northern-continent', map: 'caverns', node: 'nc-17' },
+        world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-3' },
         flags: ['combat-tutorial-done', 'hazard-tutorial-done'],
         arrive: true,
     },

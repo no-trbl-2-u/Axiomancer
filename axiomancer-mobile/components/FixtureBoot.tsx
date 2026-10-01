@@ -51,7 +51,7 @@ export function FixtureBoot() {
             if (fired.current) return;
             if (navigationRef.isReady() || attempts >= READY_POLL_MAX) {
                 fired.current = true;
-                if (!somethingAlreadyArrived(store.getState())) actions.resolveCurrentMapEvent();
+                if (!somethingAlreadyArrived(store.getState())) actions.resolveCurrentMapEvent(undefined, boot.fixture.stagedEvent);
                 return;
             }
             attempts += 1;

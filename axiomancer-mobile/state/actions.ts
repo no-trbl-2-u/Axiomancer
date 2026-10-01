@@ -126,7 +126,7 @@ import {
     type BeginBlacksmithOptions,
     type ClaimBlacksmithResult,
 } from './blacksmith/store-actions';
-import type { CacheLootTier, DieGearColor } from '@mechanics';
+import type { DieGearColor, MapEventPayload } from '@mechanics';
 import { isTutorialDone } from './tutorials';
 import {
     applyPlayerTierPresetAction,
@@ -372,9 +372,13 @@ export interface AppActions {
      * slice so the event modal can apply category-specific visual
      * treatment even when the engine resolves to a generic kind.
      *
+     * `staged` resolves that payload in place of the node's pool: a state
+     * fixture's `stagedEvent` (R7e), how `<FixtureBoot>` reaches dialogue, a
+     * shop or a cutscene on an Act 1 node.
+     *
      * Returns `true` when an event was produced (kind !== 'none').
      */
-    resolveCurrentMapEvent: (sourceNodeType?: string) => boolean;
+    resolveCurrentMapEvent: (sourceNodeType?: string, staged?: MapEventPayload) => boolean;
     /**
      * Resolve the currently-pending event by id. Branches on VM kind:
      *  - combat-prelude + 'fight'  -> startCombat(encounter.enemies[0]); clear
@@ -813,7 +817,8 @@ export function createAppActions(store: AppStore): AppActions {
             engineStore.levelUp?.();
         },
         save: () => store.getState().save(),
-        resolveCurrentMapEvent: (sourceNodeType?: string) => resolveCurrentMapEventAction(store, sourceNodeType),
+        resolveCurrentMapEvent: (sourceNodeType?: string, staged?: MapEventPayload) =>
+            resolveCurrentMapEventAction(store, sourceNodeType, staged),
         pickEventChoice: (choiceId) => pickEventChoiceAction(store, choiceId),
         fleeEncounter: () => fleeEncounterAction(store),
         dismissEvent: () => dismissEventAction(store),
@@ -1450,11 +1455,11 @@ function applyCharacterPresetAction(
 // Event actions (Spec 08 — Phase 6 Tick B)
 // ---------------------------------------------------------------------------
 
-function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string): boolean {
+function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string, staged?: MapEventPayload): boolean {
     try {
         const state = store.getState();
         const gameState = state as unknown as GameState;
-        const result: ResolveMapEventResult = resolveMapEvent(gameState);
+        const result: ResolveMapEventResult = resolveMapEvent(gameState, undefined, staged);
 
         // Phase 27: when a non-'none' event resolves, mark the current
         // node consumed in the engine's parallel data model
@@ -1556,21 +1561,19 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
         // inventory. `<CacheGate>` routes to /cache when the slice fills.
         //
         // Reward depth: the `item` offer rolls a real engine-truth
-        // loot/relic table scaled to the player's level (Phase 129).
-        // Deeper locales (northern-forest) roll the `rich` tier (more
-        // items + a unique-relic chance); the coastal opener rolls
-        // `modest`. Currency from the event payload is preserved for the
-        // `item` offer.
+        // loot/relic table scaled to the player's level (Phase 129). Every
+        // Act 1 cache rolls the `modest` tier (the `rich` tier's only map,
+        // northern-forest, went in R7e; the dev rewards menu still rolls
+        // it). Currency from the event payload is preserved for the `item`
+        // offer.
         if (result.event.kind === 'loot-cache') {
             store.setState({
                 ...resolvedState,
                 player: gameState.player,
                 event: EMPTY_EVENT_SLICE,
             });
-            const mapName = resolvedState.world?.currentMap?.name;
-            const tier: CacheLootTier = mapName === 'northern-forest' ? 'rich' : 'modest';
             beginLootCacheChoiceAction(store, {
-                tier,
+                tier: 'modest',
                 currency: result.event.currency,
                 description: result.event.description,
             });
