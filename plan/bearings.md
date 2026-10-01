@@ -765,7 +765,8 @@ ambiguity.)
   work starts, the full card-rules inventory (Phase B4,
   `plan/revamp/cards.md`) must be merged — card types, keyword families,
   pricing, rarity/rank, tiers, colour, FREE/PAID anatomy, complexity budget,
-  the carrier rule and every guard that pins them. **The card process
+  the carrier rule and every guard that pins them. **Met 2026-10-01:**
+  the inventory is `plan/revamp/card-rules-inventory.md`. **The card process
   is Plan B, ratified 2026-09-30 (D73):** one slice per lane, lanes grouped
   into families (a relic names a family), a first pool of 3 families × 1
   lane, and bridge cards within a family. See `plan/revamp/cards.md`.

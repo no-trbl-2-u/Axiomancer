@@ -155,6 +155,11 @@ the KW-* lints, face-honesty guards, the reward pool, card upgrades (D8),
 die growth (D20), and any surviving pricing remnants. The loop may ship
 this — it is an inventory, not a design.
 
+**Shipped 2026-10-01:** [`card-rules-inventory.md`](card-rules-inventory.md).
+The B4 gate is met; B5 and B6 start from it. Its three medium findings (the
+carrier rule's missing enforcer, purged card ids in old saves, the pip cap on
+VULNERABLE) are filed in `plan/AUDIT.md` for `/iterate`.
+
 ## B5 — Card-creator workflow (owner)
 
 T, 2026-09-28: "Create card-editor / card-creator workflow" as a phase of
