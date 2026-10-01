@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-01 at commit c46565c3
-> Pass count: 64
+> Last pass: 2026-10-01 at commit a6ee8167
+> Pass count: 65
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -274,9 +274,56 @@
 > because the hazard is drawn per arrival. The desktop hand's mid-token
 > chip wraps are the AUDIT row pass 63 cited.
 
+> **[critique pass 65, 2026-10-01, commit a6ee8167] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route still bounces to the title with no save). 13
+> commits after pass 64: R7e2 (the relic strip), B4 (the card-rules
+> inventory, docs only), R8 (mobile cleanup, grey card art, app label) and
+> R9 (progression retune). No screen shows a regression from them. R8's
+> paintings now sit on all three grey cards at both viewports. Filed LOW:
+> the Minor Healing Potion restores 10 VITAE (15 below half) against
+> starting pools of 160-170. It costs 12 shillings and heals about a
+> quarter of what the free rest gives (43). Reconfirmed and not re-filed:
+> pass 64's identical "PHASE n · ATTACKS" headers, pass 63's corner
+> medallions over the end cards ("Deal" under END), pass 62's phase ledger
+> column, pass 61's inn-rest wording ("Sleep where you stand. Free."
+> under the customs-house line), and pass 58's A Plain Word "+24" beside
+> "+60%". Checked and not filed: the painted "AxiomanceR" wordmark now
+> sits beside R8's "Miserere Mei, Deus" launcher label and the load
+> screen's "miserere mei, deus". The wordmark waits on new art, as
+> before. The mobile hub's dark band above the chart is the documented
+> no-clamp trade (pass 56). The Cut's footnote names the deck floor but
+> not the empty purse. One reason is enough to explain a disabled door.
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
+
+### [LOW] village / rest — the Minor Healing Potion restores 10 VITAE against a 160-170 pool, a quarter of the free rest
+- pass: 65 (commit a6ee8167)
+- viewport: both (375x812 and 1280x800)
+- category: comprehension
+- observation: the staged shop sells one consumable, the Minor Healing
+  Potion: "RESTORES 10 VITAE, 15 BELOW HALF" for 12 shillings. The
+  combat board shows a starting pool of 160 VITAE and the rest screen
+  170. That is 6% of the bar, or 9% when below half. The rest screen on
+  the same pass offers "RESTORES 43 VITAE" for free. A first-time player
+  comparing the two reads the potion as not worth buying. The amounts
+  predate the VITAE pools. R5 kept the potion ladder but did not resize
+  it.
+- evidence: `.critique-artifacts/mobile/07-village.{png,txt}`,
+  `mobile/04-combat-board.txt` ("♥ 160 / 160"), `mobile/09-rest.txt`
+  ("VITAE 20/170", "RESTORES 43 VITAE");
+  `axiomancer-mechanics/src/Items/consumable.library.ts:32-38`
+  (`healAmount: 10`, `healAmountBelowHalf: 15`).
+- suggested fix: resize the existing potions' `healAmount` /
+  `healAmountBelowHalf` against the Act 1 VITAE pools, so the minor
+  potion at least matches a rest. Pin the ratio with a test. Number
+  change on existing items only, no new content. If heal magnitudes
+  belong to B2's balance pass, route it there rather than tune it in
+  `/iterate`.
+- source: critique:drive (unattended)
 
 ### [LOW] combat — the threat sequence's collapsed rows all read "PHASE n · ATTACKS", so the preview hides how the fight escalates
 - pass: 64 (commit c46565c3)
