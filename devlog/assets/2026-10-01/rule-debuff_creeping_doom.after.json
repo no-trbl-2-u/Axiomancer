@@ -1,0 +1,5 @@
+{
+  "id": "debuff_creeping_doom",
+  "before": "Creeping Doom — DOOM — Type debuff · Category damage · Tier 2 · Duration 3 rounds · Stacking intensity",
+  "after": "Creeping Doom — CREEPING_DOOM — Type debuff · Category damage · Tier 2 · Duration 3 rounds · Stacking intensity"
+}
