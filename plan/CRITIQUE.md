@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-09-30 at commit aea7593b
-> Pass count: 63
+> Last pass: 2026-10-01 at commit c46565c3
+> Pass count: 64
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -253,9 +253,56 @@
 > The Glen Market's three GUARD 5 relics are R4's placeholders, and R7e
 > strips them.
 
+> **[critique pass 64, 2026-10-01, commit c46565c3] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route still bounces to the title with no save). 15
+> commits after pass 63: R7c2-R7c3 (engine purge), R7d-R7d2 (stance
+> removal), R7e (the parked world's content) and D73. No screen shows a
+> regression from them. Filed LOW: with stance gone, the threat sequence's
+> four collapsed rows read "PHASE n · ATTACKS" word for word and hide the
+> rising damage. Housekeeping: moved three rows to Done. Pass 60's fixture
+> row is fixed by R7e (every gated capture is on the Breakwater now). Pass
+> 54's doubled tell went with R7d's stance hint. Pass 55's fishing-village
+> row has been moot since R3b deleted the map. Reconfirmed and not
+> re-filed: pass 63's corner medallions over the end cards ("Dea" under
+> END), pass 62's phase ledger column, pass 61's inn-rest wording, and pass
+> 58's A Plain Word "+24" beside "+60%". Checked and not filed: the staged
+> dialogue, shop and cutscene print R7e's placeholder copy, which is
+> deliberate (D58). The mobile and desktop hazard captures show different
+> hazards (Cracked Cliff Path, The Famine March) from the same fixture,
+> because the hazard is drawn per arrival. The desktop hand's mid-token
+> chip wraps are the AUDIT row pass 63 cited.
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
+
+### [LOW] combat — the threat sequence's collapsed rows all read "PHASE n · ATTACKS", so the preview hides how the fight escalates
+- pass: 64 (commit c46565c3)
+- viewport: both (375x812 and 1280x800)
+- category: comprehension
+- observation: the "A FOE BARS THE WAY" preview lists the Brine Hag's five
+  phases. Only phase 1 opens by default. The other four collapse to
+  identical headers: "PHASE 2 · ATTACKS" through "PHASE 5 · ATTACKS". Since
+  R2 every live enemy card deals plain damage, so every header carries the
+  same icon and word. The one thing that differs between phases, the damage
+  (the budget rises 20% a phase), sits behind four taps. A first-time player
+  sees five copies of the same row and learns nothing about whether to take
+  the fight. Before R7d the open row's stance tell at least varied. Now the
+  headers are the whole telegraph, and they are all the same.
+- evidence: `.critique-artifacts/mobile/03-combat.{png,txt}` and
+  `desktop/03-combat.png`;
+  `axiomancer-mobile/components/combat/encounter/CombatEncounterPanel.tsx:750-771`
+  (the header renders only `PHASE {p.index} · {meta.label}`; the threat
+  text mounts only when open); `axiomancer-mechanics/src/Combat/combat.enemy-cards.ts:11-24`
+  (every card is plain damage, weighted up by phase).
+- suggested fix: put each phase's damage figure in its header ("PHASE 2 ·
+  ATTACKS · 13"), read from the structured threat payload rather than
+  parsed from the description. Keep the accordion for the action sentence.
+  Pin it with a presenter or render test that each collapsed header carries
+  its phase's damage. Presentation only, no new content.
+- source: critique:drive (unattended)
 
 ### [LOW] combat / mobile — on a 375-wide phone the corner medallions cover the effect rows of the fan's two end cards
 - pass: 63 (commit aea7593b)
@@ -337,44 +384,6 @@
   so pin it with a presenter test on an inn node.
 - source: critique:drive (unattended)
 
-### [MED] tooling / critique — after R3a, every state fixture boots off Act 1, so critique's gated screens show places no player can reach
-- pass: 60 (commit 2d918845)
-- viewport: both (coverage, not layout)
-- category: navigation
-- observation: R3a parked the northern maps and left fishing-village for
-  R3b to delete, and v28 migrates any real save off those maps onto the
-  Lantern Deep. The state-fixture registry was not touched. Of its 11
-  fixtures, every one but `fresh-start` sits on `fishing-village` (6) or a
-  parked map (`northern-forest` 2, `caverns` 2). Fixtures bypass the
-  migration, so critique's dialogue, village, cutscene, rest, hazard and
-  late-game-hub captures all show a map the player can no longer reach
-  (for example "the Drowned Parish · Map i of ii" and Old Marrow). No
-  fixture stands on the Breakwater, Charcoal Wood, Beacon Crags or the
-  Lantern Deep, so the critique lens has not seen Act 1's gated screens or
-  R3a's two sealed-door cutscenes. The R3 brief never mentions fixtures,
-  and R3b deletes the map that `apprentice-fv-interaction`,
-  `apprentice-fv-rest` and `sage-fv-boss-gate` stand on.
-- evidence: `axiomancer-mechanics/src/Game/fixtures/state-fixture.registry.ts:34,43,53,67,78,90,99,109,118,128`;
-  `.critique-artifacts/mobile/06-dialogue.txt` (Old Marrow),
-  `11-late-game-hub.txt` ("the Drowned Parish"), `10-hazard.txt`
-  (caverns' Flooded Undercroft); `plan/phases/phase_R3_world_reset.md`
-  (no fixture item in R3a-R3c).
-- suggested fix: re-point the fixtures at Act 1 nodes carrying the same
-  screen kinds, including one on a sealed door (`ld-15` or `ld-18`). Do it
-  in R3b alongside the fishing-village purge, or as a named R3b/R3c scope
-  line, with `critique-drive.mjs` and `smoke-screens.mjs` following the
-  new ids. Uses existing nodes only, so no content is created.
-- update (pass 61, commit 0be3bb1c): half addressed. `apprentice-bw-rest`
-  and `sage-bw-door-gate` now stand on the Breakwater, and the `fv-` ids are
-  gone. Four fixture screens still boot onto parked maps: dialogue
-  (`apprentice-nf-interaction`, nf-3), village (`wanderer-nf-village`,
-  nf-8), cutscene (`wanderer-nf-cutscene`, nf-17) and hazard
-  (`l30-caverns-hazard-arrive`, nc-17). Hazard can move now (the Breakwater
-  has `bw-3` and `bw-12`), and so can the cutscene, using a sealed door.
-  Dialogue and village have no Act 1 node of their kind yet (the registry
-  comment says so, and so does the `plan/AUDIT.md` row "Act 1 has no shop").
-- source: critique:drive (unattended)
-
 ### [MED] combat — A Plain Word shows its FREE VULNERABLE as "×24" beside its paid "+60%"
 - pass: 58 (commit 36238fd8)
 - viewport: both (375×812 and 1280×800)
@@ -405,62 +414,6 @@
 - update (pass 63, commit aea7593b): unchanged. Both viewports still read
   "A PLAIN WORD / +24 / VULNERABLE / +60%".
 - source: critique:drive (unattended)
-
-### [MED] fishing-village — the village still points the player at "the breakwater", which is now the first map they already walked
-- pass: 55 (commit bd517cf9)
-- viewport: both (content, not layout)
-- category: comprehension
-- observation: since M3a a new game starts on the Act 1 map named "The
-  Breakwater", and fishing-village is reached only after crossing all of
-  Act 1. D33 (T, 2026-09-26) kept the map's name and ruled that
-  fishing-village's lines must stop pointing at it, but reworded only two
-  (`fv-6`'s boss description and the King's brutal-defeat line). The rest
-  of the village still does. Its arrival scene says "Nobody here has
-  hauled a full net since the breakwater went quiet." and "Whichever way
-  you go, the breakwater is at the end of it." Old Marrow's offer (the
-  dialogue screen this pass captured) says a great crab "has nested at the
-  breakwater". The quest reads "Slay the King of Revenge holding court at
-  the breakwater." The column-6 gate fight is "On the breakwater steps a
-  skull...". A player who has just come from The Breakwater will read
-  these as a sign to go back, or as a map that loops. The arrival scene
-  also opens "You step out of the hovel", a new-game wake-up line that no
-  longer fits a player walking in from the Lantern Deep or the Beacon Crags.
-- evidence: `axiomancer-mechanics/src/World/MapEvents/content.ts` (`fvArrival`
-  lines, about 954-959; `FV_ENCOUNTER_FOES['fv-28']`, about 649);
-  `axiomancer-mechanics/src/World/Continents/Coastal-Village/maps.ts:79`
-  (Marrow's `offer`) and `:382` (`startingQuest.description`);
-  `axiomancer-mechanics/src/Enemy/enemy.library.ts:566,649` (King of Revenge
-  lore); D33 in `plan/2026-09-25-refactor-strategy.decisions.md`;
-  `.critique-artifacts/mobile/06-dialogue.txt`.
-- suggested fix: finish D33 over the remaining fishing-village lines, using
-  its own word, "the harbour wall" (or "the sea wall"). Reword the arrival
-  scene's hovel line so it reads as arriving rather than waking. Add a
-  test that no fishing-village player-facing string contains "breakwater".
-  Keep the map name. Route through `content-curator` for the prose.
-- source: critique-drive (unattended, §3.5)
-
-### [LOW] combat — the pre-fight preview prints the foe's opening tell twice, word for word
-- pass: 54 (commit 5d6eca56)
-- viewport: both (375×812 and 1280×800)
-- category: comprehension
-- observation: on the "A FOE BARS THE WAY" preview, the Brine Hag's
-  quote under its portrait ("They have heard kinder sermons than yours,
-  and drowned anyway.") is repeated verbatim in the expanded PHASE 1 row
-  as "🜲 stance hidden — They have heard kinder sermons than yours, and
-  drowned anyway." The header quote is the current phase's `stanceHint`,
-  and phase 1 is open by default, so every fight's preview repeats
-  its opening tell. The second copy reads like a layout bug, and it
-  buries the one piece of new information in that row (that the stance
-  is hidden).
-- evidence: `axiomancer-mobile/components/combat/encounter/CombatEncounterPanel.tsx:816`
-  (header renders `vm.enemy.stanceHint`) and `:861` (phase row renders
-  `p.stanceHint`); `axiomancer-mobile/state/presenters/combat-encounter.engine.ts:1532`
-  (`vm.enemy.stanceHint` = the current phase's hint);
-  `.critique-artifacts/mobile/03-combat.{png,txt}`.
-- suggested fix: in the phase row, drop the hint when it equals the
-  header's (show only "🜲 stance hidden"), or drop the header quote once
-  the threat sequence renders the per-phase tells.
-- source: critique-drive (unattended, §3.5)
 
 ### [MED] combat — the only SUMMON carrier cannot reach wave 2, so half the spawn rule is dead on the roster
 - pass: burn-day audit 2026-09-19 (row 3.9)
@@ -764,6 +717,115 @@
 - source: loop
 
 ## Done
+
+### [x] [MED] tooling / critique — after R3a, every state fixture boots off Act 1, so critique's gated screens show places no player can reach — RESOLVED 2026-10-01 (R7e, commit 1017c8d5; verified on screen pass 64)
+- pass: 60 (commit 2d918845)
+- viewport: both (coverage, not layout)
+- category: navigation
+- observation: R3a parked the northern maps and left fishing-village for
+  R3b to delete, and v28 migrates any real save off those maps onto the
+  Lantern Deep. The state-fixture registry was not touched. Of its 11
+  fixtures, every one but `fresh-start` sits on `fishing-village` (6) or a
+  parked map (`northern-forest` 2, `caverns` 2). Fixtures bypass the
+  migration, so critique's dialogue, village, cutscene, rest, hazard and
+  late-game-hub captures all show a map the player can no longer reach
+  (for example "the Drowned Parish · Map i of ii" and Old Marrow). No
+  fixture stands on the Breakwater, Charcoal Wood, Beacon Crags or the
+  Lantern Deep, so the critique lens has not seen Act 1's gated screens or
+  R3a's two sealed-door cutscenes. The R3 brief never mentions fixtures,
+  and R3b deletes the map that `apprentice-fv-interaction`,
+  `apprentice-fv-rest` and `sage-fv-boss-gate` stand on.
+- evidence: `axiomancer-mechanics/src/Game/fixtures/state-fixture.registry.ts:34,43,53,67,78,90,99,109,118,128`;
+  `.critique-artifacts/mobile/06-dialogue.txt` (Old Marrow),
+  `11-late-game-hub.txt` ("the Drowned Parish"), `10-hazard.txt`
+  (caverns' Flooded Undercroft); `plan/phases/phase_R3_world_reset.md`
+  (no fixture item in R3a-R3c).
+- suggested fix: re-point the fixtures at Act 1 nodes carrying the same
+  screen kinds, including one on a sealed door (`ld-15` or `ld-18`). Do it
+  in R3b alongside the fishing-village purge, or as a named R3b/R3c scope
+  line, with `critique-drive.mjs` and `smoke-screens.mjs` following the
+  new ids. Uses existing nodes only, so no content is created.
+- update (pass 61, commit 0be3bb1c): half addressed. `apprentice-bw-rest`
+  and `sage-bw-door-gate` now stand on the Breakwater, and the `fv-` ids are
+  gone. Four fixture screens still boot onto parked maps: dialogue
+  (`apprentice-nf-interaction`, nf-3), village (`wanderer-nf-village`,
+  nf-8), cutscene (`wanderer-nf-cutscene`, nf-17) and hazard
+  (`l30-caverns-hazard-arrive`, nc-17). Hazard can move now (the Breakwater
+  has `bw-3` and `bw-12`), and so can the cutscene, using a sealed door.
+  Dialogue and village have no Act 1 node of their kind yet (the registry
+  comment says so, and so does the `plan/AUDIT.md` row "Act 1 has no shop").
+- resolution (pass 64, commit c46565c3): R7e moved the last four. The
+  dialogue, village and cutscene fixtures now stage neutral events on the
+  Breakwater (`StateFixture.stagedEvent`), the hazard fixtures stand on
+  `bw-3`, and the late-game hub reads "The Breakwater · Map i of iv". Every
+  gated capture now shows Act 1. The staged dialogue, shop and cutscene
+  print the R7e placeholder copy by design ("A placeholder line.", "Fixture
+  Shop"; D58), so the critique lens judges their layout, not their voice.
+- source: critique:drive (unattended)
+
+### [x] [MED] fishing-village — the village still points the player at "the breakwater", which is now the first map they already walked — RESOLVED-STALE 2026-10-01 (map deleted in R3b, no commit)
+- pass: 55 (commit bd517cf9)
+- viewport: both (content, not layout)
+- category: comprehension
+- observation: since M3a a new game starts on the Act 1 map named "The
+  Breakwater", and fishing-village is reached only after crossing all of
+  Act 1. D33 (T, 2026-09-26) kept the map's name and ruled that
+  fishing-village's lines must stop pointing at it, but reworded only two
+  (`fv-6`'s boss description and the King's brutal-defeat line). The rest
+  of the village still does. Its arrival scene says "Nobody here has
+  hauled a full net since the breakwater went quiet." and "Whichever way
+  you go, the breakwater is at the end of it." Old Marrow's offer (the
+  dialogue screen this pass captured) says a great crab "has nested at the
+  breakwater". The quest reads "Slay the King of Revenge holding court at
+  the breakwater." The column-6 gate fight is "On the breakwater steps a
+  skull...". A player who has just come from The Breakwater will read
+  these as a sign to go back, or as a map that loops. The arrival scene
+  also opens "You step out of the hovel", a new-game wake-up line that no
+  longer fits a player walking in from the Lantern Deep or the Beacon Crags.
+- evidence: `axiomancer-mechanics/src/World/MapEvents/content.ts` (`fvArrival`
+  lines, about 954-959; `FV_ENCOUNTER_FOES['fv-28']`, about 649);
+  `axiomancer-mechanics/src/World/Continents/Coastal-Village/maps.ts:79`
+  (Marrow's `offer`) and `:382` (`startingQuest.description`);
+  `axiomancer-mechanics/src/Enemy/enemy.library.ts:566,649` (King of Revenge
+  lore); D33 in `plan/2026-09-25-refactor-strategy.decisions.md`;
+  `.critique-artifacts/mobile/06-dialogue.txt`.
+- suggested fix: finish D33 over the remaining fishing-village lines, using
+  its own word, "the harbour wall" (or "the sea wall"). Reword the arrival
+  scene's hovel line so it reads as arriving rather than waking. Add a
+  test that no fishing-village player-facing string contains "breakwater".
+  Keep the map name. Route through `content-curator` for the prose.
+- resolution (pass 64, commit c46565c3): R3b deleted fishing-village, so
+  none of the quoted lines ships. `Coastal-Village/` now holds only
+  `breakwater.ts` and `charcoal-wood.ts`, and `MapEvents/content.ts` names
+  fishing-village only in history comments. Pass 61 flagged it as moot.
+- source: critique-drive (unattended, §3.5)
+
+### [x] [LOW] combat — the pre-fight preview prints the foe's opening tell twice, word for word — RESOLVED 2026-10-01 (R7d, commit 2a727668; verified on screen pass 64)
+- pass: 54 (commit 5d6eca56)
+- viewport: both (375×812 and 1280×800)
+- category: comprehension
+- observation: on the "A FOE BARS THE WAY" preview, the Brine Hag's
+  quote under its portrait ("They have heard kinder sermons than yours,
+  and drowned anyway.") is repeated verbatim in the expanded PHASE 1 row
+  as "🜲 stance hidden — They have heard kinder sermons than yours, and
+  drowned anyway." The header quote is the current phase's `stanceHint`,
+  and phase 1 is open by default, so every fight's preview repeats
+  its opening tell. The second copy reads like a layout bug, and it
+  buries the one piece of new information in that row (that the stance
+  is hidden).
+- evidence: `axiomancer-mobile/components/combat/encounter/CombatEncounterPanel.tsx:816`
+  (header renders `vm.enemy.stanceHint`) and `:861` (phase row renders
+  `p.stanceHint`); `axiomancer-mobile/state/presenters/combat-encounter.engine.ts:1532`
+  (`vm.enemy.stanceHint` = the current phase's hint);
+  `.critique-artifacts/mobile/03-combat.{png,txt}`.
+- suggested fix: in the phase row, drop the hint when it equals the
+  header's (show only "🜲 stance hidden"), or drop the header quote once
+  the threat sequence renders the per-phase tells.
+- resolution (pass 64, commit c46565c3): R7d removed the stance hint, so
+  the preview no longer has a header quote. Phase 1's row prints the
+  threat line once ("The Wet Congregation — ... (+11 damage).") at both
+  viewports.
+- source: critique-drive (unattended, §3.5)
 
 ### [x] [MED] village / inventory — every signet relic's flavor text restates the auto-generated "grants X" line verbatim — CLOSED 2026-09-29 (R4)
 - pass: 53 (commit 82bbf241)
