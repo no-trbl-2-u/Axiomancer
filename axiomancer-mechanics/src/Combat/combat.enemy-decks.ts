@@ -111,33 +111,17 @@ export const ENEMY_DECKS: Record<string, EnemyDeckSpec> = {
 /** Projects one enemy-card face onto an authored-phase fragment. */
 function faceToPhase(face: EnemyCardFace): AuthoredThreatPhase {
     return {
-        enemyStance: face.stance,
         damageWeight: face.damageWeight,
         threatEffectId: face.effectId,
         threatIntensity: face.intensity,
         enemyHeal: face.enemyHeal,
         enemyCleanse: face.enemyCleanse,
         actionText: face.actionText,
-        stanceHint: face.stanceHint,
     };
 }
 
 /** Projects one enemy card onto its authored threat step. The telegraph names
  *  the card being played — the enemy is visibly a deck-player. */
-
-/**
- * AUTHORED STANCE CHECKS (spec 33 §2 / phase D9) — deck-level, like the stake.
- * A stance check names which stance the fight PUNISHES and which it YIELDS to
- * on a given phase; it is an enemy's read of YOU, not a property of the card
- * it happens to be holding, and signature cards are shared across decks — so
- * the authoring lives here, keyed by deck and phase index. Phases with no
- * entry fall through to `defaultStanceCheck` (combat.threat.ts), unchanged.
- *
- * Ported verbatim from the pre-rework `AUTHORED_THREAT_SEQUENCES` literals
- * (@ a69eab56) so the D9 content survives the Profane-Canon rework intact.
- */
-export const DECK_STANCE_CHECKS: Record<string, Record<number, { punishes?: 'heart' | 'body' | 'mind'; yields?: 'heart' | 'body' | 'mind' }>> = {
-};
 
 /**
  * THE STAKE is a DECK property, not a card property: signature cards are
@@ -157,7 +141,6 @@ function wagersCovetedDie(enemyId: string): boolean {
 
 function cardToStep(
     cardId: string, card: EnemyCard, isFinal: boolean, stake: boolean,
-    stanceCheck: { punishes?: 'heart' | 'body' | 'mind'; yields?: 'heart' | 'body' | 'mind' } | undefined,
     unlockAfterRound: number | undefined,
 ): AuthoredThreatStep {
     if (card.branch) {
@@ -172,17 +155,14 @@ function cardToStep(
         };
     }
     return {
-        enemyStance: card.stance,
         damageWeight: card.damageWeight,
         threatEffectId: card.effectId,
         threatIntensity: card.intensity,
         enemyHeal: card.enemyHeal,
         enemyCleanse: card.enemyCleanse,
         stake: stake || undefined,
-        stanceCheck,
         unlockAfterRound,
         actionText: `${card.name} — ${card.actionText}`,
-        stanceHint: card.stanceHint,
         isFinalPhase: isFinal,
     };
 }
@@ -303,10 +283,7 @@ export function compileEnemyDeck(enemyId: string): AuthoredThreatStep[] {
             gate = Math.max(gate, card.unlockAfterRound ?? 0, tiers[i] > 1 ? tierRounds[tiers[i]] : 0);
             unlockAfterRound = gate > 1 ? gate : undefined;
         }
-        return cardToStep(
-            cardId, card, i === cardIds.length - 1, stake,
-            DECK_STANCE_CHECKS[enemyId]?.[i], unlockAfterRound,
-        );
+        return cardToStep(cardId, card, i === cardIds.length - 1, stake, unlockAfterRound);
     });
 }
 

@@ -20,8 +20,6 @@ export type {
 export { applyDamage, heal, isAlive, isDefeated, getHealthPercentage } from './health';
 export {
     updateEffectDuration, tickAllEffects,
-    // 0.34.0 status-depth epic — HP-model selectors + tunable scalars
-    DISRUPT_DENY_AT,
 } from './effects';
 
 export {
@@ -46,9 +44,9 @@ export type {
     CombatOutcome, CombatEvent,
     CombatSummary,
     // Spec 26 / 26b additions
-    CombatIntentType, CombatReadResult,
+    CombatIntentType,
     SignatureSkill,
-    // The three chain/stance colours (spec 33 momentum chain + stance checks)
+    // The three chain colours (spec 33 momentum chain)
     WheelStance,
     // Spec 33 (Phase D2) — the die-gear interface (D5 makes it a real rail)
     UpgradeableDieGear,
@@ -60,9 +58,8 @@ export {
     handCards, buildCombatSummary,
     // Spec 26b / spec 33 — turn lifecycle + Conviction + Signature Skills
     startTurn, endTurn, discardCombatCard,
-    playSignatureSkill, isPhaseStanceRevealed,
+    playSignatureSkill,
     getSignatureSkill, signatureCastBlock, signatureGuardAmount, SIGNATURE_COST, SIGNATURE_GUARD,
-    READ_DAMAGE_MULT,
     // THE BIG NUMBERS REWRITE — the LIVE colour-match rule. Mobile's presenter
     // must consume this, or the card face prints a bonus the engine does not
     // apply.

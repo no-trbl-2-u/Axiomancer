@@ -694,7 +694,7 @@ async function renderCatalog(media, out, warnings) {
       <div class="foe-body">
         <p class="mono" style="display:flex;justify-content:space-between"><span>level ${roman(foe.level || 1)}</span><span>${escapeHtml(foe.difficulty || '')}</span></p>
         <h3>${escapeHtml(foe.name)}</h3>
-        <p class="dim">${escapeHtml(foe.stanceHint || foe.logicBlurb || '')}</p>
+        <p class="dim">${escapeHtml(foe.logicBlurb || '')}</p>
         <p class="mono">hp ${escapeHtml(String(foe.maxHealth ?? ''))}</p>
       </div>
     </article>`)

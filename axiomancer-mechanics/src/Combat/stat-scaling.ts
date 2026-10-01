@@ -103,14 +103,9 @@ export const PAYLOAD_SCALING: Record<keyof EffectPayload, ScalingKind> = {
     damageOverTime: 'repeating',
     tickAmplifyFlat: 'repeating',
     damageTakenMult: 'one-shot',
-    damageTakenMultForStance: 'one-shot',
     outgoingDamageMulPct: 'one-shot',
     actionRestriction: 'flat',
-    advantageModifier: 'flat',
-    revealsStance: 'flat',
     dotModifiers: 'flat',
-    blursStanceHints: 'flat',
-    lockedStance: 'flat',
 };
 
 export function effectScaling(def: Effect): ScalingKind {

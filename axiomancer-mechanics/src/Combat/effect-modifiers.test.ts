@@ -18,9 +18,7 @@ import {
 } from './effects';
 
 /**
- * No library effect carries the stance-keyed action restrictions (forced /
- * blocked stance) or an advantage grant; they stay until R7d removes the
- * stance layer, so their shapes are test-only `Effect` fixtures registered
+ * The skip-turn restriction is a test-only `Effect` fixture registered
  * into the shared registry (the same lookup `getActiveEffectModifiers` /
  * `canAct` resolve through). These ids never touch the library JSON. The
  * round-clock DoT runs through the live Creeping Doom (1 per stack, round
@@ -39,9 +37,6 @@ const mk = (id: string, type: 'buff' | 'debuff', payload: Effect['payload']): Ef
 });
 
 const TEST_EFFECTS: Effect[] = [
-    // action-restriction shapes.
-    mk('test_charm', 'debuff', { actionRestriction: { forcedStance: 'heart' } }),
-    mk('test_silence', 'debuff', { actionRestriction: { blockedStances: ['heart'] } }),
     mk('test_stun', 'debuff', { actionRestriction: { skipTurn: true } }),
 ];
 
@@ -85,47 +80,21 @@ describe('getActiveEffectModifiers', () => {
         expect(getActiveDotTotal(effects).total).toBe(9);
     });
 
-    it('collects action restrictions', () => {
-        const mods = getActiveEffectModifiers([
-            ae('test_charm'),    // forcedStance: heart
-            ae('test_silence'),  // blockedStances: [heart]
-            ae('test_stun'),     // skipTurn: true
-        ]);
-        expect(mods.skipTurn).toBe(true);
-        expect(mods.forcedStance).toBe('heart');
-        expect(mods.blockedStances.has('heart')).toBe(true);
+    it('collects the skip-turn restriction', () => {
+        expect(getActiveEffectModifiers([ae('test_stun')]).skipTurn).toBe(true);
+        expect(getActiveEffectModifiers([]).skipTurn).toBe(false);
     });
 });
 
-describe('canAct (Q7 precedence)', () => {
-    it('skipTurn wins over everything', () => {
-        const result = canAct([ae('test_stun'), ae('test_charm')], 'body');
+describe('canAct', () => {
+    it('a skip-turn restriction loses the action', () => {
+        const result = canAct([ae('test_stun')]);
         expect(result.canAct).toBe(false);
         expect(result.reason).toBe('skipTurn');
     });
 
-    it('forcedStance overrides requested stance', () => {
-        const result = canAct([ae('test_charm')], 'body');
-        expect(result.canAct).toBe(true);
-        expect(result.resolvedStance).toBe('heart');
-    });
-
-    it('blockedStance prevents using a specific stance', () => {
-        const result = canAct([ae('test_silence')], 'heart');
-        expect(result.canAct).toBe(false);
-        expect(result.reason).toBe('blockedStance');
-    });
-
-    it('blockedStance does not block other stances', () => {
-        const result = canAct([ae('test_silence')], 'body');
-        expect(result.canAct).toBe(true);
-        expect(result.resolvedStance).toBe('body');
-    });
-
-    it('returns the requested stance when no restrictions apply', () => {
-        const result = canAct([], 'mind');
-        expect(result.canAct).toBe(true);
-        expect(result.resolvedStance).toBe('mind');
+    it('acts when no restriction applies', () => {
+        expect(canAct([])).toEqual({ canAct: true, reason: null });
     });
 });
 

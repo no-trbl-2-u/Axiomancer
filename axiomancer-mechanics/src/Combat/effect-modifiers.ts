@@ -12,7 +12,6 @@ import { lookupEffect } from '../Effects/effects.library';
 import { evaluateInteractions, checkInteractionTrigger } from '../Effects/interactions';
 import { EFFECT_INTERACTIONS } from '../Effects/amplification.registry';
 import { INTERACTION_AMPLIFICATION } from './resolution.constants';
-import { Stance } from './types';
 
 /**
  * Phase 156 — live DoT combo amplification.
@@ -174,15 +173,11 @@ export function getActiveDotAmplifications(effects: ActiveEffect[]): ActiveDotAm
  */
 export interface AggregatedEffectModifiers {
     skipTurn: boolean;
-    forcedStance: Stance | null;
-    blockedStances: Set<Stance>;
     dotStart: number;
 }
 
 const emptyAgg = (): AggregatedEffectModifiers => ({
     skipTurn:        false,
-    forcedStance:    null,
-    blockedStances:  new Set(),
     dotStart:        0,
 });
 
@@ -203,15 +198,7 @@ export function getActiveEffectModifiers(effects: ActiveEffect[], currentRound?:
         const intensity = ae.intensity ?? 1;
         const payload = def.payload;
 
-        const restriction = payload.actionRestriction;
-        if (restriction) {
-            if (restriction.skipTurn) agg.skipTurn = true;
-            if (restriction.forcedStance && !agg.forcedStance) {
-                // Last-write-wins is unstable — keep the first; ties resolved by effect order.
-                agg.forcedStance = restriction.forcedStance;
-            }
-            for (const s of restriction.blockedStances ?? []) agg.blockedStances.add(s);
-        }
+        if (payload.actionRestriction?.skipTurn) agg.skipTurn = true;
 
         const dot = payload.damageOverTime;
         if (dot) {
@@ -235,39 +222,10 @@ export function getActiveEffectModifiers(effects: ActiveEffect[], currentRound?:
 }
 
 /**
- * Resolves Q7's action-restriction precedence into a final canAct outcome.
- *
- * Rules (per Q7 default):
- *   1. `skipTurn` wins outright — bearer loses their action regardless of stance.
- *   2. `forcedStance` overrides the requested stance and trumps `blockedStances`.
- *   3. If the requested stance is in `blockedStances`, bearer cannot use it.
- *
- * @param effects        - The bearer's active effects.
- * @param requestedStance - Stance the bearer wants to use this round (`null` if not yet chosen).
- *
- * @returns
- *   - `canAct`         — false when stunned/slept/petrified or the requested stance is blocked.
- *   - `resolvedStance` — the stance that will actually be used (forced > requested).
- *   - `reason`         — short hint for the UI when blocked.
+ * Whether the bearer can act this phase: `skipTurn` (stun, sleep, petrify)
+ * loses the action outright; `reason` is the short hint for the UI.
  */
-export function canAct(
-    effects: ActiveEffect[],
-    requestedStance: Stance | null = null,
-): { canAct: boolean; resolvedStance: Stance | null; reason: string | null } {
-    const mods = getActiveEffectModifiers(effects);
-
-    if (mods.skipTurn) {
-        return { canAct: false, resolvedStance: null, reason: 'skipTurn' };
-    }
-
-    if (mods.forcedStance) {
-        // Forced stance trumps a block — charm overrides silence on its own stance.
-        return { canAct: true, resolvedStance: mods.forcedStance, reason: null };
-    }
-
-    if (requestedStance && mods.blockedStances.has(requestedStance)) {
-        return { canAct: false, resolvedStance: null, reason: 'blockedStance' };
-    }
-
-    return { canAct: true, resolvedStance: requestedStance, reason: null };
+export function canAct(effects: ActiveEffect[]): { canAct: boolean; reason: string | null } {
+    if (getActiveEffectModifiers(effects).skipTurn) return { canAct: false, reason: 'skipTurn' };
+    return { canAct: true, reason: null };
 }

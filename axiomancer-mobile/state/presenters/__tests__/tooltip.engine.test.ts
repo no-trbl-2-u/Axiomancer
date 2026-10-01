@@ -2,7 +2,7 @@
  * Tooltip presenter pins.
  *
  * Tick A authored `kind: 'stat'`. Phase 75 authored `kind: 'effect'`,
- * `kind: 'stance-chip'`, `kind: 'card'`. All current branches read
+ * `kind: 'card'`. All current branches read
  * engine static data; state is passed as `{}` cast to AppStoreState.
  * Later kinds (codex, slot, item-stat, …) will exercise
  * live state reads.
@@ -178,30 +178,6 @@ describe('selectTooltipContentFor', () => {
         });
     });
 
-    describe('kind: stance-chip (Phase 75)', () => {
-        it('returns ADVANTAGE content for id "adv"', () => {
-            const content = selectTooltipContentFor('stance-chip', 'adv', EMPTY_STATE);
-            expect(content?.title).toBe('ADVANTAGE');
-            expect(content?.body).toContain('higher value');
-            expect(content?.footnote).toContain('counters');
-        });
-
-        it('returns DISADVANTAGE content for id "dis"', () => {
-            const content = selectTooltipContentFor('stance-chip', 'dis', EMPTY_STATE);
-            expect(content?.title).toBe('DISADVANTAGE');
-            expect(content?.body).toContain('lower value');
-            expect(content?.footnote).toContain('falls');
-        });
-
-        it('returns null for unknown stance-chip id', () => {
-            expect(selectTooltipContentFor('stance-chip', 'neutral', EMPTY_STATE)).toBeNull();
-        });
-
-        it('returns null for empty id', () => {
-            expect(selectTooltipContentFor('stance-chip', '', EMPTY_STATE)).toBeNull();
-        });
-    });
-
     describe('kind: effect (Phase 75 + tighten 2026-05-24)', () => {
         it('returns engine-sourced name + payload-derived stat-effect body for a known effectId', () => {
             // Spec 32 v3 fixture: debuff_poison (the canonical keyword DoT).
@@ -336,24 +312,6 @@ describe('formatEffectStatEffect', () => {
     it('formats actionRestriction skipTurn', () => {
         expect(formatEffectStatEffect({ actionRestriction: { skipTurn: true } }, 'fallback'))
             .toBe('skip turn');
-    });
-
-    it('formats actionRestriction forcedStance', () => {
-        expect(
-            formatEffectStatEffect(
-                { actionRestriction: { forcedStance: 'body' } },
-                'fallback',
-            ),
-        ).toBe('forced body stance');
-    });
-
-    it('formats advantageModifier grant', () => {
-        expect(
-            formatEffectStatEffect(
-                { advantageModifier: { grantAdvantage: ['body'] } },
-                'fallback',
-            ),
-        ).toBe('advantage on body');
     });
 
     it('falls back to the description string when no payload field is present', () => {

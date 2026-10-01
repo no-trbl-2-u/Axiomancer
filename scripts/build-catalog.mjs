@@ -370,8 +370,6 @@ function renderEnemies(enemies) {
             .join("")
         : `<p class="no-skills">No signature skills — fights with basic stance moves.</p>`;
 
-      const hint = e.stanceHint ? `<p class="hint">“${inline(e.stanceHint)}”</p>` : "";
-
       return (
         `  <article class="ecard" data-search="${search}">${portrait}` +
         `<div class="body">` +
@@ -380,7 +378,6 @@ function renderEnemies(enemies) {
         stats +
         `<div class="sec-label">Attacks</div>` +
         `<p class="fights">${inline(e.logicBlurb || e.logic || "")}</p>` +
-        hint +
         skills +
         `</div></article>`
       );

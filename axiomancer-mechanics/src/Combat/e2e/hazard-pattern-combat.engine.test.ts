@@ -173,11 +173,6 @@ describe('Spec 26 §2 — intent derivation', () => {
         const seq = getThreatSequence(makeEnemy(60));
         for (const p of seq) expect(p.intentType).toBeDefined();
     });
-    it('authored phases carry a thematic stance tell', () => {
-        const tyrant = deepClone(FloatEye);
-        const seq = getThreatSequence(tyrant);
-        expect(seq[0].stanceHint && seq[0].stanceHint.length).toBeGreaterThan(0);
-    });
 });
 
 // ── Card classification (§6) — pure ──────────────────────────────────────────

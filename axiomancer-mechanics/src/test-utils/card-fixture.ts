@@ -99,7 +99,6 @@ export function buildFixtureState(options: { clean?: boolean } = {}): CombatEnco
         guard: clean ? 0 : 4,
         barrier: clean ? 0 : 4,
         souls: clean ? 0 : 12,
-        revealedStances: [],
         spellsPlayedThisTurn: 0,
         discard: ['grey-strike', 'grey-ward', 'grey-word'],
         drawPile: FIXTURE_FILLER.slice(),

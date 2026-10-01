@@ -16,7 +16,7 @@ import {
 } from './effect-modifiers';
 
 // ─── 0.34.0 status-depth epic — HP-model selectors + tunable scalars ──────────
-// These power VULNERABLE / DISRUPT
+// These power VULNERABLE
 // and the mobile honesty layer. Pure reads over a combatant's `effects`; the HP
 // behavior itself is owned by `combat.engine.ts`. Kept here (a writable,
 // non-engine home) so the tuning loops can rebalance them by simulation.
@@ -25,9 +25,6 @@ import {
  *  bearer (a fully-stacked protective mult still lets half the hit through).
  *  P0-truth: protective (`damageTakenMult < 1`) payloads are REAL now. Tunable. */
 export const RESOLUTE_MIN_MULT = 0.5;
-/** DISRUPT — distinct-control pip threshold that DENIES the enemy's telegraphed
- *  turn. Tunable. */
-export const DISRUPT_DENY_AT = 3;
 /**
  * VULNERABLE / RESOLUTE multiplier — the damage multiplier the HP engine applies
  * to every HP source landing on this bearer. Aggregated additively across the
@@ -64,37 +61,6 @@ export function getOutgoingDamageMult(bearer: Combatant): number {
         if (pct !== 0) mult += (pct / 100) * (ae.intensity ?? 1);
     }
     return Math.min(2, Math.max(0.1, mult));
-}
-
-/**
- * Fate Engine P1 (spec 31 §3.1 #17) — STANCE-KEYED VULNERABLE: the extra
- * multiplier the bearer takes from plays powered by a die of `dieColor` (Wild
- * matches every stance; X matches none). Composes multiplicatively with the
- * plain `damageTakenMult` aggregate; floored at 1, uncapped (S3, D41).
- * Exactly 1 for an unmarked bearer or an un-keyed die. Pure.
- */
-export function getStanceVulnMult(bearer: Combatant, dieColor: string): number {
-    if (dieColor === 'x') return 1;
-    let mult = 1;
-    for (const ae of bearer.effects) {
-        const keyed = lookupEffect(ae.effectId)?.payload.damageTakenMultForStance;
-        if (!keyed) continue;
-        if (dieColor === 'wild' || dieColor === keyed.stance) {
-            mult += (keyed.mult - 1) * (ae.intensity ?? 1);
-        }
-    }
-    return Math.max(1, mult);
-}
-
-/** True when the bearer carries a given payload flag (P0-truth gate reads). */
-export function hasPayloadFlag(
-    bearer: Combatant,
-    flag: 'revealsStance' | 'blursStanceHints' | 'lockedStance',
-): string | null {
-    for (const ae of bearer.effects) {
-        if (lookupEffect(ae.effectId)?.payload[flag] === true) return ae.effectId;
-    }
-    return null;
 }
 
 /** One pending DoT effect's remaining lifetime total (amplification-aware). */
@@ -228,33 +194,6 @@ export function getDistinctDebuffCount(bearer: Combatant): number {
         if (lookupEffect(ae.effectId)?.type === 'debuff') ids.add(ae.effectId);
     }
     return ids.size;
-}
-
-/** The control surfaces the DISRUPT meter distinguishes (WS8.3). */
-type ControlSurface = 'action' | 'stance';
-
-/**
- * Count of DISTINCT control SURFACES touched on the bearer — the DISRUPT deny
- * meter's pip count. WS8.3 (spec 32 §12, ratified 2026-07-11 #6): the meter
- * counts KINDS of grip, not effect ids — three stuns are ONE pip;
- * `DISRUPT_DENY_AT = 3` means "three different kinds of grip". Surfaces,
- * classified by payload shape:
- *   - action — an `actionRestriction` (skip / forced / blocked)
- *   - stance — `lockedStance` (ROOT) or `blursStanceHints` (CONFUSION)
- * Centralizes the predicate so the engine and the mobile meter agree. Pure.
- */
-export function getDistinctControlCount(bearer: Combatant): number {
-    const surfaces = new Set<ControlSurface>();
-    for (const ae of bearer.effects) {
-        const p = lookupEffect(ae.effectId)?.payload;
-        if (!p) continue;
-        const r = p.actionRestriction;
-        if (!!r && (r.skipTurn === true || r.forcedStance !== undefined || (r.blockedStances?.length ?? 0) > 0)) {
-            surfaces.add('action');
-        }
-        if (p.lockedStance === true || p.blursStanceHints === true) surfaces.add('stance');
-    }
-    return surfaces.size;
 }
 
 /**

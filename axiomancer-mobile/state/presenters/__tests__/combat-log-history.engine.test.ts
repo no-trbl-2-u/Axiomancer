@@ -55,7 +55,7 @@ describe('selectCombatLogHistory — dot-tick', () => {
 
 describe('selectCombatLogHistory — card-played: FREE vs die-powered', () => {
     it('dieId === null reads as FREE', () => {
-        const events: CombatEvent[] = [{ kind: 'card-played', cardId: 'grey-strike', useBottom: false, dieId: null, advantage: 'neutral' }];
+        const events: CombatEvent[] = [{ kind: 'card-played', cardId: 'grey-strike', useBottom: false, dieId: null }];
         const [line] = selectCombatLogHistory(stateWith(events));
         expect(line.text).toContain('A Plain Blow');
         expect(line.text).toContain('FREE');
@@ -63,35 +63,9 @@ describe('selectCombatLogHistory — card-played: FREE vs die-powered', () => {
     });
 
     it('a real dieId reads as die-powered', () => {
-        const events: CombatEvent[] = [{ kind: 'card-played', cardId: 'grey-strike', useBottom: true, dieId: 'die-0', advantage: 'advantage' }];
+        const events: CombatEvent[] = [{ kind: 'card-played', cardId: 'grey-strike', useBottom: true, dieId: 'die-0' }];
         const [line] = selectCombatLogHistory(stateWith(events));
         expect(line.text).toContain('die-powered');
-    });
-});
-
-describe('selectCombatLogHistory — stance-check-resolved wording matches the open telegraph', () => {
-    it('punished quotes the ×1.5 multiplier', () => {
-        const events: CombatEvent[] = [{ kind: 'stance-check-resolved', phaseIndex: 0, outcome: 'punished', stance: 'body' }];
-        const [line] = selectCombatLogHistory(stateWith(events));
-        expect(line.text).toBe('Punished ×1.5');
-    });
-
-    it('yielded quotes the ×0.5 multiplier plus the Conviction gain', () => {
-        const events: CombatEvent[] = [{ kind: 'stance-check-resolved', phaseIndex: 0, outcome: 'yielded', stance: 'mind' }];
-        const [line] = selectCombatLogHistory(stateWith(events));
-        expect(line.text).toBe('Yielded ×0.5 +1◆');
-    });
-
-    it('none, with a stance, names the stance', () => {
-        const events: CombatEvent[] = [{ kind: 'stance-check-resolved', phaseIndex: 0, outcome: 'none', stance: 'heart' }];
-        const [line] = selectCombatLogHistory(stateWith(events));
-        expect(line.text).toBe('HEART — neither, ×1');
-    });
-
-    it('none, with no stance drafted, prints the no-stance line', () => {
-        const events: CombatEvent[] = [{ kind: 'stance-check-resolved', phaseIndex: 0, outcome: 'none', stance: null }];
-        const [line] = selectCombatLogHistory(stateWith(events));
-        expect(line.text).toBe('No stance — neither, ×1');
     });
 });
 

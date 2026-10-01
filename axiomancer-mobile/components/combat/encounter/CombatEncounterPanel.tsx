@@ -743,8 +743,7 @@ export function CombatEncounterPanel({
                         <Text style={styles.revealYours} testID="combat-reveal-player-vitae">
                             YOURS ♥ {vm.player.hp} / {vm.player.maxHp}
                         </Text>
-                        {vm.enemy.stanceHint ? <Text style={styles.revealTell}>“{vm.enemy.stanceHint}”</Text> : null}
-                        <Text style={styles.revealSection}>THREAT SEQUENCE — they telegraph WHAT, not their stance</Text>
+                        <Text style={styles.revealSection}>THREAT SEQUENCE</Text>
                         {/* Playtest fix 2026-09-04 — no line clamp on the threat
                             text: a multi-clause phase ("Deals 12. Applies BLEED 2.")
                             was ellipsised mid-sentence on the one
@@ -788,7 +787,6 @@ export function CombatEncounterPanel({
                                         ) : (
                                             <Text style={styles.revealPhaseText}>{p.threatAction.description}</Text>
                                         )) : null}
-                                        {open && p.stanceHint ? <Text style={styles.revealPhaseTell}>🜲 stance hidden — {p.stanceHint}</Text> : null}
                                     </View>
                                 </View>
                             );
@@ -981,9 +979,6 @@ export function CombatEncounterPanel({
                                             base={styles.detailPlayText}
                                             bold={[styles.detailPlayText, styles.detailPlayBold, { color: detailCard.face.categoryColor }]}
                                         />
-                                        {detailCard.detail.dieTriplet ? (
-                                            <Text style={styles.detailDieLine}>{detailCard.detail.dieTriplet}</Text>
-                                        ) : null}
                                     </View>
                                 </View>
                             </View>
@@ -1316,7 +1311,6 @@ const useStyles = makeStyles((AXM) => ({
     detailPlayBody: { flex: 1 },
     detailPlayText: { fontFamily: FONTS.serif, fontSize: 12.5, color: AXM.parchment, lineHeight: 17, flex: 1 },
     detailPlayBold: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 0.6, textTransform: 'uppercase' },
-    detailDieLine: { fontFamily: FONTS.mono, fontSize: 10.5, color: AXM.sulfur, letterSpacing: 0.2, marginTop: 3 },
     detailFreeBox: { alignSelf: 'stretch', marginBottom: 8 },
     detailFreeLine: { fontFamily: FONTS.serif, fontSize: 12.5, color: AXM.bone, lineHeight: 17, marginBottom: 5 },
     detailPowerLine: { fontFamily: FONTS.serif, fontSize: 12.5, lineHeight: 17, marginBottom: 5 },
@@ -1391,7 +1385,6 @@ const useStyles = makeStyles((AXM) => ({
     revealHp: { fontFamily: FONTS.mono, fontSize: 13, color: AXM.blood, marginTop: 2 },
     // FE-025 — the player's side of the same trade, quieter than the foe's.
     revealYours: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.bone, letterSpacing: 1, marginTop: 2 },
-    revealTell: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 14, color: AXM.bone, textAlign: 'center', marginTop: 10, marginHorizontal: 10, lineHeight: 19 },
     revealSection: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.2, color: AXM.sulfur, marginTop: 20, marginBottom: 8, alignSelf: 'stretch' },
     revealPhase: { alignSelf: 'stretch', borderWidth: 1, borderColor: AXM.ash, backgroundColor: 'rgba(0,0,0,0.35)', paddingHorizontal: 9, paddingVertical: 4, marginBottom: 7 },
     // Accordion header: the whole strip is the toggle, sized to a thumb.
@@ -1404,7 +1397,6 @@ const useStyles = makeStyles((AXM) => ({
     revealPhaseIcon: { fontSize: 20, lineHeight: 22 },
     revealPhaseLabel: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 0.6, color: AXM.parchment },
     revealPhaseText: { fontFamily: FONTS.serif, fontSize: 12, color: AXM.bone, marginTop: 2, lineHeight: 15 },
-    revealPhaseTell: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 10, color: AXM.ash, marginTop: 3, lineHeight: 13 },
     // WS9 — branch fork rows in the threat sequence
     revealBranchCond: { fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 0.6, color: AXM.sulfur, marginTop: 2 },
     revealBranchTaken: { color: AXM.parchment },

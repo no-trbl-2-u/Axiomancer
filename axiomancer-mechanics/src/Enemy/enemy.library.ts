@@ -60,7 +60,6 @@ export const FloatEye = createEnemy({
     id: 'enemy-float-eye',
     portraitAsset: 'float-eye',
     name: 'Float-Eye',
-    stanceHint: 'It only watches — whatever it does next, it has watched you do first.',
     description: 'An eye that outlived its head. It has watched so long it has developed opinions, and one of them is about you.',
     level: 1,
     baseStats: { body: 1, mind: 1, heart: 1 },
@@ -86,7 +85,6 @@ export const BrineHag = createEnemy({
     id: 'enemy-brine-hag',
     portraitAsset: 'brine-hag',
     name: 'Brine Hag',
-    stanceHint: 'She works on the feelings first — the bargain is already half-made in your chest.',
     description: 'She traded her reflection to the tide for the right to keep yours. The exchange rate has only worsened since.',
     level: 7,
     baseStats: enemyStatBudget(7, { heart: 4, body: 1, mind: 2 }),
@@ -143,7 +141,6 @@ export const TheDoorwarden = createEnemy({
     id: 'enemy-the-doorwarden',
     portraitAsset: 'the-doorwarden',
     name: 'The Doorwarden',
-    stanceHint: 'He answers every motion with a jamb — where you would step, a threshold has already been installed.',
     description:
         'A hinge-priest of jointed bronze, kneeling in a chapel whose walls are doors. ' +
         'Every door that ever shut is remembered in him, and he holds them all shut at once. ' +

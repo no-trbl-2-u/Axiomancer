@@ -37,7 +37,7 @@ function isDot(effect: Effect): boolean {
 function isControl(effect: Effect): boolean {
     if (effect.category === 'control') return true;
     const r = effect.payload.actionRestriction;
-    return !!r && (r.skipTurn === true || r.forcedStance !== undefined || (r.blockedStances?.length ?? 0) > 0);
+    return !!r && (r.skipTurn === true);
 }
 
 /** True if the effect is an exposure / soft debuff (MARK / QUARTER class). */
@@ -70,7 +70,7 @@ export function effectImpact(
     }
     if (isControl(effect)) {
         const r = effect.payload.actionRestriction;
-        const restricts = !!r && (r.skipTurn === true || r.forcedStance !== undefined || (r.blockedStances?.length ?? 0) > 0);
+        const restricts = !!r && (r.skipTurn === true);
         const durationCredit = Math.min(Math.max(0, duration), 3);
         return { track: 'control', amount: i * CONTROL_HARD_MULT + (restricts ? durationCredit : 0) };
     }

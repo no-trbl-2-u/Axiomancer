@@ -103,7 +103,6 @@ describe('<TooltipTarget>', () => {
             { kind: 'affliction', id: 'bleeding' },
             { kind: 'blessing', id: 'blessed' },
             { kind: 'effect', id: 'tier1_heart_attack' },
-            { kind: 'stance-chip', id: 'BODY' },
             { kind: 'card', id: 'ad_baculum' },
             { kind: 'slot', id: 'Head' },
             { kind: 'burden', id: 'current-burden' },

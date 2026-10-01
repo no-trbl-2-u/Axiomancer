@@ -376,6 +376,45 @@ stays green between rows):
   phases live on the encounter, which the game save does not hold (R9a
   exists for that reason).
 
+### As shipped (R7d, 2026-10-01)
+
+- **Engine**: `playerStance` and `stance-shifted`; the phase-end check
+  (`resolveStanceCheck`, `stanceCheck` on phases, forks and `AuthoredThreatPhase`,
+  `defaultStanceCheck` and its backfill, `DECK_STANCE_CHECKS`,
+  `stance-check-resolved`, the yield's +1 Conviction, the Coveted Die's
+  `'yield'` method); `READ_DAMAGE_MULT`, `CombatReadResult` and the
+  always-`'neutral'` `advantage` field on `card-played`; `enemyStance` and
+  `stanceHint` on phases, forks, enemy cards, faces and enemies (the 14 card
+  tells and 3 enemy tells went with them); `dominantStance`, `rotateStance`,
+  `DEFAULT_STANCE_HINTS`, `currentPhaseStance`; `revealedStances`,
+  `isPhaseStanceRevealed`, `revealedCurrentStance`, `isStanceReadoutBlurred`,
+  `stance-revealed`, `stance-locked` and the ROOT lock; payload keys
+  `forcedStance`, `blockedStances`, `advantageModifier` (and its type),
+  `damageTakenMultForStance` with `getStanceVulnMult`, `revealsStance`,
+  `blursStanceHints`, `lockedStance`, and `hasPayloadFlag`; `canAct(effects)`
+  is skip-turn only. DISRUPT: `DISRUPT_DENY_AT`, `getDistinctControlCount`,
+  `getDisruptMeter`, `disrupt-denied`. The economy sim's yield income column.
+  `applyStanceAndMomentumV2` is now `applyBoonAndMomentumV2`.
+- **Mobile**: the stance-check telegraph (`CombatStanceCheckVM`, the
+  IntentIcon block, its log line), the player stance chip, the enemy
+  stance badge and reveal-screen tells, the ▲/▼ read triplet row and legend
+  on the card detail, `armedReadValue`'s read argument (guard prints its
+  number plus the colour-match bonus), the guard detail copy's read lines,
+  the `stance-chip` tooltip, the forced-stance and advantage lines in the
+  tooltip formatter and the shop ware line.
+- **Scripts**: the catalog exporter's stance payload lines and enemy
+  `stanceHint`, and every devlog/catalog reader of it.
+- **Tests**: `stance-check-telegraphs.engine.test.ts`,
+  `control-surfaces.sim.test.ts` and `CombatBoard.S1-board-C34.test.tsx`
+  deleted whole; the rest rewritten to the survivors (momentum on card
+  colour, `projectIncomingThreat.willDeny` for the deny verdict).
+- **Left for R7d2** (on top of its row): the DoT / vulnerable / stun detail
+  copy still prints "the read" prose and the face VM still carries
+  `statusAdv` / `statusDis` / `readDependent` with the presenter's frozen
+  `READ_*` constants; the `'advantage'` glyph kind; the word "stance" in
+  surviving comments and docs (`docs/combat.md`, `docs/effects.md`,
+  `docs/enemy.md`, spec 33).
+
 ## Out of scope for R7a (named so it is not mistaken for a miss)
 
 - `synergy` and `synergy-predicates.ts`, themes, draft, presets,

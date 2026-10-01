@@ -281,19 +281,9 @@ function payloadLines(p: any): string[] {
     const d = p.damageOverTime;
     if (d) out.push(`DoT ${d.damagePerRound}/round × intensity (${d.damageType}, ticks ${d.trigger ?? 'round start'})`);
     if (p.damageTakenMult && p.damageTakenMult !== 1) out.push(`Damage taken ${pct(p.damageTakenMult)}`);
-    if (p.damageTakenMultForStance) {
-        const s = p.damageTakenMultForStance;
-        out.push(`Damage taken ${pct(s.mult)} from ${s.stance} plays`);
-    }
     if (p.outgoingDamageMulPct) out.push(`Outgoing damage ${signed(p.outgoingDamageMulPct)}%`);
     const ar = p.actionRestriction;
     if (ar?.skipTurn) out.push('Skips turn');
-    if (ar?.forcedStance) out.push(`Forced stance: ${ar.forcedStance}`);
-    if (ar?.blockedStances?.length) out.push(`Blocks stance: ${ar.blockedStances.join(', ')}`);
-    const av = p.advantageModifier;
-    if (av?.grantAdvantage?.length) out.push(`Advantage: ${av.grantAdvantage.join(', ')}`);
-    if (av?.grantDisadvantage?.length) out.push(`Disadvantage: ${av.grantDisadvantage.join(', ')}`);
-    if (p.revealsStance) out.push('Reveals hidden stance');
     return out;
 }
 
@@ -341,7 +331,6 @@ function buildEnemies() {
             },
             logic: e.logic,
             logicBlurb: LOGIC_BLURB[e.logic] ?? e.logic,
-            stanceHint: e.stanceHint ?? '',
             cards,
         };
     }).sort((a, b) => (a.level ?? 0) - (b.level ?? 0) || a.name.localeCompare(b.name));

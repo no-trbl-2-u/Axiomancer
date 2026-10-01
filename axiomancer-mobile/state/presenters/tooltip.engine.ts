@@ -12,7 +12,6 @@
  *   user-jot tighten 2026-05-24). Body is a terse stat-effect
  *   line derived from `Effect.payload`; engine `description`
  *   is intentionally dropped per user request.
- * - `'stance-chip'` — static ADV / DIS dice rules (Phase 75).
  * - `'card'` — engine-sourced via `getCombatCardById(id)` (Phase 75).
  * - `'hazard-keyword'` — engine-sourced via `HAZARD_KEYWORDS[id]`
  *   (Phase 82). The hazard-deck screen's keyword tally chips key
@@ -35,7 +34,6 @@ export type TooltipKind =
     | 'affliction'
     | 'blessing'
     | 'effect'
-    | 'stance-chip'
     | 'card'
     | 'hazard-keyword'
     | 'slot'
@@ -51,7 +49,7 @@ export type TooltipKind =
  * user-jot 2026-05-24). Maps each base stat / stance to a palette
  * key the primitive resolves to a colour. `'neutral'` is the
  * default — used for content with no clear stat tie (Tick A
- * `kind: 'stat'`, `kind: 'stance-chip'`).
+ * `kind: 'stat'`).
  */
 export type TooltipAccent = 'heart' | 'body' | 'mind' | 'neutral';
 
@@ -80,19 +78,6 @@ const STAT_CONTENT: Record<string, TooltipContent> = {
         body: 'the discipline of attention. governs focus, card cost recovery, and mind-stance damage curves.',
         footnote: '+1 focus per mind point',
         accent: 'mind',
-    },
-};
-
-const STANCE_CHIP_CONTENT: Record<string, TooltipContent> = {
-    adv: {
-        title: 'ADVANTAGE',
-        body: 'roll twice this exchange, keep the higher value.',
-        footnote: 'your stance counters theirs',
-    },
-    dis: {
-        title: 'DISADVANTAGE',
-        body: 'roll twice, keep the lower value.',
-        footnote: 'your stance falls to theirs',
     },
 };
 
@@ -257,8 +242,7 @@ const SLOT_CONTENT: Record<string, TooltipContent> = {
 
 interface EffectPayloadLike {
     damageOverTime?: { damagePerRound: number; damageType: string };
-    actionRestriction?: { forcedStance?: string; blockedStances?: string[]; skipTurn?: boolean };
-    advantageModifier?: { grantAdvantage?: string[]; grantDisadvantage?: string[] };
+    actionRestriction?: { skipTurn?: boolean };
 }
 
 function sign(n: number): string {
@@ -280,8 +264,7 @@ export function accentForStat(stat: string): TooltipAccent {
 
 /**
  * Format `Effect.payload` as a short stat-effect line. Picks the
- * single most-informative summand (DOT first, then action restriction, then
- * advantage). Returns the engine `description`
+ * single most-informative summand (DOT first, then action restriction). Returns the engine `description`
  * fallback when no payload data is present — defensive only;
  * Tier-1+ engine effects all carry payload.
  */
@@ -295,17 +278,6 @@ export function formatEffectStatEffect(
     }
     if (payload.actionRestriction?.skipTurn) {
         return 'skip turn';
-    }
-    if (payload.actionRestriction?.forcedStance) {
-        return `forced ${payload.actionRestriction.forcedStance} stance`;
-    }
-    if (payload.advantageModifier?.grantAdvantage?.length) {
-        const list = payload.advantageModifier.grantAdvantage.join(' / ');
-        return `advantage on ${list}`;
-    }
-    if (payload.advantageModifier?.grantDisadvantage?.length) {
-        const list = payload.advantageModifier.grantDisadvantage.join(' / ');
-        return `disadvantage on ${list}`;
     }
     return fallback;
 }
@@ -346,9 +318,6 @@ export function selectTooltipContentFor(
 ): TooltipContent | null {
     if (kind === 'stat') {
         return STAT_CONTENT[id] ?? null;
-    }
-    if (kind === 'stance-chip') {
-        return STANCE_CHIP_CONTENT[id] ?? null;
     }
     if (kind === 'slot') {
         return SLOT_CONTENT[id] ?? null;

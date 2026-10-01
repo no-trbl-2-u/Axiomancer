@@ -7,15 +7,13 @@
  * control status hinders it (`canAct`). There are no clear thresholds — the
  * player wins by dropping the enemy's HP to 0.
  *
- * An authored phase specifies the enemy's hidden stance (the RPS read), a threat
- * action (damage + optional debuff/heal), and a thematic stance tell. Threat
- * damage scales with level + difficulty, so the autonomous balance-tuning loop
+ * An authored phase specifies a threat action (damage + optional
+ * debuff/heal). Threat damage scales with level + difficulty, so the autonomous balance-tuning loop
  * can move enemy stats without re-authoring the sequences.
  */
 
 import type { Enemy } from '../Enemy/types';
 import { lookupEffect } from '../Effects/effects.library';
-import type { Stance } from './types';
 import type {
     CombatIntentType, CombatThreatAction, CombatThreatBranchOutcome, CombatThreatEffect,
     CombatThreatPhase, ThreatBranchCondition,
@@ -32,7 +30,6 @@ export type { ThreatBranchCondition } from './combat.encounter.types';
  * `combat.threat-sequences.ts`.
  */
 export interface AuthoredThreatPhase {
-    enemyStance: Stance;
     /** Threat-action damage as a multiple of the level/difficulty budget (default 1.0). */
     damageWeight?: number;
     /** Optional player-debuff applied when this phase is Overwhelmed (telegraphed punish). */
@@ -51,8 +48,6 @@ export interface AuthoredThreatPhase {
     /** Threat description WITHOUT the damage number — the resolver appends "(+N damage[, Effect])". */
     actionText: string;
     isFinalPhase?: boolean;
-    /** Spec 26b §2 — thematic tell implying this phase's hidden stance. */
-    stanceHint?: string;
     /** Phase 3 — "rage mode": locks this phase until the resolving round
      *  reaches it (see `CombatThreatPhase.unlockAfterRound`).
      *
@@ -66,15 +61,6 @@ export interface AuthoredThreatPhase {
      *  a gated candidate by HOLDING the pointer at the last reachable phase
      *  rather than advancing past it. */
     unlockAfterRound?: number;
-    /** Phase D9 (spec 33 §2) — the open stance check this phase telegraphs.
-     *  `punishes: X` → ending the phase in stance X takes the hit at ×1.5;
-     *  `yields: X` → ending in X blunts it ×0.5 AND pays +1◆. Both optional and
-     *  independent (a boss may name one of each, across different phases, to
-     *  satisfy the §2 "two stances" boss law). Undefined = no authored check —
-     *  `getThreatSequence`'s backfill (`defaultStanceCheck`) fills the uniform
-     *  D6e default instead; an authored value here always wins. Resolved at
-     *  phase end by `resolveStanceCheck`. */
-    stanceCheck?: { punishes?: Stance; yields?: Stance };
     /** Phase 33c (spec 33 §1) — THE COVETED DIE: seated at the DECK level by
      *  `compileEnemyDeck` (`DECK_STAKES`, defaulting to a BOSS/UNIQUE deck's
      *  2nd card), never via backfill. Undefined = no coveted die on this
@@ -158,11 +144,8 @@ export function commitThreatBranch(
     const outcome = taken === 'then' ? phase.branch.then : phase.branch.else;
     const committed: CombatThreatPhase = {
         ...phase,
-        enemyStance: outcome.enemyStance,
         threatAction: outcome.threatAction,
         intentType: outcome.intentType,
-        stanceHint: outcome.stanceHint,
-        stanceCheck: outcome.stanceCheck,
         stake: outcome.stake,
         branch: { ...phase.branch, taken },
     };
@@ -189,7 +172,7 @@ function difficultyMult(enemy: Enemy): number {
     return (d !== undefined && DIFFICULTY_MULT[d] !== undefined) ? DIFFICULTY_MULT[d] : 1.0;
 }
 
-// ── Spec 26 §2 — intent derivation (the telegraph; stance stays hidden) ──────
+// ── Spec 26 §2 — intent derivation (the telegraph) ───────────────────────────
 
 /** True when a threat effect debuffs the player (an applied effectId). */
 function effectIsDebuff(eff: CombatThreatEffect): boolean {
@@ -221,28 +204,6 @@ export function deriveIntentType(effects: readonly CombatThreatEffect[]): Combat
 /** Stamps the derived intent (unless an explicit override is present). */
 function withIntent(phase: CombatThreatPhase): CombatThreatPhase {
     return phase.intentType ? phase : { ...phase, intentType: deriveIntentType(phase.threatAction.effects) };
-}
-
-/** A generic per-stance thematic tell for unauthored enemies. */
-const DEFAULT_STANCE_HINTS: Record<Stance, string> = {
-    heart: 'Something raw and feeling drives it — it answers from the heart.',
-    body: 'It carries itself like a brawler — force is its first language.',
-    mind: 'A cold calculation moves behind its eyes — it thinks before it strikes.',
-};
-
-/** Picks an enemy's dominant base stat as its phase-1 stance (deterministic). */
-function dominantStance(enemy: Enemy): Stance {
-    const { heart, body, mind } = enemy.baseStats;
-    if (body >= heart && body >= mind) return 'body';
-    if (mind >= heart && mind >= body) return 'mind';
-    return 'heart';
-}
-
-/** Rotates heart → body → mind so each phase reads a different stance. */
-const STANCE_CYCLE: Stance[] = ['heart', 'body', 'mind'];
-function rotateStance(from: Stance, steps: number): Stance {
-    const i = STANCE_CYCLE.indexOf(from);
-    return STANCE_CYCLE[(i + steps) % STANCE_CYCLE.length];
 }
 
 /**
@@ -325,16 +286,11 @@ function defaultThreatAction(enemy: Enemy, phaseIndex: number): CombatThreatActi
 /** Ids that carry an authored threat sequence. */
 export const AUTHORED_THREAT_ENEMY_IDS: readonly string[] = Object.freeze(Object.keys(AUTHORED_THREAT_SEQUENCES));
 
-/** Enemy-level fallback tell (from the Enemy record), if authored. */
-function enemyStanceHint(enemy: Enemy): string | undefined {
-    return (enemy as Enemy & { stanceHint?: string }).stanceHint;
-}
-
 /** Resolves one authored fork into a branch outcome (level/difficulty scaled).
  *  `implicitCleanse` is the WS9 afflictions-gte branch's legacy reactive
  *  cleanse (`resolveAuthored` below) — an explicit `p.enemyCleanse` wins. */
 function resolveBranchOutcome(
-    enemy: Enemy, p: AuthoredThreatPhase, phaseIndex: number, level: number, dMult: number,
+    p: AuthoredThreatPhase, phaseIndex: number, level: number, dMult: number,
     implicitCleanse?: number,
 ): CombatThreatBranchOutcome {
     const damage = threatDamageBudget(level, dMult, phaseIndex, p.damageWeight ?? 1);
@@ -343,11 +299,8 @@ function resolveBranchOutcome(
         enemyCleanse: p.enemyCleanse ?? implicitCleanse,
     });
     return {
-        enemyStance: p.enemyStance,
         threatAction,
         intentType: deriveIntentType(threatAction.effects),
-        stanceHint: p.stanceHint ?? enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[p.enemyStance],
-        stanceCheck: p.stanceCheck,
         stake: p.stake,
     };
 }
@@ -363,8 +316,8 @@ function resolveAuthored(enemy: Enemy, authored: AuthoredThreatStep[]): CombatTh
             // answers being stacked by shedding ONE affliction (a fraction,
             // never a wipe; enforced again at resolution in the engine).
             const reactiveCleanse = condition.kind === 'bearer-afflictions-gte' ? 1 : undefined;
-            const thenOutcome = resolveBranchOutcome(enemy, step.branch.then, i, level, dMult, reactiveCleanse);
-            const elseOutcome = resolveBranchOutcome(enemy, step.branch.else, i, level, dMult);
+            const thenOutcome = resolveBranchOutcome(step.branch.then, i, level, dMult, reactiveCleanse);
+            const elseOutcome = resolveBranchOutcome(step.branch.else, i, level, dMult);
             // Pending face = the ELSE (baseline) fork; `commitThreatBranch`
             // swaps the taken fork in at phase START.
             return {
@@ -384,14 +337,11 @@ function resolveAuthored(enemy: Enemy, authored: AuthoredThreatStep[]): CombatTh
         const damage = threatDamageBudget(level, dMult, i, p.damageWeight ?? 1);
         return withIntent({
             index: i + 1,
-            enemyStance: p.enemyStance,
             threatAction: buildThreatAction(p.actionText, damage, p.threatEffectId, p.threatIntensity, {
                 enemyHeal: p.enemyHeal, enemyCleanse: p.enemyCleanse,
             }),
             isFinalPhase: p.isFinalPhase ?? i === authored.length - 1,
-            stanceHint: p.stanceHint ?? enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[p.enemyStance],
             unlockAfterRound: p.unlockAfterRound,
-            stanceCheck: p.stanceCheck,
             stake: p.stake,
         });
     });
@@ -412,53 +362,24 @@ export const RAGE_UNLOCK_ROUND = 6;
 export const RAGE_DAMAGE_WEIGHT = 1.6;
 export const RAGE_HEAL_FRACTION = 0.5;
 
-/**
- * Spec 33 §2 (Upgradeable Dice) — the first-batch open stance-check telegraph
- * (Phase D6e, draining D3-F2). The enemy PUNISHES being met head-on in its own
- * stance (the hit lands at ×1.5) and YIELDS to being answered from the momentum
- * chain's SUCCESSOR color (heart→body→mind, via `rotateStance(s, 1)`; the hit is
- * blunted ×0.5 and pays +1◆) — so the telegraph teaches the chain: don't mirror
- * the enemy, flow past it. Because `enemyStance` rotates across the fight, all
- * three stances appear as `yields` in turn, so a mono-color build faces 1–2
- * off-color checks per fight (§2 authoring law). Resolved at phase end by
- * `resolveThreatPhase`. Density (every phase) + payout (+1◆) are D7 dials — this is the uniform first
- * pass; per-enemy authored checks live at the deck level (`DECK_STANCE_CHECKS`
- * in `combat.enemy-decks.ts`, Phase D9) and win over this backfill.
- */
-export function defaultStanceCheck(enemyStance: Stance): { punishes: Stance; yields: Stance } {
-    return { punishes: enemyStance, yields: rotateStance(enemyStance, 1) };
-}
-
 /** Generates a default escalating sequence for an unauthored enemy (§10),
- *  topped with a locked rage phase (Phase 3). Each phase carries a spec-33 §2
- *  open stance check (`defaultStanceCheck`). */
+ *  topped with a locked rage phase (Phase 3). */
 export function generateDefaultThreatSequence(enemy: Enemy): CombatThreatPhase[] {
-    const base = dominantStance(enemy);
     const PHASES = 3;
-    const phases = Array.from({ length: PHASES }, (_unused, i) => {
-        const enemyStance = rotateStance(base, i);
-        return withIntent({
-            index: i + 1,
-            enemyStance,
-            threatAction: defaultThreatAction(enemy, i),
-            isFinalPhase: false, // the rage phase below is the true final phase
-            stanceHint: enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[enemyStance],
-            stanceCheck: defaultStanceCheck(enemyStance),
-        });
-    });
-    const rageStance = rotateStance(base, PHASES);
+    const phases = Array.from({ length: PHASES }, (_unused, i) => withIntent({
+        index: i + 1,
+        threatAction: defaultThreatAction(enemy, i),
+        isFinalPhase: false, // the rage phase below is the true final phase
+    }));
     const rageDamage = threatDamageBudget(enemy.level, difficultyMult(enemy), PHASES, RAGE_DAMAGE_WEIGHT);
     const rageHeal = Math.round(rageDamage * RAGE_HEAL_FRACTION);
     phases.push(withIntent({
         index: PHASES + 1,
-        enemyStance: rageStance,
         threatAction: buildThreatAction(
             `${enemy.name} loses patience and turns savage`, rageDamage, undefined, undefined, { enemyHeal: rageHeal },
         ),
         isFinalPhase: true,
         unlockAfterRound: RAGE_UNLOCK_ROUND,
-        stanceHint: enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[rageStance],
-        stanceCheck: defaultStanceCheck(rageStance),
     }));
     return phases;
 }
@@ -471,30 +392,20 @@ export function getThreatSequence(enemy: Enemy): CombatThreatPhase[] {
     const explicit = (enemy as Enemy & { threatSequence?: CombatThreatPhase[] }).threatSequence;
     let seq: CombatThreatPhase[];
     if (explicit && explicit.length > 0) {
-        seq = explicit.map(p => withIntent({
-            ...p,
-            stanceHint: p.stanceHint ?? enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[p.enemyStance],
-        }));
+        seq = explicit.map(withIntent);
     } else {
         const authored = AUTHORED_THREAT_SEQUENCES[enemy.id];
         seq = authored ? resolveAuthored(enemy, authored) : generateDefaultThreatSequence(enemy);
     }
-    // Spec 33 §2 (Phase D6e) — backfill the open stance-check telegraph on any
-    // phase that authored none, at the single choke point every source funnels
-    // through (explicit `threatSequence`, `AUTHORED_THREAT_SEQUENCES`, and the
-    // default generator alike — the sim's witness enemies carry short explicit
-    // sequences the generator never touched). A hand-authored check is
-    // preserved; only absent ones are filled.
-    //
     // ROUND-KEYED DECK TIERS (2026-09-02) — the ANTI-STALL guarantee, applied
-    // at the same choke point: the OPENING phase is never round-gated,
+    // at the single choke point every source funnels through (explicit
+    // `threatSequence`, `AUTHORED_THREAT_SEQUENCES`, the generator): the OPENING phase is never round-gated,
     // whatever the source authored. Every later phase can only hold the
     // pointer where it is (`processBetweenPhases`), and the phase it holds on
     // always has an action — so no combination of tier gates can leave a
     // fight without a legal enemy action.
     return seq.map((p, i) => {
-        const withCheck = p.stanceCheck ? p : { ...p, stanceCheck: defaultStanceCheck(p.enemyStance) };
-        if (i > 0 || withCheck.unlockAfterRound === undefined) return withCheck;
-        return { ...withCheck, unlockAfterRound: undefined };
+        if (i > 0 || p.unlockAfterRound === undefined) return p;
+        return { ...p, unlockAfterRound: undefined };
     });
 }

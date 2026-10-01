@@ -7,19 +7,14 @@
  * (portraits, visible enemy HP, intent telegraph, the open stance check, the
  * spec-33 faced dice tray, and Conviction + Signature Skills — the HP-only
  * model).
- *
- * The redesign (Spec 26b): the enemy STANCE is hidden until revealed, so this
- * presenter only surfaces a stance colour/label once `isPhaseStanceRevealed`;
- * otherwise it shows the thematic tell and a "?".
  */
 
 import {
     handCards as engineHandCards, getCard, getCardById,
-    isPhaseStanceRevealed, getSignatureSkill,
-    lookupEffect, READ_DAMAGE_MULT, colorMatchBonus,
+    getSignatureSkill,
+    lookupEffect, colorMatchBonus,
     RESERVE_MAX,
     riderText,
-    DISRUPT_DENY_AT,
     // phase 28 — legibility sweep
     projectIncomingThreat,
     // phase 2 — projected-lethality readout (spec 30): the status kill-path
@@ -27,15 +22,14 @@ import {
     projectCombatOutcome,
     // Revamp R4 — the signature bar reads the engine's own cast gate.
     signatureCastBlock,
-    // Spec 33 (Phase D6b) — the momentum chain, stance-check telegraph, and
-    // die-gear rail.
+    // Spec 33 (Phase D6b) — the momentum chain and the die-gear rail.
     MOMENTUM_CHAIN_ORDER, MOMENTUM_SURGE_LENGTH, activeDieGear, DEFAULT_DIE_GEAR,
     // S3 — stat scaling: the hand prints final numbers in the family colour.
     scaleCardForStats,
     type StatFamily,
     type CombatEncounterState, type CombatCard, type CombatManaDie, type CombatEvent,
-    type CombatThreatPhase, type CombatThreatEffect, type CombatIntentType, type CombatReadResult,
-    type CombatSummary, type SignatureSkill, type Stance,
+    type CombatThreatPhase, type CombatThreatEffect, type CombatIntentType,
+    type CombatSummary, type SignatureSkill,
     type Card, type CardCombatEffects, type CardType,
     type UpgradeableDieGear,
     type WheelStance,
@@ -252,33 +246,6 @@ export interface CombatIntentVM {
     wallMath: {
         projectedDamage: number; netDamage: number; willDeny: boolean; guard: number; barrier: number;
     };
-    /** Spec 33 §5 (Phase D6b) — the OPEN stance-check telegraph for this
-     *  phase (D6e authored `punishes`/`yields` on every threat phase): what
-     *  this hit does to the player's current stance, plus the end-of-phase
-     *  resolution feedback. Null when the phase carries no check. */
-    stanceCheck: CombatStanceCheckVM | null;
-}
-/**
- * Spec 33 §5 (Phase D6b) — the open stance check on a threat phase. NO hidden
- * information (owner-UI doctrine): both the punish and the yield stances are
- * telegraphed with their multiplier, and once the phase resolves the outcome
- * (×1.5 punished / ×0.5 yielded +1◆ / none) is shown plainly.
- */
-export interface CombatStanceCheckVM {
-    /** The stance this hit PUNISHES (×1.5), or null. */
-    punishes: WheelStance | null;
-    /** The stance this hit YIELDS to (×0.5 + you gain 1◆), or null. */
-    yields: WheelStance | null;
-    /** Terse telegraph line, e.g. 'Punishes BODY ×1.5' — null when no punish. */
-    punishesText: string | null;
-    /** Terse telegraph line, e.g. 'Yields to MIND ×0.5 +1◆' — null when none. */
-    yieldsText: string | null;
-    /** Which telegraphed branch the player's CURRENT stance is walking into
-     *  right now (live preview before the hit lands): 'punished'/'yielded'/'none'. */
-    live: 'punished' | 'yielded' | 'none';
-    /** The last resolved outcome for this check (from the `stance-check-resolved`
-     *  event), or null before the phase has resolved. */
-    resolution: { outcome: 'punished' | 'yielded' | 'none'; stance: Stance | null; text: string } | null;
 }
 export interface CombatEnemyPaneVM {
     name: string; artKey: string; isBoss: boolean;
@@ -288,11 +255,6 @@ export interface CombatEnemyPaneVM {
     hp: number; maxHp: number; hpPct: number;
     effects: CombatEffectChipVM[];
     intent: CombatIntentVM;
-    /** Revealed stance ('heart'|'body'|'mind') or null while hidden. */
-    revealedStance: string | null;
-    stanceColor: string;      // accent (revealed stance colour, else neutral)
-    stanceLabel: string;      // 'HEART' / '?' …
-    stanceHint: string;       // the thematic tell (always shown)
     /** The count of STAGE thresholds this foe has already crossed (0 for
      *  anything that does not escalate). The loud announcement is the combat
      *  log's `stage-entered` line — this is the standing "it has changed" mark. */
@@ -448,12 +410,6 @@ export interface CombatCardDetailVM {
      *  ('DEAL 20  +  CURDLE …  +  HEAL 16'). Null only for a card that prints
      *  no payload at all. */
     diePaidLine: string | null;
-    /** The exact ▲/—/▼ read triplet for read-scaled kinds (guard/barrier/
-     *  dot/vulnerable); null otherwise. */
-    dieTriplet: string | null;
-    /** One global legend decoding ▲/—/▼ — non-null exactly when `dieTriplet`
-     *  renders (the most-cited undefined notation of the 10-deck playtest). */
-    readLegend: string | null;
     /** The colour-match rule — rendered ONCE per modal (not per powerLine). */
     colorMatchHint: string;
     /** 2026-07-12 (owner playtest) — the per-card slice of the systems
@@ -477,7 +433,7 @@ export interface CombatCardDetailVM {
 
 /** detailStats' switch builds everything BUT the pill fields; the wrapper appends them. */
 type DetailCore = Omit<CombatCardDetailVM,
-    'freePill' | 'diePaidLine' | 'dieTriplet' | 'readLegend' | 'colorMatchHint' | 'systemTerms'
+    'freePill' | 'diePaidLine' | 'colorMatchHint' | 'systemTerms'
     | 'rarityLabel' | 'rarityPips' | 'rarityColor' | 'freeTag' | 'paidTag'>;
 
 export interface CombatCardVM {
@@ -536,21 +492,6 @@ export interface CombatMomentumV2VM {
     colorHex: string;
     a11y: string;
 }
-/**
- * Spec 33 §2 (Phase D6b) — the player's CURRENT stance chip (the
- * stance of the last PAID card). A clear "no stance" renders when null.
- */
-export interface CombatStanceChipVM {
-    stance: WheelStance | null;
-    label: string;   // 'HEART' / 'NO STANCE'
-    glyph: string;   // the stance glyph / '—'
-    colorHex: string;
-    /** Cluster S1-board-C34 — the empty state's INSTRUCTION: the action that
-     *  fills the chip ('PLAY A PAID CARD'). Null once a stance is held, where
-     *  the value is the whole answer. */
-    hint: string | null;
-    a11y: string;
-}
 /** Spec 33 §6 (Phase D6b) — one die's gear slot in the rail + inspection VM. */
 export interface CombatDieGearSlotVM {
     color: 'heart' | 'body' | 'mind' | 'wild';
@@ -597,8 +538,6 @@ export interface CombatViewModel {
     discardCards: { id: string; name: string }[];
     /** Spec 33 §3 (Phase D6b) — the momentum chain chip. */
     momentumV2: CombatMomentumV2VM;
-    /** Spec 33 §2 (Phase D6b) — the player's current-stance chip. */
-    playerStance: CombatStanceChipVM;
     /** Spec 33 §6 (Phase D6b) — the die-gear rail. */
     dieGear: CombatDieGearRailVM;
 }
@@ -633,51 +572,6 @@ function branchVM(phase: CombatThreatPhase | undefined): CombatIntentBranchVM | 
         elseText: b.else.threatAction.description,
         taken: b.taken ?? null,
     };
-}
-
-/** Spec 33 §5 (Phase D6b) — the OPEN stance-check telegraph for a phase.
- *  Reads D6e's authored `punishes`/`yields`, previews what the player's
- *  CURRENT stance walks into, and surfaces the last resolved outcome from the
- *  event log. Null when the phase carries no check. */
-function stanceCheckVM(
-    state: CombatEncounterState,
-    phase: CombatThreatPhase | undefined,
-    phaseIndex: number,
-): CombatStanceCheckVM | null {
-    const check = phase?.stanceCheck;
-    if (!check || (!check.punishes && !check.yields)) return null;
-    const punishes = (check.punishes ?? null) as WheelStance | null;
-    const yields = (check.yields ?? null) as WheelStance | null;
-    const adv = READ_DAMAGE_MULT.advantage;      // ×1.5
-    const dis = READ_DAMAGE_MULT.disadvantage;   // ×0.5
-    const punishesText = punishes ? `Punishes ${STANCE_LABELS[punishes]} ×${adv}` : null;
-    const yieldsText = yields ? `Yields to ${STANCE_LABELS[yields]} ×${dis} +1◆` : null;
-    // Live preview — where the player's CURRENT stance stands vs this check.
-    const stance = state.playerStance ?? null;
-    const live: 'punished' | 'yielded' | 'none' =
-        stance && punishes === stance ? 'punished'
-            : stance && yields === stance ? 'yielded'
-                : 'none';
-    // Last resolved outcome for THIS phase (the engine logs it at phase end).
-    let resolution: CombatStanceCheckVM['resolution'] = null;
-    for (let i = state.log.length - 1; i >= 0; i--) {
-        const ev = state.log[i];
-        if (ev.kind === 'stance-check-resolved' && ev.phaseIndex === phaseIndex) {
-            // Playtest 2026-09-04 — the NONE outcome used to print "No stance
-            // check" directly under the "Punishes X / Yields to Y" telegraph,
-            // which read as a contradiction (the check exists; the player's
-            // stance simply matched neither side). Say what happened.
-            resolution = {
-                outcome: ev.outcome, stance: ev.stance,
-                text: ev.outcome === 'punished' ? `Punished ×${adv}`
-                    : ev.outcome === 'yielded' ? `Yielded ×${dis} +1◆`
-                        : ev.stance ? `${STANCE_LABELS[ev.stance] ?? ev.stance} — neither, ×1`
-                            : 'No stance — neither, ×1',
-            };
-            break;
-        }
-    }
-    return { punishes, yields, punishesText, yieldsText, live, resolution };
 }
 
 // ── The enemy's played "card" (the after-the-fact reveal) ────────────────────
@@ -863,7 +757,7 @@ export function selectCombatLogLines(events: readonly CombatEvent[]): CombatLogL
 // ledger sentence (stage-entered, the WRATH/FLAY/CHAIN/
 // TWIN/OVERKILL ledgers, enemy-healed, the PLEA lines, ...) and adds the
 // kinds that function deliberately omits — the raw damage/DoT/card/threat/
-// stance-check beats a FLOAT already carries but the log never wrote down.
+// beats a FLOAT already carries but the log never wrote down.
 
 export interface CombatLogHistoryEntryVM {
     id: string;
@@ -946,21 +840,6 @@ export function selectCombatLogHistory(state: CombatEncounterState): CombatLogHi
                     push('player', GLYPH_COLORS.statup, `PHASE ${e.phaseIndex} — DENIED.`);
                 }
                 break;
-            // Same wording the open stance-check telegraph resolves to
-            // (`stanceCheckVM` above) — one vocabulary, never two.
-            case 'stance-check-resolved': {
-                const adv = READ_DAMAGE_MULT.advantage;
-                const dis = READ_DAMAGE_MULT.disadvantage;
-                const text = e.outcome === 'punished' ? `Punished ×${adv}`
-                    : e.outcome === 'yielded' ? `Yielded ×${dis} +1◆`
-                        : e.stance ? `${STANCE_LABELS[e.stance] ?? e.stance} — neither, ×1`
-                            : 'No stance — neither, ×1';
-                const color = e.outcome === 'punished' ? INTENT_ICONS.damage.color
-                    : e.outcome === 'yielded' ? GLYPH_COLORS.statup
-                        : GUARD_COLOR;
-                push('player', color, text);
-                break;
-            }
             case 'signature-cast':
                 push('player', GOLD_ACCENT, `${e.name} — Signature, ◆${e.cost}.`);
                 break;
@@ -982,7 +861,6 @@ export function selectCombatLogHistory(state: CombatEncounterState): CombatLogHi
 
 function intentVM(state: CombatEncounterState): CombatIntentVM {
     const cur = currentPhase(state);
-    const curIdx = Math.min(state.currentPhaseIndex, state.threatPhases.length - 1);
     const type = (cur?.intentType ?? 'pass') as CombatIntentType;
     const meta = INTENT_ICONS[type];
     const nextPhase = state.threatPhases[state.currentPhaseIndex + 1];
@@ -993,8 +871,6 @@ function intentVM(state: CombatEncounterState): CombatIntentVM {
     const damage = effects.reduce((s, e) => s + (e.damage ?? 0), 0);
     const debuffs = effects.some((e) => !!e.effectId);
     const threat = projectIncomingThreat(state);
-    // Spec 33 §5: the open stance-check telegraph.
-    const stanceCheck = stanceCheckVM(state, cur, curIdx);
     return {
         type, icon: meta.icon, label: cur?.intentLabel ?? meta.label, color: meta.color,
         description: cur?.threatAction.description ?? '', damage, debuffs,
@@ -1003,15 +879,11 @@ function intentVM(state: CombatEncounterState): CombatIntentVM {
             projectedDamage: threat.projectedDamage, netDamage: threat.netDamage,
             willDeny: threat.willDeny, guard: threat.guard, barrier: threat.barrier,
         },
-        stanceCheck,
     };
 }
 
 function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
     const e = state.enemy;
-    const cur = currentPhase(state);
-    const revealed = isPhaseStanceRevealed(state, Math.min(state.currentPhaseIndex, state.threatPhases.length - 1));
-    const stance = revealed ? cur?.enemyStance ?? null : null;
     const isBoss = e.difficulty === 'boss' || e.difficulty === 'unique'
         || (e.tags ?? []).includes('boss') || (e.tags ?? []).includes('unique');
     // Phase 2 (spec 30) — pure selector, no state mutation; safe to call once
@@ -1026,10 +898,6 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
         hpPct: e.maxHealth > 0 ? Math.max(0, e.health) / e.maxHealth : 0,
         effects: chips(e.effects),
         intent: intentVM(state),
-        revealedStance: stance,
-        stanceColor: stance ? STANCE_COLORS[stance] : '#6b6257',
-        stanceLabel: stance ? STANCE_LABELS[stance] : '?',
-        stanceHint: cur?.stanceHint ?? (e as { stanceHint?: string }).stanceHint ?? '',
         stagesEntered: (state.stagesEntered ?? []).length,
         pendingDot: lethality.pendingDot,
         roundsToKill: lethality.roundsToKill,
@@ -1119,8 +987,6 @@ export function engineHonestKind(
     if ((p.outgoingDamageMulPct ?? 0) < 0) return 'weaken';
     // 0.34.0: damage-amp is read by the live HP engine, so it's honest.
     if ((p.damageTakenMult ?? 1) > 1) return 'vulnerable';
-    // Fate Engine P1: STANCE-KEYED vulnerability (+N% only from that color die).
-    if ((p as { damageTakenMultForStance?: { mult: number } }).damageTakenMultForStance) return 'vulnerable';
     if ((p.damageTakenMult ?? 1) < 1) return 'resolute';      // real % dmg-taken reduction
     return null;
 }
@@ -1544,7 +1410,7 @@ function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
         case 'stun': return { subtitle: `${Title} the enemy — it loses its turns.`, metaChip, outcomeLine: `Apply ${Title} ${c.skips} turn${c.skips === 1 ? '' : 's'}.`, outcomeStats: [{ label: 'SKIPS', value: `${c.skips} turns` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${Title} — the foe skips its next ${c.skips} actions.`, readNote: `The read is exact: ▲ won read changes nothing (skips are duration-driven), ▼ lost read shortens the skip by ${READ_DISADVANTAGE_DURATION_PENALTY} turn (floor 1).`, mathLine: `skip ${c.skips}t = ${Title.toLowerCase()} duration ${c.skips} (each turn it would act is cancelled).`, keywords };
         case 'weaken': return { subtitle: `${Title} the enemy — its attacks hit softer.`, metaChip, outcomeLine: c.turns > 0 ? `Apply ${Title} · ${c.turns} turns.` : `Apply ${Title}.`, outcomeStats: c.turns > 0 ? [{ label: 'TURNS', value: `${c.turns}` }] : [], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — the foe's hits land softer while it holds.`, readNote: `${Title} weakens the enemy's blows.`, mathLine: `${Title} reduces the enemy's outgoing damage while active (real engine units).`, keywords };
         case 'mark': return { subtitle: `${Title} the enemy — the flaw is named.`, metaChip, outcomeLine: `Apply ${Title} +${c.markAmp}/tick · ${c.turns} turns.`, outcomeStats: [{ label: 'PER TICK', value: `+${c.markAmp}` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — every DoT tick and payoff hit on the foe deals +${c.markAmp} while it holds.`, readNote: `${Title} counts as an affliction — RUPTURE, SOUL, and REAP all feed on it.`, mathLine: `+${c.markAmp}/tick = tickAmplifyFlat × intensity, for ${c.turns} turns.`, keywords };
-        case 'guard': { const b = c.guardAmount ?? 0; const adv = Math.max(1, Math.round(b * READ_DAMAGE_MULT.advantage)); const dis = Math.max(1, Math.round(b * READ_DAMAGE_MULT.disadvantage)); return { subtitle: 'Guard yourself — soak the next hit.', metaChip, outcomeLine: `Gain ${Title} ${b}.`, outcomeStats: [{ label: 'GUARD', value: `${b} (▲${adv} · —${b} · ▼${dis})` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: Guard ${b}; ▲ read raises it to ${adv}, ▼ read drops it to ${dis}; +${colorMatchBonus(b)} if a ${STANCE} die matches.`, readNote: `The read scales this: ▲ advantage ×${READ_DAMAGE_MULT.advantage}, ▼ disadvantage ×${READ_DAMAGE_MULT.disadvantage}.`, mathLine: `POWER = round(${b} × read) + ${colorMatchBonus(b)} on a colour match.`, keywords }; }
+        case 'guard': { const b = c.guardAmount ?? 0; return { subtitle: 'Guard yourself — soak the next hit.', metaChip, outcomeLine: `Gain ${Title} ${b}.`, outcomeStats: [{ label: 'GUARD', value: `${b}` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: Guard ${b}; +${colorMatchBonus(b)} if a ${STANCE} die matches.`, readNote: `Lands as printed; a colour-matched die adds +${colorMatchBonus(b)}.`, mathLine: `POWER = ${b} + ${colorMatchBonus(b)} on a colour match.`, keywords }; }
         case 'befriend': return { subtitle: 'Spare a near-dead foe.', metaChip, outcomeLine: 'Spare a near-dead foe — end combat peacefully.', outcomeStats: [], stacksText: null, freeLine, powerLine: '◆ WITH A DIE: if the enemy VITAE is low, end combat peacefully (befriend).', readNote: 'Watch the enemy VITAE bar — befriend lands only when it is low.', mathLine: 'No fixed number — a conditional outcome gated on low enemy VITAE.', keywords };
         case 'vulnerable': { return { subtitle: `${Title} the enemy — it takes more damage.`, metaChip, outcomeLine: `Apply ${Title} +${c.vulnPct}% · ${c.turns} turns.`, outcomeStats: [{ label: 'DMG TAKEN', value: `+${c.vulnPct}%` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: 'Stacks without limit.', freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — +${c.vulnPct}% damage taken for ${c.turns} turns.`, readNote: `The read is exact: ▲ won read lands +${READ_ADVANTAGE_INTENSITY_BONUS} intensity (+${c.vulnPctAdv}%), ▼ lost read −${READ_DISADVANTAGE_DURATION_PENALTY} turn; +${c.vulnPct}% on an even read.`, mathLine: `+${c.vulnPct}% = (damageTakenMult − 1) × 100 × intensity on an even read; combined Vulnerable is uncapped.`, keywords }; }
         // ── card-overhaul (2026-07-03) — the 6 previously-blank effects ──
@@ -1638,10 +1504,9 @@ function paidLine(sourceCard?: Card): string | null {
 /** Honest card DETAIL view-model (inspect modal) — the CORE plus the +DIE row
  *  fields. 2026-07-12 (card-wording audit): the NO-DIE pill (a pure duplicate
  *  of the face's ◇ rail) is gone; the +DIE row carries only what the face
- *  can't — the FULL paid line and the exact read triplet. */
+ *  can't — the FULL paid line. */
 export function detailStats(card: CombatCard, sourceCard?: Card): CombatCardDetailVM {
     const core = detailCore(card, sourceCard);
-    const c = cardCalc(card, sourceCard);
     const STANCE = STANCE_LABELS[card.stance] ?? card.stance.toUpperCase();
     // The free (die-optional) value — the ENGINE's own free line, not the
     // face's hero slot. 2026-09-21 (W3): the face hard-codes 'mercy' on a
@@ -1649,38 +1514,6 @@ export function detailStats(card: CombatCard, sourceCard?: Card): CombatCardDeta
     // any befriend card disagree with its authored rider. `freeLineText` is
     // `riderText` from mechanics, de-abbreviated — nothing else.
     const freePill = freeLineText(card, sourceCard);
-    // The exact ▲/—/▼ read triplet for the read-scaled kinds.
-    let dieTriplet: string | null = null;
-    if (c.kind === 'guard') {
-        const b = c.guardAmount ?? 0;
-        const adv = Math.max(1, Math.round(b * READ_DAMAGE_MULT.advantage));
-        const dis = Math.max(1, Math.round(b * READ_DAMAGE_MULT.disadvantage));
-        dieTriplet = `▲${adv} · —${b} · ▼${dis}`;
-    } else if (c.kind === 'dot') {
-        // P0-truth: the exact deterministic triplet (▲ +1 intensity / ▼ −1 turn).
-        // WI-2 — an event DoT (poison/bleed) reads PER TICK, not as a round-clock
-        // lifetime; the read scales the per-tick bite (▲ +1 intensity; ▼ −1 turn
-        // shortens the window, per-tick unchanged).
-        if (c.dotTrigger) {
-            const perTickAdv = Math.floor(c.dpr * (c.intensity + READ_ADVANTAGE_INTENSITY_BONUS));
-            dieTriplet = `▲${perTickAdv} · —${c.perTurn} · ▼${c.perTurn}`;
-        } else {
-            dieTriplet = `▲${c.totalAdv} · —${c.total} · ▼${c.totalDis}`;
-        }
-    } else if (c.kind === 'vulnerable') {
-        dieTriplet = `▲+${c.vulnPctAdv}% · —+${c.vulnPct}% · ▼−1 turn`;
-    }
-    // The ▲/—/▼ legend. 2026-09-21 (W3, owner finding 3 — "too busy"): a
-    // standing prose row explaining a notation that only ever renders one line
-    // above it is a row the combat overlay no longer spends. The decode now
-    // rides the triplet itself (`READ ▲12 · —8 · ▼6 — won · even · lost`), so
-    // the same fact costs one row instead of two. The field stays on the VM
-    // because the DECK screen — read out of combat, where a full sentence is
-    // affordable — still renders it.
-    const readLegend = dieTriplet
-        ? "▲ won read · — even · ▼ lost read — your die's stance against the foe's picks the column."
-        : null;
-    if (dieTriplet) dieTriplet = `READ ${dieTriplet} — won · even · lost`;
     const diePaidLine = paidLine(sourceCard);
     // The colour law (dice-law rework 2026-07-09) — rendered ONCE per modal.
     // A colourless (grey) card takes any die — never 'Only a ANY … die'.
@@ -1703,30 +1536,23 @@ export function detailStats(card: CombatCard, sourceCard?: Card): CombatCardDeta
     const freeTag = 'NO DIE';
     const paidTag = `+DIE · ${STANCE}/WILD`;
     return {
-        ...core, freePill, diePaidLine, dieTriplet, readLegend, colorMatchHint, systemTerms,
+        ...core, freePill, diePaidLine, colorMatchHint, systemTerms,
         rarityLabel: RARITY_LABEL[band], rarityPips: RARITY_PIPS[band], rarityColor: RARITY_COLOR[band],
         freeTag, paidTag,
     };
 }
 
-/** Read-scaled hero value at the moment of commit (read known) — StagedCard only.
- *  Guard/Barrier scale by the damage read (+colour-match bonus); DoT total and
- *  Vulnerable % follow the P0-truth deterministic read rule EXACTLY (▲ +1
- *  intensity / ▼ −1 turn — no multiplier approximations, matching the engine
- *  byte-for-byte). null for kinds with no read-scalable number (strike stays
- *  qualitative 'HIT' + a read pip; stun's skip count is duration-driven). */
-export function armedReadValue(face: CombatCardFaceVM, read: CombatReadResult, colorMatch: boolean): number | null {
+/** The hero value at the moment of commit — StagedCard only. Guard adds the
+ *  colour-match bonus; DoT total and Vulnerable % land as printed. null for
+ *  kinds with no number to arm (stun's skip count is duration-driven). */
+export function armedReadValue(face: CombatCardFaceVM, colorMatch: boolean): number | null {
     if (face.kind === 'guard' && face.guardBase != null) {
         // THE BIG NUMBERS REWRITE — the colour-match reward is a PERCENTAGE
-        // (+25%, min +2), not the legacy flat +3. The two agree only near a
-        // base of 12; at GUARD 36 the engine grants 9 and the flat rule printed
-        // 3. `colorMatchBonus` IS the engine's rule, imported, not restated.
-        const base = Math.max(1, Math.round(face.guardBase * READ_DAMAGE_MULT[read]));
-        return base + (colorMatch ? colorMatchBonus(base) : 0);
+        // (+25%, min +2). `colorMatchBonus` IS the engine's rule, imported,
+        // not restated.
+        return face.guardBase + (colorMatch ? colorMatchBonus(face.guardBase) : 0);
     }
     if ((face.kind === 'dot' || face.kind === 'vulnerable') && face.statusBase != null) {
-        if (read === 'advantage') return face.statusAdv ?? face.statusBase;
-        if (read === 'disadvantage') return face.statusDis ?? face.statusBase;
         return face.statusBase;
     }
     return null;
@@ -1924,35 +1750,6 @@ function momentumV2VM(state: CombatEncounterState): CombatMomentumV2VM {
     };
 }
 
-// ── Spec 33 §2 — player current-stance chip ──────────────────────────────────
-
-/**
- * Reshapes the player's current stance into its board chip.
- *
- * Purpose: the chip is the only surface that names the stance the player
- * holds. Input: the encounter state (`state.playerStance`). Output: the chip
- * VM.
- *
- * Cluster S1-board-C34 — the empty read was a bare state word, 'NO STANCE',
- * on a chip that answers nothing when tapped: it named a hole and not the
- * action that fills it. The empty state now carries that action as `hint`.
- */
-function playerStanceVM(state: CombatEncounterState): CombatStanceChipVM {
-    const stance = state.playerStance ?? null;
-    if (!stance) {
-        return {
-            stance: null, label: 'NO STANCE', glyph: '—', colorHex: '#6b6257',
-            hint: 'PLAY A PAID CARD',
-            a11y: 'No stance yet — play a paid card to take its stance.',
-        };
-    }
-    return {
-        stance, label: STANCE_LABELS[stance], glyph: DIE_GLYPHS[stance] ?? '?',
-        colorHex: STANCE_COLORS[stance], hint: null,
-        a11y: `Current stance: ${STANCE_LABELS[stance]} — from the last paid card.`,
-    };
-}
-
 // ── Spec 33 §6 — die-gear rail + payload-only inspection ─────────────────────
 
 const GEAR_RAIL_ORDER: readonly ('heart' | 'body' | 'mind' | 'wild')[] = ['heart', 'body', 'mind', 'wild'];
@@ -2006,7 +1803,6 @@ export function buildCombatViewModel(state: CombatEncounterState): CombatViewMod
         discardCount: state.discard.length,
         discardCards: state.discard.map((id) => ({ id, name: getCardById(id)?.name ?? id })),
         momentumV2: momentumV2VM(state),
-        playerStance: playerStanceVM(state),
         dieGear: dieGearRailVM(state),
     };
 }

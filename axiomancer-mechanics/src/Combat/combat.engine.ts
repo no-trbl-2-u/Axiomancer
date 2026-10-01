@@ -34,17 +34,15 @@ import type { Enemy } from '../Enemy/types';
 import { getCardById } from '../Cards/cards.library';
 import { executeCard } from '../Cards/card.engine';
 import type { Card, CardAspect, CardRider } from '../Cards/types';
-import type { CombatState, Stance } from './types';
+import type { CombatState } from './types';
 import { applyDamage, heal, isDefeated, erodeMaxHealth } from './health';
 import {
     processRoundStartEffects, processRoundEndEffects,
     getDamageTakenMultiplier, getPendingDotTotal,
-    getDistinctControlCount,
     getOutgoingDamageMult,
-    hasPayloadFlag, getStanceVulnMult, computeRoundsToKill,
+    computeRoundsToKill,
     fireDotTrigger, growPerEnemyActionDots,
     applyCleanse,
-    DISRUPT_DENY_AT,
 } from './effects';
 import {
     dieHasStance,
@@ -53,7 +51,7 @@ import {
 } from './combat.dice';
 import {
     rollUpgradeableDice, rollGoldLeadPair,
-    crackedColorsForTurn, expireCrackedDice, advanceMomentumV2, resolveStanceCheck,
+    crackedColorsForTurn, expireCrackedDice, advanceMomentumV2,
     isChainStance, activeDieGear, tableHasRoom,
     UPGRADEABLE_TABLE_CEILING,
     OVERHEAT_CRACK_CHANCE, SPECIAL_FIRES_ON_USE, SURGE_DIE_PREFIX, COVETED_DIE_PREFIX,
@@ -72,7 +70,7 @@ import { getSignatureSkill, applySignatureSkill, signatureCastBlock, playerArche
 import { getSignaturesForLoadout } from '../Items/relic.library';
 import type {
     CombatCard, CombatDieColor, CombatEncounterState, CombatEvent, CardPlay,
-    CombatManaDie, CombatPhaseResult, CombatTransition, LandedEffect, CombatReadResult,
+    CombatManaDie, CombatPhaseResult, CombatTransition, LandedEffect,
     CombatThreatEffect,
 } from './combat.encounter.types';
 
@@ -81,15 +79,8 @@ import type {
 /** Safety cap on total phases processed — prevents a degenerate stalemate loop. */
 const MAX_PHASES = 60;
 
-// ── Stance-check rails & color-match tuning ──────────────────────────────────
+// ── Color-match tuning ───────────────────────────────────────────────────────
 
-/** The advantage / disadvantage rails. Spec 33 retired the hidden-stance read
- *  (every play lands at its printed numbers); the rails now price the open
- *  stance checks at phase end — `punishes` lands the telegraphed hit at
- *  `advantage` (x1.5), `yields` blunts it to `disadvantage` (x0.5). */
-export const READ_DAMAGE_MULT: Record<CombatReadResult, number> = {
-    advantage: 1.5, neutral: 1.0, disadvantage: 0.5, none: 1.0,
-};
 /**
  * THE BIG NUMBERS REWRITE (2026-09-02) — the colour-match reward is now a
  * PERCENTAGE, not a flat +3. A flat bonus that mattered on a GUARD 6 card is
@@ -235,17 +226,6 @@ function intensityMap(effects: readonly ActiveEffect[]): Record<string, number> 
     return m;
 }
 
-const currentPhaseStance = (enc: CombatEncounterState): Stance => {
-    // CHARM (P0-truth `forcedStance` fix): a forced stance on the enemy REPLACES
-    // its hidden phase stance — the charm names the stance it must fight from,
-    // so the player can answer it with certainty. Previously
-    // `canAct().resolvedStance` was computed and discarded.
-    const forced = getActiveEffectModifiers(enc.enemy.effects as ActiveEffect[]).forcedStance;
-    if (forced) return forced;
-    const phase = enc.threatPhases[Math.min(enc.currentPhaseIndex, enc.threatPhases.length - 1)];
-    return phase?.enemyStance ?? 'heart';
-};
-
 // ── Initialization (§9) ──────────────────────────────────────────────────────
 
 /**
@@ -302,7 +282,6 @@ export function initializeCombatEncounter(
         // Gate 0 (round-turn law) — no tray rolled yet this phase.
         turnTakenThisPhase: false,
         conviction: 0,
-        revealedStances: [],
         // `archetype` is kept for the mobile portrait flavour only — it no
         // longer selects signatures (Phase 19). Signatures come from the worn
         // signet-relic loadout.
@@ -468,7 +447,7 @@ export function endTurn(state: CombatEncounterState): CombatTransition {
  * tray die back to `available` so it can power a SECOND card this round. The
  * push always succeeds; the RISK is the crack — `OVERHEAT_CRACK_CHANCE` that
  * the die is all-miss NEXT round.
- * The second play is a normal paid play: it moves stance and momentum. Any
+ * The second play is a normal paid play: it moves momentum. Any
  * die may be overheated, gold included. Cards carry this verb from D4; the
  * engine primitive ships here so D3's policies can exercise it.
  */
@@ -540,22 +519,21 @@ export function playCombatCard(
     const transition = useBottom
         ? playBottomAction(state, entry.uid, card, dieId, rng)
         : playTopAction(state, entry.uid, card, rng);
-    // Spec 33 — stance-from-cards + the null-reset momentum chain; FREE plays
+    // Spec 33 — the BOON payload + the null-reset momentum chain; FREE plays
     // never touch either (§3 rule 5).
-    return applyStanceAndMomentumV2(state, transition, card.stance, useBottom);
+    return applyBoonAndMomentumV2(state, transition, card.stance, useBottom);
 }
 
 /**
  * Spec 33 §2/§3 — post-play bookkeeping for a LANDED PAID play:
  * 1. BOON payload (§1, owner-ratified use-triggered rule): the powering die's
  *    special face fires its gear payload (+◆) because it was USED.
- * 2. Stance-from-cards: the player's stance becomes this card's stance.
- * 3. Momentum: start / advance / break-to-NULL (owner-locked D1); a completed
+ * 2. Momentum (on the card's colour): start / advance / break-to-NULL (owner-locked D1); a completed
  *    3-chain SURGES — a temporary gold die (until spent, this combat) joins
  *    the tray, ceiling permitting (overflow → +1◆) — then momentum resets.
  * FREE (top) plays and fizzles return untouched.
  */
-function applyStanceAndMomentumV2(
+function applyBoonAndMomentumV2(
     preState: CombatEncounterState,
     transition: CombatTransition,
     stance: CombatDieColor | CardAspect,
@@ -584,13 +562,9 @@ function applyStanceAndMomentumV2(
         }
     }
 
-    // 2 + 3. Stance + momentum — chain stances only (wild/x synthetics touch
-    // neither: "wilds don't shift it").
+    // 2. Momentum — the three chain colours only (wild/x synthetics never
+    // move it: "wilds don't shift it").
     if (isChainStance(stance)) {
-        if (state.playerStance !== stance) {
-            state = { ...state, playerStance: stance };
-            events.push({ kind: 'stance-shifted', stance });
-        }
         const result = advanceMomentumV2(state.momentumV2 ?? null, stance);
         state = { ...state, momentumV2: result.momentum };
         if (result.broke) {
@@ -879,7 +853,7 @@ function playTopAction(
 ): CombatTransition {
     const sourceCard = lookupCard(card.id);
     const events: CombatEvent[] = [
-        { kind: 'card-played', cardId: card.id, useBottom: false, dieId: null, advantage: 'neutral' },
+        { kind: 'card-played', cardId: card.id, useBottom: false, dieId: null },
     ];
     let next = discardEntry(state, uid);
     // WS3.3 pre-play stack snapshot: only stacks that existed BEFORE this
@@ -970,7 +944,7 @@ function playBottomAction(
     // they land. Colour match and VULNERABLE stack on top.
     const stats = state.player.baseStats;
 
-    const events: CombatEvent[] = [{ kind: 'card-played', cardId: card.id, useBottom: true, dieId: powering.id, advantage: 'neutral', colorMatch }];
+    const events: CombatEvent[] = [{ kind: 'card-played', cardId: card.id, useBottom: true, dieId: powering.id, colorMatch }];
 
     // 3. Execute the card (unchanged effect machinery) against a shim.
     const before = intensityMap(state.enemy.effects);
@@ -978,10 +952,8 @@ function playBottomAction(
 
     let player = res.state.player as Character;
     // VULNERABLE — the foe's incoming-damage multiplier, read from state.enemy
-    // BEFORE this card's own debuff lands. Composed with the STANCE-KEYED
-    // vulnerability (P1 #17).
-    const vulnMult = getDamageTakenMultiplier(state.enemy)
-        * getStanceVulnMult(state.enemy, powering.color);
+    // BEFORE this card's own debuff lands.
+    const vulnMult = getDamageTakenMultiplier(state.enemy);
     let enemy = res.state.enemy as Enemy;
     let attribution = state.attribution;
     let directDamage = state.directDamageDealt;
@@ -1192,25 +1164,9 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     const phase = state.threatPhases[idx];
     const events: CombatEvent[] = [];
 
-    // Spec 33 §2 — the phase's OPEN stance check resolves against the
-    // player's stance-from-cards NOW (phase end): `punishes` lands the hit at
-    // the advantage rail (x1.5); `yields` blunts it to the disadvantage rail
-    // (x0.5) and pays +1◆ below. Stance-less players fire nothing.
-    const stanceCheck = resolveStanceCheck(phase.stanceCheck, state.playerStance ?? null,
-        READ_DAMAGE_MULT.advantage, READ_DAMAGE_MULT.disadvantage);
-    if (phase.stanceCheck) {
-        events.push({
-            kind: 'stance-check-resolved', phaseIndex: phase.index,
-            outcome: stanceCheck.outcome, stance: state.playerStance ?? null,
-        });
-    }
-
-    // Control on the enemy hinders its turn. HARD control (skipTurn) denies it
-    // outright via canAct; DISRUPT — a VARIETY of >= DISRUPT_DENY_AT DISTINCT
-    // controls — cancels the telegraphed turn too.
-    const act = canAct(state.enemy.effects as ActiveEffect[], phase.enemyStance);
-    const controlPips = getDistinctControlCount(state.enemy);
-    const disruptDenied = controlPips >= DISRUPT_DENY_AT;
+    // Control on the enemy hinders its turn: HARD control (skipTurn) denies it
+    // outright via canAct.
+    const act = canAct(state.enemy.effects as ActiveEffect[]);
     const isBossTier = state.enemy.difficulty === 'boss' || state.enemy.difficulty === 'unique';
     // THE CLOCK (depth epic): the telegraphed hit escalates each round past the grace
     // window, so a drawn-out fight turns lethal. 1.0 on round ≤ grace (a fast kill is
@@ -1231,8 +1187,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     const effectIntensityBonus = Math.floor((escalation - 1) / THREAT_EFFECT_ESCALATION_STEP);
     // Enemy-borne outgoing-damage statuses (QUARTER) dampen its telegraphed hit.
     const enemyOutgoingMult = getOutgoingDamageMult(state.enemy);
-    const hindered = !act.canAct || disruptDenied;
-    if (disruptDenied) events.push({ kind: 'disrupt-denied', pips: controlPips });
+    const hindered = !act.canAct;
 
     let player = state.player;
     let enemy = state.enemy;
@@ -1275,10 +1230,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     // six. A stage should change the shape of a fight, not end
                     // it before the deck can answer.
                     * (1 + Math.min(STAGE_THREAT_BONUS_CAP, state.stageThreatBonus ?? 0))
-                    * playerTakenMult
-                    // Spec 33 §2 — the open stance check's rail (1 when no check
-                    // is authored or the player is stance-less).
-                    * stanceCheck.mult,
+                    * playerTakenMult,
                 );
                 const preSoakDmg = dmg;
                 // RIPOSTE parry reduces the incoming hit once this phase.
@@ -1418,27 +1370,16 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         phase: 'phase-resolve',
         threatMarks,
         phaseResults: [...state.phaseResults, result],
-        // Spec 33 §2: answering a `yields` check pays +1◆.
-        conviction: stanceCheck.yielded
-            ? Math.min(CONVICTION_CAP, state.conviction + 1)
-            : state.conviction,
     };
-    if (stanceCheck.yielded && next.conviction > state.conviction) {
-        events.push({ kind: 'conviction-gained', amount: 1, total: next.conviction, reason: 'effect' });
-    }
 
     // Phase 33c (spec 33 §1) — THE COVETED DIE: a boss/unique phase authored
     // `stake: true` converts to a temp gold die the moment its telegraph is
-    // fully blocked or its open stance check is answered with a yield. Resolved AFTER `next` above so the yield's own
-    // +1◆ payout composes first. One-time per phase index this combat
+    // fully blocked. One-time per phase index this combat
     // (`covetedDiceClaimed`) — a repeating/locked final phase can't be farmed
-    // on every loop. Priority when more than one condition holds: block >
-    // yield (a single event, never a double-payout for one phase).
+    // on every loop.
     if (phase.stake && !(state.covetedDiceClaimed ?? []).includes(phase.index)) {
-        const method: 'block' | 'yield' | null =
-            (attacksLanded > 0 && attacksFullyBlocked === attacksLanded) ? 'block'
-                : stanceCheck.yielded ? 'yield'
-                    : null;
+        const method: 'block' | null =
+            (attacksLanded > 0 && attacksFullyBlocked === attacksLanded) ? 'block' : null;
         if (method) {
             next = { ...next, covetedDiceClaimed: [...(next.covetedDiceClaimed ?? []), phase.index] };
             if (tableHasRoom(next)) {
@@ -1594,19 +1535,12 @@ export function processBetweenPhases(
     const rageGated = candidatePhase.unlockAfterRound !== undefined && resolvedRound < candidatePhase.unlockAfterRound;
     const nextIndex = rageGated ? state.currentPhaseIndex : candidateIndex;
 
-    // WS8.2 STANCE surface (spec 32 §12 #6): while the enemy carries ROOT's
-    // `lockedStance` payload, every phase advance keeps the current
-    // (revealed) stance. Read off the PRE-tick enemy: the lock
-    // held when this phase resolved, so it still binds this advance.
-    const statusLockId = hasPayloadFlag(state.enemy, 'lockedStance');
     let threatPhases = state.threatPhases;
-    let revealedStances = state.revealedStances;
     // WS9 (spec 32 §12 #7) — a branch phase commits its fork at phase START,
     // read from LIVE state (the post-tick enemy + the full-block ledger just
     // written by `resolveThreatPhase`), so the telegraph shows the taken fork
     // alongside the condition. Zero RNG. A looping final phase re-evaluates on
-    // every re-entry; the stance-lock / forced-omen overrides below still win
-    // over the committed stance.
+    // every re-entry.
     const branchCommit = commitThreatBranch(
         threatPhases, nextIndex, enemy, state.lastThreatFullyBlocked ?? false,
     );
@@ -1617,15 +1551,9 @@ export function processBetweenPhases(
             conditionText: branchCommit.conditionText, taken: branchCommit.taken,
         });
     }
-    if (statusLockId !== null && nextIndex !== state.currentPhaseIndex) {
-        const lockedStance = currentPhaseStance(state);
-        threatPhases = threatPhases.map((p, i) => (i === nextIndex ? { ...p, enemyStance: lockedStance } : p));
-        if (!revealedStances.includes(nextIndex)) revealedStances = [...revealedStances, nextIndex];
-        events.push({ kind: 'stance-locked', phaseIndex: nextIndex, stance: lockedStance });
-    }
 
     let omenState: CombatEncounterState = {
-        ...state, player, enemy, threatPhases, revealedStances,
+        ...state, player, enemy, threatPhases,
     };
 
     // SOULS from expiry (base law: 1 per expired enemy affliction instance).
@@ -1893,34 +1821,6 @@ export function availableDice(state: CombatEncounterState): number {
 // ── Spec 26b — presenter selectors (the engine owns truth; the UI hides) ─────
 
 /**
- * WS8.2 STANCE surface (spec 32 §12 #6) — true while the PLAYER carries a
- * `blursStanceHints` effect (enemy-inflicted CONFUSION): stance certainty is
- * fogged, so every revealed stance reads as hidden again for the blur's
- * duration (the underlying `revealedStances` knowledge survives and returns
- * when it expires). The readout layer consumes this directly — mobile should
- * render the stance panel / threat tells blurred while it is true.
- */
-export function isStanceReadoutBlurred(state: CombatEncounterState): boolean {
-    return hasPayloadFlag(state.player, 'blursStanceHints') !== null;
-}
-
-/** True when the player has revealed a given phase's hidden enemy stance (§2).
- *  A MARKED foe (`revealsStance` payload — Fate Engine P1) is public on EVERY
- *  phase while the mark holds. WS8.2: a stance BLUR on the player fogs every
- *  reveal (including the mark's) while it lasts. */
-export function isPhaseStanceRevealed(state: CombatEncounterState, phaseIndex: number): boolean {
-    if (isStanceReadoutBlurred(state)) return false;
-    return state.revealedStances.includes(phaseIndex)
-        || hasPayloadFlag(state.enemy, 'revealsStance') !== null;
-}
-
-/** The current phase's enemy stance IF revealed, else null (drives the "?" UI). */
-export function revealedCurrentStance(state: CombatEncounterState): Stance | null {
-    const idx = Math.min(state.currentPhaseIndex, state.threatPhases.length - 1);
-    return isPhaseStanceRevealed(state, idx) ? currentPhaseStance(state) : null;
-}
-
-/**
  * UI preview (spec 32 v3): there is NO immediate-strike number any more — the
  * strike is dead. `amount` is always 0; the card's honest numbers live in its
  * printed FREE/PAID text and the DoT lifetime preview. Kept for the mobile
@@ -1957,22 +1857,6 @@ export function getEnemyIncomingDamageMultiplier(state: CombatEncounterState): n
 }
 
 /**
- * DISRUPT meter (the engine owns the threshold; mobile must NOT hard-code it):
- * the live DISTINCT-control pip count, the deny threshold, and whether the
- * next telegraphed turn WILL be denied (matching the resolved phase mark ===
- * 'clear': hard skip or the distinct-control deny).
- */
-export function getDisruptMeter(state: CombatEncounterState): {
-    pips: number; threshold: number; willDeny: boolean;
-} {
-    const enemy = state.enemy;
-    const pips = getDistinctControlCount(enemy);
-    const act = canAct(enemy.effects as ActiveEffect[], currentPhaseStance(state));
-    const willDeny = !act.canAct || pips >= DISRUPT_DENY_AT;
-    return { pips, threshold: DISRUPT_DENY_AT, willDeny };
-}
-
-/**
  * Wall-math projection (phase 28 / Gate 1 §4) — what the CURRENTLY
  * telegraphed hit would actually deal right now, netted against live
  * guard/barrier. `IntentIcon` today shows only the raw, unscaled
@@ -1988,9 +1872,7 @@ export function getDisruptMeter(state: CombatEncounterState): {
  * KNOWN DIVERGENCES from `resolveThreatPhase`, documented rather than closed —
  * closing them moves the on-screen number for every existing foe and is its own
  * tuning change, not a side effect of adding a keyword. The boss term here
- * omits `state.stageThreatBonus`, and — while the Upgradeable-Dice flag is
- * on — an authored phase's `stanceCheck.mult`, so against a staged or
- * stance-punished foe it UNDERSTATES.
+ * omits `state.stageThreatBonus`, so against a staged foe it UNDERSTATES.
  *
  * Audit 3.2: the guard / barrier soak runs through the same `soakFlatHit`
  * the engine applies.
@@ -2002,10 +1884,9 @@ export function projectIncomingThreat(state: CombatEncounterState): {
     const phase = state.threatPhases[idx];
     const rawDamage = phase.threatAction.effects.reduce((s, e) => s + (e.damage ?? 0), 0);
 
-    const act = canAct(state.enemy.effects as ActiveEffect[], phase.enemyStance);
-    const controlPips = getDistinctControlCount(state.enemy);
+    const act = canAct(state.enemy.effects as ActiveEffect[]);
     const isBossTier = state.enemy.difficulty === 'boss' || state.enemy.difficulty === 'unique';
-    const willDeny = !act.canAct || controlPips >= DISRUPT_DENY_AT;
+    const willDeny = !act.canAct;
 
     const escalationRate = THREAT_ESCALATION_PER_ROUND * (isBossTier ? THREAT_ESCALATION_BOSS_MULT : 1);
     const escalation = Math.min(THREAT_ESCALATION_MAX, 1 + escalationRate * Math.max(0, state.round - THREAT_ESCALATION_GRACE));

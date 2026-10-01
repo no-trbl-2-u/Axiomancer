@@ -15,7 +15,7 @@
  *      roster and went with it in the enemy roster reset, R2.)
  *
  * The F2 yield canary FLIPPED as designed: Phase D6e (2026-07-18) authored the
- * enemy stanceCheck telegraphs, so realized yield income went > 0 — until the
+ * enemy stance-check telegraphs (deleted in R7d), so realized yield income went > 0 — until the
  * card purge (P1, 2026-09-27) left only colourless cards, which set no stance
  * and so can never yield; that floor went with the coloured cards. The F3 `pressFate == 0` canary FLIPPED the same
  * day (owner call: the Gambler's Knot is default-worn — every starter loadout

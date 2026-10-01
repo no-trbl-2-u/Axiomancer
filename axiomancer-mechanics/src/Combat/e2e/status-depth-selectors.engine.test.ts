@@ -7,9 +7,8 @@
  * Pure reads over hand-built `ActiveEffect[]`:
  *   - getDamageTakenMultiplier   (exactly 1 without a marker — no v3 effect
  *     carries a plain damageTakenMult; the machinery is kept for enemies/tests)
- *   - getStanceVulnMult          (stance-keyed vulnerability, uncapped)
  *   - getPendingDotTotal (RUPTURE fuel)
- *   - getDistinctDebuffCount / getDistinctControlCount
+ *   - getDistinctDebuffCount
  *   - getActiveDotTotal / getActiveDotAmplifications  (amplification surface)
  *   - getTickAmplifyFlat         (MARK)
  *
@@ -18,10 +17,9 @@
  * — same split as `guard`). Self-contained, deterministic, no disk / RNG.
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
-import { effectsLibrary } from '../../Effects/effects.library';
-import type { ActiveEffect, Effect } from '../../Effects/types';
+import type { ActiveEffect } from '../../Effects/types';
 import type { Combatant } from '../types';
 import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
@@ -33,8 +31,8 @@ import { executeCard } from '../../Cards/card.engine';
 import type { Card, CardSpecialMechanic } from '../../Cards/types';
 import type { CombatState } from '../types';
 import {
-    getDamageTakenMultiplier, getStanceVulnMult, getPendingDotTotal,
-    getDistinctDebuffCount, getDistinctControlCount,
+    getDamageTakenMultiplier, getPendingDotTotal,
+    getDistinctDebuffCount,
 } from '../effects';
 import { getActiveDotTotal, getActiveDotAmplifications, getTickAmplifyFlat } from '../effect-modifiers';
 
@@ -51,42 +49,12 @@ const combatant = (effects: ActiveEffect[]): Combatant => {
     return c;
 };
 
-// The spec 32 v3 keyword reset deleted the stance-keyed VULNERABLE debuff and
-// the stance-keyed control debuffs (R7d removes their channels). No surviving library
-// effect carries those shapes, so the stance-vuln and distinct-control machinery
-// is driven by test-only fixtures registered into the shared registry (the same
-// lookup the selectors read). Never touches the library JSON.
-const SELECTOR_FIXTURES: Effect[] = [
-    { id: 'test_vuln_body', name: 'test vuln body', description: 'stance-keyed vulnerable body ×1.5', type: 'debuff', category: 'stat', duration: 4, stacking: 'intensity', tier: 2, payload: { damageTakenMultForStance: { stance: 'body', mult: 1.5 } } },
-    { id: 'test_charm', name: 'test charm', description: 'forcedStance heart', type: 'debuff', category: 'control', duration: 4, stacking: 'none', tier: 2, payload: { actionRestriction: { forcedStance: 'heart' } } },
-    { id: 'test_silence', name: 'test silence', description: 'blockedStances heart', type: 'debuff', category: 'control', duration: 4, stacking: 'none', tier: 2, payload: { actionRestriction: { blockedStances: ['heart'] } } },
-    { id: 'test_root', name: 'test root', description: 'stance lock', type: 'debuff', category: 'control', duration: 4, stacking: 'none', tier: 2, payload: { lockedStance: true } },
-    { id: 'test_confusion_blur', name: 'test stance blur', description: 'blursStanceHints', type: 'debuff', category: 'control', duration: 4, stacking: 'none', tier: 2, payload: { blursStanceHints: true } },
-];
-beforeAll(() => { for (const e of SELECTOR_FIXTURES) effectsLibrary.registry.set(e.id, e); });
-afterAll(() => { for (const e of SELECTOR_FIXTURES) effectsLibrary.registry.delete(e.id); });
-
 describe('getDamageTakenMultiplier — exactly 1 without a marker', () => {
     it('is EXACTLY 1 with no marker (byte-identical guard)', () => {
         expect(getDamageTakenMultiplier(combatant([]))).toBe(1);
         expect(getDamageTakenMultiplier(combatant([ae('debuff_poison', 3)]))).toBe(1);
         // MARK amplifies TICKS, not the plain incoming-damage multiplier.
         expect(getDamageTakenMultiplier(combatant([ae('debuff_mark', 3)]))).toBe(1);
-    });
-});
-
-describe('getStanceVulnMult — stance-keyed vulnerability (Fate Engine P1 #17)', () => {
-    it('reads the keyed mult for a matching die color (and wild)', () => {
-        const c = combatant([ae('test_vuln_body', 1)]);
-        expect(getStanceVulnMult(c, 'body')).toBe(1.5);
-        expect(getStanceVulnMult(c, 'wild')).toBe(1.5);
-        expect(getStanceVulnMult(c, 'mind')).toBe(1);
-        expect(getStanceVulnMult(c, 'x')).toBe(1);
-    });
-
-    it('scales with intensity and is uncapped (S3, D41)', () => {
-        expect(getStanceVulnMult(combatant([ae('test_vuln_body', 2)]), 'body')).toBe(2.0);
-        expect(getStanceVulnMult(combatant([ae('test_vuln_body', 3)]), 'body')).toBe(2.5);
     });
 });
 
@@ -135,28 +103,6 @@ describe('getDistinctDebuffCount (FALLEN / variety payoffs)', () => {
             ae('debuff_poison', 1), ae('debuff_poison', 2), ae('debuff_bleed', 1), ae('debuff_mark', 1),
         ]))).toBe(3);
         expect(getDistinctDebuffCount(combatant([]))).toBe(0);
-    });
-});
-
-describe('getDistinctControlCount (DISRUPT meter — WS8.3 counts SURFACES, not ids)', () => {
-    it('counts distinct control SURFACES; same-surface ids collapse to one pip', () => {
-        // Four control ids on TWO surfaces: petrify + charm + silence share
-        // 'action', root owns 'stance' (WS8.2 lockedStance).
-        expect(getDistinctControlCount(combatant([
-            ae('debuff_petrify', 1),              // skipTurn        → action
-            ae('test_charm', 1),                  // forcedStance    → action
-            ae('test_silence', 1),                // blockedStances  → action
-            ae('test_root', 1),                   // lockedStance    → stance
-            ae('debuff_poison', 1),               // DoT — NOT control
-            ae('debuff_mark', 1),                 // exposure — NOT control
-        ]))).toBe(2);
-        expect(getDistinctControlCount(combatant([]))).toBe(0);
-    });
-
-    it('ROOT (lock) and CONFUSION (blur) are the same stance surface', () => {
-        expect(getDistinctControlCount(combatant([
-            ae('test_root', 1), ae('test_confusion_blur', 1),
-        ]))).toBe(1);
     });
 });
 

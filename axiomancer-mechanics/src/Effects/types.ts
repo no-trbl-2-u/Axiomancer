@@ -72,15 +72,7 @@ export interface DamageOverTime {
 
 /** Constraints on what actions the bearer may take. */
 export interface ActionRestriction {
-    forcedStance?: Stance;
-    blockedStances?: Stance[];
     skipTurn?: boolean;
-}
-
-/** Auto-advantage / auto-disadvantage granted to the bearer. */
-export interface AdvantageModifier {
-    grantAdvantage?: Stance[];
-    grantDisadvantage?: Stance[];
 }
 
 /**
@@ -90,7 +82,6 @@ export interface AdvantageModifier {
 export interface EffectPayload {
     damageOverTime?: DamageOverTime;
     actionRestriction?: ActionRestriction;
-    advantageModifier?: AdvantageModifier;
     /**
      * VULNERABLE — outgoing-damage multiplier applied to HP the bearer TAKES.
      * `1` (or absent) is neutral; `1.5` means the bearer takes +50% from the
@@ -101,20 +92,6 @@ export interface EffectPayload {
      * byte-identical. See the VULNERABLE epic (mechanics 0.34.0).
      */
     damageTakenMult?: number;
-    /**
-     * Fate Engine P1 (spec 31 §3.1 #17) — STANCE-KEYED VULNERABLE: the bearer
-     * takes `mult` × damage, but ONLY from plays powered by a die of `stance`
-     * color (Wild counts as matching). A debuff that tells the player what to
-     * DRAFT. Read by the combat engine's powered-play paths; composes
-     * multiplicatively with the plain `damageTakenMult` aggregate.
-     */
-    damageTakenMultForStance?: { stance: 'heart' | 'body' | 'mind'; mult: number };
-    /**
-     * Fate Engine P1 — MARK: while the bearer carries this, their hidden phase
-     * stance is PUBLIC (Dune-style public-risk indicator). Read by the combat
-     * engine's stance-reveal selectors.
-     */
-    revealsStance?: boolean;
     /** DoT-specific behaviour beyond the plain `damageOverTime` tick. */
     dotModifiers?: {
         /** Tick damage ramps the longer the effect survives (POISON, spec 32 v3):
@@ -143,23 +120,6 @@ export interface EffectPayload {
     /** Outgoing-damage multiplier applied to damage the bearer DEALS (QUARTER)
      *  — additive across stacks, -X% each. */
     outgoingDamageMulPct?: number;
-    /**
-     * WS8.2 STANCE surface (blur) — the bearer's stance perception is fogged
-     * (CONFUSION): while the PLAYER carries this, revealed enemy stances read
-     * as hidden again (`isPhaseStanceRevealed`) and the readout layer renders
-     * the stance panel blurred (`isStanceReadoutBlurred` — mobile consumes
-     * that selector). On the ENEMY it counts as the stance surface for the
-     * DISRUPT meter (there is no enemy-side stance read to fog).
-     */
-    blursStanceHints?: boolean;
-    /**
-     * WS8.2 STANCE surface (lock) — the bearer is locked into its revealed
-     * stance (ROOT — "paralysis through possibility"): while the ENEMY
-     * carries this, the phase advance keeps the CURRENT stance and reveals
-     * it. The status twin of the `lock_stance` card mechanic; read where
-     * stances swap in `processBetweenPhases`.
-     */
-    lockedStance?: boolean;
 }
 
 /**

@@ -69,7 +69,7 @@ export const MOMENTUM_SURGE_LENGTH = 3;
 export const SURGE_DIE_PREFIX = 'surge-';
 
 /** Id prefix for the coveted-die payout (Phase 33c, spec 33 §1): a boss/unique
- *  phase's `stake` claimed via STAGGER-to-0 / full block / stance-check yield.
+ *  phase's `stake` claimed by a full block.
  *  Same shape as the surge die (temp gold, until spent), distinct prefix so
  *  the two payout sources stay attributable in telemetry/tests. */
 export const COVETED_DIE_PREFIX = 'coveted-';
@@ -291,29 +291,7 @@ export function expireCrackedDice(
     return (cracked ?? []).filter(c => c.turn >= turn);
 }
 
-// ---------------------------------------------------------------------------
-// Stance checks (§2)
-// ---------------------------------------------------------------------------
-
-/**
- * Resolves a phase's open stance check against the player's stance at phase
- * end. Null stance (stance-less) fires NOTHING — a check against a stance you
- * never entered passes silently. Returns the damage multiplier for the
- * enemy's telegraphed hit and whether the yield's +1◆ pays.
- */
-export function resolveStanceCheck(
-    check: { punishes?: WheelStance | string; yields?: WheelStance | string } | undefined,
-    playerStance: WheelStance | null | undefined,
-    advantageMult: number,
-    disadvantageMult: number,
-): { mult: number; yielded: boolean; outcome: 'punished' | 'yielded' | 'none' } {
-    if (!check || !playerStance) return { mult: 1, yielded: false, outcome: 'none' };
-    if (check.punishes === playerStance) return { mult: advantageMult, yielded: false, outcome: 'punished' };
-    if (check.yields === playerStance) return { mult: disadvantageMult, yielded: true, outcome: 'yielded' };
-    return { mult: 1, yielded: false, outcome: 'none' };
-}
-
-/** True for the three chain/stance colors (never wild/x). */
+/** True for the three momentum-chain colours (never wild/x). */
 export function isChainStance(s: CombatDieColor | CardAspect): s is WheelStance {
     return s === 'heart' || s === 'body' || s === 'mind';
 }

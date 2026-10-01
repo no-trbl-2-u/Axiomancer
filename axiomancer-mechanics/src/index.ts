@@ -54,8 +54,6 @@ export {
 export {
     heal, isDefeated,
     getActiveEffectModifiers, canAct,
-    // 0.34.0 status-depth epic — HP-model selectors + tunable scalars
-    DISRUPT_DENY_AT,
     healCharacter,
 } from './Combat';
 export type {
@@ -78,9 +76,8 @@ export {
     mechanicText,
     // Spec 26b / spec 33 — turn lifecycle, Conviction, Signature Skills
     startTurn, endTurn, discardCombatCard,
-    playSignatureSkill, isPhaseStanceRevealed,
+    playSignatureSkill,
     getSignatureSkill, signatureCastBlock, signatureGuardAmount, SIGNATURE_COST, SIGNATURE_GUARD,
-    READ_DAMAGE_MULT,
     colorMatchBonus,
     // phase 28 — legibility sweep
     projectIncomingThreat,
@@ -113,9 +110,9 @@ export type {
     CombatThreatPhase, CombatThreatAction, CombatThreatEffect,
     CombatOutcome, CombatEvent,
     CombatSummary,
-    CombatIntentType, CombatReadResult,
+    CombatIntentType,
     SignatureSkill,
-    // The three chain/stance colours (spec 33 momentum chain + stance checks)
+    // The three chain colours (spec 33 momentum chain)
     WheelStance,
 } from './Combat';
 

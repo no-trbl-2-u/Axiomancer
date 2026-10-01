@@ -21,7 +21,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import {
-    getCard, getCardById, READ_DAMAGE_MULT, colorMatchBonus,
+    getCard, getCardById, colorMatchBonus,
     registerSandboxCards, clearSandboxCards, effectsLibrary,
 } from '@mechanics';
 import type { Card, Effect } from '@mechanics';
@@ -185,19 +185,9 @@ describe('detailStats — same numbers as the face', () => {
 });
 
 describe('card-wording audit (2026-07-12) — the +DIE row carries only what the face cannot', () => {
-    it('a read-scaled Guard card keeps its triplet', () => {
-        const { card, sourceCard } = cardOf('grey-ward');
-        const d = detailStats(card, sourceCard);
-        expect(d.diePaidLine).toContain('GUARD 5');
-        expect(d.dieTriplet).toMatch(/^READ ▲\d+ · —5 · ▼\d+ — won · even · lost$/);
-        expect(d.readLegend).toContain("your die's stance");
-    });
-    it('a card that takes no read prints no triplet and no legend', () => {
-        const { card, sourceCard } = cardOf('grey-strike');
-        const d = detailStats(card, sourceCard);
-        expect(d.diePaidLine).toContain('DEAL 5');
-        expect(d.dieTriplet).toBeNull();
-        expect(d.readLegend).toBeNull();
+    it('the +DIE row prints the full paid line', () => {
+        expect(detailStats(cardOf('grey-ward').card, cardOf('grey-ward').sourceCard).diePaidLine).toContain('GUARD 5');
+        expect(detailStats(cardOf('grey-strike').card, cardOf('grey-strike').sourceCard).diePaidLine).toContain('DEAL 5');
     });
     it('INTENSITY and FREE never render as system terms (retired, owner 2026-07-18)', () => {
         // Both read plainly enough in context; their rows padded every inspect.
@@ -214,26 +204,20 @@ describe('resolvePrimary + armedReadValue', () => {
         expect(resolvePrimary(getCard('grey-word')!, getCardById('grey-word')).kind).toBe('vulnerable');
         expect(resolvePrimary(getCard('grey-strike')!, getCardById('grey-strike')).kind).toBe('mechanic');
     });
-    it('armedReadValue scales Guard by the DAMAGE read (+colour match)', () => {
+    it('armedReadValue prints Guard as printed (+colour match)', () => {
         const guard = faceStats(getCard('grey-ward')!, getCardById('grey-ward'));
         const base = guard.guardBase!;
         expect(base).toBe(5);
-        const adv = Math.max(1, Math.round(base * READ_DAMAGE_MULT.advantage));
-        const dis = Math.max(1, Math.round(base * READ_DAMAGE_MULT.disadvantage));
-        expect(armedReadValue(guard, 'neutral', false)).toBe(base);
-        expect(armedReadValue(guard, 'advantage', false)).toBe(adv);
-        expect(armedReadValue(guard, 'disadvantage', false)).toBe(dis);
+        expect(armedReadValue(guard, false)).toBe(base);
         // The presenter consumes the ENGINE's rule, not a restatement of it:
         // colorMatchBonus() = max(2, 25% of the base), which here (2) differs
         // from the old flat +3 — the printed-not-applied bug this catches.
-        expect(armedReadValue(guard, 'neutral', true)).toBe(base + colorMatchBonus(base));
+        expect(armedReadValue(guard, true)).toBe(base + colorMatchBonus(base));
         expect(colorMatchBonus(base)).not.toBe(3);
     });
     it('armedReadValue reads a ROUND-CLOCK DoT as its ramp-aware lifetime (exact)', () => {
         // Sketch of a Thought: kindling ember dpr 1, i1, 3 turns, no ramp → 3.
         const dot = faceStats(getCard('fx-ember')!, getCardById('fx-ember'));
-        expect(armedReadValue(dot, 'neutral', false)).toBe(3);          // 1+1+1
-        expect(armedReadValue(dot, 'advantage', false)).toBe(6);        // +1 intensity: 2+2+2
-        expect(armedReadValue(dot, 'disadvantage', false)).toBe(2);     // −1 turn: 1+1
+        expect(armedReadValue(dot, false)).toBe(3);          // 1+1+1
     });
 });

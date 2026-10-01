@@ -99,7 +99,7 @@ export const VOICE_RULES = [
  */
 export const PROSE_FIELDS = new Set([
   'description', 'scene', 'narration', 'text', 'remark', 'flavor', 'intro',
-  'body', 'quiet', 'heavy', 'stanceHint', 'journalEntry', 'blurb', 'summary',
+  'body', 'quiet', 'heavy', 'journalEntry', 'blurb', 'summary',
   'prompt', 'lines', 'line', 'refusal', 'riddle', 'title', 'subtitle',
 ])
 

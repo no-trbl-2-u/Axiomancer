@@ -5,7 +5,7 @@
  * feeds Souls; RIPOSTE fires only on a FULL block).
  *
  * Covers each surviving behavior end to end (DoT-amplification honesty,
- * DISRUPT, BARRIER / RIPOSTE), an INVARIANT guard that the
+ * BARRIER / RIPOSTE), an INVARIANT guard that the
  * shared hot path stays quiet without its marker, and the card-projection /
  * reward-pool contract for the library.
  *
@@ -15,7 +15,7 @@
  * with their cards; the state-driven BARRIER / RIPOSTE laws stay.
  */
 
-import { describe, it, expect, afterEach, afterAll, beforeAll, vi } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
@@ -25,12 +25,11 @@ import { deepClone } from '../../Utils';
 import { mockSequentialRng } from '../../test-utils/rng';
 import { getCardById } from '../../Cards/cards.library';
 import { lookupEffect } from '../../Effects';
-import { effectsLibrary } from '../../Effects/effects.library';
-import type { ActiveEffect, Effect } from '../../Effects/types';
+import type { ActiveEffect } from '../../Effects/types';
 import {
     initializeCombatEncounter, rollEncounterDice,
     resolveThreatPhase, processBetweenPhases,
-    getDisruptMeter, getEnemyIncomingDamageMultiplier,
+    getEnemyIncomingDamageMultiplier,
 } from '../combat.engine';
 import { classifyVerbClass, toCombatCard } from '../combat.cards';
 import { getActiveDotTotal, getActiveDotAmplifications } from '../effect-modifiers';
@@ -41,17 +40,6 @@ afterEach(() => { vi.restoreAllMocks(); });
 
 const ae = (effectId: string, intensity = 1, remainingDuration = 4, tier: 1 | 2 | 3 = 2): ActiveEffect =>
     ({ effectId, intensity, remainingDuration, appliedAt: 1, tier });
-
-// No library effect carries the stance-keyed controls (R7d removes them), so
-// the DISRUPT distinct-control machinery is driven by test-only fixtures
-// registered into the shared registry (the same lookup the engine's
-// distinct-control reader consults). Never touches the library JSON.
-const CONTROL_FIXTURES: Effect[] = [
-    { id: 'test_ctrl_charm', name: 'test charm', description: 'control forced stance', type: 'debuff', category: 'control', duration: 4, stacking: 'none', tier: 2, payload: { actionRestriction: { forcedStance: 'mind' } } },
-    { id: 'test_ctrl_root', name: 'test root', description: 'control stance-lock', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { lockedStance: true } },
-];
-beforeAll(() => { for (const e of CONTROL_FIXTURES) effectsLibrary.registry.set(e.id, e); });
-afterAll(() => { for (const e of CONTROL_FIXTURES) effectsLibrary.registry.delete(e.id); });
 
 function makePlayer(cards: string[], effects: ActiveEffect[] = []): Character {
     const p = deepClone(Player);
@@ -100,25 +88,6 @@ describe('AMPLIFICATION — the combo registry is surfaced honestly', () => {
         const state = initializeCombatEncounter(
             makePlayer([]), makeEnemy(300, 'mind', [ae('debuff_poison', 2)]), undefined, 7);
         expect(getEnemyIncomingDamageMultiplier(state)).toBe(1);
-    });
-});
-
-// ── DISRUPT — distinct-control deny meter ────────────────────────────────────
-
-describe('DISRUPT — a variety of control SURFACES denies the telegraphed turn (WS8.3)', () => {
-    // Two surfaces remain after R7c3 (action, stance), so DISRUPT_DENY_AT (3)
-    // is out of reach; R7d removes the stance surface and the meter with it.
-    it('does NOT deny at 2 distinct surfaces', () => {
-        mockSequentialRng(0.05);
-        const twoSurfaces = [ae('test_ctrl_charm', 1), ae('test_ctrl_root', 1)];
-        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', twoSurfaces), undefined, 7);
-        const state = rollEncounterDice(base).state;
-        const meter = getDisruptMeter(state);
-        expect(meter.pips).toBe(2);
-        expect(meter.willDeny).toBe(false);
-        const res = resolveThreatPhase(state);
-        expect(res.events.some(e => e.kind === 'disrupt-denied')).toBe(false);
-        expect(res.events.some(e => e.kind === 'threat-fired')).toBe(true);
     });
 });
 
@@ -206,7 +175,7 @@ describe('RIPOSTE — counters only when Guard/Barrier fully blocked the attack'
 
 describe('INVARIANT — no new behavior fires without its marker', () => {
     const NEW_KINDS = new Set([
-        'rupture-detonated', 'disrupt-denied',
+        'rupture-detonated',
         'barrier-absorbed', 'riposte-fired', 'reaped', 'staggered',
         'soul-gained',
     ]);

@@ -8,9 +8,6 @@
  *   §1 BOON — fires its gear payload (+2◆) only when the die is USED
  *      (the owner-ratified use-triggered rule), including from the Reserve
  *   §1 CEILING — 7 die objects; overflow converts to +1◆, never silently drops
- *   §2 STANCE — stance = last PAID card's stance; FREE lines never shift it;
- *      open stance checks resolve at phase end (punishes x1.5 / yields x0.5+1◆);
- *      stance-less players fire nothing
  *   §3 MOMENTUM — start/advance; breaks (wrong OR same color) reset to NULL
  *      (owner-locked D1); persists across rounds; surge grants an until-spent
  *      gold die and resets to null
@@ -32,7 +29,7 @@ import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
     endTurn, overheatSpentDie, startTurn,
-    READ_DAMAGE_MULT, CONVICTION_CAP,
+    CONVICTION_CAP,
 } from '../combat.engine';
 import {
     UPGRADEABLE_DIE_COLORS, UPGRADEABLE_TABLE_CEILING,
@@ -165,12 +162,6 @@ describe('spec 33 §1 — the four-die roll law', () => {
         expect(fizzle.kind === 'effect-fizzled' && fizzle.message).toContain('miss face is dead');
     });
 
-    it('the read is retired — every play lands printed (neutral)', () => {
-        const s = open([MANA, MANA, MANA, MANA]);
-        const res = paid(s, 'ud-body-dot', trayDie(s, 'body').id);
-        const played = events(res, 'card-played')[0];
-        expect(played.kind === 'card-played' && played.advantage).toBe('neutral');
-    });
 });
 
 // ── §1 — BOON fires on use ───────────────────────────────────────────────
@@ -211,21 +202,18 @@ describe('spec 33 §1/§6 — the BOON payload (ratified use-triggered rule)', (
     });
 });
 
-describe('spec 33 §2/§3 — stance-from-cards + the null-reset momentum chain', () => {
+describe('spec 33 §3 — the null-reset momentum chain', () => {
     function openAllMana(): CombatEncounterState {
         return open([MANA, MANA, MANA, MANA]);
     }
 
-    it('a PAID play sets stance and starts momentum; a FREE play touches neither', () => {
+    it('a PAID play starts momentum on the card\'s colour; a FREE play never does', () => {
         const s = openAllMana();
         const free = playCombatCard(s, { uid: s.hand.find(h => h.cardId === 'ud-heart-dot')!.uid }, false, undefined, seqRng(0.5));
-        expect(free.state.playerStance ?? null).toBeNull();
         expect(free.state.momentumV2 ?? null).toBeNull();
 
         const res = paid(s, 'ud-body-dot', trayDie(s, 'body').id);
-        expect(res.state.playerStance).toBe('body');
         expect(res.state.momentumV2).toEqual({ color: 'body', length: 1 });
-        expect(events(res, 'stance-shifted')).toHaveLength(1);
         expect(events(res, 'momentum-advanced')).toHaveLength(1);
     });
 
@@ -239,7 +227,6 @@ describe('spec 33 §2/§3 — stance-from-cards + the null-reset momentum chain'
         const res = paid(s, 'ud-body-dot', trayDie(s, 'wild').id);
         expect(events(res, 'momentum-broken')).toHaveLength(1);
         expect(res.state.momentumV2 ?? null).toBeNull();
-        expect(res.state.playerStance).toBe('body'); // stance stays — only the chain broke
     });
 
     it('a WRONG-color paid play (non-successor) also resets to NULL', () => {
@@ -271,61 +258,6 @@ describe('spec 33 §2/§3 — stance-from-cards + the null-reset momentum chain'
         expect(s.momentumV2).toEqual({ color: 'heart', length: 1 });
         s = resolveThreatPhase(s, seqRng(0.5)).state;
         expect(s.momentumV2).toEqual({ color: 'heart', length: 1 });
-        expect(s.playerStance).toBe('heart');
-    });
-});
-
-// ── §2 — open stance checks ─────────────────────────────────────────────────
-
-describe('spec 33 §2 — open stance checks at phase end', () => {
-    function withCheck(
-        s: CombatEncounterState,
-        check: { punishes?: 'heart' | 'body' | 'mind'; yields?: 'heart' | 'body' | 'mind' } | undefined,
-        damage = 20,
-    ): CombatEncounterState {
-        const phase = {
-            ...s.threatPhases[0],
-            threatAction: { description: 'test swing', effects: [{ damage }] },
-            stanceCheck: check,
-        };
-        return { ...s, threatPhases: [phase, ...s.threatPhases.slice(1)], currentPhaseIndex: 0 };
-    }
-
-    function hpLost(s: CombatEncounterState): number {
-        const res = resolveThreatPhase(s, seqRng(0.5));
-        return s.player.health - res.state.player.health;
-    }
-
-    it('ending in the PUNISHED stance lands the hit x1.5', () => {
-        let s = open([MANA, MANA, MANA, MANA]);
-        s = paid(s, 'ud-heart-dot', trayDie(s, 'heart').id).state;
-        const neutral = hpLost(withCheck(s, undefined));
-        const punished = hpLost(withCheck(s, { punishes: 'heart' }));
-        expect(neutral).toBeGreaterThan(0);
-        expect(punished).toBe(Math.round(neutral * READ_DAMAGE_MULT.advantage / 1));
-    });
-
-    it('ending in the YIELDED stance blunts to x0.5 and pays +1◆', () => {
-        let s = open([MANA, MANA, MANA, MANA]);
-        s = paid(s, 'ud-heart-dot', trayDie(s, 'heart').id).state;
-        const neutralLoss = hpLost(withCheck(s, undefined));
-        const checked = withCheck(s, { yields: 'heart' });
-        const res = resolveThreatPhase(checked, seqRng(0.5));
-        const yieldLoss = s.player.health - res.state.player.health;
-        expect(yieldLoss).toBeLessThan(neutralLoss);
-        const resolved = events(res, 'stance-check-resolved')[0];
-        expect(resolved.kind === 'stance-check-resolved' && resolved.outcome).toBe('yielded');
-        expect(res.state.conviction).toBe(Math.min(CONVICTION_CAP, checked.conviction + 1));
-    });
-
-    it('a STANCE-LESS player fires no check — it passes silently', () => {
-        const s = open([MANA, MANA, MANA, MANA]); // no card played — stance-less
-        const neutral = hpLost(withCheck(s, undefined));
-        const withPunish = withCheck(s, { punishes: 'heart' });
-        const res = resolveThreatPhase(withPunish, seqRng(0.5));
-        expect(s.player.health - res.state.player.health).toBe(neutral);
-        const resolved = events(res, 'stance-check-resolved')[0];
-        expect(resolved.kind === 'stance-check-resolved' && resolved.outcome).toBe('none');
     });
 });
 

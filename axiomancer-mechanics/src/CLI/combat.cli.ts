@@ -53,7 +53,6 @@ import {
     playSignatureSkill,
     resolveThreatPhase,
     handCards,
-    revealedCurrentStance,
     firstLegalPoweringDie,
     buildCombatSummary,
     getSignatureSkill, signatureCastBlock,
@@ -402,14 +401,13 @@ async function interactiveHazardCombatLoop(
     while (s.phase !== 'complete' && !s.finalOutcome && phaseCount < flags.maxTurns) {
         phaseCount++;
         const phase = s.threatPhases[Math.min(s.currentPhaseIndex, s.threatPhases.length - 1)];
-        const revealed = revealedCurrentStance(s);
         log(`\n── Phase ${phaseCount} (round ${s.round}) ──`);
         log(`  Enemy: ${s.enemy.name}  HP ${s.enemy.health}/${s.enemy.maxHealth}`);
         log(`  Player HP ${s.player.health}/${s.player.maxHealth}  Conviction ${s.conviction}◆`);
-        log(`  Enemy intent: ${phase?.intentType ?? 'unknown'}  stance: ${revealed ?? '?'}  guard: ${s.guard ?? 0}`);
+        log(`  Enemy intent: ${phase?.intentType ?? 'unknown'}  guard: ${s.guard ?? 0}`);
         log(`  Threat: ${phase?.threatAction.description ?? '?'}`);
         const momentum = s.momentumV2 ? `${s.momentumV2.color} x${s.momentumV2.length}` : '—';
-        log(`  Stance: ${s.playerStance ?? '—'}  Momentum: ${momentum}`);
+        log(`  Momentum: ${momentum}`);
 
         const before = s;
 

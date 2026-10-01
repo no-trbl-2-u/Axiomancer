@@ -732,15 +732,6 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                     ) : null}
                 </View>
                 <View style={styles.hudUnderBar} pointerEvents="box-none">
-                    {/* hidden-stance read — badge only, no text telegraph */}
-                    <Text
-                        style={[styles.stanceBadge, {
-                            color: enemy.revealedStance ? enemy.stanceColor : AXM.bone,
-                            borderColor: enemy.revealedStance ? enemy.stanceColor : AXM.ash,
-                        }]}
-                    >
-                        🜲 {enemy.stanceLabel}
-                    </Text>
                     <View style={styles.hudRight} pointerEvents="box-none">
                         <IntentIcon intent={enemy.intent} />
                         <EffectChips effects={enemy.effects} onChip={onChip} align="flex-end" />
@@ -815,13 +806,8 @@ const useStyles = makeStyles((AXM) => ({
         borderWidth: 1, borderColor: 'rgba(0,0,0,0.9)', overflow: 'hidden',
     },
     altMeterFill: { height: '100%', position: 'absolute', left: 0, top: 0, bottom: 0, borderRadius: 3 },
-    hudUnderBar: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 2 },
+    hudUnderBar: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-end', marginTop: 2 },
     hudRight: { alignItems: 'flex-end', gap: 6, flexShrink: 1 },
-    stanceBadge: {
-        fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 1.2, borderWidth: 1.5, borderRadius: 4,
-        paddingHorizontal: 7, paddingVertical: 3, overflow: 'hidden', backgroundColor: 'rgba(0,0,0,0.55)',
-        marginTop: 2,
-    },
 
     // Status tiles.
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 5 },

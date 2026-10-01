@@ -65,7 +65,6 @@ export const PUBLISHED_FIELDS = {
         maxHealth: foe.maxHealth,
         stats: foe.stats,
         logic: foe.logicBlurb,
-        hint: foe.stanceHint,
     }),
     effects: (effect) => ({
         name: effect.name,

@@ -237,13 +237,6 @@ export interface Enemy {
      */
     portraitAsset?: string;
     /**
-     * Spec 26b §2 — an enemy-level thematic tell that IMPLIES (never states) the
-     * enemy's stance tendency. Per-phase `CombatThreatPhase.stanceHint` overrides
-     * it; if neither is set a generic per-stance hint is used. Surfaced in the
-     * combat reveal so reading the foe's character pays off in the hidden read.
-     */
-    stanceHint?: string;
-    /**
      * The foe's combat keywords. Empty since the revamp deleted all eleven
      * (D63); the optional slot stays so B2 can re-add them. See
      * {@link EnemyKeyword}.

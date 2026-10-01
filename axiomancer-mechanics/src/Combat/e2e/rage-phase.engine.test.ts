@@ -115,8 +115,8 @@ describe('Phase 3 — an explicit enemy.threatSequence override threads unlockAf
     it('a gated phase in an explicit override keeps its unlockAfterRound (future authored rage content)', () => {
         const enemy = makeEnemy(500) as Enemy & { threatSequence?: CombatThreatPhase[] };
         enemy.threatSequence = [
-            { index: 1, enemyStance: 'body', threatAction: { description: 'opens with a jab', effects: [{ damage: 5 }] }, isFinalPhase: false },
-            { index: 2, enemyStance: 'body', threatAction: { description: 'turns feral', effects: [{ damage: 20 }] }, isFinalPhase: true, unlockAfterRound: 4 },
+            { index: 1, threatAction: { description: 'opens with a jab', effects: [{ damage: 5 }] }, isFinalPhase: false },
+            { index: 2, threatAction: { description: 'turns feral', effects: [{ damage: 20 }] }, isFinalPhase: true, unlockAfterRound: 4 },
         ];
         const seq = getThreatSequence(enemy);
         expect(seq[0].unlockAfterRound).toBeUndefined();

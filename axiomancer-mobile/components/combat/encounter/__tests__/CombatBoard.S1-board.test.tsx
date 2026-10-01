@@ -9,9 +9,8 @@
  *       line was anchored 30pt LEFT of an 80pt disc sitting at right 10, so
  *       its 140pt box ended 20pt off-screen, which the page could scroll to.
  *       The line is anchored inward and the board clips at its own edge.
- *  C19  `StanceChip` (inert) looked exactly like `MomentumChainChip`
- *       (tappable) directly above it. The tappable one now carries a ⓘ mark
- *       and the readout names itself.
+ *  C19  `MomentumChainChip` is tappable and carries a ⓘ mark. (The inert
+ *       stance chip beside it went with the stance layer, R7d.)
  *  C32  `compactFree` fell through to `v.slice(0, 3)` and printed '×4 ' — a
  *       chopped three-character piece of '×4 · 3t', not a value.
  */
@@ -167,23 +166,12 @@ describe('S1-board-C12 — nothing on the board runs past the viewport', () => {
 
 // ── C19: the tappable chip is the one that looks tappable ───────────────────
 
-describe('S1-board-C19 — the momentum chip and the stance chip read apart', () => {
+describe('S1-board-C19 — the momentum chip looks tappable', () => {
     it('the momentum chip is a button and carries a visible tap mark', () => {
         renderBoard();
         const chip = screen.getByTestId('combat-momentum-v2');
         expect(chip.props.accessibilityRole).toBe('button');
         expect(screen.getByTestId('combat-momentum-info-mark')).toBeTruthy();
-    });
-
-    it('the stance chip stays an inert readout and names itself', () => {
-        renderBoard();
-        const chip = screen.getByTestId('combat-player-stance');
-        expect(chip.props.accessibilityRole).toBe('text');
-        // Either it prints the canon word as its caption, or its value already
-        // carries it ('NO STANCE') — never a bare unlabelled chip.
-        const caption = screen.queryByTestId('combat-player-stance-caption');
-        const label = String(chip.props.accessibilityLabel ?? '');
-        expect(caption !== null || /stance/i.test(label)).toBe(true);
     });
 });
 

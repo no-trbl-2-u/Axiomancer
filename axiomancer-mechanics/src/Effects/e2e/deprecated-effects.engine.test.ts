@@ -217,8 +217,7 @@ describe('effect deprecation contract (spec 32 v3 §3) — the ban list', () => 
             const def = lookupEffect(id)!;
             const p = def.payload;
             const real = !!(p.damageOverTime || p.actionRestriction
-                || p.damageTakenMult !== undefined || p.damageTakenMultForStance
-                || p.revealsStance
+                || p.damageTakenMult !== undefined
                 || p.outgoingDamageMulPct !== undefined || p.dotModifiers
                 || (p as { tickAmplifyFlat?: number }).tickAmplifyFlat);
             expect(real, `${id} is a card effect with no engine-read channel`).toBe(true);

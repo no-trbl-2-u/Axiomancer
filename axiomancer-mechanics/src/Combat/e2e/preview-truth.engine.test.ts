@@ -97,7 +97,7 @@ function activeEffect(effectId: string, intensity = 1, duration = 3, appliedAt =
 /** One-phase custom threat so incoming numbers are fully controlled. */
 function threatOnly(effects: CombatThreatPhase['threatAction']['effects']): CombatThreatPhase[] {
     return [{
-        index: 1, enemyStance: 'body', isFinalPhase: true,
+        index: 1, isFinalPhase: true,
         threatAction: { description: 'truth probe', effects },
     }];
 }
