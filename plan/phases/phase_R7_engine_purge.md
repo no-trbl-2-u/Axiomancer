@@ -305,6 +305,77 @@ The tick that took R7c2 split it once more, like R2, R3 and R7c:
   `KEYWORD_FAMILY` rows no engine carrier prints. `docs/effects.md` keeps its
   Superseded banner for R10c.
 
+## Scope — R7d (stance removal; refined against the tree R7c3 left, 2026-10-01)
+
+Part plan `plan/revamp/engine.md` § R7d; D65 (T: "I only want the RPS gone,
+card-colour/dice-colour stay"). The tree R7c3 left still carries the whole
+open-stance layer. No library effect prints a stance-keyed payload key
+(`debuffs.library.json` holds Poison, Bleed, Mark, Vulnerable, Quarter,
+Creeping Doom, Petrify; Petrify is `skipTurn`), so every stance-keyed key is
+carrier-less.
+
+**Split, like R2, R3 and R7c** (one tick has a 75-minute ceiling and main
+stays green between rows):
+
+- **R7d — the RPS layer, engine and mobile together** (the compiler couples
+  them through `@mechanics`):
+  1. Player stance: `playerStance`, the `stance-shifted` event, the stance
+     half of `applyStanceAndMomentumV2`.
+  2. The phase-end check: `resolveStanceCheck`, `stanceCheck` on threat
+     phases, forks and enemy decks, `defaultStanceCheck` and its backfill,
+     `DECK_STANCE_CHECKS`, the `stance-check-resolved` event, the yield's
+     +1 Conviction and the Coveted Die's `'yield'` claim (block stays),
+     `READ_DAMAGE_MULT` and `CombatReadResult`.
+  3. Enemy stances: `enemyStance` and `stanceHint` on threat phases, forks,
+     enemy cards and enemies; `dominantStance` / `rotateStance` /
+     `DEFAULT_STANCE_HINTS`; `currentPhaseStance`.
+  4. Reveals and their fogs: `revealedStances`, `isPhaseStanceRevealed`,
+     `revealedCurrentStance`, `isStanceReadoutBlurred`, the `stance-revealed`
+     and `stance-locked` events, the ROOT lock in `processBetweenPhases`.
+  5. Stance-keyed payload keys and readers: `actionRestriction.forcedStance`
+     / `blockedStances` (charm, silence), `advantageModifier`,
+     `revealsStance`, `damageTakenMultForStance` and `getStanceVulnMult`,
+     `blursStanceHints`, `lockedStance`, the `lock_stance` mapping;
+     `canAct` loses its requested-stance parameter (skipTurn only).
+  6. DISRUPT: with the stance surface gone its meter tops out at one pip
+     (`DISRUPT_DENY_AT` is 3), so `getDistinctControlCount`,
+     `DISRUPT_DENY_AT` and the disrupt-deny branch go.
+  7. Mobile: `stanceCheckVM`, the IntentIcon punish/yield telegraph, the
+     `stance-check-resolved` log line, `playerStanceVM` / `StanceChip`, the
+     enemy stance readout and reveal-screen tells, the ▲/▼ read previews on
+     `READ_DAMAGE_MULT`, the `stance-chip` tooltip and the advantage lines
+     in tooltip / village payload text.
+  8. Tests deleted with their subjects or rewritten to the survivors.
+- **R7d2 — residue and the carrier sweep**: the legacy `CombatState` types
+  (`Advantage`, `choosing_stance`, `CombatAction.stance`) and the Enemy AI
+  stance doc, the word "stance" out of player-facing copy (level-up, deck,
+  character screens), "CHOOSE A STANCE" canon copy (`spec.md`,
+  `axiomancer-mobile/AGENTS.md`), and the D45 sweep: STAGGER, ROOT,
+  CONFUSION, charm, DISRUPT and every stance word with no carrier out of
+  the atlas, glossary and glyph registries.
+
+### Decisions made upfront (R7d) — DO NOT ASK
+
+- **The momentum chain stays, on card colour.** It reads `card.stance`,
+  which is the card's colour (heart/body/mind; grey and wild never move
+  it), not an RPS stance. It feeds exactly one thing: a completed
+  heart→body→mind chain surges a temporary wild die (or +1 Conviction on a
+  full table). It never read the enemy's stance. D65 keeps colour and calls
+  dice colour "the main fun mechanic"; keeping the chain deletes nothing T
+  might want, and deleting it later is one small diff. T can rule otherwise
+  at R7d2 or in their session.
+- **Identifiers that mean colour or stat family keep their names in R7d**:
+  `Stance` (stat family: `resistedBy`, `damageType`), `card.stance`,
+  `cardStanceColor`, `WheelStance`, `StanceGlyph`, `presenters/stances.ts`.
+  Their doc comments lose the RPS wording. A rename is churn across both
+  workspaces with no behaviour change; R10c's comments pass owns names.
+- **The Coveted Die keeps its block claim.** Only the yield path goes.
+- **Charm and silence go whole** (`forcedStance` / `blockedStances`): no
+  library effect prints them and there is no enemy stance left to force.
+- **No save migration.** `playerStance`, `revealedStances` and the threat
+  phases live on the encounter, which the game save does not hold (R9a
+  exists for that reason).
+
 ## Out of scope for R7a (named so it is not mistaken for a miss)
 
 - `synergy` and `synergy-predicates.ts`, themes, draft, presets,
