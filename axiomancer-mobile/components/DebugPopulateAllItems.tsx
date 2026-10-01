@@ -2,7 +2,7 @@
  * Dev-only "populate registry items" button.
  *
  * Press to fire `actions.populateAllItems()` — walks the engine's two
- * item registries (`relicLibrary`: the 8 signet relics, the only
+ * item registries (`relicLibrary`: the signet relics, the only
  * equipment in the game; `consumableLibrary`) and pushes one of each to
  * the player's inventory. Useful for surface-testing inventory
  * rendering, the equip dock, and per-slot chrome under a maximal load.
@@ -40,14 +40,14 @@ export function DebugPopulateAllItems() {
                 <Text style={styles.label}>DEBUG · POPULATE</Text>
                 <Text style={styles.sub} testID="debug-populate-sub">
                     {lastResult ??
-                        'the 8 signet relics + every consumable · relics are the only equipment now'}
+                        'the signet relics + every consumable · relics are the only equipment now'}
                 </Text>
             </View>
             <Pressable
                 style={styles.button}
                 onPress={onPress}
                 accessibilityRole="button"
-                accessibilityLabel="Populate inventory with the 8 signet relics and every consumable"
+                accessibilityLabel="Populate inventory with the signet relics and every consumable"
                 testID="debug-populate-all-items"
             >
                 <Text style={styles.buttonLabel}>POPULATE</Text>

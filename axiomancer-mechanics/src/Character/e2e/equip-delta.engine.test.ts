@@ -59,37 +59,41 @@ describe('computeEquipDelta (Phase 23 — stat + signature diff only)', () => {
         expect(d.isEmpty).toBe(true);
     });
 
-    // ── Phase 19 — signet relic signature swap ────────────────────────────────
+    // ── Phase 19 — signet relic signature swap (the ring is the one signature)
     it('surfaces the granted signature (with name) when equipping a signet relic', () => {
-        const relic = makeEquipment('relic-x', { grantsSignature: 'sig-overwhelming-argument' });
+        const relic = makeEquipment('relic-x', { grantsSignature: 'sig-disarming-plea' });
         const d = computeEquipDelta(relic, null);
         expect(d.signatures.gained).toEqual([
-            { id: 'sig-overwhelming-argument', name: 'The Stilling' },
+            { id: 'sig-disarming-plea', name: 'The Open Hand' },
         ]);
         expect(d.signatures.lost).toEqual([]);
         expect(d.isEmpty).toBe(false);
     });
 
     it('surfaces the lost signature when unequipping a signet relic', () => {
-        const relic = makeEquipment('relic-x', { grantsSignature: 'sig-read-opponent' });
+        const relic = makeEquipment('relic-x', { grantsSignature: 'sig-disarming-plea' });
         const d = computeEquipDelta(relic, relic);
         expect(d.mode).toBe('unequip');
-        expect(d.signatures.lost).toEqual([{ id: 'sig-read-opponent', name: 'Read the Entrails' }]);
+        expect(d.signatures.lost).toEqual([{ id: 'sig-disarming-plea', name: 'The Open Hand' }]);
         expect(d.signatures.gained).toEqual([]);
     });
 
-    it('swapping two relics surfaces the gained and lost signatures', () => {
-        const worn = makeEquipment('relic-a', { grantsSignature: 'sig-read-opponent' });
-        const candidate = makeEquipment('relic-b', { grantsSignature: 'sig-second-wind' });
-        const d = computeEquipDelta(candidate, worn);
-        expect(d.mode).toBe('swap');
-        expect(d.signatures.gained.map(s => s.id)).toEqual(['sig-second-wind']);
-        expect(d.signatures.lost.map(s => s.id)).toEqual(['sig-read-opponent']);
+    it('swapping a relic for plain gear surfaces the lost signature, and back the gained one', () => {
+        const relic = makeEquipment('relic-a', { grantsSignature: 'sig-disarming-plea' });
+        const plain = makeEquipment('plain-b');
+        const off = computeEquipDelta(plain, relic);
+        expect(off.mode).toBe('swap');
+        expect(off.signatures.gained).toEqual([]);
+        expect(off.signatures.lost.map(s => s.id)).toEqual(['sig-disarming-plea']);
+        const on = computeEquipDelta(relic, plain);
+        expect(on.mode).toBe('swap');
+        expect(on.signatures.gained.map(s => s.id)).toEqual(['sig-disarming-plea']);
+        expect(on.signatures.lost).toEqual([]);
     });
 
     it('a same-signature swap nets to no signature change', () => {
-        const worn = makeEquipment('relic-a', { grantsSignature: 'sig-read-opponent' });
-        const candidate = makeEquipment('relic-b', { grantsSignature: 'sig-read-opponent' });
+        const worn = makeEquipment('relic-a', { grantsSignature: 'sig-disarming-plea' });
+        const candidate = makeEquipment('relic-b', { grantsSignature: 'sig-disarming-plea' });
         const d = computeEquipDelta(candidate, worn);
         expect(d.signatures.gained).toEqual([]);
         expect(d.signatures.lost).toEqual([]);

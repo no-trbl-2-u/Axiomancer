@@ -50,17 +50,16 @@ describe('applyPlayerTierPreset: L1/L15/L30/L50 ladder', () => {
         },
     );
 
-    it('seeds level-relevant equipment for the higher tiers', () => {
+    it('seeds the starting relics for the higher tiers', () => {
         const { store, actions } = makeStore();
 
         actions.applyPlayerTierPreset('kid-l50');
         const player = store.getState().player;
-        // L50 declares seven equipment pieces; Phase 18's 5-slot loadout
-        // wears the first weapon, first armor, and three accessories
-        // (capacity-capped), benching the overflow into inventory. So the
-        // build arrives with the full five worn pieces.
+        // The preset's declared equipment is vestigial (Phase 21); the build
+        // wears the starting relics `createCharacter` seeds — since R7e2 the
+        // Suppliant's Ring alone.
         const worn = getEquippedItems(player.equipment);
-        expect(worn).toHaveLength(5);
+        expect(worn.map((i) => i.id)).toEqual(['relic-disarming-plea']);
     });
 
     it('L1 is a leaner build than L50 (ladder escalates)', () => {
@@ -106,7 +105,7 @@ describe('addItemById: registry resolution', () => {
         const { store, actions } = makeStore();
         const before = store.getState().player.inventory?.length ?? 0;
 
-        const result = actions.addItemById('relic-read');
+        const result = actions.addItemById('relic-disarming-plea');
 
         expect(result.added).toBe(true);
         expect(result.kind).toBe('equipment');
@@ -126,10 +125,10 @@ describe('addItemById: registry resolution', () => {
     it('trims surrounding whitespace before lookup', () => {
         const { store, actions } = makeStore();
 
-        const result = actions.addItemById('  relic-read  ');
+        const result = actions.addItemById('  relic-disarming-plea  ');
 
         expect(result.added).toBe(true);
-        expect(result.id).toBe('relic-read');
+        expect(result.id).toBe('relic-disarming-plea');
         expect(result.kind).toBe('equipment');
     });
 

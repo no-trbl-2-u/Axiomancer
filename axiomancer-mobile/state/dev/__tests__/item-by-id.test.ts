@@ -29,7 +29,7 @@ describe('addItemByIdAction dev helper', () => {
 
     it('resolves a signet relic id and adds it (Phase 21 — relics are the only equipment)', () => {
         const before = store.getState().player.inventory?.length ?? 0;
-        const result = addItemByIdAction(store, 'relic-overwhelming');
+        const result = addItemByIdAction(store, 'relic-disarming-plea');
 
         expect(result.added).toBe(true);
         expect(result.kind).toBe('equipment');
@@ -49,10 +49,10 @@ describe('addItemByIdAction dev helper', () => {
     });
 
     it('trims surrounding whitespace before resolving a real id', () => {
-        const result = addItemByIdAction(store, '  relic-overwhelming  ');
+        const result = addItemByIdAction(store, '  relic-disarming-plea  ');
 
         expect(result.added).toBe(true);
-        expect(result.id).toBe('relic-overwhelming');
+        expect(result.id).toBe('relic-disarming-plea');
         expect(result.kind).toBe('equipment');
     });
 

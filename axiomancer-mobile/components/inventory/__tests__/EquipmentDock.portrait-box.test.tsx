@@ -52,8 +52,8 @@ afterAll(() => {
 function makeVm(): EquipmentDockViewModel {
     return {
         slots: [
-            { key: 'weapon', label: 'WEAPON', item: { id: 'w', name: 'Gorgon Brand', sub: 'Weapon', grantsSignature: 'The Stilling' } },
-            { key: 'armor', label: 'ARMOR', item: { id: 'a', name: 'Coldglass Aegis', sub: 'Armor', grantsSignature: 'Read the Entrails' } },
+            { key: 'weapon', label: 'WEAPON', item: { id: 'w', name: 'Fixture Weapon', sub: 'Weapon', grantsSignature: null } },
+            { key: 'armor', label: 'ARMOR', item: { id: 'a', name: 'Fixture Armor', sub: 'Armor', grantsSignature: null } },
             { key: 'accessory', accessoryIndex: 0, label: 'TRINKET I', item: null },
             { key: 'accessory', accessoryIndex: 1, label: 'TRINKET II', item: null },
             { key: 'accessory', accessoryIndex: 2, label: 'TRINKET III', item: null },

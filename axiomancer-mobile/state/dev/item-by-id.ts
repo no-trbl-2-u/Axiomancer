@@ -58,7 +58,7 @@ export function addItemByIdAction(
     try {
         const addItem = store.getState().addItem;
 
-        // Phase 21 — the only equipment is the 8 signet relics (resolve by id).
+        // Phase 21 — the only equipment is the signet relics (resolve by id).
         const relic = getRelicById(id);
         if (relic) {
             addItem({ ...relic });

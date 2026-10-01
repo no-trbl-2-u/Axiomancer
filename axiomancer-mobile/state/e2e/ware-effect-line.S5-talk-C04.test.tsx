@@ -19,7 +19,9 @@ import React from 'react';
 
 import {
     consumableLibrary,
-    relicLibrary,
+    getRelicById,
+    FIRST_NODE_RELIC_ID,
+    FIXTURE_ARMOR,
     type Consumable,
     type Item,
 } from '@mechanics';
@@ -42,9 +44,9 @@ jest.mock('@/lib/platform/router', () => ({
 }));
 
 const HEAL_WARE = consumableLibrary.find((c) => (c.healAmount ?? 0) > 0)!;
-// A relic that still carries a stat line (since TRIM THE FAT T2a only the two
-// armor relics do — their +maxHp), so the stat-bump clause has something to state.
-const RELIC = relicLibrary.find((r) => (r.statModifiers ?? []).length > 0)!;
+// The live library's one relic (the ring) grants a signature and no stat; the
+// fixture armor carries the +maxHp line, so the stat-bump clause has a witness.
+const RELIC = getRelicById(FIRST_NODE_RELIC_ID)!;
 
 /** A village seated on one stall selling `ware`, with coin enough to buy it. */
 function villageStore(wareId: string): AppStore {
@@ -109,11 +111,12 @@ describe('wareEffectLine states the mechanical read (S5-talk-C04)', () => {
         expect(line).not.toContain('below half');
     });
 
-    it('states a relic as its stat bump and the signature it grants', () => {
-        const line = wareEffectLine(RELIC);
+    it('states a relic as the signature it grants', () => {
+        expect(wareEffectLine(RELIC)).toBe('grants The Open Hand');
+    });
 
-        expect(line).toMatch(/[+-]\d/);
-        expect(line).toContain('grants ');
+    it('states a relic\'s stat bump', () => {
+        expect(wareEffectLine(FIXTURE_ARMOR)).toBe('+5 max VITAE');
     });
 
     it('says nothing for an item with no mechanical payload', () => {

@@ -145,7 +145,7 @@ function modWords(mod: { stat: string; value: number }): string {
  *
  * @param item - the library item a ware resolves to (`resolveWareItem`).
  * @returns a terse mechanical read — `restores 20 VITAE`,
- *   `+5 defense, 3 rounds`, `+2 body - grants The Stilling` — or `''` for an
+ *   `+5 defense, 3 rounds`, `+2 body - grants The Open Hand` — or `''` for an
  *   item with no statable payload (a material, or a consumable whose payload
  *   shape this presenter does not read).
  */

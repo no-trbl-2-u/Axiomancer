@@ -33,7 +33,8 @@ export type EffectCategory =
 
 /**
  * A persistent stat line on a piece of equipment. The only stat an item can
- * modify is `maxHp` (the two armor relics' +5 max VITAE), folded onto
+ * modify is `maxHp` (no live relic carries one since R7e2; `FIXTURE_ARMOR`
+ * witnesses it), folded onto
  * `Character.maxHealth` by the equip reducers.
  *
  * TRIM THE FAT T2a (D14) deleted every other target: the derived attack /

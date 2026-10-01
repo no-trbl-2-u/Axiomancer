@@ -43,7 +43,6 @@ import {
     getRelicById,
     FIRST_NODE_RELIC_FLAG,
     FIRST_NODE_RELIC_ID,
-    STAND_IN_RELIC_ID,
 } from '@mechanics';
 import type {
     Character,
@@ -146,17 +145,9 @@ export function offerFirstNodeRelicAction(store: AppStore): boolean {
     const ring = getRelicById(FIRST_NODE_RELIC_ID);
     if (!ring) return false;
 
-    // `withholdFirstNodeRelic` back-fills the ring's seat with the Venom Sigil
-    // stand-in, so that is the piece this grant should push out. Passing the
-    // index explicitly keeps that true even if the accessory row is reordered
-    // before the player reaches the first node; when the stand-in is absent the
-    // engine default (last worn accessory) applies.
-    const standInIndex = player.equipment.accessories.findIndex((a) => a.id === STAND_IN_RELIC_ID);
-
     offerItemRewardAction(store, ring, {
         source: 'Handed over at the first waypoint',
         settleFlags: [FIRST_NODE_RELIC_FLAG],
-        ...(standInIndex === -1 ? {} : { replaceIndex: standInIndex }),
         // The ring qualifies under D5 on its own (signature + stat grant); the
         // flag makes that independent of a future content edit.
         includeInline: true,

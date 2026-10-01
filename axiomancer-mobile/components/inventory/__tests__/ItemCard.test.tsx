@@ -467,8 +467,8 @@ describe('ItemCard: equipDelta panel (Phase 133)', () => {
                 { stat: 'stamina', delta: -1 },
             ],
             signatures: {
-                gained: [{ id: 'sig-second-wind', name: 'Second Wind' }],
-                lost: [{ id: 'sig-read-opponent', name: 'Read the Entrails' }],
+                gained: [{ id: 'sig-disarming-plea', name: 'The Open Hand' }],
+                lost: [],
             },
             isEmpty: false,
         },
@@ -482,8 +482,7 @@ describe('ItemCard: equipDelta panel (Phase 133)', () => {
         expect(r.getByTestId('equip-delta-fang')).toBeTruthy();
         expect(r.getByTestId('equip-delta-stats-fang')).toBeTruthy();
         expect(r.getByTestId('equip-delta-signatures-fang')).toBeTruthy();
-        expect(r.getByText('grants Second Wind')).toBeTruthy();
-        expect(r.getByText('loses Read the Entrails')).toBeTruthy();
+        expect(r.getByText('grants The Open Hand')).toBeTruthy();
     });
 
     it('does not render the panel when collapsed', () => {

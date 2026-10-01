@@ -29,7 +29,7 @@ export {
 export { consumableLibrary, getConsumableById } from './consumable.library';
 export { buyItem, sellItem, defaultSellPrice } from './shop.reducer';
 export type { ShopWare } from './shop.types';
-// Phase 19 — the 11 signet relics (Phase 85 added 3) + worn-loadout signature derivation.
+// The signet relics + worn-loadout signature derivation.
 export {
     relicLibrary, getRelicById,
 } from './relic.library';

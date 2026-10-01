@@ -1300,7 +1300,7 @@ function debugSeedAction(store: AppStore): DebugSeedResult {
         }
 
         // 2. One relic per slot kind (weapon / armor / accessory). Phase 21 —
-        //    the only equipment is the 8 signet relics; grant the first of each
+        //    the only equipment is the signet relics; grant the first of each
         //    slot kind so the inventory dock + equip-replace preview have a
         //    piece to render for every slot.
         const seedSlots: ReadonlyArray<EquipmentSlot> = ['weapon', 'armor', 'accessory'];
@@ -1404,7 +1404,7 @@ function populateAllItemsAction(store: AppStore): PopulateAllItemsResult {
         const addItem = state.addItem;
 
         // Phase 21 — the procedural equipment library is retired; "every item"
-        // equipment is now the 8 signet relics. Uniques no longer exist.
+        // equipment is now the signet relics. Uniques no longer exist.
         for (const relic of relicLibrary) {
             try {
                 addItem({ ...relic });

@@ -413,7 +413,7 @@ describe('telemetry — folding a transcript reads the locked systems', () => {
         const events: CombatEvent[] = [
             { kind: 'conviction-gained', amount: 2, total: 2, reason: 'effect' },
             { kind: 'conviction-gained', amount: 1, total: 3, reason: 'scrap' },
-            { kind: 'signature-cast', signatureId: 'sig-press-the-point', name: 'Press', cost: 2 },
+            { kind: 'signature-cast', signatureId: 'sig-disarming-plea', name: 'The Open Hand', cost: 2 },
             { kind: 'special-fired', dieId: 'die-0', conviction: 2, total: 4 },
             { kind: 'momentum-advanced', color: 'heart', length: 1 },
             { kind: 'momentum-advanced', color: 'body', length: 2 },

@@ -29,9 +29,10 @@
  * consumables and their effects dropped), v30 → v31 (2026-09-30, R6a: the
  * hazard token and hex flags dropped), v31 → v32 (2026-09-30, R6b: hazard
  * deck cards outside the core ten dropped), v32 → v33 (2026-09-30, R7c:
- * the write-only `regionConsequences` slice dropped) and v33 → v34
- * (2026-10-01, R7e: the parked world's maps, quests and flags dropped). The
- * hops chain, so a v11 save lands at v34 in one `migrate` call. Every other version mismatch still rejects.
+ * the write-only `regionConsequences` slice dropped), v33 → v34
+ * (2026-10-01, R7e: the parked world's maps, quests and flags dropped) and
+ * v34 → v35 (2026-10-01, R7e2: every relic but the Suppliant's Ring
+ * dropped). The hops chain, so a v11 save lands at v35 in one `migrate` call. Every other version mismatch still rejects.
  */
 
 import { GameState } from './types';
@@ -39,7 +40,7 @@ import type { Character, EquipmentLoadout } from '../Character/types';
 import type { Equipment, Item } from '../Items/types';
 import { isEquipment } from '../Items/types';
 import { getEquippedItems, wornMaxHpBonus } from '../Character/equipment.reducer';
-import { cloneStartingRelics } from '../Items/relic.library';
+import { cloneStartingRelics, getRelicById } from '../Items/relic.library';
 import { calculateMaxHealth } from '../Utils';
 import { reslotLegacyLoadout, reslotLegacyEquipment, type LegacySlot } from './legacy-slots';
 import { concreteDefaultRail } from '../Character/dieGear.reducer';
@@ -101,7 +102,7 @@ function migrateV12ToV13(raw: Record<string, unknown>): Record<string, unknown> 
         return { ...raw, version: 13 };
     }
 
-    const { worn, benched } = cloneStartingRelics();
+    const worn = cloneStartingRelics();
     const relicLoadout: EquipmentLoadout = {
         weapon: worn.find(w => w.slot === 'weapon') ?? null,
         armor: worn.find(w => w.slot === 'armor') ?? null,
@@ -118,7 +119,7 @@ function migrateV12ToV13(raw: Record<string, unknown>): Record<string, unknown> 
     const oldIds = new Set(oldInventory.map(i => i.id));
     const displaced: Equipment[] = player.equipment ? getEquippedItems(player.equipment) : [];
     const displacedMissing = displaced.filter(d => !oldIds.has(d.id));
-    const inventory: Item[] = [...worn, ...benched, ...oldInventory, ...displacedMissing];
+    const inventory: Item[] = [...worn, ...oldInventory, ...displacedMissing];
 
     const baseMaxHealth = calculateMaxHealth(player.level, player.baseStats);
     const nextMaxHealth = baseMaxHealth + wornMaxHpBonus(relicLoadout);
@@ -162,12 +163,14 @@ function migrateV13ToV14(raw: Record<string, unknown>): Record<string, unknown> 
 
     // Rebuild the loadout: keep worn relics, replace any non-relic worn piece
     // with the default relic for that slot, and backfill the accessory row to 3.
-    const { worn: defaults } = cloneStartingRelics();
+    // Since R7e2 the starting relics are the ring alone, so a slot with no
+    // default stays empty (the v35 hop drops the deleted relics anyway).
+    const defaults = cloneStartingRelics();
     const loadout = player.equipment;
     const weapon = loadout?.weapon && isRelic(loadout.weapon)
-        ? loadout.weapon : defaults.find(r => r.slot === 'weapon')!;
+        ? loadout.weapon : defaults.find(r => r.slot === 'weapon') ?? null;
     const armor = loadout?.armor && isRelic(loadout.armor)
-        ? loadout.armor : defaults.find(r => r.slot === 'armor')!;
+        ? loadout.armor : defaults.find(r => r.slot === 'armor') ?? null;
     const accessories: Equipment[] = (loadout?.accessories ?? []).filter(isRelic).slice(0, 3);
     for (const d of defaults.filter(r => r.slot === 'accessory')) {
         if (accessories.length >= 3) break;
@@ -384,33 +387,12 @@ function migrateV20ToV21(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
- * v21 → v22 (Phase 85): 3 new signet relics fill the `head`/`hands`/`feet`
- * accessory kinds left empty since Phase 19. Appends the 3 new relics
- * (benched, per `BENCHED_RELIC_IDS`-shape — new content never auto-equips
- * over an already-chosen loadout) to inventory, skipping any id the save
- * already carries (idempotent — a save re-migrated from a version that
- * already saw this hop keeps a single copy). The worn loadout, `derivedStats`,
- * and every other field pass through untouched: the new relics only affect
- * combat once the player chooses to equip one. Pure over a raw save payload.
+ * v21 → v22 (Phase 85) appended three new signet relics to inventory. R7e2
+ * deleted them (the v34 → v35 hop drops any a save still holds), so the hop
+ * only bumps the version.
  */
 function migrateV21ToV22(raw: Record<string, unknown>): Record<string, unknown> {
-    const player = raw.player as (Partial<Character> & { inventory?: Item[] }) | undefined;
-    if (!player || typeof player !== 'object') {
-        return { ...raw, version: 22 };
-    }
-
-    const { benched } = cloneStartingRelics();
-    const newRelics = benched.filter(r => r.id.startsWith('relic-')
-        && ['relic-mounting-dread', 'relic-endless-labor', 'relic-unbroken-stride'].includes(r.id));
-    const oldInventory: Item[] = Array.isArray(player.inventory) ? player.inventory.slice() : [];
-    const oldIds = new Set(oldInventory.map(i => i.id));
-    const missing = newRelics.filter(r => !oldIds.has(r.id));
-
-    return {
-        ...raw,
-        player: { ...player, inventory: [...oldInventory, ...missing] },
-        version: 22,
-    };
+    return { ...raw, version: 22 };
 }
 
 /**
@@ -874,6 +856,42 @@ function migrateV33ToV34(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
+ * v34 → v35 (2026-10-01, THE REVAMP R7e2, D72): the relic library is the
+ * Suppliant's Ring alone. Every other `relic-` equipment leaves the inventory
+ * and every loadout slot; `maxHealth` is recomputed from the worn bonus that
+ * remains (the two deleted armor relics carried +5) and `health` clamped. The
+ * ring and every non-relic item pass through. Idempotent and pure over a raw
+ * save payload.
+ */
+function migrateV34ToV35(raw: Record<string, unknown>): Record<string, unknown> {
+    const player = raw.player as (Partial<Character> & {
+        equipment?: EquipmentLoadout;
+        inventory?: Item[];
+    }) | undefined;
+    if (!player || typeof player !== 'object') return { ...raw, version: 35 };
+
+    const deleted = (it: Item | null | undefined): boolean =>
+        !!it && isEquipment(it) && it.id.startsWith('relic-') && !getRelicById(it.id);
+    const inventory: Item[] = (Array.isArray(player.inventory) ? player.inventory : [])
+        .filter(it => !deleted(it));
+    const loadout = player.equipment;
+    if (!loadout) return { ...raw, player: { ...player, inventory }, version: 35 };
+    const equipment: EquipmentLoadout = {
+        weapon: deleted(loadout.weapon) ? null : loadout.weapon,
+        armor: deleted(loadout.armor) ? null : loadout.armor,
+        accessories: (loadout.accessories ?? []).filter(a => !deleted(a)),
+    };
+
+    const next: Record<string, unknown> = { ...player, inventory, equipment };
+    if (typeof player.maxHealth === 'number') {
+        const maxHealth = player.maxHealth - wornMaxHpBonus(loadout) + wornMaxHpBonus(equipment);
+        next.maxHealth = maxHealth;
+        if (typeof player.health === 'number') next.health = Math.max(0, Math.min(player.health, maxHealth));
+    }
+    return { ...raw, player: next, version: 35 };
+}
+
+/**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
  * game). The name/signature is kept so the persistence layer's call site is
@@ -904,7 +922,7 @@ export function migrate(
     // Quest Board minigame; v18 → v19 retires the Gathering minigame; v19 →
     // v20 retires the loot-cache Pick Pool minigame and adds `mapGoodwill`;
     // v20 → v21 seeds the continent catalogue for inter-map travel; v21 → v22
-    // appends the Phase 85 head/hands/feet signet relics to inventory; v22 →
+    // is a version bump (its relics were deleted in R7e2); v22 →
     // v23 strips the curated-loadout seed flags; v23 → v24 stamps the
     // first-node relic grant settled; v24 → v25 strips the retired derived
     // stats and stat lines; v25 → v26 strips the alignment grid and GRACE;
@@ -914,8 +932,9 @@ export function migrate(
     // drops the retired consumables and their effects; v30 → v31 drops the
     // hazard token and hex flags; v31 → v32 drops deleted hazard deck cards;
     // v32 → v33 drops the write-only region-consequences slice; v33 → v34
-    // drops the parked world's maps, quests and flags.
-    // Chained so a v11 save lands at v34 in one call.
+    // drops the parked world's maps, quests and flags; v34 → v35 drops every
+    // relic but the Suppliant's Ring.
+    // Chained so a v11 save lands at v35 in one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
@@ -1007,6 +1026,10 @@ export function migrate(
     if (version === 33 && toVersion >= 34) {
         working = migrateV33ToV34(working);
         version = 34;
+    }
+    if (version === 34 && toVersion >= 35) {
+        working = migrateV34ToV35(working);
+        version = 35;
     }
 
     if (version !== toVersion) {

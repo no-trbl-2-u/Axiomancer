@@ -1,7 +1,7 @@
 /**
- * Phase R4 — the signature placeholders (D47, `plan/revamp/relics.md`): ten
- * signatures raise GUARD 5 for the flat cost, and The Open Hand opens the
- * mercy choice on a foe that can be befriended once it is low enough.
+ * Phase R4 — the signature kit (D47, `plan/revamp/relics.md`), one signature
+ * since R7e2 (D72): The Open Hand opens the mercy choice on a foe that can be
+ * befriended once it is low enough.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -13,10 +13,8 @@ import {
     initializeCombatEncounter, rollEncounterDice, playSignatureSkill, selectMercyChoice,
 } from './combat.engine';
 import {
-    SIGNATURE_SKILL_LIST, SIGNATURE_COST, SIGNATURE_GUARD, getSignatureSkill, signatureCastBlock,
-    signatureGuardAmount,
+    SIGNATURE_SKILL_LIST, SIGNATURE_COST, getSignatureSkill, signatureCastBlock,
 } from './combat.signature';
-import { scaleFor } from './stat-scaling';
 import type { CombatEncounterState } from './combat.encounter.types';
 
 const OPEN_HAND = 'sig-disarming-plea';
@@ -29,33 +27,15 @@ function encounter(enemy: Enemy, hpFrac = 1, conviction = SIGNATURE_COST): Comba
 }
 
 describe('R4 — the signature kit', () => {
-    it('keeps all eleven signatures at one flat cost: ten GUARD 5, one mercy', () => {
-        expect(SIGNATURE_SKILL_LIST).toHaveLength(11);
-        for (const sig of SIGNATURE_SKILL_LIST) expect(sig.cost).toBe(SIGNATURE_COST);
-        const guards = SIGNATURE_SKILL_LIST.filter(s => s.kind === 'guard');
-        expect(guards).toHaveLength(10);
-        for (const sig of guards) {
-            expect(sig.magnitude).toBe(SIGNATURE_GUARD);
-            expect(sig.description).toBe('Raise GUARD 5.');
-        }
-        expect(SIGNATURE_SKILL_LIST.filter(s => s.kind === 'mercy').map(s => s.id)).toEqual([OPEN_HAND]);
+    it('is The Open Hand alone, a mercy signature at the flat cost', () => {
+        expect(SIGNATURE_SKILL_LIST.map(s => s.id)).toEqual([OPEN_HAND]);
+        const sig = getSignatureSkill(OPEN_HAND)!;
+        expect(sig.kind).toBe('mercy');
+        expect(sig.cost).toBe(SIGNATURE_COST);
     });
 
-    it('a GUARD signature adds the mind-scaled GUARD, like a card GUARD', () => {
-        const s = encounter(FloatEye);
-        const sig = getSignatureSkill('sig-overwhelming-argument')!;
-        const expected = scaleFor(SIGNATURE_GUARD, s.player.baseStats, 'mind', 'one-shot');
-        expect(signatureGuardAmount(s, sig)).toBe(expected);
-        const r = playSignatureSkill({ ...s, guard: 2 }, sig.id);
-        expect(r.state.guard).toBe(2 + expected);
-        expect(r.state.conviction).toBe(0);
-    });
-
-    it('a higher mind raises more GUARD', () => {
-        const s = encounter(FloatEye);
-        const sig = getSignatureSkill('sig-rallying-blow')!;
-        const sharp = { ...s, player: { ...s.player, baseStats: { ...s.player.baseStats, mind: s.player.baseStats.mind + 5 } } };
-        expect(signatureGuardAmount(sharp, sig)).toBeGreaterThan(signatureGuardAmount(s, sig));
+    it('an unknown id resolves to nothing', () => {
+        expect(getSignatureSkill('sig-unknown')).toBeUndefined();
     });
 });
 

@@ -40,7 +40,7 @@ const EFFECT_KEYWORD: Record<string, string> = {
     // S3 (D43) — rebuilt for the grey office's A Plain Word.
     debuff_vulnerable: 'Vulnerable',
     // Revamp R4 (D45) deleted Poison, Quarter and Doom: the signature skills
-    // were their last carriers, and are GUARD placeholders now. R5 deleted
+    // were their last carriers (R7e2 then deleted those signatures). R5 deleted
     // Mark: nothing applies it once the consumables that borrowed it retired.
 };
 
@@ -84,12 +84,12 @@ const MECHANIC_KEYWORD: Record<string, string> = {
  * numbers live on the face/preview; this explains the keyword.
  *
  * The table holds only words something live still prints: the grey office
- * (GUARD/VULNERABLE), the signature skills (GUARD), the healing potions
- * (HEAL), a map hazard (BLEED), the dice system (PIP, BOON, HONE, TEMPER) and
- * the two card-type labels. Revamp R4 (D45) cut POISON, DOOM, QUARTER,
- * STAGGER, PLEA, WRATH and CHAIN when the signature skills, their last
- * carriers, became GUARD placeholders; R5 cut CLEANSE, DRAW and MARK with the
- * consumables that printed them. Git history keeps the rest.
+ * (GUARD/VULNERABLE), the healing potions (HEAL), a map hazard (BLEED), the
+ * dice system (PIP, BOON, HONE, TEMPER) and the two card-type labels. Revamp
+ * R4 (D45) cut POISON, DOOM, QUARTER, STAGGER, PLEA, WRATH and CHAIN when the
+ * signature skills, their last carriers, became GUARD placeholders (R7e2
+ * deleted those); R5 cut CLEANSE, DRAW and MARK with the consumables that
+ * printed them. Git history keeps the rest.
  *
  * 2026-07-12 (owner playtest) — TERSE GLOSSES: every gloss is ONE short
  * sentence in the Dawncaster register ("Cards with Lifedrain restore health

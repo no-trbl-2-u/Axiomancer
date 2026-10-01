@@ -116,7 +116,7 @@ describe('policy roster — every id resolves', () => {
     it('greedy/blind keep the exact legacy witness configuration', () => {
         for (const id of ['greedy', 'blind'] as const) {
             const policy = COMBAT_SIM_POLICIES[id];
-            expect(policy.signatureKinds).toEqual(['guard', 'mercy']);
+            expect(policy.signatureKinds).toEqual(['mercy']);
             expect(policy.convictionThreshold).toBe(7);
             expect(policy.mercyChoice).toBe('spare');
             expect(policy.rankSignature).toBeUndefined();

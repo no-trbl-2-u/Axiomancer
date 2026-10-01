@@ -1778,7 +1778,7 @@ export function playSignatureSkill(
 /** The baseline signature kit (for the presenter / UI bar). */
 export {
     SIGNATURE_SKILLS, SIGNATURE_SKILL_LIST, getSignatureSkill,
-    signatureCastBlock, signatureGuardAmount, SIGNATURE_COST, SIGNATURE_GUARD,
+    signatureCastBlock, SIGNATURE_COST,
 } from './combat.signature';
 
 // ── Summary (§7.7) ───────────────────────────────────────────────────────────

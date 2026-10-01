@@ -246,7 +246,7 @@ export function buildCharacterFromPreset(preset: CharacterPreset): Character {
     // Phase 21 — the procedural equipment library + factory are retired. The
     // declared `preset.equipment` template entries no longer resolve to anything
     // (there is no more procedural gear), so presets carry only their consumables
-    // and wear the fixed 11-relic default loadout seeded by `createCharacter`. The
+    // and wear the starting relics seeded by `createCharacter`. The
     // `equipment` field is retained on the recipe as vestigial metadata.
     return createCharacter({
         name: preset.name,

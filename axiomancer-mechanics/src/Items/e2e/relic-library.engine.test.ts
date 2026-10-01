@@ -1,53 +1,43 @@
 /**
- * Hermetic engine test — the 11 signet relics (Phase 19; extended Phase 85).
+ * Hermetic engine test — the relic library (one row since R7e2, D72: the
+ * Suppliant's Ring).
  *
- * Locks the relic library invariants (roster, slot split, stat pool, default
- * loadout legality) and the `getSignaturesForLoadout` derivation that replaces
- * the retired archetype kit at combat-init.
+ * Locks the library invariants (roster, shape, no stat line), the
+ * `cloneStartingRelics` seed and the `getSignaturesForLoadout` derivation that
+ * replaces the retired archetype kit at combat-init.
  */
 
 import { describe, it, expect } from 'vitest';
 import {
     relicLibrary, getRelicById, getSignaturesForLoadout, cloneStartingRelics,
-    DEFAULT_WORN_RELIC_IDS, BENCHED_RELIC_IDS,
 } from '../relic.library';
 import { SIGNATURE_SKILLS } from '../../Combat/combat.signature';
-import { SLOT_CAPACITY } from '../types';
 import type { SignatureSkillId } from '../../Combat/combat.encounter.types';
 import { emptyLoadout } from '../../Character/types';
+import { FIXTURE_WEAPON, FIXTURE_ARMOR, FIXTURE_TRINKETS } from '../../Game/fixtures';
 
 const ALL_SIGNATURE_IDS = Object.keys(SIGNATURE_SKILLS) as SignatureSkillId[];
+const RING_ID = 'relic-disarming-plea';
 
-describe('relic library — roster + slot split', () => {
-    it('ships exactly 11 relics', () => {
-        expect(relicLibrary).toHaveLength(11);
+describe('relic library — roster', () => {
+    it('ships exactly one relic, the Suppliant\'s Ring', () => {
+        expect(relicLibrary.map(r => r.id)).toEqual([RING_ID]);
+        const ring = getRelicById(RING_ID)!;
+        expect(ring.name).toBe("Suppliant's Ring");
+        expect(ring.slot).toBe('accessory');
+        expect(ring.accessoryKind).toBe('ring');
     });
 
-    it('splits 2 weapon / 2 armor / 7 accessory', () => {
-        const bySlot = (slot: string) => relicLibrary.filter(r => r.slot === slot);
-        expect(bySlot('weapon')).toHaveLength(2);
-        expect(bySlot('armor')).toHaveLength(2);
-        expect(bySlot('accessory')).toHaveLength(7);
-    });
-
-    it('every accessory relic carries an accessoryKind; weapons/armor do not', () => {
-        for (const r of relicLibrary) {
-            if (r.slot === 'accessory') expect(r.accessoryKind).toBeDefined();
-            else expect(r.accessoryKind).toBeUndefined();
-        }
-    });
-
-    it('every relic grants exactly one signature; the 11 cover the full roster with no dupes', () => {
+    it('every relic grants exactly one signature; together they cover the full roster with no dupes', () => {
         const granted = relicLibrary.map(r => r.grantsSignature);
         expect(granted.every(Boolean)).toBe(true);
-        expect(new Set(granted).size).toBe(11);
+        expect(new Set(granted).size).toBe(relicLibrary.length);
         expect([...granted].sort()).toEqual([...ALL_SIGNATURE_IDS].sort());
+        expect(getRelicById(RING_ID)!.grantsSignature).toBe('sig-disarming-plea');
     });
 
     it('relics are the lean signet shape — only stat/signature fields (Phase 23)', () => {
         for (const r of relicLibrary) {
-            // Phase 23 — the rarity / rolled-mod / affix / effect / proc / resource
-            // fields are gone from the Equipment type entirely.
             const keys = Object.keys(r).sort();
             expect(keys).toEqual(
                 (r.slot === 'accessory'
@@ -57,68 +47,33 @@ describe('relic library — roster + slot split', () => {
         }
     });
 
-    it('stat pool is maxHp +5 on the two armor relics only; every other relic carries no stat line', () => {
-        // TRIM THE FAT T2a (D14) cut the +2 body/mind/heart lines; relics other
-        // than the armor pair grant only their signature (the Suppliant's Ring
-        // already did — owner call 2026-09-23).
-        const ARMOR_RELIC_IDS = ['relic-read', 'relic-second-wind'];
-        for (const r of relicLibrary) {
-            if (ARMOR_RELIC_IDS.includes(r.id)) {
-                expect(r.slot).toBe('armor');
-                expect(r.statModifiers).toEqual([{ stat: 'maxHp', value: 5 }]);
-            } else {
-                expect(r.statModifiers, r.id).toEqual([]);
-            }
-        }
+    it('the ring carries no stat line — it grants only its signature', () => {
+        for (const r of relicLibrary) expect(r.statModifiers, r.id).toEqual([]);
+    });
+
+    it('resolves an unknown or deleted relic id to undefined', () => {
+        expect(getRelicById('relic-overwhelming')).toBeUndefined();
+        expect(getRelicById('nope')).toBeUndefined();
     });
 });
 
-describe('relic library — default loadout', () => {
-    it('DEFAULT_WORN_RELIC_IDS is a legal loadout (1 weapon + 1 armor + 3 accessories)', () => {
-        const worn = DEFAULT_WORN_RELIC_IDS.map(id => getRelicById(id)!);
-        expect(worn.filter(r => r.slot === 'weapon')).toHaveLength(1);
-        expect(worn.filter(r => r.slot === 'armor')).toHaveLength(1);
-        expect(worn.filter(r => r.slot === 'accessory')).toHaveLength(SLOT_CAPACITY.accessory);
-        expect(worn).toHaveLength(5);
-    });
-
-    it('the 6 benched relics are exactly the non-default weapon/armor/accessory', () => {
-        expect(BENCHED_RELIC_IDS).toHaveLength(6);
-        const overlap = BENCHED_RELIC_IDS.filter(id => DEFAULT_WORN_RELIC_IDS.includes(id));
-        expect(overlap).toEqual([]);
-        // Worn + benched partition the full 11.
-        expect([...DEFAULT_WORN_RELIC_IDS, ...BENCHED_RELIC_IDS].sort())
-            .toEqual(relicLibrary.map(r => r.id).sort());
-    });
-
-    it('cloneStartingRelics returns fresh, non-aliased objects in canonical worn order', () => {
+describe('cloneStartingRelics', () => {
+    it('returns the whole library as fresh, non-aliased clones', () => {
         const a = cloneStartingRelics();
         const b = cloneStartingRelics();
-        expect(a.worn).toHaveLength(5);
-        expect(a.benched).toHaveLength(6);
-        // canonical order: weapon, armor, then accessories.
-        expect(a.worn.map(r => r.slot)).toEqual(['weapon', 'armor', 'accessory', 'accessory', 'accessory']);
+        expect(a.map(r => r.id)).toEqual(relicLibrary.map(r => r.id));
+        expect(a).toEqual([...relicLibrary]);
         // Fresh objects each call (equipping must not mutate the singleton library).
-        expect(a.worn[0]).not.toBe(b.worn[0]);
-        const singleton = getRelicById(a.worn[0].id);
-        expect(a.worn[0]).not.toBe(singleton);
+        expect(a[0]).not.toBe(b[0]);
+        expect(a[0]).not.toBe(getRelicById(a[0].id));
+        expect(a[0].statModifiers).not.toBe(getRelicById(a[0].id)!.statModifiers);
     });
 });
 
 describe('getSignaturesForLoadout', () => {
-    it('derives the 5 default-worn signatures in slot order (weapon, armor, accessories)', () => {
-        const { worn } = cloneStartingRelics();
-        const loadout = {
-            weapon: worn.find(r => r.slot === 'weapon')!,
-            armor: worn.find(r => r.slot === 'armor')!,
-            accessories: worn.filter(r => r.slot === 'accessory'),
-        };
-        // Owner call 2026-07-18: Press Fate rides the default loadout (Gambler's
-        // Knot in, Venom Sigil benched) so every starter owns the whiff valve.
-        expect(getSignaturesForLoadout(loadout)).toEqual([
-            'sig-overwhelming-argument', 'sig-read-opponent',
-            'sig-clever-gambit', 'sig-disarming-plea', 'sig-press-the-point',
-        ]);
+    it('derives the ring\'s signature from a worn ring', () => {
+        const loadout = { weapon: null, armor: null, accessories: cloneStartingRelics() };
+        expect(getSignaturesForLoadout(loadout)).toEqual(['sig-disarming-plea']);
     });
 
     it('returns [] for an empty loadout (combat may legally begin signature-less)', () => {
@@ -126,13 +81,20 @@ describe('getSignaturesForLoadout', () => {
     });
 
     it('dedupes when two worn pieces grant the same signature (first occurrence wins)', () => {
-        const overwhelming = getRelicById('relic-overwhelming')!;
-        const loadout = { weapon: overwhelming, armor: null, accessories: [{ ...overwhelming, id: 'dup', slot: 'accessory' as const, accessoryKind: 'charm' as const }] };
-        expect(getSignaturesForLoadout(loadout)).toEqual(['sig-overwhelming-argument']);
+        const ring = getRelicById(RING_ID)!;
+        const loadout = { weapon: null, armor: null, accessories: [ring, { ...ring, id: 'dup' }] };
+        expect(getSignaturesForLoadout(loadout)).toEqual(['sig-disarming-plea']);
+    });
+
+    it('reads the signature from any slot (a weapon-slot carrier counts)', () => {
+        const ringAsWeapon = { ...FIXTURE_WEAPON, grantsSignature: 'sig-disarming-plea' as const };
+        expect(getSignaturesForLoadout({ weapon: ringAsWeapon, armor: null, accessories: [] }))
+            .toEqual(['sig-disarming-plea']);
     });
 
     it('ignores non-relic worn pieces (no grantsSignature)', () => {
-        const plainWeapon = { ...getRelicById('relic-overwhelming')!, id: 'plain', grantsSignature: undefined };
-        expect(getSignaturesForLoadout({ weapon: plainWeapon, armor: null, accessories: [] })).toEqual([]);
+        expect(getSignaturesForLoadout({
+            weapon: FIXTURE_WEAPON, armor: FIXTURE_ARMOR, accessories: [...FIXTURE_TRINKETS],
+        })).toEqual([]);
     });
 });

@@ -26,47 +26,17 @@
  *
  * ## The shape of the move
  *
- * `withholdFirstNodeRelic` and `grantFirstNodeRelic` are exact inverses over
- * the seeded character:
+ * `withholdFirstNodeRelic` and `grantFirstNodeRelic` are inverses over a
+ * seeded character:
  *
  * - **withhold** (kept for callers that seed the kit themselves — since the
- *   2026-09-23 owner call `createNewGameState` seeds no relics) takes the fully
- *   seeded character and removes the Suppliant's Ring from both `inventory`
- *   and the worn accessory row, promoting the highest-ranked benched
- *   accessory (`STAND_IN_RELIC_ID`, the Venom Sigil) into the freed seat.
- * - **grant** (applied at the first node) puts it back: the stand-in is
- *   unequipped and returned to the bench, the ring is added to inventory in
- *   the worn window and equipped.
+ *   2026-09-23 owner call `createNewGameState` seeds no relics) takes the ring
+ *   off the worn accessory row and out of `inventory`.
+ * - **grant** (applied at the first node) puts it back: added to inventory in
+ *   the worn window and equipped. A full accessory row gives up its last worn
+ *   piece to the satchel first, so the equip never no-ops.
  *
- * The round trip is asserted by test. Post-grant state is EQUIVALENT to
- * today's shipped seed — same five worn relics, same five signatures, same
- * derived stats, same eleven items owned — so nothing downstream of the first
- * node changes. It is not byte-identical: inventory ORDER differs (the ring
- * lands third in the accessory worn-window rather than second, and the
- * stand-in ends the list). Accessory positions carry no identity, so that
- * difference is cosmetic by construction.
- *
- * ### Why the seat is back-filled rather than left empty
- *
- * Worn-state has TWO representations that must agree: the engine's
- * `Character.equipment` loadout, and the positional convention every
- * inventory-driven client reads (`wornPerSlot` — the first
- * `SLOT_CAPACITY[slot]` equipment items per slot, in inventory order). The
- * positional convention cannot express a partially-filled accessory row: with
- * six accessories in inventory it will always report three as worn. Leaving
- * the ring's seat empty would therefore have the SATCHEL dock draw a benched
- * relic as TRINKET III while combat derived no signature from it — a visible
- * drift between two surfaces reading the same save. Back-filling the seat
- * keeps both models at three and keeps them agreeing.
- *
- * ### Why the library is untouched
- *
- * `defaultWorn` on `relic.library.ts` feeds `cloneStartingRelics()`, which
- * also feeds `buildCharacterFromPreset` — and therefore every combat sim and
- * the measured baselines. Changing it there would move balance for a UI
- * finding. The withholding was applied at `createNewGameState()` only (the one
- * real-player origination point, which now seeds nothing at all). Presets,
- * fixtures, mocks and sims keep the exact loadout they have today.
+ * The round trip is asserted by test.
  *
  * ## Settling
  *
@@ -95,16 +65,6 @@ import { equipItem, unequipItem } from './equipment.reducer';
  * (`grantsSignature: 'sig-disarming-plea'` — "The Open Hand").
  */
 export const FIRST_NODE_RELIC_ID = 'relic-disarming-plea';
-
-/**
- * The benched accessory promoted into the ring's seat for the pre-grant
- * window, and displaced back to the bench when the ring lands: the Venom
- * Sigil ("The Oath Kept").
- *
- * It holds the seat for exactly one node and then goes back to the bench, so
- * the loadout the player fights with is unchanged.
- */
-export const STAND_IN_RELIC_ID = 'relic-conviction-strike';
 
 /**
  * Set on `GameState.flags` once the first-node grant has been settled, by
@@ -191,51 +151,25 @@ function benchInInventory(inventory: readonly Item[], relicId: string): Item[] {
 }
 
 /**
- * Remove the Suppliant's Ring from a freshly seeded character and back-fill
- * its accessory seat with the stand-in, producing the pre-grant character a
- * fresh run starts from.
- *
- * Returns the character unchanged when the ring is not worn/owned (already
- * withheld, or a caller-chosen loadout that never had it), so this is safe to
- * apply once to any seeded character (`createNewGameState` no longer calls it).
+ * Take the Suppliant's Ring off a seeded character (worn row and inventory),
+ * producing the pre-grant character. Returns the character unchanged when the
+ * ring is not owned, so this is safe to apply to any character
+ * (`createNewGameState` no longer calls it).
  */
 export function withholdFirstNodeRelic(character: Character): Character {
-    const accessories = character.equipment.accessories;
-    const wornIndex = accessories.findIndex(a => a.id === FIRST_NODE_RELIC_ID);
+    const wornIndex = character.equipment.accessories.findIndex(a => a.id === FIRST_NODE_RELIC_ID);
     if (wornIndex === -1 && !ownsRelic(character, FIRST_NODE_RELIC_ID)) return character;
 
-    let next = character;
-    if (wornIndex !== -1) next = unequipItem(next, 'accessory', wornIndex);
-
-    // Drop the ring from inventory entirely — it is not the player's yet.
-    next = { ...next, inventory: next.inventory.filter(i => i.id !== FIRST_NODE_RELIC_ID) };
-
-    // Back-fill the freed seat so the worn row stays at capacity and the
-    // positional convention keeps agreeing with the engine loadout.
-    const alreadyWorn = next.equipment.accessories.some(a => a.id === STAND_IN_RELIC_ID);
-    const standIn = alreadyWorn ? undefined : next.inventory.find(
-        (i): i is Equipment => isEquipment(i) && i.id === STAND_IN_RELIC_ID,
-    );
-    if (standIn && next.equipment.accessories.length < SLOT_CAPACITY.accessory) {
-        next = {
-            ...next,
-            inventory: insertIntoWornWindow(
-                next.inventory.filter(i => i.id !== STAND_IN_RELIC_ID),
-                standIn,
-            ),
-        };
-        next = equipItem(next, standIn);
-    }
-    return next;
+    const next = wornIndex === -1 ? character : unequipItem(character, 'accessory', wornIndex);
+    return { ...next, inventory: next.inventory.filter(i => i.id !== FIRST_NODE_RELIC_ID) };
 }
 
 /**
  * Hand the Suppliant's Ring to the player. Idempotent, non-destructive, and
  * safe to call on any character/flag pair.
  *
- * When the accessory row is at capacity the stand-in relic is unequipped
- * first and returned to the satchel (never dropped); when some other relic
- * holds the seat, the last worn accessory is displaced instead. When the row
+ * When the accessory row is at capacity the last worn accessory is
+ * unequipped first and returned to the satchel (never dropped). When the row
  * has a free position the ring simply fills it and `displaced` is `null`.
  */
 export function grantFirstNodeRelic(
@@ -273,10 +207,8 @@ export function grantFirstNodeRelic(
 
     const accessories = next.equipment.accessories;
     if (accessories.length >= SLOT_CAPACITY.accessory) {
-        // Prefer displacing the stand-in that was holding the ring's seat;
-        // otherwise take the last worn accessory so the equip cannot no-op.
-        const standInIdx = accessories.findIndex(a => a.id === STAND_IN_RELIC_ID);
-        const idx = standInIdx === -1 ? accessories.length - 1 : standInIdx;
+        // Take the last worn accessory so the equip cannot no-op.
+        const idx = accessories.length - 1;
         displaced = accessories[idx]!;
         next = unequipItem(next, 'accessory', idx);
         // The displaced piece stays owned — push it out of the worn window so

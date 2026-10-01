@@ -61,19 +61,32 @@ describe('EquipDeltaPanel', () => {
     });
 
     // Phase 19/23 — signet relic signature swap.
-    it('renders the gained and lost signatures of a relic swap', () => {
+    it('renders the signature a relic grants', () => {
         const { getByText, getByTestId } = renderPanel(
             makeDelta({
                 mode: 'swap',
                 signatures: {
-                    gained: [{ id: 'sig-second-wind', name: 'Second Wind' }],
-                    lost: [{ id: 'sig-read-opponent', name: 'Read the Entrails' }],
+                    gained: [{ id: 'sig-disarming-plea', name: 'The Open Hand' }],
+                    lost: [],
                 },
             }),
         );
         expect(getByTestId(`equip-delta-signatures-${ITEM_ID}`)).toBeTruthy();
-        expect(getByText('grants Second Wind')).toBeTruthy();
-        expect(getByText('loses Read the Entrails')).toBeTruthy();
+        expect(getByText('grants The Open Hand')).toBeTruthy();
+    });
+
+    it('renders the signature a relic swap loses', () => {
+        const { getByText, getByTestId } = renderPanel(
+            makeDelta({
+                mode: 'swap',
+                signatures: {
+                    gained: [],
+                    lost: [{ id: 'sig-disarming-plea', name: 'The Open Hand' }],
+                },
+            }),
+        );
+        expect(getByTestId(`equip-delta-signatures-${ITEM_ID}`)).toBeTruthy();
+        expect(getByText('loses The Open Hand')).toBeTruthy();
     });
 
     it('omits the signature row when nothing changes', () => {

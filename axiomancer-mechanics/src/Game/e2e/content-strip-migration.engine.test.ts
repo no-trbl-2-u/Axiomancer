@@ -55,7 +55,7 @@ const hop = (raw: Record<string, unknown>): GameState => migrate(raw, 33, 34);
 
 describe('migrate v33 → v34 (THE REVAMP R7e / D72)', () => {
     it('lands at the current version', () => {
-        expect(GAME_STATE_VERSION).toBe(34);
+        expect(GAME_STATE_VERSION).toBeGreaterThanOrEqual(34);
         expect(hop({ ...createNewGameState(), version: 33 }).version).toBe(34);
     });
 

@@ -168,8 +168,10 @@ import { generateRunId } from './run-loop';
  * 2026-10-01 — bumped 33 → 34: THE REVAMP R7e (D72). The parked world's
  *   content is deleted; the hop moves a save off a deleted map onto the
  *   Lantern Deep and drops the deleted maps, quests and story flags.
+ * 2026-10-01 — bumped 34 → 35: THE REVAMP R7e2 (D72). The relic library is
+ *   the Suppliant's Ring alone; the hop drops every other relic.
  */
-export const GAME_STATE_VERSION = 34;
+export const GAME_STATE_VERSION = 35;
 
 /**
  * Builds a brand-new GameState with default player and world.
@@ -198,14 +200,11 @@ export function createNewGameState(opts: { startMap?: MapName } = {}): GameState
         // the run owes the player, the Suppliant's Ring, is still handed over
         // at the first node (`Character/first-node-grant.ts` — with an empty
         // accessory row it simply fills the first seat, displacing nothing).
-        // The other ten signet relics are village-market wares now
-        // (`World/MapEvents/content.ts`), bought with coin the run earns.
         //
-        // Presets, fixtures, mocks and sims still seed the Phase-19 kit via
-        // `buildCharacterFromPreset` / `cloneStartingRelics`, so the measured
-        // baselines are untouched by this — only the real-player origination
-        // point changed. (The v24 stand-in swap, `withholdFirstNodeRelic`,
-        // is kept exported for callers that seed the kit themselves.)
+        // Presets, fixtures, mocks and sims still seed the starting relics via
+        // `buildCharacterFromPreset` / `cloneStartingRelics`; only the
+        // real-player origination point differs. (`withholdFirstNodeRelic` is
+        // kept exported for callers that seed the kit themselves.)
         player: createCharacter({
             name: 'Player',
             level: 1,

@@ -16,7 +16,7 @@ import { DevChip, DevChips, DevRow } from '@/components/dev/DevControls';
 import { isDevToolsEnabled } from '@/lib/buildProfile';
 import { useGameActions } from '@/state/GameStoreProvider';
 
-/** `relic-second-wind` → `second wind`; `minor-healing-potion` → `minor healing potion`. */
+/** `relic-disarming-plea` → `disarming plea`; `minor-healing-potion` → `minor healing potion`. */
 const chipLabel = (id: string): string => id.replace(/^relic-/, '').replace(/-/g, ' ');
 
 const RELIC_IDS = relicLibrary.map((r) => r.id);

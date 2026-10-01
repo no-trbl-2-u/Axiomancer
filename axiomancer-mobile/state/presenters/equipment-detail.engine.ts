@@ -63,7 +63,7 @@ export interface EquipmentStatLine {
  * The signature skill a signet relic grants while worn.
  *
  * @property id          - Engine `SignatureSkillId`.
- * @property name        - Player-facing skill name ("The Stilling").
+ * @property name        - Player-facing skill name ("The Open Hand").
  * @property cost        - Conviction (◆) cost to cast, from the engine.
  * @property description - The engine's own effect text, verbatim. This is the
  *                         exact mechanical effect — deliberately NOT rewritten

@@ -70,26 +70,32 @@ describe('CombatDieVM face axis', () => {
     });
 });
 
-describe('signature runes (R4 placeholders — the engine cast gate)', () => {
+describe('signature runes (the engine cast gate)', () => {
     function withRunes(conviction: number): CombatEncounterState {
         const s = openEncounter();
-        s.signatures = ['sig-overwhelming-argument', 'sig-disarming-plea'];
+        s.signatures = ['sig-disarming-plea'];
         s.conviction = conviction;
         return s;
     }
     const rune = (s: CombatEncounterState, id: string) =>
         buildCombatViewModel(s).signatures.find(x => x.id === id)!;
+    /** A befriendable foe inside The Open Hand's HP gate. */
+    function spareable(s: CombatEncounterState): CombatEncounterState {
+        s.enemy = {
+            ...s.enemy, health: 1, befriendabilityConfig: { hpGate: { belowPct: 0.3 } },
+            friendshipReward: { narrative: 'spared' },
+        };
+        return s;
+    }
 
-    it('a GUARD rune prints the flat cost and its one line, castable when funded', () => {
-        const r = rune(withRunes(4), 'sig-overwhelming-argument');
+    it('The Open Hand rune prints the flat cost and its one line', () => {
+        const r = rune(withRunes(4), 'sig-disarming-plea');
         expect(r.cost).toBe(4);
-        expect(r.description).toBe('Raise GUARD 5.');
-        expect(r.affordable).toBe(true);
-        expect(r.reason).toBeNull();
+        expect(r.description).toBe('Offer the foe mercy. A foe that can be befriended, once low enough, may be spared.');
     });
 
     it('a rune is refused with the reason when Conviction is short', () => {
-        const r = rune(withRunes(3), 'sig-overwhelming-argument');
+        const r = rune(spareable(withRunes(3)), 'sig-disarming-plea');
         expect(r.affordable).toBe(false);
         expect(r.reason).toMatch(/Need 4/);
     });

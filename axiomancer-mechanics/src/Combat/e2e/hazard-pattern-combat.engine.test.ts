@@ -7,7 +7,7 @@
  *   - direct-damage cards still contribute 0 pressure
  *   - a landed status lands on the enemy; the powering die is spent
  *   - between-phases fires DoT ticks + ticks durations + draws a fresh hand
- *   - Signature Skills spend Conviction (the R4 GUARD placeholders) regardless of hand
+ *   - a Signature Skill is gated on Conviction, regardless of hand
  *   - victory by HP depletion via status play (card-sourced cards only); post-combat attribution
  *   - the Monte-Carlo sim reports per-phase Clear rates
  *
@@ -31,9 +31,10 @@ import {
     startTurn,
 } from '../combat.engine';
 import { UPGRADEABLE_DIE_COLORS } from '../combat.upgradeable-dice';
-import { SIGNATURE_SKILL_LIST, SIGNATURE_COST, signatureGuardAmount } from '../combat.signature';
-import { getSignaturesForLoadout, getRelicById } from '../../Items/relic.library';
-import { equipItem } from '../../Character';
+import { SIGNATURE_COST } from '../combat.signature';
+import { getSignaturesForLoadout } from '../../Items/relic.library';
+import { equipItem, unequipItem } from '../../Character';
+import { FIXTURE_TRINKETS } from '../../Game/fixtures';
 import { rollCombatCardRewards, addRewardCard, unlockCardViaDilemma, COMBAT_REWARD_POOL } from '../combat.rewards';
 import { buildCombatDeck, COMBAT_HAND_SIZE } from '../combat.deck';
 import { getCardById } from '../../Cards/cards.library';
@@ -319,27 +320,13 @@ describe('Spec 25 §4.5 — between-phases processing', () => {
 
 // ── Signature Skills (§4) ────────────────────────────────────────────────────
 
-describe('Spec 26b §4 — Signature Skills (Conviction-funded, R4 placeholders)', () => {
-    it('every signature but The Open Hand raises GUARD for the flat cost, regardless of hand', () => {
-        mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(60, 'mind'), [DOT_BODY], 2);
-        state = rollEncounterDice(state).state;
-        for (const sig of SIGNATURE_SKILL_LIST.filter(s => s.kind === 'guard')) {
-            const start = { ...state, conviction: SIGNATURE_COST, guard: 0 };
-            const r = playSignatureSkill(start, sig.id);
-            expect(r.events.some(e => e.kind === 'signature-cast')).toBe(true);
-            expect(r.state.conviction).toBe(0);
-            expect(r.state.guard).toBe(signatureGuardAmount(start, sig));
-            expect(r.state.enemy).toBe(start.enemy); // the foe is untouched
-        }
-    });
-
+describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
     it('a signature skill fizzles (no-op, nothing spent) when underfunded', () => {
         mockSequentialRng(0.5);
         let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(60, 'mind'), [DOT_BODY], 1);
         state = rollEncounterDice(state).state;
         state = { ...state, conviction: SIGNATURE_COST - 1 };
-        const r = playSignatureSkill(state, 'sig-overwhelming-argument');
+        const r = playSignatureSkill(state, 'sig-disarming-plea');
         expect(r.state.conviction).toBe(SIGNATURE_COST - 1);
         expect(r.state.guard ?? 0).toBe(state.guard ?? 0);
         expect(r.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
@@ -387,22 +374,21 @@ describe('Spec 26b tuning — projection + carry', () => {
 describe('Spec 26b §B/§C/§D — archetype kit, rewards, unlock, difficulty floor', () => {
     it('the signature kit is derived from the worn signet-relic loadout, not archetype', () => {
         // Phase 19 — signatures come from worn equipment. The fixture player
-        // wears the default 5-relic loadout, so the kit is the 5 default-worn
-        // signatures regardless of the (portrait-only) archetype / base stats.
+        // wears the Suppliant's Ring, so the kit is The Open Hand regardless
+        // of the (portrait-only) archetype / base stats.
         const bodyPlayer = makePlayer([DOT_BODY]); bodyPlayer.baseStats = { heart: 2, body: 9, mind: 2 };
         const s = initializeCombatEncounter(bodyPlayer, makeEnemy(60), [DOT_BODY], 1);
         expect(s.archetype).toBe('body'); // archetype still derived (portrait flavour)
         expect(s.signatures).toEqual(getSignaturesForLoadout(bodyPlayer.equipment));
-        expect(s.signatures).toEqual([
-            'sig-overwhelming-argument', 'sig-read-opponent',
-            'sig-clever-gambit', 'sig-disarming-plea', 'sig-press-the-point',
-        ]);
-        // Swapping the worn weapon relic changes which signature is available —
-        // independent of base stats (the old archetype gate is gone).
-        const swapped = equipItem(bodyPlayer, getRelicById('relic-conclusion')!);
+        expect(s.signatures).toEqual(['sig-disarming-plea']);
+        // Taking the ring off empties the kit; a signature-less relic in its
+        // seat grants nothing — independent of base stats (the old archetype
+        // gate is gone).
+        const ringIdx = bodyPlayer.equipment.accessories.findIndex(a => a.id === 'relic-disarming-plea');
+        expect(ringIdx).toBeGreaterThanOrEqual(0);
+        const swapped = equipItem(unequipItem(bodyPlayer, 'accessory', ringIdx), FIXTURE_TRINKETS[0]);
         const s2 = initializeCombatEncounter(swapped, makeEnemy(60), [DOT_BODY], 1);
-        expect(s2.signatures).toContain('sig-rallying-blow');        // Capstone Maul grants The Butcher's Bill
-        expect(s2.signatures).not.toContain('sig-overwhelming-argument');
+        expect(s2.signatures).toEqual([]);
     });
 
     it('rollCombatCardRewards offers valid distinct card-sourced cards, biased to archetype', () => {

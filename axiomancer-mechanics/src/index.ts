@@ -23,7 +23,7 @@ export {
     DIE_GEAR_COLORS,
     characterPresets, getPresetById, buildCharacterFromPreset,
     grantFirstNodeRelic, withholdFirstNodeRelic, isFirstNodeRelicPending,
-    FIRST_NODE_RELIC_ID, STAND_IN_RELIC_ID, FIRST_NODE_RELIC_FLAG,
+    FIRST_NODE_RELIC_ID, FIRST_NODE_RELIC_FLAG,
     levelLadderPresets,
     previewStatAllocation,
 } from './Character';
@@ -77,7 +77,7 @@ export {
     // Spec 26b / spec 33 — turn lifecycle, Conviction, Signature Skills
     startTurn, endTurn, discardCombatCard,
     playSignatureSkill,
-    getSignatureSkill, signatureCastBlock, signatureGuardAmount, SIGNATURE_COST, SIGNATURE_GUARD,
+    getSignatureSkill, signatureCastBlock, SIGNATURE_COST,
     colorMatchBonus,
     // phase 28 — legibility sweep
     projectIncomingThreat,
@@ -208,6 +208,7 @@ export {
     getStateFixtureById, listStateFixtureIds,
     FIXTURE_NPC, FIXTURE_SHOP, FIXTURE_QUEST,
     FIXTURE_DIALOGUE_EVENT, FIXTURE_VILLAGE_EVENT, FIXTURE_CUTSCENE_EVENT,
+    FIXTURE_WEAPON, FIXTURE_ARMOR, FIXTURE_TRINKETS,
 } from './Game';
 export type {
     StateFixture,

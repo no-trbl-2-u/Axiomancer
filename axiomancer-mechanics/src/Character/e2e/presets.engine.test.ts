@@ -41,16 +41,16 @@ describe('buildCharacterFromPreset', () => {
         expect(player.name).toBe('Apprentice');
         expect(player.level).toBe(1);
         expect(player.baseStats).toEqual({ heart: 5, body: 5, mind: 5 });
-        // Phase 19 — every preset wears the default 5-relic loadout (signatures
-        // come from worn equipment, not archetype).
-        expect(player.equipment.weapon?.id).toBe('relic-overwhelming');
-        expect(player.equipment.armor?.id).toBe('relic-read');
-        expect(player.equipment.accessories).toHaveLength(3);
+        // Every preset wears the starting relics (R7e2: the Suppliant's Ring
+        // alone; signatures come from worn equipment, not archetype).
+        expect(player.equipment.weapon).toBeNull();
+        expect(player.equipment.armor).toBeNull();
+        expect(player.equipment.accessories.map(a => a.id)).toEqual(['relic-disarming-plea']);
         // The card purge (P1, 2026-09-27): every preset seeds the grey deck.
         expect(player.knownCards).toEqual([...STARTING_CARD_IDS]);
-        // Apprentice declares no procedural gear: inventory = 11 relics (worn-first)
+        // Apprentice declares no procedural gear: inventory = the ring (worn-first)
         // + the 1 declared potion.
-        expect(player.inventory).toHaveLength(12);
+        expect(player.inventory.map(i => i.id)).toEqual(['relic-disarming-plea', 'minor-healing-potion']);
         const potion = player.inventory.find(i => i.id === 'minor-healing-potion');
         expect(potion).toBeDefined();
         expect((potion as Consumable | undefined)?.quantity).toBe(3);
@@ -63,13 +63,11 @@ describe('buildCharacterFromPreset', () => {
         expect(player.level).toBe(8);
         expect(player.baseStats).toEqual({ heart: 5, body: 4, mind: 4 });
         expect(player.knownCards).toEqual([...STARTING_CARD_IDS]); // the purge: grey deck at every tier
-        // Phase 21 — the procedural library is retired; presets wear the relic
-        // loadout and carry NO procedural gear (only relics as equipment).
-        expect(player.equipment.weapon?.id).toBe('relic-overwhelming');
-        expect(player.equipment.armor?.id).toBe('relic-read');
+        // Phase 21 — the procedural library is retired; presets wear the ring
+        // and carry NO procedural gear (the ring is the only equipment).
+        expect(player.equipment.accessories.map(a => a.id)).toEqual(['relic-disarming-plea']);
         const invEquipmentIds = player.inventory.filter(i => i.category === 'equipment').map(i => i.id);
-        expect(invEquipmentIds.every(id => id.startsWith('relic-'))).toBe(true);
-        expect(invEquipmentIds).not.toContain('iron-blade');
+        expect(invEquipmentIds).toEqual(['relic-disarming-plea']);
         expect(player.currency).toBe(25);
     });
 
@@ -79,13 +77,11 @@ describe('buildCharacterFromPreset', () => {
         expect(player.level).toBe(15);
         expect(player.baseStats).toEqual({ heart: 20, body: 30, mind: 25 });
         expect(player.knownCards).toEqual([...STARTING_CARD_IDS]); // the purge: grey deck at every tier
-        // Phase 19 — wears the relic loadout; declared procedural gear benched.
-        expect(player.equipment.weapon?.id).toBe('relic-overwhelming');
-        expect(player.equipment.armor?.id).toBe('relic-read');
-        // Phase 21 — no procedural gear; only relics as equipment.
+        // Wears the ring; declared procedural gear does not resolve (Phase 21),
+        // so the ring is the only equipment.
+        expect(player.equipment.accessories.map(a => a.id)).toEqual(['relic-disarming-plea']);
         const invEquipmentIds = player.inventory.filter(i => i.category === 'equipment').map(i => i.id);
-        expect(invEquipmentIds.every(id => id.startsWith('relic-'))).toBe(true);
-        expect(invEquipmentIds).not.toContain('steel-blade');
+        expect(invEquipmentIds).toEqual(['relic-disarming-plea']);
         expect(player.currency).toBe(75);
     });
 

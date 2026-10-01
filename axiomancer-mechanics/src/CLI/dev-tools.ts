@@ -93,7 +93,7 @@ export function devUnlockCards(store: Store, cardIds: string[] | 'all'): DevResu
 
 export function devGrantAllEquipment(store: Store, _rarity: string = 'common'): DevResult {
     // Phase 21 — the procedural library is retired; the only equipment is the
-    // signet relics (11 since Phase 85). Grant a fresh clone of each (rarity is
+    // signet relics. Grant a fresh clone of each (rarity is
     // meaningless now).
     const state = store.getState();
     let count = 0;
@@ -156,6 +156,6 @@ export function getCardIds(): string[] {
 }
 
 export function getEquipmentTemplateIds(): string[] {
-    // Phase 21 — the "equipment templates" are now the signet relics (11 since Phase 85).
+    // Phase 21 — the "equipment templates" are now the signet relics.
     return relicLibrary.map(r => r.id);
 }

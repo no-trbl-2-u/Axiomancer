@@ -55,7 +55,7 @@ export {
     // Spec 26b / spec 33 — turn lifecycle + Conviction + Signature Skills
     startTurn, endTurn, discardCombatCard,
     playSignatureSkill,
-    getSignatureSkill, signatureCastBlock, signatureGuardAmount, SIGNATURE_COST, SIGNATURE_GUARD,
+    getSignatureSkill, signatureCastBlock, SIGNATURE_COST,
     // THE BIG NUMBERS REWRITE — the LIVE colour-match rule. Mobile's presenter
     // must consume this, or the card face prints a bonus the engine does not
     // apply.

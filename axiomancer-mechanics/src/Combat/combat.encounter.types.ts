@@ -161,26 +161,12 @@ export interface CardPlay {
 // Conviction + Signature Skills (Spec 26b §1, §4)
 // ---------------------------------------------------------------------------
 
-/** What a signature skill does (drives the engine dispatch + the UI icon).
- *  Phase R4 left two placeholders until the owner re-authors them (B1). */
+/** What a signature skill does (drives the engine dispatch + the UI icon). */
 export type SignatureSkillKind =
-    | 'guard'          // raise GUARD (mind-scaled, like a card's GUARD)
     | 'mercy';         // The Open Hand: open the mercy choice on a befriendable foe
 
 export type SignatureSkillId =
-    | 'sig-read-opponent'
-    | 'sig-press-the-point'
-    | 'sig-second-wind'
-    | 'sig-overwhelming-argument'
-    | 'sig-conviction-strike'
-    // Per-archetype exclusives (Spec 26b tuning §B)
-    | 'sig-disarming-plea'    // heart
-    | 'sig-rallying-blow'     // body
-    | 'sig-clever-gambit'     // mind
-    // Phase 85 — head/hands/feet accessory relics
-    | 'sig-mounting-dread'    // mind (head)
-    | 'sig-endless-labor'     // body (hands)
-    | 'sig-unbroken-stride';  // body (feet)
+    | 'sig-disarming-plea';
 
 /** Player archetype, derived from the dominant base stat. Drives (mobile) the
  *  portrait only — Phase 19 retired the archetype→signature gating. */
@@ -195,8 +181,6 @@ export interface SignatureSkill {
     /** Conviction (◆) cost. */
     cost: number;
     kind: SignatureSkillKind;
-    /** The GUARD a `guard` signature raises (unused by `mercy`). */
-    magnitude: number;
 }
 
 // ---------------------------------------------------------------------------

@@ -5,10 +5,15 @@
  * have no live carrier. These placeholders are their witnesses: suites and
  * state fixtures (`stagedEvent`) use them, the live world never registers
  * them, and their text is placeholder copy, not story (D58).
+ *
+ * R7e2 added the fixture relics: the live library is the Suppliant's Ring
+ * alone, so equip / unequip across every slot and the `maxHp` line are
+ * witnessed here. They grant no signature (none can be authored).
  */
 
 import type { NPC } from '../../NPCs/types';
 import type { ShopInventory } from '../../Items/shop.types';
+import type { Equipment } from '../../Items/types';
 import type { MapEventPayload } from '../../World/MapEvents/types';
 import type { Quest } from '../../World/types';
 
@@ -72,3 +77,34 @@ export const FIXTURE_CUTSCENE_EVENT: MapEventPayload = {
     kind: 'cutscene',
     lines: ['A placeholder line.', 'A second placeholder line.'],
 };
+
+/** A weapon-slot fixture relic. */
+export const FIXTURE_WEAPON: Equipment = {
+    id: 'fixture-weapon',
+    name: 'Fixture Weapon',
+    description: 'A placeholder weapon.',
+    category: 'equipment',
+    slot: 'weapon',
+    statModifiers: [],
+};
+
+/** An armor-slot fixture relic: +5 max VITAE, the `maxHp` line's witness. */
+export const FIXTURE_ARMOR: Equipment = {
+    id: 'fixture-armor',
+    name: 'Fixture Armor',
+    description: 'A placeholder armor.',
+    category: 'equipment',
+    slot: 'armor',
+    statModifiers: [{ stat: 'maxHp', value: 5 }],
+};
+
+/** Three accessory-slot fixture relics, one per accessory seat. */
+export const FIXTURE_TRINKETS: readonly Equipment[] = (['amulet', 'charm', 'head'] as const).map((kind, i) => ({
+    id: `fixture-trinket-${i + 1}`,
+    name: `Fixture Trinket ${i + 1}`,
+    description: 'A placeholder trinket.',
+    category: 'equipment',
+    slot: 'accessory',
+    accessoryKind: kind,
+    statModifiers: [],
+}));

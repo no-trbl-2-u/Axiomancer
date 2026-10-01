@@ -1604,7 +1604,7 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
 }
 
 const SIG_ICON: Record<SignatureSkill['kind'], string> = {
-    guard: '🛡', mercy: '🕊',
+    mercy: '🕊',
 };
 
 function signaturesVM(state: CombatEncounterState): CombatSignatureVM[] {
