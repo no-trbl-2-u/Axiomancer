@@ -112,7 +112,7 @@ read the log.** Section container ids are `dev-section-<key>`.
 | Leaf | Helper | What it does | Test ids |
 |---|---|---|---|
 | `DebugWorldTravel` | `state/dev/world-travel.ts` | **Map chips** travel to any map on any continent (start node). **Node chips** jump to a node on the current map and fire its authored event through the live `resolveCurrentMapEvent` (travel doors in red). **RESET MAP** re-seeds the map; **COMPLETE MAP** stamps it done and unlocks the next. **THE APORIA** act buttons enter act I / II / III and open `/labyrinth`. | `debug-travel-map-<map>`, `debug-travel-node-<id>`, `debug-map-reset-button`, `debug-map-complete-button`, `debug-aporia-act{1,2,3}` |
-| `DebugFlags` | `state/dev/flags.ts` | Chips for the tutorial-done flags, the starter-bundle pick, and the hazard hex; ALL TUTS ON / OFF | `debug-flag-<flag>`, `debug-flags-tuts-{on,off}` |
+| `DebugFlags` | `state/dev/flags.ts` | Chips for the tutorial-done flags; ALL TUTS ON / OFF | `debug-flag-<flag>`, `debug-flags-tuts-{on,off}` |
 
 ### ENCOUNTERS — `dev-section-encounters`
 

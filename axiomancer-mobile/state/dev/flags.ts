@@ -2,7 +2,7 @@
  * Dev-only FLAG helpers.
  *
  * `GameState.flags` is the engine's persistent string set: tutorial
- * completions, the starter-bundle pick, hazard scars, keepsakes,
+ * completions, hazard scars, keepsakes,
  * and the encoded hazard deck all ride it. The `/dev` FLAGS row exposes
  * the well-known toggles so a tester can replay a tutorial or skip the
  * title flow without a fresh save.
@@ -16,7 +16,6 @@
 
 import type { GameState } from '@mechanics';
 
-import { BUNDLE_CHOSEN_FLAG } from '@/state/combat/store-actions';
 import type { AppStore } from '@/state/store';
 import {
     BLACKSMITH_TUTORIAL_FLAG,
@@ -36,13 +35,12 @@ export interface KnownFlag {
     readonly label: string;
 }
 
-/** The flags a tester flips by hand. Tutorial coaches first, then gates. */
+/** The flags a tester flips by hand. The tutorial coaches. */
 export const KNOWN_FLAGS: readonly KnownFlag[] = Object.freeze([
     { flag: COMBAT_TUTORIAL_FLAG, label: 'COMBAT TUT' },
     { flag: HAZARD_TUTORIAL_FLAG, label: 'HAZARD TUT' },
     { flag: BLACKSMITH_TUTORIAL_FLAG, label: 'FORGE TUT' },
     { flag: NIGHT_WATCH_TUTORIAL_FLAG, label: 'REST TUT' },
-    { flag: BUNDLE_CHOSEN_FLAG, label: 'BUNDLE PICKED' },
 ]);
 
 /** Read the flag list off any store state. */

@@ -1,21 +1,8 @@
 /**
- * Keyword registry — the player-facing combat vocabulary (spec 32 §3,
- * amended 2026-07-11 by the Phase 29 language pass).
+ * Keyword registry — the player-facing combat vocabulary.
  *
- * 30 KEYWORDS (down from a drifted 32 — the "exactly 30" directive yields
- * to earned support: see `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-keyword-registry.md`).
- * Spec 33 §6 (D4, 2026-07-17) registers three more die-gear rows: BOON
- * (the face payload) plus the blacksmith upgrade verbs HONE and TEMPER.
- * Phase 29 (`plan/archive/2026-09-25-trim-t4/plan/phases/phase_29_keyword_registry.md`) folded six
- * previously-unmapped debuff ids into registry keywords, renamed three
- * colliding words (FESTER→PROLONG, TRANSMUTE→CURDLE, REPRISE→RECALL),
- * retired/merged three ghosts (BARRIER into GUARD, CONJURE — zero library
- * cards, SENTENCE — demoted to card-local text on its sole carrier), and
- * promoted one (SIPHON — was raw unglossed text). TICK and KINDLE are
- * UNCHANGED this phase: TICK's retirement rides Phase 30's FREE-line
- * rework, and KINDLE's fold-into-FORGE is conditional on Phase 30/32
- * content work giving it more carriers — neither is a registry-honesty
- * question this pass.
+ * The registry is `KEYWORD_GLOSS` below: only words a live card, item,
+ * hazard or die still prints (D45, the carrier rule). No fixed count.
  *
  * The doctrine: "every mechanic is a terse, learnable KEYWORD" over "the
  * count is exactly 30" — a mechanic without a keyword here is the bug (see
@@ -47,7 +34,7 @@ const EFFECT_KEYWORD: Record<string, string> = {
 /**
  * SUPPORT effect ids (items / consumables / the Cards token system — tagged
  * `support`/`non-card` in the effect libraries). NOT card keywords and NOT in
- * the 30-keyword glossary; mapped so the combat log never prints a raw id.
+ * the keyword glossary; mapped so the combat log never prints a raw id.
  */
 const SUPPORT_KEYWORD: Record<string, string> = {
     // Revamp R5 (D49) retired every consumable but the healing potions, and

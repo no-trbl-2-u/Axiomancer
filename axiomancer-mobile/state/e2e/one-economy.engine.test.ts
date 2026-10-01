@@ -1,13 +1,11 @@
 /**
- * Hermetic E2E Tests — engine-owned spoils + card learning.
+ * Hermetic E2E Tests — engine-owned spoils + the starter deck.
  *
  * Drives `createAppStore` + the typed action layer end-to-end:
  *
  *  - victory spoils are engine-owned: `endCombat('victory')`'s report
  *    carries the rolled loot + granted XP, already applied to the player;
- *  - starter cards seed an empty `knownCards` before combat starts;
- *  - level-up learn offers come from the engine and
- *    `learnCard` grows `knownCards`.
+ *  - the grey office seeds an empty `knownCards` before combat starts.
  *
  * Legacy turn-based combat (the `state.combat` slice, its per-round
  * bridges + cross-combat resource carry) was removed from the engine in
@@ -19,7 +17,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { createEnemy } from '@mechanics';
+import { createEnemy, STARTING_CARD_IDS } from '@mechanics';
 
 import { createAppStore } from '../store';
 import { createAppActions, type AppActions } from '../actions';
@@ -88,46 +86,23 @@ describe('victory spoils come from the engine endCombat report', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Card learning
+// Starter deck
 // ---------------------------------------------------------------------------
 
-describe('starter cards + learn-card flow', () => {
-    it('startCombat seeds the tier-1 starter set into an empty knownCards', () => {
+describe('the starter deck', () => {
+    it('startCombat seeds the grey office into an empty knownCards', () => {
         expect(store.getState().player.knownCards ?? []).toHaveLength(0);
         actions.startCombat(makeEnemy());
-        const known = store.getState().player.knownCards ?? [];
-        expect(known.length).toBeGreaterThan(0);
-        expect(known).toContain('grey-ward');
+        expect(store.getState().player.knownCards).toEqual([...STARTING_CARD_IDS]);
+        // Seeding is a deck write only: the retired starter-bundle flag is
+        // not written.
+        expect(store.getState().flags ?? []).not.toContain('starter-bundle-chosen');
     });
 
-    /** The grey office is the whole library since the card purge, and the
-     *  starter seed knows all three of its cards — so a player who knows only
-     *  A Plain Blow is the one with something left to learn. */
-    function knowOnlyTheBlow(): void {
+    it('leaves a player who already knows cards alone', () => {
         const player = store.getState().player;
         store.setState({ player: { ...player, knownCards: ['grey-strike'] } } as never);
-    }
-
-    it('getLearnableCardOffers returns ≤3 unknown, requirement-met offers with effect lines', () => {
-        knowOnlyTheBlow();
-        const offers = actions.getLearnableCardOffers();
-        expect(offers.length).toBeGreaterThan(0);
-        expect(offers.length).toBeLessThanOrEqual(3);
-        const known = store.getState().player.knownCards ?? [];
-        for (const offer of offers) {
-            expect(known).not.toContain(offer.id);
-            expect(offer.effectText.length).toBeGreaterThan(0);
-            expect(['body', 'mind', 'heart', 'any']).toContain(offer.stance);
-        }
-    });
-
-    it('learnCard grows knownCards through the engine and is idempotent', () => {
-        knowOnlyTheBlow();
-        const offers = actions.getLearnableCardOffers();
-        const pick = offers[0];
-        expect(actions.learnCard(pick.id)).toBe(true);
-        expect(store.getState().player.knownCards).toContain(pick.id);
-        // already known → engine returns the same character → false
-        expect(actions.learnCard(pick.id)).toBe(false);
+        actions.startCombat(makeEnemy());
+        expect(store.getState().player.knownCards).toEqual(['grey-strike']);
     });
 });

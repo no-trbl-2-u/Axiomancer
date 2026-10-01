@@ -18,8 +18,6 @@ import {
     sellItem as engineSellItem,
     defaultSellPrice as engineDefaultSellPrice,
     buildCharacterFromPreset,
-    getAvailableCards,
-    learnCard as engineLearnCard,
     changeMap as worldChangeMap,
     completeNode as worldCompleteNode,
     consumableLibrary,
@@ -55,21 +53,12 @@ import {
     type MapName,
     type MapState,
     type ResolveMapEventResult,
-    type Card,
     type WorldState,
 } from '@mechanics';
 
 
-import {
-    COMBAT_CARDS,
-    getCombatCardById,
-    cardEffectText,
-} from '@/state/selectors/combat-cards';
+import { COMBAT_CARDS } from '@/state/selectors/combat-cards';
 import { resolveWareItem } from '@/state/presenters/village.engine';
-import {
-    chosenStarterBundle,
-    BUNDLE_CHOSEN_FLAG,
-} from './combat/store-actions';
 import { EMPTY_EVENT_SLICE, EMPTY_LABYRINTH_SLICE, type AppStore } from './store';
 import {
     abandonHazardAction,
@@ -553,20 +542,6 @@ export interface AppActions {
      * Returns success.
      */
     sellVillageItem: (index: number) => boolean;
-
-    // -----------------------------------------------------------------
-    // Card-learning pass.
-    // -----------------------------------------------------------------
-
-    /**
-     * Rolls up to `count` (default 3) level-up card offers from
-     * everything the player currently qualifies for (engine
-     * `getAvailableCards`, ungated). Empty = nothing new to
-     * learn; the caller skips the modal.
-     */
-    getLearnableCardOffers: (count?: number) => LearnableCardOffer[];
-    /** Learns a card through the engine (requirement-checked). */
-    learnCard: (cardId: string) => boolean;
 }
 
 export interface UseItemResult {
@@ -579,97 +554,19 @@ export interface UseItemResult {
 }
 
 // ---------------------------------------------------------------------------
-// Card learning (level-up picks)
+// Starter deck
 // ---------------------------------------------------------------------------
 
 /**
- * Phase 104 (the grey office) — the new player's starting combat repertoire.
- * `STARTING_CARD_IDS` is the engine's 10-card grey recipe (`grey-strike` ×5,
- * `grey-ward` ×3, `grey-word` ×2 since S3): colourless shapes, any die powers each, so fight one
- * teaches STRIKE, WARD, FREE-vs-PAID, and the die-spend loop with zero colour
- * arithmetic. `buildCombatDeck` deals `knownCards` verbatim (copies are real,
- * not deduplicated), so `ensureStarterCards` writes the recipe directly
- * rather than `engineLearnCard`-ing a Set — a learn-requirement gate has no
- * business touching cards the world hands every player on day one.
- *
- * Seeds the starter deck when the player knows nothing yet — the chosen
- * starter bundle if one was picked (the dev deck-swap menu only, post-104 —
- * the fresh-run flow never offers a picker), else the grey office.
+ * Seeds the grey office when the player knows no card yet. `STARTING_CARD_IDS`
+ * is the engine's grey recipe (`grey-strike` ×5, `grey-ward` ×3, `grey-word`
+ * ×2). `buildCombatDeck` deals `knownCards` verbatim (copies are real), so the
+ * recipe is written directly rather than learned card by card.
  */
 function ensureStarterCards(store: AppStore): void {
     const player = store.getState().player;
     if (!player || (player.knownCards?.length ?? 0) > 0) return;
-    // Deck-identity path: a bundle was chosen pre-run (dev tool only). Direct-
-    // set its curated deck (the cards are valid engine ids; learn-requirements
-    // don't gate the combat deal — knownCards IS the deck source).
-    const bundle = chosenStarterBundle(store);
-    if (bundle) {
-        store.setState({ player: { ...player, knownCards: [...bundle.cardIds], combatRewardCards: [] } });
-        return;
-    }
-    const state = store.getState() as unknown as GameState;
-    const flags = new Set(state.flags ?? []);
-    flags.add(BUNDLE_CHOSEN_FLAG);
-    store.setState({
-        player: { ...player, knownCards: [...STARTING_CARD_IDS], combatRewardCards: [] },
-        flags: [...flags],
-    } as never);
-}
-
-/** One learnable-card offer row for the level-up learn modal. */
-export interface LearnableCardOffer {
-    id: string;
-    name: string;
-    description: string;
-    stance: 'body' | 'mind' | 'heart' | 'any';
-    tier: number;
-    /** Compact effect line — same format as the combat picker rows. */
-    effectText: string;
-}
-
-function toLearnableOffer(store: AppStore, card: Card): LearnableCardOffer {
-    const combatCard = getCombatCardById(card.id);
-    // Spec 32 v3 — THE STRIKE IS DEAD: cards deal no immediate damage, so the
-    // offer row carries only the status/effect line (never a fabricated number).
-    const damage = 0;
-    return {
-        id: card.id,
-        name: card.name.toUpperCase(),
-        description: card.description,
-        stance: card.color,
-        tier: card.tier,
-        effectText: combatCard
-            ? cardEffectText(combatCard, damage)
-            : 'NO DIRECT EFFECT',
-    };
-}
-
-/**
- * Rolls the level-up card offers: up to `count` random picks from
- * everything the player currently qualifies for (engine
- * `getAvailableCards`, ungated). Empty when nothing new is
- * learnable — the caller skips the modal.
- */
-function getLearnableCardOffersAction(store: AppStore, count = 3): LearnableCardOffer[] {
-    ensureStarterCards(store);
-    const player = store.getState().player;
-    if (!player) return [];
-    const pool = getAvailableCards(player).slice();
-    for (let i = pool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
-    return pool.slice(0, count).map((s) => toLearnableOffer(store, s));
-}
-
-/** Learns a card through the engine (requirement-checked). */
-function learnCardAction(store: AppStore, cardId: string): boolean {
-    const player = store.getState().player;
-    if (!player) return false;
-    const next = engineLearnCard(player, cardId);
-    if (next === player) return false;
-    store.setState({ player: next });
-    return true;
+    store.setState({ player: { ...player, knownCards: [...STARTING_CARD_IDS], combatRewardCards: [] } });
 }
 
 // ---------------------------------------------------------------------------
@@ -886,8 +783,6 @@ export function createAppActions(store: AppStore): AppActions {
         completeBlacksmithTutorial: (skipped) => completeBlacksmithTutorialAction(store, skipped),
         buyVillageWare: (itemId) => buyVillageWareAction(store, itemId),
         sellVillageItem: (index) => sellVillageItemAction(store, index),
-        getLearnableCardOffers: (count) => getLearnableCardOffersAction(store, count),
-        learnCard: (cardId) => learnCardAction(store, cardId),
     };
     return wrapActionsWithLogging(actions);
 }

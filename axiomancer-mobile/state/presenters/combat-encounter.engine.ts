@@ -1533,10 +1533,8 @@ export function armedValue(face: CombatCardFaceVM, colorMatch: boolean): number 
  */
 const KEYWORD_FAMILY: Record<string, StatFamily> = {
     DEAL: 'body',
-    GUARD: 'mind', BARRIER: 'mind', RIPOSTE: 'mind', HEAL: 'mind', SOUL: 'mind',
-    RESOLUTE: 'mind',
-    POISON: 'heart', BLEED: 'heart', DOOM: 'heart', MARK: 'heart', QUARTER: 'heart',
-    VULNERABLE: 'heart', STUN: 'heart', TICK: 'heart', KINDLE: 'heart', WEAKEN: 'heart',
+    GUARD: 'mind', HEAL: 'mind',
+    BLEED: 'heart', VULNERABLE: 'heart',
 };
 
 /**

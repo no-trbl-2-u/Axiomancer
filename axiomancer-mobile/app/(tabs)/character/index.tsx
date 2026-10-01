@@ -5,7 +5,6 @@ import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import { TooltipTarget } from '@/components/tooltip/TooltipTarget';
 import { AscendStrip } from '@/components/levelup/AscendStrip';
-import { LearnCardModal } from '@/components/levelup/LearnCardModal';
 import { LevelReadyStrip } from '@/components/levelup/LevelReadyStrip';
 import { LevelUpModal } from '@/components/levelup/LevelUpModal';
 import { DevToolsLink } from '@/components/dev/DevToolsLink';
@@ -72,49 +71,10 @@ export default function CharacterScreen() {
     });
   }, [store]);
 
-  // Learn-card pass — LEVEL UP opens the stat ledger with the
-  // learn-card modal stacked on top: one pick of three qualifying
-  // cards per level gained (the engine applies stacked level-ups in
-  // one dispatch, so a multi-level XP dump queues multiple picks).
-  // Offers regenerate after each pick; FORGO spends a pick on nothing.
-  const [cardPicksRemaining, setCardPicksRemaining] = useState<number>(0);
-  const [cardOffers, setCardOffers] = useState<
-    ReturnType<typeof actions.getLearnableCardOffers>
-  >([]);
   const onLevelUp = useCallback(() => {
-    const before = store.getState().player?.level ?? 0;
     actions.levelUp();
-    const after = store.getState().player?.level ?? before;
-    const gained = Math.max(0, after - before);
-    if (gained > 0) {
-      const offers = actions.getLearnableCardOffers();
-      if (offers.length > 0) {
-        setCardOffers(offers);
-        setCardPicksRemaining(gained);
-      }
-    }
-    // The stat ledger opens beneath the learn modal — the user
-    // allocates points once the picks are spent.
     setLevelUpOpen(true);
-  }, [actions, store]);
-  const advanceCardPick = useCallback(() => {
-    setCardPicksRemaining((remaining) => {
-      const next = remaining - 1;
-      if (next > 0) {
-        setCardOffers(actions.getLearnableCardOffers());
-      } else {
-        setCardOffers([]);
-      }
-      return next;
-    });
   }, [actions]);
-  const onPickCardOffer = useCallback(
-    (cardId: string) => {
-      actions.learnCard(cardId);
-      advanceCardPick();
-    },
-    [actions, advanceCardPick],
-  );
   const onCommitAllocation = useCallback(
     (spent: { heart: number; body: number; mind: number }) => {
       // Dispatch the engine action N times — once per allocated
@@ -222,17 +182,6 @@ export default function CharacterScreen() {
           })()}
           onCommit={onCommitAllocation}
           onCancel={onCloseLevelUp}
-        />
-      )}
-
-      {/* Learn-card modal — stacks above the stat ledger (zIndex 60
-          vs the LevelUpModal's 50) until every pick is spent. */}
-      {cardPicksRemaining > 0 && cardOffers.length > 0 && (
-        <LearnCardModal
-          offers={cardOffers}
-          picksRemaining={cardPicksRemaining}
-          onPick={onPickCardOffer}
-          onSkip={advanceCardPick}
         />
       )}
 

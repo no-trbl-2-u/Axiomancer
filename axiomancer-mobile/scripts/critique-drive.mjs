@@ -94,11 +94,10 @@ const SCREENS = [
         name: 'onboarding',
         path: '/',
         why: 'Where a first-time player forms their model of the game.',
-        // New player: dismiss the title, land on the starter-bundle picker.
+        // New player: dismiss the title.
         prepare: async (page) => {
             const cont = page.getByRole('button').first()
             if (await cont.count()) await cont.click({ timeout: 4000, force: true }).catch(() => {})
-            await page.getByTestId('bundle-select').waitFor({ state: 'visible', timeout: 6000 }).catch(() => {})
         },
     },
     {
