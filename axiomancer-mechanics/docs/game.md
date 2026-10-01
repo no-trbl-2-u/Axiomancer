@@ -188,7 +188,7 @@ Core balance values are defined in `game-mechanics.constants.ts`:
 |----------|-------|---------|
 | `PLAYER_VITAE_BASE` | `50` | Flat floor of every player VITAE pool |
 | `RESOURCE_MULTIPLIERS.VITAE_PER_BODY` / `VITAE_PER_MIND` / `VITAE_PER_HEART` | `12` / `6` / `6` | Per-stat terms: VITAE = base + 12·body + 6·mind + 6·heart (S3, D41) |
-| `EXPERIENCE_PER_LEVEL` | `1000` | XP required per level |
+| `EXPERIENCE_STEP` | `250` | Reaching level L+1 costs L × this much XP (`experienceForLevel`) |
 | `STAT_POINTS_PER_LEVEL` | `3` | Stat points gained per level |
 | `MAX_EFFECT_INTENSITY` | `30` | Maximum effect stack intensity |
 | `MAX_EFFECT_DURATION` | `10` | Maximum effect duration in rounds |

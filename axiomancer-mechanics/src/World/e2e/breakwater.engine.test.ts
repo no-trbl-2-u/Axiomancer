@@ -128,8 +128,9 @@ describe('the Breakwater\'s events (D29)', () => {
     });
 
     it('fights the Doorwarden at the watchtower, pinned low, the last fight before the door (D61)', () => {
+        // R9 (D55): level 1, one under the level-2 player a full clear brings.
         const payload = getNodeEventPool('coastal-continent', 'breakwater', 'bw-17')!.entries[0]!.payload;
-        expect(payload).toMatchObject({ kind: 'encounter', enemySlug: 'the-doorwarden', isBoss: true, level: 3 });
+        expect(payload).toMatchObject({ kind: 'encounter', enemySlug: 'the-doorwarden', isBoss: true, level: 1 });
     });
 
     it('fights the region\'s elite, the Brine Hag, mid-region (D61)', () => {

@@ -32,7 +32,8 @@
  * the write-only `regionConsequences` slice dropped), v33 → v34
  * (2026-10-01, R7e: the parked world's maps, quests and flags dropped) and
  * v34 → v35 (2026-10-01, R7e2: every relic but the Suppliant's Ring
- * dropped). The hops chain, so a v11 save lands at v35 in one `migrate` call. Every other version mismatch still rejects.
+ * dropped), v35 → v36 (2026-10-01, R9: XP re-expressed on the rising
+ * level curve). The hops chain, so a v11 save lands at v36 in one `migrate` call. Every other version mismatch still rejects.
  */
 
 import { GameState } from './types';
@@ -42,6 +43,8 @@ import { isEquipment } from '../Items/types';
 import { getEquippedItems, wornMaxHpBonus } from '../Character/equipment.reducer';
 import { cloneStartingRelics, getRelicById } from '../Items/relic.library';
 import { calculateMaxHealth } from '../Utils';
+import { experienceForLevel } from '../Character/experience';
+import { EXPERIENCE_STEP } from './game-mechanics.constants';
 import { reslotLegacyLoadout, reslotLegacyEquipment, type LegacySlot } from './legacy-slots';
 import { concreteDefaultRail } from '../Character/dieGear.reducer';
 import { GAME_STATE_VERSION } from './game.reducer';
@@ -891,6 +894,33 @@ function migrateV34ToV35(raw: Record<string, unknown>): Record<string, unknown> 
     return { ...raw, player: next, version: 35 };
 }
 
+/** The flat level cost every save before v36 was written against. */
+const V35_EXPERIENCE_PER_LEVEL = 1000;
+
+/**
+ * v35 → v36 (2026-10-01, THE REVAMP R9, D55): a level used to cost a flat
+ * 1,000 XP; it now costs `level × EXPERIENCE_STEP`. The hop keeps the
+ * player's `level` and their progress through it: progress below 0 (a
+ * malformed save) clamps to 0, and progress past 1 (a level-up the player
+ * has not taken yet) carries over so it stays pending. Pure over a raw v35
+ * save payload.
+ */
+function migrateV35ToV36(raw: Record<string, unknown>): Record<string, unknown> {
+    const player = raw.player as Partial<Character> | undefined;
+    if (!player || typeof player !== 'object' || typeof player.level !== 'number') {
+        return { ...raw, version: 36 };
+    }
+    const level = Math.max(1, Math.floor(player.level));
+    const oldExperience = typeof player.experience === 'number' ? player.experience : 0;
+    const progress = Math.max(0, (oldExperience - (level - 1) * V35_EXPERIENCE_PER_LEVEL) / V35_EXPERIENCE_PER_LEVEL);
+    const experience = Math.round(experienceForLevel(level) + progress * level * EXPERIENCE_STEP);
+    return {
+        ...raw,
+        player: { ...player, experience, experienceToNextLevel: experienceForLevel(level + 1) },
+        version: 36,
+    };
+}
+
 /**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
@@ -933,8 +963,9 @@ export function migrate(
     // hazard token and hex flags; v31 → v32 drops deleted hazard deck cards;
     // v32 → v33 drops the write-only region-consequences slice; v33 → v34
     // drops the parked world's maps, quests and flags; v34 → v35 drops every
-    // relic but the Suppliant's Ring.
-    // Chained so a v11 save lands at v35 in one call.
+    // relic but the Suppliant's Ring; v35 → v36 re-expresses XP on the
+    // rising level curve.
+    // Chained so a v11 save lands at v36 in one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
@@ -1030,6 +1061,10 @@ export function migrate(
     if (version === 34 && toVersion >= 35) {
         working = migrateV34ToV35(working);
         version = 35;
+    }
+    if (version === 35 && toVersion >= 36) {
+        working = migrateV35ToV36(working);
+        version = 36;
     }
 
     if (version !== toVersion) {

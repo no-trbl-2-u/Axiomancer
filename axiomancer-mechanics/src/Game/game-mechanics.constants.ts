@@ -29,7 +29,9 @@ export const PLAYER_VITAE_BASE = 50;
 // PROGRESSION — EXPERIENCE & LEVELING
 // ============================================================================
 
-export const EXPERIENCE_PER_LEVEL = 1000;
+// R9 (D55): reaching level L+1 costs L × EXPERIENCE_STEP more XP
+// (`Character/experience.ts`). A full Act 1 clear ends at level 5.
+export const EXPERIENCE_STEP = 250;
 
 // Stat points granted per level promotion (Spec 06 Q3). Spent via
 // `allocateStatPoint` to raise heart / body / mind. Per Spec 06 Q5 there is

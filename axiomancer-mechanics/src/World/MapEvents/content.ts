@@ -26,16 +26,6 @@ import { BLACKSMITH_WITNESS_VARIANTS } from '../Blacksmith/blacksmith.content';
 // The builders the Act 1 maps share. They were fishing-village's until R3b
 // purged that map (D53); the pools and lines they build are unchanged.
 
-function plainEncounterPool(nodeId: string, foe: { slug: EnemySlug; description?: string }): MapEventPool {
-    return {
-        id: `${nodeId}.encounter`,
-        entries: [{
-            kind: 'encounter', weight: 1,
-            payload: { kind: 'encounter', enemySlug: foe.slug, isBoss: false, description: foe.description },
-        }],
-    };
-}
-
 /**
  * Inn rests (Phase 52b): tended, paid shelter inside a settlement, and the
  * only rests that mend hazard-scarred max-VITAE.
@@ -200,21 +190,30 @@ const bwWindmillArrival: MapEventPool = {
 /** D30: the Breakwater's elite, pinned low like every Act 1 fight (brief §3b). */
 const BW_ELITE_LEVEL = 3;
 
-const BW_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description?: string }> = {
+/** R9 (D55): the Breakwater's Float-Eyes are pinned too, so its XP is fixed. */
+const BW_FIGHT_LEVEL = 2;
+
+/**
+ * R9 (D55): each region's door sits one level under the player a full clear
+ * brings to it (Breakwater 1, Charcoal Wood 2, Beacon Crags 3, Lantern Deep 4).
+ */
+const BW_DOOR_LEVEL = 1;
+
+const BW_ENCOUNTER_FOES: Record<string, ActOneFoe> = {
     // c1 — the crane quay
-    'bw-2':  { slug: 'float-eye' },
+    'bw-2':  { slug: 'float-eye', level: BW_FIGHT_LEVEL },
     // c2 — the sea fort, the north pier, the walled manor
-    'bw-6':  { slug: 'float-eye',        description: 'A lidless thing hangs over the fort wall. It has already seen you.' },
-    'bw-10': { slug: 'float-eye' },
+    'bw-6':  { slug: 'float-eye', level: BW_FIGHT_LEVEL, description: 'A lidless thing hangs over the fort wall. It has already seen you.' },
+    'bw-10': { slug: 'float-eye', level: BW_FIGHT_LEVEL },
     // c4 — the lighthouse
-    'bw-14': { slug: 'float-eye' },
+    'bw-14': { slug: 'float-eye', level: BW_FIGHT_LEVEL },
 };
 
 /** D61: the Brine Hag, a rarer mid-region fight on the north pier. */
 const BW_ELITE: ActOneFoe = { slug: 'brine-hag', level: BW_ELITE_LEVEL };
 
 /** D61: the watchtower, the chokepoint before the bridge, holds the door fight. */
-const BW_DOOR: ActOneFoe = { slug: 'the-doorwarden', level: BW_ELITE_LEVEL, isBoss: true };
+const BW_DOOR: ActOneFoe = { slug: 'the-doorwarden', level: BW_DOOR_LEVEL, isBoss: true };
 
 const BW_REST_NODES: Record<string, string> = {
     'bw-9':  'The customs house lets rooms by the night. The clerk takes shillings, not names.',
@@ -279,7 +278,7 @@ const BREAKWATER_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
             } else {
                 const foe = BW_ENCOUNTER_FOES[nodeId];
                 if (!foe) throw new Error(`breakwater: ${nodeId} has no authored event kind or foe.`);
-                out.push({ nodeId, pool: plainEncounterPool(nodeId, foe) });
+                out.push({ nodeId, pool: cwEncounterPool(nodeId, foe) });
             }
         }
         return out;
@@ -310,6 +309,7 @@ interface ActOneFoe { slug: EnemySlug; level: number; description?: string; isBo
 
 const CW_FIGHT_LEVEL_EARLY = 2;
 const CW_FIGHT_LEVEL_LATE = 3;
+const CW_DOOR_LEVEL = 2;
 
 /** Arrival over the river bridge from the Breakwater. */
 const cwArrival: MapEventPool = {
@@ -348,7 +348,7 @@ const CW_ENCOUNTER_FOES: Record<string, ActOneFoe> = {
     // c4 — the rock chapel, the wayside cross, the east cave
     'cw-16': { slug: 'float-eye', level: CW_FIGHT_LEVEL_LATE },
     // D61: the door fight, on the centre lane of the last ring.
-    'cw-17': { slug: 'the-doorwarden', level: CW_FIGHT_LEVEL_LATE, isBoss: true },
+    'cw-17': { slug: 'the-doorwarden', level: CW_DOOR_LEVEL, isBoss: true },
     'cw-19': { slug: 'float-eye', level: CW_FIGHT_LEVEL_LATE },
 };
 
@@ -451,6 +451,7 @@ const CHARCOAL_WOOD_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }>
 
 const BC_FIGHT_LEVEL_EARLY = 3;
 const BC_FIGHT_LEVEL_LATE = 4;
+const BC_DOOR_LEVEL = 3;
 
 /** Arrival up the Charcoal Wood's stair, on the crag road. */
 const bcArrival: MapEventPool = {
@@ -479,7 +480,7 @@ const BC_ENCOUNTER_FOES: Record<string, ActOneFoe> = {
     'bc-11': { slug: 'float-eye', level: BC_FIGHT_LEVEL_LATE },
     'bc-13': { slug: 'float-eye', level: BC_FIGHT_LEVEL_LATE },
     // c5 — the stone gate: D61, the door fight, on the centre lane of the last ring
-    'bc-15': { slug: 'the-doorwarden', level: BC_FIGHT_LEVEL_LATE, isBoss: true },
+    'bc-15': { slug: 'the-doorwarden', level: BC_DOOR_LEVEL, isBoss: true },
 };
 
 /** All three rests are CAMPS: Phase 52b keeps inns inside settlements. */
@@ -568,6 +569,7 @@ const BEACON_CRAGS_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> 
 
 const LD_FIGHT_LEVEL_EARLY = 3;
 const LD_FIGHT_LEVEL_LATE = 4;
+const LD_DOOR_LEVEL = 4;
 
 /** Arrival down the Beacon Crags' stair, through the cavern roof. */
 const ldArrival: MapEventPool = {
@@ -598,7 +600,7 @@ const LD_ENCOUNTER_FOES: Record<string, ActOneFoe> = {
     // c4 — the fortress gate
     'ld-13': { slug: 'float-eye', level: LD_FIGHT_LEVEL_LATE },
     // c5 — the ruined city: D61, the door fight, on the last fight column
-    'ld-16': { slug: 'the-doorwarden', level: LD_FIGHT_LEVEL_LATE, isBoss: true },
+    'ld-16': { slug: 'the-doorwarden', level: LD_DOOR_LEVEL, isBoss: true },
 };
 
 /** All three rests are CAMPS: Phase 52b keeps inns inside settlements. */

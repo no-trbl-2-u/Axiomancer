@@ -179,8 +179,9 @@ describe('migrations.engine', () => {
             // v32 (phase R6b): the deleted hazard deck card hop;
             // v33 (phase R7c): the region-consequences slice hop;
             // v34 (phase R7e): the parked world's content hop;
-            // v35 (phase R7e2): the deleted relic hop.
-            expect(GAME_STATE_VERSION).toBe(35);
+            // v35 (phase R7e2): the deleted relic hop;
+            // v36 (phase R9): the XP curve hop.
+            expect(GAME_STATE_VERSION).toBe(36);
             expect(result.version).toBe(GAME_STATE_VERSION);
         });
     });

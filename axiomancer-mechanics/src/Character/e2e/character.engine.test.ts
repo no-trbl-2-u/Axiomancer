@@ -30,7 +30,6 @@ import {
 import {
     RESOURCE_MULTIPLIERS,
     PLAYER_VITAE_BASE,
-    EXPERIENCE_PER_LEVEL,
 } from '../../Game/game-mechanics.constants';
 import type { Equipment } from '../../Items/types';
 
@@ -98,12 +97,13 @@ describe('createCharacter — derivation contracts', () => {
         mockSequentialRng(0.5);
         const lvl1 = buildPlayer({ level: 1 });
         expect(lvl1.experience).toBe(0);
-        expect(lvl1.experienceToNextLevel).toBe(1 * EXPERIENCE_PER_LEVEL);
+        expect(lvl1.experienceToNextLevel).toBe(250);
 
         mockSequentialRng(0.5);
         const lvl5 = buildPlayer({ level: 5 });
-        expect(lvl5.experience).toBe(4 * EXPERIENCE_PER_LEVEL);
-        expect(lvl5.experienceToNextLevel).toBe(5 * EXPERIENCE_PER_LEVEL);
+        // R9 (D55): the rising curve, L5 at 2,500 and L6 at 3,750.
+        expect(lvl5.experience).toBe(2500);
+        expect(lvl5.experienceToNextLevel).toBe(3750);
     });
 });
 

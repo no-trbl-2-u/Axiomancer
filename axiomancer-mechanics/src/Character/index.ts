@@ -3,7 +3,7 @@ import { ActiveEffect } from '../Effects/types';
 import { Equipment, Item } from '../Items/types';
 import { calculateMaxHealth } from '../Utils';
 import { getRng } from '../Utils/rng';
-import { EXPERIENCE_PER_LEVEL } from '../Game/game-mechanics.constants';
+import { experienceForLevel } from './experience';
 import { equipItem, wornMaxHpBonus } from './equipment.reducer';
 import { cloneStartingRelics } from '../Items/relic.library';
 
@@ -86,8 +86,8 @@ export function createCharacter(options: CreateCharacterOptions): Character {
         id: id ?? generateCharacterId(),
         name,
         level,
-        experience: (level - 1) * EXPERIENCE_PER_LEVEL,
-        experienceToNextLevel: level * EXPERIENCE_PER_LEVEL,
+        experience: experienceForLevel(level),
+        experienceToNextLevel: experienceForLevel(level + 1),
         health: maxHealth,
         maxHealth,
         baseStats,
@@ -174,6 +174,7 @@ export {
     FIRST_NODE_RELIC_ID, FIRST_NODE_RELIC_FLAG,
 } from './first-node-grant';
 export { computeEquipDelta } from './equip-delta';
+export { experienceForLevel } from './experience';
 export type {
     EquipDelta,
     SignatureDeltaEntry,

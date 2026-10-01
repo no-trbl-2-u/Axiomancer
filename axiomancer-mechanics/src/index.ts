@@ -26,6 +26,7 @@ export {
     FIRST_NODE_RELIC_ID, FIRST_NODE_RELIC_FLAG,
     levelLadderPresets,
     previewStatAllocation,
+    experienceForLevel,
 } from './Character';
 export type {
     Character, BaseStats,

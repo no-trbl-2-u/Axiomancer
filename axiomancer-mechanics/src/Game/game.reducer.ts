@@ -39,7 +39,8 @@ import { resolveMapEvent } from '../World';
 import { applyDialogueChoice as applyDialogueRuntime } from '../World/dialogue.runtime';
 import { killObjectives, progressQuest, findQuest } from '../World/quest.engine';
 import { calculateMaxHealth } from '../Utils';
-import { EXPERIENCE_PER_LEVEL, STAT_POINTS_PER_LEVEL } from './game-mechanics.constants';
+import { STAT_POINTS_PER_LEVEL } from './game-mechanics.constants';
+import { experienceForLevel } from '../Character/experience';
 import { addItemStacking, rollEncounterLoot, totalEncounterXp } from './combat-grants';
 import { getRng } from '../Utils/rng';
 import { generateRunId } from './run-loop';
@@ -170,8 +171,10 @@ import { generateRunId } from './run-loop';
  *   Lantern Deep and drops the deleted maps, quests and story flags.
  * 2026-10-01 — bumped 34 → 35: THE REVAMP R7e2 (D72). The relic library is
  *   the Suppliant's Ring alone; the hop drops every other relic.
+ * 2026-10-01 — bumped 35 → 36: THE REVAMP R9 (D55). Levels cost a rising
+ *   `L × 250` XP; the hop re-expresses a save's progress on the new curve.
  */
-export const GAME_STATE_VERSION = 35;
+export const GAME_STATE_VERSION = 36;
 
 /**
  * Builds a brand-new GameState with default player and world.
@@ -243,7 +246,7 @@ function applyLevelUps(player: Character): Character {
             level,
             maxHealth,
             health: maxHealth,
-            experienceToNextLevel: level * EXPERIENCE_PER_LEVEL,
+            experienceToNextLevel: experienceForLevel(level + 1),
             // Spec 06 Q3 — grant STAT_POINTS_PER_LEVEL on every promotion.
             // Multi-level cascades (Q9) accumulate without merging.
             availableStatPoints: (next.availableStatPoints ?? 0) + STAT_POINTS_PER_LEVEL,
