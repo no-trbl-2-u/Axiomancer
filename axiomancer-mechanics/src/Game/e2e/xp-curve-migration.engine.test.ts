@@ -1,7 +1,7 @@
 /**
- * Hermetic engine test — the v35 → v36 hop: THE REVAMP R9 XP curve.
+ * Hermetic engine test — the v35 → v36 hop: the XP curve.
  *
- * R9 (D55) replaces the flat 1,000 XP level with a rising `level × 250`. A
+ * The flat 1,000 XP level becomes a rising `level × 250`. A
  * v35 save keeps its level and its progress through that level; a level-up
  * the player has not taken yet stays pending.
  */

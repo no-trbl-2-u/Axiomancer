@@ -1,11 +1,9 @@
 /**
  * `BefriendabilityConfig` hermetic coverage.
  *
- * The config's one surviving axis is `hpGate`, read by `befriendHpGateOpen`
+ * The config's one axis is `hpGate`, read by `befriendHpGateOpen`
  * (`Enemy/befriend.ts`) — the gate The Open Hand checks before a befriend
- * lands (D47). The friendship counter, its `roundsThreshold` override and the
- * `defaultFallback` escape hatch went in revamp phase R7c2: no live path
- * incremented or read the counter.
+ * lands.
  */
 
 import { describe, it, expect } from 'vitest';

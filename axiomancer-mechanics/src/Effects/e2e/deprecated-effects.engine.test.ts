@@ -1,23 +1,14 @@
 /**
- * Hermetic E2E — the spec 32 v3 DEPRECATION contract (the BAN LIST).
- *
- * The v3 keyword reset (spec 32 §3) retired the entire pre-v3 card vocabulary
- * (~126 effect ids) and rebuilt the CARD-side registry as exactly six effects:
- *
- *   debuff_poison · debuff_bleed · debuff_mark · debuff_backfire ·
- *   debuff_quarter · buff_thorns
+ * Hermetic E2E — the card-vocabulary BAN LIST.
  *
  * Effect ids that non-card content (items, consumables, the Cards system,
- * enemy passives) still resolves were restored with tags
- * `["support", "non-card"]` — those may EXIST in the library JSONs but may
- * never be referenced by a combat card. Every OTHER old id is gone, and the
- * retired CARD-vocabulary ids below are banned from `cards.library.ts`
+ * enemy passives) resolves carry tags `["support", "non-card"]` — those may
+ * EXIST in the library JSONs but may never be referenced by a combat card.
+ * The retired CARD-vocabulary ids below are banned from `cards.library.ts`
  * forever (ids die; they are never renamed).
  *
- * THE BIG NUMBERS REWRITE (2026-09-02, §3 L20 / §10) repealed the CLOSED
- * vocabulary: a card may now name any live effect id. What is still enforced
- * is the bug-detector half — a card's effect ids must RESOLVE, and the retired
- * ids stay dead forever.
+ * A card may name any live effect id. What is enforced is that a card's
+ * effect ids must RESOLVE, and the retired ids stay dead forever.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -31,48 +22,31 @@ import { EFFECT_INTERACTIONS } from '../amplification.registry';
 import { AUTHORED_THREAT_SEQUENCES } from '../../Combat/combat.threat-sequences';
 import { flattenAuthoredSteps } from '../../Combat/combat.threat';
 
-// ─── The canonical card vocabulary (spec 32 v3 §3) ───────────────────────────
+// ─── The canonical card vocabulary ───────────────────────────────────────────
 
-// The v3 card vocabulary. The reset (spec 32 v3 §3) rebuilt it as six effects;
-// the 2026-07-08 themed-deck rebalance added six THEMED afflictions on top.
-// WS10.1 / Phase 29 KW-1 (2026-07-11, with the WS3.3 clock sweep) folded four
-// of those keyword-less clones back into the canonical set: argument_wound and
-// echo_sting → POISON, foretold_wound → POISON + MARK double-apply,
-// backfire_acute → BACKFIRE @ i3. The two survivors are CARD-LOCAL SPECIES
-// under the 2026-07-10 card-keyword doctrine (one card each, face keyword on
-// the card, no atlas row): kindling_ember (forge) and nettle_sting (bulwark).
-// debuff_creeping_doom is the WS3.4 Doom species (grows per enemy action, no
-// calendar — ratified as card-local, NOT keyword #31); its only card lives in
-// the 'doom-species' sandbox set until promotion.
-//
-// THE KEYWORD AUDIT (2026-09-27, after the card purge): debuff_backfire,
-// buff_thorns and the two card-local species (kindling_ember, nettle_sting)
-// were deleted with the cards that carried them — see RETIRED_CARD_VOCABULARY.
+// The card vocabulary. debuff_creeping_doom is the Doom species (grows per
+// enemy action, no calendar; card-local, not an atlas keyword); its only card
+// lives in the 'doom-species' sandbox set until promotion.
 const CARD_EFFECT_SET = new Set([
     'debuff_poison',
     'debuff_bleed',
     'debuff_mark',
     'debuff_quarter',
-    // S3 (D43, T's guided session 2026-09-27): VULNERABLE rebuilt for the
-    // grey office's A Plain Word — revived from the stat-down zoo below.
+    // VULNERABLE, carried by the grey office's A Plain Word.
     'debuff_vulnerable',
     'debuff_creeping_doom',
 ]);
 
 /**
- * Retired card-vocabulary ids (spec 32 v3 §3 "Retired"). These were the
- * pre-v3 card library's working set — every one is banned from the card
- * library forever. Some survive in the JSONs as support/non-card entries
+ * Retired card-vocabulary ids — every one is banned from the card library
+ * forever. Some survive in the JSONs as support/non-card entries
  * (items and the Cards system still resolve them); cards may not touch them.
  */
 const RETIRED_CARD_VOCABULARY = [
-    // THE KEYWORD AUDIT (2026-09-27, after the card purge) — deleted from the
-    // library JSONs with the cards that carried them. `buff_grace_momentum`
-    // was support-tagged (engine-granted by a purged choir card).
+    // Deleted from the library JSONs.
     'debuff_backfire', 'buff_thorns', 'debuff_kindling_ember',
     'debuff_nettle_sting', 'buff_grace_momentum',
-    // WS10.1 / Phase 29 KW-1 (2026-07-11) — keyword-less themed clones, folded
-    // into POISON / MARK / BACKFIRE and DELETED from the library JSONs.
+    // Keyword-less themed clones, DELETED from the library JSONs.
     // Ids die; they are never renamed and never resurrected.
     'debuff_argument_wound', 'debuff_echo_sting', 'debuff_foretold_wound',
     'debuff_backfire_acute',
@@ -102,7 +76,7 @@ const RETIRED_CARD_VOCABULARY = [
     'tier1_body_attack', 'tier1_body_defend', 'tier1_mind_attack',
     'tier1_mind_defend', 'tier1_heart_attack', 'tier1_heart_defend',
     'tier1_mind_mark',
-    // the buff zoo (self-buff cards are gone; enchantments replaced them)
+    // the buff zoo
     'buff_attack_up', 'buff_defend_up', 'buff_accuracy_up', 'buff_evasion_up',
     'buff_critical_rate_up', 'buff_critical_damage_up', 'buff_haste',
     'buff_regeneration', 'buff_max_hp_up', 'buff_barrier',
@@ -151,11 +125,8 @@ describe('effect deprecation contract (spec 32 v3 §3) — the ban list', () => 
         }
     });
 
-    // REPEALED (THE BIG NUMBERS REWRITE §3 L20, §10): the "every card
-    // references ONLY the six-keyword card set" clause was a closed-vocabulary
-    // law — it failed when the game was DIFFERENT, not when it was wrong. What
-    // survives is the bug detector underneath it: a card must never name an
-    // effect id that does not resolve (a typo, a deleted id, a rename).
+    // A card may name any live effect id, but never one that does not
+    // resolve (a typo, a deleted id, a rename).
     it('every effect id a card references RESOLVES in the effects library', () => {
         for (const card of cardLibrary) {
             for (const id of effectIdsReferencedBy(card)) {
@@ -197,7 +168,7 @@ describe('effect deprecation contract (spec 32 v3 §3) — the ban list', () => 
 
     it('threat sequences and the combo registry speak only live ids; combos speak only card ids', () => {
         for (const [slug, steps] of Object.entries(AUTHORED_THREAT_SEQUENCES)) {
-            // WS9 — branch steps contribute BOTH forks to the id audit.
+            // Branch steps contribute BOTH forks to the id audit.
             for (const p of flattenAuthoredSteps(steps)) {
                 const id = p.threatEffectId;
                 if (id) expect(libraryIds.has(id), `${slug} threat uses unknown ${id}`).toBe(true);

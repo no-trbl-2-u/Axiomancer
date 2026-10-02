@@ -17,7 +17,7 @@ describe('previewStatAllocation', () => {
     it('should match allocateStatPoint results without character mutation', () => {
         // `previewStatAllocation` is equipment-agnostic (base-stat math only), so
         // it only equals `allocateStatPoint` for an UNEQUIPPED character — build a
-        // bare one (Phase 19 presets wear armor relics whose +maxHp would diverge).
+        // bare one (presets wear armor relics whose +maxHp would diverge).
         const character = createCharacter({
             name: 'Preview Test', level: 2, baseStats: { heart: 3, body: 4, mind: 5 },
         });

@@ -1,11 +1,9 @@
 /**
- * Loot-cache choice encounter ("The Reliquary") — engine types (Phase 63,
- * replacing the retired Pick Pool dice-pool minigame).
+ * Loot-cache choice encounter ("The Reliquary") — engine types.
  *
  * A loot-cache node is one irreversible choice of two — `card` (a rolled
  * reward card) or `item` (a tier-scaled consumable haul + the node's
- * currency). The third offer, `sacrifice`, fed the per-map goodwill tally;
- * it granted nothing once R3b purged goodwill and R3c removed it. Two-way like every minigame here: the engine
+ * currency). Two-way like every minigame here: the engine
  * never reads `GameState`, and the host settles the outcome against the
  * real `Character` at claim time. Unlike `RestChoice`'s `cut`, no offer
  * here needs a sub-picker — the `card`/`item` candidates are rolled by the

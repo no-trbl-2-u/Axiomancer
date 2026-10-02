@@ -1,11 +1,8 @@
 /**
- * Hermetic e2e — Phase 52b: the inn is a first-class thing.
+ * Hermetic e2e — the inn is a first-class thing.
  *
- * "Is this an inn?" used to mean `healFraction >= 1.0`. Three wilderness
- * rest nodes were authored at 1.0 (`nf-4` cold spring, `nf-24` hidden
- * grove, and the labyrinth's own generosity band never reached it), so
- * forest springs mended hazard-scarred max-VITAE exactly like a paid
- * shelter. `RestPayload.shelter` replaces the inference.
+ * `RestPayload.shelter` says whether a rest is an inn or a camp; only an
+ * inn mends hazard-scarred max-VITAE.
  *
  * This suite is the regression pin: EVERY authored rest pool in the game
  * is enumerated from the live registry and its shelter asserted by name.
@@ -144,8 +141,8 @@ describe('Phase 52b — the shelter classification of every authored rest pool',
     });
 
     it('the ONLY inns in the game are the Breakwater\'s: a walled harbour town', () => {
-        // Map revamp M3a — the customs house and harbour inn are inns; every
-        // other Act 1 rest is a camp (R7e deleted the parked settlements).
+        // The customs house and harbour inn are inns; every other Act 1 rest
+        // is a camp.
         const census = censusOfAuthoredRestPools();
         const innKeys = Object.entries(census)
             .filter(([, shelters]) => shelters.includes('inn'))
@@ -202,9 +199,7 @@ describe('Phase 52b — the resolved rest event carries the shelter', () => {
     });
 
     it('the passive heal runs at the carried-forward shipped default for both shelters', () => {
-        // Phase 52b changes NO heal numbers: the retired `healFraction`
-        // defaulted to 1.0 and that value is carried forward verbatim until
-        // 52c derives the heal from `shelter`.
+        // The passive heal is the same full heal for both shelters.
         expect(REST_PASSIVE_HEAL_FRACTION).toBe(1.0);
 
         const base = createNewGameState();

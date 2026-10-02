@@ -1,13 +1,12 @@
 /**
- * Spec 33 — Upgradeable Dice: the D3 economy witness.
+ * Upgradeable Dice: the D3 economy witness.
  *
  * Runs encounters through the real engine + policy driver
  * (`upgradeablePlayPhase`) with the grey deck across stage profiles ×
- * seeds, then reads the recorded transcript to measure spec 33 §7's **D3 gate
+ * seeds, then reads the recorded transcript to measure the **D3 gate
  * table**: E[usable dice/round], whiff rate, per-color access, dead rounds,
  * realized ◆ income (specials-on-use + yield + overflow), surge frequency and
- * momentum-break rate. (The STAKE-retirement gap arm — a flag-off comparison
- * run — was deleted with the flag, D7.)
+ * momentum-break rate.
  *
  * Every number is READ FROM THE ENGINE'S OWN EVENT STREAM — the roll gates from
  * the `turn-dice-rolled` events (the fresh four-die roll, not a post-spend
@@ -36,11 +35,10 @@ import type {
 } from './combat.encounter.types';
 
 const FIXED_DIE_ID = /-u-(body|mind|heart|wild)$/;
-/** The stock four PLUS the act-reward duplicates (`t1-u-act0-body`, THE PATH
- *  2026-09-02). ◆ conservation has to count every die that can fire a special:
- *  an act die's `special-fired` was landing in REALIZED but never in GROSS, so
- *  the spend-rate could read >100% on a short fight (surfaced 2026-09-04 when
- *  the free-line card-played clock shortened the matrix's fights). */
+/** The stock four PLUS the act-reward duplicates (`t1-u-act0-body`, THE PATH).
+ *  ◆ conservation has to count every die that can fire a special: an act
+ *  die's `special-fired` must land in GROSS as well as REALIZED, or the
+ *  spend-rate can read >100% on a short fight. */
 const ROLLED_DIE_ID = /-u-(act\d+-)?(body|mind|heart|wild)$/;
 const CHAIN_COLORS = ['body', 'mind', 'heart'] as const;
 type ChainColor = (typeof CHAIN_COLORS)[number];
@@ -58,9 +56,9 @@ function rolledDice(dice: readonly CombatManaDie[]): CombatManaDie[] {
 }
 
 /** The authoritative dice-math witness: a single long stream of stock four-die
- *  rolls, decoupled from any encounter. This measures the FACE TABLES (spec 33
- *  §1) — usable, whiff, per-color access, gross special ◆ — the way the spec's
- *  own baseline arithmetic does. It is the canonical D3 roll-gate reading; the
+ *  rolls, decoupled from any encounter. This measures the FACE TABLES — usable,
+ *  whiff, per-color access, gross special ◆ — the way the baseline
+ *  arithmetic does. It is the canonical D3 roll-gate reading; the
  *  in-play realized figures (below) are the SAME dice seen through the engine's
  *  interleaved RNG stream and diverge from these by the RNG-lattice skew the
  *  report flags. */

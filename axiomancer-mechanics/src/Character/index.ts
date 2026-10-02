@@ -8,7 +8,7 @@ import { equipItem, wornMaxHpBonus } from './equipment.reducer';
 import { cloneStartingRelics } from '../Items/relic.library';
 
 /**
- * Phase 35 — produce a stable character id drawn from `getRng()`. Seeded
+ * Produce a stable character id drawn from `getRng()`. Seeded
  * tests inherit determinism; production gets a non-colliding 8-char base36
  * suffix that's good enough for in-process attribution. Not a true UUID
  * because the package ships into React Native and we don't want a
@@ -34,11 +34,11 @@ export interface CreateCharacterOptions {
     level: number;
     baseStats: BaseStats;
     inventory?: Item[];
-    /** Starting currency (Spec 08 Q8). Defaults to 0. */
+    /** Starting currency. Defaults to 0. */
     currency?: number;
     /**
-     * Optional starting equipment as an ordered list of pieces to equip
-     * (Phase 18). Each is equipped via `equipItem`, so weapon/armor replace in
+     * Optional starting equipment as an ordered list of pieces to equip.
+     * Each is equipped via `equipItem`, so weapon/armor replace in
      * place and accessories fill the first 3 free positions (a 4th accessory is
      * a guarded no-op — order the list so the worn 3 come first). A worn
      * armor relic's +max VITAE is folded in at create-time, so the returned
@@ -46,12 +46,12 @@ export interface CreateCharacterOptions {
      */
     equipment?: Equipment[];
     /**
-     * Seed the starting relics (`cloneStartingRelics`, the Suppliant's Ring
-     * since R7e2), worn, so the character enters combat with the signature kit
+     * Seed the starting relics (`cloneStartingRelics`, the Suppliant's Ring),
+     * worn, so the character enters combat with the signature kit
      * they grant (signatures derive from the worn loadout). Off by default so bare
      * `createCharacter` fixtures keep their exact (relic-free) stats;
      * `buildCharacterFromPreset` and the `Player` mock opt in (`createNewGameState`
-     * no longer seeds relics — owner call 2026-09-23). Ignored when an explicit `equipment` list is
+     * does not seed relics). Ignored when an explicit `equipment` list is
      * passed (the caller is choosing the loadout).
      */
     seedStartingRelics?: boolean;
@@ -110,7 +110,7 @@ export function createCharacter(options: CreateCharacterOptions): Character {
 }
 
 /**
- * Spec 06 Q3 — spend one entry from `availableStatPoints` to raise the
+ * Spend one entry from `availableStatPoints` to raise the
  * named base stat by 1, recompute maxHealth, and grow current HP by the
  * maxHealth delta.
  *
@@ -146,7 +146,7 @@ export function allocateStatPoint(
 }
 
 /**
- * Phase 97 — preview max VITAE for a hypothetical stat point allocation, so
+ * Preview max VITAE for a hypothetical stat point allocation, so
  * the mobile level-up modal never duplicates the engine's VITAE formula.
  *
  * Takes current base stats, character level, and allocation delta. Returns computed

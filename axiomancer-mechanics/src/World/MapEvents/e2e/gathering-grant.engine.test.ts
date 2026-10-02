@@ -2,12 +2,9 @@
  * Hermetic engine coverage — the gathering grant is real, on every
  * authored gathering node.
  *
- * 2026-09-21, owner finding 2: "the Gather node is now a no-op". The
- * complaint is about what the PLAYER sees, and the player was right about
- * the symptom — but the engine half was never the cause. This file pins
- * that half, so the mobile fix cannot be blamed for a resolver that grants
- * nothing, and so a later content pass that authors an empty `items: []`
- * pool fails here rather than silently shipping a node that gives nothing.
+ * This file pins the engine half of the gathering grant, so a content pass
+ * that authors an empty `items: []` pool fails here rather than silently
+ * shipping a node that gives nothing.
  *
  * Walked over every gathering-primary node in `MAP_REGISTRY` (the four
  * Act 1 maps):
@@ -17,8 +14,7 @@
  *   - the node is spent by resolving it, so a second arrival grants
  *     nothing — a gathering node is not a farm.
  *
- * Phase 76 retired the "Gleaning" minigame and left `resolveGathering` as
- * the whole mechanism. Nothing here resurrects it: this reads the shipped
+ * `resolveGathering` is the whole mechanism: this reads the shipped
  * resolver against the shipped content pools.
  *
  * RNG is pinned because a gathering-PRIMARY node need not be a
@@ -99,7 +95,7 @@ afterEach(() => {
 
 describe('gathering nodes grant real, named items', () => {
     it('the shipped registry still authors gathering nodes at all', () => {
-        // A guard on the guard: if a content pass retired every gathering
+        // A guard on the guard: if content authored no gathering
         // node, the sweeps below would pass vacuously.
         expect(GATHER_NODES.length).toBeGreaterThanOrEqual(MIN_GATHER_ROLLS);
     });

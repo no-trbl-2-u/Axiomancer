@@ -7,11 +7,11 @@
  * escalation clock, branches, the coveted die) reads the card as its
  * authored intent. The telegraph reads as the enemy PLAYING a named card.
  *
- * Since the enemy roster reset (revamp phase R2) the library holds only the
+ * The library holds only the
  * 14 cards the three live foes play — Float-Eye, the Brine Hag and the
  * Doorwarden. Every card deals plain damage: no card carries a debuff
  * (`effectId`/`intensity`). The debuff fields stay on the types because the
- * resolver still reads them (B2 decides whether afflictions return); nothing
+ * resolver still reads them; nothing
  * in the library sets them.
  *
  * `threatDamageBudget` is round((6 + 0.8·level) · DIFFICULTY_MULT ·

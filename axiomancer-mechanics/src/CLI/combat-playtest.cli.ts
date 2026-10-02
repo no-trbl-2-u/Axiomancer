@@ -11,8 +11,7 @@
  * turns (arc), offering more than one line per powering die (width), carried
  * by a lead card that isn't the whole deck (identity), and flowing through
  * Conviction / the Surge meter / the Dice (spine). Nothing is graded against
- * it — THE BIG NUMBERS REWRITE (2026-09-02) repealed every governing combat
- * objective function, CQI included. `statusEngagement` and `dotHpFraction`
+ * it: no combat objective function governs, CQI included. `statusEngagement` and `dotHpFraction`
  * print beside it as warning lights, never as a target.
  *
  * Usage:
@@ -31,9 +30,9 @@
  *   --enemy=<slug>                          restrict rosters to one enemy
  *   --runs=N                                runs per cell (default 60)
  *   --seed=N                                base seed (default 1)
- *   (dice model: always spec 33's Upgradeable Dice — the only combat model
- *    since the D7 flag collapse. `--upgradeable-dice` is accepted as a no-op
- *    for old scripts; `--legacy-dice` fails: that model was deleted.)
+ *   (dice model: always Upgradeable Dice, the only combat model.
+ *    `--upgradeable-dice` is accepted as a no-op for old scripts;
+ *    `--legacy-dice` fails, since that model does not exist.)
  *   --cards                                 append the per-card usage table
  *   --json                                  print the PlaytestReport as JSON — and
  *                                           NOTHING else (agent consumption)
@@ -137,9 +136,9 @@ function main(): void {
         }
     }
 
-    // D7 (2026-09-25) — spec 33's Upgradeable Dice is the only combat model;
-    // the pre-spec-33 comparison model was deleted, so asking for it fails
-    // loudly rather than silently measuring something else.
+    // Upgradeable Dice is the only combat model; asking for the old
+    // comparison model fails loudly rather than silently measuring something
+    // else.
     // `--upgradeable-dice` stays accepted as a no-op for existing scripts.
     if (has('legacy-dice')) {
         fail('--legacy-dice is gone: the pre-spec-33 dice model was deleted (D7). Spec 33 is the only model.');
@@ -169,7 +168,7 @@ function main(): void {
                 statusEngagement: cell.stats.statusEngagement,
                 dotHpFraction: cell.stats.dotHpFraction,
                 avgRounds: cell.stats.avgRounds,
-                // Phase 43 — the objective function, per cell, in the replay index.
+                // The objective function, per cell, in the replay index.
                 combatQualityIndex: cell.stats.combatQuality.index,
                 combatQualityComponents: cell.stats.combatQuality.components,
                 combatQualitySpine: cell.stats.combatQuality.spineComponents,

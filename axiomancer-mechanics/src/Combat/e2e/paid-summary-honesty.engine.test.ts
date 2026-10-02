@@ -1,12 +1,9 @@
 /**
- * GUARD — authored PAID summaries stay honest (2026-07-16, SIDE RAIL follow-up).
+ * GUARD — authored PAID summaries stay honest.
  *
  * A card may carry an authored `paidSummary`: human prose that REPLACES the
- * generated telegraphese on the card face. Two bug detectors survive the
- * 2026-09-02 repeal (big-numbers overhaul §3 L22, §10) — the ≤130-char
- * budget, the em-dash/semicolon ban, the terminal-punctuation rule, and the
- * "the foe" not "the enemy" rule were style clauses (a law, not a bug
- * detector) and are deleted:
+ * generated telegraphese on the card face. Two bug detectors (no style
+ * clauses):
  *
  *   1. NUMBER PARITY — every number the generated `paidText` prints (the
  *      engine-applied units) must appear verbatim in the authored text. A
@@ -24,17 +21,15 @@ import { cardLibrary } from '../../Cards/cards.library';
 import { lookupEffect } from '../../Effects';
 import { paidText } from '../combat.cards';
 
-/** The spec 32 §3 keyword registry (mirrors the mobile KEYWORD_GLOSS keys)
+/** The keyword registry (mirrors the mobile KEYWORD_GLOSS keys)
  *  plus the structural words a paid sentence may legitimately print in caps. */
 const KNOWN_UPPER = new Set([
-    // registry keywords — cut to the live registry by the keyword audit
-    // (2026-09-27, after the card purge), with the stale CURDLE / OPENING /
-    // PIPS / SOULS / CHARGES / TOLL forms that no longer print anywhere.
+    // registry keywords
     'DRAW', 'GUARD', 'MARK', 'CLEANSE', 'HEAL', 'POISON', 'BLEED', 'DOOM',
     'PIP', 'STAGGER', 'FORETELL', 'QUARTER', 'RIPOSTE',
-    // THE BIG NUMBERS REWRITE (2026-09-02) — direct damage and its family.
+    // direct damage and its family
     'DEAL', 'PIERCE', 'WRATH', 'CHAIN', 'BARRIER',
-    // S3 (D43) — VULNERABLE, rebuilt for the grey office's A Plain Word.
+    // VULNERABLE, printed by the grey office's A Plain Word
     'VULNERABLE',
     // structural / system words the faces already print in caps
     'FREE', 'ALL', 'WILD', 'VITAE', 'DOT', 'DOTS', 'HP',

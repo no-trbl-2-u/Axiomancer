@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E Tests — Card Library structural invariants (Spec 04b)
+ * Hermetic E2E Tests — Card Library structural invariants
  *
  * Covers the card library's structural invariants via the live engine entry
  * point (`cardLibrary`).
@@ -26,8 +26,7 @@ describe('Card library structural invariants', () => {
             expect([1, 2, 3]).toContain(card.tier);
             expect(['self', 'enemy']).toContain(card.targetType);
             expect(['body', 'mind', 'heart', 'any']).toContain(card.color);
-            // Spec 32 v3 — the quality axis + card type replace the deleted
-            // basePower/scalingStat damage fields (THE STRIKE IS DEAD).
+            // Every card carries a quality rank and a card type.
             expect([1, 2, 3, 4, 5, 6]).toContain(card.rank);
             expect(['attack', 'skill', 'spell']).toContain(card.cardType);
         }

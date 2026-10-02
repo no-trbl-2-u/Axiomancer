@@ -1,5 +1,5 @@
 /**
- * Shop types — Phase 37.
+ * Shop types.
  *
  * `ShopInventory` is an item catalogue keyed by `itemId` with a flat
  * price per ware. It rides on `VillagePayload.shop` so a `village`

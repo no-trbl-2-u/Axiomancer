@@ -1,10 +1,7 @@
 /**
- * Phase 72 — Run-loop semantics (closes GH#65 ask 2).
+ * Run-loop semantics.
  *
- * Pins the preserve / reset matrix for `resetRun({ keepCharacter })`. (The
- * v5 → v6 migration hop that defaulted `runId` is gone — `migrate` rejects
- * saves below v11.) The Phase 72 brief laid out the decisions D1..D15
- * these cases pin.
+ * Pins the preserve / reset matrix for `resetRun({ keepCharacter })`.
  */
 import { describe, it, expect } from 'vitest';
 import { createGameStore } from '../store';
@@ -52,7 +49,7 @@ describe('Phase 72 — run-loop semantics', () => {
         expect(next.flags).toEqual([]);
         expect(next.quests.active).toEqual([]);
         // World resets back to STARTING_REGION's starting node
-        // (createStartingWorld pattern; D5).
+        // (createStartingWorld pattern).
         const startingNodeId = getMapDefinition(
             'coastal-continent',
             STARTING_REGION,

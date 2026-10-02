@@ -1,6 +1,5 @@
 /**
- * Loot-cache-choice engine ("card" / "item") — hermetic unit
- * suite (Phase 63).
+ * Loot-cache-choice engine ("card" / "item") — hermetic unit suite.
  *
  * No RNG stub needed: every transition here is deterministic by
  * construction (the candidates are host-rolled and passed in). Driven
@@ -99,7 +98,7 @@ describe('loot-cache-choice — item offer', () => {
 
 describe('loot-cache-choice — the retired sacrifice offer (R3c)', () => {
     it('is no longer an offer: committing it is a silent no-op', () => {
-        // It granted nothing once R3b purged goodwill; R3c removed it.
+        // `sacrifice` is not an offer; a host still naming it gets the session back unchanged.
         const s = offerSession();
         expect(chooseLootCacheChoiceOffer(s, 'sacrifice' as LootCacheChoiceOfferId)).toBe(s);
     });

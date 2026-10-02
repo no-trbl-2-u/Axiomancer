@@ -1,7 +1,7 @@
 /**
- * Hermetic engine test — Phase 52e save migration (v16 → v17).
+ * Hermetic engine test — rest-minigame save migration (v16 → v17).
  *
- * Retires the rest minigame. Pins that a v16 save
+ * The rest minigame does not exist. Pins that a v16 save
  * loads clean at v17: the dead tutorial flag drops, `night-keepsake:*`
  * flags survive (`/memoir`'s REMAINS section reads them back), and a live
  * rest-minigame session riding along in the raw payload's mobile-only

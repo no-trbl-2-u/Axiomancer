@@ -5,10 +5,10 @@
  * provides typed sugar around `dispatch` and emits `GameEvent`s after each
  * reducer run.
  *
- * Phase 09 keeps payloads minimal but real. Where the underlying reducer
- * needs richer context (e.g. dialogue requires the active tree), the payload
- * carries it through — the CLI / UI is responsible for staging that context
- * before dispatch. See `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/09-game-loop-orchestration.md`.
+ * Payloads are minimal but real. Where the underlying reducer needs richer
+ * context (e.g. dialogue requires the active tree), the payload carries it
+ * through — the CLI / UI is responsible for staging that context before
+ * dispatch.
  */
 
 import { Enemy } from '../Enemy/types';

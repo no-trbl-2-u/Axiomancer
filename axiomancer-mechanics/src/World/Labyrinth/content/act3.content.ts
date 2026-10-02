@@ -5,11 +5,10 @@
  * fragment placement cross-checked against `act3.solution.md`.
  */
 
-// lexicon-ok: premise — The Foundation's gate riddle asks "WHAT ARGUMENT HAS NO
-// FIRST PREMISE?": ordinary philosophical English about arguments, not the
-// retired card keyword (renamed to CHARGE, spec 34 R-1). It collides with the
-// registry only because the house shouts its gate riddles in caps, which is
-// what that row is scoped to.
+// lexicon-ok: premise — the gate riddle "WHAT ARGUMENT HAS NO FIRST PREMISE?"
+// in The Foundation is ordinary philosophical English about arguments, not a
+// card keyword. It collides with the registry only because the house shouts
+// its gate riddles in caps, which is what that row is scoped to.
 
 import type { LabyrinthActDef } from '../types';
 

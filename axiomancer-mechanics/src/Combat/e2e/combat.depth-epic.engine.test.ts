@@ -1,8 +1,7 @@
 /**
  * Hermetic E2E — combat depth epic (combat-depth-epic branch).
  *
- * H2 (the hidden-stance read biting a landed status) retired with the stance
- * draft under spec 33 — every paid play lands printed. The live lever:
+ * Every paid play lands printed. The lever under test:
  *   H3 — THE CLOCK: the enemy's telegraphed hit escalates each round past the
  *        grace window (capped), so a drawn-out fight turns lethal.
  */
@@ -115,7 +114,7 @@ describe('combat depth epic — H4: bosses escalate faster', () => {
 });
 
 describe('combat depth epic — H5: the clock also intensifies enemy-inflicted STATUS', () => {
-    /** Injects a status-applying effect onto phase 0's threat action (the
+    /** Injects a status-applying effect onto the first threat action (the
      *  default generated sequence is damage-only) so landed intensity can be
      *  observed directly. Same neutral-read fixture as H3/H4 (body vs body). */
     function statusIntensityAtRound(round: number): number {
@@ -144,13 +143,11 @@ describe('combat depth epic — H5: the clock also intensifies enemy-inflicted S
 });
 
 /**
- * TRIM THE FAT Tier 0 item 3 (`plan/2026-09-25-trim-the-fat.spec.md`): the H6
- * threat-clock enchant is gone. Every 5 rounds it put Sorites Ascension on the
- * enemy or Grelling's Malediction on the player and announced it, but both
- * were no-ops: the enemy's +1 roll bonus is never read (only enemy roll
- * PENALTIES are), and the player's roll modifier is never read at all. A
- * visible event that changes nothing lied to the player, so the clock tier
- * was removed rather than left as theatre.
+ * The threat clock applies no enchant or curse (no Sorites Ascension on the
+ * enemy, no Grelling's Malediction on the player). Both would be no-ops — the
+ * enemy's +1 roll bonus is never read (only enemy roll PENALTIES are), and the
+ * player's roll modifier is never read at all — and a visible event that
+ * changes nothing lies to the player.
  */
 describe('combat depth epic — H6 retired: no threat-clock enchant or curse', () => {
     function stateAtRound(round: number): CombatEncounterState {

@@ -1,10 +1,10 @@
 /**
- * Hermetic e2e — ActiveEffect.sourceId attribution (Phase 38).
+ * Hermetic e2e — ActiveEffect.sourceId attribution.
  *
  * Pins the convention that every applied effect carries a sourceId
  * pointing back to the agent that caused it: player.id on the card
  * path, actor.id on the proc path (Character | Enemy), never from
- * equipment (Phase 20 — equipment applies no effects), and undefined for
+ * equipment (equipment applies no effects), and undefined for
  * environmental hazards.
  *
  * The unit-level coverage of `applyEffect`'s sourceId plumbing lives
@@ -144,7 +144,7 @@ describe('Phase 20 — equipment applies no effect, so equipment never sources a
         };
 
         const equipped = equipItem(player, passiveEquipment);
-        // Phase 20 — equipment is stat-only; no effect (and thus no sourceId) is added.
+        // Equipment is stat-only; no effect (and thus no sourceId) is added.
         expect(equipped.effects.some(e => e.sourceId === 'eq_regen_band')).toBe(false);
         expect(equipped.effects.some(e => e.effectId === 'debuff_mark')).toBe(false);
     });

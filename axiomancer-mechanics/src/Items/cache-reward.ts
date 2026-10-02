@@ -1,21 +1,17 @@
 /**
- * Loot-cache reward roller (Phase 21).
+ * Loot-cache reward roller.
  *
- * The procedural equipment library and its factory are retired — loot surfaces
- * no longer mint random equipment. This replaces the old `rollCacheLoot`
- * equipment generator: The Reliquary (and any other cache surface) now yields a
- * deterministic set of **consumables** scaled by tier. Currency is handled by
+ * Loot surfaces mint no random equipment: The Reliquary (and any other cache
+ * surface) yields a deterministic set of **consumables** scaled by tier. Currency is handled by
  * the caller (the cache session carries its own currency reward). Relics are
  * never cache loot.
  *
  * Determinism: same `seed` + inputs → same rewards (a caller-supplied cache
  * seed drives a self-contained PRNG).
  *
- * Balance note: this is a minimal-correct reward table. `loot-cache-tuning`
- * (the sim/CLI-driven harness that would have tuned the count/rarity mix)
- * retired in Phase 63 along with the Pick Pool minigame this table used to
- * feed — `LootCacheChoice`'s `item` offer is now this roller's only caller.
- * Re-tuning the mix, if ever needed, is a manual follow-up.
+ * Balance note: this is a minimal-correct reward table. `LootCacheChoice`'s
+ * `item` offer is this roller's only caller. Re-tuning the mix, if ever
+ * needed, is a manual follow-up.
  */
 
 import { consumableLibrary } from './consumable.library';
@@ -65,7 +61,7 @@ function rollInt(rng: () => number, min: number, max: number): number {
 /**
  * Roll a deterministic set of consumable rewards for a loot cache. Draws a
  * tier-scaled count of consumables from `consumableLibrary` (the healing
- * potions, R5), cloned at `quantity: 1` so the shared library is never
+ * potions), cloned at `quantity: 1` so the shared library is never
  * mutated. Never throws; returns `[]` only if the pool
  * is somehow empty.
  */

@@ -1,6 +1,5 @@
 /**
- * Hermetic E2E — Spec 33 Upgradeable Dice (Phase D2; the only dice model
- * since the D7 flag collapse, 2026-09-25).
+ * Hermetic E2E — Upgradeable Dice, the combat dice model.
  *
  * Pins the model to exact engine behavior:
  *   §1 ROLL LAW — 4 fixed-color dice every round, faces from the gear tables;

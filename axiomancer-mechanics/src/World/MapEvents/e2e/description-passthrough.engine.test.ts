@@ -1,5 +1,5 @@
 /**
- * MapEvent `description` passthrough (Phase 58) — hermetic coverage.
+ * MapEvent `description` passthrough — hermetic coverage.
  *
  * Every `MapEventPayload` kind but 'cutscene' (delivers its authored
  * prose via `lines`, already reaches the player) and the pool-roll

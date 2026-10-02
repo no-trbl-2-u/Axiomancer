@@ -1,8 +1,8 @@
 /**
- * Hermetic engine test — Phase 52a save migration (v15 → v16).
+ * Hermetic engine test — save migration (v15 → v16).
  *
  * The deck-removal primitive adds `player.cardRemovals`, the per-run counter
- * the escalating price reads. A pre-52a (v15) save has no such field. The hop
+ * the escalating price reads. A v15 save has no such field. The hop
  * materialises it at 0 so a loaded save carries the counter explicitly — the
  * same stance the die-gear hop takes toward the rail — while the field stays
  * sparse-optional on fresh characters and `cardRemovalsOf` reads BOTH shapes
@@ -27,8 +27,8 @@ function v15Save(): Record<string, unknown> {
 
 describe('Phase 52a — migrate v15 → v16: default the card-removal counter', () => {
     it('the v15 → v16 hop is still on the supported chain', () => {
-        // The runtime version moves on (Phase 52e took it to 17); what this
-        // suite owns is that the 52a hop survives every later bump.
+        // The runtime version moves on; what this suite owns is that the
+        // v15 → v16 hop survives every later bump.
         expect(GAME_STATE_VERSION).toBeGreaterThanOrEqual(16);
     });
 

@@ -1,5 +1,5 @@
 /**
- * The XP curve (R9, D55). Reaching level L+1 costs `L × EXPERIENCE_STEP`
+ * The XP curve. Reaching level L+1 costs `L × EXPERIENCE_STEP`
  * more XP, so a level's cost rises with it, as fight payouts do (they are
  * `level × DEFAULT_XP_BY_DIFFICULTY`). `experience` is a running total;
  * this helper is the one place a threshold is computed.

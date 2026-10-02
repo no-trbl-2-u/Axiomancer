@@ -14,7 +14,7 @@ export function applyDamage<T extends Combatant>(combatant: T, damage: number): 
 }
 
 /**
- * Phase 32 part 1 (Harvest — REAP attacks MAXIMUM HP): subtracts `amount`
+ * Harvest (REAP attacks MAXIMUM HP): subtracts `amount`
  * from BOTH `health` and `maxHealth`, each floored independently at 0. An
  * invariant-preserving subtraction, not a clamp-after-the-fact — because
  * both fields start from the same pre-erosion state and drop by the same

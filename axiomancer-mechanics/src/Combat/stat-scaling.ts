@@ -1,6 +1,5 @@
 /**
- * STAT SCALING — Phase S3 (refactor D1 step 3; decisions D40–D43,
- * `plan/2026-09-27-stat-scaling.prompt.md`).
+ * STAT SCALING.
  *
  * The player's three stats scale the numbers their cards print. Which stat is
  * decided by WHERE THE EFFECT LANDS, never by the card's colour:
@@ -19,7 +18,7 @@
  *   flat      — never scales: on/off effects and every duration (no
  *               stun-lock).
  *
- * Nothing is capped (D41). Enemies never use this: their numbers stay
+ * Nothing is capped. Enemies never use this: their numbers stay
  * authored. No engine state, safe to import from presenters.
  */
 
@@ -136,7 +135,7 @@ export function scaleEffectIntensity(
     return scaleFor(intensity, stats, effectFamily(def, onSelf), effectScaling(def));
 }
 
-// ─── The card face: a stat-scaled copy (S3, "final numbers on card faces") ───
+// ─── The card face: a stat-scaled copy ("final numbers on card faces") ───────
 
 /** A rider with every scaled field at the player's stats. Pure. */
 export function scaleRider(r: CardRider, stats: BaseStats | undefined): CardRider {

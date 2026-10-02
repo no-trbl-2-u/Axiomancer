@@ -8,8 +8,7 @@
  * `buildStagePlayer` turns a profile into a ready-to-fight `Character` whose
  * known cards are exactly the stage-eligible card pool.
  *
- * HP is the sole win condition (the old status-primacy doctrine is retired —
- * see `docs/lexicon.json`). Stage rosters exist so the playtest matrix can
+ * HP is the sole win condition. Stage rosters exist so the playtest matrix can
  * measure every win path at EVERY stage of the campaign, not just at one
  * tuned snapshot.
  *
@@ -26,12 +25,10 @@ import { deepClone, calculateMaxHealth } from '../Utils';
 
 /**
  * Deck-MATURITY level implied by a card's RANK (the quality ladder Ash 1 …
- * Saint 6). Cards no longer carry a player-level requirement (removed
- * 2026-07-08); the playtest harness instead uses this rank→maturity mapping to
- * decide which cards a player "at stage X" would plausibly hold — so the stage
- * pools (and the balance-band win-rate curve they feed) are unchanged. This is
- * a SIM-harness heuristic only; it is not a gate the game enforces on the
- * player. Mapping mirrors the retired rank-ladder level gates exactly.
+ * Saint 6). Cards carry no player-level requirement; the playtest harness
+ * uses this rank→maturity mapping to decide which cards a player "at stage X"
+ * would plausibly hold. This is a SIM-harness heuristic only; it is not a gate
+ * the game enforces on the player.
  */
 export function rankMaturityLevel(rank: CardRank): number {
     return ({ 1: 1, 2: 2, 3: 4, 4: 6, 5: 10, 6: 12 } as Record<CardRank, number>)[rank];
@@ -57,16 +54,15 @@ export interface CombatStageProfile {
     playerMaxHealth: number;
     /** Deck maturity gate — only cards with `tier <= maxCardTier` are eligible. */
     maxCardTier: CardTier;
-    // ── THE PATH (owner ruling 2026-09-02) — the progression axes ────────────
-    // A player's power does NOT grow through card rank alone. Modelling only
-    // rank + stats is what made every late cell read unwinnable: the harness
-    // was sending an act-1 body at act-4 content. These fields carry the rest
-    // of the campaign's growth into the measurement.
+    // ── THE PATH — the progression axes ─────────────────────────────────────
+    // A player's power does NOT grow through card rank alone; modelling only
+    // rank + stats sends an act-1 body at act-4 content. These fields carry
+    // the rest of the campaign's growth into the measurement.
     /** ACT REWARD DICE banked by this stage — extra dice in every turn's tray.
      *  One per completed act ("a red/blue/purple base die of their choice").
      *
-     *  NOT A SHIPPED FEATURE YET (owner note 2026-09-03): the game is still in
-     *  act one, so no player has ever been handed an act-reward die. This field
+     *  NOT A SHIPPED FEATURE YET: the game is still in act one, so no player
+     *  is handed an act-reward die. This field
      *  is the harness PROJECTING the campaign the design intends, so a mid/late
      *  cell is measured with the body that stage of the game will actually
      *  have. Do not read it as evidence the reward exists in the product. */
@@ -74,7 +70,7 @@ export interface CombatStageProfile {
     /** DIE UPGRADES bought by this stage (0-`MAX_DIE_UPGRADE_LEVEL`) — the share
      *  of LIVE and WILD faces in the roll bag. Expensive in the fiction.
      *
-     *  Owner-set bands (2026-09-03): early = the base die, mid = 1-2 upgrades,
+     *  Owner-set bands: early = the base die, mid = 1-2 upgrades,
      *  late = 3-4. Pinned in `progression-axes.engine.test.ts`. */
     dieUpgradeLevel: number;
     /** CARD UPGRADES: the fraction of this stage's deck that has been upgraded
@@ -118,12 +114,10 @@ export const COMBAT_STAGE_PROFILES: Record<CombatStageId, CombatStageProfile> = 
         playerLevel: 20,
         playerBaseStats: { heart: 17, body: 17, mind: 17 },
         playerMaxHealth: 255,
-        // THE BIG NUMBERS REWRITE (2026-09-02) — raised 2 -> 3. `tier` is the
-        // RESIST tier, never a power axis; using it as a maturity gate was a
-        // proxy that `rankMaturityLevel` already does properly (rank 5 wants
-        // level 10, rank 6 level 12). At level 20 a player plainly holds Skull
-        // and Saint cards, and every one of them is tier 3 — so the old cap
-        // sent a Rib-capped deck against thousand-VITAE bosses and read 0%.
+        // `tier` is the RESIST tier, never a power axis; `rankMaturityLevel`
+        // is the maturity gate (rank 5 wants level 10, rank 6 level 12). At
+        // level 20 a player holds Skull and Saint cards, all tier 3, so the
+        // cap admits tier 3.
         maxCardTier: 3,
         // One act cleared: a fourth die, two hones (top of the owner's "1 or 2"
         // band), a third of the deck upgraded at rest sites.
@@ -167,8 +161,7 @@ export function isCombatStageId(id: string): id is CombatStageId {
  * library card by sharing its id) filtered by `tier <= maxCardTier` and
  * `rankMaturityLevel(rank) <= playerLevel`. Excludes nothing else — the point
  * is the WHOLE maturity-gated library, so the playtest matrix can measure
- * coverage of it. (Cards no longer carry a level requirement; the rank→maturity
- * heuristic reproduces the retired level gate so stage pools are unchanged.)
+ * coverage of it.
  */
 export function stageEligibleCardIds(
     stage: CombatStageProfile,
@@ -181,8 +174,8 @@ export function stageEligibleCardIds(
     for (const card of pool.values()) {
         if (card.tier > stage.maxCardTier) continue;
         if (rankMaturityLevel(card.rank) > stage.playerLevel) continue;
-        // The card purge (D44): the grey office is now also the reward pool,
-        // so a stage pool models the reward-built deck with it.
+        // The grey office is also the reward pool, so a stage pool models the
+        // reward-built deck with it.
         ids.push(card.id);
     }
     // THE PATH — CARD UPGRADES (axis 3). By this stage the player has spent
@@ -210,13 +203,9 @@ export function buildStagePlayer(stage: CombatStageProfile): Character {
     const player = deepClone(Player);
     player.level = stage.playerLevel;
     player.baseStats = { ...stage.playerBaseStats };
-    // THE BIG NUMBERS REWRITE (2026-09-02) — DERIVE the pool, never author it.
-    // These profiles used to hard-code `playerMaxHealth` at the old
-    // `stats x 5` scale (mid 255, late 570). When the formula moved to
-    // `50 + stats x 8` the harness kept fighting the new enemies with the old
-    // body, and every mid/late/impossible cell read 0% — a measurement
-    // artefact that looked exactly like a balance catastrophe. The authored
-    // field is retained only as documentation of the profile's era.
+    // DERIVE the pool from the live VITAE formula, never author it: a
+    // hard-coded `playerMaxHealth` drifts from the formula and turns every
+    // cell into a measurement artefact. The authored field is not read here.
     const vitae = calculateMaxHealth(stage.playerLevel, player.baseStats);
     player.maxHealth = vitae;
     player.health = vitae;

@@ -1,11 +1,9 @@
 /**
- * Hermetic E2E — Gate 0 §1 (archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-turn-law-and-honest-baseline.md):
- * the ROUND-TURN LAW as an engine invariant.
+ * Hermetic E2E — the ROUND-TURN LAW as an engine invariant.
  *
  *   - `startTurn` refuses a SECOND tray roll inside one threat phase: the
  *     tray/draft/turn are untouched and a `turn-law-blocked` event records
- *     the attempt (the pre-law engine re-rolled a fresh tray any time the
- *     draft slot was empty — the Conviction farm).
+ *     the attempt (no re-roll farm for Conviction).
  *   - `resolveThreatPhase` re-arms the law at the phase boundary: the next
  *     phase gets exactly one fresh tray.
  *   - THE WATCH RULE: the law caps TRAY ROLLS, not card plays — a multi-float
@@ -167,8 +165,7 @@ describe('Gate 0 — the round-turn law (one tray roll per threat phase)', () =>
     });
 
     it('a third, fourth, ... startTurn call is equally refused (no farm, however long)', () => {
-        // Cloud Phase 26 pin (folded in at the merge): the refusal is not a
-        // one-shot — every subsequent illegal roll inside the phase no-ops.
+        // The refusal is not a one-shot — every subsequent illegal roll inside the phase no-ops.
         let s = open();
         const trayAfterFirstTurn = s.dice;
         for (let i = 0; i < 10; i++) {
@@ -180,8 +177,7 @@ describe('Gate 0 — the round-turn law (one tray roll per threat phase)', () =>
     });
 
     it('the live mobile map auto-runner never rolls more than one tray per resolved phase', () => {
-        // Cloud Phase 26 pin (folded in at the merge): the auto-runner that
-        // drives REAL map encounters obeys the law, not just the sim policies.
+        // The auto-runner that drives REAL map encounters obeys the law, not just the sim policies.
         const result = runHazardCombatAutoEncounter(
             makePlayer(LAW_DECK), makeEnemy(), { seed: 11, policy: 'status', maxTurns: 20 },
         );

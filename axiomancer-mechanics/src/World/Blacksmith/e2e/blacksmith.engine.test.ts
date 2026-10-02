@@ -1,5 +1,5 @@
 /**
- * Blacksmith ("The Anvil") engine — hermetic unit suite (Spec 33 §6 / D5).
+ * Blacksmith ("The Anvil") engine — hermetic unit suite.
  *
  * Seeded RNG only; no timers, no network, no Math.random. Covers the upgrade
  * verbs (HONE / TEMPER / gear SWAP), shilling pricing + budget gating,

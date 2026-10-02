@@ -6,11 +6,9 @@
  * Design notes:
  *
  * - The only equipment stat line is `maxHp` (the two armor relics' +5 max
- *   VITAE), folded onto `Character.maxHealth` at equip-time. TRIM THE FAT T2a
- *   (D14) deleted the derived-stat recompute this module used to run on every
- *   equip — derived stats no longer exist and the relics' body / mind / heart
- *   bumps were cut.
- * - Equipment is DECOUPLED FROM EFFECTS (phases 20-23). Equipping/unequipping
+ *   VITAE), folded onto `Character.maxHealth` at equip-time. There are no
+ *   derived stats to recompute.
+ * - Equipment is DECOUPLED FROM EFFECTS. Equipping/unequipping
  *   applies no effect to `Character.effects`; `statModifiers` (now `maxHp`
  *   only) and `grantsSignature` are the SOLE channels from equipment to the
  *   character.
@@ -21,7 +19,7 @@ import { Equipment, EquipmentSlot, SLOT_CAPACITY } from '../Items/types';
 import { StatModifier } from '../Effects/types';
 
 /**
- * Summed worn `maxHp` bonus (Phase 19): the flat `{ stat: 'maxHp' }` lines of
+ * Summed worn `maxHp` bonus: the flat `{ stat: 'maxHp' }` lines of
  * every worn item. Folded onto `Character.maxHealth` by `withLoadout`, and by
  * stat allocation / level-up so a rebuilt `maxHealth` keeps the relic bonus.
  *
@@ -65,7 +63,7 @@ function withLoadout(
 }
 
 /**
- * Equips `item` into its slot kind (Phase 18):
+ * Equips `item` into its slot kind:
  *
  * - **weapon / armor** — replace in place (today's semantics). We don't return
  *   the displaced piece here; callers that need it back in `inventory` chain

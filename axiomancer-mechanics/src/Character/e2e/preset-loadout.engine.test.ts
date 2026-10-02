@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — Phase 18 preset loadouts are legal.
+ * Hermetic E2E — preset loadouts are legal.
  *
  * Every character/ladder preset must build a `Character` whose worn loadout
  * obeys the 5-slot cap (≤1 weapon, ≤1 armor, ≤3 accessories) and returns any

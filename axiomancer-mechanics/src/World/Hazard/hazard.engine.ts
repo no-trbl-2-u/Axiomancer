@@ -6,7 +6,7 @@
  * randomness flows through the session's embedded mulberry32 state,
  * so a session is fully reproducible from its seed.
  *
- * Doctrine (user-confirmed 2026-06-10):
+ * Doctrine:
  *  - Dice are cast ONCE at route selection and never re-cast between
  *    rounds. Spent dice stay spent. Only the SECOND WIND (re-cast) and
  *    convert cards manipulate the pool mid-hazard.
@@ -534,7 +534,7 @@ export function hazardTierOf(marks: readonly HazardMark[]): HazardOutcomeTier {
 /**
  * The pick-one card offer after a clear: three distinct cards from the core
  * deck. A perfect run's first slot is a gold rare; a one-win run offers no
- * rare. The same move the card purge made for combat rewards (D44).
+ * rare.
  */
 function rollRewardCards(
     rng: HazardRngState,

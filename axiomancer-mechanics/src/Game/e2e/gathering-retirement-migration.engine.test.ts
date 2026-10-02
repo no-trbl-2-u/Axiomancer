@@ -1,7 +1,7 @@
 /**
- * Hermetic engine test — Phase 76 save migration (v18 → v19).
+ * Hermetic engine test — Gathering-minigame save migration (v18 → v19).
  *
- * Retires the Gathering minigame ("The Gleaning"). Pins that a v18 save
+ * The Gathering minigame ("The Gleaning") does not exist. Pins that a v18 save
  * loads clean at v19: a live gathering session riding along in the raw
  * payload's mobile-only `gathering` key is cleared rather than carried
  * forward in the old shape.

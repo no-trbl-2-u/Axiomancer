@@ -1,7 +1,6 @@
 /**
- * Hermetic E2E — effect-wiring audit fixes (2026-07-14). Each block pins a
- * payload surface that was previously INERT (or mis-timed) in Hazard-Pattern
- * Combat and is now read by the live engine:
+ * Hermetic E2E — effect wiring. Each block pins a payload surface the live
+ * Hazard-Pattern Combat engine must read (not leave INERT or mis-timed):
  *
  *   - POISON ramp reset on reapplication (`escalatesPerTurn` → `appliedAt`
  *     re-stamped in `applyEffect`).
@@ -25,7 +24,7 @@ describe('POISON — reapplication resets the escalation ramp', () => {
         // Reapplied four rounds later: the ramp clock resets to the new round…
         const again = applyEffect(first, poison, 4).activeEffects;
         expect(again).toHaveLength(1);
-        expect(again[0].appliedAt).toBe(4);   // ramp restarts (spec 32 v3)
+        expect(again[0].appliedAt).toBe(4);   // ramp restarts
         expect(again[0].intensity).toBe(2);   // …but intensity still stacks
     });
 

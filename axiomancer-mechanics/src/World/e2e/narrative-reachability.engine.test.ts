@@ -1,17 +1,15 @@
 /**
- * Narrative reachability — registry-wide invariant (Phase 53a).
+ * Narrative reachability — registry-wide invariant.
  *
  * `resolveInteraction` falls back silently when an authored `npcName`
  * doesn't resolve in the host map's roster, so a mismatch or a lost NPC
  * never fails anything at runtime — it just quietly ships a dialogue no
- * player can ever reach. Eleven of fourteen authored trees sat unreachable
- * this way before this phase. `auditNarrativeReachability` is the
+ * player can ever reach. `auditNarrativeReachability` is the
  * structural guard; this file is the hermetic invariant test over the
  * whole registry, mirroring `e2e/map-traversal.engine.test.ts`.
  *
- * R3c pinned it to Act 1 (D53): the four Act 1 maps are the playable world,
- * they carry no NPC roster, and nothing on them starts a quest or sets a
- * story flag. R7e (D72) deleted the parked maps that carried the rosters.
+ * The four Act 1 maps are the playable world, they carry no NPC roster, and
+ * nothing on them starts a quest or sets a story flag.
  */
 
 import { describe, expect, it } from 'vitest';
@@ -70,10 +68,7 @@ describe('narrative reachability — registry-wide invariant', () => {
             const audit = auditNarrativeReachability(def);
 
             it('names only rostered NPCs from interaction nodes', () => {
-                // Phase 53a's one accepted exception (a fishing-village node
-                // naming nobody in the roster) was resolved in Phase 53c, and
-                // the map itself was purged in R3b, so there are no
-                // exceptions left to declare.
+                // No exceptions are declared.
                 expect(audit.unresolvedInteractions, JSON.stringify(audit.unresolvedInteractions)).toEqual([]);
             });
 

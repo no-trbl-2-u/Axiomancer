@@ -1,10 +1,7 @@
 /**
- * MapEvents (Spec 23) — type surface.
+ * MapEvents — type surface.
  *
- * Twelve event kinds plus a weighted-pool authoring model. ('quest' joined
- * the original eight in Phase 137 and was retired in Phase 61 — the
- * Quest Board minigame it launched is gone.) See `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/23-map-events.md`
- * for the original spec; see
+ * Twelve event kinds plus a weighted-pool authoring model. See
  * `src/World/MapEvents/resolve-map-event.ts` for the dispatcher.
  */
 
@@ -20,10 +17,8 @@ import type { BlacksmithVariantOffer } from '../Blacksmith/blacksmith.types';
 import type { LabyrinthActId } from '../Labyrinth/types';
 
 /**
- * The MapEvent kinds. 'narration' (a dialogue-backed monologue shell)
- * joined the original eight in 2026-06; 'quest' (Phase 137) was retired
- * in Phase 61; 'travel' (inter-map doors) joined 2026-08-28; 'labyrinth'
- * (the Aporia's door, map revamp M4, D24) joined 2026-09-27.
+ * The MapEvent kinds. 'narration' is a dialogue-backed monologue shell;
+ * 'travel' is an inter-map door; 'labyrinth' is the Aporia's door.
  */
 export type MapEventKind =
     | 'encounter'
@@ -72,17 +67,14 @@ export interface GatheringPayload {
 }
 
 /**
- * Shelter class of a rest node (Phase 52b).
+ * Shelter class of a rest node.
  *
  * `'inn'` is a PAID, tended shelter — full-recovery semantics, and the
  * only place hazard-scarred max-VITAE is mended back toward baseline.
  * `'camp'` is anything in the wild: a spring, a mossy log, a corner of
  * the labyrinth the house forgot to make uncomfortable.
  *
- * This replaces the retired `healFraction >= 1.0` heuristic, which was
- * wrong on the authored content: `nf-4`, `nf-24` and every fishing-village
- * inn (the pool builder now named `innRestPool`) were all authored at 1.0, so two forest springs mended scars like
- * a paid shelter. "Is this an inn?" is now authored, never inferred.
+ * "Is this an inn?" is authored, never inferred.
  */
 export type RestShelter = 'camp' | 'inn';
 
@@ -103,7 +95,7 @@ export interface VillagePayload {
     /** Shopkeepers / merchants present in the scene. */
     merchants?: readonly NPC[];
     /**
-     * Transactional shop attached to this village (Phase 37). Authoring
+     * Transactional shop attached to this village. Authoring
      * is optional — a village can carry merchants for dialogue without
      * a shop, or a shop without named merchants.
      */
@@ -148,20 +140,14 @@ export interface NarrationPayload {
 }
 
 /**
- * Blacksmith node ("The Anvil", Spec 33 §6 / Phase D5). Hands the host an
+ * Blacksmith node ("The Anvil"). Hands the host an
  * authored budget + variant-gear offers; the host launches a
  * `World/Blacksmith` session from them (the sandboxed launch contract the
  * hazard minigame uses). The handler touches no state — it only
  * validates the offered gear against the die-gear caps.
  *
- * RULED (T, attended chat, 2026-08-08; resolved Phase 52c) the anvil was
- * reached THROUGH the rest node, one of `World/RestChoice`'s offers. Phase
- * 59 dropped that offer (T direct, 2026-08-15) and Phase 60 re-homed the
- * anvil to its own placed `blacksmith` node — a single fixed placement at
- * fishing-village `fv-21`, mirroring the D6c precedent (one owner-ruled
- * node, not a repeating cadence). R3b (D61) purged that map and placed one
- * Anvil per Act 1 region near its exit instead. See `MapEvents/content.ts`'s
- * `ACT1_ANVIL_NODES`.
+ * The anvil is its own placed `blacksmith` node: one per Act 1 region, near
+ * its exit. See `MapEvents/content.ts`'s `ACT1_ANVIL_NODES`.
  */
 export interface BlacksmithPayload {
     kind: 'blacksmith';
@@ -173,7 +159,7 @@ export interface BlacksmithPayload {
 }
 
 /**
- * Travel node — an inter-map DOOR (2026-08-28). Resolving it walks the
+ * Travel node — an inter-map DOOR. Resolving it walks the
  * player out of the current map: the departed map's runtime `MapState` is
  * preserved under `WorldState.mapStates` and the map is marked in
  * `completedMaps` (the world is a place, not a checklist — completing a
@@ -191,7 +177,7 @@ export interface TravelPayload {
 }
 
 /**
- * Labyrinth door (map revamp M4, D24): arriving enters THE APORIA. The engine
+ * Labyrinth door: arriving enters THE APORIA. The engine
  * only names the act: the durable progress's `currentAct`, so a first visit
  * opens act I and a return opens the act the player left. The world swap,
  * its overworld snapshot and the way back belong to the host (mobile
@@ -235,7 +221,7 @@ export interface MapEventPool {
 
 // ─── Resolved events (the engine's output) ────────────────────────────────────
 
-// Phase 58 — every kind below except 'cutscene' (already delivers its
+// Every kind below except 'cutscene' (already delivers its
 // authored prose via `lines`) and 'none' (nothing to say) carries the
 // optional `description` threaded straight from its `MapEventPayload`.
 // Presenters prefer it over their kind-keyed placeholder text; see
@@ -244,10 +230,9 @@ export type ResolvedEvent =
     | { kind: 'encounter';   encounter: Encounter; isBoss: boolean; description?: string }
     | { kind: 'interaction'; npcName: string; dialogue?: DialogueTree; description?: string }
     | { kind: 'gathering';   items: Item[]; description?: string }
-    // Phase 52b — the authored `healFraction` is retired; the resolved rest
-    // event carries the SHELTER CLASS so hosts (and 52c's rest-choice
-    // engine) decide the heal from an honest marker rather than a number.
-    // `healed` remains a computed OUTCOME, not an authoring knob.
+    // The resolved rest event carries the SHELTER CLASS so hosts (and the
+    // rest-choice engine) decide the heal from an honest marker rather than
+    // a number. `healed` is a computed OUTCOME, not an authoring knob.
     | { kind: 'rest';        healed: number; shelter: RestShelter; description?: string }
     | { kind: 'village';     villageName: string; merchants: NPC[]; shop?: ShopInventory; description?: string }
     | { kind: 'cutscene';    lines: readonly string[] }

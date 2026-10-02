@@ -1,7 +1,7 @@
 /**
- * Spec 25 — Hazard-Pattern Combat: die helpers (§4.2).
+ * Hazard-Pattern Combat: die helpers.
  *
- * The rolled tray itself is spec 33's four fixed dice
+ * The rolled tray itself is the four fixed dice
  * (`combat.upgradeable-dice.ts`). This module keeps the die primitives that
  * model shares: the Reserve and its pips, GHOST (floating) dice, the colour
  * law (`combatDieCanPower`), and spend/refresh helpers.
@@ -11,19 +11,19 @@ import type { Stance } from './types';
 import type { CombatDieColor, CombatManaDie } from './combat.encounter.types';
 
 /**
- * THE PATH (owner ruling 2026-09-02) — the highest die-upgrade level the
- * balance harness models. Under spec 33 a level HONES a miss face into a mana
+ * THE PATH — the highest die-upgrade level the
+ * balance harness models. A level HONES a miss face into a mana
  * face (`honedDieGear`); the ladder saturates at level 4.
  */
 export const MAX_DIE_UPGRADE_LEVEL = 4;
 
-/** True when a die color carries a stance for the RPS read (heart/body/mind). */
+/** True when a die color carries a stance (heart/body/mind). */
 export function dieHasStance(color: CombatDieColor): boolean {
     return color === 'heart' || color === 'body' || color === 'mind';
 }
 
 // ---------------------------------------------------------------------------
-// Fate Engine P1 (spec 31 R2) — the RESERVE and its ripening pips
+// Fate Engine — the RESERVE and its ripening pips
 // ---------------------------------------------------------------------------
 
 /** Max dice the Reserve holds. Banking past this burns for Conviction instead. */
@@ -44,7 +44,7 @@ export function ripenReserve(reserve: readonly CombatManaDie[]): { reserve: Comb
 }
 
 // ---------------------------------------------------------------------------
-// Spec 32 v3 §5 — GHOST dice (the live-tray model)
+// GHOST dice (the live-tray model)
 // ---------------------------------------------------------------------------
 
 /** Hard cap on the floating-die pool. Forging at cap → +1 Conviction instead. */
@@ -118,12 +118,12 @@ export function stanceToDieColor(stance: Stance): CombatDieColor {
 }
 
 // ---------------------------------------------------------------------------
-// Master Spec §4 — wild-die permanent-growth mechanic
+// Wild-die permanent-growth mechanic
 // ---------------------------------------------------------------------------
 
 /**
  * Hard cap on `CombatEncounterState.permanentWildDice` (the
- * `grant_permanent_wild_die` card mechanic). Under spec 33 any non-zero pool
+ * `grant_permanent_wild_die` card mechanic). Any non-zero pool
  * materializes as the single gold+lead pair (`rollGoldLeadPair`).
  */
 export const MAX_PERMANENT_WILD_DICE = 3;

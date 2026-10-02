@@ -23,18 +23,17 @@ import {
 
 /** RESOLUTE — hard floor on the incoming-damage multiplier for a protected
  *  bearer (a fully-stacked protective mult still lets half the hit through).
- *  P0-truth: protective (`damageTakenMult < 1`) payloads are REAL now. Tunable. */
+ *  Protective (`damageTakenMult < 1`) payloads are real. Tunable. */
 export const RESOLUTE_MIN_MULT = 0.5;
 /**
  * VULNERABLE / RESOLUTE multiplier — the damage multiplier the HP engine applies
  * to every HP source landing on this bearer. Aggregated additively across the
  * bearer's OWN `damageTakenMult` payloads:
  *   mult = 1 + Σ ((damageTakenMult - 1) × intensity)
- * floored at `RESOLUTE_MIN_MULT` and UNCAPPED above (S3, D41: the old ×2.0
- * `VULNERABLE_MAX_MULT` ceiling is gone). Returns EXACTLY `1`
+ * floored at `RESOLUTE_MIN_MULT` and UNCAPPED above. Returns EXACTLY `1`
  * when the bearer carries no marker, so unmarked HP assertions are byte-identical.
- * P0-truth: the old `Math.max(1, …)` clamp silently erased every protective
- * (<1) payload — `buff_resolute` and self-`debuff_vulnerable` are real now. Pure.
+ * Protective (<1) payloads count — `buff_resolute` and self-`debuff_vulnerable`
+ * both apply. Pure.
  */
 export function getDamageTakenMultiplier(bearer: Combatant): number {
     let mult = 1;
@@ -73,10 +72,10 @@ export interface PendingDotEntry {
     amount: number;
 }
 
-/** WS3 fuel math — how many times each EVENT clock is expected to fire per
- *  round. Legacy (no-trigger) DoTs never read this: their math is unchanged
- *  (one tick per remaining-duration round).
- *  // PLAYTEST-CALIBRATION: conservative constants until WS3.6 telemetry
+/** Fuel math — how many times each EVENT clock is expected to fire per
+ *  round. Round-clocked (no-trigger) DoTs never read this: they tick once per
+ *  remaining-duration round.
+ *  // PLAYTEST-CALIBRATION: conservative constants until telemetry
  *  // replaces them with the sim's own per-policy averages — 2 player plays
  *  // per round drive the card-played and damage-instance clocks; payoff
  *  // verbs fire about once a round at most. */
@@ -90,8 +89,8 @@ export const EXPECTED_TRIGGERS_PER_ROUND: Readonly<Record<DotEventTrigger, numbe
  * The total DoT HP still pending on the bearer over the effects' remaining
  * lifetimes — the figure RUPTURE detonates. Amplification-aware (reuses the same
  * combo multiplier the aggregator applies), floored per-tick. Round-clocked
- * (legacy) DoTs tick once per remaining-duration round (permanent counts one
- * tick — exactly today's math); event-clocked DoTs expect
+ * DoTs tick once per remaining-duration round (permanent counts one
+ * tick); event-clocked DoTs expect
  * `EXPECTED_TRIGGERS_PER_ROUND` ticks over the same round horizon (a
  * no-calendar instance, `remainingDuration` -1, counts one round —
  * conservative, bounded). Pure.
@@ -109,9 +108,9 @@ export function getPendingDotTotal(bearer: Combatant, currentRound?: number): { 
         const eventClock = dotEventTrigger(dot);
         const ticksPerRound = eventClock ? EXPECTED_TRIGGERS_PER_ROUND[eventClock] : 1;
         const rounds = Math.max(1, ae.remainingDuration);
-        // P0-truth: escalating DoTs (`escalatesPerTurn`) sum their GROWING future
+        // Escalating DoTs (`escalatesPerTurn`) sum their GROWING future
         // ticks when a round is threaded; flat DoTs keep perTick × ticks.
-        // BLEED (spec 32 v3 `decaysPerTick`): intensity falls 1 per future tick
+        // BLEED (`decaysPerTick`): intensity falls 1 per future tick
         // and the instance washes out at 0 — the pending fuel must model that
         // decay or RUPTURE previews overstate the burst (projection-truth law).
         const decays = def.payload.dotModifiers?.decaysPerTick === true;
@@ -140,7 +139,7 @@ export function getPendingDotTotal(bearer: Combatant, currentRound?: number): { 
  * `getPendingDotTotal` sums in lump form (ramp- and combo-amplification-aware).
  * Each effect's round horizon is capped at `Math.max(1, remainingDuration)` —
  * the same "permanent DoT counts one round" convention `getPendingDotTotal`
- * uses — and event-clocked DoTs (WS3) contribute their expected
+ * uses — and event-clocked DoTs contribute their expected
  * `EXPECTED_TRIGGERS_PER_ROUND` ticks each round, so the two figures never
  * diverge. Returns `null` when the DoT alone won't finish the bearer over its
  * remaining duration. Pure.
@@ -213,11 +212,11 @@ export function updateEffectDuration<T extends Combatant>(target: T, effectId: s
 /**
  * Decrements every non-permanent effect's remaining duration by 1, removes
  * any that expired, and returns both the updated combatant and the list of
- * expired effects (for UI announcements). WS3: effects that opted out of the
+ * expired effects (for UI announcements). Effects that opted out of the
  * calendar (`dotModifiers.calendarExpiry === false`) never count down — they
  * expire only via their own decay (e.g. `decaysPerTick` washout) or combat end.
  *
- * BEARER ASYMMETRY (2026-07-12): the no-calendar law was ratified for ENEMY
+ * BEARER ASYMMETRY: the no-calendar law holds for ENEMY
  * bearers, where payoff consumption (RUPTURE / consumeMarks / cleanse riders)
  * bounds a permanent affliction. The player has no such consumer, so a
  * player-borne no-calendar effect honors the opt-out only when it can wash
@@ -268,7 +267,7 @@ export function processDamageOverTime<T extends Combatant>(
     // amount to the same truth or attribution can exceed total VITAE lost.
     const damage = Math.min(projectedDamage, Math.max(0, target.health));
     let next: T = applyDamage(target, damage);
-    // BLEED (spec 32 v3, `dotModifiers.decaysPerTick`): a front-loaded DoT loses
+    // BLEED (`dotModifiers.decaysPerTick`): a front-loaded DoT loses
     // 1 intensity each time it ticks; the instance washes out at 0. Only effects
     // that ticked on the round clock decay. No-op for every non-decaying DoT.
     const washedOut: ActiveEffect[] = [];
@@ -299,7 +298,7 @@ export function processDamageOverTime<T extends Combatant>(
 export function processRoundStartEffects<T extends Combatant>(target: T, currentRound?: number): {
     target: T;
     dotDamage: number;
-    /** WS3 — decay-consumed DoT instances (Soul economy reads no-calendar ones). */
+    /** Decay-consumed DoT instances (Soul economy reads no-calendar ones). */
     dotWashedOut: ActiveEffect[];
 } {
     const dot = processDamageOverTime(target, currentRound);
@@ -314,7 +313,7 @@ export function processRoundEndEffects<T extends Combatant>(
     return tickAllEffects(target, bearer);
 }
 
-// ── WS3.2 — trigger-clock DoT substrate (spec 32 §12, ratified 2026-07-11 #3) ─
+// ── Trigger-clock DoT substrate ──────────────────────────────────────────────
 
 /** One `fireDotTrigger` outcome. */
 export interface DotTriggerResult<T extends Combatant> {
@@ -329,16 +328,16 @@ export interface DotTriggerResult<T extends Combatant> {
 }
 
 /**
- * Advances one EVENT clock (WS3): ticks exactly the effects whose
+ * Advances one EVENT clock: ticks exactly the effects whose
  * `damageOverTime.trigger` matches, with the same per-tick body
  * `processDamageOverTime` uses — combo amplification, POISON ramp
  * (`escalatesPerTurn`), MARK flat amplification, and BLEED `decaysPerTick`
- * washout. Legacy (untriggered) and round-clocked DoTs never match here.
+ * washout. Untriggered (round-clocked) DoTs never match here.
  * The tick damage is applied with the plain `applyDamage`, so a
  * 'damage-instance' DoT can never re-trigger itself. Pure; exact no-op
  * (same object) when nothing matches.
  *
- * `eligible` (WS3.3) — optional per-instance gate: an instance for which it
+ * `eligible` — optional per-instance gate: an instance for which it
  * returns false (or 0) neither ticks nor decays on this trigger. The card-play
  * resolver passes "existed BEFORE this play" so a play's own fresh stacks are
  * never on their own clock (doctrine witness: a PAID line must not chip a
@@ -413,7 +412,7 @@ export function fireDotTrigger<T extends Combatant>(
 }
 
 /**
- * WS3 Doom growth (`dotModifiers.growth: 'per-enemy-action'`) — every matching
+ * Doom growth (`dotModifiers.growth: 'per-enemy-action'`) — every matching
  * effect on the bearer gains +1 intensity (capped at `MAX_EFFECT_INTENSITY`).
  * The engine calls this on the ENEMY after its telegraphed action actually
  * fires (a denied turn never grows the Doom). Pure; no-op when none match.

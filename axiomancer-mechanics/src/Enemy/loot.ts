@@ -1,5 +1,5 @@
 /**
- * Weighted loot-table roller (Spec 07 Q7B).
+ * Weighted loot-table roller.
  *
  * `LootTableEntry { item, weight }` lets enemies express dynamic drop tables
  * — empty buckets (`item: null`) carry the no-drop weight so probability is

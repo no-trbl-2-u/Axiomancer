@@ -33,14 +33,9 @@ export type EffectCategory =
 
 /**
  * A persistent stat line on a piece of equipment. The only stat an item can
- * modify is `maxHp` (no live relic carries one since R7e2; `FIXTURE_ARMOR`
+ * modify is `maxHp` (no live relic carries one; `FIXTURE_ARMOR`
  * witnesses it), folded onto
  * `Character.maxHealth` by the equip reducers.
- *
- * TRIM THE FAT T2a (D14) deleted every other target: the derived attack /
- * defence / save / test stats and luck (display-only — combat read none of
- * them) and the body / mind / heart lines on relics and effects (inert —
- * VITAE reads the raw base stats). Stat hooks come back with D4.
  */
 export interface StatModifier {
     stat: 'maxHp';
@@ -49,9 +44,8 @@ export interface StatModifier {
 }
 
 /**
- * WS3 trigger-clock DoT substrate (spec 32 §12, ratified 2026-07-11 #3) — the
- * EVENT clock a DoT ticks on instead of the round boundary ('card-played'
- * counts PLAYER-side card plays only, ratified). A DoT with no trigger ticks
+ * Trigger-clock DoT substrate — the EVENT clock a DoT ticks on instead of
+ * the round boundary ('card-played' counts PLAYER-side card plays only). A DoT with no trigger ticks
  * at round start.
  */
 export type DotTriggerClock = 'card-played' | 'damage-instance' | 'payoff';
@@ -88,32 +82,30 @@ export interface EffectPayload {
      * `1` (or absent) is neutral; `1.5` means the bearer takes +50% from the
      * attacker's HP sources. Read by the HP-model combat engine
      * (`getDamageTakenMultiplier`) and aggregated additively across the bearer's
-     * own payloads, uncapped since S3 (D41). Inert in the legacy
-     * resolver (it never reads this field), so existing exact-HP tests are
-     * byte-identical. See the VULNERABLE epic (mechanics 0.34.0).
+     * own payloads, uncapped.
      */
     damageTakenMult?: number;
     /** DoT-specific behaviour beyond the plain `damageOverTime` tick. */
     dotModifiers?: {
-        /** Tick damage ramps the longer the effect survives (POISON, spec 32 v3):
+        /** Tick damage ramps the longer the effect survives (POISON):
          *  `tickDamage = baseTick * (1 + turnsSurvived * rampFactor)`. Reapplication
          *  resets the ramp rather than stacking. */
         escalatesPerTurn?: boolean;
         /** Multiplier applied per turn survived when `escalatesPerTurn` is set. */
         rampFactor?: number;
-        /** BLEED (spec 32 v3) — front-loaded: the effect loses 1 intensity each
+        /** BLEED — front-loaded: the effect loses 1 intensity each
          *  time it ticks (removed at 0). Big now, gone soon. */
         decaysPerTick?: boolean;
-        /** WS3 (spec 32 §12 #3) — explicit opt-out of the round-end duration
-         *  countdown: the instance expires only via its own decay (e.g.
-         *  `decaysPerTick` washout) or combat end. Absent = legacy calendar. */
+        /** Explicit opt-out of the round-end duration countdown: the
+         *  instance expires only via its own decay (e.g. `decaysPerTick`
+         *  washout) or combat end. Absent = the round-end calendar. */
         calendarExpiry?: false;
-        /** WS3 Doom species (spec 32 §12 #3, card-local — NOT keyword #31):
+        /** Doom species (card-local, not a keyword):
          *  the effect's intensity grows +1 each time the enemy acts. */
         growth?: 'per-enemy-action';
     };
     /**
-     * MARK (spec 32 v3, ratified A3) — the universal glue affliction: every DoT
+     * MARK — the universal glue affliction: every DoT
      * tick on the bearer deals +`tickAmplifyFlat` × intensity extra HP, and the
      * effect counts as an affliction for RUPTURE / SOUL / REAP payoffs.
      */
@@ -146,15 +138,14 @@ export interface Effect {
     resistedBy?: Stance;
     resistDR?: number;
     /**
-     * S3 (D43) — on re-application an `intensity`-stacking effect normally
+     * On re-application an `intensity`-stacking effect normally
      * extends (additive) or resets its duration. With this set it adds the
      * intensity and refreshes the duration to the longer of the two, so
      * repeating the card grows the effect without stretching its window.
      */
     refreshOnStack?: boolean;
     /**
-     * Content-provenance metadata (originally consumed by the since-retired
-     * tuning `--focus` filter). `addedIn` is an ISO date (`YYYY-MM-DD`)
+     * Content-provenance metadata. `addedIn` is an ISO date (`YYYY-MM-DD`)
      * or phase tag marking when the effect was authored; `tags` are freeform
      * labels. Both optional and ignored by the effects engine. Present in the
      * JSON library entries as plain fields.

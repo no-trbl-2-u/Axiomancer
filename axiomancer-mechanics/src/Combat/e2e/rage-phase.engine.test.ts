@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — Phase 3: enemy rage-mode threat phase.
+ * Hermetic E2E — enemy rage-mode threat phase.
  *
  * A generated (unauthored) enemy's threat sequence now carries a 4th,
  * locked "rage" phase — harder-hitting AND self-healing — that the fight

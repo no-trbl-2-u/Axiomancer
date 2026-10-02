@@ -1,18 +1,18 @@
 /**
- * The Beacon Crags — Act 1, map 3 (map revamp M3c; D21, D25–D29).
+ * The Beacon Crags — Act 1, map 3.
  *
- * Pins what the map revamp decided for the third Act 1 map:
- * - the first Act 1 map on `northern-continent` (D28): the Charcoal Wood's
+ * Pins the third Act 1 map:
+ * - the first Act 1 map on `northern-continent`: the Charcoal Wood's
  *   stair cave crosses into it, and this map's glacier shrine leads on down
- *   into the Lantern Deep (M3d);
- * - the map borrows the shipped builders, the caverns' roster and its iron
- *   (D29), with one authored event on every node;
+ *   into the Lantern Deep;
+ * - the map borrows the shipped builders, the caverns' roster and its iron,
+ *   with one authored event on every node;
  * - the caverns' roster is level 13 and up, so every fight here is pinned low.
  *
  * The generic gauntlet invariants (no strands, column law, ribs, distinct
  * coordinates) run over this map in `map-traversal.engine.test.ts` like every
- * other registered map. The D25/D16 layout pins live in mobile, where the
- * landmarks and the sheet are.
+ * other registered map. The layout pins live in mobile, where the landmarks
+ * and the sheet are.
  */
 
 import { describe, expect, it } from 'vitest';

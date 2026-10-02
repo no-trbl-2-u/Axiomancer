@@ -1,5 +1,5 @@
 /**
- * Spec 07 — Encounter generator tests.
+ * Encounter generator tests.
  *
  * Verifies:
  *   - Per-map node resolution (`bw-*` → breakwater, `cw-*` → charcoal-wood).
@@ -44,7 +44,7 @@ describe('scaledEncounterLevel', () => {
     });
 
     it('unique enemies ignore player level — they stay at authored level', () => {
-        // No roster foe is unique since the R2 reset — a unique-tier fixture.
+        // No roster foe is unique — a unique-tier fixture.
         const unique: Enemy = { ...FloatEye, difficulty: 'unique', level: 30 };
         const level = scaledEncounterLevel(unique, 50);
         expect(level).toBe(unique.level);
@@ -90,7 +90,7 @@ describe('generateEncounter', () => {
     it('picks an enemy from the resolved map and stamps origin', () => {
         const enc = generateEncounter(coastNode, 1);
         expect(enc.enemies).toHaveLength(1);
-        // The Act 1 pool is Float-Eye only (R2).
+        // The Act 1 pool is Float-Eye only.
         expect(enc.enemies[0].id).toBe(FloatEye.id);
         expect(enc.origin).toBe('breakwater:bw-2');
     });

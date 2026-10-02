@@ -1,12 +1,12 @@
 /**
- * The enemy roster reset (revamp phase R2, D48 / D61).
+ * The enemy roster reset.
  *
  * Pins the post-reset roster: exactly three live foes (Float-Eye, the Brine
  * Hag, the Doorwarden) plus the `sandbag` fixture; no survivor carries a
  * keyword or a stage `gain` list; no enemy card carries an affliction; every
  * Act 1 map draws Float-Eye; each Act 1 region pins the Brine Hag mid-region
- * and the Doorwarden as its door boss. R2b: the keyword, rider, curse and
- * SUMMON code is gone from the engine's surface.
+ * and the Doorwarden as its door boss. The keyword, rider, curse and
+ * SUMMON code stays gone from the engine's surface. lexicon-ok: guard pins the deleted surface stays gone
  */
 
 import { describe, expect, it } from 'vitest';

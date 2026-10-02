@@ -7,11 +7,11 @@
 // ============================================================================
 // CHARACTER — RESOURCE CALCULATIONS
 // ============================================================================
-// THE BIG NUMBERS REWRITE (2026-09-02) — the player's VITAE pool.
-// Formula: VITAE = PLAYER_VITAE_BASE + 12·body + 6·mind + 6·heart (S3, D41:
-// body is the hardy stat; 170 at 5/5/5, as before).
+// The player's VITAE pool.
+// Formula: VITAE = PLAYER_VITAE_BASE + 12·body + 6·mind + 6·heart (body is
+// the hardy stat; 170 at 5/5/5).
 // The flat base keeps a level-1 pilgrim alive long enough to see a second
-// telegraph now that enemy threats open in the high single digits; the
+// telegraph when enemy threats open in the high single digits; the
 // per-stat term is what progression buys. Level influences VITAE through the
 // authored stat budget, not by a second multiplicative level factor.
 // Reference points: level 1 ≈ 100, level 3 ≈ 120, level 18 ≈ 350.
@@ -29,13 +29,13 @@ export const PLAYER_VITAE_BASE = 50;
 // PROGRESSION — EXPERIENCE & LEVELING
 // ============================================================================
 
-// R9 (D55): reaching level L+1 costs L × EXPERIENCE_STEP more XP
+// Reaching level L+1 costs L × EXPERIENCE_STEP more XP
 // (`Character/experience.ts`). A full Act 1 clear ends at level 5.
 export const EXPERIENCE_STEP = 250;
 
-// Stat points granted per level promotion (Spec 06 Q3). Spent via
-// `allocateStatPoint` to raise heart / body / mind. Per Spec 06 Q5 there is
-// no level cap today, so the points stream is uncapped — content authors
+// Stat points granted per level promotion. Spent via
+// `allocateStatPoint` to raise heart / body / mind. There is
+// no level cap, so the points stream is uncapped — content authors
 // decide where progression naturally stops.
 export const STAT_POINTS_PER_LEVEL = 3;
 
@@ -45,12 +45,9 @@ export const STAT_POINTS_PER_LEVEL = 3;
 // Hard ceiling on how high any single effect's intensity or remaining duration
 // can grow, regardless of stacking mode or repeated applications.
 
-// THE BIG NUMBERS REWRITE (2026-09-02) — the intensity ceiling was 10, set
-// when POISON 1-4 was a big number. At the new scale six cards print THORNS
-// 12-20 and DOOM 12 and every one of them silently landed 10 — a printed
-// number the engine did not apply, which is the one text law the repeal kept.
-// The DURATION cap is untouched: a 10-turn calendar is still a long time, and
-// stretching it is a different design question.
+// The intensity ceiling sits above every printed amount (cards print THORNS
+// 12-20 and DOOM 12), so no printed number is silently clipped. The DURATION
+// cap is 10: a 10-turn calendar is a long time.
 export const MAX_EFFECT_INTENSITY = 30;
 export const MAX_EFFECT_DURATION  = 10;
 
@@ -64,24 +61,15 @@ export const RESOURCE_GENERATION = {
     DEFEND:      5,
 } as const;
 
-// Phase 150 — probability that an enemy answers a player's HOSTILE card with
-// a card of its own ("answer power with power"). Distinct from the Phase 49
-// lead-with-card cadence (`ENEMY_CARD_PICK_CHANCE`): this dial governs the
-// REACTIVE answer to the player's offensive card, not the enemy's own opening.
-// Set at 0.10 — a felt but not overwhelming reactive threat. A guaranteed
-// (1.0) answer crushes both the STRATEGIST friendship route and the difficult
-// lethal anchor (`mirac`, retired with the old roster in revamp phase R2);
-// an answer-chance sweep on the Phase 121
-// difficult anchor found win rate 0.04 at 0.20–0.35, 0.12 at 0.15, and 0.16 at
-// 0.10 against an authored band of 0.10–0.40, while the normal anchor (0.80)
-// and difficult-anchor friendship rate (0.20) stay flat across the range. 0.10
-// keeps the doctrine ("answer power with power") alive with safe band margin;
-// it is a deliberate floor, flagged as a tuning candidate to raise once the
-// difficult anchor's stat block is retuned. Recorded in
-// automation/playtest/BALANCE_LEDGER.md (marker M-150).
+// Probability that an enemy answers a player's HOSTILE card with a card of
+// its own ("answer power with power"). Distinct from the lead-with-card
+// cadence (`ENEMY_CARD_PICK_CHANCE`): this dial governs the REACTIVE answer
+// to the player's offensive card, not the enemy's own opening. Set at 0.10 —
+// a felt but not overwhelming reactive threat; a deliberate floor and a
+// tuning candidate.
 export const ENEMY_CARD_ANSWER_CHANCE = 0.10;
 
-// Phase 125 — Effects-driven resolution thresholds
+// Effects-driven resolution thresholds
 // Combined intensity of control/debuff effects needed to force saturation yield (friendship route)
 export const EFFECTS_RESOLUTION_DEBUFF_INTENSITY_THRESHOLD = 3;
 // Minimum DoT damage per round needed to force erosion victory route
@@ -106,7 +94,7 @@ export const EFFECTS_RESOLUTION_DOT_MAX_ROUNDS_TO_KILL = 10;
 //
 // This is the single tunable knob for global enemy power scaling. Authored
 // enemies that opt into budget-based stats build their `baseStats` via
-// `enemyStatBudget(level)` (see `src/Enemy/index.ts`); legacy enemies that
+// `enemyStatBudget(level)` (see `src/Enemy/index.ts`); enemies that
 // hand-author `baseStats` are unaffected.
 export const ENEMY_STAT_PER_LEVEL = 3;
 
@@ -120,9 +108,9 @@ export const ENEMY_STAT_PER_LEVEL = 3;
 export const ENEMY_GEAR_TIER_PER_LEVEL = 0.02;
 
 // ============================================================================
-// ENEMY — VITAE (THE BIG NUMBERS REWRITE, 2026-09-02)
+// ENEMY — VITAE
 // ============================================================================
-// Enemy VITAE no longer rides the player's per-stat formula. `baseStats` still
+// Enemy VITAE does not ride the player's per-stat formula. `baseStats` still
 // drives stance procs, derived combat stats and befriend logic; the pool a
 // player has to chew through is its own authored/derived number, so difficulty
 // bands separate cleanly and a boss can be a wall without a grotesque stat
@@ -135,10 +123,9 @@ export const ENEMY_GEAR_TIER_PER_LEVEL = 0.02;
 // (every boss and unique does). Reference points off the curve: L1 normal ≈
 // 38, L7 elite ≈ 120, L6 boss ≈ 148, L13 normal ≈ 134, L18 boss ≈ 331.
 export const ENEMY_VITAE_BASE = 30;
-// Measured against the playtest matrix 2026-09-02 and pulled back from 18: a
-// player's damage per turn is set by CARD RANK and does not grow with level,
-// so a pool growing at 18/level outran any deck by the late campaign (every
-// late cell read 0%). At 8/level the curve stays ahead of card growth without
+// A player's damage per turn is set by CARD RANK and does not grow with
+// level, so a steep per-level pool outruns any deck by the late campaign.
+// At 8/level the curve stays ahead of card growth without
 // leaving it behind.
 export const ENEMY_VITAE_PER_LEVEL = 8;
 

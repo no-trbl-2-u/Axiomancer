@@ -4,16 +4,15 @@ import { QuestName } from '../World/quest.library';
 /**
  * NPCs module type definitions.
  *
- * - `DialogueMap` is the legacy flat string-keyed map. Retained so older NPC
- *   data keeps working.
- * - `DialogueTree` is the Spec 08 Q9 branching tree — every node has text and
+ * - `DialogueMap` is the flat string-keyed map that older NPC data uses.
+ * - `DialogueTree` is the branching tree — every node has text and
  *   optional `choices` that traverse to other nodes, gated by requirements
  *   and able to fire side effects (start quest, advance objective, teach a
  *   card, set a flag).
  */
 
 /**
- * Legacy flat dialogue map kept for back-compat. Use `DialogueTree` for new
+ * Flat dialogue map, read for older NPC data. Use `DialogueTree` for new
  * NPCs — the branching shape enables quest / flag gating.
  *
  * @example
@@ -79,12 +78,12 @@ export interface DialogueTree {
 /**
  * NPC is a non-player character that can be interacted with.
  *
- * Either `dialogue` (legacy flat map) or `dialogueTree` (Spec 08 Q9) may be
+ * Either `dialogue` (flat map) or `dialogueTree` (branching tree) may be
  * present. New authoring should use `dialogueTree`; the flat map is retained
  * for the existing NPC data.
  *
  * @property name          - The name of the NPC (also the lookup key in node events).
- * @property dialogue      - Legacy flat dialogue map (optional).
+ * @property dialogue      - Flat dialogue map (optional).
  * @property dialogueTree  - Branching tree (preferred for new content).
  * @property description   - A description of the NPC (optional).
  * @property image         - Optional visual.

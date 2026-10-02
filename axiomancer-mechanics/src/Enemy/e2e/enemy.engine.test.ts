@@ -1,12 +1,6 @@
 /**
- * Enemy data-model coverage — 2026-07-06 art-driven roster.
- *
- * The Spec 07 turn-based AI strategy tests were removed with the legacy
- * turn-based combat driver — the Hazard-Pattern engine drives enemies via
- * authored threat sequences, not these strategies. What remains here is the
- * enemy registry shape. (The authored card rotations and the anchor card
- * guards went with the vestigial `Enemy.cards` lists in the card purge,
- * P1, 2026-09-27.)
+ * Enemy data-model coverage — the enemy registry shape. The Hazard-Pattern
+ * engine drives enemies via authored threat sequences.
  */
 
 import { describe, it, expect } from 'vitest';

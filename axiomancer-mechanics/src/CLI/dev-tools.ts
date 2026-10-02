@@ -75,8 +75,7 @@ export function devLearnCards(store: Store, cardIds: string[] | 'all'): DevResul
 
 /**
  * Grant/unlock named cards or all cards by writing knownCards.
- * (Phase 99 / ADR-0002 — cards are known, not equipped; the legacy
- * `devEquipCards` was removed in Phase 159.)
+ * (ADR-0002 — cards are known, not equipped.)
  */
 export function devUnlockCards(store: Store, cardIds: string[] | 'all'): DevResult {
     const ids = cardIds === 'all'
@@ -92,9 +91,8 @@ export function devUnlockCards(store: Store, cardIds: string[] | 'all'): DevResu
 }
 
 export function devGrantAllEquipment(store: Store, _rarity: string = 'common'): DevResult {
-    // Phase 21 — the procedural library is retired; the only equipment is the
-    // signet relics. Grant a fresh clone of each (rarity is
-    // meaningless now).
+    // The only equipment is the signet relics. Grant a fresh clone of each
+    // (`_rarity` is ignored).
     const state = store.getState();
     let count = 0;
     for (const relic of relicLibrary) {
@@ -115,7 +113,7 @@ export function devGrantAllConsumables(store: Store, quantity = 5): DevResult {
 }
 
 export function devEquipItem(store: Store, templateId: string, slot: EquipmentSlot, _rarity: string = 'common'): DevResult {
-    // Phase 21 — equipment ids resolve to signet relics (the only equipment).
+    // Equipment ids resolve to signet relics (the only equipment).
     const relic = getRelicById(templateId);
     if (!relic) return { ok: false, detail: `Unknown relic id: ${templateId}` };
     store.getState().equipItem({ ...relic });
@@ -156,6 +154,6 @@ export function getCardIds(): string[] {
 }
 
 export function getEquipmentTemplateIds(): string[] {
-    // Phase 21 — the "equipment templates" are now the signet relics.
+    // The "equipment templates" are the signet relics.
     return relicLibrary.map(r => r.id);
 }

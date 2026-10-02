@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — Phase 18 five-slot equipment loadout.
+ * Hermetic E2E — five-slot equipment loadout.
  *
  * Proves the `EquipmentLoadout` semantics end-to-end:
  *   • weapon / armor replace in place.

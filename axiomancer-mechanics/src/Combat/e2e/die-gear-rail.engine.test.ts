@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — Spec 33 §6 die-gear rail → combat wiring (Phase D5).
+ * Hermetic E2E — die-gear rail → combat wiring.
  *
  * The SOLE engine wiring point is `initializeCombatEncounter` copying
  * `clonedPlayer.dieGear` onto the encounter state; `activeDieGear` does the

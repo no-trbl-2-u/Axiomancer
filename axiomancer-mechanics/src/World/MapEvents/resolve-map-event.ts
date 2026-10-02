@@ -1,11 +1,10 @@
 /**
- * `resolveMapEvent` — the Spec 23 dispatcher.
+ * `resolveMapEvent` — the map-event dispatcher.
  *
  * Walks the contract:
  *   0. Answer the node's arrival: clear `pendingArrival` if it names this
  *      node. Resolving IS the answer, whatever the roll produces, so this
- *      happens before any handler runs (burn-day audit 2026-09-19 row 3.1
- *      follow-up).
+ *      happens before any handler runs.
  *   1. Look up the active node on the current map.
  *   2. If the node is already in `consumedNodes`, return
  *      `{ kind: 'none' }` immediately (one-shot enforcement).
@@ -18,7 +17,7 @@
  *   6. Return the handler's `{ state, event }` with the discovery /
  *      consumption updates folded in.
  *
- * An `encounter` is the exception to 0 and 5 (phase R9a). Its arrival stays
+ * An `encounter` is the exception to 0 and 5. Its arrival stays
  * owed and its node unconsumed, with the way on still shut, until the fight
  * settles: `settleArrival` below, which `END_COMBAT` runs for every outcome.
  * The fight itself is never saved (`currentEncounter` is transient), so a
@@ -40,8 +39,7 @@ import type {
 
 /**
  * Advances any active `reach`-type quest objectives that target `nodeId`.
- * Restores the auto-advance behaviour the deleted `process-node.ts` provided
- * before Phase 25. Pure — re-entering a node whose reach objective already
+ * Pure — re-entering a node whose reach objective already
  * completed is a silent no-op via `reachableObjectives`' `currentCount <
  * requiredCount` filter.
  */
@@ -70,16 +68,13 @@ function advanceCollectObjectives(quests: QuestLog, itemIds: string[]): QuestLog
 }
 
 /**
- * Map-level extension surface for Phase 23. We attach pools via a side
- * registry rather than mutating `MapDefinition` directly — that keeps
- * the existing Spec 08 surface unchanged for the duration of Phase 23.
- * Phase 24 will fold pools onto `MapDefinition` proper and migrate
- * content.
+ * Map-level extension surface. Pools attach via a side registry rather
+ * than living on `MapDefinition` itself.
  */
 const poolRegistry = new Map<string, MapEventPool>();
 const defaultPoolByMap = new Map<string, string>();
 const nodePoolOverrides = new Map<string, string>();
-// Phase 161 — count how many times each node-override key has been set so the
+// Count how many times each node-override key has been set so the
 // content-parity guard can detect a node that was authored then silently
 // clobbered (last-write-wins shadowing). The live override `Map` collapses
 // duplicates; this preserves the registration history.
@@ -122,7 +117,7 @@ export function setNodeEventPoolOverride(
 }
 
 /**
- * Read-only (Phase 161 content-parity guard): the `continent:map:node` keys
+ * Read-only (content-parity guard): the `continent:map:node` keys
  * whose node-override was registered more than once on module load — i.e. an
  * authored pool that was silently clobbered by a later registration
  * (last-write-wins shadowing). An empty array means there is exactly one source
@@ -228,7 +223,7 @@ function rollPool(
 
 /**
  * Clears `pendingArrival` when it names `nodeId` — the arrival at that node
- * has just been answered (burn-day audit 2026-09-19 row 3.1 follow-up).
+ * has just been answered.
  * Identity-stable when nothing was owed, so a no-op resolve stays a no-op.
  */
 function answerArrival(state: GameState, nodeId: NodeId): GameState {
@@ -244,7 +239,7 @@ function answerArrival(state: GameState, nodeId: NodeId): GameState {
  * Settles the arrival at the node under the player: clears the debt, reveals
  * and unlocks the adjacents, and marks the node consumed. This is the second
  * half of resolving an `encounter`, run once the fight is over, whatever its
- * outcome (phase R9a). Identity-stable when nothing is owed at the current
+ * outcome. Identity-stable when nothing is owed at the current
  * node, so calling it after a fight that never came from the map (a dev
  * pick, a test) changes nothing.
  */
@@ -261,7 +256,7 @@ export function settleArrival(state: GameState): GameState {
  * Resolves the MapEvent for the player's current node. See file header.
  *
  * `staged` resolves that payload in place of the node's pool. It exists for
- * the state fixtures (`StateFixture.stagedEvent`, R7e): Act 1 stages no NPC
+ * the state fixtures (`StateFixture.stagedEvent`): Act 1 stages no NPC
  * or shop, so a fixture stages one on an Act 1 node without registering it
  * in the live world.
  */
@@ -279,7 +274,7 @@ export function resolveMapEvent(
     //    `currentMap` for the destination and files the departed map under
     //    `world.mapStates`, so a clear applied afterwards would scribble on
     //    the wrong map and leave the door owed forever on the one the player
-    //    left (burn-day audit 2026-09-19 row 3.1 follow-up).
+    //    left.
     const answered = answerArrival(state, nodeId);
 
     // 1. Already consumed? Idempotent no-op.
@@ -357,7 +352,7 @@ export function resolveMapEvent(
         }
         : result.state;
 
-    // 4a-travel (2026-08-28). A resolved travel event has already crossed —
+    // 4a-travel. A resolved travel event has already crossed —
     // `result.state.world.currentMap` IS the destination map. Return here:
     // the reveal/unlock/consume step below operates on the current map and
     // would scribble the departed node's id onto the destination's books.
@@ -368,15 +363,15 @@ export function resolveMapEvent(
         return { state: result.state, event: result.event };
     }
 
-    // 5. Reveal + unlock adjacents + mark consumed. Phase 31 — unlock is what
-    // moves the adjacents out of `lockedNodes` into `availableNodes` so the
-    // CLI `mapTab` filter actually offers them as valid moves. The reveal
-    // path (Spec 23) only updates `discoveredNodes`.
+    // 5. Reveal + unlock adjacents + mark consumed. Unlock is what moves the
+    // adjacents out of `lockedNodes` into `availableNodes` so the CLI
+    // `mapTab` filter actually offers them as valid moves. The reveal path
+    // only updates `discoveredNodes`.
     const next = unlockAdjacent(
         revealAdjacent(stateAfterCollect.world.currentMap, nodeId),
         nodeId,
     );
-    // The Labyrinth door (M4, D24) opens the way on like any node but is
+    // The Labyrinth door opens the way on like any node but is
     // never consumed: it stays a door, and the next arrival enters again.
     const consumed = result.event.kind === 'labyrinth' ? next : markNodeConsumed(next, nodeId);
     const nextState: GameState = {

@@ -1,8 +1,8 @@
 /**
- * Hermetic engine test — the v33 → v34 hop: THE REVAMP R7e content strip (D72).
+ * Hermetic engine test — the v33 → v34 hop: the content strip.
  *
- * R7e deletes the parked world: northern-forest and the five northern-continent
- * maps, their nine quests and the story flags their dialogue set. Since v28
+ * The parked world is gone: northern-forest and the five northern-continent
+ * maps, their nine quests and the story flags their dialogue set. From v28
  * only dev travel reaches a parked map, but such a save must still load: the
  * hop moves it onto the Lantern Deep's sealed deep stair (`ld-18`) and scrubs
  * the deleted maps, quests and flags. Act 1 and Labyrinth saves stay put.

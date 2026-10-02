@@ -1,5 +1,5 @@
 /**
- * Equip-change delta — hermetic E2E tests (Phase 154).
+ * Equip-change delta — hermetic E2E tests.
  *
  * Pins the three delta modes (equip / unequip / swap), the deltas-only
  * contract, signature gained/lost surfacing, and the engine-simulated stat
@@ -59,7 +59,7 @@ describe('computeEquipDelta (Phase 23 — stat + signature diff only)', () => {
         expect(d.isEmpty).toBe(true);
     });
 
-    // ── Phase 19 — signet relic signature swap (the ring is the one signature)
+    // ── Signet relic signature swap (the ring is the one signature)
     it('surfaces the granted signature (with name) when equipping a signet relic', () => {
         const relic = makeEquipment('relic-x', { grantsSignature: 'sig-disarming-plea' });
         const d = computeEquipDelta(relic, null);

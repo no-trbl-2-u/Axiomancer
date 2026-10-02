@@ -1,17 +1,14 @@
 /**
- * Hermetic engine test — the v24 → v25 hop: derived stats retired.
+ * Hermetic engine test — the v24 → v25 hop: derived stats stripped.
  *
- * TRIM THE FAT T2a (`plan/2026-09-25-trim-the-fat.spec.md`, D14 in
- * `plan/2026-09-25-refactor-strategy.decisions.md`) deleted the six derived
- * attack/defence stats, luck, the six non-combat saves/tests, and every
- * body/mind/heart stat line on relics. A v24 save still carries all of them.
- * This hop strips them so a loaded save matches the current shape, and must
- * The same hop drops `factionReputations`: the Faction system was
- * write-only (nothing but a dev inspector read it) and was deleted in the
- * same T2a pass. It must leave everything that still means something — base stats, max VITAE, an
- * armor relic's +5 max VITAE line, the worn loadout — exactly as it was. Since
- * R7e2 the kit is the ring alone, so the save wears the neutral fixture
- * weapon and armor to carry the stat lines.
+ * The current shape has no six derived attack/defence stats, no luck, no six
+ * non-combat saves/tests, and no body/mind/heart stat lines on relics. A v24
+ * save still carries all of them. This hop strips them so a loaded save
+ * matches the current shape, and drops `factionReputations` (the Faction
+ * system is gone). It must leave everything that still means something —
+ * base stats, max VITAE, an armor relic's +5 max VITAE line, the worn
+ * loadout — exactly as it was. The kit is the ring alone, so the save wears
+ * the neutral fixture weapon and armor to carry the stat lines.
  */
 
 import { describe, it, expect } from 'vitest';

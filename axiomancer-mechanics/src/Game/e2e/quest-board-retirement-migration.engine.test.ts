@@ -1,7 +1,7 @@
 /**
- * Hermetic engine test — Phase 61 save migration (v17 → v18).
+ * Hermetic engine test — Quest Board save migration (v17 → v18).
  *
- * Retires the Quest Board minigame. Pins that a v17 save loads clean at
+ * The Quest Board minigame does not exist. Pins that a v17 save loads clean at
  * v18: a live quest-board session riding along in the raw payload's
  * mobile-only `quest` key is cleared rather than carried forward in the
  * old shape.

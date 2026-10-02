@@ -1,5 +1,5 @@
 /**
- * Hermetic engine test — THE VERY START (owner call 2026-09-23).
+ * Hermetic engine test — the very start.
  *
  * A brand-new run begins with NOTHING: no items, no worn equipment, no coin,
  * no experience. Two things make that a game rather than a punishment:
@@ -7,12 +7,11 @@
  *   1. The Suppliant's Ring is still handed over at the run's first node
  *      (`Character/first-node-grant.ts`), and it now grants ONLY its
  *      signature skill (The Open Hand) — no stat bump.
- *   2. The other ten relics were village-market wares until R7e deleted the
- *      parked markets (D72); R7e2 deletes the relics themselves.
+ *   2. No other relic exists to buy or find.
  *
- * Presets, fixtures and sims still seed the Phase-19 kit (that is the loadout
- * the measured baselines are built on); only `createNewGameState`, the one
- * real-player origination point, changed. This file pins all of that.
+ * Presets, fixtures and sims still seed a kit; only `createNewGameState`,
+ * the one real-player origination point, starts empty. This file pins all
+ * of that.
  */
 
 import { describe, it, expect } from 'vitest';

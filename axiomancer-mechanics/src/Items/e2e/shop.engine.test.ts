@@ -1,5 +1,5 @@
 /**
- * Hermetic e2e — shop economy (Phase 37).
+ * Hermetic e2e — shop economy.
  *
  * Drives the buy / sell reducers through the public surface they ride
  * on: the `village` MapEvent resolved by `resolveMapEvent` exposes a
@@ -26,7 +26,7 @@ import type { Consumable } from '../types';
 import { FIXTURE_VILLAGE_EVENT } from '../../Game/fixtures/fixture-content';
 
 
-// No Act 1 map carries a village (R7e, D72): the fixture shop is staged on
+// No Act 1 map carries a village: the fixture shop is staged on
 // the Breakwater's bw-2, never registered in the live world.
 function freshWorldAt(nodeId = 'bw-2'): GameState {
     const base: GameState = createNewGameState();

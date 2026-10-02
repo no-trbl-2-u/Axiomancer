@@ -1,5 +1,5 @@
 /**
- * Hermetic e2e — Phase 24 content.
+ * Hermetic e2e — map-event content.
  *
  * Walks the Act 1 pools authored in `src/World/MapEvents/content.ts` and
  * asserts the expected event kind fires at each node. Verifies the side-effect import path
@@ -71,7 +71,7 @@ describe('every MapEventKind is covered', () => {
         }
     });
 
-    // R7e (D72): Act 1 stages no NPC, shop or narration. Those kinds keep
+    // Act 1 stages no NPC, shop or narration. Those kinds keep
     // their handlers, witnessed by the neutral fixtures staged on an Act 1 node.
     it.each([
         ['narration', FIXTURE_DIALOGUE_EVENT],
@@ -95,7 +95,7 @@ describe('Phase 52f — guaranteed per-act shilling income (the calibration inpu
     // grants XP + loot items but no currency
     // (`aftermath.engine.ts`'s `currency: null`). This test walks every
     // authored node on a full map completion and pins the guaranteed
-    // shilling total the Phase 52f price derivation is anchored to — so a
+    // shilling total the price derivation is anchored to — so a
     // future content edit that changes a loot-cache amount (or adds/removes
     // one) is forced to revisit the pricing constants instead of silently
     // drifting past them.
@@ -104,7 +104,7 @@ describe('Phase 52f — guaranteed per-act shilling income (the calibration inpu
         let state = freshWorldAt(map);
         const def = getMapDefinition(CONTINENT_OF[map], map);
         for (const node of def.nodes) {
-            // Skip the travel doors (bw-18 / nf-10, 2026-08-28): resolving
+            // Skip the travel doors: resolving
             // one moves the whole world to the destination map, and a door
             // grants no shillings anyway.
             if (getNodePrimaryEventKind(CONTINENT_OF[map], map, node.id) === 'travel') continue;

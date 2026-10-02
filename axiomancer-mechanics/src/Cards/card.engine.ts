@@ -1,5 +1,5 @@
 /**
- * Card engine — pure execution helpers for Spec 04.
+ * Card engine — pure execution helpers for cards.
  *
  * The Hazard-Pattern combat engine drives card bottom-actions through
  * `executeCard`. Every helper here is pure: callers thread the updated state
@@ -16,14 +16,13 @@ import { scaleEffectIntensity } from '../Combat/stat-scaling';
 import { Card, CardCombatEffects } from './types';
 import { cardLibrary, getCardById } from './cards.library';
 
-// ─── Card Learning (Phase 30) ───────────────────────────────────────────────
+// ─── Card Learning ──────────────────────────────────────────────────────────
 
 /**
  * Returns every entry in `cardLibrary` that the character has not already
  * learned. Order matches the library order so the UI can show a stable list
- * across calls. Cards are learnable unconditionally — the legacy
- * learning-requirement gate (level / stat / prerequisite / alignment) was
- * removed 2026-07-08.
+ * across calls. Cards are learnable unconditionally (no level / stat /
+ * prerequisite / alignment gate).
  */
 export function getAvailableCards(
     character: Pick<Character, 'knownCards'>,
@@ -75,7 +74,7 @@ export interface CardLookup {
  *
  *   1. Validate the player owns the card (known or a card-reward pickup).
  *   2. Resolve each `combatEffects` payload through `resolveEffectApplication`
- *      (every effect lands as printed — D12).
+ *      (every effect lands as printed).
  *
  * `specialMechanics` (DEAL, GUARD) are the combat engine's: this engine never
  * reads them, and it deals no direct damage.
@@ -136,13 +135,12 @@ interface CardEffectResult {
 }
 
 /**
- * Routes a single `CardCombatEffects` payload through the Spec 03
+ * Routes a single `CardCombatEffects` payload through the
  * `resolveEffectApplication` resolver and lands the outcome on the correct
- * combatant. Tier-driven resist behaviour is inherited from the underlying
- * effect definition (Tier 1 auto, Tier 2 resisted, Tier 3 nat-20 only).
+ * combatant. Every effect lands as printed, whatever its tier.
  *
  * `payload.intensity` and `payload.duration` override the effect's default
- * stack/duration, scaled by the player's stats (S3). `payload.appliedTo ===
+ * stack/duration, scaled by the player's stats. `payload.appliedTo ===
  * 'self'` routes to the caster's effects; otherwise to the target's.
  */
 function applyCardEffect(

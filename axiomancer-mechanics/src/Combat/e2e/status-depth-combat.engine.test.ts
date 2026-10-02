@@ -1,18 +1,12 @@
 /**
  * Hermetic E2E — status-depth mechanics, LIVE through the HP-model combat
- * engine, re-pinned to spec 32 v3 (THE STRIKE IS DEAD: no basePower, no chip;
- * compound/amplify/execute are deleted; RUPTURE consumes ALL afflictions and
- * feeds Souls; RIPOSTE fires only on a FULL block).
+ * engine (no basePower, no chip; RIPOSTE fires only on a FULL block).
  *
  * Covers each surviving behavior end to end (DoT-amplification honesty,
  * BARRIER / RIPOSTE), an INVARIANT guard that the
  * shared hot path stays quiet without its marker, and the card-projection /
- * reward-pool contract for the library.
- *
- * Card purge (P1, 2026-09-27): RUPTURE and SIPHON lost every carrier (their
- * sandbox fixtures went with them — the verbs leave the engine next), and the
- * card-play cases for BARRIER (Adamant Wall) and RIPOSTE (Reprisal Bell) left
- * with their cards; the state-driven BARRIER / RIPOSTE laws stay.
+ * reward-pool contract for the library. BARRIER / RIPOSTE are pinned as
+ * state-driven laws (no live card plays them).
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
@@ -69,8 +63,8 @@ describe('AMPLIFICATION — the combo registry is surfaced honestly', () => {
         const enemyEffects = [ae('debuff_poison', 2), ae('debuff_bleed', 1)];
         const res = processBetweenPhases({ ...base, enemy: { ...base.enemy, effects: enemyEffects } });
         const lost = 300 - res.state.enemy.health;
-        // WS3.3: poison (card-played clock) and bleed (damage-instance clock)
-        // no longer tick at the round boundary — the boundary leaves them
+        // Poison (card-played clock) and bleed (damage-instance clock) do not
+        // tick at the round boundary — the boundary leaves them
         // untouched, honestly (emitted == landed == 0).
         expect(lost).toBe(0);
         expect(enemyDotSum(res.events)).toBe(0);
@@ -110,7 +104,7 @@ describe('BARRIER — a persistent, stacking soak', () => {
     });
 });
 
-// ── RIPOSTE — spec 32 v3: fires ONLY on a FULL block ─────────────────────────
+// ── RIPOSTE — fires ONLY on a FULL block ─────────────────────────────────────
 
 describe('RIPOSTE — counters only when Guard/Barrier fully blocked the attack', () => {
     it('fires the counter when the hit is FULLY blocked, then clears', () => {
@@ -183,8 +177,8 @@ describe('INVARIANT — no new behavior fires without its marker', () => {
     it('a plain enemy + plain player emit ZERO new-kind events and un-amplified DoT', () => {
         mockSequentialRng(0.05);
         // One control (stance lock) → below every deny threshold; one
-        // ROUND-CLOCKED DoT, no combo. (WS3.3: poison moved to the card-played
-        // clock, so the round-tick witness here is Creeping Doom: dpr 1.)
+        // ROUND-CLOCKED DoT, no combo. (Poison rides the card-played clock, so
+        // the round-tick witness here is Creeping Doom: dpr 1.)
         const enemyEffects = [ae('test_ctrl_root', 1), ae('debuff_creeping_doom', 2)];
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', enemyEffects), undefined, 7);
         const state = rollEncounterDice(base).state;
@@ -203,9 +197,7 @@ describe('INVARIANT — no new behavior fires without its marker', () => {
 // ── Projection / verbClass / reward-pool contract ────────────────────────────
 
 describe('card projection — the grey office classifies + advertises sensibly', () => {
-    // Card purge (P1, 2026-09-27): the library is the grey office. The
-    // purged cases (RUPTURE/REAP finishers, DoT seeds, STAGGER/PLEA control,
-    // oath/hex frames) left with their cards. A Plain Blow is deliberately
+    // The library is the grey office. A Plain Blow is deliberately
     // NOT pinned here: `classifyVerbClass` has no branch for a plain `deal`,
     // so it reads 'buff-self' — a classification gap reported for a source
     // fix rather than frozen into this contract.

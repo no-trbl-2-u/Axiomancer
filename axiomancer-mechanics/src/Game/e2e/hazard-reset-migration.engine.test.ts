@@ -1,8 +1,8 @@
 /**
- * Hermetic engine test — the v30 → v31 hop: THE REVAMP R6a hazard rewards.
+ * Hermetic engine test — the v30 → v31 hop: the hazard rewards reset.
  *
- * R6a (D52, `plan/revamp/hazards.md`) deletes the Paradox Token reward and
- * the Hexed consequence. Both only ever wrote a flag nothing read:
+ * The Paradox Token reward and the Hexed consequence are gone. Both only
+ * ever wrote a flag nothing read:
  * `hazard-token-banked:<stamp>` per token and `hazard-hexed`. The hop drops
  * them and leaves every other flag, including the hazard deck
  * (`hazard-card:*`) and scar (`hazard-scar:*`) flags, untouched.

@@ -1,19 +1,18 @@
 /**
- * The Lantern Deep — Act 1, map 4 (map revamp M3d; decisions D21–D35).
+ * The Lantern Deep — Act 1, map 4.
  *
  * The last Act 1 map, built on T's underworld plate
- * (`axiomancer-mobile/assets/images/maps/act1-underworld.webp`). Named by T
- * from three drafts (D26). Under `northern-continent` (D28): the Beacon Crags'
- * glacier shrine is a stair down into the ice, and it comes out here at the
- * surface stair. The deep stair led on to fishing-village (D27) until THE
- * REVAMP purged that map; it is sealed, like the vault door (R3a).
+ * (`axiomancer-mobile/assets/images/maps/act1-underworld.webp`). Under
+ * `northern-continent`: the Beacon Crags' glacier shrine is a stair down into
+ * the ice, and it comes out here at the surface stair. The deep stair is
+ * sealed, like the vault door.
  *
- * One node per landmark on the plate (D25, `act1-landmarks.json`), and no
+ * One node per landmark on the plate (`act1-landmarks.json`), and no
  * others. The engine graph is abstract (columns and lanes); the mobile layout
  * places each node on its landmark. The stair comes down through the ceiling
  * at the top of the plate, so the columns are bands down through the deep,
  * lanes running west to east, and the map closes on the deep stair in the
- * south-east (D16):
+ * south-east:
  *
  *   c0  the surface stair                                     (arrival)
  *   c1  ferry landing · drowned temple · north aqueduct · cathedral
@@ -23,10 +22,10 @@
  *   c5  ruined city · east stairs                             (the elite)
  *   c6  the deep stair                                        (the door, terminal)
  *
- * Lanes run west to east in every band, so every lateral rib (D1) joins two
+ * Lanes run west to east in every band, so every lateral rib joins two
  * landmarks that are neighbours on the plate. The vault door is the
- * Labyrinth's door (D24, wired in M4). Events use the shipped builders and the
- * caverns' roster and iron (D29): see `MapEvents/content.ts`.
+ * Labyrinth's door. Events use the shipped builders and the
+ * caverns' roster and iron: see `MapEvents/content.ts`.
  */
 
 import { MapDefinition } from '../../types';

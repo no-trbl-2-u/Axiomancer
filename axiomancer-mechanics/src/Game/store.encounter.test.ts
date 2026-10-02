@@ -1,5 +1,5 @@
 /**
- * Spec 07 — Store integration for encounter rewards.
+ * Store integration for encounter rewards.
  *
  * Verifies the Encounter ↔ store contract:
  *   - startCombat accepts Enemy | Encounter (back-compat).

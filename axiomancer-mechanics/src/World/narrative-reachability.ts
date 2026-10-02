@@ -1,11 +1,10 @@
 /**
- * Narrative reachability audit (Phase 53a).
+ * Narrative reachability audit.
  *
  * `resolveInteraction` (`MapEvents/handlers.ts`) looks an NPC up by display
  * name against the host map's roster and falls back silently when the name
  * is absent — a missing tree reads as a deliberately minimal encounter, not
- * a missing conversation. Eleven of fourteen authored dialogue trees sat
- * unreachable this way before this phase; nothing failed when it was true.
+ * a missing conversation, so an unreachable tree fails nothing on its own.
  *
  * `auditNarrativeReachability` is the structural guard, mirroring
  * `auditMapTraversal`'s shape: a pure function over a static `MapDefinition`

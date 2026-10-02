@@ -1,5 +1,5 @@
 /**
- * Spec 26b deckbuilder — combat card rewards + the card-unlock hook.
+ * Deckbuilder — combat card rewards + the card-unlock hook.
  *
  * Two distinct progression levers (per the design):
  *   1. CARD REWARDS (frequent, after a won combat) grow the DECK — extra copies
@@ -8,7 +8,7 @@
  *   2. CARD UNLOCKS (rare, via ethical-dilemma events) add a NEW card type.
  *      `unlockCardViaDilemma` is the hook those events call; it bypasses the
  *      normal learning requirements (the dilemma IS the gate), unlike
- *      `learnCard`. No live caller since R3b purged village goodwill.
+ *      `learnCard`. It has no live caller.
  *
  * Pure: rolling takes an explicit `rng`. The mobile aftermath offers the 1-of-N
  * and persists the pick.
@@ -18,8 +18,7 @@ import type { Character } from '../Character/types';
 import { cardLibrary, getCardById } from '../Cards/cards.library';
 
 /**
- * The card-reward pool: the whole library. Since the card purge (D44) the
- * grey office IS the pool: a won fight offers A Plain Blow, Ward and Word,
+ * The card-reward pool: the whole library. The grey office IS the pool: a won fight offers A Plain Blow, Ward and Word,
  * and the pool grows as guided sessions add cards.
  */
 export const COMBAT_REWARD_POOL: readonly string[] = Object.freeze(
@@ -27,11 +26,11 @@ export const COMBAT_REWARD_POOL: readonly string[] = Object.freeze(
 );
 
 /**
- * Phase 104 (the grey office) — every brand-new player's opening 10-card
+ * The grey office — every brand-new player's opening 10-card
  * deck: three colourless shapes (`color: 'any'` — every die
  * colour powers each), so fight one teaches STRIKE, WARD, FREE-vs-PAID, and
- * the die-spend loop with zero colour arithmetic. Mobile's
- * S3 (T, 2026-09-27): Blow 5, Ward 3, and 2 of A Plain Word (D42, D43).
+ * the die-spend loop with zero colour arithmetic: Blow 5, Ward 3, and 2 of
+ * A Plain Word.
  *
  * `ensureStarterCards` writes this list VERBATIM (copies kept — 5 + 3 + 2, not
  * deduplicated) into a fresh character's `knownCards`, and every sim and
@@ -46,9 +45,9 @@ export const STARTING_CARD_IDS: readonly string[] = Object.freeze([
 /**
  * Rolls `count` distinct card-reward offers after a won combat: a uniform
  * draw over {@link COMBAT_REWARD_POOL}. Pure: every decision is seeded by
- * `rng`, so the same seed always yields the same offers. The theme pull,
- * the keyword guarantee and the rarity weights were cut in R7b (D50): no
- * live card carries a theme, and all three grey cards share one rank.
+ * `rng`, so the same seed always yields the same offers. There is no theme
+ * pull, keyword guarantee or rarity weighting: all three grey cards share
+ * one rank.
  */
 export function rollCombatCardRewards(
     _player: Character,
@@ -71,10 +70,10 @@ export function addRewardCard(player: Character, cardId: string): Character {
 }
 
 /**
- * Spec 26b §D — unlock a NEW card from an ethical-dilemma event. Bypasses the
+ * Unlock a NEW card from an ethical-dilemma event. Bypasses the
  * normal `learnCard` requirement gates (level/stat/prereq) because the dilemma
  * choice is itself the gate. No-op (same ref) when already known or unknown id.
- * No live caller since R3b purged village goodwill (its only caller).
+ * It has no live caller.
  */
 export function unlockCardViaDilemma(player: Character, cardId: string): Character {
     if (player.knownCards.includes(cardId)) return player;

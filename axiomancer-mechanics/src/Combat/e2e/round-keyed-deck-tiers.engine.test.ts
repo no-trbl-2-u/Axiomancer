@@ -1,6 +1,5 @@
 /**
- * Hermetic E2E — ROUND-KEYED DECK TIERS (owner ruling, 2026-09-02; reverses
- * decision D15 of the big-numbers overhaul).
+ * Hermetic E2E — ROUND-KEYED DECK TIERS.
  *
  * "Enemy decks increase in tier as the rounds increase." Aeon's End's tiered
  * nemesis deck is the model: tier 1 on top, tier 3 on the bottom, so the fight
@@ -10,14 +9,14 @@
  * DERIVED from the cards' own `grade`.
  *
  * The evidence pinned here is the CONTRACT, not the numbers (the weights and
- * the roster are retuned freely under THE BIG NUMBERS REWRITE):
+ * the roster are retuned freely):
  *   (a) a flat deck compiles to exactly the steps it compiled to before —
- *       same cards, same order, same stakes/stance-checks/riders — plus round
+ *       same cards, same order, same stakes/riders — plus round
  *       gates that add no delay to the 2-3 card majority;
  *   (b) a tiered deck shows only tier 1 in round 1, opens tier 2 at its
  *       authored round and tier 3 strictly later;
  *   (c) a tier never reverts (tiers and gates are non-decreasing);
- *   (d) the sequence NEVER stalls — phase 0 is never gated and a round-gated
+ *   (d) the sequence NEVER stalls — the first phase is never gated and a round-gated
  *       candidate merely holds the pointer on a phase that still acts;
  *   (e) a hand-authored boss's late tier hits strictly harder than its
  *       opening tier.
@@ -118,8 +117,7 @@ describe('round-keyed deck tiers — a flat deck still compiles to what it alway
 
     it('the 2-3 card majority gains NO delay it did not already author on a card', () => {
         const short = FLAT_DECK_IDS.filter(id => deckCardIds(ENEMY_DECKS[id]).length <= 3);
-        // Was `> 20` ("this shape really is the majority") on the pre-R2
-        // roster; the reset left one flat deck, and it is short.
+        // The roster has one flat deck, and it is short.
         expect(short.length).toBeGreaterThan(0);
         for (const id of short) {
             const cardIds = deckCardIds(ENEMY_DECKS[id]);
@@ -161,7 +159,7 @@ describe('round-keyed deck tiers — a flat deck still compiles to what it alway
 
 describe('round-keyed deck tiers — an authored tiered deck opens its tiers by round', () => {
     it('every boss/unique that hand-authored tiers gates exactly by tier', () => {
-        // Was `>= 21` on the pre-R2 roster; the Doorwarden is the one left.
+        // The Doorwarden is the only hand-tiered deck.
         expect(TIERED_DECK_IDS).toEqual(['enemy-the-doorwarden']);
         for (const id of TIERED_DECK_IDS) {
             const plan = planDeckTiers(id)!;
@@ -197,7 +195,7 @@ describe('round-keyed deck tiers — an authored tiered deck opens its tiers by 
     });
 
     it('a branch card sitting in a GATED tier carries the gate on both of its forks', () => {
-        // No live card is a branch since the R2 reset, so the fixture
+        // No live card is a branch, so the fixture
         // registers its own for the duration of the test.
         const FIXTURE = 'enemy-tier-fixture';
         const BRANCH = 'fixture-branch-card';

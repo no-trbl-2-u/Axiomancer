@@ -1,11 +1,10 @@
 /**
- * Spec 26b §4 — Signature Skills, as the revamp leaves them (phase R4, D47).
+ * Signature Skills.
  *
  * A small, ALWAYS-available kit (independent of the shuffled deck) funded by
- * Conviction (◆) and granted only by worn signet relics. One is left since
- * R7e2 (D72): The Open Hand (the Suppliant's Ring), the befriend — it opens
- * the mercy choice on a foe that can be befriended and is low enough. B1
- * re-authors the rest with T.
+ * Conviction (◆) and granted only by worn signet relics. There is one: The
+ * Open Hand (the Suppliant's Ring), the befriend — it opens the mercy choice
+ * on a foe that can be befriended and is low enough.
  *
  * `applySignatureSkill` is a pure transition; the engine wraps it in
  * `playSignatureSkill` to gate on `signatureCastBlock`, spend Conviction and

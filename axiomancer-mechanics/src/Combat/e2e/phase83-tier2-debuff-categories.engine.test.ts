@@ -58,8 +58,8 @@ describe.each(categories)(
             expect(result.success).toBe(true);
             expect(result.activeEffect).toBe(effect);
             expect(result.message).toBe('Effect lands.');
-            // `rebounded` was removed from EffectApplicationResult at the Phase 84/86
-            // drain; assert the legacy field stays absent at runtime.
+            // EffectApplicationResult carries no `rebounded` field; assert it
+            // stays absent at runtime.
             expect((result as { rebounded?: unknown }).rebounded).toBeUndefined();
             expect(result.roll).toBeUndefined();
         });

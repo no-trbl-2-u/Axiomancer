@@ -9,8 +9,7 @@
  * across stages/policies/decks and aggregates stage summaries plus card
  * coverage, so the balance loops can see the whole campaign at once.
  *
- * HP is the sole win condition (the old status-primacy doctrine is retired —
- * see `docs/lexicon.json`). The matrix still reports the status witnesses at
+ * HP is the sole win condition. The matrix reports the status witnesses at
  * EVERY stage: `statusEngagement` and `dotHpFraction` sit next
  * to `winRate` in every summary, and the deliberately weak `aggro-brute`
  * baseline is expected to underperform the status policies.
@@ -40,16 +39,14 @@ import {
     simulateHazardPatternCombatDetailed,
     type CombatCardUsage, type CombatSimStats, type WinPathCounts,
 } from './combat.encounter.sim';
-// Phase 43 — objective function v2, reported BESIDE `statusEngagement`.
+// Objective function v2, reported BESIDE `statusEngagement`.
 import { poolObjectiveTelemetry } from './combat.objective.telemetry';
 import { formatCombatQuality, scoreCombatObjective, type CombatQualityScore } from './combat.objective';
 
 /**
  * How a playtest cell (or CLI invocation) names the deck it wants: the grey
  * deck every fresh run opens with (`STARTING_CARD_IDS`), or an explicit card
- * list. The preset table, the seeded drafts and the measurement-seat swaps
- * went in R7b (D50): with one card library of three cards there was nothing
- * left to draft or swap.
+ * list.
  */
 export type CombatDeckSelection =
     | { kind: 'grey' }
@@ -102,7 +99,7 @@ export interface PlaytestStageSummary {
     winRate: number;
     /** Warning light (the voided status doctrine) — kept, not the objective. */
     statusEngagement: number;
-    /** **THE OBJECTIVE FUNCTION (Phase 43).** Scored from the stage's cells'
+    /** **THE OBJECTIVE FUNCTION.** Scored from the stage's cells'
      *  POOLED objective telemetry, not averaged from their per-cell indices. */
     combatQuality: CombatQualityScore;
     dotHpFraction: number;
@@ -123,10 +120,9 @@ export interface PlaytestStageSummary {
 }
 
 /**
- * The doctrine win-rate curve (load-bearing doctrine
- * 2026-07-08, canonical in VISION.md → Combat vision) expressed as BANDS the
- * instrument can measure against: early ~80%, mid ~50%, late 25-35% (the
- * `impossible` stage went with its only foe in revamp phase R2). The ±5pt tolerance on early/mid is an instrument default
+ * The doctrine win-rate curve (canonical in VISION.md → Combat vision)
+ * expressed as BANDS the instrument can measure against: early ~80%, mid
+ * ~50%, late 25-35%. The ±5pt tolerance on early/mid is an instrument default
  * reading of the doctrine's "~", not a doctrine change; late is the doctrine's
  * own printed band.
  */
@@ -144,7 +140,7 @@ export interface PlaytestDeckStageRow {
     winRate: number;
     /** Warning light (the voided status doctrine) — kept, not the objective. */
     statusEngagement: number;
-    /** **THE OBJECTIVE FUNCTION (Phase 43)** for this deck × stage, scored
+    /** **THE OBJECTIVE FUNCTION** for this deck × stage, scored
      *  from the row's POOLED objective telemetry. */
     combatQuality: CombatQualityScore;
     avgRounds: number;
@@ -160,12 +156,12 @@ export interface PlaytestDeckStageRow {
     policyWinRates: Record<string, number>;
 }
 
-/** Per-deck rollup across the matrix (metrics slate 2026-07-18). */
+/** Per-deck rollup across the matrix. */
 export interface PlaytestDeckSummary {
     /** The deck's label (`deckLabel`): `grey` or `cards(N)`. */
     deckLabel: string;
     stages: PlaytestDeckStageRow[];
-    /** **THE OBJECTIVE FUNCTION (Phase 43)** for this deck across every stage
+    /** **THE OBJECTIVE FUNCTION** for this deck across every stage
      *  it was measured on, scored from the deck's POOLED telemetry. One deck,
      *  so the IDENTITY component is meaningful here (see `combat.objective.ts`)
      *  — this is the row `/deck-tuning` should rank decks by. */
@@ -186,10 +182,10 @@ export interface PlaytestDeckSummary {
 
 export interface PlaytestReport {
     cells: PlaytestCellResult[];
-    /** **THE OBJECTIVE FUNCTION (Phase 43)** for the WHOLE sweep — scored from
+    /** **THE OBJECTIVE FUNCTION** for the WHOLE sweep — scored from
      *  every cell's pooled objective telemetry. This is the headline number
      *  `/deck-tuning` and `/combat-playtest` optimise; `statusEngagement` is
-     *  kept beside it as a warning light for the doctrine it used to enforce. */
+     *  kept beside it as a warning light. */
     combatQuality: CombatQualityScore;
     /** Aggregated over cells, weighted by runs. */
     stageSummaries: PlaytestStageSummary[];
@@ -306,8 +302,8 @@ function bandDelta(winRate: number, band: readonly [number, number]): number {
     return 0;
 }
 
-/** Groups the matrix's cells into per-deck × stage rollups (metrics slate
- *  2026-07-18), one per deck label, in first-seen order. */
+/** Groups the matrix's cells into per-deck × stage rollups, one per deck
+ *  label, in first-seen order. */
 function summarizeDecks(cells: readonly PlaytestCellResult[]): PlaytestDeckSummary[] {
     const byDeck = new Map<string, PlaytestCellResult[]>();
     for (const cell of cells) {
@@ -490,7 +486,7 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
     lines.push('   enforced was voided by THE UNSHACKLING; they are informational, not the target;');
     lines.push(' util=deck utilization, H=play entropy, dom=dominant-card HP share (>70% = spam))');
     lines.push('');
-    // ── Phase 43 — THE OBJECTIVE FUNCTION, printed first because it is what
+    // ── THE OBJECTIVE FUNCTION, printed first because it is what
     //    /deck-tuning and /combat-playtest are supposed to be optimising. ─────
     lines.push('OBJECTIVE FUNCTION v2 — Combat Quality Index (see Combat/combat.objective.ts)');
     lines.push('  "good combat" = the deck\'s engine runs: it assembles across turns (arc), offers');
@@ -629,7 +625,7 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
                 agg.topPlays += usage.topPlays;
                 agg.statusLands += usage.statusLands;
                 agg.discards += usage.discards;
-                // WS1.1 line telemetry — optional on the row type, always
+                // Line telemetry — optional on the row type, always
                 // present on these aggregates (?? 0 tolerates older shapes).
                 agg.fizzles = (agg.fizzles ?? 0) + (usage.fizzles ?? 0);
                 agg.unplayedAtPhaseEnd = (agg.unplayedAtPhaseEnd ?? 0) + (usage.unplayedAtPhaseEnd ?? 0);

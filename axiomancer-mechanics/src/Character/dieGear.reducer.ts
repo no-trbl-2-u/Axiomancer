@@ -1,5 +1,5 @@
 /**
- * Die-gear reducers (Spec 33 §6, Phase D5) — pure transitions over a
+ * Die-gear reducers — pure transitions over a
  * `Character.dieGear` rail, the parallel of `equipment.reducer.ts` for the
  * four upgradeable dice.
  *
@@ -9,7 +9,7 @@
  * `equipItem` (signet relics and die gear never compete). It is its own
  * color-keyed rail on the character.
  *
- * Two upgrade verbs (blacksmith keywords, §6):
+ * Two upgrade verbs (blacksmith keywords):
  *  - HONE   — add a mana face (−1 miss). Refused (loud, character unchanged)
  *             when the die would drop below 1 miss: whiff is never forgeable
  *             away.
@@ -17,7 +17,7 @@
  *             Refused (loud) above the special cap (colored ≤ 2, wild ≤ 1) or
  *             with no mana face to spend.
  * Plus `swapDieGear` — replace a die's gear wholesale (a payload change IS a
- * gear swap; §6 — no forge-service keyword for it), cap-validated.
+ * gear swap; no forge-service keyword for it), cap-validated.
  *
  * Cap authority: every candidate face table is run through `validateDieGear`
  * — the SINGLE place caps are enforced. Refusals return the input character
@@ -159,7 +159,7 @@ export function temperDieGear(character: Character, color: DieGearColor): DieGea
 }
 
 /**
- * Swap `color`'s die gear wholesale (the payload-change path — §6: swapping
+ * Swap `color`'s die gear wholesale (the payload-change path: swapping
  * gear IS the payload change, no service keyword). Cap-validated against the
  * target color; refused loudly on an illegal table.
  */

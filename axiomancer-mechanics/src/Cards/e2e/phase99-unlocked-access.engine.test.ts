@@ -1,11 +1,8 @@
 /**
- * Phase 99 / ADR-0002 — unlocked card access e2e tests.
+ * ADR-0002 — unlocked card access e2e tests.
  *
  * Verifies that the combat catalogue is exactly the player's knownCards; there
- * is no equipped-card loadout gate (the legacy `equippedSkills` field was
- * removed entirely in Phase 159), and combat cards carry no resource cost.
- * The save-side migration of legacy `equippedSkills` into `knownCards` and its
- * suite were since retired — no engine code references the field.
+ * is no equipped-card loadout gate, and combat cards carry no resource cost.
  */
 
 import { describe, test, expect, beforeEach } from 'vitest';

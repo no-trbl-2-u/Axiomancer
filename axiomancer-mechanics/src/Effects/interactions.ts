@@ -1,7 +1,7 @@
 /**
  * Status Effect Interactions
  * 
- * Phase 142 — Enhanced effect-on-effect interactions for status depth.
+ * Enhanced effect-on-effect interactions for status depth.
  * Provides synergy bonuses when specific effect combinations are present.
  */
 

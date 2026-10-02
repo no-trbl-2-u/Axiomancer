@@ -29,9 +29,7 @@ import { initializeCombatEncounter } from '../combat.engine';
 import { toCombatCard } from '../combat.cards';
 import type { CombatCard, CombatEncounterState } from '../combat.encounter.types';
 
-// Spec 32 v3: basePower is deleted at the schema level — the "no status game"
-// card is a statusless utility fixture. (The Befriend card verb went in R7a;
-// the mercy path lives on The Open Hand signature.)
+// The "no status game" card is a statusless utility fixture.
 const QA_STATUSLESS = 'qa-statusless-utility';
 registerSandboxCards([
     {
@@ -64,17 +62,9 @@ function loadout(cards: string[]): Character {
     return p;
 }
 
-// A cross-theme starter mix: ramping poison, second poison DoT, control, guard.
-// (Profane Canon 2026-08-08: the old library is gone wholesale. The seats
-//  refill by mechanical role — spoiled-poultice (weak poison starter, was
-//  slippery-slope), unction-of-boils (tier-2 poison DoT, was
-//  recurring-symptom — same theme, same body aspect), scolds-bridle
-//  (STAGGER + BACKFIRE control, was red-herring), chilblain-watch (guard
-//  starter, was brace-for-impact).)
-//
-// The card purge (P1, 2026-09-27): the library is the grey office alone, so
-// MIX is its three roles — A Plain Word (the VULNERABLE status card), two
-// Plain Blows (direct damage), A Plain Ward (GUARD).
+// The starter mix: the grey office's three roles — A Plain Word (the
+// VULNERABLE status card), two Plain Blows (direct damage), A Plain Ward
+// (GUARD).
 const MIX = ['grey-word', 'grey-strike', 'grey-strike', 'grey-ward'];
 /** The status card of MIX (VULNERABLE) — the seat the DoT starter held. */
 const STATUS_CARD = 'grey-word';
@@ -155,79 +145,14 @@ describe('greedy rankCard — the legacy ordering as scores (doctrine: status > 
 });
 
 describe('greedy object reproduces the pinned decision sequences', () => {
-    // Freshly measured against the spec 32 v3 library (2026-07-08); if they
-    // drift, a refactor changed greedy's behavior — fix the refactor, never
-    // the pin (unless the library/engine legitimately changed again).
+    // FIDELITY measurements of the current library + engine — a "the sim is
+    // reproducible" detector, never a balance target. If they drift without a
+    // library/engine change, a refactor changed greedy's behavior: fix the
+    // refactor, never the pin. Re-measure them after a legitimate change; do
+    // not tune the game to them.
     //
-    // Re-pinned 2026-07-08: removing the Retreat card (no in-combat retreat
-    // exists any more) changed MIX's deck length from 5 to 4 cards, which
-    // reshuffles every seed-derived draw order for `loadout(MIX)` — both
-    // pins below were re-measured against the current engine.
-    //
-    // Re-pinned 2026-07-09 (dice-law rework): 3 dice per turn, strict color
-    // match, per-die token accrual — every seed-derived roll and greedy
-    // decision shifted; both pins re-measured against the current engine.
-    //
-    // Re-pinned 2026-07-11 (WS3.3 DoT-clock data sweep): poison rides the
-    // card-played clock (each subsequent play ticks it) and bleed the
-    // damage-instance clock — kills land earlier on the same seeds; both
-    // pins re-measured against the current engine.
-    //
-    // Re-pinned 2026-07-11 (Gate 0 round-turn law): ONE tray roll per threat
-    // phase — greedy now plays the whole legal turn (drafted die + Reserve +
-    // floats, then the FREE-top drain) instead of farming endTurn→startTurn;
-    // both pins re-measured with zero turn-law-blocked events.
-    //
-    // Re-pinned 2026-07-12 (WS3.3 fresh-stack CAP): the card-played clock's
-    // eligibility gate became an intensity cap (a play's own fresh stacks
-    // merged onto an existing instance no longer tick on the play that
-    // applied them), and manual TICK paths now decay decaysPerTick DoTs.
-    //
-    // post-Phase-30 merge re-pin 2026-07-12: slippery-slope's and (the since-
-    // retired) straw-mans-jab's FREE lines moved from TICK (retired
-    // registry-wide) to a MARK seed under the FREE-currency law, shifting
-    // greedy's per-play scoring on the merged tree.
-    //
-    // Re-pinned 2026-07-13 (keep-hand rule): COMBAT_HAND_SIZE 6→5 and the
-    // round boundary now REFILLS the kept hand instead of redrawing it —
-    // fewer cards per round means fewer plays on the same seeds. Outcomes
-    // and round counts are unchanged on both pins.
-    //
-    // Re-pinned 2026-07-18 (Phase D8 ten-in/ten-out): straw-mans-jab left the
-    // library and MIX's second seat went to recurring-symptom (see the MIX
-    // comment above) — every seed-derived draw and greedy decision shifted;
-    // both pins re-measured against the current engine. Both fights remain
-    // status victories at the same round counts as before the swap.
-    //
-    // Re-pinned 2026-08-08 (Profane Canon): the card library was replaced
-    // wholesale and every MIX seat refilled by role (see the MIX comment
-    // above) — every seed-derived draw and greedy decision shifted; both
-    // pins re-measured against the new library + engine.
-    //
-    // Re-pinned 2026-09-02 (THE BIG NUMBERS REWRITE): every card in MIX was
-    // rewritten and direct damage came back as a first-class verb, so both
-    // fights end far sooner on the same seeds. These pins are FIDELITY
-    // measurements of the current tree — a "the sim is reproducible" detector,
-    // never a balance target. Nothing here grades the game against a shape;
-    // re-measure them, do not tune the game to them.
-    //
-    // Re-measured 2026-09-04 (playtest fix): FREE-line plays now advance the
-    // card-played DoT clock like PAID plays always did, so the poison the
-    // greedy line stacks ticks on every play and the same seed closes in ONE
-    // round (plays/statusPlays unchanged).
-    //
-    // Re-measured 2026-09-25 (D7 flag collapse): until now this file's
-    // `afterEach` switched the Upgradeable-Dice flag OFF, so every test after
-    // the first — these pins included — silently measured the deleted
-    // draft-era model. First honest spec-33 measurement: same one-round
-    // victory, fewer status lands (3→1).
-    //
-    // Re-measured after the card purge (P1, 2026-09-27): MIX is the grey
-    // office (see the MIX comment above) — a five-round victory, 24 plays,
-    // 5 VULNERABLE lands, all from A Plain Word.
-    //
-    // Re-pointed at Float-Eye in the enemy roster reset (R2): its foe was
-    // retired. Re-measured: a five-round victory, 22 plays, 5 lands.
+    // Seed 11 vs Float-Eye: a five-round victory, 22 plays, 5 VULNERABLE
+    // lands, all from A Plain Word.
     it('seed 11 vs FloatEye: a status victory', () => {
         const r = runOneEncounter(loadout(MIX), FloatEye, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
@@ -243,42 +168,9 @@ describe('greedy object reproduces the pinned decision sequences', () => {
         expect(usage.reduce((n, u) => n + u.statusLands, 0)).toBe(r.statusPlays);
     });
 
-    // Re-pinned 2026-07-11 (phase 30 control-theme fix): red-herring's FREE
-    // line moved from a double-stagger stack (which flattened the standstill
-    // preset's win-rate curve to 100% at every stage — a real balance
-    // regression caught by combat-playtest.balance-bands.sim.test.ts) to a
-    // reveal-stance deposit. This is a narrow fidelity pin on `greedy`'s
-    // decision sequence, not a balance gate (that's the win-rate-curve
-    // suite). post-Phase-30 merge re-pin 2026-07-12 against the merged tree.
-    // Re-pinned 2026-07-13 (keep-hand rule, see the FloatEye pin above).
-    // Re-pinned 2026-07-14: POISON ramp now resets on reapplication (spec 32 v3
-    // — `applyEffect` re-stamps `appliedAt` for `escalatesPerTurn` DoTs), so a
-    // reapplied poison ticks slightly less and the greedy line spent one more
-    // play (15→16) to reach the same four-round status victory.
-    // Re-pinned 2026-07-18 (color-match rider removal): straw-mans-jab (then
-    // still in the library) lost its color-match +1-intensity dieBonus, its
-    // bleed landed one point weaker, and the greedy line spent one more play
-    // (16→17, statusPlays 11→12) for the same four-round status victory.
-    // Re-pinned 2026-07-18 (Phase D8, see the FloatEye pin above):
-    // recurring-symptom now holds the second MIX seat — still a four-round
-    // status victory (plays 17→18, statusPlays 12→11).
-    // Re-pinned 2026-08-08 (Profane Canon, see the FloatEye pin above).
-    // Re-measured 2026-09-02 (THE BIG NUMBERS REWRITE + its tuning pass): the
-    // same seeded line now closes in 3 rounds instead of 4 because the starter
-    // office deals real damage. These figures are a FIDELITY MEASUREMENT of a
-    // deterministic sequence, never a target — re-measure them after any
-    // tuning change rather than treating a move as a regression.
-    // Re-measured 2026-09-04 (free-line card-played clock, see the FloatEye
-    // pin above): one fewer play (8→7, statusPlays 6→5) for the same
-    // two-round status victory.
-    // Re-measured 2026-09-25 (D7 flag collapse, see the FloatEye pin
-    // above): the first spec-33 measurement of this line — a three-round
-    // victory (plays 11, statusPlays 2).
-    // Re-measured after the card purge (P1, 2026-09-27): the grey MIX at 5/5/5
-    // loses this line in four rounds (plays 20, statusPlays 4). A fidelity
-    // pin, not a balance gate — the grey office is the deck you outgrow.
-    // Re-pointed at the Doorwarden in the enemy roster reset (R2): its boss
-    // was retired. Re-measured: a four-round defeat (plays 20, statusPlays 4).
+    // A narrow fidelity pin on `greedy`'s decision sequence, not a balance
+    // gate: the grey MIX at 5/5/5 loses this line in four rounds (plays 20,
+    // statusPlays 4) — the grey office is the deck you outgrow.
     it('seed 11 vs TheDoorwarden: the pinned sequence (Gate 0 law: one tray per phase)', () => {
         const r = runOneEncounter(loadout(MIX), TheDoorwarden, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
@@ -291,7 +183,7 @@ describe('greedy object reproduces the pinned decision sequences', () => {
         expect({ outcome: again.outcome, rounds: again.rounds, plays: again.plays, statusPlays: again.statusPlays })
             .toEqual({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays });
         expect(again.cardUsage).toEqual(r.cardUsage);
-        // card-retreat no longer exists — it can never appear in cardUsage.
+        // There is no retreat card — card-retreat can never appear in cardUsage.
     }, 30_000);
 });
 

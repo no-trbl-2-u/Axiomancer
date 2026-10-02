@@ -1,5 +1,5 @@
 /**
- * Quest engine (Spec 08 Q7B — per-objective tracking).
+ * Quest engine (per-objective tracking).
  *
  * Quests live in a `QuestLog` carried on `GameState`. The lifecycle is:
  *
@@ -127,13 +127,8 @@ export function collectObjectives(log: QuestLog, itemId: string): Array<{
  * authored objectives carry — e.g. an objective targets "The Doorwarden",
  * not the `the-doorwarden` slug.
  *
- * The engine's legacy `endCombat` has always done this inline. It lives here
- * as a reusable reducer because the live hazard-pattern combat (Spec 26b)
- * never routes through `endCombat` — the 2026-08-08 first-map audit found
- * that killing the first map's boss in the app advanced nothing, leaving
- * `starting-quest` permanently unfinishable and every one of Old Marrow's
- * reward branches (all gated on `questCompleted: 'starting-quest'`)
- * unreachable, which in turn made `get-to-forest` ungrantable.
+ * It is a reusable reducer because the hazard-pattern combat never routes
+ * through `endCombat`, so the host calls it when a fight ends.
  */
 export function advanceKillObjectives(
     log: QuestLog,

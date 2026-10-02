@@ -1,5 +1,5 @@
 /**
- * Game reducer — pure top-level dispatch (Spec 09).
+ * Game reducer — pure top-level dispatch.
  *
  * `gameReducer(state, action)` is the single dispatch spine. Every store
  * action goes through here; the store layer wraps it with side effects
@@ -49,130 +49,81 @@ import { generateRunId } from './run-loop';
  * Increment when GameState's shape changes. Save loaders branch on this so
  * old saves can be migrated rather than corrupted.
  *
- * Phase 72 — bumped 5 → 6 to add the required `runId: string` field.
- * Phase 73 — bumped 6 → 7 to add the required `codex: CodexState` slice.
- * `migrateV6toV7` defaults the slice to `{ unlockedEntries: [] }` for
- * legacy v6 saves.
- * Phase 109 — bumped 8 → 9 to add the required `regionConsequences: RegionConsequences` slice.
- * Phase 110 — bumped 9 → 10 to add the required `factionReputations: FactionReputations` slice.
- * knownSkills→knownCards rename — bumped 10 → 11 to rename the persisted `player.knownSkills` field to `knownCards`.
- * Phase 18 — bumped 11 → 12: `player.equipment` moves from the 7-slot record to
- *   the 5-slot `EquipmentLoadout`; worn gear re-slots deterministically and
- *   accessory/body overflow returns to inventory (see `game.migrate.ts`).
- * Phase 19 — bumped 12 → 13: seed the 8 signet relics onto the player (default 5
- *   worn, displaced gear + other 3 relics to inventory) so loaded saves derive a
- *   full signature kit from the worn loadout instead of the retired archetype
- *   kit; recompute maxHealth (see `game.migrate.ts`).
- * Phase 21 — bumped 13 → 14: the procedural equipment library is retired, so
- *   purge every non-relic `Equipment` from the loadout + inventory (relics are
- *   the only equipment that survives); backfill any stripped loadout slot with
- *   the default relic (see `game.migrate.ts`).
- * Phase D5 (spec 33 §6) — bumped 14 → 15: backfill the DIE-GEAR RAIL
- *   (`player.dieGear`) with the concrete default 4-color loadout so upgrades
- *   write to a real per-save object and never mutate the frozen
- *   `DEFAULT_DIE_GEAR` (see `game.migrate.ts`).
- * Phase 52a — bumped 15 → 16: the deck-removal primitive adds the per-run
- *   counter `player.cardRemovals` (the escalating removal price reads it).
- *   The migration materialises it to 0 on older saves (see `game.migrate.ts`);
- *   the field stays sparse-optional on fresh characters, and `cardRemovalsOf`
- *   is the seam that reads both shapes as 0.
- * Phase 52e — bumped 16 → 17: retired the rest minigame ("The Night
- *   Watch"). Drops the dead `night-watch-tutorial-done` flag and clears
- *   any live rest-minigame session riding along in `flags` / the raw
- *   payload's `rest` key (a mobile-only slice, not a `GameState` field —
- *   the old `RestSession` shape is gone, so a stale one must not survive
- *   into the rest-choice screen's presenter). `night-keepsake:*` flags
- *   are untouched — `/memoir`'s REMAINS section still reads them back
- *   (see `game.migrate.ts`).
- * Phase 61 — bumped 17 → 18: retired the Quest Board minigame ("The
- *   Boy's Almanac"). Clears any live quest-board session riding along
- *   in the raw payload's `quest` key (a mobile-only slice, not a
- *   `GameState` field — the old `QuestBoardSession` shape is gone, so a
- *   stale one must not survive; see `game.migrate.ts`).
- * Phase 76 — bumped 18 → 19: retired the Gathering minigame ("The
- *   Gleaning"). Clears a stale mobile-only gathering session (see
- *   `game.migrate.ts`).
- * Phase 63 — bumped 19 → 20: retired the loot-cache Pick Pool minigame
- *   ("The Reliquary"), replaced by `World/LootCacheChoice`'s three-offer
- *   choice. Clears any live cache session riding along in the raw
- *   payload's `cache` key and adds the required `mapGoodwill: Record<string,
- *   number>` slice, defaulted to `{}` for legacy saves (see `game.migrate.ts`).
- * 2026-08-28 — bumped 20 → 21: inter-map travel. `createStartingWorld` now
- *   populates the `world` continent catalogue (coastal + northern) instead
- *   of `[]`, and `WorldState` gains the optional `mapStates` record of
- *   departed maps. The migration seeds the catalogue onto old saves,
- *   preserving `currentContinent` / `currentMap` and any completed /
- *   available state they carried (see `game.migrate.ts`).
- * 2026-09-15 — bumped 21 → 22 (Phase 85): 3 new signet relics fill the
- *   `head`/`hands`/`feet` accessory kinds that shipped empty in Phase 19.
- *   The migration appends the 3 new relics (benched) to any save's
- *   inventory that doesn't already carry them; the worn loadout and every
- *   other field pass through untouched (see `game.migrate.ts`).
- * 2026-09-20 — bumped 22 → 23: retired the STARTING-LOADOUT SEED. Every
- *   fresh save used to carry a Phase-169 `combat-loadout-card:` flag per
- *   `STARTING_CARD_IDS` (4 cards). Nothing in the shipped product ever
- *   edits that loadout, but `buildCombatDeck` deals it INSTEAD of
- *   `knownCards` whenever it exists — so the starter bundle the player
- *   chose (18+ cards, written to `knownCards`) was never the deck that was
- *   dealt. Two live symptoms: (a) a 4-card base + a few rewards sits at
- *   `MIN_COMBAT_DECK_SIZE` and every rest-node CUT is refused
- *   `deck-at-floor` with shillings in hand; (b) a bundle that does not
- *   contain a seeded starter (e.g. `thin-hymn`) still deals it, and
- *   `executeCard`'s ownership guard (which reads `knownCards`, never the
- *   loadout) throws `Card 'thin-hymn' is not known.` mid-combat. The
- *   migration strips every `combat-loadout-card:` flag; `knownCards` +
- *   `combatRewardCards` is the deck again (see `game.migrate.ts`). The
- *   loadout codec itself stays (dev/e2e harnesses still pin decks through
- *   it) — it is simply no longer seeded.
- * 2026-09-21 — bumped 23 → 24: the SUPPLIANT'S RING moved out of the silent
- *   seed and into the run's first node. A fresh v24 save carries 10 relics,
- *   not 11, with the Venom Sigil holding the ring's accessory seat and no
- *   `first-node-relic-granted` flag; the first node hands the ring over,
- *   swaps it into that seat, and benches the Sigil — landing on the exact
- *   loadout v23 seeded silently at t=0. The finding this answers was "new
- *   players start with no items": the ring was never missing (measured — a
- *   v23 fresh state carries it worn, and the SATCHEL renders it), it was
- *   handed over inside `createCharacter` before any screen existed to say
- *   so. The migration stamps `first-node-relic-granted` on every existing
- *   save, which already owns the ring, so no save is ever offered it twice
- *   (see `game.migrate.ts`).
- * 2026-09-23 — NO version bump: THE VERY START. A fresh save now seeds NO
- *   relics at all (empty inventory, empty loadout, zero coin, zero XP). The
- *   save SHAPE is unchanged, so existing saves need no migration — they keep
- *   whatever kit they already carry. The ring still arrives at the first
- *   node; the other ten relics are village-market wares (owner call).
- * 2026-09-25 — bumped 24 → 25: TRIM THE FAT T2a (D14). Derived stats, luck,
- *   the non-combat saves/tests, every non-maxHp stat line on equipment and
- *   the write-only `factionReputations` slice are retired; the hop strips
- *   them from loaded saves (see
- *   `game.migrate.ts`).
- * 2026-09-27 — bumped 25 → 26: T6 (D39). The philosophical-alignment grid,
- *   its observer cache and the GRACE meter (`moralMeter`) are removed, and a
- *   card's `philosophicalAspect` is renamed `color`; the hop strips and
- *   renames them in loaded saves.
- * 2026-09-29 — bumped 26 → 27: THE REVAMP R2 (D48). The roster is three
- *   foes; the hop re-points a staged encounter's retired foe to Float-Eye
- *   and strips survivors' keywords.
- * 2026-09-29 — bumped 27 → 28: THE REVAMP R3a (D53/D54/D61). The world is
- *   Act 1; the hop moves a save standing off Act 1 onto the Lantern Deep.
- * 2026-09-29 — bumped 28 → 29: THE REVAMP R3b (D53). fishing-village and the
- *   village goodwill system are purged; the hop drops `mapGoodwill`, the
- *   goodwill flags, fishing-village's map entries and its two quests.
- * 2026-09-30 — bumped 29 → 30: THE REVAMP R5 (D49). Items are the healing
- *   potions; the hop drops retired consumable stacks and their effects.
- * 2026-09-30 — bumped 30 → 31: THE REVAMP R6a (D52). Hazard rewards do what
- *   they say; the hop drops the Paradox Token and Hexed flags.
- * 2026-09-30 — bumped 31 → 32: THE REVAMP R6b (D52/D63). The hazard deck is
- *   the core ten; the hop drops acquired deck cards that were deleted.
- * 2026-09-30 — bumped 32 → 33: THE REVAMP R7c (D47/D50). The alt-win systems
- *   are gone; the hop drops the write-only `regionConsequences` slice.
- * 2026-10-01 — bumped 33 → 34: THE REVAMP R7e (D72). The parked world's
- *   content is deleted; the hop moves a save off a deleted map onto the
- *   Lantern Deep and drops the deleted maps, quests and story flags.
- * 2026-10-01 — bumped 34 → 35: THE REVAMP R7e2 (D72). The relic library is
- *   the Suppliant's Ring alone; the hop drops every other relic.
- * 2026-10-01 — bumped 35 → 36: THE REVAMP R9 (D55). Levels cost a rising
- *   `L × 250` XP; the hop re-expresses a save's progress on the new curve.
+ * Every hop from v11 on lives in `game.migrate.ts`. What each version added:
+ * - v6: the required `runId: string` field.
+ * - v7: the required `codex: CodexState` slice (`migrateV6toV7` defaults it to
+ *   `{ unlockedEntries: [] }`).
+ * - v9: the `regionConsequences` slice; v10: the `factionReputations` slice.
+ * - v11: `player.knownSkills` is renamed `knownCards`.
+ * - v12: `player.equipment` moves from the 7-slot record to the 5-slot
+ *   `EquipmentLoadout`; worn gear re-slots deterministically and
+ *   accessory/body overflow returns to inventory.
+ * - v13: the 8 signet relics are seeded onto the player (default 5 worn,
+ *   displaced gear + other 3 relics to inventory); maxHealth is recomputed.
+ * - v14: every non-relic `Equipment` is purged from the loadout + inventory;
+ *   a stripped loadout slot is backfilled with the default relic.
+ * - v15: the die-gear rail (`player.dieGear`) is backfilled with the concrete
+ *   default 4-color loadout so upgrades write to a real per-save object and
+ *   never mutate the frozen `DEFAULT_DIE_GEAR`.
+ * - v16: the per-run counter `player.cardRemovals` (the escalating removal
+ *   price reads it) is materialised to 0; the field stays sparse-optional on
+ *   fresh characters, and `cardRemovalsOf` reads both shapes as 0.
+ * - v17: the dead `night-watch-tutorial-done` flag and any rest-minigame
+ *   session in `flags` / the raw payload's `rest` key (a mobile-only slice)
+ *   are dropped, so a stale session never reaches the rest-choice
+ *   presenter. `night-keepsake:*` flags are kept: `/memoir`'s REMAINS
+ *   section reads them.
+ * - v18: any quest-board session in the raw payload's `quest` key (a
+ *   mobile-only slice) is dropped.
+ * - v19: a stale mobile-only gathering session is dropped.
+ * - v20: any loot-cache session in the raw payload's `cache` key is dropped
+ *   (`World/LootCacheChoice`'s three-offer choice replaces it), and the
+ *   required `mapGoodwill: Record<string, number>` slice defaults to `{}`.
+ * - v21: inter-map travel. `createStartingWorld` populates the `world`
+ *   continent catalogue and `WorldState` gains the optional `mapStates`
+ *   record of departed maps; the hop seeds the catalogue, preserving
+ *   `currentContinent` / `currentMap` and any completed / available state.
+ * - v22: 3 signet relics for the `head`/`hands`/`feet` accessory kinds are
+ *   appended (benched) to an inventory that lacks them; everything else
+ *   passes through.
+ * - v23: every `combat-loadout-card:` flag is stripped. `buildCombatDeck`
+ *   deals a curated loadout INSTEAD of `knownCards` whenever one exists, so a
+ *   seeded loadout shadowed the starter bundle: the deck sat at
+ *   `MIN_COMBAT_DECK_SIZE` and every rest-node CUT was refused, and a card
+ *   outside the bundle could be dealt and then rejected by `executeCard`'s
+ *   `knownCards` ownership guard mid-combat. `knownCards` +
+ *   `combatRewardCards` is the deck. The loadout codec stays (dev/e2e
+ *   harnesses pin decks through it); it is never seeded.
+ * - v24: the Suppliant's Ring is handed over at the run's first node, not in
+ *   `createCharacter`. The hop stamps `first-node-relic-granted` on every
+ *   existing save, which already owns the ring, so no save is offered it
+ *   twice. (A fresh save seeds no relics at all, with empty inventory and
+ *   loadout, zero coin and zero XP; that needs no version bump.)
+ * - v25: derived stats, luck, the non-combat saves, every non-maxHp stat
+ *   line on equipment and the write-only `factionReputations` slice are
+ *   stripped.
+ * - v26: the philosophical-alignment grid, its observer cache and the GRACE
+ *   meter (`moralMeter`) are stripped, and a card's `philosophicalAspect` is
+ *   renamed `color`.
+ * - v27: the roster is three foes; a staged encounter's removed foe is
+ *   re-pointed to Float-Eye and survivors' keywords are stripped.
+ * - v28: the world is Act 1; a save standing off Act 1 moves onto the
+ *   Lantern Deep.
+ * - v29: fishing-village and the village goodwill system are dropped:
+ *   `mapGoodwill`, the goodwill flags, fishing-village's map entries and its
+ *   two quests.
+ * - v30: items are the healing potions; other consumable stacks and their
+ *   effects are dropped.
+ * - v31: the Paradox Token and Hexed flags are dropped.
+ * - v32: the hazard deck is the core ten; acquired deck cards that no longer
+ *   exist are dropped.
+ * - v33: the write-only `regionConsequences` slice is dropped.
+ * - v34: a save on a deleted map moves onto the Lantern Deep, and the
+ *   deleted maps, quests and story flags are dropped.
+ * - v35: the relic library is the Suppliant's Ring alone; every other relic
+ *   is dropped.
+ * - v36: levels cost a rising `L × 250` XP; a save's progress is
+ *   re-expressed on that curve.
  */
 export const GAME_STATE_VERSION = 36;
 
@@ -180,11 +131,11 @@ export const GAME_STATE_VERSION = 36;
  * Builds a brand-new GameState with default player and world.
  *
  * `opts.startMap` places the new game on another campaign map instead of the
- * default start (`STARTING_MAP`, the Breakwater since D27). Used by the dev
+ * default start (`STARTING_MAP`, the Breakwater). Used by the dev
  * "start on any map" tools and by tests pinned to one map's content.
  */
 export function createNewGameState(opts: { startMap?: MapName } = {}): GameState {
-    // No curated-loadout seed (v23, 2026-09-20 — see the version log above):
+    // No curated-loadout seed (see v23 in the version log above):
     // the combat deck is `knownCards` + `combatRewardCards`, and the client
     // seeds `knownCards` from the chosen starter bundle (`ensureStarterCards`).
     // A loadout flag here would shadow that bundle for the whole run.
@@ -197,10 +148,10 @@ export function createNewGameState(opts: { startMap?: MapName } = {}): GameState
         // territory for the early encounters. Starter cards are seeded by the
         // client on first combat (`ensureStarterCards`).
         //
-        // Owner call 2026-09-23 — THE VERY START: a fresh run seeds NO items,
+        // A fresh run seeds NO items,
         // no equipment, no currency and no XP. `seedStartingRelics` is off, so
         // the inventory and the worn loadout are both empty. The one relic
-        // the run owes the player, the Suppliant's Ring, is still handed over
+        // the run owes the player, the Suppliant's Ring, is handed over
         // at the first node (`Character/first-node-grant.ts` — with an empty
         // accessory row it simply fills the first seat, displacing nothing).
         //
@@ -233,13 +184,13 @@ function isEncounter(target: Enemy | Encounter): target is Encounter {
  * Level-up step. While the player has accumulated enough XP for the next
  * level, increment `level`, recompute `maxHealth` (base-stat pool plus the worn
  * armor relics' bonus), raise the threshold, refill
- * HP, and bank Spec 06's stat points (spent later via `ALLOCATE_STAT_POINT`).
+ * HP, and bank stat points (spent later via `ALLOCATE_STAT_POINT`).
  */
 function applyLevelUps(player: Character): Character {
     let next = player;
     while (next.experience >= next.experienceToNextLevel) {
         const level = next.level + 1;
-        // Tier 0 item 4 (TRIM THE FAT T2a): keep the worn armor relics' bonus.
+        // Keep the worn armor relics' bonus.
         const maxHealth = calculateMaxHealth(level, next.baseStats) + wornMaxHpBonus(next.equipment);
         next = {
             ...next,
@@ -247,8 +198,8 @@ function applyLevelUps(player: Character): Character {
             maxHealth,
             health: maxHealth,
             experienceToNextLevel: experienceForLevel(level + 1),
-            // Spec 06 Q3 — grant STAT_POINTS_PER_LEVEL on every promotion.
-            // Multi-level cascades (Q9) accumulate without merging.
+            // Grant STAT_POINTS_PER_LEVEL on every promotion.
+            // Multi-level cascades accumulate without merging.
             availableStatPoints: (next.availableStatPoints ?? 0) + STAT_POINTS_PER_LEVEL,
         };
     }
@@ -277,7 +228,7 @@ function settleFirstNodeRelic(state: GameState): GameState {
  * action types — instead returns state unchanged (caller is responsible for
  * type safety).
  *
- * Autosave policy lives in `store.ts` (Phase 51, Spec 09 Q4 path B):
+ * Autosave policy lives in `store.ts`:
  * only the curated `DURABLE_ACTIONS` set triggers an `adapter.save` call.
  */
 export function gameReducer(state: GameState, action: GameAction): GameState {
@@ -298,12 +249,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 throw new Error('START_COMBAT: encounter has no enemies.');
             }
 
-            // The Phase 92 moral-meter stat scaling that stood here was a
-            // provable no-op (uniform scaling never changes the argmax
-            // stance, and combat reads no stat) — deleted in TRIM THE FAT T2a.
             const scaledEnemy = { ...encounter.enemies[0]! };
 
-            // The store no longer drives combat — it only stages the (scaled)
+            // The store does not drive combat — it only stages the
             // encounter. The Hazard-Pattern engine runs the fight outside the
             // store; `END_COMBAT` consumes `currentEncounter` to grant rewards.
             const scaledEncounter: Encounter = {
@@ -320,8 +268,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             const encounter = state.currentEncounter;
             if (!encounter) return state;
 
-            // The Hazard-Pattern combat driver reports the outcome; the store
-            // no longer derives it from a legacy combat snapshot. Default to
+            // The Hazard-Pattern combat driver reports the outcome. Default to
             // `'flee'` (no grants) when the caller omits it.
             const outcome: 'victory' | 'defeat' | 'flee' | 'friendship' =
                 action.payload?.outcome ?? 'flee';
@@ -377,7 +324,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 }
             }
 
-            // Phase 62 — friendship resolutions append the per-enemy
+            // Friendship resolutions append the per-enemy
             // `flagSet` to state.flags (de-duped). Reuses the existing
             // requires.flag machinery so downstream dialogue / quest
             // content can gate on the flag without engine work.
@@ -389,12 +336,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 }
             }
 
-            // Phase 73 — friendship resolutions auto-fire the per-enemy
+            // Friendship resolutions auto-fire the per-enemy
             // codex unlock. The entry's id is appended to
             // state.codex.unlockedEntries (de-duped); the store layer
             // surfaces { id, title } on
-            // CombatEndReport.friendshipReward.codexEntryUnlocked. Closes
-            // GH#65 ask 3.
+            // CombatEndReport.friendshipReward.codexEntryUnlocked.
             let nextCodex = state.codex;
             if (outcome === 'friendship') {
                 const entry = foe.journalEntry;
@@ -407,7 +353,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             }
 
             // The fight is over, so the node it was fought on is settled,
-            // whatever the outcome (phase R9a): `resolveMapEvent` left the
+            // whatever the outcome: `resolveMapEvent` left the
             // arrival owed so a save taken mid-fight re-offers it.
             return settleArrival({
                 ...state,
@@ -492,12 +438,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             return state;
 
         case 'RESET_RUN': {
-            // Phase 72 — closes GH#65 ask 2.
             const { keepCharacter } = action.payload;
             const freshRunId = generateRunId(() => getRng().random());
 
             if (!keepCharacter) {
-                // Full new-game reset; carry rngState forward (D2 — don't
+                // Full new-game reset; carry rngState forward (don't
                 // reset the seed mid-session, that breaks deterministic
                 // replay) and assign a fresh runId.
                 const fresh = createNewGameState();
@@ -505,8 +450,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             }
 
             // keepCharacter: true — preserve persistent character ledger
-            // (player + rngState per
-            // Phase 72 D1; codex per Phase 73 D12 — codex unlocks are
+            // (player + rngState; codex too — codex unlocks are
             // character knowledge, carry across runs); reset run-scoped
             // state. HP refills to maxHealth; effects clears defensively
             // (already empty between combats).
@@ -527,7 +471,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         }
 
         case 'UNLOCK_CODEX_ENTRY': {
-            // Phase 73 — closes GH#65 ask 3.
             const { entryId } = action.payload;
             if (state.codex.unlockedEntries.includes(entryId)) return state;
             return {

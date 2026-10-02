@@ -63,7 +63,7 @@ describe('applyEffect', () => {
         expect(second[0].intensity).toBe(2);
     });
 
-    // Phase 38 — sourceId attribution.
+    // sourceId attribution.
     describe('sourceId (Phase 38)', () => {
         it('stamps sourceId on a fresh application', () => {
             const { activeEffects } = applyEffect([], makeEffect(), 1, { sourceId: 'char-player' });
@@ -121,7 +121,7 @@ describe('removeEffect', () => {
 });
 
 describe('removeEffectsByType', () => {
-    // The library carries no buffs (R7c deleted the last one), so the tiers
+    // The library carries no buffs, so the tiers
     // run over the live debuffs: MARK (1), POISON (2), PETRIFY (3).
     const effects: ActiveEffect[] = [
         { effectId: 'debuff_poison',  remainingDuration: 3, intensity: 1, appliedAt: 1, tier: 2 },

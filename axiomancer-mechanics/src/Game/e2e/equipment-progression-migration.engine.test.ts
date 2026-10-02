@@ -1,8 +1,8 @@
 /**
- * Hermetic engine test — 2026-09-15 save migration (v21 → v22, Phase 85).
+ * Hermetic engine test — equipment-progression save migration (v21 → v22).
  *
- * Phase 85's hop appended three head/hands/feet signet relics to inventory.
- * R7e2 (D72) deleted them, so the hop is now a version bump: a v21 save loads
+ * The hop is a version bump only (the head/hands/feet signet relics it once
+ * appended no longer exist): a v21 save loads
  * at v22 with its player untouched (the v34 → v35 hop drops any deleted relic
  * a save still holds).
  */

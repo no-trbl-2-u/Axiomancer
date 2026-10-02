@@ -1,14 +1,12 @@
 /**
  * THE CARD LIBRARY — the aggregator.
  *
- * After the card purge (P1, 2026-09-27) the player library is the grey
- * office: three colourless cards (`library/starters.cards.ts`). Stat scaling
- * (S3, `Combat/stat-scaling.ts`) grows their numbers with the player's
- * body, mind and heart. New cards are designed only in a guided session with
- * T (D37), which is where this file grows again.
+ * The player library is the grey office: three colourless cards
+ * (`library/starters.cards.ts`). Stat scaling (`Combat/stat-scaling.ts`)
+ * grows their numbers with the player's body, mind and heart. New cards are
+ * designed only in a guided session with T, which is where this file grows.
  *
- * THE SURVIVING CONSTRAINTS (the 5/5/5 aspect thirds went with the presets in
- * the purge, D36):
+ * THE CONSTRAINTS:
  *   1. Every card is playable without a die: a spell authors a non-empty
  *      `free`, an oath/hex gets an engine-derived timed FREE instance.
  *   2. One tray roll per threat phase (a bug fix, not a design law).
@@ -16,7 +14,7 @@
  * There is no rank band, no pricing gate, no win-rate curve and no governing
  * objective function. Numbers are judged by playing the game.
  *
- * Direct damage is a first-class verb (DEAL), scaled by body (S3). Enemy
+ * Direct damage is a first-class verb (DEAL), scaled by body. Enemy
  * VITAE falls to any authored mix of hits, statuses and reflect.
  *
  * This file is data-only. All runtime behaviour lives in
@@ -29,10 +27,8 @@ import { getUpgradedCardById, isUpgradedCardId } from './card-upgrades';
 import { GREY_OFFICE_CARDS } from './library/starters.cards';
 
 /**
- * THE CARD PURGE (P1, 2026-09-27; D36, D42–D44): the player library is the
- * grey office alone — A Plain Blow, A Plain Ward, A Plain Word. Every other
- * player card was deleted (git history keeps them). New cards arrive only
- * through a guided session with T (D37).
+ * The player library is the grey office alone — A Plain Blow, A Plain Ward,
+ * A Plain Word. New cards arrive only through a guided session with T.
  */
 export const cardLibrary: Card[] = [
     ...GREY_OFFICE_CARDS,

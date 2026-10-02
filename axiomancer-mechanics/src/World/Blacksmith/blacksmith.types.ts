@@ -1,12 +1,12 @@
 /**
  * Blacksmith encounter ("The Anvil") — engine types.
  *
- * The die-gear upgrade surface (Spec 33 §6, Phase D5). The four dice are
+ * The die-gear upgrade surface. The four dice are
  * permanent immutable 6-siders; ALL progression lives on the GEAR that drives
  * each die's face table + special payload. The blacksmith is where that gear
  * is HONED (add a mana face, −1 miss) and TEMPERED (upgrade a mana face to a
  * special face), and where variant gear pieces can be SWAPPED in (a payload
- * change IS a gear swap; §6 — no service keyword for it).
+ * change IS a gear swap — no service keyword for it).
  *
  * Two-way like the hazard / rest / loot-cache minigames: the engine NEVER
  * reads `GameState`. The host passes an authored payload in — the starting

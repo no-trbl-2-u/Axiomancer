@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — Hazard-Pattern Combat (Spec 25 + Spec 33 Upgradeable Dice).
+ * Hermetic E2E — Hazard-Pattern Combat with Upgradeable Dice.
  *
  * Covers the turn model end to end with seeded / stubbed RNG:
  *   - the per-turn four-die tray (one die per color, each showing a face);
@@ -49,7 +49,6 @@ afterEach(() => {
 
 // ── Fixtures ─────────────────────────────────────────────────────────────────
 
-// Spec 32 v3: basePower is deleted at the schema level — no card can strike.
 // The "damage class" fixture is a bare body DEAL.
 // Poison/bleed ride EVENT clocks, so the round-boundary witness is a SYNTHETIC
 // card carrying the library's round-clock DoT, Creeping Doom.
@@ -74,9 +73,8 @@ registerSandboxCards([{
     targetType: 'enemy',
     combatEffects: [{ effectId: 'debuff_creeping_doom', appliedTo: 'opponent', intensity: 1, duration: 2 }],
 }, {
-    // The card purge (P1, 2026-09-27): spoiled-poultice is gone and the grey
-    // office is colourless with no DoT, so this SYNTHETIC mirror of its exact
-    // shape keeps the body-coloured POISON seat (the colour law and the
+    // The grey office is colourless with no DoT, so this SYNTHETIC card
+    // holds the body-coloured POISON seat (the colour law and the
     // status-play pins need a coloured DoT card; poison itself stays live —
     // enemies inflict it).
     id: 'qa-poultice-dot',
@@ -115,7 +113,7 @@ function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'heart'): Ene
     return e;
 }
 
-/** Forces this turn's tray to known colors (deterministic). Spec 33: every
+/** Forces this turn's tray to known colors (deterministic). Every
  *  non-X die shows a MANA face; an X die is a dead miss. */
 function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
     const turn = state.turn || 1;
@@ -139,7 +137,7 @@ function playWithDie(state: CombatEncounterState, cardId: string, dieIndex = 0) 
 }
 
 /** Every live die (Reserve, tray, floating) that can power `cardId`'s PAID
- *  line under spec 33: a non-miss face, color-legal for the card. */
+ *  line: a non-miss face, color-legal for the card. */
 function poweringDice(state: CombatEncounterState, cardId: string): string[] {
     const stance = getCard(cardId)?.stance;
     return [...(state.reserve ?? []), ...state.dice]
@@ -159,7 +157,7 @@ function batchRound(state: CombatEncounterState, cardId: string, maxPlays: numbe
     return resolveCombatPhase(s, plays);
 }
 
-// ── Intent derivation (Spec 26 §2) ───────────────────────────────────────────
+// ── Intent derivation ────────────────────────────────────────────────────────
 
 describe('Spec 26 §2 — intent derivation', () => {
     it('classifies damage / debuff / buff / combo / pass', () => {
@@ -243,8 +241,7 @@ describe('Spec 26b §1 — status landing + the color law', () => {
         expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_poison')).toBe(true);
         const landed = r.events!.some(e => e.kind === 'effect-landed' && e.target === 'enemy');
         expect(landed).toBe(true);
-        // Spec 33 retired the variety-chain auto-refresh: every die powers its
-        // own play, so the powering die is simply spent.
+        // Every die powers its own play, so the powering die is simply spent.
         expect(r.events!.some(e => e.kind === 'die-refreshed')).toBe(false);
         expect(r.state.dice.find(d => d.id === r.dieId)?.state).toBe('spent');
     });
@@ -265,7 +262,7 @@ describe('Spec 26b §1 — status landing + the color law', () => {
 describe('Spec 25 §4.5 — between-phases processing', () => {
     it('fires enemy DoT ticks (erodes HP) and refills the hand', () => {
         mockSequentialRng(0.05);
-        // WS3.3: poison/bleed ride EVENT clocks now — the round-boundary
+        // Poison/bleed ride EVENT clocks, so the round-boundary
         // witness is the synthetic Creeping Doom carrier (round clock).
         const NETTLE = 'qa-round-dot';
         let state = initializeCombatEncounter(makePlayer([NETTLE]), makeEnemy(80, 'mind'), [NETTLE], 5);
@@ -333,7 +330,7 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
     });
 });
 
-// ── Tuning pass 2: anti-spam, control, read-loop (Spec 26b §2/§3) ────────────
+// ── Tuning pass 2: anti-spam, control, read-loop ─────────────────────────────
 
 describe('Spec 26b tuning — projection + carry', () => {
     it('projectCardImpact advertises NO strike number (spec 32 v3 — the strike is dead)', () => {
@@ -373,7 +370,7 @@ describe('Spec 26b tuning — projection + carry', () => {
 
 describe('Spec 26b §B/§C/§D — archetype kit, rewards, unlock, difficulty floor', () => {
     it('the signature kit is derived from the worn signet-relic loadout, not archetype', () => {
-        // Phase 19 — signatures come from worn equipment. The fixture player
+        // Signatures come from worn equipment. The fixture player
         // wears the Suppliant's Ring, so the kit is The Open Hand regardless
         // of the (portrait-only) archetype / base stats.
         const bodyPlayer = makePlayer([DOT_BODY]); bodyPlayer.baseStats = { heart: 2, body: 9, mind: 2 };
@@ -451,11 +448,9 @@ describe('Spec 25 §11 — victory by HP depletion via status play, card-sourced
         expect(summary.headline).toMatch(/Victory/);
         expect(summary.rows.length).toBeGreaterThan(0);
         expect(summary.bestCard.length).toBeGreaterThan(0);
-        // REPEALED 2026-09-02 (L5, status-primacy): this used to require
-        // `totalDotDamage > 0`, i.e. that HP fell to DoT specifically. The
-        // status/damage/wall/alt-win paths compete on merit now, and this
-        // 24-VITAE foe dies to spoiled-poultice's printed "Deal 7" before its
-        // POISON ever ticks. The win is the assertion; the route is not.
+        // The status/damage/wall/alt-win paths compete on merit, so this does
+        // not require HP to fall to DoT specifically. The win is the
+        // assertion; the route is not.
     });
 });
 
@@ -472,9 +467,8 @@ describe('Spec 25 §9 — resolveCombatPhase batch entry point', () => {
         expect(res.state.phaseResults.length + (res.state.finalOutcome ? 1 : 0)).toBeGreaterThan(0);
     });
 
-    // D7 (2026-09-25): a play submitted WITHOUT a dieId used to ask for a
-    // stance draft — a no-op under spec 33 — and fell back to Reserve/floating
-    // only, so a dieless PAID play fizzled with a live tray die in hand.
+    // A play submitted WITHOUT a dieId must still find a live tray die, not
+    // fall back to Reserve/floating only and fizzle.
     it('powers a dieless PAID play with the first colour-legal live tray die', () => {
         mockSequentialRng(0.05);
         let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(200, 'mind'), [DOT_BODY, DOT_BODY], 13);

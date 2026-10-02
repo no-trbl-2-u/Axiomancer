@@ -1,10 +1,7 @@
 /**
  * WS1.3 — FREE/PAID line-telemetry shape (sim e2e, telemetry-first).
  *
- * The 85%/15% FREE/PAID dominance-flag bands were repealed 2026-09-02
- * (big-numbers overhaul §3/§10) along with every other balance band — the
- * library is being rewritten wholesale, so no old line-share number
- * survives as a law. What remains is a bug detector: the matrix runs on
+ * A bug detector, pinning no line-share band: the matrix runs on
  * the grey deck and the report carries the WS1.2 per-card line-telemetry columns
  * (`free%`), so a future rebalance pass has real data to look at.
  */

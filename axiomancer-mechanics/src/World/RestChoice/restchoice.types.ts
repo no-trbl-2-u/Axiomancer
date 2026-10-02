@@ -1,6 +1,5 @@
 /**
- * Rest-choice encounter (Phase 52c; anvil offer dropped Phase 59) — engine
- * types.
+ * Rest-choice encounter — engine types.
  *
  * A rest node is one irreversible choice of two: `rest` (free, flat-25%
  * heal) or `cut` (paid, composes `Cards/card.removal` for ONE deck
@@ -51,7 +50,7 @@ export interface RestChoiceOutcome {
 
 export interface RestChoiceSession {
     phase: RestChoicePhase;
-    /** Authored shelter class (Phase 52b) — kept for the inn scar-mend (unrelated to the flat rest heal). */
+    /** Authored shelter class — kept for the inn scar-mend (unrelated to the flat rest heal). */
     shelter: RestShelter;
     maxHealth: number;
     health: number;
@@ -61,7 +60,7 @@ export interface RestChoiceSession {
     /** `Character.cardRemovals` going in — prices the `cut` offer. */
     removals: number;
     offers: readonly RestChoiceOffer[];
-    /** Phase 59 — the authored MapEvent one-liner, preferred over the placeholder intro when present. */
+    /** The authored MapEvent one-liner, preferred over the placeholder intro when present. */
     description: string | null;
     outcome: RestChoiceOutcome | null;
     seed: SeedInput;

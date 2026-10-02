@@ -3,13 +3,10 @@
  *
  * Every effect lands as authored — no roll at any tier:
  *
- * - Tier 1 auto-applies (always did).
- * - Tier 2 / Tier 3 debuffs always land (Phase 80, direction (a): target
- *   resist, Nat-20 rebound/escape and Nat-1 overwhelm were removed then).
- * - Tier 2 buffs land at printed intensity. D12
- *   (`plan/2026-09-25-refactor-strategy.decisions.md`, trim spec Tier 0
- *   item 5) removed the hidden caster-side d20 that fizzled 5 % of buffs
- *   and doubled 5 % without the player ever seeing the roll.
+ * - Tier 1 auto-applies.
+ * - Tier 2 / Tier 3 debuffs always land: no target resist, no Nat-20
+ *   rebound/escape, no Nat-1 overwhelm.
+ * - Tier 2 buffs land at printed intensity: no hidden caster-side roll.
  *
  * The function survives (rather than callers applying effects directly)
  * because it is the single seam that turns an `ActiveEffect` into the

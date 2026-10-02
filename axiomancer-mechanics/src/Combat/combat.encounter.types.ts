@@ -1,5 +1,5 @@
 /**
- * Spec 25 — Hazard-Pattern Combat: engine types.
+ * Hazard-pattern combat: engine types.
  *
  * The new card-and-dice combat driver, structurally identical to the Hazard
  * minigame (`src/World/Hazard/`). HP MODEL: the enemy's SOLE bar is HP and the
@@ -8,12 +8,11 @@
  * verb is a combat card (projected from a learned card).
  *
  * This is the sole combat driver. It reuses the shared effects engine and
- * card engine (Spec 25 §12 Q4 recommendation (b)): the `executeCard` /
+ * card engine: the `executeCard` /
  * `applyEffect` machinery is untouched — the engine *drives* it differently.
  *
- * DoT erosion + control (one win path among several — the old status-primacy
- * doctrine is retired, see `docs/lexicon.json`) make a fight something the player *assembles a solution* for rather than
- * *trades stats* in.
+ * DoT erosion + control (one win path among several) make a fight something
+ * the player *assembles a solution* for rather than *trades stats* in.
  */
 
 import type { Character } from '../Character/types';
@@ -22,7 +21,7 @@ import type { Effect, ActiveEffect } from '../Effects/types';
 import type { CardAspect, CardType } from '../Cards/types';
 
 // ---------------------------------------------------------------------------
-// Dice — the stance-color economy (Spec 25 §4.2)
+// Dice — the stance-color economy
 // ---------------------------------------------------------------------------
 
 /**
@@ -32,15 +31,14 @@ import type { CardAspect, CardType } from '../Cards/types';
  */
 export type CombatDieColor = 'heart' | 'body' | 'mind' | 'wild' | 'x';
 
-/** Phase 31 — the three stance colors the combat MOMENTUM wheel and THE
+/** The three stance colors the combat MOMENTUM wheel and THE
  *  STAKE both key off (a strict subset of {@link CombatDieColor}: wild/x
  *  never participate in either mechanic). */
 export type WheelStance = 'heart' | 'body' | 'mind';
 
 /**
  * Die lifecycle. `available` → `spent` on power; `spent` → `available` again
- * via the self-reinforcing status loop (§4.7), RPS advantage (§4.8 waives the
- * cost entirely), or die-manipulation cards. `exhausted` / `preserved` mirror
+ * via the self-reinforcing status loop or die-manipulation cards. `exhausted` / `preserved` mirror
  * the Hazard state machine for parity; `locked` is reserved for X dice that a
  * card has not yet unlocked.
  */
@@ -54,14 +52,14 @@ export interface CombatManaDie {
     /** Created by card effects; expires between phases (display + cleanup). */
     temporary: boolean;
     /**
-     * Spec 32 v3 §5 — a GHOST die: forged by the FORGE verb, joins the tray
+     * A GHOST die: forged by the FORGE verb, joins the tray
      * NOW, is exempt from every reroll, persists across rounds AND combats
      * (written to the character save at combat end), and is gone forever when
      * spent. Absent/false for rolled, temporary, and Reserve dice.
      */
     floating?: boolean;
     /**
-     * Fate Engine P1 (spec 31 R2) — RIPENING pips. Deterministic, no new RNG:
+     * RIPENING pips. Deterministic, no new RNG:
      * fresh-rolled dice have 0; a die BANKED to the Reserve gains +1 pip per
      * threat phase survived (max `RESERVE_PIP_CAP`). Spending a pipped die adds
      * +1 intensity per pip to the status it lands, or +2 Guard per pip on a
@@ -69,7 +67,7 @@ export interface CombatManaDie {
      */
     pips?: number;
     /**
-     * Spec 33 (Upgradeable Dice) — the FACE this fixed-color die rolled this
+     * The FACE this fixed-color die rolled this
      * round: `mana` powers a card of its color, `special` powers a card AND
      * fires its gear payload (+◆) when USED, `miss` is dead (state `locked`).
      * Absent on dice that are not rolled (GHOST/forged dice, state literals).
@@ -78,20 +76,20 @@ export interface CombatManaDie {
 }
 
 // ---------------------------------------------------------------------------
-// Cards — combat card projected from a learned Card (Spec 25 §4.3, §6)
+// Cards — combat card projected from a learned Card
 // ---------------------------------------------------------------------------
 
 /**
- * Verb-class taxonomy (adapted from the Hazard card classes, §6). Drives the
+ * Verb-class taxonomy (adapted from the Hazard card classes). Drives the
  * effect-kind a card applies and its hand icon.
  */
 export type CombatVerbClass =
     | 'direct-dot'        // applies DoT debuffs (Poison, Bleed) → erodes HP
-    | 'direct-control'    // hinders the enemy's turn (STAGGER / BACKFIRE)
+    | 'direct-control'    // hinders the enemy's turn
     | 'stat-debuff'       // applies exposure debuffs (MARK / QUARTER) → soft control
     | 'buff-self'         // buffs the player / engine verbs → utility
     | 'direct-damage'     // status-payoff bursts (RUPTURE / REAP) — never raw strikes
-    | 'befriend'          // Befriend card → opens the mercy choice (§6 Q6)
+    | 'befriend'          // Befriend card → opens the mercy choice
     | 'defend'            // Guard/defense card → shields against the enemy's next threat
     | 'retreat';          // dead — no card ever produces this verb class any more.
                            // No in-combat retreat exists; combat resolves only
@@ -114,26 +112,26 @@ export interface CombatCard {
     id: string;
     name: string;
     /** Colour identity (Heart / Body / Mind / Any). Derived verbatim from the
-     *  card's `color` (Phase 104 — 'any' is the grey office's
-     *  colourless aspect, distinct from a die's own 'wild'/'x' colours). */
+     *  card's `color` ('any' is the grey office's colourless aspect,
+     *  distinct from a die's own 'wild'/'x' colours). */
     stance: CardAspect;
     verbClass: CombatVerbClass;
     /** Which effect-kind the bottom action applies (dot / control / none). */
     effectKind: CardEffectKind;
     tier: 1 | 2 | 3;
-    /** Spec 32 v3 — rarity band derived from the rank ladder (§4). Drives the
+    /** Rarity band derived from the rank ladder. Drives the
      *  deck recipe, drop weights, and the mobile frame. */
     rarity?: 'common' | 'uncommon' | 'rare';
-    /** Spec 32 v3 — rank 1-6 (Ash → Saint); printed on the face. */
+    /** Rank 1-6 (Ash → Saint); printed on the face. */
     rank?: 1 | 2 | 3 | 4 | 5 | 6;
-    /** The card's type: attack / skill / spell (D51). */
+    /** The card's type: attack / skill / spell. */
     cardType?: CardType;
     /** Human-readable description of the FREE top action. */
     topActionText: string;
     /** Human-readable description of the powered BOTTOM action. */
     bottomActionText: string;
-    /** Projected impact if the bottom action lands (a damage-weighted preview;
-     *  §7.1, §7.3). */
+    /** Projected impact if the bottom action lands (a damage-weighted
+     *  preview). */
     bottomDamagePreview: number;
     /** The id of the primary enemy effect this card applies (for the projection
      *  preview's diminishing-returns lookup). Null for damage/buff/synthetic. */
@@ -158,7 +156,7 @@ export interface CardPlay {
 }
 
 // ---------------------------------------------------------------------------
-// Conviction + Signature Skills (Spec 26b §1, §4)
+// Conviction + Signature Skills
 // ---------------------------------------------------------------------------
 
 /** What a signature skill does (drives the engine dispatch + the UI icon). */
@@ -169,11 +167,11 @@ export type SignatureSkillId =
     | 'sig-disarming-plea';
 
 /** Player archetype, derived from the dominant base stat. Drives (mobile) the
- *  portrait only — Phase 19 retired the archetype→signature gating. */
+ *  portrait only. */
 export type PlayerArchetype = 'heart' | 'body' | 'mind';
 
 /** A signature skill — an always-available ability funded by Conviction (◆),
- *  independent of the shuffled deck (Spec 26b §4). */
+ *  independent of the shuffled deck. */
 export interface SignatureSkill {
     id: SignatureSkillId;
     name: string;
@@ -184,7 +182,7 @@ export interface SignatureSkill {
 }
 
 // ---------------------------------------------------------------------------
-// Threat phases — the enemy redesign (Spec 25 §4.4, §10)
+// Threat phases
 // ---------------------------------------------------------------------------
 
 /** A single effect an enemy threat action applies to the player when a phase
@@ -200,9 +198,8 @@ export interface CombatThreatEffect {
     duration?: number;
     /** Self-heal the enemy performs (escalation). */
     enemyHeal?: number;
-    /** WS9 (spec 32 §12 #7) — the enemy sheds up to this many of its OWN
-     *  afflictions when the action fires (spec 29 guardrail: a fraction,
-     *  never the last one). Written only by the threat-branch resolver. */
+    /** The enemy sheds up to this many of its OWN afflictions when the
+     *  action fires (a fraction, never the last one). Written only by the threat-branch resolver. */
     enemyCleanse?: number;
 }
 
@@ -214,9 +211,8 @@ export interface CombatThreatAction {
 }
 
 /**
- * Spec 26 §2 — the enemy's telegraphed intent type, derived from the threat
- * action's effects. The STANCE (the RPS axis) stays hidden; the INTENT (what the
- * enemy will do if not cleared) is shown.
+ * The enemy's telegraphed intent type, derived from the threat action's
+ * effects. The INTENT (what the enemy will do if not cleared) is shown.
  */
 export type CombatIntentType =
     | 'damage'     // only direct HP damage
@@ -227,7 +223,7 @@ export type CombatIntentType =
     | 'combo';     // multiple types at once
 
 /**
- * WS9 (spec 32 §12 item 7, Ratified 2026-07-11) — a threat branch's authored
+ * A threat branch's authored
  * condition. CLOSED union, authored data only, zero RNG: the fork commits from
  * observable state at phase START, so the telegraph can show both outcomes AND
  * the reason the taken one was taken.
@@ -240,14 +236,14 @@ export type ThreatBranchCondition =
 export interface CombatThreatBranchOutcome {
     threatAction: CombatThreatAction;
     intentType?: CombatIntentType;
-    /** Phase 33c (spec 33 §1) — this fork carries THE COVETED DIE. Undefined =
+    /** This fork carries THE COVETED DIE. Undefined =
      *  no coveted die on this fork (the common case; no boss/unique fork is
      *  authored with one — see `combat.threat-sequences.ts`). */
     stake?: boolean;
 }
 
 /**
- * WS9 — the branch payload carried on a resolved `CombatThreatPhase`. While the
+ * The branch payload carried on a resolved `CombatThreatPhase`. While the
  * phase is upcoming (`taken` undefined) the phase's top-level face is the ELSE
  * (baseline) fork and the telegraph surfaces `conditionText` + both outcomes;
  * at phase START the engine evaluates the condition, copies the taken fork
@@ -268,26 +264,24 @@ export interface CombatThreatPhase {
     threatAction: CombatThreatAction;         // the enemy's telegraphed attack each phase (HP model)
     isFinalPhase: boolean;                    // last telegraph in the sequence (then it loops)
 
-    // ── Spec 26 — intent telegraph ──────────────────────────────────────────
+    // ── Intent telegraph ────────────────────────────────────────────────────
     /** Auto-derived from `threatAction.effects` (deriveIntentType); override for
      *  boss clarity. Drives the mobile intent icon + label. */
     intentType?: CombatIntentType;
     /** Optional short flavor label, e.g. "Charges up". Presenter defaults per type. */
     intentLabel?: string;
-    /** Phase 3 — "rage mode": this phase cannot be entered until the
+    /** "Rage mode": this phase cannot be entered until the
      *  ABOUT-TO-RESOLVE round (state.round + 1 at phase-advance time) is
      *  >= this value. While locked, `processBetweenPhases` holds the phase
      *  pointer at the last reachable phase (repeating it) instead of
-     *  advancing into this one. Undefined = never locked (every phase
-     *  authored before this epic behaves exactly as before). */
+     *  advancing into this one. Undefined = never locked. */
     unlockAfterRound?: number;
 
-    /** WS9 (spec 32 §12 #7) — conditional fork: condition + BOTH outcomes,
-     *  committed at phase START (`commitThreatBranch`). Undefined on every
-     *  linear phase — byte-identical to before. */
+    /** Conditional fork: condition + BOTH outcomes, committed at phase
+     *  START (`commitThreatBranch`). Undefined on every linear phase. */
     branch?: CombatThreatBranch;
 
-    /** Phase 33c (spec 33 §1) — this phase carries THE COVETED DIE: fully
+    /** This phase carries THE COVETED DIE: fully
      *  blocking its telegraph converts it to a temp gold die
      *  (`resolveThreatPhase`, ceiling-gated — overflow → +1◆). Authored at
      *  the DECK level (`DECK_STAKES` in `combat.enemy-decks.ts`; the default
@@ -311,21 +305,20 @@ export interface CombatPhaseResult {
 // the enemy's turn via `canAct`. There are no abstract effect kinds/bars.
 // ---------------------------------------------------------------------------
 
-/** Per-card attribution row for the post-combat summary (§7.7). */
+/** Per-card attribution row for the post-combat summary. */
 export interface CombatAttributionRow {
     cardId: string;
     name: string;
     /** ACTUAL DoT damage the enemy took from ticks of THIS card's effects, summed
-     *  from emitted `dot-tick` events at summary time (WI-9). No longer a
-     *  projection of the DoT's whole life — post trigger-migration a poison/bleed
-     *  can sit for its whole duration and never tick. */
+     *  from emitted `dot-tick` events at summary time (a poison/bleed can sit
+     *  for its whole duration and never tick). */
     dotDamage: number;
     /** Total DIRECT HP damage this card dealt the enemy now (strikes + payoff
      *  bursts), overkill-clamped to HP actually applicable. */
     damageDealt: number;
     /** Phases across which the card's effects were active. */
     phases: number;
-    /** WI-9 — the DoT effect ids this card applied, so the summary can attribute
+    /** The DoT effect ids this card applied, so the summary can attribute
      *  their ACTUAL emitted ticks back to this card. Optional (absent = none). */
     effectIds?: string[];
 }
@@ -359,17 +352,17 @@ export type CombatEncounterPhase =
     | 'phase-play'     // player plays cards
     | 'phase-resolve'  // effect kinds compared, enemy action fires, Clear/Overwhelmed
     | 'between-phases' // DoT ticks, durations tick, draw 5
-    | 'mercy-choice'   // a successful Befriend opened the Phase 112 spare/exploit modal
+    | 'mercy-choice'   // a successful Befriend opened the spare/exploit modal
     | 'complete';      // combat over, outcome determined
 
 // ---------------------------------------------------------------------------
-// Events — typed stream for UI rendering (Spec 25 §7)
+// Events — typed stream for UI rendering
 // ---------------------------------------------------------------------------
 
 export type CombatEvent =
     | { kind: 'dice-rolled'; dice: CombatManaDie[] }
     | { kind: 'turn-dice-rolled'; turn: number; dice: CombatManaDie[] }
-    // Gate 0 (2026-07-10 round-turn law) — a second `startTurn` inside one
+    // Round-turn law: a second `startTurn` inside one
     // threat phase was refused (the state is untouched; the tray stays as-is).
     | { kind: 'turn-law-blocked'; turn: number; phaseIndex: number }
     | { kind: 'conviction-gained'; amount: number; total: number; reason: 'effect' | 'scrap' }
@@ -383,21 +376,21 @@ export type CombatEvent =
     | { kind: 'die-refreshed'; dieId: string; color: CombatDieColor }
     | { kind: 'die-spent'; dieId: string; color: CombatDieColor }
     | { kind: 'dot-tick'; effectId: string; label: string; amount: number; target: 'self' | 'enemy' }
-    // ── 0.34.0 status-depth epic — new card-mechanic events ──────────────────
+    // ── Card-mechanic events ─────────────────────────────────────────────────
     | { kind: 'barrier-absorbed'; amount: number }
     | { kind: 'riposte-fired'; amount: number }
-    // ── Fate Engine P1 (spec 31 §1) — dice-layer events ──────────────────────
+    // ── Dice-layer events ────────────────────────────────────────────────────
     | { kind: 'die-banked'; dieId: string; color: CombatDieColor; pips: number }
     | { kind: 'die-ripened'; dieId: string; pips: number }
     | { kind: 'resonance-gained'; color: 'heart' | 'body' | 'mind'; total: number }
     | { kind: 'pips-cashed'; cardId: string; pips: number; bonus: 'intensity' | 'guard'; amount: number }
-    // ── Spec 32 v3 — ghost-die and oratory events ────────────────────────────
+    // ── Ghost-die and oratory events ─────────────────────────────────────────
     | { kind: 'floating-die-spent'; dieId: string; color: CombatDieColor; poolSize: number }
     | { kind: 'soul-gained'; amount: number; total: number; reason: 'expiry' | 'consumed' | 'granted' }
     /** A foe crossed one of its STAGE thresholds and became another fight. */
     | { kind: 'stage-entered'; enemyId: string; name: string; text: string }
     /**
-     * The foe's VITAE went UP (playtest fix 2026-09-04). `amount` is the HP
+     * The foe's VITAE went UP. `amount` is the HP
      * ACTUALLY restored after the max-VITAE clamp — never the printed figure —
      * so the attribution ledger can reconcile "HP lost" against damage dealt.
      * Every enemy-heal site (a STAGE's `heal`, a threat's `enemyHeal`) emits
@@ -407,17 +400,17 @@ export type CombatEvent =
     | { kind: 'dots-boosted'; intensity: number; affected: string[] }
     | { kind: 'phase-resolved'; phaseIndex: number; mark: 'clear' | 'overwhelmed' }
     | { kind: 'threat-fired'; phaseIndex: number; description: string; effects: CombatThreatEffect[] }
-    // WS9 (spec 32 §12 #7) — a branch phase committed its fork at phase START.
+    // A branch phase committed its fork at phase START.
     | { kind: 'threat-branch'; phaseIndex: number; conditionText: string; taken: 'then' | 'else' }
-    // WS9 — the enemy's reactive cleanse shed some of its own afflictions.
+    // The enemy's reactive cleanse shed some of its own afflictions.
     | { kind: 'threat-cleansed'; phaseIndex: number; effectIds: string[] }
     | { kind: 'hand-drawn'; cards: string[] }
     | { kind: 'mercy-opened'; message: string }
-    // ── Spec 33 (Upgradeable Dice) — the shipped dice model's events. ──────
+    // ── Upgradeable-dice events ────────────────────────────────────────────
     // Momentum chain advanced (length grew) or started (length 1).
     | { kind: 'momentum-advanced'; color: WheelStance; length: number }
-    // A paid card of a non-successor color broke the chain to NULL (owner-locked
-    // D1 rule: the breaking card builds nothing).
+    // A paid card of a non-successor color broke the chain to NULL (the
+    // breaking card builds nothing).
     | { kind: 'momentum-broken'; by: WheelStance }
     // The 3-color chain completed: a temporary gold die (until spent, this
     // combat) is granted and momentum resets to null.
@@ -430,36 +423,35 @@ export type CombatEvent =
     // An OVERHEAT push armed a second play but cracked the die: all-miss next
     // round.
     | { kind: 'die-cracked'; dieId: string; color: CombatDieColor }
-    // Phase 33c — a boss/unique phase's coveted die was claimed: its telegraph
+    // A boss/unique phase's coveted die was claimed: its telegraph
     // was fully blocked. `dieId` is absent when the table was full and the
     // payout converted to +1◆ instead (see the paired `die-overflowed` event).
     | { kind: 'coveted-die-stolen'; phaseIndex: number; method: 'block'; dieId?: string }
     | { kind: 'combat-ended'; outcome: CombatOutcome };
 
 // ---------------------------------------------------------------------------
-// Top-level encounter state (Spec 25 §4.1)
+// Top-level encounter state
 // ---------------------------------------------------------------------------
 
 export interface CombatEncounterState {
     phase: CombatEncounterPhase;
     enemy: Enemy;                          // unchanged — HP, effects, stats (deep-cloned)
     player: Character;                     // unchanged — HP, effects, stats (deep-cloned)
-    /** Spec 33 §1 — the CURRENT ROUND's tray: the four fixed dice (plus act
+    /** The CURRENT ROUND's tray: the four fixed dice (plus act
      *  reward dice, the gold+lead pair, and GHOST/surge floats). Rolled fresh
      *  each round; every live mana/special face may power one paid line. */
     dice: CombatManaDie[];
     /** Turn counter within the encounter (drives die ids + display). */
     turn: number;
-    /** Gate 0 (2026-07-10 round-turn law) — true once this threat phase's ONE
+    /** Round-turn law: true once this threat phase's ONE
      *  legal tray roll has happened (`startTurn` stamps it; the phase
      *  boundary in `resolveThreatPhase`/`processBetweenPhases` re-arms it).
      *  A second `startTurn` in the same phase is refused with a
      *  `turn-law-blocked` event. The law caps TRAY ROLLS, not card plays —
      *  Reserve and floating dice still power extra plays within the turn.
-     *  Optional for back-compat with state literals (absent = false — the
-     *  migration default). */
+     *  Optional for back-compat with state literals (absent = false). */
     turnTakenThisPhase?: boolean;
-    /** Conviction (◆) bank — funds Signature Skills (Spec 26b §4). */
+    /** Conviction (◆) bank — funds Signature Skills. */
     conviction: number;
     /** Hazard GUARD — a transient shield (HP) granted by defense cards that
      *  absorbs the enemy's NEXT telegraphed threat, then resets each phase.
@@ -469,22 +461,21 @@ export interface CombatEncounterState {
      *  `guard`, which resets every phase). Absorbed AFTER guard in
      *  `resolveThreatPhase`; only the absorbed amount is subtracted, the rest
      *  carries across phases. Optional for back-compat with state literals
-     *  (treated as 0 when absent). 0.34.0 status-depth epic. */
+     *  (treated as 0 when absent). */
     barrier?: number;
     /** RIPOSTE — a one-shot parry armed by a Briar Riposte card: reduces the
      *  enemy's next telegraphed hit by `reduce` and counters for `damage`. Cleared
-     *  each phase (like guard). Optional for back-compat with state literals.
-     *  0.34.0 status-depth epic. */
+     *  each phase (like guard). Optional for back-compat with state literals. */
     riposte?: { damage: number; reduce: number };
     /**
-     * Fate Engine P1 (spec 31 R2) — the RESERVE: banked dice (max
+     * The RESERVE: banked dice (max
      * `RESERVE_MAX`), each ripening +1 pip per threat phase survived. A bottom
      * action may be powered by a tray die OR a Reserve die (one die per paid
      * line). Optional for back-compat (absent = empty).
      */
     reserve?: CombatManaDie[];
     /**
-     * Fate Engine P1 (spec 31 R1) — the TOLL tally: every die spent this
+     * The TOLL tally: every die spent this
      * encounter to power a paid line adds 1 of its color;
      * a Wild adds to the color of the card it powered. Cards with a `threshold`
      * check this tally at play time. Optional for back-compat (absent = zeros).
@@ -498,16 +489,16 @@ export interface CombatEncounterState {
     drawPile: string[];                    // remaining draw order
     discard: string[];                     // used / discarded card ids
     hand: CombatHandEntry[];               // current hand (up to 5)
-    /** Spec 32 v3 §5 — the GHOST die pool (live tray): merged into every
+    /** The GHOST die pool (live tray): merged into every
      *  turn's dice, exempt from rerolls, persists across combats. Optional. */
     floatingDice?: CombatManaDie[];
-    /** Phase 33c (spec 33 §1) — phase INDICES whose coveted die has already
+    /** Phase INDICES whose coveted die has already
      *  been claimed THIS COMBAT (one-time-per-phase steal, so a repeating/
      *  locked final phase can't be farmed on every loop). Initialized `[]` in
      *  `initializeCombatEncounter`. Optional for back-compat (absent = none
      *  claimed yet). */
     covetedDiceClaimed?: number[];
-    /** Spec 32 v3 T7 — the SOUL bank (Harvest currency). Optional. */
+    /** The SOUL bank (Harvest currency). Optional. */
     souls?: number;
     /** THE PATH — extra dice added to every turn's tray (act-reward dice),
      *  seeded from `Character.bonusTurnDice`. Absent = 0. */
@@ -521,21 +512,21 @@ export interface CombatEncounterState {
     /** Cumulative `threatBonus` contributed by every STAGE entered so far,
      *  added to each subsequent phase's damage weight. */
     stageThreatBonus?: number;
-    /** Spec 32 v3 T10 — spells played this turn (resonant-chamber's gate). */
+    /** Spells played this turn (resonant-chamber's gate). */
     spellsPlayedThisTurn?: number;
-    /** Spec 32 §12 #4 — HP the enemy's threat dealt the player this turn
+    /** HP the enemy's threat dealt the player this turn
      *  (post-soak budget); rolls into `enemyDamageLastRound` between phases. */
     enemyDamageThisTurn?: number;
-    /** Spec 32 §12 #4 — the prior round's `enemyDamageThisTurn`. The enemy hits
+    /** The prior round's `enemyDamageThisTurn`. The enemy hits
      *  BETWEEN player turns, so this is the value a card played this turn reads. */
     enemyDamageLastRound?: number;
-    /** WI-10 (2026-07-12) — scraps taken THIS turn. Scrapping a hand card pays
+    /** Scraps taken THIS turn. Scrapping a hand card pays
      *  +1 Conviction only for the first {@link SCRAP_CONVICTION_CAP_PER_TURN}
      *  scraps per turn; further scraps still cycle the card but pay nothing, so
      *  "scrap the whole hand for +6◆/turn" against a 12 cap is closed. Reset each
      *  turn in `startTurn`. Optional for back-compat (absent = 0). */
     scrapsThisTurn?: number;
-    /** WI-1 (2026-07-12) — the REAL DoT damage the enemy has taken from
+    /** The REAL DoT damage the enemy has taken from
      *  event-triggered ticks so far THIS round (poison `card-played`, bleed
      *  `damage-instance`). Folded in `withLog` at every
      *  enemy `dot-tick` emission, reset each turn in `startTurn`, and consumed
@@ -544,9 +535,9 @@ export interface CombatEncounterState {
      *  total instead of the structurally-empty round-clock pool. Optional for
      *  back-compat with state literals (treated as 0 when absent). */
     enemyDotDamageThisRound?: number;
-    /** Spec 32 §12 #4 — the prior threat's damage was FULLY prevented (every
+    /** The prior threat's damage was FULLY prevented (every
      *  budgeted hit soaked to 0 by riposte/guard/barrier). Persists until the
-     *  next threat resolves (WS9 `prior-threat-fully-blocked` branch fuel). */
+     *  next threat resolves (`prior-threat-fully-blocked` branch fuel). */
     lastThreatFullyBlocked?: boolean;
     threatPhases: CombatThreatPhase[];     // enemy's authored / generated threat sequence
     threatMarks: CombatThreatMark[];       // O / X ledger per phase (hindered / acted)
@@ -558,45 +549,45 @@ export interface CombatEncounterState {
     directDamageDealt: number;             // raw HP damage (for the summary)
     log: CombatEvent[];                    // event stream for UI rendering
     finalOutcome: CombatOutcome | null;    // null until combat ends
-    /** Phase 112 — set when a successful Befriend opens the spare/exploit
+    /** Set when a successful Befriend opens the spare/exploit
      *  mercy choice. */
     mercyChoiceActive?: boolean;
     /**
-     * Master Spec §4 — permanent wild-die pool growth. Unlike `dice` (rolled
+     * Permanent wild-die pool growth. Unlike `dice` (rolled
      * fresh each round), these persist for the REST of the encounter once
-     * granted by a `grant_permanent_wild_die` card special mechanic. Under
-     * spec 33 any non-zero pool adds the gold+lead pair (`rollGoldLeadPair`,
+     * granted by a `grant_permanent_wild_die` card special mechanic. Any
+     * non-zero pool adds the gold+lead pair (`rollGoldLeadPair`,
      * cap 1 pair) to every round's tray. Never reset by `startTurn`/`endTurn`.
      * Optional for back-compat with state literals (treated as 0 when absent).
      */
     permanentWildDice?: number;
     /** See `permanentWildDice`. The grant's paired dead-die tally (reported by
-     *  `permanent-wild-die-granted`); under spec 33 the LEADEN die of the
+     *  `permanent-wild-die-granted`); the LEADEN die of the
      *  gold+lead pair is the visible "fate pushes back" cost. */
     permanentDeadDice?: number;
 
-    // ── Spec 33 (Upgradeable Dice) — all optional for back-compat with state
+    // ── Upgradeable dice — all optional for back-compat with state
     //    literals. ─────────────────────────────────────────────────────────
-    /** §3 — the momentum chain: `{color, length}` of the live chain, or null.
-     *  Breaks reset to NULL (owner-locked D1); persists across rounds; surge
+    /** The momentum chain: `{color, length}` of the live chain, or null.
+     *  Breaks reset to NULL; persists across rounds; surge
      *  (length 3) grants the temp gold die and resets to null. */
     momentumV2?: { color: WheelStance; length: number } | null;
-    /** §6 OVERHEAT — dice cracked by an overheat push: each entry forces that
+    /** OVERHEAT — dice cracked by an overheat push: each entry forces that
      *  color's NEXT roll to all-miss (`turn` = the turn the crack bites; under
      *  the round-turn law one turn == one round). Entries are consumed by the bitten turn's roll. */
     crackedDice?: { color: 'heart' | 'body' | 'mind' | 'wild'; turn: number }[];
-    /** §6 — the die-gear loadout driving the four dice's face tables + special
-     *  payloads. ABSENT in D2 (the engine falls back to the hardcoded default
-     *  gear); D5 makes this a real persisted equipment rail. */
+    /** The die-gear loadout driving the four dice's face tables + special
+     *  payloads. When absent the engine falls back to the hardcoded default
+     *  gear. */
     dieGear?: Partial<Record<'heart' | 'body' | 'mind' | 'wild', UpgradeableDieGear>>;
     seed?: number;                         // seed used to drive the encounter (sim/tests)
 }
 
 /**
- * Spec 33 §6 (Upgradeable Dice) — one die's GEAR: the equipment piece that
+ * One die's GEAR: the equipment piece that
  * defines everything mutable about its die. The DICE are permanent immutable
  * 6-siders; gear carries the face distribution and the special payload.
- * Caps (enforced where gear is authored/upgraded, D5): colored dice keep
+ * Caps (enforced where gear is authored/upgraded): colored dice keep
  * >= 1 miss face and <= 2 special faces; the wild (gold) die keeps <= 1
  * special face.
  */

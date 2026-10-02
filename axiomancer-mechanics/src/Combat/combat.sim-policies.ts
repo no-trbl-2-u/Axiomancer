@@ -7,19 +7,17 @@
  * resolves. The sim driver stays
  * one loop; the policies make it a matrix.
  *
- * HP is the sole win condition (the old status-primacy doctrine is retired —
- * see `docs/lexicon.json`). The roster was built to witness status play: `dot-weaver` and `control-lock` play the doctrinal game,
+ * HP is the sole win condition. The roster was built to witness status play: `dot-weaver` and `control-lock` play the doctrinal game,
  * `aggro-brute` is the deliberately weak basic-attack baseline (its
  * underperformance IS the design), and `greedy`/`blind` remain the tuned
  * balance witnesses.
  *
  * Behavior guarantee: `greedy` and `blind`'s `rankCard`/`bestSignature`
- * ordering encodes EXACTLY the legacy per-card score (Befriend-at-lowHp,
+ * ordering encodes EXACTLY the per-card score (Befriend-at-lowHp,
  * new-status-first,
  * status-over-strike, damage preview) — never consumes rng, so the seeded
- * engine stream is untouched there. Since the D7 flag collapse (2026-09-25)
- * deleted the hidden-stance draft and THE STAKE, `greedy` and `blind` play
- * identically; `blind` is kept so the playtest matrix keeps its column.
+ * engine stream is untouched there. `greedy` and `blind` play identically;
+ * `blind` is kept so the playtest matrix keeps its column.
  */
 
 import type {
@@ -35,7 +33,7 @@ export type CombatSimPolicyId =
 /**
  * A scripted witness: the full decision surface of one sim player.
  * `rankCard` scores candidate powered plays (highest wins; ties resolve to the
- * earliest card in hand order, matching the legacy stable sort).
+ * earliest card in hand order, a stable sort).
  */
 export interface CombatSimPolicy {
     id: CombatSimPolicyId;
@@ -43,7 +41,7 @@ export interface CombatSimPolicy {
     /** One line, doctrine-aware: what this witness proves about status play. */
     description: string;
     /** Rank candidate powered plays; highest first. Receives the same candidate
-     *  info the legacy `bestCard` used. Only `chaos` consumes `rng`. */
+     *  info for every policy. Only `chaos` consumes `rng`. */
     rankCard(state: CombatEncounterState, card: CombatCard, rng: () => number): number;
     /** Signature kinds this witness will fund (checked in `state.signatures` order). */
     signatureKinds: readonly SignatureSkillKind[];
@@ -54,7 +52,7 @@ export interface CombatSimPolicy {
     /**
      * OPTIONAL (extension beyond the base contract): rank affordable signatures;
      * highest wins. When absent the sim takes the FIRST affordable signature in
-     * `state.signatures` order whose kind is in `signatureKinds` — the legacy
+     * `state.signatures` order whose kind is in `signatureKinds` — the
      * behavior `greedy`/`blind` rely on. Only `chaos` uses this (random pick).
      */
     rankSignature?(state: CombatEncounterState, signature: SignatureSkill, rng: () => number): number;
@@ -71,7 +69,7 @@ const BAND_NEW_STATUS = 1e8;
 const BAND_EFFECT = 1e4;
 const BAND_UTILITY_LIVE = 1e6;
 
-/** Legacy low-HP gate for the Befriend/mercy turn. */
+/** Low-HP gate for the Befriend/mercy turn. */
 const LOW_HP_FRACTION = 0.30;
 
 function enemyLowHp(s: CombatEncounterState): boolean {
@@ -92,8 +90,7 @@ function isUtilityClass(card: CombatCard): boolean {
 }
 
 /**
- * The legacy `bestCard` ordering as a pure per-card score (bit-identical
- * argmax): Befriend when the foe is low, then new-status > any-status >
+ * The greedy ordering as a pure per-card score (an argmax): Befriend when the foe is low, then new-status > any-status >
  * damage preview.
  */
 function greedyRankCard(s: CombatEncounterState, card: CombatCard): number {
@@ -104,7 +101,7 @@ function greedyRankCard(s: CombatEncounterState, card: CombatCard): number {
     return score;
 }
 
-/** Every signature kind: The Open Hand is the one left (R7e2). */
+/** Every signature kind: The Open Hand is the only one. */
 const ALL_SIGNATURE_KINDS: readonly SignatureSkillKind[] = Object.freeze(['mercy']);
 
 /** The killers never offer mercy, and no other signature is left to cast. */

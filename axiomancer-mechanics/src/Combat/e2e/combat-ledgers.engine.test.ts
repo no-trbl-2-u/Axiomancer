@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — spec 32 §12 item 4 (Ratified 2026-07-11): the COMBAT LEDGERS.
+ * Hermetic E2E — the COMBAT LEDGERS.
  *
  * Three `CombatEncounterState` fields feed the WS5 sequencing conditions and
  * the WS9 threat-branch condition, in real units:

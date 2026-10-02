@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — Card Effectiveness Lint (archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-08-win-path-scaling.md #6).
+ * Hermetic E2E — Card Effectiveness Lint.
  *
  * The Ouroboros-class-bug witness: a card once shipped its finisher damage
  * on the FREE line, which never fires alongside the PAID play, so the paid
@@ -26,7 +26,7 @@
  * `hazard-pattern-combat.engine.test.ts`; the sandbox-fixture-card and
  * `mockSequentialRng` conventions follow `cards-sandbox.engine.test.ts` and
  * neighboring Combat e2e suites. Tier 1-3 debuffs always land unconditionally
- * (`src/Combat/resist.ts`, the Phase 80 always-land law) and every
+ * (`src/Combat/resist.ts`, the always-land law) and every
  * combatEffects target here uses
  * `stacking: 'intensity'` (verified against `debuffs.library.json`), so a
  * fixed RNG of 0.5 (neutral d20, no fumble/crit) is sufficient determinism —
@@ -203,10 +203,9 @@ describe.each(Object.entries(KNOWN_INEFFECTIVE))(
     },
 );
 
-// ── Phase 30 — the FREE line gets the same rigor as the PAID line ────────────
-// The FREE-currency law (turn-texture.md §1, ratified 2026-07-10) rewrote
-// every spell's FREE line to deposit theme currency instead of TICK/generic
-// draw/guard chaff. This suite is `assertCardEffective`'s twin for the TOP
+// ── The FREE line gets the same rigor as the PAID line ──────────────────────
+// Under the FREE-currency law (turn-texture.md §1) every spell's FREE line
+// deposits theme currency. This suite is `assertCardEffective`'s twin for the TOP
 // (dieless) action: it reuses the exact same `assertRiderPromise` dispatch
 // table, so a FREE line that authors a rider field with no real engine
 // promise fails here the same way a broken PAID mechanic fails above.

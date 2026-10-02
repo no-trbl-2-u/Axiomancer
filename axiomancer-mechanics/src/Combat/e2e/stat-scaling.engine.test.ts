@@ -1,13 +1,12 @@
 /**
- * Hermetic E2E — Phase S3: stat scaling (D40–D43,
- * `plan/2026-09-27-stat-scaling.prompt.md`).
+ * Hermetic E2E — stat scaling.
  *
  * Pins, through the real engine:
  *   - the formula (`scaleAmount`): one-shot `base × stat ÷ 5`, repeating at
  *     half rate, flat never scales, floored, never below 1;
- *   - the brief's worked numbers (§3): A Plain Blow, A Plain Ward, A Plain
+ *   - the worked numbers: A Plain Blow, A Plain Ward, A Plain
  *     Word's VULNERABLE, and a Blow on a marked foe, at four builds;
- *   - VULNERABLE (D43): lasts 2 turns, adds up and refreshes, uncapped;
+ *   - VULNERABLE: lasts 2 turns, adds up and refreshes, uncapped;
  *   - the guard: every mechanic kind, rider field and payload key has a
  *     family / scaling kind, and every status a player card applies resolves.
  */

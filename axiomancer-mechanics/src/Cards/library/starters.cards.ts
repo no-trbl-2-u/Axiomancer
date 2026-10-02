@@ -1,12 +1,8 @@
 /**
- * THE GREY OFFICE — the whole player card library (the card purge, P1,
- * 2026-09-27; decisions D36, D42–D44).
+ * THE GREY OFFICE — the whole player card library.
  *
- * Every other player card — the eight Threadbare starters, the six archetype
- * libraries, the apocrypha, the relic valves and the curses — was purged.
- * New cards arrive only through a guided session with T (D37). These three
- * are the fresh-run deck (Blow 5 / Ward 3 / Word 2, D43) and, since D44, the
- * reward pool.
+ * New cards arrive only through a guided session with T. These three are
+ * the fresh-run deck (Blow 5 / Ward 3 / Word 2) and the reward pool.
  *
  * This file is data-only. All runtime behaviour lives in
  * `src/Cards/card.engine.ts` and `src/Combat/combat.engine.ts`.
@@ -14,11 +10,11 @@
 
 import type { Card } from '../types';
 
-// ─── THE GREY OFFICE — Phase 104's fresh-run seed ─────────────────────────────
+// ─── THE GREY OFFICE — the fresh-run seed ────────────────────────────────────
 // Colourless shapes (aspect 'any' — every die colour powers them, neutral
 // colour-match bonus). Deliberately plain: fight one teaches
 // STRIKE, WARD, FREE-vs-PAID, and the die-spend loop with zero colour
-// arithmetic. Since the purge (D44) they are also the whole reward pool.
+// arithmetic. They are also the whole reward pool.
 
 const GREY_ADDED = '2026-09-20';
 
@@ -54,8 +50,7 @@ const greyWard: Card = {
     tags: ['grey', 'starter'],
 };
 
-// A Plain Word — T's guided S3 session, 2026-09-27 (D42, D43). The grey
-// office's heart verb: VULNERABLE lands on the foe, so heart scales its
+// A Plain Word — the grey office's heart verb: VULNERABLE lands on the foe, so heart scales its
 // percentage (`stat-scaling.ts`). Grey frame like its siblings.
 const greyWord: Card = {
     id: 'grey-word',
@@ -67,7 +62,7 @@ const greyWord: Card = {
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
     paidSummary: 'VULNERABLE +25% for 2 turns.',
-    // D43: +25% for 2 turns, adds up and refreshes on re-application; FREE is
+    // +25% for 2 turns, adds up and refreshes on re-application; FREE is
     // the same verb at whisper volume. Both scale with heart.
     free: { applyEffect: { effectId: 'debuff_vulnerable', intensity: 10, duration: 1 } },
     combatEffects: [{ effectId: 'debuff_vulnerable', appliedTo: 'opponent', intensity: 25, duration: 2 }],
@@ -75,6 +70,5 @@ const greyWord: Card = {
     tags: ['grey', 'starter'],
 };
 
-/** The grey office (Phase 104; A Plain Word, D42): the entire player card
- *  library after the purge, and the reward pool (D44). */
+/** The grey office: the entire player card library, and the reward pool. */
 export const GREY_OFFICE_CARDS: Card[] = [greyStrike, greyWard, greyWord];

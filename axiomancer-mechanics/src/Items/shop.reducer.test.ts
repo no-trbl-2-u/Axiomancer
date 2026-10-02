@@ -1,5 +1,5 @@
 /**
- * Unit tests — shop reducers (Phase 37).
+ * Unit tests — shop reducers.
  *
  * The hermetic e2e at `src/Items/e2e/shop.engine.test.ts` drives the
  * reducers through the `village` MapEvent surface; these tests pin the
@@ -109,12 +109,9 @@ describe('sellItem', () => {
 });
 
 describe('defaultSellPrice (Phase 37 exploit-fix)', () => {
-    // The CLI shopLoop used to call `Math.max(1, Math.floor(price/2))` for
-    // displayed sell prices. That formula yielded sellPrice >= buyPrice
-    // for any ware with price <= 2 (price 1 → sell 1, price 2 → sell 1),
-    // enabling a small infinite-money loop on any future ware that
-    // happened to land at the low end. The engine-tier defaultSellPrice
-    // helper drops the `Math.max(1, ...)` floor.
+    // No `Math.max(1, ...)` floor: with one, sellPrice >= buyPrice for any
+    // ware with price <= 2 (price 1 → sell 1, price 2 → sell 1), an
+    // infinite-money loop on any ware at the low end.
 
     const ware = (price: number): ShopWare => ({ itemId: 'x', price });
 

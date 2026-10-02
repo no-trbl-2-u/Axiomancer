@@ -1,13 +1,9 @@
 /**
- * Rest shelter classification (Phase 52b).
+ * Rest shelter classification.
  *
- * "Is this an inn?" used to mean `healFraction >= 1.0`. That heuristic
- * was wrong on the authored content — `nf-4` (cold spring), `nf-24`
- * (hidden grove) and every fishing-village inn were all authored at 1.0,
- * so two wilderness springs mended hazard-scarred max-VITAE exactly like
- * a paid shelter. `RestPayload.shelter` replaces the inference with an
- * authored marker; this module is the single place the default and the
- * inn test live.
+ * `RestPayload.shelter` is an authored marker saying whether a rest is an
+ * inn or a camp; this module is the single place the default and the inn
+ * test live.
  *
  * The scar mend is an INN-ONLY privilege. It is the strongest argument
  * for keeping inns distinct at all, so it hangs off `shelter === 'inn'`
@@ -23,19 +19,12 @@ import type { RestPayload, RestShelter } from './types';
 export const DEFAULT_REST_SHELTER: RestShelter = 'camp';
 
 /**
- * CARRIED FORWARD from the retired `healFraction` knob — do not tune here.
+ * The engine's passive `resolveRest` heal: a full heal — do not tune here.
  *
- * The retired `RestPayload.healFraction` defaulted to 1.0
- * (`payload.healFraction ?? 1.0` in `resolveRest`, and
- * `options.healFraction ?? 1.0` in mobile's `beginRestAction`). Phase 52b
- * removed the per-node knob, so the shipped default is carried forward
- * verbatim as this constant for the engine's passive `resolveRest` heal.
- *
- * Phase 52c shipped the player-facing rest as `World/RestChoice`, whose
- * `rest` offer heals a flat fraction of max VITAE
- * (`RESTCHOICE_TUNING.restHealFraction`, no shelter distinction — T direct,
- * 2026-08-15); the inn scar mend still hangs off `shelter`. Any tuning
- * belongs there.
+ * The player-facing rest is `World/RestChoice`, whose `rest` offer heals a
+ * flat fraction of max VITAE (`RESTCHOICE_TUNING.restHealFraction`, no
+ * shelter distinction); the inn scar mend still hangs off `shelter`. Any
+ * tuning belongs there.
  */
 export const REST_PASSIVE_HEAL_FRACTION = 1.0;
 

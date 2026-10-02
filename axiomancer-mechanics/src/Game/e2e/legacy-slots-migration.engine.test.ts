@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — Phase 18 legacy slot re-slotting + v11 → v12 save migration.
+ * Hermetic E2E — legacy slot re-slotting + v11 → v12 save migration.
  *
  * `LEGACY_SLOT_MAP` / `reslotLegacyEquipment` / `reslotLegacyLoadout` fold the
  * old 7-slot shape into the 5-slot loadout; `migrate` applies the whole
@@ -18,7 +18,7 @@ import type { Equipment } from '../../Items/types';
 import type { StatModifier } from '../../Effects/types';
 import type { LegacySlot } from '../index';
 
-/** Build a legacy-shaped Equipment instance (slot may be a pre-Phase-18 kind). */
+/** Build a legacy-shaped Equipment instance (slot may be an old 7-slot kind). */
 function legacy(id: string, slot: LegacySlot, maxHp = 0): Equipment {
     const statModifiers: StatModifier[] = maxHp ? [{ stat: 'maxHp', value: maxHp }] : [];
     return {
@@ -101,8 +101,8 @@ describe('Phase 18 — migrate v11 → v12', () => {
     }
 
     it('folds the legacy record into a loadout', () => {
-        // Pin toVersion=12 to exercise the Phase-18 hop in isolation; the
-        // Phase-19 v12→v13 relic seeding (which would replace this loadout) is
+        // Pin toVersion=12 to exercise the v11→v12 hop in isolation; the
+        // v12→v13 relic seeding (which would replace this loadout) is
         // covered separately in the relic-library migration test.
         const migrated = migrate(v11Save(), 11, 12);
         expect(migrated.version).toBe(12);

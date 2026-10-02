@@ -1,10 +1,9 @@
 /**
- * Hermetic e2e — Phase 30 unit 2 (Spec 06 Q7 + Phase 30 brief).
+ * Hermetic e2e — level-up card unlocks.
  *
  * Verifies that `character:levelup` events emitted by the store carry
- * an `unlockedCards: string[]` payload — always empty now that card
- * eligibility no longer depends on level (learning requirements were
- * removed 2026-07-08). The computation lives in `enrichExtra` in
+ * an `unlockedCards: string[]` payload — always empty, since card
+ * eligibility does not depend on level. The computation lives in `enrichExtra` in
  * `src/Game/store.ts`; this test drives the public store surface (no
  * internal-helper calls).
  */
@@ -50,8 +49,7 @@ describe('character:levelup payload — cards are no longer level-gated (2026-07
     });
 
     it('a real promotion unlocks NOTHING — card eligibility no longer depends on level', () => {
-        // Cross level 5 (and beyond): under the removed level gate this used to
-        // unlock the tier-2/3 cards. Now that cards carry no level requirement,
+        // Cross level 5 (and beyond): cards carry no level requirement, so
         // eligibility is identical before and after the promotion, so the diff
         // is empty (only stat/prereq gates could ever change it, and
         // none of those move on a plain level-up).

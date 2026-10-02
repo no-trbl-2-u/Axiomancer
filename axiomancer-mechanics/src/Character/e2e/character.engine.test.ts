@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E Tests — Character module (Spec 01 + Spec 05 Q3 fold-in)
+ * Hermetic E2E Tests — Character module
  *
  * Drives the Character module's public surface — `createCharacter`,
  * `equipItem`, `unequipItem` — through the library entry points without
@@ -9,8 +9,8 @@
  *
  *   1. Health / xp derivation contracts from `createCharacter`.
  *   2. Default fields and option pass-through.
- *   3. Spec 05 Q3 option A: starting `equipment`'s `maxHp` line is folded
- *      into `maxHealth` at create-time (Phase 20: equipment applies NO effects).
+ *   3. Starting `equipment`'s `maxHp` line is folded into `maxHealth` at
+ *      create-time (equipment applies NO effects).
  *   4. `equipItem` slot replacement keeps `effects` untouched and refolds
  *      the worn `maxHp` delta onto `maxHealth`.
  *   5. `unequipItem` on an empty slot is a referential no-op.
@@ -101,7 +101,7 @@ describe('createCharacter — derivation contracts', () => {
 
         mockSequentialRng(0.5);
         const lvl5 = buildPlayer({ level: 5 });
-        // R9 (D55): the rising curve, L5 at 2,500 and L6 at 3,750.
+        // The rising curve: L5 at 2,500 and L6 at 3,750.
         expect(lvl5.experience).toBe(2500);
         expect(lvl5.experienceToNextLevel).toBe(3750);
     });
@@ -116,7 +116,7 @@ describe('createCharacter — defaults and option pass-through', () => {
         expect(ch.equipment).toEqual(emptyLoadout());
         expect(ch.effects).toEqual([]);
         expect(ch.knownCards).toEqual([]);
-        // Spec 06 Q3 — points start at zero; level-ups add STAT_POINTS_PER_LEVEL.
+        // Points start at zero; level-ups add STAT_POINTS_PER_LEVEL.
         expect(ch.availableStatPoints).toBe(0);
     });
 
@@ -215,7 +215,7 @@ describe('unequipItem', () => {
     });
 });
 
-// ─── allocateStatPoint — Spec 06 Q3 + Q8 ──────────────────────────────────────
+// ─── allocateStatPoint ────────────────────────────────────────────────────────
 
 describe('allocateStatPoint', () => {
     it('decrements the pool, raises baseStat, and re-derives maxHealth', () => {
@@ -255,7 +255,7 @@ describe('allocateStatPoint', () => {
 });
 
 // ────────────────────────────────────────────────────────────────────────────
-// Phase 35 — Character.id stability
+// Character.id stability
 //
 // Pins that every Character ships with a non-empty `id`, that callers can
 // override the auto-gen by supplying `id` explicitly (mirrors how fixtures

@@ -1,7 +1,7 @@
 /**
  * Status Effect Depth E2E Tests
  * 
- * Phase 142 — Hermetic e2e coverage for enhanced status effect interactions
+ * Hermetic e2e coverage for enhanced status effect interactions
  * and synergy systems. Proves that effect combinations trigger expected
  * amplification and resolution behavior.
  */
@@ -291,11 +291,8 @@ describe('Status Effect Depth Engine', () => {
         });
     });
 
-    // Phase 156 — guard against dead combos. Before Phase 156 the registry
-    // referenced effect ids (debuff_acid, debuff_vulnerability, buff_focus, …)
-    // that did not exist in the library, so most combos could never fire even
-    // once wired into combat. This guard fails the build if any combo ever
-    // references a missing effect again.
+    // Guard against dead combos: fails the build if any combo references an
+    // effect id that does not exist in the library.
     describe('Registry integrity (Phase 156)', () => {
         it('every interaction references only effects that exist in the live library', () => {
             const liveIds = new Set(effectsLibrary.registry.keys());
@@ -309,9 +306,8 @@ describe('Status Effect Depth Engine', () => {
         });
 
         it('speaks ONLY the consumed result type (Fate Engine P1 rebuild)', () => {
-            // The 2026-07-05 audit proved amplify_duration / grant_advantage /
-            // amplify_intensity results had NO consumer — the rebuilt registry
-            // uses amplify_damage exclusively so every combo is live.
+            // Only amplify_damage results have a consumer, so the registry
+            // uses amplify_damage exclusively and every combo is live.
             const types = new Set(EFFECT_INTERACTIONS.map(i => i.result.type));
             expect(types.size).toBe(1);
             expect(types.has('amplify_damage')).toBe(true);

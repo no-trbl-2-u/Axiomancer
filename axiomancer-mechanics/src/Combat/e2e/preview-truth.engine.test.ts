@@ -1,24 +1,18 @@
 /**
  * Hermetic E2E — P0-truth: THE PRINTED NUMBER IS THE APPLIED NUMBER.
  *
- * Re-pinned to spec 32 v3: the strike is dead (`basePower`/`chipHp` deleted at
- * the schema level), the retired effect vocabulary (resolute / vulnerable /
- * septic / doubt / overextended / despair / isolated / hemorrhage / clarity /
- * sensory-null / unraveling) is gone from the library, and the surviving truth
- * laws are pinned against the v3 cards and effects:
+ * Cards carry no strike (`basePower`/`chipHp` do not exist). The truth laws:
  *   1. `bottomDamagePreview` is the DoT's real lifetime HP on a neutral read,
  *      and 0 (no number) otherwise.
- *   2. A paid play lands the printed numbers EXACTLY (spec 33 retired the
- *      hidden-stance read); a color match adds exactly +1 duration (Fate
- *      Engine R7).
+ *   2. A paid play lands the printed numbers EXACTLY; a color match adds
+ *      exactly +1 duration (Fate Engine R7).
  *   3. `projectCardImpact` never advertises a strike number — there is none.
- *   4. QUARTER (the v3 charm-vocabulary debuff) really dampens the enemy's
+ *   4. QUARTER (the charm-vocabulary debuff) really dampens the enemy's
  *      outgoing threat damage.
  *
- * Card purge (P1, 2026-09-27): the library is the grey office — colourless
- * cards with no DoT payload — so the DoT-preview and colour-law cases run on
- * one minimal SANDBOX card (`qa-truth-poison`, a BODY card landing POISON,
- * the shape spoiled-poultice used to carry). The whole-roster laws run over
+ * The library is the grey office — colourless cards with no DoT payload — so
+ * the DoT-preview and colour-law cases run on one minimal SANDBOX card
+ * (`qa-truth-poison`, a BODY card landing POISON). The whole-roster laws run over
  * the live library plus that fixture.
  */
 
@@ -77,7 +71,7 @@ function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind'): Enemy {
     return e;
 }
 
-/** Spec 33 tray: every non-X die shows a MANA face (can power a paid line). */
+/** The tray: every non-X die shows a MANA face (can power a paid line). */
 function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
     const turn = state.turn || 1;
     const dice = colors.map((c, i) => ({
@@ -123,8 +117,7 @@ function threatState(
 const BASE_HIT = Math.round(10 * THREAT_DAMAGE_SCALE); // round 1 = grace → escalation 1, no weaken
 
 /**
- * THE BIG NUMBERS REWRITE (2026-09-02) — the direct-damage half of the
- * preview. `bottomDamagePreview` counts what the PAID line takes off the foe:
+ * The direct-damage half of the preview. `bottomDamagePreview` counts what the PAID line takes off the foe:
  * the `deal` mechanic. Re-derived here from the card data so the test
  * computes the same truth independently of the implementation.
  */
@@ -142,8 +135,7 @@ describe('P0-truth — the card preview is the applied number', () => {
             const card = getCard(c.id);
             return card?.verbClass === 'direct-dot';
         });
-        // After the card purge the only DoT seed is the sandbox fixture; a
-        // future library DoT card joins this sweep automatically.
+        // The only DoT seed is the sandbox fixture; a library DoT card joins this sweep automatically.
         expect(dotCards.map(c => c.id)).toContain(TRUTH_POISON);
         for (const entry of dotCards) {
             const card = getCard(entry.id)!;
@@ -177,12 +169,9 @@ describe('P0-truth — the card preview is the applied number', () => {
     });
 
     it('every card previews exactly its REAL direct damage + enemy-DoT lifetime VITAE (real-units-or-no-number)', () => {
-        // Pin change 2026-07-19: pre-promotion, "verbClass !== direct-dot ⇒
-        // preview 0" held because no defend-class card carried an enemy DoT.
-        // The promoted hybrids (tempered-edge, the-anvil-speaks: GUARD mech ⇒
-        // classified 'defend', plus a real ember/sting DoT payload) print
-        // their DoT's true lifetime number. The invariant is restated in its
-        // honest general form: the preview EQUALS the card's real enemy-DoT
+        // A defend-class hybrid (a GUARD mech plus a real DoT payload) prints
+        // its DoT's true lifetime number, so the invariant is not "verbClass
+        // !== direct-dot ⇒ preview 0" but its general form: the preview EQUALS the card's real enemy-DoT
         // lifetime on a neutral read — never a fake "impact" number, and 0
         // whenever no enemy DoT exists.
         for (const entry of ROSTER) {
@@ -211,9 +200,8 @@ describe('P0-truth — the card preview is the applied number', () => {
     });
 
     it('an OFF-color die cannot power a card — the play fizzles honestly (the color law)', () => {
-        // Dice-law rework (2026-07-09): the fixture is a BODY card; a heart
-        // die may not power it at all. The old "off-color lands untouched
-        // numbers" case no longer exists — the fizzle IS the truth now.
+        // The fixture is a BODY card; a heart die may not power it at all —
+        // the fizzle IS the truth.
         let s = initializeCombatEncounter(makePlayer([TRUTH_POISON]), makeEnemy(500, 'heart'), [TRUTH_POISON], 7);
         s = rollEncounterDice(s).state;
         s = setDice(s, ['heart']);

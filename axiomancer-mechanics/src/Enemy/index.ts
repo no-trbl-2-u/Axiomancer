@@ -30,44 +30,43 @@ export interface CreateEnemyOptions {
     loot?: LootTableEntry[];
     xpReward?: number;
     effects?: ActiveEffect[];
-    /** Phase 60 — optional per-enemy friendship-resolution content. */
+    /** Optional per-enemy friendship-resolution content. */
     friendshipReward?: FriendshipReward;
     /**
-     * Phase 68 — optional per-enemy override of the friendship-eligibility
-     * predicate. When undefined, the Phase 36 mechanic stays unchanged.
+     * Optional per-enemy override of the friendship-eligibility predicate.
+     * When undefined, the default eligibility rule applies.
      */
     befriendabilityConfig?: BefriendabilityConfig;
-    /** Phase 71 — optional per-foe victory final-blow chronicle prose (GH#65 ask 1). */
+    /** Optional per-foe victory final-blow chronicle prose. */
     finalBlowLines?: FinalBlowLines;
-    /** Phase 71 — optional per-foe friendship-pact chronicle prose (GH#65 ask 1). */
+    /** Optional per-foe friendship-pact chronicle prose. */
     pactLines?: PactLines;
-    /** Phase 71 — optional per-foe defeat / cause-of-loss chronicle prose (GH#65 ask 1). */
+    /** Optional per-foe defeat / cause-of-loss chronicle prose. */
     causeLines?: CauseLines;
-    /** Phase 73 — optional per-foe codex / journal entry (GH#65 ask 3). */
+    /** Optional per-foe codex / journal entry. */
     journalEntry?: CodexEntry;
-    /** Content-provenance metadata (the tuning `--focus` filter that consumed it is retired). */
+    /** Content-provenance metadata. */
     addedIn?: string;
     tags?: string[];
-    /** Spec 26 §3.1 — asset id for the enemy's combat portrait (kebab-case). */
+    /** Asset id for the enemy's combat portrait (kebab-case). */
     portraitAsset?: string;
     /**
-     * THE BIG NUMBERS REWRITE — authored VITAE pool. Overrides the difficulty
+     * Authored VITAE pool. Overrides the difficulty
      * curve in {@link enemyVitae}. Every boss and unique authors this; ordinary
      * foes let the curve decide.
      */
     vitae?: number;
-    /** Combat keywords. None exist since the revamp (D63); B2 re-adds them. */
+    /** Combat keywords. None are defined yet. */
     keywords?: EnemyKeyword[];
-    /** THE BIG NUMBERS REWRITE — boss/unique stage thresholds. */
+    /** Boss/unique stage thresholds. */
     stages?: EnemyStage[];
 }
 
 /**
- * The VITAE pool a player has to chew through, THE BIG NUMBERS REWRITE
- * (2026-09-02).
+ * The VITAE pool a player has to chew through.
  *
- * Enemies no longer borrow the player's per-stat health formula: `baseStats`
- * still drives derived combat stats and befriend logic, but the
+ * Enemies do not use the player's per-stat health formula: `baseStats`
+ * drives derived combat stats and befriend logic, but the
  * pool is its own number so the difficulty bands separate cleanly and a boss
  * can be a wall without a grotesque stat budget.
  *
@@ -91,9 +90,8 @@ export function enemyVitae(
 }
 
 /**
- * Default XP grant on kill by difficulty band (Spec 07). Mirrors the
- * suggested table in Spec 06 Q2 — strategy authors can override per-enemy
- * with `xpReward`.
+ * Default XP grant on kill by difficulty band. Strategy authors can override
+ * per-enemy with `xpReward`.
  */
 export const DEFAULT_XP_BY_DIFFICULTY: Record<EnemyDifficulty, number> = {
     simple: 10,
@@ -171,7 +169,7 @@ export function enemyStatBudget(
 }
 
 /**
- * THE BIG NUMBERS REWRITE (2026-09-02) — the stage floor.
+ * The stage floor.
  *
  * Every boss and unique gets at least one moment where the fight becomes a
  * different fight. Marquee foes author their own stages (which win outright);
@@ -241,7 +239,7 @@ export function createEnemy(options: CreateEnemyOptions): Enemy {
         addedIn,
         tags,
         portraitAsset,
-        // No keywords exist until B2 (D63); an empty list keeps the slot.
+        // No keywords are defined yet; an empty list keeps the slot.
         keywords: keywords ?? [],
         stages: stages ?? defaultEnemyStages(difficulty, maxHealth),
     };

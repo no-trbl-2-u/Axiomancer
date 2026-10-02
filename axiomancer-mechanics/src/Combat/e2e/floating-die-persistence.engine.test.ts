@@ -1,17 +1,14 @@
 /**
- * Hermetic E2E — CROSS-COMBAT floating-die persistence (spec 32 v3 §5).
+ * Hermetic E2E — CROSS-COMBAT floating-die persistence.
  *
- * The handoff's open checklist item (2026-07-09): the save-back seam was only
- * unit-covered — this pins the loop through real encounters:
+ * Pins the save-back seam through real encounters:
  *
  *   a persisted float (Character.floatingDice) → fight 2: the float
  *   materializes in the opening tray → spend it (named as the powering die)
  *   → getFloatingDiceColors (the save-back) is empty → fight 3 opens with an
  *   empty pool.
  *
- * The card purge (P1, 2026-09-27) removed the fight-1 FORGE step (the
- * `forge_floating_die` card verb has no surviving carrier); the loop now
- * starts from a saved float.
+ * The loop starts from a saved float (no live card forges one).
  *
  * Plus the seam under the real auto-runner (`runHazardCombatAutoEncounter` ×2
  * — the map-run shape): the pool never grows without a forge card in the deck
@@ -35,7 +32,7 @@ import { FLOATING_DICE_CAP } from '../combat.dice';
 import { runHazardCombatAutoEncounter } from '../../test-utils/combat-autoplay';
 import type { CombatEncounterState } from '../combat.encounter.types';
 
-// The card purge (P1, 2026-09-27): A Plain Blow (colourless) — any die,
+// A Plain Blow (colourless) — any die,
 // a wild float included, powers it.
 const DOT = 'grey-strike';
 

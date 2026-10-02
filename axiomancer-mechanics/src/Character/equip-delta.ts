@@ -1,11 +1,9 @@
 /**
- * Equip-change delta model (Phase 154; slimmed to the signet model in Phase 23).
+ * Equip-change delta model.
  *
  * When the player equips, unequips, or swaps an equipment item, a client wants
- * to show **only what changes**. After the equipment-signature epic (phases
- * 18-23) equipment carries only `statModifiers` (incl. the phase-19 `maxHp`)
- * and one `grantsSignature` — the rarity / affix / rolled-modifier / passive-
- * effect / proc / resource machinery is gone. So the delta is just:
+ * to show **only what changes**. Equipment carries only `statModifiers` (the
+ * `maxHp` line) and one `grantsSignature`. So the delta is just:
  *
  *   - the net signed **max-VITAE** delta (armor relics' `maxHp`), and
  *   - the **signature** gained / lost (signet relics).
@@ -45,7 +43,7 @@ export interface StatDeltaEntry {
     delta: number;
 }
 
-/** A signature skill gained or lost by equipping a signet relic (Phase 19).
+/** A signature skill gained or lost by equipping a signet relic.
  * `name` is the engine signature name when resolvable, else `null`. */
 export interface SignatureDeltaEntry {
     id: SignatureSkillId;
@@ -60,7 +58,7 @@ export interface EquipDelta {
     against: { id: string; name: string } | null;
     /** Net signed additive stat deltas, zero entries dropped. */
     stats: readonly StatDeltaEntry[];
-    /** Signet-relic signatures gained / lost by this equip change (Phase 19).
+    /** Signet-relic signatures gained / lost by this equip change.
      * Empty on non-relic gear. Same-signature swaps surface nothing. */
     signatures: { gained: readonly SignatureDeltaEntry[]; lost: readonly SignatureDeltaEntry[] };
     /** True when nothing actually changed. */

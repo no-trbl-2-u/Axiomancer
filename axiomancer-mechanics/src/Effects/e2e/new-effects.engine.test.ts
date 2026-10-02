@@ -1,17 +1,14 @@
 /**
- * The spec 32 v3 card-vocabulary effect sweep (re-pinned 2026-07-08).
+ * The card-vocabulary effect sweep.
  *
- * The pre-v3 "since April" content sweep this file used to cover was retired
- * wholesale with the keyword reset. What remains under coverage is the
- * rebuilt CARD vocabulary plus the schema contract every entry must honour
- * (BACKFIRE and THORNS left the six with the keyword audit, 2026-09-27, when
- * the card purge deleted every card carrying them). Asserts that:
+ * Covers the CARD vocabulary plus the schema contract every entry must
+ * honour. Asserts that:
  *   - every card-vocabulary id resolves via the effects library lookup,
  *   - each has a valid tier (1-3) and a non-empty payload,
  *   - tier 2/3 entries declare `resistedBy` (+ a `resistDR`),
  *   - each carries provenance (`addedIn` ISO date + the `v3` tag),
  *   - each applies cleanly via the engine,
- *   - the v3-specific payload numbers (spec 32 §3) are pinned.
+ *   - the vocabulary's payload numbers are pinned.
  */
 
 import { describe, it, expect } from 'vitest';

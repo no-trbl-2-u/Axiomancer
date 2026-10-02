@@ -1,14 +1,10 @@
 /**
- * Kill-objective progression (2026-08-08 first-map audit).
+ * Kill-objective progression.
  *
- * The audit found fishing-village's quest chain dead in the app: the legacy
- * engine `endCombat` advanced kill objectives inline, but the live
- * hazard-pattern combat never routes through it, so the boss died and the
- * counter stayed at 0/1 forever. `advanceKillObjectives` is the reusable
- * reducer both paths can call.
+ * `advanceKillObjectives` is the reusable reducer that advances a quest's
+ * kill objectives when a foe dies, on any combat path.
  *
- * fishing-village and its `starting-quest` were purged in R3b (D53), and no
- * authored quest carries a kill objective any more, so the reducer's contract
+ * No authored quest carries a kill objective, so the reducer's contract
  * is pinned on a fixture quest whose target is a real rostered foe (the
  * Doorwarden, every Act 1 region's door fight).
  */

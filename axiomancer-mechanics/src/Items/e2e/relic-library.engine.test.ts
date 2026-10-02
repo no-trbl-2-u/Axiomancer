@@ -1,10 +1,9 @@
 /**
- * Hermetic engine test — the relic library (one row since R7e2, D72: the
- * Suppliant's Ring).
+ * Hermetic engine test — the relic library (one row: the Suppliant's Ring).
  *
  * Locks the library invariants (roster, shape, no stat line), the
- * `cloneStartingRelics` seed and the `getSignaturesForLoadout` derivation that
- * replaces the retired archetype kit at combat-init.
+ * `cloneStartingRelics` seed and the `getSignaturesForLoadout` derivation
+ * that supplies the signature kit at combat-init.
  */
 
 import { describe, it, expect } from 'vitest';

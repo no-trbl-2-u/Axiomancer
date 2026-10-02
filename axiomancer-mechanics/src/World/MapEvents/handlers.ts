@@ -1,5 +1,5 @@
 /**
- * MapEvent handlers (Spec 23) — one function per kind.
+ * MapEvent handlers — one function per kind.
  *
  * Each handler is pure: `(state, payload, rng) → { state, event }`.
  * Handlers do NOT mark nodes consumed or reveal adjacents — that's the
@@ -113,9 +113,8 @@ export function resolveRest(
     state: GameState,
     payload: RestPayload,
 ): ResolveMapEventResult {
-    // Phase 52b — the per-node `healFraction` knob is retired. The passive
-    // heal runs at the carried-forward shipped default; hosts that use
-    // `World/RestChoice` (52c) replace it with that engine's flat heal. See
+    // The passive heal runs at the pinned default; hosts that use
+    // `World/RestChoice` replace it with that engine's flat heal. See
     // `rest-shelter.ts` for why the number is pinned.
     const shelter = restShelterOf(payload);
     const before = state.player.health;
@@ -178,7 +177,7 @@ export function resolveHazard(
     for (const id of payload.effectIds ?? []) {
         const def = lookupEffect(id);
         if (!def) continue;
-        // Phase 38 — environmental hazards intentionally leave sourceId
+        // Environmental hazards intentionally leave sourceId
         // undefined. Hazards aren't combatants; there's no stable id to
         // attribute. If a consumer ever needs to distinguish hazards from
         // other unsourced effects, file an iterate row to add a synthetic
@@ -242,7 +241,7 @@ export function resolveNarration(
 // ─── blacksmith ───────────────────────────────────────────────────────────────
 
 /**
- * Blacksmith events (Spec 33 §6 / Phase D5) hand the host the authored budget
+ * Blacksmith events hand the host the authored budget
  * + variant-gear offers; the host launches a `World/Blacksmith` session and
  * applies the upgraded rail to `Character.dieGear` at claim (the same sandboxed
  * launch contract the hazard minigame uses). The handler touches no
@@ -272,7 +271,7 @@ export function resolveBlacksmith(
 // ─── travel ───────────────────────────────────────────────────────────────────
 
 /**
- * Travel events (2026-08-28) walk the player through an inter-map door.
+ * Travel events walk the player through an inter-map door.
  *
  * The departed map's runtime `MapState` is PRESERVED under
  * `WorldState.mapStates` — the design call, decided: the world is a place
@@ -325,7 +324,7 @@ export function resolveTravel(
 // ─── labyrinth ────────────────────────────────────────────────────────────────
 
 /**
- * The Labyrinth door (map revamp M4, D24). Pure signal: the state is
+ * The Labyrinth door. Pure signal: the state is
  * returned untouched, and the resolved event names the act to enter, which is
  * the durable progress's `currentAct` (act I when the player has never been
  * in). The host performs the swap and keeps the way back.

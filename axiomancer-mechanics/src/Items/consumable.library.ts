@@ -1,8 +1,8 @@
 /**
- * Consumable Library — the healing potions (THE REVAMP R5, D49).
+ * Consumable Library — the healing potions.
  *
  * Three potions: minor, normal and greater. Each heals a flat amount of
- * VITAE, half again when the drinker is under half VITAE (Phase 96's
+ * VITAE, half again when the drinker is under half VITAE (the
  * desperation band: a flat heal is worth the same at full health as at
  * death's door, so without it the dominant play is to hoard the flask). Prior
  * art for baking the conditional into the item is Dawncaster's Healing Potion

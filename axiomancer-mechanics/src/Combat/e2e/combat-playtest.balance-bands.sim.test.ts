@@ -1,11 +1,7 @@
 /**
  * Hermetic sim e2e — playtest matrix smoke test.
  *
- * The per-stage win-rate floors/ceiling, the exact-offender curve-shape
- * pin, and the status-engagement/DoT-erosion doctrine witnesses were
- * repealed 2026-09-02 (big-numbers overhaul §3 L5/L23, §10) — the library
- * and enemy roster are being rewritten wholesale and no old balance number
- * survives. What remains is a loose smoke test: the matrix runs across
+ * A loose smoke test, pinning no balance number: the matrix runs across
  * every stage without crashing and every cell's outcome accounting is
  * exact and produces a finite win rate.
  */

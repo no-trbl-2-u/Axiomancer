@@ -4,8 +4,7 @@ import type { MapName, ContinentName } from './map.library';
 import type { CoastalContinentMapNames } from './map.library';
 
 /**
- * The map a new game starts on (D27, map revamp M3a): the Breakwater, Act 1's
- * coast. Before M3a every new game started on fishing-village.
+ * The map a new game starts on: the Breakwater, Act 1's coast.
  */
 export const STARTING_MAP: CoastalContinentMapNames = 'breakwater';
 
@@ -15,7 +14,7 @@ const CAMPAIGN_CONTINENTS: readonly ContinentName[] = ['coastal-continent', 'nor
 /**
  * Every map a new game can be started on: every map of the two campaign
  * continents, in registry order. The Aporia's acts are not here — they are
- * entered through the Labyrinth door (D5/D24), never started on.
+ * entered through the Labyrinth door, never started on.
  */
 export const STARTABLE_MAPS: readonly MapName[] = CAMPAIGN_CONTINENTS.flatMap(
     c => Object.keys(MAP_REGISTRY[c]) as MapName[],
@@ -40,8 +39,7 @@ function continentOf(map: MapName): ContinentName {
  * The start map is AVAILABLE in its continent's catalogue and the continent
  * is current; every other campaign map starts locked.
  *
- * The `world` catalogue is REAL as of 2026-08-28 (inter-map travel): it
- * carries the two campaign continents, and `changeContinent` / `unlockMap`
+ * The `world` catalogue is REAL (inter-map travel): it carries the two campaign continents, and `changeContinent` / `unlockMap`
  * keep it in sync with `currentContinent`. The labyrinth-continent (THE
  * APORIA, W-01) stays deliberately uncatalogued.
  *
@@ -104,15 +102,15 @@ export {
     completeNode, unlockNode, changeContinent,
     revealAdjacent, markNodeConsumed,
     teleportToNode, placeOnNode, unblockMapRoute,
-    // 2026-08-08 first-map audit: traversal queries + the strand audit.
+    // Traversal queries + the strand audit.
     legalMovesFrom,
-    // D1 (2026-09-21) — frontier roaming: the derived spent/frontier sets
+    // Frontier roaming: the derived spent/frontier sets
     // every surface classifies nodes from, plus the forward skeleton the
     // progression audits walk.
     forwardEdges,
 } from './world.reducer';
 
-// Spec 23 — MapEvents engine.
+// MapEvents engine.
 // Importing `./MapEvents/content` for its side effect registers every
 // authored map's pools (coastal + northern continents) on module load.
 import './MapEvents/content';
@@ -127,8 +125,7 @@ export type {
     MapEventKind,
     MapEventPayload, ResolvedEvent, ResolveMapEventResult,
 } from './MapEvents/types';
-// Phase 52b — rest shelter classification (replaces the healFraction >= 1.0
-// inn heuristic). Mobile gates the hazard-scar mend on `shelter === 'inn'`.
+// Rest shelter classification. Mobile gates the hazard-scar mend on `shelter === 'inn'`.
 export type { RestShelter } from './MapEvents/types';
 export {
     DEFAULT_REST_SHELTER, isInnShelter,
@@ -139,7 +136,7 @@ export {
     applyDialogueChoice,
 } from './dialogue.runtime';
 
-// Hazard Minigame (Phase 131)
+// Hazard Minigame
 export * from './Hazard';
 
 // The Labyrinth — THE APORIA (W-01). The pools module self-registers the

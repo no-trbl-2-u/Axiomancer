@@ -1,5 +1,5 @@
 /**
- * Phase 169 — Curated Combat Deck: loadout persistence codec.
+ * Curated Combat Deck: loadout persistence codec.
  *
  * The player's curated combat loadout is an ordered list of card ids
  * persisted on `GameState.flags` via a `combat-loadout-card:` prefix —
@@ -11,8 +11,7 @@
  * order (flag-array order is preserved by the Zustand store).
  *
  * When no loadout flags exist `getCombatLoadout` returns `[]` and
- * `buildCombatDeck` falls back to `player.knownCards` — full backwards
- * compatibility with saves that pre-date Phase 169.
+ * `buildCombatDeck` falls back to `player.knownCards`.
  */
 
 export const COMBAT_LOADOUT_FLAG_PREFIX = 'combat-loadout-card:';

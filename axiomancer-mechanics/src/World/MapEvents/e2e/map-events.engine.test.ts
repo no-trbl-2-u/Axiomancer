@@ -1,5 +1,5 @@
 /**
- * Hermetic e2e — Spec 23 MapEvents engine.
+ * Hermetic e2e — MapEvents engine.
  *
  * Covers each of the eight kinds via `resolveMapEvent`, plus an
  * integration walkthrough that drives discover → reveal → roll →
@@ -26,7 +26,7 @@ import type { QuestName } from '../../quest.library';
 // and reuse.
 const REACH_BW2 = 'reach-bw2' as QuestName;
 
-// Fabricated quest name for the collect-objective tests below (Phase 8).
+// Fabricated quest name for the collect-objective tests below.
 const COLLECT_DRIFTWOOD = 'collect-driftwood' as QuestName;
 
 function freshState(): GameState {
@@ -261,7 +261,7 @@ describe('resolveMapEvent — discovery + one-shot', () => {
     });
 });
 
-// ── Phase 31 — resolveMapEvent unlocks adjacents into availableNodes ─────────
+// ── resolveMapEvent unlocks adjacents into availableNodes ───────────────────
 
 describe('resolveMapEvent — Phase 31 traversal fix', () => {
     it('moves resolved-node adjacents from lockedNodes into availableNodes', () => {
@@ -345,11 +345,7 @@ describe('resolveMapEvent — Phase 31 traversal fix', () => {
     });
 });
 
-// ── Phase 25 follow-up — `reach`-objective auto-advance via resolveMapEvent ──
-//
-// Restores the auto-advance behaviour the deleted process-node.ts shipped
-// before Phase 25. Filed as a LOW AUDIT finding (score 2.4) drained in this
-// iterate pass.
+// ── `reach`-objective auto-advance via resolveMapEvent ──────────────────────
 
 describe('resolveMapEvent — reach-objective auto-advance', () => {
     function seedReachQuest(state: GameState, targetNodeId: string): GameState {
@@ -416,12 +412,10 @@ describe('resolveMapEvent — reach-objective auto-advance', () => {
     });
 });
 
-// ── Phase 8 — `collect`-objective auto-advance via resolveMapEvent ─────────
+// ── `collect`-objective auto-advance via resolveMapEvent ───────────────────
 //
-// Mirrors the reach-objective block above: the `collect` objective type has
-// existed on `QuestObjectiveType` since Spec 08 but had no engine wiring
-// until this phase — `resolveGathering` granted items but nothing advanced
-// a matching quest objective.
+// Mirrors the reach-objective block above: items granted by
+// `resolveGathering` advance a matching `collect` quest objective.
 
 describe('resolveMapEvent — collect-objective auto-advance', () => {
     function seedCollectQuest(state: GameState, targetItemId: string, requiredCount = 1): GameState {

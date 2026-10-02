@@ -1,5 +1,5 @@
 /**
- * Hermetic e2e — autosave throttling (Phase 51, Spec 09 Q4 path B).
+ * Hermetic e2e — autosave throttling.
  *
  * Pins the DURABLE_ACTIONS allowlist by counting `adapter.save` calls
  * across a series of dispatched actions. UI-tier actions (USE_ITEM,
@@ -7,9 +7,7 @@
  * SHIFT_PHILOSOPHICAL_ALIGNMENT, START_COMBAT, PROCESS_NODE) must NOT
  * trigger `adapter.save`. The curated durable set must — as of now
  * LEVEL_UP, END_COMBAT, MOVE_TO_NODE, APPLY_DIALOGUE, SAVE_GAME,
- * RESET_RUN (Phase 72) and UNLOCK_CODEX_ENTRY (Phase 73). Phase 51 also
- * shipped COMBAT_ROUND in the set and it has since been dropped; this
- * line said otherwise until the burn-day audit 2026-09-19, row 3.7.
+ * RESET_RUN and UNLOCK_CODEX_ENTRY. COMBAT_ROUND is not in the set.
  * `src/Game/store.ts` is the authority, not this comment.
  *
  * Note the scope: this pins the ENGINE's policy. A consumer may wrap the

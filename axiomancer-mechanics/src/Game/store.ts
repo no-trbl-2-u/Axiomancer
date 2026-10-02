@@ -5,15 +5,15 @@
  * in React Native via the `useStore` hook.
  *
  * ── Architectural rule ───────────────────────────────────────────────────────
- * Per Spec 09, every state mutation flows through `gameReducer`. The store is
+ * Every state mutation flows through `gameReducer`. The store is
  * a thin Zustand wrapper that:
  *   1. Calls `gameReducer(get(), action)` to compute the next state.
  *   2. `set(...)` to publish it.
  *   3. Emits the corresponding `GameEvent` to any subscribed consumer.
  *   4. Autosaves through the provided `PersistenceAdapter`.
  *
- * Legacy method-style actions (`startCombat`, `endCombat`, ...) are retained
- * so callers don't have to rewrite imports; each is now sugar over `dispatch`.
+ * Method-style actions (`startCombat`, `endCombat`, ...) are sugar over
+ * `dispatch`.
  *
  * ── Usage (Node.js) ──────────────────────────────────────────────────────────
  *   import { createGameStore, createEventEmitter } from 'axiomancer-mechanics';
@@ -57,10 +57,10 @@ import {
 
 /**
  * Curated set of action types that trigger an autosave through the
- * provided `PersistenceAdapter` (Phase 51, Spec 09 Q4 path B).
+ * provided `PersistenceAdapter`.
  *
  * This is the ENGINE-ONLY save policy: the CLI and the hermetic tests run on
- * it. The mobile app owns its own save timing (ruled 2026-09-23; phase R9a):
+ * it. The mobile app owns its own save timing:
  * it wraps the adapter so this allowlist never writes, and saves at
  * hand-placed checkpoints instead (`axiomancer-mobile/state/store.ts`).
  *
@@ -75,19 +75,19 @@ const DURABLE_ACTIONS: ReadonlySet<GameAction['type']> = new Set<GameAction['typ
     'MOVE_TO_NODE',
     'APPLY_DIALOGUE',
     'SAVE_GAME',
-    'RESET_RUN', // Phase 72 — persist new runId + reset world immediately.
-    'UNLOCK_CODEX_ENTRY', // Phase 73 — persist codex unlock immediately.
+    'RESET_RUN', // Persist new runId + reset world immediately.
+    'UNLOCK_CODEX_ENTRY', // Persist codex unlock immediately.
 ]);
 
 /**
- * Summary of what an `endCombat` call granted to the player (Spec 07).
+ * Summary of what an `endCombat` call granted to the player.
  *
  * Returned from `endCombat()` so the CLI / UI can render an after-action
  * report.
  *
  * - `outcome` — `'victory'` when the player killed the enemy, `'defeat'`
  *   when the player went down first, `'friendship'` when the
- *   friendship-counter capped (Phase 36 — half XP),
+ *   friendship-counter capped (half XP),
  *   `'flee'` when combat ended without any of the above (manual escape).
  * - `xpGained` — flat XP added to `player.experience` this turn (enemy XP
  *   only; quest reward XP is folded directly into `player.experience`).
@@ -101,7 +101,7 @@ export interface CombatEndReport {
     xpGained: number;
     loot: Item[];
     /**
-     * Phase 60 — per-enemy friendship-reward content. Only present on
+     * Per-enemy friendship-reward content. Only present on
      * `outcome === 'friendship'` when the befriended enemy carries a
      * `friendshipReward`. The engine has already applied the reward's
      * `items` to `loot` and `xpBonus` to `xpGained` by the time this
@@ -110,13 +110,13 @@ export interface CombatEndReport {
     friendshipReward?: {
         narrative?: string;
         /**
-         * Phase 73 — when the befriended enemy carries a `journalEntry`
+         * When the befriended enemy carries a `journalEntry`
          * and the entry wasn't already unlocked, the engine appends its
          * id to `state.codex.unlockedEntries` and surfaces
          * `{ id, title }` here for the consumer's after-action UI
          * (mobile `<CombatFriendshipPanel>` NEW ENTRY card). Body is
          * recovered via lookup against the source `Enemy` (or a future
-         * `CodexLibrary` registry). Closes GH#65 ask 3.
+         * `CodexLibrary` registry).
          */
         codexEntryUnlocked?: { id: string; title: string };
     };
@@ -173,10 +173,10 @@ export interface GameActions {
     allocateStatPoint: (stat: 'heart' | 'body' | 'mind') => void;
     learnCard: (cardId: string) => void;
     save: () => void;
-    // ── Run loop (Phase 72) ──────────────────────────────────────────────────
+    // ── Run loop ─────────────────────────────────────────────────────────────
     /**
-     * Phase 72 — resets the playthrough back to the starting hearth (closes
-     * GH#65 ask 2). `keepCharacter: true` preserves the character ledger
+     * Resets the playthrough back to the starting hearth.
+     * `keepCharacter: true` preserves the character ledger
      * (player + rngState + codex) and
      * refills HP; world / combat / quests / flags reset.
      * `keepCharacter: false` performs a full new-game reset. Every call
@@ -184,10 +184,10 @@ export interface GameActions {
      * standard DURABLE_ACTIONS pipeline. Returns the post-reset GameState.
      */
     resetRun: (opts: { keepCharacter: boolean }) => GameState;
-    // ── Codex (Phase 73) ─────────────────────────────────────────────────────
+    // ── Codex ────────────────────────────────────────────────────────────────
     /**
-     * Phase 73 — append a codex entry id to `state.codex.unlockedEntries`
-     * (de-duped). Closes GH#65 ask 3. Friendship outcomes auto-fire the
+     * Append a codex entry id to `state.codex.unlockedEntries`
+     * (de-duped). Friendship outcomes auto-fire the
      * unlock when the befriended enemy carries a `journalEntry`; this
      * method exists so future dialogue / map-event content can grant
      * codex entries directly. Dispatches `UNLOCK_CODEX_ENTRY` through the
@@ -206,7 +206,7 @@ export type GameStore = GameState & GameActions;
  */
 /**
  * Compute the extra envelope fields that depend on the prev→next diff.
- * Today this is only the Phase 30 `unlockedCards` bag for level-ups —
+ * Today this is only the `unlockedCards` bag for level-ups —
  * the list of card ids that became eligible because the promotion
  * crossed a learning-requirement threshold.
  */
@@ -218,10 +218,9 @@ function enrichExtra(
 ): { report?: CombatEndReport; unlockedCards?: string[] } | undefined {
     if (action.type !== 'LEVEL_UP') return extra;
     if (next.player.level === prev.player.level) return extra; // No promotion → no diff.
-    // Card availability no longer has level/stat/alignment gates (learning
-    // requirements were removed 2026-07-08), so a level-up never changes the
-    // available set — this diff is now always empty. Kept for event-shape
-    // stability; the field can be retired when its consumers are.
+    // Card availability has no level/stat/alignment gates, so a level-up
+    // never changes the available set — this diff is always empty. Kept for
+    // event-shape stability.
     const before = new Set(getAvailableCards(prev.player).map(s => s.id));
     const after = getAvailableCards(next.player).map(s => s.id);
     const unlockedCards = after.filter(id => !before.has(id));
@@ -282,10 +281,10 @@ function logGameEventSanitized(event: GameEvent): void {
 
 /**
  * The part of the state a save writes: every durable `GameState` field, and
- * not the transient `currentEncounter` (encounters re-roll on load, Spec 07)
+ * not the transient `currentEncounter` (encounters re-roll on load)
  * or the store's verbs. One list for the autosave and the explicit `save()`.
- * `labyrinth` is the Aporia's durable progress (W-01), and with it an open
- * visit's way back (map revamp M4); it is absent until the player first
+ * `labyrinth` is the Aporia's durable progress, and with it an open
+ * visit's way back; it is absent until the player first
  * enters, so saves from before then are unchanged.
  */
 function durableSlice(next: GameState): GameState {
@@ -337,7 +336,7 @@ export function createGameStore(
 
     return createStore<GameStore>()((set, get) => {
         // Core dispatch: run reducer → set → emit → autosave (gated).
-        // Phase 51 (Spec 09 Q4): autosave only fires for the curated
+        // Autosave only fires for the curated
         // DURABLE_ACTIONS set; UI-tier actions never write through. The
         // direct `save()` verb below keeps its own unconditional write.
         function dispatch(action: GameAction, extra?: { report?: CombatEndReport }): GameState {
@@ -349,7 +348,7 @@ export function createGameStore(
             const event = eventForAction(action, next, enriched);
             if (event && emitter) emitter.emit(event);
             // Save excludes transient currentEncounter — encounters re-roll on
-            // load (Spec 07).
+            // load.
             if (DURABLE_ACTIONS.has(action.type)) {
                 adapter.save(durableSlice(next));
             }
@@ -380,12 +379,12 @@ export function createGameStore(
                     xpGained = totalEncounterXp(encounter);
                     loot = rollEncounterLoot(encounter, () => getRng().random());
                 } else if (outcome === 'friendship') {
-                    // Phase 36 — friendship grants half the kill-win XP and the
+                    // Friendship grants half the kill-win XP and the
                     // full loot table (consistent with the reducer treating
                     // friendship as a peaceful resolution rather than a flee).
                     xpGained = Math.floor(totalEncounterXp(encounter) * 0.5);
                     loot = rollEncounterLoot(encounter, () => getRng().random());
-                    // Phase 60 — per-enemy friendshipReward supplement. Items
+                    // Per-enemy friendshipReward supplement. Items
                     // append to the weighted-loot roll; xpBonus adds on top of
                     // the half-XP base.
                     const fr = foe.friendshipReward;
@@ -396,7 +395,7 @@ export function createGameStore(
                 }
 
                 const report: CombatEndReport = { outcome, xpGained, loot };
-                // Phase 60 — surface the narrative on the report so the CLI /
+                // Surface the narrative on the report so the CLI /
                 // UI can render it. Items + xpBonus already reach the consumer
                 // through report.loot / report.xpGained.
                 if (outcome === 'friendship') {
@@ -413,7 +412,7 @@ export function createGameStore(
                         } = {};
                         if (fr?.narrative) friendshipReport.narrative = fr.narrative;
                         if (willUnlockCodex && entry) {
-                            // Phase 73 — surface the unlocked entry's id +
+                            // Surface the unlocked entry's id +
                             // title on the report (the END_COMBAT reducer
                             // has appended the id to state.codex.unlockedEntries).
                             friendshipReport.codexEntryUnlocked = {
@@ -501,12 +500,12 @@ export function createGameStore(
                 if (emitter) emitter.emit({ type: 'game:saved', payload: { state: next } });
             },
 
-            // ── Run loop (Phase 72) ──────────────────────────────────────────
+            // ── Run loop ─────────────────────────────────────────────────────
             resetRun(opts: { keepCharacter: boolean }) {
                 return dispatch({ type: 'RESET_RUN', payload: opts });
             },
 
-            // ── Codex (Phase 73) ─────────────────────────────────────────────
+            // ── Codex ────────────────────────────────────────────────────────
             unlockCodexEntry(entryId: string) {
                 dispatch({ type: 'UNLOCK_CODEX_ENTRY', payload: { entryId } });
             },

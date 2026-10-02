@@ -1,5 +1,5 @@
 /**
- * Dialogue tree traversal helpers (Spec 08 Q9).
+ * Dialogue tree traversal helpers.
  *
  * Branching dialogue is data-only — the engine walks a `DialogueTree`, hands
  * back the current node and visible choices, and lets the caller (CLI / UI)

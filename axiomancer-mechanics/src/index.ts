@@ -9,8 +9,7 @@
  *
  * The barrel carries only what a consumer outside the engine imports
  * (axiomancer-mobile, root scripts). Engine-internal
- * helpers and test-only symbols are imported from their defining module
- * (pruned 2026-09-25, TRIM THE FAT).
+ * helpers and test-only symbols are imported from their defining module.
  */
 
 // ─── Character ────────────────────────────────────────────────────────────────
@@ -42,10 +41,10 @@ export {
 } from './Enemy';
 export type {
     Enemy, EnemyDifficulty,
-    // CodexEntry moved to ./Game block — Phase 73 type's semantic home
-    // is the Game-loop persistence surface; the Enemy module re-exports
-    // it via `src/Enemy/types.ts` for the per-foe content site, but the
-    // top-level barrel now pulls from Game alongside CodexState.
+    // CodexEntry's semantic home is the Game-loop persistence surface; the
+    // Enemy module re-exports it via `src/Enemy/types.ts` for the per-foe
+    // content site, but the top-level barrel pulls from Game alongside
+    // CodexState.
 } from './Enemy';
 export {
     EnemyLibrary, EnemiesByMap, ENEMY_REGISTRY,
@@ -62,10 +61,10 @@ export type {
     AggregatedEffectModifiers,
 } from './Combat';
 
-// ─── Spec 25 — Hazard-Pattern Combat ──────────────────────────────────────────
+// ─── Hazard-pattern combat ────────────────────────────────────────────────────
 // Card-and-dice combat: emptying the foe's VITAE (`isDefeated`) wins; a
 // befriend through The Open Hand opens the mercy choice, the only non-lethal
-// ending (D47, D63).
+// ending.
 export {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveThreatPhase, processBetweenPhases,
@@ -75,29 +74,29 @@ export {
     toCombatCard, buildCombatDeck,
     getThreatSequence,
     mechanicText,
-    // Spec 26b / spec 33 — turn lifecycle, Conviction, Signature Skills
+    // Turn lifecycle, Conviction, Signature Skills
     startTurn, endTurn, discardCombatCard,
     playSignatureSkill,
     getSignatureSkill, signatureCastBlock, SIGNATURE_COST,
     colorMatchBonus,
-    // phase 28 — legibility sweep
+    // Incoming-threat readout
     projectIncomingThreat,
-    // Phase 2 — projected-lethality readout (spec 30)
+    // Projected-lethality readout
     projectCombatOutcome,
-    // Spec 32 v3 — floating dice save-back
+    // Floating dice save-back
     getFloatingDiceColors,
-    // Spec 26b tuning §B/§C/§D
+    // Card rewards and the starting deck
     COMBAT_REWARD_POOL, STARTING_CARD_IDS, rollCombatCardRewards, addRewardCard,
     unlockCardViaDilemma,
-    // Fate Engine P1 (spec 31) — the dice get a second read
+    // Fate Engine — the dice get a second read
     riderText, RESERVE_MAX,
-    // Spec 33 — Upgradeable Dice (THE combat dice model since the D7 flag
-    // collapse): the surfaces the app/sim layers need.
+    // Upgradeable Dice (the combat dice model): the surfaces the app/sim
+    // layers need.
     SPECIAL_CONVICTION_DEFAULT, MOMENTUM_CHAIN_ORDER, MOMENTUM_SURGE_LENGTH,
     DEFAULT_DIE_GEAR, activeDieGear,
 } from './Combat';
 export type { UpgradeableDieGear } from './Combat';
-// S3 — stat scaling (D40–D43).
+// Stat scaling.
 export {
     scaleAmount, scaleFor, statFor, scaleRider, scaleCardForStats,
     scaleEffectIntensity, effectScaling, effectFamily,
@@ -113,7 +112,7 @@ export type {
     CombatSummary,
     CombatIntentType,
     SignatureSkill,
-    // The three chain colours (spec 33 momentum chain)
+    // The three chain colours (momentum chain)
     WheelStance,
 } from './Combat';
 
@@ -126,10 +125,9 @@ export {
     clearSandboxCards,
 } from './Cards/cards.sandbox';
 
-// ─── Deck removal (Phase 52a) — taking a card OUT, and what that costs ───────
-// The engine's first removal primitive plus the per-run escalating price. The
-// rest-choice engine (52c) and the picker screen (52d) consume these; prices
-// were ratified in Phase 52f against measured income.
+// ─── Deck removal — taking a card OUT, and what that costs ──────────────────
+// The removal primitive plus the per-run escalating price. The rest-choice
+// engine and the picker screen consume these.
 export {
     removeCardFromCombatDeck,
     cardRemovalPrice, cardRemovalsOf,
@@ -148,14 +146,12 @@ export type {
 // ─── Items ────────────────────────────────────────────────────────────────────
 export {
     isEquipment, isConsumable, isMaterial, isQuestItem,
-    // Phase 96 — the desperation band (a healing potion pays 1.5x under half
+    // The desperation band (a healing potion pays 1.5x under half
     // VITAE). `resolveConsumableHeal` is the shared resolver mobile's presenters
     // preview with, so the shop line and the drink preview cannot drift from
     // what the engine actually pays.
     resolveConsumableHeal,
-    // Phase 21 — procedural equipment factory/templates retired; loot caches
-    // yield consumables via rollCacheReward. Phase 23 — modifier catalogue,
-    // affix library, item sets, and the rarity model are torn down.
+    // Loot caches yield consumables via rollCacheReward.
     rollCacheReward,
     wornPerSlot, isEquippedFirstOfSlot, findEquippedInSlot,
     SLOT_CAPACITY,
@@ -166,7 +162,7 @@ export {
     // piece (weapon/armor replace in place; a full accessory row is a guarded
     // no-op), so every grant site routes through `grantItem` rather than
     // re-deriving the unequip -> addItem -> equipItem chain.
-    // `qualifiesForItemRewardScreen` is D5: the one predicate that decides
+    // `qualifiesForItemRewardScreen` is the one predicate that decides
     // ceremony (reward screen) vs. the lightweight inline grant.
     grantItem, qualifiesForItemRewardScreen, partitionGrantsForReward, displacedBy,
 } from './Items';
@@ -182,15 +178,15 @@ export type {
 export type {
     Card, CardAspect, CardTier, CardTarget,
     CardCombatEffects, CardSpecialMechanic,
-    // Spec 32 v3 — the rank ladder / rarity / card-type axes
+    // The rank ladder / rarity / card-type axes
     CardRank, CardRarity, CardType, CardRider,
 } from './Cards';
 export {
-    // Spec 32 v3 — rank/rarity helpers (mobile renders rank names off these)
+    // Rank/rarity helpers (mobile renders rank names off these)
     CARD_RANK_NAMES, rankToRarity,
     getAvailableCards, learnCard,
     cardLibrary, getCardById,
-    // Phase 68 — runtime enumeration of the CardSpecialMechanic union, bound to
+    // Runtime enumeration of the CardSpecialMechanic union, bound to
     // the type by compile-time assertions. Mobile KW-2 walks this list.
     CARD_SPECIAL_MECHANIC_KINDS,
 } from './Cards';
@@ -203,7 +199,7 @@ export {
     selectVersion,
     nullAdapter,
     MAX_EFFECT_INTENSITY,
-    // State fixtures (2026-09-07) — one declarative state for CLI / Jest / web.
+    // State fixtures — one declarative state for CLI / Jest / web.
     buildStateFromFixture,
     validateStateFixture,
     getStateFixtureById, listStateFixtureIds,
@@ -221,7 +217,7 @@ export type {
 // ─── World ────────────────────────────────────────────────────────────────────
 export {
     MAP_REGISTRY, getMapDefinition, createMapState,
-    // Map revamp M3a — the new-game start (D27) and "start on any map" (dev tools).
+    // The new-game start and "start on any map" (dev tools).
     createStartingWorld, STARTING_MAP, STARTABLE_MAPS,
     moveToNode,
     teleportToNode, placeOnNode, unblockMapRoute,
@@ -230,11 +226,9 @@ export {
     startQuest, progressQuest, completeQuest,
 } from './World';
 
-// Hazard Minigame (v2 — faithful port of the former mobile living rules source).
-// The engine transitions, content, tuning, deck-flag codec and types mobile
-// consumes (mobile has deleted its local engine); the rest of the Hazard
-// module's surface is reachable from `./World/Hazard`.
-// See `archive-pre-revamp:plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/hazard-v2-vs-mechanics-divergence.md` (archived 2026-09-25).
+// Hazard Minigame. The engine transitions, content, tuning, deck-flag codec
+// and types mobile consumes; the rest of the Hazard module's surface is
+// reachable from `./World/Hazard`.
 export {
     HAZARD_TUNING, HAZARD_KEYWORDS, HAZARD_DECK, HAZARD_CRACK_CARD,
     getHazardCardDef, HAZARD_REWARDS, HAZARD_CONSEQUENCES,
@@ -254,11 +248,8 @@ export type {
     HazardMark, HazardOutcomeTier, HazardPhase, HazardSessionState,
 } from './World/Hazard';
 
-// Quest Board minigame ("The Boy's Almanac") — retired in Phase 61; nothing
-// is exported for it any more (see `game.migrate.ts`'s v17 → v18 hop).
-
-// Blacksmith encounter ("The Anvil" — Spec 33 §6 die-gear upgrades: HONE /
-// TEMPER / gear swap).
+// Blacksmith encounter ("The Anvil" — die-gear upgrades: HONE / TEMPER /
+// gear swap).
 export {
     ANVIL_VERB_PRICING, BLACKSMITH_WITNESS_VARIANTS, HEART_RICH_PAYLOAD_VARIANT,
     createBlacksmithSession, beginBlacksmith, honeBlacksmith, temperBlacksmith,
@@ -268,10 +259,9 @@ export {
 export type {
     BlacksmithVariantOffer, BlacksmithSession,
 } from './World/Blacksmith';
-// Rest-choice encounter (Phase 52c-d) — the rest node's one irreversible
-// choice of `rest` / `cut` (the `anvil` offer was dropped in Phase 59),
-// composing the Cards/card.removal primitive rather than rebuilding it.
-// Replaced the former rest minigame, retired in Phase 52e.
+// Rest-choice encounter — the rest node's one irreversible choice of
+// `rest` / `cut`, composing the Cards/card.removal primitive rather than
+// rebuilding it.
 export {
     RESTCHOICE_TUNING, createRestChoiceSession, previewRestChoiceHeal,
     chooseRestChoiceOffer, pickRestChoiceCut, claimRestChoiceOutcome,
@@ -280,8 +270,7 @@ export type {
     RestChoiceOfferId, RestChoiceSession,
 } from './World/RestChoice';
 // Loot-cache-choice encounter ("The Reliquary") — the cache node's one
-// irreversible choice of `card` / `item`. Replaced the
-// former Pick Pool dice-pool minigame, retired in Phase 63.
+// irreversible choice of `card` / `item`.
 export {
     createLootCacheChoiceSession, chooseLootCacheChoiceOffer,
     claimLootCacheChoiceOutcome,
@@ -293,9 +282,9 @@ export {
     changeMap, completeMap, unlockMap,
     completeNode, unlockNode, changeContinent,
     revealAdjacent, markNodeConsumed,
-    // 2026-08-08 first-map audit: traversal queries.
+    // Traversal queries.
     legalMovesFrom,
-    // D1 (2026-09-21) — the forward skeleton the progression audits walk.
+    // The forward skeleton the progression audits walk.
     forwardEdges,
 } from './World';
 export {
@@ -308,13 +297,12 @@ export type {
     MapEventKind,
     MapEventPayload, ResolvedEvent, ResolveMapEventResult,
 } from './World';
-// Phase 52b — rest shelter classification (retires the healFraction >= 1.0
-// inn heuristic). Mobile gates the hazard-scar max-VITAE mend on this.
+// Rest shelter classification. Mobile gates the hazard-scar max-VITAE mend on this.
 export type { RestShelter } from './World';
 export {
     DEFAULT_REST_SHELTER, isInnShelter,
 } from './World';
-// W-01 — The Labyrinth (THE APORIA). Additive surface for the mobile
+// The Labyrinth (THE APORIA). Additive surface for the mobile
 // dev-menu entry + labyrinth presenters.
 export {
     createLabyrinthProgress, visibleDoors, inspectPoi,

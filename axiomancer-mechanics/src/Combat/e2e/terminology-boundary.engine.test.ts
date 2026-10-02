@@ -1,5 +1,5 @@
 /**
- * Regression guard — Phase 166 Skills vs Cards terminology boundary.
+ * Regression guard — Skills vs Cards terminology boundary.
  *
  * Skills are always-available token-spending actions in `knownCards`.
  * Cards are Hazard-style deck/hand/reward objects (CombatCard).
@@ -7,8 +7,7 @@
  *
  * This suite reads key source files and asserts that banned conflation phrases
  * are absent from active (non-comment-historical, non-spec-archived) mechanics
- * source. It deliberately targets only the files that the Phase 166 brief
- * called out as the boundary-relevant surface.
+ * source. It deliberately targets only the boundary-relevant files.
  *
  * Allowlisted patterns (changelog / spec archive prose) are excluded by
  * checking targeted source files — not the whole repo — so the guard stays

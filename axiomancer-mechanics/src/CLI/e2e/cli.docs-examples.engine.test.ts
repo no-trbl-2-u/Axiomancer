@@ -1,7 +1,7 @@
 /**
  * Doc/registry parity — `docs/cli.md` `--enemy` examples must name enemies
- * that actually exist. Phase 22: this is the cheap CI-visible guard the
- * brief asks for so a future enemy rename/removal can't leave stale
+ * that actually exist. This is the cheap CI-visible guard so a future
+ * enemy rename/removal can't leave stale
  * documented examples behind (the same failure class as the CLI-typecheck
  * gap, just for prose instead of code).
  */

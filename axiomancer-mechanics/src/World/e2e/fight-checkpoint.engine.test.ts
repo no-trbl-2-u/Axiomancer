@@ -1,17 +1,13 @@
 /**
- * Phase R9a — a save taken mid-fight reloads onto the fight.
+ * A save taken mid-fight reloads onto the fight.
  *
  * The fight itself is never saved: `currentEncounter` is transient
- * (`durableSlice`, Spec 07), and the turn state lives with whoever drives the
+ * (`durableSlice`), and the turn state lives with whoever drives the
  * fight. What a save CAN carry is the arrival debt, `pendingArrival`. So an
  * encounter leaves the debt owed, its node unconsumed and the way on shut, and
  * only the fight's end settles it (`END_COMBAT` → `settleArrival`). A reload
  * between the two stands the player back on the node with the fight owed, and
  * resolving the arrival again offers the same fight from the start.
- *
- * Before this, the resolve settled the node on entry, a save taken during the
- * fight reloaded with nothing owed and the onward edges open, and on a door
- * node the Doorwarden was simply behind the player.
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';

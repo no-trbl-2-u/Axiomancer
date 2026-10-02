@@ -1,14 +1,11 @@
 /**
- * Hermetic E2E — combat MOMENTUM, engine-native (Phase 31 EA-6, now the
- * spec 33 null-reset chain `momentumV2`).
+ * Hermetic E2E — combat MOMENTUM, engine-native (the null-reset chain
+ * `momentumV2`).
  *
- * D7 (the OFF dice path deleted): the v1 momentum WHEEL (`momentumWheel`,
- * advanced by every landed play incl. FREE ones) left with the draft model,
- * and its truth table with it. The chain's own truth table (start / advance /
- * break-to-null / surge) lives in `upgradeable-dice.engine.test.ts`; what
- * stays here are the rules this file ratified that still hold:
+ * The chain's own truth table (start / advance / break-to-null / surge) lives
+ * in `upgradeable-dice.engine.test.ts`; this file pins:
  *   - a FIZZLED play does NOT advance momentum;
- *   - a FREE line never touches momentum (spec 33 §3 rule 5);
+ *   - a FREE line never touches momentum;
  *   - the temporary momentum die never survives to the character save.
  *
  * Pure math + a fixed RNG only; no disk / network / TTY.
@@ -53,7 +50,7 @@ registerSandboxCards([
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_confusion', appliedTo: 'opponent', duration: 2 }],
     },
-    // A FREE-line rider fixture for the spec 33 §3 rule 5 regression below
+    // A FREE-line rider fixture for the regression below
     // ("FREE lines never touch momentum").
     {
         id: 'qa-wheel-free-rider', name: 'QA Wheel Free Rider',
@@ -133,7 +130,7 @@ describe('Phase 31 — momentum (engine-native)', () => {
     });
 
     it('spec 33 §3 rule 5 regression — a FREE-line play never mutates momentumV2', () => {
-        // `applyBoonAndMomentumV2` (the spec 33 momentum chain) is only
+        // `applyBoonAndMomentumV2` (the momentum chain) is only
         // invoked on `useBottom` (PAID) plays — a FREE-line
         // rider is structurally momentum-safe already; this proves it rather
         // than just asserting it.

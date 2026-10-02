@@ -1,18 +1,18 @@
 /**
- * The Charcoal Wood — Act 1, map 2 (map revamp M3b; D21, D25–D29).
+ * The Charcoal Wood — Act 1, map 2.
  *
- * Pins what the map revamp decided for the second Act 1 map:
+ * Pins the second Act 1 map:
  * - the Breakwater's river bridge leads here, and this map's stair cave leads
- *   on into the Beacon Crags (M3c);
+ *   on into the Beacon Crags;
  * - the map borrows the shipped builders, the northern forest's roster and
- *   its materials (D29), with one authored event on every node and one
- *   Anvil near its exit (D61, R3b);
+ *   its materials, with one authored event on every node and one
+ *   Anvil near its exit;
  * - the forest roster is level 9 and up, so every fight here is pinned low.
  *
  * The generic gauntlet invariants (no strands, column law, ribs, distinct
  * coordinates) run over this map in `map-traversal.engine.test.ts` like every
- * other registered map. The D25/D16 layout pins live in mobile, where the
- * landmarks and the sheet are.
+ * other registered map. The layout pins live in mobile, where the landmarks
+ * and the sheet are.
  */
 
 import { describe, expect, it } from 'vitest';

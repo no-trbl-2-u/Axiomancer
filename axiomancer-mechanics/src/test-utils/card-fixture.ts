@@ -1,7 +1,5 @@
 /**
- * Shared card-play fixture for the Cards e2e lints (extracted from
- * `card-effectiveness.engine.test.ts` per WS0.4,
- * `archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md`).
+ * Shared card-play fixture for the Cards e2e lints.
  *
  * Two variants of the same level-20 player + single-WILD-die tray:
  *
@@ -45,7 +43,7 @@ export function buildFixtureState(options: { clean?: boolean } = {}): CombatEnco
     const clean = options.clean ?? false;
 
     const player: Character = deepClone(Player);
-    // NEUTRAL stats (S3, D41): 5 leaves every printed number as printed, so a
+    // NEUTRAL stats: 5 leaves every printed number as printed, so a
     // card test asserts the card's own numbers. Stat scaling has its own
     // suite (`Combat/e2e/stat-scaling.engine.test.ts`).
     player.baseStats = { heart: 5, body: 5, mind: 5 };

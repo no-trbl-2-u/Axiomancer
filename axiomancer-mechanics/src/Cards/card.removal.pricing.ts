@@ -1,7 +1,7 @@
 /**
- * Phase 52a — deck removal: THE ESCALATING PRICE.
+ * Deck removal: THE ESCALATING PRICE.
  *
- * T direct (2026-08-08): removal is *"a low price to start, but every time the
+ * Removal is *"a low price to start, but every time the
  * player does this across the game, it costs a little more."* The curve is
  * LINEAR — `base + step × removals` — deliberately, not exponential: an
  * exponential curve prices the fourth removal out of the game entirely, and
@@ -10,18 +10,16 @@
  * The counter is PER RUN (`Character.cardRemovals`), not per node and not
  * lifetime-across-runs.
  *
- * PRICES ARE RATIFIED (Phase 52f) against MEASURED income: a map's three
+ * PRICES ARE RATIFIED against MEASURED income: a map's three
  * authored loot-cache nodes grant a guaranteed 26 shillings on a full walk
  * (`src/World/MapEvents/content.ts`'s `COAST_LOOT_CACHES`, the Breakwater's), and shop
  * wares run ~1-12. `base` sits well under a single loot-cache find so the
  * first cut is obviously affordable early; `step` is sized so the fourth/fifth
  * cut (20 / 25) approaches a full act's income — a real sacrifice, not a
- * lockout. See `archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/phases/phase_52f_shilling_economy_calibration.md` and its
- * report for the full derivation. Do not fork copies of these numbers: read
- * the constant.
+ * lockout. Do not fork copies of these numbers: read the constant.
  *
  * This module charges nothing. `removeCardFromCombatDeck` deliberately does
- * not spend currency — pricing is the CALLER's transaction (52c's rest-choice
+ * not spend currency — pricing is the CALLER's transaction (the rest-choice
  * engine debits `Character.currency`), so the primitive stays single-purpose
  * and testable without an economy.
  */
@@ -29,7 +27,7 @@
 import type { Character } from '../Character/types';
 
 /**
- * The removal curve, ratified by Phase 52f against measured income. Currency
+ * The removal curve, ratified against measured income. Currency
  * unit is SHILLINGS (`Character.currency`).
  */
 export const CARD_REMOVAL_PRICING = Object.freeze({

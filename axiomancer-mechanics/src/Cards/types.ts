@@ -1,8 +1,6 @@
 /**
  * Cards System Types
- * Cards run on the resonance economy (heart / body / mind). The original
- * `specs/04-cards-engine.md` was removed in the skill→card unification (see
- * `specs/README.md`); the live design is spec 32 + THE BIG NUMBERS REWRITE.
+ * Cards run on the resonance economy (heart / body / mind).
  */
 
 /**
@@ -15,7 +13,7 @@
 export type StatType = 'body' | 'mind' | 'heart';
 
 /**
- * Phase 104 — a CARD's colour identity. `StatType` plus `'any'`: the grey
+ * A CARD's colour identity. `StatType` plus `'any'`: the grey
  * office's colourless aspect, powered by every die colour (body/mind/heart,
  * AND wild) with a neutral (never on/off) colour-match bonus. `StatType`
  * itself stays three stats — only a card's aspect widens.
@@ -24,13 +22,13 @@ export type CardAspect = StatType | 'any';
 
 /**
  * Tier of a card — mirrors the effect tier system. Drives the resist tier
- * used when a card applies a `combatEffects` payload through the Spec 03
+ * used when a card applies a `combatEffects` payload through the effect-application
  * machinery (Tier 1 auto-applies, Tier 2 resisted, Tier 3 only nat-20 repels).
  */
 export type CardTier = 1 | 2 | 3;
 
 /**
- * Spec 32 v3 — the rank ladder (quality axis, distinct from `tier`):
+ * The rank ladder (quality axis, distinct from `tier`):
  * 1 Ash · 2 Tooth · 3 Splinter · 4 Rib · 5 Skull · 6 Saint.
  */
 export type CardRank = 1 | 2 | 3 | 4 | 5 | 6;
@@ -40,7 +38,7 @@ export const CARD_RANK_NAMES: Readonly<Record<CardRank, string>> = Object.freeze
     1: 'Ash', 2: 'Tooth', 3: 'Splinter', 4: 'Rib', 5: 'Skull', 6: 'Saint',
 });
 
-/** Spec 32 v3 — rarity band, derived from rank (§4). Drives the deck recipe
+/** Rarity band, derived from rank. Drives the deck recipe
  *  and reward drop weights. */
 export type CardRarity = 'common' | 'uncommon' | 'rare';
 
@@ -51,9 +49,8 @@ export function rankToRarity(rank: CardRank): CardRarity {
 }
 
 /**
- * A card's type (D51): Attack (the DEAL card), Skill (the GUARD card) and
- * Spell (the VULNERABLE card). More types arrive only in a card session with
- * T (D37). Every type plays the same way: FREE or PAID, then discard.
+ * A card's type: Attack (the DEAL card), Skill (the GUARD card) and
+ * Spell (the VULNERABLE card). Every type plays the same way: FREE or PAID, then discard.
  */
 export type CardType = 'attack' | 'skill' | 'spell';
 
@@ -61,13 +58,12 @@ export type CardType = 'attack' | 'skill' | 'spell';
  * Targeting scope for a card effect.
  * - `'self'`  — the caster.
  * - `'enemy'` — the current opponent.
- * Multi-combatant targeting is deferred to Spec 07.
  */
 export type CardTarget = 'self' | 'enemy';
 
 /**
  * Combat effect payload applied by a card. Routes through
- * `resolveEffectApplication` (Spec 03) so resist / repel / crit follow the
+ * `resolveEffectApplication` so resist / repel / crit follow the
  * same rules as proc-applied effects.
  *
  * @property effectId    - ID of the effect in the global effects library.
@@ -93,7 +89,7 @@ export interface CardCombatEffects {
  * A card's PAID-line mechanics — the verbs the combat engine resolves itself
  * rather than through a `combatEffects` payload. Kept as a discriminated
  * union so the resolver / UI can branch on `kind` without runtime tag
- * parsing. Only verbs a live card prints exist here (D50): the grey office
+ * parsing. Only verbs a live card prints exist here: the grey office
  * prints DEAL and GUARD.
  */
 export type CardSpecialMechanic =
@@ -105,7 +101,7 @@ export type CardSpecialMechanic =
     | { kind: 'deal'; amount: number };
 
 /**
- * Every `CardSpecialMechanic` kind, at RUNTIME (phase 68).
+ * Every `CardSpecialMechanic` kind, at RUNTIME.
  *
  * The union above is erased at compile time, so every consumer that needed to
  * enumerate the kinds kept its own copy — and they drifted. This array IS the
@@ -143,7 +139,7 @@ type _KindListHasNoStrays = AssertNever<NotAKind>;
  * A card's FREE (dieless) line: a bundle of real-unit verbs. Every field is an
  * exact engine unit so generated action text is the applied number (P0-truth
  * law). All fields optional; absent = 0. Only verbs a live card prints exist
- * here (D50).
+ * here.
  */
 export interface CardRider {
     /** Deal N direct VITAE damage. */
@@ -155,7 +151,7 @@ export interface CardRider {
     applyEffect?: { effectId: string; intensity?: number; duration?: number; to?: 'self' | 'opponent' };
 }
 
-// ── CARD UPGRADES (2026-09-02) — the Slay the Spire axis ────────────────────
+// ── CARD UPGRADES — the Slay the Spire axis ─────────────────────────────────
 // One of the six progression axes: a card you own can be upgraded once, into
 // `<id>+` / `<name>+`. The upgraded copy is a PATCH of the original, never a
 // second hand-authored card, so a rework of the base card carries forward.
@@ -240,9 +236,8 @@ export interface CardUpgrade {
  * @property targetType      - 'self' or 'enemy'.
  * @property combatEffects   - Optional list of effect payloads to apply.
  * @property specialMechanics - Optional bespoke behaviours. Resolved after
- *                              `combatEffects`. (`basePower` was deleted from
- *                              the schema by spec 32 v3; direct damage returned
- *                              2026-09-02 as the `deal` mechanic.)
+ *                              `combatEffects`. Direct damage is the `deal`
+ *                              mechanic.
  */
 export interface Card {
     id: string;
@@ -252,22 +247,20 @@ export interface Card {
     tier: CardTier;
     targetType: CardTarget;
     /**
-     * Spec 32 v3 — the RANK ladder (quality axis): 1 Ash · 2 Tooth · 3 Splinter
-     * · 4 Rib · 5 Skull · 6 Saint. Rarity derives from it (§4):
+     * The RANK ladder (quality axis): 1 Ash · 2 Tooth · 3 Splinter
+     * · 4 Rib · 5 Skull · 6 Saint. Rarity derives from it:
      * common = 1-2, uncommon = 3-4, rare = 5-6. Orthogonal to `tier` (resist).
      */
     rank: CardRank;
-    /** Attack / Skill / Spell (D51). See {@link CardType}. */
+    /** Attack / Skill / Spell. See {@link CardType}. */
     cardType: CardType;
     /**
-     * Spec 32 v3 — the authored FREE (dieless) line. Budget law: FREE ≈
+     * The authored FREE (dieless) line. Budget law: FREE ≈
      * 25-35% of the card's total points.
      */
     free?: CardRider;
     /**
-     * 2026-07-16 (SIDE RAIL follow-up) — the authored, human-readable PAID
-     * sentence. The face's paid line got room to breathe under the
-     * #5 rail design, so a card may print prose ("Apply POISON 2 for 3 turns,
+     * The authored, human-readable PAID sentence. A card may print prose ("Apply POISON 2 for 3 turns,
      * then PROLONG every DoT by 1.") instead of the generated telegraphese.
      * The P0-truth law still holds: every number the engine applies must
      * appear verbatim in this text, and every UPPERCASE token must be a real
@@ -278,15 +271,14 @@ export interface Card {
     combatEffects?: CardCombatEffects[];
     specialMechanics?: CardSpecialMechanic[];
     /**
-     * Content-provenance metadata (originally consumed by the since-retired
-     * tuning `--focus` filter). `addedIn` is an ISO date / phase tag;
+     * Content-provenance metadata. `addedIn` is an ISO date / phase tag;
      * `tags` are freeform labels (e.g. `'mid-game'`, `'damage'`). Both
      * optional and ignored by the card engine.
      */
     addedIn?: string;
     tags?: string[];
     /**
-     * CARD UPGRADES (2026-09-02) — the authored patch used when this card is
+     * CARD UPGRADES — the authored patch used when this card is
      * upgraded to `<id>+`. Optional by design: a card WITHOUT one still
      * upgrades, through the documented default rule in
      * `src/Cards/card-upgrades.ts`. Author one only when the default reads

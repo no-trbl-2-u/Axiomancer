@@ -136,12 +136,11 @@ function extractDoctrine() {
     .split(/\n\s*\*\s*\n/)
     .map((p) => p.split('\n').map((l) => l.replace(/^\s*\*\/?\s?/, '')).join(' ').replace(/\s+/g, ' ').trim())
     .filter(Boolean)
-  // THE BIG NUMBERS REWRITE (2026-09-02) — the library header states the three
-  // surviving constraints, the absence of any governing objective function, and
-  // that DEAL is a first-class verb. Those are the paragraphs agents must read
-  // as current law; everything older was repealed.
+  // The library header states the card constraints, the absence of any
+  // governing objective function, and that DEAL is a first-class verb. Those
+  // are the paragraphs agents must read as current law.
   return paragraphs.filter((p) =>
-    /SURVIVING CONSTRAINTS|no rank band|Direct damage is a first-class verb/.test(p))
+    /THE CONSTRAINTS:|no rank band|Direct damage is a first-class verb/.test(p))
 }
 
 // --- tools ------------------------------------------------------------------

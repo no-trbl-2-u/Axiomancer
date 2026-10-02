@@ -1,8 +1,8 @@
 /**
- * Hermetic sim e2e — the deck-tuning FREE-metrics tier (2026-07-08).
+ * Hermetic sim e2e — the deck-tuning FREE-metrics tier.
  *
- * Proves the new engagement metrics compute correctly on a KNOWN seeded run:
- *   1. Win-path mix is un-collapsed and reconciles with the legacy counters.
+ * Proves the engagement metrics compute correctly on a KNOWN seeded run:
+ *   1. Win-path mix is un-collapsed and reconciles with the per-outcome counters.
  *   2. Deck utilization = distinct-played / distinct-deck (recomputed here).
  *   3. Usage entropy and dominant-card share sit in [0,1] and reconcile.
  *   4. The report surfaces a first-class dead-card rate.

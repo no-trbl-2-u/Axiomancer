@@ -3,8 +3,8 @@
  *
  * Each helper does two things:
  *   1. Replaces the production singleton (`getRng()` / `setRng()`) with a tiny
- *      Rng whose `random()` delegates to `Math.random()`. Phase 11 routed all
- *      gameplay rolls through `getRng()`, so without this step a `Math.random`
+ *      Rng whose `random()` delegates to `Math.random()`. All gameplay rolls go
+ *      through `getRng()`, so without this step a `Math.random`
  *      spy alone has no effect on the resist pipeline, dice helpers, or any
  *      `getRng().random()` callsite.
  *   2. Spies on `Math.random` with the requested canned sequence.

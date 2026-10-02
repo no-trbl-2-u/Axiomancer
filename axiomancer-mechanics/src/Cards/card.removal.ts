@@ -1,9 +1,8 @@
 /**
- * Phase 52a — DECK REMOVAL: the engine's first way to take a card OUT.
+ * DECK REMOVAL: the engine's way to take a card OUT.
  *
- * The engine had no card removal at all before this. This module is the
- * pure primitive; the rest-choice engine (52c) and the picker screen (52d)
- * sit on top. No player-facing surface lands here.
+ * This module is the pure primitive; the rest-choice engine and the picker
+ * screen sit on top. No player-facing surface lands here.
  *
  * ## What "the deck" means
  *
@@ -13,9 +12,7 @@
  *   - the CARD BASE — the curated loadout (`combat-loadout-card:` flags) when
  *     any loadout flag exists, otherwise `player.knownCards`. Whichever of the
  *     two is in force contributes ONE deck copy PER ENTRY: a base that lists
- *     an id three times deals three copies. (It used to be de-duplicated to a
- *     single copy; that silently destroyed every authored copy count in the
- *     shipped presets and was repealed 2026-09-05 — see `buildCombatDeck`.)
+ *     an id three times deals three copies (see `buildCombatDeck`).
  *   - the REWARDS — `player.combatRewardCards`, duplicates KEPT (extra copies
  *     are the whole point of a deckbuilder pickup).
  *
@@ -50,7 +47,7 @@
  *
  * ## What this does NOT do
  *
- * It spends no currency (52c's transaction), touches no RNG (removal is fully
+ * It spends no currency (the rest-choice engine's transaction), touches no RNG (removal is fully
  * deterministic — there is nothing to roll), and goes nowhere near the LOCKED
  * MECHANICS: Conviction, the Surge meter and the Dice system are not read or
  * written here. A thinner deck draws the same hands off the same dice.
@@ -70,7 +67,7 @@ import type {
  * The deck-size floor. Removal that would take `buildCombatDeck`'s output
  * below this is REFUSED, not clamped.
  *
- * **10, re-derived by Phase 104 (the grey office).** A fresh run now deals a
+ * **10, from the grey office.** A fresh run deals a
  * 10-card starting deck (`grey-strike` ×5, `grey-ward` ×3, `grey-word` ×2 — see
  * `Combat/combat.rewards.ts`'s `STARTING_CARD_IDS`), the smallest shipped
  * starting shape in the tree, so the floor tracks it: **10 = 2 ×
@@ -78,14 +75,9 @@ import type {
  * the draw pile reshuffles inside a single round and every fight deals the
  * same hand. A fresh run's first CUT is legal only after the first reward
  * card is taken (10 + 1 reward > floor) — the intended tempo.
- *
- * (Superseded derivation, kept for history: 2026-07-through-2026-09-19 pinned
- * this at 12, derived from the campaign-preset LINEAGE LAW's low-water mark
- * (18 − 6 Pilgrim removals). That story is still true of the three campaign
- * presets — they are untouched by this phase — but the floor now tracks the
- * smallest shipped deck overall, which is the grey office, not a preset.
  * `card-removal.engine.test.ts` pins the derivation, so a future re-cut of
- * either shape forces this to be re-derived rather than silently drifting.)
+ * the starting deck forces this to be re-derived rather than silently
+ * drifting.
  */
 export const MIN_COMBAT_DECK_SIZE = 10;
 
@@ -182,12 +174,9 @@ export function removeCardFromCombatDeck(
     } else {
         // Rule 4 — the card base gives up exactly ONE copy.
         //
-        // This used to drain EVERY entry naming the id, from the loadout and
-        // from `knownCards` both, because `buildCombatDeck` de-duplicated the
-        // base: however many entries it held, the base dealt one copy, so one
-        // copy could only leave by taking all of them. The base keeps its
-        // copies now (see `buildCombatDeck`), which makes entries and deck
-        // copies one-for-one — so draining the list would delete a 3-of for
+        // The base keeps its copies (see `buildCombatDeck`), which makes
+        // entries and deck copies one-for-one — so draining the list would
+        // delete a 3-of for
         // the price of a single removal. One entry leaves, and it leaves from
         // whichever list is actually IN FORCE: the loadout when loadout flags
         // exist (`knownCards` is the unlock set then, not the deck, and

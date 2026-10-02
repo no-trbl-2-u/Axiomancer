@@ -1,9 +1,8 @@
 /**
- * Hermetic engine test — the v29 → v30 hop: THE REVAMP R5 items reset.
+ * Hermetic engine test — the v29 → v30 hop: the items reset.
  *
- * R5 (D49 in `plan/2026-09-25-refactor-strategy.decisions.md`) keeps three
- * consumables, the healing potions. A v29 save may still carry a stack of one
- * of the nineteen retired consumables, or an active effect whose definition
+ * Three consumables exist, the healing potions. A v29 save may still carry a
+ * stack of one of the nineteen deleted consumables, or an active effect whose definition
  * was deleted with them. The hop drops both and refunds nothing; potions,
  * relics and every other effect ride through untouched.
  */
@@ -14,7 +13,7 @@ import { createNewGameState, GAME_STATE_VERSION } from '../game.reducer';
 import { consumableLibrary } from '../../Items/consumable.library';
 import type { GameState } from '../types';
 
-/** A v29 save holding two retired stacks, a potion and two active effects. */
+/** A v29 save holding two deleted-consumable stacks, a potion and two active effects. */
 function v29WithRetiredItems(): Record<string, unknown> {
     const fresh = createNewGameState({ startMap: 'breakwater' });
     const inventory = [

@@ -1,14 +1,11 @@
 /**
- * The reward draft — the post-combat 1-of-3 (D44).
+ * The reward draft — the post-combat 1-of-3.
  *
  * The contract this file pins:
  *   · determinism — same player + same seeded rng ⇒ same offers, always;
  *   · offers are always distinct and always resolvable;
  *   · every pool card is reachable (a uniform draw, no steering);
  *   · a request larger than the pool returns the whole pool, never a repeat.
- *
- * The theme pull, the keyword guarantee and the rarity weights were cut in
- * R7b (D50); their suites went with them.
  */
 
 import { describe, it, expect } from 'vitest';

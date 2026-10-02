@@ -1,10 +1,11 @@
 /**
- * Hermetic engine test — 2026-09-20 save migration (v22 → v23): retire the
+ * Hermetic engine test — save migration (v22 → v23): strip the
  * STARTING-LOADOUT SEED.
  *
- * Reproduces the two live symptoms the seed caused and pins both closed:
+ * A v22 save carries the seed, and the seed caused two symptoms this suite
+ * pins closed:
  *
- *   1. `createNewGameState()` used to write one `combat-loadout-card:` flag
+ *   1. A v22 `createNewGameState()` wrote one `combat-loadout-card:` flag
  *      per `STARTING_CARD_IDS` entry. `buildCombatDeck` deals a loadout
  *      INSTEAD of `knownCards` whenever one exists, so the 18-card starter
  *      bundle the client writes to `knownCards` was never dealt — the deck
@@ -32,21 +33,21 @@ import { getCardById } from '../../Cards/cards.library';
 import { FloatEye } from '../../Enemy/enemy.library';
 import type { CombatState } from '../../Combat/types';
 
-// Phase 104 (2026-09-20) repurposed `STARTING_CARD_IDS` for the grey-office
-// fresh-run seed, so this migration fixture pins the EXACT pre-v23 seed by
-// value instead of tracking the live (now differently-shaped) constant.
+// `STARTING_CARD_IDS` now holds the grey-office fresh-run seed, so this
+// migration fixture pins the EXACT pre-v23 seed by value instead of tracking
+// the live (differently-shaped) constant.
 const LEGACY_V22_SEED_IDS: readonly string[] = [
     'spoiled-poultice', 'chilblain-watch', 'first-spadeful', 'thin-hymn',
 ];
 
-/** The pre-v23 seed, rebuilt exactly as `createNewGameState` used to write it. */
+/** The pre-v23 seed, rebuilt exactly as a v22 `createNewGameState` wrote it. */
 function legacySeedFlags(): string[] {
     let flags: string[] = [];
     for (const id of LEGACY_V22_SEED_IDS) flags = addToLoadout(flags, id);
     return flags;
 }
 
-/** A v22 save: a fresh state stamped back to v22 with the legacy seed restored. */
+/** A v22 save: a fresh state stamped back to v22 with the old seed restored. */
 function v22Save(): Record<string, unknown> {
     const fresh = createNewGameState();
     return {
@@ -74,10 +75,10 @@ describe('createNewGameState — no starting-loadout seed (v23)', () => {
         expect(buildCombatDeck(player, fresh.flags)).toEqual(bundle);
     });
 
-    // Re-fixtured after the card purge (P1, 2026-09-27): the fresh grey deck
-    // sits exactly AT the floor (10 = MIN_COMBAT_DECK_SIZE), so the first CUT
-    // is legal after the first reward card (card.removal.ts). The legacy seed
-    // shadowed that bundle with 4 cards and kept the deck under the floor.
+    // The fresh grey deck sits exactly AT the floor (10 = MIN_COMBAT_DECK_SIZE),
+    // so the first CUT is legal after the first reward card (card.removal.ts).
+    // The old seed shadows that bundle with 4 cards and keeps the deck under
+    // the floor.
     it('a rest-node CUT is legal once the bundle holds one reward (the seed no longer shadows it)', () => {
         const fresh = createNewGameState();
         const player = {
@@ -85,7 +86,7 @@ describe('createNewGameState — no starting-loadout seed (v23)', () => {
         };
         const cut = removeCardFromCombatDeck(player, 'grey-strike', fresh.flags);
         expect(cut.ok).toBe(true);
-        // The same player under the legacy seed flags is dealt 4 + 1 and refused.
+        // The same player under the old seed flags is dealt 4 + 1 and refused.
         const seeded = removeCardFromCombatDeck(player, 'grey-strike', [...fresh.flags, ...legacySeedFlags()]);
         expect(seeded.ok).toBe(false);
     });

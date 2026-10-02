@@ -1,11 +1,11 @@
 /**
- * Hermetic engine test — Phase 19 save migration (v12 → v13).
+ * Hermetic engine test — relic save migration (v12 → v13).
  *
  * A v12 save has the 5-slot loadout but no signet relics. Migrating seeds the
- * starting relics via `cloneStartingRelics` — since R7e2 (D72) the Suppliant's
- * Ring alone, worn — displaces the old gear to inventory and recomputes
+ * starting relics via `cloneStartingRelics` — the Suppliant's Ring alone,
+ * worn — displaces the old gear to inventory and recomputes
  * maxHealth, so a loaded save derives its signature kit from the worn loadout
- * instead of the retired archetype kit.
+ * instead of the old archetype kit.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -38,7 +38,7 @@ function v12Save(): Record<string, unknown> {
     };
 }
 
-// Pin toVersion=13 to exercise the Phase-19 hop in isolation; the Phase-21
+// Pin toVersion=13 to exercise the v12→v13 hop in isolation; the
 // v13→v14 purge is covered in its own block below.
 describe('migrate v12 → v13 — seed the signet relics', () => {
     it('seeds the Suppliant\'s Ring worn onto a v12 save, the other slots empty', () => {
@@ -73,7 +73,7 @@ describe('migrate v12 → v13 — seed the signet relics', () => {
     });
 });
 
-// Phase 21 — v13 → v14 purges non-relic equipment.
+// v13 → v14 purges non-relic equipment.
 describe('migrate v13 → v14 — purge non-relic equipment', () => {
     it('strips the old procedural weapon (worn + inventory) and keeps only relics as equipment', () => {
         // A v12 save chained all the way to current: the old sword parked in

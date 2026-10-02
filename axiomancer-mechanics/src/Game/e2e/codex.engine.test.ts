@@ -1,10 +1,8 @@
 /**
- * Phase 73 — Codex / journal-entry surface (closes GH#65 ask 3).
+ * Codex / journal-entry surface.
  *
  * Pins the auto-firing unlock matrix on friendship outcomes + the
- * dispatchable `unlockCodexEntry` surface. (The v6 → v7 migration hop
- * is gone — `migrate` rejects saves below v11.) The Phase 73 brief
- * laid out the decisions D1..D13 these cases pin.
+ * dispatchable `unlockCodexEntry` surface.
  */
 import { describe, it, expect } from 'vitest';
 import { createGameStore } from '../store';

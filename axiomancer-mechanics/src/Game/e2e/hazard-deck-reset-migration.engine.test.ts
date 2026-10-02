@@ -1,8 +1,8 @@
 /**
- * Hermetic engine test — the v31 → v32 hop: THE REVAMP R6b hazard deck.
+ * Hermetic engine test — the v31 → v32 hop: the hazard deck reset.
  *
- * R6b (D52/D63, `plan/revamp/hazards.md`) cuts the hazard deck to the
- * prototype's ten cards and deletes the reward-card pool. An acquired card
+ * The hazard deck is the prototype's ten cards and there is no reward-card
+ * pool. An acquired card
  * rides the save as `hazard-card:<id>:<n>`; the hop drops every one whose
  * card is gone and keeps the core cards, CRACK and every other flag.
  */

@@ -1,9 +1,9 @@
 /**
- * Phase 52a — deck removal: the RESULT SHAPE.
+ * Deck removal: the RESULT SHAPE.
  *
  * Removal is a transaction that can be REFUSED, and a refusal is a first-class
  * returned value — never a thrown string, never a silent no-op. The caller
- * (52c's rest-choice engine, 52d's picker screen) must be able to render the
+ * (the rest-choice engine, the picker screen) must be able to render the
  * reason verbatim without pattern-matching on prose, so a refusal carries BOTH
  * a stable machine `code` and a loud human `reason`.
  *

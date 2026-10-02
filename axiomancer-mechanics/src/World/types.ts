@@ -21,7 +21,7 @@ export type Reward =
     | { kind: 'item'; item: Item };
 
 /**
- * A combat encounter (Spec 07 Q5B). Wraps the list of enemies that take
+ * A combat encounter. Wraps the list of enemies that take
  * part in the fight plus any encounter-level rewards beyond the per-enemy
  * `xpReward` / `loot` tables.
  *
@@ -35,10 +35,10 @@ export interface Encounter {
     origin?: string;
 }
 
-// ─── Quests (Spec 08 Q7B) ─────────────────────────────────────────────────────
+// ─── Quests ───────────────────────────────────────────────────────────────────
 
 /**
- * What an objective tracks. Per Spec 08 Q7 (option B) the engine tracks
+ * What an objective tracks. The engine tracks
  * per-objective progress rather than treating a quest as binary.
  *
  * - `kill`    — defeat N enemies of `target` slug.
@@ -108,7 +108,7 @@ export interface MapNode {
     connectedNodes: NodeId[];
 }
 
-// ─── Map split (Spec 08 Q5A): static MapDefinition vs runtime MapState ────────
+// ─── Map split: static MapDefinition vs runtime MapState ──────────────────────
 
 /**
  * Static, frozen template for a map. Lives in the map registry; never mutated.
@@ -118,8 +118,8 @@ export interface MapNode {
  * @property uniqueEvents - Event templates that fire at most once per save.
  * @property quests       - Quests this map can hand out.
  *
- * Node events are no longer authored on the definition. Spec 23
- * shifted to weighted pools registered via `registerMapEventPool` /
+ * Node events are not authored on the definition: they come from weighted
+ * pools registered via `registerMapEventPool` /
  * `setDefaultMapEventPool` / `setNodeEventPoolOverride`; see
  * `src/World/MapEvents/content.ts` for the authored content.
  */
@@ -135,9 +135,9 @@ export interface MapDefinition {
     readonly quests?: readonly Quest[];
     readonly images?: { mapImage: Image; combatImage: Image };
     /**
-     * Traversal doctrine (W-01, amended by D1 on 2026-09-21).
+     * Traversal doctrine.
      *
-     * `'gauntlet'` (default when absent) is now FRONTIER ROAMING: a node the
+     * `'gauntlet'` (default when absent) is FRONTIER ROAMING: a node the
      * player has resolved is SPENT and cannot be re-entered, and every
      * UNVISITED node joined by an unblocked edge to ANY visited node is a
      * legal destination — not merely the ones adjacent to where the player
@@ -145,10 +145,10 @@ export interface MapDefinition {
      * skipped earlier stays walkable and the region boss becomes
      * unavoidable only when the frontier runs out. It is still a gauntlet
      * in the sense that matters: nothing resolved is ever re-farmed.
-     * `lockedNodes` is legacy bookkeeping the reducer keeps in step; it is
+     * `lockedNodes` is bookkeeping the reducer keeps in step; it is
      * not consulted for legality.
      *
-     * `'labyrinth'` is the Aporia mode, untouched by D1: free travel along
+     * `'labyrinth'` is the Aporia mode: free travel along
      * the CURRENT node's edges INCLUDING back into completed or consumed
      * rooms. One-shot events (`consumedNodes`) apply in both modes.
      */
@@ -160,7 +160,7 @@ export interface MapDefinition {
      */
     readonly initialBlockedRoutes?: readonly BlockedRoute[];
     /**
-     * Phase 53a — NPCs on this map's `npcs` roster that are deliberately NOT
+     * NPCs on this map's `npcs` roster that are deliberately NOT
      * homed to any node yet. A written reason (not a boolean) so the
      * narrative-reachability guard (`auditNarrativeReachability`) can tell a
      * deliberate omission from a lost NPC — an NPC with a `dialogueTree`
@@ -170,7 +170,7 @@ export interface MapDefinition {
     readonly unstagedNpcs?: ReadonlyArray<{ readonly name: string; readonly reason: string }>;
 }
 
-// ─── Hazard Persistence (Phase 135) ────────────────────────────────────────
+// ─── Hazard Persistence ────────────────────────────────────────────────────
 
 /**
  * Hazard modifier effect applied to future encounters at tagged nodes.
@@ -207,20 +207,19 @@ export interface BlockedRoute {
 /**
  * Runtime, per-save state for a map.
  *
- * @property currentNode    - Player's current position on this map (Spec 08 Q1: per-map).
- * @property completedNodes - Nodes the player has fully resolved (locked from back-travel — Q2).
+ * @property currentNode    - Player's current position on this map (per-map).
+ * @property completedNodes - Nodes the player has fully resolved (locked from back-travel).
  * @property availableNodes - Nodes currently traversable from the player's progress.
  * @property lockedNodes    - Nodes not yet unlocked.
  * @property uniqueEvents   - Mutable runtime copy of the definition's unique events.
- * @property discoveredNodes - Spec 23: nodes the player has revealed via the
+ * @property discoveredNodes - Nodes the player has revealed via the
  *                             fog-of-war discovery mechanic. Seeded with the
  *                             map's `startingNode` by `createMapState`.
- * @property consumedNodes   - Spec 23: nodes whose MapEvent has been resolved.
+ * @property consumedNodes   - Nodes whose MapEvent has been resolved.
  *                             One-shot: a consumed node returns `{ kind: 'none' }`
  *                             from `resolveMapEvent`.
  * @property pendingArrival  - The node the player ARRIVED at and has not yet
- *                             answered (burn-day audit 2026-09-19 row 3.1
- *                             follow-up). Written by the arrival verb
+ *                             answered. Written by the arrival verb
  *                             (`moveToNode`), cleared by `resolveMapEvent`
  *                             the moment the arrival is answered and by the
  *                             placement verbs (`placeOnNode`,
@@ -231,9 +230,9 @@ export interface BlockedRoute {
  *                             of walking past it. Absent/`null` = nothing
  *                             owed; saves written before this field default
  *                             to that.
- * @property hazardOutcomes   - Phase 135: persistent hazard effects applied to this map.
+ * @property hazardOutcomes   - Persistent hazard effects applied to this map.
  *                             Tracks modifier effects and cleared/blocked/modified states.
- * @property blockedRoutes    - Phase 135: routes blocked by hazard outcomes (e.g., collapsed bridge).
+ * @property blockedRoutes    - Routes blocked by hazard outcomes (e.g., collapsed bridge).
  *                             Checked by moveToNode validation for path availability.
  */
 export interface MapState {
@@ -265,7 +264,7 @@ export interface Continent {
  * navigation context.
  *
  * @property mapStates - Preserved runtime `MapState` of every map the player
- *   departed through a `travel` door (2026-08-28). The world is a PLACE the
+ *   departed through a `travel` door. The world is a PLACE the
  *   player moves around in: leaving a map never resets it, and a door that
  *   later leads back restores the preserved state instead of a fresh one.
  *   Optional so pre-travel saves and hand-built test worlds stay valid; an

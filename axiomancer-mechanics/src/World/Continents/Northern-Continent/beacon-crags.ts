@@ -1,19 +1,18 @@
 /**
- * The Beacon Crags — Act 1, map 3 (map revamp M3c; decisions D21–D29).
+ * The Beacon Crags — Act 1, map 3.
  *
  * The third Act 1 map, built on T's mountain plate
- * (`axiomancer-mobile/assets/images/maps/act1-mountains.webp`). Named by T from
- * three drafts (D26). The first Act 1 map under `northern-continent` (D28): the
- * Charcoal Wood's stair cave crosses into it the way the shipped chain's
- * `nf-10` cave mouth crosses into the caverns, with a plain `travel` event. The
- * glacier shrine is the door down into the Lantern Deep (M3d).
+ * (`axiomancer-mobile/assets/images/maps/act1-mountains.webp`). The first
+ * Act 1 map under `northern-continent`: the Charcoal Wood's stair cave
+ * crosses into it with a plain `travel` event. The glacier shrine is the door
+ * down into the Lantern Deep.
  *
- * One node per landmark on the plate (D25, `act1-landmarks.json`), and no
+ * One node per landmark on the plate (`act1-landmarks.json`), and no
  * others. The engine graph is abstract (columns and lanes); the mobile layout
  * places each node on its landmark. The stair comes up on the crag road at the
  * top of the plate, so the columns are bands down the mountain in three lanes
  * (west, middle, east), and the map closes on the glacier shrine in the
- * south-west (D16):
+ * south-west:
  *
  *   c0  the top pass                                    (arrival)
  *   c1  summit beacon · hanging lake · shepherds' village
@@ -23,9 +22,9 @@
  *   c5  mountain inn · stone gate · tunnel bridge
  *   c6  the glacier shrine                              (the door, terminal)
  *
- * Lanes run west to east in every band, so every lateral rib (D1) joins two
+ * Lanes run west to east in every band, so every lateral rib joins two
  * landmarks that are neighbours on the plate. Events use the shipped builders
- * and the caverns' roster and iron (D29): see `MapEvents/content.ts`.
+ * and the caverns' roster and iron: see `MapEvents/content.ts`.
  */
 
 import { MapDefinition } from '../../types';

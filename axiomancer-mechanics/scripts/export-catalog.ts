@@ -103,7 +103,7 @@ function copyArt(srcDir: string, file: string, subdir: string): string | null {
 
 /**
  * Every card ships its point-pricing arithmetic as a `// pts: ...` comment
- * inside its object literal (spec 32 §4 point table). It's source-only —
+ * inside its object literal (the point table). It's source-only —
  * never surfaced on the `Card` type — so recover it the same way art gets
  * recovered: parse the declaring file as text, one block per
  * `const <name>: Card = { ... }`, id → first `// pts:` line in the block.
@@ -121,7 +121,7 @@ function parsePricingComments(): Record<string, string> {
 }
 
 // ---------------------------------------------------------------------------
-// How an enemy fights — human blurb per AI logic (Spec 07 / Enemy/types.ts).
+// How an enemy fights — human blurb per AI logic (Enemy/types.ts).
 // ---------------------------------------------------------------------------
 const LOGIC_BLURB: Record<string, string> = {
     random: 'Unpredictable — any stance, any action, no pattern to read.',
@@ -141,7 +141,7 @@ type Chip = { k: string; v: string };
 const signed = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
 const pct = (n: number) => `${n > 0 ? '+' : ''}${Math.round((n - 1) * 100)}%`;
 
-/** A card's special-mechanic entry → one short label (spec 32 v3 vocabulary). */
+/** A card's special-mechanic entry → one short label. */
 function specialMechanicLabel(sm: any): string {
     const amt = sm.amount ?? sm.count ?? sm.rungs;
     return mechanicText(sm) ?? (amt != null ? `${sm.kind} ${amt}` : String(sm.kind));
@@ -149,8 +149,8 @@ function specialMechanicLabel(sm: any): string {
 
 // Non-effect FREE riders (guard / draw / premise …) → a terse rune for the
 // giant free-glyph; affliction riders use their own effect glyph instead.
-// The keyword audit (2026-09-27, after the card purge) kept only the rider
-// fields whose keyword is still live; the others fall back to the ◆ rune.
+// Only rider fields whose keyword is live get a rune; the others fall back
+// to the ◆ rune.
 const FREE_TXT_GLYPH: Record<string, string> = {
     guard: '❖', barrier: '❖', healHp: '✚', drawCards: '⚑',
     sway: '∿', foretell: '◉', pips: '⬡', stagger: '⚔', cleanse: '✦',
@@ -204,7 +204,7 @@ function cardFace(c: any): { freeGlyph: string; freeKw: string | null; freeVal: 
 }
 
 /**
- * The FREE rider in the authored-prose register (2026-07-16 part 2) — the
+ * The FREE rider in the authored-prose register — the
  * catalog's FREE line must read like the glyph it annotates, not like
  * `riderText`'s telegraphese ("mark i1 d1 (self)"). Clause order mirrors the
  * glyph-priority order in `cardFace` (applyEffect first, then the
@@ -256,7 +256,7 @@ function cardStats(c: any): { chips: Chip[]; lines: string[] } {
     ];
     chips.push({ k: 'Rank', v: `${CARD_RANK_NAMES[c.rank as 1] ?? c.rank} (${rankToRarity(c.rank)})` });
     chips.push({ k: 'Kind', v: c.cardType });
-    // Since the card purge (D44) every card is both a starter and a reward.
+    // Every card is both a starter and a reward.
     chips.push({ k: 'Source', v: STARTING_CARD_IDS.includes(c.id) ? 'starter' : 'reward' });
 
     const lines: string[] = [];
@@ -390,7 +390,7 @@ function main() {
     const enemies = buildEnemies();
     const effects = buildEffects();
 
-    // Freshness stamp (2026-07-17): the catalog is a derived view of the
+    // Freshness stamp: the catalog is a derived view of the
     // engine libraries — record WHICH tree it was derived from so a stale
     // render is visible on the page itself instead of masquerading as truth.
     let commit = 'unknown';

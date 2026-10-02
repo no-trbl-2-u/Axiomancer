@@ -1,11 +1,8 @@
 /**
- * Hermetic e2e — public barrel surface (Phase 50).
+ * Hermetic e2e — public barrel surface.
  *
  * Pins the top-level `axiomancer-mechanics` exports that consumers
- * (notably `axiomancer-mobile`) rely on. The Cards library + lookup
- * were the original Phase 50 motivator (mobile-side stop-gap at
- * `state/mocks/combat.cards.fixture.ts`); the broader purpose is a
- * compact contract test that catches accidental removal of any
+ * (notably `axiomancer-mobile`) rely on: a compact contract test that catches accidental removal of any
  * locked public name without forcing every consumer to set up an
  * out-of-repo smoke.
  *

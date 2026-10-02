@@ -1,5 +1,5 @@
 /**
- * Objective function v2 (Phase 43) — the RAW COUNTERS.
+ * Objective function v2 — the RAW COUNTERS.
  *
  * This module owns the *measurement*; `combat.objective.ts` owns the *score*.
  * Splitting them is deliberate: the counters are engine-shaped (they read the
@@ -13,7 +13,7 @@
  * `scoreCombatObjective`) instead of averaging per-cell scores. Averaging
  * scores of nonlinear terms is wrong; pooling the counters is not.
  *
- * LOCKED MECHANICS (bearings § "LOCKED MECHANICS", T direct 2026-08-08):
+ * LOCKED MECHANICS (bearings § "LOCKED MECHANICS"):
  * Conviction, the Surge meter and the Dice system are permanent. The three
  * blocks below are their first-class measurement surface — they are read from
  * the systems' OWN events, so a card library that routes around a system
@@ -32,9 +32,7 @@ import { SURGE_DIE_PREFIX } from './combat.upgradeable-dice';
 /**
  * Dice-system verbs whose PRESENCE (not volume) proves the dice economy was
  * actually PLAYED rather than merely rolled: banking, ripening, forging,
- * converting, floating, refreshing, cracking and overflowing (the draft-era
- * fate tap and THE STAKE went with the D7 flag collapse, Press Fate with the
- * R4 signature placeholders). A deck that only rolls-and-spends touches none
+ * converting, floating, refreshing, cracking and overflowing. A deck that only rolls-and-spends touches none
  * of them — that is the failure mode the breadth term exists to catch.
  *
  * Order is stable so the derived breadth count is deterministic.

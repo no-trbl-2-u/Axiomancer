@@ -13,9 +13,8 @@ afterEach(() => {
 });
 
 /**
- * Spec 32 v3 fixtures — these carry no damage magnitude (`basePower` is gone
- * from the schema; direct damage now lives in the combat-engine-owned `deal`
- * mechanic): the fallacy card applies a DoT, the paradox card a self-buff. Combat-engine-owned verbs (guard etc.) no-op here.
+ * Fixtures — these carry no damage magnitude (direct damage lives in the
+ * combat-engine-owned `deal` mechanic): the fallacy card applies a DoT, the paradox card a self-buff. Combat-engine-owned verbs (guard etc.) no-op here.
  */
 const dotCard: Card = {
     id: 'sk_erode',

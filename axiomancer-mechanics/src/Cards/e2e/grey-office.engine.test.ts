@@ -1,9 +1,9 @@
 /**
- * Hermetic E2E — Phase 104: the grey office (the fresh-run starter shapes).
+ * Hermetic E2E — the grey office (the fresh-run starter shapes).
  *
  * `grey-strike` ("A Plain Blow") and `grey-ward` ("A Plain Ward") are the
  * two colourless cards (`color: 'any'`) every brand-new run
- * seeds ten copies of (5 + 3 + 2 with A Plain Word, S3 — see `STARTING_CARD_IDS`,
+ * seeds ten copies of (5 + 3 + 2 with A Plain Word — see `STARTING_CARD_IDS`,
  * `Combat/combat.rewards.ts`). This suite pins:
  *
  *   - both resolve with the right shape (colourless aspect, `theme: 'grey'`,
@@ -13,8 +13,7 @@
  *   - FREE/PAID ledgers read exactly 2 / 5, as printed;
  *   - a fresh `STARTING_CARD_IDS`-shaped deck deals exactly 7 grey-strike +
  *     3 grey-ward (`ensureStarterCards`'s verbatim-copy contract);
- *   - the grey office IS the reward pool (D44, the card purge — reversing
- *     Phase 104's "never a reward" law).
+ *   - the grey office IS the reward pool.
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
@@ -63,7 +62,7 @@ describe('Phase 104 — the grey office: card shape', () => {
     });
 });
 
-/** The tray die every PAID play names as its powering die (spec 33 — no implicit default). */
+/** The tray die every PAID play names as its powering die (no implicit default). */
 const GREY_DIE = 'fx-grey-die';
 
 /** A CLEAN fixture with `cardId` staged in hand, powered by a single die of `color`. */

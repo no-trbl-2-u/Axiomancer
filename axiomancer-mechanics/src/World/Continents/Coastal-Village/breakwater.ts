@@ -1,16 +1,15 @@
 /**
- * The Breakwater — Act 1, map 1 (map revamp M3a; decisions D21–D29).
+ * The Breakwater — Act 1, map 1.
  *
  * The first of the four Act 1 maps built from T's plates
- * (`axiomancer-mobile/assets/images/maps/act1-coast.webp`). Named by T from
- * three drafts (D26). A new game starts here (D27); the river bridge is the
- * door on to the Charcoal Wood (M3b).
+ * (`axiomancer-mobile/assets/images/maps/act1-coast.webp`). A new game
+ * starts here; the river bridge is the door on to the Charcoal Wood.
  *
- * One node per landmark on the plate (D25, `act1-landmarks.json`), and no
+ * One node per landmark on the plate (`act1-landmarks.json`), and no
  * others. The engine graph is abstract (columns and lanes); the mobile layout
  * places each node on its landmark. The columns are rings spreading out from
  * the windmill near the plate's centre, so on the plate the map opens in every
- * direction before it closes on the east bank (D16):
+ * direction before it closes on the east bank:
  *
  *   c0  the windmill                                   (start)
  *   c1  crane quay · gallows · foothill pass · smugglers' cove
@@ -20,9 +19,9 @@
  *   c5  the watchtower                                 (the last fight)
  *   c6  the river bridge                               (the door, terminal)
  *
- * Lanes run in plate order around each ring, so every lateral rib (D1) joins
+ * Lanes run in plate order around each ring, so every lateral rib joins
  * two landmarks that are neighbours on the plate. Events use the shared
- * Act 1 pool builders (D29): see `MapEvents/content.ts`.
+ * Act 1 pool builders: see `MapEvents/content.ts`.
  */
 
 import { MapDefinition } from '../../types';

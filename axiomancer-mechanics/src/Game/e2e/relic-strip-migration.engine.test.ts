@@ -1,7 +1,7 @@
 /**
- * Hermetic engine test — the v34 → v35 hop: THE REVAMP R7e2 relic strip.
+ * Hermetic engine test — the v34 → v35 hop: the relic strip.
  *
- * R7e2 (D72) keeps one relic, the Suppliant's Ring. A v34 save may still hold
+ * One relic exists, the Suppliant's Ring. A v34 save may still hold
  * any of the ten deleted relics, worn or benched. The hop drops them from the
  * inventory and the loadout, recomputes max VITAE off the bonus that remains
  * and clamps health; the ring and every non-relic item ride through.

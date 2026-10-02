@@ -1,16 +1,10 @@
 /**
- * Effect-interaction amplification bounds.
- *
- * The legacy Pressure-Track resolution thresholds (STATUS_RESOLUTION_*,
- * STATUS_ENGAGEMENT_FLOOR_PERCENT, the EFFECTS_RESOLUTION_* re-export, and
- * INTERACTION_PRIORITY) lived here too; they died with the legacy turn-based
- * combat resolver. The interaction-amplification bounds remain — they are
- * shared infrastructure consumed by `effect-modifiers.ts` in both combat
- * systems.
+ * Effect-interaction amplification bounds, consumed by
+ * `effect-modifiers.ts`.
  */
 
 /**
- * Interaction amplification bounds for Phase 142 effect combinations.
+ * Interaction amplification bounds for effect combinations.
  * These limits prevent runaway amplification while allowing meaningful
  * synergy bonuses.
  */

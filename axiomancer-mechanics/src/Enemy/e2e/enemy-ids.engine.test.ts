@@ -1,8 +1,7 @@
 /**
  * Hermetic E2E — enemy id hygiene.
  *
- * Moved here from the root naming-law sweep (`scripts/check-naming-law.mjs`)
- * when revamp phase R1 deleted it. A malformed or colliding id is a runtime
+ * A malformed or colliding id is a runtime
  * bug (broken lookups, silent registry overwrites), not a taste call, so the
  * check lives with the library it guards.
  */

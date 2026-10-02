@@ -14,7 +14,7 @@ import { EFFECT_INTERACTIONS } from '../Effects/amplification.registry';
 import { INTERACTION_AMPLIFICATION } from './resolution.constants';
 
 /**
- * Phase 156 — live DoT combo amplification.
+ * Live DoT combo amplification.
  *
  * Evaluates the active effects against the interaction registry and returns a
  * per-effect-id DoT multiplier for every triggered `amplify_damage` combo. When
@@ -37,7 +37,7 @@ export function getDotAmplificationByEffect(effects: ActiveEffect[]): Map<string
     return amp;
 }
 
-// ── WS3 trigger-clock DoT substrate (spec 32 §12, ratified 2026-07-11 #3) ─────
+// ── Trigger-clock DoT substrate ─────────────────────────────────────────────
 
 /** The three EVENT clocks — DoTs that tick on game events, never at the round
  *  boundary. A DoT with no `trigger` rides the round clock instead. */
@@ -112,9 +112,9 @@ export function getActiveDotTotal(effects: ActiveEffect[], currentRound?: number
 }
 
 /**
- * MARK (spec 32 v3, ratified A3) — the flat bonus every DoT tick on the bearer
- * gains: Σ (tickAmplifyFlat × intensity) across the bearer's effects. 0 for an
- * unmarked bearer (every prior case byte-identical). Pure.
+ * MARK — the flat bonus every DoT tick on the bearer gains:
+ * Σ (tickAmplifyFlat × intensity) across the bearer's effects. 0 for an
+ * unmarked bearer. Pure.
  */
 export function getTickAmplifyFlat(effects: ActiveEffect[]): number {
     let bonus = 0;
@@ -166,9 +166,8 @@ export function getActiveDotAmplifications(effects: ActiveEffect[]): ActiveDotAm
 /**
  * Aggregated, intensity-scaled modifiers from every active effect on a combatant.
  *
- * - Every numeric is intensity-scaled per Q2: a value of `v` at intensity `n`
- *   contributes `v × n`. (The stat-modifier maps this carried were deleted
- *   with effect stat modifiers in TRIM THE FAT T2a, D14.)
+ * - Every numeric is intensity-scaled: a value of `v` at intensity `n`
+ *   contributes `v × n`.
  * - `dotStart` is the round-clock DoT total (event-clocked DoTs excluded).
  */
 export interface AggregatedEffectModifiers {
@@ -202,13 +201,13 @@ export function getActiveEffectModifiers(effects: ActiveEffect[], currentRound?:
 
         const dot = payload.damageOverTime;
         if (dot) {
-            // Phase 156: apply live combo amplification to this effect's DoT.
+            // Apply live combo amplification to this effect's DoT.
             // Multiplier defaults to 1 (no combo) and floors to an integer to
-            // match the rest of the unresisted DoT math. P0-truth: the ramp
+            // match the rest of the unresisted DoT math. The ramp
             // (`escalatesPerTurn`) grows the per-round base when a round is threaded.
-            // MARK (spec 32 v3): each ticking effect gains the bearer's flat
+            // MARK: each ticking effect gains the bearer's flat
             // tick-amplify bonus (+1 per Mark stack per tick), added below.
-            // WS3: event-clocked DoTs (null round phase) never tick at the
+            // Event-clocked DoTs (null round phase) never tick at the
             // round boundary — `fireDotTrigger` owns their clock.
             if (ticksOnRoundClock(dot)) {
                 const multiplier = dotAmp.get(ae.effectId) ?? 1;

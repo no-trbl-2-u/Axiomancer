@@ -2,10 +2,10 @@
 
 /**
  * CoastalContinentMapNames are all the maps in the Coastal Continent
- * - 'breakwater': Act 1, map 1 — the storm coast, where a new game starts
- *   (map revamp M3a, D27). Defined in `./Continents/Coastal-Village/breakwater.ts`.
- * - 'charcoal-wood': Act 1, map 2 — the forest past the Breakwater's bridge
- *   (map revamp M3b). Defined in `./Continents/Coastal-Village/charcoal-wood.ts`.
+ * - 'breakwater': Act 1, map 1 — the storm coast, where a new game starts.
+ *   Defined in `./Continents/Coastal-Village/breakwater.ts`.
+ * - 'charcoal-wood': Act 1, map 2 — the forest past the Breakwater's bridge.
+ *   Defined in `./Continents/Coastal-Village/charcoal-wood.ts`.
  */
 export type CoastalContinentMapNames =
     'breakwater' |
@@ -49,10 +49,10 @@ export type MapName =
 
 /**
  * NorthernContinentMaps are all the maps in the Northern Continent
- * - 'beacon-crags': Act 1, map 3 — the mountains past the Charcoal Wood's stair cave
- *   (map revamp M3c). Defined in `./Continents/Northern-Continent/beacon-crags.ts`.
- * - 'lantern-deep': Act 1, map 4 — the underworld below the Beacon Crags' glacier shrine
- *   (map revamp M3d). Defined in `./Continents/Northern-Continent/lantern-deep.ts`.
+ * - 'beacon-crags': Act 1, map 3 — the mountains past the Charcoal Wood's stair cave.
+ *   Defined in `./Continents/Northern-Continent/beacon-crags.ts`.
+ * - 'lantern-deep': Act 1, map 4 — the underworld below the Beacon Crags' glacier shrine.
+ *   Defined in `./Continents/Northern-Continent/lantern-deep.ts`.
  * @todo: Add more maps
  * @todo: Come up with better names
  */

@@ -1,11 +1,11 @@
 /**
- * Shop reducers — Phase 37.
+ * Shop reducers.
  *
  * Pure `Character → Character` operations. No GameState coupling, no
  * exceptions: invalid input (negative price, insufficient funds,
  * missing item) returns the input character unchanged so UI layers can
  * pre-check and the engine never has to throw across the consumer
- * boundary. Mirrors the shape of `allocateStatPoint` (Phase 29).
+ * boundary. Mirrors the shape of `allocateStatPoint`.
  *
  * `buyItem` deep-clones the purchased item — two consumers who each
  * buy the same ware should not share an item identity in their
@@ -20,14 +20,13 @@ import type { ShopWare } from './shop.types';
 import { grantItem } from './item-grant';
 
 /**
- * Default sell price for a shop ware (Phase 37, exploit-fix iterate).
+ * Default sell price for a shop ware.
  *
  * Halves the buy price and floors — so a ware with price 1 sells for 0,
  * price 2 sells for 1, price 12 sells for 6. The result is always
  * strictly less than the buy price for any positive integer price,
  * which forces every buy → sell round-trip to be net-negative for the
- * player and forecloses the small infinite-money loop the prior
- * `Math.max(1, Math.floor(price / 2))` floor allowed at price ≤ 2.
+ * player and forecloses an infinite-money loop at price ≤ 2.
  *
  * UIs should call this helper rather than re-implementing the
  * heuristic; the policy lives on the engine side so future content

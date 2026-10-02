@@ -1,11 +1,9 @@
 /**
  * Hermetic E2E — equip / unequip stat folding + consumable lifecycle.
  *
- * After the equipment-signature epic (phases 18-23) equipment carries only
- * static `statModifiers` (now only the `maxHp` line, folded into `maxHealth`
- * at equip-time) and one `grantsSignature`. The rarity / affix / rolled-modifier /
- * passive-effect / proc / resource-token machinery is gone, so this suite pins
- * only the surviving contracts:
+ * Equipment carries only static `statModifiers` (only the `maxHp` line,
+ * folded into `maxHealth` at equip-time) and one `grantsSignature`. This
+ * suite pins:
  *
  *   • `equipItem` folds `statModifiers` into `maxHealth`; `unequipItem` reverts.
  *   • Equipment applies NO effects (stat-only) — `Character.effects` untouched.

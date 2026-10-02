@@ -90,8 +90,8 @@ describe('stage-eligible card pools', () => {
             // share of the deck the player has spent rest-site beats on. The
             // pool is still one entry per eligible card, so compare on BASE ids.
             const pool = new Set(stageEligibleCardIds(stage).map(baseCardId));
-            // The card purge (D44, 2026-09-27): the grey office is now also
-            // the reward pool, so it sits inside every stage pool.
+            // The grey office is also the reward pool, so it sits inside
+            // every stage pool.
             const expected = cardLibrary.filter(c =>
                 c.tier <= stage.maxCardTier
                 && rankMaturityLevel(c.rank) <= stage.playerLevel);
@@ -103,8 +103,7 @@ describe('stage-eligible card pools', () => {
     });
 
     it('the early pool is strictly smaller than the late pool (deck maturity grows)', () => {
-        // Rewritten after the card purge (P1, 2026-09-27): the library is three
-        // tier-1 grey cards that pass every gate, so a tier-3, rank-5 extra
+        // The library is three tier-1 grey cards that pass every gate, so a tier-3, rank-5 extra
         // card stands in for the mature content the late stage unlocks.
         const mature: Card = {
             id: 'stage-test-mature', name: 'Stage Test Mature',

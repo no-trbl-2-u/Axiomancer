@@ -2,7 +2,7 @@
  * Process-level smoke — real `ts-node` command startup for the two
  * player-facing entrypoints (`npm run combat`, `npm run game -- --route`).
  *
- * Phase 22: the hermetic e2e suites (`combat.cli.engine.test.ts`,
+ * The hermetic e2e suites (`combat.cli.engine.test.ts`,
  * `game.cli.route-hazard.engine.test.ts`) call `runCombatCli` /
  * `runGameCli` in-process, which proves the store/event wiring but never
  * exercises the actual `require.main === module` bootstrap, npm's argv

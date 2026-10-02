@@ -1,11 +1,8 @@
 /**
  * Loot-cache choice engine ("card" / "item") — pure engine
- * transitions (Phase 63).
+ * transitions.
  *
- * Replaces The Reliquary's Pick Pool dice-pool session with T's ruling
- * (2026-08-15: "Card reward, item reward, or sacrifice reward.") — a
- * loot-cache node is one irreversible choice of two (the sacrifice offer
- * granted nothing after R3b and went in R3c). State machine:
+ * A loot-cache node is one irreversible choice of two. State machine:
  *
  *   offer ──chooseLootCacheChoiceOffer('card'|'item')──▶ outcome
  *                                                                        │

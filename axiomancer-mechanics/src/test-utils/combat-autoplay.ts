@@ -57,8 +57,8 @@ const rankedAutoCards = (s: CombatEncounterState, policy: HazardAutoPolicyId): {
 
 
 /**
- * Plays one threat phase under the ROUND-TURN LAW (Gate 0, 2026-07-10): ONE
- * tray roll per phase. Spec 33 — each paid play takes the best-ranked card a
+ * Plays one threat phase under the ROUND-TURN LAW: ONE
+ * tray roll per phase. Each paid play takes the best-ranked card a
  * live die can LEGALLY power (`firstLegalPoweringDie`), until none can; then
  * the leftover hand drains through the FREE tops and the turn ends. The
  * safety counter is kept but never binds on legal play.

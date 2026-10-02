@@ -1,14 +1,13 @@
 /**
- * Enemy library — THE REVAMP roster (R2, D48).
+ * Enemy library — the roster.
  *
  * Three foes that deal plain damage, one per tier Act 1 uses, plus the
  * `sandbag-01` dev dummy:
  *   - Float-Eye (L1, normal) — every Act 1 map's wandering fight.
  *   - The Brine Hag (L7, elite) — a rarer mid-region fight; befriendable.
- *   - The Doorwarden (L8, boss) — every region's door fight (D61).
+ *   - The Doorwarden (L8, boss) — every region's door fight.
  *
- * No enemy keyword, affliction or rider survives (D48, D63); B2 regrows the
- * roster tier by tier with T. Git history holds the 76 retired foes (D50).
+ * No enemy carries a keyword, affliction or rider.
  *
  * Difficulty is tier (`normal → elite → boss`, driving the threat-damage
  * multiplier, XP and the encounter generator's adaptive level band), authored
@@ -51,8 +50,8 @@ const APORIA_ADDED = '2026-07-07';
 // ─── The roster ───────────────────────────────────────────────────────────────
 
 /**
- * The library's smallest stat block. HAND-SET 1/1/1 (15 HP at L1) — mirrors
- * the retired Disatree fixture; many hermetic e2e tests depend on the exact
+ * The library's smallest stat block. HAND-SET 1/1/1 (15 HP at L1); many
+ * hermetic e2e tests depend on the exact
  * `maxHealth = 15`, so keep this block at 1/1/1.
  */
 export const FloatEye = createEnemy({
@@ -133,8 +132,8 @@ export const BrineHag = createEnemy({
 });
 
 /**
- * The region boss — every Act 1 region's door fight (D61). Formerly the
- * Labyrinth's Act I boss; its stages are a boss phase change, not keywords.
+ * The region boss — every Act 1 region's door fight. Its stages are a boss
+ * phase change, not keywords.
  */
 export const TheDoorwarden = createEnemy({
     id: 'enemy-the-doorwarden',
@@ -194,12 +193,11 @@ export const TheDoorwarden = createEnemy({
     tags: ['early-game', 'boss', 'enemy'],
 });
 
-// ─── Test fixture (legacy, NOT part of the roster) ────────────────────────────
+// ─── Test fixture (NOT part of the roster) ───────────────────────────────────
 
 /**
- * Punching-bag enemy used by Spec 04b's e2e suite and hermetic tests that
- * need a long-lived combat encounter. It keeps body at 1 so old body-defense
- * damage assertions remain stable, while heart/mind carry the extra HP budget.
+ * Punching-bag enemy used by hermetic tests that need a long-lived combat
+ * encounter. It keeps body at 1 so body-defense damage assertions remain stable, while heart/mind carry the extra HP budget.
  * Kept separate from the roster so the encounter generator never selects it.
  */
 export const Sandbag_01 = createEnemy({
@@ -221,7 +219,7 @@ export const Sandbag_01 = createEnemy({
 export const EnemyLibrary = [FloatEye, BrineHag, TheDoorwarden] as const;
 
 /**
- * An Act 1 region's wandering pool: Float-Eye (D61). The Brine Hag is a
+ * An Act 1 region's wandering pool: Float-Eye. The Brine Hag is a
  * rarer mid-region fight and the Doorwarden the door fight; both are pinned
  * per-node in `MapEvents/content.ts`, not drawn.
  */
@@ -229,14 +227,14 @@ const ACT1_POOL = [FloatEye];
 
 /**
  * Per-map enemy pools used by the encounter generator. Act 1 draws Float-Eye;
- * the Labyrinth (parked, D54) keeps it so its parked tests run.
+ * the parked Labyrinth keeps it so its parked tests run.
  */
 export const EnemiesByMap = {
     'breakwater': ACT1_POOL,
     'charcoal-wood': ACT1_POOL,
     'beacon-crags': ACT1_POOL,
     'lantern-deep': ACT1_POOL,
-    // Parked (D54); unreachable since the vault door is sealed.
+    // Parked; unreachable while the vault door is sealed.
     'aporia-colonnade': ACT1_POOL,
     'aporia-archive': ACT1_POOL,
     'aporia-proof': ACT1_POOL,
@@ -244,8 +242,7 @@ export const EnemiesByMap = {
 
 /**
  * Slug-keyed registry of enemy fixtures. Useful for hermetic tests, map-event
- * payloads and debug entry points that look an enemy up by short name. The
- * `sandbag` alias stays stable for back-compat with Spec 04b-era tests.
+ * payloads and debug entry points that look an enemy up by short name.
  */
 export const ENEMY_REGISTRY = {
     // Test fixture.
@@ -257,7 +254,7 @@ export const ENEMY_REGISTRY = {
 
 export type EnemySlug = keyof typeof ENEMY_REGISTRY;
 
-/** Every live enemy id. A save naming any other (a foe R2 retired) re-points to Float-Eye. */
+/** Every live enemy id. A save naming any other (a removed foe) re-points to Float-Eye. */
 export const LIVE_ENEMY_IDS: ReadonlySet<string> = new Set(
     Object.values(ENEMY_REGISTRY).map(e => e.id),
 );

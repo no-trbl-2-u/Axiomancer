@@ -1,15 +1,13 @@
 /**
- * Spec 32 v3 — The Themed Deck Library: Card → CombatCard projection adapter.
+ * Card → CombatCard projection adapter.
  *
  * Projects a learned `Card` into a `CombatCard` view: stance color, verb
  * class, rank/rarity, card type, and FREE/PAID action text. The projection is
  * pure — it reads the card + effect libraries and never mutates.
  *
- * THE STRIKE IS DEAD (§1): there is no chip line and no auto-derived strike
- * line. (Direct damage returned as the authored `deal` mechanic in THE BIG
- * NUMBERS REWRITE, 2026-09-02, and `bottomDamagePreview` counts it.) Every
- * printed number is a real engine unit (the P0-truth law survives the
- * overhaul).
+ * There is no chip line and no auto-derived strike line: direct damage is
+ * the authored `deal` mechanic, and `bottomDamagePreview` counts it. Every
+ * printed number is a real engine unit.
  */
 
 import { MAX_EFFECT_INTENSITY } from '../Game/game-mechanics.constants';
@@ -33,7 +31,7 @@ function isDot(effect: Effect): boolean {
     return effect.payload.damageOverTime !== undefined;
 }
 
-/** True if the effect hinders the bearer's turn (BACKFIRE-class control). */
+/** True if the effect hinders the bearer's turn (control). */
 function isControl(effect: Effect): boolean {
     if (effect.category === 'control') return true;
     const r = effect.payload.actionRestriction;
@@ -80,8 +78,8 @@ export function effectImpact(
     return { track: 'none', amount: 0 };
 }
 
-/** Stance color for a projected combat card — its philosophical aspect (§4.3).
- *  Phase 104 — 'any' is the grey office's colourless aspect: every die colour
+/** Stance color for a projected combat card — its philosophical aspect.
+ *  'any' is the grey office's colourless aspect: every die colour
  *  powers it, with a neutral (never on/off) colour-match bonus. */
 export function cardStanceColor(card: Card): CardAspect {
     return card.color;
@@ -113,19 +111,13 @@ export function classifyVerbClass(
 }
 
 /**
- * VITAE preview (P0-truth): what this card's PAID line takes off the foe on a
+ * VITAE preview: what this card's PAID line takes off the foe on a
  * neutral read — direct damage PLUS the lifetime of the statuses it lands
  * (Σ floor(damagePerRound × intensity) × duration, ramp-aware).
  *
- * THE BIG NUMBERS REWRITE (2026-09-02): this used to sum DoT ONLY, with the
- * comment "0 for everything else (no strike preview exists any more)" — true
- * under the strike ban, and badly wrong once DEAL came back. The sim's greedy
- * pilot ranks candidate plays by exactly this number, so while it ignored
- * direct damage the pilot was blind to the library's primary verb: every
- * damage card scored 0, the bot fell through to its signature skill on almost
- * every turn (dominance 100% on a signature at every stage), 75% of the
- * library never got played, and the late-stage cells read unwinnable. The
- * preview is what makes the pilot able to see; it has to count the whole hit.
+ * The sim's greedy pilot ranks candidate plays by exactly this number, so it
+ * must count the whole hit: a preview that ignored direct damage would leave
+ * the pilot blind to the library's primary verb.
  */
 export function bottomDamagePreview(card: Card, lookupEffect: EffectLookup): number {
     let total = 0;
@@ -181,8 +173,8 @@ export function primaryEnemyEffectId(card: Card, lookupEffect: EffectLookup): st
 }
 
 /**
- * Human text for a `CardRider` — every clause a real engine unit (the P0-truth
- * law: generated action text IS the applied number).
+ * Human text for a `CardRider` — every clause a real engine unit (generated
+ * action text IS the applied number).
  *
  * `opts.selfTargetCard` marks riders printed on a self-target card: an effect
  * rider then names its side only when it crosses the card's printed target
@@ -219,8 +211,7 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
 
 /** Registry DoT species — their keyword definition already says how they tick.
  *  Any OTHER DoT effect is card-local vocabulary and prints its per-turn bite
- *  inline (card-wording audit 2026-07-13: nettle sting / kindling ember were
- *  the two undefined species). */
+ *  inline. */
 export const REGISTRY_DOT_IDS: ReadonlySet<string> = new Set(['debuff_poison', 'debuff_bleed']);
 
 /** Human text for a card's PAID payload: statuses + mechanics, real units.
@@ -269,7 +260,7 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
     const { verbClass, track } = classifyVerbClass(card, lookupEffect);
     const preview = bottomDamagePreview(card, lookupEffect);
 
-    // 2026-07-16 — an authored `paidSummary` replaces the generated
+    // An authored `paidSummary` replaces the generated
     // telegraphese wholesale; the honesty guard pins its numbers and keywords
     // to the payload, so the authored sentence IS the truth surface (no auto
     // dot-suffix gets appended on top of it).

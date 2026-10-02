@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — Spec 33 §6 die-gear reducer (Phase D5).
+ * Hermetic E2E — die-gear reducer.
  *
  * Pure transitions over `Character.dieGear`:
  *  - HONE   adds a mana face (−1 miss); refused loudly at the 1-miss floor;

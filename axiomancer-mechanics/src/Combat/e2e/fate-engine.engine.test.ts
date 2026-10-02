@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — Fate Engine P1 (spec 31 §1): the dice get a second read.
+ * Hermetic E2E — Fate Engine: the dice get a second read.
  *
  * Pins every new dice mechanic to exact engine behavior, in real units:
  *   R1 TOLL — every spent die tallies its color; card THRESHOLDS fire free riders
@@ -9,17 +9,8 @@
  *   R7 COLOR MATCH — a matched die extends the landed status +1 turn
  *   R8 dieId HONORED — a Reserve die id powers the play; a bogus id fizzles
  *
- * D7 (the OFF dice path deleted): every play names its powering die under the
- * shipped spec-33 model. R2's bank-or-burn AT DRAFT, R4 (X dice + the FATE
- * TAP — the rolled tray has no X dice) and R5 (the undrafted omen die) were
- * draft-model mechanics and left with it.
- *
- * spec 32 v3 re-pin: REACT is deleted (REAP/RUPTURE absorb the payoff role);
- * riders carry no chipHp (the strike is dead); fixtures carry rank/cardType.
- *
- * The card purge (P1, 2026-09-27) deleted the "library cards print their
- * threshold die lines" block: its carriers (the-long-lent, the-offertory-
- * plate) are gone and no surviving card prints a threshold.
+ * Every play names its powering die. Riders carry no chipHp; fixtures carry
+ * rank/cardType.
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
@@ -116,8 +107,8 @@ describe('R2 RESERVE — bank, ripen, cash', () => {
     it('pips cash as +PIP_INTENSITY_BONUS intensity per pip on a status play (R8: the dieId is honored)', () => {
         let s = open(['qa-bleed-card'], 'heart');
         s = setDice(s, ['heart', 'mind']);
-        // BODY reserve die — the color law (2026-07-09) demands the powering die
-        // match the body card; every spec-33 play lands at read 'none'.
+        // BODY reserve die — the color law demands the powering die match the
+        // body card; every play lands at read 'none'.
         s = { ...s, reserve: [{ id: 'bank-2', color: 'body', state: 'available', temporary: false, pips: 2 }] };
         const entry = s.hand.find(h => h.cardId === 'qa-bleed-card')!;
         const res = playCombatCard(s, { uid: entry.uid }, true, 'bank-2');
@@ -125,8 +116,8 @@ describe('R2 RESERVE — bank, ripen, cash', () => {
         // authored i1 + 2 pips × PIP_INTENSITY_BONUS (no read bonus)
         expect(bleed.intensity).toBe(1 + 2 * PIP_INTENSITY_BONUS);
         expect(res.events.some(e => e.kind === 'pips-cashed')).toBe(true);
-        // Spec 33 retired the VARIETY-CHAIN auto-refresh (R9), so the powering
-        // Reserve die is spent and leaves the Reserve with its cashed pips.
+        // The powering Reserve die is spent and leaves the Reserve with its
+        // cashed pips.
         expect(res.state.reserve ?? []).toEqual([]);
     });
 

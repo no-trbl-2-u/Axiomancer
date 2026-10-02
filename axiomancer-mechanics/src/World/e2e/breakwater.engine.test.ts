@@ -1,19 +1,19 @@
 /**
- * The Breakwater — Act 1, map 1 (map revamp M3a; D21, D25–D29).
+ * The Breakwater — Act 1, map 1.
  *
- * Pins what the map revamp decided for the first Act 1 map:
- * - a new game starts here (D27), and any campaign map can be started on
+ * Pins the first Act 1 map:
+ * - a new game starts here, and any campaign map can be started on
  *   instead (the dev "start on any map" tools);
- * - the map borrows the shipped pool builders (D29), with one authored
- *   event on every node, one Anvil near its exit (D61, R3b) and a door on
- *   to the Charcoal Wood (M3b);
+ * - the map borrows the shipped pool builders, with one authored
+ *   event on every node, one Anvil near its exit and a door on
+ *   to the Charcoal Wood;
  * - every run ends at the river bridge, through the watchtower, where the
- *   region's elite waits (D30); the start is an arrival scene (D31).
+ *   region's elite waits; the start is an arrival scene.
  *
  * The generic gauntlet invariants (no strands, column law, ribs, distinct
  * coordinates) run over this map in `map-traversal.engine.test.ts` like every
- * other registered map. The D25/D16 layout pins live in mobile, where the
- * landmarks and the sheet are.
+ * other registered map. The layout pins live in mobile, where the landmarks
+ * and the sheet are.
  */
 
 import { describe, expect, it } from 'vitest';
@@ -128,7 +128,7 @@ describe('the Breakwater\'s events (D29)', () => {
     });
 
     it('fights the Doorwarden at the watchtower, pinned low, the last fight before the door (D61)', () => {
-        // R9 (D55): level 1, one under the level-2 player a full clear brings.
+        // Level 1, one under the level-2 player a full clear brings.
         const payload = getNodeEventPool('coastal-continent', 'breakwater', 'bw-17')!.entries[0]!.payload;
         expect(payload).toMatchObject({ kind: 'encounter', enemySlug: 'the-doorwarden', isBoss: true, level: 1 });
     });

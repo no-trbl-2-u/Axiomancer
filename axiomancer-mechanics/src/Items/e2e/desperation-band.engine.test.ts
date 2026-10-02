@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — Phase 96, the consumable desperation band.
+ * Hermetic E2E — the consumable desperation band.
  *
  * A flat `healAmount` pays the same at full health as at death's door, so the
  * dominant play is to hoard the flask and never drink it. `healAmountBelowHalf`
@@ -13,7 +13,7 @@
  *   - the band is read BEFORE healing, so a drink that lifts the player out of
  *     the band still pays the desperation amount;
  *   - `healAmountBelowHalf` without a `healAmount` is inert (not a payload);
- *   - a consumable with no band behaves exactly as it did pre-Phase-96;
+ *   - a consumable with no band pays its flat amount only;
  *   - the clamp to `maxHealth` still wins over the larger amount;
  *   - degenerate records (`maxHealth <= 0`) never read as desperate;
  *   - the shipped library's three healing potions all carry the 1.5x band.
@@ -54,7 +54,7 @@ const bandedPotion: Consumable = {
     quantity: 1,
 };
 
-/** A pre-Phase-96 shaped potion: flat only, no band. */
+/** A flat-only potion: no band. */
 const flatPotion: Consumable = {
     id: 'csl_flat',
     name: 'Flat Draught',

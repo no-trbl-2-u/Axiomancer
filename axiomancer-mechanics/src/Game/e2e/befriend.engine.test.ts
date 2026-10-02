@@ -1,15 +1,15 @@
 /**
- * Hermetic e2e — Phase 60 befriendable-enemy content arc (2026-07-06 roster).
+ * Hermetic e2e — befriendable-enemy content arc.
  *
  * Drives a friendship outcome for the Brine Hag end-to-end
  * through `createGameStore`, asserts the per-enemy `friendshipReward`
- * threads through `store.endCombat()` per Phase 60 D5 / D6 / D7:
+ * threads through `store.endCombat()`:
  *
- *   - items append to `report.loot` (D6)
- *   - xpBonus adds to `report.xpGained` on top of Phase 36 half-XP (D5)
- *   - narrative surfaces on `report.friendshipReward.narrative` (D7)
+ *   - items append to `report.loot`
+ *   - xpBonus adds to `report.xpGained` on top of the half-XP base
+ *   - narrative surfaces on `report.friendshipReward.narrative`
  *
- * Phase 36 mechanics (half-XP base) are preserved.
+ * The half-XP base is preserved.
  *
  * Combat is now decoupled from the store: `endCombat(outcome)` takes the
  * resolved outcome directly (the Hazard-Pattern engine decides eligibility
@@ -24,7 +24,7 @@ import { nullAdapter } from '../persistence/null.adapter';
 
 describe('Phase 60 — befriendable-enemy content arc', () => {
     it('FloatEye friendship omits report.friendshipReward — enemy has no authored reward', () => {
-        // Regression guard for Phase 60 D12: existing consumers that
+        // Regression guard: existing consumers that
         // destructure { outcome, xpGained, loot } continue to work; the
         // friendshipReward field is undefined for enemies without authoring.
         const store = createGameStore(nullAdapter);
@@ -34,13 +34,13 @@ describe('Phase 60 — befriendable-enemy content arc', () => {
 
         expect(report.outcome).toBe('friendship');
         expect(report.friendshipReward).toBeUndefined();
-        // Phase 36 base still computes: half-XP only; no xpBonus applied.
+        // The base still computes: half-XP only; no xpBonus applied.
         // Base half-XP for FloatEye (level 1, normal: 1 * 20 / 2 = 10).
         expect(report.xpGained).toBe(10);
     });
 
     it('victory outcome does NOT thread friendshipReward content even when authored', () => {
-        // Phase 60 D7 — friendshipReward field surfaces ONLY on
+        // The friendshipReward field surfaces ONLY on
         // outcome === 'friendship'. Defeat / victory / flee paths skip it.
         const store = createGameStore(nullAdapter);
         store.getState().startCombat(BrineHag);
@@ -62,7 +62,7 @@ describe('Phase 62 — quest-branch wire-in on outcome === friendship', () => {
         // Drive a second friendship encounter (same flag would be a no-op).
         store.getState().startCombat(BrineHag);
         store.getState().endCombat('friendship');
-        // De-duped: still exactly one occurrence per Phase 62 D3.
+        // De-duped: still exactly one occurrence.
         const matches = store.getState().flags.filter(f => f === 'befriended-brine-hag');
         expect(matches.length).toBe(1);
     });
@@ -82,7 +82,6 @@ describe('Phase 102 — Befriendable-enemy Tier-2 expansion', () => {
 
         const report = store.getState().endCombat('friendship');
         expect(report.outcome).toBe('friendship');
-        // heart-draught was a no-op consumable retired by Tier 0 item 2.
         expect(report.loot.some(item => item.id === 'healing-potion')).toBe(true);
         expect(report.xpGained).toBe(Math.floor(7 * 50 * 0.5) + 35); // base half-XP (elite) + 35 bonus
         expect(report.friendshipReward?.narrative).toMatch(/hag lowers her hands/);

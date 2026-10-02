@@ -1,10 +1,10 @@
 /**
- * Hermetic engine test — THE REVAMP R5 (D49): items are the healing potions.
+ * Hermetic engine test — items are the healing potions.
  *
  * The consumable library holds minor, normal and greater healing potions and
  * nothing else. Every grant surface (enemy loot, friendship rewards, debug
  * presets, shops including the parked maps', loot caches) may only name an id
- * the library has, so no surface hands out an item that no longer exists.
+ * the library has, so no surface hands out an item that does not exist.
  */
 
 import { describe, it, expect } from 'vitest';

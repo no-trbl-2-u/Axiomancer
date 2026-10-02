@@ -1,12 +1,10 @@
 /**
- * Hermetic engine test — Phase 63 save migration (v19 → v20).
+ * Hermetic engine test — loot-cache save migration (v19 → v20).
  *
- * Retires the loot-cache Pick Pool minigame ("The Reliquary"), replaced by
- * `World/LootCacheChoice`'s three-offer choice. Pins that a v19 save loads
- * clean at v20: a live cache session riding along in the raw payload's
- * mobile-only `cache` key is cleared rather than carried forward in the old
- * shape. (The hop also defaulted the `mapGoodwill` slice; the village
- * goodwill system was purged in R3b, v29, so those cases went with it.)
+ * The loot cache is `World/LootCacheChoice`'s three-offer choice, not the
+ * Pick Pool minigame ("The Reliquary"). Pins that a v19 save loads clean at
+ * v20: a live cache session riding along in the raw payload's mobile-only
+ * `cache` key is cleared rather than carried forward in the old shape.
  */
 
 import { describe, it, expect } from 'vitest';

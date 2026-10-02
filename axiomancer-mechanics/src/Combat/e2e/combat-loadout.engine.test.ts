@@ -1,5 +1,5 @@
 /**
- * Phase 169 — Curated Combat Loadout: hermetic e2e test.
+ * Curated Combat Loadout: hermetic e2e test.
  *
  * Covers:
  *  1. Codec round-trip: addToLoadout / getCombatLoadout / removeFromLoadout.
@@ -18,8 +18,8 @@ import { initializeCombatEncounter } from '../combat.engine';
 import { createCharacter } from '../../Character';
 import { FloatEye } from '../../Enemy/enemy.library';
 
-// The card purge (P1, 2026-09-27): the grey office is the whole library, so
-// its three cards hold the fixture seats (A Plain Blow / Ward / Word).
+// The grey office is the whole library, so its three cards hold the fixture
+// seats (A Plain Blow / Ward / Word).
 const CARD_A = 'grey-strike';
 const CARD_B = 'grey-ward';
 

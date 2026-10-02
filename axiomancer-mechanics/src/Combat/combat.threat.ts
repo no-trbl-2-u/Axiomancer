@@ -1,5 +1,5 @@
 /**
- * Spec 25 — Hazard-Pattern Combat: enemy threat sequences (§4.4, §10).
+ * Hazard-pattern combat: enemy threat sequences.
  *
  * Each enemy fights as an authored *threat sequence* — 2-5 phases, revealed in
  * full at combat start (Hazard's full-information doctrine). HP MODEL: the enemy
@@ -38,20 +38,19 @@ export interface AuthoredThreatPhase {
     threatIntensity?: number;
     /** Optional enemy self-heal on Overwhelm (a regenerating phase). */
     enemyHeal?: number;
-    /** Phase 33b — enemy sheds up to this many of its OWN afflictions on
-     *  Overwhelm (the CAUTERIZE archetype: a fraction, never the last —
-     *  enforced again at resolution in the engine). Previously only
-     *  reachable via the WS9 `bearer-afflictions-gte` branch's implicit
-     *  reactive cleanse; now directly authorable on any phase, linear or
-     *  branch. An explicit value here wins over that implicit fallback. */
+    /** Enemy sheds up to this many of its OWN afflictions on Overwhelm (the
+     *  CAUTERIZE archetype: a fraction, never the last — enforced again at
+     *  resolution in the engine). Authorable on any phase, linear or branch;
+     *  the `bearer-afflictions-gte` branch also carries an implicit reactive
+     *  cleanse, and an explicit value here wins over that fallback. */
     enemyCleanse?: number;
     /** Threat description WITHOUT the damage number — the resolver appends "(+N damage[, Effect])". */
     actionText: string;
     isFinalPhase?: boolean;
-    /** Phase 3 — "rage mode": locks this phase until the resolving round
+    /** "Rage mode": locks this phase until the resolving round
      *  reaches it (see `CombatThreatPhase.unlockAfterRound`).
      *
-     *  ROUND-KEYED DECK TIERS (owner ruling, 2026-09-02) — this field is now
+     *  ROUND-KEYED DECK TIERS — this field is
      *  also the mechanism behind tiered enemy decks: `compileEnemyDeck`
      *  (`combat.enemy-decks.ts`) stamps a tier's round onto every card in it,
      *  so tier 2 is unreachable before round 3 and tier 3 before round 6 by
@@ -61,18 +60,18 @@ export interface AuthoredThreatPhase {
      *  a gated candidate by HOLDING the pointer at the last reachable phase
      *  rather than advancing past it. */
     unlockAfterRound?: number;
-    /** Phase 33c (spec 33 §1) — THE COVETED DIE: seated at the DECK level by
+    /** THE COVETED DIE: seated at the DECK level by
      *  `compileEnemyDeck` (`DECK_STAKES`, defaulting to a BOSS/UNIQUE deck's
      *  2nd card), never via backfill. Undefined = no coveted die on this
      *  phase (the common case). */
     stake?: boolean;
 }
 
-// ── WS9 (spec 32 §12 item 7, Ratified 2026-07-11) — conditional threat branches ──
+// ── Conditional threat branches ──
 
 /**
  * A BRANCH step: one authored phase slot holding a condition and two fully
- * authored forks. `AuthoredThreatPhase` itself is UNCHANGED (ratified) — the
+ * authored forks. `AuthoredThreatPhase` itself is unchanged — the
  * branch is a parallel wrapper. Closed condition union, authored data only,
  * zero RNG: the fork commits from observable state at phase START.
  */
@@ -109,7 +108,7 @@ export function describeThreatBranchCondition(condition: ThreatBranchCondition):
 /**
  * Evaluates a branch condition against phase-START state. Pure and RNG-free:
  * affliction count is the enemy's live debuff instances; the full-block read
- * is the `lastThreatFullyBlocked` combat ledger (spec 32 §12 item 4).
+ * is the `lastThreatFullyBlocked` combat ledger.
  */
 export function evaluateThreatBranchCondition(
     condition: ThreatBranchCondition,
@@ -172,7 +171,7 @@ function difficultyMult(enemy: Enemy): number {
     return (d !== undefined && DIFFICULTY_MULT[d] !== undefined) ? DIFFICULTY_MULT[d] : 1.0;
 }
 
-// ── Spec 26 §2 — intent derivation (the telegraph) ───────────────────────────
+// ── Intent derivation (the telegraph) ────────────────────────────────────────
 
 /** True when a threat effect debuffs the player (an applied effectId). */
 function effectIsDebuff(eff: CombatThreatEffect): boolean {
@@ -180,17 +179,14 @@ function effectIsDebuff(eff: CombatThreatEffect): boolean {
 }
 
 /**
- * Derives the enemy's INTENT type from a threat action's effects (Spec 26 §2.2).
+ * Derives the enemy's INTENT type from a threat action's effects.
  * Damage + a debuff, or damage + self-heal, etc. → `combo`. Pure.
  */
 export function deriveIntentType(effects: readonly CombatThreatEffect[]): CombatIntentType {
     const hasDamage = effects.some(e => (e.damage ?? 0) > 0);
-    // Phase 33a correction: `enemyCleanse` used to read as self-serving
-    // (buff) below, but shedding its OWN afflictions erases the player's
-    // invested DoT work — that's counterplay against the player, not a
-    // benign self-buff, so it now counts toward `hasDebuff` alongside the
-    // two new hooks (`effectIsDebuff` already covers those). Only a bare
-    // self-heal still reads as `buff`.
+    // `enemyCleanse` counts toward `hasDebuff`: shedding its OWN afflictions
+    // erases the player's invested DoT work — counterplay against the player,
+    // not a benign self-buff. Only a bare self-heal reads as `buff`.
     const hasDebuff = effects.some(e => effectIsDebuff(e) || (e.enemyCleanse ?? 0) > 0);
     const hasBuff = effects.some(e => (e.enemyHeal ?? 0) > 0);
     const active = [hasDamage, hasDebuff, hasBuff].filter(Boolean).length;
@@ -208,20 +204,13 @@ function withIntent(phase: CombatThreatPhase): CombatThreatPhase {
 
 /**
  * Threat-damage budget for an Overwhelmed phase (hazard-combat pass). Anchored to
- * LEVEL + DIFFICULTY, not the enemy's legacy attack stat — the old `atk × scale`
- * model produced ~180 dmg/phase at L50 (instant death) and ~4 at L2 (no bite),
- * because the legacy attack curve is far steeper than HP. As a consistent ~%-of-
- * player-HP punish it keeps a missed clear meaningful at every level. Authored
- * sequences set their own damage; this only backs the generator fallback.
- */
-/**
- * THE BIG NUMBERS REWRITE (2026-09-02) — the budget was raised so a telegraph
- * reads as a real threat against the new VITAE pools, and the separate global
- * `THREAT_DAMAGE_SCALE` fudge factor was folded in here and deleted (one knob,
- * not two). Reference points at `damageWeight` 1.0, phase 0:
- * Measured against the playtest matrix on 2026-09-02 and pulled back from
- * 2.5: at 2.5 a mid-campaign boss killed the player in 4 phases before any
- * deck could assemble. Reference points at weight 1.0, phase 0 (per-level 0.8):
+ * LEVEL + DIFFICULTY, not the enemy's attack stat (whose curve is far steeper
+ * than HP). As a consistent ~%-of-player-HP punish it keeps a missed clear
+ * meaningful at every level. Authored sequences set their own damage; this
+ * only backs the generator fallback. Sized so a telegraph reads as a real
+ * threat against the VITAE pools without letting a mid-campaign boss kill the
+ * player before any deck could assemble. Reference points at weight 1.0,
+ * phase index 0 (per-level 0.8):
  * L1 normal 6 · L6 boss 16 · L7 elite 13 · L18 boss 31 · L110 unique 136.
  */
 const THREAT_BASE = 6;
@@ -240,7 +229,7 @@ function effectLabel(effectId: string): string {
     return effectId.replace(/^debuff_/, '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
-/** Phase 33b — the non-damage/non-debuff riders a threat action can carry. */
+/** The non-damage/non-debuff riders a threat action can carry. */
 interface ThreatActionRiders {
     enemyHeal?: number;
     enemyCleanse?: number;
@@ -287,7 +276,7 @@ function defaultThreatAction(enemy: Enemy, phaseIndex: number): CombatThreatActi
 export const AUTHORED_THREAT_ENEMY_IDS: readonly string[] = Object.freeze(Object.keys(AUTHORED_THREAT_SEQUENCES));
 
 /** Resolves one authored fork into a branch outcome (level/difficulty scaled).
- *  `implicitCleanse` is the WS9 afflictions-gte branch's legacy reactive
+ *  `implicitCleanse` is the afflictions-gte branch's implicit reactive
  *  cleanse (`resolveAuthored` below) — an explicit `p.enemyCleanse` wins. */
 function resolveBranchOutcome(
     p: AuthoredThreatPhase, phaseIndex: number, level: number, dMult: number,
@@ -311,8 +300,8 @@ function resolveAuthored(enemy: Enemy, authored: AuthoredThreatStep[]): CombatTh
     return authored.map((step, i) => {
         if (isBranchStep(step)) {
             const { condition } = step.branch;
-            // Phase 33's first reactive verb: the THEN fork of an
-            // affliction-count branch carries the spec-29 cleanse — the enemy
+            // The THEN fork of an affliction-count branch carries a
+            // reactive cleanse — the enemy
             // answers being stacked by shedding ONE affliction (a fraction,
             // never a wipe; enforced again at resolution in the engine).
             const reactiveCleanse = condition.kind === 'bearer-afflictions-gte' ? 1 : undefined;
@@ -348,7 +337,7 @@ function resolveAuthored(enemy: Enemy, authored: AuthoredThreatStep[]): CombatTh
 }
 
 /**
- * Phase 3 — "rage mode": the generated (unauthored) sequence's appended
+ * "Rage mode": the generated (unauthored) sequence's appended
  * escalation phase. Locked until `RAGE_UNLOCK_ROUND` — a discrete,
  * qualitative step layered on top of THE CLOCK's continuous numeric
  * escalation (`THREAT_ESCALATION_*`, `combat.engine.ts`), which already
@@ -363,7 +352,7 @@ export const RAGE_DAMAGE_WEIGHT = 1.6;
 export const RAGE_HEAL_FRACTION = 0.5;
 
 /** Generates a default escalating sequence for an unauthored enemy (§10),
- *  topped with a locked rage phase (Phase 3). */
+ *  topped with a locked rage phase. */
 export function generateDefaultThreatSequence(enemy: Enemy): CombatThreatPhase[] {
     const PHASES = 3;
     const phases = Array.from({ length: PHASES }, (_unused, i) => withIntent({
@@ -397,7 +386,7 @@ export function getThreatSequence(enemy: Enemy): CombatThreatPhase[] {
         const authored = AUTHORED_THREAT_SEQUENCES[enemy.id];
         seq = authored ? resolveAuthored(enemy, authored) : generateDefaultThreatSequence(enemy);
     }
-    // ROUND-KEYED DECK TIERS (2026-09-02) — the ANTI-STALL guarantee, applied
+    // ROUND-KEYED DECK TIERS — the ANTI-STALL guarantee, applied
     // at the single choke point every source funnels through (explicit
     // `threatSequence`, `AUTHORED_THREAT_SEQUENCES`, the generator): the OPENING phase is never round-gated,
     // whatever the source authored. Every later phase can only hold the

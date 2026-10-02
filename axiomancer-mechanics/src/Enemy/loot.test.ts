@@ -1,5 +1,5 @@
 /**
- * Spec 07 — Loot table tests.
+ * Loot table tests.
  *
  * `rollLoot` uses pluggable RNG so the table → outcome mapping can be
  * checked exactly with scripted values.

@@ -1,11 +1,8 @@
 /**
- * Consumable engine — combat-side consumable helper (Spec 05).
+ * Consumable engine — combat-side consumable helper.
  *
- * Phases 20-23 decoupled equipment from combat entirely: equipment contributes
- * only its signature and the armor relics' `maxHp` line, so the old
- * equipment combat helpers (`aggregateCombatStartTokens`,
- * `applyEquipmentGenerationBonus`, `getEquipmentProcTriggers`) are gone. Only
- * the consumable helper remains here:
+ * Equipment contributes to combat only its signature and the armor relics'
+ * `maxHp` line, so this file holds just the consumable helper:
  *
  *   - `useConsumableEffect` — resolves a consumable's heal / effect payload
  *     against the caller's `ActiveEffect` array and HP, returning the new
@@ -28,7 +25,7 @@ import { Character } from '../Character/types';
  * @property player         - The updated player snapshot (new HP / effects).
  * @property healed         - HP actually restored (after clamping to `maxHealth`).
  * @property applied        - The Effect that landed via `applyEffect`, if any.
- * @property desperate      - Phase 96. True when the drinker was below
+ * @property desperate      - True when the drinker was below
  *   {@link DESPERATION_HP_FRACTION} of `maxHealth` at the moment of use AND the
  *   consumable carried a `healAmountBelowHalf`, i.e. the larger desperation-band
  *   heal is the one that fired. False for every flat heal and for every
@@ -43,7 +40,7 @@ export interface ConsumableUseResult {
 }
 
 /**
- * Phase 96 — the desperation band's upper bound, as a fraction of `maxHealth`.
+ * The desperation band's upper bound, as a fraction of `maxHealth`.
  *
  * A drinker is "desperate" while `health / maxHealth < DESPERATION_HP_FRACTION`.
  * Strictly less-than, so a combatant sitting exactly at half health is NOT
@@ -57,7 +54,7 @@ export interface ConsumableUseResult {
 export const DESPERATION_HP_FRACTION = 0.5;
 
 /**
- * Phase 96 — is this combatant inside the desperation band right now?
+ * Is this combatant inside the desperation band right now?
  *
  * Exported so presenters (mobile's inventory modal, the village ware line) can
  * ask the same question the engine asks, instead of re-deriving the threshold
@@ -76,7 +73,7 @@ export function isDesperate(player: Pick<Character, 'health' | 'maxHealth'>): bo
 }
 
 /**
- * Phase 96 — which heal a consumable pays out against a given HP snapshot.
+ * Which heal a consumable pays out against a given HP snapshot.
  *
  * The single place that resolves the two-band heal, shared by the engine
  * (`useConsumableEffect`) and by every presenter that previews a drink before
@@ -116,7 +113,7 @@ export function resolveConsumableHeal(
  *
  *   1. If `healAmount` is set, restores that many HP (clamped via `heal`) —
  *      or, when the drinker is inside the desperation band and the item carries
- *      a `healAmountBelowHalf`, that larger amount instead (Phase 96; see
+ *      a `healAmountBelowHalf`, that larger amount instead (see
  *      {@link resolveConsumableHeal}). The band is read off the player snapshot
  *      BEFORE any healing is applied, so a drink that lifts the player out of
  *      the band still pays the desperation amount — the potion answers the
@@ -140,7 +137,7 @@ export function useConsumableEffect(
     let healed = 0;
     let applied: Effect | null = null;
 
-    // Phase 96 — resolved against the INCOMING snapshot, before any healing or
+    // Resolved against the INCOMING snapshot, before any healing or
     // effect application mutates HP. Reading the band first is what makes the
     // payout depend on the state the player chose to drink in.
     const { amount: healPayout, desperate } = resolveConsumableHeal(player, consumable);

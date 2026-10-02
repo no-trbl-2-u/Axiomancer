@@ -148,7 +148,7 @@ async function arrive(
         });
         combatOutcome = combat.outcome;
         // The fight ran outside the store: settle the room here, as
-        // `END_COMBAT` does in the store (phase R9a).
+        // `END_COMBAT` does in the store.
         store.setState({ world: settleArrival(store.getState()).world });
     }
 

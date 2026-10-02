@@ -1,5 +1,5 @@
 /**
- * Hermetic sim e2e — OBJECTIVE FUNCTION v2 over REAL fights (Phase 43).
+ * Hermetic sim e2e — OBJECTIVE FUNCTION v2 over REAL fights.
  *
  * The companion of `combat-objective.engine.test.ts` (which pins the metric's
  * arithmetic on synthetic telemetry). This suite drives the score through the
@@ -36,7 +36,7 @@ import {
 
 afterEach(() => vi.restoreAllMocks());
 
-// The card purge (P1, 2026-09-27): the grey office is the whole library.
+// The grey office is the whole library.
 const DECK = ['grey-strike', 'grey-strike', 'grey-ward', 'grey-ward', 'grey-word'];
 
 function loadout(cards: readonly string[]): Character {
@@ -97,16 +97,15 @@ describe('objective v2 — the LOCKED systems are exercised in real play', () =>
         expect(pooled.convictionSpent, 'Conviction is never spent').toBeGreaterThan(0);
         expect(pooled.signatureCasts).toBeGreaterThan(0);
 
-        // Surge meter — CANARY since the card purge (P1, 2026-09-27): the grey
-        // office is colourless (`color: 'any'`), so no shipped card sets a
-        // chain stance and the momentum chain cannot advance (measured 0).
-        // When a guided session adds a coloured card this goes red: flip it
-        // back to `> 0` for both counters (the pre-purge guard).
+        // Surge meter — CANARY: the grey office is colourless (`color: 'any'`),
+        // so no shipped card sets a chain stance and the momentum chain cannot
+        // advance (measured 0). When a coloured card is added this goes red:
+        // flip it to `> 0` for both counters.
         expect(pooled.momentumAdvances, 'the momentum chain advances again — restore the > 0 guard').toBe(0);
         expect(pooled.surges, 'a chain surges again — restore the > 0 guard').toBe(0);
 
-        // Dice — rolled, spent, and the economy live: since R7b the matrix
-        // runs the full 10-card grey deck (not a 6-card draft), and its
+        // Dice — rolled, spent, and the economy live: the matrix runs the
+        // full 10-card grey deck, and its
         // longer fights bank and ripen Reserve dice (measured: 2 verbs).
         expect(pooled.diceRolled).toBeGreaterThan(0);
         expect(pooled.diceSpent, 'rolled dice never power a line').toBeGreaterThan(0);

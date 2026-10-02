@@ -1,11 +1,10 @@
 /**
- * Spec 08 — exploration loop test suite.
+ * Exploration loop test suite.
  *
  * Coverage:
  *   - moveToNode adjacency / completed-lock / locked-node validation.
  *   - Per-objective quest engine (start / progress / complete).
- *   - resolveMapEvent dispatch for every kind the demo map exercises
- *     (post-Phase 25 — processNode + the legacy MapEvent surface removed).
+ *   - resolveMapEvent dispatch for every kind the demo map exercises.
  *   - End-to-end flow through the Breakwater from start to its door fight.
  */
 
@@ -26,7 +25,7 @@ afterEach(() => vi.restoreAllMocks());
 
 const startingState = (): GameState => createNewGameState({ startMap: 'breakwater' });
 
-// The Act 1 maps carry no NPC, village or quest (R7e, D72): the varied kinds
+// The Act 1 maps carry no NPC, village or quest: the varied kinds
 // and the quest/dialogue mechanics run on the neutral fixtures, staged on the
 // Breakwater. Sets currentNode directly — resolveMapEvent works off
 // currentNode regardless of traversal.
@@ -114,7 +113,7 @@ describe('per-objective quest engine', () => {
     });
 });
 
-// ── resolveMapEvent dispatcher (post-Phase 25) ────────────────────────────
+// ── resolveMapEvent dispatcher ────────────────────────────────────────────
 
 describe('resolveMapEvent dispatch', () => {
     it('returns kind=narration with the dialogue tree for a staged NPC', () => {

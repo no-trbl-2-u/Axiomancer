@@ -1,9 +1,9 @@
 /**
- * The Act 1 XP ledger (R9, D55): every fight the four Act 1 maps can stage,
- * read from the registered map-event pools, and a walk of it through the XP
- * curve. The R9 test pins its outcome (a full clear meets each door one level
- * above it and ends at level 5); `npm run act1-progression` prints it. A
- * measurement, not a gated baseline (D57).
+ * The Act 1 XP ledger: every fight the four Act 1 maps can stage, read from
+ * the registered map-event pools, and a walk of it through the XP curve. Its
+ * test pins the outcome (a full clear meets each door one level above it and
+ * ends at level 5); `npm run act1-progression` prints it. A measurement, not a
+ * gated baseline.
  */
 
 import '../World/MapEvents/content';

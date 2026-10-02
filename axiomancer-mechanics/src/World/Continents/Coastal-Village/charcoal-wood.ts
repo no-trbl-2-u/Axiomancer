@@ -1,17 +1,17 @@
 /**
- * The Charcoal Wood — Act 1, map 2 (map revamp M3b; decisions D21–D29).
+ * The Charcoal Wood — Act 1, map 2.
  *
  * The second Act 1 map, built on T's forest plate
- * (`axiomancer-mobile/assets/images/maps/act1-forest.webp`). Named by T from
- * three drafts (D26). The Breakwater's river bridge leads here; the stair cave
- * is the door on to the Beacon Crags (M3c).
+ * (`axiomancer-mobile/assets/images/maps/act1-forest.webp`). The Breakwater's
+ * river bridge leads here; the stair cave is the door on to the Beacon
+ * Crags.
  *
- * One node per landmark on the plate (D25, `act1-landmarks.json`), and no
+ * One node per landmark on the plate (`act1-landmarks.json`), and no
  * others. The engine graph is abstract (columns and lanes); the mobile layout
  * places each node on its landmark. The player comes in over the river bridge
  * on the plate's west edge, so the columns are rings spreading east and north
- * from there, and the map closes on the carved stair in the southern cliff
- * (D16):
+ * from there, and the map closes on the carved stair in the southern
+ * cliff:
  *
  *   c0  the river bridge                                (arrival)
  *   c1  ruined tower · ruined shrine · watermill · gibbet · west cave
@@ -20,9 +20,9 @@
  *   c4  woodcutters' camp · rock chapel · wayside cross · well · east cave
  *   c5  the stair cave                                  (the door, terminal)
  *
- * Lanes run in plate order around each ring, so every lateral rib (D1) joins
+ * Lanes run in plate order around each ring, so every lateral rib joins
  * two landmarks that are neighbours on the plate. Events use the shipped
- * builders and the northern forest's roster and materials (D29): see
+ * builders and the northern forest's roster and materials: see
  * `MapEvents/content.ts`.
  */
 

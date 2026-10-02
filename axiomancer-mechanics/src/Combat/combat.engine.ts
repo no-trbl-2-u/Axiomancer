@@ -1,22 +1,20 @@
 /**
- * Spec 25 — Hazard-Pattern Combat: the engine (§4, §9).
+ * Hazard-Pattern Combat: the engine.
  *
  * `resolveCombatPhase` drives the HP-model combat: the enemy's SOLE bar is HP,
  * and the player drops it to 0. Every verb is a combat card (projected from a
  * learned card); the player rolls stance dice and plays cards. Combat is
- * STATUS-FIRST — the auto-derived strike is dead (spec 32 §12): enemy HP
- * falls through a printed status or its payoff (DoT ticks, affliction bursts
- * like RUPTURE/REAP, ratified enchant-gated drips, reflect) or, since THE
- * BIG NUMBERS REWRITE (2026-09-02), the authored `deal` damage family.
- * Control hinders the enemy's turn instead. The legacy resolver,
- * the effects engine, the card engine, and all effects are UNCHANGED — this
- * engine *drives* `executeCard` / `applyEffect` differently.
+ * STATUS-FIRST — there is no auto-derived strike: enemy HP falls through a
+ * printed status or its payoff (DoT ticks, affliction bursts like
+ * RUPTURE/REAP, enchant-gated drips, reflect) or the authored `deal` damage
+ * family. Control hinders the enemy's turn instead. This engine *drives*
+ * `executeCard` / `applyEffect`; it does not reimplement them.
  *
- * Card bottom actions execute through the unchanged `executeCard`: one live die
- * from the spec-33 tray (or the Reserve / a GHOST die) is the card's whole
+ * Card bottom actions execute through `executeCard`: one live die
+ * from the tray (or the Reserve / a GHOST die) is the card's whole
  * cost — combat cards carry no resource cost.
  * Landed `effect-applied` events drive the post-combat attribution and the
- * self-reinforcing die loop (§4.7).
+ * self-reinforcing die loop.
  *
  * Randomness flows through the seedable global RNG singleton; pass `seed` to
  * `initializeCombatEncounter` for a reproducible encounter (hermetic tests +
@@ -82,8 +80,7 @@ const MAX_PHASES = 60;
 // ── Color-match tuning ───────────────────────────────────────────────────────
 
 /**
- * THE BIG NUMBERS REWRITE (2026-09-02) — the colour-match reward is now a
- * PERCENTAGE, not a flat +3. A flat bonus that mattered on a GUARD 6 card is
+ * The colour-match reward is a PERCENTAGE, not a flat bonus. A flat bonus that mattered on a GUARD 6 card is
  * noise on a GUARD 40 one; a percentage keeps "power the card with its own
  * colour" worth doing at every rank. The floor keeps it felt on the smallest
  * Ash lines. Use {@link colorMatchBonus} — never the raw constants.
@@ -102,27 +99,22 @@ export function colorMatchBonus(base: number): number {
 }
 
 /**
- * THE BIG NUMBERS REWRITE (2026-09-02) — RETIRED. The global threat fudge
- * factor was folded into `threatDamageBudget` (`combat.threat.ts`), so a
- * telegraph's printed number IS the number the engine applies. Kept at 1 and
- * exported only so external callers that still import it stay honest; delete
- * once nothing references it.
+ * Always 1: threat scaling lives in `threatDamageBudget` (`combat.threat.ts`),
+ * so a telegraph's printed number IS the number the engine applies. Exported
+ * only for callers that still import it; delete once nothing references it.
  */
 export const THREAT_DAMAGE_SCALE = 1;
 /** Conviction is capped so a long grind can't bank a Signature spam. */
 export const CONVICTION_CAP = 12;
-/** WI-10 — how many scraps per turn PAY +1 Conviction. The hand refills to
- *  COMBAT_HAND_SIZE (then 6, now 5), so an ungated scrap paid a full hand of ◆
- *  per turn against the 12 cap (scrap-the-hand). Beyond
- *  this many, a scrap still cycles the dead card but pays nothing. Tunable under
- *  EA-2's baseline. */
+/** How many scraps per turn PAY +1 Conviction. The hand refills to
+ *  COMBAT_HAND_SIZE, so an ungated scrap would pay a full hand of ◆ per turn
+ *  against the 12 cap. Beyond this many, a scrap still cycles the dead card
+ *  but pays nothing. */
 export const SCRAP_CONVICTION_CAP_PER_TURN = 2;
-// Spec 32 v3 §1 — DIRECT_DAMAGE_WEIGHT is DEAD: the strike was purged from the
-// schema (`basePower` no longer exists), so there is no auto-derived strike
-// path to weight. Direct damage exists only as the authored `deal` family
-// (THE BIG NUMBERS REWRITE), scaled by `scalePlayerHit`.
+// There is no auto-derived strike: direct damage exists only as the authored
+// `deal` family, scaled by `scalePlayerHit`.
 
-// ── Depth epic (combat-depth-epic) ───────────────────────────────────────────
+// ── Threat escalation ────────────────────────────────────────────────────────
 
 /**
  * THE CLOCK. The enemy's telegraphed hit ESCALATES the longer a fight runs: each
@@ -131,7 +123,7 @@ export const SCRAP_CONVICTION_CAP_PER_TURN = 2;
  * lethal — so a careless or over-cautious line loses where before combat was
  * unloseable. The counters are on-vision: race the foe down (DoT) before the ramp
  * bites, OR deny its turns (control) to skip the escalated hits. This is also what
- * finally gives the threat ledger teeth — every round the clock advances is a round
+ * gives the threat ledger teeth — every round the clock advances is a round
  * the 'overwhelmed' marks were paid for. Tuned by /combat-playtest (engine constants) and /deck-tuning.
  */
 export const THREAT_ESCALATION_PER_ROUND = 0.22;
@@ -163,20 +155,19 @@ export const THREAT_ESCALATION_BOSS_MULT = 1.6;
  * ramps and caps on exactly the same schedule. Tuned by /combat-playtest (engine constants) and /deck-tuning.
  */
 export const THREAT_EFFECT_ESCALATION_STEP = 0.34;
-// ── Fate Engine P1 (spec 31 §1) — the dice get a second read ─────────────────
+// ── Fate Engine — the dice get a second read ─────────────────────────────────
 
-/** R2 — each pip on a spent Reserve die adds this much intensity to the status
+/** Each pip on a spent Reserve die adds this much intensity to the status
  *  the play lands (the ripened die hits harder). Tuned by /combat-playtest (engine constants) and /deck-tuning. */
 export const PIP_INTENSITY_BONUS = 2;
-/** R2 — each pip on a spent Reserve die adds this much Guard on a defend card.
- *  THE BIG NUMBERS REWRITE — raised 2 → 5 so a ripened die is worth banking
- *  against GUARD lines that now open at 8 and reach 60. */
+/** Each pip on a spent Reserve die adds this much Guard on a defend card,
+ *  so a ripened die is worth banking against GUARD lines from 8 to 60. */
 export const PIP_GUARD_BONUS = 5;
-/** R7 — a color-matched (or Wild) die on a STATUS card extends the landed
- *  status by this many turns. Strike/defend keep the flat +3 damage bonus. */
+/** A color-matched (or Wild) die on a STATUS card extends the landed
+ *  status by this many turns. */
 export const COLOR_MATCH_STATUS_DURATION_BONUS = 1;
 
-// ── THE BIG NUMBERS REWRITE (2026-09-02) — the damage-scaler constants ───────
+// ── The damage-scaler constants ──────────────────────────────────────────────
 
 /** The most every STAGE a foe has entered can add to its later phases,
  *  combined. Stage bonuses stack on top of the escalation clock, so this is
@@ -203,9 +194,8 @@ function cardShim(enc: CombatEncounterState): CombatState {
     return { round: enc.round, player: enc.player, enemy: enc.enemy };
 }
 
-/** THE COLOR LAW (dice-law rework 2026-07-09): a die powers only a card of ITS
- *  color; WILD (gold) matches every card, and a grey 'any' card (Phase 104)
- *  accepts every die colour. The single definition `playBottomAction` and
+/** THE COLOR LAW: a die powers only a card of ITS color; WILD (gold)
+ *  matches every card, and a grey 'any' card accepts every die colour. The single definition `playBottomAction` and
  *  `firstLegalPoweringDie` share. */
 function dieSatisfiesColorLaw(die: CombatManaDie, cardStance: CombatDieColor | CardAspect): boolean {
     return cardStance === 'any' || die.color === 'wild' || die.color === cardStance;
@@ -218,7 +208,7 @@ function intensityMap(effects: readonly ActiveEffect[]): Record<string, number> 
     return m;
 }
 
-// ── Initialization (§9) ──────────────────────────────────────────────────────
+// ── Initialization ───────────────────────────────────────────────────────────
 
 /**
  * Builds a fresh `CombatEncounterState`. Combatants are deep-cloned (mutations
@@ -226,13 +216,10 @@ function intensityMap(effects: readonly ActiveEffect[]): Record<string, number> 
  * `reveal` phase with an opening hand drawn, mirroring Hazard's route-select →
  * rolling → playing flow. Call `rollEncounterDice` to advance.
  *
- * `flags` is `GameState.flags` (Phase 169's curated-loadout codec, see
+ * `flags` is `GameState.flags` (the curated-loadout codec, see
  * `combat.loadout.ts`) — forwarded to `buildCombatDeck` only when `playerDeck`
  * is omitted; an explicit `playerDeck` always wins. Omitted/empty `flags`
- * falls back to `player.knownCards`, unchanged from before this parameter
- * existed (audit: "the Phase-169 loadout path is dead in the shipped
- * runtime" — this closes the reachability gap, not a behavior change for
- * callers that don't pass flags).
+ * falls back to `player.knownCards`.
  */
 export function initializeCombatEncounter(
     player: Character,
@@ -248,7 +235,7 @@ export function initializeCombatEncounter(
     const deck = playerDeck && playerDeck.length > 0 ? playerDeck.slice() : buildCombatDeck(clonedPlayer, flags);
 
     let threatPhases = getThreatSequence(clonedEnemy);
-    // WS9 (spec 32 §12 #7) — a branch on the OPENING phase commits at combat
+    // A branch on the OPENING phase commits at combat
     // start (its phase START); no threat has resolved yet, so the full-block
     // ledger reads false.
     const openingBranch = commitThreatBranch(threatPhases, 0, clonedEnemy, false);
@@ -261,7 +248,7 @@ export function initializeCombatEncounter(
     let uid = 0;
     const hand = draw.drawn.map(cardId => ({ uid: `c${++uid}`, cardId }));
 
-    // Spec 32 v3 §5 — the character's persistent GHOST dice arrive in the
+    // The character's persistent GHOST dice arrive in the
     // opening tray (they were forged in earlier combats and never spent).
     const floatingDice = materializeFloatingDice(clonedPlayer.floatingDice ?? []);
 
@@ -271,12 +258,11 @@ export function initializeCombatEncounter(
         player: clonedPlayer,
         dice: [],
         turn: 0,
-        // Gate 0 (round-turn law) — no tray rolled yet this phase.
+        // Round-turn law — no tray rolled yet this phase.
         turnTakenThisPhase: false,
         conviction: 0,
-        // `archetype` is kept for the mobile portrait flavour only — it no
-        // longer selects signatures (Phase 19). Signatures come from the worn
-        // signet-relic loadout.
+        // `archetype` is the mobile portrait flavour only; signatures come
+        // from the worn signet-relic loadout.
         archetype: playerArchetype(clonedPlayer),
         signatures: getSignaturesForLoadout(clonedPlayer.equipment),
         deck,
@@ -286,7 +272,7 @@ export function initializeCombatEncounter(
         floatingDice,
         souls: 0,
         spellsPlayedThisTurn: 0,
-        // Spec 32 §12 #4 — the combat ledgers start empty.
+        // The combat ledgers start empty.
         enemyDamageThisTurn: 0,
         enemyDamageLastRound: 0,
         lastThreatFullyBlocked: false,
@@ -300,29 +286,28 @@ export function initializeCombatEncounter(
         directDamageDealt: 0,
         log: [],
         finalOutcome: null,
-        // Master Spec §4 — wild-die permanent-growth pool. Starts empty; grown
+        // Wild-die permanent-growth pool. Starts empty; grown
         // for the rest of the encounter by `grant_permanent_wild_die` cards.
         permanentWildDice: 0,
         permanentDeadDice: 0,
-        // Spec 33 §6 (Phase D5) — the character's persisted die-gear rail drives
-        // the four dice's face tables + special payloads. Absent on a fresh/
-        // pre-D5 player → `activeDieGear` falls back to `DEFAULT_DIE_GEAR` per
+        // The character's persisted die-gear rail drives the four dice's face
+        // tables + special payloads. Absent → `activeDieGear` falls back to `DEFAULT_DIE_GEAR` per
         // color. This is the SOLE engine wiring point for the rail; every roll
         // and every fired special reads it via `activeDieGear`.
         dieGear: clonedPlayer.dieGear,
-        // THE PATH (owner ruling 2026-09-02) — the two dice progression axes:
+        // THE PATH — the two dice progression axes:
         // act-reward dice grow the tray, die upgrades grow the share of live
         // faces in it. Both seeded once, here, from the character.
         bonusTurnDice: clonedPlayer.bonusTurnDice ?? 0,
         dieUpgradeLevel: clonedPlayer.dieUpgradeLevel ?? 0,
         seed,
-        // Phase 33c (spec 33 §1) — no coveted die claimed yet this combat.
+        // No coveted die claimed yet this combat.
         covetedDiceClaimed: [],
     };
 }
 
 /**
- * Back-compat shim (Spec 25 public API): opens phase-play and starts the first
+ * Public-API shim: opens phase-play and starts the first
  * turn. The granular path is `startTurn` → play → `endTurn`.
  */
 export function rollEncounterDice(
@@ -339,9 +324,9 @@ export function rollEncounterDice(
 }
 
 /**
- * Spec 33 §1 — starts a round: rolls the four fixed dice (one per colour, from
+ * Starts a round: rolls the four fixed dice (one per colour, from
  * each die's gear face table), plus any act-reward dice, the gold+lead pair
- * (the spec-33 reading of `permanentWildDice`, cap 1 pair) and the floating
+ * (from `permanentWildDice`, cap 1 pair) and the floating
  * (GHOST / surge) dice. OVERHEAT cracks bite here (all-miss, then consumed).
  * The 7-object table ceiling converts the overflow to +1◆ by materialization
  * priority (permanent pool → Reserve → KINDLE → surge/floating). No-op outside
@@ -352,12 +337,12 @@ export function startTurn(
     rng: () => number = defaultRng,
 ): CombatTransition {
     if (state.phase !== 'phase-play') return { state, events: [] };
-    // Gate 0 (2026-07-10) — the ROUND-TURN LAW: ONE tray roll per threat
+    // The ROUND-TURN LAW: ONE tray roll per threat
     // phase. A second roll in the same phase is refused outright (state
     // untouched) with a `turn-law-blocked` event so callers and telemetry can
     // see the attempt. The law caps TRAY ROLLS, not card plays — Reserve dice
     // and floating dice still power extra plays WITHIN the one turn (the
-    // multi-float turn is owner-locked: ALL floats may be spent in one round).
+    // ALL floats may be spent in one round).
     if (state.turnTakenThisPhase) {
         const blocked: CombatEvent[] = [
             { kind: 'turn-law-blocked', turn: state.turn, phaseIndex: state.currentPhaseIndex },
@@ -400,11 +385,11 @@ export function startTurn(
         ...state, dice, reserve, floatingDice, conviction, turn,
         crackedDice: expireCrackedDice(state.crackedDice, turn),
         spellsPlayedThisTurn: 0,
-        // WI-1 — the enemy-DoT accumulator is per-round; a fresh turn zeroes it
+        // The enemy-DoT accumulator is per-round; a fresh turn zeroes it
         // so `suppurating-curse` only doubles THIS round's real DoT total.
-        // WI-10 — the per-turn scrap-pay counter resets with the turn.
+        // The per-turn scrap-pay counter resets with the turn.
         enemyDotDamageThisRound: 0, scrapsThisTurn: 0,
-        // Gate 0 — this phase's one legal tray roll is now taken.
+        // This phase's one legal tray roll is now taken.
         turnTakenThisPhase: true,
     };
     events.push({ kind: 'turn-dice-rolled', turn, dice });
@@ -412,11 +397,11 @@ export function startTurn(
     return { state: withLog(next, events), events };
 }
 
-/** Spec 33 §6 — ends the turn: at end of round, ONE unspent mana/special tray
+/** Ends the turn: at end of round, ONE unspent mana/special tray
  *  die banks to the Reserve (cap RESERVE_MAX), best face first (special >
  *  mana — a banked special still fires its payload when spent from the
  *  Reserve, use-triggered). Unbanked dice simply expire — misses were always
- *  worth 0◆ and unspent mana earns nothing (§1: income is specials + yield
+ *  worth 0◆ and unspent mana earns nothing (income is specials + yield
  *  bonuses only, never leftovers). */
 export function endTurn(state: CombatEncounterState): CombatTransition {
     if (state.phase !== 'phase-play') return { state, events: [] };
@@ -435,13 +420,12 @@ export function endTurn(state: CombatEncounterState): CombatTransition {
 }
 
 /**
- * Spec 33 §6 — OVERHEAT, reinterpreted: push an already-SPENT
+ * OVERHEAT: push an already-SPENT
  * tray die back to `available` so it can power a SECOND card this round. The
  * push always succeeds; the RISK is the crack — `OVERHEAT_CRACK_CHANCE` that
  * the die is all-miss NEXT round.
  * The second play is a normal paid play: it moves momentum. Any
- * die may be overheated, gold included. Cards carry this verb from D4; the
- * engine primitive ships here so D3's policies can exercise it.
+ * die may be overheated, gold included.
  */
 export function overheatSpentDie(
     state: CombatEncounterState,
@@ -471,7 +455,7 @@ function withLog(state: CombatEncounterState, events: CombatEvent[]): CombatEnco
     // routes through, so one guarded forward here mirrors the whole combat
     // event stream. One boolean read when logging is off (the sim default).
     if (isLoggingEnabled()) forwardCombatEventsToLog(events);
-    // WI-1 — accumulate the REAL DoT damage the enemy takes this round as its
+    // Accumulate the REAL DoT damage the enemy takes this round as its
     // ticks are logged. `withLog` is the single choke point every emission site
     // routes through, so folding here catches all enemy `dot-tick` families
     // (card-played / damage-instance / fate-tap / TICK) without threading an
@@ -484,7 +468,7 @@ function withLog(state: CombatEncounterState, events: CombatEvent[]): CombatEnco
     return { ...state, log: [...state.log, ...events], enemyDotDamageThisRound: enemyDot };
 }
 
-// ── Card play (§9 playCombatCard) ────────────────────────────────────────────
+// ── Card play ────────────────────────────────────────────────────────────────
 
 /**
  * Plays one card from hand. `useBottom` powers the full effect (costs the named
@@ -511,16 +495,16 @@ export function playCombatCard(
     const transition = useBottom
         ? playBottomAction(state, entry.uid, card, dieId, rng)
         : playTopAction(state, entry.uid, card, rng);
-    // Spec 33 — the BOON payload + the null-reset momentum chain; FREE plays
-    // never touch either (§3 rule 5).
+    // The BOON payload + the null-reset momentum chain; FREE plays
+    // never touch either.
     return applyBoonAndMomentumV2(state, transition, card.stance, useBottom);
 }
 
 /**
- * Spec 33 §2/§3 — post-play bookkeeping for a LANDED PAID play:
- * 1. BOON payload (§1, owner-ratified use-triggered rule): the powering die's
+ * Post-play bookkeeping for a LANDED PAID play:
+ * 1. BOON payload (use-triggered): the powering die's
  *    special face fires its gear payload (+◆) because it was USED.
- * 2. Momentum (on the card's colour): start / advance / break-to-NULL (owner-locked D1); a completed
+ * 2. Momentum (on the card's colour): start / advance / break-to-NULL; a completed
  *    3-chain SURGES — a temporary gold die (until spent, this combat) joins
  *    the tray, ceiling permitting (overflow → +1◆) — then momentum resets.
  * FREE (top) plays and fizzles return untouched.
@@ -538,7 +522,7 @@ function applyBoonAndMomentumV2(
     if (state.phase === 'complete') return transition;
     const events: CombatEvent[] = [];
 
-    // 1. BOON fires on USE (the single ratified switch).
+    // 1. BOON fires on USE.
     if (SPECIAL_FIRES_ON_USE && played.dieId) {
         const preDie = preState.dice.find(d => d.id === played.dieId)
             ?? (preState.reserve ?? []).find(d => d.id === played.dieId);
@@ -586,12 +570,11 @@ function applyBoonAndMomentumV2(
 }
 
 /**
- * Spec 26b — scrap a hand card for +1 Conviction. Turns a dead draw into resolve
+ * Scrap a hand card for +1 Conviction. Turns a dead draw into resolve
  * toward a Signature Skill (the agency lever through a bad hand). Phase-play only.
  *
- * WI-10 (2026-07-12): only the first {@link SCRAP_CONVICTION_CAP_PER_TURN} scraps
- * per turn PAY. The hand refills to COMBAT_HAND_SIZE (then 6, now 5), so an
- * ungated scrap-the-hand banked a full hand of ◆ per turn against the 12 cap; beyond the cap a scrap still cycles the dead card
+ * Only the first {@link SCRAP_CONVICTION_CAP_PER_TURN} scraps per turn PAY;
+ * beyond the cap a scrap still cycles the dead card
  * (agency preserved) but pays nothing. The `conviction-gained` event carries
  * `reason: 'scrap'` so the gate is testable and telemetry can see it.
  */
@@ -626,18 +609,18 @@ function discardEntry(state: CombatEncounterState, uid: string): CombatEncounter
     };
 }
 
-// ── Spec 32 v3 — shared rider/state helpers ──────────────────────────────────
+// ── Shared rider/state helpers ───────────────────────────────────────────────
 
-/** WS3.2 'damage-instance' clock — the shared enemy-damage funnel: applies the
+/** The 'damage-instance' clock — the shared enemy-damage funnel: applies the
  *  hit, then advances every damage-instance-clocked DoT on the enemy (BLEED's
- *  ratified shape). DoT-clock ticks themselves never route through here
+ *  shape). DoT-clock ticks themselves never route through here
  *  (clocks must not cascade), and the trigger's own tick damage lands via the
  *  plain `applyDamage` inside `fireDotTrigger`, so a damage-instance DoT can
  *  never re-trigger itself. Emits the clock's `dot-tick` events; callers fold
  *  `clockDamage` into their direct-damage tally and — where a Soul channel is
  *  in scope — count `washedOut` via `soulWorthyWashouts`.
  *
- *  `erode` (phase 32 part 1 — Harvest REAP attacks MAXIMUM HP): when true,
+ *  `erode` (Harvest — REAP attacks MAXIMUM HP): when true,
  *  the initial hit is applied via `erodeMaxHealth` instead of `applyDamage`
  *  — same current-HP subtraction, plus an identical `maxHealth` reduction in
  *  the SAME call, so the damage-instance clock still fires exactly once,
@@ -667,8 +650,8 @@ function applyEnemyDamage(
  * one place so every damage source (the `deal` mechanic, a FREE-line
  * `damage`) reads the same rules. Order is authored:
  *   1. the colour-match bonus, as a percentage of the base
- *   2. VULNERABLE — the foe's incoming-damage multiplier (S3, D41: last of
- *      the multipliers, uncapped). The caller scales `base` by body first.
+ *   2. VULNERABLE — the foe's incoming-damage multiplier (last of the
+ *      multipliers, uncapped). The caller scales `base` by body first.
  */
 export interface PlayerHitParams {
     base: number;
@@ -685,10 +668,10 @@ export function scalePlayerHit(params: PlayerHitParams): number {
     return Math.max(0, dmg);
 }
 
-/** WS3.2 Soul economy — decay-consumed instances of NO-CALENDAR debuffs
+/** Soul economy — decay-consumed instances of NO-CALENDAR debuffs
  *  (`calendarExpiry === false`) expire BY decay: they owe the same Soul a
  *  calendar expiry would (Harvest must not starve when calendars disappear).
- *  Legacy calendar-carrying effects keep today's behavior (washout ≠ expiry). */
+ *  Calendar-carrying effects do not (washout ≠ expiry). */
 function soulWorthyWashouts(washedOut: readonly ActiveEffect[]): number {
     return washedOut.filter(ae => {
         const def = lookupEffectDef(ae.effectId);
@@ -696,7 +679,7 @@ function soulWorthyWashouts(washedOut: readonly ActiveEffect[]): number {
     }).length;
 }
 
-/** SOUL gain (Harvest): bumps the bank (spec 32 v3 §1 source 3). */
+/** SOUL gain (Harvest): bumps the bank. */
 function gainSouls(
     state: CombatEncounterState,
     amount: number,
@@ -725,13 +708,13 @@ function applyRiderToState(
     let guard = state.guard ?? 0;
     let souls = state.souls ?? 0;
     const washedOutHere: ActiveEffect[] = [];
-    // S3 (D40–D41) — every number a rider prints scales by the stat of where
+    // Every number a rider prints scales by the stat of where
     // it lands: damage by body, guard by mind, a status by heart (on the foe)
     // or mind (on you). See `stat-scaling.ts`.
     const stats = player.baseStats;
 
     if (r.guard) guard += scaleFor(r.guard, stats, 'mind', 'one-shot');
-    // Attribution ledger (playtest fix 2026-09-04): the FREE line records
+    // Attribution ledger: the FREE line records
     // provenance with the same `recordAttribution` calls as the PAID path.
     let attribution = state.attribution;
     const cardName = lookupCard(cardId)?.name ?? cardId;
@@ -792,13 +775,10 @@ function applyRiderToState(
 }
 
 /**
- * WS3.2 'card-played' clock on the FREE line (playtest fix 2026-09-04).
+ * The 'card-played' clock on the FREE line.
  *
- * The clock is "once per PLAYER-side spell play", but only `playBottomAction`
- * ever fired it — a deck that leaned on FREE lines (the doctrine's own
- * "every card has a FREE line") watched POISON sit at 3 stacks for a whole
- * fight while the projection billed `EXPECTED_TRIGGERS_PER_ROUND` ticks for
- * it. Same rules as the PAID site: the pre-play intensity map caps
+ * The clock fires once per PLAYER-side spell play, FREE or PAID. Same rules
+ * as the PAID site: the pre-play intensity map caps
  * eligibility (fresh stacks never self-tick), enemy-borne washouts earn
  * expiry Souls, player-borne ones do not.
  */
@@ -830,7 +810,7 @@ function fireFreePlayClock(
 }
 
 /**
- * Spec 32 v3 §2.2 — the FREE (top) action executes the card's AUTHORED free
+ * The FREE (top) action executes the card's AUTHORED free
  * rider: dieless, small, always available. There is no chip, no auto-derived
  * weak effect — what is printed is what fires.
  */
@@ -845,7 +825,7 @@ function playTopAction(
         { kind: 'card-played', cardId: card.id, useBottom: false, dieId: null },
     ];
     let next = discardEntry(state, uid);
-    // WS3.3 pre-play stack snapshot: only stacks that existed BEFORE this
+    // Pre-play stack snapshot: only stacks that existed BEFORE this
     // play are on the 'card-played' clock (a FREE line's own fresh POISON
     // never ticks itself). Taken before the rider so a free-line apply is
     // "fresh" exactly as a PAID apply is.
@@ -860,7 +840,7 @@ function playTopAction(
 }
 
 /**
- * Powered bottom action (§4.3, §4.7, §4.8): pays dice via RPS scaling, runs the
+ * Powered bottom action: spends the powering die, runs the
  * full card through `executeCard`, folds landed effects into the impact
  * tracks + attribution, and refreshes a matching die when a status effect
  * meaningfully lands.
@@ -875,7 +855,7 @@ function playBottomAction(
     const sourceCard = lookupCard(card.id);
     if (!sourceCard) return { state, events: [] };
 
-    // 1. Resolve the POWERING die — spec 33 §1: no draft, no single-die law.
+    // 1. Resolve the POWERING die — no draft, no single-die law.
     //    ANY available die (tray mana/special face, Reserve, or floating) may
     //    power a paid line; the color law below still gates it. The dieId is
     //    REQUIRED — there is no implicit default die.
@@ -908,10 +888,10 @@ function playBottomAction(
         return { state: withLog(state, events), events };
     }
 
-    // 1b. THE COLOR LAW (dice-law rework 2026-07-09): a die can only power a
+    // 1b. THE COLOR LAW: a die can only power a
     //     card of ITS color. WILD (gold) is the sole exception — it matches
     //     every card. Applies to every power source: tray, Reserve, and
-    //     floating alike. Phase 104 — a card of aspect 'any' (the grey office)
+    //     floating alike. A card of aspect 'any' (the grey office)
     //     has no colour to mismatch: every die colour powers it.
     if (!dieSatisfiesColorLaw(powering, card.stance)) {
         const events: CombatEvent[] = [{
@@ -921,21 +901,19 @@ function playBottomAction(
         return { state: withLog(state, events), events };
     }
 
-    // 2. Color-match. Spec 33 §2 retired the hidden-stance read: every play
-    //    lands at its printed numbers (the 1.5/0.5 rails belong to the open
-    //    stance checks at phase end, `resolveThreatPhase`).
-    // Phase 104 — a grey card's colour-match bonus is NEUTRAL: never on-colour
+    // 2. Color-match. Every play lands at its printed numbers.
+    // A grey card's colour-match bonus is NEUTRAL: never on-colour
     // (even powered by wild), never off-colour.
     const colorMatch = card.stance !== 'any' && (powering.color === 'wild' || powering.color === card.stance);
     const poweringPips = powering.pips ?? 0;
-    // S3 (D40–D41) — the player's stats scale this play's printed numbers
+    // The player's stats scale this play's printed numbers
     // (`stat-scaling.ts`): DEAL by body, GUARD by mind, statuses by where
     // they land. Colour match and VULNERABLE stack on top.
     const stats = state.player.baseStats;
 
     const events: CombatEvent[] = [{ kind: 'card-played', cardId: card.id, useBottom: true, dieId: powering.id, colorMatch }];
 
-    // 3. Execute the card (unchanged effect machinery) against a shim.
+    // 3. Execute the card (the shared effect machinery) against a shim.
     const before = intensityMap(state.enemy.effects);
     const res = executeCard(cardShim(state), sourceCard.id, lookupCard);
 
@@ -947,8 +925,8 @@ function playBottomAction(
     let attribution = state.attribution;
     let directDamage = state.directDamageDealt;
 
-    // ── Fate Engine P1 — resonance and pips (spec 31 §1) ──
-    // Spending the powering die feeds the TOLL tally (R1): its own color,
+    // ── Fate Engine — resonance and pips ──
+    // Spending the powering die feeds the TOLL tally: its own color,
     // or the card's stance for a Wild.
     let resonance = { heart: 0, body: 0, mind: 0, ...(state.resonance ?? {}) };
     const resonanceColor: 'heart' | 'body' | 'mind' | null =
@@ -960,8 +938,8 @@ function playBottomAction(
         events.push({ kind: 'resonance-gained', color: resonanceColor, total: resonance[resonanceColor] });
     }
     // Landed-status adjustments in one pass, all REAL units: RIPENED pips (+1
-    // intensity per pip on a non-defend play, R2), and the color-match +1
-    // duration on status cards (R7). Spec 32 v3 §7.
+    // intensity per pip on a non-defend play), and the color-match +1
+    // duration on status cards.
     const isDefendPlay = card.verbClass === 'defend';
     const bonusIntensity = isDefendPlay ? 0 : poweringPips * PIP_INTENSITY_BONUS;
     const bonusDuration = colorMatch && card.effectKind !== 'none' ? COLOR_MATCH_STATUS_DURATION_BONUS : 0;
@@ -1031,9 +1009,9 @@ function playBottomAction(
         }
     }
 
-    // WS3.2 'card-played' clock (spec 32 §12 #3) — a PLAYER-side card play
+    // The 'card-played' clock — a PLAYER-side card play
     // advances every card-played-clocked DoT on the enemy. Enemy actions
-    // never fire this, and — WS3.3 — only STACKS that existed BEFORE this
+    // never fire this, and only STACKS that existed BEFORE this
     // play are on the clock: a play's own fresh stacks never tick themselves.
     const clock = fireDotTrigger(enemy, 'card-played', state.round,
         ae => Math.min(ae.intensity ?? 1, Math.min(before[ae.effectId] ?? 0, ae.intensity ?? 1)));
@@ -1046,7 +1024,7 @@ function playBottomAction(
         gainSoulsLocal(soulWorthyWashouts(clock.washedOut));
     }
 
-    // WS3.3 — the same clock advances card-played-clocked DoTs the PLAYER
+    // The same clock advances card-played-clocked DoTs the PLAYER
     // bears: the clock is the player's own play, wherever the DoT sits. Same
     // pre-existing STACK cap, and player-borne washouts never earn Souls.
     const playerPrePlay = intensityMap(state.player.effects);
@@ -1060,7 +1038,7 @@ function playBottomAction(
     }
 
     // 5. Die spend — the powering die's fate. A GHOST die is GONE FOREVER when
-    //    spent (spec 32 v3 §5).
+    //    spent.
     let dice = state.dice;
     let reserve = reserveIn;
     let floatingDice = state.floatingDice ?? [];
@@ -1099,7 +1077,7 @@ function playBottomAction(
 }
 
 
-/** Checks for a global threshold crossing mid-phase (immediate outcome, §7.1). */
+/** Checks for a global threshold crossing mid-phase (immediate outcome). */
 function checkImmediateOutcome(state: CombatEncounterState, events: CombatEvent[]): CombatTransition {
     if (state.finalOutcome) return { state, events };
     // HP model: the enemy's only bar is HP. A successful Befriend opens the
@@ -1114,7 +1092,7 @@ function endCombat(state: CombatEncounterState, outcome: CombatEncounterState['f
     return { state: withLog(ended, [ev]), events: [...events, ev] };
 }
 
-// ── Phase resolution + between-phases (§4.4, §4.5, §9) ───────────────────────
+// ── Phase resolution + between-phases ───────────────────────────────────────
 
 /**
  * The soak arithmetic for one flat hit: GUARD, then BARRIER. The
@@ -1156,9 +1134,9 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     // outright via canAct.
     const act = canAct(state.enemy.effects as ActiveEffect[]);
     const isBossTier = state.enemy.difficulty === 'boss' || state.enemy.difficulty === 'unique';
-    // THE CLOCK (depth epic): the telegraphed hit escalates each round past the grace
+    // THE CLOCK: the telegraphed hit escalates each round past the grace
     // window, so a drawn-out fight turns lethal. 1.0 on round ≤ grace (a fast kill is
-    // unpunished → those fights are byte-identical to pre-epic).
+    // unpunished).
     // Boss/unique enemies escalate FASTER: their per-round rate is multiplied by
     // THREAT_ESCALATION_BOSS_MULT so a dragging boss fight becomes more lethal than a
     // dragging normal fight — makes finishing bosses quickly (DoT/control) the clear
@@ -1180,7 +1158,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     let player = state.player;
     let enemy = state.enemy;
     // GUARD (one-shot, per-phase) absorbs first; BARRIER (persistent, stacking)
-    // soaks the remainder; RIPOSTE parries and — spec 32 v3 — counters ONLY when
+    // soaks the remainder; RIPOSTE parries and counters ONLY when
     // the attack was FULLY blocked (reflect class). All no-op when unset.
     let guard = state.guard ?? 0;
     let barrier = state.barrier ?? 0;
@@ -1188,12 +1166,12 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     let riposteFired = false;
     let attacksLanded = 0;
     let attacksFullyBlocked = 0;
-    // Spec 32 §2 PA-3 — the raw (pre-soak) size of every attack the wall
+    // The raw (pre-soak) size of every attack the wall
     // (parry + guard + barrier, combined) brought all the way to 0 this
     // phase. RIPOSTE's counter scales off this, not a flat printed number —
     // "the wall IS the weapon."
     let blockedBlowTotal = 0;
-    // Spec 32 §12 #4 — post-soak HP the enemy's threat lands on the player
+    // Post-soak HP the enemy's threat lands on the player
     // this phase (the `enemyDamageThisTurn` ledger's write site).
     let enemyDamageDealt = 0;
     let directDamage = state.directDamageDealt;
@@ -1210,12 +1188,11 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                 let dmg = Math.round(
                     eff.damage * THREAT_DAMAGE_SCALE * escalation
                     * enemyOutgoingMult
-                    // THE BIG NUMBERS REWRITE — every STAGE this foe has
-                    // entered adds its printed weight to every later phase,
-                    // CLAMPED: stage bonuses multiply on top of the escalation
-                    // clock (itself up to x2, x1.6 for a boss), and unbounded
-                    // they turned a four-stage unique into a one-shot by round
-                    // six. A stage should change the shape of a fight, not end
+                    // Every STAGE this foe has entered adds its printed weight
+                    // to every later phase, CLAMPED: stage bonuses multiply on
+                    // top of the escalation clock (itself up to x2, x1.6 for a
+                    // boss), and unbounded they would turn a four-stage unique
+                    // into a one-shot. A stage should change the shape of a fight, not end
                     // it before the deck can answer.
                     * (1 + Math.min(STAGE_THREAT_BONUS_CAP, state.stageThreatBonus ?? 0))
                     * playerTakenMult,
@@ -1240,7 +1217,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                 if (dmg > 0) {
                     player = applyDamage(player, dmg);
                     enemyDamageDealt += dmg;
-                    // WS3.3 'damage-instance' clock, player bearer — a threat
+                    // The 'damage-instance' clock, player bearer — a threat
                     // hit that LANDS advances every damage-instance-clocked
                     // DoT the player carries (enemy threat riders land
                     // `debuff_bleed` on the player). Self-costs (RECOIL)
@@ -1271,8 +1248,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     player = { ...player, effects: res.activeEffects };
                     // `mirror-of-guilt` deliberately does NOT reflect here:
                     // enemy-inflicted debuffs are not "self-debuffs your own
-                    // cards land" (owner ruling 2026-07-12, detail-cleanup
-                    // follow-up Bucket B #16 — the face is the contract).
+                    // cards land" (the face is the contract).
                 }
             }
             if (eff.enemyHeal && eff.enemyHeal > 0) {
@@ -1285,7 +1261,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                 }
             }
             if (eff.enemyCleanse && eff.enemyCleanse > 0) {
-                // WS9 reactive cleanse — spec 29 guardrail: telegraphed, and it
+                // Reactive cleanse — telegraphed, and it
                 // sheds a FRACTION, never the last affliction. `applyCleanse`
                 // names the cleansable set; only the first `enemyCleanse` of it
                 // (minus the guaranteed survivor) actually leave the bearer.
@@ -1302,12 +1278,11 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
             }
             penaltiesApplied.push(eff);
         }
-        // RIPOSTE counter — spec 32 v3: fires only when your Guard/Barrier FULLY
-        // blocked an attack this phase (reflect class, §1 source 4). Spec 32
-        // §2 PA-3: the counter reflects the prevented blow's actual size, not
-        // a flat printed number — floored at the card's printed `damage` so a
-        // card never counters for less than it did before this rework (the
-        // wall IS the weapon; bigger threats become bigger paydays).
+        // RIPOSTE counter — fires only when your Guard/Barrier FULLY blocked an
+        // attack this phase (reflect class). The counter reflects the prevented
+        // blow's actual size, not a flat printed number — floored at the
+        // card's printed `damage` (the wall IS the weapon; bigger threats
+        // become bigger paydays).
         if (riposte && attacksLanded > 0 && attacksFullyBlocked > 0) {
             const counter = Math.round(Math.max(riposte.damage, blockedBlowTotal) * getDamageTakenMultiplier(enemy));
             if (counter > 0) {
@@ -1318,7 +1293,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
             }
         }
         events.push({ kind: 'threat-fired', phaseIndex: phase.index, description: phase.threatAction.description, effects: phase.threatAction.effects });
-        // WS3.2 Doom growth (spec 32 §12 #3, card-local species): enemy-borne
+        // Doom growth (card-local species): enemy-borne
         // `growth: 'per-enemy-action'` DoTs deepen by 1 each time the enemy
         // actually acts — a hindered (denied) turn never feeds the Doom.
         const doomGrowth = growPerEnemyActionDots(enemy);
@@ -1350,7 +1325,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         guard: 0,                       // brace is spent on this phase's threat; resets each phase
         barrier,                        // persistent soak — carries the unspent remainder across phases
         riposte: undefined,             // cleared each phase (like guard)
-        // Spec 32 §12 #4 — the enemy-damage ledger (rolled over between phases)
+        // The enemy-damage ledger (rolled over between phases)
         // and the full-block verdict (persists until the NEXT threat resolves;
         // a hindered/denied threat was never blocked).
         enemyDamageThisTurn: (state.enemyDamageThisTurn ?? 0) + enemyDamageDealt,
@@ -1360,7 +1335,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         phaseResults: [...state.phaseResults, result],
     };
 
-    // Phase 33c (spec 33 §1) — THE COVETED DIE: a boss/unique phase authored
+    // THE COVETED DIE: a boss/unique phase authored
     // `stake: true` converts to a temp gold die the moment its telegraph is
     // fully blocked. One-time per phase index this combat
     // (`covetedDiceClaimed`) — a repeating/locked final phase can't be farmed
@@ -1406,7 +1381,7 @@ function pendingOutcome(state: CombatEncounterState): CombatEncounterState['fina
 }
 
 /**
- * Between-phases processing (§4.5): DoT ticks erode HP (start+end phase) on both
+ * Between-phases processing: DoT ticks erode HP (start+end phase) on both
  * sides, effect durations tick, and the hand refills up to COMBAT_HAND_SIZE
  * (unplayed cards are KEPT — keep-hand rule). Advances the phase pointer
  * (looping the final phase so the enemy keeps attacking).
@@ -1419,7 +1394,7 @@ export function processBetweenPhases(
 ): CombatTransition {
     const events: CombatEvent[] = [];
 
-    // 1. Per-effect DoT ticks (labeled, §7.5) — computed before processing.
+    // 1. Per-effect DoT ticks (labeled) — computed before processing.
     //    Round-threaded so escalating DoTs (POISON ramp) tick their real value.
     const projectedEnemyDotTicks = dotTickBreakdown(state.enemy.effects, state.round);
     const projectedPlayerDotTicks = dotTickBreakdown(state.player.effects, state.round);
@@ -1432,9 +1407,9 @@ export function processBetweenPhases(
     let enemy = enemyEnd.target as Enemy;
     const enemyDotTicks = clampDotTickBreakdown(projectedEnemyDotTicks, enemyStart.dotDamage);
 
-    // SOUL economy (spec 32 v3 T7): every enemy affliction instance that
+    // SOUL economy: every enemy affliction instance that
     // EXPIRES yields 1 Soul (consumption-side Souls are granted at the verbs).
-    // WS3.2: decay-consumed instances of NO-CALENDAR effects expire BY decay —
+    // Decay-consumed instances of NO-CALENDAR effects expire BY decay —
     // they owe the same Soul, so Harvest never starves when calendars go.
     const expiredAfflictions = [...enemyEnd.expired, ...tithedExpired]
         .filter(ae => lookupEffectDef(ae.effectId)?.type === 'debuff').length
@@ -1468,14 +1443,13 @@ export function processBetweenPhases(
     for (const t of playerDotTicks) events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'self' });
 
     // 4. Advance the phase pointer — loop the final phase so the enemy keeps acting.
-    //    Phase 3 (rage mode): a candidate phase gated by `unlockAfterRound`
+    //    Rage mode: a candidate phase gated by `unlockAfterRound`
     //    isn't entered until the resolving round reaches it — the pointer
     //    holds at the current (last reachable) phase instead of advancing
-    //    past it. Undefined `unlockAfterRound` (every phase before this
-    //    epic) is always reachable — byte-identical to the old one-liner.
+    //    past it. Undefined `unlockAfterRound` is always reachable.
     const resolvedRound = state.round + 1;
 
-    // ── THE BIG NUMBERS REWRITE — STAGES resolve at the boundary ──
+    // ── STAGES resolve at the boundary ──
     // STAGES: the moment a fight becomes a different fight. Each stage fires at
     // most once; `stagesEntered` is the per-combat ledger. Authored order wins
     // ties, so a boss that crosses two thresholds in one blow enters the first
@@ -1509,8 +1483,8 @@ export function processBetweenPhases(
                     const hpBefore = enemy.health;
                     enemy = heal(enemy, amount);
                     const healed = enemy.health - hpBefore;
-                    // The stage's heal was invisible: no event, so the bar
-                    // jumped and the ledger's "HP lost" silently understated.
+                    // The stage's heal emits an event, so the bar and the
+                    // ledger's "HP lost" account for it.
                     if (healed > 0) events.push({ kind: 'enemy-healed', enemyId: enemy.id, source: 'STAGE', amount: healed });
                 }
             }
@@ -1524,7 +1498,7 @@ export function processBetweenPhases(
     const nextIndex = rageGated ? state.currentPhaseIndex : candidateIndex;
 
     let threatPhases = state.threatPhases;
-    // WS9 (spec 32 §12 #7) — a branch phase commits its fork at phase START,
+    // A branch phase commits its fork at phase START,
     // read from LIVE state (the post-tick enemy + the full-block ledger just
     // written by `resolveThreatPhase`), so the telegraph shows the taken fork
     // alongside the condition. Zero RNG. A looping final phase re-evaluates on
@@ -1549,7 +1523,7 @@ export function processBetweenPhases(
         omenState = gainSouls(omenState, expiredAfflictions, 'expiry', events);
     }
 
-    // Fate Engine P1 R2 — RESERVE dice RIPEN: +1 pip per threat phase survived
+    // Fate Engine — RESERVE dice RIPEN: +1 pip per threat phase survived
     // (cap RESERVE_PIP_CAP). Holding a die through a telegraph is the gamble.
     let reserve = omenState.reserve ?? [];
     if (reserve.length > 0) {
@@ -1560,7 +1534,7 @@ export function processBetweenPhases(
         }
     }
 
-    // 5. Refill the hand up to COMBAT_HAND_SIZE (keep-hand rule, 2026-07-13):
+    // 5. Refill the hand up to COMBAT_HAND_SIZE (keep-hand rule):
     //    unplayed cards STAY in hand and occupy draw room, so holding a card
     //    is a real cost — a dead card clogs the hand until it is played or
     //    scrapped. `bonusDraw` lets a caller raise the refill target (no
@@ -1584,21 +1558,21 @@ export function processBetweenPhases(
         hand,
         phase: 'phase-play',
         round: state.round + 1,
-        // Spec 32 §12 #4 — the enemy-damage ledger rolls over at the turn
+        // The enemy-damage ledger rolls over at the turn
         // boundary: this turn's value becomes last-round's, then resets.
         enemyDamageLastRound: omenState.enemyDamageThisTurn ?? 0,
         enemyDamageThisTurn: 0,
         // New phase → fresh turn; clear the tray so the next startTurn rolls.
         dice: [],
-        // Gate 0 (round-turn law) — the phase boundary re-arms the one legal
+        // Round-turn law — the phase boundary re-arms the one legal
         // tray roll for the incoming phase.
         turnTakenThisPhase: false,
-        // THE BIG NUMBERS REWRITE — the STAGE ledgers.
+        // The STAGE ledgers.
         stagesEntered,
         stageThreatBonus,
     };
     next = withLog(next, events);
-    // WI-1 — the round is closed: zero the enemy-DoT accumulator AFTER logging
+    // The round is closed: zero the enemy-DoT accumulator AFTER logging
     // (so this round's round-clock/suppuration ticks don't leak into the next
     // round's suppuration read). `startTurn` also resets it in the live game;
     // this covers back-to-back `processBetweenPhases` calls in tests.
@@ -1618,12 +1592,12 @@ interface DotTick { effectId: string; label: string; amount: number; }
 /**
  * Per-effect DoT amounts for the labeled `dot-tick` events. Routes through
  * `getActiveDotTotal` so each emitted amount is the COMBO-AMPLIFIED HP that
- * actually leaves the bar (poison+bleed → Hemorrhage etc.) — the latent honesty
- * bug was recomputing the raw `damagePerRound × intensity` and understating the
- * tick. Byte-identical for un-amplified integer DoTs (floor(x×1) === x).
+ * actually leaves the bar (poison+bleed → Hemorrhage etc.), not the raw
+ * `damagePerRound × intensity`. Equal to the raw value for un-amplified integer
+ * DoTs (floor(x×1) === x).
  */
 function dotTickBreakdown(effects: readonly ActiveEffect[], currentRound?: number): DotTick[] {
-    // WS3: event-clocked DoTs never tick at the round boundary — drop their
+    // Event-clocked DoTs never tick at the round boundary — drop their
     // ENTRIES (after the full-array amp/MARK pass, matching the aggregator's
     // math exactly) so the emitted round `dot-tick` events sum to the HP that
     // actually left the bar (projection-truth law).
@@ -1645,7 +1619,7 @@ function clampDotTickBreakdown(ticks: readonly DotTick[], actualDamage: number):
     });
 }
 
-// ── Batch entry point (§9 resolveCombatPhase) ────────────────────────────────
+// ── Batch entry point (resolveCombatPhase) ───────────────────────────────────
 
 /**
  * The first die that can LEGALLY power `card`'s paid line right now, in the
@@ -1689,7 +1663,7 @@ export function resolveCombatPhase(
         if (working.phase !== 'phase-play') break;
         let dieId = play.dieId;
         if (play.useBottom) {
-            // Gate 0 (round-turn law) — roll the phase's ONE tray only if it
+            // Round-turn law — roll the phase's ONE tray only if it
             // hasn't been rolled yet; a re-roll is illegal.
             if (!working.turnTakenThisPhase) {
                 const started = startTurn(working, rng);
@@ -1712,7 +1686,7 @@ export function resolveCombatPhase(
     return { state: resolved.state, events: [...allEvents, ...resolved.events] };
 }
 
-// ── Mercy choice (Phase 112 / §3) ────────────────────────────────────────────
+// ── Mercy choice ─────────────────────────────────────────────────────────────
 
 /**
  * Resolves the spare/exploit mercy choice opened by a successful Befriend
@@ -1729,7 +1703,7 @@ export function selectMercyChoice(
         const ev: CombatEvent = { kind: 'combat-ended', outcome: 'mercy' };
         return { state: withLog(ended, [ev]), events: [ev] };
     }
-    // Exploit — a free heavy strike (Phase 108). Resolve to victory if it kills.
+    // Exploit — a free heavy strike. Resolve to victory if it kills.
     const strike = Math.max(10, Math.round(state.enemy.maxHealth * 0.5));
     const enemy = applyDamage(state.enemy, strike);
     const events: CombatEvent[] = [
@@ -1744,7 +1718,7 @@ export function selectMercyChoice(
     return { state: next, events };
 }
 
-// ── Signature Skills (Spec 26b §4) ───────────────────────────────────────────
+// ── Signature Skills ─────────────────────────────────────────────────────────
 
 /**
  * Casts a signature skill, spending Conviction (◆). Always available regardless
@@ -1781,15 +1755,15 @@ export {
     signatureCastBlock, SIGNATURE_COST,
 } from './combat.signature';
 
-// ── Summary (§7.7) ───────────────────────────────────────────────────────────
+// ── Summary ──────────────────────────────────────────────────────────────────
 
 export { buildCombatSummary } from './combat.attribution';
 
 // ── Convenience selectors for the presenter ──────────────────────────────────
 
-/** Cards in hand, projected to their views (for the UI hand display, §7.3). */
+/** Cards in hand, projected to their views (for the UI hand display). */
 export function handCards(state: CombatEncounterState): Array<{ uid: string; card: CombatCard }> {
-    // S3 — the hand prints FINAL numbers: each card is built from its
+    // The hand prints FINAL numbers: each card is built from its
     // stat-scaled copy (display only; play always executes the library card).
     const stats = state.player.baseStats;
     const scaledLookup = (id: string) => {
@@ -1801,16 +1775,15 @@ export function handCards(state: CombatEncounterState): Array<{ uid: string; car
         .filter((x): x is { uid: string; card: CombatCard } => x.card !== null);
 }
 
-/** Count of available (non-X) dice — surfaced for the dice board (§7.4). */
+/** Count of available (non-X) dice — surfaced for the dice board. */
 export function availableDice(state: CombatEncounterState): number {
     return availableDieCount(state.dice);
 }
 
-// ── Spec 26b — presenter selectors (the engine owns truth; the UI hides) ─────
+// ── Presenter selectors (the engine owns truth; the UI hides) ────────────────
 
 /**
- * UI preview (spec 32 v3): there is NO immediate-strike number any more — the
- * strike is dead. `amount` is always 0; the card's honest numbers live in its
+ * UI preview: there is no immediate-strike number. `amount` is always 0; the card's honest numbers live in its
  * printed FREE/PAID text and the DoT lifetime preview. Kept for the mobile
  * presenter contract.
  */
@@ -1822,10 +1795,10 @@ export function projectCardImpact(
 }
 
 /**
- * Spec 32 v3 §5 — the floating-die colors to WRITE BACK to the character save
+ * The floating-die colors to WRITE BACK to the character save
  * at combat end (they persist across combats until spent). Excludes
  * `temporary` floats (the momentum surge die, the coveted die): momentum
- * never survives past the fight it was earned in, owner-ratified 2026-07-10.
+ * never survives past the fight it was earned in.
  */
 export function getFloatingDiceColors(
     state: CombatEncounterState,
@@ -1836,7 +1809,7 @@ export function getFloatingDiceColors(
         .filter((c): c is 'heart' | 'body' | 'mind' | 'wild' => c !== 'x');
 }
 
-// ── 0.34.0 status-depth epic — honesty selectors (the engine owns the rule) ──
+// ── Honesty selectors (the engine owns the rule) ─────────────────────────────
 
 /** VULNERABLE — the foe's live incoming-damage multiplier (×1 when unmarked).
  *  Mobile reads the real "+X% damage" off this; never hard-codes it. */
@@ -1845,7 +1818,7 @@ export function getEnemyIncomingDamageMultiplier(state: CombatEncounterState): n
 }
 
 /**
- * Wall-math projection (phase 28 / Gate 1 §4) — what the CURRENTLY
+ * Wall-math projection — what the CURRENTLY
  * telegraphed hit would actually deal right now, netted against live
  * guard/barrier. `IntentIcon` today shows only the raw, unscaled
  * `phase.threatAction.effects` damage sum; this selector runs that same raw
@@ -1855,14 +1828,14 @@ export function getEnemyIncomingDamageMultiplier(state: CombatEncounterState): n
  * denied outright. Approximates a phase's damage as a single hit (matching
  * `intentVM`'s existing raw-sum granularity) — a phase with more than one
  * damaging effect is summed before scaling, not scaled per-effect like the
- * real resolution; a known, documented simplification (see phase 28 brief).
+ * real resolution; a known, documented simplification.
  *
  * KNOWN DIVERGENCES from `resolveThreatPhase`, documented rather than closed —
  * closing them moves the on-screen number for every existing foe and is its own
  * tuning change, not a side effect of adding a keyword. The boss term here
  * omits `state.stageThreatBonus`, so against a staged foe it UNDERSTATES.
  *
- * Audit 3.2: the guard / barrier soak runs through the same `soakFlatHit`
+ * The guard / barrier soak runs through the same `soakFlatHit`
  * the engine applies.
  */
 export function projectIncomingThreat(state: CombatEncounterState): {
@@ -1890,7 +1863,7 @@ export function projectIncomingThreat(state: CombatEncounterState): {
     const riposte = state.riposte ?? null;
     let remaining = projectedDamage;
     if (riposte && riposte.reduce > 0) remaining = Math.max(0, remaining - riposte.reduce);
-    // Audit 3.2 — the foe's hit goes through the SAME `soakFlatHit` the engine
+    // The foe's hit goes through the SAME `soakFlatHit` the engine
     // applies. RIPOSTE stays outside the helper (a one-shot parry on the foe's
     // own swing), applied first as the engine does.
     remaining = soakFlatHit(remaining, { guard, barrier }).dealt;
@@ -1900,7 +1873,7 @@ export function projectIncomingThreat(state: CombatEncounterState): {
     };
 }
 
-/** The consolidated status kill-path readout (spec 30, build-plan phase 2):
+/** The consolidated status kill-path readout:
  *  pending DoT, and whether it alone kills the foe and in how many rounds.
  *  Pure selector — no `CombatEvent`, no state mutation; call it on demand
  *  from a presenter. */

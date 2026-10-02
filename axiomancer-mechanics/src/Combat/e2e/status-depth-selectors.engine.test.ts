@@ -1,11 +1,9 @@
 /**
- * Hermetic unit tests — status-depth selectors + card-engine no-ops,
- * re-pinned to the spec 32 v3 library (poison ramps, bleed decays, MARK is the
- * universal glue affliction; the old vulnerable/compound/execute vocabulary is
- * retired).
+ * Hermetic unit tests — status-depth selectors + card-engine no-ops (poison
+ * ramps, bleed decays, MARK is the universal glue affliction).
  *
  * Pure reads over hand-built `ActiveEffect[]`:
- *   - getDamageTakenMultiplier   (exactly 1 without a marker — no v3 effect
+ *   - getDamageTakenMultiplier   (exactly 1 without a marker — no library effect
  *     carries a plain damageTakenMult; the machinery is kept for enemies/tests)
  *   - getPendingDotTotal (RUPTURE fuel)
  *   - getDistinctDebuffCount
@@ -60,7 +58,7 @@ describe('getDamageTakenMultiplier — exactly 1 without a marker', () => {
 
 describe('getPendingDotTotal (RUPTURE fuel)', () => {
     it('sums each DoT over its remaining lifetime (amplification- and decay-aware)', () => {
-        // WS3.3: poison rides the card-played clock — 2 expected ticks/round.
+        // Poison rides the card-played clock — 2 expected ticks/round.
         // i2, 4 rounds, NO round threaded → flat floor(2×2) × 8 ticks = 32.
         const only = getPendingDotTotal(combatant([ae('debuff_poison', 2, 4)]));
         expect(only.total).toBe(32);
@@ -74,7 +72,7 @@ describe('getPendingDotTotal (RUPTURE fuel)', () => {
     });
 
     it('bleed pending fuel models the per-tick intensity decay (spec 32 v3)', () => {
-        // WS3.3: bleed rides the damage-instance clock (2 expected/round) but
+        // Bleed rides the damage-instance clock (2 expected/round) but
         // stays decay-LIMITED: i3 ticks 9, 6, 3, then washes out → 18 on any
         // clock (NOT 9 × ticks).
         expect(getPendingDotTotal(combatant([ae('debuff_bleed', 3, 4)])).total).toBe(18);

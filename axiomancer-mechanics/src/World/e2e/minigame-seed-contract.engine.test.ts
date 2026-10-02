@@ -3,7 +3,7 @@
  *
  * These tests pin the shared seed semantics used by minigame engines,
  * CLIs, and playtest harnesses: string seeds are first-class, numeric
- * seeds keep legacy uint32 behavior, same seeds replay exactly, and
+ * seeds keep plain uint32 behavior, same seeds replay exactly, and
  * different seed labels produce different dealt state.
  */
 import { describe, expect, it } from 'vitest';
@@ -45,16 +45,11 @@ describe('minigame engine seed contract', () => {
         expectReplayable('Hazard', seed => createHazardSession(seed, hazardStarterBag(), 'cracked-cliff'));
     });
 
-    // Rest-choice (Phase 52c-d, replacing the retired rest minigame — Phase
-    // 52e) has no entry here: `createRestChoiceSession` is deterministic
+    // Rest-choice has no entry here: `createRestChoiceSession` is deterministic
     // given its inputs — no dealt state depends on the seed, so this
     // contract doesn't apply to it.
 
-    // Loot-cache-choice (Phase 63, replacing the retired Pick Pool
-    // dice-pool minigame) has no entry here either, for the same reason as
+    // Loot-cache-choice has no entry here either, for the same reason as
     // rest-choice: `createLootCacheChoiceSession` is deterministic given
     // its host-rolled inputs — no dealt state depends on the seed.
-
-    // QuestBoard (Phase 61 — the minigame is retired) had an entry here;
-    // removed along with `World/QuestBoard/`.
 });

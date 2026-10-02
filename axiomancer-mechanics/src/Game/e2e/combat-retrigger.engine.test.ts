@@ -1,5 +1,5 @@
 /**
- * Combat retrigger lock fix (Phase 103) — hermetic e2e test.
+ * Combat retrigger lock fix — hermetic e2e test.
  *
  * Reproduces and verifies the fix for playtest jot #89(a): after WIN or
  * FRIENDSHIP outcomes, players cannot trigger new combat encounters. Only
@@ -7,7 +7,7 @@
  *
  * Each terminal combat outcome should allow re-triggering new encounters.
  *
- * Post-legacy-removal: combat is driven by the Hazard-Pattern engine outside
+ * Combat is driven by the Hazard-Pattern engine outside
  * the store. `startCombat` stages `currentEncounter`; the driver reports the
  * outcome to `endCombat(outcome)`, which clears the staged encounter.
  */

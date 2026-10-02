@@ -1,6 +1,6 @@
 /**
  * Blacksmith encounter ("The Anvil") — content, tuning, and pure engine
- * transitions (Spec 33 §6, Phase D5). Compact enough to live in one file.
+ * transitions. Compact enough to live in one file.
  *
  * State machine:
  *
@@ -17,11 +17,9 @@
  * so a cap-violating upgrade is refused identically here and in the reducer.
  * Refusals are LOUD (a refusal card) and leave the rail + budget untouched.
  *
- * Prices are ratified (Phase 52f) in SHILLINGS. The rest-node offer that
- * used to reach this engine with a single flat bypass price was dropped
- * Phase 59; Phase 60 re-homes access to a directly-authored `blacksmith`
- * MapEvent node instead (`MapEvents/types.ts`), so these per-verb tiers are
- * the live prices again. The mobile host maps `budget` to
+ * Prices are in SHILLINGS. Access is a directly-authored `blacksmith`
+ * MapEvent node (`MapEvents/types.ts`), priced by these per-verb tiers.
+ * The mobile host maps `budget` to
  * `Character.currency` by default.
  */
 
@@ -43,14 +41,13 @@ import type {
 } from './blacksmith.types';
 
 // ---------------------------------------------------------------------------
-// Tuning (ratified Phase 52f)
+// Tuning
 // ---------------------------------------------------------------------------
 
 /**
- * Upgrade prices in shillings, ratified Phase 52f against measured
- * loot-cache income (~26 shillings/act) — sized so a single anvil visit
+ * Upgrade prices in shillings, sized against measured loot-cache income (~26 shillings/act) — sized so a single anvil visit
  * (hone + temper + swap once each = 16) still leaves room for shop wares,
- * while HONE < TEMPER < SWAP keeps the D3-derived ordering (a full gear
+ * while HONE < TEMPER < SWAP keeps the ordering (a full gear
  * swap costs more than one face upgrade).
  */
 export const ANVIL_VERB_PRICING = Object.freeze({
@@ -83,7 +80,7 @@ const VERB_CHROME: Readonly<Record<BlacksmithVerb, { title: string; body: string
 
 /**
  * Builds the anvil session from the authored payload. `rail` is the player's
- * current die gear (a pre-D5 host may pass a default rail via
+ * current die gear (a host without one may pass a default rail via
  * `concreteDefaultRail()`); `budget` is the spendable resource; `variants` are
  * the swap offers. RNG is seeded and threaded but untouched by the
  * deterministic upgrade transitions.

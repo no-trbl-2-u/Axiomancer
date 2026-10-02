@@ -1,5 +1,5 @@
 /**
- * Hermetic e2e — agent Vitest reporter (Phase 39).
+ * Hermetic e2e — agent Vitest reporter.
  *
  * Drives `automation/agent-vitest-reporter.mjs` with structurally
  * minimal stand-ins for Vitest's TestModule / TestCase objects. The
@@ -471,7 +471,7 @@ describe('AgentVitestReporter — slowestFailures (iterate, Phase 39 self-critiq
     });
 });
 
-// ─── Phase 40 — failures[] + prior-run diff ───────────────────────────────────
+// ─── failures[] + prior-run diff ──────────────────────────────────────────────
 
 describe('AgentVitestReporter — Phase 40 failures[] flat list', () => {
     it('populates a top-level failures[] entry per failed test (and is [] when all pass)', async () => {

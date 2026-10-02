@@ -1,9 +1,5 @@
 /**
- * Hermetic E2E — THE BIG NUMBERS REWRITE (2026-09-02).
- *
- * DEAL, the hit scaler, and boss STAGES. The enemy keywords this suite once
- * pinned were deleted in revamp phase R2b (D63); WRATH, CHAIN, FLAY, TWIN,
- * EXECUTE, OVERKILL and ECHO in R7a (D50).
+ * Hermetic E2E — DEAL, the hit scaler, and boss STAGES.
  *
  * These are BUG DETECTORS, not balance laws: every assertion checks that the
  * number the engine applies is the number the rules say it applies. None of
@@ -140,7 +136,7 @@ describe('boss STAGES', () => {
         s = res.state;
         expect(s.stagesEntered).toEqual([0]);
         expect(s.stageThreatBonus).toBe(0.5);
-        // Playtest fix 2026-09-04: the stage's heal is witnessed, not silent.
+        // The stage's heal is witnessed, not silent.
         expect(res.events.filter(e => e.kind === 'enemy-healed' && e.source === 'STAGE'))
             .toEqual([{ kind: 'enemy-healed', enemyId: foe.id, source: 'STAGE', amount: 50 }]);
 

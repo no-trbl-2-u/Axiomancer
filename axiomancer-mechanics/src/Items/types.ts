@@ -2,14 +2,10 @@
  * Item System Types
  * Discriminated union of all item types with type guards.
  *
- * Equipment is now the lean signet-relic shape (phases 18-23): persistent
- * `statModifiers` plus an optional `grantsSignature`. The procedural library,
- * rarity/affix model, item sets, and every equipment->combat effect channel
- * (`passiveEffects` / `onHit` / `onDefend` procs / `resourceInteraction`,
- * along with `EquipmentTemplate` / `UniqueItemTemplate` / `rolledMods` /
- * `rarity` / `requiredLevel`) were retired. See `docs/equipment.md`.
+ * Equipment is the lean signet-relic shape: persistent `statModifiers` plus
+ * an optional `grantsSignature`. See `docs/equipment.md`.
  *
- * Consumables (Spec 05) reference real effects from the effects library —
+ * Consumables reference real effects from the effects library —
  * either by ID, by inline `Effect`, and/or with an immediate `healAmount` —
  * with optional `intensityOverride` / `durationOverride` per-instance tuning.
  */
@@ -36,24 +32,22 @@ export interface BaseItem {
 }
 
 /**
- * Equipment slot kinds (Phase 18). Collapsed from the legacy 7-slot union
- * (`weapon | armor | accessory | head | body | hands | feet`) to exactly 3
- * kinds. A character wears at most 5 pieces: 1 weapon, 1 armor, 3 accessories
- * (see `SLOT_CAPACITY`). The legacy `head`/`hands`/`feet` slots fold into
- * `accessory` as `AccessoryKind`s; `body` folds into `armor` (torso wear is
- * armor, not an accessory). See `LEGACY_SLOT_MAP` in the save migration.
+ * Equipment slot kinds. A character wears at most 5 pieces: 1 weapon,
+ * 1 armor, 3 accessories (see `SLOT_CAPACITY`). The save migration maps old
+ * `head`/`hands`/`feet` slots into `accessory` as `AccessoryKind`s and `body`
+ * into `armor` (torso wear is armor, not an accessory); see `LEGACY_SLOT_MAP`.
  */
 export type EquipmentSlot = 'weapon' | 'armor' | 'accessory';
 
 /**
- * The kind of an `accessory`-slot piece (Phase 18). Explicit and deliberately
+ * The kind of an `accessory`-slot piece. Explicit and deliberately
  * extensible — adding a kind later is additive (no slot change). Set on an
  * `Equipment` iff `slot === 'accessory'`; absent on weapons and armor.
  */
 export type AccessoryKind = 'head' | 'hands' | 'feet' | 'amulet' | 'ring' | 'charm';
 
 /**
- * Worn capacity per slot kind (Phase 18). The wear-cap of 5 is not a bolt-on
+ * Worn capacity per slot kind. The wear-cap of 5 is not a bolt-on
  * counter — it *is* the slot model: 1 weapon + 1 armor + 3 accessories.
  */
 export const SLOT_CAPACITY: Record<EquipmentSlot, number> = {
@@ -63,21 +57,19 @@ export const SLOT_CAPACITY: Record<EquipmentSlot, number> = {
 };
 
 /**
- * Equipment instance (Phase 23 — lean shape).
+ * Equipment instance.
  *
- * The procedural library, rarity model, affix system, item sets, and all
- * equipment→combat effect channels are retired (phases 18-23). Equipment is
- * now the fixed signet relics only, each carrying static `statModifiers` and
+ * Equipment is the fixed signet relics only, each carrying static `statModifiers` and
  * one `grantsSignature`. Nothing else drives combat.
  *
  * @property category       - Always `'equipment'`.
  * @property slot           - The equipment slot this item occupies.
- * @property accessoryKind  - Set iff `slot === 'accessory'` (Phase 18); the worn
+ * @property accessoryKind  - Set iff `slot === 'accessory'`; the worn
  *                            flavour (head / hands / feet / amulet / ring / charm).
  * @property statModifiers  - Persistent stat lines; only `maxHp`, folded onto
  *                            `maxHealth` at equip-time.
  * @property grantsSignature - The one signature skill this signet relic grants
- *                            while worn (Phase 19). Combat-init derives
+ *                            while worn. Combat-init derives
  *                            `CombatEncounterState.signatures` from the worn
  *                            loadout's `grantsSignature` values. Absent on
  *                            non-relic equipment.
@@ -93,8 +85,7 @@ export interface Equipment extends BaseItem {
 /**
  * Consumable item that can be used once (quantity decrements).
  *
- * Per Spec 05 Q8 (option C) and Q9 (option C), a consumable may carry any
- * combination of:
+ * A consumable may carry any combination of:
  *   - `effectId`     — reference into the global effects library.
  *   - `inlineEffect` — bespoke one-off `Effect` definition not in the library.
  *   - `healAmount`   — immediate flat HP heal (no effect entry).
@@ -103,7 +94,7 @@ export interface Equipment extends BaseItem {
  * `intensityOverride` / `durationOverride` retune the referenced or inline
  * effect on a per-instance basis.
  *
- * ## The desperation band (`healAmountBelowHalf`) — Phase 96
+ * ## The desperation band (`healAmountBelowHalf`)
  *
  * A flat `healAmount` gives a player no reason to ever DRINK the potion: the
  * flask is worth the same 20 HP at full health as at death's door, so the
@@ -118,8 +109,7 @@ export interface Equipment extends BaseItem {
  * player judgment, which is what converts a hoarded resource into a used one.
  *
  * The field is OPTIONAL and purely additive: a consumable that omits it behaves
- * exactly as before (flat `healAmount` at every HP level), so every pre-Phase-96
- * item and every hand-written state literal keeps its current semantics.
+ * as a flat `healAmount` at every HP level.
  *
  * @property category         - Always `'consumable'`.
  * @property quantity         - Number of this item in the stack.
@@ -139,7 +129,7 @@ export interface Consumable extends BaseItem {
     effectId?: string;
     inlineEffect?: Effect;
     healAmount?: number;
-    /** Phase 96 — the desperation-band heal. See the interface docblock. */
+    /** The desperation-band heal. See the interface docblock. */
     healAmountBelowHalf?: number;
     intensityOverride?: number;
     durationOverride?: number;

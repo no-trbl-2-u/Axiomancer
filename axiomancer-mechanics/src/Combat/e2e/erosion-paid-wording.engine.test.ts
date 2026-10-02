@@ -1,10 +1,8 @@
 /**
  * Wording guard — the complete live starter paid-line surface.
  *
- * Profane Canon re-pin (2026-08-08): the ten theme presets (erosion et al.)
- * were retired and the campaign opened on the Threadbare preset. The card
- * purge (P1, 2026-09-27; D36, D43) retired that too: every fresh run now
- * opens on the grey deck (A Plain Blow / Ward / Word). Its paid lines are the
+ * Every fresh run opens on the grey deck (A Plain Blow / Ward / Word). Its
+ * paid lines are the
  * first player-facing wording surface of every run, so they carry the audit.
  * This test pins the production projection, not merely the authored fragments.
  */
@@ -16,9 +14,8 @@ import { lookupEffect } from '../../Effects';
 import { toCombatCard } from '../combat.cards';
 import { STARTING_CARD_IDS } from '../combat.rewards';
 
-// Re-derived after the card purge (P1, 2026-09-27): the grey office's lines.
-// The intent of the pin is unchanged — the production projection is the
-// wording the player reads, and it must not drift silently.
+// The grey office's lines. The production projection is the wording the
+// player reads, and it must not drift silently.
 const EXPECTED_PAID_LINES: Readonly<Record<string, string>> = {
     'grey-strike': 'PAID — Deal 5. Costs 1 die.',
     'grey-ward': 'PAID — GUARD 5. Costs 1 die.',

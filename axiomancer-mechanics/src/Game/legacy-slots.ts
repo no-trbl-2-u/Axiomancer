@@ -1,13 +1,12 @@
 /**
- * Legacy equipment-slot re-slotting (Phase 18).
+ * Old-save equipment-slot re-slotting.
  *
- * Before Phase 18 a character wore up to 7 independent slots
+ * Old saves can carry up to 7 independent slots
  * (`weapon | armor | accessory | head | body | hands | feet`). This module is
- * the single, permanent source of truth for folding that legacy shape into the
+ * the single, permanent source of truth for folding that old shape into the
  * 3-kind / 5-slot model (1 weapon + 1 armor + 3 accessories). It lives in the
- * Game (save) module deliberately: phases 21-23 delete the rest of the legacy
- * equipment machinery from `Items/`, but `LEGACY_SLOT_MAP` must survive so
- * old-save upgrades keep working. Nothing here depends on the procedural
+ * Game (save) module deliberately: `LEGACY_SLOT_MAP` must stay so old-save
+ * upgrades keep working. Nothing here depends on the procedural
  * template / affix / modifier libraries.
  */
 
@@ -16,11 +15,11 @@ import { SLOT_CAPACITY } from '../Items/types';
 import type { EquipmentLoadout } from '../Character/types';
 import { emptyLoadout } from '../Character/types';
 
-/** The seven legacy slot literals (pre-Phase-18). */
+/** The seven legacy slot literals. */
 export type LegacySlot =
     | 'weapon' | 'armor' | 'accessory' | 'head' | 'body' | 'hands' | 'feet';
 
-/** Where a legacy slot lands in the Phase-18 model. */
+/** Where a legacy slot lands in the current model. */
 export interface LegacySlotMapping {
     slot: EquipmentSlot;
     /** Set iff `slot === 'accessory'` — the kind the legacy slot becomes. */
@@ -28,7 +27,7 @@ export interface LegacySlotMapping {
 }
 
 /**
- * Fixed legacy → Phase-18 slot mapping. `body` folds into `armor` (torso wear
+ * Fixed legacy → current slot mapping. `body` folds into `armor` (torso wear
  * is armor, not an accessory); `head`/`hands`/`feet` fold into `accessory` as
  * matching kinds; a generic legacy `accessory` becomes kind `charm`. `weapon`
  * and `armor` are unchanged.
@@ -51,7 +50,7 @@ export const LEGACY_SLOT_MAP: Record<LegacySlot, LegacySlotMapping> = {
 const ACCESSORY_FILL_ORDER: readonly LegacySlot[] = ['accessory', 'head', 'hands', 'feet'];
 
 /**
- * Re-slot a single persisted `Equipment` instance to the Phase-18 model:
+ * Re-slot a single persisted `Equipment` instance to the current model:
  * rewrites `slot` via `LEGACY_SLOT_MAP` and assigns `accessoryKind` when the
  * result is an accessory (preserving any kind the instance already carries).
  * Non-accessory results have `accessoryKind` stripped. Pure.
@@ -70,7 +69,7 @@ export function reslotLegacyEquipment(item: Equipment): Equipment {
 }
 
 /**
- * Fold a legacy worn-equipment record into a Phase-18 `EquipmentLoadout`,
+ * Fold a legacy worn-equipment record into an `EquipmentLoadout`,
  * returning the loadout plus every piece that no longer fits (`overflow` — the
  * caller returns these to inventory). Deterministic (decision 6):
  *

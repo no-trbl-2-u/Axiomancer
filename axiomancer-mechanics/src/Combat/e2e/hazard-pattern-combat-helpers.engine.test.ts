@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — Spec 25 Hazard-Pattern Combat: helper-export coverage.
+ * Hermetic E2E — Hazard-Pattern Combat: helper-export coverage.
  *
  * The §11 acceptance suite (`hazard-pattern-combat.engine.test.ts`) drives the
  * engine end-to-end but pins many of the smaller public exports only indirectly.
@@ -7,10 +7,7 @@
  * deliberate focus on the doctrine-critical surface:
  *
  *   - the self-reinforcing status-loop dice primitives (`combatDieCanPower` /
- *     `refreshOneDie`) — HP is the sole win condition
- *     (2026-06-22); DoT/control cards deplete HP far faster than the weak
- *     basic strike; `dotErosionReached` / `controlSaturationReached` were
- *     removed with the old Pressure-Track model;
+ *     `refreshOneDie`) — HP is the sole win condition;
  *   - the Befriend mercy entry (`selectEncounterMercyChoice`);
  *   - the deck / threat / card-adapter / UI-preview helpers.
  *
@@ -47,9 +44,9 @@ import { generateDefaultThreatSequence, AUTHORED_THREAT_ENEMY_IDS } from '../com
 import { ENEMY_REGISTRY } from '../../Enemy/enemy.library';
 import type { CombatManaDie, CombatEvent } from '../combat.encounter.types';
 
-// The card purge (P1, 2026-09-27): the library is the grey office. A Plain
+// The library is the grey office. A Plain
 // Word is its control-track card (VULNERABLE, stat-debuff) and A Plain Blow
-// its direct-damage card; no surviving card prints a DoT, so a minimal
+// its direct-damage card; no library card prints a DoT, so a minimal
 // sandbox POISON card (poison stays live — enemies inflict it) holds the DoT
 // seat for the adapter and presenter contracts.
 registerSandboxCards([{
@@ -151,10 +148,8 @@ describe('Spec 25 §4.3 — buildCombatDeck', () => {
     });
 
     it('KEEPS duplicate known cards and preserves learn order', () => {
-        // The de-dup was repealed 2026-09-05: it silently collapsed every
-        // authored copy count in the shipped presets (the 18-card Threadbare
-        // Office was dealt as 8 cards). Copies are load-bearing in a
-        // deckbuilder, so the card base keeps them — same as the reward list.
+        // Copies are load-bearing in a deckbuilder, so the card base keeps
+        // every authored copy — same as the reward list.
         const deck = buildCombatDeck(makePlayer([DOT_BODY, DOT_BODY, CONTROL_HEART]));
         expect(deck.filter(id => id === DOT_BODY)).toHaveLength(2);
         expect(deck.indexOf(DOT_BODY)).toBeLessThan(deck.indexOf(CONTROL_HEART));
@@ -179,10 +174,6 @@ describe('Spec 25 §6 — card adapters', () => {
         expect(['direct-control', 'stat-debuff']).toContain(verbClass);
         expect(track).toBe('control');
     });
-
-    // The payoff-burst classification test (a bare RUPTURE card →
-    // direct-damage) was deleted with the card purge (P1, 2026-09-27):
-    // RUPTURE has no surviving carrier.
 
     it('toCombatCard returns null for the removed Retreat id (no in-combat retreat exists)', () => {
         expect(toCombatCard('card-retreat', getCardById, lookupEffect)).toBeNull();
@@ -256,7 +247,7 @@ describe('Spec 25 §7.6 — selectEncounterMercyChoice', () => {
     });
 });
 
-// ── Press Fate partial re-roll (PR #190 / Spec 26b §4) ─────────────────────
+// ── Press Fate partial re-roll ──────────────────────────────────────────────
 
 describe('Spec 25 — constants', () => {
     it('COMBAT_HAND_SIZE is the draw cap', () => {
@@ -317,8 +308,7 @@ describe('Spec 25 §7 — handCards', () => {
 // ── Enemy threat resolver (§4.5) — `resolveThreatPhase` ─────────────────────
 
 describe('Spec 25 §4.5 — resolveThreatPhase', () => {
-    // The spec 32 v3 keyword reset deleted the tier-2 skipTurn (Sleep); the
-    // skipTurn-clear witness is a test-only fixture registered into the shared
+    // The skipTurn-clear witness is a test-only fixture registered into the shared
     // registry (the same lookup the threat engine reads). Never touches the
     // library JSON.
     const THREAT_FIXTURES: Effect[] = [
@@ -395,10 +385,10 @@ describe('Spec 25 §7.7 — recordAttribution field shape', () => {
 });
 
 // ── Attribution honesty — direct-damage clamp + WI-9 DoT provenance ──────────
-// The audit found 740 PROJECTED DoT attributed against a 40-max-HP enemy: the
-// ledger claimed damage the fight could never contain. WI-9 retired projection
-// entirely — a card records only its DoT PROVENANCE and its actual DIRECT
-// damage (overkill-clamped); DoT is summed from emitted ticks at summary time.
+// Attribution records no projected damage — a card records only its DoT
+// PROVENANCE and its actual DIRECT damage (overkill-clamped); DoT is summed
+// from emitted ticks at summary time, so the ledger never claims damage the
+// fight could not contain.
 
 describe('recordAttribution — direct-damage clamp + DoT provenance (WI-9)', () => {
     /** A real landed poison at a given intensity/duration. */
@@ -560,6 +550,3 @@ describe('Spec 25 §7.7 — buildCombatSummary field shape', () => {
         expect(summary.outcome).toBe('defeat');
     });
 });
-
-// spec 32 v3: GOLD is gone — GOLD_CARD_IDS / isGoldCard were deleted with the
-// old library; rarity (common/uncommon/rare, derived from rank) replaces it.

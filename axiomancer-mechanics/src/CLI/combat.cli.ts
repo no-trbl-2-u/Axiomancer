@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Hazard-style Combat CLI — agentic playthrough driver (Phase 165).
+ * Hazard-style Combat CLI — agentic playthrough driver.
  *
  * Reachable as a SUBCOMMAND of the game CLI:
  *
@@ -243,15 +243,15 @@ function rankedAutoCards(s: CombatEncounterState, policy: CombatAutoPolicyId) {
 
 
 /**
- * Runs one full phase in auto mode under the ROUND-TURN LAW (Gate 0,
- * 2026-07-10): ONE tray roll per phase. Spec 33 — no draft: each paid play
+ * Runs one full phase in auto mode under the ROUND-TURN LAW: ONE tray roll
+ * per phase. No draft: each paid play
  * takes the policy's best-ranked card that some live die can LEGALLY power
  * (`firstLegalPoweringDie`: a colour-legal tray die, then Reserve, then
  * floating), until no card can be powered; then the leftover hand drains
  * through the FREE tops and the turn ends. The safety counter is kept but
  * never binds on legal play.
  *
- * Every engine verb `emit`s its events (Gate 0 §2, 2026-07-10): auto mode
+ * Every engine verb `emit`s its events: auto mode
  * carries the same per-play transcript the interactive loop does, so a
  * `--json-events` run is an honest turn-by-turn audit record — no bespoke
  * harness needed.
@@ -331,7 +331,7 @@ async function promptCardChoice(state: CombatEncounterState): Promise<{ uid: str
     const cards = handCards(state);
     if (cards.length === 0) return null;
     const choices = cards.flatMap(({ uid, card }) => {
-        // Spec 33: a powered play costs exactly one live die of the card's
+        // A powered play costs exactly one live die of the card's
         // colour (gold = any); the CLI powers it with the first legal one.
         const die = firstLegalPoweringDie(state, card);
         const dieLabel = die ? `die ${die.id}` : 'no legal die';
@@ -390,7 +390,7 @@ async function interactiveHazardCombatLoop(
         const before = s;
 
         // Start turn: roll dice — but only when this phase's ONE legal tray
-        // roll hasn't happened yet (rollEncounterDice already rolled phase 1's;
+        // roll hasn't happened yet (rollEncounterDice already rolled the first phase's;
         // an unguarded startTurn would log a false 'turn-law-blocked' event).
         if (s.dice.length === 0 && !s.turnTakenThisPhase) {
             const turned = startTurn(s);
@@ -479,7 +479,7 @@ async function autoHazardCombatLoop(
 
         s = autoPlayPhase(s, flags.policy, flags.maxTurns);
         logState('hazardCombat:autoPhase', before, s, { phaseCount, policy: flags.policy });
-        // Phase 26 tooling (cloud fold-in) — a per-phase boundary marker with
+        // A per-phase boundary marker with
         // an HP snapshot, alongside the per-play transcript above, so an
         // auditor can see phase-level progress without diffing play events.
         emit({
@@ -615,8 +615,8 @@ export async function runCombatCli(rawArgs: string[]): Promise<void> {
     attachCliLogSinks(flags);
 
     // --stage without --enemy fights the STAGE'S roster, not the default
-    // float-eye (Gate 0 §2, 2026-07-10 — a stage-scaled player against a
-    // 40-HP early enemy is a stomp that reads as engagement). Seeded runs
+    // float-eye (a stage-scaled player against a 40-HP early enemy is a
+    // stomp that reads as engagement). Seeded runs
     // pick deterministically from the roster; unseeded runs pick at random.
     if (flags.stage !== undefined && !flags.enemyExplicit) {
         const roster = getStageProfile(flags.stage)!.enemySlugs;

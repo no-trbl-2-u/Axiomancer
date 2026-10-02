@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E Tests — NPCs dialogue traversal (Spec 08 Q9)
+ * Hermetic E2E Tests — NPCs dialogue traversal
  *
  * Drives the three exported helpers (`getDialogueNode`, `visibleChoices`,
  * `isLeafNode`) plus the `DialogueContext` predicate against fabricated

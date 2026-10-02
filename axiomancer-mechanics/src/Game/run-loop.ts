@@ -1,5 +1,5 @@
 /**
- * Phase 72 — Run-loop semantics (GH#65 ask 2).
+ * Run-loop semantics.
  *
  * The `resetRun` action on `createGameStore` lets a consumer rewind a
  * playthrough back to its starting hearth without quitting the session.
@@ -9,11 +9,11 @@
  * reset. Every reset assigns a fresh `runId`.
  *
  * This module ships the small support surface:
- * - `generateRunId(rng)` — 16-char hex id from the supplied RNG (Phase 35
+ * - `generateRunId(rng)` — 16-char hex id from the supplied RNG (the
  *   character-id generation pattern; deterministic when seeded).
  * - `STARTING_REGION` — canonical starting region name; today only
- *   the new-game start is a viable run-start point (the Breakwater since
- *   map revamp M3a, D27). Per Phase 72 D5 the hearth concept reuses
+ *   the new-game start is a viable run-start point (the Breakwater). The
+ *   hearth concept reuses
  *   `MapDefinition.startingNode` — the engine routes the reset world through
  *   the existing `createStartingWorld()` helper, which lands on it.
  */
@@ -22,18 +22,17 @@ import type { MapName } from '../World/map.library';
 import { STARTING_MAP } from '../World';
 
 /**
- * Phase 72 — canonical starting region for `resetRun`. The reset sends the
+ * Canonical starting region for `resetRun`. The reset sends the
  * player back to `getMapDefinition('coastal-continent',
- * STARTING_REGION).startingNode.id`. Since map revamp M3a (D27) that is the
- * Breakwater's `bw-1`; it was fishing-village's `fv-1` before. One source:
+ * STARTING_REGION).startingNode.id`, the Breakwater's `bw-1`. One source:
  * `STARTING_MAP` in the World barrel, which `createStartingWorld()` uses.
  */
 export const STARTING_REGION: MapName = STARTING_MAP;
 
 /**
- * Phase 72 — produce a 16-char hex id string from the supplied RNG.
+ * Produce a 16-char hex id string from the supplied RNG.
  *
- * Mirrors the Phase 35 `generateCharacterId` pattern (random-digit
+ * Mirrors the `generateCharacterId` pattern (random-digit
  * accumulation) but emits 16 hex chars (64 bits of entropy) — collision-free
  * in the limit for the runs-history surface this id keys off. The supplied
  * `rng` is invoked 16 times; pass `() => getRng().random()` to consume the

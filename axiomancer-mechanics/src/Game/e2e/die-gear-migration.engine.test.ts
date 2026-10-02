@@ -1,7 +1,7 @@
 /**
- * Hermetic engine test — Phase D5 save migration (v14 → v15).
+ * Hermetic engine test — die-gear save migration (v14 → v15).
  *
- * A pre-D5 (v14) save has no `player.dieGear`. Migrating backfills the concrete
+ * A v14 save has no `player.dieGear`. Migrating backfills the concrete
  * default 4-color rail so upgrades write to a real per-save object and never
  * mutate the frozen `DEFAULT_DIE_GEAR`. Also pins the chained hop (a v13 save
  * lands at v15 in one call) and that an existing rail is preserved.
@@ -22,8 +22,8 @@ function v14Save(): Record<string, unknown> {
 
 describe('migrate v14 → v15 — backfill the die-gear rail', () => {
     it('the v14 → v15 hop is still on the supported chain', () => {
-        // The runtime version moves on (Phase 52a took it to 16); what this
-        // suite owns is that the D5 hop survives every later bump.
+        // The runtime version moves on; what this suite owns is that the
+        // die-gear hop survives every later bump.
         expect(GAME_STATE_VERSION).toBeGreaterThanOrEqual(15);
         expect(migrate(v14Save(), 14, 15).version).toBe(15);
     });

@@ -1,18 +1,12 @@
 /**
  * ENEMY KEYWORDS AND STAGES.
  *
- * THE REVAMP (D63, phase R2b) deleted all eleven enemy keywords (HIDE, SWIFT,
- * BRUTAL, VENOM, UNSHAKEN, ELUSIVE, REGROW, RAVENOUS, WOUNDING, FLURRY,
- * SUMMON) and every site that resolved them: with the roster cut to three
- * plain-damage foes (D48) none had a carrier, and most had no player counter
- * left. Git history is the archive (D50).
- *
- * `EnemyKeyword` stays as an empty type so `Enemy.keywords?` keeps its slot
- * for B2, which re-adds keywords one at a time, each with a live counter
- * (D45).
+ * No enemy keyword exists. `EnemyKeyword` is an empty type so
+ * `Enemy.keywords?` keeps its slot for keywords added later, one at a time,
+ * each with a live counter.
  */
 
-/** A keyword carried by an enemy. None exist until B2 re-adds them. */
+/** A keyword carried by an enemy. None exist yet. */
 export type EnemyKeyword = never;
 
 /**

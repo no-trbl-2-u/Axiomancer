@@ -1,5 +1,5 @@
 /**
- * GameEvent surface (Spec 09 Q6).
+ * GameEvent surface.
  *
  * `createEventEmitter()` returns a tiny topic-based pub/sub the store uses
  * after every reducer pass. Consumers (CLI, RN UI, transcript recorders)

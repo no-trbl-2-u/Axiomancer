@@ -1,7 +1,5 @@
 /**
- * Worn-state convention over an inventory list (Phase 154 — absorbed from the
- * mobile app's `state/selectors/equipment.ts`; generalized to slot capacity in
- * Phase 18).
+ * Worn-state convention over an inventory list, by slot capacity.
  *
  * The engine ships no `equipped` flag on `Equipment`. Inventory-driven clients
  * encode "worn" via ordering: the FIRST `SLOT_CAPACITY[slot]` equipment items
@@ -57,13 +55,13 @@ export function isEquippedFirstOfSlot(
 
 /**
  * Find the worn equipment item that equipping `target` would displace, or
- * `null` when nothing is displaced. Semantics (Phase 18):
+ * `null` when nothing is displaced. Semantics:
  *   - `target` already worn → `null` (no swap).
  *   - the slot has a free position (`worn.length < capacity`) → `null`
  *     (`target` fills a gap, displaces nothing).
  *   - the slot is at capacity → the LAST worn piece (the one a fresh equip
  *     would push out). For weapon/armor (capacity 1) this is the sole worn
- *     piece, matching the pre-Phase-18 replace-preview behaviour.
+ *     piece (a replace preview).
  */
 export function findEquippedInSlot(
     inventory: readonly Item[],

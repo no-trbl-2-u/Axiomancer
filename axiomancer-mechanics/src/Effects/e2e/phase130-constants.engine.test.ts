@@ -1,9 +1,7 @@
 /**
- * Phase 130 — Constants verification tests
+ * Constants verification tests
  *
- * Verifies that Phase 130 constants changes are correctly applied. (The
- * befriendability pins on the retired mid-tier foes went with them in the
- * enemy roster reset, R2.)
+ * Pins the effects-resolution threshold constants.
  */
 
 import { describe, it, expect } from 'vitest';

@@ -127,12 +127,11 @@ export function createDie(sides: number, timesRolled: number, func?: (arr: numbe
 
 /**
  * Calculates the maximum VITAE of a PLAYER-side entity from all base stats.
- * Equation: PLAYER_VITAE_BASE + 12·body + 6·mind + 6·heart (S3, D41)
+ * Equation: PLAYER_VITAE_BASE + 12·body + 6·mind + 6·heart
  *
- * THE BIG NUMBERS REWRITE (2026-09-02): the flat base is what keeps a level-1
- * pilgrim standing through the opening telegraphs now that threats are printed
- * in real numbers. Enemies do NOT use this function any more — they carry
- * their own pool (`enemyVitae`, `src/Enemy/index.ts`).
+ * The flat base is what keeps a level-1 pilgrim standing through the opening
+ * telegraphs, since threats are printed in real numbers. Enemies do NOT use
+ * this function — they carry their own pool (`enemyVitae`, `src/Enemy/index.ts`).
  *
  * Level is not multiplied again here because the game's stat law already
  * encodes level as total stat budget; multiplying by level again double-counts

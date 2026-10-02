@@ -1,5 +1,5 @@
 /**
- * Hermetic e2e — OBJECTIVE FUNCTION v2, the Combat Quality Index (Phase 43).
+ * Hermetic e2e — OBJECTIVE FUNCTION v2, the Combat Quality Index.
  *
  * Drives the metric through its highest public entry points
  * (`scoreCombatObjective`, `foldObjectiveEvents`, `assertLockedMechanicsFirstClass`)

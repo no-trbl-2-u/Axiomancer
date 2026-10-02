@@ -77,12 +77,11 @@ test('axio_overview publishes live doctrine, not the retired STRIKE IS DEAD ban'
   ])
   const text = replies.get(1)?.result?.content?.[0]?.text ?? ''
   assert.doesNotMatch(text, /STRIKE IS DEAD/)
-  // The live doctrine, not one pinned sentence: the three surviving
-  // constraints, the absence of a governing objective function, and DEAL as a
-  // first-class verb. Reword the library header freely; this still holds.
+  // The live doctrine, not one pinned sentence: the card constraints, the
+  // absence of a governing objective function, and DEAL as a first-class verb.
+  // Reword the library header freely; this still holds.
   assert.match(text, /# Doctrine — /)
-  // The count moved with the card purge (D36): the 5/5/5 thirds were repealed.
-  assert.match(text, /SURVIVING CONSTRAINTS/)
+  assert.match(text, /THE CONSTRAINTS:/)
   assert.match(text, /no rank band/)
   assert.match(text, /Direct damage is a first-class verb/)
 })

@@ -1,11 +1,11 @@
 /**
- * Act 1's fights (map revamp D30, re-shaped by the enemy roster reset D61).
+ * Act 1's fights.
  *
- * D61 (revamp R2): every Act 1 region's door fight — the map's last fight
+ * Every Act 1 region's door fight — the map's last fight
  * column — is the Doorwarden as a boss; each region keeps one mid-region
  * node pinned to its one elite, the Brine Hag. Every other fight is Float-Eye.
  *
- * Every Act 1 fight is pinned low (brief §3b), and the elite is too: an
+ * Every Act 1 fight is pinned low, and the elite is too: an
  * unpinned elite would scale to its own roster level (7 and up).
  */
 

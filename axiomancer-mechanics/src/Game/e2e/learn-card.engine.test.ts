@@ -1,5 +1,5 @@
 /**
- * Hermetic e2e — Phase 30 unit 3 (Spec 06 Q7).
+ * Hermetic e2e — the LEARN_CARD action.
  *
  * Drives the LEARN_CARD action through the public game-store surface
  * to verify the reducer + store wiring. The underlying eligibility
@@ -30,7 +30,7 @@ function buildStore(level: number, knownCards: string[] = []) {
 
 describe('LEARN_CARD action — Phase 30 unit 3', () => {
     it('appends an eligible card id to knownCards', () => {
-        const t1 = cardLibrary.find(s => s.rank === 1)!; // Doxa cards gate at level 1
+        const t1 = cardLibrary.find(s => s.rank === 1)!; // rank-1 cards gate at level 1
         const store = buildStore(1, []);
         const before = store.getState().player.knownCards.length;
         store.getState().learnCard(t1.id);

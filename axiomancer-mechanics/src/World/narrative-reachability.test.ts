@@ -1,5 +1,5 @@
 /**
- * Unit test for `auditNarrativeReachability` (Phase 53a) against a
+ * Unit test for `auditNarrativeReachability` against a
  * hand-built fixture map, isolated from the real content registry so the
  * three report categories can each be exercised in a controlled scenario.
  */

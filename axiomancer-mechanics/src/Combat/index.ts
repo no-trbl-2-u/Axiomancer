@@ -25,13 +25,11 @@ export type {
     AggregatedEffectModifiers,
 } from './effect-modifiers';
 
-// Legacy export name retained for backward compatibility with any older code
-// that imported `applyDamage` and `healCharacter` separately.
+// `heal`, also exported under the name `healCharacter`.
 export { heal as healCharacter } from './health';
 
-// ─── Spec 25 — Hazard-Pattern Combat ──────────────────────────────────────────
-// The card-and-dice combat driver; the
-// effects + card engines are unchanged (Spec 25 §12 Q4 recommendation (b)).
+// ─── Hazard-pattern combat ───────────────────────────────────────────────────
+// The card-and-dice combat driver, built on the effects + card engines.
 export type {
     CombatEncounterState,
     CombatManaDie, CombatDieColor,
@@ -39,12 +37,12 @@ export type {
     CombatThreatPhase, CombatThreatAction, CombatThreatEffect,
     CombatOutcome, CombatEvent,
     CombatSummary,
-    // Spec 26 / 26b additions
+    // Intents and signature skills
     CombatIntentType,
     SignatureSkill,
-    // The three chain colours (spec 33 momentum chain)
+    // The three chain colours (the momentum chain)
     WheelStance,
-    // Spec 33 (Phase D2) — the die-gear interface (D5 makes it a real rail)
+    // The die-gear interface
     UpgradeableDieGear,
 } from './combat.encounter.types';
 export {
@@ -52,24 +50,24 @@ export {
     resolveThreatPhase, processBetweenPhases,
     selectMercyChoice as selectEncounterMercyChoice, getCard,
     handCards, buildCombatSummary,
-    // Spec 26b / spec 33 — turn lifecycle + Conviction + Signature Skills
+    // Turn lifecycle + Conviction + Signature Skills
     startTurn, endTurn, discardCombatCard,
     playSignatureSkill,
     getSignatureSkill, signatureCastBlock, SIGNATURE_COST,
-    // THE BIG NUMBERS REWRITE — the LIVE colour-match rule. Mobile's presenter
+    // The LIVE colour-match rule. Mobile's presenter
     // must consume this, or the card face prints a bonus the engine does not
     // apply.
     colorMatchBonus,
-    // Fate Engine P1 (spec 31) — the dice get a second read
+    // The dice get a second read
     riderText,
-    // phase 28 — legibility sweep
+    // Legibility: the incoming-threat projection
     projectIncomingThreat,
-    // Phase 2 — projected-lethality readout (spec 30); heal-aware since 2026-09-04
+    // Projected-lethality readout (heal-aware)
     projectCombatOutcome,
-    // Spec 32 v3 — floating dice save-back
+    // Floating dice save-back
     getFloatingDiceColors,
 } from './combat.engine';
-// S3 — stat scaling (D40–D43): the formula, the keyword families, and the
+// Stat scaling: the formula, the keyword families, and the
 // display-only stat-scaled card the hand prints.
 export {
     scaleAmount, scaleFor, statFor, scaleRider, scaleCardForStats,
@@ -77,8 +75,7 @@ export {
     MECHANIC_SCALING, RIDER_SCALING, PAYLOAD_SCALING, NEUTRAL_STAT,
 } from './stat-scaling';
 export type { StatFamily, ScalingKind, KeywordScaling } from './stat-scaling';
-// Spec 33 — the Upgradeable-Dice model: THE combat dice model (the flag was
-// collapsed in D7, 2026-09-25).
+// The Upgradeable-Dice model: THE combat dice model.
 export {
     SPECIAL_CONVICTION_DEFAULT, MOMENTUM_CHAIN_ORDER, MOMENTUM_SURGE_LENGTH,
     DEFAULT_DIE_GEAR, activeDieGear,

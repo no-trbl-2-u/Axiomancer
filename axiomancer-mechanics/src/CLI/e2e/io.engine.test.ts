@@ -8,7 +8,7 @@
  *   - json-mode `emit` writes one JSON-stringified line per call.
  *   - human-mode `emit` writes the human bullet.
  *   - json-mode `log` routes to stderr (keeps stdout machine-clean).
- *   - state-log writer round-trips records to disk (Phase 26 unit 4).
+ *   - state-log writer round-trips records to disk.
  *
  * No TTY interaction; `inquirer` is never invoked.
  */

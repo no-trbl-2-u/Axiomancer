@@ -2,16 +2,8 @@
  * Balance-sim witness — status-payoff loadouts.
  *
  * The sim MACHINERY stays armed: payoff-built loadouts of the library must
- * terminate and account for every run (no crashes, no hangs). The BAND
- * assertions (win rate > 0, engagement > 0, DoT fraction > 0), formerly
- * parked in a `describe.skip` block, were repealed outright 2026-09-02
- * (big-numbers overhaul §3/§10) rather than left as a skipped tombstone.
- *
- * Loadout lineage (old → new fixture map):
- *   slippery-slope        → unction-of-boils (tier-2 poison common)
- *   festering-argument    → the-long-lent (PROLONG / extend_dots)
- *   opening-statement     → reading-of-the-charges (MARK exposure)
- *   resonance-detonation  → communion-of-the-worm (RUPTURE ALL + SIPHON 50%)
+ * terminate and account for every run (no crashes, no hangs). No balance
+ * band is asserted.
  */
 
 import { describe, it, expect } from 'vitest';

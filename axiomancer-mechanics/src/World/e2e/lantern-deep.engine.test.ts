@@ -1,20 +1,20 @@
 /**
- * The Lantern Deep — Act 1, map 4 (map revamp M3d; D21, D25–D31).
+ * The Lantern Deep — Act 1, map 4.
  *
- * Pins what the map revamp decided for the last Act 1 map:
- * - on `northern-continent` (D28): the Beacon Crags' glacier shrine goes down
- *   into it, and this map's deep stair is sealed (THE REVAMP R3a, D61): there
+ * Pins the last Act 1 map:
+ * - on `northern-continent`: the Beacon Crags' glacier shrine goes down
+ *   into it, and this map's deep stair is sealed: there
  *   is no end-of-run state;
- * - the map borrows the shipped builders, the caverns' roster and its iron
- *   (D29), with one authored event on every node;
+ * - the map borrows the shipped builders, the caverns' roster and its iron,
+ *   with one authored event on every node;
  * - the caverns' roster is level 13 and up, so every fight here is pinned low;
- * - the vault door (`ld-15`) was the Labyrinth's (D24, M4); the Labyrinth is
- *   parked (D54), so the door is sealed and never opens in play.
+ * - the vault door (`ld-15`) is the Labyrinth's; the Labyrinth is parked,
+ *   so the door is sealed and never opens in play.
  *
  * The generic gauntlet invariants (no strands, column law, ribs, distinct
  * coordinates) run over this map in `map-traversal.engine.test.ts` like every
- * other registered map. The D25/D16 layout pins live in mobile, where the
- * landmarks and the sheet are.
+ * other registered map. The layout pins live in mobile, where the landmarks
+ * and the sheet are.
  */
 
 import { describe, expect, it } from 'vitest';

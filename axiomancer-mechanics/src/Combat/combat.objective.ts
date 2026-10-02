@@ -1,17 +1,13 @@
 /**
- * OBJECTIVE FUNCTION v2 — the Combat Quality Index (Phase 43).
+ * OBJECTIVE FUNCTION v2 — the Combat Quality Index.
  *
  * ─── The decision ───────────────────────────────────────────────────────────
  *
- * `statusEngagement` was the objective function for `/deck-tuning` and
- * `/combat-playtest` because "status play is the dominant win path" WAS the
- * doctrine. THE UNSHACKLING (T direct, 2026-08-08 — bearings § "THE
- * UNSHACKLING") voided that doctrine for combat, so `statusEngagement` now
- * measures adherence to a rule the game no longer has. It stays computed and
- * reported beside this score (other suites assert on it, and it remains a
- * useful warning light), but it is no longer what "good" means.
+ * `statusEngagement` measures how much of a fight ran on status play. It is
+ * computed and reported beside this score (other suites assert on it, and it
+ * is a useful warning light), but it is not what "good" means.
  *
- * What "good combat" means under the new rules, in one sentence:
+ * What "good combat" means, in one sentence:
  *
  *   > A fight is GOOD when the deck's own engine runs — its loop assembles
  *   > across turns instead of firing at once (ARC), the player has more than
@@ -23,15 +19,12 @@
  * That yields ONE named score, `combatQualityIndex` (CQI, 0–1), with four
  * explicitly weighted components, every one of them reported individually.
  *
- * **Win rate is deliberately NOT a term.** The starter-preset doctrine curve
- * (early ~80% / mid ~50% / late 25-35% / impossible 0%) already grades WHETHER
- * a deck should win at a stage; CQI grades HOW the fight played. Folding win
+ * **Win rate is deliberately NOT a term.** CQI grades HOW the fight played,
+ * not WHETHER a deck should win at a stage. Folding win
  * rate in would make a good fight on the `impossible` stage unscoreable and
- * would re-create the old metric's failure mode — one number pretending to be
- * both the target and the diagnosis.
+ * make one number pretend to be both the target and the diagnosis.
  *
- * **What was considered and rejected as standalone components** (the phase row
- * says decide, do not collect all of them):
+ * **Rejected as standalone components:**
  *   - *Comeback frequency* — needs a lead/trail model the HP-only win condition
  *     does not provide, and the sim policies are instruments, not players, so a
  *     "comeback" would measure the driver's guard counters, not the design.
@@ -41,7 +34,7 @@
  *
  * ─── The locked-mechanics guard ─────────────────────────────────────────────
  *
- * The phase row (and bearings § "LOCKED MECHANICS") requires that Conviction,
+ * Bearings § "LOCKED MECHANICS" requires that Conviction,
  * the Surge meter and the Dice system be first-class terms such that a deck
  * ignoring them scores WORSE, and that a later balance pass cannot tune them
  * into irrelevance. Three mechanisms enforce that here:
@@ -93,22 +86,19 @@ export interface CombatQualityWeights {
 /**
  * THE WEIGHTS, and why.
  *
- * `spine` **0.40** — the largest term by design. After the unshackling every
- * other thing the metric could anchor on (cards, keywords, theme, damage
+ * `spine` **0.40** — the largest term by design. Every other thing the
+ * metric could anchor on (cards, keywords, theme, damage
  * model) is explicitly mutable; Conviction, Surge and Dice are the only
  * structure T locked as permanent. Anchoring the objective function on the
  * only fixed points in the game is the one choice that cannot rot. At 0.40 the
  * other three components sum to 0.60, so a spine-blind deck cannot reach a
- * passing score by excelling everywhere else — which is exactly the guard the
- * phase row asks for.
+ * passing score by excelling everywhere else — which is exactly the
+ * locked-mechanics guard.
  *
- * `arc` **0.25** — the second-largest, because "volume-based and arc-blind"
- * was the parked AUDIT row's own diagnosis of what `statusEngagement` got
- * wrong. Every one of the six shipped archetypes (`archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/profane-canon.md` §2)
- * is a setup→payoff engine: rot plants then RUPTUREs, debt borrows then bills,
- * grave fills then REQUIEMs, vigil banks quiet rounds, trial stacks CHARGE
- * toward CONDEMN, choir hoards SOUL then REAPs. A flat damage profile means
- * the archetype is not being played as designed, and no other term sees that.
+ * `arc` **0.25** — the second-largest, because `statusEngagement` is
+ * volume-based and arc-blind. A deck built as a setup→payoff engine shows a
+ * developing damage profile; a flat one means the engine is not being played
+ * as designed, and no other term sees that.
  *
  * `width` **0.20** — the other named blind spot (a metric that rewards more
  * applications without more DECISIONS is a failed metric). Ranked below arc
@@ -245,14 +235,14 @@ const clamp01 = (n: number): number => clamp(Number.isFinite(n) ? n : 0, 0, 1);
 const both = (a: number, b: number): number => Math.sqrt(clamp01(a) * clamp01(b));
 
 /**
- * THE LOCKED-MECHANICS GUARD (bearings § "LOCKED MECHANICS"; Phase 43 row).
+ * THE LOCKED-MECHANICS GUARD (bearings § "LOCKED MECHANICS").
  *
  * Throws unless all three locked systems are present with positive sub-weights
  * and the SPINE component carries at least `LOCKED_SPINE_WEIGHT_FLOOR` of the
  * score. `scoreCombatObjective` calls this on every invocation, so a balance
  * pass that tries to tune Conviction, the Surge meter or the Dice system out of
  * the objective function fails loudly at measurement time instead of silently
- * shipping a metric that no longer defends them.
+ * shipping a metric that does not defend them.
  */
 export function assertLockedMechanicsFirstClass(
     weights: CombatQualityWeights = COMBAT_QUALITY_WEIGHTS,
@@ -340,8 +330,8 @@ export function scoreDecisionWidth(t: CombatObjectiveTelemetry): { score: number
  * **Read it per DECK.** Identity is the only component that is definitionally a
  * property of one deck: pooling telemetry across DIFFERENT decks dilutes the
  * dominant share (three decks' lead cards split the denominator) and inflates
- * the term. The per-cell and per-preset rows are the meaningful readings; a
- * `--deck=preset:all` matrix-level identity number is an artifact. The other
+ * the term. The per-cell and per-deck rows are the meaningful readings; a
+ * matrix-level identity number across decks is an artifact. The other
  * three components pool cleanly across decks.
  */
 export function scoreDeckIdentity(t: CombatObjectiveTelemetry): { score: number; dominantShare: number } {

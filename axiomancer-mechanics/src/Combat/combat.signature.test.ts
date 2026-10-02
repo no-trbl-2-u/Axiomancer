@@ -1,6 +1,5 @@
 /**
- * Phase R4 — the signature kit (D47, `plan/revamp/relics.md`), one signature
- * since R7e2 (D72): The Open Hand opens the mercy choice on a foe that can be
+ * The signature kit (`plan/revamp/relics.md`), one signature: The Open Hand opens the mercy choice on a foe that can be
  * befriended once it is low enough.
  */
 

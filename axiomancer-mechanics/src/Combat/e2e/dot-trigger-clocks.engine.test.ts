@@ -1,12 +1,9 @@
 /**
- * Hermetic e2e — WS3.2 trigger-clock DoT substrate (spec 32 §12, ratified
- * 2026-07-11 #3; archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md
- * WS3).
+ * Hermetic e2e — trigger-clock DoT substrate.
  *
- * The WS3.3 data sweep (2026-07-11) put the substrate on live data: POISON
- * ticks the card-played clock, BLEED the damage-instance clock, MARK is
- * battle-long (`calendarExpiry: false`), and `debuff_creeping_doom` (WS3.4)
- * grows per enemy action. The scenarios here still register SYNTHETIC effects
+ * On live data POISON ticks the card-played clock, BLEED the damage-instance
+ * clock, MARK is battle-long (`calendarExpiry: false`), and
+ * `debuff_creeping_doom` grows per enemy action. The scenarios here register SYNTHETIC effects
  * into the shared effect registry (removed in `afterAll`; vitest isolates
  * module state per file) so the SUBSTRATE semantics stay pinned independently
  * of the library's tuning numbers.
@@ -16,21 +13,18 @@
  *      POISON ramp, MARK flat amplification, BLEED `decaysPerTick` washout.
  *   2. The round clock: an untagged DoT ticks at round start only.
  *   3. Engine call sites: 'card-played' fires on a PLAYER spell play (PAID
- *      bottom or FREE top — the FREE site was missing until 2026-09-04);
+ *      bottom or FREE top);
  *      'damage-instance' fires on the shared enemy-damage funnel (a card hit).
- *      (The card purge, P1 2026-09-27, deleted the 'payoff' call-site test —
- *      RUPTURE has no surviving carrier — and the card-landed fresh-stack /
- *      play-site Soul tests: no surviving card lands a DoT.)
  *   4. `calendarExpiry: false` persistence (no round-end countdown) and the
  *      Soul-on-decay-consumed law (Harvest must not starve without calendars).
  *   5. `growth: 'per-enemy-action'` — Doom deepens when the enemy acts, and
  *      NOT when its turn is denied.
  *   6. Expected-trigger fuel math (`EXPECTED_TRIGGERS_PER_ROUND`) in
  *      `getPendingDotTotal` / `computeRoundsToKill`.
- *   7. Legacy parity — an UNTAGGED DoT keeps byte-identical behavior: no
- *      event clock ever ticks it, its fuel math is exactly the old
- *      perTick × max(1, remainingDuration) walk, and its calendar still
- *      counts down.
+ *   7. Untagged parity — an UNTAGGED DoT keeps the round-clock behavior: no
+ *      event clock ever ticks it, its fuel math is exactly the
+ *      perTick × max(1, remainingDuration) walk, and its calendar counts
+ *      down.
  *
  * Fixture/RNG conventions follow `card-effectiveness.engine.test.ts`
  * (shared builder in `src/test-utils/card-fixture.ts`, `mockSequentialRng(0.5)`,
@@ -91,7 +85,7 @@ const SYNTHETICS: readonly Effect[] = [
         type: 'debuff', category: 'control', duration: 2, stacking: 'none', tier: 2,
         payload: { actionRestriction: { skipTurn: true } },
     },
-    // Legacy parity twin of ws3x_card_played — identical numbers, NO trigger.
+    // Untagged twin of ws3x_card_played — identical numbers, NO trigger.
     syntheticDot('ws3x_legacy', { damagePerRound: 3, damageType: 'body' }),
 ];
 
@@ -104,7 +98,7 @@ const ae = (effectId: string, intensity: number, remainingDuration: number, appl
     ({ effectId, intensity, remainingDuration, appliedAt, tier: 1 });
 
 /** Clean fixture with the given effects staged on the ENEMY. PAID plays
- *  name its wild die `fx-die` (spec 33: no implicit powering die). */
+ *  name its wild die `fx-die` (there is no implicit powering die). */
 function stateWithEnemyEffects(effects: ActiveEffect[], hand: { uid: string; cardId: string }[] = []): CombatEncounterState {
     const s = buildFixtureState({ clean: true });
     return { ...s, hand, enemy: { ...s.enemy, effects } };
@@ -114,10 +108,10 @@ function findEvents<K extends CombatEvent['kind']>(events: CombatEvent[], kind: 
     return events.filter((e): e is Extract<CombatEvent, { kind: K }> => e.kind === kind);
 }
 
-/** The played card's OWN direct damage on the foe. THE BIG NUMBERS REWRITE
- *  brought direct damage back as a first-class verb, so an enemy-HP delta is
- *  no longer "the clock tick and nothing else" — subtract the card's own hit
- *  to isolate what the DoT clock contributed. */
+/** The played card's OWN direct damage on the foe. Direct damage is a
+ *  first-class verb, so an enemy-HP delta is not "the clock tick and nothing
+ *  else" — subtract the card's own hit to isolate what the DoT clock
+ *  contributed. */
 function directDamageToEnemy(events: CombatEvent[]): number {
     return findEvents(events, 'damage-dealt')
         .filter(e => e.target === 'enemy')
@@ -232,7 +226,7 @@ describe("engine call site — 'card-played' (player-side plays only, ratified)"
         const { state: after, events } = playCombatCard(before, { uid: 't1' }, true, 'fx-die');
 
         // Everything the foe lost beyond the card's own hit IS the clock tick
-        // (A Plain Blow lands no DoT of its own; card purge P1, 2026-09-27).
+        // (A Plain Blow lands no DoT of its own).
         expect(before.enemy.health - after.enemy.health).toBe(directDamageToEnemy(events) + 6);
         const ticks = findEvents(events, 'dot-tick').filter(e => e.effectId === 'ws3x_card_played');
         expect(ticks).toEqual([{ kind: 'dot-tick', effectId: 'ws3x_card_played', label: 'ws3x_card_played', amount: 6, target: 'enemy' }]);
@@ -241,15 +235,14 @@ describe("engine call site — 'card-played' (player-side plays only, ratified)"
         expect(inst).toMatchObject({ intensity: 2, remainingDuration: 4 });
     });
 
-    // Playtest fix 2026-09-04: the FREE line is a player-side spell play and
-    // advances the same clock. Before this, a free-line-heavy deck watched
-    // POISON sit inert all fight while the projection billed two ticks a round.
+    // The FREE line is a player-side spell play and advances the same clock,
+    // so a free-line-heavy deck's POISON ticks as the projection bills it.
     it('a player FREE (top) spell play advances the card-played clock on the enemy', () => {
         mockSequentialRng(0.5);
         const before = stateWithEnemyEffects(
             [ae('ws3x_card_played', 2, 4)],
             // A Plain Ward's FREE line (GUARD 2) deals nothing itself, so the
-            // whole enemy delta is the clock tick (card purge P1, 2026-09-27).
+            // whole enemy delta is the clock tick.
             [{ uid: 't1', cardId: 'grey-ward' }],
         );
         const { state: after, events } = playCombatCard(before, { uid: 't1' }, false);
@@ -373,7 +366,7 @@ describe('fuel math — expected-trigger counts per clock', () => {
         expect(getPendingDotTotal(bearer('ws3x_card_played', 2, 4)).total).toBe(48);
         // payoff: 1 tick/round × 3 rounds × 4 = 12
         expect(getPendingDotTotal(bearer('ws3x_payoff', 1, 3)).total).toBe(12);
-        // Legacy keeps EXACTLY the old math: perTick × max(1, duration).
+        // Untagged keeps EXACTLY the round-clock math: perTick × max(1, duration).
         expect(getPendingDotTotal(bearer('ws3x_legacy', 2, 4)).total).toBe(3 * 2 * 4);
         // No-calendar permanent (-1) counts ONE round of expected triggers,
         // decaying across ticks: 5×3 + 5×2 = 25.
@@ -385,15 +378,15 @@ describe('fuel math — expected-trigger counts per clock', () => {
         const clocked = { ...base, health: 24, effects: [ae('ws3x_card_played', 2, 4)] };
         expect(computeRoundsToKill(clocked)).toBe(2);  // 12 HP expected per round
         const legacy = { ...base, health: 24, effects: [ae('ws3x_legacy', 2, 4)] };
-        expect(computeRoundsToKill(legacy)).toBe(4);   // 6 HP per round — old walk
+        expect(computeRoundsToKill(legacy)).toBe(4);   // 6 HP per round — round-clock walk
     });
 });
 
-// ── 7. Legacy parity — untagged DoTs are byte-identical to before ────────────
+// ── 7. Untagged parity — untagged DoTs keep the round-clock walk ─────────────
 
 describe('legacy parity — an untagged DoT keeps exactly the old behavior', () => {
     it('pending fuel matches the pre-WS3 walk for real library DoTs', () => {
-        // Hand-rolled copy of the PRE-WS3 getPendingDotTotal per-effect loop.
+        // Hand-rolled round-clock getPendingDotTotal per-effect loop.
         const legacyPending = (bearer: { effects: ActiveEffect[] }, currentRound?: number): number => {
             const dotAmp = getDotAmplificationByEffect(bearer.effects);
             let total = 0;
@@ -418,8 +411,8 @@ describe('legacy parity — an untagged DoT keeps exactly the old behavior', () 
             return total;
         };
 
-        // The untagged witnesses (WS3.3 moved poison/bleed onto event clocks):
-        // the library's Creeping Doom and the synthetic legacy DoT.
+        // The untagged witnesses (poison/bleed ride event clocks): the
+        // library's Creeping Doom and the synthetic untagged DoT.
         const enemy = stateWithEnemyEffects([
             ae('debuff_creeping_doom', 3, 4), ae('ws3x_legacy', 3, 3),
         ]).enemy;

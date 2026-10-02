@@ -1,11 +1,7 @@
 /**
  * Hermetic E2E — card library shape guard.
  *
- * The library size, archetype-package shape, starter/valve/curse counts,
- * preset/reward split, THE STRIKE IS DEAD schema ban, `addedIn` floor, and
- * dieBonus-reachability pin were repealed 2026-09-02 (big-numbers overhaul
- * §3, §10); the theme, oath/hex and preset legs went with those systems in
- * R7b (D50, D51). What remains here are bug detectors: unique ids, valid
+ * These are bug detectors: unique ids, valid
  * rank/type, every card authors a non-empty FREE line, and the grey deck
  * and reward pool resolve.
  */
@@ -22,8 +18,7 @@ describe('profane canon — shape contract', () => {
         expect(new Set(ids).size).toBe(ids.length);
     });
 
-    // Moved here from the root naming-law sweep when R1 deleted it: a
-    // malformed id breaks lookups, so this is a bug detector, not a style law.
+    // A malformed id breaks lookups, so this is a bug detector, not a style law.
     it('every card id is kebab-case', () => {
         const malformed = cardLibrary.map(c => c.id).filter(id => !/^[a-z][a-z0-9-]*$/.test(id));
         expect(malformed).toEqual([]);
@@ -60,18 +55,15 @@ describe('profane canon — id hygiene and provenance', () => {
             expect(['attack', 'skill', 'spell']).toContain(card.cardType);
             expect(['self', 'enemy']).toContain(card.targetType);
             expect(['body', 'mind', 'heart', 'any']).toContain(card.color);
-            // Provenance stamp: a well-formed ISO date. The 2026-08-08 floor
-            // (Profane Canon wholesale replacement) was repealed 2026-09-02.
+            // Provenance stamp: a well-formed ISO date.
             expect(card.addedIn).toMatch(/^\d{4}-\d{2}-\d{2}$/);
         }
     });
 
     it('the starting set resolves, teaches a mechanic each, and is the 5/3/2 grey recipe', () => {
-        // Phase 104 (the grey office) — a brand-new player's first ten cards
-        // are three colourless shapes, not one card per stance colour: 'any'
-        // means every die powers every starter, so the old three-colours-
-        // represented law is superseded (there is no colour to fail to cover).
-        // S3 (T, 2026-09-27): Blow 5, Ward 3, A Plain Word 2 (D42, D43).
+        // The grey office — a brand-new player's first ten cards are three
+        // colourless shapes: 'any' means every die powers every starter.
+        // Blow 5, Ward 3, A Plain Word 2.
         expect(STARTING_CARD_IDS).toEqual([
             'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike',
             'grey-ward', 'grey-ward', 'grey-ward',
@@ -88,7 +80,7 @@ describe('profane canon — id hygiene and provenance', () => {
     });
 
     it('every reward-pool id resolves', () => {
-        // D44 (the card purge, 2026-09-27): the grey office IS the reward pool.
+        // The grey office IS the reward pool.
         expect(COMBAT_REWARD_POOL.length).toBeGreaterThan(0);
         for (const id of COMBAT_REWARD_POOL) {
             expect(getCardById(id), `reward pool: ${id}`).toBeDefined();

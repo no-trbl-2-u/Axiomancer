@@ -1,10 +1,6 @@
 /**
- * Card-face projection smoke over the seated canon.
- *
- * The Pale Choir wording pins (PLEA, SOUL, REAP, QUARTER, the vigil reflect
- * cards) went with the card purge (P1, 2026-09-27): those cards no longer
- * exist. What survives is the projection smoke — every card the grey deck
- * seats projects to a face — so a seated card can never be unprojectable.
+ * Card-face projection smoke over the seated canon: every card the grey deck
+ * seats projects to a face, so a seated card can never be unprojectable.
  */
 import { describe, expect, it } from 'vitest';
 import { getCardById } from '../../Cards/cards.library';

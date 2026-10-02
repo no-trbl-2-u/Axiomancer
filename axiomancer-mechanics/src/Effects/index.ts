@@ -20,10 +20,10 @@ import { MAX_EFFECT_INTENSITY, MAX_EFFECT_DURATION } from '../Game/game-mechanic
  * @property durationMode   - `reset` resets duration to effect.duration (default).
  *                            `additive` adds `durationDelta` to remaining duration.
  * @property durationDelta  - Used when `durationMode === 'additive'`. Defaults to `intensityDelta`.
- * @property uncapped       - S3 (D41, "nothing is capped"): skip the
+ * @property uncapped       - "Nothing is capped": skip the
  *   `MAX_EFFECT_INTENSITY` clamp. Set by the player's stat-scaled
  *   applications; enemy applications keep the clamp.
- * @property sourceId       - Phase 38. Optional combatant / item id stamped onto
+ * @property sourceId       - Optional combatant / item id stamped onto
  *   the resulting `ActiveEffect.sourceId` so consumers can answer "who applied
  *   this?". On stacking, last-writer-wins: a supplied `sourceId` overrides the
  *   prior; an omitted one preserves it.
@@ -104,7 +104,7 @@ export function applyEffect(
         case 'intensity': {
             const prev         = existing.intensity ?? 1;
             const newIntensity = Math.min(prev + intensityDelta, Math.max(intensityCap, prev));
-            // `refreshOnStack` (VULNERABLE, D43): a re-application adds its
+            // `refreshOnStack` (VULNERABLE): a re-application adds its
             // intensity and REFRESHES the clock to the longer of what is left
             // and what the new application brings; it never extends past that.
             const incoming     = durationMode === 'additive' ? durationDelta : effect.duration;
@@ -114,7 +114,7 @@ export function applyEffect(
                     ? Math.min(existing.remainingDuration + durationDelta, MAX_EFFECT_DURATION)
                     : Math.min(effect.duration, MAX_EFFECT_DURATION);
 
-            // POISON ramp reset (spec 32 v3): an `escalatesPerTurn` DoT restarts
+            // POISON ramp reset: an `escalatesPerTurn` DoT restarts
             // its ramp clock on reapplication — `rampedDamagePerRound` measures
             // `round − appliedAt`, so re-stamping `appliedAt` sends the ramp back
             // to turn 0 while the intensity climbs. Non-escalating effects keep

@@ -1,39 +1,31 @@
 /**
  * Save-state validation + migration.
  *
- * Save files are tagged with `version`. The step-wise migration chain was
- * dropped 2026-07-08 (legacy cleanup) because there were no shipped saves to
- * preserve; a save at an unsupported version is rejected so the caller starts a
- * fresh game. The equipment-signature epic (phases 18-21) re-introduces a short
- * targeted chain: v11 → v12 (Phase 18, re-slot equipment to the 5-slot model),
- * v12 → v13 (Phase 19, seed the signet relics), v13 → v14 (Phase 21, purge
- * non-relic equipment now that the procedural library is retired), v14 → v15
- * (Phase D5, backfill the die-gear rail), v15 → v16 (Phase 52a, default
- * the per-run card-removal counter), v16 → v17 (Phase 52e, retire the
- * rest minigame), v17 → v18 (Phase 61, retire the Quest Board
- * minigame), v18 → v19 (Phase 76, retire the Gathering minigame), v19 →
- * v20 (Phase 63, retire the loot-cache Pick Pool minigame), v20 → v21
- * (inter-map travel, seed the continent catalogue), v21 → v22
- * (Phase 85, seed the head/hands/feet signet relics), v22 → v23
- * (2026-09-20, strip the starting curated-loadout flags that shadowed the
- * starter bundle), and v23 → v24 (2026-09-21, stamp the first-node relic
- * grant as already settled — every existing save already wears the
- * Suppliant's Ring), v24 → v25 (2026-09-25, strip the retired derived
- * stats and non-maxHp stat lines), and v25 → v26 (2026-09-27, T6 / D39: strip
- * the alignment grid and GRACE, rename a card's `philosophicalAspect` to
- * `color`), and v26 → v27 (2026-09-29, THE REVAMP R2 / D48: a staged
- * encounter naming a retired foe re-points to Float-Eye, and survivors lose
- * their stripped keywords), v27 → v28 (2026-09-29, THE REVAMP R3a: a
- * save standing off Act 1 moves onto the Lantern Deep), v28 → v29 (R3b:
- * fishing-village purged), v29 → v30 (2026-09-30, R5: the retired
- * consumables and their effects dropped), v30 → v31 (2026-09-30, R6a: the
- * hazard token and hex flags dropped), v31 → v32 (2026-09-30, R6b: hazard
- * deck cards outside the core ten dropped), v32 → v33 (2026-09-30, R7c:
- * the write-only `regionConsequences` slice dropped), v33 → v34
- * (2026-10-01, R7e: the parked world's maps, quests and flags dropped) and
- * v34 → v35 (2026-10-01, R7e2: every relic but the Suppliant's Ring
- * dropped), v35 → v36 (2026-10-01, R9: XP re-expressed on the rising
- * level curve). The hops chain, so a v11 save lands at v36 in one `migrate` call. Every other version mismatch still rejects.
+ * Save files are tagged with `version`. A save older than v11 is rejected so
+ * the caller starts a fresh game. From v11 a targeted chain of hops brings a
+ * save to the current version: v11 → v12 (re-slot equipment to the 5-slot
+ * model), v12 → v13 (seed the signet relics), v13 → v14 (purge non-relic
+ * equipment), v14 → v15 (backfill the die-gear rail), v15 → v16 (default
+ * the per-run card-removal counter), v16 → v17 (drop the rest minigame),
+ * v17 → v18 (drop the Quest Board minigame), v18 → v19 (drop the Gathering
+ * minigame), v19 → v20 (drop the loot-cache Pick Pool minigame), v20 → v21
+ * (inter-map travel, seed the continent catalogue), v21 → v22 (version
+ * bump), v22 → v23 (strip the starting curated-loadout flags that shadowed
+ * the starter bundle), v23 → v24 (stamp the first-node relic grant as
+ * already settled — every existing save already wears the Suppliant's
+ * Ring), v24 → v25 (strip the derived stats and non-maxHp stat lines),
+ * v25 → v26 (strip the alignment grid and GRACE, rename a card's
+ * `philosophicalAspect` to `color`), v26 → v27 (a staged encounter naming a
+ * removed foe re-points to Float-Eye, and survivors lose their stripped
+ * keywords), v27 → v28 (a save standing off Act 1 moves onto the Lantern
+ * Deep), v28 → v29 (fishing-village purged), v29 → v30 (the deleted
+ * consumables and their effects dropped), v30 → v31 (the hazard token and
+ * hex flags dropped), v31 → v32 (hazard deck cards outside the core ten
+ * dropped), v32 → v33 (the write-only `regionConsequences` slice dropped),
+ * v33 → v34 (the parked world's maps, quests and flags dropped), v34 → v35
+ * (every relic but the Suppliant's Ring dropped) and v35 → v36 (XP
+ * re-expressed on the rising level curve). The hops chain, so a v11 save
+ * lands at v36 in one `migrate` call. Every other version mismatch rejects.
  */
 
 import { GameState } from './types';
@@ -57,7 +49,7 @@ import { createMapState, getMapDefinition } from '../World/map.registry';
 import { changeContinent, changeMap, placeOnNode, unlockMap } from '../World/world.reducer';
 
 /**
- * v11 → v12 (Phase 18): fold the player's 7-slot equipment record into the
+ * v11 → v12: fold the player's 7-slot equipment record into the
  * 5-slot `EquipmentLoadout`, re-slot every persisted inventory equipment
  * instance, return worn overflow (a displaced `body` piece, 4th+ accessories)
  * to inventory. Pure over a
@@ -88,9 +80,8 @@ function migrateV11ToV12(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
- * v12 → v13 (Phase 19): seed the 8 signet relics onto the player so a loaded
- * save derives a full signature kit from the worn loadout (signatures no longer
- * come from the archetype). The fixed default 5 relics become the worn loadout;
+ * v12 → v13: seed the 8 signet relics onto the player so a loaded
+ * save derives a full signature kit from the worn loadout. The fixed default 5 relics become the worn loadout;
  * any previously-worn gear is displaced to inventory; the other 3 relics also go
  * to inventory. `maxHealth` is recomputed off the relic
  * loadout (the two armor relics fold a +5 maxHp bonus onto `maxHealth`), and
@@ -140,8 +131,8 @@ function migrateV12ToV13(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
- * v13 → v14 (Phase 21): the procedural equipment library + factory are retired,
- * so any non-relic `Equipment` in a save is unresolvable dead data. Strip every
+ * v13 → v14: the procedural equipment library + factory are gone, so any
+ * non-relic `Equipment` in a save is unresolvable dead data. Strip every
  * non-relic equipment from the loadout and inventory (relics are the only
  * equipment that survives); if a loadout slot held procedural gear, backfill it
  * with the default relic for that slot so combat never begins signature-short.
@@ -166,7 +157,7 @@ function migrateV13ToV14(raw: Record<string, unknown>): Record<string, unknown> 
 
     // Rebuild the loadout: keep worn relics, replace any non-relic worn piece
     // with the default relic for that slot, and backfill the accessory row to 3.
-    // Since R7e2 the starting relics are the ring alone, so a slot with no
+    // The starting relics are the ring alone, so a slot with no
     // default stays empty (the v35 hop drops the deleted relics anyway).
     const defaults = cloneStartingRelics();
     const loadout = player.equipment;
@@ -197,8 +188,7 @@ function migrateV13ToV14(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
- * v14 → v15 (Phase D5, spec 33 §6): backfill the die-gear rail. A pre-D5 save
- * has no `player.dieGear`; the combat engine already falls back to the frozen
+ * v14 → v15: backfill the die-gear rail. A v14 save has no `player.dieGear`; the combat engine already falls back to the frozen
  * `DEFAULT_DIE_GEAR`, but a persisted default rail is the floor the blacksmith
  * upgrades write into — so a loaded save carries a real per-save object rather
  * than upgrading the frozen default. Only the rail is added; every other field
@@ -218,8 +208,7 @@ function migrateV14ToV15(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
- * v15 → v16 (Phase 52a): default the per-run card-removal counter. A pre-52a
- * save has no `player.cardRemovals`; the escalating removal price
+ * v15 → v16: default the per-run card-removal counter. A v15 save has no `player.cardRemovals`; the escalating removal price
  * (`cardRemovalPrice`) reads that counter, and `cardRemovalsOf` already treats
  * an absent field as 0, so this hop is a materialisation rather than a repair —
  * a loaded save carries the counter explicitly, exactly as the die-gear hop
@@ -245,7 +234,7 @@ function migrateV15ToV16(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
- * v16 → v17 (Phase 52e): retire the rest minigame.
+ * v16 → v17: drop the rest minigame.
  * Drops the dead `night-watch-tutorial-done` tutorial flag (the tutorial
  * screen it gated is deleted). Clears a live rest-minigame session that
  * rode along in the raw payload's `rest` key — that key is a mobile-only
@@ -253,8 +242,8 @@ function migrateV15ToV16(raw: Record<string, unknown>): Record<string, unknown> 
  * player mid-night at update time simply lands with the node consumed and
  * no pending choice, same as `resolveMapEvent` already consuming the node
  * on entry. `night-keepsake:*` flags are LEFT ALONE — `/memoir`'s REMAINS
- * section reads them back, and they are the only trace of the retired
- * system a player should still see. Pure over a raw save payload.
+ * section reads them back, and they are the only trace of the rest
+ * minigame a player should still see. Pure over a raw save payload.
  */
 function migrateV16ToV17(raw: Record<string, unknown>): Record<string, unknown> {
     const flags = Array.isArray(raw.flags)
@@ -269,7 +258,7 @@ function migrateV16ToV17(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
- * v17 → v18 (Phase 61): retire the Quest Board minigame ("The Boy's
+ * v17 → v18: drop the Quest Board minigame ("The Boy's
  * Almanac"). Clears a live quest-board session that rode along in the
  * raw payload's `quest` key — that key is a mobile-only store slice, not
  * a formal `GameState` field, so it is untyped here; a player mid-board
@@ -287,7 +276,7 @@ function migrateV17ToV18(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
- * v18 → v19 (Phase 76): retire the Gathering minigame ("The Gleaning").
+ * v18 → v19: drop the Gathering minigame ("The Gleaning").
  * Clears a live gathering session that rode along in the raw payload's
  * `gathering` key — that key is a mobile-only store slice, not a formal
  * `GameState` field, so it is untyped here; a player mid-gleaning at
@@ -304,7 +293,7 @@ function migrateV18ToV19(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
- * v19 → v20 (Phase 63): retire the loot-cache Pick Pool minigame ("The
+ * v19 → v20: drop the loot-cache Pick Pool minigame ("The
  * Reliquary"), replaced by `World/LootCacheChoice`'s three-offer choice.
  * Clears a live cache session that rode along in the raw payload's `cache`
  * key — that key is a mobile-only store slice, not a formal `GameState`
@@ -326,7 +315,7 @@ function migrateV19ToV20(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
- * v20 → v21 (2026-08-28): inter-map travel. Old saves carry `world: []` —
+ * v20 → v21: inter-map travel. Old saves carry `world: []` —
  * the continent catalogue was never populated, so `changeContinent` could
  * only no-op. Seed the new two-continent catalogue (coastal + northern,
  * matching `createStartingWorld`), REPLACING the seeded entry that matches
@@ -358,8 +347,8 @@ function migrateV20ToV21(raw: Record<string, unknown>): Record<string, unknown> 
             name: 'northern-continent',
             description: 'The northern continent begins underground. Iron caverns climb toward the first city; a river runs on from there. Nobody arrives by daylight.',
             availableMaps: [],
-            // Phase W3 — kept in sync with `createStartingWorld`. A v21 save
-            // seeded before W3 carries only 'caverns' here and needs NO new
+            // Kept in sync with `createStartingWorld`. An older v21 save
+            // carries only 'caverns' here and needs NO new
             // migration hop: the locked-map ledger is informational, and
             // `unlockMap` admits any registered destination at travel time
             // (see the travel-kind e2e's v21-catalogue regression).
@@ -390,18 +379,17 @@ function migrateV20ToV21(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
- * v21 → v22 (Phase 85) appended three new signet relics to inventory. R7e2
- * deleted them (the v34 → v35 hop drops any a save still holds), so the hop
- * only bumps the version.
+ * v21 → v22 only bumps the version: the three signet relics it once appended
+ * no longer exist (the v34 → v35 hop drops any a save still holds).
  */
 function migrateV21ToV22(raw: Record<string, unknown>): Record<string, unknown> {
     return { ...raw, version: 22 };
 }
 
 /**
- * v22 → v23 (2026-09-20): retire the STARTING-LOADOUT SEED.
+ * v22 → v23: strip the STARTING-LOADOUT SEED.
  *
- * `createNewGameState` used to write one `combat-loadout-card:<id>:<n>` flag
+ * A v22 save carries one `combat-loadout-card:<id>:<n>` flag
  * per `STARTING_CARD_IDS` entry. `buildCombatDeck` deals a loadout INSTEAD of
  * `knownCards` whenever one exists, so that 4-card seed silently replaced the
  * 18+-card starter bundle the player chose for the entire run: rest-node
@@ -423,8 +411,8 @@ function migrateV22ToV23(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
- * v23 → v24 (2026-09-21): the Suppliant's Ring moved from the silent seed to
- * the run's first node.
+ * v23 → v24: the Suppliant's Ring is handed over at the run's first node, not
+ * seeded silently.
  *
  * Every save written at v23 or earlier already OWNS the ring — it was folded
  * into the character by `createCharacter` at t=0. So this migration grants
@@ -462,8 +450,7 @@ function stripRetiredStatLines(item: unknown): unknown {
 }
 
 /**
- * v24 → v25 (2026-09-25, TRIM THE FAT T2a / D14): derived stats and Faction
- * retired.
+ * v24 → v25: derived stats and Faction are stripped.
  *
  * The six derived attack/defence stats, luck and the six non-combat
  * saves/tests were display-only (combat read none of them), and the
@@ -473,7 +460,7 @@ function stripRetiredStatLines(item: unknown): unknown {
  *
  * - `player.derivedStats` and `player.nonCombatStats`;
  * - `derivedStats` on any staged encounter enemy;
- * - every non-`maxHp` stat line (and the retired `isMultiplier` flag) on
+ * - every non-`maxHp` stat line (and the `isMultiplier` flag) on
  *   owned and worn equipment;
  * - the top-level `factionReputations` slice (the Faction system was
  *   write-only — only a dev inspector read it — and was deleted in the same
@@ -530,7 +517,7 @@ function renameCardAspect(node: unknown): unknown {
 }
 
 /**
- * v25 → v26 (2026-09-27, T6 / D39): the philosophical-alignment grid and the
+ * v25 → v26: the philosophical-alignment grid and the
  * GRACE meter are gone. Strips `moralMeter`, `philosophicalAlignment` and the
  * `lastSeenAlignmentCells` observer cache, and renames every card's
  * `philosophicalAspect` to `color` (a staged encounter's enemies carry their
@@ -544,11 +531,11 @@ function migrateV25ToV26(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
- * v26 → v27 (2026-09-29, THE REVAMP R2 / D48): the roster is three foes. A
- * staged encounter carries its enemies whole, so one naming a retired foe
- * re-points to a fresh Float-Eye (the reload lands on a live foe), and a
- * survivor saved before R2 drops the keywords and stage `gain` lists R2
- * stripped. Befriend flags and codex entries for retired foes stay as inert
+ * v26 → v27: the roster is three foes. A staged encounter carries its
+ * enemies whole, so one naming a removed foe re-points to a fresh Float-Eye
+ * (the reload lands on a live foe), and a surviving foe drops the stripped
+ * keywords and stage `gain` lists. Befriend flags and codex entries for
+ * removed foes stay as inert
  * strings. Idempotent and pure over a raw save payload.
  */
 function migrateV26ToV27(raw: Record<string, unknown>): Record<string, unknown> {
@@ -579,11 +566,11 @@ function migrateV26ToV27(raw: Record<string, unknown>): Record<string, unknown> 
     return out;
 }
 
-/** The four Act 1 maps: the only world THE REVAMP keeps in play (D53). */
+/** The four Act 1 maps: the only world in play. */
 const ACT1_MAPS: ReadonlySet<string> = new Set(['breakwater', 'charcoal-wood', 'beacon-crags', 'lantern-deep']);
 
 /**
- * v27 → v28 (2026-09-29, THE REVAMP R3a, D53/D54/D61): the world is Act 1.
+ * v27 → v28: the world is Act 1.
  * A save standing off Act 1 moves to the Lantern Deep: onto the sealed vault
  * door (`ld-15`) from inside the Labyrinth, onto the sealed deep stair
  * (`ld-18`) from fishing-village or a parked map. The save's own Lantern Deep
@@ -625,14 +612,14 @@ function migrateV27ToV28(raw: Record<string, unknown>): Record<string, unknown> 
     return out;
 }
 
-/** The fishing-village quests R3b purges with the map (D53). */
+/** The fishing-village quests purged with the map. */
 const PURGED_QUESTS: ReadonlySet<string> = new Set(['starting-quest', 'get-to-forest']);
 const PURGED_MAP: string = 'fishing-village';
-/** Phase 65's one-time goodwill bonus flag prefix, retired with the system. */
+/** The one-time goodwill bonus flag prefix, purged with the system. */
 const GOODWILL_FLAG_PREFIX = 'village-goodwill-bonus:';
 
 /**
- * v28 → v29 (2026-09-29, THE REVAMP R3b, D53): fishing-village and the
+ * v28 → v29: fishing-village and the
  * village goodwill system are purged. Drops `mapGoodwill` and the goodwill
  * bonus flags, takes fishing-village out of every continent's map lists and
  * `mapStates`, and drops its two quests from the quest log. v28 already moved
@@ -677,7 +664,7 @@ function migrateV28ToV29(raw: Record<string, unknown>): Record<string, unknown> 
     return out;
 }
 
-/** The nineteen consumables R5 retired (D49): only the healing potions stay. */
+/** The nineteen deleted consumables: only the healing potions stay. */
 const RETIRED_CONSUMABLE_IDS: ReadonlySet<string> = new Set([
     'antidote', 'clarity-serum', 'focus-vial', 'heart-draught', 'body-elixir',
     'berserker-brew', 'philosopher-tea', 'resonance-crystal', 'revive-crystal',
@@ -686,7 +673,7 @@ const RETIRED_CONSUMABLE_IDS: ReadonlySet<string> = new Set([
     'phoenix-tear', 'war-horn-draught', 'greater-resonance-crystal',
 ]);
 
-/** The effects R5 deleted with those consumables (and the applier-less curse). */
+/** The effects deleted with those consumables (and the applier-less curse). */
 const RETIRED_EFFECT_IDS: ReadonlySet<string> = new Set([
     'buff_accuracy_up', 'buff_critical_rate_up', 'buff_critical_damage_up',
     'buff_haste', 'buff_haste_surge', 'buff_status_chance_up', 'buff_liars_gambit',
@@ -696,10 +683,10 @@ const RETIRED_EFFECT_IDS: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * v29 → v30 (2026-09-30, THE REVAMP R5, D49): items are the healing potions.
- * Drops every inventory stack of a retired consumable and every active effect
+ * v29 → v30: items are the healing potions.
+ * Drops every inventory stack of a deleted consumable and every active effect
  * on the player whose definition was deleted with them. Nothing is refunded:
- * the retired items were no-ops or had no target. Idempotent and pure over a
+ * the deleted items were no-ops or had no target. Idempotent and pure over a
  * raw save payload.
  */
 function migrateV29ToV30(raw: Record<string, unknown>): Record<string, unknown> {
@@ -723,12 +710,12 @@ function migrateV29ToV30(raw: Record<string, unknown>): Record<string, unknown> 
     return out;
 }
 
-/** The flags R6a deleted with the Paradox Token and Hexed hazard outcomes. */
+/** The flags deleted with the Paradox Token and Hexed hazard outcomes. */
 const RETIRED_HAZARD_TOKEN_FLAG_PREFIX = 'hazard-token-banked:';
 const RETIRED_HAZARD_HEXED_FLAG = 'hazard-hexed';
 
 /**
- * v30 → v31 (2026-09-30, THE REVAMP R6a, D52): hazard rewards do what they
+ * v30 → v31: hazard rewards do what they
  * say. Drops every banked Paradox Token flag and the Hexed flag; nothing ever
  * read either. Idempotent and pure over a raw save payload.
  */
@@ -743,9 +730,9 @@ function migrateV30ToV31(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
- * The hazard deck R6b kept: the prototype's ten cards plus the CRACK a
- * failed crossing deals. Frozen here so the hop means the same thing after
- * B3 changes the live deck.
+ * The v32 hazard deck: the prototype's ten cards plus the CRACK a failed
+ * crossing deals. Frozen here so the hop means the same thing when the live
+ * deck changes.
  */
 const R6B_HAZARD_CARD_IDS: ReadonlySet<string> = new Set([
     'haul', 'grip', 'scram', 'runner', 'leap',
@@ -754,7 +741,7 @@ const R6B_HAZARD_CARD_IDS: ReadonlySet<string> = new Set([
 const HAZARD_CARD_FLAG = 'hazard-card:';
 
 /**
- * v31 → v32 (2026-09-30, THE REVAMP R6b, D52/D63): the hazard deck is the
+ * v31 → v32: the hazard deck is the
  * minimal core. Drops every acquired-card flag (`hazard-card:<id>:<n>`) whose
  * card was deleted; no refund. Idempotent and pure over a raw save payload.
  */
@@ -772,7 +759,7 @@ function migrateV31ToV32(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
- * v32 → v33 (2026-09-30, THE REVAMP R7c, D47/D50): the alt-win systems are
+ * v32 → v33: the alt-win systems are
  * gone. Drops the `regionConsequences` slice: nothing ever wrote a region into
  * it, and its only reader (the spared-region boss buff) is deleted.
  * Idempotent and pure over a raw save payload.
@@ -782,7 +769,7 @@ function migrateV32ToV33(raw: Record<string, unknown>): Record<string, unknown> 
     return { ...rest, version: 33 };
 }
 
-/** The six parked maps R7e deletes (D72). */
+/** The six deleted parked maps. */
 const R7E_DELETED_MAPS: ReadonlySet<string> = new Set([
     'northern-forest', 'caverns', 'northern-city', 'connecting-river', 'town-across-river', 'the-capital',
 ]);
@@ -803,10 +790,10 @@ const R7E_DELETED_FLAGS: ReadonlySet<string> = new Set([
 const R7E_NODE_FLAG = /(^|[^a-z])(nf|nc|ncy|cr|tar|cap)-\d+/;
 
 /**
- * v33 → v34 (2026-10-01, THE REVAMP R7e, D72): the parked world's content is
+ * v33 → v34: the parked world's content is
  * deleted. A save standing on a deleted map (only dev travel reaches one since
  * v28) moves onto the Lantern Deep's sealed deep stair (`ld-18`) by the v28
- * move, dropping a staged encounter; a Labyrinth save is left alone (D54). The
+ * move, dropping a staged encounter; a Labyrinth save is left alone. The
  * deleted maps leave every continent's lists and `mapStates` (the v29 scrub),
  * their quests leave the log and their story and node flags drop. Idempotent
  * and pure over a raw save payload.
@@ -859,7 +846,7 @@ function migrateV33ToV34(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
- * v34 → v35 (2026-10-01, THE REVAMP R7e2, D72): the relic library is the
+ * v34 → v35: the relic library is the
  * Suppliant's Ring alone. Every other `relic-` equipment leaves the inventory
  * and every loadout slot; `maxHealth` is recomputed from the worn bonus that
  * remains (the two deleted armor relics carried +5) and `health` clamped. The
@@ -898,8 +885,8 @@ function migrateV34ToV35(raw: Record<string, unknown>): Record<string, unknown> 
 const V35_EXPERIENCE_PER_LEVEL = 1000;
 
 /**
- * v35 → v36 (2026-10-01, THE REVAMP R9, D55): a level used to cost a flat
- * 1,000 XP; it now costs `level × EXPERIENCE_STEP`. The hop keeps the
+ * v35 → v36: a v35 save was written against a flat 1,000 XP per level; a
+ * level costs `level × EXPERIENCE_STEP`. The hop keeps the
  * player's `level` and their progress through it: progress below 0 (a
  * malformed save) clamps to 0, and progress past 1 (a level-up the player
  * has not taken yet) carries over so it stays pending. Pure over a raw v35
@@ -945,21 +932,21 @@ export function migrate(
     let working = raw as Record<string, unknown>;
     let version = fromVersion;
 
-    // Supported hops: v11 → v12 re-slots equipment to the Phase-18 model; v12 →
-    // v13 seeds the Phase-19 signet relics; v13 → v14 purges non-relic gear;
+    // Supported hops: v11 → v12 re-slots equipment to the 5-slot model; v12 →
+    // v13 seeds the signet relics; v13 → v14 purges non-relic gear;
     // v14 → v15 backfills the die-gear rail; v15 → v16 defaults the card-removal
-    // counter; v16 → v17 retires the rest minigame; v17 → v18 retires the
-    // Quest Board minigame; v18 → v19 retires the Gathering minigame; v19 →
-    // v20 retires the loot-cache Pick Pool minigame and adds `mapGoodwill`;
+    // counter; v16 → v17 drops the rest minigame; v17 → v18 drops the
+    // Quest Board minigame; v18 → v19 drops the Gathering minigame; v19 →
+    // v20 drops the loot-cache Pick Pool minigame and adds `mapGoodwill`;
     // v20 → v21 seeds the continent catalogue for inter-map travel; v21 → v22
-    // is a version bump (its relics were deleted in R7e2); v22 →
+    // is a version bump; v22 →
     // v23 strips the curated-loadout seed flags; v23 → v24 stamps the
-    // first-node relic grant settled; v24 → v25 strips the retired derived
+    // first-node relic grant settled; v24 → v25 strips the derived
     // stats and stat lines; v25 → v26 strips the alignment grid and GRACE;
-    // v26 → v27 re-points retired foes in a staged encounter to Float-Eye;
+    // v26 → v27 re-points removed foes in a staged encounter to Float-Eye;
     // v27 → v28 moves a save off Act 1 onto the Lantern Deep; v28 → v29
     // drops fishing-village, its quests and the goodwill tally; v29 → v30
-    // drops the retired consumables and their effects; v30 → v31 drops the
+    // drops the deleted consumables and their effects; v30 → v31 drops the
     // hazard token and hex flags; v31 → v32 drops deleted hazard deck cards;
     // v32 → v33 drops the write-only region-consequences slice; v33 → v34
     // drops the parked world's maps, quests and flags; v34 → v35 drops every

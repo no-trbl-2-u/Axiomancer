@@ -1,9 +1,9 @@
 /**
- * Encounter generator (Spec 07 Q5 / Q6).
+ * Encounter generator.
  *
  * `generateEncounter(mapNode, playerLevel)` picks an `Encounter` for the
  * given map node, scaling the selected enemy's level by their difficulty
- * band (Spec 07 Q6's adaptive answer). The result is a fresh `Encounter`
+ * band. The result is a fresh `Encounter`
  * with a deep-cloned enemy so combat mutations don't leak back into the
  * canonical library.
  *
@@ -22,7 +22,7 @@ import { MapNode, Encounter } from './types';
 import type { BaseStats } from '../Character/types';
 
 /**
- * Adaptive scaling bands (Spec 07 Q6). For each difficulty tier the picked
+ * Adaptive scaling bands. For each difficulty tier the picked
  * enemy's level is shifted by a random offset in `[min, max]` relative to
  * the player's level. `unique` keeps the authored level — signature fights
  * have curated difficulty.
@@ -37,15 +37,15 @@ export const DIFFICULTY_LEVEL_BANDS: Record<EnemyDifficulty, { min: number; max:
 
 /** Resolves a node id (e.g. `'bw-2'`) into the owning `MapName`. */
 function nodeIdToMapName(nodeId: string): MapName | undefined {
-    // Map revamp M3a — Act 1's coast (D28: a prefix distinct from every shipped one).
+    // Act 1's coast.
     if (nodeId.startsWith('bw-')) return 'breakwater';
-    // Map revamp M3b — Act 1's forest.
+    // Act 1's forest.
     if (nodeId.startsWith('cw-')) return 'charcoal-wood';
-    // Map revamp M3c — Act 1's mountains (northern continent).
+    // Act 1's mountains (northern continent).
     if (nodeId.startsWith('bc-')) return 'beacon-crags';
-    // Map revamp M3d — Act 1's underworld (northern continent).
+    // Act 1's underworld (northern continent).
     if (nodeId.startsWith('ld-')) return 'lantern-deep';
-    // W-01 — The Aporia's three acts.
+    // The Aporia's three acts.
     if (nodeId.startsWith('ap1-')) return 'aporia-colonnade';
     if (nodeId.startsWith('ap2-')) return 'aporia-archive';
     if (nodeId.startsWith('ap3-')) return 'aporia-proof';
@@ -109,7 +109,7 @@ export function scaleEnemyToLevel(source: Enemy, targetLevel: number): Enemy {
         level,
         baseStats: scaleBaseStatsToLevel(source.baseStats, level),
     };
-    // THE BIG NUMBERS REWRITE — an enemy's pool rides its own difficulty curve,
+    // An enemy's pool rides its own difficulty curve,
     // not the player's per-stat formula. A source foe that authored a VITAE
     // override keeps its shape by scaling proportionally with level.
     const authored = source.maxHealth > 0 && source.level > 0
@@ -177,7 +177,7 @@ export interface GenerateEncounterOptions {
  *
  * The returned encounter's `origin` is `<mapName>:<nodeId>` so the world
  * layer can attribute drops / rewards back to the specific node when
- * `endCombat` resolves the reward grant (Spec 06 hook).
+ * `endCombat` resolves the reward grant.
  */
 export function generateEncounter(
     mapNode: MapNode,

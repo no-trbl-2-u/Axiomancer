@@ -1,8 +1,7 @@
 /**
  * Character presets — pre-built characters for testing and tooling.
  *
- * Deprecation rescinded 2026-06-12: the v0.13.0 removal never landed
- * because presets became load-bearing — mobile's DEV preset picker
+ * Presets are load-bearing — mobile's DEV preset picker
  * (`applyCharacterPreset`), the Playtest runner, and the Tuning
  * difficulty bands all consume them. They are a supported public
  * surface until those consumers migrate.
@@ -10,7 +9,7 @@
  * Each preset is a declarative recipe. `buildCharacterFromPreset` lifts
  * the recipe into a real `Character` by calling `createCharacter`
  * through the canonical path: the fixed signet-relic loadout is seeded by
- * `createCharacter` (the procedural `dropItem` equipment path is retired —
+ * `createCharacter` (there is no procedural `dropItem` equipment path —
  * see `buildCharacterFromPreset`), and consumables are cloned from the
  * shared `consumableLibrary` so the canonical library is never
  * mutated.
@@ -24,8 +23,8 @@ import type { Item } from '../Items/types';
 export interface CharacterPresetEquipmentEntry {
     /**
      * EquipmentTemplate id (e.g. 'iron-blade'). The dropped item's slot kind is
-     * taken from the template itself (Phase 18 — presets no longer restate the
-     * slot). Declaration order is the equip order: the worn loadout takes the
+     * taken from the template itself (presets do not restate the slot).
+     * Declaration order is the equip order: the worn loadout takes the
      * first weapon, first armor, and first 3 accessories; the rest seed the
      * inventory.
      */
@@ -39,8 +38,8 @@ export interface CharacterPreset {
     summary: string;
     level: number;
     baseStats: BaseStats;
-    /** Vestigial: the procedural equipment library is retired, so these entries
-     *  no longer resolve (see `buildCharacterFromPreset`). */
+    /** Vestigial: there is no procedural equipment library, so these entries
+     *  resolve to nothing (see `buildCharacterFromPreset`). */
     equipment: CharacterPresetEquipmentEntry[];
     /** Card IDs the character knows. The full known set is the combat
      *  catalogue (ADR-0002); there is no equipped-card rotation. */
@@ -52,9 +51,8 @@ export interface CharacterPreset {
 
 // ─── Preset records ───────────────────────────────────────────────────────────
 
-// The card purge (P1, 2026-09-27; D36): every preset seeds the grey deck a
-// fresh run opens with (Blow 5 / Ward 3 / Word 2, D43 — mirrors
-// `STARTING_CARD_IDS`); the higher tiers had only purged cards to add.
+// Every preset seeds the grey deck a fresh run opens with (Blow 5 / Ward 3 /
+// Word 2 — mirrors `STARTING_CARD_IDS`).
 const TIER_1_CARDS = [
     'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike',
     'grey-ward', 'grey-ward', 'grey-ward',
@@ -243,11 +241,10 @@ export function buildCharacterFromPreset(preset: CharacterPreset): Character {
         return { ...source, quantity };
     });
 
-    // Phase 21 — the procedural equipment library + factory are retired. The
-    // declared `preset.equipment` template entries no longer resolve to anything
-    // (there is no more procedural gear), so presets carry only their consumables
+    // The declared `preset.equipment` template entries resolve to nothing
+    // (there is no procedural gear), so presets carry only their consumables
     // and wear the starting relics seeded by `createCharacter`. The
-    // `equipment` field is retained on the recipe as vestigial metadata.
+    // `equipment` field stays on the recipe as vestigial metadata.
     return createCharacter({
         name: preset.name,
         level: preset.level,

@@ -1,9 +1,9 @@
 /**
- * Act 1 progression CLI (R9, D55) — the XP ledger and the door win table.
+ * Act 1 progression CLI — the XP ledger and the door win table.
  *
  * Prints every Act 1 fight with its pin and XP, the level a full clear and a
  * door-only route bring to each door, and the greedy witness's win rate at
- * each door for three stat spreads. A measurement, not a baseline (D57).
+ * each door for three stat spreads. A measurement, not a baseline.
  *
  * Usage:
  *   npm run act1-progression

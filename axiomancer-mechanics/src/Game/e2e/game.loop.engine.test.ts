@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — Game loop orchestration (Spec 09).
+ * Hermetic E2E — Game loop orchestration.
  *
  * Full transcript that exercises every public verb on the store via the
  * `gameReducer` dispatch spine:
@@ -8,7 +8,7 @@
  *   2. START_COMBAT against FloatEye (low-HP enemy → cheap victory)
  *   3. the Hazard-Pattern driver decides the fight outside the store
  *   4. endCombat('victory') — loot + XP applied
- *   5. LEVEL_UP — confirms the placeholder level-up reducer (Phase 09 brief)
+ *   5. LEVEL_UP — confirms the placeholder level-up reducer
  *   6. MOVE_TO_NODE to bw-4
  *   7. SAVE_GAME (via the memory adapter)
  *   8. LOAD_GAME — round-trip through `migrate()`
@@ -81,7 +81,7 @@ describe('Game loop — full transcript through gameReducer', () => {
         store.getState().dispatch({ type: 'LEVEL_UP' });
         const levelAfter = store.getState().player.level;
         expect(levelAfter).toBeGreaterThan(levelBefore);
-        // Spec 06 Q3 — every level promotion grants STAT_POINTS_PER_LEVEL.
+        // Every level promotion grants STAT_POINTS_PER_LEVEL.
         const expectedGrant = (levelAfter - levelBefore) * 3;
         expect(store.getState().player.availableStatPoints)
             .toBe(pointsBefore + expectedGrant);
@@ -126,7 +126,7 @@ describe('Game loop — full transcript through gameReducer', () => {
 describe('gameReducer — pure path (no store)', () => {
     it('SAVE_GAME refreshes rngState; LOAD_GAME is a reducer-level no-op', () => {
         const s = createNewGameState({ startMap: 'breakwater' });
-        // SAVE_GAME stamps a fresh `rngState` snapshot (Phase 11) — every other
+        // SAVE_GAME stamps a fresh `rngState` snapshot — every other
         // field passes through unchanged.
         const afterSave = gameReducer(s, { type: 'SAVE_GAME' });
         expect(afterSave).toEqual({ ...s, rngState: afterSave.rngState });

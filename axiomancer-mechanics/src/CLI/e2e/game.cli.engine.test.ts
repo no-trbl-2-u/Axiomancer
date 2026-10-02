@@ -75,8 +75,8 @@ describe('CLI Game Driver', () => {
         expect(store.getState().player.name).toBe('Player');
         expect(store.getState().player.level).toBe(1);
         // Symbolic, not a literal: a bootstrapped store is current by
-        // construction, so pinning the digit only breaks every version bump
-        // (phase 52a's 15 -> 16 broke it here). game.migrate's own suites are
+        // construction, so pinning the digit only breaks every version bump.
+        // game.migrate's own suites are
         // where a specific version number is load-bearing.
         expect(store.getState().version).toBe(GAME_STATE_VERSION);
     });

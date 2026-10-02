@@ -1,5 +1,5 @@
 /**
- * Map registry (Spec 08 Q6).
+ * Map registry.
  *
  * Keyed by `ContinentName` → `MapName` → `MapDefinition`. Adding a new
  * continent or map is a single-file change here plus the underlying
@@ -29,19 +29,18 @@ export class MapNotFoundError extends Error {
  */
 export const MAP_REGISTRY: Record<ContinentName, Partial<Record<MapName, MapDefinition>>> = {
     'coastal-continent': {
-        // Map revamp M3a (D21, D28) — Act 1's coast, the new-game start (D27).
+        // Act 1's coast, the new-game start.
         'breakwater': breakwater,
-        // Map revamp M3b — Act 1's forest, past the Breakwater's bridge.
+        // Act 1's forest, past the Breakwater's bridge.
         'charcoal-wood': charcoalWood,
     },
     'northern-continent': {
-        // Map revamp M3c — Act 1's mountains, past the Charcoal Wood's stair cave.
+        // Act 1's mountains, past the Charcoal Wood's stair cave.
         'beacon-crags': beaconCrags,
-        // Map revamp M3d — Act 1's underworld, below the Beacon Crags' glacier shrine.
+        // Act 1's underworld, below the Beacon Crags' glacier shrine.
         'lantern-deep': lanternDeep,
     },
-    // W-01 — The Aporia (dev-menu + CLI access only until the last
-    // continent exists; see specs/world/W-01).
+    // The Aporia (dev-menu + CLI access only).
     'labyrinth-continent': {
         'aporia-colonnade': aporiaColonnade,
         'aporia-archive': aporiaArchive,
@@ -64,7 +63,7 @@ export function getMapDefinition(continent: ContinentName, mapName: MapName): Ma
  * Builds the initial runtime `MapState` for a map definition.
  *
  * The starting node is *not* listed in `availableNodes` — the player is
- * standing on it, and per Spec 08 Q2 completed nodes are locked from
+ * standing on it, and completed nodes are locked from
  * back-travel, so it shouldn't be re-entered.
  */
 export function createMapState(def: MapDefinition): MapState {
@@ -85,16 +84,16 @@ export function createMapState(def: MapDefinition): MapState {
         availableNodes: available,
         lockedNodes: locked,
         uniqueEvents: (def.uniqueEvents ?? []).map(ue => ({ ...ue }) as UniqueEvent),
-        // Spec 23 — fog-of-war seeded with the starting node; nothing consumed yet.
+        // Fog-of-war seeded with the starting node; nothing consumed yet.
         discoveredNodes: [startId],
         consumedNodes: [],
         // The player is PLACED on the starting node, never arrives at it, so
         // the map opens owing no arrival. The start node's own content is the
-        // screen's `startNodePending` affair (2026-08-08 first-map audit).
+        // screen's `startNodePending` affair.
         pendingArrival: null,
-        // Phase 135 — hazard persistence extensions, initialized as empty.
+        // Hazard persistence extensions, initialized as empty.
         hazardOutcomes: [],
-        // W-01 — secret doors / act gates arrive pre-blocked on labyrinth
+        // Secret doors / act gates arrive pre-blocked on labyrinth
         // maps; empty everywhere else.
         blockedRoutes: (def.initialBlockedRoutes ?? []).map(r => ({ ...r })),
     };

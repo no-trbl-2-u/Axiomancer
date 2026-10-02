@@ -6,9 +6,8 @@
  * Relic identity = `grantsSignature !== undefined` (plus the `relic-` id
  * prefix). There is no new item category and no slot marker.
  *
- * R7e2 (D72) left one: the Suppliant's Ring, handed over at the run's first
- * node (`Character/first-node-grant.ts`). The ten placeholder relics and
- * their GUARD 5 signatures were deleted; B1 re-authors relics with T.
+ * There is one: the Suppliant's Ring, handed over at the run's first node
+ * (`Character/first-node-grant.ts`).
  */
 
 import type { Equipment } from './types';
@@ -16,9 +15,9 @@ import type { EquipmentLoadout } from '../Character/types';
 import type { SignatureSkillId } from '../Combat/combat.encounter.types';
 
 /**
- * The relic library — one row since R7e2 (D72): the Suppliant's Ring, the
+ * The relic library — one row: the Suppliant's Ring, the
  * first-node hand-over. It carries no stat line; it grants The Open Hand (the
- * befriend, R4) and nothing else.
+ * befriend) and nothing else.
  */
 const SUPPLIANTS_RING: Equipment = {
     id: 'relic-disarming-plea',

@@ -7,15 +7,13 @@
  *
  * Usage:
  *   npm run combat-sim                              # 'greedy' witness
- *   npm run combat-sim -- --blind                  # 'blind' witness (identical play since D7)
+ *   npm run combat-sim -- --blind                  # 'blind' witness (plays like greedy)
  *   npm run combat-sim -- --enemy=BrineHag         # one enemy only
  *   npm run combat-sim -- --loadout=slippery-slope,festering-argument,soft-word
  *   npm run combat-sim -- --runs=300 --seed=1 --blind
  *
- * `--blind` selects the `blind` policy. Its hidden-stance difference (drafting
- * off only revealed stances) died with the draft in the D7 flag collapse
- * (2026-09-25); it now plays exactly like `greedy` and is kept so old commands
- * still run.
+ * `--blind` selects the `blind` policy. It plays exactly like `greedy` and is
+ * kept so existing commands still run.
  */
 
 import { Player } from '../Character/characters.mock';
@@ -24,9 +22,8 @@ import type { Enemy } from '../Enemy/types';
 import { FloatEye, BrineHag, TheDoorwarden } from '../Enemy/enemy.library';
 import { deepClone } from '../Utils';
 import { simulateHazardPatternCombat, type CombatSimPolicyId } from '../Combat/combat.encounter.sim';
-// Combat Quality Index — printed as a diagnostic beside the legacy
-// `statusEngagement` warning light; no governing objective function remains
-// (THE BIG NUMBERS REWRITE, 2026-09-02).
+// Combat Quality Index — printed as a diagnostic beside the
+// `statusEngagement` warning light; it governs nothing.
 import { formatCombatQuality } from '../Combat/combat.objective';
 
 export const ENEMIES: Record<string, Enemy> = { FloatEye, BrineHag, TheDoorwarden };
@@ -41,7 +38,7 @@ if (require.main === module) {
     const policy: CombatSimPolicyId = has('blind') ? 'blind' : 'greedy';
     const runs = Number(flag('runs') ?? '200');
     const seed = Number(flag('seed') ?? '1');
-    // Default loadout: the spec 32 v3 starting deck (slippery-slope teaches DoT,
+    // Default loadout: the starting deck (slippery-slope teaches DoT,
     // brace-for-impact teaches GUARD).
     const loadout = (flag('loadout') ?? 'slippery-slope,brace-for-impact').split(',').map(s => s.trim()).filter(Boolean);
     const only = flag('enemy');
@@ -76,7 +73,7 @@ if (require.main === module) {
             + `  V/M/D/R=${s.victories}/${s.mercies}/${s.defeats}/${s.retreats}`
             + `  rounds=${s.avgRounds.toFixed(1).padStart(4)}`
             + `  statusEng=${(s.statusEngagement * 100).toFixed(0).padStart(3)}%`
-            // Phase 43 — the objective function, beside the legacy warning light.
+            // The Combat Quality Index, beside the warning light.
             + `  ${formatCombatQuality(s.combatQuality)}`
             + `  conviction=${s.avgConvictionSpent.toFixed(1).padStart(4)}`
             + `  dotFrac=${(s.dotHpFraction * 100).toFixed(0).padStart(3)}%`

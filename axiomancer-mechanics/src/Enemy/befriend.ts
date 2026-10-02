@@ -1,6 +1,6 @@
 /**
  * Befriend eligibility read off the foe itself — the rules The Open Hand
- * (the Suppliant's Ring signature, D47) reads.
+ * (the Suppliant's Ring signature) reads.
  */
 
 import type { Enemy } from './types';

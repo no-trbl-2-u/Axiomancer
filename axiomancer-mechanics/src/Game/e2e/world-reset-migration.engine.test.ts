@@ -1,14 +1,13 @@
 /**
- * Hermetic engine test — the v27 → v28 hop: THE REVAMP R3a world reset.
+ * Hermetic engine test — the v27 → v28 hop: the world reset.
  *
- * R3a (D53/D54/D61 in `plan/2026-09-25-refactor-strategy.decisions.md`) makes
- * the world Act 1: the Lantern Deep's deep stair and the Labyrinth's vault
+ * The world is Act 1: the Lantern Deep's deep stair and the Labyrinth's vault
  * door are sealed and the northern maps are parked. A v27 save may stand on
  * fishing-village, a parked map or inside the Labyrinth. The hop moves it
  * onto the Lantern Deep (`ld-15` from the Labyrinth, `ld-18` otherwise); an
  * Act 1 save passes through with only its version stamped.
  *
- * Also the v28 → v29 hop: THE REVAMP R3b purge of fishing-village and the
+ * Also the v28 → v29 hop: the purge of fishing-village and the
  * village goodwill system. It drops `mapGoodwill` and the goodwill bonus
  * flags, takes fishing-village out of every continent list and `mapStates`,
  * and drops the map's two quests. fishing-village is gone from the map
@@ -46,9 +45,9 @@ function v27InLabyrinth(withReturn: boolean): Record<string, unknown> {
 
 /**
  * A v27 save standing on the start node of a map that has left the registry
- * (fishing-village in R3b, the parked northern maps in R7e). Its MapState is
+ * (fishing-village, the parked northern maps). Its MapState is
  * hand-built from the Breakwater's shape with the map name and node prefix a
- * legacy save carried.
+ * pre-v28 save carried.
  */
 function v27OnLegacyMap(name: string, prefix: string): Record<string, unknown> {
     const fresh = createNewGameState({ startMap: 'breakwater' });

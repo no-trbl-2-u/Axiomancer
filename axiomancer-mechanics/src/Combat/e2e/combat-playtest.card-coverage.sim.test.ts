@@ -16,8 +16,8 @@
  * COVERAGE UNIVERSE: the whole live library. There is no synthetic retreat
  * card (no in-combat retreat exists).
  *
- * The exact library size is NOT pinned here (repealed 2026-09-02, big-numbers
- * overhaul §3 L18/§10) — the universe is derived live from `cardLibrary`.
+ * The exact library size is NOT pinned here — the universe is derived live
+ * from `cardLibrary`.
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
@@ -48,10 +48,8 @@ const PLAYABLE_LIBRARY = cardLibrary;
  * "can this card ever be fired", and a foe that dies on turn one answers "no"
  * for every card the deck had not drawn yet.
  *
- * THE BIG NUMBERS REWRITE (2026-09-02): grave-larva at its own ~23 VITAE was
- * fine when a late-stage play chipped a few points; against the rewritten
- * library a focused deck one-shot it, and two Saint-rank cards reported as
- * DEAD purely because the fight ended before they were drawn. The pool is
+ * A focused deck one-shots a foe at its own VITAE, and cards would report
+ * as DEAD purely because the fight ended before they were drawn. The pool is
  * pinned high here so the probe measures reachability and nothing else.
  */
 const WEAK_ENEMY: Enemy = (() => {

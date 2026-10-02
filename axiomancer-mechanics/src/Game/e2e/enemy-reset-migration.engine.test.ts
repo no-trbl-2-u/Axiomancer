@@ -1,10 +1,9 @@
 /**
- * Hermetic engine test — the v26 → v27 hop: THE REVAMP R2 enemy reset.
+ * Hermetic engine test — the v26 → v27 hop: the enemy reset.
  *
- * R2 (D48 in `plan/2026-09-25-refactor-strategy.decisions.md`) cut the roster
- * to Float-Eye, the Brine Hag and the Doorwarden, and stripped every enemy
- * keyword. A staged encounter carries its enemies whole, so a v26 save may
- * name a retired foe, or a survivor still wearing its old keywords. The hop
+ * The roster is Float-Eye, the Brine Hag and the Doorwarden, and no enemy
+ * carries a keyword. A staged encounter carries its enemies whole, so a v26 save may
+ * name a deleted foe, or a survivor still wearing its old keywords. The hop
  * re-points the first to a fresh Float-Eye and strips the second; everything
  * else passes through untouched.
  */
@@ -14,7 +13,7 @@ import { migrate } from '../game.migrate';
 import { createNewGameState, GAME_STATE_VERSION } from '../game.reducer';
 import { FloatEye, TheDoorwarden } from '../../Enemy/enemy.library';
 
-/** A v26 save staged on a retired foe and a pre-R2 Doorwarden. */
+/** A v26 save staged on a deleted foe and a Doorwarden still wearing keywords. */
 function v26Save(): Record<string, unknown> {
     const fresh = createNewGameState();
     const oldDoorwarden = {

@@ -1,14 +1,12 @@
 /**
- * MapEvents 'blacksmith' kind (Spec 33 §6 / Phase D5) — hermetic dispatcher
+ * MapEvents 'blacksmith' kind — hermetic dispatcher
  * coverage. The kind hands the host the authored budget + variant-gear offers;
  * the handler is a validated pass-through (the anvil session is fully
  * sandboxed) that touches no state and rejects illegal (cap-violating) variant
  * gear at resolution time.
  *
- * Also pins where the kind lives in play (D61, R3b): one Anvil per Act 1
- * region, near its exit — `ACT1_ANVIL_NODES` (bw-16, cw-18, bc-12, ld-14).
- * It replaced the single fishing-village anvil (fv-21, Phase 60), purged
- * with that map.
+ * Also pins where the kind lives in play: one Anvil per Act 1 region, near
+ * its exit — `ACT1_ANVIL_NODES` (bw-16, cw-18, bc-12, ld-14).
  */
 
 import { describe, expect, it } from 'vitest';
@@ -67,7 +65,7 @@ describe("MapEvents 'blacksmith' kind", () => {
     });
 });
 
-// ── The four regional Anvils (D61, R3b) ─────────────────────────────────────
+// ── The four regional Anvils ────────────────────────────────────────────────
 
 const ACT1_MAPS = ['breakwater', 'charcoal-wood', 'beacon-crags', 'lantern-deep'] as const;
 

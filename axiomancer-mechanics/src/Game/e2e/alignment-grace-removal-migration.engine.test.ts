@@ -1,10 +1,9 @@
 /**
  * Hermetic engine test — the v25 → v26 hop: alignment and GRACE removed.
  *
- * T6 (D39 in `plan/2026-09-25-refactor-strategy.decisions.md`) deleted the
- * philosophical-alignment grid, its per-tree observer cache and the GRACE
- * meter (`moralMeter`), and renamed a card's `philosophicalAspect` to
- * `color`. A v25 save still carries all of them. This hop strips the three
+ * The current shape has no philosophical-alignment grid, per-tree observer
+ * cache or GRACE meter (`moralMeter`), and a card's `philosophicalAspect` is
+ * now `color`. A v25 save still carries all of them. This hop strips the three
  * state fields and renames the card field wherever a card rides in the save
  * (a staged encounter's enemies carry their cards whole). Everything else
  * passes through untouched.

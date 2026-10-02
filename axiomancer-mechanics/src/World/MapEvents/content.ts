@@ -4,9 +4,9 @@
  *
  * Each authored node (bw-N / cw-N / bc-N / ld-N) gets a single-entry pool override
  * so the dispatcher reproduces (and extends) the authored events
- * `processNode` used to fire. Act 1 stages no NPC, shop or narration, so
+ * `processNode` fires. Act 1 stages no NPC, shop or narration, so
  * the `interaction`, `village` and `narration` kinds have no carrier here;
- * their witnesses are the neutral fixtures in `Game/fixtures/` (R7e, D72).
+ * their witnesses are the neutral fixtures in `Game/fixtures/`.
  *
  * This file side-effects on import: `src/World/index.ts` imports it
  * for that side effect, so consumers of the package get the pools
@@ -23,11 +23,10 @@ import { BLACKSMITH_WITNESS_VARIANTS } from '../Blacksmith/blacksmith.content';
 
 // ─── Shared builders (Act 1) ─────────────────────────────────────────────────
 //
-// The builders the Act 1 maps share. They were fishing-village's until R3b
-// purged that map (D53); the pools and lines they build are unchanged.
+// The builders the Act 1 maps share.
 
 /**
- * Inn rests (Phase 52b): tended, paid shelter inside a settlement, and the
+ * Inn rests: tended, paid shelter inside a settlement, and the
  * only rests that mend hazard-scarred max-VITAE.
  */
 function innRestPool(nodeId: string, description: string): MapEventPool {
@@ -77,7 +76,7 @@ function lootCachePool(nodeId: string, cache: { currency: number; description: s
     };
 }
 
-// Phase 60 — the anvil's pool. Budget is a placeholder; the mobile
+// The anvil's pool. Budget is a placeholder; the mobile
 // interceptor re-derives the real spend cap from the player's wallet
 // (`state/blacksmith/store-actions.ts`) the moment this event fires.
 function blacksmithPool(nodeId: string, description: string): MapEventPool {
@@ -139,13 +138,12 @@ function currencyLootPool(nodeId: string, currency: number, description: string)
     };
 }
 
-// ─── The Anvil, once per region (D61) ────────────────────────────────────────
+// ─── The Anvil, once per region ──────────────────────────────────────────────
 //
-// R3b re-homes the one anvil fishing-village carried (`fv-21`, Phase 60) onto
-// one node near each Act 1 region's exit, a step from its door fight: the
-// Breakwater's fishing hamlet, the Charcoal Wood's well, the Beacon Crags'
-// falls and the Lantern Deep's forge (column 4). Same engine, budget, witness
-// variants and line; each replaces a gathering or hazard node.
+// One anvil sits on one node near each Act 1 region's exit, a step from its
+// door fight: the Breakwater's fishing hamlet, the Charcoal Wood's well, the
+// Beacon Crags' falls and the Lantern Deep's forge (column 4). Same engine,
+// budget, witness variants and line everywhere.
 const ANVIL_LINE = 'A lean-to forge, coals still breathing. The smith looks up from the anvil and nods at your dice.';
 export const ACT1_ANVIL_NODES: Readonly<Record<string, string>> = {
     'breakwater':    'bw-16',
@@ -155,21 +153,20 @@ export const ACT1_ANVIL_NODES: Readonly<Record<string, string>> = {
 };
 const ANVIL_NODE_IDS: ReadonlySet<string> = new Set(Object.values(ACT1_ANVIL_NODES));
 
-// ─── The Breakwater (Act 1, map 1 — map revamp M3a) ──────────────────────────
+// ─── The Breakwater (Act 1, map 1) ───────────────────────────────────────────
 //
-// D29: Act 1 borrows the nearest shipped pools. The Breakwater is built from
-// the shared builders above (inn rests, coast materials, hazard and loot
-// caches — fishing-village's until R3b); nothing here is a new enemy, NPC or
-// event kind. Only the one-line descriptions are new, placed on the plate's
-// landmarks (see `Continents/Coastal-Village/breakwater.ts` for the node map).
+// The Breakwater is built from the shared builders above (inn rests, coast
+// materials, hazard and loot caches); it adds no enemy, NPC or event kind of
+// its own. The one-line descriptions sit on the plate's landmarks (see
+// `Continents/Coastal-Village/breakwater.ts` for the node map).
 //
 // Kind spread over 18 nodes: 6 encounter, 2 rest, 3 loot-cache,
 // 2 gathering, 2 hazard, 1 blacksmith (the Anvil, bw-16), 1 arrival
 // cutscene, 1 travel. The watchtower (bw-17), the one node every run crosses
-// before the door, holds the region's door fight (D61).
+// before the door, holds the region's door fight.
 
 /**
- * The windmill is where a new game starts (D27). D31: it opens on a short
+ * The windmill is where a new game starts. It opens on a short
  * arrival scene, like every other Act 1 map, not on a rest screen.
  */
 const bwWindmillArrival: MapEventPool = {
@@ -187,14 +184,14 @@ const bwWindmillArrival: MapEventPool = {
     }],
 };
 
-/** D30: the Breakwater's elite, pinned low like every Act 1 fight (brief §3b). */
+/** The Breakwater's elite, pinned low like every Act 1 fight. */
 const BW_ELITE_LEVEL = 3;
 
-/** R9 (D55): the Breakwater's Float-Eyes are pinned too, so its XP is fixed. */
+/** The Breakwater's Float-Eyes are pinned too, so its XP is fixed. */
 const BW_FIGHT_LEVEL = 2;
 
 /**
- * R9 (D55): each region's door sits one level under the player a full clear
+ * Each region's door sits one level under the player a full clear
  * brings to it (Breakwater 1, Charcoal Wood 2, Beacon Crags 3, Lantern Deep 4).
  */
 const BW_DOOR_LEVEL = 1;
@@ -209,10 +206,10 @@ const BW_ENCOUNTER_FOES: Record<string, ActOneFoe> = {
     'bw-14': { slug: 'float-eye', level: BW_FIGHT_LEVEL },
 };
 
-/** D61: the Brine Hag, a rarer mid-region fight on the north pier. */
+/** The Brine Hag, a rarer mid-region fight on the north pier. */
 const BW_ELITE: ActOneFoe = { slug: 'brine-hag', level: BW_ELITE_LEVEL };
 
-/** D61: the watchtower, the chokepoint before the bridge, holds the door fight. */
+/** The watchtower, the chokepoint before the bridge, holds the door fight. */
 const BW_DOOR: ActOneFoe = { slug: 'the-doorwarden', level: BW_DOOR_LEVEL, isBoss: true };
 
 const BW_REST_NODES: Record<string, string> = {
@@ -284,26 +281,24 @@ const BREAKWATER_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
         return out;
     })();
 
-// ─── The Charcoal Wood (Act 1, map 2 — map revamp M3b) ───────────────────────
+// ─── The Charcoal Wood (Act 1, map 2) ────────────────────────────────────────
 //
-// D29: Act 1 borrows the nearest shipped pools. The Charcoal Wood uses the
-// shipped builders (the shared gathering, hazard and loot builders, the
-// caverns' camp), the northern forest's roster and its three materials.
-// Nothing here is a new enemy, NPC, item or event kind; only the one-line
-// descriptions and the two arrival lines are new, placed on the plate's
-// landmarks (see `Continents/Coastal-Village/charcoal-wood.ts`).
+// The Charcoal Wood uses the shared builders (gathering, hazard and loot, the
+// caverns' camp), the northern forest's roster and its three materials. It
+// adds no enemy, NPC, item or event kind of its own; the one-line
+// descriptions and the two arrival lines sit on the plate's landmarks (see
+// `Continents/Coastal-Village/charcoal-wood.ts`).
 //
 // Kind spread over 20 nodes: 7 encounter, 3 rest, 3 loot-cache,
 // 3 gathering, 1 hazard, 1 blacksmith (the Anvil, cw-18), 1 arrival
 // cutscene, 1 travel. The northern forest's roster is level 9 and up, so
-// every fight here is pinned to a low absolute level (the fv-6 precedent),
+// every fight here is pinned to a low absolute level,
 // ramping ring by ring from 2 to 3.
 
 /**
- * One pinned Act 1 fight. R2 (D48, D61): Float-Eye takes the normal fights,
- * the Brine Hag one mid-region node, the Doorwarden every region's door
- * fight. A node whose line described a retired foe lost it (D58: no new prose);
- * the encounter falls back to the foe's own description.
+ * One pinned Act 1 fight. Float-Eye takes the normal fights, the Brine Hag
+ * one mid-region node, the Doorwarden every region's door fight. A node with
+ * no line of its own falls back to the foe's own description.
  */
 interface ActOneFoe { slug: EnemySlug; level: number; description?: string; isBoss?: boolean }
 
@@ -343,17 +338,17 @@ const CW_ENCOUNTER_FOES: Record<string, ActOneFoe> = {
     // c2 — the stone circle, the footbridge
     'cw-7':  { slug: 'float-eye', level: CW_FIGHT_LEVEL_EARLY },
     'cw-10': { slug: 'float-eye', level: CW_FIGHT_LEVEL_EARLY },
-    // c3 — the root graveyard: D61, the Brine Hag mid-region
+    // c3 — the root graveyard: the Brine Hag mid-region
     'cw-12': { slug: 'brine-hag', level: CW_FIGHT_LEVEL_LATE },
     // c4 — the rock chapel, the wayside cross, the east cave
     'cw-16': { slug: 'float-eye', level: CW_FIGHT_LEVEL_LATE },
-    // D61: the door fight, on the centre lane of the last ring.
+    // The door fight, on the centre lane of the last ring.
     'cw-17': { slug: 'the-doorwarden', level: CW_DOOR_LEVEL, isBoss: true },
     'cw-19': { slug: 'float-eye', level: CW_FIGHT_LEVEL_LATE },
 };
 
 /**
- * All three rests are CAMPS: Phase 52b keeps inns inside settlements, and the
+ * All three rests are CAMPS: inns live inside settlements, and the
  * wood has none (the hunting lodge is shut; you sleep on its porch).
  */
 const CW_CAMP_NODES: Record<string, string> = {
@@ -435,18 +430,17 @@ const CHARCOAL_WOOD_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }>
         return out;
     })();
 
-// ─── The Beacon Crags (Act 1, map 3 — map revamp M3c) ────────────────────────
+// ─── The Beacon Crags (Act 1, map 3) ─────────────────────────────────────────
 //
-// D29: the mountains borrow the caverns (the nearest shipped northern map):
-// its roster, its iron, and its camp, hazard and loot builders. Nothing here is
-// a new enemy, NPC, item or event kind; only the one-line descriptions and the
-// two arrival lines are new, placed on the plate's landmarks (see
+// The mountains use the caverns' roster, its iron, and its camp, hazard and
+// loot builders. They add no enemy, NPC, item or event kind of their own; the
+// one-line descriptions and the two arrival lines sit on the plate's landmarks (see
 // `Continents/Northern-Continent/beacon-crags.ts`).
 //
 // Kind spread over 17 nodes: 6 encounter, 3 rest, 2 loot-cache, 1 gathering,
 // 2 hazard, 1 blacksmith (the Anvil, bc-12), 1 arrival cutscene, 1 travel.
-// The caverns' roster is level 13 and up, so every fight is pinned low (M3b's
-// rule), one step above the Charcoal Wood: 3 on the upper mountain, 4 below
+// The caverns' roster is level 13 and up, so every fight is pinned low, one
+// step above the Charcoal Wood: 3 on the upper mountain, 4 below
 // the gorge.
 
 const BC_FIGHT_LEVEL_EARLY = 3;
@@ -473,17 +467,17 @@ const bcArrival: MapEventPool = {
 const BC_ENCOUNTER_FOES: Record<string, ActOneFoe> = {
     // c1 — the summit beacon
     'bc-2':  { slug: 'float-eye', level: BC_FIGHT_LEVEL_EARLY },
-    // c3 — the ruined chapel (D61, the Brine Hag mid-region), the toll gate
+    // c3 — the ruined chapel (the Brine Hag mid-region), the toll gate
     'bc-8':  { slug: 'brine-hag', level: BC_FIGHT_LEVEL_EARLY },
     'bc-10': { slug: 'float-eye', level: BC_FIGHT_LEVEL_EARLY },
     // c4 — the arch bridge, the quarry
     'bc-11': { slug: 'float-eye', level: BC_FIGHT_LEVEL_LATE },
     'bc-13': { slug: 'float-eye', level: BC_FIGHT_LEVEL_LATE },
-    // c5 — the stone gate: D61, the door fight, on the centre lane of the last ring
+    // c5 — the stone gate: the door fight, on the centre lane of the last ring
     'bc-15': { slug: 'the-doorwarden', level: BC_DOOR_LEVEL, isBoss: true },
 };
 
-/** All three rests are CAMPS: Phase 52b keeps inns inside settlements. */
+/** All three rests are CAMPS: inns live inside settlements. */
 const BC_CAMP_NODES: Record<string, string> = {
     'bc-4':  'The shepherds let you sleep in the fold. They charge for the straw, not the wind.',
     'bc-6':  'The monks sell a blanket and lend a bench. You take the bench.',
@@ -553,19 +547,19 @@ const BEACON_CRAGS_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> 
         return out;
     })();
 
-// ─── The Lantern Deep (Act 1, map 4 — map revamp M3d) ────────────────────────
+// ─── The Lantern Deep (Act 1, map 4) ─────────────────────────────────────────
 //
-// D29: the underworld borrows the caverns like the Beacon Crags do: the roster,
-// the iron, and the camp, hazard and loot builders. Nothing here is a new
-// enemy, NPC, item or event kind; only the one-line descriptions and the two
-// arrival lines are new, placed on the plate's landmarks (see
+// The underworld uses the caverns like the Beacon Crags do: the roster, the
+// iron, and the camp, hazard and loot builders. It adds no enemy, NPC, item or
+// event kind of its own; the one-line descriptions and the two arrival lines
+// sit on the plate's landmarks (see
 // `Continents/Northern-Continent/lantern-deep.ts`).
 //
 // Kind spread over 18 nodes: 7 encounter, 3 rest, 1 loot-cache, 1 gathering,
-// 2 hazard, 1 blacksmith (the Anvil, ld-14), 1 arrival cutscene (D31), 2
-// sealed doors (the vault door and the deep stair, THE REVAMP R3a). No boss;
-// one elite on the last fight column (D30). Every fight pinned low (M3b's rule), level with the
-// Beacon Crags: 3 above the aqueducts, 4 below them.
+// 2 hazard, 1 blacksmith (the Anvil, ld-14), 1 arrival cutscene, 2 sealed
+// doors (the vault door and the deep stair). No boss; one elite on the last
+// fight column. Every fight pinned low, level with the Beacon Crags: 3 above
+// the aqueducts, 4 below them.
 
 const LD_FIGHT_LEVEL_EARLY = 3;
 const LD_FIGHT_LEVEL_LATE = 4;
@@ -592,18 +586,18 @@ const LD_ENCOUNTER_FOES: Record<string, ActOneFoe> = {
     // c1 — the drowned temple, the cathedral
     'ld-3':  { slug: 'float-eye', level: LD_FIGHT_LEVEL_EARLY },
     'ld-5':  { slug: 'float-eye', level: LD_FIGHT_LEVEL_EARLY },
-    // c2 — the central aqueduct: D61, the Brine Hag mid-region
+    // c2 — the central aqueduct: the Brine Hag mid-region
     'ld-8':  { slug: 'brine-hag', level: LD_FIGHT_LEVEL_EARLY },
     // c3 — the mushroom forest, the ossuary
     'ld-11': { slug: 'float-eye', level: LD_FIGHT_LEVEL_LATE },
     'ld-12': { slug: 'float-eye', level: LD_FIGHT_LEVEL_LATE },
     // c4 — the fortress gate
     'ld-13': { slug: 'float-eye', level: LD_FIGHT_LEVEL_LATE },
-    // c5 — the ruined city: D61, the door fight, on the last fight column
+    // c5 — the ruined city: the door fight, on the last fight column
     'ld-16': { slug: 'the-doorwarden', level: LD_DOOR_LEVEL, isBoss: true },
 };
 
-/** All three rests are CAMPS: Phase 52b keeps inns inside settlements. */
+/** All three rests are CAMPS: inns live inside settlements. */
 const LD_CAMP_NODES: Record<string, string> = {
     'ld-2':  'The ferryman lets you sleep under his lantern. He charges for the oil, not the floor.',
     'ld-10': 'The traders let you sleep behind the stalls. They sell lamp oil by the drop.',
@@ -625,9 +619,8 @@ const LD_LOOT_NODES: Record<string, { currency: number; description: string }> =
 };
 
 /**
- * The vault door — the Labyrinth's (map revamp M4, D24). Sealed in THE REVAMP
- * R3a (D54): the Labyrinth is parked, so the door is sealed scenery (a
- * cutscene) and `LabyrinthGate` never opens in play.
+ * The vault door — the Labyrinth's. The Labyrinth is parked, so the door is
+ * sealed scenery (a cutscene) and `LabyrinthGate` never opens in play.
  */
 const ldVaultDoor: MapEventPool = {
     id: 'ld-15.cutscene',
@@ -642,8 +635,7 @@ const ldVaultDoor: MapEventPool = {
 };
 
 /**
- * The deep stair — the Lantern Deep's door. It led to fishing-village (D27)
- * until THE REVAMP purged it; sealed like the vault door in R3a (D61). There
+ * The deep stair — the Lantern Deep's door, sealed like the vault door. There
  * is no end-of-run state: the column is terminal.
  */
 const ldDeepStair: MapEventPool = {
@@ -692,7 +684,7 @@ const LANTERN_DEEP_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> 
 
 // ─── single registration entry point ─────────────────────────────────────────
 //
-// Phase 161 — every map registers through one idempotent function so the
+// Every map registers through one idempotent function so the
 // content-parity guard (`getShadowedNodeOverrideKeys`) can replay registration
 // against a freshly-cleared registry deterministically. Every map has exactly
 // one block. No node is authored twice.

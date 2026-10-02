@@ -1,8 +1,8 @@
 /**
- * Hermetic E2E — Phase 52a: the deck-removal primitive + the escalating price.
+ * Hermetic E2E — the deck-removal primitive + the escalating price.
  *
  * Driven entirely through the PUBLIC BARREL (`../../index`), the same module
- * path 52d's mobile screen will import, so the barrel export is proven along
+ * path the mobile screen imports, so the barrel export is proven along
  * with the behaviour. No RNG, no clock, no disk: removal is deterministic by
  * construction — there is nothing to roll — so no stub is needed and none is
  * installed.
@@ -39,9 +39,8 @@ import {
 import { createCharacter } from '../../index';
 import type { Character } from '../../index';
 
-// The Threadbare Office — historical canon ids. The removal primitive is a
-// pure deck-list operation that never resolves a card, so after the card purge
-// (P1, 2026-09-27) these stay as opaque, DISTINCT ids: the tests need many
+// The Threadbare Office — opaque card ids. The removal primitive is a pure
+// deck-list operation that never resolves a card, so these are opaque, DISTINCT ids: the tests need many
 // different cards, and the grey office has only three.
 const OFFICE = [
     'spoiled-poultice', 'chilblain-watch', 'petty-indictment', 'first-spadeful',
@@ -114,10 +113,9 @@ describe('Phase 52a — removeCardFromCombatDeck: source ordering', () => {
     });
 
     it('a duplicated knownCards entry gives up ONE copy — a 3-of stays a 2-of', () => {
-        // The mobile starter-bundle path writes the preset recipe verbatim,
+        // The mobile starter-bundle path writes the starter recipe verbatim,
         // duplicates and all, into `knownCards`, and `buildCombatDeck` KEEPS
-        // those copies (the de-dup was repealed 2026-09-05). Entries and deck
-        // copies are one-for-one now, so one removal must take exactly one
+        // those copies. Entries and deck copies are one-for-one, so one removal must take exactly one
         // entry — draining the list would delete a 3-of for a single price.
         const player = fixture(
             ['spoiled-poultice', 'spoiled-poultice', 'spoiled-poultice', ...OFFICE.slice(1)],

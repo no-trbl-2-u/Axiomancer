@@ -1,5 +1,5 @@
 /**
- * Per-foe aftermath narrative lines (GH#65 ask 1) — 2026-07-06 roster.
+ * Per-foe aftermath narrative lines.
  *
  * Pins the registration shape (`finalBlowLines` + `causeLines` on the
  * authored set; `pactLines` only on befriendable enemies that carry a
@@ -8,15 +8,9 @@
  * for the un-authored test sandbox so the consumer-side fallback path
  * stays intact.
  *
- * `adjust-enemies` pass 15 (2026-09-21) backfilled the last 31 enemies
- * still missing `finalBlowLines`/`causeLines` (the standing 32-enemy
- * backlog re-cited-not-fixed across passes 1-14, `TheSophist` needing
- * only the two fields since it already carried `pactLines`). The
- * 'every roster entry carries finalBlowLines + causeLines' test below is
- * the regression guard this backlog never had: it sweeps the full
- * `EnemyLibrary` (not a hand-picked subset) so a future enemy landing
- * without aftermath prose fails CI immediately instead of sitting
- * unflagged for another dozen passes.
+ * The 'every roster entry carries finalBlowLines + causeLines' test below
+ * sweeps the full `EnemyLibrary` (not a hand-picked subset) so a future
+ * enemy landing without aftermath prose fails CI immediately.
  */
 import { describe, it, expect } from 'vitest';
 import { EnemyLibrary } from '../enemy.library';
@@ -26,7 +20,7 @@ import {
     // Sweep — finalBlowLines + causeLines (no pactLines).
     FloatEye,
     TheDoorwarden,
-    // Un-authored regression — test sandbox per Phase 74 D1.
+    // Un-authored regression — test sandbox.
     Sandbag_01,
 } from '../enemy.library';
 

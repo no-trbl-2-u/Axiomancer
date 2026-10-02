@@ -1,13 +1,11 @@
 /**
- * Hermetic e2e — Phase 161 content-parity guard.
+ * Hermetic e2e — content-parity guard.
  *
  * `src/World/MapEvents/content.ts` is the engine's single source of truth for
  * map-event content. Node-pool overrides are last-write-wins, so two content
  * blocks that both author the same `continent:map:node` silently diverge — the
  * later registration clobbers the earlier one, and the authored pool can never
- * fire. Phase 161 collapsed the (since purged, R3b) fishing-village content to
- * one block and added `getShadowedNodeOverrideKeys()` so that condition is a
- * test failure.
+ * fire. `getShadowedNodeOverrideKeys()` makes that condition a test failure.
  *
  * The guard clears the registry, replays `registerMapEventContent()`, then
  * asserts no node was authored more than once.

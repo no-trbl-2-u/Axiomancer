@@ -105,7 +105,7 @@ describe('hermeticity guard: isolation (no disk / network / subprocess)', () => 
      *  - the vitest-reporter test exercises the reporter's file output;
      *  - this guard reads committed sources;
      *  - the curated-library strike gate reads cards.library.ts to assert
-     *    the banned strings basePower/chipHp never reappear (spec 32 v3 §1).
+     *    the banned strings basePower/chipHp never reappear.
      * Add to this list only when the FEATURE under test is the
      * disk/process seam itself.
      */

@@ -1,8 +1,7 @@
 /**
- * Hermetic engine test — the v32 → v33 hop: THE REVAMP R7c alt-win purge.
+ * Hermetic engine test — the v32 → v33 hop: the alt-win purge.
  *
- * R7c (D47/D50, `plan/revamp/engine.md`) deletes the alt-win systems. The
- * save's `regionConsequences` slice (spared / exploited regions) was never
+ * The alt-win systems are gone. The save's `regionConsequences` slice (spared / exploited regions) was never
  * written, and its only reader, the spared-region boss buff, is gone. The hop
  * drops the slice and leaves the rest of the save untouched.
  */

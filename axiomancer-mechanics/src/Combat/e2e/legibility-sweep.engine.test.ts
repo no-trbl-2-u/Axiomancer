@@ -1,11 +1,7 @@
 /**
- * Hermetic E2E — phase 28 (Show the Engine legibility sweep). Covers the
+ * Hermetic E2E — the Show the Engine legibility sweep. Covers the
  * mechanics-side additions: the wall-math projection and its deny verdict.
- * (The DISRUPT meter went with the stance layer, R7d.) Seeded RNG only;
- * no disk / network / TTY.
- *
- * The RUPTURE projection and Overtake gate cases went with RUPTURE itself
- * (R7a, D50); the STAGGER-rung cases with the rung ladder (R7c2).
+ * Seeded RNG only; no disk / network / TTY.
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';

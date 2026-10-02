@@ -1,38 +1,35 @@
 /**
- * ENEMY DECKS — the Profane Canon (2026-08-08 rework).
+ * ENEMY DECKS — the Profane Canon.
  *
  * Every roster enemy fights as an ordered deck of enemy cards
  * (`combat.enemy-cards.ts`). The deck IS the fight's script, fully revealed
  * (Hazard's full-information doctrine): card N is threat phase N, the final
  * card loops as the standing final phase. `compileEnemyDeck` projects a deck
- * into the `AuthoredThreatStep[]` shape `combat.threat.ts` has always
- * consumed — the resolution machinery is untouched; the deck is the new
- * authoring layer.
+ * into the `AuthoredThreatStep[]` shape `combat.threat.ts`
+ * consumes; the deck is the authoring layer.
  *
- * DECK SHAPE (THE BIG NUMBERS REWRITE, 2026-09-02 — these are conventions
- * now, not laws; the tests that pinned them were repealed):
+ * DECK SHAPE (conventions, not laws):
  *   - a deck is an ordered, non-reshuffling sequence, so escalation is
  *     STRUCTURAL rather than legislated: card 1 opens, the back half spikes.
  *     Aeon's End's tiered nemesis deck is the model — tier 1 on top, tier 3 on
  *     the bottom, and the fight gets worse because of how it was built.
- *   - every card id must resolve in the library (still enforced, still a bug).
+ *   - every card id must resolve in the library (enforced; a miss is a bug).
  *   - THE STAKE is a free authoring tool: any deck may wager on any card via
- *     `DECK_STAKES`. The old "boss/unique stake exactly their second card"
- *     law is repealed; `wagersCovetedDie` remains only as the DEFAULT for a
- *     deck that authors no stake of its own.
+ *     `DECK_STAKES`. `wagersCovetedDie` is the DEFAULT for a deck that
+ *     authors no stake of its own.
  *
- * ROUND-KEYED DECK TIERS (owner ruling, 2026-09-02 — reverses decision D15):
- * "enemy decks increase in tier as the rounds increase." A deck may now be
+ * ROUND-KEYED DECK TIERS: "enemy decks increase in tier as the rounds
+ * increase." A deck may be
  * authored as ORDERED TIERS whose entry is keyed to the ROUND rather than to
  * position alone (`TieredEnemyDeck`): tier 1 plays from round 1, tier 2 is
  * unreachable before `tier2AtRound` (default 3), tier 3 before `tier3AtRound`
- * (default 6). The mechanism is the pre-existing per-phase `unlockAfterRound`
+ * (default 6). The mechanism is the per-phase `unlockAfterRound`
  * lock, stamped onto every card of a tier at compile time — so the resolver,
  * the telegraph and `processBetweenPhases` need no new vocabulary, and a
  * gated phase simply HOLDS the pointer at the last reachable phase (the fight
  * can never stall: the opener is never gated, see `compileEnemyDeck`).
  *
- * The flat `string[]` form still works and stays the majority shape: its
+ * The flat `string[]` form is the majority shape: its
  * tiers are DERIVED from the cards' own `grade` (common → 1, escalation → 2,
  * signature → 3), running-max'd so a tier never reverts. Two authoring rules
  * make the derivation safe on decks nobody hand-tiered:
@@ -73,7 +70,7 @@ export interface TieredEnemyDeck {
     readonly tier3AtRound?: number;
 }
 
-/** Either deck form. The flat array is the legacy/majority shape. */
+/** Either deck form. The flat array is the majority shape. */
 export type EnemyDeckSpec = readonly string[] | TieredEnemyDeck;
 
 /** Default round gates. A tier never reverts, so these are clamped monotonic. */
@@ -95,7 +92,7 @@ export function deckCardIds(spec: EnemyDeckSpec): readonly string[] {
 
 /** enemy id → its ordered deck of enemy-card ids (flat), or its authored tiers. */
 export const ENEMY_DECKS: Record<string, EnemyDeckSpec> = {
-    // THE REVAMP R2 (D48): the three survivors. B2 regrows the roster.
+    // The three roster enemies.
     'enemy-float-eye': ['dp-first-bell', 'dp-undertow-grip', 'dp-breaking-sea'],
     'enemy-brine-hag': ['dp-wet-congregation', 'dp-lead-bell', 'dp-drowning-drill', 'dp-breaking-sea', 'dp-vespers-under-water'],
     // BOSS — TIERED (7 cards): the door is kept open, the frame and the
@@ -129,9 +126,8 @@ function faceToPhase(face: EnemyCardFace): AuthoredThreatPhase {
  * so which seat wagers is decided here — at the one place that knows which
  * enemy is playing — rather than trusted to every card literal.
  *
- * THE BIG NUMBERS REWRITE (2026-09-02): this is now only the DEFAULT, used
- * when a deck authors no `DECK_STAKES` entry of its own. Any deck may stake
- * any seat; the boss/unique-second-card law is repealed.
+ * This is the DEFAULT, used when a deck authors no `DECK_STAKES` entry of
+ * its own. Any deck may stake any seat.
  */
 function wagersCovetedDie(enemyId: string): boolean {
     const registry = ENEMY_REGISTRY as Record<string, { difficulty?: string } | undefined>;
@@ -173,7 +169,7 @@ function cardToStep(
  * a missing card is an authoring bug, not a runtime condition).
  */
 export const DECK_STAKES: Readonly<Record<string, readonly number[]>> = Object.freeze({
-    // THE BIG NUMBERS REWRITE — per-deck stake seats (0-based card index).
+    // Per-deck stake seats (0-based card index).
     // Empty by design: every deck currently takes the default. Author an entry
     // here to make a foe wager somewhere else, or to make an elite wager at
     // all. An empty array means "this deck never stakes".

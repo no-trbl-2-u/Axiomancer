@@ -68,8 +68,8 @@ describe('level-ladder presets', () => {
         const l1 = buildCharacterFromPreset(getPresetById('kid-l1')!);
         const l50 = buildCharacterFromPreset(getPresetById('kid-l50')!);
 
-        // The declared `equipment` entries are vestigial (Phase 21); every
-        // tier wears the starting relics, the Suppliant's Ring (R7e2).
+        // The declared `equipment` entries do not resolve; every tier wears
+        // the starting relics, the Suppliant's Ring.
         for (const c of [l1, l50]) {
             expect(getEquippedItems(c.equipment).map(e => e.id)).toEqual(['relic-disarming-plea']);
         }

@@ -1,10 +1,7 @@
 /**
  * Balance-sim witness — Hazard-Pattern Combat (HP model).
  *
- * The suspended win-rate/mercy/engagement-floor/loadout-comparison bands
- * (formerly parked in a `describe.skip` block) were repealed outright
- * 2026-09-02 (big-numbers overhaul §3/§10) rather than left as a skipped
- * tombstone — no old balance number survives the library/enemy rewrite.
+ * Pins no balance band.
  *
  * Structural invariants that STAY ARMED:
  *   1. Combats TERMINATE (V+M+D+R === runs; no hangs, no crashes) for DoT,
@@ -33,9 +30,9 @@ function loadout(cards: string[]): Character {
     return p;
 }
 
-// Profane Canon loadouts (2026-08-08 rework, old ids retired):
+// Loadout families:
 const DOT = ['spoiled-poultice', 'the-long-lent', 'unction-of-boils']; // rot seed + PROLONG + tier-2 poison
-const CONTROL = ['scolds-bridle', 'petty-indictment'];                 // STAGGER + BACKFIRE, CHARGE chip
+const CONTROL = ['scolds-bridle', 'petty-indictment'];                 // control + chip
 const TURTLE = ['chilblain-watch', 'hoarfrost-teeth', 'spoiled-poultice']; // wall + thorns + DoT
 
 describe('HP combat — combats terminate for every loadout family (structural, armed)', () => {

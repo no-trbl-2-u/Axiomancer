@@ -1,11 +1,10 @@
 /**
- * Rest-choice engine ("rest" / "cut") — hermetic unit suite (Phase 52c;
- * anvil offer dropped Phase 59).
+ * Rest-choice engine ("rest" / "cut") — hermetic unit suite.
  *
  * No RNG stub needed: every transition here is deterministic by
  * construction (the deck-removal primitive is deterministic itself — see
  * its own suite). Driven through the PUBLIC BARREL (`../../../index`), the
- * same module path 52d's mobile screen imports.
+ * same module path the mobile screen imports.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -29,7 +28,7 @@ const DECK = [
     'spoiled-poultice', 'chilblain-watch', 'petty-indictment', 'first-spadeful',
     'grandmothers-psalter', 'thumbprick-oath', 'thin-hymn', 'threadbare-cope',
     'unction-of-boils', 'the-sextons-bell',
-] as const; // exactly MIN_COMBAT_DECK_SIZE (Phase 104: 10)
+] as const; // exactly MIN_COMBAT_DECK_SIZE (10)
 
 function offerSession(overrides: Partial<Parameters<typeof createRestChoiceSession>[1]> = {}): RestChoiceSession {
     return createRestChoiceSession(1, {
@@ -143,7 +142,7 @@ describe('rest-choice — `cut` offer (names a card; the host removes it)', () =
     it('the named card actually shrinks buildCombatDeck\'s output once the host removes it', () => {
         // A real fixture Character whose deck is exactly what this session was
         // authored from — proving `removedCardId` is a valid, composable input
-        // to Phase 52a's primitive, which is the host's job at claim.
+        // to the deck-removal primitive, which is the host's job at claim.
         const known = DECK.slice(0, 6);
         const rewards = DECK.slice(6);
         const player: Character = {

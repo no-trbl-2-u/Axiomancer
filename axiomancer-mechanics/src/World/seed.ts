@@ -3,7 +3,7 @@
  *
  * Engines accept a `SeedInput` at their public creation boundary, normalize it
  * once to a uint32, and then thread explicit RNG state through transitions.
- * Numeric seeds retain legacy uint32 coercion; string seeds use FNV-1a so CLI
+ * Numeric seeds use plain uint32 coercion; string seeds use FNV-1a so CLI
  * labels and playtest scenario IDs are replayable without collapsing to zero.
  */
 export type SeedInput = string | number;

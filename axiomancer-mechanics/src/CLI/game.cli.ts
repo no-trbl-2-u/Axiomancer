@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Game CLI — demonstrational full-loop driver (Spec 09 Q7).
+ * Game CLI — demonstrational full-loop driver.
  *
  * Wires every public verb on the game store into a tabbed inquirer prompt
  * so the engine can be exercised by hand. Tabs (see `pickTab`):
@@ -69,11 +69,9 @@ type Tab = 'map' | 'journal' | 'cards' | 'codex' | 'inventory' | 'character' | '
 
 type GameStoreHandle = ReturnType<typeof createGameStore>;
 
-// Phase 82 — Codex lookup. Walks EnemyLibrary once at module load to build
-// an id → CodexEntry map. Future dialogue-driven codex entries will need a
-// centralised codexRegistry export on the public barrel; today the
-// Phase-73-only origin (Enemy.journalEntry?) makes this in-CLI walk correct
-// per the brief D2.
+// Codex lookup. Walks EnemyLibrary once at module load to build an
+// id → CodexEntry map. Enemy.journalEntry is the only source of codex
+// entries, so this in-CLI walk is complete.
 const codexLookup: Map<string, CodexEntry> = (() => {
     const map = new Map<string, CodexEntry>();
     for (const enemy of EnemyLibrary) {
@@ -92,7 +90,7 @@ const codexLookup: Map<string, CodexEntry> = (() => {
 async function bootstrapStore(adapter: PersistenceAdapter, initial?: GameState, startMap?: MapName): Promise<GameStoreHandle> {
     const events = createEventEmitter();
     events.onAny(emit);
-    // Phase 30 unit 2 — surface newly-eligible cards after a level-up.
+    // Surface newly-eligible cards after a level-up.
     // The store's dispatch enriches the payload with `unlockedCards`; the
     // CLI just renders the message.
     events.on('character:levelup', evt => {
@@ -154,7 +152,7 @@ function asCombatPolicy(value: string | undefined): CombatAutoPolicyId {
 }
 
 /** What resolving one node's authored event actually produced — the
- *  contract `route:end` classification is built from (Phase 14). */
+ *  contract `route:end` classification is built from. */
 interface NodeResolutionResult {
     event: ResolvedEvent;
     /** Set only when the event was an encounter; null covers "no
@@ -165,8 +163,7 @@ interface NodeResolutionResult {
 
 /** Resolves the event authored at the CURRENT node — assumes any move
  *  already happened. Split out from `moveAndResolveMapNode` so the
- *  route runner can also resolve the start node in place (Phase 14
- *  unit 4), which `moveToNode` can never target since a node is never
+ *  route runner can also resolve the start node in place, which `moveToNode` can never target since a node is never
  *  in its own `connectedNodes`. */
 async function resolveCurrentNodeEvent(
     store: GameStoreHandle,
@@ -208,7 +205,7 @@ async function resolveCurrentNodeEvent(
         });
         combatOutcome = combatResult.outcome;
         // The fight ran outside the store, so settle its node here, as
-        // `END_COMBAT` does in the store (phase R9a).
+        // `END_COMBAT` does in the store.
         store.setState({ world: settleArrival(store.getState()).world });
     }
 
@@ -238,7 +235,7 @@ async function moveAndResolveMapNode(store: GameStoreHandle, target: string, fla
 }
 
 /**
- * Phase 14 — the honest evidence contract for `--route` / `--route-audit`.
+ * The honest evidence contract for `--route` / `--route-audit`.
  * Three lanes, never conflated:
  *   - `survivorship`   — a legal, no-backtravel walk; stops dead on defeat.
  *   - `blocked`        — a survivorship walk that hit a combat defeat.
@@ -263,7 +260,7 @@ function emitRouteEnd(store: GameStoreHandle, summary: RouteEndSummary): void {
     emit({ type: 'cli:exit', payload: { reason: 'route-complete', ...summary } });
 }
 
-/** `--route` walker (Phase 14 rewrite). Player-ish/legal moves only —
+/** `--route` walker. Player-ish/legal moves only —
  *  never claims survivorship past a combat defeat. */
 async function runScriptedRoute(store: GameStoreHandle, flags: CliFlags): Promise<void> {
     const startState = store.getState();
@@ -337,8 +334,8 @@ function findMapContinent(mapName: string): ContinentName | undefined {
     return undefined;
 }
 
-/** `--route-audit <mapName>` — non-mutating full-map coverage witness
- *  (Phase 14 unit 3, "Preferred option"). Reads every authored node's
+/** `--route-audit <mapName>` — non-mutating full-map coverage witness.
+ *  Reads every authored node's
  *  primary event kind via `getNodePrimaryEventKind` — no RNG roll, no
  *  movement, no combat — so it can honestly claim 100% node coverage
  *  without pretending a single legal route visited them all in one life. */
@@ -475,7 +472,7 @@ async function shopLoop(store: GameStoreHandle, shop: { wares: ReadonlyArray<{ i
         const inv = store.getState().player.inventory;
         if (inv.length === 0) { log('Nothing to sell.'); continue; }
         const choices = inv.map((i, idx) => {
-            // Engine-tier policy (Phase 37 + iterate exploit-fix): defaultSellPrice
+            // Engine-tier policy: defaultSellPrice
             // halves and floors a ware's buy price. Always strictly less than the
             // buy price for any positive integer, so buy → sell round-trips are
             // net-negative for the player. For items not on the current shop's
@@ -639,7 +636,7 @@ async function characterTab(store: GameStoreHandle): Promise<void> {
         }
     }
 
-    // Spec 06 Q3 + Q8 — deferred allocation. Prompt only when there are
+    // Deferred allocation. Prompt only when there are
     // points to spend; loop until the player either spends them all or
     // picks "leave them unspent". Each allocation is a dispatch so the
     // autosave + state-log records reflect the change.
@@ -662,7 +659,7 @@ async function characterTab(store: GameStoreHandle): Promise<void> {
         log(`Allocated 1 point to ${stat}.`);
     }
 
-    // Spec 06 Q7 — runtime card learning (Phase 30 unit 3). Prompt loop
+    // Runtime card learning. Prompt loop
     // mirrors the Allocate flow: visible only when there's something eligible
     // to learn, scriptable via a "skip" exit. Each learn dispatches so the
     // autosave + state log records the change.
@@ -724,9 +721,7 @@ function loadTab(store: GameStoreHandle, snapshotAdapter: PersistenceAdapter | n
         return;
     }
     const before = store.getState();
-    // Restore EVERY persisted slice (2026-09-07 — the old seven-field
-    // pick dropped codex / alignment / factions / labyrinth / consequences
-    // on load) and bring an older save up to date through `migrate` first;
+    // Restore EVERY persisted slice and bring an older save up to date through `migrate` first;
     // `currentEncounter` is transient and never saved.
     const current = saved.version < GAME_STATE_VERSION ? migrate(saved, saved.version) : saved;
     const { currentEncounter: _transient, ...restored } = current;
@@ -857,8 +852,8 @@ async function devTab(store: GameStoreHandle): Promise<void> {
 }
 
 export async function runGameCli(rawArgs = process.argv.slice(2)): Promise<void> {
-    // Subcommand: `npm run game -- combat [flags]` (Phase 165) hands off to
-    // the new Hazard-style combat agentic driver. This is the NEW combat path.
+    // Subcommand: `npm run game -- combat [flags]` hands off to the
+    // Hazard-style combat agentic driver.
     if (rawArgs[0] === 'combat') {
         const { runCombatCli } = await import('./combat.cli');
         await runCombatCli(rawArgs.slice(1));

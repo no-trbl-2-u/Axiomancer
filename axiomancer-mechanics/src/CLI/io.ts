@@ -35,27 +35,27 @@ export interface CliFlags {
      */
     saveFile?: string;
     /**
-     * State fixture to BOOT from (2026-09-07): a registry id or a path to a
+     * State fixture to BOOT from: a registry id or a path to a
      * JSON fixture document (see `src/Game/fixtures`). `list` prints the
      * registry and exits. Replaces the blank L1 5/5/5 boot character.
      */
     fixture?: string;
     /**
-     * Map revamp M3a — start the blank new game on this campaign map instead
-     * of the default start (the Breakwater, D27). Any map in `STARTABLE_MAPS`.
+     * Start the blank new game on this campaign map instead of the default
+     * start (the Breakwater). Any map in `STARTABLE_MAPS`.
      * Ignored when `--fixture` boots a full state.
      */
     startMap?: string;
     /** Comma-separated explicit node ids to walk without prompts. */
     route?: string[];
     /**
-     * Phase 14 — resolve the current (start) node's own event before
+     * Resolve the current (start) node's own event before
      * walking `route`. Without this, the start node is visited but its
      * event never resolves (see `game.cli.ts`'s `route:end` summary).
      */
     resolveStart: boolean;
     /**
-     * Phase 14 — non-mutating full-map coverage witness. Names a
+     * Non-mutating full-map coverage witness. Names a
      * registered map (e.g. `breakwater`); reports every authored
      * node's primary event kind via read-only introspection instead of
      * walking a single legal route. Mutually exclusive in practice with
@@ -332,7 +332,7 @@ export function log(...args: unknown[]): void {
     }
 }
 
-// ─── State log (Phase 26) ─────────────────────────────────────────────────────
+// ─── State log ────────────────────────────────────────────────────────────────
 
 let stateLogPath: string | null = null;
 let stateLogTick = 0;

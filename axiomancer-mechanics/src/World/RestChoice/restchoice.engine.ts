@@ -1,12 +1,8 @@
 /**
  * Rest-choice engine ("rest" / "cut") — pure engine transitions.
  *
- * Replaces the former rest minigame's silent per-node heal with T's ruling (attended
- * chat, 2026-08-08): a rest node is one irreversible choice. The `anvil`
- * offer that used to sit alongside `rest` / `cut` was dropped Phase 59 (T
- * direct, 2026-08-15: "Rest: Heal 25% health or remove a card.") — the
- * Blacksmith surface it composed is re-homed to its own map node
- * (Phase 60). State machine:
+ * A rest node is one irreversible choice: "Rest: Heal 25% health or remove a
+ * card." State machine:
  *
  *   offer ──chooseRestChoiceOffer('rest')────────────────▶ outcome
  *     │
@@ -49,7 +45,7 @@ export interface CreateRestChoiceOptions {
     deckCardIds: readonly string[];
     /** `Character.cardRemovals` going in. Defaults to 0 — same seam as `cardRemovalsOf`. */
     removals?: number;
-    /** Phase 59 — the authored MapEvent one-liner. `null`/absent falls back to the presenter's placeholder intro. */
+    /** The authored MapEvent one-liner. `null`/absent falls back to the presenter's placeholder intro. */
     description?: string | null;
 }
 
@@ -108,9 +104,7 @@ function sealOutcome(s: RestChoiceSession, outcome: RestChoiceOutcome): RestChoi
  * Purpose: let a host print the heal beside the offer without re-deriving
  * the rule. The heal is `round(maxHealth × restHealFraction)`, capped at the
  * VITAE actually missing, so a nearly-full pilgrim is never promised more
- * than the commit pays (audit 2026-09-12: the mobile offer copy restated the
- * fraction without the cap and read "Restores 44" at 170/175, where the
- * engine heals 5).
+ * than the commit pays (at 170/175 the heal is 5, not 44).
  *
  * @param s - any object carrying the session's `maxHealth` and `health`.
  * @returns the heal in VITAE, always `>= 0`.

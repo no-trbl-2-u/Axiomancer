@@ -1,16 +1,14 @@
 /**
- * Hermetic E2E Tests — Phase 80 always-land contract (direction (a) pure split).
+ * Hermetic E2E Tests — the always-land effect-application contract.
  *
- * Pins the new effect-application contract:
- *   - Tier 1: auto-applies (unchanged across Phase 80).
- *   - Tier 2 buff: caster d20 fumble/crit (KEPT per Phase 79 D8).
- *   - Tier 2 debuff: ALWAYS lands. Target-resist + Nat-20 rebound + Nat-1
- *     overwhelmed-double-duration all removed at Phase 80.
- *   - Tier 3: ALWAYS lands. Nat-20 miraculous escape removed at Phase 80.
+ *   - Tier 1: auto-applies.
+ *   - Tier 2 buff: applies exactly as printed (no hidden d20).
+ *   - Tier 2 debuff: ALWAYS lands — no target-resist, no Nat-20 rebound, no
+ *     Nat-1 double duration.
+ *   - Tier 3: ALWAYS lands — no Nat-20 escape.
  *
- * RNG convention: drive `mockFixedRng` to the legacy-Nat-1 and legacy-Nat-20
- * values; under Phase 80 those outcomes are no longer reachable on the
- * debuff / Tier 3 path. The buff path still exhibits fumble/crit per D2.
+ * RNG convention: drive the RNG to the Nat-1 and Nat-20 values; no path
+ * changes its outcome on them.
  */
 
 import { afterEach, describe, it, expect, vi } from 'vitest';
@@ -56,15 +54,15 @@ describe('Phase 80 — Tier 2 debuff always lands (target-resist removed)', () =
         const target = minimalCombatant();
         const effect = buildActiveEffect('debuff_poison', 2, 2, 4);
 
-        // Drive the d20 to a value that would have triggered legacy crit-rebound.
+        // Drive the d20 to a natural 20.
         mockSequentialRng(0.99); // → d20 = 20
 
         const result = resolveEffectApplication(target, effect, 'debuff');
 
         expect(result.success).toBe(true);
         expect(result.activeEffect).toBe(effect);
-        // `rebounded` was removed from EffectApplicationResult at the Phase 84/86
-        // drain; assert the legacy field stays absent at runtime.
+        // EffectApplicationResult carries no `rebounded` field; assert it stays
+        // absent at runtime.
         expect((result as { rebounded?: unknown }).rebounded).toBeUndefined();
         expect(result.message).toMatch(/Effect lands/);
     });
@@ -99,10 +97,8 @@ describe('Phase 80 — Tier 3 always lands (Nat-20 escape removed)', () => {
 });
 
 /**
- * D12 (plan/2026-09-25-refactor-strategy.decisions.md; trim spec Tier 0
- * item 5) — the hidden caster-side d20 on Tier 2 buffs is gone. It fizzled
- * 5 % of buffs and doubled 5 %, and the player was never shown the roll.
- * Buffs now apply exactly as printed, whatever the RNG would have rolled.
+ * Tier 2 buffs roll no hidden caster-side d20: they apply exactly as printed,
+ * whatever the RNG would have rolled.
  */
 describe('D12 — Tier 2 buffs apply as printed (no hidden d20)', () => {
     it('lands where the old roll was a Nat 1 (no fizzle)', () => {

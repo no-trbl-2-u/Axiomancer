@@ -1,13 +1,12 @@
 /**
- * The Aporia — MapEvent pools (W-01 encounter economy).
+ * The Aporia — MapEvent pools.
  *
  * Every room rolls its act's weighted pool on FIRST arrival only
  * (existing `consumedNodes` one-shot semantics = "solved space is
  * solved"). Authored overrides: entrances and set-piece rooms narrate,
  * waystones rest (one-shot, meagre; the Third Waystone generous —
  * the finale resource floor), the ledger room (`act.questRoom`) narrates
- * the Sophist's own line (Phase 61 — the Quest Board minigame it used to
- * launch is retired), boss rooms fire the act boss. Weights per act:
+ * the Sophist's own line, boss rooms fire the act boss. Weights per act:
  * DESIGN.md section 4 (plan/labyrinth).
  *
  * Self-registers on import, mirroring `MapEvents/content.ts`.
@@ -108,7 +107,7 @@ function buildDefaultPool(act: LabyrinthActDef): MapEventPool {
             },
             {
                 kind: 'rest', weight: t.weights.rest,
-                // Phase 52b — the house is not an innkeeper. Camp.
+                // The house is not an innkeeper. Camp.
                 payload: { kind: 'rest', shelter: 'camp', description: 'A corner the house forgot to make uncomfortable.' },
             },
             {
@@ -123,9 +122,8 @@ function overridePool(act: LabyrinthActDef, room: LabyrinthRoomDef): MapEventPoo
     const id = `${act.mapName}.${room.nodeId}.override`;
 
     if (room.nodeId === act.questRoom) {
-        // Phase 61 — the Quest Board minigame retired; the ledger room
-        // narrates the Sophist's own scripted line instead of launching a
-        // board (the room keeps its identity — `act.questRoom` still gates
+        // The ledger room narrates the Sophist's own scripted line (the
+        // room keeps its identity — `act.questRoom` also gates
         // the act3 "settle debt" action in `labyrinth.cli.ts` /
         // `state/presenters/labyrinth.engine.ts`, an unrelated mechanic).
         return {
@@ -157,10 +155,8 @@ function overridePool(act: LabyrinthActDef, room: LabyrinthRoomDef): MapEventPoo
     }
 
     if (room.waystone) {
-        // One-shot meagre rest. Phase 52b — a waystone is a CAMP: the stone
-        // holds your place, it does not keep an inn. The per-waystone
-        // healFraction band (0.35 / 0.5, generous on the act's LAST stone)
-        // was retired with the knob; 52c's `World/RestChoice` heals a flat
+        // One-shot meagre rest. A waystone is a CAMP: the stone holds your
+        // place, it does not keep an inn. `World/RestChoice` heals a flat
         // fraction regardless of shelter.
         return {
             id,

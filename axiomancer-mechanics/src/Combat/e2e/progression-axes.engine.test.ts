@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — THE PATH (owner ruling 2026-09-02): the progression axes.
+ * Hermetic E2E — THE PATH: the progression axes.
  *
  * A player's combat power does NOT grow through card rank alone. It grows
  * along six axes: staged decks, card removal, card upgrades, DIE UPGRADES,
@@ -11,11 +11,9 @@
  * the encounter seeds them, and the tray honours them. It is a wiring guard,
  * not a balance band — it says nothing about how much either axis is worth.
  *
- * Under spec 33 (the only dice model since the D7 flag collapse, 2026-09-25)
- * both axes are potent: there is no draft, so every usable die powers a card —
+ * Both axes are potent: there is no draft, so every usable die powers a card —
  * one more die is one more PAID play, one more mana face one fewer dead die.
- * (The draft-era legacy face-bag ladder these tests once also pinned was
- * deleted with the flag.) The wiring being correct and the axis being worth
+ * The wiring being correct and the axis being worth
  * something are still different claims; only the first is tested below.
  *
  * Pure math + a fixed RNG only; no disk / network / TTY.
@@ -157,7 +155,7 @@ describe('the stage profiles carry the campaign, not just the level', () => {
     });
 
     /**
-     * Owner-set harness bands (2026-09-03): "early game has normal amount of
+     * Owner-set harness bands: "early game has normal amount of
      * dice, mid-game should have 1 extra base dice and 1 or 2 dice upgrades,
      * late-game should [have] 2 extra base dice and 3 or 4 upgrades."
      *

@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — Spec 26b Hazard-Pattern Combat: DEFENSE cards / GUARD.
+ * Hermetic E2E — Hazard-Pattern Combat: DEFENSE cards / GUARD.
  *
  * Defense cards (a `guard` specialMechanic) grant the player GUARD —
  * a transient shield that absorbs the enemy's NEXT telegraphed threat in
@@ -12,7 +12,6 @@
  *     than the same player who played an offensive card instead;
  *   - the library's defense card is real + reachable via COMBAT_REWARD_POOL.
  *
- * The card purge (P1, 2026-09-27): the three vigil defense cards are gone;
  * A Plain Ward (grey-ward, GUARD 5, colourless) is the library's defense
  * card and A Plain Blow (grey-strike) the offensive control case.
  *
@@ -69,7 +68,7 @@ function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'mind'): Enem
 }
 
 /** Forces this turn's tray to known colors, every die showing a mana face
- *  (spec 33 — a PAID play names its powering die; no draft). */
+ *  (a PAID play names its powering die). */
 function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
     const turn = state.turn || 1;
     const dice = colors.map((c, i) => ({
@@ -118,8 +117,7 @@ describe('Spec 26b — defense cards classify as `defend`', () => {
 describe('Spec 26b — playing a defense card grants GUARD', () => {
     it('a POWERED brace grants its printed GUARD', () => {
         mockSequentialRng(0.05);
-        // Spec 33 retired the hidden stance read — every play lands printed
-        // (1.0×). A Plain Ward is colourless, so no colour match applies: its
+        // Every play lands printed (1.0×). A Plain Ward is colourless, so no colour match applies: its
         // printed GUARD 5 lands as printed at 5/5/5 stats.
         const state = openPhase(initializeCombatEncounter(makePlayer([BRACE]), makeEnemy(80, 'mind'), [BRACE, BRACE, BRACE, BRACE, BRACE], 7));
 
@@ -141,7 +139,7 @@ describe('Spec 26b — GUARD absorbs the next enemy threat', () => {
         const enemyHp = 120;
         const seed = 11;
 
-        // Both cards are colourless — each names the tray's first die (spec 33).
+        // Both cards are colourless — each names the tray's first die.
         mockSequentialRng(0.05);
         const control = resolveCombatPhase(
             openPhase(initializeCombatEncounter(makePlayer([STRIKE]), makeEnemy(enemyHp, 'mind'), [STRIKE, STRIKE, STRIKE], seed)),

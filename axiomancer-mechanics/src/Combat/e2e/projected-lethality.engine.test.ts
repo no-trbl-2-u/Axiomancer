@@ -1,13 +1,9 @@
 /**
  * Hermetic E2E — `projectCombatOutcome`, the consolidated status kill-path
  * readout (pending DoT, "lethal in N rounds", and hand finisher readiness).
- * Re-pinned to spec 32 v3: the finisher vocabulary is RUPTURE and REAP
- * (amplify/execute are deleted); bleed decays 1 intensity per tick and the
- * projection models it. Seeded RNG only; no disk / network / TTY.
- *
- * Card purge (P1, 2026-09-27): no surviving card prints RUPTURE or REAP, so
- * the finisher-readiness cases left with their carriers; the no-finisher
- * case and the pending-DoT / heal-aware readouts stay.
+ * Bleed decays 1 intensity per tick and the projection models it. Covers the
+ * no-finisher case and the pending-DoT / heal-aware readouts. Seeded RNG only;
+ * no disk / network / TTY.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -52,8 +48,8 @@ describe('projectCombatOutcome — the consolidated status kill-path readout', (
     });
 
     it('a decaying bleed that outpaces a low-HP foe is lethal in N rounds', () => {
-        // v3 bleed: 3/stack, decays 1 intensity per tick; WS3.3 puts it on
-        // the damage-instance clock (2 expected ticks/round). i3 → ticks
+        // Bleed: 3/stack, decays 1 intensity per tick, on the
+        // damage-instance clock (2 expected ticks/round). i3 → ticks
         // 9, 6, 3 — all pending, decay-aware (NOT 9 × ticks).
         const enemy = makeEnemy(15, [ae('debuff_bleed', 3, 5)]);
         const state = initializeCombatEncounter(makePlayer([]), enemy, undefined, 7);
@@ -83,7 +79,7 @@ describe('projectCombatOutcome — the consolidated status kill-path readout', (
         const state = initializeCombatEncounter(makePlayer([]), enemy, undefined, 7);
         const projection = projectCombatOutcome(state);
 
-        // Same fixture as the RUPTURE e2e suite (WS3.3 clock fuel): poison
+        // Clock fuel: poison
         // ramps + Hemorrhage on the card-played clock — per-round dprs
         // 6,6,9,9 × 2 expected ticks = 60; bleed i1 decays after one tick of
         // 3. pending = 63.

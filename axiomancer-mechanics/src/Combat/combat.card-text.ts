@@ -22,7 +22,7 @@
  *    fell back to a headline sentence. `thumbprick-oath` printed "Deal 14
  *    VITAE." and never mentioned that it costs you 5 VITAE.
  * 3. **Two clauses sharing a keyword shadowed each other.** A dedupe keyed on
- *    the WORD meant a self-buff mapped to PLEA hid the card's real `PLEA 38`.
+ *    the WORD let one clause hide another clause with the same keyword.
  *
  * The fix is structural, not editorial: the clause list is derived here, from
  * the effect data, once. Mobile formats it (keyword casing, separators,

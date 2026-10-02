@@ -1,12 +1,12 @@
 /**
- * Neutral test fixtures for the plumbing with no authored content (R7e, D72).
+ * Neutral test fixtures for the plumbing with no authored content.
  *
  * Act 1 stages no NPC, shop or quest, so dialogue, shops and the quest engine
  * have no live carrier. These placeholders are their witnesses: suites and
  * state fixtures (`stagedEvent`) use them, the live world never registers
- * them, and their text is placeholder copy, not story (D58).
+ * them, and their text is placeholder copy, not story.
  *
- * R7e2 added the fixture relics: the live library is the Suppliant's Ring
+ * The fixture relics exist because the live library is the Suppliant's Ring
  * alone, so equip / unequip across every slot and the `maxHp` line are
  * witnessed here. They grant no signature (none can be authored).
  */

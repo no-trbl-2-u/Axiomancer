@@ -1,7 +1,7 @@
 /**
  * Hermetic e2e — New Hazard-style Combat CLI (`src/CLI/combat.cli.ts`).
  *
- * Phase 165 Unit 5 DoD: deterministic `--auto` walkthrough fixture.
+ * Deterministic `--auto` walkthrough fixture.
  *
  * Tests cover:
  *   - Flag parsing (parseCombatArgv)
@@ -217,11 +217,6 @@ describe('Combat CLI — deterministic auto playthrough', () => {
         expect(trayRolls).toBeLessThanOrEqual(after.phaseResults.length + 1);
     });
 });
-
-// (The cloud Phase 26 "--stage defaults the enemy roster" describe was dropped
-// at the merge: this session's --stage default is the SEED-DETERMINISTIC
-// roster pick, pinned by the Gate 0 §2 tests above — the cloud first-slug pin
-// contradicts it while covering the same surface.)
 
 describe('Combat CLI — phase 26: auto mode emits a per-phase JSON transcript', () => {
     it('--json-events --auto emits hazardCombat:autoPhase between start and end', async () => {
