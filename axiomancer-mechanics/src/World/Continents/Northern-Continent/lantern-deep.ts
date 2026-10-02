@@ -18,9 +18,12 @@
  *   c1  ferry landing · drowned temple · north aqueduct · cathedral
  *   c2  west tunnel · crystal grotto · central aqueduct · sleeping giant
  *   c3  market grotto · mushroom forest · ossuary
- *   c4  fortress gate · forge · vault door
- *   c5  ruined city · east stairs                             (the elite)
+ *   c4  fortress gate · forge · vault door · east stairs
+ *   c5  ruined city                                           (the door fight)
  *   c6  the deep stair                                        (the door, terminal)
+ *
+ * The door fight holds a column of its own and is the deep stair's only way
+ * in, so no route reaches the exit past the Doorwarden.
  *
  * Lanes run west to east in every band, so every lateral rib joins two
  * landmarks that are neighbours on the plate. The vault door is the
@@ -55,14 +58,14 @@ const lanternDeep: MapDefinition = {
         // ── c3 — market grotto · mushroom forest · ossuary ──────────────
         { id: 'ld-10', location: [3, -1], connectedNodes: ['ld-13', 'ld-14', 'ld-11'] },
         { id: 'ld-11', location: [3, 0],  connectedNodes: ['ld-14', 'ld-15', 'ld-10', 'ld-12'] },
-        { id: 'ld-12', location: [3, 1],  connectedNodes: ['ld-15', 'ld-11'] },
+        { id: 'ld-12', location: [3, 1],  connectedNodes: ['ld-15', 'ld-17', 'ld-11'] },
         // ── c4 — fortress gate · forge · vault door ─────────────────────
         { id: 'ld-13', location: [4, -1], connectedNodes: ['ld-16', 'ld-14'] },
         { id: 'ld-14', location: [4, 0],  connectedNodes: ['ld-16', 'ld-13', 'ld-15'] },
         { id: 'ld-15', location: [4, 1],  connectedNodes: ['ld-16', 'ld-17', 'ld-14'] },
-        // ── c5 — ruined city · east stairs ──────────────────────────────
-        { id: 'ld-16', location: [5, 0],  connectedNodes: ['ld-18', 'ld-17'] },
-        { id: 'ld-17', location: [5, 1],  connectedNodes: ['ld-18', 'ld-16'] },
+        // ── c4's east stairs · c5 — the ruined city, the door fight ─────
+        { id: 'ld-16', location: [5, 0],  connectedNodes: ['ld-18'] },
+        { id: 'ld-17', location: [4, 2],  connectedNodes: ['ld-16', 'ld-15'] },
         // ── c6 — the deep stair. Terminal column: the door. ────────────
         { id: 'ld-18', location: [6, 0],  connectedNodes: [] },
     ],

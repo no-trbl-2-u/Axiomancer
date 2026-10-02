@@ -342,7 +342,7 @@ const CW_ENCOUNTER_FOES: Record<string, ActOneFoe> = {
     'cw-12': { slug: 'brine-hag', level: CW_FIGHT_LEVEL_LATE },
     // c4 — the rock chapel, the wayside cross, the east cave
     'cw-16': { slug: 'float-eye', level: CW_FIGHT_LEVEL_LATE },
-    // The door fight, on the centre lane of the last ring.
+    // The door fight, alone in its column: the exit's only way in.
     'cw-17': { slug: 'the-doorwarden', level: CW_DOOR_LEVEL, isBoss: true },
     'cw-19': { slug: 'float-eye', level: CW_FIGHT_LEVEL_LATE },
 };
@@ -473,7 +473,7 @@ const BC_ENCOUNTER_FOES: Record<string, ActOneFoe> = {
     // c4 — the arch bridge, the quarry
     'bc-11': { slug: 'float-eye', level: BC_FIGHT_LEVEL_LATE },
     'bc-13': { slug: 'float-eye', level: BC_FIGHT_LEVEL_LATE },
-    // c5 — the stone gate: the door fight, on the centre lane of the last ring
+    // c5 — the stone gate: the door fight, alone in its column: the exit's only way in
     'bc-15': { slug: 'the-doorwarden', level: BC_DOOR_LEVEL, isBoss: true },
 };
 

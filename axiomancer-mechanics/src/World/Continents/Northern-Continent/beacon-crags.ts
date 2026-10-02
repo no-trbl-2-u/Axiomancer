@@ -18,9 +18,12 @@
  *   c1  summit beacon · hanging lake · shepherds' village
  *   c2  crag castle · cliff monastery · mine entrance
  *   c3  ruined chapel · rope bridge · toll gate
- *   c4  arch bridge · gorge falls · quarry
- *   c5  mountain inn · stone gate · tunnel bridge
+ *   c4  mountain inn · arch bridge · gorge falls · quarry · tunnel bridge
+ *   c5  the stone gate                                  (the door fight)
  *   c6  the glacier shrine                              (the door, terminal)
+ *
+ * The door fight holds a column of its own and is the glacier shrine's only
+ * way in, so no route reaches the exit past the Doorwarden.
  *
  * Lanes run west to east in every band, so every lateral rib joins two
  * landmarks that are neighbours on the plate. Events use the shipped builders
@@ -50,17 +53,17 @@ const beaconCrags: MapDefinition = {
         { id: 'bc-6',  location: [2, 0],  connectedNodes: ['bc-9', 'bc-10', 'bc-5', 'bc-7'] },
         { id: 'bc-7',  location: [2, 1],  connectedNodes: ['bc-10', 'bc-6'] },
         // ── c3 — ruined chapel · rope bridge · toll gate ────────────────
-        { id: 'bc-8',  location: [3, -1], connectedNodes: ['bc-11', 'bc-9'] },
+        { id: 'bc-8',  location: [3, -1], connectedNodes: ['bc-11', 'bc-14', 'bc-9'] },
         { id: 'bc-9',  location: [3, 0],  connectedNodes: ['bc-11', 'bc-12', 'bc-8', 'bc-10'] },
-        { id: 'bc-10', location: [3, 1],  connectedNodes: ['bc-12', 'bc-13', 'bc-9'] },
+        { id: 'bc-10', location: [3, 1],  connectedNodes: ['bc-12', 'bc-13', 'bc-16', 'bc-9'] },
         // ── c4 — arch bridge · gorge falls · quarry ─────────────────────
-        { id: 'bc-11', location: [4, -1], connectedNodes: ['bc-14', 'bc-12'] },
-        { id: 'bc-12', location: [4, 0],  connectedNodes: ['bc-14', 'bc-15', 'bc-11', 'bc-13'] },
+        { id: 'bc-11', location: [4, -1], connectedNodes: ['bc-15', 'bc-14', 'bc-12'] },
+        { id: 'bc-12', location: [4, 0],  connectedNodes: ['bc-15', 'bc-11', 'bc-13'] },
         { id: 'bc-13', location: [4, 1],  connectedNodes: ['bc-15', 'bc-16', 'bc-12'] },
-        // ── c5 — mountain inn · stone gate · tunnel bridge ──────────────
-        { id: 'bc-14', location: [5, -1], connectedNodes: ['bc-17', 'bc-15'] },
-        { id: 'bc-15', location: [5, 0],  connectedNodes: ['bc-17', 'bc-14', 'bc-16'] },
-        { id: 'bc-16', location: [5, 1],  connectedNodes: ['bc-17', 'bc-15'] },
+        // ── c4 (the mountain inn and tunnel bridge flank it) · c5 — the stone gate ──
+        { id: 'bc-14', location: [4, -2], connectedNodes: ['bc-15', 'bc-11'] },
+        { id: 'bc-15', location: [5, 0],  connectedNodes: ['bc-17'] },
+        { id: 'bc-16', location: [4, 2],  connectedNodes: ['bc-15', 'bc-13'] },
         // ── c6 — the glacier shrine. Terminal column: the door. ────────
         { id: 'bc-17', location: [6, 0],  connectedNodes: [] },
     ],

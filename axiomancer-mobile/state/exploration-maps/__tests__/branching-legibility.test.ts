@@ -127,7 +127,7 @@ describe('exploration map: the sheet can carry the branching graph', () => {
         });
     }
 
-    it('accounts for all 46 ribs: 11 on the Breakwater, 14 on the Charcoal Wood, 10 on the Beacon Crags, 11 on the Lantern Deep', () => {
+    it('accounts for all 45 ribs: 11 on the Breakwater, 13 on the Charcoal Wood, 10 on the Beacon Crags, 11 on the Lantern Deep', () => {
         // A total, not a per-map count: this is the one number that catches a
         // whole map's ribs disappearing in a refactor of the forward-skeleton
         // read, which no per-map "> 0" assertion would notice.
@@ -136,9 +136,10 @@ describe('exploration map: the sheet can carry the branching graph', () => {
             0,
         );
         // The Breakwater's four ring columns carry 3 + 4 + 2 + 2.
-        // The Charcoal Wood's four carry 4 + 3 + 3 + 4.
-        // The Beacon Crags' five three-lane bands carry 2 each.
-        // The Lantern Deep's five bands carry 3 + 3 + 2 + 2 + 1.
-        expect(total).toBe(11 + 14 + 10 + 11);
+        // The Charcoal Wood's four carry 4 + 3 + 3 + 3.
+        // The Beacon Crags' four bands carry 2 + 2 + 2 + 4.
+        // The Lantern Deep's four bands carry 3 + 3 + 2 + 3.
+        // Each map's door fight stands alone in its column and carries none.
+        expect(total).toBe(11 + 13 + 10 + 11);
     });
 });
