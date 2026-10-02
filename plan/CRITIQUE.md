@@ -449,35 +449,24 @@
   so pin it with a presenter test on an inn node.
 - source: critique:drive (unattended)
 
-### [MED] combat — A Plain Word shows its FREE VULNERABLE as "×24" beside its paid "+60%"
-- pass: 58 (commit 36238fd8)
+### [MED] combat — A Plain Word's FREE VULNERABLE chip reads "+24", dropping the unit next to its paid "+60%"
+- pass: 63 (commit aea7593b)
+- history: pass 58 (commit 36238fd8, filed as "×24" vs "+60%"), pass 59
+  (commit 5ebc7c13, presenter fix landed but `compactFree` strips the "%"),
+  pass 60 (commit 2d918845, unchanged), pass 61 (commit 0be3bb1c, unchanged)
 - viewport: both (375×812 and 1280×800)
 - category: comprehension
 - observation: A Plain Word (`grey-word`) is in every starting hand since P1.
-  Both halves apply VULNERABLE, but its hand-card face prints them
-  differently. The FREE side reads "×24" and the paid side reads "+60%". A
-  first-time player reads "×24" as a 24-times multiplier. It is really
-  +24% (intensity 10, scaled by HEART under S3). `compactFree` in
-  `CombatBoard.tsx` turns the presenter's "×{intensity}" into "×24" and has
-  no percent case for VULNERABLE.
+  The presenter emits "+24%" (`percentIntensity` in
+  `combat-encounter.engine.ts`, fixed pass 59), but the board's
+  `compactFree` (`CombatBoard.tsx:1669`) matches `^\+?(\d+)` and returns
+  "+24", dropping the unit — both viewports still read "A PLAIN WORD / +24 /
+  VULNERABLE / +60%", unchanged since pass 59 and reconfirmed through pass 66.
 - evidence: `.critique-artifacts/mobile/04-combat-board.txt` ("A PLAIN WORD /
-  ×24 / VULNERABLE / +60%"); `axiomancer-mobile/components/combat/encounter/CombatBoard.tsx:1678`;
+  +24 / VULNERABLE / +60%"); `axiomancer-mobile/components/combat/encounter/CombatBoard.tsx:1669`;
   `axiomancer-mechanics/src/Cards/library/starters.cards.ts:79-80`.
-- suggested fix: have the presenter give the FREE chip the same unit as the
-  paid chip (for VULNERABLE, "+24%"), and pin it with a presenter test on
-  `grey-word`.
-- update (pass 59, commit 5ebc7c13): half-fixed. The presenter now emits
-  "+24%" (`percentIntensity` in `combat-encounter.engine.ts`), but the
-  board's `compactFree` (`CombatBoard.tsx:1669`) matches `^\+?(\d+)` and
-  returns "+24", dropping the unit. Both viewports now read "A PLAIN WORD /
-  +24 / VULNERABLE / +60%". Remaining fix: keep a trailing "%" in
-  `compactFree` and pin it with a test on "+24%".
-- update (pass 60, commit 2d918845): unchanged. Both viewports still read
-  "A PLAIN WORD / +24 / VULNERABLE / +60%".
-- update (pass 61, commit 0be3bb1c): unchanged. Both viewports still read
-  "A PLAIN WORD / +24 / VULNERABLE / +60%".
-- update (pass 63, commit aea7593b): unchanged. Both viewports still read
-  "A PLAIN WORD / +24 / VULNERABLE / +60%".
+- suggested fix: keep a trailing "%" in `compactFree` and pin it with a
+  presenter test on "+24%".
 - source: critique:drive (unattended)
 
 ### [MED] combat — the only SUMMON carrier cannot reach wave 2, so half the spawn rule is dead on the roster
@@ -2432,166 +2421,3 @@
   Phase 33's SWAY-cleanse enemy work.
 - source: playtester (owner-directed break-test session)
 
-### [x] [HIGH] tuning harness — policy-pick draft scorer starves new/sandbox cards (RESOLVED 2026-08-02, commit fbace426, issue #163)
-- pass: session-closeout 2026-07-12 (commit ffadca96, branch claude/axiomancer-dawncaster-comparison-cz6008)
-- viewport: n/a
-- category: tuning-harness
-- issue: #163
-- observation: the policy-pick draft scorer never surfaces new or
-  sandbox cards — five sets (doom-species, chooseX-vein, roles-charm,
-  roles-harvest, roles-forge's ingot) had ZERO drafts at one or more
-  seeds, and three independent A/Bs (conjure-exercise, roles-bulwark,
-  roles-harvest) show the IDENTICAL +10.8pp seed-2 mid-stage delta —
-  a pool-shuffle artifact, not a card signal. Matrix-level stage
-  deltas in sandbox A/Bs are not attributable to the cards under test.
-- evidence: `archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-honest-rebaseline-and-evidence.md`
-  §2 cross-cutting findings 1-2; direct-draft probe
-  (`probe-ingot-draftability.ts`) shows ingot-of-ruin IS structurally
-  draftable — the scorer and the lottery disagree.
-- suggested fix: one scorer fix (draft-weight/offer-rate handling of
-  pool newcomers) unblocks SIX pending gate verdicts; do it before the
-  next sandbox A/B cycle so evidence stops being lottery-shaped.
-- source: session closeout (evidence pass, 2026-07-11)
-- resolution: reproduced live on `main` (`694edb59`) before fixing —
-  `ingot-of-ruin` 0/24 draws across the 3 canonical late-stage seeds;
-  `conjure-exercise`/`roles-bulwark` produced byte-identical decks
-  across all 40 mid-stage seed=2 cells. `draftCombatDeck`
-  (`combat.deck-draft.ts`) now extends the existing defend/status
-  floor pattern with a per-id guarantee: every distinct `extraCards`
-  newcomer id is forced into the draft when the stage/tier pool
-  allows it (per-id, not per-class, so a set with multiple newcomers
-  can't have one hide another). `FOCUS_WEIGHT`/`OFF_FOCUS_WEIGHT` and
-  library-card odds untouched; no-ops whenever `extraCards` is empty,
-  so real starter presets are unaffected. Regression coverage in
-  `combat-deck-draft.engine.test.ts`. Post-fix: `ingot-of-ruin` hits
-  48/48 eligible cells; all named sets now surface in 71-100% of
-  stage-eligible cells. Mechanics `npm run verify`: 190 files / 4085
-  tests green.
-
-### [x] [MED] Engine doc-drift is chronic — RESOLVED 2026-08-02 (commit 6690c5d0, issue #164)
-- New engine surfaces (status-depth constants, new spec exports)
-  chronically lag `spec.md` / `docs/combat.md`. Keep a doc-sync
-  check in the loop rather than trusting the docs. (Build-plan
-  Phase 12 addresses the current backlog; this is the recurring
-  guard.)
-- resolution: this pass's manifestation — `axiomancer-mobile/docs/
-  combat.md` still described the fully-retired legacy combat screen
-  (deleted `app/(tabs)/combat.tsx`, the removed `resolveCombatRound`
-  four-phase loop, a deleted `SkillConfirmOverlay` component, three
-  dead e2e test paths) — rewritten to describe the current
-  `<CombatEncounterPanel>`/`<CombatBoard>` architecture, every link
-  verified to resolve. **Standing guard, not closed for good:** this
-  is a recurring pattern seeded from archived critique history: a
-  future pass finding NEW doc/engine drift should re-file a fresh row
-  rather than treat this resolution as blanket coverage.
-
-### [x] [MED] Wrong-engine mental model in docs — RESOLVED 2026-08-02 (commit 6690c5d0, issue #164)
-- Any surviving copy in `docs/combat.md` that frames
-  Hazard-Pattern Combat as "additive/secondary" or teaches
-  `resolveCombatRound`-first is the wrong mental model for mobile
-  integrators. Hazard-Pattern Combat is primary.
-- resolution: `axiomancer-mobile/docs/combat.md` opens with an
-  explicit "Hazard-Pattern Combat is the ONLY combat engine" doctrine
-  banner and no longer references `resolveCombatRound` as current;
-  `specs/04-combat-screen-wiring.md` (the doc it was pinned to) is now
-  marked superseded. Same standing-guard caveat as the row above —
-  re-file fresh if a new instance surfaces.
-
-### [x] [LOW] mechanics — THEME_KEYWORDS.harvest still advertises TICK (owner-ratified dead 2026-07-10) — RESOLVED 2026-08-01 (issue #160)
-- pass: swap-pool fan-out residue (PR #130, 2026-07-18)
-- viewport: n/a
-- auth_state: n/a
-- category: content
-- issue: #160
-- observation: `card-themes.ts` lists TICK in harvest's keyword family, but the atlas records TICK's owner-ratified death and no live card uses it — the catalog's family search advertises an empty set (the exact "family lie" class KW-2/KW-6 fixed in phase 29).
-- evidence: harvest swap-pool designer note; docs/keyword-atlas.md TICK row.
-- resolution: dropped TICK from `THEME_KEYWORDS.affliction` and `THEME_KEYWORDS.harvest` (both families listed it) in `axiomancer-mechanics/src/Cards/card-themes.ts`. Confirmed no live card uses TICK (`roles-themes.engine.test.ts` "no TICK vocabulary anywhere in the sets" witness) and no test pins family length/contents beyond the KW-6 glossary-resolution check. Mechanics + mobile verify green.
-- source: /deck-tuning fan-out session
-
-### [x] [MED] control-lock sim policy is threat-blind — WS8 surface variety unexploited — RESOLVED 2026-08-01 (commit d0d83e06, issue #159)
-- pass: session-closeout 2026-07-12 (commit ffadca96)
-- viewport: n/a
-- category: tuning-harness
-- issue: #159
-- observation: `rankCard` in the sim policies never reads
-  `threatPhases`, so no sim policy can exploit WS8's control-surface
-  variety (the data exists; no decision layer uses it). Pinned as a
-  known gap via `it.fails` in
-  `axiomancer-mechanics/src/Combat/e2e/control-surfaces.sim.test.ts`.
-- evidence: the `it.fails` pin; WS8 payload data in
-  `combat.threat-sequences.ts`.
-- suggested fix: teach the control policy to read the CURRENT threat
-  phase (rungs, intent type) when ranking STAGGER/BACKFIRE plays; flip
-  the `it.fails` pin to a passing assertion in the same change.
-- source: session closeout
-- resolution: added `controlSurfaceBonus` to the `control-lock` policy's
-  `rankCard` (`combat.sim-policies.ts`) — a threat carrying a rider ranks
-  BACKFIRE punish highest (no roster candidate erases a rider outright);
-  a clean or compounding threat ranks STAGGER rung-denial highest, with
-  `lock_stance` as a certainty tiebreak. Flipped the WS8.4 `it.fails` pin
-  to a passing `it` per its own documented instructions. Verified: all 4
-  fixture threats now produce >1 distinct preferred control card.
-
-### [x] [MED] pre-fight enemy preview disagrees with live combat VITAE — RESOLVED 2026-08-01 (commit 15d45699, issue #162)
-- pass: 12 (commit 3dc27d24)
-- viewport: mobile
-- category: inconsistency
-- issue: #162
-- observation: the pre-fight encounter card for "Little Belle"
-  previews the enemy as "level 2 · 50 hp.", but immediately on
-  entering combat the same enemy's VITAE bar reads 100/100 — double
-  the previewed value.
-- evidence: encounter card text "level 2 · 50 hp." / "Lv 2 foe · 50 HP
-  · advantage not yet scouted"; combat screen progressbar "Enemy VITAE
-  100 of 100" for the same enemy in the same encounter.
-- suggested fix: source the pre-fight preview and the live combat
-  VITAE bar from the same computed enemy stat.
-- source: playtester (critique pass 12)
-- resolution: root cause was systemic, not Little-Belle-specific —
-  `beginHazardEncounter` (`axiomancer-mobile/state/actions.ts`) applies
-  the `ENCOUNTER_ENEMY_HP_MULTIPLIER` (2x) testing knob to every live
-  foe's HP, but `composeCombatPrelude`'s preview text
-  (`axiomancer-mobile/state/presenters/event.engine.ts`) read the
-  enemy's unscaled `health`. Preview now derives its displayed health
-  from the same `withScaledEnemyHp` helper used at the live chokepoint.
-  Also widened `event.engine.test.ts`'s roman-numeral subtitle regex to
-  the full lowercase-roman alphabet — the doubled value exposed a
-  stale test regex that only ever accepted i/v/x. Full three-workspace
-  `npm run verify` green.
-
-### [x] [MED] exploration hub — player subtitle reads "LEVEL · LVL 1 PILGRIM", doubling the level label — RESOLVED 2026-07-31 (commit 16c89f25, issue #157)
-- pass: 14 (commit 9a445281)
-- viewport: mobile + desktop (375×812, 1280×800)
-- auth_state: anonymous
-- category: visual
-- observation: the exploration-hub `StatusCard` (name + level badge,
-  visible any time the player is on the map) renders a subtitle line
-  "LEVEL · LVL 1 PILGRIM" — the static section label "LEVEL" and the
-  value string's own "LVL {n}" both say the same thing back to back,
-  reading as a template/copy-paste leftover rather than intentional
-  flavor. Same shape as the earlier header MORALE "v of x" placeholder
-  bug (RESOLVED 2026-07-18, different component) — a label colliding
-  with its own value.
-- evidence: `StatusCard.tsx:61` — `` LEVEL · LVL {level} PILGRIM ``
-  inside a `SectionLabel`; confirmed live in the exploration-hub
-  cold-drive capture (mobile + desktop): "LEVEL · LVL 1 PILGRIM".
-- resolution: dropped the redundant leading "LEVEL · " section label —
-  subtitle now reads "LVL {n} · PILGRIM" once. Updated the pinned test
-  string in `StatusCard.test.tsx` to match + added a regression guard.
-
-### [x] [LOW] [green-lit 2026-07-18] session doc-residue: three AGENTS/CLAUDE additions approved — RESOLVED 2026-07-30 (commit 7c20b4fd, issue #156)
-- pass: session 2026-07-17 (measurement-freshness work)
-- category: docs
-- resolution: (2), promoting the PR auto-merge convention to root
-  AGENTS.md, was already done in an earlier tick (root AGENTS.md
-  "Pull requests" section; axiomancer-mobile/CLAUDE.md now points at
-  it). This tick landed the two still-missing pieces as one docs
-  commit: (1) a worktree-bootstrap note in root AGENTS.md's Verify
-  section (fresh `.claude/worktrees/*` checkouts lack per-workspace
-  node_modules, so `tsc` can resolve the hoisted root TypeScript and
-  fail with e.g. TS5095 — `npm install` at the worktree root first
-  avoids the detour) and (3) a wording-pin discipline note in
-  axiomancer-mechanics/AGENTS.md's Caveats section (grace-card-wording
-  + the paid-summary honesty guard pin authored prose; reword a card
-  and its pin in the same commit). Root `npm run verify` green across
-  all three workspaces.
