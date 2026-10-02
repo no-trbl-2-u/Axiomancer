@@ -70,6 +70,10 @@ against the final tree.
 
 Tick 1 is `axiomancer-mechanics`, tick 2 is `axiomancer-mobile`.
 
+> Split 2026-10-02 (brief `plan/phases/phase_R10c_mechanics_docs_truth.md`):
+> **R10c** ships items 1 and 3 for mechanics, **R10c2** items 2 and 4 for
+> mechanics, **R10c3** all four for mobile. RC requires all three.
+
 1. **Bannered docs:** every doc carrying a "Superseded (2026-09-23)" banner
    (`docs/combat.md`, `effects.md`, `effects/**`, `enemy.md`, `api.md`,
    `README.md`, `quickstart-world.md`, `oaths.md`; mobile
