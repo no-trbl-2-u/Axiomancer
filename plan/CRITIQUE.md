@@ -334,6 +334,28 @@
 
 ## Pending
 
+### [LOW] RC walk 2026-10-02 — copy, label and console findings (one row per item, all presentation)
+- pass: RC checkpoint walk, four `playtester` legs (attended, T present), commits a493eaf7 → 169b6dbc
+- viewport: playwright default (desktop)
+- category: comprehension / polish
+- observation (each its own `/iterate` fix; none blocks RC):
+  1. The map footer says "the paths close as you go deeper", but frontier roaming keeps every node next to a resolved node open (`world.reducer.ts` `frontierNodes`). The copy should say what the map does. (`state/presenters/exploration.engine.ts:428`)
+  2. Exit doors (bw-18, cw-20, bc-17, ld-18) are labelled "QUEST" with a scroll icon in the node panel and the accessibility label ("open, quest").
+  3. bw-16 says "BLACKSMITH" in the node panel; the screen it opens is "THE ANVIL".
+  4. The good die face is "SPECIAL face" in the combat primer and "BOON" at the Anvil; the Anvil's TEMPER refusal says a die at its cap "exceeds its special-face cap".
+  5. A Plain Word's VULNERABLE reads "+10" / "+25%" on the hand face, "vulnerable +10% · 1 turn" / "VULNERABLE ×25 · 2 turns" in detail and spoils, "+25% · 2 turns" on DECK. A Plain Blow reads "Deal 6" in hand but "Deal 5" on SPOILS (the spoils preview appears unscaled).
+  6. The fight summary's rows read "92 dmg · 12ph" ("ph" unexplained), print "TOTAL DOT DAMAGE: 0" with no DoT in play, and omit A Plain Ward.
+  7. The Sea Cave hazard (bw-12) opens as "CRACKED CLIFF PATH".
+  8. The first-fight coach card ("FIRST FIGHT · 1/4") draws over the card-detail modal and hides the card's name.
+  9. The Pilgrim's Blessing hazard reward preview: the "RE-CAST +DIE MANA" line overlaps a square glyph.
+  10. Cache (cw-13) and Anvil (cw-18) screens in the Charcoal Wood draw over a city skyline backdrop.
+  11. The SELF header says "LVL 4"; the Ascend strip and screen say "level iv".
+  12. Console: React 19 "Accessing element.ref was removed"; nested `<button>` hydration errors from the staged combat card (`combat-staged-*` contains `combat-staged-die-face`) and the Satchel potion card (`item-*` contains `use-*`); `translateX`/`translateY` passed to a DOM element on the hazard route-select screen.
+  13. Dev only: a hot reload white-screens the app (`useGameState/useGameActions must be used inside <GameStoreProvider>`, thrown from `SaveSlotsProvider`); a reload recovers.
+- not filed (by design or owned elsewhere): the Doorwarden's placeholder pictogram (art, B2/B8); no end-of-act screen after the deep stair (`MapEvents/content.ts`: no end-of-run state); the grey-deck Momentum chip (accepted until BT).
+- evidence: the four leg reports in the RC session; `plan/revamp/checkpoint.md` → "The walk, 2026-10-02".
+- source: playtester (attended)
+
 ### [LOW] village / rest — the Minor Healing Potion restores 10 VITAE against a 160-170 pool, a quarter of the free rest
 - pass: 65 (commit a6ee8167)
 - viewport: both (375x812 and 1280x800)

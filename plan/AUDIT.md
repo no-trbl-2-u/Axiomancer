@@ -93,7 +93,7 @@
   with a test that the default loadout resolves through `getCardById`; then
   drop the caveat from `docs/cli.md`.
 
-### [contract] Pre-purge saves keep purged card ids; combat throws on them (B4 F2, 2026-10-01)
+### [contract] Pre-purge saves keep purged card ids; combat throws on them (B4 F2, 2026-10-01) — RESOLVED 2026-10-02 (b09e1de0, RC session: `dropUnknownCardIds` runs on every load, mobile and CLI, with tests)
 - category: contract
 - impact: 6
 - ease: 6
