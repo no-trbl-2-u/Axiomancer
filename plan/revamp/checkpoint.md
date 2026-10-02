@@ -86,6 +86,11 @@ until T opens the session.
    - no console errors.
 4. **Findings:** anything small is fixed in the session; anything larger
    is filed and blocks the tag until it ships.
+5. **Accepted for RC (T, 2026-10-02):** the combat "NO MOMENTUM" chip has
+   no live carrier while the deck is grey (every grey card is colour ANY).
+   Momentum is a locked mechanic; the chip stays and comes alive with the
+   trial set's coloured cards (BT). The walk does not fail item "no glyph
+   without a live carrier" on it.
 
 ### Cut
 
