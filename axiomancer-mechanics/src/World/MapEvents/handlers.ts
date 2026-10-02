@@ -17,6 +17,7 @@ import type { GameState } from '../../Game/types';
 import type { Character } from '../../Character/types';
 import type { Item } from '../../Items/types';
 import { deepClone } from '../../Utils';
+import { addItemStacking } from '../../Items/item.reducer';
 import { applyDamage } from '../../Combat/health';
 import { applyEffect } from '../../Effects';
 import { lookupEffect } from '../../Effects/effects.library';
@@ -99,7 +100,7 @@ export function resolveGathering(
     const items = payload.items.map(deepClone) as Item[];
     const player: Character = {
         ...state.player,
-        inventory: [...state.player.inventory, ...items],
+        inventory: items.reduce(addItemStacking, state.player.inventory),
     };
     return {
         state: withPlayer(state, player),
@@ -210,7 +211,7 @@ export function resolveLootCache(
     const currency = payload.currency ?? 0;
     const player: Character = {
         ...state.player,
-        inventory: [...state.player.inventory, ...items],
+        inventory: items.reduce(addItemStacking, state.player.inventory),
         currency: state.player.currency + currency,
     };
     return {

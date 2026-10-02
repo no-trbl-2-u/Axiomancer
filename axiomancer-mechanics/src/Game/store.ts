@@ -50,7 +50,7 @@ import { getRng } from '../Utils/rng';
 import { getLogger, isLoggingEnabled } from '../Log';
 import { getAvailableCards } from '../Cards';
 import {
-    addItem as addItemReducer,
+    addItemStacking as addItemReducer,
     removeItem as removeItemReducer,
     stackItem as stackItemReducer,
 } from '../Items/item.reducer';

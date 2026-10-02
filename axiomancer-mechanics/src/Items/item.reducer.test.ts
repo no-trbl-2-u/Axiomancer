@@ -37,6 +37,22 @@ describe('useConsumable', () => {
     });
 });
 
+describe('duplicate rows of one consumable (RC walk, leg 2)', () => {
+    // Saves written before the map-event grants stacked hold the same potion
+    // as two rows of quantity 1. Drinking one must leave the other.
+    const twoRows = (): Item[] => [{ ...potion, quantity: 1 }, { ...potion, quantity: 1 }];
+
+    it('removeItem takes only the first matching row', () => {
+        expect(removeItem(twoRows(), 'hp1')).toHaveLength(1);
+    });
+
+    it('useConsumable spends one potion, not every row', () => {
+        const after = useConsumable(twoRows(), 'hp1');
+        expect(after).toHaveLength(1);
+        expect((after[0] as Consumable).quantity).toBe(1);
+    });
+});
+
 describe('stackItem', () => {
     it('increases quantity', () => {
         const inv = addItem(empty(), potion);

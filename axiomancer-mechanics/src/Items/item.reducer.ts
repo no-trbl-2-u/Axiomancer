@@ -14,9 +14,14 @@ export function addItem(inventory: Item[], item: Item): Item[] {
     return [...inventory, item];
 }
 
-/** Removes the first item with the matching ID from the inventory. */
+/**
+ * Removes the first item with the matching ID from the inventory. Other rows
+ * that share the id stay: a duplicate row is its own item.
+ */
 export function removeItem(inventory: Item[], itemId: string): Item[] {
-    return inventory.filter(item => item.id !== itemId);
+    const index = inventory.findIndex(item => item.id === itemId);
+    if (index === -1) return inventory;
+    return [...inventory.slice(0, index), ...inventory.slice(index + 1)];
 }
 
 /**
@@ -31,8 +36,8 @@ export function useConsumable(inventory: Item[], itemId: string): Item[] {
         return removeItem(inventory, itemId);
     }
     return inventory.map(i =>
-        i.id === itemId && isConsumable(i)
-            ? { ...i, quantity: i.quantity - 1 }
+        i === item
+            ? { ...item, quantity: item.quantity - 1 }
             : i,
     );
 }
