@@ -1,8 +1,9 @@
 /**
  * IntentIcon — wall-math readout.
  *
- * `intent.damage` is the raw face value; `intent.wallMath` is the live
- * projection netted against guard/barrier/denial. This pins the DENIED /
+ * `intent.damage` is the raw face value; the pill prints
+ * `intent.wallMath.projectedDamage` (the scaled hit), and the → badge the live
+ * net against guard/barrier/denial. This pins the DENIED /
  * net-damage badges and the a11y label stating the REAL outcome, not the raw one.
  */
 
@@ -34,6 +35,21 @@ describe('IntentIcon — wall-math readout', () => {
         const { tree } = withAllProviders(<IntentIcon intent={intent} />);
         render(tree);
         expect(screen.getByTestId('combat-intent-wallmath').props.children).toEqual(['→', 4]);
+    });
+
+    it('prints the scaled hit on the pill, not the authored face value', () => {
+        // Face 13, scaled to 26 by the threat scale and escalation; no guard.
+        const intent: CombatIntentVM = {
+            ...baseIntent,
+            damage: 13,
+            wallMath: { ...baseIntent.wallMath, projectedDamage: 26, netDamage: 26 },
+        };
+        const { tree } = withAllProviders(<IntentIcon intent={intent} />);
+        render(tree);
+        expect(screen.getByText('−26')).toBeTruthy();
+        expect(screen.queryByText('−13')).toBeNull();
+        expect(screen.queryByTestId('combat-intent-wallmath')).toBeNull();
+        expect(screen.getByTestId('combat-intent').props.accessibilityLabel).toMatch(/Deals 26 damage\./);
     });
 
     it('shows DENIED and states the real outcome in a11y when the turn will be denied', () => {

@@ -19,12 +19,12 @@ describe('AscendStrip: render contract', () => {
         expect(tree.queryByTestId('ascend-strip')).not.toBeNull();
     });
 
-    it('renders the ASCEND title + subline with lowercase-roman target level', () => {
+    it('renders the ASCEND title + subline with lowercase-roman level already reached', () => {
         const tree = render(
             <AscendStrip pendingPoints={3} level={7} onOpen={() => {}} />,
         );
         expect(tree.queryByText('✠ ASCEND')).not.toBeNull();
-        expect(tree.queryByText(/3 points unspent · step into level viii/)).not.toBeNull();
+        expect(tree.queryByText(/3 points unspent · risen to level vii/)).not.toBeNull();
     });
 
     it('pluralizes "point" / "points" correctly', () => {
@@ -79,7 +79,7 @@ describe('AscendStrip: tap wiring', () => {
         );
         const strip = tree.getByTestId('ascend-strip');
         expect(strip.props.accessibilityLabel).toBe(
-            'Ascend — 3 points unspent, step into level 8',
+            'Ascend — 3 points unspent, risen to level 7',
         );
     });
 });

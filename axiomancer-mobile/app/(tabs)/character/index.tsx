@@ -170,8 +170,8 @@ export default function CharacterScreen() {
       {levelUpOpen && (
         <LevelUpModal
           characterName={vm.displayName}
-          fromLevel={vm.level}
-          toLevel={vm.level + 1}
+          fromLevel={Math.max(1, vm.level - 1)}
+          toLevel={vm.level}
           totalPoints={vm.pendingPoints}
           current={(() => {
             const heart = vm.base.find((r) => r.stanceKey === 'heart')?.value ?? 0;

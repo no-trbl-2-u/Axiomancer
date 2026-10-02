@@ -22,17 +22,19 @@ function branchA11y(branch: NonNullable<CombatIntentVM['branch']>): string {
 
 export function IntentIcon({ intent, onPress }: { intent: CombatIntentVM; onPress?: () => void }) {
     const styles = useStyles();
-    // Wall-math: the raw `damage` stake above is face value only;
-    // `wallMath` is what actually lands right now, netted against live
-    // guard/barrier/modifiers. State the REAL outcome in a11y, not the raw one.
-    const { willDeny, netDamage } = intent.wallMath;
+    // Wall-math: `intent.damage` is the authored face value only. The pill
+    // prints `projectedDamage`, the hit after the engine's threat scale and
+    // escalation, and the → badge prints `netDamage`, what lands through the
+    // live guard/barrier. State the REAL outcome in a11y, not the raw one.
+    const { willDeny, netDamage, projectedDamage } = intent.wallMath;
+    const hit = willDeny ? intent.damage : projectedDamage;
     const wallMathLabel = willDeny
         ? ' This turn will be DENIED — no damage lands.'
-        : intent.damage > 0
+        : intent.damage > 0 && netDamage !== hit
             ? ` ${netDamage} will actually land through your current guard.`
             : '';
     const a11y = `Enemy intent: ${intent.label}. ${intent.description}`
-        + (intent.damage > 0 ? ` Deals ${intent.damage} damage.` : '')
+        + (intent.damage > 0 ? ` Deals ${hit} damage.` : '')
         + (intent.debuffs ? ' Applies a debuff.' : '')
         + wallMathLabel
         + (intent.branch ? branchA11y(intent.branch) : '')
@@ -56,7 +58,7 @@ export function IntentIcon({ intent, onPress }: { intent: CombatIntentVM; onPres
                       * the number is damage it will deal to the player. ♥ means
                       * only the player's VITAE; a minus means something is
                       * coming off it. */}
-                    {intent.damage > 0 && <Text style={[styles.pillText, { color: intent.color }]} allowFontScaling={false}>−{intent.damage}</Text>}
+                    {intent.damage > 0 && <Text style={[styles.pillText, { color: intent.color }]} allowFontScaling={false}>−{hit}</Text>}
                     {intent.debuffs && <Text style={styles.debuffMark} allowFontScaling={false}>☠</Text>}
                     {/* The fork glyph marks a committed branch phase */}
                     {intent.branch && <Text style={[styles.pillText, { color: intent.color }]} allowFontScaling={false}>⑂</Text>}
@@ -64,7 +66,7 @@ export function IntentIcon({ intent, onPress }: { intent: CombatIntentVM; onPres
             )}
             {willDeny ? (
                 <Text style={styles.wallMathDenied} testID="combat-intent-wallmath" allowFontScaling={false}>DENIED</Text>
-            ) : intent.damage > 0 && netDamage !== intent.damage ? (
+            ) : intent.damage > 0 && netDamage !== hit ? (
                 <Text style={styles.wallMathNet} testID="combat-intent-wallmath" allowFontScaling={false}>→{netDamage}</Text>
             ) : null}
         </View>

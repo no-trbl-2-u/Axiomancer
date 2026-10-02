@@ -26,7 +26,11 @@ import { toRomanLower } from '@/state/presenters/roman';
 export interface AscendStripProps {
     /** Unspent allocation points. Must be > 0; caller gates. */
     pendingPoints: number;
-    /** Current level (the strip renders "step into level <N+1>"). */
+    /**
+     * Current level. The engine raises the level when XP crosses the
+     * threshold and banks the points, so the strip names the level already
+     * reached ("risen to level <N>").
+     */
     level: number;
     /** Tap handler — opens the LevelUpModal. */
     onOpen: () => void;
@@ -35,14 +39,14 @@ export interface AscendStripProps {
 export function AscendStrip({ pendingPoints, level, onOpen }: AscendStripProps) {
     const styles = useStyles();
     const AXM = usePalette();
-    // Lowercase roman for the target level only, per the bundle's
+    // Lowercase roman for the level only, per the bundle's
     // numeral rule. Points count stays in arabic (stat-deltas).
-    const targetLevel = toRomanLower(level + 1);
+    const reachedLevel = toRomanLower(level);
     const pointsWord = pendingPoints === 1 ? 'point' : 'points';
     return (
         <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`Ascend — ${pendingPoints} ${pointsWord} unspent, step into level ${level + 1}`}
+            accessibilityLabel={`Ascend — ${pendingPoints} ${pointsWord} unspent, risen to level ${level}`}
             testID="ascend-strip"
             onPress={onOpen}
             style={({ pressed }) => [styles.strip, pressed && styles.stripPressed]}
@@ -60,7 +64,7 @@ export function AscendStrip({ pendingPoints, level, onOpen }: AscendStripProps) 
                 <View style={styles.centerCol}>
                     <Text style={styles.ascendTitle}>✠ ASCEND</Text>
                     <Text style={styles.ascendSubline} numberOfLines={1}>
-                        {pendingPoints} {pointsWord} unspent · step into level {targetLevel}
+                        {pendingPoints} {pointsWord} unspent · risen to level {reachedLevel}
                     </Text>
                     {pendingPoints >= 2 && (
                         <Text style={styles.ignoredPings}>
