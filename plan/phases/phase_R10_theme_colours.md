@@ -23,6 +23,18 @@
   `IntentIcon.test.tsx`, `CombatDie.*` and others). `CombatDie`'s `mixHex`
   parses only 6-digit `#rrggbb`.
 
+## As shipped (349c2ea7)
+
+- `HUE` lives in an import-free `theme/hue.ts`, re-exported from
+  `theme/axm.ts`. Inline in `axm.ts` it broke `npm run catalog:export`: the
+  mechanics exporter imports `statusGlyphs.ts` by relative path, where the
+  `@/` alias and the React theme runtime do not load.
+- `#000`/`#fff` folded into `#000000`/`#ffffff` (same colour).
+- `scripts/devlog-tokens.mjs` reads `STANCE_COLORS` through `HUE`.
+- `verify:visual`: the committed baseline is stale on every route by the
+  same amounts before and after this phase. The pre/post screenshots match
+  apart from one pixel of render noise. The baseline was left alone.
+
 ## Outcome
 
 `app/`, `components/` and `state/presenters/` contain no quoted hex colour
