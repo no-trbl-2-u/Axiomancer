@@ -97,8 +97,9 @@ starts it.
 | R9 | Progression retune: XP curve for Act 1 on the 3 survivors | loop | R3, R7c2 | progression.md |
 | R9a | Save checkpoint in fights: a reload mid-encounter re-offers the fight | loop | R7c2, R8 | checkpoint.md |
 | R10 | Theme colours: move surviving hard-coded hex colours into named `theme/axm.ts` tokens (no visual change) | loop | R8 | mobile.md |
-| R10b | Doctrine rewrite: spec.md, bearings, a one-page game model; specs 33/34 retired; plan queues swept; `plan/archive/` tagged and removed from the tree (D66, D67) | loop | R10 | doctrine.md |
-| R10c | Comments and docs truth pass (mechanics, then mobile): bannered docs rewritten, history stripped from comments, every rule of play in a live doc, a comment guard (D67) | loop | R10b | doctrine.md |
+| R10b | Doctrine rewrite 1/2: spec.md, bearings, a one-page game model; specs 33/34 retired (D67) | loop | R10 | doctrine.md |
+| R10b2 | Doctrine rewrite 2/2 (split from R10b, 2026-10-02): plan queues swept; `plan/archive/` tagged and removed; `check-lexicon` retired-term guard (D66, D67) | loop | R10b | doctrine.md |
+| R10c | Comments and docs truth pass (mechanics, then mobile): bannered docs rewritten, history stripped from comments, every rule of play in a live doc, a comment guard (D67) | loop | R10b2 | doctrine.md |
 | RC | Act 1 checkpoint release: full gate, a playtester walk of all four regions, then T tags `v0.1.0-checkpoint` | attended | R1–R10c, R7a–e (with R7c2), R9a, B4 | checkpoint.md |
 | R11 | Loop content phases: revisit the loop so content creation comes back as planned phases; ends revamp mode | attended | RC | loop.md |
 | R12 | New combat-playtest: write a fresh `/combat-playtest` command for the rebuilt game (the old one was archived in R0) | attended | RC, R11 | loop.md |

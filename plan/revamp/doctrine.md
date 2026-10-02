@@ -35,6 +35,9 @@ against the final tree.
 
 ## R10b — Doctrine rewrite (loop)
 
+> Split 2026-10-02 (brief `plan/phases/phase_R10b_doctrine_rewrite.md`):
+> **R10b** ships items 1-4, **R10b2** items 5-7. R10c requires R10b2.
+
 1. **The game model.** Write `docs/game-model.md`: one page, the
    post-revamp game as it is (README §2's core table, rewritten as current
    fact: the grey cards, the Color Law, colour match, the tray, FREE/PAID,
