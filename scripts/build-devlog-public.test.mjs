@@ -19,7 +19,7 @@ import assert from 'node:assert/strict'
 import { execFileSync, spawnSync } from 'node:child_process'
 import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { dirname, join, relative } from 'node:path'
+import { dirname, join, relative, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { DEFAULT_OUT, build, cardArtHtml, readEntries, titleAndLede } from './build-devlog-public.mjs'
@@ -36,7 +36,8 @@ const walk = (dir) => {
     for (const name of readdirSync(dir)) {
         const path = join(dir, name)
         if (statSync(path).isDirectory()) walk(path)
-        else if (name.endsWith('.html')) pages.push(relative(OUT, path))
+        // Forward slashes on every platform: the cases below match `log/<date>/`.
+        else if (name.endsWith('.html')) pages.push(relative(OUT, path).split(sep).join('/'))
     }
 }
 walk(OUT)
