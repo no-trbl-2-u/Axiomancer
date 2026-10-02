@@ -119,6 +119,7 @@ import './MapEvents/content';
 
 export {
     resolveMapEvent,
+    settleArrival,
     getNodeEventPool,
     getNodePrimaryEventKind,
 } from './MapEvents/resolve-map-event';

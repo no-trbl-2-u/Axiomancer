@@ -59,6 +59,11 @@ import {
  * Curated set of action types that trigger an autosave through the
  * provided `PersistenceAdapter` (Phase 51, Spec 09 Q4 path B).
  *
+ * This is the ENGINE-ONLY save policy: the CLI and the hermetic tests run on
+ * it. The mobile app owns its own save timing (ruled 2026-09-23; phase R9a):
+ * it wraps the adapter so this allowlist never writes, and saves at
+ * hand-placed checkpoints instead (`axiomancer-mobile/state/store.ts`).
+ *
  * UI-tier actions (`USE_ITEM`, `EQUIP_ITEM`, `ALLOCATE_STAT_POINT`,
  * `LEARN_CARD`, `START_COMBAT`, `PROCESS_NODE`, `LOAD_GAME`) are intentionally excluded —
  * they will save on the next durable transition or via an explicit

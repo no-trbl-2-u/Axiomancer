@@ -23,7 +23,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { moveToNode, placeOnNode, teleportToNode, unlockAdjacent } from '../world.reducer';
 import { createMapState, getMapDefinition } from '../map.registry';
 import { createStartingWorld } from '../index';
-import { resolveMapEvent } from '../MapEvents/resolve-map-event';
+import { resolveMapEvent, settleArrival } from '../MapEvents/resolve-map-event';
 import { createNewGameState } from '../../Game/game.reducer';
 import { mockSequentialRng } from '../../test-utils/rng';
 import type { GameState } from '../../Game/types';
@@ -115,12 +115,24 @@ describe('the placement verbs owe nothing — being placed is not arriving', () 
 
 describe('resolving the arrival is what answers it', () => {
     it('clears the debt for the node it resolved', () => {
-        const before = gameOn(walk(freshWorld(), 'bw-2', 'bw-7', 'bw-11', 'bw-14'));
-        expect(before.world.currentMap.pendingArrival).toBe('bw-14');
+        // bw-11 is the kelp wreck, a gathering node.
+        const before = gameOn(walk(freshWorld(), 'bw-2', 'bw-7', 'bw-11'));
+        expect(before.world.currentMap.pendingArrival).toBe('bw-11');
 
-        const { state } = resolveMapEvent(before);
+        const { state, event } = resolveMapEvent(before);
 
+        expect(event.kind).toBe('gathering');
         expect(state.world.currentMap.pendingArrival ?? null).toBeNull();
+    });
+
+    it('a fight is the exception: the debt stands until the fight settles (R9a)', () => {
+        const before = gameOn(walk(freshWorld(), 'bw-2', 'bw-7', 'bw-11', 'bw-14'));
+
+        const { state, event } = resolveMapEvent(before);
+
+        expect(event.kind).toBe('encounter');
+        expect(state.world.currentMap.pendingArrival).toBe('bw-14');
+        expect(settleArrival(state).world.currentMap.pendingArrival ?? null).toBeNull();
     });
 
     it('clears it on the map being LEFT when the arrival is a travel door', () => {

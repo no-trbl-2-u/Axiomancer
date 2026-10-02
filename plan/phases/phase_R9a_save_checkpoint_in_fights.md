@@ -111,10 +111,13 @@ None. No system loses its carrier.
   place every engine fight ends. Only the two flee paths, which never stage a
   fight, and the CLI, which fights outside the store, call `settleArrival`
   directly.
-- **Edges stay closed on the map while the fight is owed.** That is what makes
-  a reload honest: the player cannot walk away from an unsettled fight by
-  reloading. During a live session the modal covers the map, so nothing
-  changes there.
+- **"Edges closed" means the move gate.** The node's onward neighbours stay
+  out of `availableNodes`, which mobile's `moveToAction` checks, until the
+  fight settles. The D1 frontier (`legalMovesFrom`, which draws the map) is
+  left alone: it never depends on where the player stands, and the re-offered
+  fight's modal holds the screen until the fight settles anyway (fight, or a
+  flee that settles). Making the frontier depend on an owed arrival would
+  rework D1 for no player-visible gain.
 
 ## Tests matrix
 
@@ -171,3 +174,6 @@ Decisions:
   scope).
 - Whether `selectResumableFight` (in-memory only) still earns its keep once
   the re-offer covers reloads: R10c's truth pass or a later `/iterate`.
+- The engine's `moveToNode` follows the D1 frontier, so the CLI could in
+  principle walk off an owed fight. It never does, because it fights straight
+  after the resolve. That stays a note unless a client needs the guard.

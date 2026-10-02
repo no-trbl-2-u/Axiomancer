@@ -24,7 +24,7 @@ import {
 } from '@/state/presenters/event.engine';
 import { selectHasAnyActiveSession, selectResumableFight } from '@/state/presenters/navigation.engine';
 import { EncounterModalOverlay } from '@/components/event/EncounterModalOverlay';
-import type { Enemy } from '@mechanics';
+import { selectIsInCombat, type Enemy } from '@mechanics';
 
 export default function ExplorationScreen() {
     const styles = useStyles();
@@ -117,7 +117,11 @@ export default function ExplorationScreen() {
     useEffect(() => {
         if (!arrivalOwed || anySession || inEncounterModal || inCombat) return;
         const settle = setTimeout(() => {
-            if (selectHasAnyActiveSession(store.getState())) return;
+            // A fight still on the books (the in-memory resume below) owns the
+            // node: its arrival stays owed until the fight ends (R9a), and
+            // resolving it here as well would stage the same fight twice.
+            const now = store.getState();
+            if (selectHasAnyActiveSession(now) || selectIsInCombat(now)) return;
             actions.resolveCurrentMapEvent();
         }, 0);
         return () => clearTimeout(settle);

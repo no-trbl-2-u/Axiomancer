@@ -35,7 +35,7 @@ import { learnCard } from '../Cards';
 import { createStartingWorld, emptyQuestLog } from '../World';
 import type { MapName } from '../World/map.library';
 import { moveToNode as moveWorld } from '../World/world.reducer';
-import { resolveMapEvent } from '../World';
+import { resolveMapEvent, settleArrival } from '../World';
 import { applyDialogueChoice as applyDialogueRuntime } from '../World/dialogue.runtime';
 import { killObjectives, progressQuest, findQuest } from '../World/quest.engine';
 import { calculateMaxHealth } from '../Utils';
@@ -406,14 +406,17 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 }
             }
 
-            return {
+            // The fight is over, so the node it was fought on is settled,
+            // whatever the outcome (phase R9a): `resolveMapEvent` left the
+            // arrival owed so a save taken mid-fight re-offers it.
+            return settleArrival({
                 ...state,
                 player: nextPlayer,
                 quests: nextQuests,
                 flags: nextFlags,
                 codex: nextCodex,
                 currentEncounter: undefined,
-            };
+            });
         }
 
         case 'MOVE_TO_NODE': {

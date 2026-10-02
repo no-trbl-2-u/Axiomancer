@@ -37,6 +37,7 @@ import {
     isEquipment,
     markNodeConsumed,
     resolveMapEvent,
+    settleArrival,
     revealAdjacent,
     STARTING_CARD_IDS,
     unlockNode as worldUnlockNode,
@@ -1045,14 +1046,13 @@ function moveToAction(store: AppStore, nodeId: string): MoveToResult {
 
     // Node kind comes from the engine's authored event pools. Encounter /
     // boss nodes (both resolve to the `encounter` kind) are not completed or
-    // consumed BY THE MOVE, so the node stays walkable and the screen keeps
-    // drawing the player on it; every other kind completes here.
-    //
-    // That is a statement about this function alone, not about the node's
-    // life (burn-day audit 2026-09-19 row 3.1). Resolving the arrival marks
-    // the node consumed whatever its kind (`resolve-map-event.ts`), so a
-    // fight that has been answered is NOT re-offered on a second visit —
-    // measured: a second arrival at an answered encounter fires nothing.
+    // consumed BY THE MOVE, and the move does not open their way on either:
+    // a fight's node is settled when the fight ends (phase R9a), by the
+    // engine's `END_COMBAT` (`settleArrival`) or by a flee below. Until then
+    // a save, mid-fight included, stands the player on the node with the
+    // fight owed and nowhere else to go, and the map re-offers it on reload.
+    // Every other kind completes here, and resolving its arrival consumes it
+    // (`resolve-map-event.ts`).
     const nodeKind = getNodePrimaryEventKind(map.continent, map.name, nodeId);
     const isEncounterNode = nodeKind === 'encounter';
 
@@ -1079,7 +1079,7 @@ function moveToAction(store: AppStore, nodeId: string): MoveToResult {
     const engineNode = getMapDefinition(map.continent, map.name).nodes.find(
         (n) => n.id === nodeId,
     );
-    for (const targetId of engineNode?.connectedNodes ?? []) {
+    for (const targetId of isEncounterNode ? [] : engineNode?.connectedNodes ?? []) {
         if (completed.includes(targetId)) continue;
         if (nextWorld.currentMap.availableNodes.includes(targetId)) continue;
         nextWorld = worldUnlockNode(nextWorld, targetId);
@@ -1621,6 +1621,18 @@ function fleeEncounterAction(store: AppStore): void {
         console.error('Failed to process flee action:', error);
     }
     clearEventSlice(store);
+    settleArrivalAction(store);
+}
+
+/**
+ * Settle the fight's node when the player walks away from it (phase R9a).
+ * A fight that runs to an end settles through the engine's `END_COMBAT`; a
+ * flee from the prelude never stages one, so both flee paths settle here.
+ * The node is spent and its way on opens, as before R9a.
+ */
+function settleArrivalAction(store: AppStore): void {
+    const settled = settleArrival(store.getState() as unknown as GameState);
+    store.setState({ world: settled.world });
 }
 
 function pickEventChoiceAction(store: AppStore, choiceId: string): void {
@@ -1660,6 +1672,7 @@ function pickEventChoiceAction(store: AppStore, choiceId: string): void {
                     console.error('Failed to process flee action:', error);
                     clearEventSlice(store);
                 }
+                settleArrivalAction(store);
                 return;
             }
             // Unknown choice id on combat-prelude — defensive no-op.

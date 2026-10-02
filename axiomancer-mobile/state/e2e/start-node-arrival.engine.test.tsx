@@ -184,15 +184,69 @@ describe('an arrival the player never answered survives a reload', () => {
 
         const tree = mountExploration(reloaded);
 
-        // The arrival is answered ...
-        expect(reloaded.getState().world.currentMap.consumedNodes).toContain('bw-2');
-        // ... and the fight the player was owed is actually on screen. Do NOT
+        // The fight the player was owed is actually on screen. Its node stays
+        // owed until that fight settles (R9a), so it is not consumed yet. Do NOT
         // assert `event.pending` here: `EncounterModalOverlay` auto-engages on
         // mount and `beginHazardEncounter` clears the event slice on the way
         // in, so `pending` is null by the time this line runs — before AND
         // after the fix. The sibling start-node case can assert `pending`
         // only because bw-1 is a CUTSCENE, which has no auto-engage.
-        expect(reloaded.getState().currentEncounter).not.toBeNull();
+        expect(reloaded.getState().world.currentMap.consumedNodes).not.toContain('bw-2');
+        expect(reloaded.getState().currentEncounter).toBeDefined();
         expect(tree.queryByTestId('encounter-modal-hazard-combat')).not.toBeNull();
+    });
+});
+
+/**
+ * Phase R9a — a save taken DURING the fight reloads onto the fight.
+ *
+ * The case above is a reload before the prelude. This one is a reload after
+ * FIGHT: the app is closed mid-fight and `SaveOnExit` writes the store as it
+ * stands. The fight itself is never saved (`currentEncounter` is transient),
+ * so before R9a that save held a consumed node, nothing owed and the way on
+ * open, and the reload landed past the fight. The node now stays owed until
+ * the fight settles, so the reload stands the player back on it, with
+ * nowhere else to go, and the map offers the fight again from the start.
+ */
+describe('a save taken mid-fight survives a reload', () => {
+    it('re-offers the fight, with the onward nodes still shut', () => {
+        const adapter = createMemoryAdapter();
+        const store = createAppStore({ adapter, overrides: { world: createStartingWorld('breakwater') } });
+        const actions = createAppActions(store);
+        actions.moveTo('bw-2'); // engine kind `encounter`
+        mountExploration(store).unmount();
+        // The modal auto-engaged: the fight is under way.
+        expect(store.getState().currentEncounter).toBeDefined();
+
+        // The app is closed mid-fight; `SaveOnExit` takes the final save.
+        store.getState().save();
+        const reloaded = createAppStore({ adapter });
+        const map = reloaded.getState().world.currentMap;
+        expect(reloaded.getState().currentEncounter).toBeUndefined();
+        expect(map.currentNode).toBe('bw-2');
+        expect(map.pendingArrival).toBe('bw-2');
+        // bw-2's way on (the pier fan) is not open: the fight is still owed.
+        for (const onward of ['bw-7', 'bw-8', 'bw-9']) {
+            expect(map.availableNodes).not.toContain(onward);
+        }
+
+        const tree = mountExploration(reloaded);
+
+        expect(reloaded.getState().currentEncounter).toBeDefined();
+        expect(tree.queryByTestId('encounter-modal-hazard-combat')).not.toBeNull();
+    });
+
+    it('a fight walked away from settles its node and opens the way on', () => {
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('breakwater') } });
+        const actions = createAppActions(store);
+        actions.moveTo('bw-2');
+        mountExploration(store).unmount();
+
+        actions.fleeEncounter();
+
+        const map = store.getState().world.currentMap;
+        expect(map.pendingArrival ?? null).toBeNull();
+        expect(map.consumedNodes).toContain('bw-2');
+        expect(map.availableNodes).toEqual(expect.arrayContaining(['bw-7', 'bw-8', 'bw-9']));
     });
 });

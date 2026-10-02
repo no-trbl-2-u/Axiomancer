@@ -18,6 +18,13 @@
  *   6. Return the handler's `{ state, event }` with the discovery /
  *      consumption updates folded in.
  *
+ * An `encounter` is the exception to 0 and 5 (phase R9a). Its arrival stays
+ * owed and its node unconsumed, with the way on still shut, until the fight
+ * settles: `settleArrival` below, which `END_COMBAT` runs for every outcome.
+ * The fight itself is never saved (`currentEncounter` is transient), so a
+ * save taken mid-fight must still say what the player owes, or a reload
+ * lands past the fight.
+ *
  * Pure when `rng` is deterministic.
  */
 
@@ -234,6 +241,23 @@ function answerArrival(state: GameState, nodeId: NodeId): GameState {
 }
 
 /**
+ * Settles the arrival at the node under the player: clears the debt, reveals
+ * and unlocks the adjacents, and marks the node consumed. This is the second
+ * half of resolving an `encounter`, run once the fight is over, whatever its
+ * outcome (phase R9a). Identity-stable when nothing is owed at the current
+ * node, so calling it after a fight that never came from the map (a dev
+ * pick, a test) changes nothing.
+ */
+export function settleArrival(state: GameState): GameState {
+    const map = state.world.currentMap;
+    const nodeId = map.currentNode;
+    if ((map.pendingArrival ?? null) !== nodeId) return state;
+    const opened = unlockAdjacent(revealAdjacent(map, nodeId), nodeId);
+    const settled = markNodeConsumed({ ...opened, pendingArrival: null }, nodeId);
+    return { ...state, world: { ...state.world, currentMap: settled } };
+}
+
+/**
  * Resolves the MapEvent for the player's current node. See file header.
  *
  * `staged` resolves that payload in place of the node's pool. It exists for
@@ -306,6 +330,21 @@ export function resolveMapEvent(
     }
 
     // 4. Apply the matching handler.
+    // An encounter leaves the arrival owed (see the file header): roll it
+    // against the unanswered state, and return before step 5. Only the
+    // reveal runs, so the map can draw what lies past the fight.
+    if (entry.payload.kind === 'encounter') {
+        const reachedOwed: GameState = questsAfterReach === state.quests
+            ? state
+            : { ...state, quests: questsAfterReach };
+        const fight = applyPayload(reachedOwed, entry.payload, rng);
+        const revealed = revealAdjacent(fight.state.world.currentMap, nodeId);
+        return {
+            state: { ...fight.state, world: { ...fight.state.world, currentMap: revealed } },
+            event: fight.event,
+        };
+    }
+
     const result = applyPayload(stateAfterReach, entry.payload, rng);
 
     // 4a. Advance any active `collect`-type quest objectives the granted

@@ -300,6 +300,7 @@ export {
 } from './World';
 export {
     resolveMapEvent,
+    settleArrival,
     getNodeEventPool,
     getNodePrimaryEventKind,
 } from './World';
