@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-01 at commit a6ee8167
-> Pass count: 65
+> Last pass: 2026-10-02 at commit 630c40fa
+> Pass count: 66
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -296,6 +296,24 @@
 > no-clamp trade (pass 56). The Cut's footnote names the deck floor but
 > not the empty purse. One reason is enough to explain a disabled door.
 
+> **[critique pass 66, 2026-10-02, commit 630c40fa] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route still bounces to the title with no save). 14
+> commits after pass 65: R9a (fight checkpoint), D74's rehearsal plan,
+> R10 (every colour a theme token) and R10b-R10b2 (docs only). R10 is the
+> one change that could show on screen. No screen shows a colour
+> regression at either viewport: foe bar, dice, card faces, shop, rest,
+> hazard frame and hub chrome read as in pass 65. Housekeeping: moved the
+> burn-day "reload taken DURING a live encounter" row to Done. R9a shipped
+> its shape (a), and engine and mobile tests pin the re-offer. A reload
+> mid-fight is out of the transport's reach, so it was not seen on screen.
+> Reconfirmed and not re-filed: pass 65's Minor Healing Potion "RESTORES
+> 10 VITAE" against 160-170 pools, pass 64's identical "PHASE n · ATTACKS"
+> headers, pass 63's corner medallions over the end cards, pass 62's phase
+> ledger column, pass 61's inn-rest wording, and pass 58's A Plain Word
+> "+24" beside "+60%". Zero fresh findings this pass.
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `archive-pre-revamp:plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
@@ -508,41 +526,6 @@
   it makes the player's own clear cause the respawn).
 - source: burn-day audit 2026-09-19
 
-### [MED] exploration — a reload taken DURING a live encounter still lands past the fight
-- pass: burn-day audit 2026-09-19 (row 3.1 fix, residual)
-- viewport: both (375×812 and 1280×800) — the loss is in persistence, not
-  layout; on web it is one browser reload away
-- category: progression / persistence
-- observation: row 3.1 closed the reload-during-the-PRELUDE hole — an
-  arrival the player never answered is now re-offered on the next mount,
-  because the node's absence from `consumedNodes` is the debt and
-  `consumedNodes` rides the save. But `consumedNodes` marks "the MapEvent
-  resolved", i.e. "the prelude was shown", not "the fight ended". The
-  moment the player commits to the fight, `beginHazardEncounter` clears
-  the event slice and the hazard-pattern combat runs in the panel's local
-  React state, while the node is already consumed. A reload from there
-  rebuilds the app standing past the encounter, its onward edges open,
-  with no fight pending and nothing owed — the same player-visible loss as
-  row 3.1, one step later. It bites hardest on a boss node, where the walk
-  back is longest.
-- evidence: `axiomancer-mechanics/src/World/MapEvents/resolve-map-event.ts`
-  (`markNodeConsumed` runs at resolve time, on every non-travel path);
-  `axiomancer-mobile/state/actions.ts` `beginHazardEncounter` (clears the
-  event slice, then `startCombat`); `axiomancer-mechanics/src/Game/store.ts`
-  — the persisted payload destructures `currentEncounter: _drop` with the
-  standing comment "encounters re-roll on load (Spec 07)", so no live fight
-  is ever written; the panel's own turn state is not in the store at all.
-- suggested fix: two shapes, and the choice is a design call, not a
-  mechanical one. (a) Defer `markNodeConsumed` until the encounter settles
-  (victory / flee / defeat) so the existing `arrivalPending` re-offer
-  covers the fight too — smallest change, but it makes "consumed" mean
-  "answered" and every other consumer of that field has to agree. (b)
-  Persist enough to rebuild the fight (foe id, the encounter's seed, the
-  node) and re-enter the panel on load — truer to the player's experience,
-  and it contradicts the Spec 07 "encounters re-roll on load" note, which
-  would need reopening first. Do NOT ship (a) and (b) together.
-- source: burn-day audit 2026-09-19
-
 ### [MED] ui-fresh-eyes SWARM 2026-09-12 — the 309-row candidate set is drained
 - pass: swarm follow-up to the 2026-09-12 sweep, run from
   `archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/2026-09-12-ui-fresh-eyes-swarm.prompt.md`
@@ -681,6 +664,41 @@
 - source: loop
 
 ## Done
+
+### [x] [MED] exploration — a reload taken DURING a live encounter still lands past the fight — RESOLVED 2026-10-02 (R9a, commit 1bad8fce; shape (a), pinned by fight-checkpoint.engine.test.ts and the mobile reload-mid-fight tests)
+- pass: burn-day audit 2026-09-19 (row 3.1 fix, residual)
+- viewport: both (375×812 and 1280×800) — the loss is in persistence, not
+  layout; on web it is one browser reload away
+- category: progression / persistence
+- observation: row 3.1 closed the reload-during-the-PRELUDE hole — an
+  arrival the player never answered is now re-offered on the next mount,
+  because the node's absence from `consumedNodes` is the debt and
+  `consumedNodes` rides the save. But `consumedNodes` marks "the MapEvent
+  resolved", i.e. "the prelude was shown", not "the fight ended". The
+  moment the player commits to the fight, `beginHazardEncounter` clears
+  the event slice and the hazard-pattern combat runs in the panel's local
+  React state, while the node is already consumed. A reload from there
+  rebuilds the app standing past the encounter, its onward edges open,
+  with no fight pending and nothing owed — the same player-visible loss as
+  row 3.1, one step later. It bites hardest on a boss node, where the walk
+  back is longest.
+- evidence: `axiomancer-mechanics/src/World/MapEvents/resolve-map-event.ts`
+  (`markNodeConsumed` runs at resolve time, on every non-travel path);
+  `axiomancer-mobile/state/actions.ts` `beginHazardEncounter` (clears the
+  event slice, then `startCombat`); `axiomancer-mechanics/src/Game/store.ts`
+  — the persisted payload destructures `currentEncounter: _drop` with the
+  standing comment "encounters re-roll on load (Spec 07)", so no live fight
+  is ever written; the panel's own turn state is not in the store at all.
+- suggested fix: two shapes, and the choice is a design call, not a
+  mechanical one. (a) Defer `markNodeConsumed` until the encounter settles
+  (victory / flee / defeat) so the existing `arrivalPending` re-offer
+  covers the fight too — smallest change, but it makes "consumed" mean
+  "answered" and every other consumer of that field has to agree. (b)
+  Persist enough to rebuild the fight (foe id, the encounter's seed, the
+  node) and re-enter the panel on load — truer to the player's experience,
+  and it contradicts the Spec 07 "encounters re-roll on load" note, which
+  would need reopening first. Do NOT ship (a) and (b) together.
+- source: burn-day audit 2026-09-19
 
 ### [x] [LOW] village / items — two consumables use "wearer" language for items the player drinks, not wears
 - pass: 41 (commit 6a804a02)
