@@ -120,7 +120,8 @@ creates nothing.
 ## 5. Reset rules (every R-phase)
 
 1. **Delete, don't park, unless the part plan says park.** Git history is
-   the archive for source (D50). Markdown moves to `plan/archive/`.
+   the archive for source (D50) and, since R10b2, for markdown too (D66):
+   there is no `plan/archive/`.
 2. **Tests go with their subjects.** A test pinned to a deleted thing is
    deleted or rewritten to the survivors. Never weaken a test to keep a
    deleted thing alive.

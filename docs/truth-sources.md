@@ -26,8 +26,9 @@ than execute stale information.
    marching authority until accepted.
 6. **Critique/audit logs** (`plan/CRITIQUE.md`, `plan/AUDIT.md`) — findings
    queues and evidence of known rot.
-7. **Historical reports** (`plan/archive/`, `docs/reports/`, dated devlog
-   entries) — archived evidence, subordinate to current law.
+7. **Historical reports** (`docs/reports/`, dated devlog entries; the
+   pre-revamp archive under the `archive-pre-revamp` git tag, read only
+   when T asks about history) — evidence, subordinate to current law.
 
 If a lower layer contradicts a higher one, a worker must:
 
@@ -136,7 +137,7 @@ differently:
   freshness warning, the digest's nightly re-measure) were retired in
   revamp phase R1 (D57): after the card purge every cell was the grey
   deck, so the file measured nothing a decision could use. The last one
-  is archived at `plan/archive/baselines/deck-matrix-baseline.json`
+  is at `archive-pre-revamp:plan/archive/baselines/deck-matrix-baseline.json`
   (stamp `be808d2`) and describes a pre-revamp engine.
 
 Rules until measurement returns (R9's own measurement, then R12's new

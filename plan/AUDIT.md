@@ -28,7 +28,7 @@
 > `/oversight` ballot "Revamp-support bias".
 
 > Pass narrative through the eleventh pass (2026-09-24) and resolved rows
-> moved verbatim to `plan/archive/AUDIT_2026.md` (TRIM THE FAT T4, 2026-09-25).
+> moved verbatim to `archive-pre-revamp:plan/archive/AUDIT_2026.md` (TRIM THE FAT T4, 2026-09-25).
 
 # Site audit — 2026-09-11
 
@@ -371,7 +371,7 @@
 ### [debt] T5 Tier 2 docs — named for archive but still have consumers (2026-09-25; archive part resolved, effects/enemy rewrite open)
 
 - **Context:** trim T5 archived the Tier 2 docs rows
-  (`plan/archive/2026-09-25-trim-t5/`). Six files the spec named have inbound
+  (`archive-pre-revamp:plan/archive/2026-09-25-trim-t5/`). Six files the spec named have inbound
   pointers the trim could not repoint, because the pointers live under
   `.claude/` (classifier-blocked for autonomous runs; see the T5 hand-off
   item 2). Kept in place per the trim standing frame ¶1; the spec's Tier 2
@@ -385,7 +385,7 @@
   in T3); their stale bodies are already filed in the "stale docs" row
   below. Rewrite in place, do not archive.
 - **Resolved 2026-09-25 (attended, post-T5):** `profane-canon.md`, spec 10
-  and spec 35 archived to `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/`.
+  and spec 35 archived to `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/`.
   The `.claude/` citations were repointed: `card-expert.md` and
   `combat-playtest.md` now cite the archive paths, and the three design
   skills cite the live `docs/morality.md` in place of spec 10. So were
@@ -535,7 +535,7 @@
   - ~~`axiomancer-mobile/specs/10-navigation-and-app-shell.md`,
     `11-asset-pipeline.md`, `12-accessibility-and-theming.md`~~ — archived
     2026-09-25 (trim T5) with the whole mobile `specs/` folder to
-    `plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/`; no rewrite
+    `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/`; no rewrite
     needed.
   - `.claude/agents/playtester.md` Path A steps 3-5 and Path B — prelude modal
     / FIGHT-FLEE / stance / STAND-DO-CLASH-LET round loop —
@@ -1003,7 +1003,7 @@ present. Row stays open until that session runs.
   human at the dashboard, per the text above.
 - **CONTENT POLICY REVERSED by T, 2026-09-20 — the row's shape changes.**
   The DevLog, its evidence and the full catalog are now deliberately public
-  (`plan/archive/2026-09-25-trim-t4/plan/2026-09-20-devlog-public-publish.prompt.md`), so "content labeled
+  (`archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/2026-09-20-devlog-public-publish.prompt.md`), so "content labeled
   private is live on a public domain" is no longer the finding. What remains
   of this row is unchanged and still open: bearings' "no hosted web surface"
   sentence versus a Cloudflare project nobody in-repo controls, and the
@@ -1014,48 +1014,6 @@ present. Row stays open until that session runs.
   now also covers. Bearings' sentence is the one record that must change
   when the second Pages project exists — filed below as a loop-call rather
   than edited blind, because the project does not exist yet.
-
-### [docs] Phase 44a deferred its `lexicon.json` registrations to the phases that actually rename each concept
-- category: docs
-- impact: 4
-- ease: 8
-- detail: filed 2026-08-09 by Phase 44a. The build-plan row and spec 34 §5.9
-  item 2 both ask 44a to register the fifteen §5.2 renames, the six rank
-  names, and the V-1 word list in `axiomancer-mechanics/docs/lexicon.json`
-  right now, even though 44a ships ZERO renames. `scripts/check-lexicon.mjs`
-  scans every live `.md` file outside `plan/` (except `bearings.md`) — about
-  240 files — and every one of those existing rows was added at the commit
-  that actually retired the concept from code, never earlier (see the four
-  shipped rows' `since` dates). Registering now, while ~40 live docs
-  (`axiomancer-mechanics/docs/philosophy.md`, `morality.md`,
-  `keyword-atlas.md`, `card-frame-legend.md`, `combat.md`, `api.md`,
-  `effects.md`, `gameloop.md`, `npcs.md`, `quickstart.md`, `testing.md`,
-  `hazard-minigame.md`, `references/*`, `axiomancer-mechanics/CLAUDE.md`,
-  `axiomancer-mechanics/README.md`, plus mobile docs and `.claude/`
-  agent/skill prompts) still correctly describe the pre-retheme system,
-  would force premature rewrites of accurate docs or blanket
-  pragma-tagging dozens of files for a guard that protects nothing yet.
-  **Fix:** each of 44b (the §5.2 keyword/system-term renames), 44c (the rank
-  ladder), and 44g/44h (the broader V-1 prose vocabulary) adds its own
-  `lexicon.json` rows in the same commit that performs its rename, and
-  triages whatever `check-lexicon.mjs` then flags the normal way (fix
-  wording / HISTORICAL banner / `<!-- lexicon-ok -->` pragma). See
-  `plan/archive/2026-09-25-trim-t4/plan/phases/phase_44a_rename_infrastructure.md` "Decisions made upfront"
-  for the full reasoning.
-- update (verified via /oversight 2026-08-12): 44b and 44c followed the
-  fix exactly — `lexicon.json` carries dated rows for all of R-1–R-14.
-  44g explicitly documented a reasoned skip (no renames in scope, same
-  reasoning as 44f). **44h shipped real renames (spec 10→GRACE, spec
-  14→THE OATHS, the three alignment axes→CREED/AUGURY/TROTH,
-  `src/Philosophy/`→`src/Ledger/`) and registered zero `lexicon.json`
-  rows, with no documented rationale like 44f/44g gave.**
-  `check-lexicon.mjs` still passes clean today only because no row
-  exists to check the renamed terms against, and no live doc currently
-  misuses the old names — so there's no active prose leak yet — but
-  44h broke the registration discipline this row asked every renaming
-  phase to follow, silently. Worth a follow-up /iterate pick: register
-  44h's renames retroactively (or document why not, matching 44f/44g's
-  pattern) before the next rename phase treats the gap as precedent.
 
 ### The loop's own docs still call the `Closes #N` trailer the closing mechanism
 - category: docs
@@ -1391,22 +1349,6 @@ present. Row stays open until that session runs.
   would double the wordmark against the painted one. Until then this is a
   known, deliberate inconsistency, not drift.
 
-### [tooling] The card editor's restored fields have no form controls
-- category: tooling
-- impact: 3
-- ease: 5
-- detail: filed 2026-08-27 by Phase 69. That phase made `theme`,
-  `persistentEffect`, `paidSummary`, `intentionallyAsymmetric` and `glyph`
-  survive an editor save, and the round-trip test holds them there. What it did
-  NOT do is give them editing UI — they round-trip verbatim from the source
-  literal. So a card's theme or paid line can only be changed by editing
-  `cards.library.ts` by hand, which is a strange seam in a tool whose whole
-  purpose is to avoid that.
-- next: form controls for the four with obvious shapes (`theme` a select over
-  `CARD_THEMES`, `paidSummary` and `persistentEffect` text areas,
-  `intentionallyAsymmetric` a checkbox). `glyph` needs a design call first —
-  it is a discriminated payload union with a cap, and no live card uses it.
-
 ### [content] "Blank Indenture" violates NL-8 and is grandfathered, not renamed
 - category: content
 - impact: 2
@@ -1472,6 +1414,66 @@ present. Row stays open until that session runs.
   a flow that is otherwise working.
 
 ## Done
+
+### [x] [docs] Phase 44a deferred its `lexicon.json` registrations to the phases that actually rename each concept
+- category: docs
+- impact: 4
+- ease: 8
+- detail: filed 2026-08-09 by Phase 44a. The build-plan row and spec 34 §5.9
+  item 2 both ask 44a to register the fifteen §5.2 renames, the six rank
+  names, and the V-1 word list in `axiomancer-mechanics/docs/lexicon.json`
+  right now, even though 44a ships ZERO renames. `scripts/check-lexicon.mjs`
+  scans every live `.md` file outside `plan/` (except `bearings.md`) — about
+  240 files — and every one of those existing rows was added at the commit
+  that actually retired the concept from code, never earlier (see the four
+  shipped rows' `since` dates). Registering now, while ~40 live docs
+  (`axiomancer-mechanics/docs/philosophy.md`, `morality.md`,
+  `keyword-atlas.md`, `card-frame-legend.md`, `combat.md`, `api.md`,
+  `effects.md`, `gameloop.md`, `npcs.md`, `quickstart.md`, `testing.md`,
+  `hazard-minigame.md`, `references/*`, `axiomancer-mechanics/CLAUDE.md`,
+  `axiomancer-mechanics/README.md`, plus mobile docs and `.claude/`
+  agent/skill prompts) still correctly describe the pre-retheme system,
+  would force premature rewrites of accurate docs or blanket
+  pragma-tagging dozens of files for a guard that protects nothing yet.
+  **Fix:** each of 44b (the §5.2 keyword/system-term renames), 44c (the rank
+  ladder), and 44g/44h (the broader V-1 prose vocabulary) adds its own
+  `lexicon.json` rows in the same commit that performs its rename, and
+  triages whatever `check-lexicon.mjs` then flags the normal way (fix
+  wording / HISTORICAL banner / `<!-- lexicon-ok -->` pragma). See
+  `archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/phases/phase_44a_rename_infrastructure.md` "Decisions made upfront"
+  for the full reasoning.
+- update (verified via /oversight 2026-08-12): 44b and 44c followed the
+  fix exactly — `lexicon.json` carries dated rows for all of R-1–R-14.
+  44g explicitly documented a reasoned skip (no renames in scope, same
+  reasoning as 44f). **44h shipped real renames (spec 10→GRACE, spec
+  14→THE OATHS, the three alignment axes→CREED/AUGURY/TROTH,
+  `src/Philosophy/`→`src/Ledger/`) and registered zero `lexicon.json`
+  rows, with no documented rationale like 44f/44g gave.**
+  `check-lexicon.mjs` still passes clean today only because no row
+  exists to check the renamed terms against, and no live doc currently
+  misuses the old names — so there's no active prose leak yet — but
+  44h broke the registration discipline this row asked every renaming
+  phase to follow, silently. Worth a follow-up /iterate pick: register
+  44h's renames retroactively (or document why not, matching 44f/44g's
+  pattern) before the next rename phase treats the gap as precedent.
+- closed: moot (R10b2, 2026-10-02): the 44b/44c renamed concepts (CHARGE, PLEA, OATH, HEX and kin) were themselves deleted in the revamp; R10b2 registered them in `lexicon.json` as retired.
+
+### [x] [tooling] The card editor's restored fields have no form controls
+- category: tooling
+- impact: 3
+- ease: 5
+- detail: filed 2026-08-27 by Phase 69. That phase made `theme`,
+  `persistentEffect`, `paidSummary`, `intentionallyAsymmetric` and `glyph`
+  survive an editor save, and the round-trip test holds them there. What it did
+  NOT do is give them editing UI — they round-trip verbatim from the source
+  literal. So a card's theme or paid line can only be changed by editing
+  `cards.library.ts` by hand, which is a strange seam in a tool whose whole
+  purpose is to avoid that.
+- next: form controls for the four with obvious shapes (`theme` a select over
+  `CARD_THEMES`, `paidSummary` and `persistentEffect` text areas,
+  `intentionallyAsymmetric` a checkbox). `glyph` needs a design call first —
+  it is a discriminated payload union with a cap, and no live card uses it.
+- closed: moot (R10b2, 2026-10-02): the card editor was deleted in R1 (D56).
 
 ### [x] [debt] Phase R3b's purge commit shipped only its staged deletions (red main, 2026-09-29) — CLOSED 2026-09-29 (R3b follow-up commit)
 - category: debt
@@ -1712,7 +1714,7 @@ present. Row stays open until that session runs.
 - filed 2026-08-08 by Phase 52b (docs, impact 2, ease 9). Both logs are now
   archived with a HISTORICAL banner: `RELEASES.md` in trim T1,
   `CHANGELOG.md` in trim T5 (2026-09-25,
-  `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/CHANGELOG.md`). No
+  `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/CHANGELOG.md`). No
   live file describes `healFraction` as current.
 
 ### [x] [3.2] `CardSpecialMechanic` deprecated-name not exported — stale/resolved

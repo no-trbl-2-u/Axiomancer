@@ -106,8 +106,8 @@ Live, at the repo root:
 The content stewards (`adjust-*`, `forge`), the `card-expert`,
 `mechanics-expert`, `reader` and `content-curator` agents, and the design
 skills (`brainstorm-mechanics`, `character-spec`, `story-spec`, `world-spec`,
-`kb-query`) were archived in R0 of THE REVAMP (2026-09-28, D58) to
-`plan/archive/2026-09-28-revamp-r0/`. The loop creates no content during the
+`kb-query`) were archived in R0 of THE REVAMP (2026-09-28, D58); since R10b2
+they live only under the `archive-pre-revamp` tag (D66). The loop creates no content during the
 revamp; card and keyword design happens only in guided sessions with T (D37),
 which will write a fresh card agent (B6). The `kb-query` MCP tools stay
 callable directly. The keyword wiring checklist now lives in
@@ -136,7 +136,7 @@ run and any claim from memory is marked UNGROUNDED.
 |---|---|---|
 | **`axio-query` MCP** (`axio_overview` / `axio_cards` / `axio_effects` / `axio_keywords`) | The engine's OWN card/enemy/effect/keyword facts, generated from the live libraries | As current as the working tree — never stale |
 | **`kb-query` MCP** (`kb_overview` / `kb_find_games` / `kb_search` / `kb_read_doc` / `kb_cards` / `kb_keyword`) | External prior art: board-game rules + reception, Dawncaster corpus (1,692 cards / 141 keywords) — cite `kb:<game-slug>/<doc> (src-NNN)` | Live — served over HTTP by the KB's deployed Worker, current as of that repo's last deploy |
-| **Measured baselines** | Win-rate curves, status engagement | **Retired** (D57, R1): none is current until R9/B2 re-measure; the last one is archived in `plan/archive/baselines/` and describes a pre-revamp engine |
+| **Measured baselines** | Win-rate curves, status engagement | **Retired** (D57, R1): none is current until R9/B2 re-measure; the last one lives only under the `archive-pre-revamp` tag and describes a pre-revamp engine |
 
 Measuring is not tuning: a measurement is briefing. During the
 revamp, card and deck changes happen only in guided sessions with T (D37);
@@ -200,8 +200,10 @@ The unified **nexus** harness was re-onboarded onto the monorepo on
   **read this first**), `steps/01_build_plan.md` (the phase queue),
   `AUDIT.md` + `CRITIQUE.md` (the drain queues), `PHASE_CANDIDATES.md`,
   `revamp/` (THE REVAMP part plans),
-  `reflexes.md`, `lessons.md`, `phases/` (open + recent briefs), and
-  `archive/` (rotated history, verbatim).
+  `reflexes.md`, `lessons.md` and `phases/` (open + recent briefs).
+  There is no archive directory (D66): pre-revamp history is read with
+  `git show archive-pre-revamp:plan/archive/<path>`, and only when T asks
+  about history. Never read it to learn how the game works.
 - `scripts/` — `deploy-check.mjs` (CI-green deploy gate),
   `notify.mjs` (pager), `loop-issue.mjs` (GitHub issue mirror).
 - `docs/game-model.md` — the game as the code stands; `spec.md` — the

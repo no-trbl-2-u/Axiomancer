@@ -1,5 +1,7 @@
 # Combat
 
+<!-- lexicon-ok: stance-check, rps, retired-keyword — stale body describing deleted systems; R10c rewrites this doc and removes this pragma -->
+
 ## Overview
 
 **Hazard-Pattern Combat (Spec 25) is the ONLY combat engine** — consumed by the mobile
@@ -287,7 +289,7 @@ card library files themselves, not duplicated here):
   engine-gated drips (persistent-card hooks) and reflect (THORNS /
   RIPOSTE) are all still live VITAE sources; they now compete with `DEAL`
   rather than substituting for it. The prior no-strike accounting in
-  [`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/32-no-strike-card-library.md` (archived)](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/32-no-strike-card-library.md)
+  `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/32-no-strike-card-library.md`
   is historical, as are its 70-card / 10-theme / "exactly 30 keywords" /
   rank-band pricing rules. `cards.pricing.ts` survives as an **advisory**
   scorer, not a gate.
@@ -321,8 +323,8 @@ card library files themselves, not duplicated here):
 The canonical design record for the current library is
 `plan/2026-09-02-big-numbers-overhaul.prompt.md` (the scale ladder, the keyword
 language, the enemy model) alongside
-[`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/25-hazard-pattern-combat.md` (archived)](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/25-hazard-pattern-combat.md) for
-the underlying engine loop. `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/32-no-strike-card-library.md` (archived) is HISTORICAL.
+`archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/25-hazard-pattern-combat.md` for
+the underlying engine loop. `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/32-no-strike-card-library.md` (archived) is HISTORICAL.
 `src/Cards/types.ts` / `card.engine.ts` carry the most complete
 design rationale for the separate Cards system.
 
@@ -336,7 +338,7 @@ Direct damage (`DEAL`), DoT ticks, affliction-payoff bursts, engine-gated drips 
 reflect are all live VITAE sources and compete on merit; control denies the enemy's
 telegraphed threat turn outright rather than merely discouraging a parallel damage
 track. Full design:
-[`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/25-hazard-pattern-combat.md` (archived)](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/25-hazard-pattern-combat.md) for the
+`archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/25-hazard-pattern-combat.md` for the
 engine loop and `plan/2026-09-02-big-numbers-overhaul.prompt.md` for the current card
 and enemy model (note: spec 25's two-pressure-track narrative was superseded by the
 one-bar model 2026-06-22, and its status-primacy successor was repealed 2026-09-02 —
@@ -386,7 +388,7 @@ progression levers.
 > "Spec 26b" (stance draft / Conviction / Signature Skills / deckbuilder) is
 > in-flight scaffolding carried in via PR #184; it has no spec file of its own
 > yet, and is distinct from
-> [`specs/26-catalyst-multiplicative-scaling.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/26-catalyst-multiplicative-scaling.md) (archived 2026-09-25).
+> `specs/26-catalyst-multiplicative-scaling.md` (`archive-pre-revamp:plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/26-catalyst-multiplicative-scaling.md`) (archived 2026-09-25).
 
 - **The four-die tray (spec 33, `combat.upgradeable-dice.ts`).** Each round
   rolls four fixed dice — Body, Mind, Heart at 1 special / 2 mana / 3 miss and

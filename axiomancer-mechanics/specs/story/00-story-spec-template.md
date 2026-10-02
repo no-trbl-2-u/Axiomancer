@@ -2,7 +2,7 @@
 
 > **HISTORICAL (R0, 2026-09-28).** Story canon is `content/story/story-overview.md` alone (THE BLANK PAGE); story specs are no longer written. Kept as a record, not as live
 > guidance. The skill that wrote it was archived to
-> `plan/archive/2026-09-28-revamp-r0/`.
+> `archive-pre-revamp:plan/archive/2026-09-28-revamp-r0/`.
 
 Story specs live here: `specs/story/`. They follow the same principles as
 mechanic specs (one spec, one body of work, one branch, one PR) but use a

@@ -1,5 +1,7 @@
 # Bearings — Miserere Mei, Deus
 
+<!-- lexicon-ok: retired-keyword — names RELENT and CONDEMN to forbid them -->
+
 > Standing context for every command invocation. Read this
 > alongside the relevant skill file (`skills/<name>.md`) and the
 > matching phase brief. If anything here changes, update in the
@@ -200,8 +202,7 @@ Axiomancer/
 │   ├── steps/01_build_plan.md
 │   ├── phases/                 # template, V masterplan, open/partial + recent briefs
 │   ├── ideas/ · labyrinth/     # art-pipeline options · Labyrinth design + acts
-│   ├── <date>-<topic>.{prompt,decisions,spec}.md   # live dated records
-│   └── archive/                # rotated history, verbatim (shipped briefs, executed prompts)
+│   └── <date>-<topic>.{prompt,decisions,spec}.md   # live dated records
 ├── docs/                       # truth-sources, asking-well, devlog deploy, reports/
 ├── devlog/                     # DevLog entries (build input for the public site)
 ├── telemetry/                  # append-only invocation log, one shard per session
@@ -217,8 +218,9 @@ Axiomancer/
 
 Loop verbs live in root `skills/`; `.claude/commands/` holds their doorways
 (the `combat-playtest` command was archived in R0; R12 rebuilds it). The content stewards, the
-design skills and four agents were archived in R0 (2026-09-28, D58) to
-`plan/archive/2026-09-28-revamp-r0/`.
+design skills and four agents were archived in R0 (2026-09-28, D58).
+There is no `plan/archive/` (D66, R10b2): pre-revamp history is read with
+`git show archive-pre-revamp:plan/archive/<path>`, only when T asks.
 
 ## Sub-agents
 

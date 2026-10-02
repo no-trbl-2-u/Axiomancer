@@ -1,11 +1,13 @@
 # Enemy
 
+<!-- lexicon-ok: stance-check, rps, retired-keyword — stale body describing deleted systems; R10c rewrites this doc and removes this pragma -->
+
 > **Superseded (2026-09-23):** the 15-enemy library, `src/Enemy/enemy.logic.ts`, the six AI strategies and `decideEnemyAction` described below are retired — no `enemy.logic.ts` or `decideEnemyAction` exists and since R2a the roster holds three foes (Float-Eye, Brine Hag, the Doorwarden); every fishing-village placement below was purged in R3b — live truth: src/Enemy/enemy.library.ts, src/Enemy/types.ts, src/Combat/combat.engine.ts. Body kept as a historical record pending rewrite (plan/AUDIT.md).
 
 > **Status:** Spec 07 shipped. Type, factory, six AI strategies, a 15-enemy
 > library, weighted loot tables, and a per-map encounter generator are wired
 > in. Future work (multi-enemy combat, Spec 10 difficulty bias) is tracked in
-> [`specs/07-enemy-content-and-ai.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/07-enemy-content-and-ai.md) (archived 2026-09-25).
+> `specs/07-enemy-content-and-ai.md` (`archive-pre-revamp:plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/07-enemy-content-and-ai.md`) (archived 2026-09-25).
 
 ## Type Shape
 

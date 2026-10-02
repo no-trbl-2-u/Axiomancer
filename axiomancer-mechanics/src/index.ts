@@ -234,7 +234,7 @@ export {
 // The engine transitions, content, tuning, deck-flag codec and types mobile
 // consumes (mobile has deleted its local engine); the rest of the Hazard
 // module's surface is reachable from `./World/Hazard`.
-// See `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/hazard-v2-vs-mechanics-divergence.md` (archived 2026-09-25).
+// See `archive-pre-revamp:plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/hazard-v2-vs-mechanics-divergence.md` (archived 2026-09-25).
 export {
     HAZARD_TUNING, HAZARD_KEYWORDS, HAZARD_DECK, HAZARD_CRACK_CARD,
     getHazardCardDef, HAZARD_REWARDS, HAZARD_CONSEQUENCES,

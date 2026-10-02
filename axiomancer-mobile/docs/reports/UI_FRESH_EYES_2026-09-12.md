@@ -1,6 +1,6 @@
 # UI FRESH-EYES SWEEP — 2026-09-12
 
-> Run against [`plan/archive/2026-09-25-trim-t4/plan/2026-09-12-ui-fresh-eyes.prompt.md`](../../../plan/archive/2026-09-25-trim-t4/plan/2026-09-12-ui-fresh-eyes.prompt.md),
+> Run against `archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/2026-09-12-ui-fresh-eyes.prompt.md`,
 > adjusted for ultracode at the head of the run (commit `7d7565c`).
 > Persona, taxonomy, scope walls and gate are that prompt's; what ultracode
 > changed is how much ran in parallel and how hard each row was tested.
@@ -200,7 +200,7 @@ signal: the fan's clipped card ledger was raised by four separate lenses, one
 at confidence 100. Twenty-seven rows are fixed above; the rest are filed, not
 fixed.
 
-The full table is in [`UI_FRESH_EYES_2026-09-12.candidates.md`](../../../plan/archive/2026-09-25-trim-t5/axiomancer-mobile/docs/reports/UI_FRESH_EYES_2026-09-12.candidates.md) (archived),
+The full table is in `UI_FRESH_EYES_2026-09-12.candidates.md` (`archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/docs/reports/UI_FRESH_EYES_2026-09-12.candidates.md`) (archived),
 sorted by severity with each row's confidence and suspected source. Strongest
 recurring themes, each raised independently by three or more lenses:
 

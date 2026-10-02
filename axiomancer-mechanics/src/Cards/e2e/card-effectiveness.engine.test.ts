@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — Card Effectiveness Lint (plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-08-win-path-scaling.md #6).
+ * Hermetic E2E — Card Effectiveness Lint (archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-08-win-path-scaling.md #6).
  *
  * The Ouroboros-class-bug witness: a card once shipped its finisher damage
  * on the FREE line, which never fires alongside the PAID play, so the paid

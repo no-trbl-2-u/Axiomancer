@@ -1,5 +1,7 @@
 # Visual / UX Audit — June 2026
 
+**Status:** HISTORICAL (a June 2026 point-in-time audit; the game it describes was rebuilt in the revamp).
+
 **Goal:** push the UI toward *engagement* — new-player clarity, readability,
 and visual *pop* — without losing the dark-gothic identity. Bold direction:
 layout & hierarchy rework, a real theming system, and custom SVG art.

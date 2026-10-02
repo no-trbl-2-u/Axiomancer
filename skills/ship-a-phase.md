@@ -414,7 +414,7 @@ invocation — see §7 Hard Rule 12.
    Hand (the Suppliant's Ring signature, made a real befriend in R4)
    opens the mercy choice, the only non-lethal ending (D47, D63).
    RELENT and CONDEMN are cut (R7 deletes their engine code); never
-   reintroduce them or Pressure Tracks <!-- lexicon-ok: pressure-tracks -->
+   reintroduce them or Pressure Tracks <!-- lexicon-ok: pressure-tracks, retired-keyword -->
 10. **Phase issue mirror is best-effort, not gating.** If
     `loop-issue.mjs phase-open` fails, the phase still ships;
     log the stderr and continue. The mirror is a public timeline,
@@ -454,8 +454,8 @@ invocation — see §7 Hard Rule 12.
 Canonical in `plan/revamp/README.md` §5; in short:
 
 1. **Delete, don't park, unless the part plan says park.** Git
-   history is the archive for source (D50); markdown moves to
-   `plan/archive/`.
+   history is the archive for source (D50) and for markdown
+   (D66): there is no `plan/archive/`.
 2. **Tests go with their subjects** (Step 7).
 3. **Carrier rule (D45) runs last.** After removing a carrier,
    remove every glossary/atlas row, glyph, gloss and editor word

@@ -1,5 +1,7 @@
 # Character
 
+<!-- lexicon-ok: stance-check, rps, retired-keyword — stale body describing deleted systems; R10c rewrites this doc and removes this pragma -->
+
 ## Overview
 
 Characters are player-controlled entities with base stats, resources, and progression. Created via `createCharacter()` in `Character/index.ts`.
@@ -87,7 +89,7 @@ base stats, character level, and allocation delta; returns `{ maxHealth }`
 using the same formula as `allocateStatPoint`. Pure function
 for mobile's "what-if" preview. Added by Phase 97. `allocateStatPoint`
 shipped by Phase 29 (`9f2e3f6` + `121aea8` + `db7c26f`); closes
-`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/06-character-progression.md` (archived) Q3 + Q8.
+`archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/06-character-progression.md` (archived) Q3 + Q8.
 
 ## Active Effects
 

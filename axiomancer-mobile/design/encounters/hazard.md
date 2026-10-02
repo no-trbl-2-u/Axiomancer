@@ -8,7 +8,7 @@
 >
 > Design history:
 > - `design/hazard-minigame-mobile.md` — original UX brief (still canonical for layout intent)
-> - `plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-16/` — Figma prototype and chat logs (archived)
+> - `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-16/` — Figma prototype and chat logs (archived)
 
 ---
 

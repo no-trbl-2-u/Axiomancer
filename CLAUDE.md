@@ -9,7 +9,7 @@ the loop verbs (`/ship-a-phase`, `/march`, `/iterate`, `/oversight`, …). Domai
 Answering a **balance/measurement** question (win rates, engagement)? There
 is no current measured baseline: the deck-matrix baseline was retired in
 revamp phase R1 (D57) and returns when R9/B2 need numbers. Say so rather than
-cite the archived one (`plan/archive/baselines/`) — see
+cite the last one (it lives only under the `archive-pre-revamp` tag) — see
 `docs/truth-sources.md` → "Measured truth". Source-of-rules questions (cards,
 pricing, keywords) read the current tree.
 

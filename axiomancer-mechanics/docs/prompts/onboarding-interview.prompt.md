@@ -6,7 +6,7 @@ Here's how I'd like this to work:
 3. After I answer, either correct/deepen my understanding or confirm it, then move to the next most important concept with another question.
 
 The domains I want to cover (in roughly this order):
-- The Heart/Body/Mind stat system and rock-paper-scissors advantage logic
+- The Heart/Body/Mind stat system and the Color Law (which die powers which card)
 - How a combat round actually flows (CombatState, reducers, the engine loop)
 - The Effects/buffs/debuffs system and how status effects are applied
 - The Game store (Zustand?), persistence adapters, and how state is serialized

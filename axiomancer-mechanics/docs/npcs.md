@@ -4,7 +4,7 @@
 > legacy flat `dialogue` map and/or a structured `dialogueTree`; the engine
 > exports tree-traversal helpers and a `GameState`-side-effect applier.
 > Shop NPCs are typed but shop reducers (inventory, prices, stock refresh)
-> are still pending — see [`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/08-world-content-and-hazards.md` (archived)](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/08-world-content-and-hazards.md).
+> are still pending — see `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/08-world-content-and-hazards.md`.
 
 ## Type Shape
 
@@ -167,9 +167,9 @@ Each NPC puts a hard choice in a different life situation, with character confli
   + `defaultSellPrice` reducers in `src/Items/shop.reducer.ts`; CLI
   affordance lives in `src/CLI/game.cli.ts` `shopLoop`. `NPC.isShopkeeper`
   is consulted by the dialogue runtime to route into the shop. See
-  the archived [`docs/items.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/items.md#shop-economy-phase-37) for the engine
+  the archived `docs/items.md` (`archive-pre-revamp:plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/items.md`) for the engine
   description.
 - ~~Moral gating~~ — the moral meter and alignment gates were removed
   2026-09-27 (T6, D39). Dialogue gates on quests and flags only.
 
-See [`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/08-world-content-and-hazards.md` (archived)](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/08-world-content-and-hazards.md).
+See `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/08-world-content-and-hazards.md`.

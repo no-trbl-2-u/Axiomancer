@@ -40,7 +40,7 @@ The boundaries, stated plainly:
   calls that sit above day-to-day build-plan execution.
 - The former **`specs/`** folder (the 2026-05 screen-wiring contracts,
   all shipped) is archived at
-  [`plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/`](../plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/).
+  `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/`.
   New work is planned through the root loop (`plan/`, `skills/`).
 - **[`VISION.md`](./VISION.md)** is **doctrine** — T's game vision and UX
   guardrails. Read before major mobile UX, combat, or mercy/friendship
@@ -259,7 +259,7 @@ This repo is developed through the root nexus loop. Pick it up here:
 - **Picking up work?** The root [`plan/bearings.md`](../plan/bearings.md)
   and the loop verbs in [`skills/`](../skills/). The original mobile
   screen-wiring specs (01–12, all shipped) are archived at
-  `plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/`.
+  `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/`.
 - **Writing tests?** [`docs/testing.md`](./docs/testing.md) — hermetic
   e2e standard. Every implementation must land with at least one.
 - **Engine:** `axiomancer-mechanics` — sibling workspace, consumed as
@@ -280,7 +280,7 @@ stubbed) + isolated (`afterEach(() => jest.restoreAllMocks())`).
 
 See [`docs/testing.md`](./docs/testing.md) for the full standard.
 The harness itself shipped with spec 01 (archived:
-[`01-test-harness-setup.md`](../plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/01-test-harness-setup.md)).
+`01-test-harness-setup.md` (`archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/01-test-harness-setup.md`)).
 
 ## Theme
 
@@ -350,7 +350,7 @@ Every SVG in this codebase is a coded placeholder. The swap contract
 lives in [`SVG_ASSET_SPEC.md`](./SVG_ASSET_SPEC.md); the ingest rules for
 raster art are in [`docs/asset-conventions.md`](./docs/asset-conventions.md)
 (the original spec 11 asset pipeline is archived under
-`plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/`).
+`archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/`).
 
 ## License
 

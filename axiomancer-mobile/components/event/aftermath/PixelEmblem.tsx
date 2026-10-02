@@ -11,7 +11,7 @@
  * stays in the gothic register.
  *
  * The carve-out's rationale is preserved in
- * `plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-22/chats/chat4.md:111-112` ("a deliberate
+ * `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-22/chats/chat4.md:111-112` ("a deliberate
  * aesthetic carve-out. … pixel art [is] rendered as a 16×16 `<rect>`
  * grid, with one shadow column on the bottom-right, a single white
  * highlight pixel near the top-left, and one sulfur sparkle off the

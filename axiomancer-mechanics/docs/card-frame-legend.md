@@ -1,5 +1,7 @@
 # Card frame legend — the structure every card shares
 
+<!-- lexicon-ok: stance-check, rps, retired-keyword — stale body describing deleted systems; R10c rewrites this doc and removes this pragma -->
+
 <!-- lexicon-ok: doxa, lemma, thesis, theorem, axiom -->
 
 The [keyword atlas](./keyword-atlas.md) defines the *verbs* (STAGGER, POISON, …).

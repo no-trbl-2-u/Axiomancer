@@ -50,7 +50,7 @@ and re-stamps the baseline if mechanics source changed.
    this block in an attended session where T approves the edits, or ask T
    to delete the eight files by hand and then do the repointing.
    `deck-tuning.md` also still names `plan/tuning/` (moved to
-   `plan/archive/2026-09-25-trim-t4/plan/tuning/` in T4) — moot once it
+   `archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/tuning/` in T4) — moot once it
    is deleted.
 3. **Tier 2 docs rows not yet done** (spec § Tier 2, last two rows):
    archive with a `**Status:** HISTORICAL` banner — `CHANGELOG.md`

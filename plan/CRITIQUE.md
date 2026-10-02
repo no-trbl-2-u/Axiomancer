@@ -296,7 +296,7 @@
 > no-clamp trade (pass 56). The Cut's footnote names the deck floor but
 > not the empty purse. One reason is enough to explain a disabled door.
 
-> Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `plan/archive/CRITIQUE_2026.md`.
+> Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `archive-pre-revamp:plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
 
@@ -543,34 +543,9 @@
   would need reopening first. Do NOT ship (a) and (b) together.
 - source: burn-day audit 2026-09-19
 
-### [LOW] village / items — two consumables use "wearer" language for items the player drinks, not wears
-- pass: 41 (commit 6a804a02)
-- viewport: mobile and desktop (both render the same source text)
-- category: comprehension / voice
-- observation: `axiomancer-mechanics/src/Items/consumable.library.ts`
-  describes two `category: 'consumable'` items as affecting "the
-  wearer" even though both are drunk: `void-essence` ("A vial of
-  substance that refuses to be observed. Drinking it leaves the
-  wearer slightly insistent and intensely present.", line 147-148) and
-  `heart-draught` ("A warm draught that quickens the wearer's
-  convictions.", line 78). Every other consumable in the file
-  describes an effect on the drinker/self, not a "wearer" — this reads
-  as flavor text drafted from an equipment-item template and never
-  re-worded for a drinkable. Live in the shop: Void Essence is sold at
-  Glen Market (`wanderer-nf-village` fixture, confirmed in
-  `07-village.png`/`.txt` this pass).
-- evidence: `axiomancer-mobile/.critique-artifacts/{mobile,desktop}/07-village.png`;
-  `axiomancer-mechanics/src/Items/consumable.library.ts:78,147-148`.
-- suggested fix: reword both descriptions to drinker-appropriate
-  language, e.g. void-essence → "...leaves the drinker slightly
-  insistent and intensely present"; heart-draught → "...quickens the
-  drinker's convictions". Data-only text edit, no effect/wiring change.
-  Equipment/consumable-lifecycle territory (`/adjust-equipment`).
-- source: loop
-
 ### [MED] ui-fresh-eyes SWARM 2026-09-12 — the 309-row candidate set is drained
 - pass: swarm follow-up to the 2026-09-12 sweep, run from
-  `plan/archive/2026-09-25-trim-t4/plan/2026-09-12-ui-fresh-eyes-swarm.prompt.md`
+  `archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/2026-09-12-ui-fresh-eyes-swarm.prompt.md`
 - viewport: 375x812 and 1280x800
 - auth_state: fixture-booted, static preview export (no Docker in the container)
 - category: meta
@@ -590,7 +565,7 @@
 - source: ultracode swarm run, 96 agents across five workflows, 0 errors
 
 ### [MED] ui-fresh-eyes sweep 2026-09-12 — 21 rows shipped, a large candidate set still open
-- pass: dedicated UI fresh-eyes sweep (not a `/critique` pass — no 6-finding cap), plan/archive/2026-09-25-trim-t4/plan/2026-09-12-ui-fresh-eyes.prompt.md adjusted for ultracode
+- pass: dedicated UI fresh-eyes sweep (not a `/critique` pass — no 6-finding cap), archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/2026-09-12-ui-fresh-eyes.prompt.md adjusted for ultracode
 - viewport: 375x812 and 1280x800
 - auth_state: fixture-booted, static preview export (no Docker, no dev server in the container)
 - category: meta
@@ -627,64 +602,6 @@
 - suggested fix: [user has not specified — iterate to determine]
 - source: user
 
-### [MED] ratified-exception HP arms bypass the damage-instance clock funnel
-- pass: review-closeout 2026-07-12 (commit 4680e5e2, branch
-  claude/axiomancer-dawncaster-comparison-cz6008)
-- viewport: n/a
-- category: design
-- observation: the three spec 32 §12 ratified direct-HP exceptions — the
-  `conclude` signature arm (Conclusion, per-stack), the `mercy` signature
-  arm (Disarming Plea, flat magnitude; both `combat.signature.ts`, plain
-  `applyDamage`), and the mercy-exploit strike
-  (`selectEncounterMercyChoice` exploit branch, `combat.engine.ts`) —
-  apply damage OUTSIDE the `applyEnemyDamage` funnel. Every status-gated
-  payoff burst advances BLEED's WS3.2 damage-instance clock; these three
-  hits do not, so a Conclusion cast or a mercy-exploit strike lands on a
-  bleeding enemy without the bleed paying out. Ratified exceptions ARE
-  allowed to differ from the funnel — whether they SHOULD feed the clock
-  is a design call, not a bug fix, hence filed instead of changed.
-- evidence: `combat.engine.ts` `applyEnemyDamage` doc comment ("the
-  shared enemy-damage funnel"); `combat.signature.ts` conclude/mercy arms
-  call `applyDamage` directly; the mercy-exploit branch likewise. The
-  doctrine witness (`doctrine-strike-dead.engine.test.ts`) ratifies the
-  three arms' RIGHT to chip HP (spec 32 §12) but nothing rules on their
-  clock semantics.
-- suggested fix: owner call under the spec 32 §12 framing — either (a)
-  ratify "exception damage is clock-silent" as spec text (one sentence in
-  §12, plus a witness pinning it), or (b) route the three arms through
-  `applyEnemyDamage` so BLEED treats every enemy-HP hit uniformly. Do NOT
-  change behavior without the ratification; (b) also changes Conclusion's
-  effective damage against bleeds and needs a balance glance.
-- source: adversarial code review (2026-07-12)
-
-### [MED] WS9 reactive cleanse strips a whole merged instance — tension with the enemy-cleanse mitigation
-- pass: review-closeout 2026-07-12 (commit 4680e5e2, branch
-  claude/axiomancer-dawncaster-comparison-cz6008)
-- viewport: n/a
-- category: design
-- observation: the WS9 reactive cleanse (`enemyCleanse` threat-branch
-  payload, `combat.engine.ts`; prototype carrier Tri-Eyes,
-  `combat.threat-sequences.ts`) removes one whole merged `ActiveEffect`
-  instance in application order. Because same-id afflictions
-  intensity-stack into ONE instance, a single cleanse can erase an
-  arbitrarily tall stack — e.g. a poison the player spent three cards
-  deepening — which sits in tension with the standing "enemy cleanse <
-  cheapest DoT output" mitigation (the cleanse should never out-tempo the
-  cheapest re-application). The guardrails are real (never the last
-  affliction, telegraphed branch, at most once per sequence pass) but
-  none of them bound the VALUE removed, only the count.
-- evidence: `combat.encounter.types.ts` `enemyCleanse` doc; the
-  `applyCleanse`-based shed in `combat.engine.ts` (WS9 reactive cleanse
-  block); witness `threat-branches.engine.test.ts` ("cleanses exactly one
-  affliction... never the last") asserts instance count, not intensity.
-- suggested fix: propose intensity-SHAVING as the follow-up — the cleanse
-  removes N intensity from the chosen affliction (washing it out only at
-  0) instead of the whole instance, so the shed price stays comparable to
-  one cheap DoT application regardless of stack height. Needs a design
-  pass on N (flat 1? per-branch payload?) and a re-run of the WS9 branch
-  witnesses; until ratified, the current whole-instance shed stands.
-- source: adversarial code review (2026-07-12)
-
 ### [MED] engine hooks missing for two ratified-adjacent bridge shapes
 - pass: session-closeout 2026-07-12 (commit ffadca96)
 - viewport: n/a
@@ -696,7 +613,7 @@
   nearest-buildable instead; the killed bridges barbed-compliment and
   interest-on-the-flesh point at the re-homes.
 - evidence: session A/B report + card notes in
-  `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-honest-rebaseline-and-evidence.md`.
+  `archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-honest-rebaseline-and-evidence.md`.
 - suggested fix: add the two hooks as small engine substrate items in
   the next engine phase, then revisit the killed bridge designs.
 - source: session closeout
@@ -764,6 +681,92 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] village / items — two consumables use "wearer" language for items the player drinks, not wears
+- pass: 41 (commit 6a804a02)
+- viewport: mobile and desktop (both render the same source text)
+- category: comprehension / voice
+- observation: `axiomancer-mechanics/src/Items/consumable.library.ts`
+  describes two `category: 'consumable'` items as affecting "the
+  wearer" even though both are drunk: `void-essence` ("A vial of
+  substance that refuses to be observed. Drinking it leaves the
+  wearer slightly insistent and intensely present.", line 147-148) and
+  `heart-draught` ("A warm draught that quickens the wearer's
+  convictions.", line 78). Every other consumable in the file
+  describes an effect on the drinker/self, not a "wearer" — this reads
+  as flavor text drafted from an equipment-item template and never
+  re-worded for a drinkable. Live in the shop: Void Essence is sold at
+  Glen Market (`wanderer-nf-village` fixture, confirmed in
+  `07-village.png`/`.txt` this pass).
+- evidence: `axiomancer-mobile/.critique-artifacts/{mobile,desktop}/07-village.png`;
+  `axiomancer-mechanics/src/Items/consumable.library.ts:78,147-148`.
+- suggested fix: reword both descriptions to drinker-appropriate
+  language, e.g. void-essence → "...leaves the drinker slightly
+  insistent and intensely present"; heart-draught → "...quickens the
+  drinker's convictions". Data-only text edit, no effect/wiring change.
+  Equipment/consumable-lifecycle territory (`/adjust-equipment`).
+- source: loop
+- closed: moot (R10b2, 2026-10-02): both consumables were deleted in R5 (healing potions only); `void-essence` survives only as a migration id.
+
+### [x] [MED] ratified-exception HP arms bypass the damage-instance clock funnel
+- pass: review-closeout 2026-07-12 (commit 4680e5e2, branch
+  claude/axiomancer-dawncaster-comparison-cz6008)
+- viewport: n/a
+- category: design
+- observation: the three spec 32 §12 ratified direct-HP exceptions — the
+  `conclude` signature arm (Conclusion, per-stack), the `mercy` signature
+  arm (Disarming Plea, flat magnitude; both `combat.signature.ts`, plain
+  `applyDamage`), and the mercy-exploit strike
+  (`selectEncounterMercyChoice` exploit branch, `combat.engine.ts`) —
+  apply damage OUTSIDE the `applyEnemyDamage` funnel. Every status-gated
+  payoff burst advances BLEED's WS3.2 damage-instance clock; these three
+  hits do not, so a Conclusion cast or a mercy-exploit strike lands on a
+  bleeding enemy without the bleed paying out. Ratified exceptions ARE
+  allowed to differ from the funnel — whether they SHOULD feed the clock
+  is a design call, not a bug fix, hence filed instead of changed.
+- evidence: `combat.engine.ts` `applyEnemyDamage` doc comment ("the
+  shared enemy-damage funnel"); `combat.signature.ts` conclude/mercy arms
+  call `applyDamage` directly; the mercy-exploit branch likewise. The
+  doctrine witness (`doctrine-strike-dead.engine.test.ts`) ratifies the
+  three arms' RIGHT to chip HP (spec 32 §12) but nothing rules on their
+  clock semantics.
+- suggested fix: owner call under the spec 32 §12 framing — either (a)
+  ratify "exception damage is clock-silent" as spec text (one sentence in
+  §12, plus a witness pinning it), or (b) route the three arms through
+  `applyEnemyDamage` so BLEED treats every enemy-HP hit uniformly. Do NOT
+  change behavior without the ratification; (b) also changes Conclusion's
+  effective damage against bleeds and needs a balance glance.
+- source: adversarial code review (2026-07-12)
+- closed: moot (R10b2, 2026-10-02): the `conclude` and `mercy` signature arms were deleted (R4, R7e2) and no card applies BLEED after the card purge, so the clock this row weighs has no carrier.
+
+### [x] [MED] WS9 reactive cleanse strips a whole merged instance — tension with the enemy-cleanse mitigation
+- pass: review-closeout 2026-07-12 (commit 4680e5e2, branch
+  claude/axiomancer-dawncaster-comparison-cz6008)
+- viewport: n/a
+- category: design
+- observation: the WS9 reactive cleanse (`enemyCleanse` threat-branch
+  payload, `combat.engine.ts`; prototype carrier Tri-Eyes,
+  `combat.threat-sequences.ts`) removes one whole merged `ActiveEffect`
+  instance in application order. Because same-id afflictions
+  intensity-stack into ONE instance, a single cleanse can erase an
+  arbitrarily tall stack — e.g. a poison the player spent three cards
+  deepening — which sits in tension with the standing "enemy cleanse <
+  cheapest DoT output" mitigation (the cleanse should never out-tempo the
+  cheapest re-application). The guardrails are real (never the last
+  affliction, telegraphed branch, at most once per sequence pass) but
+  none of them bound the VALUE removed, only the count.
+- evidence: `combat.encounter.types.ts` `enemyCleanse` doc; the
+  `applyCleanse`-based shed in `combat.engine.ts` (WS9 reactive cleanse
+  block); witness `threat-branches.engine.test.ts` ("cleanses exactly one
+  affliction... never the last") asserts instance count, not intensity.
+- suggested fix: propose intensity-SHAVING as the follow-up — the cleanse
+  removes N intensity from the chosen affliction (washing it out only at
+  0) instead of the whole instance, so the shed price stays comparable to
+  one cheap DoT application regardless of stack height. Needs a design
+  pass on N (flat 1? per-branch payload?) and a re-run of the WS9 branch
+  witnesses; until ratified, the current whole-instance shed stands.
+- source: adversarial code review (2026-07-12)
+- closed: moot (R10b2, 2026-10-02): its carrier (Tri-Eyes) was deleted in R2a and no player card stacks an affliction after the purge; nothing can be over-cleansed.
 
 ### [x] [MED] tooling / critique — after R3a, every state fixture boots off Act 1, so critique's gated screens show places no player can reach — RESOLVED 2026-10-01 (R7e, commit 1017c8d5; verified on screen pass 64)
 - pass: 60 (commit 2d918845)
@@ -957,7 +960,7 @@
 - auth_state: n/a
 - category: engineering
 - observation: `combat.engine.ts` (~lines 4011/4059) still keys the telegraph-forcing hook on `fated-course`, retired from the library in D8's ten-in/ten-out ledger. Unreachable in live play (no preset/reward fields the card), but `oracle-omen-v2.engine.test.ts` depends on it as its deterministic telegraph harness — swapping the id would destroy the guaranteed-hit assertions.
-- evidence: fixture-sweep report, 2026-07-18; plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-18-d8-preset-dice-valves.md §Residue
+- evidence: fixture-sweep report, 2026-07-18; archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-18-d8-preset-dice-valves.md §Residue
 - suggested fix: next oracle pass ports the harness onto a live card or a test-only hook id, then deletes the dead engine branch.
 - source: ship-a-phase D8
 - **CLOSED 2026-09-28 (R0):** moot as a standalone row. R7 deletes every carrier-less engine hook and the tests that load them (D50, `plan/revamp/engine.md`).
@@ -1557,7 +1560,7 @@
   `515ac4d9`, 2026-09-02) moved the late band 9% -> 44% via card
   upgrades/deck tiers/CONDEMN rescale — a fourth lever, not any of the
   three this row's PHASE_CANDIDATES successor named and declined to
-  pick. Full writeup: `plan/archive/2026-09-25-trim-t4/plan/phases/phase_81_late_campaign_difficulty_cliff.md`.
+  pick. Full writeup: `archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/phases/phase_81_late_campaign_difficulty_cliff.md`.
   Residual: the three weakest late cells (13-23%, all passive-policy
   shaped) are a legitimate small follow-up, not a design-level cliff —
   filed as a Follow-up in the phase brief, not a new HIGH.
@@ -1602,7 +1605,7 @@
   The WS3/WS4 late gates FAILED on this global condition, not on their
   own cards — late-stage failure is currently unattributable to any
   individual card or theme.
-- evidence: `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-honest-rebaseline-and-evidence.md`
+- evidence: `archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-honest-rebaseline-and-evidence.md`
   (honest re-baseline matrix). Doctrine curve target is late ~25-35%
   for starter presets (`axiomancer-mechanics/CLAUDE.md`).
 - suggested fix: a dedicated late-stage tuning phase (global
@@ -2400,7 +2403,7 @@
   it as a real mechanic (see PR #68's `CardForm.tsx` SWAY field). A
   player has no way to see SWAY progress toward capitulation.
   Sequencing risk for Phase 33 (Enemy Answers, SWAY-cleanse enemies,
-  `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-theme-identity.md` §1): that phase plans
+  `archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-theme-identity.md` §1): that phase plans
   enemy counterplay against a mechanic the player currently cannot
   observe.
 - evidence: full-screen accessibility snapshot of an in-progress
@@ -2423,7 +2426,7 @@
   roles-harvest) show the IDENTICAL +10.8pp seed-2 mid-stage delta —
   a pool-shuffle artifact, not a card signal. Matrix-level stage
   deltas in sandbox A/Bs are not attributable to the cards under test.
-- evidence: `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-honest-rebaseline-and-evidence.md`
+- evidence: `archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-honest-rebaseline-and-evidence.md`
   §2 cross-cutting findings 1-2; direct-draft probe
   (`probe-ingot-draftability.ts`) shows ingot-of-ruin IS structurally
   draftable — the scorer and the lottery disagree.

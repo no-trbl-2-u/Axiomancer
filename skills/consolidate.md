@@ -30,7 +30,7 @@ Every skill's Step 0 reads `plan/bearings.md` and
 critique rows pile up, bearings prose gets superseded a
 paragraph at a time, lessons duplicate each other in different
 words. Unbounded growth is a tax on every future tick. This
-verb is the garbage collector: it merges, prunes, and archives
+verb is the garbage collector: it merges and prunes
 **without changing what the memory says**.
 
 ## 2. Invocation
@@ -51,11 +51,10 @@ own loop shape with its own cadence.
    wc -l plan/bearings.md plan/CRITIQUE.md plan/lessons.md plan/reflexes.md
    ```
 
-2. **CRITIQUE.md — archive the closed.** Rows in `## Done`
-   older than 60 days move verbatim to
-   `plan/archive/CRITIQUE_<YYYY>.md` (create on first use; one
-   file per year, append-only). The `## Pending` section is
-   never archived. Recurring findings (same defect observed
+2. **CRITIQUE.md — prune the closed.** Rows in `## Done`
+   older than 60 days are deleted; the consolidation commit is
+   their record (there is no `plan/archive/`, D66). The
+   `## Pending` section is never pruned. Recurring findings (same defect observed
    across ≥3 passes, e.g. a spacing nit that re-fires every
    pass) are collapsed to ONE row: keep the latest
    observation and the suggested fix, fold the prior
@@ -131,12 +130,11 @@ own loop shape with its own cadence.
      flag it as a `plan/AUDIT.md` finding. Do not delete it —
      that call belongs to whoever owns the surface it documents.
 
-6. **Log the pass.** Append one line to
-   `plan/archive/CONSOLIDATE_LOG.md`:
+6. **Log the pass** in the commit body, one entry:
 
    ```
    - <YYYY-MM-DD>: bearings <N>→<M> lines, CRITIQUE <N>→<M>,
-     lessons <N>→<M>; <K> rows archived, <J> merged; terminology
+     lessons <N>→<M>; <K> rows pruned, <J> merged; terminology
      sweep <clean | K lexicon rows added | K files banked/flagged>.
      <one-line note>
    ```
@@ -162,9 +160,9 @@ own loop shape with its own cadence.
 3. **Pending work is untouchable.** `## Pending` critique
    rows, open AUDIT rows, and `[ ]` build-plan rows are the
    dispatcher's queue, not clutter.
-4. **Archive, don't delete.** Anything removed from a live
-   file lands verbatim in `plan/archive/` — git history is not
-   the only escape hatch.
+4. **Git is the archive** (D66). Anything removed from a live
+   file is deleted; never recreate `plan/archive/`. The commit
+   that removes it names what went.
 5. **When in doubt, leave it.** A passage whose staleness you
    cannot verify against the tree stays put.
 6. One commit; the standing rules (no `Co-Authored-By`, no
@@ -187,11 +185,10 @@ own loop shape with its own cadence.
 
 ```bash
 plan/bearings.md                      # compact prose, never contracts
-plan/CRITIQUE.md                      # archive Done >60d, collapse recurrences
+plan/CRITIQUE.md                      # prune Done >60d, collapse recurrences
 plan/lessons.md · plan/reflexes.md    # merge dupes, propose promotions, drain enforced
 node scripts/check-lexicon.mjs        # terminology sweep — should be green; hunt unknown-unknowns
 plan/AUDIT.md                         # suspected-dead files land here, not deleted
-plan/archive/                         # CRITIQUE_<year>.md · CONSOLIDATE_LOG.md
 npm run verify
 git commit -m "consolidate: <YYYY-MM-DD>" && git push origin main
 ```

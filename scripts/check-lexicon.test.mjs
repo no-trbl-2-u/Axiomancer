@@ -110,3 +110,30 @@ test('every registry pattern compiles and carries a replacement', () => {
     assert.doesNotThrow(() => new RegExp(r.pattern, 'g'), `${r.id} pattern does not compile`)
   }
 })
+
+// Phase R10b2 (D67): the revamp's deleted concepts fail in live docs. Each row
+// targets the concept's phrasing, not a bare word, so the live uses beside it
+// stay clean.
+test('the revamp guard flags each deleted concept and spares its live neighbours', () => {
+  const flags = (id, text) => scanText(text, byId(id)).length > 0
+  assert.ok(flags('preset-deck', 'Pick one of the preset decks.'))
+  assert.ok(flags('preset-deck', 'the starter deck presets hold the curve'))
+  assert.ok(!flags('preset-deck', 'Hazard deck presets and a random deck'))
+  assert.ok(flags('stance-check', 'CHOOSE A STANCE'))
+  assert.ok(flags('stance-check', 'the punish/yield check resolves'))
+  assert.ok(!flags('stance-check', 'the stance layer was removed (D65)'))
+  assert.ok(flags('rps', 'rock-paper-scissors advantage'))
+  assert.ok(flags('card-pricing', 'every card fits the power budget'))
+  assert.ok(flags('deck-theme', 'reward steering toward the deck theme'))
+  assert.ok(flags('swap-pool', 'draw from the swap pool'))
+  assert.ok(flags('primary-colour-deck', 'a primary colour + borrows'))
+  assert.ok(!flags('primary-colour-deck', 'the Color Law: a die powers a card of its colour'))
+  assert.ok(flags('retired-keyword', 'the foe RELENTS'))
+  assert.ok(flags('retired-keyword', 'apply STAGGER 2'))
+  assert.ok(!flags('retired-keyword', 'UNBROKEN OATH draws two; GHOST dice feed the TOLL'))
+})
+
+test('a removal mention passes under a justified pragma', () => {
+  const text = '<!-- lexicon-ok: retired-keyword — names them to forbid them -->\nNever reintroduce RELENT.\n'
+  assert.deepEqual(scanText(text, byId('retired-keyword')), [])
+})

@@ -18,7 +18,7 @@ block to find the next phase. Status vocabulary: `[ ]` pending
 Tick in this file in the same commit that ships the phase. Shipped rows
 are one line (title + commit hash); the full text of every row collapsed
 in TRIM THE FAT T4 (2026-09-25) lives verbatim in
-`plan/archive/BUILD_PLAN_2026.md`.
+`archive-pre-revamp:plan/archive/BUILD_PLAN_2026.md`.
 
 > **AUDIT-DRAIN MODE LIFTED (via /oversight 2026-08-15 — T called it
 > off).** The banner set 2026-08-12 paused `ship-a-phase` dispatch
@@ -241,9 +241,9 @@ Phase 33 — Enemy Answers (specs 29/30 slice + enemy counterplay).
 SPLIT into shippable slices via oversight 2026-07-16 — the single
 mega-brief bundled ~6 verbs and carried the Phase 32 stall risk on
 oversized ticks. Each slice below must finish and commit on its own
-tick. Shared sources: `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-turn-texture.md` §3 +
-`plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-theme-identity.md` §1 +
-`plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-out-of-flow-mechanics.md` §2. All gated on
+tick. Shared sources: `archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-turn-texture.md` §3 +
+`archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-theme-identity.md` §1 +
+`archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-out-of-flow-mechanics.md` §2. All gated on
 Phase 26 (numbers) but design-independent of the owner session
 (mechanics).
 
@@ -288,7 +288,7 @@ supersession collisions before any engine work.
 > interception + route + forge UI — sibling encounters were each their own
 > phase), a momentum-V2 chip reshape, and net-new e2e flag-hook plumbing (there
 > is no Playwright in mobile — the browser e2e are bespoke `scripts/*.mjs` and
-> the flag is bundle-time only). Parent brief `plan/archive/2026-09-25-trim-t4/plan/phases/phase_D6_mobile_ui.md`
+> the flag is bundle-time only). Parent brief `archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/phases/phase_D6_mobile_ui.md`
 > stays the north star; each sub-phase renders spec-33 rules AS-IS by EXTENDING
 > the existing `STANCE_COLORS`/glyph/#5-SIDE-RAIL conventions (never forking),
 > flag-gated so flag-off stays byte-identical.
@@ -1038,14 +1038,14 @@ See the status rows above; generate briefs on demand.
   → "Miserere Mei, Deus"). Confirmed T's request: yes — T ruled the
   naming session directly mid-`/oversight` conversation, decided alongside
   setting *Mörk Borg* as the game's new tonal North Star (art/narration/
-  encounters; mechanics unchanged) — see `plan/archive/2026-09-25-trim-t5/new-north-star.prompt.md`. T's
+  encounters; mechanics unchanged) — see `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/new-north-star.prompt.md`. T's
   stated reason: "Miserere Mei, Deus" sounds good, chosen directly rather
   than from either naming-session pass; T explicitly scoped this
   `/oversight` tick to the name only, deferring the wider pivot to a
   future brainstorm session. Resulting commit: this one, plus
   `plan/AUDIT.md`'s product-name row (`[x]` resolved),
-  `plan/archive/2026-09-25-trim-t4/plan/naming-session-2026-08-12.md` §6 (closed), `plan/bearings.md`'s
-  name line, and `plan/archive/2026-09-25-trim-t5/new-north-star.prompt.md`; brief for 67 still to
+  `archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/naming-session-2026-08-12.md` §6 (closed), `plan/bearings.md`'s
+  name line, and `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/new-north-star.prompt.md`; brief for 67 still to
   generate.
 
 - **2026-08-22** — actor: **T via remote Claude Code session** (the

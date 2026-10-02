@@ -13,14 +13,14 @@
       "id": "premise",
       "type": "identifier",
       "pattern": "\\bPREMISES?\\b",
-      "replacement": "CHARGE (R-1) — the running tally keyword",
+      "replacement": "nothing: its 44b/44c successor CHARGE was itself deleted in the revamp (R7, R10b2); see docs/game-model.md \"What the game does not have\"",
       "since": "2026-08-09 (phase 44b, spec 34 §5.2 R-1)"
     },
     {
       "id": "peroration",
       "type": "identifier",
       "pattern": "\\bPERORATION\\b",
-      "replacement": "SENTENCE (R-2) — the declared-conclusion payoff",
+      "replacement": "nothing: its 44b/44c successor SENTENCE was itself deleted in the revamp (R7, R10b2); see docs/game-model.md \"What the game does not have\"",
       "since": "2026-08-09 (phase 44b, spec 34 §5.2 R-2)",
       "note": "bare-word pattern only — PERORATION was already demoted out of KEYWORD_GLOSS in phase 29, so no scoping is needed beyond the word boundary"
     },
@@ -28,35 +28,35 @@
       "id": "concede",
       "type": "identifier",
       "pattern": "\\bCONCEDES?\\b",
-      "replacement": "CONDEMN (R-3) — the alt-win the court itself declares",
+      "replacement": "nothing: its 44b/44c successor CONDEMN was itself deleted in the revamp (R7, R10b2); see docs/game-model.md \"What the game does not have\"",
       "since": "2026-08-09 (phase 44b, spec 34 §5.2 R-3)"
     },
     {
       "id": "sway",
       "type": "identifier",
       "pattern": "\\bSWAY\\b",
-      "replacement": "PLEA (R-4) — the choir's mercy-meter keyword",
+      "replacement": "nothing: its 44b/44c successor PLEA was itself deleted in the revamp (R7, R10b2); see docs/game-model.md \"What the game does not have\"",
       "since": "2026-08-09 (phase 44b, spec 34 §5.2 R-4)"
     },
     {
       "id": "capitulate",
       "type": "identifier",
       "pattern": "\\bCAPITULATE\\b",
-      "replacement": "RELENT (R-5) — the PLEA/CHARGE alt-win resolution",
+      "replacement": "nothing: its 44b/44c successor RELENT was itself deleted in the revamp (R7, R10b2); see docs/game-model.md \"What the game does not have\"",
       "since": "2026-08-09 (phase 44b, spec 34 §5.2 R-5)"
     },
     {
       "id": "rapport",
       "type": "identifier",
       "pattern": "\\bRAPPORT\\b",
-      "replacement": "QUARTER (R-6) — the incoming-damage-reduction keyword",
+      "replacement": "nothing: its 44b/44c successor QUARTER was itself deleted in the revamp (R7, R10b2); see docs/game-model.md \"What the game does not have\"",
       "since": "2026-08-09 (phase 44b, spec 34 §5.2 R-6)"
     },
     {
       "id": "reargue",
       "type": "identifier",
       "pattern": "\\bREARGUE\\b",
-      "replacement": "CURDLE (R-7) — the Bleed/Poison conversion keyword",
+      "replacement": "nothing: its 44b/44c successor CURDLE was itself deleted in the revamp (R7, R10b2); see docs/game-model.md \"What the game does not have\"",
       "since": "2026-08-09 (phase 44b, spec 34 §5.2 R-7)"
     },
     {
@@ -87,21 +87,21 @@
       "id": "enchantment",
       "type": "identifier",
       "pattern": "\\bENCHANTMENT\\b",
-      "replacement": "OATH (R-9) — the card type; the CardType literal also moved 'enchantment' -> 'oath'",
+      "replacement": "nothing: its 44b/44c successor OATH was itself deleted in the revamp (R7, R10b2); see docs/game-model.md \"What the game does not have\"",
       "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-9)"
     },
     {
       "id": "disenchant",
       "type": "identifier",
       "pattern": "\\bDISENCHANT\\b",
-      "replacement": "HEX (R-10) — the card type; the CardType literal also moved 'disenchant' -> 'hex'",
+      "replacement": "nothing: its 44b/44c successor HEX was itself deleted in the revamp (R7, R10b2); see docs/game-model.md \"What the game does not have\"",
       "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-10)"
     },
     {
       "id": "thoughtform",
       "type": "identifier",
       "pattern": "\\bTHOUGHTFORM\\b",
-      "replacement": "HAUNT (R-13) — the CONJURE-only card class; id prefix 'tf-' also moved to 'ht-'",
+      "replacement": "nothing: its 44b/44c successor HAUNT was itself deleted in the revamp (R7, R10b2); see docs/game-model.md \"What the game does not have\"",
       "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-13)"
     },
     {
@@ -159,6 +159,63 @@
       "replacement": "no status-engagement floor survives (axiomancer-mechanics/CLAUDE.md 'Load-bearing doctrine' §2/§3) — status-effect usage is not a regression gate or a graded target any more; the sims keep bug detectors and a wide sanity envelope, not a doctrine curve.",
       "since": "2026-09-02 (THE BIG NUMBERS REWRITE, commit 63e3741f)",
       "note": "assertion-scoped: catches the enforcement claim (an engagement floor exists and is applied), not a mention that no such floor survives — see axiomancer-mechanics/CLAUDE.md's own 'no status-engagement floor' line, which does not match this pattern's word order"
+    },
+    {
+      "id": "preset-deck",
+      "type": "identifier",
+      "pattern": "\\b(?:[Pp]reset decks?|[Ss]tarter (?:deck )?presets?|PRESET_LINEAGE)\\b",
+      "replacement": "the grey deck: every run starts with it; there are no preset decks or deck draft (D36, R7b)",
+      "since": "2026-10-02 (phase R10b2, D67)"
+    },
+    {
+      "id": "stance-check",
+      "type": "identifier",
+      "pattern": "\\b(?:[Ss]tance (?:check|read|chips?|choice|draft)|CHOOSE A STANCE|[Pp]unish/yield|[Hh]idden read)\\b",
+      "replacement": "nothing: stances, the hidden read and the punish/yield check were deleted in R7d (D65); the Color Law and colour match stay",
+      "since": "2026-10-02 (phase R10b2, D67)"
+    },
+    {
+      "id": "rps",
+      "type": "identifier",
+      "pattern": "\\bRPS\\b|[Rr]ock[- ][Pp]aper[- ][Ss]cissors",
+      "replacement": "nothing: the rock-paper-scissors stance layer was deleted in R7d (D65)",
+      "since": "2026-10-02 (phase R10b2, D67)"
+    },
+    {
+      "id": "card-pricing",
+      "type": "identifier",
+      "pattern": "\\b(?:[Cc]ard pricing|[Pp]ower budget|[Pp]ricing (?:law|ladder|model|table|budget))\\b",
+      "replacement": "nothing: card pricing and the power budget were deleted (R7a, R7b); the only prices are the cut and the Anvil",
+      "since": "2026-10-02 (phase R10b2, D67)"
+    },
+    {
+      "id": "deck-theme",
+      "type": "identifier",
+      "pattern": "\\b(?:[Dd]eck themes?|[Cc]ard themes?|[Tt]hemed decks?|[Tt]heme steering|[Rr]eward steering)\\b",
+      "replacement": "nothing: themes, synergy and reward steering were deleted in R7b",
+      "since": "2026-10-02 (phase R10b2, D67)"
+    },
+    {
+      "id": "swap-pool",
+      "type": "identifier",
+      "pattern": "\\b[Ss]wap pool\\b",
+      "replacement": "nothing: the swap pool went with the preset decks (R7b)",
+      "since": "2026-10-02 (phase R10b2, D67)"
+    },
+    {
+      "id": "primary-colour-deck",
+      "type": "identifier",
+      "pattern": "[Pp]rimary colou?r \\+ borrows|\\b[Bb]orrowed colou?rs?\\b|\\b[Cc]olou?r borrows?\\b",
+      "replacement": "the Color Law is a per-card rule (a die powers a card of its colour or a grey card), not a deck constraint; see docs/game-model.md",
+      "since": "2026-10-02 (phase R10b2, D67)"
+    },
+    {
+      "id": "retired-keyword",
+      "type": "identifier",
+      "pattern": "\\b(?:RELENT|CONDEMN|PLEA|CHARGE|STAGGER|BACKFIRE|CONFUSION|DISRUPT|SUMMON|WRATH|CURDLE|FLURRY|SWIFT|BRUTAL|HEX|HAUNT)S?\\b",
+      "replacement": "nothing: the revamp deleted this keyword or alt-win (R2b, R6b, R7a-R7d); the cards are DEAL and GUARD, and befriend is the one non-lethal ending",
+      "since": "2026-10-02 (phase R10b2, D67)",
+      "note": "OATH is not listed: UNBROKEN OATH is a live hazard card name. GHOST and TOLL are not listed: the surge dice and the toll tally are live."
     }
   ]
 }

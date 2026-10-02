@@ -4,7 +4,7 @@
 
 Developer reference for every status effect in Axiomancer Mechanics. For an individual
 effect deep-dive (data fields, combat interaction, test cases) see the per-effect
-documents formerly in `docs/effects/` (archived 2026-09-25 to `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/effects/`).
+documents formerly in `docs/effects/` (archived 2026-09-25 to `archive-pre-revamp:plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/effects/`).
 
 ---
 
@@ -389,7 +389,7 @@ The combat CLI processes effects in this order each round:
 
 ## Complete Effects Table — Buffs (40)
 
-Full per-effect documentation (archived 2026-09-25): `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/effects/buffs/`
+Full per-effect documentation (archived 2026-09-25): `archive-pre-revamp:plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/effects/buffs/`
 
 | ID | Name | Tier | Category | Dur | Stack | resistedBy | resistDR | Payload Summary |
 |----|------|------|----------|-----|-------|-----------|---------|-----------------|
@@ -416,7 +416,7 @@ Full per-effect documentation (archived 2026-09-25): `plan/archive/2026-09-25-tr
 
 ## Complete Effects Table — Debuffs (48)
 
-Full per-effect documentation (archived 2026-09-25): `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/effects/debuffs/`
+Full per-effect documentation (archived 2026-09-25): `archive-pre-revamp:plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/effects/debuffs/`
 
 | ID | Name | Tier | Category | Dur | Stack | resistedBy | resistDR | Payload Summary |
 |----|------|------|----------|-----|-------|-----------|---------|-----------------|

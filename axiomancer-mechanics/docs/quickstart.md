@@ -1,5 +1,7 @@
 # Quickstart — what's shipped + how to test it
 
+<!-- lexicon-ok: stance-check, rps, retired-keyword — stale body describing deleted systems; R10c rewrites this doc and removes this pragma -->
+
 > A single-page tour of `axiomancer-mechanics`: what runs today, how
 > to drive the CLI through every major surface, and where to look
 > when you want more depth. Audience: someone landing on the repo
@@ -209,6 +211,6 @@ Focused guides with runnable code samples for each major module:
 | Use a public API surface | [`docs/api.md`](./api.md) |
 | Understand a module's design | `docs/<module>.md` (per the table in §1) |
 | Add a hermetic test | [`docs/testing.md`](./testing.md) |
-| Re-ground stale consumer types after a bump | [`CHANGELOG.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/CHANGELOG.md) (archived) `[unreleased]` Migration notes (Phase 61 — the 9-row consumer-side re-grounding table covers `getCoastalMap` / `WorldMap` / `Encounter.enemy` / `DialogueChoice.id`/`.label` / `DialogueNode.speaker` / `Character.mana`/`.maxMana` / `ActiveEffect.id`/`.name` / `EffectStatTarget` / `GameState` index signature) |
-| See the per-phase shipping history | [`CHANGELOG.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/CHANGELOG.md) (archived) |
+| Re-ground stale consumer types after a bump | `CHANGELOG.md` (`archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/CHANGELOG.md`) (archived) `[unreleased]` Migration notes (Phase 61 — the 9-row consumer-side re-grounding table covers `getCoastalMap` / `WorldMap` / `Encounter.enemy` / `DialogueChoice.id`/`.label` / `DialogueNode.speaker` / `Character.mana`/`.maxMana` / `ActiveEffect.id`/`.name` / `EffectStatTarget` / `GameState` index signature) |
+| See the per-phase shipping history | `CHANGELOG.md` (`archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/CHANGELOG.md`) (archived) |
 | File a finding / feature idea | `braindump/BRAINDUMP.md` for half-formed ideas |

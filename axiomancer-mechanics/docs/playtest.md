@@ -125,4 +125,4 @@ and should tighten toward it as calibration runs land — a starter deck
 clearing late well above this curve is a dominance finding, not a
 success, since starter decks are early/mid-game decks by design (the
 player trades into a new mid-game deck after the labyrinth). Correction
-history: `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-08-win-path-scaling.md`.
+history: `archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-08-win-path-scaling.md`.

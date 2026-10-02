@@ -1,5 +1,7 @@
 # CLI
 
+<!-- lexicon-ok: stance-check, rps, retired-keyword — stale body describing deleted systems; R10c rewrites this doc and removes this pragma -->
+
 > Command-line interface for interacting with the Axiomancer mechanics engine.
 
 ## Overview

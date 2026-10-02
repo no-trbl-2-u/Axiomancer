@@ -319,7 +319,7 @@ the village below.
 ## 3g. M4 — shipped state (2026-09-27)
 
 The Lantern Deep's vault door (`ld-15`) is the Labyrinth's (D24). Brief:
-`plan/archive/2026-09-28-revamp-r0/plan/phases/phase_M4_labyrinth_door.md`.
+`archive-pre-revamp:plan/archive/2026-09-28-revamp-r0/plan/phases/phase_M4_labyrinth_door.md`.
 
 - **Engine:** a new `labyrinth` map-event kind (`LabyrinthDoorPayload`). It
   resolves to `{ kind: 'labyrinth', act }`, where `act` is the durable

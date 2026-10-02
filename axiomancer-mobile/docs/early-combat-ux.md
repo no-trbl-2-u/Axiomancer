@@ -1,5 +1,7 @@
 # Early combat UX doctrine
 
+<!-- lexicon-ok: stance-check, rps, retired-keyword — stale body describing deleted systems; R10c rewrites this doc and removes this pragma -->
+
 > Mobile-facing guidance from Tobin's early-combat review. The mechanics repo
 > owns combat truth; this client owns whether the player can read that truth
 > before it hurts them.

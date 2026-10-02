@@ -23,7 +23,7 @@ T, 2026-09-28:
   stays with the `ci-autofix` workflow, not a march step. Revamp mode ends
   when Phase R11 (the loop's content phases) ships.
 - **Also in the R0 session (T):** `/combat-playtest` is archived (command
-  and workflow, to `plan/archive/2026-09-28-revamp-r0/`); Phase R12
+  and workflow, to `archive-pre-revamp:plan/archive/2026-09-28-revamp-r0/`); Phase R12
   writes a new one after R11. The engine's matrix CLI
   (`npm run combat-playtest`) stays.
 
@@ -33,7 +33,7 @@ Telemetry note: the hook (`.claude/hooks/telemetry.mjs:232-258`) counts only
 
 ## R0 — Loop doctrine reset (attended)
 
-### Archive (move to `plan/archive/2026-09-28-revamp-r0/`)
+### Archive (move to `archive-pre-revamp:plan/archive/2026-09-28-revamp-r0/`)
 
 | Item | Why |
 |---|---|
@@ -130,7 +130,7 @@ because it edits `.claude/**` and sets doctrine.
   `/forge` model created content outside any plan). For each surface
   (cards, keywords, enemies, relics, maps, NPCs, events, art) decide:
   loop-shippable phases, owner-led sessions, or still held.
-- Review the archive in `plan/archive/2026-09-28-revamp-r0/` for anything
+- Review the R0 archive (`git show archive-pre-revamp:plan/archive/2026-09-28-revamp-r0/...`) for anything
   worth reviving in a new shape (a content agent, the wiring checklists
   already folded into docs).
 - Check telemetry (`npm run telemetry`, including `verb-read` rows) and
@@ -157,7 +157,7 @@ wanted, a workflow) for the rebuilt game:
   stage profiles to Act 1 levels if R9 has not.
 - Findings go to `plan/AUDIT.md`; it stays report-only.
 
-The archived rewrite (`plan/archive/2026-09-28-revamp-r0/.claude/commands/combat-playtest.md`)
+The archived rewrite (`archive-pre-revamp:plan/archive/2026-09-28-revamp-r0/.claude/commands/combat-playtest.md`)
 is a starting draft, not a spec. Requires R9, R11.
 
 ### Exit

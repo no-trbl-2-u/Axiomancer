@@ -37,12 +37,12 @@ scripts, and the root `npm test` is green.
    `test`; drop the CI freshness step, the test step and the path filters
    in `verify-mechanics.yml`. Move
    `axiomancer-mechanics/docs/reports/baselines/deck-matrix-baseline.json`
-   to `plan/archive/baselines/` (D50: an archived artifact, not source).
+   to `archive-pre-revamp:plan/archive/baselines/` (D50: an archived artifact, not source).
    Rewrite the root `CLAUDE.md` "balance/measurement" paragraph,
    AGENTS.md → Truth sources, `docs/truth-sources.md` → "Measured truth",
    and the digest's nightly re-measure in `skills/digest.md`.
 3. **DevLog.** Move `devlog/tuning-lab/tuning-lab-{1,2,3}.html` to
-   `plan/archive/tuning-lab/`; remove the Tuning Lab page from
+   `archive-pre-revamp:plan/archive/tuning-lab/`; remove the Tuning Lab page from
    `build-devlog-public.mjs`, `build-devlog.mjs`, the public nav in
    `devlog-public-shell.mjs`, `check-devlog-not-served.mjs`, `.gitignore`,
    `devlog/README.md`, and their tests. Entries stay as history. The

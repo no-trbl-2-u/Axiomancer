@@ -1,5 +1,7 @@
 # Keyword atlas — the live combat vocabulary
 
+<!-- lexicon-ok: stance-check, rps, retired-keyword — stale body describing deleted systems; R10c rewrites this doc and removes this pragma -->
+
 One row per LIVE keyword: the word, the reminder text a player reads the first
 time they meet it, and what carries it. Rewritten 2026-09-02 for THE BIG
 NUMBERS REWRITE (`plan/2026-09-02-big-numbers-overhaul.prompt.md`), which

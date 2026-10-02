@@ -1,5 +1,7 @@
 # The game model
 
+<!-- lexicon-ok: stance-check, rps, preset-deck, card-pricing, deck-theme, retired-keyword — names deleted systems to say the game does not have them -->
+
 > The game as the code stands. Read this first. Every number names the
 > constant it comes from, so a change to the code shows up as a wrong line
 > here. Paths are under `axiomancer-mechanics/src/` unless rooted. The card

@@ -349,7 +349,7 @@ save taken inside resumes there, and leaving puts the player back on
 **Fishing-village** was the starting map before the revamp, came after Act 1
 from M3e, and was purged in R3b (D53) with its NPCs, quests, event pools and
 the village goodwill system; save v29 scrubs it from old saves. Its
-node-by-node history (Phases 23–65) is in git and in `plan/archive/`. Read
+node-by-node history (Phases 23–65) is in git. Read
 live event content from `MapEvents/content.ts`.
 
 ## MapEvents (Spec 23)
@@ -420,7 +420,7 @@ only node-event dispatcher.
   - `getNodePrimaryEventKind(continent, mapName, nodeId)` — the
     highest-weight kind, or `undefined` for an empty/unregistered pool.
 
-See `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/23-map-events.md` (archived) for the spec and
+See `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/23-map-events.md` (archived) for the spec and
 `src/World/MapEvents/e2e/map-events.engine.test.ts` for the hermetic
 walkthrough covering all eight kinds.
 
@@ -441,7 +441,7 @@ as rest). Only the hazard minigame still carries a live balance sim
 
 ## See Also
 
-- [`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/08-world-content-and-hazards.md` (archived)](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/08-world-content-and-hazards.md)
-- [`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/23-map-events.md` (archived)](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/23-map-events.md)
+- `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/08-world-content-and-hazards.md`
+- `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/23-map-events.md`
 - [`docs/npcs.md`](./npcs.md) — branching dialogue UI conventions.
 - [`docs/effects.md`](./effects.md) — the effects engine.

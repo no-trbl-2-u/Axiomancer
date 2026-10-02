@@ -70,7 +70,7 @@ its own cadence.
 
    There is no nightly balance re-measure. The deck-matrix
    baseline is retired until the retune (D57; R1 removed its
-   scripts and archived the file to `plan/archive/baselines/`). Balance
+   scripts; the file survives only under the `archive-pre-revamp` tag). Balance
    evidence during the revamp comes from R9's own measurement
    (and, after R12, the new combat-playtest's reports); the digest only links a
    report that landed in the window.
@@ -83,7 +83,7 @@ its own cadence.
    `scripts/build-devlog.mjs`):
 
    **The entry is now PUBLISHED** (T, 2026-09-20 — see
-   `plan/archive/2026-09-25-trim-t4/plan/2026-09-20-devlog-public-publish.prompt.md`). Write every
+   `archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/2026-09-20-devlog-public-publish.prompt.md`). Write every
    line for a player who has never opened a terminal, not for the
    maintainer. The same file still renders the private index; the
    public site is `npm run site:public`.

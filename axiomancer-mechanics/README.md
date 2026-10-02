@@ -12,9 +12,9 @@ verify gates, and pointers to deeper docs.
 
 See [`VISION.md`](./VISION.md) for T's current game vision and doctrine guardrail before major mechanics, combat, friendship, or balance work.
 
-See the archived `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/RELEASES.md`
+See the archived `archive-pre-revamp:plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/RELEASES.md`
 for short-form per-version summaries (at-a-glance "what shipped in 0.X.Y?"),
-the archived [`CHANGELOG.md`](../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/CHANGELOG.md)
+the archived `CHANGELOG.md` (`archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/CHANGELOG.md`)
 for the full per-phase detail per release (both historical logs from the
 pre-monorepo npm era, frozen 2026-07-05),
 [`docs/truth-sources.md` § Source-of-truth hierarchy](../docs/truth-sources.md#source-of-truth-hierarchy--decision-authority)

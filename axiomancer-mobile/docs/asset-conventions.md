@@ -5,7 +5,7 @@
 > file headers under `assets/images/*/index.ts`, the `provenance.json`
 > records (esp. `maps/` — the Doré plate acquisition), `SVG_ASSET_SPEC.md`,
 > and the former `specs/11-asset-pipeline.md` (archived 2026-09-25 at
-> `plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/`). The registry
+> `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/`). The registry
 > headers, provenance records and `SVG_ASSET_SPEC.md` stay authoritative for
 > their own surfaces; this doc is the one-page checklist.
 

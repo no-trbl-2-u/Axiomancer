@@ -83,7 +83,7 @@ export interface InventoryItemRow {
      * `null` for non-equipment, equipped equipment, or equipment in
      * an empty slot (where the preview reduces to "no replacement —
      * the item's own stats win unopposed"). Phase 35 (ported from
-     * `plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-16/project/screens/inventory.jsx:215-225`
+     * `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-16/project/screens/inventory.jsx:215-225`
      * `computeDelta`).
      */
     replacePreview: ReplacePreview | null;
@@ -373,7 +373,7 @@ function aggregateEquipmentStats(equipment: Equipment): Map<string, number> {
 
 /**
  * Compute the net stat-delta from replacing `oldItem` with `newItem`.
- * Mirrors `plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-16/project/screens/inventory.jsx:215-225`
+ * Mirrors `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-16/project/screens/inventory.jsx:215-225`
  * `computeDelta` — start with new item's aggregated stats, subtract
  * the equipped item's stats, drop zero entries. Phase 35 preview.
  */
@@ -525,7 +525,7 @@ function readShilling(state: GameStore): number {
     // mobile chrome label for the same value — the VM field name +
     // the SHILLING screen literal carry the voice-register choice.
     // Closes the [2.5] DRIFT row from
-    // archived `plan/archive/2026-09-25-trim-t1/axiomancer-mobile/docs/mechanics-ui-audit-2026-05-22-inventory.md` row 7: the
+    // archived `archive-pre-revamp:plan/archive/2026-09-25-trim-t1/axiomancer-mobile/docs/mechanics-ui-audit-2026-05-22-inventory.md` row 7: the
     // earlier `p.shilling ?? p.currency` fallback hid which engine
     // field was canonical; no save / migration / fixture writes
     // `shilling` (cross-tree grep confirms) so the fallback was
@@ -542,7 +542,7 @@ function computeBurden(rows: readonly InventoryItemRow[]): number {
     // correct because the bar can't visualize "more than full" —
     // but the numeric text on the label row carries the overflow
     // signal. Closes the [3.0] DRIFT row from
-    // archived `plan/archive/2026-09-25-trim-t1/axiomancer-mobile/docs/mechanics-ui-audit-2026-05-22-inventory.md` row 11.
+    // archived `archive-pre-revamp:plan/archive/2026-09-25-trim-t1/axiomancer-mobile/docs/mechanics-ui-audit-2026-05-22-inventory.md` row 11.
     return rows.reduce((acc, r) => acc + r.quantity, 0);
 }
 
