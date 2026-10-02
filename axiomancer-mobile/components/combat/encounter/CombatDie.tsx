@@ -41,6 +41,7 @@ import Svg, { Circle, ClipPath, Defs, G, LinearGradient as SvgLinearGradient, Pa
 import { SPECIAL_CONVICTION_DEFAULT } from '@mechanics';
 import type { CombatDieVM } from '@/state/presenters/combat-encounter.engine';
 import { spentDieTreatment } from '@/lib/juice';
+import { HUE } from '@/theme/axm';
 
 /**
  * The die's spoken state (playtest 2026-09-04: the label still announced the
@@ -163,12 +164,12 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
     // not an animated primitive.
     const spentTreatment = spentDieTreatment({ spent: die.spent === true, dead });
     const greyed = spentTreatment.greyed;
-    const ring = cracked ? '#6b3030' : greyed ? '#3a3a3a' : special ? accent : `${accent}aa`;
+    const ring = cracked ? HUE.dieCrackedRing : greyed ? HUE.deadGrey : special ? accent : `${accent}aa`;
     const glow = !dead && !dimmed;
     // Cube face colours — lit top, shaded right, dark front (the art surface).
-    const liteFace = greyed ? '#2b2a31' : mixHex(accent, '#ffffff', 0.35);
-    const darkFace = greyed ? '#131217' : mixHex(accent, '#000000', 0.55);
-    const edge = greyed ? '#0c0b10' : mixHex(accent, '#000000', 0.7);
+    const liteFace = greyed ? HUE.dieGreyLite : mixHex(accent, HUE.white, 0.35);
+    const darkFace = greyed ? HUE.dieGreyDark : mixHex(accent, HUE.black, 0.55);
+    const edge = greyed ? HUE.dieGreyEdge : mixHex(accent, HUE.black, 0.7);
     // Component footprint (the hazard proportion): cube + cast-shadow room.
     const o = size * 0.32;
     const W = size + o;
@@ -225,11 +226,11 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
                     <SvgLinearGradient id={bodyId} x1="0%" y1="0%" x2="80%" y2="100%">
                         <Stop offset="0%" stopColor={accent} stopOpacity={greyed ? 0.1 : 0.42} />
                         <Stop offset="45%" stopColor={accent} stopOpacity={greyed ? 0.05 : 0.16} />
-                        <Stop offset="100%" stopColor="#000000" stopOpacity={0.55} />
+                        <Stop offset="100%" stopColor={HUE.black} stopOpacity={0.55} />
                     </SvgLinearGradient>
                     {/* The crystal's own facet light — white cap into the stance colour. */}
                     <SvgLinearGradient id={gemId} x1="0%" y1="0%" x2="35%" y2="100%">
-                        <Stop offset="0%" stopColor="#ffffff" stopOpacity={0.95} />
+                        <Stop offset="0%" stopColor={HUE.white} stopOpacity={0.95} />
                         <Stop offset="55%" stopColor={accent} stopOpacity={0.95} />
                         <Stop offset="100%" stopColor={accent} stopOpacity={0.75} />
                     </SvgLinearGradient>
@@ -267,7 +268,7 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
                     ))}
                 </G>
                 {/* front face (mid — carries the face art) */}
-                <Rect x={0} y={OV} width={F} height={F} fill="#0b0812" stroke={edge} strokeWidth={1.5} />
+                <Rect x={0} y={OV} width={F} height={F} fill={HUE.dieUnderside} stroke={edge} strokeWidth={1.5} />
                 <Rect x={0} y={OV} width={F} height={F} fill={`url(#${bodyId})`} />
                 {/* rim — the special/dead state ring, on the front face */}
                 <Rect x={2} y={OV + 2} width={F - 4} height={F - 4} fill="none" stroke={ring} strokeWidth={4} />
@@ -279,7 +280,7 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
                     <Circle
                         cx={50} cy={50} r={26}
                         fill={dead ? 'none' : 'rgba(0,0,0,0.35)'}
-                        stroke={greyed ? '#6f6a5e' : 'rgba(255,255,255,0.7)'}
+                        stroke={greyed ? HUE.dieGreyStroke : 'rgba(255,255,255,0.7)'}
                         strokeWidth={3.5}
                     />
                     {/* hit / special — the small crystal held in the circle */}
@@ -294,14 +295,14 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
                     {/* BOON — the crystal sparkles (the +◆ payload face) */}
                     {special && !dead && (
                         <>
-                            <Path d={sparklePath(66, 32, 8)} fill="#ffffff" opacity={0.95} />
-                            <Path d={sparklePath(33, 36, 5)} fill="#ffffff" opacity={0.8} />
-                            <Path d={sparklePath(62, 63, 4.5)} fill="#ffffff" opacity={0.7} />
+                            <Path d={sparklePath(66, 32, 8)} fill={HUE.white} opacity={0.95} />
+                            <Path d={sparklePath(33, 36, 5)} fill={HUE.white} opacity={0.8} />
+                            <Path d={sparklePath(62, 63, 4.5)} fill={HUE.white} opacity={0.7} />
                         </>
                     )}
                     {/* CRACKED — a distinct struck-out streak across the dead gem */}
                     {cracked && (
-                        <Path d="M 10 58 L 36 48 L 52 56 L 90 42" stroke="#b85c5c" strokeWidth={3.5} fill="none" strokeLinecap="round" />
+                        <Path d="M 10 58 L 36 48 L 52 56 L 90 42" stroke={HUE.dieCrackLine} strokeWidth={3.5} fill="none" strokeLinecap="round" />
                     )}
                 </G>
             </Svg>

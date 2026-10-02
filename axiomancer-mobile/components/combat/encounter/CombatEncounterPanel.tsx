@@ -64,7 +64,7 @@ import {
 } from '@/state/combat/store-actions';
 import { useSetting } from '@/state/settings';
 import { isTutorialDone } from '@/state/tutorials';
-import { FONTS } from '@/theme/axm';
+import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
 type DropResolver = (payload: DragPayload, x: number, y: number) => void | Promise<void>;
@@ -244,19 +244,19 @@ function keywordTypeTag(kind: string, index: number): string {
 
 // Reference-style coloured type tags (right-aligned on the keyword panels).
 const TAG_COLORS: Record<string, string> = {
-    DOT: '#e2543b', CONTROL: '#a86bdc', GUARD: '#9aa0a6',
-    MERCY: '#5bbf6a', EFFECT: '#8a8273',
-    DICE: '#d9c66a',
+    DOT: HUE.damageRed, CONTROL: HUE.tickPurple, GUARD: HUE.guardSteel,
+    MERCY: HUE.boonGreen, EFFECT: HUE.stoneGrey,
+    DICE: HUE.markGold,
 };
 
 // Category plaque for the status tooltip — glyph kind → badge label + colour.
 function effectCategory(kind: string, color: string): { label: string; color: string } {
     switch (kind) {
-        case 'dot': return { label: 'AFFLICTION', color: '#e2543b' };
-        case 'control': return { label: 'CONTROL', color: '#a86bdc' };
+        case 'dot': return { label: 'AFFLICTION', color: HUE.damageRed };
+        case 'control': return { label: 'CONTROL', color: HUE.tickPurple };
         case 'statdown':
-        case 'mark': return { label: 'HEX', color: '#e08a3b' };
-        case 'statup': return { label: 'BLESSING', color: '#5bbf6a' };
+        case 'mark': return { label: 'HEX', color: HUE.hexAmber };
+        case 'statup': return { label: 'BLESSING', color: HUE.boonGreen };
         default: return { label: 'EFFECT', color };
     }
 }
@@ -289,7 +289,7 @@ function GlyphBurst({ color, glyph }: { color: string; glyph: string }) {
                         />
                     );
                 })}
-                <Circle cx={85} cy={85} r={46} fill="#070509" stroke={color} strokeWidth={3} />
+                <Circle cx={85} cy={85} r={46} fill={HUE.medallionDeep} stroke={color} strokeWidth={3} />
                 <Circle cx={85} cy={85} r={41} fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth={1} />
             </Svg>
             <View style={StyleSheet.absoluteFill}>
@@ -869,11 +869,11 @@ export function CombatEncounterPanel({
             {/* mercy choice */}
             {mercy && (
                 <View style={styles.backdrop} testID="combat-mercy">
-                    <View style={[styles.modal, { borderColor: '#a86bdc' }]}>
+                    <View style={[styles.modal, { borderColor: HUE.tickPurple }]}>
                         <Text style={styles.modalTitle}>{live.enemy.name} is overwhelmed.</Text>
                         <Text style={styles.modalSub}>The will to fight has drained away.</Text>
                         <View style={styles.modalBtns}>
-                            <Pressable onPress={() => onMercy('spare')} testID="combat-mercy-spare" accessibilityRole="button" accessibilityLabel="Spare" style={[styles.modalBtn, { borderColor: '#5bbf6a' }]}><Text style={[styles.modalBtnText, { color: '#5bbf6a' }]}>SPARE</Text></Pressable>
+                            <Pressable onPress={() => onMercy('spare')} testID="combat-mercy-spare" accessibilityRole="button" accessibilityLabel="Spare" style={[styles.modalBtn, { borderColor: HUE.boonGreen }]}><Text style={[styles.modalBtnText, { color: HUE.boonGreen }]}>SPARE</Text></Pressable>
                             <Pressable onPress={() => onMercy('exploit')} testID="combat-mercy-exploit" accessibilityRole="button" accessibilityLabel="Exploit" style={[styles.modalBtn, { borderColor: AXM.blood }]}><Text style={[styles.modalBtnText, { color: AXM.blood }]}>EXPLOIT</Text></Pressable>
                         </View>
                     </View>
@@ -1279,7 +1279,7 @@ const useStyles = makeStyles((AXM) => ({
     // Sanguine-Step inspect stack (keyword defs → large card → fork) — UN-BOXED:
     // panels/card/pills float directly on the dimmed backdrop.
     detailStack: { width: '100%', maxWidth: 380, padding: 8, paddingBottom: 64, alignItems: 'center' },
-    detailCardWrap: { marginTop: 2, marginBottom: 6, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.8, shadowRadius: 20, shadowOffset: { width: 0, height: 8 }, elevation: 10 },
+    detailCardWrap: { marginTop: 2, marginBottom: 6, alignItems: 'center', justifyContent: 'center', shadowColor: HUE.black, shadowOpacity: 0.8, shadowRadius: 20, shadowOffset: { width: 0, height: 8 }, elevation: 10 },
     detailHalo: { position: 'absolute' },
     detailBold: { fontFamily: FONTS.gothic, color: AXM.parchment },
     detailKeywordHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2, gap: 8 },
@@ -1376,7 +1376,7 @@ const useStyles = makeStyles((AXM) => ({
     pilgrimRowName: { fontFamily: FONTS.sans, fontSize: 13, letterSpacing: 0.8, color: AXM.parchment },
     pilgrimRowDef: { fontFamily: FONTS.serif, fontSize: 12, lineHeight: 16, color: AXM.bone, marginTop: 2 },
 
-    reveal: { flex: 1, backgroundColor: '#0c0a08' },
+    reveal: { flex: 1, backgroundColor: HUE.inkBg },
     revealScroll: { alignItems: 'center', padding: 22, paddingBottom: 40 },
     revealEyebrow: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 2, color: AXM.blood, marginBottom: 14, marginTop: 8 },
     revealPortrait: { borderWidth: 2, borderRadius: 6, padding: 6, backgroundColor: AXM.deepBg },

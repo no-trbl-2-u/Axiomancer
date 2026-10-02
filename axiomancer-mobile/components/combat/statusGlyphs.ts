@@ -15,8 +15,12 @@
  *     arrow-down/orange, buffs = arrow-up/green, …),
  *   - a coarse `kind` the UI can group by.
  *
- * Pure + dependency-free so it is trivially unit-testable and usable anywhere.
+ * Pure (its one import is `theme/hue`, itself import-free, by relative path
+ * so the mechanics catalog export can load it) so it is trivially
+ * unit-testable and usable anywhere.
  */
+
+import { HUE } from '../../theme/hue';
 
 export type StatusGlyphKind =
     | 'dot' | 'control' | 'statdown' | 'statup' | 'mark';
@@ -45,11 +49,11 @@ export interface StatusGlyph {
 /** Category colours (spec §7.3/§7.6). Aligned to the colour palette where it
  *  reads naturally; tuned for dark-board contrast. */
 export const GLYPH_COLORS: Record<StatusGlyphKind, string> = {
-    dot: '#e2543b',        // flame red — erosion
-    control: '#a86bdc',    // chain purple
-    statdown: '#e08a3c',   // arrow-down amber
-    statup: '#5bbf6a',     // arrow-up green
-    mark: '#d9c66a',       // tracking gold
+    dot: HUE.damageRed,        // flame red — erosion
+    control: HUE.tickPurple,    // chain purple
+    statdown: HUE.statDownAmber,   // arrow-down amber
+    statup: HUE.boonGreen,     // arrow-up green
+    mark: HUE.markGold,       // tracking gold
 };
 
 /**

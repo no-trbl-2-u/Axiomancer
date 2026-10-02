@@ -33,7 +33,7 @@ import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { CombatCardFace } from '@/components/combat/encounter/CombatBoard';
-import { FONTS } from '@/theme/axm';
+import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import type { CombatCardVM } from '@/state/presenters/combat-encounter.engine';
 // D4 (2026-09-21) — the ONE mobile source for the rarity band. This file used
@@ -222,7 +222,7 @@ const useStyles = makeStyles((AXM) => ({
     // but the WORD is the signal — the colour is never asked to carry it alone.
     offerRarity: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1.4, marginTop: 3 },
     pickedBadge: { position: 'absolute', top: -9, right: -9, width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
-    pickedBadgeText: { fontFamily: FONTS.gothic, fontSize: 14, color: '#0a0a0a' },
+    pickedBadgeText: { fontFamily: FONTS.gothic, fontSize: 14, color: HUE.badgeInk },
     btnRow: { flexDirection: 'row', gap: 10, marginTop: 18 },
     btn: { flex: 1, borderWidth: 2, paddingHorizontal: 10, paddingVertical: 9, alignItems: 'center' },
     btnText: { fontFamily: FONTS.gothic, fontSize: 15, letterSpacing: 1 },

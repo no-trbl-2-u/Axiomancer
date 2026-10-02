@@ -26,7 +26,7 @@ import type {
     HazardResolveFlashVM,
     HazardOutcomeVM,
 } from '@/state/presenters/hazard.engine';
-import { FONTS } from '@/theme/axm';
+import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
 import { HazardCard } from './HazardCard';
@@ -273,7 +273,7 @@ export function CardDetailOverlay({ card, onClose }: { card: HazardCardVM; onClo
 }
 
 const useStyles = makeStyles((AXM) => ({
-    rollRoot: { ...StyleSheet.absoluteFillObject, zIndex: 55, backgroundColor: '#0a0908', alignItems: 'center' },
+    rollRoot: { ...StyleSheet.absoluteFillObject, zIndex: 55, backgroundColor: HUE.rollBg, alignItems: 'center' },
     rollBadge: { fontFamily: FONTS.sans, fontSize: 14, letterSpacing: 2, color: AXM.bg, paddingHorizontal: 12, paddingVertical: 3, overflow: 'hidden' },
     rollTitle: { fontFamily: FONTS.gothic, fontSize: 26, color: AXM.parchment, letterSpacing: 1, marginTop: 14 },
     rollSub: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 14, color: AXM.bone, marginTop: 3 },
@@ -282,7 +282,7 @@ const useStyles = makeStyles((AXM) => ({
 
     flashRoot: { ...StyleSheet.absoluteFillObject, zIndex: 58, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(4,3,3,0.93)' },
     flashEyebrow: { fontFamily: FONTS.sans, fontSize: 13, letterSpacing: 2, color: AXM.bone },
-    flashVerdict: { fontFamily: FONTS.gothic, fontSize: 34, letterSpacing: 3, textShadowColor: '#000', textShadowOffset: { width: 2, height: 2 }, textShadowRadius: 0 },
+    flashVerdict: { fontFamily: FONTS.gothic, fontSize: 34, letterSpacing: 3, textShadowColor: HUE.black, textShadowOffset: { width: 2, height: 2 }, textShadowRadius: 0 },
     flashStats: { flexDirection: 'row', gap: 14, marginTop: 10 },
     flashStat: { alignItems: 'center', gap: 3, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
     flashStatLabel: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 1 },
@@ -292,7 +292,7 @@ const useStyles = makeStyles((AXM) => ({
     tapToContinue: { marginTop: 22, fontFamily: FONTS.mono, fontSize: 12, color: AXM.bone, letterSpacing: 1.5, textAlign: 'center' },
 
     outcomeRoot: { ...StyleSheet.absoluteFillObject, zIndex: 60, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, backgroundColor: 'rgba(5,4,3,0.97)' },
-    outcomeWord: { fontFamily: FONTS.gothic, fontSize: 56, letterSpacing: 3, lineHeight: 58, textShadowColor: '#000', textShadowOffset: { width: 3, height: 3 }, textShadowRadius: 0 },
+    outcomeWord: { fontFamily: FONTS.gothic, fontSize: 56, letterSpacing: 3, lineHeight: 58, textShadowColor: HUE.black, textShadowOffset: { width: 3, height: 3 }, textShadowRadius: 0 },
     outcomeSub: { fontFamily: FONTS.sans, fontSize: 13, letterSpacing: 2, color: AXM.bone, marginTop: 10 },
     outcomeLine: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 13, color: AXM.parchment, marginTop: 16, textAlign: 'center', lineHeight: 18, maxWidth: 280 },
     outcomeCta: { marginTop: 30, paddingHorizontal: 28, paddingVertical: 11, borderWidth: 2, backgroundColor: AXM.bg },

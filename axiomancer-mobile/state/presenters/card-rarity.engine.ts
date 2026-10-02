@@ -52,6 +52,7 @@
  */
 
 import { rankToRarity, type CardRank, type CardRarity } from '@mechanics';
+import { HUE } from '@/theme/axm';
 
 /**
  * The structural shape this module reads a rarity out of.
@@ -114,9 +115,9 @@ export const RARITY_PIPS: Readonly<Record<CardRarity, number>> = Object.freeze({
  * "never colour alone" means.
  */
 export const RARITY_COLOR: Readonly<Record<CardRarity, string>> = Object.freeze({
-    common: '#8a8273',
-    uncommon: '#6b8eb0',
-    rare: '#9a6ad6',
+    common: HUE.stoneGrey,
+    uncommon: HUE.blockBlue,
+    rare: HUE.rareViolet,
 });
 
 /** The three bands, as a runtime-checkable set for validating loose input. */

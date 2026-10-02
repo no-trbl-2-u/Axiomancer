@@ -10,10 +10,11 @@ import React from 'react';
 import Svg, { Circle, G, Line, Path, Rect } from 'react-native-svg';
 
 import { usePalette } from '@/theme/runtime';
+import { HUE } from '@/theme/axm';
 
-const INK = '#0c0a08';
-const STONE = '#1d1813';
-const SMOKE = '#2a231b';
+const INK = HUE.inkBg;
+const STONE = HUE.artStone;
+const SMOKE = HUE.artSmoke;
 
 export interface DangerArtProps {
     width?: number;
@@ -64,8 +65,8 @@ function FloodArt({ width = 300, height = 150 }: DangerArtProps) {
             <Path d="M 40 150 L 40 50 Q 150 6 260 50 L 260 150" stroke={STONE} strokeWidth={10} fill="none" />
             <Path d="M 90 70 h 120 v 12 h -104 v 12 h 88 v 12 h -72 v 12 h 56" stroke={SMOKE} strokeWidth={4} fill="none" />
             {/* black water risen past the lower steps */}
-            <Path d="M 36 112 Q 80 104 120 112 T 204 112 T 268 112 L 268 150 L 36 150 Z" fill="#0f1416" />
-            <Path d="M 36 112 Q 80 104 120 112 T 204 112 T 268 112" stroke="#27353a" strokeWidth={1.6} fill="none" />
+            <Path d="M 36 112 Q 80 104 120 112 T 204 112 T 268 112 L 268 150 L 36 150 Z" fill={HUE.artWater} />
+            <Path d="M 36 112 Q 80 104 120 112 T 204 112 T 268 112" stroke={HUE.artWaterLine} strokeWidth={1.6} fill="none" />
             {/* a hand above the waterline */}
             <Path d="M 150 112 L 150 96 M 146 100 L 150 96 L 154 99 M 147 105 L 150 96 M 153 104 L 150 96" stroke={AXM.bone} strokeWidth={2.2} strokeLinecap="round" />
             {/* something breathing below */}
@@ -165,7 +166,7 @@ function FeverArt({ width = 300, height = 150 }: DangerArtProps) {
         <Svg width={width} height={height} viewBox="0 0 300 150">
             <Rect width={300} height={150} fill={INK} />
             {/* marsh water + reeds */}
-            <Path d="M 0 124 Q 75 116 150 124 T 300 124 L 300 150 L 0 150 Z" fill="#10150f" />
+            <Path d="M 0 124 Q 75 116 150 124 T 300 124 L 300 150 L 0 150 Z" fill={HUE.artMoss} />
             <G stroke={SMOKE} strokeWidth={2} strokeLinecap="round">
                 <Path d="M 36 124 Q 34 100 40 88" fill="none" />
                 <Path d="M 52 124 Q 54 104 48 94" fill="none" />

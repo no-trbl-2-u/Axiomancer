@@ -50,13 +50,13 @@ import { rarityFor, RARITY_LABEL, RARITY_PIPS, RARITY_COLOR } from '@/state/pres
 type CardSpecialMechanic = NonNullable<Card['specialMechanics']>[number];
 import { effectGlyph, GLYPH_COLORS, type StatusGlyph } from '@/components/combat/statusGlyphs';
 import { keywordForEffect, keywordForVerb, keywordForMechanic, keywordGloss, keywordsInText, systemTermsForCard } from '@/state/combat/keywords';
-import { AXM } from '@/theme/axm';
+import { AXM, HUE } from '@/theme/axm';
 
 // ── Stance palette (Heart/Body/Mind/Wild/X/Any) ──────────────────────────────
 
 export const STANCE_COLORS: Record<string, string> = {
     // Body=RED, Mind=BLUE, Heart=PURPLE, Wild=GOLD (owner-specified dice palette).
-    heart: '#9a5fd0', body: '#d6543f', mind: '#4f7fd6', wild: '#d9b44a', x: '#5a5a5a',
+    heart: HUE.dieHeart, body: HUE.dieBody, mind: HUE.dieMind, wild: HUE.goldAccent, x: HUE.dieX,
     // Phase 104 — the grey office's colourless aspect: the neutral ink token
     // (never a literal, unlike the fixed dice-identity hexes above).
     any: AXM.bone,
@@ -75,14 +75,14 @@ const RANK_NAMES: Record<number, string> = Object.freeze({
     1: 'Ash', 2: 'Tooth', 3: 'Splinter', 4: 'Rib', 5: 'Skull', 6: 'Saint',
 });
 // Verb-class card colours (these map to verbs, not Effects, so they aren't in GLYPH_COLORS).
-const GUARD_COLOR = '#9aa0a6';
-const PAYOFF_COLOR = '#c2a14e';
-const BEFRIEND_COLOR = '#5bbf6a';
-const INERT_COLOR = '#6b6257';
+const GUARD_COLOR = HUE.guardSteel;
+const PAYOFF_COLOR = HUE.payoffGold;
+const BEFRIEND_COLOR = HUE.boonGreen;
+const INERT_COLOR = HUE.inertGrey;
 
 // A single gold accent (matches `STANCE_COLORS.wild`, the existing "charged
 // token" identity) — the Signature line in the combat log.
-const GOLD_ACCENT = '#d9b44a';
+const GOLD_ACCENT = HUE.goldAccent;
 
 /**
  * Canon combat copy is VITAE (mobile CLAUDE.md — "copy regressions to the
@@ -192,12 +192,12 @@ function typeStripText(card: CombatCard): string {
 // ── Intent vocabulary (Spec 26 §2.4) ─────────────────────────────────────────
 
 export const INTENT_ICONS: Record<CombatIntentType, { icon: string; label: string; color: string }> = {
-    damage: { icon: '⚔', label: 'ATTACKS', color: '#e2543b' },
-    debuff: { icon: '☠', label: 'WEAKENS', color: '#a86bdc' },
-    buff: { icon: '✦', label: 'RECOVERS', color: '#5bbf6a' },
-    block: { icon: '🛡', label: 'DEFENDS', color: '#6b8eb0' },
-    pass: { icon: '○', label: 'WAITS', color: '#8a8273' },
-    combo: { icon: '⚡', label: 'SURGES', color: '#d9b44a' },
+    damage: { icon: '⚔', label: 'ATTACKS', color: HUE.damageRed },
+    debuff: { icon: '☠', label: 'WEAKENS', color: HUE.tickPurple },
+    buff: { icon: '✦', label: 'RECOVERS', color: HUE.boonGreen },
+    block: { icon: '🛡', label: 'DEFENDS', color: HUE.blockBlue },
+    pass: { icon: '○', label: 'WAITS', color: HUE.stoneGrey },
+    combo: { icon: '⚡', label: 'SURGES', color: HUE.goldAccent },
 };
 
 // ── View-model types ─────────────────────────────────────────────────────────
@@ -682,7 +682,7 @@ export interface CombatLogLineVM {
     side: 'enemy' | 'player';
 }
 
-const LOG_STAGE_COLOR = '#d9b44a';
+const LOG_STAGE_COLOR = HUE.goldAccent;
 
 export function selectCombatLogLines(events: readonly CombatEvent[]): CombatLogLineVM[] {
     const out: CombatLogLineVM[] = [];
@@ -915,7 +915,7 @@ function diceVM(state: CombatEncounterState): CombatDieVM[] {
         const isMiss = face === 'miss';
         const cracked = crackedColors.has(d.color);
         return {
-            id: d.id, color: d.color, colorHex: STANCE_COLORS[d.color] ?? '#888',
+            id: d.id, color: d.color, colorHex: STANCE_COLORS[d.color] ?? HUE.fallbackGrey,
             glyph: DIE_GLYPHS[d.color] ?? '?', stanceLabel: STANCE_LABELS[d.color] ?? '?',
             spent, isX,
             // Spec 32 v3 §5 — the board must know a floating die from a turn die.
@@ -930,7 +930,7 @@ function diceVM(state: CombatEncounterState): CombatDieVM[] {
     });
     // R2 — the Reserve renders in the same tray as a second power source.
     const banked: CombatDieVM[] = (state.reserve ?? []).map((d: CombatManaDie) => ({
-        id: d.id, color: d.color, colorHex: STANCE_COLORS[d.color] ?? '#888',
+        id: d.id, color: d.color, colorHex: STANCE_COLORS[d.color] ?? HUE.fallbackGrey,
         glyph: DIE_GLYPHS[d.color] ?? '?', stanceLabel: STANCE_LABELS[d.color] ?? '?',
         spent: false, isX: false,
         reserve: true, pips: d.pips ?? 0,
@@ -1277,7 +1277,7 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc, sourceCard?: Card): 
 /** Honest card FACE view-model (the 5-zone hand card). */
 export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM {
     const c = cardCalc(card, sourceCard);
-    const stanceColor = STANCE_COLORS[card.stance] ?? '#888';
+    const stanceColor = STANCE_COLORS[card.stance] ?? HUE.fallbackGrey;
     const kw = c.keyword ? c.keyword.toUpperCase() : null;
     // The authored FREE line (engine riderText) — never a fabricated chip.
     const free = freeLineText(card, sourceCard);
@@ -1586,7 +1586,7 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
         const face = { ...scaledFace, ...familyFace(scaledFace, printedFace) };
         return {
             uid, cardId: card.id, name: card.name, stance: card.stance,
-            stanceColor: STANCE_COLORS[card.stance] ?? '#888',
+            stanceColor: STANCE_COLORS[card.stance] ?? HUE.fallbackGrey,
             verbClass: card.verbClass, effectKind: card.effectKind,
             rarity: card.rarity, rank: card.rank,
             rankName: card.rank ? RANK_NAMES[card.rank] : null,
@@ -1650,7 +1650,7 @@ export function rewardCardVMs(ids: readonly string[]): CombatCardVM[] {
             // The offer is one card per id, so the id IS a stable uid.
             uid: `reward-${id}`,
             cardId: id, name: card.name, stance: card.stance,
-            stanceColor: STANCE_COLORS[card.stance] ?? '#888',
+            stanceColor: STANCE_COLORS[card.stance] ?? HUE.fallbackGrey,
             verbClass: card.verbClass, effectKind: card.effectKind,
             rarity: card.rarity, rank: card.rank,
             rankName: card.rank ? RANK_NAMES[card.rank] : null,
@@ -1710,7 +1710,7 @@ function momentumV2VM(state: CombatEncounterState): CombatMomentumV2VM {
     });
     return {
         color, length, chain, surgeAt, next, broke, surged,
-        colorHex: color ? STANCE_COLORS[color] : '#6b6257',
+        colorHex: color ? STANCE_COLORS[color] : HUE.inertGrey,
         a11y: momentumV2A11y({ color, length, next, surgeAt, broke, surged }),
     };
 }
@@ -1731,7 +1731,7 @@ function gearSlotVM(state: CombatEncounterState, color: 'heart' | 'body' | 'mind
     const payload = `+${gear.specialConviction} ◆`;
     const label = STANCE_LABELS[color] ?? color.toUpperCase();
     return {
-        color, label, glyph: DIE_GLYPHS[color] ?? '?', colorHex: STANCE_COLORS[color] ?? '#888',
+        color, label, glyph: DIE_GLYPHS[color] ?? '?', colorHex: STANCE_COLORS[color] ?? HUE.fallbackGrey,
         specialFaces: gear.specialFaces, manaFaces: gear.manaFaces, missFaces,
         specialConviction: gear.specialConviction, faceTable, payload, upgraded,
         a11y: `${label} die gear — ${faceTable}. Boon face grants ${payload}.`

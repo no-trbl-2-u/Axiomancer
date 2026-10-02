@@ -12,7 +12,7 @@ import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated'
 
 import type { HazardCardVM, HazardRouteChoiceVM, HazardViewModel } from '@/state/presenters/hazard.engine';
 import type { HazardRouteKey } from '@mechanics';
-import { FONTS } from '@/theme/axm';
+import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
 import { HazardCard } from './HazardCard';
@@ -72,7 +72,7 @@ function RoutePanel({
                 styles.routePanel,
                 {
                     borderColor: safe ? AXM.ash : accent,
-                    backgroundColor: safe ? '#17150f' : '#12110b',
+                    backgroundColor: safe ? HUE.hzRouteSafeBg : HUE.hzRouteRiskBg,
                 },
             ]}
         >
@@ -121,8 +121,8 @@ function RoutePanel({
                     <Text style={[styles.chipLabel, { color: safe ? AXM.bone : HZ.gold }]}>REWARD</Text>
                     <Text style={styles.chipValue}>{route.rewardLabel}</Text>
                 </View>
-                <View style={[styles.failChip, { borderColor: safe ? '#7a3a3a' : AXM.blood }]}>
-                    <Text style={[styles.chipLabel, { color: safe ? '#a85a5a' : AXM.blood }]}>FAIL</Text>
+                <View style={[styles.failChip, { borderColor: safe ? HUE.hzRouteSafeFailEdge : AXM.blood }]}>
+                    <Text style={[styles.chipLabel, { color: safe ? HUE.hzRouteSafeFailText : AXM.blood }]}>FAIL</Text>
                     <Text style={styles.chipValueMono}>{route.penaltyLabel}</Text>
                 </View>
             </View>
@@ -213,14 +213,14 @@ export function RouteSelect({
 }
 
 const useStyles = makeStyles((AXM) => ({
-    root: { ...StyleSheet.absoluteFillObject, backgroundColor: '#0b0a08', zIndex: 50 },
+    root: { ...StyleSheet.absoluteFillObject, backgroundColor: HUE.routeBg, zIndex: 50 },
     topStrip: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingVertical: 5,
         paddingHorizontal: 12,
-        backgroundColor: '#000',
+        backgroundColor: HUE.black,
         borderBottomWidth: 1,
         borderBottomColor: AXM.ash,
     },
@@ -228,7 +228,7 @@ const useStyles = makeStyles((AXM) => ({
     topStripMid: { fontFamily: FONTS.mono, fontSize: 11, color: AXM.bone, letterSpacing: 2 },
     header: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: AXM.ash },
     headerEyebrow: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 2, color: AXM.blood },
-    title: { fontFamily: FONTS.gothic, fontSize: 28, lineHeight: 29, color: AXM.parchment, letterSpacing: 0.5, marginTop: 6, textShadowColor: '#000', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 0 },
+    title: { fontFamily: FONTS.gothic, fontSize: 28, lineHeight: 29, color: AXM.parchment, letterSpacing: 0.5, marginTop: 6, textShadowColor: HUE.black, textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 0 },
     scenario: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 13, color: AXM.bone, marginTop: 5, lineHeight: 17 },
     handLabel: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 1.6, color: AXM.bone, textAlign: 'center', marginTop: 12 },
     handPreview: { flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-end', paddingTop: 10, paddingBottom: 16, minHeight: 140 },

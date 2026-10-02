@@ -40,7 +40,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle, Defs, Path, RadialGradient, Stop } from 'react-native-svg';
 
-import { FONTS } from '@/theme/axm';
+import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
     CombatViewModel, CombatCardVM, CombatDieVM,
@@ -138,7 +138,7 @@ export function resolveDieDropTarget(
 /** The armed staged card's tint (keyword/value/border + the APPLY ribbon).
  *  Spec 33 retired the hidden-stance read — every play lands printed — so
  *  there is one armed tint, not an ▲/▼ read palette. */
-const ARMED_ACCENT = '#8a8273';
+const ARMED_ACCENT = HUE.stoneGrey;
 
 // Render a sentence with each keyword name BOLDED (Sanguine-Step style). Shared by
 // the large inspect card FACE (here) and the inspect modal (CombatEncounterPanel).
@@ -1903,8 +1903,8 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
     diceRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 14, justifyContent: 'center', alignItems: 'flex-start', minHeight: 74, paddingBottom: 2 },
     dieAssigned: { opacity: 0.4 },
     // Drawn X/dud die — a small greyed pip, not a full slot.
-    dieXPip: { width: 24, height: 24, borderRadius: 6, borderWidth: 1, borderColor: '#3a3a3a', backgroundColor: 'rgba(0,0,0,0.4)', alignItems: 'center', justifyContent: 'center', opacity: 0.6, alignSelf: 'center' },
-    dieXGlyph: { fontFamily: FONTS.sans, fontSize: 12, color: '#8a8273' },
+    dieXPip: { width: 24, height: 24, borderRadius: 6, borderWidth: 1, borderColor: HUE.deadGrey, backgroundColor: 'rgba(0,0,0,0.4)', alignItems: 'center', justifyContent: 'center', opacity: 0.6, alignSelf: 'center' },
+    dieXGlyph: { fontFamily: FONTS.sans, fontSize: 12, color: HUE.stoneGrey },
     dieConv: { fontFamily: FONTS.sans, fontSize: 9, color: AXM.bone, textAlign: 'center', marginTop: 2, letterSpacing: 0.5, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },
 
     // ── the hand dock ── (Option A: fits the 194pt card raised ~20pt off the
@@ -1996,8 +1996,8 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
     // otherwise ran past the viewport, and the board now clips at its edge.
     statusStrip: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'flex-end', gap: 8, paddingHorizontal: 12, paddingBottom: 6 },
     guardChip: {
-        fontFamily: FONTS.sans, fontSize: 11, color: '#6fb3e0', letterSpacing: 0.5,
-        backgroundColor: 'rgba(0,0,0,0.7)', borderWidth: 1, borderColor: '#6fb3e055', borderRadius: 4,
+        fontFamily: FONTS.sans, fontSize: 11, color: HUE.guardBlue, letterSpacing: 0.5,
+        backgroundColor: 'rgba(0,0,0,0.7)', borderWidth: 1, borderColor: HUE.guardBlueEdge, borderRadius: 4,
         paddingHorizontal: 5, paddingVertical: 2, overflow: 'hidden',
     },
 
@@ -2005,7 +2005,7 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
     cornerStack: { position: 'absolute', right: 10, alignItems: 'center', gap: 8, zIndex: 40 },
     endWrap: { width: 80, height: 80 },
     endBtn: {
-        width: 80, height: 80, borderRadius: 40, borderWidth: 3, backgroundColor: '#0c0a06',
+        width: 80, height: 80, borderRadius: 40, borderWidth: 3, backgroundColor: HUE.medallionBg,
         alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
     },
     // WI-3 — dimmed while a phase resolves (double-tap guard); every other

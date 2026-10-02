@@ -31,7 +31,7 @@ import Animated, {
 
 import type { HazardCardVM, HazardDieVM, HazardMeterVM, HazardViewModel } from '@/state/presenters/hazard.engine';
 import { HAZARD_TUNING } from '@mechanics';
-import { FONTS } from '@/theme/axm';
+import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
 import { HazardCard } from './HazardCard';
@@ -604,7 +604,7 @@ export const HazardBoard = React.memo(function HazardBoard({ vm, drag, onStage, 
 });
 
 const useStyles = makeStyles((AXM) => ({
-    root: { flex: 1, backgroundColor: '#0c0a08' },
+    root: { flex: 1, backgroundColor: HUE.inkBg },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -619,7 +619,7 @@ const useStyles = makeStyles((AXM) => ({
     routeBadge: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.4, color: AXM.bg, paddingHorizontal: 5, paddingVertical: 1, overflow: 'hidden' },
     roundLabel: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.bone, letterSpacing: 1 },
     scene: { height: 64, overflow: 'hidden', borderBottomWidth: 1, borderBottomColor: AXM.ash, backgroundColor: HZ.stone, alignItems: 'center', justifyContent: 'center' },
-    sceneTitle: { fontFamily: FONTS.gothic, fontSize: 19, color: AXM.parchment, letterSpacing: 1, textShadowColor: '#000', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 0 },
+    sceneTitle: { fontFamily: FONTS.gothic, fontSize: 19, color: AXM.parchment, letterSpacing: 1, textShadowColor: HUE.black, textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 0 },
     sceneNote: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 12, color: AXM.bone, marginTop: 1 },
     meterPanel: { paddingHorizontal: 12, paddingVertical: 7, backgroundColor: 'rgba(6,5,4,0.82)', borderBottomWidth: 1, borderBottomColor: AXM.ash },
     meterHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 3 },

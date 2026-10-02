@@ -9,17 +9,18 @@
 
 import type { Palette } from '@/theme/palette';
 import type { HazardDieKind } from '@mechanics';
+import { HUE } from '@/theme/axm';
 
 export const HZ = {
-    acid: '#86a821',
-    acidDim: '#566612',
-    purple: '#8a57bd',
-    purpleDeep: '#160a26',
-    gold: '#c2a14e',
-    goldDim: '#6e5a28',
-    steel: '#6b8eb0',
-    stone: '#15120f',
-    stoneHi: '#221d18',
+    acid: HUE.hzAcid,
+    acidDim: HUE.hzAcidDim,
+    purple: HUE.hzPurple,
+    purpleDeep: HUE.hzPurpleDeep,
+    gold: HUE.payoffGold,
+    goldDim: HUE.hzGoldDim,
+    steel: HUE.blockBlue,
+    stone: HUE.hzStone,
+    stoneHi: HUE.hzStoneHi,
 } as const;
 
 export interface DieColorway {
@@ -32,31 +33,31 @@ export interface DieColorway {
 }
 
 export const DIE: Record<HazardDieKind, DieColorway> = {
-    red: { c: '#c0152a', dark: '#6e0c18', lite: '#e2455a', bg: '#1a0808', label: 'RED', glyph: 'blade' },
-    blue: { c: '#5b86c4', dark: '#34527a', lite: '#8fb0dd', bg: '#0b1018', label: 'BLUE', glyph: 'eye' },
-    purple: { c: '#8a57bd', dark: '#522f78', lite: '#b083e0', bg: '#160a26', label: 'PURPLE', glyph: 'crescent' },
-    gold: { c: '#c2a14e', dark: '#6e5a28', lite: '#ddc372', bg: '#16130a', label: 'YELLOW', glyph: 'sun' },
-    hex: { c: '#0c0c0e', dark: '#040405', lite: '#cdbede', bg: '#040405', label: 'HEX', glyph: 'cross' },
+    red: { c: HUE.hzRed, dark: HUE.hzRedDark, lite: HUE.hzRedLite, bg: HUE.hzRedBg, label: 'RED', glyph: 'blade' },
+    blue: { c: HUE.hzBlue, dark: HUE.hzBlueDark, lite: HUE.hzBlueLite, bg: HUE.hzBlueBg, label: 'BLUE', glyph: 'eye' },
+    purple: { c: HUE.hzPurple, dark: HUE.hzPurpleDark, lite: HUE.hzPurpleLite, bg: HUE.hzPurpleDeep, label: 'PURPLE', glyph: 'crescent' },
+    gold: { c: HUE.payoffGold, dark: HUE.hzGoldDim, lite: HUE.hzGoldLite, bg: HUE.hzGoldBg, label: 'YELLOW', glyph: 'sun' },
+    hex: { c: HUE.hzHex, dark: HUE.hzHexDark, lite: HUE.hzHexLite, bg: HUE.hzHexDark, label: 'HEX', glyph: 'cross' },
 };
 
 /** Progress-type accents (FORCE rust-red fist / ESCAPE steel-blue runner). */
 export const TYPE_ACCENT = {
-    force: '#c0152a',
-    escape: '#5b86c4',
-    passage: '#9e7d2a',
+    force: HUE.hzRed,
+    escape: HUE.hzBlue,
+    passage: HUE.hzPassage,
 } as const;
 
 /** Darker inks so type numbers read on parchment card stock. */
-export const TYPE_INK = { force: '#8e1020', escape: '#2c4f7a' } as const;
+export const TYPE_INK = { force: HUE.hzForceInk, escape: HUE.hzEscapeInk } as const;
 
-export const CARD_PAPER = '#d8cdb4';
-export const CARD_INK = '#241f17';
-export const CARD_INK2 = '#5d5344';
-export const CARD_EDGE = '#8d8268';
+export const CARD_PAPER = HUE.hzCardPaper;
+export const CARD_INK = HUE.hzCardInk;
+export const CARD_INK2 = HUE.hzCardInk2;
+export const CARD_EDGE = HUE.hzCardEdge;
 
 export const RARITY_UI = {
-    common: { c: '#8a8273', label: 'COMMON' },
-    uncommon: { c: '#5b86c4', label: 'UNCOMMON' },
+    common: { c: HUE.stoneGrey, label: 'COMMON' },
+    uncommon: { c: HUE.hzBlue, label: 'UNCOMMON' },
     rare: { c: HZ.gold, label: 'RARE' },
 } as const;
 

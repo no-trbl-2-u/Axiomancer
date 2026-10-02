@@ -19,7 +19,7 @@
 import React, { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { FONTS } from '@/theme/axm';
+import { FONTS, HUE } from '@/theme/axm';
 import { usePalette } from '@/theme/runtime';
 import type { HazardDeckEntryVM } from '@/state/presenters/hazard-deck.engine';
 
@@ -157,7 +157,7 @@ export function HazardRemoveGrid({
 }
 
 const styles = StyleSheet.create({
-    root: { ...StyleSheet.absoluteFillObject, backgroundColor: '#0c0a08', zIndex: 50, paddingTop: 54 },
+    root: { ...StyleSheet.absoluteFillObject, backgroundColor: HUE.inkBg, zIndex: 50, paddingTop: 54 },
     header: { paddingHorizontal: 20, paddingBottom: 8 },
     title: { fontFamily: FONTS.gothic, fontSize: 24, letterSpacing: 1 },
     sub: { fontFamily: FONTS.serif, fontSize: 13, marginTop: 2 },
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, paddingHorizontal: 16, paddingVertical: 12, justifyContent: 'center' },
     tile: { borderWidth: 1.5, borderColor: 'transparent', padding: 3 },
     countPip: { position: 'absolute', top: -4, left: -4, minWidth: 22, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4 },
-    countPipText: { fontFamily: FONTS.mono, fontSize: 10, color: '#0c0a08' },
+    countPipText: { fontFamily: FONTS.mono, fontSize: 10, color: HUE.inkBg },
     selMark: { position: 'absolute', bottom: 6, right: 6, borderWidth: 1, paddingHorizontal: 5, paddingVertical: 1 },
     selMarkText: { fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 1.5 },
     emptyBox: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40 },

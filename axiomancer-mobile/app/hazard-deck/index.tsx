@@ -29,7 +29,7 @@ import { TooltipTarget } from '@/components/tooltip/TooltipTarget';
 import { useGameState } from '@/state/GameStoreProvider';
 import { selectHazardDeckViewModel } from '@/state/presenters/hazard-deck.engine';
 import type { HazardCardVM } from '@/state/presenters/hazard.engine';
-import { FONTS } from '@/theme/axm';
+import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
 export default function HazardDeckScreen() {
@@ -233,7 +233,7 @@ const useStyles = makeStyles((AXM) => ({
     cardGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 8, justifyContent: 'center' },
     cardTile: { padding: 1 },
     countPip: { position: 'absolute', top: -4, left: -4, minWidth: 22, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4 },
-    countPipText: { fontFamily: FONTS.mono, fontSize: 10, color: '#0c0a08' },
+    countPipText: { fontFamily: FONTS.mono, fontSize: 10, color: HUE.inkBg },
     removeCta: { borderWidth: 1.5, paddingVertical: 14, alignItems: 'center' },
     removeCtaLabel: { fontFamily: FONTS.gothic, fontSize: 16, letterSpacing: 2 },
     removeCtaSub: { fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 0.5, color: AXM.bone, marginTop: 4 },

@@ -10,7 +10,7 @@ import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-na
 import { Haptics } from '@/lib/platform/haptics';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
-import { FONTS } from '@/theme/axm';
+import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 
 import { DangerArt } from './danger-art';
@@ -66,7 +66,7 @@ const useStyles = makeStyles((AXM) => ({
         maxWidth: 360,
         borderWidth: 2,
         borderColor: AXM.blood,
-        backgroundColor: '#100d0a',
+        backgroundColor: HUE.primerBg,
         paddingVertical: 18,
         paddingHorizontal: 16,
         alignItems: 'center',

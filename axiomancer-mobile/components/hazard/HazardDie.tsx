@@ -18,6 +18,7 @@ import { usePalette } from '@/theme/runtime';
 
 import { DIE } from './palette';
 import { DieGlyph } from './glyphs';
+import { HUE } from '@/theme/axm';
 
 export interface HazardDieProps {
     kind: HazardDieKind;
@@ -35,7 +36,7 @@ export const HazardDie = React.memo(function HazardDie({ kind, size = 48, state 
     const W = size + o;
     const H = size + o;
     const dim = state === 'spent' ? 0.42 : 1;
-    const glowColor = isHex ? '#8a57bd' : d.c;
+    const glowColor = isHex ? HUE.hzPurple : d.c;
     const gradId = `hzglow-${kind}-${size}-${state}-${glow ? 1 : 0}`;
 
     return (
@@ -74,14 +75,14 @@ export const HazardDie = React.memo(function HazardDie({ kind, size = 48, state 
                 {/* top face (lit) */}
                 <Polygon
                     points={`${o},0 ${W},0 ${size},${o} 0,${o}`}
-                    fill={isHex ? '#15141a' : d.lite}
+                    fill={isHex ? HUE.hzHexDieLite : d.lite}
                     stroke={d.dark}
                     strokeWidth={1}
                 />
                 {/* right face (shadow) */}
                 <Polygon
                     points={`${size},${o} ${W},0 ${W},${size} ${size},${H}`}
-                    fill={isHex ? '#060608' : d.dark}
+                    fill={isHex ? HUE.hzHexDieDark : d.dark}
                     stroke={d.dark}
                     strokeWidth={1}
                 />
@@ -91,7 +92,7 @@ export const HazardDie = React.memo(function HazardDie({ kind, size = 48, state 
                     y={o}
                     width={size}
                     height={size}
-                    fill={isHex ? '#0c0c0e' : d.bg}
+                    fill={isHex ? HUE.hzHex : d.bg}
                     stroke={temporary ? d.lite : d.dark}
                     strokeWidth={temporary ? 1.6 : 1}
                     strokeDasharray={temporary ? '4 3' : undefined}
@@ -119,7 +120,7 @@ export const HazardDie = React.memo(function HazardDie({ kind, size = 48, state 
                 }}
                 pointerEvents="none"
             >
-                <DieGlyph kind={d.glyph} size={size * 0.56} color={isHex ? '#cdbede' : d.lite} />
+                <DieGlyph kind={d.glyph} size={size * 0.56} color={isHex ? HUE.hzHexLite : d.lite} />
             </View>
         </View>
     );

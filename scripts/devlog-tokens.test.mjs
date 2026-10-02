@@ -17,7 +17,8 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {
     AA_CONTRAST, DEFAULT_THEME, GROUND_TOKENS, LIGHT_PREFERENCE_THEME, READABLE_TOKENS,
-    THEME_IDS, composite, contrast, contrastRows, derive, readThemeSpecs, stylesheet, tokensFor,
+    THEME_IDS, composite, contrast, contrastRows, derive, readHue, readStanceColors, readThemeSpecs, stylesheet,
+    tokensFor,
 } from './devlog-tokens.mjs'
 
 test('every readable token clears AA against both grounds on every theme', () => {
@@ -96,4 +97,15 @@ test('tokensFor exposes exactly the tokens the site names, and every value is a 
     for (const value of Object.values(tokens)) {
         assert.match(value, /^(#[0-9a-f]{3,8}|rgba\([\d\s.,]+\))$/i, `${value} is not a colour`)
     }
+})
+
+test('stance colours resolve through HUE tokens, and an unknown token fails loudly (R10)', () => {
+    const hue = "export const HUE = {\n    dieBody: '#d6543f',\n    goldAccent: '#d9b44a',\n} as const;"
+    assert.deepEqual(readHue(hue), { dieBody: '#d6543f', goldAccent: '#d9b44a' })
+    const presenter = "const STANCE_COLORS = { body: HUE.dieBody, mind: '#4f7fd6', heart: '#9a5fd0', wild: HUE.goldAccent };"
+    assert.deepEqual(readStanceColors(presenter, hue), {
+        body: '#d6543f', mind: '#4f7fd6', heart: '#9a5fd0', wild: '#d9b44a',
+    })
+    assert.throws(() => readStanceColors(presenter.replace('HUE.dieBody', 'HUE.nope'), hue), /HUE\.nope/)
+    for (const hex of Object.values(readStanceColors())) assert.match(hex, /^#[0-9a-f]{6}$/)
 })

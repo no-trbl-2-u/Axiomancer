@@ -12,7 +12,7 @@ import Animated, { FadeIn, FadeInDown, FadeInUp, ZoomIn } from 'react-native-rea
 
 import { TREASURE_CHEST_PALE } from '@/assets/images/treasure';
 import type { HazardRewardsVM } from '@/state/presenters/hazard.engine';
-import { FONTS } from '@/theme/axm';
+import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
 import { HazardCard } from './HazardCard';
@@ -169,7 +169,7 @@ export function RewardsOverlay({
                                                     styles.offerFrame,
                                                     {
                                                         borderColor:
-                                                            card.rarity === 'rare' ? HZ.gold : card.rarity === 'uncommon' ? '#6b8eb0' : '#8a8273',
+                                                            card.rarity === 'rare' ? HZ.gold : card.rarity === 'uncommon' ? HUE.blockBlue : HUE.stoneGrey,
                                                         shadowOpacity: picked === card.cardId ? 0.9 : 0.3,
                                                     },
                                                 ]}
@@ -291,9 +291,9 @@ export function RewardsOverlay({
 }
 
 const useStyles = makeStyles((AXM) => ({
-    root: { ...StyleSheet.absoluteFillObject, zIndex: 62, backgroundColor: '#0b0907' },
+    root: { ...StyleSheet.absoluteFillObject, zIndex: 62, backgroundColor: HUE.overlayBg },
     eyebrow: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 2, color: AXM.bone },
-    title: { fontFamily: FONTS.gothic, fontSize: 26, letterSpacing: 1.5, marginTop: 2, textShadowColor: '#000', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 0 },
+    title: { fontFamily: FONTS.gothic, fontSize: 26, letterSpacing: 1.5, marginTop: 2, textShadowColor: HUE.black, textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 0 },
     ledger: { marginHorizontal: 14, paddingHorizontal: 12, paddingVertical: 10, backgroundColor: 'rgba(0,0,0,0.4)', borderWidth: 1, borderColor: AXM.ash },
     ledgerLabel: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 1.6, marginBottom: 6 },
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
@@ -310,7 +310,7 @@ const useStyles = makeStyles((AXM) => ({
     offerRow: { flexDirection: 'row', justifyContent: 'center', gap: 12, marginTop: 10 },
     offerFrame: { borderWidth: 2, padding: 3, shadowColor: HZ.gold, shadowRadius: 10, shadowOffset: { width: 0, height: 0 } },
     pickedBadge: { position: 'absolute', top: -10, right: -10, width: 22, height: 22, borderRadius: 11, backgroundColor: AXM.sulfur, alignItems: 'center', justifyContent: 'center' },
-    pickedBadgeText: { fontFamily: FONTS.gothic, fontSize: 14, color: '#0a0a0a' },
+    pickedBadgeText: { fontFamily: FONTS.gothic, fontSize: 14, color: HUE.badgeInk },
     noSpoils: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 13, color: AXM.bone, textAlign: 'center', paddingVertical: 24 },
     confirmRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingTop: 8, paddingBottom: 16 },
     confirmBtn: { flex: 1, paddingVertical: 12, alignItems: 'center', borderWidth: 2 },
@@ -321,7 +321,7 @@ const useStyles = makeStyles((AXM) => ({
     
     // Preview overlay styles
     previewOverlay: { ...StyleSheet.absoluteFillObject, zIndex: 70, backgroundColor: 'rgba(0,0,0,0.9)', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16 },
-    previewContainer: { backgroundColor: '#0b0907', borderWidth: 2, borderColor: AXM.sulfur, paddingHorizontal: 16, paddingVertical: 20, maxWidth: 400, width: '100%' },
+    previewContainer: { backgroundColor: HUE.overlayBg, borderWidth: 2, borderColor: AXM.sulfur, paddingHorizontal: 16, paddingVertical: 20, maxWidth: 400, width: '100%' },
     previewTitle: { fontFamily: FONTS.gothic, fontSize: 16, letterSpacing: 1.5, color: AXM.sulfur, textAlign: 'center', marginBottom: 16 },
     previewCardContainer: { alignItems: 'center', marginBottom: 16 },
     previewInfo: { alignItems: 'center', marginBottom: 20 },

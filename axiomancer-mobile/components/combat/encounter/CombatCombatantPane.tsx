@@ -33,7 +33,7 @@ import Svg, { Circle, Defs, Ellipse, LinearGradient, Path, RadialGradient, Rect,
 import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
 import { getEncounterEnemyArt } from '@/assets/images/enemies';
 import { ARENA_PLATES_SHOWN, BLACK_ARENA_ALT, arenaAltTextFor, arenaBackdropFor } from '@/assets/images/combat';
-import { FONTS } from '@/theme/axm';
+import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
     CombatEnemyPaneVM, CombatPlayerPaneVM, CombatEffectChipVM,
@@ -297,8 +297,8 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
     }, []);
     const drop = useCallback((id: number) => setFloats((p) => p.filter((f) => f.id !== id)), []);
     const landHit = useCallback((dmg: number, blocked: number, fired: boolean) => {
-        if (dmg > 0) push(`-${dmg}`, '#e2543b', 0);
-        if (fired && blocked > 0) push(`BLOCKED ${blocked}`, '#9aa0a6', 40);
+        if (dmg > 0) push(`-${dmg}`, HUE.damageRed, 0);
+        if (fired && blocked > 0) push(`BLOCKED ${blocked}`, HUE.guardSteel, 40);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => undefined);
     }, [push]);
 
@@ -315,7 +315,7 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
             else if (e.kind === 'threat-fired') threatFired = true;
             else if (e.kind === 'effect-landed' && e.target === 'self') {
                 const kw = (keywordForEffect(e.effectId) ?? e.effectKind ?? 'effect').toUpperCase();
-                const color = e.effect ? effectGlyph(e.effect as Parameters<typeof effectGlyph>[0]).color : '#a86bdc';
+                const color = e.effect ? effectGlyph(e.effect as Parameters<typeof effectGlyph>[0]).color : HUE.tickPurple;
                 statuses.push({ text: kw, color });
             }
         }
@@ -335,7 +335,7 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
             impact.value = 0;
             impact.value = withDelay(IMPACT, withTiming(1, { duration: 1 }, (fin) => { if (fin) runOnJS(landHit)(dmg, blocked, threatFired); }));
         }
-        ticks.forEach((t, k) => push(`-${t}`, '#a86bdc', (k % 2 === 0 ? -1 : 1) * (20 + Math.floor(k / 2) * 16)));
+        ticks.forEach((t, k) => push(`-${t}`, HUE.tickPurple, (k % 2 === 0 ? -1 : 1) * (20 + Math.floor(k / 2) * 16)));
         const hadFloat = dmg > 0 || ticks.length > 0;
         statuses.forEach((s, k) => { if (!hadFloat) push(s.text, s.color, (k % 2 === 0 ? 1 : -1) * 30); });
         if (statuses.length > 0) setStatusPulseKey((k) => k + 1);
@@ -490,7 +490,7 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
             } else if (e.kind === 'effect-landed') {
                 const side = e.target === 'self' ? 'player' : 'enemy';
                 const kw = (keywordForEffect(e.effectId) ?? e.effectKind ?? 'effect').toUpperCase();
-                const color = e.effect ? effectGlyph(e.effect as Parameters<typeof effectGlyph>[0]).color : (side === 'player' ? '#a86bdc' : '#d9b44a');
+                const color = e.effect ? effectGlyph(e.effect as Parameters<typeof effectGlyph>[0]).color : (side === 'player' ? HUE.tickPurple : HUE.goldAccent);
                 statusFloats.push({ side, text: kw, color });
             }
         }
@@ -523,7 +523,7 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
         } else if (denied || (threatFired && enemy.intent.damage > 0)) {
             // (b) the turn resolved with no damage to the player at all → DENIED
             //     flourish over the enemy (teaches "variety / guard denies the turn").
-            pushEnemy('DENIED', '#d9b44a', 0);
+            pushEnemy('DENIED', HUE.goldAccent, 0);
         }
         // (d-symmetric) the player's APPLY landed on the enemy → flinch + float.
         if (enemyDmg > 0) {
@@ -534,7 +534,7 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
         const enemyTicks = ticks.filter((t) => t.side === 'enemy');
         enemyTicks.forEach((t, k) => {
             const dx = (k % 2 === 0 ? -1 : 1) * (20 + Math.floor(k / 2) * 16);
-            pushEnemy(`-${t.amount}`, '#e08a3b', dx);
+            pushEnemy(`-${t.amount}`, HUE.hexAmber, dx);
         });
         // (d) never-silent status: float the applied KEYWORD when the enemy had no
         //     other float (a -N / tick already says "something happened" there).
@@ -623,8 +623,8 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                         <Svg width={240} height={40} style={styles.enemyShadow}>
                             <Defs>
                                 <RadialGradient id="axmEnemyGroundShadow" cx="50%" cy="50%" rx="50%" ry="50%">
-                                    <Stop offset="0" stopColor="#000" stopOpacity={0.55} />
-                                    <Stop offset="1" stopColor="#000" stopOpacity={0} />
+                                    <Stop offset="0" stopColor={HUE.black} stopOpacity={0.55} />
+                                    <Stop offset="1" stopColor={HUE.black} stopOpacity={0} />
                                 </RadialGradient>
                             </Defs>
                             <Ellipse cx={120} cy={20} rx={112} ry={17} fill="url(#axmEnemyGroundShadow)" />
@@ -766,7 +766,7 @@ const useStyles = makeStyles((AXM) => ({
     enemyFigureImgBoss: { width: '92%', maxWidth: 460 },
     floorGlow: { position: 'absolute', left: 0, right: 0, top: '46%', bottom: 0 },
     bottomScrim: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 250 },
-    vignette: { ...StyleSheet.absoluteFillObject, backgroundColor: '#7a1410', zIndex: 30 },
+    vignette: { ...StyleSheet.absoluteFillObject, backgroundColor: HUE.woundVignette, zIndex: 30 },
 
     // ── top HUD ──
     hud: { position: 'absolute', top: 0, left: 0, right: 0, paddingHorizontal: 12 },
@@ -790,7 +790,7 @@ const useStyles = makeStyles((AXM) => ({
     crestInner: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', paddingBottom: 10 },
     crestHp: {
         fontFamily: FONTS.gothic, fontSize: 26, lineHeight: 28, color: AXM.parchment,
-        textShadowColor: '#000', textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 },
+        textShadowColor: HUE.black, textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 },
     },
     crestMax: { fontFamily: FONTS.mono, fontSize: 9, lineHeight: 10, color: AXM.bone, marginTop: -1 },
 
@@ -798,7 +798,7 @@ const useStyles = makeStyles((AXM) => ({
     altMeter: { marginTop: 4 },
     altMeterLabel: {
         fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 1, color: AXM.bone,
-        textShadowColor: '#000', textShadowRadius: 3, textShadowOffset: { width: 0, height: 1 },
+        textShadowColor: HUE.black, textShadowRadius: 3, textShadowOffset: { width: 0, height: 1 },
     },
     // FE-022 — the payoff word rides quieter than the tally it follows.
     altMeterTrack: {
@@ -821,7 +821,7 @@ const useStyles = makeStyles((AXM) => ({
         paddingHorizontal: 2, backgroundColor: 'rgba(0,0,0,0.92)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.28)',
         alignItems: 'center', justifyContent: 'center',
     },
-    chipBadgeText: { fontFamily: FONTS.sans, fontSize: 9, lineHeight: 11, color: '#fff' },
+    chipBadgeText: { fontFamily: FONTS.sans, fontSize: 9, lineHeight: 11, color: HUE.white },
     // P2 — remaining-duration tag (top-left), distinct from the stacks badge.
     chipDur: {
         position: 'absolute', left: -4, top: -6, minWidth: 14, height: 13, borderRadius: 7,
@@ -836,7 +836,7 @@ const useStyles = makeStyles((AXM) => ({
     floatNum: { position: 'absolute', top: 0, alignItems: 'center' },
     floatNumText: {
         fontFamily: FONTS.gothic, fontSize: 24, letterSpacing: 0.5,
-        textShadowColor: '#000', textShadowRadius: 5, textShadowOffset: { width: 0, height: 1 },
+        textShadowColor: HUE.black, textShadowRadius: 5, textShadowOffset: { width: 0, height: 1 },
     },
 
     // Player medallion.
@@ -846,7 +846,7 @@ const useStyles = makeStyles((AXM) => ({
         width: 80, height: 80, borderRadius: 40, overflow: 'hidden', backgroundColor: AXM.deepBg,
         alignItems: 'center', justifyContent: 'center',
     },
-    medallionFlash: { ...StyleSheet.absoluteFillObject, backgroundColor: '#e2543b' },
+    medallionFlash: { ...StyleSheet.absoluteFillObject, backgroundColor: HUE.damageRed },
     contactSlash: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', zIndex: 6 },
-    contactSlashText: { fontFamily: FONTS.gothic, fontSize: 34, color: '#fff', textShadowColor: '#e2543b', textShadowRadius: 6 },
+    contactSlashText: { fontFamily: FONTS.gothic, fontSize: 34, color: HUE.white, textShadowColor: HUE.damageRed, textShadowRadius: 6 },
 }));

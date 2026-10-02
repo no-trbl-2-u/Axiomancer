@@ -12,7 +12,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 
-import { FONTS } from '@/theme/axm';
+import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 import type { CombatIntentVM } from '@/state/presenters/combat-encounter.engine';
 
@@ -89,7 +89,7 @@ const useStyles = makeStyles((AXM) => ({
         borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)',
     },
     pillText: { fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 0.3 },
-    debuffMark: { fontFamily: FONTS.sans, fontSize: 10, color: '#a86bdc' },
-    wallMathDenied: { fontFamily: FONTS.sans, fontSize: 9, color: '#d9b44a', marginTop: 1, letterSpacing: 0.5 },
-    wallMathNet: { fontFamily: FONTS.mono, fontSize: 9, color: '#8a8273', marginTop: 1 },
+    debuffMark: { fontFamily: FONTS.sans, fontSize: 10, color: HUE.tickPurple },
+    wallMathDenied: { fontFamily: FONTS.sans, fontSize: 9, color: HUE.goldAccent, marginTop: 1, letterSpacing: 0.5 },
+    wallMathNet: { fontFamily: FONTS.mono, fontSize: 9, color: HUE.stoneGrey, marginTop: 1 },
 }));

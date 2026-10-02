@@ -19,6 +19,9 @@ export const ACTIVE_THEME_ID = getActiveThemeId();
  */
 export const AXM: Palette = currentPalette();
 
+/** Fixed colours, the same in every theme. Defined in `theme/hue.ts`. */
+export { HUE } from './hue';
+
 export const FONTS = {
   gothic: 'PirataOne_400Regular',
   serif: 'IMFellEnglish_400Regular',

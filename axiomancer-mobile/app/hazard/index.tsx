@@ -33,6 +33,7 @@ import { isTutorialDone } from '@/state/tutorials';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
 import { selectHazardViewModel, type HazardCardVM } from '@/state/presenters/hazard.engine';
 import type { SeedInput } from '@mechanics';
+import { HUE } from '@/theme/axm';
 
 type DropResolver = (payload: DragPayload, x: number, y: number) => void | Promise<void>;
 
@@ -211,6 +212,6 @@ export default function HazardScreen() {
 }
 
 const styles = StyleSheet.create({
-    root: { flex: 1, backgroundColor: '#0c0a08' },
+    root: { flex: 1, backgroundColor: HUE.inkBg },
     ghost: { position: 'absolute', top: 0, left: 0, zIndex: 999 },
 });

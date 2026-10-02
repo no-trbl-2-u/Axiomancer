@@ -9,12 +9,12 @@
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
 import type { CombatSummary } from '@mechanics';
-import { FONTS } from '@/theme/axm';
+import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
 const OUTCOME_COLOR: Record<string, string> = {
-    victory: '#5bbf6a', mercy: '#a86bdc',
-    defeat: '#e01f33', retreat: '#9c937f',
+    victory: HUE.boonGreen, mercy: HUE.tickPurple,
+    defeat: HUE.defeatRed, retreat: HUE.retreatBone,
 };
 
 export function CombatSummaryModal({ summary, onClose }: { summary: CombatSummary; onClose: () => void }) {
@@ -70,7 +70,7 @@ const useStyles = makeStyles((AXM) => ({
     rowName: { flex: 1, fontFamily: FONTS.serif, fontSize: 14, color: AXM.parchment },
     rowVal: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.sulfur },
     noRows: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 13, color: AXM.bone, textAlign: 'center' },
-    coach: { fontFamily: FONTS.sans, fontSize: 11, color: '#c2a14e', textAlign: 'center', lineHeight: 15, marginTop: 6, paddingHorizontal: 4, letterSpacing: 0.2 },
+    coach: { fontFamily: FONTS.sans, fontSize: 11, color: HUE.payoffGold, textAlign: 'center', lineHeight: 15, marginTop: 6, paddingHorizontal: 4, letterSpacing: 0.2 },
     totals: { gap: 2, marginBottom: 8 },
     total: { fontFamily: FONTS.sans, fontSize: 12, color: AXM.bone },
     best: { fontFamily: FONTS.sans, fontSize: 13, letterSpacing: 0.6, textAlign: 'center', marginBottom: 12 },

@@ -16,7 +16,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { hazardStatPairLabel } from '@/state/presenters/hazard.engine';
 import type { HazardCardVM } from '@/state/presenters/hazard.engine';
-import { FONTS } from '@/theme/axm';
+import { FONTS, HUE } from '@/theme/axm';
 
 import { DieGlyph, ProgGlyph } from './glyphs';
 import { CARD_EDGE, CARD_INK, CARD_INK2, CARD_PAPER, DIE, RARITY_UI, TYPE_INK } from './palette';
@@ -194,7 +194,7 @@ export const HazardCard = React.memo(function HazardCard({
             width: W,
             height: H,
             borderColor: c.c,
-            shadowColor: dragging || powered ? c.c : '#000',
+            shadowColor: dragging || powered ? c.c : HUE.black,
             shadowOpacity: dragging ? 0.9 : powered ? 0.6 : 0.5,
             shadowRadius: dragging ? 14 : powered ? 8 : 5,
             shadowOffset: { width: 0, height: dragging ? 10 : 4 },
@@ -284,7 +284,7 @@ export const HazardCard = React.memo(function HazardCard({
                 {overlays}
                 <View style={{ alignItems: 'center', paddingTop: 11, paddingHorizontal: 14 }}>
                     <View style={{ flexDirection: 'row', gap: 6, marginBottom: 4 }}>
-                        <Text style={{ fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.5, color: '#fff', backgroundColor: rar.c, paddingHorizontal: 7, paddingVertical: 1 }}>
+                        <Text style={{ fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.5, color: HUE.white, backgroundColor: rar.c, paddingHorizontal: 7, paddingVertical: 1 }}>
                             {rar.label}
                         </Text>
                         <Text style={{ fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.5, color: c.dark, borderWidth: 1, borderColor: c.c, paddingHorizontal: 7, paddingVertical: 1 }}>
@@ -330,7 +330,7 @@ export const HazardCard = React.memo(function HazardCard({
     if (mode === 'offer') {
         return (
             <View style={[frame, { paddingBottom: 6 }]}>
-                <Text style={{ fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.5, color: '#0a0a0a', backgroundColor: rar.c, textAlign: 'center', paddingVertical: 2 }}>
+                <Text style={{ fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.5, color: HUE.badgeInk, backgroundColor: rar.c, textAlign: 'center', paddingVertical: 2 }}>
                     {rar.label}
                 </Text>
                 <View pointerEvents="none" style={[StyleSheet.absoluteFillObject, { backgroundColor: `${c.c}1c` }]} />
@@ -399,8 +399,8 @@ const styles = StyleSheet.create({
         fontFamily: FONTS.sans,
         fontSize: 10,
         letterSpacing: 1,
-        color: '#0c0a08',
-        backgroundColor: '#86a821',
+        color: HUE.inkBg,
+        backgroundColor: HUE.hzAcid,
         paddingHorizontal: 4,
         paddingVertical: 1,
         overflow: 'hidden',

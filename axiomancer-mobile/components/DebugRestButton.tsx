@@ -10,7 +10,7 @@ import { Pressable, Text, View } from 'react-native';
 
 import { isDevToolsEnabled } from '@/lib/buildProfile';
 import { useGameActions } from '@/state/GameStoreProvider';
-import { FONTS } from '@/theme/axm';
+import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 
 export function DebugRestButton() {
@@ -73,12 +73,12 @@ const useStyles = makeStyles((AXM) => ({
     sub: { fontFamily: FONTS.mono, fontSize: 9, color: AXM.ash, marginTop: 2 },
     button: {
         borderWidth: 1,
-        borderColor: '#86a821',
+        borderColor: HUE.hzAcid,
         paddingVertical: 6,
         paddingHorizontal: 14,
         backgroundColor: 'rgba(134,168,33,0.08)',
     },
-    buttonLabel: { fontFamily: FONTS.gothic, fontSize: 14, letterSpacing: 2, color: '#86a821' },
+    buttonLabel: { fontFamily: FONTS.gothic, fontSize: 14, letterSpacing: 2, color: HUE.hzAcid },
     tutorialButton: { borderColor: AXM.sulfur, backgroundColor: AXM.sulfurSubtle, marginRight: 6 },
     tutorialLabel: { color: AXM.sulfur },
 }));

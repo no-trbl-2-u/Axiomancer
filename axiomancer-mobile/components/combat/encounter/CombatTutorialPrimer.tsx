@@ -16,7 +16,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Haptics } from '@/lib/platform/haptics';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
-import { FONTS } from '@/theme/axm';
+import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 
 interface PrimerPanel {
@@ -140,7 +140,7 @@ const useStyles = makeStyles((AXM) => ({
         maxWidth: 360,
         borderWidth: 2,
         borderColor: AXM.sulfur,
-        backgroundColor: '#100d0a',
+        backgroundColor: HUE.primerBg,
         paddingVertical: 18,
         paddingHorizontal: 16,
         alignItems: 'center',

@@ -10,6 +10,7 @@ import Svg, { Circle, Ellipse, G, Path, Rect } from 'react-native-svg';
 
 import { usePalette } from '@/theme/runtime';
 import { AxmIcon } from '@/components/icons';
+import { HUE } from '@/theme/axm';
 
 // ---------------------------------------------------------------------------
 // Die-face glyphs (blade / eye / crescent / sun / cross)
@@ -125,7 +126,7 @@ export function LedgerMark({
     if (kind === 'O') {
         return (
             <Svg viewBox="0 0 24 24" width={size} height={size}>
-                <Circle cx={12} cy={12} r={9.5} fill="#1c1a14" stroke={AXM.parchment} strokeWidth={2.2} />
+                <Circle cx={12} cy={12} r={9.5} fill={HUE.hzCleanseFill} stroke={AXM.parchment} strokeWidth={2.2} />
                 <Path d="M7.5 12.5 L 10.5 15.5 L 16.5 8.5" stroke={AXM.parchment} strokeWidth={2.2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
             </Svg>
         );
@@ -133,7 +134,7 @@ export function LedgerMark({
     if (kind === 'X') {
         return (
             <Svg viewBox="0 0 24 24" width={size} height={size}>
-                <Circle cx={12} cy={12} r={9.5} fill="#160606" stroke={AXM.blood} strokeWidth={2.2} />
+                <Circle cx={12} cy={12} r={9.5} fill={HUE.hzBloodFill} stroke={AXM.blood} strokeWidth={2.2} />
                 <Path d="M7.5 7.5 L 16.5 16.5 M 16.5 7.5 L 7.5 16.5" stroke={AXM.blood} strokeWidth={2.6} fill="none" strokeLinecap="round" />
             </Svg>
         );
@@ -232,7 +233,7 @@ export function Cracks({ seed = 1, opacity = 0.5 }: { seed?: number; opacity?: n
         >
             <G>
                 {lines.map((d, i) => (
-                    <Path key={i} d={d} stroke="#000" strokeWidth={0.5} fill="none" />
+                    <Path key={i} d={d} stroke={HUE.black} strokeWidth={0.5} fill="none" />
                 ))}
                 {lines.map((d, i) => (
                     <Path key={`h${i}`} d={d} stroke="rgba(232,223,200,0.05)" strokeWidth={0.3} fill="none" translateX={0.4} translateY={0.4} />

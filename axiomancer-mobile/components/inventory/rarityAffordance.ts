@@ -21,6 +21,7 @@
  */
 
 import type { Palette } from '@/theme/palette';
+import { HUE } from '@/theme/axm';
 
 export type ItemRarity = 'common' | 'uncommon' | 'rare' | 'unique';
 
@@ -45,7 +46,7 @@ export interface RarityAffordance {
 }
 
 /** Fixed rarity-blue — the dark-gothic palette has no blue accent. */
-export const RARITY_BLUE = '#3b7fd4';
+export const RARITY_BLUE = HUE.rarityBlue;
 
 const AFFORDANCE: Record<ItemRarity, RarityAffordance> = {
     common: { kind: 'plain', label: null, isShine: false, isOutline: false },

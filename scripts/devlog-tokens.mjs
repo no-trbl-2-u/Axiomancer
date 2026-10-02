@@ -54,6 +54,12 @@ export const STANCE_SOURCE = join(
     ROOT, 'axiomancer-mobile', 'state', 'presenters', 'combat-encounter.engine.ts',
 )
 
+/**
+ * The app's fixed colour tokens (`HUE`). Since Phase R10 the presenter names
+ * its dice colours as `HUE.<token>`, so `readStanceColors` resolves them here.
+ */
+export const HUE_SOURCE = join(ROOT, 'axiomancer-mobile', 'theme', 'hue.ts')
+
 /** The stances a card plate can be framed by, in the order the catalog lists them. */
 export const STANCES = ['body', 'mind', 'heart', 'wild']
 
@@ -218,16 +224,38 @@ export function tokensFor(spec) {
  *
  * @returns {Record<string, string>} stance -> hex
  */
-export function readStanceColors(source = readFileSync(STANCE_SOURCE, 'utf8')) {
+export function readStanceColors(
+    source = readFileSync(STANCE_SOURCE, 'utf8'),
+    hueSource = readFileSync(HUE_SOURCE, 'utf8'),
+) {
     const at = source.indexOf('STANCE_COLORS')
     if (at === -1) throw new Error('devlog-tokens: STANCE_COLORS is missing from the combat presenter')
     const block = source.slice(at, source.indexOf('}', at))
+    const hue = readHue(hueSource)
     const colors = {}
     for (const [, key, hex] of block.matchAll(/(\w+):\s*'(#[0-9a-fA-F]{3,8})'/g)) colors[key] = hex
+    for (const [, key, token] of block.matchAll(/(\w+):\s*HUE\.(\w+)/g)) {
+        if (!hue[token]) throw new Error(`devlog-tokens: STANCE_COLORS.${key} names HUE.${token}, which theme/hue.ts does not define`)
+        colors[key] = hue[token]
+    }
     for (const stance of STANCES) {
         if (!colors[stance]) throw new Error(`devlog-tokens: STANCE_COLORS has no "${stance}"`)
     }
     return colors
+}
+
+/**
+ * Read the `HUE` record (the fixed colour tokens) out of `theme/hue.ts`.
+ *
+ * @returns {Record<string, string>} token -> hex
+ */
+export function readHue(source = readFileSync(HUE_SOURCE, 'utf8')) {
+    const at = source.indexOf('export const HUE')
+    if (at === -1) throw new Error('devlog-tokens: HUE is missing from theme/hue.ts')
+    const block = source.slice(at, source.indexOf('} as const', at))
+    const hue = {}
+    for (const [, key, hex] of block.matchAll(/(\w+):\s*'(#[0-9a-fA-F]{3,8})'/g)) hue[key] = hex
+    return hue
 }
 
 /** `{ bg: '#0b0a09', … }` -> `  --bg: #0b0a09;` lines, stable order. */
