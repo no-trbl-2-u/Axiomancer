@@ -5,7 +5,7 @@ import { STARTING_CARD_IDS } from '../Combat/combat.rewards';
 
 // B4 F2 (plan/AUDIT.md): a save written before the card purge keeps purged
 // ids, and dealing one throws in `executeCard`. A trial set taken out of the
-// library leaves the same residue (D75). Every load drops them.
+// library leaves the same residue. Every load drops them.
 describe('dropUnknownCardIds', () => {
     const withCards = (knownCards: string[], combatRewardCards?: string[]) => {
         const state = createNewGameState();

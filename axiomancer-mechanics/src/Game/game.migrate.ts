@@ -1071,7 +1071,7 @@ export function migrate(
  *
  * A save can outlive the cards it names: the grey-card purge left old ids in
  * `knownCards` and `combatRewardCards`, and a trial set taken out of the
- * library would do the same (D75). Dealing an unknown id throws in
+ * library would do the same. Dealing an unknown id throws in
  * `executeCard`. This is not a version hop: a save at the current version can
  * hold them too, so the load paths call it after `migrate`. A save whose
  * `knownCards` named cards and kept none falls back to the starting cards.
