@@ -1,154 +1,90 @@
 # Miserere Mei, Deus — product spec
 
-> Retrospective spec, written at nexus adoption (2026-07-03) from
-> the live design corpus (`axiomancer-mechanics/VISION.md`,
-> per-package `AGENTS.md`/`CLAUDE.md`, `docs/adr/`, `specs/`). It
-> captures the product as it actually exists so the autonomous
-> loop has a stable anchor. Standing decisions and stack pins live
-> in `plan/bearings.md`; this file is the "what and why".
+> The "what and why". The rules of play, with their constants, are in
+> [`docs/game-model.md`](docs/game-model.md); standing decisions and stack
+> pins are in `plan/bearings.md`; the plan that got the game here is
+> [`plan/revamp/README.md`](plan/revamp/README.md).
 
 ## Product
 
 Miserere Mei, Deus is a turn-based, single-player dark fantasy
-deckbuilding RPG campaign for mobile (Expo / React Native),
-backed by a deterministic TypeScript rules engine. Its thesis —
-stated in `axiomancer-mechanics/VISION.md` — is that **what you
-owe, and to whom, is a mechanical input, not flavor**: mercy,
-honesty, restraint, and skill are each a mechanically
-consequential choice, not a role-play veneer.
+deckbuilding RPG for mobile (Expo / React Native), backed by a
+deterministic TypeScript rules engine. **What you owe, and to whom, is a
+mechanical input, not flavour:** mercy is a real ending with a real cost,
+not a dialogue skin.
 
-The core loop: explore a map → resolve authored node encounters
-(combat, minigames, dialogue, cutscenes) → make morally charged
-choices that shift quests and flags → carry those consequences
-into future world, boss, and region state. (Faction reputation was
-retired; `game.migrate.ts` strips its old save slice.)
-THE OATHS (the 3-axis alignment cube) and GRACE (the moral meter)
-were removed 2026-09-27 (T6, D39).
+The game is a small, honest core, cut down on purpose so it can be rebuilt
+one owner-led session at a time. The core loop: walk a region node by node
+→ fight, rest, gamble a hazard, grow a die at the Anvil → break the
+region's door → the next region.
 
 ## Audience
 
-The design corpus is authored for and around **T** (the
-designer/owner). The implied player enjoys deep, legible,
-tactical status-effect combat and morally weighty RPGs — the
-prior-art canon the design skills cite: Disco Elysium,
-Pathologic 2, Planescape: Torment, Undertale, Hades, Tyranny,
-and Mass Effect for narrative; Slay the Spire, Mörk Borg,
-Sekiro, Into the Breach, Mage Knight, and MTG for the tactical
-systems.
+The design corpus is authored for and around **T** (the designer/owner).
+The implied player likes legible, tactical card-and-dice combat and
+morally weighted choices: Slay the Spire, Mörk Borg, Into the Breach,
+Undertale.
 
 ## Pillars
 
-- **Mechanics make what you owe consequential.** Strange, legible,
-  consequential systems over safe RPG imitation.
-- **Bigger numbers.** (THE BIG NUMBERS REWRITE, 2026-09-02 —
-  `plan/2026-09-02-big-numbers-overhaul.prompt.md`.) A starter hit
-  is 6–9, a Saint-rank finisher 45–70 flat or past 100 when fed;
-  bosses carry hundreds of VITAE. Payoffs are uncapped. Every
-  play should visibly move something.
-- **Richer verbs, competing lines.** Direct damage, damage-over-
-  time, walls-and-reprisal, control, harvest and mercy are all
-  first-class and compete on merit. No line is the doctrinal path
-  and none is protected; no objective function grades combat from
-  above.
-- **Mastery path, not brute force.** Read the enemy → generate
-  and manage resources → use skills → commit to a line and make it
-  land big → resolve via victory, mercy, or consequence. A fight
-  should reward the read, not reward bunkering.
-- **Enemies that escalate and telegraph big.** Enemies carry
-  keywords, their own VITAE pool, tiered decks that never
-  reshuffle backwards, and — for bosses — stages that change the
-  fight mid-fight. A telegraph prints a digit, not an adjective.
-- **Difficult, consequential mercy.** Befriend is HP-gated, costs
-  heart tokens, and forks into spare-vs-exploit with lasting
-  world consequences (`docs/adr/ADR-0007`).
-- **Legibility without safety.** The mobile layer makes strange
-  mechanics understandable without sanding off their danger.
+- **Dice power cards.** Every card has a FREE line and a PAID line; the
+  PAID line costs one die, and the die's colour matters (the Color Law,
+  colour match).
+- **VITAE is the one bar.** Emptying the foe's VITAE wins. There is no
+  second track and no objective function grading a fight from above.
+- **Mercy is earned.** Befriending a foe through The Open Hand opens the
+  mercy choice: spare it, or exploit the opening. It is the only
+  non-lethal ending.
+- **The enemy telegraphs.** The foe's next card is shown before the player
+  acts; enemy damage escalates the longer a fight runs.
+- **Legibility without safety.** The app makes every number on a card face
+  the number the engine applies, without sanding off the danger.
 
 ## Scope
 
-### Shipped (v1 surface)
+### Shipped — the Act 1 core
 
-The engine (`axiomancer-mechanics` v0.37.0) ships three standalone
-encounter drivers (`combat` / `hazard` / `labyrinth`), each with its
-own CLI subcommand, seeded engine, content library, and hermetic e2e
-tests, plus pure-choice nodes with no standalone driver:
+- **Combat:** the grey deck (three cards), four dice rolled once per threat
+  phase, Conviction, one signature (The Open Hand), three foes (Float-Eye,
+  Brine Hag, the Doorwarden).
+- **World:** Act 1, four regions (Breakwater, Charcoal Wood, Beacon
+  Crags, the Lantern Deep), each closed by a Doorwarden door. Rest, the
+  Anvil, hazards, caches and gathering nodes. Shillings are the one
+  currency; healing potions the one item kind.
+- **Progression:** levels and body/mind/heart stats; stats scale each
+  card's family; dice grow only at the Anvil.
+- **The app** (`axiomancer-mobile`): an expo-router shell with a tabbed
+  home (character, exploration, inventory, memoir, deck), per-encounter
+  routes, menu routes and dev routes. Dark-only theme; colours are named
+  tokens.
 
-- **Hazard-Pattern Combat** — the primary combat system (Spec
-  25/26). Card-and-dice; the enemy has ONE bar = VITAE. THE BIG
-  NUMBERS REWRITE (2026-09-02) reset the scale, made DEAL a
-  first-class card verb again, gave enemies keywords and stages,
-  and repealed the laws that had accumulated around the old
-  library (spec 32, spec 34 §3/§8 and spec 35 are historical).
-  Dropping VITAE to 0 is the main win condition, with Befriend,
-  RELENT and CONDEMN as authored alternatives.
-- **Hazard minigame** ("v2") — environmental hazard card game.
-- **Labyrinth** — the three-act labyrinth driver
-  (`src/World/Labyrinth/`).
-- **Gathering** — "The Gleaning" minigame was retired in Phase 76;
-  `gathering` nodes now grant their items inline.
-- **Rest** — the rest-choice node (Phase 52c-d): one irreversible
-  choice of heal / anvil / cut. Retired the former rest minigame
-  (Phase 52e).
-- **Loot-cache** — "The Reliquary": since Phase 63 a three-way
-  choice node (card / item / sacrifice), no standalone driver.
-- **Quest Board** — "The Boy's Almanac" minigame was retired in
-  Phase 61; the QuestLog objective tracker stays.
-- The legacy turn-based combat (`resolveCombatRound`) and its
-  dev-only tab were fully removed; Hazard-Pattern Combat is the
-  only combat engine.
+The details are in [`docs/game-model.md`](docs/game-model.md), including
+what the game deliberately does not have.
 
-Supporting engines: character / progression / equipment (rarity,
-affixes, set items), effects and interactions, enemy content +
-AI, faction reputation, NPC dialogue trees, world maps / quests /
-map-events, deterministic seeded RNG, and a Monte-Carlo
-balance-sim harness.
+### Next — the checkpoint and the rebuild
 
-The mobile app (`axiomancer-mobile` v1.9.0) presents this engine
-through an expo-router shell: a tabbed home (character,
-exploration, inventory, memoir, deck) plus per-encounter routes
-(combat-encounter, hazard, hazard-deck, item-reward, rest, cache,
-blacksmith, labyrinth, dialogue, event, cutscene, village), menu
-routes (index, saves, settings) and dev routes. Dark-only
-theme; four period display fonts; SVG placeholder art system.
-
-### Queued / in progress
-
-- Combat-depth follow-up specs 26–30 (draft): Catalyst
-  multiplicative scaling, card-salvage sideways play, curated
-  combat deck + synergy, reactive/telegraphing enemies,
-  projected-lethality readout. (Specs 31/32 shipped since this
-  section was last reviewed — Spec 31 fate-engine card/effect
-  revamp and Spec 32 v3 no-strike card library, see above.)
-- Authored content: `specs/characters` and `specs/story` currently
-  hold only templates (`specs/world` has `W-01` and `W-02`) — character/story/
-  world authoring is the open content pipeline (driven by the
-  `character-spec` / `story-spec` / `world-spec` design skills).
-- Northern-forest region content extension (apply the
-  fishing-village expansion pattern to the mid-game gate).
+1. **RC, the Act 1 checkpoint release:** T tags the reset point once the
+   reset phases are done.
+2. **The rebuild track (owner-led, B1-B10):** relics, card sessions (Plan
+   B: lanes and families, D73), the enemy revamp (normal, elite, region
+   boss, act boss), hazards, the Deck tab, card art, the Labyrinth
+   re-theme, the dev menu. The loop does not start these (D37, D58).
+3. **R11** decides how the loop creates content again.
 
 ### Non-goals
 
-- **No databases / servers / containers** in mechanics — it is a
-  pure, deterministic library + CLI.
-- **No npm-publish loop** — mechanics is consumed as local source
-  via the `@mechanics` alias, not a published package.
-- **No auto-deploy from `main`** — the mobile app ships via
-  manual EAS builds; `main` is not push-to-production.
-- **Do not reintroduce the two-Pressure-Track combat win model** —
-  it was deliberately removed. VITAE is the main bar; the authored
-  alt-wins (Befriend, RELENT, CONDEMN) resolve fights beside it and
-  are ordinary design tools, not exceptions to a law.
-- **Do not reintroduce a governing objective function** — the
-  win-rate curve, the Combat Quality Index and the rank bands were
-  repealed 2026-09-02. Balance keeps bug detectors and a wide
-  sanity envelope; it does not grade the game against a shape.
-- New continents are deferred until the first continent is clean
-  (`docs/adr/ADR-0005`).
+- **No databases, servers or containers** in mechanics. It is a pure,
+  deterministic library and CLI.
+- **No npm publishing.** Mobile reads mechanics as local source through
+  the `@mechanics` alias.
+- **No auto-deploy of the app.** It ships through manual EAS builds. The
+  only hosted surface is the public DevLog.
+- **No second win track.** Do not reintroduce Pressure Tracks or a
+  governing objective function. <!-- lexicon-ok: pressure-tracks -->
+- **No new continents** until Act 1 is rebuilt (`axiomancer-mechanics/docs/adr/ADR-0005`).
 
 ## Contracts (must not break)
 
-See `plan/bearings.md` § "URL / API / CLI contract" for the
-enumerated, locked surface: the mechanics CLI subcommands, the
-`@mechanics` public export barrel (`src/index.ts`), the mobile
-routes, the canon combat copy (VITAE), and the
-deterministic seeded-RNG invariants.
+See `plan/bearings.md` § "URL / API / CLI contract": the mechanics CLI
+subcommands, the `@mechanics` export barrel (`src/index.ts`), the mobile
+routes, the VITAE copy canon, and the seeded-RNG invariants.

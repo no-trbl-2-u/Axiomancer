@@ -96,7 +96,7 @@ test('every voice rule carries a fix and a source', () => {
   }
 })
 
-// ── MB-1, the knife law (spec 34 §2.5.1) ────────────────────────────────────
+// ── MB-1, the knife law (DELIVERY_REGISTER.md) ─────────────────────────────────
 
 test('a literal knows which field it sits under', () => {
   const src = ["    description:", "        'a long line of prose here',", "    scene: 'inline value',"]
@@ -131,10 +131,10 @@ test('short narration sentences pass', () => {
   assert.deepEqual(scanSource("    scene: 'A cold porch of pale stone. Three doors ahead.',", retired), [])
 })
 
-test('the register rules carry a fix and cite the spec', () => {
+test('the register rules carry a fix and cite the register', () => {
   for (const r of PROSE_RULES) {
     assert.ok(r.fix.length > 20, `${r.id} has no actionable fix`)
-    assert.match(r.since, /spec 34/, `${r.id} does not cite its ruling`)
+    assert.match(r.since, /DELIVERY_REGISTER\.md/, `${r.id} does not cite its ruling`)
   }
 })
 

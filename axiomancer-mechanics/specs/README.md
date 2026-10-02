@@ -55,10 +55,11 @@ it into a follow-up spec rather than ploughing on.
 
 ## Index
 
-Every numbered spec, current or archived. Most are shipped history; the
-live rules are in `docs/` and the source. Current specs: **33**, **34**,
-plus the authored content folders `characters/`, `story/`, `world/`
-(templates + `W-01`, `W-02`).
+Every numbered spec, all of them history. No numbered spec is current: the
+game as built is [`docs/game-model.md`](../../docs/game-model.md) at the
+repo root, the live rules are in `docs/` and the source, and the design
+lands in `plan/revamp/`. What remains here is the authored content folders
+`characters/`, `story/`, `world/` (templates + `W-01`, `W-02`).
 
 | # | Spec | Notes |
 |---|------|-------|
@@ -84,8 +85,8 @@ plus the authored content folders `characters/`, `story/`, `world/`
 | 29 / 30 superseded | [`29-reactive-enemies-telegraphed-intent.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/29-reactive-enemies-telegraphed-intent.md) *(archived T1)*, [`30-projected-lethality-readout.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/30-projected-lethality-readout.md) *(archived T1)* | Partially shipped / shipped by other phases. |
 | 31 HISTORICAL | [`31-fate-engine-card-effect-revamp.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/31-fate-engine-card-effect-revamp.md) *(archived T5)* | Fate Engine revamp (P0 shipped 2026-07-05); superseded by specs 32 → 33 and THE BIG NUMBERS REWRITE. |
 | 32 HISTORICAL | [`32-no-strike-card-library.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/32-no-strike-card-library.md) *(archived T5)* | Themed no-strike library; superseded by THE BIG NUMBERS REWRITE (2026-09-02). |
-| 33 IMPLEMENTED | [`33-upgradeable-dice.md`](./33-upgradeable-dice.md) | The four-die combat model; implemented and current. |
-| 34 RATIFIED | [`34-dark-fantasy-campaign.md`](./34-dark-fantasy-campaign.md) | Dark Fantasy campaign bible (design charter, 2026-08-08). §6 (the morality system: THE OATHS, GRACE) is retired by D39 (2026-09-27). |
+| 33 RETIRED | `33-upgradeable-dice.md` *(deleted in R10b; read it with `git show 5b3e64b6:axiomancer-mechanics/specs/33-upgradeable-dice.md`)* | The four-die model. What is still true (dice, faces, Conviction, die gear) is in `docs/game-model.md`; its stance layer and preset curve are gone. |
+| 34 RETIRED | `34-dark-fantasy-campaign.md` *(deleted in R10b; `git show 5b3e64b6:axiomancer-mechanics/specs/34-dark-fantasy-campaign.md`)* | The campaign bible. Its live voice rules (§2, §2.5 MB-1 to MB-8) are now [`docs/narrative/DELIVERY_REGISTER.md`](../docs/narrative/DELIVERY_REGISTER.md); the rest was repealed or retired. |
 | 35 HISTORICAL | [`35-objective-function-v2.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/35-objective-function-v2.md) *(archived T5)* | Combat Quality Index — repealed 2026-09-02; `combat.objective.ts` still computes it as a report-only reading. |
 
 ## Conventions

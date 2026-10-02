@@ -3,15 +3,16 @@
 <!-- lexicon-ok: pressure-tracks -->
 
 **Miserere Mei, Deus** is a turn-based, single-player dark fantasy
-deckbuilding RPG campaign for mobile: a deterministic TypeScript
-rules engine where what the player owes, and to whom, is a mechanical
-input, not flavor. Combat may use direct damage, statuses, Conviction,
-Surge, and Dice without requiring status dominance; morally charged
-choices carry lasting world consequences. Full product spec: `spec.md`.
+deckbuilding RPG for mobile: a deterministic TypeScript rules engine where
+what the player owes, and to whom, is a mechanical input, not flavour.
+**Read [`docs/game-model.md`](docs/game-model.md) first:** it is the game
+as the code stands, every number with its constant, and what the game
+does not have. Then the product spec, `spec.md`.
 
-**Reading order:** loop/plan work → `plan/bearings.md` first; package
-work → that package's `AGENTS.md`; design/balance/content work →
-`axiomancer-mechanics/VISION.md` + `spec.md`.
+**Reading order:** everyone → `docs/game-model.md`; loop/plan work →
+`plan/bearings.md`; package work → that package's `AGENTS.md`;
+design/balance/content work → `axiomancer-mechanics/VISION.md` (T's wants)
++ `spec.md`.
 
 npm-workspaces monorepo. Two packages, flat at the root:
 
@@ -120,6 +121,9 @@ below).
 
 ## Truth sources
 
+**`docs/game-model.md` is the first read for any rules question**; where
+it and the code disagree, the code wins and the page is a bug.
+
 Three kinds of truth answer game questions. For any non-deterministic
 question or open-ended task, reach for the two MCP servers below —
 any agent may use them, not just the design sub-agents. `axio-query`
@@ -200,7 +204,8 @@ The unified **nexus** harness was re-onboarded onto the monorepo on
   `archive/` (rotated history, verbatim).
 - `scripts/` — `deploy-check.mjs` (CI-green deploy gate),
   `notify.mjs` (pager), `loop-issue.mjs` (GitHub issue mirror).
-- `spec.md` — the product spec the loop builds against.
+- `docs/game-model.md` — the game as the code stands; `spec.md` — the
+  product spec the loop builds against.
 
 Two gates wrap every shipping tick: the **verify gate**
 (`npm run verify`, per-workspace, pre-commit) and the **deploy gate**

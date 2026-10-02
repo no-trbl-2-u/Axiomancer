@@ -1,7 +1,7 @@
 name: verify-prose
 
-# The house-voice gate (phase 70). THE PIPELINE LIBERATION authorized
-# autonomous narrative shipping; this is the guardrail that did not follow it.
+# The house-voice gate: checks authored text against the delivery register
+# (axiomancer-mechanics/docs/narrative/DELIVERY_REGISTER.md).
 # Triggers on the authored content surfaces and on the rules themselves, so a
 # content edit in any workspace is checked without depending on that
 # workspace's own verify lane.

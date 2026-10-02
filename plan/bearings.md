@@ -7,35 +7,28 @@
 
 ## What we're building
 
-`spec.md` at the repo root is the product spec — the canonical
-description of Miserere Mei, Deus. Read once at session start. The TL;DR:
+`spec.md` at the repo root is the product spec, and
+[`docs/game-model.md`](../docs/game-model.md) is the game as the code
+stands, every number with its constant. Read both once at session start.
+The TL;DR:
 
-> A turn-based, single-player dark fantasy deckbuilding RPG
-> campaign for mobile, backed by a deterministic TypeScript
-> rules engine, where what you owe, and to whom, is a mechanical
-> input rather than flavor.
+> A turn-based, single-player dark fantasy deckbuilding RPG for mobile,
+> backed by a deterministic TypeScript rules engine, where what you owe,
+> and to whom, is a mechanical input rather than flavour.
 
 Two-package npm-workspaces monorepo: a pure rules **engine**
 (`axiomancer-mechanics`) and an Expo/React-Native **app**
-(`axiomancer-mobile`) that consumes the engine as local source (the
-card-editor dev tool was deleted in R1, D56). Status effects remain a major
-authored tool but no route is protected. THE BIG NUMBERS REWRITE repealed
-all governing combat objective functions, including CQI; simulations retain
-bug detectors and a wide sanity envelope. Morally charged choices carry
-lasting world consequences.
+(`axiomancer-mobile`) that consumes the engine as local source. The game
+is the Act 1 core the revamp left: three grey cards, four dice, three foes,
+four regions, befriend and mercy. There is no governing combat objective
+function; simulations keep bug detectors only.
 
-**Product name: "Miserere Mei, Deus"** (renamed from "Axiomancer" via
-`/oversight` 2026-08-20 — see `plan/AUDIT.md`'s product-name row and
-`plan/archive/2026-09-25-trim-t4/plan/naming-session-2026-08-12.md` §6). The migration shipped as
-build-plan **Phase 67** (2026-08-27): store/web metadata, CLI banners,
-the published DevLog/Catalog chrome, and the live doc set all carry the
-new title. What deliberately did NOT change: internal identifiers — the
-npm workspaces (`axiomancer-mechanics`, `axiomancer-mobile`), the repo
-and folder name, `GH_REPO`, the `axiomancer` URL scheme and
-`com.axiomancer.mobile` — and the title-screen wordmark, which is
-painted into `title-embark.jpg` and waits on new art. See
-`plan/archive/2026-09-25-trim-t5/new-north-star.prompt.md` for the broader Mörk-Borg-directed
-tonal pivot this name change was decided alongside.
+**Product name: "Miserere Mei, Deus".** Player- and doc-facing prose uses
+it. Internal identifiers keep the former title: the npm workspaces
+(`axiomancer-mechanics`, `axiomancer-mobile`), the repo and folder name,
+`GH_REPO`, the `axiomancer` URL scheme and `com.axiomancer.mobile`. The
+title-screen wordmark is painted into `title-embark.jpg` and waits on new
+art (B8).
 
 **One hosted web surface: the public DevLog.** The product ships as
 a mobile app via manual EAS builds; the app itself does not
@@ -76,7 +69,7 @@ with no session handshake.
 Decided across the two source projects and the monorepo merge.
 Revisit only if a phase genuinely cannot ship without changing
 one of these — then decide it deliberately and file the call as
-`[loop-call]` residue (THE OPEN GATE, 2026-08-28).
+`[loop-call]` residue.
 
 > **Exception (2026-08-08) — the Expo decouple: partly shipped, the rest
 > parked on a native project.** *(Status corrected 2026-09-25, T4: this
@@ -114,7 +107,7 @@ one of these — then decide it deliberately and file the call as
 
 | Layer | Choice | Notes |
 |---|---|---|
-| Repo | npm workspaces monorepo (3 flat packages) | **npm, never pnpm/yarn** |
+| Repo | npm workspaces monorepo (2 flat packages) | **npm, never pnpm/yarn** |
 | Engines | Node ≥22, npm ≥10 | root `package.json` `engines` |
 | React | 19.1.0 (pinned via root `overrides`) | react / react-dom / react-test-renderer |
 | **mechanics** language | TypeScript strict, CommonJS | `type-check` = `tsc --noEmit` |
@@ -128,7 +121,7 @@ one of these — then decide it deliberately and file the call as
 | mobile lint | `eslint app components` | |
 | mobile e2e | Playwright (expo-web) + per-minigame scripts | `scripts/*-e2e.mjs` |
 | Structured data | **none** — content is in-repo TS libraries | no gh-as-db; `/ship-data` not adopted; no `data/BACKLOG.md` |
-| Design layer | **none** — no `design/` export dir | design happens via the `.claude/skills/` design skills into `axiomancer-mechanics/specs/` |
+| Design layer | **none** — no `design/` export dir | during the revamp, design lands in `plan/revamp/` and T's sessions |
 | Deploy (mobile) | EAS Build (manual, release-time) | not per-push |
 | CI / deploy gate | **GitHub Actions** — `verify-*` workflows | see deploy gate below |
 
@@ -250,453 +243,124 @@ fresh card agent is written at the first card session (B6).
 (So the loop never has to ask. Add to this list any recurring
 ambiguity.)
 
+- **THE REVAMP (T, attended session 2026-09-28, D46–D73) — revamp mode.**
+  `plan/revamp/README.md` is the main build plan; its §7 is the order. The
+  loop's phase work is only ratified revamp phases; `/march` keeps the
+  upstream chain (triage → critique → phase → expand → iterate), and
+  nothing in it **creates content of any kind**: cards, keywords, enemies,
+  relics, maps, NPCs, events or art (D58). Engine constants move only
+  inside a ratified revamp phase. Owner-led B-rows are T's sessions; the
+  loop never starts one. Revamp mode ends when Phase R11 ships; R11 decides
+  what content authority the loop gets back.
+- **THE CARD HOLD (T, attended session 2026-09-26, D37).** No player card
+  and no player keyword is created outside a guided session with T. No
+  `/expand`, phase or brief adds one, and none plans a phase that would.
+  The card-rules inventory B4 required is merged
+  (`plan/revamp/card-rules-inventory.md`). **The card process is Plan B
+  (D73):** one slice per lane, lanes grouped into families (a relic names a
+  family), a first pool of 3 families × 1 lane, and bridge cards within a
+  family. See `plan/revamp/cards.md`.
 - **Which package a phase touches:** scope the verify gate to that
   workspace (`--workspace <pkg>`); if a change touches mechanics'
   public surface, also verify mobile.
-- **Which combat engine is canonical:** Hazard-Pattern Combat
-  (`simulateHazardPatternCombat` / `initializeCombatEncounter`).
-  The legacy `resolveCombatRound` driver was fully removed from
-  the engine (2026-06) — never resurrect it for a combat gate or
-  playtest.
+- **Combat:** Hazard-Pattern Combat (`initializeCombatEncounter`,
+  `simulateHazardPatternCombat`) is the only combat engine. The rules are
+  in `docs/game-model.md`.
 - **Win condition:** VITAE is the one bar and emptying it is the main
-  win. During the revamp the only other ending is befriending, entered
-  through The Open Hand into the mercy choice (D47, R4); RELENT and
-  CONDEMN are cut with their engine code in R7. Never reintroduce Pressure Tracks /
-  `CombatPressureTracks`.
+  win. The only other ending is befriending, entered through The Open Hand
+  into the mercy choice (D47, D63). Never reintroduce RELENT, CONDEMN,
+  Pressure Tracks or `CombatPressureTracks`.
   <!-- lexicon-ok: pressure-tracks -->
-- **THE BIG NUMBERS REWRITE (T direct, 2026-09-02) — the scale reset
-  and the great repeal.** Shipped on `feat/big-numbers-overhaul` from
-  the handoff brief at
-  `plan/2026-09-02-big-numbers-overhaul.prompt.md`, which is now the
-  source of truth for combat design. It repealed roughly thirty-five
-  accumulated decisions-of-record — the no-strike doctrine, status
-  primacy, the doctrine win-rate curve, the Combat Quality Index, rank
-  bands and pricing lint, the naming law, deck-size and package-shape
-  laws, the enemy stat and art laws, registry count pins, the RUPTURE
-  cap and the alt-win ladders — and deleted or gutted their enforcing
-  tests so `verify` stops defending them. Exactly three constraints
-  survive: presets split into exact aspect thirds, every card has a
-  FREE line, and one tray roll per threat phase. In their place: bigger
-  numbers as a design pillar (the §5 scale ladder), a richer keyword
-  language with direct damage as a first-class verb, and enemies with
-  keywords, VITAE pools, tiered decks and stages. Specs 32, 34 §3/§8
-  and 35 and `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/profane-canon.md` are marked HISTORICAL; there is no
-  governing objective function any more.
-  **SUPERSEDED 2026-09-28 (D36, R0).** The first surviving constraint is
-  gone: the card purge (D36) removed the presets and their 5/5/5 aspect
-  thirds; every run deals the grey deck.
-- **THE CONTENT LIFECYCLE SPLIT (T direct, 2026-09-02/03) — SUPERSEDED
-  2026-09-28 by D58.** The five `adjust-*` stewards and `/forge` were
-  archived in R0 (`plan/archive/2026-09-28-revamp-r0/`, with
-  `CONTENT_LEDGER.md`). During the revamp the loop creates no content of any
-  kind; content returns through the owner-led rebuild sessions (B1–B9).
+- **No governing objective function.** Combat is not graded against a
+  win-rate curve, a quality index or rank bands. There is no measured
+  baseline during the revamp (D57); a balance question is answered "not
+  measured" (`docs/truth-sources.md` § Measured truth). Hazard minigame
+  targets: CDR-0006.
+- **LOCKED MECHANICS — the keep-list (T direct, /oversight 2026-08-08).**
+  T, verbatim: *"the Conviction, Surge meter, and Dice mechanics system,
+  those are LOCKED into place and will need to stay. Cards can effect them,
+  but agents should not remove the mechanics."* Three systems stay:
+  1. **Conviction** — the banked combat resource that pays for signatures.
+     Anchors: `CombatEncounterState.conviction`, `CONVICTION_CAP`, the
+     `conviction-gained` / `special-fired` events,
+     `SPECIAL_CONVICTION_DEFAULT`, `SIGNATURE_COST`.
+  2. **The Surge meter** — the momentum chain (heart → body → mind) and
+     its surge die. Anchors: `MOMENTUM_CHAIN_ORDER`,
+     `MOMENTUM_SURGE_LENGTH`, `SURGE_DIE_PREFIX`, the `momentum-surged`
+     event.
+  3. **The Dice system** — `Combat/combat.dice.ts`,
+     `Combat/combat.upgradeable-dice.ts`, `DEFAULT_DIE_GEAR`, the Anvil's
+     HONE/TEMPER/SWAP die-gear economy.
+  Cards, keywords, enemies and content may read, feed, spend, block or
+  amplify all three. Removing, replacing, no-op'ing, flagging off or tuning
+  any of them out of relevance needs overwhelming design evidence, a
+  documented call and `[loop-call]` residue. The names stay too.
 - **Copy canon:** VITAE. Never HEALTH / MORALE; never "stance" (the
-  layer was removed, D65). GRACE (né MORALE, Phase 44h) was removed in T6 (D39,
-  2026-09-27).
+  layer was removed, D65).
 - **Content location:** engine content in mechanics `src/*`
   libraries; player-facing strings in mobile presenters /
   `*.copy.ts`; no hardcoded copy in components; no hex literals
-  in components (use AXM tokens).
+  in `app/`, `components/` or presenters (use `HUE` / AXM tokens,
+  R10).
 - **Effect naming:** never rename engine effect ids for player
   text — add to the mobile keyword registry
   (`state/combat/keywords.ts`). Real-units-or-no-number on card
   faces.
-- **Voice:** terse, archaic-flavored, "cold and old" — but **no
+- **Voice:** terse, archaic-flavoured, "cold and old" — but **no
   thee/thou/thy/thine/ye**. Mercy/exploit language reads as
-  morally charged, never neutral. Ratified and extended as
-  `spec 34 §2.5` (the Mörk Borg delivery register, MB-1…MB-8, Phase
-  74) — short sentences (the knife law), indifferent narration, Dial-1
-  deadpan humor, priced scenery, brutality stated flatly. Governs every
-  player-facing surface, not just card/telegraph text. See **THE LONGER
-  LEASH** below for the authority this register ships under.
-- **THE UNSHACKLING (T direct, /oversight 2026-08-08) — three locked
-  constraints are VOID.** T, verbatim: *"remove constraints across the
-  entire application. Normal damage is allowed, deck tuning is allowed to
-  change anything about a card, no more philosophy based theme. I want to
-  give you full freedom to take this deckbuilder in any direction."*
-  Authorised by the source-of-truth hierarchy below (T's latest explicit
-  decision outranks every ADR/CDR/spec). What falls:
-  1. **The strike is alive.** Cards MAY deal raw enemy-HP damage. Spec 32
-     v3 §1/§12's no-strike law and the status-dominance balance doctrine
-     are retired for combat (their enforcing tests came down in Phase 41).
-  2. **Card-pool work (`/adjust-cards`; `/deck-tuning` until its T5
-     retirement) has full card authority** — no sandbox-first
-     quarantine, no byte-identity law, no recolor-not-repartition rule,
-     no per-change owner ballot, no `[needs-user-call]` on recolors or
-     new cards. Anything about any card is fair game — **bounded only by
-     the LOCKED MECHANICS carve-out below**: cards may do anything to
-     Conviction, the Surge meter and the Dice system except make them
-     irrelevant.
-     **SUPERSEDED 2026-09-28 (D58/D37, R0).** No agent authors or changes
-     player cards outside a guided session with T; `/adjust-cards` is
-     archived.
-  3. **Philosophy theming is retired** as the organising fiction.
-     **RATIFIED the same day — the replacement is "a Dark Fantasy
-     deckbuilding RPG campaign", WHOLE PRODUCT.** T's framing:
-     *"It's looser, not that different from what we already have, and
-     should be an easy pivot while opening up A LOT of doors for us."*
-     Read "looser" as the governing constraint: this is a re-skin plus
-     permission, **not** a ground-up redesign — engine mechanics, keyword
-     *behavior*, the dice model and the minigame doctrines all survive.
-     The bible is `specs/34-dark-fantasy-campaign.md` (executed by Phases
-     42 and 44a-44i). Dark-fantasy flavor is authorable; the retheme map +
-     lexicon lint (Phase 44a) remain the guardrails. Keywords that already
-     read dark fantasy (POISON, BLEED, MARK, DOOM, THORNS, GUARD, RIPOSTE)
-     are expected to survive unchanged; renaming what already works is
-     churn.
-  What does NOT fall (still binding): every hermeticity and determinism
-  rule (injected RNG, no disk/network/TTY in engine tests), the verify
-  and deploy gates, the nexus hard rules, and `GAME_STATE_VERSION`
-  migration discipline. "Remove constraints" was about DESIGN law, not
-  engineering rigour.
+  morally charged, never neutral. The full register (the V-bans,
+  sentence form, the six lexicons, the delivery rules MB-1 to MB-8) is
+  `axiomancer-mechanics/docs/narrative/DELIVERY_REGISTER.md`, enforced in
+  part by `scripts/check-prose.mjs`. It governs every player-facing
+  surface.
+- **Story canon (THE BLANK PAGE, T direct, 2026-09-18, amended
+  2026-09-24).** Canon is whatever
+  `axiomancer-mechanics/content/story/story-overview.md` says, and nothing
+  more. The overview grows only in attended sessions with T. The player is
+  X: no name, and `X` is scaffolding, never shipped text; the overview is
+  the only source for who X is. Shipped narrative is not canon. The loop
+  does not invent canon: if a tick needs a story fact the overview does
+  not hold, it says so and stops. `docs/narrative/` (style constitution,
+  voice registers, lexicon, anti-imitation, the delivery register) is craft
+  law and binds.
 - **Direct pushes to `main` are sanctioned from ANY session, including
   remote/web ones** (T direct, 2026-08-08: *"Direct pushes to main are
-  fine, keep going."*). **No branch or PR is required** — this overrides
-  a remote harness's default of "develop on a `claude/*` branch and open a
-  PR". Branch + PR remains available and is still the better choice when a
-  change genuinely wants review before landing (large or risky diffs,
-  anything a human should read first); it is simply no longer mandatory.
-  Everything else is unchanged: the verify gate still runs pre-commit, the
-  deploy gate still runs post-push, and no force-push or destructive git
-  op is permitted.
-- **THE PIPELINE LIBERATION (T direct, remote session 2026-08-22) —
-  every content pipeline is open to the loop.** Provenance: the
-  content-pipelines audit (`docs/reports/content-pipelines-audit-2026-08-22.md`,
-  PR #228) and T's answer to it, *"what do you need from me to free up ALL
-  these pipelines? Try to do it yourself first"*. Under the
-  source-of-truth hierarchy that is T's latest explicit decision, and
-  it rules the following:
-  1. **The transitional-library ruling is LIFTED.** Card-pool work's
-     full card authority is live against the current library: balance
-     findings are work, replacement cards may be authored, tuning passes
-     may open. (The superseded ruling is archived; see its stub below.)
-     **SUPERSEDED 2026-09-28 (D58/D37, R0).** Card-pool authority is
-     withdrawn; cards are made only in guided sessions with T.
-  2. **Keyword and effect growth is open.** The 30-keyword proving
-     gate no longer blocks new keywords: a new keyword or a new
-     `specialMechanics` kind may ship WITHOUT a per-item owner
-     ratification, provided it ships through the FULL wiring
-     checklist (engine + pricing + display + mobile
-     keyword-registry/gloss + card-editor union + keyword-atlas row +
-     `docs/retheme-map.json` naming registry), with a hermetic e2e
-     and the cross-package verifies. Engineering rigour is the gate
-     now, not the count. Keyword retirement stays deliberate
-     (retired ids never renamed or resurrected).
-     **SUPERSEDED 2026-09-28 (D58/D37, R0).** Keyword growth is closed to
-     the loop; new player keywords come only from guided sessions with T.
-  3. **New content items are in scope for every content surface** —
-     enemies, maps, continents, MapEvent kinds, hazard cards,
-     gathering sites, loot-cache layers, quest boards, dialogue
-     trees, narration. The tuning commands' "numeric-only /
-     propose-only" walls on NEW CONTENT ITEMS are lifted; their walls
-     on ENGINE STRUCTURE (dispatchers, resolution control flow,
-     engine constants) remain. A new persisted kind or state field
-     still rides `GAME_STATE_VERSION` with a migration hop and a
-     pinned migration test — that discipline is engineering, not
-     design law, and stands.
-     **SUPERSEDED 2026-09-28 (D58/D37, R0).** During the revamp the loop
-     creates no new content item on any surface; content returns through
-     the owner-led rebuild sessions (B1–B9).
-  4. **Count pins are growth ledgers, not walls.** Where a test pins a
-     content count, a content add updates the pin in the same commit,
-     citing this ruling in the commit body; editing a pin without a
-     content change alongside it remains forbidden. *(Corrected
-     2026-09-25, T4: this item used to list "57 cards, 52 enemies, 42
-     glossary entries, the `addedIn` stamp" as the pinned totals. THE BIG
-     NUMBERS REWRITE deleted those registry pins on 2026-09-02 — see the
-     header of `src/Cards/e2e/curated-library.engine.test.ts`; the library
-     is ~129 cards and unpinned. Remaining count assertions are local,
-     e.g. per-map layout node counts.)*
-  5. **Narrative shipping is authorized** — the loop may author and
-     ship dialogue trees, map-event prose, cutscene lines, and flavor
-     strings through the normal gates without a per-item build-plan
-     ruling, honoring the voice constitution
-     (`axiomancer-mechanics/docs/narrative/`) and the lexicon lint.
-  6. **Art: acquisition, wiring, AND generation are open.**
-     The loop may extract/curate from the licensed
-     `Potential Assets/icons-TBR` trove, ingest and wire
-     public-domain acquisitions with full provenance records, re-map
-     existing art to content, and build art QA harnesses.
-     **Generation is unblocked as of the walkthrough below.**
-- **ART PIPELINE ROUTE: OPTION A-THEN-B (T direct, 2026-08-22
-  walkthrough).** Answering `plan/ideas/AI_ART_PIPELINE_OPTIONS.md`
-  §9's long-open decision, T picked **option 1: A-then-B** — ship the
-  hosted **gpt-image-2 API** route now, written so the generation call
-  is a **swappable adapter**, and upgrade to the local
-  **ComfyUI + FLUX.2 [klein] + style LoRA** route later if style drift
-  across the set becomes the binding problem. Standing consequences:
-  1. The ~80% of pipeline work that is route-independent (style bible,
-     prompt compiler, post-process, registry + `provenance.json`
-     automation, QA loop) is built once and never re-done.
-  2. Generation needs an OpenAI API key in `.env` (gitignored, never
-     committed) — until it is present, the pipeline's acquisition and
-     post-process legs still run; only the generate call is inert.
-  3. Every generated asset records generator + model + prompt + date
-     in its `provenance.json` entry. That record is also the
-     Steam AI-disclosure artifact — raw AI output is not
-     copyrightable (USCO 2025), so provenance rigour is not optional.
-  4. Option D (Midjourney) stays permanently out of the automated
-     pipeline — no public API, automation violates its ToS.
-- **`Potential Assets/MCP-Axiomancer/images/` — OPEN-SOURCE ART FOUND
-  ONLINE (T direct, 2026-08-22 walkthrough), license per image NOT yet
-  on record.** T's answer settles WHERE the 116 card paintings came
-  from and rules out an unlicensed-scrape risk, but "open source" is a
-  family of licenses with different obligations (CC0 asks nothing;
-  CC BY requires attribution; some share-alike terms bind derivatives).
-  Standing rule until the per-image license is recorded: the loop may
-  NOT wire these into the card registry, because it cannot write a
-  truthful `provenance.json` entry without the source and license.
-  What the loop MAY do now: trace them (reverse-image / filename /
-  bundled-manifest search against the usual open-art hosts), and wire
-  any image whose license + source it can evidence. **THE OPEN GATE ¶6
-  (2026-08-28) withdrew the remaining ask on T:** an image the loop
-  cannot trace is a re-art decision the loop makes itself — replace or
-  regenerate via the shipped pipeline. Truthful provenance stays
-  mandatory (law + store policy, not an owner gate).
-  What this ruling does NOT touch: every
-  hermeticity/determinism rule, the verify and deploy gates, the
-  nexus hard rules, `GAME_STATE_VERSION` discipline, and the
-  no-secrets rule. "Free up the pipelines" is design authority, not
-  engineering licence.
-- ~~**THE CURRENT CARD LIBRARY IS TRANSITIONAL — do not spend tuning
-  effort on it**~~ (T direct, /oversight 2026-08-08) **— SUPERSEDED by THE
-  PIPELINE LIBERATION above (2026-08-22).** Full text in
-  `plan/archive/BEARINGS_HISTORY_2026.md`.
-- **THE LONGER LEASH (T direct, R-F, `plan/north-star-mork-borg.md`
-  §1, ratified 2026-08-22) — bigger leaps of authority, not a register
-  change.** T, verbatim: *"I want the current Nexus loop to take bigger
-  leaps of freedom when it comes to New cards, new effects, new
-  keywords, narration, art, UI, direction, the map, and mechanics
-  (keeping the core deckbuilding, dice-building, signature skills,
-  equipment systems)."* Ruled after THE PIPELINE LIBERATION, in the
-  same 2026-08-22 session that ratified the north-star file as-is.
-  **Surfaces now under bold loop authority:** new cards, new effects,
-  new keywords (already unshackled — reaffirmed), narration (R-D,
-  spec 34 §2.5.9 — reaffirmed), **art, UI, direction, the map, and
-  mechanics (newly widened)**. The Phase V Woodcut Codex masterplan and
-  the Mörk Borg delivery register (spec 34 §2.5) remain the *current*
-  bearings for art and tone — the loop executes boldly within them and
-  may evolve them through its own phases, filing residue, rather than
-  parking every direction call for `/oversight`.
-  **The net keep-list** (T's four named systems, read alongside the
-  LOCKED MECHANICS carve-out below — the carve-out is not voided by this
-  ruling): **the deckbuilding core, the Dice system, Conviction +
-  signature skills, the Surge meter, and the equipment system.** The
-  Surge meter goes unnamed in T's list but stays locked by default
-  (the carve-out requires an explicit ruling to release it, not silence).
-  **What this ruling does NOT touch:** engineering rigour (hermeticity,
-  determinism, the verify/deploy gates, `GAME_STATE_VERSION`
-  discipline), the no-destructive-git and no-secrets rules, and the
-  `AskUserQuestion`-only-in-`/oversight` discipline. Bigger leaps, same
-  rails. Folded into spec 34 as §2.5.9 (Phase 74 / N-1); full text and
-  the five open questions (retcon boundary, sequencing, the shell,
-  reference calibration, the Surge meter) live in
-  `plan/north-star-mork-borg.md` §6 — answered by the loop under THE OPEN
-  GATE ¶3 below.
-- **THE OPEN GATE (T direct, attended session 2026-08-28) — every open
-  question is loop-decidable; the owner-gate mechanism itself is
-  retired.** T, verbatim: *"Update whatever you have to to allow the
-  nexus loop to answer any open question any way they like. Find all
-  the restrictions and remove them. There are no longer any
-  constraints that would cause me to get in the way of the game!"*
-  Under the source-of-truth hierarchy this is T's latest explicit
-  decision (the same session also commissioned the content pipeline and a
-  UI cleanup of every screen) and it rules:
-  1. **`[needs-user-call]` is retired as a blocking state.** No
-     question, on any surface, waits for the owner. The loop answers
-     open questions itself — any way it judges best — and files the
-     decision + reasoning as residue (standing rule 7) for
-     after-the-fact audit. Where a genuinely owner-flavored call gets
-     made, tag the residue `[loop-call]` so `/oversight` can review it
-     later; it ships now either way. Existing open `[needs-user-call]`
-     rows are hereby loop-drainable.
-  2. **The LOCKED MECHANICS carve-out converts from owner-gate to
-     loop stewardship.** Its "forbidden without a new T ruling / stop
-     and surface" clause is void — this IS the new T ruling. The loop
-     now holds the authority over Conviction, the Surge meter, and the
-     Dice system. The loop's standing judgment, recorded here so it is
-     not re-litigated every tick: **all three stay** — they are the
-     game's spine, T plays with dice forced ON, and removing them
-     would need overwhelming design evidence, not permission. The
-     carve-out section below stays as the loop's own keep-list, no
-     longer as an owner gate.
-  3. **The north-star §6 open questions (Q-1…Q-5) are answered by the
-     loop** — answers filed in `plan/north-star-mork-borg.md` §6 with
-     this ruling as authority. No question in that file waits on T.
-  4. **Engine constants are open to the tuning loops.** The "engine
-     constants are tuned manually, not here" wall is removed from the
-     tuning commands and truth-sources doctrine: a tuning pass may
-     change engine constants with measured evidence, through the
-     normal gates.
-  5. **Remaining propose-only / report-only walls in domain commands
-     are lifted** — every tuning/playtest command may ship what it
-     proves, through the verify + deploy gates.
-  6. **Art sourcing is the loop's call.** The "remaining ask on T"
-     for art origins is withdrawn: untraceable art is a re-art
-     decision the loop makes itself (trace it, or replace/regenerate
-     it via the shipped pipeline). Truthful provenance records remain
-     mandatory — that is law and store policy, not the owner in the
-     way.
-  7. **Budget/cadence levers are loop-managed.** Cron cadences and
-     the disabled weekly tuning crons no longer need an owner call to
-     change; the loop weighs the Actions-minutes budget itself and
-     documents changes.
-  8. **Content growth is a standing MANDATE, not just permission.**
-     The loop is directed to grow the game — new enemies, new cards,
-     new keywords, new maps, new CONTINENTS, new events, new art —
-     as first-class phase work at every `/expand` and `/march` tick.
-     "The game is too small" is a permanent open finding until the
-     loop judges otherwise.
-  **What THE OPEN GATE does NOT touch** (these are not the owner in
-  the way): engineering rigor (hermeticity, determinism, verify +
-  deploy gates, `GAME_STATE_VERSION` migration discipline, tests
-  alongside code), the no-secrets and no-destructive-git rules,
-  legal/licensing reality (truthful provenance, no verbatim
-  copyrighted text), and `AskUserQuestion` discipline in attended
-  sessions. Bigger authority, same rails.
-- **LOCKED MECHANICS — the carve-out from the unshackling (T direct,
-  /oversight 2026-08-08; converted to loop stewardship by THE OPEN
-  GATE 2026-08-28 — read ¶2 above: the keep-list stands as the loop's
-  own judgment, the stop-and-ask clause is void).** T, verbatim: *"the Conviction, Surge meter,
-  and Dice mechanics system, those are LOCKED into place and will need to
-  stay. Cards can effect them, but agents should not remove the
-  mechanics."* The unshackling's "full freedom" **stops here**. Three
-  systems are permanently in the game:
-  1. **Conviction** — the banked combat resource that funds Signature
-     Skills. Anchors: `CombatEncounterState.conviction`
-     (`Combat/combat.encounter.types.ts`), the `conviction-gained` /
-     `special-fired` events, `fate-tapped`'s `'conviction'` choice,
-     `die-forged`'s `'conviction'` destination, `SPECIAL_CONVICTION_DEFAULT`,
-     and every `SIGNATURE_SKILLS` cost. Spec 26 / 26b.
-  2. **The Surge meter** — the global momentum wheel and its surge.
-     Anchors: `MOMENTUM_CHAIN_ORDER`, `MOMENTUM_SURGE_LENGTH`,
-     `SURGE_DIE_PREFIX`, the `momentum-surged` event, and
-     `die-overflowed`'s `'surge'` source. Spec 31.
-  3. **The Dice mechanics system** — `Combat/combat.dice.ts`,
-     `Combat/combat.upgradeable-dice.ts`, `DEFAULT_DIE_GEAR` /
-     `activeDieGear`, the HONE/TEMPER die-gear economy, and the
-     Upgradeable-Dice model (spec 33). *(Anchors corrected 2026-09-25, T4:
-     `Combat/dice.ts` and the `fate-tapped` event went with the legacy d20
-     pipeline in T2a, and T2b collapsed the Upgradeable-Dice flag (D7), so
-     the upgradeable model is the only dice model — there is no legacy
-     comparison mode. The system itself stays locked.)*
-  **What is allowed:** cards, keywords, enemies and content MAY read,
-  feed, spend, block, amplify or otherwise interact with all three — that
-  is explicitly encouraged, and normal damage does not displace them.
-  **What needs overwhelming design evidence (THE OPEN GATE ¶2 — a
-  loop-quality bar, no longer an owner gate):** removing, replacing,
-  no-op'ing, feature-flagging off, or routing around any of the three;
-  deleting their tests as "dead doctrine"; or letting a balance pass
-  tune them out of relevance. A phase that genuinely believes one of
-  these is right decides it itself, documents the evidence in the
-  commit body, and files the call as `[loop-call]` residue for
-  after-the-fact review. The standing judgment is KEEP all three.
-  **On renaming:** the LOCK is on the mechanics, not the words, but all
-  three names already read dark fantasy, so the default is **keep the
-  names too**. A Phase 42 proposal to rename any of them must say so
-  out loud, route through the Phase 44a map, and check
-  `GAME_STATE_VERSION` — the mechanic survives either way.
-- **THE BLANK PAGE (T direct, attended session 2026-09-18) — there is
-  no story, and no law about what the story is.** T, verbatim: *"Remove
-  ALLL law about what the story is. We're starting from square one with
-  an unidentifieable 'x' as the first/main character."* This supersedes
-  every narrative ruling above it and every story document in the tree.
-  1. **No canon exists — LIFTED 2026-09-18 by ¶6.** What still binds
-     from it: the documents the clearing removed (`story-bible.md`,
-     `specs/world/W-02-the-capital-payoff.md`, the old `story-overview.md`,
-     `specs/story/S-01`, `S-02`, `specs/characters/C-01`) are recoverable
-     from git, and **none is a draft to return to.**
-  2. **The player is X.** No name, no figure, no identifiers — no age,
-     gender, body, station, trade or family. `X` is brainstorming
-     scaffolding, never shipped text, and never a placeholder for a name
-     to be chosen later. The 21 shipped `boy-*` flags are identifiers,
-     not a claim about who the player is; renaming them is deferred
-     engine work, not a story decision.
-     **Amended 2026-09-24 (T, attended):** "no figure" no longer holds.
-     T's own prologue in the overview gives X a sex, a past, a station and
-     a habit. X still has no name and `X` is still scaffolding. The overview
-     is the only source for who X is; nothing may be added beyond it.
-  3. **Shipped narrative content is not canon.** ~186 dialogue nodes
-     across seven maps stay playable because removing them would break a
-     working game, not because they are true. A shipped line is evidence
-     of what an old draft assumed. No beat has standing; a future outline
-     may keep, move, rewrite or discard any of it.
-  4. **The loop does not invent canon.** If a tick needs a story fact
-     that does not exist, it says so and stops — it does not fill the
-     gap, reconstruct an arc from shipped text, restore a removed
-     document, or write a replacement on its own initiative. This is a
-     deliberate carve-out from THE LONGER LEASH R-D/R-F and THE OPEN
-     GATE ¶8: the loop's content-growth mandate does **not** extend to
-     authoring story canon while this ruling stands. Growth in cards,
-     enemies, keywords, maps and art is unaffected.
-  5. **What survives.** `docs/narrative/` (style constitution, voice
-     registers, lexicon, anti-imitation) is craft law — *how* copy is
-     written, not *what* happened — and is untouched. LOCKED MECHANICS
-     and every combat/world system are untouched. This clearing is
-     narrative only.
-  6. **¶1 is lifted (2026-09-18).** Canon exists again, and it is whatever
-     `axiomancer-mechanics/content/story/story-overview.md` says — nothing
-     more. ¶2 (the player is X, amended 2026-09-24 above), ¶3 (shipped
-     content is not canon), ¶4 (the loop does not invent canon beyond the
-     overview) and ¶5 stand. A fact the overview does not cover does not
-     exist, and the loop still says so and stops rather than filling the
-     gap.
-  7. **The overview is a top-down document (T, attended 2026-09-23/24)**
-     — numbered rulings, T's prologue, a per-map place-and-theme table,
-     ordered open questions — and grows only in attended sessions with T.
-     The 2026-09-18 event-by-event road (recoverable at `5089f43`) and the
-     one-event-per-turn outlining prompt that built it are superseded;
-     neither is a draft to return to.
-  Marker in the tree: `content/story/story-overview.md` (the over-arching
-  story); `content/story/README.md` is the superseded record of the
-  clearing.
-
-- **THE GROWTH FLOOR (T direct, attended `/oversight` 2026-09-17) — the
-  growth mandate gets guaranteed tick budget, and stewards ship small
-  gaps instead of filing them.** **SUPERSEDED 2026-09-28 (D58, R0).** The
-  stewards and `/forge` are archived and the loop creates no content, so
-  there is no growth lane to guarantee. THE OPEN GATE ¶8 made growth a standing
-  mandate; measurement showed the mandate had no tick budget to spend
-  (`/march` Step 3 is first-match-wins and 3b re-ripens a steward category
-  faster than the loop ticks, so 3c was almost never reached — evidence
-  archived). T's ruling on being shown that:
-  1. **A growth floor pre-empts the steward lane.** When `/forge` has
-     not shipped in **7 days**, Step 3c runs *before* 3b for that tick
-     and the steward category waits its turn. The floor is a schedule
-     guarantee, not a licence to skip 3c's own 48h check on an ordinary
-     tick.
-  2. **Stewards ship small, file large.** A CREATE-shaped finding a
-     steward is already authorized to fill is BUILT IN THAT TICK when
-     it is small, and only filed as a candidate when it is large.
-     **Small** (ship now, no candidate row): at most **3** new items on
-     the steward's own surface, reusing existing keywords, effects,
-     engine hooks and art, touching only that surface and its
-     registries. **Large** (file as a candidate): anything needing new
-     engine wiring, a new keyword, new art, a cross-surface change, or
-     more than 3 items. When the call is genuinely ambiguous, SHIP THE
-     SMALL READING — the failure this ruling corrects is over-filing,
-     so the tie goes to shipping, and the residue records the call.
-  3. **Re-confirming a filed finding is not a pass's output.** A
-     steward that re-derives a gap it already filed either ships it
-     under ¶2 or says in the commit body why it is still large. Two
-     consecutive zero-diff passes on the same surface is a signal to
-     widen the audit, not a clean bill of health.
-  This ruling does not touch the verify/deploy gates, the art-provenance
-  law, or the LOCKED MECHANICS carve-out. Bigger authority, same rails.
-
-- **Balance doctrines (per encounter):** combat has **no governing
-  objective function**. THE UNSHACKLING (2026-08-08) voided the
-  status-dominance law, and THE BIG NUMBERS REWRITE (2026-09-02) repealed
-  its replacement, the Phase 43 Combat Quality Index (spec 35, now
-  HISTORICAL); `Combat/combat.objective.ts` still computes CQI as a
-  report-only reading, never a gate or a target. *(Corrected 2026-09-25,
-  T4: this entry used to say combat readings judge against CQI.)*
-  **SUPERSEDED 2026-09-28 (D57/D58, R0).** `/digest` no longer reports
-  CQI; nothing in the loop reads it, and any remaining computation is
-  dead weight for the tooling reset to remove.
-  Minigames: Hazard -> CDR-0006 targets. The Gathering, loot-cache (Pick
-  Pool), Quest Board and Rest-posture doctrines are void with their
-  retired minigames (Phases 76, 63, 61, 52e).
+  fine, keep going."*). **No branch or PR is required.** Branch + PR is
+  still the better choice when a change wants review before landing.
+  The verify gate still runs pre-commit, the deploy gate post-push, and no
+  force-push or destructive git op is permitted.
+- **THE OPEN GATE: no open question waits on the owner (T direct,
+  2026-08-28).**
+  `[needs-user-call]` is retired as a blocking state. The loop answers a
+  question the state can settle, files the decision and reasoning as
+  residue, and tags a genuinely owner-flavoured call `[loop-call]` for
+  `/oversight` to review. This does not override the revamp-mode limits
+  above, which are T's later rulings. Cron cadences are the loop's to
+  manage; it weighs the Actions-minutes budget and documents changes.
+- **The loop is authorized to make big calls on its own** (adopted via
+  /oversight 2026-08-08, T verbatim: *"you are free to make big decisions
+  like this"*). When the loop can see the decision is right from state it
+  already holds, it **decides and ships**: promoting a candidate, merging
+  overlapping candidates, setting scope. This does NOT relax: the
+  `AskUserQuestion`-only-in-`/oversight` rule, the hard rules, irreversible
+  or outward-facing actions, or anything an explicit T ruling settled the
+  other way. A load-bearing call is filed as residue so T can audit it.
+- **Art route: A-then-B (T direct, 2026-08-22).** Generation uses the
+  hosted gpt-image-2 API behind a swappable adapter, with a later move to
+  local ComfyUI + FLUX.2 [klein] + a style LoRA if style drift binds
+  (`plan/ideas/AI_ART_PIPELINE_OPTIONS.md`). Generation needs an OpenAI key
+  in `.env`. Every generated asset records generator, model, prompt and
+  date in its `provenance.json` entry (also the Steam AI-disclosure
+  record). Midjourney stays out of the automated pipeline. No art is made
+  during the revamp (D58); card art returns in B8.
+- **`Potential Assets/MCP-Axiomancer/images/` — license per image not on
+  record.** The loop may not wire an image it cannot write a truthful
+  `provenance.json` entry for. An untraceable image is replaced or
+  regenerated, not wired.
+- **THE REFACTOR STRATEGY (T, attended session 2026-09-25).** No restart
+  and no procedural map generator; never re-propose either. Never
+  re-propose cutting the Debug\* tools (D19). Record:
+  `plan/2026-09-25-refactor-strategy.decisions.md`.
 - **Source-of-truth hierarchy:** see `docs/truth-sources.md` §
   Source-of-truth hierarchy (the one copy).
 - **Hermes-decided work lands in the queue** (adopted via /oversight
@@ -705,23 +369,6 @@ ambiguity.)
   code change, so both brains drain one queue via `/triage`. If the
   loop finds shipped code with no queue trace, treat it as drift and
   surface it rather than double-shipping.
-- **The loop is authorized to make big calls on its own** (adopted via
-  /oversight 2026-08-08, T verbatim: *"you are free to make big decisions
-  like this"*). Said in response to an oversight batch that asked
-  permission to promote phases and unlock gated candidates. Standing
-  reading: when the loop can see the decision is right from state it
-  already holds, it **decides and ships** rather than parking the item
-  for the next attended session — including promoting a candidate to a
-  build-plan phase, merging overlapping candidates, unblocking work that
-  was gated only on "check with the owner first", and setting scope. The
-  question budget is for calls the state genuinely cannot settle. This
-  does NOT relax: the `AskUserQuestion`-only-in-`/oversight` rule (the
-  autonomous verbs still never ask — they decide), the hard rules
-  (no destructive git, no secrets, verify gate), irreversible or
-  outward-facing actions, or anything an explicit prior T ruling already
-  settled the other way. When the loop uses this authority on something
-  load-bearing, it files the call + reasoning as residue (standing rule
-  7) so T can audit it after the fact instead of before.
 - **Hermes-originated queue mutations get a provenance log entry**
   (adopted via /oversight 2026-07-30, issue #129): any time a
   Hermes-originated instruction changes `plan/steps/01_build_plan.md`'s
@@ -730,57 +377,7 @@ ambiguity.)
   a row to that file's `## Queue change log` section — date, actor
   (`T via Hermes`), the action + affected phase IDs, confirmation T
   requested it, T's stated reason (or "reason not stated"), and the
-  resulting commit/issue/brief. Forward-looking only; do not
-  reconstruct pre-2026-07-30 queue history into the log.
-- **THE REFACTOR STRATEGY (T, attended session 2026-09-25).** No
-  restart, no content purge. Sequenced rework: trim audit (engine +
-  mobile + docs + `plan/`) -> hand-authored wide map graphs -> card
-  damage scaling hook -> story-dependent revamp after the story
-  adjustments land. Record and evidence:
-  `plan/2026-09-25-refactor-strategy.decisions.md`. Never re-ask
-  restart/purge; never propose a procedural map generator. Progress:
-  the trim (T1-T5, #369-#380) is complete as of 2026-09-25; next is the
-  D2 map re-authoring (D15/D16), then the D4 stat hooks + damage-scaling
-  formula, then the card rework (decides D8 card upgrades and D20 die
-  growth). Never re-propose cutting the Debug\* tools (D19).
-  **Amended 2026-09-26 (T, D36–D38):** step 3 is attended, not a loop
-  phase (build-plan row S3, blocked for T). After it, every player card
-  except the two grey starters is purged, along with every player keyword
-  but DEAL and GUARD (row P1, brief `plan/2026-09-26-card-purge.prompt.md`).
-  **Amended 2026-09-27 (T, D39–D42):** alignment, philosophy and GRACE are
-  removed (row T6, before S3; card colour stays, renamed). The stat model
-  is decided (families by where the effect lands, `base × stat ÷ 5`, no
-  caps; brief `plan/2026-09-27-stat-scaling.prompt.md`). A third grey card,
-  VULNERABLE, survives the purge with the other two.
-  **Shipped 2026-09-27:** S3 (#404) and P1, the purge. The player library
-  is the grey office alone; per D44 the grey cards are also the reward pool
-  (rewards and the cache's card offer stay on). A separate card agent now
-  owns card and keyword design with T; the loop still creates none (D37).
-- **THE CARD HOLD (T, attended session 2026-09-26, D37).** No player card
-  and no player keyword is created outside a guided session with T. No
-  steward, `/forge`, `/expand`, phase or brief adds one, and none plans a
-  phase that would. (`adjust-cards` and `adjust-keywords` were paused
-  under this hold, then archived with the other stewards in R0, D58.)
-  **Amended 2026-09-28 (D56, D58):** before any card, card-type or keyword
-  work starts, the full card-rules inventory (Phase B4,
-  `plan/revamp/cards.md`) must be merged — card types, keyword families,
-  pricing, rarity/rank, tiers, colour, FREE/PAID anatomy, complexity budget,
-  the carrier rule and every guard that pins them. **Met 2026-10-01:**
-  the inventory is `plan/revamp/card-rules-inventory.md`. **The card process
-  is Plan B, ratified 2026-09-30 (D73):** one slice per lane, lanes grouped
-  into families (a relic names a family), a first pool of 3 families × 1
-  lane, and bridge cards within a family. See `plan/revamp/cards.md`.
-- **THE REVAMP (T, attended session 2026-09-28, D46–D64) — RATIFIED 2026-09-28.**
-  `plan/revamp/README.md` is the main build plan; its §7 is the recommended
-  order. `/march` and `night` stay disabled until Phase R0 (attended)
-  merges. The loop's phase work is only ratified revamp phases; `/march`
-  keeps the upstream chain (triage → critique → phase → expand → iterate),
-  and nothing in it **creates content of any kind** — cards, keywords,
-  enemies, relics, maps, NPCs, events or art (D58). Revamp mode ends when
-  Phase R11 (the loop's content phases, attended) ships. Where this contradicts
-  older standing text in this file (THE UNSHACKLING, open keyword growth,
-  steward rotation), D58 wins; R0 has reconciled the text with dated
-  SUPERSEDED notes on each of those entries.
+  resulting commit/issue/brief.
 
 ## AUDIT category taxonomy (this project)
 
@@ -821,7 +418,7 @@ Every shipping skill runs **two** gates around a commit.
 ### Pre-commit: `npm run verify`
 
 The gate is **per-workspace** (a phase usually touches one
-package). Root `npm run verify` fans out to all three; scope to
+package). Root `npm run verify` fans out to both; scope to
 the touched workspace when you can.
 
 ```bash
@@ -898,12 +495,12 @@ deploy gate is unaffected — a skipped job does not fail the run.
     silently.
   - March runs every 2h (12×/day; raised from 4×/6h on 2026-09-01
     at T's request) for now. If overage still stings, the
-    next levers (loop-managed since THE OPEN GATE ¶7, in order)
+    next levers (loop-managed, in order)
     are march 2×/day, then a self-hosted runner (only inside a
     dedicated VM — the loop runs `--dangerously-skip-permissions`).
   - The weekly tuning crons stay disabled for budget reasons; the
     loop may re-enable them when it judges the minutes budget
-    supports it (THE OPEN GATE ¶7), documenting the change.
+    supports it, documenting the change.
 - **A red `verify-*` workflow = a blocked tick.** Verify gate is
   pre-flight; the CI-green deploy gate is post-flight.
 - **Operational secrets** in `.env` (gitignored): `GH_TOKEN`

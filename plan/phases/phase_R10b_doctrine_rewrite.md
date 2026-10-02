@@ -49,6 +49,25 @@ items 1-4. Like R2, R3 and R7 before it, the row splits:
   asserts the citation.
 - `docs/game-model.md` does not exist.
 
+## As shipped
+
+- Scope widened by three files the brief missed, because they are always
+  loaded and taught the old game as current: `axiomancer-mechanics/CLAUDE.md`
+  (its "Load-bearing doctrine" was the BIG NUMBERS charter, with RELENT,
+  CONDEMN, WRATH and the read), `axiomancer-mechanics/AGENTS.md` and
+  `axiomancer-mechanics/VISION.md` (alignment, faction reputation, Befriend at
+  5 heart tokens). VISION keeps T's wants; the built facts point to the game
+  model; unbuilt mercy wants are listed as not built, minus the deleted
+  alignment and faction ones.
+- Bearings went from 923 to ~520 lines. Kept, rewritten to the live part:
+  LOCKED MECHANICS (folded with THE LONGER LEASH's keep-list), THE OPEN GATE
+  (¶1 and ¶7 only), THE BLANK PAGE (as "Story canon"), THE REFACTOR STRATEGY
+  (its never-re-propose rules), the art route and image-license rule.
+- `.github/workflows/verify-prose.yml`'s header cited THE PIPELINE
+  LIBERATION; it now cites the delivery register.
+- V-1's examples in the delivery register drop the words the lexicon lint
+  retires; the rule is unchanged.
+
 ## Outcome
 
 An agent that reads `AGENTS.md`, `docs/game-model.md`, `spec.md` and

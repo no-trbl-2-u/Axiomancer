@@ -73,7 +73,7 @@ describe('per-foe aftermath narrative lines (art-driven roster)', () => {
         }
     });
 
-    it('no roster aftermath line uses the archaic thee/thou/thy/thine/ye register (spec 34 §2.5)', () => {
+    it('no roster aftermath line uses the archaic thee/thou/thy/thine/ye register (DELIVERY_REGISTER.md)', () => {
         const archaic = /\b(thee|thou|thy|thine|ye)\b/i;
         for (const enemy of EnemyLibrary) {
             const lines = [

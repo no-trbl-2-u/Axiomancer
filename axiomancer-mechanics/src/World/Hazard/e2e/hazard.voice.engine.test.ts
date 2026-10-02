@@ -1,7 +1,8 @@
 /**
  * Hazard intro voice (CRITIQUE pass 56, #405) — every authored hazard
  * `intro` addresses the player in second person, never as a gendered
- * third person. Spec 34 §2.5.4 (MB-4) permits second person to price a
+ * third person. The delivery register (MB-4,
+ * `docs/narrative/DELIVERY_REGISTER.md`) permits second person to price a
  * death; this pins that no intro slips back to "he/him/his".
  * Pure data check; no RNG.
  */

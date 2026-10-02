@@ -51,6 +51,16 @@ Phase shipping drains or annotates matching critique/audit/candidate rows.
 CDRs/ADRs are not optional commentary; they sit above the central ledger in
 repo execution disputes.
 
+## The game model — the first read for rules
+
+[`game-model.md`](./game-model.md) states the game as the code stands, every
+number with the constant it comes from. It is the first read for any rules
+question and outranks every spec, braindump or report that describes the
+game differently. It ranks below the code: where the two disagree, the code
+is right and the page is a bug to fix in the same change. It sits below
+the decision records in the hierarchy above because it describes, it does
+not decide.
+
 ## Game knowledge base — external prior art
 
 `no-trbl-2-u/game-knowledge-base` is the OKF corpus of board-game rules
@@ -114,8 +124,8 @@ the corpus's only route into this repo.
 Two kinds of truth answer game questions, and they go stale
 differently:
 
-- **Source-derived truth** (what a card does, how it prices, what a
-  keyword means) regenerates from the tree — the libraries,
+- **Source-derived truth** (what a card does, what a keyword means)
+  regenerates from the tree — `game-model.md`, the libraries,
   `axio-query`, and the catalog are as fresh as their last export, and
   the guard tests pin every player-facing surface to the payloads. The
   catalog page carries a stamp (`from engine source <commit>`) so a

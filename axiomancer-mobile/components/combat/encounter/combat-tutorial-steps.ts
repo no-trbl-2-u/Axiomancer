@@ -18,7 +18,7 @@
  * `turn`, `currentPhaseIndex`) — a card that was staged and then applied has
  * left the hand and the step stays done.
  *
- * The copy teaches the spec-33 dice model (`specs/33-upgradeable-dice.md`):
+ * The copy teaches the dice model (`docs/game-model.md` § Dice):
  * four fixed-colour dice roll every turn, each face is SPECIAL / MANA / MISS,
  * and there is no draft — a die is spent by dragging it onto a staged card.
  *

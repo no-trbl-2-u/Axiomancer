@@ -88,7 +88,7 @@ export const VOICE_RULES = [
 ]
 
 /**
- * Fields whose value is NARRATION, and so subject to MB-1 (spec 34 §2.5.1).
+ * Fields whose value is NARRATION, and so subject to MB-1 (`docs/narrative/DELIVERY_REGISTER.md`).
  *
  * `paidSummary` is deliberately absent: it is rules text, governed by §2.3 and
  * the real-units-or-no-number law. Shortening a paid line to satisfy a
@@ -103,7 +103,7 @@ export const PROSE_FIELDS = new Set([
 ])
 
 /**
- * MB-1, the knife law (spec 34 §2.5.1), mechanically checkable half.
+ * MB-1, the knife law (`docs/narrative/DELIVERY_REGISTER.md`), mechanically checkable half.
  * Narration only — see PROSE_FIELDS.
  */
 export const MB1_MAX_WORDS = 20
@@ -112,14 +112,14 @@ export const PROSE_RULES = [
   {
     id: 'mb1-long-sentence',
     fix: `MB-1: narration runs short — target under twelve words, hard ceiling ${MB1_MAX_WORDS}`,
-    since: 'spec 34 §2.5.1',
+    since: 'DELIVERY_REGISTER.md MB-1',
     test: (value) => sentencesOf(value).some((s) => wordCount(s) > MB1_MAX_WORDS),
   },
   {
     id: 'mb1-semicolon',
     fix: 'MB-1: a semicolon in player-facing prose is a defect — full stops are '
       + 'the register. Split the sentence; do not swap the semicolon for a comma',
-    since: 'spec 34 §2.5.1',
+    since: 'DELIVERY_REGISTER.md MB-1',
     test: (value) => value.includes(';'),
   },
 ]

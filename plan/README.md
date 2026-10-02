@@ -38,14 +38,16 @@ plan/
    one + commit separately.
 3. **Bearings** — `bearings.md` holds stack pins, contracts,
    visual defaults, sub-agent registry, standing decisions.
-   Read once per session.
+   Read once per session, with `docs/game-model.md` (the game as
+   the code stands).
 
 ## Where design lands
 
 No `design/` export layer is adopted in this project (see
 `bearings.md`). During THE REVAMP, design lands in `plan/revamp/` (one part
 plan per area) and in attended sessions with T; the rebuild-track sessions
-(B1–B10) write their own outputs there. The design skills that used to write
+(B1–B10) write their own outputs there. No numbered spec is current (specs 33 and 34
+were retired in R10b). The design skills that used to write
 `axiomancer-mechanics/specs/` and `braindump/` were archived in R0
 (2026-09-28) to `plan/archive/2026-09-28-revamp-r0/`.
 
