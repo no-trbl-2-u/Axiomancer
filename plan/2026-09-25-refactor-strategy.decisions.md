@@ -743,6 +743,23 @@ one lane per card, free multi-lane tags, bridges across families.
 first pool; a Heal sub-lane (folded into Misc). The other fantasies (The Vigil, Rot and Omen, Loaded Dice)
 stay open, not rejected.
 
+**D75 — RC proves Act 1 works; Blood Price follows as a removable trial set.**
+(T, attended, 2026-10-02.)
+
+- RC's walk checks that Act 1 works, not that the grey deck can win it.
+  Fights the grey deck cannot win are settled with the dev menu, and the
+  report names them. The version is cut there (`plan/revamp/checkpoint.md`).
+- After RC, the Blood Price rehearsal's ballot survivors are wired in as a
+  **trial set** to test the reward mechanism (D71), the Curse and Global
+  types, SACRIFICE, EXILE and a real Act 1 clear. Blood Price may become
+  the first lane family; that is judged after play.
+- The trial cards must be easy to remove when real lanes arrive: one
+  library file, one registration point, no other code naming their ids,
+  saves dropping removed ids on load, and a test that the game runs without
+  them (`plan/revamp/cards.md` → "The trial set").
+
+*Rejected:* gating RC on a winnable clear with the grey deck.
+
 ## Open follow-ups
 
 **D1 status at a glance (2026-09-28, after #408).** Card and keyword

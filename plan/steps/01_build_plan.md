@@ -145,7 +145,8 @@ event-pool and layout files).
 - [x] Phase R10c — Comments and docs truth pass 1/3, mechanics docs: stale mechanics docs rewritten to the code or deleted, rules linked to `docs/game-model.md` (6f9a74aa)
 - [x] Phase R10c2 — Comments and docs truth pass 2/3, mechanics comments: history narration stripped from every mechanics code comment; `scripts/check-comments.mjs` guards it in the root `npm test` (22f4e41f)
 - [x] Phase R10c3 — Comments and docs truth pass 3/3, mobile: the two bannered mobile docs deleted; history stripped from every mobile code comment; `scripts/check-comments.mjs` now guards both packages (6bbca8a6, 2ee20eba)
-- [ ] Phase RC — Act 1 checkpoint release (attended): the full gate green, a playtester run from a new game through all four regions' Doorwarden fights, befriend via The Open Hand, save/reload mid-fight; then T tags `v0.1.0-checkpoint`, publishes the GitHub release and builds the EAS preview APK. The reset point before any content work. `plan/revamp/checkpoint.md`. Requires R1, R2a, R2b, R3a, R3b, R3c, R4, R5, R6a, R6b, R7c, R7c2, R7c3, R7d, R7d2, R7e, R7e2, B4, R8, R9, R9a, R10, R10b, R10b2, R10c, R10c2, R10c3.
+- [ ] Phase RC — Act 1 checkpoint release (attended): the full gate green, a playtester run from a new game through all four regions' Doorwarden fights (proving Act 1 works, not that the grey deck wins it; unwinnable fights settled with the dev menu, D75), befriend via The Open Hand, save/reload mid-fight; then T tags `v0.1.0-checkpoint`, publishes the GitHub release and builds the EAS preview APK. The reset point before any content work. `plan/revamp/checkpoint.md`. Requires R1, R2a, R2b, R3a, R3b, R3c, R4, R5, R6a, R6b, R7c, R7c2, R7c3, R7d, R7d2, R7e, R7e2, B4, R8, R9, R9a, R10, R10b, R10b2, R10c, R10c2, R10c3.
+- [blocked: owner-led — T's session 2026-10-02] Phase BT — Blood Price trial set (D75): T records the rehearsal ballot's verdicts, then the survivors are wired in as a removable trial set with the engine pieces they need (Curse, Global, SACRIFICE, EXILE, a lane relic naming the family, the 2-random + 1-lane combat reward); tests the reward mechanism and a real Act 1 clear. Removal must stay a small mechanical change (one library file, one registration point, saves drop removed ids, a test that the game runs without the set). `plan/revamp/cards.md` → "The trial set". Requires RC, B4.
 - [blocked: owner-led — T's session 2026-09-28] Phase B1 — The relic pass. `plan/revamp/relics.md`. Requires R4, RC.
 - [blocked: owner-led — T's session 2026-09-28] Phase B5 — Card-creator workflow. `plan/revamp/cards.md`. Requires B4, RC.
 - [blocked: owner-led — T's session 2026-09-28] Phase B6 — Card sessions. Plan B, one slice per lane; families of sub-lanes and bridge cards within a family (D73). `plan/revamp/cards.md`. Requires B4, B5, RC.
@@ -1269,6 +1270,15 @@ See the status rows above; generate briefs on demand.
   start work on content"; R9a: "Promote to a phase before RC"; B-rows: "All
   B-rows after RC"). The R7 split is the agent's alignment call under that
   same instruction. Resulting commit: this one.
+- **2026-10-02** — actor: **T, attended session** (branch
+  `claude/revamp-roadmap-status-62453c`). Action: **material scope change
+  to Phase RC** (the walk proves Act 1 works, not a winnable grey-deck
+  clear) and **added Phase BT** (Blood Price trial set, owner-led) after
+  RC (D75). Confirmed T's request: yes ("I verify act 1 works at all, as
+  is, THIS is where we'll cut the version. Then we'll use the 'sacrifice'
+  trial set of cards to test the reward mechanism"). Reason: "I can't do a
+  real playthrough of act 1 with just the starter cards." Resulting
+  commit: this one.
 
 ## Phase log (commit hashes)
 

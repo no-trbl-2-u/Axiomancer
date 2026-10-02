@@ -188,6 +188,7 @@ process plan (step a) is a decision, not a phase, and can happen any time.
 
 | Step | Phase / decision | Ready after | Why here |
 |---|---|---|---|
+| a0 | **BT** Blood Price trial set (D75) | RC + T's ballot verdicts | Grey cards cannot carry a real clear; a removable trial set tests the reward mechanism, Curse/Global/SACRIFICE/EXILE and a full Act 1 run, and may become the first lane family |
 | a | **Pick the card process plan** (A, B or C) — open `plan/2026-09-27-keyword-card-revamp.summary.html` | now | Nothing else in card work can be scheduled until it is picked; picking early lets B5/B6 follow B4 immediately |
 | b | **B1** Relic pass | R4 | Signatures are the player's only non-card actions; small, and it restores texture to fights early |
 | c | **B5** Card-creator workflow | B4 | The tool shape follows the inventory and the picked plan |

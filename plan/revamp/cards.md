@@ -30,6 +30,35 @@ with these amendments:
 
 Plans A and C are rejected. THE CARD HOLD (D37) and the B4 gate stand.
 
+## The trial set: Blood Price after RC (T, 2026-10-02, D75)
+
+RC cuts the version on Act 1 as it stands, with the grey deck (the walk
+proves the flow, not a winnable clear). Straight after RC, the Blood Price
+rehearsal becomes a **trial set**: its ballot survivors are wired in so
+the reward mechanism (D71: 2 random + 1 lane card, a lane relic naming
+the family), the Curse and Global types, SACRIFICE and EXILE, and a real
+Act 1 clear can be tested in play. If it holds up, Blood Price may become
+the first lane family; that is decided after play, not assumed.
+
+**The trial set must come out cleanly (T).** When real lanes are added,
+removing the trial cards is a small, mechanical change:
+
+- The trial cards live in their own library file, apart from the grey
+  starters, and join the library through one registration point. Deleting
+  the set is deleting that file and that line.
+- No other code names a trial card id: no engine branch, mobile presenter,
+  test or fixture outside the set's own test file keys off one.
+- The engine pieces the set needs (Curse, Global, SACRIFICE, EXILE, the
+  lane relic and reward slot) are general systems that stay. Only the
+  cards, and the relic that names the family, belong to the set.
+- Saves drop removed trial card ids on load (the save hop B4's inventory
+  flagged for purged ids), so removal needs no hand migration.
+- A test pins the removal: the game runs and the reward pool still fills
+  with the set's file unregistered.
+
+THE CARD HOLD still governs: the trial cards are only the ballot's
+survivors, chosen by T.
+
 ## Where things stand
 
 - Library: the grey office only — A Plain Blow (DEAL), A Plain Ward (GUARD),

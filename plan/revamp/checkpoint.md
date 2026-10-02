@@ -1,5 +1,7 @@
 # Revamp — the Act 1 checkpoint
 
+<!-- lexicon-ok: stance-check — the RC walk checks that the removed stance surface stays absent -->
+
 > Part plan of [THE REVAMP](README.md). Phases **R9a** (save checkpoint in
 > fights, loop) and **RC** (the Act 1 checkpoint release, attended). Added
 > via `/oversight` 2026-09-28 at T's request.
@@ -60,8 +62,13 @@ until T opens the session.
    tagged commit are green.
 3. **The walk:** the `playtester` agent drives the exported web build from
    a new game through the Breakwater, the Charcoal Wood, the Beacon Crags
-   and the Lantern Deep. Each report must show:
-   - a Doorwarden door fight in all four regions, each winnable;
+   and the Lantern Deep. **RC proves Act 1 works, not that it is winnable
+   (T, 2026-10-02, D75):** three grey cards cannot carry a real clear.
+   Where the grey deck cannot win a fight, the walk settles it with the
+   dev menu (D19) and moves on, and the report says which fights it
+   settled that way. Each report must show:
+   - a Doorwarden door fight in all four regions, each one starting,
+     playing and settling without a crash or dead end;
    - Float-Eye on normal fights and at least one Brine Hag;
    - The Open Hand opens the mercy choice on the Brine Hag;
    - an Anvil near each region's exit;
@@ -70,7 +77,8 @@ until T opens the session.
      NPC, quest or shop is reachable (R7e, D72);
    - the vault door and the deep stair both sealed, with no crash or
      dead end past them;
-   - about 3–4 level-ups across the clear (R9's target);
+   - level-ups fire as XP crosses R9's curve (the 3–4 across a clear
+     is checked again once the trial set makes a real clear possible);
    - a reload mid-fight re-offers that fight (R9a);
    - no keyword, gloss or glyph on screen without a live carrier;
    - no stance chip, punish/yield line or stance readout anywhere (R7d);
@@ -88,7 +96,8 @@ until T opens the session.
 3. Record the tag in `plan/bearings.md` (THE REVAMP bullet) and the
    decisions log, with the reset recipe:
    `git switch -c <branch> v0.1.0-checkpoint`.
-4. Tick RC. R11 is then the next attended phase.
+4. Tick RC. Next is the Blood Price trial set (D75, `cards.md` → "The
+   trial set"); R11 stays the next attended loop phase.
 
 ### Not in RC
 

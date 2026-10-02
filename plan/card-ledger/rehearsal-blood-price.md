@@ -6,6 +6,11 @@
 > verb may build, wire or cite these cards as live content. Real card
 > sessions (B6) start after RC and B5. They may reuse these drafts only
 > through a fresh ballot.
+>
+> **Amended (D75, 2026-10-02):** after RC, this ballot's survivors are
+> wired in as a removable **trial set** (`plan/revamp/cards.md` → "The
+> trial set"). Until T records the verdicts and RC is cut, the warning
+> above stands.
 
 > A paper rehearsal of Plan B (D73), run 2026-09-30 in an attended session
 > with T. **Nothing here is wired:** no card, keyword or type exists in
