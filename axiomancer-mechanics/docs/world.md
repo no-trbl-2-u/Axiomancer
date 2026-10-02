@@ -444,4 +444,3 @@ as rest). Only the hazard minigame still carries a live balance sim
 - `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/08-world-content-and-hazards.md`
 - `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/23-map-events.md`
 - [`docs/npcs.md`](./npcs.md) — branching dialogue UI conventions.
-- [`docs/effects.md`](./effects.md) — the effects engine.

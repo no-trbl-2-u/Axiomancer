@@ -50,7 +50,7 @@ instead of the boss fight itself being the dead end.
 - **Depends on:** the existing `the-capital` `MapDefinition`
   (`src/World/Continents/Northern-Continent/maps.ts`), the `cutscene` and
   `hazard` `MapEventKind`s (spec 23), `processWorldEffectTick` /
-  `getActiveHazards` (`docs/effects.md`) for the hazard payload.
+  `getActiveHazards` for the hazard payload.
 
 ## Atmosphere
 

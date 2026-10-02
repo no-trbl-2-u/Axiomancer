@@ -8,7 +8,6 @@ See root [`docs/truth-sources.md` § Source-of-truth hierarchy](../../../docs/tr
 
 ## Records
 
-- [ADR-0001 — Combat resources live on CombatState](./ADR-0001-combat-resources-live-on-combat-state.md)
 - [ADR-0002 — Skills are known, not equipped](./ADR-0002-skills-are-known-not-equipped.md)
 - [ADR-0003 — Difficult befriending requires HP pressure](./ADR-0003-difficult-befriending-requires-hp-pressure.md)
 - [ADR-0004 — Reference playtests anchor balance](./ADR-0004-reference-playtests-anchor-balance.md)

@@ -1,7 +1,7 @@
 # Quickstart — Character
 
-> Create, configure, and level a character. For full API reference
-> see [`character.md`](./character.md).
+> Create, configure, and level a character. For what the stats mean
+> see [the game model](../../docs/game-model.md#vitae-and-stats).
 
 ## Create a character
 
@@ -63,6 +63,7 @@ const bare = unequipItem(equipped, 'weapon');
 
 ## Deep-dive
 
-- Full type reference: [`character.md`](./character.md)
+- Type reference: `src/Character/types.ts`
+- Rules: [the game model](../../docs/game-model.md#vitae-and-stats)
 - Presets source: `src/Character/presets.ts`
 - Stat derivation: `src/Utils/index.ts` (`deriveStats`)

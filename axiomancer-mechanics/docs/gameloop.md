@@ -217,8 +217,7 @@ Two adapters ship with the package:
 
 The React Native consumer is responsible for an `AsyncStorage` adapter that
 implements the same interface (Spec 09 Q5 — kept in the consumer to preserve
-separation of responsibilities). The recommended shape lives in
-[`docs/api.md`](./api.md) under "React Native Usage" (post-Phase 21).
+separation of responsibilities). The mobile app's adapter is the worked example.
 
 #### Extending PersistenceAdapter for async backends (Phase 55)
 

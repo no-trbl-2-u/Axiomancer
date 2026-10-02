@@ -1,233 +1,225 @@
 # CLI
 
-<!-- lexicon-ok: stance-check, rps, retired-keyword — stale body describing deleted systems; R10c rewrites this doc and removes this pragma -->
+The command-line drivers in `src/CLI/`. They run from source through
+`ts-node` and only parse flags, prompt, call engine functions and print; the
+logic is in the engine modules. Rules of play are in
+[`../../docs/game-model.md`](../../docs/game-model.md).
 
-> Command-line interface for interacting with the Axiomancer mechanics engine.
+| Script | Entry | What it runs |
+| --- | --- | --- |
+| `npm run game` | `game.cli.ts` | The tabbed game loop. |
+| `npm run combat` | `game.cli.ts combat` → `combat.cli.ts` | One fight. |
+| `npm run hazard` | `game.cli.ts hazard` → `hazard.cli.ts` | The hazard minigame. |
+| `npm run labyrinth` | `game.cli.ts labyrinth` → `labyrinth.cli.ts` | The Aporia. |
+| `npm run combat-sim` | `combat-sim.cli.ts` | Bot win rates against a small roster. |
+| `npm run act1-progression` | `act1-progression.cli.ts` | The Act 1 XP ledger and door win table. |
+| `npm run combat-playtest` | `combat-playtest.cli.ts` | The stage x policy x deck matrix. |
 
-## Overview
+`combat`, `hazard` and `labyrinth` are subcommands of the game CLI, so
+`npm run combat -- <flags>` and `npm run game -- combat <flags>` are the same
+command. Pass flags after `--`.
 
-The CLI module provides a complete command-line interface for playing and testing the game. It includes a full interactive game driver, development tools, and flexible I/O abstractions.
+## Shared I/O
 
-## Components
-
-### `game.cli.ts` - Main Game Interface
-
-The primary CLI driver that provides a tabbed inquirer interface for playing the game. Main tabs include:
-
-- **Map** - Navigate between nodes and trigger map events. Hazard-Pattern Combat is reached via `npm run combat` (a subcommand of the game CLI).
-- **Journal** - View active/completed quests and world flags
-- **Cards** - View learned/unlocked cards; combat should show only currently affordable cards
-- **Inventory** - View carried items and equipment
-
-**Usage:**
-```bash
-npm run game
-```
-
-**Features:**
-- Full game loop interaction through store actions
-- Real-time combat resolution
-- Save/load functionality
-- Development cheats and debugging
-
-### `combat.cli.ts` - Hazard-Pattern Combat CLI (Phase 165)
-
-A standalone driver for the **Spec 25/26b Hazard-Pattern Combat engine** (the only combat engine), reachable as a subcommand of the game CLI. Drives the card-and-dice HP-model combat (status effects are the efficient path, raw strikes are the weak baseline). Supports interactive TTY play, `--auto` bot policies, and scripted/stdin agentic modes.
-
-**Usage:**
-```bash
-npm run game -- combat [flags]
-npm run combat -- [flags]             # convenience alias
-```
-
-**Combat routing (Phase 165):**
-
-| Command | Engine |
-| --- | --- |
-| `npm run combat` | Hazard-Pattern card/dice engine (`combat.cli.ts`) |
-| `npm run combat-sim` | Monte-Carlo balance witness (not player-facing) |
-
-**New-combat flags:**
+`io.ts` gives the interactive CLIs three input modes and two output modes:
 
 | Flag | Effect |
 | --- | --- |
-| `--enemy <slug>` | Enemy from the registry (default `float-eye`). |
-| `--preset <id>` | Character preset id (default `apprentice`). |
-| `--seed <n>` | Deterministic RNG seed — same seed → same dice, same outcome. |
-| `--auto` | Run a bot policy without TTY (no prompts). |
-| `--policy naive\|safe\|aggressive\|status` | Bot policy for `--auto` (default `status`). `status` prioritises landing new distinct status effects (DoT/control) for the combo-refresh loop. |
-| `--max-turns <n>` | Stop auto play after N threat phases (default `8`). |
-| `--script <path>` | JSON answer array (shared `io.ts` layer). |
-| `--stdin` | Line-buffered JSONL answers (shared `io.ts` layer). |
-| `--json-events` | Machine-clean event stream on stdout. |
-| `--state-log <path>` | JSONL state mutation log (start / phase / end records). |
+| (none) | Prompts at the terminal (inquirer). |
+| `--script <path>` | Answers come from a JSON array of answer objects. The run fails when the array runs out. |
+| `--stdin` | Answers come line by line from stdin (JSONL), for an external agent. |
+| `--json-events` | Prints events as one JSON object per line instead of human text. |
+| `--state-log <path>` | Appends a JSONL record of each state change to `path`. |
+| `--log-level <trace\|debug\|info\|warn\|error>` | Turns on the structured logger (`src/Log/`) at that level. |
+| `--log-file <path>` | Appends logger entries to `path` as JSONL (level defaults to `info`). |
 
-**Examples:**
+`game`, `combat`, `hazard` and `labyrinth` take the first five. `game` and
+`combat` also take the two logger flags.
+
+## game
+
 ```bash
-# Deterministic auto run (status-focused bot, reproducible)
+npm run game -- [flags]
+```
+
+Tabs: Map, Journal, Cards, Codex, Inventory, Character, DEV, Begin again,
+Save, Load, Quit. The DEV tab calls the helpers in `dev-tools.ts`
+(`devSetLevel`, `devSetStats`, `devLearnCards`, `devGrantAllEquipment`,
+`devGrantAllConsumables`, `devSpawnEnemy`, `devMaxOut` and others).
+
+| Flag | Effect |
+| --- | --- |
+| `--save-file <path>` | The Save and Load tabs read and write this JSON file. Without it they have nowhere to save. |
+| `--fixture <id\|path.json\|list>` | Boot from a state fixture instead of a new character. `list` prints the registry and exits. See [`../../docs/state-fixtures.md`](../../docs/state-fixtures.md). |
+| `--start-map <map>` | Start a new game on another campaign map (any of `STARTABLE_MAPS`: `breakwater`, `charcoal-wood`, `beacon-crags`, `lantern-deep`). Ignored with `--fixture`. |
+| `--route <node,node,...>` | Walk these nodes in order without prompts, then exit. |
+| `--resolve-start` | With `--route`, resolve the start node's event before walking. |
+| `--route-audit <map>` | Print every node of a map with its event kind, without walking. |
+| `--auto-combat` | A bot plays the fights the map starts. Fights already auto-play under `--route`, `--script` or `--stdin`. |
+| `--combat-policy <policy>` | Bot policy for auto-played map fights (see `combat --policy`). |
+| `--combat-max-turns <n>` | Phase cap for auto-played fights (default 20). |
+| `--combat-seed <n>` | Seed for map fights. |
+| `--combat-enemy <slug>` with `--combat-enemy-node <id>` | Replace the enemy at one node (used by tests). |
+
+```bash
+npm run game -- --fixture list
+npm run game -- --route-audit breakwater
+npm run game -- --stdin --json-events --state-log /tmp/game.jsonl
+```
+
+## combat
+
+```bash
+npm run combat -- [flags]
+```
+
+Builds a player and an enemy and runs `initializeCombatEncounter`, then the
+turn loop from `combat.engine.ts` ([`combat.md`](./combat.md)). Interactive
+by default; `--auto` lets a bot play.
+
+| Flag | Effect |
+| --- | --- |
+| `--enemy <slug>` | An `ENEMY_REGISTRY` slug: `float-eye` (default), `brine-hag`, `the-doorwarden`. |
+| `--preset <id>` | Character preset from `src/Character/presets.ts`: `apprentice` (default), `wanderer`, `sage`, `kid-l1`, `kid-l15`. |
+| `--stage <early\|mid\|late>` | Use that playtest stage's player (unless `--preset` is given) and an enemy from its roster (unless `--enemy` is given). |
+| `--deck <grey\|cards:a,b,c>` | The deck: the grey deck, or these card ids. Without it the deck is built from the player's known cards. |
+| `--seed <n>` | Seeds the RNG; the same seed replays the same fight. |
+| `--auto` | A bot plays; no prompts. |
+| `--policy <naive\|safe\|aggressive\|status>` | The bot's card ranking (default `status`). |
+| `--max-turns <n>` | Stop an auto run after this many phases (default 8). |
+
+In a `--script` file, a card answer is `top:<uid>` or `bot:<uid>`; a card
+with a chosen X takes `bot:<uid>:<X>`.
+
+Events on stdout: `hazardCombat:start`, `hazardCombat:card`,
+`hazardCombat:turnEnd`, `hazardCombat:resolvedPhase`, `hazardCombat:mercy`,
+`hazardCombat:end`. The end event's outcome is a `CombatOutcome`
+(`src/Combat/combat.encounter.types.ts`).
+
+```bash
 npm run combat -- --auto --policy status --enemy float-eye --seed 42 \
   --max-turns 12 --json-events --state-log /tmp/combat.jsonl
 
-# Interactive TTY play
 npm run combat -- --enemy brine-hag --preset wanderer
+npm run combat -- --auto --stage mid --deck grey --seed 7
 ```
 
-**State-log records** (for agentic consumers):
-- `hazardCombat:start` — encounter initialised (player + enemy + policy)
-- `hazardCombat:autoPhase` — one full auto-played threat phase
-- `hazardCombat:playCard` — card played (interactive)
-- `hazardCombat:resolveThreat` — threat phase resolved + between-phases
-- `hazardCombat:mercy` — mercy choice made
-- `hazardCombat:signature` — signature skill cast
-- `hazardCombat:end` — encounter over; `event.outcome` ∈ `{victory, mercy, capitulate, concede, defeat}`
+## hazard
 
-### `combat-sim.cli.ts` - Hazard-Pattern Combat Balance Sim
-
-A non-interactive Monte-Carlo witness that runs `simulateHazardPatternCombat`
-against a curated set of enemies across difficulty tiers and prints win-rate,
-outcome distribution, round count, and status-engagement stats. Used for
-balance tuning — not player-facing.
-
-**Usage:**
 ```bash
-npm run combat-sim
-npm run combat-sim -- --blind
-npm run combat-sim -- --enemy=BrineHag
-npm run combat-sim -- --loadout=slippery-slope,eternal-regress,befriend
-npm run combat-sim -- --runs=300 --seed=1 --blind
+npm run hazard -- [flags]
 ```
 
-**Flags:**
+Plays hazards back to back through the session functions in
+`src/World/Hazard/` (`createHazardSession`, `selectHazardRoute`,
+`resolveHazardRound` and the rest). Each run starts a new hazard session; a
+player ledger carries across runs until the process exits. An illegal action
+is warned about and skipped, and logged as `illegalHazardAction` with a
+state snapshot.
 
 | Flag | Effect |
 | --- | --- |
-| `--blind` | Runs the `blind` policy. Since the D7 flag collapse (2026-09-25) deleted the stance draft, it plays identically to the default `greedy` witness; kept so old commands still run. |
-| `--enemy <Name>` | Run against one enemy only (e.g. `BrineHag`, `TheDoorwarden`). Omit to run the full tier sweep. |
-| `--loadout <ids>` | Comma-separated card IDs for the player's deck (default `slippery-slope`). |
-| `--runs <n>` | Number of Monte-Carlo playthroughs (default `200`). |
-| `--seed <n>` | Deterministic RNG seed for reproducible runs (default `1`). |
+| `--hazard <id>` | Pick a hazard card (e.g. `cracked-cliff`). Prompts from `HAZARD_LIBRARY` when omitted. |
+| `--route <top\|bottom>` | The safe or the risk route. Prompts when omitted. |
+| `--auto` | A greedy heuristic plays each round. |
+| `--seed <n\|str>` | Seeds the session. |
+| `--runs <n>` | Hazards to play (default 5). |
+| `--deck <id,id,...>` | Hazard card ids added to the starter bag. Ids are checked against `HAZARD_DECK`. |
+| `--bag-file <path>` | A JSON array of hazard card ids that replaces the whole bag. |
 
-**Output:** Win-rate percentage, round count, status-effect hit distribution, and per-enemy breakdown printed to stdout.
+Events: `hazard:complete` per run and `hazard:summary` at the end.
 
-### `hazard.cli.ts` - Hazard Mini-Game Driver
-
-A standalone driver for the hazard mini-game, reachable as a **subcommand** of
-the game CLI. It reuses the same `io.ts` layer (tty / `--script` / `--stdin`,
-plus `--json-events` and `--state-log`) so a person, a replay file, or an agent
-can all drive it the same way.
-
-**Usage:**
 ```bash
-npm run game -- hazard [flags]
-npm run hazard -- [flags]            # convenience alias
-```
-
-**Flags:**
-
-| Flag | Effect |
-| --- | --- |
-| `--hazard <id>` | Pick a hazard card (e.g. `cracked-cliff`). Prompts from the library when omitted. |
-| `--route top\|bottom` | Choose the route. Prompts when omitted. |
-| `--auto` | A greedy heuristic plays each round (focus first, then matching progress cards, preferring affordable bottom actions). Otherwise the player picks cards by hand. |
-| `--seed <n\|str>` | Seed the shared RNG so dice rolls and the deck shuffle are reproducible. |
-| `--runs <n>` | Play N hazards back-to-back (default **5**). |
-| `--script <path>` | Scripted answers (JSON array), as in `game.cli.ts`. |
-| `--stdin` | Line-buffered stdin answers. |
-| `--json-events` | Emit `hazard:complete` / `hazard:summary` events as JSON on stdout. |
-| `--state-log <path>` | Append a per-decision JSONL trace (init, route, dice, each round, final score). |
-
-**Encounter vs. player state.** Each run creates a fresh per-encounter *hazard
-state* (the engine's `HazardSessionState`); dice exhaustion / refresh and deck
-state persist **within** that encounter and are discarded when it ends. A
-cross-run *player ledger* (vitae / supply / items / threatened-X) persists
-across `--runs` and is only reset when the process exits.
-
-> Reward/penalty application is a CLI-layer policy (the engine's `resolveRound`
-> does not yet apply them): each `X` round applies the route `failurePenalty`
-> (plus `finalRoundFailurePenalty` on the last round), and the route `reward` is
-> granted when the encounter nets positive.
-
-**Illegal actions** (unaffordable bottom cost, unknown card, wrong phase) are
-**warned and skipped** rather than aborting the run — and logged to the state
-log as an `illegalHazardAction` record carrying the attempted action and a full
-hazard-state snapshot, so automated tuning can learn from them.
-
-**Examples:**
-```bash
-# Reproducible auto run of one hazard, machine-readable trace
 npm run hazard -- --auto --seed 42 --runs 1 --hazard cracked-cliff --route top \
   --json-events --state-log /tmp/hazard.jsonl
 
-# Interactive manual play, prompted for hazard + route
-npm run hazard -- --runs 1
+npm run hazard -- --auto --runs 3 --hazard flooded-undercroft --route bottom
 ```
 
-### `dev-tools.ts` - Development Utilities
+## labyrinth
 
-Development utilities for testing and debugging the game engine.
-
-**Key Functions:**
-- `devSetLevel()` - Set character level
-- `devSetStats()` - Modify character base stats
-- `devLearnCards()` / `devUnlockCards()` - Manage card progression (Phase 99 removed separate card equipment; `devEquipSkills` was removed in Phase 159)
-- `devGrantAllEquipment()` / `devGrantAllConsumables()` - Grant items
-- `devSpawnEnemy()` - Spawn specific enemies for testing
-- `devMaxOut()` - Max out character for endgame testing
-
-### `io.ts` - I/O Abstraction
-
-Flexible I/O abstraction supporting multiple input and output modes:
-
-**Input Modes:**
-- TTY - Interactive terminal input
-- Scripted - Predefined answers from file  
-- Stdin - Line-buffered stdin input
-
-**Output Modes:**
-- Human-readable - Formatted console output
-- JSON - JSON-per-line output for agents/automation
-
-**Key Functions:**
-- `parseArgv()` - Parse command-line arguments
-- `prompt()` - Universal prompt function
-- `emit()` / `log()` - Output functions
-- `setIoMode()` / `setOutputMode()` - Configure I/O behavior
-
-## Command-Line Arguments
-
-- `--script <path>` - Run with scripted input from file
-- `--stdin` - Read input from stdin (line-buffered)
-- `--json-events` - Output JSON events instead of human-readable text
-- `--state-log <path>` - Log game state to JSONL file
-- `--save-file <path>` - Use persistent save file
-
-## Examples
-
-### Interactive Play
 ```bash
-npm run game
+npm run labyrinth -- [flags]
 ```
 
-### Scripted Automation
+Walks the Aporia room by room: doors, points of interest, gates, hints, the
+Study and the act bosses, through `src/World/Labyrinth/labyrinth.engine.ts`.
+Fights auto-resolve through `runHazardCombatCliEncounter` from
+`combat.cli.ts`.
+
+| Flag | Effect |
+| --- | --- |
+| `--act <act1\|act2\|act3>` | Starting act (default `act1`). |
+| `--level <n>` | Player level (default 14). |
+| `--preset <id>` | Character preset for fights (default `kid-l15`). |
+
+It also takes the shared I/O flags.
+
+## combat-sim
+
 ```bash
-npm run game -- --script automation/scenarios/test.json --json-events
+npm run combat-sim -- [--key=value ...]
 ```
 
-### Agent Integration
+Runs `simulateHazardPatternCombat` against each enemy in its roster and
+prints win rate, outcome counts, average rounds and diagnostic columns. Values must use the `--key=value` form.
+
+| Flag | Effect |
+| --- | --- |
+| `--enemy=<Name>` | Run against one enemy only (e.g. `BrineHag`, `TheDoorwarden`). Omit to run the full roster. |
+| `--loadout=<id,id,...>` | Card ids for the player's deck. The default, `slippery-slope,brace-for-impact`, names cards that are not in the card library, so pass a loadout. |
+| `--runs=<n>` | Runs per enemy (default 200). |
+| `--seed=<n>` | Base seed (default 1). |
+| `--blind` | Use the `blind` sim policy instead of `greedy`. |
+
+The roster is the `ENEMIES` export of `combat-sim.cli.ts`: `FloatEye`,
+`BrineHag`, `TheDoorwarden`.
+
 ```bash
-npm run game -- --stdin --json-events --state-log debug.jsonl
+npm run combat-sim -- --loadout=grey-strike,grey-ward,grey-word --runs=100
+npm run combat-sim -- --enemy=FloatEye --loadout=grey-strike,grey-ward --seed=3
 ```
 
-## Integration
+## act1-progression
 
-The CLI is built on top of the core game store and reducer system. It demonstrates how to:
-- Create and configure a game store
-- Handle game events through the event emitter
-- Implement persistence with adapters
-- Drive the complete game loop
+```bash
+npm run act1-progression -- [--runs=<n>] [--seed=<n>]
+```
 
-## See Also
+Prints every Act 1 fight with its level and XP (`act1FightLedger`,
+`act1FightXp` in `src/Game/act1-progression.ts`), the level a full clear and
+a door-only route reach at each door (`walkAct1`), and the sim's win rate at
+each door for three stat spreads. `--runs` defaults to 200, `--seed` to 1.
 
-- [Game Loop](./gameloop.md) - Core game mechanics
-- [Combat](./combat.md) - Combat system details
-- [World](./world.md) - Map and event system
+## combat-playtest
+
+```bash
+npm run combat-playtest -- [--key=value ...]
+```
+
+Sweeps `runPlaytestMatrix` (`src/Combat/combat.playtest.ts`) over stages,
+sim policies and decks and prints the report. Values use `--key=value`.
+
+| Flag | Effect |
+| --- | --- |
+| `--stage=<early\|mid\|late\|all>` | Stages to sweep (default `all`). |
+| `--policy=<id\|all>` | A policy from `COMBAT_SIM_POLICY_ORDER` (`greedy`, `blind`, `dot-weaver`, `control-lock`, `aggro-brute`, `turtle`, `chaos`, `mercy-seeker`), or `all`. Default `greedy`. |
+| `--deck=<grey\|cards:a,b,c>` | Deck selection (default `grey`). |
+| `--enemy=<slug>` | Only fights against this `ENEMY_REGISTRY` slug; stages that do not field it are dropped. |
+| `--runs=<n>` | Runs per cell (default 60). |
+| `--seed=<n>` | Base seed (default 1). |
+| `--cards` | Append the per-card usage table. |
+| `--json` | Print only the `PlaytestReport` as JSON. |
+| `--log-level=<level>`, `--log-file=<path>` | Turn on the structured logger for the sweep. |
+
+```bash
+npm run combat-playtest -- --stage=early --policy=all
+npm run combat-playtest -- --deck=cards:grey-strike,grey-ward --runs=100 --seed=7
+npm run combat-playtest -- --json
+```
+
+## Tests
+
+`src/CLI/e2e/` drives these CLIs in tests. `cli.docs-examples.engine.test.ts`
+reads this file and fails if an `--enemy` or `--hazard` example names an
+enemy or hazard that does not exist.

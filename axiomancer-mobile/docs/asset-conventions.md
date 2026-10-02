@@ -20,8 +20,7 @@
 3. **Registry**: add a static `require()` literal to that directory's
    `index.ts` map (Metro needs static literals — no dynamic paths).
    Art keys are kebab-case; enemies key by `portraitAsset`
-   (declared in `axiomancer-mechanics/src/Enemy/types.ts`, documented
-   in `axiomancer-mechanics/docs/enemy.md`), cards key by card id in
+   (declared in `axiomancer-mechanics/src/Enemy/types.ts`), cards key by card id in
    `assets/images/cards/index.ts` (the ONE place a card id meets a
    file path — the mechanics package stays art-free).
 4. **Provenance**: append an entry to the directory's

@@ -22,5 +22,4 @@ Manual playthrough and audit work repeatedly found UI assumptions diverging from
 ## Links
 
 - README — presentation-layer statement
-- Mechanics ADR-0001 — Combat resources live on CombatState
 - Mechanics ADR-0002 — Skills are known, not equipped

@@ -52,6 +52,19 @@
 
 ## Pending
 
+### [tooling] `combat-sim`'s default loadout names two deleted cards (R10c, 2026-10-02)
+- category: tooling
+- impact: 4
+- ease: 8
+- detail: the default `--loadout` in `src/CLI/combat-sim.cli.ts` is
+  `slippery-slope,brace-for-impact`; neither id is in the card library, so
+  `npm run combat-sim` with no flag plays no real card and every column
+  reads 0. Found writing `docs/cli.md`, which tells readers to pass a
+  loadout for now.
+- next (`/iterate`): default to the grey cards (`GREY_OFFICE_CARDS` ids),
+  with a test that the default loadout resolves through `getCardById`; then
+  drop the caveat from `docs/cli.md`.
+
 ### [contract] Pre-purge saves keep purged card ids; combat throws on them (B4 F2, 2026-10-01)
 - category: contract
 - impact: 6

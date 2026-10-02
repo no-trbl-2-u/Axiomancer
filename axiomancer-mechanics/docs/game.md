@@ -133,7 +133,7 @@ events.on('combat:started', (event) => {
 
 ### Event Types
 
-Every event carries the same `EnginePayload` envelope (`{ action, state, report?, unlockedCards? }` — see `docs/api.md` § Events). The nine `GameEventType` values:
+Every event carries the same `EnginePayload` envelope (`{ action, state, report?, unlockedCards? }` — see `src/Game/events.types.ts`). The nine `GameEventType` values:
 
 | Event | When Emitted |
 |-------|--------------|

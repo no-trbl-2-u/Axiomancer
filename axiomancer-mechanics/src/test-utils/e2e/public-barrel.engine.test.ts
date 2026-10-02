@@ -61,8 +61,8 @@ describe('Phase 50 — public barrel exposes cardLibrary + getCardById', () => {
 });
 
 describe('iterate (post-critique-21) — public barrel exposes the Combat-tier aggregators', () => {
-    // Pins the four effect/combat aggregators that `docs/effects.md` lists
-    // as public Combat-tier helpers. Until this iterate tick they lived only
+    // Pins the four effect/combat aggregators that are public Combat-tier
+    // helpers. Until this iterate tick they lived only
     // on `src/Combat/index.ts` and were unreachable from the top-level
     // `axiomancer-mechanics` barrel — external consumers (e.g. mobile
     // building custom UI on top of these helpers) had no path in. The
