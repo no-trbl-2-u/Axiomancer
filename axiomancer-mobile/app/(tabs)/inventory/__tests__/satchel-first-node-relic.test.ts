@@ -5,8 +5,8 @@
  * empty and the dock IS bare — this file pins that, and pins what the player
  * actually SEES when the run's first node hands over the Suppliant's Ring
  * (the first thing they own). The displacement case — a full accessory row
- * benching the stand-in — is kept over an explicitly kitted character, the
- * loadout presets and sims still seed.
+ * benching its last worn piece — is kept over a character wearing the three
+ * fixture trinkets.
  *
  * Presenter-level, not a render test: the SATCHEL screen consumes
  * `selectInventoryViewModel` unconditionally (`app/(tabs)/inventory/index.tsx`
@@ -19,7 +19,7 @@
 import { describe, it, expect } from '@jest/globals';
 
 import {
-    createCharacter, grantFirstNodeRelic, withholdFirstNodeRelic, FIRST_NODE_RELIC_ID, STAND_IN_RELIC_ID,
+    createCharacter, grantFirstNodeRelic, FIRST_NODE_RELIC_ID, FIXTURE_TRINKETS,
 } from '@mechanics';
 import type { GameState } from '@mechanics';
 
@@ -33,16 +33,20 @@ function freshStore(): AppStore {
     return createAppStore({ adapter: createMemoryAdapter() });
 }
 
-/** The pre-2026-09-23 fresh state: the Phase-19 kit worn, the ring withheld. */
+/** A full accessory row (the three fixture trinkets worn), ring not yet granted. */
 function kittedStore(): AppStore {
     const store = freshStore();
     store.setState({
-        player: withholdFirstNodeRelic(createCharacter({
-            name: 'Kitted', level: 1, baseStats: { heart: 5, body: 5, mind: 5 }, seedStartingRelics: true,
-        })),
+        player: createCharacter({
+            name: 'Kitted', level: 1, baseStats: { heart: 5, body: 5, mind: 5 },
+            inventory: [...FIXTURE_TRINKETS], equipment: [...FIXTURE_TRINKETS],
+        }),
     } as never);
     return store;
 }
+
+/** The engine displaces the last worn accessory when the row is full. */
+const DISPLACED_ID = FIXTURE_TRINKETS[FIXTURE_TRINKETS.length - 1]!.id;
 
 function vmOf(store: AppStore) {
     return selectInventoryViewModel(store.getState(), {});
@@ -117,13 +121,13 @@ describe('SATCHEL — after the first node grants the ring', () => {
         const result = settleGrant(store);
         const after = vmOf(store);
 
-        expect(result.displaced?.id).toBe(STAND_IN_RELIC_ID);
+        expect(result.displaced?.id).toBe(DISPLACED_ID);
         expect(after.items.length).toBe(before.items.length + 1);
 
-        const displacedRow = after.items.find(i => i.id === STAND_IN_RELIC_ID);
+        const displacedRow = after.items.find(i => i.id === DISPLACED_ID);
         expect(displacedRow).toBeDefined();
         expect(displacedRow!.equipped).toBe(false);
-        expect(after.equipmentDock.slots.map(s => s.item?.id)).not.toContain(STAND_IN_RELIC_ID);
+        expect(after.equipmentDock.slots.map(s => s.item?.id)).not.toContain(DISPLACED_ID);
     });
 
     it('keeps the dock and the engine loadout telling the same story', () => {

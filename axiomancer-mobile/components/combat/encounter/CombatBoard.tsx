@@ -45,9 +45,9 @@ import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
     CombatViewModel, CombatCardVM, CombatDieVM,
     CombatSignatureVM, CombatEffectChipVM,
-    CombatMomentumV2VM, CombatStanceChipVM,
+    CombatMomentumV2VM,
 } from '@/state/presenters/combat-encounter.engine';
-import { armedReadValue, dieCanPowerCardVM, STANCE_COLORS } from '@/state/presenters/combat-encounter.engine';
+import { armedValue, dieCanPowerCardVM, STANCE_COLORS } from '@/state/presenters/combat-encounter.engine';
 // D4 (2026-09-21) — the ONE mobile source for the rarity band. The face never
 // re-bands a rank and never re-types a rarity hue; see `card-rarity.engine.ts`.
 import { rarityFor, RARITY_LABEL, RARITY_PIPS, RARITY_COLOR } from '@/state/presenters/card-rarity.engine';
@@ -497,21 +497,21 @@ export const StagedCard = React.memo(function StagedCard({
     const popStyle = useJuicePulse(popKey, 0.4);
     const shakeStyle = useJuiceShake(rejectKey, 'low');
     const armed = assignedDie !== null;
-    const readColor = armed ? ARMED_ACCENT : AXM.bone;
+    const armedColor = armed ? ARMED_ACCENT : AXM.bone;
     // Option A rail needs width: staged faces track the hand-card proportion
     // (shaved with it in the 2026-07-19 declutter pass).
     const cardW = compact ? 92 : 112;
     const cardH = compact ? 135 : 164;
-    // The keyword line shows the POWER value; for read-dependent kinds (guard) it is
-    // recomputed live — printed (read 'none') plus the colour-match bonus the
-    // armed die earns — so the staged number is exact at commit.
+    // The keyword line shows the POWER value; for guard it is recomputed live —
+    // printed plus the colour-match bonus the armed die earns — so the staged
+    // number is exact at commit.
     let heroOverride: string | undefined;
-    if (armed && f.readDependent) {
+    if (armed && f.armable) {
         // Phase 104 — a grey card's colour-match bonus is neutral, even off wild.
         const colorMatch = card.stance !== 'any'
             && (assignedDie!.color === card.stance || assignedDie!.color === 'wild');
-        const g = armedReadValue(f, 'none', colorMatch);
-        // Read-scaled commit value: Guard NN / +NN% Vulnerable / NN DoT total.
+        const g = armedValue(f, colorMatch);
+        // Commit value: Guard NN / +NN% Vulnerable / NN DoT total.
         if (g != null) heroOverride = f.kind === 'guard' ? `Guard ${g}` : f.kind === 'vulnerable' ? `+${g}%` : `${g}`;
     }
     // P2 — spell out the APPLY suffix instead of a bare glyph: a powered play
@@ -548,7 +548,7 @@ export const StagedCard = React.memo(function StagedCard({
                         card={card}
                         width={cardW}
                         height={cardH}
-                        accent={armed ? readColor : null}
+                        accent={armed ? armedColor : null}
                         heroOverride={heroOverride}
                     />
                     {/* die socket notched into the top-right corner: dashed target while
@@ -581,14 +581,14 @@ export const StagedCard = React.memo(function StagedCard({
                 hitSlop={8}
                 style={[
                     styles.applyRibbon,
-                    { borderColor: armed ? readColor : AXM.bone, backgroundColor: armed ? 'rgba(91,191,106,0.16)' : 'rgba(0,0,0,0.55)', width: cardW },
+                    { borderColor: armed ? armedColor : AXM.bone, backgroundColor: armed ? 'rgba(91,191,106,0.16)' : 'rgba(0,0,0,0.55)', width: cardW },
                     // Dead-tray telegraph: the FREE line is the live out — the
                     // ribbon lights sulfur so it reads as THE button to press.
                     !armed && freeProminent && { borderColor: AXM.sulfur, backgroundColor: 'rgba(212,192,38,0.16)' },
                     compact && { paddingVertical: 3 },
                 ]}
             >
-                <Text style={[styles.applyText, { color: armed ? readColor : freeProminent ? AXM.sulfur : AXM.parchment }, compact && { fontSize: 10 }]} numberOfLines={1} adjustsFontSizeToFit>
+                <Text style={[styles.applyText, { color: armed ? armedColor : freeProminent ? AXM.sulfur : AXM.parchment }, compact && { fontSize: 10 }]} numberOfLines={1} adjustsFontSizeToFit>
                     {applyLabel}
                 </Text>
             </Pressable>
@@ -676,52 +676,9 @@ function MomentumChainChip({ vm, onPress }: { vm: CombatMomentumV2VM; onPress?: 
                     ) : null}
                 </>
             )}
-            {/* S1-board-C19 — the tap mark. Always drawn, in every chain state,
-                so the chip never reads as the inert stance chip below it. */}
+            {/* S1-board-C19 — the tap mark. Always drawn, in every chain state. */}
             <Text style={styles.chipInfoMark} allowFontScaling={false} testID="combat-momentum-info-mark">ⓘ</Text>
         </Pressable>
-    );
-}
-
-// ── Spec 33 §2 (Phase D6b) — player current-stance chip ──────────────────────
-
-/** The player's current stance, as an INERT readout.
- *
- *  Input: the stance-chip VM. Output: the chip row. Cluster S1-board-C19 — it
- *  sat directly under the momentum chip, in the same pill, reading a bare
- *  'NO STANCE'; the two looked like one control each, but only the momentum
- *  one opened anything. The momentum chip now carries a ⓘ tap mark and this
- *  one names itself — STANCE ♥ HEART — so it reads as a labelled value, never
- *  a button that refuses to answer. ('NO STANCE' already carries the word, so
- *  the caption is dropped there rather than stuttering it twice.)
- *
- *  Cluster S1-board-C34 — the empty read stopped at the state word and left
- *  the way out unnamed, on a chip that cannot be tapped for more. It now
- *  prints the presenter's `hint` beside it: the action that fills the chip. */
-function StanceChip({ vm }: { vm: CombatStanceChipVM }) {
-    const AXM = usePalette();
-    const styles = useStyles();
-    const active = vm.stance !== null;
-    return (
-        <View
-            style={[styles.stanceChip, { borderColor: active ? vm.colorHex : AXM.ash }]}
-            testID="combat-player-stance"
-            accessible
-            accessibilityRole="text"
-            accessibilityLabel={vm.a11y}
-        >
-            {active ? (
-                <Text style={styles.stanceChipCaption} allowFontScaling={false} testID="combat-player-stance-caption">STANCE</Text>
-            ) : null}
-            <Text style={[styles.stanceChipGlyph, { color: active ? vm.colorHex : AXM.ash }]} allowFontScaling={false}>{vm.glyph}</Text>
-            <Text style={[styles.stanceChipLabel, { color: active ? vm.colorHex : AXM.bone }]} allowFontScaling={false}>{vm.label}</Text>
-            {/* S1-board-C34 — the empty state names the action that fills it. */}
-            {vm.hint ? (
-                <Text style={styles.stanceChipHint} allowFontScaling={false} numberOfLines={1} testID="combat-player-stance-hint">
-                    · {vm.hint}
-                </Text>
-            ) : null}
-        </View>
     );
 }
 
@@ -1289,9 +1246,6 @@ export const CombatBoard = React.memo(function CombatBoard({
 
                 {/* momentum — the spec-33 stance-sequence chain chip. */}
                 <MomentumChainChip vm={vm.momentumV2} onPress={onMomentumInfo} />
-
-                {/* Spec 33 §2 — the player's current-stance chip. */}
-                <StanceChip vm={vm.playerStance} />
 
                 {/* player status strip — IN FLOW (not floated over the fan, where the
                     hand's gesture area swallowed the taps) so every tile stays tappable.
@@ -1975,20 +1929,6 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
         borderRadius: 5, paddingHorizontal: 7, paddingVertical: 2, overflow: 'hidden',
     },
     chainBroke: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.4, textShadowRadius: 6, textShadowOffset: { width: 0, height: 0 } },
-    // ── Spec 33 §2 — player current-stance chip ──
-    stanceChip: {
-        flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'center',
-        borderWidth: 1, borderRadius: 5, paddingHorizontal: 8, paddingVertical: 3, marginBottom: 2,
-        backgroundColor: 'rgba(0,0,0,0.55)',
-    },
-    stanceChipGlyph: { fontFamily: FONTS.sans, fontSize: 13, textShadowRadius: 5, textShadowOffset: { width: 0, height: 0 } },
-    stanceChipLabel: { fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 1 },
-    // S1-board-C19 — the readout's own name, in the convictionCaption idiom:
-    // chrome-quiet, still legible.
-    stanceChipCaption: { fontFamily: FONTS.sans, fontSize: 7, letterSpacing: 0.8, color: AXM.bone },
-    // S1-board-C34 — the empty state's instruction, quieter than the value it
-    // follows so 'NO STANCE' stays the thing the eye lands on.
-    stanceChipHint: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 0.6, color: AXM.bone },
     // S1-board-C19 — the tap mark on the momentum chip (the tappable half of
     // the pair). Quiet chrome; the chip's own colours stay the loud part. It
     // floats on the arena floor art beside the readout's plate, not on it, so

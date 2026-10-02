@@ -49,8 +49,8 @@ make it sound ancient.
 
 - **VITAE:** canonical combat vitality label. Keep exact in UI and mechanical
   previews.
-- **STANCE:** canonical combat posture/commitment label. Use `CHOOSE A STANCE`
-  for the player action.
+- **Colour:** a card's or a die's heart / body / mind identity. Say
+  "colour", never "stance" (the stance layer was removed, D65).
 - **Status effects:** use the implemented status name and exact stack/duration
   syntax in rules copy. Narrative aliases may appear only in a separate flavor
   line.

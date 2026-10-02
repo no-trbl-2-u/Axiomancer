@@ -145,16 +145,6 @@ describe('createAppActions: dispatch', () => {
         expect(verbs).toContain('defend');
     });
 
-    it('seeding the grey office sets the bundle-chosen flag (no picker re-shown)', () => {
-        const store = createAppStore({ adapter });
-        const actions = createAppActions(store);
-
-        expect((store.getState() as unknown as { flags?: string[] }).flags ?? []).not.toContain('starter-bundle-chosen');
-        actions.startCombat(makeEnemy());
-        const flags = (store.getState() as unknown as { flags?: string[] }).flags ?? [];
-        expect(flags).toContain('starter-bundle-chosen');
-    });
-
     it('endCombat clears the active encounter and preserves player progress', () => {
         const store = createAppStore({ adapter });
         const actions = createAppActions(store);

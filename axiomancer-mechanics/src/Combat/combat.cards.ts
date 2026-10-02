@@ -37,15 +37,13 @@ function isDot(effect: Effect): boolean {
 function isControl(effect: Effect): boolean {
     if (effect.category === 'control') return true;
     const r = effect.payload.actionRestriction;
-    return !!r && (r.skipTurn === true || r.forcedStance !== undefined || (r.blockedStances?.length ?? 0) > 0);
+    return !!r && (r.skipTurn === true);
 }
 
 /** True if the effect is an exposure / soft debuff (MARK / QUARTER class). */
 function isStatDebuff(effect: Effect): boolean {
     if (effect.type !== 'debuff') return false;
-    return (effect.payload.rollModifier ?? 0) < 0
-        || (effect.payload.defenseModifier ?? 0) < 0
-        || (effect.payload.damageTakenMult ?? 1) > 1
+    return (effect.payload.damageTakenMult ?? 1) > 1
         || (effect.payload.tickAmplifyFlat ?? 0) > 0
         || (effect.payload.outgoingDamageMulPct ?? 0) < 0;
 }
@@ -72,7 +70,7 @@ export function effectImpact(
     }
     if (isControl(effect)) {
         const r = effect.payload.actionRestriction;
-        const restricts = !!r && (r.skipTurn === true || r.forcedStance !== undefined || (r.blockedStances?.length ?? 0) > 0);
+        const restricts = !!r && (r.skipTurn === true);
         const durationCredit = Math.min(Math.max(0, duration), 3);
         return { track: 'control', amount: i * CONTROL_HARD_MULT + (restricts ? durationCredit : 0) };
     }

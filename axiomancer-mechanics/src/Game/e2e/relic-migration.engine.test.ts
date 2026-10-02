@@ -2,10 +2,10 @@
  * Hermetic engine test — Phase 19 save migration (v12 → v13).
  *
  * A v12 save has the 5-slot loadout but no signet relics. Migrating seeds the
- * relics via `cloneStartingRelics` (default 5 worn, displaced gear + the
- * benched rest to inventory) and recomputes
- * maxHealth so a loaded save derives a full signature kit from the
- * worn loadout instead of the retired archetype kit.
+ * starting relics via `cloneStartingRelics` — since R7e2 (D72) the Suppliant's
+ * Ring alone, worn — displaces the old gear to inventory and recomputes
+ * maxHealth, so a loaded save derives its signature kit from the worn loadout
+ * instead of the retired archetype kit.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -41,37 +41,31 @@ function v12Save(): Record<string, unknown> {
 // Pin toVersion=13 to exercise the Phase-19 hop in isolation; the Phase-21
 // v13→v14 purge is covered in its own block below.
 describe('migrate v12 → v13 — seed the signet relics', () => {
-    it('seeds the default 5-relic loadout onto a v12 save', () => {
+    it('seeds the Suppliant\'s Ring worn onto a v12 save, the other slots empty', () => {
         const migrated = migrate(v12Save(), 12, 13);
         expect(migrated.version).toBe(13);
-        expect(migrated.player.equipment.weapon?.id).toBe('relic-overwhelming');
-        expect(migrated.player.equipment.armor?.id).toBe('relic-read');
-        expect(migrated.player.equipment.accessories).toHaveLength(3);
+        expect(migrated.player.equipment.weapon).toBeNull();
+        expect(migrated.player.equipment.armor).toBeNull();
+        expect(migrated.player.equipment.accessories.map(a => a.id)).toEqual(['relic-disarming-plea']);
     });
 
-    it('displaces the old worn gear to inventory and adds the 3 benched relics', () => {
+    it('displaces the old worn gear to inventory behind the ring', () => {
         const invIds = migrate(v12Save(), 12, 13).player.inventory.map(i => i.id);
-        expect(invIds).toContain('old-sword'); // nothing lost at v13
-        expect(invIds).toContain('relic-conclusion');
-        expect(invIds).toContain('relic-second-wind');
-        expect(invIds).toContain('relic-conviction-strike');
+        expect(invIds).toEqual(['relic-disarming-plea', 'old-sword']); // nothing lost at v13
     });
 
-    it('recomputes maxHealth to include the +5 worn armor relic and clamps health', () => {
+    it('recomputes maxHealth off the ring loadout (no stat line) and clamps health', () => {
         const raw = v12Save();
         const player = raw.player as { level: number; baseStats: { heart: number; body: number; mind: number } };
         const base = calculateMaxHealth(player.level, player.baseStats);
         const migrated = migrate(raw, 12, 13);
-        expect(migrated.player.maxHealth).toBe(base + 5);
+        expect(migrated.player.maxHealth).toBe(base);
         expect(migrated.player.health).toBeLessThanOrEqual(migrated.player.maxHealth);
     });
 
-    it('the migrated player derives a full 5-signature kit from the worn loadout', () => {
+    it('the migrated player derives The Open Hand from the worn loadout', () => {
         const migrated = migrate(v12Save(), 12, 13);
-        expect(getSignaturesForLoadout(migrated.player.equipment)).toEqual([
-            'sig-overwhelming-argument', 'sig-read-opponent',
-            'sig-clever-gambit', 'sig-disarming-plea', 'sig-press-the-point',
-        ]);
+        expect(getSignaturesForLoadout(migrated.player.equipment)).toEqual(['sig-disarming-plea']);
     });
 
     it('still rejects an unsupported (pre-v11) version', () => {
@@ -82,21 +76,20 @@ describe('migrate v12 → v13 — seed the signet relics', () => {
 // Phase 21 — v13 → v14 purges non-relic equipment.
 describe('migrate v13 → v14 — purge non-relic equipment', () => {
     it('strips the old procedural weapon (worn + inventory) and keeps only relics as equipment', () => {
-        // A v12 save chained all the way to current (v14): the old sword parked in
+        // A v12 save chained all the way to current: the old sword parked in
         // inventory at v13 is stripped at v14; only relic equipment survives.
         const migrated = migrate(v12Save(), 12);
         expect(migrated.version).toBe(GAME_STATE_VERSION); // chains v12 → current
         const equipmentIds = migrated.player.inventory
             .filter((i): i is typeof i => (i as { category?: string }).category === 'equipment')
             .map(i => i.id);
-        expect(equipmentIds).not.toContain('old-sword');
-        expect(equipmentIds.every(id => id.startsWith('relic-'))).toBe(true);
-        // The worn loadout is relics and still derives a full signature kit.
-        expect(migrated.player.equipment.weapon?.id).toBe('relic-overwhelming');
-        expect(getSignaturesForLoadout(migrated.player.equipment)).toHaveLength(5);
+        expect(equipmentIds).toEqual(['relic-disarming-plea']);
+        // The worn loadout is the ring and still derives The Open Hand.
+        expect(migrated.player.equipment.weapon).toBeNull();
+        expect(getSignaturesForLoadout(migrated.player.equipment)).toEqual(['sig-disarming-plea']);
     });
 
-    it('backfills a loadout slot that held procedural gear with the default relic', () => {
+    it('empties a weapon slot that held procedural gear and backfills the ring', () => {
         // A hand-built v13 save whose loadout still wears the old sword (edge case).
         const fresh = createNewGameState();
         const base = calculateMaxHealth(fresh.player.level, fresh.player.baseStats);
@@ -113,10 +106,10 @@ describe('migrate v13 → v14 — purge non-relic equipment', () => {
         };
         const migrated = migrate(v13, 13);
         expect(migrated.version).toBe(GAME_STATE_VERSION); // chains v13 → current
-        // The procedural weapon slot is backfilled with the default weapon relic.
-        expect(migrated.player.equipment.weapon?.id).toBe('relic-overwhelming');
-        expect(migrated.player.equipment.armor?.id).toBe('relic-read');
-        expect(migrated.player.equipment.accessories).toHaveLength(3);
+        // No starting weapon relic is left, so the procedural weapon's slot empties.
+        expect(migrated.player.equipment.weapon).toBeNull();
+        expect(migrated.player.equipment.armor).toBeNull();
+        expect(migrated.player.equipment.accessories.map(a => a.id)).toEqual(['relic-disarming-plea']);
         expect(migrated.player.inventory.map(i => i.id)).not.toContain('old-sword');
     });
 });

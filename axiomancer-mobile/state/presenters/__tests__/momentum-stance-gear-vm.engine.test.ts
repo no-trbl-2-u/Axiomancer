@@ -1,13 +1,10 @@
 /**
- * Spec 33 (Phase D6b) — the momentum/stance chips + stance-check telegraph +
- * die-gear rail, presenter contract.
+ * Spec 33 (Phase D6b) — the momentum chip + die-gear rail, presenter
+ * contract.
  *
- * Pins the four view-model surfaces against the REAL engine + presenter:
+ * Pins the two view-model surfaces against the REAL engine + presenter:
  *   1. the Momentum-V2 chain chip (color/length + the LOUD break-to-null + surge);
- *   2. the player current-stance chip (a stance, or a clear "no stance");
- *   3. the open stance-check telegraph (punishes/yields + all three resolution
- *      outcomes: punished / yielded / none);
- *   4. the die-gear rail + payload-only inspection VM (face table, payload, upgrade).
+ *   2. the die-gear rail + payload-only inspection VM (face table, payload, upgrade).
  * (The flag-OFF byte-identity pins were deleted with the flag, D7.)
  */
 
@@ -119,105 +116,6 @@ describe('Momentum-V2 chain chip', () => {
 });
 
 // ── §2 player current-stance chip ────────────────────────────────────────────
-
-describe('player current-stance chip', () => {
-    it('renders the current stance from the last paid card', () => {
-        const s = openEncounter();
-        s.playerStance = 'body';
-        const chip = buildCombatViewModel(s).playerStance;
-        expect(chip.stance).toBe('body');
-        expect(chip.label).toBe('BODY');
-        expect(chip.glyph).not.toBe('—');
-    });
-
-    it('renders a clear "no stance" when null', () => {
-        const s = openEncounter();
-        s.playerStance = null;
-        const chip = buildCombatViewModel(s).playerStance;
-        expect(chip.stance).toBeNull();
-        expect(chip.label).toBe('NO STANCE');
-        expect(chip.a11y).toMatch(/No stance/);
-    });
-});
-
-// ── §5 stance-check telegraph ────────────────────────────────────────────────
-
-describe('stance-check telegraph', () => {
-    function stateWithCheck(): CombatEncounterState {
-        const s = openEncounter();
-        const idx = Math.min(s.currentPhaseIndex, s.threatPhases.length - 1);
-        s.threatPhases[idx] = { ...s.threatPhases[idx], stanceCheck: { punishes: 'body', yields: 'mind' } };
-        return s;
-    }
-
-    it('telegraphs punishes/yields openly with the multipliers', () => {
-        const s = stateWithCheck();
-        const sc = buildCombatViewModel(s).enemy.intent.stanceCheck!;
-        expect(sc.punishes).toBe('body');
-        expect(sc.yields).toBe('mind');
-        expect(sc.punishesText).toMatch(/Punishes BODY ×1\.5/);
-        expect(sc.yieldsText).toMatch(/Yields to MIND ×0\.5 \+1◆/);
-    });
-
-    it('previews the live outcome against the player stance', () => {
-        const s = stateWithCheck();
-        s.playerStance = 'body';
-        expect(buildCombatViewModel(s).enemy.intent.stanceCheck!.live).toBe('punished');
-        s.playerStance = 'mind';
-        expect(buildCombatViewModel(s).enemy.intent.stanceCheck!.live).toBe('yielded');
-        s.playerStance = 'heart';
-        expect(buildCombatViewModel(s).enemy.intent.stanceCheck!.live).toBe('none');
-        s.playerStance = null;
-        expect(buildCombatViewModel(s).enemy.intent.stanceCheck!.live).toBe('none');
-    });
-
-    it('surfaces the PUNISHED resolution from the event log', () => {
-        const s = stateWithCheck();
-        const idx = Math.min(s.currentPhaseIndex, s.threatPhases.length - 1);
-        s.log = [...s.log, { kind: 'stance-check-resolved', phaseIndex: idx, outcome: 'punished', stance: 'body' }];
-        const res = buildCombatViewModel(s).enemy.intent.stanceCheck!.resolution!;
-        expect(res.outcome).toBe('punished');
-        expect(res.text).toMatch(/Punished ×1\.5/);
-    });
-
-    it('surfaces the YIELDED resolution (×0.5 +1◆) from the event log', () => {
-        const s = stateWithCheck();
-        const idx = Math.min(s.currentPhaseIndex, s.threatPhases.length - 1);
-        s.log = [...s.log, { kind: 'stance-check-resolved', phaseIndex: idx, outcome: 'yielded', stance: 'mind' }];
-        const res = buildCombatViewModel(s).enemy.intent.stanceCheck!.resolution!;
-        expect(res.outcome).toBe('yielded');
-        expect(res.text).toMatch(/Yielded ×0\.5 \+1◆/);
-    });
-
-    it('surfaces the NONE resolution from the event log', () => {
-        const s = stateWithCheck();
-        const idx = Math.min(s.currentPhaseIndex, s.threatPhases.length - 1);
-        s.log = [...s.log, { kind: 'stance-check-resolved', phaseIndex: idx, outcome: 'none', stance: null }];
-        const res = buildCombatViewModel(s).enemy.intent.stanceCheck!.resolution!;
-        expect(res.outcome).toBe('none');
-        // Playtest 2026-09-04 — never "No stance check": the check exists and
-        // both branches are printed right above this line. State the result.
-        expect(res.text).not.toMatch(/No stance check/);
-        expect(res.text).toMatch(/neither, ×1/);
-    });
-
-    it('names the stance that matched neither branch in the NONE resolution', () => {
-        const s = stateWithCheck();
-        const idx = Math.min(s.currentPhaseIndex, s.threatPhases.length - 1);
-        s.log = [...s.log, { kind: 'stance-check-resolved', phaseIndex: idx, outcome: 'none', stance: 'body' }];
-        const res = buildCombatViewModel(s).enemy.intent.stanceCheck!.resolution!;
-        expect(res.text).toBe('BODY — neither, ×1');
-    });
-
-    it('is null when the phase carries no check', () => {
-        const s = openEncounter();
-        const idx = Math.min(s.currentPhaseIndex, s.threatPhases.length - 1);
-        s.threatPhases[idx] = { ...s.threatPhases[idx], stanceCheck: undefined };
-        expect(buildCombatViewModel(s).enemy.intent.stanceCheck).toBeNull();
-    });
-});
-
-// ── §6 die-gear rail + inspection ────────────────────────────────────────────
 
 describe('die-gear rail + payload-only inspection', () => {
     it('renders 4 stock slots (heart/body/mind/wild) from the default gear', () => {

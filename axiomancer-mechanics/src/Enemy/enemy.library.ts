@@ -21,7 +21,6 @@ import { createEnemy, enemyStatBudget } from './index';
 import { LootTableEntry } from './types';
 import { consumableLibrary, getConsumableById } from '../Items/consumable.library';
 import { Consumable } from '../Items/types';
-import { Enemy } from './types';
 
 // ─── Loot helpers ─────────────────────────────────────────────────────────────
 
@@ -60,7 +59,6 @@ export const FloatEye = createEnemy({
     id: 'enemy-float-eye',
     portraitAsset: 'float-eye',
     name: 'Float-Eye',
-    stanceHint: 'It only watches — whatever it does next, it has watched you do first.',
     description: 'An eye that outlived its head. It has watched so long it has developed opinions, and one of them is about you.',
     level: 1,
     baseStats: { body: 1, mind: 1, heart: 1 },
@@ -86,7 +84,6 @@ export const BrineHag = createEnemy({
     id: 'enemy-brine-hag',
     portraitAsset: 'brine-hag',
     name: 'Brine Hag',
-    stanceHint: 'She works on the feelings first — the bargain is already half-made in your chest.',
     description: 'She traded her reflection to the tide for the right to keep yours. The exchange rate has only worsened since.',
     level: 7,
     baseStats: enemyStatBudget(7, { heart: 4, body: 1, mind: 2 }),
@@ -96,7 +93,6 @@ export const BrineHag = createEnemy({
     loot: [none(80), drop('healing-potion', 20)],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.3 },
-        roundsThreshold: 4,
     },
     friendshipReward: {
         items: [
@@ -144,7 +140,6 @@ export const TheDoorwarden = createEnemy({
     id: 'enemy-the-doorwarden',
     portraitAsset: 'the-doorwarden',
     name: 'The Doorwarden',
-    stanceHint: 'He answers every motion with a jamb — where you would step, a threshold has already been installed.',
     description:
         'A hinge-priest of jointed bronze, kneeling in a chapel whose walls are doors. ' +
         'Every door that ever shut is remembered in him, and he holds them all shut at once. ' +
@@ -215,7 +210,7 @@ export const Sandbag_01 = createEnemy({
         'rarely strikes back, and refuses to die quickly.',
     level: 10,
     baseStats: { body: 1, mind: 30, heart: 29 },
-    mapName: 'northern-forest',
+    mapName: 'breakwater',
     difficulty: 'simple',
     logic: 'random',
 });
@@ -233,28 +228,14 @@ export const EnemyLibrary = [FloatEye, BrineHag, TheDoorwarden] as const;
 const ACT1_POOL = [FloatEye];
 
 /**
- * A parked map's pool (THE REVAMP R3a, D53): empty. No Act 1 door leads to
- * a parked map, so nothing draws from it in play.
- */
-const PARKED_POOL: readonly Enemy[] = [];
-
-/**
  * Per-map enemy pools used by the encounter generator. Act 1 draws Float-Eye;
- * the parked northern maps are empty. Fishing-village keeps Float-Eye until
- * R3b purges it; the Labyrinth (parked, D54) keeps it so its parked tests run.
+ * the Labyrinth (parked, D54) keeps it so its parked tests run.
  */
 export const EnemiesByMap = {
     'breakwater': ACT1_POOL,
     'charcoal-wood': ACT1_POOL,
     'beacon-crags': ACT1_POOL,
     'lantern-deep': ACT1_POOL,
-    // Parked (D53).
-    'northern-forest': PARKED_POOL,
-    'caverns': PARKED_POOL,
-    'northern-city': PARKED_POOL,
-    'connecting-river': PARKED_POOL,
-    'town-across-river': PARKED_POOL,
-    'the-capital': PARKED_POOL,
     // Parked (D54); unreachable since the vault door is sealed.
     'aporia-colonnade': ACT1_POOL,
     'aporia-archive': ACT1_POOL,

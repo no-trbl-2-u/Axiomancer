@@ -24,9 +24,9 @@ import {
  */
 function v23Save(extraFlags: string[] = []): Record<string, unknown> {
     const fresh = createNewGameState();
-    // A v23 save carried the whole Phase-19 kit (11 relics, 5 worn). Since
-    // 2026-09-23 a fresh run seeds nothing, so the pre-v24 shape is rebuilt
-    // here from a kit-seeded character rather than from the fresh state.
+    // A v23 save carried the starting kit, worn. Since 2026-09-23 a fresh run
+    // seeds nothing, so the pre-v24 shape is rebuilt here from a kit-seeded
+    // character (the ring alone since R7e2) rather than from the fresh state.
     const kitted = createCharacter({
         name: 'Player', level: 1, baseStats: { heart: 5, body: 5, mind: 5 }, seedStartingRelics: true,
     });
@@ -57,7 +57,7 @@ describe('migrate v23 → v24 — the first-node relic grant', () => {
         const migrated = migrate(raw, 23, 24);
         expect(JSON.parse(JSON.stringify(migrated.player))).toEqual(before);
         expect(migrated.player.inventory.map(i => i.id)).toContain(FIRST_NODE_RELIC_ID);
-        expect(migrated.player.inventory).toHaveLength(11);
+        expect(migrated.player.inventory).toHaveLength(1);
     });
 
     it('keeps every other flag', () => {

@@ -130,25 +130,22 @@ describe('Phase 31 — momentum (engine-native)', () => {
         expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
         expect(res.events.some(e => e.kind === 'card-played')).toBe(false);
         expect(res.state.momentumV2 ?? null).toBeNull();
-        expect(res.state.playerStance).toBe(s.playerStance);
     });
 
     it('spec 33 §3 rule 5 regression — a FREE-line play never mutates momentumV2', () => {
-        // `applyStanceAndMomentumV2` (the spec 33 momentum chain) is only
+        // `applyBoonAndMomentumV2` (the spec 33 momentum chain) is only
         // invoked on `useBottom` (PAID) plays — a FREE-line
         // rider is structurally momentum-safe already; this proves it rather
         // than just asserting it.
         let s = open();
         s = {
             ...s,
-            playerStance: 'heart',
             momentumV2: { color: 'heart', length: 2 },
             hand: [...s.hand, { uid: 'rider-free', cardId: 'qa-wheel-free-rider' }],
         };
         const res = playCombatCard(s, { uid: 'rider-free' }, false, undefined, rng);
         expect(res.events.some(e => e.kind === 'card-played')).toBe(true);
         expect(res.state.momentumV2).toEqual({ color: 'heart', length: 2 });
-        expect(res.state.playerStance).toBe('heart');
     });
 
     it('the momentum die never survives to the character save (getFloatingDiceColors excludes temporary floats)', () => {

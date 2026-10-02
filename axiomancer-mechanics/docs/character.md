@@ -48,10 +48,19 @@ wiring. Legacy v7 saves still fold their old `equippedSkills` rotation into
 
 ## Experience
 
+`experience` is a running total. Reaching level L+1 costs `L × EXPERIENCE_STEP`
+(250) more, so the total to be level L is `experienceForLevel(L)`
+(`Character/experience.ts`):
+
 ```
-experience            = (level - 1) × EXPERIENCE_PER_LEVEL (1000)
-experienceToNextLevel = level × EXPERIENCE_PER_LEVEL       (1000)
+experienceForLevel(L) = EXPERIENCE_STEP × (L − 1) × L ÷ 2   (L2 250, L3 750, L4 1,500, L5 2,500)
+experience            = experienceForLevel(level)       (a fresh character)
+experienceToNextLevel = experienceForLevel(level + 1)
 ```
+
+Fights are the only XP source in Act 1. A full clear pays 3,640 XP and ends
+at level 5, meeting each region's Doorwarden one level above it;
+`npm run act1-progression` prints the ledger and the door win rates.
 
 ## Stat allocation
 

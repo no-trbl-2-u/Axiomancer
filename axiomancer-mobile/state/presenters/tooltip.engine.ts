@@ -12,7 +12,6 @@
  *   user-jot tighten 2026-05-24). Body is a terse stat-effect
  *   line derived from `Effect.payload`; engine `description`
  *   is intentionally dropped per user request.
- * - `'stance-chip'` — static ADV / DIS dice rules (Phase 75).
  * - `'card'` — engine-sourced via `getCombatCardById(id)` (Phase 75).
  * - `'hazard-keyword'` — engine-sourced via `HAZARD_KEYWORDS[id]`
  *   (Phase 82). The hazard-deck screen's keyword tally chips key
@@ -35,7 +34,6 @@ export type TooltipKind =
     | 'affliction'
     | 'blessing'
     | 'effect'
-    | 'stance-chip'
     | 'card'
     | 'hazard-keyword'
     | 'slot'
@@ -51,7 +49,7 @@ export type TooltipKind =
  * user-jot 2026-05-24). Maps each base stat / stance to a palette
  * key the primitive resolves to a colour. `'neutral'` is the
  * default — used for content with no clear stat tie (Tick A
- * `kind: 'stat'`, `kind: 'stance-chip'`).
+ * `kind: 'stat'`).
  */
 export type TooltipAccent = 'heart' | 'body' | 'mind' | 'neutral';
 
@@ -66,33 +64,20 @@ export interface TooltipContent {
 const STAT_CONTENT: Record<string, TooltipContent> = {
     HEART: {
         title: 'HEART',
-        body: "the will to stay with what's difficult. governs willpower and the heart-stance damage curve.",
+        body: "the will to stay with what's difficult. governs willpower and the keywords that scale by heart.",
         accent: 'heart',
     },
     BODY: {
         title: 'BODY',
-        body: 'the weight you carry in the world. governs hp, physical attack, defense, and body-stance damage curves.',
+        body: 'the weight you carry in the world. governs hp, physical attack, defense, and the keywords that scale by body.',
         footnote: '+1 hp per body point',
         accent: 'body',
     },
     MIND: {
         title: 'MIND',
-        body: 'the discipline of attention. governs focus, card cost recovery, and mind-stance damage curves.',
+        body: 'the discipline of attention. governs focus, card cost recovery, and the keywords that scale by mind.',
         footnote: '+1 focus per mind point',
         accent: 'mind',
-    },
-};
-
-const STANCE_CHIP_CONTENT: Record<string, TooltipContent> = {
-    adv: {
-        title: 'ADVANTAGE',
-        body: 'roll twice this exchange, keep the higher value.',
-        footnote: 'your stance counters theirs',
-    },
-    dis: {
-        title: 'DISADVANTAGE',
-        body: 'roll twice, keep the lower value.',
-        footnote: 'your stance falls to theirs',
     },
 };
 
@@ -257,12 +242,7 @@ const SLOT_CONTENT: Record<string, TooltipContent> = {
 
 interface EffectPayloadLike {
     damageOverTime?: { damagePerRound: number; damageType: string };
-    regeneration?: { healthPerRound?: number };
-    actionRestriction?: { forcedStance?: string; blockedStances?: string[]; skipTurn?: boolean };
-    advantageModifier?: { grantAdvantage?: string[]; grantDisadvantage?: string[] };
-    rollModifier?: number;
-    defenseModifier?: number;
-    reflectDamage?: number;
+    actionRestriction?: { skipTurn?: boolean };
 }
 
 function sign(n: number): string {
@@ -284,8 +264,7 @@ export function accentForStat(stat: string): TooltipAccent {
 
 /**
  * Format `Effect.payload` as a short stat-effect line. Picks the
- * single most-informative summand (regeneration first, then DOT, then action restriction, then roll /
- * defense / reflect modifiers). Returns the engine `description`
+ * single most-informative summand (DOT first, then action restriction). Returns the engine `description`
  * fallback when no payload data is present — defensive only;
  * Tier-1+ engine effects all carry payload.
  */
@@ -294,34 +273,11 @@ export function formatEffectStatEffect(
     fallback: string,
 ): string {
     if (!payload) return fallback;
-    if (payload.regeneration?.healthPerRound !== undefined) {
-        return `${sign(payload.regeneration.healthPerRound)} hp / round`;
-    }
     if (payload.damageOverTime !== undefined) {
         return `${sign(-payload.damageOverTime.damagePerRound)} hp / round`;
     }
     if (payload.actionRestriction?.skipTurn) {
         return 'skip turn';
-    }
-    if (payload.actionRestriction?.forcedStance) {
-        return `forced ${payload.actionRestriction.forcedStance} stance`;
-    }
-    if (payload.advantageModifier?.grantAdvantage?.length) {
-        const list = payload.advantageModifier.grantAdvantage.join(' / ');
-        return `advantage on ${list}`;
-    }
-    if (payload.advantageModifier?.grantDisadvantage?.length) {
-        const list = payload.advantageModifier.grantDisadvantage.join(' / ');
-        return `disadvantage on ${list}`;
-    }
-    if (payload.rollModifier !== undefined && payload.rollModifier !== 0) {
-        return `${sign(payload.rollModifier)} to rolls`;
-    }
-    if (payload.defenseModifier !== undefined && payload.defenseModifier !== 0) {
-        return `${sign(payload.defenseModifier)} defense`;
-    }
-    if (payload.reflectDamage !== undefined && payload.reflectDamage !== 0) {
-        return `reflects ${payload.reflectDamage} damage`;
     }
     return fallback;
 }
@@ -362,9 +318,6 @@ export function selectTooltipContentFor(
 ): TooltipContent | null {
     if (kind === 'stat') {
         return STAT_CONTENT[id] ?? null;
-    }
-    if (kind === 'stance-chip') {
-        return STANCE_CHIP_CONTENT[id] ?? null;
     }
     if (kind === 'slot') {
         return SLOT_CONTENT[id] ?? null;
@@ -410,7 +363,7 @@ export function selectTooltipContentFor(
         return {
             title: card.name,
             body: card.description,
-            footnote: `stance ${card.stance.toUpperCase()}`,
+            footnote: `colour ${card.stance.toUpperCase()}`,
             accent: accentForStat(card.stance),
         };
     }

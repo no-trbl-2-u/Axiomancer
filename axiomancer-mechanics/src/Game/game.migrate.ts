@@ -28,9 +28,12 @@
  * fishing-village purged), v29 → v30 (2026-09-30, R5: the retired
  * consumables and their effects dropped), v30 → v31 (2026-09-30, R6a: the
  * hazard token and hex flags dropped), v31 → v32 (2026-09-30, R6b: hazard
- * deck cards outside the core ten dropped) and v32 → v33 (2026-09-30, R7c:
- * the write-only `regionConsequences` slice dropped). The hops chain, so a
- * v11 save lands at v33 in one `migrate` call. Every other version mismatch still rejects.
+ * deck cards outside the core ten dropped), v32 → v33 (2026-09-30, R7c:
+ * the write-only `regionConsequences` slice dropped), v33 → v34
+ * (2026-10-01, R7e: the parked world's maps, quests and flags dropped) and
+ * v34 → v35 (2026-10-01, R7e2: every relic but the Suppliant's Ring
+ * dropped), v35 → v36 (2026-10-01, R9: XP re-expressed on the rising
+ * level curve). The hops chain, so a v11 save lands at v36 in one `migrate` call. Every other version mismatch still rejects.
  */
 
 import { GameState } from './types';
@@ -38,8 +41,10 @@ import type { Character, EquipmentLoadout } from '../Character/types';
 import type { Equipment, Item } from '../Items/types';
 import { isEquipment } from '../Items/types';
 import { getEquippedItems, wornMaxHpBonus } from '../Character/equipment.reducer';
-import { cloneStartingRelics } from '../Items/relic.library';
+import { cloneStartingRelics, getRelicById } from '../Items/relic.library';
 import { calculateMaxHealth } from '../Utils';
+import { experienceForLevel } from '../Character/experience';
+import { EXPERIENCE_STEP } from './game-mechanics.constants';
 import { reslotLegacyLoadout, reslotLegacyEquipment, type LegacySlot } from './legacy-slots';
 import { concreteDefaultRail } from '../Character/dieGear.reducer';
 import { GAME_STATE_VERSION } from './game.reducer';
@@ -100,7 +105,7 @@ function migrateV12ToV13(raw: Record<string, unknown>): Record<string, unknown> 
         return { ...raw, version: 13 };
     }
 
-    const { worn, benched } = cloneStartingRelics();
+    const worn = cloneStartingRelics();
     const relicLoadout: EquipmentLoadout = {
         weapon: worn.find(w => w.slot === 'weapon') ?? null,
         armor: worn.find(w => w.slot === 'armor') ?? null,
@@ -117,7 +122,7 @@ function migrateV12ToV13(raw: Record<string, unknown>): Record<string, unknown> 
     const oldIds = new Set(oldInventory.map(i => i.id));
     const displaced: Equipment[] = player.equipment ? getEquippedItems(player.equipment) : [];
     const displacedMissing = displaced.filter(d => !oldIds.has(d.id));
-    const inventory: Item[] = [...worn, ...benched, ...oldInventory, ...displacedMissing];
+    const inventory: Item[] = [...worn, ...oldInventory, ...displacedMissing];
 
     const baseMaxHealth = calculateMaxHealth(player.level, player.baseStats);
     const nextMaxHealth = baseMaxHealth + wornMaxHpBonus(relicLoadout);
@@ -161,12 +166,14 @@ function migrateV13ToV14(raw: Record<string, unknown>): Record<string, unknown> 
 
     // Rebuild the loadout: keep worn relics, replace any non-relic worn piece
     // with the default relic for that slot, and backfill the accessory row to 3.
-    const { worn: defaults } = cloneStartingRelics();
+    // Since R7e2 the starting relics are the ring alone, so a slot with no
+    // default stays empty (the v35 hop drops the deleted relics anyway).
+    const defaults = cloneStartingRelics();
     const loadout = player.equipment;
     const weapon = loadout?.weapon && isRelic(loadout.weapon)
-        ? loadout.weapon : defaults.find(r => r.slot === 'weapon')!;
+        ? loadout.weapon : defaults.find(r => r.slot === 'weapon') ?? null;
     const armor = loadout?.armor && isRelic(loadout.armor)
-        ? loadout.armor : defaults.find(r => r.slot === 'armor')!;
+        ? loadout.armor : defaults.find(r => r.slot === 'armor') ?? null;
     const accessories: Equipment[] = (loadout?.accessories ?? []).filter(isRelic).slice(0, 3);
     for (const d of defaults.filter(r => r.slot === 'accessory')) {
         if (accessories.length >= 3) break;
@@ -383,33 +390,12 @@ function migrateV20ToV21(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
- * v21 → v22 (Phase 85): 3 new signet relics fill the `head`/`hands`/`feet`
- * accessory kinds left empty since Phase 19. Appends the 3 new relics
- * (benched, per `BENCHED_RELIC_IDS`-shape — new content never auto-equips
- * over an already-chosen loadout) to inventory, skipping any id the save
- * already carries (idempotent — a save re-migrated from a version that
- * already saw this hop keeps a single copy). The worn loadout, `derivedStats`,
- * and every other field pass through untouched: the new relics only affect
- * combat once the player chooses to equip one. Pure over a raw save payload.
+ * v21 → v22 (Phase 85) appended three new signet relics to inventory. R7e2
+ * deleted them (the v34 → v35 hop drops any a save still holds), so the hop
+ * only bumps the version.
  */
 function migrateV21ToV22(raw: Record<string, unknown>): Record<string, unknown> {
-    const player = raw.player as (Partial<Character> & { inventory?: Item[] }) | undefined;
-    if (!player || typeof player !== 'object') {
-        return { ...raw, version: 22 };
-    }
-
-    const { benched } = cloneStartingRelics();
-    const newRelics = benched.filter(r => r.id.startsWith('relic-')
-        && ['relic-mounting-dread', 'relic-endless-labor', 'relic-unbroken-stride'].includes(r.id));
-    const oldInventory: Item[] = Array.isArray(player.inventory) ? player.inventory.slice() : [];
-    const oldIds = new Set(oldInventory.map(i => i.id));
-    const missing = newRelics.filter(r => !oldIds.has(r.id));
-
-    return {
-        ...raw,
-        player: { ...player, inventory: [...oldInventory, ...missing] },
-        version: 22,
-    };
+    return { ...raw, version: 22 };
 }
 
 /**
@@ -796,6 +782,145 @@ function migrateV32ToV33(raw: Record<string, unknown>): Record<string, unknown> 
     return { ...rest, version: 33 };
 }
 
+/** The six parked maps R7e deletes (D72). */
+const R7E_DELETED_MAPS: ReadonlySet<string> = new Set([
+    'northern-forest', 'caverns', 'northern-city', 'connecting-river', 'town-across-river', 'the-capital',
+]);
+
+/** Their nine quests. */
+const R7E_DELETED_QUESTS: ReadonlySet<string> = new Set([
+    'gather-wood', 'get-to-cave', 'gather-iron', 'get-to-northern-city', 'get-to-connecting-river',
+    'find-islanders', 'join-islanders-for-ritual', 'get-to-town-across-river', 'get-to-the-capital',
+]);
+
+/** The story flags their dialogue trees set. */
+const R7E_DELETED_FLAGS: ReadonlySet<string> = new Set([
+    'boy-chased-the-rumor', 'boy-witnessed-the-crowning', 'boy-witnessed-the-river-ritual',
+    'sweetheart-was-nominated', 'shrine_keeper_recognizes_seeker',
+]);
+
+/** A flag keyed to a node of a deleted map (`nf-3`, `ncy-12`, …). */
+const R7E_NODE_FLAG = /(^|[^a-z])(nf|nc|ncy|cr|tar|cap)-\d+/;
+
+/**
+ * v33 → v34 (2026-10-01, THE REVAMP R7e, D72): the parked world's content is
+ * deleted. A save standing on a deleted map (only dev travel reaches one since
+ * v28) moves onto the Lantern Deep's sealed deep stair (`ld-18`) by the v28
+ * move, dropping a staged encounter; a Labyrinth save is left alone (D54). The
+ * deleted maps leave every continent's lists and `mapStates` (the v29 scrub),
+ * their quests leave the log and their story and node flags drop. Idempotent
+ * and pure over a raw save payload.
+ */
+function migrateV33ToV34(raw: Record<string, unknown>): Record<string, unknown> {
+    let out: Record<string, unknown> = { ...raw, version: 34 };
+    const world = raw.world as WorldState | undefined;
+    const current = world?.currentMap;
+    if (world && current && typeof current.name === 'string' && R7E_DELETED_MAPS.has(current.name)) {
+        // The v28 move. The save is not in the Labyrinth, so its Labyrinth
+        // slice is kept out of the move and passes through untouched.
+        const { labyrinth, ...rest } = raw;
+        out = { ...migrateV27ToV28(rest), version: 34 };
+        if (labyrinth !== undefined) out.labyrinth = labyrinth;
+    }
+    const moved = out.world as WorldState | undefined;
+    if (moved && typeof moved === 'object') {
+        const scrub = (c: Continent): Continent => ({
+            ...c,
+            availableMaps: (c.availableMaps ?? []).filter(m => !R7E_DELETED_MAPS.has(m)),
+            lockedMaps: (c.lockedMaps ?? []).filter(m => !R7E_DELETED_MAPS.has(m)),
+            completedMaps: (c.completedMaps ?? []).filter(m => !R7E_DELETED_MAPS.has(m)),
+        });
+        const next: WorldState = {
+            ...moved,
+            world: Array.isArray(moved.world) ? moved.world.map(scrub) : moved.world,
+            currentContinent: moved.currentContinent ? scrub(moved.currentContinent) : moved.currentContinent,
+        };
+        if (moved.mapStates && typeof moved.mapStates === 'object') {
+            const states = { ...moved.mapStates } as Record<string, MapState>;
+            for (const m of R7E_DELETED_MAPS) delete states[m];
+            next.mapStates = states as Partial<Record<MapName, MapState>>;
+        }
+        out.world = next;
+    }
+    const quests = raw.quests as QuestLog | undefined;
+    if (quests && typeof quests === 'object') {
+        out.quests = {
+            ...quests,
+            available: (quests.available ?? []).filter(q => !R7E_DELETED_QUESTS.has(q.name)),
+            active: (quests.active ?? []).filter(q => !R7E_DELETED_QUESTS.has(q.name)),
+            completed: (quests.completed ?? []).filter(n => !R7E_DELETED_QUESTS.has(n)),
+        };
+    }
+    if (Array.isArray(raw.flags)) {
+        out.flags = (raw.flags as unknown[]).filter(f =>
+            !(typeof f === 'string' && (R7E_DELETED_FLAGS.has(f) || R7E_NODE_FLAG.test(f))));
+    }
+    return out;
+}
+
+/**
+ * v34 → v35 (2026-10-01, THE REVAMP R7e2, D72): the relic library is the
+ * Suppliant's Ring alone. Every other `relic-` equipment leaves the inventory
+ * and every loadout slot; `maxHealth` is recomputed from the worn bonus that
+ * remains (the two deleted armor relics carried +5) and `health` clamped. The
+ * ring and every non-relic item pass through. Idempotent and pure over a raw
+ * save payload.
+ */
+function migrateV34ToV35(raw: Record<string, unknown>): Record<string, unknown> {
+    const player = raw.player as (Partial<Character> & {
+        equipment?: EquipmentLoadout;
+        inventory?: Item[];
+    }) | undefined;
+    if (!player || typeof player !== 'object') return { ...raw, version: 35 };
+
+    const deleted = (it: Item | null | undefined): boolean =>
+        !!it && isEquipment(it) && it.id.startsWith('relic-') && !getRelicById(it.id);
+    const inventory: Item[] = (Array.isArray(player.inventory) ? player.inventory : [])
+        .filter(it => !deleted(it));
+    const loadout = player.equipment;
+    if (!loadout) return { ...raw, player: { ...player, inventory }, version: 35 };
+    const equipment: EquipmentLoadout = {
+        weapon: deleted(loadout.weapon) ? null : loadout.weapon,
+        armor: deleted(loadout.armor) ? null : loadout.armor,
+        accessories: (loadout.accessories ?? []).filter(a => !deleted(a)),
+    };
+
+    const next: Record<string, unknown> = { ...player, inventory, equipment };
+    if (typeof player.maxHealth === 'number') {
+        const maxHealth = player.maxHealth - wornMaxHpBonus(loadout) + wornMaxHpBonus(equipment);
+        next.maxHealth = maxHealth;
+        if (typeof player.health === 'number') next.health = Math.max(0, Math.min(player.health, maxHealth));
+    }
+    return { ...raw, player: next, version: 35 };
+}
+
+/** The flat level cost every save before v36 was written against. */
+const V35_EXPERIENCE_PER_LEVEL = 1000;
+
+/**
+ * v35 → v36 (2026-10-01, THE REVAMP R9, D55): a level used to cost a flat
+ * 1,000 XP; it now costs `level × EXPERIENCE_STEP`. The hop keeps the
+ * player's `level` and their progress through it: progress below 0 (a
+ * malformed save) clamps to 0, and progress past 1 (a level-up the player
+ * has not taken yet) carries over so it stays pending. Pure over a raw v35
+ * save payload.
+ */
+function migrateV35ToV36(raw: Record<string, unknown>): Record<string, unknown> {
+    const player = raw.player as Partial<Character> | undefined;
+    if (!player || typeof player !== 'object' || typeof player.level !== 'number') {
+        return { ...raw, version: 36 };
+    }
+    const level = Math.max(1, Math.floor(player.level));
+    const oldExperience = typeof player.experience === 'number' ? player.experience : 0;
+    const progress = Math.max(0, (oldExperience - (level - 1) * V35_EXPERIENCE_PER_LEVEL) / V35_EXPERIENCE_PER_LEVEL);
+    const experience = Math.round(experienceForLevel(level) + progress * level * EXPERIENCE_STEP);
+    return {
+        ...raw,
+        player: { ...player, experience, experienceToNextLevel: experienceForLevel(level + 1) },
+        version: 36,
+    };
+}
+
 /**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
@@ -827,7 +952,7 @@ export function migrate(
     // Quest Board minigame; v18 → v19 retires the Gathering minigame; v19 →
     // v20 retires the loot-cache Pick Pool minigame and adds `mapGoodwill`;
     // v20 → v21 seeds the continent catalogue for inter-map travel; v21 → v22
-    // appends the Phase 85 head/hands/feet signet relics to inventory; v22 →
+    // is a version bump (its relics were deleted in R7e2); v22 →
     // v23 strips the curated-loadout seed flags; v23 → v24 stamps the
     // first-node relic grant settled; v24 → v25 strips the retired derived
     // stats and stat lines; v25 → v26 strips the alignment grid and GRACE;
@@ -836,8 +961,11 @@ export function migrate(
     // drops fishing-village, its quests and the goodwill tally; v29 → v30
     // drops the retired consumables and their effects; v30 → v31 drops the
     // hazard token and hex flags; v31 → v32 drops deleted hazard deck cards;
-    // v32 → v33 drops the write-only region-consequences slice.
-    // Chained so a v11 save lands at v33 in one call.
+    // v32 → v33 drops the write-only region-consequences slice; v33 → v34
+    // drops the parked world's maps, quests and flags; v34 → v35 drops every
+    // relic but the Suppliant's Ring; v35 → v36 re-expresses XP on the
+    // rising level curve.
+    // Chained so a v11 save lands at v36 in one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
@@ -925,6 +1053,18 @@ export function migrate(
     if (version === 32 && toVersion >= 33) {
         working = migrateV32ToV33(working);
         version = 33;
+    }
+    if (version === 33 && toVersion >= 34) {
+        working = migrateV33ToV34(working);
+        version = 34;
+    }
+    if (version === 34 && toVersion >= 35) {
+        working = migrateV34ToV35(working);
+        version = 35;
+    }
+    if (version === 35 && toVersion >= 36) {
+        working = migrateV35ToV36(working);
+        version = 36;
     }
 
     if (version !== toVersion) {

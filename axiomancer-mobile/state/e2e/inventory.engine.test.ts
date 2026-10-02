@@ -127,10 +127,10 @@ function makeStore(items: readonly Item[]) {
 
 describe('selectInventoryViewModel: signet relic granted signature (Phase 19)', () => {
     it('surfaces the granted signature name on a signet relic row', () => {
-        const relic = getRelicById('relic-overwhelming')!;
+        const relic = getRelicById('relic-disarming-plea')!;
         const vm = selectInventoryViewModel(makeStore([relic]).getState());
-        const row = vm.items.find((r) => r.id === 'relic-overwhelming');
-        expect(row?.grantsSignature).toBe('The Stilling');
+        const row = vm.items.find((r) => r.id === 'relic-disarming-plea');
+        expect(row?.grantsSignature).toBe('The Open Hand');
     });
 
     it('leaves non-relic equipment without a granted signature', () => {
@@ -140,13 +140,11 @@ describe('selectInventoryViewModel: signet relic granted signature (Phase 19)', 
     });
 
     it('threads the granted signature into the worn equipment dock', () => {
-        const relic = getRelicById('relic-overwhelming')!;
+        const relic = getRelicById('relic-disarming-plea')!;
         const vm = selectInventoryViewModel(makeStore([relic]).getState());
-        const weaponSlot = vm.equipmentDock.slots.find((s) => s.key === 'weapon');
-        // A lone worn weapon relic surfaces its signature in the dock slot.
-        if (weaponSlot?.item) {
-            expect(weaponSlot.item.grantsSignature).toBe('The Stilling');
-        }
+        const ringSlot = vm.equipmentDock.slots.find((s) => s.item?.id === 'relic-disarming-plea');
+        // A lone worn trinket relic surfaces its signature in the dock slot.
+        expect(ringSlot?.item?.grantsSignature).toBe('The Open Hand');
     });
 });
 
@@ -350,7 +348,7 @@ describe('selectInventoryViewModel: stacking', () => {
         actions.populateAllItems();
         // The dev item picker grants a fresh relic instance (its own instance
         // id), so it surfaces as a distinct row from the populated base.
-        const result = actions.addItemById('relic-overwhelming');
+        const result = actions.addItemById('relic-disarming-plea');
 
         expect(result.added).toBe(true);
         expect(result.name).not.toBeNull();

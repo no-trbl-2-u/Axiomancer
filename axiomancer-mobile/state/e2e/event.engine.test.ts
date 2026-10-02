@@ -10,7 +10,7 @@
  */
 
 import { afterEach, describe, it, expect, jest } from '@jest/globals';
-import { getMapDefinition } from '@mechanics';
+import { FIXTURE_NPC } from '@mechanics';
 import type { ResolveMapEventResult } from '@mechanics';
 
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
@@ -925,19 +925,16 @@ describe('selectEventViewModel: invariants', () => {
 // Before Phase 53b the presenter built its DialogueContext by hand and
 // silently dropped fields, so gated choices evaluated hidden forever. The
 // alignment gates it was fixed for are gone (D39) — every choice they hid is
-// now simply shown. These tests drive the real Hermit Sage tree
-// (`coastal-continent` / `northern-forest`); a synthetic tree would pass
-// while the shipped content stayed broken.
+// now simply shown. These tests drive the neutral fixture NPC's tree (R7e,
+// D72: no map stages an NPC any more).
 // ---------------------------------------------------------------------------
 
-function loadHermitSageTree() {
-    const northernForest = getMapDefinition('coastal-continent', 'northern-forest');
-    const npc = northernForest.npcs!.find((n) => n.name === 'Hermit Sage')!;
-    return npc.dialogueTree!;
+function loadFixtureTree() {
+    return FIXTURE_NPC.dialogueTree!;
 }
 
 function setDialogueCursor(store: AppStore, nodeId: string) {
-    const tree = loadHermitSageTree();
+    const tree = loadFixtureTree();
     store.setState({
         event: {
             ...EMPTY_EVENT_SLICE,
@@ -971,15 +968,15 @@ describe('selectEventViewModel: NPC dialogue without alignment gates (D39)', () 
         // raw indices so any hidden gate cannot knock them out of step.
         const store = makeStore();
         const actions = createAppActions(store);
-        setDialogueCursor(store, 'greet');
+        setDialogueCursor(store, 'start');
 
         const vm = selectEventViewModel(store.getState());
-        const askNeed = vm.choices.find((c) => c.description === 'Is there anything you need, out here alone?')!;
-        expect(askNeed.id).toBe('3');
+        const take = vm.choices.find((c) => c.description === 'Take the quest.')!;
+        expect(take.id).toBe('0');
 
-        actions.pickEventChoice(askNeed.id);
+        actions.pickEventChoice(take.id);
 
-        // The fourth greeting choice routes to the 'hermit_firewood' leaf node.
-        expect(store.getState().event.dialogueCursor?.nodeId).toBe('hermit_firewood');
+        // The first choice routes to the 'end' node.
+        expect(store.getState().event.dialogueCursor?.nodeId).toBe('end');
     });
 });

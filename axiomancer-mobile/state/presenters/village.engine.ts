@@ -20,8 +20,6 @@ import {
     getSignatureSkill,
     isConsumable,
     isEquipment,
-    lookupEffect,
-    type Effect,
     type Item,
     type ShopWare,
 } from '@mechanics';
@@ -103,21 +101,6 @@ export function resolveWareItem(ware: ShopWare): Item | null {
 // ---------------------------------------------------------------------------
 
 /**
- * The payload fields a shop ware's effect can carry.
- *
- * Structural, not nominal: the engine's `EffectPayload` is far wider than
- * anything a stall sells, and this presenter reads only the fields the
- * shipped shop consumables actually set. Cluster: S5-talk-C04.
- */
-interface WarePayload {
-    cleanse?: boolean;
-    regeneration?: { healthPerRound?: number };
-    defenseModifier?: number;
-    rollModifier?: number;
-    advantageModifier?: { grantAdvantage?: readonly string[] };
-}
-
-/**
  * Render a number with an explicit sign.
  *
  * @param n - a modifier value.
@@ -153,32 +136,6 @@ function modWords(mod: { stat: string; value: number }): string {
 }
 
 /**
- * One terse mechanical line for an effect a ware applies.
- *
- * @param effect - the engine effect the consumable references or inlines.
- * @returns e.g. `advantage on body / mind / heart, 3 rounds`, or `''` when
- *   the payload carries nothing this presenter knows how to state — a stall
- *   says nothing rather than saying a shape it cannot read. Cluster:
- *   S5-talk-C04.
- */
-function effectWords(effect: Effect): string {
-    const payload = (effect.payload ?? {}) as WarePayload;
-    const parts: string[] = [];
-    const regen = payload.regeneration?.healthPerRound ?? 0;
-    if (regen !== 0) parts.push(`${signed(regen)} VITAE / round`);
-    if (payload.defenseModifier) parts.push(`${signed(payload.defenseModifier)} defense`);
-    if (payload.rollModifier) parts.push(`${signed(payload.rollModifier)} to rolls`);
-    const advantage = payload.advantageModifier?.grantAdvantage ?? [];
-    if (advantage.length > 0) parts.push(`advantage on ${advantage.join(' / ')}`);
-    if (payload.cleanse) parts.push('clears afflictions');
-    if (parts.length === 0) return '';
-    const rounds = effect.duration > 0
-        ? `, ${effect.duration} ${effect.duration === 1 ? 'round' : 'rounds'}`
-        : '';
-    return `${parts.join(', ')}${rounds}`;
-}
-
-/**
  * What a ware DOES, in one line (S5-talk-C04).
  *
  * The stalls priced a name, a flavour line and a number — nothing on the row
@@ -188,7 +145,7 @@ function effectWords(effect: Effect): string {
  *
  * @param item - the library item a ware resolves to (`resolveWareItem`).
  * @returns a terse mechanical read — `restores 20 VITAE`,
- *   `+5 defense, 3 rounds`, `+2 body - grants The Stilling` — or `''` for an
+ *   `+5 defense, 3 rounds`, `+2 body - grants The Open Hand` — or `''` for an
  *   item with no statable payload (a material, or a consumable whose payload
  *   shape this presenter does not read).
  */
@@ -208,10 +165,6 @@ export function wareEffectLine(item: Item): string {
                     : `restores ${heal} VITAE`,
             );
         }
-        const effect = item.inlineEffect
-            ?? (item.effectId ? lookupEffect(item.effectId) : undefined);
-        const words = effect ? effectWords(effect) : '';
-        if (words) parts.push(words);
         return parts.join(' · ');
     }
     if (isEquipment(item)) {

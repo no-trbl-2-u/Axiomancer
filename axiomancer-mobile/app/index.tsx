@@ -14,8 +14,8 @@
  * the compiled state directly — a harness that asked for a fixture did not
  * ask for a menu.
  *
- * Phase 104 note still holds: no starter-bundle picker lives here. The
- * combat deck is seeded lazily at first combat (`ensureStarterCards`).
+ * No deck picker lives here: the grey office is seeded at first combat
+ * (`ensureStarterCards`).
  */
 
 import React, { useState } from 'react';

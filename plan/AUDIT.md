@@ -52,6 +52,42 @@
 
 ## Pending
 
+### [contract] Pre-purge saves keep purged card ids; combat throws on them (B4 F2, 2026-10-01)
+- category: contract
+- impact: 6
+- ease: 6
+- detail: no `game.migrate.ts` hop drops player card ids the P1 purge
+  deleted. A pre-purge save keeps them in `knownCards` /
+  `combatRewardCards`; `buildCombatDeck` (`combat.deck.ts:71`) deals them
+  and `executeCard` throws `not found in library` (`card.engine.ts:105`).
+  Traced by reading, not run. `plan/revamp/card-rules-inventory.md` §14.
+- next (`/iterate`): reproduce with a v26-era fixture save; add a hop that
+  filters both lists through `getCardById` (re-seed `STARTING_CARD_IDS` if
+  `knownCards` empties), with a migration test.
+
+### [contract] The pip pass caps VULNERABLE at 30, cutting a stack above it (B4 F3, 2026-10-01)
+- category: contract
+- impact: 5
+- ease: 7
+- detail: `combat.engine.ts:977` clamps the pip intensity bonus to
+  `MAX_EFFECT_INTENSITY = 30`. A Plain Word at heart >= 7 lands VULNERABLE
+  above 30 (uncapped, D41), so a pipped play would lower it to 30. Traced
+  by reading; no test covers pips on VULNERABLE. Inventory §7.
+- next (`/iterate`): write the failing test first, then skip the clamp for
+  uncapped effects (the FREE path already passes `uncapped: true`, `:762`).
+
+### [tests] The carrier rule (D45) has no enforcer; BLEED has no carrier (B4 F1, 2026-10-01)
+- category: tests
+- impact: 5
+- ease: 5
+- detail: nothing checks that an atlas row, gloss, silhouette or status
+  glyph has a live carrier. BLEED is registered in all four with none (the
+  "Bleeding" hazard never applies `debuff_bleed`). Dead rows also sit in
+  `KEYWORD_FAMILY`, `EFFECT_GLYPHS` and `FREE_KW_GLYPH`. Inventory §8, §9.
+- next (`/iterate`): add a carrier walk to `scripts/content-drift.mjs`
+  (cards, enemy decks, items, hazards, map events, dice, anvil), delete
+  the rows it fails (deletion only, D58), and keep it in root `npm test`.
+
 ### [infra] A reconciled merge commit reached main with no verify-* run, tripping the deploy gate fail-closed (2026-09-29)
 - category: infra
 - impact: 5

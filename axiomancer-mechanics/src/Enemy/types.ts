@@ -15,24 +15,10 @@ import type { EnemyKeyword, EnemyStage } from './enemy-keywords';
 export type { EnemyKeyword, EnemyStage };
 
 /**
- * Phase 68 — per-enemy override on the Phase 36 friendship-eligibility
- * predicate. ALL present predicates AND-compose; eligibility requires
- * every named predicate to pass simultaneously. When the field is
- * absent, the Phase 36 mechanic stays unchanged
- * (`friendshipCounter >= FRIENDSHIP_COUNTER_MAX` -> friendship).
- *
- * Authors leave predicates undefined when they don't apply (e.g. low-tier
- * enemies that only need the rounds threshold drop the other fields).
+ * Per-enemy befriend gate, read by The Open Hand (`befriendHpGateOpen`,
+ * `Enemy/befriend.ts`). Absent = the foe is always open to a befriend.
  */
 export interface BefriendabilityConfig {
-    /**
-     * Override for the both-defend round count required. Defaults to the
-     * global `FRIENDSHIP_COUNTER_MAX` (Phase 36) when absent. Setting this
-     * to a lower value makes the enemy easier to befriend on the counter
-     * axis; a higher value makes it harder. Negative or zero values are
-     * not validated; authors are responsible for sensible thresholds.
-     */
-    roundsThreshold?: number;
     /**
      * Friendship eligibility requires `enemy.health / enemy.maxHealth`
      * to be at or below `belowPct` at the eligibility check. Pure
@@ -40,33 +26,13 @@ export interface BefriendabilityConfig {
      * eligibility. Range [0, 1].
      */
     hpGate?: { belowPct: number };
-    /**
-     * Explicit "fall through to Phase 36 mechanic". When set, the engine
-     * treats this config as if the field were absent — useful for
-     * authoring clarity ("this enemy was explicitly considered and uses
-     * defaults"). Other fields on the same config are ignored when this
-     * is set.
-     */
-    defaultFallback?: 'both-defend-cap';
 }
 
 /**
- * Decision-making strategy used by an enemy each round (Spec 07). Retained as
- * data only: the legacy turn-based AI driver that branched on it was removed
- * (the Hazard-Pattern engine drives foes via authored threat sequences).
- *
- * - `random`     — picks any stance and any action uniformly.
- * - `aggressive` — attacks ~75% of the time; favours the stance that beats
- *                  the player's last stance (rock-paper-scissors counter).
- * - `defensive`  — defends until HP > 50% of max; then attacks the stance
- *                  the player has the *lowest* base stat in.
- * - `balanced`   — attacks while HP > 50%; defends below that threshold.
- * - `strategic`  — inspects the player's active effects and exploits
- *                  matching debuffs (e.g. a Body-stat debuff pulls Body
- *                  attacks). Falls back to `aggressive` heuristics
- *                  when no exploit is on the board.
- * - `boss`       — deterministic phase script keyed off `state.round`. Used
- *                  by `bossLogic` enemies for telegraphed signature patterns.
+ * Decision-making label an enemy carries (Spec 07). Data only: nothing reads
+ * it. The Hazard-Pattern engine drives every foe through its authored threat
+ * sequence, and the legacy turn-based AI that branched on this label (and on
+ * the player's stance) was removed with that driver.
  */
 export type EnemyLogic =
     | 'random' | 'aggressive' | 'defensive' | 'balanced' | 'strategic' | 'boss';
@@ -212,13 +178,7 @@ export interface Enemy {
      * mechanical (Phase 36 base only: half-XP + weighted-loot roll).
      */
     friendshipReward?: FriendshipReward;
-    /**
-     * Phase 68 — optional per-enemy override of the Phase 36
-     * friendship-eligibility predicate (`friendshipCounter >=
-     * FRIENDSHIP_COUNTER_MAX`). See {@link BefriendabilityConfig}.
-     * When undefined, the Phase 36 mechanic stays unchanged; when
-     * present, ALL named predicates AND-compose.
-     */
+    /** The befriend gate The Open Hand reads. See {@link BefriendabilityConfig}. */
     befriendabilityConfig?: BefriendabilityConfig;
     /**
      * Phase 71 — optional per-foe victory final-blow chronicle
@@ -264,13 +224,6 @@ export interface Enemy {
      * (e.g. `coastal-tyrant`).
      */
     portraitAsset?: string;
-    /**
-     * Spec 26b §2 — an enemy-level thematic tell that IMPLIES (never states) the
-     * enemy's stance tendency. Per-phase `CombatThreatPhase.stanceHint` overrides
-     * it; if neither is set a generic per-stance hint is used. Surfaced in the
-     * combat reveal so reading the foe's character pays off in the hidden read.
-     */
-    stanceHint?: string;
     /**
      * The foe's combat keywords. Empty since the revamp deleted all eleven
      * (D63); the optional slot stays so B2 can re-add them. See

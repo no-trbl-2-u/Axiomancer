@@ -11,11 +11,9 @@
 | Script | Target Tier | Description | Enemies Tested |
 |---|---|---|---|
 | [`late-game-coastal-tyrant.json`](./scenarios/late-game-coastal-tyrant.json) | Endgame | Late-game Sage preset against The Coastal Tyrant | `coastal-tyrant` |
-| [`mid-game-reference-probe.mjs`](./mid-game-reference-probe.mjs) | Midgame | Level-6 Wanderer against northern-forest elite-tier enemies | `hush-wraith`, `hollow-saint`, `frostbound-hunter` |
 
 ### When to Run Probes
 
-- **Mid-game probe**: Run when evaluating balance changes affecting levels 4-8, northern-forest content, or Tier 1-2 skill balance.
 - **Late-game probe**: Run when evaluating endgame balance, boss-tier content, or Tier 3 skill interactions.
 
 ### Running Probes
@@ -23,9 +21,6 @@
 ```bash
 # Run specific scenario
 npm run playtest -- --scenario=automation/playtest/scenarios/late-game-coastal-tyrant.json
-
-# Run mid-game reference probe (multiple scenarios)
-node automation/playtest/mid-game-reference-probe.mjs
 ```
 
 ## Signal Interpretation

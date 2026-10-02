@@ -17,7 +17,6 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
     _clearMapEventPoolRegistry,
     getShadowedNodeOverrideKeys,
-    getNodePrimaryEventKind,
 } from '../resolve-map-event';
 import { registerMapEventContent } from '../content';
 
@@ -34,14 +33,5 @@ describe('Phase 161 — map-event content has one source of truth', () => {
             `these node overrides were authored more than once and silently ` +
             `clobbered each other (last-write-wins): ${shadowed.join(', ')}`,
         ).toEqual([]);
-    });
-
-    it('northern-forest remains the live source for the kinds Act 1 does not author', () => {
-        // northern-forest is unshadowed and carries village/cutscene/interaction
-        // so the all-MapEventKind invariant still holds: no Act 1 map authors
-        // a village or an interaction.
-        expect(getNodePrimaryEventKind('coastal-continent', 'northern-forest', 'nf-8')).toBe('village');
-        expect(getNodePrimaryEventKind('coastal-continent', 'northern-forest', 'nf-1')).toBe('cutscene');
-        expect(getNodePrimaryEventKind('coastal-continent', 'northern-forest', 'nf-7')).toBe('interaction');
     });
 });

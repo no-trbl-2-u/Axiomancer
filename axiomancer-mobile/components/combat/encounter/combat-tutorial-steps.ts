@@ -92,8 +92,8 @@ export const COMBAT_TUTORIAL_STEPS: CombatTutorialStep[] = [
         title: 'ONE BAR, MANY BLADES',
         body:
             'Wear their VITAE down to nothing — it is the only bar. A strike takes it straight ' +
-            'off the top; a DoT bleeds them every turn; STAGGER strips their telegraphed action ' +
-            'rung by rung. Strikes, statuses, Conviction, MOMENTUM and your dice all compete on merit.',
+            'off the top. Strikes, statuses, Conviction ' +
+            'and your dice all compete on merit.',
         lookFor: 'the enemy VITAE bar',
         done: (s) => pressured(s) || advanced(s),
     },
@@ -102,7 +102,7 @@ export const COMBAT_TUTORIAL_STEPS: CombatTutorialStep[] = [
         title: 'PRESS THE ADVANTAGE',
         body:
             'Every usable die can power a card, so stage and apply as many as your roll allows. ' +
-            'Your STANCE is the colour of the last PAID card you played. When your cards are ' +
+            'A die that matches its card\'s colour adds a bonus. When your cards are ' +
             'applied, hit ⧗ END PHASE to resolve your pressure against the threat — four fresh ' +
             'dice arrive with the new turn.',
         lookFor: '⧗ END PHASE',

@@ -1,6 +1,6 @@
 /**
  * Hermetic unit tests for the honest card view-model helpers
- * (engineHonestKind / resolvePrimary / faceStats / detailStats / armedReadValue).
+ * (engineHonestKind / resolvePrimary / faceStats / detailStats / armedValue).
  *
  * Fixtures are live library cards, read live from the sibling engine so the
  * assertions stay true to real data. After the card purge (2026-09-27) the
@@ -21,20 +21,25 @@
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import {
-    getCard, getCardById, READ_DAMAGE_MULT, colorMatchBonus,
-    registerSandboxCards, clearSandboxCards,
+    getCard, getCardById, colorMatchBonus,
+    registerSandboxCards, clearSandboxCards, effectsLibrary,
 } from '@mechanics';
-import type { Card } from '@mechanics';
+import type { Card, Effect } from '@mechanics';
 import {
-    faceStats, detailStats, engineHonestKind, resolvePrimary, armedReadValue,
+    faceStats, detailStats, engineHonestKind, resolvePrimary, armedValue,
 } from '@/state/presenters/combat-encounter.engine';
-import { registerFixtureEffects } from '@mechanics/test-utils/fixture-effects';
 
 /**
- * The Profane Canon prints no round-clock DoT: POISON ticks per card played,
- * BLEED per hit taken, DOOM grows per enemy action. The "N over M turns" face
- * is still a live presenter branch, so a synthetic ember carrier exercises it.
+ * The Profane Canon prints no plain round-clock DoT: POISON ticks per card
+ * played, BLEED per hit taken, DOOM grows per enemy action. The "N over M
+ * turns" face is still a live presenter branch, so a test-local ember effect
+ * and card exercise it.
  */
+const FX_EMBER_EFFECT: Effect = {
+    id: 'fx_ember', name: 'Kindling Ember', description: 'Test effect: a round-clock DoT.',
+    type: 'debuff', category: 'damage', duration: 3, stacking: 'intensity', tier: 1,
+    payload: { damageOverTime: { damagePerRound: 1, damageType: 'mind' } },
+};
 const FX_EMBER: Card = {
     id: 'fx-ember',
     name: 'Ember (fixture)',
@@ -44,18 +49,18 @@ const FX_EMBER: Card = {
     targetType: 'enemy',
     paidSummary: 'Inflict KINDLING EMBER 1 for 3 turns.',
     free: { guard: 1 },
-    combatEffects: [{ effectId: 'fixture_ember', appliedTo: 'opponent', intensity: 1, duration: 3 }],
+    combatEffects: [{ effectId: 'fx_ember', appliedTo: 'opponent', intensity: 1, duration: 3 }],
     addedIn: '2026-08-08',
     tags: ['rot'],
 };
-// The keyword audit (2026-09-27) deleted debuff_kindling_ember, debuff_backfire
-// and buff_thorns from the effects library; the mechanics `fixture_*` effects
-// carry their payloads so the presenter branches stay under test.
 beforeAll(() => {
-    registerFixtureEffects();
+    effectsLibrary.registry.set(FX_EMBER_EFFECT.id, FX_EMBER_EFFECT);
     registerSandboxCards([FX_EMBER]);
 });
-afterAll(() => clearSandboxCards());
+afterAll(() => {
+    clearSandboxCards();
+    effectsLibrary.registry.delete(FX_EMBER_EFFECT.id);
+});
 
 const cardOf = (id: string) => {
     const card = getCard(id);
@@ -69,9 +74,7 @@ describe('engineHonestKind — the honesty gate', () => {
         expect(engineHonestKind('debuff_poison')).toBe('dot');
         expect(engineHonestKind('debuff_bleed')).toBe('dot');
         expect(engineHonestKind('debuff_mark')).toBe('mark');           // tickAmplifyFlat
-        expect(engineHonestKind('fixture_backfire')).toBe('backfire');  // backfirePerRung
         expect(engineHonestKind('debuff_quarter')).toBe('weaken');      // outgoingDamageMulPct < 0
-        expect(engineHonestKind('fixture_thorns')).toBe('thorns');      // reflectDamage
         expect(engineHonestKind(null)).toBeNull();
     });
 });
@@ -96,7 +99,7 @@ describe('faceStats — honest real-unit faces', () => {
         // phase 30: BARRIER merged into GUARD — the FREE line lays a
         // persistent brick, not a fading chip.
         expect(f.freeHeroText).toBe('Guard 2');
-        expect(f.readDependent).toBe(true);
+        expect(f.armable).toBe(true);
         expect(f.guardBase).toBe(5);
     });
     it('A Plain Blow (DEAL) → the printed number, no read — never a fabricated one', () => {
@@ -104,8 +107,8 @@ describe('faceStats — honest real-unit faces', () => {
         const f = faceStats(card, sourceCard);
         expect(f.heroText).toBe('Deal 5');
         expect(f.freeHeroText).toBe('Deal 2');
-        // DEAL takes no read: the printed line IS the applied effect.
-        expect(f.readDependent).toBe(false);
+        // DEAL arms nothing: the printed line IS the applied effect.
+        expect(f.armable).toBe(false);
         expect(f.inert).toBe(false);
     });
     it('A Plain Word (VULNERABLE +25% 2t) → a real percentage, real turns', () => {
@@ -115,7 +118,7 @@ describe('faceStats — honest real-unit faces', () => {
         expect(f.keyword).toBe('VULNERABLE');
         expect(f.heroText).toBe('+25%');
         expect(f.heroSub).toBe('dmg taken · 2 turns');
-        expect(f.readDependent).toBe(true);
+        expect(f.armable).toBe(true);
         expect(f.statusBase).toBe(25);
         expect(f.inert).toBe(false);
     });
@@ -182,19 +185,9 @@ describe('detailStats — same numbers as the face', () => {
 });
 
 describe('card-wording audit (2026-07-12) — the +DIE row carries only what the face cannot', () => {
-    it('a read-scaled Guard card keeps its triplet', () => {
-        const { card, sourceCard } = cardOf('grey-ward');
-        const d = detailStats(card, sourceCard);
-        expect(d.diePaidLine).toContain('GUARD 5');
-        expect(d.dieTriplet).toMatch(/^READ ▲\d+ · —5 · ▼\d+ — won · even · lost$/);
-        expect(d.readLegend).toContain("your die's stance");
-    });
-    it('a card that takes no read prints no triplet and no legend', () => {
-        const { card, sourceCard } = cardOf('grey-strike');
-        const d = detailStats(card, sourceCard);
-        expect(d.diePaidLine).toContain('DEAL 5');
-        expect(d.dieTriplet).toBeNull();
-        expect(d.readLegend).toBeNull();
+    it('the +DIE row prints the full paid line', () => {
+        expect(detailStats(cardOf('grey-ward').card, cardOf('grey-ward').sourceCard).diePaidLine).toContain('GUARD 5');
+        expect(detailStats(cardOf('grey-strike').card, cardOf('grey-strike').sourceCard).diePaidLine).toContain('DEAL 5');
     });
     it('INTENSITY and FREE never render as system terms (retired, owner 2026-07-18)', () => {
         // Both read plainly enough in context; their rows padded every inspect.
@@ -205,32 +198,26 @@ describe('card-wording audit (2026-07-12) — the +DIE row carries only what the
     });
 });
 
-describe('resolvePrimary + armedReadValue', () => {
+describe('resolvePrimary + armedValue', () => {
     it('resolvePrimary routes by verb-class + honesty (the v3 shapes)', () => {
         expect(resolvePrimary(getCard('grey-ward')!, getCardById('grey-ward')).kind).toBe('guard');
         expect(resolvePrimary(getCard('grey-word')!, getCardById('grey-word')).kind).toBe('vulnerable');
         expect(resolvePrimary(getCard('grey-strike')!, getCardById('grey-strike')).kind).toBe('mechanic');
     });
-    it('armedReadValue scales Guard by the DAMAGE read (+colour match)', () => {
+    it('armedValue prints Guard as printed (+colour match)', () => {
         const guard = faceStats(getCard('grey-ward')!, getCardById('grey-ward'));
         const base = guard.guardBase!;
         expect(base).toBe(5);
-        const adv = Math.max(1, Math.round(base * READ_DAMAGE_MULT.advantage));
-        const dis = Math.max(1, Math.round(base * READ_DAMAGE_MULT.disadvantage));
-        expect(armedReadValue(guard, 'neutral', false)).toBe(base);
-        expect(armedReadValue(guard, 'advantage', false)).toBe(adv);
-        expect(armedReadValue(guard, 'disadvantage', false)).toBe(dis);
+        expect(armedValue(guard, false)).toBe(base);
         // The presenter consumes the ENGINE's rule, not a restatement of it:
         // colorMatchBonus() = max(2, 25% of the base), which here (2) differs
         // from the old flat +3 — the printed-not-applied bug this catches.
-        expect(armedReadValue(guard, 'neutral', true)).toBe(base + colorMatchBonus(base));
+        expect(armedValue(guard, true)).toBe(base + colorMatchBonus(base));
         expect(colorMatchBonus(base)).not.toBe(3);
     });
-    it('armedReadValue reads a ROUND-CLOCK DoT as its ramp-aware lifetime (exact)', () => {
+    it('armedValue reads a ROUND-CLOCK DoT as its ramp-aware lifetime (exact)', () => {
         // Sketch of a Thought: kindling ember dpr 1, i1, 3 turns, no ramp → 3.
         const dot = faceStats(getCard('fx-ember')!, getCardById('fx-ember'));
-        expect(armedReadValue(dot, 'neutral', false)).toBe(3);          // 1+1+1
-        expect(armedReadValue(dot, 'advantage', false)).toBe(6);        // +1 intensity: 2+2+2
-        expect(armedReadValue(dot, 'disadvantage', false)).toBe(2);     // −1 turn: 1+1
+        expect(armedValue(dot, false)).toBe(3);          // 1+1+1
     });
 });

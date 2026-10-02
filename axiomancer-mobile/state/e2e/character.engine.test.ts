@@ -28,7 +28,7 @@ afterEach(() => {
 
 /** The effects library carries no buffs since R7c deleted `buff_absolved`, so
  *  the buff mapping runs on a test-local buff registered into the live
- *  registry (the mechanics `fixture-effects` pattern; jest isolates files). */
+ *  registry (jest isolates files). */
 const TEST_BUFF: Effect = {
     id: 'fixture_test_buff', name: 'Test Buff', description: 'Test fixture: no payload.',
     type: 'buff', category: 'stat', duration: 3, stacking: 'none', tier: 1, payload: {},

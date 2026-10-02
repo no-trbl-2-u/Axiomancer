@@ -47,7 +47,6 @@ export const CONTENT_SURFACES = [
   'axiomancer-mechanics/src/World/Hazard/hazard.content.ts',
   'axiomancer-mechanics/src/World/RestChoice/restchoice.content.ts',
   'axiomancer-mechanics/src/World/Blacksmith/blacksmith.content.ts',
-  'axiomancer-mechanics/src/World/Continents/Northern-Forest/npcs.ts',
   'axiomancer-mechanics/src/World/quest.library.ts',
   'axiomancer-mechanics/src/Enemy/enemy.library.ts',
   'axiomancer-mechanics/src/Cards/cards.library.ts',
@@ -99,7 +98,7 @@ export const VOICE_RULES = [
  */
 export const PROSE_FIELDS = new Set([
   'description', 'scene', 'narration', 'text', 'remark', 'flavor', 'intro',
-  'body', 'quiet', 'heavy', 'stanceHint', 'journalEntry', 'blurb', 'summary',
+  'body', 'quiet', 'heavy', 'journalEntry', 'blurb', 'summary',
   'prompt', 'lines', 'line', 'refusal', 'riddle', 'title', 'subtitle',
 ])
 

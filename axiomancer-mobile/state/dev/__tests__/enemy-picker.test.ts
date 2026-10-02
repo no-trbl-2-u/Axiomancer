@@ -19,7 +19,7 @@ import { createAppStore } from '@/state/store';
 describe('enemy-picker dev helpers', () => {
     it('lists every roster map including the labyrinth acts', () => {
         expect(listEnemyMaps()).toEqual([...Object.keys(EnemiesByMap), 'library']);
-        expect(listEnemyMaps()).toEqual(expect.arrayContaining(['aporia-proof', 'northern-city']));
+        expect(listEnemyMaps()).toEqual(expect.arrayContaining(['aporia-proof', 'lantern-deep']));
     });
 
     it('sorts by level and flags bosses', () => {

@@ -229,7 +229,7 @@ would actually boot (`docs/state-fixtures.md` at the monorepo root).
 import { createFixtureStore, arriveFromFixture } from '@/test-utils/fixtureStore';
 
 // A committed registry fixture …
-const { store, actions } = createFixtureStore('wanderer-nf-village');
+const { store, actions } = createFixtureStore('wanderer-staged-village');
 
 // … or an inline one (give it a seed — determinism is the point).
 const h = createFixtureStore({

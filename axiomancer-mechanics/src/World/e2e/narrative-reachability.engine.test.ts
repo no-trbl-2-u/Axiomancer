@@ -11,16 +11,14 @@
  *
  * R3c pinned it to Act 1 (D53): the four Act 1 maps are the playable world,
  * they carry no NPC roster, and nothing on them starts a quest or sets a
- * story flag. The parked maps (northern-forest and the northern continent)
- * stay registered and audited, code kept.
+ * story flag. R7e (D72) deleted the parked maps that carried the rosters.
  */
 
 import { describe, expect, it } from 'vitest';
 
 import { MAP_REGISTRY } from '../map.registry';
 import { auditNarrativeReachability } from '../narrative-reachability';
-import { getNodeEventPool, getNodePrimaryEventKind } from '../MapEvents/resolve-map-event';
-import { northernForest } from '../Continents/Coastal-Village/maps';
+import { getNodeEventPool } from '../MapEvents/resolve-map-event';
 import type { MapDefinition } from '../types';
 // Import for side effect — registers the authored pools when the test loads.
 import '../MapEvents/content';
@@ -84,61 +82,4 @@ describe('narrative reachability — registry-wide invariant', () => {
             });
         });
     }
-});
-
-describe('northern-forest (parked, D53) — Phase 53a mismatch repairs', () => {
-    it('nf-7 resolves to Hermit Sage with a dialogue tree attached', () => {
-        const pool = getNodeEventPool('coastal-continent', 'northern-forest', 'nf-7');
-        const entry = pool?.entries.find(e => e.payload.kind === 'interaction');
-        expect(entry).toBeDefined();
-        expect(entry?.payload.kind === 'interaction' && entry.payload.npcName).toBe('Hermit Sage');
-
-        const npc = northernForest.npcs?.find(n => n.name === 'Hermit Sage');
-        expect(npc?.dialogueTree, 'Hermit Sage must carry the dialogue tree, not just resolve the name').toBeDefined();
-    });
-
-    it('nf-23 resolves as cutscene, not interaction — scenery, not people', () => {
-        // nf-14 was the same class of scenery-cutscene until adjust-npcs pass
-        // 1 (2026-09-05) restaged it as the Lost Trader's interaction node
-        // (see the dedicated nf-14 test below); nf-23 is untouched.
-        expect(getNodePrimaryEventKind('coastal-continent', 'northern-forest', 'nf-23')).toBe('cutscene');
-    });
-
-    it('reaches all 6 of 6 NPCs (adjust-npcs pass 1, 2026-09-05) — Forest Ranger and Lost Trader are now homed', () => {
-        const npcNames = new Set((northernForest.npcs ?? []).map(n => n.name));
-        const reached = new Set<string>();
-        for (const node of northernForest.nodes) {
-            const pool = getNodeEventPool('coastal-continent', 'northern-forest', node.id);
-            for (const entry of pool?.entries ?? []) {
-                if (entry.payload.kind === 'interaction' && npcNames.has(entry.payload.npcName)) {
-                    reached.add(entry.payload.npcName);
-                }
-            }
-        }
-        expect([...reached].sort()).toEqual(
-            ['Forest Ranger', 'Hermit Sage', 'Lost Trader', 'Shrine Keeper', 'The Chronicler', 'The Wandering Philosopher'].sort(),
-        );
-
-        expect(northernForest.unstagedNpcs ?? []).toEqual([]);
-    });
-
-    it('the Forest Ranger is reachable at nf-21, so get-to-cave (Phase 8) can actually be started', () => {
-        const pool = getNodeEventPool('coastal-continent', 'northern-forest', 'nf-21');
-        const entry = pool?.entries.find(e => e.payload.kind === 'interaction');
-        expect(entry).toBeDefined();
-        expect(entry?.payload.kind === 'interaction' && entry.payload.npcName).toBe('Forest Ranger');
-
-        const npc = northernForest.npcs?.find(n => n.name === 'Forest Ranger');
-        expect(npc?.dialogueTree?.nodes['greet'].choices?.some(c => c.effect?.startQuest === 'get-to-cave')).toBe(true);
-    });
-
-    it('the Lost Trader is reachable at nf-14', () => {
-        const pool = getNodeEventPool('coastal-continent', 'northern-forest', 'nf-14');
-        const entry = pool?.entries.find(e => e.payload.kind === 'interaction');
-        expect(entry).toBeDefined();
-        expect(entry?.payload.kind === 'interaction' && entry.payload.npcName).toBe('Lost Trader');
-
-        const npc = northernForest.npcs?.find(n => n.name === 'Lost Trader');
-        expect(npc?.dialogueTree, 'Lost Trader must carry the dialogue tree, not just resolve the name').toBeDefined();
-    });
 });

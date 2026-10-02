@@ -11,7 +11,10 @@
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
-import { createCharacter, getConsumableById, getRelicById, SLOT_CAPACITY } from '@mechanics';
+import {
+    createCharacter, getConsumableById, getRelicById, FIRST_NODE_RELIC_ID, FIXTURE_ARMOR, FIXTURE_TRINKETS,
+    FIXTURE_WEAPON, SLOT_CAPACITY,
+} from '@mechanics';
 import type { Character, Equipment, GameState, Item } from '@mechanics';
 
 import ItemRewardScreen from '@/app/item-reward/index';
@@ -34,8 +37,11 @@ function relic(id: string): Equipment {
     return found;
 }
 
-/** A relic the seeded character is guaranteed NOT to be wearing. */
-const BENCHED_ACCESSORY = 'relic-mounting-dread';
+/** A relic the seeded character is guaranteed NOT to be wearing: the ring. */
+const BENCHED_ACCESSORY = FIRST_NODE_RELIC_ID;
+
+/** A second armor piece; its +max VITAE line earns it the screen under D5. */
+const SPARE_ARMOR: Equipment = { ...FIXTURE_ARMOR, id: 'fixture-armor-2' };
 
 function player(store: AppStore): Character {
     return (store.getState() as unknown as GameState).player;
@@ -44,11 +50,13 @@ function player(store: AppStore): Character {
 function mount(offer?: (store: AppStore) => void) {
     const { tree, store } = withAllProviders(<ItemRewardScreen />);
     // A fresh run wears NOTHING since 2026-09-23 (THE VERY START), so the
-    // D6 "trade" cases seed the Phase-19 kit explicitly: a full accessory
+    // D6 "trade" cases seed the fixture relics explicitly: a full accessory
     // row is what makes EQUIP a swap rather than a free fill.
+    const kit = [FIXTURE_WEAPON, FIXTURE_ARMOR, ...FIXTURE_TRINKETS];
     store.setState({
         player: createCharacter({
-            name: 'Kitted', level: 1, baseStats: { heart: 5, body: 5, mind: 5 }, seedStartingRelics: true,
+            name: 'Kitted', level: 1, baseStats: { heart: 5, body: 5, mind: 5 },
+            inventory: [...kit], equipment: [...kit],
         }),
     });
     if (offer) offer(store);
@@ -60,10 +68,10 @@ describe('/item-reward screen', () => {
     it('presents the item, its signature skill, and the trade EQUIP would make', () => {
         mount((store) => offerItemRewardAction(store, relic(BENCHED_ACCESSORY)));
 
-        expect(screen.getByTestId('item-reward-name').props.children).toBe("Cassandra's Circlet");
+        expect(screen.getByTestId('item-reward-name').props.children).toBe("Suppliant's Ring");
         expect(screen.getByTestId('item-reward-signature')).toBeTruthy();
-        // The circlet grants ONLY its signature since TRIM THE FAT T2a (only the
-        // two armor relics keep a stat line), so no stats block renders.
+        // The ring grants ONLY its signature (owner call 2026-09-23), so no
+        // stats block renders.
         expect(screen.queryByTestId('item-reward-stats')).toBeNull();
         // D6 — the displaced piece is named before the player commits.
         expect(screen.getByTestId('item-reward-trade-note').props.children)
@@ -129,7 +137,7 @@ describe('/item-reward screen', () => {
 
     it('dismissing mid-batch keeps every queued item', () => {
         const { store, view } = mount((s) =>
-            offerItemRewardAction(s, [relic(BENCHED_ACCESSORY), relic('relic-endless-labor')]),
+            offerItemRewardAction(s, [relic(BENCHED_ACCESSORY), SPARE_ARMOR]),
         );
 
         act(() => {
@@ -138,7 +146,7 @@ describe('/item-reward screen', () => {
 
         const ids = player(store).inventory.map((i) => i.id);
         expect(ids).toContain(BENCHED_ACCESSORY);
-        expect(ids).toContain('relic-endless-labor');
+        expect(ids).toContain(SPARE_ARMOR.id);
     });
 
     it('unwinds the route once the queue is empty', () => {

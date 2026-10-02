@@ -17,28 +17,29 @@ import {
     openNpcDialogue,
     questStatus,
     startQuestByName,
+    type NpcChoice,
+    type QuestChoice,
 } from '@/state/dev/story-catalog';
+import { FIXTURE_NPC, FIXTURE_QUEST } from '@mechanics';
 import { selectHasActiveEvent } from '@/state/presenters/event.engine';
 import { createAppStore } from '@/state/store';
 
-describe('story-catalog dev helpers', () => {
-    it('lists staged NPC trees with unique keys across maps', () => {
-        const npcs = listNpcs();
-        expect(npcs.length).toBeGreaterThan(0);
-        expect(new Set(npcs.map((n) => n.key)).size).toBe(npcs.length);
-        expect(npcs.some((n) => n.map === 'northern-forest')).toBe(true);
-        for (const n of npcs) expect(n.tree.nodes[n.tree.rootId]).toBeDefined();
-    });
+const FIXTURE_NPC_CHOICE: NpcChoice = {
+    key: `breakwater/${FIXTURE_NPC.name}`, name: FIXTURE_NPC.name, map: 'breakwater', tree: FIXTURE_NPC.dialogueTree!,
+};
+const FIXTURE_QUEST_CHOICE: QuestChoice = { key: FIXTURE_QUEST.name, map: 'breakwater', quest: FIXTURE_QUEST };
 
-    it('lists the authored quest line starting with gather-wood', () => {
-        const quests = listQuests();
-        expect(quests[0]?.key).toBe('gather-wood');
-        expect(quests.map((q) => q.key)).toEqual(expect.arrayContaining(['gather-wood', 'get-to-cave']));
+describe('story-catalog dev helpers', () => {
+    // R7e (D72): no map stages an NPC or carries a quest, so both lists are
+    // empty and the helpers below run on the neutral fixtures.
+    it('lists no staged NPC and no authored quest', () => {
+        expect(listNpcs()).toEqual([]);
+        expect(listQuests()).toEqual([]);
     });
 
     it('openNpcDialogue seeds an interaction with a cursor at the root', () => {
         const store = createAppStore();
-        const npc = listNpcs()[0];
+        const npc = FIXTURE_NPC_CHOICE;
         openNpcDialogue(store, npc);
         const slice = store.getState().event;
         expect(selectHasActiveEvent(store.getState())).toBe(true);
@@ -48,7 +49,7 @@ describe('story-catalog dev helpers', () => {
 
     it('start → advance → complete walks a real quest through the log', () => {
         const store = createAppStore();
-        const quest = listQuests()[0];
+        const quest = FIXTURE_QUEST_CHOICE;
         expect(advanceQuest(store, quest)).toBe(false);
         startQuestByName(store, quest);
         expect(questStatus(store.getState(), quest.key)).toBe('active');

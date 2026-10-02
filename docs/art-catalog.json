@@ -3,10 +3,10 @@
   "_meta": {
     "generated": "2026-09-19",
     "purpose": "Input for authoring a new story outline. Each entry pairs what is literally depicted with the narrative hooks it offers, so a story pass can be written against the art the game already has rather than against art it would need commissioned.",
-    "scope": "The sixteen world plates only. Excluded: enemy/character portraits (the engine already carries authored `description` and `causeLines` prose per enemy in axiomancer-mechanics/src/Enemy/enemy.library.ts — read that directly rather than duplicating it here), card faces, treasure icons, UI motifs, and app icons.",
-    "plateCount": 16,
+    "scope": "The eleven world plates only. Excluded: enemy/character portraits (the engine already carries authored `description` and `causeLines` prose per enemy in axiomancer-mechanics/src/Enemy/enemy.library.ts — read that directly rather than duplicating it here), card faces, treasure icons, UI motifs, and app icons.",
+    "plateCount": 11,
     "surfaceCounts": {
-      "combat-arena": 7,
+      "combat-arena": 2,
       "map-backdrop": 9
     },
     "house_register": "The Woodcut Codex (axiomancer-mobile/docs/VISUAL_LANGUAGE.md): FromSoftware x Inscryption x illuminated manuscript. Twelve plates are 19th-century wood engravings by Gustave Doré, graded toward the void (grayscale, brightness 0.62 / contrast 1.08). Ten are from London: A Pilgrimage (1872); two — the Caverns and the Capital arenas — are Dante plates, a deliberate break recorded in plan/archive/2026-09-28-revamp-r0/plan/phases/phase_103_the_last_two_arenas.md. The pixel-art outlier this catalogue previously flagged was retired in phase 103; the `coherenceFlag`s that remain record legible 1872 text on `ludgate-hill` and `arena-desolation`. The four `act1-*` map plates (2026-09-25, D21) are the exception: machine-generated Doré-style engravings (ChatGPT, run by the owner), tinted to one parchment ramp instead of graded toward the void, because they are the map itself rather than atmosphere under it.",
@@ -88,153 +88,6 @@
         "Everyone in the frame is looking at the same off-frame thing. Whatever the parish is watching, it arrives by water.",
         "A congregation that is also a workforce: the people who owe the parish their labour are the same people who fill its services.",
         "The masts read as a drowned forest. A place that thinks of its boats as trees, or its trees as wrecks."
-      ]
-    },
-    {
-      "id": "arena-northern-city",
-      "file": "axiomancer-mobile/assets/images/combat/arena-northern-city.webp",
-      "surface": "combat-arena",
-      "boundTo": [
-        "The Northern City"
-      ],
-      "artist": "Gustave Dore",
-      "work": "London: A Pilgrimage (1872) — \"Over London by Rail\"",
-      "licence": "Public domain",
-      "description": "Seen through a dark brick arch: rank upon rank of tenement backyards, each walled, each with its own chimney stack and washing line, receding toward a railway viaduct where a train crosses trailing smoke. Tiny figures stand in the yards. Brick fills almost every surface.",
-      "composition": "The arch puts near-black at both edges and across the top; a lit corridor runs up the centre to the viaduct.",
-      "mood": "Grim by ordinary congestion rather than by monsters. Nobody is being tortured; everybody is simply penned.",
-      "tags": [
-        "city",
-        "slum",
-        "overcast",
-        "industry",
-        "poverty",
-        "surveillance",
-        "scale"
-      ],
-      "storySeeds": [
-        "Every yard is identical and every yard is walled. A city that administers its people in units.",
-        "The viaduct passes over the tenements without stopping. Something crosses this district daily and has no business in it — a tax cart, a procession, an inspection.",
-        "You are looking through an arch. Somebody built the vantage point you are standing in, which means somebody meant this to be looked at."
-      ]
-    },
-    {
-      "id": "arena-connecting-river",
-      "file": "axiomancer-mobile/assets/images/combat/arena-connecting-river.webp",
-      "surface": "combat-arena",
-      "boundTo": [
-        "The Connecting River"
-      ],
-      "artist": "Gustave Dore",
-      "work": "London: A Pilgrimage (1872) — a dockside night scene",
-      "licence": "Public domain",
-      "description": "Night, or a very low sun. A crowd presses at the lit doorway of a low dockside shed, arms raised. A forest of ships' masts stands behind, black against a grey sky with a single pale sun or moon. A man strides across the open cobbles with a dog at his heel. A body lies face-down in the roadway, unattended. At right, a figure is slumped in a handcart while others stand by.",
-      "composition": "Dark mass at both lower corners; the lit doorway sits left-of-centre and the pale sky band runs behind the masts.",
-      "mood": "A queue that has turned into a scrum. Something is being handed out, or handed over, and there is not enough of it.",
-      "tags": [
-        "dock",
-        "river",
-        "night",
-        "crowd",
-        "corpse",
-        "destitute",
-        "toll",
-        "passage"
-      ],
-      "storySeeds": [
-        "A body lies in the open and the crowd at the door has not turned around. Whatever is being given out at that doorway is worth more than a death.",
-        "This is a crossing you ARRIVE at, not one you watch. The ferry, the queue and the toll are all in the same frame.",
-        "The man with the dog is the only figure moving with purpose. He is leaving while everyone else is pressing in."
-      ]
-    },
-    {
-      "id": "arena-sweethearts-village",
-      "file": "axiomancer-mobile/assets/images/combat/arena-sweethearts-village.webp",
-      "surface": "combat-arena",
-      "boundTo": [
-        "The Sweetheart's Village"
-      ],
-      "artist": "Gustave Dore",
-      "work": "London: A Pilgrimage (1872) — \"Dudley Street, Seven Dials\"",
-      "licence": "Public domain",
-      "description": "A slum lane crowded almost entirely with children — toddlers held by older children, a girl dragging a toy on a string, infants sitting on the kerb. A goat stands at the left among a knot of women. Rows and rows of second-hand boots are laid out on the pavement and in the gutter, tended by seated dealers. Women lean from upper windows. A cart and a lamppost stand further up the street; chimney stacks recede into haze.",
-      "composition": "Terraces close the frame at both sides; the roadway opens a lit channel up the middle.",
-      "mood": "Domestic and dense. Poor, but alive and entirely unbothered by being looked at.",
-      "tags": [
-        "slum",
-        "street",
-        "overcast",
-        "children",
-        "crowd",
-        "poverty",
-        "debt"
-      ],
-      "storySeeds": [
-        "The village's whole visible economy is SECOND-HAND BOOTS. Everything here belonged to somebody else first — including, perhaps, the debts.",
-        "This is the only plate in the set where children outnumber adults. A settlement raising the next generation of somebody's obligation.",
-        "Someone is watching from an upper window in almost every frame of this street. Being seen is the village's default state."
-      ]
-    },
-    {
-      "id": "arena-caverns",
-      "file": "axiomancer-mobile/assets/images/combat/arena-caverns.webp",
-      "surface": "combat-arena",
-      "boundTo": [
-        "The Caverns (combat arena, region rule /cavern/i)"
-      ],
-      "artist": "Gustave Doré",
-      "work": "\"Abandon all hope ye who enter here\" — Dante's Inferno, Canto III, plate 8 (1861)",
-      "licence": "Public domain (read from Commons imageinfo extmetadata at acquisition)",
-      "description": "A vast gateway cut into a sheer rock face, its opening far taller than the two small figures standing at its threshold. Beyond and behind them a lit horizon band runs across the frame; the rock mass fills the upper two thirds in near-black.",
-      "composition": "The gate's dark mouth occupies the centre-left; the two figures are tiny at its base, giving the scale. The lit horizon runs behind them at roughly the vertical third, which is where a foe composites.",
-      "mood": "The moment before going in, not the inside. Threshold dread — the last place you can still turn around.",
-      "tags": [
-        "underground",
-        "threshold",
-        "ruin",
-        "overcast",
-        "solitary-figure",
-        "passage",
-        "scale",
-        "judgement"
-      ],
-      "coherenceFlag": null,
-      "notes": "A DANTE plate, not a London one — the first deliberate break from the single-source rule phase 101 set, because Doré drew no documentary-London underworld. Same artist, same decade, same technique, same grade. Deliberately NOT a cave interior: the region BEGINS underground, so its arena wants the moment of entry. Distinct from the maps registry's Titans plate, which the player crossed to get here.",
-      "storySeeds": [
-        "A gate somebody CUT. The opening is worked, not natural — so it was made, by whom, and for what to pass through it.",
-        "The pair at the threshold. Two figures, one gesture: someone is being brought here, or led. A guide is a role the story does not yet have filled.",
-        "The light is BEHIND them. Everything ahead is the dark mass. A descent where the last of the day is at your back is a one-way reading of a journey that might not be."
-      ]
-    },
-    {
-      "id": "arena-the-capital",
-      "file": "axiomancer-mobile/assets/images/combat/arena-the-capital.webp",
-      "surface": "combat-arena",
-      "boundTo": [
-        "The Capital (combat arena, region rule /the capital/i)"
-      ],
-      "artist": "Gustave Doré",
-      "work": "The Empyrean Rose — Dante's Paradiso, Canto XXXI (1868)",
-      "licence": "Public domain (read from Commons imageinfo extmetadata at acquisition)",
-      "description": "Two small figures stand on a rock in the lower frame before an immense spiralling host of winged forms, ranked in receding tiers and circling a blinding point of light at the centre. The host fills almost the whole plate; the figures are a fraction of its height.",
-      "composition": "A vortex. Everything converges on the light at centre-frame, and the two supplicants at the base of the frame are the only thing at human scale — which is exactly the player's position in this region.",
-      "mood": "Overwhelming order. Not hostile and not welcoming: vast, ranked, and wholly indifferent to whoever is standing at the bottom of it.",
-      "tags": [
-        "interior",
-        "threshold",
-        "shaft-of-light",
-        "crowd",
-        "congregation",
-        "judgement",
-        "scale",
-        "surveillance"
-      ],
-      "coherenceFlag": null,
-      "notes": "The second Dante plate (see arena-caverns for why the single-source rule is broken here). Chosen because the Capital is where the advisor-selection payoff lands, so its arena should be the one place that DWARFS the player. The nearest thing in the set to an interior — a ranked hall rather than a street — which partly answers the NO INTERIOR gap.",
-      "storySeeds": [
-        "An audience you cannot address. The host is arranged to be looked AT, in tiers, around something too bright to look at directly. A petition to a power with no face.",
-        "Two arrivals, not one. Whoever is standing there was accompanied. The story has room for the person who brought them and does not go further.",
-        "Rank as architecture. The crowd is not a crowd, it is an ORDER — which means there is a place in it, and someone decides yours."
       ]
     },
     {

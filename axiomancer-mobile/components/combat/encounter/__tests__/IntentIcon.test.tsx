@@ -19,9 +19,8 @@ const baseIntent: CombatIntentVM = {
     type: 'damage', icon: '⚔', label: 'ATTACKS', color: '#e2543b',
     description: 'A telegraphed strike.', damage: 10, debuffs: false, branch: null, next: null,
     wallMath: {
-        projectedDamage: 10, netDamage: 10, willDeny: false, guard: 0, barrier: 0, rungsTotal: 2, rungsLost: 0,
+        projectedDamage: 10, netDamage: 10, willDeny: false, guard: 0, barrier: 0,
     },
-    stanceCheck: null,
 };
 
 describe('IntentIcon — wall-math readout', () => {
@@ -42,7 +41,7 @@ describe('IntentIcon — wall-math readout', () => {
         const intent: CombatIntentVM = {
             ...baseIntent,
             wallMath: {
-                projectedDamage: 0, netDamage: 0, willDeny: true, guard: 0, barrier: 0, rungsTotal: 2, rungsLost: 2,
+                projectedDamage: 0, netDamage: 0, willDeny: true, guard: 0, barrier: 0,
             },
         };
         const { tree } = withAllProviders(<IntentIcon intent={intent} />);
@@ -50,67 +49,6 @@ describe('IntentIcon — wall-math readout', () => {
         expect(screen.getByTestId('combat-intent-wallmath').props.children).toBe('DENIED');
         const node = screen.getByTestId('combat-intent');
         expect(node.props.accessibilityLabel).toMatch(/DENIED — no damage lands/);
-    });
-});
-
-describe('IntentIcon — variable-rung telegraph (phase 33b)', () => {
-    it('renders one pip per rung, all filled when none are stripped', () => {
-        const { tree } = withAllProviders(<IntentIcon intent={baseIntent} />);
-        render(tree);
-        expect(screen.getAllByText('●')).toHaveLength(2);
-        expect(screen.queryAllByText('○')).toHaveLength(0);
-    });
-
-    it('renders hollow pips for stripped rungs and filled pips for the remainder', () => {
-        const intent: CombatIntentVM = {
-            ...baseIntent,
-            wallMath: { ...baseIntent.wallMath, rungsTotal: 3, rungsLost: 1 },
-        };
-        const { tree } = withAllProviders(<IntentIcon intent={intent} />);
-        render(tree);
-        expect(screen.getAllByText('●')).toHaveLength(2);
-        expect(screen.getAllByText('○')).toHaveLength(1);
-    });
-
-    it('states the rung magnitude in the a11y label', () => {
-        const intent: CombatIntentVM = {
-            ...baseIntent,
-            wallMath: { ...baseIntent.wallMath, rungsTotal: 4, rungsLost: 1 },
-        };
-        const { tree } = withAllProviders(<IntentIcon intent={intent} />);
-        render(tree);
-        const node = screen.getByTestId('combat-intent');
-        expect(node.props.accessibilityLabel).toMatch(/Carries 4 STAGGER rungs, 3 remaining\./);
-    });
-});
-
-/**
- * FE-014 — the stance-check telegraph is drawn over the enemy art. At 375 the
- * sprite reaches under it, and coloured 10pt mono on painted art lost its
- * edges. It now sits on a near-opaque plate, the same solution the intent
- * pill above it already uses.
- */
-describe('FE-014: telegraph sits on a plate, not bare on the art', () => {
-    it('gives the stance-check block an opaque ground', () => {
-        const intent: CombatIntentVM = {
-            ...baseIntent,
-            stanceCheck: {
-                punishes: 'heart',
-                yields: 'body',
-                punishesText: 'Punishes HEART ×1.5',
-                yieldsText: 'Yields to BODY ×0.5 +1◆',
-                live: 'none',
-                resolution: null,
-            },
-        };
-        const { tree } = withAllProviders(<IntentIcon intent={intent} />);
-        render(tree);
-        const block = screen.getByTestId('combat-intent-stance-check');
-        const style = Array.isArray(block.props.style)
-            ? Object.assign({}, ...block.props.style.flat(Infinity).filter(Boolean))
-            : block.props.style;
-        expect(String(style.backgroundColor)).toMatch(/rgba\(0,\s*0,\s*0,/);
-        expect(Number(style.paddingHorizontal)).toBeGreaterThan(0);
     });
 });
 

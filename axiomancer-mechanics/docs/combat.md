@@ -19,7 +19,6 @@ and [§Scale](#scale--the-numbers-the-big-numbers-rewrite-2026-09-02) for the li
 The shared combat mechanics live in:
 
 - `Combat/index.ts` — module barrel + small mechanics helpers (health, effect queries).
-- `Combat/combat.reducer.ts` — `initializeCombat`, the `CombatState` constructor shared by the card / effects / equipment engines, plus `incrementFriendship`.
 - `Combat/combat.engine.ts` — the Hazard-Pattern Combat driver (see §Hazard-Pattern Combat below).
 
 The sections that follow document the shared mechanics (stances, the read,
@@ -86,12 +85,10 @@ See `docs/effects.md` for the full per-tier breakdown and stacking rules.
 
 ## Friendship Path
 
-Both combatants defending on the same round increments `friendshipCounter`.
-Reaching `FRIENDSHIP_COUNTER_MAX` (3) ends combat with the `friendship`
-outcome — UNLESS the enemy carries a per-enemy `befriendabilityConfig`
-override (Phase 68), in which case ALL of its named predicates must pass
-simultaneously before friendship triggers. See § "Per-enemy predicate
-(Phase 68 — `BefriendabilityConfig`)" below for the override semantics.
+The Open Hand (the Suppliant's Ring signature) befriends a foe whose
+`befriendabilityConfig.hpGate` is open; that opens the mercy choice, and
+sparing ends combat with the `friendship` outcome (D47). See § "Per-enemy
+befriend gate" below.
 
 When the Game store's `endCombat()` resolves a friendship exit (Phase 36),
 the returned `CombatEndReport` carries:
@@ -160,51 +157,15 @@ Phase 36 base only (the report's `friendshipReward` field is
 `undefined`). See `docs/enemy.md` § "Befriendable enemies (Phase 60)"
 for authoring guidance.
 
-### Per-enemy predicate (Phase 68 — `BefriendabilityConfig`)
+### Per-enemy befriend gate (`BefriendabilityConfig`)
 
-`Enemy.befriendabilityConfig?: BefriendabilityConfig` overrides the
-Phase 36 friendship-eligibility predicate per enemy. When absent, the
-Phase 36 mechanic stays unchanged. When present, ALL of its named
-fields AND-compose; eligibility requires every named predicate to pass
-simultaneously. Within a single list-valued predicate, the match is
-existential (at least one element).
-
-| Field | Semantics |
-|---|---|
-| `roundsThreshold?: number` | Per-enemy override of `FRIENDSHIP_COUNTER_MAX`. Defaults to the global value (3) when absent on a config that sets other fields. |
-| `hpGate?: { belowPct: number }` | Enemy HP fraction must be ≤ `belowPct` at the eligibility check. Pure snapshot — healing back above the threshold un-qualifies. Range [0, 1]. |
-| `requiredStances?: Stance[]` | Player must have used at least one of the named stances during combat (existential). Derived from `state.log[].playerAction.stance`. Empty array = no requirement. |
-| `requiredCardUse?: string[]` | Player must have cast at least one of the named card IDs during combat (existential). Derived from `state.log[].playerAction` entries with `action === 'card'`. Empty array = no requirement. |
-| `defaultFallback?: 'both-defend-cap'` | Explicit "fall through to Phase 36". When set, other fields are ignored for THIS enemy; eligibility uses the global counter cap exactly. |
-
-The engine helper that evaluates the predicate lives in
-`src/Combat/index.ts` (the private `befriendabilityPredicatesPass`,
-consumed by `isBefriendAttemptEligible`). The legacy combat-end
-predicates that also consumed it (`determineCombatEnd` /
-`isCombatOngoing` / `isFriendshipEligible`) were removed with the
-legacy turn-based driver.
-
-The counter still increments freely on both-defend rounds (Phase 36
-unchanged); friendship triggers only when ALL config predicates pass
-together. A player can "bank" defends past `roundsThreshold` and have
-friendship trigger later (e.g. once `hpGate` clears via damage progress).
-
-Coastal Tyrant is the first boss-tier authored config (Phase 68):
-
-```typescript
-// CoastalTyrant (boss)
-befriendabilityConfig: {
-    hpGate: { belowPct: 0.4 },
-    requiredStances: ['heart'],
-    roundsThreshold: 3, // Phase 101 — reduced from 5 for mercy policy viability
-},
-```
-
-The fallen magistrate-priest opens his friendship arc only after he's
-been brought low (HP ≤ 40%), the player has shown empathy at least
-once (heart stance), and 3 both-defend rounds have passed. The
-authored `friendshipReward` content (multi-paragraph narrative + items)
-is deferred to the boss-tier befriendable-enemy follow-up phase.
+`Enemy.befriendabilityConfig?: BefriendabilityConfig` carries one field,
+`hpGate?: { belowPct: number }`: the foe's VITAE fraction must be at or below
+`belowPct` for The Open Hand to land (`befriendHpGateOpen`,
+`Enemy/befriend.ts`). A pure snapshot — healing back above it shuts the gate
+again. Absent = always open. The Brine Hag carries `{ belowPct: 0.3 }`. The
+friendship counter, `roundsThreshold` and `defaultFallback` went in revamp
+phase R7c2: no live path incremented or read the counter.
 
 ### Friendship Resolution Authority (Phase 112)
 
@@ -260,8 +221,6 @@ with the legacy driver.)
 
 | Function | Alias(es) | Description |
 |----------|-----------|-------------|
-| `initializeCombat(player, enemy)` | — | Creates fresh CombatState with deep-cloned combatants — the `CombatState` constructor shared by the card / effects / equipment engines |
-| `incrementFriendship(state)` | — | Increments the friendship counter |
 
 ## Combat Mechanics API
 
@@ -271,12 +230,6 @@ with the legacy driver.)
 | `heal(entity, amount)` (alias `healCharacter`) | Restores HP (clamps to max) |
 | `resolveEffectApplication(target, effect, type, heart, equip)` | Effect application (Tier 2 buff fumble/crit; Tier 2 debuff + Tier 3 always land) |
 | `tickAllEffects(target)` | Decrements all effect durations |
-| `getStudyMarkIntensity(target)` | Mind mark bonus for damage |
-| `getThornsReflect(bearer)` | Thorns reflect damage total |
-| `removeRandomBuff(target)` | Strips one random buff |
-| `extendRandomBuffDuration(target, amount)` | Extends one random buff |
-| `applyRegen(target)` | Sums and applies all regen effects |
-| `getActiveRollModifier(target)` | Sums all `rollModifier` + `rollModifierPerIntensity × intensity` across active effects — flat roll-mod total consumed by the combat engine |
 | `canAct(effects, requestedStance?)` | Action-restriction gate — returns `{ canAct, resolvedStance, reason }` reflecting forced/blocked-stance and skipTurn constraints |
 | `isAlive(combatant)` | True if `health > 0` |
 | `isDefeated(combatant)` | True if `health <= 0` — the main win condition for Hazard-Pattern Combat |
@@ -331,7 +284,7 @@ card library files themselves, not duplicated here):
   does not restore them. `calculateSkillDamage` is kept only for call-site
   compatibility (sim policies / projections still call it) and unconditionally
   returns `0`. DoT ticks, affliction-payoff bursts (RUPTURE / REAP),
-  engine-gated drips (BACKFIRE, persistent-card hooks) and reflect (THORNS /
+  engine-gated drips (persistent-card hooks) and reflect (THORNS /
   RIPOSTE) are all still live VITAE sources; they now compete with `DEAL`
   rather than substituting for it. The prior no-strike accounting in
   [`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/32-no-strike-card-library.md` (archived)](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/32-no-strike-card-library.md)
@@ -499,7 +452,6 @@ progression levers.
 | `getThreatSequence(enemy)` | Returns the threat phase sequence for an enemy: explicit `enemy.threatSequence` wins; otherwise an authored sequence keyed by enemy id; otherwise the generated default. |
 | `generateDefaultThreatSequence(enemy)` | Generates a 3-phase fallback threat sequence from the enemy's dominant stance, rotating through Heart / Body / Mind. Used automatically by `getThreatSequence` when no authored sequence exists. |
 | `rerollSpentDice(state, rng?)` / `hasRerollableDice(state)` / `dieIsRerollable(die)` | The `reroll_spent` card mechanic's partial re-roll: re-rolls only spent/exhausted + dead `x`-face dice from the legacy face bag, leaving usable dice in play. |
-| `THREAT_WEAKEN_PER_ROLL` / `THREAT_DENY_AT` / `THREAT_WEAKEN_FLOOR` | Soft-control and stat-debuff threat tunables (0.33.0). Each point of enemy roll penalty (from confusion, fear, blind, slow, accuracy/attack-down etc.) reduces the incoming hit by `THREAT_WEAKEN_PER_ROLL` (default 0.06). When the cumulative roll penalty reaches `THREAT_DENY_AT` (default 8), the turn is fully denied (same as hard control). `THREAT_WEAKEN_FLOOR` (default 0.4) clamps the minimum damage multiplier for a weakened-but-not-denied enemy. Read these to display soft-control thresholds in the UI. |
 | `CombatIntentType`, `CombatReadResult`, `SignatureSkill`, `SignatureSkillId`, `SignatureSkillKind`, `PlayerArchetype` | The depth-layer type family. |
 
 ### Phase 169 — Curated Combat Loadout
@@ -614,7 +566,6 @@ EXECUTE, VULNERABLE, SIPHON) and by mobile for hit-preview rendering.
 |---------------------|-------------|
 | `getDamageTakenMultiplier(target)` | Incoming-damage multiplier for a combatant, given active Vulnerable or similar effects. |
 | `getPendingDotTotal(target)` | Sums pending DoT damage across all active DoT effects — the raw value used by AMPLIFY burst. |
-| `consumeDotEffects(target)` | Removes all active DoT effects and returns the total damage consumed. Used by RUPTURE to convert stacked DoT into a single burst. |
 | `getDistinctDebuffCount(target)` | Counts the number of distinct active debuff effect types on the target. Drives COMPOUND damage scaling (capped at `COMPOUND_COUNT_CAP`). |
 | `getDistinctControlCount(target)` | Counts the number of distinct active control effects. Drives DISRUPT — when ≥ `DISRUPT_DENY_AT` the target's next action is denied. |
 | `RUPTURE_CAP_FRACTION` / `ruptureBurstCap(maxHp)` | RUPTURE burst cap: `round(fraction × enemy max VITAE)`. **The cap is repealed** (2026-09-02) — payoffs are uncapped by design; the constant is `Number.POSITIVE_INFINITY` in `src/Combat/effects.ts`, matching doctrine. |

@@ -96,8 +96,8 @@ them.
 ## Canon and precedence
 
 - Use **VITAE**, never a generic substitute, on player-facing combat surfaces.
-- Use **STANCE** and **CHOOSE A STANCE**, never a defensive synonym that changes
-  the concept.
+- Say **colour** for a card's or die's heart / body / mind identity, never
+  "stance" (the stance layer was removed, D65).
 - Status effects remain the center of combat explanation and texture.
 - If atmosphere competes with target, cost, duration, timing, route, or result,
   cut atmosphere.

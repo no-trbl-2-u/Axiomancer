@@ -131,26 +131,6 @@ describe('Phase 52b — the shelter classification of every authored rest pool',
         }
     });
 
-    it('pins the three wilderness nodes that the 1.0 heuristic wrongly called inns', () => {
-        const census = censusOfAuthoredRestPools();
-        // nf-4 (cold spring) and nf-24 (hidden grove) were authored at
-        // healFraction 1.0 and therefore mended hazard scars for free.
-        expect(
-            census['coastal-continent:northern-forest:nf-4'],
-            'nf-4 cold spring is wilderness, not a paid shelter',
-        ).toEqual(['camp']);
-        expect(
-            census['coastal-continent:northern-forest:nf-24'],
-            'nf-24 hidden grove is wilderness, not a paid shelter',
-        ).toEqual(['camp']);
-        // nf-11 (mossy clearing) was at 0.75 — already not inn-grade, but it
-        // is pinned here so the whole northern-forest rest set is covered.
-        expect(
-            census['coastal-continent:northern-forest:nf-11'],
-            'nf-11 mossy clearing is a camp',
-        ).toEqual(['camp']);
-    });
-
     it('pins both labyrinth rest entries as camps', () => {
         const census = censusOfAuthoredRestPools();
         // The act default pool ("a corner the house forgot to make
@@ -163,16 +143,9 @@ describe('Phase 52b — the shelter classification of every authored rest pool',
         expect(new Set(labyrinthShelters)).toEqual(new Set<RestShelter>(['camp']));
     });
 
-    it('the ONLY inns in the game are inside settlements: the Breakwater, the northern city, town-across-river, and the capital', () => {
-        // Phase W3 — the northern city was the second SETTLEMENT with
-        // tended, paid beds (after the fishing village, purged in R3b): its
-        // three rests are inns by the same 52b law that made every
-        // wilderness rest a camp. Phase W4 — town-across-river is the third: a proper town,
-        // one inn (The Miller's Rest). Phase W5 — the-capital is the
-        // fourth: one inn (The Waiting Room). Everything else — including
-        // connecting-river, wild again after the city — still only camps.
-        // Map revamp M3a — the Breakwater is a walled harbour town: its
-        // customs house and harbour inn are inns.
+    it('the ONLY inns in the game are the Breakwater\'s: a walled harbour town', () => {
+        // Map revamp M3a — the customs house and harbour inn are inns; every
+        // other Act 1 rest is a camp (R7e deleted the parked settlements).
         const census = censusOfAuthoredRestPools();
         const innKeys = Object.entries(census)
             .filter(([, shelters]) => shelters.includes('inn'))
@@ -181,12 +154,7 @@ describe('Phase 52b — the shelter classification of every authored rest pool',
         expect(innKeys).toEqual([
             'coastal-continent:breakwater:bw-13',
             'coastal-continent:breakwater:bw-9',
-            'northern-continent:northern-city:ncy-16',
-            'northern-continent:northern-city:ncy-4',
-            'northern-continent:northern-city:ncy-9',
-            'northern-continent:the-capital:cap-4',
-            'northern-continent:town-across-river:tar-3',
-        ].sort());
+        ]);
     });
 });
 

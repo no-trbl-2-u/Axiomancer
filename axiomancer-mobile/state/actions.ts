@@ -18,8 +18,6 @@ import {
     sellItem as engineSellItem,
     defaultSellPrice as engineDefaultSellPrice,
     buildCharacterFromPreset,
-    getAvailableCards,
-    learnCard as engineLearnCard,
     changeMap as worldChangeMap,
     completeNode as worldCompleteNode,
     consumableLibrary,
@@ -39,6 +37,7 @@ import {
     isEquipment,
     markNodeConsumed,
     resolveMapEvent,
+    settleArrival,
     revealAdjacent,
     STARTING_CARD_IDS,
     unlockNode as worldUnlockNode,
@@ -55,21 +54,12 @@ import {
     type MapName,
     type MapState,
     type ResolveMapEventResult,
-    type Card,
     type WorldState,
 } from '@mechanics';
 
 
-import {
-    COMBAT_CARDS,
-    getCombatCardById,
-    cardEffectText,
-} from '@/state/selectors/combat-cards';
+import { COMBAT_CARDS } from '@/state/selectors/combat-cards';
 import { resolveWareItem } from '@/state/presenters/village.engine';
-import {
-    chosenStarterBundle,
-    BUNDLE_CHOSEN_FLAG,
-} from './combat/store-actions';
 import { EMPTY_EVENT_SLICE, EMPTY_LABYRINTH_SLICE, type AppStore } from './store';
 import {
     abandonHazardAction,
@@ -126,7 +116,7 @@ import {
     type BeginBlacksmithOptions,
     type ClaimBlacksmithResult,
 } from './blacksmith/store-actions';
-import type { CacheLootTier, DieGearColor } from '@mechanics';
+import type { DieGearColor, MapEventPayload } from '@mechanics';
 import { isTutorialDone } from './tutorials';
 import {
     applyPlayerTierPresetAction,
@@ -372,9 +362,13 @@ export interface AppActions {
      * slice so the event modal can apply category-specific visual
      * treatment even when the engine resolves to a generic kind.
      *
+     * `staged` resolves that payload in place of the node's pool: a state
+     * fixture's `stagedEvent` (R7e), how `<FixtureBoot>` reaches dialogue, a
+     * shop or a cutscene on an Act 1 node.
+     *
      * Returns `true` when an event was produced (kind !== 'none').
      */
-    resolveCurrentMapEvent: (sourceNodeType?: string) => boolean;
+    resolveCurrentMapEvent: (sourceNodeType?: string, staged?: MapEventPayload) => boolean;
     /**
      * Resolve the currently-pending event by id. Branches on VM kind:
      *  - combat-prelude + 'fight'  -> startCombat(encounter.enemies[0]); clear
@@ -549,20 +543,6 @@ export interface AppActions {
      * Returns success.
      */
     sellVillageItem: (index: number) => boolean;
-
-    // -----------------------------------------------------------------
-    // Card-learning pass.
-    // -----------------------------------------------------------------
-
-    /**
-     * Rolls up to `count` (default 3) level-up card offers from
-     * everything the player currently qualifies for (engine
-     * `getAvailableCards`, ungated). Empty = nothing new to
-     * learn; the caller skips the modal.
-     */
-    getLearnableCardOffers: (count?: number) => LearnableCardOffer[];
-    /** Learns a card through the engine (requirement-checked). */
-    learnCard: (cardId: string) => boolean;
 }
 
 export interface UseItemResult {
@@ -575,97 +555,19 @@ export interface UseItemResult {
 }
 
 // ---------------------------------------------------------------------------
-// Card learning (level-up picks)
+// Starter deck
 // ---------------------------------------------------------------------------
 
 /**
- * Phase 104 (the grey office) — the new player's starting combat repertoire.
- * `STARTING_CARD_IDS` is the engine's 10-card grey recipe (`grey-strike` ×5,
- * `grey-ward` ×3, `grey-word` ×2 since S3): colourless shapes, any die powers each, so fight one
- * teaches STRIKE, WARD, FREE-vs-PAID, and the die-spend loop with zero colour
- * arithmetic. `buildCombatDeck` deals `knownCards` verbatim (copies are real,
- * not deduplicated), so `ensureStarterCards` writes the recipe directly
- * rather than `engineLearnCard`-ing a Set — a learn-requirement gate has no
- * business touching cards the world hands every player on day one.
- *
- * Seeds the starter deck when the player knows nothing yet — the chosen
- * starter bundle if one was picked (the dev deck-swap menu only, post-104 —
- * the fresh-run flow never offers a picker), else the grey office.
+ * Seeds the grey office when the player knows no card yet. `STARTING_CARD_IDS`
+ * is the engine's grey recipe (`grey-strike` ×5, `grey-ward` ×3, `grey-word`
+ * ×2). `buildCombatDeck` deals `knownCards` verbatim (copies are real), so the
+ * recipe is written directly rather than learned card by card.
  */
 function ensureStarterCards(store: AppStore): void {
     const player = store.getState().player;
     if (!player || (player.knownCards?.length ?? 0) > 0) return;
-    // Deck-identity path: a bundle was chosen pre-run (dev tool only). Direct-
-    // set its curated deck (the cards are valid engine ids; learn-requirements
-    // don't gate the combat deal — knownCards IS the deck source).
-    const bundle = chosenStarterBundle(store);
-    if (bundle) {
-        store.setState({ player: { ...player, knownCards: [...bundle.cardIds], combatRewardCards: [] } });
-        return;
-    }
-    const state = store.getState() as unknown as GameState;
-    const flags = new Set(state.flags ?? []);
-    flags.add(BUNDLE_CHOSEN_FLAG);
-    store.setState({
-        player: { ...player, knownCards: [...STARTING_CARD_IDS], combatRewardCards: [] },
-        flags: [...flags],
-    } as never);
-}
-
-/** One learnable-card offer row for the level-up learn modal. */
-export interface LearnableCardOffer {
-    id: string;
-    name: string;
-    description: string;
-    stance: 'body' | 'mind' | 'heart' | 'any';
-    tier: number;
-    /** Compact effect line — same format as the combat picker rows. */
-    effectText: string;
-}
-
-function toLearnableOffer(store: AppStore, card: Card): LearnableCardOffer {
-    const combatCard = getCombatCardById(card.id);
-    // Spec 32 v3 — THE STRIKE IS DEAD: cards deal no immediate damage, so the
-    // offer row carries only the status/effect line (never a fabricated number).
-    const damage = 0;
-    return {
-        id: card.id,
-        name: card.name.toUpperCase(),
-        description: card.description,
-        stance: card.color,
-        tier: card.tier,
-        effectText: combatCard
-            ? cardEffectText(combatCard, damage)
-            : 'NO DIRECT EFFECT',
-    };
-}
-
-/**
- * Rolls the level-up card offers: up to `count` random picks from
- * everything the player currently qualifies for (engine
- * `getAvailableCards`, ungated). Empty when nothing new is
- * learnable — the caller skips the modal.
- */
-function getLearnableCardOffersAction(store: AppStore, count = 3): LearnableCardOffer[] {
-    ensureStarterCards(store);
-    const player = store.getState().player;
-    if (!player) return [];
-    const pool = getAvailableCards(player).slice();
-    for (let i = pool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
-    return pool.slice(0, count).map((s) => toLearnableOffer(store, s));
-}
-
-/** Learns a card through the engine (requirement-checked). */
-function learnCardAction(store: AppStore, cardId: string): boolean {
-    const player = store.getState().player;
-    if (!player) return false;
-    const next = engineLearnCard(player, cardId);
-    if (next === player) return false;
-    store.setState({ player: next });
-    return true;
+    store.setState({ player: { ...player, knownCards: [...STARTING_CARD_IDS], combatRewardCards: [] } });
 }
 
 // ---------------------------------------------------------------------------
@@ -813,7 +715,8 @@ export function createAppActions(store: AppStore): AppActions {
             engineStore.levelUp?.();
         },
         save: () => store.getState().save(),
-        resolveCurrentMapEvent: (sourceNodeType?: string) => resolveCurrentMapEventAction(store, sourceNodeType),
+        resolveCurrentMapEvent: (sourceNodeType?: string, staged?: MapEventPayload) =>
+            resolveCurrentMapEventAction(store, sourceNodeType, staged),
         pickEventChoice: (choiceId) => pickEventChoiceAction(store, choiceId),
         fleeEncounter: () => fleeEncounterAction(store),
         dismissEvent: () => dismissEventAction(store),
@@ -881,8 +784,6 @@ export function createAppActions(store: AppStore): AppActions {
         completeBlacksmithTutorial: (skipped) => completeBlacksmithTutorialAction(store, skipped),
         buyVillageWare: (itemId) => buyVillageWareAction(store, itemId),
         sellVillageItem: (index) => sellVillageItemAction(store, index),
-        getLearnableCardOffers: (count) => getLearnableCardOffersAction(store, count),
-        learnCard: (cardId) => learnCardAction(store, cardId),
     };
     return wrapActionsWithLogging(actions);
 }
@@ -1145,14 +1046,13 @@ function moveToAction(store: AppStore, nodeId: string): MoveToResult {
 
     // Node kind comes from the engine's authored event pools. Encounter /
     // boss nodes (both resolve to the `encounter` kind) are not completed or
-    // consumed BY THE MOVE, so the node stays walkable and the screen keeps
-    // drawing the player on it; every other kind completes here.
-    //
-    // That is a statement about this function alone, not about the node's
-    // life (burn-day audit 2026-09-19 row 3.1). Resolving the arrival marks
-    // the node consumed whatever its kind (`resolve-map-event.ts`), so a
-    // fight that has been answered is NOT re-offered on a second visit —
-    // measured: a second arrival at an answered encounter fires nothing.
+    // consumed BY THE MOVE, and the move does not open their way on either:
+    // a fight's node is settled when the fight ends (phase R9a), by the
+    // engine's `END_COMBAT` (`settleArrival`) or by a flee below. Until then
+    // a save, mid-fight included, stands the player on the node with the
+    // fight owed and nowhere else to go, and the map re-offers it on reload.
+    // Every other kind completes here, and resolving its arrival consumes it
+    // (`resolve-map-event.ts`).
     const nodeKind = getNodePrimaryEventKind(map.continent, map.name, nodeId);
     const isEncounterNode = nodeKind === 'encounter';
 
@@ -1179,7 +1079,7 @@ function moveToAction(store: AppStore, nodeId: string): MoveToResult {
     const engineNode = getMapDefinition(map.continent, map.name).nodes.find(
         (n) => n.id === nodeId,
     );
-    for (const targetId of engineNode?.connectedNodes ?? []) {
+    for (const targetId of isEncounterNode ? [] : engineNode?.connectedNodes ?? []) {
         if (completed.includes(targetId)) continue;
         if (nextWorld.currentMap.availableNodes.includes(targetId)) continue;
         nextWorld = worldUnlockNode(nextWorld, targetId);
@@ -1295,7 +1195,7 @@ function debugSeedAction(store: AppStore): DebugSeedResult {
         }
 
         // 2. One relic per slot kind (weapon / armor / accessory). Phase 21 —
-        //    the only equipment is the 8 signet relics; grant the first of each
+        //    the only equipment is the signet relics; grant the first of each
         //    slot kind so the inventory dock + equip-replace preview have a
         //    piece to render for every slot.
         const seedSlots: ReadonlyArray<EquipmentSlot> = ['weapon', 'armor', 'accessory'];
@@ -1399,7 +1299,7 @@ function populateAllItemsAction(store: AppStore): PopulateAllItemsResult {
         const addItem = state.addItem;
 
         // Phase 21 — the procedural equipment library is retired; "every item"
-        // equipment is now the 8 signet relics. Uniques no longer exist.
+        // equipment is now the signet relics. Uniques no longer exist.
         for (const relic of relicLibrary) {
             try {
                 addItem({ ...relic });
@@ -1450,11 +1350,11 @@ function applyCharacterPresetAction(
 // Event actions (Spec 08 — Phase 6 Tick B)
 // ---------------------------------------------------------------------------
 
-function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string): boolean {
+function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string, staged?: MapEventPayload): boolean {
     try {
         const state = store.getState();
         const gameState = state as unknown as GameState;
-        const result: ResolveMapEventResult = resolveMapEvent(gameState);
+        const result: ResolveMapEventResult = resolveMapEvent(gameState, undefined, staged);
 
         // Phase 27: when a non-'none' event resolves, mark the current
         // node consumed in the engine's parallel data model
@@ -1556,21 +1456,19 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
         // inventory. `<CacheGate>` routes to /cache when the slice fills.
         //
         // Reward depth: the `item` offer rolls a real engine-truth
-        // loot/relic table scaled to the player's level (Phase 129).
-        // Deeper locales (northern-forest) roll the `rich` tier (more
-        // items + a unique-relic chance); the coastal opener rolls
-        // `modest`. Currency from the event payload is preserved for the
-        // `item` offer.
+        // loot/relic table scaled to the player's level (Phase 129). Every
+        // Act 1 cache rolls the `modest` tier (the `rich` tier's only map,
+        // northern-forest, went in R7e; the dev rewards menu still rolls
+        // it). Currency from the event payload is preserved for the `item`
+        // offer.
         if (result.event.kind === 'loot-cache') {
             store.setState({
                 ...resolvedState,
                 player: gameState.player,
                 event: EMPTY_EVENT_SLICE,
             });
-            const mapName = resolvedState.world?.currentMap?.name;
-            const tier: CacheLootTier = mapName === 'northern-forest' ? 'rich' : 'modest';
             beginLootCacheChoiceAction(store, {
-                tier,
+                tier: 'modest',
                 currency: result.event.currency,
                 description: result.event.description,
             });
@@ -1723,6 +1621,18 @@ function fleeEncounterAction(store: AppStore): void {
         console.error('Failed to process flee action:', error);
     }
     clearEventSlice(store);
+    settleArrivalAction(store);
+}
+
+/**
+ * Settle the fight's node when the player walks away from it (phase R9a).
+ * A fight that runs to an end settles through the engine's `END_COMBAT`; a
+ * flee from the prelude never stages one, so both flee paths settle here.
+ * The node is spent and its way on opens, as before R9a.
+ */
+function settleArrivalAction(store: AppStore): void {
+    const settled = settleArrival(store.getState() as unknown as GameState);
+    store.setState({ world: settled.world });
 }
 
 function pickEventChoiceAction(store: AppStore, choiceId: string): void {
@@ -1762,6 +1672,7 @@ function pickEventChoiceAction(store: AppStore, choiceId: string): void {
                     console.error('Failed to process flee action:', error);
                     clearEventSlice(store);
                 }
+                settleArrivalAction(store);
                 return;
             }
             // Unknown choice id on combat-prelude — defensive no-op.

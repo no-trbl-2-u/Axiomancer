@@ -35,11 +35,12 @@ import { learnCard } from '../Cards';
 import { createStartingWorld, emptyQuestLog } from '../World';
 import type { MapName } from '../World/map.library';
 import { moveToNode as moveWorld } from '../World/world.reducer';
-import { resolveMapEvent } from '../World';
+import { resolveMapEvent, settleArrival } from '../World';
 import { applyDialogueChoice as applyDialogueRuntime } from '../World/dialogue.runtime';
 import { killObjectives, progressQuest, findQuest } from '../World/quest.engine';
 import { calculateMaxHealth } from '../Utils';
-import { EXPERIENCE_PER_LEVEL, STAT_POINTS_PER_LEVEL } from './game-mechanics.constants';
+import { STAT_POINTS_PER_LEVEL } from './game-mechanics.constants';
+import { experienceForLevel } from '../Character/experience';
 import { addItemStacking, rollEncounterLoot, totalEncounterXp } from './combat-grants';
 import { getRng } from '../Utils/rng';
 import { generateRunId } from './run-loop';
@@ -165,8 +166,15 @@ import { generateRunId } from './run-loop';
  *   the core ten; the hop drops acquired deck cards that were deleted.
  * 2026-09-30 — bumped 32 → 33: THE REVAMP R7c (D47/D50). The alt-win systems
  *   are gone; the hop drops the write-only `regionConsequences` slice.
+ * 2026-10-01 — bumped 33 → 34: THE REVAMP R7e (D72). The parked world's
+ *   content is deleted; the hop moves a save off a deleted map onto the
+ *   Lantern Deep and drops the deleted maps, quests and story flags.
+ * 2026-10-01 — bumped 34 → 35: THE REVAMP R7e2 (D72). The relic library is
+ *   the Suppliant's Ring alone; the hop drops every other relic.
+ * 2026-10-01 — bumped 35 → 36: THE REVAMP R9 (D55). Levels cost a rising
+ *   `L × 250` XP; the hop re-expresses a save's progress on the new curve.
  */
-export const GAME_STATE_VERSION = 33;
+export const GAME_STATE_VERSION = 36;
 
 /**
  * Builds a brand-new GameState with default player and world.
@@ -195,14 +203,11 @@ export function createNewGameState(opts: { startMap?: MapName } = {}): GameState
         // the run owes the player, the Suppliant's Ring, is still handed over
         // at the first node (`Character/first-node-grant.ts` — with an empty
         // accessory row it simply fills the first seat, displacing nothing).
-        // The other ten signet relics are village-market wares now
-        // (`World/MapEvents/content.ts`), bought with coin the run earns.
         //
-        // Presets, fixtures, mocks and sims still seed the Phase-19 kit via
-        // `buildCharacterFromPreset` / `cloneStartingRelics`, so the measured
-        // baselines are untouched by this — only the real-player origination
-        // point changed. (The v24 stand-in swap, `withholdFirstNodeRelic`,
-        // is kept exported for callers that seed the kit themselves.)
+        // Presets, fixtures, mocks and sims still seed the starting relics via
+        // `buildCharacterFromPreset` / `cloneStartingRelics`; only the
+        // real-player origination point differs. (`withholdFirstNodeRelic` is
+        // kept exported for callers that seed the kit themselves.)
         player: createCharacter({
             name: 'Player',
             level: 1,
@@ -241,7 +246,7 @@ function applyLevelUps(player: Character): Character {
             level,
             maxHealth,
             health: maxHealth,
-            experienceToNextLevel: level * EXPERIENCE_PER_LEVEL,
+            experienceToNextLevel: experienceForLevel(level + 1),
             // Spec 06 Q3 — grant STAT_POINTS_PER_LEVEL on every promotion.
             // Multi-level cascades (Q9) accumulate without merging.
             availableStatPoints: (next.availableStatPoints ?? 0) + STAT_POINTS_PER_LEVEL,
@@ -401,14 +406,17 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 }
             }
 
-            return {
+            // The fight is over, so the node it was fought on is settled,
+            // whatever the outcome (phase R9a): `resolveMapEvent` left the
+            // arrival owed so a save taken mid-fight re-offers it.
+            return settleArrival({
                 ...state,
                 player: nextPlayer,
                 quests: nextQuests,
                 flags: nextFlags,
                 codex: nextCodex,
                 currentEncounter: undefined,
-            };
+            });
         }
 
         case 'MOVE_TO_NODE': {

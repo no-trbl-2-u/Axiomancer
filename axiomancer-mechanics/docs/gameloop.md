@@ -128,6 +128,22 @@ two `TODO(spec-09)` markers that flagged the cadence concern (one in
 the canonical autosave policy from Phase 51 onward; hermetic coverage
 at `src/Game/e2e/autosave-throttling.engine.test.ts`.
 
+**Who owns save timing.** On the app, mobile does, through its explicit
+checkpoints (ruled 2026-09-23, phase R9a). The allowlist above is the
+engine-only path, for the CLI and the hermetic tests.
+
+### A fight settles its node (phase R9a)
+
+`currentEncounter` is never saved, so a save cannot hold a fight. It holds
+the arrival debt instead. `resolveMapEvent` leaves an `encounter` arrival
+owed: `pendingArrival` stays on the node, the node is not consumed, and its
+adjacents stay locked. `END_COMBAT` settles it for every outcome (victory,
+friendship, flee, defeat) through `settleArrival`. A client that fights
+outside the store calls `settleArrival` itself: the CLI does, and so do the
+mobile flee paths. A save taken mid-fight therefore reloads onto the node
+with the fight owed, and resolving the arrival again offers the same fight
+from the start. Pinned in `src/World/e2e/fight-checkpoint.engine.test.ts`.
+
 ## Event surface
 
 ```ts

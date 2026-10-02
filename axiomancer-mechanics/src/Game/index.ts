@@ -39,4 +39,8 @@ export {
     buildStateFromFixture,
     validateStateFixture,
     getStateFixtureById, listStateFixtureIds,
+    // R7e / R7e2 — the neutral witnesses for dialogue, shops, quests and gear.
+    FIXTURE_NPC, FIXTURE_SHOP, FIXTURE_QUEST,
+    FIXTURE_DIALOGUE_EVENT, FIXTURE_VILLAGE_EVENT, FIXTURE_CUTSCENE_EVENT,
+    FIXTURE_WEAPON, FIXTURE_ARMOR, FIXTURE_TRINKETS,
 } from './fixtures';

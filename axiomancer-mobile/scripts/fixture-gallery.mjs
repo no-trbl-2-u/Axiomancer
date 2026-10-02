@@ -44,27 +44,8 @@ const log = (m) => console.log(`fixture-gallery: ${m}`)
 
 const SAGE = { preset: 'sage', flags: ['combat-tutorial-done', 'hazard-tutorial-done'] }
 const coastal = (map, node) => ({ continent: 'coastal-continent', map, node, completedMaps: map === 'breakwater' ? [] : ['breakwater'] })
-const northern = (map, node, done = []) => ({ continent: 'northern-continent', map, node, completedMaps: done })
 
 export const GALLERY = [
-    // ── The second continent ─────────────────────────────────────────────
-    { name: 'caverns-omen', why: 'The northern continent opens underground — its first omen.',
-      fixture: { id: 'g-caverns-omen', seed: 'g1', ...SAGE, world: northern('caverns', 'nc-1'), arrive: true }, path: '/exploration', waitForPath: '/cutscene' },
-    { name: 'caverns-hub', why: 'The Caverns map, mid-walk.',
-      fixture: { id: 'g-caverns-hub', seed: 'g2', ...SAGE, world: northern('caverns', 'nc-3') }, path: '/exploration', waitFor: 'node-nc-3' },
-    { name: 'caverns-delver', why: 'The Delver — first NPC on the northern continent.',
-      fixture: { id: 'g-caverns-delver', seed: 'g3', ...SAGE, world: northern('caverns', 'nc-2'), arrive: true }, path: '/exploration', waitForPath: '/dialogue' },
-    { name: 'northern-city-hub', why: 'The Northern City map.',
-      fixture: { id: 'g-ncity-hub', seed: 'g4', ...SAGE, world: northern('northern-city', 'ncy-3', ['caverns']) }, path: '/exploration', waitFor: 'node-ncy-3' },
-    { name: 'northern-city-village', why: 'A settlement + shop in the Northern City.',
-      fixture: { id: 'g-ncity-village', seed: 'g5', ...SAGE, player: { currency: 300 }, world: northern('northern-city', 'ncy-6', ['caverns']), arrive: true }, path: '/exploration', waitForPath: '/village' },
-    { name: 'connecting-river-hub', why: 'The Connecting River map (W4).',
-      fixture: { id: 'g-river-hub', seed: 'g6', ...SAGE, world: northern('connecting-river', 'cr-3', ['caverns', 'northern-city']) }, path: '/exploration', waitFor: 'node-cr-3' },
-    { name: 'river-village', why: 'The islanders’ village on the river.',
-      fixture: { id: 'g-river-village', seed: 'g7', ...SAGE, player: { currency: 300 }, world: northern('connecting-river', 'cr-10', ['caverns', 'northern-city']), arrive: true }, path: '/exploration', waitForPath: '/village' },
-    { name: 'town-across-river-hub', why: 'The Sweetheart’s Village map (W4).',
-      fixture: { id: 'g-tar-hub', seed: 'g8', ...SAGE, world: northern('town-across-river', 'tar-4', ['caverns', 'northern-city', 'connecting-river']) }, path: '/exploration', waitFor: 'node-tar-4' },
-
     // ── THE APORIA (labyrinth) ───────────────────────────────────────────
     // Entering an act fires the entrance narration (a paced event → /dialogue);
     // leaving it lands in the room.
@@ -96,12 +77,12 @@ export const GALLERY = [
     { name: 'loot-cache', why: 'The loot-cache choice.',
       fixture: 'apprentice-bw-cache', path: '/exploration', waitForPath: '/cache' },
     { name: 'hazard-intro', why: 'A hazard, before the first card — late-game kit.',
-      fixture: 'l30-caverns-hazard-arrive', path: '/exploration', waitForPath: '/hazard' },
+      fixture: 'l30-bw-hazard-arrive', path: '/exploration', waitForPath: '/hazard' },
     { name: 'hazard-routes', why: 'Choosing a route — the safe crawl or the leap — hand fanned above.',
-      fixture: 'l30-caverns-hazard-arrive', path: '/exploration', waitForPath: '/hazard',
+      fixture: 'l30-bw-hazard-arrive', path: '/exploration', waitForPath: '/hazard',
       steps: [{ click: 'hazard-intro-continue' }, { settle: 1200 }] },
     { name: 'hazard-board', why: 'The hazard board after taking the safe route — play area + mana dice.',
-      fixture: 'l30-caverns-hazard-arrive', path: '/exploration', waitForPath: '/hazard',
+      fixture: 'l30-bw-hazard-arrive', path: '/exploration', waitForPath: '/hazard',
       steps: [{ click: 'hazard-intro-continue' }, { settle: 800 }, { clickText: 'TAKE SAFE ROUTE' }, { waitFor: 'hazard-board' }, { settle: 1000 }] },
 
     // ── Combat at the boss gate ──────────────────────────────────────────
@@ -116,7 +97,7 @@ export const GALLERY = [
     { name: 'self-l50', why: 'SELF at L50 — every stat and relic slot filled.', fixture: { id: 'g-self-l50', seed: 'g13', preset: 'kid-l50' }, path: '/character' },
     { name: 'satchel-l50', why: 'SATCHEL at L50.', fixture: { id: 'g-satchel-l50', seed: 'g13', preset: 'kid-l50' }, path: '/inventory' },
     { name: 'hazard-deck-l30', why: 'The hazard deck sheet with a late kit.', fixture: { id: 'g-hdeck-l30', seed: 'g14', preset: 'kid-l30' }, path: '/hazard-deck' },
-    { name: 'memoir-l15', why: 'THE LEDGER for a mid-campaign Sage.', fixture: { id: 'g-memoir', seed: 'g15', ...SAGE, world: coastal('northern-forest', 'nf-5') }, path: '/memoir' },
+    { name: 'memoir-l15', why: 'THE LEDGER for a mid-campaign Sage.', fixture: { id: 'g-memoir', seed: 'g15', ...SAGE, world: coastal('charcoal-wood', 'cw-5') }, path: '/memoir' },
 
     // ── Dev-only panels that have no organic capture path ────────────────
     { name: 'aftermath-defeat', why: 'The DEFEAT aftermath panel.', fixture: 'fresh-start', path: '/devaftermath?panel=defeat', waitFor: 'devaftermath-panel' },

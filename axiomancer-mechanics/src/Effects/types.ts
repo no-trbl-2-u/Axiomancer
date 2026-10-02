@@ -29,11 +29,12 @@ export type EffectTier = 1 | 2 | 3;
 
 /** Thematic grouping for UI / library queries. */
 export type EffectCategory =
-    | 'stat' | 'damage' | 'defense' | 'control' | 'regeneration' | 'advantage';
+    | 'stat' | 'damage' | 'defense' | 'control' | 'regeneration';
 
 /**
  * A persistent stat line on a piece of equipment. The only stat an item can
- * modify is `maxHp` (the two armor relics' +5 max VITAE), folded onto
+ * modify is `maxHp` (no live relic carries one since R7e2; `FIXTURE_ARMOR`
+ * witnesses it), folded onto
  * `Character.maxHealth` by the equip reducers.
  *
  * TRIM THE FAT T2a (D14) deleted every other target: the derived attack /
@@ -47,17 +48,13 @@ export interface StatModifier {
     value: number;
 }
 
-/** When in a round a DoT effect ticks. Different damage flavours feel different. */
-export type DotTickPhase = 'start' | 'end';
-
 /**
  * WS3 trigger-clock DoT substrate (spec 32 §12, ratified 2026-07-11 #3) — the
- * clock a DoT ticks on. The two round clocks alias the legacy `tickPhase`
- * pair; the three EVENT clocks tick on game events instead of the round
- * boundary ('card-played' counts PLAYER-side card plays only, ratified).
+ * EVENT clock a DoT ticks on instead of the round boundary ('card-played'
+ * counts PLAYER-side card plays only, ratified). A DoT with no trigger ticks
+ * at round start.
  */
-export type DotTriggerClock =
-    | 'round-start' | 'round-end' | 'card-played' | 'damage-instance' | 'payoff';
+export type DotTriggerClock = 'card-played' | 'damage-instance' | 'payoff';
 
 /**
  * Damage dealt each round to the bearer. Total per tick = `damagePerRound × intensity`
@@ -66,52 +63,26 @@ export type DotTriggerClock =
  */
 export interface DamageOverTime {
     damagePerRound: number;
-    /** Which stance the damage reads as. Informational (UI accent only). */
+    /** Which stat family the damage reads as. Informational (UI accent only). */
     damageType: Stance;
-    /** Where in the round this DoT ticks. Defaults to `'start'`. */
-    tickPhase?: DotTickPhase;
-    /** WS3 trigger clock. Absent = legacy `tickPhase` behavior (round clock);
-     *  `tickPhase` stays as the alias for the two round clocks. Event-clocked
-     *  DoTs ('card-played' / 'damage-instance' / 'payoff') never tick at the
-     *  round boundary — the engine advances them via `fireDotTrigger`. */
+    /** WS3 event clock. Absent = the round clock (ticks at round start).
+     *  Event-clocked DoTs never tick at the round boundary — the engine
+     *  advances them via `fireDotTrigger`. */
     trigger?: DotTriggerClock;
-}
-
-/** Health restored (positive) or drained (negative) at the start of each round. */
-export interface RegenerationConfig {
-    healthPerRound?: number;
 }
 
 /** Constraints on what actions the bearer may take. */
 export interface ActionRestriction {
-    forcedStance?: Stance;
-    blockedStances?: Stance[];
     skipTurn?: boolean;
-}
-
-/** Auto-advantage / auto-disadvantage granted to the bearer. */
-export interface AdvantageModifier {
-    grantAdvantage?: Stance[];
-    grantDisadvantage?: Stance[];
 }
 
 /**
  * Mechanical payload of an effect. Every field is optional; an effect may
- * combine several (e.g. a regeneration buff that also raises defense).
+ * combine several (e.g. a DoT with its `dotModifiers`).
  */
 export interface EffectPayload {
     damageOverTime?: DamageOverTime;
-    regeneration?: RegenerationConfig;
     actionRestriction?: ActionRestriction;
-    advantageModifier?: AdvantageModifier;
-    /** Flat bonus / penalty added to dice rolls. Does NOT scale with intensity. */
-    rollModifier?: number;
-    /** Roll modifier multiplied by the effect's current intensity. */
-    rollModifierPerIntensity?: number;
-    /** Flat bonus / penalty added to defense values. */
-    defenseModifier?: number;
-    /** Damage per intensity reflected back when the bearer is hit (thorns). */
-    reflectDamage?: number;
     /**
      * VULNERABLE — outgoing-damage multiplier applied to HP the bearer TAKES.
      * `1` (or absent) is neutral; `1.5` means the bearer takes +50% from the
@@ -122,33 +93,8 @@ export interface EffectPayload {
      * byte-identical. See the VULNERABLE epic (mechanics 0.34.0).
      */
     damageTakenMult?: number;
-    /**
-     * Fate Engine P1 (spec 31 §3.1 #17) — STANCE-KEYED VULNERABLE: the bearer
-     * takes `mult` × damage, but ONLY from plays powered by a die of `stance`
-     * color (Wild counts as matching). A debuff that tells the player what to
-     * DRAFT. Read by the combat engine's powered-play paths; composes
-     * multiplicatively with the plain `damageTakenMult` aggregate.
-     */
-    damageTakenMultForStance?: { stance: 'heart' | 'body' | 'mind'; mult: number };
-    /**
-     * Fate Engine P1 — MARK: while the bearer carries this, their hidden phase
-     * stance is PUBLIC (Dune-style public-risk indicator). Read by the combat
-     * engine's stance-reveal selectors.
-     */
-    revealsStance?: boolean;
-    /**
-     * Cards/Status Master Spec §1 — extensions for the 12 new status
-     * entries. Originally data-only; the DoT-modifier fields are now read by
-     * `Combat/effects.ts`, while the fields marked below as not yet wired
-     * remain data-only (card-play and die-roll resolution never read them). Kept on
-     * `EffectPayload` rather than as bespoke top-level fields so the shape
-     * stays discoverable from one place.
-     */
     /** DoT-specific behaviour beyond the plain `damageOverTime` tick. */
     dotModifiers?: {
-        /** Halve remaining tick damage the instant the bearer receives any heal
-         *  (Hemorrhage). */
-        decayOnHeal?: boolean;
         /** Tick damage ramps the longer the effect survives (POISON, spec 32 v3):
          *  `tickDamage = baseTick * (1 + turnsSurvived * rampFactor)`. Reapplication
          *  resets the ramp rather than stacking. */
@@ -172,100 +118,9 @@ export interface EffectPayload {
      * effect counts as an affliction for RUPTURE / SOUL / REAP payoffs.
      */
     tickAmplifyFlat?: number;
-    /**
-     * BACKFIRE (spec 32 v3, Control theme) — engine-gated drip: the bearer takes
-     * `backfirePerRung` × intensity HP per rung its telegraphed action loses
-     * (STAGGER rungs, quagmire attachments, crumbling resolve).
-     */
-    backfirePerRung?: number;
-    /** Outgoing-damage multiplier applied to damage the bearer DEALS (Septic's
-     *  necrotic seep is the first user) — additive across stacks, -X% each. */
+    /** Outgoing-damage multiplier applied to damage the bearer DEALS (QUARTER)
+     *  — additive across stacks, -X% each. */
     outgoingDamageMulPct?: number;
-    /**
-     * WS8.2 telegraph-DAMAGE surface (spec 32 §12 #6) — multiplier on the HP
-     * the bearer's TELEGRAPHED threat action deals: -25 = "weakened hits
-     * softer" (EXHAUSTION). Additive across stacks; aggregated + clamped by
-     * `getOutgoingThreatDamageMult` and read in `resolveThreatPhase` where the
-     * budgeted damage lands. Distinct from `outgoingDamageMulPct`, which also
-     * dampens the bearer's non-telegraph HP sources.
-     */
-    outgoingThreatDamageMulPct?: number;
-    /**
-     * WS8.2 RIDER surface — while active on the enemy, its telegraphed
-     * phase's `threatEffectId` rider cannot land (BLIND — "information
-     * erased"). The phase's damage and self-heal still resolve; only the
-     * status rider is suppressed. Read in `resolveThreatPhase`.
-     */
-    suppressesThreatRiders?: boolean;
-    /**
-     * WS8.2 STANCE surface (blur) — the bearer's stance perception is fogged
-     * (CONFUSION): while the PLAYER carries this, revealed enemy stances read
-     * as hidden again (`isPhaseStanceRevealed`) and the readout layer renders
-     * the stance panel blurred (`isStanceReadoutBlurred` — mobile consumes
-     * that selector). On the ENEMY it counts as the stance surface for the
-     * DISRUPT meter (there is no enemy-side stance read to fog).
-     */
-    blursStanceHints?: boolean;
-    /**
-     * WS8.2 STANCE surface (lock) — the bearer is locked into its revealed
-     * stance (ROOT — "paralysis through possibility"): while the ENEMY
-     * carries this, the phase advance keeps the CURRENT stance and reveals
-     * it. The status twin of the `lock_stance` card mechanic; read where
-     * stances swap in `processBetweenPhases`.
-     */
-    lockedStance?: boolean;
-    /** Multiplier applied to a card's effective "power" for math purposes
-     *  (Fatigue-style chip debuffs feeding tier-3 execute setup). */
-    powerMulPct?: number;
-    /** Healing the bearer RECEIVES is multiplied by this (Despair-style). */
-    healingReceivedMulPct?: number;
-    /**
-     * Single-use "consumed on next matching event" lifecycle flag. Recommended
-     * by the Master Spec rather than four bespoke booleans: `debuff_exposure`,
-     * `debuff_doubt`, `buff_clarity`, and `debuff_overextended` all set this.
-     * Honored by whichever resolver path is nearest each consumption trigger
-     * (DoT application, card-play resolution, or die-roll resolution) — not
-     * yet wired to any of those paths.
-     */
-    consumedOnUse?: boolean;
-    /** Upgrades the tier of the bearer's next incoming DoT tick by this many
-     *  tiers, then the effect instance is removed (pairs with `consumedOnUse`). */
-    nextDotTierUpgrade?: number;
-    /** Forces the bearer's next card play to resolve at weak-tier even if a
-     *  matching/wild die is spent — an opponent-inflicted denial (pairs with
-     *  `consumedOnUse`). */
-    restrictsSurgeAccess?: boolean;
-    /** Forces the bearer's OWN next play to weak-tier as a self-inflicted status
-     *  cost (tier-3 cards that pay via status instead of a die spend). Distinct
-     *  from `restrictsSurgeAccess` to keep the self-cost vs. opponent-denial
-     *  sources unambiguous (pairs with `consumedOnUse`). */
-    forcesWeakTierNextPlay?: boolean;
-    /** Anti-control: the bearer cannot benefit from advantage/crit bonuses. */
-    blocksAdvantage?: boolean;
-    /** Anti-control: the bearer's own control-effect application accuracy is
-     *  reduced. */
-    reducesControlAccuracy?: boolean;
-    /** Denies the bearer from targeting allies with buff cards for the duration. */
-    deniesAllyBuffTargeting?: boolean;
-    /** Solo-fight fallback when there's no ally to deny a buff onto — flagged
-     *  for a combat-engine enemy-card-denial hook that doesn't exist yet. */
-    soloFightFallback?: 'deny_self_buff_card';
-    /** Forces the bearer's next die of `colorChoice` to count as Wild for
-     *  card-powering purposes (pairs with `consumedOnUse`). */
-    forceWildOnNextDie?: boolean;
-    /**
-     * CLEANSE marker. An instant (`duration: 0`) whose only job is to strip
-     * debuffs from the bearer — it carries no persistent modifier. Appliers
-     * honor it by routing to `removeEffectsByType(effects, 'debuff',
-     * effect.tier)` INSTEAD of adding the (payload-less) instance. Read in
-     * `useConsumableEffect` (`src/Items/equipment.engine.ts`). No effect in
-     * the library carries it (R5 retired the cleanse consumables).
-     */
-    cleanse?: boolean;
-    /** Die color this buff's `forceWildOnNextDie` applies to. Inlined as a
-     *  literal union (rather than importing `CombatDieColor`) to avoid a
-     *  Combat → Effects → Combat import cycle. */
-    colorChoice?: 'heart' | 'body' | 'mind' | 'wild' | 'x';
 }
 
 /**
@@ -274,7 +129,7 @@ export interface EffectPayload {
  * @property id          - Unique identifier used for lookups.
  * @property duration    - Base duration in rounds (-1 permanent, 0 instant).
  * @property tier        - Application/resist tier (1-3).
- * @property resistedBy  - Which stance resists this effect. Absent for tier 1.
+ * @property resistedBy  - Which stat family resists this effect. Absent for tier 1.
  * @property resistDR    - Base difficulty for a resist roll. Absent for tier 1.
  * @property payload     - Mechanical modifiers applied to the bearer.
  */

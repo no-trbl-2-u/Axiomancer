@@ -68,7 +68,7 @@ npm run game -- --fixture ./my-fixture.json --route-audit fishing-village
 **Jest (mobile)**
 
 ```ts
-const boot = resolveBootFixture({ request: { source: 'url', ref: 'l30-caverns-hazard' }, devToolsEnabled: true })!;
+const boot = resolveBootFixture({ request: { source: 'url', ref: 'l30-bw-hazard' }, devToolsEnabled: true })!;
 const store = createAppStore({ adapter: createFixtureBootAdapter(boot.state) });
 // or, engine-side: createAppStore({ adapter: createMemoryAdapter(buildStateFromFixture(fixture)) })
 ```
@@ -83,7 +83,7 @@ http://localhost:8081/exploration?fixture=sage-bw-door-gate
 
 ```js
 import { injectStateFixture } from './fixture-injector.mjs'
-await injectStateFixture(context, 'wanderer-nf-village')                 // registry id
+await injectStateFixture(context, 'wanderer-staged-village')                 // registry id
 await injectStateFixture(context, { id: 'x', seed: 1, preset: 'sage', arrive: true }) // inline
 await page.goto(`${baseUrl}/`)
 ```

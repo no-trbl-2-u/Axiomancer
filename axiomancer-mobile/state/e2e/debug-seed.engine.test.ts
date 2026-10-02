@@ -12,6 +12,8 @@
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 
+import { relicLibrary } from '@mechanics';
+
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import { createAppActions } from '@/state/actions';
 import { createAppStore } from '@/state/store';
@@ -38,22 +40,20 @@ describe('debugSeed: items + cards + map reset', () => {
         const result = actions.debugSeed();
 
         const after = store.getState().player.inventory ?? [];
-        expect(after.length).toBeGreaterThanOrEqual(4);
-        // One consumable + three equipment (weapon/armor/accessory).
+        expect(after.length).toBeGreaterThanOrEqual(2);
+        // One consumable + the first relic of each slot the library fills
+        // (since R7e2 the Suppliant's Ring alone: an accessory).
         const categories = new Set(after.map((i: { category: string }) => i.category));
         expect(categories.has('consumable')).toBe(true);
         expect(categories.has('equipment')).toBe(true);
-        // Equipment slots covered by the Phase-18 3-kind seed: weapon/armor/accessory.
         const equipmentSlots = new Set(
             after
                 .filter((i: { category: string }) => i.category === 'equipment')
                 .map((i) => (i as { slot?: string }).slot),
         );
-        expect(equipmentSlots.has('weapon')).toBe(true);
-        expect(equipmentSlots.has('armor')).toBe(true);
-        expect(equipmentSlots.has('accessory')).toBe(true);
+        expect(equipmentSlots).toEqual(new Set(relicLibrary.map((r) => r.slot)));
 
-        expect(result.itemsAdded).toBeGreaterThanOrEqual(4);
+        expect(result.itemsAdded).toBe(1 + equipmentSlots.size);
     });
 
     it('teaches at least 2 cards covering both fixture categories', () => {

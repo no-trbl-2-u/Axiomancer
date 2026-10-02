@@ -3,7 +3,7 @@ import { ActiveEffect } from '../Effects/types';
 import { Equipment, Item } from '../Items/types';
 import { calculateMaxHealth } from '../Utils';
 import { getRng } from '../Utils/rng';
-import { EXPERIENCE_PER_LEVEL } from '../Game/game-mechanics.constants';
+import { experienceForLevel } from './experience';
 import { equipItem, wornMaxHpBonus } from './equipment.reducer';
 import { cloneStartingRelics } from '../Items/relic.library';
 
@@ -46,10 +46,9 @@ export interface CreateCharacterOptions {
      */
     equipment?: Equipment[];
     /**
-     * Phase 19 — seed the 11 signet relics: the fixed default 5 are worn (1
-     * weapon + 1 armor + 3 accessories) and the other 6 seed the inventory, so a
-     * fresh character always enters combat with a full signature kit (signatures
-     * derive from the worn loadout, not archetype). Off by default so bare
+     * Seed the starting relics (`cloneStartingRelics`, the Suppliant's Ring
+     * since R7e2), worn, so the character enters combat with the signature kit
+     * they grant (signatures derive from the worn loadout). Off by default so bare
      * `createCharacter` fixtures keep their exact (relic-free) stats;
      * `buildCharacterFromPreset` and the `Player` mock opt in (`createNewGameState`
      * no longer seeds relics — owner call 2026-09-23). Ignored when an explicit `equipment` list is
@@ -70,19 +69,15 @@ export function createCharacter(options: CreateCharacterOptions): Character {
         knownCards = [], seedStartingRelics = false,
     } = options;
 
-    // Phase 19 — the 11 signet relics: 5 default-worn, 6 benched.
     // Opt-in and only when the caller hasn't chosen an explicit loadout.
     const useRelics = seedStartingRelics && equipment.length === 0;
-    const relics = useRelics ? cloneStartingRelics() : { worn: [] as Equipment[], benched: [] as Equipment[] };
-    const wornPieces = useRelics ? relics.worn : equipment;
+    const wornPieces = useRelics ? cloneStartingRelics() : equipment;
 
-    // The worn relics live in inventory too, ordered worn-first per slot, so the
-    // presenter's inventory-position worn convention (`wornPerSlot`) agrees with
-    // the engine `equipment` loadout combat reads. Benched relics follow, then
-    // the caller's inventory (kept after so its gear never displaces a relic from
-    // the worn window).
+    // The worn relics live in inventory too, ahead of the caller's inventory,
+    // so the presenter's inventory-position worn convention (`wornPerSlot`)
+    // agrees with the engine `equipment` loadout combat reads.
     const seededInventory: Item[] = useRelics
-        ? [...relics.worn, ...relics.benched, ...inventory]
+        ? [...wornPieces, ...inventory]
         : [...inventory];
 
     const maxHealth = calculateMaxHealth(level, baseStats);
@@ -91,8 +86,8 @@ export function createCharacter(options: CreateCharacterOptions): Character {
         id: id ?? generateCharacterId(),
         name,
         level,
-        experience: (level - 1) * EXPERIENCE_PER_LEVEL,
-        experienceToNextLevel: level * EXPERIENCE_PER_LEVEL,
+        experience: experienceForLevel(level),
+        experienceToNextLevel: experienceForLevel(level + 1),
         health: maxHealth,
         maxHealth,
         baseStats,
@@ -176,9 +171,10 @@ export type { Character, BaseStats } from './types';
 export { equipItem, unequipItem, getEquippedItems } from './equipment.reducer';
 export {
     grantFirstNodeRelic, withholdFirstNodeRelic, isFirstNodeRelicPending,
-    FIRST_NODE_RELIC_ID, STAND_IN_RELIC_ID, FIRST_NODE_RELIC_FLAG,
+    FIRST_NODE_RELIC_ID, FIRST_NODE_RELIC_FLAG,
 } from './first-node-grant';
 export { computeEquipDelta } from './equip-delta';
+export { experienceForLevel } from './experience';
 export type {
     EquipDelta,
     SignatureDeltaEntry,

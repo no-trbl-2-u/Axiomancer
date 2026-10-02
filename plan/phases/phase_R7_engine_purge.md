@@ -225,6 +225,228 @@ it, like R2 and R3:
 - **The CLI and sims keep the befriend path**: `mercies` now counts the
   `mercy` cell only.
 
+### As shipped (R7c2, 2026-09-30)
+
+The tick that took R7c2 split it once more, like R2, R3 and R7c:
+
+- **Shipped in R7c2**: the STAGGER rung ladder (`computeRungDenial`,
+  `staggerRungs`, `bossRungGrowth`, the rung constants, authored `rungs` on
+  threat phases and enemy cards, the `rung-regrown` event, the coveted die's
+  `stagger` method) and BACKFIRE (`backfirePerRung`, its drip and event,
+  `fixture_backfire`); friendship increments and the counter's whole
+  predicate (`incrementsFriendship`, `friendshipCounter`,
+  `isBefriendAttemptEligible`, `FRIENDSHIP_COUNTER_MAX`, `roundsThreshold`,
+  `defaultFallback`), leaving `hpGate` as The Open Hand's one gate; the dead
+  `executeCard` branches (haunt ownership, enemy caster, `cards.haunts.ts`);
+  the test-only modules `World/quest-reward.ts` and `combat.reducer.ts`.
+  Mobile lost the intent rung pips, the RUNGS system term, the BACKFIRE face
+  kind and float, and the tutorial copy teaching rungs; the atlas lost RUNGS.
+- **Learn Card stays.** `getAvailableCards` / `learnCard` feed the mobile
+  level-up modal; the part plan's "always empty" note predates it.
+- **Suites rewritten, not weakened**: the deny and weaken cases that leaned
+  on STAGGER now use live library effects (Petrify's skip-turn, Quarter's
+  outgoing damage).
+
+## Scope — R7c3 (the rest of R7c2)
+
+1. **Payload keys with no library carrier** (`Effects/types.ts`), with their
+   readers, aggregators and helpers in `Combat/effects.ts`,
+   `effect-modifiers.ts`, `combat.engine.ts`, `stat-scaling.ts` and the
+   mobile presenter's honest kinds: e.g. `regeneration`, `rollModifier`,
+   `rollModifierPerIntensity`, `defenseModifier`, `reflectDamage`,
+   `decayOnHeal`, `outgoingThreatDamageMulPct`, `suppressesThreatRiders`,
+   `powerMulPct`, `healingReceivedMulPct`, `consumedOnUse`,
+   `nextDotTierUpgrade`, `restrictsSurgeAccess`, `forcesWeakTierNextPlay`,
+   `blocksAdvantage`, `reducesControlAccuracy`, `deniesAllyBuffTargeting`,
+   `soloFightFallback`, `forceWildOnNextDie`, `colorChoice`, `cleanse`.
+   Re-verify each against `debuffs.library.json` first: a key a library
+   effect prints stays. The part plan's named helpers
+   (`getStudyMarkIntensity`, `extendRandomBuffDuration`, `applyDrain`,
+   `applyDispel`, `consumeDotEffects`) go if still unread.
+2. **Stance-keyed keys stay for R7d**: `actionRestriction.forcedStance` /
+   `blockedStances`, `advantageModifier`, `revealsStance`,
+   `damageTakenMultForStance`, `blursStanceHints`, `lockedStance`.
+3. **`test-utils/fixture-effects.ts`** goes with the channels only it
+   exercises; suites that used a fixture for a surviving channel move to a
+   library effect.
+4. **The closing carrier sweep (D45)**: every glossary / atlas row, glyph,
+   family entry and gloss left without a carrier, both workspaces.
+
+### As shipped (R7c3, 2026-09-30)
+
+- **Payload keys gone**: `regeneration`, `rollModifier`,
+  `rollModifierPerIntensity`, `defenseModifier`, `reflectDamage`,
+  `dotModifiers.decayOnHeal`, `outgoingThreatDamageMulPct`,
+  `suppressesThreatRiders`, `powerMulPct`, `healingReceivedMulPct`,
+  `consumedOnUse`, `nextDotTierUpgrade`, `restrictsSurgeAccess`,
+  `forcesWeakTierNextPlay`, `blocksAdvantage`, `reducesControlAccuracy`,
+  `deniesAllyBuffTargeting`, `soloFightFallback`, `forceWildOnNextDie`,
+  `colorChoice`, `cleanse`. With them: the roll-penalty weaken/deny
+  (`THREAT_WEAKEN_*`, `THREAT_DENY_AT`, `getActiveRollModifier`), the armor
+  soak, THORNS (`getThornsReflect`, the `thorns-reflected` event), regen and
+  drain, the heal multiplier, the threat-damage multiplier, DOUBT /
+  OVEREXTENDED / BLIND riders and `consumeEffect`, the consumable cleanse
+  branch, and the unread helpers (`getStudyMarkIntensity`, `removeRandomBuff`,
+  `extendRandomBuffDuration`, `applyDispel`, `consumeDotEffects`).
+- **The round clock is round start only.** No library DoT printed `tickPhase`
+  or a `round-start` / `round-end` trigger; Creeping Doom (no trigger) is the
+  round-clock carrier. `tickPhase`, the two round triggers, `dotEnd` and the
+  round-end DoT tick went; `processRoundEndEffects` only counts down.
+- **`fixture-effects.ts` is deleted.** Suites moved to library effects
+  (Creeping Doom, Mark, Petrify, the live debuff tiers); stance-keyed shapes
+  stay as test-local fixtures until R7d.
+- **DISRUPT stays for R7d.** Its surfaces are now action and stance, so
+  `DISRUPT_DENY_AT` (3) is out of reach; R7d removes the stance surface and
+  the meter with it. The unreachable deny test went; the below-threshold one
+  stays.
+- **Carrier sweep**: mobile's honest kinds regen / thorns / exposure / doubt /
+  sensoryNull / isolated / overextended / clarity, the regen / drain / thorns
+  glyph kinds, the dead tooltip and shop-ware payload lines, and the
+  `KEYWORD_FAMILY` rows no engine carrier prints. `docs/effects.md` keeps its
+  Superseded banner for R10c.
+
+## Scope — R7d (stance removal; refined against the tree R7c3 left, 2026-10-01)
+
+Part plan `plan/revamp/engine.md` § R7d; D65 (T: "I only want the RPS gone,
+card-colour/dice-colour stay"). The tree R7c3 left still carries the whole
+open-stance layer. No library effect prints a stance-keyed payload key
+(`debuffs.library.json` holds Poison, Bleed, Mark, Vulnerable, Quarter,
+Creeping Doom, Petrify; Petrify is `skipTurn`), so every stance-keyed key is
+carrier-less.
+
+**Split, like R2, R3 and R7c** (one tick has a 75-minute ceiling and main
+stays green between rows):
+
+- **R7d — the RPS layer, engine and mobile together** (the compiler couples
+  them through `@mechanics`):
+  1. Player stance: `playerStance`, the `stance-shifted` event, the stance
+     half of `applyStanceAndMomentumV2`.
+  2. The phase-end check: `resolveStanceCheck`, `stanceCheck` on threat
+     phases, forks and enemy decks, `defaultStanceCheck` and its backfill,
+     `DECK_STANCE_CHECKS`, the `stance-check-resolved` event, the yield's
+     +1 Conviction and the Coveted Die's `'yield'` claim (block stays),
+     `READ_DAMAGE_MULT` and `CombatReadResult`.
+  3. Enemy stances: `enemyStance` and `stanceHint` on threat phases, forks,
+     enemy cards and enemies; `dominantStance` / `rotateStance` /
+     `DEFAULT_STANCE_HINTS`; `currentPhaseStance`.
+  4. Reveals and their fogs: `revealedStances`, `isPhaseStanceRevealed`,
+     `revealedCurrentStance`, `isStanceReadoutBlurred`, the `stance-revealed`
+     and `stance-locked` events, the ROOT lock in `processBetweenPhases`.
+  5. Stance-keyed payload keys and readers: `actionRestriction.forcedStance`
+     / `blockedStances` (charm, silence), `advantageModifier`,
+     `revealsStance`, `damageTakenMultForStance` and `getStanceVulnMult`,
+     `blursStanceHints`, `lockedStance`, the `lock_stance` mapping;
+     `canAct` loses its requested-stance parameter (skipTurn only).
+  6. DISRUPT: with the stance surface gone its meter tops out at one pip
+     (`DISRUPT_DENY_AT` is 3), so `getDistinctControlCount`,
+     `DISRUPT_DENY_AT` and the disrupt-deny branch go.
+  7. Mobile: `stanceCheckVM`, the IntentIcon punish/yield telegraph, the
+     `stance-check-resolved` log line, `playerStanceVM` / `StanceChip`, the
+     enemy stance readout and reveal-screen tells, the ▲/▼ read previews on
+     `READ_DAMAGE_MULT`, the `stance-chip` tooltip and the advantage lines
+     in tooltip / village payload text.
+  8. Tests deleted with their subjects or rewritten to the survivors.
+- **R7d2 — residue and the carrier sweep**: the legacy `CombatState` types
+  (`Advantage`, `choosing_stance`, `CombatAction.stance`) and the Enemy AI
+  stance doc, the word "stance" out of player-facing copy (level-up, deck,
+  character screens), "CHOOSE A STANCE" canon copy (`spec.md`,
+  `axiomancer-mobile/AGENTS.md`), and the D45 sweep: STAGGER, ROOT,
+  CONFUSION, charm, DISRUPT and every stance word with no carrier out of
+  the atlas, glossary and glyph registries.
+
+### Decisions made upfront (R7d) — DO NOT ASK
+
+- **The momentum chain stays, on card colour.** It reads `card.stance`,
+  which is the card's colour (heart/body/mind; grey and wild never move
+  it), not an RPS stance. It feeds exactly one thing: a completed
+  heart→body→mind chain surges a temporary wild die (or +1 Conviction on a
+  full table). It never read the enemy's stance. D65 keeps colour and calls
+  dice colour "the main fun mechanic"; keeping the chain deletes nothing T
+  might want, and deleting it later is one small diff. T can rule otherwise
+  at R7d2 or in their session.
+- **Identifiers that mean colour or stat family keep their names in R7d**:
+  `Stance` (stat family: `resistedBy`, `damageType`), `card.stance`,
+  `cardStanceColor`, `WheelStance`, `StanceGlyph`, `presenters/stances.ts`.
+  Their doc comments lose the RPS wording. A rename is churn across both
+  workspaces with no behaviour change; R10c's comments pass owns names.
+- **The Coveted Die keeps its block claim.** Only the yield path goes.
+- **Charm and silence go whole** (`forcedStance` / `blockedStances`): no
+  library effect prints them and there is no enemy stance left to force.
+- **No save migration.** `playerStance`, `revealedStances` and the threat
+  phases live on the encounter, which the game save does not hold (R9a
+  exists for that reason).
+
+### As shipped (R7d, 2026-10-01)
+
+- **Engine**: `playerStance` and `stance-shifted`; the phase-end check
+  (`resolveStanceCheck`, `stanceCheck` on phases, forks and `AuthoredThreatPhase`,
+  `defaultStanceCheck` and its backfill, `DECK_STANCE_CHECKS`,
+  `stance-check-resolved`, the yield's +1 Conviction, the Coveted Die's
+  `'yield'` method); `READ_DAMAGE_MULT`, `CombatReadResult` and the
+  always-`'neutral'` `advantage` field on `card-played`; `enemyStance` and
+  `stanceHint` on phases, forks, enemy cards, faces and enemies (the 14 card
+  tells and 3 enemy tells went with them); `dominantStance`, `rotateStance`,
+  `DEFAULT_STANCE_HINTS`, `currentPhaseStance`; `revealedStances`,
+  `isPhaseStanceRevealed`, `revealedCurrentStance`, `isStanceReadoutBlurred`,
+  `stance-revealed`, `stance-locked` and the ROOT lock; payload keys
+  `forcedStance`, `blockedStances`, `advantageModifier` (and its type),
+  `damageTakenMultForStance` with `getStanceVulnMult`, `revealsStance`,
+  `blursStanceHints`, `lockedStance`, and `hasPayloadFlag`; `canAct(effects)`
+  is skip-turn only. DISRUPT: `DISRUPT_DENY_AT`, `getDistinctControlCount`,
+  `getDisruptMeter`, `disrupt-denied`. The economy sim's yield income column.
+  `applyStanceAndMomentumV2` is now `applyBoonAndMomentumV2`.
+- **Mobile**: the stance-check telegraph (`CombatStanceCheckVM`, the
+  IntentIcon block, its log line), the player stance chip, the enemy
+  stance badge and reveal-screen tells, the ▲/▼ read triplet row and legend
+  on the card detail, `armedReadValue`'s read argument (guard prints its
+  number plus the colour-match bonus), the guard detail copy's read lines,
+  the `stance-chip` tooltip, the forced-stance and advantage lines in the
+  tooltip formatter and the shop ware line.
+- **Scripts**: the catalog exporter's stance payload lines and enemy
+  `stanceHint`, and every devlog/catalog reader of it.
+- **Tests**: `stance-check-telegraphs.engine.test.ts`,
+  `control-surfaces.sim.test.ts` and `CombatBoard.S1-board-C34.test.tsx`
+  deleted whole; the rest rewritten to the survivors (momentum on card
+  colour, `projectIncomingThreat.willDeny` for the deny verdict).
+- **Left for R7d2** (on top of its row): the DoT / vulnerable / stun detail
+  copy still prints "the read" prose and the face VM still carries
+  `statusAdv` / `statusDis` / `readDependent` with the presenter's frozen
+  `READ_*` constants; the `'advantage'` glyph kind; the word "stance" in
+  surviving comments and docs (`docs/combat.md`, `docs/effects.md`,
+  `docs/enemy.md`, spec 33).
+
+### As shipped (R7d2, 2026-10-01)
+
+- **Legacy types**: `Action`, `Advantage`, `CombatAction`,
+  `PlayerCombatAction` and `CombatPhase` (with `choosing_stance`) are gone;
+  `CombatState` is the slice `executeCard` reads (`round`, `player`,
+  `enemy`). The advantage die helpers (`createDieRoll`,
+  `determineRollAdvantageModifier`) went with `Advantage`. `scalePlayerHit`
+  lost its always-1 `readMult`. `EnemyLogic`'s doc no longer describes the
+  removed stance AI; the `Stance` doc names the three stat families.
+- **Player-facing copy**: the card detail's read lines ("▲ won read / ▼ lost
+  read", "takes no read") now say what lands; the face VM lost `statusAdv`,
+  `statusDis`, the frozen `READ_*` constants and the dead
+  `damageTakenMultForStance` reader; `readDependent` / `armedReadValue` are
+  `armable` / `armedValue`; guard's power rail drops "↑read". The tutorial
+  step, primer, summary coach line, momentum tip and a11y line, stat
+  tooltips, card tooltip footnote and the stat-glyph labels say "colour"
+  where they said "stance".
+- **Canon copy**: "CHOOSE A STANCE" / STANCE canon is out of `spec.md`,
+  `axiomancer-mobile/AGENTS.md` and `CLAUDE.md`, `plan/bearings.md`, the
+  ship-a-phase hard rule and the narrative lexicon, style and voice docs.
+- **Carrier sweep**: the `advantage` glyph kind (and its `advantageModifier`
+  reader and BLESSING case), the `advantage` effect category and the
+  `grant_advantage` interaction trigger. STAGGER, ROOT, CONFUSION, charm and
+  DISRUPT had no row left in the atlas, glossary or glyph registries; they
+  survive only in historical prose and in `deprecated-effects` (which pins
+  their absence).
+- **Left for R10c**: the word "stance" in code comments and in surviving
+  identifiers that mean colour (`card.stance`, `StanceGlyph`, `STANCE_COLORS`,
+  per the R7d decision); `docs/combat.md`, `docs/effects.md`, `docs/enemy.md`
+  and spec 33 prose; test fixtures that use `debuff_confusion` as an
+  arbitrary unknown effect id.
+
 ## Out of scope for R7a (named so it is not mistaken for a miss)
 
 - `synergy` and `synergy-predicates.ts`, themes, draft, presets,

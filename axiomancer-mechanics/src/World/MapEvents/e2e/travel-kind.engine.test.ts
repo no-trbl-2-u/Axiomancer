@@ -3,11 +3,8 @@
  * at the highest public entry point.
  *
  * The doors under test are authored in `content.ts`:
- *   bw-18 (the Breakwater's river bridge)       → coastal / charcoal-wood
- *   nf-10 (the cave mouth at the forest's edge) → northern / caverns
- * and the parked northern chain beyond it. The parked arc (northern-forest
- * onward) is entered by starting a game on northern-forest: no Act 1 door
- * leads there since fishing-village was purged (R3b).
+ *   bw-18 (the Breakwater's river bridge) → coastal / charcoal-wood
+ *   cw-20 (the Charcoal Wood's stair cave) → northern / beacon-crags
  *
  * The design call, decided: the world is a PLACE the player moves around
  * in. Departing a map preserves its runtime `MapState` under
@@ -17,7 +14,7 @@
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
-import { resolveMapEvent, createStartingWorld, startQuest, getMapDefinition } from '../../index';
+import { resolveMapEvent, createStartingWorld, getMapDefinition } from '../../index';
 import { createNewGameState, GAME_STATE_VERSION } from '../../../Game/game.reducer';
 import { migrate } from '../../../Game/game.migrate';
 import { mockSequentialRng } from '../../../test-utils/rng';
@@ -45,10 +42,10 @@ function atRiverBridge(): GameState {
     return seatAt({ ...createNewGameState(), world: createStartingWorld('breakwater') }, 'bw-18');
 }
 
-/** A fresh game started on the parked northern-forest, at its treeline. */
-function inForest(): GameState {
+/** A fresh game started on the Charcoal Wood, seated on its stair cave (cw-20). */
+function atStairCave(): GameState {
     mockSequentialRng(0.5);
-    return { ...createNewGameState(), world: createStartingWorld('northern-forest') };
+    return seatAt({ ...createNewGameState(), world: createStartingWorld('charcoal-wood') }, 'cw-20');
 }
 
 describe("the bw-18 door — Breakwater → Charcoal Wood (same continent)", () => {
@@ -112,216 +109,42 @@ describe("the bw-18 door — Breakwater → Charcoal Wood (same continent)", () 
     });
 });
 
-describe('the nf-10 door — forest → caverns (cross-continent)', () => {
-    function atCaveMouth(): GameState {
-        // Start on the forest, then seat on its cave mouth.
-        return seatAt(inForest(), 'nf-10');
-    }
-
-    it('switches continent, unlocks the caverns, and lands on nc-1', () => {
-        const { state, event } = resolveMapEvent(atCaveMouth());
+describe('the cw-20 door — wood → crags (cross-continent)', () => {
+    it('switches continent, unlocks the crags, and lands on their start node', () => {
+        const { state, event } = resolveMapEvent(atStairCave());
 
         expect(event.kind).toBe('travel');
         expect(state.world.currentContinent.name).toBe('northern-continent');
-        expect(state.world.currentMap.name).toBe('caverns');
-        expect(state.world.currentMap.currentNode).toBe('nc-1');
-        expect(state.world.currentContinent.availableMaps).toContain('caverns');
-        expect(state.world.currentContinent.lockedMaps).not.toContain('caverns');
+        expect(state.world.currentMap.name).toBe('beacon-crags');
+        expect(state.world.currentMap.currentNode).toBe(getMapDefinition('northern-continent', 'beacon-crags').startingNode.id);
+        expect(state.world.currentContinent.availableMaps).toContain('beacon-crags');
+        expect(state.world.currentContinent.lockedMaps).not.toContain('beacon-crags');
     });
 
     it('keeps both continents honest in the catalogue after the crossing', () => {
-        const { state } = resolveMapEvent(atCaveMouth());
+        const { state } = resolveMapEvent(atStairCave());
 
         const coastal = state.world.world.find(c => c.name === 'coastal-continent')!;
-        expect(coastal.completedMaps).toContain('northern-forest');
+        expect(coastal.completedMaps).toContain('charcoal-wood');
         const northern = state.world.world.find(c => c.name === 'northern-continent')!;
         expect(northern).toEqual(state.world.currentContinent);
 
-        // The departed forest rides along, preserved.
-        expect(state.world.mapStates?.['northern-forest']?.currentNode).toBe('nf-10');
+        // The departed wood rides along, preserved.
+        expect(state.world.mapStates?.['charcoal-wood']?.currentNode).toBe('cw-20');
     });
 
     it('the whole arc survives a save → migrate roundtrip at the current version', () => {
-        const { state } = resolveMapEvent(atCaveMouth());
+        const { state } = resolveMapEvent(atStairCave());
 
         const raw = JSON.parse(JSON.stringify(state));
         const loaded = migrate(raw, raw.version, GAME_STATE_VERSION);
 
         expect(loaded.version).toBe(GAME_STATE_VERSION);
         expect(loaded.world.currentContinent.name).toBe('northern-continent');
-        expect(loaded.world.currentMap.name).toBe('caverns');
-        expect(loaded.world.mapStates?.['northern-forest']).toBeDefined();
+        expect(loaded.world.currentMap.name).toBe('beacon-crags');
+        expect(loaded.world.mapStates?.['charcoal-wood']).toBeDefined();
         expect(loaded.world.world.map(c => c.name)).toEqual(
             ['coastal-continent', 'northern-continent'],
         );
-    });
-});
-
-describe('the nc-26 door — caverns → northern-city (Phase W3)', () => {
-    /** Walk the real arc through the forest's door, then seat on nc-26. */
-    function atUnderGate(): GameState {
-        const throughForest = resolveMapEvent(seatAt(inForest(), 'nf-10')).state;
-        return seatAt(throughForest, 'nc-26');
-    }
-
-    it('stays on the northern continent, unlocks the city, and lands on ncy-1', () => {
-        const { state, event } = resolveMapEvent(atUnderGate());
-
-        expect(event.kind).toBe('travel');
-        expect(state.world.currentContinent.name).toBe('northern-continent');
-        expect(state.world.currentMap.name).toBe('northern-city');
-        expect(state.world.currentMap.currentNode).toBe('ncy-1');
-        expect(state.world.currentContinent.availableMaps).toContain('northern-city');
-        expect(state.world.currentContinent.lockedMaps).not.toContain('northern-city');
-        expect(state.world.currentContinent.completedMaps).toContain('caverns');
-        // The departed caverns ride along, preserved on the door node.
-        expect(state.world.mapStates?.['caverns']?.currentNode).toBe('nc-26');
-    });
-
-    it("completes get-to-northern-city: The Delver's grant ticks on the city arrival", () => {
-        const under = atUnderGate();
-        const quest = getMapDefinition('northern-continent', 'caverns')
-            .quests!.find(q => q.name === 'get-to-northern-city')!;
-        const questing: GameState = { ...under, quests: startQuest(under.quests, quest) };
-
-        const travelled = resolveMapEvent(questing).state;
-        expect(travelled.quests.completed).not.toContain('get-to-northern-city');
-
-        // Arriving on ncy-1 (unconsumed on the fresh city) resolves the
-        // arrival cutscene; the reach objective ticks before the pool roll.
-        const arrived = resolveMapEvent(travelled);
-        expect(arrived.state.quests.completed).toContain('get-to-northern-city');
-    });
-
-    it('a v21 save with the PRE-W3 two-map catalogue can still cross — no migration hop needed', () => {
-        // Yesterday's save: version 21, northern catalogue listing ONLY the
-        // caverns (northern-city did not exist when v20→v21 seeded it).
-        // The design call, documented: the locked-map ledger is
-        // informational — `unlockMap` (the travel handler's step 3) admits
-        // any REGISTERED destination into `availableMaps` whether or not
-        // the catalogue ever listed it as locked, so old v21 saves need no
-        // v21→v22 hop to reach the new map.
-        const under = atUnderGate();
-        const raw = JSON.parse(JSON.stringify(under));
-        for (const continent of [raw.world.currentContinent, ...raw.world.world]) {
-            if (continent.name !== 'northern-continent') continue;
-            continent.lockedMaps = continent.lockedMaps.filter((m: string) => m !== 'northern-city');
-            continent.availableMaps = continent.availableMaps.filter((m: string) => m !== 'northern-city');
-        }
-        expect(raw.world.currentContinent.lockedMaps).not.toContain('northern-city');
-
-        const loaded = migrate(raw, raw.version, GAME_STATE_VERSION);
-        expect(loaded.version).toBe(GAME_STATE_VERSION);
-
-        const { state } = resolveMapEvent(loaded);
-        expect(state.world.currentMap.name).toBe('northern-city');
-        expect(state.world.currentMap.currentNode).toBe('ncy-1');
-        expect(state.world.currentContinent.availableMaps).toContain('northern-city');
-    });
-});
-
-describe('the ncy-26 door — northern-city → connecting-river (Phase W4)', () => {
-    /** Walk the real arc through every earlier door, then seat on ncy-26. */
-    function atWaterGate(): GameState {
-        const throughForest = resolveMapEvent(seatAt(inForest(), 'nf-10')).state;
-        const throughCaverns = resolveMapEvent(seatAt(throughForest, 'nc-26')).state;
-        return seatAt(throughCaverns, 'ncy-26');
-    }
-
-    it('stays on the northern continent, unlocks connecting-river, and lands on cr-1', () => {
-        const { state, event } = resolveMapEvent(atWaterGate());
-
-        expect(event.kind).toBe('travel');
-        expect(state.world.currentContinent.name).toBe('northern-continent');
-        expect(state.world.currentMap.name).toBe('connecting-river');
-        expect(state.world.currentMap.currentNode).toBe('cr-1');
-        expect(state.world.currentContinent.availableMaps).toContain('connecting-river');
-        expect(state.world.currentContinent.lockedMaps).not.toContain('connecting-river');
-        expect(state.world.currentContinent.completedMaps).toContain('northern-city');
-        expect(state.world.mapStates?.['northern-city']?.currentNode).toBe('ncy-26');
-    });
-
-    it("completes get-to-connecting-river: the Gate-Clerk's grant ticks on the river arrival", () => {
-        const gated = atWaterGate();
-        const quest = getMapDefinition('northern-continent', 'northern-city')
-            .quests!.find(q => q.name === 'get-to-connecting-river')!;
-        const questing: GameState = { ...gated, quests: startQuest(gated.quests, quest) };
-
-        const travelled = resolveMapEvent(questing).state;
-        expect(travelled.quests.completed).not.toContain('get-to-connecting-river');
-
-        const arrived = resolveMapEvent(travelled);
-        expect(arrived.state.quests.completed).toContain('get-to-connecting-river');
-    });
-});
-
-describe('the cr-13 door — connecting-river → town-across-river (Phase W4)', () => {
-    function atFarBankGate(): GameState {
-        const throughForest = resolveMapEvent(seatAt(inForest(), 'nf-10')).state;
-        const throughCaverns = resolveMapEvent(seatAt(throughForest, 'nc-26')).state;
-        const throughCity = resolveMapEvent(seatAt(throughCaverns, 'ncy-26')).state;
-        return seatAt(throughCity, 'cr-13');
-    }
-
-    it('stays on the northern continent, unlocks town-across-river, and lands on tar-1', () => {
-        const { state, event } = resolveMapEvent(atFarBankGate());
-
-        expect(event.kind).toBe('travel');
-        expect(state.world.currentContinent.name).toBe('northern-continent');
-        expect(state.world.currentMap.name).toBe('town-across-river');
-        expect(state.world.currentMap.currentNode).toBe('tar-1');
-        expect(state.world.currentContinent.availableMaps).toContain('town-across-river');
-        expect(state.world.currentContinent.lockedMaps).not.toContain('town-across-river');
-        expect(state.world.currentContinent.completedMaps).toContain('connecting-river');
-        expect(state.world.mapStates?.['connecting-river']?.currentNode).toBe('cr-13');
-    });
-
-    it('completes get-to-town-across-river: The Boatwoman\'s grant ticks on arrival', () => {
-        const gated = atFarBankGate();
-        const quest = getMapDefinition('northern-continent', 'connecting-river')
-            .quests!.find(q => q.name === 'get-to-town-across-river')!;
-        const questing: GameState = { ...gated, quests: startQuest(gated.quests, quest) };
-
-        const travelled = resolveMapEvent(questing).state;
-        expect(travelled.quests.completed).not.toContain('get-to-town-across-river');
-
-        const arrived = resolveMapEvent(travelled);
-        expect(arrived.state.quests.completed).toContain('get-to-town-across-river');
-    });
-});
-
-describe('the tar-7 door — town-across-river → the-capital (Phase W5)', () => {
-    function atRibbonRoad(): GameState {
-        const throughForest = resolveMapEvent(seatAt(inForest(), 'nf-10')).state;
-        const throughCaverns = resolveMapEvent(seatAt(throughForest, 'nc-26')).state;
-        const throughCity = resolveMapEvent(seatAt(throughCaverns, 'ncy-26')).state;
-        const throughRiver = resolveMapEvent(seatAt(throughCity, 'cr-13')).state;
-        return seatAt(throughRiver, 'tar-7');
-    }
-
-    it('stays on the northern continent, unlocks the-capital, and lands on cap-1', () => {
-        const { state, event } = resolveMapEvent(atRibbonRoad());
-
-        expect(event.kind).toBe('travel');
-        expect(state.world.currentContinent.name).toBe('northern-continent');
-        expect(state.world.currentMap.name).toBe('the-capital');
-        expect(state.world.currentMap.currentNode).toBe('cap-1');
-        expect(state.world.currentContinent.availableMaps).toContain('the-capital');
-        expect(state.world.currentContinent.lockedMaps).not.toContain('the-capital');
-        expect(state.world.currentContinent.completedMaps).toContain('town-across-river');
-        expect(state.world.mapStates?.['town-across-river']?.currentNode).toBe('tar-7');
-    });
-
-    it('completes get-to-the-capital: The Sweetheart\'s grant ticks on arrival', () => {
-        const gated = atRibbonRoad();
-        const quest = getMapDefinition('northern-continent', 'town-across-river')
-            .quests!.find(q => q.name === 'get-to-the-capital')!;
-        const questing: GameState = { ...gated, quests: startQuest(gated.quests, quest) };
-
-        const travelled = resolveMapEvent(questing).state;
-        expect(travelled.quests.completed).not.toContain('get-to-the-capital');
-
-        const arrived = resolveMapEvent(travelled);
-        expect(arrived.state.quests.completed).toContain('get-to-the-capital');
     });
 });

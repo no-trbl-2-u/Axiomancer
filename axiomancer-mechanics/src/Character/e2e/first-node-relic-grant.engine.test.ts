@@ -1,17 +1,11 @@
 /**
  * Hermetic engine test — the first-node relic grant (the Suppliant's Ring).
  *
- * The first block is the DIAGNOSIS the fix was built on and is deliberately
- * kept: it pins that the pre-v24 seed never dropped the ring. The owner's
- * finding ("new players start with no items") was read as a leak between
- * `cloneStartingRelics()` and the SATCHEL; it is not one. `createCharacter`
- * has always handed the whole kit over — silently, inside character
- * construction, before any screen existed to say so. If a future change
- * really does start dropping relics, the first block is what catches it.
- *
- * The rest pins the v24 behaviour: the ring is withheld from the seed, handed
- * over at the first node, and the post-grant character is equivalent to the
- * character the old seed produced.
+ * The first block pins that the seed (`createCharacter({ seedStartingRelics })`)
+ * carries the ring, worn. The rest pins the hand-over: the ring is withheld
+ * from a seeded character, handed over at the first node, and the post-grant
+ * character is equivalent to the seeded one. A full accessory row (the
+ * fixture trinkets, R7e2) gives up its last worn piece to the satchel.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -19,30 +13,38 @@ import { createCharacter } from '../index';
 import { createNewGameState, gameReducer } from '../../Game/game.reducer';
 import {
     grantFirstNodeRelic, withholdFirstNodeRelic, isFirstNodeRelicPending,
-    FIRST_NODE_RELIC_ID, STAND_IN_RELIC_ID, FIRST_NODE_RELIC_FLAG,
+    FIRST_NODE_RELIC_ID, FIRST_NODE_RELIC_FLAG,
 } from '../first-node-grant';
 import { getRelicById, getSignaturesForLoadout } from '../../Items/relic.library';
 import { wornPerSlot } from '../../Items/equipped';
 import { SLOT_CAPACITY } from '../../Items/types';
+import { FIXTURE_TRINKETS } from '../../Game/fixtures';
 import type { Character } from '../types';
 import type { Enemy } from '../../Enemy/types';
 
 const BASE = { heart: 5, body: 5, mind: 5 } as const;
 
-/** The character the pre-v24 seed produced: the whole kit, silently. */
+/** The seeded character: the ring, worn. */
 function seededCharacter(): Character {
     return createCharacter({ name: 'Player', level: 1, baseStats: BASE, seedStartingRelics: true });
+}
+
+/** A character whose accessory row is full of fixture trinkets (no ring). */
+function fullRowCharacter(): Character {
+    return createCharacter({
+        name: 'Full', level: 1, baseStats: BASE,
+        equipment: [...FIXTURE_TRINKETS], inventory: [...FIXTURE_TRINKETS],
+    });
 }
 
 const ids = (c: Character): string[] => c.inventory.map(i => i.id);
 const accIds = (c: Character): string[] => c.equipment.accessories.map(a => a.id);
 
-describe('DIAGNOSIS — the satchel was never empty', () => {
+describe('the seed — the ring is carried, worn', () => {
     it('the seeded character carries the Suppliant\'s Ring, worn', () => {
         const c = seededCharacter();
-        expect(ids(c)).toContain(FIRST_NODE_RELIC_ID);
-        expect(accIds(c)).toContain(FIRST_NODE_RELIC_ID);
-        expect(c.inventory).toHaveLength(11);
+        expect(ids(c)).toEqual([FIRST_NODE_RELIC_ID]);
+        expect(accIds(c)).toEqual([FIRST_NODE_RELIC_ID]);
     });
 
     it('the ring sits inside the worn window, so inventory-driven clients agree it is worn', () => {
@@ -61,13 +63,21 @@ describe('withholdFirstNodeRelic — the pre-grant character', () => {
         const c = withholdFirstNodeRelic(seededCharacter());
         expect(ids(c)).not.toContain(FIRST_NODE_RELIC_ID);
         expect(accIds(c)).not.toContain(FIRST_NODE_RELIC_ID);
-        expect(c.inventory).toHaveLength(10);
+        expect(c.inventory).toHaveLength(0);
+        expect(c.equipment.accessories).toHaveLength(0);
     });
 
-    it('keeps the accessory row at capacity by promoting the stand-in', () => {
-        const c = withholdFirstNodeRelic(seededCharacter());
-        expect(c.equipment.accessories).toHaveLength(SLOT_CAPACITY.accessory);
-        expect(accIds(c)).toContain(STAND_IN_RELIC_ID);
+    it('leaves the other worn accessories in place', () => {
+        const withRing = grantFirstNodeRelic(
+            createCharacter({
+                name: 'Two', level: 1, baseStats: BASE,
+                equipment: FIXTURE_TRINKETS.slice(0, 2), inventory: FIXTURE_TRINKETS.slice(0, 2),
+            }),
+            [],
+        ).character;
+        const c = withholdFirstNodeRelic(withRing);
+        expect(accIds(c)).toEqual(FIXTURE_TRINKETS.slice(0, 2).map(t => t.id));
+        expect(ids(c)).toEqual(FIXTURE_TRINKETS.slice(0, 2).map(t => t.id));
     });
 
     it('keeps the positional worn-convention agreeing with the loadout', () => {
@@ -83,9 +93,9 @@ describe('withholdFirstNodeRelic — the pre-grant character', () => {
         }
     });
 
-    it('still derives a full five-signature kit (the seat is held, not left empty)', () => {
+    it('derives no signature once the ring is withheld', () => {
         const c = withholdFirstNodeRelic(seededCharacter());
-        expect(getSignaturesForLoadout(c.equipment)).toHaveLength(5);
+        expect(getSignaturesForLoadout(c.equipment)).toEqual([]);
     });
 
     it('is a no-op on a character that never had the ring', () => {
@@ -102,21 +112,30 @@ describe('withholdFirstNodeRelic — the pre-grant character', () => {
 });
 
 describe('grantFirstNodeRelic — the hand-over', () => {
-    it('hands the ring over and swaps it onto the body, benching the stand-in', () => {
-        const before = withholdFirstNodeRelic(seededCharacter());
+    it('on a full accessory row, swaps the ring onto the body, displacing the last worn accessory', () => {
+        const before = fullRowCharacter();
+        const last = FIXTURE_TRINKETS[FIXTURE_TRINKETS.length - 1]!;
         const g = grantFirstNodeRelic(before, []);
         expect(g.reason).toBe('granted');
         expect(g.granted?.id).toBe(FIRST_NODE_RELIC_ID);
-        expect(g.displaced?.id).toBe(STAND_IN_RELIC_ID);
+        expect(g.displaced?.id).toBe(last.id);
+        expect(g.character.equipment.accessories).toHaveLength(SLOT_CAPACITY.accessory);
         expect(accIds(g.character)).toContain(FIRST_NODE_RELIC_ID);
-        expect(accIds(g.character)).not.toContain(STAND_IN_RELIC_ID);
+        expect(accIds(g.character)).not.toContain(last.id);
     });
 
     it('never destroys the displaced relic — it goes back to the satchel', () => {
-        const before = withholdFirstNodeRelic(seededCharacter());
+        const before = fullRowCharacter();
+        const last = FIXTURE_TRINKETS[FIXTURE_TRINKETS.length - 1]!;
         const g = grantFirstNodeRelic(before, []);
-        expect(ids(g.character)).toContain(STAND_IN_RELIC_ID);
-        expect(g.character.inventory).toHaveLength(11);
+        expect(ids(g.character)).toContain(last.id);
+        expect(g.character.inventory).toHaveLength(before.inventory.length + 1);
+    });
+
+    it('keeps the positional worn-convention agreeing after a full-row swap', () => {
+        const granted = grantFirstNodeRelic(fullRowCharacter(), []).character;
+        const positional = (wornPerSlot(granted.inventory).get('accessory') ?? []).map(a => a.id);
+        expect(positional).toEqual(accIds(granted));
     });
 
     it('does not alias the library singleton into the character', () => {
@@ -130,22 +149,14 @@ describe('grantFirstNodeRelic — the hand-over', () => {
         expect(a.statModifiers).not.toBe(getRelicById(FIRST_NODE_RELIC_ID)!.statModifiers);
     });
 
-    it('lands on a character equivalent to the pre-v24 silent seed', () => {
+    it('withhold then grant lands on a character equivalent to the seed', () => {
         const seeded = seededCharacter();
         const granted = grantFirstNodeRelic(withholdFirstNodeRelic(seeded), []).character;
 
-        expect(getSignaturesForLoadout(granted.equipment))
-            .toEqual(expect.arrayContaining(getSignaturesForLoadout(seeded.equipment)));
-        expect(getSignaturesForLoadout(granted.equipment)).toHaveLength(5);
+        expect(getSignaturesForLoadout(granted.equipment)).toEqual(getSignaturesForLoadout(seeded.equipment));
         expect(granted.maxHealth).toBe(seeded.maxHealth);
-        expect(ids(granted).slice().sort()).toEqual(ids(seeded).slice().sort());
-        expect(accIds(granted).slice().sort()).toEqual(accIds(seeded).slice().sort());
-    });
-
-    it('keeps the positional worn-convention agreeing after the swap', () => {
-        const granted = grantFirstNodeRelic(withholdFirstNodeRelic(seededCharacter()), []).character;
-        const positional = (wornPerSlot(granted.inventory).get('accessory') ?? []).map(a => a.id);
-        expect(positional).toEqual(accIds(granted));
+        expect(ids(granted)).toEqual(ids(seeded));
+        expect(accIds(granted)).toEqual(accIds(seeded));
     });
 
     it('stamps the settle flag and is then a no-op', () => {
@@ -193,9 +204,8 @@ describe('isFirstNodeRelicPending', () => {
 
 describe('createNewGameState — the run starts owing the player the ring', () => {
     // Owner call 2026-09-23 (THE VERY START): a fresh run seeds NO relics.
-    // The ring is still owed and still arrives at the first node; the other
-    // ten are village-market wares. See `fresh-start.engine.test.ts` for the
-    // full empty-start contract.
+    // The ring is still owed and still arrives at the first node. See
+    // `fresh-start.engine.test.ts` for the full empty-start contract.
     it('seeds no relics and owes the ring', () => {
         const s = createNewGameState();
         expect(s.player.inventory).toHaveLength(0);

@@ -8,8 +8,10 @@
  * This hop strips them so a loaded save matches the current shape, and must
  * The same hop drops `factionReputations`: the Faction system was
  * write-only (nothing but a dev inspector read it) and was deleted in the
- * same T2a pass. It must leave everything that still means something — base stats, max VITAE, the
- * armor relics' +5 max VITAE line, the worn loadout — exactly as it was.
+ * same T2a pass. It must leave everything that still means something — base stats, max VITAE, an
+ * armor relic's +5 max VITAE line, the worn loadout — exactly as it was. Since
+ * R7e2 the kit is the ring alone, so the save wears the neutral fixture
+ * weapon and armor to carry the stat lines.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -17,13 +19,14 @@ import { migrate } from '../game.migrate';
 import { createNewGameState, GAME_STATE_VERSION } from '../game.reducer';
 import { createCharacter } from '../../Character';
 import type { Equipment } from '../../Items/types';
+import { FIXTURE_WEAPON, FIXTURE_ARMOR } from '../fixtures';
 
 /** The pre-v25 stat line shape: any stat, optional multiplier flag. */
 type LegacyStatLine = { stat: string; value: number; isMultiplier?: boolean };
 
 /**
- * Re-applies the v24 relic stat lines to a relic: +2 body on the weapon the
- * kit wears, and the `isMultiplier: false` flag v24 wrote on every line.
+ * Re-applies the v24 relic stat lines to a relic: +2 body on a worn weapon,
+ * and the `isMultiplier: false` flag v24 wrote on every line.
  */
 function legacyRelic(relic: Equipment): Record<string, unknown> {
     const lines: LegacyStatLine[] = (relic.statModifiers ?? []).map(m => ({ ...m, isMultiplier: false }));
@@ -32,15 +35,22 @@ function legacyRelic(relic: Equipment): Record<string, unknown> {
 }
 
 /**
- * A v24 save: a kitted player (11 relics, 5 worn) carrying `derivedStats`,
- * `nonCombatStats` and a +2 body line on every weapon relic, plus a staged
- * encounter whose enemy still carries `derivedStats`.
+ * A v24 save: a kitted player (the ring) also wearing the fixture weapon and
+ * armor, carrying `derivedStats`, `nonCombatStats` and a +2 body line on the
+ * weapon, plus a staged encounter whose enemy still carries `derivedStats`.
  */
 function v24Save(): Record<string, unknown> {
     const fresh = createNewGameState();
-    const kitted = createCharacter({
+    const ringed = createCharacter({
         name: 'Player', level: 3, baseStats: { heart: 5, body: 6, mind: 4 }, seedStartingRelics: true,
     });
+    const kitted = {
+        ...ringed,
+        inventory: [FIXTURE_WEAPON, FIXTURE_ARMOR, ...ringed.inventory],
+        equipment: { ...ringed.equipment, weapon: FIXTURE_WEAPON, armor: FIXTURE_ARMOR },
+        maxHealth: ringed.maxHealth + 5,
+        health: ringed.health + 5,
+    };
     const player = {
         ...kitted,
         derivedStats: {
@@ -107,7 +117,7 @@ describe('migrate v24 → v25 — derived stats retired', () => {
         expect(allStatLines(raw.player as Record<string, unknown>).some(l => l.stat === 'body')).toBe(true);
         const migrated = migrate(raw, 24, 25);
         const lines = allStatLines(migrated.player as unknown as Record<string, unknown>);
-        expect(lines.length).toBeGreaterThan(0); // the armor relics' +5 max VITAE survives
+        expect(lines.length).toBeGreaterThan(0); // the armor relic's +5 max VITAE survives
         expect(lines.every(l => l.stat === 'maxHp')).toBe(true);
         expect(lines.every(l => !('isMultiplier' in l))).toBe(true);
     });

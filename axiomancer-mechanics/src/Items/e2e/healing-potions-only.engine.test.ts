@@ -10,9 +10,7 @@
 import { describe, it, expect } from 'vitest';
 import { EnemiesByMap } from '../../Enemy/enemy.library';
 import { characterPresets, levelLadderPresets } from '../../Character/presets';
-import { listRegisteredMapEventPools } from '../../World/MapEvents/resolve-map-event';
-import { registerMapEventContent } from '../../World/MapEvents/content';
-import { consumableLibrary, getConsumableById } from '../consumable.library';
+import { consumableLibrary } from '../consumable.library';
 import { rollCacheReward, type CacheLootTier } from '../cache-reward';
 
 const POTIONS = ['healing-potion', 'minor-healing-potion', 'greater-healing-potion'];
@@ -26,18 +24,6 @@ function allEnemies() {
 }
 
 /** Every item id a registered map-event pool sells (village shop wares). */
-function allShopWareIds(): string[] {
-    registerMapEventContent();
-    const out: string[] = [];
-    for (const pool of listRegisteredMapEventPools()) {
-        for (const entry of pool.entries) {
-            const shop = (entry.payload as { shop?: { wares?: { itemId: string }[] } }).shop;
-            for (const w of shop?.wares ?? []) out.push(w.itemId);
-        }
-    }
-    return out;
-}
-
 describe('R5 — the consumable library is the healing potions', () => {
     it('holds exactly minor, normal and greater healing potions', () => {
         expect(consumableLibrary.map(c => c.id).sort()).toEqual([...POTIONS].sort());
@@ -71,13 +57,6 @@ describe('R5 — the consumable library is the healing potions', () => {
             .filter(c => !isPotion(c.id))
             .map(c => `${p.id}: ${c.id}`));
         expect(hits).toEqual([]);
-    });
-
-    it('no shop sells a consumable the library lacks', () => {
-        const wares = allShopWareIds();
-        expect(wares.length).toBeGreaterThan(0); // the shops are actually being read
-        const consumableWares = wares.filter(id => !id.startsWith('relic-'));
-        expect(consumableWares.filter(id => !getConsumableById(id))).toEqual([]);
     });
 
     it('a loot cache only rolls potions', () => {

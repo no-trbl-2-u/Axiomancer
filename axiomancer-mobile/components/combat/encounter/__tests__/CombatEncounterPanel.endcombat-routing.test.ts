@@ -13,7 +13,7 @@ import { afterEach, describe, expect, it, jest } from '@jest/globals';
 
 import {
     createCharacter, initializeCombatEncounter, type CombatEncounterState, type CombatOutcome,
-    ENEMY_REGISTRY, getMapDefinition, emptyQuestLog, startQuest,
+    ENEMY_REGISTRY, FIXTURE_QUEST, emptyQuestLog, startQuest,
 } from '@mechanics';
 
 import { applyHazardOutcome } from '@/components/combat/encounter/CombatEncounterPanel';
@@ -82,16 +82,16 @@ describe('applyHazardOutcome: routes through endCombat (phase 54)', () => {
     it('befriending a kill-objective target completes its quest and grants the quest reward', () => {
         const store = createAppStore({ adapter: createMemoryAdapter() });
         const boss = ENEMY_REGISTRY['brine-hag'];
-        // The authored gather-wood quest, its objective re-aimed at a live
-        // foe (objectives match on the enemy's display name).
-        const authored = getMapDefinition('coastal-continent', 'northern-forest').quests!.find((q) => q.name === 'gather-wood')!;
+        // The fixture quest (no quest is authored since R7e), its objective
+        // re-aimed at a live foe (objectives match on the enemy's display name).
+        const authored = FIXTURE_QUEST;
         const startingQuest = {
             ...authored,
             objectives: [{ ...authored.objectives[0], type: 'kill' as const, target: boss.name, requiredCount: 1, currentCount: 0 }],
         };
         const reward = authored.reward as { kind?: string; amount?: number } | undefined;
         if (reward?.kind !== 'currency' || typeof reward.amount !== 'number') {
-            throw new Error('gather-wood no longer pays currency');
+            throw new Error('the fixture quest no longer pays currency');
         }
         store.setState({ quests: startQuest(emptyQuestLog(), startingQuest) });
         store.getState().startCombat(boss);
@@ -103,7 +103,7 @@ describe('applyHazardOutcome: routes through endCombat (phase 54)', () => {
         applyHazardOutcome(store, 'mercy' as CombatOutcome, finalState, boss);
 
         const state = store.getState();
-        expect(state.quests.completed).toContain('gather-wood');
+        expect(state.quests.completed).toContain(FIXTURE_QUEST.name);
         expect(state.player!.currency).toBe(currencyBefore + reward.amount);
         expect(state.flags).toContain(boss.friendshipReward!.flagSet);
     });

@@ -6,12 +6,10 @@ import {
     startTurn,
     endTurn,
     playCombatCard,
-    playSignatureSkill,
     resolveThreatPhase,
     handCards,
     firstLegalPoweringDie,
     buildCombatSummary,
-    getSignatureSkill,
     selectMercyChoice,
 } from '../Combat/combat.engine';
 import type { CombatCard, CombatEncounterState, CombatOutcome } from '../Combat/combat.encounter.types';
@@ -57,14 +55,6 @@ const rankedAutoCards = (s: CombatEncounterState, policy: HazardAutoPolicyId): {
     });
 };
 
-const bestAutoSignature = (s: CombatEncounterState): string | null => {
-    for (const id of s.signatures) {
-        const sig = getSignatureSkill(id);
-        if (!sig || s.conviction < sig.cost) continue;
-        if (['dot', 'control'].includes(sig.kind)) return id;
-    }
-    return null;
-};
 
 /**
  * Plays one threat phase under the ROUND-TURN LAW (Gate 0, 2026-07-10): ONE
@@ -86,13 +76,6 @@ const playAutoPhase = (state: CombatEncounterState, policy: HazardAutoPolicyId, 
     // Paid plays: each spends one live die on a colour-legal card.
     while (s.phase === 'phase-play' && !s.finalOutcome && !s.mercyChoiceActive && safety < phaseTurnLimit * 6) {
         safety++;
-        if (s.conviction >= 6) {
-            const sigId = bestAutoSignature(s);
-            if (sigId) {
-                const cast = playSignatureSkill(s, sigId);
-                if (cast.state !== s) { s = cast.state; if (s.finalOutcome) break; continue; }
-            }
-        }
         const current = s;
         const want = rankedAutoCards(current, policy)
             .map(c => ({ ...c, die: firstLegalPoweringDie(current, c.card) }))

@@ -13,28 +13,16 @@ import {
     canAct,
 } from './effect-modifiers';
 import {
-    applyRegen, applyDrain,
     processDamageOverTime, processRoundStartEffects, processRoundEndEffects,
-    applyCleanse, applyDispel,
+    applyCleanse,
 } from './effects';
-import { registerFixtureEffects } from '../test-utils/fixture-effects';
-
-// The keyword audit (2026-09-27) deleted buff_thorns / debuff_backfire /
-// the round-clock DoT species from the library; their engine channels are
-// exercised through the `fixture_*` effects instead.
-registerFixtureEffects();
 
 /**
- * The spec 32 v3 keyword reset deleted the library effects that used to carry
- * negative-regen drain and action-restriction payloads.
- * No surviving library effect carries those shapes, so — rather than weaken
- * the machinery coverage those shapes exercise — we register test-only
- * `Effect` fixtures into the shared registry (the same lookup
- * `getActiveEffectModifiers` / `canAct` / the effect helpers resolve
- * through). These ids never touch the library JSON. Payloads that a surviving
- * effect DOES cover (DoT) are repointed to those real survivors; R5 deleted
- * the last regeneration buff, so regen runs through `test_regen`. (Effect stat modifiers were deleted
- * outright by TRIM THE FAT T2a / D14, so they have no fixture here.)
+ * The skip-turn restriction is a test-only `Effect` fixture registered
+ * into the shared registry (the same lookup `getActiveEffectModifiers` /
+ * `canAct` resolve through). These ids never touch the library JSON. The
+ * round-clock DoT runs through the live Creeping Doom (1 per stack, round
+ * start).
  */
 const mk = (id: string, type: 'buff' | 'debuff', payload: Effect['payload']): Effect => ({
     id,
@@ -49,23 +37,6 @@ const mk = (id: string, type: 'buff' | 'debuff', payload: Effect['payload']): Ef
 });
 
 const TEST_EFFECTS: Effect[] = [
-    // Positive regen (the shape R5's deleted buff_regeneration carried).
-    mk('test_regen', 'buff', { regeneration: { healthPerRound: 4 } }),
-    // Negative-regen drain shapes.
-    mk('test_drain1', 'debuff', { regeneration: { healthPerRound: -1 } }),
-    mk('test_drain2', 'debuff', { regeneration: { healthPerRound: -2 } }),
-    // DoT (2 @ start) + drain (1) — the retired disease shape.
-    mk('test_disease', 'debuff', {
-        damageOverTime: { damagePerRound: 2, damageType: 'body', tickPhase: 'start' },
-        regeneration: { healthPerRound: -1 },
-    }),
-    // grant-advantage on body only.
-    mk('test_adv_body', 'buff', {
-        advantageModifier: { grantAdvantage: ['body'] },
-    }),
-    // action-restriction shapes.
-    mk('test_charm', 'debuff', { actionRestriction: { forcedStance: 'heart' } }),
-    mk('test_silence', 'debuff', { actionRestriction: { blockedStances: ['heart'] } }),
     mk('test_stun', 'debuff', { actionRestriction: { skipTurn: true } }),
 ];
 
@@ -83,18 +54,15 @@ const ae = (effectId: string, intensity = 1, remainingDuration = 3): ActiveEffec
     ({ effectId, intensity, remainingDuration, appliedAt: 1, tier: 2 });
 
 describe('getActiveEffectModifiers', () => {
-    it('aggregates ROUND-CLOCK DoT damage by tick phase (Q4) — event clocks stay off the boundary', () => {
-        // WS3.3: poison/bleed moved to event clocks — the round aggregator
-        // must carry ZERO for them. The round-clocked card-local species
-        // (kindling ember: start; nettle sting: end) keep the phase split.
+    it('aggregates ROUND-CLOCK DoT damage — event clocks stay off the boundary', () => {
+        // WS3.3: poison/bleed ride event clocks — the round aggregator must
+        // carry ZERO for them. Creeping Doom names no trigger: round start.
         const mods = getActiveEffectModifiers([
-            ae('fixture_ember', 2),  // 1 × 2 = 2 at start
-            ae('fixture_nettle',   1),  // 2 × 1 = 2 at end
-            ae('debuff_poison', 1),          // card-played clock → 0 here
-            ae('debuff_bleed',  1),          // damage-instance clock → 0 here
+            ae('debuff_creeping_doom', 2),  // 1 × 2 = 2 at start
+            ae('debuff_poison', 1),         // card-played clock → 0 here
+            ae('debuff_bleed',  1),         // damage-instance clock → 0 here
         ]);
         expect(mods.dotStart).toBe(2);
-        expect(mods.dotEnd).toBe(2);
     });
 
     it('amplifies DoT live when an amplify_damage combo is present (Phase 156)', () => {
@@ -108,168 +76,85 @@ describe('getActiveEffectModifiers', () => {
         ];
         const mods = getActiveEffectModifiers(effects);
         expect(mods.dotStart).toBe(0);
-        expect(mods.dotEnd).toBe(0);
         // floor(2 × 2 × 1.5) = 6 (poison, Hemorrhage) + 3 × 1 = 3 (bleed).
         expect(getActiveDotTotal(effects).total).toBe(9);
     });
 
-    it('separates regen from drain (Q6)', () => {
-        const mods = getActiveEffectModifiers([
-            ae('test_regen',        2),  // healthPerRound 4 × 2 = 8
-            ae('test_drain1',       1),  // healthPerRound -1 × 1 = drain 1
-            ae('test_drain2',       1),  // healthPerRound -2 × 1 = drain 2
-        ]);
-        expect(mods.healthRegen).toBe(8);
-        expect(mods.healthDrain).toBe(3);
-    });
-
-    it('collects action restrictions', () => {
-        const mods = getActiveEffectModifiers([
-            ae('test_charm'),    // forcedStance: heart
-            ae('test_silence'),  // blockedStances: [heart]
-            ae('test_stun'),     // skipTurn: true
-        ]);
-        expect(mods.skipTurn).toBe(true);
-        expect(mods.forcedStance).toBe('heart');
-        expect(mods.blockedStances.has('heart')).toBe(true);
+    it('collects the skip-turn restriction', () => {
+        expect(getActiveEffectModifiers([ae('test_stun')]).skipTurn).toBe(true);
+        expect(getActiveEffectModifiers([]).skipTurn).toBe(false);
     });
 });
 
-describe('canAct (Q7 precedence)', () => {
-    it('skipTurn wins over everything', () => {
-        const result = canAct([ae('test_stun'), ae('test_charm')], 'body');
+describe('canAct', () => {
+    it('a skip-turn restriction loses the action', () => {
+        const result = canAct([ae('test_stun')]);
         expect(result.canAct).toBe(false);
         expect(result.reason).toBe('skipTurn');
     });
 
-    it('forcedStance overrides requested stance', () => {
-        const result = canAct([ae('test_charm')], 'body');
-        expect(result.canAct).toBe(true);
-        expect(result.resolvedStance).toBe('heart');
-    });
-
-    it('blockedStance prevents using a specific stance', () => {
-        const result = canAct([ae('test_silence')], 'heart');
-        expect(result.canAct).toBe(false);
-        expect(result.reason).toBe('blockedStance');
-    });
-
-    it('blockedStance does not block other stances', () => {
-        const result = canAct([ae('test_silence')], 'body');
-        expect(result.canAct).toBe(true);
-        expect(result.resolvedStance).toBe('body');
-    });
-
-    it('returns the requested stance when no restrictions apply', () => {
-        const result = canAct([], 'mind');
-        expect(result.canAct).toBe(true);
-        expect(result.resolvedStance).toBe('mind');
+    it('acts when no restriction applies', () => {
+        expect(canAct([])).toEqual({ canAct: true, reason: null });
     });
 });
 
-describe('DoT and drain HP changes', () => {
-    it('processDamageOverTime applies start-phase damage only', () => {
-        // WS3.3: poison left the round clocks — the round-clocked witness is
-        // kindling ember (dpr 1, start phase).
-        const t = fixture([ae('fixture_ember', 2)]);
-        const before = t.health;
-        const r = processDamageOverTime(t, 'start');
-        expect(r.damage).toBe(2); // ember: 1 × 2 = 2
-        expect(r.target.health).toBe(before - 2);
-    });
-
-    it('processDamageOverTime separates start from end phases (event clocks excluded)', () => {
-        // Round-clocked species: ember starts (1), nettle ends (2). The
-        // event-clocked poison/bleed never tick at either boundary (WS3.3).
+describe('round-clock DoT HP changes', () => {
+    it('processDamageOverTime ticks the round-clock DoT (event clocks excluded)', () => {
+        // Creeping Doom (dpr 1) rides the round clock; the event-clocked
+        // poison/bleed never tick at the boundary (WS3.3).
         const t = fixture([
-            ae('fixture_ember'), ae('fixture_nettle'),
+            ae('debuff_creeping_doom', 2),
             ae('debuff_poison'), ae('debuff_bleed'),
         ]);
-        const startTick = processDamageOverTime(t, 'start');
-        expect(startTick.damage).toBe(1);
-        const endTick = processDamageOverTime(startTick.target, 'end');
-        expect(endTick.damage).toBe(2);
-    });
-
-    it('applyDrain damages bearer based on negative regen', () => {
-        const t = fixture([ae('test_drain1')]); // healthPerRound -1
         const before = t.health;
-        const r = applyDrain(t);
-        expect(r.drained).toBe(1);
-        expect(r.target.health).toBe(before - 1);
+        const r = processDamageOverTime(t);
+        expect(r.damage).toBe(2); // doom: 1 × 2 = 2
+        expect(r.target.health).toBe(before - 2);
     });
-
-    it('applyRegen scales with intensity (Q2)', () => {
-        const damaged = { ...fixture([ae('test_regen', 2)]), health: 10 };
-        // healthPerRound 4 × intensity 2 = 8
-        const r = applyRegen(damaged);
-        expect(r.healed).toBe(8);
-        expect(r.target.health).toBe(18);
-    });
-
 });
 
 describe('processRoundStartEffects orchestrator', () => {
-    it('applies regen, drain and start-DoT in one call', () => {
-        // kindling ember (DoT 1 start, ×2) + test_disease (DoT 2 start,
-        // drain 1 — the retired disease shape as a fixture). WS3.3: poison is
-        // event-clocked and would carry 0 at the round boundary.
-        const t = { ...fixture([ae('fixture_ember', 2), ae('test_disease')]), health: 30 };
+    it('applies the round-clock DoT', () => {
+        const t = { ...fixture([ae('debuff_creeping_doom', 3)]), health: 30 };
         const r = processRoundStartEffects(t);
-        // start-DoT total: 2 + 2 = 4; drain: 1
-        expect(r.dotDamage).toBe(4);
-        expect(r.drained).toBe(1);
-        expect(r.target.health).toBe(30 - 4 - 1);
+        expect(r.dotDamage).toBe(3);
+        expect(r.target.health).toBe(27);
     });
 });
 
 describe('processRoundEndEffects orchestrator', () => {
-    it('applies end-DoT then ticks duration; event-clocked BLEED stays off the boundary (WS3.3)', () => {
-        // nettle sting is the round-end witness (dpr 2). BLEED rides the
-        // damage-instance clock now: it neither ticks nor decays at round end
-        // (its per-tick decay is exercised via `fireDotTrigger`); its
-        // CALENDAR still counts down.
-        const t = { ...fixture([ae('fixture_nettle', 2, 2), ae('debuff_bleed', 2, 2)]), health: 20 };
+    it('ticks duration only; event-clocked BLEED stays off the boundary (WS3.3)', () => {
+        // BLEED rides the damage-instance clock: it neither ticks nor decays
+        // at round end (its per-tick decay is exercised via `fireDotTrigger`);
+        // its CALENDAR still counts down.
+        const t = { ...fixture([ae('debuff_bleed', 2, 2)]), health: 20 };
         const r = processRoundEndEffects(t);
-        expect(r.dotDamage).toBe(4); // nettle: floor(2 × 2) = 4; bleed: 0
-        expect(r.target.health).toBe(16); // 20 - 4
-        const nettle = r.target.effects.find(e => e.effectId === 'fixture_nettle')!;
-        expect(nettle.intensity).toBe(2); // decaysPerTick: false
-        expect(nettle.remainingDuration).toBe(1);
+        expect(r.target.health).toBe(20);
         const bleed = r.target.effects.find(e => e.effectId === 'debuff_bleed')!;
         expect(bleed.intensity).toBe(2); // no round-end tick → no decay
-        expect(bleed.remainingDuration).toBe(1); // calendar unchanged by WS3.3
+        expect(bleed.remainingDuration).toBe(1);
     });
 });
 
-describe('applyCleanse / applyDispel (Q10)', () => {
+describe('applyCleanse (Q10)', () => {
     it('Tier 2 cleanse strips Tier 1 + 2 debuffs', () => {
         const t = fixture([
             { effectId: 'debuff_poison', intensity: 1, remainingDuration: 3, appliedAt: 1, tier: 2 },
-            { effectId: 'fixture_backfire', intensity: 1, remainingDuration: 2, appliedAt: 1, tier: 3 },
+            { effectId: 'debuff_petrify', intensity: 1, remainingDuration: 2, appliedAt: 1, tier: 3 },
         ]);
         const r = applyCleanse(t, 2);
         expect(r.removed.map(e => e.effectId)).toEqual(['debuff_poison']);
         // Tier 3 survives
-        expect(r.target.effects.some(e => e.effectId === 'fixture_backfire')).toBe(true);
+        expect(r.target.effects.some(e => e.effectId === 'debuff_petrify')).toBe(true);
     });
 
     it('Tier 3 cleanse strips everything', () => {
         const t = fixture([
             { effectId: 'debuff_poison',  intensity: 1, remainingDuration: 3, appliedAt: 1, tier: 2 },
-            { effectId: 'fixture_backfire', intensity: 1, remainingDuration: 2, appliedAt: 1, tier: 3 },
+            { effectId: 'debuff_petrify', intensity: 1, remainingDuration: 2, appliedAt: 1, tier: 3 },
         ]);
         const r = applyCleanse(t, 3);
         expect(r.removed).toHaveLength(2);
-    });
-
-    it('Tier 2 dispel strips Tier 1 + 2 buffs but leaves Tier 3', () => {
-        const t = fixture([
-            { effectId: 'test_regen',    intensity: 1, remainingDuration: 3, appliedAt: 1, tier: 2 },
-            { effectId: 'test_adv_body', intensity: 1, remainingDuration: 2, appliedAt: 1, tier: 3 },
-        ]);
-        const r = applyDispel(t, 2);
-        expect(r.removed.map(e => e.effectId)).toEqual(['test_regen']);
     });
 });
 

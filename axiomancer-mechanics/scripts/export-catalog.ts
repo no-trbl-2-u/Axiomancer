@@ -279,35 +279,11 @@ function payloadLines(p: any): string[] {
         out.push(`${m.stat} ${m.isMultiplier ? `×${m.value}` : signed(m.value)}`);
     }
     const d = p.damageOverTime;
-    if (d) out.push(`DoT ${d.damagePerRound}/round × intensity (${d.damageType}, ticks ${d.tickPhase ?? 'start'})`);
-    const rh = p.regeneration?.healthPerRound;
-    if (rh) out.push(`${rh > 0 ? `Regen +${rh}` : `Drain ${rh}`} HP/round`);
-    if (p.rollModifier) out.push(`Roll ${signed(p.rollModifier)}`);
-    if (p.rollModifierPerIntensity) out.push(`Roll ${signed(p.rollModifierPerIntensity)}/intensity`);
-    if (p.defenseModifier) out.push(`Defense ${signed(p.defenseModifier)}`);
-    if (p.reflectDamage) out.push(`Thorns ${p.reflectDamage}/intensity`);
+    if (d) out.push(`DoT ${d.damagePerRound}/round × intensity (${d.damageType}, ticks ${d.trigger ?? 'round start'})`);
     if (p.damageTakenMult && p.damageTakenMult !== 1) out.push(`Damage taken ${pct(p.damageTakenMult)}`);
-    if (p.damageTakenMultForStance) {
-        const s = p.damageTakenMultForStance;
-        out.push(`Damage taken ${pct(s.mult)} from ${s.stance} plays`);
-    }
     if (p.outgoingDamageMulPct) out.push(`Outgoing damage ${signed(p.outgoingDamageMulPct)}%`);
-    if (p.powerMulPct) out.push(`Card power ${signed(p.powerMulPct)}%`);
-    if (p.healingReceivedMulPct) out.push(`Healing received ${signed(p.healingReceivedMulPct)}%`);
     const ar = p.actionRestriction;
     if (ar?.skipTurn) out.push('Skips turn');
-    if (ar?.forcedStance) out.push(`Forced stance: ${ar.forcedStance}`);
-    if (ar?.blockedStances?.length) out.push(`Blocks stance: ${ar.blockedStances.join(', ')}`);
-    const av = p.advantageModifier;
-    if (av?.grantAdvantage?.length) out.push(`Advantage: ${av.grantAdvantage.join(', ')}`);
-    if (av?.grantDisadvantage?.length) out.push(`Disadvantage: ${av.grantDisadvantage.join(', ')}`);
-    if (p.revealsStance) out.push('Reveals hidden stance');
-    if (p.blocksAdvantage) out.push('Blocks advantage/crit');
-    if (p.reducesControlAccuracy) out.push('Reduces control accuracy');
-    if (p.nextDotTierUpgrade) out.push(`Next DoT tick +${p.nextDotTierUpgrade} tier`);
-    if (p.restrictsSurgeAccess) out.push('Denies enemy surge (next play weak-tier)');
-    if (p.forceWildOnNextDie) out.push(`Next ${p.colorChoice ?? ''} die counts as Wild`.replace('  ', ' '));
-    if (p.consumedOnUse && out.length === 0) out.push('Single-use trigger');
     return out;
 }
 
@@ -355,7 +331,6 @@ function buildEnemies() {
             },
             logic: e.logic,
             logicBlurb: LOGIC_BLURB[e.logic] ?? e.logic,
-            stanceHint: e.stanceHint ?? '',
             cards,
         };
     }).sort((a, b) => (a.level ?? 0) - (b.level ?? 0) || a.name.localeCompare(b.name));

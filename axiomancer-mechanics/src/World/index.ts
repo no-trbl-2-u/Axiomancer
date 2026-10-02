@@ -1,7 +1,7 @@
 import { WorldState, Continent } from './types';
 import { createMapState, getMapDefinition, MAP_REGISTRY } from './map.registry';
 import type { MapName, ContinentName } from './map.library';
-import type { CoastalContinentMapNames } from './Continents/Coastal-Village/maps';
+import type { CoastalContinentMapNames } from './map.library';
 
 /**
  * The map a new game starts on (D27, map revamp M3a): the Breakwater, Act 1's
@@ -119,12 +119,13 @@ import './MapEvents/content';
 
 export {
     resolveMapEvent,
+    settleArrival,
     getNodeEventPool,
     getNodePrimaryEventKind,
 } from './MapEvents/resolve-map-event';
 export type {
     MapEventKind,
-    ResolvedEvent, ResolveMapEventResult,
+    MapEventPayload, ResolvedEvent, ResolveMapEventResult,
 } from './MapEvents/types';
 // Phase 52b — rest shelter classification (replaces the healFraction >= 1.0
 // inn heuristic). Mobile gates the hazard-scar mend on `shelter === 'inn'`.

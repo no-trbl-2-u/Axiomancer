@@ -19,54 +19,6 @@
     "generated_by": "public-domain-acquisition",
     "date": "2026-09-19",
     "tool": "scripts/acquire-art.mjs (Commons API + sharp)",
-    "source": "https://commons.wikimedia.org/wiki/File:Bpt6k10470488_f277.jpg",
-    "artist": "Gustave Doré",
-    "license": "Public domain",
-    "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
-    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44; 2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs",
-    "covers": [
-      "arena-northern-city.webp"
-    ],
-    "used_by": [
-      "assets/images/combat/index.ts"
-    ]
-  },
-  {
-    "generated_by": "public-domain-acquisition",
-    "date": "2026-09-19",
-    "tool": "scripts/acquire-art.mjs (Commons API + sharp)",
-    "source": "https://commons.wikimedia.org/wiki/File:Bpt6k10470488_f95.jpg",
-    "artist": "Gustave Doré",
-    "license": "Public domain",
-    "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
-    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44; 2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs",
-    "covers": [
-      "arena-connecting-river.webp"
-    ],
-    "used_by": [
-      "assets/images/combat/index.ts"
-    ]
-  },
-  {
-    "generated_by": "public-domain-acquisition",
-    "date": "2026-09-19",
-    "tool": "scripts/acquire-art.mjs (Commons API + sharp)",
-    "source": "https://commons.wikimedia.org/wiki/File:Bpt6k10470488_f375.jpg",
-    "artist": "Gustave Doré",
-    "license": "Public domain",
-    "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
-    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44; 2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs",
-    "covers": [
-      "arena-sweethearts-village.webp"
-    ],
-    "used_by": [
-      "assets/images/combat/index.ts"
-    ]
-  },
-  {
-    "generated_by": "public-domain-acquisition",
-    "date": "2026-09-19",
-    "tool": "scripts/acquire-art.mjs (Commons API + sharp)",
     "source": "https://commons.wikimedia.org/wiki/File:YCBA_London_a_Pilgrimage_07.jpg",
     "artist": "Gustave Doré",
     "license": "Public domain",
@@ -89,55 +41,5 @@
       "inset": 0.01
     },
     "replaces": "arena-ruined-city.jpg — owner-supplied pixel art, licence UNRESOLVED and untraced. Retired in phase 103 under THE OPEN GATE ¶6 (2026-08-28), which makes replacing an untraceable asset from the licensed trove a loop call. Its record was removed with the file; the retirement rationale lives in plan/archive/2026-09-28-revamp-r0/plan/phases/phase_103_the_last_two_arenas.md."
-  },
-  {
-    "generated_by": "public-domain-acquisition",
-    "date": "2026-09-19",
-    "tool": "scripts/acquire-art.mjs (Commons API + sharp)",
-    "source": "https://commons.wikimedia.org/wiki/File:Gustave_Dor%C3%A9_-_Dante_Alighieri_-_Inferno_-_Plate_8_(Canto_III_-_Abandon_all_hope_ye_who_enter_here).jpg",
-    "artist": "Gustave Doré (1832 – 1883)",
-    "license": "Public domain",
-    "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
-    "post_process": "plate detected on the scanned page and extracted to 2690x2192 at (65,74) of 2820x2314 (inset 0.01), then grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44; 2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs",
-    "covers": [
-      "arena-caverns.webp"
-    ],
-    "used_by": [
-      "assets/images/combat/index.ts"
-    ],
-    "crop": {
-      "left": 65,
-      "top": 74,
-      "width": 2690,
-      "height": 2192,
-      "sourceWidth": 2820,
-      "sourceHeight": 2314,
-      "inset": 0.01
-    }
-  },
-  {
-    "generated_by": "public-domain-acquisition",
-    "date": "2026-09-19",
-    "tool": "scripts/acquire-art.mjs (Commons API + sharp)",
-    "source": "https://commons.wikimedia.org/wiki/File:Paradiso_Canto_31_(no_caption).jpg",
-    "artist": "Gustave Doré",
-    "license": "Public domain",
-    "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
-    "post_process": "plate detected on the scanned page and extracted to 2328x2873 at (61,62) of 2448x2992 (inset 0.01), then grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44; 2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs",
-    "covers": [
-      "arena-the-capital.webp"
-    ],
-    "used_by": [
-      "assets/images/combat/index.ts"
-    ],
-    "crop": {
-      "left": 61,
-      "top": 62,
-      "width": 2328,
-      "height": 2873,
-      "sourceWidth": 2448,
-      "sourceHeight": 2992,
-      "inset": 0.01
-    }
   }
 ]

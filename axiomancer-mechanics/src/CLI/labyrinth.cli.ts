@@ -28,7 +28,7 @@ import { createEventEmitter } from '../Game/events';
 import { nullAdapter } from '../Game/persistence/null.adapter';
 import { devSetLevel } from './dev-tools';
 import { getMapDefinition, createMapState } from '../World/map.registry';
-import { resolveMapEvent } from '../World';
+import { resolveMapEvent, settleArrival } from '../World';
 import { moveToNode, unblockMapRoute, teleportToNode } from '../World/world.reducer';
 import type { ResolvedEvent } from '../World/MapEvents/types';
 import type { WorldState } from '../World/types';
@@ -147,6 +147,9 @@ async function arrive(
             maxTurns: flags.combatMaxTurns ?? 30,
         });
         combatOutcome = combat.outcome;
+        // The fight ran outside the store: settle the room here, as
+        // `END_COMBAT` does in the store (phase R9a).
+        store.setState({ world: settleArrival(store.getState()).world });
     }
 
     // The Oubliette: after its lesson, the house returns you.

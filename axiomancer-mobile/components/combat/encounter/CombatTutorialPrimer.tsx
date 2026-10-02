@@ -29,19 +29,16 @@ const PANELS: PrimerPanel[] = [
     {
         eyebrow: '⚔ A NEW KIND OF FIGHT',
         title: 'ONE BAR, MANY BLADES',
-        // S1-board-C35 — this line used to promise 'the Surge meter', a readout
-        // the board never draws; MOMENTUM is the chip that is actually there.
         body:
-            'The enemy has ONE bar: VITAE. Wear it to nothing — strikes, statuses, Conviction, ' +
-            'MOMENTUM and your dice all compete on merit. A clever read turns the fight.',
+            'The enemy has ONE bar: VITAE. Wear it to nothing — strikes, statuses, Conviction ' +
+            'and your dice all compete on merit. A clever play turns the fight.',
     },
     {
-        eyebrow: 'BLEED & BIND',
-        title: 'POISON, STEAL THEIR TURN, OR JUST HIT HARD',
+        eyebrow: 'BLOW, WARD & WORD',
+        title: 'HIT, HOLD, OR OPEN THEM UP',
         body:
-            'A DoT (POISON, BLEED) drains their VITAE every turn. STAGGER strips rungs from ' +
-            'their telegraphed action: at zero it is denied outright. A strike takes VITAE ' +
-            'straight off the top — no wrong answer. Befriend a low-VITAE foe to spare it.',
+            'A strike takes VITAE straight off the top. GUARD blocks the next threat. ' +
+            'VULNERABLE makes every hit land harder. Befriend a low-VITAE foe to spare it.',
     },
     {
         eyebrow: 'DICE & CARDS',

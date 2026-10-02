@@ -65,7 +65,7 @@ describe('DebugPopulateAllItems: press routing', () => {
         fireEvent.press(tree.getByTestId('debug-populate-all-items'));
 
         const inventoryAfter = store.getState().player.inventory ?? [];
-        // Phase 21 — "every item" is the 8 signet relics + every consumable.
+        // Phase 21 — "every item" is the signet relics + every consumable.
         const expected = relicLibrary.length + consumableLibrary.length;
         expect(inventoryAfter.length - inventoryBefore).toBe(expected);
 

@@ -136,10 +136,9 @@ const SCREENS = [
     // `gathering` node now grants items inline with no screen to capture.
     {
         id: 'dialogue', file: '19-dialogue.png', drive: async (p) => {
-            await goto(p, '/character')
-            await openDevMenu(p)
-            await tap(p, 'debug-dialogue-northern-forest-hermit-sage')
-            await settle(p, 1600)
+            // No map stages an NPC since R7e: the staged-dialogue fixture does.
+            await goto(p, '/exploration?fixture=apprentice-staged-dialogue')
+            await settle(p, 2400)
         },
     },
     // Paced narrative screens reached via <EventGate> (Phase 137 dedicated

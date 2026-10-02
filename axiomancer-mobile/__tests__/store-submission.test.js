@@ -35,7 +35,7 @@ describe('Store Submission Requirements', () => {
     test('app.json has required production fields', () => {
       const { expo } = appConfig;
       
-      expect(expo.name).toBe('axiomancer-mobile');
+      expect(expo.name).toBe('Miserere Mei, Deus'); // launcher label; slug stays frozen
       expect(expo.slug).toBe('axiomancer-mobile');
       expect(expo.version).toMatch(/^\d+\.\d+\.\d+$/); // Semantic versioning
       expect(expo.orientation).toBe('portrait');

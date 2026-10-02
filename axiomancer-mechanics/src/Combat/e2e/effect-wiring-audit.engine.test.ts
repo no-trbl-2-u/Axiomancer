@@ -3,105 +3,15 @@
  * payload surface that was previously INERT (or mis-timed) in Hazard-Pattern
  * Combat and is now read by the live engine:
  *
- *   - `defenseModifier` → flat armor soak on the incoming telegraph (no
- *     library effect carries it since R5; `fixture_armor` keeps it pinned
- *     until R7a deletes the channel).
- *   - BACKFIRE lethal-ordering guard — an enemy the backfire drip kills does
- *     not still complete its telegraphed swing that phase.
  *   - POISON ramp reset on reapplication (`escalatesPerTurn` → `appliedAt`
  *     re-stamped in `applyEffect`).
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
 
-import { Player } from '../../Character/characters.mock';
-import type { Character } from '../../Character/types';
-import type { Enemy } from '../../Enemy/types';
-import { FloatEye } from '../../Enemy/enemy.library';
-import { deepClone } from '../../Utils';
-import { mockSequentialRng } from '../../test-utils/rng';
 import { applyEffect, lookupEffect } from '../../Effects';
-import type { ActiveEffect } from '../../Effects/types';
-import {
-    initializeCombatEncounter, rollEncounterDice, resolveThreatPhase,
-} from '../combat.engine';
-import type { CombatEvent } from '../combat.encounter.types';
-import { registerFixtureEffects } from '../../test-utils/fixture-effects';
-
-// The keyword audit (2026-09-27) deleted buff_thorns / debuff_backfire /
-// the round-clock DoT species from the library; their engine channels are
-// exercised through the `fixture_*` effects instead.
-registerFixtureEffects();
 
 afterEach(() => { vi.restoreAllMocks(); });
-
-const ae = (effectId: string, intensity = 1, remainingDuration = 4, tier: 1 | 2 | 3 = 2): ActiveEffect =>
-    ({ effectId, intensity, remainingDuration, appliedAt: 1, tier });
-
-function makePlayer(effects: ActiveEffect[] = []): Character {
-    const p = deepClone(Player);
-    p.knownCards = [];
-    p.baseStats = { heart: 8, body: 8, mind: 8 };
-    p.health = 200; p.maxHealth = 200; p.effects = effects;
-    return p;
-}
-
-function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'mind', effects: ActiveEffect[] = []): Enemy {
-    const e = deepClone(FloatEye);
-    e.id = 'enemy-test-dummy';
-    e.health = hp; e.maxHealth = hp; e.effects = effects;
-    e.baseStats = { heart: stance === 'heart' ? 6 : 2, body: stance === 'body' ? 6 : 2, mind: stance === 'mind' ? 6 : 2 };
-    return e;
-}
-
-const has = (events: readonly CombatEvent[], kind: string): boolean => events.some(e => e.kind === kind);
-
-// ── ARMOR (defenseModifier) ──────────────────────────────────────────────────
-
-describe('ARMOR — defenseModifier soaks the incoming telegraph', () => {
-    it('a plain player takes telegraph damage (control)', () => {
-        mockSequentialRng(0.05);
-        const base = initializeCombatEncounter(makePlayer(), makeEnemy(300, 'mind'), undefined, 7);
-        const res = resolveThreatPhase(rollEncounterDice(base).state);
-        expect(res.state.player.health).toBeLessThan(200);
-    });
-
-    it('fixture_armor (defenseModifier 5) shaves 5 off the control hit', () => {
-        mockSequentialRng(0.05);
-        const control = resolveThreatPhase(
-            rollEncounterDice(initializeCombatEncounter(makePlayer(), makeEnemy(300, 'mind'), undefined, 7)).state,
-        ).state.player.health;
-        const armored = resolveThreatPhase(
-            rollEncounterDice(initializeCombatEncounter(
-                makePlayer([ae('fixture_armor', 1, 3)]), makeEnemy(300, 'mind'), undefined, 7,
-            )).state,
-        ).state.player.health;
-        // Same seed / same hit; armor shaves up to 5 off whatever the hit was.
-        const controlLoss = 200 - control;
-        const armoredLoss = 200 - armored;
-        expect(controlLoss).toBeGreaterThan(0);                 // control took a hit
-        expect(armoredLoss).toBe(Math.max(0, controlLoss - 5)); // …armor removed 5 of it
-    });
-});
-
-// ── BACKFIRE lethal-ordering guard ───────────────────────────────────────────
-
-describe('BACKFIRE — a lethal drip cancels the enemy swing this phase', () => {
-    it('an enemy killed by backfire does not still hit the player', () => {
-        mockSequentialRng(0.05);
-        // 1-HP enemy carrying backfire; one rung staggered (not fully denied) so
-        // it WOULD act — but the 1-HP backfire drip kills it before the swing.
-        const enemy = makeEnemy(1, 'mind', [ae('fixture_backfire', 1, 2)]);
-        const base = initializeCombatEncounter(makePlayer(), enemy, undefined, 7);
-        const state = { ...rollEncounterDice(base).state, staggerRungs: 1 };
-        const res = resolveThreatPhase(state);
-        expect(has(res.events, 'backfired')).toBe(true);
-        expect(res.state.enemy.health).toBe(0);
-        expect(res.state.finalOutcome).toBe('victory');
-        expect(res.state.player.health).toBe(200);      // the swing never landed
-        expect(has(res.events, 'threat-fired')).toBe(false);
-    });
-});
 
 // ── POISON ramp reset on reapplication ───────────────────────────────────────
 

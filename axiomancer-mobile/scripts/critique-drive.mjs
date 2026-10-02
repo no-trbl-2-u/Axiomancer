@@ -94,11 +94,10 @@ const SCREENS = [
         name: 'onboarding',
         path: '/',
         why: 'Where a first-time player forms their model of the game.',
-        // New player: dismiss the title, land on the starter-bundle picker.
+        // New player: dismiss the title.
         prepare: async (page) => {
             const cont = page.getByRole('button').first()
             if (await cont.count()) await cont.click({ timeout: 4000, force: true }).catch(() => {})
-            await page.getByTestId('bundle-select').waitFor({ state: 'visible', timeout: 6000 }).catch(() => {})
         },
     },
     {
@@ -130,21 +129,21 @@ const SCREENS = [
     {
         name: 'dialogue',
         path: '/(tabs)/exploration',
-        fixture: 'apprentice-nf-interaction',
+        fixture: 'apprentice-staged-dialogue',
         waitForPath: '/dialogue',
         why: 'The NPC dialogue shell — voice, choice legibility, and how a conversation reads to a first-time player.',
     },
     {
         name: 'village',
         path: '/(tabs)/exploration',
-        fixture: 'wanderer-nf-village',
+        fixture: 'wanderer-staged-village',
         waitForPath: '/village',
         why: 'The settlement + shop screen — merchant voice, ware pricing, and whether buying/selling explains itself.',
     },
     {
         name: 'cutscene',
         path: '/(tabs)/exploration',
-        fixture: 'wanderer-nf-cutscene',
+        fixture: 'wanderer-staged-cutscene',
         waitForPath: '/cutscene',
         why: 'A mid-forest omen — cutscene pacing, type, and whether the player knows how to continue.',
     },
@@ -158,7 +157,7 @@ const SCREENS = [
     {
         name: 'hazard',
         path: '/(tabs)/exploration',
-        fixture: 'l30-caverns-hazard-arrive',
+        fixture: 'l30-bw-hazard-arrive',
         waitForPath: '/hazard',
         why: 'The hazard minigame entry with a late-game kit — does the danger read before the first card is dragged?',
     },

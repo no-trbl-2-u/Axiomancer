@@ -2,7 +2,6 @@
  * Utility functions used across the application
  */
 
-import { Advantage } from "../Combat/types";
 import { RESOURCE_MULTIPLIERS, PLAYER_VITAE_BASE } from "../Game/game-mechanics.constants";
 import { BaseStats } from "../Character/types";
 import { getRng, Rng } from './rng';
@@ -103,19 +102,6 @@ export function formatPercent(value: number, decimals: number = 0): string {
 // ===============================================
 
 /**
- * Determines the modifier to apply to a roll based on the advantage
- * @param advantage - The advantage to apply to the roll
- * @returns A function that selects the appropriate value from a roll array
- */
-export const determineRollAdvantageModifier = (advantage: Advantage): (arr: number[]) => number => {
-  switch (advantage) {
-    case 'advantage':    return max;
-    case 'disadvantage': return min;
-    default:             return sum;
-  }
-}
-
-/**
  * Creates a die roll function
  * @param sides - Number of sides on the die
  * @param timesRolled - Number of times to roll the die
@@ -123,8 +109,7 @@ export const determineRollAdvantageModifier = (advantage: Advantage): (arr: numb
  * @returns A function that returns the result of the die roll
  * @example
  * const d20 = createDie(20, 1)
- * const advAtk = createDie(20, 2, max)   // roll 2d20, keep highest
- * const disadvAtk = createDie(20, 2, min) // roll 2d20, keep lowest
+ * const best2 = createDie(20, 2, max)   // roll 2d20, keep highest
  */
 export function createDie(sides: number, timesRolled: number, func?: (arr: number[]) => number, rng?: Rng): () => number {
   const rngInstance = rng ?? getRng();
@@ -134,18 +119,6 @@ export function createDie(sides: number, timesRolled: number, func?: (arr: numbe
     );
     return (func ?? sum)(rolls);
   };
-}
-
-/**
- * Creates a d20 roll respecting advantage/disadvantage.
- * Advantage: roll 2d20 keep highest. Disadvantage: roll 2d20 keep lowest.
- * Neutral: roll 1d20.
- * @param advantage - The advantage to create a die roll for
- * @returns A function that returns the result of the die roll
- */
-export function createDieRoll(advantage: Advantage): () => number {
-  const rollCount = advantage === 'neutral' ? 1 : 2;
-  return createDie(20, rollCount, determineRollAdvantageModifier(advantage));
 }
 
 // ===============================================

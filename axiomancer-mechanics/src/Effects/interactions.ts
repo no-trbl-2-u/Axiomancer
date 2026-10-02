@@ -12,7 +12,6 @@ export type InteractionTriggerType =
     | 'amplify_intensity'      // Boost intensity of target effect
     | 'amplify_duration'       // Extend duration of target effect
     | 'amplify_damage'         // Increase damage-over-time potency
-    | 'grant_advantage'        // Grant combat advantage while combo active
     | 'reduce_resistance';     // Lower resist difficulty for future effects
 
 /** Condition that must be met for an interaction to trigger. */

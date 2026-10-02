@@ -17,7 +17,7 @@ import { createEventEmitter } from '../events';
 import { createNewGameState } from '../game.reducer';
 import { nullAdapter } from '../persistence/null.adapter';
 import { cardLibrary } from '../../Cards/cards.library';
-import { EXPERIENCE_PER_LEVEL } from '../game-mechanics.constants';
+import { experienceForLevel } from '../../Character/experience';
 import type { TypedLevelUpEvent } from '../events.types';
 
 function buildStore(level: number, opts: {
@@ -56,7 +56,7 @@ describe('character:levelup payload — cards are no longer level-gated (2026-07
         // is empty (only stat/prereq gates could ever change it, and
         // none of those move on a plain level-up).
         const { store, captured } = buildStore(4, {
-            experience: 14 * EXPERIENCE_PER_LEVEL,
+            experience: experienceForLevel(14),
         });
         store.getState().levelUp();
         expect(store.getState().player.level).toBeGreaterThanOrEqual(14);
@@ -67,7 +67,7 @@ describe('character:levelup payload — cards are no longer level-gated (2026-07
     it('having some cards already known does not surface them on level-up either', () => {
         const someKnown = cardLibrary[0].id;
         const { store, captured } = buildStore(4, {
-            experience: 4 * EXPERIENCE_PER_LEVEL + 1,
+            experience: experienceForLevel(5) + 1,
             knownCards: [someKnown],
         });
         store.getState().levelUp();

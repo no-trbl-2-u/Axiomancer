@@ -11,7 +11,7 @@
  *
  * Every number is READ FROM THE ENGINE'S OWN EVENT STREAM — the roll gates from
  * the `turn-dice-rolled` events (the fresh four-die roll, not a post-spend
- * snapshot), realized income from `special-fired` / `stance-check-resolved` /
+ * snapshot), realized income from `special-fired` /
  * `die-overflowed`, surges from `momentum-surged`. Nothing is recomputed by a
  * parallel model, so the witness cannot drift from the engine it measures.
  */
@@ -115,7 +115,6 @@ export interface UpgradeableEconomyStats {
     specialIncomePerRound: number;
     /** Fraction of rolled special ◆ actually realized (spent-on-use). */
     specialSpendRate: number;
-    yieldIncomePerRound: number;
     overflowIncomePerRound: number;
     totalIncomePerRound: number;
     // ── Momentum / surge ─────────────────────────────────────────────────────
@@ -146,7 +145,6 @@ interface EconomyAccumulator {
     colorHits: Record<ChainColor, number>;
     grossSpecials: number;
     specialIncome: number;
-    yieldIncome: number;
     overflowIncome: number;
     surges: number;
     breaks: number;
@@ -158,7 +156,7 @@ function emptyAcc(): EconomyAccumulator {
     return {
         encounters: 0, rounds: 0, usable: 0, whiff: 0, deadRounds: 0,
         colorHits: { body: 0, mind: 0, heart: 0 },
-        grossSpecials: 0, specialIncome: 0, yieldIncome: 0, overflowIncome: 0,
+        grossSpecials: 0, specialIncome: 0, overflowIncome: 0,
         surges: 0, breaks: 0, wins: 0, totalRounds: 0,
     };
 }
@@ -194,7 +192,6 @@ function foldEvents(acc: EconomyAccumulator, events: readonly CombatEncounterSta
         else if (ev.kind === 'momentum-surged') acc.surges++;
         else if (ev.kind === 'momentum-broken') acc.breaks++;
         else if (ev.kind === 'die-overflowed') acc.overflowIncome += 1;
-        else if (ev.kind === 'stance-check-resolved' && ev.outcome === 'yielded') acc.yieldIncome += 1;
     }
 }
 
@@ -280,9 +277,8 @@ function finalize(acc: EconomyAccumulator): UpgradeableEconomyStats {
         grossSpecialIncomePerRound: grossSpecialIncome,
         specialIncomePerRound: specialIncome,
         specialSpendRate: grossSpecialIncome > 0 ? specialIncome / grossSpecialIncome : 0,
-        yieldIncomePerRound: acc.yieldIncome / r,
         overflowIncomePerRound: acc.overflowIncome / r,
-        totalIncomePerRound: (acc.specialIncome + acc.yieldIncome + acc.overflowIncome) / r,
+        totalIncomePerRound: (acc.specialIncome + acc.overflowIncome) / r,
         surgePerRound: acc.surges / r,
         momentumBreakPerRound: acc.breaks / r,
         winRate: acc.encounters > 0 ? acc.wins / acc.encounters : 0,
@@ -347,7 +343,7 @@ export function formatUpgradeableEconomyReport(result: ReturnType<typeof simulat
     lines.push(`  per-color body/mind/heart = ${pct(pooled.perColorAccess.body)} / ${pct(pooled.perColorAccess.mind)} / ${pct(pooled.perColorAccess.heart)}`);
     lines.push(`  ◆ income/round       = ${num(pooled.totalIncomePerRound)}   band 1.2-1.6   [${band(pooled.totalIncomePerRound, 1.2, 1.6)}]`);
     lines.push(`      special (realized) = ${num(pooled.specialIncomePerRound)}   gross(in-play) = ${num(pooled.grossSpecialIncomePerRound)}   spend-rate = ${pct(pooled.specialSpendRate)}`);
-    lines.push(`      yield              = ${num(pooled.yieldIncomePerRound)}   overflow = ${num(pooled.overflowIncomePerRound)}`);
+    lines.push(`      overflow           = ${num(pooled.overflowIncomePerRound)}`);
     lines.push(`  surge frequency      = ${num(pooled.surgePerRound)}/round   (momentum breaks ${num(pooled.momentumBreakPerRound)}/round)`);
     lines.push(`  dead rounds (0◆ FREE-only) = ${pct(pooled.deadRoundRate)}   (no band — measured only)`);
     lines.push('');

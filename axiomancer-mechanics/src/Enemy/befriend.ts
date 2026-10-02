@@ -1,7 +1,6 @@
 /**
  * Befriend eligibility read off the foe itself — the rules The Open Hand
- * (the Suppliant's Ring signature, D47) and the card-side befriend predicate
- * in `Combat/index.ts` share, so the two can never disagree.
+ * (the Suppliant's Ring signature, D47) reads.
  */
 
 import type { Enemy } from './types';

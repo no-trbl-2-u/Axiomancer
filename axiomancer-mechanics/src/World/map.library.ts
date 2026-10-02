@@ -1,10 +1,20 @@
 /* map.library.ts is a the enumeration of the entire World */
-import { CoastalContinentMapNames } from "./Continents/Coastal-Village/maps";
+
+/**
+ * CoastalContinentMapNames are all the maps in the Coastal Continent
+ * - 'breakwater': Act 1, map 1 — the storm coast, where a new game starts
+ *   (map revamp M3a, D27). Defined in `./Continents/Coastal-Village/breakwater.ts`.
+ * - 'charcoal-wood': Act 1, map 2 — the forest past the Breakwater's bridge
+ *   (map revamp M3b). Defined in `./Continents/Coastal-Village/charcoal-wood.ts`.
+ */
+export type CoastalContinentMapNames =
+    'breakwater' |
+    'charcoal-wood';
 
 /**
  * ContinentName represents the names of all continents in the game world
  * - 'coastal-continent': Starting Continent
- * - 'northern-continent': Contains Caverns, first major city, and connecting river
+ * - 'northern-continent': Act 1's mountains and underworld
  * - 'labyrinth-continent': THE APORIA — the MAZE-style puzzle labyrinth
  *   gating the last continent (specs/world/W-01). Dev-menu + CLI access
  *   only until the last continent exists.
@@ -43,24 +53,9 @@ export type MapName =
  *   (map revamp M3c). Defined in `./Continents/Northern-Continent/beacon-crags.ts`.
  * - 'lantern-deep': Act 1, map 4 — the underworld below the Beacon Crags' glacier shrine
  *   (map revamp M3d). Defined in `./Continents/Northern-Continent/lantern-deep.ts`.
- * - 'caverns': Caverns. Gather Iron ore
- * - 'northern-city': Northern City. Give artisans materials to build boat.
- *                    First hear rumors of the death of the advisor and     King seeking a new one.
- * - 'connecting-river': Connecting River. Use boat to sail down river. Meet islanders.
- *                       See ritual of selection of child to be nominated as the island's representitive for potential new advisor.
- * - 'town-across-river': Town across the river. Home of sweetheart. See sweetheart be nominatedas her village's
- *                       representitive for potential new advisor.
- * - 'the-capital': The Capital (map 5, 2026-09-10). Where every nominee's ribbon-road
- *                  ends — the river court's boy, the sweetheart, and whoever else the
- *                  provinces sent this cycle. The Factor holds court over who is chosen.
  * @todo: Add more maps
  * @todo: Come up with better names
  */
 export type NorthernContinentMapNames =
     'beacon-crags' |
-    'lantern-deep' |
-    'caverns' |
-    'northern-city' |
-    'connecting-river' |
-    'town-across-river' |
-    'the-capital';
+    'lantern-deep';

@@ -29,19 +29,10 @@ import { getCardById } from '@mechanics';
  *
  * Keyed loosely (`string`) rather than by `QuestName` so an id the engine adds
  * later degrades to `humanizeEngineId` instead of failing the type-check in a
- * package that cannot fix it.
+ * package that cannot fix it. Empty since R7e (D72) deleted the parked
+ * world's nine quests: no quest is authored.
  */
-const QUEST_TITLES: Readonly<Record<string, string>> = Object.freeze({
-    'gather-wood': 'Deadfall',
-    'get-to-cave': 'The Mouth in the Hill',
-    'gather-iron': 'Iron Out of the Dark',
-    'get-to-northern-city': 'The City Beyond',
-    'get-to-connecting-river': 'The Water Between',
-    'find-islanders': 'Those Who Stayed',
-    'join-islanders-for-ritual': 'Kneel With Them',
-    'get-to-town-across-river': 'The Far Bank',
-    'get-to-the-capital': 'The Capital',
-});
+const QUEST_TITLES: Readonly<Record<string, string>> = Object.freeze({});
 
 /**
  * Last-resort rendering for an id with no authored title.

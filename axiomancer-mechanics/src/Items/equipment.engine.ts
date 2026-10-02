@@ -15,7 +15,7 @@
 
 import { Consumable } from './types';
 import { Effect } from '../Effects/types';
-import { applyEffect, removeEffectsByType } from '../Effects';
+import { applyEffect } from '../Effects';
 import { heal } from '../Combat/health';
 import { Character } from '../Character/types';
 
@@ -168,16 +168,6 @@ export function useConsumableEffect(
     };
 
     const runEffect = (effect: Effect): void => {
-        // A cleanse instant is payload-less: its job is to STRIP debuffs, not to
-        // persist. Route it to `removeEffectsByType` scoped by the effect's tier
-        // (a tier-2 cleanse sheds tier 1+2 debuffs, a tier-1 cleanse sheds tier
-        // 1 only) instead of adding an inert instance.
-        if (effect.payload.cleanse) {
-            const { activeEffects } = removeEffectsByType(next.effects, 'debuff', effect.tier);
-            next = { ...next, effects: activeEffects };
-            applied = effect;
-            return;
-        }
         const { activeEffects } = applyEffect(next.effects, effect, round, buildApplyOptions());
         next = { ...next, effects: activeEffects };
         applied = effect;

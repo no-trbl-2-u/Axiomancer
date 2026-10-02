@@ -50,8 +50,6 @@ export interface CreateEnemyOptions {
     tags?: string[];
     /** Spec 26 §3.1 — asset id for the enemy's combat portrait (kebab-case). */
     portraitAsset?: string;
-    /** Spec 26b §2 — enemy-level thematic stance tell surfaced in the combat reveal. */
-    stanceHint?: string;
     /**
      * THE BIG NUMBERS REWRITE — authored VITAE pool. Overrides the difficulty
      * curve in {@link enemyVitae}. Every boss and unique authors this; ordinary
@@ -69,7 +67,7 @@ export interface CreateEnemyOptions {
  * (2026-09-02).
  *
  * Enemies no longer borrow the player's per-stat health formula: `baseStats`
- * still drives stance procs, derived combat stats and befriend logic, but the
+ * still drives derived combat stats and befriend logic, but the
  * pool is its own number so the difficulty bands separate cleanly and a boss
  * can be a wall without a grotesque stat budget.
  *
@@ -216,7 +214,7 @@ export function createEnemy(options: CreateEnemyOptions): Enemy {
         friendshipReward, befriendabilityConfig,
         finalBlowLines, pactLines, causeLines,
         journalEntry, addedIn, tags,
-        portraitAsset, stanceHint,
+        portraitAsset,
         vitae, keywords, stages,
     } = options;
 
@@ -243,7 +241,6 @@ export function createEnemy(options: CreateEnemyOptions): Enemy {
         addedIn,
         tags,
         portraitAsset,
-        stanceHint,
         // No keywords exist until B2 (D63); an empty list keeps the slot.
         keywords: keywords ?? [],
         stages: stages ?? defaultEnemyStages(difficulty, maxHealth),

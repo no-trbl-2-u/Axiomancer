@@ -19,7 +19,6 @@
 import type { Character } from '../Character/types';
 import type { Enemy } from '../Enemy/types';
 import type { Effect, ActiveEffect } from '../Effects/types';
-import type { Stance } from './types';
 import type { CardAspect, CardType } from '../Cards/types';
 
 // ---------------------------------------------------------------------------
@@ -159,34 +158,15 @@ export interface CardPlay {
 }
 
 // ---------------------------------------------------------------------------
-// Stance read + Conviction + Signature Skills (Spec 26b §1, §2, §4)
+// Conviction + Signature Skills (Spec 26b §1, §4)
 // ---------------------------------------------------------------------------
 
-/** The advantage/disadvantage rail labels. Spec 33 retired the hidden-stance
- *  read; `READ_DAMAGE_MULT` keeps the advantage (x1.5) / disadvantage (x0.5)
- *  rails for the open stance checks (`resolveThreatPhase`). */
-export type CombatReadResult = 'advantage' | 'neutral' | 'disadvantage' | 'none';
-
-/** What a signature skill does (drives the engine dispatch + the UI icon).
- *  Phase R4 left two placeholders until the owner re-authors them (B1). */
+/** What a signature skill does (drives the engine dispatch + the UI icon). */
 export type SignatureSkillKind =
-    | 'guard'          // raise GUARD (mind-scaled, like a card's GUARD)
     | 'mercy';         // The Open Hand: open the mercy choice on a befriendable foe
 
 export type SignatureSkillId =
-    | 'sig-read-opponent'
-    | 'sig-press-the-point'
-    | 'sig-second-wind'
-    | 'sig-overwhelming-argument'
-    | 'sig-conviction-strike'
-    // Per-archetype exclusives (Spec 26b tuning §B)
-    | 'sig-disarming-plea'    // heart
-    | 'sig-rallying-blow'     // body
-    | 'sig-clever-gambit'     // mind
-    // Phase 85 — head/hands/feet accessory relics
-    | 'sig-mounting-dread'    // mind (head)
-    | 'sig-endless-labor'     // body (hands)
-    | 'sig-unbroken-stride';  // body (feet)
+    | 'sig-disarming-plea';
 
 /** Player archetype, derived from the dominant base stat. Drives (mobile) the
  *  portrait only — Phase 19 retired the archetype→signature gating. */
@@ -201,8 +181,6 @@ export interface SignatureSkill {
     /** Conviction (◆) cost. */
     cost: number;
     kind: SignatureSkillKind;
-    /** The GUARD a `guard` signature raises (unused by `mercy`). */
-    magnitude: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -260,19 +238,8 @@ export type ThreatBranchCondition =
 
 /** One fully-resolved fork of a branch phase (the telegraph shows both). */
 export interface CombatThreatBranchOutcome {
-    enemyStance: Stance;
     threatAction: CombatThreatAction;
     intentType?: CombatIntentType;
-    stanceHint?: string;
-    /** Phase 33b — this fork's authored STAGGER-rung count (1-4), overriding
-     *  the flat `THREAT_RUNGS`/`THREAT_RUNGS_BOSS` default. Undefined = the
-     *  fork carries the enemy's natural rung count. */
-    rungs?: number;
-    /** Phase D9 (spec 33 §2) — this fork's authored open stance check, if any.
-     *  Carried onto the committed phase by `commitThreatBranch`. Undefined =
-     *  no authored check on this fork (the `getThreatSequence` backfill fills
-     *  the uniform default). */
-    stanceCheck?: { punishes?: Stance; yields?: Stance };
     /** Phase 33c (spec 33 §1) — this fork carries THE COVETED DIE. Undefined =
      *  no coveted die on this fork (the common case; no boss/unique fork is
      *  authored with one — see `combat.threat-sequences.ts`). */
@@ -298,7 +265,6 @@ export interface CombatThreatBranch {
 
 export interface CombatThreatPhase {
     index: number;                            // 1-indexed for display
-    enemyStance: Stance;                      // dominant stance — HIDDEN until revealed (Spec 26b §2)
     threatAction: CombatThreatAction;         // the enemy's telegraphed attack each phase (HP model)
     isFinalPhase: boolean;                    // last telegraph in the sequence (then it loops)
 
@@ -308,10 +274,6 @@ export interface CombatThreatPhase {
     intentType?: CombatIntentType;
     /** Optional short flavor label, e.g. "Charges up". Presenter defaults per type. */
     intentLabel?: string;
-    /** Spec 26b §2 — thematic tell that *implies* (never states) this phase's
-     *  hidden stance. Falls back to the enemy-level `stanceHint`. */
-    stanceHint?: string;
-
     /** Phase 3 — "rage mode": this phase cannot be entered until the
      *  ABOUT-TO-RESOLVE round (state.round + 1 at phase-advance time) is
      *  >= this value. While locked, `processBetweenPhases` holds the phase
@@ -325,25 +287,8 @@ export interface CombatThreatPhase {
      *  linear phase — byte-identical to before. */
     branch?: CombatThreatBranch;
 
-    /** Phase 33b — variable-rung telegraph: this phase's authored STAGGER-rung
-     *  count (1-4), overriding the flat `THREAT_RUNGS`/`THREAT_RUNGS_BOSS`
-     *  default (`computeRungDenial`, `combat.engine.ts`). Undefined = the
-     *  phase carries the enemy's natural (difficulty-derived) rung count —
-     *  every phase authored before this epic behaves exactly as before. */
-    rungs?: number;
-
-    /** Spec 33 §2 (Upgradeable Dice) — the phase's OPEN stance
-     *  check, resolved against the player's stance-from-cards at phase END
-     *  (`resolveThreatPhase`): ending in `punishes` lands the hit at
-     *  `READ_DAMAGE_MULT.advantage` (x1.5); ending in `yields` blunts it to
-     *  `READ_DAMAGE_MULT.disadvantage` (x0.5) and pays +1 Conviction. No
-     *  hidden information — the telegraph renders both fields. Undefined =
-     *  no check this phase. */
-    stanceCheck?: { punishes?: Stance; yields?: Stance };
-
-    /** Phase 33c (spec 33 §1) — this phase carries THE COVETED DIE: denying
-     *  its telegraph (STAGGER-to-0), fully blocking it, or answering its
-     *  `stanceCheck`'s `yields` converts it to a temp gold die
+    /** Phase 33c (spec 33 §1) — this phase carries THE COVETED DIE: fully
+     *  blocking its telegraph converts it to a temp gold die
      *  (`resolveThreatPhase`, ceiling-gated — overflow → +1◆). Authored at
      *  the DECK level (`DECK_STAKES` in `combat.enemy-decks.ts`; the default
      *  seats it on a BOSS/UNIQUE deck's 2nd card) — never backfilled.
@@ -428,10 +373,9 @@ export type CombatEvent =
     // threat phase was refused (the state is untouched; the tray stays as-is).
     | { kind: 'turn-law-blocked'; turn: number; phaseIndex: number }
     | { kind: 'conviction-gained'; amount: number; total: number; reason: 'effect' | 'scrap' }
-    | { kind: 'stance-revealed'; phaseIndex: number; stance: Stance }
     | { kind: 'signature-cast'; signatureId: SignatureSkillId; name: string; cost: number }
     | { kind: 'card-played'; cardId: string; useBottom: boolean; dieId: string | null;
-        advantage: 'advantage' | 'neutral' | 'disadvantage'; colorMatch?: boolean }
+        colorMatch?: boolean }
     | { kind: 'effect-landed'; cardId: string; effectId: string; target: 'self' | 'enemy';
         effectKind: CardEffectKind; intensity: number; effect: Effect }
     | { kind: 'effect-fizzled'; cardId: string; effectId: string; message: string }
@@ -440,8 +384,6 @@ export type CombatEvent =
     | { kind: 'die-spent'; dieId: string; color: CombatDieColor }
     | { kind: 'dot-tick'; effectId: string; label: string; amount: number; target: 'self' | 'enemy' }
     // ── 0.34.0 status-depth epic — new card-mechanic events ──────────────────
-    | { kind: 'disrupt-denied'; pips: number }
-    | { kind: 'thorns-reflected'; amount: number; target: 'enemy' }
     | { kind: 'barrier-absorbed'; amount: number }
     | { kind: 'riposte-fired'; amount: number }
     // ── Fate Engine P1 (spec 31 §1) — dice-layer events ──────────────────────
@@ -451,9 +393,6 @@ export type CombatEvent =
     | { kind: 'pips-cashed'; cardId: string; pips: number; bonus: 'intensity' | 'guard'; amount: number }
     // ── Spec 32 v3 — ghost-die and oratory events ────────────────────────────
     | { kind: 'floating-die-spent'; dieId: string; color: CombatDieColor; poolSize: number }
-    | { kind: 'backfired'; amount: number; rungs: number }
-    | { kind: 'rung-regrown'; rungs: number; total: number }
-    | { kind: 'stance-locked'; phaseIndex: number; stance: Stance }
     | { kind: 'soul-gained'; amount: number; total: number; reason: 'expiry' | 'consumed' | 'granted' }
     /** A foe crossed one of its STAGE thresholds and became another fight. */
     | { kind: 'stage-entered'; enemyId: string; name: string; text: string }
@@ -475,8 +414,6 @@ export type CombatEvent =
     | { kind: 'hand-drawn'; cards: string[] }
     | { kind: 'mercy-opened'; message: string }
     // ── Spec 33 (Upgradeable Dice) — the shipped dice model's events. ──────
-    // The player's stance shifted (stance = the last PAID card's stance).
-    | { kind: 'stance-shifted'; stance: WheelStance }
     // Momentum chain advanced (length grew) or started (length 1).
     | { kind: 'momentum-advanced'; color: WheelStance; length: number }
     // A paid card of a non-successor color broke the chain to NULL (owner-locked
@@ -488,18 +425,15 @@ export type CombatEvent =
     // A BOON face fired its gear payload because its die was USED to power a
     // card (the owner-ratified use-triggered rule).
     | { kind: 'special-fired'; dieId: string; conviction: number; total: number }
-    // The phase's open stance check resolved at phase end.
-    | { kind: 'stance-check-resolved'; phaseIndex: number; outcome: 'punished' | 'yielded' | 'none'; stance: Stance | null }
     // The 7-object table ceiling refused a die grant; it converted to +1◆.
     | { kind: 'die-overflowed'; source: 'surge' | 'kindle' | 'materialize' | 'coveted'; total: number }
     // An OVERHEAT push armed a second play but cracked the die: all-miss next
     // round.
     | { kind: 'die-cracked'; dieId: string; color: CombatDieColor }
     // Phase 33c — a boss/unique phase's coveted die was claimed: its telegraph
-    // was denied (STAGGER-to-0), fully blocked, or its open stance check was
-    // answered with a yield. `dieId` is absent when the table was full and the
+    // was fully blocked. `dieId` is absent when the table was full and the
     // payout converted to +1◆ instead (see the paired `die-overflowed` event).
-    | { kind: 'coveted-die-stolen'; phaseIndex: number; method: 'stagger' | 'block' | 'yield'; dieId?: string }
+    | { kind: 'coveted-die-stolen'; phaseIndex: number; method: 'block'; dieId?: string }
     | { kind: 'combat-ended'; outcome: CombatOutcome };
 
 // ---------------------------------------------------------------------------
@@ -542,8 +476,6 @@ export interface CombatEncounterState {
      *  each phase (like guard). Optional for back-compat with state literals.
      *  0.34.0 status-depth epic. */
     riposte?: { damage: number; reduce: number };
-    /** Phase indices whose hidden enemy stance the player has revealed (§2). */
-    revealedStances: number[];
     /**
      * Fate Engine P1 (spec 31 R2) — the RESERVE: banked dice (max
      * `RESERVE_MAX`), each ripening +1 pip per threat phase survived. A bottom
@@ -575,17 +507,6 @@ export interface CombatEncounterState {
      *  `initializeCombatEncounter`. Optional for back-compat (absent = none
      *  claimed yet). */
     covetedDiceClaimed?: number[];
-    /** Spec 32 v3 T5 — STAGGER rungs accumulated against the enemy's NEXT
-     *  telegraphed action (consumed at threat resolution). Optional. */
-    staggerRungs?: number;
-    /** plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-08-win-path-scaling.md item 1c — boss/unique
-     *  anti-permalock: rungs a boss/unique has REGROWN back after a phase
-     *  where its telegraph was denied/weakened by STAGGER. Raises the
-     *  effective rung total (`THREAT_RUNGS_BOSS` + this, capped at double)
-     *  so a denial deck that reliably meets the flat threshold every round
-     *  cannot lock a boss out of acting for the whole fight. Normal enemies
-     *  never accrue this. Optional (absent = 0, byte-identical to before). */
-    bossRungGrowth?: number;
     /** Spec 32 v3 T7 — the SOUL bank (Harvest currency). Optional. */
     souls?: number;
     /** THE PATH — extra dice added to every turn's tray (act-reward dice),
@@ -656,9 +577,6 @@ export interface CombatEncounterState {
 
     // ── Spec 33 (Upgradeable Dice) — all optional for back-compat with state
     //    literals. ─────────────────────────────────────────────────────────
-    /** §2 — the player's stance: the stance of the last PAID card played.
-     *  Fights open stance-less (null/absent). FREE lines never change it. */
-    playerStance?: WheelStance | null;
     /** §3 — the momentum chain: `{color, length}` of the live chain, or null.
      *  Breaks reset to NULL (owner-locked D1); persists across rounds; surge
      *  (length 3) grants the temp gold die and resets to null. */

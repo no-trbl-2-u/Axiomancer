@@ -19,12 +19,13 @@ import {
     createCharacter,
     getConsumableById,
     getRelicById,
-    withholdFirstNodeRelic,
     wornPerSlot,
     FIRST_NODE_RELIC_FLAG,
     FIRST_NODE_RELIC_ID,
+    FIXTURE_ARMOR,
+    FIXTURE_TRINKETS,
+    FIXTURE_WEAPON,
     SLOT_CAPACITY,
-    STAND_IN_RELIC_ID,
 } from '@mechanics';
 import type { Character, Equipment, GameState, Item } from '@mechanics';
 
@@ -49,17 +50,19 @@ import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 // ---------------------------------------------------------------------------
 
 /**
- * A store whose player wears the Phase-19 kit with the ring withheld (the
- * pre-2026-09-23 fresh state). A real fresh run now wears NOTHING (THE VERY
- * START), so the swap / displacement cases seed the kit explicitly: a full
- * accessory row is what makes EQUIP a swap rather than a free fill.
+ * A store whose player wears the fixture relics on every slot, the ring not
+ * yet granted. A real fresh run wears NOTHING (THE VERY START), so the swap /
+ * displacement cases seed a loadout explicitly: a full accessory row is what
+ * makes EQUIP a swap rather than a free fill.
  */
 function makeStore(): AppStore {
     const store = createAppStore({ adapter: createMemoryAdapter() });
+    const kit = [FIXTURE_WEAPON, FIXTURE_ARMOR, ...FIXTURE_TRINKETS];
     store.setState({
-        player: withholdFirstNodeRelic(createCharacter({
-            name: 'Kitted', level: 1, baseStats: { heart: 5, body: 5, mind: 5 }, seedStartingRelics: true,
-        })),
+        player: createCharacter({
+            name: 'Kitted', level: 1, baseStats: { heart: 5, body: 5, mind: 5 },
+            inventory: [...kit], equipment: [...kit],
+        }),
     } as never);
     return store;
 }
@@ -83,8 +86,11 @@ function relic(id: string): Equipment {
     return found;
 }
 
-/** A relic the seeded character is guaranteed NOT to be wearing. */
-const BENCHED_ACCESSORY = 'relic-mounting-dread';
+/** A relic the seeded character is guaranteed NOT to be wearing: the ring. */
+const BENCHED_ACCESSORY = FIRST_NODE_RELIC_ID;
+
+/** A second armor piece; its +max VITAE line earns it the screen under D5. */
+const SPARE_ARMOR: Equipment = { ...FIXTURE_ARMOR, id: 'fixture-armor-2' };
 
 /** Force a known loadout so the swap assertions are not at the mercy of seeding. */
 function setLoadout(store: AppStore, patch: Partial<Character['equipment']>): void {
@@ -149,7 +155,7 @@ describe('item-reward view model', () => {
         expect(vm.flavor.length).toBeGreaterThan(0);
     });
 
-    it('D6 — names the piece EQUIP would push out, and what is gained and lost', () => {
+    it('D6 — names the piece EQUIP would push out, and the signature gained', () => {
         const store = makeStore();
         // A full accessory row is the case that must never swap blind.
         expect(player(store).equipment.accessories).toHaveLength(SLOT_CAPACITY.accessory);
@@ -162,9 +168,21 @@ describe('item-reward view model', () => {
         expect(vm.trade?.note).toContain(worn.name);
         expect(vm.trade?.note).toContain('satchel');
         expect(vm.delta?.mode).toBe('swap');
-        // Both sides present — gained AND lost, per D6.
-        expect(vm.delta?.signatures.gained.map((s) => s.id)).toContain('sig-mounting-dread');
-        expect(vm.delta?.signatures.lost).not.toHaveLength(0);
+        expect(vm.delta?.signatures.gained.map((s) => s.id)).toContain('sig-disarming-plea');
+    });
+
+    it('D6 — names the signature a swap loses', () => {
+        const store = makeStore();
+        // The ring sits in the seat EQUIP would displace.
+        const ring = relic(FIRST_NODE_RELIC_ID);
+        setLoadout(store, { accessories: [FIXTURE_TRINKETS[0]!, FIXTURE_TRINKETS[1]!, ring] });
+
+        offerItemRewardAction(store, FIXTURE_TRINKETS[2]!, { includeInline: true });
+        const vm = vmOf(store);
+
+        expect(vm.trade?.name).toBe(ring.name);
+        expect(vm.delta?.mode).toBe('swap');
+        expect(vm.delta?.signatures.lost.map((s) => s.id)).toContain('sig-disarming-plea');
     });
 
     it('a free slot trades nothing away', () => {
@@ -260,11 +278,10 @@ describe('committing the reward', () => {
         const oldWeapon = player(store).equipment.weapon;
         expect(oldWeapon).not.toBeNull();
 
-        const candidate = relic('relic-conclusion').id === oldWeapon?.id
-            ? relic('relic-overwhelming')
-            : relic('relic-conclusion');
+        const candidate: Equipment = { ...FIXTURE_WEAPON, id: 'fixture-weapon-2' };
 
-        offerItemRewardAction(store, candidate);
+        // A bare fixture weapon fails D5 on its own; the flag queues it anyway.
+        offerItemRewardAction(store, candidate, { includeInline: true });
         const result = equipItemRewardAction(store);
 
         const after = player(store);
@@ -275,13 +292,13 @@ describe('committing the reward', () => {
 
     it('works through a queued batch, one item at a time', () => {
         const store = makeStore();
-        offerItemRewardAction(store, [relic(BENCHED_ACCESSORY), relic('relic-endless-labor')]);
+        offerItemRewardAction(store, [relic(BENCHED_ACCESSORY), SPARE_ARMOR]);
 
         expect(vmOf(store).remaining).toBe(1);
         expect(vmOf(store).remainingNote).not.toBeNull();
 
         confirmItemRewardAction(store);
-        expect(vmOf(store).itemId).toBe('relic-endless-labor');
+        expect(vmOf(store).itemId).toBe(SPARE_ARMOR.id);
         expect(vmOf(store).remaining).toBe(0);
 
         confirmItemRewardAction(store);
@@ -303,14 +320,14 @@ describe('D7 — leaving the screen keeps the item', () => {
     it('dismissal grants every queued item to the satchel and wears none', () => {
         const store = makeStore();
         const wornBefore = player(store).equipment.accessories.map((a) => a.id);
-        offerItemRewardAction(store, [relic(BENCHED_ACCESSORY), relic('relic-endless-labor')]);
+        offerItemRewardAction(store, [relic(BENCHED_ACCESSORY), SPARE_ARMOR]);
 
         const result = dismissItemRewardAction(store);
 
         expect(result.applied).toBe(true);
         const after = player(store);
         expect(after.inventory.map((i) => i.id)).toContain(BENCHED_ACCESSORY);
-        expect(after.inventory.map((i) => i.id)).toContain('relic-endless-labor');
+        expect(after.inventory.map((i) => i.id)).toContain(SPARE_ARMOR.id);
         expect(after.equipment.accessories.map((a) => a.id)).toEqual(wornBefore);
         expect(selectHasPendingItemReward(store.getState())).toBe(false);
     });
@@ -337,11 +354,10 @@ describe('the first-node Suppliant\'s Ring', () => {
         expect(store.getState().itemReward.queue).toHaveLength(1);
     });
 
-    it('EQUIP hands it over, displaces the stand-in, and settles the grant flag', () => {
+    it('EQUIP hands it over, displaces the last worn trinket, and settles the grant flag', () => {
         const store = makeStore();
-        const standInWorn = player(store).equipment.accessories
-            .some((a) => a.id === STAND_IN_RELIC_ID);
-        expect(standInWorn).toBe(true);
+        expect(player(store).equipment.accessories).toHaveLength(SLOT_CAPACITY.accessory);
+        const lastWorn = player(store).equipment.accessories[SLOT_CAPACITY.accessory - 1]!.id;
 
         offerFirstNodeRelicAction(store);
         const result = equipItemRewardAction(store);
@@ -349,9 +365,9 @@ describe('the first-node Suppliant\'s Ring', () => {
         const after = player(store);
         expect(after.equipment.accessories.map((a) => a.id)).toContain(FIRST_NODE_RELIC_ID);
         expect(after.inventory.map((i) => i.id)).toContain(FIRST_NODE_RELIC_ID);
-        // The Venom Sigil goes back to the bench, not the bin.
-        expect(result.displaced?.id).toBe(STAND_IN_RELIC_ID);
-        expect(after.inventory.map((i) => i.id)).toContain(STAND_IN_RELIC_ID);
+        // The displaced trinket goes back to the bench, not the bin.
+        expect(result.displaced?.id).toBe(lastWorn);
+        expect(after.inventory.map((i) => i.id)).toContain(lastWorn);
 
         expect(gameState(store).flags).toContain(FIRST_NODE_RELIC_FLAG);
         expect(offerFirstNodeRelicAction(store)).toBe(false);

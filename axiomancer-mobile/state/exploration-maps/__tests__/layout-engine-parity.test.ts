@@ -21,12 +21,10 @@ import { getMapLayout } from '../index';
 // Each shipped map, with the engine registry keys the presenter resolves it by
 // (`world.currentMap.continent` / `world.currentMap.name`).
 const MAPS = [
-    { mapId: 'northern-forest', continent: 'coastal-continent' },
-    { mapId: 'caverns', continent: 'northern-continent' },
-    { mapId: 'northern-city', continent: 'northern-continent' },
-    { mapId: 'connecting-river', continent: 'northern-continent' },
-    { mapId: 'town-across-river', continent: 'northern-continent' },
-    { mapId: 'the-capital', continent: 'northern-continent' },
+    { mapId: 'breakwater', continent: 'coastal-continent' },
+    { mapId: 'charcoal-wood', continent: 'coastal-continent' },
+    { mapId: 'beacon-crags', continent: 'northern-continent' },
+    { mapId: 'lantern-deep', continent: 'northern-continent' },
 ] as const;
 
 describe('exploration map: engine ↔ layout node-id parity', () => {

@@ -207,9 +207,8 @@ describe('hazard scar recovery at inn rest', () => {
         expect(actions.claimRestOutcome().scarMended).toBe(scar);
     });
 
-    it('a northern-forest spring routes a CAMP rest through the live interceptor', () => {
-        // nf-4 (cold spring) was authored at healFraction 1.0 and therefore
-        // mended scars under the retired heuristic. It must not any more.
+    it('a Charcoal Wood camp routes a CAMP rest through the live interceptor', () => {
+        // cw-9 (the hunting lodge's porch) is wilderness: it must not mend scars.
         const { store, actions } = makeStoreAndActions();
         const scar = scarThePlayer(store, actions);
         const scarredMax = (store.getState() as unknown as GameState).player.maxHealth;
@@ -221,8 +220,8 @@ describe('hazard scar recovery at inn rest', () => {
                 currentMap: {
                     ...before.world.currentMap,
                     continent: 'coastal-continent',
-                    name: 'northern-forest',
-                    currentNode: 'nf-4',
+                    name: 'charcoal-wood',
+                    currentNode: 'cw-9',
                 },
             },
         } as never);

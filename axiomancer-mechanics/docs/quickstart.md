@@ -111,28 +111,18 @@ the full inventory + exit expectations.
    threat phase (`resolveThreatPhase`).
 3. **Victory path** — when `enemy.health <= 0`, `endCombat()` reports
    `outcome: 'victory'`, grants full XP + the weighted loot roll.
-4. **Friendship path** (Phase 36) — both combatants picking `defend`
-   on the same round increments `combat.friendshipCounter`. When it
-   reaches `FRIENDSHIP_COUNTER_MAX` (3), `endCombat()` reports
-   `outcome: 'friendship'`, grants half-XP + full loot.
+4. **Friendship path** — The Open Hand (the Suppliant's Ring signature)
+   befriends a foe whose `befriendabilityConfig.hpGate` is open, which opens
+   the mercy choice; sparing ends combat with `outcome: 'friendship'`.
 5. **Per-enemy `friendshipReward`** (Phase 60 + 62) — if the
    befriended enemy carries an authored `friendshipReward`, items
    append to `report.loot`, `xpBonus` adds to `report.xpGained`,
    and `narrative` surfaces on `report.friendshipReward.narrative`
    for the CLI to render. `friendshipReward.flagSet` (Phase 62)
    sets a world flag for downstream `requires.flag` dialogue gates.
-6. **Per-enemy befriend predicate** (Phase 68) — if the enemy
-   carries `Enemy.befriendabilityConfig`, the Phase 36 cap is
-   overridden by an AND-composed predicate set (`roundsThreshold`
-   / `hpGate { belowPct }` / `requiredStances[]` / `requiredCardUse[]`
-   / `defaultFallback`). The internal predicate helper backs
-   `isBefriendAttemptEligible` (the legacy `isFriendshipEligible` /
-   `determineCombatEnd` / `isCombatOngoing` consumers were removed
-   with the legacy driver). Counter still increments freely; friendship triggers
-   only when all named predicates pass together — late-resolution
-   semantics. First boss-tier authored config: `CoastalTyrant`
-   (`hpGate { belowPct: 0.4 }`, `requiredStances: ['heart']`,
-   `roundsThreshold: 5`).
+6. **Per-enemy befriend gate** — `Enemy.befriendabilityConfig.hpGate
+   { belowPct }` shuts The Open Hand until the foe's VITAE fraction is at or
+   below `belowPct` (`befriendHpGateOpen`).
 
 The befriendable enemies this section once listed (MournfulGull,
 HollowEyedBeggar, on fishing-village nodes) were retired in R2a with the

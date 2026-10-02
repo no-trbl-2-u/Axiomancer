@@ -104,11 +104,11 @@ function greedyRankCard(s: CombatEncounterState, card: CombatCard): number {
     return score;
 }
 
-/** Both placeholder signature kinds (phase R4): GUARD and The Open Hand. */
-const ALL_SIGNATURE_KINDS: readonly SignatureSkillKind[] = Object.freeze(['guard', 'mercy']);
+/** Every signature kind: The Open Hand is the one left (R7e2). */
+const ALL_SIGNATURE_KINDS: readonly SignatureSkillKind[] = Object.freeze(['mercy']);
 
-/** The killers never offer mercy; they only raise GUARD. */
-const GUARD_ONLY: readonly SignatureSkillKind[] = Object.freeze(['guard']);
+/** The killers never offer mercy, and no other signature is left to cast. */
+const NO_SIGNATURES: readonly SignatureSkillKind[] = Object.freeze([]);
 
 /** The scripted witness roster. */
 export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
@@ -144,7 +144,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
             if (card.effectKind !== 'none') return BAND_EFFECT + card.bottomDamagePreview;
             return 100 + card.bottomDamagePreview;
         },
-        signatureKinds: GUARD_ONLY,
+        signatureKinds: NO_SIGNATURES,
         convictionThreshold: 7,
         mercyChoice: 'exploit',
     },
@@ -161,7 +161,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
             if (card.verbClass === 'defend') return BAND_EFFECT;
             return 100 + card.bottomDamagePreview;
         },
-        signatureKinds: GUARD_ONLY,
+        signatureKinds: NO_SIGNATURES,
         convictionThreshold: 8,
         mercyChoice: 'spare',
     },
@@ -170,7 +170,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         name: 'Aggro Brute',
         description: 'The doctrine\'s weak baseline: raw damage preview, no payoff timing, no status game — its underperformance IS the design.',
         rankCard: (_s, card) => card.bottomDamagePreview,
-        signatureKinds: GUARD_ONLY,
+        signatureKinds: NO_SIGNATURES,
         convictionThreshold: 7,
         mercyChoice: 'exploit',
     },
@@ -187,7 +187,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
             if (card.effectKind !== 'none') return BAND_EFFECT + card.bottomDamagePreview;
             return 100 + card.bottomDamagePreview;
         },
-        signatureKinds: GUARD_ONLY,
+        signatureKinds: NO_SIGNATURES,
         convictionThreshold: 9,
         mercyChoice: 'spare',
     },
@@ -213,7 +213,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
             if (card.verbClass === 'defend') return BAND_UTILITY_LIVE;
             return 100 + card.bottomDamagePreview;
         },
-        signatureKinds: ['mercy', 'guard'],
+        signatureKinds: ALL_SIGNATURE_KINDS,
         convictionThreshold: 6,
         mercyChoice: 'spare',
     },

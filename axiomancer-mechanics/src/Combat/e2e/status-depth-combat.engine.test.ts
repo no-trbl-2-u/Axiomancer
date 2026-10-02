@@ -5,7 +5,7 @@
  * feeds Souls; RIPOSTE fires only on a FULL block).
  *
  * Covers each surviving behavior end to end (DoT-amplification honesty,
- * DISRUPT deny, THORNS / BARRIER / RIPOSTE), an INVARIANT guard that the
+ * BARRIER / RIPOSTE), an INVARIANT guard that the
  * shared hot path stays quiet without its marker, and the card-projection /
  * reward-pool contract for the library.
  *
@@ -15,7 +15,7 @@
  * with their cards; the state-driven BARRIER / RIPOSTE laws stay.
  */
 
-import { describe, it, expect, afterEach, afterAll, beforeAll, vi } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
@@ -25,50 +25,21 @@ import { deepClone } from '../../Utils';
 import { mockSequentialRng } from '../../test-utils/rng';
 import { getCardById } from '../../Cards/cards.library';
 import { lookupEffect } from '../../Effects';
-import { effectsLibrary } from '../../Effects/effects.library';
-import type { ActiveEffect, Effect } from '../../Effects/types';
+import type { ActiveEffect } from '../../Effects/types';
 import {
     initializeCombatEncounter, rollEncounterDice,
     resolveThreatPhase, processBetweenPhases,
-    getDisruptMeter, getEnemyIncomingDamageMultiplier,
+    getEnemyIncomingDamageMultiplier,
 } from '../combat.engine';
 import { classifyVerbClass, toCombatCard } from '../combat.cards';
 import { getActiveDotTotal, getActiveDotAmplifications } from '../effect-modifiers';
 import { COMBAT_REWARD_POOL } from '../combat.rewards';
 import type { CombatEvent } from '../combat.encounter.types';
 
-import { registerFixtureEffects } from '../../test-utils/fixture-effects';
-
-// The keyword audit (2026-09-27) deleted buff_thorns / debuff_backfire /
-// the round-clock DoT species from the library; their engine channels are
-// exercised through the `fixture_*` effects instead.
-registerFixtureEffects();
-
 afterEach(() => { vi.restoreAllMocks(); });
 
 const ae = (effectId: string, intensity = 1, remainingDuration = 4, tier: 1 | 2 | 3 = 2): ActiveEffect =>
     ({ effectId, intensity, remainingDuration, appliedAt: 1, tier });
-
-// The spec 32 v3 keyword reset deleted the negative-rollModifier control debuffs
-// (Daze -3, Slow -2, Root -2). No surviving library effect carries a roll
-// penalty, so the DISRUPT distinct-control machinery is driven by test-only
-// control fixtures registered into the shared registry (the same lookup the
-// engine's roll-penalty / distinct-control readers consult). Never touches the
-// library JSON.
-// Post-Phase-30 merge 2026-07-12: the zero-producer sweep deleted the legacy
-// control vocabulary (knockdown/root/blind/slow/straw-man-echo), so the WS8
-// surface shapes live on as test-only fixtures — one per DISRUPT surface
-// (roll / stance-lock / rider-suppress) plus the roll-shred fillers.
-const CONTROL_FIXTURES: Effect[] = [
-    { id: 'test_ctrl_daze', name: 'test daze', description: 'control -3', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -3 } },
-    { id: 'test_ctrl_knockdown', name: 'test knockdown', description: 'control roll -3', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -3 } },
-    { id: 'test_ctrl_slow', name: 'test slow', description: 'control -2', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -2 } },
-    { id: 'test_ctrl_echo', name: 'test echo shred', description: 'control -1', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -1 } },
-    { id: 'test_ctrl_root', name: 'test root', description: 'control stance-lock', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { defenseModifier: -2, lockedStance: true } },
-    { id: 'test_ctrl_blind', name: 'test blind', description: 'control rider-suppress', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { suppressesThreatRiders: true } },
-];
-beforeAll(() => { for (const e of CONTROL_FIXTURES) effectsLibrary.registry.set(e.id, e); });
-afterAll(() => { for (const e of CONTROL_FIXTURES) effectsLibrary.registry.delete(e.id); });
 
 function makePlayer(cards: string[], effects: ActiveEffect[] = []): Character {
     const p = deepClone(Player);
@@ -117,90 +88,6 @@ describe('AMPLIFICATION — the combo registry is surfaced honestly', () => {
         const state = initializeCombatEncounter(
             makePlayer([]), makeEnemy(300, 'mind', [ae('debuff_poison', 2)]), undefined, 7);
         expect(getEnemyIncomingDamageMultiplier(state)).toBe(1);
-    });
-});
-
-// ── DISRUPT — distinct-control deny meter ────────────────────────────────────
-
-describe('DISRUPT — a variety of control SURFACES denies the telegraphed turn (WS8.3)', () => {
-    // Support-tagged (non-card) controls carried by enemy threats / legacy
-    // sources — each on a DIFFERENT surface (spec 32 §12 #6):
-    //   knockdown → roll (-3), root → stance (lockedStance),
-    //   blind → rider-suppress (suppressesThreatRiders).
-    // (daze folded into confusion, WS8.1 KW-2 — knockdown is the -3 roll
-    // carrier now; all shapes are test-only fixtures post the zero-producer
-    // sweep.)
-    const twoSurfaces = () => [ae('test_ctrl_knockdown', 1), ae('test_ctrl_root', 1)];
-    const threeSurfaces = () => [...twoSurfaces(), ae('test_ctrl_blind', 1)];
-
-    it('does NOT deny at 2 distinct surfaces (roll penalty 3 < 8)', () => {
-        mockSequentialRng(0.05);
-        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', twoSurfaces()), undefined, 7);
-        const state = rollEncounterDice(base).state;
-        const meter = getDisruptMeter(state);
-        expect(meter.pips).toBe(2);
-        expect(meter.willDeny).toBe(false);
-        const res = resolveThreatPhase(state);
-        expect(res.events.some(e => e.kind === 'disrupt-denied')).toBe(false);
-        expect(res.events.some(e => e.kind === 'threat-fired')).toBe(true);
-    });
-
-    it('does NOT deny at 3 controls of the SAME grip (three roll shreds = 1 pip)', () => {
-        mockSequentialRng(0.05);
-        // knockdown -3 + slow -2 + echo shred -1 = penalty 6 < 8, all 'roll'.
-        const sameGrip = [ae('test_ctrl_knockdown', 1), ae('test_ctrl_slow', 1), ae('test_ctrl_echo', 1)];
-        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', sameGrip), undefined, 7);
-        const state = rollEncounterDice(base).state;
-        const meter = getDisruptMeter(state);
-        expect(meter.pips).toBe(1);
-        expect(meter.willDeny).toBe(false);
-        const res = resolveThreatPhase(state);
-        expect(res.events.some(e => e.kind === 'disrupt-denied')).toBe(false);
-        expect(res.events.some(e => e.kind === 'threat-fired')).toBe(true);
-    });
-
-    it('DENIES at exactly 3 distinct surfaces (the additive path, roll penalty 3 < 8)', () => {
-        mockSequentialRng(0.05);
-        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', threeSurfaces()), undefined, 7);
-        const state = rollEncounterDice(base).state;
-        const meter = getDisruptMeter(state);
-        expect(meter.pips).toBe(3);
-        expect(meter.rollPenalty).toBe(3); // < THREAT_DENY_AT(8): legacy path would NOT deny
-        expect(meter.willDeny).toBe(true);
-        const res = resolveThreatPhase(state);
-        const denied = res.events.find(e => e.kind === 'disrupt-denied') as { pips: number } | undefined;
-        expect(denied).toBeDefined();
-        expect(denied!.pips).toBe(3);
-        expect(res.events.some(e => e.kind === 'threat-fired')).toBe(false);
-        const resolved = res.events.find(e => e.kind === 'phase-resolved') as { mark: string } | undefined;
-        expect(resolved!.mark).toBe('clear');
-    });
-});
-
-// ── THORNS — reflect a telegraphed hit ───────────────────────────────────────
-
-describe('THORNS — the foe telegraphed hit rebounds onto it', () => {
-    it('reflects reflectDamage back at the enemy when it attacks', () => {
-        mockSequentialRng(0.05);
-        const player = makePlayer([], [ae('fixture_thorns', 1)]); // reflectDamage 1
-        const base = initializeCombatEncounter(player, makeEnemy(300, 'mind'), undefined, 7);
-        const state = rollEncounterDice(base).state;
-        const hpBefore = state.enemy.health;
-        const res = resolveThreatPhase(state);
-        const reflected = res.events.find(e => e.kind === 'thorns-reflected') as { amount: number; target: string } | undefined;
-        expect(reflected).toBeDefined();
-        expect(reflected!.amount).toBe(1);
-        expect(reflected!.target).toBe('enemy');
-        expect(hpBefore - res.state.enemy.health).toBe(1); // enemy has no DoT — only the reflect
-    });
-
-    it('the THORNS reflect channel (fixture_thorns) reflects 1 per intensity', () => {
-        mockSequentialRng(0.05);
-        const player = makePlayer([], [ae('fixture_thorns', 3, 2)]);
-        const base = initializeCombatEncounter(player, makeEnemy(300, 'mind'), undefined, 7);
-        const res = resolveThreatPhase(rollEncounterDice(base).state);
-        const reflected = res.events.find(e => e.kind === 'thorns-reflected') as { amount: number } | undefined;
-        expect(reflected!.amount).toBe(3);
     });
 });
 
@@ -288,27 +175,27 @@ describe('RIPOSTE — counters only when Guard/Barrier fully blocked the attack'
 
 describe('INVARIANT — no new behavior fires without its marker', () => {
     const NEW_KINDS = new Set([
-        'rupture-detonated', 'disrupt-denied', 'thorns-reflected',
-        'barrier-absorbed', 'riposte-fired', 'backfired', 'reaped', 'staggered',
+        'rupture-detonated',
+        'barrier-absorbed', 'riposte-fired', 'reaped', 'staggered',
         'soul-gained',
     ]);
 
     it('a plain enemy + plain player emit ZERO new-kind events and un-amplified DoT', () => {
         mockSequentialRng(0.05);
-        // One control (roll -3) → below every deny threshold; one ROUND-CLOCKED
-        // DoT, no combo. (WS3.3: poison moved to the card-played clock — it no
-        // longer ticks at the round boundary, so the round-tick witness here is
-        // the nettle-sting fixture (`fixture_nettle`): dpr 2, round-end.)
-        const enemyEffects = [ae('test_ctrl_knockdown', 1), ae('fixture_nettle', 2)];
+        // One control (stance lock) → below every deny threshold; one
+        // ROUND-CLOCKED DoT, no combo. (WS3.3: poison moved to the card-played
+        // clock, so the round-tick witness here is Creeping Doom: dpr 1.)
+        const enemyEffects = [ae('test_ctrl_root', 1), ae('debuff_creeping_doom', 2)];
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', enemyEffects), undefined, 7);
         const state = rollEncounterDice(base).state;
         const res = resolveThreatPhase(state); // fires threat + processBetweenPhases
 
         for (const ev of res.events) expect(NEW_KINDS.has(ev.kind), ev.kind).toBe(false);
         expect(res.events.some(e => e.kind === 'dot-tick' && e.effectId === 'vulnerable-surcharge')).toBe(false);
-        // fixture_nettle i2, round 1, no combo → floor(2×2)=4 exactly.
-        const tick = res.events.find(e => e.kind === 'dot-tick' && e.effectId === 'fixture_nettle') as { amount: number } | undefined;
-        expect(tick!.amount).toBe(4);
+        // Doom i2 grows to i3 when the enemy acts, then ticks at round
+        // start, no combo → floor(1×3)=3 exactly.
+        const tick = res.events.find(e => e.kind === 'dot-tick' && e.effectId === 'debuff_creeping_doom') as { amount: number } | undefined;
+        expect(tick!.amount).toBe(3);
         expect(res.events.some(e => e.kind === 'threat-fired')).toBe(true); // enemy still acts
     });
 });

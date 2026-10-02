@@ -38,14 +38,14 @@ describe('consequenceLabel', () => {
     });
 
     it('renders quest-start as the errand\'s title', () => {
-        expect(consequenceLabel({ kind: 'quest-start', label: 'gather-wood' })).toBe(
-            'new errand · Deadfall',
+        expect(consequenceLabel({ kind: 'quest-start', label: 'fixture-quest' })).toBe(
+            'new errand · Fixture Quest',
         );
     });
 
     it('renders quest-progress and card-learn without echoing the id', () => {
-        expect(consequenceLabel({ kind: 'quest-progress', label: 'gather-wood' })).toBe(
-            'errand · Deadfall',
+        expect(consequenceLabel({ kind: 'quest-progress', label: 'fixture-quest' })).toBe(
+            'errand · Fixture Quest',
         );
         expect(consequenceLabel({ kind: 'card-learn', label: 'thin-hymn' })).toBe(
             'new card · Thin Hymn',

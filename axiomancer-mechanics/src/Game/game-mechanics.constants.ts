@@ -29,7 +29,9 @@ export const PLAYER_VITAE_BASE = 50;
 // PROGRESSION — EXPERIENCE & LEVELING
 // ============================================================================
 
-export const EXPERIENCE_PER_LEVEL = 1000;
+// R9 (D55): reaching level L+1 costs L × EXPERIENCE_STEP more XP
+// (`Character/experience.ts`). A full Act 1 clear ends at level 5.
+export const EXPERIENCE_STEP = 250;
 
 // Stat points granted per level promotion (Spec 06 Q3). Spent via
 // `allocateStatPoint` to raise heart / body / mind. Per Spec 06 Q5 there is
@@ -61,14 +63,6 @@ export const RESOURCE_GENERATION = {
     ATTACK_MISS: 1,
     DEFEND:      5,
 } as const;
-
-// ============================================================================
-// COMBAT — FRIENDSHIP MECHANIC
-// ============================================================================
-// When both combatants choose 'defend' on the same turn the friendship
-// counter increments.  Reaching the maximum ends combat peacefully.
-
-export const FRIENDSHIP_COUNTER_MAX = 3;
 
 // Phase 150 — probability that an enemy answers a player's HOSTILE card with
 // a card of its own ("answer power with power"). Distinct from the Phase 49

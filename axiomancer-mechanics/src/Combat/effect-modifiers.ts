@@ -3,17 +3,15 @@
  *
  * One pass over a combatant's `ActiveEffect[]` builds a single
  * `AggregatedEffectModifiers` object the rest of the combat module reads from
- * (defense bonus, advantage grants, action restrictions, DoT
- * totals, regen / drain). Per-application stacking caps and intensity scaling
+ * (action restrictions and the round-clock DoT total). Per-application stacking caps and intensity scaling
  * (Q2) are applied here so the consumers stay simple.
  */
 
-import { ActiveEffect, DamageOverTime, DotTickPhase } from '../Effects/types';
+import { ActiveEffect, DamageOverTime } from '../Effects/types';
 import { lookupEffect } from '../Effects/effects.library';
 import { evaluateInteractions, checkInteractionTrigger } from '../Effects/interactions';
 import { EFFECT_INTERACTIONS } from '../Effects/amplification.registry';
 import { INTERACTION_AMPLIFICATION } from './resolution.constants';
-import { Stance } from './types';
 
 /**
  * Phase 156 — live DoT combo amplification.
@@ -42,26 +40,18 @@ export function getDotAmplificationByEffect(effects: ActiveEffect[]): Map<string
 // ── WS3 trigger-clock DoT substrate (spec 32 §12, ratified 2026-07-11 #3) ─────
 
 /** The three EVENT clocks — DoTs that tick on game events, never at the round
- *  boundary. Round-clock triggers ('round-start'/'round-end') stay on the
- *  legacy `tickPhase` aggregation path. */
+ *  boundary. A DoT with no `trigger` rides the round clock instead. */
 export type DotEventTrigger = 'card-played' | 'damage-instance' | 'payoff';
 
-/** The event clock a DoT ticks on, or null when it rides a round clock. */
+/** The event clock a DoT ticks on, or null when it rides the round clock. */
 export function dotEventTrigger(dot: DamageOverTime): DotEventTrigger | null {
-    return dot.trigger === 'card-played' || dot.trigger === 'damage-instance' || dot.trigger === 'payoff'
-        ? dot.trigger
-        : null;
+    return dot.trigger ?? null;
 }
 
-/** Effective round-clock phase for a DoT: `tickPhase` stays the alias for the
- *  two round clocks ('round-start'/'round-end' map onto it; absent trigger =
- *  legacy `tickPhase ?? 'start'`); null for event-clocked DoTs — they tick
- *  only via `fireDotTrigger`, never at the round boundary. */
-export function dotRoundClockPhase(dot: DamageOverTime): DotTickPhase | null {
-    if (dot.trigger === undefined) return dot.tickPhase ?? 'start';
-    if (dot.trigger === 'round-start') return 'start';
-    if (dot.trigger === 'round-end') return 'end';
-    return null;
+/** True when a DoT ticks at round start (it names no event `trigger`);
+ *  event-clocked DoTs tick only via `fireDotTrigger`. */
+export function ticksOnRoundClock(dot: DamageOverTime): boolean {
+    return dot.trigger === undefined;
 }
 
 /**
@@ -95,7 +85,7 @@ export interface ActiveDotEntry {
 }
 
 /**
- * Per-effect AMPLIFIED DoT total for one tick (start + end phases combined),
+ * Per-effect AMPLIFIED DoT total for one tick,
  * surfacing the live combo multiplier so the mobile honesty layer can render the
  * real numbers (and so payoff cards like RUPTURE read the true detonation total).
  * Pure; mirrors the floor-per-tick math `getActiveEffectModifiers` uses, so the
@@ -179,29 +169,16 @@ export function getActiveDotAmplifications(effects: ActiveEffect[]): ActiveDotAm
  * - Every numeric is intensity-scaled per Q2: a value of `v` at intensity `n`
  *   contributes `v × n`. (The stat-modifier maps this carried were deleted
  *   with effect stat modifiers in TRIM THE FAT T2a, D14.)
- * - DoT damage is split by tick phase (Q4). Drain is kept separate from regen
- *   so the consumer can render them differently (Q6).
+ * - `dotStart` is the round-clock DoT total (event-clocked DoTs excluded).
  */
 export interface AggregatedEffectModifiers {
-    defenseDelta: number;
     skipTurn: boolean;
-    forcedStance: Stance | null;
-    blockedStances: Set<Stance>;
     dotStart: number;
-    dotEnd: number;
-    healthRegen: number;
-    healthDrain: number;
 }
 
 const emptyAgg = (): AggregatedEffectModifiers => ({
-    defenseDelta:    0,
     skipTurn:        false,
-    forcedStance:    null,
-    blockedStances:  new Set(),
     dotStart:        0,
-    dotEnd:          0,
-    healthRegen:     0,
-    healthDrain:     0,
 });
 
 /**
@@ -221,19 +198,7 @@ export function getActiveEffectModifiers(effects: ActiveEffect[], currentRound?:
         const intensity = ae.intensity ?? 1;
         const payload = def.payload;
 
-        if (payload.defenseModifier) {
-            agg.defenseDelta += payload.defenseModifier * intensity;
-        }
-
-        const restriction = payload.actionRestriction;
-        if (restriction) {
-            if (restriction.skipTurn) agg.skipTurn = true;
-            if (restriction.forcedStance && !agg.forcedStance) {
-                // Last-write-wins is unstable — keep the first; ties resolved by effect order.
-                agg.forcedStance = restriction.forcedStance;
-            }
-            for (const s of restriction.blockedStances ?? []) agg.blockedStances.add(s);
-        }
+        if (payload.actionRestriction?.skipTurn) agg.skipTurn = true;
 
         const dot = payload.damageOverTime;
         if (dot) {
@@ -245,21 +210,11 @@ export function getActiveEffectModifiers(effects: ActiveEffect[], currentRound?:
             // tick-amplify bonus (+1 per Mark stack per tick), added below.
             // WS3: event-clocked DoTs (null round phase) never tick at the
             // round boundary — `fireDotTrigger` owns their clock.
-            const phase = dotRoundClockPhase(dot);
-            if (phase !== null) {
+            if (ticksOnRoundClock(dot)) {
                 const multiplier = dotAmp.get(ae.effectId) ?? 1;
                 const dpr = rampedDamagePerRound(ae, dot.damagePerRound, payload.dotModifiers, currentRound);
-                const total = Math.floor(dpr * intensity * multiplier) + markBonus;
-                if (phase === 'start') agg.dotStart += total;
-                else                   agg.dotEnd   += total;
+                agg.dotStart += Math.floor(dpr * intensity * multiplier) + markBonus;
             }
-        }
-
-        const regen = payload.regeneration;
-        if (regen) {
-            const hp = (regen.healthPerRound ?? 0) * intensity;
-            if (hp > 0) agg.healthRegen += hp;
-            else if (hp < 0) agg.healthDrain += -hp;
         }
     }
 
@@ -267,39 +222,10 @@ export function getActiveEffectModifiers(effects: ActiveEffect[], currentRound?:
 }
 
 /**
- * Resolves Q7's action-restriction precedence into a final canAct outcome.
- *
- * Rules (per Q7 default):
- *   1. `skipTurn` wins outright — bearer loses their action regardless of stance.
- *   2. `forcedStance` overrides the requested stance and trumps `blockedStances`.
- *   3. If the requested stance is in `blockedStances`, bearer cannot use it.
- *
- * @param effects        - The bearer's active effects.
- * @param requestedStance - Stance the bearer wants to use this round (`null` if not yet chosen).
- *
- * @returns
- *   - `canAct`         — false when stunned/slept/petrified or the requested stance is blocked.
- *   - `resolvedStance` — the stance that will actually be used (forced > requested).
- *   - `reason`         — short hint for the UI when blocked.
+ * Whether the bearer can act this phase: `skipTurn` (stun, sleep, petrify)
+ * loses the action outright; `reason` is the short hint for the UI.
  */
-export function canAct(
-    effects: ActiveEffect[],
-    requestedStance: Stance | null = null,
-): { canAct: boolean; resolvedStance: Stance | null; reason: string | null } {
-    const mods = getActiveEffectModifiers(effects);
-
-    if (mods.skipTurn) {
-        return { canAct: false, resolvedStance: null, reason: 'skipTurn' };
-    }
-
-    if (mods.forcedStance) {
-        // Forced stance trumps a block — charm overrides silence on its own stance.
-        return { canAct: true, resolvedStance: mods.forcedStance, reason: null };
-    }
-
-    if (requestedStance && mods.blockedStances.has(requestedStance)) {
-        return { canAct: false, resolvedStance: null, reason: 'blockedStance' };
-    }
-
-    return { canAct: true, resolvedStance: requestedStance, reason: null };
+export function canAct(effects: ActiveEffect[]): { canAct: boolean; reason: string | null } {
+    if (getActiveEffectModifiers(effects).skipTurn) return { canAct: false, reason: 'skipTurn' };
+    return { canAct: true, reason: null };
 }

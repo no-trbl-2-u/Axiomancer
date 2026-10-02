@@ -306,8 +306,15 @@ export const RECENT_EVENTS_CAPACITY = 20;
  * of an explicit `store.save()` call below. So the engine allowlist has no
  * effect here, and every checkpoint on mobile is a deliberate `save()`
  * call site. Guarded by `state/e2e/exploration.engine.test.ts` ("mobile
- * owns save timing"). Two owners of one policy is a known open question —
- * see the `[loop-call]` row in `plan/AUDIT.md`.
+ * owns save timing").
+ *
+ * That is the rule, not an accident: mobile is the one owner of save timing
+ * on the app (ruled 2026-09-23, the `[loop-call]` row in `plan/AUDIT.md`;
+ * phase R9a), and the engine's allowlist is the engine-only path the CLI
+ * and the hermetic tests run on. A checkpoint is safe to take at any moment,
+ * mid-fight included, because the state says what the player still owes: a
+ * fight's node stays owed (`pendingArrival`) until the fight settles, so a
+ * reload re-offers the fight rather than landing past it.
  */
 function wrapDeflectingAdapter(real: PersistenceAdapter) {
     let passthrough = false;

@@ -45,7 +45,7 @@ describe('createStartingWorld', () => {
         // dev-menu + CLI only.
         expect(w.world.map(c => c.name)).not.toContain('labyrinth-continent');
         const northern = w.world.find(c => c.name === 'northern-continent')!;
-        expect(northern.lockedMaps).toContain('caverns');
+        expect(northern.lockedMaps).toContain('beacon-crags');
         expect(northern.availableMaps).toEqual([]);
     });
 });
@@ -64,13 +64,13 @@ describe('completeMap', () => {
 
 describe('unlockMap', () => {
     it('moves from locked to available', () => {
-        const w = unlockMap(world(), 'northern-forest');
-        expect(w.currentContinent.lockedMaps).not.toContain('northern-forest');
-        expect(w.currentContinent.availableMaps).toContain('northern-forest');
+        const w = unlockMap(world(), 'charcoal-wood');
+        expect(w.currentContinent.lockedMaps).not.toContain('charcoal-wood');
+        expect(w.currentContinent.availableMaps).toContain('charcoal-wood');
     });
     it('idempotent if already available', () => {
-        const w1 = unlockMap(world(), 'northern-forest');
-        const w2 = unlockMap(w1, 'northern-forest');
+        const w1 = unlockMap(world(), 'charcoal-wood');
+        const w2 = unlockMap(w1, 'charcoal-wood');
         expect(w2).toBe(w1);
     });
 });
@@ -96,7 +96,7 @@ describe('changeContinent', () => {
     it('switches to a catalogued continent', () => {
         const w = changeContinent(world(), 'northern-continent');
         expect(w.currentContinent.name).toBe('northern-continent');
-        expect(w.currentContinent.lockedMaps).toContain('caverns');
+        expect(w.currentContinent.lockedMaps).toContain('beacon-crags');
     });
 
     it('writes the outgoing continent back into the catalogue before switching', () => {

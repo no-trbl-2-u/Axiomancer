@@ -18,6 +18,7 @@ import { GAME_STATE_VERSION, createNewGameState } from '../game.reducer';
 import { migrate } from '../game.migrate';
 import { setSeed } from '../../Utils/rng';
 import { getMapDefinition } from '../../World/map.registry';
+import { resolveMapEvent } from '../../World/MapEvents/resolve-map-event';
 import {
     STATE_FIXTURES, buildStateFromFixture, getStateFixtureById, listStateFixtureIds,
     parseStateFixture, problemsFor, validateStateFixture, StateFixtureError,
@@ -106,16 +107,16 @@ describe('buildStateFromFixture', () => {
         const state = buildStateFromFixture({
             id: 'world',
             seed: 3,
-            world: { continent: 'coastal-continent', map: 'northern-forest', node: 'nf-8', completedMaps: ['breakwater'] },
+            world: { continent: 'coastal-continent', map: 'charcoal-wood', node: 'cw-8', completedMaps: ['breakwater'] },
         });
         const { currentContinent, currentMap } = state.world;
         expect(currentContinent.name).toBe('coastal-continent');
-        expect(currentContinent.availableMaps).toContain('northern-forest');
-        expect(currentContinent.lockedMaps).not.toContain('northern-forest');
+        expect(currentContinent.availableMaps).toContain('charcoal-wood');
+        expect(currentContinent.lockedMaps).not.toContain('charcoal-wood');
         expect(currentContinent.completedMaps).toEqual(['breakwater']);
-        expect(currentMap.currentNode).toBe('nf-8');
-        expect(currentMap.availableNodes).toContain('nf-8');
-        expect(currentMap.discoveredNodes).toContain('nf-8');
+        expect(currentMap.currentNode).toBe('cw-8');
+        expect(currentMap.availableNodes).toContain('cw-8');
+        expect(currentMap.discoveredNodes).toContain('cw-8');
     });
 
     it('flags append without duplicates', () => {
@@ -126,13 +127,13 @@ describe('buildStateFromFixture', () => {
     });
 
     it('boots a store through createGameStore as full overrides', () => {
-        const initial = buildStateFromFixture(getStateFixtureById('l30-caverns-hazard')!);
+        const initial = buildStateFromFixture(getStateFixtureById('l30-bw-hazard')!);
         const store = createGameStore(nullAdapter, initial);
         const s = store.getState();
         expect(s.player.level).toBe(30);
         expect(s.player.health).toBe(12);
-        expect(s.world.currentMap.name).toBe('caverns');
-        expect(s.world.currentMap.currentNode).toBe('nc-17');
+        expect(s.world.currentMap.name).toBe('breakwater');
+        expect(s.world.currentMap.currentNode).toBe('bw-3');
         expect(s.version).toBe(GAME_STATE_VERSION);
     });
 });
@@ -199,5 +200,20 @@ describe('createFixtureGameStore (src/test-utils/fixture-store.ts)', () => {
             const { state } = createFixtureGameStore(f.id);
             expect(state.world.currentMap.currentNode).toBe(f.world?.node);
         }
+    });
+
+    // R7e — Act 1 stages no NPC, shop or off-start cutscene; these fixtures
+    // stage the neutral witnesses and must resolve to them, not the node's pool.
+    it.each([
+        ['apprentice-staged-dialogue', 'narration'],
+        ['wanderer-staged-village', 'village'],
+        ['wanderer-staged-cutscene', 'cutscene'],
+    ])('"%s" resolves its staged %s event', (id, kind) => {
+        const f = getStateFixtureById(id)!;
+        expect(f.stagedEvent?.kind).toBe(kind);
+        const { state } = createFixtureGameStore(id);
+        const result = resolveMapEvent(state, () => 0, f.stagedEvent);
+        expect(result.event.kind).toBe(kind);
+        expect(result.state.world.currentMap.consumedNodes).toContain(f.world?.node);
     });
 });

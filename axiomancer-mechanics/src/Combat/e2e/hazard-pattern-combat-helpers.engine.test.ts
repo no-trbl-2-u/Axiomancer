@@ -35,7 +35,6 @@ import {
     availableDice,
     selectMercyChoice as selectEncounterMercyChoice,
     handCards, resolveThreatPhase,
-    THREAT_WEAKEN_PER_ROLL, THREAT_DENY_AT, THREAT_WEAKEN_FLOOR,
 } from '../combat.engine';
 import { recordAttribution, buildCombatSummary } from '../combat.attribution';
 import type { CombatAttributionRow, LandedEffect } from '../combat.encounter.types';
@@ -318,37 +317,15 @@ describe('Spec 25 §7 — handCards', () => {
 // ── Enemy threat resolver (§4.5) — `resolveThreatPhase` ─────────────────────
 
 describe('Spec 25 §4.5 — resolveThreatPhase', () => {
-    // The spec 32 v3 keyword reset deleted the skipTurn (Sleep) and
-    // negative-rollModifier control debuffs (Confusion -5, Fear -4). No surviving
-    // library effect carries those shapes, so the skipTurn-clear and
-    // weaken/deny-split machinery is driven by test-only fixtures registered into
-    // the shared registry (the same lookup the threat engine reads). Never
-    // touches the library JSON.
+    // The spec 32 v3 keyword reset deleted the tier-2 skipTurn (Sleep); the
+    // skipTurn-clear witness is a test-only fixture registered into the shared
+    // registry (the same lookup the threat engine reads). Never touches the
+    // library JSON.
     const THREAT_FIXTURES: Effect[] = [
         {
             id: 'test_skip', name: 'test sleep', description: 'test skipTurn control',
             type: 'debuff', category: 'control', duration: 3, stacking: 'none', tier: 2,
             payload: { actionRestriction: { skipTurn: true } },
-        },
-        {
-            id: 'test_ctrl_confusion', name: 'test confusion', description: 'test control -5',
-            type: 'debuff', category: 'control', duration: 3, stacking: 'intensity', tier: 2,
-            payload: { rollModifier: -5 },
-        },
-        {
-            id: 'test_ctrl_fear', name: 'test fear', description: 'test control -4',
-            type: 'debuff', category: 'control', duration: 3, stacking: 'intensity', tier: 2,
-            payload: { rollModifier: -4 },
-        },
-        {
-            id: 'test_ctrl_knockdown', name: 'test knockdown', description: 'test control -3',
-            type: 'debuff', category: 'control', duration: 3, stacking: 'intensity', tier: 2,
-            payload: { rollModifier: -3 },
-        },
-        {
-            id: 'test_ctrl_slow', name: 'test slow', description: 'test control -2',
-            type: 'debuff', category: 'control', duration: 3, stacking: 'intensity', tier: 2,
-            payload: { rollModifier: -2 },
         },
     ];
     beforeAll(() => { for (const e of THREAT_FIXTURES) effectsLibrary.registry.set(e.id, e); });
@@ -385,76 +362,6 @@ describe('Spec 25 §4.5 — resolveThreatPhase', () => {
         expect(result.events).toEqual([]);
     });
 
-    it('weakens (but does not deny) the threat when rollPenalty < THREAT_DENY_AT', () => {
-        // WS8.2 (spec 32 §12 #6): confusion moved off the roll surface — FEAR
-        // (-4) is the heavy roll carrier that weakens without denying. The
-        // library's control vocabulary was deleted with the zero-producer
-        // sweep, so the shape is a test-only fixture.
-        const fearEffect = lookupEffect('test_ctrl_fear')!;
-        const player = makePlayer([DOT_BODY]);
-        const enemy = makeEnemy(100, 'heart');
-        const { activeEffects: enemyEffects } = applyEffect(enemy.effects, fearEffect, 1);
-
-        let baseState = initializeCombatEncounter(player, makeEnemy(100, 'heart'), undefined, SEED);
-        baseState = rollEncounterDice(baseState).state;
-        const baseResult = resolveThreatPhase(baseState);
-
-        let weakenState = initializeCombatEncounter(player, { ...enemy, effects: enemyEffects }, undefined, SEED);
-        weakenState = rollEncounterDice(weakenState).state;
-        const weakenResult = resolveThreatPhase(weakenState);
-
-        const weakenPhaseEvent = weakenResult.events.find(e => e.kind === 'phase-resolved') as
-            { kind: 'phase-resolved'; phaseIndex: number; mark: string } | undefined;
-        expect(weakenPhaseEvent!.mark).toBe('overwhelmed');
-        expect(weakenResult.state.player.health).toBeLessThan(player.health);
-        expect(weakenResult.state.player.health).toBeGreaterThan(baseResult.state.player.health);
-    });
-
-    it('denies the threat via soft-control when rollPenalty >= THREAT_DENY_AT', () => {
-        // WS8.2: the cumulative roll-deny witness stacks the roll-surface
-        // carriers (fear -4 + knockdown -3 + slow -2 = 9 ≥ 8). All three share
-        // ONE DISRUPT surface, so this is the legacy penalty path, not the
-        // distinct-surface deny. Test-only fixtures — the library shapes were
-        // deleted with the zero-producer sweep.
-        const fearEffect = lookupEffect('test_ctrl_fear')!;
-        const knockdownEffect = lookupEffect('test_ctrl_knockdown')!;
-        const slowEffect = lookupEffect('test_ctrl_slow')!;
-        const player = makePlayer([DOT_BODY]);
-        const enemy = makeEnemy(100, 'heart');
-        const { activeEffects: withFear } = applyEffect(enemy.effects, fearEffect, 1);
-        const { activeEffects: withKnockdown } = applyEffect(withFear, knockdownEffect, 1);
-        const { activeEffects: enemyEffects } = applyEffect(withKnockdown, slowEffect, 1);
-
-        let state = initializeCombatEncounter(player, { ...enemy, effects: enemyEffects }, undefined, SEED);
-        state = rollEncounterDice(state).state;
-        const result = resolveThreatPhase(state);
-
-        const phaseEvent = result.events.find(e => e.kind === 'phase-resolved') as
-            { kind: 'phase-resolved'; phaseIndex: number; mark: string } | undefined;
-        expect(phaseEvent!.mark).toBe('clear');
-        expect(result.state.player.health).toBe(player.health);
-    });
-});
-
-// ── Soft-control threat tunable contracts ────────────────────────────────────
-
-describe('Soft-control threat tunables — contract values', () => {
-    it('THREAT_WEAKEN_PER_ROLL is 0.06', () => {
-        expect(THREAT_WEAKEN_PER_ROLL).toBe(0.06);
-    });
-
-    it('THREAT_DENY_AT is 8', () => {
-        expect(THREAT_DENY_AT).toBe(8);
-    });
-
-    it('THREAT_WEAKEN_FLOOR is 0.4', () => {
-        expect(THREAT_WEAKEN_FLOOR).toBe(0.4);
-    });
-
-    it('floor never binds at current tunables: 1 - THREAT_DENY_AT * THREAT_WEAKEN_PER_ROLL > THREAT_WEAKEN_FLOOR', () => {
-        const weakenAtDenyThreshold = 1 - THREAT_DENY_AT * THREAT_WEAKEN_PER_ROLL;
-        expect(weakenAtDenyThreshold).toBeGreaterThan(THREAT_WEAKEN_FLOOR);
-    });
 });
 
 // ── Attribution ledger (§7.7) — `recordAttribution` ─────────────────────────

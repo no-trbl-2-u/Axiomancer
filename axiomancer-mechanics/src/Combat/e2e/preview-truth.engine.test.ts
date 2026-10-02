@@ -40,7 +40,7 @@ import {
     THREAT_DAMAGE_SCALE,
 } from '../combat.engine';
 import {
-    getDamageTakenMultiplier, getHealingReceivedMult, getOutgoingDamageMult,
+    getDamageTakenMultiplier, getOutgoingDamageMult,
 } from '../effects';
 import { getActiveDotTotal } from '../effect-modifiers';
 import { MAX_EFFECT_INTENSITY } from '../../Game/game-mechanics.constants';
@@ -97,7 +97,7 @@ function activeEffect(effectId: string, intensity = 1, duration = 3, appliedAt =
 /** One-phase custom threat so incoming numbers are fully controlled. */
 function threatOnly(effects: CombatThreatPhase['threatAction']['effects']): CombatThreatPhase[] {
     return [{
-        index: 1, enemyStance: 'body', isFinalPhase: true,
+        index: 1, isFinalPhase: true,
         threatAction: { description: 'truth probe', effects },
     }];
 }
@@ -275,7 +275,6 @@ describe('P0-truth — dice/DoT-side laws', () => {
     it('multiplier helpers are exactly 1 for unmarked bearers (byte-compat)', () => {
         const p = makePlayer([]);
         expect(getDamageTakenMultiplier(p)).toBe(1);
-        expect(getHealingReceivedMult(p)).toBe(1);
         expect(getOutgoingDamageMult(p)).toBe(1);
     });
 });

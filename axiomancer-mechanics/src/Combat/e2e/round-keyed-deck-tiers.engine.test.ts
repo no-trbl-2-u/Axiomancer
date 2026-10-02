@@ -104,14 +104,12 @@ describe('round-keyed deck tiers — a flat deck still compiles to what it alway
                     // A branch card still projects both authored forks.
                     expect(card.branch, `${id}[${i}] compiled a branch from a linear card`).toBeDefined();
                     expect(step.branch.condition).toEqual(card.branch!.condition);
-                    expect(step.branch.then.enemyStance).toBe(card.branch!.then.stance);
-                    expect(step.branch.else.enemyStance).toBe(card.branch!.else.stance);
+                    expect(step.branch.then.actionText).toBe(card.branch!.then.actionText);
+                    expect(step.branch.else.actionText).toBe(card.branch!.else.actionText);
                     return;
                 }
-                expect(step.enemyStance, `${id}[${i}] stance`).toBe(card.stance);
                 expect(step.damageWeight, `${id}[${i}] weight`).toBe(card.damageWeight);
                 expect(step.threatEffectId, `${id}[${i}] effect`).toBe(card.effectId);
-                expect(step.rungs, `${id}[${i}] rungs`).toBe(card.rungs);
                 expect(step.actionText).toContain(card.name);
                 expect(step.isFinalPhase, `${id}[${i}] final`).toBe(i === cardIds.length - 1);
             });
@@ -204,13 +202,13 @@ describe('round-keyed deck tiers — an authored tiered deck opens its tiers by 
         const FIXTURE = 'enemy-tier-fixture';
         const BRANCH = 'fixture-branch-card';
         (ENEMY_CARD_LIBRARY as Record<string, EnemyCard>)[BRANCH] = {
-            name: 'Fixture Fork', archetype: 'drowned-parish', grade: 'escalation', stance: 'body',
+            name: 'Fixture Fork', archetype: 'drowned-parish', grade: 'escalation',
             branch: {
                 condition: { kind: 'prior-threat-fully-blocked' },
-                then: { stance: 'mind', actionText: 'then', stanceHint: 'then' },
-                else: { stance: 'body', actionText: 'else', stanceHint: 'else' },
+                then: { actionText: 'then' },
+                else: { actionText: 'else' },
             },
-            actionText: 'fork', stanceHint: 'fork',
+            actionText: 'fork',
         };
         (ENEMY_DECKS as Record<string, unknown>)[FIXTURE] = {
             tier1: ['dp-first-bell', 'dp-undertow-grip'],
@@ -264,8 +262,8 @@ describe('round-keyed deck tiers — the sequence never stalls', () => {
     it('getThreatSequence strips a gate off phase 0 whatever the source authored', () => {
         const enemy = enemyById('enemy-the-doorwarden') as Enemy & { threatSequence?: unknown };
         enemy.threatSequence = [
-            { index: 1, enemyStance: 'body', threatAction: { description: 'x', effects: [{ damage: 5 }] }, unlockAfterRound: 4 },
-            { index: 2, enemyStance: 'mind', threatAction: { description: 'y', effects: [{ damage: 9 }] }, isFinalPhase: true, unlockAfterRound: 4 },
+            { index: 1, threatAction: { description: 'x', effects: [{ damage: 5 }] }, unlockAfterRound: 4 },
+            { index: 2, threatAction: { description: 'y', effects: [{ damage: 9 }] }, isFinalPhase: true, unlockAfterRound: 4 },
         ];
         const seq = getThreatSequence(enemy as Enemy);
         expect(seq[0].unlockAfterRound).toBeUndefined();

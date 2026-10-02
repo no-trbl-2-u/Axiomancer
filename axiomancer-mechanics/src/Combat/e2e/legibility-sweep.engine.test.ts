@@ -1,11 +1,11 @@
 /**
  * Hermetic E2E — phase 28 (Show the Engine legibility sweep). Covers the
- * mechanics-side additions: the shared rung-denial fix
- * (getDisruptMeter.willDeny) and the wall-math projection. Seeded RNG only;
+ * mechanics-side additions: the wall-math projection and its deny verdict.
+ * (The DISRUPT meter went with the stance layer, R7d.) Seeded RNG only;
  * no disk / network / TTY.
  *
  * The RUPTURE projection and Overtake gate cases went with RUPTURE itself
- * (R7a, D50).
+ * (R7a, D50); the STAGGER-rung cases with the rung ladder (R7c2).
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
@@ -17,7 +17,7 @@ import { FloatEye } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import type { ActiveEffect } from '../../Effects/types';
 import {
-    initializeCombatEncounter, projectIncomingThreat, getDisruptMeter,
+    initializeCombatEncounter, projectIncomingThreat,
 } from '../combat.engine';
 
 afterEach(() => { vi.restoreAllMocks(); });
@@ -38,21 +38,20 @@ function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'mind', effec
     return e;
 }
 
-describe('getDisruptMeter.willDeny — STAGGER-rung denial (phase 28 fix)', () => {
-    it('reports willDeny=true when accumulated STAGGER alone denies the turn (previously false)', () => {
-        // FloatEye is 'simple' difficulty -> THREAT_RUNGS (2), no boss growth.
-        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', []), undefined, 7);
-        const state = { ...base, staggerRungs: 2 }; // rungsLost (2) >= rungsTotal (2)
-        const meter = getDisruptMeter(state);
-        expect(meter.pips).toBeLessThan(meter.threshold);   // no distinct-control deny
-        expect(meter.rollPenalty).toBe(0);                  // no roll-penalty deny
-        expect(meter.willDeny).toBe(true);
+const PETRIFY: ActiveEffect = { effectId: 'debuff_petrify', remainingDuration: 1, intensity: 1, appliedAt: 0, tier: 3 };
+const QUARTER: ActiveEffect = { effectId: 'debuff_quarter', remainingDuration: 2, intensity: 1, appliedAt: 0, tier: 2 };
+
+describe('projectIncomingThreat.willDeny', () => {
+    it('reports willDeny=true when a hard control (PETRIFY) skips the turn', () => {
+        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', [PETRIFY]), undefined, 7);
+        const projection = projectIncomingThreat(base);
+        expect(projection.willDeny).toBe(true);
+        expect(projection.projectedDamage).toBe(0);
     });
 
     it('reports willDeny=false with no denial path active', () => {
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', []), undefined, 7);
-        const meter = getDisruptMeter(base);
-        expect(meter.willDeny).toBe(false);
+        expect(projectIncomingThreat(base).willDeny).toBe(false);
     });
 });
 
@@ -69,19 +68,18 @@ describe('projectIncomingThreat — wall-math readout (phase 28)', () => {
     });
 
     it('projects 0 net damage when the turn will be denied', () => {
-        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', []), undefined, 7);
-        const denied = { ...base, staggerRungs: 2 }; // rung-denied (THREAT_RUNGS = 2)
+        const denied = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', [PETRIFY]), undefined, 7);
         const projection = projectIncomingThreat(denied);
         expect(projection.willDeny).toBe(true);
         expect(projection.projectedDamage).toBe(0);
         expect(projection.netDamage).toBe(0);
     });
 
-    it('projected damage drops once a live modifier (partial rung loss) is in play', () => {
+    it('projected damage drops once a live modifier (QUARTER on the foe) is in play', () => {
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', []), undefined, 7);
         const baseline = projectIncomingThreat(base);
-        const partiallyStaggered = { ...base, staggerRungs: 1 }; // 1 of 2 rungs lost, not denied
-        const projection = projectIncomingThreat(partiallyStaggered);
+        const quartered = { ...base, enemy: { ...base.enemy, effects: [QUARTER] } };
+        const projection = projectIncomingThreat(quartered);
         expect(projection.willDeny).toBe(false);
         expect(projection.rawDamage).toBe(baseline.rawDamage); // the raw face value is unmodified…
         expect(projection.projectedDamage).toBeLessThan(baseline.projectedDamage); // …but the live projection isn't

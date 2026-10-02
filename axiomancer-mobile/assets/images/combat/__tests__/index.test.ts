@@ -29,28 +29,18 @@ import { ALL_MAP_LAYOUTS } from '@/state/exploration-maps';
 const LIVE_REGIONS: readonly string[] = ALL_MAP_LAYOUTS.map((l) => l.region);
 
 /**
- * The live regions that legitimately still reach the fallback plate, and why.
- *
- * `Northern Forest` (`state/exploration-maps/northern-forest.layout.ts`, map
- * `northern-forest`, "Map ii of ii") has no plate of its own yet. Phase 103
- * took the set from 4/7 to 6/7 and the brief says so — `plan/phases/
- * phase_103_the_last_two_arenas.md:13` reads "6 of 7" — but the comments in
- * this file, in `CombatCombatantPane.tsx` and in
- * `__tests__/CombatBoard.region-arena.test.tsx` all claimed 7/7, and the
- * hand-written input set above made the omission invisible. It is named here
- * instead, where it is asserted rather than assumed.
- *
- * This list is meant to reach length 0. It is pinned in BOTH directions below:
- * a region added to it that is not falling back fails, and a region falling
- * back that is not in it fails. So the day the forest plate ships, the case
- * goes red and points at this entry and at the comments that name it.
+ * The live regions that legitimately still reach the fallback plate. Pinned in
+ * BOTH directions below: a region added here that is not falling back fails,
+ * and a region falling back that is not here fails. So the day a plate ships,
+ * the case goes red and points at this entry.
  */
 // Map revamp M3a-M3d — the Breakwater (Act 1's coast), the Charcoal Wood
 // (Act 1's forest), the Beacon Crags (Act 1's mountains) and the Lantern Deep
 // (Act 1's underworld) ship before their arena plates; their fights fall back
-// like the Northern Forest's until one is chosen.
+// until one is chosen. R7e (D72) deleted the Northern Forest with the parked
+// maps, and the five plated parked regions with it.
 const AWAITING_PLATE: readonly string[] = [
-    'Northern Forest', 'The Breakwater', 'The Charcoal Wood', 'The Beacon Crags', 'The Lantern Deep',
+    'The Breakwater', 'The Charcoal Wood', 'The Beacon Crags', 'The Lantern Deep',
 ];
 
 /** The live regions that are meant to have a plate of their own. */
@@ -83,10 +73,7 @@ describe('arenaBackdropFor', () => {
      * the Capital have their own plates and are asserted against them below.
      *
      * What is left here is a region string with no rule at all, the undefined
-     * dev-sandbox case, and one live region — the Northern Forest, which has no
-     * plate yet and is named in `AWAITING_PLATE` above. This case used to say
-     * there was no live region among them, which was never true of phase 103's
-     * tree.
+     * dev-sandbox case, and the live regions `AWAITING_PLATE` names.
      */
     it('falls back for a region with no rule, for undefined, and for exactly the regions AWAITING_PLATE names', () => {
         const fallback = arenaBackdropFor(undefined);
@@ -119,30 +106,11 @@ describe('arenaBackdropFor', () => {
         // Pinned as two numbers, not one: a dropped plate and a dropped map are
         // different failures and neither may hide behind the other.
         // Revamp R3b purged the fishing-village map (the Drowned Parish), so its
-        // plated region left the live set (6 → 5).
-        expect(PLATED_REGIONS).toHaveLength(5);
-        // Map revamp M3a added the Breakwater (7 → 8), M3b the Charcoal Wood (→ 9),
-        // M3c the Beacon Crags (→ 10), M3d the Lantern Deep (→ 11); R3b's
-        // fishing-village purge took it back to 10.
-        expect(LIVE_REGIONS).toHaveLength(10);
-    });
-
-    it("matches the village on `sweetheart` alone, so the apostrophe cannot break it", () => {
-        // The live string is "The Sweetheart's Village". A pattern spanning the
-        // apostrophe would break on a straight/curly swap in the layout file.
-        const village = arenaBackdropFor("The Sweetheart's Village");
-        expect(arenaBackdropFor('The Sweetheart’s Village')).toEqual(village);
-        expect(arenaBackdropFor('sweetheart')).toEqual(village);
-    });
-
-    /**
-     * `/the capital/i` is the one pattern that is a substring of nothing else,
-     * but it IS a substring of prose. Pinned because the Northern City and the
-     * Capital are the two regions the game most wants to feel unlike each
-     * other, and a generic `city|capital` family would have collapsed them.
-     */
-    it('keeps The Capital and The Northern City on separate plates', () => {
-        expect(arenaBackdropFor('The Capital')).not.toEqual(arenaBackdropFor('The Northern City'));
+        // plated region left the live set (6 → 5); R7e deleted the other five
+        // with the parked maps (→ 0).
+        expect(PLATED_REGIONS).toHaveLength(0);
+        // The four Act 1 maps are the whole world since R7e.
+        expect(LIVE_REGIONS).toHaveLength(4);
     });
 
     it('never throws on undefined or empty input — undefined is the ordinary dev-sandbox case', () => {

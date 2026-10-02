@@ -67,15 +67,15 @@ export const SLOT_CAPACITY: Record<EquipmentSlot, number> = {
  *
  * The procedural library, rarity model, affix system, item sets, and all
  * equipment→combat effect channels are retired (phases 18-23). Equipment is
- * now the 11 fixed signet relics only, each carrying static `statModifiers` and
+ * now the fixed signet relics only, each carrying static `statModifiers` and
  * one `grantsSignature`. Nothing else drives combat.
  *
  * @property category       - Always `'equipment'`.
  * @property slot           - The equipment slot this item occupies.
  * @property accessoryKind  - Set iff `slot === 'accessory'` (Phase 18); the worn
  *                            flavour (head / hands / feet / amulet / ring / charm).
- * @property statModifiers  - Persistent stat lines; today only the armor relics'
- *                            `maxHp`, folded onto `maxHealth` at equip-time.
+ * @property statModifiers  - Persistent stat lines; only `maxHp`, folded onto
+ *                            `maxHealth` at equip-time.
  * @property grantsSignature - The one signature skill this signet relic grants
  *                            while worn (Phase 19). Combat-init derives
  *                            `CombatEncounterState.signatures` from the worn

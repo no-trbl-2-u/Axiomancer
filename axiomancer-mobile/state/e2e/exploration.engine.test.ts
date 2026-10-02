@@ -8,11 +8,20 @@
  */
 
 import { afterEach, describe, it, expect, jest } from '@jest/globals';
-import { createMapState, getMapDefinition, getNodeEventPool, createStartingWorld } from '@mechanics';
+import { createMapState, getMapDefinition, getNodeEventPool, createStartingWorld, settleArrival, type GameState } from '@mechanics';
 
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import { createAppActions } from '@/state/actions';
-import { createAppStore } from '@/state/store';
+import { createAppStore, type AppStore } from '@/state/store';
+
+/**
+ * The fight on the node underfoot ends (phase R9a). A fight's node stays owed,
+ * with its way on shut, until the fight settles; in play the engine's
+ * `END_COMBAT` does this, and these walks stand in for it.
+ */
+function fightOut(store: AppStore): void {
+    store.setState({ world: settleArrival(store.getState() as unknown as GameState).world });
+}
 import { jumpToNode } from '@/state/dev/world-travel';
 // Side-effect: registers exploration map event pools so resolveMapEvent
 // produces real events in the travel-to-event path tests below.
@@ -192,8 +201,15 @@ describe('moveTo action: happy path', () => {
 
         const vm = selectExplorationViewModel(store.getState());
         expect(vm.currentNodeId).toBe('bw-2');
-        const byId = Object.fromEntries(vm.nodes.map((n) => [n.id, n]));
-        expect(byId['bw-2'].kind).toBe('current');
+        expect(Object.fromEntries(vm.nodes.map((n) => [n.id, n]))['bw-2'].kind).toBe('current');
+        // The crane quay is a fight: the move does not open its way on, the
+        // fight's end does (R9a).
+        expect(store.getState().world.currentMap.availableNodes).not.toContain('bw-7');
+
+        fightOut(store);
+        const byId = Object.fromEntries(
+            selectExplorationViewModel(store.getState()).nodes.map((n) => [n.id, n]),
+        );
         // The crane quay's forward fan (bw-7 / bw-8 / bw-9) opens; the third
         // ring (bw-12 / bw-13) opens only once the player stands on it.
         expect(byId['bw-7'].kind).toBe('available');
@@ -269,6 +285,7 @@ describe('moveTo action: locked / invalid targets', () => {
         // via bw-2 → bw-7 → bw-6), so it is not completed on entry — it
         // stays reachable and can be re-entered.
         actions.moveTo('bw-2');
+        fightOut(store);
         actions.moveTo('bw-7');
         actions.moveTo('bw-6');
         const result = actions.moveTo('bw-6');
@@ -299,24 +316,24 @@ describe('changeMap action: map transition', () => {
         const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('breakwater') } });
         const actions = createAppActions(store);
 
-        actions.changeMap('northern-forest');
+        actions.changeMap('charcoal-wood');
 
         const vm = selectExplorationViewModel(store.getState());
-        expect(vm.mapId).toBe('northern-forest');
-        expect(vm.currentNodeId).toBe('nf-1');
-        expect(store.getState().world.currentMap.name).toBe('northern-forest');
+        expect(vm.mapId).toBe('charcoal-wood');
+        expect(vm.currentNodeId).toBe('cw-1');
+        expect(store.getState().world.currentMap.name).toBe('charcoal-wood');
     });
 
     it('loads the new layout fixture so node positions and labels update', () => {
         const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('breakwater') } });
         const actions = createAppActions(store);
 
-        actions.changeMap('northern-forest');
+        actions.changeMap('charcoal-wood');
 
         const vm = selectExplorationViewModel(store.getState());
         const ids = vm.nodes.map((n) => n.id);
-        expect(ids).toEqual(expect.arrayContaining(['nf-1', 'nf-2', 'nf-3']));
-        expect(ids.every((id) => id.startsWith('nf-'))).toBe(true);
+        expect(ids).toEqual(expect.arrayContaining(['cw-1', 'cw-2', 'cw-3']));
+        expect(ids.every((id) => id.startsWith('cw-'))).toBe(true);
     });
 
     it('also accepts the MapState built from getMapDefinition+createMapState as a sanity hint', () => {
@@ -326,9 +343,9 @@ describe('changeMap action: map transition', () => {
         // `createMapState(getMapDefinition(continent, name))`; the returned
         // `MapState` carries the definition's `startingNode.id` as
         // `currentNode` on a fresh map.
-        const map = createMapState(getMapDefinition('coastal-continent', 'northern-forest'));
-        expect(map.name).toBe('northern-forest');
-        expect(map.currentNode).toBe('nf-1');
+        const map = createMapState(getMapDefinition('coastal-continent', 'charcoal-wood'));
+        expect(map.name).toBe('charcoal-wood');
+        expect(map.currentNode).toBe('cw-1');
     });
 });
 
@@ -342,8 +359,10 @@ describe('exploration lifecycle: multi-step navigation', () => {
         const actions = createAppActions(store);
 
         actions.moveTo('bw-2'); // the crane quay — encounter, reusable
+        fightOut(store);
         actions.moveTo('bw-7'); // the south pier — loot-cache, consumed on entry
         actions.moveTo('bw-6'); // the sea fort — encounter, reusable, not completed
+        fightOut(store);
 
         const completed = store.getState().world.currentMap.completedNodes;
         // bw-2 and bw-6 are engine `encounter` kinds, so they do not complete
@@ -517,8 +536,9 @@ describe('resolveCurrentMapEvent: engine consumedNodes population (Phase 27)', (
         const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('breakwater') } });
         const actions = createAppActions(store);
         // Walk to a node before resolving — the starting node may be a
-        // 'none' kind in some fixtures.
-        actions.moveTo('bw-2');
+        // 'none' kind in some fixtures. bw-5 is a loot cache: a fight would
+        // stay unconsumed until it settles (R9a, the twin below).
+        actions.moveTo('bw-5');
         const before = store.getState().world.currentMap.consumedNodes.length;
 
         const produced = actions.resolveCurrentMapEvent();
@@ -547,6 +567,21 @@ describe('resolveCurrentMapEvent: engine consumedNodes population (Phase 27)', (
         if (!produced) {
             expect(after.length).toBe(before);
         }
+    });
+
+    it('leaves a fight\'s node unconsumed until the fight settles (R9a)', () => {
+        const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('breakwater') } });
+        const actions = createAppActions(store);
+        actions.moveTo('bw-2');
+
+        expect(actions.resolveCurrentMapEvent()).toBe(true);
+        expect(store.getState().world.currentMap.consumedNodes).not.toContain('bw-2');
+
+        actions.beginHazardEncounter();
+        store.getState().endCombat('victory');
+
+        expect(store.getState().world.currentMap.consumedNodes).toContain('bw-2');
+        expect(store.getState().world.currentMap.availableNodes).toContain('bw-7');
     });
 });
 
@@ -849,6 +884,7 @@ describe('selectExplorationViewModel: arrivalPending', () => {
         const store = createAppStore({ adapter, overrides: { world: createStartingWorld('breakwater') } });
         const actions = createAppActions(store);
         actions.moveTo('bw-2');
+        fightOut(store);
         actions.moveTo('bw-7');
         actions.moveTo('bw-6'); // engine kind `encounter`
 
@@ -859,16 +895,20 @@ describe('selectExplorationViewModel: arrivalPending', () => {
     });
 
     it('owes nothing once the arrival has been answered', () => {
-        // The negative twin: resolving IS the answer — it clears
-        // `pendingArrival` — so an answered arrival is never re-offered,
-        // here or after a reload.
+        // The negative twin: answering clears `pendingArrival`, so an
+        // answered arrival is never re-offered, here or after a reload. For
+        // a fight the answer is the fight's end, not the resolve (R9a).
         const adapter = createMemoryAdapter();
         const store = createAppStore({ adapter, overrides: { world: createStartingWorld('breakwater') } });
         const actions = createAppActions(store);
         actions.moveTo('bw-2');
+        fightOut(store);
         actions.moveTo('bw-7');
         actions.moveTo('bw-6');
         actions.resolveCurrentMapEvent();
+        expect(selectExplorationViewModel(store.getState()).arrivalPending).toBe(true);
+        actions.beginHazardEncounter();
+        store.getState().endCombat('victory');
         actions.save();
 
         expect(store.getState().world.currentMap.consumedNodes).toContain('bw-6');

@@ -45,26 +45,27 @@ function v27InLabyrinth(withReturn: boolean): Record<string, unknown> {
 }
 
 /**
- * A v27 save standing on the purged fishing-village's start node. The map
- * left the registry in R3b, so its MapState is hand-built from the
- * Breakwater's shape with the map name and `fv-` node ids a legacy save carried.
+ * A v27 save standing on the start node of a map that has left the registry
+ * (fishing-village in R3b, the parked northern maps in R7e). Its MapState is
+ * hand-built from the Breakwater's shape with the map name and node prefix a
+ * legacy save carried.
  */
-function v27OnFishingVillage(): Record<string, unknown> {
+function v27OnLegacyMap(name: string, prefix: string): Record<string, unknown> {
     const fresh = createNewGameState({ startMap: 'breakwater' });
-    const fv = (ids: string[]): string[] => ids.map(id => id.replace(/^bw-/, 'fv-'));
+    const re = (ids: string[]): string[] => ids.map(id => id.replace(/^bw-/, `${prefix}-`));
     const bw = fresh.world.currentMap;
     const legacyMap = {
         ...bw,
-        name: 'fishing-village',
-        currentNode: 'fv-1',
-        completedNodes: fv(bw.completedNodes),
-        availableNodes: fv(bw.availableNodes),
-        lockedNodes: fv(bw.lockedNodes),
-        discoveredNodes: fv(bw.discoveredNodes),
+        name,
+        currentNode: `${prefix}-1`,
+        completedNodes: re(bw.completedNodes),
+        availableNodes: re(bw.availableNodes),
+        lockedNodes: re(bw.lockedNodes),
+        discoveredNodes: re(bw.discoveredNodes),
     };
     const coastal = {
         ...fresh.world.currentContinent,
-        availableMaps: ['fishing-village', ...fresh.world.currentContinent.availableMaps],
+        availableMaps: [name, ...fresh.world.currentContinent.availableMaps],
     };
     return {
         ...fresh,
@@ -77,6 +78,8 @@ function v27OnFishingVillage(): Record<string, unknown> {
         },
     };
 }
+
+const v27OnFishingVillage = (): Record<string, unknown> => v27OnLegacyMap('fishing-village', 'fv');
 
 const hop = (raw: Record<string, unknown>): GameState => migrate(raw, 27, 28);
 
@@ -105,8 +108,8 @@ describe('migrate v27 → v28 (THE REVAMP R3a / D53, D54, D61)', () => {
     });
 
     it('moves a save on a parked map onto the sealed deep stair', () => {
-        for (const map of ['northern-forest', 'caverns', 'the-capital'] as const) {
-            const migrated = hop(v27On(map));
+        for (const [map, prefix] of [['northern-forest', 'nf'], ['caverns', 'nc'], ['the-capital', 'cap']] as const) {
+            const migrated = hop(v27OnLegacyMap(map, prefix));
             expect(migrated.world.currentMap.name).toBe('lantern-deep');
             expect(migrated.world.currentMap.currentNode).toBe('ld-18');
         }

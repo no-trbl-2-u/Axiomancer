@@ -15,7 +15,7 @@ known game state instead of the persisted save:
 | Channel | Example | Notes |
 |---|---|---|
 | URL deep link (web) | `/exploration?fixture=sage-bw-door-gate` | Hand-typable; any route works, the fixture applies before the store mounts |
-| Init-script global | `globalThis.__AXM_FIXTURE__ = 'wanderer-nf-village'` or an inline fixture object | `scripts/fixture-injector.mjs` → `injectStateFixture(context, …)` |
+| Init-script global | `globalThis.__AXM_FIXTURE__ = 'wanderer-staged-village'` or an inline fixture object | `scripts/fixture-injector.mjs` → `injectStateFixture(context, …)` |
 
 Ids come from the engine registry (`STATE_FIXTURES`;
 `npm run game -w axiomancer-mechanics -- --fixture list`). The run is
@@ -112,7 +112,7 @@ read the log.** Section container ids are `dev-section-<key>`.
 | Leaf | Helper | What it does | Test ids |
 |---|---|---|---|
 | `DebugWorldTravel` | `state/dev/world-travel.ts` | **Map chips** travel to any map on any continent (start node). **Node chips** jump to a node on the current map and fire its authored event through the live `resolveCurrentMapEvent` (travel doors in red). **RESET MAP** re-seeds the map; **COMPLETE MAP** stamps it done and unlocks the next. **THE APORIA** act buttons enter act I / II / III and open `/labyrinth`. | `debug-travel-map-<map>`, `debug-travel-node-<id>`, `debug-map-reset-button`, `debug-map-complete-button`, `debug-aporia-act{1,2,3}` |
-| `DebugFlags` | `state/dev/flags.ts` | Chips for the tutorial-done flags, the starter-bundle pick, and the hazard hex; ALL TUTS ON / OFF | `debug-flag-<flag>`, `debug-flags-tuts-{on,off}` |
+| `DebugFlags` | `state/dev/flags.ts` | Chips for the tutorial-done flags; ALL TUTS ON / OFF | `debug-flag-<flag>`, `debug-flags-tuts-{on,off}` |
 
 ### ENCOUNTERS — `dev-section-encounters`
 

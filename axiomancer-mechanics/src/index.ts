@@ -23,9 +23,10 @@ export {
     DIE_GEAR_COLORS,
     characterPresets, getPresetById, buildCharacterFromPreset,
     grantFirstNodeRelic, withholdFirstNodeRelic, isFirstNodeRelicPending,
-    FIRST_NODE_RELIC_ID, STAND_IN_RELIC_ID, FIRST_NODE_RELIC_FLAG,
+    FIRST_NODE_RELIC_ID, FIRST_NODE_RELIC_FLAG,
     levelLadderPresets,
     previewStatAllocation,
+    experienceForLevel,
 } from './Character';
 export type {
     Character, BaseStats,
@@ -54,8 +55,6 @@ export {
 export {
     heal, isDefeated,
     getActiveEffectModifiers, canAct,
-    // 0.34.0 status-depth epic — HP-model selectors + tunable scalars
-    DISRUPT_DENY_AT,
     healCharacter,
 } from './Combat';
 export type {
@@ -78,9 +77,8 @@ export {
     mechanicText,
     // Spec 26b / spec 33 — turn lifecycle, Conviction, Signature Skills
     startTurn, endTurn, discardCombatCard,
-    playSignatureSkill, isPhaseStanceRevealed,
-    getSignatureSkill, signatureCastBlock, signatureGuardAmount, SIGNATURE_COST, SIGNATURE_GUARD,
-    READ_DAMAGE_MULT,
+    playSignatureSkill,
+    getSignatureSkill, signatureCastBlock, SIGNATURE_COST,
     colorMatchBonus,
     // phase 28 — legibility sweep
     projectIncomingThreat,
@@ -113,9 +111,9 @@ export type {
     CombatThreatPhase, CombatThreatAction, CombatThreatEffect,
     CombatOutcome, CombatEvent,
     CombatSummary,
-    CombatIntentType, CombatReadResult,
+    CombatIntentType,
     SignatureSkill,
-    // The three chain/stance colours (spec 33 momentum chain + stance checks)
+    // The three chain colours (spec 33 momentum chain)
     WheelStance,
 } from './Combat';
 
@@ -209,6 +207,9 @@ export {
     buildStateFromFixture,
     validateStateFixture,
     getStateFixtureById, listStateFixtureIds,
+    FIXTURE_NPC, FIXTURE_SHOP, FIXTURE_QUEST,
+    FIXTURE_DIALOGUE_EVENT, FIXTURE_VILLAGE_EVENT, FIXTURE_CUTSCENE_EVENT,
+    FIXTURE_WEAPON, FIXTURE_ARMOR, FIXTURE_TRINKETS,
 } from './Game';
 export type {
     StateFixture,
@@ -299,12 +300,13 @@ export {
 } from './World';
 export {
     resolveMapEvent,
+    settleArrival,
     getNodeEventPool,
     getNodePrimaryEventKind,
 } from './World';
 export type {
     MapEventKind,
-    ResolvedEvent, ResolveMapEventResult,
+    MapEventPayload, ResolvedEvent, ResolveMapEventResult,
 } from './World';
 // Phase 52b — rest shelter classification (retires the healFraction >= 1.0
 // inn heuristic). Mobile gates the hazard-scar max-VITAE mend on this.

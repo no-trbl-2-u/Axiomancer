@@ -57,7 +57,6 @@ function makeEnemy(stance: 'heart' | 'body' | 'mind' = 'body'): Enemy {
 function damagePhase(damage: number): CombatThreatPhase {
     return {
         index: 1,
-        enemyStance: 'body',
         threatAction: { description: 'qa swing', effects: [{ damage }] },
         isFinalPhase: true,
     };

@@ -64,14 +64,15 @@ describe('level-ladder presets', () => {
         expect(character.knownCards.length).toBeGreaterThan(0);
     });
 
-    it('escalates: L50 fills the whole loadout (5 worn pieces) and is tougher than L1', () => {
+    it('escalates: L50 is tougher than L1, both wearing the ring alone', () => {
         const l1 = buildCharacterFromPreset(getPresetById('kid-l1')!);
         const l50 = buildCharacterFromPreset(getPresetById('kid-l50')!);
 
-        // Phase 18: the worn maximum is 5 (1 weapon + 1 armor + 3 accessories).
-        // The L50 preset declares 7 pieces; the 2 that overflow the caps
-        // (a second armor + a 4th accessory) seed the inventory instead.
-        expect(getEquippedItems(l50.equipment).length).toBe(5);
+        // The declared `equipment` entries are vestigial (Phase 21); every
+        // tier wears the starting relics, the Suppliant's Ring (R7e2).
+        for (const c of [l1, l50]) {
+            expect(getEquippedItems(c.equipment).map(e => e.id)).toEqual(['relic-disarming-plea']);
+        }
         expect(l50.maxHealth).toBeGreaterThan(l1.maxHealth);
     });
 });

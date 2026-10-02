@@ -1,21 +1,8 @@
 /**
- * Keyword registry — the player-facing combat vocabulary (spec 32 §3,
- * amended 2026-07-11 by the Phase 29 language pass).
+ * Keyword registry — the player-facing combat vocabulary.
  *
- * 30 KEYWORDS (down from a drifted 32 — the "exactly 30" directive yields
- * to earned support: see `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-keyword-registry.md`).
- * Spec 33 §6 (D4, 2026-07-17) registers three more die-gear rows: BOON
- * (the face payload) plus the blacksmith upgrade verbs HONE and TEMPER.
- * Phase 29 (`plan/archive/2026-09-25-trim-t4/plan/phases/phase_29_keyword_registry.md`) folded six
- * previously-unmapped debuff ids into registry keywords, renamed three
- * colliding words (FESTER→PROLONG, TRANSMUTE→CURDLE, REPRISE→RECALL),
- * retired/merged three ghosts (BARRIER into GUARD, CONJURE — zero library
- * cards, SENTENCE — demoted to card-local text on its sole carrier), and
- * promoted one (SIPHON — was raw unglossed text). TICK and KINDLE are
- * UNCHANGED this phase: TICK's retirement rides Phase 30's FREE-line
- * rework, and KINDLE's fold-into-FORGE is conditional on Phase 30/32
- * content work giving it more carriers — neither is a registry-honesty
- * question this pass.
+ * The registry is `KEYWORD_GLOSS` below: only words a live card, item,
+ * hazard or die still prints (D45, the carrier rule). No fixed count.
  *
  * The doctrine: "every mechanic is a terse, learnable KEYWORD" over "the
  * count is exactly 30" — a mechanic without a keyword here is the bug (see
@@ -40,14 +27,14 @@ const EFFECT_KEYWORD: Record<string, string> = {
     // S3 (D43) — rebuilt for the grey office's A Plain Word.
     debuff_vulnerable: 'Vulnerable',
     // Revamp R4 (D45) deleted Poison, Quarter and Doom: the signature skills
-    // were their last carriers, and are GUARD placeholders now. R5 deleted
+    // were their last carriers (R7e2 then deleted those signatures). R5 deleted
     // Mark: nothing applies it once the consumables that borrowed it retired.
 };
 
 /**
  * SUPPORT effect ids (items / consumables / the Cards token system — tagged
  * `support`/`non-card` in the effect libraries). NOT card keywords and NOT in
- * the 30-keyword glossary; mapped so the combat log never prints a raw id.
+ * the keyword glossary; mapped so the combat log never prints a raw id.
  */
 const SUPPORT_KEYWORD: Record<string, string> = {
     // Revamp R5 (D49) retired every consumable but the healing potions, and
@@ -84,12 +71,12 @@ const MECHANIC_KEYWORD: Record<string, string> = {
  * numbers live on the face/preview; this explains the keyword.
  *
  * The table holds only words something live still prints: the grey office
- * (GUARD/VULNERABLE), the signature skills (GUARD), the healing potions
- * (HEAL), a map hazard (BLEED), the dice system (PIP, BOON, HONE, TEMPER) and
- * the two card-type labels. Revamp R4 (D45) cut POISON, DOOM, QUARTER,
- * STAGGER, PLEA, WRATH and CHAIN when the signature skills, their last
- * carriers, became GUARD placeholders; R5 cut CLEANSE, DRAW and MARK with the
- * consumables that printed them. Git history keeps the rest.
+ * (GUARD/VULNERABLE), the healing potions (HEAL), a map hazard (BLEED), the
+ * dice system (PIP, BOON, HONE, TEMPER) and the two card-type labels. Revamp
+ * R4 (D45) cut POISON, DOOM, QUARTER, STAGGER, PLEA, WRATH and CHAIN when the
+ * signature skills, their last carriers, became GUARD placeholders (R7e2
+ * deleted those); R5 cut CLEANSE, DRAW and MARK with the consumables that
+ * printed them. Git history keeps the rest.
  *
  * 2026-07-12 (owner playtest) — TERSE GLOSSES: every gloss is ONE short
  * sentence in the Dawncaster register ("Cards with Lifedrain restore health
@@ -182,7 +169,7 @@ export function allRegistryKeywords(): readonly string[] {
 /**
  * KW-7 (phase 29) — the "systems glossary": engine tokens spec 32 §3 calls
  * out as "systems, not card keywords" (Conviction, Resonance, Reserve/Pips,
- * Floating dice, rungs, WILD/X) but that the player still reads on cards and
+ * Floating dice, WILD/X) but that the player still reads on cards and
  * threshold lines with no definition anywhere.
  *
  * 2026-07-12 (owner playtest) — NO LONGER dumped wholesale into every card's
@@ -195,7 +182,6 @@ export function allRegistryKeywords(): readonly string[] {
 export const SYSTEM_GLOSSARY: readonly { term: string; def: string }[] = [
     { term: 'CONVICTION ◆', def: 'A spend-anytime resource banked from unspent dice and overflow. It never decays.' },
     { term: 'RESERVE & PIPS', def: 'Up to 2 dice held between phases instead of played. Each gains +1 pip per phase it survives, spent for extra intensity or Guard.' },
-    { term: 'RUNGS', def: "The foe's telegraphed action has rungs: 2 on a normal action, 3 on a boss. Losing all of them denies the action." },
     { term: 'WILD / X', def: 'A WILD die counts as any color. A dead X die powers nothing.' },
     // The keyword audit (2026-09-27, after the card purge) removed TOLL,
     // GHOST, SENTENCE and CONDEMN: no card the player holds prints them now.
@@ -210,7 +196,6 @@ export const SYSTEM_GLOSSARY: readonly { term: string; def: string }[] = [
 const SYSTEM_TERM_MATCH: Record<string, RegExp> = {
     'CONVICTION ◆': /\bconviction\b/i,
     'RESERVE & PIPS': /\breserve\b|\bpips?\b/i,
-    'RUNGS': /\brungs?\b/i,
     'WILD / X': /\bwild\b|\bX die\b/,
 };
 

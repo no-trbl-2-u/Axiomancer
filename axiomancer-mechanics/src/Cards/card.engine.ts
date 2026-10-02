@@ -11,7 +11,6 @@ import { Enemy } from '../Enemy/types';
 import { ActiveEffect, Effect } from '../Effects/types';
 import { lookupEffect, applyEffect } from '../Effects';
 import { resolveEffectApplication } from '../Combat/resist';
-import { incrementFriendship } from '../Combat/combat.reducer';
 import { Combatant, CombatState } from '../Combat/types';
 import { scaleEffectIntensity } from '../Combat/stat-scaling';
 import { Card, CardCombatEffects } from './types';
@@ -52,19 +51,13 @@ export function learnCard(
 // ─── Card Execution ─────────────────────────────────────────────────────────
 
 /** One discrete thing that happened while a card resolved. */
-export type CardEvent =
-    | { kind: 'effect-applied';
-        cardId: string;
-        appliedTo: 'self' | 'enemy';
-        effect: Effect;
-        message: string }
-    | { kind: 'buff-converted';
-        cardId: string;
-        effect: Effect | null;
-        message: string }
-    | { kind: 'friendship-incremented'; 
-        cardId: string; 
-        amount: number };
+export type CardEvent = {
+    kind: 'effect-applied';
+    cardId: string;
+    appliedTo: 'self' | 'enemy';
+    effect: Effect;
+    message: string;
+};
 
 /** Result of `executeCard`. */
 export interface CardResolution {
@@ -78,69 +71,34 @@ export interface CardLookup {
 }
 
 /**
- * Runs a card end-to-end against the current `CombatState`:
+ * Runs a player card's `combatEffects` against the current `CombatState`:
  *
- *   1. Validate the card is owned (player: known / reward / haunt / curse) or
- *      in the enemy's rotation.
+ *   1. Validate the player owns the card (known or a card-reward pickup).
  *   2. Resolve each `combatEffects` payload through `resolveEffectApplication`
  *      (every effect lands as printed — D12).
- *   3. Resolve the friendship increment. `specialMechanics` (DEAL, GUARD)
- *      are the combat engine's: this engine never reads them.
  *
- * The card engine deals no direct damage: direct damage is the combat
- * engine's `deal` mechanic (THE BIG NUMBERS REWRITE), and the Phase 66
- * effect-matching synergy branch was deleted in TRIM THE FAT T2a because
- * every library synergy is a combat-state predicate the combat engine owns.
+ * `specialMechanics` (DEAL, GUARD) are the combat engine's: this engine never
+ * reads them, and it deals no direct damage.
  *
  * The caller — not this function — is responsible for surfacing the returned
  * `CardEvent[]` to any higher-level event stream.
  *
- * Phase 49 — `casterSide` decides which side is firing the card. Defaults
- * to `'player'` for back-compat with the pre-Phase-49 call site at
- * `src/Combat/phases/scenario.ts`. When `'enemy'`, the enemy is the caster
- * and the player is the target; `card.targetType` is interpreted relative
- * to the caster (`'self'` → caster's effects; `'enemy'` → opposing side).
- * Enemy-cast cards are validated against `Enemy.cards?` rather than
- * `Character.knownCards`.
- *
- * @throws if the card is not known (player path) or not in the enemy's
- *   rotation (enemy path), or not found in the lookup.
+ * @throws if the card is not owned or not found in the lookup.
  */
 export function executeCard(
     state: CombatState,
     cardId: string,
     lookupCard: CardLookup,
-    casterSide: 'player' | 'enemy' = 'player',
 ): CardResolution {
-    const isPlayerCaster = casterSide === 'player';
-    const caster: Combatant = isPlayerCaster ? state.player : state.enemy;
-    const target: Combatant = isPlayerCaster ? state.enemy : state.player;
-
-    if (isPlayerCaster) {
-        // A player OWNS a combat card when it is a learned card OR a card-reward
-        // pickup — the exact two sources `buildCombatDeck` deals from. Reward
-        // cards (`combatRewardCards`) enter the deck WITHOUT joining `knownCards`
-        // (they bypass the learning gate — the won combat is the gate), so a
-        // knownCards-only check wrongly rejected legitimately-dealt reward cards
-        // and crashed combat when one was played.
-        const playerCaster = caster as Character;
-        // WS2.1 (spec 32 v3 CONJURE): a Haunt (spec 34 R-13: was Thoughtform)
-        // is never learned and never a reward — it can only reach a hand
-        // through a `conjure_card` play, so the conjuring play IS its
-        // ownership provenance. The tag lives on the registry record
-        // (`cards.haunts.ts`), not on player state.
-        const haunt = (lookupCard(cardId)?.tags ?? []).includes('haunt');
-        const owned = haunt
-            || playerCaster.knownCards.includes(cardId)
-            || (playerCaster.combatRewardCards ?? []).includes(cardId);
-        if (!owned) {
-            throw new Error(`Card '${cardId}' is not known.`);
-        }
-    } else {
-        const rotation = (caster as Enemy).cards ?? [];
-        if (!rotation.some(s => s.id === cardId)) {
-            throw new Error(`Card '${cardId}' is not in the enemy's rotation.`);
-        }
+    // A player OWNS a combat card when it is a learned card OR a card-reward
+    // pickup — the exact two sources `buildCombatDeck` deals from. Reward
+    // cards (`combatRewardCards`) enter the deck WITHOUT joining `knownCards`,
+    // so a knownCards-only check would reject a legitimately-dealt reward card.
+    const player = state.player;
+    const owned = player.knownCards.includes(cardId)
+        || (player.combatRewardCards ?? []).includes(cardId);
+    if (!owned) {
+        throw new Error(`Card '${cardId}' is not known.`);
     }
 
     const card = lookupCard(cardId);
@@ -149,45 +107,23 @@ export function executeCard(
     }
 
     const events: CardEvent[] = [];
-
-    let workingCaster: Combatant = caster;
-    let workingTarget: Combatant = target;
+    let workingPlayer: Combatant = state.player;
+    let workingEnemy: Combatant = state.enemy;
 
     for (const payload of card.combatEffects ?? []) {
         const result = applyCardEffect(
-            payload, card, workingCaster, workingTarget, state.round,
-            isPlayerCaster ? state.player.baseStats : undefined,
+            payload, card, workingPlayer, workingEnemy, state.round, state.player.baseStats,
         );
-        workingCaster = result.caster;
-        workingTarget = result.target;
+        workingPlayer = result.caster;
+        workingEnemy = result.target;
         events.push(...result.events);
     }
 
-    // Phase 91 — friendship increment processing
-    let workingState = {
-        ...state,
-        player: (isPlayerCaster ? workingCaster : workingTarget) as Character,
-        enemy: (isPlayerCaster ? workingTarget : workingCaster) as Enemy,
-    };
-    if (card.incrementsFriendship && card.incrementsFriendship > 0) {
-        for (let i = 0; i < card.incrementsFriendship; i++) {
-            workingState = incrementFriendship(workingState);
-        }
-        events.push({ 
-            kind: 'friendship-incremented', 
-            cardId, 
-            amount: card.incrementsFriendship 
-        });
-    }
-
-    const nextPlayer = (isPlayerCaster ? workingCaster : workingTarget) as Character;
-    const nextEnemy  = (isPlayerCaster ? workingTarget : workingCaster) as Enemy;
-
     return {
         state: {
-            ...workingState,
-            player: nextPlayer,
-            enemy:  nextEnemy,
+            ...state,
+            player: workingPlayer as Character,
+            enemy:  workingEnemy as Enemy,
         },
         events,
     };
@@ -206,13 +142,8 @@ interface CardEffectResult {
  * effect definition (Tier 1 auto, Tier 2 resisted, Tier 3 nat-20 only).
  *
  * `payload.intensity` and `payload.duration` override the effect's default
- * stack/duration so cards like Liar's Echo (+2 intensity, 2-round mark) and
- * Sorites' Cascade (intensity-2 bleed) can lean on the same library entry as
- * the proc system without warping the underlying effect definition.
- *
- * Phase 49 — caster-agnostic. `payload.appliedTo === 'self'` routes to
- * `caster.effects`; `'enemy'` routes to `target.effects` (the opposing
- * side, regardless of which Combatant subtype that is).
+ * stack/duration, scaled by the player's stats (S3). `payload.appliedTo ===
+ * 'self'` routes to the caster's effects; otherwise to the target's.
  */
 function applyCardEffect(
     payload: CardCombatEffects,
@@ -220,9 +151,7 @@ function applyCardEffect(
     caster: Combatant,
     target: Combatant,
     round: number,
-    /** The player's stats when the player cast it (S3); enemies pass none,
-     *  so their printed intensities apply as authored. */
-    playerStats?: BaseStats,
+    playerStats: BaseStats,
 ): CardEffectResult {
     const events: CardEvent[] = [];
     const effect = lookupEffect(payload.effectId);
@@ -232,9 +161,7 @@ function applyCardEffect(
 
     const targetIsSelf = payload.appliedTo === 'self';
     const effectTarget: Combatant = targetIsSelf ? caster : target;
-    const intensityOverride = playerStats
-        ? scaleEffectIntensity(effect, payload.intensity ?? 1, targetIsSelf, playerStats)
-        : payload.intensity;
+    const intensityOverride = scaleEffectIntensity(effect, payload.intensity ?? 1, targetIsSelf, playerStats);
     const durationOverride  = payload.duration;
 
     const built = buildActiveEffect(effect, round, intensityOverride, durationOverride);
@@ -263,7 +190,7 @@ function applyCardEffect(
 
     const applied = applyEffect(
         effectTarget.effects, effect, round,
-        { ...buildApplyOptions(appliedIntensity, appliedDuration), sourceId: caster.id, uncapped: playerStats !== undefined },
+        { ...buildApplyOptions(appliedIntensity, appliedDuration), sourceId: caster.id, uncapped: true },
     );
 
     events.push({

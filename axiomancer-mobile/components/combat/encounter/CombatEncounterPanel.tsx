@@ -237,7 +237,6 @@ function keywordTypeTag(kind: string, index: number): string {
         case 'stun':
         case 'weaken': return 'CONTROL';
         case 'guard': return 'GUARD';
-        case 'regen': return 'REGEN';
         case 'befriend': return 'MERCY';
         default: return 'EFFECT';
     }
@@ -245,7 +244,7 @@ function keywordTypeTag(kind: string, index: number): string {
 
 // Reference-style coloured type tags (right-aligned on the keyword panels).
 const TAG_COLORS: Record<string, string> = {
-    DOT: '#e2543b', CONTROL: '#a86bdc', GUARD: '#9aa0a6', REGEN: '#5bbf6a',
+    DOT: '#e2543b', CONTROL: '#a86bdc', GUARD: '#9aa0a6',
     MERCY: '#5bbf6a', EFFECT: '#8a8273',
     DICE: '#d9c66a',
 };
@@ -256,12 +255,8 @@ function effectCategory(kind: string, color: string): { label: string; color: st
         case 'dot': return { label: 'AFFLICTION', color: '#e2543b' };
         case 'control': return { label: 'CONTROL', color: '#a86bdc' };
         case 'statdown':
-        case 'drain':
         case 'mark': return { label: 'HEX', color: '#e08a3b' };
-        case 'statup':
-        case 'regen':
-        case 'advantage':
-        case 'thorns': return { label: 'BLESSING', color: '#5bbf6a' };
+        case 'statup': return { label: 'BLESSING', color: '#5bbf6a' };
         default: return { label: 'EFFECT', color };
     }
 }
@@ -747,8 +742,7 @@ export function CombatEncounterPanel({
                         <Text style={styles.revealYours} testID="combat-reveal-player-vitae">
                             YOURS ♥ {vm.player.hp} / {vm.player.maxHp}
                         </Text>
-                        {vm.enemy.stanceHint ? <Text style={styles.revealTell}>“{vm.enemy.stanceHint}”</Text> : null}
-                        <Text style={styles.revealSection}>THREAT SEQUENCE — they telegraph WHAT, not their stance</Text>
+                        <Text style={styles.revealSection}>THREAT SEQUENCE</Text>
                         {/* Playtest fix 2026-09-04 — no line clamp on the threat
                             text: a multi-clause phase ("Deals 12. Applies BLEED 2.")
                             was ellipsised mid-sentence on the one
@@ -792,7 +786,6 @@ export function CombatEncounterPanel({
                                         ) : (
                                             <Text style={styles.revealPhaseText}>{p.threatAction.description}</Text>
                                         )) : null}
-                                        {open && p.stanceHint ? <Text style={styles.revealPhaseTell}>🜲 stance hidden — {p.stanceHint}</Text> : null}
                                     </View>
                                 </View>
                             );
@@ -985,9 +978,6 @@ export function CombatEncounterPanel({
                                             base={styles.detailPlayText}
                                             bold={[styles.detailPlayText, styles.detailPlayBold, { color: detailCard.face.categoryColor }]}
                                         />
-                                        {detailCard.detail.dieTriplet ? (
-                                            <Text style={styles.detailDieLine}>{detailCard.detail.dieTriplet}</Text>
-                                        ) : null}
                                     </View>
                                 </View>
                             </View>
@@ -1000,7 +990,7 @@ export function CombatEncounterPanel({
                             {detailCard.detail.stacksText ? <Text style={styles.detailStacks}>{detailCard.detail.stacksText}</Text> : null}
 
                             {/* KW-7 (phase 29, re-scoped 2026-07-12) — system-term definitions
-                                (Conviction, Resonance, Reserve/Pips, Floating, rungs, WILD/X):
+                                (Conviction, Resonance, Reserve/Pips, Floating, WILD/X):
                                 ONLY the entries THIS card's printed lines reference, derived
                                 per-card by the presenter (systemTermsForCard). The wholesale
                                 six-entry dump made every inspect a scrolling wall (owner
@@ -1125,12 +1115,12 @@ export function CombatEncounterPanel({
                         <GlyphBurst color={AXM.sulfur} glyph="✦" />
                         <Text style={[styles.tipName, { color: AXM.sulfur, textShadowColor: AXM.sulfur }]}>MOMENTUM</Text>
                         <Text style={styles.tipGloss}>
-                            Play stances around the wheel — HEART, then BODY, then MIND (starting on any of
-                            them). Each right stance lights the next node; a wrong stance resets the wheel.
+                            Play cards around the wheel — HEART, then BODY, then MIND (starting on any of
+                            them). Each right colour lights the next node; a wrong colour resets the wheel.
                             Light all three and you forge a wild ✦ MOMENTUM die — drag it onto ANY card,
                             regardless of colour, to power it.
                         </Text>
-                        <Text style={styles.tipMeta}>wrong stance resets · the wild die lasts until spent or the turn ends</Text>
+                        <Text style={styles.tipMeta}>wrong colour resets · the wild die lasts until spent or the turn ends</Text>
                         <View style={styles.tipBadgeWrap} pointerEvents="none">
                             <Svg width={128} height={30} viewBox="0 0 128 30">
                                 <Polygon points="14,1 114,1 127,15 114,29 14,29 1,15" fill={AXM.panelBg} stroke={AXM.sulfur} strokeWidth={1.5} />
@@ -1320,11 +1310,10 @@ const useStyles = makeStyles((AXM) => ({
     detailPlayBody: { flex: 1 },
     detailPlayText: { fontFamily: FONTS.serif, fontSize: 12.5, color: AXM.parchment, lineHeight: 17, flex: 1 },
     detailPlayBold: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 0.6, textTransform: 'uppercase' },
-    detailDieLine: { fontFamily: FONTS.mono, fontSize: 10.5, color: AXM.sulfur, letterSpacing: 0.2, marginTop: 3 },
     detailFreeBox: { alignSelf: 'stretch', marginBottom: 8 },
     detailFreeLine: { fontFamily: FONTS.serif, fontSize: 12.5, color: AXM.bone, lineHeight: 17, marginBottom: 5 },
     detailPowerLine: { fontFamily: FONTS.serif, fontSize: 12.5, lineHeight: 17, marginBottom: 5 },
-    // KW-7 (phase 29) — systems glossary (Conviction/Resonance/Reserve+Pips/Floating/rungs/WILD-X).
+    // KW-7 (phase 29) — systems glossary (Conviction/Resonance/Reserve+Pips/Floating/WILD-X).
     systemsGlossary: { alignSelf: 'stretch', marginTop: 6, marginBottom: 4, paddingTop: 6, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)' },
     systemsGlossaryLine: { fontFamily: FONTS.sans, fontSize: 9.5, color: AXM.bone, opacity: 0.65, lineHeight: 15, marginBottom: 3 },
     systemsGlossaryTerm: { fontFamily: FONTS.sans, fontSize: 9.5, letterSpacing: 1, color: AXM.ash, opacity: 1 },
@@ -1395,7 +1384,6 @@ const useStyles = makeStyles((AXM) => ({
     revealHp: { fontFamily: FONTS.mono, fontSize: 13, color: AXM.blood, marginTop: 2 },
     // FE-025 — the player's side of the same trade, quieter than the foe's.
     revealYours: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.bone, letterSpacing: 1, marginTop: 2 },
-    revealTell: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 14, color: AXM.bone, textAlign: 'center', marginTop: 10, marginHorizontal: 10, lineHeight: 19 },
     revealSection: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.2, color: AXM.sulfur, marginTop: 20, marginBottom: 8, alignSelf: 'stretch' },
     revealPhase: { alignSelf: 'stretch', borderWidth: 1, borderColor: AXM.ash, backgroundColor: 'rgba(0,0,0,0.35)', paddingHorizontal: 9, paddingVertical: 4, marginBottom: 7 },
     // Accordion header: the whole strip is the toggle, sized to a thumb.
@@ -1408,7 +1396,6 @@ const useStyles = makeStyles((AXM) => ({
     revealPhaseIcon: { fontSize: 20, lineHeight: 22 },
     revealPhaseLabel: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 0.6, color: AXM.parchment },
     revealPhaseText: { fontFamily: FONTS.serif, fontSize: 12, color: AXM.bone, marginTop: 2, lineHeight: 15 },
-    revealPhaseTell: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 10, color: AXM.ash, marginTop: 3, lineHeight: 13 },
     // WS9 — branch fork rows in the threat sequence
     revealBranchCond: { fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 0.6, color: AXM.sulfur, marginTop: 2 },
     revealBranchTaken: { color: AXM.parchment },

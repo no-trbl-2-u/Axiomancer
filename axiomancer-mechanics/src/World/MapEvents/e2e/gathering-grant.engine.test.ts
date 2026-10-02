@@ -9,9 +9,8 @@
  * nothing, and so a later content pass that authors an empty `items: []`
  * pool fails here rather than silently shipping a node that gives nothing.
  *
- * Walked over every gathering-primary node in `MAP_REGISTRY` (the Act 1
- * maps plus the parked northern-forest / caverns / northern-city /
- * connecting-river / the-capital):
+ * Walked over every gathering-primary node in `MAP_REGISTRY` (the four
+ * Act 1 maps):
  *   - the resolved event carries at least one NAMED item;
  *   - resolving appends exactly those items to `player.inventory`,
  *     in order, and disturbs nothing already in it;
@@ -22,10 +21,9 @@
  * the whole mechanism. Nothing here resurrects it: this reads the shipped
  * resolver against the shipped content pools.
  *
- * RNG is pinned because a gathering-PRIMARY node is not always a
- * gathering-ONLY node — `cap-5` carries the Ribbon-Picker on a lighter
- * weight-1 entry beside the weight-3 gathering payload, so an unpinned
- * roll would make this suite flaky one visit in four. A node whose pinned
+ * RNG is pinned because a gathering-PRIMARY node need not be a
+ * gathering-ONLY node: a lighter sibling entry would make an unpinned roll
+ * flaky. A node whose pinned
  * roll lands on a lighter sibling is skipped rather than failed, and
  * `MIN_GATHER_ROLLS` keeps that escape hatch from quietly hollowing the
  * suite out if content shifts.
@@ -82,12 +80,12 @@ const GATHER_NODES = allGatheringNodes();
 
 /**
  * How many of those nodes must actually roll their gathering entry under the
- * pinned RNG for this suite to be worth anything. 12 of 12 do today; the
- * floor leaves room for one node to gain a weighted sibling without a red
- * build, while a content pass that turned gathering into a rare draw
- * everywhere would still be caught.
+ * pinned RNG for this suite to be worth anything. 7 of 7 Act 1 nodes do
+ * today; the floor leaves room for one node to gain a weighted sibling
+ * without a red build, while a content pass that turned gathering into a
+ * rare draw everywhere would still be caught.
  */
-const MIN_GATHER_ROLLS = 10;
+const MIN_GATHER_ROLLS = 6;
 
 /** `rollPool` consumes one `rng()`; pinning it makes each node's draw fixed. */
 function pinRoll(): void {

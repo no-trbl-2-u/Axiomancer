@@ -26,17 +26,17 @@ import {
 describe('world-travel dev helpers', () => {
     it('listMaps enumerates every continent', () => {
         const maps = listMaps();
-        expect(maps.map((m) => m.map)).toEqual(expect.arrayContaining(['breakwater', 'caverns', 'aporia-proof']));
+        expect(maps.map((m) => m.map)).toEqual(expect.arrayContaining(['breakwater', 'lantern-deep', 'aporia-proof']));
         expect(new Set(maps.map((m) => m.continent)).size).toBe(3);
     });
 
     it('travelToMap lands on the destination start node with the continent switched', () => {
         const store = createAppStore({ overrides: { world: createStartingWorld('breakwater') } });
-        expect(travelToMap(store, 'northern-continent', 'northern-city')).toBe(true);
+        expect(travelToMap(store, 'northern-continent', 'beacon-crags')).toBe(true);
         const world = store.getState().world;
         expect(world.currentContinent.name).toBe('northern-continent');
-        expect(world.currentMap.name).toBe('northern-city');
-        expect(world.currentMap.currentNode).toBe(getMapDefinition('northern-continent', 'northern-city').startingNode.id);
+        expect(world.currentMap.name).toBe('beacon-crags');
+        expect(world.currentMap.currentNode).toBe(getMapDefinition('northern-continent', 'beacon-crags').startingNode.id);
     });
 
     it('listNodes flags the start + current node and every node of the map', () => {

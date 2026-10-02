@@ -167,7 +167,7 @@ export function applyEffect(
 
 /**
  * Removes every ActiveEffect whose `effectId` matches `lookupEffect(...)?.type === effectType`,
- * optionally filtered by tier. Used by cleanse (removes debuffs) and dispel (removes buffs).
+ * optionally filtered by tier. Used by the enemy's reactive cleanse.
  *
  * @param activeEffects - Source array (not mutated).
  * @param effectType    - `'buff'` or `'debuff'` — which kind to strip.

@@ -16,15 +16,12 @@ import { afterEach, describe, it, expect, vi } from 'vitest';
 import { mockSequentialRng } from '../../test-utils/rng';
 import { createCharacter } from '../../Character';
 import { createEnemy } from '../../Enemy';
-import { initializeCombat } from '../../Combat/combat.reducer';
+import type { CombatState } from '../../Combat/types';
 import { executeCard } from '../../Cards/card.engine';
 import type { Card } from '../../Cards/types';
-import { registerFixtureEffects } from '../../test-utils/fixture-effects';
-
-// The keyword audit (2026-09-27) deleted buff_thorns / debuff_backfire /
-// the round-clock DoT species from the library; their engine channels are
-// exercised through the `fixture_*` effects instead.
-registerFixtureEffects();
+const combatState = (player: CombatState['player'], enemy: CombatState['enemy']): CombatState => ({
+    round: 1, player, enemy,
+});
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -52,7 +49,7 @@ const buffCard: Card = {
     rank: 1,
     cardType: 'spell',
     targetType: 'self',
-    combatEffects: [{ effectId: 'fixture_thorns', appliedTo: 'self' }],
+    combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'self' }],
 };
 
 function fixturePlayer() {
@@ -72,7 +69,7 @@ function fixtureEnemy() {
         description: 'd',
         level: 1,
         baseStats: { heart: 3, body: 3, mind: 3 },
-        mapName: 'northern-city',
+        mapName: 'breakwater',
         logic: 'random',
     });
 }
@@ -82,7 +79,7 @@ describe('Phase 38 — player card applies debuff onto enemy', () => {
         mockSequentialRng(0.05);
         const player = fixturePlayer();
         const enemy = fixtureEnemy();
-        const base = initializeCombat(player, enemy);
+        const base = combatState(player, enemy);
         const state = base;
 
         const { state: next } = executeCard(state, debuffCard.id, lookup(debuffCard));
@@ -98,12 +95,12 @@ describe('Phase 38 — player card applies buff onto self', () => {
         mockSequentialRng(0.5);
         const player = fixturePlayer();
         const enemy = fixtureEnemy();
-        const base = initializeCombat(player, enemy);
+        const base = combatState(player, enemy);
         const state = base;
 
         const { state: next } = executeCard(state, buffCard.id, lookup(buffCard));
 
-        const applied = next.player.effects.find(e => e.effectId === 'fixture_thorns');
+        const applied = next.player.effects.find(e => e.effectId === 'debuff_mark');
         expect(applied).toBeDefined();
         expect(applied!.sourceId).toBe('char-player-shopper');
     });
@@ -114,7 +111,7 @@ describe('Phase 38 — sourceId round-trips through JSON serialization (save/loa
         mockSequentialRng(0.05);
         const player = fixturePlayer();
         const enemy = fixtureEnemy();
-        const base = initializeCombat(player, enemy);
+        const base = combatState(player, enemy);
         const state = base;
         const { state: applied } = executeCard(state, debuffCard.id, lookup(debuffCard));
 
@@ -143,12 +140,12 @@ describe('Phase 20 — equipment applies no effect, so equipment never sources a
             tier: 1,
             rarity: 'common' as const,
             requiredLevel: 1,
-            passiveEffects: ['fixture_roll_up'],
+            passiveEffects: ['debuff_mark'],
         };
 
         const equipped = equipItem(player, passiveEquipment);
         // Phase 20 — equipment is stat-only; no effect (and thus no sourceId) is added.
         expect(equipped.effects.some(e => e.sourceId === 'eq_regen_band')).toBe(false);
-        expect(equipped.effects.some(e => e.effectId === 'fixture_roll_up')).toBe(false);
+        expect(equipped.effects.some(e => e.effectId === 'debuff_mark')).toBe(false);
     });
 });

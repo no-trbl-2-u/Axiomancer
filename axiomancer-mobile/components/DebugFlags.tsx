@@ -1,8 +1,8 @@
 /**
  * Dev-only FLAGS row.
  *
- * Chips for the well-known `GameState.flags` entries (tutorial coaches,
- * the starter-bundle pick, the hazard hex) — lit when set, tap to flip —
+ * Chips for the well-known `GameState.flags` entries (the tutorial
+ * coaches) — lit when set, tap to flip —
  * plus ALL TUTS ON / OFF shortcuts so a tester can replay every first-
  * visit coach or skip them all. The full flag list is visible in the
  * STATE inspector. Renders null outside dev builds.

@@ -4,7 +4,8 @@
  * Panel 1 taught 'the Surge meter' among the things competing to wear VITAE
  * down, and the live board draws no such meter: the primer promised a readout
  * the player then hunted for and never found. The primer may name only things
- * the board actually displays.
+ * the board actually displays. R8 (D65) also drops MOMENTUM and POISON: no
+ * grey card feeds the chain, and nothing applies Poison since R4.
  */
 
 import React from 'react';
@@ -35,10 +36,14 @@ describe('S1-board-C35 — the primer names no meter the board never draws', () 
         }
     });
 
-    it('still names the board readouts it always named', () => {
+    it('names no system a grey deck cannot reach', () => {
         const all = sweepPanels().join('\n');
-        // The chip the board actually draws in this slot, plus the canon terms.
-        expect(all).toMatch(/MOMENTUM/);
+        expect(all).not.toMatch(/MOMENTUM/);
+        expect(all).not.toMatch(/POISON/);
+    });
+
+    it('still names the canon terms', () => {
+        const all = sweepPanels().join('\n');
         expect(all).toMatch(/VITAE/);
         expect(all).toMatch(/Conviction/);
     });

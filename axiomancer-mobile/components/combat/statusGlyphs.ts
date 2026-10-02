@@ -19,7 +19,7 @@
  */
 
 export type StatusGlyphKind =
-    | 'dot' | 'control' | 'statdown' | 'statup' | 'regen' | 'drain' | 'thorns' | 'advantage' | 'mark';
+    | 'dot' | 'control' | 'statdown' | 'statup' | 'mark';
 
 /** Minimal shape this module reads from an engine Effect (structural typing). */
 export interface EffectLike {
@@ -30,12 +30,7 @@ export interface EffectLike {
     payload?: {
         damageOverTime?: unknown;
         actionRestriction?: unknown;
-        regeneration?: { healthPerRound?: number };
         statModifiers?: { value: number }[];
-        advantageModifier?: unknown;
-        reflectDamage?: number;
-        rollModifier?: number;
-        defenseModifier?: number;
     };
 }
 
@@ -47,17 +42,13 @@ export interface StatusGlyph {
     label: string;
 }
 
-/** Category colours (spec §7.3/§7.6). Aligned to the stance palette where it
+/** Category colours (spec §7.3/§7.6). Aligned to the colour palette where it
  *  reads naturally; tuned for dark-board contrast. */
 export const GLYPH_COLORS: Record<StatusGlyphKind, string> = {
     dot: '#e2543b',        // flame red — erosion
-    drain: '#8e2b2b',      // dark blood
     control: '#a86bdc',    // chain purple
     statdown: '#e08a3c',   // arrow-down amber
     statup: '#5bbf6a',     // arrow-up green
-    regen: '#49b98a',      // restorative teal-green
-    thorns: '#9aa0a6',     // iron grey
-    advantage: '#4f9ddb',  // insight blue
     mark: '#d9c66a',       // tracking gold
 };
 
@@ -87,13 +78,9 @@ const EFFECT_GLYPHS: Record<string, string> = {
 /** Category fallback glyphs. */
 const KIND_GLYPHS: Record<StatusGlyphKind, string> = {
     dot: '🔥',
-    drain: '🩸',
     control: '⛓',
     statdown: '▼',
     statup: '▲',
-    regen: '✚',
-    thorns: '✸',
-    advantage: '◆',
     mark: '◎',
 };
 
@@ -102,15 +89,9 @@ export function classifyGlyphKind(effect: EffectLike): StatusGlyphKind {
     const p = effect.payload ?? {};
     if (p.damageOverTime) return 'dot';
     if (p.actionRestriction || effect.category === 'control') return 'control';
-    const regen = p.regeneration?.healthPerRound ?? 0;
-    if (regen > 0) return 'regen';
-    if (regen < 0) return 'drain';
-    if (p.reflectDamage) return 'thorns';
-    if (p.advantageModifier) return 'advantage';
     if (effect.id?.endsWith('_mark')) return 'mark';
     const isDebuff = effect.type === 'debuff';
-    const hasNegStat = (p.statModifiers ?? []).some(m => m.value < 0)
-        || (p.rollModifier ?? 0) < 0 || (p.defenseModifier ?? 0) < 0;
+    const hasNegStat = (p.statModifiers ?? []).some(m => m.value < 0);
     if (isDebuff || hasNegStat) return 'statdown';
     return 'statup';
 }

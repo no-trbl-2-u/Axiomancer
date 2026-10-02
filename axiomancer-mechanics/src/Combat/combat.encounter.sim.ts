@@ -601,10 +601,7 @@ export function runOneEncounter(
     let mechanicBurstDamage = 0;
     for (const ev of state.log) {
         if (ev.kind === 'dot-tick' && ev.target === 'enemy') dotHpDamage += ev.amount;
-        // The engine-gated drips (BACKFIRE, thorns, riposte) are credited via
-        // their own events.
-        if (ev.kind === 'backfired') mechanicBurstDamage += ev.amount;
-        if (ev.kind === 'thorns-reflected') mechanicBurstDamage += ev.amount;
+        // The engine-gated riposte is credited via its own event.
         if (ev.kind === 'riposte-fired') mechanicBurstDamage += ev.amount;
     }
     // directDamageDealt includes mechanic bursts; subtract them to get pure strikes.

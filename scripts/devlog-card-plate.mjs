@@ -152,7 +152,6 @@ export function foePlate(foe, opts = {}) {
             freeVal: `HP ${foe.maxHealth ?? '?'}`,
             paid: [
                 foe.logicBlurb || '',
-                foe.stanceHint || '',
                 `body ${stats.body ?? '?'} · mind ${stats.mind ?? '?'} · heart ${stats.heart ?? '?'}`,
             ].filter(Boolean).join(' '),
         },

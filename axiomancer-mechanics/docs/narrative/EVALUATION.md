@@ -6,7 +6,7 @@ entry, or screen. Score each dimension 0–3.
 | Dimension | 0 — fail | 1 — weak | 2 — ship with polish | 3 — strong |
 |---|---|---|---|---|
 | Mechanical clarity | target/cost/timing/result missing or obscured | inferable after reread | correct and adjacent to choice | instantly scannable; unknowns clearly marked |
-| Canon terminology | contradicts canonical terms | mixed or invented synonym | VITAE/STANCE and statuses correct | correct, economical, localization-ready |
+| Canon terminology | contradicts canonical terms | mixed or invented synonym | VITAE and statuses correct | correct, economical, localization-ready |
 | Material consequence | abstractions only | object is decoration | object carries one consequence | object links choice, history, and persistent result |
 | Landscape agency | mood wallpaper | generic obstacle | terrain physically routes action | local ecology/construction creates distinct options |
 | Moral event design | narrator declares verdict | false binary or hidden bias | beneficiary/cost visible | outcomes complicate the initial claim without authorial verdict |

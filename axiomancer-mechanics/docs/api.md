@@ -55,8 +55,6 @@ unchanged, but the absolute semver guarantee starts at 1.0.
   the legacy turn-based `resolveCombatRound` (and its `RoundEvent` /
   `RoundResolution` surface) was removed.
 - Healing (`healCharacter`) — Stable.
-- Combat state management (`initializeCombat` — the shared `CombatState`
-  constructor) — Stable.
 - Combat types (`CombatState`, `Action`, `Stance`,
   `CombatEncounterState`, `CombatEvent`, etc.) — Stable.
 - **Phase 80 always-land contract:** `resolveEffectApplication` rewritten —
@@ -198,38 +196,13 @@ See `docs/combat.md` § "Friendship Path" + § "Befriendable-enemy
 content (Phase 60)" and `docs/enemy.md` § "Befriendable enemies
 (Phase 60)".
 
-**Per-enemy befriend predicate (Phase 68) — Beta.** Optional
-`Enemy.befriendabilityConfig?: BefriendabilityConfig` overrides the
-Phase 36 friendship-eligibility check on a per-enemy basis. When
-absent, the Phase 36 mechanic (`friendshipCounter >=
-FRIENDSHIP_COUNTER_MAX`) is unchanged; when present, ALL named
-predicates AND-compose:
-
-- `roundsThreshold?: number` — per-enemy override of the global
-  counter cap (default `FRIENDSHIP_COUNTER_MAX`).
-- `hpGate?: { belowPct: number }` — enemy HP fraction must be at or
-  below `belowPct` at the eligibility check (snapshot; healing back
-  above the threshold un-qualifies).
-- `requiredStances?: Stance[]` — player must have used at least one
-  of the named stances during combat (existential; derived from
-  `state.log[].playerAction.stance`).
-- `requiredCardUse?: string[]` — player must have cast at least one
-  of the named card IDs during combat (existential; derived from
-  `state.log[].playerAction` entries with `action === 'card'`).
-- `defaultFallback?: 'both-defend-cap'` — explicit escape hatch that
-  treats other fields as no-ops and uses the global counter cap.
-
-Counter still increments freely on both-defend rounds (Phase 36
-unchanged); friendship triggers only when all predicates pass
-together — late-resolution semantics. The internal predicate helper is
-**not** on the public barrel per Phase 68 D11; today it backs
-`isBefriendAttemptEligible` (the legacy `isFriendshipEligible` /
-`determineCombatEnd` / `isCombatOngoing` consumers were removed with
-the legacy turn-based driver). First boss-tier authored config:
-`CoastalTyrant` ships `{ hpGate: { belowPct: 0.4 }, requiredStances:
-['heart'], roundsThreshold: 5 }`. See `docs/combat.md` § "Per-enemy
-predicate (Phase 68 — `BefriendabilityConfig`)" for the full schema
-and authoring guidance.
+**Per-enemy befriend gate — Beta.** Optional
+`Enemy.befriendabilityConfig?: BefriendabilityConfig` carries one field,
+`hpGate?: { belowPct: number }`: The Open Hand's befriend is shut until the
+foe's VITAE fraction is at or below `belowPct` (`befriendHpGateOpen`,
+`Enemy/befriend.ts`; a snapshot, so healing back above it shuts the gate
+again). The friendship counter, `roundsThreshold` and `defaultFallback` went
+in revamp phase R7c2.
 
 **Aftermath narrative prose (Phase 71 — GH#65 ask 1).** Three
 optional per-foe line sets carry chronicle-voice prose for the
@@ -338,7 +311,7 @@ reality.
   members of a named `ItemSet` grants threshold-keyed `SetBonus`
   payloads on top of per-item `statModifiers` /
   `resourceInteraction` / `passiveEffects`. Set bonuses are computed
-  on-demand at `initializeCombat` —
+  on-demand at combat start —
   no cached per-character state. Engine helpers + library:
   - `getActiveSetBonuses(equipment): SetBonus[]` — primary lookup
     against an equipped-slots snapshot.

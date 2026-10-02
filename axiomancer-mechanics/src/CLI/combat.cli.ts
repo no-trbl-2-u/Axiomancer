@@ -53,7 +53,6 @@ import {
     playSignatureSkill,
     resolveThreatPhase,
     handCards,
-    revealedCurrentStance,
     firstLegalPoweringDie,
     buildCombatSummary,
     getSignatureSkill, signatureCastBlock,
@@ -242,14 +241,6 @@ function rankedAutoCards(s: CombatEncounterState, policy: CombatAutoPolicyId) {
     });
 }
 
-function bestAutoSignature(s: CombatEncounterState): string | null {
-    for (const id of s.signatures) {
-        const sig = getSignatureSkill(id);
-        if (!sig || signatureCastBlock(s, sig)) continue;
-        if (sig.kind === 'guard') return id;
-    }
-    return null;
-}
 
 /**
  * Runs one full phase in auto mode under the ROUND-TURN LAW (Gate 0,
@@ -287,20 +278,6 @@ function autoPlayPhase(
     // Paid plays: each one spends one live die on a colour-legal card.
     while (s.phase === 'phase-play' && !s.finalOutcome && !s.mercyChoiceActive && safety < phaseTurnLimit * 6) {
         safety++;
-
-        // Spend Conviction on a Signature when banked well.
-        if (s.conviction >= 6) {
-            const sigId = bestAutoSignature(s);
-            if (sigId) {
-                const cast = playSignatureSkill(s, sigId);
-                if (cast.state !== s) {
-                    s = cast.state;
-                    emit({ type: 'hazardCombat:signature', payload: { signatureId: sigId, events: cast.events } });
-                    if (s.finalOutcome) break;
-                    continue;
-                }
-            }
-        }
 
         const current = s;
         const pick = rankedAutoCards(current, policy)
@@ -402,14 +379,13 @@ async function interactiveHazardCombatLoop(
     while (s.phase !== 'complete' && !s.finalOutcome && phaseCount < flags.maxTurns) {
         phaseCount++;
         const phase = s.threatPhases[Math.min(s.currentPhaseIndex, s.threatPhases.length - 1)];
-        const revealed = revealedCurrentStance(s);
         log(`\n── Phase ${phaseCount} (round ${s.round}) ──`);
         log(`  Enemy: ${s.enemy.name}  HP ${s.enemy.health}/${s.enemy.maxHealth}`);
         log(`  Player HP ${s.player.health}/${s.player.maxHealth}  Conviction ${s.conviction}◆`);
-        log(`  Enemy intent: ${phase?.intentType ?? 'unknown'}  stance: ${revealed ?? '?'}  guard: ${s.guard ?? 0}`);
+        log(`  Enemy intent: ${phase?.intentType ?? 'unknown'}  guard: ${s.guard ?? 0}`);
         log(`  Threat: ${phase?.threatAction.description ?? '?'}`);
         const momentum = s.momentumV2 ? `${s.momentumV2.color} x${s.momentumV2.length}` : '—';
-        log(`  Stance: ${s.playerStance ?? '—'}  Momentum: ${momentum}`);
+        log(`  Momentum: ${momentum}`);
 
         const before = s;
 

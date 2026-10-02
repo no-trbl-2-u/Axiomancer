@@ -26,14 +26,11 @@ describe('Phase 18 — preset loadouts (Phase 21: relics are the only equipment)
         if (l.armor) expect(l.armor.slot).toBe('armor');
     });
 
-    it('every preset wears the 5 default relics and owns all 11 (no procedural gear)', () => {
-        const l50 = levelLadderPresets.find(p => p.id === 'kid-l50')!;
-        const c = buildCharacterFromPreset(l50);
-        expect(getEquippedItems(c.equipment).length).toBe(5);
-        // The only inventory equipment is the 11 signet relics (worn-first per the
+    it.each(allPresets.map(p => [p.id, p] as const))('%s wears the ring and owns only it (no procedural gear)', (_id, preset) => {
+        const c = buildCharacterFromPreset(preset);
+        expect(getEquippedItems(c.equipment).map(e => e.id)).toEqual(['relic-disarming-plea']);
+        // The only inventory equipment is the ring (worn-first per the
         // phase-19 convention); no procedural gear survives.
-        const invEquipment = c.inventory.filter(isEquipment);
-        expect(invEquipment).toHaveLength(11);
-        expect(invEquipment.every(e => e.id.startsWith('relic-'))).toBe(true);
+        expect(c.inventory.filter(isEquipment).map(e => e.id)).toEqual(['relic-disarming-plea']);
     });
 });
