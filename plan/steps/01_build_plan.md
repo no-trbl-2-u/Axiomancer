@@ -138,7 +138,7 @@ event-pool and layout files).
 - [x] Phase B4 — Card-rules inventory (loop; creates nothing; gates all card work). `plan/revamp/cards.md`. Requires R7e2. (383a331f)
 - [x] Phase R8 — Mobile cleanup: dead flows and glosses, grey card art, app label, VITAE/shillings copy. `plan/revamp/mobile.md`. Requires R7e2. (049174f2)
 - [x] Phase R9 — Progression retune: a rising XP curve (level L+1 costs L × 250), Doorwarden pins 1/2/3/4; a full Act 1 clear ends at level 5 (61d16fcf)
-- [ ] Phase R9a — Save checkpoint in fights: one owner for save policy; a reload mid-encounter resumes that encounter instead of landing past it (promoted from PHASE_CANDIDATES via /oversight 2026-09-28). `plan/revamp/checkpoint.md`. Requires R7c2, R8.
+- [x] Phase R9a — Save checkpoint in fights: a fight settles its node, so a reload mid-fight re-offers it (1bad8fce)
 - [ ] Phase R10 — Theme colours: move surviving hard-coded hex colours into named `theme/axm.ts` tokens, no visual change. `plan/revamp/mobile.md`. Requires R8.
 - [ ] Phase R10b — Doctrine rewrite: `spec.md`, `plan/bearings.md` and a new one-page `docs/game-model.md` describe only the post-revamp game; specs 33 and 34 retired; the live plan queues swept of preset / colour-law / stance rows; `plan/archive/` tagged `archive-pre-revamp` and removed from the tree, every pointer to it fixed; `check-lexicon` fails retired terms in live docs (D66, D67). `plan/revamp/doctrine.md`. Requires R10.
 - [ ] Phase R10c — Comments and docs truth pass, two ticks (mechanics, then mobile): the Superseded-bannered docs rewritten or deleted; history narration stripped from code comments (git is the history); every rule of play stated in a live doc; a guard for retired terms in comments (D67). `plan/revamp/doctrine.md`. Requires R10b.
