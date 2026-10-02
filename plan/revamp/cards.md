@@ -23,7 +23,7 @@ with these amendments:
 |---|---|
 | Slice unit | **One lane** per slice (one build session plus one kill session); no colour order |
 | Lane grouping | **Families of sub-lanes.** A relic names a family; the guaranteed reward card comes from any lane in the family |
-| First pool | **3 families × 1 lane** (≈36 cards + grey) |
+| First pool | ~~3 families × 1 lane~~ → **D74: one family, Blood Price, with 3 sub-lanes (Payoff, Engine, Misc) of ~10 cards = 30 + grey**. Rehearsal ledger: `plan/card-ledger/rehearsal-blood-price.md` |
 | Multi-lane cards | **Bridge cards within a family**, built at the cross-slice session once a family has 2+ lanes (so the first pool has none) |
 | §1 session rules | **Not ratified**; reviewed later |
 | Still open | C1 threat matrix; §7 D8/D20 and progression calls; B5's tool shape |
@@ -141,6 +141,16 @@ VITAE a Curse can be stuck in hand until the player heals.
 
 A trial lane session (self-sacrifice, codename SACRIFICE) paused at its
 first stage; the trial skill lives outside the repo until T adopts it.
+
+**Scrap floor (T, 2026-09-30).** Scrapping any card gives 1 Conviction, so
+every card line must be worth more than scrapping it. A line that only gives
+1 Conviction is dead text.
+
+**Global card text template (T, 2026-09-30).**
+- The duration is printed on the frame as two badges, FREE ⏳3 (in play 3 turns) and PAID ∞ (rest of combat, D69), never in the rules text.
+- The text opens with its trigger, taken from a closed set: ⟳ "Start of your turn:", 🩸 "When you SACRIFICE n:", 📜 "When you play a Curse:".
+- A PAID line prints only what changes ("DEAL n instead.", "Also gain 1 Conviction."); if nothing changes, there is no PAID line.
+- Each trigger phrase becomes a keyword candidate once 3 or more kept cards use it (Plan B's extraction rule).
 
 ## B4 — Card-rules inventory (loop; creates nothing)
 
