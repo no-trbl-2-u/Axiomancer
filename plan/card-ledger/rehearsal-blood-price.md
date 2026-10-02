@@ -1,4 +1,11 @@
-# Card ledger — Blood Price (paper rehearsal)
+# REHEARSAL — Card ledger, Blood Price (paper rehearsal, not a live card set)
+
+> [!WARNING]
+> **REHEARSAL ONLY.** This file records a *practice run* of the Plan B card
+> process. No card here is approved for the library, and no agent or loop
+> verb may build, wire or cite these cards as live content. Real card
+> sessions (B6) start after RC and B5. They may reuse these drafts only
+> through a fresh ballot.
 
 > A paper rehearsal of Plan B (D73), run 2026-09-30 in an attended session
 > with T. **Nothing here is wired:** no card, keyword or type exists in

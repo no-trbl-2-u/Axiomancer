@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Blood Price Ballot</title>
+<title>Rehearsal Ballot</title>
 <!--
   Blood Price ballot (paper rehearsal, D73/D74): Payoff, Engine and Misc tabs, 90 candidates.
   Self-contained: no network, no storage. Open in any browser.
@@ -99,6 +99,7 @@
   .pick { position: absolute; top: 8px; right: 8px; width: 20px; height: 20px; accent-color: var(--sel); }
   .top { padding-right: 26px; }
 
+  .rehearsal { margin: 0 0 10px; padding: 8px 10px; border: 2px dashed var(--blood); border-radius: 6px; color: var(--blood); }
   /* ---- Tabs ---- */
   .tabs { max-width: 1100px; margin: 0 auto; display: flex; gap: 6px; flex-wrap: wrap;
           position: sticky; top: 0; background: var(--bg); padding: 8px 0; z-index: 2; }
@@ -122,7 +123,8 @@
 <body>
 <header>
   <button class="theme" id="themeBtn" type="button" aria-label="Toggle colour theme">◐</button>
-  <h1>Blood Price — ballot</h1>
+  <p class="rehearsal" role="note"><b>REHEARSAL ONLY</b> — a practice run of the card process. These are draft candidates, not live cards; nothing here ships.</p>
+  <h1>Blood Price — rehearsal ballot</h1>
   <p class="sub">Paper rehearsal (D73, D74). Family: Blood Price. Three sub-lanes, one per tab: Payoff, Engine, Misc. Each has 10 slots × 3 candidates (90 cards in all); the target is about 1 survivor per slot, 30 in all.</p>
   <p class="legend">
     <b>Tick</b> each card you keep. Ticking two in one slot means "merge". <b>Unticked = CUT</b>.
@@ -444,7 +446,7 @@ const sheet = () => {
   const k = kept();
   const general = document.getElementById('general').value.trim();
   return [
-    'BALLOT — Blood Price (rehearsal, D73/D74)',
+    'REHEARSAL BALLOT — Blood Price (practice run, D73/D74; not live cards)',
     `kept ${k.length} of ${CARDS.length}`,
     ...TABS.flatMap((t) => [
       `-- ${t.name} --`,
