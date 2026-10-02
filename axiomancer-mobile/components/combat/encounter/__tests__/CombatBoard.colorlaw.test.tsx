@@ -1,8 +1,8 @@
 /**
- * CombatBoard — THE COLOR LAW at the UI gate (owner directive 2026-07-12).
+ * CombatBoard — THE COLOR LAW at the UI gate.
  *
  * The engine's COLOR LAW (`playCombatCard`, axiomancer-mechanics
- * src/Combat/combat.engine.ts ~:1339) fizzles an off-color play at resolution.
+ * src/Combat/combat.engine.ts ~:891) fizzles an off-color play at resolution.
  * The board must make that state UNREACHABLE: during a die drag every staged
  * card the die cannot power reads disabled (dimmed), an off-color drop
  * REJECTS (no selection, no dispatch), and APPLY never routes an off-color
@@ -15,13 +15,11 @@
  * through the board's real tap-to-power gesture (`tapCombatDie`), which runs
  * the same gate.
  *
- * Since the card purge (2026-09-27) every card in the library is colourless
- * ('any' — the grey office), so no real hand can hold an off-colour card: the
- * board-level off-colour cases (disabled-on-drag, refused-die → FREE) went
- * with the aspect cards. The pure gate (`dieCanPowerCardVM`,
- * `resolveDieDropTarget`) is still pinned on synthetic colours below, and the
- * board cases now pin the other half of the law: a colourless card takes a
- * die of every colour.
+ * Every card in the library is colourless ('any' — the grey office), so no
+ * real hand can hold an off-colour card. The pure gate (`dieCanPowerCardVM`,
+ * `resolveDieDropTarget`) is pinned on synthetic colours below, and the board
+ * cases pin the other half of the law: a colourless card takes a die of every
+ * colour.
  */
 
 import React from 'react';
@@ -127,7 +125,7 @@ describe('resolveDieDropTarget — an illegal drop dispatches NOTHING', () => {
         expect(resolveDieDropTarget(ghostDie('wild'), null, false, ['u-mind', 'u-body'], stanceOf, {})).toBeNull();
     });
 
-    // ── The STAGING LAW (owner directive 2026-07-12): a card already carrying
+    // ── The STAGING LAW: a card already carrying
     // a dropped die rejects further drops — exactly like an off-color card. ──
     it('a direct hit on an already-armed card REJECTS, even color-legal', () => {
         expect(resolveDieDropTarget(ghostDie('body'), 'u-body', true, ['u-body'], stanceOf, { 'u-body': 'die-1' })).toBeNull();

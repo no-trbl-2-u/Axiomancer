@@ -1,14 +1,12 @@
 /**
- * Hermetic presenter tests — what the exploration chart has to SAY after D1.
+ * Hermetic presenter tests — what the exploration chart has to SAY.
  *
- * Wave 1 changed the rules underneath this presenter in two ways it could
- * not absorb silently:
+ * Two engine rules the presenter must reflect:
  *
- *   1. `legalMovesFrom` became the FRONTIER (`world.reducer.ts`), so a node
- *      the player has resolved is no longer a legal destination. The
- *      presenter's `classifyNode` had exactly three ways to say "not a
- *      destination" and only one of them was true.
- *   2. 69 LATERAL LANE RIBS landed across the seven maps. They are traversal,
+ *   1. `legalMovesFrom` is the FRONTIER (`world.reducer.ts`), so a node the
+ *      player has resolved is not a legal destination, and `classifyNode`
+ *      must say why it is not one.
+ *   2. LATERAL LANE RIBS connect nodes across the maps. They are traversal,
  *      not progression — the engine's own route audits walk the forward
  *      skeleton and ignore them — and the canvas has to draw that difference
  *      or a branching map reads as a tangle.
@@ -32,7 +30,7 @@ import {
 const freshStore = () => createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('breakwater') } });
 
 // ---------------------------------------------------------------------------
-// D1 — SPENT IS NOT SEALED
+// SPENT IS NOT SEALED
 // ---------------------------------------------------------------------------
 
 /**
@@ -42,11 +40,11 @@ const freshStore = () => createAppStore({ adapter: createMemoryAdapter(), overri
  * consumes — and a rest / treasure / quest / gathering node resolved without
  * a completion lands in `consumedNodes` alone.
  *
- * The presenter used to test `completedNodes` by itself. Once D1 took spent
- * nodes out of the frontier, such a node matched neither `completed` nor
- * `available`, fell through to `locked`, and was drawn SEALED — counted in
- * the legend's "N sealed" and announced to a screen reader as sealed — when
- * the player had in fact walked it and answered it.
+ * Spent nodes are not in the frontier, so a presenter that tested
+ * `completedNodes` alone would let such a node match neither `completed` nor
+ * `available`, fall through to `locked`, and draw it SEALED — counted in the
+ * legend's "N sealed" and announced to a screen reader as sealed — when the
+ * player had in fact walked it and answered it.
  */
 describe('D1: a consumed node reads as TRODDEN, never as SEALED', () => {
     /** Put `nodeId` in `consumedNodes` ONLY, leaving `completedNodes` alone. */
@@ -130,7 +128,7 @@ describe('D1: a consumed node reads as TRODDEN, never as SEALED', () => {
 });
 
 // ---------------------------------------------------------------------------
-// D1 — LATERAL LANE RIBS
+// LATERAL LANE RIBS
 // ---------------------------------------------------------------------------
 
 describe('D1: the chart separates lateral ribs from forward roads', () => {
@@ -155,7 +153,7 @@ describe('D1: the chart separates lateral ribs from forward roads', () => {
     });
 
     it('puts every rib inside ONE column and every road across TWO', () => {
-        // The layer law D1 replaced the column law with, read off the chart
+        // The layer law, read off the chart
         // rather than off the engine's own invariant test — if the presenter
         // ever mislabels an edge, the canvas draws a sideways step as
         // progress.

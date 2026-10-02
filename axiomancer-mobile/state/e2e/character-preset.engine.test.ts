@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E tests — Character preset adoption (Phase 59).
+ * Hermetic E2E tests — Character preset adoption.
  *
  * Drives `actions.applyCharacterPreset(presetId)` end-to-end
  * through the engine store and asserts on the resulting

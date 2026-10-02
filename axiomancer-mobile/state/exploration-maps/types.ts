@@ -20,13 +20,9 @@
  */
 /**
  * The sheet a map is drawn on: its coordinate space, how large it renders, and
- * its plate (D15/D16, map revamp M2).
- *
- * Every map used to share one 360×400 viewBox spread by a global `SPREAD` of
- * 2.6 into one portrait canvas, with its plate picked by a regex over the
- * region name. D16 needs each map's canvas larger than the viewport on both
- * axes, and D15 needs nodes placed on the plate's own landmarks, so each
- * layout now declares its sheet explicitly.
+ * its plate. Each layout declares its own sheet, so a map's canvas can be
+ * larger than the viewport on both axes and its nodes can sit on the plate's
+ * own landmarks.
  */
 export interface MapSheet {
     /** Width of the node coordinate space (the SVG viewBox), in sheet units. */
@@ -39,7 +35,7 @@ export interface MapSheet {
     backdrop: number;
     /**
      * Plate opacity. Atmosphere plates sit dim under the chart (0.2); a plate
-     * that IS the map, with nodes on its landmarks (D15), reads near full.
+     * that IS the map, with nodes on its landmarks, reads near full.
      */
     plateOpacity: number;
     /**
@@ -50,7 +46,7 @@ export interface MapSheet {
     chartTexture: boolean;
     /**
      * Pool each node mark in a dark halo, so the marks hold contrast over a
-     * dense plate's linework (map revamp M3d: the Lantern Deep's underworld).
+     * dense plate's linework (the Lantern Deep's underworld).
      * Omitted means no halo.
      */
     nodeHalo?: boolean;
@@ -75,11 +71,10 @@ export interface MapLayout {
     /**
      * Display copy for the header — the map ordinal only (e.g. "Map ii of
      * vii"). Never a node/path count: counts are computed live for the map
-     * legend, and a static one here inevitably drifts out of agreement
-     * (CRITIQUE pass 19).
+     * legend, and a static one here would drift out of agreement.
      */
     regionProgress: string;
-    /** The sheet this map is drawn on — canvas size and plate (M2). */
+    /** The sheet this map is drawn on — canvas size and plate. */
     sheet: MapSheet;
     nodes: readonly NodeLayout[];
 }

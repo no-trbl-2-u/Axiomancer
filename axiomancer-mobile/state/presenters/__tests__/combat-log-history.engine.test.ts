@@ -1,13 +1,10 @@
 /**
- * Hermetic presenter tests — `selectCombatLogHistory` (playtest fix
- * 2026-09-04).
+ * Hermetic presenter tests — `selectCombatLogHistory`.
  *
- * The playtest found combat has no persistent log: every beat is a floating
- * token that vanishes in ~1s, so the player cannot reconstruct what just
- * happened. This pins the history selector: it walks the full `state.log`
+ * Every combat beat is a floating token that vanishes in ~1s, so the history
+ * is the persistent log. This pins the history selector: it walks the full `state.log`
  * event stream, narrates the raw beats `selectCombatLogLines` deliberately
- * omits (damage, DoT ticks, card plays, threats, stance checks, turn
- * dividers), and still carries every line that function already produces.
+ * omits (damage, DoT ticks, card plays, threats, turn dividers), and still carries every line that function already produces.
  *
  * Hermetic = self-contained + deterministic + isolated. See docs/testing.md.
  */

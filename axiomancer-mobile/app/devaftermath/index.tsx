@@ -1,5 +1,5 @@
 /**
- * Dev-only aftermath-panel showcase (visual-audit 2026-06). Renders the
+ * Dev-only aftermath-panel showcase. Renders the
  * combat aftermath panels that have no organic capture path — DEFEAT
  * (the player can't lose to the tutorial rat deterministically) and
  * PARLEY (mercy is a branch combat-drive doesn't take) — with fixed

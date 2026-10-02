@@ -1,11 +1,9 @@
 /**
  * The enemy's played card — a short after-the-fact reveal of the foe's turn.
  *
- * User report (2026-08-10): "the enemy's card/attack — can we show the card to
- * the player for a moment so the player knows what happened on the enemy's
- * turn?" The threat sequence telegraphs the intent BEFORE the phase and the
- * floats show the numbers AFTER it, but nothing ever named the action itself,
- * so an END PHASE read as "some damage happened".
+ * The threat sequence telegraphs the intent BEFORE the phase and the floats
+ * show the numbers AFTER it; this card names the action itself, so an END
+ * PHASE does not read as "some damage happened".
  *
  * The enemy holds no literal cards (it has a telegraphed threat sequence), so
  * this renders that phase's resolved action in the same card grammar the
@@ -63,15 +61,12 @@ export function EnemyActionCard({
         return () => { clearTimeout(fade); clearTimeout(done); };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [revealKey]);
-    // THE END-TURN CRASH (Sentry `CppException: Object is not a function`,
-    // pinned 2026-09-04 after three unreproduced owner reports). This read
-    // used to live INSIDE the worklet below. `shouldInstantSettleJuice` is a
-    // plain JS function, so Reanimated serialized it into the UI runtime as
-    // an OBJECT; calling it there threw a C++ exception on the UI thread that
-    // no JS handler could catch, and Android killed the process — the app
-    // "minimized" the instant the enemy's action card mounted, which is every
-    // END PHASE. Web never reproduced it because Reanimated has no separate
-    // UI runtime there and the call just works.
+    // Never call `shouldInstantSettleJuice` INSIDE the worklet below. It is a
+    // plain JS function, so Reanimated serializes it into the UI runtime as an
+    // OBJECT; calling it there throws a C++ exception (`CppException: Object
+    // is not a function`) on the UI thread that no JS handler can catch, and
+    // Android kills the process on every END PHASE. Web has no separate UI
+    // runtime, so it never shows there.
     //
     // Read it on the JS thread and let the worklet capture the BOOLEAN, which
     // serializes cleanly. This also reads the RIGHT global: the value lives on

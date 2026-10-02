@@ -1,6 +1,5 @@
 /**
- * Loot-cache-choice encounter ("The Reliquary", Phase 63) — store action
- * glue, replacing the retired Pick Pool dice-pool minigame.
+ * Loot-cache-choice encounter ("The Reliquary") — store action glue.
  *
  * The pure engine lives in `axiomancer-mechanics` (World/LootCacheChoice);
  * these wrappers thread the cache node's one irreversible choice — `card`
@@ -28,10 +27,8 @@ import { resolveMinigameSeed } from '../minigame-seeds';
 import { EMPTY_CACHE_SLICE, type AppStore } from '../store';
 
 /**
- * Flag prefix banking a keeper's keepsake. Historical only — the retired
- * Pick Pool engine minted these on its deepest layer; nothing mints a new
- * one.
- * `/memoir`'s REMAINS section still reads old ones back.
+ * Flag prefix banking a keeper's keepsake. Nothing in the game mints these;
+ * saves may still carry them, and `/memoir`'s REMAINS section reads them back.
  */
 export const CACHE_KEEPSAKE_FLAG_PREFIX = 'cache-keepsake:';
 

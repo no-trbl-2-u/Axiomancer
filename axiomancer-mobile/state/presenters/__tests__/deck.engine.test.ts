@@ -1,13 +1,12 @@
 /**
- * Hermetic tests for the DECK screen presenter (finding 7 / D2).
+ * Hermetic tests for the DECK screen presenter.
  *
  * Fixtures are LIVE library cards, read out of the sibling engine, because the
  * thing most worth pinning here is agreement: the deck screen must print the
  * same rarity the shared rarity module derives, the same lines the combat
  * detail prints, and the same prose the card actually authors. A hand-written
  * card fixture could agree with a hand-written expectation while both
- * disagreed with the shipped data — which is exactly the class of bug
- * (finding 4) this whole change exists to stop repeating.
+ * disagreed with the shipped data.
  *
  *   grey-strike   A Plain Blow  rank 1 'any' attack
  *   grey-ward     A Plain Ward  rank 1 'any' skill
@@ -81,8 +80,7 @@ describe('selectDeckViewModel: the deck it shows', () => {
 
     it('counts COPIES rather than de-duplicating them', () => {
         // A deckbuilder's copy counts are load-bearing — `buildCombatDeck`
-        // preserves them deliberately (it used to de-duplicate, which dealt an
-        // 18-card deck as 8). A deck screen that collapsed them would lie
+        // preserves them deliberately. A deck screen that collapsed them would lie
         // about the deck the next fight deals.
         const vm = selectDeckViewModel(runWith([BLOW, BLOW, BLOW, WARD]));
 
@@ -145,7 +143,7 @@ describe('selectDeckViewModel: grouping by card type', () => {
 });
 
 // ---------------------------------------------------------------------------
-// D4 — rarity comes from the shared module, never re-derived here
+// Rarity comes from the shared module, never re-derived here
 // ---------------------------------------------------------------------------
 
 describe('selectDeckViewModel: rarity (D4)', () => {

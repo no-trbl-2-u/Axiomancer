@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — persistent Hazard deck screen (Phase 126).
+ * Hermetic E2E — persistent Hazard deck screen.
  *
  * Mounts the real `/hazard-deck` screen against a rigged store and
  * walks the inspect-only deck/library: headline tallies, the card

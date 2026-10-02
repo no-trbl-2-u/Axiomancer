@@ -1,10 +1,8 @@
 /**
- * Hermetic component test — the persistent combat log toggle (playtest fix
- * 2026-09-04).
+ * Hermetic component test — the persistent combat log toggle.
  *
- * The playtest found combat has no persistent log: every beat is a floating
- * token that vanishes in ~1s, so the player cannot reconstruct what just
- * happened. This pins the panel wiring only (the line content itself is
+ * Every combat beat is a floating token that vanishes in ~1s, so the log is
+ * how the player reconstructs what just happened. This pins the panel wiring only (the line content itself is
  * covered by `state/presenters/__tests__/combat-log-history.engine.test.ts`):
  * the toggle is absent over the reveal, appears once the board is live,
  * opens the `combat-log` sheet, and the sheet's own close button dismisses it.

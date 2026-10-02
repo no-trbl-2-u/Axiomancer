@@ -1,14 +1,13 @@
 /**
  * Combat momentum — UI-only helpers.
  *
- * Spec 33 §3: momentum is a single chain `{ color, length } | null`, advanced
+ * Momentum is a single chain `{ color, length } | null`, advanced
  * and broken engine-native (`axiomancer-mechanics` combat.engine.ts). A BREAK
  * resets it to null and must be taught LOUDLY; a SURGE (length reached the
  * ceiling) forges a temporary gold die and also resets to null. These states
  * all read as null momentum, so the a11y sentence is driven by the transient
  * break/surge flags the presenter derives from the event log — not by the
- * null value alone. (The three-node Phase 31 wheel and its helpers were
- * deleted with the Upgradeable-Dice flag collapse, D7.)
+ * null value alone.
  */
 
 export type WheelStance = 'heart' | 'body' | 'mind';

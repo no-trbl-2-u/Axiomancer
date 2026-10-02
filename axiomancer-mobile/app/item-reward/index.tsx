@@ -1,12 +1,11 @@
 /**
- * /item-reward — the hand-over screen (owner finding 10; D5 / D6 / D7).
+ * /item-reward — the hand-over screen.
  *
- * A granted relic used to drop into the satchel with no ceremony and no
- * explanation. This screen presents it: name and art, the SIGNATURE SKILL it
+ * A granted relic is presented here: name and art, the SIGNATURE SKILL it
  * grants (the engine's own name, Conviction cost and effect text, never a
  * rewrite), the stats it moves, and — when wearing it would push something off
  * the body — exactly what is gained and what is lost, with the displaced piece
- * named as returning to the satchel (D6: never swap blind).
+ * named as returning to the satchel (never swap blind).
  *
  * Two commits:
  *   - CONFIRM — the item goes to the satchel;
@@ -18,18 +17,17 @@
  * ## Dismissal posture — deliberately the inverse of /cache
  *
  * `/cache` is a no-back-out screen: `gestureEnabled: false` in the root layout
- * plus a `<HardwareBackHandler>`. This one carries NEITHER, because D7 makes it
+ * plus a `<HardwareBackHandler>`. This one carries NEITHER, because it is
  * dismissible — the item is already the player's and no exit path may lose it.
  * Back, swipe and Android hardware-back all unmount the route, and the unmount
  * cleanup below commits every queued entry as CONFIRM. Leaving is keeping.
  *
- * Structure mirrors `app/cache/index.tsx` (Phase 63): a full-screen non-tab
+ * Structure mirrors `app/cache/index.tsx`: a full-screen non-tab
  * route that renders a presenter VM and dispatches store actions only.
  *
  * ## No rarity row
  *
- * D4 governs cards. Phase 23 retired `rarity` from the lean signet `Equipment`
- * — every relic is `common` by construction — so a rarity badge here would
+ * Every relic is `common` by construction, so a rarity badge here would
  * render a constant. There is none.
  */
 
@@ -64,7 +62,7 @@ export default function ItemRewardScreen() {
     );
     const router = useRouter();
 
-    // D7 — every exit is CONFIRM. Back, swipe and Android hardware-back all
+    // Every exit is CONFIRM. Back, swipe and Android hardware-back all
     // unmount this route; whatever is still queued is paid on the way out, so
     // no exit path can lose a reward. A no-op when the queue is already empty
     // (the ordinary case: the button handlers drained it).
@@ -130,7 +128,7 @@ export default function ItemRewardScreen() {
                         </View>
                     )}
 
-                    {/* D6 — gained, lost, and the piece that returns to the satchel. */}
+                    {/* Gained, lost, and the piece that returns to the satchel. */}
                     {vm.canEquip && (
                         <ItemRewardTradePanel itemId={vm.itemId} delta={vm.delta} trade={vm.trade} />
                     )}

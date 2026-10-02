@@ -1,11 +1,8 @@
 /**
- * SELF-tab affordance that opens the dedicated `/dev` route
- * (Phase 132 — dev menu tab extraction).
+ * SELF-tab affordance that opens the dedicated `/dev` route.
  *
- * Replaces the inline `DevMenu` dropdown that used to render every
- * Debug* control at the bottom of the SELF sheet. The SELF screen stays
- * a player-facing character surface; the dev controls now live on their
- * own route, reached by tapping this link.
+ * The SELF screen stays a player-facing character surface; the dev
+ * controls live on their own route, reached by tapping this link.
  *
  * Production gate: returns `null` outside dev builds, so production /
  * non-dev builds expose no dev affordance on the SELF tab.

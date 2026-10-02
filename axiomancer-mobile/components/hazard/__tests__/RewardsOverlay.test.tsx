@@ -131,8 +131,7 @@ describe('RewardsOverlay', () => {
         expect(getByText('Ice Shield')).toBeTruthy();
     });
 
-    // Regression guard for issue #460 (critique pass 46 / Kid playthrough
-    // 2026-06-18): every reward offer tile must surface its card name AND
+    // Issue #460: every reward offer tile must surface its card name AND
     // rarity — both as visible text and on the tile's accessibility label —
     // BEFORE the player opens the preview. A blank pre-preview tile leaves
     // automation/screen-reader users choosing blind.

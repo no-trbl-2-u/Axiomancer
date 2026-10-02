@@ -1,5 +1,5 @@
 /**
- * Hermetic component tests — ToastHost (Phase 29 Tick B).
+ * Hermetic component tests — ToastHost.
  *
  * ToastHost is the global transient-feedback strip. Subscribes
  * to engine events for inventory-driven toasts AND renders the
@@ -163,8 +163,8 @@ describe('ToastHost: emitter path', () => {
         const emitter = getEmitterForStore(store);
         const tree = render(withProvider(store, <ToastHost />));
 
-        // Simulate 4 items added synchronously (the dev POPULATE / chest scenario
-        // that previously caused "Maximum update depth exceeded").
+        // Simulate 4 items added synchronously (the dev POPULATE / chest
+        // scenario) — must not hit "Maximum update depth exceeded".
         expect(() => {
             act(() => {
                 for (let i = 1; i <= 4; i++) {

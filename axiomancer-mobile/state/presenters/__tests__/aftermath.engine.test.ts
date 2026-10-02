@@ -1,5 +1,5 @@
 /**
- * Phase 70 Tick A — aftermath presenter pins.
+ * Aftermath presenter pins.
  *
  * Hermetic; presenter is a pure function on `AftermathData`, so no
  * store / provider scaffolding is needed.
@@ -26,9 +26,7 @@ describe('selectAftermathViewModel', () => {
         expect(selectAftermathViewModel(null)).toBeNull();
     });
 
-    // Defeat branch now ships in Tick C — see the dedicated describe
-    // block at the bottom of this file. The Tick A "returns null on
-    // defeat" pin was retired with the Tick C swap.
+    // The defeat branch has its own describe block below.
 
     it('uppercases the enemy name for the gothic title slot', () => {
         const vm = selectAftermathViewModel(VICTORY_SNAPSHOT);
@@ -141,7 +139,7 @@ describe('selectAftermathViewModel', () => {
                 },
             ] as never,
         });
-        // Phase 23 — the rarity model is retired; all equipment reports `common`.
+        // Every loot entry reports `common`; equipment has no rarity axis.
         expect(vm?.kind === 'victory' && vm.rewards.loot).toEqual([
             { name: 'Rusted Cutlass', slot: 'weapon', rarity: 'common' },
             { name: 'Minor Healing Potion', slot: 'consumable', rarity: 'common' },
@@ -155,7 +153,7 @@ describe('selectAftermathViewModel', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Phase 70 Tick B — parley branch
+// Parley branch
 // ---------------------------------------------------------------------------
 
 const PARLEY_SNAPSHOT_MID: Extract<AftermathData, { variant: 'parley' }> = {
@@ -234,7 +232,7 @@ describe('selectAftermathViewModel: parley branch', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Phase 70 Tick C — defeat branch
+// Defeat branch
 // ---------------------------------------------------------------------------
 
 const DEFEAT_SNAPSHOT: Extract<AftermathData, { variant: 'defeat' }> = {
@@ -310,8 +308,8 @@ describe('selectAftermathViewModel: defeat branch', () => {
         const vm = selectAftermathViewModel(DEFEAT_SNAPSHOT);
         expect(vm?.kind === 'defeat' && vm.runSummary).toEqual({
             rounds: 4,
-            encountersFaced: 11, // Phase 93: 12 - 1 = 11 (when died, survived 0 encounters)
-            deepestNodeId: 'The Lighthouse', // Phase 93: resolved from bw-14 via map layout
+            encountersFaced: 11, // 12 - 1: the fatal encounter is not survived
+            deepestNodeId: 'The Lighthouse', // resolved from bw-14 via map layout
         });
     });
 
@@ -325,7 +323,7 @@ describe('selectAftermathViewModel: defeat branch', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Phase 93 — death screen presenter fixes (F09 + F10 regression coverage)
+// Death screen: encounters survived and deepest node name
 // ---------------------------------------------------------------------------
 
 describe('selectAftermathViewModel: Phase 93 fixes', () => {
@@ -395,7 +393,7 @@ describe('selectAftermathViewModel: Phase 93 fixes', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Phase 76 — engine narrative prose consumer
+// Engine narrative prose consumer
 // ---------------------------------------------------------------------------
 
 describe('selectAftermathViewModel: engine narrative lines (Phase 76)', () => {

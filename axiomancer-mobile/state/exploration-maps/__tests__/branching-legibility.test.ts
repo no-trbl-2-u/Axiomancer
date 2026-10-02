@@ -3,19 +3,16 @@
  * the graph the engine authored?
  *
  * The parity guard next door answers "does every engine node have a
- * position". It does not answer "are those positions any good", and after D1
- * that gap matters: 69 LATERAL LANE RIBS landed across the seven maps at
- * once, all of them joining two nodes that already existed. Parity stayed
- * green by construction — no node was added or removed — while the number of
- * lines drawn on the sheet rose by more than half on the starting map alone
- * (46 roads to 46 roads + 14 ribs).
+ * position". It does not answer "are those positions any good". Lateral lane
+ * ribs join two nodes that already exist, so parity stays green however many
+ * are added, while the number of lines drawn on the sheet grows.
  *
  * A rib between two nodes that sit too close together is a line nobody can
  * see: the node glyph is 44 device px on a canvas spread `sheet.scale` x wider
  * than the sheet, so it covers `NODE_SIZE / sheet.scale` sheet units, and an edge
- * shorter than that is entirely hidden under the two marks it joins. The
- * owner's finding was that the map does not read as branching; a rib drawn
- * under a node glyph is a branch that was authored and never shown.
+ * shorter than that is entirely hidden under the two marks it joins. A rib
+ * drawn under a node glyph is a branch that was authored and never shown, and
+ * the map stops reading as branching.
  *
  * These assertions are derived from the real render constants rather than
  * hard-coded, so shrinking the spread or growing the glyph moves the bar with
@@ -34,14 +31,14 @@ import { getMapLayout } from '../index';
  * `<ExplorationNode>` draws a `NODE_SIZE`-px mark on `<MapCanvas>`'s spread
  * canvas, which is `sheet.scale`x the sheet — so the mark's footprint here is
  * the quotient. Two glyphs closer together than this overlap outright. Per
- * map, because each layout declares its own sheet (map revamp M2).
+ * map, because each layout declares its own sheet.
  */
 function glyphDiameter(mapId: string): number {
     return NODE_SIZE / getMapLayout(mapId)!.sheet.scale;
 }
 
 const MAPS = [
-    // Map revamp M3a — Act 1's coast, on the 1000×1000 plate sheet.
+    // Act 1's four maps, on the 1000×1000 plate sheet.
     { mapId: 'breakwater', continent: 'coastal-continent' },
     { mapId: 'charcoal-wood', continent: 'coastal-continent' },
     { mapId: 'beacon-crags', continent: 'northern-continent' },
@@ -138,11 +135,10 @@ describe('exploration map: the sheet can carry the branching graph', () => {
             (n, m) => n + drawnEdges(m.continent, m.mapId).filter((e) => e.lateral).length,
             0,
         );
-        // Map revamp M3a: the Breakwater's four ring columns carry 3 + 4 + 2 + 2.
-        // M3b: the Charcoal Wood's four carry 4 + 3 + 3 + 4.
-        // M3c: the Beacon Crags' five three-lane bands carry 2 each.
-        // M3d: the Lantern Deep's five bands carry 3 + 3 + 2 + 2 + 1.
-        // R7e deleted the 55 pre-revamp ribs with the parked maps.
+        // The Breakwater's four ring columns carry 3 + 4 + 2 + 2.
+        // The Charcoal Wood's four carry 4 + 3 + 3 + 4.
+        // The Beacon Crags' five three-lane bands carry 2 each.
+        // The Lantern Deep's five bands carry 3 + 3 + 2 + 2 + 1.
         expect(total).toBe(11 + 14 + 10 + 11);
     });
 });

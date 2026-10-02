@@ -1,5 +1,5 @@
 /**
- * Hermetic pin for the D4 rarity contract (wave 0 of the rarity work).
+ * Hermetic pin for the card rarity contract.
  *
  * Three things are pinned here:
  *  1. `rarityFor` NEVER re-implements the banding — it agrees with the
@@ -9,7 +9,7 @@
  *  2. Rank beats a drifted projected `rarity`, and the loose-input paths
  *     (absent rank, off-ladder rank, junk rarity, nullish card) all resolve
  *     to something sane rather than throwing.
- *  3. D4's "never colour alone": the label and the pip count are distinct
+ *  3. "Never colour alone": the label and the pip count are distinct
  *     per band, so the signal survives greyscale and colour blindness with
  *     `RARITY_COLOR` switched off entirely.
  */

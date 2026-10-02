@@ -5,14 +5,10 @@
  * rest node opens the matching minigame, NOT the "/event" card.
  * `resolveCurrentMapEventAction` intercepts those two kinds (plus
  * hazard) and starts a minigame session instead of dropping a
- * `ResolvedEvent` on the event slice. A gather node is different since
- * Phase 76 retired "The Gleaning": it grants its items inline through
- * the same intercept point, with no session and no screen.
- *
- * 2026-09-21 (owner finding 2) — "no screen" turned out to be the bug: a
- * gather node granted its items and then said nothing a player could read.
- * The grant is still inline and still session-free, but it now surfaces on
- * the paced `/event` card. See `gathering-acknowledgement.engine.test.ts`.
+ * `ResolvedEvent` on the event slice. A gather node is different: it grants
+ * its items inline through the same intercept point, with no session and no
+ * minigame, and the grant surfaces on the paced `/event` card. See
+ * `gathering-acknowledgement.engine.test.ts`.
  *
  * This pins that contract end-to-end through the store action layer
  * (the same path `app/(tabs)/exploration` drives on a node tap):
@@ -20,17 +16,6 @@
  *   - rest node → rest session
  *   - gather node → items land in inventory inline, no session, and the
  *     paced /event acknowledgement card
- *
- * The previous gap (2026-06-14): the only coverage of these kinds was
- * `DebugTriggerEncounter.test.tsx`, which asserted the BROKEN
- * slice-seeding behavior. Nothing pinned the actual minigame launch,
- * so the debug panel silently dead-ended at "NO EVENT".
- *
- * (Phase 61 — the quest-board node retired; the earlier "one
- * quest node" coverage went with it, see `content.engine.test.ts`.
- * Phase 76 — the gathering node's minigame session assertion below
- * was rewritten to an inline-grant assertion; the node itself and its
- * kind census are untouched.)
  */
 
 import { describe, expect, it } from '@jest/globals';
@@ -98,12 +83,9 @@ describe('map encounter → minigame routing (charcoal-wood)', () => {
         expect(selectPacedEventRoute(store.getState())).toBeNull();
     });
 
-    // 2026-09-21 (owner finding 2, "the Gather node is now a no-op") — this
-    // case used to assert the OPPOSITE tail: items land, and then nothing.
-    // That was the bug. The grant still happens in the engine resolver with
-    // no session and no minigame (the Gleaning stays retired), but the node
-    // now pays out onto the paced `/event` card so the player is told what
-    // they picked up. Full coverage of the card lives in
+    // The grant happens in the engine resolver with no session and no
+    // minigame, and the node pays out onto the paced `/event` card so the
+    // player is told what they picked up. Full coverage of the card lives in
     // `gathering-acknowledgement.engine.test.ts`.
     it('gather node grants its items and opens the paced /event acknowledgement, with no session', () => {
         const { store, actions } = makeStoreAndActions();

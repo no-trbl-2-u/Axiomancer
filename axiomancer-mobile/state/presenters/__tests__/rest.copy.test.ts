@@ -1,8 +1,8 @@
 /**
- * FE-024 — the REST offer names the VITAE it restores.
+ * The REST offer names the VITAE it restores.
  *
- * Audit 2026-09-12: `restOfferDesc` now takes the engine's own preview
- * number (`previewRestChoiceHeal`) instead of re-deriving the heal from the
+ * `restOfferDesc` takes the engine's own preview number
+ * (`previewRestChoiceHeal`) rather than re-deriving the heal from the
  * fraction. These cases pin the wording; the arithmetic is pinned in the
  * engine suite and in `rest-offer-heal-cap.audit.test.ts`.
  */

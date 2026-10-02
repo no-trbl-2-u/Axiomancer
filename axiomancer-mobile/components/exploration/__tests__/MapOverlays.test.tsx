@@ -23,7 +23,7 @@ describe('MapOverlays', () => {
 
     it('renders the fixed compass chrome, naming the pan/pinch gesture', () => {
         render(<MapOverlays legend={legend} />);
-        // S4-world-C07: the chart pans and zooms behind a much smaller
+        // The chart pans and zooms behind a much smaller
         // window, so the always-on furniture has to say so — the first-visit
         // hint chip fades and cannot be the only place it is told.
         expect(screen.getByText('N ↑ · leagues · drag · pinch')).toBeTruthy();
@@ -51,10 +51,9 @@ describe('MapOverlays', () => {
     });
 
     /**
-     * FE-005 — the travel hint used to be an absolutely-positioned view on the
-     * SCREEN at `bottom: 80`, which landed on top of this legend at 375x812.
-     * It is now a sibling of the legend inside the map's fixed furniture, so
-     * these guards pin that it renders here and that it is optional.
+     * The travel hint is a sibling of the legend inside the map's fixed
+     * furniture, so it cannot land on top of the legend; these guards pin
+     * that it renders here and that it is optional.
      */
     describe('FE-005: travel hint', () => {
         it('renders the hint above the legend when one is passed', () => {
@@ -89,14 +88,11 @@ describe('MapOverlays', () => {
     });
 
     /**
-     * 04-exploration-midgame (/exploration, map hint) @mobile — S4-world-C07
-     * widened the hint copy to name the gesture, but its box still ran from
-     * chart edge to chart edge. At 375x812 the longer pill spanned x~48-333
-     * and swallowed `<MapCanvas>`'s compass rose (a 52x52 SVG pinned at
+     * A box running chart edge to chart edge lets a long hint swallow
+     * `<MapCanvas>`'s compass rose (a 52x52 SVG pinned at
      * `right: 10, bottom: 10`, i.e. a 62px footprint in the very band the
-     * pill sits in), leaving a needle tip above it and a sliver of ring
-     * below. The box must stop short of that corner — and mirror the inset,
-     * or the pill drifts off the chart's centre line.
+     * pill sits in). The box must stop short of that corner — and mirror the
+     * inset, or the pill drifts off the chart's centre line.
      */
     describe('04-exploration-midgame: the hint leaves the compass rose its corner', () => {
         // MapCanvas: 52px rose pinned 10px off the chart's right edge.
@@ -130,19 +126,19 @@ describe('MapOverlays', () => {
     });
 
     /**
-     * owner finding 9, 2026-09-21 — THE CLIPPED LEGEND.
+     * THE LEGEND MUST NOT CLIP.
      *
-     * The strip was cut off on screen for two independent reasons, and a
-     * fix for either alone leaves the other live, so both are pinned:
+     * The strip can be cut off for two independent reasons, and guarding
+     * either alone leaves the other live, so both are pinned:
      *
-     *   1. it ran under `<MapCanvas>`'s compass rose (a 52x52 SVG pinned at
+     *   1. running under `<MapCanvas>`'s compass rose (a 52x52 SVG pinned at
      *      `right: 10, bottom: 10` — a 62px corner reaching up from the
-     *      chart's foot) while the legend sat at `bottom: 8`;
-     *   2. neither `Text` could give way in the row, and `graphWrap` is
-     *      `overflow: 'hidden'`, so the moment the two strings exceeded the
-     *      strip they were clipped rather than wrapped.
+     *      chart's foot) while the legend sits at `bottom: 8`;
+     *   2. a row whose `Text`s cannot give way, inside `graphWrap`'s
+     *      `overflow: 'hidden'`, so strings that exceed the strip are
+     *      clipped rather than wrapped.
      *
-     * These assertions are geometric on purpose: the collision was geometric,
+     * These assertions are geometric on purpose: the collision is geometric,
      * and shortening the copy would hide it rather than fix it.
      */
     describe('owner finding 9: the legend cannot be clipped', () => {
@@ -187,8 +183,8 @@ describe('MapOverlays', () => {
         });
 
         it('keeps the travel hint clear of the now two-line strip', () => {
-            // FE-005 again: the hint and the legend collided once already
-            // because their offsets were chosen independently. The legend is
+            // The hint and the legend collide if their offsets are chosen
+            // independently. The legend is
             // anchored at bottom: 8 and grows upward over two ~11px lines.
             render(<MapOverlays legend={legend} hint="x" />);
             const hint = StyleSheet.flatten(screen.getByTestId('map-hint').props.style);

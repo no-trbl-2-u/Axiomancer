@@ -1,18 +1,16 @@
 /**
- * Act 1 map layouts — nodes on the plate (map revamp M3; D15, D16, D25).
+ * Act 1 map layouts — nodes on the plate.
  *
  * The Act 1 maps are drawn ON their plates: each node sits on a landmark read
  * off the plate (`assets/images/maps/act1-landmarks.json`). These pins state
- * the three rulings that shape every Act 1 layout:
+ * the three rules that shape every Act 1 layout:
  *
- *   D25 — every landmark on the plate has a node on it (more nodes are
- *         allowed, never a landmark without one);
- *   D16 — the map does not read as a climb: the nodes spread across the
- *         sheet on both axes, and the entry is not on the bottom edge;
- *   D15 — the plate is the map: shown near full strength, with the
- *         procedural chart texture off.
- *
- * Each Act 1 map joins `ACT1_MAPS` as its M3 PR ships.
+ *   - every landmark on the plate has a node on it (more nodes are
+ *     allowed, never a landmark without one);
+ *   - the map does not read as a climb: the nodes spread across the
+ *     sheet on both axes, and the entry is not on the bottom edge;
+ *   - the plate is the map: shown near full strength, with the
+ *     procedural chart texture off.
  */
 
 import { describe, expect, it } from '@jest/globals';
@@ -32,7 +30,7 @@ const ACT1_MAPS: readonly { mapId: MapName; continent: ContinentName; plate: Pla
     { mapId: 'lantern-deep', continent: 'northern-continent', plate: 'act1-underworld', art: ACT1_PLATES.underworld },
 ];
 
-/** A node counts as ON a landmark within 2% of the sheet (D25's tolerance). */
+/** A node counts as ON a landmark within 2% of the sheet. */
 const ON_LANDMARK = 0.02;
 
 describe.each(ACT1_MAPS)('$mapId — an Act 1 map on its plate', ({ mapId, continent, plate, art }) => {

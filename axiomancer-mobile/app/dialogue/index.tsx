@@ -1,7 +1,7 @@
 /**
- * /dialogue — the dedicated NPC interaction screen (Phase 137).
+ * /dialogue — the dedicated NPC interaction screen.
  *
- * Renders the same composed event view-model the generic modal used
+ * Renders the composed event view-model
  * (dialogue-cursor walking, flag/quest gating, consequence
  * chips all live in `state/presenters/event.engine`), with chrome
  * built for a conversation: nameplate, spoken text panel, replies.
@@ -25,38 +25,34 @@ import {
 import { FONTS, TYPE } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 
-/** How long the dialogue-confirmation ✓ stays visible (ported from
- *  the pre-Phase-137 event modal's Tick C). */
+/** How long the dialogue-confirmation ✓ stays visible. */
 const DIALOGUE_CONFIRM_TTL_MS = 500;
 
 /**
  * Widest the parley column is allowed to get.
  *
- * Purpose: on a desktop viewport the scene ran the full window and the
- * spoken text measured ~165 characters to a line, which loses the eye on
- * every return sweep. Input: none (a constant). Output: the cap applied
- * to the scroll content column; below it the column is simply full-width,
- * so phone layout is unchanged. Cluster: S5-talk-C13.
+ * Purpose: keep the spoken text at a readable line length on a desktop
+ * viewport. Input: none (a constant). Output: the cap applied to the
+ * scroll content column; below it the column is simply full-width, so
+ * phone layout is unaffected.
  */
 const SCENE_MAX_WIDTH = 560;
 
 /**
  * Size of a reply's consequence chip.
  *
- * Purpose: the chips were printed at 8pt, small enough to be unreadable
- * beside every other description on the screen. Input: none (a constant).
- * Output: the point size the chips share with the rest of the app's
- * description copy. Cluster: S5-talk-C17.
+ * Purpose: keep the chips as readable as every other description on the
+ * screen. Input: none (a constant). Output: the point size the chips share
+ * with the rest of the app's description copy.
  */
 const CHIP_FONT_SIZE = 12;
 
-/** Preview chips for `choice.consequences` — ported from the dead
- *  `/event` fallback shell's `ConsequenceChips` (Phase 46c) so a
+/** Preview chips for `choice.consequences`, so a
  *  quest-granting reply (e.g. Old Marrow's "Consider it done.") says
  *  so before the player taps it, not just via the generic ✓ flash. */
 function ReplyConsequences({ choice }: { choice: EventChoice }) {
     const styles = useStyles();
-    // FE-002: drop consequences with no player-facing label (story flags)
+    // Drop consequences with no player-facing label (story flags)
     // before slicing, so they neither render an empty chip nor spend one of
     // the three visible slots.
     const visible = visibleConsequences(choice.consequences);
@@ -140,7 +136,7 @@ export default function DialogueScreen() {
     // When the engine emits `dialogue:applied`, briefly flash a ✓ next
     // to the matching reply so the player sees their pick land before
     // the next dialogue node renders. Component-local state — the
-    // flash is intentionally ephemeral. (Ported from the event modal.)
+    // flash is intentionally ephemeral.
     const [lastConfirmedChoiceId, setLastConfirmedChoiceId] =
         useState<string | null>(null);
     const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -180,7 +176,7 @@ export default function DialogueScreen() {
     }, [hasEvent, router]);
 
     // Inactive shell — visible for a frame while the router unwinds; never a
-    // blank screen (UI-cleanup pass, CRITIQUE).
+    // blank screen.
     if (!hasEvent) {
         return (
             <ScreenBg scrollable={false} art="dialogue">
@@ -208,10 +204,10 @@ export default function DialogueScreen() {
                     <Text style={styles.speechText}>{vm.body}</Text>
                 </View>
 
-                {/* FE-011: the eyebrow heads the reply list, so it only renders
-                  * when there are replies. On a tree's closing node the list is
-                  * empty and 'A RECKONING' sat over nothing but the exit, which
-                  * reads as choices that failed to load. */}
+                {/* The eyebrow heads the reply list, so it only renders when
+                  * there are replies. On a tree's closing node the list is
+                  * empty, and 'A RECKONING' over nothing but the exit would
+                  * read as choices that failed to load. */}
                 {vm.choices.length > 0 && (
                     <Text style={styles.sectionLabel}>{vm.chrome.reckoningEyebrow}</Text>
                 )}
@@ -224,8 +220,8 @@ export default function DialogueScreen() {
                     />
                 ))}
 
-                {/* FE-007: shared bordered control — this was bare text under
-                  * two boxed replies and read as a caption, not the way out. */}
+                {/* Shared bordered control, so it reads as the way out rather
+                  * than a caption under the boxed replies. */}
                 <LeaveRow
                     label="TIP YOUR CAP AND GO"
                     accessibilityLabel="Walk away"
@@ -240,8 +236,7 @@ export default function DialogueScreen() {
 const useStyles = makeStyles((AXM) => ({
     scrollOuter: { flex: 1 },
     // Centre the conversation in the viewport so it doesn't sit in a sea
-    // of empty black (critic round 1: narrative screens had huge dead space).
-    // S5-talk-C13: and cap the column so the spoken text keeps a readable
+    // of empty black, and cap the column so the spoken text keeps a readable
     // measure on a wide window instead of running edge to edge.
     scroll: {
         padding: 14,
@@ -313,7 +308,7 @@ const useStyles = makeStyles((AXM) => ({
     },
     flexOne: { flex: 1 },
     consequenceRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 4 },
-    // S5-talk-C17: was 8 — unreadable next to every other description line.
+    // Sized to match every other description line.
     consequenceChip: {
         fontFamily: FONTS.mono,
         fontSize: CHIP_FONT_SIZE,

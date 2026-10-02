@@ -1,5 +1,5 @@
 /**
- * Consumer hook for the tap-tooltip system (Phase 74 Tick A).
+ * Consumer hook for the tap-tooltip system.
  *
  * Thin wrapper around `useTooltipContext()` so call sites read
  * `const tooltip = useTooltip(); tooltip.show({ ... });` without

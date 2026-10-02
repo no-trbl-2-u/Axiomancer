@@ -1,26 +1,21 @@
 /**
- * Phase 70 Tick A — aftermath presenter.
+ * Aftermath presenter.
  *
- * Composes the view model that `<CombatVictoryPanel>` (and, in later
- * ticks, `<CombatFriendshipPanel>` / `<CombatDefeatPanel>`) consumes
+ * Composes the view model that `<CombatVictoryPanel>`,
+ * `<CombatFriendshipPanel>` and `<CombatDefeatPanel>` consume
  * to render the in-encounter-modal aftermath. The combat slice is
  * cleared at the moment combat exits (`actions.endCombat()` fires
  * before this VM is built), so the presenter reads from the
  * `AftermathData` snapshot stashed on the `combat-mode` provider
  * instead — see `state/combat-mode.tsx`.
  *
- * Discriminated-union VM keyed by `kind`. Tick A populates the
- * `'victory'` branch only; the other branches are typed but unused
- * until later ticks. The view-side mount only renders the panel
- * matching the VM's `kind`, so the empty branches don't surface as
- * dead UI.
+ * Discriminated-union VM keyed by `kind` (victory, parley, defeat).
+ * The view-side mount only renders the panel matching the VM's `kind`.
  *
  * Per Hard Rule #8 — no display literals at the view layer. The
- * `finalBlowPhrase` chronicle flavour line is selected here, keyed
- * off the damage tier. Three placeholder variants (brutal / quiet /
- * ironic) ship as a presenter-local lookup; engine-side flavour
- * generation is a Phase 70 follow-up if the writers want to
- * generate per-enemy lines.
+ * chronicle flavour lines are selected here, keyed off a tier: the
+ * foe's engine-authored line when present, else a presenter-local
+ * fallback.
  */
 
 import { isEquipment, type Item } from '@mechanics';
@@ -29,10 +24,8 @@ import type { AftermathData } from '@/state/combat-mode';
 import { getMapLayout } from '@/state/exploration-maps';
 
 /**
- * Loot tile rendered in the spoils list. Tick A keeps this shape
- * minimal — Tick B / C may extend (icon hint per slot, rarity tier
- * color, etc.) but the basics (name + slot + rarity) cover the
- * design's `RarityRail` + `ItemGlyph` rendering.
+ * Loot tile rendered in the spoils list. Name + slot + rarity cover
+ * the design's `RarityRail` + `ItemGlyph` rendering.
  */
 export interface AftermathLootEntry {
     name: string;
@@ -47,8 +40,8 @@ export interface AftermathLootEntry {
  * slot and read as `common` (they have no rarity axis).
  */
 function toAftermathLootEntry(item: Item): AftermathLootEntry {
-    // Phase 23 — the rarity model is retired; all equipment (the signet relics)
-    // reports as `common` for the aftermath loot list.
+    // Equipment has no rarity axis; every item reports as `common` for the
+    // aftermath loot list.
     return isEquipment(item)
         ? { name: item.name, slot: item.slot, rarity: 'common' }
         : { name: item.name, slot: item.category, rarity: 'common' };
@@ -56,9 +49,8 @@ function toAftermathLootEntry(item: Item): AftermathLootEntry {
 
 /**
  * Currency reward strip cell. Combat spoils are engine-owned and
- * item-based (`CombatEndReport.loot`), so victories no longer pay a
- * separate purse — the cell stays nullable for the other aftermath
- * variants and collapses when absent.
+ * item-based (`CombatEndReport.loot`), so victories pay no separate
+ * purse; the cell is nullable and collapses when absent.
  */
 export interface AftermathCurrency {
     shillings: number;
@@ -86,10 +78,8 @@ export interface AftermathVictoryViewModel {
 
 /**
  * Optional journal-entry card surfaced under the reward strip on
- * the friendship panel. Engine doesn't yet expose per-foe codex
- * entries, so this stays null in Tick B; the panel collapses the
- * section. Bundle shape per
- * `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-22/project/screens/aftermath-modal.jsx:454-458`.
+ * the friendship panel, read from the aftermath snapshot. Null
+ * collapses the section.
  */
 export interface AftermathJournalEntry {
     bookName: string;
@@ -106,10 +96,8 @@ export interface AftermathParleyViewModel {
     /**
      * One-line chronicle phrase rendered in italic under the pixel
      * emblem. Presenter-selected from a small variant table keyed
-     * off enemy "softness" (currently a coarse heuristic on level —
-     * lower-level foes lay down quiet; higher-level foes set things
-     * down before yielding). The engine doesn't currently surface
-     * per-foe pact lines.
+     * off enemy level (`derivePactPhrase`). Prefers the foe's engine
+     * `pactLines`; falls back to a presenter-local phrase.
      */
     pactPhrase: string;
     rewards: {
@@ -153,24 +141,8 @@ export type AftermathViewModel =
     | AftermathDefeatViewModel;
 
 /**
- * Build the aftermath VM from the snapshot stashed at combat-exit
- * time. Returns `null` when the snapshot is null (no aftermath to
- * render).
- *
- * Phase 70 shipped all four outcome panels — Victory (Tick A),
- * Friendship/Parley (Tick B), Defeat (Tick C), Error (Tick D —
- * separate boundary fallback, not consumed by this selector).
- * The three combat outcomes each return a populated VM with their
- * `kind` set; flee never lands here (the panel/banner stayed silent
- * pre-Phase-70 and stays silent now — the seal dismisses without
- * an aftermath render).
- */
-/**
  * Resolve a node ID to human-readable name via map layout lookup.
  * Fallback to the original node ID if map layout or node lookup fails.
- * 
- * Phase 93 — fix F10 playtest finding where "deepest node" showed the
- * internal node ID instead of the node's name.
  */
 function resolveNodeIdToHumanName(nodeId: string | null, mapId: string | null): string {
     if (nodeId === null) return '·';
@@ -185,6 +157,13 @@ function resolveNodeIdToHumanName(nodeId: string | null, mapId: string | null): 
     return node.label;
 }
 
+/**
+ * Build the aftermath VM from the snapshot stashed at combat-exit
+ * time. Returns `null` when the snapshot is null (no aftermath to
+ * render). Victory, parley and defeat each return a populated VM;
+ * flee never lands here (the seal dismisses without an aftermath
+ * render).
+ */
 export function selectAftermathViewModel(
     data: AftermathData | null,
 ): AftermathViewModel | null {
@@ -217,7 +196,7 @@ export function selectAftermathViewModel(
             journalEntry: data.journalEntry,
         };
     }
-    // Defeat — Tick C.
+    // Defeat.
     return {
         kind: 'defeat',
         characterName: data.characterName.toUpperCase(),
@@ -237,10 +216,9 @@ export function selectAftermathViewModel(
         causePhrase: deriveCausePhrase(data),
         runSummary: {
             rounds: data.runSummary.roundsEndured,
-            // Phase 93 — fix F09: when player died, they survived 0 encounters, not 1.
-            // Guard against negative values for edge cases.
+            // The fatal encounter is not counted as survived; clamp at 0.
             encountersFaced: Math.max(0, data.runSummary.encountersFaced - 1),
-            // Phase 93 — fix F10: resolve node ID to human-readable name.
+            // Resolve node ID to its human-readable name.
             deepestNodeId: resolveNodeIdToHumanName(data.runSummary.deepestNodeId, data.runSummary.currentMapId),
         },
     };
@@ -285,7 +263,7 @@ function deriveFinalBlow(
 }
 
 /**
- * Phase 76 — tier-key extraction helpers shared by the three
+ * Tier-key extraction helpers shared by the three
  * narrative selectors. Engine line keys differ per kind
  * (`brutal | quiet | ironic` for victory; `brutal | broken | quiet`
  * for defeat; `quiet | setDown | heavy` for parley), so each kind

@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E Tests — Inventory modal presenter (Spec 06 Q2 / Q5).
+ * Hermetic E2E Tests — Inventory modal presenter.
  *
  * The modal previews the result of using or equipping an item before
  * the player confirms. These tests drive `selectItemModalViewModel`
@@ -53,7 +53,7 @@ const blade: Equipment = {
     
 };
 
-// A stat-bearing weapon used to exercise the equip stat-delta surface:
+// A stat-bearing weapon that exercises the equip stat-delta surface:
 // it adds max health (`maxHp`, the only equipment stat line), so swapping
 // it in over the plain `blade` produces a real, non-empty set of changes.
 const runeBlade: Equipment = {
@@ -80,7 +80,7 @@ const fractionBlade: Equipment = {
     statModifiers: [{ stat: 'maxHp', value: 1.55432728 }],
 };
 
-// Two named (affixed) weapons used to prove the equip/swap block shows
+// Two named (affixed) weapons that prove the equip/swap block shows
 // non-stat changes, not affix/keyword add-removes.
 const affixBladeWorn: Equipment = {
     id: 'affix-worn',
@@ -131,7 +131,7 @@ describe('selectItemModalViewModel: consumable preview (Q2)', () => {
     });
 
     it('reports "No VITAE change." when the effect is non-healing', () => {
-        // Intentionally exercises the legacy `effectId` fallback: a free-form
+        // Intentionally exercises the `effectId` fallback: a free-form
         // non-healing effect should round-trip through `parseHealAmount → 0`
         // and surface the "No VITAE change." preview line.
         const odd: Consumable = {
@@ -277,8 +277,7 @@ describe('selectItemModalViewModel: equipment preview (Q5)', () => {
     });
 
     it('reports "WORN" + null replacingName when the target is already first-in-slot AND sole item in slot', () => {
-        // User-jot 2026-05-22 (oversight 29th): sole-item-in-slot
-        // falls back to mode='view' confirmLabel='WORN' — there's
+        // Sole-item-in-slot falls back to mode='view' confirmLabel='WORN' — there's
         // no other peer to swap to, so unequip is a no-op under
         // the mobile first-per-slot convention.
         const store = makeStore([blade]);
@@ -379,8 +378,8 @@ describe('selectItemModalViewModel: equipment preview (Q5)', () => {
         expect(vm.statDeltas).toHaveLength(0);
     });
 
-    // The item's own stat modifiers surface (with values). Phase 23 — equipment
-    // has only stat modifiers (no passive-effect / affix lines).
+    // The item's own stat modifiers surface (with values). Equipment has only
+    // stat modifiers (no passive-effect / affix lines).
     it('exposes the item\'s intrinsic stat modifiers with values', () => {
         const store = makeStore([blade, runeBlade]);
 
@@ -424,7 +423,7 @@ describe('selectItemModalViewModel: equipment preview (Q5)', () => {
         }
     });
 
-    // Phase 23 — the equip/swap effect block shows only the signet-relic
+    // The equip/swap effect block shows only the signet-relic
     // signature gained/lost; plain gear (no affixes / passive effects) surfaces
     // no non-stat effect lines.
     it('surfaces no non-stat effect lines for plain gear (no affixes / passives)', () => {

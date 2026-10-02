@@ -1,11 +1,11 @@
 /**
- * Start-node arrival (2026-08-08 first-map audit).
+ * Start-node arrival.
  *
  * Map events fire on ARRIVAL at a node, and the player never arrives at the
  * node `createMapState` places them on — so whatever a map authored for its
- * starting node was unreachable content.
+ * starting node would be unreachable content.
  *
- * The fix has two halves and this file pins both: a map's start node is
+ * Two halves make it reachable and this file pins both: a map's start node is
  * authored as an arrival CUTSCENE (a kind that is safe to fire the moment
  * the map opens, unlike a fight nobody has had a chance to prepare for) —
  * the Breakwater's bw-1 today — and `ExplorationScreen` resolves the start
@@ -103,12 +103,11 @@ describe('start-node arrival: the map resolves the node it puts you on', () => {
     });
 
     it('stands down when another session already owns the app', () => {
-        // The regression CI caught on PR #186. Every minigame owns its own
-        // slice, so a caller can navigate to this screen and open a CACHE (or
-        // hazard, or rest…) session without ever touching `state.event`. The
-        // arrival used to check only the event slice, see an "idle" app, and
-        // steal the caller's route — the dev treasure trigger ended up on
-        // /cutscene instead of /cache.
+        // Every minigame owns its own slice, so a caller can navigate to this
+        // screen and open a CACHE (or hazard, or rest…) session without ever
+        // touching `state.event`. An arrival that checked only the event slice
+        // would see an "idle" app and steal the caller's route — the dev
+        // treasure trigger would land on /cutscene instead of /cache.
         const store = makeStore();
         const actions = createAppActions(store);
         actions.beginLootCacheChoice({ tier: 'modest', currency: 25 });
@@ -159,14 +158,13 @@ describe('start-node arrival: the map resolves the node it puts you on', () => {
 });
 
 /**
- * Burn-day audit 2026-09-19 row 3.1 — the arrival is owed across a reload.
+ * The arrival is owed across a reload.
  *
- * A move is a checkpoint (BUG-03), and the checkpoint is taken BEFORE the
- * arrival event resolves: `moveToAction` saves, and only then does
- * `onConfirmMove` call `resolveCurrentMapEvent`. On an encounter node that
- * used to mean a player who reloaded during the prelude came back standing
- * ON the node, with its onward edges already open and no fight pending —
- * the encounter was silently skipped. The arrival re-fire (the screen's
+ * A move is a checkpoint, and the checkpoint is taken BEFORE the arrival
+ * event resolves: `moveToAction` saves, and only then does `onConfirmMove`
+ * call `resolveCurrentMapEvent`. Without a re-fire, a player who reloaded
+ * during the prelude would come back standing ON the node with no fight
+ * pending — the encounter silently skipped. The arrival re-fire (the screen's
  * `vm.arrivalPending` effect) is what makes the early checkpoint honest.
  */
 describe('an arrival the player never answered survives a reload', () => {
@@ -185,7 +183,7 @@ describe('an arrival the player never answered survives a reload', () => {
         const tree = mountExploration(reloaded);
 
         // The fight the player was owed is actually on screen. Its node stays
-        // owed until that fight settles (R9a), so it is not consumed yet. Do NOT
+        // owed until that fight settles, so it is not consumed yet. Do NOT
         // assert `event.pending` here: `EncounterModalOverlay` auto-engages on
         // mount and `beginHazardEncounter` clears the event slice on the way
         // in, so `pending` is null by the time this line runs — before AND
@@ -198,15 +196,14 @@ describe('an arrival the player never answered survives a reload', () => {
 });
 
 /**
- * Phase R9a — a save taken DURING the fight reloads onto the fight.
+ * A save taken DURING the fight reloads onto the fight.
  *
  * The case above is a reload before the prelude. This one is a reload after
  * FIGHT: the app is closed mid-fight and `SaveOnExit` writes the store as it
  * stands. The fight itself is never saved (`currentEncounter` is transient),
- * so before R9a that save held a consumed node, nothing owed and the way on
- * open, and the reload landed past the fight. The node now stays owed until
- * the fight settles, so the reload stands the player back on it, with
- * nowhere else to go, and the map offers the fight again from the start.
+ * but the node stays owed until the fight settles, so the reload stands the
+ * player back on it, with nowhere else to go, and the map offers the fight
+ * again from the start.
  */
 describe('a save taken mid-fight survives a reload', () => {
     it('re-offers the fight, with the onward nodes still shut', () => {

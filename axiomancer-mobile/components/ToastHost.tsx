@@ -1,5 +1,5 @@
 /**
- * <ToastHost> — global transient feedback (Phase 29 Tick B).
+ * <ToastHost> — global transient feedback.
  *
  * Subscribes to engine `inventory:changed` events via
  * `useGameEvents`, runs each through `selectInventoryToast`, and

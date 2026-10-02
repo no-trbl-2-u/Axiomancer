@@ -1,9 +1,8 @@
 /**
- * FE-025 — the pre-fight commit gate must show the player's VITAE.
+ * The pre-fight commit gate must show the player's VITAE.
  *
- * The reveal priced the fight entirely in the foe's numbers — its
- * '120 / 120' and five phases of damage aimed at the player — while the
- * player's own VITAE appeared nowhere. The screen now prints
+ * The reveal prices the fight in the foe's numbers — its '120 / 120' and five
+ * phases of damage aimed at the player — so the screen also prints
  * `vm.player.hp / vm.player.maxHp` beside the foe's, so this pins that the
  * view model carries the player pool the gate reads, separately from the
  * enemy's.

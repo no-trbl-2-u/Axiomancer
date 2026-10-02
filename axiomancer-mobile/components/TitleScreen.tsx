@@ -29,8 +29,8 @@ interface TitleScreenProps {
 export function TitleScreen({ onContinue }: TitleScreenProps) {
   const styles = useStyles();
 
-  // Owner call 2026-09-23 (THE VERY START): EMBARK no longer dev-seeds the
-  // character. It only hands off to the main menu; a new game starts with
+  // EMBARK does not seed the character. It only hands off to the main
+  // menu; a new game starts with
   // nothing in every build, and the `/dev` route seeds on demand.
   const handleStartGame = () => {
     onContinue();
@@ -47,9 +47,9 @@ export function TitleScreen({ onContinue }: TitleScreenProps) {
           intact at full width instead; the container's own dark
           background fills the space below it, which the scrim
           bands already darken toward for the CTA panel. */}
-      {/* S4-world-C22: `contain` ends the square plate in a ruled line
+      {/* `contain` ends the square plate in a ruled line
           straight across the figures, with flat ground beneath it — a
-          seam, not an edge. The art now sits in its own square wrapper
+          seam, not an edge. The art sits in its own square wrapper
           so a short ramp of ground-coloured bands can be anchored to
           the ART's own foot (not the screen's), dissolving that line at
           any viewport height. Same no-gradient-dependency trick as the
@@ -132,7 +132,7 @@ const useStyles = makeStyles((AXM) => ({
     right: 0,
     bottom: 0,
   },
-  // The feathered foot of the plate (S4-world-C22). Seven bands of the
+  // The feathered foot of the plate. Seven bands of the
   // page ground over the art's own lower quarter, the last fully opaque,
   // so the image has already become the field by the time it ends. Seven
   // rather than the scrim's three: the scrim ramps over half a screen

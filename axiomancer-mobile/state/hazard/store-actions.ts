@@ -1,13 +1,10 @@
 /**
  * Hazard minigame — store action implementations.
  *
- * The pure engine lives in `axiomancer-mechanics` (World/Hazard —
- * decoupled 2026-06-12 at 0.17.1; mobile owns UI only); these
- * wrappers thread the session through the mobile store slice and, at
- * claim time, apply the outcome to the real engine `GameState`
- * (VITAE, max VITAE, currency, deck flags). See
- * `archive-pre-revamp:plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/hazard-v2-vs-mechanics-divergence.md` (archived 2026-09-25) for what applies live
- * vs. what is recorded as flags pending engine systems.
+ * The pure engine lives in `axiomancer-mechanics` (World/Hazard; mobile
+ * owns UI only); these wrappers thread the session through the mobile
+ * store slice and, at claim time, apply the outcome to the real engine
+ * `GameState` (VITAE, max VITAE, currency, deck flags).
  */
 
 import type { GameState } from '@mechanics';
@@ -57,8 +54,7 @@ export interface MobileHazardSlice {
 export const EMPTY_HAZARD_SLICE: MobileHazardSlice = Object.freeze({ session: null, tutorial: false });
 
 /** Flag set once the guided first crossing is completed or skipped. */
-// Source of truth moved to `state/tutorials.ts` (SETTINGS gate, 2026-09-23);
-// re-exported so existing importers keep working.
+// Defined in `state/tutorials.ts`; re-exported for importers of this module.
 export { HAZARD_TUTORIAL_FLAG } from '../tutorials';
 import { HAZARD_TUTORIAL_FLAG, isTutorialDone } from '../tutorials';
 
@@ -77,12 +73,12 @@ export const HAZARD_TUTORIAL_ID = 'cracked-cliff';
  * is also baked into `player.maxHealth` at claim (the live effect); the
  * flag is the durable record an inn rest reads to restore the loss
  * toward baseline. Mobile-only adapter — `axiomancer-mechanics` owns no
- * scar-recovery truth (see the archived archive-pre-revamp:plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/hazard-v2-vs-mechanics-divergence.md).
+ * scar-recovery truth.
  */
 export const HAZARD_SCAR_FLAG_PREFIX = 'hazard-scar:';
 
 /**
- * Flag prefix recording an out-of-combat death (Phase 130). One flag is
+ * Flag prefix recording an out-of-combat death. One flag is
  * stamped per fatal Hazard crossing — a crossing whose net VITAE swing
  * would drop the player to `health <= 0` by the engine's `isDefeated`
  * threshold. The suffix is a timestamp so repeated deaths accumulate
@@ -304,7 +300,7 @@ export interface ClaimHazardRewardsResult {
     cardAdded: string | null;
     crackAdded: boolean;
     /**
-     * Phase 130 — true when the crossing was fatal: the net VITAE swing
+     * True when the crossing was fatal: the net VITAE swing
      * would have dropped the player to `health <= 0` (engine `isDefeated`
      * threshold), so the run was reset via `resetRun({ keepCharacter })`
      * and the crossing's spoils were forfeit. On a fatal claim every
@@ -374,7 +370,7 @@ export function claimHazardRewardsAction(store: AppStore, cardId: string | null)
 
     const player = state.player;
 
-    // Phase 130 — out-of-combat death. The nominal post-crossing VITAE
+    // Out-of-combat death. The nominal post-crossing VITAE
     // (before the floor-1 clamp below) decides lethality by the engine's
     // own `isDefeated` threshold (`health <= 0`) — the SAME predicate the
     // combat death path uses. A crossing the player cannot afford routes

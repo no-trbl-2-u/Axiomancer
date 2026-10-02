@@ -1,7 +1,6 @@
 /**
- * Hermetic component tests — Splatter (phase V7: a real acquired
- * ink-splatter plate, tinted via `tintColor`, replacing the old procedural
- * random-circle SVG). Tests pin the acquired-art contract: deterministic
+ * Hermetic component tests — Splatter (a real acquired ink-splatter plate,
+ * tinted via `tintColor`). Tests pin the acquired-art contract: deterministic
  * plate selection by seed, and prop passthrough (size, color -> tintColor).
  */
 

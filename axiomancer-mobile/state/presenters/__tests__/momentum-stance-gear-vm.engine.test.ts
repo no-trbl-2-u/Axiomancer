@@ -1,11 +1,9 @@
 /**
- * Spec 33 (Phase D6b) — the momentum chip + die-gear rail, presenter
- * contract.
+ * The momentum chip + die-gear rail, presenter contract.
  *
  * Pins the two view-model surfaces against the REAL engine + presenter:
  *   1. the Momentum-V2 chain chip (color/length + the LOUD break-to-null + surge);
  *   2. the die-gear rail + payload-only inspection VM (face table, payload, upgrade).
- * (The flag-OFF byte-identity pins were deleted with the flag, D7.)
  */
 
 import { describe, expect, it } from '@jest/globals';
@@ -28,7 +26,7 @@ function openEncounter(): CombatEncounterState {
 }
 
 
-// ── §3 Momentum-V2 chain chip ────────────────────────────────────────────────
+// ── Momentum-V2 chain chip ───────────────────────────────────────────────────
 
 describe('Momentum-V2 chain chip', () => {
     it('maps a live chain to { color, length, next }', () => {
@@ -115,7 +113,7 @@ describe('Momentum-V2 chain chip', () => {
     });
 });
 
-// ── §2 player current-stance chip ────────────────────────────────────────────
+// ── die-gear rail + payload-only inspection ──────────────────────────────────
 
 describe('die-gear rail + payload-only inspection', () => {
     it('renders 4 stock slots (heart/body/mind/wild) from the default gear', () => {

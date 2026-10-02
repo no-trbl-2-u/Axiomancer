@@ -12,11 +12,11 @@ interface EquipmentSlotProps {
     selected: boolean;
     onPress: (key: EquipmentDockSlot['key'] | null) => void;
     /**
-     * Long-press handler for a FILLED slot (2026-09-13 playthrough note #2).
+     * Long-press handler for a FILLED slot.
      * Receives the worn item's engine id; the screen resolves it into the
      * equipment detail card. Optional — when omitted (or when the slot is
-     * empty) the long press falls back to the legacy `kind:'slot'` tooltip,
-     * which is still the only information an EMPTY slot has to give.
+     * empty) the long press falls back to the `kind:'slot'` tooltip, which
+     * is the only information an EMPTY slot has to give.
      */
     onShowItemDetail?: (itemId: string) => void;
 }
@@ -28,11 +28,11 @@ export function EquipmentSlot({
     onPress,
     onShowItemDetail,
 }: EquipmentSlotProps) {
-    // Long-press behaviour (2026-09-13 playthrough note #2): on a FILLED slot
+    // Long-press behaviour: on a FILLED slot
     // it opens the equipment detail card — the only place outside combat where
     // a signature skill's real effect can be read. On an EMPTY slot there is no
-    // item to describe, so it keeps the Phase-74 `kind:'slot'` tooltip.
-    // Single-tap stays for slot-filter select (existing behaviour).
+    // item to describe, so it raises the `kind:'slot'` tooltip.
+    // Single-tap selects the slot filter.
     const styles = useStyles();
     const tooltip = useTooltip();
     const slotRef = useRef<View | null>(null);
@@ -167,7 +167,7 @@ const useStyles = makeStyles((AXM) => ({
         color: AXM.bone,
         lineHeight: 14,
     },
-    // Phase 19 — signet relic's granted signature, a quiet sub-label.
+    // Signet relic's granted signature, a quiet sub-label.
     dockSlotSignature: {
         fontFamily: FONTS.sans,
         fontSize: 10,

@@ -14,7 +14,7 @@
  *       3. crash tail — the last ~200 info+ entries persisted to a
  *          dedicated AsyncStorage key so a crash/restart on an APK leaves
  *          a structured trace (`prevSession()` / the /dev log viewer).
- *     It also installs global crash capture (Phase 77): a JS error handler
+ *     It also installs global crash capture: a JS error handler
  *     (`ErrorUtils` on native, `window.onerror`-equivalent on web) and an
  *     unhandled-promise-rejection hook, both force-flushing the crash tail
  *     with a `crash` marker so `getPrevSessionCrash()` can offer a
@@ -62,7 +62,7 @@ export interface AppLoggingOptions {
     storage?: StorageLike;
 }
 
-/** A crash marker attached to the persisted tail (Phase 77). */
+/** A crash marker attached to the persisted tail. */
 export interface CrashInfo {
     /** `'global-error' | 'unhandled-rejection' | 'react-boundary'`. */
     kind: string;
@@ -183,7 +183,7 @@ export function getPrevSessionLogTail(): AxmLogEntry[] | null {
     return prevSessionTail;
 }
 
-/** The previous session's crash marker, if it force-flushed one (Phase 77). */
+/** The previous session's crash marker, if it force-flushed one. */
 export function getPrevSessionCrash(): CrashInfo | null {
     return prevSessionCrash;
 }
@@ -274,7 +274,7 @@ export function __resetAppLoggingForTests(): void {
 }
 
 // ---------------------------------------------------------------------------
-// Global crash capture (Phase 77)
+// Global crash capture
 // ---------------------------------------------------------------------------
 
 /** Minimal local narrow — RN's `global.ErrorUtils`, not exported by `@types`. */

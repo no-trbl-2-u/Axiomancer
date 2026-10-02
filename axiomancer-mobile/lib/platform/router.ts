@@ -1,15 +1,12 @@
 /**
- * The Expo-decouple seam for navigation. Phase 47a made this file the
- * single import site every application call site routes through;
- * phase 47b is the swap this seam existed for — the implementation
- * below is `@react-navigation/native` + `native-stack` + `bottom-tabs`
- * (the bare-RN libraries Expo Router itself is built on), not
- * `expo-router`. Every call site's shape (`useRouter().push('/x')`,
- * `<Stack.Screen name="x/index" />`, `useLocalSearchParams()`,
- * `usePathname()`, `<Redirect href="/x" />`) is preserved so app/*
- * and components/* needed no restructuring beyond `_layout.tsx`
- * gaining explicit `component` props (no more file-tree
- * auto-discovery to resolve them from).
+ * The navigation seam: the single import site every application call
+ * site routes through. The implementation is `@react-navigation/native`
+ * + `native-stack` + `bottom-tabs` (the bare-RN libraries Expo Router
+ * itself is built on), behind Expo-Router-shaped call sites
+ * (`useRouter().push('/x')`, `<Stack.Screen name="x/index" />`,
+ * `useLocalSearchParams()`, `usePathname()`, `<Redirect href="/x" />`).
+ * There is no file-tree auto-discovery: `_layout.tsx` gives every
+ * screen an explicit `component` prop.
  */
 import { useEffect, useState } from 'react';
 import {
@@ -30,8 +27,7 @@ export { NavigationContainer } from '@react-navigation/native';
 // `<Stack>`/`<Tabs>` compat surface: expo-router's own versions are a
 // thin wrapper over exactly these two factories, with `.Screen`
 // attached to the Navigator component so `<Stack>...<Stack.Screen/>`
-// JSX needs no restructuring. The file-tree auto-population expo-router
-// added on top is gone — every screen the app has is now an explicit
+// JSX works as-is. Every screen the app has is an explicit
 // `<Stack.Screen name="..." component={...} />` in `app/_layout.tsx` /
 // `app/(tabs)/_layout.tsx`.
 const RootStack = createNativeStackNavigator();
@@ -41,10 +37,9 @@ const RootTabs = createBottomTabNavigator();
 export const Tabs = Object.assign(RootTabs.Navigator, { Screen: RootTabs.Screen });
 
 // Every `router.push('/segment')` / `<Redirect href="/segment">` call
-// site inherited its path strings from the expo-router file-tree era
-// (e.g. `/hazard`, `/(tabs)/exploration`, `/combat-encounter?tutorial=1`).
-// This table is the one place that now owns segment -> registered
-// screen `name` resolution, so those call sites needed zero edits.
+// site uses file-tree-style path strings (e.g. `/hazard`,
+// `/(tabs)/exploration`, `/combat-encounter?tutorial=1`). This table is
+// the one place that owns segment -> registered screen `name` resolution.
 // `tab: true` entries live under the nested `(tabs)` navigator and
 // resolve via a nested `navigate`, not a root Stack push (matching
 // expo-router's own tab-link behavior — visiting a tab focuses it,
@@ -82,11 +77,9 @@ const ROUTE_TABLE: Readonly<Record<string, RouteEntry>> = {
 // exactly (segment -> URL path). This is what makes a fresh page load
 // at `/character`, `/hazard`, etc. resolve to the right screen on web
 // (scripts/*-e2e.mjs and scripts/smoke-screens.mjs depend on exactly
-// this — see phase 47b brief "Decisions" for why their static file
-// servers needed zero changes). `prefixes: []` intentionally carries
-// over today's behavior: native deep-linking via the `axiomancer://`
-// scheme was never wired to navigation (see the removed handler note
-// in `app/_layout.tsx`'s history) and stays that way here.
+// this). `prefixes: []` is intentional: native deep-linking via the
+// `axiomancer://` scheme is not wired to navigation (see the note in
+// `app/_layout.tsx`).
 // `PathConfigMap<ParamListBase>` can't express a nested `screens` block
 // generically (the generic param type per key is `object | undefined`,
 // not a nested ParamListBase to recurse into) — the `as` below is the
@@ -147,16 +140,11 @@ function parseHref(href: string): { entry: RouteEntry | undefined; params?: Reco
 /**
  * The navigation request that arrived before the container was ready.
  *
- * PLAYTEST_BUGS_2026-09-18 BUG-02 (critical — the game was unreachable for
- * every returning player). `dispatchTo` used to `return` silently when
- * `navigationRef.isReady()` was false, and nothing ever retried. A returning
- * player has `showTitleScreen` false, so `app/index.tsx` renders
- * `<Redirect href="/exploration" />` on its FIRST paint — which can land before
- * the NavigationContainer attaches. `Redirect`'s effect is keyed on `[href]`,
- * and `href` never changes, so the effect could not re-run: the redirect was
- * dropped, the index route kept rendering `null`, and the player got a
- * permanently blank screen with no error anywhere. Clearing the save made the
- * title screen render again, which is what pinned it to this path.
+ * A `<Redirect>` can fire on a screen's FIRST paint, before the
+ * NavigationContainer attaches. `Redirect`'s effect is keyed on `[href]`, and
+ * `href` never changes, so the effect cannot re-run: if `dispatchTo` dropped
+ * the request while `navigationRef.isReady()` was false, the screen would stay
+ * blank forever. So the request is held here and replayed on ready.
  *
  * Last-write-wins on purpose: only the most recent request can still be
  * correct. If two screens both asked to navigate while the container was

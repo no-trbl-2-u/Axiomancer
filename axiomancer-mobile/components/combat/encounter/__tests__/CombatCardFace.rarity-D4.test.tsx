@@ -1,15 +1,11 @@
 /**
- * D4 — rarity at a glance, and specifically NEVER BY COLOUR ALONE.
- *
- * Owner finding 8 was "no way to recognise a card's rarity at a glance". The
- * face's answer had been one wax pip in one of three hues, which the 2026-08-28
- * plate doctrine wrote down as deliberate ("rarity is a small wax pip … not a
- * text tag"). D4 reverses that: named label + pip row + frame colour.
+ * Rarity at a glance, and specifically NEVER BY COLOUR ALONE: the face shows
+ * a named label + pip row + frame colour.
  *
  * This suite is the greyscale test written as code. Every assertion below is
  * phrased so that it would still pass if `RARITY_COLOR` returned the same hue
- * for all three bands — because that is exactly the failure mode D4 exists to
- * prevent, and a test that reads the pip's `backgroundColor` to tell the bands
+ * for all three bands — because that is exactly the failure mode this exists
+ * to prevent, and a test that reads the pip's `backgroundColor` to tell the bands
  * apart would be re-testing the colour instead of the signal.
  *
  * What is pinned:
@@ -25,9 +21,8 @@
  *   5. the band is derived by the shared module, never re-banded here: the
  *      face agrees with `rarityFor` for every real library card.
  *
- * Since the card purge (2026-09-27) the library is the grey office — every
- * card rank 1, one band — so the multi-band cases (the fixture spanning
- * bands, bands separated by count) went with the higher-rank cards.
+ * The library is the grey office — every card rank 1, one band — so the
+ * fixture spans only the bands the library carries.
  */
 
 import React from 'react';
@@ -140,8 +135,8 @@ describe('CombatCardFace — D4 rarity pip track', () => {
 
     it('tracks the ENGINE rank, not a mobile-side re-band', () => {
         // Deliberately asserted against `rankToRarity` from mechanics rather
-        // than against `rarityFor`: if the board ever inlines `rank <= 2 ? …`
-        // again, a test phrased in terms of the mobile module could drift along
+        // than against `rarityFor`: if the board ever inlines `rank <= 2 ? …`,
+        // a test phrased in terms of the mobile module could drift along
         // with it, where this one cannot.
         for (const card of cards) {
             expect(card.rank).toBeDefined();
@@ -167,7 +162,7 @@ describe('CombatCardFace — D4 named label', () => {
 
     it('does NOT print it on the small face — the fanned name column is not for sale', () => {
         // The word costs ~34pt of a 120pt band, and the fan already clips names
-        // down to a ~40pt sliver (cluster CB-handfan). The small face pays for
+        // down to a ~40pt sliver (`CombatBoard.handfan.test.tsx`). The small face pays for
         // the signal in pips, which cost nothing horizontally.
         for (const card of cards) {
             const { unmount } = renderFace(card, false);

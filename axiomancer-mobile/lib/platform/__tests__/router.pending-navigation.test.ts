@@ -1,18 +1,14 @@
 /**
- * Router — PLAYTEST_BUGS_2026-09-18 BUG-02: the dropped redirect.
+ * Router — a redirect that fires before the container is ready.
  *
- * A returning player has `onboarding.showTitleScreen` false, so `app/index.tsx`
- * renders `<Redirect href="/exploration" />` on its FIRST paint — there is no
- * title screen to click through. That redirect could land before the
- * NavigationContainer attached. `dispatchTo` began with a bare
- * `if (!navigationRef.isReady()) return;`, and `Redirect`'s effect is keyed only
- * on `[href]` — which never changes — so the effect could not re-run. The
- * redirect was dropped, the index route kept rendering `null`, and the player
- * got a permanently blank white screen with nothing in the log (both failure
- * exits were `__DEV__`-gated).
+ * A `<Redirect>` can fire on a screen's FIRST paint, before the
+ * NavigationContainer attaches. `Redirect`'s effect is keyed only on `[href]` —
+ * which never changes — so the effect cannot re-run; a dropped request would
+ * leave a permanently blank screen.
  *
- * The fix queues the request and replays it from `<NavigationContainer onReady>`.
- * This suite pins the queue's behaviour directly, without a container:
+ * The router queues the request and replays it from
+ * `<NavigationContainer onReady>`. This suite pins the queue's behaviour
+ * directly, without a container:
  *
  *   1. a dispatch made while not-ready is REMEMBERED, not dropped;
  *   2. `flushPendingNavigation` replays it once the ref reports ready;

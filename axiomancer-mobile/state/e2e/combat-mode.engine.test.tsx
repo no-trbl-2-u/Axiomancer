@@ -1,11 +1,10 @@
 /**
- * Hermetic E2E Tests — Combat-mode context (Phase 41 follow-up)
+ * Hermetic E2E Tests — Combat-mode context
  *
  * Pins the one-shot `lastOutcome` signal that the exploration screen
  * reads to render the post-victory aftermath banner. The signal
- * lives on the React-context shim at `state/combat-mode.tsx` (still
- * UI-only; not engine state yet — see the file's own JSDoc on the
- * Spec 02 migration plan).
+ * lives on the React-context shim at `state/combat-mode.tsx` (UI-only,
+ * not engine state).
  *
  * Hermetic = self-contained + deterministic + isolated. Uses
  * `react-test-renderer` semantics via React's createRoot + a small
@@ -111,9 +110,8 @@ describe('combat-mode: inEncounterModal session flag (Phase 63c)', () => {
         const { result } = renderHook(() => useCombatMode(), { wrapper });
         act(() => result.current.openEncounterModal());
         act(() => result.current.enterCombat());
-        // Modal open + combat in progress simultaneously — this is the
-        // exact state Phase 63c needs to support (modal stays mounted
-        // across the prelude → combat transition).
+        // Modal open + combat in progress simultaneously — the modal stays
+        // mounted across the prelude → combat transition.
         expect(result.current.inEncounterModal).toBe(true);
         expect(result.current.inCombat).toBe(true);
 
@@ -129,7 +127,7 @@ describe('combat-mode: inEncounterModal session flag (Phase 63c)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Phase 70 Tick A — aftermath data snapshot + dismissAftermath
+// Aftermath data snapshot + dismissAftermath
 // ---------------------------------------------------------------------------
 
 describe('combat-mode: aftermathData + dismissAftermath', () => {
@@ -220,7 +218,7 @@ describe('combat-mode: aftermathData + dismissAftermath', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Phase 70 Tick C — run-stats counters (encountersFaced + deepestNodeId)
+// Run-stats counters (encountersFaced + deepestNodeId)
 // ---------------------------------------------------------------------------
 
 describe('combat-mode: run-stats counters', () => {

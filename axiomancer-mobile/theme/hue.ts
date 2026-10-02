@@ -1,11 +1,10 @@
 /**
- * Fixed colours — the hues that are the same in every theme (Phase R10).
+ * Fixed colours — the hues that are the same in every theme.
  *
  * `app/`, `components/` and `state/presenters/` never write a hex literal;
  * they read a token from `AXM` (theme-driven) or from here (fixed), both
  * exported from `theme/axm.ts`. `theme/__tests__/no-hex-literals.test.ts`
- * holds that line. Values are byte-identical to the literals they replaced,
- * so the move changed nothing on screen. A hue that should follow the theme
+ * holds that line. A hue that should follow the theme
  * moves into `ThemeSpec` (`theme/palette.ts`) as a deliberate visual change.
  *
  * This file has no imports, so modules loaded outside the app can use it

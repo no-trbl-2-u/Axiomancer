@@ -1,11 +1,9 @@
 /**
- * Hermetic E2E Tests — engine events ring buffer (Phase 25 Tick A).
+ * Hermetic E2E Tests — engine events ring buffer.
  *
  * Pins the emitter wiring + the `_recentEvents` ring-buffer behaviour
  * that the memoir chronicle and the error screen read. Drives the
  * engine via `createAppStore` + the action layer. (The
- * `selectRecentEngineEvents` presenter this file used to read through
- * had no screen consumer and was removed — TRIM THE FAT T3. The
  * `isCombat*Event` type guards are pinned engine-side in
  * `axiomancer-mechanics/src/Game/e2e/events.engine.test.ts`.)
  */

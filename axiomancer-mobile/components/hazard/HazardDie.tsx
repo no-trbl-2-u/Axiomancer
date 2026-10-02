@@ -5,8 +5,8 @@
  * (dimmed + diagonal slash), hex (black hostile ✕), temporary
  * (dashed conjured rim).
  *
- * Recreates the prototype's `Die3D` (CSS preserve-3d) with SVG so the
- * same object renders on native and web.
+ * A 3D-looking die drawn in SVG so the same object renders on native
+ * and web.
  */
 
 import React from 'react';

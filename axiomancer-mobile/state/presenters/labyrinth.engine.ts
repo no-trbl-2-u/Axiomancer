@@ -105,10 +105,9 @@ export const LABYRINTH_COPY = Object.freeze({
     completeBody: 'The Unfounded Door was never locked. You walk through.',
     completeLastLine: '"Mind the first step. There is no first step."',
     /**
-     * Screen-reader copy for the labyrinth's unadorned pressables
-     * (cluster S7-hazard-C20). The act cards, LEAVE and the MAP toggle
-     * carry no visual affordance a reader can infer, so they name
-     * themselves here rather than in the screen (Hard Rule #8 — copy
+     * Screen-reader copy for the labyrinth's unadorned pressables. The act
+     * cards, LEAVE and the MAP toggle carry no visual affordance a reader
+     * can infer, so they name themselves here rather than in the screen (Hard Rule #8 — copy
      * lives in the presenter).
      */
     a11y: Object.freeze({
@@ -117,7 +116,7 @@ export const LABYRINTH_COPY = Object.freeze({
          * Purpose: name the descent and say whether it is already walked,
          * since the card's state is carried visually by a lowercase word.
          * Input: the act's title, and whether the act is completed.
-         * Output: the label string. Resolves cluster S7-hazard-C20.
+         * Output: the label string.
          */
         actOption: (title: string, completed: boolean): string =>
             completed ? `${title}. Walked. Descend again.` : `${title}. Descend.`,

@@ -1,7 +1,7 @@
 /**
  * Hermetic tests — `<CrashReportPanel>`, the shared technical-panel +
  * COPY + RECENT LOG rendering `ErrorBoundary` and `PrevSessionCrashPrompt`
- * both mount (Phase 77 extraction). `ErrorBoundary.test.tsx` already
+ * both mount. `ErrorBoundary.test.tsx` already
  * exercises this through its default `testIDPrefix`; this suite pins
  * the component directly, including the custom-prefix contract the
  * next-launch prompt relies on to avoid testID collisions.

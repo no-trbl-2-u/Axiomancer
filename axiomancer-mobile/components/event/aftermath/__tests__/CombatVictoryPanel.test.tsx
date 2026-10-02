@@ -2,7 +2,7 @@
  * Hermetic component tests — CombatVictoryPanel.
  *
  * Pins the render contract the in-encounter-modal aftermath mount
- * relies on (Phase 70 Tick A):
+ * relies on:
  *   1. Enemy name + epithet render in their respective slots; the
  *      epithet collapses when null.
  *   2. Final-blow header / phrase / descriptor render together;

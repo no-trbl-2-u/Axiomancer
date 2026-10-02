@@ -1,5 +1,5 @@
 /**
- * Hermetic tests for the Phase 137 settlement-shop presenter
+ * Hermetic tests for the settlement-shop presenter
  * (`state/presenters/village.engine.ts`).
  *
  * `selectVillageVM` is a pure `(state) -> VillageVM` mapper, and
@@ -29,7 +29,7 @@ import {
 import type { AppStoreState } from '@/state/store';
 
 const REAL_CONSUMABLE_ID = consumableLibrary[0]?.id;
-// Phase 21 — equipment wares resolve to signet relics (the only equipment).
+// Equipment wares resolve to signet relics (the only equipment).
 const REAL_TEMPLATE_ID = relicLibrary[0]?.id;
 
 type VillageState = Pick<AppStoreState, 'event' | 'player'>;

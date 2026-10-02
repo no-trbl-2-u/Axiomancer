@@ -1,11 +1,9 @@
 /**
- * Item-reward screen presenter (owner finding 10; decisions D5 / D6 / D7).
+ * Item-reward screen presenter.
  *
- * A granted relic used to land in the satchel with no ceremony and no
- * explanation of what it does. This is the data half of the screen that fixes
- * that: the item, the signature skill it grants, the stats it moves, and — when
- * EQUIP would displace something — the exact trade, named before the player
- * commits.
+ * The data half of the screen shown when a relic is granted: the item, the
+ * signature skill it grants, the stats it moves, and — when EQUIP would
+ * displace something — the exact trade, named before the player commits.
  *
  * ## What this file does NOT do
  *
@@ -28,11 +26,10 @@
  *
  * ## Deliberate omission: no rarity row
  *
- * D4 governs CARDS, whose rarity derives from `rank`. Phase 23 retired `rarity`
- * from the lean signet `Equipment`: every relic is `common` by construction and
- * the aftermath panel hardcodes it. A rarity row here would render a constant,
- * which is noise, so there is none. See the hand-back rather than inventing a
- * rarity for relics.
+ * Rarity belongs to CARDS, derived from `rank`. The signet `Equipment` carries
+ * no `rarity` field: every relic is `common` by construction and the aftermath
+ * panel hardcodes it. A rarity row here would render a constant, so there is
+ * none.
  *
  * Pure: state in, view-model out. No store writes, no rolls, no rule decisions.
  */
@@ -62,7 +59,7 @@ export const ITEM_REWARD_CONFIRM_LABEL = 'TO THE SATCHEL';
 export const ITEM_REWARD_EQUIP_LABEL = 'WEAR IT NOW';
 
 /**
- * D7, said out loud. The screen is dismissible and every exit commits the
+ * The screen is dismissible and every exit commits the
  * item, so the player is told that before they look for a trap.
  */
 export const ITEM_REWARD_KEEP_NOTE =
@@ -74,7 +71,7 @@ export const ITEM_REWARD_FREE_SLOT_NOTE = 'The slot is empty. Nothing is given u
 /** The inactive shell's line, shown for the frame it takes the router to unwind. */
 export const ITEM_REWARD_INACTIVE_NOTE = 'Nothing is waiting to change hands.';
 
-/** D6 — the trade, named. `{item}` is the piece pushed out. */
+/** The trade, named. `{item}` is the piece pushed out. */
 export function itemRewardTradeNote(displacedName: string): string {
     return `Wearing this takes off ${displacedName}, which returns to the satchel.`;
 }
@@ -116,9 +113,9 @@ export interface ItemRewardVM {
      * Feed straight to `<EquipDeltaPanel itemId delta />`.
      */
     delta: EquipDelta | null;
-    /** D6 — what EQUIP costs, named before the player commits. */
+    /** What EQUIP costs, named before the player commits. */
     trade: ItemRewardTradeVM | null;
-    /** D6 — EQUIP is HIDDEN, not greyed, when this is false. */
+    /** EQUIP is HIDDEN, not greyed, when this is false. */
     canEquip: boolean;
     confirmLabel: string;
     equipLabel: string;
@@ -226,7 +223,7 @@ function tradeOf(displaced: Equipment | null): ItemRewardTradeVM {
  *
  * Returns the inactive VM when nothing is pending, or when the pending item is
  * not equipment and therefore has no detail card to draw — the latter cannot
- * happen through D5's predicate, but a caller may force an item onto the queue
+ * happen through the normal grant path, but a caller may force an item onto the queue
  * with `includeInline`, and a blank screen is never the right answer.
  */
 export function selectItemRewardVM(
@@ -265,7 +262,7 @@ export function selectItemRewardVM(
 
     const player = state.player;
 
-    // D6 — the same preview the grant path itself uses, so the screen cannot
+    // The same preview the grant path itself uses, so the screen cannot
     // promise a trade the commit will not make.
     const preview = player
         ? displacedBy(

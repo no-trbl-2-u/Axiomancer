@@ -1,11 +1,8 @@
 /**
- * CombatTutorialPrimer — fresh-eyes shard S1-board, cluster C35.
- *
- * Panel 1 taught 'the Surge meter' among the things competing to wear VITAE
- * down, and the live board draws no such meter: the primer promised a readout
- * the player then hunted for and never found. The primer may name only things
- * the board actually displays. R8 (D65) also drops MOMENTUM and POISON: no
- * grey card feeds the chain, and nothing applies Poison since R4.
+ * CombatTutorialPrimer — the primer may name only things the board actually
+ * displays. The live board draws no Surge meter, so the primer never promises
+ * one. It names neither MOMENTUM nor POISON either: no grey card feeds the
+ * chain, and nothing applies Poison.
  */
 
 import React from 'react';

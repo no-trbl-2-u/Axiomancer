@@ -10,19 +10,13 @@
  * codex." The contrast lands only because the rest of the surface
  * stays in the gothic register.
  *
- * The carve-out's rationale is preserved in
- * `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-22/chats/chat4.md:111-112` ("a deliberate
- * aesthetic carve-out. … pixel art [is] rendered as a 16×16 `<rect>`
- * grid, with one shadow column on the bottom-right, a single white
- * highlight pixel near the top-left, and one sulfur sparkle off the
- * upper-right of the heart. Treating it as a diegetic motif from an
- * in-world 'old friend codex' lets the contrast land — it reads as
- * a *thing inside the world*, not a stylistic mistake — and it
- * earns its place by being the only place this register appears.").
+ * The sprite is a 16×16 `<rect>` grid, with one shadow column on the
+ * bottom-right, a single white highlight pixel near the top-left, and one
+ * sulfur sparkle off the upper-right of the heart. It reads as a *thing
+ * inside the world*, not a stylistic mistake, and earns its place by being
+ * the only place this register appears.
  *
- * Source-of-truth sprite: `PIXEL_HEART` from the handoff bundle's
- * `screens/aftermath-modal.jsx:386-403`. The grid is ported verbatim;
- * cell scaling (default 11px) yields a 176×176 sprite that matches
+ * Cell scaling (default 11px) yields a 176×176 sprite that matches
  * the design's framed-emblem proportions.
  */
 
@@ -41,9 +35,7 @@ import { makeStyles, usePalette } from '@/theme/runtime';
  *   p  hand parchment (AXM.parchment)
  *   *  sulfur sparkle (AXM.sulfur)
  *
- * Verbatim from the design handoff bundle. Do not edit individual
- * characters without re-rendering against the source artboard —
- * the silhouette is hand-tuned and the shadow / highlight pattern
+ * Do not edit individual characters casually — the silhouette is hand-tuned and the shadow / highlight pattern
  * carries the "in-world codex sprite" reading.
  */
 export const PIXEL_HEART: readonly string[] = [

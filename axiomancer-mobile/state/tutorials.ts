@@ -3,7 +3,7 @@
  *
  * Each coach (combat primer, hazard crossing, forge, night watch) marks
  * itself done with a flag on `GameState.flags`, so "done" is PER SAVE. The
- * SETTINGS screen adds a device-wide switch on top (owner call 2026-09-23):
+ * SETTINGS screen adds a device-wide switch on top:
  * with TUTORIAL HINTS off, every coach reads as done regardless of flags,
  * and RESET TUTORIALS strips the flags from the current run so the coaches
  * run again.

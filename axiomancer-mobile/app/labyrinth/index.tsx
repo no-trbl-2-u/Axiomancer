@@ -1,6 +1,6 @@
 /**
  * THE APORIA — labyrinth screen (W-01 / DESIGN.md section 7). Entered
- * through the Lantern Deep's vault door (map revamp M4, D24) or the dev
+ * through the Lantern Deep's vault door or the dev
  * menu; `<LabyrinthGate>` routes here. Act select → room scene →
  * accordion; gates, fog map, finale.
  *
@@ -43,7 +43,7 @@ import type { Enemy } from '@mechanics';
  * Inputs: none (reads the game store via selectors and the combat-mode
  * hook). Output: the screen element. Its bare pressables (the act cards,
  * LEAVE and the MAP toggle) carry `accessibilityRole` + presenter-owned
- * labels, resolving cluster S7-hazard-C20.
+ * labels.
  */
 export default function LabyrinthScreen() {
     const styles = useStyles();
@@ -152,7 +152,7 @@ export default function LabyrinthScreen() {
         setActiveEnemy(enemy);
         enterCombat();
     };
-    // Retreat is the combat reveal's WITHDRAW now (exploration-screen parity):
+    // Retreat is the combat reveal's WITHDRAW (exploration-screen parity):
     // it fires after the encounter was entered, so the cost is paid through
     // `fleeEncounter`, not the (already-cleared) event choice.
     const onEncounterFlee = () => {

@@ -1,11 +1,9 @@
 /**
- * The DECK screen presenter (owner finding 7, ratified decision D2).
+ * The DECK screen presenter.
  *
- * The player had no player-facing view of the combat deck they carry. The
- * only combat-deck surface in the app was `components/DebugCombatDeck.tsx`,
- * a dev tool that swaps presets — useful for testing, useless as an answer to
- * "what is in my deck?". This presenter is the answer: it maps the run's real
- * deck onto a render-ready view-model for `app/(tabs)/deck/index.tsx`.
+ * Maps the run's real combat deck onto a render-ready view-model for
+ * `app/(tabs)/deck/index.tsx`. (`components/DebugCombatDeck.tsx` is a dev
+ * tool that swaps presets, not a player-facing view.)
  *
  * ## Prior art it deliberately copies
  *
@@ -17,11 +15,8 @@
  *
  * ## Where every word on the screen comes from
  *
- * Nothing here derives card text. Finding 4 — "card details sometimes don't
- * match the actual card" — is a correctness bug caused by text being
- * hand-assembled beside the data instead of generated from it, and a second
- * deck-shaped copy of that assembly would be the same bug again in a new
- * place. So:
+ * Nothing here derives card text: text hand-assembled beside the data instead
+ * of generated from it drifts from the actual card. So:
  *
  * - the DECK LIST is `buildCombatDeck(player, flags)`, the engine function the
  *   fight itself deals from — loadout-aware, copies preserved;
@@ -30,13 +25,12 @@
  * - the ◇ NO DIE / ◆ +DIE shorthand and the KEYWORD ledger come from
  *   `detailStats` in `combat-encounter.engine.ts` — the SAME presenter call
  *   the combat detail overlay makes, so the two panels cannot disagree. That
- *   call now bottoms out in `axiomancer-mechanics/src/Combat/combat.card-text.ts`
- *   (`paidClauses`), the engine-side clause list that fixed finding 4, so this
- *   screen inherits the fix rather than re-deriving anything;
- * - RARITY comes from `card-rarity.engine.ts` (D4), never re-banded here;
- * - FLAVOR is `Card.description`, read straight off the authored row. Per
- *   finding 6 flavor leaves the combat overlay and lands here: out of a
- *   fight, prose is the point rather than the noise.
+ *   call bottoms out in `axiomancer-mechanics/src/Combat/combat.card-text.ts`
+ *   (`paidClauses`), the engine-side clause list;
+ * - RARITY comes from `card-rarity.engine.ts`, never re-banded here;
+ * - FLAVOR is `Card.description`, read straight off the authored row. Flavor
+ *   shows here rather than in the combat overlay: out of a fight, prose is
+ *   the point rather than the noise.
  *
  * Pure: no store writes, no rule decisions, no text generation.
  */
@@ -68,7 +62,7 @@ import type { AppStoreState } from '@/state/store';
 // VM shapes
 // ---------------------------------------------------------------------------
 
-/** The rarity signal, all three legs of D4 at once (label + pips + colour). */
+/** The rarity signal, all three legs at once (label + pips + colour). */
 export interface DeckRarityVM {
     band: CardRarity;
     /** 'Common' | 'Uncommon' | 'Rare'. */
@@ -99,7 +93,7 @@ export interface DeckCardVM {
     metaChip: string;
     /** One plain sentence: what playing this card does. */
     outcomeLine: string;
-    /** The ◇ NO DIE value (D3 keeps the shorthand; only its source changed). */
+    /** The ◇ NO DIE value. */
     freeText: string;
     /** The ◆ +DIE value, or null when the free line already says all of it. */
     paidText: string | null;
@@ -181,8 +175,7 @@ const STANCE_LABEL: Readonly<Record<string, string>> = Object.freeze({
 });
 
 /**
- * D5-of-the-deck-screen, decided here and worth stating plainly: this screen
- * always shows the FULL RUN DECK, never the draw pile of a fight in progress.
+ * This screen always shows the FULL RUN DECK, never the draw pile of a fight in progress.
  *
  * Two reasons, one of them decisive. The soft one: the deck a player reasons
  * about between fights is the durable object — a draw-pile view answers a
@@ -190,17 +183,15 @@ const STANCE_LABEL: Readonly<Record<string, string>> = Object.freeze({
  * a tab. The decisive one: the tab bar is hard-locked while the encounter
  * modal is open (`app/(tabs)/_layout.tsx`, `lockOtherTabs`), so during a fight
  * this tab is unreachable by construction and a draw-pile mode here would be
- * dead code. The alternative — a live draw-pile / discard readout — belongs on
- * the combat board where the player can act on it, and is filed as a follow-up.
+ * dead code. A live draw-pile / discard readout belongs on the combat board
+ * where the player can act on it.
  */
 export const DECK_SOURCE_NOTE = 'The whole deck you carry — the cards the next fight deals from.';
 
 /**
- * The kept shorthand for the two play lines (D3: the notation stays, only its
- * SOURCE changes). Constants rather than string literals in the component so
- * the deck detail and the combat detail can be pinned to one spelling — and
- * so that when the combat panel's copy of these glyphs moves into a shared
- * card-text projection, there is exactly one place here to re-point.
+ * The shorthand for the two play lines. Constants rather than string literals
+ * in the component so the deck detail and the combat detail can be pinned to
+ * one spelling.
  */
 export const FREE_LINE_LABEL = '◇ NO DIE';
 export const PAID_LINE_LABEL = '◆ +DIE';
@@ -254,7 +245,7 @@ function tallyInc<K extends string>(map: Map<K, number>, key: K, by = 1): void {
 /**
  * Build one card's VM from the engine projection plus the SHARED combat
  * detail presenter. Returns null for an id the card library does not know
- * (a save from a retired card set), so an unknown id drops out of the list
+ * (e.g. a save holding a card the library lacks), so an unknown id drops out of the list
  * instead of rendering a blank row.
  */
 function deckCardVM(cardId: string, count: number): DeckCardVM | null {

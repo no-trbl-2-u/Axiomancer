@@ -1,6 +1,5 @@
 /**
- * Helper for driving store actions and flushing React updates in integration tests
- * (Phase 121).
+ * Helper for driving store actions and flushing React updates in integration tests.
  *
  * Integration tests need to dispatch actions to the store and ensure
  * all React updates have propagated before asserting state. This helper

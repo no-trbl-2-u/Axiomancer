@@ -19,7 +19,7 @@
  *
  * BREADCRUMBS COME FROM THE LOGGER WE ALREADY HAVE. `attachCrashBreadcrumbs`
  * registers a third sink on `state/logging.ts`'s existing fan-out (console
- * mirror, crash tail, now Sentry), so every structured log line the engine
+ * mirror, crash tail, Sentry), so every structured log line the engine
  * and the app already emit rides along with the crash automatically. No
  * parallel breadcrumb API, no new call sites — the trail is whatever the
  * session logged.

@@ -96,7 +96,7 @@ export function travelToMap(store: AppStore, continent: ContinentName, map: MapN
  * Put the cursor on `nodeId` without firing its event. Dev bypass: the
  * engine's `moveToNode` forbids back-travel and only allows adjacent
  * moves; testers need neither rule. Delegates to the engine's
- * `placeOnNode` (shared with state fixtures, 2026-09-07), which marks the
+ * `placeOnNode` (shared with state fixtures), which marks the
  * node discovered + available and unlocks its neighbours so the walk can
  * continue. Returns `false` on an unknown node.
  */

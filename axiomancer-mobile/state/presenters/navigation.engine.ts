@@ -40,9 +40,9 @@ export interface NavigationViewModel {
  * A chronicle saved mid-fight (`selectIsInCombat`) also lands on the map:
  * the live fight's dice, hand and HP lived in the panel's local state and
  * did not survive the restart, so the exploration screen re-opens that
- * saved foe as a fresh fight (`selectResumableFight`). This used to return
- * `'combat-encounter'` — the dev sandbox route (mock foe, nothing
- * persisted) — which silently dropped the player out of their run.
+ * saved foe as a fresh fight (`selectResumableFight`). It must not return
+ * `'combat-encounter'`: that is the dev sandbox route (mock foe, nothing
+ * persisted).
  *
  * Events fire as a full-screen modal (see `app/event/index.tsx` +
  * `selectHasActiveEvent`), not a tab, so they do not participate in
@@ -86,7 +86,7 @@ const EMPTY_BADGES: Record<TabRoute, TabBadge | null> = Object.freeze({
     character: null,
     memoir: null,
     inventory: null,
-    // DECK (2026-09-21) carries no badge. A badge is a call to ACT, and the
+    // DECK carries no badge. A badge is a call to ACT, and the
     // deck screen is a reference surface — nothing on it is pending. The
     // obvious candidate ("you drafted a new card") already announces itself
     // in the rewards overlay the player just dismissed; repeating it here
@@ -101,19 +101,19 @@ const LEVELUP_BADGE: TabBadge = Object.freeze({ text: '↑', kind: 'levelup' });
  * Tab badges for actionable states. Both badges park on the
  * `character` tab — the level-up badge logically belongs there (stat
  * upgrades live on the character screen), and the event badge sits
- * alongside until a navigation-pass phase splits them.
+ * alongside.
  *
  * When both predicates fire simultaneously, level-up wins — it's the
  * higher-agency action (stat-allocation prompt) versus a narrative
  * hint.
  *
- * Phase 29 Tick A: the levelup badge also requires
+ * The levelup badge also requires
  * `notifications.levelUpAcknowledged === false` — i.e. a fresh
  * `character:levelup` engine event must have fired since the player
  * last visited the character screen. Avoids nagging after the player
  * has already seen the badge once.
  *
- * Phase 46c: the `memoir` tab gets its own badge, independent of the
+ * The `memoir` tab gets its own badge, independent of the
  * character-tab pair above — a quest can be pending with no active
  * event and no level-up ready. Gates on
  * `notifications.questAcknowledged === false`, set by the engine
@@ -169,11 +169,9 @@ export function selectNavigationViewModel(state: AppStoreState): NavigationViewM
  * event slice alone, and anything that assumes otherwise will fire into
  * another gate's flow.
  *
- * Added 2026-08-08 after exactly that: the exploration screen's arrival-
- * cutscene beat checked only `selectHasActiveEvent`, so the dev treasure
- * trigger — which navigates to the map and then opens the CACHE slice —
- * arrived to find an "empty" event slice, and the cutscene stole its route to
- * /cache. Composed from the gates' own selectors rather than re-reading the
+ * For example, a dev treasure trigger navigates to the map and then opens the
+ * CACHE slice; a check of `selectHasActiveEvent` alone would see an "empty"
+ * event slice and let an arrival cutscene steal the route. Composed from the gates' own selectors rather than re-reading the
  * slices, so a new gate is one import here and cannot be forgotten twice.
  */
 export function selectHasAnyActiveSession(state: AppStoreState): boolean {

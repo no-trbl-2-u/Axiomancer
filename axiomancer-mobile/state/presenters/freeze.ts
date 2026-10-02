@@ -1,7 +1,7 @@
 /**
  * View-model deep-freeze helper.
  *
- * Per Spec 03 Q3: every presenter return value is deep-frozen in dev
+ * Every presenter return value is deep-frozen in dev
  * so screens cannot accidentally mutate the VM. In production builds
  * we skip the recursion to keep the per-render cost at zero.
  *

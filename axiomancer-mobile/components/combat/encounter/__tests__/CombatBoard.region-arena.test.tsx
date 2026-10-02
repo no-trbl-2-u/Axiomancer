@@ -1,13 +1,12 @@
 /**
- * Phase 83 — the `region` prop threads from `CombatBoard` down to
- * `CombatCombatantPane`'s arena backdrop. Fixture pattern lifted from
+ * The `region` prop threads from `CombatBoard` down to
+ * `CombatCombatantPane`'s arena backdrop. Fixture pattern as in
  * `CombatBoard.S1-board.test.tsx`: a real engine-initialized `CombatViewModel`
  * mounted through `withAllProviders`.
  *
- * D32 (T, 2026-09-26): combat shows a plain black scene "for now". While
- * `ARENA_PLATES_SHOWN` is off, the first block pins that every region gets the
- * same black backdrop; the phase-83 threading block runs again the moment the
- * switch comes back on. The plates themselves stay pinned at the unit level in
+ * Combat shows a plain black scene while `ARENA_PLATES_SHOWN` is off: the
+ * first block pins that every region gets the same black backdrop; the
+ * region-threading block runs instead when the switch is on. The plates themselves stay pinned at the unit level in
  * `assets/images/combat/__tests__/index.test.ts`.
  */
 
@@ -75,18 +74,11 @@ function renderBoard(region: string | undefined) {
     });
 
     /**
-     * RE-DERIVED — phase 103. This case used to feed 'The Caverns', which was a
-     * live region with no rule of its own. Phase 103 gave it one (and the
-     * Capital too), so the Caverns no longer demonstrates the fallback and the
-     * case feeds an invented region instead.
-     *
-     * It said "every LIVE region is now keyed and the fallback is reachable
-     * only by a string the game never produces". That was false when written:
-     * the Northern Forest has no plate and reaches the fallback in play
-     * (burn-day audit 3.11). Which live regions still fall back is a unit-level
+     * Feeds an invented region, so the case does not depend on which live
+     * regions have a plate. Which live regions fall back is a unit-level
      * property, asserted over the map registry in
      * `assets/images/combat/__tests__/index.test.ts`; this file pins only that
-     * the `region` prop threads down to the pane, so it stays as written.
+     * the `region` prop threads down to the pane.
      */
     it('an unmapped region keeps the exact fallback plate and label the dev sandbox gets', () => {
         const withUnmapped = renderBoard('The Kingdom of Nowhere');

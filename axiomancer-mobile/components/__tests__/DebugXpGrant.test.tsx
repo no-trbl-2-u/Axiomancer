@@ -1,5 +1,5 @@
 /**
- * Hermetic component tests — DebugXpGrant (Phase 61b).
+ * Hermetic component tests — DebugXpGrant.
  *
  * Pins:
  *   - DEV gate (true / simulated-false)

@@ -1,7 +1,7 @@
 /**
  * Mobile-local slug -> illustration mapping for the event modal.
  *
- * Spec 08 Q3 = B: mobile owns the slug-to-asset map. The engine
+ * Mobile owns the slug-to-asset map. The engine
  * returns a `ResolvedEvent` with a discriminant (8 kinds + 'none');
  * the screen renders an SVG illustration component keyed on a stable
  * slug. If the engine later adds an `art: string` field on
@@ -15,19 +15,13 @@
 
 import type { ResolvedEvent } from '@mechanics';
 
-// Phase 137 cleanup: rest / gathering / loot-cache / hazard slugs were
-// removed — those kinds never reach the event modal anymore (their
-// resolve interceptors start minigame sessions instead, except
-// gathering, which grants its items inline since Phase 76), so only
-// the kinds the modal can actually render keep an art slug.
-//
-// 2026-09-21 (owner finding 2): `gathering` reaches the modal again as an
-// acknowledgement card (`event.engine.ts::composeGathering`), but it
-// deliberately keeps borrowing `'interaction-generic'` rather than
-// reclaiming a bespoke slug. A new `EventArtSlug` member is an exhaustive
-// `Record` in `components/event/PlaceholderIllustration.tsx` plus its test
-// plus a drawing; that is an art errand, not this fix. Filed as a
-// follow-up — the card reads correctly meanwhile.
+// Only the kinds the modal renders with their own art keep a slug. Rest,
+// loot-cache and hazard never reach the event modal (their interceptors
+// start minigame sessions). `gathering` reaches it as an acknowledgement
+// card (`event.engine.ts::composeGathering`) and borrows
+// `'interaction-generic'`; a new `EventArtSlug` member needs an entry in the
+// exhaustive `Record` in `components/event/PlaceholderIllustration.tsx`, its
+// test, and a drawing.
 export const EVENT_ART_SLUGS = [
     'encounter',
     'boss',
@@ -54,26 +48,20 @@ export function selectEventArtSlug(event: ResolvedEvent): EventArtSlug {
             return 'village';
         case 'cutscene':
             return 'cutscene';
-        // 2026-09-21 — `gathering` DOES reach the modal now (owner finding
-        // 2); it borrows the generic figure until it earns a drawing of its
-        // own. Every other kind below still never reaches the modal — their
-        // interceptors start minigame sessions instead — and keeps the
-        // generic fallback defensively.
+        // `gathering` reaches the modal and borrows the generic figure. Every
+        // other kind below never reaches the modal (their interceptors start
+        // minigame sessions or resolve elsewhere) and keeps the generic
+        // fallback defensively.
         case 'gathering':
         case 'rest':
         case 'loot-cache':
         case 'hazard':
         case 'narration':
-        // Spec 33 §6 / Phase D5 — 'blacksmith' is a dead-end kind here: its
-        // interceptor starts "The Anvil" die-gear session (D6 owns that
-        // screen). Never reaches the event modal; generic fallback kept
-        // defensively, mirroring the other minigame kinds.
+        // 'blacksmith': its interceptor starts "The Anvil" die-gear session.
         case 'blacksmith':
-        // 2026-08-28 — 'travel' resolves engine-side (the world has already
-        // crossed); the travel-UI wave owns its presentation.
+        // 'travel' resolves engine-side (the world has already crossed).
         case 'travel':
-        // Map revamp M4 — the Labyrinth door enters the Aporia straight
-        // from its interceptor; it never reaches the modal.
+        // The Labyrinth door enters the Aporia straight from its interceptor.
         case 'labyrinth':
         case 'none':
             return 'interaction-generic';
@@ -95,14 +83,12 @@ const DEFAULT_BODY_BY_KIND: Record<ResolvedEvent['kind'], string> = {
     hazard: 'The air turns.',
     'loot-cache': 'Forgotten goods.',
     narration: 'A voice speaks, unbidden.',
-    // Spec 33 §6 / Phase D5 — 'blacksmith' launches "The Anvil" die-gear
-    // session via its interceptor (D6 owns the screen); never renders in the
-    // modal, but the exhaustive record needs the entry.
+    // 'blacksmith' launches "The Anvil" die-gear session via its interceptor;
+    // never renders in the modal, but the exhaustive record needs the entry.
     blacksmith: 'An anvil, and a waiting hammer.',
-    // 2026-08-28 — travel doors resolve engine-side; the travel-UI wave
-    // owns the real presentation. Exhaustive record needs the entry.
+    // Travel doors resolve engine-side. Exhaustive record needs the entry.
     travel: 'The road goes on. So do you.',
-    // Map revamp M4 — the Labyrinth door never renders in the modal (its
+    // The Labyrinth door never renders in the modal (its
     // interceptor enters the Aporia); the exhaustive record needs the entry.
     labyrinth: 'A door that was not open before.',
     none: '',

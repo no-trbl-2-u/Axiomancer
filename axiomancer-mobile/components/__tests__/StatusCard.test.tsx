@@ -3,10 +3,7 @@
  *
  * StatusCard is the SELF-tab summary header: name + level
  * badge + HP bar. Wired to engine `state.player` via
- * `useGameState` post-2026-05-22 (live-drive playtest found
- * the prop-less render on the exploration screen was
- * displaying hardcoded placeholder values; the [5.5] AUDIT
- * row drove the engine-state wiring).
+ * `useGameState`.
  *
  * Tests cover three regimes:
  * - **store-driven defaults** — no props passed; values read
@@ -15,7 +12,7 @@
  *   read (useful for test fixtures + the rare case a caller
  *   wants to display synthetic state).
  * - **structural landmarks** — HP bar present; NO MP/MANA
- *   bar (Phase-62 bug-sweep dropped mana out of combat).
+ *   bar (mana is combat-only).
  */
 
 import { describe, expect, it } from '@jest/globals';

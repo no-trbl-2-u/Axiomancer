@@ -1,11 +1,11 @@
 /**
- * The post-combat card draft, store side (audit findings 4a + 4b).
+ * The post-combat card draft, store side.
  *
- * Two bugs this pins shut:
- *   4a — the pick was appended to the character but NEVER SAVED, so it lived
- *        only until some unrelated `save()` happened to run.
- *   4b — the offer lived in `CombatEncounterPanel`'s own React state, so a
- *        remount mid-draft silently threw away an already-earned reward.
+ * Two guarantees this pins:
+ *   4a — the claimed pick is SAVED at once, not left until some unrelated
+ *        `save()` happens to run.
+ *   4b — the offer lives in the store, not in `CombatEncounterPanel`'s own
+ *        React state, so a remount mid-draft keeps an already-earned reward.
  *
  * Plus the draft's own contract: rolled once (never rerolled under the
  * player), claimed exactly once, cleared for the next encounter.

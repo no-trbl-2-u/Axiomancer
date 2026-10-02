@@ -1,33 +1,25 @@
 /**
- * Spec 26b §1 + combat-screen-polish 2026-07 (recut 2026-07-19, owner
- * directive) — a stance die, PHYSICAL-CUBE treatment.
+ * A stance die, PHYSICAL-CUBE treatment.
  *
- * The flat gem slab read as a chip, not a die (owner report 2026-07-19: "the
- * dice are flat") — this recut renders the same faux-isometric SVG cube as the
- * hazard minigame's `HazardDie` (lit top face, mid front face carrying the
+ * Renders the same faux-isometric SVG cube as the hazard minigame's `HazardDie` (lit top face, mid front face carrying the
  * face art, shadow right face, a cast shadow beneath), so combat and hazard
  * dice are visibly the same physical object.
  *
- * Phase 89 (art-direction coherence) — the shell (top/right) faces carried a
- * flat CG gradient with no ink linework, next to painted enemy portraits
- * (Phase 88) and the codex's woodcut/hairline-rule language (Phase V). A
- * faint cross-hatch on the shell faces plus an inner hairline (echoing the
- * card plate's own hairline rule) nudges the die toward that ink register
- * without touching geometry, colour semantics, or interaction — the stance
- * colour and the dead/greyed/cracked states are all unchanged.
+ * A faint cross-hatch on the shell (top/right) faces plus an inner hairline
+ * (echoing the card plate's own hairline rule) puts the die in the same ink
+ * register as the painted enemy portraits and the codex's woodcut language,
+ * without touching geometry, colour semantics, or interaction.
  *
- * Renders the spec-33 four-die tray (the shipped combat model): every usable
+ * Renders the four-die tray: every usable
  * face may power a card of its color this round. Unrolled dice (Reserve,
  * GHOST, forged) carry no face and power by colour alone.
  *
- * The face language (owner directive 2026-07-18) is unchanged and lives on the
- * FRONT face. The die's COLOUR carries the stance — no printed stance label,
+ * The face language lives on the FRONT face. The die's COLOUR carries the stance — no printed stance label,
  * no per-stance glyph. Every face is a circle:
  *   · hit (mana)  → a circle holding a small crystal — this face powers a card;
  *   · special     → a circle holding a SPARKLING crystal (the +◆ payload face);
- *   · miss        → a GREYED-OUT empty circle — dead, powers nothing (owner
- *                   directive, second pass same day: grey, not stance-coloured,
- *                   so "red missed" reads at a glance);
+ *   · miss        → a GREYED-OUT empty circle — dead, powers nothing (grey,
+ *                   not stance-coloured, so "red missed" reads at a glance);
  *   · cracked     → the greyed circle struck through (an OVERHEAT crack, dead
  *                   this round); an X die reads the same dead way.
  * Colour is never the only a11y channel — the accessibility label still names
@@ -44,10 +36,8 @@ import { spentDieTreatment } from '@/lib/juice';
 import { HUE } from '@/theme/axm';
 
 /**
- * The die's spoken state (playtest 2026-09-04: the label still announced the
- * retired 2-die draft — "available to draft"). Spec 33, the shipped model:
- * four dice, each showing a FACE — SPECIAL powers a card of its colour AND
- * grants Conviction (the gear payload, 2 by default); MANA powers one paid
+ * The die's spoken state. Four dice, each showing a FACE — a special face
+ * powers a card of its colour AND grants Conviction (the gear payload, 2 by default); MANA powers one paid
  * line of its colour (the gold WILD die powers any colour); MISS is dead.
  * The label names the colour, the face, and what the die can do right now,
  * with a spent / assigned state — colour is never the only a11y channel.
@@ -141,7 +131,7 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
     /** Board-local state the VM cannot know: this die has been dropped on a
      *  staged card and waits for APPLY. Spoken in the a11y label. */
     assigned?: boolean;
-    /** The die's gear payload for its SPECIAL face (`vm.dieGear`); the stock
+    /** The die's gear payload for its special face (`vm.dieGear`); the stock
      *  default when the caller has no gear rail. */
     specialConviction?: number;
     /** Overrides the default `combat-die-<id>`. The drag ghost renders a CLONE
@@ -155,11 +145,11 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
     const special = die.face === 'special';
     const cracked = die.cracked === true;
     // A "dead" face powers nothing — the X die OR a miss/cracked face.
-    // EVERY dead face greys out (owner directive 2026-07-18): a miss must read
+    // EVERY dead face greys out: a miss must read
     // as an undraggable dead die at a glance, so it drops its stance colour
     // like a crack/X does — only the rim hue tells a crack from a plain miss.
     const dead = die.isX || die.face === 'miss' || cracked;
-    // Owner jot (2026-07-20, routed to Phase 38): a used die reads as spent —
+    // A used die reads as spent —
     // greyed out, desaturated. A static state change (lib/juice `spentDie`),
     // not an animated primitive.
     const spentTreatment = spentDieTreatment({ spent: die.spent === true, dead });
@@ -178,8 +168,8 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
     const gradId = `axmDieGlow-${die.color}`;
     const bodyId = `axmDieBody-${die.color}-${greyed ? 'grey' : 'live'}`;
     const gemId = `axmDieGem-${die.color}`;
-    // The a11y state must not lie — see `combatDieA11yLabel` (spec 33 wording:
-    // colour, face, what the die can do, spent / assigned).
+    // The a11y state must not lie — see `combatDieA11yLabel` (colour, face,
+    // what the die can do, spent / assigned).
     const a11yLabel = combatDieA11yLabel(die, { assigned, specialConviction });
     return (
         <View

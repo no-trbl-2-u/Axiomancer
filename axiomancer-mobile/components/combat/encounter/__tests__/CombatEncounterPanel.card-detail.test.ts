@@ -1,24 +1,23 @@
 /**
- * The combat card-detail overlay's SHAPE — owner findings 3, 5 and 6 (W3,
- * 2026-09-21).
+ * The combat card-detail overlay's SHAPE.
  *
- * Finding 4 (the detail disagreeing with the card) is proved data-side by
+ * That the detail agrees with the card is proved data-side by
  * `state/presenters/__tests__/card-detail-agreement.test.ts`. What is left is
  * structural, and structure is what this file pins:
  *
- * - **finding 6** — flavor prose is GONE from the combat overlay. The testID
- *   must not exist here. It is not deleted from the data: `CombatCardVM.flavor`
- *   still carries `card.description`, and the DECK screen renders it.
- * - **finding 5** — the keyword definitions render ABOVE the card face.
- * - **finding 3** — the prose rows under the fork (the ▲/—/▼ legend and the
- *   colour-match hint) no longer render as rows. They survive as VM fields for the out-of-combat DECK
+ * - Flavor prose does not render in the combat overlay; the testID must not
+ *   exist here. The data keeps it: `CombatCardVM.flavor` carries
+ *   `card.description`, and the DECK screen renders it.
+ * - The keyword definitions render ABOVE the card face.
+ * - The prose rows under the fork (the ▲/—/▼ legend and the colour-match
+ *   hint) do not render as rows. They are VM fields for the out-of-combat DECK
  *   screen; the combat overlay folds their content into the row each one
  *   qualifies.
- * - **D4** — the rarity band renders, from the wave-0 module.
+ * - The rarity band renders: pips, frame colour, and a named label.
  *
  * Reading the source is deliberate. Every claim above is about what the
  * overlay's JSX contains and in what order — mounting the whole encounter
- * panel to re-discover that would test the fixture, not the change.
+ * panel to re-discover that would test the fixture, not the overlay.
  */
 
 import { describe, expect, it } from '@jest/globals';
@@ -66,7 +65,7 @@ describe('combat card detail — overlay shape', () => {
         for (const field of ['detail.readLegend', 'detail.colorMatchHint']) {
             expect(overlay).not.toContain(`detailCard.${field}`);
         }
-        // The facts themselves did not go away — they ride the rows they qualify.
+        // The facts themselves still show — they ride the rows they qualify.
         expect(overlay).toContain('detailCard.detail.freeTag');
         expect(overlay).toContain('detailCard.detail.paidTag');
     });

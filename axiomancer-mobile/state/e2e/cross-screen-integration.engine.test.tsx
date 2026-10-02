@@ -1,5 +1,5 @@
 /**
- * Cross-screen integration harness (Phase 10).
+ * Cross-screen integration harness.
  *
  * `smoke-render.engine.test.tsx` mounts each primary surface one at a
  * time; `EncounterModalOverlay.test.tsx` pins the encounter-modal
@@ -164,15 +164,15 @@ describe('integration: exploration + tab-bar lock survive the encounter-modal li
     it('regression pin: engaging clears the event slice, but the modal AND the tab lock both survive into combat', () => {
         const store = makeStore();
         seedActiveEvent(store, ENCOUNTER_EVENT);
-        // 2026-08-10: the modal auto-engages on mount (the ENGAGE/FLEE prelude
-        // is retired), so the transition this pins now fires without a press.
+        // The modal auto-engages on mount, so the transition this pins fires
+        // without a press.
         const tree = mountBothScreens(store);
 
-        // The moment the historical bug fired: `beginHazardEncounter`
-        // clears the event slice the instant the encounter is entered, so
-        // `hasEvent`/`preludeReady` both flip false. Pre-fix, that
-        // flip alone unmounted the modal; a same-shaped drift on the
-        // tab-bar gate would re-show the tab bar mid-encounter. Both
+        // `beginHazardEncounter` clears the event slice the instant the
+        // encounter is entered, so `hasEvent`/`preludeReady` both flip
+        // false. If that flip alone drove the modal it would unmount; a
+        // same-shaped drift on the tab-bar gate would re-show the tab bar
+        // mid-encounter. Both
         // must stay locked together, driven by `inEncounterModal` +
         // `inCombat` — not by the (now-false) `hasEvent`.
         expect(store.getState().event.pending).toBeNull();
@@ -187,7 +187,7 @@ describe('integration: exploration + tab-bar lock survive the encounter-modal li
         seedActiveEvent(store, ENCOUNTER_EVENT);
         const tree = mountBothScreens(store);
 
-        // Retreat lives on the combat reveal now — the old prelude FLEE.
+        // Retreat lives on the combat reveal.
         fireEvent.press(tree.getByTestId('combat-withdraw'));
 
         expect(tree.queryByTestId('encounter-modal-overlay')).toBeNull();

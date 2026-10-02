@@ -1,15 +1,13 @@
 /**
  * Typed action layer for the engine store.
  *
- * Per Spec 04 the combat screen never dispatches engine reducers
- * directly — it calls these actions. Each one wraps a small bit of
+ * The combat screen never dispatches engine reducers directly — it
+ * calls these actions. Each one wraps a small bit of
  * engine state and writes the result back through the store.
  *
  * In-combat resource accounting is fully engine-owned by the
  * Hazard-Pattern combat driver (`CombatEncounterState.resonance`,
- * `dice`/`reserve`) — mobile keeps no parallel mana bookkeeping. The
- * legacy mobile-only `combatMana` slice (Phase 60d) was retired when
- * legacy turn-based combat was removed (mechanics 0.37.0).
+ * `dice`/`reserve`) — mobile keeps no parallel mana bookkeeping.
  */
 
 import {
@@ -154,7 +152,7 @@ import { getMapLayout } from './exploration-maps';
 // ---------------------------------------------------------------------------
 
 /**
- * Phase 78 — `CombatEndReport` is not re-exported from the engine
+ * `CombatEndReport` is not re-exported from the engine
  * package root (only via `axiomancer-mechanics/Game`, which the
  * package `exports` field doesn't expose). Derive the type from
  * the GameStore.endCombat signature so the alias tracks engine
@@ -171,7 +169,7 @@ export interface MoveToResult {
     locked: boolean;
 }
 
-/** Phase 54 — debug seed action summary. */
+/** Debug seed action summary. */
 export interface DebugSeedResult {
     /** Count of items pushed to the player's inventory across categories. */
     itemsAdded: number;
@@ -182,11 +180,9 @@ export interface DebugSeedResult {
 }
 
 /**
- * Dev-only "populate every item" affordance (user-direct request
- * 2026-05-22, mid-`/march` interjection). Adds one of every item
+ * Dev-only "populate every item" affordance. Adds one of every item
  * known to the engine's central registries to the player's
- * inventory: equipment templates, unique-item templates,
- * consumables. Useful for surface-testing inventory rendering,
+ * inventory: signet relics and consumables. Useful for surface-testing inventory rendering,
  * equip dock peer ordering, and per-rarity / per-slot chrome under
  * a maximal load. Mirrors `DebugSeedResult`'s shape so callers can
  * toast a uniform summary.
@@ -202,7 +198,7 @@ export interface PopulateAllItemsResult {
     };
 }
 
-/** Phase 59 — character-preset adoption result. */
+/** Character-preset adoption result. */
 export interface ApplyCharacterPresetResult {
     /** True when the preset id matched an engine preset and `player` was replaced. */
     applied: boolean;
@@ -215,30 +211,24 @@ export interface ApplyCharacterPresetResult {
 export interface AppActions {
     startCombat: (enemy: Enemy) => void;
     /**
-     * Phase 200 — begin a LIVE map encounter on the new hazard-pattern
-     * combat (Spec 26b) instead of legacy `startCombat`. Pulls the foe out
-     * of the pending combat-prelude event, guarantees starter cards (the
-     * real-deck safe fallback), clears the event slice, and returns the
-     * `Enemy` for the in-place `<CombatEncounterPanel>` to initialise from.
-     * Deliberately does NOT touch the engine `combat` slice — the new
-     * engine state lives in the panel's local React state. Returns `null`
-     * when there's no pending encounter.
+     * Begin a LIVE map encounter on the hazard-pattern combat. Pulls the
+     * foe out of the pending combat-prelude event, guarantees starter cards
+     * (the real-deck safe fallback), clears the event slice, stages the
+     * engine encounter via `startCombat` (HP-scaled foe) so the exit-time
+     * `endCombat` has an encounter to resolve, and returns that `Enemy` for
+     * the in-place `<CombatEncounterPanel>` to initialise from. The fight
+     * itself lives in the panel's local React state. Returns `null` when
+     * there's no pending encounter.
      */
     beginHazardEncounter: () => Enemy | null;
     /**
-     * Phase 78 — returns the engine `CombatEndReport` (was `void`).
-     * Callers that need post-combat metadata (codex unlock, narrative)
-     * read it off the return value; legacy callers
-     * that ignore the return value remain compatible.
-     */
-    /**
-     * Legacy engine `endCombat` bridge (Phase 78). The live hazard
-     * encounter applies its own spoils; this store-level action forwards
-     * an outcome to the engine's `endCombat` method (which now requires
-     * an explicit outcome) and surfaces the resulting `CombatEndReport`
-     * (XP, loot, friendship codex unlock). Defaults to `'flee'` (no
-     * reward) when called with no argument. Returns `null` outside an
-     * encounter.
+     * Engine `endCombat` bridge. The live hazard encounter applies its
+     * own spoils; this store-level action forwards an outcome to the
+     * engine's `endCombat` method (which requires an explicit outcome)
+     * and surfaces the resulting `CombatEndReport`
+     * (XP, loot, friendship codex unlock) for callers that need post-combat
+     * metadata. Defaults to `'flee'` (no reward) when called with no
+     * argument.
      */
     endCombat: (outcome?: CombatEndReport['outcome']) => CombatEndReport | null;
     addItem: (item: Item) => void;
@@ -246,41 +236,41 @@ export interface AppActions {
     useConsumable: (itemId: string) => void;
     /**
      * Apply a consumable's effect to the player and decrement the stack
-     * (Spec 06 Q2=A). Heals parsed from the consumable's `effect` string
-     * (e.g. `"Heal 6 HP"` / `"Restore 4 HP"` / `"+10 HP"`). No-op when
-     * the item isn't a consumable or doesn't exist.
+     * through the engine. A consumable without a structured `healAmount`
+     * heals by parsing its `effectId` string (e.g. `"Heal 6 HP"` /
+     * `"Restore 4 HP"` / `"+10 HP"`). No-op when the item isn't a
+     * consumable or doesn't exist.
      */
     useItem: (itemId: string) => UseItemResult;
     /**
-     * Soft-equip an item by reordering inventory so it is the first
-     * occurrence of its slot — the convention shared with
-     * `selectCharacterViewModel`. No-op when the item isn't equipment.
+     * Equip an item: the engine folds its stats into the loadout and the
+     * inventory is reordered so it leads its slot peers (the worn window,
+     * `wornPerSlot`). Refuses with a toast when every accessory position is
+     * already worn. No-op when the item isn't equipment.
      */
     equipItem: (itemId: string) => void;
     /**
-     * User-jot 2026-05-22 (oversight 29th): unequip is the swap
-     * counterpart to equip. Under mobile's
-     * "first-equipment-per-slot = worn" convention, unequip moves
-     * the target to the END of its slot peers in inventory; the
-     * next slot-peer (currently at index 1) becomes the new
-     * first-in-slot worn item. If the target is the sole item in
-     * its slot, the action is a no-op (the convention can't
-     * express "worn nothing" without a richer mobile-side flag).
+     * The swap counterpart to equip. Under mobile's "the first
+     * `SLOT_CAPACITY[slot]` items per slot are worn" convention, unequip
+     * moves the target to the END of its slot peers in inventory so a
+     * benched peer scrolls into the worn window. When the slot holds no
+     * more items than its capacity the action is a no-op (the convention
+     * can't express "wearing fewer than are carried").
      */
     unequipItem: (itemId: string) => void;
     /** Discard an item — wraps `removeItem` with a quest-item guard. */
     dropItem: (itemId: string) => void;
     /**
-     * Move the player to a connected, available node.
-     * Marks the target completed, advances `currentNodeId`, and unlocks
-     * outbound edges declared in the screen-side layout fixture
-     * (`app/(tabs)/exploration/maps/<map>.layout.ts`).
+     * Move the player to an available node and record the arrival. A
+     * non-encounter target is completed and its outbound edges in the
+     * engine map graph unlock; an encounter node stays open until the
+     * fight settles. Checkpoints the save.
      */
     moveTo: (nodeId: string) => MoveToResult;
     /** Swap the active map within the current continent. */
     changeMap: (mapName: MapName) => void;
     /**
-     * Dev-only seed action (Phase 54). Adds representative items
+     * Dev-only seed action. Adds representative items
      * across categories, teaches a handful of fixture cards, and
      * resets the current map back to its starting node. Returns a
      * summary so the calling UI can toast the result. Component
@@ -288,15 +278,14 @@ export interface AppActions {
      */
     debugSeed: () => DebugSeedResult;
     /**
-     * Dev-only "populate every item" affordance (user-direct request
-     * 2026-05-22). Walks the engine's central item registries
-     * (`equipmentTemplates`, `uniqueTemplates`, `consumableLibrary`)
+     * Dev-only "populate every item" affordance. Walks the engine's
+     * central item registries (`relicLibrary`, `consumableLibrary`)
      * and pushes one of each to the player's inventory. Component
      * mount is `__DEV__`-guarded; production never reaches this.
      */
     populateAllItems: () => PopulateAllItemsResult;
     /**
-     * Dev-only character preset adoption (Phase 59). Looks up the
+     * Dev-only character preset adoption. Looks up the
      * engine `characterPresets` row by id and replaces the player
      * slice with a fresh `buildCharacterFromPreset(preset)` result.
      * No-op (returns `applied: false`) when the id is unknown.
@@ -305,7 +294,7 @@ export interface AppActions {
      */
     applyCharacterPreset: (presetId: string) => ApplyCharacterPresetResult;
     /**
-     * Phase 131 — dev-only player-tier preset adoption. Looks up the
+     * Dev-only player-tier preset adoption. Looks up the
      * mobile `PLAYER_TIER_PRESETS` row (`kid-l1` / `kid-l15` /
      * `kid-l30` / `kid-l50`) and replaces the player slice with a
      * fresh `buildCharacterFromPreset` build at that level — seeded
@@ -315,15 +304,14 @@ export interface AppActions {
      */
     applyPlayerTierPreset: (presetId: string) => ApplyPlayerTierPresetResult;
     /**
-     * Phase 131 — dev-only "add item by id". Resolves `id` against
-     * the engine's item registries (equipment template → unique
-     * template → consumable) and pushes the match to the player's
+     * Dev-only "add item by id". Resolves `id` against the engine's
+     * item registries (signet relic → consumable) and pushes the match to the player's
      * inventory. Returns a graceful failure for unknown ids.
      * Component mount is `isDevToolsEnabled()`-guarded.
      */
     addItemById: (id: string) => AddItemByIdResult;
     /**
-     * Phase 73 — allocate a single stat point. Wraps the engine's
+     * Allocate a single stat point. Wraps the engine's
      * `allocateStatPoint(stat)` action. The engine clamps
      * `availableStatPoints >= 1` before applying; this wrapper trusts
      * the caller to gate. Returns the new `availableStatPoints` count
@@ -332,8 +320,7 @@ export interface AppActions {
      */
     allocateStatPoint: (stat: 'heart' | 'body' | 'mind') => number;
     /**
-     * Phase 73 follow-up (user-jot 2026-05-24): engine `levelUp`
-     * action. Drains accumulated XP and grants stat points via the
+     * Engine `levelUp` action. Drains accumulated XP and grants stat points via the
      * engine's `applyLevelUps` loop (handles stacked level-ups in
      * one pass). Caller is responsible for gating on
      * `vm.levelUpReady`; the engine's `LEVEL_UP` reducer is a no-op
@@ -341,21 +328,21 @@ export interface AppActions {
      */
     levelUp: () => void;
     /**
-     * Phase 77 — engine run-reset (`RESET_RUN` action). Atomic:
+     * Engine run-reset (`RESET_RUN` action). Atomic:
      * regenerates `runId`, full-heals the player, clears active
      * effects, regenerates world / quests / flags. With
      * `keepCharacter: true` the player slice survives the reset
      * (only health + effects refresh); with `keepCharacter: false`
      * a brand-new game state is built. Wraps the engine GameStore
-     * method exposed on `GameStore = GameState & GameActions`.
+     * method exposed on `GameStore = GameState & GameActions`, and
+     * clears any in-flight Labyrinth visit and its return point.
      */
     resetRun: (opts: { keepCharacter: boolean }) => void;
     save: () => void;
     /**
      * Run `resolveMapEvent(state)` on the current node, cache the
      * `ResolveMapEventResult` in the mobile event slice, and apply
-     * the resulting `state` to the engine store. No-ops while combat
-     * is active (Spec 08 Q4 = Future spec).
+     * the resulting `state` to the engine store.
      *
      * `sourceNodeType` — the map node type that triggered this event
      * (e.g. `'quest'`, `'rest'`, `'treasure'`). Stored in the event
@@ -363,7 +350,7 @@ export interface AppActions {
      * treatment even when the engine resolves to a generic kind.
      *
      * `staged` resolves that payload in place of the node's pool: a state
-     * fixture's `stagedEvent` (R7e), how `<FixtureBoot>` reaches dialogue, a
+     * fixture's `stagedEvent`, how `<FixtureBoot>` reaches dialogue, a
      * shop or a cutscene on an Act 1 node.
      *
      * Returns `true` when an event was produced (kind !== 'none').
@@ -381,9 +368,9 @@ export interface AppActions {
     pickEventChoice: (choiceId: string) => void;
     /**
      * Withdraw from an encounter already entered (the combat reveal's
-     * WITHDRAW). Toasts the retreat — it costs nothing since the morale
-     * meter was removed (D39) — without requiring a pending event slice, which `beginHazardEncounter`
-     * has already cleared by then. Only offered where retreat is allowed;
+     * WITHDRAW). Toasts the retreat (free; it only narrates) and settles
+     * the node, without requiring a pending event slice, which
+     * `beginHazardEncounter` has already cleared by then. Only offered where retreat is allowed;
      * boss encounters never surface it.
      */
     fleeEncounter: () => void;
@@ -456,8 +443,8 @@ export interface AppActions {
     claimRestOutcome: () => ClaimRestChoiceResult;
 
     // -----------------------------------------------------------------
-    // Loot-cache-choice encounter ("The Reliquary" — see state/cache/,
-    // Phase 63). One irreversible choice of two: card / item.
+    // Loot-cache-choice encounter ("The Reliquary" — see state/cache/).
+    // One irreversible choice of two: card / item.
     // -----------------------------------------------------------------
 
     /** Start a cache from the authored payload. Returns false if one is open. */
@@ -495,8 +482,8 @@ export interface AppActions {
     completeBlacksmithTutorial: (skipped: boolean) => void;
 
     // -----------------------------------------------------------------
-    // The Labyrinth — THE APORIA (W-01; see state/labyrinth/). Entered
-    // through the Lantern Deep's vault door (map revamp M4, D24) or the dev
+    // The Labyrinth — THE APORIA (see state/labyrinth/). Entered
+    // through the Lantern Deep's vault door or the dev
     // menu. Durable progress lives on GameState.labyrinth; the
     // transient visit on the labyrinthUi slice. Arrival events resolve
     // through resolveCurrentMapEvent with labyrinth bracketing (waystone
@@ -527,19 +514,19 @@ export interface AppActions {
     clearLabyrinthArrivalNote: () => void;
 
     /**
-     * Buy a ware from the pending village event's shop (Phase 137
-     * dedicated village screen). Engine `buyItem` owns the rules
+     * Buy a ware from the pending village event's shop (the village
+     * screen). Engine `buyItem` owns the rules
      * (affordability, cloning); returns success.
      */
     buyVillageWare: (itemId: string) => boolean;
 
     /**
      * Sell an inventory item back to the pending village event's
-     * shop (Phase 5). `index` identifies the inventory slot (mirrors
+     * shop. `index` identifies the inventory slot (mirrors
      * the CLI `shopLoop` sell path, which disambiguates the same
      * way). Price is engine `defaultSellPrice` against the shop's
      * ware list when the item matches a listed ware, else the CLI's
-     * long-standing fallback of `1`. Quest items are never sellable.
+     * fallback of `1`. Quest items are never sellable.
      * Returns success.
      */
     sellVillageItem: (index: number) => boolean;
@@ -616,13 +603,12 @@ export function createAppActions(store: AppStore): AppActions {
             store.getState().startCombat(enemy);
         },
         beginHazardEncounter: () => {
-            // Live map encounters now run the new hazard-pattern combat
-            // (Spec 26b), not the legacy stance engine. Pull the foe out of
+            // Live map encounters run the hazard-pattern combat. Pull the foe out of
             // the pending combat-prelude event, guarantee a real deck via
             // starter cards, clear the event slice, and hand the enemy back
             // for the in-place panel to bootstrap. The fight itself is still
             // driven entirely by the panel's local React state — but we DO
-            // stage `state.currentEncounter` via `startCombat` (Phase 54) so
+            // stage `state.currentEncounter` via `startCombat` so
             // the exit-time `endCombat` call has a real encounter to resolve
             // rewards, flags, codex unlocks, and faction deltas
             // against instead of silently no-op'ing.
@@ -640,13 +626,14 @@ export function createAppActions(store: AppStore): AppActions {
             return scaledEnemy;
         },
         endCombat: (outcome) => {
-            // Cross-combat resource carry is engine-owned now (the reducer's
+            // Cross-combat resource carry is engine-owned (the reducer's
             // END_COMBAT banks unspent philosophical resources onto the player
             // and folds them into the next combat's seed) — no client carry.
-            // Phase 78 — surface the engine `CombatEndReport` so callers can
-            // read post-combat metadata (codex unlock, narrative). The engine `endCombat` now requires an explicit
-            // outcome; default to `'flee'` (no reward) when unspecified. It
-            // returns a stub 'flee' report when called outside an encounter.
+            // Surface the engine `CombatEndReport` so callers can read
+            // post-combat metadata (codex unlock, narrative). The engine
+            // `endCombat` requires an explicit outcome; default to `'flee'`
+            // (no reward) when unspecified. It returns a stub 'flee' report
+            // when called outside an encounter.
             const report = store.getState().endCombat(outcome ?? 'flee');
             return report ?? null;
         },
@@ -677,8 +664,7 @@ export function createAppActions(store: AppStore): AppActions {
             return store.getState().player?.availableStatPoints ?? 0;
         },
         resetRun: (opts) => {
-            // Phase 77 — engine `resetRun` (Phase 72 [ENGINE LANDED]).
-            // Same cast pattern as `allocateStatPoint`: the method is
+            // Engine `resetRun`. Same cast pattern as `allocateStatPoint`: the method is
             // attached to the zustand store directly, not the engine
             // selectors. Return value (the fresh GameState) is unused
             // here — the store already reflects the new state.
@@ -696,7 +682,7 @@ export function createAppActions(store: AppStore): AppActions {
             if (store.getState().labyrinthUi?.session) {
                 store.setState({ labyrinthUi: EMPTY_LABYRINTH_SLICE });
             }
-            // The visit's durable return point (map revamp M4) goes with it:
+            // The visit's durable return point goes with it:
             // the fresh overworld is where the run now stands.
             const lab = store.getState().labyrinth;
             if (lab?.returnWorld) {
@@ -704,7 +690,7 @@ export function createAppActions(store: AppStore): AppActions {
             }
         },
         levelUp: () => {
-            // Phase 73 follow-up — engine `levelUp` action. Same
+            // Engine `levelUp` action. Same
             // cast pattern as `allocateStatPoint` / `resetRun`. The
             // engine's `LEVEL_UP` reducer applies `applyLevelUps`
             // which loops while `experience >= experienceToNextLevel`,
@@ -789,7 +775,7 @@ export function createAppActions(store: AppStore): AppActions {
 }
 
 // ---------------------------------------------------------------------------
-// Inventory action implementations (Spec 06)
+// Inventory action implementations
 // ---------------------------------------------------------------------------
 
 /**
@@ -828,9 +814,9 @@ function useItemAction(store: AppStore, itemId: string): UseItemResult {
     // The engine's `store.useConsumable` runs `useConsumableEffect`
     // internally, which already applies `consumable.healAmount` when the
     // structured field is present. We only need to apply heal ourselves
-    // for legacy fixtures / records that still encode the value as a
-    // free-form `effectId` string ("Heal N HP") — the engine ignores
-    // those (lookupEffect returns undefined).
+    // for fixtures / records that encode the value as a free-form
+    // `effectId` string ("Heal N HP") — the engine ignores those
+    // (lookupEffect returns undefined).
     const legacyHeal = consumable.healAmount != null
         ? 0
         : parseHealAmount(consumable.effectId ?? '');
@@ -888,7 +874,7 @@ function equipItemAction(store: AppStore, itemId: string): void {
     const equip = target as Equipment;
     const targetSlot = equip.slot;
 
-    // Accessory-full guard (Phase 18): with all 3 accessory positions worn and
+    // Accessory-full guard: with all 3 accessory positions worn and
     // the target not already among them, refuse rather than silently displace.
     let updatedPlayer = state.player;
     if (targetSlot === 'accessory') {
@@ -930,7 +916,7 @@ function equipItemAction(store: AppStore, itemId: string): void {
 
 function unequipItemAction(store: AppStore, itemId: string): void {
     // Mobile "worn" convention: the first `SLOT_CAPACITY[slot]` equipment items
-    // per slot are worn (Phase 18 — capacity-aware `wornPerSlot`). To "unequip"
+    // per slot are worn (capacity-aware `wornPerSlot`). To "unequip"
     // the target under that convention, move it to the END of its slot peers so
     // a benched peer scrolls into the worn window. When a slot has no more items
     // than its capacity the move can't reduce the worn set, so it's a no-op —
@@ -999,13 +985,12 @@ function dropItemAction(store: AppStore, itemId: string): void {
 }
 
 // ---------------------------------------------------------------------------
-// World actions (Spec 07)
+// World actions
 // ---------------------------------------------------------------------------
 
 /**
- * Read the player's current node id from the world slice. As of
- * `axiomancer-mechanics@0.5.0` (Spec 08 Q5A), the runtime `MapState`
- * exposes `currentNode` directly — `createMapState` seeds it from the
+ * Read the player's current node id from the world slice. The runtime
+ * `MapState` exposes `currentNode` directly — `createMapState` seeds it from the
  * static definition's `startingNode.id` for a fresh map.
  */
 export function readCurrentNodeId(world: WorldState): string {
@@ -1018,8 +1003,7 @@ export function readCurrentNodeId(world: WorldState): string {
  * own arrival verb `moveToNode` does. Mobile keeps its own move (the screen's
  * reachability rules differ from the reducer's), so it must write the same
  * sentence the engine writes — otherwise the move's checkpoint would save a
- * player standing on a node with no record of what they still owe it
- * (burn-day audit 2026-09-19 row 3.1 follow-up).
+ * player standing on a node with no record of what they still owe it.
  */
 function writeArrivalNodeId(map: MapState, nodeId: string): MapState {
     return { ...map, currentNode: nodeId, pendingArrival: nodeId };
@@ -1047,7 +1031,7 @@ function moveToAction(store: AppStore, nodeId: string): MoveToResult {
     // Node kind comes from the engine's authored event pools. Encounter /
     // boss nodes (both resolve to the `encounter` kind) are not completed or
     // consumed BY THE MOVE, and the move does not open their way on either:
-    // a fight's node is settled when the fight ends (phase R9a), by the
+    // a fight's node is settled when the fight ends, by the
     // engine's `END_COMBAT` (`settleArrival`) or by a flee below. Until then
     // a save, mid-fight included, stands the player on the node with the
     // fight owed and nowhere else to go, and the map re-offers it on reload.
@@ -1075,7 +1059,7 @@ function moveToAction(store: AppStore, nodeId: string): MoveToResult {
 
     // Populate `availableNodes` (the screen's reachable set) from the ENGINE
     // graph's outbound edges — `getMapDefinition` is the single source of truth
-    // for the unlock graph, so the client no longer carries its own edge list.
+    // for the unlock graph; the client carries no edge list of its own.
     const engineNode = getMapDefinition(map.continent, map.name).nodes.find(
         (n) => n.id === nodeId,
     );
@@ -1090,12 +1074,11 @@ function moveToAction(store: AppStore, nodeId: string): MoveToResult {
         currentMap: writeArrivalNodeId(nextWorld.currentMap, nodeId),
     };
 
-    // Phase 27: populate the engine's parallel data model
-    // (`discoveredNodes`) via `revealAdjacent`. The engine reads
-    // neighbours from `getMapDefinition(continent, name).nodes[].connectedNodes`
-    // — no mobile-side traversal needed. Coexists with the legacy
-    // `availableNodes` population above until the screen migrates
-    // (future Phase 30 TBD).
+    // Populate the engine's parallel data model (`discoveredNodes`) via
+    // `revealAdjacent`. The engine reads neighbours from
+    // `getMapDefinition(continent, name).nodes[].connectedNodes` — no
+    // mobile-side traversal needed. Kept alongside the `availableNodes`
+    // population above.
     nextWorld = {
         ...nextWorld,
         currentMap: revealAdjacent(nextWorld.currentMap, nodeId),
@@ -1103,18 +1086,13 @@ function moveToAction(store: AppStore, nodeId: string): MoveToResult {
 
     store.setState({ world: nextWorld });
 
-    // PLAYTEST_BUGS_2026-09-18 BUG-03: moving between nodes was NOT a
-    // checkpoint. Saves are explicit on mobile (Spec 09) and the checkpoint
-    // list was combat outcome, rest, cache, hazard, blacksmith, labyrinth and
-    // MAP CROSSING only — so a player who walked two nodes and reloaded was
-    // put back where they started, with the walk (and anything picked up by
-    // walking) gone. Node movement mutates `currentNode`, `completedNodes`,
-    // `availableNodes` and `discoveredNodes`: that is real, hard-won progress,
-    // and the same argument the crossing checkpoint already makes applies to
-    // it. The adapter debounces writes, so this is cheap even tapped quickly.
+    // Moving between nodes is a checkpoint. Saves are explicit on mobile,
+    // and node movement mutates `currentNode`, `completedNodes`,
+    // `availableNodes` and `discoveredNodes`: real progress that a reload
+    // must not undo, on the same argument as the map-crossing checkpoint.
+    // The adapter debounces writes, so this is cheap even tapped quickly.
     //
-    // THE ARRIVAL IS NOT IN THIS SNAPSHOT, AND THAT IS DELIBERATE (burn-day
-    // audit 2026-09-19 row 3.1). The caller resolves the node's event AFTER
+    // THE ARRIVAL IS NOT IN THIS SNAPSHOT, AND THAT IS DELIBERATE. The caller resolves the node's event AFTER
     // this returns (`app/(tabs)/exploration/index.tsx` → `onConfirmMove`), so
     // the checkpoint records a player standing on a node whose event they
     // have not answered — on an encounter node, a fight they have not had.
@@ -1122,14 +1100,14 @@ function moveToAction(store: AppStore, nodeId: string): MoveToResult {
     // as itself: the move above wrote `pendingArrival: nodeId` onto the map
     // (`writeArrivalNodeId`), it rides this very save, and the map screen
     // re-offers it on the next mount (`vm.arrivalPending`). Saving here
-    // rather than after the resolve is therefore load-bearing, not a
-    // leftover — `resolveMapEvent` clears `pendingArrival` the moment the
+    // rather than after the resolve is therefore load-bearing —
+    // `resolveMapEvent` clears `pendingArrival` the moment the
     // arrival is answered, so a save taken below it would persist "nothing
     // owed" and the reload would walk past the fight.
     //
     // The debt is a record of ARRIVING, not a guess from the shape of the
     // map. Reading it off "the node under the player is unconsumed" instead
-    // (the first cut of row 3.1) could not tell a walk from a placement, and
+    // could not tell a walk from a placement, and
     // `placeOnNode` un-consumes the node it places you on — so every state
     // fixture and every `/dev` JUMP looked like an arrival nobody had
     // answered and fired its event on mount.
@@ -1143,15 +1121,9 @@ function changeMapAction(store: AppStore, mapName: MapName): void {
         const world: WorldState | undefined = store.getState().world;
         if (!world) return;
 
-        // Phase 60a — adopted `createMapState(getMapDefinition(...))`
-        // pattern. The engine's `getCoastalMap` was the single-arg
-        // convenience on 0.10.0 (`getCoastalMap(name)`); 0.10.1+
-        // removed it in favour of the two-step
-        // `createMapState(getMapDefinition(continent, name))` form.
-        // Both paths exist on 0.10.0, so this migration is safe under
-        // the current lockfile. Continent is sourced from the current
-        // map (Coastal Cradle today; world-state-tracked when the
-        // northern continent ships).
+        // Build the fresh map with the engine's two-step
+        // `createMapState(getMapDefinition(continent, name))`. Continent
+        // is sourced from the current map, so this swaps within it.
         const continent = world.currentMap.continent;
         const nextMap = createMapState(getMapDefinition(continent, mapName));
         const nextWorld = worldChangeMap(world, nextMap);
@@ -1162,14 +1134,8 @@ function changeMapAction(store: AppStore, mapName: MapName): void {
 }
 
 // ---------------------------------------------------------------------------
-// Debug seed (Phase 54 — dev-only manual-testing affordance)
+// Debug seed (dev-only manual-testing affordance)
 // ---------------------------------------------------------------------------
-
-// `templateToEquipment` extracted to `state/selectors/equipment.ts`
-// (AUDIT [4.0] engine-duplication fix 2026-05-22). This debug-seed
-// path still routes through the shared helper; mobile's former
-// `state/exploration-maps/event-pools.ts` override was deleted in
-// Phase 161 when map-event content moved fully to engine truth.
 
 function debugSeedAction(store: AppStore): DebugSeedResult {
     let itemsAdded = 0;
@@ -1194,8 +1160,8 @@ function debugSeedAction(store: AppStore): DebugSeedResult {
             console.warn('Failed to add consumable item:', error);
         }
 
-        // 2. One relic per slot kind (weapon / armor / accessory). Phase 21 —
-        //    the only equipment is the signet relics; grant the first of each
+        // 2. One relic per slot kind (weapon / armor / accessory). The only
+        //    equipment is the signet relics; grant the first of each
         //    slot kind so the inventory dock + equip-replace preview have a
         //    piece to render for every slot.
         const seedSlots: ReadonlyArray<EquipmentSlot> = ['weapon', 'armor', 'accessory'];
@@ -1211,10 +1177,8 @@ function debugSeedAction(store: AppStore): DebugSeedResult {
             }
         }
 
-        // 3. Two cards from the engine's library. Phase 16 swapped the
-        //    data source from the local mock to `state/selectors/combat-cards`; engine
-        //    0.10.2 now re-exports `cardLibrary` at the top level.
-        //    Push directly onto `player.knownCards` rather than via
+        // 3. The first four cards of the engine's library (via
+        //    `state/selectors/combat-cards`). Push directly onto `player.knownCards` rather than via
         //    `engine.learnCard` — `learnCard` enforces level-/stat-
         //    gating which the dev seed should bypass. The ids it adds
         //    are exactly what the picker renders from `COMBAT_CARDS`.
@@ -1247,9 +1211,6 @@ function debugSeedAction(store: AppStore): DebugSeedResult {
         //    `changeMap`. Engine guarantees the returned `MapState` is at
         //    `currentNode = startingNode.id` with cleared
         //    discoveredNodes / consumedNodes.
-        //    (Phase 60a — migrated from the deprecated single-arg
-        //    `getCoastalMap`; both paths exist on 0.10.0 but 0.10.1+
-        //    drops the old form.)
         const world: WorldState | undefined = store.getState().world;
         if (world && world.currentMap) {
             try {
@@ -1275,31 +1236,26 @@ function debugSeedAction(store: AppStore): DebugSeedResult {
 
 /**
  * Walk every engine item registry and push one of each into the
- * player's inventory. Dev-only — surfaced via the SELF-tab Debug
- * menu's POPULATE button. Mirrors the existing `debugSeedAction`
- * shape so the Debug button can render a uniform toast.
+ * player's inventory. Dev-only — surfaced via the Debug menu's
+ * POPULATE button. Mirrors the `debugSeedAction` shape so the Debug
+ * button can render a uniform toast.
  *
- * Filed against the user-direct request 2026-05-22 (mid-`/march`
- * interjection): "let's add a button that 'populates' items and
- * gives the player every item in the game". "Every item" here means
- * every entry in the engine's three central item registries:
- * `equipmentTemplates` (base equipment), `uniqueTemplates` (uniques,
- * marked `rarity: 'unique'`), and `consumableLibrary`. Materials
- * and quest-items aren't in central registries (materials are
+ * "Every item" means every entry in the engine's central item
+ * registries: `relicLibrary` (the signet relics, the only equipment)
+ * and `consumableLibrary`. Materials and quest-items aren't in central registries (materials are
  * authored per engine event payload; quest-items live per quest),
  * so they're out of scope.
  */
 function populateAllItemsAction(store: AppStore): PopulateAllItemsResult {
     let equipment = 0;
-    const unique = 0; // Phase 21 — uniques retired; kept in the breakdown as 0.
+    const unique = 0; // No unique items exist; the breakdown field stays 0.
     let consumable = 0;
 
     try {
         const state = store.getState();
         const addItem = state.addItem;
 
-        // Phase 21 — the procedural equipment library is retired; "every item"
-        // equipment is now the signet relics. Uniques no longer exist.
+        // The only equipment is the signet relics.
         for (const relic of relicLibrary) {
             try {
                 addItem({ ...relic });
@@ -1347,7 +1303,7 @@ function applyCharacterPresetAction(
 }
 
 // ---------------------------------------------------------------------------
-// Event actions (Spec 08 — Phase 6 Tick B)
+// Event actions
 // ---------------------------------------------------------------------------
 
 function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string, staged?: MapEventPayload): boolean {
@@ -1356,16 +1312,12 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string, 
         const gameState = state as unknown as GameState;
         const result: ResolveMapEventResult = resolveMapEvent(gameState, undefined, staged);
 
-        // Phase 27: when a non-'none' event resolves, mark the current
-        // node consumed in the engine's parallel data model
-        // (`consumedNodes`) for one-time events only. Encounter and boss
-        // events should be reusable (can trigger multiple times), while
-        // rest, treasure, quest, and gathering events are consumable
-        // (one-time only). This fixes the issue where encounters stop
-        // triggering after the first completion.
-        // Coexists with legacy `completedNodes` (already populated by
-        // `moveToAction`'s `worldCompleteNode` call). Screen still reads
-        // legacy fields; Phase 30+ TBD migrates the read side.
+        // When a non-'none' event resolves, mark the current node consumed
+        // in the engine's parallel data model (`consumedNodes`) for one-time
+        // events only. Encounter, travel and labyrinth events are never
+        // consumed here; every other kind is (one-time only). Kept alongside
+        // `completedNodes` (populated by `moveToAction`'s
+        // `worldCompleteNode` call).
         let resolvedState: GameState = result.state;
         // 'travel' must never consume: post-travel, `currentMap` is the
         // DESTINATION, so consuming here would mark the arrival map's
@@ -1386,9 +1338,8 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string, 
             }
         }
 
-        // Hazard events launch the v2 minigame instead of the legacy
-        // passive damage consequence (design handoff 2026-06-10). The
-        // engine's resolveMapEvent already applied its flat damage to
+        // Hazard events launch the hazard minigame. The engine's
+        // resolveMapEvent already applied its flat damage to
         // `result.state`; restore the pre-event player so the minigame's
         // outcome is the only thing that touches VITAE, then start a
         // session. `<HazardGate>` routes to /hazard when the slice fills.
@@ -1407,27 +1358,16 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string, 
             return true;
         }
 
-        // Gathering has NO interceptor (2026-09-21, owner finding 2 — "the
-        // Gather node is now a no-op").
-        //
-        // Phase 76 retired "The Gleaning" minigame and left the grant inline:
-        // the engine's `resolveGathering` appends the payload items to the
-        // inventory in `resolvedState`, and that part was never broken — all
-        // twelve authored gathering nodes roll a real, named item (measured;
-        // pinned in `MapEvents/e2e/gathering-grant.engine.test.ts`). What WAS
-        // broken: the only acknowledgement was `pushToast('Gathered …')` —
-        // three seconds of 10pt mono at `bottom: 80`, drawn by a `<ToastHost>`
-        // that `app/_layout.tsx` declares BEFORE `<Stack>` with no `zIndex`,
-        // so the navigator's opaque `<ScreenBg>` paints straight over it.
-        //
-        // So gathering falls through to the paced-event tail below like
-        // `interaction` / `village` / `cutscene`, and `composeGathering`
+        // Gathering has NO interceptor: the engine's `resolveGathering`
+        // appends the payload items to the inventory in `resolvedState`, and
+        // gathering falls through to the paced-event tail below like
+        // `interaction` / `village` / `cutscene`, where `composeGathering`
         // renders an acknowledgement card that names what was picked up and
-        // waits for the player. No session, no RNG, no new route — the
-        // Gleaning stays retired; only the receipt came back.
+        // waits for the player. A toast alone would not do: `<ToastHost>` is
+        // declared BEFORE `<Stack>` in `app/_layout.tsx` with no `zIndex`,
+        // so the navigator's opaque `<ScreenBg>` paints over it.
         //
-        // Rest events launch the rest-choice node (Phase 52d) instead of
-        // the legacy silent heal. The engine's resolveMapEvent already
+        // Rest events launch the rest-choice node. The engine's resolveMapEvent already
         // applied the passive heal to `result.state`; restore the
         // pre-event player so the node's settled ledger is the only thing
         // that touches VITAE/currency. `<RestGate>` routes to /rest when
@@ -1439,27 +1379,23 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string, 
                 event: EMPTY_EVENT_SLICE,
             });
             beginRestAction(store, {
-                // Phase 52b — the authored inn/camp marker, not a heal number.
+                // The authored inn/camp marker, not a heal number.
                 shelter: result.event.shelter,
-                // Phase 59 — the authored one-liner, same passthrough
+                // The authored one-liner, same passthrough
                 // pattern as the other kinds (event.engine.ts::bodyFromPayload).
                 description: result.event.description,
             });
             return true;
         }
 
-        // Loot-cache events launch the three-offer choice screen (Phase
-        // 63, replacing the retired Pick Pool minigame) instead of the
-        // legacy passive grant. The engine already appended the payload
+        // Loot-cache events launch the two-offer choice screen. The engine already appended the payload
         // items + currency to `result.state`; restore the pre-event
         // player so the cache's claim is the only thing that touches the
         // inventory. `<CacheGate>` routes to /cache when the slice fills.
         //
         // Reward depth: the `item` offer rolls a real engine-truth
-        // loot/relic table scaled to the player's level (Phase 129). Every
-        // Act 1 cache rolls the `modest` tier (the `rich` tier's only map,
-        // northern-forest, went in R7e; the dev rewards menu still rolls
-        // it). Currency from the event payload is preserved for the `item`
+        // loot/relic table scaled to the player's level. Every cache rolls
+        // the `modest` tier (only the dev rewards menu rolls `rich`). Currency from the event payload is preserved for the `item`
         // offer.
         if (result.event.kind === 'loot-cache') {
             store.setState({
@@ -1475,8 +1411,8 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string, 
             return true;
         }
 
-        // Blacksmith events launch "The Anvil" (Spec 33 §6 die-gear
-        // upgrades) instead of dropping a paced /event card. The engine
+        // Blacksmith events launch "The Anvil" (die-gear upgrades) instead
+        // of dropping a paced /event card. The engine
         // handler touches no state (it only validates the offered variant
         // gear), so there is nothing to restore — but we still clear the
         // event slice and seed the session from the player's live rail +
@@ -1500,7 +1436,7 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string, 
             return true;
         }
 
-        // The Labyrinth door (map revamp M4, D24): the engine names the act
+        // The Labyrinth door: the engine names the act
         // and leaves the world alone; the swap is `enterLabyrinthAction`'s.
         // Settle the resolved overworld first (the door's way on is open and
         // the node is NOT consumed), so the snapshot the entry takes is the
@@ -1530,7 +1466,7 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string, 
                 ?? result.event.destinationMap;
             pushToast(store, `You cross into ${region}.`);
             // Crossing a map is a checkpoint, same as a combat or rest
-            // outcome — saves are explicit on mobile (Spec 09), and a
+            // outcome — saves are explicit on mobile, and a
             // crossing lost to an app close would strand the run on the
             // wrong map.
             try { store.getState().save(); } catch { /* persistence must not block the road */ }
@@ -1563,10 +1499,10 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string, 
         // PERMANENT change to the inventory rather than a choice the player is
         // still weighing — the acknowledgement card cannot refuse it.
         // Checkpoint it here, on the same argument the crossing save above
-        // makes: saves are explicit on mobile (Spec 09), `moveToAction`'s
+        // makes: saves are explicit on mobile, `moveToAction`'s
         // checkpoint is taken BEFORE the arrival resolves, and a close on the
         // acknowledgement card would otherwise cost the player what they had
-        // just picked up. "The item is in SATCHEL afterward, and stays there."
+        // just picked up.
         if (result.event.kind === 'gathering') {
             try { store.getState().save(); } catch { /* persistence must not block the road */ }
         }
@@ -1585,11 +1521,8 @@ function clearEventSlice(store: AppStore): void {
 /**
  * Walking away from a non-boss encounter. Boss encounters are sealed (the
  * retreat is never offered), so this is only ever called for a foe you were
- * allowed to leave. Retreat carried a -2 grace cost until the morale meter
- * was removed (D39); it is free now and only narrates.
- *
- * Phase 92 — flee narrative feedback: prose-style narrative in the lowercase
- * ritual register (deep-playtest F03).
+ * allowed to leave. Retreat is free and only narrates, as a prose toast in the
+ * lowercase ritual register.
  */
 function announceFlee(store: AppStore): void {
     const prev = store.getState().notifications;
@@ -1607,12 +1540,10 @@ function announceFlee(store: AppStore): void {
 
 /**
  * Withdraw from an encounter the player has already stepped into — the
- * combat reveal's WITHDRAW, which replaced the old prelude modal's FLEE
- * (2026-08-10 user report: two consecutive popups asked to agree to the same
- * fight). By then `beginHazardEncounter` has already cleared the event slice,
+ * combat reveal's WITHDRAW. By then `beginHazardEncounter` has already cleared the event slice,
  * so unlike `pickEventChoice('flee')` this narrates the retreat without needing a
  * pending event; the slice is cleared defensively for any path that still has
- * one. The modal teardown is the caller's (the overlay's) concern.
+ * one, and the node is settled. The modal teardown is the caller's (the overlay's) concern.
  */
 function fleeEncounterAction(store: AppStore): void {
     try {
@@ -1625,10 +1556,9 @@ function fleeEncounterAction(store: AppStore): void {
 }
 
 /**
- * Settle the fight's node when the player walks away from it (phase R9a).
- * A fight that runs to an end settles through the engine's `END_COMBAT`; a
- * flee from the prelude never stages one, so both flee paths settle here.
- * The node is spent and its way on opens, as before R9a.
+ * Settle the fight's node when the player walks away from it. A fight that
+ * runs to an end settles through the engine's `END_COMBAT`; a flee does not,
+ * so both flee paths settle here. The node is spent and its way on opens.
  */
 function settleArrivalAction(store: AppStore): void {
     const settled = settleArrival(store.getState() as unknown as GameState);
@@ -1647,13 +1577,8 @@ function pickEventChoiceAction(store: AppStore, choiceId: string): void {
         if (processed.kind === 'encounter') {
             if (choiceId === 'fight') {
                 try {
-                    // Phase 60b — engine's canonical `Encounter` shape is
-                    // `{ enemies: Enemy[], origin?: string, rewards?:
-                    // Reward[] }` (axiomancer-mechanics/dist/World/types.d.ts).
-                    // The prelude consumes the first enemy. The earlier
-                    // `as any` cast (closed via [2.5] event-audit row 4)
-                    // dated back to Phase 60b's migration; the engine type
-                    // exposes `.enemies` directly today.
+                    // The engine's `Encounter` carries `enemies: Enemy[]`;
+                    // the prelude consumes the first enemy.
                     const enemy = processed.encounter.enemies[0];
                     ensureStarterCards(store);
                     store.getState().startCombat(enemy);
@@ -1684,9 +1609,9 @@ function pickEventChoiceAction(store: AppStore, choiceId: string): void {
             try {
                 const { tree, nodeId } = slice.dialogueCursor;
                 const node = getDialogueNode(tree, nodeId);
-                // Phase 60c — engine flattened DialogueChoice (dropped `.id`).
-                // The presenter now derives `choiceId` from the choice's
-                // index in `node.choices`; lookup mirrors that index. If the
+                // DialogueChoice has no `.id`: the presenter derives
+                // `choiceId` from the choice's index in `node.choices`;
+                // lookup mirrors that index. If the
                 // id isn't a valid index, treat as unknown choice
                 // (defensive no-op preserved).
                 const idx = Number(choiceId);
@@ -1747,7 +1672,7 @@ function dismissEventAction(store: AppStore): void {
 }
 
 /**
- * Buys a ware off the pending village event's shop (Phase 137). The
+ * Buys a ware off the pending village event's shop. The
  * engine reducer owns affordability and item cloning; a no-op result
  * (can't afford, unknown ware) returns false so the screen can leave
  * the row enabled-but-inert rather than crash.
@@ -1773,8 +1698,8 @@ function buyVillageWareAction(store: AppStore, itemId: string): boolean {
 }
 
 /**
- * Sells an inventory item back to the pending village event's shop
- * (Phase 5). Quest items are never sellable — mirrors the `dropItem`
+ * Sells an inventory item back to the pending village event's shop.
+ * Quest items are never sellable — mirrors the `dropItem`
  * defend-in-depth guard (`canDiscard` on the inventory VM keeps the
  * screen from ever offering the action, but the action layer checks
  * again for direct dispatch). Price matches the CLI's `shopLoop` sell

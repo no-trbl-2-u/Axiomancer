@@ -1,5 +1,5 @@
 /**
- * Hermetic smoke-render harness (Phase 30 Tick A).
+ * Hermetic smoke-render harness.
  *
  * The shipped pattern — hermetic tests on the presenter VM only —
  * has a strategic gap: it doesn't render the full screen tree, so
@@ -18,10 +18,6 @@
  * broken screen. The harness intentionally keeps mocks minimal —
  * the goal is to exercise the full screen render path the way the
  * runtime does, not the way the VM-shape tests do.
- *
- * When Phase 31 (tabs design pass) lands, the tab-title fixtures
- * here update to match the new register; the bracket-leak
- * assertion is the contract that stays stable.
  */
 
 import { afterEach, describe, it, expect, jest } from '@jest/globals';
@@ -84,11 +80,10 @@ const REST_EVENT: ResolveMapEventResult = {
     event: { kind: 'rest', healed: 7 } as never,
 };
 
-// A real `createEnemy(...)`-built Enemy, not a hand-rolled literal: since the
-// encounter modal auto-engages (2026-08-10) this fixture boots the live combat
-// panel on render, and the engine reads shape a literal never carried
-// (`effects`, threat sequence). The hand-rolled version threw
-// "bearer.effects is not iterable" the moment the prelude stopped gating.
+// A real `createEnemy(...)`-built Enemy, not a hand-rolled literal: the
+// encounter modal auto-engages, so this fixture boots the live combat panel
+// on render, and the engine reads shape a literal never carries (`effects`,
+// threat sequence) — a hand-rolled one throws "bearer.effects is not iterable".
 const ENCOUNTER_EVENT: ResolveMapEventResult = {
     state: undefined as never,
     event: {
@@ -273,7 +268,7 @@ describe('smoke-render: no template-string leaks in rendered output', () => {
 // Active-event render guard (Maximum-update-depth regression)
 // ---------------------------------------------------------------------------
 //
-// Regression for the map-node-nav crash (2026-06-12). The fresh-boot
+// Regression for the map-node-nav crash. The fresh-boot
 // smoke renders above all run with an EMPTY event slice, where
 // `selectEventViewModel` returns the stable `EMPTY_VM` singleton — so
 // they never exercised the path that loops. The exploration screen

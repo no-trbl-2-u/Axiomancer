@@ -1,12 +1,12 @@
 /**
- * Dev-only player-tier presets for mobile evidence runs (Phase 131).
+ * Dev-only player-tier presets for mobile evidence runs.
  *
- * The pre-existing `applyCharacterPreset` (Phase 59) swaps the player
+ * `applyCharacterPreset` swaps the player
  * for one of three engine archetypes (apprentice / wanderer / sage).
  * The evidence matrix needs a finer, level-explicit ladder — exactly
  * `L1`, `L15`, `L30`, `L50`.
  *
- * **The preset DATA now lives in the engine** (`levelLadderPresets`),
+ * **The preset DATA lives in the engine** (`levelLadderPresets`),
  * so the curated level / stat / card / gear selection is engine-owned
  * and validated by `buildCharacterFromPreset`. This file keeps only the
  * mobile-side presentation wrapper (button `label` + one-line `summary`)
@@ -78,7 +78,7 @@ export function getPlayerTierPreset(
 /**
  * Replace the player slice with a fresh build of the requested
  * level tier. No-op (`applied: false`) on an unknown id. Mirrors
- * `applyCharacterPresetAction` (Phase 59) — same engine build path,
+ * `applyCharacterPresetAction` — same engine build path,
  * just the finer level ladder.
  */
 export function applyPlayerTierPresetAction(

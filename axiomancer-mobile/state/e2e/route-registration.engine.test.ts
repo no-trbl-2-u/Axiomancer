@@ -1,8 +1,7 @@
 /**
  * Hermetic E2E Tests — Layout / route registration regression checks
  *
- * Pins two layout-file invariants that a user-reported runtime bug
- * surfaced on 2026-05-19 (commit `3a14f5f`):
+ * Pins three layout-file invariants:
  *
  * 1. **`<GestureHandlerRootView>` wraps the root layout's render
  *    tree.** Without it, every `<GestureDetector>` in the app (the
@@ -21,7 +20,6 @@
  *    `foo/index.tsx` silently fails to match. The result: the
  *    layout options aren't applied, and the tab renders with the
  *    default label which is the raw route ID (e.g. "foo --index").
- *    Both failure modes hit at once on 2026-05-19.
  *
  * Source-grep tests rather than router-mount tests — the layout
  * files import expo-router which requires a real router context to
@@ -30,15 +28,10 @@
  * mount overhead. Hermetic = self-contained + deterministic +
  * isolated; this only touches `fs`.
  *
- * Filed via `/oversight` 2026-05-19 as Phase 34 follow-up to the
- * routing/gesture fix in `3a14f5f`.
- *
  * 3. **Every `linking` entry in `lib/platform/router.ts` names a
  *    registered screen.** The linking config (and `ROUTE_TABLE`, which
  *    it mirrors) turns a URL segment into a screen `name`; an entry no
- *    navigator registers is a dead route. `quest` outlived the retired
- *    Quest Board screen there (phase 61) until TRIM THE FAT Tier 0
- *    item 7 (2026-09-25).
+ *    navigator registers is a dead route.
  */
 
 import { describe, it, expect } from '@jest/globals';

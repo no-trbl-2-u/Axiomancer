@@ -1,10 +1,9 @@
 /**
- * Hermetic E2E — Spec 26 / 26b Combat encounter screen.
+ * Hermetic E2E — Combat encounter screen.
  *
  * Mounts the real `/combat-encounter` screen against a rigged store player and
- * walks the redesigned flow: the reveal → ENTER → the board (portraits, visible
- * HP, the spec-33 four-die tray, Conviction + Signature Skills, the open
- * stance check) → END PHASE. Determinism comes from the engine seed
+ * walks the flow: the reveal → ENTER → the board (portraits, visible HP, the
+ * four-die tray, Conviction, the signature bar, the foe's intent) → END PHASE. Determinism comes from the engine seed
  * (`__AXM_COMBAT_SEED__`). The engine owns the rules; this asserts the
  * presenter + screen wiring.
  */
@@ -56,7 +55,7 @@ describe('combat-encounter screen — reveal then board', () => {
         enter();
         expect(screen.getByTestId('combat-board')).toBeTruthy();
         expect(screen.getByTestId('combat-combatant-pane')).toBeTruthy();
-        // HP is the sole enemy bar now — the DoT / Control pressure tracks are gone.
+        // HP is the sole enemy bar — there are no DoT / Control pressure tracks.
         expect(screen.queryByTestId('combat-pressure-tracks')).toBeNull();
         expect(screen.getByTestId('combat-dice-tray')).toBeTruthy();
         expect(screen.getByTestId('combat-hand')).toBeTruthy();
@@ -82,8 +81,8 @@ describe('combat-encounter screen — drag-to-power flow (2026-06-22)', () => {
         expect(screen.queryByTestId('combat-read-banner')).toBeNull();
         expect(screen.queryByTestId('combat-free-slippery-slope')).toBeNull();
         expect(screen.queryByTestId('combat-power-slippery-slope')).toBeNull();
-        // END PHASE + SCRAP stay; the dice-reroll button is deliberately GONE
-        // (2026-07 polish): the rolled dice ARE the turn.
+        // END PHASE + SCRAP are present; there is no dice-reroll button: the
+        // rolled dice ARE the turn.
         expect(screen.queryByTestId('combat-new-turn')).toBeNull();
         expect(screen.getByTestId('combat-end-phase')).toBeTruthy();
         expect(screen.getByTestId('combat-trash')).toBeTruthy();
@@ -113,8 +112,8 @@ describe('combat-encounter screen — END PHASE + terminal outcome', () => {
     });
 });
 
-// 2026-08-10 (user report) — "show the enemy's card for a moment so the player
-// knows what happened on the enemy's turn". The shaping is pinned in
+// The foe's action card shows for a moment so the player knows what happened
+// on the foe's turn. The shaping is pinned in
 // `state/presenters/__tests__/enemy-action-card.engine.test.ts`; this is the
 // wiring pin: the panel actually mounts the reveal off a real resolution.
 describe('combat-encounter screen — the enemy plays its card back at you', () => {

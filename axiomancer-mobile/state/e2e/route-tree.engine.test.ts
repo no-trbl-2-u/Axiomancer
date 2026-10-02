@@ -1,15 +1,10 @@
 /**
  * Hermetic E2E Tests — route registration
  *
- * Pre-phase-47b this guarded Expo Router's `require.context` file
- * discovery (a stray `.ts` helper under `app/` could silently become a
- * misdiscovered route or `_layout` conflict). Phase 47b replaced that
- * discovery mechanism with explicit registration: every screen is now
- * an imported component passed as a `<Stack.Screen component={...}>` /
- * `<Tabs.Screen component={...}>` prop in `app/_layout.tsx` /
- * `app/(tabs)/_layout.tsx` (`lib/platform/router.ts`'s brief has the
- * full swap rationale). The failure class this test now guards against
- * is the modern equivalent: a route file under `app/` that nothing
+ * Screens are registered explicitly: every screen is an imported component
+ * passed as a `<Stack.Screen component={...}>` / `<Tabs.Screen
+ * component={...}>` prop in `app/_layout.tsx` / `app/(tabs)/_layout.tsx`.
+ * This test guards against a route file under `app/` that nothing
  * registers (orphaned — unreachable in the built app), or a
  * registration whose `name` points at a file that doesn't exist
  * (stale — points at nothing).

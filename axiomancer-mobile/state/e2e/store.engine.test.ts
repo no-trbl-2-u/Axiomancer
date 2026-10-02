@@ -7,9 +7,7 @@
  * Hermetic = self-contained + deterministic + isolated.
  * See docs/testing.md for the full standard.
  *
- * Note: legacy turn-based combat (the `state.combat` slice, `selectCombat`,
- * `setCombatPhase`, …) was removed from the engine in mechanics 0.37.0.
- * "In combat" is now the engine's `currentEncounter` (`selectIsInCombat`);
+ * "In combat" is the engine's `currentEncounter` (`selectIsInCombat`);
  * the live card/dice combat runs in the encounter panel's local state.
  */
 
@@ -95,7 +93,7 @@ describe('createAppActions: dispatch', () => {
         expect(store.getState().currentEncounter?.enemies[0]?.name).toBe('Test Lich');
     });
 
-    // Phase 104 (the grey office) — the authored starting deck: two
+    // The grey office — the authored starting deck: two
     // colourless shapes (`grey-strike` ×7, `grey-ward` ×3), every die colour
     // powers either, so fight one teaches STRIKE, WARD, FREE-vs-PAID, and the
     // die-spend loop with zero colour arithmetic. No synthetic Retreat is

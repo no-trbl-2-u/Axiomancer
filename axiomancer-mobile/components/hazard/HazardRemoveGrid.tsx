@@ -1,13 +1,13 @@
 /**
- * Hazard remove-card grid overlay (Phase 126).
+ * Hazard remove-card grid overlay.
  *
  * A full-screen modal that lays the player's removable (acquired)
  * Hazard cards out in a tap-to-select grid. The player picks one card,
  * confirms, and — once `axiomancer-mechanics` exposes a remove-card
  * action — that card leaves the deck.
  *
- * Until then the confirm is BLOCKED: the brief (Phase 126 §3) forbids
- * implementing deck-mutation rules locally, so confirming surfaces a
+ * Until then the confirm is BLOCKED: deck-mutation rules are not
+ * implemented locally in the presenter layer, so confirming surfaces a
  * graceful, dismissible blocked banner (`removeBlockedReason`) and the
  * save is left untouched. The grid stays fully usable for inspection.
  *

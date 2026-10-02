@@ -6,18 +6,16 @@
  * suite reads those counts + distinguishing prop values to
  * lock the visual semantic.
  *
- * S4-world-C06 re-pinned the accent: `available` (where you CAN go)
- * carries the sulfur beacon, `current` (where you already stand) is a
- * muted bone pin. The assertions below are the same strength as before,
- * inverted, and each kind now also asserts it does NOT wear the other's
- * accent so the pair can never drift back together.
+ * The accent: `available` (where you CAN go) carries the sulfur beacon,
+ * `current` (where you already stand) is a muted bone pin. Each kind also
+ * asserts it does NOT wear the other's accent so the pair cannot drift
+ * together.
  *
- * 2026-09-21 (owner finding 9 / D1) — the three states a player has to
- * tell apart must be distinguishable WITHOUT COLOUR. The `✕` that 23 of
- * 28 nodes wore in the owner's Drowned Parish screenshot is gone, and the
- * `NODE_MARK_COLOURLESS` block below pins the channels that replaced it:
- * fill (mass), size (radius), and shape. Those assertions read no hue at
- * all — they would hold on a greyscale screen — which is the whole point.
+ * The three states a player has to tell apart must be distinguishable
+ * WITHOUT COLOUR. The `NODE_MARK_COLOURLESS` block below pins the channels
+ * that carry them: fill (mass), size (radius), and shape. Those assertions
+ * read no hue at all — they would hold on a greyscale screen — which is the
+ * whole point.
  */
 
 import { describe, expect, it } from '@jest/globals';
@@ -42,9 +40,8 @@ describe('NodeMark: kind → SVG branch', () => {
         const circles = tree.UNSAFE_getAllByType(Circle);
         expect(circles).toHaveLength(2);
 
-        // The `✕` is retired: a sealed node stops offering itself rather
-        // than shouting. It was the loudest mark on a map where it is the
-        // majority state.
+        // No `✕`: a sealed node stops offering itself rather than
+        // shouting. It is the majority state on most maps.
         expect(tree.UNSAFE_queryAllByType(Path)).toHaveLength(0);
         expect(circles.some((c) => c.props.stroke === AXM.blood)).toBe(false);
         expect(circles.some((c) => c.props.fill === AXM.blood)).toBe(false);
@@ -65,7 +62,7 @@ describe('NodeMark: kind → SVG branch', () => {
         expect(boneCircle).toBeDefined();
         const dashedRing = circles.find((c) => c.props.strokeDasharray !== undefined);
         expect(dashedRing).toBeDefined();
-        // S4-world-C06: the node you already occupy must not be the
+        // The node you already occupy must not be the
         // brightest mark on the chart.
         expect(circles.some((c) => c.props.fill === AXM.sulfur)).toBe(false);
         expect(circles.some((c) => c.props.stroke === AXM.sulfur)).toBe(false);
@@ -90,8 +87,8 @@ describe('NodeMark: kind → SVG branch', () => {
 });
 
 /**
- * NODE_MARK_COLOURLESS — owner finding 9: "three node states must be
- * visually distinct WITHOUT relying on colour alone".
+ * NODE_MARK_COLOURLESS — three node states must be visually distinct
+ * WITHOUT relying on colour alone.
  *
  * Every assertion here is hue-free on purpose. If the glyphs are ever
  * retuned so the only difference left is a palette token, this block goes

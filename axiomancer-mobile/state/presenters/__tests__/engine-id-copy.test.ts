@@ -1,9 +1,8 @@
 /**
- * FE-002 — no engine identifier may reach the player.
+ * No engine identifier may reach the player.
  *
- * The walked build printed `quest: starting-quest` as a dialogue consequence
- * chip and headlined the ERRANDS journal entry `starting-quest`. These guards
- * pin both the resolver and the two consequence branches that leaked.
+ * These guards pin both the resolver and the consequence branches that would
+ * otherwise print a slug (`quest: starting-quest`).
  */
 
 import { cardTitle, humanizeEngineId, isEngineSlug, questTitle } from '../engine-id-copy';
@@ -54,7 +53,7 @@ describe('consequenceLabel (FE-002 branches)', () => {
         ({ kind, label, amount }) as EventConsequence;
 
     it('names the errand instead of printing the quest slug', () => {
-        // No quest is authored since R7e (D72), so the title is the humanized id.
+        // No quest is authored, so the title is the humanized id.
         expect(consequenceLabel(q('quest-start', 'fixture-quest')))
             .toBe('new errand · Fixture Quest');
         expect(consequenceLabel(q('quest-progress', 'fixture-quest')))

@@ -2,11 +2,11 @@
  * Shared mobile minigame seed resolver.
  *
  * Deterministic playtest/smoke tooling can set one unified global,
- * `globalThis.__AXM_MINIGAME_SEEDS__`, while older harnesses may still
- * set the per-minigame `__AXM_*_SEED__` globals. Begin actions use the
+ * `globalThis.__AXM_MINIGAME_SEEDS__`, or the per-minigame
+ * `__AXM_*_SEED__` globals. Begin actions use the
  * same precedence everywhere:
  *
- *   explicit begin option > unified global > legacy global > fallback
+ *   explicit begin option > unified global > per-minigame global > fallback
  */
 
 export type MinigameSeedKey = 'hazard' | 'rest' | 'cache' | 'blacksmith';

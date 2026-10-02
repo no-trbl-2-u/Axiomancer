@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E tests — Phase 131 dev evidence presets.
+ * Hermetic E2E tests — dev evidence presets.
  *
  * Drives the two new dev actions end-to-end through the engine store:
  *   - `applyPlayerTierPreset` (L1/L15/L30/L50 ladder)
@@ -55,9 +55,8 @@ describe('applyPlayerTierPreset: L1/L15/L30/L50 ladder', () => {
 
         actions.applyPlayerTierPreset('kid-l50');
         const player = store.getState().player;
-        // The preset's declared equipment is vestigial (Phase 21); the build
-        // wears the starting relics `createCharacter` seeds — since R7e2 the
-        // Suppliant's Ring alone.
+        // The preset's declared equipment is ignored; the build wears the
+        // starting relic `createCharacter` seeds — the Suppliant's Ring alone.
         const worn = getEquippedItems(player.equipment);
         expect(worn.map((i) => i.id)).toEqual(['relic-disarming-plea']);
     });

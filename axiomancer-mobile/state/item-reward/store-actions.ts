@@ -1,24 +1,24 @@
 /**
- * Item-reward screen — store action glue (owner finding 10; D5 / D6 / D7).
+ * Item-reward screen — store action glue.
  *
  * The RULES live in `axiomancer-mechanics`:
  *   - `grantItem` owns the `unequipItem -> addItem -> equipItem` chain, so
  *     nothing is destroyed and a full accessory row swaps instead of no-oping;
- *   - `qualifiesForItemRewardScreen` (D5) is the one predicate that decides
+ *   - `qualifiesForItemRewardScreen` is the one predicate that decides
  *     ceremony vs. the lightweight inline grant;
- *   - `displacedBy` previews the trade so the screen can name it (D6).
+ *   - `displacedBy` previews the trade so the screen can name it.
  *
  * This module only threads those through the mobile `itemReward` slice. It
  * makes no rule decisions of its own, and it never re-derives what the engine
  * already answers.
  *
- * ## The commit model, and why dismissal is safe (D7)
+ * ## The commit model, and why dismissal is safe
  *
  * The pending item is NOT in the inventory while the screen is up — the grant
  * is exactly what CONFIRM and EQUIP commit. That would make "back" a way to
  * lose a reward, so `dismissItemRewardAction` DRAINS the whole queue as
  * CONFIRM. Back, swipe, and Android hardware-back all route there (the screen
- * commits on unmount), which is D7 stated in code: leaving keeps the item.
+ * commits on unmount): leaving keeps the item.
  *
  * ## Why the inventory is reordered after an EQUIP
  *
@@ -67,8 +67,8 @@ export interface OfferItemRewardOptions {
     /** Accessory position EQUIP should displace when the row is full. */
     replaceIndex?: number;
     /**
-     * Queue items that do NOT pass D5 as well. Default `false`: D5 partitions
-     * them out and the caller keeps its existing inline grant for them.
+     * Queue items that do NOT pass the reward-screen predicate as well.
+     * Default `false`: the predicate partitions them out and the caller keeps its existing inline grant for them.
      */
     includeInline?: boolean;
 }
@@ -77,7 +77,7 @@ export interface OfferItemRewardResult {
     /** Items now waiting on the reward screen, in the order they will show. */
     queued: readonly Item[];
     /**
-     * Items D5 sent back to the caller's lightweight inline grant. These were
+     * Items the predicate sent back to the caller's lightweight inline grant. These were
      * NOT granted here — the caller still owns them.
      */
     inline: readonly Item[];
@@ -95,8 +95,8 @@ function currentQueue(store: AppStore): readonly PendingItemReward[] {
  * Offer one item or a batch to the reward screen.
  *
  * Nothing is granted here — the grant is the player's CONFIRM / EQUIP. The
- * returned `inline` list is the caller's to grant as it does today, which is
- * exactly the split D5 asks for.
+ * returned `inline` list is the caller's to grant inline, the split
+ * `qualifiesForItemRewardScreen` decides.
  */
 export function offerItemRewardAction(
     store: AppStore,
@@ -148,7 +148,7 @@ export function offerFirstNodeRelicAction(store: AppStore): boolean {
     offerItemRewardAction(store, ring, {
         source: 'Handed over at the first waypoint',
         settleFlags: [FIRST_NODE_RELIC_FLAG],
-        // The ring qualifies under D5 on its own (signature + stat grant); the
+        // The ring qualifies for the screen on its own (signature + stat grant); the
         // flag makes that independent of a future content edit.
         includeInline: true,
     });
@@ -297,13 +297,13 @@ export function confirmItemRewardAction(store: AppStore): ItemRewardCommitResult
     return commitItemRewardAction(store, 'confirm');
 }
 
-/** EQUIP — the item goes to the satchel AND onto the body (D6: swap, never destroy). */
+/** EQUIP — the item goes to the satchel AND onto the body (swap, never destroy). */
 export function equipItemRewardAction(store: AppStore): ItemRewardCommitResult {
     return commitItemRewardAction(store, 'equip');
 }
 
 /**
- * D7 — leaving the screen is CONFIRM, for every entry still queued.
+ * Leaving the screen is CONFIRM, for every entry still queued.
  *
  * Back, swipe, and Android hardware-back land here (the screen commits on
  * unmount), so there is no exit path that loses a reward. Returns the LAST
@@ -321,7 +321,7 @@ export function dismissItemRewardAction(store: AppStore): ItemRewardCommitResult
 }
 
 /**
- * D5's predicate and D6's displacement preview, re-exported so a call site can
+ * The reward-screen predicate and the displacement preview, re-exported so a call site can
  * ask "does this deserve the screen, and what would it cost" from the one
  * module it already imports. Both are the engine's — nothing is re-derived.
  */

@@ -36,8 +36,8 @@ export function ItemGlyph({ category, sub }: { category: InventoryCategory; sub:
     if (category === 'equipment' && (sub === 'Armor' || sub === 'Shield')) {
         return <ActionIcon kind="shield" size={32} color={AXM.parchment} />;
     }
-    // FE-009: the presenter's accessory label is 'Trinket'; 'Accessory' stays
-    // accepted so a persisted or fixture row written before the rename still
+    // The presenter's accessory label is 'Trinket'; 'Accessory' stays
+    // accepted so a persisted or fixture row with the older label still
     // draws its glyph instead of falling through to the generic icon.
     if (category === 'equipment' && (sub === 'Trinket' || sub === 'Accessory')) {
         return (
@@ -145,7 +145,7 @@ export function ItemCard({ item, expanded, onTap, onUseOrEquip, onDiscard }: Ite
     const AXM = usePalette();
     const [isFocused, setIsFocused] = useState(false);
 
-    // Phase 23 — the rarity model is retired; `rarity` is always null now.
+    // Equipment carries no rarity; the presenter always passes `null`.
     const affordance = rarityAffordance(item.rarity ?? null);
     const colors = rarityColors(item.rarity ?? null, AXM);
 

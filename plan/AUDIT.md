@@ -52,6 +52,34 @@
 
 ## Pending
 
+### [bug] Memoir chronicle reads the event buffer in the wrong order (R10c3, 2026-10-02)
+- category: bug
+- impact: 5
+- ease: 8
+- detail: `state/store.ts` (~375) prepends each event to `_recentEvents`
+  (newest first), but `buildChronicle` in
+  `state/presenters/memoir.engine.ts` (~285) treats the buffer as
+  oldest-first and reverses it. The live chronicle shows the 12 oldest of
+  the 20 buffered events, oldest first, and the continent-change check walks
+  backwards in time. The tests pass only because their fixtures are
+  oldest-first. Found by the R10c3 comment sweep; the JSDoc now states the
+  mismatch.
+- next: drop the reverse (or make the buffer append), and add a test that
+  feeds the buffer through the store's real handler.
+
+### [copy] Combat die a11y label still says "SPECIAL face" (R10c3, 2026-10-02)
+- category: copy
+- impact: 2
+- ease: 9
+- detail: `combatDieA11yLabel` in
+  `components/combat/encounter/CombatDie.tsx` (~69) speaks "SPECIAL" for a
+  special face. `axiomancer-mechanics/docs/lexicon.json` retires "SPECIAL
+  face" for BOON, and the board's comments now say BOON. A screen reader
+  hears the retired word.
+- next: decide the spoken word (BOON per the lexicon, or "special" per
+  `docs/game-model.md` § Dice, which still writes it lowercase) and make the
+  label, its test and the game model agree.
+
 ### [tooling] `combat-sim`'s default loadout names two deleted cards (R10c, 2026-10-02)
 - category: tooling
 - impact: 4
@@ -554,6 +582,10 @@
     / FIGHT-FLEE / stance / STAND-DO-CLASH-LET round loop —
     `axiomancer-mobile/docs/combat.md`,
     `components/combat/encounter/CombatEncounterPanel.tsx`.
+- status (2026-10-02): every doc above is closed. Phase R10c rewrote or
+  deleted the mechanics ones; Phase R10c3 deleted
+  `engine-integration-architecture.md`. Only `.claude/agents/playtester.md`
+  remains open.
 - next: one `/iterate` tick per file (or per section for combat.md): rewrite
   the body from the named live source, drop the banner. Also dated-record
   drift the audit saw but did not touch, for the same pass if cheap:

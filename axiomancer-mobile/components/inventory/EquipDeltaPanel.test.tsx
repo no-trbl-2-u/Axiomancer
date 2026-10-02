@@ -1,7 +1,7 @@
 /**
- * Hermetic component tests — EquipDeltaPanel (Phase 133; slimmed Phase 23).
+ * Hermetic component tests — EquipDeltaPanel.
  *
- * After the equipment-signature epic the panel renders only the stat deltas and
+ * The panel renders only the stat deltas and
  * the signet-relic signature gained / lost. Pins: `isEmpty` whole-panel
  * suppression, the mode eyebrow, signed stat-chip labels + sign treatment, and
  * the signature row.
@@ -60,7 +60,7 @@ describe('EquipDeltaPanel', () => {
         expect(textColor(getByText('-1 stamina'))).toBe(AXM.blood);
     });
 
-    // Phase 19/23 — signet relic signature swap.
+    // Signet relic signature swap.
     it('renders the signature a relic grants', () => {
         const { getByText, getByTestId } = renderPanel(
             makeDelta({

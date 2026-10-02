@@ -10,11 +10,7 @@ interface StatusCardProps {
   /**
    * Optional override props for tests / fixtures. In production
    * the card reads from engine state directly via `useGameState`;
-   * the props win only when explicitly passed. Closes the
-   * `[5.5]` AUDIT row from the live-drive playtest 2026-05-22 —
-   * the card was previously rendered with NO props by every
-   * caller, so the defaults (HP 22/38, level 7, hardcoded name)
-   * were what every player saw, regardless of real game state.
+   * the props win only when explicitly passed.
    */
   name?: string;
   level?: number;
@@ -28,9 +24,8 @@ export function StatusCard(props: StatusCardProps = {}) {
   // Read from engine `state.player` so the card reflects real
   // game state. Test fixtures may still inject props directly —
   // the prop wins when defined, otherwise we fall through to the
-  // store. Phase-62 bug-sweep 2026-05-21 dropped the mana bar
-  // (mana is combat-only, owned by the Hazard-Pattern combat panel);
-  // the status card surfaces only the HP that exists out-of-combat.
+  // store. The status card surfaces only the HP that exists
+  // out-of-combat (mana is combat-only).
   const playerName = useGameState((s) => s.player?.name ?? 'WORM-EATEN PILGRIM');
   const playerLevel = useGameState((s) => s.player?.level ?? 1);
   const playerHp = useGameState((s) => s.player?.health ?? 0);
@@ -55,7 +50,7 @@ export function StatusCard(props: StatusCardProps = {}) {
         </View>
       </View>
       <View style={styles.barsCol}>
-        {/* FE-019: a quarter or less of my VITAE turns the readout and the
+        {/* A quarter or less of my VITAE turns the readout and the
           * track's edge blood, so a nearly-empty bar reads as danger rather
           * than as a bar that failed to fill. */}
         <StatBar value={hp} max={hpMax} color={AXM.blood} label="VITAE" height={8} alarmAt={0.25} />

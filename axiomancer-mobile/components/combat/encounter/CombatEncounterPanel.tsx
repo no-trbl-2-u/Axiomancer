@@ -1,8 +1,7 @@
 /**
- * CombatEncounterPanel — the Spec 26 / 26b card-and-dice combat surface,
- * extracted from `app/combat-encounter/index.tsx` (Phase 200) so the same
- * surface can be hosted by BOTH the dev route AND in-place inside the live
- * `EncounterModalOverlay` when the player triggers a map encounter.
+ * CombatEncounterPanel — the card-and-dice combat surface, hosted by BOTH
+ * the dev route (`app/combat-encounter/index.tsx`) AND in-place inside the
+ * live `EncounterModalOverlay` when the player triggers a map encounter.
  *
  * The engine `CombatEncounterState` is pure, so the panel holds it in local
  * React state and dispatches engine transitions; the presenter
@@ -13,15 +12,14 @@
  * full-screen layer).
  *
  * Live play (`persistOutcome`) hand-rolls only the write-backs that have no
- * engine equivalent — floating dice (Spec 32 v3 §5), banked Souls (Phase 32
- * part 1b), and final HP → player.health — then (Phase 54) routes the
- * outcome through the engine's real `endCombat` reducer for everything else
+ * engine equivalent — floating dice, banked Souls, and final HP →
+ * player.health — then routes the outcome through the engine's real `endCombat` reducer for everything else
  * (XP, loot, quest kill-objective advancement + completion rewards, and, on
  * a merciful win, the authored `friendshipReward` payload: flags, codex
  * unlocks, faction deltas). `beginHazardEncounter`
  * stages `state.currentEncounter` via `startCombat` so `endCombat` has a real
- * encounter to resolve against. The deckbuilder reward card is written
- * regardless — it's the new system's own reward (Spec 26b §C). Defeat HP /
+ * encounter to resolve against. The deckbuilder reward card is rolled into
+ * the store on victory whether or not `persistOutcome` is set. Defeat HP /
  * run reset is the host's concern.
  */
 
@@ -79,14 +77,14 @@ const EMPTY_OFFERS: readonly string[] = Object.freeze([]);
 const DIE_GHOST_SIZE = 49;
 const DIE_GHOST_FOOT = combatDieFootprint(DIE_GHOST_SIZE);
 
-/** WI-3 — how long an END-phase press locks the button + staging while the
+/** How long an END-phase press locks the button + staging while the
  *  threat resolves and its fx timeline plays out (IMPACT 100ms + the longest
  *  resolution animation ~880ms in CombatCombatantPane, with headroom). The lock
  *  exists only to swallow machine-gun double-taps; a legitimately new end-phase
  *  after the state has fully advanced is always ~1s away. */
 const RESOLVE_LOCK_MS = 1100;
 
-/** WI-7 — if a live drag goes this long with no pointer movement, its input
+/** If a live drag goes this long with no pointer movement, its input
  *  stream is assumed dead (a killed/interrupted pointer that never delivered an
  *  end event) and the drag is force-finalized so it can't wedge staging or leave
  *  a permanent ghost. Every `pointermove` resets the clock, so a slow-but-live
@@ -102,8 +100,8 @@ export interface CombatEncounterPanelProps {
     deck?: string[];
     /**
      * `GameState.flags` — when non-empty and loadout-shaped, overrides
-     * `bootstrapPlayer.knownCards` as the deck's card base (Phase 169's
-     * curated loadout, see `combat.loadout.ts`). Callers must pass the flags
+     * `bootstrapPlayer.knownCards` as the deck's card base (the curated
+     * loadout, see `combat.loadout.ts`). Callers must pass the flags
      * that actually correspond to `bootstrapPlayer` — the dev sandbox route
      * synthesises a demo `bootstrapPlayer` disjoint from the real player's
      * `knownCards`, so it omits this prop rather than pass the real store's
@@ -122,32 +120,31 @@ export interface CombatEncounterPanelProps {
     persistOutcome?: boolean;
     /**
      * Retreat, offered on the reveal screen only (before a die is rolled).
-     * This is where the retired encounter-prelude modal's FLEE now lives — the
-     * reveal IS the commit gate, so the choice belongs beside ENTER COMBAT.
+     * The reveal IS the commit gate, so the choice belongs beside ENTER COMBAT.
      * Omitted (dev sandbox, boss encounters) = no retreat is offered.
      */
     onWithdraw?: () => void;
     /** Fired once when the player dismisses the terminal summary. */
     onExit: (outcome: CombatOutcome | null) => void;
     /** The live map region (`vm.region` from the exploration screen), keying
-     *  the arena backdrop plate (phase 83). The dev-only sandbox route omits
+     *  the arena backdrop plate. The dev-only sandbox route omits
      *  it and gets the fallback plate, same as any unmapped region. */
     region?: string;
 }
 
 type StoreLike = ReturnType<typeof useGameStore>;
 
-/** The merciful win: a befriend through The Open Hand, spared (D47). It
+/** The merciful win: a befriend through The Open Hand, spared. It
  *  rewards like mercy: XP flows, no corpse loot. */
 function isMercifulWin(outcome: CombatOutcome): boolean {
     return outcome === 'mercy';
 }
 
 /**
- * Phase 54 — translate the hazard-pattern engine's `CombatOutcome`
- * into the vocabulary `game.reducer.ts`'s `END_COMBAT` case understands.
- * The merciful win (mercy — "won without killing") maps onto the legacy engine's `'friendship'` outcome, which is exactly the
- * "spared the foe" branch already-authored `Enemy.friendshipReward` data
+ * Translate the hazard-pattern engine's `CombatOutcome` into the
+ * vocabulary `game.reducer.ts`'s `END_COMBAT` case understands. The merciful
+ * win (mercy — "won without killing") maps onto the reducer's `'friendship'`
+ * outcome, the "spared the foe" branch that `Enemy.friendshipReward` data
  * targets. `'retreat'` is dead (`combat.encounter.types.ts` — no in-combat
  * retreat exists) and maps to `'flee'` only so this function stays total.
  */
@@ -162,12 +159,12 @@ function mapHazardOutcomeToEndCombat(
 
 /**
  * Write-back for a finished hazard encounter. Handles only what has no
- * engine equivalent — the GHOST-die pool (spec 32 v3 §5, forged dice persist
- * across combats until spent), Phase 32 part 1b's banked Harvest Souls
+ * engine equivalent — the GHOST-die pool (forged dice persist across
+ * combats until spent), the banked Harvest Souls
  * (`player.bankedSouls` accumulates `finalState.souls`, "the jar travels"
  * regardless of how the fight ended), and final HP (persists for every
  * outcome except defeat — the host's run-reset full-heals there) — then
- * (Phase 54) dispatches the real `game.reducer.ts` `endCombat` for
+ * dispatches the real `game.reducer.ts` `endCombat` for
  * everything else: XP, loot, quest kill-objective advancement + completion
  * rewards, and — on a merciful win — the authored `friendshipReward`
  * payload (flags, codex unlock, faction deltas). `endCombat` reads its own `Enemy` off the `currentEncounter`
@@ -185,10 +182,10 @@ export function applyHazardOutcome(
     enemy: Enemy,
 ): void {
     const finalHp = finalState.player.health;
-    // Spec 32 v3 §5 — the surviving floating dice, in engine truth (spent dice
+    // The surviving floating dice, in engine truth (spent dice
     // are gone forever; unspent ones arrive in the next battle's opening tray).
     const floatingDice = getFloatingDiceColors(finalState);
-    // Phase 32 part 1b — whatever Souls the fight ended with, unspent, banks
+    // Whatever Souls the fight ended with, unspent, banks
     // permanently; a combat that never generated Souls contributes 0.
     const soulsRemaining = finalState.souls ?? 0;
     store.setState((s) => {
@@ -203,7 +200,7 @@ export function applyHazardOutcome(
         }
         return { player };
     });
-    // Phase 54 — resolve the staged encounter through the engine's real
+    // Resolve the staged encounter through the engine's real
     // endCombat reducer: XP, loot, quest kill-objective advancement +
     // completion rewards, and (on 'friendship') flags/codex/faction
     // deltas, all read off Enemy.xpReward / .loot /
@@ -212,7 +209,7 @@ export function applyHazardOutcome(
     // Cascade level-ups through the engine store (applyLevelUps isn't exported,
     // so the LEVEL_UP reducer is the only public path). applyLevelUps already
     // loops internally; the guarded while-loop is belt-and-braces. Runs after
-    // endCombat since that's what actually grants the XP now.
+    // endCombat since that's what grants the XP.
     if (outcome === 'victory' || isMercifulWin(outcome)) {
         const levelUp = (store.getState() as { levelUp?: () => void }).levelUp;
         let guard = 0;
@@ -348,10 +345,7 @@ export function CombatEncounterPanel({
     const detailOpenedAt = useRef(0);
     const [tipEffect, setTipEffect] = useState<CombatEffectChipVM | null>(null);
     /**
-     * Which threat phases are expanded in the pre-combat reveal (owner directive
-     * 2026-09-13: "the enemy phases should be an accordion — we don't need to
-     * show them all by default").
-     *
+     * Which threat phases are expanded in the pre-combat reveal (an accordion).
      * Holds the 1-based `phase.index` of every OPEN row. Seeded with `1` so the
      * imminent phase — the only one that can hurt you this turn — is still read
      * at a glance, while the rest of the sequence collapses to its headers.
@@ -371,9 +365,9 @@ export function CombatEncounterPanel({
     // Signature-rune info popup (long-press / unaffordable tap) + pilgrim modal.
     const [sigInfo, setSigInfo] = useState<CombatSignatureVM | null>(null);
     const [pilgrimOpen, setPilgrimOpen] = useState(false);
-    // Deckbuilder reward (Spec 26b §C) — rolled once on victory, claimed before
-    // the summary. The offer lives in the STORE, not here: panel-local state
-    // meant navigating away mid-draft silently threw away an earned reward.
+    // Deckbuilder reward — rolled once on victory, claimed before the summary.
+    // The offer lives in the STORE, not here, so navigating away mid-draft
+    // keeps the earned reward.
     const wroteBackRef = useRef(false);
     const exitedRef = useRef(false);
     // Resolution-feedback bridge: the latest resolved engine events + a rising seq.
@@ -381,7 +375,7 @@ export function CombatEncounterPanel({
     // to the board via a bumped seq, so the pane animates exactly once per resolve.
     const fxRef = useRef<CombatEvent[]>([]);
     const [fxSeq, setFxSeq] = useState(0);
-    // WI-3 — END-phase in-flight guard. `resolvingRef` is the synchronous gate
+    // END-phase in-flight guard. `resolvingRef` is the synchronous gate
     // (checked before any dispatch, so machine-gun taps in the same frame are
     // dropped); `resolving` is the render-visible mirror that dims/disables the
     // button and suppresses staging/apply until the resolution + its fx timeline
@@ -403,17 +397,14 @@ export function CombatEncounterPanel({
     // per encounter. Nothing engine-side reads `state.seed` after init.
     const initial = useMemo(
         () => {
-            // Phase 93 — `flags` (Phase 169's curated-loadout codec,
-            // `combat-loadout-card:` entries) is an explicit prop, not read
-            // from the store here: `createNewGameState` seeds every fresh
-            // save's flags with a loadout for `STARTING_CARD_IDS`, which is
-            // NOT a subset of the dev sandbox's synthetic demo deck
-            // (`bootstrapPlayer` there diverges from the real player's
-            // `knownCards`). Reading the store unconditionally dealt a
-            // loadout card the demo player didn't know and crashed combat
-            // (`Card 'first-spadeful' is not known.`) — see fix-ci run
-            // 35317577069. Each caller now supplies flags that actually
-            // correspond to the `bootstrapPlayer` it passed.
+            // `flags` (the curated-loadout codec, `combat-loadout-card:`
+            // entries) is an explicit prop, not read from the store here:
+            // `createNewGameState` seeds every fresh save's flags with a
+            // loadout for `STARTING_CARD_IDS`, which is NOT a subset of the
+            // dev sandbox's synthetic demo deck. Reading the store would deal
+            // a loadout card the demo player doesn't know and crash combat.
+            // Each caller supplies flags that correspond to the
+            // `bootstrapPlayer` it passed.
             const s = initializeCombatEncounter(bootstrapPlayer, enemy, deck, seed, flags);
             const stamped = s.seed === undefined ? { ...s, seed: Math.floor(Math.random() * 0xffffffff) } : s;
             // AXM Log: thin mount marker only — the engine's `withLog` tap
@@ -432,24 +423,22 @@ export function CombatEncounterPanel({
     const live = state ?? initial;
     const vm = useMemo(() => buildCombatViewModel(live), [live]);
 
-    // ── momentum chain (spec 33 §3 — engine-native) — `vm.momentumV2` is read
+    // ── momentum chain — `vm.momentumV2` is read
     // straight off engine state; the panel owns only the how-it-works popup. ──
     const [momentumInfoOpen, setMomentumInfoOpen] = useState(false);
 
-    // Playtest fix 2026-09-04 — the persistent combat log. `topInset` mirrors
+    // The persistent combat log. `topInset` mirrors
     // CombatBoard's own null-safe read of the same context (no SafeAreaProvider
     // in tests) so the toggle sits directly under the HUD. The history is
     // cheap (capped at 200 lines) and only walked off `live`, so recomputing
     // every render is fine.
     const insets = useContext(SafeAreaInsetsContext);
     const topInset = insets?.top ?? 0;
-    // Bug fix 2026-09-09 — the LOG toggle and the tutorial coach both used to
-    // anchor off the static `COMBAT_HUD_HEIGHT` estimate; a full stance-check
-    // telegraph plus an active alt-win meter grows the real HUD past it, and
-    // the LOG toggle's near-opaque pill painted over the telegraph's tail
-    // line. `CombatBoard`'s `onHudLayout` reports the HUD's real measured
-    // height on every layout pass; both siblings now anchor off that once it
-    // lands, falling back to the estimate until then.
+    // The LOG toggle and the tutorial coach anchor off the HUD's real measured
+    // height (`CombatBoard`'s `onHudLayout`, reported on every layout pass),
+    // falling back to the static `COMBAT_HUD_HEIGHT` estimate until it lands.
+    // The estimate alone is too short when a full stance-check telegraph and
+    // an active alt-win meter grow the HUD.
     const [hudBottom, setHudBottom] = useState(0);
     const hudAnchor = hudBottom > 0 ? hudBottom : topInset + COMBAT_HUD_HEIGHT;
     const [logOpen, setLogOpen] = useState(false);
@@ -487,7 +476,7 @@ export function CombatEncounterPanel({
         if (resolver) void resolver(payload, x, y);
     }, [drag, dragShown]);
     drag.end = end;
-    // WI-7 — force-finalize a live drag whose pointer stream was interrupted
+    // Force-finalize a live drag whose pointer stream was interrupted
     // (pointercancel / blur / tab hidden / dead stream) so it can't leave a
     // permanent ghost or wedge staging. The finalizer is the SAME snap-home path
     // the cancel branch uses (`end(-1,-1)`).
@@ -498,10 +487,10 @@ export function CombatEncounterPanel({
     const cardGhostStyle = useAnimatedStyle(() => ({ opacity: dragShown.value, transform: [{ translateX: dragX.value - HAND_CARD_W / 2 }, { translateY: dragY.value - HAND_CARD_H / 2 - 24 }, { scale: 1.1 }] }));
     // The DIE ghost is a small chip, not a card: it must anchor at ITS OWN
     // half-size so the die stays centred under the pointer for the whole drag.
-    // CONSTRAINT: never reuse the card's half-W/H anchor for the die — that was
-    // the "die renders up-and-left of the finger" bug (playtest, 2026-07-11).
+    // CONSTRAINT: never reuse the card's half-W/H anchor for the die — the die
+    // would render up-and-left of the finger.
     const dieGhostStyle = useAnimatedStyle(() => ({ opacity: dragShown.value, transform: [{ translateX: dragX.value - DIE_GHOST_FOOT.width / 2 }, { translateY: dragY.value - DIE_GHOST_FOOT.height / 2 }, { scale: 1.1 }] }));
-    // Ineligible-target cue (owner directive 2026-07-12): while the pointer is
+    // Ineligible-target cue: while the pointer is
     // over ANY illegal drop target (an off-color or already-armed staged card,
     // rects measured by the board at drag begin), the ghost carries an ✕ —
     // "this die can't land here", said before the drop.
@@ -521,25 +510,21 @@ export function CombatEncounterPanel({
     const unstageUid = useCallback((uid: string) => setStagedUids((prev) => prev.filter((u) => u !== uid)), []);
     const onEnter = useCallback(() => apply((s) => rollEncounterDice(s).state), [apply]);
     const onStage = useCallback((uid: string) => {
-        if (resolvingRef.current) return; // WI-3 — no staging mid-resolution
+        if (resolvingRef.current) return; // no staging mid-resolution
         setStagedUids((prev) => (prev.includes(uid) ? prev : [...prev, uid]));
     }, []);
     const onUnstage = useCallback((uid: string) => unstageUid(uid), [unstageUid]);
     // APPLY one staged card (hazard model — the die is OPTIONAL). `power` true →
     // the dragged die powers the card (bottom action); `power` false → the FREE
     // base action (top action, no die). One commit; the card leaves staging.
-    // Fate Engine P1 R3, recut 2026-07-18 (owner) — the spare/bank toggle chip
-    // is GONE from the tray: the spare die always burns for +1◆ (the default).
-    // The Reserve still fills through cards (KINDLE / bank_spent_die).
     const onApply = useCallback((uid: string, dieId: string | null, power: boolean) => {
-        if (resolvingRef.current) return; // WI-3 — a drag must not land mid-resolution
+        if (resolvingRef.current) return; // a drag must not land mid-resolution
         apply((s) => {
-            // Spec 33 — every dropped die (fresh tray face, Reserve, or GHOST)
-            // is its OWN power source and is forwarded as the explicit `dieId`:
-            // the engine's `playBottomAction` REQUIRES one (no dieId fizzles
-            // "choose a die to power this card"). Phase 31 — the engine's
-            // `playCombatCard` also advances the momentum wheel and grants its
-            // die internally now; the panel no longer does either.
+            // Every dropped die (fresh tray face, Reserve, or GHOST) is its
+            // OWN power source and is forwarded as the explicit `dieId`: the
+            // engine's `playBottomAction` REQUIRES one (no dieId fizzles
+            // "choose a die to power this card"). `playCombatCard` also
+            // advances the momentum wheel and grants its die internally.
             const t = playCombatCard(s, { uid }, power, dieId ?? undefined);
             fxRef.current = t.events;
             return t.state;
@@ -550,25 +535,22 @@ export function CombatEncounterPanel({
     const onDiscard = useCallback((uid: string) => { apply((s) => discardCombatCard(s, uid).state); unstageUid(uid); }, [apply, unstageUid]);
     const onSignature = useCallback((id: string) => apply((s) => playSignatureSkill(s, id).state), [apply]);
     const onEndPhase = useCallback(() => {
-        // WI-3 — the synchronous gate: a second tap in the same frame (touch
+        // The synchronous gate: a second tap in the same frame (touch
         // double-tap) finds the lock already held and is dropped, so exactly one
         // threat phase resolves per intent.
         if (resolvingRef.current) return;
         resolvingRef.current = true;
         setResolving(true);
         apply((s) => {
-            // Spec 33 §6 — close the turn BEFORE the phase resolves: ONE unspent
+            // Close the turn BEFORE the phase resolves: ONE unspent
             // mana/special tray die BANKS to the Reserve when a slot is free
-            // (`endTurn`, combat.engine.ts). The panel used to skip straight to
-            // `resolveThreatPhase`, whose boundary just WIPES the tray, so
-            // mobile silently lost the banked die the engine promises.
-            // END-TURN BREADCRUMBS. The owner's repeat crash report is "the
-            // app closes when I end my turn", and it is a NATIVE process
-            // death (EAS preview APK) that no web harness reproduces — so
-            // nothing survives it except what was already logged. These four
-            // lines ride into Sentry as breadcrumbs (lib/monitoring.ts) and
-            // into the on-device crash tail, so the LAST one recorded names
-            // the step that died. Cheap: four entries per turn, not a hot loop.
+            // (`endTurn`, combat.engine.ts). Skipping to `resolveThreatPhase`
+            // would lose it, since that boundary WIPES the tray.
+            // END-TURN BREADCRUMBS. A native process death at end of turn
+            // leaves nothing but what was already logged. These four lines
+            // ride into Sentry as breadcrumbs (lib/monitoring.ts) and into the
+            // on-device crash tail, so the LAST one recorded names the step
+            // that died. Cheap: four entries per turn, not a hot loop.
             const log = getLogger();
             log.info('combat', 'end-phase:begin', {
                 turn: s.turn, round: s.round, phaseIndex: s.currentPhaseIndex,
@@ -597,9 +579,8 @@ export function CombatEncounterPanel({
     // the seq (captures the events stashed in fxRef just before).
     const fx = useMemo<CombatFx>(() => ({ seq: fxSeq, events: fxRef.current }), [fxSeq]);
 
-    // The enemy's turn, shown back as a card for a beat (user report 2026-08-10:
-    // "show the card so the player knows what happened on the enemy's turn").
-    // Driven off the SAME resolved-event bump the pane's floats ride, and keyed
+    // The enemy's turn, shown back as a card for a beat so the player knows
+    // what happened on the foe's turn. Driven off the SAME resolved-event bump the pane's floats ride, and keyed
     // by that seq so a repeated action still replays. `null` on every bump that
     // carried no threat resolution — a card APPLY is the player's turn, not the
     // foe's. The seq ref makes this exactly-once-per-resolve even though `live`
@@ -653,7 +634,7 @@ export function CombatEncounterPanel({
     }, [tutorialActive, primerDone, live, vm, stagedUids.length, finishTutorial]);
 
     // Claim (or skip) — the action appends the card AND persists, so the pick
-    // no longer waits on some unrelated save() to happen along.
+    // does not wait on some unrelated save() to happen along.
     const onRewardPick = useCallback((cardId: string | null) => {
         claimCombatRewardAction(store, cardId);
     }, [store]);
@@ -664,8 +645,7 @@ export function CombatEncounterPanel({
     const onInspect = useCallback((c: CombatCardVM) => { detailOpenedAt.current = Date.now(); setDetailCard(c); }, []);
     /**
      * Dismiss the card detail overlay. Shared by the backdrop, the card body,
-     * and the scrolled content so a tap ANYWHERE exits (owner directive
-     * 2026-09-13). The 350ms guard swallows the tail of the press that OPENED
+     * and the scrolled content so a tap ANYWHERE exits. The 350ms guard swallows the tail of the press that OPENED
      * the overlay, which would otherwise close it on the same gesture.
      */
     const closeCardDetail = useCallback(() => {
@@ -688,7 +668,7 @@ export function CombatEncounterPanel({
     const summary = live.finalOutcome ? buildCombatSummary(live) : null;
     const mercy = live.phase === 'mercy-choice' && !live.finalOutcome;
     const showReveal = live.phase === 'reveal';
-    // Playtest fix 2026-09-04 — the log toggle/sheet never shows over the
+    // The log toggle/sheet never shows over the
     // reveal (nothing has happened yet) or once the fight is over (the
     // summary owns that screen).
     const logAvailable = !showReveal && !live.finalOutcome;
@@ -718,7 +698,7 @@ export function CombatEncounterPanel({
                 />
             )}
 
-            {/* CombatRevealOverlay (Spec 26 §7) — read the foe before you commit */}
+            {/* CombatRevealOverlay — read the foe before you commit */}
             {showReveal && (
                 <View style={styles.reveal} testID="combat-reveal">
                     <ScrollView contentContainerStyle={styles.revealScroll}>
@@ -734,19 +714,16 @@ export function CombatEncounterPanel({
                         </View>
                         <Text style={styles.revealName}>{vm.enemy.name}</Text>
                         <Text style={styles.revealHp}>♥ {vm.enemy.hp} / {vm.enemy.maxHp}</Text>
-                        {/* FE-025: this screen is the commit gate for a fight, and it
-                          * priced the fight entirely in the foe's numbers — its VITAE
-                          * and five phases of damage aimed at me — while my own VITAE
-                          * appeared nowhere. The one figure that decides whether to
-                          * take the fight now or turn back was the missing one. */}
+                        {/* This screen is the commit gate for a fight: beside the
+                          * foe's VITAE and threat sequence, show the player's own
+                          * VITAE, the figure that decides whether to fight or turn back. */}
                         <Text style={styles.revealYours} testID="combat-reveal-player-vitae">
                             YOURS ♥ {vm.player.hp} / {vm.player.maxHp}
                         </Text>
                         <Text style={styles.revealSection}>THREAT SEQUENCE</Text>
-                        {/* Playtest fix 2026-09-04 — no line clamp on the threat
-                            text: a multi-clause phase ("Deals 12. Applies BLEED 2.")
-                            was ellipsised mid-sentence on the one
-                            screen whose whole job is to telegraph it. */}
+                        {/* No line clamp on the threat text: a multi-clause phase
+                            ("Deals 12. Applies BLEED 2.") must read in full on the
+                            one screen whose whole job is to telegraph it. */}
                         {live.threatPhases.map((p, i) => {
                             const meta = INTENT_ICONS[p.intentType ?? 'pass'];
                             // Accordion row: the header (icon + PHASE n · INTENT +
@@ -772,7 +749,7 @@ export function CombatEncounterPanel({
                                     </Pressable>
                                     <View style={[styles.revealPhaseBody, open ? null : styles.revealPhaseBodyHidden]}>
                                         {open ? (p.branch ? (
-                                            /* WS9 — a branch phase telegraphs its condition + BOTH
+                                            /* A branch phase telegraphs its condition + BOTH
                                                outcomes before commit; the taken fork is marked after. */
                                             <View>
                                                 <Text style={styles.revealBranchCond}>⑂ {p.branch.conditionText}</Text>
@@ -793,9 +770,8 @@ export function CombatEncounterPanel({
                         <Pressable onPress={onEnter} testID="combat-enter" accessibilityRole="button" accessibilityLabel="Enter combat and roll your first dice" style={[styles.revealBtn, { borderColor: AXM.sulfur }]}>
                             <Text style={[styles.revealBtnText, { color: AXM.sulfur }]}>ENTER COMBAT ›</Text>
                         </Pressable>
-                        {/* The retreat, where the retired prelude modal's FLEE now
-                            lives: the reveal is the commit gate, so the choice sits
-                            beside the commit. Absent when retreat is sealed. */}
+                        {/* The retreat: the reveal is the commit gate, so the choice
+                            sits beside the commit. Absent when retreat is sealed. */}
                         {onWithdraw && (
                             <Pressable
                                 onPress={onWithdraw}
@@ -812,10 +788,8 @@ export function CombatEncounterPanel({
                 </View>
             )}
 
-            {/* Playtest fix 2026-09-04 — the persistent combat log. Every beat
-                used to be a floating token that vanished in ~1s; this toggle
-                opens a scrollable, newest-at-the-bottom history of the whole
-                fight. Pinned top-right, directly under the HUD (mirrors
+            {/* The persistent combat log: this toggle opens a scrollable,
+                newest-at-the-bottom history of the whole fight. Pinned top-right, directly under the HUD (mirrors
                 CombatTutorialCoach's own placement below the same HUD — both
                 anchor off the measured `hudAnchor`, see above). */}
             {logAvailable && (
@@ -886,11 +860,10 @@ export function CombatEncounterPanel({
                 The developer-facing mathLine / subtitle / readNote are NEVER shown. */}
             {detailCard && (
                 <Pressable style={styles.backdrop} testID="combat-card-detail" onPress={closeCardDetail}>
-                    {/* Owner directive 2026-09-13: a card detail screen exits on a
-                        tap ANYWHERE — the card body no longer claims the touch via
-                        `onStartShouldSetResponder`, and the scrolled content is
-                        wrapped in its own Pressable so a tap landing on the prose
-                        closes too. The ✕ stays as an explicit affordance. Scroll
+                    {/* A card detail screen exits on a tap ANYWHERE — the card body
+                        does not claim the touch via `onStartShouldSetResponder`,
+                        and the scrolled content is wrapped in its own Pressable so
+                        a tap landing on the prose closes too. The ✕ stays as an explicit affordance. Scroll
                         gestures are unaffected: a drag never fires `onPress`. */}
                     <Pressable style={styles.detailModalWrap} onPress={closeCardDetail}>
                         <ScrollView
@@ -898,10 +871,9 @@ export function CombatEncounterPanel({
                             contentContainerStyle={styles.detailStack}
                         >
                             <Pressable onPress={closeCardDetail}>
-                            {/* (1) keyword DEFINITIONS at the top — ONE compact ledger
-                                (owner playtest 2026-07-18: five separate full-size boxes
-                                buried the card they were explaining). Hairline-separated
-                                rows, terse type. */}
+                            {/* (1) keyword DEFINITIONS at the top — ONE compact ledger,
+                                not a box per keyword, so the card stays visible.
+                                Hairline-separated rows, terse type. */}
                             {detailCard.detail.keywords.length > 0 && (
                                 <View style={styles.detailKeywords}>
                                     {detailCard.detail.keywords.map((k, i) => {
@@ -921,9 +893,8 @@ export function CombatEncounterPanel({
 
                             {/* (2) the LARGE rendered card over a stance-coloured radial halo.
                                 The face is the glance read only (name · free glyph · KEYWORD ·
-                                value) since the 2026-08-10 declutter — the sentence, the type
-                                strip and the die triplet it used to carry are restated BELOW,
-                                where the definitions already live. */}
+                                value); the sentence, the type strip and the die triplet are
+                                shown BELOW, where the definitions already live. */}
                             <View style={styles.detailCardWrap}>
                                 <Svg width={detailCardW + 120} height={detailCardW + 120} viewBox="0 0 100 100" style={styles.detailHalo} pointerEvents="none">
                                     <Defs>
@@ -937,15 +908,15 @@ export function CombatEncounterPanel({
                                 </Svg>
                                 <CombatCardFace card={detailCard} width={detailCardW} height={Math.round(detailCardW * 1.43)} large />
                             </View>
-                            {/* the card's own metadata strip — off the face since
-                                2026-08-10, so it reads here instead. */}
+                            {/* the card's own metadata strip — not printed on the face,
+                                so it reads here instead. */}
                             <View style={styles.detailMetaRow}>
                                 <Text style={styles.detailMetaStrip} testID="combat-card-detail-meta">{detailCard.detail.metaChip}</Text>
-                                {/* D4 — rarity as a PIP ROW beside the named band already
-                                    in the meta strip. The count is what survives greyscale
+                                {/* Rarity as a PIP ROW beside the named band already in
+                                    the meta strip. The count is what survives greyscale
                                     and colour blindness; the hue is decoration on top of
                                     it, never the signal by itself. Both come from the
-                                    wave-0 `card-rarity.engine` module — no local banding. */}
+                                    `card-rarity.engine` module — no local banding. */}
                                 <View
                                     style={styles.detailRarityPips}
                                     testID="combat-card-detail-rarity"
@@ -958,11 +929,8 @@ export function CombatEncounterPanel({
                                 </View>
                             </View>
 
-                            {/* (3) the NO-DIE / +DIE fork — RESTORED 2026-08-10. It was retired
-                                on 2026-07-16 because the face carried the free glyph, the paid
-                                sentence and the printed die lines itself; now that the face is
-                                bare, this is the only place a player can read what the card
-                                actually does. Keywords bold out of the sentence and are defined
+                            {/* (3) the NO-DIE / +DIE fork. The face is bare, so this is the
+                                only place a player can read what the card actually does. Keywords bold out of the sentence and are defined
                                 in the ledger at the top. */}
                             <View style={styles.detailPlays}>
                                 <View style={styles.detailPlayRow}>
@@ -981,21 +949,18 @@ export function CombatEncounterPanel({
                                     </View>
                                 </View>
                             </View>
-                            {/* STACKS survives the 2026-09-21 declutter: whether a status
-                                stacks is exactly why a player replays a card mid-fight.
+                            {/* STACKS stays: whether a status stacks is exactly why a
+                                player replays a card mid-fight.
                                 The ▲/—/▼ legend rides the triplet itself and the
                                 colour-match hint rides the ◆ tag of the row it qualifies.
                                 The VM still carries both for the DECK screen, which is
                                 read out of combat and can afford full sentences. */}
                             {detailCard.detail.stacksText ? <Text style={styles.detailStacks}>{detailCard.detail.stacksText}</Text> : null}
 
-                            {/* KW-7 (phase 29, re-scoped 2026-07-12) — system-term definitions
-                                (Conviction, Resonance, Reserve/Pips, Floating, WILD/X):
-                                ONLY the entries THIS card's printed lines reference, derived
-                                per-card by the presenter (systemTermsForCard). The wholesale
-                                six-entry dump made every inspect a scrolling wall (owner
-                                playtest) — a card's inspect explains only what the card
-                                actually uses, each term at most once. */}
+                            {/* System-term definitions (Conviction, Resonance,
+                                Reserve/Pips, Floating, WILD/X): ONLY the entries THIS
+                                card's printed lines reference, derived per-card by the
+                                presenter (systemTermsForCard), each term at most once. */}
                             {detailCard.detail.systemTerms.length > 0 && (
                                 <View style={styles.systemsGlossary}>
                                     {detailCard.detail.systemTerms.map(s => (
@@ -1007,14 +972,9 @@ export function CombatEncounterPanel({
                                 </View>
                             )}
 
-                            {/* (4) FLAVOR — DELETED from the combat overlay, 2026-09-21
-                                (owner finding 6: "flavor text should not appear in the
-                                combat card detail"). Mid-fight the player is deciding
-                                which die to spend, and a paragraph of fiction between
-                                them and that decision is the busiest thing on the panel.
-                                The prose is NOT deleted from the data — `card.flavor`
-                                still rides the VM and the DECK screen is its home, where
-                                it is read between fights. Do not restore it here. */}
+                            {/* No flavor text here: mid-fight the player is deciding which
+                                die to spend. `card.flavor` still rides the VM; the DECK
+                                screen shows it, read between fights. */}
                             </Pressable>
                         </ScrollView>
 
@@ -1211,12 +1171,10 @@ export function CombatEncounterPanel({
             {/* drag ghost — persistently mounted after the first drag; dragShown
                 gates visibility so a finished drag leaves it hidden, not unmounted */}
             {ghostPayload && (
-                // WI-7 — the ghost is a purely-visual clone that follows the
-                // finger. It must carry its OWN testID and be hidden from
-                // accessibility: without this it inherited the source node's
-                // testID + aria, which surfaced DUPLICATE dice (two
-                // `combat-die-*` nodes) and phantom "available to draft" entries
-                // to screen readers.
+                // The ghost is a purely-visual clone that follows the finger.
+                // It carries its OWN testID and is hidden from accessibility,
+                // so it never surfaces as a duplicate die (a second
+                // `combat-die-*` node) or a phantom entry to screen readers.
                 <Animated.View
                     pointerEvents="none"
                     testID="combat-drag-ghost"
@@ -1225,8 +1183,7 @@ export function CombatEncounterPanel({
                     style={[styles.ghost, ghostPayload.type === 'card' ? cardGhostStyle : dieGhostStyle]}
                 >
                     {ghostPayload.type === 'card' ? (
-                        // The dragged card keeps its real face (was a stripped name-only box
-                        // that looked like a different, "old" card mid-drag).
+                        // The dragged card keeps its real face.
                         <CombatCardFace card={ghostPayload.card} width={HAND_CARD_W} height={HAND_CARD_H} />
                     ) : (
                         <>
@@ -1245,7 +1202,7 @@ export function CombatEncounterPanel({
 
 const useStyles = makeStyles((AXM) => ({
     root: { flex: 1, width: '100%', height: '100%' },
-    // Playtest fix 2026-09-04 — the persistent combat log toggle + sheet.
+    // The persistent combat log toggle + sheet.
     logToggle: {
         position: 'absolute', right: 10, zIndex: 20,
         borderWidth: 1.5, borderColor: AXM.sulfur, backgroundColor: 'rgba(10,8,6,0.82)',
@@ -1296,9 +1253,9 @@ const useStyles = makeStyles((AXM) => ({
     detailStatLabel: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 0.8, color: AXM.bone },
     detailStatValue: { fontFamily: FONTS.mono, fontSize: 13, color: AXM.parchment },
     detailStacks: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 11, color: AXM.bone, marginTop: 6 },
-    // 2026-08-10 declutter — everything the bare face no longer prints reads here.
+    // Everything the bare face does not print reads here.
     detailMetaStrip: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1.6, color: AXM.bone, opacity: 0.7, marginBottom: 8 },
-    // D4 — the rarity pip row sits on the meta strip's own line, so the band
+    // The rarity pip row sits on the meta strip's own line, so the band
     // costs no extra row in a panel that must fit one 360pt screen.
     detailMetaRow: { alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
     detailRarityPips: { flexDirection: 'row', alignItems: 'center', gap: 3, marginBottom: 8 },
@@ -1313,13 +1270,13 @@ const useStyles = makeStyles((AXM) => ({
     detailFreeBox: { alignSelf: 'stretch', marginBottom: 8 },
     detailFreeLine: { fontFamily: FONTS.serif, fontSize: 12.5, color: AXM.bone, lineHeight: 17, marginBottom: 5 },
     detailPowerLine: { fontFamily: FONTS.serif, fontSize: 12.5, lineHeight: 17, marginBottom: 5 },
-    // KW-7 (phase 29) — systems glossary (Conviction/Resonance/Reserve+Pips/Floating/WILD-X).
+    // Systems glossary (Conviction/Resonance/Reserve+Pips/Floating/WILD-X).
     systemsGlossary: { alignSelf: 'stretch', marginTop: 6, marginBottom: 4, paddingTop: 6, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)' },
     systemsGlossaryLine: { fontFamily: FONTS.sans, fontSize: 9.5, color: AXM.bone, opacity: 0.65, lineHeight: 15, marginBottom: 3 },
     systemsGlossaryTerm: { fontFamily: FONTS.sans, fontSize: 9.5, letterSpacing: 1, color: AXM.ash, opacity: 1 },
     detailReadNote: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 11, color: AXM.bone, lineHeight: 15 },
     detailLine: { fontFamily: FONTS.serif, fontSize: 13, color: AXM.parchment, lineHeight: 18 },
-    // 2026-07-18 (owner playtest) — ONE compact ledger, not a box per keyword.
+    // ONE compact ledger, not a box per keyword.
     detailKeywords: { alignSelf: 'stretch', marginBottom: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)', borderRadius: 6, backgroundColor: 'rgba(0,0,0,0.65)', overflow: 'hidden' },
     detailKeywordsHead: { fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 1.5, color: AXM.bone, opacity: 0.7, marginBottom: 7 },
     detailKeywordRow: { alignSelf: 'stretch', paddingHorizontal: 10, paddingVertical: 6 },
@@ -1382,7 +1339,7 @@ const useStyles = makeStyles((AXM) => ({
     revealPortrait: { borderWidth: 2, borderRadius: 6, padding: 6, backgroundColor: AXM.deepBg },
     revealName: { fontFamily: FONTS.gothic, fontSize: 24, color: AXM.parchment, marginTop: 12, textAlign: 'center' },
     revealHp: { fontFamily: FONTS.mono, fontSize: 13, color: AXM.blood, marginTop: 2 },
-    // FE-025 — the player's side of the same trade, quieter than the foe's.
+    // The player's side of the same trade, quieter than the foe's.
     revealYours: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.bone, letterSpacing: 1, marginTop: 2 },
     revealSection: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.2, color: AXM.sulfur, marginTop: 20, marginBottom: 8, alignSelf: 'stretch' },
     revealPhase: { alignSelf: 'stretch', borderWidth: 1, borderColor: AXM.ash, backgroundColor: 'rgba(0,0,0,0.35)', paddingHorizontal: 9, paddingVertical: 4, marginBottom: 7 },
@@ -1396,7 +1353,7 @@ const useStyles = makeStyles((AXM) => ({
     revealPhaseIcon: { fontSize: 20, lineHeight: 22 },
     revealPhaseLabel: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 0.6, color: AXM.parchment },
     revealPhaseText: { fontFamily: FONTS.serif, fontSize: 12, color: AXM.bone, marginTop: 2, lineHeight: 15 },
-    // WS9 — branch fork rows in the threat sequence
+    // Branch fork rows in the threat sequence
     revealBranchCond: { fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 0.6, color: AXM.sulfur, marginTop: 2 },
     revealBranchTaken: { color: AXM.parchment },
     revealBtn: { borderWidth: 2, paddingHorizontal: 30, paddingVertical: 12, marginTop: 22, backgroundColor: 'rgba(212,192,38,0.12)' },

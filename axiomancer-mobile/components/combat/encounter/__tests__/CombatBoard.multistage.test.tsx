@@ -1,8 +1,7 @@
 /**
- * CombatBoard — multi-card staging (2026-06-22).
+ * CombatBoard — multi-card staging.
  *
- * The board now accepts `stagedUids: string[]` (was a single `stagedUid`) so the
- * player can stage SEVERAL cards at once, hazard-style — each renders its own
+ * The board accepts `stagedUids: string[]` so the player can stage SEVERAL cards at once, hazard-style — each renders its own
  * staged frame + die slot + APPLY. The drag/drop + per-card die-drop path uses
  * gestures + `measureInWindow`, which jest can't drive; this asserts the pure
  * render logic: given N staged uids, N staged cards render and the count shows.
@@ -19,8 +18,7 @@ import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 import { tapCombatDie } from '@/test-utils/tapCombatDie';
 
-// A four-card hand off the grey office (the whole library since the card
-// purge, 2026-09-27).
+// A four-card hand off the grey office (the whole card library).
 const CARDS = ['grey-strike', 'grey-ward', 'grey-word', 'grey-strike'];
 
 const noopDrag = (): DragController =>
@@ -51,9 +49,8 @@ describe('CombatBoard — multi-card staging', () => {
         );
         render(tree);
 
-        // Both staged cards render (was impossible with the old single-staged board),
-        // each with its own APPLY ribbon (the 2026-07 polish dropped the text count —
-        // the staged row itself is the count).
+        // Both staged cards render, each with its own APPLY ribbon (there is no
+        // text count — the staged row itself is the count).
         expect(screen.getByTestId(`combat-staged-${uids[0]}`)).toBeTruthy();
         expect(screen.getByTestId(`combat-staged-${uids[1]}`)).toBeTruthy();
         expect(screen.getByTestId(`combat-apply-${uids[0]}`)).toBeTruthy();
@@ -90,10 +87,10 @@ describe('CombatBoard — multi-card staging', () => {
         expect(cbs.onEndPhase).toHaveBeenCalledTimes(1);
     });
 
-    // WI-3 — a threat phase resolving must lock the END button: a touch
-    // double-tap used to machine-gun `onEndPhase`, resolving several phases with
-    // zero player turns between them (2026-07-12 playtest). The board renders the
-    // button disabled and its handler no-ops while `resolving`.
+    // A threat phase resolving must lock the END button, so a touch double-tap
+    // cannot machine-gun `onEndPhase` and resolve several phases with zero
+    // player turns between them. The board renders the button disabled and its
+    // handler no-ops while `resolving`.
     it('END PHASE is disabled + press-inert while a phase is resolving', () => {
         const { store } = withAllProviders(<></>);
         const base = store.getState().player;

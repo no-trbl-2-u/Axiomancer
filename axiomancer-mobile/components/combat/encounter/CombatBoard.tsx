@@ -1,19 +1,18 @@
 /**
- * Spec 26 / 26b — the Combat board (HP model + drag-to-power UX), rebuilt to the
- * combat-screen-polish 2026-07 layout (design/combat-screen-polish-2026-07.md).
+ * The Combat board (HP model + drag-to-power UX); layout per
+ * axiomancer-mobile/design/combat-screen-polish-2026-07.md.
  *
- * The interaction model is unchanged:
+ * The interaction model:
  *   1. drag a card UP into the play region to STAGE it (drag to SCRAP to discard);
  *   2. drag a DIE onto the staged card to power it (the die is *selected*, not
  *      yet committed — you can re-drag a different die);
  *   3. read the card's live keyword line (the stance-read + projected hit);
  *   4. tap APPLY (the ribbon fused to the staged card) to commit.
- * Every die is chosen explicitly (spec 33 — no draft): a die powers only the
- * card it was dropped (or tapped) onto, and a card with no die commits FREE.
- * Nothing auto-attaches — that was the stale-powered bug ("the NEXT card
- * appears powered", owner playtest 2026-07-12).
+ * Every die is chosen explicitly (no draft): a die powers only the card it
+ * was dropped (or tapped) onto, and a card with no die commits FREE. Nothing
+ * auto-attaches, so a die never appears to power the next card.
  *
- * The housing is new — a full-bleed battlefield with floating chrome:
+ * The housing is a full-bleed battlefield with floating chrome:
  *   battlefield + top HUD      → CombatCombatantPane (absolute-fill overlay)
  *   play region                → invisible drop target; dashed affordance only
  *                                while a card drag is live; staged cards float
@@ -48,7 +47,7 @@ import type {
     CombatMomentumV2VM,
 } from '@/state/presenters/combat-encounter.engine';
 import { armedValue, dieCanPowerCardVM, STANCE_COLORS } from '@/state/presenters/combat-encounter.engine';
-// D4 (2026-09-21) — the ONE mobile source for the rarity band. The face never
+// The ONE mobile source for the rarity band. The face never
 // re-bands a rank and never re-types a rarity hue; see `card-rarity.engine.ts`.
 import { rarityFor, RARITY_LABEL, RARITY_PIPS, RARITY_COLOR } from '@/state/presenters/card-rarity.engine';
 import { TrashGlyph, LedgerMark } from '@/components/hazard/glyphs';
@@ -110,7 +109,7 @@ function measureRect(ref: React.RefObject<View | null>): Promise<Rect | null> {
  * a loose drop); `inPlayArea` is whether the release landed inside the play
  * region. Enforces THE COLOR LAW (see `dieCanPowerCardVM` — the engine's
  * `playCombatCard` gate, combat.engine.ts ~:1339) AND the one-die-per-card
- * staging law (owner directive 2026-07-12) at the drop itself:
+ * staging law at the drop itself:
  *   · a direct hit on an ineligible card — off-color, OR already carrying a
  *     dropped die — REJECTS (returns null: the die snaps home, nothing is
  *     selected, no fizzle can ever reach the engine);
@@ -136,8 +135,7 @@ export function resolveDieDropTarget(
 }
 
 /** The armed staged card's tint (keyword/value/border + the APPLY ribbon).
- *  Spec 33 retired the hidden-stance read — every play lands printed — so
- *  there is one armed tint, not an ▲/▼ read palette. */
+ *  Every play lands printed, so there is one armed tint. */
 const ARMED_ACCENT = HUE.stoneGrey;
 
 // Render a sentence with each keyword name BOLDED (Sanguine-Step style). Shared by
@@ -184,11 +182,9 @@ function SignatureColumn({ conviction, signatures, onCast, onInfo, top, onMeasur
                 accessibilityLabel={`${conviction} conviction`}
             >
                 <Text style={[styles.convictionText, { color: AXM.sulfur }]} allowFontScaling={false}>◆ {conviction}</Text>
-                {/* FE-021: name it. This chip is the board's whole economy — every
-                  * rune below it is priced in ◆, and the enemy telegraph offers
-                  * '+1◆' — but the word CONVICTION appeared nowhere on the board,
-                  * only in the chip's accessibility label. A first-time player
-                  * could see the number move and never learn what it was. */}
+                {/* Name the economy: every rune below is priced in ◆ and the
+                  * enemy telegraph offers '+1◆', so the chip prints the word
+                  * CONVICTION rather than leaving it to the a11y label. */}
                 <Text style={styles.convictionCaption} allowFontScaling={false}>CONVICTION</Text>
             </View>
             {signatures.map((s) => (
@@ -221,7 +217,6 @@ function SignatureColumn({ conviction, signatures, onCast, onInfo, top, onMeasur
 
 // ── Dice row (free-floating gems above the hand) ─────────────────────────────
 
-// Owner declutter pass 2026-07-19: the 54pt cube crowded the board — shave ~1/8.
 const TRAY_DIE_SIZE = 47;
 
 // The rune column's resting anchor, and the gap it keeps above the dice tray
@@ -234,7 +229,7 @@ const SIG_TRAY_CLEARANCE = 10;
 // inset. Exported for the rail test — the readout must sit inside this.
 export const RAIL_LINE_H = 26;
 
-// ── The hand fan's chrome-free band (cluster S1-board-C11) ───────────────────
+// ── The hand fan's chrome-free band ──────────────────────────────────────────
 // The two bottom corners are chrome, not board: the player medallion sits at
 // left 10 and is PLAYER_DOCK_FOOTPRINT_W wide, the END stack at right 10 with
 // an 80pt disc. The fan prefers the band BETWEEN them — but only a hand that
@@ -250,8 +245,7 @@ export const HAND_FAN_MIN_STEP = 28;
 export const HAND_FAN_BOARD_EDGE = 12;
 
 /**
- * Lay the hand fan out in the widest band it can honestly use (cluster
- * S1-board-C11).
+ * Lay the hand fan out in the widest band it can honestly use.
  *
  * Inputs: `screenW` (viewport width) and `n` (number of fanned cards).
  * Outputs: `band` — the width the fan lays out in; `step` — the visible width
@@ -261,10 +255,9 @@ export const HAND_FAN_BOARD_EDGE = 12;
  * corner medallions is preferred, and a hand that seats there above the sliver
  * floor takes it — such a fan clears both corners entirely. A hand that does
  * NOT seat there takes the full board band instead: forcing it into the narrow
- * band shaved every card to the 28pt floor (four of five names cut to two
- * letters, all art and cost chips hidden, each a 28pt drag target) AND still
- * overflowed the band, so the last card landed half under the END disc with
- * its keyword chip cut mid-word. A readable fan the corner chrome floats over
+ * band would shave every card to the 28pt floor (names cut to two letters,
+ * art and cost chips hidden, each a 28pt drag target) AND still overflow the
+ * band, landing the last card half under the END disc. A readable fan the corner chrome floats over
  * beats an unreadable one crushed beside it.
  */
 /**
@@ -278,26 +271,22 @@ export const HAND_FAN_BOARD_EDGE = 12;
  * + 5    `plateBand.gap` (pip → text)
  * = 17.5
  *
- * D4 (2026-09-21) turned the single pip into a three-slot TRACK and this number
- * did not move, which is the whole reason the track stacks vertically: the
- * track is a column, so its width is still exactly one `plateRarityPip.width`.
- * A horizontal row would have made this 31.5 and cost every fanned card ~14pt
- * of name.
+ * The rarity pip is a three-slot TRACK that stacks vertically, so its width
+ * is still exactly one `plateRarityPip.width`. A horizontal row would make
+ * this 31.5 and cost every fanned card ~14pt of name.
  *
  * Exported so the fan and its tests read ONE number, and gated for real:
  * `CombatBoard.handfan.test.tsx` renders {@link useCombatBoardStyles} and sums
  * `faceCard.borderWidth + plateBand.paddingHorizontal + plateRarityPip.width +
  * plateBand.gap` off the SHIPPED sheet, so moving any one of those four styles
- * turns this constant red instead of quietly re-clipping every name. (Until
- * the 2026-09-20 burn-day audit that test re-typed the four numbers as
- * literals beside the constant — a tautology that could never fail.)
+ * turns this constant red instead of quietly re-clipping every name.
  */
 export const NAME_BAND_LEFT_CHROME = 17.5;
 
 /**
  * How much of a FANNED card's name column the player can actually see.
  *
- * Cluster CB-handfan (`plan/CRITIQUE.md` [MED], pass 37). In the fan, card `i`
+ * In the fan, card `i`
  * is covered by card `i+1`, which is opaque (`faceCard.backgroundColor`) and
  * paints on top (`zIndex: i` ascending), so only `step` points of each covered
  * card survive. The name band's own chrome eats the first
@@ -345,7 +334,7 @@ function DiceRow({
     const AXM = usePalette();
     const styles = useStyles();
 
-    // ── Spec 33 (Phase D6f) — The Roll Ritual ────────────────────────────────
+    // ── The Roll Ritual ──────────────────────────────────────────────────────
     // The tumble choreographs the four dice onto the faces the engine ALREADY
     // rolled — it never decides an outcome.
     const reducedMotion = useReducedMotion();
@@ -384,7 +373,7 @@ function DiceRow({
                 // onEnd/onFinalize: the drop never resolved and the ghost stuck.
                 const draggable = die.draggable;
                 const isAssigned = assignedDieIds.has(die.id);
-                // An X die (the `reroll_spent` legacy bag can still land one) is
+                // An X die (the `reroll_spent` bag can still land one) is
                 // dead — a static struck pip, never draggable.
                 if (die.isX) {
                     return (
@@ -394,7 +383,7 @@ function DiceRow({
                     );
                 }
                 const dieDimmed = draggingDieId === die.id;
-                // The SPECIAL face's real payload (gear may raise it above the
+                // The BOON face's real payload (gear may raise it above the
                 // stock 2) — spoken in the die's a11y label.
                 const specialConviction = vm.dieGear?.slots.find((s) => s.color === die.color)?.specialConviction;
                 const node = (
@@ -436,7 +425,7 @@ function DiceRow({
                     <View key={die.id}>{node}</View>
                 );
             })}
-            {/* Spec 33 (Phase D6f) — tap-to-skip: while any die is mid-tumble a
+            {/* Tap-to-skip: while any die is mid-tumble a
                 transparent overlay catches a tap and snaps every die to its
                 settled (engine-rolled) face. Absent once settled, so it never
                 sits in front of the dice drags. */}
@@ -474,11 +463,11 @@ export const StagedCard = React.memo(function StagedCard({
      *  highlight, deliberately not an animation: N staged cards each running an
      *  infinite pulse measurably chugged die drags.) */
     socketPulse?: boolean;
-    /** THE COLOR LAW + staging law during a die drag (owner directives
-     *  2026-07-12): true while the dragged die CANNOT land on this card —
-     *  off-color (non-wild) OR the card already carries a dropped die — the
-     *  card dims like every other disabled control and reads disabled to
-     *  a11y; the drop itself is rejected in `resolveDieDropTarget`. */
+    /** THE COLOR LAW + staging law during a die drag: true while the dragged
+     *  die CANNOT land on this card — off-color (non-wild) OR the card already
+     *  carries a dropped die — the card dims like every other disabled
+     *  control and reads disabled to a11y; the drop itself is rejected in
+     *  `resolveDieDropTarget`. */
     dropIneligible?: boolean;
     /** Rising nonce: a drop on this card was just REJECTED → a brief shake
      *  (the loud-rejection cue; the reason line renders at board level). */
@@ -491,15 +480,14 @@ export const StagedCard = React.memo(function StagedCard({
     const styles = useStyles();
     const f = card.face;
     // Drop-confirmation pop (a nudge, not the full status-proc "main event")
-    // and rejection SHAKE (loud rejection, owner directive 2026-07-12: a quick
-    // left-right shudder on the exact card that refused the drop) — lib/juice
-    // primitives (phase 38), reduced-motion + escape-hatch gated centrally.
+    // and rejection SHAKE (a quick left-right shudder on the exact card that
+    // refused the drop) — lib/juice primitives, reduced-motion + escape-hatch
+    // gated centrally.
     const popStyle = useJuicePulse(popKey, 0.4);
     const shakeStyle = useJuiceShake(rejectKey, 'low');
     const armed = assignedDie !== null;
     const armedColor = armed ? ARMED_ACCENT : AXM.bone;
-    // Option A rail needs width: staged faces track the hand-card proportion
-    // (shaved with it in the 2026-07-19 declutter pass).
+    // Staged faces track the hand-card proportion.
     const cardW = compact ? 92 : 112;
     const cardH = compact ? 135 : 164;
     // The keyword line shows the POWER value; for guard it is recomputed live —
@@ -507,15 +495,15 @@ export const StagedCard = React.memo(function StagedCard({
     // number is exact at commit.
     let heroOverride: string | undefined;
     if (armed && f.armable) {
-        // Phase 104 — a grey card's colour-match bonus is neutral, even off wild.
+        // A grey card's colour-match bonus is neutral, even off wild.
         const colorMatch = card.stance !== 'any'
             && (assignedDie!.color === card.stance || assignedDie!.color === 'wild');
         const g = armedValue(f, colorMatch);
         // Commit value: Guard NN / +NN% Vulnerable / NN DoT total.
         if (g != null) heroOverride = f.kind === 'guard' ? `Guard ${g}` : f.kind === 'vulnerable' ? `+${g}%` : `${g}`;
     }
-    // P2 — spell out the APPLY suffix instead of a bare glyph: a powered play
-    // names the die color; the dieless out reads FREE.
+    // The APPLY suffix: a powered play names the die color; the dieless out
+    // reads FREE.
     const applyLabel = !armed
         ? 'APPLY · FREE'
         : assignedDie?.color
@@ -596,26 +584,24 @@ export const StagedCard = React.memo(function StagedCard({
     );
 });
 
-// ── Spec 33 §3 (Phase D6b) — the momentum chain chip ─────────────────────────
+// ── The momentum chain chip ──────────────────────────────────────────────────
 
 const CHAIN_GLYPHS: Record<string, string> = { heart: '♥', body: '⚡', mind: '★' };
 
-// S1-board-C19 — the momentum chip's ⓘ tap mark is a plated box of this
-// width, set apart by this gap; `chipInfoGutter` mirrors the pair on the row's
-// leading edge so the readout keeps the centre line it held before the mark.
+// The momentum chip's ⓘ tap mark is a plated box of this width, set apart by
+// this gap; `chipInfoGutter` mirrors the pair on the row's leading edge so the
+// readout stays on the centre line.
 // The glyph measures ~15pt in the capture (U+24D8 rides wide), so the box is
 // sized to seat it with a plate's worth of air, borders included.
 export const CHIP_INFO_MARK_W = 24;
 export const CHIP_INFO_MARK_GAP = 5;
 
-/** The spec-33 momentum chain: a single color + length (heart→body→mind),
- *  NOT the three-node wheel. A BREAK collapses it to null and reads LOUD
- *  (owner-locked strict rule — the chip teaches it); a SURGE flashes gold.
+/** The momentum chain: a single color + length (heart→body→mind). A BREAK
+ *  collapses it to null and reads LOUD (strict rule — the chip teaches it); a
+ *  SURGE flashes gold.
  *
  *  Inputs: the momentum-V2 VM and the "how momentum works" opener. Output: the
- *  chip row. Cluster S1-board-C19 — this chip OPENS something and the stance
- *  chip directly below it does not, so it now carries a visible ⓘ mark: the
- *  tappable one of the pair is the one that says it is tappable. The mark
+ *  chip row. The chip opens a popup, so it carries a visible ⓘ mark. The mark
  *  carries its own backing plate (it sits on the arena floor, not on the
  *  readout's plate) and a mirrored leading gutter, so marking the chip neither
  *  costs the mark its contrast nor costs the readout its centre line. */
@@ -632,9 +618,8 @@ function MomentumChainChip({ vm, onPress }: { vm: CombatMomentumV2VM; onPress?: 
             accessibilityLabel={a11y}
             accessibilityHint="Tap for how momentum works"
         >
-            {/* S1-board-C19 — the tap mark's mirror. An empty box of the mark's
-                own footprint, so adding the mark did not shove the readout off
-                the centre line it held. */}
+            {/* The tap mark's mirror: an empty box of the mark's own
+                footprint, so the readout stays on the centre line. */}
             <View style={styles.chipInfoGutter} testID="combat-momentum-info-gutter" />
             {broke ? (
                 <Text style={[styles.chainBroke, { color: AXM.blood }]} allowFontScaling={false} testID="combat-momentum-broke">
@@ -676,7 +661,7 @@ function MomentumChainChip({ vm, onPress }: { vm: CombatMomentumV2VM; onPress?: 
                     ) : null}
                 </>
             )}
-            {/* S1-board-C19 — the tap mark. Always drawn, in every chain state. */}
+            {/* The tap mark. Always drawn, in every chain state. */}
             <Text style={styles.chipInfoMark} allowFontScaling={false} testID="combat-momentum-info-mark">ⓘ</Text>
         </Pressable>
     );
@@ -686,11 +671,11 @@ function MomentumChainChip({ vm, onPress }: { vm: CombatMomentumV2VM; onPress?: 
 
 function EndPhaseMedallion({ onPress, consequence = null, disabled = false }: {
     onPress: () => void;
-    /** Owner directive 2026-07-12 (no-softlock telegraph): the honest one-line
+    /** No-softlock telegraph: the honest one-line
      *  consequence of ending now (verified engine behavior, never invented) —
      *  rendered under the medallion and folded into the a11y label. */
     consequence?: string | null;
-    /** WI-3 — dimmed + press-inert while a phase is resolving (double-tap guard). */
+    /** Dimmed + press-inert while a phase is resolving (double-tap guard). */
     disabled?: boolean;
 }) {
     const AXM = usePalette();
@@ -754,7 +739,7 @@ export interface CombatBoardProps {
     onDiscard: (uid: string) => void;
     onSignature: (id: string) => void;
     onEndPhase: () => void;
-    /** WI-3 — true while a threat phase is resolving (and its fx timeline plays).
+    /** True while a threat phase is resolving (and its fx timeline plays).
      *  The END button renders disabled + dimmed and the auto-apply/end-phase
      *  handler no-ops, so a touch double-tap can't machine-gun several phases. */
     resolving?: boolean;
@@ -774,7 +759,7 @@ export interface CombatBoardProps {
      *  of the static `COMBAT_HUD_HEIGHT` estimate. */
     onHudLayout?: (height: number) => void;
     /** The live map region (`vm.region` from the exploration screen), keying
-     *  the arena backdrop plate (phase 83). Omitted by the dev-only sandbox
+     *  the arena backdrop plate. Omitted by the dev-only sandbox
      *  route, which falls back to the plate every unmapped region gets. */
     region?: string;
 }
@@ -810,7 +795,7 @@ export const CombatBoard = React.memo(function CombatBoard({
     const [pendingDieByUid, setPendingDieByUid] = useState<Record<string, string>>({});
     // Rising drop-confirmation nonce for the card a die just landed on (scale-pop).
     const [dropPop, setDropPop] = useState<{ uid: string; n: number }>({ uid: '', n: 0 });
-    // Loud rejection (owner directive 2026-07-12): a rejected die drop shakes
+    // Loud rejection: a rejected die drop shakes
     // the refusing card (`uid` — '' for a loose rejection) and surfaces the
     // reason as a visible line, auto-cleared after a beat.
     const [dropReject, setDropReject] = useState<{ uid: string; reason: string; n: number }>({ uid: '', reason: '', n: 0 });
@@ -880,7 +865,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                 setPendingDieByUid((prev) => ({ ...prev, [t]: payload.dieId }));
                 setDropPop((prev) => ({ uid: t, n: prev.n + 1 }));   // confirm the drop landed HERE
             } else if (hitUid || inPlayArea) {
-                // LOUD rejection (owner directive 2026-07-12): the refusing card
+                // LOUD rejection: the refusing card
                 // shakes and the reason renders as a visible line — never just
                 // an a11y whisper. A drop outside the play area stays silent
                 // (that's an aborted drag, not a refusal).
@@ -920,9 +905,8 @@ export const CombatBoard = React.memo(function CombatBoard({
     (drag as DragController & { resolveDrop?: typeof resolveDrop }).resolveDrop = resolveDrop;
 
     // ── stable gesture layer (multi-card staging perf) ───────────────────────
-    // Gestures used to be REBUILT on every render — with several staged cards
-    // each interaction re-created and re-attached every pan/tap handler on the
-    // board, and the drags degraded the longer cards sat staged. Now:
+    // Rebuilding gestures every render re-attaches every pan/tap handler on
+    // the board and degrades drags while several cards sit staged. So:
     //   · latest handlers live in refs, bridged through IDENTITY-STABLE JS
     //     callbacks (runOnJS mappings never change);
     //   · each card/die gets its gesture built ONCE, cached by uid;
@@ -951,7 +935,7 @@ export const CombatBoard = React.memo(function CombatBoard({
         if (card) onInspectRef.current(card);
     }, []);
     const unstageJS = useCallback((uid: string) => { onUnstageRef.current(uid); }, []);
-    // Tap-to-power (playtest 2026-09-04: a tap on a die did nothing). With
+    // Tap-to-power. With
     // exactly ONE card staged, a tap routes the die to it exactly as a drop
     // would — through the same `resolveDieDropTarget` gate (THE COLOR LAW +
     // one-die-per-card), so an illegal pairing is refused silently, the way a
@@ -1030,12 +1014,12 @@ export const CombatBoard = React.memo(function CombatBoard({
     const fan = vm.hand.filter((c) => !stagedSet.has(c.uid));
     const n = fan.length;
     const mid = (n - 1) / 2;
-    // Width is the binding constraint. S1-board-C11: the fan prefers the
+    // Width is the binding constraint. The fan prefers the
     // chrome-free band BETWEEN the corner medallions (see `handFanLayout`),
     // and falls back to the full board band for a hand too large to seat
     // there — readable cards the corners float over, never a row of slivers.
     const { step, overlap } = handFanLayout(screenW, n);
-    // CB-handfan: every fanned card EXCEPT the last is covered by its
+    // Every fanned card EXCEPT the last is covered by its
     // right-hand neighbour, so its name must lay out inside the surviving
     // sliver. The last card is uncovered and keeps the full band (null).
     const handNamePeek = nameColumnPeek(step);
@@ -1053,7 +1037,7 @@ export const CombatBoard = React.memo(function CombatBoard({
     const dropIneligibleFor = (card: CombatCardVM): boolean =>
         !!draggingDie && (!dieCanPowerCardVM(draggingDie, card.stance) || !!pendingDieByUid[card.uid]);
 
-    // Ghost ✕ cue (owner directive 2026-07-12): on die-drag begin, measure
+    // Ghost ✕ cue: on die-drag begin, measure
     // every INELIGIBLE staged card once and hand the rects to the panel's
     // ghost via the drag controller — the ✕ shows per-frame on the UI thread
     // while the pointer is over any of them. Cleared when the drag ends.
@@ -1076,11 +1060,9 @@ export const CombatBoard = React.memo(function CombatBoard({
 
     // ── the rune column must never sit on the tray ──────────────────────────
     // `sigColumn` is absolutely positioned and grows DOWNWARD with the
-    // signature count. Measured 2026-09-03 (live e2e probe): with a full
-    // loadout it reached into the dice row, and `elementFromPoint` at the
-    // leftmost die's centre returned the rune button, not the die — so that
-    // die could not be dragged at all, and a tap aimed at it cast a signature
-    // and spent Conviction instead. Anchor the column off the MEASURED tray
+    // signature count; with a full loadout it can reach into the dice row,
+    // where a rune button would swallow a die's drag and a tap aimed at the
+    // die would cast a signature instead. Anchor the column off the MEASURED tray
     // top so its last rune always clears the tray, however many signatures the
     // loadout grants and however many rows the tray wraps to. Falls back to the
     // stylesheet's proportional `top` until the first layout pass lands.
@@ -1091,7 +1073,7 @@ export const CombatBoard = React.memo(function CombatBoard({
         ? Math.max(0, Math.min(contentH * SIG_COLUMN_TOP_RATIO, trayTop - sigH - SIG_TRAY_CLEARANCE))
         : undefined;
 
-    // NO-SOFTLOCK telegraph (owner directive 2026-07-12) — the DEAD TRAY: at
+    // NO-SOFTLOCK telegraph — the DEAD TRAY: at
     // least one die is still playable but NONE of them can power ANY card in
     // hand (no matching color, no wild). The outs get lit instead of leaving
     // the player staring: FREE ribbons read prominent, and END carries its
@@ -1099,18 +1081,17 @@ export const CombatBoard = React.memo(function CombatBoard({
     const playableDice = vm.dice.filter((d) => d.draggable && !d.isX && !d.spent);
     const deadTray = vm.diceRolled && playableDice.length > 0 && vm.hand.length > 0
         && playableDice.every((d) => vm.hand.every((c) => !dieCanPowerCardVM(d, c.stance)));
-    // The END consequence on a dead tray. Engine truth (`endTurn`, spec 33 §6):
-    // ONE unspent mana/special die banks to the Reserve when a slot is free;
-    // the rest expire and the fresh tray rolls next phase. NOTE: this line
-    // predates the flag collapse and does not name the bank — see the D7
-    // residue list before rewording it.
+    // The END consequence on a dead tray. Engine truth (`endTurn`): ONE
+    // unspent mana/special die banks to the Reserve when a slot is free; the
+    // rest expire and the fresh tray rolls next phase. The line does not name
+    // the bank.
     const endConsequence = deadTray
         ? 'unusable dice are discarded · fresh roll next phase'
         : null;
 
     // Commit ONE staged card: powered by the die the player dropped on it
     // (when still usable and colour-legal), else FREE (no die). Commit
-    // mirrors display (the stale-powered fix, 2026-07-12).
+    // mirrors display.
     // Latest-closure ref + a stable dispatcher so memoized StagedCards never
     // re-render just because the board did.
     const handleApplyRef = useRef<(uid: string) => void>(() => undefined);
@@ -1137,7 +1118,7 @@ export const CombatBoard = React.memo(function CombatBoard({
     // applies and the resolve all compose through the panel's functional setState, so
     // cards land before the enemy acts.
     const handleEndPhase = () => {
-        if (resolving) return; // WI-3 — a phase is already resolving; ignore the tap
+        if (resolving) return; // a phase is already resolving; ignore the tap
         for (const uid of stagedUids) handleApplyRef.current(uid);
         onEndPhase();
     };
@@ -1146,9 +1127,8 @@ export const CombatBoard = React.memo(function CombatBoard({
         .replace('ROUND ', 'R').replace('TURN ', 'T');
     // The rail is at least one 26pt line plus the home-indicator inset, and it
     // GROWS if its row wraps (a long phase ledger on a narrow phone) — it never
-    // clips. Playtest 2026-09-04 at 390x844: the row overflowed its width, the
-    // VITAE text wrapped to a second line under a fixed 26pt height, and the
-    // number fell off the bottom of the screen. The floating chrome (SCRAP,
+    // clips; a fixed height would push a wrapped VITAE line off the bottom of
+    // the screen. The floating chrome (SCRAP,
     // END) keys off the MEASURED height so it always sits above the rail.
     const [railMeasuredH, setRailMeasuredH] = useState(0);
     const railMinH = RAIL_LINE_H + bottomInset;
@@ -1175,8 +1155,8 @@ export const CombatBoard = React.memo(function CombatBoard({
                 onLayout={(e) => setContentH(e.nativeEvent.layout.height)}
             >
                 {/* clearance under the floating top HUD — the measured height
-                    once it lands, so a tall HUD (stance-check telegraph, alt-win
-                    meters) never overlaps the play region below it */}
+                    once it lands, so a tall HUD (telegraphs, alt-win meters)
+                    never overlaps the play region below it */}
                 <View style={{ height: hudBottom }} pointerEvents="none" />
 
                 {/* play region — an invisible drop target over the battlefield. The
@@ -1231,26 +1211,21 @@ export const CombatBoard = React.memo(function CombatBoard({
                         {stagedCards.length > 0 && !stagedCards.some((c) => assignedDieFor(c.uid)) && !cardDragLive && !dropReject.reason ? (
                             <Text style={styles.stageHint} numberOfLines={1} testID="combat-stage-hint">
                                 {/* This line is for the card already lifted out of the fan.
-                                    The tap-to-read hatch used to be tacked on here too, which
-                                    put it 67 chars into a `numberOfLines={1}` line (RN
-                                    ellipsizes the TAIL, so the hatch was the clause that got
-                                    dropped) and, worse, only ever showed it AFTER a card was
-                                    staged — past the moment the player needed it to choose
-                                    which occluded card to lift. It now lives on the fan, at
-                                    `styles.fanHint` below. */}
+                                    The tap-to-read hatch lives on the fan (`styles.fanHint`
+                                    below), where the player chooses which card to lift. */}
                                 {deadTray ? 'no die matches your hand — APPLY · FREE still works' : 'drag a die onto your card · APPLY to commit'}
                             </Text>
                         ) : null}
                     </View>
                 </View>
 
-                {/* momentum — the spec-33 stance-sequence chain chip. */}
+                {/* momentum — the chain chip. */}
                 <MomentumChainChip vm={vm.momentumV2} onPress={onMomentumInfo} />
 
                 {/* player status strip — IN FLOW (not floated over the fan, where the
                     hand's gesture area swallowed the taps) so every tile stays tappable.
-                    RIGHT-aligned (owner playtest 2026-07-18): the left edge belongs to
-                    the signature-rune column, which was hiding these tiles. */}
+                    RIGHT-aligned: the left edge belongs to the signature-rune
+                    column, which would hide these tiles. */}
                 {(vm.player.effects.length > 0 || vm.player.guard > 0) && (
                     <View style={styles.statusStrip} pointerEvents="box-none">
                         {vm.player.guard > 0 ? <Text style={styles.guardChip} testID="combat-guard">🛡 {vm.player.guard}</Text> : null}
@@ -1266,8 +1241,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                         no die matches your hand — FREE plays still work · END rolls fresh dice
                     </Text>
                 ) : null}
-                {/* The tray outranks the rune column in z-order (2026-09-13,
-                    re-fixed 2026-09-13). `sigTop` keeps the column clear of the
+                {/* The tray outranks the rune column in z-order. `sigTop` keeps the column clear of the
                     tray whenever there is room, but it is derived from THREE
                     measured values (`contentH`, `trayTop`, `sigH`) held in
                     state: for the frame between a re-layout and the re-render
@@ -1278,19 +1252,10 @@ export const CombatBoard = React.memo(function CombatBoard({
                     spends Conviction instead. Ranking the tray's zIndex (31)
                     above the column's (30) is only real if they are SIBLINGS —
                     react-native-web gives every plain View `position: relative;
-                    z-index: 0` by default, so this tray layer used to be
-                    trapped inside `content`'s own stacking context while the
-                    column floated as `content`'s SIBLING at the `root` level.
-                    There, `content` (z-index 0) always lost to the column
-                    (z-index 30) regardless of the tray's internal 31, so the
-                    column painted — and hit-tested — on top of the tray
-                    whenever they overlapped. CI caught exactly that (PR #306,
-                    boss seed 16, round 9 one run and round 5 the next — the
-                    round is incidental, the stacking bug is not; it reproduced
-                    again on main at d4468c21, the merge that already carried
-                    the first zIndex attempt). The column is rendered as this
-                    layer's own sibling below so the 31-vs-30 comparison is a
-                    real one: a die wins the hit test no matter what the
+                    z-index: 0` by default, so a tray nested in another
+                    stacking context would lose to the column regardless of
+                    its own 31. The column is rendered as this layer's own
+                    sibling below so the 31-vs-30 comparison is a real one: a die wins the hit test no matter what the
                     measurements are doing; the clearance clamp still does the
                     visual work. */}
                 <View
@@ -1322,8 +1287,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                         </Defs>
                         <Circle cx={50} cy={30} r={55} fill="url(#axmFanGlow)" />
                     </Svg>
-                    {/* CB-handfan, the precedent's second half (RouteSelect 8f3acef7,
-                        "TAP A CARD TO READ IT"): every fanned card but the last is
+                    {/* Every fanned card but the last is
                         covered, so its name is capped to `handNamePeek` and reads
                         short. The escape hatch belongs HERE — on the fan, while the
                         clipped names are what the player is looking at — not in the
@@ -1348,9 +1312,9 @@ export const CombatBoard = React.memo(function CombatBoard({
                                     }}
                                     testID={`combat-hand-${card.uid}`}
                                     accessible accessibilityRole="button"
-                                    // D4 — the fanned face has no room to PRINT the
-                                    // rarity word (see the REVERSAL note on
-                                    // `CombatCardFace`), so the band is where a
+                                    // The fanned face has no room to PRINT the
+                                    // rarity word (see the face doc block above
+                                    // `CombatCardFace`), so the label is where a
                                     // screen-reader player gets it. This pressable is
                                     // `accessible`, which collapses the face's own
                                     // track label, so the word has to be said here.
@@ -1360,8 +1324,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                                     {/* The in-flight dim lives on a plain inner view: FadeIn
                                         drives `opacity` on the animated wrapper, and an
                                         `opacity` style on that same node is what Reanimated
-                                        warns "may be overwritten by a layout animation" —
-                                        once per hand card, every draw (playtest 2026-09-04). */}
+                                        warns "may be overwritten by a layout animation". */}
                                     <View style={draggingCardUid === card.uid ? styles.handCardLifted : null}>
                                         <HandCard
                                             card={card}
@@ -1380,11 +1343,8 @@ export const CombatBoard = React.memo(function CombatBoard({
                     testID="combat-rail"
                     onLayout={(e) => setRailMeasuredH(e.nativeEvent.layout.height)}
                 >
-                    {/* FE-016: print the maximum. The enemy's bar above reads
-                      * '120 /120', so a bare '♥ 160' down here gave no way to tell
-                      * whether 160 is most of my VITAE or nearly none of it — the
-                      * one number a player checks before spending a turn. maxHp was
-                      * already on the view model, just unused. */}
+                    {/* Print the maximum, as the enemy's bar does, so the player
+                      * can tell how much of their VITAE is left. */}
                     <Text
                         style={styles.railHp}
                         numberOfLines={1}
@@ -1435,8 +1395,8 @@ export const CombatBoard = React.memo(function CombatBoard({
                 <Text style={[styles.trashLabel, draggingCardUid ? { color: AXM.blood } : null]}>SCRAP</Text>
             </View>
 
-            {/* corner medallion — END PHASE. (The dice-reroll disc is deliberately
-                gone: dice are the turn's hand, you play what you rolled.) */}
+            {/* corner medallion — END PHASE. Dice are the turn's hand: you
+                play what you rolled. */}
             <View style={[styles.cornerStack, { bottom: railH + 6 }]} pointerEvents="box-none">
                 <EndPhaseMedallion onPress={handleEndPhase} consequence={endConsequence} disabled={resolving} />
             </View>
@@ -1462,13 +1422,9 @@ function artMirrored(cardId: string): boolean {
  * Input: the face's raw FREE value (or its hero line), or null.
  * Output: a WHOLE value, never a fragment — '' when nothing whole fits.
  *
- * Resolves cluster S1-board-C32: the old fallback was `v.slice(0, 3)`, which
- * cut any unmatched string mid-word — the '×4 · 3t' the presenter prints for
- * an applyEffect rider reached the card face as the three characters "×4 "
- * (trailing space included), which reads as a chopped sentence, not a value.
- * The ×N intensity now has its own branch, and the last resort keeps a whole
- * short token or prints nothing (the glyph still carries the read; the
- * inspect overlay carries the full truth).
+ * The ×N intensity has its own branch, and the last resort keeps a whole
+ * short token or prints nothing — never a mid-word slice (the glyph still
+ * carries the read; the inspect overlay carries the full truth).
  */
 export function compactFree(v: string | null): string {
     if (!v) return '';
@@ -1498,7 +1454,7 @@ function darkenHex(hex: string, f: number): string {
 }
 
 // The stance cube — a small isometric die that flags "this line costs a die",
-// tinted the card's stance colour (matches the #5 rail design).
+// tinted the card's stance colour.
 function StanceCube({ color, size }: { color: string; size: number }) {
     return (
         <Svg width={size} height={size} viewBox="0 0 24 24">
@@ -1521,30 +1477,23 @@ function paidValueFor(f: CombatCardVM['face'], override?: string): string {
 }
 
 /**
- * The shared card FACE — THE PRINTED PLATE (owner reset 2026-08-28: "dump the
- * card design … full freedom" — the #5 side-rail face is retired). Cards read
- * as pages of the codex, in line with the ratified Woodcut Codex direction:
+ * The shared card FACE — THE PRINTED PLATE. Cards read as pages of the codex,
+ * in line with the Woodcut Codex direction:
  *   · ① NAME BAND, top, HORIZONTAL, blackletter on solid ink — the fan shows
- *     each card's left edge, so the name now reads without turning your head;
+ *     each card's left edge, so the name reads without turning your head;
  *     rarity is a wax pip TRACK at the band's head, plus a named tag on the
- *     large face;
+ *     large face.
  *
- *     REVERSAL, 2026-09-21 (owner finding 8, ratified decision D4). This line
- *     used to read "rarity is a small wax pip at the band's head, NOT a text
- *     tag", and the face rendered exactly one pip in one of three hues. The
- *     owner's report — "no way to recognise a card's rarity at a glance" —
- *     retired that stance: one pip in a hue is a colour-only signal, illegible
- *     in greyscale, to a colourblind player, and to anyone who has not yet
- *     learned that purple means rare. D4 replaces it with the three-legged
- *     signal — NAMED LABEL + PIP ROW + FRAME COLOUR, never colour alone.
+ *     Rarity is a three-legged signal — NAMED LABEL + PIP ROW + FRAME COLOUR,
+ *     never colour alone: a lone hue is illegible in greyscale, to a
+ *     colourblind player, and to anyone who has not learned that purple means
+ *     rare.
  *
- *     What that costs, and the trade the face actually takes: the pip track is
- *     a fixed THREE-SLOT column (filled = the band's pip count, hollow = the
+ *     The trade the face takes: the pip track is a fixed THREE-SLOT column (filled = the band's pip count, hollow = the
  *     rest), stacked VERTICALLY rather than laid out in a row. A horizontal
  *     three-pip row would widen {@link NAME_BAND_LEFT_CHROME} by ~14pt, and in
  *     the hand fan that chrome is subtracted from the ~57pt sliver of each
- *     covered card — it would have eaten a third of every fanned card's name
- *     to re-fix the legibility bug cluster CB-handfan just fixed. Vertical
+ *     covered card — about a third of every fanned card's name. Vertical
  *     keeps the band's left chrome at its shipped width, so the count is legible
  *     and no name loses a character. The NAMED tag rides the `large` face only
  *     (inspect overlay, reward preview) for the same reason: at 120pt the word
@@ -1560,7 +1509,7 @@ function paidValueFor(f: CombatCardVM['face'], override?: string): string {
  * Instanced small in the hand and LARGE in the inspect modal so the two can
  * never drift.
  *
- * Owner directive 2026-08-10 still governs: the face carries NO prose. The
+ * The face carries NO prose. The
  * authored PAID sentence, the type strip, and the printed die lines live in
  * the inspect overlay. The face is the glance read (name · free glyph ·
  * keyword · value); the overlay is the explanation.
@@ -1578,7 +1527,7 @@ export const NARROW_FACE_W = 112;
 export const RARITY_TRACK_SLOTS = RARITY_PIPS.rare;
 
 /**
- * D4's PIP ROW leg — the greyscale-safe half of the rarity signal.
+ * The PIP ROW leg — the greyscale-safe half of the rarity signal.
  *
  * Always {@link RARITY_TRACK_SLOTS} slots: the first `pips` are filled in the
  * band's hue, the rest are hollow rings. Drawing the empty slots is the point —
@@ -1588,8 +1537,8 @@ export const RARITY_TRACK_SLOTS = RARITY_PIPS.rare;
  * blindness with {@link RARITY_COLOR} switched off entirely; the hue is the
  * decoration on top, never the message.
  *
- * Stacked vertically on purpose — see the REVERSAL note in `CombatCardFace`'s
- * doc block: a horizontal row would widen {@link NAME_BAND_LEFT_CHROME} and
+ * Stacked vertically on purpose — see the face doc block above
+ * `CombatCardFace`: a horizontal row would widen {@link NAME_BAND_LEFT_CHROME} and
  * re-break the fanned-name read.
  */
 function RarityTrack({ pips, color, large, label }: { pips: number; color: string; large: boolean; label: string }) {
@@ -1625,11 +1574,10 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     height: number;
     large?: boolean;
     /**
-     * Cluster CB-handfan — cap the NAME text's layout width (points) because
-     * something opaque covers the rest of this face. Only the hand fan passes
-     * it; every other instance (staged 92, reward offer 100, drag ghost, detail
-     * overlay) leaves it null and lays the name out across the full band
-     * exactly as before, so this prop cannot regress the other four sizes.
+     * Cap the NAME text's layout width (points) because something opaque
+     * covers the rest of this face. Only the hand fan passes it; every other
+     * instance (staged 92, reward offer 100, drag ghost, detail overlay) leaves
+     * it null and lays the name out across the full band.
      */
     namePeek?: number | null;
     /** Override the keyword/value/border colour (the armed staged-card read tint). */
@@ -1644,7 +1592,7 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     // PRINTED PLATE: STANCE colours the frame + the die cube; CATEGORY colours
     // the FREE glyph + the keyword. Inert cards grey both honestly.
     const band = f.stanceColor;
-    // S3 (D40) — a keyword wears its STAT FAMILY's dice colour and glyph
+    // A keyword wears its STAT FAMILY's dice colour and glyph
     // (body ⚡, mind ★, heart ♥) on the live hand; elsewhere, its category.
     const baseKw = f.inert ? AXM.ash : (f.familyColor ?? f.categoryColor);
     const kwColor = accent ?? baseKw;
@@ -1657,32 +1605,28 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     const paidValue = paidValueFor(f, heroOverride);
     const freeInner = compactFree(f.freeValue ?? (f.freeHeroText || null));
     const hasFree = !!f.freeGlyph;
-    // Effect-shaped silhouette for the FREE glyph (owner directive 2026-07-16);
+    // Effect-shaped silhouette for the FREE glyph;
     // keywords without a shape keep the text rune.
     const freeShape = glyphShapeFor(f.freeGlyphKey);
     // A NARROW face (the reward-draft offer at 100pt, a compact staged card at
     // 92pt) cannot seat FREE | PAID side by side: the fixed FREE cell and the
-    // stance cube left the keyword and value ~8pt, which react-native-web
-    // ellipsized to "B..", "D." (playtest 2026-09-04 — the player could not
-    // read the card they were adding to the deck for the rest of the run).
-    // `adjustsFontSizeToFit` is a silent no-op on web, so the fix is layout:
+    // stance cube leave the keyword and value ~8pt, which react-native-web
+    // ellipsizes to "B..", "D.". `adjustsFontSizeToFit` is a silent no-op on
+    // web, so the answer is layout:
     // the ledger STACKS (FREE row over PAID row, full width each) and the
     // text wraps under an explicit lineHeight instead of clipping.
     const narrow = !large && width < NARROW_FACE_W;
     const bandH = large ? 36 : 26;
     const ledgerH = large ? 60 : 42;
     const glyphSize = large ? 38 : narrow ? 18 : 24;
-    // The drop shadow is STANCE-coloured (owner directive 2026-09-13). It is
+    // The drop shadow is STANCE-coloured. It is
     // applied inline on `faceOuter` rather than in the static style, because
     // the colour is per-card data; `accent` (the armed staged-card read tint)
     // wins where set, so the shadow always matches the frame above it.
 
-    // D4 — the rarity band, derived ONCE by the wave-0 module from the card's
-    // own rank. The three hex literals that used to sit here (and a second copy
-    // of them in `CombatRewardsOverlay`) now live in `RARITY_COLOR`, and the
-    // hues are unchanged: what D4 adds is the pip COUNT, the empty-slot track,
-    // and the large face's named tag. (`band`, just above, is already taken by
-    // the STANCE colour — these two are different systems on one face.)
+    // The rarity band, derived ONCE by `card-rarity.engine` from the card's
+    // own rank; hues come from `RARITY_COLOR`. (`band`, just above, is the
+    // STANCE colour — these two are different systems on one face.)
     const rarBand = rarityFor(card);
     const rarColor = RARITY_COLOR[rarBand];
     const rarLabel = RARITY_LABEL[rarBand];
@@ -1690,12 +1634,12 @@ export const CombatCardFace = React.memo(function CombatCardFace({
         <View style={[styles.faceOuter, { width, height, shadowColor: accent ?? band }]}>
             <View style={[styles.faceCard, { borderColor: accent ?? band }]}>
                 {/* ① NAME BAND — horizontal blackletter on solid ink; the wax
-                    pip TRACK carries rarity (D4). The fan's visible sliver
+                    pip TRACK carries rarity. The fan's visible sliver
                     starts here.
                     A long name wraps to a second line (the band grows, the art
                     plate gives) rather than truncating to a stub.
 
-                    CB-handfan: that wrap only helps if the text is LAID OUT in
+                    That wrap only helps if the text is LAID OUT in
                     the width the player can see. A fanned card is covered by
                     its right-hand neighbour, so `namePeek` caps the text box to
                     the surviving sliver and the name wraps inside it — without
@@ -1721,10 +1665,10 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                     >
                         {card.name.toUpperCase()}
                     </Text>
-                    {/* D4's NAMED LABEL leg — `large` only. The inspect overlay
+                    {/* The NAMED LABEL leg — `large` only. The inspect overlay
                         and the reward preview have the band width for a word;
                         the 120pt hand card does not, and spending its name
-                        column on "UNCOMMON" would undo cluster CB-handfan. */}
+                        column on "UNCOMMON" would clip the name. */}
                     {large ? (
                         <Text
                             style={[styles.plateRarityLabel, { color: rarColor }]}
@@ -1750,7 +1694,7 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                     </View>
                 </View>
                 {/* ③ LEDGER — solid ink ground: FREE cell | rule | PAID cell.
-                    No prose (owner 2026-08-10); the overlay explains. */}
+                    No prose; the overlay explains. */}
                 <View
                     style={[styles.plateLedger, narrow ? styles.plateLedgerStacked : { minHeight: ledgerH }]}
                     pointerEvents="none"
@@ -1809,9 +1753,7 @@ export const CombatCardFace = React.memo(function CombatCardFace({
 
 // The fanned hand card — a small instance of the shared face, art-forward at the
 // reference's ~1:1.5 proportion. The fan-overlap math (band fit) keys off these
-// same constants — keep them in sync. Option A: 108×158 → 132×194 (the split
-// rail needs the room; the old size was illegible) → 120×176 (owner declutter
-// pass 2026-07-19: the board read too busy). Exported for the drag ghost.
+// same constants — keep them in sync. Exported for the drag ghost.
 export const HAND_CARD_W = 120;
 export const HAND_CARD_H = 176;
 function HandCard({ card, namePeek = null }: { card: CombatCardVM; namePeek?: number | null }) {
@@ -1826,7 +1768,7 @@ function HandCard({ card, namePeek = null }: { card: CombatCardVM; namePeek?: nu
  * renders with. Every call site inside this file still reads `useStyles`.
  */
 export const useCombatBoardStyles = makeStyles((AXM) => ({
-    // S1-board-C12 — the fight fits the phone. The board is the viewport: any
+    // The fight fits the phone. The board is the viewport: any
     // floating chrome that bleeds past its edge (the END disc's backing glow,
     // an over-wide consequence line) is clipped here instead of widening the
     // page into a sideways scroll with unpainted ground beyond the board.
@@ -1847,7 +1789,7 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
         alignSelf: 'center', marginTop: 4, fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 12,
         color: AXM.bone, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3,
     },
-    // Loud-rejection reason line (owner directive 2026-07-12) — the refusal,
+    // Loud-rejection reason line — the refusal,
     // said out loud where the drop just failed.
     rejectLine: {
         alignSelf: 'center', marginTop: 4, paddingHorizontal: 10, fontFamily: FONTS.sans, fontSize: 11,
@@ -1884,7 +1826,7 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
         paddingHorizontal: 7, paddingVertical: 3,
     },
     convictionText: { fontFamily: FONTS.gothic, fontSize: 15, letterSpacing: 0.5, textAlign: 'center' },
-    // FE-021 — the word, small enough to stay chrome, large enough to read.
+    // The CONVICTION caption — small enough to stay chrome, large enough to read.
     convictionCaption: { fontFamily: FONTS.sans, fontSize: 6, letterSpacing: 0.6, color: AXM.bone, textAlign: 'center', marginTop: 1 },
     sigRune: {
         width: 46, height: 46, borderRadius: 23, borderWidth: 1.5, backgroundColor: 'rgba(0,0,0,0.6)',
@@ -1898,8 +1840,8 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
     sigCostText: { fontFamily: FONTS.mono, fontSize: 9, lineHeight: 12 },
 
     // ── dice row ──
-    // gap 26→14 + wrap (2026-07-18): four 54pt gems + the spare chip overflowed
-    // a 375pt viewport and clipped the first die off-screen.
+    // gap 14 + wrap: four gems + the spare chip must fit a 375pt viewport
+    // without clipping a die off-screen.
     diceRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 14, justifyContent: 'center', alignItems: 'flex-start', minHeight: 74, paddingBottom: 2 },
     dieAssigned: { opacity: 0.4 },
     // Drawn X/dud die — a small greyed pip, not a full slot.
@@ -1907,19 +1849,19 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
     dieXGlyph: { fontFamily: FONTS.sans, fontSize: 12, color: HUE.stoneGrey },
     dieConv: { fontFamily: FONTS.sans, fontSize: 9, color: AXM.bone, textAlign: 'center', marginTop: 2, letterSpacing: 0.5, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },
 
-    // ── the hand dock ── (Option A: fits the 194pt card raised ~20pt off the
-    // screen bottom — was 178 for the 158pt card flush against the rail)
+    // ── the hand dock ── (fits the 176pt hand card above the fan's 20pt bottom
+    // padding, leaving 20pt at the top for the tap-to-read hint)
     dock: { height: 216, overflow: 'hidden' },
 
     // ── momentum chip row (shared by the chain chip's nodes + SURGED tag) ──
     wheelRow: { alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 3, paddingHorizontal: 10, marginBottom: 2 },
     wheelGlyph: { fontSize: 12, lineHeight: 15, textShadowRadius: 6, textShadowOffset: { width: 0, height: 0 } },
     wheelCharged: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.6, marginLeft: 7, textShadowRadius: 7, textShadowOffset: { width: 0, height: 0 } },
-    // ── Spec 33 §3 — momentum chain chip ──
+    // ── momentum chain chip ──
     chainNode: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
     chainNext: { fontFamily: FONTS.sans, fontSize: 13, marginLeft: 4 },
-    // CRITIQUE pass 21 — bare "○ no momentum" text vanished against the arena
-    // floor art (fully invisible on desktop). Give the empty state the same
+    // Bare "○ no momentum" text vanishes against the arena floor art. Give the
+    // empty state the same
     // contrast-guaranteeing container the filled chain nodes get: dark alpha
     // fill + ash border. `overflow: 'hidden'` keeps the radius on Android
     // (the guardChip treatment).
@@ -1929,25 +1871,24 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
         borderRadius: 5, paddingHorizontal: 7, paddingVertical: 2, overflow: 'hidden',
     },
     chainBroke: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.4, textShadowRadius: 6, textShadowOffset: { width: 0, height: 0 } },
-    // S1-board-C19 — the tap mark on the momentum chip (the tappable half of
-    // the pair). Quiet chrome; the chip's own colours stay the loud part. It
-    // floats on the arena floor art beside the readout's plate, not on it, so
-    // it carries the same contrast-guaranteeing backing the empty readout got
-    // in CRITIQUE pass 21 — bare, it read at ~1.5:1 against the bright floor
-    // and vanished on desktop. Fixed width: `chipInfoGutter` mirrors it.
+    // The tap mark on the momentum chip. Quiet chrome; the chip's own colours
+    // stay the loud part. It floats on the arena floor art beside the
+    // readout's plate, not on it, so it carries the same contrast-guaranteeing
+    // backing as the empty readout (bare, it reads ~1.5:1 against the bright
+    // floor). Fixed width: `chipInfoGutter` mirrors it.
     chipInfoMark: {
         fontFamily: FONTS.sans, fontSize: 10, lineHeight: 14, color: AXM.bone, textAlign: 'center',
         marginLeft: CHIP_INFO_MARK_GAP, width: CHIP_INFO_MARK_W,
         backgroundColor: 'rgba(0,0,0,0.55)', borderWidth: 1, borderColor: AXM.ash,
         borderRadius: 5, paddingVertical: 2, overflow: 'hidden',
     },
-    // S1-board-C19 — the mark's mirror on the leading edge of the chip row.
+    // The mark's mirror on the leading edge of the chip row.
     chipInfoGutter: { width: CHIP_INFO_MARK_W + CHIP_INFO_MARK_GAP },
     fanGlow: { position: 'absolute', bottom: 0, left: 0 },
-    // S1-board-C11 — the side paddings are the corner-medallion footprints,
-    // not decoration: the fan is centred in what is left between them. A hand
-    // too large for that band (see `handFanLayout`) overflows it symmetrically
-    // and the corners float over the outermost cards, as they did before.
+    // The side paddings are the corner-medallion footprints, not decoration:
+    // the fan is centred in what is left between them. A hand too large for
+    // that band (see `handFanLayout`) overflows it symmetrically and the
+    // corners float over the outermost cards.
     fan: {
         ...StyleSheet.absoluteFillObject, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center',
         paddingLeft: HAND_FAN_LEFT, paddingRight: HAND_FAN_RIGHT, paddingBottom: 20,
@@ -1974,7 +1915,7 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
         borderTopWidth: 1, borderTopColor: AXM.divider,
     },
     railHp: { fontFamily: FONTS.mono, fontSize: 13, lineHeight: 17, color: AXM.parchment, letterSpacing: 0.5, flexShrink: 0 },
-    // FE-016 — the maximum rides quieter than the live value.
+    // The maximum rides quieter than the live value.
     railHpMax: { color: AXM.bone, fontSize: 11 },
     railLedger: { flexDirection: 'row', flexWrap: 'wrap', flexShrink: 1, gap: 3, alignItems: 'center', justifyContent: 'center' },
     railPiles: { flexDirection: 'row', alignItems: 'center', gap: 3, flexShrink: 0 },
@@ -1992,8 +1933,8 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
 
     // ── player status strip (in-flow, above the dice; RIGHT-aligned so the
     //    left signature-rune column never covers it) ──
-    // S1-board-C12 — wraps: a long ledger row (GUARD · WRATH · CHAIN · chips)
-    // otherwise ran past the viewport, and the board now clips at its edge.
+    // Wraps: a long row of chips would otherwise run past the viewport, where
+    // the board clips at its edge.
     statusStrip: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'flex-end', gap: 8, paddingHorizontal: 12, paddingBottom: 6 },
     guardChip: {
         fontFamily: FONTS.sans, fontSize: 11, color: HUE.guardBlue, letterSpacing: 0.5,
@@ -2008,7 +1949,7 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
         width: 80, height: 80, borderRadius: 40, borderWidth: 3, backgroundColor: HUE.medallionBg,
         alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
     },
-    // WI-3 — dimmed while a phase resolves (double-tap guard); every other
+    // Dimmed while a phase resolves (double-tap guard); every other
     // disabled control in this board uses the same ~0.4 opacity treatment.
     endBtnDisabled: { opacity: 0.4 },
     endBtnInnerRim: {
@@ -2017,12 +1958,10 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
     },
     endGlyph: { fontFamily: FONTS.gothic, fontSize: 30, lineHeight: 33 },
     endLabel: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 2, marginTop: -1 },
-    // The honest one-line END consequence (R2 telegraph, 2026-07-12) —
-    // floats ABOVE the medallion (below would collide with the bottom rail).
-    // S1-board-C12 — anchored to the medallion's RIGHT edge, so the 140pt line
-    // runs inward across the board. Anchored left (-30) it ran 20pt past the
-    // screen's right edge, which is horizontal overflow the viewport can scroll
-    // to; clipping it at `root` would have eaten the words instead.
+    // The honest one-line END consequence — floats ABOVE the medallion (below
+    // would collide with the bottom rail). Anchored to the medallion's RIGHT
+    // edge, so the 140pt line runs inward across the board rather than past
+    // the screen's right edge, where `root` would clip the words.
     endConsequenceWrap: { position: 'absolute', top: -34, right: 0, width: 140, alignItems: 'center' },
     endConsequence: {
         fontFamily: FONTS.sans, fontSize: 8.5,
@@ -2030,31 +1969,28 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
         textShadowColor: 'rgba(0,0,0,0.95)', textShadowRadius: 3,
     },
 
-    // ── Shared card FACE — THE PRINTED PLATE (owner reset 2026-08-28) ────────
+    // ── Shared card FACE — THE PRINTED PLATE ─────────────────────────────────
     // A page of the codex: name band on ink, framed art plate behind a
     // hairline rule, solid-ground ledger. Stance colours the frame; category
     // colours glyph + keyword. AXM tokens throughout — no scrim, no washes.
-    // Owner directive 2026-09-13: the 2pt `pixelShadow` ring (a dark RED in the
-    // default palette, #7a0d1c) read as a second border wrapped around every
-    // card, fighting the stance-coloured frame that is the card's real colour
-    // signal. The ring is gone — a card now carries exactly ONE border, the
-    // stance colour on `faceCard`. The drop shadow stays as a depth cue and now
-    // carries the card's own stance colour, supplied inline by `CombatCardFace`
-    // (`shadowColor` is per-card data, so it cannot live in this static style).
+    // A card carries exactly ONE border, the stance colour on `faceCard`. The
+    // drop shadow is a depth cue in the card's own stance colour, supplied
+    // inline by `CombatCardFace` (`shadowColor` is per-card data, so it cannot
+    // live in this static style).
     faceOuter: {
         borderRadius: 6, backgroundColor: AXM.deepBg,
         shadowOpacity: 0.5, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: 6,
     },
     faceCard: { flex: 1, borderWidth: 1.5, borderRadius: 4, backgroundColor: AXM.deepBg, overflow: 'hidden' },
     // ① The name band — horizontal blackletter; the wax pip TRACK is the rarity
-    // (D4, 2026-09-21 — see the REVERSAL note in `CombatCardFace`).
+    // (see the face doc block above `CombatCardFace`).
     plateBand: {
         flexDirection: 'row', alignItems: 'center', paddingHorizontal: 6, gap: 5,
         backgroundColor: AXM.deepBg,
         borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: AXM.divider,
     },
     // The track is a COLUMN (RN's default `flexDirection`), so its width is one
-    // pip's width and `NAME_BAND_LEFT_CHROME` is unchanged by D4. Laying the
+    // pip's width and `NAME_BAND_LEFT_CHROME` counts one pip. Laying the
     // three slots out in a row instead would widen the band's left chrome by
     // ~14pt and shave that off every fanned card's visible name.
     plateRarityTrack: { alignItems: 'center', justifyContent: 'center', gap: 2 },
@@ -2066,9 +2002,9 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
     plateRarityPipLarge: { width: 7, height: 7, borderRadius: 4 },
     // An UNEARNED slot: hollow, not merely dimmer. Filled-vs-hollow is a shape
     // difference, which is what keeps "one of three" readable in greyscale and
-    // to a colourblind player — D4's "never colour alone".
+    // to a colourblind player — "never colour alone".
     plateRarityPipEmpty: { backgroundColor: 'transparent', borderWidth: 1, borderColor: AXM.ash },
-    // D4's named tag — `large` faces only. Sits at the band's tail, after the
+    // The named rarity tag — `large` faces only. Sits at the band's tail, after the
     // name's `flex: 1`, so it can never squeeze the name on a small face
     // (it is not rendered there at all).
     plateRarityLabel: {
@@ -2102,12 +2038,12 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
     plateRuleAcross: { height: StyleSheet.hairlineWidth, alignSelf: 'stretch', backgroundColor: AXM.divider },
     platePaidCell: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 5 },
     paidTextWrap: { flex: 1 },
-    // The keyword is the loudest word on the face — it is the whole read now.
+    // The keyword is the loudest word on the face — it is the whole read.
     paidKeyword: { fontFamily: FONTS.sans, fontSize: 12, lineHeight: 14, letterSpacing: 0.8 },
     paidKeywordLarge: { fontSize: 17, lineHeight: 20, letterSpacing: 1.2 },
     paidValue: { fontFamily: FONTS.mono, fontSize: 11, lineHeight: 15, color: AXM.parchment },
     paidValueLarge: { fontSize: 15, lineHeight: 20 },
 }));
 
-/** In-file alias: the ten `const styles = useStyles()` call sites are unchanged. */
+/** In-file alias read by every `const styles = useStyles()` call site. */
 const useStyles = useCombatBoardStyles;

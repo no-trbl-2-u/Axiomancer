@@ -1,6 +1,6 @@
 /**
  * Hermetic E2E — Blacksmith encounter ("The Anvil") store flow + map
- * interception (Spec 33 §6 / Phase D6c, re-homed Phase 60). Drives the anvil
+ * interception. Drives the anvil
  * through the store action layer: begin → intro → forging (hone / temper /
  * swap) → card → outcome → claim, and verifies:
  *   - a 'blacksmith' map event launches the session (interception), not a

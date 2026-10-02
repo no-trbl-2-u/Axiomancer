@@ -38,8 +38,7 @@ describe('selectEventArtSlug', () => {
         expect(selectEventArtSlug({ kind: 'loot-cache', items: [], currency: 0 })).toBe('interaction-generic');
     });
 
-    // 2026-09-21 (owner finding 2) — gathering DOES reach the modal now, as
-    // the acknowledgement card. It borrows the generic figure on purpose: a
+    // Gathering DOES reach the modal, as the acknowledgement card. It borrows the generic figure on purpose: a
     // bespoke slug means a new exhaustive `Record` member in
     // `PlaceholderIllustration` plus a drawing, which is an art errand. The
     // slug is pinned here so that errand shows up as a failing test, not as

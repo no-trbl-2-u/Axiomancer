@@ -5,10 +5,8 @@
  * app shows a debug screen instead of breaking (white screen on
  * web, native red box on iOS/Android).
  *
- * Phase 70 Tick D port of the handoff bundle's `ErrorScreen`
- * (`archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-22/project/screens/aftermath-modal.jsx:
- * 709-809`). The fallback now lives in the same gothic-chronicle
- * register as the rest of the app:
+ * The fallback lives in the same gothic-chronicle register as the
+ * rest of the app:
  *
  *   - Heavy diagonal hatch background (a "damaged page" feel).
  *   - `THE BINDING TORE` gothic title with a blood drop-shadow.
@@ -328,7 +326,6 @@ const useStyles = makeStyles((AXM) => ({
      * borderStyle: 'dashed' top edge. react-native doesn't ship
      * proper diagonal-stripe primitives; this gives the surface
      * a visibly-distressed feel without bringing in an SVG dep.
-     * Phase 71 chrome refresh may tune this further.
      */
     hatchBg: {
         position: 'absolute',

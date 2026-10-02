@@ -1,8 +1,7 @@
 /**
  * Hermetic component tests — PixelEmblem.
  *
- * Pins the lone pixel-art primitive's render contract (Phase 70
- * Tick B). The emblem is the app's ONE deliberate aesthetic break;
+ * Pins the lone pixel-art primitive's render contract. The emblem is the app's ONE deliberate aesthetic break;
  * see the JSDoc on `components/event/aftermath/PixelEmblem.tsx`
  * for the carve-out rationale. These pins keep a future "tidy this
  * up" refactor from silently normalizing the sprite into a regular
@@ -14,7 +13,7 @@
  *   2. Sprite renders the expected total cell count given the
  *      ported 16×16 PIXEL_HEART grid (transparent cells skipped).
  *      The exact count is computed from the constant itself so the
- *      test doesn't drift if the bundle ships a touch-up — it
+ *      test doesn't drift if the sprite is touched up — it
  *      simply checks the rendered SVG matches the source string.
  *   3. Cell scaling honours the `cell` prop (default 11 → 176×176).
  */

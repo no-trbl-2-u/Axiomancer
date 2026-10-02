@@ -1,5 +1,5 @@
 /**
- * Victory laurel (visual-audit 2026-06) — a ceremonial wreath for the
+ * Victory laurel — a ceremonial wreath for the
  * combat aftermath. Two mirrored laurel branches curving up to a central
  * sulfur sigil. Theme-aware; decorative (hidden from a11y).
  *

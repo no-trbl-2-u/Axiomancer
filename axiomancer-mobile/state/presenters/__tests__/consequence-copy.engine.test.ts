@@ -1,16 +1,12 @@
 /**
- * Unit tests for consequence-copy.ts (Phase 46c).
+ * Unit tests for consequence-copy.ts.
  *
- * Ported verbatim out of `app/event/index.tsx`'s dead local
- * `consequenceLabel` — pinning every `ConsequenceKind` case so
+ * Pins every `ConsequenceKind` case of `consequenceLabel` so
  * `/event` and `/dialogue` cannot silently drift on what a
  * consequence chip says.
  *
- * FE-002 (2026-09-12 fresh-eyes sweep) rewrote four of these expectations.
- * They had pinned the defect: the damage/heal branches said HP where the canon
- * word is VITAE, and the quest/progress/card branches echoed the engine slug
- * (`quest: starting-quest`) into player copy. The cases are still pinned —
- * against the fixed strings. Resolver-level coverage lives in
+ * Damage/heal chips say VITAE (the canon word), and quest/progress/card chips
+ * never echo the engine slug into player copy. Resolver-level coverage lives in
  * `engine-id-copy.test.ts`.
  */
 
@@ -33,7 +29,7 @@ describe('consequenceLabel', () => {
 
     it('renders an item from its authored label, and no chip for a story flag', () => {
         expect(consequenceLabel({ kind: 'item', label: 'Rusty Key' })).toBe('Rusty Key');
-        // A flag id is bookkeeping, never copy — FE-002.
+        // A flag id is bookkeeping, never copy.
         expect(consequenceLabel({ kind: 'flag', label: 'marrow_pressed' })).toBe('');
     });
 

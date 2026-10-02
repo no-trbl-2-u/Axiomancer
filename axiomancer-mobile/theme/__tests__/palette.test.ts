@@ -1,5 +1,5 @@
 /**
- * Theme registry + palette factory (visual-audit 2026-06).
+ * Theme registry + palette factory.
  *
  * Isolates theme/palette.ts's own contract — the runtime store
  * (runtime.test.tsx) only uses paletteFor/DEFAULT_THEME_ID as fixtures
@@ -240,7 +240,7 @@ describe('registry shape', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Contrast (Phase 101 follow-on — the guard that did not exist)
+// Contrast
 // ---------------------------------------------------------------------------
 
 /**
@@ -275,8 +275,7 @@ describe('theme contrast', () => {
      *
      * `ash` is deliberately absent: VISUAL_LANGUAGE.md records it as
      * borders/disabled only and explicitly NOT body or hint text, precisely
-     * because it is too low-contrast against `bg` (the Phase V8 critic-loop
-     * finding). Asserting AA on it would either fail honestly or push a border
+     * because it is too low-contrast against `bg`. Asserting AA on it would either fail honestly or push a border
      * colour brighter than a border should be.
      */
     const READABLE_PAIRS: ReadonlyArray<readonly [keyof ThemeSpec, keyof ThemeSpec]> = [

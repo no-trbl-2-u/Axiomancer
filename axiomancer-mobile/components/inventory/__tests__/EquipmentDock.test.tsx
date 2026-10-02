@@ -14,7 +14,7 @@ jest.mock('@/components/SectionLabel', () => {
     };
 });
 
-// The centre column now renders the player portrait (was the PaperDoll SVG).
+// The centre column renders the player portrait.
 jest.mock('@/components/art/PlayerPortraitImage', () => ({
     PlayerPortraitImage: () => null,
 }));

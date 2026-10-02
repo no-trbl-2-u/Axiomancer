@@ -307,7 +307,7 @@ function fireOwedArrival(store: AppStore, actions: SkipEventActions, options: Sk
     const fired = actions.resolveCurrentMapEvent();
     const mapAfter = currentMapName(store);
     if (mapBefore !== mapAfter && store.getState().labyrinthUi?.session) {
-        // The Lantern Deep's vault door (M4): the world is now an Aporia act.
+        // The Lantern Deep's vault door: the world is now an Aporia act.
         return { kind: 'labyrinth', nodeId, outcome: `entered:${mapAfter}`, detail: { from: mapBefore, firedArrival: true } };
     }
     if (mapBefore !== mapAfter) {

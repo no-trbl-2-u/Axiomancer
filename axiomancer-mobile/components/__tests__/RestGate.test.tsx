@@ -3,8 +3,7 @@
  *
  * RestGate is a side-effect-only component (returns null) that
  * pushes the user into the full-screen `/rest` route whenever
- * `selectHasActiveRest` flips true. Coverage gap filed by `/iterate`
- * 2026-06-14.
+ * `selectHasActiveRest` flips true.
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';

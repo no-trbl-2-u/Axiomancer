@@ -1,10 +1,9 @@
 /**
- * IntentIcon — wall-math readout (phase 28).
+ * IntentIcon — wall-math readout.
  *
- * `intent.damage` is the raw face value (unchanged, pre-existing contract);
- * `intent.wallMath` is what phase 28 adds — the live projection netted
- * against guard/barrier/denial. This pins the new DENIED / net-damage
- * badges and the a11y label stating the REAL outcome, not the raw one.
+ * `intent.damage` is the raw face value; `intent.wallMath` is the live
+ * projection netted against guard/barrier/denial. This pins the DENIED /
+ * net-damage badges and the a11y label stating the REAL outcome, not the raw one.
  */
 
 import React from 'react';
@@ -53,10 +52,10 @@ describe('IntentIcon — wall-math readout', () => {
 });
 
 /**
- * FE-020 — the enemy intent pill printed the damage it will deal as '♥11'.
- * The same board uses '♥ 160' on the player rail for the player's own VITAE,
- * so one glyph meant my health in one corner and the foe's outgoing damage in
- * the other.
+ * The enemy intent pill prints the damage it will deal with a minus, never a
+ * heart: the board uses '♥ 160' on the player rail for the player's own
+ * VITAE, so a heart on the pill would mean the player's health in one corner
+ * and the foe's outgoing damage in the other.
  */
 describe('FE-020: the intent pill does not wear a heart', () => {
     it('prints incoming damage with a minus, not a heart', () => {

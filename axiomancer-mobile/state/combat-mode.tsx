@@ -1,11 +1,7 @@
 /**
  * UI-only flag tracking whether the player is currently in combat.
  *
- * This is a temporary shim: once Spec 02 wires the engine store into the
- * app, callers should swap to `useGameStore(s => s.combat !== null)` and
- * this module can be deleted.
- *
- * Also carries a one-shot "last outcome" signal (Phase 41 port) the
+ * Also carries a one-shot "last outcome" signal the
  * exploration screen reads to render the post-victory aftermath
  * banner. When combat exits via `exitCombatWith(outcome)`, the
  * outcome stays on the context until the next consumer calls
@@ -19,8 +15,8 @@ import type { Item } from '@mechanics';
 export type CombatOutcome = 'victory' | 'defeat' | 'flee' | 'parley';
 
 /**
- * Phase 70 Tick A — snapshot captured at the moment combat exits
- * with `victory` (or, in later ticks, `parley` / `defeat`). The
+ * Snapshot captured at the moment combat exits with `victory`,
+ * `parley` or `defeat`. The
  * combat slice is cleared as part of `actions.endCombat()`, so the
  * aftermath panel can't read live state — the calling site snapshots
  * the fields the panel needs and stashes them here for the modal
@@ -28,11 +24,9 @@ export type CombatOutcome = 'victory' | 'defeat' | 'flee' | 'parley';
  *
  * Victory carries the engine `CombatEndReport` spoils (`xpGained`
  * + rolled `loot`); the presenter maps the loot into the panel's
- * spoils list and collapses the (now item-based) currency cell.
+ * spoils list and collapses the item-based currency cell.
  *
- * Discriminated union so later ticks can extend without churn — the
- * `variant` field keys off the outcome class. Tick A ships
- * `'victory'` only.
+ * Discriminated union — the `variant` field keys off the outcome class.
  */
 export type AftermathData =
     | {
@@ -42,8 +36,7 @@ export type AftermathData =
               description: string;
               level: number;
               /**
-               * Phase 76 — per-foe chronicle lines from the engine
-               * (`axiomancer-mechanics` 0.11.0). All optional; the
+               * Per-foe chronicle lines from the engine. All optional; the
                * aftermath presenter falls back to the generic
                * per-tier phrase when the field is absent.
                */
@@ -71,8 +64,7 @@ export type AftermathData =
               description: string;
               level: number;
               /**
-               * Phase 76 — per-foe chronicle lines from the engine
-               * (`axiomancer-mechanics` 0.11.0). All optional; the
+               * Per-foe chronicle lines from the engine. All optional; the
                * aftermath presenter falls back to the generic
                * per-tier phrase when the field is absent.
                */
@@ -82,11 +74,8 @@ export type AftermathData =
           };
           xpReward: number | null;
           /**
-           * Optional journal entry unlocked by the pact. Engine doesn't
-           * yet expose this — the snapshot stays null and the panel
-           * collapses the "A NEW ENTRY" section. Promote to engine
-           * integration as a Phase 70 follow-up when the writers
-           * surface per-foe codex entries.
+           * Optional journal entry unlocked by the pact. When null the
+           * panel collapses the "A NEW ENTRY" section.
            */
           journalEntry: { bookName: string; entryTitle: string; preview: string } | null;
       }
@@ -98,8 +87,7 @@ export type AftermathData =
               description: string;
               level: number;
               /**
-               * Phase 76 — per-foe chronicle lines from the engine
-               * (`axiomancer-mechanics` 0.11.0). All optional; the
+               * Per-foe chronicle lines from the engine. All optional; the
                * aftermath presenter falls back to the generic
                * per-tier phrase when the field is absent.
                */
@@ -151,14 +139,14 @@ export interface CombatModeApi {
     /** Clear the lastOutcome signal — called after a consumer acts on it. */
     clearLastOutcome: () => void;
     /**
-     * Phase 70 Tick A — snapshot stashed alongside `lastOutcome`.
+     * Snapshot stashed alongside `lastOutcome`.
      * The aftermath panel reads this for enemy / final-blow / reward
      * data instead of the (now-null) combat slice. Cleared by
      * `dismissAftermath()` when the panel's CARRY ON button fires.
      */
     aftermathData: AftermathData | null;
     /**
-     * Phase 70 Tick A — the encounter-modal aftermath panel's
+     * The encounter-modal aftermath panel's
      * CARRY ON button calls this to atomically clear the outcome
      * signal, drop the snapshot, and close the encounter modal. The
      * combat slice itself is cleared earlier (by `actions.endCombat()`
@@ -167,7 +155,7 @@ export interface CombatModeApi {
      */
     dismissAftermath: () => void;
     /**
-     * Phase 63c — true while the encounter modal is mounted (prelude,
+     * True while the encounter modal is mounted (prelude,
      * in-modal combat, or aftermath). Drives two contracts:
      *
      *   1. Exploration keeps `<EncounterModalOverlay>` mounted across
@@ -177,7 +165,7 @@ export interface CombatModeApi {
      *      mid-encounter).
      *   2. The tab bar hides while a modal session is active, enforcing
      *      the "hard stop" — user can't switch tabs until the encounter
-     *      resolves (chat1: "user cannot exit these modals").
+     *      resolves.
      *
      * Set true via `openEncounterModal()` when the encounter prelude
      * mounts; cleared via `closeEncounterModal()` when the aftermath
@@ -187,8 +175,8 @@ export interface CombatModeApi {
     openEncounterModal: () => void;
     closeEncounterModal: () => void;
     /**
-     * Phase 70 Tick C — mobile-side run-summary counters. The
-     * engine doesn't currently surface run-level progression
+     * Mobile-side run-summary counters. The
+     * engine doesn't surface run-level progression
      * (encounters faced, deepest node reached), so the shim
      * tracks them in-session for the defeat panel's run-summary
      * ledger.
@@ -205,9 +193,8 @@ export interface CombatModeApi {
      * formats it as the "deepest node" ledger line. No depth
      * comparison is done — the most-recent node wins.
      *
-     * Both fields persist for the lifetime of the provider; a
-     * future "new game" / "respawn" flow would need to reset them
-     * explicitly via `resetRunStats()`.
+     * Both fields persist for the lifetime of the provider until
+     * `resetRunStats()` (called alongside a run reset).
      */
     encountersFaced: number;
     deepestNodeId: string | null;

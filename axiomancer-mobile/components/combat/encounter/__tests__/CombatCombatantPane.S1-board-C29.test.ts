@@ -1,11 +1,10 @@
 /**
- * CombatCombatantPane — fresh-eyes shard S1-board, cluster C29.
+ * CombatCombatantPane — the top HUD scrim has no seam.
  *
- * The dark band behind the top HUD used to fade to nothing by 85% of the scene
- * band and then rise BACK to 0.4 ink, which the band's own hard bottom edge
- * sliced off: a horizontal seam ruled across the arena partway down the enemy
- * art. `combatTopScrimStops` is the scrim's stop table, and these cases pin the
- * shape that removes the seam — the tail runs all the way to the board's own
+ * A dark band that fades out and then rises back to ink is sliced off by the
+ * band's own hard bottom edge: a horizontal seam ruled across the arena
+ * partway down the enemy art. `combatTopScrimStops` is the scrim's stop table,
+ * and these cases pin the shape that leaves no seam — the tail runs all the way to the board's own
  * ground colour at full opacity, so the band's last row of pixels already IS
  * the paint behind it and there is nothing left to see an edge against.
  */
@@ -42,9 +41,9 @@ describe('S1-board-C29 — the top HUD scrim fades out instead of ending in an e
     });
 
     it('no longer leaves the pre-fix step — transparent at 0.85, dark again at 1', () => {
-        // The old table ended `{0.85, 0}` then `{1, 0.4}`: a dark tail with a
-        // hard cut. Whatever the tail's shape now, it must be climbing into the
-        // ground by the last third, never transparent at the very bottom.
+        // A table ending `{0.85, 0}` then `{1, 0.4}` is a dark tail with a hard
+        // cut. Whatever the tail's shape, it must be climbing into the ground
+        // by the last third, never transparent at the very bottom.
         const table = stops();
         const tail = table.filter((s) => s.offset >= 0.66);
         expect(tail.length).toBeGreaterThan(0);

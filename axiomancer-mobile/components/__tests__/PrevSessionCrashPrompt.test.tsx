@@ -1,6 +1,5 @@
 /**
- * Hermetic tests — `<PrevSessionCrashPrompt>` (Phase 77 next-launch
- * crash banner).
+ * Hermetic tests — `<PrevSessionCrashPrompt>` (next-launch crash banner).
  *
  * `@/state/logging`'s crash-marker plumbing is pinned separately in
  * `state/__tests__/logging.test.ts`; this suite stubs its two reader

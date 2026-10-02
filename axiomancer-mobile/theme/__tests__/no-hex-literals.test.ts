@@ -1,5 +1,5 @@
 /**
- * Phase R10 — no hex colour literal outside `theme/`.
+ * No hex colour literal outside `theme/`.
  *
  * `app/`, `components/` and `state/presenters/` read every colour from a
  * named token: `AXM` (theme-driven) or `HUE` (fixed), both exported from

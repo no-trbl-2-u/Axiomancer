@@ -1,8 +1,8 @@
 /**
- * Phase 32 part 1b — Harvest's persistent Soul bank ("the jar travels").
+ * Harvest's persistent Soul bank ("the jar travels").
  *
  * `applyHazardOutcome` (the panel's economy write-back, same call site that
- * already writes `floatingDice` back to the character) must fold whatever
+ * writes `floatingDice` back to the character) must fold whatever
  * `CombatEncounterState.souls` remains unspent at combat end into
  * `player.bankedSouls`, on every outcome — mirrors the floating-die pool's
  * own "persists regardless of how the fight ended" convention.

@@ -1,5 +1,5 @@
 /**
- * WILDS map backdrops — Phase V (the Woodcut Codex).
+ * WILDS map backdrops (the Woodcut Codex).
  *
  * Full-bleed engraving plates rendered (dimmed) under the exploration
  * chart so the map reads as a page torn from a chronicle, not a void.
@@ -9,7 +9,7 @@
  * blur, and never fight the nodes for contrast.
  *
  * Each map layout names its plate in its sheet
- * (`state/exploration-maps/*.layout.ts`, map revamp M2); a screen with no
+ * (`state/exploration-maps/*.layout.ts`); a screen with no
  * layout falls back to the dark wood (`FALLBACK_SHEET`).
  */
 
@@ -21,9 +21,8 @@ const WENTWORTH_STREET = require('./wentworth-street.webp');
 
 /**
  * The atmosphere plates, by name. Each map layout names its plate explicitly
- * in its sheet (map revamp M2); the region regex that used to pick one was
- * retired because a rename (phase 44f's "the Drowned Parish") could silently
- * break it. Every plate is public domain with its licence read from the source
+ * in its sheet, so a region rename cannot silently change which plate a map
+ * gets. Every plate is public domain with its licence read from the source
  * at acquisition — see `provenance.json` and `scripts/acquire-art.mjs`.
  */
 export const MAP_PLATES = {
@@ -35,10 +34,10 @@ export const MAP_PLATES = {
 } as const;
 
 /**
- * The four Act 1 plates (D21): one generated Doré-style engraving per region,
+ * The four Act 1 plates: one generated Doré-style engraving per region,
  * with landmark positions in `act1-landmarks.json`. Unlike the plates above
- * they are the map itself, not atmosphere (D15), so no region regex reaches
- * them: each Act 1 layout names its plate explicitly (M2).
+ * they are the map itself, not atmosphere; each Act 1 layout names its plate
+ * explicitly.
  */
 export const ACT1_PLATES = {
     coast: require('./act1-coast.webp'),

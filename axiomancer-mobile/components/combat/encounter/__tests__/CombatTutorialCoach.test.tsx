@@ -4,8 +4,7 @@
  * The coach derives its current step statelessly from the live encounter plus
  * the board's staged-card count every render, renders nothing once the script
  * is complete, and hangs UNDER the enemy HUD rather than over the dice tray
- * (the 2026-09-04 playtest found the old bottom anchor covering the dice it
- * pointed at). These tests pin the render-layer logic the step-engine test
+ * (a bottom anchor would cover the dice it points at). These tests pin the render-layer logic the step-engine test
  * does not reach: the null-return gate, the `stagedCount` prop reaching the
  * predicates, the `FIRST FIGHT · n / total` counter, the current step's copy,
  * the top anchor (inset-safe without a provider), and the SKIP wiring. The

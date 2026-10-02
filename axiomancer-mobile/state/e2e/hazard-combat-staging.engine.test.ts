@@ -1,9 +1,8 @@
 /**
- * Phase 54 — `beginHazardEncounter` stages `state.currentEncounter` via
- * `startCombat` before handing the enemy to the panel, so the exit-time
- * `endCombat` call has a real encounter to resolve rewards against instead
- * of silently no-op'ing (`plan/AUDIT.md`'s resolved endCombat row, first-map
- * audit 2026-08-08 finding F3).
+ * `beginHazardEncounter` stages `state.currentEncounter` via `startCombat`
+ * before handing the enemy to the panel, so the exit-time `endCombat` call
+ * has a real encounter to resolve rewards against instead of silently
+ * no-op'ing.
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';

@@ -1,10 +1,10 @@
 /**
- * Spec 33 (Phase D6f — The Roll Ritual) — the hermetic roll-state machine.
+ * The Roll Ritual — the hermetic roll-state machine.
  *
  * The visuals aren't testable in Node, but the DATA layer is — and the one law
  * that MUST hold is proven here in every mode: the settled face the ritual plans
  * ALWAYS equals the engine-rolled face. The animation lands on the result; it
- * never decides it (dice-honesty, 2026-07-09).
+ * never decides it (dice-honesty).
  */
 
 import {

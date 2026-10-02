@@ -1,5 +1,5 @@
 /**
- * Blacksmith presenter VM tests (Spec 33 §6 / Phase D6c). The forge
+ * Blacksmith presenter VM tests. The forge
  * screen renders one offer per die (HONE / TEMPER) plus swap offers; each
  * offer carries `enabled` and, when disabled, the LOUD reason. These pin
  * the enabled/disabled + reason contract off pure engine sessions.
@@ -101,9 +101,8 @@ describe('forge offer VM (enabled / disabled + reason)', () => {
 });
 
 /**
- * FE-023 — the forge prices in SHILLINGS but printed every price with `◆`,
- * the glyph the combat board spends on CONVICTION. A player arriving from a
- * fight reads the smith's prices as costing a combat resource.
+ * The forge prices in SHILLINGS. `◆` is the combat board's CONVICTION glyph,
+ * so a forge price printed with it would read as costing a combat resource.
  */
 describe('FE-023: forge prices carry the shilling suffix, never the conviction glyph', () => {
     it('an unaffordable offer states its price in shillings', () => {

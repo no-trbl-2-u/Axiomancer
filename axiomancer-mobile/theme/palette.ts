@@ -1,26 +1,18 @@
 /**
- * Theme registry + palette factory (visual-audit 2026-06).
+ * Theme registry + palette factory.
  *
  * Miserere Mei, Deus ships a single dark-gothic identity, but the colour
- * *accents* are now theme-driven so the world can shift palette as the
+ * *accents* are theme-driven so the world can shift palette as the
  * pilgrim descends into different regions (future biome worlds) without
  * touching the 150+ components that read `AXM.*`.
  *
  * ## How it works
  *
- * Every component imports the `AXM` object from `theme/axm.ts`. That
- * object is now a *frozen snapshot of the active theme's palette*,
- * resolved **once at module-load** (see `theme/axm.ts`). Because the
- * resolution happens while `theme/axm.ts` evaluates — strictly before
- * any importing module's body (and therefore before any
- * `StyleSheet.create(...)` runs) — every static stylesheet captures the
- * active palette with zero per-component change.
- *
- * Switching themes at runtime therefore reloads the bundle (the dev
- * switcher does this) so the new palette is re-resolved cleanly. This
- * keeps the system bullet-proof against React Native's module-scope
- * `StyleSheet.create` caching, at the cost of a ~1s reload on switch —
- * an acceptable trade for a preview affordance.
+ * The active palette is a live value held by `theme/runtime.tsx`.
+ * Reactive UI reads it through `usePalette()` / `makeStyles()`, so a
+ * theme switch re-paints in place without a reload. `AXM` in
+ * `theme/axm.ts` is a static snapshot of the active palette at
+ * module-load, kept for non-reactive consumers.
  *
  * ## Authoring a new theme
  *
@@ -70,7 +62,7 @@ export interface ThemeSpec {
     pixelHighlight: string;
 }
 
-/** The full resolved palette — the exact shape the legacy `AXM` had. */
+/** The full resolved palette — the shape of `AXM`. */
 export interface Palette extends ThemeSpec {
     backdrop: string;
     overlay: string;
@@ -131,37 +123,17 @@ export function makePalette(s: ThemeSpec): Palette {
 }
 
 /**
- * Phase 101 retune — the accents were pulled toward HISTORICAL PIGMENT.
+ * The accents are HISTORICAL PIGMENT.
  *
  * The world plates are 19th-century wood engravings graded toward the void:
- * they carry essentially zero chroma. Against that, the previous accents
- * (a #a6e22e lime, a #b81fae magenta, a #5ec5e8 cyan) read as UI stickers
- * laid on top of a print rather than as part of the page. Each theme's hues
- * were desaturated and shifted toward colours a hand-tinted plate or an
- * illuminated manuscript would actually carry — iron-gall, oxblood, gold
- * leaf, verdigris, red ochre, lapis, orpiment, murex — while keeping every
- * theme's identity and its name.
+ * they carry essentially zero chroma. Saturated UI accents would read as
+ * stickers laid on top of a print rather than as part of the page, so each
+ * theme's hues are colours a hand-tinted plate or an illuminated manuscript
+ * would actually carry — iron-gall, oxblood, gold leaf, verdigris, red ochre,
+ * lapis, orpiment, murex.
  *
- * Readability was measured before and after. The two pairs that were only
- * AA-large before now clear full AA: ashen-gold's `blood/bg` 4.16 -> 5.39,
- * plague-bloom's `blood/bg` 3.63 -> 5.72.
- *
- * What this comment claimed until 2026-09-20 — "no pair regressed" — was
- * false. Of the 60 readable-token pairs (6 accents x `bg`/`panelBg` x 5
- * themes), 36 moved down; most stayed far clear of AA (ashen-gold
- * `sulfur/bg` 12.52 -> 9.75, `heal/bg` 8.83 -> 7.44, `parchment/bg`
- * 16.09 -> 15.13). One token crossed the line: `rust`, against BOTH `bg`
- * and `panelBg`, on ashen-gold (the default), coastal-verdant and
- * ember-depths. On coastal-verdant that was a clean regression across AA
- * (`rust/bg` 5.07 -> 4.26); on the other two the retune deepened a deficit
- * that already existed. `rust` was retuned back over the line on 2026-09-20
- * — lightness lifted only, hue and saturation held, so the pigment
- * direction is unchanged: ashen-gold 4.89/4.64, coastal-verdant 4.97/4.64,
- * ember-depths 4.86/4.61 against `bg`/`panelBg`.
- *
- * It went uncaught because `READABLE_PAIRS` in `__tests__/palette.test.ts`
- * did not list `rust` at all, and covered the other accents against `bg`
- * only. That block now asserts `rust/bg` and `rust/panelBg` on every theme.
+ * Readability is pinned by `READABLE_PAIRS` in `__tests__/palette.test.ts`,
+ * which holds every readable token/surface pair at WCAG AA on every theme.
  */
 export const THEME_SPECS: Record<ThemeId, ThemeDef> = {
     'ashen-gold': {

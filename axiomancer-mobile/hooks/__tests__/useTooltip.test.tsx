@@ -1,5 +1,5 @@
 /**
- * Phase 74 Tick A — useTooltip hook pin.
+ * useTooltip hook pin.
  *
  * Thin wrapper around `useTooltipContext`; verifies the hook
  * surfaces `show` + `hide` from the provider context.

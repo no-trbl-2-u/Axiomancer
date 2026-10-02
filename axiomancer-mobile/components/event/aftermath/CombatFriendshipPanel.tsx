@@ -2,10 +2,7 @@
  * CombatFriendshipPanel — the "the heart opens" panel rendered
  * inside the encounter modal seal once `lastOutcome === 'parley'`.
  *
- * Phase 70 Tick B port of the handoff bundle's
- * `CombatFriendshipModal` (`archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-22/project/
- * screens/aftermath-modal.jsx:446-579`). Sibling of
- * `<CombatVictoryPanel>` — same vertical rhythm, but the centerpiece
+ * Sibling of `<CombatVictoryPanel>` — same vertical rhythm, but the centerpiece
  * is the pixel-art emblem (the app's lone pixel-art carve-out;
  * see `PixelEmblem.tsx` for the rationale) and the accent palette
  * is rust + parchment (not blood + sulfur).
@@ -154,7 +151,7 @@ function RewardCell({ label, value, tint }: RewardCellProps) {
 
 /**
  * Closed-book glyph rendered next to the journal-entry text block.
- * Source: handoff bundle `aftermath-modal.jsx:540-545`. 28×34 SVG,
+ * 28×34 SVG,
  * rust spine + parchment-bone page hatching + a small rust dot
  * standing in for the codex seal.
  */

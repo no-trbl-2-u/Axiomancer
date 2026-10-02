@@ -1,5 +1,5 @@
 /**
- * Hermetic component tests — DevToolsLink (Phase 132).
+ * Hermetic component tests — DevToolsLink.
  *
  * Pins the SELF-tab affordance that opens the dedicated `/dev` route:
  *   - DEV gate (production renders null — no dev affordance on SELF)

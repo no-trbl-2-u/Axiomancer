@@ -8,10 +8,6 @@
  * header, these are deliberate placeholders until the asset-
  * swap workflow ships real art. The branches still need pinning
  * so a refactor can't silently drop a kind's visual.
- *
- * Phase 137 cleanup: the rest / gathering / loot-cache / hazard
- * branches left with their kinds (those events launch minigames and
- * never reach the event modal).
  */
 
 import { describe, expect, it } from '@jest/globals';

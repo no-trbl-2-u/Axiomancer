@@ -1,17 +1,10 @@
 /**
- * Runtime theme store + reactive styling primitives (theming-hot-reload
- * 2026-06).
- *
- * ## Why this exists
- *
- * Historically `AXM` was resolved **once** at module-load and baked into
- * every static `StyleSheet.create(...)`, so switching themes meant
- * reloading the whole JS bundle. That only ever worked on web in dev.
+ * Runtime theme store + reactive styling primitives.
  *
  * This module makes the active palette a *live* value backed by a tiny
  * external store. Components subscribe with `usePalette()` (for inline
  * colours, SVG `fill`/`stroke`, dynamic styles) and `makeStyles(...)`
- * (for what used to be a module-scope `StyleSheet.create`). When
+ * (in place of a module-scope `StyleSheet.create`). When
  * `setActiveTheme(id)` runs, the store swaps the palette and notifies
  * every subscriber, so the UI re-paints in place — no reload, on web
  * **and** native, in dev **and** production.
@@ -124,7 +117,7 @@ export function usePalette(): Palette {
 
 type NamedStyles<T> = { [P in keyof T]: ViewStyle | TextStyle | ImageStyle };
 
-// --- text size (SETTINGS → TEXT SIZE, 2026-09-23) --------------------------
+// --- text size (SETTINGS → TEXT SIZE) --------------------------------------
 
 const readTextScale = (): TextScale => settingsStore.get().textScale;
 

@@ -1,5 +1,5 @@
 /**
- * Reactive theming runtime (theming-hot-reload 2026-06).
+ * Reactive theming runtime.
  *
  * Locks in the core contract: switching the active theme updates the
  * live store synchronously and re-renders subscribers in place (no

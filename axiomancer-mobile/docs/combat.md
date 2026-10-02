@@ -1,16 +1,10 @@
 # Combat screen
 
-> **Hazard-Pattern Combat (mechanics Spec 25, mobile Spec 26 / 26b) is the
-> ONLY combat engine.** The legacy turn-based resolver this doc used to
-> describe (`resolveCombatRound`, the four-phase `choosing_stance` loop,
-> `app/(tabs)/combat.tsx`) was fully removed from the engine in 2026-06 —
-> see `plan/bearings.md` § "Which combat engine is canonical". **Never**
-> resurrect that shape for a combat gate or playtest. The engine-side rules
-> live in [`axiomancer-mechanics/docs/combat.md`](../../axiomancer-mechanics/docs/combat.md);
-> this doc describes only what the **mobile screen** renders and how it
-> drives that engine. (History: the retired screen was pinned by
-> Spec 04 (`archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/04-combat-screen-wiring.md`), archived as a decision
-> record — do not treat it as current.)
+This doc describes what the mobile combat screen renders and how it drives
+the engine. The rules of a fight live in
+[`docs/game-model.md`](../../docs/game-model.md) (§ Dice, § A fight,
+§ Befriend and mercy); the engine side, with its files and functions, in
+[`axiomancer-mechanics/docs/combat.md`](../../axiomancer-mechanics/docs/combat.md).
 
 ## Entry points
 
@@ -40,9 +34,8 @@ buildCombatViewModel(state)  ──►  CombatViewModel
 <CombatBoard>  (components/combat/encounter/CombatBoard.tsx)
 ```
 
-Unlike the retired screen, there is no separate "action layer" module —
-the panel calls the `@mechanics` transition functions from `@mechanics`
-directly and re-renders from the returned `CombatEncounterState`. The
+There is no separate "action layer" module: the panel calls the
+`@mechanics` transition functions directly and re-renders from the returned `CombatEncounterState`. The
 presenter (`buildCombatViewModel`) is the only translation step, and owns
 the engine → view-model mapping; the board owns all UI/interaction.
 
@@ -63,19 +56,17 @@ The engine's `CombatEncounterState.phase` (`CombatEncounterPhase` in
 | `phase-play` | Player plays cards (`playCombatCard` with the chosen die; `endTurn` banks one unspent die). |
 | `phase-resolve` | Effect kinds compared, enemy threat action fires, phase graded Clear/Overwhelmed (`resolveThreatPhase`). |
 | `between-phases` | DoT ticks, durations tick, hand draws back to 5. |
-| `mercy-choice` | Control Saturation opened the spare/exploit modal (`selectMercyChoice`). |
+| `mercy-choice` | A successful befriend opened the spare/exploit modal (`selectMercyChoice`). |
 | `complete` | Combat over, `finalOutcome` determined. |
 
-## Turn flow (Spec 26b)
+## Turn flow
 
-Per turn, inside `phase-play` (spec 33, the Upgradeable-Dice model — the
-only combat model since the D7 flag collapse): **reveal → roll the four
-fixed-colour dice (each shows a SPECIAL, MANA or MISS face) → drag any live
+Per turn, inside `phase-play`: **reveal → roll the four
+fixed-colour dice (each shows a special, mana or miss face) → drag any live
 die onto a staged card of its colour (WILD powers any) to POWER it → END
 PHASE to bank one unspent die and resolve the threat phase.**
 
-The drag-to-power interaction model (unchanged since introduction, per
-`CombatBoard.tsx`'s own header comment):
+The drag-to-power interaction (`CombatBoard.tsx`):
 
 1. Drag a card UP into the play region to **stage** it (drag to the scrap
    zone to discard instead).
@@ -104,16 +95,14 @@ scrolling panel stack:
 | Corner medallions | Player portrait (tap → pilgrim modal) and the END PHASE button. |
 | Bottom rail | HP, phase ledger (`ledger`/`phaseBadge`/`roundLabel`/`turnLabel`), deck/discard counts. |
 
-There is no scrolling battle log in the current UI (the retired screen's
-severity-coloured log is gone); state changes read from the board itself
+There is no scrolling battle log; state changes read from the board itself
 plus transient FX (`CombatFx`).
 
 ## View-model
 
 `CombatViewModel` (`state/presenters/combat-encounter.engine.ts`) is the
 single frozen object the board renders — `phase`, `enemy`, `player`,
-`dice`, `hand`, `conviction`, `signatures`, `resonance`, the Spec 33
-`momentumV2` / `playerStance` / `dieGear` / `pressFate` surfaces, and
+`dice`, `hand`, `conviction`, `signatures`, `resonance`, `dieGear` and
 `diceRolled`. See the file's own interfaces
 (`CombatEnemyPaneVM`, `CombatPlayerPaneVM`, `CombatCardVM`, `CombatDieVM`,
 …) for the full per-region shape — they're the source of truth, not this

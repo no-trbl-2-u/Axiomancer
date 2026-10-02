@@ -1,5 +1,5 @@
 /**
- * Hermetic component tests — DebugCurrencyControl (Phase 87).
+ * Hermetic component tests — DebugCurrencyControl.
  *
  * Pins:
  *   - DEV gate (true / simulated-false)

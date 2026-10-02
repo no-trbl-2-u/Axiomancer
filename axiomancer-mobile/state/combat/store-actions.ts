@@ -22,8 +22,7 @@ import { EMPTY_COMBAT_REWARD_SLICE, type AppStore } from '../store';
  * string array that rides the save) — no migration needed: old saves simply
  * lack it and read as "not yet seen".
  */
-// Source of truth moved to `state/tutorials.ts` (SETTINGS gate, 2026-09-23);
-// re-exported so existing importers keep working.
+// Source of truth is `state/tutorials.ts`; re-exported for importers here.
 export { COMBAT_TUTORIAL_FLAG } from '../tutorials';
 import { COMBAT_TUTORIAL_FLAG, isTutorialDone } from '../tutorials';
 

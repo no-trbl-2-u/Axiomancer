@@ -1,6 +1,5 @@
 /**
- * Blacksmith encounter ("The Anvil") — store action glue (Spec 33 §6 /
- * Phase D6c).
+ * Blacksmith encounter ("The Anvil") — store action glue.
  *
  * The pure engine lives in `axiomancer-mechanics` (World/Blacksmith);
  * these wrappers thread its die-gear upgrade session through the mobile
@@ -8,7 +7,7 @@
  * engine NEVER reads `GameState`. The slice seeds the session from the
  * player's current rail (`player.dieGear`, materialised to a concrete
  * rail) and the player's spendable currency (the PLACEHOLDER budget unit
- * the host maps to ◆/souls — D7 ratifies the numbers). At claim it writes
+ * the host maps to ◆/souls). At claim it writes
  * `outcome.rail` back to `Character.dieGear` and deducts `outcome.spent`
  * from the wallet (floors at 0 — the anvil charges, it never indebts).
  *
@@ -39,8 +38,7 @@ import { resolveMinigameSeed } from '../minigame-seeds';
 import { EMPTY_BLACKSMITH_SLICE, type AppStore } from '../store';
 
 /** Flag set once the guided first visit is completed or skipped. */
-// Source of truth moved to `state/tutorials.ts` (SETTINGS gate, 2026-09-23);
-// re-exported so existing importers keep working.
+// Defined in `state/tutorials.ts`; re-exported for importers of this module.
 export { BLACKSMITH_TUTORIAL_FLAG } from '../tutorials';
 import { BLACKSMITH_TUTORIAL_FLAG, isTutorialDone } from '../tutorials';
 

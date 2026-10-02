@@ -1,5 +1,5 @@
 /**
- * Hermetic unit tests — combat-cards adapter (Phase 16).
+ * Hermetic unit tests — combat-cards adapter.
  *
  * Pins the mapping contract from the engine's `Card` to the
  * mobile `CombatCardOption` row: shape coverage, name uppercased,
@@ -53,7 +53,7 @@ describe('getCombatCardById: resolution', () => {
 
     it('returns null for an unknown id (e.g. legacy pre-Phase-16 ids)', () => {
         expect(getCombatCardById('not-a-real-card')).toBeNull();
-        // Legacy mock id from the fixture that did NOT match an engine id.
+        // A name that is not an engine card id.
         expect(getCombatCardById('ad-hominem')).toBeNull();
     });
 

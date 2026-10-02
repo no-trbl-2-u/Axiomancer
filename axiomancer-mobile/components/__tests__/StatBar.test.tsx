@@ -116,11 +116,10 @@ describe('StatBar: divide-by-zero', () => {
 });
 
 /**
- * FE-019 — a nearly-spent bar must read as an alarm, not as an empty rail.
+ * A nearly-spent bar must read as an alarm, not as an empty rail.
  *
- * The broke fixture's HUD showed 'VITAE 1/175' with a fill half a pixel wide
- * and the numerals in ordinary parchment, so one hit from death looked the
- * same as a bar that had failed to render.
+ * At 'VITAE 1/175' the fill is half a pixel wide; without the alarm, one
+ * hit from death looks the same as a bar that failed to render.
  */
 describe('FE-019: alarm state', () => {
     it('colours the readout and the track edge at or below the threshold', () => {

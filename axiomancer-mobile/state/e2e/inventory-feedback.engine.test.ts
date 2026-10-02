@@ -1,5 +1,5 @@
 /**
- * Hermetic unit tests for `selectInventoryToast` (Phase 29 Tick B).
+ * Hermetic unit tests for `selectInventoryToast`.
  *
  * The presenter is a pure mapper; tests construct synthetic
  * `inventory:changed` events that mirror the runtime payload shapes

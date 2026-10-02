@@ -1,7 +1,7 @@
 /**
  * Hermetic E2E — inter-map travel doors through the store action layer.
  *
- * The gameplay contract the player feels (2026-08-28, Phase W1): tapping
+ * The gameplay contract the player feels: tapping
  * a door node walks the run onto the next map with no event card and no
  * screen detour — the exploration canvas re-renders the arrival map and
  * a toast narrates the crossing. Cross-continent doors switch the
@@ -25,8 +25,7 @@ import { createFixtureStore } from '@/test-utils/fixtureStore';
 import { selectPacedEventRoute, selectHasActiveEvent } from '@/state/presenters/event.engine';
 
 /**
- * Seat the player on a door node through a state fixture (2026-09-08 —
- * the exemplar conversion from hand-built `createMapState` seating; see
+ * Seat the player on a door node through a state fixture (see
  * docs/testing.md "Seeding state with fixtures"). The same document
  * shape boots the CLI (`--fixture`) and the web build (`?fixture=`).
  */
@@ -50,8 +49,8 @@ describe('inter-map travel doors (Phase W1)', () => {
         expect(selectHasActiveEvent(after)).toBe(false);
         expect(selectPacedEventRoute(after)).toBeNull();
         expect(after.notifications?.toast?.text).toMatch(/You cross into/);
-        // Crossing checkpoints the run — saves are explicit on mobile
-        // (Spec 09); without this, an app close after the door loses it.
+        // Crossing checkpoints the run — saves are explicit on mobile;
+        // without this, an app close after the door loses it.
         expect(adapter.saveCount).toBe(savesBefore + 1);
     });
 

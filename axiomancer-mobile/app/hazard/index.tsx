@@ -1,6 +1,5 @@
 /**
- * Hazard minigame screen — full-screen tactical surface (design
- * handoff 2026-06-10, `Hazard Minigame Prototype.html`).
+ * Hazard minigame screen — full-screen tactical surface.
  *
  * Phase orchestration only: the engine (axiomancer-mechanics
  * World/Hazard) owns rules,

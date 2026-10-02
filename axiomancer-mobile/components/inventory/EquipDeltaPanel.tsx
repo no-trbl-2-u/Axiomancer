@@ -7,16 +7,15 @@ import { TooltipTarget } from '@/components/tooltip/TooltipTarget';
 import type { EquipDelta, SignatureDeltaEntry } from '@mechanics';
 
 /**
- * Character-update delta surface (Phase 133; slimmed to the signet model in
- * Phase 23).
+ * Character-update delta surface.
  *
  * Renders **only what changes** when an item is equipped, unequipped, or
- * swapped. After the equipment-signature epic equipment carries only static
+ * swapped. Equipment carries only static
  * `statModifiers` and one `grantsSignature`, so the delta is just the net signed
  * **stat** changes plus the **signature** gained / lost. Unchanged values never
  * render; the whole panel is suppressed when `delta.isEmpty`.
  *
- * Polarity doctrine (Phase 137): increases / gains use the **green** (heal)
+ * Polarity doctrine: increases / gains use the **green** (heal)
  * treatment; decreases / losses use the **red** (blood) treatment.
  */
 
@@ -68,7 +67,7 @@ export function EquipDeltaPanel({ itemId, delta }: EquipDeltaPanelProps) {
     );
 }
 
-/** Phase 19 — signet relic signature swap: the signature gained (green) and/or
+/** Signet relic signature swap: the signature gained (green) and/or
  *  lost (red) by this equip change. */
 function SignatureRow({
     itemId,

@@ -1,11 +1,10 @@
 /**
- * Hermetic component test — Equipment Dock column split (cluster S3-sheet-C11).
+ * Hermetic component test — Equipment Dock column split.
  *
- * The dock used a 50/50 flex split between the pilgrim bust and the five worn
- * slots, which left each slot row ~110pt for its text: names and the "grants
- * <signature>" sub-label truncated mid-word ("GRANTS READ THE ENTRA…"). The
- * gear list is the information in this panel, so it takes the room and the
- * portrait keeps a fixed narrow gutter.
+ * An even flex split between the pilgrim bust and the five worn slots leaves
+ * each slot row too little room: names and the "grants <signature>" sub-label
+ * truncate mid-word. The gear list is the information in this panel, so it
+ * takes the room and the portrait keeps a fixed narrow gutter.
  *
  * Contract asserted here: the portrait column has a fixed width and does not
  * flex-grow; the slot column is the one that grows.

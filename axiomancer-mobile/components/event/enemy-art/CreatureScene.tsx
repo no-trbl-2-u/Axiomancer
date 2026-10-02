@@ -1,5 +1,5 @@
 /**
- * CreatureScene (visual-audit 2026-06) — the shared moonlit backdrop for
+ * CreatureScene — the shared moonlit backdrop for
  * bespoke enemy illustrations. Draws a glowing moon, a receding treeline,
  * framing trees, ground mist and drifting embers, then renders the
  * per-enemy creature figure (passed as children) centred on the ground.

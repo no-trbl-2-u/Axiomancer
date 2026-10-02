@@ -443,8 +443,7 @@ describe('computeFocusTransform', () => {
         expect(fit).toEqual({ scale: 1, tx: (400 - CANVAS_W) / 2, ty: (800 - CANVAS_H) / 2 });
     });
 
-    // CRITIQUE.md [MED] "open map nodes just off-screen no-op silently on
-    // tap" — a wide branch of simultaneously-open nodes must all land
+    // A wide branch of simultaneously-open nodes must all land
     // inside the viewport on the initial fit, not just their centroid.
     it('zooms out to fit a wide branch of open nodes fully in the viewport', () => {
         const nodes: ExplorationNode[] = [
@@ -483,15 +482,15 @@ describe('computeFocusTransform', () => {
             { id: 'right', label: 'Right', kind: 'available', type: 'encounter', x: 1000, y: 1000, triggersCombat: false },
         ];
         const fit = computeFocusTransform(nodes, { w: 400, h: 800 });
-        // Legacy sheet is 936px wide: the floor is the scale that shows it whole.
+        // The default sheet is 936px wide: the floor is the scale that shows it whole.
         expect(fit.scale).toBeCloseTo(400 / 936, 5);
         expect(fit.scale).toBe(minScaleFor({ w: 400, h: 800 }));
     });
 
     it('fits the Breakwater start fan on a phone (2026-09-26 playthrough)', () => {
-        // A 2400px-square plate (map revamp M2+) at 394x557: the windmill and
-        // its four exits span ~840x985 canvas px. The old flat 0.6 floor left
-        // every exit off-screen; the fit must reach the ~0.37 it needs.
+        // A 2400px-square plate at 394x557: the windmill and its four exits
+        // span ~840x985 canvas px. A flat 0.6 floor would leave every exit
+        // off-screen; the fit must reach the ~0.37 it needs.
         const sheet = { width: 2400, height: 2400, scale: 1 };
         const viewport = { w: 394, h: 557 };
         const nodes: ExplorationNode[] = [
@@ -522,23 +521,17 @@ describe('computeFocusTransform', () => {
 });
 
 // ---------------------------------------------------------------------------
-// BUG-04 — the camera re-frames as the road opens, without fighting a pan
+// The camera re-frames as the road opens, without fighting a pan
 // ---------------------------------------------------------------------------
 
 /**
  * `focusKeyOf` is the whole safety argument for re-fitting the camera, so it is
  * pinned directly rather than inferred from a rendered Reanimated transform.
  *
- * PLAYTEST_BUGS_2026-09-18 BUG-04: the camera fitted once at mount
- * (`initialized.current`) and never again, so after the player moved, their
- * onward choices could sit entirely off-screen — measured at the Crossing on a
- * 414px viewport, two of three onward paths off opposite edges, 19 of 25 nodes
- * out of frame.
- *
- * The danger in fixing it is `plan/CRITIQUE.md`'s RESOLVED row at :2140 ("the
- * map recenters against manual panning", commit 6fe4e47c, issue #294). A naive
- * re-key on `nodes` would reopen it, because `nodes` is a fresh array on every
- * render. These cases pin the property that keeps both closed.
+ * The camera must re-fit after a move, or the player's onward choices can sit
+ * entirely off-screen. It must also not fight a manual pan (issue #294): a
+ * naive re-key on `nodes` would, because `nodes` is a fresh array on every
+ * render. These cases pin the property that satisfies both.
  */
 describe('focusKeyOf — what the camera considers a change', () => {
     const node = (id: string, kind: ExplorationNode['kind']): ExplorationNode => ({
@@ -562,7 +555,7 @@ describe('focusKeyOf — what the camera considers a change', () => {
     });
 
     it('CHANGES when the player moves', () => {
-        // This is BUG-04 itself: the moment the camera has to re-fit.
+        // The moment the camera has to re-fit.
         const before = [node('n1', 'current'), node('n2', 'available')];
         const after = [node('n2', 'current'), node('n3', 'available')];
         expect(focusKeyOf(before)).not.toBe(focusKeyOf(after));
@@ -614,7 +607,7 @@ describe('MapCanvas re-frames on a focus change', () => {
     };
 
     it('fits the camera to the current focus set, and re-fits when the player moves', () => {
-        // BUG-04 itself, against a live component: the second fit must
+        // The re-fit against a live component: the second fit must
         // actually land, not merely "not throw".
         const { getByTestId, rerender } = render(
             <MapCanvas nodes={mockNodes} edges={mockEdges}><MockChildren /></MapCanvas>,
@@ -672,7 +665,7 @@ describe('MapCanvas re-frames on a focus change', () => {
         rerender(<MapCanvas nodes={[...dressed]} edges={mockEdges}><MockChildren /></MapCanvas>);
         expect(cameraOf(getByTestId)).toEqual(panned);
 
-        // …until the player actually moves, which is when BUG-04 says it must.
+        // …until the player actually moves, which is when it must.
         const moved: ExplorationNode[] = dressed.map((n) =>
             n.id === 'node-1' ? { ...n, kind: 'completed' as const }
             : n.id === 'node-2' ? { ...n, kind: 'current' as const }
@@ -684,12 +677,12 @@ describe('MapCanvas re-frames on a focus change', () => {
 });
 
 // ---------------------------------------------------------------------------
-// owner finding 9 / D1 — a branching chart has to stay readable
+// A branching chart has to stay readable
 // ---------------------------------------------------------------------------
 
 /**
- * `edgeStroke` is the whole of how the chart tells a forward road from one of
- * D1's 69 lateral lane ribs, so it is pinned directly rather than inferred
+ * `edgeStroke` is the whole of how the chart tells a forward road from a
+ * lateral lane rib, so it is pinned directly rather than inferred
  * from rendered SVG (the sheet also draws ~43 hatch `Path`s and 5 contour
  * `Path`s, which would make a count-based assertion meaningless).
  */
@@ -738,7 +731,7 @@ describe('edgeStroke: ribs read as ribs, roads read as roads', () => {
 /**
  * RECENTRE — the return leg of the drag affordance. The pan is unbounded, so
  * a player who drags off to look down a side strand can be left holding a
- * blank corner of a 936x1040 sheet. With D1's frontier roaming, looking
+ * blank corner of a 936x1040 sheet. With frontier roaming, looking
  * sideways is the point, so it has to be undoable.
  */
 describe('MapCanvas: the recentre control', () => {

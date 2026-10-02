@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E Tests — useGameEvents hook (Phase 25 Tick B).
+ * Hermetic E2E Tests — useGameEvents hook.
  *
  * Pins: handler subscribes on mount, fires for dispatched events in
  * order, unsubscribes on unmount, accepts a non-stable handler

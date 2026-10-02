@@ -26,7 +26,8 @@ export interface GameStoreProviderProps {
     store?: AppStore;
     /**
      * Optional persistence adapter used when no `store` is supplied. Ignored
-     * when `store` is provided. Spec 09 will plug in the AsyncStorage adapter.
+     * when `store` is provided. The app root passes the AsyncStorage
+     * save-slot adapter here.
      */
     adapter?: PersistenceAdapter;
 }
@@ -81,7 +82,7 @@ export function useGameStore(): AppStore {
 
 /**
  * Subscribe to engine-emitted typed events via the store's
- * `GameEventEmitter` (Phase 25). The handler fires for every dispatched
+ * `GameEventEmitter`. The handler fires for every dispatched
  * event; consumers narrow via the `is*Event` guards exported from
  * `axiomancer-mechanics`. The subscription is set up on mount and torn
  * down on unmount; the `handler` is read from a ref so its identity

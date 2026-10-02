@@ -1,5 +1,5 @@
 /**
- * Keyword-registry honesty lints (phase 29, `archive-pre-revamp:plan/archive/2026-09-25-trim-t4/plan/phases/phase_29_keyword_registry.md`).
+ * Keyword-registry honesty lints.
  *
  * Mirrors the "no-strike"/pricing lint shape in
  * `axiomancer-mechanics/src/Cards/e2e/curated-library.engine.test.ts`: a
@@ -27,12 +27,10 @@ describe('keyword registry — KW-1 (no unmapped effect id renders a blank face)
 });
 
 describe('keyword registry — KW-3 (no dead references)', () => {
-    // KW-2 (the pinned exact registry count) was repealed 2026-09-02
-    // (big-numbers overhaul §3 L21, §10) — no count pin survives; the
-    // keyword vocabulary is growable.
+    // No count pin: the keyword vocabulary is growable.
 
     /**
-     * Kinds that deliberately carry NO `MECHANIC_KEYWORD` row (phase 68).
+     * Kinds that deliberately carry NO `MECHANIC_KEYWORD` row.
      *
      * A kind earns a row when the card FACE badges it as a keyword. These
      * speak through the printed paid/free lines instead, so mapping them
@@ -40,9 +38,7 @@ describe('keyword registry — KW-3 (no dead references)', () => {
      *
      * This list is half of the KW-2 gate: the union is walked in full, so a
      * NEW mechanic kind fails the test until it is either mapped to a glossed
-     * keyword or added here with its reason. That is the drift the
-     * content-pipelines audit (2026-08-22) found open — the old KW-2 walked a
-     * hardcoded 17 while `MECHANIC_KEYWORD` already held 22.
+     * keyword or added here with its reason.
      */
     const KINDS_WITHOUT_MECHANIC_KEYWORD: readonly string[] = [
         // GUARD prints as its own word in the paid summary (GUARD 4), so the
@@ -80,14 +76,13 @@ describe('keyword registry — KW-3 (no dead references)', () => {
 
     it('the union is walked, not a copy of it', () => {
         // Guards the gate itself: an empty or truncated enumeration would make
-        // every assertion above pass vacuously. Revamp R7a (D50) cut the union
-        // to the verbs a live card prints.
+        // every assertion above pass vacuously. The union holds only the verbs
+        // a live card prints.
         expect([...CARD_SPECIAL_MECHANIC_KINDS].sort()).toEqual(['deal', 'guard']);
     });
 
     it('the 2026-09-28 purge removed PIERCE, RIPOSTE and FORETELL from the glossary', () => {
-        // T, 2026-09-28: purge the remaining unused keywords. None of the three
-        // had a live carrier; their engine mechanics stay (the P1 brief's rule).
+        // None of the three has a live carrier; their engine mechanics stay.
         const stillPresent = ['Pierce', 'Riposte', 'Foretell'].filter((k) => keywordGloss(k) !== null);
         expect(stillPresent).toEqual([]);
         expect(keywordForMechanic('foretell')).toBeNull();
@@ -95,9 +90,6 @@ describe('keyword registry — KW-3 (no dead references)', () => {
     });
 
     it('retired keywords (BARRIER, CONJURE, PERORATION, TRANSMUTE, REPRISE) are gone', () => {
-        // FESTER left this list on 2026-08-08: the Profane Canon promoted it
-        // back to a printed keyword (gangrene-gospel, The Untended Garden), so
-        // it needs a gloss again.
         const stillPresent = ['Barrier', 'Conjure', 'Peroration', 'Transmute', 'Reprise']
             .filter(retired => keywordGloss(retired) !== null);
         expect(stillPresent).toEqual([]);
@@ -134,12 +126,10 @@ describe('keyword registry — terse glosses (owner directive 2026-07-12)', () =
 });
 
 describe('keyword registry — card-text grammar (phase 40, 2026-08-23)', () => {
-    // The templating grammar adopted for the card-text copy pass bans the em
-    // dash and the semicolon from every authored player-facing string: a
-    // clause break is a new sentence, a trigger/consequence label is a colon.
-    // Mirrors the mechanics-side lint in
-    // `paid-summary-honesty.engine.test.ts` — this is the mobile half of the
-    // "add an em-dash/semicolon lint" requirement.
+    // The card-text grammar bans the em dash and the semicolon from every
+    // authored player-facing string: a clause break is a new sentence, a
+    // trigger/consequence label is a colon. Mobile half of the mechanics-side
+    // lint in `paid-summary-honesty.engine.test.ts`.
     it('no keyword gloss carries an em dash or a semicolon', () => {
         const offenders: string[] = [];
         for (const kw of allRegistryKeywords()) {

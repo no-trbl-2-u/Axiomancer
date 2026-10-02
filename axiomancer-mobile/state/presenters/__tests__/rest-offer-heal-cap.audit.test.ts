@@ -1,11 +1,8 @@
 /**
- * Audit 2026-09-12 — the REST offer's promise equals the commit's payoff.
+ * The REST offer's promise equals the commit's payoff.
  *
- * FE-024's first cut computed `round(max × fraction)` in the presenter and
- * skipped the engine's missing-VITAE cap, so a pilgrim at 170/175 read
- * "Restores 44 VITAE" and then healed 5. The presenter now words the
- * engine's `previewRestChoiceHeal`, which shares its arithmetic with
- * `chooseRestChoiceOffer`.
+ * The presenter words the engine's `previewRestChoiceHeal`, which shares its
+ * arithmetic (missing-VITAE cap included) with `chooseRestChoiceOffer`.
  */
 
 import {

@@ -1,8 +1,7 @@
 /**
- * SELF-tab affordance that opens `/settings` — replaces the inline COLOUR
- * THEME picker that used to sit at the bottom of the SELF sheet (the theme
- * moved into SETTINGS with the rest of the player preferences, owner call
- * 2026-09-23). Player-facing: not gated behind dev tools.
+ * SELF-tab affordance that opens `/settings`, where the colour theme lives
+ * with the rest of the player preferences. Player-facing: not gated behind
+ * dev tools.
  */
 
 import React from 'react';

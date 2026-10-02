@@ -1,10 +1,10 @@
 /**
- * The SETTINGS screen — `/settings` (owner call 2026-09-23).
+ * The SETTINGS screen — `/settings`.
  *
  * Reached from the main menu and from the SELF tab. Every row is a player
  * preference kept on the device (`state/settings.ts`), except COLOUR THEME,
  * which lives in the theme runtime and is rendered through the same
- * `<ThemeSwitcher>` the SELF tab used to host.
+ * `<ThemeSwitcher>` component.
  *
  * Two rows exist only inside a run (the store has an active slot):
  * RESET TUTORIALS (strips the coach flags from THIS chronicle) and

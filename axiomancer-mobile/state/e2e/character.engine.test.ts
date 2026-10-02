@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E Tests — Character screen presenter (Spec 05)
+ * Hermetic E2E Tests — Character screen presenter
  *
  * Drives `selectCharacterViewModel` end-to-end with real engine reads.
  * Every test is self-contained and deterministic (no network, no RNG,
@@ -26,8 +26,7 @@ afterEach(() => {
     jest.restoreAllMocks();
 });
 
-/** The effects library carries no buffs since R7c deleted `buff_absolved`, so
- *  the buff mapping runs on a test-local buff registered into the live
+/** The effects library carries no buffs, so the buff mapping runs on a test-local buff registered into the live
  *  registry (jest isolates files). */
 const TEST_BUFF: Effect = {
     id: 'fixture_test_buff', name: 'Test Buff', description: 'Test fixture: no payload.',
@@ -65,7 +64,7 @@ describe('selectCharacterViewModel: shape contract', () => {
         expect(Array.isArray(vm.effects)).toBe(true);
         expect(Array.isArray(vm.equipment)).toBe(true);
         expect(Array.isArray(vm.cards)).toBe(true);
-        // D39: the GRACE meter and the alignment grid are gone from the sheet.
+        // The sheet carries no GRACE meter and no alignment grid.
         expect(vm).not.toHaveProperty('morale');
         expect(vm).not.toHaveProperty('alignment');
         expect(vm).not.toHaveProperty('graceCopy');
@@ -149,8 +148,8 @@ describe('selectCharacterViewModel: shape contract', () => {
 
         const vm = selectCharacterViewModel(store.getState());
 
-        // Phase 18 collapsed the slot model to Weapon, Armor, and three
-        // interchangeable accessory positions. 'Trinket' (not 'Accessory')
+        // The slot model is Weapon, Armor, and three interchangeable
+        // accessory positions. 'Trinket' (not 'Accessory')
         // aligns the SELF tab with the inventory dock's TRINKET chrome.
         expect(vm.equipment).toHaveLength(5);
         const names = vm.equipment.map((s) => s.name);
@@ -240,8 +239,8 @@ describe('selectCharacterViewModel: boundary conditions', () => {
     });
 
     it('character with no inventory: all equipment slots are null', () => {
-        // Use the relic-free fixture player (a fresh game seeds the signet relics,
-        // Phase 19) so the worn window is genuinely empty.
+        // Use the relic-free fixture player so the worn window is genuinely
+        // empty.
         const store = makeStore();
 
         const vm = selectCharacterViewModel(store.getState());
@@ -382,7 +381,7 @@ describe('selectCharacterViewModel: store lifecycle', () => {
         const before = selectCharacterViewModel(store.getState());
         const beforeName = before.displayName;
 
-        // Mutate player name via internal state override (simulates Spec 06 upgrade)
+        // Mutate player name via internal state override
         const newPlayer = { ...store.getState().player, name: 'Upgraded Hero' };
         store.setState({ player: newPlayer });
 

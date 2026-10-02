@@ -1,5 +1,5 @@
 /**
- * Hermetic component tests — AxmIcon + the icon registry (Phase V1).
+ * Hermetic component tests — AxmIcon + the icon registry.
  *
  * The registry is the single source of truth for the icon canon:
  * curated game-icons.net silhouettes (the owner-provided library under

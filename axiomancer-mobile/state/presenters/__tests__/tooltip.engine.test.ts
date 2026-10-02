@@ -1,11 +1,8 @@
 /**
  * Tooltip presenter pins.
  *
- * Tick A authored `kind: 'stat'`. Phase 75 authored `kind: 'effect'`,
- * `kind: 'card'`. All current branches read
- * engine static data; state is passed as `{}` cast to AppStoreState.
- * Later kinds (codex, slot, item-stat, …) will exercise
- * live state reads.
+ * Every branch tested here reads engine static data; state is passed as
+ * `{}` cast to AppStoreState.
  */
 
 import { describe, expect, it } from '@jest/globals';
@@ -153,9 +150,7 @@ describe('selectTooltipContentFor', () => {
     });
 
     describe('kind: slot (Phase 74 walkthrough Tick 3)', () => {
-        // Phase 18 collapsed the slot model — only weapon / armor /
-        // accessory tooltip ids now resolve (head/body/hands/feet folded
-        // into armor + accessory).
+        // Only weapon / armor / accessory tooltip ids resolve.
         const slotKeys = ['weapon', 'armor', 'accessory'] as const;
         it.each(slotKeys)('returns content for slot id %s', (key) => {
             const content = selectTooltipContentFor('slot', key, EMPTY_STATE);
@@ -180,15 +175,13 @@ describe('selectTooltipContentFor', () => {
 
     describe('kind: effect (Phase 75 + tighten 2026-05-24)', () => {
         it('returns engine-sourced name + payload-derived stat-effect body for a known effectId', () => {
-            // Spec 32 v3 fixture: debuff_poison (the canonical keyword DoT).
+            // Fixture: debuff_poison (the canonical keyword DoT).
             const content = selectTooltipContentFor('effect', 'debuff_poison', EMPTY_STATE);
             expect(content).not.toBeNull();
             // Title is the engine effect name uppercased.
             expect(content?.title).toBe('POISON');
-            // Body is the formatted stat-effect line — not the engine
-            // description (which Phase 75 originally surfaced but the
-            // user-jot follow-up asked to drop in favour of the
-            // payload-derived line).
+            // Body is the formatted stat-effect line, not the engine
+            // description.
             expect(content?.body).toBe('-2 hp / round');
             // mentalAttack damage type → 'mind' accent.
             expect(content?.accent).toBe('mind');
@@ -283,7 +276,7 @@ describe('selectTooltipContentFor', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Helpers (Phase 75 follow-up — payload formatter + accent mapper)
+// Helpers (payload formatter + accent mapper)
 // ---------------------------------------------------------------------------
 
 describe('accentForStat', () => {

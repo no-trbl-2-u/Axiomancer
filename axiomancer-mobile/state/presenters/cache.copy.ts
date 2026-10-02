@@ -1,6 +1,5 @@
 /**
- * Loot-cache-choice screen copy (Phase 63, replacing the retired Pick Pool
- * minigame). Neutral register on purpose, same doctrine as `rest.copy.ts`.
+ * Loot-cache-choice screen copy. Neutral register on purpose, same doctrine as `rest.copy.ts`.
  */
 
 import type { LootCacheChoiceOfferId } from '@mechanics';

@@ -1,5 +1,5 @@
 /**
- * Inventory feedback presenter (Phase 29 Tick B).
+ * Inventory feedback presenter.
  *
  * Pure mapper from an `inventory:changed` engine event to a toast
  * string the player sees. Defensive: the engine emits this event from

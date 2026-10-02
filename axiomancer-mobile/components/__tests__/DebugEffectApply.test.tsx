@@ -5,7 +5,7 @@
  *   - DEV gate (true / simulated-false)
  *   - One chip per buff and per debuff in the engine library
  *   - A chip runs the engine's applyEffect onto player.effects (the library
- *     carries no buffs since R7c, so the debuff chip is the witness)
+ *     carries no buffs, so the debuff chip is the witness)
  *   - CLEAR empties player.effects
  */
 

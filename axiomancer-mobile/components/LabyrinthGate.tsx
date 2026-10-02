@@ -5,7 +5,7 @@ import { useGameState } from '@/state/GameStoreProvider';
 
 /**
  * Pushes the user into the full-screen `/labyrinth` route whenever a visit
- * to THE APORIA opens: the Lantern Deep's vault door (map revamp M4, D24),
+ * to THE APORIA opens: the Lantern Deep's vault door,
  * the dev menu, or a save loaded mid-visit. Mirrors `<CacheGate>`, a
  * side-effect-only component mounted once in the root layout. It does not
  * push when the player is already on the route (the act-select screen

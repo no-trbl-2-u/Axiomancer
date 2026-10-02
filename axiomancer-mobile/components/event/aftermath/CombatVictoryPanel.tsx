@@ -2,23 +2,17 @@
  * CombatVictoryPanel — the "the foe falls" panel rendered inside
  * the encounter modal seal once `lastOutcome === 'victory'`.
  *
- * Phase 70 Tick A port of the handoff bundle's `CombatVictoryModal`
- * (`archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-22/project/screens/aftermath-modal.jsx`
- * lines 217-375). The component is a pure render of the VM produced
+ * The component is a pure render of the VM produced
  * by `selectAftermathViewModel`; the dismiss handler is wired
  * upstream by `<EncounterModalOverlay>` so the same modal seal that
  * opened on the encounter trigger closes on CARRY ON.
  *
- * Non-dismissible by tap-outside per chat1: "user cannot exit these
- * modals" — the only release is the CARRY ON button below.
+ * Non-dismissible by tap-outside — the only release is the CARRY ON
+ * button below.
  *
- * Tick A renders the bundle's layout faithfully *except* for the
- * loot list (the engine doesn't surface combat loot yet — the
- * spoils section shows the "no spoils. only quiet." fallback) and
- * the currency row (engine doesn't surface vitae / sigils — the
- * cell shows a single em-dash). Those fields land in subsequent
- * ticks; the component contract already accepts populated values
- * so no future churn is needed at the call site.
+ * An empty loot list shows the "no spoils. only quiet." fallback, and
+ * a null reward field (the VM's currency is always null) shows a
+ * single em-dash.
  */
 
 import React from 'react';
@@ -76,7 +70,7 @@ export function CombatVictoryPanel({ vm, onContinue }: CombatVictoryPanelProps) 
                     )}
                 </View>
 
-                {/* Final-blow panel — bundle lines 267-299. */}
+                {/* Final-blow panel. */}
                 <View style={styles.finalBlowWrap}>
                     <Splatter
                         color={AXM.blood}
@@ -122,7 +116,7 @@ export function CombatVictoryPanel({ vm, onContinue }: CombatVictoryPanelProps) 
                     </View>
                 </View>
 
-                {/* Reward strip — bundle lines 301-319. */}
+                {/* Reward strip. */}
                 <View style={styles.rewardStrip} testID="combat-victory-panel-rewards">
                     <RewardCell label="EXPERIENCE" value={xpDisplay} tint={AXM.parchment} />
                     <View style={styles.rewardDivider} />
@@ -135,7 +129,7 @@ export function CombatVictoryPanel({ vm, onContinue }: CombatVictoryPanelProps) 
                     <RewardCell label="LOOT" value={lootDisplay} tint={AXM.parchment} />
                 </View>
 
-                {/* Spoils / loot list — empty branch ships in Tick A. */}
+                {/* Spoils / loot list. */}
                 <View style={styles.lootSection}>
                     <Text style={styles.lootHeader}>✠ SPOILS OF THE FELLED</Text>
                     {lootCount === 0 ? (
@@ -223,8 +217,7 @@ function RewardCell({ label, value, tint }: RewardCellProps) {
 }
 
 /**
- * Slot glyph mirrors the design's `ItemGlyph` primitive (bundle
- * lines 140-180). Stroke-only woodcut style; the slot string keys
+ * Slot glyph. Stroke-only woodcut style; the slot string keys
  * which glyph to draw. Unknown slots fall through to the bone
  * fragment default.
  */
@@ -232,8 +225,7 @@ function ItemGlyph({ slot, size = 18 }: { slot: string; size?: number }) {
     const AXM = usePalette();
     const c = AXM.parchment;
     if (slot === 'weapon') {
-        // Canonical sword mark from the icon registry (Phase V1) — this
-        // slot used to re-inline the path verbatim.
+        // Canonical sword mark from the icon registry.
         return <AxmIcon name="action-sword" size={size} color={c} />;
     }
     if (slot === 'accessory' || slot === 'trinket') {
@@ -259,8 +251,7 @@ function ItemGlyph({ slot, size = 18 }: { slot: string; size?: number }) {
 }
 
 /**
- * Loot-tile rarity rail. Phase 135 aligns the rail colours to the
- * shared rarity rule so reward tiles speak the same language as the
+ * Loot-tile rarity rail. The rail colours follow the shared rarity rule so reward tiles speak the same language as the
  * inventory `ItemCard`: uncommon green, rare blue, unique red. Unique
  * renders a thicker, full-opacity bar so its red outline reads as the
  * "set-in-stone" tier; common stays a muted hairline.

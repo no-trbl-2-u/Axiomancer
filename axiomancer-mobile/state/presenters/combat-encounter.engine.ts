@@ -1,12 +1,11 @@
 /**
- * Spec 26 / 26b — Combat board presenter.
+ * Combat board presenter.
  *
  * Pure function `buildCombatViewModel(state)`: maps the engine
  * `CombatEncounterState` into a single render-ready `CombatViewModel`. No store
  * writes, no rules — the engine owns truth, this shapes it for the board
- * (portraits, visible enemy HP, intent telegraph, the open stance check, the
- * spec-33 faced dice tray, and Conviction + Signature Skills — the HP-only
- * model).
+ * (portraits, visible enemy HP, intent telegraph, the faced dice tray, the
+ * hand, and Conviction + Signature Skills).
  */
 
 import {
@@ -15,16 +14,15 @@ import {
     lookupEffect, colorMatchBonus,
     RESERVE_MAX,
     riderText,
-    // phase 28 — legibility sweep
+    // The wall-math readout on the intent.
     projectIncomingThreat,
-    // phase 2 — projected-lethality readout (spec 30): the status kill-path
-    // foresight, wired into the board's HUD by this pass.
+    // The status kill-path foresight on the enemy pane.
     projectCombatOutcome,
-    // Revamp R4 — the signature bar reads the engine's own cast gate.
+    // The signature bar reads the engine's own cast gate.
     signatureCastBlock,
-    // Spec 33 (Phase D6b) — the momentum chain and the die-gear rail.
+    // The momentum chain and the die-gear rail.
     MOMENTUM_CHAIN_ORDER, MOMENTUM_SURGE_LENGTH, activeDieGear, DEFAULT_DIE_GEAR,
-    // S3 — stat scaling: the hand prints final numbers in the family colour.
+    // Stat scaling: the hand prints final numbers in the family colour.
     scaleCardForStats,
     type StatFamily,
     type CombatEncounterState, type CombatCard, type CombatManaDie, type CombatEvent,
@@ -34,16 +32,15 @@ import {
     type UpgradeableDieGear,
     type WheelStance,
 } from '@mechanics';
-// W3 (2026-09-21, owner finding 4) — the card-text projection. The detail
-// panel's printed clauses are DERIVED here, in mechanics, from the effect
-// data; this presenter only formats them (keyword casing, separators,
-// de-abbreviation). It never decides what is in the list. Sub-path alias:
-// the module is deliberately not re-exported
-// through the top-level barrel, which several workers are editing in parallel.
+// The card-text projection. The detail panel's printed clauses are DERIVED in
+// mechanics from the effect data; this presenter only formats them (keyword
+// casing, separators, de-abbreviation). It never decides what is in the list.
+// Imported by sub-path: the module is not re-exported through the top-level
+// barrel.
 import { paidClauses, type CardClause } from '@mechanics/Combat/combat.card-text';
 import { momentumV2A11y } from '@/state/combat/momentum';
-// D4 — the single mobile source for the rarity band (wave-0 contract). Never
-// re-band a rank here; `rarityFor` owns that question for every surface.
+// The single mobile source for the rarity band. Never re-band a rank here;
+// `rarityFor` owns that question for every surface.
 import { rarityFor, RARITY_LABEL, RARITY_PIPS, RARITY_COLOR } from '@/state/presenters/card-rarity.engine';
 
 /** The barrel doesn't re-export the union, so derive it from Card. */
@@ -57,18 +54,16 @@ import { AXM, HUE } from '@/theme/axm';
 export const STANCE_COLORS: Record<string, string> = {
     // Body=RED, Mind=BLUE, Heart=PURPLE, Wild=GOLD (owner-specified dice palette).
     heart: HUE.dieHeart, body: HUE.dieBody, mind: HUE.dieMind, wild: HUE.goldAccent, x: HUE.dieX,
-    // Phase 104 — the grey office's colourless aspect: the neutral ink token
-    // (never a literal, unlike the fixed dice-identity hexes above).
+    // The colourless (grey) aspect: the neutral ink token.
     any: AXM.bone,
 };
 const DIE_GLYPHS: Record<string, string> = { heart: '♥', body: '⚡', mind: '★', wild: '✦', x: '✕', any: '✦' };
 const STANCE_LABELS: Record<string, string> = { heart: 'HEART', body: 'BODY', mind: 'MIND', wild: 'WILD', x: 'X', any: 'ANY' };
 
-// Spec 32 v3 — THE STRIKE IS DEAD: a FREE (no-die) play executes the card's
-// AUTHORED free rider (no flat chip exists). The free text below always comes
-// from the engine's riderText so printed == applied (P0-truth).
+// A FREE (no-die) play executes the card's AUTHORED free rider. The free text
+// below always comes from the engine's riderText so printed == applied.
 //
-// Rank ladder display names (spec 32 v3 §4). CARD_RANK_NAMES lives in
+// Rank ladder display names. CARD_RANK_NAMES lives in
 // mechanics src/Cards/types.ts but is NOT re-exported through the barrel,
 // so mirrored here (kept in sync by hand).
 const RANK_NAMES: Record<number, string> = Object.freeze({
@@ -97,8 +92,7 @@ function vitaeCopy(text: string): string {
     return text.replace(/\bHP\b/g, 'VITAE');
 }
 
-/** 2026-07-12 (card-wording audit) — 8 of 10 playtest decks could not decode
- *  the rider shorthand ('mark i1 d2'). De-abbreviate at render: intensity →
+/** De-abbreviate the rider shorthand ('mark i1 d2') at render: intensity →
  *  '×N', duration → 'N turns'. Presentation-only — the engine text stays the
  *  truth; this is its spelling (ADR-0001/0003). */
 function deabbreviateShorthand(text: string): string {
@@ -112,7 +106,7 @@ function deabbreviateShorthand(text: string): string {
  *  card's `free` rider. Never a fabricated number. */
 function freeLineText(card: CombatCard, sourceCard?: Card): string {
     // selfTargetCard: a rider crossing the card's printed target names its side
-    // ('mark ×1 (enemy)' on the self-target ad-nauseam — card-clarity audit).
+    // ('mark ×1 (enemy)' on a self-target card).
     if (!sourceCard?.free) return 'no effect';
     const text = deabbreviateShorthand(riderText(sourceCard.free, { selfTargetCard: sourceCard.targetType === 'self' }));
     const ae = sourceCard.free.applyEffect;
@@ -132,7 +126,7 @@ function percentIntensity(effectId: string, intensity: number): string | null {
 /** The barrel doesn't export CardRider — derive it from Card. */
 type CardRider = NonNullable<Card['free']>;
 
-/** Option A split rail — project the authored FREE rider into a KEYWORD · value
+/** Split rail — project the authored FREE rider into a KEYWORD · value
  *  pair for the face's ◇ column. Clause order mirrors the engine's riderText so
  *  the head clause is the same one the prose leads with; a multi-clause free
  *  line keeps the head pair and marks the rest with a trailing '+' (the overlay
@@ -145,7 +139,7 @@ function riderPairs(r: CardRider): [string, string][] {
             ?? r.applyEffect.effectId.replace(/^(debuff|buff)_/, '');
         const i = r.applyEffect.intensity ?? 1;
         const d = r.applyEffect.duration;
-        // De-abbreviated (audit 2026-07-12): '×1 · 1t', never the 'i1 d1' code.
+        // De-abbreviated: '×1 · 1t', never the 'i1 d1' code.
         pairs.push([kw.toUpperCase(), `${percentIntensity(r.applyEffect.effectId, i) ?? `×${i}`}${d ? ` · ${d}t` : ''}`]);
     }
     return pairs;
@@ -162,9 +156,8 @@ function freeRail(sourceCard?: Card): { freeKeyword: string | null; freeValue: s
 
 // FREE-effect glyph — the hero mark for the dieless play. Affliction riders use
 // their effect's board glyph; currency riders (guard/draw…) map to a
-// terse rune. '' when the card has no free line.
-// The keyword audit (2026-09-27, after the card purge) kept only the live
-// registry words; any other rider falls back to the generic ◆ rune.
+// terse rune; any other rider falls back to the generic ◆ rune. '' when the
+// card has no free line.
 const FREE_KW_GLYPH: Record<string, string> = {
     GUARD: '❖', HEAL: '✚', DRAW: '⚑',
     CLEANSE: '✦', PIP: '⬡',
@@ -183,13 +176,13 @@ function freeGlyphMeta(sourceCard?: Card): { glyph: string; key: string | null }
     return kw ? { glyph: FREE_KW_GLYPH[kw] ?? '◆', key: kw } : { glyph: '', key: null };
 }
 
-/** Option A type strip — stance + card type. */
+/** Type strip — stance + card type. */
 function typeStripText(card: CombatCard): string {
     const typeLabel = card.cardType ? card.cardType.toUpperCase() : null;
     return [card.stance.toUpperCase(), ...(typeLabel ? [typeLabel] : [])].join(' · ');
 }
 
-// ── Intent vocabulary (Spec 26 §2.4) ─────────────────────────────────────────
+// ── Intent vocabulary ────────────────────────────────────────────────────────
 
 export const INTENT_ICONS: Record<CombatIntentType, { icon: string; label: string; color: string }> = {
     damage: { icon: '⚔', label: 'ATTACKS', color: HUE.damageRed },
@@ -203,13 +196,13 @@ export const INTENT_ICONS: Record<CombatIntentType, { icon: string; label: strin
 // ── View-model types ─────────────────────────────────────────────────────────
 
 export interface CombatEffectChipVM {
-    // No `isMax`: the engine has no intensity cap, so the old "✶ at 10" badge
-    // was a presenter invention that hid the real stack count (2026-09-04).
+    // No `isMax`: the engine has no intensity cap, so the chip shows the real
+    // stack count.
     effectId: string; glyph: StatusGlyph; intensity: number; duration: number;
     /** General keyword definition for the on-board status tooltip (null if unmapped). */
     gloss: string | null;
 }
-/** WS9 (spec 32 §12 #7) — the fork telegraph of a BRANCH phase: the condition
+/** The fork telegraph of a BRANCH phase: the condition
  *  plus BOTH outcomes stay visible; `taken` is stamped once the phase starts. */
 export interface CombatIntentBranchVM {
     /** Human condition text, e.g. "if it carries 3+ afflictions". */
@@ -226,10 +219,10 @@ export interface CombatIntentVM {
     damage: number;
     /** True if the threat action also applies a debuff to the player. */
     debuffs: boolean;
-    /** WS9 — fork info for the CURRENT phase (null on linear phases). */
+    /** Fork info for the CURRENT phase (null on linear phases). */
     branch: CombatIntentBranchVM | null;
     next: { type: CombatIntentType; icon: string; label: string; branch: CombatIntentBranchVM | null } | null;
-    /** phase 28 — the wall-math readout (`projectIncomingThreat`): what this
+    /** The wall-math readout (`projectIncomingThreat`): what this
      *  telegraphed hit actually deals right now, netted against live guard/
      *  barrier and denial state — the number `damage` above can't show. */
     wallMath: {
@@ -248,7 +241,7 @@ export interface CombatEnemyPaneVM {
      *  anything that does not escalate). The loud announcement is the combat
      *  log's `stage-entered` line — this is the standing "it has changed" mark. */
     stagesEntered: number;
-    /** Phase 2 (spec 30) — the status kill-path foresight. `pendingDot` is the
+    /** The status kill-path foresight. `pendingDot` is the
      *  damage the foe's CURRENT stacks will deal if nothing else happens;
      *  `roundsToKill` is null unless that alone clears remaining HP, in which
      *  case `isLethalInFlight` is true. Engine truth (`projectCombatOutcome`),
@@ -261,12 +254,11 @@ export interface CombatPlayerPaneVM {
 export interface CombatDieVM {
     id: string; color: string; colorHex: string; glyph: string; stanceLabel: string;
     spent: boolean; isX: boolean;
-    // ── Fate Engine P1 ──
     /** A banked Reserve die — a second power source, ripening between phases. */
     reserve?: boolean;
     /** Ripening pips (+1 intensity per pip on a status play; +2 Guard on a defend). */
     pips?: number;
-    /** Spec 32 v3 §5 — a GHOST die: consumed forever when spent, persists
+    /** A GHOST die: consumed forever when spent, persists
      *  across combats, never rerolls. */
     floating?: boolean;
     /** The board may attach a drag gesture to this die. Computed HERE (not in
@@ -274,21 +266,21 @@ export interface CombatDieVM {
      *  it mid-drag unmounts the GestureDetector, which on web kills the pan
      *  without onEnd/onFinalize (the stuck-ghost / dead-drop bug). */
     draggable: boolean;
-    /** Spec 33 (Phase D6a) — the rolled gear face: `mana` powers a card of its
+    /** The rolled gear face: `mana` powers a card of its
      *  color (the normal look), `special` also fires its +◆ payload (the
      *  marked face), `miss` is DEAD (unpowerable). ABSENT on unrolled dice
      *  (GHOST / forged / Reserve) — those power by colour alone. */
     face?: 'special' | 'mana' | 'miss';
-    /** Spec 33 §6 (Phase D6a) — an OVERHEAT crack forced this die's color
+    /** An OVERHEAT crack forced this die's color
      *  all-miss this round; it reads as a distinct struck-out state. */
     cracked?: boolean;
 }
 /**
- * THE COLOR LAW, UI-side (owner directive 2026-07-12: the board must PREVENT
- * illegal die placement, not let the play fizzle).
+ * THE COLOR LAW, UI-side: the board PREVENTS illegal die placement rather
+ * than letting the play fizzle.
  *
  * Rule source — the ENGINE, not this file: `playCombatCard`'s COLOR LAW gate
- * (axiomancer-mechanics src/Combat/combat.engine.ts ~:1339 — a die powers only
+ * (axiomancer-mechanics src/Combat/combat.engine.ts — a die powers only
  * a card of ITS color; WILD is the sole exception; a fate-X play acts wild but
  * rides its own tap path, never a drag) and `combatDieCanPower`
  * (src/Combat/combat.dice.ts), which additionally wants the die's live
@@ -303,22 +295,21 @@ export function dieCanPowerCardVM(
     cardStance: string,
 ): boolean {
     if (die.isX || die.color === 'x') return false;
-    // Spec 33: a MISS face is dead — it powers nothing, so any drop is
+    // A MISS face is dead — it powers nothing, so any drop is
     // refused just like an off-color one.
     if (die.face === 'miss') return false;
     if (cardStance === 'wild') return true;   // parity with combatDieCanPower
-    // Phase 104 — a grey card ('any') is powered by every non-X, non-miss die.
+    // A grey card ('any') is powered by every non-X, non-miss die.
     if (cardStance === 'any') return true;
     return die.color === 'wild' || die.color === cardStance;
 }
 
 export type CombatCardKind =
     | 'dot' | 'stun' | 'guard' | 'weaken' | 'inert' | 'befriend'
-    // ── mechanics 0.34.0 — newly REAL in the HP engine ──
     | 'vulnerable'   // debuff_vulnerable / debuff_vulnerability_* — foe takes +N% damage
-    | 'mark'         // spec 32 v3 — universal exposure: +N per DoT tick per stack
+    | 'mark'         // universal exposure: +N per DoT tick per stack
     | 'resolute'      // buff_resolute → real -N% damage-taken reduction (the inverse of vulnerable)
-    // ── card-honesty (2026-07-10) — the generic MECHANIC-LED face ──
+    // The generic MECHANIC-LED face:
     | 'mechanic';     // a specialMechanics verb (DEAL / GUARD) or a
                       // rider-carried verb (DRAW / HEAL / …) is the card's paid identity;
                       // keyword + value come from the mechanic, never a fabricated fallback
@@ -330,7 +321,7 @@ export type CombatCardKind =
 export interface CombatCardFaceVM {
     kind: CombatCardKind;
     keyword: string | null;        // UPPERCASE keyword for the face (e.g. 'BLEED')
-    /** S3 (D40) — the stat family of the card's main keyword (body: damage to
+    /** The stat family of the card's main keyword (body: damage to
      *  the foe; mind: on you; heart: on the foe). Set on the live hand only. */
     statFamily?: StatFamily | null;
     /** The family's dice colour and stat glyph (♥ ⚡ ★) for the keyword text. */
@@ -355,13 +346,13 @@ export interface CombatCardFaceVM {
     heroSub: string | null;        // e.g. '(18)'
     freeHeroText: string;          // the no-die value
     freeHeroSub: string | null;
-    /** Option A split rail (owner-picked 2026-07-09) — the FREE column's
+    /** Split rail — the FREE column's
      *  KEYWORD · value projection of the authored free rider (e.g. TICK · 1).
      *  null keyword = no free effect; the overlay's freePill keeps the full
      *  prose. */
     freeKeyword: string | null;
     freeValue: string | null;
-    /** Option A type strip at the card foot — 'BODY · SPELL'. */
+    /** Type strip at the card foot — 'BODY · SPELL'. */
     typeStrip: string;
     verbLine: string;              // plain who/what
     powerRail: string;
@@ -383,30 +374,27 @@ export interface CombatCardDetailVM {
     readNote: string;
     mathLine: string;
     keywords: { name: string; def: string; minor: boolean }[];
-    // ── The +DIE row (card-wording audit 2026-07-12: the NO-DIE pill was a
-    //    pure duplicate of the face's ◇ rail and is no longer rendered; this
-    //    row keeps only what the face cannot carry) ──
+    // ── The +DIE row: only what the face cannot carry ──
     /** The no-die (free) value — the full-truth authored line (the face's ◇
      *  rail is its terse projection). Kept as a presenter truth surface. */
     freePill: string;
     /** The FULL paid line — EVERY clause a die-powered play fires, in authored
      *  order, derived from `paidClauses()` in mechanics
-     *  ('DEAL 20  +  CURDLE …  +  HEAL 16'). Null only for a card that prints
+     *  ('DEAL 20  +  MARK ×1 · 2 turns  +  HEAL 16'). Null only for a card that prints
      *  no payload at all. */
     diePaidLine: string | null;
     /** The colour-match rule — rendered ONCE per modal (not per powerLine). */
     colorMatchHint: string;
-    /** 2026-07-12 (owner playtest) — the per-card slice of the systems
-     *  glossary: ONLY the system terms this card's printed lines reference
-     *  (and that no keyword chip already explains). Replaces the KW-7 dump of
-     *  all six entries on every inspect. */
+    /** The per-card slice of the systems glossary: ONLY the system terms this
+     *  card's printed lines reference (and that no keyword chip already
+     *  explains). */
     systemTerms: { term: string; def: string }[];
-    /** D4 — the rarity band's player-facing name ('Common' / 'Uncommon' /
-     *  'Rare'), from the wave-0 `card-rarity.engine` module. */
+    /** The rarity band's player-facing name ('Common' / 'Uncommon' /
+     *  'Rare'), from the `card-rarity.engine` module. */
     rarityLabel: string;
-    /** D4 — how many pips to draw. The COUNT is the greyscale-safe signal. */
+    /** How many pips to draw. The COUNT is the greyscale-safe signal. */
     rarityPips: number;
-    /** D4 — the band's hue. Never render it as the only rarity cue. */
+    /** The band's hue. Never render it as the only rarity cue. */
     rarityColor: string;
     /** The ◇ row's tag. */
     freeTag: string;
@@ -423,10 +411,10 @@ type DetailCore = Omit<CombatCardDetailVM,
 export interface CombatCardVM {
     uid: string; cardId: string; name: string; stance: string; stanceColor: string;
     verbClass: string; effectKind: 'dot' | 'control' | 'none';
-    /** Spec 32 v3 — rarity band derived from the rank ladder. The RARE frame
-     *  keys off `rarity === 'rare'` (the gold tier is gone). */
+    /** Rarity band derived from the rank ladder. The RARE frame keys off
+     *  `rarity === 'rare'`. */
     rarity?: 'common' | 'uncommon' | 'rare';
-    /** Spec 32 v3 — rank 1-6 (Ash → Saint) + its printed name. */
+    /** Rank 1-6 (Ash → Saint) + its printed name. */
     rank?: 1 | 2 | 3 | 4 | 5 | 6;
     rankName: string | null;
     /** Attack / skill / spell. */
@@ -438,7 +426,7 @@ export interface CombatCardVM {
     /** Honest, render-ready inspect detail (outcome + free/die + math + keywords). */
     detail: CombatCardDetailVM;
     /** Authored flavor prose (`Card.description`) — overlay BOTTOM only, never
-     *  on the face (owner directive 2026-07-09: the face is purely functional). */
+     *  on the face (the face is purely functional). */
     flavor: string | null;
 }
 export interface CombatSignatureVM {
@@ -449,8 +437,7 @@ export interface CombatSignatureVM {
     reason?: string | null;
 }
 /**
- * Spec 33 §3 (Phase D6b) — the momentum chain chip. Spec-33 momentum is a
- * single chain `{ color, length }`. A BREAK collapses it to null and the chip must
+ * The momentum chain chip. Momentum is a single chain `{ color, length }`. A BREAK collapses it to null and the chip must
  * teach that LOUDLY; a SURGE forges a temporary gold die and also resets. Both
  * transient states are derived from the event log (the null value alone can't
  * tell an empty chain from a just-broken one).
@@ -468,7 +455,7 @@ export interface CombatMomentumV2VM {
     surgeAt: number;
     /** The stance that ADVANCES the chain next (null when no chain). */
     next: WheelStance | null;
-    /** LOUD state — the chain just BROKE to null (owner-locked strict rule). */
+    /** LOUD state — the chain just BROKE to null. */
     broke: boolean;
     /** Celebratory state — the chain just SURGED (gold die granted). */
     surged: boolean;
@@ -476,7 +463,7 @@ export interface CombatMomentumV2VM {
     colorHex: string;
     a11y: string;
 }
-/** Spec 33 §6 (Phase D6b) — one die's gear slot in the rail + inspection VM. */
+/** One die's gear slot in the rail + inspection VM. */
 export interface CombatDieGearSlotVM {
     color: 'heart' | 'body' | 'mind' | 'wild';
     label: string;   // 'HEART' / 'WILD'
@@ -494,7 +481,7 @@ export interface CombatDieGearSlotVM {
     upgraded: boolean;
     a11y: string;
 }
-/** Spec 33 §6 (Phase D6b) — the 4-slot die-gear rail. */
+/** The 4-slot die-gear rail. */
 export interface CombatDieGearRailVM {
     slots: CombatDieGearSlotVM[];   // heart, body, mind, wild (rail order)
 }
@@ -507,7 +494,6 @@ export interface CombatViewModel {
     conviction: number;
     signatures: CombatSignatureVM[];
     hand: CombatCardVM[];
-    // ── Fate Engine P1 ──
     /** Room left in the Reserve (drives the bank-or-burn chip). */
     reserveRoom: boolean;
     /** The encounter's Resonance tally (thresholds key off this). */
@@ -518,11 +504,11 @@ export interface CombatViewModel {
     turnLabel: string;
     deckCount: number;
     discardCount: number;
-    /** phase 28 — discard-pile card ids + names, for the REPRISE songbook picker. */
+    /** Discard-pile card ids + names, for the REPRISE songbook picker. */
     discardCards: { id: string; name: string }[];
-    /** Spec 33 §3 (Phase D6b) — the momentum chain chip. */
+    /** The momentum chain chip. */
     momentumV2: CombatMomentumV2VM;
-    /** Spec 33 §6 (Phase D6b) — the die-gear rail. */
+    /** The die-gear rail. */
     dieGear: CombatDieGearRailVM;
 }
 
@@ -546,7 +532,7 @@ function chips(effects: { effectId: string; intensity: number; remainingDuration
     });
 }
 
-/** WS9 — maps a phase's branch payload to the fork telegraph (null if linear). */
+/** Maps a phase's branch payload to the fork telegraph (null if linear). */
 function branchVM(phase: CombatThreatPhase | undefined): CombatIntentBranchVM | null {
     const b = phase?.branch;
     if (!b) return null;
@@ -653,25 +639,17 @@ export function selectEnemyActionCard(
 }
 
 /**
- * THE BIG NUMBERS REWRITE (2026-09-02) — the combat log's narration of the
- * rewrite's own events.
- *
- * Everything the engine emits should be legible, and the seven new ledgers
- * (WRATH / CHAIN / FLAY / TWIN / OVERKILL) plus the ENEMY beat (a foe
- * changing STAGE) were landing silently: the numbers moved and the player was never told which word moved
- * them. This is the mapping, and the only place the words live.
+ * The combat log's sentence for the event kinds no other surface narrates:
+ * a foe entering a STAGE, a foe healing, and a refused action. This is the
+ * mapping, and the only place the words live.
  *
  * `text` is the log sentence; `float` is the short token the battlefield rises
  * over the combatant (null = log only), so the two surfaces can never drift
- * apart. Events with no line here are handled elsewhere (damage, DoT ticks,
- * status applications) and are deliberately absent rather than duplicated.
- *
- * Corrected 2026-09-20 (burn-day audit 3.4): that last sentence was read as
- * blanket permission, and kinds the engine emits (`effect-fizzled` among
- * them) fell to `default:` and vanished from the log, the history and the
- * float layer at once. "Absent because it is handled elsewhere" is only
- * honest when the other surface actually exists and can be named. A kind with
- * no arm at all must be one no surface narrates.
+ * apart. Events with no line here (damage, DoT ticks, status applications)
+ * are narrated by `selectCombatLogHistory` and the float layer. "Absent
+ * because it is handled elsewhere" is only honest when the other surface
+ * actually exists and can be named; a kind with no arm anywhere is one no
+ * surface narrates.
  */
 export interface CombatLogLineVM {
     kind: CombatEvent['kind'];
@@ -697,10 +675,8 @@ export function selectCombatLogLines(events: readonly CombatEvent[]): CombatLogL
                     float: `‡ ${e.name.toUpperCase()} ‡`,
                 });
                 break;
-            // Playtest fix 2026-09-04 — silent ledgers. The foe's bar climbed
-            // with no line saying WHY, and the PLEA tally decayed at the turn
-            // boundary with no narration. Zero-amount heals never emit, so no
-            // guard is needed here.
+            // The foe's bar climbing gets a line saying WHY. Zero-amount heals
+            // never emit, so no guard is needed here.
             case 'enemy-healed': {
                 const why = e.source === 'STAGE' ? 'The new STAGE restores' : 'Its threat restores';
                 out.push({
@@ -729,19 +705,17 @@ export function selectCombatLogLines(events: readonly CombatEvent[]): CombatLogL
     return out;
 }
 
-// ── Playtest fix 2026-09-04 — the persistent combat log ─────────────────────
+// ── The persistent combat log ───────────────────────────────────────────────
 //
-// The playtest found combat has no persistent log: every beat is a floating
-// token that dies in ~1s, so the player cannot reconstruct what just
-// happened. `selectCombatLogHistory` walks the FULL event stream
+// A floating token dies in ~1s, so the log is how the player reconstructs
+// what just happened. `selectCombatLogHistory` walks the FULL event stream
 // (`state.log`) and produces an ordered, human-readable line per beat,
 // grouped by turn.
 //
 // It reuses `selectCombatLogLines` for every event kind that already has a
-// ledger sentence (stage-entered, the WRATH/FLAY/CHAIN/
-// TWIN/OVERKILL ledgers, enemy-healed, the PLEA lines, ...) and adds the
-// kinds that function deliberately omits — the raw damage/DoT/card/threat/
-// beats a FLOAT already carries but the log never wrote down.
+// sentence (stage-entered, enemy-healed, effect-fizzled) and adds the kinds
+// that function omits — the raw damage/DoT/card/threat beats a FLOAT
+// carries.
 
 export interface CombatLogHistoryEntryVM {
     id: string;
@@ -831,9 +805,8 @@ export function selectCombatLogHistory(state: CombatEncounterState): CombatLogHi
                 push('player', GUARD_COLOR, `Barrier absorbs ${e.amount}.`);
                 break;
             default: {
-                // Every kind `selectCombatLogLines` already narrates (stage
-                // entries, the ledgers, the PLEA lines, ...)
-                // — one source of copy, never a forked duplicate.
+                // Every kind `selectCombatLogLines` already narrates — one
+                // source of copy, never a forked duplicate.
                 const [line] = selectCombatLogLines([e]);
                 if (line) push(line.side, line.color, line.text);
                 break;
@@ -870,7 +843,7 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
     const e = state.enemy;
     const isBoss = e.difficulty === 'boss' || e.difficulty === 'unique'
         || (e.tags ?? []).includes('boss') || (e.tags ?? []).includes('unique');
-    // Phase 2 (spec 30) — pure selector, no state mutation; safe to call once
+    // Pure selector, no state mutation; safe to call once
     // per render off the same encounter state the rest of the pane reads.
     const lethality = projectCombatOutcome(state);
     return {
@@ -900,9 +873,8 @@ function playerPane(state: CombatEncounterState): CombatPlayerPaneVM {
 }
 
 function diceVM(state: CombatEncounterState): CombatDieVM[] {
-    // Spec 33 §6 OVERHEAT — colors whose die was forced all-miss this round
-    // (`turn` is the crack's bite turn; round-turn law: one turn == one round).
-    // Derived inline so the mechanics barrel is untouched.
+    // OVERHEAT — colors whose die was forced all-miss this round (`turn` is
+    // the crack's bite turn; one turn == one round). Derived inline.
     const crackedColors = new Set<string>(
         (state.crackedDice ?? []).filter(c => c.turn === state.turn).map(c => c.color),
     );
@@ -918,7 +890,7 @@ function diceVM(state: CombatEncounterState): CombatDieVM[] {
             id: d.id, color: d.color, colorHex: STANCE_COLORS[d.color] ?? HUE.fallbackGrey,
             glyph: DIE_GLYPHS[d.color] ?? '?', stanceLabel: STANCE_LABELS[d.color] ?? '?',
             spent, isX,
-            // Spec 32 v3 §5 — the board must know a floating die from a turn die.
+            // The board must know a floating die from a turn die.
             floating: floating || undefined,
             // Every live die drags until it is spent; a MISS face and an X die
             // are DEAD — never draggable. NEVER a function of live drag state
@@ -928,7 +900,7 @@ function diceVM(state: CombatEncounterState): CombatDieVM[] {
             ...(cracked ? { cracked: true } : {}),
         };
     });
-    // R2 — the Reserve renders in the same tray as a second power source.
+    // The Reserve renders in the same tray as a second power source.
     const banked: CombatDieVM[] = (state.reserve ?? []).map((d: CombatManaDie) => ({
         id: d.id, color: d.color, colorHex: STANCE_COLORS[d.color] ?? HUE.fallbackGrey,
         glyph: DIE_GLYPHS[d.color] ?? '?', stanceLabel: STANCE_LABELS[d.color] ?? '?',
@@ -944,9 +916,8 @@ function diceVM(state: CombatEncounterState): CombatDieVM[] {
 type EffectPayloadLike = {
     damageOverTime?: { damagePerRound: number; trigger?: string };
     actionRestriction?: { skipTurn?: boolean };
-    // ── mechanics 0.34.0 ──
     damageTakenMult?: number;   // debuff_vulnerable / debuff_vulnerability_* → Vulnerable (>1) / buff_resolute → Resolute (<1)
-    // ── spec 32 v3 — the themed-deck payload keys ──
+    // ── The themed-deck payload keys ──
     tickAmplifyFlat?: number;      // debuff_mark → +N per DoT tick per stack
     outgoingDamageMulPct?: number; // debuff_quarter → the enemy deals N% less damage (<0)
 };
@@ -964,12 +935,12 @@ export function engineHonestKind(
     const p = (e.payload ?? {}) as EffectPayloadLike;
     if (p.damageOverTime) return 'dot';
     if (p.actionRestriction?.skipTurn) return 'stun';
-    // Spec 32 v3 — the themed-deck payloads, all engine-read (honest):
-    // MARK amplifies every DoT tick; QUARTER
-    // (negative outgoing-damage %) weakens the enemy's hits.
+    // The themed-deck payloads, all engine-read (honest): MARK amplifies
+    // every DoT tick; QUARTER (negative outgoing-damage %) weakens the
+    // enemy's hits.
     if ((p.tickAmplifyFlat ?? 0) > 0) return 'mark';
     if ((p.outgoingDamageMulPct ?? 0) < 0) return 'weaken';
-    // 0.34.0: damage-amp is read by the live HP engine, so it's honest.
+    // Damage-amp is read by the live HP engine, so it's honest.
     if ((p.damageTakenMult ?? 1) > 1) return 'vulnerable';
     if ((p.damageTakenMult ?? 1) < 1) return 'resolute';      // real % dmg-taken reduction
     return null;
@@ -1012,8 +983,7 @@ export function resolvePrimary(card: CombatCard, sourceCard: Card | undefined): 
     }
     if (vc === 'buff-self') {
         const self = (sourceCard?.combatEffects ?? []).filter(e => e.appliedTo === 'self');
-        // card-overhaul (2026-07-03): a self-buff that reduces damage taken
-        // (Resolute) is real.
+        // A self-buff that reduces damage taken (Resolute) is real.
         const resolute = self.find(s => engineHonestKind(s.effectId) === 'resolute');
         if (resolute) return { kind: 'resolute', ce: resolute, guardAmount: null, riders: self.filter(s => s !== resolute), mech: null };
         // Not a recognised self-EFFECT — headline the driving MECHANIC. The
@@ -1025,11 +995,9 @@ export function resolvePrimary(card: CombatCard, sourceCard: Card | undefined): 
     }
     // direct-dot | direct-control | stat-debuff → opponent effects
     const opp = (sourceCard?.combatEffects ?? []).filter(e => e.appliedTo === 'opponent');
-    // card-overhaul (2026-07-03): a self-cost/self-buff effect riding a card
-    // classified by its opponent effect (e.g. Existential Debt's Resolute +
-    // Overextended alongside a Despair DoT) was previously dropped entirely —
-    // it wasn't even a rider. Surface it as a rider too, so the (now honest)
-    // keyword shows in the inspect modal rather than vanishing.
+    // A self-cost/self-buff effect riding a card classified by its opponent
+    // effect (e.g. a Resolute alongside a DoT) is surfaced as a rider too, so
+    // its keyword shows in the inspect modal.
     const selfFx = (sourceCard?.combatEffects ?? []).filter(e => e.appliedTo === 'self');
     const primary = opp.find(o => engineHonestKind(o.effectId)) ?? opp[0] ?? null;
     const k = engineHonestKind(primary?.effectId);
@@ -1058,19 +1026,18 @@ interface CardCalc extends PrimaryResolution {
     freePerTurn: number; freeTurns: number; freeTotal: number;
     skips: number;
     dpr: number; intensity: number; stacks: boolean;
-    // WI-2 — the DoT's trigger FAMILY (post trigger-migration): 'card-played'
+    // The DoT's trigger FAMILY: 'card-played'
     // (poison), 'damage-instance' (bleed), 'payoff', or null for a round-clock
     // DoT. Event-triggered DoTs tick per game event, NOT per turn, so their
     // face/detail must not print the round-clock "total over Nt" fiction.
     dotTrigger: 'card-played' | 'damage-instance' | 'payoff' | null;
-    // Profane Canon (2026-08-08) — DOOM: a DoT with NO calendar that grows +1
+    // DOOM: a DoT with NO calendar that grows +1
     // intensity every time the foe acts. "N over 3 turns" is a lie for it
     // (nothing expires, and the bite rises), so the face prints its real clock.
     dotGrowsOnEnemyAction: boolean;
-    // ── 0.34.0 authored statics (real units; live swings stay live) ──
+    // ── Authored statics (real units; live swings stay live) ──
     vulnPct: number;       // +N% damage taken (from damageTakenMult)
     markAmp: number;       // MARK: +N per DoT tick per application (tickAmplifyFlat × intensity)
-    // ── card-overhaul (2026-07-03) ──
     resolutePct: number;   // real -N% dmg taken (the inverse of vulnPct, negative)
 }
 
@@ -1096,7 +1063,7 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
             out.turns = pr.ce?.duration ?? eff?.duration ?? 0;
             out.dpr = p.damageOverTime?.damagePerRound ?? 0;
             out.perTurn = Math.floor(out.dpr * out.intensity);
-            // WI-2 — classify the trigger family so the face/detail describe how
+            // Classify the trigger family so the face/detail describe how
             // the DoT actually ticks (per card / per hit) instead of assuming a
             // round clock. `undefined`/`round-start`/`round-end` = round-clock.
             const trig = p.damageOverTime?.trigger;
@@ -1104,7 +1071,7 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
             const clockMods = (p as { dotModifiers?: { calendarExpiry?: false; growth?: string } }).dotModifiers;
             out.dotGrowsOnEnemyAction = clockMods?.growth === 'per-enemy-action'
                 && clockMods?.calendarExpiry === false;
-            // Fate Engine P1 — RAMP-AWARE lifetime totals (canonical poison /
+            // RAMP-AWARE lifetime totals (canonical poison /
             // unraveling escalate): mirror the engine's exact tick math so the
             // face equals `bottomDamagePreview` (printed == applied).
             const rampMods = (p as { dotModifiers?: { escalatesPerTurn?: boolean; rampFactor?: number } }).dotModifiers;
@@ -1150,8 +1117,8 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
             const p = (eff?.payload ?? {}) as EffectPayloadLike;
             out.intensity = pr.ce?.intensity ?? 1;
             out.turns = pr.ce?.duration ?? eff?.duration ?? 0;
-            // P0-truth: the % shown is the engine's real intensity-scaled delta
-            // (mult = 1 + (dtm−1) × intensity, uncapped since S3) — not the per-stack figure.
+            // The % shown is the engine's real intensity-scaled delta
+            // (mult = 1 + (dtm−1) × intensity, uncapped) — not the per-stack figure.
             const dtm = p.damageTakenMult ?? 1;
             out.vulnPct = Math.round((dtm - 1) * out.intensity * 100);
             out.keyword = keywordForEffect(pr.ce?.effectId) ?? 'Vulnerable';
@@ -1248,8 +1215,8 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc, sourceCard?: Card): 
     // A riposte card also grants Guard — surface it as a secondary keyword.
     // A rider is "minor" only if the engine still doesn't read it (engineHonestKind null).
     for (const r of c.riders) push(keywordForEffect(r.effectId), engineHonestKind(r.effectId) === null);
-    // 2026-07-12 (owner directive: EVERY keyword a card prints must pop a
-    // definition) — sweep the whole printed surface, not just the headline:
+    // EVERY keyword a card prints must pop a definition, so sweep the whole
+    // printed surface, not just the headline:
     // authored statuses, every special-mechanic kind, and any UPPERCASE
     // registry word on the engine lines. The keyword panel IS the popup; a
     // printed keyword without a chip is unexplained vocabulary.
@@ -1257,20 +1224,17 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc, sourceCard?: Card): 
     for (const m of sourceCard?.specialMechanics ?? []) push(keywordForMechanic(m.kind), false);
     const printed = [card.topActionText, card.bottomActionText, freeLineText(card, sourceCard)].join(' ');
     for (const kw of keywordsInText(printed)) push(kw, false);
-    // D-fix (card-wording audit 2026-07-12): a FREE-line rider is applied by
-    // the rider path, not a combatEffect, and prints in lowercase — neither
-    // sweep above sees it, so MARK printed on a no-die line rendered no panel
-    // on five decks. Sweep the authored free rider's own keyword pairs.
+    // A FREE-line rider is applied by the rider path, not a combatEffect, and
+    // prints in lowercase — neither sweep above sees it. Sweep the authored
+    // free rider's own keyword pairs.
     if (sourceCard?.free) {
         for (const [kw] of riderPairs(sourceCard.free)) {
             const title = kw.charAt(0) + kw.slice(1).toLowerCase();
             if (keywordGloss(title)) push(title, false);
         }
     }
-    // Owner playtest 2026-07-18 — the always-on BOON gloss is GONE:
-    // a die-face rule is unrelated to the card being inspected, so it no longer
-    // rides every panel. BOON/HONE/TEMPER still resolve through the printed
-    // sweep above whenever a card's OWN lines name them.
+    // No always-on die-face gloss: BOON/HONE/TEMPER resolve through the
+    // printed sweep above only when a card's OWN lines name them.
     return out;
 }
 
@@ -1290,9 +1254,9 @@ export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM
     };
     switch (c.kind) {
         case 'dot': {
-            // WI-2 — trigger-aware face. Event DoTs (poison/bleed) tick per game
-            // event, never at the round boundary, so the round-clock "total over
-            // Nt" face was a lie for them (passive play deals literally 0).
+            // Trigger-aware face. Event DoTs (poison/bleed) tick per game
+            // event, never at the round boundary, so they print a per-event
+            // rate, not a round-clock "total over Nt".
             const evt = c.dotTrigger === 'card-played'
                 ? { hero: `${c.perTurn}/play`, sub: `per card you play · ${c.turns}t`, verb: 'foe loses VITAE each card you play' }
                 : c.dotTrigger === 'damage-instance'
@@ -1315,7 +1279,6 @@ export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM
         case 'guard': { const b = c.guardAmount ?? 0; return { ...base, kind: 'guard', keyword: 'GUARD', heroText: `Guard ${b}`, heroSub: null, freeHeroText: free, freeHeroSub: null, verbLine: 'block the next hit', powerRail: `${b}`, armable: true, inert: false, guardBase: b }; }
         case 'befriend': return { ...base, kind: 'befriend', keyword: 'SPARE', heroText: '', heroSub: 'spare a near-dead foe', freeHeroText: 'mercy', freeHeroSub: null, verbLine: 'spare a near-dead foe', powerRail: 'mercy', armable: false, inert: false, guardBase: null };
         case 'vulnerable': return { ...base, kind: 'vulnerable', keyword: kw, heroText: `+${c.vulnPct}%`, heroSub: `dmg taken · ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'foe takes more damage', powerRail: c.keyword ?? 'Vulnerable', armable: true, inert: false, guardBase: null, statusBase: c.vulnPct };
-        // ── card-overhaul (2026-07-03) — the 6 previously-blank effects ──
         case 'resolute': return { ...base, kind: 'resolute', keyword: kw, heroText: `${c.resolutePct}%`, heroSub: `dmg taken · ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'you take less damage', powerRail: c.keyword ?? 'Resolute', armable: false, inert: false, guardBase: null, statusBase: c.resolutePct };
         // A keyword-less headline (DEAL — "Deal 24" needs no badge) leaves the
         // verb slot empty on purpose; the power rail then carries the hero
@@ -1331,16 +1294,11 @@ function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
     const c = cardCalc(card, sourceCard);
     const Title = c.keyword ?? '';
     const STANCE = STANCE_LABELS[card.stance] ?? card.stance.toUpperCase();
-    // Spec 32 v3 — the meta chip surfaces the RANK NAME + CARD TYPE (where the
-    // gold tag used to sit): e.g. 'BODY · ASH · SPELL · DOT'.
+    // The meta chip: stance, rank name (or tier), rarity band, card type —
+    // e.g. 'BODY · ASH · COMMON · SPELL'. No engine-jargon verb class: the
+    // keyword ledger and the ◆ +DIE row already say what the card does.
     const rankName = card.rank ? RANK_NAMES[card.rank] : null;
     const typeLabel = card.cardType ? card.cardType.toUpperCase() : null;
-    // 2026-09-21 (W3, owner finding 3) — the trailing engine-jargon word
-    // ('DOT' / 'CONTROL' / 'DIRECT-DAMAGE') is CUT: the keyword ledger above
-    // and the ◆ +DIE row below both already say what the card does, in the
-    // player's vocabulary, and no one re-plans a turn because the strip says
-    // DIRECT-DOT. Its slot goes to the rarity band (D4), so the strip carries
-    // one more decision-relevant fact in the same single row.
     const metaChip = [
         card.stance.toUpperCase(),
         rankName ? rankName.toUpperCase() : `TIER ${card.tier}`,
@@ -1348,15 +1306,15 @@ function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
         ...(typeLabel ? [typeLabel] : []),
     ].join(' · ');
     const keywords = buildDetailKeywords(card, c, sourceCard);
-    // The authored FREE line (engine riderText) — the strike/chip is dead.
+    // The authored FREE line (engine riderText).
     const free = freeLineText(card, sourceCard);
     const freeLine = `◇ FREE (no die): ${free}.`;
     switch (c.kind) {
         case 'dot': {
-            // WI-2 — event DoTs (poison=card-played, bleed=damage-instance) tick
-            // on a game event, never at the round boundary; the "PER TURN / TURNS
-            // / TOTAL" table is a lie for them. Print "PER TICK / TRIGGER /
-            // DURATION" and describe the real trigger instead.
+            // Event DoTs (poison=card-played, bleed=damage-instance) tick on a
+            // game event, never at the round boundary, so they print "PER TICK
+            // / TRIGGER / DURATION" and describe the real trigger, not the
+            // round-clock "PER TURN / TURNS / TOTAL" table.
             if (c.dotTrigger) {
                 const evt = c.dotTrigger === 'card-played' ? { noun: 'card you play', trig: 'per card played', dur: { label: 'DURATION', value: `${c.turns}t` } }
                     : c.dotTrigger === 'damage-instance' ? { noun: 'time it is struck', trig: 'per hit taken', dur: { label: 'STACKS', value: `${c.intensity}` } }
@@ -1380,7 +1338,6 @@ function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
         case 'guard': { const b = c.guardAmount ?? 0; return { subtitle: 'Guard yourself — soak the next hit.', metaChip, outcomeLine: `Gain ${Title} ${b}.`, outcomeStats: [{ label: 'GUARD', value: `${b}` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: Guard ${b}; +${colorMatchBonus(b)} if a ${STANCE} die matches.`, readNote: `Lands as printed; a colour-matched die adds +${colorMatchBonus(b)}.`, mathLine: `POWER = ${b} + ${colorMatchBonus(b)} on a colour match.`, keywords }; }
         case 'befriend': return { subtitle: 'Spare a near-dead foe.', metaChip, outcomeLine: 'Spare a near-dead foe — end combat peacefully.', outcomeStats: [], stacksText: null, freeLine, powerLine: '◆ WITH A DIE: if the enemy VITAE is low, end combat peacefully (befriend).', readNote: 'Watch the enemy VITAE bar — befriend lands only when it is low.', mathLine: 'No fixed number — a conditional outcome gated on low enemy VITAE.', keywords };
         case 'vulnerable': { return { subtitle: `${Title} the enemy — it takes more damage.`, metaChip, outcomeLine: `Apply ${Title} +${c.vulnPct}% · ${c.turns} turns.`, outcomeStats: [{ label: 'DMG TAKEN', value: `+${c.vulnPct}%` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: 'Stacks without limit.', freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — +${c.vulnPct}% damage taken for ${c.turns} turns.`, readNote: `Lands as printed: +${c.vulnPct}% damage taken for ${c.turns} turns.`, mathLine: `+${c.vulnPct}% = (damageTakenMult − 1) × 100 × intensity; combined Vulnerable is uncapped.`, keywords }; }
-        // ── card-overhaul (2026-07-03) — the 6 previously-blank effects ──
         case 'resolute': return { subtitle: `${Title} — you take less damage.`, metaChip, outcomeLine: `Gain ${Title} ${c.resolutePct}% · ${c.turns} turns.`, outcomeStats: [{ label: 'DMG TAKEN', value: `${c.resolutePct}%` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: gain ${Title} — ${c.resolutePct}% damage taken for ${c.turns} turns.`, readNote: `Lands as printed: ${Title} is a self-buff.`, mathLine: `${c.resolutePct}% = (damageTakenMult − 1) × 100${c.stacks ? '; stacks by intensity' : ''}.`, keywords };
         // A keyword-less mechanic headline (DEAL) has no Title to lead with —
         // every line below falls back to the headline's own words rather than
@@ -1402,8 +1359,8 @@ function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
  * `i3 d2` code).
  *
  * A clause the engine prints as a full sentence (no headline word — a
- * card-local rules clause such as CURDLE's flip) is printed verbatim: inventing
- * a badge for it would be exactly the drift this rewrite removed.
+ * card-local rules clause) is printed verbatim: a badge for it would be
+ * invented here, not read from the engine.
  */
 function formatPaidClause(c: CardClause): string {
     const registry = c.source === 'effect' ? keywordForEffect(c.id) : keywordForMechanic(c.id);
@@ -1411,9 +1368,9 @@ function formatPaidClause(c: CardClause): string {
     if (!word) return deabbreviateShorthand(vitaeCopy(c.text));
     const value = clauseValue(c);
     if (!value) return word;
-    // Some engine clauses TRAIL the word the badge already says ('+5 Charges',
-    // '+2 Souls'), and 'CHARGE +5 Charges' is exactly the busy-ness of finding
-    // 3. Drop the trailing repeat — but only when a number survives it, so the
+    // Some engine clauses TRAIL the word the badge already says ('+2 Souls'
+    // under SOUL would read 'SOUL +2 Souls'). Drop the trailing repeat — but
+    // only when a number survives it, so the
     // badge still leads a real value. A clause whose word is load-bearing prose
     // ('your next spell gains ECHO') prints as written, keeping the registry
     // word uppercase so the ledger above still links to it.
@@ -1444,23 +1401,10 @@ function clauseValue(c: CardClause): string {
 /**
  * The FULL ◆ +DIE line: every clause the paid play fires, in authored order.
  *
- * 2026-09-21 (owner findings 3-6, W3) — REWRITTEN at the source. The old
- * implementation walked `specialMechanics` a second time mobile-side through a
- * partial `mechPaidPart` switch, deduped on the printed WORD, and returned
- * `null` whenever fewer than two clauses survived — at which point the panel
- * fell back to a one-clause headline sentence. Between them those three rules
- * silently dropped, across the live library:
- *
- * - every DEAL on a multi-verb card (DEAL carries no keyword badge on purpose,
- *   so the badge-keyed walk skipped it — `the-lazars-kiss` printed
- *   'CURDLE +3 + HEAL 16' and never said it deals 20);
- * - every self-cost that was the only survivor (`thumbprick-oath` printed
- *   'Deal 14 VITAE.' and never said it costs you 5 VITAE);
- * - the real PLEA 38 on a card that also carries a PLEA-mapped self-buff,
- *   because the dedupe was keyed on the word.
- *
- * Now the list comes from `paidClauses()` in mechanics and nothing filters it.
- * Per D3 the terse shorthand stays — only its SOURCE changed.
+ * The list comes from `paidClauses()` in mechanics and nothing here filters,
+ * dedupes or re-derives it — a DEAL with no keyword badge, a self-cost, and
+ * two clauses sharing a word all print. Each clause is formatted in the terse
+ * shorthand by `formatPaidClause`. Null when the card has no paid clause.
  */
 function paidLine(sourceCard?: Card): string | null {
     if (!sourceCard) return null;
@@ -1469,25 +1413,22 @@ function paidLine(sourceCard?: Card): string | null {
 }
 
 /** Honest card DETAIL view-model (inspect modal) — the CORE plus the +DIE row
- *  fields. 2026-07-12 (card-wording audit): the NO-DIE pill (a pure duplicate
- *  of the face's ◇ rail) is gone; the +DIE row carries only what the face
- *  can't — the FULL paid line. */
+ *  fields, which carry what the face can't: the FULL paid line. */
 export function detailStats(card: CombatCard, sourceCard?: Card): CombatCardDetailVM {
     const core = detailCore(card, sourceCard);
     const STANCE = STANCE_LABELS[card.stance] ?? card.stance.toUpperCase();
     // The free (die-optional) value — the ENGINE's own free line, not the
-    // face's hero slot. 2026-09-21 (W3): the face hard-codes 'mercy' on a
-    // befriend card, so reading the pill off the face made the NO-DIE row of
-    // any befriend card disagree with its authored rider. `freeLineText` is
-    // `riderText` from mechanics, de-abbreviated — nothing else.
+    // face's hero slot (the face hard-codes 'mercy' on a befriend card, which
+    // would disagree with its authored rider). `freeLineText` is `riderText`
+    // from mechanics, de-abbreviated — nothing else.
     const freePill = freeLineText(card, sourceCard);
     const diePaidLine = paidLine(sourceCard);
-    // The colour law (dice-law rework 2026-07-09) — rendered ONCE per modal.
+    // The colour law — rendered ONCE per modal.
     // A colourless (grey) card takes any die — never 'Only a ANY … die'.
     const colorMatchHint = card.stance === 'any'
         ? 'Any die can power this card.'
         : `Only a ${STANCE} or WILD die can power this card.`;
-    // 2026-07-12 — the per-card systems-glossary slice: scan the card's OWN
+    // The per-card systems-glossary slice: scan the card's OWN
     // printed lines plus its overlay free/stacks lines (colorMatchHint excluded
     // — its WILD is the global colour law, not a card reference) and drop
     // terms a keyword chip already covers.
@@ -1495,7 +1436,7 @@ export function detailStats(card: CombatCard, sourceCard?: Card): CombatCardDeta
         [card.topActionText, card.bottomActionText, core.freeLine, core.stacksText ?? ''].join(' '),
         core.keywords.map(k => k.name),
     );
-    // D4 — the rarity band, derived ONCE by the wave-0 module. Named label +
+    // The rarity band, derived ONCE by `rarityFor`. Named label +
     // pip count + hue; the panel renders label and pips so the signal survives
     // greyscale and colour blindness, and the hue is decoration on top.
     const band = rarityFor(card);
@@ -1514,8 +1455,7 @@ export function detailStats(card: CombatCard, sourceCard?: Card): CombatCardDeta
  *  kinds with no number to arm (stun's skip count is duration-driven). */
 export function armedValue(face: CombatCardFaceVM, colorMatch: boolean): number | null {
     if (face.kind === 'guard' && face.guardBase != null) {
-        // THE BIG NUMBERS REWRITE — the colour-match reward is a PERCENTAGE
-        // (+25%, min +2). `colorMatchBonus` IS the engine's rule, imported,
+        // The colour-match reward is a PERCENTAGE (+25%, min +2). `colorMatchBonus` IS the engine's rule, imported,
         // not restated.
         return face.guardBase + (colorMatch ? colorMatchBonus(face.guardBase) : 0);
     }
@@ -1526,7 +1466,7 @@ export function armedValue(face: CombatCardFaceVM, colorMatch: boolean): number 
 }
 
 /**
- * S3 (D40) — the stat family of the keyword a face SHOWS, by where it lands:
+ * The stat family of the keyword a face SHOWS, by where it lands:
  * body = damage to the foe, mind = on you, heart = on the foe. Keyed by the
  * face's keyword (a card can DEAL and POISON; the face names one of them).
  * Keywords not listed are grey: no colour, no glyph.
@@ -1571,11 +1511,11 @@ export function familyFace(
 
 function handVM(state: CombatEncounterState): CombatCardVM[] {
     return engineHandCards(state)
-        // Retreat is no longer an in-combat card — fleeing is offered at the
-        // encounter prelude (ENGAGE / FLEE), not from the hand.
+        // Fleeing is offered at the encounter prelude (ENGAGE / FLEE), never
+        // from the hand, so a retreat card is filtered out.
         .filter(({ card }: { card: CombatCard }) => card.id !== 'card-retreat' && card.verbClass !== 'retreat')
         .map(({ uid, card }: { uid: string; card: CombatCard }) => {
-        // S3 — the hand prints FINAL numbers: the stat-scaled copy of the card
+        // The hand prints FINAL numbers: the stat-scaled copy of the card
         // (the engine's `handCards` already built `card` from the same copy).
         const libraryCard = getCardById(card.id);
         const stats = state.player.baseStats;
@@ -1606,7 +1546,7 @@ const SIG_ICON: Record<SignatureSkill['kind'], string> = {
 };
 
 function signaturesVM(state: CombatEncounterState): CombatSignatureVM[] {
-    // The worn relics' signatures (Phase 19). Castability and its reason come
+    // The worn relics' signatures. Castability and its reason come
     // from the engine's own gate, so the rune never offers what
     // `playSignatureSkill` would refuse.
     return state.signatures
@@ -1623,18 +1563,15 @@ function signaturesVM(state: CombatEncounterState): CombatSignatureVM[] {
         });
 }
 
-// ── Deckbuilder reward offers (Spec 26b §C) ──────────────────────────────────
+// ── Deckbuilder reward offers ────────────────────────────────────────────────
 
 /**
  * Maps reward card ids (from `rollCombatCardRewards`) into REAL card VMs — the
  * exact `CombatCardVM` the hand and the inspect modal render.
  *
- * The thin `CombatRewardOfferVM` this replaced (2026-08-08) duplicated a
- * hand-rolled slice of face logic — a name, a glyph, a tier line — which the
- * card-face-honesty guard could not see and which was already drifting from
- * the real face. A player committing a card to their deck for the rest of the
- * run reads the same face they will read in combat, or the reward screen is
- * lying to them.
+ * A player committing a card to their deck for the rest of the run reads the
+ * same face they will read in combat, so the reward screen never builds its
+ * own slice of face logic.
  *
  * There is no encounter state here (the reward is post-combat), so the face is
  * built at the card's authored truth: no live enemy difficulty, no chosen-X clamp. Every number still comes from `faceStats` /
@@ -1666,7 +1603,7 @@ export function rewardCardVMs(ids: readonly string[]): CombatCardVM[] {
     return out;
 }
 
-// ── Spec 33 §3 — the momentum chain chip ─────────────────────────────────────
+// ── The momentum chain chip ──────────────────────────────────────────────────
 
 /** The stance that advances the chain next — the successor in chain order. */
 function nextChainColor(s: WheelStance): WheelStance {
@@ -1674,7 +1611,7 @@ function nextChainColor(s: WheelStance): WheelStance {
 }
 
 /**
- * Reshapes momentum to the spec-33 chain. `state.momentumV2`
+ * Reshapes momentum to the chain chip. `state.momentumV2`
  * ({color,length}|null) drives it; the transient BREAK / SURGE states — both of
  * which leave momentum null — are recovered from the most-recent momentum event
  * in the log so a just-broken chain reads LOUD, not merely empty.
@@ -1686,9 +1623,7 @@ function momentumV2VM(state: CombatEncounterState): CombatMomentumV2VM {
     // Only when the chain sits at null can a break/surge be the live transient —
     // any live chain already superseded them. Scan back for the last chain
     // event, but STOP at the current turn's dice roll: a transient is loud for
-    // the turn it happened in, then decays to the plain empty chip. (Unbounded,
-    // a round-1 break yelled "MOMENTUM BROKEN" for the rest of the fight —
-    // owner report 2026-07-19.)
+    // the turn it happened in, then decays to the plain empty chip.
     let broke = false;
     let surged = false;
     if (m === null) {
@@ -1715,12 +1650,12 @@ function momentumV2VM(state: CombatEncounterState): CombatMomentumV2VM {
     };
 }
 
-// ── Spec 33 §6 — die-gear rail + payload-only inspection ─────────────────────
+// ── Die-gear rail + payload-only inspection ──────────────────────────────────
 
 const GEAR_RAIL_ORDER: readonly ('heart' | 'body' | 'mind' | 'wild')[] = ['heart', 'body', 'mind', 'wild'];
 
 function gearSlotVM(state: CombatEncounterState, color: 'heart' | 'body' | 'mind' | 'wild'): CombatDieGearSlotVM {
-    // D5's rail if present; else the engine's stock default (activeDieGear resolves both).
+    // The upgraded gear if present; else the engine's stock default (activeDieGear resolves both).
     const gear: UpgradeableDieGear = activeDieGear(state, color);
     const missFaces = Math.max(0, 6 - gear.specialFaces - gear.manaFaces);
     const stock = DEFAULT_DIE_GEAR[color];

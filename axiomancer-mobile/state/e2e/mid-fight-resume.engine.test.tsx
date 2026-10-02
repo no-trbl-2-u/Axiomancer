@@ -2,10 +2,9 @@
  * Trim-the-fat Tier 0 item 6 — a chronicle continued mid-fight.
  *
  * The live fight's dice, hand and HP live in the combat panel's local state,
- * so a restart keeps only the engine's `currentEncounter` (the foe). Cold
- * start used to route that save to `/combat-encounter` — the dev sandbox
- * (mock foe, nothing persisted). Now Continue lands on the map, and the map
- * restarts the fight against the saved foe (owner call, 2026-09-25).
+ * so a restart keeps only the engine's `currentEncounter` (the foe). Continue
+ * lands on the map — not `/combat-encounter`, the dev sandbox (mock foe,
+ * nothing persisted) — and the map restarts the fight against the saved foe.
  */
 
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';

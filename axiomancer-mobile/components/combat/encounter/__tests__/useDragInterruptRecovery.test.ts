@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  *
- * WI-7 — the drag interrupt-recovery hook. A drag whose pointer stream is killed
+ * The drag interrupt-recovery hook. A drag whose pointer stream is killed
  * mid-flight (pointercancel / window blur / tab hidden / no movement for 4s)
  * must be force-finalized, else it leaves a permanent ghost and can wedge all
  * subsequent staging. These pin every recovery trigger + the no-early-cut

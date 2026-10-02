@@ -1,6 +1,5 @@
 /**
- * /cutscene — the dedicated narration screen (Phase 137; re-presented by the
- * 2026-09-13 playthrough note #1).
+ * /cutscene — the dedicated narration screen.
  *
  * PRESENTATION CONTRACT (what the player sees)
  * --------------------------------------------
@@ -14,11 +13,10 @@
  *   5. Tapping through the LAST line fades it out and then dismisses the
  *      event (returns the player to whatever route pushed the cutscene).
  *
- * This replaces the previous "lines stack like a page being written"
- * presentation: only one line is ever mounted, so the screen reads as a
- * sequence of beats rather than a growing wall of prose.
+ * Only one line is ever mounted, so the screen reads as a sequence of
+ * beats rather than a growing wall of prose.
  *
- * SKIP abandons the whole scene immediately (owner call 2026-09-13) — with a
+ * SKIP abandons the whole scene immediately — with a
  * fade-through presentation there is no meaningful "reveal everything at once"
  * state to jump to, so the control dismisses the event outright.
  *
@@ -121,7 +119,7 @@ export default function CutsceneScreen() {
     }, [dismiss, isLastLine, opacity, reducedMotion]);
 
     // Inactive shell — visible for a frame while the router unwinds; never a
-    // blank screen (UI-cleanup pass, CRITIQUE).
+    // blank screen.
     if (!active) {
         return (
             <ScreenBg scrollable={false} art="cutscene">
@@ -155,7 +153,7 @@ export default function CutsceneScreen() {
                     </Text>
                 </Animated.View>
             </TouchableOpacity>
-            {/* SKIP abandons the scene outright (owner call 2026-09-13). */}
+            {/* SKIP abandons the scene outright. */}
             <TouchableOpacity
                 accessibilityRole="button"
                 accessibilityLabel="Skip the scene"
@@ -212,10 +210,8 @@ const useStyles = makeStyles((AXM) => ({
         textAlign: 'center',
         marginTop: 22,
     },
-    // S4-world-C17: SKIP was a 10px bone caption with 8px of padding —
-    // it read as chrome, not a control, and its target was well under a
-    // thumb. Given a bordered plate, a legible label, and a 44pt minimum
-    // box, it looks pressable and can be hit.
+    // SKIP has a bordered plate, a legible label, and a 44pt minimum box,
+    // so it looks pressable and can be hit.
     skip: {
         position: 'absolute',
         top: 14,

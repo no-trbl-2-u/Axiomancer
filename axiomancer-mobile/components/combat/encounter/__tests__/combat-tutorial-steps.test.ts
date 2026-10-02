@@ -10,8 +10,8 @@
  * first-unmet scan, the `-1` completion sentinel, the default context for
  * callers without a board, and — the load-bearing one — that the script does
  * NOT snap backwards when per-turn state (the staging area) resets on a new
- * turn. A copy guard also pins that no step still teaches the retired
- * three-dice draft (spec 33 replaced it with four dice and no draft). Fixtures
+ * turn. A copy guard also pins that no step teaches the retired three-dice
+ * draft (play uses four dice and no draft). Fixtures
  * are minimal partial states populating only the fields the predicates read.
  */
 

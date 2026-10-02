@@ -1,6 +1,5 @@
 /**
- * Hermetic component tests — HardwareBackHandler (Phase 8 decision A;
- * Phase 52d added the rest-choice node).
+ * Hermetic component tests — HardwareBackHandler.
  *
  * Side-effect-only component. Registers an Android hardwareBackPress
  * listener that returns `true` (prevent default) while in combat or an

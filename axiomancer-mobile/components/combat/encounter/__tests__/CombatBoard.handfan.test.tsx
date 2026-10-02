@@ -1,20 +1,17 @@
 /**
- * CombatBoard — cluster CB-handfan: the hand fan covered its own card names.
+ * CombatBoard — the hand fan must not cover its own card names.
  *
- * `plan/CRITIQUE.md` [MED], filed pass 37 and reconfirmed verbatim by passes
- * 38-41: at 375x812 a five-card hand rendered "THIN HYM / CHILBLAI / THE LONG /
- * SPOILED " — only the rightmost (topmost) card showed a full name. That was
- * OCCLUSION, not truncation: `plateName` is `numberOfLines={2}` and was laying
- * the name out across the face's full 95pt column, of which the covering card
- * painted over all but ~40pt.
+ * At 375x812 a five-card hand risks OCCLUSION, not truncation: a name laid
+ * out across the face's full 95pt column (`plateName` is
+ * `numberOfLines={2}`) is painted over, all but ~40pt, by the card above.
  *
- * The fix is the NAME BOX, not the geometry. The fan must satisfy
+ * The answer is the NAME BOX, not the geometry. The fan must satisfy
  * `HAND_CARD_W + (n-1) * step <= screenW`, which at 375pt with 5 cards caps
- * `step` at 63.75 against the shipped 57.75 — widening the overlap buys about
+ * `step` at 63.75 against the live 57.75 — widening the overlap buys about
  * one character before the outermost cards run off the phone. So `step` is
- * DELIBERATELY UNCHANGED here (the C11-R / C11-R2 invariants in
- * `CombatBoard.fresh-eyes-repair.test.tsx` still hold to 5 decimals) and the
- * name text is instead laid out inside the sliver it can actually occupy.
+ * left to the fan invariants in `CombatBoard.fresh-eyes-repair.test.tsx` and
+ * each covered card's name text is laid out inside the sliver it can
+ * actually occupy.
  *
  * What this suite pins:
  *   1. `NAME_BAND_LEFT_CHROME` equals the four styles it claims to sum, read
@@ -26,14 +23,6 @@
  *   6. The tap-to-read hatch is on screen while the fan is still occluded, and
  *      both hint lines fit the single line they are given.
  *   7. Tapping a hand card reaches `onInspect`.
- *
- * Corrected by the burn-day audit of 2026-09-19 (row 3.13). As first shipped,
- * item 1 re-typed the four style numbers as literals beside the constant — a
- * tautology that stayed green when a style moved — and item 6 claimed the tap
- * path was tested when the file contained no such test at all: its one
- * tap-related assertion sat behind an `if (hint)` that never ran, because the
- * hint it looked for only rendered once a card had already been staged. Both
- * are now real gates, each verified red against the tree that shipped them.
  */
 
 import React from 'react';
@@ -54,10 +43,10 @@ import { buildCombatViewModel, type CombatViewModel } from '@/state/presenters/c
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
-/** A four-card hand off the grey office (the whole library since the card
- *  purge, 2026-09-27). The name cap is fan geometry, not name length. */
+/** A four-card hand off the grey office (the whole card library). The name
+ *  cap is fan geometry, not name length. */
 const CARDS = ['grey-strike', 'grey-ward', 'grey-word', 'grey-strike'];
-/** The viewport the critique captured the bug at. */
+/** The phone viewport the fan is measured at. */
 const PHONE = { width: 375, height: 812, scale: 3, fontScale: 1 };
 const INSETS = { top: 47, bottom: 34, left: 0, right: 0 };
 
@@ -148,7 +137,7 @@ describe('nameColumnPeek', () => {
     it('never returns a non-positive width', () => {
         // A degenerate step must not produce a zero/negative layout box, which
         // React Native would treat as "lay out at zero" and hide the name
-        // entirely — strictly worse than the bug this fixes.
+        // entirely — strictly worse than an occluded name.
         expect(nameColumnPeek(0)).toBeGreaterThan(0);
         expect(nameColumnPeek(NAME_BAND_LEFT_CHROME)).toBeGreaterThan(0);
         expect(nameColumnPeek(-50)).toBeGreaterThan(0);
@@ -161,9 +150,8 @@ describe('nameColumnPeek', () => {
     });
 
     it('leaves a real, multi-character peek at the captured viewport', () => {
-        // The shipped geometry at 375x812 with five cards. This is the number
-        // the critique's stubs were measured against; if the fan geometry ever
-        // moves, this is the assertion that says whether names still fit.
+        // The live geometry at 375x812 with five cards; if the fan geometry
+        // ever moves, this is the assertion that says whether names still fit.
         const { step } = handFanLayout(PHONE.width, 5);
         expect(step).toBeCloseTo(57.75, 5);
         expect(nameColumnPeek(step)).toBeCloseTo(40.25, 5);
@@ -236,8 +224,8 @@ const textOf = (node: { props: { children?: unknown } }): string => {
  * One `numberOfLines={1}` line of `stageHint` copy, in characters.
  *
  * The dock is the full 375pt viewport; `stageHint` is 12pt serif italic,
- * whose average uppercase-and-lowercase advance measured off the 375x812
- * critique capture is ~5.6pt, so a line holds ~63 glyphs before React
+ * whose average uppercase-and-lowercase advance measured at 375x812 is
+ * ~5.6pt, so a line holds ~63 glyphs before React
  * Native silently drops its TAIL (`ellipsizeMode` defaults to 'tail'). 56
  * is that with a margin for the wider glyphs. This is a legibility floor,
  * not a copy freeze — any rewrite that fits stays green.
@@ -246,11 +234,8 @@ const ONE_LINE_BUDGET = 56;
 
 describe('tap-to-read — the affordance the board now advertises', () => {
     it('states the tap hatch on the fan itself, while the names are still occluded', () => {
-        // The precedent (RouteSelect, 8f3acef7) changed its visible label for
-        // exactly this reason: the wiring existed, but a sighted player only
-        // ever met it in an accessibilityHint. Phase 97 then put the line
-        // where only a player who had ALREADY staged a card could read it —
-        // past the moment they needed it to choose which covered card to lift.
+        // A hint shown only after a card is staged comes too late: the player
+        // needs it to choose which covered card to lift.
         const { vm } = renderBoard();
         // A covered card exists, so at least one name is being clipped right
         // now: this is precisely when the hatch has to be on screen.

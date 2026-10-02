@@ -1,23 +1,18 @@
 /**
  * SaveOnExit — write the run down before the app goes away.
  *
- * PLAYTEST_BUGS_2026-09-18 BUG-03 (high — silent loss of real player progress).
- * Saves are explicit on mobile (Spec 09): the store writes at named checkpoints
+ * Saves are explicit on mobile: the store writes at named checkpoints
  * (combat outcome, rest, cache, hazard, blacksmith, labyrinth, map crossing and
- * — as of Phase 99 — node movement). Two holes made that lossy:
+ * node movement). That alone is lossy in two ways:
  *
- *   1. There was NO save-on-exit anywhere in the app. `flush()` has existed on
- *      the persistence adapter since it was written and had **zero** callers
- *      outside its own tests; there was no `AppState`, `pagehide` or
- *      `visibilitychange` handler in `app/`, `state/`, `lib/` or `components/`.
+ *   1. Progress since the last checkpoint is never written when the app goes
+ *      away.
  *   2. The adapter debounces writes by `DEFAULT_DEBOUNCE_MS` (500ms), so even a
  *      legitimate checkpoint could be eaten if the player closed the app within
  *      half a second of it — the timer is cleared on teardown, not fired.
  *
- * Together those meant a player could hit a real checkpoint, background the
- * app immediately, and lose it. This component closes both: on the way out it
- * takes a final save AND awaits the adapter's flush, so whatever the store
- * holds at that moment reaches disk.
+ * This component closes both: on the way out it takes a final save AND awaits
+ * the adapter's flush, so whatever the store holds at that moment reaches disk.
  *
  * Mount it inside `GameStoreProvider` (it needs the store) and pass the same
  * adapter instance the provider was given.

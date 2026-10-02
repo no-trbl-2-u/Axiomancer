@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E Tests — Inventory screen presenter (Spec 06)
+ * Hermetic E2E Tests — Inventory screen presenter
  *
  * Drives `selectInventoryViewModel` and the inventory action layer
  * (useItem / equipItem / dropItem) end-to-end through the engine
@@ -105,9 +105,8 @@ function makeStore(items: readonly Item[]) {
     const store = createAppStore({ adapter: createMemoryAdapter() });
     const state = store.getState();
     // Rebuild a clean, unequipped player (no signet relics) so the worn window
-    // and equip-delta computations reflect exactly the provided items. Phase 19
-    // seeds the 8 relics onto a fresh game — these fixtures don't want them, and
-    // a stale relic loadout/derivedStats would skew the deltas.
+    // and equip-delta computations reflect exactly the provided items. A stale
+    // relic loadout/derivedStats would skew the deltas.
     const clean = createCharacter({
         id: state.player.id,
         name: state.player.name,
@@ -122,7 +121,7 @@ function makeStore(items: readonly Item[]) {
 }
 
 // ---------------------------------------------------------------------------
-// Phase 19 — signet relic granted-signature label surfacing
+// Signet relic granted-signature label surfacing
 // ---------------------------------------------------------------------------
 
 describe('selectInventoryViewModel: signet relic granted signature (Phase 19)', () => {
@@ -228,8 +227,7 @@ describe('selectInventoryViewModel: localUi argument', () => {
 
 describe('selectInventoryViewModel: empty state', () => {
     it('reports isEmpty=true and an empty-state message for a fresh character', () => {
-        // A fresh game now owns the 8 signet relics (Phase 19); force a genuinely
-        // empty inventory to exercise the empty-state branch.
+        // Force a genuinely empty inventory to exercise the empty-state branch.
         const store = makeStore([]);
 
         const vm = selectInventoryViewModel(store.getState());
@@ -671,7 +669,7 @@ describe('dropItem action: removes the item, except quest items', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Lifecycle: createGameStore → addItem → useConsumable → save (Spec 09 hook)
+// Lifecycle: createGameStore → addItem → useConsumable → save
 // ---------------------------------------------------------------------------
 
 describe('inventory lifecycle: persistence hook', () => {
@@ -724,7 +722,7 @@ describe('selectInventoryViewModel: chrome strings', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Equipment Dock — Phase 32 sub-tick E (port from design handoff)
+// Equipment Dock
 // ---------------------------------------------------------------------------
 
 describe('selectInventoryViewModel: equipmentDock', () => {
@@ -744,14 +742,13 @@ describe('selectInventoryViewModel: equipmentDock', () => {
     ];
 
     it('ships 5 slots in the design grid order with chrome labels and null items by default', () => {
-        // A fresh game now wears the signet relics (Phase 19); force an empty
-        // inventory to exercise the bare-dock default.
+        // Force an empty inventory to exercise the bare-dock default.
         const store = makeStore([]);
         const vm: InventoryViewModel = selectInventoryViewModel(store.getState());
 
         expect(vm.equipmentDock.headerLabel).toBe('✠ WORN UPON THE BODY');
-        // FE-027: the hint used to promise a worn-vs-unworn comparison that is
-        // not on screen until a slot is tapped. It now names the tap.
+        // FE-027: the hint names the tap — the worn-vs-unworn comparison is not
+        // on screen until a slot is tapped.
         expect(vm.equipmentDock.hintLabel).toBe('TAP A SLOT TO SEE WHAT ELSE FITS');
         expect(vm.equipmentDock.bareLabel).toBe('— bare —');
         expect(vm.equipmentDock.slots).toHaveLength(5);
@@ -794,7 +791,7 @@ describe('selectInventoryViewModel: equipmentDock', () => {
             id: 'long-blade-1',
             name: 'Long Blade',
             sub: 'Weapon',
-            grantsSignature: null, // Phase 19 — non-relic gear grants no signature
+            grantsSignature: null, // non-relic gear grants no signature
         });
     });
 
@@ -817,7 +814,7 @@ describe('selectInventoryViewModel: equipmentDock', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Equipment Dock slot-filter — Phase 32 sub-tick F (port from design handoff)
+// Equipment Dock slot-filter
 // ---------------------------------------------------------------------------
 
 describe('selectInventoryViewModel: equipmentDock slot-filter', () => {
@@ -877,7 +874,7 @@ describe('selectInventoryViewModel: equipmentDock slot-filter', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Equip-preview stat deltas — Phase 35 (port design spec)
+// Equip-preview stat deltas
 // ---------------------------------------------------------------------------
 
 function swordWithStats(
@@ -1040,7 +1037,7 @@ describe('selectInventoryViewModel: equipDelta surface (Phase 133)', () => {
         ]);
     });
 
-    // Phase 23 — equipment carries no passive effects; the equip-delta surfaces
+    // Equipment carries no passive effects; the equip-delta surfaces
     // stat + signature changes only. A plain-gear swap surfaces just the stat diff.
     it('surfaces the stat diff on a plain-gear swap', () => {
         const store = makeStore([sword('worn-blade'), dagger('new-fang')]);

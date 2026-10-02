@@ -336,7 +336,7 @@ export const HazardBoard = React.memo(function HazardBoard({ vm, drag, onStage, 
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
                     onStage(payload.uid);
                 } else {
-                    // an aborted drag reads the card — matches the prototype
+                    // an aborted drag reads the card
                     onInspect(payload.card);
                 }
                 return;

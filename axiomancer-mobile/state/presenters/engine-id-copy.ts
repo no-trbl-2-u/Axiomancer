@@ -1,12 +1,8 @@
 /**
- * Turning engine IDENTIFIERS into player-facing text (FE-002).
+ * Turning engine IDENTIFIERS into player-facing text.
  *
  * The engine addresses quests, cards and story flags by slug — `starting-quest`,
- * `shrine_keeper_recognizes_seeker`. Several presenters interpolated those
- * slugs straight into player copy, so the walked build printed
- * `quest: starting-quest` as a dialogue consequence chip and headlined the
- * ERRANDS journal entry `starting-quest` in the same gothic face it uses for
- * authored titles.
+ * `shrine_keeper_recognizes_seeker`. A slug must not be printed as player copy.
  *
  * An id is bookkeeping. This module is the single place that decides what a
  * player is shown instead, so no screen has to invent its own answer and none
@@ -24,13 +20,12 @@ import { getCardById } from '@mechanics';
  *
  * These live in the presenter, not in the engine's `Quest` object: a quest is
  * PERSISTED in the save's quest log, so adding a field to it would be a
- * persisted-state change, which this sweep is walled out of. Titles are
+ * persisted-state change. Titles are
  * presentation, and presentation is this package's job.
  *
  * Keyed loosely (`string`) rather than by `QuestName` so an id the engine adds
  * later degrades to `humanizeEngineId` instead of failing the type-check in a
- * package that cannot fix it. Empty since R7e (D72) deleted the parked
- * world's nine quests: no quest is authored.
+ * package that cannot fix it. Empty: no quest is authored.
  */
 const QUEST_TITLES: Readonly<Record<string, string>> = Object.freeze({});
 
@@ -78,8 +73,8 @@ export function isEngineSlug(value: string): boolean {
  * @returns the authored title when one exists, otherwise the humanized slug,
  *   otherwise an empty string.
  *
- * Resolves FE-002 for the ERRANDS journal (`memoir.engine.ts`) and the
- * dialogue/event consequence chips (`consequence-copy.ts`).
+ * Used by the ERRANDS journal (`memoir.engine.ts`) and the dialogue/event
+ * consequence chips (`consequence-copy.ts`).
  */
 export function questTitle(id: string): string {
     if (!id) return '';
@@ -99,7 +94,7 @@ export function questTitle(id: string): string {
  *   to the humanized id when the library has no such card (a content drift the
  *   player should not be shown as a slug either).
  *
- * Resolves FE-002 for the `card-learn` consequence chip.
+ * Used by the `card-learn` consequence chip.
  */
 export function cardTitle(id: string): string {
     if (!id) return '';

@@ -1,17 +1,14 @@
 /**
- * Hermetic component test — the equipment dock's portrait box at both viewports
- * (fresh-eyes repair of cluster S3-sheet-C11).
+ * Hermetic component test — the equipment dock's portrait box at both viewports.
  *
- * S3-sheet-C11 bought the gear list its width by pinning the portrait column to
- * `width: 96` while the bust kept `height={260}` and `fit="contain"`. The
- * portrait sources are square, so `contain` drew the pilgrim at 96x96 inside a
- * 96x260 box: a column that is ~70% dead black on a phone, and at 1280pt a ~70pt
- * thumbnail floating in an empty gutter — desktop paid the whole cost of a
- * phone-width wrap bug it never had.
+ * The portrait sources are square, so a narrow fixed column with a tall
+ * `fit="contain"` bust would letterbox the pilgrim into a mostly dead-black
+ * column on a phone and a thumbnail floating in an empty gutter on desktop.
  *
  * Contract asserted here: the box is always SQUARE (no letterbox), it stays a
- * narrow gutter at phone widths (so the slot column keeps the room that stopped
- * "GRANTS READ THE ENTRA…"), and it grows into a real bust at desktop widths.
+ * narrow gutter at phone widths (so the slot column keeps its room for the
+ * "grants <signature>" sub-label), and it grows into a real bust at desktop
+ * widths.
  */
 
 import { describe, expect, it, beforeAll, afterAll } from '@jest/globals';
@@ -110,7 +107,7 @@ describe('EquipmentDock: the portrait column is art, not dead space', () => {
 
         expect(imageHeight).toBe(columnWidth);
         expect(columnWidth as number).toBeLessThanOrEqual(120);
-        // The S3-sheet-C11 win stands: the slot column still takes the rest.
+        // The slot column still takes the rest.
         expect(slotsFlex).toBe(1);
     });
 

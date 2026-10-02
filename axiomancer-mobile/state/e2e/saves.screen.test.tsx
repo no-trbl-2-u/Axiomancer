@@ -1,6 +1,6 @@
 /**
- * Hermetic E2E — the `/saves` screen (NEW GAME / LOAD GAME over three slots,
- * owner call 2026-09-23) mounted over an in-memory slot store.
+ * Hermetic E2E — the `/saves` screen (NEW GAME / LOAD GAME over three slots)
+ * mounted over an in-memory slot store.
  */
 
 import React from 'react';

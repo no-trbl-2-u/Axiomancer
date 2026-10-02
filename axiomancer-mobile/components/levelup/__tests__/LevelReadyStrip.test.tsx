@@ -1,6 +1,5 @@
 /**
- * Hermetic component tests — LevelReadyStrip (Phase 73 follow-up,
- * user-jot 2026-05-24).
+ * Hermetic component tests — LevelReadyStrip.
  *
  * Pins: mount, copy (level transition target in lowercase-roman),
  * tap handler wiring, accessibility label.

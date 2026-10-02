@@ -1,8 +1,7 @@
 /**
  * Hermetic component tests — CombatFriendshipPanel.
  *
- * Pins the render contract for the parley aftermath panel (Phase
- * 70 Tick B). Sibling of the victory-panel tests; the contract is
+ * Pins the render contract for the parley aftermath panel. Sibling of the victory-panel tests; the contract is
  * the same shape but tuned to the rust accent palette + the pixel
  * emblem centerpiece + the optional journal-entry section.
  */

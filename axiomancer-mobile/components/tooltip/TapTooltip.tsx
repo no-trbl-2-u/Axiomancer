@@ -1,5 +1,5 @@
 /**
- * Visual primitive for the tap-tooltip system (Phase 74 Tick A).
+ * Visual primitive for the tap-tooltip system.
  *
  * Pure presentational — receives positioned content and renders
  * the torn-edge panel. Anchor measurement + dismiss handling
@@ -11,10 +11,9 @@
  *   IM Fell English, optional mono footnote for engine numbers.
  * - Max-width 280px; body wraps. Static mount (no animation).
  *
- * Phase 75 follow-up (user-jot 2026-05-24): optional `accent`
- * prop tints title + border to the stance/stat the content is
- * about (heart/body/mind). `'neutral'` (default) keeps the
- * Tick A sulfur title + ash border.
+ * Optional `accent` prop tints title + border to the stance/stat
+ * the content is about (heart/body/mind). `'neutral'` (default)
+ * keeps the sulfur title + ash border.
  */
 
 import React from 'react';
@@ -30,8 +29,8 @@ export interface TapTooltipProps {
     footnote?: string;
     /**
      * Window-space coords from the provider's `measureInWindow`
-     * + flip / clamp pass. Tick A renders as an absolutely-
-     * positioned root-layer child (the provider's overlay).
+     * + flip / clamp pass. Renders as an absolutely-positioned
+     * root-layer child (the provider's overlay).
      */
     left: number;
     top: number;

@@ -2,15 +2,14 @@
  * Keyword registry — the player-facing combat vocabulary.
  *
  * The registry is `KEYWORD_GLOSS` below: only words a live card, item,
- * hazard or die still prints (D45, the carrier rule). No fixed count.
+ * hazard or die prints. No fixed count.
  *
  * The doctrine: "every mechanic is a terse, learnable KEYWORD" over "the
  * count is exactly 30" — a mechanic without a keyword here is the bug (see
  * the card-face-honesty guard test). The engine keeps its thematic effect
  * names as lore; this module is the PRESENTATION-layer mapping the board,
  * card faces, glossary, and combat log read instead. Pure, with no
- * dependencies. (The enemy keyword vocabulary it once adapted was deleted with
- * the keywords themselves in revamp phase R2b, D63.)
+ * dependencies.
  *
  * Why mobile-side: a player-facing label is presentation (ADR-0001/0003 — the
  * engine owns truth, mobile owns how it reads). Never rename engine effect ids
@@ -20,15 +19,12 @@
  * pop (card face, glossary header). The combat log uses Title-Case directly.
  */
 
-/** Effect id → keyword (Title-Case). The CARD vocabulary (spec 32 v3 §3). */
+/** Effect id → keyword (Title-Case). The CARD vocabulary. */
 const EFFECT_KEYWORD: Record<string, string> = {
     // ── The effect-backed keywords ──
     debuff_bleed: 'Bleed',
-    // S3 (D43) — rebuilt for the grey office's A Plain Word.
+    // Printed by the grey office's A Plain Word.
     debuff_vulnerable: 'Vulnerable',
-    // Revamp R4 (D45) deleted Poison, Quarter and Doom: the signature skills
-    // were their last carriers (R7e2 then deleted those signatures). R5 deleted
-    // Mark: nothing applies it once the consumables that borrowed it retired.
 };
 
 /**
@@ -37,9 +33,7 @@ const EFFECT_KEYWORD: Record<string, string> = {
  * the keyword glossary; mapped so the combat log never prints a raw id.
  */
 const SUPPORT_KEYWORD: Record<string, string> = {
-    // Revamp R5 (D49) retired every consumable but the healing potions, and
-    // with them every support effect this table labelled. `buff_absolved`
-    // (the region-consequence status) shows its own effect name.
+    // Empty: no live support effect needs a label.
 };
 
 /** Verb class → keyword for cards whose action is the keyword itself. */
@@ -48,12 +42,10 @@ const VERB_KEYWORD: Record<string, string> = {
 };
 
 /**
- * Special-mechanic kind → keyword (Title-Case). The MISSING half of the
- * vocabulary map: `EFFECT_KEYWORD` covers effect-backed cards (Poison / Mark /
- * …), but a card whose PAID identity is a `specialMechanics` verb (STAGGER,
- * PLEA, …) had no keyword resolution and fell through to the ambiguous
- * "DEBUFF / buff yourself" face. Every headline-able mechanic maps to a real
- * glossary keyword here so the face can always print `KEYWORD · value`.
+ * Special-mechanic kind → keyword (Title-Case). `EFFECT_KEYWORD` covers
+ * effect-backed cards; this covers a card whose PAID identity is a
+ * `specialMechanics` verb, so the face can print `KEYWORD · value` instead of
+ * an ambiguous "DEBUFF / buff yourself" line. Currently empty.
  *
  * Kinds the face prints through their own face kind or plain rules text
  * (guard/barrier/riposte, the die verbs, `deal`, and every kind whose
@@ -70,15 +62,11 @@ const MECHANIC_KEYWORD: Record<string, string> = {
  * Keyword → a short, general definition (the glossary rule). The card's own
  * numbers live on the face/preview; this explains the keyword.
  *
- * The table holds only words something live still prints: the grey office
- * (GUARD/VULNERABLE), the healing potions (HEAL), a map hazard (BLEED), the
- * dice system (PIP, BOON, HONE, TEMPER) and the two card-type labels. Revamp
- * R4 (D45) cut POISON, DOOM, QUARTER, STAGGER, PLEA, WRATH and CHAIN when the
- * signature skills, their last carriers, became GUARD placeholders (R7e2
- * deleted those); R5 cut CLEANSE, DRAW and MARK with the consumables that
- * printed them. Git history keeps the rest.
+ * The table holds only words something live prints: the grey office
+ * (GUARD/VULNERABLE), the healing potions (HEAL), a map hazard (BLEED) and the
+ * dice system (PIP, BOON, HONE, TEMPER).
  *
- * 2026-07-12 (owner playtest) — TERSE GLOSSES: every gloss is ONE short
+ * TERSE GLOSSES: every gloss is ONE short
  * sentence in the Dawncaster register ("Cards with Lifedrain restore health
  * equal to the damage they deal."), with a second short sentence only where
  * a rule genuinely needs it. Load-bearing numbers stay; edge-case prose,
@@ -98,9 +86,8 @@ const KEYWORD_GLOSS: Record<string, string> = {
     Pip:
         'Each threat phase a Reserve die survives, it gains one pip, capped at 2. '
         + 'Each pip spent adds +2 intensity, or +5 Guard on a defend card.',
-    // ── Die gear (spec 33 Upgradeable Dice §6, registered D4 2026-07-17) —
-    // BOON is the face payload; HONE/TEMPER are the blacksmith upgrade verbs.
-    // (Renamed from SPECIAL — R-8, phase 44b.) ──
+    // ── Die gear — BOON is the face payload; HONE/TEMPER are the blacksmith
+    // upgrade verbs. ──
     Boon: "A die's BOON face powers a card of its color and grants Conviction. Its equipped gear sets how much (2 by default).",
     Hone: "A blacksmith upgrade: adds a mana face to a die's gear, so more of its rolls power a card.",
     Temper: "A blacksmith upgrade: turns a mana face into a BOON face. A colored die caps at 2 boon and 1 miss, gold at 1.",
@@ -145,7 +132,7 @@ export function keywordForMechanic(kind: string | null | undefined): string | nu
 }
 
 /**
- * Every mechanic kind that carries a keyword badge (phase 68). Exported so the
+ * Every mechanic kind that carries a keyword badge. Exported so the
  * KW-2 lint can check the REVERSE drift — a mapping row surviving the engine
  * kind it described — without keeping its own copy of this table.
  */
@@ -159,35 +146,25 @@ export function keywordGloss(keyword: string | null | undefined): string | null 
     return KEYWORD_GLOSS[keyword] ?? null;
 }
 
-/** Every registered keyword name (Title-Case), including the two card-type
- *  labels. The KW-6/KW-1/KW-5 lints (phase 29) assert against this list —
- *  it IS the registry, not a copy of it. */
+/** Every registered keyword name (Title-Case). The KW-6/KW-1/KW-5 lints
+ *  assert against this list — it IS the registry, not a copy of it. */
 export function allRegistryKeywords(): readonly string[] {
     return Object.keys(KEYWORD_GLOSS);
 }
 
 /**
- * KW-7 (phase 29) — the "systems glossary": engine tokens spec 32 §3 calls
- * out as "systems, not card keywords" (Conviction, Resonance, Reserve/Pips,
- * Floating dice, WILD/X) but that the player still reads on cards and
- * threshold lines with no definition anywhere.
+ * KW-7 — the "systems glossary": engine tokens that are systems, not card
+ * keywords (Conviction, Reserve/Pips, WILD/X), but that the player still
+ * reads on cards and threshold lines.
  *
- * 2026-07-12 (owner playtest) — NO LONGER dumped wholesale into every card's
- * inspect overlay: six always-on dice-system entries made every inspect a
- * scrolling wall, with some terms explained twice. A card's inspect now shows
- * only the entries its OWN printed lines reference ({@link systemTermsForCard});
- * the full list stays exported as the single source of truth for any future
- * dedicated help/glossary surface.
+ * A card's inspect overlay shows only the entries its OWN printed lines
+ * reference ({@link systemTermsForCard}); the full list stays exported as the
+ * single source of truth.
  */
 export const SYSTEM_GLOSSARY: readonly { term: string; def: string }[] = [
     { term: 'CONVICTION ◆', def: 'A spend-anytime resource banked from unspent dice and overflow. It never decays.' },
     { term: 'RESERVE & PIPS', def: 'Up to 2 dice held between phases instead of played. Each gains +1 pip per phase it survives, spent for extra intensity or Guard.' },
     { term: 'WILD / X', def: 'A WILD die counts as any color. A dead X die powers nothing.' },
-    // The keyword audit (2026-09-27, after the card purge) removed TOLL,
-    // GHOST, SENTENCE and CONDEMN: no card the player holds prints them now.
-    // 2026-07-18 (owner playtest) — INTENSITY and FREE are RETIRED from the
-    // overlay glossary: both read plainly enough in context, and their rows
-    // padded every inspect (they were the 07-12 audit's additions).
 ];
 
 /** How a card's PRINTED lines reference each system term. Matched against the
@@ -201,13 +178,13 @@ const SYSTEM_TERM_MATCH: Record<string, RegExp> = {
 
 /** Keyword chips whose own gloss already explains a system term — when such a
  *  chip renders on the card, the system entry is a duplicate and is skipped
- *  (owner directive 2026-07-12: each term explained at most once per overlay). */
+ *  (each term is explained at most once per overlay). */
 const SYSTEM_TERM_COVERED_BY: Record<string, readonly string[]> = {
     'RESERVE & PIPS': ['PIP'],  // the Pip gloss defines the Reserve
 };
 
 /**
- * 2026-07-12 (owner playtest) — the per-card slice of the systems glossary:
+ * The per-card slice of the systems glossary:
  * only the entries the card's printed text actually references, minus any
  * already explained by one of its keyword chips. `printedText` is the joined
  * engine lines; `chipNames` the UPPERCASE keyword-panel names already shown.

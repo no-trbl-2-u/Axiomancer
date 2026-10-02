@@ -1,5 +1,5 @@
 /**
- * Persistent Hazard deck presenter (Phase 126).
+ * Persistent Hazard deck presenter.
  *
  * Maps the durable Hazard deck — the implicit starter bag plus the
  * reward / CRACK cards the player has acquired (decoded from
@@ -14,10 +14,9 @@
  * the in-encounter hand renders (`cardVMFromId`).
  *
  * Deck MUTATION (remove-card) is deliberately NOT implemented here:
- * the brief (Phase 126 §3) forbids local deck-mutation rules, and
- * `axiomancer-mechanics` exposes no remove-card action yet (see
- * `archive-pre-revamp:plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/hazard-v2-vs-mechanics-divergence.md` (archived 2026-09-25) — only
- * `appendAcquiredCard` exists, no counterpart). The VM therefore
+ * mobile owns no deck-mutation rules, and `axiomancer-mechanics`
+ * exposes no remove-card action (only `appendAcquiredCard` exists,
+ * no counterpart). The VM therefore
  * marks acquired cards as the removable set and carries an explicit
  * `removeBlocked` flag so the screen can present a graceful blocked
  * state instead of silently mutating the save.
@@ -99,7 +98,7 @@ export interface HazardDeckViewModel {
     /**
      * Remove-card is blocked: `axiomancer-mechanics` exposes no
      * engine-owned remove action, and mobile must not mutate the deck
-     * locally (Phase 126 §3 / divergence doc). The grid stays usable
+     * locally. The grid stays usable
      * for inspection + selection but the confirm surfaces this block.
      */
     removeBlocked: boolean;

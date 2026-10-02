@@ -3,7 +3,7 @@
  *
  * Pins that the screen renders without throwing for both empty and
  * populated inventories, and that the modal confirmation routes
- * through the action layer (Spec 06 Q2 / Q5).
+ * through the action layer.
  *
  * Hermetic = self-contained + deterministic + isolated.
  * See docs/testing.md for the full standard.
@@ -114,12 +114,10 @@ describe('inventory screen: use modal', () => {
     });
 });
 
-// Phase 80a — the inventory item modal renders an equip-swap's changed
-// stats as before → after rows. (Those rows used to be TooltipTarget-wrapped
-// with an `inv-modal-stat-<key>` testID for the derived stats; the derived
-// stats and their tooltips were deleted in TRIM THE FAT T2a, and the only
-// diffable stat left, max health, carries no tooltip.) This pins that the
-// equip modal still renders its stat row without throwing.
+// The inventory item modal renders an equip-swap's changed stats as
+// before → after rows. The only diffable stat, max health, carries no
+// tooltip. This pins that the equip modal renders its stat row without
+// throwing.
 describe('inventory screen: item-modal stat rows (Phase 80a)', () => {
     it('renders the changed stat row for an equipment modal', () => {
         // `sword` is worn (first-in-slot, no stat mods). A stat-bearing

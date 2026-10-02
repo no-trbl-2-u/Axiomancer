@@ -1,5 +1,5 @@
 /**
- * Screen backdrop plates — Phase V (the Woodcut Codex), wired in V5.
+ * Screen backdrop plates (the Woodcut Codex).
  *
  * The key → plate resolver for `components/ScreenBg`. It lives beside the art,
  * exactly as `maps/index.ts` maps a region, so `ScreenBg` stays a layout
@@ -8,7 +8,7 @@
  * Metro needs static `require()` literals — no dynamic paths, no computed keys.
  *
  * Every plate here is REUSED from `assets/images/maps/`. They were acquired as
- * map backdrops (phase V4, public domain, licence read from the source at
+ * map backdrops (public domain, licence read from the source at
  * acquisition); where one suits a screen it is reused and that directory's
  * `provenance.json` records the second consumer. Nothing is re-acquired to give
  * a screen a private copy of the same engraving.
@@ -33,8 +33,7 @@ const PLATES: Record<ScreenArtKey, number> = {
     labyrinth: require('../maps/the-pit.webp'),
     // The dev-only combat sandbox route's backdrop. Deliberately the arena
     // FALLBACK plate rather than a region one: this screen has no region, so
-    // it should show what an unmapped region shows. Repointed in phase 103
-    // when `arena-ruined-city.jpg` was retired — see `../combat/index.ts`.
+    // it should show what an unmapped region shows — see `../combat/index.ts`.
     combat: require('../combat/arena-desolation.webp'),
     // A settlement is a street: Doré's Wentworth Street crowd.
     village: require('../maps/wentworth-street.webp'),
@@ -54,7 +53,7 @@ const PLATES: Record<ScreenArtKey, number> = {
  * The plate for a screen key, or null.
  *
  * Null is the ordinary case, not an error: a screen with no key keeps the
- * procedural look, which stays the fallback rather than becoming a leftover.
+ * procedural look.
  */
 export function screenBackdropFor(key: ScreenArtKey | undefined | null): number | null {
     if (!key) return null;

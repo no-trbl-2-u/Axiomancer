@@ -1,5 +1,5 @@
 /**
- * Unit — Spec 25 §7.6 status-effect glyph mapping.
+ * Unit — status-effect glyph mapping.
  *
  * Every effect must resolve to a visible glyph + a category colour + a coarse
  * kind so the player can SEE it. Distinctive named effects get distinctive
@@ -36,14 +36,14 @@ describe('statusGlyphs — resolution', () => {
         // Mark/Quarter/Vulnerable ARE the keyword system — no generic category icons.
         expect(effectGlyph({ id: 'debuff_mark', type: 'debuff' }).glyph).toBe('◉');
         expect(effectGlyph({ id: 'debuff_quarter', type: 'debuff' }).glyph).toBe('☙');
-        // A Plain Word's VULNERABLE no longer falls back to the category ▼
-        // by accident: it is curated (the same arrow, on purpose).
+        // A Plain Word's VULNERABLE is curated, not left to the category ▼
+        // fallback (the same arrow, on purpose).
         expect(effectGlyph({ id: 'debuff_vulnerable', type: 'debuff' }).glyph).toBe('▼');
     });
 
     it('curates only ids the effects library defines (keyword audit 2026-09-27)', () => {
-        // Rows for deleted ids render nothing and hide drift; the purged-card
-        // species now fall back like any unknown id.
+        // Rows for undefined ids render nothing and hide drift; such ids
+        // fall back like any unknown id.
         for (const id of ['debuff_backfire', 'debuff_kindling_ember', 'debuff_nettle_sting', 'buff_thorns', 'debuff_burn', 'debuff_stun']) {
             const g = effectGlyph({ id, type: 'debuff', category: 'control', payload: { actionRestriction: { skipTurn: true } } });
             expect(g.glyph).toBe('⛓');

@@ -7,17 +7,19 @@
  * primitive stays defensive.
  *
  * Authored kinds:
- * - `'stat'` — HEART / BODY / MIND (Tick A, Phase 74).
- * - `'effect'` — engine-sourced; payload-formatted (Phase 75 +
- *   user-jot tighten 2026-05-24). Body is a terse stat-effect
- *   line derived from `Effect.payload`; engine `description`
- *   is intentionally dropped per user request.
- * - `'card'` — engine-sourced via `getCombatCardById(id)` (Phase 75).
- * - `'hazard-keyword'` — engine-sourced via `HAZARD_KEYWORDS[id]`
- *   (Phase 82). The hazard-deck screen's keyword tally chips key
+ * - `'stat'` — HEART / BODY / MIND.
+ * - `'effect'` — engine-sourced; payload-formatted. Body is a terse
+ *   stat-effect line derived from `Effect.payload`; the engine
+ *   `description` is only a fallback.
+ * - `'card'` — engine-sourced via `getCombatCardById(id)`.
+ * - `'hazard-keyword'` — engine-sourced via `HAZARD_KEYWORDS[id]`.
+ *   The hazard-deck screen's keyword tally chips key
  *   off `HazardKeywordId`; this kind reads the same glossary the
  *   in-hazard card faces already draw from, so the two stay in sync
  *   for free.
+ * - `'slot'`, `'burden'`, `'map-node'`, `'chronicle-entry'`,
+ *   `'quest-objective'`, `'item-stat'`, `'disabled-action'` — static
+ *   tables below.
  *
  * Voice: title in uppercase mono / gothic, body in lowercase
  * chronicle (IM Fell English), footnote in mono for engine numbers.
@@ -45,11 +47,9 @@ export type TooltipKind =
     | 'disabled-action';
 
 /**
- * Stat-stance accent for tooltip tinting (Phase 75 follow-up,
- * user-jot 2026-05-24). Maps each base stat / stance to a palette
- * key the primitive resolves to a colour. `'neutral'` is the
- * default — used for content with no clear stat tie (Tick A
- * `kind: 'stat'`).
+ * Stat-stance accent for tooltip tinting. Maps each base stat / stance
+ * to a palette key the primitive resolves to a colour. `'neutral'` is
+ * the default — used for content with no clear stat tie.
  */
 export type TooltipAccent = 'heart' | 'body' | 'mind' | 'neutral';
 
@@ -81,9 +81,8 @@ const STAT_CONTENT: Record<string, TooltipContent> = {
     },
 };
 
-// Phase 95 — disabled action button tooltips. Keys match ActionKey
-// values from the combat presenter (`item` initially, extensible
-// for other disabled actions if needed later).
+// Disabled action button tooltips. Keys match ActionKey values from
+// the combat presenter (only `item` is authored).
 const DISABLED_ACTION_CONTENT: Record<string, TooltipContent> = {
     item: {
         title: 'ITEM UNAVAILABLE',
@@ -92,9 +91,7 @@ const DISABLED_ACTION_CONTENT: Record<string, TooltipContent> = {
     },
 };
 
-// Phase 74 follow-up — memoir walkthrough Tick 2: chronicle +
-// quest-status content. Two branches authored in one go since both
-// surface on the memoir screen.
+// Chronicle + quest-status content, both surfaced on the memoir screen.
 //
 // Chronicle ids are the 4 engine event types the mapper recognises
 // (per `state/presenters/memoir.engine.ts::ChronicleEntry`).
@@ -142,10 +139,9 @@ const QUEST_OBJECTIVE_CONTENT: Record<string, TooltipContent> = {
     },
 };
 
-// Phase 74 follow-up — exploration walkthrough Tick 1: map-node
-// content. Keys match the 8 NodeType variants emitted by the
-// exploration presenter (`encounter | treasure | boss | quest |
-// rest | gather | hazard | current`). Each entry: uppercased title + short
+// Map-node content. Keys match the NodeType variants emitted by the
+// exploration presenter (`encounter | treasure | boss | quest | rest |
+// gather | hazard | blacksmith | village | current`). Each entry: uppercased title + short
 // description of what happens when the node is engaged.
 const MAP_NODE_CONTENT: Record<string, TooltipContent> = {
     encounter: {
@@ -200,8 +196,7 @@ const MAP_NODE_CONTENT: Record<string, TooltipContent> = {
     },
 };
 
-// Phase 74 follow-up — inventory walkthrough Tick 1: burden bar
-// content. Single id ('burden') keys the inventory burden tooltip.
+// Burden bar content. Single id ('burden') keys the inventory burden tooltip.
 const BURDEN_CONTENT: Record<string, TooltipContent> = {
     burden: {
         title: 'BURDEN',
@@ -210,12 +205,10 @@ const BURDEN_CONTENT: Record<string, TooltipContent> = {
     },
 };
 
-// Phase 74 follow-up walkthrough Tick 3 — equipment slot content.
-// Keys match the Phase-18 engine `EquipmentSlot` kinds (`weapon | armor |
-// accessory`). SELF equipment cells pass the slotKey verbatim as the tooltip
+// Equipment slot content. Keys match the engine `EquipmentSlot` kinds
+// (`weapon | armor | accessory`). SELF equipment cells pass the slotKey verbatim as the tooltip
 // id; "accessory" stays the engine key (the chrome label "Trinket" lives on
-// the row, not the tooltip lookup). The legacy head/body/hands/feet slots
-// folded into armor (torso) and accessory (worn kinds) in Phase 18.
+// the row, not the tooltip lookup).
 const SLOT_CONTENT: Record<string, TooltipContent> = {
     weapon: {
         title: 'WEAPON',
@@ -232,12 +225,11 @@ const SLOT_CONTENT: Record<string, TooltipContent> = {
 };
 
 // ---------------------------------------------------------------------------
-// Effect payload formatter (Phase 75 follow-up).
+// Effect payload formatter.
 //
-// User-jot 2026-05-24 asked for the combat tooltip to drop the
-// engine description and surface just "Name + the effect on the
-// stats". The helpers below format an Effect.payload into the
-// shortest line that still names what changed and by how much.
+// The combat tooltip shows just "Name + the effect on the stats", not
+// the engine description. The helpers below format an Effect.payload
+// into the shortest line that still names what changed and by how much.
 // ---------------------------------------------------------------------------
 
 interface EffectPayloadLike {
@@ -254,8 +246,7 @@ function sign(n: number): string {
 /**
  * Derive the accent from a stance key. The bare stances
  * `'heart' | 'body' | 'mind'` map to themselves; anything else returns
- * `'neutral'`. (The `physical*` / `mental*` / `emotional*` stat prefixes it
- * also mapped were deleted with `EffectStatTarget` in TRIM THE FAT T2a.)
+ * `'neutral'`.
  */
 export function accentForStat(stat: string): TooltipAccent {
     if (stat === 'heart' || stat === 'body' || stat === 'mind') return stat;
@@ -264,9 +255,9 @@ export function accentForStat(stat: string): TooltipAccent {
 
 /**
  * Format `Effect.payload` as a short stat-effect line. Picks the
- * single most-informative summand (DOT first, then action restriction). Returns the engine `description`
- * fallback when no payload data is present — defensive only;
- * Tier-1+ engine effects all carry payload.
+ * single most-informative summand (DOT first, then action restriction).
+ * Returns the engine `description` fallback when the payload carries
+ * neither.
  */
 export function formatEffectStatEffect(
     payload: EffectPayloadLike | undefined,
@@ -283,11 +274,8 @@ export function formatEffectStatEffect(
 }
 
 /**
- * Phase 74 follow-up — inventory walkthrough Tick 2: item-stat tooltip
- * synthesizer. The only stat keys left are the bare stances (`heart`,
- * `body`, `mind`), which reuse the `kind:'stat'` copy. The derived
- * `<dimension><Verb>` keys and `luck` it used to synthesize were deleted
- * with those stats in TRIM THE FAT T2a.
+ * Item-stat tooltip synthesizer. The only stat keys are the bare stances
+ * (`heart`, `body`, `mind`), which reuse the `kind:'stat'` copy.
  *
  * Returns `null` for unknown keys so the chip stays silent.
  */
@@ -309,10 +297,9 @@ export function selectTooltipContentFor(
     kind: TooltipKind,
     id: string,
     // Reserved for kinds that need live state (effect-attribution,
-    // codex entries). Current authored kinds
-    // read engine static data only, so state is unused — keeping
-    // the signature stable means future ticks don't have to
-    // retrofit every call site.
+    // codex entries). Current authored kinds read engine static data
+    // only, so state is unused; the stable signature spares every call
+    // site a retrofit.
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _state: AppStoreState,
 ): TooltipContent | null {
@@ -341,11 +328,9 @@ export function selectTooltipContentFor(
         if (!id) return null;
         const def = lookupEffect(id);
         if (!def) return null;
-        // Phase 75 follow-up (user-jot 2026-05-24): drop the
-        // engine description; render just the stat-effect line.
-        // The `description` is kept only as a defensive fallback
-        // when payload introspection finds nothing usable (Tier-1
-        // engine effects always carry payload, so this is rare).
+        // Render just the stat-effect line; the engine `description`
+        // is the fallback when payload introspection finds nothing
+        // usable.
         const body = formatEffectStatEffect(
             def.payload as EffectPayloadLike | undefined,
             def.description,

@@ -2,11 +2,11 @@
  * Shared crash-report rendering — the torn-edge technical panel + COPY
  * button + RECENT LOG section from `ErrorBoundary`'s live `ErrorScreen`.
  *
- * Extracted (Phase 77) so `PrevSessionCrashPrompt` can reuse the exact
- * same report presentation for a *previous* session's crash tail instead
- * of duplicating it or falling back to the dev-only `DebugLogViewer`
- * chrome. `testIDPrefix` defaults to `error-boundary` so `ErrorBoundary`'s
- * existing tests keep their exact testIDs after the extraction.
+ * Shared so `PrevSessionCrashPrompt` can reuse the exact same report
+ * presentation for a *previous* session's crash tail instead of
+ * duplicating it or falling back to the dev-only `DebugLogViewer`
+ * chrome. `testIDPrefix` defaults to `error-boundary`, the testIDs
+ * `ErrorBoundary`'s tests use.
  */
 
 import React, { useState } from 'react';

@@ -1,6 +1,5 @@
 /**
- * The post-combat attribution summary — the other surface the 2026-08-08 audit
- * found with ZERO tests (finding 4c).
+ * The post-combat attribution summary.
  *
  * It is pure presentation over the engine's `buildCombatSummary`, so the whole
  * contract is honesty: every number printed must be a number the summary

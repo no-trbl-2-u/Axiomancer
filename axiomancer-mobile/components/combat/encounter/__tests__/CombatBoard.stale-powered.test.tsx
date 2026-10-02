@@ -1,17 +1,10 @@
 /**
- * CombatBoard — the STALE-POWERED bug (owner playtest 2026-07-12).
+ * CombatBoard — the STALE-POWERED bug: "when I apply a die and play a card,
+ * the NEXT card appears powered."
  *
- * Report: "when I apply a die and play a card, the NEXT card appears powered."
- *
- * Root cause (draft era): a powered play that landed a status REFRESHED the
- * powering die (it stayed available), and the board re-attached that die to
- * the first color-legal staged card, so a card the player never armed
- * rendered (and committed) powered.
- *
- * The law, carried into the spec-33 model (no draft, D7): a die powers only
- * the card the player explicitly dropped (or tapped) it onto. A die that is
- * still live after powering card A — a refresh rider/mechanic hands it back —
- * never re-attaches to card B on its own: B both READS and COMMITS as FREE
+ * The law: a die powers only the card the player explicitly dropped (or
+ * tapped) it onto. A die that is still live after powering card A — a
+ * refresh rider/mechanic hands it back — never re-attaches to card B on its own: B both READS and COMMITS as FREE
  * until the player chooses the die again, and that explicit re-choice works.
  */
 
@@ -29,9 +22,9 @@ import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 import { tapCombatDie } from '@/test-utils/tapCombatDie';
 
-// Two copies of A Plain Blow (the grey office is the whole library since the
-// card purge) share one colour, 'any' — exactly the pairing where the old
-// re-attach showed: play A with a die, stage B (same colour) → B lit up.
+// Two copies of A Plain Blow (the grey office is the whole library) share one
+// colour, 'any' — exactly the pairing where a stale re-attach would show:
+// play A with a die, stage B (same colour) → B lights up.
 const CARDS = ['grey-strike', 'grey-ward', 'grey-word', 'grey-strike'];
 
 const noopDrag = (): DragController =>
@@ -89,7 +82,7 @@ describe('CombatBoard — a die that powered card A never re-attaches to card B'
         expect(a).toBeDefined();
         expect(b).toBeDefined();
         expect(a.uid).not.toBe(b.uid);
-        expect(b.stance).toBe(a.stance); // same color — the old re-attach case
+        expect(b.stance).toBe(a.stance); // same color — the stale re-attach case
 
         const { cbs, restage } = mountBoard(vm, [a.uid], store);
         await tapCombatDie(dieId);
@@ -98,7 +91,7 @@ describe('CombatBoard — a die that powered card A never re-attaches to card B'
 
         // A leaves staging; the player stages B.
         restage([b.uid]);
-        // THE BUG: B rendered the die in its socket ("appears powered")
+        // THE BUG would render the die in B's socket ("appears powered")
         // without the player ever choosing it for B.
         expect(screen.queryByTestId('combat-staged-die')).toBeNull();
         expect(screen.getByTestId(`combat-socket-${b.uid}`)).toBeTruthy();

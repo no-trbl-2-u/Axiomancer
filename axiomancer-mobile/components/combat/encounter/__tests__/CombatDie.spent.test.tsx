@@ -1,6 +1,5 @@
 /**
- * Owner jot (`/jot` 2026-07-20, routed to Phase 38 via `/oversight`): a used
- * die reads as spent — greyed out. Proves `CombatDie` wires the lib/juice
+ * A used die reads as spent — greyed out. Proves `CombatDie` wires the lib/juice
  * `spentDieTreatment` static state through to the rendered die.
  */
 import React from 'react';
@@ -31,8 +30,7 @@ describe('CombatDie — spent-state greying', () => {
 
     it('THE FLIP model — a used faced tray die greys and says it is spent', () => {
         // A card is powered by a tray die directly — no draft step — so a used
-        // die is simply `spent`. The old `drafted && spent` gate excluded exactly
-        // this live case and used dice never greyed (the owner's regression).
+        // die is simply `spent`, and `spent` alone greys it.
         const usedDie: CombatDieVM = { ...BASE_DIE, spent: true, draggable: false, face: 'mana' };
         render(<CombatDie die={usedDie} />);
         const el = screen.getByTestId(`combat-die-${usedDie.id}`);

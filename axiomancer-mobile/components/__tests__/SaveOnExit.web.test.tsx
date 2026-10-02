@@ -3,7 +3,7 @@
  */
 
 /**
- * SaveOnExit — the WEB lifecycle branch (PLAYTEST_BUGS_2026-09-18 BUG-03).
+ * SaveOnExit — the WEB lifecycle branch.
  *
  * The sibling `SaveOnExit.test.tsx` covers the native `AppState` branch, which
  * is what the default react-native jest preset reports. That preset provides no
@@ -11,8 +11,7 @@
  * file, which opts into the jsdom environment via the docblock pragma above.
  *
  * The web branch is not incidental: the exported web build is what every
- * Playwright harness in this repo drives (`critique:drive`, the e2e journeys),
- * and it is where this bug was originally found and reproduced.
+ * Playwright harness in this repo drives (`critique:drive`, the e2e journeys).
  *
  * Pinned here:
  *   1. `pagehide` takes a final save AND flushes it. `pagehide`, not
@@ -64,9 +63,8 @@ describe('SaveOnExit — web lifecycle branch', () => {
 
         firePageHide();
 
-        // THE REGRESSION: before the fix there was no exit handler anywhere in
-        // the app, so neither of these ever happened and a checkpoint taken
-        // inside the adapter's 500ms debounce window was simply lost.
+        // Both must happen, or a checkpoint taken inside the adapter's 500ms
+        // debounce window is simply lost.
         expect(save).toHaveBeenCalledTimes(1);
         expect(flush).toHaveBeenCalledTimes(1);
     });

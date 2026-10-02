@@ -4,9 +4,9 @@ import { ACT1_SHEET_SIZE } from './breakwater.layout';
 import type { MapLayout, MapSheet } from './types';
 
 /**
- * The Lantern Deep — Act 1, map 4 (map revamp M3d). Drawn on the underworld
- * plate the way the Beacon Crags are drawn on the mountains (D15): every node
- * sits on one of the plate's landmarks (D25), read from `act1-landmarks.json`,
+ * The Lantern Deep — Act 1, map 4. Drawn on the underworld
+ * plate the way the Beacon Crags are drawn on the mountains: every node
+ * sits on one of the plate's landmarks, read from `act1-landmarks.json`,
  * on the shared Act 1 sheet (`ACT1_SHEET_SIZE`, see `breakwater.layout.ts` for
  * the sizing).
  *
@@ -27,7 +27,7 @@ const sheet: MapSheet = {
     nodeHalo: true,
 };
 
-/** Node id → the landmark it sits on (D25). Every underworld landmark appears exactly once. */
+/** Node id → the landmark it sits on. Every underworld landmark appears exactly once. */
 export const LANTERN_DEEP_LANDMARKS: Readonly<Record<string, string>> = {
     'ld-1':  'surface-stair',
     'ld-2':  'ferry-landing',
@@ -64,7 +64,7 @@ export const lanternDeepLayout: MapLayout = {
     mapId: 'lantern-deep',
     continent: 'CONTINENT · NORTHERN',
     region: 'The Lantern Deep',
-    // Ordinal only — no node/path count (CRITIQUE pass 19). Act 1, map 4 of 4.
+    // Ordinal only — no node/path count. Act 1, map 4 of 4.
     regionProgress: 'Map iv of iv',
     sheet,
     nodes: [

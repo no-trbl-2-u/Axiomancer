@@ -1,10 +1,10 @@
 /**
- * Spec 33 §1/§4 (Phase D6f — The Roll Ritual) — the HERMETIC data layer of the
+ * The Roll Ritual — the HERMETIC data layer of the
  * dice tumble.
  *
  * THE LAW THIS FILE ENFORCES: the engine RNG is the sole authority on outcomes
- * (dice-honesty, 2026-07-09). This module NEVER invents a face — it only plans
- * how to ANIMATE toward the faces the engine already rolled (the faces D6a's
+ * (dice-honesty). This module NEVER invents a face — it only plans
+ * how to ANIMATE toward the faces the engine already rolled (the faces
  * `CombatDieVM` renders). `planDiceRoll(...).settledFace` is copied verbatim
  * from the input die every time, in every mode; that invariant is the whole
  * reason the visuals can be non-deterministic while the OUTCOME cannot.

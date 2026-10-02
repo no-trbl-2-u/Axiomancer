@@ -1,12 +1,9 @@
 /**
- * Map backdrop assignment — each layout names its plate (map revamp M2).
+ * Map backdrop assignment — each layout names its plate.
  *
- * The plate used to be picked by a regex over the region display string
- * (`mapBackdropFor`). Phase 83 found that a rename (phase 44f's "the Drowned
- * Parish") had silently dropped the coastal village's own plate for the forest
- * fallback. M2 retired the regex: each layout's sheet now names its plate, so
- * these pins state the assignment directly, per map, instead of re-deriving it
- * from region strings.
+ * Each layout's sheet names its plate, so these pins state the assignment
+ * directly, per map, rather than deriving it from region strings (which a
+ * rename could silently break).
  */
 
 import { describe, expect, it } from '@jest/globals';

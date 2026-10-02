@@ -1,5 +1,5 @@
 /**
- * Phase 28 (Show the Engine legibility sweep) — presenter coverage for the
+ * Legibility sweep — presenter coverage for the
  * mobile-side surfaces: discard-pile names, the projected-lethality readout
  * and the wall-math intent projection. The grey office is the fixture.
  */
@@ -21,11 +21,9 @@ function openState(): CombatEncounterState {
     return rollEncounterDice(state).state;
 }
 
-// Phase 2 (spec 30) — the status kill-path foresight. The engine selector
-// (`projectCombatOutcome`) already had hermetic coverage in mechanics; this
-// pins the mobile presenter actually forwards it onto the enemy pane VM,
-// which it never did before this pass (the API shipped Phase 2 but was
-// never wired to the board — CRITIQUE.md "Combat kill-path legibility").
+// The status kill-path foresight. The engine selector (`projectCombatOutcome`)
+// has hermetic coverage in mechanics; this pins that the mobile presenter
+// forwards it onto the enemy pane VM.
 describe('Phase 2 — projected-lethality readout (spec 30)', () => {
     it('reads zero/hidden when the foe carries no DoT', () => {
         const vm = buildCombatViewModel(openState());

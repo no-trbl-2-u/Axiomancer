@@ -1,5 +1,5 @@
 /**
- * S3 (D40) — the hand's card faces print FINAL numbers, and the keyword wears
+ * The hand's card faces print FINAL numbers, and the keyword wears
  * its stat family's dice colour and glyph. The tint marks a number the
  * player's stats actually moved, never a family merely present on the card.
  */

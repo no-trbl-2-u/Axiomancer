@@ -1,14 +1,14 @@
 /**
  * Village encounter presenter — composes the dedicated settlement
- * screen's VM from the pending `village` event (Phase 137). Pure: no
+ * screen's VM from the pending `village` event. Pure: no
  * store writes. Wares resolve against the engine item libraries; the
  * BUY action lives in the action layer (`buyVillageWare`).
  *
- * Phase 5 adds the SELL side: `sellables` mirrors the player's
+ * The SELL side: `sellables` mirrors the player's
  * inventory (quest items excluded — they are never sellable, same
  * guard as `dropItem`) with a price derived by engine
  * `defaultSellPrice` when the item matches a ware this village's shop
- * lists, else the CLI's long-standing fallback of `1`
+ * lists, else the CLI's fallback of `1`
  * (`src/CLI/game.cli.ts` `shopLoop`) — this presenter is the second
  * consumer of that policy, so mobile and the CLI price sells alike.
  */
@@ -38,7 +38,7 @@ export interface VillageWareVM {
     name: string;
     description: string;
     /**
-     * S5-talk-C04 — what buying this ware BUYS, in one terse mechanical
+     * What buying this ware BUYS, in one terse mechanical
      * line (`restores 20 VITAE`). Empty for an item with no payload this
      * presenter can state; the row then prints its flavour line alone.
      */
@@ -88,16 +88,15 @@ const EMPTY_VM: VillageVM = Object.freeze({
 export function resolveWareItem(ware: ShopWare): Item | null {
     const consumable = consumableLibrary.find(c => c.id === ware.itemId);
     if (consumable) return consumable;
-    // Phase 21 — the procedural equipment library is retired; a shop selling
-    // equipment sells a signet relic by fixed id (no rarity roll). Unknown ids
-    // (e.g. a dead procedural template) resolve to null and drop from the stall.
+    // A shop selling equipment sells a signet relic by fixed id (no rarity
+    // roll). Unknown ids resolve to null and drop from the stall.
     const relic = getRelicById(ware.itemId);
     if (relic) return { ...relic };
     return null;
 }
 
 // ---------------------------------------------------------------------------
-// Ware effect lines (S5-talk-C04)
+// Ware effect lines
 // ---------------------------------------------------------------------------
 
 /**
@@ -105,7 +104,6 @@ export function resolveWareItem(ware: ShopWare): Item | null {
  *
  * @param n - a modifier value.
  * @returns `+3` / `-3`. An unsigned stat line reads as a total, not a change.
- *   Cluster: S5-talk-C04.
  */
 function signed(n: number): string {
     return n > 0 ? `+${n}` : `${n}`;
@@ -117,7 +115,7 @@ function signed(n: number): string {
  * @param stat - a `lowerCamel` engine stat key (`physicalAttack`, `maxHp`).
  * @returns the key split into spaced lower-case words (`physical attack`).
  *   `maxHp` resolves to `max VITAE`: VITAE is the canon word for the health
- *   pool, and a stall may not print `HP` at it. Cluster: S5-talk-C04.
+ *   pool, and a stall may not print `HP` at it.
  */
 function statWords(stat: string): string {
     if (stat === 'maxHp') return 'max VITAE';
@@ -127,21 +125,19 @@ function statWords(stat: string): string {
 /**
  * One relic stat modifier as a phrase.
  *
- * @param mod - a flat stat modifier off a relic (only `maxHp` since TRIM THE
- *   FAT T2a; effects no longer carry stat lines).
- * @returns `+5 max VITAE`. Cluster: S5-talk-C04.
+ * @param mod - a flat stat modifier off a relic (only `maxHp`; effects carry
+ *   no stat lines).
+ * @returns `+5 max VITAE`.
  */
 function modWords(mod: { stat: string; value: number }): string {
     return `${signed(mod.value)} ${statWords(mod.stat)}`;
 }
 
 /**
- * What a ware DOES, in one line (S5-talk-C04).
+ * What a ware DOES, in one line.
  *
- * The stalls priced a name, a flavour line and a number — nothing on the row
- * said what the coin bought, which is the one thing a shop in this genre
- * always states. Everything here is read off the same libraries the engine
- * applies on use; no rule, number or threshold is invented.
+ * Everything here is read off the same libraries the engine applies on use;
+ * no rule, number or threshold is invented.
  *
  * @param item - the library item a ware resolves to (`resolveWareItem`).
  * @returns a terse mechanical read — `restores 20 VITAE`,
@@ -154,10 +150,8 @@ export function wareEffectLine(item: Item): string {
         const parts: string[] = [];
         const heal = item.healAmount ?? 0;
         if (heal > 0) {
-            // Phase 96 — the shop line states BOTH bands. A stall that quotes
-            // only the flat number undersells every healing potion in the game
-            // and hides the one fact that should decide the purchase: this is
-            // worth half again when the buyer is losing.
+            // The shop line states both heal bands: the flat number and the
+            // larger amount when the buyer is below half VITAE.
             const desperate = item.healAmountBelowHalf ?? 0;
             parts.push(
                 desperate > 0
@@ -185,7 +179,7 @@ export function wareEffectLine(item: Item): string {
  *   player (purse + inventory).
  * @returns the render-ready `VillageVM`, or the inactive `EMPTY_VM` when no
  *   village event is pending. Each ware now carries an `effect` line beside
- *   its price (cluster S5-talk-C04); every other field is unchanged.
+ *   its price; every other field is unchanged.
  */
 export function selectVillageVM(
     state: Pick<AppStoreState, 'event' | 'player'>,

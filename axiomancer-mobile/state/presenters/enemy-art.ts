@@ -1,5 +1,5 @@
 /**
- * Enemy → illustration archetype resolver (2026-07-06 art-driven roster).
+ * Enemy → illustration archetype resolver.
  *
  * Every roster enemy has a 1:1 painting (see `assets/images/enemies`),
  * so this resolver is the SILHOUETTE FALLBACK: it routes art keys onto a
@@ -10,7 +10,7 @@
  * The matcher is keyword-based over the enemy id / portrait key, with an
  * explicit override map for names that don't imply their shape. Pure +
  * dependency-free so it's trivially unit-testable. Slug→asset routing is
- * mobile-local (Spec 08 Q3 = B).
+ * mobile-local.
  */
 
 export type EnemyArchetype =
@@ -31,8 +31,7 @@ const OVERRIDES: Record<string, EnemyArchetype> = {
 };
 
 /**
- * Ordered keyword rules; first match wins. Generic creature words only — the
- * per-name keywords went with the enemies they named (phase R2 roster reset).
+ * Ordered keyword rules; first match wins. Generic creature words only.
  */
 const RULES: ReadonlyArray<readonly [RegExp, EnemyArchetype]> = [
     [/rat|vermin|gnaw|rodent/, 'vermin'],

@@ -1,13 +1,15 @@
 /**
- * Rarity affordance helper (Phase 135).
+ * Rarity affordance helper.
  *
  * Maps an item's `rarity` to the visual treatment the inventory /
  * reward surfaces paint, plus the accessible phrase that announces the
  * affix / fixed-modifier count. Driven purely by `item.rarity` — never
  * by parsing `item.name` or counting `prefixName` / `suffixName` at
- * render time (Phase 135 decision).
+ * render time.
  *
- * Mechanics truth (`axiomancer-mechanics@0.22.0`):
+ * Equipment carries no rarity today (the inventory presenter passes `null`,
+ * aftermath loot reports `common`), so in practice every item renders plain.
+ * The bands and their treatments:
  *   - uncommon → exactly one procedural affix → green shine
  *   - rare     → two procedural affixes        → blue shine
  *   - unique   → three set-in-stone modifiers   → red outline

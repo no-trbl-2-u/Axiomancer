@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — dedicated dev-tools route (Phase 132).
+ * Hermetic E2E — dedicated dev-tools route.
  *
  * Pins the dev menu tab extraction at the route-shell level:
  *   - The `/dev` route renders its header + the grouped-sections

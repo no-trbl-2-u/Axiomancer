@@ -1,5 +1,5 @@
 /**
- * Phase 38 — combat-first adoption witness. Proves the status-proc,
+ * Combat juice adoption witness. Proves the status-proc,
  * damage-tick, and card-refusal-sibling (card play) sites actually fire
  * through the lib/juice primitives, not just that the module exists in
  * isolation.
@@ -29,7 +29,7 @@ jest.mock('@/lib/juice', () => {
 
 const PLAYER: CombatPlayerPaneVM = {
     name: 'Pilgrim', hp: 40, maxHp: 50, hpPct: 0.8, guard: 0, effects: [],
-    // THE BIG NUMBERS REWRITE — the damage-scaler ledgers; idle here (this
+    // The damage-scaler ledgers; idle here (this
     // witness is about the juice call sites, not the ledgers).
 };
 

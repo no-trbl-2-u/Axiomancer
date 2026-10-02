@@ -1,10 +1,9 @@
 /**
- * AsyncStorage persistence adapter — THREE SAVE SLOTS (owner call 2026-09-23).
+ * AsyncStorage persistence adapter — THREE SAVE SLOTS.
  *
  * Bridges the engine's synchronous `PersistenceAdapter` (`load()` /
- * `save()`) to AsyncStorage's async I/O with an in-memory mirror, exactly as
- * the single-slot Spec 09 adapter did, and adds the slot surface the main
- * menu drives (`SaveSlotStore` in `saveSlots.ts`).
+ * `save()`) to AsyncStorage's async I/O with an in-memory mirror, and exposes
+ * the slot surface the main menu drives (`SaveSlotStore` in `saveSlots.ts`).
  *
  * ## Shape
  *
@@ -12,11 +11,10 @@
  *   `StoredEnvelope` stamped with `savedAt`.
  * - `LAST_SLOT_KEY` remembers which slot the store last ran from. `preload()`
  *   reads it so a cold launch (a browser refresh on `/exploration`, a phone
- *   relaunch) boots the store STRAIGHT into that slot's state, the way the
- *   single slot always did — the title menu's CONTINUE is then a no-op
+ *   relaunch) boots the store STRAIGHT into that slot's state — the title menu's CONTINUE is then a no-op
  *   confirmation, not a second load.
- * - The retired single-slot key (`LEGACY_SAVE_KEY`) is DELETED on preload and
- *   never read (owner call: discard the legacy save).
+ * - The single-slot key from before save slots (`LEGACY_SAVE_KEY`) is DELETED
+ *   on preload and never read: that save is discarded, not migrated.
  *
  * ## Contract with the store
  *
@@ -24,7 +22,7 @@
  *   active or the active slot is empty → the engine boots a fresh state.
  * - `save(state)` writes to the ACTIVE slot only. With no active slot the
  *   write is dropped and logged (`save-no-slot`): nothing is ever written
- *   into a slot the player did not pick. Debounced like before; `flush()`
+ *   into a slot the player did not pick. Debounced; `flush()`
  *   forces the pending write (used by `<SaveOnExit>`).
  * - A slot whose bytes fail to parse or migrate reads `unreadable`; it is
  *   never loaded and never thrown over — the LOAD screen shows it torn and
@@ -201,8 +199,8 @@ export function createAsyncStorageAdapter(
     return {
         // ── boot ────────────────────────────────────────────────────────
         async preload() {
-            // Owner call: the single-slot save is discarded, never migrated.
-            // Best-effort delete so the retired key does not linger.
+            // The pre-slot single-slot save is discarded, never migrated.
+            // Best-effort delete so the old key does not linger.
             await storage.removeItem(LEGACY_SAVE_KEY).catch(() => undefined);
 
             for (const id of SAVE_SLOT_IDS) {

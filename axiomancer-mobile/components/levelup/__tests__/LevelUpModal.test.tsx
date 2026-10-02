@@ -1,5 +1,5 @@
 /**
- * Hermetic component tests — LevelUpModal (Phase 73 Tick B).
+ * Hermetic component tests — LevelUpModal.
  *
  * The modal is presentation-only with local allocation state. The
  * tests exercise the user flow:

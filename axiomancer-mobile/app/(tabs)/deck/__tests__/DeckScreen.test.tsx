@@ -1,5 +1,5 @@
 /**
- * DECK — the fifth tab, rendered (finding 7 / D2).
+ * DECK — the fifth tab, rendered.
  *
  * The presenter is pinned separately in
  * `state/presenters/__tests__/deck.engine.test.ts`. What this file pins is the
@@ -25,7 +25,7 @@ import { createAppStore, type AppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
-// The grey office is the whole library after the card purge (2026-09-27).
+// The grey office is the whole library.
 const BLOW = 'grey-strike';
 const WARD = 'grey-ward';
 const WORD = 'grey-word';

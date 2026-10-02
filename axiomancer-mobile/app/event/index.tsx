@@ -1,6 +1,5 @@
 /**
- * /event — the generic paced-event card (Phase 137 cleanup; gathering
- * receipt 2026-09-21).
+ * /event — the generic paced-event card.
  *
  * Most event kinds have a dedicated surface: interaction / narration →
  * /dialogue, village → /village, cutscene → /cutscene; rest /
@@ -12,8 +11,6 @@
  * they picked up (`state/e2e/gathering-acknowledgement.engine.test.ts`).
  * It is also the `selectPacedEventRoute` fallback, so an unforeseen
  * paced kind degrades to a readable generic card instead of a dead end.
- * The kind-specific chrome (category headers/sashes) and the dialogue-
- * confirmation flash moved out with their kinds.
  */
 
 import React, { useEffect, useMemo } from 'react';
@@ -49,7 +46,7 @@ function resolveAccent(key: ChoiceAccentKey, AXM: Palette): string {
 
 function ConsequenceChips({ consequences }: { consequences: readonly EventConsequence[] }) {
     const styles = useStyles();
-    // FE-002: see the sibling row in app/dialogue — filter unlabelled
+    // Same as the sibling row in app/dialogue — filter unlabelled
     // consequences before slicing so the overflow count stays honest.
     const visible = visibleConsequences(consequences);
     if (visible.length === 0) return null;

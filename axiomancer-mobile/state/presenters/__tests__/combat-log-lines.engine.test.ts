@@ -1,9 +1,8 @@
 /**
- * Hermetic presenter tests — `selectCombatLogLines` (playtest fix 2026-09-04).
+ * Hermetic presenter tests — `selectCombatLogLines`.
  *
- * The playthrough found engine ledgers the log never narrated: a foe's bar
- * climbing (a STAGE or THREAT heal) with no line saying why. This pins that
- * every one of them now has a sentence and that the sentence carries the
+ * Engine ledgers such as a foe's bar climbing (a STAGE or THREAT heal) must
+ * each be narrated. This pins that every one of them has a sentence and that the sentence carries the
  * engine's number.
  *
  * Hermetic = self-contained + deterministic + isolated. See docs/testing.md.
@@ -32,8 +31,8 @@ describe('selectCombatLogLines — enemy healing is narrated with its source', (
 });
 
 /**
- * Burn-day audit 3.4 — a refused action is narrated, not swallowed. It used to
- * fall to `default:` and vanish from the log and the history together.
+ * A refused action is narrated, not swallowed: it must not fall to `default:`
+ * and vanish from the log and the history together.
  */
 describe('selectCombatLogLines — a refused action is narrated (audit 3.4)', () => {
     it('a refused action reaches the log in the engine’s own words, and does not shout', () => {

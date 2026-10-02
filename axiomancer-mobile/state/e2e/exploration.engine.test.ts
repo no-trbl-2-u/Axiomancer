@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E Tests — Exploration screen presenter (Spec 07)
+ * Hermetic E2E Tests — Exploration screen presenter
  *
  * Drives `selectExplorationViewModel` and the world action layer
  * (moveTo / changeMap) end-to-end through the engine store. Hermetic =
@@ -15,7 +15,7 @@ import { createAppActions } from '@/state/actions';
 import { createAppStore, type AppStore } from '@/state/store';
 
 /**
- * The fight on the node underfoot ends (phase R9a). A fight's node stays owed,
+ * The fight on the node underfoot ends. A fight's node stays owed,
  * with its way on shut, until the fight settles; in play the engine's
  * `END_COMBAT` does this, and these walks stand in for it.
  */
@@ -203,7 +203,7 @@ describe('moveTo action: happy path', () => {
         expect(vm.currentNodeId).toBe('bw-2');
         expect(Object.fromEntries(vm.nodes.map((n) => [n.id, n]))['bw-2'].kind).toBe('current');
         // The crane quay is a fight: the move does not open its way on, the
-        // fight's end does (R9a).
+        // fight's end does.
         expect(store.getState().world.currentMap.availableNodes).not.toContain('bw-7');
 
         fightOut(store);
@@ -234,11 +234,10 @@ describe('moveTo action: happy path', () => {
 
         const vm = selectExplorationViewModel(store.getState());
         const optionIds = vm.options.map((o) => o.nodeId).sort();
-        // D1 (2026-09-21) — frontier roaming replaced linear adjacency. The
-        // drawer offers the whole explored edge, so the manor's fan and the
-        // pass's lateral neighbours arrive together AND `bw-1` is back: this
-        // harness moves off the windmill without ever resolving it, and D1 spends a node on
-        // RESOLUTION, not on departure. (In play `resolveMapEvent` consumes
+        // Frontier roaming: the drawer offers the whole explored edge, so the
+        // manor's fan and the pass's lateral neighbours arrive together AND
+        // `bw-1` is back: this harness moves off the windmill without ever
+        // resolving it, and a node is spent on RESOLUTION, not on departure. (In play `resolveMapEvent` consumes
         // the start node and seals it; see the engine's matching case,
         // `src/World/world.reducer.test.ts` → 'spends a node on RESOLUTION,
         // not on departure'.)
@@ -338,8 +337,8 @@ describe('changeMap action: map transition', () => {
 
     it('also accepts the MapState built from getMapDefinition+createMapState as a sanity hint', () => {
         // The action accepts a MapName string; this assertion proves the
-        // engine still ships the expected map under that name. Post-Spec
-        // 08 Q5A + Phase 60a, the canonical build path is
+        // engine still ships the expected map under that name. The
+        // canonical build path is
         // `createMapState(getMapDefinition(continent, name))`; the returned
         // `MapState` carries the definition's `startingNode.id` as
         // `currentNode` on a fresh map.
@@ -382,37 +381,22 @@ describe('exploration lifecycle: multi-step navigation', () => {
     });
 
     /**
-     * INVARIANT CHANGED, deliberately — Phase 99.
+     * A move is a save checkpoint.
      *
-     * This case used to assert the OPPOSITE ("a move does not implicitly call
-     * adapter.save"), labelled as a Spec 09 hook. That label was wrong, and the
-     * assertion encoded a mobile implementation gap as if it were the design:
+     * Save granularity is a curated `DURABLE_ACTIONS` allowlist, and
+     * `MOVE_TO_NODE` is ON it (`axiomancer-mechanics/src/Game/store.ts`). But
+     * the engine allowlist is inert on mobile: `wrapDeflectingAdapter`
+     * (`state/store.ts`) swallows EVERY engine autosave — durable ones
+     * included — unless it is inside the explicit `store.save()` passthrough.
+     * Mobile owns save timing, and a move is a checkpoint because
+     * `moveToAction` (`state/actions.ts`) takes an explicit save. That
+     * ownership is itself guarded by the case below.
      *
-     *   - Spec 09 Q4 ("Save granularity") is RESOLVED, at Phase 51 (`4972f9a`),
-     *     in favour of Path B — autosave restricted to a curated
-     *     `DURABLE_ACTIONS` allowlist. `MOVE_TO_NODE` is ON that allowlist
-     *     (`axiomancer-mechanics/src/Game/store.ts`), so persisting on node
-     *     movement is a ratified save granularity, not a violation of it.
-     *   - CORRECTED — burn-day audit 2026-09-19 row 3.7. This comment used to
-     *     say mobile "never got that behaviour" because `moveToAction` writes
-     *     the world with `store.setState({ world })` instead of dispatching,
-     *     "so the DURABLE_ACTIONS gate never sees the move". The bypass is
-     *     real; the causal story was backwards. Dispatching `MOVE_TO_NODE`
-     *     through the reducer would not have saved here either:
-     *     `wrapDeflectingAdapter` (`state/store.ts`) swallows EVERY engine
-     *     autosave — durable ones included — unless it is inside the explicit
-     *     `store.save()` passthrough. The engine allowlist is inert on mobile.
-     *     Mobile owns save timing, and a move is a checkpoint because
-     *     `moveToAction` (`state/actions.ts`) takes an explicit save. That
-     *     ownership is itself guarded by the case below.
+     * Without that checkpoint, a player who walked two nodes and reloaded is
+     * put back where they started, with the walk and the opening quest gone.
      *
-     * The player-visible cost of not taking that checkpoint is
-     * PLAYTEST_BUGS_2026-09-18 BUG-03: a player who walked two nodes and
-     * reloaded was put back where they started, with the walk and the opening
-     * quest gone.
-     *
-     * What Spec 09 still forbids — and what the UI-tier case further below
-     * pins — is UI-tier actions writing through. That has not changed.
+     * UI-tier actions still never write through; the UI-tier case further
+     * below pins that.
      */
     it('a move IS a save checkpoint — mobile policy, at the Spec 09 Q4 / Phase 51 granularity', () => {
         const adapter = createMemoryAdapter();
@@ -433,10 +417,9 @@ describe('exploration lifecycle: multi-step navigation', () => {
     });
 
     /**
-     * The OWNERSHIP guard — burn-day audit 2026-09-19 row 3.7.
+     * The OWNERSHIP guard.
      *
-     * The case above is green for a reason its own comment used to get
-     * backwards. The engine's `DURABLE_ACTIONS` allowlist does not reach
+     * The engine's `DURABLE_ACTIONS` allowlist does not reach
      * mobile at all: `wrapDeflectingAdapter` (`state/store.ts`) swallows
      * EVERY engine autosave, durable ones included, unless the wrapper is
      * inside the `store.save()` passthrough. Mobile owns save timing.
@@ -447,8 +430,7 @@ describe('exploration lifecycle: multi-step navigation', () => {
      *       own mobile persistence — arm A starts writing;
      *   (b) drop the explicit save in `moveToAction` on the belief that
      *       `MOVE_TO_NODE` being on the allowlist already covers the walk —
-     *       arm B stops writing, and that is PLAYTEST_BUGS_2026-09-18
-     *       BUG-03 returning.
+     *       arm B stops writing, and a reload loses the walk.
      */
     it('mobile owns save timing: a DURABLE engine action is deflected, the explicit checkpoint writes', () => {
         // Arm A — the engine verb, straight through the engine reducer.
@@ -480,8 +462,8 @@ describe('exploration lifecycle: multi-step navigation', () => {
         const actions = createAppActions(store);
         const saveSpy = jest.spyOn(adapter, 'save');
 
-        // Dismissing an event card is presentation, not progress. Spec 09's
-        // whole point is that this class never reaches the disk.
+        // Dismissing an event card is presentation, not progress: this class
+        // never reaches the disk.
         actions.dismissEvent();
 
         expect(saveSpy).not.toHaveBeenCalled();
@@ -489,7 +471,7 @@ describe('exploration lifecycle: multi-step navigation', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Phase 27: engine parallel data-model (discoveredNodes / consumedNodes)
+// Engine parallel data-model (discoveredNodes / consumedNodes)
 // ---------------------------------------------------------------------------
 
 describe('moveTo action: engine discoveredNodes population (Phase 27)', () => {
@@ -505,8 +487,7 @@ describe('moveTo action: engine discoveredNodes population (Phase 27)', () => {
         // from getMapDefinition; bw-2's connected nodes per the
         // registered map should land here.
         expect(map.discoveredNodes.length).toBeGreaterThan(0);
-        // No legacy regression: availableNodes still populated for
-        // the screen.
+        // availableNodes is populated too, for the screen.
         expect(map.availableNodes.length).toBeGreaterThan(0);
     });
 
@@ -537,7 +518,7 @@ describe('resolveCurrentMapEvent: engine consumedNodes population (Phase 27)', (
         const actions = createAppActions(store);
         // Walk to a node before resolving — the starting node may be a
         // 'none' kind in some fixtures. bw-5 is a loot cache: a fight would
-        // stay unconsumed until it settles (R9a, the twin below).
+        // stay unconsumed until it settles (the twin below).
         actions.moveTo('bw-5');
         const before = store.getState().world.currentMap.consumedNodes.length;
 
@@ -605,17 +586,16 @@ describe('selectExplorationViewModel: drawer copy', () => {
         const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('breakwater') } });
         const vm = selectExplorationViewModel(store.getState());
 
-        // Pin regression: the pre-fix copy started with a capital and
-        // an article. The voice unification dropped both.
+        // The empty message starts with neither a capital nor an article.
         expect(vm.drawerCopy.emptyMessage).not.toMatch(/^[A-Z]/);
         expect(vm.drawerCopy.emptyMessage).not.toContain('No paths remain');
     });
 });
 
 // ---------------------------------------------------------------------------
-// LEAGUES bucket — Phase 32 design-handoff port (spec32 tick B)
+// LEAGUES bucket
 //
-// Ported from `prototype.jsx:184-208` (StepCardClickable). Each
+// Each
 // available next-step option carries a `leagues: 'I' | 'II' | 'III'`
 // bucket derived from Euclidean distance on the canonical 360×400
 // viewBox between the current node and the option node. Cutoffs:
@@ -682,9 +662,9 @@ describe('selectExplorationViewModel: LEAGUES bucket', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Encounter modal seam — Phase 32 design-handoff port (spec32 tick D)
+// Encounter modal seam
 //
-// Per `prototype.jsx` PtEventModal + `chats/chat1.md`. Tapping an
+// Tapping an
 // encounter / boss node populates the engine's pending event slice;
 // the exploration screen mounts <EncounterModalOverlay> when that
 // slice carries `kind === 'combat-prelude'`. These tests pin the
@@ -748,8 +728,7 @@ describe('encounter-modal seam (Tick D)', () => {
         actions.resolveCurrentMapEvent();
 
         expect(selectHasActiveEvent(store.getState() as never)).toBe(true);
-        // Legacy `state.combat` removed in mechanics 0.37.0; the engine now
-        // records the fight via `currentEncounter`.
+        // The engine records the fight via `currentEncounter`.
         expect(store.getState().currentEncounter).toBeUndefined();
 
         actions.pickEventChoice('fight');
@@ -805,19 +784,14 @@ describe('FE-008: legend and counter agree on SEALED', () => {
 });
 
 /**
- * BUG-01 (PLAYTEST_BUGS_2026-09-18) — the legend counted a different set of
- * nodes than the one it labels.
+ * BUG-01 — the legend must count the same set of nodes the map draws.
  *
- * The strip read "25 nodes · 20 sealed" over a map drawing 21 sealed pips. Two
- * sources of truth: the PIPS come from `classifyNode`, the COUNTER came from
- * `world.currentMap.lockedNodes`. The start node is where they part — it was
- * never in `lockedNodes` (you begin standing on it), but once you walk away it
- * is neither `reachable` nor `completed`, so the renderer calls it sealed while
- * the engine's lock list never did.
- *
- * A retired map layout recorded an EARLIER disagreement with this same
- * counter (critique pass 19), so this surface has bitten before. These cases
- * pin label against pips directly rather than against either source.
+ * The PIPS come from `classifyNode`; `world.currentMap.lockedNodes` is a
+ * different source. The start node is where they part — it is never in
+ * `lockedNodes` (you begin standing on it), but once you walk away it is
+ * neither `reachable` nor `completed`, so the renderer calls it sealed while
+ * the engine's lock list does not. These cases pin label against pips
+ * directly rather than against either source.
  */
 describe('BUG-01: the legend counts the nodes the map actually draws', () => {
     /** Pull the two numbers out of "N nodes · M sealed". */
@@ -837,10 +811,9 @@ describe('BUG-01: the legend counts the nodes the map actually draws', () => {
     });
 
     it('still agrees after the player walks away from the start node', () => {
-        // THE REGRESSION: this is the exact step that used to split the two
-        // counts. The start node stops being reachable, was never completed,
-        // and was never in `lockedNodes` — so it became a sealed pip that the
-        // counter did not count.
+        // THE REGRESSION: this is the step that splits the two sources. The
+        // start node stops being reachable, was never completed, and was never
+        // in `lockedNodes` — so it is a sealed pip the lock list misses.
         const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('breakwater') } });
         const actions = createAppActions(store);
         actions.moveTo('bw-2');
@@ -869,7 +842,7 @@ describe('BUG-01: the legend counts the nodes the map actually draws', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Burn-day audit 2026-09-19 row 3.1: the arrival the map still owes you
+// The arrival the map still owes you
 // ---------------------------------------------------------------------------
 
 describe('selectExplorationViewModel: arrivalPending', () => {
@@ -897,7 +870,7 @@ describe('selectExplorationViewModel: arrivalPending', () => {
     it('owes nothing once the arrival has been answered', () => {
         // The negative twin: answering clears `pendingArrival`, so an
         // answered arrival is never re-offered, here or after a reload. For
-        // a fight the answer is the fight's end, not the resolve (R9a).
+        // a fight the answer is the fight's end, not the resolve.
         const adapter = createMemoryAdapter();
         const store = createAppStore({ adapter, overrides: { world: createStartingWorld('breakwater') } });
         const actions = createAppActions(store);

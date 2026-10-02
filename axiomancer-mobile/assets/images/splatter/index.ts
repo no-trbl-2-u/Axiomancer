@@ -1,12 +1,10 @@
 /**
- * Ink splatter plates — Phase V7 (the Woodcut Codex).
+ * Ink splatter plates (the Woodcut Codex).
  *
  * Real ink-on-paper silhouettes (Rorschach test plates, public domain —
- * Hermann Rorschach died 1922) replace the procedural random-circle splatter
- * `<Splatter>` drew before. Each file is an alpha matte: paper is
- * transparent, ink is opaque black, so `<Image tintColor>` recolors the
- * shape to whichever AXM token the caller passes — the same contract the
- * procedural version's `color` prop had.
+ * Hermann Rorschach died 1922) drawn by `<Splatter>`. Each file is an alpha
+ * matte: paper is transparent, ink is opaque black, so `<Image tintColor>`
+ * recolors the shape to whichever AXM token the caller passes.
  *
  * See `provenance.json` for source, licence and the acquisition recipe.
  */

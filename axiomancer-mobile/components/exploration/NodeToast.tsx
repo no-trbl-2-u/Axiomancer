@@ -15,10 +15,8 @@ interface NodeToastProps {
 
 /**
  * Locked / consumed node feedback toast with a fade-in entrance.
- * Phase 44 port from prototype.jsx:633-637 `@keyframes fade`
- * (opacity 0 → 1, 200ms). The parent unmounts the toast on
- * timeout (the existing useEffect at line 60-65); this component
- * handles the mount-time fade-in only.
+ * Fades in (opacity 0 → 1, 200ms). The parent unmounts the toast on
+ * timeout; this component handles the mount-time fade-in only.
  */
 export function NodeToast({ tip }: NodeToastProps) {
     const styles = useStyles();
@@ -42,9 +40,8 @@ export function NodeToast({ tip }: NodeToastProps) {
 }
 
 const useStyles = makeStyles((AXM) => ({
-    // Locked / consumed node feedback toast (port design spec — design's
-    // prototype.jsx flow). Bottom-center, brief auto-dismiss, parchment
-    // text over an ash-bordered panel.
+    // Locked / consumed node feedback toast. Bottom-center, brief
+    // auto-dismiss, parchment text over an ash-bordered panel.
     nodeToast: {
         position: 'absolute',
         bottom: 32,

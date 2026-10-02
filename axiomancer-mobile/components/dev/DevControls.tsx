@@ -1,9 +1,9 @@
 /**
  * Shared presentational primitives for the `/dev` route.
  *
- * Every Debug* leaf used to carry its own copy of the same dashed-border
- * row, mono label, and sulfur button styles. This module centralises
- * them so the dev surface reads as ONE system and a leaf is only its
+ * The dashed-border row, mono label, and sulfur button styles every
+ * Debug* leaf shares. This module centralises them so the dev surface
+ * reads as ONE system and a leaf is only its
  * behaviour: which store action it calls and what feedback it prints.
  *
  * Three primitives, composed top-down:

@@ -1,12 +1,9 @@
 /**
- * Phase 71 — encounter-seal chrome presenter.
+ * Encounter-seal chrome presenter.
  *
  * The encounter modal seal renders top + bottom `SEALED` chain
- * bars + a panel border + a soft glow. Pre-Phase-71 those were
- * static (blood + "SEALED · NO RETREAT" forever); the design's
- * `PtEncounterFlow` chrome (handoff bundle `prototype.jsx:558-617`)
- * swaps them per phase to carry the "the seal is waking up"
- * signal at outcome.
+ * bars + a panel border + a soft glow, swapped per phase to carry
+ * the "the seal is waking up" signal at outcome.
  *
  * Three states:
  *   - prelude   — blood border + glow, "SEALED · AT ARMS" top,

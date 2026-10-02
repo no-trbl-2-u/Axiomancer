@@ -1,7 +1,7 @@
 /**
  * /blacksmith — the Blacksmith encounter screen ("The Anvil").
  *
- * The die-gear upgrade surface (Spec 33 §6): HONE (add a mana face),
+ * The die-gear upgrade surface: HONE (add a mana face),
  * TEMPER (mana face → special face), and gear SWAP. All rules live in
  * `axiomancer-mechanics` (World/Blacksmith); this screen renders the
  * presenter VM and dispatches store actions only.
@@ -33,11 +33,10 @@ import { makeStyles, usePalette } from '@/theme/runtime';
 /**
  * Widest the forge column is allowed to get.
  *
- * Purpose: on a desktop viewport the smith's prose ran the full window at
- * ~165 characters to a line, which loses the eye on every return sweep.
- * Input: none (a constant). Output: the cap applied to the scroll content
- * column; below it the column is simply full-width, so phone layout is
- * unchanged. Cluster: S5-talk-C13.
+ * Purpose: keep the smith's prose at a readable line length on a desktop
+ * viewport. Input: none (a constant). Output: the cap applied to the scroll
+ * content column; below it the column is simply full-width, so phone layout
+ * is unaffected.
  */
 const SCENE_MAX_WIDTH = 560;
 
@@ -51,7 +50,7 @@ function hapticImpact(style: ImpactFeedbackStyle): void {
 
 /**
  * A single service offer as a button: its label, its shilling price, the trade
- * it makes (`MISS face → MANA` — cluster S5-talk-C12), and, when the offer is
+ * it makes (`MISS face → MANA`), and, when the offer is
  * greyed, the LOUD reason. Reads one `BlacksmithOfferVM` off the presenter;
  * mounted by `DieRow` (HONE + TEMPER) and `SwapRow` (SWAP) below.
  */
@@ -64,8 +63,8 @@ function OfferButton({ offer, onPress }: { offer: BlacksmithOfferVM; onPress: ()
                 accessibilityRole="button"
                 accessibilityLabel={
                     offer.enabled
-                        // S5-talk-C12: the forge prices in SHILLINGS (FE-023); this
-                        // label still said "diamonds", the combat board's CONVICTION.
+                        // The forge prices in SHILLINGS, not the combat board's
+                        // CONVICTION diamonds.
                         ? `${offer.label} the ${offer.color} die for ${offer.price} shillings`
                             + (offer.effect ? `: ${offer.effect}` : '')
                         : `${offer.label} unavailable: ${offer.reason}`
@@ -82,12 +81,12 @@ function OfferButton({ offer, onPress }: { offer: BlacksmithOfferVM; onPress: ()
                 <Text style={[styles.offerLabel, !offer.enabled && { color: AXM.bone }]}>
                     {offer.label}
                 </Text>
-                {/* FE-023: shillings, not ◆ — that glyph is combat's CONVICTION. */}
+                {/* Shillings, not ◆ — that glyph is combat's CONVICTION. */}
                 <Text style={[styles.offerPrice, !offer.enabled && { color: AXM.bone }]}>
                     {offer.price}s
                 </Text>
             </TouchableOpacity>
-            {/* S5-talk-C12: HONE and TEMPER are the smith's words, not the
+            {/* HONE and TEMPER are the smith's words, not the
                 game's — each offer states the trade it makes in the same face
                 vocabulary the die read above it uses. */}
             {offer.effect.length > 0 && (
@@ -158,7 +157,7 @@ export default function BlacksmithScreen() {
     }, [vm.active, router]);
 
     // Inactive shell — visible for a frame while the router unwinds; never a
-    // blank screen (UI-cleanup pass, CRITIQUE).
+    // blank screen.
     if (!vm.active) {
         return (
             <ScreenBg scrollable={false} art="blacksmith">
@@ -203,7 +202,7 @@ export default function BlacksmithScreen() {
                     <View testID="blacksmith-forging">
                         <View style={styles.budgetRow}>
                             <Text style={styles.budgetLabel}>PURSE</Text>
-                            {/* S5-talk-C12: spelled out once, the way the village
+                            {/* Spelled out once, the way the village
                                 stall head spells its own purse, so the `12s` on
                                 every offer below has something to decode against. */}
                             <Text style={styles.budgetValue} testID="blacksmith-budget">
@@ -212,8 +211,8 @@ export default function BlacksmithScreen() {
                         </View>
 
                         <Text style={styles.sectionLabel}>YOUR DICE</Text>
-                        {/* S5-talk-C12: every die prints `1 BOON · 2 MANA · 3 MISS`
-                            and nothing said what those three words are worth. */}
+                        {/* Every die prints `1 BOON · 2 MANA · 3 MISS`; this key
+                            says what those three words are worth. */}
                         <Text style={styles.faceKey} testID="blacksmith-face-key">
                             {vm.faceKey}
                         </Text>
@@ -301,7 +300,7 @@ export default function BlacksmithScreen() {
                     </View>
                 )}
 
-                {/* FE-007: shared bordered control — see LeaveRow. */}
+                {/* Shared bordered control — see LeaveRow. */}
                 {vm.phase !== 'outcome' && vm.phase !== 'card' && (
                     <LeaveRow
                         label="LET THE COALS DIE"
@@ -317,7 +316,7 @@ export default function BlacksmithScreen() {
 
 const useStyles = makeStyles((AXM) => ({
     scrollOuter: { flex: 1 },
-    // S5-talk-C13: cap the column so the smith's prose keeps a readable
+    // Cap the column so the smith's prose keeps a readable
     // measure on a wide window instead of running edge to edge.
     scroll: {
         padding: 14,
@@ -373,7 +372,7 @@ const useStyles = makeStyles((AXM) => ({
         marginTop: 6,
         marginBottom: 6,
     },
-    // S5-talk-C12: the legend for the per-die face read; chronicle voice, one
+    // The legend for the per-die face read; chronicle voice, one
     // step quieter than the die rows it explains.
     faceKey: {
         fontFamily: FONTS.serifItalic,
@@ -412,7 +411,7 @@ const useStyles = makeStyles((AXM) => ({
     offerDisabled: { borderColor: AXM.ash, opacity: 0.5 },
     offerLabel: { fontFamily: FONTS.gothic, fontSize: 14, letterSpacing: 1.5, color: AXM.sulfur },
     offerPrice: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.sulfur },
-    // S5-talk-C12: the trade a verb makes, in the die read's own mono face.
+    // The trade a verb makes, in the die read's own mono face.
     offerEffect: {
         fontFamily: FONTS.mono,
         fontSize: 11,

@@ -1,7 +1,7 @@
 /**
- * Dev-only "add item by id" inventory injection (Phase 131).
+ * Dev-only "add item by id" inventory injection.
  *
- * T asked for a dev control that drops a specific engine item into
+ * A dev control that drops a specific engine item into
  * the player's inventory by its id, for evidence runs where the Kid
  * needs a known item present (e.g. a particular consumable or a
  * given relic). We resolve the id against engine truth in priority
@@ -58,7 +58,7 @@ export function addItemByIdAction(
     try {
         const addItem = store.getState().addItem;
 
-        // Phase 21 — the only equipment is the signet relics (resolve by id).
+        // The only equipment is the signet relics (resolve by id).
         const relic = getRelicById(id);
         if (relic) {
             addItem({ ...relic });

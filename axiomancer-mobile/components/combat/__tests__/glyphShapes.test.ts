@@ -1,11 +1,10 @@
 /**
- * Unit — the card-face FREE-glyph silhouette table (Phase V6, glyph
- * unification). Two jobs: (1) basic hygiene on every registered shape, and
+ * Unit — the card-face FREE-glyph silhouette table. Two jobs: (1) basic hygiene on every registered shape, and
  * (2) a keyword-mark canon audit — every registry keyword that can actually
  * reach the card face through a live effect (`state/combat/keywords.ts`'s
  * `EFFECT_KEYWORD`) must resolve to a real silhouette, and no shape is kept
- * for a keyword the free-glyph path can no longer produce (the BARRIER
- * removal this phase is the regression this guards against).
+ * for a keyword the free-glyph path cannot produce (BARRIER, folded into
+ * GUARD, must stay without a shape).
  */
 
 import { describe, expect, it } from '@jest/globals';
@@ -44,10 +43,7 @@ describe('glyphShapes — keyword canon audit (Phase V6)', () => {
     });
 
     it('every effect-backed registry keyword resolves to a silhouette', () => {
-        // debuff_bleed/_vulnerable — the only effect-backed keywords left
-        // (BACKFIRE and THORNS left with the keyword audit, 2026-09-27;
-        // POISON, QUARTER and DOOM with the R4 signature placeholders; MARK
-        // with the R5 consumables).
+        // debuff_bleed/_vulnerable are the only effect-backed keywords.
         const effectBackedKeywords = ['BLEED', 'VULNERABLE'];
         for (const kw of effectBackedKeywords) {
             expect(registryKeywords.has(kw)).toBe(true);

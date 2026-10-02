@@ -1,5 +1,5 @@
 /**
- * Hermetic component tests — EnemyActionCard (2026-08-10).
+ * Hermetic component tests — EnemyActionCard.
  *
  * The reveal of what the foe just did. Pins the three things that make it
  * useful rather than decorative: it says the action, it clears itself, and it

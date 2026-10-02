@@ -1,8 +1,8 @@
 /**
  * Hermetic component tests — DebugDialogueJump (real NPC trees).
  *
- * The panel offers one chip per NPC a map stages. R7e (D72) deleted the
- * parked world's NPC trees and Act 1 stages none, so the row shows no chips;
+ * The panel offers one chip per NPC a map stages. No map stages one today,
+ * so the row shows no chips;
  * the jump it drives (`openNpcDialogue`) is pinned on the fixture NPC in
  * `state/dev/__tests__/story-catalog.test.ts`.
  */

@@ -239,7 +239,7 @@ export function OutcomeOverlay({
 
 /**
  * CardDetailOverlay — the tap-to-read card: its keyword call-outs, the
- * card at detail size, and (cluster S7-hazard-C04) the FORCE / ESCAPE
+ * card at detail size, and the FORCE / ESCAPE
  * key for the two unnamed marks the card prints.
  *
  * Inputs: `card` — the VM to read; `onClose` — fired on any tap.
@@ -264,7 +264,7 @@ export function CardDetailOverlay({ card, onClose }: { card: HazardCardVM; onClo
                 <Animated.View entering={FadeIn.duration(180)}>
                     <HazardCard card={card} mode="detail" />
                 </Animated.View>
-                {/* S7-hazard-C04 — key the card's two unnamed marks. */}
+                {/* Key the card's two unnamed marks. */}
                 <HazardStatKey />
             </View>
             <Text style={[styles.tapToContinue, { paddingBottom: 12 }]}>TAP ANYWHERE TO CLOSE</Text>

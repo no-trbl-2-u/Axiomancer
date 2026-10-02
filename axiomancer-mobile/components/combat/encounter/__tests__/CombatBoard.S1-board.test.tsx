@@ -1,18 +1,15 @@
 /**
- * CombatBoard — fresh-eyes shard S1-board, confirmed clusters.
+ * CombatBoard — board chrome at the phone viewport.
  *
- *  C11  The player medallion (bottom-left) and the END stack (bottom-right)
- *       were parked ON the outermost hand cards: the fan ran edge-to-edge at
- *       12pt insets under both. The fan now lays out in the chrome-free band
- *       between them (`handFanLayout`).
- *  C12  The board bled past the viewport's right edge — the END consequence
- *       line was anchored 30pt LEFT of an 80pt disc sitting at right 10, so
- *       its 140pt box ended 20pt off-screen, which the page could scroll to.
- *       The line is anchored inward and the board clips at its own edge.
- *  C19  `MomentumChainChip` is tappable and carries a ⓘ mark. (The inert
- *       stance chip beside it went with the stance layer, R7d.)
- *  C32  `compactFree` fell through to `v.slice(0, 3)` and printed '×4 ' — a
- *       chopped three-character piece of '×4 · 3t', not a value.
+ *  - The hand fan lays out in the chrome-free band between the player
+ *    medallion (bottom-left) and the END stack (bottom-right)
+ *    (`handFanLayout`), not edge-to-edge under both.
+ *  - The board fits the viewport: the END consequence line is anchored inward
+ *    (anchored LEFT of the disc, its 140pt box would end off-screen) and the
+ *    board clips at its own edge.
+ *  - `MomentumChainChip` is tappable and carries a ⓘ mark.
+ *  - `compactFree` prints a whole value, never a chopped slice such as '×4 '
+ *    out of '×4 · 3t'.
  */
 
 import React from 'react';
@@ -31,8 +28,7 @@ import { buildCombatViewModel, type CombatViewModel } from '@/state/presenters/c
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
-// A four-card hand off the grey office (the whole library since the card
-// purge, 2026-09-27).
+// A four-card hand off the grey office (the whole card library).
 const CARDS = ['grey-strike', 'grey-ward', 'grey-word', 'grey-strike'];
 const PHONE = { width: 390, height: 844, scale: 3, fontScale: 1 };
 const INSETS = { top: 47, bottom: 34, left: 0, right: 0 };
@@ -81,8 +77,8 @@ function renderBoard(shape: (vm: CombatViewModel) => CombatViewModel = (v) => v)
 }
 
 /** A DEAD TRAY (live dice, none of which can power any card in hand) is what
- *  makes END print its consequence line — the one piece of board chrome that
- *  used to reach past the screen's right edge. Every die reads HEART, every
+ *  makes END print its consequence line — the piece of board chrome most
+ *  likely to reach past the screen's right edge. Every die reads HEART, every
  *  card BODY: no colour-law pairing exists. */
 const withDeadTray = (vm: CombatViewModel): CombatViewModel => ({
     ...vm,
@@ -95,7 +91,7 @@ const flat = (testID: string) => StyleSheet.flatten(screen.getByTestId(testID).p
 /** The fan's total laid-out width for `n` cards at the given step. */
 const fanWidth = (n: number, step: number) => (n < 1 ? 0 : HAND_CARD_W + step * (n - 1));
 
-// ── C11: the fan sits BESIDE the corner medallions ──────────────────────────
+// ── The fan sits BESIDE the corner medallions ──────────────────────────
 
 describe('S1-board-C11 — the hand fan lays out beside the corner chrome', () => {
     it('reserves both corner footprints instead of running edge-to-edge', () => {
@@ -103,7 +99,7 @@ describe('S1-board-C11 — the hand fan lays out beside the corner chrome', () =
         const fan = flat('combat-hand');
         expect(fan.paddingLeft).toBe(HAND_FAN_LEFT);
         expect(fan.paddingRight).toBe(HAND_FAN_RIGHT);
-        // The old edge-to-edge inset is gone on both sides.
+        // No edge-to-edge inset on either side.
         expect(fan.paddingHorizontal).toBeUndefined();
     });
 
@@ -116,8 +112,8 @@ describe('S1-board-C11 — the hand fan lays out beside the corner chrome', () =
     });
 
     it('an oversized hand overflows the band by points, not by whole cards', () => {
-        // The pre-fix band was the full screen less 12pt insets, so the fan ran
-        // right under the 102pt medallion and the 90pt END disc.
+        // The reference edge-to-edge band is the full screen less 12pt insets,
+        // which runs the fan right under the 102pt medallion and the 90pt END disc.
         const OLD_BAND = PHONE.width - 24;
         for (const n of [4, 5, 6]) {
             const { band, step } = handFanLayout(PHONE.width, n);
@@ -126,16 +122,14 @@ describe('S1-board-C11 — the hand fan lays out beside the corner chrome', () =
             const oldSpillLeft = HAND_FAN_LEFT - (PHONE.width - fanWidth(n, oldStep)) / 2;
             expect(spill).toBeLessThan(oldSpillLeft);
             // Whatever the hand size, the outermost card keeps its touch centre
-            // clear of the chrome it used to hide under.
+            // clear of the corner chrome.
             expect(spill).toBeLessThan(HAND_CARD_W / 2);
         }
     });
 
     it('never tightens a card below the readable sliver, and never on a single card', () => {
-        // Both inputs re-picked for the C11 repair, same properties: a hand the
-        // chrome band cannot seat now takes the BOARD band (the narrow band
-        // crushed a five-card hand to the floor and overflowed anyway), so the
-        // floor binds later — and 200pt was never narrower than one 120pt card.
+        // A hand the chrome band cannot seat takes the BOARD band, so the
+        // floor binds only for a very large hand.
         expect(handFanLayout(PHONE.width, 12).step).toBe(HAND_FAN_MIN_STEP);
         expect(handFanLayout(PHONE.width, 1).step).toBe(HAND_CARD_W);
         expect(handFanLayout(PHONE.width, 1).overlap).toBe(0);
@@ -144,7 +138,7 @@ describe('S1-board-C11 — the hand fan lays out beside the corner chrome', () =
     });
 });
 
-// ── C12: the board fits the phone ───────────────────────────────────────────
+// ── The board fits the phone ───────────────────────────────────────────
 
 describe('S1-board-C12 — nothing on the board runs past the viewport', () => {
     it('the board clips at its own edge', () => {
@@ -164,7 +158,7 @@ describe('S1-board-C12 — nothing on the board runs past the viewport', () => {
     });
 });
 
-// ── C19: the tappable chip is the one that looks tappable ───────────────────
+// ── The tappable chip is the one that looks tappable ───────────────────
 
 describe('S1-board-C19 — the momentum chip looks tappable', () => {
     it('the momentum chip is a button and carries a visible tap mark', () => {
@@ -175,7 +169,7 @@ describe('S1-board-C19 — the momentum chip looks tappable', () => {
     });
 });
 
-// ── C32: a value cell shows a whole value ───────────────────────────────────
+// ── A value cell shows a whole value ───────────────────────────────────
 
 describe('S1-board-C32 — compactFree never prints a chopped fragment', () => {
     it('compacts the presenter’s applyEffect rail to its intensity', () => {

@@ -7,11 +7,8 @@
  * Where it is mounted: `app/dialogue/index.tsx` (TIP YOUR CAP AND GO) and
  * `app/blacksmith/index.tsx` (LET THE COALS DIE).
  *
- * FE-007: both screens previously rendered this exit as bare bone-coloured
- * text with no border and 6-8px of padding, directly beneath choices drawn as
- * solid bordered boxes. It read as a caption, not a control — on the dialogue
- * screen I nearly missed the only way out of the conversation — and its hit
- * target was about 27px tall, under the 44px minimum.
+ * Bare text beneath choices drawn as solid bordered boxes reads as a caption,
+ * not a control, so the exit gets a border and a 44px hit target.
  *
  * It stays deliberately quieter than the boxed choices above it: the border is
  * dashed and the type is bone rather than parchment, so the scene's real

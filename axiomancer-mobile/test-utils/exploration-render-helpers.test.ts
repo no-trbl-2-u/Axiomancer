@@ -1,5 +1,5 @@
 /**
- * Focused tests for Phase 107 — Map node label display optimization
+ * Focused tests for map node label display.
  * 
  * Tests that node labels are only shown for unvisited available nodes
  * that are currently shown as choices in the options drawer.

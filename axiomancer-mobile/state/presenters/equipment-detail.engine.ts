@@ -1,13 +1,12 @@
 /**
- * Equipment DETAIL presenter — the long-press card for a worn equipment slot
- * (2026-09-13 playthrough note #2).
+ * Equipment DETAIL presenter — the long-press card for a worn equipment slot.
  *
  * WHY THIS EXISTS
  * ---------------
  * Swapping equipment tells the player which signature skill ("sigSkill") the
- * change gains or loses — by NAME only. Outside combat there was no way to find
- * out what that named skill actually DOES. This presenter is the data half of
- * the fix: it resolves everything a player needs to judge a relic in one place.
+ * change gains or loses — by NAME only. This presenter resolves what that
+ * named skill DOES, and everything else a player needs to judge a relic, in
+ * one place.
  *
  * WHAT IT PRODUCES
  * ----------------
@@ -183,7 +182,7 @@ function buildStatLines(eq: Equipment): EquipmentStatLine[] {
  *
  * @param eq - The equipment item.
  * @returns The signature info, or `null` when the item grants none (or the id
- *          no longer resolves against the engine's kit — a content drift guard).
+ *          does not resolve against the engine's kit — a content drift guard).
  */
 function buildSignature(eq: Equipment): EquipmentSignatureInfo | null {
     if (!eq.grantsSignature) return null;

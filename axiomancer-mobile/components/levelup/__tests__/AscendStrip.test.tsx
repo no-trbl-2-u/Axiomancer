@@ -1,5 +1,5 @@
 /**
- * Hermetic component tests — AscendStrip (Phase 73 Tick A).
+ * Hermetic component tests — AscendStrip.
  *
  * Pins: mount, copy (level transition + points + chevron noise),
  * pluralization, tap handler wiring, accessibility.

@@ -3,14 +3,6 @@
  * own measure ref and fires `useTooltip().show({ kind, id })` on
  * tap. Empty `id` short-circuits — useful for fixture-built
  * elements that have no engine id.
- *
- * Originally inlined in `app/(tabs)/combat.tsx` (Phase 75); lifted
- * here when SELF tooltip wiring landed (Phase 74 follow-up
- * walkthrough Tick 1) so multiple surfaces share the same
- * primitive. The combat-screen copy still uses its local
- * definition to avoid touching the combat-modal surface mid-audit
- * (the 36th /oversight call's combat-modal-audit bias); future
- * ticks may consolidate.
  */
 
 import React, { useRef } from 'react';

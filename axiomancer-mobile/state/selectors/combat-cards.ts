@@ -1,15 +1,10 @@
 /**
- * Engine card-library adapter (Phase 16).
+ * Engine card-library adapter.
  *
- * Bridges the engine's `Card` shape (axiomancer-mechanics 0.10.2's
- * `cardLibrary` + `getCardById`, top-level re-exported as of the
- * Phase 60f engine bump) to the mobile presentation row consumed by
- * the combat card picker.
+ * Bridges the engine's `Card` shape (`cardLibrary` + `getCardById`) to the
+ * mobile presentation row consumed by the combat card picker.
  *
- * The combat card-picker row contract is unchanged; only the data
- * source moves.
- *
- * Mapping decisions per the Phase 16 brief §"Decisions made upfront":
+ * Mapping:
  *   - `id` = engine `id` (e.g. `'slippery-slope'`)
  *   - `name` = engine `name`, uppercased for display
  *   - `description` = engine `description` verbatim
@@ -27,10 +22,8 @@ import {
 import { keywordForEffect } from '@/state/combat/keywords';
 
 /**
- * The philosophical stances a card can be locked to (plus Phase 104's
- * colourless 'any' — the grey office). Inlined here after the legacy
- * `combat.engine.ts` presenter (its former home) was removed with the legacy
- * turn-based combat surface.
+ * The philosophical stances a card can be locked to, plus the colourless
+ * 'any' (the grey office).
  */
 export type StanceKey = 'heart' | 'body' | 'mind' | 'any';
 
@@ -90,9 +83,8 @@ export const COMBAT_CARDS: readonly CombatCardOption[] = Object.freeze(
 
 /**
  * Resolve a card id to its mobile presentation row. Returns `null`
- * when the id is not in the engine library (e.g. legacy ids from a
- * pre-Phase-16 save). Callers should treat `null` the same way they
- * treated a missing fixture entry.
+ * when the id is not in the engine library (e.g. an id from an old
+ * save). Callers treat `null` as a missing card.
  */
 export function getCombatCardById(id: string): CombatCardOption | null {
     const card = getCardById(id);

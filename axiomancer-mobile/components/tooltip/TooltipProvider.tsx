@@ -1,5 +1,5 @@
 /**
- * Root-level provider for the tap-tooltip system (Phase 74 Tick A).
+ * Root-level provider for the tap-tooltip system.
  *
  * Mounts a single absolutely-positioned `<TapTooltip>` overlay
  * across the whole window. Consumers call
@@ -14,10 +14,9 @@
  * - `show` called with the same anchor toggles the tooltip off.
  * - Programmatic `hide()`.
  *
- * Hard rules locked by the brief (see
- * `plan/phases/phase_74_tap_tooltip_primitive.md` §2):
+ * Hard rules:
  * - Single tooltip at a time; new show replaces the previous.
- * - No animation in Tick A.
+ * - No animation.
  * - `measureInWindow` zeros trigger a one-frame retry via
  *   `requestAnimationFrame`; second zero result is a no-op.
  * - Tooltip flips below the anchor when `anchor.y < 100` and
@@ -101,8 +100,8 @@ export function TooltipProvider({ children, windowSize }: TooltipProviderProps) 
     // `useGameStore()` returns the stable store ref (does NOT
     // subscribe to changes). State is read imperatively inside
     // `show()` so the provider doesn't re-render on every engine
-    // tick — Tick A presenter ignores state, but Ticks B–E will
-    // need fresh reads at the moment of tap.
+    // tick, while content still gets a fresh read at the moment of
+    // tap.
     const store = useGameStore();
     const [active, setActive] = useState<ActiveTooltip | null>(null);
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

@@ -1,5 +1,5 @@
 /**
- * Dev-only character preset picker (Phase 59).
+ * Dev-only character preset picker.
  *
  * Three buttons — one per engine `characterPresets` row
  * (apprentice / wanderer / sage). Press swaps the player slice
@@ -9,9 +9,6 @@
  *
  * Sits beside the finer `DebugPlayerTierPresets` ladder in the `/dev`
  * PLAYER section. Renders null in production builds.
- *
- * Promoted via `/oversight` 2026-05-20 (14th call) from
- * PHASE_CANDIDATES pass 5 [score 4.5].
  */
 
 import { characterPresets } from '@mechanics';

@@ -1,18 +1,18 @@
 /**
- * Spec 33 §1/§4 (Phase D6f — The Roll Ritual) — the ONE presenter-adjacent home
+ * The Roll Ritual — the ONE presenter-adjacent home
  * for every timing/easing constant the dice tumble uses. Choreography logic
  * (the state machine in `dice-roll-ritual.ts`, the visuals in `RollingDie.tsx`)
  * reads these; nobody hard-codes a duration. Tune the feel HERE without touching
  * a line of choreography — the owner feel-rank knob (ritual duration vs. combat
  * pace) lives in `tumbleDurationMs` + `staggerMs`.
  *
- * The choreography is the HAZARD CAST (owner call 2026-07-19): the proven
+ * The choreography is the HAZARD CAST: the
  * `TumblingDie` fall-in from `components/hazard/HazardOverlays.tsx` — each die
  * drops from above the tray rotated hard, lands, and micro-bounces to rest.
  * The drop geometry constants below mirror that overlay verbatim.
  *
  * They describe PRESENTATION; the engine RNG already decided every outcome — nothing here can
- * change what a settled die shows (dice-honesty law, 2026-07-09).
+ * change what a settled die shows (the dice-honesty law).
  */
 
 export interface DiceRollTiming {

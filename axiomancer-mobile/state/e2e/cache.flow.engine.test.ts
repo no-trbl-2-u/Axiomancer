@@ -1,10 +1,9 @@
 /**
- * Hermetic E2E Tests — Loot-cache-choice encounter ("The Reliquary", Phase
- * 63, replacing the retired Pick Pool minigame) store flow. Drives caches
- * through the store action layer: begin → offer → outcome → claim, for
- * both offers (card / item), and verifies the claim applies the right
- * grant to the real GameState. The sacrifice offer granted nothing after
- * R3b and was removed in R3c.
+ * Hermetic E2E Tests — Loot-cache-choice encounter ("The Reliquary") store
+ * flow. Drives caches through the store action layer: begin → offer →
+ * outcome → claim, for both offers (card / item), and verifies the claim
+ * applies the right grant to the real GameState. There is no sacrifice
+ * offer; choosing one is a no-op.
  * Seeded; no timers, no network.
  */
 

@@ -58,13 +58,10 @@ describe('NodeGrid', () => {
     });
 
     /**
-     * S4-world-C06 re-pinned this contract. The old assertion claimed a locked
-     * node swallowed its own press "due to accessibility disabled state" —
-     * that was a testing-library artifact, never the app: React Native honours
-     * `TouchableOpacity`'s `disabled` PROP, not `accessibilityState`, so the
-     * screen has always received the locked press and answered it with
-     * "This path is sealed." NodeGrid reports every tap; the screen decides
-     * what a tap means (pinned in
+     * React Native honours `TouchableOpacity`'s `disabled` PROP, not
+     * `accessibilityState`, so the screen receives a locked node's press and
+     * answers it with "This path is sealed." NodeGrid reports every tap; the
+     * screen decides what a tap means (pinned in
      * `state/e2e/node-tap-affordance.S4-world-C06.test.tsx`).
      */
     it('reports every node press to the parent, whatever the node kind', () => {

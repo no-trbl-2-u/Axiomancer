@@ -1,9 +1,9 @@
 /**
- * FE-007 — the "walk away" control must read as a control.
+ * The "walk away" control must read as a control.
  *
- * On `/dialogue` and `/blacksmith` this exit was bare bone-coloured text
- * under solid bordered choices, with a ~27px hit target. These guards pin the
- * border, the 44px minimum target, and that the press still fires.
+ * On `/dialogue` and `/blacksmith` this exit sits under solid bordered
+ * choices; bare text there reads as a caption. These guards pin the border,
+ * the 44px minimum target, and that the press still fires.
  */
 
 import React from 'react';

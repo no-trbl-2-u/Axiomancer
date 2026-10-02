@@ -1,9 +1,8 @@
 /**
- * Hermetic presenter tests — `selectEnemyActionCard` (2026-08-10).
+ * Hermetic presenter tests — `selectEnemyActionCard`.
  *
- * The user report this shapes: "the enemy's card/attack — can we show the card
- * to the player for a moment so the player knows what happened on the enemy's
- * turn?" The enemy plays no literal cards, so the selector reads its resolved
+ * Shows the player, for a moment, what happened on the enemy's turn. The enemy
+ * plays no literal cards, so the selector reads its resolved
  * threat phase back off the event stream and shapes it as one.
  *
  * Pins:

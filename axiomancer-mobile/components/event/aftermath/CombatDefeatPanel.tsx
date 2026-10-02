@@ -2,9 +2,7 @@
  * CombatDefeatPanel — the "the page closes" panel rendered inside
  * the encounter modal seal once `lastOutcome === 'defeat'`.
  *
- * Phase 70 Tick C port of the handoff bundle's `CombatDefeatModal`
- * (`archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-22/project/screens/aftermath-modal.jsx:
- * 585-703`). Sibling of `<CombatVictoryPanel>` /
+ * Sibling of `<CombatVictoryPanel>` /
  * `<CombatFriendshipPanel>` but tuned darker — no splatter, no
  * pixel emblem, no celebration. A spent-wick hairline above the
  * title, gothic character name, italic fell-to line, mono damage
@@ -14,8 +12,8 @@
  *
  * Two action buttons:
  *   1. `BEGIN AGAIN` — primary parchment-bordered gothic. Wired
- *      via `onBeginAgain` to a full-heal-and-dismiss restart at
- *      the call site.
+ *      via `onBeginAgain`; the call site resets the run (keeping the
+ *      character) and dismisses.
  *   2. `let the page close` — ghost bone-italic lowercase. Wired
  *      via `onLetClose`; the panel dismisses without resetting
  *      anything, leaving the player on the map at 0 HP (the
@@ -37,10 +35,8 @@ export interface CombatDefeatPanelProps {
     onLetClose: () => void;
 }
 
-// Lowercase Roman helper consolidated into
-// `@/state/presenters/roman`. The `·` fallback the bundle source
-// uses for n <= 0 is preserved via the helper's `fallback` arg at
-// the call sites.
+// Lowercase Roman numerals come from `@/state/presenters/roman`; the
+// call sites pass `·` as the helper's `fallback` for n <= 0.
 
 export function CombatDefeatPanel({ vm, onBeginAgain, onLetClose }: CombatDefeatPanelProps) {
     const AXM = usePalette();
@@ -142,7 +138,6 @@ export function CombatDefeatPanel({ vm, onBeginAgain, onLetClose }: CombatDefeat
              * primitives, but a stacked solid + half-opacity wash
              * gives a similar feel. The torn edge is approximated
              * with a thicker top border of mixed blood + ash dots.
-             * Phase 71 chrome refresh will tune this further.
              */}
             <View style={styles.bloodSeep} pointerEvents="none">
                 <View style={styles.bloodSeepInner} />

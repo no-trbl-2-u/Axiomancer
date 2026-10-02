@@ -1,14 +1,12 @@
 /**
- * Spec 33 (Phase D6a) — combat render CORE, presenter contract.
+ * Combat render CORE, presenter contract.
  *
  * Pins the view-model surfaces the dice tray + signature runes read,
  * against the REAL engine + presenter:
  *   1. the CombatDieVM face axis (special / mana / miss) + the OVERHEAT `cracked`
  *      read, and that a MISS face is DEAD (never draggable);
  *   2. the signature runes (castable / refused + the loud refusal reason),
- *      mirroring the engine's `signatureCastBlock` (revamp R4 retired Press
- *      Fate's reroll with the other signature behaviours).
- * (The flag-OFF byte-identity pins were deleted with the flag, D7.)
+ *      mirroring the engine's `signatureCastBlock`.
  */
 
 import { describe, expect, it } from '@jest/globals';

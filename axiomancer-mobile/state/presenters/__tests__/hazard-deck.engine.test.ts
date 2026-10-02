@@ -1,5 +1,5 @@
 /**
- * Persistent Hazard deck presenter — hermetic mapping suite (Phase 126).
+ * Persistent Hazard deck presenter — hermetic mapping suite.
  *
  * Composition is mechanics truth (`hazardStarterBag` +
  * `appendAcquiredCard`); these tests pin the presenter's grouping,

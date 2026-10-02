@@ -19,7 +19,7 @@ interface NodeMarkProps {
  * can be retuned without the invariant going quiet.
  *
  * `current` is deliberately mid-weight: it marks where you already are, not
- * somewhere to go (S4-world-C06).
+ * somewhere to go.
  */
 export const NODE_MARK_RADIUS: Record<NodeMarkKind, number> = {
   available: 15.5,
@@ -29,30 +29,26 @@ export const NODE_MARK_RADIUS: Record<NodeMarkKind, number> = {
 };
 
 /**
- * NodeMark — the map-node glyph. Visual-audit 2026-06: each kind now
- * sits on a filled backing disc so the node reads as a distinct *stop*
+ * NodeMark — the map-node glyph. Each kind sits on a filled backing
+ * disc so the node reads as a distinct *stop*
  * over the connecting paths drawn behind it, with bolder strokes and a
  * defining outer rim. Bigger default size; the parent scales it up
  * further on the exploration map.
  *
- * S4-world-C06: the accent belongs to `available`, not `current`. The
- * sulfur beacon used to mark the square the player was ALREADY standing
- * on — the brightest thing on the chart was the one node that does
- * nothing when tapped — while the nodes you can actually walk to sat in
- * plain parchment. Reversed: `available` wears the lit sulfur lamp (and
- * the parent's pulse), `current` wears a muted bone pin that reads "you
- * are here" rather than "go here".
+ * The accent belongs to `available`, not `current`: the brightest thing on
+ * the chart must be a node you can walk to, not the one node that does
+ * nothing when tapped. `available` wears the lit sulfur lamp (and the
+ * parent's pulse), `current` wears a muted bone pin that reads "you are
+ * here" rather than "go here".
  *
- * ── 2026-09-21, owner finding 9 / D1: THREE STATES, NO COLOUR ALONE ──
+ * ── THREE STATES, NO COLOUR ALONE ──
  *
- * The owner's Drowned Parish screenshot showed 23 of 28 nodes wearing a
- * blood-red `✕` at strokeWidth 3 — the loudest mark on the chart was the
- * state that means "nothing here for you", repeated until the map read as
- * noise. Worse, the three states a player has to tell apart were carried
- * mostly by hue (sulfur / bone / blood), which a colour-blind player or a
- * greyscale screenshot flattens into one.
+ * Sealed is usually the majority state, so it must be the quietest mark,
+ * not the loudest. And the three states a player has to tell apart cannot
+ * be carried by hue alone, which a colour-blind player or a greyscale
+ * screenshot flattens into one.
  *
- * They are now separated on THREE independent channels, any one of which
+ * They are separated on THREE independent channels, any one of which
  * is enough on its own:
  *
  *   | state             | FILL          | SIZE            | SHAPE            |
@@ -63,8 +59,8 @@ export const NODE_MARK_RADIUS: Record<NodeMarkKind, number> = {
  *
  * So: the thing you can do is the biggest and brightest; the thing you
  * have already answered is a solid, closed mass; the thing that is shut to
- * you is a small empty outline that recedes into the sheet. The `✕` is
- * gone — a sealed node no longer shouts, it simply stops offering itself.
+ * you is a small empty outline that recedes into the sheet. A sealed node
+ * does not shout; it simply stops offering itself.
  */
 export function NodeMark({ kind = 'available', size = 28 }: NodeMarkProps) {
   const AXM = usePalette();

@@ -1,5 +1,5 @@
 /**
- * Treasure & reward art — temp art pass (2026-07-06 drop). Alpha-matted so the
+ * Treasure & reward art (temp art). Alpha-matted so the
  * pieces float on any dark screen.
  */
 

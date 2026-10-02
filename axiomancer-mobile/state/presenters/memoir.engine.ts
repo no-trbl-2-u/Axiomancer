@@ -1,14 +1,13 @@
 /**
- * MEMOIR presenter (Phase 33 — shipped).
+ * MEMOIR presenter.
  *
  * Pure mapper from `GameStore` to the journal surface's view-model.
  * Every section — chronicle, quests, remains — reads live engine
  * state. See the JSDoc on
- * `selectMemoirViewModel` for the per-section read map and the
- * Phase 33 sub-tick history.
+ * `selectMemoirViewModel` for the per-section read map.
  *
- * The screen consumes this VM via the slim-slice + `useMemo` pattern
- * (Phase 30 Tick A). Calling `useGameState(selectMemoirViewModel)`
+ * The screen consumes this VM via the slim-slice + `useMemo` pattern.
+ * Calling `useGameState(selectMemoirViewModel)`
  * directly would churn `useSyncExternalStore` because the VM is a
  * frozen-new object every call.
  */
@@ -36,7 +35,7 @@ import { questTitle } from './engine-id-copy';
  * Honest signature for `selectMemoirViewModel`: takes engine
  * `GameStore` (the canonical game state) and optionally the
  * mobile-private `_recentEvents` ring buffer from
- * `AppStoreState` (Phase 25). The optional `_recentEvents`
+ * `AppStoreState`. The optional `_recentEvents`
  * field keeps the presenter usable from hermetic test fixtures
  * that build a `GameStore` via `createGameStore` (no mobile
  * slices) — they pass undefined and chronicle stays empty.
@@ -50,8 +49,8 @@ import { freezeViewModel } from './freeze';
 const CHRONICLE_VISIBLE_CAP = 12;
 
 /**
- * One typed-event-derived chronicle row. Ticks D will populate from
- * the mobile `_recentEvents` ring buffer; Tick A ships an empty list.
+ * One typed-event-derived chronicle row, built from the mobile
+ * `_recentEvents` ring buffer by `buildChronicle`.
  */
 export interface ChronicleEntry {
     /** Stable id for keying — composed from event type + ordinal. */
@@ -65,11 +64,9 @@ export interface ChronicleEntry {
 }
 
 /**
- * Bullet glyphs for the objective rows. Pinned at module scope (lifted
- * off `app/(tabs)/memoir/index.tsx` by /iterate addressing CRITIQUE
- * pass 7 HIGH) so the view layer carries no display literals per Hard
- * Rule #8. Same pattern as `EVENT_CHROME` / `ENCOUNTER_LABEL` /
- * `EVENT_CHROME` constants in the event presenter.
+ * Bullet glyphs for the objective rows. Pinned at module scope so the
+ * view layer carries no display literals per Hard Rule #8. Same pattern
+ * as `EVENT_CHROME` / `ENCOUNTER_LABEL` in the event presenter.
  */
 export const QUEST_OBJECTIVE_BULLET = Object.freeze({
     done: '✓',
@@ -77,8 +74,7 @@ export const QUEST_OBJECTIVE_BULLET = Object.freeze({
 }) as { readonly done: '✓'; readonly pending: '○' };
 
 /**
- * One quest row. Tick B will populate from `state.quests`; Tick A
- * ships empty sub-sections.
+ * One quest row, built from `state.quests`.
  */
 export interface MemoirQuestRow {
     id: string;
@@ -95,17 +91,14 @@ export interface MemoirQuestRow {
 }
 
 /**
- * REMAINS section (Phase 6) — read-back of two previously-orphaned
- * durable records: out-of-combat death tombstones (`hazardDeathCount`,
- * unconsumed since Phase 130) and Rest/LootCache keepsake labels
- * (banked as flags, never read back outside their own outcome
- * screens). See `extractKeepsakes` / `buildDeathLine` below.
+ * REMAINS section — read-back of durable records: out-of-combat death
+ * tombstones (`hazardDeathCount`) and Rest/LootCache keepsake labels
+ * (banked as flags). See `extractKeepsakes` / `buildDeathLine` below.
  *
- * Phase 32 part 1b adds a third read-back: `player.bankedSouls`, the
- * Harvest theme's persistent Soul jar (unspent `souls` write back here
- * at combat end — see `CombatEncounterPanel.applyHazardOutcome`). Part
- * 1c layers a milestone epithet onto the same line once the bank
- * crosses a recognition tier. See `buildSoulsLine` below.
+ * Also reads `player.bankedSouls`, the Harvest theme's persistent Soul
+ * jar (unspent `souls` write back here at combat end — see
+ * `CombatEncounterPanel.applyHazardOutcome`), with a milestone epithet
+ * once the bank crosses a recognition tier. See `buildSoulsLine` below.
  */
 export interface MemoirRemainsViewModel {
     /** Raw tally from `hazardDeathCount(state.flags)`. */
@@ -117,11 +110,11 @@ export interface MemoirRemainsViewModel {
      *  `cache-keepsake:`), reverse-chronological — most recently
      *  banked first, matching the chronicle section's ordering. */
     keepsakes: readonly string[];
-    /** Raw tally from `player.bankedSouls` (Phase 32 part 1b). */
+    /** Raw tally from `player.bankedSouls`. */
     bankedSouls: number;
     /** Narrative line — singular/plural/zero handled here, same
      *  convention as `deathLine`; gains a milestone epithet past a
-     *  recognition tier (Phase 32 part 1c). */
+     *  recognition tier. */
     soulsLine: string;
 }
 
@@ -135,39 +128,35 @@ export interface MemoirViewModel {
     questsActiveEyebrow: string;
     questsCompletedEyebrow: string;
     questsForgottenEyebrow: string;
-    /** REMAINS section eyebrows (Phase 6). */
+    /** REMAINS section eyebrows. */
     remainsEyebrow: string;
     remainsKeepsakesEyebrow: string;
-    /** Chronicle section — Tick D populates from `_recentEvents`. */
+    /** Chronicle section, built from `_recentEvents`. */
     chronicle: ReadonlyArray<ChronicleEntry>;
-    /** Quest sections — Tick B populates from `state.quests`. */
+    /** Quest sections, built from `state.quests`. */
     quests: {
         active: ReadonlyArray<MemoirQuestRow>;
         completed: ReadonlyArray<MemoirQuestRow>;
         forgotten: ReadonlyArray<MemoirQuestRow>;
     };
-    /** REMAINS section (Phase 6) — death tally + keepsake read-back. */
+    /** REMAINS section — death tally, keepsakes and Soul jar. */
     remains: MemoirRemainsViewModel;
-    /** Empty-state copy lines, pinned per Phase 33 brief. */
+    /** Empty-state copy lines. */
     emptyChronicle: string;
     emptyQuests: string;
-    /** Phase 6 — shown when `remains.keepsakes` is empty. */
+    /** Shown when `remains.keepsakes` is empty. */
     emptyKeepsakes: string;
 }
 
 /**
- * Tick D: chronicle mapper. Reads `state._recentEvents` (Phase 25
- * ring buffer, capacity 20) and emits at most `CHRONICLE_VISIBLE_CAP`
- * entries in reverse-chronological order. Per Phase 33 brief §"Tick D":
+ * Chronicle mapper. Reads `state._recentEvents` (ring buffer, capacity
+ * 20), treats it as oldest-first, reverses it and emits at most
+ * `CHRONICLE_VISIBLE_CAP` entries. Note: the live store prepends to the
+ * buffer (newest-first), so there the output runs oldest-first and the
+ * continent tracking below walks backwards in time.
  *
- * - `combat:ended` → "FELLED" / "ROUTED BY" / "FLED" depending on
- *   `report.outcome` (engine outcomes are 'victory' / 'defeat' /
- *   'flee'). The Phase 33 brief originally targeted "PARLEYED WITH"
- *   for the flee outcome; CRITIQUE pass 7 + /oversight 2026-05-16
- *   reverted that to "FLED" because the engine has no parley outcome
- *   today and the journal was reading as misleading (player fled,
- *   chronicle claimed they negotiated). When/if engine ships a real
- *   parley outcome, PARLEYED WITH can return as its own mapping.
+ * - `combat:ended` → "FELLED" for 'victory', "ROUTED BY" for 'defeat',
+ *   "FLED" for anything else ('flee' and 'friendship').
  *   Enemy name is lost from the event payload after END_COMBAT (the
  *   reducer clears `state.combat`), so the body line carries the
  *   outcome flavour + xp grant rather than naming the foe.
@@ -179,8 +168,8 @@ export interface MemoirViewModel {
  *   source of truth, no external state needed).
  * - `dialogue:applied` → "SPOKE WITH <npc>" when the tree carries an
  *   identifiable NPC name; defensively skipped when not extractable.
- * - Every other event type (inventory:changed etc.) → skipped per
- *   brief ("too noisy for a chronicle").
+ * - Every other event type (inventory:changed etc.) → skipped as too
+ *   noisy for a chronicle.
  */
 function buildChronicle(rawEvents: unknown): ReadonlyArray<ChronicleEntry> {
     if (!Array.isArray(rawEvents) || rawEvents.length === 0) {
@@ -195,8 +184,7 @@ function buildChronicle(rawEvents: unknown): ReadonlyArray<ChronicleEntry> {
         if (isCombatEndedEvent(e)) {
             // Engine `EnginePayload.report?: CombatEndReport` with
             // `{outcome: 'victory'|'defeat'|'friendship'|'flee',
-            // xpGained: number, loot: Item[]}`. Memoir-audit [3.0]
-            // fix 2026-05-22 dropped the `(e.payload as any)` cast.
+            // xpGained: number, loot: Item[]}`.
             const report = e.payload.report;
             const outcome = report?.outcome;
             if (!outcome) continue;
@@ -242,11 +230,8 @@ function buildChronicle(rawEvents: unknown): ReadonlyArray<ChronicleEntry> {
         }
         if (isWorldMovedEvent(e)) {
             // Engine `WorldState.currentContinent: Continent` (an
-            // object with `.name`), NOT a string. The previous
-            // `typeof world?.currentContinent === 'string'` read was
-            // dead code; current shape pulls the continent name off
-            // the typed Continent object. Defensive `?? null` on
-            // each chain step.
+            // object with `.name`), NOT a string. Optional chaining
+            // on each step; a missing name skips the event.
             const world = e.payload.state?.world;
             const continent: string | undefined =
                 typeof world?.currentContinent?.name === 'string'
@@ -333,26 +318,21 @@ const FALLBACK_VM: MemoirViewModel = Object.freeze({
 }) as MemoirViewModel;
 
 /**
- * Synthesize a one-line text for a quest objective. The engine's
- * `QuestObjective` runtime shape carries `{id, type, target,
- * currentCount, requiredCount}` plus an optional human-readable
- * `text` / `label` / `description` field (engine fixtures vary).
- * Read whichever's present; fall back to a synthetic
- * `<type> <target>` line so the screen always has SOMETHING to
- * render. Progress fraction is appended only when the engine
- * actually returns a useful count.
- */
-/**
  * Mobile-extended `QuestObjective` shape: engine `description` is the
- * canonical field; tests + older fixtures sometimes inject `text` or
- * `label` for free-form objective copy. Memoir-audit [2.5] fix
- * 2026-05-22 replaced the `as any` cast with this narrower extension.
+ * canonical field; test fixtures sometimes inject `text` or `label`
+ * for free-form objective copy.
  */
 type MemoirObjectiveInput = Partial<QuestObjective> & {
     readonly text?: unknown;
     readonly label?: unknown;
 };
 
+/**
+ * Synthesize a one-line text for a quest objective. Reads `text`, then
+ * `label`, then `description`, whichever is a non-empty string; falls
+ * back to a synthetic `<type>: <target>` line so the screen always has
+ * SOMETHING to render. No progress fraction is appended.
+ */
 function synthesizeObjectiveText(objective: MemoirObjectiveInput): string {
     const provided: string | undefined =
         (typeof objective.text === 'string' && objective.text) ||
@@ -372,12 +352,10 @@ function synthesizeObjectiveText(objective: MemoirObjectiveInput): string {
 }
 
 /**
- * Memoir-audit [2.5] fix 2026-05-22: dropped `(q: any)` /
- * `(o: any)` casts. Engine `Quest` / `QuestObjective` types
- * (axiomancer-mechanics/dist/World/types.d.ts) shape the input;
- * objectives extend via `MemoirObjectiveInput` for the
- * mobile-side `text` / `label` fallback fields that legacy
- * fixtures inject.
+ * Engine `Quest` / `QuestObjective` types (`@mechanics`) shape the
+ * input; objectives extend via `MemoirObjectiveInput` for the
+ * mobile-side `text` / `label` fallback fields that test fixtures
+ * inject. An objective is done when `currentCount >= requiredCount`.
  */
 function buildActiveRows(activeQuests: readonly Quest[] | undefined): ReadonlyArray<MemoirQuestRow> {
     if (!Array.isArray(activeQuests)) return Object.freeze([]) as readonly MemoirQuestRow[];
@@ -411,7 +389,7 @@ function buildActiveRows(activeQuests: readonly Quest[] | undefined): ReadonlyAr
                 done: boolean;
                 bullet: '✓' | '○';
             }[];
-            // FE-002: `name` is the engine's quest SLUG (`starting-quest`);
+            // `name` is the engine's quest SLUG (`starting-quest`);
             // the journal headlines this field, so resolve it to an authored
             // title. `id` keeps the slug — it is the list key, not copy.
             return Object.freeze({
@@ -432,7 +410,7 @@ function buildCompletedRows(
     return Object.freeze(
         completedNames.map((name) => {
             const safeName = typeof name === 'string' ? name : 'unnamed';
-            // FE-002: same slug-to-title resolution as the active rows.
+            // Same slug-to-title resolution as the active rows.
             return Object.freeze({
                 id: safeName,
                 name: questTitle(safeName) || 'unnamed',
@@ -450,7 +428,7 @@ function buildCompletedRows(
 }
 
 /**
- * Narrative death-tally line (Phase 6). Singular/plural handled here
+ * Narrative death-tally line. Singular/plural handled here
  * so the screen carries no numeric-copy literal (Hard Rule #8).
  */
 function buildDeathLine(count: number): string {
@@ -460,14 +438,11 @@ function buildDeathLine(count: number): string {
 }
 
 /**
- * Milestone thresholds for the carried Soul bank (Phase 32 part 1c —
- * the deferred "what does a running Soul total unlock" question).
- * Resolved as a cosmetic/narrative recognition tier, not a spend or a
- * shop good (neither exists yet — `Character.currency`'s own doc
- * comment: "shops have not landed"): crossing a tier appends a fixed
- * epithet to `soulsLine`, read back from the same `bankedSouls` tally
- * Part 1b already persists. No new state, no new event, no economy
- * change — the epithet is derived, not stored.
+ * Milestone thresholds for the carried Soul bank: a cosmetic/narrative
+ * recognition tier, not a spend or a shop good. Crossing a tier appends
+ * a fixed epithet to `soulsLine`, derived from the `bankedSouls` tally
+ * and never stored. Ordered highest-first so `find` picks the highest
+ * tier reached.
  */
 const SOULS_MILESTONE_TIERS: ReadonlyArray<{ min: number; epithet: string }> = Object.freeze([
     { min: 50, epithet: 'the harvest is legend.' },
@@ -476,12 +451,10 @@ const SOULS_MILESTONE_TIERS: ReadonlyArray<{ min: number; epithet: string }> = O
 ]);
 
 /**
- * Narrative Soul-jar line (Phase 32 part 1b, milestone epithet added
- * part 1c). Singular/plural/zero handled here so the screen carries
- * no numeric-copy literal (Hard Rule #8), same convention as
- * `buildDeathLine`; the milestone epithet is a second clause appended
- * once the bank crosses the lowest qualifying tier in
- * `SOULS_MILESTONE_TIERS`.
+ * Narrative Soul-jar line. Singular/plural/zero handled here so the
+ * screen carries no numeric-copy literal (Hard Rule #8), same convention
+ * as `buildDeathLine`; the epithet of the highest tier the bank has
+ * reached in `SOULS_MILESTONE_TIERS` is appended as a second clause.
  */
 function buildSoulsLine(count: number): string {
     if (count === 0) return DEFAULT_REMAINS.soulsLine;
@@ -493,7 +466,7 @@ function buildSoulsLine(count: number): string {
 /**
  * Merge Rest (`night-keepsake:`) and LootCache (`cache-keepsake:`)
  * flags into one reverse-chronological, de-duplicated label list
- * (Phase 6). `state.flags` is append-order (oldest first); reversing
+ * `state.flags` is append-order (oldest first); reversing
  * before de-dup keeps the most-recent occurrence of a repeated label,
  * matching the chronicle section's "most recent first" convention.
  * The writers already guard against literal duplicate flags
@@ -523,8 +496,8 @@ function extractKeepsakes(flags: unknown): ReadonlyArray<string> {
 }
 
 /**
- * Composes the REMAINS section VM from raw `state.flags` (Phase 6) and
- * `player.bankedSouls` (Phase 32 part 1b).
+ * Composes the REMAINS section VM from raw `state.flags` and
+ * `player.bankedSouls`.
  */
 function buildRemains(
     flags: unknown,
@@ -563,17 +536,17 @@ function buildRemains(
  *   just the name). `forgotten` stays empty — the engine has no
  *   failed-quest concept today; the field is reserved for future
  *   expansion without forcing a schema change.
- * - **Chronicle** — reads `state._recentEvents` (Phase 25 ring
- *   buffer, capacity 20) and folds typed events into reverse-
- *   chronological `ChronicleEntry` rows via `buildChronicle`. Combat
+ * - **Chronicle** — reads `state._recentEvents` (ring buffer,
+ *   capacity 20) and folds typed events into `ChronicleEntry` rows via
+ *   `buildChronicle` (see its doc for ordering). Combat
  *   outcomes → FELLED / ROUTED BY / FLED; levelups → ROSE
  *   TO N; world:moved (continent transition only) → CROSSED INTO X;
  *   dialogue:applied with extractable npcName → SPOKE WITH X. Other
- *   event kinds are skipped per the brief. Capped at
+ *   event kinds are skipped. Capped at
  *   `CHRONICLE_VISIBLE_CAP` (12) rows; the screen scrolls if more
  *   exist.
- * - **Remains** (Phase 6; Phase 32 part 1b) — reads `state.flags` (engine
- *   `GameState.flags`). Death tally via the previously-unconsumed
+ * - **Remains** — reads `state.flags` (engine
+ *   `GameState.flags`). Death tally via
  *   `hazardDeathCount`; keepsakes merge Rest's `night-keepsake:` and
  *   LootCache's `cache-keepsake:` flags into one reverse-chronological,
  *   de-duplicated list via `extractKeepsakes`. `bankedSouls` reads
@@ -582,25 +555,11 @@ function buildRemains(
  *
  * The view-model shape is pinned by `state/e2e/memoir.engine.test.ts`;
  * extensions to any section must keep the contract stable.
- *
- * ## Phase 33 history
- *
- * Shipped across 4 sub-ticks on 2026-05-16, all closed via Phase 33's
- * DoD tick (`6c1ddfa`):
- * - Tick A `6515cb5` — route + skeleton VM + empty fixtures.
- * - Tick B `2f70eac` — quests section reads `state.quests`.
- * - Tick C `6105b90` — moral bands + provisional philosophical
- *   alignment from `baseStats` (both removed with the alignment
- *   system, D39).
- * - Tick D `9ccdee2` — chronicle from `_recentEvents`.
  */
 export function selectMemoirViewModel(state: MemoirStateInput): MemoirViewModel {
-    // Memoir-audit [2.5] fix 2026-05-22: typed `state` as
-    // `MemoirStateInput` (GameStore + optional `_recentEvents`)
-    // instead of `GameStore` with `(state as any)` casts. Engine
-    // `GameState.quests: QuestLog` is typed cleanly on `GameStore`; the
-    // `_recentEvents` ring buffer is mobile-private (Phase 25)
-    // so we extend with the optional field. Tests that pass an
+    // `state` is `MemoirStateInput` (GameStore + optional
+    // `_recentEvents`). The `_recentEvents` ring buffer is
+    // mobile-private, hence the optional field. Tests that pass an
     // engine `GameStore` (no mobile slices) still work — the
     // optional field is undefined and chronicle stays empty.
     const player = state.player;

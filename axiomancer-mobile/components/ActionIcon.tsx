@@ -8,12 +8,12 @@ interface ActionIconProps {
 }
 
 /**
- * ActionIcon — legacy-keyed adapter over the icon canon (Phase V1).
+ * ActionIcon — short-keyed adapter over the icon canon.
  *
- * Callers keep the short action kinds ('sword', 'eye', …); the art now
+ * Callers use the short action kinds ('sword', 'eye', …); the art
  * comes from `components/icons/` so every placement draws the same
- * registry mark. 'flame' keeps its historical delegation to the burn
- * effect glyph. Unknown kinds render nothing (pinned by tests).
+ * registry mark. 'flame' delegates to the burn effect glyph. Unknown
+ * kinds render nothing (pinned by tests).
  */
 export function ActionIcon({ kind, size = 28, color }: ActionIconProps) {
   const name = kind === 'flame' ? 'effect-burn' : `action-${kind}`;

@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E Tests — Debug seed action (Phase 54).
+ * Hermetic E2E Tests — Debug seed action.
  *
  * Drives `actions.debugSeed()` end-to-end through the engine store
  * and asserts on the resulting `GameState`: inventory gains items
@@ -34,7 +34,7 @@ describe('debugSeed: items + cards + map reset', () => {
         const { store, actions } = makeStore();
 
         const before = store.getState().player.inventory ?? [];
-        // A fresh game seeds the 8 signet relics (Phase 19); no other items yet.
+        // A fresh game holds no items beyond any signet relics.
         expect(before.filter((i: { id: string }) => !i.id.startsWith('relic-'))).toHaveLength(0);
 
         const result = actions.debugSeed();
@@ -42,7 +42,7 @@ describe('debugSeed: items + cards + map reset', () => {
         const after = store.getState().player.inventory ?? [];
         expect(after.length).toBeGreaterThanOrEqual(2);
         // One consumable + the first relic of each slot the library fills
-        // (since R7e2 the Suppliant's Ring alone: an accessory).
+        // (the Suppliant's Ring alone: an accessory).
         const categories = new Set(after.map((i: { category: string }) => i.category));
         expect(categories.has('consumable')).toBe(true);
         expect(categories.has('equipment')).toBe(true);

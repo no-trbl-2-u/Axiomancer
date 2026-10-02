@@ -1,11 +1,10 @@
 /**
- * CombatDie — the spoken die (spec 33 a11y copy).
+ * CombatDie — the spoken die (its a11y copy).
  *
- * Playtest 2026-09-04 finding 3: the die label still said "available to
- * draft", the pre-spec-33 one-draft vocabulary. Under spec 33 a die is never
- * drafted; it is dragged onto a staged card. A SPECIAL face powers the card
- * AND pays Conviction, a MANA face powers one paid line of its colour, gold
- * powers any colour, MISS is dead. The label is a pure function so the
+ * A die is never drafted; it is dragged onto a staged card, and its label
+ * never speaks draft vocabulary. A `special` face powers the card AND pays
+ * Conviction, a MANA face powers one paid line of its colour, gold powers
+ * any colour, MISS is dead. The label is a pure function so the
  * e2e harness (`scripts/combat-round-e2e.mjs` readDice) and the screen
  * reader hear the same words.
  */

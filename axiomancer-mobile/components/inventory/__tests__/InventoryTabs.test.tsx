@@ -90,9 +90,9 @@ describe('InventoryTabs', () => {
         );
     });
 
-    // FE-010 — an empty tab used to render a bare word with no badge and no
-    // count in its accessible name, which reads as a tab that failed to load
-    // rather than one that is empty. It now says so, in both channels.
+    // A bare word with no badge and no count reads as a tab that failed to
+    // load rather than one that is empty, so an empty tab says so in both
+    // channels.
     it('says "empty" in the accessibility label when count is zero', () => {
         const { tree } = withAllProviders(
             <InventoryTabs tabs={mockTabs} activeTab="all" onTabPress={jest.fn()} />
@@ -112,7 +112,7 @@ describe('InventoryTabs', () => {
 
         expect(rendered.getByText('5')).toBeTruthy();
         expect(rendered.getByText('2')).toBeTruthy();
-        // FE-010: a zero is shown, not hidden.
+        // A zero is shown, not hidden.
         expect(rendered.queryAllByText('0').length).toBeGreaterThan(0);
     });
 
@@ -129,8 +129,8 @@ describe('InventoryTabs', () => {
         expect(style.opacity).toBeLessThan(1);
     });
 
-    // FE-018 — a two-digit count broke '10' across two lines inside the badge
-    // on the midgame save (PHIALS 10).
+    // A two-digit count (PHIALS 10 on the midgame save) must not break
+    // across two lines inside the badge.
     it('keeps a two-digit count on one line', () => {
         const twoDigit = mockTabs.map((t) =>
             t.key === 'consumable' ? { ...t, count: 10 } : t,

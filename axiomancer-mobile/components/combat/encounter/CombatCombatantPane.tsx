@@ -1,19 +1,16 @@
 /**
- * Spec 26 §4.3 + 26b + combat-screen-polish 2026-07 — the battlefield overlay.
- *
- * Redesigned from the boxed two-column pane into a reference-style full-bleed
- * composition (see design/combat-screen-polish-2026-07.md):
+ * The battlefield overlay — a reference-style full-bleed composition (see
+ * design/combat-screen-polish-2026-07.md):
  *   · layer 0 — the arena backdrop with a LARGE alpha-matted enemy painting
  *     (random per encounter — see assets/images/enemies) filling the upper
  *     band of the screen (the enemy IS the screen);
  *   · layer 1 — scrim gradients keep the HUD legible + shelf the hand;
  *   · layer 2 — floating chrome: enemy name, a full-width HP bar anchored by a
  *     central crest carrying the big HP number, the intent badge, glowing
- *     status tiles, the hidden-stance badge, and the player medallion with an
- *     HP arc ring in the bottom-left corner.
+ *     status tiles, and the player medallion with an HP arc ring in the bottom-left corner.
  *
  * Resolution FEEDBACK (driven off the engine's typed `CombatEvent` stream via
- * `fx`) is unchanged in spirit: the enemy scene lunges, the player medallion
+ * `fx`): the enemy scene lunges, the player medallion
  * recoils + flashes, floating "-N" numbers rise, DENIED flourishes, and the
  * board shakes behind a damage-scaled red vignette.
  *
@@ -45,8 +42,7 @@ import { keywordForEffect } from '@/state/combat/keywords';
 import { IntentIcon } from './IntentIcon';
 import { useJuiceFlash, useJuiceIdleBreath, useJuiceNumberPop, useJuicePulse, useJuiceShake } from '@/lib/juice';
 
-/** Full-bleed battlefield backdrop — region-keyed (phase 83, extended in
- *  phases 101/103 to six of the seven live regions), falling back to a neutral
+/** Full-bleed battlefield backdrop — region-keyed, falling back to a neutral
  *  desolation plate for a region with no rule. Sits behind the enemy figure;
  *  the SVG `CreatureScene` draws `hideBackdrop` so its procedural moon/treeline
  *  doesn't overpaint the art. */
@@ -59,14 +55,11 @@ export interface CombatFx { seq: number; events: CombatEvent[]; }
 export interface CombatScrimStop { offset: number; color: string; opacity: number; }
 
 /**
- * The top-HUD scrim's gradient stop table (cluster S1-board-C29).
+ * The top-HUD scrim's gradient stop table.
  *
- * Purpose: the scrim used to fade to nothing by 85% of the scene band and then
- * rise back to 0.4 ink — a dark tail that the band's own hard bottom edge
- * sliced off, drawing a horizontal seam across the arena. The tail now runs
- * all the way to the board's OWN ground colour at full opacity, so the band's
- * last row of pixels already IS the ground behind it: the scrim fades out
- * instead of ending in a visible edge.
+ * Purpose: the tail runs all the way to the board's OWN ground colour at full
+ * opacity, so the band's last row of pixels already IS the ground behind it:
+ * the scrim fades out instead of ending in a visible seam across the arena.
  *
  * Inputs: `deepBg` — the HUD-legibility ink; `groundBg` — the colour the pane
  * sits on below the scene band (the board root's `AXM.bg`).
@@ -96,8 +89,8 @@ export const COMBAT_HUD_PAD_TOP = 8;
 
 /** Screen-left footprint of the player medallion's dock: its 10pt left offset
  *  plus the 92pt medallion. The board reserves this much of the bottom band so
- *  the hand fan lays out BESIDE the medallion instead of under it
- *  (cluster S1-board-C11). Keep in step with `playerDock` / `medallion`. */
+ *  the hand fan lays out BESIDE the medallion instead of under it.
+ *  Keep in step with `playerDock` / `medallion`. */
 export const PLAYER_DOCK_FOOTPRINT_W = 102;
 
 type Float = { id: number; text: string; color: string; dx: number };
@@ -192,8 +185,8 @@ function HudMeter({ glyph, label, value, target, color, testID }: {
  *  tick + BLOCKED) don't pile onto one pixel. */
 function FloatNum({ text, color, dx, onDone }: { text: string; color: string; dx: number; onDone: () => void }) {
     const styles = useStyles();
-    // lib/juice number-pop primitive (phase 38) — the rise+fade math lives in
-    // the module now; this call site only supplies the horizontal jitter (a
+    // lib/juice number-pop primitive — the rise+fade math lives in the
+    // module; this call site only supplies the horizontal jitter (a
     // static per-instance offset, so it rides the OUTER plain View — a style
     // array can't merge two `transform` arrays, so the animated translateY
     // stays on its own nested Animated.View).
@@ -231,8 +224,8 @@ export function EffectChips({ effects, onChip, align = 'flex-start' }: {
                 >
                     <View style={[StyleSheet.absoluteFill, { backgroundColor: e.glyph.color, opacity: 0.16 }]} />
                     <Text style={[styles.chipGlyph, { color: e.glyph.color, textShadowColor: e.glyph.color }]}>{e.glyph.glyph}</Text>
-                    {/* P2 — the badge NUMBER is stacks (intensity); the remaining
-                        DURATION rides a distinct top-left tag so "🩸 3" is no longer
+                    {/* The badge NUMBER is stacks (intensity); the remaining
+                        DURATION rides a distinct top-left tag so "🩸 3" is not
                         an ambiguous bare number. Hidden for no-calendar effects
                         (duration ≤ 0). Full breakdown lives in the chip inspect. */}
                     {e.duration > 0 ? (
@@ -279,8 +272,8 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
     const squash = useSharedValue(1);
     const contact = useSharedValue(0);
     const impact = useSharedValue(0);
-    // Status-proc pulse (phase 38 brief — "a status landing should FEEL like
-    // the main event"): a distinct emphasis from the damage hit-reaction
+    // Status-proc pulse (a status landing should FEEL like the main event):
+    // a distinct emphasis from the damage hit-reaction
     // bundle above, so a status-only turn (no damage) is never a bare float.
     const [statusPulseKey, setStatusPulseKey] = useState(0);
     const statusPulseStyle = useJuicePulse(statusPulseKey, 1);
@@ -423,7 +416,7 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
     region?: string;
     /** Reports the HUD's real rendered height (top of screen to its bottom
      *  edge, `topInset` already included via the HUD's own padding) on every
-     *  layout pass. The stance-check telegraph + alt-win meters make this
+     *  layout pass. The alt-win meters make this
      *  height variable; siblings anchored off the static `COMBAT_HUD_HEIGHT`
      *  estimate (the LOG toggle, the tutorial coach) should prefer this
      *  measured value once it lands. */
@@ -445,7 +438,7 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
     const enemyShift = useSharedValue(0);
     const enemyScale = useSharedValue(1);
     // Board-level feedback: a damage-scaled screen shake + a red vignette
-    // flash — lib/juice primitives (phase 38), synced to the IMPACT beat
+    // flash — lib/juice primitives, synced to the IMPACT beat
     // below via each hook's own `delayMs` so they still land with the enemy
     // lunge apex instead of firing on the trigger frame.
     const [damageTick, setDamageTick] = useState({ key: 0, norm: 0 });
@@ -494,10 +487,8 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                 statusFloats.push({ side, text: kw, color });
             }
         }
-        // THE BIG NUMBERS REWRITE — the new ledgers and the enemy's STAGE beat
-        // were landing silently: the numbers
-        // moved and nothing on the board said which word moved them. The
-        // wording lives ONCE, in the presenter's `selectCombatLogLines`, so
+        // The ledgers and the enemy's STAGE beat each float the word that moved
+        // the numbers. The wording lives ONCE, in the presenter's `selectCombatLogLines`, so
         // this float and the log line can never drift apart.
         selectCombatLogLines(fx.events).forEach((line, k) => {
             if (line.float) pushEnemy(line.float, line.color, (k % 2 === 0 ? 1 : -1) * 24);
@@ -509,7 +500,7 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
         //     float/haptic) fire in `PlayerMedallion` off the same event stream.
         if (playerDmg > 0) {
             // Normalise the hit to its share of max HP so a 4-dmg chip and a 40-dmg
-            // crusher no longer feel identical — every beat scales off `norm`.
+            // crusher do not feel identical — every beat scales off `norm`.
             const norm = Math.min(1, playerDmg / Math.max(1, player.maxHp));
             if (!reduceMotion.current) {
                 const lunge = 8 + norm * 10;        // 8–18px enemy lunge apex
@@ -554,12 +545,12 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
     // fight's duration — see assets/images/enemies.
     const enemyArt = getEncounterEnemyArt(enemy.artKey, enemy.artNonce);
 
-    // Region-keyed arena backdrop (phase 83) — falls back to the neutral
+    // Region-keyed arena backdrop — falls back to the neutral
     // desolation plate for a region with no rule of its own. The Northern
     // Forest is the one live region still on that path: it has no plate yet.
     // See `assets/images/combat/index.ts` and the AWAITING_PLATE list in its
-    // test, which pins that count in both directions (burn-day audit 3.11).
-    // D32 (T, 2026-09-26): while `ARENA_PLATES_SHOWN` is off, every fight gets
+    // test, which pins that count in both directions.
+    // While `ARENA_PLATES_SHOWN` is off, every fight gets
     // a plain black scene instead (the palette's darkest ink, `deepBg`).
     const arenaBg = arenaBackdropFor(region);
     const arenaAlt = arenaAltTextFor(region);
@@ -568,7 +559,7 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
         <Animated.View style={[StyleSheet.absoluteFillObject, shakeStyle]} pointerEvents="box-none" testID="combat-combatant-pane">
             {/* ── layer 0: the battlefield scene, enemy figure LARGE ── */}
             <View style={styles.sceneBand} pointerEvents="none">
-                {/* raster arena backdrop — full-bleed behind the foe (or plain black, D32) */}
+                {/* raster arena backdrop — full-bleed behind the foe (or plain black) */}
                 {ARENA_PLATES_SHOWN ? (
                     <Image
                         source={arenaBg}
@@ -596,14 +587,14 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                         ]}
                         testID="combat-enemy-figure-wrap"
                     >
-                        {/* FIGURE PLATE (device playtest 2026-09-20). The roster art is
+                        {/* FIGURE PLATE. The roster art is
                             alpha-matted by keying BLACK out of a painting, so every dark
                             interior stroke of a creature is partly transparent and the
-                            engraved arena backdrop reads straight through its body — the
-                            foe looked like a ghost over the crew. A soft dark radial plate
+                            engraved arena backdrop would read straight through its body.
+                            A soft dark radial plate
                             sits between the backdrop and the figure: where the art is
                             opaque nothing changes; where its shading was keyed away, the
-                            hole now shows the plate's ink instead of the engraving. Same
+                            hole shows the plate's ink instead of the engraving. Same
                             layer as the ground shadow (outside the breath wrapper) so the
                             plate is the scene's, not the creature's. */}
                         <Svg style={StyleSheet.absoluteFill} pointerEvents="none" testID="combat-enemy-figure-plate">
@@ -649,7 +640,7 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                 <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
                     <Defs>
                         <LinearGradient id="axmCombatTopScrim" x1="0" y1="0" x2="0" y2="1">
-                            {/* S1-board-C29 — the tail meets the board ground, so the
+                            {/* The tail meets the board ground, so the
                                 scene band has no visible bottom edge. */}
                             {combatTopScrimStops(AXM.deepBg, AXM.bg).map((st) => (
                                 <Stop key={st.offset} offset={st.offset} stopColor={st.color} stopOpacity={st.opacity} />
@@ -712,12 +703,11 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                         {metaLine ? <Text style={styles.hudMeta} allowFontScaling={false}>{metaLine}</Text> : null}
                     </View>
                     <EnemyHpBar pct={enemy.hpPct} value={enemy.hp} max={enemy.maxHp} />
-                    {/* Phase 2 (spec 30) — the status kill-path foresight. Makes the
-                        DoT win path foreseeable instead of invisible accumulation:
-                        a plain pending tally once stacks land, a "LETHAL IN N" call
-                        once they alone clear remaining HP. Playtest fix 2026-09-04:
-                        the tally prints the REAL pending figure (the fill bar clamps
-                        on its own — "45/45" while 240 was queued hid the surplus). */}
+                    {/* The status kill-path foresight. Makes the DoT win path
+                        foreseeable instead of invisible accumulation: a plain
+                        pending tally once stacks land, a "LETHAL IN N" call once
+                        they alone clear remaining HP. The tally prints the REAL
+                        pending figure; the fill bar clamps on its own. */}
                     {enemy.pendingDot > 0 ? (
                         <HudMeter
                             glyph="☠"
@@ -800,7 +790,7 @@ const useStyles = makeStyles((AXM) => ({
         fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 1, color: AXM.bone,
         textShadowColor: HUE.black, textShadowRadius: 3, textShadowOffset: { width: 0, height: 1 },
     },
-    // FE-022 — the payoff word rides quieter than the tally it follows.
+    // The payoff word rides quieter than the tally it follows.
     altMeterTrack: {
         marginTop: 2, height: 5, borderRadius: 3, backgroundColor: 'rgba(0,0,0,0.6)',
         borderWidth: 1, borderColor: 'rgba(0,0,0,0.9)', overflow: 'hidden',
@@ -822,7 +812,7 @@ const useStyles = makeStyles((AXM) => ({
         alignItems: 'center', justifyContent: 'center',
     },
     chipBadgeText: { fontFamily: FONTS.sans, fontSize: 9, lineHeight: 11, color: HUE.white },
-    // P2 — remaining-duration tag (top-left), distinct from the stacks badge.
+    // Remaining-duration tag (top-left), distinct from the stacks badge.
     chipDur: {
         position: 'absolute', left: -4, top: -6, minWidth: 14, height: 13, borderRadius: 7,
         paddingHorizontal: 2, backgroundColor: 'rgba(0,0,0,0.85)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)',

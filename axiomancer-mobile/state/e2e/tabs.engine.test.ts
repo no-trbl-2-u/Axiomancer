@@ -94,8 +94,7 @@ describe('selectVisibleTabs: always-visible tabs', () => {
     );
 
     it('returns 5 visible tabs (1 positional + 4 always-visible) post-DECK', () => {
-        // Finding 7 / D2 (2026-09-21) added DECK as the fifth VISIBLE tab.
-        // Phase 33's count of 4 is the pre-DECK number.
+        // DECK is the fifth VISIBLE tab.
         for (const inCombat of [false, true]) {
             const vm = selectVisibleTabs(inCombat);
             expect(vm.visibleTabs).toHaveLength(5);
@@ -163,7 +162,7 @@ describe('selectVisibleTabs: purity', () => {
 });
 
 // ---------------------------------------------------------------------------
-// TAB_TITLES contract — Phase 30 Tick B
+// TAB_TITLES contract
 // ---------------------------------------------------------------------------
 
 describe('TAB_TITLES: tab-label contract', () => {
@@ -176,9 +175,8 @@ describe('TAB_TITLES: tab-label contract', () => {
     });
 
     it('contains no `{...}` or `${...}` template-string leaks', () => {
-        // Tick B contract: the user-observed runtime regression
-        // rendered tab labels as `{ TAB NAME }"--index"` literally.
-        // Pin that no title carries an unresolved template-shape.
+        // A template leak renders a tab label as `{ TAB NAME }"--index"`
+        // literally. Pin that no title carries an unresolved template-shape.
         const leakRe = /\{[\s\w.-]+\}|\$\{[^}]+\}/;
         for (const [key, title] of Object.entries(TAB_TITLES)) {
             expect({ key, title, leaks: leakRe.test(title) }).toEqual({
@@ -190,26 +188,20 @@ describe('TAB_TITLES: tab-label contract', () => {
     });
 
     it('matches the post-handoff-port register (places + MEMOIR + SATCHEL rename)', () => {
-        // Phase 31 (2026-05-16) flipped from the mixed-register
-        // pre-fix set (MAP · COMBAT · SHEET · SACK) to a coherent
-        // all-places register. Phase 33 (2026-05-16) added MEMOIR as
-        // a fifth route. Phase 32 (2026-05-16, Claude Design handoff
-        // port) renamed SACK → SATCHEL to fit the period serif
-        // register (`SACK` was bag-shaped slang flagged by the
-        // design canvas decisions doc). The template-leak invariant
-        // above stays stable across all three renames.
+        // A coherent all-places register in the period serif voice. The
+        // template-leak invariant above holds whatever the titles are.
         expect(TAB_TITLES.exploration).toBe('WILDS');
         expect(TAB_TITLES.combat).toBe('STRIFE');
         expect(TAB_TITLES.character).toBe('SELF');
         expect(TAB_TITLES.memoir).toBe('THE LEDGER');
         expect(TAB_TITLES.inventory).toBe('SATCHEL');
-        // D2 (2026-09-21) names the fifth tab DECK, in those words.
+        // The fifth tab is named DECK, in those words.
         expect(TAB_TITLES.deck).toBe('DECK');
     });
 });
 
 // ---------------------------------------------------------------------------
-// Tab-bar FIT — the overflow contract DECK has to clear (finding 7 / D2)
+// Tab-bar FIT — the overflow contract DECK has to clear
 // ---------------------------------------------------------------------------
 
 describe('measureTabBarFit: no tab-bar overflow at 360pt', () => {

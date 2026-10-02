@@ -2,8 +2,8 @@
  * Hermetic component tests — EncounterModalOverlay surface.
  *
  * Pins the contracts the screen depends on for the
- * encounter-modal-over-map seam (Phase 32 sub-tick D port,
- * `components/event/EncounterModalOverlay.tsx`, commit `7dab20c`).
+ * encounter-modal-over-map seam
+ * (`components/event/EncounterModalOverlay.tsx`).
  * The presenter-layer pin lives in
  * `state/e2e/exploration.engine.test.ts: encounter-modal seam`;
  * this file covers the component-level branches the screen
@@ -12,14 +12,13 @@
  *   1. Returns null on non-combat-prelude VMs (so a paced /
  *      narrative-choice event never accidentally mounts the
  *      overlay).
- *   2. Auto-engage (2026-08-10): the ENGAGE/FLEE prelude seal is
- *      retired, so mounting on a combat-prelude VM goes straight to
+ *   2. Auto-engage: mounting on a combat-prelude VM goes straight to
  *      combat — the reveal is the one commit gate. Retreat rides
  *      along as the panel's WITHDRAW, offered only when the VM's
  *      flee choice is enabled (bosses seal it).
  *   3. Backdrop has no `onPress` handler — non-dismissibility
- *      is the diegetic SEALED · NO RETREAT contract (chat1:
- *      "user cannot exit these modals").
+ *      is the diegetic SEALED · NO RETREAT contract (the player
+ *      cannot exit these modals).
  *
  * Hermetic = self-contained + deterministic + isolated.
  * See docs/testing.md.
@@ -37,12 +36,10 @@ import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import type { EventViewModel } from '@/state/presenters/event.engine';
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 
-// Phase 64 follow-up: overlay now reads `useGameState((s) => s.combat?.phase)`
-// for the auto-scroll-on-phase-change effect, so it requires
-// GameStoreProvider even for mount-condition tests.
-// Phase 70 Tick A follow-up: overlay also reads `useCombatMode()` to
-// watch `lastOutcome` / `aftermathData` for the in-modal aftermath
-// swap. Tests now mount inside <CombatModeProvider> too.
+// The overlay reads the game store (`useGameState` / `useGameActions`), so
+// it requires GameStoreProvider even for mount-condition tests. It also
+// reads `useCombatMode()` to watch `lastOutcome` / `aftermathData` for the
+// in-modal aftermath swap, so tests mount inside <CombatModeProvider> too.
 function withProviders(child: React.ReactNode) {
     const store = createAppStore({ adapter: createMemoryAdapter() });
     return (
@@ -167,7 +164,7 @@ describe('EncounterModalOverlay: mount conditions', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 2026-08-10 — the ENGAGE/FLEE prelude seal is retired: mounting engages.
+// Auto-engage: mounting engages.
 // ---------------------------------------------------------------------------
 
 describe('EncounterModalOverlay: auto-engage (the prelude popup is retired)', () => {
@@ -224,8 +221,7 @@ describe('EncounterModalOverlay: auto-engage (the prelude popup is retired)', ()
 });
 
 // ---------------------------------------------------------------------------
-// Phase 63c follow-up — modal stays mounted after engine clears the event
-// slice (the regression user surfaced 2026-05-21).
+// The modal stays mounted after the engine clears the event slice.
 // ---------------------------------------------------------------------------
 
 describe('EncounterModalOverlay: combat mode survives vm.kind change', () => {
@@ -245,8 +241,8 @@ describe('EncounterModalOverlay: combat mode survives vm.kind change', () => {
         // Initial vm is combat-prelude; the overlay engages on mount; on the
         // next render the parent (exploration) passes a non-prelude vm
         // because engaging cleared the event slice. The overlay must NOT
-        // return null in this state — the user-facing regression "combat
-        // modal disappears when I enter the fight".
+        // return null in this state, or the combat modal would disappear
+        // when the player enters the fight.
         const initialVm = makeCombatPreludeVm();
         const { rerender, queryByTestId } = localRender(
             withAllProviders(
@@ -269,8 +265,7 @@ describe('EncounterModalOverlay: combat mode survives vm.kind change', () => {
             ),
         );
 
-        // Pre-fix this would unmount (vm.kind !== 'combat-prelude' →
-        // early-return null). Post-fix: combat mode stays mounted.
+        // Combat mode stays mounted despite vm.kind !== 'combat-prelude'.
         expect(queryByTestId('encounter-modal-overlay')).not.toBeNull();
         expect(queryByTestId('encounter-modal-combat-mode')).not.toBeNull();
     });
@@ -289,7 +284,7 @@ describe('EncounterModalOverlay: non-dismissible backdrop (chat1 invariant)', ()
 });
 
 // ---------------------------------------------------------------------------
-// Phase 70 Tick A — combat → aftermath transition inside the modal
+// Combat → aftermath transition inside the modal
 // ---------------------------------------------------------------------------
 
 describe('EncounterModalOverlay: combat → aftermath swap', () => {
@@ -368,7 +363,7 @@ describe('EncounterModalOverlay: combat → aftermath swap', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Phase 70 Tick B — parley swap
+// Parley swap
 // ---------------------------------------------------------------------------
 
 describe('EncounterModalOverlay: combat → aftermath swap (parley)', () => {
@@ -436,7 +431,7 @@ describe('EncounterModalOverlay: combat → aftermath swap (parley)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Phase 70 Tick C — defeat swap
+// Defeat swap
 // ---------------------------------------------------------------------------
 
 describe('EncounterModalOverlay: combat → aftermath swap (defeat)', () => {
@@ -517,8 +512,7 @@ describe('EncounterModalOverlay: combat → aftermath swap (defeat)', () => {
         expect(tree.queryByTestId('combat-defeat-panel')).toBeNull();
     });
 
-    // Phase 77 — BEGIN AGAIN now dispatches the engine's resetRun
-    // primitive instead of patching player.health directly. Assert
+    // BEGIN AGAIN dispatches the engine's resetRun primitive. Assert
     // the post-state reflects an actual engine reset (new runId,
     // full health, cleared effects).
     it('BEGIN AGAIN dispatches engine resetRun (new runId, full health, cleared effects)', () => {
@@ -589,7 +583,7 @@ describe('EncounterModalOverlay: combat → aftermath swap (defeat)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Phase 71 — phase-aware seal chrome (chain bars + border / glow)
+// Phase-aware seal chrome (chain bars + border / glow)
 // ---------------------------------------------------------------------------
 
 describe('EncounterModalOverlay: phase-aware seal chrome', () => {
@@ -616,11 +610,10 @@ describe('EncounterModalOverlay: phase-aware seal chrome', () => {
         );
         // Both chain bars mount (top + bottom) — two testIDs.
         expect(tree.queryAllByTestId('encounter-modal-chain')).toHaveLength(2);
-        // The engine combat slice isn't seeded in this test (no
-        // startCombat() called), so round defaults to 1 — the
-        // chrome's combat branch fires with round=1 → "ROUND i".
+        // The overlay always passes round 1 to the seal chrome, so the
+        // combat branch renders "ROUND i".
         expect(tree.queryByText('SEALED · ROUND i')).not.toBeNull();
-        // The retired pre-engage label must never render again.
+        // The pre-engage label never renders.
         expect(tree.queryByText('SEALED · AT ARMS')).toBeNull();
     });
 
@@ -655,8 +648,8 @@ describe('EncounterModalOverlay: phase-aware seal chrome', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Phase 200 — in-place hazard-pattern combat (Spec 26b) wired into the modal.
-// Live map encounters run the NEW combat full-screen over the dimmed map.
+// In-place hazard-pattern combat wired into the modal.
+// Live map encounters run combat full-screen over the dimmed map.
 // ---------------------------------------------------------------------------
 
 describe('EncounterModalOverlay: in-place hazard combat (Phase 200)', () => {
@@ -698,10 +691,10 @@ describe('EncounterModalOverlay: in-place hazard combat (Phase 200)', () => {
             ),
         );
 
-        // New hazard layer mounts; the legacy combat-mode ScrollView does NOT.
+        // The hazard layer mounts; the fallback combat-mode ScrollView does NOT.
         expect(tree.queryByTestId('encounter-modal-hazard-combat')).not.toBeNull();
         expect(tree.queryByTestId('encounter-modal-combat-mode')).toBeNull();
-        // The board opens on its reveal screen — the ONE commit gate now.
+        // The board opens on its reveal screen — the ONE commit gate.
         expect(tree.queryByTestId('combat-reveal')).not.toBeNull();
     });
 
@@ -774,7 +767,7 @@ describe('EncounterModalOverlay: in-place hazard combat (Phase 200)', () => {
         fireEvent.press(tree.getByTestId('combat-withdraw'));
         expect(onFlee).toHaveBeenCalledTimes(1);
     });
-    // Tier 0 item 6 — a chronicle continued mid-fight: there is no prelude VM
+    // A chronicle continued mid-fight: there is no prelude VM
     // (the event slice was cleared when the fight began), so the overlay must
     // open straight into a fresh fight against the saved foe.
     const clearedVm = (): EventViewModel => ({ ...makeCombatPreludeVm(), kind: 'narrative-choice', preludeChrome: null });

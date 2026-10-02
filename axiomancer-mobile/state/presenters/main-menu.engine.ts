@@ -1,6 +1,6 @@
 /**
- * Presenter — the MAIN MENU (the first screen after the title; owner call
- * 2026-09-23) and the SAVE SLOTS screen it opens.
+ * Presenter — the MAIN MENU (the first screen after the title) and the SAVE
+ * SLOTS screen it opens.
  *
  * Pure functions from slot summaries to view-models, plus every line of
  * player-facing copy those screens print (copy lives here, not in the
@@ -49,8 +49,7 @@ export const SAVE_SLOTS_COPY = Object.freeze({
     unreadable: 'the page was torn — it cannot be read',
     startAction: 'BEGIN',
     overwriteAction: 'OVERWRITE',
-    // Owner call 2026-09-23 (second pass): the LOAD screen's verbs read
-    // JOURNEY ON… (resume) and DELETE SAVE (clear).
+    // The LOAD screen's verbs: JOURNEY ON… (resume) and DELETE SAVE (clear).
     loadAction: 'JOURNEY ON…',
     clearAction: 'DELETE SAVE',
     back: 'BACK',

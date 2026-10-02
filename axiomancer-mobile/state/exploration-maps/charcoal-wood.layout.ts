@@ -4,9 +4,9 @@ import { ACT1_SHEET_SIZE } from './breakwater.layout';
 import type { MapLayout, MapSheet } from './types';
 
 /**
- * The Charcoal Wood — Act 1, map 2 (map revamp M3b). Drawn on the forest plate
- * the way the Breakwater is drawn on the coast (D15): every node sits on one of
- * the plate's landmarks (D25), read from `act1-landmarks.json`, on the shared
+ * The Charcoal Wood — Act 1, map 2. Drawn on the forest plate
+ * the way the Breakwater is drawn on the coast: every node sits on one of
+ * the plate's landmarks, read from `act1-landmarks.json`, on the shared
  * Act 1 sheet (`ACT1_SHEET_SIZE`, see `breakwater.layout.ts` for the sizing).
  *
  * The engine graph (`Continents/Coastal-Village/charcoal-wood.ts`) enters over
@@ -22,7 +22,7 @@ const sheet: MapSheet = {
     chartTexture: false,
 };
 
-/** Node id → the landmark it sits on (D25). Every forest landmark appears exactly once. */
+/** Node id → the landmark it sits on. Every forest landmark appears exactly once. */
 export const CHARCOAL_WOOD_LANDMARKS: Readonly<Record<string, string>> = {
     'cw-1':  'river-bridge',
     'cw-2':  'ruined-tower',
@@ -61,7 +61,7 @@ export const charcoalWoodLayout: MapLayout = {
     mapId: 'charcoal-wood',
     continent: 'CONTINENT · COASTAL',
     region: 'The Charcoal Wood',
-    // Ordinal only — no node/path count (CRITIQUE pass 19). Act 1, map 2 of 4.
+    // Ordinal only — no node/path count. Act 1, map 2 of 4.
     regionProgress: 'Map ii of iv',
     sheet,
     nodes: [

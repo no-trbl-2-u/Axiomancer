@@ -1,5 +1,5 @@
 /**
- * Unit tests — Hazard out-of-combat death tombstone flag (Phase 130).
+ * Unit tests — Hazard out-of-combat death tombstone flag.
  *
  * `hazardDeathCount` reads the durable `hazard-death:` flags the lethal
  * Hazard claim stamps, ignoring every other flag family (scar, token,

@@ -1,5 +1,5 @@
 /**
- * Hazard UI/UX LOCK-IN (user ask, 2026-06-11).
+ * Hazard UI/UX LOCK-IN.
  *
  * The hazard view-model is the entire contract the screen renders. This
  * suite freezes its STRUCTURE (every field + nested element shape) across

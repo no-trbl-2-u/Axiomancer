@@ -1,5 +1,5 @@
 /**
- * Phase 78 — codex / journal-entry consumer pins.
+ * Codex / journal-entry consumer pins.
  *
  * Asserts:
  * - `actions.endCombat(outcome)` returns the engine `CombatEndReport`.
@@ -7,9 +7,7 @@
  *   first friendship with an enemy that has `journalEntry`; absent on repeat
  *   friendships and on non-friendship outcomes.
  *
- * Legacy turn-based combat (the `state.combat` slice, its friendship
- * counter) was removed from the engine in mechanics 0.37.0. The engine's
- * `endCombat` now takes an explicit outcome and reads the recorded
+ * The engine's `endCombat` takes an explicit outcome and reads the recorded
  * `currentEncounter` (set by `startCombat`) — so these pins drive the
  * outcome directly rather than manipulating a combat slice.
  */
@@ -104,7 +102,7 @@ describe('actions.endCombat: returns engine CombatEndReport (Phase 78)', () => {
 
     // Smoke pin — `applyEffect` import keeps the engine-effect surface
     // exercised so a regression in the effects library shape surfaces
-    // here, not at runtime. Phase 78 doesn't change that surface.
+    // here, not at runtime.
     it('engine effects library is non-empty (smoke pin)', () => {
         expect(effectsLibrary.debuffs.length).toBeGreaterThan(0);
         const { activeEffects } = applyEffect([], effectsLibrary.debuffs[0], 1);

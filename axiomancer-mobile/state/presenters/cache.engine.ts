@@ -1,6 +1,5 @@
 /**
- * Loot-cache-choice presenter (Phase 63, replacing the retired Pick Pool
- * dice-pool minigame) — maps the engine session (`axiomancer-mechanics`
+ * Loot-cache-choice presenter — maps the engine session (`axiomancer-mechanics`
  * World/LootCacheChoice) onto a render-ready view-model. Pure: no store
  * writes, no rolls, no rule decisions.
  *

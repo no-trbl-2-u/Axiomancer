@@ -5,7 +5,7 @@ import { EnemyIllustration } from './enemy-art/EnemyIllustration';
 
 /**
  * Renders the procedural SVG illustration for an event by its art
- * slug. Spec 08 Q3 = B: slug → component map is mobile-local.
+ * slug. The slug → component map is mobile-local.
  *
  * Combat slugs ('encounter' / 'boss') route through `EnemyIllustration`,
  * which picks a bespoke archetype drawing from `enemyArtKey` (falling

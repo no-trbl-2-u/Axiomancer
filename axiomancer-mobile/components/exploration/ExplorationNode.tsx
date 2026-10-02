@@ -23,14 +23,12 @@ interface ExplorationNodeProps {
 /**
  * ExplorationNode — per-node touch target on the exploration map.
  *
- * Single-tap commits movement (existing onNodePress behaviour);
- * long-press fires the kind:'map-node' tooltip (Phase 74 follow-up
- * walkthrough — Exploration Tick 1). Mirrors the Phase 75
- * card-row pattern: tap is reserved for the action, long-press
- * for the explanation. Extracted from the parent's map() body so
- * each node owns its own measure ref.
+ * Single-tap commits movement (onNodePress); long-press fires the
+ * kind:'map-node' tooltip. Same pattern as the card rows: tap is
+ * reserved for the action, long-press for the explanation. Each node
+ * owns its own measure ref.
  */
-// Visual-audit 2026-06: larger, more-defined nodes. The wrap is centred
+// The wrap is centred
 // exactly on (n.x, n.y) via a percentage position + a half-node negative
 // margin (px), so centring is correct regardless of the canvas size the
 // map is spread across (see MapCanvas's per-sheet scale).
@@ -92,11 +90,10 @@ export function ExplorationNode({ node: n, onNodePress, isSelected }: Exploratio
                             : `open, ${n.type}`
             }`}
             accessibilityHint="hold to read node type description"
-            // S4-world-C06: every kind answers a tap now — a sealed node says
-            // it is sealed, a walked one says it is walked, the node you stand
-            // on says so. `disabled` announced the opposite (and had a screen
-            // reader skip the mark entirely); the label already carries the
-            // state, so the control is honestly enabled.
+            // Every kind answers a tap — a sealed node says it is sealed, a
+            // walked one says it is walked, the node you stand on says so.
+            // The label carries the state, so the control is not marked
+            // `disabled` (which would have a screen reader skip the mark).
             accessibilityState={{ selected: isSelected }}
             onPress={() => onNodePress(n)}
             onLongPress={() => tooltip.show({ kind: 'map-node', id: n.type, anchorRef: ref })}

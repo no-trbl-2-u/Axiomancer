@@ -1,7 +1,6 @@
 /**
  * Hazard minigame palette — extends the canonical AXM tokens with the
- * minigame's four-colour card/dice identities and board hues. Ported
- * from the design-handoff prototype kit (`hazard-kit.jsx`).
+ * minigame's four-colour card/dice identities and board hues.
  *
  * Colour is never the only channel: every die face pairs its colour
  * with a distinct glyph shape (blade / eye / crescent / sun / cross).

@@ -14,7 +14,7 @@ jest.mock('expo-splash-screen', () => ({
 // react-native-haptic-feedback's default (non-.web) entry point calls
 // `TurboModuleRegistry.getEnforcing('RNHapticFeedback')` at import time
 // (codegenSpec/NativeHapticFeedback.js) — throws synchronously under Jest,
-// since no native project is linked yet (phase 47d brief "Decisions").
+// since no native project is linked.
 jest.mock('react-native-haptic-feedback', () => ({
     trigger: jest.fn(),
     HapticFeedbackTypes: {

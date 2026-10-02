@@ -8,7 +8,7 @@ import type { ItemRewardTradeVM } from '@/state/presenters/item-reward.engine';
 import type { EquipDelta } from '@mechanics';
 
 /**
- * D6 made visible: what wearing this costs, before the player commits.
+ * What wearing this costs, shown before the player commits.
  *
  * The numbers come from `EquipDeltaPanel` — the codebase's one stat-delta
  * view, fed the engine's `computeEquipDelta`, which in `'swap'` mode already

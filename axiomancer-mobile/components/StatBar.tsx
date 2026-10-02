@@ -13,7 +13,7 @@ interface StatBarProps {
   showText?: boolean;
   /**
    * Fraction (0-1) at or below which the bar reads as an ALARM rather than a
-   * readout (FE-019). When set and crossed, the numeric readout takes the
+   * readout. When set and crossed, the numeric readout takes the
    * bar's own colour at full opacity and the empty track tints toward it, so
    * a nearly-spent bar cannot be mistaken for a bar with nothing in it.
    *
@@ -29,9 +29,9 @@ export const StatBar = React.memo(function StatBar({ value, max, color, label, h
   const barColor = color ?? AXM.blood;
   const pct = Math.max(0, Math.min(1, value / max));
   const percentage = Math.round(pct * 100);
-  // FE-019: at 1/175 the fill is half a pixel wide, so the bar read as a plain
-  // grey rail and the '1/175' beside it as ordinary 11pt parchment — a player
-  // one hit from death got no warning at all.
+  // At 1/175 the fill is half a pixel wide, so without the alarm the bar
+  // reads as a plain grey rail and a player one hit from death gets no
+  // warning at all.
   const alarmed = typeof alarmAt === 'number' && pct <= alarmAt;
   const accessibilityLabel = label ? 
     `${label}: ${value} out of ${max}, ${percentage} percent` : 

@@ -1,17 +1,10 @@
 /**
  * Grouped dev-tools surface — the body of the `/dev` route.
  *
- * Rebuilt in the 2026-09 dev-tools audit. The Phase 132 extraction kept
- * every legacy control "for a later audit"; this is that audit. Retired
- * (stale or duplicated): the rarity-loot buttons (rarity model retired
- * in Phase 21), the second rest/cache row, the FRESH/ENDGAME raw-state
- * presets (superseded by the L1–L50 ladder), the composite SEED button,
- * the dead HIDE MANA / HIDE STANCE toggles, the free-text add-item
- * input, and the synthetic OMEN/FRIEND dialogue + two-quest fixtures.
- * Added: a live STATE inspector, world travel to any map / node with
- * its authored event, the labyrinth acts, an any-foe enemy picker, every
- * reward channel, flag toggles, real NPC trees + real quests, effect and
- * item pickers, and run controls.
+ * Holds a live STATE inspector, the L1–L50 player ladder, world travel
+ * to any map / node with its authored event, the labyrinth acts, an
+ * any-foe enemy picker, every reward channel, flag toggles, real NPC
+ * trees + real quests, effect and item pickers, and run controls.
  *
  * Sections read top-down in the order a tester thinks: see state →
  * shape the player → shape the deck → stand somewhere → fight / play a

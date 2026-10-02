@@ -1,7 +1,6 @@
-// Engine Spec 11 (axiomancer-mechanics 0.5.0+) routes randomness through a
-// singleton `getRng()`/`setRng()` instead of `Math.random`. Each helper
-// installs a deterministic `Rng` on the engine *and* keeps the legacy
-// `Math.random` spy so the few engine paths that still default to
+// The engine routes randomness through a singleton `getRng()`/`setRng()`.
+// Each helper installs a deterministic `Rng` on the engine *and* spies on
+// `Math.random` so the few engine paths that default to
 // `Math.random` (item.factory, encounter pickers, loot tables) stay
 // pinned too.
 

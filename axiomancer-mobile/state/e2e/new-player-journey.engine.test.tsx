@@ -1,5 +1,5 @@
 /**
- * Hermetic integration tests — new player journey (Phase 121 Tick A).
+ * Hermetic integration tests — new player journey.
  *
  * Exercises the full journey from fresh state through first encounter:
  * title screen detection → map movement → encounter trigger. 
@@ -40,14 +40,13 @@ describe('integration: new player journey — fresh state through first encounte
         // - Player at level 1
         expect(state.player?.level).toBe(1);
 
-        // - No encounter in progress (legacy `state.combat` removed in
-        //   mechanics 0.37.0; the engine now signals via `currentEncounter`)
+        // - No encounter in progress (the engine signals via `currentEncounter`)
         expect(state.currentEncounter).toBeUndefined();
 
         // - No pending events
         expect(state.event?.pending).toBeNull();
         
-        // - At starting node (bw-1, the Breakwater's windmill — D27)
+        // - At starting node (bw-1, the Breakwater's windmill)
         if (state.world) {
             expect(state.world.currentMap?.currentNode).toBe('bw-1');
         }

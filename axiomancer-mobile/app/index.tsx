@@ -4,8 +4,8 @@
  * Two phases, then the run:
  *   1. TITLE  — the key art and EMBARK (`<TitleScreen>`), shown on every
  *               cold launch.
- *   2. MENU   — CONTINUE / NEW GAME / LOAD GAME / SETTINGS (`<MainMenu>`;
- *               owner call 2026-09-23). CONTINUE resumes the most recent
+ *   2. MENU   — CONTINUE / NEW GAME / LOAD GAME / SETTINGS (`<MainMenu>`).
+ *               CONTINUE resumes the most recent
  *               slot in place; NEW GAME and LOAD GAME open the slot screen;
  *               SETTINGS opens the settings route.
  *

@@ -1,11 +1,8 @@
 /**
- * Hermetic E2E Tests — MEMOIR presenter (Phase 33).
+ * Hermetic E2E Tests — MEMOIR presenter.
  *
- * Tick A pins the VM shape end-to-end. Ticks B-D extend with quest /
- * chronicle cases (Tick C's alignment readouts were removed with the
- * alignment system, D39). The shape contract here is
- * stable across those extensions — only the section *contents* fill
- * in.
+ * Pins the VM shape end-to-end, then the quest, chronicle and remains
+ * section contents.
  *
  * Hermetic = self-contained + deterministic + isolated.
  * See docs/testing.md for the full standard.
@@ -43,14 +40,14 @@ describe('selectMemoirViewModel: shape contract', () => {
         expect(vm.questsCompletedEyebrow).toBe('✠ COMPLETED');
         expect(vm.questsForgottenEyebrow).toBe('✠ FORGOTTEN');
 
-        // Sections — Tick A ships empty placeholders.
+        // Sections — a fresh game's chronicle is empty.
         expect(Array.isArray(vm.chronicle)).toBe(true);
         expect(vm.chronicle.length).toBe(0);
         expect(Array.isArray(vm.quests.active)).toBe(true);
         expect(Array.isArray(vm.quests.completed)).toBe(true);
         expect(Array.isArray(vm.quests.forgotten)).toBe(true);
 
-        // D39: the MEASURE section (GRACE band + philosophical bent) is gone.
+        // The VM carries no MEASURE section (GRACE band + philosophical bent).
         expect(vm).not.toHaveProperty('measureEyebrow');
         expect(vm).not.toHaveProperty('moralAlignment');
         expect(vm).not.toHaveProperty('exemplarQuote');
@@ -83,7 +80,7 @@ describe('selectMemoirViewModel: shape contract', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tick B — quests section reads state.quests
+// Quests section reads state.quests
 // ---------------------------------------------------------------------------
 
 /**
@@ -229,9 +226,9 @@ describe('selectMemoirViewModel: quests section', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tick D — chronicle from _recentEvents (Phase 25 ring buffer)
+// Chronicle from _recentEvents (the engine's ring buffer)
 //
-// Per Phase 33 brief §"Tick D": mapper folds engine events into
+// The mapper folds engine events into
 // reverse-chronological ChronicleEntry rows. Combat outcomes →
 // FELLED/ROUTED/FLED; levelups → ROSE TO N; world:moved (continent
 // change only) → CROSSED INTO X; dialogue:applied (when NPC name
@@ -316,8 +313,7 @@ describe('selectMemoirViewModel: chronicle (Tick D)', () => {
         // Engine `WorldState.currentContinent: Continent` is an
         // OBJECT with `.name`, not a string. Fixtures shape the
         // currentContinent as `{name: <string>}` to match the
-        // engine type. Memoir-audit [3.0] typing fix
-        // 2026-05-22 dropped the dead string-shape read.
+        // engine type.
         const store = createGameStore(createMemoryAdapter());
         setRecentEvents(store, [
             {
@@ -407,7 +403,7 @@ describe('selectMemoirViewModel: chronicle (Tick D)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tick E — remains section (Phase 6): death tally + keepsake read-back
+// Remains section: death tally + keepsake read-back
 // ---------------------------------------------------------------------------
 
 function setFlags(store: ReturnType<typeof createGameStore>, flags: string[]): void {
@@ -485,7 +481,7 @@ describe('selectMemoirViewModel: remains (Phase 6)', () => {
         expect(Object.isFrozen(vm.remains.keepsakes)).toBe(true);
     });
 
-    // Phase 32 part 1b — Harvest's persistent Soul jar read-back.
+    // Harvest's persistent Soul jar read-back.
     function setBankedSouls(store: ReturnType<typeof createGameStore>, bankedSouls: number): void {
         const player = store.getState().player;
         store.setState({ player: { ...player, bankedSouls } } as Partial<AppStoreState>);
@@ -518,7 +514,7 @@ describe('selectMemoirViewModel: remains (Phase 6)', () => {
         expect(selectMemoirViewModel(store.getState()).remains.bankedSouls).toBe(0);
     });
 
-    // Phase 32 part 1c — milestone epithet layered onto the same line.
+    // Milestone epithet layered onto the same line.
     it('stays plain below the lowest milestone tier', () => {
         const store = createGameStore(createMemoryAdapter());
         setBankedSouls(store, 9);

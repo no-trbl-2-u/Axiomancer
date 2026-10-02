@@ -1,12 +1,11 @@
 /**
- * Phase 54 — `applyHazardOutcome` now routes rewards through the engine's
- * real `endCombat` reducer instead of hand-rolling XP/loot/quest-advancement
- * itself. These tests stage `state.currentEncounter` via `startCombat` the
- * way `beginHazardEncounter` now does, then assert `endCombat`'s full grant
- * lands live: quest kill-objective advancement + completion reward, and —
- * on a merciful win — the authored `friendshipReward` payload (flags,
- * codex unlock, faction deltas). Resolves
- * `plan/AUDIT.md`'s endCombat row (first-map audit 2026-08-08, finding F3).
+ * `applyHazardOutcome` routes rewards through the engine's real `endCombat`
+ * reducer rather than hand-rolling XP/loot/quest-advancement itself. These
+ * tests stage `state.currentEncounter` via `startCombat` the way
+ * `beginHazardEncounter` does, then assert `endCombat`'s full grant lands
+ * live: quest kill-objective advancement + completion reward, and — on a
+ * merciful win — the authored `friendshipReward` payload (flags, codex
+ * unlock, faction deltas).
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
@@ -64,7 +63,7 @@ describe('applyHazardOutcome: routes through endCombat (phase 54)', () => {
         const store = createAppStore({ adapter: createMemoryAdapter() });
         // Brine Hag: friendshipReward carries items, xpBonus, flagSet
         // and journalEntry — real authored content, not a test
-        // fixture, previously unreachable from live hazard combat.
+        // fixture, reached from live hazard combat.
         const brineHag = ENEMY_REGISTRY['brine-hag'];
         store.getState().startCombat(brineHag);
         const finalState = openEncounter(brineHag);
@@ -82,7 +81,7 @@ describe('applyHazardOutcome: routes through endCombat (phase 54)', () => {
     it('befriending a kill-objective target completes its quest and grants the quest reward', () => {
         const store = createAppStore({ adapter: createMemoryAdapter() });
         const boss = ENEMY_REGISTRY['brine-hag'];
-        // The fixture quest (no quest is authored since R7e), its objective
+        // The fixture quest (no quest is authored), its objective
         // re-aimed at a live foe (objectives match on the enemy's display name).
         const authored = FIXTURE_QUEST;
         const startingQuest = {
@@ -98,8 +97,7 @@ describe('applyHazardOutcome: routes through endCombat (phase 54)', () => {
         const finalState = openEncounter(boss);
         const currencyBefore = store.getState().player!.currency;
 
-        // The audit's F3 finding named the merciful win as the one that never
-        // advanced kill objectives live.
+        // The merciful win must advance kill objectives too.
         applyHazardOutcome(store, 'mercy' as CombatOutcome, finalState, boss);
 
         const state = store.getState();

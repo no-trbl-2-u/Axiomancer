@@ -17,22 +17,20 @@
  *               `/hazard`, `<RestGate>` → `/rest`, `<CacheGate>` →
  *               `/cache`) routes to the full-screen minigame.
  *   - GATHER   → grants a sample item straight into inventory, no
- *               gate and no route (Phase 76 retired "The Gleaning"
- *               minigame; the live `gathering` node does the same).
+ *               gate and no route (the live `gathering` node does the
+ *               same).
  *
- * Mechanism (Phase 137 alignment, 2026-06-14): rest / gather /
- * treasure no longer reach the `/event` slice — the live
- * `resolveCurrentMapEventAction` intercepts those kinds and starts a
- * minigame session (or, for gather since Phase 76, grants inline).
+ * Mechanism: rest / gather / treasure never reach the `/event` slice —
+ * the live `resolveCurrentMapEventAction` intercepts those kinds and
+ * starts a minigame session (or, for gather, grants inline).
  * This panel mirrors that interception by calling the `begin*`
  * actions (or the inline grant) directly rather than seeding a
- * `ResolvedEvent` onto the event slice. The old slice-seeding
- * behavior dead-ended at the `/event` "NO EVENT" card because
- * `composeNarrative` returns the empty VM for these kinds — the exact
- * bug this rewrite fixes. Combat / boss still construct a
+ * `ResolvedEvent` onto the event slice, which would dead-end at the
+ * `/event` "NO EVENT" card because `composeNarrative` returns the empty
+ * VM for these kinds. Combat / boss construct a
  * combat-prelude `ResolvedEvent` and drop it on the slice (those DO
  * render in-place via `<EncounterModalOverlay>`); village / cutscene
- * still seed their paced events for `<EventGate>` to route. Every
+ * seed their paced events for `<EventGate>` to route. Every
  * button is deterministic regardless of where the player is standing.
  *
  * Navigation happens first so the minigame / paced routes stack on
@@ -75,13 +73,12 @@ const ENCOUNTERS: readonly { kind: NodeType; label: string }[] = [
 ];
 
 /** Paced narrative events that route to their own dedicated screens
- * (Phase 137) rather than the generic /event shell — village + cutscene.
+ * rather than the generic /event shell — village + cutscene.
  * Their `kind` isn't a NodeType, so they ride a separate button row; the
  * seeded event drives <EventGate> to push /village or /cutscene. Sample
  * payloads mirror the engine's ResolvedEvent shape (selectVillageVM reads
  * merchants[].dialogueTree + shop.wares; the cutscene screen reads
- * lines[]). Visual-audit 2026-06 — closes the village/cutscene capture
- * gap so both screens can be eyeballed. */
+ * lines[]). Lets both screens be eyeballed without walking to one. */
 const PACED_EXTRAS: readonly { id: string; label: string; event: unknown }[] = [
     {
         id: 'village',
@@ -193,13 +190,12 @@ export function DebugTriggerEncounter() {
                 return;
             case 'rest':
                 // The rest-choice node — <RestGate> routes to /rest. Mirror
-                // the live interceptor's default shelter (Phase 52b: a
-                // node that forgot to say is wilderness).
+                // the live interceptor's default shelter (a node that
+                // does not say is wilderness).
                 actions.beginRest({ shelter: 'camp' });
                 return;
             case 'gather': {
-                // Items grant inline (Phase 76 retired "The Gleaning"
-                // minigame — no gate, no route). Mirrors the live
+                // Items grant inline — no gate, no route. Mirrors the live
                 // interceptor's gathering branch: seed a sample item
                 // straight into inventory, same as TREASURE below seeds
                 // its cache items directly.

@@ -51,7 +51,7 @@ describe('HazardCard', () => {
         expect(getByText('MANA')).toBeTruthy();
     });
 
-    // S7-hazard-C04 — the two printed marks carry no names, so the pair
+    // The two printed marks carry no names, so the pair
     // must announce itself: FREE row first, SURGE row second.
     it('announces each number pair by type name', () => {
         const { getByLabelText } = render(

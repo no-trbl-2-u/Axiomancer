@@ -63,7 +63,7 @@ export function ItemGrid({
     }
 
     // Contained scroll: the list scrolls inside this bordered panel rather
-    // than scrolling the whole Satchel screen (visual-audit 2026-06).
+    // than scrolling the whole Satchel screen.
     return (
         <View style={styles.panel}>
             <ScrollView

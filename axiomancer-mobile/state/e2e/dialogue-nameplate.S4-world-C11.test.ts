@@ -1,12 +1,10 @@
 /**
  * S4-world-C11 — the nameplate must name the speaker the prose names.
  *
- * A first-time player read a dialogue card whose header said A FIGURE while
- * the line directly beneath it called the character by name. The engine's
- * `DialogueNode` has carried no `.speaker` since Phase 60c, and the presenter
- * hard-fell back to 'A FIGURE' for EVERY dialogue node — but the `interaction`
- * event that opened the tree carries `npcName`, the very name
- * `composeInteraction` already puts on the no-tree card.
+ * A dialogue card's header must not say A FIGURE while the line beneath it
+ * names the character. The engine's `DialogueNode` carries no `.speaker`, but
+ * the `interaction` event that opened the tree carries `npcName`, the very
+ * name `composeInteraction` puts on the no-tree card.
  *
  * The fallback survives for a `narration` monologue, which has no speaker by
  * design; that is the only case it is honest for.

@@ -1,8 +1,8 @@
 /**
- * PlayerPortraitImage (temp art pass 2026-07-06) — the raster pilgrim bust.
+ * PlayerPortraitImage — the raster pilgrim bust.
  *
- * Successor to the procedural `PlayerPortrait` SVG at every production call
- * site (character-sheet header, combat medallion, pilgrim inspect modal).
+ * Used at every production portrait call site (character-sheet header,
+ * combat medallion, pilgrim inspect modal).
  * Reads the chosen portrait from the store (`portrait:<id>` flag — see
  * assets/images/portraits); decorative, the caller's frame supplies a label.
  */

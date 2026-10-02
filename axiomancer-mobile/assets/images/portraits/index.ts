@@ -1,5 +1,5 @@
 /**
- * Player portrait gallery — temp art pass (2026-07-06 drop).
+ * Player portrait gallery (temp art).
  *
  * 15 alpha-matted busts/figures. The pilgrim's chosen portrait is stored as a
  * `portrait:<id>` entry in `GameState.flags` (generic string flags, persisted

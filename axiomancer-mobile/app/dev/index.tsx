@@ -1,14 +1,9 @@
 /**
- * Dev-only tooling route (Phase 132 — dev menu tab extraction).
+ * Dev-only tooling route.
  *
- * The expanding evidence-setup controls (Phase 131) made the SELF tab's
- * `DEV MENU` dropdown too noisy. This dedicated route moves the same
- * controls off the player-facing SELF sheet into a purpose-grouped dev
- * surface, reached from the SELF tab's `DEV TOOLS` link in dev builds.
- *
- * No controls are pruned here — every Debug* affordance that lived in
- * the old dropdown lives in `DevToolsSections`, grouped for T's later
- * visual-audit pass (Phase 132 follow-up).
+ * Keeps the evidence-setup controls off the player-facing SELF sheet in a
+ * purpose-grouped dev surface, reached from the SELF tab's `DEV TOOLS`
+ * link in dev builds. Every Debug* affordance lives in `DevToolsSections`.
  *
  * Production gate: outside dev builds the route renders an inert
  * placeholder (`dev-route-disabled`) and exposes no controls. The

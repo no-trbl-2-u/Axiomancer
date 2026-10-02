@@ -3,7 +3,7 @@
  *
  * Tests the root index route (`app/index.tsx`) through its public entry
  * point with mocked navigation: the title screen, the main menu behind it
- * (owner call 2026-09-23 — CONTINUE / NEW GAME / LOAD GAME / SETTINGS over
+ * (CONTINUE / NEW GAME / LOAD GAME / SETTINGS over
  * three save slots), and the fixture-boot bypass.
  *
  * Hermetic = self-contained + deterministic + isolated.

@@ -1,5 +1,5 @@
 /**
- * Hermetic component tests — LabyrinthGate (map revamp M4, D24).
+ * Hermetic component tests — LabyrinthGate.
  *
  * LabyrinthGate is a side-effect-only component (returns null) that pushes
  * the user into `/labyrinth` whenever a visit to THE APORIA opens: the

@@ -1,6 +1,6 @@
 /**
- * Main-menu store actions (owner call 2026-09-23 — the first screen after
- * the title is CONTINUE / NEW GAME / LOAD GAME / SETTINGS over three slots).
+ * Main-menu store actions — the first screen after the title is CONTINUE /
+ * NEW GAME / LOAD GAME / SETTINGS over three slots.
  *
  * The store is created ONCE at app boot (`GameStoreProvider`) over whatever
  * the persistence adapter's `load()` returned. Switching runs at the menu
@@ -67,7 +67,7 @@ export function hydrateStoreWithGameState(store: AppStore, next: GameState): voi
         rest: EMPTY_REST_SLICE,
         cache: EMPTY_CACHE_SLICE,
         blacksmith: EMPTY_BLACKSMITH_SLICE,
-        // A save taken inside the Aporia resumes there (map revamp M4).
+        // A save taken inside the Aporia resumes there.
         labyrinthUi: resumed ? { session: resumed } : EMPTY_LABYRINTH_SLICE,
         notifications: DEFAULT_NOTIFICATIONS_SLICE,
         _recentEvents: [],
@@ -85,8 +85,8 @@ export function hydrateStoreWithGameState(store: AppStore, next: GameState): voi
  * Overwriting an occupied slot is the CALLER's decision (the slot screen
  * confirms it); this verb does not check.
  *
- * `startMap` (map revamp M3a, dev tools only) starts the fresh game on another
- * campaign map instead of the default start (the Breakwater, D27). The player
+ * `startMap` (dev tools only) starts the fresh game on another campaign map
+ * instead of the default start (the Breakwater). The player
  * path never passes it.
  */
 export function startNewGameAction(

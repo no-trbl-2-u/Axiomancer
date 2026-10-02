@@ -1,7 +1,7 @@
 /**
- * Spec 26 / 26b — Combat encounter screen (DEV route).
+ * Combat encounter screen (DEV route).
  *
- * Phase 200: the combat surface itself now lives in the reusable
+ * The combat surface itself lives in the reusable
  * `<CombatEncounterPanel>` so the LIVE map flow can host it in-place inside
  * the encounter modal. This route is the dev-only launcher: it bootstraps a
  * mock foe + demo deck and does NOT persist the outcome (a sandbox), so
@@ -9,7 +9,7 @@
  * path (EncounterModalOverlay) feeds the panel the real enemy + player and
  * sets `persistOutcome`.
  *
- * Turn flow (Spec 26b): reveal → roll 2 → DRAFT one (the other → ◆) → POWER a
+ * Turn flow: reveal → roll 2 → DRAFT one (the other → ◆) → POWER a
  * card with your stance die → END TURN to re-roll → END PHASE to resolve.
  */
 
@@ -40,7 +40,7 @@ function readDeckOverride(): string[] | undefined {
     return Array.isArray(g) && g.every((x) => typeof x === 'string') ? (g as string[]) : undefined;
 }
 
-// The grey office — the whole player library since the card purge (D36).
+// The grey office — the whole player library.
 const DEMO_CARDS = ['grey-strike', 'grey-ward', 'grey-word'];
 function withDemoDeck<T extends { knownCards?: string[]; baseStats?: { heart: number; body: number; mind: number }; health?: number; maxHealth?: number }>(player: T): T {
     const known = player.knownCards ?? [];

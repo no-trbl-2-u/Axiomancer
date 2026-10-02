@@ -1,7 +1,6 @@
 /**
- * Rest-choice screen copy (Phase 52d). Neutral register on purpose — this
- * is the placeholder voice Phase 44f's retheme pass replaces without
- * touching `app/rest/index.tsx` or the presenter.
+ * Rest-choice screen copy. Neutral register on purpose; the copy can be
+ * rethemed without touching `app/rest/index.tsx` or the presenter.
  */
 
 import type { RestChoiceOfferId } from '@mechanics';
@@ -22,7 +21,7 @@ export const REST_CHOICE_OFFER_DESC: Record<RestChoiceOfferId, string> = Object.
 });
 
 /**
- * The REST offer's description, with the heal it actually pays (FE-024).
+ * The REST offer's description, with the heal it actually pays.
  *
  * @param healed - the VITAE the engine says a REST would restore right now
  *   (`previewRestChoiceHeal(session)` — the same arithmetic the commit
@@ -31,14 +30,8 @@ export const REST_CHOICE_OFFER_DESC: Record<RestChoiceOfferId, string> = Object.
  *   static sentence alone when there is nothing to promise (0, negative,
  *   or not a number).
  *
- * The screen showed 'SLEEP WHERE YOU STAND. FREE.' beside a bar reading
- * 20/175 — three statements of the price and none of the payoff, so the only
- * number a hurt player wants was withheld until after committing.
- *
- * Audit 2026-09-12: the first cut of this function re-derived the heal from
- * the fraction alone and skipped the engine's missing-VITAE cap, so at
- * 170/175 it promised 44 where the engine pays 5. The presenter no longer
- * computes anything — it words the engine's number.
+ * Computes nothing: it words the engine's number, so the missing-VITAE cap
+ * is always respected.
  */
 export function restOfferDesc(healed: number): string {
     const base = REST_CHOICE_OFFER_DESC.rest;

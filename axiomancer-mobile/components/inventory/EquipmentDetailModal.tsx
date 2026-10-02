@@ -1,14 +1,12 @@
 /**
- * EquipmentDetailModal — the long-press card for a worn equipment slot
- * (2026-09-13 playthrough note #2).
+ * EquipmentDetailModal — the long-press card for a worn equipment slot.
  *
  * WHY
  * ---
  * Equipment swaps announce which signature skill is gained or lost by name, but
- * outside combat there was nowhere to learn what that skill does. Long-pressing
- * a filled slot used to raise a tooltip describing the SLOT; it now raises this
- * card describing the ITEM — including the exact in-game effect of its
- * signature.
+ * outside combat this is the place to learn what that skill does. Long-pressing
+ * a filled slot raises this card describing the ITEM — including the exact
+ * in-game effect of its signature.
  *
  * LAYOUT (per the owner's sketch)
  * -------------------------------

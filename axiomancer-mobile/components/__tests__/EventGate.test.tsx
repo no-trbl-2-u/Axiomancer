@@ -2,11 +2,10 @@
  * Hermetic component tests — EventGate.
  *
  * EventGate is a side-effect-only component (returns null) that
- * pushes the user into the full-screen `/event` route whenever
- * `selectHasActivePacedEvent` flips true. Combat-prelude events
- * stay out of the router (they render via EncounterModalOverlay
- * over the exploration map). Coverage gap filed by `/iterate`
- * 2026-05-20.
+ * pushes the user into the paced event's full-screen route
+ * (`selectPacedEventRoute`). Combat-prelude events stay out of the
+ * router (they render via EncounterModalOverlay over the
+ * exploration map).
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
@@ -26,11 +25,11 @@ import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 const mockPush = jest.fn();
 
 jest.mock('@/lib/platform/router', () => ({
-    // S4-world-C03: the real `useRouter()` (lib/platform/router.ts) builds a
+    // The real `useRouter()` (lib/platform/router.ts) builds a
     // FRESH object literal on every call, so `router` changes identity on
     // every render and an effect keyed on it re-runs each time. This mock
     // reproduces that exactly — a stable reference here would hide the
-    // double-push the gate now latches against.
+    // double-push the gate latches against.
     useRouter: () => ({
         push: mockPush,
         replace: jest.fn(),
@@ -71,7 +70,7 @@ function makeEncounterResult(): ResolveMapEventResult {
         state: undefined as never,
         event: {
             kind: 'encounter',
-            // Phase 60b — canonical {enemies, origin} shape.
+            // Canonical {enemies, origin} shape.
             encounter: { enemies: [enemy], origin: 'breakwater:bw-2' } as never,
             isBoss: false,
         },
@@ -150,12 +149,11 @@ describe('EventGate: paced events route to /event', () => {
 });
 
 /**
- * S4-world-C03 — the opening omen mounted twice and buried the screen the
- * player asked for. `useRouter()` returns a new object every render, so the
- * gate's `[route, router]` effect re-fired (and re-pushed) on every re-render
- * of the root layout while an event was still pending. The gate now latches
- * the route it has already opened and releases the latch when the event
- * resolves.
+ * `useRouter()` returns a new object every render, so the gate's
+ * `[route, router]` effect re-fires on every re-render of the root layout
+ * while an event is still pending. The gate latches the route it has
+ * already opened, so the screen is pushed once, and releases the latch
+ * when the event resolves.
  */
 describe('EventGate: one push per event (S4-world-C03)', () => {
     it('pushes once across repeated re-renders with a fresh router each time', () => {

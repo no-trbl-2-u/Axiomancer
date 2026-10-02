@@ -1,5 +1,5 @@
 /**
- * Spec 25 §7.7 — Post-combat attribution summary.
+ * Post-combat attribution summary.
  *
  * Every fight (win OR loss) shows an explicit breakdown of which card cards
  * contributed the DoT / control pressure that decided it, naming the best card.

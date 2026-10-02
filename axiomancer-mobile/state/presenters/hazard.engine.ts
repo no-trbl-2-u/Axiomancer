@@ -241,7 +241,7 @@ function cardVM(entry: HazardHandEntry, session: HazardSessionState): HazardCard
 
 /**
  * Build a static (un-staged) card VM straight from a card id — the
- * same shape the rewards offer uses. Phase 126 reuses this so the
+ * same shape the rewards offer uses. Reused so the
  * persistent deck screen and remove-card grid render identical
  * `HazardCard` stock to the in-encounter hand. Unknown ids fall
  * through to the engine's own throw, matching offer behaviour.
@@ -306,7 +306,7 @@ function routeChoices(session: HazardSessionState): HazardRouteChoiceVM[] {
 }
 
 // ---------------------------------------------------------------------------
-// FORCE / ESCAPE glyph key (cluster S7-hazard-C04)
+// FORCE / ESCAPE glyph key
 // ---------------------------------------------------------------------------
 
 /** The legend for the number pair printed on every hazard card. */
@@ -318,7 +318,7 @@ export interface HazardStatKeyVM {
 }
 
 /**
- * Static copy for the card number-pair key (cluster S7-hazard-C04). The
+ * Static copy for the card number-pair key. The
  * pair's meaning never varies with session state, so it is a constant,
  * not a selector — components read it instead of hardcoding the words.
  */
@@ -332,7 +332,7 @@ export const HAZARD_STAT_KEY: HazardStatKeyVM = Object.freeze({
 
 /**
  * Spoken label for a card's FORCE/ESCAPE number pair, so the two
- * unkeyed micro-glyphs are announced by name (cluster S7-hazard-C04).
+ * unkeyed micro-glyphs are announced by name.
  *
  * Inputs: `force`, `escape` — the pair's two numbers, in print order.
  * Outputs: one string, e.g. "FORCE 3, ESCAPE 1".

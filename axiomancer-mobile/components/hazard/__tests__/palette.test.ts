@@ -1,5 +1,5 @@
 /**
- * Hazard-minigame palette (visual-audit 2026-06, twenty-first tick).
+ * Hazard-minigame palette.
  *
  * Isolates components/hazard/palette.ts's own contract — it is consumed
  * by seven hazard components (HazardCard, HazardBoard, HazardDie,

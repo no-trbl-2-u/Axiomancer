@@ -1,10 +1,9 @@
 /**
  * Dev-only ITEM PICKER.
  *
- * Replaces the free-text "add item by id" input: every relic and every
- * consumable in the engine registries is a chip, so a tester never has
- * to remember an id. A tap calls `actions.addItemById` (the same
- * resolver the old input used) and prints the result on the sub line.
+ * Every relic and every consumable in the engine registries is a chip,
+ * so a tester never has to remember an id. A tap calls
+ * `actions.addItemById` and prints the result on the sub line.
  *
  * Renders null outside dev builds.
  */

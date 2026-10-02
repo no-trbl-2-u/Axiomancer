@@ -84,7 +84,7 @@ describe('navigation.engine', () => {
         it('returns exploration when combat ends', () => {
             const store = createGameStore(createMemoryAdapter());
             
-            // Start then end combat (engine `endCombat` now requires an outcome)
+            // Start then end combat (engine `endCombat` requires an outcome)
             store.getState().startCombat(makeEnemy());
             store.getState().endCombat('victory');
             
@@ -104,7 +104,7 @@ describe('navigation.engine', () => {
                 character: null,
                 memoir: null,
                 inventory: null,
-                // DECK (2026-09-21, finding 7 / D2) is the fifth tab route.
+                // DECK is the fifth tab route.
                 // It is deliberately badge-less: a badge is a call to ACT and
                 // the deck screen is reference material.
                 deck: null,
@@ -224,13 +224,7 @@ describe('navigation.engine', () => {
             expect(result.character?.kind).toBe('levelup');
         });
 
-        // The former "suppresses the event badge while combat is active"
-        // test pinned `selectHasActiveEvent`'s short-circuit on the legacy
-        // `state.combat` slice, removed from the engine in mechanics 0.37.0.
-        // With no turn-based combat slice, mid-combat event suppression is
-        // no longer a concept, so the test was retired.
-
-        // Phase 46c — the Memoir tab's quest-discovery badge.
+        // The Memoir tab's quest-discovery badge.
         it('surfaces a badge on the memoir tab when a dialogue choice grants a quest', () => {
             const store: AppStore = createAppStore({ adapter: createMemoryAdapter() });
             expect(selectTabBadges(store.getState()).memoir).toBeNull();
@@ -300,14 +294,9 @@ describe('navigation.engine', () => {
     });
 
     describe('selectNavigationViewModel', () => {
-        // Phase 60e — `selectNavigationViewModel(state: AppStoreState)`
-        // expects the mobile-only slice composition. Previously
-        // these tests used `createGameStore` (engine-level) and
-        // passed plain GameState; works on engine 0.10.0 with
-        // permissive types but would fail under 0.10.2 strict.
-        // Switched to `createAppStore` so the type alignment is
-        // honest and the lockfile bump (Phase 60f) is a no-op
-        // here.
+        // `selectNavigationViewModel(state: AppStoreState)` expects the
+        // mobile-only slice composition, so these tests build stores with
+        // `createAppStore`, not the engine-level `createGameStore`.
 
         it('combines active tab and badges correctly', () => {
             const store: AppStore = createAppStore({ adapter: createMemoryAdapter() });

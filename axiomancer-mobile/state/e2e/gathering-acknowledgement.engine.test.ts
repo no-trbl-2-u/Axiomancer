@@ -1,24 +1,15 @@
 /**
- * Hermetic E2E — the gathering node's acknowledgement (owner finding 2,
- * 2026-09-21: "the Gather node is now a no-op").
+ * Hermetic E2E — the gathering node's acknowledgement.
  *
- * WHAT WAS ACTUALLY WRONG. The grant was never missing. `resolveGathering`
- * appends the payload items to `player.inventory` and `resolve-map-event`
- * advances any matching `collect` objective, and all twelve authored
- * gathering nodes roll a real, named item (pinned engine-side in
+ * `resolveGathering` appends the payload items to `player.inventory` and
+ * `resolve-map-event` advances any matching `collect` objective; every
+ * authored gathering node rolls a real, named item (pinned engine-side in
  * `axiomancer-mechanics/src/World/MapEvents/e2e/gathering-grant.engine.test.ts`).
- * What was missing was the RECEIPT. Phase 76 retired "The Gleaning" and
- * replaced its screen with `pushToast('Gathered …')`; Phase 137 then filed
- * `gathering` as a dead-end kind in the event presenter. That left three
- * seconds of 10pt mono at `bottom: 80`, drawn by a `<ToastHost>` that
- * `app/_layout.tsx` declares BEFORE `<Stack>` with no `zIndex` — under an
- * opaque `<ScreenBg>`. So the node went dark and said nothing.
- *
- * The fix routes `gathering` to the same paced `/event` card that
- * `interaction` / `village` / `cutscene` already use. No session, no RNG,
- * no new route: the Gleaning stays retired (see
- * `Game/e2e/gathering-retirement-migration.engine.test.ts`); only the
- * receipt came back.
+ * The RECEIPT is the paced `/event` card that `interaction` / `village` /
+ * `cutscene` also use. No session, no RNG, no new route. A toast is not
+ * enough: `<ToastHost>` sits under the opaque `<ScreenBg>` (`app/_layout.tsx`
+ * declares it BEFORE `<Stack>` with no `zIndex`), so a toast-only grant says
+ * nothing a player can read.
  *
  * This file pins the player-visible contract:
  *   - resolving a gather node leaves the item in the inventory;

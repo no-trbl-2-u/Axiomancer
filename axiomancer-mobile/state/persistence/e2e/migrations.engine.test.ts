@@ -1,11 +1,8 @@
 /**
  * Hermetic e2e tests for persistence schema migrations.
  *
- * Covers the v1 → v2 migration that validates the save's base stats
- * (it no longer backfills derivedStats / nonCombatStats — those stats were
- * deleted from the engine in TRIM THE FAT T2a), and
- * the v2 → v3 migration, now a pass-through (it backfilled the alignment
- * cube until T6 / D39 removed the grid and the GRACE meter).
+ * Covers the v1 → v2 migration that validates the save's base stats, and
+ * the v2 → v3 migration, a pass-through for any object state.
  */
 
 import {
@@ -147,9 +144,8 @@ describe('migrations.engine', () => {
 
     describe('engine migration delegation (engine owns GameState versioning)', () => {
         test('an engine-shaped save below GAME_STATE_VERSION is rejected (old-save migration was dropped)', () => {
-            // Old-save migration was removed (2026-07-08): only the current
-            // engine version loads. A below-current save throws, surfacing to
-            // the host so it can start a fresh game.
+            // A save older than the engine's oldest migration hop throws,
+            // surfacing to the host so it can start a fresh game.
             const current = createNewGameState() as unknown as Record<string, unknown>;
             const stale = { ...current, version: 9 };
 
@@ -171,16 +167,18 @@ describe('migrations.engine', () => {
 
             const result = unwrap({ schemaVersion: CURRENT_SCHEMA_VERSION, state: v25 });
 
-            // v27 (phase R2): the retired-foe re-point hop chains after T6's;
-            // v28 (phase R3a): the Act 1 relocation hop chains after it;
-            // v29 (phase R3b): the fishing-village / goodwill purge hop after that;
-            // v30 (phase R5): the retired-consumable purge hop;
-            // v31 (phase R6a): the hazard token / hex flag hop;
-            // v32 (phase R6b): the deleted hazard deck card hop;
-            // v33 (phase R7c): the region-consequences slice hop;
-            // v34 (phase R7e): the parked world's content hop;
-            // v35 (phase R7e2): the deleted relic hop;
-            // v36 (phase R9): the XP curve hop.
+            // The hops chain from v25 to the current version:
+            // v26: the alignment grid / GRACE meter strip;
+            // v27: the deleted-foe re-point hop;
+            // v28: the Act 1 relocation hop;
+            // v29: the fishing-village / goodwill purge hop;
+            // v30: the deleted-consumable purge hop;
+            // v31: the hazard token / hex flag hop;
+            // v32: the deleted hazard deck card hop;
+            // v33: the region-consequences slice hop;
+            // v34: the parked world's content hop;
+            // v35: the deleted relic hop;
+            // v36: the XP curve hop.
             expect(GAME_STATE_VERSION).toBe(36);
             expect(result.version).toBe(GAME_STATE_VERSION);
         });

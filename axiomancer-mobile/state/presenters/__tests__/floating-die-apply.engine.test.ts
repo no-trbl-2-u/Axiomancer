@@ -1,19 +1,18 @@
 /**
- * Dice-law rework (2026-07-09) — floating dice apply end-to-end.
+ * Floating dice apply end-to-end.
  *
  * Pins the exact commit the panel runs on APPLY — `playCombatCard(s, { uid },
  * true, dieId)` with the dropped die forwarded as the EXPLICIT power source —
- * against the REAL engine, guarding the floating-die laws the UI once broke:
- *   1. a floating die commits as an explicit power source (the old code
- *      drafted it, the engine refused, and the play fizzled: the snap-back
- *      bug);
+ * against the REAL engine, guarding the floating-die laws:
+ *   1. a floating die commits as an explicit power source (never drafted,
+ *      which the engine refuses);
  *   2. several dice — floats and a tray die — power plays in the same turn;
  *   3. a spent floating die is GONE FOREVER (leaves `floatingDice`).
- * Plus a fresh tray die commits a paid play (the D6d "die spent, card
- * bounces" regression).
+ * Plus a fresh tray die commits a paid play (the die is spent and the card
+ * does not bounce).
  *
- * Fixtures are the grey office (the whole library since the card purge,
- * 2026-09-27): colourless cards every die colour powers.
+ * Fixtures are the grey office (the whole library): colourless cards every
+ * die colour powers.
  */
 
 import {
@@ -124,11 +123,10 @@ describe('floating-die APPLY (the snap-back bug)', () => {
         });
     });
 
-    // The stuck-ghost / dead-drop bug (found live 2026-07-10): draggability
-    // flipped false the moment the die's OWN drag began, unmounting its
-    // GestureDetector mid-gesture — on web the pan died without onEnd, so the
-    // drop never resolved. `draggable` is presenter-owned and depends only on
-    // engine state, never on live drag state.
+    // `draggable` is presenter-owned and depends only on engine state, never
+    // on live drag state: flipping it false when the die's OWN drag begins
+    // would unmount its GestureDetector mid-gesture, and on web the pan dies
+    // without onEnd, so the drop never resolves.
     it('draggable is presenter-computed from engine state: live dice drag, spent dice do not', () => {
         let s = openEncounter(['wild']);
         const pre = buildCombatViewModel(s);

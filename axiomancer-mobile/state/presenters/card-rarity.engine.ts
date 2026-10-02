@@ -1,17 +1,12 @@
 /**
- * Card rarity affordance — the single mobile source for the D4 rarity signal.
+ * Card rarity affordance — the single mobile source for the rarity signal.
  *
  * ## Why this module exists
  *
- * Rarity had three uncoordinated mobile spellings: the wax pip on the card
- * face (`CombatBoard.tsx`, a local ternary over three hex literals), the
- * frame colour in the card-draft overlay (`CombatRewardsOverlay.tsx`, a
- * second `RARITY_COLORS` record with the same three literals), and nothing
- * at all in the card detail panel. The owner's finding 8 ("no way to
- * recognise a card's rarity at a glance") and ratified decision D4 ask for
- * one legible signal — **named label + pip row + frame colour, never colour
- * alone** — on the face, in the rewards overlay, in the detail panel, and on
- * the DECK screen. Four surfaces agreeing needs one module; this is it.
+ * Rarity shows as one legible signal — **named label + pip row + frame
+ * colour, never colour alone** — on the card face, in the rewards overlay, in
+ * the detail panel, and on the DECK screen. Four surfaces agreeing needs one
+ * module; this is it.
  *
  * ## Rarity is DERIVED, never stored
  *
@@ -27,26 +22,20 @@
  *
  * ## Cards only
  *
- * D4 governs CARDS. Equipment rarity was retired in Phase 23 — the lean
- * signet `Equipment` carries no `rarity` field, every relic is `common` by
+ * This module is for CARDS. The signet `Equipment` carries no `rarity`
+ * field, every relic is `common` by
  * construction, and the aftermath panel hardcodes `'common'`. Do not reach
  * for this module from an equipment or loot surface (that is
  * `components/inventory/rarityAffordance.ts`), and do not reach for it from
  * the Hazard deck (hazard cards carry their own rarity in
  * `src/World/Hazard/hazard.content.ts`). Different systems, deliberately.
  *
- * ## On the hex literals below
+ * ## On the fixed hues below
  *
- * `RARITY_COLOR` holds three literal hues rather than `AXM` tokens. They are
- * not new: they are the exact wax-pip colours already shipped in
- * `CombatBoard.tsx` and duplicated in `CombatRewardsOverlay.tsx`, lifted here
- * so the duplication ends. The palette (`theme/palette.ts`) has no rarity
- * token to map onto, and rarity is a fixed identity signal that must read the
- * same in every theme — a themed rarity hue would make "purple = rare"
- * unlearnable across a theme switch. Promoting these three into `ThemeSpec`
- * as `rarityCommon` / `rarityUncommon` / `rarityRare` is the fuller fix and is
- * filed as a follow-up rather than done here, because the palette registry is
- * outside this change's blast radius.
+ * `RARITY_COLOR` reads fixed `HUE` colours (`theme/hue.ts`) rather than
+ * theme-driven `AXM` tokens. Rarity is a fixed identity signal that must read
+ * the same in every theme — a themed rarity hue would make "purple = rare"
+ * unlearnable across a theme switch.
  *
  * Pure: no store reads, no store writes, no rule decisions.
  */
@@ -78,9 +67,9 @@ export interface RarityCard {
 const DEFAULT_RARITY: CardRarity = 'common';
 
 /**
- * Player-facing name for each band (D4's "named label" leg).
+ * Player-facing name for each band (the "named label" leg).
  *
- * Title case, as the owner wrote them in D4. Screens that shout their chrome
+ * Title case. Screens that shout their chrome
  * (the name band, a chip) apply `textTransform: 'uppercase'` themselves — the
  * casing of a rendered label is the renderer's call, the words are not.
  */
@@ -91,7 +80,7 @@ export const RARITY_LABEL: Readonly<Record<CardRarity, string>> = Object.freeze(
 });
 
 /**
- * How many pips to draw for each band (D4's "pip row" leg) — one per rank
+ * How many pips to draw for each band (the "pip row" leg) — one per rank
  * pair, so the count climbs with the ladder: Ash/Tooth 1, Splinter/Rib 2,
  * Skull/Saint 3.
  *
@@ -106,13 +95,10 @@ export const RARITY_PIPS: Readonly<Record<CardRarity, number>> = Object.freeze({
 });
 
 /**
- * Frame / pip hue for each band (D4's "frame colour" leg).
+ * Frame / pip hue for each band (the "frame colour" leg).
  *
- * The values are the shipped wax-pip hues, unchanged, so adopting this module
- * in `CombatBoard.tsx` and `CombatRewardsOverlay.tsx` is a refactor with no
- * visual diff. Never render this as the ONLY rarity cue — pair it with
- * {@link RARITY_LABEL} or {@link RARITY_PIPS}, which is exactly what D4's
- * "never colour alone" means.
+ * Never render this as the ONLY rarity cue — pair it with
+ * {@link RARITY_LABEL} or {@link RARITY_PIPS}.
  */
 export const RARITY_COLOR: Readonly<Record<CardRarity, string>> = Object.freeze({
     common: HUE.stoneGrey,

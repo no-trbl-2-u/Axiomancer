@@ -1,5 +1,5 @@
 /**
- * Phase 38 — combat-first adoption witness. Proves the card play/refusal
+ * Combat juice adoption witness. Proves the card play/refusal
  * site (`StagedCard`'s drop-confirm pop + rejection shake) actually fires
  * through the lib/juice primitives.
  */
@@ -24,8 +24,7 @@ jest.mock('@/lib/juice', () => {
     };
 });
 
-// A four-card hand off the grey office (the whole library since the card
-// purge, 2026-09-27).
+// A four-card hand off the grey office (the whole card library).
 const CARDS = ['grey-strike', 'grey-ward', 'grey-word', 'grey-strike'];
 
 function freshCard() {

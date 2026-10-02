@@ -30,9 +30,11 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const require = createRequire(path.join(ROOT, 'axiomancer-mechanics', 'package.json'))
 const ts = require('typescript')
 
-// The trees whose comments are guarded. Mobile joins when its comments are
-// clean.
-export const GUARDED_DIRS = ['axiomancer-mechanics/src', 'axiomancer-mechanics/scripts']
+// The trees whose comments are guarded.
+export const GUARDED_DIRS = ['axiomancer-mechanics/src', 'axiomancer-mechanics/scripts', 'axiomancer-mobile']
+
+// Installed packages and gitignored build output are never scanned.
+const SKIP_DIRS = new Set(['node_modules', '.expo', 'dist', 'web-build'])
 
 export const HISTORY_ROWS = [
   { id: 'phase-number', re: /\b[Pp]hases? (?:R?\d|[A-Z]\d)/ },
@@ -89,7 +91,7 @@ export function guardRows() {
 
 function* tsFiles(dir) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (entry.name === 'node_modules') continue
+    if (entry.isDirectory() && SKIP_DIRS.has(entry.name)) continue
     const p = path.join(dir, entry.name)
     if (entry.isDirectory()) yield* tsFiles(p)
     else if (/\.tsx?$/.test(entry.name)) yield p

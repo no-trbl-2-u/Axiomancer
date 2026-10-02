@@ -1,12 +1,10 @@
 /**
- * Spec 26 §2.4 + combat-screen-polish 2026-07 — the enemy intent telegraph.
+ * The enemy intent telegraph.
  *
  * A compact circular badge (icon in the intent colour over a tinted disc) with
  * the damage stake in an attached dark pill — reference-style icon+number
  * chrome, no text label. The label, description, damage and the next-phase
  * preview all live on the accessibility label so nothing is lost to a11y.
- * The STANCE (the RPS axis) is deliberately NOT shown here — it is hidden and
- * read from the thematic tell (Spec 26b §2).
  */
 
 import React from 'react';
@@ -16,7 +14,7 @@ import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 import type { CombatIntentVM } from '@/state/presenters/combat-encounter.engine';
 
-/** WS9 — one a11y sentence for a fork: condition + both outcomes (+ taken). */
+/** One a11y sentence for a fork: condition + both outcomes (+ taken). */
 function branchA11y(branch: NonNullable<CombatIntentVM['branch']>): string {
     return ` Forked threat — ${branch.condition}: ${branch.thenText} Otherwise: ${branch.elseText}`
         + (branch.taken ? ` It committed to the ${branch.taken === 'then' ? 'conditional' : 'baseline'} path.` : '');
@@ -24,7 +22,7 @@ function branchA11y(branch: NonNullable<CombatIntentVM['branch']>): string {
 
 export function IntentIcon({ intent, onPress }: { intent: CombatIntentVM; onPress?: () => void }) {
     const styles = useStyles();
-    // phase 28 — wall-math: the raw `damage` stake above is face value only;
+    // Wall-math: the raw `damage` stake above is face value only;
     // `wallMath` is what actually lands right now, netted against live
     // guard/barrier/modifiers. State the REAL outcome in a11y, not the raw one.
     const { willDeny, netDamage } = intent.wallMath;
@@ -54,16 +52,13 @@ export function IntentIcon({ intent, onPress }: { intent: CombatIntentVM; onPres
             </View>
             {(intent.damage > 0 || intent.debuffs || intent.branch) && (
                 <View style={styles.pill}>
-                    {/* FE-020: a minus, not a heart. This pill is the ENEMY's
-                      * telegraph and the number is damage it will deal to me, but
-                      * it printed '♥11' — and the same board uses '♥ 160' on my own
-                      * rail for my VITAE. One glyph meant my health in one corner
-                      * and the enemy's outgoing damage in the other, so the badge
-                      * read as the foe healing or having 11 health left. ♥ now means
-                      * only my VITAE; a minus means something is coming off it. */}
+                    {/* A minus, not a heart. This pill is the ENEMY's telegraph:
+                      * the number is damage it will deal to the player. ♥ means
+                      * only the player's VITAE; a minus means something is
+                      * coming off it. */}
                     {intent.damage > 0 && <Text style={[styles.pillText, { color: intent.color }]} allowFontScaling={false}>−{intent.damage}</Text>}
                     {intent.debuffs && <Text style={styles.debuffMark} allowFontScaling={false}>☠</Text>}
-                    {/* WS9 — the fork glyph marks a committed branch phase */}
+                    {/* The fork glyph marks a committed branch phase */}
                     {intent.branch && <Text style={[styles.pillText, { color: intent.color }]} allowFontScaling={false}>⑂</Text>}
                 </View>
             )}

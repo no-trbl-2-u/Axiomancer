@@ -42,22 +42,22 @@ export interface MobileEventSlice {
 }
 
 /**
- * Mobile-only notifications slice (Phase 29). Tracks:
+ * Mobile-only notifications slice. Tracks:
  *
  * - `levelUpAcknowledged` — has the player acknowledged the most
  *   recent level-up? Levelup tab badge clears when `true`. Engine
  *   `character:levelup` flips to `false`; character-screen mount
- *   flips back to `true`. (Tick A.)
+ *   flips back to `true`.
  * - `toast` — transient feedback string (e.g. inventory action
  *   confirmation). The `<ToastHost>` in `app/_layout.tsx` clears
  *   the field ~3 seconds after `id` changes. `id` increments per
  *   new toast so listeners can detect fresh dispatches even if
- *   `text` is identical. (Tick B.)
+ *   `text` is identical.
  * - `questAcknowledged` — has the player visited Memoir since last
  *   accepting a quest? Mirrors `levelUpAcknowledged` exactly: engine
  *   `dialogue:applied` (with a `startQuest` effect on the applied
  *   choice) flips to `false`; Memoir-screen mount flips back to
- *   `true`. Drives the Memoir tab badge. (Phase 46c.)
+ *   `true`. Drives the Memoir tab badge.
  */
 export interface MobileNotificationsSlice {
     levelUpAcknowledged: boolean;
@@ -69,7 +69,7 @@ export interface MobileNotificationsSlice {
 }
 
 /**
- * Mobile-only Hazard minigame slice. Holds the active v2 hazard
+ * Mobile-only Hazard minigame slice. Holds the active hazard
  * session (engine: `axiomancer-mechanics` World/Hazard; mobile glue:
  * `state/hazard/store-actions.ts`) — `null` outside a hazard.
  * Sessions are transient by design: abandoning mid-hazard forfeits
@@ -83,11 +83,10 @@ export interface MobileHazardSlice {
 }
 
 /**
- * Mobile-only Rest-choice slice (Phase 52d, replacing the rest minigame
- * retired in Phase 52e; anvil offer dropped Phase 59). Holds the active
+ * Mobile-only Rest-choice slice. Holds the active
  * rest node's session (engine: World/RestChoice) — `null` outside a rest.
  * A node is one irreversible choice of `rest` / `cut`; the shelter class
- * (Phase 52b) rides on the session itself (`session.shelter`), not a
+ * rides on the session itself (`session.shelter`), not a
  * sibling slice field. The claim ledger (heal / spend / removed card)
  * applies to the player at claim.
  */
@@ -96,19 +95,18 @@ export interface MobileRestSlice {
 }
 
 /**
- * Mobile-only Loot-cache-choice encounter slice ("The Reliquary", Phase
- * 63). Holds the active three-offer session (engine: World/LootCacheChoice)
- * — `null` outside one. The engine deals in real `Item`s directly (no
- * opaque-ref indirection, unlike the retired Pick Pool session), and needs
- * no tutorial slice — three labeled offers need no guided coach.
+ * Mobile-only Loot-cache-choice encounter slice ("The Reliquary"). Holds
+ * the active two-offer session (engine: World/LootCacheChoice) — `null`
+ * outside one. The engine deals in real `Item`s directly (no opaque-ref
+ * indirection), and needs no tutorial slice — two labeled offers need no
+ * guided coach.
  */
 export interface MobileCacheSlice {
     session: LootCacheChoiceSession | null;
 }
 
 /**
- * Mobile-only Blacksmith encounter slice ("The Anvil", Spec 33 §6 /
- * Phase D6c). Holds the active die-gear upgrade session (engine:
+ * Mobile-only Blacksmith encounter slice ("The Anvil"). Holds the active die-gear upgrade session (engine:
  * World/Blacksmith) — `null` outside one. The engine NEVER reads
  * `GameState`; the slice seeds it from `player.dieGear` + the player's
  * spendable currency (the placeholder budget unit the host maps), and
@@ -149,10 +147,9 @@ export interface MobileLabyrinthSlice {
 /**
  * Mobile-only post-combat CARD REWARD slice (the 1-of-3 theme-aware draft).
  *
- * The offer used to live in `CombatEncounterPanel`'s own React state, so any
- * unmount mid-draft (navigating away, a remount) silently threw the offer
- * away and the player lost a reward they had already earned. Hoisting it here
- * makes the draft survive the panel: the offer is rolled once per won
+ * Held in the store rather than `CombatEncounterPanel`'s own React state so
+ * an unmount mid-draft (navigating away, a remount) does not throw away a
+ * reward the player has already earned: the offer is rolled once per won
  * encounter, held until the player picks or skips, and cleared on claim.
  *
  * Transient by design — the CLAIM is what persists (`addRewardCard` onto
@@ -170,8 +167,8 @@ export interface MobileCombatRewardSlice {
  * One item waiting on the player's CONFIRM / EQUIP at `/item-reward`.
  *
  * The item is NOT yet in the inventory: the grant is what CONFIRM and EQUIP
- * commit, both through the engine's single `grantItem` path. D7 makes the
- * screen dismissible, so every exit route (back, swipe, Android hardware-back)
+ * commit, both through the engine's single `grantItem` path. The screen is
+ * dismissible, so every exit route (back, swipe, Android hardware-back)
  * drains the queue as CONFIRM — the item cannot be lost by leaving.
  */
 export interface PendingItemReward {
@@ -192,7 +189,7 @@ export interface PendingItemReward {
 }
 
 /**
- * Mobile-only ITEM REWARD slice (owner finding 10; decisions D5/D6/D7).
+ * Mobile-only ITEM REWARD slice.
  *
  * A FIFO queue so a batch grant (a gathering haul, a loot cache, an encounter's
  * drops) can present its qualifying items one after another — the head is the
@@ -291,15 +288,11 @@ export const RECENT_EVENTS_CAPACITY = 20;
 
 /**
  * On mobile we don't want the engine deciding when AsyncStorage is
- * touched — saves are explicit (Spec 09).
+ * touched — saves are explicit.
  *
  * The engine gates its own autosave to a curated `DURABLE_ACTIONS` set
- * (Phase 51, `4972f9a`; `axiomancer-mechanics/src/Game/store.ts`), which
- * is narrower than the "persists on every dispatch" behaviour this
- * comment used to describe — that sentence was stale from Phase 51 and is
- * corrected here by the burn-day audit 2026-09-19, row 3.7.
- *
- * But mobile does not merely narrow that gate, it bypasses it entirely:
+ * (`axiomancer-mechanics/src/Game/store.ts`). Mobile does not merely
+ * narrow that gate, it bypasses it entirely:
  * `wrapDeflectingAdapter` proxies `load()` straight through and swallows
  * `save()` — INCLUDING the engine's durable-action autosaves — unless the
  * wrapper is in "passthrough" mode, which we only engage for the duration
@@ -309,8 +302,7 @@ export const RECENT_EVENTS_CAPACITY = 20;
  * owns save timing").
  *
  * That is the rule, not an accident: mobile is the one owner of save timing
- * on the app (ruled 2026-09-23, the `[loop-call]` row in `plan/AUDIT.md`;
- * phase R9a), and the engine's allowlist is the engine-only path the CLI
+ * on the app, and the engine's allowlist is the engine-only path the CLI
  * and the hermetic tests run on. A checkpoint is safe to take at any moment,
  * mid-fight included, because the state says what the player still owes: a
  * fight's node stays owed (`pendingArrival`) until the fight settles, so a
@@ -339,7 +331,7 @@ function wrapDeflectingAdapter(real: PersistenceAdapter) {
  * Per-store emitter registry. The emitter instance is held outside the
  * store's serialized state (zustand setState would treat it as state
  * and serialize on every dispatch). Consumers that need the emitter
- * directly (e.g. the `useGameEvents` hook, Phase 25 Tick B) look it
+ * directly (e.g. the `useGameEvents` hook) look it
  * up here.
  */
 const EMITTER_BY_STORE = new WeakMap<AppStore, GameEventEmitter>();
@@ -359,7 +351,7 @@ export function createAppStore(options: CreateAppStoreOptions = {}): AppStore {
     // Engine's `save()` writes through `adapter.save(...)`. Gate the
     // wrapped adapter so only this explicit path reaches the real one.
     const engineSave = engineStore.getState().save;
-    // A save taken inside the Aporia boots back into it (map revamp M4).
+    // A save taken inside the Aporia boots back into it.
     const resumed = resumeLabyrinthSession(engineStore.getState());
     store.setState({
         save: () => withPassthrough(engineSave),
@@ -384,7 +376,7 @@ export function createAppStore(options: CreateAppStoreOptions = {}): AppStore {
         store.setState({ _recentEvents: next });
     });
 
-    // Phase 29 Tick A: flip `levelUpAcknowledged` to false when the
+    // Flip `levelUpAcknowledged` to false when the
     // engine fires `character:levelup`. The badge re-arms; visiting
     // the character screen flips it back to true. See
     // `state/presenters/navigation.engine.ts` for the predicate.
@@ -395,7 +387,7 @@ export function createAppStore(options: CreateAppStoreOptions = {}): AppStore {
         });
     });
 
-    // Phase 46c: flip `questAcknowledged` to false when the applied
+    // Flip `questAcknowledged` to false when the applied
     // dialogue choice granted a quest (`effect.startQuest`). Mirrors
     // the level-up handler above; the Memoir tab badge re-arms and
     // clears on Memoir-screen mount. Payload shape probed the same

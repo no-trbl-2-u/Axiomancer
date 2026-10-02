@@ -20,17 +20,15 @@ interface MapCanvasProps {
     nodes: readonly ExplorationNode[];
     edges: readonly ExplorationEdge[];
     /**
-     * The map's sheet: canvas size, scale, plate and plate opacity (map revamp
-     * M2). Omitted, the canvas uses the legacy 360×400 ×2.6 size with no plate.
+     * The map's sheet: canvas size, scale, plate and plate opacity. Omitted,
+     * the canvas uses `LEGACY_SHEET_SIZE` (360×400 ×2.6) with no plate.
      */
     sheet?: MapSheet | null;
     /**
      * Viewport-fixed chart furniture (legend, compass copy, sheet label) —
      * rendered as a sibling of the vignette/compass SVGs, NOT inside the
      * pannable canvas, so absolute positions resolve against the visible
-     * viewport instead of the 936×1040 spread canvas (CRITIQUE pass 20:
-     * the legend clipped to a bare "25" on desktop when it panned with
-     * the map).
+     * viewport instead of the pannable canvas.
      */
     overlays?: React.ReactNode;
     children: React.ReactNode;
@@ -38,8 +36,7 @@ interface MapCanvasProps {
 
 // Node coordinates live on the map's sheet (`MapSheet`), rendered `scale`x
 // into a larger pannable canvas so each node has breathing room — the window
-// clips to a viewport the user pans/zooms around. (Visual-audit 2026-06; the
-// one global SPREAD became a per-sheet scale in map revamp M2.)
+// clips to a viewport the user pans/zooms around.
 
 /** The canvas size in device px for a sheet at 1x zoom. */
 export function canvasSizeOf(size: SheetSize): { w: number; h: number } {
@@ -53,12 +50,9 @@ const MAX_SCALE = 3;
  * The zoom-out floor for this sheet in this viewport: `MIN_SCALE`, or lower
  * if that is what it takes to see the whole plate at once — never lower.
  *
- * A flat 0.6 was tuned on the 936px legacy sheet, where it already shows more
- * than a phone's width. Map revamp M2 moved to per-sheet plates (the
- * Breakwater is 2400px square), and at 0.6 a phone sees about a quarter of
- * one: the fit clamped there and every open node from the Breakwater's start
- * windmill sat off-screen, with RECENTRE re-running the same clamped fit.
- * Found by the 2026-09-26 agent playthrough.
+ * A large plate (the Breakwater is 2400px square) at 0.6 shows a phone about a
+ * quarter of the sheet, so a fit clamped there would leave every open node
+ * from the Breakwater's start windmill off-screen.
  *
  * Exported for unit coverage; the fit and the pinch share it so a pinch that
  * starts below 0.6 does not snap up.
@@ -68,14 +62,10 @@ export function minScaleFor(viewport: { w: number; h: number }, size: SheetSize 
     return Math.min(MIN_SCALE, viewport.w / canvas.w, viewport.h / canvas.h);
 }
 
-// CRITIQUE.md [MED] "open map nodes just off-screen no-op silently on tap"
-// (pass, 2026-08-29): the prior initial-camera effect centred on the focus
-// nodes' centroid at a fixed scale of 1, so a wide branch (several
-// simultaneously-open nodes spread further apart than the viewport) still
-// left the outermost ones off-screen the moment the map opened. This fits
-// the whole focus bounding box in frame instead, zooming out (never in —
-// a lone node shouldn't get punched in past 1x) just enough that every
-// currently-open node starts visible.
+// The camera fits the whole focus bounding box in frame, zooming out (never
+// in — a lone node shouldn't get punched in past 1x) just enough that every
+// currently-open node starts visible, even on a branch wider than the
+// viewport.
 const FIT_PADDING = 40;
 
 /**
@@ -86,16 +76,11 @@ const FIT_PADDING = 40;
  * re-fitting the camera, so it is pinned directly rather than inferred from a
  * rendered transform.
  *
- * Two findings meet here and pull in opposite directions:
+ * Two requirements meet here and pull in opposite directions:
  *
- *   - PLAYTEST_BUGS_2026-09-18 BUG-04: the camera fitted once at mount and
- *     never again, so after the player moved, their onward choices could sit
- *     entirely off-screen. Measured at the Crossing on a 414px viewport, two of
- *     three onward paths were off opposite edges and 19 of 25 nodes were out of
- *     frame. The camera therefore MUST re-fit when the road ahead changes.
- *   - `plan/CRITIQUE.md`'s RESOLVED row at :2140 ("the map recenters against
- *     manual panning", commit 6fe4e47c, issue #294): the camera MUST NOT fight
- *     a player panning to look around.
+ *   - The camera MUST re-fit when the road ahead changes, or after a move the
+ *     player's onward choices can sit entirely off-screen.
+ *   - The camera MUST NOT fight a player panning to look around (issue #294).
  *
  * Keying the re-fit on this value satisfies both structurally instead of by
  * heuristic. Panning changes neither where the player stands nor what is open
@@ -170,24 +155,23 @@ interface EdgePalette { parchment: string; ash: string; bone: string; }
  * The ink for one edge — the whole of how the chart tells its road types
  * apart, as a pure function so it can be asserted without reading SVG.
  *
- * ── owner finding 9 / D1, 2026-09-21: RIBS ARE NOT ROADS ──
+ * ── RIBS ARE NOT ROADS ──
  *
- * D1 landed 69 LATERAL LANE RIBS across the seven maps — sideways steps
- * between neighbouring lanes of the same column. They are traversal, not
+ * LATERAL LANE RIBS are sideways steps between neighbouring lanes of the
+ * same column. They are traversal, not
  * progression: the engine's own route audits walk the forward skeleton and
  * deliberately ignore them (`forwardEdges()` in `world.reducer.ts`).
  *
- * Inked at the same weight as the forward roads, they very nearly undo the
- * thing they were added for. A column of five lanes gains four ribs, the fan
- * out of the gate before it already draws five diagonals, and the chart
- * becomes an even mesh in which the spine the player is progressing along is
- * no longer findable — "branching" read as "tangled". So a rib is drawn at
+ * Inked at the same weight as the forward roads, they would hide the spine:
+ * a column of five lanes gains four ribs, the fan out of the gate before it
+ * already draws five diagonals, and the chart becomes an even mesh in which
+ * the spine the player is progressing along cannot be found. So a rib is drawn at
  * half the weight, without the dark casing that makes a road read as a road,
  * and finely dashed. The hierarchy on the page then matches the hierarchy in
  * the rules: solid, cased lines carry you forward; hairlines let you step
  * across.
  *
- * The three progression states keep their existing separation, and it is not
+ * The three progression states are separated, and it is not
  * hue-only either: travelled is the widest and solid, open is mid-weight and
  * solid, sealed is thin and coarsely dashed.
  */
@@ -213,19 +197,16 @@ export function edgeStroke(e: ExplorationEdge, AXM: EdgePalette): EdgeStroke {
     };
 }
 
-// Phase V1/V2 (the Woodcut Codex) — the map reads as a chart, not a
-// void: a faint diagonal hatch over the whole sheet (the handoff's
-// `.axm-hatch` texture, redrawn as strokes so no Pattern support is
-// needed), cartographic contour "hills" in the dead zones, a
-// viewport-fixed compass rose, and an edge vignette. All tokenized;
-// swapped for real backdrop art at Phase V5 (procedural stays as the
-// fallback).
+// The map reads as a chart, not a void: a faint diagonal hatch over the
+// whole sheet (drawn as strokes so no Pattern support is needed),
+// cartographic contour "hills" in the dead zones, a viewport-fixed compass
+// rose, and an edge vignette. All tokenized; the hatch and hills are skipped
+// when the sheet sets `chartTexture: false`.
 const HATCH_STEP = 18;
 
 /**
  * 45° hatch lines across a sheet: sweep the x-intercept from -height (a line
- * entering from the left edge) to width. On the legacy 360×400 sheet this is
- * the original fixed set.
+ * entering from the left edge) to width.
  */
 export function hatchLines(width: number, height: number): string[] {
     const lines: string[] = [];
@@ -235,7 +216,7 @@ export function hatchLines(width: number, height: number): string[] {
     return lines;
 }
 
-/** Nested contour rings — hand-authored cartographic hills, on the legacy 360×400 sheet. */
+/** Nested contour rings — hand-authored cartographic hills on a 360×400 sheet, scaled to the map's sheet. */
 const CONTOUR_GROUPS: readonly string[][] = [
     [
         'M40 250 q 20 -22 44 -10 q 12 14 -10 20 q -26 4 -34 -10 z',
@@ -285,17 +266,11 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
      * The identity of the camera's SUBJECT — where the player stands plus the
      * steps open from there — as a stable string.
      *
-     * PLAYTEST_BUGS_2026-09-18 BUG-04: the camera fitted once at mount and never
-     * again (`initialized.current` latched on first run), so after the player
-     * moved, the newly-opened branch could sit entirely off both edges. Measured
-     * at a three-way crossing on a 414px viewport: of the three onward paths,
-     * one landed at x = -49 and one at x = 419 — two of three choices invisible,
-     * 19 of 25 nodes off-screen, with nothing on screen saying more existed.
-     *
-     * Keying the fit on THIS rather than on `nodes` is what makes the fix safe.
-     * `nodes` is a fresh array every render, which is why the latch existed in
-     * the first place; this key changes only when the player's actual position
-     * or set of options changes. See the effect below for why that matters.
+     * The camera re-fits whenever this changes, so after a move the newly
+     * opened branch is framed. Keying the fit on THIS rather than on `nodes`
+     * keeps it safe: `nodes` is a fresh array every render, while this key
+     * changes only when the player's actual position or set of options
+     * changes. See the effect below for why that matters.
      */
     const focusKey = React.useMemo(() => focusKeyOf(nodes), [nodes]);
     const [viewport, setViewport] = React.useState<{ w: number; h: number } | null>(null);
@@ -329,13 +304,11 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
     /**
      * RECENTRE — the drag affordance's missing return leg.
      *
-     * owner finding 9 / D1, 2026-09-21. The chart is a 936x1040 spread behind
-     * a phone-sized window and the pan is unbounded, so a player who drags to
-     * look down a side strand can end up holding a blank corner of the sheet
-     * with no way back except guessing. That was survivable while the map was
-     * a vertical ladder and the only interesting thing was directly ahead;
-     * with lateral ribs and D1's frontier roaming, looking sideways is now
-     * the point, so looking sideways has to be undoable.
+     * The chart is far larger than a phone-sized window and the pan is
+     * unbounded, so a player who drags to look down a side strand can end up
+     * holding a blank corner of the sheet with no way back except guessing.
+     * With lateral ribs and frontier roaming, looking sideways is the point,
+     * so looking sideways has to be undoable.
      *
      * It re-runs the SAME fit the camera performs on mount and whenever the
      * road ahead changes, which is why it needs no geometry of its own and
@@ -358,28 +331,23 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
         //
         // This runs on every CHANGE OF `focusKey` — not once, and not on every
         // render. That distinction is the whole design, because it has to
-        // satisfy two findings at once:
+        // satisfy two requirements at once:
         //
-        //   - BUG-04 (this phase): fitting only once left the player's onward
-        //     choices off-screen after they moved. So the camera must re-fit
-        //     when the road ahead changes.
-        //   - CRITIQUE.md's RESOLVED row at :2140 ("the map recenters against
-        //     manual panning", commit 6fe4e47c, issue #294): the camera must
-        //     NOT fight a player who is panning to look around.
+        //   - The camera must re-fit when the road ahead changes, or the
+        //     player's onward choices sit off-screen after a move.
+        //   - The camera must NOT fight a player who is panning to look
+        //     around (issue #294).
         //
         // Keying on `focusKey` satisfies both structurally rather than by
         // heuristic: panning does not change where the player stands or what
         // is open to them, so it cannot produce a re-fit — no "has the user
         // panned?" flag is needed, and there is no window in which the camera
         // could snap back mid-gesture. The camera moves only at the moments the
-        // player themselves changed the map's subject, which is precisely when
-        // that RESOLVED row's own text anticipated a re-fit would be wanted:
-        // "a tap-to-pan affordance is separable follow-up if a future pass
-        // still finds nodes going out of frame after a move."
+        // player themselves changed the map's subject.
         commitCamera(computeFocusTransform(nodes, viewport, size));
         // `nodes` is deliberately NOT a dependency — it is a fresh array every
-        // render, and depending on it would re-fit constantly, which is exactly
-        // the defect issue #294 closed. `focusKey` is its stable projection.
+        // render, and depending on it would re-fit constantly and fight the
+        // player's pan (issue #294). `focusKey` is its stable projection.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [viewport, focusKey, size.width, size.height, size.scale, commitCamera]);
 
@@ -394,7 +362,7 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
         });
 
     // `withTestId` is RNGH's own test affordance, inert in production — it
-    // lets the suite drive a real pan and then prove the BUG-04 re-fit does
+    // lets the suite drive a real pan and then prove the focus re-fit does
     // not undo it (issue #294).
     const pan = Gesture.Pan()
         .withTestId('map-pan')
@@ -431,7 +399,7 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
                     {/* The engraving plate — pans and zooms with the chart so the
                         wood feels painted onto the page. An atmosphere plate is
                         dimmed so roads and nodes keep contrast (dim, never blur);
-                        a plate that is the map itself reads near full (D15). */}
+                        a plate that is the map itself reads near full. */}
                     {sheet != null && (
                         <Image
                             source={sheet.backdrop}
@@ -528,9 +496,8 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
 
             {/* Viewport-fixed chart furniture — never pans with the map.
                 Sized explicitly: an SVG with no width/height falls back to
-                300×150 on web, which drew this vignette as a dark box in the
-                chart's top-left corner (invisible under the dim atmosphere
-                plates; plain over the Act 1 plates, map revamp M3a). */}
+                300×150 on web and draws this vignette as a dark box in the
+                chart's top-left corner. */}
             <Svg
                 width="100%"
                 height="100%"
@@ -606,9 +573,7 @@ const useStyles = makeStyles((AXM) => ({
         // own TOP-LEFT corner. The platform default pivots around the CENTER
         // instead, which is invisible whenever scale lands at 1 (desktop
         // always does — `Math.min(1, …)` caps it) but throws the whole canvas
-        // off-frame the moment a narrow viewport clamps to MIN_SCALE (CRITIQUE
-        // pass 48: the late-game hub's node graph rendered fully blank on
-        // mobile — the fitted canvas landed almost entirely below the fold).
+        // off-frame the moment a narrow viewport clamps to MIN_SCALE.
         transformOrigin: '0 0',
     },
     graphBackground: {

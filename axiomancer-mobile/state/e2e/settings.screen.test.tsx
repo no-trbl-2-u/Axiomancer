@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — the `/settings` screen (owner call 2026-09-23) over its
+ * Hermetic E2E — the `/settings` screen over its
  * own settings store and an in-memory slot store.
  */
 

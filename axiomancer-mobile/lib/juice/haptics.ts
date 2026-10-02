@@ -2,7 +2,7 @@ import { Haptics, ImpactFeedbackStyle, NotificationFeedbackType } from '@/lib/pl
 
 /**
  * The single wrapper every juice/combat call site fires haptics through —
- * the Expo-decouple swap point (phase 38 brief §"Inputs"). Preserves the
+ * the single swap point for the haptics backend. Preserves the
  * house `.catch(() => undefined)` never-throw idiom used at every existing
  * haptics call site.
  */

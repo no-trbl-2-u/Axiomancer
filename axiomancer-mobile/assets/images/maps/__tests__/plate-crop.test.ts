@@ -1,11 +1,9 @@
 /**
- * Map-plate crop gate — DECISION-6 (row C-267), the follow-through on
- * S4-world-C21.
+ * Map-plate crop gate.
  *
- * The owner's decision was "crop the Doré plates above their baked-in
- * captions", plural. `charon-crossing.webp` was cropped and the other three
- * were not, so the codex shipped plates that still carried the scanned book's
- * blank page paper. Under `contentFit="cover"` that paper does not vanish: at
+ * The Doré plates are cropped above their baked-in captions and free of the
+ * scanned book's blank page paper. Under `contentFit="cover"` that paper does
+ * not vanish: at
  * 1280x800 a side margin survives as a pale bar down the screen edge, at
  * 375x812 a foot margin survives as a pale rule under the art. Either way the
  * backdrop stops being an engraving bled into the void and becomes a photo of

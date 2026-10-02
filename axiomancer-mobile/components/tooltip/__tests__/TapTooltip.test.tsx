@@ -1,5 +1,5 @@
 /**
- * Phase 74 Tick A — TapTooltip visual primitive pins.
+ * TapTooltip visual primitive pins.
  *
  * Pure presentational; no provider needed.
  */

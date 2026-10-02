@@ -2,10 +2,9 @@
  * S7-hazard-C04 — the deck screen must key the marks its cards print.
  *
  * Every hazard card carries two unnamed glyph-and-number pairs. The
- * board keys them with its labelled FORCE / ESCAPE meters; the deck
- * screen had no such legend, so the numbers there were unreadable. A
- * `HazardStatKey` now sits above the card grid and under the card in
- * the tap-to-read overlay.
+ * board keys them with its labelled FORCE / ESCAPE meters; on the deck
+ * screen a `HazardStatKey` sits above the card grid and under the card in
+ * the tap-to-read overlay, so the numbers there are readable.
  *
  * The suite pins what the finding is about — the key renders with both
  * names on the deck screen, and follows the player into the card detail

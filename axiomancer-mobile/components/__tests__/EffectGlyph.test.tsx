@@ -1,6 +1,6 @@
 /**
- * Hermetic component tests — EffectGlyph. Pins the adapter contract
- * (Phase V1): each known status-effect kind resolves to its registry
+ * Hermetic component tests — EffectGlyph. Pins the adapter contract:
+ * each known status-effect kind resolves to its registry
  * silhouette (an Svg with at least one Path), and unknown kinds fall
  * back to a colored placeholder View — the loud "this effect has no
  * mark yet" signal.

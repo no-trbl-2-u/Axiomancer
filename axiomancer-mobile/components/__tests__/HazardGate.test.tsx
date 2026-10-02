@@ -3,8 +3,7 @@
  *
  * HazardGate is a side-effect-only component (returns null) that
  * pushes the user into the full-screen `/hazard` route whenever
- * `selectHasActiveHazard` flips true. Coverage gap filed by `/iterate`
- * 2026-06-14.
+ * `selectHasActiveHazard` flips true.
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';

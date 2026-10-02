@@ -26,9 +26,9 @@ The engine (`axiomancer-mechanics`) is a sibling workspace consumed as
 local source via the `@mechanics` alias — the historical npm-pin
 upgrade guides were removed (git history preserves them).
 
-| File | Coverage | Priority |
-|------|----------|----------|
-| [`engine-integration-architecture.md`](./engine-integration-architecture.md) | How the app consumes the engine | **HELPFUL** |
+The presenter boundary is stated in [`presenters.md`](./presenters.md) and
+[ADR-0001](./adr/ADR-0001-engine-truth-and-presenter-boundary.md); the rules
+of play live in [`docs/game-model.md`](../../docs/game-model.md).
 
 ## Hazard minigame documentation
 
@@ -39,7 +39,6 @@ The hazard docs live in `axiomancer-mechanics/docs/` (`encounters/hazard.md`, `h
 | File | Coverage | Priority |
 |------|----------|----------|
 | [`combat.md`](./combat.md) | Combat system design documentation | **HELPFUL** |
-| [`early-combat-ux.md`](./early-combat-ux.md) | Combat UX evolution and design decisions | **REFERENCE** |
 
 ## Architecture Decision Records (ADRs)
 

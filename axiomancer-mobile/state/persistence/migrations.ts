@@ -5,7 +5,7 @@ import {
 } from '@mechanics';
 
 /**
- * Envelope-format version for the *mobile-only* legacy bridge.
+ * Envelope-format version for the *mobile-only* pre-engine save bridge.
  *
  * This is **frozen at 3** and is NOT the source of truth for GameState
  * migration. The engine owns that (`migrate` / `GAME_STATE_VERSION`).
@@ -24,7 +24,7 @@ export interface StoredEnvelope {
     schemaVersion: number;
     state: unknown;
     /**
-     * Epoch ms of the write (2026-09-23, save slots). Optional: envelopes
+     * Epoch ms of the write. Optional: envelopes
      * written before the slot system carry none and read as `0` — "oldest"
      * — when CONTINUE picks the most recent slot. A property of the WRITE,
      * so it lives on the envelope, not inside the game state.
@@ -43,10 +43,8 @@ export type Migration = (state: unknown) => unknown;
 export type MigrationMap = Record<number, Migration>;
 
 /**
- * Migration from schema v1 to v2. Originally backfilled the player's
- * `derivedStats` / `nonCombatStats`; those stats were deleted from the engine
- * in TRIM THE FAT T2a (engine save v25), so the step now only validates that
- * the pre-engine save carries usable base stats. It stays in the chain so a
+ * Migration from schema v1 to v2. Validates that the pre-engine save carries
+ * usable base stats. It stays in the chain so a
  * v1 envelope still walks v1 → v2 → v3 before the engine's `migrate` runs.
  */
 function migrateV1ToV2(state: unknown): unknown {
@@ -75,12 +73,9 @@ function migrateV1ToV2(state: unknown): unknown {
 }
 
 /**
- * Migration from schema v2 to v3. Originally (Phase 51, engine 0.10.0)
- * backfilled the top-level alignment cube; the alignment grid and the GRACE
- * meter were removed from the engine (T6 / D39, engine save v26), so the step
- * now only validates the save is an object. It stays in the chain so a v2
- * envelope still walks v2 → v3; the engine's `migrate` strips the retired
- * fields from engine-shaped saves.
+ * Migration from schema v2 to v3. Validates the save is an object. It stays
+ * in the chain so a v2 envelope still walks v2 → v3; the engine's `migrate`
+ * strips obsolete fields from engine-shaped saves.
  */
 function migrateV2ToV3(state: unknown): unknown {
     if (!state || typeof state !== 'object') {
@@ -102,7 +97,7 @@ export const DEFAULT_MIGRATIONS: MigrationMap = {
  * Wrap a state for storage.
  *
  * @param state   the game state to persist.
- * @param savedAt epoch ms of this write; omitted → no stamp (legacy shape).
+ * @param savedAt epoch ms of this write; omitted → no stamp.
  */
 export function wrap(state: GameState, savedAt?: number): StoredEnvelope {
     return savedAt === undefined
@@ -114,15 +109,15 @@ export function wrap(state: GameState, savedAt?: number): StoredEnvelope {
  * Load an on-disk save into a current-version `GameState`.
  *
  * Two stages:
- *  1. **Legacy envelope bridge** — applies the frozen v1→v3 mobile steps
+ *  1. **Pre-engine envelope bridge** — applies the frozen v1→v3 mobile steps
  *     to normalise pre-engine save *shapes* (string `version`, missing
  *     base stats). No new steps are added
  *     here.
  *  2. **Engine migration (source of truth)** — delegates to the engine's
  *     `migrate`, keyed on the engine numeric `GameState.version`, to bring
- *     the save up to `GAME_STATE_VERSION`. This is what makes future engine
- *     schema bumps ride through without any mobile change; mobile no longer
- *     maintains per-engine-version migration logic.
+ *     the save up to `GAME_STATE_VERSION`. Engine schema bumps ride through
+ *     without any mobile change; mobile keeps no per-engine-version
+ *     migration logic.
  *
  * Throws on malformed envelopes and on saves from a future version.
  */
@@ -144,7 +139,7 @@ export function unwrap(
             `asyncStorageAdapter: save schema v${v} is from a future version (current v${CURRENT_SCHEMA_VERSION})`,
         );
     }
-    // Stage 1 — legacy mobile-shape bridge (frozen).
+    // Stage 1 — pre-engine mobile-shape bridge (frozen).
     while (v < CURRENT_SCHEMA_VERSION) {
         const m = migrations[v];
         if (!m) {
@@ -154,8 +149,8 @@ export function unwrap(
         v++;
     }
     // Stage 2 — engine owns GameState migration. Only engine-shaped saves
-    // carry a numeric `version`; legacy bridged saves (string `version`)
-    // are left to the engine reducer's own tolerance, as before.
+    // carry a numeric `version`; pre-engine bridged saves (string `version`)
+    // are left to the engine reducer's own tolerance.
     const engineVersion = (state as { version?: unknown } | null)?.version;
     if (typeof engineVersion === 'number' && engineVersion < GAME_STATE_VERSION) {
         state = migrate(state, engineVersion);

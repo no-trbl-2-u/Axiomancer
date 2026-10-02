@@ -2,8 +2,7 @@ import { type Palette } from './palette';
 import { currentPalette, getActiveThemeId } from './runtime';
 
 /**
- * The active theme id at module-load. Exported for backward compat and
- * non-reactive callers; React code that must track switches should use
+ * The active theme id at module-load. Exported for non-reactive callers; React code that must track switches should use
  * `useThemeId()` from `theme/runtime` instead.
  */
 export const ACTIVE_THEME_ID = getActiveThemeId();

@@ -1,5 +1,5 @@
 /**
- * Hermetic component tests — DebugPresetPicker (Phase 59).
+ * Hermetic component tests — DebugPresetPicker.
  *
  * Pins the dev-only mount gate + the action-routing contract.
  * The full preset-application mutation is exercised in

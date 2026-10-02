@@ -1,7 +1,7 @@
 /**
  * SATCHEL × the first-node relic grant.
  *
- * Since 2026-09-23 (THE VERY START, owner call) a brand-new run's satchel IS
+ * A brand-new run's satchel IS
  * empty and the dock IS bare — this file pins that, and pins what the player
  * actually SEES when the run's first node hands over the Suppliant's Ring
  * (the first thing they own). The displacement case — a full accessory row

@@ -1,5 +1,5 @@
 /**
- * Dev-only enemy-art gallery (visual-audit 2026-06). Renders every
+ * Dev-only enemy-art gallery. Renders every
  * bespoke enemy archetype illustration in a grid so the procedural SVG
  * figures can be eyeballed without driving combat to each foe. Gated to
  * dev builds; production renders nothing.

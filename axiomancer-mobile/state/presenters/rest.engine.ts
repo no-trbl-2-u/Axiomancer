@@ -1,8 +1,6 @@
 /**
- * Rest-choice presenter (Phase 52d, replacing the retired rest minigame —
- * see Phase 52e) — maps
- * the engine session (`axiomancer-mechanics` World/RestChoice) onto a
- * render-ready view-model. Pure: no store writes, no rolls, no rule
+ * Rest-choice presenter — maps the engine session (`axiomancer-mechanics`
+ * World/RestChoice) onto a render-ready view-model. Pure: no store writes, no rolls, no rule
  * decisions.
  *
  * Owner-UI doctrine: an unaffordable OR capped offer is disabled AND names
@@ -58,14 +56,14 @@ export interface RestChoiceOutcomeVM {
 export interface RestChoiceVM {
     active: boolean;
     phase: RestChoiceSession['phase'] | 'none';
-    /** S6-camp-C03 — VITAE as it stands NOW: the snapshot, plus any settled heal. */
+    /** VITAE as it stands NOW: the snapshot, plus any settled heal. */
     health: number;
     maxHealth: number;
     currency: number;
     offers: readonly RestChoiceOfferVM[];
     cut: RestChoiceCutVM | null;
     outcome: RestChoiceOutcomeVM | null;
-    /** Phase 59 — the authored MapEvent one-liner; `null` falls back to the placeholder intro. */
+    /** The authored MapEvent one-liner; `null` falls back to the placeholder intro. */
     description: string | null;
 }
 
@@ -94,7 +92,7 @@ function cardName(cardId: string): string {
 }
 
 /**
- * Displayed VITAE for the rest screen's purse readout (S6-camp-C03).
+ * Displayed VITAE for the rest screen's purse readout.
  *
  * The engine session is a frozen snapshot: `health` keeps the value the
  * pilgrim walked in with, and the heal sits in the settled ledger until the
@@ -126,8 +124,7 @@ export function selectRestVM(state: Pick<AppStoreState, 'rest'>): RestChoiceVM {
     const offers: RestChoiceOfferVM[] = s.offers.map((o) => ({
         id: o.id,
         label: REST_CHOICE_OFFER_LABEL[o.id],
-        // FE-024: REST names the VITAE it restores — the one number a hurt
-        // player is deciding on. Audit 2026-09-12: read from the engine's own
+        // REST names the VITAE it restores, read from the engine's own
         // preview (cap included), never re-derived from the fraction.
         desc: o.id === 'rest'
             ? restOfferDesc(previewRestChoiceHeal(s))
@@ -158,7 +155,7 @@ export function selectRestVM(state: Pick<AppStoreState, 'rest'>): RestChoiceVM {
     return {
         active: true,
         phase: s.phase,
-        // S6-camp-C03: the readout follows the settled ledger, not the
+        // The readout follows the settled ledger, not the
         // pre-choice snapshot.
         health: restDisplayHealth(s.health, s.maxHealth, s.outcome),
         maxHealth: s.maxHealth,

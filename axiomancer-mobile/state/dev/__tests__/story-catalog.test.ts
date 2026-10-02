@@ -30,7 +30,7 @@ const FIXTURE_NPC_CHOICE: NpcChoice = {
 const FIXTURE_QUEST_CHOICE: QuestChoice = { key: FIXTURE_QUEST.name, map: 'breakwater', quest: FIXTURE_QUEST };
 
 describe('story-catalog dev helpers', () => {
-    // R7e (D72): no map stages an NPC or carries a quest, so both lists are
+    // No map stages an NPC or carries a quest, so both lists are
     // empty and the helpers below run on the neutral fixtures.
     it('lists no staged NPC and no authored quest', () => {
         expect(listNpcs()).toEqual([]);

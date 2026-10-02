@@ -1,5 +1,5 @@
 /**
- * Hermetic unit tests — rarityAffordance helper (Phase 135).
+ * Hermetic unit tests — rarityAffordance helper.
  *
  * Pins the rarity → visual-kind + accessible-phrase mapping and the
  * palette colour resolution. Pure module, no rendering.

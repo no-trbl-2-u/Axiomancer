@@ -1,5 +1,5 @@
 /**
- * Next-launch "previous session crashed" prompt (Phase 77).
+ * Next-launch "previous session crashed" prompt.
  *
  * `state/logging.ts` installs global JS-error / unhandled-rejection
  * handlers alongside `ErrorBoundary`'s render-error capture; all three

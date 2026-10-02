@@ -2,10 +2,10 @@
  * GUARD — no library card may render the ambiguous PAID fallback.
  *
  * The card face prints its PAID side as `KEYWORD · value`. A card whose driving
- * `specialMechanics` verb (or rider) was never wired into the presenter used to
- * fall through to a contradictory placeholder: keyword "DEBUFF" with the body
- * "buff yourself" (owner report, 2026-07-10 — "Curry's Conversion"). The
- * generic mechanic-led face (`kind: 'mechanic'`) closes that gap.
+ * `specialMechanics` verb (or rider) is not wired into the presenter would fall
+ * through to a contradictory placeholder: keyword "DEBUFF" with the body
+ * "buff yourself". The generic mechanic-led face (`kind: 'mechanic'`) closes
+ * that gap.
  *
  * This guard sweeps the ENTIRE live library through the real presenter and
  * fails if any card is still ambiguous — so a new card or a new mechanic kind
@@ -41,7 +41,7 @@ describe('card-face honesty guard', () => {
     });
 
     it('every explainer term renders at most once per overlay (no dump, no double-gloss)', () => {
-        // 2026-07-12 (owner playtest) — the inspect overlay may explain each
+        // The inspect overlay may explain each
         // term at most once: keyword chips are deduped, and the per-card
         // systems slice may not restate a chip (e.g. GHOST beside FORGE) or
         // repeat a term. Also pins the dump eviction: a card whose printed
@@ -57,7 +57,7 @@ describe('card-face honesty guard', () => {
                 if (seen.has(n)) offenders.push(`${id} → '${n}' explained twice`);
                 seen.add(n);
             }
-            // 2026-07-12 (card-wording audit) — the presenter scans the printed
+            // The presenter scans the printed
             // lines PLUS the overlay's own free/stacks lines (INTENSITY/FREE
             // live there); this reference check mirrors that scan basis.
             const printed = [card.topActionText, card.bottomActionText, d.freeLine, d.stacksText ?? ''].join(' ');
@@ -114,18 +114,6 @@ describe('card-face honesty guard', () => {
         expect(offenders).toEqual([]);
     });
 
-    // REPEALED 2026-09-02 — "WI-2 extension (2026-08-05): no authored PAID
-    // sentence claims a round-clock lifetime for an event-triggered DoT it
-    // carries" is deleted here. It was pure enforcement of L7 (the per-family
-    // DoT clock law: POISON = card-played, BLEED = damage-instance, event
-    // clocks never round-tick), which THE BIG NUMBERS REWRITE voids by name.
-    // See `plan/2026-09-02-big-numbers-overhaul.prompt.md` §3, row L7, which
-    // cites this very file at :110 and :155 as enforcement to delete. The
-    // `DotTriggerClock` MECHANISM survives; WHICH family gets which clock is
-    // now a design choice, so a card printing "POISON 4 for 3 turns" is no
-    // longer categorically a lie. What survives is the NUMBER-parity half of
-    // the honesty doctrine (L22) — the sweeps above and below still hold it.
-
     it('P2 HP→VITAE sweep — no card face or detail string says "HP" (player-facing term is VITAE)', () => {
         const offenders: string[] = [];
         const hp = /\bHP\b/;
@@ -148,11 +136,10 @@ describe('card-face honesty guard', () => {
     });
 
     it('every keyword/effect a card prints has a popup (keyword chip or system entry) — nothing unexplained', () => {
-        // 2026-07-12 (owner directive): the inspect overlay is the popup layer.
+        // The inspect overlay is the popup layer.
         // Every UPPERCASE registry word on the printed lines must render a
         // keyword chip WITH a gloss; every authored status effect must resolve
-        // its keyword chip. (The Peroration words SENTENCE / CONDEMN left the
-        // systems glossary in the keyword audit, 2026-09-27, with their cards.)
+        // its keyword chip.
         const offenders: string[] = [];
         for (const { id } of cardLibrary) {
             const card = getCard(id);
@@ -194,9 +181,8 @@ describe('card-face honesty guard', () => {
     });
 
     it('spec 33 die-gear keywords (BOON/HONE/TEMPER) resolve a gloss — a gear card can never fall through', () => {
-        // D4 (spec 33 §6, 2026-07-17): the blacksmith/die-gear vocabulary is
-        // registered ahead of its card carriers (die gear + blacksmith land in
-        // D5). Pinning the glosses here means the first card face that prints
+        // The blacksmith/die-gear vocabulary is registered whether or not a
+        // card carries it. Pinning the glosses here means any card face that prints
         // BOON, HONE, or TEMPER resolves a keyword chip instead of the
         // ambiguous PAID fallback the rest of this file guards against.
         const missing = ['Boon', 'Hone', 'Temper'].filter(kw => !keywordGloss(kw));
@@ -204,8 +190,7 @@ describe('card-face honesty guard', () => {
     });
 
     it('the grey office vocabulary survives the keyword audit — GUARD and VULNERABLE resolve end to end', () => {
-        // The keyword audit (2026-09-27) cut the registry to what live content
-        // prints. The three grey cards are the whole player library, so their
+        // The registry holds what live content prints. The three grey cards are the whole player library, so their
         // words are pinned directly: the gloss, the effect/verb mapping, and a
         // drawn silhouette for each.
         expect(keywordGloss('Guard')).toBeTruthy();

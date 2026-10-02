@@ -1,12 +1,12 @@
 /**
- * Save-corrupted prompt modal — Phase 53 (Spec 09 Q7=A follow-up).
+ * Save-corrupted prompt modal.
  *
  * Mounts at the root layout when `persistenceAdapter.preload()`
  * rejects (corrupt JSON, mismatched schema version, future-version
  * save, etc.). Pure display — the host (`app/_layout.tsx`) owns
  * the failure state + the confirm/cancel callbacks.
  *
- * Voice register: lowercase ritual (Phase 33). No second-person
+ * Voice register: lowercase ritual. No second-person
  * archaic pronouns. Copy lives on the component (not the
  * presenter) because there's no game-state presenter responsible
  * for boot-time chrome.

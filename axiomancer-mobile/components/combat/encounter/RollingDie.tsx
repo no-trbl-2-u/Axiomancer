@@ -1,13 +1,13 @@
 /**
- * Spec 33 §1/§4 (Phase D6f — The Roll Ritual) — the choreographed dice cast.
+ * The Roll Ritual — the choreographed dice cast.
  *
- * The choreography is the HAZARD CAST (owner call 2026-07-19): the proven
+ * The choreography is the HAZARD CAST: the proven
  * fall-in from the hazard minigame's dice-cast interstitial
  * (`HazardOverlays.tsx`'s `TumblingDie`) — the die drops in from above the
  * tray rotated hard, unwinds as it falls, lands with a spring micro-bounce,
  * and comes to rest EXACTLY on the tray line. It ALWAYS lands on the
- * engine-rolled face: the engine RNG is the sole authority on outcomes
- * (dice-honesty, 2026-07-09); this component only choreographs the arrival.
+ * engine-rolled face: the engine RNG is the sole authority on outcomes;
+ * this component only choreographs the arrival.
  * The real `CombatDie` — carrying the true settled face, its a11y label, and
  * its testID — stays mounted the whole time, so the outcome a die shows is
  * never in doubt (and screen readers / e2e read the settled face immediately).
@@ -61,7 +61,7 @@ export const RollingDie = React.memo(function RollingDie({
     onTumbleChange?: (id: string, tumbling: boolean) => void;
     /** Forwarded to `CombatDie`'s a11y label — socketed on a staged card. */
     assigned?: boolean;
-    /** Forwarded to `CombatDie`'s a11y label — the SPECIAL face's real (gear-scaled) payload. */
+    /** Forwarded to `CombatDie`'s a11y label — the special die face's real (gear-scaled) payload. */
     specialConviction?: number;
 }) {
     // The single fall driver (the hazard `TumblingDie` mapping):

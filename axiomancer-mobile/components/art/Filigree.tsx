@@ -1,5 +1,5 @@
 /**
- * Filigree rule (visual-audit 2026-06) — a thin decorative divider with
+ * Filigree rule — a thin decorative divider with
  * a centred diamond, for separating sections inside the gothic chrome.
  *
  * Theme-aware (defaults to a dim sulfur accent). Reused across the

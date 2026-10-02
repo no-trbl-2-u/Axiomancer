@@ -1,11 +1,9 @@
 /**
- * DECK — the fifth bottom tab (owner finding 7, ratified decision D2).
+ * DECK — the fifth bottom tab.
  *
- * The player could see the hazard deck they carry (`app/hazard-deck/index.tsx`,
- * Phase 126) but not the COMBAT deck, which is the one they build all run. The
- * only combat-deck view in the app was the dev tool `DebugCombatDeck`. This
- * screen is the player-facing answer, and it deliberately mirrors the hazard
- * deck screen's structure — headline tallies, distribution rows, the full list,
+ * The player-facing view of the COMBAT deck, the one they build all run. It
+ * deliberately mirrors the hazard deck screen's (`app/hazard-deck/index.tsx`)
+ * structure — headline tallies, distribution rows, the full list,
  * tap a card to inspect — so the two decks read as one system rather than two
  * separate inventions.
  *
@@ -82,7 +80,7 @@ export default function DeckScreen() {
                             <Stat label="RARE" value={vm.rareCards} tone={AXM.sulfur} />
                         </View>
 
-                        {/* Rarity distribution — D4's signal, at deck scale. */}
+                        {/* Rarity distribution, at deck scale. */}
                         {vm.rarityTally.length > 0 && (
                             <View style={styles.section}>
                                 <SectionLabel size={10}>✠ RARITY</SectionLabel>

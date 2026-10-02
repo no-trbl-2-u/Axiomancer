@@ -3,7 +3,7 @@
  * SELF tab when the player has accumulated enough XP to level up
  * but `levelUp()` has not yet been dispatched.
  *
- * Phase 73 follow-up (user-jot 2026-05-24). Companion to
+ * Companion to
  * `<AscendStrip>` — same visual language (sulfur-banded strip with
  * a wax-seal glyph), but the copy + chevron read "earn the level"
  * rather than "spend the points". The two strips are mutually

@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E Tests — Hazard out-of-combat death (Phase 130).
+ * Hermetic E2E Tests — Hazard out-of-combat death.
  *
  * Pins the lethality contract through the store action layer:
  *  - a Hazard crossing whose net VITAE swing would drop the player to
@@ -79,7 +79,7 @@ describe('hazard out-of-combat death', () => {
         const levelBefore = gameState(store).player.level;
         const shillingsBefore = gameState(store).player.currency;
         // Wound the player low so the failing crossing's −20 swing crosses the
-        // isDefeated threshold (the fresh-game default is now 75 VITAE).
+        // isDefeated threshold.
         setHealth(store, 15, gameState(store).player.maxHealth);
 
         driveFailingCrossing(store, actions);

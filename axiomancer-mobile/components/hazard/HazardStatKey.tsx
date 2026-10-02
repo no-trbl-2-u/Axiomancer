@@ -1,7 +1,7 @@
 /**
  * HazardStatKey — the legend for the glyph-and-number pair every hazard
  * card prints: the fist is FORCE, the runner is ESCAPE, and the card
- * bears them in that order (cluster S7-hazard-C04).
+ * bears them in that order.
  *
  * Renders two glyph+name chips over the caption from `HAZARD_STAT_KEY`.
  * Reads no store state — the key is static presenter copy.

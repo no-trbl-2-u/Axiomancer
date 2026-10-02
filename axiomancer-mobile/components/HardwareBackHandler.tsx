@@ -1,17 +1,15 @@
 /**
  * Hardware back button handler for Android.
  *
- * Disables back button during combat per Phase 8 decision A, and during an
- * open rest-choice node (Phase 52d — "no back-out": `resolveMapEvent`
- * consumes the node on entry, before any choice, so a back-out would burn
- * it for nothing).
+ * Disables back button during combat, and during an open rest-choice node
+ * ("no back-out": `resolveMapEvent` consumes the node on entry, before any
+ * choice, so a back-out would burn it for nothing).
  *
- * Audit 2026-09-12: also locked while a **paced** event is pending
- * (`/cutscene`, `/dialogue`, `/village`, `/event`). `EventGate` pushes each
- * paced route exactly once (S4-world-C03 latch) and only re-arms when the
- * event resolves, so a hardware back that popped the modal left the event
- * pending with no screen showing it — the player parked on the tabs, the
- * gate silent. Same doctrine as the rest node: the node is already consumed,
+ * Also locked while a **paced** event is pending (`/cutscene`, `/dialogue`,
+ * `/village`, `/event`). `EventGate` pushes each paced route exactly once
+ * (its latch) and only re-arms when the event resolves, so a hardware back
+ * that popped the modal would leave the event pending with no screen
+ * showing it. Same doctrine as the rest node: the node is already consumed,
  * there is nothing to back out to.
  */
 

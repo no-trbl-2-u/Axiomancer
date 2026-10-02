@@ -1,6 +1,5 @@
 /**
- * Hermetic E2E — AsyncStorage persistence adapter (Spec 09; three save
- * slots since 2026-09-23).
+ * Hermetic E2E — AsyncStorage persistence adapter (three save slots).
  *
  * Drives `createAsyncStorageAdapter` end-to-end against
  * AsyncStorage's official jest mock. Hermetic = self-contained +
@@ -8,7 +7,7 @@
  *
  * Slot semantics under test: `load()`/`save()` are scoped to the ACTIVE
  * slot; preload reads every slot and the remembered last slot; an
- * unreadable slot is reported, never thrown; the legacy single-slot key is
+ * unreadable slot is reported, never thrown; the pre-slot single-slot key is
  * deleted and never read.
  */
 
@@ -306,7 +305,7 @@ describe('createAsyncStorageAdapter — clear / clearSlot', () => {
         await adapter.flush();
 
         expect(storage.setItem).not.toHaveBeenCalled();
-        // Exactly the slot key goes (the legacy key is preload's job).
+        // Exactly the slot key goes (the pre-slot key is preload's job).
         expect(storage.removeItem).toHaveBeenCalledWith(slotStorageKey(1));
     });
 
@@ -375,8 +374,7 @@ describe('migrations — unwrap', () => {
     it('preload + load on a v2 envelope walks the legacy bridge (Phase 51 + 52)', async () => {
         // Load a `schemaVersion: 2` envelope through the adapter and confirm
         // it comes back intact. Pins the migration runs end-to-end through
-        // createAsyncStorageAdapter, not just through unwrap(). (The v2 → v3
-        // step backfilled the alignment cube until D39 removed it.)
+        // createAsyncStorageAdapter, not just through unwrap().
         const v2State = {
             player: {
                 name: 'V2 Pilgrim',

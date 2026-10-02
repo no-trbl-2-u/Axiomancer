@@ -1,5 +1,5 @@
 /**
- * The Labyrinth (THE APORIA, W-01) — store action glue.
+ * The Labyrinth (THE APORIA) — store action glue.
  *
  * The pure engine lives in `axiomancer-mechanics` (World/Labyrinth);
  * these wrappers thread a visit through the mobile `labyrinthUi`
@@ -105,7 +105,7 @@ function labyrinthWorld(actId: LabyrinthActId): WorldState {
  * event afterwards — entrances narrate (authored override).
  *
  * The snapshot is written twice: on the session, and on the durable
- * progress as `returnWorld` (map revamp M4), so the save this action takes
+ * progress as `returnWorld`, so the save this action takes
  * still knows the way back after a reload (`resumeLabyrinthSession`).
  */
 export function enterLabyrinthAction(store: AppStore, actId: LabyrinthActId): void {

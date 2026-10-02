@@ -59,7 +59,7 @@ function encounter(isBoss = false): ResolveMapEventResult {
     } as never;
     return {
         state: undefined as never,
-        // Phase 60b — canonical {enemies, origin} shape.
+        // Canonical {enemies, origin} shape.
         event: {
             kind: 'encounter',
             encounter: { enemies: [enemy], origin: 'breakwater:bw-2' } as never,
@@ -199,7 +199,7 @@ describe('EventScreen render', () => {
         expect(flee.props.accessibilityState?.disabled).toBe(true);
     });
 
-    // Phase 137 cleanup — rest events launch the rest-choice session via
+    // Rest events launch the rest-choice session via
     // the resolve interceptor and never reach this modal; a rest result in
     // the slice renders the defensive empty composition (no choices).
     it('renders a rest result as the empty composition (Phase 137)', () => {
@@ -259,7 +259,7 @@ describe('EventScreen render', () => {
         expect(getByTestId('event-choice-leave')).toBeTruthy();
     });
 
-    // Phase 137 cleanup — hazard / loot-cache events launch their
+    // Hazard / loot-cache events launch their
     // minigames via the resolve interceptor; results in the slice
     // render the defensive empty composition (no choices, no chips).
     it('renders hazard and loot-cache results as the empty composition (Phase 137)', () => {
@@ -276,9 +276,8 @@ describe('EventScreen render', () => {
         }
     });
 
-    // 2026-09-21, owner finding 2 — "the Gather node is now a no-op". The
-    // items always landed; nothing on screen ever said so. These three pin
-    // that the acknowledgement actually RENDERS: the name of what was
+    // A gathering's items land inline, so the card is the only thing that
+    // tells the player. These three pin that the acknowledgement RENDERS: the name of what was
     // gathered, where it went, and a button that waits for the player
     // instead of a toast that outruns them.
     it('renders a gathering event naming the item, where it went, and a receipt chip', () => {
@@ -413,8 +412,8 @@ describe('EventScreen choice dispatch', () => {
     });
 });
 
-// Phase 137 — the dialogue confirmation flash moved to /dialogue with
-// its kind (interactions no longer render in the generic modal).
+// The dialogue confirmation flash lives on /dialogue with its kind
+// (interactions do not render in the generic modal).
 describe('DialogueScreen dialogue confirmation flash (ported Phase 29 Tick C)', () => {
     it('renders a ✓ next to the reply row that matches a dialogue:applied event', () => {
         jest.useFakeTimers();

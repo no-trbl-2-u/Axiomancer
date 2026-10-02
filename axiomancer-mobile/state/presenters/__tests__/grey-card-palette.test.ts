@@ -1,11 +1,10 @@
 /**
- * Hermetic test pin — Phase 104 (the grey office): the mobile palette's
- * colourless 'any' aspect.
+ * Hermetic test pin — the grey office: the mobile palette's colourless 'any'
+ * aspect.
  *
- * `STANCE_COLORS.any` must be a real AXM token (never a hex literal — the
- * house rule the rest of this palette is grandfathered out of, since those
- * rows are the fixed owner-specified dice identity; 'any' is new and has no
- * such exemption), distinct from every real stance colour, and
+ * `STANCE_COLORS.any` must be a theme-driven AXM token (the other rows are
+ * fixed `HUE` colours, the owner-specified dice identity), distinct from
+ * every real stance colour, and
  * `dieCanPowerCardVM` must treat a grey card as powerable by every die
  * colour (mirroring THE COLOUR LAW's engine-side exception).
  */

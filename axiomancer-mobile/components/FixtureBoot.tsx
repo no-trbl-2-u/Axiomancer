@@ -1,5 +1,5 @@
 /**
- * Honour a booted fixture's `arrive` intent (2026-09-07).
+ * Honour a booted fixture's `arrive` intent.
  *
  * When the app booted from a `StateFixture` whose `arrive` is true, fire
  * the current node's authored event once — exactly what walking onto the

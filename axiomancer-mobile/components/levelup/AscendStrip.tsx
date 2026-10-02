@@ -3,19 +3,15 @@
  * the level box and the XP chain on the SELF tab when the player
  * has unspent stat-allocation points.
  *
- * Phase 73 Tick A port of the handoff bundle's
- * `SelfTabHeaderWithLevelUp` design
- * (`archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-23/project/screens/levelup.jsx` + chat5
- * brief lines 109-167). The strip is the LOUDEST single element on
+ * The strip is the LOUDEST single element on
  * the SELF tab when armed — full-width, ~64px tall, sulfur-banded.
- * The carve-out is deliberate per the brief: the seal sits on the
+ * The carve-out is deliberate: the seal sits on the
  * page like a wax-sealed proclamation, not a CTA shouting from a
  * settings app.
  *
  * Mounts only when `pendingPoints > 0`. The caller (SELF screen)
  * gates on `vm.pendingPoints` from the character presenter and
- * skips mounting when zero — the SELF header then renders
- * byte-identical to pre-Phase-73.
+ * skips mounting when zero.
  */
 
 import React from 'react';
@@ -87,7 +83,7 @@ export function AscendStrip({ pendingPoints, level, onOpen }: AscendStripProps) 
 }
 
 /**
- * Per the brief: `↑×N` form once pendingPoints > 5 to avoid the
+ * `↑×N` form once pendingPoints > 5 to avoid the
  * row becoming an arrow soup. ≤5 renders one arrow per point.
  */
 function renderChevrons(n: number): string {
@@ -96,10 +92,8 @@ function renderChevrons(n: number): string {
 }
 
 /**
- * LockSeal glyph — wax-seal motif with an inset lock. Mirrors the
- * `<LockSeal>` primitive the design's encounter-modal.jsx ships
- * (`archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-23/project/screens/encounter-modal.jsx:18-34`).
- * Rendered in sulfur here per the ASCEND brand color.
+ * LockSeal glyph — wax-seal motif with an inset lock. Rendered in
+ * sulfur per the ASCEND brand color.
  */
 function LockSealGlyph() {
     const AXM = usePalette();

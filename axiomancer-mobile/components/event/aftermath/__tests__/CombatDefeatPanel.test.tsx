@@ -1,5 +1,5 @@
 /**
- * Hermetic component tests — CombatDefeatPanel (Phase 70 Tick C).
+ * Hermetic component tests — CombatDefeatPanel.
  *
  * Pins the defeat-panel render contract + the two action handlers.
  * The killer block, damage ledger, run-summary ledger, and the

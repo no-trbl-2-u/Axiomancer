@@ -40,7 +40,7 @@ describe('labyrinth — defeat / run reset', () => {
         // A battle loss inside the labyrinth resets the run.
         actions.resetRun({ keepCharacter: true });
 
-        // The session is dropped, and the presenter no longer throws.
+        // The session is dropped, and the presenter does not throw.
         expect(store.getState().labyrinthUi?.session ?? null).toBeNull();
         expect(() => selectLabyrinthViewModel(store.getState())).not.toThrow();
         expect(selectLabyrinthViewModel(store.getState()).kind).toBe('act-select');

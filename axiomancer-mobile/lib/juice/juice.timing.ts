@@ -1,7 +1,7 @@
 /**
- * Phase 38 — the central juice/animation layer. Tunable timing/easing
- * constants for every primitive, isolated D6f-style (`dice-roll-ritual.timing.ts`
- * precedent): tune the feel HERE without touching a line of choreography.
+ * The central juice/animation layer's tunable timing/easing constants for
+ * every primitive, isolated like `dice-roll-ritual.timing.ts`: tune the feel
+ * HERE without touching a line of choreography.
  */
 
 export type ShakeIntensity = 'low' | 'medium' | 'high';

@@ -1,5 +1,5 @@
 /**
- * The Labyrinth (THE APORIA) — resuming a visit from a save (map revamp M4).
+ * The Labyrinth (THE APORIA) — resuming a visit from a save.
  *
  * Pure, with type-only imports, so both the store's cold boot
  * (`createAppStore`) and the menu's slot load (`hydrateStoreWithGameState`)
@@ -13,7 +13,7 @@ import type { MobileLabyrinthSlice } from '../store';
 type LabyrinthSession = NonNullable<MobileLabyrinthSlice['session']>;
 
 /**
- * Rebuild the transient visit from a loaded save (map revamp M4). A save
+ * Rebuild the transient visit from a loaded save. A save
  * taken inside the Aporia holds the act map as its world and the overworld
  * as `labyrinth.returnWorld`; without a session the screen would have no act
  * and the exit no way back. Returns the session, or `null` when the state is

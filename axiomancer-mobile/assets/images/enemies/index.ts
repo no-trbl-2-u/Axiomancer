@@ -1,13 +1,11 @@
 /**
  * Enemy art registry — 1:1 per-enemy portraits.
  *
- * Phase R2 (enemy reset) cut the roster to three survivors; their art is all
- * that remains here: two alpha-matted paintings from the 2026-07-06 drop
- * (black backgrounds keyed out so figures float over the arena backdrop) and
- * one licensed game-icons.net silhouette (The Doorwarden, 2026-09-05) — one
- * asset per enemy either way (the 1:1 art law). The registry key is the
- * enemy's `portraitAsset` (kebab-case, Spec 26 §3.1) — slug→asset routing
- * stays mobile-local per Spec 08 Q3 = B. See provenance.json.
+ * Three enemies: two alpha-matted paintings (black backgrounds keyed out so
+ * figures float over the arena backdrop) and one licensed game-icons.net
+ * silhouette (The Doorwarden) — one asset per enemy either way (the 1:1 art
+ * law). The registry key is the enemy's `portraitAsset` (kebab-case) —
+ * slug→asset routing stays mobile-local. See provenance.json.
  *
  * `getEncounterEnemyArt(artKey, nonce)` resolves the key directly; unknown /
  * missing keys fall back to a stable hash pick over the whole pool (so an

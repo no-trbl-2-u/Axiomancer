@@ -1,5 +1,5 @@
 /**
- * MainMenu — the first screen after the title (owner call 2026-09-23):
+ * MainMenu — the first screen after the title:
  * CONTINUE (most recent slot) · NEW GAME · LOAD GAME · SETTINGS.
  *
  * Presentation only. The view-model comes from `selectMainMenuViewModel`

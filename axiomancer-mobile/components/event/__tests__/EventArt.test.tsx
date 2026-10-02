@@ -1,17 +1,14 @@
 /**
  * Hermetic component tests — EventArt slug→illustration dispatcher.
  *
- * Three-branch dispatch: `'encounter' → EncounterIllustration`,
- * `'boss' → BossIllustration`, everything else →
+ * Three-branch dispatch: `'encounter' → EnemyIllustration`,
+ * `'boss' → EnemyIllustration` (isBoss), everything else →
  * `PlaceholderIllustration` (slug forwarded). The PlaceholderIllustration
  * test already pins the placeholder branches; this test pins the
  * dispatch contract so a future refactor can't silently re-route an
  * encounter slug to the placeholder (or vice-versa).
  *
- * Phase 137 cleanup: the rest / gathering / hazard slug cases left
- * with their kinds (those events launch minigames and never reach the
- * event modal); the live placeholder slugs are interaction-generic,
- * village, and cutscene.
+ * The placeholder slugs are interaction-generic, village, and cutscene.
  */
 
 import { describe, expect, it } from '@jest/globals';

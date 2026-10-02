@@ -1,5 +1,5 @@
 /**
- * FE-012 — haptics must not fire before the page has a user gesture.
+ * Haptics must not fire before the page has a user gesture.
  *
  * The web backend calls `navigator.vibrate()`, which Chromium blocks and logs
  * as a console ERROR until the first tap. Screens that pulse on mount (combat

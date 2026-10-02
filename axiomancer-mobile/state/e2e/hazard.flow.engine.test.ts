@@ -144,11 +144,10 @@ describe('hazard store flow', () => {
 
     it('failure claim: penalty + consequences hit VITAE/max VITAE, CRACK joins the deck, no hex flag, vitae floors at 1', () => {
         const { store, actions } = makeStoreAndActions();
-        // Phase 130 — this case probes the maim-to-1 floor + scar, which
+        // This case probes the maim-to-1 floor + scar, which
         // requires SURVIVING the crossing on exactly 1 VITAE. The −20 VITAE
-        // swing (minhp −8 + penaltyVitae −12) is lethal at the default 15
-        // VITAE (out-of-combat death); 21 VITAE lands the swing on exactly 1
-        // — the floor, not a death. maxHealth (the scar baseline) is left
+        // swing (minhp −8 + penaltyVitae −12) from 21 VITAE lands on exactly
+        // 1 — the floor, not a death (any lower is out-of-combat death). maxHealth (the scar baseline) is left
         // untouched so the −5 scar assertion below still holds.
         const p0 = (store.getState() as unknown as GameState).player;
         store.setState({ player: { ...p0, health: 21 } } as never);

@@ -3,15 +3,15 @@ import landmarks from '@/assets/images/maps/act1-landmarks.json';
 import type { MapLayout, MapSheet } from './types';
 
 /**
- * The Breakwater — Act 1, map 1 (map revamp M3a). The first map drawn ON its
- * plate (D15): the coast plate is the map, and every node sits on one of the
- * plate's landmarks (D25), read from `act1-landmarks.json`.
+ * The Breakwater — Act 1, map 1. Drawn ON its plate:
+ * the coast plate is the map, and every node sits on one of the
+ * plate's landmarks, read from `act1-landmarks.json`.
  *
  * The sheet is the plate's own square, 1000 units a side, rendered 2.4x into a
  * 2400px canvas: the plate's native size, so it is shown 1:1 at full zoom, and
  * even at the camera's 0.6 zoom floor it spans 1440px — wider than a desktop
- * chart, not only a phone's (D16). At 1.6x a desktop opening fit showed the
- * plate's edge and black beyond it. The plate
+ * chart, not only a phone's. A smaller scale lets a desktop opening fit show
+ * the plate's edge and black beyond it. The plate
  * reads near full strength and the procedural chart texture is off: invented
  * contour hills over drawn terrain would contradict it.
  *
@@ -31,7 +31,7 @@ const sheet: MapSheet = {
     chartTexture: false,
 };
 
-/** Node id → the landmark it sits on (D25). Every coast landmark appears exactly once. */
+/** Node id → the landmark it sits on. Every coast landmark appears exactly once. */
 export const BREAKWATER_LANDMARKS: Readonly<Record<string, string>> = {
     'bw-1':  'windmill',
     'bw-2':  'crane-quay',
@@ -68,11 +68,11 @@ export const breakwaterLayout: MapLayout = {
     mapId: 'breakwater',
     continent: 'CONTINENT · COASTAL',
     region: 'The Breakwater',
-    // Ordinal only — no node/path count (CRITIQUE pass 19). Act 1, map 1 of 4.
+    // Ordinal only — no node/path count. Act 1, map 1 of 4.
     regionProgress: 'Map i of iv',
     sheet,
     nodes: [
-        // ── c0 — the windmill: where a new game starts (D27) ──
+        // ── c0 — the windmill: where a new game starts ──
         { id: 'bw-1',  ...at('bw-1'),  label: 'The Windmill', description: 'Sails lashed down. The sea is loud below.' },
         // ── c1 ──
         { id: 'bw-2',  ...at('bw-2'),  label: 'The Crane Quay', description: 'Cargo cranes over black mud. Something under it moves.' },

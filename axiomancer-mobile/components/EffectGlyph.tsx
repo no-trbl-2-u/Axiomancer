@@ -10,7 +10,7 @@ interface EffectGlyphProps {
 }
 
 /**
- * EffectGlyph — legacy-keyed adapter over the icon canon (Phase V1).
+ * EffectGlyph — short-keyed adapter over the icon canon.
  *
  * Status-effect kinds ('poison', 'bleed', …) resolve to the registry's
  * `effect-*` marks; unknown kinds fall back to the colored placeholder

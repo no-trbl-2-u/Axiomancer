@@ -1,9 +1,9 @@
 /**
  * S4-world-C17 — the cutscene's SKIP must read as a control, not a caption.
  *
- * A first-time player took the 10px bone SKIP for chrome and, when they did
- * try it, missed it: `padding: 8` around a four-glyph mono label is well under
- * a thumb. It is now a bordered plate with a 44pt minimum box.
+ * A small bare SKIP label reads as chrome and is easy to miss: `padding: 8`
+ * around a four-glyph mono label is well under a thumb. SKIP is a bordered
+ * plate with a 44pt minimum box.
  *
  * The suite pins the two things the finding is actually about — that the
  * control is announced and reachable as a button, and that its box clears the
@@ -86,7 +86,7 @@ describe('S4-world-C17: SKIP is a button, and a hittable one', () => {
         expect(style.backgroundColor).toBeTruthy();
     });
 
-    // Owner call 2026-09-13: with the fade-through presentation (one line on
+    // With the fade-through presentation (one line on
     // screen at a time) there is no "reveal everything" state to jump to, so
     // SKIP abandons the scene outright — it dismisses the pending event, which
     // empties the store slice and drops the screen to its inactive shell.

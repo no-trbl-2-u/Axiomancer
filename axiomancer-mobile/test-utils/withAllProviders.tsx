@@ -1,6 +1,5 @@
 /**
- * Shared provider-stack wrapper for hermetic integration tests
- * (Phase 64 Tick A).
+ * Shared provider-stack wrapper for hermetic integration tests.
  *
  * Every integration test that mounts a screen-level component
  * needs the same contexts in the right nesting order:
@@ -36,9 +35,9 @@ import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 export interface AllProvidersOptions {
     /** Optional pre-built store. Defaults to a fresh memory-adapter store. */
     store?: AppStore;
-    /** Optional slot store (2026-09-23). Defaults to a fresh in-memory one. */
+    /** Optional slot store. Defaults to a fresh in-memory one. */
     slots?: SaveSlotStore;
-    /** Optional settings store (2026-09-23). Defaults to a fresh one at the defaults. */
+    /** Optional settings store. Defaults to a fresh one at the defaults. */
     settings?: SettingsStore;
 }
 

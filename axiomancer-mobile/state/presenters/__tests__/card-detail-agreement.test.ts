@@ -1,14 +1,12 @@
 /**
  * AGREEMENT GUARD — the card detail panel must say what the card actually does.
  *
- * Owner finding 4, the most important item of the 2026-09-21 UI brief: "card
- * details sometimes don't match the actual card". This is a CORRECTNESS bug,
- * not a copy bug, and this test is how we know when it is fixed.
+ * A detail panel that disagrees with the card is a CORRECTNESS bug, not a copy
+ * bug.
  *
  * ## What it checks
  *
- * For every card in the live library (all nine pools — apocrypha, choir, debt,
- * grave, relics, rot, starters, trial, vigil) it builds the REAL detail
+ * For every card in the live library it builds the REAL detail
  * view-model the combat overlay renders (`detailStats`) and compares the two
  * player-visible rows against the card's AUTHORED effect data:
  *

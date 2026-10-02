@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — the `/item-reward` screen (owner finding 10; D5 / D6 / D7).
+ * Hermetic E2E — the `/item-reward` screen (rules D5 / D6 / D7).
  *
  * Mounts the real route against a rigged store and drives its two commits.
  * The D7 assertion is the one that matters most: UNMOUNTING the screen — what
@@ -49,8 +49,7 @@ function player(store: AppStore): Character {
 
 function mount(offer?: (store: AppStore) => void) {
     const { tree, store } = withAllProviders(<ItemRewardScreen />);
-    // A fresh run wears NOTHING since 2026-09-23 (THE VERY START), so the
-    // D6 "trade" cases seed the fixture relics explicitly: a full accessory
+    // A fresh run wears NOTHING, so the D6 "trade" cases seed the fixture relics explicitly: a full accessory
     // row is what makes EQUIP a swap rather than a free fill.
     const kit = [FIXTURE_WEAPON, FIXTURE_ARMOR, ...FIXTURE_TRINKETS];
     store.setState({
@@ -70,8 +69,7 @@ describe('/item-reward screen', () => {
 
         expect(screen.getByTestId('item-reward-name').props.children).toBe("Suppliant's Ring");
         expect(screen.getByTestId('item-reward-signature')).toBeTruthy();
-        // The ring grants ONLY its signature (owner call 2026-09-23), so no
-        // stats block renders.
+        // The ring grants ONLY its signature, so no stats block renders.
         expect(screen.queryByTestId('item-reward-stats')).toBeNull();
         // D6 — the displaced piece is named before the player commits.
         expect(screen.getByTestId('item-reward-trade-note').props.children)

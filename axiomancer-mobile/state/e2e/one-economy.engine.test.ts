@@ -7,11 +7,6 @@
  *    carries the rolled loot + granted XP, already applied to the player;
  *  - the grey office seeds an empty `knownCards` before combat starts.
  *
- * Legacy turn-based combat (the `state.combat` slice, its per-round
- * bridges + cross-combat resource carry) was removed from the engine in
- * mechanics 0.37.0. Those describe blocks — hazard-omen bridges into the
- * combat slice and combat-resource carry — were retired with the slice.
- *
  * Hermetic = self-contained + deterministic + isolated.
  * See docs/testing.md for the full standard.
  */
@@ -94,8 +89,7 @@ describe('the starter deck', () => {
         expect(store.getState().player.knownCards ?? []).toHaveLength(0);
         actions.startCombat(makeEnemy());
         expect(store.getState().player.knownCards).toEqual([...STARTING_CARD_IDS]);
-        // Seeding is a deck write only: the retired starter-bundle flag is
-        // not written.
+        // Seeding is a deck write only: no starter-bundle flag is written.
         expect(store.getState().flags ?? []).not.toContain('starter-bundle-chosen');
     });
 

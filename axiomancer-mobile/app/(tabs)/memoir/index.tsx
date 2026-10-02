@@ -17,8 +17,7 @@ import { makeStyles, usePalette } from '@/theme/runtime';
 function QuestCard({ quest }: { quest: MemoirQuestRow }) {
     const styles = useStyles();
     return (
-        // Phase 74 follow-up walkthrough — memoir Tick 2: wrap the
-        // whole card in a TooltipTarget pointing at the new
+        // Wrap the whole card in a TooltipTarget pointing at the
         // kind:'quest-objective' content keyed by quest status.
         // Tap explains what a quest in that state means.
         <TooltipTarget
@@ -57,13 +56,11 @@ function QuestCard({ quest }: { quest: MemoirQuestRow }) {
 }
 
 /**
- * MEMOIR screen — read-only journal surface. Phase 33 Tick A
- * renders the four section shells with presenter-sourced
- * empty-state copy; Tick B (this commit) renders quest cards
- * from `state.quests`. Tick D fills in the chronicle.
+ * MEMOIR screen — read-only journal surface: the chronicle, quest
+ * cards from `state.quests`, and the remains, with presenter-sourced
+ * empty-state copy.
  *
- * Subscribes to slim slices and memo's the VM (Phase 30 Tick A
- * pattern) — `useGameState(selectMemoirViewModel)` would churn
+ * Subscribes to slim slices and memo's the VM — `useGameState(selectMemoirViewModel)` would churn
  * `useSyncExternalStore` because the VM is a frozen-new object
  * every call.
  *
@@ -77,7 +74,7 @@ export default function MemoirScreen() {
     const player = useGameState((s) => s.player);
     const quests = useGameState((s) => s.quests);
 
-    // Phase 46c: acknowledge any pending quest the moment Memoir
+    // Acknowledge any pending quest the moment Memoir
     // renders. The tab badge clears via `selectTabBadges` (which gates
     // on `questAcknowledged`). Mirrors the character screen's
     // level-up acknowledge effect; preserves other notification
@@ -88,12 +85,10 @@ export default function MemoirScreen() {
             notifications: { ...prev, questAcknowledged: true },
         });
     }, [store]);
-    // Subscribing to `_recentEvents` here even though Tick A doesn't
-    // read it yet — Tick D's chronicle mapper will, and arming the
-    // subscription now means the screen rebuilds the chronicle
-    // automatically when the ring buffer ticks.
+    // Subscribing to `_recentEvents` means the screen rebuilds the
+    // chronicle automatically when the ring buffer ticks.
     const recentEvents = useGameState((s) => s._recentEvents);
-    // Phase 6 — REMAINS section reads death tombstones + keepsake
+    // The REMAINS section reads death tombstones + keepsake
     // labels off the durable flags array.
     const flags = useGameState((s) => s.flags);
     const vm = useMemo<MemoirViewModel>(
@@ -125,9 +120,8 @@ export default function MemoirScreen() {
                         <Text style={styles.emptyLine}>{vm.emptyChronicle}</Text>
                     ) : (
                         vm.chronicle.map((entry) => (
-                            // Phase 74 follow-up walkthrough — memoir
-                            // Tick 2: wrap each chronicle row in a
-                            // TooltipTarget pointing at the new
+                            // Wrap each chronicle row in a
+                            // TooltipTarget pointing at the
                             // kind:'chronicle-entry' content keyed by
                             // engine event type.
                             <TooltipTarget
@@ -194,7 +188,7 @@ export default function MemoirScreen() {
                     )}
                 </View>
 
-                {/* Remains (Phase 6) */}
+                {/* Remains */}
                 <View style={styles.section} testID="memoir-remains">
                     <View style={styles.remainsEyebrowRow}>
                         <AxmIcon name="action-tombstone" size={14} color={AXM.bone} />

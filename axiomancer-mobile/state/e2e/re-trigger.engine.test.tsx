@@ -1,15 +1,12 @@
 /**
- * Hermetic integration tests — re-trigger scenarios (Phase 121 Tick C).
+ * Hermetic integration tests — re-trigger scenarios.
  *
- * Regression guard for Phase 118 issue #191: second encounter node
- * fires after first resolves; combat modal re-arms cleanly.
- * Tests the specific integration gap where completed encounters
- * would block subsequent event resolution.
+ * Regression guard for issue #191: a second encounter node fires after the
+ * first resolves, and the combat modal re-arms cleanly — a completed
+ * encounter must not block subsequent event resolution.
  *
- * Legacy turn-based combat (the `state.combat` slice) was removed from the
- * engine in mechanics 0.37.0; "in combat" is now the recorded
- * `currentEncounter` (set by `startCombat`, cleared by `endCombat`), so these
- * pins assert on it rather than a combat slice.
+ * "In combat" is the recorded `currentEncounter` (set by `startCombat`,
+ * cleared by `endCombat`), so these pins assert on it.
  *
  * Hermetic = self-contained + deterministic + isolated. See
  * `docs/testing.md`.

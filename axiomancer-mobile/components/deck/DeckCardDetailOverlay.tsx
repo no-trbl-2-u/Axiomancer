@@ -47,7 +47,7 @@ export function DeckCardDetailOverlay({ card, onClose }: DeckCardDetailOverlayPr
                 contentContainerStyle={styles.content}
                 showsVerticalScrollIndicator={false}
             >
-                {/* 1 — KEYWORDS. Finding 5: definitions before the text that uses them. */}
+                {/* 1 — KEYWORDS. Definitions before the text that uses them. */}
                 {card.keywords.length > 0 && (
                     <View style={styles.block} testID="deck-card-detail-keywords">
                         {card.keywords.map((kw) => (
@@ -84,7 +84,7 @@ export function DeckCardDetailOverlay({ card, onClose }: DeckCardDetailOverlayPr
                     <Text style={styles.outcome}>{card.outcomeLine}</Text>
                 </View>
 
-                {/* 3 — the two play lines, in D3's kept shorthand. */}
+                {/* 3 — the two play lines, in the kept shorthand. */}
                 <View style={styles.block}>
                     <View style={styles.line} testID="deck-card-detail-free">
                         <Text style={styles.lineLabel}>{FREE_LINE_LABEL}</Text>

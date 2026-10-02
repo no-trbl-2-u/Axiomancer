@@ -1,5 +1,5 @@
 /**
- * The rarity affordance, all three legs of D4 in one mark: a NAMED label, a
+ * The rarity affordance, all three legs in one mark: a NAMED label, a
  * PIP ROW, and the band's frame colour — never colour alone.
  *
  * The pip COUNT is the load-bearing half (it survives greyscale and every

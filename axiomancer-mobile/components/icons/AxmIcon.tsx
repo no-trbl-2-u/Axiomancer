@@ -13,7 +13,7 @@ interface AxmIconProps {
 }
 
 /**
- * AxmIcon — the one renderer for the icon canon (Phase V1).
+ * AxmIcon — the one renderer for the icon canon.
  *
  * Draws a registry silhouette in a single caller color over the AXM
  * token contract; the reserved accent channel (`stroke: 'accent'`)

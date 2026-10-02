@@ -1,6 +1,5 @@
 /**
- * /cache — the loot-cache-choice screen ("The Reliquary", Phase 63,
- * replacing the retired Pick Pool dice-pool minigame).
+ * /cache — the loot-cache-choice screen ("The Reliquary").
  *
  * One irreversible choice of two: TAKE A CARD (a rolled reward card) or
  * TAKE THE GOODS (a tier-scaled consumable haul + the node's currency).
@@ -66,7 +65,7 @@ export default function CacheScreen() {
     }, [vm.active, router]);
 
     // Inactive shell — visible for a frame while the router unwinds; never a
-    // blank screen (UI-cleanup pass, CRITIQUE).
+    // blank screen.
     if (!vm.active) {
         return (
             <ScreenBg scrollable={false} art="cache">
@@ -85,12 +84,10 @@ export default function CacheScreen() {
 
                 {vm.phase === 'offer' && (
                     <View testID="cache-choice-offers">
-                        {/* FE-026: the authored node line used to REPLACE the
-                          * one-way warning (`vm.description ?? INTRO`), so on every
-                          * node that has flavour — which is most of them — the screen
-                          * said only scenery and never that the node is already spent
-                          * and there is no leaving without choosing. Flavour now sits
-                          * ABOVE the warning; the warning always shows. */}
+                        {/* The authored node line sits ABOVE the one-way warning;
+                          * the warning always shows, so the player is always told
+                          * the node is spent and there is no leaving without
+                          * choosing. */}
                         {vm.description ? (
                             <Text style={styles.body} testID="cache-choice-intro">
                                 {vm.description}
@@ -164,7 +161,7 @@ const useStyles = makeStyles((AXM) => ({
         color: AXM.parchment,
         marginBottom: 8,
     },
-    // FE-026 — the irreversibility line, quieter than the scene but always there.
+    // The irreversibility line, quieter than the scene but always there.
     oneWayNote: { fontFamily: FONTS.serifItalic, fontSize: 12, color: AXM.bone, lineHeight: 16, marginTop: 6, marginBottom: 2 },
     offerCol: { marginBottom: 8 },
     offerButton: {

@@ -1,24 +1,20 @@
 /**
- * Shared copy for `EventConsequence` chips (Phase 46c).
+ * Shared copy for `EventConsequence` chips.
  *
- * Ported out of `app/event/index.tsx` (the dead fallback shell) so
- * `/dialogue` can render the same preview without a component owning
- * player-facing copy (CLAUDE.md: no hardcoded copy in components) or
- * the two screens drifting on what a consequence kind means.
+ * Lives here so `/dialogue` and `/event` render the same preview without a
+ * component owning player-facing copy (CLAUDE.md: no hardcoded copy in
+ * components) or the two screens drifting on what a consequence kind means.
  *
- * FE-002 (2026-09-12 fresh-eyes sweep): the quest / progress / card branches
- * interpolated the engine's slug straight into the chip, so a player choosing
- * Old Marrow's reply was shown `quest: starting-quest`. Ids now resolve through
- * `engine-id-copy`, and a consequence with nothing a player can act on renders
- * no chip at all rather than an empty box.
+ * Quest / progress / card ids resolve through `engine-id-copy` rather than
+ * printing the engine slug, and a consequence with nothing a player can act
+ * on renders no chip at all rather than an empty box.
  */
 
 import type { EventConsequence } from './event.engine';
 import { cardTitle, questTitle } from './engine-id-copy';
 
 export function consequenceLabel(c: EventConsequence): string {
-    // VITAE is the canon word for the player's health pool (CLAUDE.md); these
-    // two branches said "HP" before FE-002.
+    // VITAE is the canon word for the player's health pool (CLAUDE.md).
     if (c.kind === 'damage') return `-${c.amount ?? 0} VITAE`;
     if (c.kind === 'heal') return `+${c.amount ?? 0} VITAE`;
     if (c.kind === 'currency') return `+${c.amount ?? 0} ${c.amount === 1 ? 'shilling' : 'shillings'}`;
@@ -54,8 +50,6 @@ export function consequenceLabel(c: EventConsequence): string {
  * the three visible slots on an empty box, and keeps the overflow count honest.
  *
  * Pure; the input array is never mutated.
- *
- * Resolves FE-002 (dialogue + event: empty and slug-bearing consequence chips).
  */
 export function visibleConsequences(
     consequences: readonly EventConsequence[],

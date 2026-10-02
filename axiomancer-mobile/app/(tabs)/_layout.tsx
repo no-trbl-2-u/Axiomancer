@@ -30,11 +30,11 @@ function TabBadge({ text, kind }: { text: string; kind: 'event' | 'levelup' }) {
   );
 }
 
-// Tab icons come from the icon canon (Phase V1) — the same registry
+// Tab icons come from the icon canon — the same registry
 // marks the exploration drawer and combat surfaces draw, so the art
 // upgrades in one place. Per-tab a11y labels override the registry's
 // generic ones. The active tab wears the handoff active-tick: a short
-// sulfur bar above the icon (design handoff 2026-05-23, tab contract).
+// sulfur bar above the icon (the handoff tab contract).
 const TAB_ICONS: Record<string, { name: AxmIconName; label: string }> = {
   eye: { name: 'action-eye', label: 'Exploration tab' },
   sword: { name: 'action-sword', label: 'Combat tab' },
@@ -42,12 +42,11 @@ const TAB_ICONS: Record<string, { name: AxmIconName; label: string }> = {
   bag: { name: 'action-bag', label: 'Inventory tab' },
   scroll: { name: 'action-scroll', label: 'Event tab' },
   quill: { name: 'action-quill', label: 'Memoir tab' },
-  // DECK (2026-09-21, finding 7 / D2). The icon canon has no stacked-cards
+  // DECK. The icon canon has no stacked-cards
   // glyph and minting one would mean editing the shared registry from a tab
   // change, so DECK borrows `action-arcane` — the canon's spell mark, which
   // is literally what the combat deck is a stack of. Its a11y label is
-  // overridden here, as every tab's is. A bespoke card-stack glyph is filed
-  // as a follow-up for the icon canon's own pass.
+  // overridden here, as every tab's is.
   cards: { name: 'action-arcane', label: 'Deck tab' },
 };
 
@@ -81,8 +80,8 @@ export default function TabLayout() {
   const AXM = usePalette();
   const styles = useStyles();
   const { inEncounterModal } = useCombatMode();
-  // Tab configuration: Combat moved to encounter modal (Phase 63d), so
-  // there is no combat tab; the five tabs are registered below.
+  // Tab configuration: combat runs in the encounter modal, so there is
+  // no combat tab; the five tabs are registered below.
   // Subscribe to the slim slices `selectTabBadges` reads, then memo
   // the badges object. The presenter returns a stable `EMPTY_BADGES`
   // reference in the no-event / no-levelup steady state but a fresh
@@ -104,16 +103,11 @@ export default function TabLayout() {
     [player, eventSlice, notifications],
   );
 
-  // Phase 63c+ (2026-05-21) — hard-stop the tab bar while the
-  // encounter modal is open. User confirmed the WILDS tab being
-  // visible during the modal breaks the hard-stop feel. Hide the
+  // Hard-stop the tab bar while the encounter modal is open: a visible
+  // WILDS tab during the modal breaks the hard-stop feel. Hide the
   // tab bar entirely via `display: 'none'` AND lock every
-  // non-exploration tab's href to null (defense in depth). The
-  // previous attempt at hiding the bar caused a "blank screen"
-  // symptom — root cause was the modal early-return null'ing once
-  // the event slice cleared (since fixed in the overlay's
-  // mode-gated early-return). Re-enabling now that the modal
-  // stays mounted across the combat-active boundary.
+  // non-exploration tab's href to null (defense in depth). This relies
+  // on the modal staying mounted across the combat-active boundary.
   const lockOtherTabs = inEncounterModal;
   const tabBarStyle = inEncounterModal
     ? styles.tabBarHidden
@@ -144,16 +138,14 @@ export default function TabLayout() {
               badge={badges.exploration}
             />
           ),
-          // Phase 63d — exploration is the unconditional leftmost tab.
+          // Exploration is the unconditional leftmost tab.
           // It never locks even during the encounter modal so the route
           // remains current and the modal stays mounted. Other tabs lock
-          // via `tabBarButton`/`tabPress` below (phase 47b — expo-router's
-          // `href: null` link-disable has no react-navigation equivalent
-          // property; hiding the tab button plus blocking a residual
-          // `tabPress` reproduces the same "can't navigate here" contract).
-          // Exploration itself shouldn't lock or force-navigates away from
-          // the modal-bearing screen (the failure mode that surfaced after
-          // commit a18ee12).
+          // via `tabBarButton`/`tabPress` below (react-navigation has no
+          // `href: null` link-disable; hiding the tab button plus blocking a
+          // residual `tabPress` gives the "can't navigate here" contract).
+          // Exploration itself must not lock, or navigation is forced away
+          // from the modal-bearing screen.
         }}
       />
       <Tabs.Screen
@@ -276,7 +268,7 @@ const useStyles = makeStyles((AXM) => ({
   },
   // Type size and tracking come from the presenter so the tab-bar FIT
   // contract in `state/e2e/tabs.engine.test.ts` measures the label the bar
-  // actually draws. Tracking dropped 2 -> 1 when DECK made the bar five tabs
+  // actually draws. Tracking is 1 because the bar is five tabs
   // wide: THE LEDGER at tracking 2 clears a 360pt phone by 6pt but overflows
   // a 320pt one, and a clipped label is silent (the navigator's Label is
   // `numberOfLines: 1`, so it ellipsises rather than breaking the layout).

@@ -1,8 +1,8 @@
 /**
- * Map sheets (map revamp M2, D15/D16).
+ * Map sheets.
  *
  * Each layout declares its own sheet: coordinate space, render scale, plate.
- * D16 rules that a map must not read as a climb, and that its canvas is larger
+ * A map must not read as a climb, and its canvas must be larger
  * than the viewport on BOTH axes, so reaching the whole map takes panning in
  * every direction. The rendered canvas is `width * scale` by `height * scale`.
  */

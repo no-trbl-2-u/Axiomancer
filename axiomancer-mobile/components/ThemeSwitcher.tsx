@@ -1,15 +1,15 @@
 /**
- * User-facing colour-theme switcher (theming-hot-reload 2026-06).
+ * User-facing colour-theme switcher.
  *
- * A collapsible "APPEARANCE" section (collapsed by default to respect
- * the SELF tab's tight, no-scroll layout). Expanded, it renders one
+ * A collapsible "APPEARANCE" section (collapsed by default). Expanded,
+ * it renders one
  * swatch per registered theme; tapping switches the active palette **in
  * place** — no reload — via the runtime store, so the whole app
  * re-paints instantly on web and native. The selection persists across
  * launches and the active theme is highlighted.
  *
  * This is a real player setting, so it is not gated behind dev tools.
- * Hosted on `/settings` since 2026-09-23 (the SELF tab links there); the
+ * Hosted on `/settings` (the SELF tab links there); the
  * row carries no outer margin so the settings list spaces it like its
  * siblings.
  */

@@ -1,6 +1,5 @@
 /**
- * Hermetic E2E — loot-cache-choice reward depth (Phase 129 roll, re-homed
- * to the Phase 63 three-offer engine).
+ * Hermetic E2E — loot-cache-choice reward depth (the three-offer engine).
  *
  * Proves `beginLootCacheChoice({ tier })` rolls a real engine-truth reward
  * set (`rollCacheReward`) into `itemCandidates` at session creation, that
@@ -58,7 +57,7 @@ describe('cache loot-table reward depth', () => {
 
         const after = store.getState() as unknown as GameState;
         expect(after.player.inventory.length).toBe(beforeInv + candidateCount);
-        // Phase 21 — the Reliquary yields consumables (procedural equipment is retired).
+        // The Reliquary yields consumables only.
         const added = after.player.inventory.slice(beforeInv);
         expect(added.every((i) => i.category === 'consumable')).toBe(true);
     });

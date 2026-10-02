@@ -1,9 +1,9 @@
 /**
  * Hermetic component tests — DebugQuestState (real authored quests).
  *
- * The panel lists the quests the engine authors on a `MapDefinition`. R7e
- * (D72) deleted the parked world's nine, so no quest is authored and the
- * panel renders nothing; the start / advance / complete helpers it drives are
+ * The panel lists the quests the engine authors on a `MapDefinition`. No
+ * quest is authored today, so the panel renders nothing; the start /
+ * advance / complete helpers it drives are
  * pinned on the fixture quest in `state/dev/__tests__/story-catalog.test.ts`.
  */
 

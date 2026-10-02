@@ -3,20 +3,16 @@
  * (engineHonestKind / resolvePrimary / faceStats / detailStats / armedValue).
  *
  * Fixtures are live library cards, read live from the sibling engine so the
- * assertions stay true to real data. After the card purge (2026-09-27) the
- * library is the grey office:
+ * assertions stay true to real data. The library is the grey office:
  *   - grey-strike   A Plain Blow   FREE Deal 2 · PAID DEAL 5       → a mechanic face, no read
  *   - grey-ward     A Plain Ward   FREE Guard 2 · PAID GUARD 5     → the read-scaled Guard face
  *   - grey-word     A Plain Word   FREE VULN 10% 1t · PAID 25% 2t  → the status face
  *   - fx-ember (synthetic)         round-clock kindling ember      → the "N over M turns" face
  *
- * The faces only purged cards printed (event-DoT POISON, RIPOSTE, RUPTURE,
- * REAP, CONDEMN, MARK, BACKFIRE, oath/hex) left with those cards; their
- * presenter branches get coverage again when a guided session adds a card
- * that prints them.
+ * Presenter branches for faces no live card prints have no coverage here.
  *
  * Core invariant under test: real-units-or-no-number (never a fabricated
- * value — THE STRIKE IS DEAD), and face↔detail numbers agree.
+ * value), and face↔detail numbers agree.
  */
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
@@ -96,8 +92,7 @@ describe('faceStats — honest real-unit faces', () => {
         const f = faceStats(card, sourceCard);
         expect(f.kind).toBe('guard');
         expect(f.heroText).toBe('Guard 5');
-        // phase 30: BARRIER merged into GUARD — the FREE line lays a
-        // persistent brick, not a fading chip.
+        // The FREE line lays a persistent Guard brick, not a fading chip.
         expect(f.freeHeroText).toBe('Guard 2');
         expect(f.armable).toBe(true);
         expect(f.guardBase).toBe(5);
@@ -133,7 +128,7 @@ describe('Option A split rail — freeKeyword/freeValue + typeStrip (owner-picke
         expect(f.typeStrip).toBe('ANY · SKILL');
     });
     it("A Plain Word → ◇ VULNERABLE · ×10 · 1t, never the 'i10 d1' code", () => {
-        // 2026-07-12 (card-wording audit): '×N · Mt', never the 'iN dM' code.
+        // '×N · Mt', never the 'iN dM' code.
         const { card, sourceCard } = cardOf('grey-word');
         const f = faceStats(card, sourceCard);
         expect(f.freeKeyword).toBe('VULNERABLE');
@@ -160,10 +155,10 @@ describe('detailStats — same numbers as the face', () => {
         expect(d.outcomeStats.find(st => st.label === 'TURNS')?.value).toBe('2');
         // The FREE pill is the authored free line, de-abbreviated — the face's text.
         expect(d.freePill).toBe(faceStats(card, sourceCard).freeHeroText);
-        // D-fix: the FREE-line rider renders its keyword panel.
+        // The FREE-line rider renders its keyword panel.
         expect(d.keywords.map(k => k.name)).toContain('VULNERABLE');
         expect(d.keywords.every(k => k.def.length > 0)).toBe(true);
-        // The meta chip surfaces the rank name + card type (where gold used to sit).
+        // The meta chip surfaces the rank name + card type.
         expect(d.metaChip).toContain('ASH');
         expect(d.metaChip).toContain('SPELL');
     });
@@ -175,8 +170,7 @@ describe('detailStats — same numbers as the face', () => {
     });
     it('systemTerms is the PER-CARD glossary slice, not the KW-7 dump (owner, 2026-07-12)', () => {
         // The grey office's printed lines reference no dice-system token → NO
-        // entries (INTENSITY/FREE retired from the glossary, owner
-        // 2026-07-18) — never the dump.
+        // entries — never the dump.
         for (const id of ['grey-strike', 'grey-ward', 'grey-word']) {
             const { card, sourceCard } = cardOf(id);
             expect(detailStats(card, sourceCard).systemTerms.map(s => s.term)).toEqual([]);

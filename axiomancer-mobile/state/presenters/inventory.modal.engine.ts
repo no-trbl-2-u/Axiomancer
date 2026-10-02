@@ -1,5 +1,5 @@
 /**
- * Item-use / item-equip modal presenter for the inventory screen (Spec 06).
+ * Item-use / item-equip modal presenter for the inventory screen.
  *
  * Q2 / Q5 both call for a confirmation modal that previews the effect
  * of using or equipping an item before it is committed. The helpers
@@ -34,8 +34,7 @@ import {
  * - `'use'` → `actions.useItem` (consumables).
  * - `'equip'` → `actions.equipItem` (equipment NOT currently worn).
  * - `'unequip'` → `actions.unequipItem` (equipment currently worn
- *   AND has at least one other slot peer to swap to). Filed via
- *   user-jot 2026-05-22 (oversight 29th call).
+ *   AND has at least one other slot peer to swap to).
  * - `'view'` → no action (display-only; for items with no available
  *   action, including equipment that's the sole worn item in its
  *   slot — see notes on `unequipItemAction` for why sole-item
@@ -51,15 +50,12 @@ export interface StatDelta {
 }
 
 /**
- * A non-stat change (passive / on-hit / on-defend effect, combat
- * resource interaction, or keyword/affix) gained or lost by the equip
- * operation the modal previews. Stat changes ride on `statDeltas`;
- * everything else the equip alters surfaces here so the preview shows
- * *all* of an item's effect — not just its four headline combat stats.
+ * A non-stat change — a signet-relic signature — gained or lost by the
+ * equip operation the modal previews. Stat changes ride on `statDeltas`.
  */
 export interface ModalEffectDelta {
-    /** Display label (resolved engine effect name, resource summary, or
-     * keyword/affix word; falls back to the raw id when unresolved). */
+    /** Display label (`grants <name>` / `loses <name>`; falls back to the
+     * signature id when it has no name). */
     label: string;
     /** `'gained'` when the equip adds this, `'lost'` when it removes it. */
     direction: 'gained' | 'lost';
@@ -95,25 +91,22 @@ export interface ItemModalViewModel {
      */
     statDeltas: readonly StatDelta[];
     /**
-     * Non-stat changes the equip preview should surface — passive /
-     * on-hit / on-defend effects, combat-resource interactions, and
-     * keyword/affix labels gained or lost. Empty for consumables,
-     * display-only rows, and equips that change no effects.
+     * Signet-relic signatures the equip preview gains or loses. Empty for
+     * consumables, display-only rows, and equips that change no signature.
      */
     effectDeltas: readonly ModalEffectDelta[];
     /**
-     * The item's own intrinsic modifiers — the stats (with values) and
-     * effects it grants, regardless of equip state. Empty for items with
-     * no modifiers (e.g. a plain common drop) and for consumables.
+     * The item's own intrinsic stat modifiers (with values), regardless of
+     * equip state. Empty for items with no stat modifiers and for
+     * consumables.
      */
     itemModifiers: readonly ItemModifierLine[];
     /**
      * Name of the currently-equipped item that this equip would
      * replace, or `null` when the slot is empty / this item is
      * already equipped / the item isn't equipment. Surfaced on the
-     * equip modal's confirmLabel as `"EQUIP · REPLACE <NAME>"` per
-     * the design's chat-1 iteration 2 EQUIP-button rule (Phase 36
-     * port). The view layer reads `replacingName` directly to avoid
+     * equip modal's confirmLabel as `"EQUIP · REPLACE <NAME>"`.
+     * The view layer reads `replacingName` directly to avoid
      * parsing the label string back out.
      */
     replacingName: string | null;
@@ -153,15 +146,14 @@ export function selectItemModalViewModel(
 function buildConsumableModal(player: Character, item: Item): ItemModalViewModel {
     // `isConsumable(item)` has narrowed at the call site; cast through.
     const consumable = item as Consumable;
-    // Prefer the engine's structured `healAmount`; fall back to parsing
-    // a legacy `effectId` string for fixtures / records that haven't
-    // migrated yet.
+    // Prefer the engine's structured heal; fall back to parsing a heal
+    // amount out of a free-form `effectId` string (fixtures / records that
+    // carry no structured heal).
     const legacyEffect = consumable.effectId ?? '';
-    // Phase 96 — ask the engine what THIS player, at THIS HP, would actually be
-    // paid. `resolveConsumableHeal` is the same call `useConsumableEffect` makes,
-    // so the number previewed here is by construction the number drinking pays;
-    // the legacy `parseHealAmount` path stays as the fallback for un-migrated
-    // fixtures whose heal is still encoded in a free-form `effectId` string.
+    // Ask the engine what THIS player, at THIS HP, would actually be paid.
+    // `resolveConsumableHeal` is the same call `useConsumableEffect` makes, so
+    // the number previewed here is by construction the number drinking pays;
+    // `parseHealAmount` is the fallback for an `effectId`-encoded heal.
     const { amount: resolvedHeal, desperate } = resolveConsumableHeal(player, consumable);
     const heal = resolvedHeal > 0 ? resolvedHeal : parseHealAmount(legacyEffect);
     const projectedHp = heal > 0
@@ -217,15 +209,13 @@ function buildEquipmentModal(player: Character, item: Item): ItemModalViewModel 
     const isAlreadyEquipped = selectIsEquippedFirstOfSlot(player.inventory, eq);
     const replacing = isAlreadyEquipped ? null : selectFindEquippedInSlot(player.inventory, eq);
 
-    // User-jot 2026-05-22 (oversight 29th): equipment needs an
-    // 'unequip' option in addition to equip + discard. Under
+    // Equipment offers 'unequip' in addition to equip + discard. Under
     // mobile's "first-equipment-per-slot = worn" convention,
     // unequip = swap to a different slot-peer (move the worn
     // item to the back of its slot peers). When the worn item
     // is the sole entry in its slot, there's no peer to swap to
     // — the row falls back to display-only with the WORN label
-    // (engine-true "unequip to bare" requires a mobile-side
-    // unequipped-marker that's not in scope today).
+    // (there is no "unequip to bare").
     const slotPeerCount = player.inventory.filter(
         (it: Item): it is Equipment =>
             isEquipment(it) && (it as Equipment).slot === eq.slot,
@@ -240,7 +230,7 @@ function buildEquipmentModal(player: Character, item: Item): ItemModalViewModel 
           ) ?? null
         : null;
 
-    // Phase 36 + user-jot 2026-05-22 confirmLabel matrix:
+    // confirmLabel matrix:
     // - Not equipped, slot empty → 'EQUIP'
     // - Not equipped, slot has worn sibling → 'EQUIP · REPLACE <NAME>'
     // - Equipped, has peer → 'UNEQUIP · WEAR <NAME>' (or just
@@ -279,9 +269,8 @@ function buildEquipmentModal(player: Character, item: Item): ItemModalViewModel 
     ];
 
     // Compute the real before/after character for whichever operation
-    // the confirm button performs, then surface *every* changed stat and
-    // effect — not just the four headline combat stats — keeping only
-    // entries that actually change (per the design brief).
+    // the confirm button performs, then surface every changed stat and
+    // signature, keeping only entries that actually change.
     //
     // - equip   → wear `eq` (engine replaces any worn slot sibling).
     // - unequip → take `eq` off and wear `wornSibling` in its place.
@@ -352,8 +341,7 @@ function round1(n: number): number {
 /**
  * Flatten a character's diffable stats into one `key → value` map. Max
  * health is the only stat equipment can change (the armor relics' +max
- * VITAE); the derived and save/test stats this used to include were deleted
- * in TRIM THE FAT T2a.
+ * VITAE).
  */
 function characterStatMap(character: Character): Map<string, number> {
     const out = new Map<string, number>();
@@ -408,7 +396,7 @@ function effectName(id: string): string {
 /**
  * Build the item's intrinsic modifier block — the stat lines (with
  * values) it grants on its own. Values render as `+N` / `-N`. Returns
- * `[]` for an item with no modifiers (a plain common drop).
+ * `[]` for an item with no stat modifiers.
  */
 function computeItemModifiers(eq: Equipment): ItemModifierLine[] {
     const out: ItemModifierLine[] = [];
@@ -416,7 +404,7 @@ function computeItemModifiers(eq: Equipment): ItemModifierLine[] {
         const value = signed(mod.value);
         out.push({ label: `${value} ${statLabelFor(mod.stat)}` });
     }
-    // Phase 23 — equipment is stat-only + `grantsSignature`; there are no
+    // Equipment is stat-only + `grantsSignature`; there are no
     // passive-effect / proc / resource lines to list. The granted signature is
     // surfaced separately (see `computeEffectDeltas`).
     return out;
@@ -424,7 +412,7 @@ function computeItemModifiers(eq: Equipment): ItemModifierLine[] {
 
 /**
  * The non-stat change the equip causes: the signet-relic signature gained /
- * lost (Phase 23 — equipment carries no other non-stat channel). Stat changes
+ * lost (equipment carries no other non-stat channel). Stat changes
  * ride on `computeStatDeltas`.
  */
 function computeEffectDeltas(

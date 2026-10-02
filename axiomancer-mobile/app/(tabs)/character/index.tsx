@@ -35,14 +35,14 @@ export default function CharacterScreen() {
   // `selectCharacterViewModel` returns a frozen new object every call,
   // which would loop `useSyncExternalStore` if used directly as a
   // selector. Pull the underlying slice and memoize the VM downstream
-  // (mirrors the pattern fixed in event screen, Phase 6 Tick A).
+  // (the same pattern as the event screen).
   const player = useGameState((s) => s.player);
   const vm = useMemo(() => selectCharacterViewModel({ player } as never), [player]);
   const store = useGameStore();
   const actions = useGameActions();
   const router = useRouter();
 
-  // Phase 29 Tick A: acknowledge any pending level-up the moment the
+  // Acknowledge any pending level-up the moment the
   // character screen renders. The tab badge clears via
   // `selectTabBadges` (which gates on `levelUpAcknowledged`). Preserve
   // any other notification fields (toast, etc.) on the slice.
@@ -53,7 +53,7 @@ export default function CharacterScreen() {
     });
   }, [store]);
 
-  // Phase 73 — LevelUpModal mount toggle. Strip tap opens, modal
+  // LevelUpModal mount toggle. Strip tap opens, modal
   // commit / keep-deliberating dismisses. Snapshot the level + base
   // stat values at the moment the modal opens so it has the "before"
   // figures even if the engine mutates underneath us mid-allocation.
@@ -113,12 +113,11 @@ export default function CharacterScreen() {
             <SectionLabel size={9} color={AXM.bone}>{vm.subtitle}</SectionLabel>
             <Text style={styles.characterName} numberOfLines={1}>{vm.displayName}</Text>
             <View style={styles.xpRow}>
-              {/* FE-004: value first, then the caption naming what it counts
-                * TOWARD. Side-by-side, the label and value each wrapped inside
-                * this ~130px column and interleaved into 'XP · 0 /' over
-                * 'LVL 2  1000'; stacked, each fits one line and the caption
-                * cannot be read as the current level (which the medallion to
-                * the right already shows). */}
+              {/* Value first, then the caption naming what it counts TOWARD.
+                * Stacked, each fits one line of this ~130px column (side by
+                * side they wrap and interleave), and the caption cannot be
+                * read as the current level (which the medallion to the right
+                * already shows). */}
               <Text style={styles.xpValue} numberOfLines={1}>{vm.xp} / {vm.xpMax}</Text>
               <Text style={styles.xpLabel} numberOfLines={1}>{vm.xpLabel}</Text>
             </View>
@@ -164,9 +163,9 @@ export default function CharacterScreen() {
         />
       )}
 
-      {/* Phase 73 — LevelUpModal overlays the SELF tab when the
-          ASCEND strip is tapped. Non-tap-out-dismissible per the
-          design (chat5 brief). Closes via COMMIT (allocates + closes)
+      {/* LevelUpModal overlays the SELF tab when the
+          ASCEND strip is tapped. Non-tap-out-dismissible by
+          design. Closes via COMMIT (allocates + closes)
           or "keep deliberating" / discard-confirm step. */}
       {levelUpOpen && (
         <LevelUpModal
@@ -185,8 +184,8 @@ export default function CharacterScreen() {
         />
       )}
 
-      {/* Hazard deck — persistent library / remove-card surface
-          (Phase 126). Always available outside an encounter. */}
+      {/* Hazard deck — persistent library / remove-card surface.
+          Always available outside an encounter. */}
       <Pressable
         style={styles.deckLink}
         onPress={() => router.push('/hazard-deck')}
@@ -233,11 +232,9 @@ export default function CharacterScreen() {
             <Text style={styles.emptyLabel}>{vm.emptyEffectsMessage}</Text>
           ) : (
             vm.effects.map((e) => (
-              // Phase 74 follow-up walkthrough Tick 1: wrap the
-              // affliction/blessing row in a TooltipTarget so a tap
-              // fires the existing kind:'effect' content (Phase 75
-              // authored — reads engine `Effect.payload` for the
-              // stat-effect line + accent). id is the engine
+              // Wrap the affliction/blessing row in a TooltipTarget so a
+              // tap fires the kind:'effect' content (reads engine
+              // `Effect.payload` for the stat-effect line + accent). id is the engine
               // effectId threaded through CharacterEffectRow.
               <TooltipTarget
                 key={e.name}
@@ -273,9 +270,8 @@ export default function CharacterScreen() {
         </View>
       </View>
 
-      {/* WORN & WIELDED removed from the SELF tab (visual-audit
-          2026-06) — equipment lives in the SATCHEL tab; the SELF sheet
-          keeps to identity + stats so it fits one screen. */}
+      {/* Equipment lives in the SATCHEL tab; the SELF sheet keeps to
+          identity + stats so it fits one screen. */}
 
       {/* Cards */}
       {vm.cards.length > 0 && (
@@ -283,12 +279,10 @@ export default function CharacterScreen() {
           <SectionLabel size={13}>✠ FALLACIES &amp; PARADOXES</SectionLabel>
           <View style={styles.cardsGrid}>
             {vm.cards.map((s) => (
-              // Phase 74 follow-up walkthrough Tick 2: wrap each
-              // card card in a TooltipTarget pointing at the
-              // existing kind:'card' content (Phase 75 authored
-              // — engine description + cost/stance footnote).
-              // vm.cards is currently dead surface ([] in the
-              // presenter); the wire-up is forward-looking.
+              // Wrap each card in a TooltipTarget pointing at the
+              // kind:'card' content (engine description + cost/stance
+              // footnote). vm.cards is always [] in the presenter, so
+              // this section never renders today.
               <TooltipTarget
                 key={s.id || s.name}
                 kind="card"
@@ -313,7 +307,7 @@ export default function CharacterScreen() {
           </View>
         </View>
       )}
-      {/* The COLOUR THEME picker moved to /settings (2026-09-23). */}
+      {/* The COLOUR THEME picker lives in /settings. */}
       <SettingsLink />
       <DevToolsLink />
     </ScreenBg>
@@ -321,9 +315,8 @@ export default function CharacterScreen() {
 }
 
 const useStyles = makeStyles((AXM) => ({
-  // Density pass (visual-audit 2026-06): tightened section spacing and
-  // hero-element sizes so the whole SELF tab fits a 390×844 screen
-  // without scrolling. Kept legible — only spacing/scale shrank.
+  // Section spacing and hero-element sizes are tight so the whole SELF
+  // tab fits a 390×844 screen without scrolling.
   // D&D character-sheet header: portrait bust + identity + level box.
   sheetHeader: { flexDirection: 'column', paddingHorizontal: 12, paddingTop: 4, paddingBottom: 0 },
   sheetHeaderTopRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },

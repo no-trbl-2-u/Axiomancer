@@ -8,16 +8,14 @@
  * -> startCombat) and `'narrative-choice'` (prose + choices ->
  * applyDialogue or auto-resolve).
  *
- * Spec 08 product Qs locked (still binding after the 0.7.0 migration):
- *   Q1 = A (two kinds), Q2 = C (both description + machine-readable
- *   consequences), Q3 = B (mobile-local slug -> asset, see
- *   event-assets.ts), Q4 = Future spec (mid-combat events deferred),
- *   Q5 = Yes (skip affordance over long bodies).
+ * Rules: two VM kinds only; each choice carries both a description and
+ * machine-readable consequences; art resolves through a mobile-local
+ * slug (see `event-assets.ts`); mid-combat events are out of scope;
+ * long bodies get a skip affordance.
  *
- * Engine-side surface (`axiomancer-mechanics@0.7.0`): pure
- * `resolveMapEvent(state)` returns `{ state, event }` where `event`
- * is a `ResolvedEvent` union over 8 kinds + 'none' (see
- * `node_modules/axiomancer-mechanics/dist/World/MapEvents/types.d.ts`).
+ * Engine surface (`@mechanics`): pure `resolveMapEvent(state)` returns
+ * `{ state, event }` where `event` is the `ResolvedEvent` union (one
+ * member per map-event kind, plus 'none').
  */
 
 import type {
@@ -45,15 +43,9 @@ import { freezeViewModel } from './freeze';
 import { toRomanLower } from './roman';
 
 export type EventKind = 'combat-prelude' | 'narrative-choice';
-// Phase 137 cleanup: the 'rest' / 'gather' variants left with their
-// kinds — those events launch minigames and never reach this VM.
-//
-// 2026-09-21 (owner finding 2, "the Gather node is now a no-op"): 'gather'
-// comes BACK. Phase 76 retired the Gleaning minigame and Phase 137 then
-// filed `gathering` as a dead-end kind, which left the node with no
-// player-facing surface at all — see `composeGathering` for the whole
-// argument. The kind now composes a real acknowledgement card, so it needs
-// its variant again. 'rest' stays gone: the rest-choice node still owns it.
+// 'gather' is the gathering acknowledgement card (see `composeGathering`).
+// There is no 'rest' variant: rest events start the rest-choice node and
+// never reach this VM.
 export type EventVariant = 'encounter' | 'boss' | 'quest' | 'npc' | 'gather';
 export type ChoiceAccentKey = 'blood' | 'sulfur' | 'parchment' | 'bone' | 'rust';
 
@@ -74,7 +66,7 @@ export interface EventConsequence {
 }
 
 export interface EventChoice {
-    /** Stable choice id. For combat-prelude: `'fight'` | `'flee'`. For dialogue: index into `visibleChoices(node, ctx)` as a string (Phase 60c — engine flattened DialogueChoice). */
+    /** Stable choice id. For combat-prelude: `'fight'` | `'flee'`. For dialogue: the choice's index in the raw `node.choices` list, as a string (see `composeNpcDialogue`). */
     id: string;
     label: string;
     description: string;
@@ -84,10 +76,8 @@ export interface EventChoice {
     enabled: boolean;
     /**
      * Chrome subtitle rendered below the button label (italic, bone-
-     * color, smaller font). Ports the design's `'ix · vi vitae ·
-     * adv. unknown'`-style cost/consequence preview from
-     * `prototype.jsx:481-489` (combat shell) + `:522-531` (paced
-     * shell). `null` when no subtitle should render (default for
+     * color, smaller font): a `'ix · vi vitae · adv. unknown'`-style
+     * cost/consequence preview. `null` when no subtitle should render (default for
      * narrative-choice dialogue branches; combat-prelude populates
      * via the enemy-stats / retreat ritual lines below).
      *
@@ -110,13 +100,10 @@ export interface EventChoice {
 
 /**
  * Combat-prelude chrome strings, populated only on `kind: 'combat-prelude'`
- * VMs. Phase 32 (Claude Design handoff, 2026-05-16) ported the prototype's
- * encounter-modal seam — header strip (red triangle + ENCOUNTER eyebrow),
- * diagonal "STRIFE STIRS" sash overlaying the illustration, plus the
- * non-dismissible SEALED · NO RETREAT chain bars and the FLEE-disabled
- * hint added in pass-7/8 chrome lifts. Routing the four chrome strings
- * (eyebrow, sash, seal-bar, flee-disabled hint) through the VM keeps
- * the view layer free of inline literals per Hard Rule #8 — the screen
+ * VMs: the header-strip eyebrow, the diagonal "STRIFE STIRS" sash over
+ * the illustration, the non-dismissible SEALED · NO RETREAT chain bars,
+ * the FLEE-disabled hint and the doom line. Routing them through the VM
+ * keeps the view layer free of inline literals per Hard Rule #8 — the screen
  * reads `vm.preludeChrome` and paints if set, or returns null when the
  * field is null (narrative-choice variants).
  */
@@ -128,8 +115,7 @@ export interface PreludeChrome {
     /**
      * Chain-bar label rendered top + bottom of the encounter modal
      * overlay (`SEALED · NO RETREAT`). The diegetic irreversible-
-     * commitment signal — see `components/event/EncounterModalOverlay.tsx`
-     * (Phase 32 sub-tick D port; chats/chat1.md).
+     * commitment signal — see `components/event/EncounterModalOverlay.tsx`.
      */
     sealLabel: string;
     /**
@@ -140,7 +126,7 @@ export interface PreludeChrome {
      */
     fleeDisabledHint: string;
     /**
-     * One-doom-grammar pass — the grim hopeless line every threat
+     * The grim hopeless line every threat
      * modal carries (matches the hazard danger intro's register),
      * always ending on the player's only out: "Unless…". Rendered in
      * italic between the body prose and the choice rows.
@@ -150,11 +136,8 @@ export interface PreludeChrome {
 
 /**
  * General event-screen chrome strings constant across every variant.
- * Lifted onto the VM by /iterate (2026-05-16, addressing CRITIQUE pass 6
- * HIGH finding) so the screen reads `vm.chrome.*` instead of carrying
- * inline display literals per Hard Rule #8. Same pattern as pass 5's
- * drains for combat.tsx, exploration drawer, inventory headers, and
- * character empty-effects.
+ * The screen reads `vm.chrome.*` instead of carrying inline display
+ * literals per Hard Rule #8.
  */
 export interface EventChrome {
     /** Section eyebrow above the choice list. Active-state only. */
@@ -176,13 +159,9 @@ export const EVENT_CHROME: EventChrome = {
 
 /**
  * Single source of truth for the non-boss encounter label that the
- * prelude eyebrow and the badge BOTH derive from. CRITIQUE pass 6 MED
- * flagged the duplicate literal: `withPreludeChrome` and
- * `composeCombatPrelude` previously hard-coded `'ENCOUNTER'` separately,
- * with no test pinning them together, so a copy edit on one would have
- * silently drifted from the other. Centralizing here makes the
- * relationship explicit and lets a single test (in
- * `state/e2e/event.engine.test.ts`) pin both call sites.
+ * prelude eyebrow (`withPreludeChrome`) and the badge
+ * (`composeCombatPrelude`) BOTH derive from, so a copy edit cannot drift
+ * one from the other. `state/e2e/event.engine.test.ts` pins both call sites.
  */
 export const ENCOUNTER_LABEL = 'ENCOUNTER';
 
@@ -259,12 +238,6 @@ export function selectHasActiveEvent(state: AppStoreState): boolean {
  * shell; the `EventGate` reads this selector instead of the broader
  * `selectHasActiveEvent` to keep the two shells from mounting
  * simultaneously.
- *
- * Filed via Phase 40 (event-shell distinction audit, 2026-05-19).
- * Before this split, `EventGate` pushed `/event` on every active
- * event, which produced a "double-mount" race when a combat-prelude
- * fired: both the in-place modal and the full-screen route would
- * appear at once.
  */
 export function selectHasActivePacedEvent(state: AppStoreState): boolean {
     if (!selectHasActiveEvent(state)) return false;
@@ -272,21 +245,17 @@ export function selectHasActivePacedEvent(state: AppStoreState): boolean {
     return vm.kind === 'narrative-choice';
 }
 
-/** Route targets for paced events (Phase 137 dedicated screens). */
+/** Route targets for paced events. */
 export type PacedEventRoute = '/event' | '/village' | '/dialogue' | '/cutscene';
 
 /**
  * Which full-screen route the active paced event should mount.
- * Phase 137 gave interaction / village / cutscene dedicated screens;
- * everything else paced keeps the generic `/event` shell. Returns
- * `null` when no paced event is active (rest / loot-cache / quest /
- * hazard never reach the event slice — their interceptors start
- * minigame sessions instead).
- *
- * 2026-09-21 — `gathering` reaches the slice again and mounts the
- * generic `/event` shell as its acknowledgement card (owner finding 2;
- * see `composeGathering`). It is the one kind that routes here in
- * production, so `/event` is no longer a dead fallback.
+ * Interaction and narration mount `/dialogue`, village mounts
+ * `/village`, cutscene mounts `/cutscene`; everything else paced (in
+ * practice `gathering`, see `composeGathering`) mounts the generic
+ * `/event` shell. Returns `null` when no paced event is active (rest /
+ * loot-cache / quest / hazard never reach the event slice — their
+ * interceptors start minigame sessions instead).
  */
 export function selectPacedEventRoute(state: AppStoreState): PacedEventRoute | null {
     if (!selectHasActivePacedEvent(state)) return null;
@@ -304,9 +273,7 @@ export function selectPacedEventRoute(state: AppStoreState): PacedEventRoute | n
  * `<EncounterModalOverlay>` over the map. The tab layout consumes
  * this OR `useCombatMode().inCombat` to flip the WILDS/STRIFE
  * positional slot to STRIFE early — while the encounter modal is
- * up, before the player commits FIGHT. Mirrors the design's
- * prototype.jsx:42 `combatTabShown = route === 'strife' ||
- * modal?.kind === 'event-combat'`. Phase 42 port (2026-05-19).
+ * up, before the player commits FIGHT.
  */
 export function selectHasActiveCombatPrelude(state: AppStoreState): boolean {
     if (!selectHasActiveEvent(state)) return false;
@@ -315,7 +282,7 @@ export function selectHasActiveCombatPrelude(state: AppStoreState): boolean {
 }
 
 /**
- * Phase 32 design-handoff port (2026-05-16): backfill `preludeChrome`
+ * Backfill `preludeChrome`
  * on a freshly-composed VM so each `composeX` function can stay
  * focused on its own concerns. Combat-prelude variants get the
  * "STRIFE STIRS" sash + ENCOUNTER / BOSS · ENCOUNTER eyebrow; every
@@ -450,19 +417,9 @@ const BOSS_OMEN_BY_LEVEL: readonly string[] = [
     'fifth seal · the long count',
 ];
 
-// Lowercase-Roman helper consolidated into `./roman` (close
-// `[3.0]` engine-dup audit row). The earlier "duplicate of
-// combat.engine.ts::toRoman" was self-acknowledged in the
-// doc-block on this surface; both call sites now import from the
-// shared util.
-
 function composeCombatPrelude(encounter: Encounter, isBoss: boolean): Omit<EventViewModel, 'preludeChrome' | 'chrome' | 'sourceNodeType'> {
-    // Phase 60b — engine's canonical `Encounter` shape is
-    // `{ enemies: Enemy[], origin?: string }`. The prelude
-    // consumes the first enemy (combat is single-enemy today).
-    // The earlier `as any` cast (closed via [2.5] event-audit
-    // row 4) dated back to Phase 60b's migration; engine
-    // `Encounter` exposes `.enemies` directly today.
+    // Engine `Encounter` is `{ enemies: Enemy[], origin?: string }`.
+    // The prelude shows the first enemy (combat is single-enemy).
     const enemy = encounter.enemies[0];
     // The live encounter (`beginHazardEncounter` in actions.ts) scales every
     // foe's HP by `ENCOUNTER_ENEMY_HP_MULTIPLIER` before combat starts, so the
@@ -470,23 +427,15 @@ function composeCombatPrelude(encounter: Encounter, isBoss: boolean): Omit<Event
     // preview previews the SAME scaled number.
     const previewHealth = withScaledEnemyHp(enemy, ENCOUNTER_ENEMY_HP_MULTIPLIER).health;
     const badge = isBoss ? 'OMEN OF DOOM' : ENCOUNTER_LABEL;
-    // Phase 43 port: boss encounters swap FIGHT/FLEE labels for
-    // STRIKE/KNEEL per the design's chat-1 spec ("KNEEL / STRIKE for
-    // boss"). Choice IDs stay 'fight' / 'flee' so the screen's
-    // existing handlers (onFight/onFlee) still dispatch correctly —
-    // KNEEL is semantically engine-equivalent to FLEE today (still
-    // disabled on bosses; no engine-side "kneel to a boss" mechanic
-    // exists yet), but the label honors the design's intent that the
-    // ritual register differs from a regular encounter's
-    // fight-or-flee binary.
-    // Phase 45 port: chrome subtitles under each action button (the
-    // italic cost/consequence preview from prototype.jsx:481-489 +
-    // :486-489 — 'ix · vi vitae · adv. unknown' on FIGHT, 'forfeit
-    // the path' on FLEE). Lowercase-roman cost line + ritual-register
-    // kicker. The FLEE line carried a grace cost until the morale meter
-    // was removed (D39); retreat is now free. Boss variant tightens the kicker
-    // since the engine's boss-blocks-flee rule is part of the
-    // design intent (KNEEL is sealed, not a real choice).
+    // Boss encounters label FIGHT/FLEE as STRIKE/KNEEL. Choice IDs stay
+    // 'fight' / 'flee' so the screen's handlers (onFight/onFlee) dispatch
+    // the same way — KNEEL is FLEE, disabled on bosses (there is no
+    // engine "kneel to a boss" mechanic); only the ritual register differs.
+    // Chrome subtitles under each action button: a lowercase-roman cost
+    // line on FIGHT ('ix · vi vitae · adv. unknown'), a ritual-register
+    // kicker on FLEE ('forfeit the path'). Retreat costs nothing. The boss
+    // kicker reads sealed because bosses block flee (KNEEL is not a real
+    // choice).
     const fightSubtitle = `${toRomanLower(enemy.level)} · ${toRomanLower(previewHealth)} vitae · adv. unknown`;
     const fleeSubtitle = isBoss
         ? 'sealed · no retreat'
@@ -547,8 +496,7 @@ function composeCombatPrelude(encounter: Encounter, isBoss: boolean): Omit<Event
 /**
  * Builds the engine's `DialogueContext` from mobile store state. The single
  * source of truth for every `visibleChoices` call site — a second hand-built
- * context is how the phase 53b gap (gates evaluating false for every player,
- * forever) happened in the first place.
+ * context drifts and leaves gates evaluating false for every player.
  */
 export function buildDialogueContext(state: AppStoreState): DialogueContext {
     const activeNames: string[] = state.quests.active.map((q: { name: string }) => q.name);
@@ -568,11 +516,9 @@ export function buildDialogueContext(state: AppStoreState): DialogueContext {
  * has no speaker by design, and that is the only case the fallback is
  * honest for.
  *
- * Resolves S4-world-C11: every NPC's nameplate read 'A FIGURE' while the
- * prose directly beneath it called the character by name. The engine's
- * `DialogueNode` has carried no `.speaker` since Phase 60c, but the
+ * The engine's `DialogueNode` carries no `.speaker`, but the
  * `interaction` event that OPENED the tree carries `npcName` — the same
- * name `composeInteraction` already puts on the no-tree card.
+ * name `composeInteraction` puts on the no-tree card.
  */
 function dialogueSpeakerTitle(resolved: ResolvedEvent | undefined): string {
     if (resolved?.kind === 'interaction') {
@@ -591,14 +537,12 @@ function composeNpcDialogue(
     const rawChoices = node.choices ?? [];
     const ctx = buildDialogueContext(state);
     const visible = visibleChoices(node, ctx);
-    // Phase 60c — engine's DialogueChoice was flattened: `.id` and
-    // `.label` were removed; the canonical user-facing field is
-    // `.text`. Mobile derives a stable VM `id` from the choice's index
-    // in `node.choices` (the RAW list `pickEventChoiceAction` indexes
-    // into), not its index in `visible` — a gate hiding any earlier
-    // choice shifts the filtered array's indices out of step with the
-    // raw one, which silently fires the wrong branch on click. (Phase
-    // 53b: caught while wiring the since-removed alignment gates live.)
+    // Engine `DialogueChoice` has no id or label; its user-facing field
+    // is `.text`. The VM `id` is the choice's index in `node.choices`
+    // (the RAW list `pickEventChoiceAction` indexes into), not its index
+    // in `visible` — a gate hiding any earlier choice shifts the filtered
+    // array's indices out of step with the raw one, which would fire the
+    // wrong branch on click.
     const choices: EventChoice[] = visible.map((choice) => ({
         id: String(rawChoices.indexOf(choice)),
         label: choice.text.toUpperCase(),
@@ -617,9 +561,8 @@ function composeNpcDialogue(
         artSlug: 'interaction-generic',
         badge: 'A VOICE',
         badgeAccentKey: 'parchment',
-        // Phase 60c — engine's DialogueNode dropped `.speaker`; the
-        // opening `interaction` event is where the name lives now
-        // (S4-world-C11). 'A FIGURE' survives only for a speakerless
+        // `DialogueNode` has no speaker; the name comes from the opening
+        // `interaction` event. 'A FIGURE' is only for a speakerless
         // narration.
         title: dialogueSpeakerTitle(state.event.pending?.event),
         subtitle: '',
@@ -631,7 +574,7 @@ function composeNpcDialogue(
 }
 
 function bodyFromPayload(event: ResolvedEvent): string {
-    // Phase 58 — every kind but 'cutscene' (delivers its prose via
+    // Every kind but 'cutscene' (delivers its prose via
     // `lines` already) and 'none' carries the authored MapEvent
     // `description` threaded from the engine. Prefer it; fall back to
     // the kind-keyed placeholder only when the node left it unauthored.
@@ -657,7 +600,7 @@ function composeNarrative(resolved: ResolvedEvent): Omit<EventViewModel, 'prelud
             return composeCutscene(body, artSlug);
         case 'gathering':
             return composeGathering(resolved.items, body, artSlug);
-        // Dead-end kinds (Phase 137 cleanup): rest / loot-cache /
+        // Dead-end kinds: rest / loot-cache /
         // hazard never reach the event slice —
         // `resolveCurrentMapEventAction` intercepts them and starts
         // their minigame/choice sessions instead (the rest-choice
@@ -671,17 +614,15 @@ function composeNarrative(resolved: ResolvedEvent): Omit<EventViewModel, 'prelud
         case 'hazard':
         case 'encounter':
         case 'narration':
-        // Spec 33 §6 / Phase D5 — 'blacksmith' is a dead-end kind here: its
-        // interceptor starts "The Anvil" die-gear session (D6 builds the
-        // screen, tray rework, and gear-inspection panel). It never reaches
-        // composeNarrative; falls to the empty VM defensively like the other
-        // minigame kinds.
+        // 'blacksmith': its interceptor starts "The Anvil" die-gear
+        // session. It never reaches composeNarrative; falls to the empty
+        // VM defensively like the other minigame kinds.
         case 'blacksmith':
-        // 2026-08-28 — 'travel' is engine-resolved (the world has already
-        // crossed when the event surfaces); the follow-up travel-UI wave
-        // owns its presentation. Falls to the empty VM defensively.
+        // 'travel' is engine-resolved (the world has already crossed when
+        // the event surfaces) and composes no card. Falls to the empty VM
+        // defensively.
         case 'travel':
-        // Map revamp M4 — the Labyrinth door enters the Aporia from its
+        // The Labyrinth door enters the Aporia from its
         // interceptor; like travel it never composes a card.
         case 'labyrinth':
         case 'none':
@@ -694,10 +635,8 @@ function composeInteraction(npcName: string, body: string, artSlug: EventArtSlug
         kind: 'narrative-choice',
         variant: 'npc',
         artSlug,
-        // Phase 46 port: design eyebrow 'INTERACTION' (literal,
-        // chrome-shaped). Title stays as the NPC name from engine —
-        // the design's 'The Wagoner' is one specimen of a generic
-        // npc-name title.
+        // Eyebrow 'INTERACTION' is literal chrome; the title is the NPC
+        // name from the engine.
         badge: 'INTERACTION',
         badgeAccentKey: 'parchment',
         title: npcName.toUpperCase(),
@@ -727,11 +666,8 @@ function composeVillage(
     body: string,
     artSlug: EventArtSlug,
 ): Omit<EventViewModel, 'preludeChrome' | 'chrome' | 'sourceNodeType'> {
-    // Shop UI is still out of scope (was already deferred under Spec
-    // 08's 'shop' kind). Render the village name + a single LEAVE
-    // choice. Surface `merchants.length` in the subtitle so the
-    // deferred-shop signal is visible in-VM rather than hidden behind
-    // an underscore-prefixed unused arg.
+    // No shop UI on this card: render the village name + a single LEAVE
+    // choice, with the stall count (`merchants.length`) as the subtitle.
     const stallCount = merchants.length;
     const subtitle =
         stallCount === 0 ? '' : stallCount === 1 ? '1 stall' : `${stallCount} stalls`;
@@ -739,8 +675,7 @@ function composeVillage(
         kind: 'narrative-choice',
         variant: 'quest',
         artSlug,
-        // Phase 46 port: design eyebrow 'A SETTLEMENT' (kindToMeta
-        // 'town' fallback from prototype.jsx:503).
+        // Eyebrow 'A SETTLEMENT' is literal chrome.
         badge: 'A SETTLEMENT',
         badgeAccentKey: 'parchment',
         title: villageName.toUpperCase(),
@@ -806,24 +741,15 @@ function gatheredLabel(item: Item): string {
 /**
  * The gathering acknowledgement card.
  *
- * 2026-09-21, owner finding 2 — "the Gather node is now a no-op". It was
- * not a no-op in the engine: `resolveGathering` appends the payload items
- * to `player.inventory` and `resolve-map-event` advances any `collect`
- * quest objectives, and both were measured working on all twelve authored
- * gathering nodes. What was missing was any surface. Phase 76 retired the
- * "Gleaning" minigame and replaced its screen with a 3-second, 10pt toast;
- * Phase 137 then filed `gathering` as a dead-end kind here. So the player
- * walked onto a node, the node went dark, and the only trace was a strip
- * of text that the navigator paints over (`<ToastHost>` is declared BEFORE
- * `<Stack>` in `app/_layout.tsx`, with no `zIndex`, and every screen's
- * `<ScreenBg>` is opaque).
- *
- * This is NOT the Gleaning coming back. There is no session, no RNG, no
- * tuning surface and no new route — the grant still happens in the engine
- * resolver, exactly as Phase 76 left it, and this composes the same paced
- * `narrative-choice` card that `interaction` / `village` / `cutscene`
- * already use. The card's only job is to name what the player just picked
- * up and to wait for them, so the acknowledgement outlives a glance.
+ * The grant happens in the engine: `resolveGathering` appends the payload
+ * items to `player.inventory` and `resolve-map-event` advances any
+ * `collect` quest objectives. This card has no session, RNG or route of
+ * its own — it is the same paced `narrative-choice` card that
+ * `interaction` / `village` / `cutscene` use. Its only job is to name what
+ * the player just picked up and wait for them. A toast would not do:
+ * `<ToastHost>` is declared BEFORE `<Stack>` in `app/_layout.tsx` with no
+ * `zIndex`, and every screen's `<ScreenBg>` is opaque, so the navigator
+ * paints over it.
  *
  * The button is a continue, not a decision: the items are already in the
  * inventory by the time this VM exists, so the label acknowledges a thing
@@ -842,8 +768,8 @@ function composeGathering(
         artSlug,
         badge: 'A GATHERING',
         badgeAccentKey: 'rust',
-        // The names ARE the payload of this card — the owner's complaint was
-        // that nothing told them what they had gathered.
+        // The names ARE the payload of this card: they tell the player what
+        // they gathered.
         title: foundSomething ? labels.join(' · ').toUpperCase() : 'NOTHING WORTH TAKING',
         // Where it went, so the player knows which tab to look in.
         subtitle: foundSomething ? 'into the satchel' : '',

@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — village shop action layer (Phase 5).
+ * Hermetic E2E — village shop action layer.
  *
  * Drives `buyVillageWare` / `sellVillageItem` through the real action
  * layer against a store with a pending village event, mirroring the

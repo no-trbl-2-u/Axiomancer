@@ -1,11 +1,11 @@
 /**
  * Reduced motion — one hook every animated surface asks.
  *
- * Per Phase 10: skip all transitions when reduced motion is on. Since
- * 2026-09-23 the answer is the OS switch (react-native-reanimated's
- * `useReducedMotion`) OVERRIDDEN by the SETTINGS choice:
+ * Skip all transitions when reduced motion is on. The answer is the OS
+ * switch (react-native-reanimated's `useReducedMotion`) OVERRIDDEN by the
+ * SETTINGS choice:
  *
- *   - `system` → the OS accessibility switch decides (the old behaviour);
+ *   - `system` → the OS accessibility switch decides;
  *   - `on`     → always reduced, whatever the OS says;
  *   - `off`    → never reduced, whatever the OS says.
  *

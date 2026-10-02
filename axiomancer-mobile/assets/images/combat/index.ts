@@ -1,27 +1,20 @@
 /**
- * Combat arena backdrops — Phase 83 (Woodcut Codex, V-series follow-up),
- * extended in Phases 101 and 103. R7e (D72) deleted the parked regions'
- * five plates with their maps; no Act 1 region has a plate yet. The count is
- * pinned by this module's test against the map registry, never restated here.
+ * Combat arena backdrops (the Woodcut Codex). No live region has a plate of
+ * its own yet. The count is pinned by this module's test against the map
+ * registry, never restated here.
  *
  * `CombatCombatantPane`'s full-bleed battlefield scene, region-keyed the same
  * way `assets/images/maps/index.ts` keys the exploration-map backdrop: an
  * ordered list of rules, first match wins, unmatched falls back to the arena
  * that already shipped.
  *
- * ## One table, not two (Phase 101)
+ * ## One table, not two
  *
- * The plate and its screen-reader description used to live in two separate
- * functions — an ordered `REGION_ARENAS` table for the image, and a hand-written
- * `if` chain for the alt text. With one region that was merely redundant. With
- * seven it is a drift hazard with a specific failure mode: a plate ships, its
- * `if` branch is forgotten, and a screen-reader user is confidently told they
- * are looking at a storm-lit ruined city while the sighted player sees a
- * cathedral. Nothing would have caught it — the provenance gate checks that art
- * is *reachable*, not that it is *described*.
- *
- * So a plate and its description are now ONE record. You cannot add the image
- * without writing the words, because they are the same object.
+ * A plate and its screen-reader description are ONE record. You cannot add the
+ * image without writing the words, because they are the same object. Kept
+ * apart, a plate could ship without its description and a screen-reader user
+ * would be told they are looking at some other plate's scene. The provenance
+ * gate checks that art is *reachable*, not that it is *described*.
  *
  * ## The register
  *
@@ -31,19 +24,12 @@
  * graded toward the void by the shared recipe in `scripts/ingest-art.mjs`. See
  * `provenance.json` beside this file for the per-plate record.
  *
- * ## The fallback was replaced (Phase 103)
+ * ## The fallback
  *
- * It used to be `arena-ruined-city.jpg`: owner-supplied, licence UNRESOLVED,
- * and — visible the moment anyone looked at it — saturated PIXEL ART of modern
- * high-rise buildings, sitting among nine grayscale wood engravings. Because it
- * is the fallback it was the most-seen arena in the game, so it was both the
- * licence exposure and the worst visual mismatch in the product.
- *
- * THE OPEN GATE ¶6 (2026-08-28) makes that a loop call rather than an owner
- * one: art that cannot be traced within reasonable effort is a re-art decision,
- * "replace via the licensed trove and retire the untraceable asset". This is
- * that retirement. The replacement is Doré's "The New Zealander" (1873), chosen
- * because a fallback must stay coherent behind regions it was not drawn for:
+ * Because it is the fallback it is the most-seen arena in the game, so it must
+ * be licence-proven like every other plate. It is Doré's "The New Zealander"
+ * (1873), chosen because a fallback must stay coherent behind regions it was
+ * not drawn for:
  * heavy dark mass at the edges, a lit band across the middle where the foe
  * composites, and a subject — ruin outliving the city that made it — general
  * enough not to contradict an unmapped region.
@@ -73,22 +59,17 @@ interface ArenaPlate {
 /**
  * Ordered: the FIRST pattern that matches wins.
  *
- * Every pattern is narrow and names its own region rather than reusing the maps
- * registry's generic `village|town` / `city|citadel|capital` families. Two
- * reasons, both learned the hard way:
- *
- *   1. A generic rule stops matching SILENTLY when a region is renamed — which
- *      is exactly what happened to the maps registry after the 44f naming pass.
- *   2. The generic `city|capital` family would collapse The Northern City and
- *      The Capital onto one plate, and those are the two places this game most
- *      wants to feel different from each other.
+ * Every pattern is narrow and names its own region rather than a generic
+ * family like `village|town` or `city|capital`: a generic rule stops matching
+ * SILENTLY when a region is renamed, and collapses distinct places onto one
+ * plate.
  *
  * Because the patterns are disjoint, order is not currently load-bearing — but
  * it is still first-match-wins, so a future broad rule must be appended AFTER
  * the narrow ones, never before.
  */
 const REGION_ARENAS: readonly ArenaPlate[] = [
-    // The coastal village (the Drowned Parish) — the game's opening region.
+    // The coastal village (the Drowned Parish). No live map names this region.
     {
         pattern: /drowned parish/i,
         art: ARENA_COASTAL_VILLAGE,
@@ -100,7 +81,7 @@ const REGION_ARENAS: readonly ArenaPlate[] = [
  * The arena shown wherever no rule matches.
  *
  * Kept OUT of the table on purpose: it is not a region rule, it is the absence
- * of one, and every unmapped region keeps today's behaviour byte-for-byte.
+ * of one.
  */
 const FALLBACK_ARENA: Omit<ArenaPlate, 'pattern'> = {
     art: ARENA_DESOLATION,
@@ -108,9 +89,8 @@ const FALLBACK_ARENA: Omit<ArenaPlate, 'pattern'> = {
 };
 
 /**
- * Whether combat shows its arena plates at all (D32).
+ * Whether combat shows its arena plates at all.
  *
- * T, 2026-09-26: "an all black background for all combat plates for now".
  * While this is off, `CombatCombatantPane` paints the scene band plain black
  * for every region and never draws a plate. The plates, their descriptions and
  * the resolver below stay as they are (and stay tested), so turning combat art

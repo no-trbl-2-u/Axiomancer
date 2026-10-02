@@ -1,7 +1,7 @@
 /**
  * Screen-level presenter for `app/(tabs)/inventory/index.tsx`.
  *
- * Spec 06: drives the inventory view-model from `state.player.inventory`.
+ * Drives the inventory view-model from `state.player.inventory`.
  * Items are grouped by engine category (Q1=A), stacks render as a single
  * row with a `quantity` (Q3=A), and the screen renders an empty-state
  * placeholder when the player carries nothing (Q4=A).
@@ -40,8 +40,8 @@ export interface InventoryLocalUi {
     expandedItemId?: string | null;
     /**
      * When set, the equipment slot the user has tapped in the
-     * Equipment Dock to filter the sack to compatible items
-     * (Phase 32 sub-tick F). The filter overrides `activeTab` —
+     * Equipment Dock to filter the sack to compatible items.
+     * The filter overrides `activeTab` —
      * the screen sets `activeTab='all'` whenever it picks a slot,
      * and the presenter additionally guards against the case where
      * a stale tab is still set (slot filter wins). `null` / omitted
@@ -55,14 +55,13 @@ export interface InventoryItemRow {
     id: string;
     name: string;
     category: InventoryCategory;
-    /** Free-form sub-classification (`'Weapon'`, `'Body'`, …) or `null`. */
+    /** Slot label for equipment (`'Weapon'`, `'Armor'`, `'Trinket'`), else `null`. */
     sub: string | null;
     /** Stack size — always 1 for non-stackable items. */
     quantity: number;
     /**
-     * Phase 23 — the rarity model is retired; equipment (the signet relics) is
-     * uniform, so this is always `null` now. The field is kept optional so the
-     * rarity-shine affordance degrades to "no shine" without a wider UI change.
+     * Always `null`: equipment (the signet relics) carries no rarity, so the
+     * rarity-shine affordance renders "no shine".
      */
     rarity?: 'common' | 'uncommon' | 'rare' | 'unique' | null;
     equipped: boolean;
@@ -82,25 +81,21 @@ export interface InventoryItemRow {
      *
      * `null` for non-equipment, equipped equipment, or equipment in
      * an empty slot (where the preview reduces to "no replacement —
-     * the item's own stats win unopposed"). Phase 35 (ported from
-     * `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-16/project/screens/inventory.jsx:215-225`
-     * `computeDelta`).
+     * the item's own stats win unopposed").
      */
     replacePreview: ReplacePreview | null;
     /**
-     * Phase 19 — the signature this signet relic grants (display name), or
+     * The signature this signet relic grants (display name), or
      * `null` when the item is not a relic. Surfaced as a "grants <name>"
      * sub-label on equipment rows and in the worn dock. Optional (sparse):
      * the presenter always sets it, but fixtures may omit it.
      */
     grantsSignature?: string | null;
     /**
-     * Rich equip-change delta surface (Phase 133). Where `replacePreview`
-     * collapses the change into a single signed net-stat list, this model
-     * splits the change into gained vs. lost across stats, rolled
-     * modifiers, passive effects, on-hit / on-defend proc hooks, combat
-     * resource interactions, and keyword/affix labels — showing **only**
-     * what the equip operation changes.
+     * Rich equip-change delta surface. Where `replacePreview`
+     * is a single signed net-stat list for swaps only, this model carries
+     * the net stat deltas plus the signet-relic signatures gained and lost
+     * — showing **only** what the equip operation changes.
      *
      * Filled for equipment rows:
      *   - non-equipped with a worn sibling → `mode: 'swap'`
@@ -172,7 +167,7 @@ export interface EquipmentDockViewModel {
     /** Empty-slot copy (lowercase ritual register, framed with em-dashes per the design). */
     bareLabel: string;
     /**
-     * Slot-filter banner copy & state (Phase 32 sub-tick F).
+     * Slot-filter banner copy & state.
      * `selectedSlot` mirrors the user pick; `bannerEyebrow` /
      * `bannerSlotLabel` / `bannerClearLabel` are the chrome strings
      * the screen renders when a slot is active. `bannerSlotLabel`
@@ -203,7 +198,7 @@ export interface InventoryViewModel {
     expandedItemId: string | null;
     /** True when the inventory is empty — the screen shows the empty state. */
     isEmpty: boolean;
-    /** Empty-state copy. Per bearings 2026-05-15 no second-person archaic pronouns (drops the earlier "Thy sack…" phrasing). */
+    /** Empty-state copy. No second-person archaic pronouns. */
     emptyMessage: string;
     /**
      * Display header above the category list (rendered uppercased by
@@ -218,7 +213,7 @@ export interface InventoryViewModel {
      */
     categoryHeaders: Record<InventoryCategory, string>;
     /**
-     * Paper-doll Equipment Dock above the tabs (Phase 32 sub-tick E).
+     * Paper-doll Equipment Dock above the tabs.
      * Computed from the full inventory (independent of active-tab
      * filter) so the dock keeps showing worn slots regardless of
      * which tab the user is on.
@@ -239,19 +234,13 @@ const TAB_ORDER: readonly InventoryTab[] = [
 ] as const;
 
 /** Display strings for the inventory screen's chrome. */
-// Phase 80 (naming pass): the eyebrow said WALLET while the money box a few
-// pixels below it said SHILLING — two words for the same readout on one
-// screen. PURSE is the canonical money-container word everywhere else
-// (blacksmith/rest/village); this screen now agrees with itself and them.
+// PURSE is the canonical money-container word (blacksmith/rest/village).
 const SECTION_HEADER = 'SATCHEL · PURSE · BURDEN';
 const CATEGORY_HEADERS: Record<InventoryCategory, string> = {
-    // S3-sheet-C22 (second half): every header echoes its own tab — PHIALS →
-    // '✠ PHIALS & SOPS', STUFF → '✠ STUFF', SEALED → '✠ SEALED'. This one was
-    // '✠ WORN & WIELDED' back when the tab read WORN, so renaming the tab to
-    // GEAR left the section heading as the surviving half of the same lie: it
-    // claims wornness over a list that includes everything carried unworn.
-    // GEAR & GIRDING restores the echo and names the goods, not their state;
-    // the per-row WORN badge stays the only claim about what is on the body.
+    // Every header echoes its own tab — GEAR → '✠ GEAR & GIRDING', PHIALS →
+    // '✠ PHIALS & SOPS', and so on. The equipment header names the goods, not
+    // their state: the list includes everything carried unworn, and the per-row
+    // WORN badge is the only claim about what is on the body.
     equipment: '✠ GEAR & GIRDING',
     consumable: '✠ PHIALS & SOPS',
     material: '✠ STUFF',
@@ -260,11 +249,10 @@ const CATEGORY_HEADERS: Record<InventoryCategory, string> = {
 
 const TAB_LABELS: Record<InventoryTab, string> = {
     all: 'ALL',
-    // S3-sheet-C22: every tab's badge counts the rows that tab shows, and this
-    // tab shows all equipment carried — so the badge read "8" while five things
-    // were worn. The count is right; the word was the liar. GEAR names the
-    // filter (equipment) instead of a state (equipped) the filter does not
-    // apply; the per-row WORN badge still marks what is actually on the body.
+    // Every tab's badge counts the rows that tab shows, and this tab shows all
+    // equipment carried. GEAR names the filter (equipment), not a state
+    // (equipped) the filter does not apply; the per-row WORN badge marks what
+    // is actually on the body.
     equipment: 'GEAR',
     consumable: 'PHIALS',
     material: 'STUFF',
@@ -274,11 +262,8 @@ const TAB_LABELS: Record<InventoryTab, string> = {
 const SLOT_LABELS: Record<Equipment['slot'], string> = {
     weapon: 'Weapon',
     armor: 'Armor',
-    // FE-009: 'Trinket', not 'Accessory'. The worn-gear dock above the grid
-    // labels these three positions TRINKET I/II/III, and the SELF sheet was
-    // already aligned to Trinket by an earlier drift fix — the item grid was
-    // the last surface naming the same slot a second way, on the same
-    // unscrolled screen as the dock.
+    // 'Trinket', not 'Accessory': matches the dock's TRINKET I/II/III and the
+    // SELF sheet, so the slot has one name on every surface.
     accessory: 'Trinket',
 };
 
@@ -301,12 +286,9 @@ const DOCK_SLOT_TITLE: Record<Equipment['slot'], string> = {
 const DOCK_ACCESSORY_NUMERALS = ['I', 'II', 'III'] as const;
 
 const DOCK_HEADER_LABEL = '✠ WORN UPON THE BODY';
-// FE-027: the old hint, 'WORN VS. UNWORN AT A GLANCE', described a comparison
-// that is not on screen — the dock lists five worn slots with a name and what
-// each grants, and nothing unworn. The comparison is real but it is BEHIND a
-// tap: selecting a slot filters the grid below to the items that fit it
-// (`filterRowsBySlot`). The hint now says how to get it, which also teaches an
-// interaction nothing else on the screen advertises.
+// The dock lists only worn slots; the worn-vs-unworn comparison is behind a
+// tap — selecting a slot filters the grid below to the items that fit it
+// (`filterRowsBySlot`). The hint teaches that interaction.
 const DOCK_HINT_LABEL = 'TAP A SLOT TO SEE WHAT ELSE FITS';
 const DOCK_BARE_LABEL = '— bare —';
 const DOCK_BANNER_EYEBROW = 'FITTING SLOT';
@@ -329,13 +311,12 @@ function subFor(item: Item): string | null {
 }
 
 function rarityFor(_item: Item): InventoryItemRow['rarity'] {
-    // Phase 23 — the rarity model is retired; equipment (the signet relics) is
-    // uniform, so no row carries a rarity shine any more.
+    // Equipment (the signet relics) carries no rarity, so no row has a shine.
     return null;
 }
 
-/** Phase 19 — the display name of the signature a signet relic grants, or
- *  `null` for non-relic items. */
+/** The display name of the signature a signet relic grants, or `null` for
+ *  non-relic items. */
 function grantsSignatureName(item: Item): string | null {
     if (!isEquipment(item) || !item.grantsSignature) return null;
     return getSignatureSkill(item.grantsSignature)?.name ?? null;
@@ -344,8 +325,7 @@ function grantsSignatureName(item: Item): string | null {
 function quantityFor(item: Item): number {
     if (isConsumable(item) || isMaterial(item)) {
         // `?? 1` defends against fixtures that omit the engine-required
-        // `quantity` field; pre-cast-drop refactor preserved this
-        // fallback under `(item as any).quantity ?? 1`.
+        // `quantity` field.
         return Math.max(1, Number(item.quantity ?? 1));
     }
     return 1;
@@ -372,10 +352,9 @@ function aggregateEquipmentStats(equipment: Equipment): Map<string, number> {
 }
 
 /**
- * Compute the net stat-delta from replacing `oldItem` with `newItem`.
- * Mirrors `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-16/project/screens/inventory.jsx:215-225`
- * `computeDelta` — start with new item's aggregated stats, subtract
- * the equipped item's stats, drop zero entries. Phase 35 preview.
+ * Compute the net stat-delta from replacing `oldItem` with `newItem`:
+ * start with the new item's aggregated stats, subtract the equipped
+ * item's stats, drop zero entries.
  */
 function computeReplacePreview(
     newItem: Equipment,
@@ -396,16 +375,16 @@ function computeReplacePreview(
  * Convert the raw engine inventory into display rows. Per Q3=A, items
  * with the same `id` collapse into a single row whose `quantity`
  * reflects the stack size. The *first* equipment item per slot is
- * marked `equipped` to match `selectCharacterViewModel`. Phase 35
- * additionally computes `replacePreview` for every non-equipped
+ * marked `equipped` to match `selectCharacterViewModel`. Also
+ * computes `replacePreview` for every non-equipped
  * equipment row whose slot has an equipped sibling.
  */
 function buildRows(state: GameStore): InventoryItemRow[] {
     const inventory = state.player?.inventory ?? [];
     const rowsById = new Map<string, InventoryItemRow>();
     const order: string[] = [];
-    // Worn-state convention lives in the engine's capacity-aware `wornPerSlot`
-    // (Phase 18). Compute once; all consumers in this function read from it.
+    // Worn-state convention lives in the engine's capacity-aware `wornPerSlot`.
+    // Compute once; all consumers in this function read from it.
     const wornBySlot = wornPerSlot(inventory);
     const isWorn = (item: Equipment): boolean =>
         (wornBySlot.get(item.slot) ?? []).some((w) => w.id === item.id);
@@ -460,12 +439,10 @@ function buildRows(state: GameStore): InventoryItemRow[] {
 
     // Second pass: replacePreview + equipDelta for equipment rows.
     //
-    // `replacePreview` (Phase 35) stays scoped to non-equipped items
-    // with an equipped sibling — net signed stat list only. `equipDelta`
-    // (Phase 133) is computed for *every* equipment row so the surface
+    // `replacePreview` is scoped to non-equipped items with an equipped
+    // sibling — net signed stat list only. `equipDelta` is computed for *every* equipment row so the surface
     // can show gained-only (equip into empty slot), lost-only (the worn
-    // item), or gained+lost (swap), across stats, modifiers, passive
-    // effects, proc hooks, resources, and keywords.
+    // item), or gained+lost (swap), across stats and granted signatures.
     for (const id of order) {
         const row = rowsById.get(id)!;
         if (row.category !== 'equipment') continue;
@@ -524,12 +501,6 @@ function readShilling(state: GameStore): number {
     // (engine type def `Character/types.d.ts:41`). "Shilling" is the
     // mobile chrome label for the same value — the VM field name +
     // the SHILLING screen literal carry the voice-register choice.
-    // Closes the [2.5] DRIFT row from
-    // archived `archive-pre-revamp:plan/archive/2026-09-25-trim-t1/axiomancer-mobile/docs/mechanics-ui-audit-2026-05-22-inventory.md` row 7: the
-    // earlier `p.shilling ?? p.currency` fallback hid which engine
-    // field was canonical; no save / migration / fixture writes
-    // `shilling` (cross-tree grep confirms) so the fallback was
-    // dead code.
     const raw = Number(state.player.currency ?? 0);
     return Number.isFinite(raw) && raw >= 0 ? raw : 0;
 }
@@ -541,14 +512,13 @@ function computeBurden(rows: readonly InventoryItemRow[]): number {
     // clamped at 100% (StatBar handles its own pct clamp) — that's
     // correct because the bar can't visualize "more than full" —
     // but the numeric text on the label row carries the overflow
-    // signal. Closes the [3.0] DRIFT row from
-    // archived `archive-pre-revamp:plan/archive/2026-09-25-trim-t1/axiomancer-mobile/docs/mechanics-ui-audit-2026-05-22-inventory.md` row 11.
+    // signal.
     return rows.reduce((acc, r) => acc + r.quantity, 0);
 }
 
 /**
  * Resolve the item-row's `sub` field back to the engine slot key.
- * `subFor` produces title-case slot labels ("Weapon" / "Body" / etc.)
+ * `subFor` produces title-case slot labels ("Weapon" / "Armor" / "Trinket")
  * from `SLOT_LABELS`; reverse the mapping here so the dock can build
  * its `worn` map without re-importing the engine's Equipment type at
  * the screen.

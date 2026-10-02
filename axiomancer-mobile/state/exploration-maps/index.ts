@@ -7,13 +7,13 @@ import type { MapLayout } from './types';
 export type { MapLayout, MapSheet, NodeLayout } from './types';
 
 const REGISTRY: Record<string, MapLayout> = {
-    // Map revamp M3a — Act 1's coast, the new-game start (D27).
+    // Act 1's coast, the new-game start.
     'breakwater': breakwaterLayout,
-    // Map revamp M3b — Act 1's forest, past the Breakwater's bridge.
+    // Act 1's forest, past the Breakwater's bridge.
     'charcoal-wood': charcoalWoodLayout,
-    // Map revamp M3c — Act 1's mountains, past the Charcoal Wood's stair cave.
+    // Act 1's mountains, past the Charcoal Wood's stair cave.
     'beacon-crags': beaconCragsLayout,
-    // Map revamp M3d — Act 1's underworld, below the Beacon Crags' glacier shrine.
+    // Act 1's underworld, below the Beacon Crags' glacier shrine.
     'lantern-deep': lanternDeepLayout,
 };
 
@@ -28,7 +28,6 @@ export function getMapLayout(mapId: string): MapLayout | null {
  * in?" without hand-copying the answer. `REGISTRY` is not an implementation
  * detail of anything under test — it is the game's own statement of which maps
  * exist — so it is the correct oracle for that question, and the only one that
- * cannot silently omit a map (burn-day audit 3.11: the arena test's hand-written
- * region list omitted the Northern Forest, and nothing noticed).
+ * cannot silently omit a map the way a hand-written region list can.
  */
 export const ALL_MAP_LAYOUTS: readonly MapLayout[] = Object.values(REGISTRY);

@@ -1,11 +1,11 @@
 /**
  * S7-hazard-C20 — THE APORIA's controls must announce themselves.
  *
- * A screen-reader player met the act cards, LEAVE and the MAP toggle as
- * bare `<Pressable>`s: no role, no label, so the descent read as three
- * paragraphs of prose and the two header words read as decoration. They
- * now carry `accessibilityRole="button"` and presenter-owned labels
- * (`LABYRINTH_COPY.a11y`, Hard Rule #8).
+ * The act cards, LEAVE and the MAP toggle carry
+ * `accessibilityRole="button"` and presenter-owned labels
+ * (`LABYRINTH_COPY.a11y`, Hard Rule #8); as bare `<Pressable>`s the
+ * descent would read as three paragraphs of prose and the two header
+ * words as decoration.
  *
  * The suite pins what the finding is about — every one of those controls
  * is announced as a button with a spoken label, the act label names its

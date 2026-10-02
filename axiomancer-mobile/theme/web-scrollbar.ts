@@ -1,6 +1,5 @@
 /**
- * Web scrollbar skin (visual-audit 2026-06; reactive theming-hot-reload
- * 2026-06). React Native Web renders the platform's default scrollbar,
+ * Web scrollbar skin. React Native Web renders the platform's default scrollbar,
  * which clashes with the gothic chrome. This side-effect module injects
  * a slim themed scrollbar (ash thumb on a void track, sulfur on hover)
  * on web only. Colours track the active theme and re-skin in place when

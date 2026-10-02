@@ -1,6 +1,5 @@
 /**
- * The SAVE SLOTS screen — `/saves?mode=new|load` (owner call 2026-09-23:
- * three save slots).
+ * The SAVE SLOTS screen — `/saves?mode=new|load` (three save slots).
  *
  * One screen, two modes:
  *   - `new`  — NEW GAME. An empty row BEGINs at once; an occupied row asks

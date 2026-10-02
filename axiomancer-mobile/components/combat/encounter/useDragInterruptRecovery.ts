@@ -1,13 +1,13 @@
 import { useEffect } from 'react';
 
 /**
- * WI-7 — recover a live drag whose pointer stream was INTERRUPTED.
+ * Recover a live drag whose pointer stream was INTERRUPTED.
  *
  * The RNGH pan gesture finalizes on its own `onEnd`/`onFinalize`, but a
  * cancelled pointer (web `pointercancel`), a window blur (alt-tab / OS gesture),
  * a tab hidden via `visibilitychange`, or a stream that simply dies mid-drag
  * never delivers one — leaving a permanent ghost and a drag state machine that
- * can wedge all subsequent staging until reload (2026-07-12 playtest). While a
+ * can wedge all subsequent staging until reload. While a
  * drag is `active`, this hook listens for those signals plus a no-movement
  * watchdog and runs `finalize` (the same snap-home path the cancel branch uses).
  * Every `pointermove` resets the watchdog, so a slow-but-live drag is never cut

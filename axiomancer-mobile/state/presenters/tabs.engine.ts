@@ -23,38 +23,17 @@ export interface TabsViewModel {
  * Display titles for the bottom tab bar, keyed by route name.
  * Lives on the presenter so the screen has no inline string
  * literals on the navigation chrome (Hard Rule #8). Pinned by
- * `state/e2e/tabs.engine.test.ts` — Phase 30 Tick B added this
- * extraction in response to a user-observed runtime regression
- * where the tab labels rendered as `{ TAB NAME }"--index"`
- * literally (the user saw raw template-string output in place of
- * the configured titles). Pinning the strings here makes any
- * future regression visible at verify time even if the
- * `_layout.tsx` `title:` props end up bypassed.
+ * `state/e2e/tabs.engine.test.ts`, so a regression is visible at
+ * verify time even if the `_layout.tsx` `title:` props are bypassed.
  *
- * Phase 31 (Tabs design pass, 2026-05-16) flipped the four
- * strings from the mixed-register pre-fix set
- * (`MAP · COMBAT · SHEET · SACK` — three places + one
- * event-state) to the coherent all-places register the user
- * picked via `/oversight`: `WILDS · STRIFE · SELF · SACK`.
+ * The titles sit in one all-places register. Display order in the
+ * bottom bar: exploration/combat → character → memoir → inventory →
+ * deck. The inventory section header (`inventory.engine.ts`) uses the
+ * same SATCHEL name.
  *
- * Phase 33 (MEMOIR tab, 2026-05-16) added the journal surface
- * as a fifth route. Display order in the bottom bar:
- * exploration/combat → character → memoir → inventory.
- *
- * Phase 32 (Claude Design handoff port, 2026-05-16) renamed the
- * fourth slot from `SACK` to `SATCHEL` — the design canvas
- * decisions doc §V calls SACK out as register-mismatched ("SACK
- * is bag-shaped slang"; SATCHEL preserves the period serif
- * voice). Inventory section header (`inventory.engine.ts`)
- * tracks the same rename so all places sit in one register.
- *
- * DECK (2026-09-21, owner finding 7 / ratified decision D2) is the
- * fifth VISIBLE tab: the player had no way to see the combat deck
- * they carry. It is appended LAST rather than slotted beside SELF so
- * that no existing tab changes position — four tabs' worth of muscle
- * memory survives the addition — and because DECK and SATCHEL are the
- * two "what you carry" surfaces, which reads better adjacent than
- * split by THE LEDGER. `DECK` is a thing, not a place, so it sits
+ * DECK is the fifth visible tab and shows the combat deck the player
+ * carries. It sits last, beside SATCHEL, so the two "what you carry"
+ * surfaces are adjacent. `DECK` is a thing, not a place, so it sits
  * slightly outside the all-places register; the alternative in that
  * register ("THE HAND", "THE CANON") would collide with the combat
  * hand and the Apocrypha canon respectively, both live terms.
@@ -93,7 +72,7 @@ export function isTabHidden(inCombat: boolean, tab: TabKey): boolean {
  * (`FONTS.sans` = Bebas Neue 400, `assets/fonts/BebasNeue_400Regular.ttf`).
  *
  * MEASURED, not estimated: read straight out of the shipped `.ttf`'s
- * `hmtx`/`head` tables (unitsPerEm 1000) on 2026-09-21, covering exactly the
+ * `hmtx`/`head` tables (unitsPerEm 1000), covering exactly the
  * characters the tab titles use — space plus A-Z. Bebas Neue is a condensed
  * display face, so a generic 0.6em-per-character rule of thumb overstates its
  * labels by ~50% and would have failed a fit that in fact passes comfortably.
@@ -121,12 +100,9 @@ const SANS_ADVANCE_EM_FALLBACK = 0.557;
 export const TAB_BAR_LABEL_FONT_SIZE = 10;
 
 /**
- * Tab label letter-spacing. Dropped from 2 to 1 when DECK made the bar five
- * tabs wide (2026-09-21): at spacing 2, THE LEDGER measures 55.8pt against a
- * 62pt budget at 360pt — it fits, but the same label overflows a 320pt phone
- * (iPhone SE), where the budget is 54pt. Spacing 1 measures 45.8pt and clears
- * both with room to spare. The tracked, all-caps register survives; only the
- * amount of air between letters changes.
+ * Tab label letter-spacing. With five tabs, THE LEDGER at spacing 2 measures
+ * 55.8pt, which overflows a 320pt phone (iPhone SE, 54pt budget). Spacing 1
+ * measures 45.8pt and fits both 320pt and 360pt phones.
  */
 export const TAB_BAR_LABEL_LETTER_SPACING = 1;
 

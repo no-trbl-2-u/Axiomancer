@@ -1,5 +1,5 @@
 /**
- * Persistent Hazard deck / library screen (Phase 126).
+ * Persistent Hazard deck / library screen.
  *
  * Reachable outside an encounter (from the SELF tab) so the player can
  * study the durable deck they carry between hazards: the implicit
@@ -10,7 +10,7 @@
  * Phase orchestration only: composition is mechanics truth, the
  * presenter maps it (`selectHazardDeckViewModel`), this screen renders
  * the VM. Remove-card is wired but BLOCKED — the engine exposes no
- * remove action yet (Phase 126 §3), so the grid surfaces a graceful
+ * remove action yet, so the grid surfaces a graceful
  * blocked state rather than mutating the save.
  */
 
@@ -115,7 +115,7 @@ export default function HazardDeckScreen() {
                 </View>
             )}
 
-            {/* Keyword distribution — tap a chip to read its glossary entry (Phase 82). */}
+            {/* Keyword distribution — tap a chip to read its glossary entry. */}
             {vm.keywordTally.length > 0 && (
                 <View style={styles.section}>
                     <SectionLabel size={10}>✠ KEYWORDS</SectionLabel>
@@ -141,7 +141,7 @@ export default function HazardDeckScreen() {
             {/* The full deck — tap any card to inspect */}
             <View style={styles.section}>
                 <SectionLabel size={10}>✠ ALL CARDS</SectionLabel>
-                {/* S7-hazard-C04 — key the two unnamed marks the cards print. */}
+                {/* Key the two unnamed marks the cards print. */}
                 <HazardStatKey />
                 <View style={styles.cardGrid}>
                     {vm.entries.map((entry) => (

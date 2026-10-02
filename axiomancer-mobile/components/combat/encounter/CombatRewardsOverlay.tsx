@@ -1,13 +1,9 @@
 /**
- * Spec 26b §C — the post-combat card draft. After a won combat the player adds
+ * The post-combat card draft. After a won combat the player adds
  * ONE of three offered cards to their persistent deck, or keeps the deck lean.
  *
- * 2026-08-08 rebuild. Two things changed:
- *
- *  1. REAL CARD FACES. The tiles used to be bespoke 104x132 mini-cards that
- *     re-derived a slice of face logic (name, effect glyph, tier line) the
- *     card-face-honesty guard could not see. They now render `CombatCardFace`
- *     off a real `CombatCardVM` — byte-identical to the face the card will
+ *  1. REAL CARD FACES. The tiles render `CombatCardFace` off a real
+ *     `CombatCardVM` — byte-identical to the face the card will
  *     show in hand. A card you are committing to for the rest of the run must
  *     be readable BEFORE you commit, so tapping a tile opens a full inspect
  *     (the hazard `RewardsOverlay`'s `hazard-card-preview` pattern): the large
@@ -18,15 +14,11 @@
  *     not a greyed-out afterthought. The Threadbare Office exists to teach
  *     exactly that.
  *
- * 2026-09-21 — D4 (owner finding 8: "no way to recognise a card's rarity at a
- * glance"). The tile frame was already tinted by rarity, which made this the
- * screen where a colour-only signal did the most damage: the draft is the one
- * moment the player is asked to compare three cards and keep one for the rest
- * of the run, and the difference between them was a hue nobody had been taught.
- * Each tile now carries all three of D4's legs — the frame colour it always
- * had, the pip track the shared `CombatCardFace` draws, and a printed rarity
- * word beneath the face. The three hex literals this file used to hold are
- * gone; `card-rarity.engine.ts` is the only place they live.
+ * Rarity is never colour-only: the draft is the one moment the player compares
+ * three cards and keeps one for the rest of the run. Each tile carries three
+ * signals — the rarity-tinted frame, the pip track the shared `CombatCardFace`
+ * draws, and a printed rarity word beneath the face. The rarity hexes live
+ * only in `card-rarity.engine.ts`.
  */
 
 import React, { useState } from 'react';
@@ -36,10 +28,8 @@ import { CombatCardFace } from '@/components/combat/encounter/CombatBoard';
 import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import type { CombatCardVM } from '@/state/presenters/combat-encounter.engine';
-// D4 (2026-09-21) — the ONE mobile source for the rarity band. This file used
-// to keep its own `RARITY_COLORS` record holding the same three hex literals
-// the card face held; both now read `RARITY_COLOR`, so the draft frame and the
-// face's pips can never drift apart again.
+// The ONE mobile source for the rarity band: the draft frame and the face's
+// pips both read `RARITY_COLOR`, so they cannot drift apart.
 import { rarityFor, RARITY_LABEL, RARITY_COLOR } from '@/state/presenters/card-rarity.engine';
 
 /** Offer-tile face size. Smaller than the hand card (three must fit a phone
@@ -73,7 +63,7 @@ export function CombatRewardsOverlay({
                 <View style={styles.offerRow}>
                     {offers.map((card) => {
                         const on = picked === card.cardId;
-                        // D4's three legs on one tile: the FRAME COLOUR (this
+                        // The three rarity signals on one tile: the FRAME COLOUR (this
                         // border, unless the tile is selected — selection owns
                         // the gold), the PIP ROW (drawn by `CombatCardFace`'s
                         // own track), and the NAMED LABEL (the caption below).
@@ -97,7 +87,7 @@ export function CombatRewardsOverlay({
                                 ]}
                             >
                                 <CombatCardFace card={card} width={OFFER_W} height={OFFER_H} />
-                                {/* D4's NAMED LABEL leg. The 100pt offer face is
+                                {/* The NAMED LABEL signal. The 100pt offer face is
                                     too narrow to print the word in its own name
                                     band, and this is the one screen where the
                                     player is choosing BETWEEN cards — the band
@@ -153,8 +143,7 @@ export function CombatRewardsOverlay({
                     <View style={[styles.previewPanel, { borderColor: previewCard.face.categoryColor }]}>
                         <ScrollView contentContainerStyle={styles.previewScroll}>
                             <CombatCardFace card={previewCard} width={PREVIEW_W} height={PREVIEW_H} large />
-                            {/* The face carries only KEYWORD · value since the 2026-08-10
-                                declutter, so the preview states the two plays itself —
+                            {/* The face carries only KEYWORD · value, so the preview states the two plays itself —
                                 "nothing is committed to the run unread" still has to hold. */}
                             <View style={styles.previewPlays}>
                                 <Text style={styles.previewPlayLine}>

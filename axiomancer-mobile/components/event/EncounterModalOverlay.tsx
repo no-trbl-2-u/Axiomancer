@@ -1,30 +1,20 @@
 /**
- * Encounter modal overlay (Phase 32 design-handoff port, 2026-05-16).
+ * Encounter modal overlay. Encounters triggered by map movement are
+ * modals the player cannot exit: when the player taps an encounter or
+ * boss node, this overlay rises over the exploration map. The backdrop
+ * is intentionally non-dismissible — there is no `onPress` handler on
+ * the backdrop View. The only way out is through the encounter itself.
  *
- * Per the prototype's seam pattern (prototype.jsx PtEventModal +
- * chats/chat1.md "encounters triggered by map movement should now be
- * modals — the user cannot exit these modals"): when the player taps
- * an encounter or boss node, this overlay rises over the exploration
- * map. The backdrop is intentionally non-dismissible — there is no
- * `onPress` handler on the backdrop View. The only way out is through
- * the encounter itself.
- *
- * 2026-08-10 (user report) — THE PRELUDE MODAL IS RETIRED. Entering a
- * fight used to ask twice: this overlay's ENGAGE/FLEE seal (over a
- * procedural SVG of the foe) and then the combat reveal's ENTER COMBAT
- * (over the foe's painting, with the whole threat sequence laid out).
- * Two consecutive agreements to the same fight, the first strictly
- * poorer than the second. The seal now auto-engages on mount and the
- * reveal is the single commit gate; retreat moved there too, as the
- * panel's WITHDRAW (`onWithdraw`), so nothing was lost with the popup.
+ * The seal auto-engages on mount: the combat reveal's ENTER COMBAT is the
+ * single commit gate, and retreat is the panel's WITHDRAW (`onWithdraw`).
  *
  * Mounts only when the active event VM has `kind === 'combat-prelude'`.
  * Caller (`app/(tabs)/exploration/index.tsx`) controls mount/unmount
  * via `selectHasActiveEvent` + `vm.kind`.
  *
  * The "SEALED · NO RETREAT" chain bars top and bottom carry the
- * diegetic signal that the encounter is committed; they still frame the
- * aftermath panels, which is where the seal chrome is still seen.
+ * diegetic signal that the encounter is committed; they frame the
+ * aftermath panels.
  * Component-level pins live in
  * `components/event/__tests__/EncounterModalOverlay.test.tsx`.
  */
@@ -55,29 +45,28 @@ import type { EventViewModel } from '@/state/presenters/event.engine';
 import type { CombatOutcome, Enemy } from '@mechanics';
 
 /**
- * Modal mode state machine (Phase 63b).
+ * Modal mode state machine.
  *
- * - `prelude`  — the first frame only. Once the ENGAGE/FLEE seal was
- *                retired (2026-08-10) nothing renders here but the
+ * - `prelude`  — the first frame only. Nothing renders but the
  *                backdrop: the effect below engages immediately.
  * - `combat`   — the encounter itself, `<CombatEncounterPanel>`, living
  *                inside the same modal session that opened on the
  *                encounter trigger. No `router.replace('/combat')`.
  * - `aftermath`— the post-combat victory / parley / defeat panel, inside
- *                the seal (Phase 70).
+ *                the seal.
  */
 export type EncounterModalMode = 'prelude' | 'combat' | 'aftermath';
 
 interface EncounterModalOverlayProps {
     vm: EventViewModel;
-    /** Phase 200 — the foe for the in-place hazard combat (null until engaged). */
+    /** The foe for the in-place hazard combat (null until engaged). */
     encounterEnemy?: Enemy | null;
     onFight: () => void;
     /** Pays the retreat cost. Fired by the reveal's WITHDRAW (see doc-block). */
     onFlee: () => void;
     /** The exploration screen's current map region (`vm.region` there — this
      *  component's own `vm` is the event VM, hence the separate name), keying
-     *  the combat arena backdrop plate (phase 83). */
+     *  the combat arena backdrop plate. */
     region?: string;
     /** Set when a chronicle saved mid-fight is continued: the fight's own
      *  state did not survive the restart, so the modal opens straight into a
@@ -94,14 +83,11 @@ export function EncounterModalOverlay({
     region,
     resumeFight,
 }: EncounterModalOverlayProps) {
-    // Phase 63b — internal mode. FIGHT advances prelude → combat
-    // and bubbles the existing onFight callback up (which still
-    // starts combat in the engine but no longer routes away).
-    // Phase 70 Tick A — `combat` flips to `aftermath` when the
-    // combat-mode shim's `lastOutcome === 'victory'`; the modal
-    // body swaps from `<CombatPanel>` to `<CombatVictoryPanel>`
-    // in place, and the seal stays closed until the panel's
-    // CARRY ON button fires `dismissAftermath()`.
+    // Internal mode. Engaging advances prelude → combat and calls
+    // `onFight` (which starts combat in the engine without routing away).
+    // `combat` flips to `aftermath` on a terminal outcome; the modal body
+    // swaps to the matching aftermath panel in place, and the seal stays
+    // closed until that panel calls `dismissAftermath()`.
     const AXM = usePalette();
     const styles = useStyles();
     const [mode, setMode] = useState<EncounterModalMode>(resumeFight ? 'combat' : 'prelude');
@@ -124,10 +110,8 @@ export function EncounterModalOverlay({
         setMode('combat');
     }, [onFight, vm]);
 
-    // Phase 70 Tick A — watch the outcome signal. On 'victory' (the
-    // only branch with a Tick A panel), swap mode to 'aftermath'.
-    // Phase 70 Tick B — extend to 'parley' (friendship panel).
-    // Phase 70 Tick C — extend to 'defeat' (defeat panel).
+    // Watch the outcome signal: on 'victory', 'parley' or 'defeat' (with
+    // aftermath data present), swap mode to 'aftermath'.
     useEffect(() => {
         if (
             mode === 'combat'
@@ -138,13 +122,12 @@ export function EncounterModalOverlay({
         }
     }, [mode, lastOutcome, aftermathData]);
 
-    // Phase 77 — BEGIN AGAIN dispatches the engine's `resetRun({
-    // keepCharacter: true })` primitive (Phase 72 [ENGINE LANDED]):
-    // atomically regenerates `runId`, full-heals the player, clears
+    // BEGIN AGAIN dispatches the engine's `resetRun({
+    // keepCharacter: true })` primitive: atomically regenerates `runId`, full-heals the player, clears
     // active effects, regenerates world / quests / flags. The
-    // mobile-only `resetRunStats()` shim still runs alongside —
+    // mobile-only `resetRunStats()` shim runs alongside —
     // `encountersFaced` / `deepestNodeId` live on the combat-mode
-    // provider (engine doesn't track run-level counters yet).
+    // provider (the engine does not track run-level counters).
     // `dismissAftermath()` tears down the modal session.
     const actions = useGameActions();
     const handleBeginAgain = useCallback(() => {
@@ -153,19 +136,17 @@ export function EncounterModalOverlay({
         dismissAftermath();
     }, [actions, resetRunStats, dismissAftermath]);
 
-    // Phase 200 — the player snapshot the in-place hazard combat (Spec 26b)
-    // initialises from (live map encounters).
+    // The player snapshot the in-place hazard combat initialises from.
     const player = useGameState((s) => s.player);
-    // Phase 93 — the real player's loadout flags, threaded to the panel
+    // The real player's loadout flags, threaded to the panel
     // explicitly (it corresponds to `player` above, unlike the dev sandbox's
     // synthetic demo deck, which must not receive them).
     const flags = useGameState((s) => (s as unknown as { flags?: string[] }).flags);
 
-    // Phase 200 — teardown for the in-place hazard combat. The panel already
-    // persisted HP/XP/loot on the terminal outcome; here we mirror the legacy
-    // defeat BEGIN AGAIN (reset the run, keep the character — full heal +
-    // regenerate world/quests) and tear the modal session down for any
-    // outcome.
+    // Teardown for the in-place hazard combat. The panel already persisted
+    // HP/XP/loot on the terminal outcome; on defeat this does what BEGIN
+    // AGAIN does (reset the run, keep the character — full heal + regenerate
+    // world/quests), then tears the modal session down for any outcome.
     const handleHazardExit = useCallback((outcome: CombatOutcome | null) => {
         if (outcome === 'defeat') {
             actions.resetRun({ keepCharacter: true });
@@ -176,7 +157,7 @@ export function EncounterModalOverlay({
     }, [actions, resetRunStats, exitCombat, closeEncounterModal]);
 
     // The reveal's WITHDRAW: pay the retreat cost, then tear the session down
-    // the same way any non-defeat exit does. `onFlee` no longer runs through
+    // the same way any non-defeat exit does. `onFlee` does not run through
     // the event slice (already cleared at engage) — see `fleeEncounter`.
     const handleWithdraw = useCallback(() => {
         onFlee();
@@ -185,22 +166,11 @@ export function EncounterModalOverlay({
 
     const aftermathVm = selectAftermathViewModel(aftermathData);
 
-    // Phase 64 follow-up (2026-05-21) — auto-scroll on combat phase
-    // change. User-direct symptom: "choosing the Action does nothing
-    // but logs it to the screen." Engine layer mutates state
-    // correctly per Phase 64's integration tests; the suspected
-    // root cause is layout (hypothesis A in AUDIT [9.8]): the
-    // ResolvePanel mounts when `combat.phase` flips to 'resolving',
-    // but the modal's bounded ScrollView leaves it below the
-    // visible viewport. This hook scrolls the modal to bottom
-    // whenever the engine phase advances, surfacing the new
-    // active row (action picker → resolving → choosing_action of
-    // next round) into view.
-    const combatScrollRef = useRef<ScrollView>(null);
-    // Legacy turn-based combat (engine `state.combat` phase/round) was
-    // removed in mechanics 0.37.0. Live hazard combat owns its own state
-    // in the panel, so the phase-driven auto-scroll is inert and the seal
+    // Scrolls the combat-mode body to the bottom whenever `combatPhase`
+    // changes. Live hazard combat owns its own state in the panel, so
+    // `combatPhase` is always null (the auto-scroll is inert) and the seal
     // chrome always renders round 1.
+    const combatScrollRef = useRef<ScrollView>(null);
     const combatPhase: string | null = null;
     const combatRound = 1;
     const sealChrome = selectEncounterSealChrome(mode as EncounterSealMode, combatRound);
@@ -213,8 +183,7 @@ export function EncounterModalOverlay({
         return () => clearTimeout(handle);
     }, [mode, combatPhase]);
 
-    // Rise animation (Phase 44 port from prototype.jsx:632-638 — the
-    // design's `@keyframes rise`). Backdrop fades in over 280ms;
+    // Rise animation (the design's `@keyframes rise`). Backdrop fades in over 280ms;
     // panel translates from translateY(20) → 0 + opacity 0 → 1.
     // Shared values default to the start state so the first frame
     // renders mid-transition rather than at the final state.
@@ -234,17 +203,16 @@ export function EncounterModalOverlay({
         transform: [{ translateY: panelOffset.value }],
     }));
 
-    // Phase 63c follow-up (2026-05-21): the prelude branch requires
+    // The prelude branch requires
     // a `combat-prelude` VM, but the `combat` mode branch MUST stay
     // mounted even after the engine event slice clears (which engaging
     // does synchronously). Gate the early-return on mode: only the
     // pre-engage branch needs the prelude VM. Combat mode reads the
-    // captured foe; aftermath mode (Phase 70 Tick A) reads from the
+    // captured foe; aftermath mode reads from the
     // snapshot stashed in `combat-mode` and surfaced via `aftermathVm`.
     const preludeRenderable = vm.kind === 'combat-prelude' && vm.preludeChrome !== null;
 
-    // Auto-engage (2026-08-10) — the ENGAGE/FLEE seal is retired; the combat
-    // reveal is the one commit gate. The effect (not a render-time call)
+    // Auto-engage: the combat reveal is the one commit gate. The effect (not a render-time call)
     // keeps the parent's state write out of this render pass.
     useEffect(() => {
         if (mode === 'prelude' && preludeRenderable) handleFight();
@@ -267,13 +235,13 @@ export function EncounterModalOverlay({
         return null;
     }
 
-    // Phase 200 — live hazard-pattern combat (Spec 26b). When the player chose
-    // FIGHT and exploration captured the foe, render the new card-and-dice
+    // Live hazard-pattern combat. When the player engaged and exploration
+    // captured the foe, render the card-and-dice
     // combat as a FULL-SCREEN layer over the dimmed map: the board's drag uses
     // window coords, so it must mount from the window origin rather than inside
     // the inset seal panel. The map stays mounted underneath — modal-contained,
-    // not a route push. Legacy <CombatPanel> (below) stays as the fallback for
-    // any path that reaches combat mode without a captured foe.
+    // not a route push. The NO FOE CAPTURED placeholder (below) is the
+    // fallback for any path that reaches combat mode without a captured foe.
     if (mode === 'combat' && encounterEnemy && player) {
         return (
             <View style={styles.overlay} testID="encounter-modal-overlay">
@@ -296,23 +264,21 @@ export function EncounterModalOverlay({
     return (
         <View
             style={styles.overlay}
-            // The backdrop is non-dismissible per chat1: "user cannot
-            // exit these modals". No `onPress` handler. `pointerEvents:
+            // The backdrop is non-dismissible: the player cannot exit
+            // these modals. No `onPress` handler. `pointerEvents:
             // box-none` would let taps fall through; we want the
             // opposite — swallow all backdrop taps.
             testID="encounter-modal-overlay"
         >
             <Animated.View style={[styles.backdrop, backdropStyle]} />
-            {/* Phase 73 — chain bars now sit OUTSIDE the seal panel
-              * to match the design (`prototype.jsx:558-569` for the
-              * top chain, `:605-617` for the bottom). The panel is
+            {/* Chain bars sit OUTSIDE the seal panel. The panel is
               * inset between them so the diamond strands frame the
               * seal rather than living inside its border. */}
             <ChainBarFixed position="top" label={sealChrome.topLabel} accentColor={sealChrome.accentColor} />
             <Animated.View
                 style={[
                     styles.panel,
-                    // Phase 71/73 — phase-aware border + glow. Border
+                    // Phase-aware border + glow. Border
                     // color tracks the seal chrome (blood in prelude /
                     // combat, sulfur on aftermath). boxShadow uses the
                     // glow color so the outer halo around the panel
@@ -326,9 +292,7 @@ export function EncounterModalOverlay({
                     panelStyle,
                 ]}
             >
-                {/* Phase 73 — four corner rivets inside the seal,
-                  * porting the design's `PtRivet` chrome (handoff
-                  * bundle `prototype.jsx:580-583`). */}
+                {/* Four corner rivets inside the seal. */}
                 <ModalRivet position="tl" />
                 <ModalRivet position="tr" />
                 <ModalRivet position="bl" />
@@ -354,10 +318,8 @@ export function EncounterModalOverlay({
                     // combat mode is entered without a captured foe. The
                     // live path is the full-screen hazard combat early-return
                     // above (`encounterEnemy && player`); map encounters always
-                    // supply a foe. The legacy turn-based <CombatPanel> that
-                    // used to render here was removed with the legacy combat
-                    // surface; this placeholder keeps the modal's combat-mode
-                    // contract defined.
+                    // supply a foe. This placeholder keeps the modal's
+                    // combat-mode contract defined.
                     <ScrollView
                         ref={combatScrollRef}
                         style={styles.combatScroll}
@@ -371,7 +333,7 @@ export function EncounterModalOverlay({
                     </ScrollView>
                 )}
             </Animated.View>
-            {/* Phase 73 — bottom chain, also outside the panel. */}
+            {/* Bottom chain, also outside the panel. */}
             <ChainBarFixed
                 position="bottom"
                 label={sealChrome.bottomLabel}
@@ -401,45 +363,36 @@ const useStyles = makeStyles((AXM) => ({
         bottom: 0,
         // Backdrop opacity tuned to the design's diegetic-stack target
         // (chat 2 §IV — "map persists at 35% opacity behind every
-        // modal"). 0.65 backdrop fill = ~35% map visibility. Mirrors
-        // `archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-16/project/prototype.jsx:454`
-        // `'rgba(10,10,10,0.6)'` for the combat-event shell; ours is
-        // marginally darker (0.65 vs 0.6) so the panel border reads
-        // sharp on the lighter regions of the exploration map. Phase
-        // 39 port from the handoff bundle.
+        // modal"). 0.65 backdrop fill = ~35% map visibility — marginally
+        // darker than the design's 0.6 so the panel border reads sharp
+        // on the lighter regions of the exploration map.
         backgroundColor: AXM.nodeBg,
     },
     panel: {
         position: 'absolute',
-        // Phase 73 (2026-05-23, user-direct): pull the panel
-        // close to all four screen edges. The seal should fill
+        // Pull the panel close to all four screen edges. The seal should fill
         // the available real estate so the combat content
         // (enemy + log + phase stack + HUD) has room to breathe
         // without the body scrolling for every interaction. The
         // top/bottom insets leave 26px for the SEALED chain bars
-        // that sit OUTSIDE the panel per the design
-        // (`prototype.jsx:558-617`): each chain bar is 18px tall,
+        // that sit OUTSIDE the panel: each chain bar is 18px tall,
         // pinned 4px in from the screen edge, plus a 4px breath
         // gap before the panel border begins.
         left: 8,
         right: 8,
         top: 26,
         bottom: 22,
-        // Phase 73 — match the design's panel fill (AXM.silhouette)
-        // (`prototype.jsx:574`). Slightly warmer than AXM.bg so
+        // The design's panel fill (AXM.silhouette). Slightly warmer than AXM.bg so
         // the panel reads as a sealed parchment leaf rather
         // than the same flat near-black as the page behind it.
         backgroundColor: AXM.silhouette,
-        // Phase 72 — border bumped 1px → 2px to match the design
-        // bundle's PtEncounterFlow (`prototype.jsx:574`)
-        // `border: 2px solid $accent`. The color itself comes
-        // from `sealChrome.accentColor` (Phase 71).
+        // 2px border, per the design's `border: 2px solid $accent`.
+        // The color itself comes from `sealChrome.accentColor`.
         borderWidth: 2,
         borderColor: AXM.rust,
-        // Phase 73 — port the design's `boxShadow: 0 0 0 1px
-        // ${AXM.bg}, 0 0 24px <accent-tint>, inset 0 0 60px
-        // rgba(0,0,0,0.7)` (`prototype.jsx:576`). React Native's
-        // legacy shadowProps can only carry the outer halo, so
+        // The design's `boxShadow: 0 0 0 1px ${AXM.bg}, 0 0 24px
+        // <accent-tint>, inset 0 0 60px rgba(0,0,0,0.7)`. React Native's
+        // shadow* props can only carry the outer halo, so
         // we surface the dark 1px outer ring + inset darken via
         // `boxShadow` (RN 0.76+ web-compatible) and keep the
         // shadow* keys as a native fallback for older Android.
@@ -453,18 +406,12 @@ const useStyles = makeStyles((AXM) => ({
         elevation: 10,
         flexDirection: 'column',
     },
-    // Phase 63b — combat-mode ScrollView wrap. The panel has a
-    // bounded height (top: 56, bottom: 84); CombatPanel renders
-    // EnemyPanel + log + HUD + PhaseStack, often taller than the
-    // panel viewport, so the scroll lets the player see all of
-    // it without breaking the modal containment.
+    // Combat-mode ScrollView wrap. The panel has a bounded height
+    // (top: 26, bottom: 22), so the scroll keeps any taller combat-mode
+    // content visible without breaking the modal containment.
     combatScroll: { flex: 1 },
-    // Phase 72 — combat-body horizontal inset aligns with the
-    // design bundle's `PtCombatBody` outer wrap
-    // (`archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-23/project/prototype.jsx:697`
-    // `padding: '8px 14px 12px'`). Pre-Phase-72 the scroll was
-    // edge-to-edge and the EnemyPanel + phase rows looked cramped
-    // against the modal border.
+    // Combat-body inset so content does not sit cramped against the
+    // modal border.
     combatScrollContent: { paddingBottom: 12, paddingHorizontal: 4 },
     combatFallbackText: {
         textAlign: 'center',

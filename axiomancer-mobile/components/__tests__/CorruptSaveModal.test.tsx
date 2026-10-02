@@ -1,5 +1,5 @@
 /**
- * Hermetic component tests — CorruptSaveModal surface (Phase 53).
+ * Hermetic component tests — CorruptSaveModal surface.
  *
  * Pins the boot-time save-corrupted prompt: copy register, button
  * routing, accessibility labels. Mount is driven by the `visible`

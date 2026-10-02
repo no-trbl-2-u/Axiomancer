@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E Tests — Event screen presenter (Phase 23 — 0.7.0 surface).
+ * Hermetic E2E Tests — Event screen presenter.
  *
  * Drives `selectEventViewModel` and `selectHasActiveEvent` against
  * fixture `ResolveMapEventResult` shapes injected into the mobile
@@ -67,9 +67,8 @@ function makeEncounterResult(opts: { isBoss?: boolean } = {}): ResolveMapEventRe
         health: 24,
         maxHealth: 24,
     } as never;
-    // Phase 60b — engine's canonical Encounter shape is
-    // `{ enemies, origin }`. Pre-60b fixtures used `{enemy}`;
-    // mobile consumers now read `enemies[0]`.
+    // The engine's canonical Encounter shape is `{ enemies, origin }`;
+    // mobile consumers read `enemies[0]`.
     return {
         state: undefined as never,
         event: {
@@ -175,12 +174,7 @@ describe('selectHasActiveEvent', () => {
         expect(selectHasActiveEvent(store.getState())).toBe(true);
     });
 
-    // The former "short-circuits to false when combat is active" test
-    // pinned `selectHasActiveEvent`'s guard on the legacy `state.combat`
-    // slice, removed from the engine in mechanics 0.37.0. Turn-based
-    // combat no longer exists, so mid-combat event suppression is moot.
-
-    // Phase 40 — event-shell distinction audit. EventGate must NOT
+    // Event-shell distinction. EventGate must NOT
     // push the player into the full-screen /event route when the
     // pending event is a combat-prelude (which renders in-place over
     // the map via <EncounterModalOverlay>).
@@ -205,7 +199,7 @@ describe('selectHasActiveEvent', () => {
         expect(selectHasActivePacedEvent(store.getState())).toBe(true);
     });
 
-    // Phase 42 — combat-tab mutex extension. The tab layout flips
+    // Combat-tab mutex. The tab layout flips
     // to STRIFE early (while encounter modal is up) so visual
     // continuity holds across the encounter-modal seam.
     it('selectHasActiveCombatPrelude: false on a fresh store', () => {
@@ -226,10 +220,6 @@ describe('selectHasActiveEvent', () => {
         // exactly one (or neither) returns true for any given pending.
         expect(selectHasActiveCombatPrelude(store.getState())).toBe(false);
     });
-
-    // The former "selectHasActiveCombatPrelude: false when combat is
-    // already active" test relied on the removed `state.combat`
-    // short-circuit (mechanics 0.37.0). Retired with the legacy slice.
 });
 
 describe('selectEventViewModel: shape contract', () => {
@@ -301,8 +291,7 @@ describe('selectEventViewModel: combat-prelude composition', () => {
         expect(vm.choices.find((c) => c.id === 'flee')?.enabled).toBe(false);
     });
 
-    // Phase 43 port — boss encounters swap FIGHT/FLEE labels for
-    // STRIKE/KNEEL per the design's chat-1 spec. Choice IDs stay
+    // Boss encounters swap FIGHT/FLEE labels for STRIKE/KNEEL. Choice IDs stay
     // the same so the screen's onFight/onFlee handlers still
     // dispatch correctly.
     it('non-boss encounters keep FIGHT/FLEE labels (Phase 43)', () => {
@@ -327,7 +316,7 @@ describe('selectEventViewModel: combat-prelude composition', () => {
         expect(vm.choices.find((c) => c.id === 'flee')?.enabled).toBe(false);
     });
 
-    // Phase 45 port — action-button subtitle chrome.
+    // Action-button subtitle chrome.
     it('combat-prelude action-button subtitles ship the lowercase-roman cost line (Phase 45)', () => {
         const store = makeStore();
         setPending(store, makeEncounterResult({ isBoss: false }));
@@ -343,7 +332,7 @@ describe('selectEventViewModel: combat-prelude composition', () => {
         // alphabet (i,v,x,l,c,d,m) for any positive n, not just i/v/x,
         // so the regex must accept the full alphabet.
         expect(fight.subtitle).toMatch(/^[ivxlcdm0-9]+ · [ivxlcdm0-9]+ vitae · adv\. unknown$/);
-        // D39: retreat costs no grace, so the kicker names no cost.
+        // Retreat costs no grace, so the kicker names no cost.
         expect(flee.subtitle).toBe('forfeit the path');
     });
 
@@ -366,10 +355,9 @@ describe('selectEventViewModel: combat-prelude composition', () => {
         }
     });
 
-    // Phase 137 cleanup — rest events launch the rest-choice session
-    // via the resolve interceptor and never reach the modal;
-    // a rest result that somehow lands in the slice composes to the
-    // empty VM rather than the old "A FIRE LOWERS" hearth card.
+    // Rest events launch the rest-choice session via the resolve
+    // interceptor and never reach the modal; a rest result that somehow
+    // lands in the slice composes to the empty VM.
     it('a rest result in the slice composes to the empty VM (Phase 137)', () => {
         const store = makeStore();
         setPending(store, makeRestResult(5));
@@ -380,9 +368,9 @@ describe('selectEventViewModel: combat-prelude composition', () => {
 });
 
 // ---------------------------------------------------------------------------
-// preludeChrome — Phase 32 (Claude Design handoff port, 2026-05-16)
+// preludeChrome
 //
-// `vm.preludeChrome` is the design handoff's STRIFE-STIRS header chrome
+// `vm.preludeChrome` is the STRIFE-STIRS header chrome
 // (eyebrow + diagonal sash) lifted off the screen and onto the VM per
 // Hard Rule #8 (no inline display strings in the view layer). Combat-
 // prelude variants populate it; every other kind returns `null`.
@@ -459,7 +447,7 @@ describe('selectEventViewModel: preludeChrome contract', () => {
 });
 
 // ---------------------------------------------------------------------------
-// chrome — /iterate 2026-05-16 (CRITIQUE pass 6 HIGH drain)
+// chrome
 //
 // `vm.chrome` lifts the four general-event display literals
 // (RECKONING eyebrow, SKIP label, empty-state BACK / RETURN labels) off
@@ -514,7 +502,7 @@ describe('selectEventViewModel: chrome contract', () => {
 });
 
 describe('selectEventViewModel: referential stability (Maximum-update-depth guard)', () => {
-    // Regression for the map-node-nav crash (2026-06-12): the exploration
+    // Regression for the map-node-nav crash: the exploration
     // screen subscribes via `useGameState(selectEventViewModel)`, whose
     // `getSnapshot` is the bare selector call. React's `useSyncExternalStore`
     // requires a STABLE reference for unchanged state or it loops forever
@@ -558,15 +546,11 @@ describe('selectEventViewModel: referential stability (Maximum-update-depth guar
 });
 
 describe('selectEventViewModel: narrative-choice composition', () => {
-    // Phase 137 cleanup — rest / loot-cache events are intercepted in
+    // Rest / loot-cache events are intercepted in
     // resolveCurrentMapEventAction (they launch the rest-choice session /
     // "The Reliquary") and never reach the modal. The composer treats them
-    // as dead-end kinds.
-    //
-    // 2026-09-21 (owner finding 2) — `gathering` LEFT this list. It used to
-    // sit here because Phase 76 retired "The Gleaning" and left the grant
-    // inline with only a toast; a dead-end VM was the presenter agreeing
-    // that a gather node had nothing to say. It has something to say now.
+    // as dead-end kinds. `gathering` is not one: it composes its
+    // acknowledgement card.
     it('composes minigame-intercepted kinds (rest / loot-cache) to the empty VM', () => {
         const store = makeStore();
         for (const result of [makeRestResult(7), makeLootCacheResult()]) {
@@ -832,11 +816,6 @@ describe('eventActions.dismissEvent', () => {
     });
 });
 
-// The former `eventActions.resolveCurrentMapEvent` "no-ops while combat
-// is active" test pinned the removed `state.combat` guard (mechanics
-// 0.37.0). Turn-based combat no longer stacks over events, so it was
-// retired.
-
 describe('selectEventViewModel: sourceNodeType', () => {
     it('is null on the empty-state VM (no pending event)', () => {
         const store = makeStore();
@@ -920,13 +899,12 @@ describe('selectEventViewModel: invariants', () => {
 });
 
 // ---------------------------------------------------------------------------
-// composeNpcDialogue's DialogueContext — Phase 53b
+// composeNpcDialogue's DialogueContext
 //
-// Before Phase 53b the presenter built its DialogueContext by hand and
-// silently dropped fields, so gated choices evaluated hidden forever. The
-// alignment gates it was fixed for are gone (D39) — every choice they hid is
-// now simply shown. These tests drive the neutral fixture NPC's tree (R7e,
-// D72: no map stages an NPC any more).
+// The presenter must build a complete DialogueContext; a dropped field
+// would leave gated choices evaluating hidden forever. There are no
+// alignment gates. These tests drive the neutral fixture NPC's tree (no map
+// stages an NPC).
 // ---------------------------------------------------------------------------
 
 function loadFixtureTree() {
@@ -961,11 +939,9 @@ describe('buildDialogueContext: field completeness (Phase 53b regression witness
 
 describe('selectEventViewModel: NPC dialogue without alignment gates (D39)', () => {
     it('clicking a choice fires the branch at its RAW node.choices index', () => {
-        // Regression for the id-derivation bug Phase 53b closed:
-        // composeNpcDialogue used to derive `id` from the choice's index
-        // in the FILTERED (visible) array, while pickEventChoiceAction
-        // always indexed into the RAW node.choices array. The ids stay
-        // raw indices so any hidden gate cannot knock them out of step.
+        // composeNpcDialogue derives `id` from the RAW node.choices index,
+        // the array pickEventChoiceAction indexes into — not the FILTERED
+        // (visible) array — so any hidden gate cannot knock them out of step.
         const store = makeStore();
         const actions = createAppActions(store);
         setDialogueCursor(store, 'start');

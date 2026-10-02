@@ -1,10 +1,9 @@
 /**
  * Hermetic E2E — the item-reward screen's store flow and presenter
- * (owner finding 10; decisions D5 / D6 / D7).
+ * (rules D5 / D6 / D7).
  *
  * Drives the reward through its public entry points: offer -> VM -> commit.
- * The load-bearing assertions are the two SILENT failures the brief warned
- * about, because both read as success from the outside:
+ * The load-bearing assertions are the two SILENT failures, because both read as success from the outside:
  *
  *   - `equipItem` drops the worn weapon/armor on the floor unless the caller
  *     rescues it first;
@@ -150,7 +149,7 @@ describe('item-reward view model', () => {
         expect(vm.signature?.name).toBe('The Open Hand');
         expect(vm.signature?.cost).toBeGreaterThan(0);
         expect(vm.signature?.description.length).toBeGreaterThan(0);
-        // The ring grants ONLY its signature (owner call 2026-09-23) — no stat line.
+        // The ring grants ONLY its signature — no stat line.
         expect(vm.statLines).toHaveLength(0);
         expect(vm.flavor.length).toBeGreaterThan(0);
     });

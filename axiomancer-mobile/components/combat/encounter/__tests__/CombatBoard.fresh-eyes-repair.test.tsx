@@ -1,21 +1,17 @@
 /**
- * CombatBoard — repair of the damage this sweep's own S1-board fixes did, as
- * an independent reader found it in the before/after captures.
+ * CombatBoard — hand-fan and momentum-readout geometry at the phone and
+ * desktop viewports.
  *
- *  C11-R  The chrome-free band (375 − 102 − 90 = 183pt) cannot seat five 120pt
- *         cards. Clamped into it, every non-last card collapsed to the 28pt
- *         sliver floor — four of five names cut to two letters, all art and
- *         cost chips hidden, each card a 28pt drag target — and the 232pt fan
- *         overflowed the 183pt band anyway. The fan now falls back to the full
- *         board band whenever the chrome band cannot seat the hand.
- *  C11-R2 The same overflow parked the last card's keyword chip HALF under the
- *         END disc, which cut it to 'GUAR' with '12' wrapped beneath. With the
- *         board band restored the disc meets that card no further into its
- *         face than it did before the sweep — the chip is wholly behind it.
- *  C19-R  The ⓘ tap mark rendered OUTSIDE the readout's dark backing plate, on
- *         bright arena floor art (~1.5:1) — invisible on desktop — and shoved
- *         the 'no momentum' readout off the centre it held. The mark now
- *         carries the same plate, and a mirrored gutter holds the centre.
+ *  - The chrome-free band (375 − 102 − 90 = 183pt) cannot seat five 120pt
+ *    cards: clamped into it, every non-last card would collapse to the 28pt
+ *    sliver floor and the 232pt fan would still overflow. The fan falls back
+ *    to the full board band whenever the chrome band cannot seat the hand.
+ *  - With the board band, the END disc meets the last card no further into
+ *    its face than the reference layout does, so the card's keyword chip is
+ *    never cut by the disc.
+ *  - The ⓘ tap mark sits on the readout's dark backing plate (bare, it reads
+ *    ~1.5:1 on bright arena floor art), and a mirrored gutter keeps the
+ *    'no momentum' readout centred.
  */
 
 import React from 'react';
@@ -35,8 +31,7 @@ import { buildCombatViewModel, type CombatViewModel } from '@/state/presenters/c
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
-// A four-card hand off the grey office (the whole library since the card
-// purge, 2026-09-27).
+// A four-card hand off the grey office (the whole card library).
 const CARDS = ['grey-strike', 'grey-ward', 'grey-word', 'grey-strike'];
 /** The capture's primary viewport — the one the fan collapsed at. */
 const PHONE = { width: 375, height: 812, scale: 3, fontScale: 1 };
@@ -99,8 +94,6 @@ const fanWidth = (n: number, step: number) => (n < 1 ? 0 : HAND_CARD_W + step * 
  * fan is `justifyContent: 'center'`, so content wider than the box overflows
  * it symmetrically). Output: the step, the leading edge, the LAST card's
  * leading edge, and the fan's trailing edge — board coordinates.
- *
- * Resolves C11-R/C11-R2: both findings are statements about these edges.
  */
 function fanEdges(screenW: number, n: number, padLeft: number, padRight: number): {
     step: number; left: number; lastLeft: number; right: number;
@@ -111,12 +104,11 @@ function fanEdges(screenW: number, n: number, padLeft: number, padRight: number)
 }
 
 /**
- * The reference fan — the pre-sweep, edge-to-edge layout the BEFORE captures
- * show: the board band at HAND_FAN_BOARD_EDGE insets, corner medallions
- * floating above its ends.
+ * The reference fan — the edge-to-edge layout: the board band at
+ * HAND_FAN_BOARD_EDGE insets, corner medallions floating above its ends.
  *
  * Inputs: viewport width and card count. Output: the same edges as `fanEdges`.
- * Resolves C11-R/C11-R2: the repair must be no worse than this on both counts.
+ * The live fan must be no worse than this on either edge.
  */
 function referenceFanEdges(screenW: number, n: number): { step: number; left: number; lastLeft: number; right: number } {
     const band = screenW - HAND_FAN_BOARD_EDGE * 2;
@@ -127,7 +119,7 @@ function referenceFanEdges(screenW: number, n: number): { step: number; left: nu
     return { step, left, lastLeft: left + step * (n - 1), right: left + fanWidth(n, step) };
 }
 
-// ── C11-R: the fan reads again at the phone viewport ────────────────────────
+// ── The fan reads at the phone viewport ────────────────────────
 
 describe('C11-R — a hand the chrome-free band cannot seat takes the board band', () => {
     it('a five-card hand at 375 keeps a name-wide peek, not the sliver floor', () => {
@@ -136,8 +128,8 @@ describe('C11-R — a hand the chrome-free band cannot seat takes the board band
         // readable step, so the fan lays out in the board band instead.
         expect(band).toBe(PHONE.width - HAND_FAN_BOARD_EDGE * 2);
         expect(step).toBeCloseTo(referenceFanEdges(PHONE.width, 5).step, 5);
-        // The damaged layout clamped every card to the floor: two letters of a
-        // name, no art, a 28pt drag target.
+        // At the floor a card shows two letters of its name, no art, and is a
+        // 28pt drag target.
         expect(step).toBeGreaterThan(HAND_FAN_MIN_STEP * 1.5);
     });
 
@@ -170,7 +162,7 @@ describe('C11-R — a hand the chrome-free band cannot seat takes the board band
     });
 });
 
-// ── C11-R2: the last card's chip is not cut by the END disc ────────────────
+// ── The last card's chip is not cut by the END disc ────────────────
 
 describe('C11-R2 — the END disc does not slice the last card mid-chip', () => {
     it('lays the fan out no further left than the reference layout, and on-board', () => {
@@ -180,12 +172,12 @@ describe('C11-R2 — the END disc does not slice the last card mid-chip', () => 
         const fan = flat('combat-hand');
         const laid = fanEdges(PHONE.width, n, fan.paddingLeft as number, fan.paddingRight as number);
         const ref = referenceFanEdges(PHONE.width, n);
-        // The END corner starts here; the damaged fan stopped 24pt inside it,
-        // which cut the last card's keyword chip in half instead of hiding it.
+        // The END corner starts here; a fan ending just inside it cuts the
+        // last card's keyword chip in half instead of hiding it.
         const endCornerLeft = PHONE.width - HAND_FAN_RIGHT;
         // Either the fan clears the corner outright (a small hand seats beside
         // it), or it tucks at least as deep under the disc as the reference
-        // layout did — never grazing it, which is what cut the chip in half.
+        // layout does — never grazing it, which would cut the chip in half.
         const clearsCorner = laid.right <= endCornerLeft;
         expect(clearsCorner || laid.lastLeft >= ref.lastLeft).toBe(true);
         // And the board still clips nothing: the fan ends inside the viewport.
@@ -194,7 +186,7 @@ describe('C11-R2 — the END disc does not slice the last card mid-chip', () => 
     });
 });
 
-// ── C19-R: the tap mark is legible, the readout keeps its centre ───────────
+// ── The tap mark is legible, the readout keeps its centre ───────────
 
 describe('C19-R — the momentum tap mark carries its own backing plate', () => {
     /** Force the chip's empty state — the one the desktop capture shows. */
@@ -207,7 +199,7 @@ describe('C19-R — the momentum tap mark carries its own backing plate', () => 
         renderBoard(emptyChain);
         const mark = flat('combat-momentum-info-mark');
         const readout = flat('combat-momentum-empty');
-        // Bare, the glyph sat on the arena floor art at ~1.5:1 and vanished.
+        // Bare, the glyph sits on the arena floor art at ~1.5:1 and vanishes.
         expect(mark.backgroundColor).toBe(readout.backgroundColor);
         expect(mark.borderColor).toBe(readout.borderColor);
         expect(mark.borderWidth).toBe(readout.borderWidth);

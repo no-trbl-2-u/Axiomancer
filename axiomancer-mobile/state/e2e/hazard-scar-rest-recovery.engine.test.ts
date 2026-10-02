@@ -1,8 +1,8 @@
 /**
  * Hermetic E2E Tests — Hazard max-VITAE scar recovery at inn rest.
  *
- * Pins the Phase 128 contract through the store action layer, re-homed by
- * Phase 52b onto the authored `RestPayload.shelter` marker:
+ * Pins the contract through the store action layer, keyed on the authored
+ * `RestPayload.shelter` marker:
  *  - a `maxhp` hazard scar bakes the loss into maxHealth AND records a
  *    durable `hazard-scar:` flag;
  *  - a rest at an INN (`shelter: 'inn'`) mends the scarred max-VITAE
@@ -11,10 +11,6 @@
  *    silent) does NOT mend the scar and leaves the flags intact;
  *  - recovered max-VITAE never exceeds the pre-scar baseline.
  *
- * The old trigger was `baseHealFraction >= 1.0`, which two authored
- * wilderness springs (`nf-4`, `nf-24`) also passed — they mended scars
- * like a paid shelter. The BEHAVIOUR below is unchanged; only its
- * trigger is honest now.
  * Seeded; no timers, no network.
  */
 
@@ -69,9 +65,8 @@ function playLosingRound(store: AppStore, actions: AppActions): void {
 /** Drives a full failing hazard that scars max-VITAE; returns the applied scar. */
 function scarThePlayer(store: AppStore, actions: AppActions): number {
     const maxBefore = (store.getState() as unknown as GameState).player.maxHealth;
-    // Phase 130 — the failing crossing's VITAE swing (−20) is lethal at the
-    // default 15 VITAE, which would route through out-of-combat death and
-    // skip the scar entirely. These tests probe max-VITAE *scarring*, so
+    // A lethal VITAE swing (−20 on the failing crossing) would route through
+    // out-of-combat death and skip the scar entirely. These tests probe max-VITAE *scarring*, so
     // give the pilgrim enough current VITAE to survive the maiming. Only
     // current health is raised; maxHealth (the scar baseline) is untouched.
     const survivor = (store.getState() as unknown as GameState).player;
@@ -151,9 +146,8 @@ describe('hazard scar recovery at inn rest', () => {
     });
 
     it('a rest with NO authored shelter defaults to camp and does NOT mend', () => {
-        // Phase 52b — silence is never a paid bed. This is the regression
-        // that mattered: `nf-4` / `nf-24` were full-heal wilderness springs
-        // and the old `>= 1.0` heuristic mended their scars for free.
+        // Silence is never a paid bed: a full-heal wilderness spring (like
+        // `nf-4` / `nf-24`) must not mend scars for free.
         const { store, actions } = makeStoreAndActions();
         const scar = scarThePlayer(store, actions);
         const scarredMax = (store.getState() as unknown as GameState).player.maxHealth;

@@ -47,7 +47,7 @@ export default function ExplorationScreen() {
         const t = setTimeout(() => setShowMapHint(false), 5000);
         return () => clearTimeout(t);
     }, []);
-    // Phase 200 — the foe for the in-place hazard combat, captured at FIGHT
+    // The foe for the in-place hazard combat, captured at FIGHT
     // (the event slice is cleared by then) and fed to the encounter modal.
     const [activeEnemy, setActiveEnemy] = useState<Enemy | null>(null);
 
@@ -62,7 +62,7 @@ export default function ExplorationScreen() {
     const eventVm = useGameState(selectEventViewModel);
     const vm = useGameState(selectExplorationViewModel);
 
-    // Phase 63c — the modal mount lifecycle. Skip `state.hasEvent` hook
+    // The modal mount lifecycle. Skip `state.hasEvent` hook
     // (state shape; would re-render on every engine call), read the 
     // presenter shape directly. The encounter modal mounts on the
     // first combat-prelude event and stays mounted until aftermath
@@ -72,39 +72,35 @@ export default function ExplorationScreen() {
 
     // Resolve the arrival this screen still owes the player, once, on mount.
     //
-    // 2026-08-08 first-map audit — the original case was the START node.
-    // Events fire on ARRIVAL at a node, and the player never "arrives" at
-    // the node they are placed on, so whatever the map authored for its
-    // starting node was dead content: on the then-first map that silently
-    // swallowed the start node's entire pool. The mechanics CLI has resolved the start
-    // node behind `--resolve-start` since Phase 14; this is the app's
-    // equivalent.
+    // The START node: events fire on ARRIVAL at a node, and the player never
+    // "arrives" at the node they are placed on, so without this whatever the
+    // map authored for its starting node would be dead content. The
+    // mechanics CLI resolves the start node behind `--resolve-start`; this
+    // is the app's equivalent.
     //
-    // Burn-day audit 2026-09-19 row 3.1 — the start node is only the FIRST
-    // unanswered arrival, not the only one. A move checkpoints before its
-    // arrival resolves (`moveToAction` saves, then `onConfirmMove` calls
-    // `resolveCurrentMapEvent`), so a player who reloaded in between came
-    // back standing on the node with its onward edges open and no fight
-    // pending — the encounter was skipped outright. `vm.arrivalPending` is
-    // that debt, read off the engine's `pendingArrival` record, and it is
-    // cleared by the resolve, so it stays a genuine one-shot: an answered
-    // arrival never re-fires, here or after a reload.
+    // The start node is only the FIRST unanswered arrival, not the only one.
+    // A move checkpoints before its arrival resolves (`moveToAction` saves,
+    // then `onConfirmMove` calls `resolveCurrentMapEvent`), so a player who
+    // reloads in between comes back standing on the node with the arrival
+    // still owed. `vm.arrivalPending` is that debt, read off the engine's
+    // `pendingArrival` record, and it is cleared by the resolve, so it stays
+    // a genuine one-shot: an answered arrival never re-fires, here or after
+    // a reload.
     //
     // The two flags are owed for different reasons and neither implies the
-    // other (row 3.1 follow-up). `arrivalPending` is a record of WALKING onto
-    // a node; `startNodePending` is the map placing you on its first one.
-    // Being PLACED somewhere else — a state fixture, a `/dev` JUMP — is
-    // neither, and owes nothing: firing on the fixture's placement is what
-    // made `/exploration?fixture=sage-bw-door-gate` engage the boss
-    // instead of drawing the map.
+    // other. `arrivalPending` is a record of WALKING onto a node;
+    // `startNodePending` is the map placing you on its first one. Being
+    // PLACED somewhere else — a state fixture, a `/dev` JUMP — is neither,
+    // and owes nothing (so `/exploration?fixture=sage-bw-door-gate` draws
+    // the map rather than engaging the boss).
     //
-    // Two guards, and CI taught me both of them.
+    // Two guards.
     //
     // WHAT counts as busy: every minigame owns its own slice, so the arrival
     // has to stand down for ANY of them, not just a paced event — see
-    // `selectHasAnyActiveSession`. Checking only the event slice let the dev
-    // treasure trigger (which opens the CACHE slice) look idle, and the
-    // cutscene stole its route to /cache.
+    // `selectHasAnyActiveSession`. Checking only the event slice would let
+    // the dev treasure trigger (which opens the CACHE slice) look idle, and
+    // the cutscene would steal its route to /cache.
     //
     // WHEN to decide: callers navigate to this screen and open their session
     // in the same handler — `DebugTriggerEncounter.onPress` does
@@ -118,7 +114,7 @@ export default function ExplorationScreen() {
         if (!arrivalOwed || anySession || inEncounterModal || inCombat) return;
         const settle = setTimeout(() => {
             // A fight still on the books (the in-memory resume below) owns the
-            // node: its arrival stays owed until the fight ends (R9a), and
+            // node: its arrival stays owed until the fight ends, and
             // resolving it here as well would stage the same fight twice.
             const now = store.getState();
             if (selectHasAnyActiveSession(now) || selectIsInCombat(now)) return;
@@ -126,12 +122,11 @@ export default function ExplorationScreen() {
         }, 0);
         return () => clearTimeout(settle);
     }, [vm.mapId, vm.currentNodeId, arrivalOwed, anySession, inEncounterModal, inCombat, store, actions]);
-    // Phase 63c — the modal mount lifecycle now spans the full
+    // The modal mount lifecycle spans the full
     // encounter session (prelude → combat → aftermath), not just
     // the moment `selectHasActiveEvent` returns true. Once combat
     // starts, `selectHasActiveEvent` flips false (it short-circuits
-    // when `state.combat !== null` — Spec 08 Q4 = Future spec for
-    // mid-combat events), which would otherwise unmount the modal
+    // when `state.combat !== null`), which would otherwise unmount the modal
     // mid-encounter. The `inEncounterModal` flag (combat-mode)
     // keeps the modal mounted across that boundary.
     const preludeReady = hasEvent && eventVm.kind === 'combat-prelude';
@@ -139,16 +134,14 @@ export default function ExplorationScreen() {
 
     // Open the encounter session the first time the prelude appears
     // for a given event. The flag is the modal's lifecycle anchor;
-    // the modal itself drives the close via aftermath dismissal
-    // (Phase 63c follow-on or 63d).
+    // the modal itself drives the close via aftermath dismissal.
     useEffect(() => {
         if (preludeReady && !inEncounterModal) {
             openEncounterModal();
         }
     }, [preludeReady, inEncounterModal, openEncounterModal]);
-    // Phase 118 — Close encounter modal when encounter event is cleared.
-    // Fixes issue where subsequent encounters don't trigger after first
-    // encounter (issue #191). When user flees or other non-aftermath exit
+    // Close the encounter modal when the encounter event is cleared.
+    // When the user flees or other non-aftermath exit
     // paths clear the event but leave inEncounterModal=true, subsequent
     // encounters can't open because the openEncounterModal effect above
     // won't fire when inEncounterModal is already true.
@@ -156,7 +149,7 @@ export default function ExplorationScreen() {
     // modal is showing the aftermath panel — `lastOutcome` is non-null
     // in exactly that window and the panel's own CARRY ON drives the
     // dismissal. Closing here would swallow the aftermath entirely.
-    // Phase 200 — `!inCombat` guard. The new hazard combat keeps its state
+    // `!inCombat` guard. The hazard combat keeps its state
     // in the panel's local React state, so `state.combat` stays null during
     // a live encounter — without this clause the teardown would slam the
     // modal shut the instant FIGHT clears the event slice. `inCombat` is true
@@ -183,12 +176,12 @@ export default function ExplorationScreen() {
         if (inCombat) exitCombat();
     }, [devSkipSeq, inCombat, exitCombat]);
 
-    // Phase 200 — drop the captured foe once the modal session fully closes,
+    // Drop the captured foe once the modal session fully closes,
     // so the next encounter bootstraps clean. Strictly on the CLOSING edge:
-    // since the modal auto-engages (2026-08-10) the foe is now captured by a
-    // child effect in the very commit that opens the session, and this screen's
-    // own effects run after its children's — a plain `if (!inEncounterModal)`
-    // wiped that foe the instant it was captured, and every encounter fell
+    // the modal auto-engages, so the foe is captured by a child effect in
+    // the very commit that opens the session, and this screen's own effects
+    // run after its children's — a plain `if (!inEncounterModal)` would wipe
+    // that foe the instant it was captured, and every encounter would fall
     // through to the NO FOE CAPTURED fallback.
     const modalWasOpen = useRef(false);
     useEffect(() => {
@@ -203,8 +196,7 @@ export default function ExplorationScreen() {
     // A chronicle continued mid-fight (the store still holds its
     // `currentEncounter`) restarts that fight here, once, on mount: the
     // fight's dice, hand and HP lived in the panel and did not survive the
-    // restart, so the saved foe is fought again from the top (owner call,
-    // 2026-09-25). Cold start used to route this to the dev sandbox.
+    // restart, so the saved foe is fought again from the top.
     const [resumeFight, setResumeFight] = useState<{ fleeAllowed: boolean } | null>(null);
     const resumeChecked = useRef(false);
     useEffect(() => {
@@ -231,10 +223,8 @@ export default function ExplorationScreen() {
      *
      * Input: the tapped `ExplorationNode`. Output: none — it either selects
      * the node (opening `<NodeConfirmPanel>`) or raises a brief toast saying
-     * why the tap did nothing. Resolves S4-world-C06: the node the player is
-     * STANDING on fell through to a silent `return`, so the one mark the
-     * chart drew loudest was also the one that answered nothing when tapped.
-     * Every kind now says something back.
+     * why the tap did nothing. Every kind says something back, including the
+     * node the player is STANDING on.
      */
     const onNodePress = (node: ExplorationNode) => {
         if (node.kind === 'locked') {
@@ -275,9 +265,9 @@ export default function ExplorationScreen() {
     };
 
     const onEncounterFight = () => {
-        // Phase 200 — live encounters now run the new hazard-pattern combat
-        // (Spec 26b) in-place. `beginHazardEncounter` pulls the foe, guarantees
-        // a real deck, and clears the event WITHOUT starting legacy combat; we
+        // Live encounters run the hazard-pattern combat in-place.
+        // `beginHazardEncounter` pulls the foe, guarantees a real deck, and
+        // clears the event WITHOUT setting `state.combat`; we
         // hand the foe to the modal and flip the combat-mode flag. The
         // EncounterModalOverlay swaps prelude → combat and renders
         // <CombatEncounterPanel> full-screen over the still-mounted map.
@@ -287,7 +277,7 @@ export default function ExplorationScreen() {
         enterCombat();
     };
 
-    // 2026-08-10 — retreat now comes from the combat reveal's WITHDRAW, after
+    // Retreat comes from the combat reveal's WITHDRAW, after
     // the encounter has already been entered and the event slice cleared, so
     // it pays the cost through `fleeEncounter` rather than the event choice.
     // The modal owns its own teardown.
@@ -297,17 +287,11 @@ export default function ExplorationScreen() {
 
     return (
         <ScreenBg scrollable={false}>
-            {/* CRITIQUE.md [MED] "persistent header VITAE bar doesn't update
-              * during combat" (pass 12): the encounter modal already renders
-              * full-screen over this map (see onEncounterFight above), but
-              * this out-of-combat header stayed mounted underneath it,
-              * showing a stale VITAE reading that visibly contradicted the
-              * live combat HUD's. There is no shared store between this
-              * screen's player snapshot and the combat panel's local state
-              * (CombatEncounterPanel keeps its engine state in local React
-              * state), so the fix is to stop rendering the stale header
-              * while the modal owns the screen, matching the "full-screen"
-              * design intent instead of wiring a new cross-boundary read. */}
+            {/* The encounter modal renders full-screen over this map (see
+              * onEncounterFight above). The combat panel keeps its engine
+              * state in local React state, so this out-of-combat header would
+              * show a stale VITAE reading under it; it is not rendered while
+              * the modal owns the screen. */}
             {!showEncounterModal && <StatusCard />}
 
             {/* Region Header */}
@@ -353,15 +337,10 @@ export default function ExplorationScreen() {
                 />
             )}
             {nodeTip !== null && <NodeToast tip={nodeTip} />}
-            {/* FE-005: the hint moved into <MapOverlays> so it stacks above
-              * the legend instead of landing on top of it at 375x812. */}
-            {/* Phase 70 Tick B — `<AftermathBanner>` retired. Both
-              * victory and parley outcomes now render inside
-              * `<EncounterModalOverlay>` via `<CombatVictoryPanel>`
-              * / `<CombatFriendshipPanel>`. Defeat (Tick C pending)
-              * and flee paths intentionally don't surface anything
-              * on the exploration screen — the seal dismisses
-              * silently in those cases. */}
+            {/* The first-visit hint renders inside <MapOverlays> so it stacks
+              * above the legend instead of landing on top of it. */}
+            {/* Combat outcomes render inside `<EncounterModalOverlay>`;
+              * nothing on the exploration screen surfaces them. */}
         </ScreenBg>
     );
 }

@@ -10,9 +10,9 @@ interface ScreenBgProps {
   children: React.ReactNode;
   scrollable?: boolean;
   /**
-   * Optional backdrop plate (phase V5). Screens opt IN: a backdrop under a
-   * dense inventory table is noise, so a screen with no key keeps the flat
-   * ground it has always had.
+   * Optional backdrop plate. Screens opt IN: a backdrop under a
+   * dense inventory table is noise, so a screen with no key keeps a flat
+   * ground.
    */
   art?: ScreenArtKey;
 }

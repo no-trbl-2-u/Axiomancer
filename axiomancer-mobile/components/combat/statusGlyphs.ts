@@ -1,11 +1,10 @@
 /**
- * Spec 25 §7.6 — Status-effect glyphs.
+ * Status-effect glyphs.
  *
  * Presentation-only mapping from an engine `Effect` to a visible glyph + colour
  * so the player can SEE every status effect on the combat board — status
- * effects remain a major authored tool and must stay legible even though
- * status primacy is no longer doctrine (THE BIG NUMBERS REWRITE, 2026-09-02;
- * VISION.md §Combat vision). The engine owns the effect content; this module
+ * effects are an authored tool and must stay legible (VISION.md §Combat
+ * vision). The engine owns the effect content; this module
  * owns the visual mapping (ADR-0001/0003).
  *
  * Each effect resolves to:
@@ -46,7 +45,7 @@ export interface StatusGlyph {
     label: string;
 }
 
-/** Category colours (spec §7.3/§7.6). Aligned to the colour palette where it
+/** Category colours. Aligned to the colour palette where it
  *  reads naturally; tuned for dark-board contrast. */
 export const GLYPH_COLORS: Record<StatusGlyphKind, string> = {
     dot: HUE.damageRed,        // flame red — erosion
@@ -62,10 +61,7 @@ export const GLYPH_COLORS: Record<StatusGlyphKind, string> = {
  * listed falls back to its category glyph via `kindGlyph`.
  */
 const EFFECT_GLYPHS: Record<string, string> = {
-    // The keyword audit (2026-09-27, after the card purge) cut this table to
-    // the ids the effects library still defines; the ~40 legacy rows (burn,
-    // stun, frostbite, ...) and the purged-card species (kindling_ember,
-    // nettle_sting, backfire, buff_thorns) pointed at nothing.
+    // Only ids the effects library defines.
     // ── DoT ──
     debuff_poison: '☠',
     debuff_bleed: '🩸',
@@ -75,7 +71,7 @@ const EFFECT_GLYPHS: Record<string, string> = {
     // ── Stat-down / marks ──
     debuff_mark: '◉',
     debuff_quarter: '☙',
-    // S3 (D43) — A Plain Word's affliction: the foe's guard is open.
+    // A Plain Word's affliction: the foe's guard is open.
     debuff_vulnerable: '▼',
 };
 

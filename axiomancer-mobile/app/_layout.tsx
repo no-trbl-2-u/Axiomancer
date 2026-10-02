@@ -12,8 +12,8 @@ import { CombatModeProvider } from '@/state/combat-mode';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
 import { FontProvider } from '@/hooks/useFontFallbacks';
 // Map event pools are authored and self-registered by the engine
-// (axiomancer-mechanics → World/MapEvents/content); the client no longer
-// registers a parallel pool set.
+// (axiomancer-mechanics → World/MapEvents/content); the client registers
+// none of its own.
 // Side-effect: skin the web scrollbar to match the gothic chrome.
 import '@/theme/web-scrollbar';
 import { createAsyncStorageAdapter } from '@/state/persistence/asyncStorageAdapter';
@@ -60,9 +60,8 @@ import DevArtGallery from './devart/index';
 import DevRoomGallery from './devart/rooms';
 import DevAftermathPanel from './devaftermath/index';
 
-// Vendored locally (phase 47c dropped the `@expo-google-fonts/*` npm
-// packages — same OFL-licensed .ttf files, sourced under
-// assets/fonts/LICENSES/). Keys stay the exact fontFamily strings
+// Vendored locally (OFL-licensed .ttf files, sourced under
+// assets/fonts/LICENSES/). Keys are the exact fontFamily strings
 // `theme/axm.ts` references; `expo-font`'s loader keys a font by
 // this object's property name, not the file name.
 const PirataOne_400Regular = require('@/assets/fonts/PirataOne_400Regular.ttf');
@@ -97,12 +96,12 @@ const persistenceAdapter = createAsyncStorageAdapter();
 // They are a UX preference, not gameplay state — a new game never resets them.
 const settingsHydrated = settingsStore.hydrate();
 
-// State-fixture boot (2026-09-07, `state/fixtures.ts`): when a dev build
+// State-fixture boot (`state/fixtures.ts`): when a dev build
 // is asked for a fixture (`?fixture=<id>` or `__AXM_FIXTURE__`), the
 // store boots from that compiled state through an in-memory adapter —
 // the AsyncStorage slot is neither read into the store nor written to.
-// `null` on every normal launch, so production is byte-for-byte the
-// old path.
+// `null` on every normal launch, so production uses the real
+// persistence adapter.
 const bootFixture = resolveBootFixture();
 const storeAdapter = bootFixture ? createFixtureBootAdapter(bootFixture.state) : persistenceAdapter;
 
@@ -131,8 +130,8 @@ function RootLayout() {
     let cancelled = false;
     Promise.all([persistenceAdapter.preload(), settingsHydrated])
       .catch((err: unknown) => {
-        // Q7=A on Spec 09: surface "save corrupted — start new game?" to
-        // the user. Phase 53 wires the user-facing CorruptSaveModal; the
+        // Surface "save corrupted — start new game?" to the user via
+        // CorruptSaveModal; the
         // console.warn stays as a dev breadcrumb so the failure shows up
         // in Metro logs alongside the modal mount.
         if (__DEV__) {
@@ -201,16 +200,13 @@ function RootLayout() {
   useEffect(() => {
     if (Platform.OS !== 'android') return;
     // Best-effort: phones using gesture nav already hide the system bar,
-    // but on devices with the legacy 3-button nav this drives it offscreen
+    // but on devices with 3-button nav this drives it offscreen
     // until the user swipes from the bottom edge.
     NavigationBar.setVisibilityAsync('hidden').catch(() => undefined);
   }, []);
 
   // Deep linking is declared in `app.json` (`scheme: "axiomancer"`)
-  // but **not yet wired to navigation**. A handler was scaffolded
-  // here pre-Phase 8 and removed in critique-pass-1 close-out
-  // because both branches were no-ops — keeping a subscription that
-  // does nothing was actively misleading. When deep-linking is
+  // but **not yet wired to navigation**. When deep-linking is
   // wired, register the subscription here, look up the route from
   // `Linking.parse`, and call `router.replace(...)` (the router
   // must come from `useRouter()` rendered below the `<Stack>`
@@ -235,19 +231,14 @@ function RootLayout() {
         <SettingsProvider>
         {/* ErrorBoundary mounts INSIDE the GameStoreProvider so
             the fallback ErrorScreen can read engine state via
-            useGameState for the debug snapshot (filed via
-            user-jot 2026-05-22 oversight 29th). */}
+            useGameState for the debug snapshot. */}
         <ErrorBoundary>
           <FontProvider secondaryLoaded={secondaryFontsLoaded}>
           <CombatModeProvider>
           <TooltipProvider>
-            {/* PLAYTEST_BUGS_2026-09-18 BUG-02: a returning player's very
-            first paint is `<Redirect href="/exploration">` (no title
-            screen to click through), which could fire BEFORE this
-            container attached. `dispatchTo` dropped it silently and
-            `Redirect`'s effect — keyed only on `[href]` — could never
-            re-run, so the app sat on a blank screen forever. The router
-            now queues that request; `onReady` is where it gets replayed. */}
+            {/* A navigation request (e.g. a `<Redirect>` on first paint)
+            can fire BEFORE this container attaches. The router queues it;
+            `onReady` is where it gets replayed. */}
             <NavigationContainer
           ref={navigationRef}
           linking={linking}
@@ -272,19 +263,16 @@ function RootLayout() {
             </Suspense>
           )}
           <ToastHost />
-          {/* PLAYTEST_BUGS_2026-09-18 BUG-03: the app had no save-on-exit
-              of any kind, and the adapter's 500ms write debounce could eat
-              even a legitimate checkpoint if the player closed inside it.
-              This takes a final save and flushes it on background/pagehide. */}
+          {/* The adapter's 500ms write debounce could eat a checkpoint if
+              the player closed inside it. This takes a final save and
+              flushes it on background/pagehide. */}
           <SaveOnExit adapter={storeAdapter} />
           <FixtureBoot />
           {/* `initialRouteName="index"`: every launch begins at the title
-              and its menu (owner call 2026-09-23). Without it the native
-              stack would open on the first registered screen — the tabs
-              — and skip the title on a phone while web (URL `/`) showed
-              it. The former dev-only auto-seed (`DevAutoSeed`) is gone
-              with the same call: a new game starts with nothing, in dev
-              builds too; the `/dev` route still seeds on demand. */}
+              and its menu. Without it the native stack would open on the
+              first registered screen — the tabs — and skip the title on a
+              phone while web (URL `/`) showed it. A new game starts with
+              nothing, in dev builds too; the `/dev` route seeds on demand. */}
           <Stack initialRouteName="index" screenOptions={{ headerShown: false }}>
             <Stack.Screen name="index" component={IndexScreen} options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" component={TabLayout} options={{ headerShown: false }} />
@@ -318,7 +306,7 @@ function RootLayout() {
               component={HazardDeckScreen}
               options={{ headerShown: false, presentation: 'fullScreenModal' }}
             />
-            {/* D7 — the ONE reward screen that is dismissible on purpose.
+            {/* The ONE reward screen that is dismissible on purpose.
                 No `gestureEnabled: false` and no <HardwareBackHandler>: the
                 item is already the player's and every exit commits it as
                 CONFIRM (see `app/item-reward/index.tsx`). Do not "fix" this

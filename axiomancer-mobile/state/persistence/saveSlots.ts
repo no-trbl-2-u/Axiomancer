@@ -1,6 +1,5 @@
 /**
- * Save slots — the pure vocabulary of the three-slot save system
- * (owner call 2026-09-23: "the player should have 3 save slots to work with").
+ * Save slots — the pure vocabulary of the three-slot save system.
  *
  * Nothing here touches storage. This module owns the slot ids, the storage
  * keys they map to, the summary a menu row is drawn from, and the one rule
@@ -22,7 +21,7 @@ import type { GameState } from '@mechanics';
 
 import type { StoredEnvelope } from './migrations';
 
-/** The three slots a player can write to. Fixed by owner call. */
+/** The three slots a player can write to. */
 export type SaveSlotId = 1 | 2 | 3;
 
 /** Every slot id, in display order. */
@@ -30,16 +29,15 @@ export const SAVE_SLOT_IDS: readonly SaveSlotId[] = Object.freeze([1, 2, 3]) as 
 
 /**
  * Storage namespace for the slot system. `:v2` because the single-slot
- * `@axiomancer/save:v1` key was RETIRED with this change — the owner chose
- * to discard the legacy save rather than migrate it into slot 1, so the
- * adapter deletes `LEGACY_SAVE_KEY` on first preload and never reads it.
+ * `@axiomancer/save:v1` key is discarded rather than migrated into slot 1:
+ * the adapter deletes `LEGACY_SAVE_KEY` on first preload and never reads it.
  */
 export const SAVE_SLOT_KEY_PREFIX = '@axiomancer/save:v2:slot-';
 
 /** Which slot the store last booted from / saved to. Read at preload. */
 export const LAST_SLOT_KEY = '@axiomancer/save:v2:last-slot';
 
-/** The retired single-slot key (Spec 09). Deleted on preload, never read. */
+/** The single-slot key from before save slots. Deleted on preload, never read. */
 export const LEGACY_SAVE_KEY = '@axiomancer/save:v1';
 
 /** True for exactly the three slot ids (rejects `0`, `4`, strings, `NaN`). */

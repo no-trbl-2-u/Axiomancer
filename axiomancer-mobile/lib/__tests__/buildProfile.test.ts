@@ -2,8 +2,8 @@
  * Hermetic test for the unmocked `@/lib/buildProfile` helper.
  *
  * `jest.setup.ts` ships a project-wide auto-mock that routes
- * `isDevToolsEnabled` to `__DEV__` so the legacy `__DEV__`-toggling
- * Debug* / DevMenu suites stay green without touching every file.
+ * `isDevToolsEnabled` to `__DEV__` so the `__DEV__`-toggling
+ * Debug* / DevMenu suites need no per-file mock.
  * This suite uses `jest.unmock` so we exercise the real
  * `Constants.expoConfig.extra.devToolsEnabled` lookup that runs in
  * production / preview / dev builds.

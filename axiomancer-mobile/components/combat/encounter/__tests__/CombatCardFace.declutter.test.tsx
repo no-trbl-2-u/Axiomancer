@@ -1,7 +1,6 @@
 /**
- * CombatCardFace — the card face carries NO prose (owner directive 2026-08-10:
- * "there's not so much verbage on the cards — the card details already define
- * the keywords, so it's a little redundant").
+ * CombatCardFace — the card face carries NO prose: the card details already
+ * define the keywords, so prose on the face is redundant.
  *
  * The face is the GLANCE read: art, the card NAME on the rail, the FREE glyph,
  * the rarity tag, and the PAID line as `KEYWORD` over its value. The authored
@@ -24,10 +23,9 @@ import { buildCombatViewModel, type CombatCardVM } from '@/state/presenters/comb
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
-// The grey office — the whole library since the card purge (2026-09-27): a
-// DEAL, a GUARD and a VULNERABLE face. A Plain Word's PAID sentence
-// ('VULNERABLE +25% for 2 turns.') is long enough that the sentence sweep
-// below is not vacuous.
+// The grey office — the whole card library: a DEAL, a GUARD and a VULNERABLE
+// face. A Plain Word's PAID sentence ('VULNERABLE +25% for 2 turns.') is long
+// enough that the sentence sweep below is not vacuous.
 const CARDS = ['grey-strike', 'grey-ward', 'grey-word'];
 
 function handVMs(): CombatCardVM[] {
@@ -67,9 +65,8 @@ describe('CombatCardFace — no prose on the face (2026-08-10 declutter)', () =>
 
     // Non-vacuity: the sweeps below are per-card `not.toContain` loops, so a
     // fixture that lost its prose upstream would pass them for the wrong
-    // reason. Pin that the fixture still HAS a sentence to hide. (No surviving
-    // card prints a die line since the card purge, so the die-line sweep went
-    // with the threshold cards that printed one.)
+    // reason. Pin that the fixture still HAS a sentence to hide. (No library
+    // card prints a die line, so there is no die-line sweep.)
     it('the fixture actually carries the prose the face must not print', () => {
         expect(cards.length).toBeGreaterThan(0);
         expect(cards.some(c => (c.bottomActionText || '').split(/\s+/).length >= 5)).toBe(true);

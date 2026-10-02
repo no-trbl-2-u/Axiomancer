@@ -1,6 +1,5 @@
 /**
- * Hazard minigame glyph kit — woodcut SVG marks ported from the
- * design-handoff prototype (`hazard-kit.jsx`, `hazard-proto-rewards.jsx`).
+ * Hazard minigame glyph kit — woodcut SVG marks.
  * Shape is the accessibility channel: every die colour, progress type,
  * verdict, and boon has a distinct silhouette.
  */
@@ -169,8 +168,8 @@ export function BoonIcon({
     );
     switch (icon) {
         case 'chest':
-            // V6 glyph unification — the registry already curates this exact
-            // mark (Phase V1); draw it instead of a second hand-authored chest.
+            // The icon registry already curates this exact mark; draw it
+            // instead of a second hand-authored chest.
             return <AxmIcon name="action-chest" size={size} color={color} />;
         case 'heart':
             return wrap(

@@ -12,11 +12,11 @@ interface SplatterProps {
 }
 
 /**
- * A real ink-splatter silhouette (phase V7 — see
+ * A real ink-splatter silhouette (see
  * `assets/images/splatter/provenance.json`), tinted to whichever AXM colour
  * the caller passes. `seed` picks deterministically among the acquired set
  * so a given call site always draws the same plate; different seeds vary
- * the shape, replacing the old procedural random-circle blot.
+ * the shape.
  */
 export function Splatter({ color: colorProp, size = 220, seed = 1, style = {} }: SplatterProps) {
   const AXM = usePalette();

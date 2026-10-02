@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — the Labyrinth door (map revamp M4, D24).
+ * Hermetic E2E — the Labyrinth door.
  *
  * The Lantern Deep's vault door (`ld-15`) enters THE APORIA on arrival, with
  * no gate, through `enterLabyrinthAction`'s snapshot and return path. Pinned
@@ -14,9 +14,9 @@
  *     to the door
  *   - a second visit opens the act the player left
  *
- * THE REVAMP R3a (D54) sealed the door: the Labyrinth is parked, code kept,
- * so the door's entry journeys skip `parked (D54)` and the one live pin is
- * that arriving on the sealed door opens no visit.
+ * The door is sealed: the Labyrinth is parked with its code kept, so the
+ * door's entry journeys are skipped and the one live pin is that arriving on
+ * the sealed door opens no visit.
  */
 
 import { describe, expect, it } from '@jest/globals';

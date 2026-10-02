@@ -1,9 +1,6 @@
 /**
  * LevelUpModal — "the ledger opens"
  *
- * Phase 73 port of the 2026-05-23 design handoff
- * (`archive-pre-revamp:plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-23/project/screens/levelup.jsx:246-449`).
- *
  * Full-screen non-tap-out-dismissible stat-allocation modal. Three
  * stance rows (HEART / BODY / MIND) with ± controls, derived-preview
  * ribbon (ATK / SKL / DEF), reset link, COMMIT primary + "keep
@@ -102,7 +99,7 @@ export function LevelUpModal({
     }, [fullyAllocated, onCommit, spent]);
 
     const flavor = useMemo(() => pickFlavor(toLevel), [toLevel]);
-    // S3 (D41) — the engine's own VITAE formula previews what the spend buys
+    // The engine's own VITAE formula previews what the spend buys
     // (body is worth 12 VITAE a point, mind and heart 6), never restated here.
     // Shown as the GAIN: relic bonuses sit on top of the formula, so the gain
     // is exact where an absolute total would not be.
@@ -177,7 +174,7 @@ export function LevelUpModal({
                     ))}
                 </View>
 
-                {/* S3 — the VITAE this allocation buys */}
+                {/* The VITAE this allocation buys */}
                 <View style={styles.vitaeRow} testID="levelup-modal-vitae">
                     <Text style={styles.pointsLabel}>MAX VITAE</Text>
                     <Text style={styles.vitaeValue}>+{vitaeGain}</Text>

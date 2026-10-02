@@ -10,7 +10,6 @@
  *   - COMPLETE MAP unlocks the next map
  *   - An act button enters THE APORIA and pushes /labyrinth
  *   - NEW GAME ON starts a fresh run on the chosen map in the active slot
- *     (map revamp M3a: "start on any map")
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';

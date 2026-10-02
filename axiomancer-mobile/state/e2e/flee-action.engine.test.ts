@@ -1,10 +1,10 @@
 /**
- * Hermetic E2E Tests — Flee action behavior (Phase 92)
+ * Hermetic E2E Tests — Flee action behavior
  *
  * Tests the flee action narrative feedback. Covers the F03 regression
  * (flee gives visible feedback) and verifies the narrative toast is
- * displayed after successful flee. Retreat carried a -2 grace cost until
- * the morale meter was removed (D39); the toast now names no cost.
+ * displayed after successful flee. Retreat is free, so the toast names no
+ * cost.
  */
 
 import { afterEach, describe, it, expect, jest } from '@jest/globals';
@@ -54,7 +54,7 @@ function setPending(store: AppStore, result: ResolveMapEventResult) {
 }
 
 // ---------------------------------------------------------------------------
-// Flee narrative feedback (Phase 92)
+// Flee narrative feedback
 // ---------------------------------------------------------------------------
 
 describe('flee action: narrative feedback', () => {
@@ -133,9 +133,9 @@ describe('flee action: narrative feedback', () => {
 
         const state = store.getState();
         
-        // F03 fix: flee now provides visible feedback via toast
+        // F03: flee provides visible feedback via toast
         expect(state.notifications?.toast?.text).toContain('you fled the encounter');
-        // D39: the morale meter is gone, so the toast carries no grace cost.
+        // Retreat is free, so the toast carries no grace cost.
         expect(state.notifications?.toast?.text).not.toMatch(/grace/i);
     });
 });

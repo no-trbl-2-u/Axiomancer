@@ -1,20 +1,18 @@
 /**
- * CombatBoard — playtest 2026-09-04 layout findings at 390x844 (iPhone-class
- * portrait, the playtest driver's viewport).
+ * CombatBoard — layout at 390x844 (iPhone-class portrait).
  *
- *  1. The reward-draft mini face (100x147) clipped its NAME and paid line to
- *     stubs ("C.. +.", "D. 5.") because `adjustsFontSizeToFit` is a no-op on
- *     react-native-web. Under `NARROW_FACE_W` the ledger STACKS (keyword over
- *     value, full width) and every text line wraps to two lines with an
- *     explicit lineHeight — no font-fit dependence.
- *  2. The player VITAE readout on the bottom rail fell off the bottom: the
- *     rail was a fixed 26pt, the text wrapped to two lines and the second
- *     line drew below the screen. The rail now grows (minHeight = line +
- *     bottom inset, paddingBottom = inset) and the readout never wraps.
- *  4. Reanimated (web) warned `[opacity] may be overwritten by a layout
- *     animation` once per hand card per draw: FadeIn drives `opacity` on the
- *     animated wrapper and the in-flight dim was an `opacity` style on the
- *     SAME node. The dim now lives on a plain inner View.
+ *  1. `adjustsFontSizeToFit` is a no-op on react-native-web, so the
+ *     reward-draft mini face (100x147) does not depend on font-fit: under
+ *     `NARROW_FACE_W` the ledger STACKS (keyword over value, full width) and
+ *     every text line wraps to two lines with an explicit lineHeight, so the
+ *     NAME and paid line read in full rather than as stubs ("C.. +.").
+ *  2. The player VITAE readout stays on screen: the bottom rail grows
+ *     (minHeight = line + bottom inset, paddingBottom = inset) rather than
+ *     sitting at a fixed height, and the readout never wraps.
+ *  3. No `opacity` on a layout-animated node: FadeIn drives `opacity` on the
+ *     animated hand-card wrapper, so the in-flight dim lives on a plain inner
+ *     View (sharing the node makes Reanimated warn `[opacity] may be
+ *     overwritten by a layout animation`).
  */
 
 import React from 'react';
@@ -31,15 +29,14 @@ import { buildCombatViewModel, type CombatViewModel } from '@/state/presenters/c
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
-// A four-card hand off the grey office (the whole library since the card
-// purge, 2026-09-27).
+// A four-card hand off the grey office (the whole card library).
 const CARDS = ['grey-strike', 'grey-ward', 'grey-word', 'grey-strike'];
 const PHONE = { width: 390, height: 844, scale: 3, fontScale: 1 };
 const INSETS = { top: 47, bottom: 34, left: 0, right: 0 };
 
 // `useWindowDimensions` is read off the react-native module object at call
 // time (named import -> property access), so overriding the export pins the
-// board to the playtest viewport without mocking the whole module.
+// board to the 390x844 viewport without mocking the whole module.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const RN = require('react-native') as Record<string, unknown>;
 const realUseWindowDimensions = RN.useWindowDimensions;
@@ -81,7 +78,7 @@ function renderBoard() {
 
 const flat = (testID: string) => StyleSheet.flatten(screen.getByTestId(testID).props.style) as Record<string, unknown>;
 
-// ── Finding 2: the VITAE readout stays on screen ─────────────────────────────
+// ── 2. The VITAE readout stays on screen ─────────────────────────────
 
 describe('CombatBoard rail — player VITAE is fully visible at 390x844', () => {
     it('the rail grows with the bottom inset instead of clipping to a fixed line', () => {
@@ -97,17 +94,17 @@ describe('CombatBoard rail — player VITAE is fully visible at 390x844', () => 
         const vm = renderBoard();
         const hp = screen.getByTestId('combat-rail-vitae');
         expect(hp.props.numberOfLines).toBe(1);
-        // FE-016 — the readout now prints the maximum too, so the accessible
-        // name names both. The canon word and the one-line rule are unchanged.
+        // The readout prints the maximum too, so the accessible name names
+        // both, after the canon word.
         expect(hp.props.accessibilityLabel).toBe(`VITAE ${vm.player.hp} of ${vm.player.maxHp}`);
         const style = StyleSheet.flatten(hp.props.style) as Record<string, unknown>;
-        // A flex-shrinking Text is what wrapped "♥ 129" onto two lines.
+        // A flex-shrinking Text would wrap "♥ 129" onto two lines.
         expect(style.flexShrink).toBe(0);
         expect(typeof style.lineHeight).toBe('number');
     });
 });
 
-// ── Finding 4: no `opacity` on a layout-animated node ───────────────────────
+// ── 3. No `opacity` on a layout-animated node ───────────────────────
 
 describe('CombatBoard hand fan — the in-flight dim is not on the FadeIn node', () => {
     it('no hand card wrapper carries an opacity style', () => {
@@ -120,7 +117,7 @@ describe('CombatBoard hand fan — the in-flight dim is not on the FadeIn node',
     });
 });
 
-// ── Finding 1: the narrow face reads in full ────────────────────────────────
+// ── 1. The narrow face reads in full ────────────────────────────────
 
 describe('CombatCardFace — the reward-draft mini face (100x147) is readable', () => {
     const { vm } = freshVM();

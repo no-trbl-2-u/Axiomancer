@@ -46,7 +46,7 @@ interface EquipmentDockProps {
     selectedSlot: EquipmentDockSlot['key'] | null;
     onSelectSlot: (key: EquipmentDockSlot['key'] | null) => void;
     /** Long-press pass-through: a filled slot asks the screen to open the
-     *  equipment detail card for the worn item's id (2026-09-13 note #2). */
+     *  equipment detail card for the worn item's id. */
     onShowItemDetail?: (itemId: string) => void;
 }
 
@@ -158,15 +158,14 @@ const useStyles = makeStyles((AXM) => ({
         gap: 12,
     },
     dockCol: {
-        // S3-sheet-C11: the gear list is the information in this dock, so it
-        // takes every point the portrait does not claim. Under the old 50/50
-        // split each row had ~110pt for its text and the grants sub-label broke
-        // mid-word ('GRANTS READ THE ENTRA…').
+        // The gear list is the information in this dock, so it takes every
+        // point the portrait does not claim; an even split leaves each row
+        // too narrow and the grants sub-label breaks mid-word.
         flex: 1,
         alignItems: 'stretch',
     },
     dockPortrait: {
-        // S3-sheet-C11: a fixed box instead of flex:1 — the bust never reclaims
+        // A fixed box instead of flex:1 — the bust never reclaims
         // half the panel from the five named slots. The width itself is set
         // inline from `equipmentDockPortraitBox` (viewport-dependent).
         flexShrink: 0,

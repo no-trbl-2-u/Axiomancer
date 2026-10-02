@@ -1,11 +1,9 @@
 /**
- * `plan/AUDIT.md` [1.8] "Flag-on tumbling tray die speaks the stock
- * Conviction payload, not the assigned gear-scaled value" — `RollingDie`
- * (the flag-on Roll Ritual's tumbling die) forwarded only `die/size/dimmed`
- * to the real `CombatDie`, dropping `assigned`/`specialConviction` on the
- * floor. A screen reader heard "2 Conviction" (the stock default) even on a
- * die whose gear slot pays more, and never heard "assigned to a staged
- * card" for a socketed tray die mid-cast. `CombatDie.a11y.test.tsx` already
+ * `RollingDie` (the flag-on Roll Ritual's tumbling die) must forward
+ * `assigned`/`specialConviction` to the real `CombatDie`, not just
+ * `die/size/dimmed`. Otherwise a screen reader hears "2 Conviction" (the stock
+ * default) even on a die whose gear slot pays more, and never hears "assigned
+ * to a staged card" for a socketed tray die mid-cast. `CombatDie.a11y.test.tsx`
  * proves the label itself is correct once given the right opts; this proves
  * `RollingDie` actually forwards them.
  */

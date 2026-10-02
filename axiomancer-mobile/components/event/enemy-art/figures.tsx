@@ -1,5 +1,5 @@
 /**
- * Bespoke enemy figures (visual-audit 2026-06). Each is a distinct
+ * Bespoke enemy figures. Each is a distinct
  * creature silhouette drawn in the CreatureScene's ground-origin space
  * (feet at y≈0, body rising into negative-y, width within x∈[-64,64]).
  * Theme-aware: silhouettes are `AXM.bg` filled with `AXM.parchment`

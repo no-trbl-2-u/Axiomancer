@@ -1,6 +1,6 @@
 /**
  * Player settings — the persisted, game-independent preferences a NEW
- * PLAYER can change from SETTINGS (owner call 2026-09-23).
+ * PLAYER can change from SETTINGS.
  *
  * ## What lives here, and what does not
  *

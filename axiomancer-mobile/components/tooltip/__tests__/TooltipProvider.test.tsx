@@ -1,5 +1,5 @@
 /**
- * Phase 74 Tick A — TooltipProvider integration pins.
+ * TooltipProvider integration pins.
  *
  * Exercises show → measure → position → render → dismiss
  * through the public `useTooltip()` API. Anchor `measureInWindow`

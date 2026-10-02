@@ -1,6 +1,5 @@
 /**
- * The post-combat card draft overlay — the surface that had ZERO tests before
- * the 2026-08-08 rebuild (audit finding 4c).
+ * The post-combat card draft overlay.
  *
  * What this pins:
  *   · the tiles render REAL card faces (the card's own name off `CombatCardVM`,
@@ -27,8 +26,7 @@ import { RARITY_LABEL, RARITY_PIPS, rarityFor } from '@/state/presenters/card-ra
 import { RARITY_TRACK_SLOTS } from '@/components/combat/encounter/CombatBoard';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
-// The three real library cards the reward draft offers since the card purge
-// (D44): the grey office.
+// The three real library cards the reward draft offers: the grey office.
 const OFFER_IDS = ['grey-strike', 'grey-ward', 'grey-word'];
 
 function renderOverlay(onPick: (cardId: string | null) => void = () => undefined) {
@@ -54,11 +52,10 @@ describe('CombatRewardsOverlay', () => {
         for (const offer of offers) {
             const label = screen.getByTestId(`combat-reward-${offer.cardId}`).props.accessibilityLabel as string;
             expect(label).toContain(offer.name);
-            // D4 (2026-09-21) — the label now names the band in the player's
-            // own words ('Uncommon'), where it used to splice the raw VM field
-            // ('uncommon'). Compared case-insensitively so this pins the FACT
-            // (the label says which band) and not the casing, which is the
-            // renderer's call.
+            // The label names the band in the player's own words ('Uncommon'),
+            // not the raw VM field ('uncommon'). Compared case-insensitively so
+            // this pins the FACT (the label says which band) and not the
+            // casing, which is the renderer's call.
             expect(label.toLowerCase()).toContain(offer.rarity ?? 'common');
         }
     });
@@ -144,11 +141,11 @@ describe('CombatRewardsOverlay', () => {
 });
 
 /**
- * D4 (2026-09-21, owner finding 8) — the draft is the screen where a
- * colour-only rarity signal cost the most: three cards side by side, one kept
- * for the rest of the run, and the only thing telling them apart was a border
- * hue. All three of D4's legs must be on the tile, and the two that survive
- * greyscale must be legible with the colour channel ignored.
+ * Rarity is never colour alone. The draft is the screen where a colour-only
+ * rarity signal would cost the most: three cards side by side, one kept for
+ * the rest of the run. All three rarity legs (named label, pip row, frame
+ * colour) must be on the tile, and the two that survive greyscale must be
+ * legible with the colour channel ignored.
  */
 describe('CombatRewardsOverlay — D4 rarity, never colour alone', () => {
     it('prints the band by NAME under every offer', () => {

@@ -32,7 +32,7 @@ describe('TitleScreen', () => {
     );
 
     expect(getByText(/The cursed lands await/)).toBeTruthy();
-    // D27: a new game starts on the Breakwater, at the windmill (M3a).
+    // A new game starts on the Breakwater, at the windmill.
     expect(getByText(/windmill above the\s+breakwater/)).toBeTruthy();
   });
 
@@ -51,9 +51,8 @@ describe('TitleScreen', () => {
   });
 
   /**
-   * S4-world-C01 — the only button on the title screen used to be captioned
-   * 'tap a glowing node on the map to begin', on a screen with no map, for a
-   * press that opens an omen. The sub-line has to describe what EMBARK does.
+   * The title screen has no map, so the sub-line under its only button has
+   * to describe what EMBARK does, not give map instructions.
    */
   it('sub-labels EMBARK with what EMBARK does, not with map instructions', () => {
     const mockOnContinue = jest.fn();
@@ -69,10 +68,9 @@ describe('TitleScreen', () => {
   });
 
   /**
-   * DECISION-5 (rows C-103, C-105) — `leagues` is a unit of distance, not a
-   * proper noun. The tagline used to shout LEAGUES while the map compass
-   * hint whispered 'leagues', so the pair clashed on screen. Lower case in
-   * prose is the shipped decision; the step-card column header keeps its
+   * `leagues` is a unit of distance, not a proper noun, so the tagline
+   * writes it lower case like the map compass hint. Lower case in prose is
+   * the rule; the step-card column header keeps its
    * all-caps LEAGUES because a header is not prose.
    */
   it('writes leagues as a lowercase unit in the tagline', () => {

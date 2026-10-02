@@ -87,7 +87,7 @@ function ManaSocket({
 /**
  * StatPair — the FORCE / ESCAPE number pair a card prints (zeros dimmed).
  * The two marks carry no printed name, so the pair announces itself by
- * name for screen readers (cluster S7-hazard-C04); sighted players get
+ * name for screen readers; sighted players get
  * the same key from `HazardStatKey`.
  *
  * Inputs: `force` / `escape` numbers, plus glyph `size` and `gap`.

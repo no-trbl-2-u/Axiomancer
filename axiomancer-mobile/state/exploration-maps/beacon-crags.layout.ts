@@ -4,9 +4,9 @@ import { ACT1_SHEET_SIZE } from './breakwater.layout';
 import type { MapLayout, MapSheet } from './types';
 
 /**
- * The Beacon Crags — Act 1, map 3 (map revamp M3c). Drawn on the mountain plate
- * the way the Charcoal Wood is drawn on the forest (D15): every node sits on one
- * of the plate's landmarks (D25), read from `act1-landmarks.json`, on the shared
+ * The Beacon Crags — Act 1, map 3. Drawn on the mountain plate
+ * the way the Charcoal Wood is drawn on the forest: every node sits on one
+ * of the plate's landmarks, read from `act1-landmarks.json`, on the shared
  * Act 1 sheet (`ACT1_SHEET_SIZE`, see `breakwater.layout.ts` for the sizing).
  *
  * The engine graph (`Continents/Northern-Continent/beacon-crags.ts`) comes up
@@ -23,7 +23,7 @@ const sheet: MapSheet = {
     chartTexture: false,
 };
 
-/** Node id → the landmark it sits on (D25). Every mountain landmark appears exactly once. */
+/** Node id → the landmark it sits on. Every mountain landmark appears exactly once. */
 export const BEACON_CRAGS_LANDMARKS: Readonly<Record<string, string>> = {
     'bc-1':  'top-pass',
     'bc-2':  'summit-beacon',
@@ -59,7 +59,7 @@ export const beaconCragsLayout: MapLayout = {
     mapId: 'beacon-crags',
     continent: 'CONTINENT · NORTHERN',
     region: 'The Beacon Crags',
-    // Ordinal only — no node/path count (CRITIQUE pass 19). Act 1, map 3 of 4.
+    // Ordinal only — no node/path count. Act 1, map 3 of 4.
     regionProgress: 'Map iii of iv',
     sheet,
     nodes: [

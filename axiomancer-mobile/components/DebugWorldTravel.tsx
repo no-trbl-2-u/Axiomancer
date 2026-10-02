@@ -15,10 +15,10 @@
  *            (`completeCurrentMap`) to drive late-game map bookkeeping.
  *   THE APORIA — enter act I / II / III of the labyrinth via
  *            `actions.enterLabyrinth`; `<LabyrinthGate>` opens `/labyrinth`.
- *   NEW GAME ON — (map revamp M3a) start a FRESH game on any campaign map
+ *   NEW GAME ON — start a FRESH game on any campaign map
  *            (`STARTABLE_MAPS`) in the active save slot: the same new-game
  *            verb the slot screen uses, placed on the chosen map instead of
- *            the default start (the Breakwater, D27). Unlike TRAVEL, the run
+ *            the default start (the Breakwater). Unlike TRAVEL, the run
  *            is new — no carried items, coin, XP, flags or quests.
  *
  * Firing a node event jumps to the WILDS tab first so overlays and gated

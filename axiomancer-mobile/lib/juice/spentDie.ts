@@ -11,17 +11,12 @@ export interface SpentDieTreatment {
 }
 
 /**
- * Owner jot (`/jot` 2026-07-20, routed to Phase 38 via `/oversight`): a die
- * that's been played should read as spent — grey out / desaturate, keeping its
+ * A die that's been played reads as spent — grey out / desaturate, keeping its
  * face, for the remainder of the round. A STATIC state change, not an animated
- * primitive; reduced-motion is a no-op here (phase 38 brief §Scope).
+ * primitive; reduced-motion is a no-op here.
  *
- * The gate is SPENT alone. Under the Upgradeable-Dice model (THE FLIP,
- * 2026-07-18 — on for every build) a tray die powers a card directly: it is
- * marked `spent` but never `drafted` (there is no draft step). The original
- * `drafted && spent` gate was legacy-shaped — where you drafted a die THEN
- * spent it — so it never fired for the live model, and used dice stayed at full
- * colour. Legacy spent dice are drafted too, so `spent` alone covers both.
+ * The gate is SPENT alone: a tray die powers a card directly, so it is marked
+ * `spent` but never `drafted` (there is no draft step).
  */
 export function spentDieTreatment({ spent, dead }: SpentDieInput): SpentDieTreatment {
     if (dead) return { greyed: true, opacity: 1 };

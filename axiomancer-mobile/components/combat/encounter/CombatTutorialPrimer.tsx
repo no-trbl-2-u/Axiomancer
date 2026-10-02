@@ -4,7 +4,7 @@
  * A short, swipe-through stack of full-screen panels shown ONCE before the
  * player's first hazard-pattern fight (and on demand from the dev menu). It sets
  * the core concepts and tone — pressure over health, the two win conditions, the
- * four-dice stage-then-power loop (spec 33) — then hands off to the live board,
+ * four-dice stage-then-power loop — then hands off to the live board,
  * where the `CombatTutorialCoach` guides turn one by doing.
  *
  * Styled after `HazardIntroOverlay`, extended to paging. The parent owns the
@@ -53,8 +53,7 @@ const PANELS: PrimerPanel[] = [
     {
         eyebrow: 'THE LEFT EDGE',
         title: 'SIGNATURES COST CONVICTION, NOT DICE',
-        // UI fresh-eyes 2026-09-12 §4.2 — the rune column stays compact by
-        // owner design; its names live in long-press, not printed labels. The
+        // The rune column stays compact by design; its names live in long-press, not printed labels. The
         // primer is where a first-time player learns that reflex exists.
         body:
             'Down the left edge sit your SIGNATURES — a few personal moves paid in ◆ CONVICTION ' +

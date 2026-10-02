@@ -2,9 +2,9 @@
  * Hermetic screen test — narrative screens keep a readable measure
  * (cluster S5-talk-C13).
  *
- * At a desktop width the /dialogue and /blacksmith scenes ran the full
- * window: ~165 characters to a line, which loses the eye on every return
- * sweep. Both content columns are now capped and centred; below the cap
+ * At a desktop width an uncapped /dialogue or /blacksmith scene runs the
+ * full window: ~165 characters to a line, which loses the eye on every
+ * return sweep. Both content columns are capped and centred; below the cap
  * the column is full-width, so phone layout is untouched.
  *
  * Contract asserted here: each screen's scroll content column declares a

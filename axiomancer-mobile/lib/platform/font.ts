@@ -1,5 +1,5 @@
 /**
- * The Expo-decouple seam for font loading (phase 47a). Phase 47c owns
- * the actual swap.
+ * The Expo-decouple seam for font loading: the one import site for
+ * `expo-font`.
  */
 export { useFonts } from 'expo-font';

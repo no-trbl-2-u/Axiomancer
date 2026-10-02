@@ -1,13 +1,11 @@
 /**
- * Rest-choice encounter — store action glue (Phase 52d, replacing the
- * retired rest minigame — see Phase 52e; anvil offer dropped Phase 59).
+ * Rest-choice encounter — store action glue.
  *
  * The pure engine lives in `axiomancer-mechanics` (World/RestChoice); these
  * wrappers thread a rest node's one irreversible choice — `rest` (free,
  * flat 25% heal) / `cut` (paid deck removal) — through the mobile `rest`
  * slice and, at claim, apply the settled ledger to the real `GameState`:
- * heal, shillings spent, `cardRemovals` incremented, and the inn scar-mend
- * preserved from the retired rest minigame (Phase 52b).
+ * heal, shillings spent, `cardRemovals` incremented, and the inn scar-mend.
  */
 
 import type { GameState } from '@mechanics';
@@ -34,11 +32,9 @@ import { resolveMinigameSeed } from '../minigame-seeds';
 import { EMPTY_REST_SLICE, type AppStore } from '../store';
 
 /**
- * Flag prefix banking a held dream / watchful find from the retired Night
- * Watch. The rest-choice node never writes new ones (52d — see the
- * scope note above), but historical saves still carry them, and
- * `/memoir`'s REMAINS section reads them back — kept per the 52e brief's
- * KEEP list even after the writer that produced them is gone.
+ * Flag prefix banking a held dream / watchful find. Nothing in the game
+ * writes these; saves may still carry them, and `/memoir`'s REMAINS
+ * section reads them back.
  */
 export const REST_KEEPSAKE_FLAG_PREFIX = 'night-keepsake:';
 
@@ -58,12 +54,12 @@ function setSession(store: AppStore, session: RestChoiceSession | null): void {
 export interface BeginRestOptions {
     seed?: number;
     /**
-     * Authored shelter class from the map-event payload (Phase 52b).
+     * Authored shelter class from the map-event payload.
      * Defaults to `'camp'` — silence is never a paid bed. Only an
      * `'inn'` night mends hazard-scarred max-VITAE.
      */
     shelter?: RestShelter;
-    /** Phase 59 — the authored MapEvent one-liner (`ResolvedEvent.description`). */
+    /** The authored MapEvent one-liner (`ResolvedEvent.description`). */
     description?: string | null;
 }
 
@@ -129,8 +125,8 @@ const NOOP_CLAIM: ClaimRestChoiceResult = Object.freeze({
  *
  * A night at an INN (`shelter === 'inn'`, authored on the map event's
  * `RestPayload`) mends hazard-scarred max-VITAE regardless of which offer
- * was taken — the shelter is the trigger, not the choice (Phase 52b),
- * unrelated to the flat 25% `rest` heal fraction (Phase 59). The engine
+ * was taken — the shelter is the trigger, not the choice — unrelated to
+ * the flat 25% `rest` heal fraction. The engine
  * computes `rest`'s heal against the PRE-mend maxHealth (it never reads
  * `GameState`), so the clamp below re-caps it against the post-mend max
  * rather than under-healing by the mended amount.

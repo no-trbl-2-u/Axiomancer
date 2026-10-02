@@ -12,17 +12,15 @@
  *     (and crucially leave NO paced /event route, so they can never
  *     dead-end at the "NO EVENT" card)
  *   - GATHER grants a sample item straight into inventory — no
- *     session, no route (Phase 76 retired "The Gleaning" minigame)
+ *     session, no route
  *   - VILLAGE / CUTSCENE seed their paced events for the dedicated
  *     /village + /cutscene routes
  *
- * Regression guard (2026-06-14): the previous version of this test
- * asserted that rest/gather/treasure "seed a narrative event"
- * with `selectHasActiveEvent === true`. That pinned the BROKEN
- * behavior — those kinds route through `<EventGate>` to /event, where
- * `composeNarrative` returns the empty VM ("NO EVENT IN PROGRESS").
- * The contract a player cares about is "the minigame opens", so these
- * tests now assert the session selectors + absence of a paced route.
+ * Seeding a narrative event for rest/gather/treasure would route through
+ * `<EventGate>` to /event, where `composeNarrative` returns the empty VM
+ * ("NO EVENT IN PROGRESS"). The contract a player cares about is "the
+ * minigame opens", so these tests assert the session selectors + absence
+ * of a paced route.
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
@@ -181,11 +179,10 @@ describe('DebugTriggerEncounter: paced dedicated-route triggers', () => {
     // VILLAGE + CUTSCENE genuinely DO render through the event slice —
     // <EventGate> (root-mounted) routes them to /village and /cutscene.
     //
-    // Regression guard (2026-06-15): these must NOT jump to the WILDS
-    // tab first. The dedicated route pushes from wherever the dev
-    // triggered it, so jumping made the event's dismiss tap dead-end on
-    // the exploration map instead of returning to the dev menu. EventGate
-    // fires from any tab, so the jump was both unnecessary and wrong.
+    // These must NOT jump to the WILDS tab first. The dedicated route
+    // pushes from wherever the dev triggered it, so jumping would make the
+    // event's dismiss tap dead-end on the exploration map instead of
+    // returning to the dev menu. EventGate fires from any tab.
     it.each([
         ['village', 'village', '/village'],
         ['cutscene', 'cutscene', '/cutscene'],

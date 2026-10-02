@@ -1,11 +1,8 @@
 /**
- * SaveOnExit — PLAYTEST_BUGS_2026-09-18 BUG-03: nothing saved on the way out.
+ * SaveOnExit — the run is saved on the way out.
  *
- * The app had NO save-on-exit of any kind: `flush()` existed on the persistence
- * adapter with zero callers outside its own tests, and there was no `AppState`,
- * `pagehide` or `visibilitychange` handler anywhere in `app/`, `state/`, `lib/`
- * or `components/`. Combined with the adapter's 500ms write debounce, a player
- * could hit a real checkpoint, close the app, and lose it.
+ * Without a save-on-exit, and with the adapter's 500ms write debounce, a
+ * player could hit a real checkpoint, close the app, and lose it.
  *
  * This file covers the NATIVE `AppState` branch — the product's real target
  * (it ships as a mobile app), and the branch the default jest preset reports
@@ -64,8 +61,7 @@ describe('SaveOnExit — native AppState branch', () => {
 
         listener.fire('background');
 
-        // THE REGRESSION: before the fix neither of these ever happened —
-        // there was no exit handler in the app at all.
+        // Both must happen on the way out.
         expect(save).toHaveBeenCalledTimes(1);
         expect(flush).toHaveBeenCalledTimes(1);
     });

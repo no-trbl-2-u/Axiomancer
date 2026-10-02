@@ -1,5 +1,5 @@
 /**
- * Presenter — the SETTINGS screen (owner call 2026-09-23).
+ * Presenter — the SETTINGS screen.
  *
  * Every line the screen prints and every option list it offers lives here,
  * plus the pure view-model over `PlayerSettings`. The screen renders; it
