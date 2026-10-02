@@ -156,7 +156,7 @@ export interface MemoirViewModel {
  * continent tracking below walks backwards in time.
  *
  * - `combat:ended` → "FELLED" for 'victory', "ROUTED BY" for 'defeat',
- *   "FLED" for anything else ('flee' and 'friendship').
+ *   "SPARED" for 'friendship' (the mercy ending), "FLED" for 'flee'.
  *   Enemy name is lost from the event payload after END_COMBAT (the
  *   reducer clears `state.combat`), so the body line carries the
  *   outcome flavour + xp grant rather than naming the foe.
@@ -194,7 +194,9 @@ function buildChronicle(rawEvents: unknown): ReadonlyArray<ChronicleEntry> {
                     ? 'FELLED'
                     : outcome === 'defeat'
                       ? 'ROUTED BY'
-                      : 'FLED';
+                      : outcome === 'friendship'
+                        ? 'SPARED'
+                        : 'FLED';
             const body =
                 outcome === 'victory'
                     ? xp > 0
@@ -202,7 +204,11 @@ function buildChronicle(rawEvents: unknown): ReadonlyArray<ChronicleEntry> {
                         : 'a foe falls.'
                     : outcome === 'defeat'
                       ? 'the path turns dark.'
-                      : 'the path bends away.';
+                      : outcome === 'friendship'
+                        ? xp > 0
+                            ? `mercy, and it was owed. +${xp} xp.`
+                            : 'mercy, and it was owed.'
+                        : 'the path bends away.';
             entries.push(
                 Object.freeze({
                     id: `combat-${ordinal}`,

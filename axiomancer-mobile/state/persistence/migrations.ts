@@ -1,6 +1,7 @@
 import type { GameState } from '@mechanics';
 import {
     migrate,
+    dropUnknownCardIds,
     GAME_STATE_VERSION,
 } from '@mechanics';
 
@@ -154,6 +155,11 @@ export function unwrap(
     const engineVersion = (state as { version?: unknown } | null)?.version;
     if (typeof engineVersion === 'number' && engineVersion < GAME_STATE_VERSION) {
         state = migrate(state, engineVersion);
+    }
+    // Every engine-shaped load, current version included: a save can name
+    // cards the library no longer holds (`dropUnknownCardIds`).
+    if (typeof engineVersion === 'number') {
+        state = dropUnknownCardIds(state as GameState);
     }
     return state as GameState;
 }

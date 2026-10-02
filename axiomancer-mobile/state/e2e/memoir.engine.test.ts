@@ -296,6 +296,19 @@ describe('selectMemoirViewModel: chronicle (Tick D)', () => {
         expect(vm.chronicle[0]?.body).toBe('the path bends away.');
     });
 
+    it('maps a combat:ended friendship (the mercy ending) to SPARED, not FLED', () => {
+        const store = createGameStore(createMemoryAdapter());
+        setRecentEvents(store, [
+            {
+                type: 'combat:ended',
+                payload: { report: { outcome: 'friendship', xpGained: 110, loot: [] } },
+            },
+        ]);
+        const vm = selectMemoirViewModel(store.getState());
+        expect(vm.chronicle[0]?.label).toBe('SPARED');
+        expect(vm.chronicle[0]?.body).toBe('mercy, and it was owed. +110 xp.');
+    });
+
     it('maps a character:levelup event to ROSE TO <level>', () => {
         const store = createGameStore(createMemoryAdapter());
         setRecentEvents(store, [

@@ -207,4 +207,18 @@ describe('migrations.engine', () => {
             expect(envelope.state).toBe(mockState);
         });
     });
+
+    describe('every load drops card ids the library no longer holds (B4 F2)', () => {
+        it('cleans a current-version save that still names purged cards', () => {
+            const fresh = createNewGameState();
+            const state = {
+                ...fresh,
+                player: { ...fresh.player, knownCards: ['grey-strike', 'purged-card'], combatRewardCards: ['gone-card', 'grey-word'] },
+            };
+            const loaded = unwrap(wrap(state));
+            expect(loaded.version).toBe(GAME_STATE_VERSION);
+            expect(loaded.player.knownCards).toEqual(['grey-strike']);
+            expect(loaded.player.combatRewardCards).toEqual(['grey-word']);
+        });
+    });
 });

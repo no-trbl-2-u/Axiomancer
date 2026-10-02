@@ -37,6 +37,8 @@ import { cloneStartingRelics, getRelicById } from '../Items/relic.library';
 import { calculateMaxHealth } from '../Utils';
 import { experienceForLevel } from '../Character/experience';
 import { EXPERIENCE_STEP } from './game-mechanics.constants';
+import { getCardById } from '../Cards/cards.library';
+import { STARTING_CARD_IDS } from '../Combat/combat.rewards';
 import { reslotLegacyLoadout, reslotLegacyEquipment, type LegacySlot } from './legacy-slots';
 import { concreteDefaultRail } from '../Character/dieGear.reducer';
 import { GAME_STATE_VERSION } from './game.reducer';
@@ -1062,6 +1064,39 @@ export function migrate(
     }
 
     return assertGameState(working);
+}
+
+/**
+ * Drop the player card ids the library no longer holds, on every load.
+ *
+ * A save can outlive the cards it names: the grey-card purge left old ids in
+ * `knownCards` and `combatRewardCards`, and a trial set taken out of the
+ * library would do the same (D75). Dealing an unknown id throws in
+ * `executeCard`. This is not a version hop: a save at the current version can
+ * hold them too, so the load paths call it after `migrate`. A save whose
+ * `knownCards` named cards and kept none falls back to the starting cards.
+ * Returns `state` itself when nothing changes.
+ */
+export function dropUnknownCardIds(state: GameState): GameState {
+    const player = state.player;
+    if (!player || typeof player !== 'object') return state;
+    const known = (id: string): boolean => getCardById(id) !== undefined;
+    const knownCards = player.knownCards ?? [];
+    const rewards = player.combatRewardCards;
+    const keptKnown = knownCards.filter(known);
+    const keptRewards = rewards?.filter(known);
+    if (keptKnown.length === knownCards.length && keptRewards?.length === rewards?.length) {
+        return state;
+    }
+    const nextKnown = keptKnown.length === 0 && knownCards.length > 0 ? [...STARTING_CARD_IDS] : keptKnown;
+    return {
+        ...state,
+        player: {
+            ...player,
+            knownCards: nextKnown,
+            ...(keptRewards !== undefined ? { combatRewardCards: keptRewards } : {}),
+        },
+    };
 }
 
 /**
