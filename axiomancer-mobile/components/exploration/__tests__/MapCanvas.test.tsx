@@ -754,15 +754,13 @@ describe('MapCanvas: the recentre control', () => {
         expect(String(btn.props.accessibilityLabel)).toMatch(/recentre/i);
     });
 
-    it('sits above the compass rose rather than beside it', () => {
-        // MapCanvas pins the 52x52 rose at right:10, bottom:10 — a 62px-tall
-        // corner. The control has to start above that or the chart's one
-        // touchable instrument is buried under a decorative one.
-        const { getByTestId } = mounted();
+    it('takes the bottom-right corner, with no compass rose or ink blots left on the chart (T, 2026-10-02)', () => {
+        const { getByTestId, queryByTestId } = mounted();
         const flat = StyleSheet.flatten(getByTestId('map-recenter').props.style);
         expect(flat.position).toBe('absolute');
-        expect(flat.bottom).toBeGreaterThanOrEqual(62);
+        expect(flat.bottom).toBe(10);
         expect(flat.right).toBe(10);
+        expect(queryByTestId('map-compass')).toBeNull();
     });
 
     it('is a real touch target — it is NOT inside the pointerEvents="none" overlay layer', () => {

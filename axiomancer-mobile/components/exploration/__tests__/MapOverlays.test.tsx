@@ -1,9 +1,8 @@
 /**
  * MapOverlays component — hermetic test suite.
- * Tests the compass + NODE GRAPH label + bottom-legend chrome layered
- * over the exploration map. The component is prop-driven on `legend`
- * (left/right strings) and renders fixed compass + node-graph chrome
- * alongside it.
+ * Tests the gesture line + bottom-legend chrome layered over the
+ * exploration map. The component is prop-driven on `legend` (left/right
+ * strings) and `hint`.
  */
 
 import React from 'react';
@@ -21,17 +20,18 @@ describe('MapOverlays', () => {
         expect(root).toBeTruthy();
     });
 
-    it('renders the fixed compass chrome, naming the pan/pinch gesture', () => {
+    it('renders the fixed gesture line, naming the pan/pinch gesture', () => {
         render(<MapOverlays legend={legend} />);
         // The chart pans and zooms behind a much smaller
         // window, so the always-on furniture has to say so — the first-visit
         // hint chip fades and cannot be the only place it is told.
-        expect(screen.getByText('N ↑ · leagues · drag · pinch')).toBeTruthy();
+        expect(screen.getByText('drag · pinch')).toBeTruthy();
     });
 
-    it('renders the NODE GRAPH label', () => {
+    it('carries no compass and no NODE GRAPH label (T, 2026-10-02)', () => {
         render(<MapOverlays legend={legend} />);
-        expect(screen.getByText('NODE GRAPH')).toBeTruthy();
+        expect(screen.queryByText('NODE GRAPH')).toBeNull();
+        expect(screen.queryByText(/N ↑|leagues/)).toBeNull();
     });
 
     it('renders both legend strings from props', () => {
@@ -72,7 +72,7 @@ describe('MapOverlays', () => {
         it('omitting the prop keeps the pre-FE-005 chrome intact', () => {
             render(<MapOverlays legend={legend} />);
             expect(screen.queryByTestId('map-hint')).toBeNull();
-            expect(screen.getByText('NODE GRAPH')).toBeTruthy();
+            expect(screen.getByText('drag · pinch')).toBeTruthy();
         });
 
         it('sits clear of the legend: its bottom offset is greater', () => {
@@ -89,14 +89,14 @@ describe('MapOverlays', () => {
 
     /**
      * A box running chart edge to chart edge lets a long hint swallow
-     * `<MapCanvas>`'s compass rose (a 52x52 SVG pinned at
-     * `right: 10, bottom: 10`, i.e. a 62px footprint in the very band the
+     * `<MapCanvas>`'s recentre button (32x32, pinned at
+     * `right: 10, bottom: 10`, i.e. a 42px footprint in the very band the
      * pill sits in). The box must stop short of that corner — and mirror the
      * inset, or the pill drifts off the chart's centre line.
      */
-    describe('04-exploration-midgame: the hint leaves the compass rose its corner', () => {
-        // MapCanvas: 52px rose pinned 10px off the chart's right edge.
-        const ROSE_FOOTPRINT = 62;
+    describe('04-exploration-midgame: the hint leaves the recentre button its corner', () => {
+        // MapCanvas: 32px recentre button pinned 10px off the chart's right edge.
+        const BUTTON_FOOTPRINT = 42;
         const LONG_HINT = 'Tap a glowing node to travel — drag or pinch the chart';
 
         /** Flattened style of the rendered hint box, for the given copy. */
@@ -108,9 +108,9 @@ describe('MapOverlays', () => {
                 : box.props.style;
         };
 
-        it('stops short of the rose, so the longest copy wraps instead of covering it', () => {
+        it('stops short of the button, so the longest copy wraps instead of covering it', () => {
             const flat = hintBoxStyle(LONG_HINT);
-            expect(flat.right).toBeGreaterThan(ROSE_FOOTPRINT);
+            expect(flat.right).toBeGreaterThan(BUTTON_FOOTPRINT);
         });
 
         it('mirrors that inset on the left, keeping the pill centred on the chart', () => {
@@ -131,8 +131,8 @@ describe('MapOverlays', () => {
      * The strip can be cut off for two independent reasons, and guarding
      * either alone leaves the other live, so both are pinned:
      *
-     *   1. running under `<MapCanvas>`'s compass rose (a 52x52 SVG pinned at
-     *      `right: 10, bottom: 10` — a 62px corner reaching up from the
+     *   1. running under `<MapCanvas>`'s recentre button (32x32, pinned at
+     *      `right: 10, bottom: 10` — a 42px corner reaching up from the
      *      chart's foot) while the legend sits at `bottom: 8`;
      *   2. a row whose `Text`s cannot give way, inside `graphWrap`'s
      *      `overflow: 'hidden'`, so strings that exceed the strip are
@@ -142,16 +142,16 @@ describe('MapOverlays', () => {
      * and shortening the copy would hide it rather than fix it.
      */
     describe('owner finding 9: the legend cannot be clipped', () => {
-        // MapCanvas: 52px rose pinned 10px off the chart's right edge.
-        const ROSE_FOOTPRINT = 62;
+        // MapCanvas: 32px recentre button pinned 10px off the chart's right edge.
+        const BUTTON_FOOTPRINT = 42;
 
         const legendBox = () => {
             render(<MapOverlays legend={legend} />);
             return StyleSheet.flatten(screen.getByTestId('map-legend').props.style);
         };
 
-        it('leaves the compass rose its corner instead of drawing across it', () => {
-            expect(legendBox().right).toBeGreaterThan(ROSE_FOOTPRINT);
+        it('leaves the recentre button its corner instead of drawing across it', () => {
+            expect(legendBox().right).toBeGreaterThan(BUTTON_FOOTPRINT);
         });
 
         it('stacks the keys and the counter, so neither has to share a line', () => {
@@ -196,6 +196,6 @@ describe('MapOverlays', () => {
     it('renders empty legend strings without crashing', () => {
         const { root } = render(<MapOverlays legend={{ left: '', right: '' }} />);
         expect(root).toBeTruthy();
-        expect(screen.getByText('NODE GRAPH')).toBeTruthy();
+        expect(screen.getByText('drag · pinch')).toBeTruthy();
     });
 });

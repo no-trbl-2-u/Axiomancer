@@ -1,6 +1,6 @@
 /**
- * Viewport-fixed chart furniture for `<MapCanvas>` — compass line, sheet
- * label, legend strip, and the first-visit travel hint.
+ * Viewport-fixed chart furniture for `<MapCanvas>` — the gesture line, the
+ * legend strip, and the first-visit travel hint.
  *
  * Renders inside the map's viewport (never inside the pannable canvas), so
  * every position here resolves against the visible chart rather than the
@@ -10,8 +10,8 @@
  * hint is showing and the presenter owns its words.
  * Mounted from: `app/(tabs)/exploration/index.tsx`, as `<MapCanvas overlays=…>`.
  *
- * The hint's box keeps `<MapCanvas>`'s compass-rose corner free (see
- * `COMPASS_ROSE_CLEARANCE`), so a long hint cannot run under the rose.
+ * The hint's box keeps `<MapCanvas>`'s recentre-button corner free (see
+ * `RECENTRE_CLEARANCE`), so a long hint cannot run under the button.
  *
  * The hint is a sibling of the legend, stacked a fixed distance above it, so
  * the two cannot collide at any viewport.
@@ -35,13 +35,12 @@ export function MapOverlays({ legend, hint = null }: MapOverlaysProps) {
     const styles = useStyles();
     return (
         <>
-            {/* Compass. The travel hint is a first-visit chip
+            {/* Gesture line. The travel hint is a first-visit chip
                 that fades; the chart's own furniture is where a player who
                 missed it looks. Naming the gesture here keeps "the sheet
                 moves" on screen for the whole run, beside the legend's node
                 count that provoked the question. */}
-            <Text style={styles.compass}>N ↑ · leagues · drag · pinch</Text>
-            <Text style={styles.nodeGraphLabel}>NODE GRAPH</Text>
+            <Text style={styles.gestures}>drag · pinch</Text>
 
             {/* Travel hint — stacked directly above the legend strip. */}
             {hint != null && hint.length > 0 && (
@@ -64,16 +63,15 @@ export function MapOverlays({ legend, hint = null }: MapOverlaysProps) {
  * Side inset, in px, that the travel hint keeps free at both ends of the
  * chart.
  *
- * `<MapCanvas>` draws the compass rose as a 52x52 viewport-fixed SVG pinned at
- * `right: 10, bottom: 10` — a 62px-wide footprint reaching 62px up from the
- * chart's foot, which is exactly the band the hint pill sits in. 70 leaves the
- * rose that corner plus an 8px gutter. The pill is centred on the chart, so
+ * `<MapCanvas>` pins the 32x32 recentre button at `right: 10, bottom: 10` — a
+ * 42px footprint reaching up from the chart's foot, in the band the hint pill
+ * sits in. 70 leaves the button that corner with room to spare. The pill is centred on the chart, so
  * the room it must leave on the right is mirrored on the left; inset one side
  * only and the pill drifts off-centre.
  *
  * Resolves: 04-exploration-midgame (/exploration, map hint) @mobile.
  */
-const COMPASS_ROSE_CLEARANCE = 70;
+const RECENTRE_CLEARANCE = 70;
 
 /**
  * Bottom offset, in px, that the travel hint sits at so it clears the legend.
@@ -92,12 +90,12 @@ const LEGEND_CLEARANCE = 36;
 /**
  * Theme-reactive stylesheet for the chart furniture.
  *
- * Input: the active palette `AXM`. Output: the compass / node-graph label /
- * hint / legend styles. The `hint` box's side insets resolve
+ * Input: the active palette `AXM`. Output: the gesture line / hint / legend
+ * styles. The `hint` box's side insets resolve
  * 04-exploration-midgame (/exploration, map hint) @mobile.
  */
 const useStyles = makeStyles((AXM) => ({
-    compass: {
+    gestures: {
         position: 'absolute',
         top: 10,
         left: 10,
@@ -107,27 +105,16 @@ const useStyles = makeStyles((AXM) => ({
         letterSpacing: 1,
         zIndex: 2,
     },
-    nodeGraphLabel: {
-        position: 'absolute',
-        top: 10,
-        right: 12,
-        fontFamily: FONTS.gothic,
-        fontSize: 14,
-        color: AXM.parchment,
-        opacity: 0.6,
-        letterSpacing: 2,
-        zIndex: 2,
-    },
     // `bottom` clears the legend: the legend sits at 8 and is TWO 8px mono
     // line boxes (~11px each), so it reaches ~30px up from the
     // chart's foot. `LEGEND_CLEARANCE` is that height plus a gutter. The side
-    // insets clear the compass rose the pill shares that band with, so longer
-    // hint copy wraps inside the chart instead of burying the rose.
+    // insets clear the recentre button the pill shares that band with, so longer
+    // hint copy wraps inside the chart instead of burying the button.
     hint: {
         position: 'absolute',
         bottom: LEGEND_CLEARANCE,
-        left: COMPASS_ROSE_CLEARANCE,
-        right: COMPASS_ROSE_CLEARANCE,
+        left: RECENTRE_CLEARANCE,
+        right: RECENTRE_CLEARANCE,
         alignItems: 'center',
         zIndex: 2,
     },
@@ -147,8 +134,8 @@ const useStyles = makeStyles((AXM) => ({
     // A single row (keys left, counter right) clips for two independent
     // reasons, either of which is enough on its own:
     //
-    //   1. The compass rose. `<MapCanvas>` pins a 52x52 rose at
-    //      `right: 10, bottom: 10`, i.e. a 62px-tall corner reaching up from
+    //   1. The recentre button. `<MapCanvas>` pins a 32x32 button at
+    //      `right: 10, bottom: 10`, i.e. a 42px-tall corner reaching up from
     //      the chart's foot, and the legend at `bottom: 8` sits inside that
     //      band.
     //   2. Neither `Text` can give way. Yoga defaults `flexShrink` to 0, so
@@ -157,7 +144,7 @@ const useStyles = makeStyles((AXM) => ({
     //      wrapped. A font scale or a third legend key is enough to do it.
     //
     // Both are handled structurally rather than by shaving copy. The strip is a
-    // two-line COLUMN that keeps the rose's corner free, and `alignItems:
+    // two-line COLUMN that keeps the button's corner free, and `alignItems:
     // 'stretch'` is the load-bearing half: it gives each line the container's
     // full width as its BOUND, so copy that outgrows the strip wraps to
     // another line inside it instead of running off the sheet. (`flexShrink`
@@ -168,7 +155,7 @@ const useStyles = makeStyles((AXM) => ({
         position: 'absolute',
         bottom: 8,
         left: 12,
-        right: COMPASS_ROSE_CLEARANCE,
+        right: RECENTRE_CLEARANCE,
         flexDirection: 'column',
         alignItems: 'stretch',
         rowGap: 2,

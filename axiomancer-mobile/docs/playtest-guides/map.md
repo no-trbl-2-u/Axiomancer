@@ -17,7 +17,6 @@
 |---|---|
 | `map-canvas-wrapper` / `map-canvas` | The viewport and the pannable canvas (pan gesture id `map-pan`) |
 | `map-backdrop` / `map-vignette` | Art plate and vignette |
-| `map-compass` | Viewport-fixed compass |
 | `map-recenter` | RECENTRE — re-fit the camera on current + available nodes |
 | `map-overlays-fixed` / `map-legend` / `map-legend-keys` / `map-legend-count` | Viewport-fixed legend |
 | `map-hint` | First-visit hint (auto-dismisses after 5 s or first tap) |

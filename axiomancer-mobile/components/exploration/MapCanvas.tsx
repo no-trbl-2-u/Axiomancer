@@ -9,7 +9,6 @@ import Svg, { Path, Circle, G, Defs, RadialGradient, Stop, Rect } from 'react-na
 import { Image } from '@/lib/platform/image';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
-import { Splatter } from '@/components/Splatter';
 import type { ExplorationNode, ExplorationEdge } from '@/state/presenters/exploration.engine';
 import type { MapSheet } from '@/state/exploration-maps';
 import { LEGACY_SHEET_SIZE } from '@/state/exploration-maps/sheet';
@@ -25,8 +24,8 @@ interface MapCanvasProps {
      */
     sheet?: MapSheet | null;
     /**
-     * Viewport-fixed chart furniture (legend, compass copy, sheet label) —
-     * rendered as a sibling of the vignette/compass SVGs, NOT inside the
+     * Viewport-fixed chart furniture (legend, gesture line, travel hint) —
+     * rendered as a sibling of the vignette SVG, NOT inside the
      * pannable canvas, so absolute positions resolve against the visible
      * viewport instead of the pannable canvas.
      */
@@ -199,8 +198,7 @@ export function edgeStroke(e: ExplorationEdge, AXM: EdgePalette): EdgeStroke {
 
 // The map reads as a chart, not a void: a faint diagonal hatch over the
 // whole sheet (drawn as strokes so no Pattern support is needed),
-// cartographic contour "hills" in the dead zones, a viewport-fixed compass
-// rose, and an edge vignette. All tokenized; the hatch and hills are skipped
+// cartographic contour "hills" in the dead zones, and an edge vignette. All tokenized; the hatch and hills are skipped
 // when the sheet sets `chartTexture: false`.
 const HATCH_STEP = 18;
 
@@ -388,8 +386,6 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
     return (
         <View style={styles.graphWrap} onLayout={onWrapLayout} testID="map-canvas-wrapper">
             <View style={[StyleSheet.absoluteFillObject, styles.graphBackground]} />
-            <Splatter color={AXM.blood} size={170} seed={3} style={styles.bloodSplatter} />
-            <Splatter color={AXM.sulfur} size={130} seed={9} style={styles.sulfurSplatter} />
 
             <GestureDetector gesture={composed}>
                 <Animated.View
@@ -513,23 +509,6 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
                 </Defs>
                 <Rect x="0" y="0" width="100%" height="100%" fill="url(#axmMapVignette)" />
             </Svg>
-            <Svg
-                width={52}
-                height={52}
-                viewBox="0 0 52 52"
-                style={styles.compassRose}
-                pointerEvents="none"
-                accessibilityRole="image"
-                accessibilityLabel="Compass rose"
-                testID="map-compass"
-            >
-                <Circle cx={26} cy={26} r={21} stroke={AXM.bone} strokeWidth={1} fill="none" opacity={0.45} />
-                <Circle cx={26} cy={26} r={16} stroke={AXM.bone} strokeWidth={0.6} fill="none" opacity={0.3} strokeDasharray="2 4" />
-                <Path d="M6 26 H16 M36 26 H46 M26 36 V46" stroke={AXM.bone} strokeWidth={1} opacity={0.4} />
-                <Path d="M26 6 L29 26 L26 32 L23 26 Z" fill={AXM.blood} opacity={0.75} />
-                <Path d="M26 46 L29 26 L23 26 Z" fill={AXM.bone} opacity={0.5} />
-                <Circle cx={26} cy={26} r={2} fill={AXM.parchment} opacity={0.7} />
-            </Svg>
             {/* Viewport-fixed overlays (legend etc.) — pointerEvents none so
                 they never swallow a pan that starts over them. */}
             {overlays != null && (
@@ -539,9 +518,7 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
             )}
             {/* RECENTRE — the one piece of chart furniture that takes a touch.
                 Rendered AFTER the pointerEvents="none" overlay layer so the
-                legend can never sit on top of it, and stacked directly above
-                the compass rose so the right margin reads as one column of
-                instruments rather than two scattered chips. */}
+                legend can never sit on top of it. */}
             <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Recentre the chart on your position"
@@ -579,31 +556,11 @@ const useStyles = makeStyles((AXM) => ({
     graphBackground: {
         backgroundColor: AXM.deepBg,
     },
-    bloodSplatter: {
-        position: 'absolute',
-        top: -10,
-        right: -10,
-        opacity: 0.35,
-    },
-    sulfurSplatter: {
-        position: 'absolute',
-        bottom: 30,
-        left: -20,
-        opacity: 0.18,
-    },
-    compassRose: {
-        position: 'absolute',
-        right: 10,
-        bottom: 10,
-        opacity: 0.85,
-    },
-    // Stacked directly above the 52x52 rose pinned at right:10, bottom:10,
-    // with an 8px gutter — 10 + 52 + 8 = 70. Same right edge, so the two read
-    // as one column of instruments.
+    // The chart's one instrument, pinned in its bottom-right corner.
     recenter: {
         position: 'absolute',
         right: 10,
-        bottom: 70,
+        bottom: 10,
         width: 32,
         height: 32,
         alignItems: 'center',

@@ -22,8 +22,7 @@ interface TitleScreenProps {
  *
  * Resolves DECISION-5 (rows C-103, C-105): `leagues` is a unit of
  * distance, not a proper noun, so the tagline says "the leagues beyond"
- * in lower case — matching the map compass hint, which already reads
- * "N ↑ · leagues · drag · pinch". The step-card column
+ * in lower case. The step-card column
  * header keeps its all-caps LEAGUES; that is a header, not prose.
  */
 export function TitleScreen({ onContinue }: TitleScreenProps) {
