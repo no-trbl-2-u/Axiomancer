@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-02 at commit 630c40fa
-> Pass count: 66
+> Last pass: 2026-10-02 at commit 0a5a3199
+> Pass count: 67
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -313,6 +313,22 @@
 > headers, pass 63's corner medallions over the end cards, pass 62's phase
 > ledger column, pass 61's inn-rest wording, and pass 58's A Plain Word
 > "+24" beside "+60%". Zero fresh findings this pass.
+
+> **[critique pass 67, 2026-10-02, commit 0a5a3199] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route still bounces to the title with no save). 13
+> commits after pass 66: R10c, R10c2 and R10c3 (docs and code comments
+> only) and a consolidate pass. None of it touches a screen, and no
+> screen changed: the combat board, rest, hazard and late-game hub read
+> as in pass 66 at both viewports. Reconfirmed and not re-filed: pass
+> 65's Minor Healing Potion "RESTORES 10 VITAE" against 160-170 pools,
+> pass 64's identical "PHASE n · ATTACKS" headers, pass 63's corner
+> medallions over the end cards, pass 62's phase ledger column, pass
+> 61's inn-rest wording, pass 58's A Plain Word "+24" beside "+60%", and
+> the desktop "VUL"/"+6"/"%" and "GUAR"/"12" chip wraps (the
+> `plan/AUDIT.md` row "Post-purge: a staged A Plain Word wraps +25%
+> mid-token"). Zero fresh findings this pass.
 
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `archive-pre-revamp:plan/archive/CRITIQUE_2026.md`.
 
