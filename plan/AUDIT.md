@@ -52,6 +52,52 @@
 
 ## Pending
 
+### [perf] Map SVG fix is unproven on a device (perf audit, 2026-10-03)
+- category: bug
+- impact: 8
+- ease: 6
+- detail: T reported the `v0.1.0-checkpoint` preview APK as laggy everywhere.
+  The audit found the Act 1 map drawing its roads in one canvas-wide `<Svg>`
+  (2400dp square), which `react-native-svg` on Android rasterises into one
+  ARGB bitmap of the view's size: 92MB at density 2, 159MB at 2.625, 207MB at
+  3, mounted under every screen. Roads and halos now draw in per-road strips
+  (12 to 17MB per map at density 3; `MapCanvas.raster.test.tsx` holds the
+  budget). The JS thread was ruled out on the web build (no long task at
+  idle or on node select, one 60ms task on travel). No Android device or
+  emulator was available, so the cause is proven from the library source and
+  arithmetic, not from a frame trace.
+- next: build a preview APK from the fix and play it on T's phone. If it
+  still lags, capture `adb shell dumpsys gfxinfo com.axiomancer.mobile` and
+  `dumpsys meminfo` on the map screen before looking elsewhere.
+
+### [perf] The fallback map sheet still mounts a canvas-wide SVG (perf audit, 2026-10-03)
+- category: debt
+- impact: 3
+- ease: 5
+- detail: `MapCanvas` keeps one whole-canvas `<Svg>` for the chart texture
+  (hatch and contour hills) when a sheet sets `chartTexture`. Only
+  `FALLBACK_SHEET` (936x1040dp, about 27MB at density 2.625) does; no Act 1
+  map uses it. The same defect class as the row above at a seventh of the
+  size.
+- next: before any map ships with `chartTexture: true`, draw the texture as
+  a tiled image or drop it; extend the raster test to the fallback sheet.
+
+### [tooling] `npm ci` in a fresh worktree leaves mobile typecheck red (perf audit, 2026-10-03)
+- category: debt
+- impact: 4
+- ease: 6
+- detail: the lockfile marks the hoisted `node_modules/@types/react`
+  (19.2.17) `optional` and `peer`, and npm 11.16 skips it on a clean install.
+  `react-native` is hoisted to the root and then resolves `react` with no
+  types, so `tsc --noEmit` reports 4138 errors (`'View' cannot be used as a
+  JSX component`) on untouched files. `AGENTS.md` says to `npm install` in a
+  worktree first; that does not fix it. Copying the package from the main
+  checkout does.
+- next: make `@types/react` resolvable from the root in a clean install (a
+  root devDependency or an override pinned to mobile's 19.1 line), then
+  confirm `npm ci && npm run verify -w axiomancer-mobile` is green in a
+  fresh worktree.
+
 ### [bug] Memoir chronicle reads the event buffer in the wrong order (R10c3, 2026-10-02)
 - category: bug
 - impact: 5
