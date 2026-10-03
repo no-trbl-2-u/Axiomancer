@@ -1,7 +1,7 @@
 /**
  * Dev-only aftermath-panel showcase. Renders the
  * combat aftermath panels that have no organic capture path — DEFEAT
- * (the player can't lose to the tutorial rat deterministically) and
+ * (no seeded fight loses deterministically) and
  * PARLEY (mercy is a branch combat-drive doesn't take) — with fixed
  * sample view-models so the panel internals can be eyeballed without
  * driving combat to those outcomes. Victory is already captured via the

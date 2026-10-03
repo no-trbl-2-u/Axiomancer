@@ -37,11 +37,6 @@ import type {
 import { resolveMinigameSeed } from '../minigame-seeds';
 import { EMPTY_BLACKSMITH_SLICE, type AppStore } from '../store';
 
-/** Flag set once the guided first visit is completed or skipped. */
-// Defined in `state/tutorials.ts`; re-exported for importers of this module.
-export { BLACKSMITH_TUTORIAL_FLAG } from '../tutorials';
-import { BLACKSMITH_TUTORIAL_FLAG, isTutorialDone } from '../tutorials';
-
 /**
  * Dev/test seed override (`globalThis.__AXM_BLACKSMITH_SEED__`),
  * mirroring the hazard/cache/rest hooks. The upgrade transitions are
@@ -79,8 +74,6 @@ export interface BeginBlacksmithOptions {
      */
     budget?: number;
     seed?: number;
-    /** Start the guided first visit (sets the `tutorial` flag on the slice). */
-    tutorial?: boolean;
 }
 
 /**
@@ -103,7 +96,6 @@ export function beginBlacksmithAction(store: AppStore, options: BeginBlacksmithO
     store.setState({
         blacksmith: {
             session: createBlacksmithSession(seed, rail, budget, variants),
-            tutorial: options.tutorial === true,
         },
     });
     return true;
@@ -210,21 +202,4 @@ export function claimBlacksmithOutcomeAction(store: AppStore): ClaimBlacksmithRe
 export function abandonBlacksmithAction(store: AppStore): void {
     const prev = store.getState().blacksmith ?? EMPTY_BLACKSMITH_SLICE;
     store.setState({ blacksmith: { ...prev, session: null } });
-}
-
-/**
- * Marks the guided first visit as done (completed or skipped): sets the
- * persistent flag so the map trigger never re-runs it, and persists.
- */
-export function completeBlacksmithTutorialAction(store: AppStore, skipped: boolean): void {
-    const state = store.getState() as unknown as GameState;
-    if (!isTutorialDone(state.flags, BLACKSMITH_TUTORIAL_FLAG, true)) {
-        store.setState({ flags: [...(state.flags ?? []), BLACKSMITH_TUTORIAL_FLAG] } as never);
-        try {
-            store.getState().save();
-        } catch {
-            // Persistence failures must not strand the coach.
-        }
-    }
-    void skipped;
 }

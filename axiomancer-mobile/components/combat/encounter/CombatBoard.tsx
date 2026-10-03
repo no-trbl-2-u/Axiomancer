@@ -755,7 +755,7 @@ export interface CombatBoardProps {
     fx?: CombatFx;
     /** Reports the enemy HUD's measured bottom edge (screen-top-relative) on
      *  every layout pass, so panel-level siblings anchored under the same HUD
-     *  (the LOG toggle, the tutorial coach) can track its real height instead
+     *  (the LOG toggle) can track its real height instead
      *  of the static `COMBAT_HUD_HEIGHT` estimate. */
     onHudLayout?: (height: number) => void;
     /** The live map region (`vm.region` from the exploration screen), keying

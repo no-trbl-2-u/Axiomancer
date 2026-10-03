@@ -37,13 +37,13 @@ export function DebugRestButton() {
                 <Text style={styles.sub}>start the rest-choice node</Text>
             </View>
             <Pressable
-                style={[styles.button, styles.tutorialButton]}
+                style={[styles.button, styles.innButton]}
                 onPress={onInn}
                 accessibilityRole="button"
                 accessibilityLabel="Start a debug rest node at an inn"
                 testID="debug-rest-inn-button"
             >
-                <Text style={[styles.buttonLabel, styles.tutorialLabel]}>INN</Text>
+                <Text style={[styles.buttonLabel, styles.innLabel]}>INN</Text>
             </Pressable>
             <Pressable
                 style={styles.button}
@@ -79,6 +79,6 @@ const useStyles = makeStyles((AXM) => ({
         backgroundColor: 'rgba(134,168,33,0.08)',
     },
     buttonLabel: { fontFamily: FONTS.gothic, fontSize: 14, letterSpacing: 2, color: HUE.hzAcid },
-    tutorialButton: { borderColor: AXM.sulfur, backgroundColor: AXM.sulfurSubtle, marginRight: 6 },
-    tutorialLabel: { color: AXM.sulfur },
+    innButton: { borderColor: AXM.sulfur, backgroundColor: AXM.sulfurSubtle, marginRight: 6 },
+    innLabel: { color: AXM.sulfur },
 }));

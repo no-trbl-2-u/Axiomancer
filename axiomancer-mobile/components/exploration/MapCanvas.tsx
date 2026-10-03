@@ -24,7 +24,7 @@ interface MapCanvasProps {
      */
     sheet?: MapSheet | null;
     /**
-     * Viewport-fixed chart furniture (legend, gesture line, travel hint) —
+     * Viewport-fixed chart furniture (legend, gesture line) —
      * rendered as a sibling of the vignette SVG, NOT inside the
      * pannable canvas, so absolute positions resolve against the visible
      * viewport instead of the pannable canvas.

@@ -6,8 +6,7 @@
  *   - combat prelude → victory through the engine `endCombat` (XP paid,
  *     encounter cleared, slice cleared), never fatal.
  *   - live fight (already engaged) → same settlement.
- *   - hazard → median `complete` crossing claimed, session cleared,
- *     tutorial flag set when the guided crossing was skipped.
+ *   - hazard → median `complete` crossing claimed, session cleared.
  *   - rest → the free REST offer claimed (heal applied), session cleared.
  *   - loot-cache → the ITEM offer claimed, session cleared.
  *   - blacksmith → left unchanged, session cleared, wallet untouched.
@@ -108,7 +107,7 @@ describe('skipCurrentEvent — combat', () => {
 describe('skipCurrentEvent — minigames', () => {
     it('hazard: claims a median complete crossing and clears the session', () => {
         const { store, actions } = freshHandle();
-        expect(actions.beginHazard({ tutorial: true })).toBe(true);
+        expect(actions.beginHazard({ seed: 887, hazardId: 'cracked-cliff' })).toBe(true);
         const hazardId = store.getState().hazard.session!.hazardId;
 
         const result = skipCurrentEvent(store, actions, DEV);
@@ -117,7 +116,6 @@ describe('skipCurrentEvent — minigames', () => {
         expect(result.outcome).toMatch(/^(complete|perfect):\d+\/\d+$/);
         expect(result.detail).toMatchObject({ hazardId, died: false });
         expect(store.getState().hazard.session).toBeNull();
-        expect(store.getState().flags).toContain('hazard-tutorial-done');
     });
 
     it('rest: takes the free REST offer and heals', () => {
@@ -153,7 +151,7 @@ describe('skipCurrentEvent — minigames', () => {
     it('blacksmith: leaves the anvil unchanged and clears the session', () => {
         const { store, actions } = freshHandle();
         const coinBefore = player(store).currency;
-        expect(actions.beginBlacksmith({ tutorial: true })).toBe(true);
+        expect(actions.beginBlacksmith()).toBe(true);
         // The claim writes the session rail back (the live screen does the
         // same); untouched, it is exactly the rail the visit was seeded with.
         const railSeeded = store.getState().blacksmith.session!.rail;

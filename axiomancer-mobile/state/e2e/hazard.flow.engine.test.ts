@@ -38,12 +38,12 @@ function session(store: AppStore): HazardSessionState {
 function rigHand(store: AppStore, cards: { uid: string; cardId: string }[]): void {
     const s = session(store);
     const hand: HazardHandEntry[] = cards.map((c) => ({ ...c, dieId: null }));
-    store.setState({ hazard: { session: { ...s, hand, play: [] }, tutorial: false } });
+    store.setState({ hazard: { session: { ...s, hand, play: [] } } });
 }
 
 function rigDice(store: AppStore, dice: HazardSessionState['dice']): void {
     const s = session(store);
-    store.setState({ hazard: { session: { ...s, dice }, tutorial: false } });
+    store.setState({ hazard: { session: { ...s, dice } } });
 }
 
 /** Plays one rigged round: stage everything, resolve, continue. */

@@ -175,7 +175,6 @@ async function caseInlineArrive(browser, baseUrl) {
             seed: 'fixture-e2e-inline',
             preset: 'apprentice',
             world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-2' },
-            flags: ['combat-tutorial-done'],
             arrive: true,
             stagedEvent: {
                 kind: 'narration',

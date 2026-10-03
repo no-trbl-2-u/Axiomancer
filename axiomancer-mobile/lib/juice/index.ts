@@ -6,8 +6,8 @@
  * treatment, and a haptics wrapper. Every animated primitive is reduced-motion gated and honors the `__AXM_JUICE_INSTANT__`
  * escape hatch (`instant.ts`) so seeded e2e never waits on animation.
  *
- * New work uses this module; other Reanimated call sites (tutorial coaches,
- * toasts, boards, the dice roll ritual) still run their own animations.
+ * New work uses this module; other Reanimated call sites (toasts, boards,
+ * the dice roll ritual) still run their own animations.
  */
 export * from './juice.timing';
 export * from './instant';

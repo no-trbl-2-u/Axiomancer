@@ -6,8 +6,7 @@
  * which lives in the theme runtime and is rendered through the same
  * `<ThemeSwitcher>` component.
  *
- * Two rows exist only inside a run (the store has an active slot):
- * RESET TUTORIALS (strips the coach flags from THIS chronicle) and
+ * One row exists only inside a run (the store has an active slot):
  * SAVE & RETURN TO TITLE (writes the chronicle, then lands on the menu).
  *
  * Copy and option sets: `state/presenters/settings.engine.ts`.
@@ -24,7 +23,6 @@ import { ScreenBg } from '@/components/ScreenBg';
 import { SectionLabel } from '@/components/SectionLabel';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { useRouter } from '@/lib/platform/router';
-import { useGameStore } from '@/state/GameStoreProvider';
 import { useSaveSlots, useSaveSlotSummaries } from '@/state/SaveSlotsProvider';
 import {
     REDUCED_MOTION_OPTIONS,
@@ -36,7 +34,6 @@ import {
     volumeStep,
 } from '@/state/presenters/settings.engine';
 import { useSettings, useSettingsStore } from '@/state/settings';
-import { resetTutorialsAction } from '@/state/tutorials';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
@@ -44,7 +41,6 @@ export default function SettingsScreen() {
     const AXM = usePalette();
     const styles = useStyles();
     const router = useRouter();
-    const store = useGameStore();
     const settings = useSettings();
     const settingsStore = useSettingsStore();
     const { slots, returnToTitle } = useSaveSlots();
@@ -53,13 +49,7 @@ export default function SettingsScreen() {
     const inRun = slots.getActiveSlot() !== null;
     const vm = selectSettingsViewModel(settings, inRun);
 
-    const [tutorialNote, setTutorialNote] = useState<string | null>(null);
     const [confirmReset, setConfirmReset] = useState(false);
-
-    const onResetTutorials = useCallback(() => {
-        const removed = resetTutorialsAction(store);
-        setTutorialNote(removed.length > 0 ? SETTINGS_COPY.resetTutorialsDone : SETTINGS_COPY.resetTutorialsNothing);
-    }, [store]);
 
     const onReturnToTitle = useCallback(() => {
         void returnToTitle().then(() => router.replace('/?menu=1'));
@@ -113,24 +103,6 @@ export default function SettingsScreen() {
                     onChange={(haptics) => settingsStore.set({ haptics })}
                     testID="settings-haptics"
                 />
-
-                <SectionLabel size={10} color={AXM.sulfur} style={styles.sectionGap}>{SETTINGS_COPY.sections.guidance}</SectionLabel>
-                <OptionRow
-                    label={SETTINGS_COPY.tutorialHints}
-                    hint={SETTINGS_COPY.tutorialHintsHint}
-                    options={TOGGLE_OPTIONS}
-                    value={vm.tutorialHints}
-                    onChange={(tutorialHints) => settingsStore.set({ tutorialHints })}
-                    testID="settings-tutorial-hints"
-                />
-                {vm.inRun ? (
-                    <MenuButton
-                        label={SETTINGS_COPY.resetTutorials}
-                        hint={tutorialNote ?? SETTINGS_COPY.resetTutorialsHint}
-                        onPress={onResetTutorials}
-                        testID="settings-reset-tutorials"
-                    />
-                ) : null}
 
                 <SectionLabel size={10} color={AXM.sulfur} style={styles.sectionGap}>{SETTINGS_COPY.sections.sound}</SectionLabel>
                 <StepperRow

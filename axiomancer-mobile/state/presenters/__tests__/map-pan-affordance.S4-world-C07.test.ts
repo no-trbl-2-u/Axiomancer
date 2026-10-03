@@ -2,15 +2,11 @@
  * S4-world-C07 — the chart is bigger than the window, and has to say so.
  *
  * The exploration map spreads its nodes across a 936x1040 canvas behind a
- * phone-sized viewport that pans and pinches. A first-time player read
- * "25 nodes" in the legend, counted about eight on screen, saw them cut off
- * on every side, and had nothing anywhere telling them the sheet moved — the
- * only copy over the chart said "tap a glowing node".
- *
- * The nudge now names the gesture as well as the tap. (Its always-on twin,
- * the compass line, is pinned in
- * `components/exploration/__tests__/MapOverlays.test.tsx` — the hint chip
- * fades after five seconds and must not be the only place it is told.)
+ * phone-sized viewport that pans and pinches. A player reads "25 nodes" in
+ * the legend and counts about eight on screen, so the chart has to name the
+ * gesture. The always-on gesture line is pinned in
+ * `components/exploration/__tests__/MapOverlays.test.tsx`; this file pins
+ * the premise that makes it necessary.
  *
  * Hermetic = self-contained + deterministic + isolated. See docs/testing.md.
  */
@@ -27,20 +23,10 @@ function vm() {
     );
 }
 
-describe('S4-world-C07: the map hint names the pan gesture', () => {
-    it('tells the player the chart can be dragged or pinched', () => {
-        const hint = vm().drawerCopy.mapHint;
-        expect(hint).toMatch(/drag/i);
-        expect(hint).toMatch(/pinch/i);
-    });
-
-    it('still tells the player what a tap does', () => {
-        expect(vm().drawerCopy.mapHint).toMatch(/tap/i);
-    });
-
+describe('S4-world-C07: the map must name the pan gesture', () => {
     it('draws far more nodes than a phone viewport can show, which is why it must', () => {
         // The premise of the finding, pinned so a future layout that genuinely
-        // fits on screen retires this copy rather than leaving it lying.
+        // fits on screen retires the gesture line rather than leaving it lying.
         expect(vm().nodes.length).toBeGreaterThan(12);
     });
 });

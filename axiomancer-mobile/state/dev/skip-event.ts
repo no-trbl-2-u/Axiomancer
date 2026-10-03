@@ -85,7 +85,6 @@ import {
     abandonHazardAction,
     acknowledgeHazardOutcomeAction,
     claimHazardRewardsAction,
-    completeHazardTutorialAction,
     continueHazardAfterResolveAction,
 } from '@/state/hazard/store-actions';
 import { confirmItemRewardAction } from '@/state/item-reward/store-actions';
@@ -457,7 +456,6 @@ function skipHazard(store: AppStore, nodeId: string | null): SkipEventResult {
         abandonHazardAction(store);
         return { kind: 'hazard', nodeId, outcome: 'abandoned', detail: { hazardId: session.hazardId } };
     }
-    if (slice.tutorial) completeHazardTutorialAction(store, true);
     const cardId = outcome.canSkip ? null : (outcome.offerCards[0]?.id ?? null);
     const claim = claimHazardRewardsAction(store, cardId);
     if (!claim.applied) {

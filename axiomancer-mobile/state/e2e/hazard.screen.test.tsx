@@ -45,38 +45,26 @@ function rigHand(store: AppStore, cards: { uid: string; cardId: string }[]): voi
     const s = store.getState().hazard.session;
     if (!s) throw new Error('no session');
     const hand: HazardHandEntry[] = cards.map((c) => ({ ...c, dieId: null }));
-    store.setState({ hazard: { session: { ...s, hand, play: [] }, tutorial: false } });
+    store.setState({ hazard: { session: { ...s, hand, play: [] } } });
 }
 
-describe('hazard screen — danger intro', () => {
-    it('shows the grim danger modal first; FACE IT hands off to route select', () => {
+describe('hazard screen — opening', () => {
+    it('opens straight on route select', () => {
         const { actions } = mountHazard();
         act(() => {
             actions.beginHazard({ seed: 7, hazardId: 'cracked-cliff' });
         });
-        // The intro modal owns the screen — route select is held back.
-        expect(screen.getByTestId('hazard-intro-overlay')).toBeTruthy();
-        expect(screen.queryByTestId('hazard-route-select')).toBeNull();
-        expect(screen.getAllByText('CRACKED CLIFF PATH').length).toBeGreaterThan(0);
-        // grim copy ends on the player's only out
-        expect(screen.getByText(/Unless…/)).toBeTruthy();
-        fireEvent.press(screen.getByTestId('hazard-intro-continue'));
-        expect(screen.queryByTestId('hazard-intro-overlay')).toBeNull();
         expect(screen.getByTestId('hazard-route-select')).toBeTruthy();
+        expect(screen.getAllByText('CRACKED CLIFF PATH').length).toBeGreaterThan(0);
     });
 });
 
 describe('hazard screen — route select', () => {
-    function dismissIntro() {
-        fireEvent.press(screen.getByTestId('hazard-intro-continue'));
-    }
-
     it('renders the reveal: title, scenario, opening hand, both stacked route panels with thresholds', () => {
         const { actions } = mountHazard();
         act(() => {
             actions.beginHazard({ seed: 7, hazardId: 'cracked-cliff' });
         });
-        dismissIntro();
         expect(screen.getByTestId('hazard-route-select')).toBeTruthy();
         expect(screen.getAllByText('CRACKED CLIFF PATH').length).toBeGreaterThan(0);
         expect(screen.getByTestId('hazard-opening-hand')).toBeTruthy();
@@ -93,7 +81,6 @@ describe('hazard screen — route select', () => {
         act(() => {
             actions.beginHazard({ seed: 7, hazardId: 'cracked-cliff' });
         });
-        dismissIntro();
         fireEvent.press(screen.getByTestId('hazard-route-risk'));
         expect(store.getState().hazard.session?.route).toBe('risk');
         expect(store.getState().hazard.session?.phase).toBe('rolling');
@@ -184,7 +171,6 @@ describe('hazard screen — round play board', () => {
                             { id: 'd2', kind: 'hex', state: 'available' },
                         ],
                     },
-                    tutorial: false,
                 },
             });
         });

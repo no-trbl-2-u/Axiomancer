@@ -11,7 +11,6 @@ import SettingsScreen from '@/app/settings/index';
 import { createMemorySlotStore } from '@/state/persistence/memorySlotStore';
 import { DEFAULT_SETTINGS, createSettingsStore } from '@/state/settings';
 import { createAppStore } from '@/state/store';
-import { COMBAT_TUTORIAL_FLAG } from '@/state/tutorials';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
 const mockReplace = jest.fn();
@@ -41,13 +40,12 @@ describe('/settings', () => {
         mount(false);
         expect(screen.getByTestId('theme-switcher')).toBeTruthy();
         expect(screen.getByTestId('theme-ashen-gold')).toBeTruthy();
-        for (const id of ['settings-text-scale', 'settings-reduced-motion', 'settings-haptics', 'settings-tutorial-hints', 'settings-music', 'settings-sfx', 'settings-story-mode', 'settings-reset']) {
+        for (const id of ['settings-text-scale', 'settings-reduced-motion', 'settings-haptics', 'settings-music', 'settings-sfx', 'settings-story-mode', 'settings-reset']) {
             expect(screen.getByTestId(id)).toBeTruthy();
         }
         // Story mode is listed but not yet a choice.
         expect(screen.getByTestId('settings-story-mode').props.accessibilityState?.disabled).toBe(true);
-        // Run-only rows are absent outside a run.
-        expect(screen.queryByTestId('settings-reset-tutorials')).toBeNull();
+        // The run-only row is absent outside a run.
         expect(screen.queryByTestId('settings-return-to-title')).toBeNull();
     });
 
@@ -56,8 +54,7 @@ describe('/settings', () => {
         act(() => { fireEvent.press(screen.getByTestId('settings-text-scale-1.3')); });
         act(() => { fireEvent.press(screen.getByTestId('settings-reduced-motion-on')); });
         act(() => { fireEvent.press(screen.getByTestId('settings-haptics-false')); });
-        act(() => { fireEvent.press(screen.getByTestId('settings-tutorial-hints-false')); });
-        expect(settings.get()).toEqual({ ...DEFAULT_SETTINGS, textScale: 1.3, reducedMotion: 'on', haptics: false, tutorialHints: false });
+        expect(settings.get()).toEqual({ ...DEFAULT_SETTINGS, textScale: 1.3, reducedMotion: 'on', haptics: false });
     });
 
     it('volume steppers move by 10 and clamp', () => {
@@ -77,12 +74,9 @@ describe('/settings', () => {
         expect(settings.get()).toEqual(DEFAULT_SETTINGS);
     });
 
-    it('inside a run: RESET TUTORIALS strips the coach flags; RETURN TO TITLE saves and lands on the menu', async () => {
+    it('inside a run: RETURN TO TITLE saves and lands on the menu', async () => {
         const { store, slots } = mount(true);
-        store.setState({ flags: [COMBAT_TUTORIAL_FLAG, 'keepsake'] } as never);
-
-        act(() => { fireEvent.press(screen.getByTestId('settings-reset-tutorials')); });
-        expect(store.getState().flags).toEqual(['keepsake']);
+        store.setState({ flags: ['keepsake'] } as never);
 
         await act(async () => { fireEvent.press(screen.getByTestId('settings-return-to-title')); });
         expect(slots.readSlot(1)?.flags).toEqual(['keepsake']);

@@ -197,16 +197,6 @@ async function runRoundTrip(page, baseUrl) {
     }
     log('modal armed; tab bar correctly hidden')
 
-    // The first-fight tutorial primer animates in OVER the reveal and swallows
-    // pointer events (a fresh store has never seen a fight). Dismiss it before
-    // driving the reveal's own buttons — same treatment as combat-encounter-e2e.
-    for (let k = 0; k < 5; k++) {
-        const skip = page.getByTestId('combat-primer-skip')
-        if (!(await skip.count())) break
-        await skip.click({ timeout: 2000, force: true }).catch(() => {})
-        await page.waitForTimeout(300)
-    }
-
     log('pressing WITHDRAW ...')
     const flee = page.getByTestId('combat-withdraw')
     await flee.waitFor({ state: 'visible', timeout: 10000 })

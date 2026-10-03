@@ -4,8 +4,8 @@
  *
  * ## What lives here, and what does not
  *
- * - HERE: reduced motion, haptics, text size, tutorial hints, music and
- *   sound-effect volume. A UX preference: it survives a new game, a slot
+ * - HERE: reduced motion, haptics, text size, music and sound-effect
+ *   volume. A UX preference: it survives a new game, a slot
  *   change and a corrupt save, and it is never part of a `GameState`.
  * - NOT here: the colour THEME. It already has its own live store
  *   (`theme/runtime.tsx`) that every stylesheet subscribes to; the SETTINGS
@@ -49,8 +49,6 @@ export interface PlayerSettings {
     readonly reducedMotion: ReducedMotionPreference;
     readonly haptics: boolean;
     readonly textScale: TextScale;
-    /** Show the first-time coaches (combat, hazard, forge, rest). */
-    readonly tutorialHints: boolean;
     /** 0–100. Persisted for the audio build; no audio system plays yet. */
     readonly musicVolume: number;
     /** 0–100. Persisted for the audio build; no audio system plays yet. */
@@ -61,7 +59,6 @@ export const DEFAULT_SETTINGS: PlayerSettings = Object.freeze({
     reducedMotion: 'system',
     haptics: true,
     textScale: 1,
-    tutorialHints: true,
     musicVolume: 70,
     sfxVolume: 80,
 });
@@ -85,7 +82,6 @@ export function sanitizeSettings(raw: unknown): PlayerSettings {
         reducedMotion: isReducedMotion(r.reducedMotion) ? r.reducedMotion : DEFAULT_SETTINGS.reducedMotion,
         haptics: typeof r.haptics === 'boolean' ? r.haptics : DEFAULT_SETTINGS.haptics,
         textScale: isTextScale(r.textScale) ? r.textScale : DEFAULT_SETTINGS.textScale,
-        tutorialHints: typeof r.tutorialHints === 'boolean' ? r.tutorialHints : DEFAULT_SETTINGS.tutorialHints,
         musicVolume: clampVolume(r.musicVolume, DEFAULT_SETTINGS.musicVolume),
         sfxVolume: clampVolume(r.sfxVolume, DEFAULT_SETTINGS.sfxVolume),
     };

@@ -70,8 +70,7 @@ function mountExploration(store: AppStore) {
     // The arrival is deliberately deferred a tick so a caller that navigates
     // here and opens its own session in the same handler wins the race — see
     // the effect's comment in `app/(tabs)/exploration/index.tsx`. Advance by
-    // a tick rather than `runAllTimers()`: the screen also arms long-lived
-    // UI timers (the map hint) that re-schedule and would never drain.
+    // a tick so only that deferred arrival fires.
     act(() => { jest.advanceTimersByTime(1); });
     return tree;
 }

@@ -324,17 +324,6 @@ async function skipRoll(page) {
     if (await has(skip)) await skip.click({ timeout: 1500, force: true }).catch(() => {})
 }
 
-async function killPrimer(page) {
-    for (let k = 0; k < 4; k++) {
-        await page.waitForTimeout(250)
-        const skip = page.getByTestId('combat-primer-skip')
-        if (await has(skip)) await skip.click({ timeout: 2000, force: true }).catch(() => {})
-        else break
-    }
-    const coach = page.getByTestId('combat-coach-dismiss')
-    if (await has(coach)) await coach.click({ timeout: 1500, force: true }).catch(() => {})
-}
-
 // ── one played round ─────────────────────────────────────────────────────────
 
 /**
@@ -578,9 +567,7 @@ async function playSeed(browser, baseUrl, seed, mode) {
             note(`${tag} — WITHDRAW requested but no combat-withdraw control (retreat sealed); playing normally`)
         }
 
-        await killPrimer(page)
         await page.getByTestId('combat-enter').click({ timeout: 8000, force: true }).catch(() => {})
-        await killPrimer(page)
 
         await page.getByTestId('combat-board').waitFor({ state: 'visible', timeout: 25000 })
         await assertAlive(page, sink, `${tag}, the board mounting`)

@@ -10,8 +10,8 @@
 ## Why not a raw `GameState` snapshot
 
 A saved `GameState` is ~40 fields deep, rots on every schema bump, and is
-unreadable in review. A fixture is the *intent* ("a Sage on fv-9 with the
-combat tutorial done"); `buildStateFromFixture` turns intent into a
+unreadable in review. A fixture is the *intent* ("a Sage on fv-9 with a
+hazard scar"); `buildStateFromFixture` turns intent into a
 current-version state every time it runs.
 
 ## Layers, lowest → highest abstraction
@@ -40,7 +40,7 @@ current-version state every time it runs.
   "preset": "sage",                   // apprentice | wanderer | sage | kid-l1 | kid-l15 | kid-l30 | kid-l50
   "player": { "level": 7, "baseStats": { "body": 9 }, "health": 5, "currency": 33, "knownCards": ["thin-hymn"], "name": "Tester" },
   "world": { "continent": "coastal-continent", "map": "fishing-village", "node": "fv-9", "completedMaps": [] },
-  "flags": ["combat-tutorial-done"],  // appended to the new-game flags, deduped
+  "flags": ["hazard-scar:5"],         // appended to the new-game flags, deduped
   "arrive": true                      // fire the node's event on boot (CLI: --resolve-start; mobile: <FixtureBoot>)
 }
 ```

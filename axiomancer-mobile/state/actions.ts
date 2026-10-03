@@ -66,11 +66,9 @@ import {
     applyHazardCardAction,
     beginHazardAction,
     claimHazardRewardsAction,
-    completeHazardTutorialAction,
     continueHazardAfterResolveAction,
     discardHazardCardAction,
     finishHazardRollingAction,
-    HAZARD_TUTORIAL_FLAG,
     powerHazardCardAction,
     randomizeHazardDeckAction,
     resolveHazardRoundAction,
@@ -103,19 +101,16 @@ import {
     abandonBlacksmithAction,
     beginBlacksmithAction,
     claimBlacksmithOutcomeAction,
-    completeBlacksmithTutorialAction,
     continueBlacksmithCardAction,
     honeBlacksmithAction,
     leaveBlacksmithAction,
     startBlacksmithForgingAction,
     swapBlacksmithAction,
     temperBlacksmithAction,
-    BLACKSMITH_TUTORIAL_FLAG,
     type BeginBlacksmithOptions,
     type ClaimBlacksmithResult,
 } from './blacksmith/store-actions';
 import type { DieGearColor, MapEventPayload } from '@mechanics';
-import { isTutorialDone } from './tutorials';
 import {
     applyPlayerTierPresetAction,
     type ApplyPlayerTierPresetResult,
@@ -424,8 +419,6 @@ export interface AppActions {
     randomizeHazardDeck: () => string[];
     /** Dev tool — apply one deterministic Kid strategy deck preset. */
     applyHazardDeckPreset: (presetId: HazardDeckPresetId) => HazardDeckPresetResult;
-    /** Marks the guided first crossing done (completed or skipped). */
-    completeHazardTutorial: (skipped: boolean) => void;
 
     // -----------------------------------------------------------------
     // Rest-choice encounter (see state/rest/). One irreversible choice
@@ -478,8 +471,6 @@ export interface AppActions {
     claimBlacksmithOutcome: () => ClaimBlacksmithResult;
     /** Clear the anvil without applying anything (dev / escape hatch). */
     abandonBlacksmith: () => void;
-    /** Mark the guided first visit done (completed or skipped) and persist. */
-    completeBlacksmithTutorial: (skipped: boolean) => void;
 
     // -----------------------------------------------------------------
     // The Labyrinth — THE APORIA (see state/labyrinth/). Entered
@@ -721,7 +712,6 @@ export function createAppActions(store: AppStore): AppActions {
         abandonHazard: () => abandonHazardAction(store),
         randomizeHazardDeck: () => randomizeHazardDeckAction(store),
         applyHazardDeckPreset: (presetId) => applyHazardDeckPresetAction(store, presetId),
-        completeHazardTutorial: (skipped) => completeHazardTutorialAction(store, skipped),
         // ── The Labyrinth (THE APORIA) ──
         enterLabyrinth: (actId) => enterLabyrinthAndArriveAction(store, actId),
         exitLabyrinth: () => exitLabyrinthAction(store),
@@ -767,7 +757,6 @@ export function createAppActions(store: AppStore): AppActions {
         leaveBlacksmith: () => leaveBlacksmithAction(store),
         claimBlacksmithOutcome: () => claimBlacksmithOutcomeAction(store),
         abandonBlacksmith: () => abandonBlacksmithAction(store),
-        completeBlacksmithTutorial: (skipped) => completeBlacksmithTutorialAction(store, skipped),
         buyVillageWare: (itemId) => buyVillageWareAction(store, itemId),
         sellVillageItem: (index) => sellVillageItemAction(store, index),
     };
@@ -1349,12 +1338,7 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string, 
                 player: gameState.player,
                 event: EMPTY_EVENT_SLICE,
             });
-            // The first-ever crossing runs as the guided tutorial (pinned
-            // seed + hazard, coach overlay); the persistent flag set on
-            // completion/skip keeps every later crossing organic.
-            // SETTINGS → TUTORIAL HINTS off reads every coach as done.
-            const tutorialDone = isTutorialDone(gameState.flags, HAZARD_TUTORIAL_FLAG);
-            beginHazardAction(store, tutorialDone ? {} : { tutorial: true });
+            beginHazardAction(store);
             return true;
         }
 
@@ -1425,13 +1409,8 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string, 
                 ...resolvedState,
                 event: EMPTY_EVENT_SLICE,
             });
-            // The first-ever visit runs as the guided tutorial; the
-            // persistent flag set on completion/skip keeps every later
-            // visit organic.
-            const tutorialDone = isTutorialDone(gameState.flags, BLACKSMITH_TUTORIAL_FLAG);
             beginBlacksmithAction(store, {
                 variants: result.event.variants,
-                tutorial: !tutorialDone,
             });
             return true;
         }

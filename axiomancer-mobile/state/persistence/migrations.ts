@@ -2,6 +2,7 @@ import type { GameState } from '@mechanics';
 import {
     migrate,
     dropUnknownCardIds,
+    dropRetiredFlags,
     GAME_STATE_VERSION,
 } from '@mechanics';
 
@@ -157,9 +158,10 @@ export function unwrap(
         state = migrate(state, engineVersion);
     }
     // Every engine-shaped load, current version included: a save can name
-    // cards the library no longer holds (`dropUnknownCardIds`).
+    // cards the library no longer holds (`dropUnknownCardIds`) and flags no
+    // code reads (`dropRetiredFlags`).
     if (typeof engineVersion === 'number') {
-        state = dropUnknownCardIds(state as GameState);
+        state = dropRetiredFlags(dropUnknownCardIds(state as GameState));
     }
     return state as GameState;
 }

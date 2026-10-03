@@ -11,7 +11,6 @@ import {
     HAZARD_CONSEQUENCES,
     HAZARD_KEYWORDS,
     HAZARD_REWARDS,
-    type SeedInput,
 } from '@mechanics';
 import { dieCanPowerCard, hazardProjectedProgress } from '@mechanics';
 import type { AppStoreState } from '@/state/store';
@@ -135,12 +134,6 @@ export interface HazardViewModel {
     phase: HazardPhase;
     title: string;
     scenario: string;
-    /** Grim danger-intro copy for the modal shown when the hazard triggers. */
-    intro: string;
-    /** Hazard def id — keys the intro modal's per-danger art. */
-    hazardId: string;
-    /** Session seed — lets the screen show the intro once per session. */
-    sessionSeed: SeedInput;
     boardHeadline: string;
     boardNote: string;
     roundLabel: string;
@@ -367,9 +360,6 @@ const EMPTY_VM: HazardViewModel = Object.freeze({
     phase: 'route-select',
     title: '',
     scenario: '',
-    intro: '',
-    hazardId: '',
-    sessionSeed: 0,
     boardHeadline: '',
     boardNote: '',
     roundLabel: '',
@@ -524,9 +514,6 @@ export function selectHazardViewModel(state: Pick<AppStoreState, 'hazard'>): Haz
         phase: session.phase,
         title: def.title,
         scenario: def.scenario,
-        intro: def.intro,
-        hazardId: session.hazardId,
-        sessionSeed: session.seed,
         boardHeadline: def.boardHeadline,
         boardNote: isRisk ? def.riskBoardNote : def.safeBoardNote,
         roundLabel: `ROUND ${ROMAN[session.round - 1]} / ${ROMAN[session.totalRounds - 1]}`,

@@ -1,6 +1,6 @@
 /**
  * Hermetic E2E — player settings (`state/settings.ts`) and the seams that
- * read them: the tutorial gate, reduced motion, text scaling, haptics.
+ * read them: reduced motion, text scaling, haptics.
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
@@ -13,15 +13,6 @@ import {
     sanitizeSettings,
     settingsStore,
 } from '@/state/settings';
-import {
-    COMBAT_TUTORIAL_FLAG,
-    HAZARD_TUTORIAL_FLAG,
-    TUTORIAL_FLAGS,
-    isTutorialDone,
-    resetTutorialsAction,
-} from '@/state/tutorials';
-import { createAppStore } from '@/state/store';
-import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import { scaleTextStyles } from '@/theme/runtime';
 
 function fakeStorage(seed: Record<string, string> = {}) {
@@ -45,9 +36,15 @@ describe('sanitizeSettings', () => {
         expect(sanitizeSettings({ haptics: 'yes', textScale: 2, musicVolume: 500, extra: 1 })).toEqual({
             ...DEFAULT_SETTINGS, musicVolume: 100,
         });
-        expect(sanitizeSettings({ reducedMotion: 'on', textScale: 1.3, sfxVolume: -5, tutorialHints: false })).toEqual({
-            ...DEFAULT_SETTINGS, reducedMotion: 'on', textScale: 1.3, sfxVolume: 0, tutorialHints: false,
+        expect(sanitizeSettings({ reducedMotion: 'on', textScale: 1.3, sfxVolume: -5 })).toEqual({
+            ...DEFAULT_SETTINGS, reducedMotion: 'on', textScale: 1.3, sfxVolume: 0,
         });
+    });
+
+    it('ignores a tutorialHints key left in older persisted settings', () => {
+        const parsed = sanitizeSettings({ haptics: false, tutorialHints: false });
+        expect(parsed).toEqual({ ...DEFAULT_SETTINGS, haptics: false });
+        expect(parsed).not.toHaveProperty('tutorialHints');
     });
 });
 
@@ -83,36 +80,6 @@ describe('createSettingsStore', () => {
         await bad.hydrate();
         expect(bad.get()).toEqual(DEFAULT_SETTINGS);
         expect(bad.isHydrated()).toBe(true);
-    });
-});
-
-describe('the tutorial gate', () => {
-    it('reads the flag when hints are on, and everything as done when off', () => {
-        expect(isTutorialDone([], COMBAT_TUTORIAL_FLAG, true)).toBe(false);
-        expect(isTutorialDone([COMBAT_TUTORIAL_FLAG], COMBAT_TUTORIAL_FLAG, true)).toBe(true);
-        expect(isTutorialDone([], COMBAT_TUTORIAL_FLAG, false)).toBe(true);
-        expect(isTutorialDone(undefined, HAZARD_TUTORIAL_FLAG, true)).toBe(false);
-    });
-
-    it('defaults the hints argument to the live settings store', () => {
-        expect(isTutorialDone([], COMBAT_TUTORIAL_FLAG)).toBe(false);
-        settingsStore.set({ tutorialHints: false });
-        expect(isTutorialDone([], COMBAT_TUTORIAL_FLAG)).toBe(true);
-    });
-
-    it('resetTutorialsAction strips exactly the coach flags and saves', () => {
-        const adapter = createMemoryAdapter();
-        const store = createAppStore({ adapter });
-        store.setState({ flags: ['keepsake', ...TUTORIAL_FLAGS] } as never);
-
-        const removed = resetTutorialsAction(store);
-
-        expect([...removed].sort()).toEqual([...TUTORIAL_FLAGS].sort());
-        expect(store.getState().flags).toEqual(['keepsake']);
-        expect(adapter.saveCount).toBe(1);
-        // Nothing left → nothing removed, no extra save.
-        expect(resetTutorialsAction(store)).toEqual([]);
-        expect(adapter.saveCount).toBe(1);
     });
 });
 

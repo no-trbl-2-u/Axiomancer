@@ -51,7 +51,7 @@ function withDemoDeck<T extends { knownCards?: string[]; baseStats?: { heart: nu
 export default function CombatEncounterScreen() {
     const styles = useStyles();
     const router = useRouter();
-    const params = useLocalSearchParams<{ seed?: string; tutorial?: string }>();
+    const params = useLocalSearchParams<{ seed?: string }>();
     const player = useGameState((s) => s.player);
 
     if (!player) {
@@ -78,7 +78,6 @@ export default function CombatEncounterScreen() {
                     bootstrapPlayer={bootstrapPlayer}
                     deck={deckOverride}
                     seed={readSeed(params.seed)}
-                    forceTutorial={params.tutorial === '1'}
                     persistOutcome={false}
                     onExit={() => { if (router.canGoBack()) router.back(); }}
                 />

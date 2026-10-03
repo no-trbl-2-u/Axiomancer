@@ -25,16 +25,16 @@ function forging(budget: number, variants = [] as const): BlacksmithSession {
 
 describe('selectHasActiveBlacksmith', () => {
     it('is false with no session and true with one', () => {
-        expect(selectHasActiveBlacksmith({ blacksmith: { session: null, tutorial: false } })).toBe(false);
+        expect(selectHasActiveBlacksmith({ blacksmith: { session: null } })).toBe(false);
         expect(
-            selectHasActiveBlacksmith({ blacksmith: { session: forging(10), tutorial: false } }),
+            selectHasActiveBlacksmith({ blacksmith: { session: forging(10) } }),
         ).toBe(true);
     });
 });
 
 describe('forge offer VM (enabled / disabled + reason)', () => {
     it('exposes all four dice with a HONE and TEMPER offer each', () => {
-        const vm = selectBlacksmithVM({ blacksmith: { session: forging(100), tutorial: false } });
+        const vm = selectBlacksmithVM({ blacksmith: { session: forging(100) } });
         expect(vm.dice.map((d) => d.color)).toEqual(['heart', 'body', 'mind', 'wild']);
         for (const die of vm.dice) {
             expect(die.hone.verb).toBe('hone');
@@ -45,14 +45,14 @@ describe('forge offer VM (enabled / disabled + reason)', () => {
     });
 
     it('enables an affordable, legal HONE with no reason', () => {
-        const vm = selectBlacksmithVM({ blacksmith: { session: forging(100), tutorial: false } });
+        const vm = selectBlacksmithVM({ blacksmith: { session: forging(100) } });
         const heart = vm.dice.find((d) => d.color === 'heart')!;
         expect(heart.hone.enabled).toBe(true);
         expect(heart.hone.reason).toBe('');
     });
 
     it('disables an unaffordable HONE and names the cost', () => {
-        const vm = selectBlacksmithVM({ blacksmith: { session: forging(1), tutorial: false } });
+        const vm = selectBlacksmithVM({ blacksmith: { session: forging(1) } });
         const heart = vm.dice.find((d) => d.color === 'heart')!;
         expect(heart.hone.enabled).toBe(false);
         expect(heart.hone.reason).toMatch(/cover/i);
@@ -65,7 +65,7 @@ describe('forge offer VM (enabled / disabled + reason)', () => {
         s = continueBlacksmithCard(s);
         s = honeBlacksmith(s, 'heart');
         s = continueBlacksmithCard(s);
-        const vm = selectBlacksmithVM({ blacksmith: { session: s, tutorial: false } });
+        const vm = selectBlacksmithVM({ blacksmith: { session: s } });
         const heart = vm.dice.find((d) => d.color === 'heart')!;
         expect(heart.hone.enabled).toBe(false);
         expect(heart.hone.reason).toMatch(/miss face/i);
@@ -73,7 +73,7 @@ describe('forge offer VM (enabled / disabled + reason)', () => {
 
     it('disables TEMPER on the wild die at its 1-special cap', () => {
         // Wild default is 1 special (its cap). TEMPER would push to 2 → refused.
-        const vm = selectBlacksmithVM({ blacksmith: { session: forging(100), tutorial: false } });
+        const vm = selectBlacksmithVM({ blacksmith: { session: forging(100) } });
         const wild = vm.dice.find((d) => d.color === 'wild')!;
         expect(wild.temper.enabled).toBe(false);
         expect(wild.temper.reason).toMatch(/cap/i);
@@ -81,7 +81,7 @@ describe('forge offer VM (enabled / disabled + reason)', () => {
 
     it('presents an affordable swap offer for the witness variant', () => {
         const vm = selectBlacksmithVM({
-            blacksmith: { session: forging(100, [HEART_RICH_PAYLOAD_VARIANT] as never), tutorial: false },
+            blacksmith: { session: forging(100, [HEART_RICH_PAYLOAD_VARIANT] as never) },
         });
         expect(vm.swaps).toHaveLength(1);
         const swap = vm.swaps[0]!;
@@ -92,7 +92,7 @@ describe('forge offer VM (enabled / disabled + reason)', () => {
 
     it('disables the swap offer when the wallet cannot cover it', () => {
         const vm = selectBlacksmithVM({
-            blacksmith: { session: forging(1, [HEART_RICH_PAYLOAD_VARIANT] as never), tutorial: false },
+            blacksmith: { session: forging(1, [HEART_RICH_PAYLOAD_VARIANT] as never) },
         });
         const swap = vm.swaps[0]!;
         expect(swap.offer.enabled).toBe(false);
@@ -106,7 +106,7 @@ describe('forge offer VM (enabled / disabled + reason)', () => {
  */
 describe('FE-023: forge prices carry the shilling suffix, never the conviction glyph', () => {
     it('an unaffordable offer states its price in shillings', () => {
-        const vm = selectBlacksmithVM({ blacksmith: { session: forging(1), tutorial: false } });
+        const vm = selectBlacksmithVM({ blacksmith: { session: forging(1) } });
         const heart = vm.dice.find((d) => d.color === 'heart')!;
         expect(heart.hone.enabled).toBe(false);
         expect(heart.hone.reason).toMatch(/costs \d+s\b/);
@@ -114,7 +114,7 @@ describe('FE-023: forge prices carry the shilling suffix, never the conviction g
     });
 
     it('no view-model string carries the conviction glyph', () => {
-        const vm = selectBlacksmithVM({ blacksmith: { session: forging(500), tutorial: false } });
+        const vm = selectBlacksmithVM({ blacksmith: { session: forging(500) } });
         expect(JSON.stringify(vm)).not.toContain('\u25C6');
     });
 });

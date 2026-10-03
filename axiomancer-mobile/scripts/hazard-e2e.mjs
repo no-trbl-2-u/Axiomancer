@@ -3,8 +3,8 @@
 //
 // Hazard minigame — browser-driven end-to-end playthrough.
 //
-// Boots the exported web build, opens the dev entry, dismisses the
-// danger-intro modal, and PLAYS the minigame with real pointer
+// Boots the exported web build, opens the dev entry, and PLAYS the
+// minigame with real pointer
 // gestures: drags cards from the fanned hand into the play area
 // (uncapped — the whole hand can stage), drags mana dice onto staged
 // cards, presses PLAY (which auto-applies the staged set), taps
@@ -335,15 +335,6 @@ async function playHazard(page, baseUrl, route, seed) {
     await openDevTools(page)
     await page.getByTestId('debug-hazard-button').waitFor({ state: 'visible', timeout: 15000 })
     await page.getByTestId('debug-hazard-button').click()
-
-    // Phase: danger intro — the grim modal owns the screen until the
-    // player faces it (shows for dev-triggered hazards too).
-    await page.getByTestId('hazard-intro-overlay').waitFor({ state: 'visible', timeout: 15000 })
-    const introText = await page.getByTestId('hazard-intro-overlay').innerText()
-    if (!introText.includes('Unless')) fail('danger intro is missing its "Unless…" doom copy')
-    await shot(page, `${route}-danger-intro`)
-    await page.getByTestId('hazard-intro-continue').click()
-    await page.getByTestId('hazard-intro-overlay').waitFor({ state: 'hidden', timeout: 5000 })
 
     // Phase: route select — opening hand before dice.
     await page.getByTestId('hazard-route-select').waitFor({ state: 'visible', timeout: 15000 })

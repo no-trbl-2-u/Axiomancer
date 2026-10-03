@@ -53,9 +53,7 @@ exports[`hazard view-model lock-in round-play VM contract is frozen (a staged, p
       "utility": "boolean",
     },
   ],
-  "hazardId": "string",
   "hexCount": "number",
-  "intro": "string",
   "marks": [
     "string",
   ],
@@ -116,7 +114,6 @@ exports[`hazard view-model lock-in round-play VM contract is frozen (a staged, p
   "routeKey": "string",
   "routeLabel": "string",
   "scenario": "string",
-  "sessionSeed": "number",
   "thresholdLadder": [
     {
       "key": "string",
@@ -174,9 +171,7 @@ exports[`hazard view-model lock-in route-select VM contract is frozen: route-sel
       "utility": "boolean",
     },
   ],
-  "hazardId": "string",
   "hexCount": "number",
-  "intro": "string",
   "marks": [
     "string",
   ],
@@ -218,7 +213,6 @@ exports[`hazard view-model lock-in route-select VM contract is frozen: route-sel
   "routeKey": "null",
   "routeLabel": "string",
   "scenario": "string",
-  "sessionSeed": "number",
   "thresholdLadder": [],
   "title": "string",
   "totalRounds": "number",

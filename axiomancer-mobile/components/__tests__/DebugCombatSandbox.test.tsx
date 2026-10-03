@@ -3,8 +3,8 @@
  *
  * Pins:
  *   - DEV gate (true / simulated-false)
- *   - ASSEMBLE pushes /combat-encounter (historic testID kept for the
- *     upgradeable-dice e2e); TEACH pushes it with ?tutorial=1
+ *   - ASSEMBLE pushes /combat-encounter (its testID is the one the
+ *     upgradeable-dice e2e taps)
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
@@ -24,10 +24,9 @@ afterEach(() => {
 });
 
 describe('DebugCombatSandbox', () => {
-    it('renders both launchers in dev', () => {
+    it('renders the launcher in dev', () => {
         const tree = render(<DebugCombatSandbox />);
         expect(tree.queryByTestId('debug-combat-encounter-button')).not.toBeNull();
-        expect(tree.queryByTestId('debug-combat-tutorial-button')).not.toBeNull();
     });
 
     it('renders null when __DEV__ is false (production build simulation)', () => {
@@ -41,11 +40,9 @@ describe('DebugCombatSandbox', () => {
         }
     });
 
-    it('ASSEMBLE and TEACH push the sandbox route', () => {
+    it('ASSEMBLE pushes the sandbox route', () => {
         const tree = render(<DebugCombatSandbox />);
         fireEvent.press(tree.getByTestId('debug-combat-encounter-button'));
         expect(mockPush).toHaveBeenCalledWith('/combat-encounter');
-        fireEvent.press(tree.getByTestId('debug-combat-tutorial-button'));
-        expect(mockPush).toHaveBeenCalledWith('/combat-encounter?tutorial=1');
     });
 });

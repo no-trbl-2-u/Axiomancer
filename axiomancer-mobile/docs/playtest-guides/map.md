@@ -19,7 +19,6 @@
 | `map-backdrop` / `map-vignette` | Art plate and vignette |
 | `map-recenter` | RECENTRE — re-fit the camera on current + available nodes |
 | `map-overlays-fixed` / `map-legend` / `map-legend-keys` / `map-legend-count` | Viewport-fixed legend |
-| `map-hint` | First-visit hint (auto-dismisses after 5 s or first tap) |
 | `node-<id>` | A map node; accessibility label says sealed / walked / here |
 | `node-confirm-panel` | Selected-node sheet |
 | `node-confirm-go` | TRAVEL HERE |
@@ -44,7 +43,6 @@
 - A fixture boot (`?fixture=`) or a `/dev` JUMP owes no arrival — the map draws quietly; that is correct (only the start node and an interrupted move fire on mount).
 - A `travel` node consumed nothing and left the old map "incomplete": travel never consumes; the region toast + save is the whole event.
 - `setPointerCapture` console errors: synthetic pointer artefacts.
-- `map-hint` overlapping the legend at 375×812 was fixed (FE-005); it now stacks above.
 
 ## 6. Actually stuck
 

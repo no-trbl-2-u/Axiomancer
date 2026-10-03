@@ -75,11 +75,9 @@ export interface MobileNotificationsSlice {
  * Sessions are transient by design: abandoning mid-hazard forfeits
  * progress. The persistent piece (the player's hazard action deck)
  * rides `GameState.flags` via the package's deck-flags codec.
- * `tutorial` marks the guided first crossing (the coach overlay).
  */
 export interface MobileHazardSlice {
     session: HazardSessionState | null;
-    tutorial: boolean;
 }
 
 /**
@@ -98,8 +96,7 @@ export interface MobileRestSlice {
  * Mobile-only Loot-cache-choice encounter slice ("The Reliquary"). Holds
  * the active two-offer session (engine: World/LootCacheChoice) — `null`
  * outside one. The engine deals in real `Item`s directly (no opaque-ref
- * indirection), and needs no tutorial slice — two labeled offers need no
- * guided coach.
+ * indirection).
  */
 export interface MobileCacheSlice {
     session: LootCacheChoiceSession | null;
@@ -111,11 +108,10 @@ export interface MobileCacheSlice {
  * `GameState`; the slice seeds it from `player.dieGear` + the player's
  * spendable currency (the placeholder budget unit the host maps), and
  * at claim writes `outcome.rail` to `Character.dieGear` and deducts
- * `outcome.spent`. `tutorial` marks the guided first visit.
+ * `outcome.spent`.
  */
 export interface MobileBlacksmithSlice {
     session: BlacksmithSession | null;
-    tutorial: boolean;
 }
 
 /**
@@ -254,7 +250,7 @@ export const EMPTY_ITEM_REWARD_SLICE: MobileItemRewardSlice = Object.freeze({
     queue: Object.freeze([]),
 });
 
-export const EMPTY_HAZARD_SLICE: MobileHazardSlice = Object.freeze({ session: null, tutorial: false });
+export const EMPTY_HAZARD_SLICE: MobileHazardSlice = Object.freeze({ session: null });
 
 export const EMPTY_REST_SLICE: MobileRestSlice = Object.freeze({
     session: null,
@@ -266,7 +262,6 @@ export const EMPTY_CACHE_SLICE: MobileCacheSlice = Object.freeze({
 
 export const EMPTY_BLACKSMITH_SLICE: MobileBlacksmithSlice = Object.freeze({
     session: null,
-    tutorial: false,
 });
 
 export const EMPTY_LABYRINTH_SLICE: MobileLabyrinthSlice = Object.freeze({ session: null });

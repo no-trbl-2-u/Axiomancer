@@ -221,4 +221,26 @@ describe('migrations.engine', () => {
             expect(loaded.player.combatRewardCards).toEqual(['grey-word']);
         });
     });
+
+    describe('every load drops the flags no code reads', () => {
+        it('cleans a current-version save that still carries the tutorial done-flags', () => {
+            const fresh = createNewGameState();
+            const state = {
+                ...fresh,
+                flags: [
+                    'combat-tutorial-done', 'hazard-scar:5', 'hazard-tutorial-done',
+                    'blacksmith-tutorial-done', 'night-watch-tutorial-done', 'night-keepsake:kept',
+                ],
+            };
+            const loaded = unwrap(wrap(state));
+            expect(loaded.version).toBe(GAME_STATE_VERSION);
+            expect(loaded.flags).toEqual(['hazard-scar:5', 'night-keepsake:kept']);
+        });
+
+        it('leaves a save without them untouched', () => {
+            const fresh = createNewGameState();
+            const state = { ...fresh, flags: ['hazard-scar:5'] };
+            expect(unwrap(wrap(state)).flags).toEqual(['hazard-scar:5']);
+        });
+    });
 });

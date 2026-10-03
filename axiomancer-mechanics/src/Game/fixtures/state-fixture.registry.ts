@@ -33,7 +33,6 @@ export const STATE_FIXTURES: readonly StateFixture[] = Object.freeze([
         seed: 'fixture-apprentice-staged-dialogue',
         preset: 'apprentice',
         world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-2' },
-        flags: ['combat-tutorial-done'],
         arrive: true,
         stagedEvent: FIXTURE_DIALOGUE_EVENT,
     },
@@ -43,7 +42,6 @@ export const STATE_FIXTURES: readonly StateFixture[] = Object.freeze([
         seed: 'fixture-sage-bw-door-gate',
         preset: 'sage',
         world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-15' },
-        flags: ['combat-tutorial-done', 'hazard-tutorial-done'],
     },
     {
         id: 'wanderer-staged-village',
@@ -62,7 +60,6 @@ export const STATE_FIXTURES: readonly StateFixture[] = Object.freeze([
         preset: 'kid-l30',
         world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-3' },
         player: { health: 12 },
-        flags: ['combat-tutorial-done', 'hazard-tutorial-done'],
     },
     {
         id: 'broke-l1-bw-rest',
@@ -82,7 +79,6 @@ export const STATE_FIXTURES: readonly StateFixture[] = Object.freeze([
         seed: 'fixture-wanderer-staged-cutscene',
         preset: 'wanderer',
         world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-2' },
-        flags: ['combat-tutorial-done'],
         arrive: true,
         stagedEvent: FIXTURE_CUTSCENE_EVENT,
     },
@@ -93,7 +89,6 @@ export const STATE_FIXTURES: readonly StateFixture[] = Object.freeze([
         preset: 'apprentice',
         world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-9' },
         player: { health: 20 },
-        flags: ['combat-tutorial-done'],
         arrive: true,
     },
     {
@@ -102,7 +97,6 @@ export const STATE_FIXTURES: readonly StateFixture[] = Object.freeze([
         seed: 'fixture-apprentice-bw-cache',
         preset: 'apprentice',
         world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-5' },
-        flags: ['combat-tutorial-done'],
         arrive: true,
     },
     {
@@ -112,7 +106,6 @@ export const STATE_FIXTURES: readonly StateFixture[] = Object.freeze([
         preset: 'wanderer',
         world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-16' },
         player: { currency: 180 },
-        flags: ['combat-tutorial-done', 'blacksmith-tutorial-done'],
         arrive: true,
     },
     {
@@ -121,7 +114,6 @@ export const STATE_FIXTURES: readonly StateFixture[] = Object.freeze([
         seed: 'fixture-l30-bw-hazard-arrive',
         preset: 'kid-l30',
         world: { continent: 'coastal-continent', map: 'breakwater', node: 'bw-3' },
-        flags: ['combat-tutorial-done', 'hazard-tutorial-done'],
         arrive: true,
     },
 ]);

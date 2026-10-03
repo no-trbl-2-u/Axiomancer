@@ -42,7 +42,7 @@ const log = (m) => console.log(`fixture-gallery: ${m}`)
 // visible before the frame is taken.
 // ---------------------------------------------------------------------------
 
-const SAGE = { preset: 'sage', flags: ['combat-tutorial-done', 'hazard-tutorial-done'] }
+const SAGE = { preset: 'sage' }
 const coastal = (map, node) => ({ continent: 'coastal-continent', map, node, completedMaps: map === 'breakwater' ? [] : ['breakwater'] })
 
 export const GALLERY = [
@@ -71,19 +71,17 @@ export const GALLERY = [
       // seeds 4 starters) plus reward cards; THE CUT is offered only above the
       // 12-card floor, so a dozen extra loadout flags make a 16-card deck.
       fixture: { id: 'g-rest-cut', seed: 'g11', ...SAGE, player: { currency: 40, health: 20 }, world: coastal('breakwater', 'bw-9'), arrive: true,
-        flags: [...SAGE.flags, ...['unction-of-boils', 'salt-in-the-font', 'vinegar-and-gall', 'the-sextons-bell', 'the-blister-rosary', 'the-surgeons-absence', 'the-long-lent', 'alms-of-bad-bread', 'the-inventory-of-wounds', 'gangrene-gospel', 'the-lazars-kiss', 'communion-of-the-worm'].map((c) => `combat-loadout-card:${c}`)] },
+        flags: ['unction-of-boils', 'salt-in-the-font', 'vinegar-and-gall', 'the-sextons-bell', 'the-blister-rosary', 'the-surgeons-absence', 'the-long-lent', 'alms-of-bad-bread', 'the-inventory-of-wounds', 'gangrene-gospel', 'the-lazars-kiss', 'communion-of-the-worm'].map((c) => `combat-loadout-card:${c}`) },
       path: '/exploration', waitForPath: '/rest',
       steps: [{ jsClick: 'rest-choice-offer-cut' }, { settle: 1200 }] },
     { name: 'loot-cache', why: 'The loot-cache choice.',
       fixture: 'apprentice-bw-cache', path: '/exploration', waitForPath: '/cache' },
-    { name: 'hazard-intro', why: 'A hazard, before the first card — late-game kit.',
-      fixture: 'l30-bw-hazard-arrive', path: '/exploration', waitForPath: '/hazard' },
     { name: 'hazard-routes', why: 'Choosing a route — the safe crawl or the leap — hand fanned above.',
       fixture: 'l30-bw-hazard-arrive', path: '/exploration', waitForPath: '/hazard',
-      steps: [{ click: 'hazard-intro-continue' }, { settle: 1200 }] },
+      steps: [{ settle: 1200 }] },
     { name: 'hazard-board', why: 'The hazard board after taking the safe route — play area + mana dice.',
       fixture: 'l30-bw-hazard-arrive', path: '/exploration', waitForPath: '/hazard',
-      steps: [{ click: 'hazard-intro-continue' }, { settle: 800 }, { clickText: 'TAKE SAFE ROUTE' }, { waitFor: 'hazard-board' }, { settle: 1000 }] },
+      steps: [{ settle: 800 }, { clickText: 'TAKE SAFE ROUTE' }, { waitFor: 'hazard-board' }, { settle: 1000 }] },
 
     // ── Combat at the boss gate ──────────────────────────────────────────
     { name: 'boss-reveal', why: 'The Breakwater door fight — the REVEAL over the map.',

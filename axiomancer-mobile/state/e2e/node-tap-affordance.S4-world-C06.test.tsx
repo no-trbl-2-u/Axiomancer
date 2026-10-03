@@ -63,8 +63,8 @@ function mountExploration(store: AppStore) {
         </CombatModeProvider>,
     );
     // The start-node arrival is deferred a tick (see the screen's own
-    // comment); advance by one so the map settles, not `runAllTimers()` —
-    // the map hint arms a long-lived timer that would never drain.
+    // comment); advance by one so the map settles and only that deferred
+    // arrival fires.
     act(() => { jest.advanceTimersByTime(1); });
     return tree;
 }

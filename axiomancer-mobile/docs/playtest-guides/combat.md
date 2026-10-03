@@ -6,9 +6,9 @@ An encounter node resolves to a `combat-prelude` event that renders **in place o
 
 ## 2. Enter it directly
 
-- Fixture: `/exploration?fixture=sage-bw-door-gate` — Sage L15 on bw-15, door fight **bw-17** one step away (tutorial flags set). No `arrive`, so you land on the map; tap `node-bw-17` → `node-confirm-go`. `fresh-start` gives the untutored first fight (tap the first glowing node).
+- Fixture: `/exploration?fixture=sage-bw-door-gate` — Sage L15 on bw-15, door fight **bw-17** one step away. No `arrive`, so you land on the map; tap `node-bw-17` → `node-confirm-go`. `fresh-start` gives the first fight (tap the first glowing node).
 - `/dev` → `debug-trigger-encounter-encounter` (gentlest foe) or `debug-trigger-encounter-boss`; `debug-enemy-map-<map>` then `debug-enemy-<enemyId>` for a specific foe. Both push `/(tabs)/exploration` and fire the prelude.
-- Sandbox: `/combat-encounter?seed=N&tutorial=1` (mock foe, nothing persists; `debug-combat-encounter-button` / `debug-combat-tutorial-button`). Renders `combat-encounter-empty` if the sandbox cannot build.
+- Sandbox: `/combat-encounter?seed=N` (mock foe, nothing persists; `debug-combat-encounter-button`). Renders `combat-encounter-empty` if the sandbox cannot build.
 - Aftermath panels alone: `/devaftermath?panel=defeat|parley` (`devaftermath-panel`).
 - Globals: `__AXM_COMBAT_SEED__` (sandbox seed, `readSeed`), `__AXM_COMBAT_DECK__` (sandbox deck override), `__AXM_DICE_INSTANT_SETTLE__` and `__AXM_JUICE_INSTANT__` (skip roll/juice animations).
 
@@ -21,11 +21,6 @@ An encounter node resolves to a `combat-prelude` event that renders **in place o
 | `combat-reveal-phase-<i>` | One phase card on the reveal |
 | `combat-enter` | ENTER — starts the fight and rolls the first tray |
 | `combat-withdraw` | WITHDRAW on the reveal — flee the fight |
-| `combat-tutorial-primer` | First-fight primer panels (shown when `combat-tutorial-done` is unset or `?tutorial=1`) |
-| `combat-primer-next` / `combat-primer-begin` | Advance / finish the primer |
-| `combat-primer-skip` | Skip the primer |
-| `combat-tutorial` | Turn-one coach card (stateless; step derives from board state) |
-| `combat-tutorial-skip` | Dismiss the coach and set the flag |
 | `combat-board` | The board |
 | `combat-hud` | Enemy HUD block (vitae, intent) |
 | `combat-intent` | Enemy intent icon |
@@ -56,14 +51,13 @@ An encounter node resolves to a `combat-prelude` event that renders **in place o
 
 ## 4. A correct play, step by step
 
-1. Wait for `encounter-modal-overlay` then `combat-reveal`. On a first fight `combat-tutorial-primer` covers the reveal **before** ENTER: `combat-primer-skip` (or walk `combat-primer-next` → `combat-primer-begin`). Then press `combat-enter`.
-2. If `combat-tutorial` shows on the board, either follow its "find:" line or `combat-tutorial-skip`.
-3. **Drag** a `combat-hand-<uid>` into `combat-play-area` → it becomes `combat-staged-<uid>`. A plain tap only opens `combat-card-detail` (the board says "tap a card to read it") — close it with `combat-card-detail-close`.
-4. **Drag** a `combat-die-<id>` whose colour matches the card onto `combat-staged-<uid>`; success shows `combat-staged-die`. A die whose aria-label says `MISS face` powers nothing — pick another. A wrong colour flashes `combat-drop-reject`. Use real pointer moves (down → several moves → up); `scripts/combat-round-e2e.mjs` `dragTo` is the reference.
-5. Press `combat-apply-<uid>`. Repeat 3–5 while dice remain, or discard via `combat-trash`.
-6. Press `combat-end-phase`; the enemy acts (`combat-enemy-action-card`), the tray re-rolls.
-7. Repeat until the foe breaks. Answer `combat-mercy-spare`/`-exploit` if asked.
-8. Pick a reward (`combat-reward-<cardId>` → `combat-reward-confirm`) or `combat-reward-skip`; close `combat-summary-close`; press `combat-victory-panel-carry-on` (or the friendship/defeat exit). You are back on the map.
+1. Wait for `encounter-modal-overlay` then `combat-reveal`, then press `combat-enter`.
+2. **Drag** a `combat-hand-<uid>` into `combat-play-area` → it becomes `combat-staged-<uid>`. A plain tap only opens `combat-card-detail` (the board says "tap a card to read it") — close it with `combat-card-detail-close`.
+3. **Drag** a `combat-die-<id>` whose colour matches the card onto `combat-staged-<uid>`; success shows `combat-staged-die`. A die whose aria-label says `MISS face` powers nothing — pick another. A wrong colour flashes `combat-drop-reject`. Use real pointer moves (down → several moves → up); `scripts/combat-round-e2e.mjs` `dragTo` is the reference.
+4. Press `combat-apply-<uid>`. Repeat 2–4 while dice remain, or discard via `combat-trash`.
+5. Press `combat-end-phase`; the enemy acts (`combat-enemy-action-card`), the tray re-rolls.
+6. Repeat until the foe breaks. Answer `combat-mercy-spare`/`-exploit` if asked.
+7. Pick a reward (`combat-reward-<cardId>` → `combat-reward-confirm`) or `combat-reward-skip`; close `combat-summary-close`; press `combat-victory-panel-carry-on` (or the friendship/defeat exit). You are back on the map.
 
 ## 5. Looks stuck but isn't
 
@@ -71,7 +65,6 @@ An encounter node resolves to a `combat-prelude` event that renders **in place o
 - `combat-card-detail` / `combat-reward-preview` covering the board are deliberate modals — use their `-close` (or `-select`).
 - Dice do nothing right after ENTER / END PHASE: the roll ritual is animating (`state/combat/dice-roll-ritual.ts`); wait, or set `__AXM_DICE_INSTANT_SETTLE__` before boot. `combat-dice-skip` also ends it.
 - Impact/shake/number-pop pauses (`lib/juice`): set `__AXM_JUICE_INSTANT__` or wait ~1 s.
-- `combat-tutorial` sitting over the board: it is a gate only in the sense that it waits for the action it names; `combat-tutorial-skip` clears it and sets `combat-tutorial-done` (`state/tutorials.ts`).
 - A die that will not drop on a card: colour mismatch (`combat-drop-reject`) — try another die or card, not the same one again.
 - `setPointerCapture` console errors: artefacts of synthetic pointer events, not a bug.
 - The header VITAE bar under the seal is hidden on purpose during combat.

@@ -31,7 +31,7 @@ describe('hydrateStoreWithGameState', () => {
         const store = makeStore();
         // Dirty a mobile slice and an optional engine field first.
         store.setState({
-            hazard: { session: { fake: true } as never, tutorial: true },
+            hazard: { session: { fake: true } as never },
             currentEncounter: { enemies: [] } as never,
             _recentEvents: [{ type: 'x' } as never],
         });

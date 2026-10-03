@@ -22,13 +22,13 @@ describe('Hazard deck presets', () => {
 
     it('baseline clears acquired hazard cards and leaves other flags intact', () => {
         const store = makeStore();
-        store.setState({ flags: ['hazard-card:grip:1', 'combat-tutorial-done'] } as never);
+        store.setState({ flags: ['hazard-card:grip:1', 'night-keepsake:kept'] } as never);
 
         const result = applyHazardDeckPresetAction(store, 'starter-baseline');
 
         expect(result.presetId).toBe('starter-baseline');
         expect(result.cardIds).toEqual([]);
-        expect(store.getState().flags).toEqual(['combat-tutorial-done']);
+        expect(store.getState().flags).toEqual(['night-keepsake:kept']);
     });
 
     it('straightforward grants the number cards and utility the utility cards, deterministically', () => {

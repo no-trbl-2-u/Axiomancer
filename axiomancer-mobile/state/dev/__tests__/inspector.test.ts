@@ -45,8 +45,8 @@ describe('selectInspectorSections', () => {
 
     it('STORY lists flags with a count prefix', () => {
         const { store, rows } = sectionRows('STORY');
-        store.setState({ flags: ['combat-tutorial-done', 'hazard-tutorial-done'] } as never);
-        expect(rows().flags).toBe('2 · combat-tutorial-done, hazard-tutorial-done');
+        store.setState({ flags: ['hazard-scar:5', 'night-keepsake:kept'] } as never);
+        expect(rows().flags).toBe('2 · hazard-scar:5, night-keepsake:kept');
     });
 
     it('THE APORIA reads "never entered" without labyrinth progress', () => {

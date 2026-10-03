@@ -43,10 +43,7 @@ import { COMBAT_HUD_HEIGHT, type CombatFx } from '@/components/combat/encounter/
 import { CombatDie, combatDieFootprint } from '@/components/combat/encounter/CombatDie';
 import { CombatSummaryModal } from '@/components/combat/encounter/CombatSummaryModal';
 import { CombatRewardsOverlay } from '@/components/combat/encounter/CombatRewardsOverlay';
-import { CombatTutorialPrimer } from '@/components/combat/encounter/CombatTutorialPrimer';
 import { EnemyActionCard } from '@/components/combat/encounter/EnemyActionCard';
-import { CombatTutorialCoach } from '@/components/combat/encounter/CombatTutorialCoach';
-import { currentCombatTutorialStep } from '@/components/combat/encounter/combat-tutorial-steps';
 import { Image } from '@/lib/platform/image';
 import { getEncounterEnemyArt } from '@/assets/images/enemies';
 import {
@@ -57,11 +54,8 @@ import {
 import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
 import { useGameState, useGameStore } from '@/state/GameStoreProvider';
 import {
-    COMBAT_TUTORIAL_FLAG, completeCombatTutorialAction,
     claimCombatRewardAction, resetCombatRewardAction, rollCombatRewardAction,
 } from '@/state/combat/store-actions';
-import { useSetting } from '@/state/settings';
-import { isTutorialDone } from '@/state/tutorials';
 import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
@@ -110,8 +104,6 @@ export interface CombatEncounterPanelProps {
     flags?: readonly string[];
     /** Deterministic seed. */
     seed?: number;
-    /** Force the first-fight tutorial primer/coach even if the flag is set. */
-    forceTutorial?: boolean;
     /**
      * Live play: hand-roll HP/XP/loot/level-up back onto the persistent
      * player on combat end. Dev sandbox passes false so test runs don't
@@ -304,7 +296,6 @@ export function CombatEncounterPanel({
     deck,
     flags,
     seed,
-    forceTutorial = false,
     persistOutcome = false,
     onWithdraw,
     onExit,
@@ -321,19 +312,6 @@ export function CombatEncounterPanel({
     // The live reward draft (store-owned so it survives a panel remount).
     const rewardOffers = useGameState((s) => s.combatReward?.offers ?? EMPTY_OFFERS);
     const rewardsClaimed = useGameState((s) => s.combatReward?.claimed ?? false);
-
-    // ── first-fight tutorial (primer panels → turn-one coach) ──
-    const tutorialHints = useSetting('tutorialHints');
-    const seenTutorial = useGameState(
-        (s) => isTutorialDone((s as unknown as { flags?: string[] }).flags, COMBAT_TUTORIAL_FLAG, tutorialHints),
-    );
-    const [primerDone, setPrimerDone] = useState(false);
-    const [tutorialDismissed, setTutorialDismissed] = useState(false);
-    const tutorialActive = (forceTutorial || !seenTutorial) && !tutorialDismissed;
-    const finishTutorial = useCallback((skipped: boolean) => {
-        setTutorialDismissed(true);
-        completeCombatTutorialAction(store, skipped);
-    }, [store]);
 
     const [state, setState] = useState<CombatEncounterState | null>(null);
     // Multi-card staging (hazard model): several cards can be staged at once; each
@@ -434,7 +412,7 @@ export function CombatEncounterPanel({
     // every render is fine.
     const insets = useContext(SafeAreaInsetsContext);
     const topInset = insets?.top ?? 0;
-    // The LOG toggle and the tutorial coach anchor off the HUD's real measured
+    // The LOG toggle anchors off the HUD's real measured
     // height (`CombatBoard`'s `onHudLayout`, reported on every layout pass),
     // falling back to the static `COMBAT_HUD_HEIGHT` estimate until it lands.
     // The estimate alone is too short when a full stance-check telegraph and
@@ -625,14 +603,6 @@ export function CombatEncounterPanel({
         if (live.finalOutcome === 'victory') rollCombatRewardAction(store);
     }, [live.finalOutcome, store]);
 
-    // Tutorial completes itself once the turn-one coach script is exhausted.
-    useEffect(() => {
-        if (tutorialActive && primerDone && vm && live.phase !== 'reveal'
-            && currentCombatTutorialStep(live, vm, { stagedCount: stagedUids.length }) === -1) {
-            finishTutorial(false);
-        }
-    }, [tutorialActive, primerDone, live, vm, stagedUids.length, finishTutorial]);
-
     // Claim (or skip) — the action appends the card AND persists, so the pick
     // does not wait on some unrelated save() to happen along.
     const onRewardPick = useCallback((cardId: string | null) => {
@@ -789,9 +759,8 @@ export function CombatEncounterPanel({
             )}
 
             {/* The persistent combat log: this toggle opens a scrollable,
-                newest-at-the-bottom history of the whole fight. Pinned top-right, directly under the HUD (mirrors
-                CombatTutorialCoach's own placement below the same HUD — both
-                anchor off the measured `hudAnchor`, see above). */}
+                newest-at-the-bottom history of the whole fight. Pinned top-right, directly under the HUD
+                (anchored off the measured `hudAnchor`, see above). */}
             {logAvailable && (
                 <Pressable
                     onPress={() => setLogOpen(true)}
@@ -1158,14 +1127,6 @@ export function CombatEncounterPanel({
 
             {summary && (rewardsClaimed || live.finalOutcome !== 'victory') && (
                 <CombatSummaryModal summary={summary} onClose={handleExit} />
-            )}
-
-            {/* first-fight tutorial — primer panels, then the turn-one coach */}
-            {tutorialActive && !primerDone && (
-                <CombatTutorialPrimer onBegin={() => setPrimerDone(true)} onSkip={() => finishTutorial(true)} />
-            )}
-            {tutorialActive && primerDone && !showReveal && !summary && !mercy && (
-                <CombatTutorialCoach state={live} vm={vm} stagedCount={stagedUids.length} onSkip={() => finishTutorial(true)} hudBottom={hudAnchor} />
             )}
 
             {/* drag ghost — persistently mounted after the first drag; dragShown

@@ -418,7 +418,7 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
      *  edge, `topInset` already included via the HUD's own padding) on every
      *  layout pass. The alt-win meters make this
      *  height variable; siblings anchored off the static `COMBAT_HUD_HEIGHT`
-     *  estimate (the LOG toggle, the tutorial coach) should prefer this
+     *  estimate (the LOG toggle) should prefer this
      *  measured value once it lands. */
     onHudLayout?: (height: number) => void;
 }) {
@@ -691,7 +691,7 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                     carries. Anchoring the figure to the WHOLE HUD instead would
                     drag its top down past that column and collapse the foe to a
                     thumbnail. `onHudLayout` above still reports the whole HUD —
-                    the board's dock spacer, the LOG toggle and the tutorial coach
+                    the board's dock spacer and the LOG toggle
                     must keep clearing the chips too. */}
                 <View
                     pointerEvents="box-none"

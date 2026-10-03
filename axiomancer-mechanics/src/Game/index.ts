@@ -12,7 +12,7 @@ export type { GameStore, StoreApi } from './store';
 export { createNewGameState, GAME_STATE_VERSION } from './game.reducer';
 export type { GameState, CodexEntry } from './types';
 
-export { migrate, dropUnknownCardIds } from './game.migrate';
+export { migrate, dropUnknownCardIds, dropRetiredFlags } from './game.migrate';
 
 export {
     LEGACY_SLOT_MAP, reslotLegacyEquipment, reslotLegacyLoadout,

@@ -270,8 +270,6 @@ async function gathering(page) {
 async function fight(page) {
     await travelTo(page, 'bw-6')
     await waitFor(page, 'combat-reveal', 'bw-6 encounter reveal')
-    // The first-fight primer animates in over the reveal and swallows taps.
-    for (let k = 0; k < 5 && (await tap(page, 'combat-primer-skip')); k++) await sleep(300)
     await tap(page, 'combat-enter') || fail('bw-6: the reveal has no ENTER COMBAT')
     await waitFor(page, 'combat-arena-backdrop', 'bw-6 combat board')
 
@@ -287,7 +285,6 @@ async function fight(page) {
     for (let k = 0; k < 120; k++) {
         if (await page.getByTestId('combat-summary').count()) break
         if (await tap(page, 'combat-mercy-spare')) continue
-        await tap(page, 'combat-primer-skip')
         await tap(page, 'combat-end-phase')
         await sleep(150)
     }
@@ -304,8 +301,8 @@ async function hazard(page) {
     // A defeat restarts the run at the windmill; a win leaves bw-3 a rib away
     // too, so bw-3 is open either way.
     await travelTo(page, 'bw-3')
-    await waitFor(page, 'hazard-intro-overlay', 'bw-3 hazard')
-    log('bw-3 hazard: landed on the hazard intro (the board is hazard-e2e.mjs\'s)')
+    await waitFor(page, 'hazard-route-select', 'bw-3 hazard')
+    log('bw-3 hazard: landed on the route select (the board is hazard-e2e.mjs\'s)')
 }
 
 // ---------------------------------------------------------------------------

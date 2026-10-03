@@ -6,7 +6,7 @@
  * stable list of labelled sections of key/value rows. The `/dev` route
  * renders it verbatim so a tester can see "any aspect of the game" at a
  * glance — progression, economy, deck, world position, late-game
- * labyrinth ledger, tutorial flags, and which transient session is open —
+ * labyrinth ledger, story flags, and which transient session is open —
  * without opening every tab.
  *
  * No React, no store writes: input state → output rows. Every row is a

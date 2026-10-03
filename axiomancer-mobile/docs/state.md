@@ -16,8 +16,7 @@ selectors + dispatch typed actions.
 | `state/persistence/memorySlotStore.ts` | In-memory `SaveSlotStore` for tests and fixture boots. |
 | `state/menu/store-actions.ts` | NEW GAME / LOAD GAME / CONTINUE / RETURN TO TITLE — `hydrateStoreWithGameState` swaps the engine state inside the live store. |
 | `state/SaveSlotsProvider.tsx` | `<SaveSlotsProvider slots>` + `useSaveSlots()` / `useSaveSlotSummaries()`. |
-| `state/settings.ts` | Player settings (`settingsStore`, `useSetting`, `useSettings`) — motion, haptics, text size, tutorial hints, volumes. |
-| `state/tutorials.ts` | The coach flags, `isTutorialDone(flags, flag, hints)` and `resetTutorialsAction`. |
+| `state/settings.ts` | Player settings (`settingsStore`, `useSetting`, `useSettings`) — motion, haptics, text size, volumes. |
 | `state/e2e/store.engine.test.ts` | Hermetic e2e — provider boot, action dispatch, adapter invocation, selector stability. |
 
 Save slots, the main menu and the settings screen are documented in

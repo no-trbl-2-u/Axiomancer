@@ -121,18 +121,7 @@ async function playCombat(page, baseUrl) {
     await page.getByTestId('combat-reveal').waitFor({ state: 'visible', timeout: 15000 })
     await page.waitForTimeout(250)
     await shot(page, '01-reveal')
-    // Dismiss the combat tutorial primer if it overlays the reveal/board (it can
-    // animate in over either, intercepting taps).
-    const killPrimer = async () => {
-        for (let k = 0; k < 4; k++) {
-            await page.waitForTimeout(300)
-            const skip = page.getByTestId('combat-primer-skip')
-            if (await skip.count()) { await skip.click({ timeout: 2000, force: true }).catch(() => {}) } else break
-        }
-    }
-    await killPrimer()
     await page.getByTestId('combat-enter').click({ timeout: 8000, force: true }).catch(() => {})
-    await killPrimer()
 
     // 2) The board renders the full Spec 26/26b surface. (The pressure tracks and
     //    the read banner are legacy-combat chrome the HP model removed — the jest

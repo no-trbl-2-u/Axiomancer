@@ -2,12 +2,12 @@
 
 ## 1. What this screen is for
 
-A hazard node starts a hazard session (`state/actions.ts` → `beginHazardAction`, tutorial forced unless `hazard-tutorial-done`); `<HazardGate>` (`components/HazardGate.tsx`) pushes `/hazard` (`app/hazard/index.tsx`). Play: pick a route (safe/risk), the dice roll, then stage cards from your hazard deck, power them with dice, apply, PLAY the round; meters and sub-quests resolve to an outcome and a rewards pick. Engine: `axiomancer-mechanics/src/World/Hazard/*`.
+A hazard node starts a hazard session (`state/actions.ts` → `beginHazardAction`); `<HazardGate>` (`components/HazardGate.tsx`) pushes `/hazard` (`app/hazard/index.tsx`). Play: pick a route (safe/risk), the dice roll, then stage cards from your hazard deck, power them with dice, apply, PLAY the round; meters and sub-quests resolve to an outcome and a rewards pick. Engine: `axiomancer-mechanics/src/World/Hazard/*`.
 
 ## 2. Enter it directly
 
 - Fixture: `/exploration?fixture=l30-bw-hazard-arrive` — L30 kit on the Breakwater's bw-3, `arrive: true` → lands on `/hazard`. `l30-bw-hazard` is the same spot without `arrive` (you are on the map; the node is already consumed as "here", so use a neighbour or the dev button).
-- `/dev` → `debug-hazard-button` (BRAVE IT) or `debug-hazard-tutorial-button` (pinned tutorial crossing); `debug-trigger-encounter-hazard`; `debug-hazard-id-<id>` for a specific authored hazard; `debug-hazard-deck-preset-<id>` / `debug-hazard-deck-randomize` to shape the deck first.
+- `/dev` → `debug-hazard-button` (BRAVE IT); `debug-trigger-encounter-hazard`; `debug-hazard-id-<id>` for a specific authored hazard; `debug-hazard-deck-preset-<id>` / `debug-hazard-deck-randomize` to shape the deck first.
 - Globals: `__AXM_MINIGAME_SEEDS__.hazard = { seed, hazardId }` or legacy `__AXM_HAZARD_SEED__` / `__AXM_HAZARD_ID__` (harness default `424242`, `cracked-cliff`); `__AXM_JUICE_INSTANT__`.
 
 ## 3. Test IDs
@@ -15,7 +15,6 @@ A hazard node starts a hazard session (`state/actions.ts` → `beginHazardAction
 | testID | what it is |
 |---|---|
 | `hazard-empty` | Route mounted with no session (the screen pops back) |
-| `hazard-intro-overlay` / `hazard-intro-continue` | Authored intro; CONTINUE |
 | `hazard-route-select` | Route pick screen |
 | `hazard-route-safe` / `hazard-route-risk` | The two routes (`HazardRouteKey`) |
 | `hazard-opening-hand` | Preview of the opening hand on route select |
@@ -36,19 +35,17 @@ A hazard node starts a hazard session (`state/actions.ts` → `beginHazardAction
 | `hazard-outcome` / `hazard-outcome-continue` | Outcome overlay; CONTINUE |
 | `hazard-rewards` / `hazard-offer-<cardId>` / `hazard-card-preview` / `hazard-preview-confirm` / `hazard-preview-cancel` / `hazard-rewards-confirm` / `hazard-rewards-skip` | Reward pick |
 | `hazard-reward-<id>` / `hazard-consequence-<id>` / `hazard-rewards-penalty` | Reward / consequence rows, route-penalty line |
-| `hazard-tutorial` / `hazard-tutorial-skip` | Tutorial coach |
 | `hazard-stat-key` | Stat key legend |
 | `hazard-remove-grid` / `hazard-remove-tile-<cardId>` / `hazard-remove-confirm` / `hazard-remove-close` / `hazard-remove-blocked` / `hazard-remove-blocked-dismiss` | Deck-thinning grid (from `/hazard-deck`, `hazard-deck-open-remove`) |
 
 ## 4. A correct play, step by step
 
-1. `hazard-intro-overlay` → `hazard-intro-continue`.
-2. `hazard-route-select` → `hazard-route-safe` (safest happy path).
-3. Wait for `hazard-dice-roll` to finish and `hazard-board` to appear.
-4. Tap `hazard-hand-<uid>` → `hazard-staged-<uid>`; drag/tap a `hazard-die-<id>` onto it; `hazard-apply-<uid>`. If `hazard-tutorial` is up, follow it or `hazard-tutorial-skip`.
-5. `hazard-play-button`; wait through `hazard-resolve-flash`.
-6. Repeat 4–5 until `hazard-outcome`; `hazard-outcome-continue`.
-7. `hazard-rewards`: tap `hazard-offer-<cardId>` → `hazard-preview-confirm` → `hazard-rewards-confirm` (or `hazard-rewards-skip`). You return to the map.
+1. `hazard-route-select` → `hazard-route-safe` (safest happy path).
+2. Wait for `hazard-dice-roll` to finish and `hazard-board` to appear.
+3. Tap `hazard-hand-<uid>` → `hazard-staged-<uid>`; drag/tap a `hazard-die-<id>` onto it; `hazard-apply-<uid>`.
+4. `hazard-play-button`; wait through `hazard-resolve-flash`.
+5. Repeat 3–4 until `hazard-outcome`; `hazard-outcome-continue`.
+6. `hazard-rewards`: tap `hazard-offer-<cardId>` → `hazard-preview-confirm` → `hazard-rewards-confirm` (or `hazard-rewards-skip`). You return to the map.
 
 ## 5. Looks stuck but isn't
 
@@ -56,7 +53,6 @@ A hazard node starts a hazard session (`state/actions.ts` → `beginHazardAction
 - `hazard-resolve-flash` likewise auto-clears.
 - `hazard-play-button` disabled: nothing applied yet, or a staged card still needs a die. Apply or trash it.
 - A die refusing a card: colour mismatch. Use another die.
-- `hazard-tutorial` coach over the board waits for the step it names; `hazard-tutorial-skip` clears it and writes `hazard-tutorial-done`.
 - `hazard-remove-blocked`: the deck is at its floor; dismiss it.
 - `hazard-empty` for a frame while the gate pops back to the map is normal after `claimHazardRewards`.
 - `setPointerCapture` console errors: synthetic-pointer artefacts.
@@ -67,11 +63,11 @@ A hazard node starts a hazard session (`state/actions.ts` → `beginHazardAction
 - `hazard-play-button` enabled, pressed, and no `hazard-resolve-flash`, no phase change, no `action/resolveHazardRound` in the log.
 - `hazard-outcome-continue` or `hazard-rewards-confirm` pressed and the overlay stays / the map never comes back.
 - `hazard-empty` persisting on `/hazard` with no map behind it.
-Record: hazard id (intro title), route, round number, meters (`hazard-meters` text), last 30 `action` log lines, screenshot. Only then `globalThis.__AXM_SKIP_EVENT__()` — and file that as a finding.
+Record: hazard id (route-select title), route, round number, meters (`hazard-meters` text), last 30 `action` log lines, screenshot. Only then `globalThis.__AXM_SKIP_EVENT__()` — and file that as a finding.
 
 ## 7. Read the log
 
 `__AXM_LOG__.tail(50, { domains: ['action', 'minigame', 'game'] })` (debug level for `action`):
-- `action/beginHazard`, `action/selectHazardRoute`, `action/finishHazardRolling`, `action/stageHazardCard`, `action/powerHazardCard`, `action/applyHazardCard`, `action/resolveHazardRound`, `action/continueHazardAfterResolve`, `action/acknowledgeHazardOutcome`, `action/claimHazardRewards`, `action/completeHazardTutorial`.
+- `action/beginHazard`, `action/selectHazardRoute`, `action/finishHazardRolling`, `action/stageHazardCard`, `action/powerHazardCard`, `action/applyHazardCard`, `action/resolveHazardRound`, `action/continueHazardAfterResolve`, `action/acknowledgeHazardOutcome`, `action/claimHazardRewards`.
 - `nav/route-changed {pathname:'/hazard'}` then back to `/exploration`.
 - `game/world:processed` when the node is consumed.

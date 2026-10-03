@@ -9,8 +9,7 @@
  *   - COLOUR THEME   the five palettes (moved here from the SELF tab);
  *   - TEXT SIZE      four steps; scales every stylesheet's type;
  *   - REDUCED MOTION follow the OS, or force on / off;
- *   - HAPTICS        the pulses on drags, dice and coaches;
- *   - TUTORIAL HINTS the first-time coaches, plus RESET so they run again;
+ *   - HAPTICS        the pulses on drags and dice;
  *   - MUSIC / SOUND  volumes kept for the audio build (nothing plays yet);
  *   - STORY MODE     coming soon — listed so its absence is not a mystery.
  *
@@ -29,7 +28,6 @@ export const SETTINGS_COPY = Object.freeze({
     sections: Object.freeze({
         appearance: 'APPEARANCE',
         motion: 'MOTION & FEEL',
-        guidance: 'GUIDANCE',
         sound: 'SOUND',
         story: 'STORY',
         run: 'THE RUN',
@@ -40,13 +38,7 @@ export const SETTINGS_COPY = Object.freeze({
     reducedMotion: 'REDUCED MOTION',
     reducedMotionHint: 'skip the dice ritual, fades and pops',
     haptics: 'HAPTICS',
-    hapticsHint: 'the pulse on drags, dice and coaches',
-    tutorialHints: 'TUTORIAL HINTS',
-    tutorialHintsHint: 'the first-time coaches: combat, crossing, forge, rest',
-    resetTutorials: 'RESET TUTORIALS',
-    resetTutorialsHint: 'the coaches run again in this chronicle',
-    resetTutorialsDone: 'the coaches will run again',
-    resetTutorialsNothing: 'nothing to reset yet',
+    hapticsHint: 'the pulse on drags and dice',
     music: 'MUSIC',
     sfx: 'SOUND EFFECTS',
     soundNote: 'no sound plays yet — these are kept for the build that brings it',
@@ -58,7 +50,7 @@ export const SETTINGS_COPY = Object.freeze({
     resetSettings: 'RESET SETTINGS',
     resetSettingsHint: 'back to the defaults; the chronicles are untouched',
     resetSettingsTitle: 'reset every setting?',
-    resetSettingsBody: 'theme, text size, motion, haptics, hints and sound return to their defaults. no chronicle is touched.',
+    resetSettingsBody: 'theme, text size, motion, haptics and sound return to their defaults. no chronicle is touched.',
     resetSettingsConfirm: 'RESET',
     cancel: 'KEEP IT',
     on: 'ON',
@@ -100,13 +92,12 @@ export interface SettingsViewModel {
     readonly textScale: TextScale;
     readonly reducedMotion: ReducedMotionPreference;
     readonly haptics: boolean;
-    readonly tutorialHints: boolean;
     readonly musicVolume: number;
     readonly sfxVolume: number;
     /** `70%` for the stepper readout. */
     readonly musicLabel: string;
     readonly sfxLabel: string;
-    /** RESET TUTORIALS and RETURN TO TITLE only make sense inside a run. */
+    /** RETURN TO TITLE only makes sense inside a run. */
     readonly inRun: boolean;
 }
 
@@ -116,7 +107,6 @@ export function selectSettingsViewModel(settings: PlayerSettings, inRun: boolean
         textScale: settings.textScale,
         reducedMotion: settings.reducedMotion,
         haptics: settings.haptics,
-        tutorialHints: settings.tutorialHints,
         musicVolume: settings.musicVolume,
         sfxVolume: settings.sfxVolume,
         musicLabel: `${settings.musicVolume}%`,

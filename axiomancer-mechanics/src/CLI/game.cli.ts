@@ -44,7 +44,7 @@ import {
 import type { CodexEntry } from '../Game/types';
 import { createGameStore } from '../Game/store';
 import { GAME_STATE_VERSION } from '../Game/game.reducer';
-import { migrate, dropUnknownCardIds } from '../Game/game.migrate';
+import { migrate, dropUnknownCardIds, dropRetiredFlags } from '../Game/game.migrate';
 import { buildStateFromFixture } from '../Game/fixtures';
 import type { GameState } from '../Game/types';
 import { createStartingWorld, STARTABLE_MAPS } from '../World';
@@ -723,7 +723,7 @@ function loadTab(store: GameStoreHandle, snapshotAdapter: PersistenceAdapter | n
     const before = store.getState();
     // Restore EVERY persisted slice and bring an older save up to date through `migrate` first;
     // `currentEncounter` is transient and never saved.
-    const current = dropUnknownCardIds(saved.version < GAME_STATE_VERSION ? migrate(saved, saved.version) : saved);
+    const current = dropRetiredFlags(dropUnknownCardIds(saved.version < GAME_STATE_VERSION ? migrate(saved, saved.version) : saved));
     const { currentEncounter: _transient, ...restored } = current;
     store.setState(restored);
     logState('load', before, store.getState());

@@ -56,13 +56,11 @@ const SCREENS = [
   { name: 'inventory-midgame', path: '/inventory', fixture: 'sage-bw-door-gate' },
   { name: 'memoir-fresh', path: '/memoir', fixture: 'fresh-start' },
   { name: 'memoir-midgame', path: '/memoir', fixture: 'sage-bw-door-gate' },
-  { name: 'combat-preview', path: '/combat-encounter', seed: 16, prepare: dismissPrimer },
+  { name: 'combat-preview', path: '/combat-encounter', seed: 16 },
   {
     name: 'combat-board', path: '/combat-encounter', seed: 16,
     prepare: async (p) => {
-      await dismissPrimer(p)
       await p.getByTestId('combat-enter').click({ timeout: 8000, force: true }).catch(() => {})
-      await dismissPrimer(p)
       await p.getByTestId('combat-board').waitFor({ state: 'visible', timeout: 15000 }).catch(() => {})
     },
   },
@@ -82,16 +80,6 @@ const SCREENS = [
   { name: 'devart', path: '/devart', fixture: 'fresh-start' },
   { name: 'devart-rooms', path: '/devart/rooms', fixture: 'fresh-start' },
 ]
-
-/** Dismiss the combat tutorial primer if it overlays the board. */
-async function dismissPrimer(p) {
-  for (let k = 0; k < 4; k++) {
-    await p.waitForTimeout(300)
-    const skip = p.getByTestId('combat-primer-skip')
-    if (await skip.count()) await skip.click({ timeout: 2000, force: true }).catch(() => {})
-    else break
-  }
-}
 
 /** Capture one screen in one viewport. Never throws for screen-level trouble. */
 async function capture(browser, screen, vpName, index) {

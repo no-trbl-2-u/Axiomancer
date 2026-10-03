@@ -38,7 +38,7 @@ export const Tabs = Object.assign(RootTabs.Navigator, { Screen: RootTabs.Screen 
 
 // Every `router.push('/segment')` / `<Redirect href="/segment">` call
 // site uses file-tree-style path strings (e.g. `/hazard`,
-// `/(tabs)/exploration`, `/combat-encounter?tutorial=1`). This table is
+// `/(tabs)/exploration`, `/combat-encounter?seed=16`). This table is
 // the one place that owns segment -> registered screen `name` resolution.
 // `tab: true` entries live under the nested `(tabs)` navigator and
 // resolve via a nested `navigate`, not a root Stack push (matching

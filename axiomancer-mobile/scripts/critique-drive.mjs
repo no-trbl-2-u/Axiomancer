@@ -105,8 +105,6 @@ const SCREENS = [
         path: '/combat-encounter',
         why: "The game's core loop as actually played.",
         seed: COMBAT_SEED,
-        // Dismiss the tutorial primer if it overlays the reveal/preview.
-        prepare: dismissCombatPrimer,
     },
     {
         name: 'combat-board',
@@ -114,9 +112,7 @@ const SCREENS = [
         why: 'The live board mid-fight — card hand + face copy (VITAE/DoT text) only render after ENTER COMBAT; the pre-fight preview alone cannot re-validate them unattended.',
         seed: COMBAT_SEED,
         prepare: async (page) => {
-            await dismissCombatPrimer(page)
             await page.getByTestId('combat-enter').click({ timeout: 8000, force: true }).catch(() => {})
-            await dismissCombatPrimer(page)
             await page.getByTestId('combat-board').waitFor({ state: 'visible', timeout: 15000 }).catch(() => {})
         },
     },
@@ -176,17 +172,6 @@ const MIME = {
     '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml',
     '.json': 'application/json; charset=utf-8',
     '.woff': 'font/woff', '.woff2': 'font/woff2', '.ttf': 'font/ttf',
-}
-
-// Shared by the pre-fight and in-combat screens: the tutorial primer can
-// overlay either the reveal or the live board.
-async function dismissCombatPrimer(page) {
-    for (let k = 0; k < 4; k++) {
-        await page.waitForTimeout(300)
-        const skip = page.getByTestId('combat-primer-skip')
-        if (await skip.count()) await skip.click({ timeout: 2000, force: true }).catch(() => {})
-        else break
-    }
 }
 
 function log(msg) { console.log(`critique-drive: ${msg}`) }

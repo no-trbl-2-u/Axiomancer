@@ -1099,6 +1099,27 @@ export function dropUnknownCardIds(state: GameState): GameState {
     };
 }
 
+/** `GameState.flags` entries that no code reads; `dropRetiredFlags` removes them. */
+const RETIRED_FLAGS: ReadonlySet<string> = new Set([
+    'combat-tutorial-done',
+    'hazard-tutorial-done',
+    'blacksmith-tutorial-done',
+    'night-watch-tutorial-done',
+]);
+
+/**
+ * Drop the `RETIRED_FLAGS` entries from `state.flags`, on every load.
+ *
+ * Like `dropUnknownCardIds` this is not a version hop: a save at the current
+ * version can still carry them, so the load paths call it after
+ * `dropUnknownCardIds`. Returns `state` itself when nothing changes.
+ */
+export function dropRetiredFlags(state: GameState): GameState {
+    const flags = state.flags;
+    if (!Array.isArray(flags) || !flags.some(f => RETIRED_FLAGS.has(f))) return state;
+    return { ...state, flags: flags.filter(f => !RETIRED_FLAGS.has(f)) };
+}
+
 /**
  * Narrow `raw` to a `GameState`. Only the top-level shape is checked — the
  * sub-modules trust their own invariants and the serialiser writes the full

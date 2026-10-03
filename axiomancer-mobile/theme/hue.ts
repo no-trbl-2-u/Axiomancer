@@ -26,7 +26,6 @@ export const HUE = {
     overlayBg: '#0b0907',
     routeBg: '#0b0a08',
     rollBg: '#0a0908',
-    primerBg: '#100d0a',
     medallionBg: '#0c0a06',
     medallionDeep: '#070509',
 

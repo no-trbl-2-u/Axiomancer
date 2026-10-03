@@ -91,7 +91,7 @@ attachCrashBreadcrumbs();
 // the provider's `adapter` / `store` props.
 const persistenceAdapter = createAsyncStorageAdapter();
 
-// Player settings (theme, motion, haptics, text size, tutorial hints, audio)
+// Player settings (theme, motion, haptics, text size, audio)
 // hydrate from their own AsyncStorage key alongside the save preload below.
 // They are a UX preference, not gameplay state — a new game never resets them.
 const settingsHydrated = settingsStore.hydrate();

@@ -3,8 +3,8 @@
  *
  * Holds a live STATE inspector, the L1–L50 player ladder, world travel
  * to any map / node with its authored event, the labyrinth acts, an
- * any-foe enemy picker, every reward channel, flag toggles, real NPC
- * trees + real quests, effect and item pickers, and run controls.
+ * any-foe enemy picker, every reward channel, real NPC trees + real
+ * quests, effect and item pickers, and run controls.
  *
  * Sections read top-down in the order a tester thinks: see state →
  * shape the player → shape the deck → stand somewhere → fight / play a
@@ -40,7 +40,6 @@ const DebugPopulateAllItems = lazyNamed(() => import('@/components/DebugPopulate
 const DebugItemPicker = lazyNamed(() => import('@/components/DebugItemPicker'), 'DebugItemPicker');
 // ── WORLD ──
 const DebugWorldTravel = lazyNamed(() => import('@/components/DebugWorldTravel'), 'DebugWorldTravel');
-const DebugFlags = lazyNamed(() => import('@/components/DebugFlags'), 'DebugFlags');
 // ── ENCOUNTERS ──
 const DebugTriggerEncounter = lazyNamed(() => import('@/components/DebugTriggerEncounter'), 'DebugTriggerEncounter');
 const DebugEnemyPicker = lazyNamed(() => import('@/components/DebugEnemyPicker'), 'DebugEnemyPicker');
@@ -108,9 +107,8 @@ export function DevToolsSections() {
                     <DebugItemPicker />
                 </DevSection>
 
-                <DevSection label="WORLD" hint="any map · any node · the labyrinth · flags" testID="dev-section-world">
+                <DevSection label="WORLD" hint="any map · any node · the labyrinth" testID="dev-section-world">
                     <DebugWorldTravel />
-                    <DebugFlags />
                 </DevSection>
 
                 <DevSection label="ENCOUNTERS" hint="quick triggers · any foe · sandbox · skip" testID="dev-section-encounters">

@@ -40,13 +40,6 @@ export default function ExplorationScreen() {
     } = useCombatMode();
     const [nodeTip, setNodeTip] = useState<string | null>(null);
     const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-    // First-visit hint: shown once on mount, auto-dismissed after 5s or on first node tap.
-    const [showMapHint, setShowMapHint] = useState(true);
-
-    useEffect(() => {
-        const t = setTimeout(() => setShowMapHint(false), 5000);
-        return () => clearTimeout(t);
-    }, []);
     // The foe for the in-place hazard combat, captured at FIGHT
     // (the event slice is cleared by then) and fed to the encounter modal.
     const [activeEnemy, setActiveEnemy] = useState<Enemy | null>(null);
@@ -240,7 +233,6 @@ export default function ExplorationScreen() {
             return;
         }
         if (node.kind !== 'available') return;
-        setShowMapHint(false);
         setSelectedNodeId((prev) => (prev === node.id ? null : node.id));
     };
 
@@ -306,7 +298,7 @@ export default function ExplorationScreen() {
             {/* Node Graph */}
             {/* Legend/compass copy ride the `overlays` slot (viewport-fixed),
                 not `children` (the pannable canvas) — CRITIQUE pass 20. */}
-            <MapCanvas nodes={vm.nodes} edges={vm.edges} sheet={vm.sheet} overlays={<MapOverlays legend={vm.legend} hint={showMapHint ? vm.drawerCopy.mapHint : null} />}>
+            <MapCanvas nodes={vm.nodes} edges={vm.edges} sheet={vm.sheet} overlays={<MapOverlays legend={vm.legend} />}>
                 <NodeGrid
                     nodes={vm.nodes}
                     onNodePress={onNodePress}
@@ -337,8 +329,6 @@ export default function ExplorationScreen() {
                 />
             )}
             {nodeTip !== null && <NodeToast tip={nodeTip} />}
-            {/* The first-visit hint renders inside <MapOverlays> so it stacks
-              * above the legend instead of landing on top of it. */}
             {/* Combat outcomes render inside `<EncounterModalOverlay>`;
               * nothing on the exploration screen surfaces them. */}
         </ScreenBg>

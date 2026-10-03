@@ -112,7 +112,6 @@ read the log.** Section container ids are `dev-section-<key>`.
 | Leaf | Helper | What it does | Test ids |
 |---|---|---|---|
 | `DebugWorldTravel` | `state/dev/world-travel.ts` | **Map chips** travel to any map on any continent (start node). **Node chips** jump to a node on the current map and fire its authored event through the live `resolveCurrentMapEvent` (travel doors in red). **RESET MAP** re-seeds the map; **COMPLETE MAP** stamps it done and unlocks the next. **THE APORIA** act buttons enter act I / II / III and open `/labyrinth`. | `debug-travel-map-<map>`, `debug-travel-node-<id>`, `debug-map-reset-button`, `debug-map-complete-button`, `debug-aporia-act{1,2,3}` |
-| `DebugFlags` | `state/dev/flags.ts` | Chips for the tutorial-done flags; ALL TUTS ON / OFF | `debug-flag-<flag>`, `debug-flags-tuts-{on,off}` |
 
 ### ENCOUNTERS — `dev-section-encounters`
 
@@ -120,14 +119,14 @@ read the log.** Section container ids are `dev-section-<key>`.
 |---|---|---|
 | `DebugTriggerEncounter` | Quick triggers on the WILDS tab: COMBAT (gentlest foe), BOSS, HAZARD, REST, GATHER, TREASURE, VILLAGE, CUTSCENE | `debug-trigger-encounter-<kind>` |
 | `DebugEnemyPicker` | Any foe from any roster (`EnemiesByMap`), bosses in red; stages a real combat prelude so rewards pay out (`state/dev/enemy-picker.ts`) | `debug-enemy-map-<map>`, `debug-enemy-<enemyId>` |
-| `DebugCombatSandbox` | `/combat-encounter` sandbox (mock foe, nothing persists): ASSEMBLE, TEACH (`?tutorial=1`) | `debug-combat-encounter-button`, `debug-combat-tutorial-button` |
+| `DebugCombatSandbox` | `/combat-encounter` sandbox (mock foe, nothing persists): ASSEMBLE | `debug-combat-encounter-button` |
 | `DebugSkipEvent` | SKIP EVENT — resolve whatever the player is in (or the arrival owed on the node under them) with a plausible outcome and jump to WILDS; see "Skip the current event" below (`state/dev/skip-event.ts`) | `debug-skip-event-button` |
 
 ### MINIGAMES & REWARDS — `dev-section-rewards`
 
 | Leaf | What it does | Test ids |
 |---|---|---|
-| `DebugHazardButton` | Start a hazard (BRAVE IT) or the pinned tutorial crossing | `debug-hazard-button`, `debug-hazard-tutorial-button` |
+| `DebugHazardButton` | Start a hazard (BRAVE IT) | `debug-hazard-button` |
 | `DebugRestButton` | Start the night watch at a camp or an inn | `debug-rest-button`, `debug-rest-inn-button` |
 | `DebugBlacksmithButton` | Open the Anvil with the witness variant | `debug-blacksmith-button` |
 | `DebugRewardTriggers` | RELIQUARY MODEST / RICH (loot-cache tiers), ANVIL ×500 (fixed budget), UNLOCK JOURNAL (every foe codex entry), KNOW ALL CARDS, and one chip per authored hazard id (`state/dev/rewards.ts`) | `debug-cache-button`, `debug-cache-rich-button`, `debug-anvil-budget-button`, `debug-journal-unlock-button`, `debug-learn-all-cards-button`, `debug-hazard-id-<id>` |
