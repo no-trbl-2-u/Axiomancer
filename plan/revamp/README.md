@@ -177,6 +177,7 @@ T walked the agent defaults one at a time the same day. None remain open.
 | 12 | **R10** Theme colours | Last: R8 has already deleted about half the literals |
 | 12b | **R10b** Doctrine rewrite | After every deletion, so spec.md, bearings and the game model are written once against the final tree; removes `plan/archive/` so the old game cannot be grepped back in (D66, D67) |
 | 12c | **R10c** Comments and docs truth pass | Last: comments and docs describe the code that survived; the 2026-09-23 pass left mobile comments and six bannered docs undone (D67) |
+| 12d | **R10d** Tutorial removal | T, 2026-10-02: every coach, the hazard intro and the map hint go before the tag |
 | 12a | **RC** Act 1 checkpoint release (attended) | The reset point: mechanics in place, the map working, everything cleaned up. T tags it; nothing below starts before it |
 | 13 | **R11** Loop content phases (attended) | Closes the revamp: decides how the loop creates content again, as phases, now that the core is rebuilt; ends revamp mode (D58) |
 | 14 | **R12** New combat-playtest (attended) | Written once the survivors, Act 1 and the XP curve are final (R9) and the loop's content rules are set (R11), so it measures the game that exists |

@@ -56,7 +56,7 @@ until T opens the session.
 
 ### Gate (all must hold before tagging)
 
-1. **Rows:** R1–R10, R7a–R7e (with R7c2), R9a, R10b, R10c and B4 are `[x]` on main.
+1. **Rows:** R1–R10, R7a–R7e (with R7c2), R9a, R10b, R10c, R10d and B4 are `[x]` on main.
 2. **Checks:** the root `npm test`, mechanics `verify`, mobile `verify`,
    `lint:content`, `check-lexicon`, and every `verify-*` workflow on the
    tagged commit are green.
@@ -119,10 +119,13 @@ at T's request, the map's ink blots, NODE GRAPH label and compass rose
 removed (4f88a720).
 
 **Filed, not blocking:** thirteen copy/label/console rows in
-`plan/CRITIQUE.md` ("RC walk 2026-10-02"). **Two calls for T at the cut**
-(`plan/PHASE_CANDIDATES.md`): the Chronicle empties on reload, and the
-victory/mercy panels do not show XP or loot. Both are recommended to be
-accepted for the tag and shipped after it.
+`plan/CRITIQUE.md` ("RC walk 2026-10-02"). **Accepted for the tag (T,
+2026-10-02):** the Chronicle empties on reload, and the victory/mercy panels
+do not show XP or loot. Both ship after the tag (`plan/PHASE_CANDIDATES.md`).
+
+**Added before the tag (T, 2026-10-02): Phase R10d**, every tutorial window
+removed ("they're miserable"). RC requires it; the gate and CI re-run on the
+commit that ships it, and that commit is the one tagged.
 
 ### Cut
 

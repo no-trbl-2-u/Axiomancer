@@ -247,7 +247,7 @@
   tab) and B8 (card art) are separate surfaces.
 
 ### [ ] [score 6.0] The Chronicle is an in-memory event buffer: a reload empties it and noisy events push fights out
-- proposed: 2026-10-02, RC walk (legs 1, 2 and 4); recommended to accept for the RC tag, T to confirm at the cut
+- proposed: 2026-10-02, RC walk (legs 1, 2 and 4); accepted for the RC tag by T (2026-10-02), ships after it
 - source signals:
   - The Ledger's "A CHRONICLE" is built from `_recentEvents` (`axiomancer-mobile/state/store.ts:286`), a 20-slot ring of every app event that is never saved. A page reload empties it ("THE PAGE IS BARE"), and inventory events crowd fights and levels out within a region.
   - The memoir presenter's own header says the engine's events are the source; the run's history has no engine owner.
@@ -255,7 +255,7 @@
 - conflicts: none; creates no content.
 
 ### [ ] [score 5.0] Victory and mercy panels do not say what the player gained
-- proposed: 2026-10-02, RC walk (legs 2 and 3); recommended to accept for the RC tag, T to confirm at the cut
+- proposed: 2026-10-02, RC walk (legs 2 and 3); accepted for the RC tag by T (2026-10-02), ships after it
 - source signals: a won fight's +XP and a mercy's +110 XP and potions are shown on no panel; potions arrive silently in the Satchel. The engine's `CombatEndReport` already carries `xpGained` and `loot`.
 - proposed scope: 1 small phase (presentation). The victory and mercy summaries print the report's XP and loot; a presenter test pins both.
 - conflicts: none.
