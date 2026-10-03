@@ -196,6 +196,62 @@ export function edgeStroke(e: ExplorationEdge, AXM: EdgePalette): EdgeStroke {
     };
 }
 
+/** The dark road casing is this much wider than the stroke it sits under, in sheet units. */
+const CASING_EXTRA = 3;
+/** Radius of the travelled-road bead, in sheet units. */
+const BEAD_RADIUS = 2.5;
+/** Clear sheet units kept around a road's widest ink inside its strip, for anti-aliasing. */
+const STRIP_MARGIN = 1;
+
+/** Where one road's strip sits on the canvas. Exported with `edgeStripOf` for unit coverage. */
+export interface EdgeStrip {
+    /** Road length, in sheet units. */
+    length: number;
+    /** Sheet units from the strip's edge to the road's centre line and to each end. */
+    pad: number;
+    /** Clockwise rotation about the road's start, in degrees. */
+    angle: number;
+    /** The unrotated strip's box on the canvas, in device px at 1x zoom. */
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+}
+
+/**
+ * The strip one road is drawn in: a box as long as the road and only as tall
+ * as its ink, laid flat and then rotated about the road's start.
+ *
+ * ── WHY A STRIP PER ROAD ──
+ *
+ * `react-native-svg` on Android rasterises every `<Svg>` into ONE ARGB bitmap
+ * the size of the view (`SvgView.drawOutput`). A single SVG across the whole
+ * canvas therefore costs `canvas px² × 4` bytes whatever it draws: an Act 1
+ * sheet is 2400dp square, which is 92MB on a density-2 phone and 159MB at
+ * density 2.625. A strip costs only the road's own area, so the roads of a
+ * whole map come to a few megabytes.
+ */
+export function edgeStripOf(
+    A: { x: number; y: number },
+    B: { x: number; y: number },
+    ink: EdgeStroke,
+    bead: boolean,
+    scale: number,
+): EdgeStrip {
+    const length = Math.hypot(B.x - A.x, B.y - A.y);
+    const halfInk = (ink.casing ? ink.width + CASING_EXTRA : ink.width) / 2;
+    const pad = Math.max(halfInk, bead ? BEAD_RADIUS : 0) + STRIP_MARGIN;
+    return {
+        length,
+        pad,
+        angle: (Math.atan2(B.y - A.y, B.x - A.x) * 180) / Math.PI,
+        left: (A.x - pad) * scale,
+        top: (A.y - pad) * scale,
+        width: (length + pad * 2) * scale,
+        height: pad * 2 * scale,
+    };
+}
+
 // The map reads as a chart, not a void: a faint diagonal hatch over the
 // whole sheet (drawn as strokes so no Pattern support is needed),
 // cartographic contour "hills" in the dead zones, and an edge vignette. All tokenized; the hatch and hills are skipped
@@ -228,6 +284,27 @@ const CONTOUR_GROUPS: readonly string[][] = [
         'M282 74 q 18 -16 38 -6 q 8 12 -12 16 q -22 2 -26 -10 z',
     ],
 ];
+
+/** One node's halo, in its own SVG no larger than the halo (see `edgeStripOf`). `cx`/`cy`/`r` are sheet units. */
+function NodeHalo({ cx, cy, r, scale, color }: { cx: number; cy: number; r: number; scale: number; color: string }) {
+    const side = r * 2 * scale;
+    return (
+        <Svg
+            viewBox={`0 0 ${r * 2} ${r * 2}`}
+            width={side}
+            height={side}
+            style={{ position: 'absolute', left: (cx - r) * scale, top: (cy - r) * scale }}
+        >
+            <Defs>
+                <RadialGradient id="axmNodeHalo" cx="50%" cy="50%" r="50%">
+                    <Stop offset="40%" stopColor={color} stopOpacity={0.85} />
+                    <Stop offset="100%" stopColor={color} stopOpacity={0} />
+                </RadialGradient>
+            </Defs>
+            <Circle cx={r} cy={r} r={r} fill="url(#axmNodeHalo)" />
+        </Svg>
+    );
+}
 
 export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvasProps) {
     const styles = useStyles();
@@ -404,52 +481,79 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
                             testID="map-backdrop"
                         />
                     )}
-                    {/* SVG edges — drawn across the spread canvas */}
-                    <Svg
-                        viewBox={`0 0 ${size.width} ${size.height}`}
-                        width={canvas.w}
-                        height={canvas.h}
-                        style={StyleSheet.absoluteFillObject}
-                    >
-                        {/* The chart sheet: diagonal hatch + contour hills under the
-                            roads — only over an atmosphere plate, never over a plate
-                            that draws its own terrain. */}
-                        {chartTexture && (
+                    {/* The chart sheet: diagonal hatch + contour hills under the
+                        roads — only over an atmosphere plate, never over a plate
+                        that draws its own terrain. This is the one canvas-wide
+                        SVG left, so it is mounted only when a sheet asks for it. */}
+                    {chartTexture && (
+                        <Svg
+                            viewBox={`0 0 ${size.width} ${size.height}`}
+                            width={canvas.w}
+                            height={canvas.h}
+                            style={StyleSheet.absoluteFillObject}
+                            pointerEvents="none"
+                            testID="map-chart-texture"
+                        >
                             <G stroke={AXM.parchment} strokeWidth={0.4} opacity={0.05}>
                                 {hatch.map((d) => (
                                     <Path key={d} d={d} fill="none" />
                                 ))}
                             </G>
-                        )}
-                        {chartTexture && CONTOUR_GROUPS.map((group, gi) => (
-                            <G
-                                key={gi}
-                                opacity={0.45}
-                                stroke={AXM.ash}
-                                strokeWidth={1}
-                                fill="none"
-                                transform={`scale(${size.width / 360} ${size.height / 400})`}
+                            {CONTOUR_GROUPS.map((group, gi) => (
+                                <G
+                                    key={gi}
+                                    opacity={0.45}
+                                    stroke={AXM.ash}
+                                    strokeWidth={1}
+                                    fill="none"
+                                    transform={`scale(${size.width / 360} ${size.height / 400})`}
+                                >
+                                    {group.map((d) => (
+                                        <Path key={d} d={d} />
+                                    ))}
+                                </G>
+                            ))}
+                        </Svg>
+                    )}
+                    {/* Roads: straight node-to-node paths so the graph reads as a
+                        connected route, each in its own strip (see `edgeStripOf`).
+                        A dark casing under the stroke gives each path a defined
+                        "road" edge. */}
+                    {edges.map((e) => {
+                        const A = nodeById.get(e.fromId);
+                        const B = nodeById.get(e.toId);
+                        if (!A || !B) return null;
+                        const ink = edgeStroke(e, AXM);
+                        // The travelled-road bead marks progression, so a rib
+                        // never wears one even once both its lanes are spent.
+                        const bead = e.traveled && !e.lateral;
+                        const strip = edgeStripOf(A, B, ink, bead, size.scale);
+                        const pivot = strip.pad * size.scale;
+                        const d = `M ${strip.pad} ${strip.pad} L ${strip.pad + strip.length} ${strip.pad}`;
+                        return (
+                            <View
+                                key={`${e.fromId}|${e.toId}`}
+                                pointerEvents="none"
+                                testID="map-edge"
+                                style={[
+                                    styles.edgeStrip,
+                                    {
+                                        left: strip.left,
+                                        top: strip.top,
+                                        width: strip.width,
+                                        height: strip.height,
+                                        transformOrigin: `${pivot}px ${pivot}px`,
+                                        transform: [{ rotate: `${strip.angle}deg` }],
+                                    },
+                                ]}
                             >
-                                {group.map((d) => (
-                                    <Path key={d} d={d} />
-                                ))}
-                            </G>
-                        ))}
-                        {edges.map((e) => {
-                            const A = nodeById.get(e.fromId);
-                            const B = nodeById.get(e.toId);
-                            if (!A || !B) return null;
-                            // Straight node-to-node paths so the graph reads as
-                            // a connected route. A dark casing under the stroke
-                            // gives each path a defined "road" edge.
-                            const d = `M ${A.x} ${A.y} L ${B.x} ${B.y}`;
-                            const ink = edgeStroke(e, AXM);
-                            const mx = (A.x + B.x) / 2;
-                            const my = (A.y + B.y) / 2;
-                            return (
-                                <G key={`${e.fromId}|${e.toId}`}>
+                                <Svg
+                                    viewBox={`0 0 ${strip.length + strip.pad * 2} ${strip.pad * 2}`}
+                                    width={strip.width}
+                                    height={strip.height}
+                                >
                                     {ink.casing && (
-                                        <Path d={d} stroke={AXM.deepBg} strokeWidth={ink.width + 3} fill="none" opacity={0.95} strokeLinecap="round" />
+                                        <Path d={d} stroke={AXM.deepBg} strokeWidth={ink.width + CASING_EXTRA} fill="none" opacity={0.95} strokeLinecap="round" />
                                     )}
                                     <Path
                                         d={d}
@@ -460,31 +564,23 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
                                         opacity={ink.opacity}
                                         strokeLinecap="round"
                                     />
-                                    {/* The travelled-road bead marks progression, so a rib
-                                        never wears one even once both its lanes are spent. */}
-                                    {e.traveled && !e.lateral && <Circle cx={mx} cy={my} r={2.5} fill={AXM.sulfur} />}
-                                </G>
-                            );
-                        })}
-                        {/* Node halos over the roads and under the glyphs: a dark
-                            pool that clears a dense plate's linework from around
-                            each mark, so the mark reads as a mark. */}
-                        {nodeHalo && (
-                            <Defs>
-                                <RadialGradient id="axmNodeHalo" cx="50%" cy="50%" r="50%">
-                                    <Stop offset="40%" stopColor={AXM.deepBg} stopOpacity={0.85} />
-                                    <Stop offset="100%" stopColor={AXM.deepBg} stopOpacity={0} />
-                                </RadialGradient>
-                            </Defs>
-                        )}
-                        {nodeHalo && (
-                            <G testID="map-node-halos">
-                                {nodes.map((n) => (
-                                    <Circle key={n.id} cx={n.x} cy={n.y} r={haloRadius} fill="url(#axmNodeHalo)" />
-                                ))}
-                            </G>
-                        )}
-                    </Svg>
+                                    {bead && (
+                                        <Circle cx={strip.pad + strip.length / 2} cy={strip.pad} r={BEAD_RADIUS} fill={AXM.sulfur} />
+                                    )}
+                                </Svg>
+                            </View>
+                        );
+                    })}
+                    {/* Node halos over the roads and under the glyphs: a dark
+                        pool that clears a dense plate's linework from around
+                        each mark, so the mark reads as a mark. */}
+                    {nodeHalo && (
+                        <View style={StyleSheet.absoluteFillObject} pointerEvents="none" testID="map-node-halos">
+                            {nodes.map((n) => (
+                                <NodeHalo key={n.id} cx={n.x} cy={n.y} r={haloRadius} scale={size.scale} color={AXM.deepBg} />
+                            ))}
+                        </View>
+                    )}
 
                     <MapSheetContext.Provider value={size}>{children}</MapSheetContext.Provider>
                 </Animated.View>
@@ -579,5 +675,8 @@ const useStyles = makeStyles((AXM) => ({
     },
     backdropPlate: {
         ...StyleSheet.absoluteFillObject,
+    },
+    edgeStrip: {
+        position: 'absolute',
     },
 }));
