@@ -254,6 +254,9 @@ ambiguity.)
   inside a ratified revamp phase. Owner-led B-rows are T's sessions; the
   loop never starts one. Revamp mode ends when Phase R11 ships; R11 decides
   what content authority the loop gets back.
+  **The Act 1 checkpoint is tagged `v0.1.0-checkpoint`** (commit `9ddba0f8`,
+  2026-10-02; GitHub release and EAS preview APK linked from it). To reset to
+  it: `git switch -c <branch> v0.1.0-checkpoint`.
 - **THE CARD HOLD (T, attended session 2026-09-26, D37).** No player card
   and no player keyword is created outside a guided session with T. No
   `/expand`, phase or brief adds one, and none plans a phase that would.

@@ -760,6 +760,19 @@ stay open, not rejected.
 
 *Rejected:* gating RC on a winnable clear with the grey deck.
 
+**D76 — The Act 1 checkpoint is cut.** (T, attended, 2026-10-02.)
+
+- `v0.1.0-checkpoint` is an annotated tag on `9ddba0f8`, published as a
+  GitHub release with an EAS preview APK (Android) linked from it.
+- The gate passed: local legs and every `verify-*` workflow green, and the
+  four-region walk passed with its fixes shipped (`plan/revamp/checkpoint.md`).
+  Phase R10d (every tutorial window removed) was added and shipped before the
+  tag at T's request.
+- Accepted for the tag: the Chronicle empties on reload, the victory and mercy
+  panels omit XP and loot, and the grey-deck Momentum chip never activates.
+- Reset recipe: `git switch -c <branch> v0.1.0-checkpoint`.
+- Next: BT (the Blood Price trial set), R11, and the owner-led B-rows.
+
 ## Open follow-ups
 
 **D1 status at a glance (2026-09-28, after #408).** Card and keyword

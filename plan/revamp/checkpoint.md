@@ -129,6 +129,10 @@ commit that ships it, and that commit is the one tagged.
 
 ### Cut
 
+**Done 2026-10-02 (D76):** tagged `v0.1.0-checkpoint` on `9ddba0f8`, GitHub
+release published, EAS preview APK built from the tag and linked from the
+release; recorded in bearings and the decisions log; RC ticked.
+
 1. T tags the gated commit `v0.1.0-checkpoint` (annotated), pushes the tag
    and publishes a GitHub release. The release notes list what the core
    holds (README §2) and what is deliberately absent.
