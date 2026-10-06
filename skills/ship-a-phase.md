@@ -186,7 +186,7 @@ cat > "$issue_body" <<EOF
 **Brief:** [\`plan/phases/phase_<N>_<topic>.md\`](https://github.com/no-trbl-2-u/Axiomancer/blob/main/plan/phases/phase_<N>_<topic>.md)
 
 ---
-_Tracked by the autonomous loop. The phase commit will close this issue via a \`Closes #<this-issue>\` trailer; deploy URL is posted as a follow-up comment._
+_Tracked by the autonomous loop. The phase commit names this issue in a \`Closes #<this-issue>\` trailer and the \`close-trailers\` workflow closes it when the commit reaches main; deploy URL is posted as a follow-up comment._
 EOF
 
 # 2. Open / reuse / reopen.
@@ -305,9 +305,12 @@ describing what shipped + what the user can now do. Add
 "Decisions" section listing autonomous design calls.
 
 **If Step 2.5 captured a phase issue number** (`$PHASE_ISSUE`),
-add a `Closes #<N>` trailer to the commit body. GitHub auto-closes
-the phase mirror when the commit pushes to main; that's
-the canonical ship signal on the public timeline.
+add a `Closes #<N>` trailer to the commit body. The
+`close-trailers` workflow sweeps every push to `main` and closes
+the issues the commits name, so the phase mirror closes when the
+commit lands on main; that's the canonical ship signal on the
+public timeline. (GitHub's native parser is inert here, Phase 48;
+the sweep reads the trailer instead.)
 
 ```bash
 git add <explicit files>
@@ -372,13 +375,12 @@ node scripts/loop-issue.mjs phase-close \
 
 `phase-close` posts the deploy-URL comment **and actively closes the
 mirror via the GitHub API** (`state=closed`, `state_reason=completed`).
-The `Closes #<N>` trailer in Step 10's commit is a belt-and-suspenders
-backup only — it fires reliably solely for commits pushed **directly**
-to the default branch, so phases that reach `main` via a cross-session
-`claude/*` branch merge reconciliation would leak the mirror open
-without the explicit API close. The close is
-idempotent (an already-closed mirror is a no-op). Failures here are
-warnings, not blockers.
+The load-bearing close is the `close-trailers` sweep reading the
+`Closes #<N>` trailer in Step 10's commit; it runs on the push itself,
+including a merge that brings a `claude/*` branch onto `main`, because
+it scans every commit in the pushed range. This call adds the deploy
+comment. The close is idempotent (an already-closed mirror is a
+no-op). Failures here are warnings, not blockers.
 
 If this tick ends before Step 12's `deploy:check` goes green, this
 comment never posts — but `.github/workflows/deploy-comment.yml`

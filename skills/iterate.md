@@ -188,7 +188,8 @@ Top scored. If `/iterate audit`, stop here.
 Open a public GitHub issue mirroring the picked finding **before**
 the work starts. The repo's Issues tab becomes a live timeline of
 "what the loop is shipping right now"; the issue opens when work
-starts and auto-closes on the fix commit's `Closes #N` trailer.
+starts and closes when the fix commit, carrying a `Closes #N`
+trailer, reaches `main` (the `close-trailers` sweep, Step 5).
 
 Skip this step in two cases:
 
@@ -217,7 +218,7 @@ cat > "$issue_body" <<EOF
 <verbatim from row's "suggested fix" field>
 
 ---
-_Tracked by the autonomous loop. The fix lands as a commit with \`Closes #<this-issue>\` in the body; this issue auto-closes when the commit pushes to main._
+_Tracked by the autonomous loop. The fix lands as a commit with \`Closes #<this-issue>\` in the body; the \`close-trailers\` workflow closes this issue when the commit reaches main._
 EOF
 
 # 2. Map row severity → helper flag.
@@ -301,14 +302,17 @@ Body lists audit finding ID/score, the fix, verify result.
 routing), close the loop on GitHub in the same flow:
 
 ```
-# Trailer in commit body — auto-links + auto-closes when merged
+# Trailer in commit body — the close-trailers sweep reads it
 - Closes #42
 ```
 
 The `- Closes #<N>` trailer is **mandatory** in the commit body
 when the row carries an issue number; it is the closing mechanism.
-Multiple issues can be closed in a single commit by listing one
-trailer line per issue.
+GitHub's native parser does not act on it in this repo (Phase 48).
+`.github/workflows/close-trailers.yml` sweeps every push to `main`,
+reads the closing keywords out of each commit in the range, and
+closes the named issues through the API. Multiple issues can be
+closed in a single commit by listing one trailer line per issue.
 
 Load `GH_TOKEN` and `GH_REPO` from `.env` first if they aren't
 already in the env (see `skills/triage.md` §3). The
@@ -341,9 +345,10 @@ npm run deploy:check
 
 **Once deploy:check is green and the row carried an `- issue: #N`,
 post the close-comment** (posts the deploy-URL comment AND actively
-closes the issue via the API — the `Closes #N` commit trailer is a
-belt-and-suspenders backup, not the load-bearing close; see
-`scripts/loop-issue.mjs`'s `close-comment` doc comment):
+closes the issue via the API. The load-bearing close is the
+`close-trailers` sweep reading the commit's `Closes #N` trailer
+(Step 5); this call adds the deploy comment and is idempotent if
+the sweep already closed it):
 
 ```bash
 node scripts/loop-issue.mjs close-comment \

@@ -5,9 +5,9 @@
 // the autonomous loop's work. Two flavors:
 //
 //   1) /iterate findings (one issue per finding — "open" + "close-comment")
-//      close-comment posts the deploy comment AND actively closes the
-//      issue via the API; the shipping commit's `Closes #N` trailer is a
-//      belt-and-suspenders backup, not the load-bearing close (see below).
+//      close-comment posts the deploy comment AND closes the issue via
+//      the API, idempotently. The load-bearing close is flavor 3 below,
+//      which reads the shipping commit's `Closes #N` trailer.
 //
 //   2) Phases (one issue per phase, find-or-create-or-reopen — "phase-open"
 //      + "phase-close"). Idempotent across ticks: if an issue with the
@@ -83,13 +83,11 @@
 //               --deploy-url <url>
 //
 //     Posts a "phase shipped" comment AND actively closes the mirror via
-//     the API (state=closed, state_reason=completed). The commit's
-//     `Closes #N` trailer only fires for commits pushed DIRECTLY to the
-//     default branch — phases that reach `main` via cross-session
-//     `claude/*` branch merge reconciliation leave the mirror open (nine
-//     leaked before the 2026-07-14 triage), so the trailer is a
-//     belt-and-suspenders backup, not the load-bearing close. Idempotent
-//     (an already-closed mirror is a no-op). Best-effort.
+//     the API (state=closed, state_reason=completed). GitHub's native
+//     `Closes #N` parser is inert here (nine mirrors leaked before the
+//     2026-07-14 triage); the load-bearing close is the `close-trailers`
+//     sweep, which reads the commit's trailer on every push to `main`.
+//     Idempotent (an already-closed mirror is a no-op). Best-effort.
 //
 //   deploy-comment --sha <sha>
 //                  --deploy-url <url>
@@ -323,7 +321,7 @@ function closeIssue(number, repo) {
 // best-effort prose step in `skills/iterate.md` Step 7, gated behind
 // `npm run deploy:check` going green — and an agent turn that ends before
 // CI concludes skips it silently, forever. The `Closes #N` trailer that
-// the docs call a "belt-and-suspenders backup" has never been observed
+// the docs then called a "belt-and-suspenders backup" has never been observed
 // closing anything in this repo; WHY GitHub's parser stays inert here
 // could not be determined, which is exactly why nothing may depend on it.
 //
@@ -809,7 +807,7 @@ export function buildCloseCommentBody({ commit, deployUrl }) {
     '',
     `Live at ${deployUrl} after deploy ready (~3–5 min).`,
     '',
-    '_Closed by the autonomous loop via the GitHub API (reliable regardless of push route); the commit\'s `Closes #N` trailer is a belt-and-suspenders backup._',
+    '_Closed by the autonomous loop via the GitHub API (reliable regardless of push route); the `close-trailers` sweep also closes it from the commit\'s `Closes #N` trailer._',
   ].join('\n')
 }
 
@@ -991,7 +989,7 @@ export function buildPhaseShippedCommentBody({ phaseId, commit, deployUrl }) {
     '',
     `Live at ${deployUrl} after deploy ready.`,
     '',
-    '_Closed by the autonomous loop after a green deploy (via the GitHub API — reliable regardless of push route); the commit\'s `Closes #N` trailer is a belt-and-suspenders backup._',
+    '_Closed by the autonomous loop after a green deploy (via the GitHub API — reliable regardless of push route); the `close-trailers` sweep also closes it from the commit\'s `Closes #N` trailer._',
   ].join('\n')
 }
 

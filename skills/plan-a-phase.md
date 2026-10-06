@@ -183,7 +183,7 @@ cat > "$issue_body" <<EOF
 **Brief:** [\`plan/phases/phase_<N>_<topic>.md\`](https://github.com/no-trbl-2-u/Axiomancer/blob/main/plan/phases/phase_<N>_<topic>.md)
 
 ---
-_Tracked by the autonomous loop. The phase commit will close this issue via a \`Closes #<this-issue>\` trailer; deploy URL is posted as a follow-up comment._
+_Tracked by the autonomous loop. The phase commit names this issue in a \`Closes #<this-issue>\` trailer and the \`close-trailers\` workflow closes it when the commit reaches main; deploy URL is posted as a follow-up comment._
 EOF
 
 node scripts/loop-issue.mjs phase-open \
