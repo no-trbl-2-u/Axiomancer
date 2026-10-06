@@ -1091,8 +1091,9 @@ present. Row stays open until that session runs.
   when the second Pages project exists — filed below as a loop-call rather
   than edited blind, because the project does not exist yet.
 
-### The loop's own docs still call the `Closes #N` trailer the closing mechanism
+### [x] The loop's own docs still call the `Closes #N` trailer the closing mechanism — RESOLVED 2026-10-06 (9d86edbe)
 - category: docs
+- issue: #449
 - impact: 6
 - ease: 9
 - detail: filed 2026-08-08 by Phase 48. `skills/ship-a-phase.md:325`,
