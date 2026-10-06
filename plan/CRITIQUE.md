@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-02 at commit 0a5a3199
-> Pass count: 67
+> Last pass: 2026-10-06 at commit 534b93f6
+> Pass count: 68
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -330,9 +330,67 @@
 > `plan/AUDIT.md` row "Post-purge: a staged A Plain Word wraps +25%
 > mid-token"). Zero fresh findings this pass.
 
+> **[critique pass 68, 2026-10-06, commit 534b93f6] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route still bounces to the title with no save). 19
+> commits after pass 67: the RC walk fixes, R10d (tutorial removal), the
+> RC cut (D76) and the map perf pass (each road in its own strip). The
+> hub draws its roads on the sheet at both viewports with no visible
+> regression, and the first-fight coach card no longer appears on the
+> combat board. Filed two LOW rows on the hazard route-select screen:
+> the mobile top strip runs its three segments together, and the opening
+> hand's names are clipped by the next card again. Reconfirmed and not
+> re-filed: the RC walk row (the hub footer's "the paths close as you go
+> deeper" is still item 1), pass 65's Minor Healing Potion, pass 64's
+> identical "PHASE n · ATTACKS" headers, pass 63's corner medallions,
+> pass 62's phase ledger column, pass 61's inn-rest wording, pass 58's
+> A Plain Word "+24" beside "+60%", and the desktop "VUL"/"+6"/"%" and
+> "GUAR"/"12" chip wraps (`plan/AUDIT.md`).
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `archive-pre-revamp:plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
+
+### [LOW] hazard / mobile — the route-select top strip reads "◆ HAZARDNO RETREAT — CHOOSE TO PROCEED◆" with no gaps
+- pass: 68 (commit 534b93f6)
+- viewport: mobile (375x812); desktop is fine
+- category: visual
+- observation: the strip above the hazard title is three `Text`
+  segments ("◆ HAZARD", "NO RETREAT — CHOOSE TO PROCEED", "◆") in a
+  `justifyContent: 'space-between'` row. At 1280 they sit far apart. At
+  375 the three, at 11px mono with 2px letter-spacing, fill the row, and
+  space-between leaves no gap, so they read as one run-on string.
+- evidence: `.critique-artifacts/mobile/10-hazard.png` (top strip);
+  `desktop/10-hazard.png` for the intended spacing;
+  `axiomancer-mobile/components/hazard/RouteSelect.tsx:157-160` and the
+  `topStrip` style at `:217`.
+- suggested fix: give the row a `gap` (or margins on the middle
+  segment) and let the middle segment shrink/ellipsize, or drop the
+  middle line below 400px. The strip's copy is also hardcoded in the
+  component; move it with the fix.
+- source: critique:drive (unattended)
+
+### [LOW] hazard — the opening-hand fan clips card names again ("SURE FOOTIN", "BALANCE POL")
+- pass: 68 (commit 534b93f6)
+- viewport: both (375x812 and 1280x800)
+- category: visual / legibility
+- observation: the route-select hand preview shows each card name on
+  one line, and the next card in the fan covers its tail: "SURE
+  FOOTIN", "BALANCE POL" twice, at both viewports. The 2026-09-11 fix
+  (`8f3acef7`, Done row "the fanned route-choice hand truncates card
+  names illegibly") cut the overlap to -22 so names wrapped inside the
+  visible strip. The overlap is still -22, so the names now lay out
+  wider than the 68px the fan leaves visible. Tap-to-read still works,
+  so this is legibility only. Desktop has room to spare and still
+  overlaps.
+- evidence: `.critique-artifacts/{mobile,desktop}/10-hazard.png`;
+  `RouteSelect.tsx:181` (`marginLeft: -22`); `HazardCard` hand-mode
+  name at `components/hazard/*Card*.tsx` (`numberOfLines={2}`).
+- suggested fix: make the hand-mode name wrap inside the visible strip
+  (fixed width), or open the fan out when the row has room
+  (e.g. no overlap at desktop widths).
+- source: critique:drive (unattended)
 
 ### [LOW] RC walk 2026-10-02 — copy, label and console findings (one row per item, all presentation)
 - pass: RC checkpoint walk, four `playtester` legs (attended, T present), commits a493eaf7 → 169b6dbc
