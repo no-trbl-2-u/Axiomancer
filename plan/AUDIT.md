@@ -98,21 +98,6 @@
   confirm `npm ci && npm run verify -w axiomancer-mobile` is green in a
   fresh worktree.
 
-### [bug] Memoir chronicle reads the event buffer in the wrong order (R10c3, 2026-10-02)
-- category: bug
-- impact: 5
-- ease: 8
-- detail: `state/store.ts` (~375) prepends each event to `_recentEvents`
-  (newest first), but `buildChronicle` in
-  `state/presenters/memoir.engine.ts` (~285) treats the buffer as
-  oldest-first and reverses it. The live chronicle shows the 12 oldest of
-  the 20 buffered events, oldest first, and the continent-change check walks
-  backwards in time. The tests pass only because their fixtures are
-  oldest-first. Found by the R10c3 comment sweep; the JSDoc now states the
-  mismatch.
-- next: drop the reverse (or make the buffer append), and add a test that
-  feeds the buffer through the store's real handler.
-
 ### [copy] Combat die a11y label still says "SPECIAL face" (R10c3, 2026-10-02)
 - category: copy
 - impact: 2
@@ -1505,6 +1490,25 @@ present. Row stays open until that session runs.
   a flow that is otherwise working.
 
 ## Done
+
+### [x] [bug] Memoir chronicle reads the event buffer in the wrong order (R10c3, 2026-10-02) — CLOSED 2026-10-06 (09161ae7)
+- category: bug
+- impact: 5
+- ease: 8
+- detail: `state/store.ts` (~375) prepends each event to `_recentEvents`
+  (newest first), but `buildChronicle` in
+  `state/presenters/memoir.engine.ts` (~285) treats the buffer as
+  oldest-first and reverses it. The live chronicle shows the 12 oldest of
+  the 20 buffered events, oldest first, and the continent-change check walks
+  backwards in time. The tests pass only because their fixtures are
+  oldest-first. Found by the R10c3 comment sweep; the JSDoc now states the
+  mismatch.
+- next: drop the reverse (or make the buffer append), and add a test that
+  feeds the buffer through the store's real handler.
+- issue: #448
+- resolution: `buildChronicle` walks a reversed copy of the newest-first
+  buffer, then emits the newest 12 newest-first; fixtures use the store's
+  order and a new test feeds events through the store's emitter handler.
 
 ### [x] [docs] Phase 44a deferred its `lexicon.json` registrations to the phases that actually rename each concept
 - category: docs
