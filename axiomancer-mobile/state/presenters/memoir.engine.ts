@@ -150,10 +150,10 @@ export interface MemoirViewModel {
 
 /**
  * Chronicle mapper. Reads `state._recentEvents` (ring buffer, capacity
- * 20), treats it as oldest-first, reverses it and emits at most
- * `CHRONICLE_VISIBLE_CAP` entries. Note: the live store prepends to the
- * buffer (newest-first), so there the output runs oldest-first and the
- * continent tracking below walks backwards in time.
+ * 20), which the store keeps newest-first (`state/store.ts` prepends
+ * each event). Walks it oldest-first so the continent tracking below
+ * runs forward in time, then emits the newest
+ * `CHRONICLE_VISIBLE_CAP` entries, newest first.
  *
  * - `combat:ended` → "FELLED" for 'victory', "ROUTED BY" for 'defeat',
  *   "SPARED" for 'friendship' (the mercy ending), "FLED" for 'flee'.
@@ -175,7 +175,8 @@ function buildChronicle(rawEvents: unknown): ReadonlyArray<ChronicleEntry> {
     if (!Array.isArray(rawEvents) || rawEvents.length === 0) {
         return Object.freeze([]) as readonly ChronicleEntry[];
     }
-    const events = rawEvents as ReadonlyArray<TypedGameEvent>;
+    // The buffer is newest-first; walk a reversed copy (oldest-first).
+    const events = [...(rawEvents as ReadonlyArray<TypedGameEvent>)].reverse();
     const entries: ChronicleEntry[] = [];
     let lastSeenContinent: string | null = null;
     let ordinal = 0;

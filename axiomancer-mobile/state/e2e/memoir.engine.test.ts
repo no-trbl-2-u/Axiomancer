@@ -16,7 +16,7 @@ import {
     selectMemoirViewModel,
     type MemoirViewModel,
 } from '@/state/presenters/memoir.engine';
-import { type AppStoreState } from '@/state/store';
+import { createAppStore, getEmitterForStore, type AppStoreState } from '@/state/store';
 
 afterEach(() => {
     jest.restoreAllMocks();
@@ -240,6 +240,7 @@ type RecentEvent = {
     payload?: Record<string, unknown>;
 };
 
+/** `events` is newest-first, the order the live store keeps the buffer in. */
 function setRecentEvents(
     store: ReturnType<typeof createGameStore>,
     events: RecentEvent[],
@@ -328,10 +329,11 @@ describe('selectMemoirViewModel: chronicle (Tick D)', () => {
         // currentContinent as `{name: <string>}` to match the
         // engine type.
         const store = createGameStore(createMemoryAdapter());
+        // Newest-first: Ash Marches, Ash Marches again, then Bell Vale.
         setRecentEvents(store, [
             {
                 type: 'world:moved',
-                payload: { state: { world: { currentContinent: { name: 'Ash Marches' } } } },
+                payload: { state: { world: { currentContinent: { name: 'Bell Vale' } } } }, // change
             },
             {
                 type: 'world:moved',
@@ -339,7 +341,7 @@ describe('selectMemoirViewModel: chronicle (Tick D)', () => {
             },
             {
                 type: 'world:moved',
-                payload: { state: { world: { currentContinent: { name: 'Bell Vale' } } } }, // change
+                payload: { state: { world: { currentContinent: { name: 'Ash Marches' } } } },
             },
         ]);
         const vm = selectMemoirViewModel(store.getState());
@@ -401,10 +403,10 @@ describe('selectMemoirViewModel: chronicle (Tick D)', () => {
 
     it('returns reverse-chronological entries and caps at 12 visible rows', () => {
         const store = createGameStore(createMemoryAdapter());
-        // Build 15 levelup events with monotonically rising levels.
+        // 15 levelups with rising levels, stored newest-first (15 down to 1).
         const events: RecentEvent[] = Array.from({ length: 15 }, (_, i) => ({
             type: 'character:levelup',
-            payload: { state: { player: { level: i + 1 } } },
+            payload: { state: { player: { level: 15 - i } } },
         }));
         setRecentEvents(store, events);
         const vm = selectMemoirViewModel(store.getState());
@@ -412,6 +414,54 @@ describe('selectMemoirViewModel: chronicle (Tick D)', () => {
         // Reverse-chronological: highest level appears first.
         expect(vm.chronicle[0]?.label).toBe('ROSE TO 15');
         expect(vm.chronicle[11]?.label).toBe('ROSE TO 4');
+    });
+
+    it('reads the buffer in the order the live store writes it', () => {
+        // Feed events through the store's own emitter handler, not a
+        // hand-built fixture, so the test breaks if the buffer's order
+        // and the mapper's reading of it drift apart again.
+        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const emitter = getEmitterForStore(store);
+        expect(emitter).not.toBeNull();
+        const moveTo = (name: string) =>
+            emitter!.emit({
+                type: 'world:moved',
+                payload: { state: { world: { currentContinent: { name } } } } as never,
+            });
+        moveTo('Ash Marches');
+        moveTo('Bell Vale');
+        moveTo('Bell Vale');
+        moveTo('Ash Marches');
+        for (let level = 2; level <= 20; level++) {
+            emitter!.emit({
+                type: 'character:levelup',
+                payload: { state: { player: { level } } } as never,
+            });
+        }
+
+        // 23 events, capacity 20: the three oldest crossings fall out,
+        // leaving the return to Ash Marches as the oldest buffered event.
+        const vm = selectMemoirViewModel(store.getState());
+        expect(vm.chronicle).toHaveLength(12);
+        expect(vm.chronicle[0]?.label).toBe('ROSE TO 20');
+        expect(vm.chronicle[11]?.label).toBe('ROSE TO 9');
+        expect(vm.chronicle.some((e) => e.kind === 'world:moved')).toBe(false);
+
+        // With room to spare, the crossings read newest first and the
+        // repeated Bell Vale move is not a crossing.
+        const fresh = createAppStore({ adapter: createMemoryAdapter() });
+        const freshEmitter = getEmitterForStore(fresh)!;
+        for (const name of ['Ash Marches', 'Bell Vale', 'Bell Vale', 'Ash Marches']) {
+            freshEmitter.emit({
+                type: 'world:moved',
+                payload: { state: { world: { currentContinent: { name } } } } as never,
+            });
+        }
+        expect(selectMemoirViewModel(fresh.getState()).chronicle.map((e) => e.label)).toEqual([
+            'CROSSED INTO ASH MARCHES',
+            'CROSSED INTO BELL VALE',
+            'CROSSED INTO ASH MARCHES',
+        ]);
     });
 });
 
