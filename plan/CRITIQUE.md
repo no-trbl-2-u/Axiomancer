@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-06 at commit 534b93f6
-> Pass count: 68
+> Last pass: 2026-10-07 at commit 60d52715
+> Pass count: 69
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -348,9 +348,68 @@
 > A Plain Word "+24" beside "+60%", and the desktop "VUL"/"+6"/"%" and
 > "GUAR"/"12" chip wraps (`plan/AUDIT.md`).
 
+> **[critique pass 69, 2026-10-07, commit 60d52715] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route still bounces to the title with no save). 12
+> commits after pass 68, mostly critique fixes. Re-verified on screen:
+> the hub footer now reads "every path beside trodden ground stays open
+> — tap a glowing node to travel." at both viewports (RC walk item 1),
+> and the mobile combat rail's ledger reads "PHASE 1/5 · R1 · T1" on one
+> row. Filed two LOW rows: the map legend is 8px text with no backing
+> plate over the engraving, and the desktop main menu stretches its
+> rows 1232px wide under an empty upper half. Reconfirmed and not
+> re-filed: pass 68's hazard top strip and clipped hand names, pass 65's
+> Minor Healing Potion, pass 64's identical "PHASE n · ATTACKS"
+> headers, pass 63's corner medallions, pass 61's inn-rest wording, and
+> the desktop "GUAR"/"12" and "VUL" chip wraps (`plan/AUDIT.md`).
+> Checked and not filed: the mobile hub's black band above the sheet
+> (the documented no-clamp trade, pass 56).
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `archive-pre-revamp:plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
+
+### [LOW] exploration hub — the map legend is 8px bone text laid straight over the engraving, and roads run through it
+- pass: 69 (commit 60d52715)
+- viewport: both (375x812 and 1280x800)
+- category: a11y / legibility
+- observation: the legend in the chart's bottom-left corner
+  ("● TRODDEN ● OPEN · SEALED" over "18 nodes · 12 sealed") is the
+  smallest text in the game, and it has no backing. On the walked
+  Breakwater sheet it sits on light engraved rock with black road
+  strokes crossing it, so the three keys and the count are hard to
+  read at either viewport. It is the only key to what the node colours
+  mean.
+- evidence: `desktop/11-late-game-hub.png` and
+  `mobile/11-late-game-hub.png` (bottom-left of the chart);
+  `axiomancer-mobile/components/exploration/MapOverlays.tsx:94-110`
+  (`legend` is absolutely placed, no background; `legendText` is
+  `fontSize: 8`).
+- suggested fix: give the legend a translucent `AXM.bg` plate with a
+  little padding (as the recentre button has its own disc), and raise
+  the text to the 9-10px the other mono eyebrows use. Keep the
+  `RECENTRE_CLEARANCE` right inset.
+- source: critique:drive (unattended)
+
+### [LOW] main menu / desktop — the rows stretch 1232px edge to edge under an empty upper half
+- pass: 69 (commit 60d52715)
+- viewport: desktop (1280x800); mobile reads well
+- category: visual
+- observation: after EMBARK, the chronicle menu anchors to the bottom
+  (`justifyContent: 'flex-end'`), which suits a phone's thumb. At 1280
+  the top 55% of the screen is empty black, and NEW GAME, LOAD GAME and
+  SETTINGS each run the full width, with the label at the far left and
+  the ">" 1200px away at the far right. The heading "miserere mei, deus"
+  is centred above them, so the screen reads as two unrelated layouts.
+  Dialogue already caps its column at about 530px on desktop.
+- evidence: `desktop/02-onboarding.png` against `mobile/02-onboarding.png`;
+  `axiomancer-mobile/components/menu/MainMenu.tsx:78-85` (`root` has no
+  `maxWidth` and no centring).
+- suggested fix: cap the menu column (heading and rows) at a reading
+  width (about 480-560px) and centre it, keeping the bottom anchor on
+  narrow screens. Layout only; no copy or art change.
+- source: critique:drive (unattended)
 
 ### [LOW] hazard / mobile — the route-select top strip reads "◆ HAZARDNO RETREAT — CHOOSE TO PROCEED◆" with no gaps
 - pass: 68 (commit 534b93f6)
