@@ -491,32 +491,6 @@
   rects must not intersect any card's effect row.
 - source: critique:drive (unattended)
 
-### [MED] combat / mobile — on a 375-wide phone the phase ledger stacks as a five-mark vertical column under the hand
-- pass: 62 (commit 3293e959)
-- viewport: mobile (375x812); desktop (1280x800) renders the same five marks as one row
-- category: mobile
-- observation: the bottom rail shows the fight's five-phase ledger (one
-  mark per Brine Hag phase). On desktop the marks sit as one row between
-  "160 / 160" and the deck piles. On the phone they stack one above the
-  other, a column of five empty circles running from under the hand's
-  middle card down to the screen's bottom edge, so it reads as stray
-  chrome rather than "phase 1 of 5". The rail pads 104 left and 92 right
-  for the two medallions, which leaves 179pt. The VITAE readout and the
-  piles never shrink, so the ledger, the one flexible cell, gets roughly
-  one mark's width and `flexWrap: 'wrap'` breaks after every mark. The
-  style comment expects "a second row on a narrow phone", not five.
-- evidence: `.critique-artifacts/mobile/04-combat-board.png` (bottom
-  centre, below the third card) vs `desktop/04-combat-board.png` (bottom
-  centre, one row); `axiomancer-mobile/components/combat/encounter/CombatBoard.tsx:1585`
-  (ledger render) and `:2181-2189` (`rail` paddings, `railLedger` wrap).
-- suggested fix: keep the ledger on one row at 375: drop `flexWrap` and
-  shrink the marks (`LedgerMark size`) on narrow widths, or move the
-  ledger to its own centred line above the rail when it can't fit. Pin
-  it with a layout test that measures the ledger as one row at 375.
-- update (pass 63, commit aea7593b): unchanged. The ledger still stacks as a
-  five-mark column under the hand at 375.
-- source: critique:drive (unattended)
-
 ### [MED] rest — the Breakwater's inns are described as paid rooms, but REST reads "Sleep where you stand. Free."
 - pass: 61 (commit 0be3bb1c)
 - viewport: both (375x812 and 1280x800)
@@ -729,6 +703,33 @@
 - source: loop
 
 ## Done
+
+### [x] [MED] combat / mobile — on a 375-wide phone the phase ledger stacks as a five-mark vertical column under the hand — RESOLVED 2026-10-07 (commit 67fc1541; railLedgerStacks puts the ledger on its own unwrapped line at the top of the rail when the row cannot hold it, pinned in CombatBoard.rail-ledger.test.tsx)
+- issue: #452
+- pass: 62 (commit 3293e959)
+- viewport: mobile (375x812); desktop (1280x800) renders the same five marks as one row
+- category: mobile
+- observation: the bottom rail shows the fight's five-phase ledger (one
+  mark per Brine Hag phase). On desktop the marks sit as one row between
+  "160 / 160" and the deck piles. On the phone they stack one above the
+  other, a column of five empty circles running from under the hand's
+  middle card down to the screen's bottom edge, so it reads as stray
+  chrome rather than "phase 1 of 5". The rail pads 104 left and 92 right
+  for the two medallions, which leaves 179pt. The VITAE readout and the
+  piles never shrink, so the ledger, the one flexible cell, gets roughly
+  one mark's width and `flexWrap: 'wrap'` breaks after every mark. The
+  style comment expects "a second row on a narrow phone", not five.
+- evidence: `.critique-artifacts/mobile/04-combat-board.png` (bottom
+  centre, below the third card) vs `desktop/04-combat-board.png` (bottom
+  centre, one row); `axiomancer-mobile/components/combat/encounter/CombatBoard.tsx:1585`
+  (ledger render) and `:2181-2189` (`rail` paddings, `railLedger` wrap).
+- suggested fix: keep the ledger on one row at 375: drop `flexWrap` and
+  shrink the marks (`LedgerMark size`) on narrow widths, or move the
+  ledger to its own centred line above the rail when it can't fit. Pin
+  it with a layout test that measures the ledger as one row at 375.
+- update (pass 63, commit aea7593b): unchanged. The ledger still stacks as a
+  five-mark column under the hand at 375.
+- source: critique:drive (unattended)
 
 ### [x] [MED] combat — A Plain Word's FREE VULNERABLE chip reads "+24", dropping the unit next to its paid "+60%" — RESOLVED 2026-10-07 (commit ef0e7a8b; compactFree keeps a trailing "%", pinned in CombatBoard.S1-board.test.tsx)
 - pass: 63 (commit aea7593b)
