@@ -545,26 +545,6 @@
   so pin it with a presenter test on an inn node.
 - source: critique:drive (unattended)
 
-### [MED] combat — A Plain Word's FREE VULNERABLE chip reads "+24", dropping the unit next to its paid "+60%"
-- pass: 63 (commit aea7593b)
-- history: pass 58 (commit 36238fd8, filed as "×24" vs "+60%"), pass 59
-  (commit 5ebc7c13, presenter fix landed but `compactFree` strips the "%"),
-  pass 60 (commit 2d918845, unchanged), pass 61 (commit 0be3bb1c, unchanged)
-- viewport: both (375×812 and 1280×800)
-- category: comprehension
-- observation: A Plain Word (`grey-word`) is in every starting hand since P1.
-  The presenter emits "+24%" (`percentIntensity` in
-  `combat-encounter.engine.ts`, fixed pass 59), but the board's
-  `compactFree` (`CombatBoard.tsx:1669`) matches `^\+?(\d+)` and returns
-  "+24", dropping the unit — both viewports still read "A PLAIN WORD / +24 /
-  VULNERABLE / +60%", unchanged since pass 59 and reconfirmed through pass 66.
-- evidence: `.critique-artifacts/mobile/04-combat-board.txt` ("A PLAIN WORD /
-  +24 / VULNERABLE / +60%"); `axiomancer-mobile/components/combat/encounter/CombatBoard.tsx:1669`;
-  `axiomancer-mechanics/src/Cards/library/starters.cards.ts:79-80`.
-- suggested fix: keep a trailing "%" in `compactFree` and pin it with a
-  presenter test on "+24%".
-- source: critique:drive (unattended)
-
 ### [MED] combat — the only SUMMON carrier cannot reach wave 2, so half the spawn rule is dead on the roster
 - pass: burn-day audit 2026-09-19 (row 3.9)
 - viewport: n/a — engine reach, not layout
@@ -749,6 +729,27 @@
 - source: loop
 
 ## Done
+
+### [x] [MED] combat — A Plain Word's FREE VULNERABLE chip reads "+24", dropping the unit next to its paid "+60%" — RESOLVED 2026-10-07 (commit ef0e7a8b; compactFree keeps a trailing "%", pinned in CombatBoard.S1-board.test.tsx)
+- pass: 63 (commit aea7593b)
+- history: pass 58 (commit 36238fd8, filed as "×24" vs "+60%"), pass 59
+  (commit 5ebc7c13, presenter fix landed but `compactFree` strips the "%"),
+  pass 60 (commit 2d918845, unchanged), pass 61 (commit 0be3bb1c, unchanged)
+- viewport: both (375×812 and 1280×800)
+- category: comprehension
+- observation: A Plain Word (`grey-word`) is in every starting hand since P1.
+  The presenter emits "+24%" (`percentIntensity` in
+  `combat-encounter.engine.ts`, fixed pass 59), but the board's
+  `compactFree` (`CombatBoard.tsx:1669`) matches `^\+?(\d+)` and returns
+  "+24", dropping the unit — both viewports still read "A PLAIN WORD / +24 /
+  VULNERABLE / +60%", unchanged since pass 59 and reconfirmed through pass 66.
+- evidence: `.critique-artifacts/mobile/04-combat-board.txt` ("A PLAIN WORD /
+  +24 / VULNERABLE / +60%"); `axiomancer-mobile/components/combat/encounter/CombatBoard.tsx:1669`;
+  `axiomancer-mechanics/src/Cards/library/starters.cards.ts:79-80`.
+- suggested fix: keep a trailing "%" in `compactFree` and pin it with a
+  presenter test on "+24%".
+- source: critique:drive (unattended)
+- issue: #451
 
 ### [x] [MED] exploration — a reload taken DURING a live encounter still lands past the fight — RESOLVED 2026-10-02 (R9a, commit 1bad8fce; shape (a), pinned by fight-checkpoint.engine.test.ts and the mobile reload-mid-fight tests)
 - pass: burn-day audit 2026-09-19 (row 3.1 fix, residual)
