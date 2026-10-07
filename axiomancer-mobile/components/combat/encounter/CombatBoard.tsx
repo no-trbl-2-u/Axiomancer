@@ -241,7 +241,7 @@ const RAIL_LEDGER_GAP = 3;
 
 /** True when the phase ledger cannot sit on one row between the VITAE readout
  *  and the piles. It then takes its own centred line at the top of the rail,
- *  so a narrow phone shows "phase 1 of 5" as a row, never a column. */
+ *  so a narrow phone still reads the ledger as a row, never a column. */
 export function railLedgerStacks(screenW: number, marks: number): boolean {
     if (marks < 1) return false;
     const ledgerW = marks * RAIL_LEDGER_MARK + (marks - 1) * RAIL_LEDGER_GAP;
