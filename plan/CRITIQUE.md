@@ -370,25 +370,6 @@
 
 ## Pending
 
-### [LOW] main menu / desktop — the rows stretch 1232px edge to edge under an empty upper half
-- pass: 69 (commit 60d52715)
-- viewport: desktop (1280x800); mobile reads well
-- category: visual
-- observation: after EMBARK, the chronicle menu anchors to the bottom
-  (`justifyContent: 'flex-end'`), which suits a phone's thumb. At 1280
-  the top 55% of the screen is empty black, and NEW GAME, LOAD GAME and
-  SETTINGS each run the full width, with the label at the far left and
-  the ">" 1200px away at the far right. The heading "miserere mei, deus"
-  is centred above them, so the screen reads as two unrelated layouts.
-  Dialogue already caps its column at about 530px on desktop.
-- evidence: `desktop/02-onboarding.png` against `mobile/02-onboarding.png`;
-  `axiomancer-mobile/components/menu/MainMenu.tsx:78-85` (`root` has no
-  `maxWidth` and no centring).
-- suggested fix: cap the menu column (heading and rows) at a reading
-  width (about 480-560px) and centre it, keeping the bottom anchor on
-  narrow screens. Layout only; no copy or art change.
-- source: critique:drive (unattended)
-
 ### [LOW] hazard / mobile — the route-select top strip reads "◆ HAZARDNO RETREAT — CHOOSE TO PROCEED◆" with no gaps
 - pass: 68 (commit 534b93f6)
 - viewport: mobile (375x812); desktop is fine
@@ -714,6 +695,26 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] main menu / desktop — the rows stretch 1232px edge to edge under an empty upper half — RESOLVED 2026-10-07 (commit 9c435716; heading and rows sit in one column capped at `MENU_COLUMN_MAX_WIDTH` 520 and centred, phone fills it, bottom anchor kept; pinned in MainMenu.test.tsx)
+- issue: #456
+- pass: 69 (commit 60d52715)
+- viewport: desktop (1280x800); mobile reads well
+- category: visual
+- observation: after EMBARK, the chronicle menu anchors to the bottom
+  (`justifyContent: 'flex-end'`), which suits a phone's thumb. At 1280
+  the top 55% of the screen is empty black, and NEW GAME, LOAD GAME and
+  SETTINGS each run the full width, with the label at the far left and
+  the ">" 1200px away at the far right. The heading "miserere mei, deus"
+  is centred above them, so the screen reads as two unrelated layouts.
+  Dialogue already caps its column at about 530px on desktop.
+- evidence: `desktop/02-onboarding.png` against `mobile/02-onboarding.png`;
+  `axiomancer-mobile/components/menu/MainMenu.tsx:78-85` (`root` has no
+  `maxWidth` and no centring).
+- suggested fix: cap the menu column (heading and rows) at a reading
+  width (about 480-560px) and centre it, keeping the bottom anchor on
+  narrow screens. Layout only; no copy or art change.
+- source: critique:drive (unattended)
 
 ### [x] [LOW] combat — the threat sequence's collapsed rows all read "PHASE n · ATTACKS", so the preview hides how the fight escalates — RESOLVED 2026-10-07 (commit ccf6f7eb; `threatPhaseHeader` prints "PHASE 2 · ATTACKS · 13" from the structured threat effects, spoken as "Phase 2, ATTACKS, 13 damage"; branch phases omit the figure; pinned in threat-phase-header.test.ts and combat-encounter.screen.test.tsx)
 - issue: #455
