@@ -229,6 +229,26 @@ const SIG_TRAY_CLEARANCE = 10;
 // inset. Exported for the rail test — the readout must sit inside this.
 export const RAIL_LINE_H = 26;
 
+// The rail's widths, for deciding whether the phase ledger fits its row. The
+// side paddings are the two medallion footprints; the fixed cells are the
+// widest VITAE readout ("♥ 999 / 999") and the two piles, which never shrink.
+export const RAIL_PAD_LEFT = 104;
+export const RAIL_PAD_RIGHT = 92;
+const RAIL_GAP = 6;
+const RAIL_FIXED_CELLS_W = 150;
+export const RAIL_LEDGER_MARK = 14;
+const RAIL_LEDGER_GAP = 3;
+
+/** True when the phase ledger cannot sit on one row between the VITAE readout
+ *  and the piles. It then takes its own centred line at the top of the rail,
+ *  so a narrow phone shows "phase 1 of 5" as a row, never a column. */
+export function railLedgerStacks(screenW: number, marks: number): boolean {
+    if (marks < 1) return false;
+    const ledgerW = marks * RAIL_LEDGER_MARK + (marks - 1) * RAIL_LEDGER_GAP;
+    const room = screenW - RAIL_PAD_LEFT - RAIL_PAD_RIGHT - RAIL_FIXED_CELLS_W - RAIL_GAP * 2;
+    return ledgerW > room;
+}
+
 // ── The hand fan's chrome-free band ──────────────────────────────────────────
 // The two bottom corners are chrome, not board: the player medallion sits at
 // left 10 and is PLAYER_DOCK_FOOTPRINT_W wide, the END stack at right 10 with
@@ -1133,6 +1153,12 @@ export const CombatBoard = React.memo(function CombatBoard({
     const [railMeasuredH, setRailMeasuredH] = useState(0);
     const railMinH = RAIL_LINE_H + bottomInset;
     const railH = Math.max(railMinH, railMeasuredH);
+    const ledgerStacks = railLedgerStacks(screenW, vm.ledger.length);
+    const ledger = (
+        <View style={[styles.railLedger, ledgerStacks && styles.railLedgerStacked]} testID="combat-ledger">
+            {vm.ledger.map((m, i) => <LedgerMark key={i} kind={m === 'clear' ? 'O' : m === 'overwhelmed' ? 'X' : 'pending'} size={RAIL_LEDGER_MARK} />)}
+        </View>
+    );
 
     return (
         <View style={styles.root} testID="combat-board">
@@ -1339,10 +1365,11 @@ export const CombatBoard = React.memo(function CombatBoard({
 
                 {/* bottom rail — ♥ HP · phase ledger · deck/discard */}
                 <View
-                    style={[styles.rail, { minHeight: railMinH, paddingBottom: bottomInset }]}
+                    style={[styles.rail, ledgerStacks && styles.railStacked, { minHeight: railMinH, paddingBottom: bottomInset }]}
                     testID="combat-rail"
                     onLayout={(e) => setRailMeasuredH(e.nativeEvent.layout.height)}
                 >
+                    {ledgerStacks ? ledger : null}
                     {/* Print the maximum, as the enemy's bar does, so the player
                       * can tell how much of their VITAE is left. */}
                     <Text
@@ -1354,9 +1381,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                     >
                         ♥ {vm.player.hp}<Text style={styles.railHpMax}> / {vm.player.maxHp}</Text>
                     </Text>
-                    <View style={styles.railLedger} testID="combat-ledger">
-                        {vm.ledger.map((m, i) => <LedgerMark key={i} kind={m === 'clear' ? 'O' : m === 'overwhelmed' ? 'X' : 'pending'} size={14} />)}
-                    </View>
+                    {ledgerStacks ? null : ledger}
                     <View
                         style={styles.railPiles}
                         accessible
@@ -1906,18 +1931,20 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
 
     // ── bottom rail ── The row sits between the player medallion (left 10,
     //    92 wide) and the END medallion (right 10, 80 wide); the side paddings
-    //    are those footprints, not spare room. The VITAE readout never wraps
-    //    or shrinks; the ledger is the one flexible cell (it wraps to a second
-    //    row on a narrow phone and the rail grows with it).
+    //    are those footprints, not spare room. The VITAE readout and the piles
+    //    never wrap or shrink. When the ledger cannot fit between them
+    //    (`railLedgerStacks`) it takes the first line whole and the rail grows.
     rail: {
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 6,
-        paddingLeft: 104, paddingRight: 92, backgroundColor: 'rgba(7,5,9,0.9)',
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: RAIL_GAP,
+        paddingLeft: RAIL_PAD_LEFT, paddingRight: RAIL_PAD_RIGHT, backgroundColor: 'rgba(7,5,9,0.9)',
         borderTopWidth: 1, borderTopColor: AXM.divider,
     },
+    railStacked: { flexWrap: 'wrap', rowGap: 2, paddingTop: 4 },
     railHp: { fontFamily: FONTS.mono, fontSize: 13, lineHeight: 17, color: AXM.parchment, letterSpacing: 0.5, flexShrink: 0 },
     // The maximum rides quieter than the live value.
     railHpMax: { color: AXM.bone, fontSize: 11 },
-    railLedger: { flexDirection: 'row', flexWrap: 'wrap', flexShrink: 1, gap: 3, alignItems: 'center', justifyContent: 'center' },
+    railLedger: { flexDirection: 'row', flexShrink: 1, gap: RAIL_LEDGER_GAP, alignItems: 'center', justifyContent: 'center' },
+    railLedgerStacked: { width: '100%', flexShrink: 0 },
     railPiles: { flexDirection: 'row', alignItems: 'center', gap: 3, flexShrink: 0 },
     pileGlyph: { width: 13, height: 17, borderRadius: 2, borderWidth: 1, borderColor: AXM.ash, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center' },
     pileGlyphText: { fontFamily: FONTS.sans, fontSize: 7, color: AXM.ash, lineHeight: 9 },
