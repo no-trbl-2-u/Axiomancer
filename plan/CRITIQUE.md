@@ -388,28 +388,6 @@
 
 ## Pending
 
-### [LOW] combat preview / desktop — the threat rows stretch 1236px edge to edge under a centred portrait column
-- pass: 70 (commit 560de043)
-- viewport: desktop (1280x800); mobile is fine
-- category: visual
-- observation: the "A FOE BARS THE WAY" preview centres the eyebrow,
-  portrait, name and both VITAE lines in a narrow column, then each
-  THREAT SEQUENCE row runs the full width: the "PHASE n · ATTACKS · N"
-  label sits at x≈60 and its chevron at x≈1245, with the expanded
-  phase text one short line along the left edge. The eye has to cross
-  the screen to tie a label to its chevron, and the list reads as a
-  separate layout from the foe above it. Same shape as pass 69's main
-  menu row, fixed in 9c435716.
-- evidence: `.critique-artifacts/desktop/03-combat.png`;
-  `axiomancer-mobile/components/combat/encounter/CombatEncounterPanel.tsx:1307`
-  (`revealPhase` is `alignSelf: 'stretch'`; `revealSection` at `:1306`
-  likewise) inside `revealScroll` (`:1299`, no width cap).
-- suggested fix: cap the preview's content at one column width (a
-  named constant, as `MENU_COLUMN_MAX_WIDTH` did for the menu) and
-  centre it, so the phone still fills the width; pin it in the combat
-  encounter screen test.
-- source: critique:drive (unattended)
-
 ### [LOW] combat preview — an opened threat phase repeats the header's figure as "(+11 damage)", and the "+" reads as a bonus
 - pass: 70 (commit 560de043)
 - viewport: both (375x812 and 1280x800)
@@ -757,6 +735,29 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] combat preview / desktop — the threat rows stretch 1236px edge to edge under a centred portrait column — RESOLVED 2026-10-07 (commit 31c785d8; the reveal's scroll content sits in one column capped at `REVEAL_COLUMN_MAX_WIDTH` 520 and centred, phone fills it; pinned in combat-encounter.screen.test.tsx)
+- issue: #457
+- pass: 70 (commit 560de043)
+- viewport: desktop (1280x800); mobile is fine
+- category: visual
+- observation: the "A FOE BARS THE WAY" preview centres the eyebrow,
+  portrait, name and both VITAE lines in a narrow column, then each
+  THREAT SEQUENCE row runs the full width: the "PHASE n · ATTACKS · N"
+  label sits at x≈60 and its chevron at x≈1245, with the expanded
+  phase text one short line along the left edge. The eye has to cross
+  the screen to tie a label to its chevron, and the list reads as a
+  separate layout from the foe above it. Same shape as pass 69's main
+  menu row, fixed in 9c435716.
+- evidence: `.critique-artifacts/desktop/03-combat.png`;
+  `axiomancer-mobile/components/combat/encounter/CombatEncounterPanel.tsx:1307`
+  (`revealPhase` is `alignSelf: 'stretch'`; `revealSection` at `:1306`
+  likewise) inside `revealScroll` (`:1299`, no width cap).
+- suggested fix: cap the preview's content at one column width (a
+  named constant, as `MENU_COLUMN_MAX_WIDTH` did for the menu) and
+  centre it, so the phone still fills the width; pin it in the combat
+  encounter screen test.
+- source: critique:drive (unattended)
 
 ### [x] [LOW] main menu / desktop — the rows stretch 1232px edge to edge under an empty upper half — RESOLVED 2026-10-07 (commit 9c435716; heading and rows sit in one column capped at `MENU_COLUMN_MAX_WIDTH` 520 and centred, phone fills it, bottom anchor kept; pinned in MainMenu.test.tsx)
 - issue: #456
