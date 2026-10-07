@@ -85,18 +85,32 @@ describe('MapOverlays', () => {
         });
 
         it('BOUNDS each line to the strip, so long copy wraps instead of running off', () => {
-            // This is the assertion that actually closes the clipping. In a
-            // column, `alignItems: 'stretch'` is what hands each Text the
-            // container's width as its wrap bound; content-sized lines
-            // (`flex-start`) would overflow exactly as the row did, and
-            // `flexShrink` governs HEIGHT on this axis, not width.
-            expect(legendBox().alignItems).toBe('stretch');
+            // This is the assertion that actually closes the clipping. The
+            // plate may hug short copy but is capped at the strip's width,
+            // and inside it `alignItems: 'stretch'` hands each Text the
+            // plate's width as its wrap bound; `flexShrink` governs HEIGHT
+            // on this axis, not width.
+            legendBox();
+            const plate = StyleSheet.flatten(screen.getByTestId('map-legend-plate').props.style);
+            expect(plate.maxWidth).toBe('100%');
+            expect(plate.flexDirection).toBe('column');
+            expect(plate.alignItems).toBe('stretch');
             for (const id of ['map-legend-keys', 'map-legend-count']) {
                 const flat = StyleSheet.flatten(screen.getByTestId(id).props.style);
                 // Belt and braces: Yoga defaults flexShrink to 0.
                 expect(flat.flexShrink).toBe(1);
                 // And nothing may clamp a wrapped line back to one row.
                 expect(screen.getByTestId(id).props.numberOfLines).toBeUndefined();
+            }
+        });
+
+        it('sets the keys on a backed plate, legible over light engraving (critique pass 69)', () => {
+            legendBox();
+            const plate = StyleSheet.flatten(screen.getByTestId('map-legend-plate').props.style);
+            expect(plate.backgroundColor).toBeTruthy();
+            for (const id of ['map-legend-keys', 'map-legend-count']) {
+                const flat = StyleSheet.flatten(screen.getByTestId(id).props.style);
+                expect(flat.fontSize).toBeGreaterThanOrEqual(9);
             }
         });
 

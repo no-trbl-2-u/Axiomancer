@@ -35,10 +35,15 @@ export function MapOverlays({ legend }: MapOverlaysProps) {
             <Text style={styles.gestures}>drag · pinch</Text>
 
             {/* Legend. Two stacked lines, not two ends of one row — see
-                `legend` in the stylesheet for why the row could not hold. */}
+                `legend` in the stylesheet for why the row could not hold. The
+                plate gives the keys their own ground: on a light engraved
+                sheet, bare bone text with roads running through it could not
+                be read (critique pass 69). */}
             <View style={styles.legend} testID="map-legend">
-                <Text style={styles.legendText} testID="map-legend-keys">{legend.left}</Text>
-                <Text style={styles.legendText} testID="map-legend-count">{legend.right}</Text>
+                <View style={styles.legendPlate} testID="map-legend-plate">
+                    <Text style={styles.legendText} testID="map-legend-keys">{legend.left}</Text>
+                    <Text style={styles.legendText} testID="map-legend-count">{legend.right}</Text>
+                </View>
             </View>
         </>
     );
@@ -83,10 +88,13 @@ const useStyles = makeStyles((AXM) => ({
     //      `graphWrap` is `overflow: 'hidden'`, so overflow means CLIPPED, not
     //      wrapped. A font scale or a third legend key is enough to do it.
     //
-    // Both are handled structurally rather than by shaving copy. The strip is a
-    // two-line COLUMN that keeps the button's corner free, and `alignItems:
-    // 'stretch'` is the load-bearing half: it gives each line the container's
-    // full width as its BOUND, so copy that outgrows the strip wraps to
+    // Both are handled structurally rather than by shaving copy. The strip is
+    // the BOUND: an absolute box that keeps the button's corner free. Inside
+    // it the plate hugs its copy (`alignItems: 'flex-start'` on the strip, so
+    // a short legend does not paint a band across the whole chart) but can
+    // never outgrow the strip (`maxWidth: '100%'`). The plate is a two-line
+    // COLUMN with `alignItems: 'stretch'`, which hands each line the plate's
+    // width as its wrap bound, so copy that outgrows the strip wraps to
     // another line inside it instead of running off the sheet. (`flexShrink`
     // cannot do that job in a column — in a column it governs height.) The
     // keys therefore survive a third key, a longer counter, and an
@@ -97,13 +105,24 @@ const useStyles = makeStyles((AXM) => ({
         left: 12,
         right: RECENTRE_CLEARANCE,
         flexDirection: 'column',
+        alignItems: 'flex-start',
+        zIndex: 2,
+    },
+    // The same smoked ground as `<MapCanvas>`'s recentre disc, so the two
+    // pieces of foot furniture read as one set.
+    legendPlate: {
+        maxWidth: '100%',
+        flexDirection: 'column',
         alignItems: 'stretch',
         rowGap: 2,
-        zIndex: 2,
+        paddingHorizontal: 6,
+        paddingVertical: 4,
+        borderRadius: 3,
+        backgroundColor: 'rgba(10,10,10,0.72)',
     },
     legendText: {
         fontFamily: FONTS.mono,
-        fontSize: 8,
+        fontSize: 9,
         color: AXM.bone,
         letterSpacing: 1,
         flexShrink: 1,
