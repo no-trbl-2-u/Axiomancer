@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from '@jest/globals';
 
-import type { CombatThreatPhase } from 'axiomancer-mechanics';
+import type { CombatThreatPhase } from '@mechanics';
 import { threatPhaseHeader } from '@/state/presenters/combat-encounter.engine';
 
 function phase(index: number, damage: number[], extra: Partial<CombatThreatPhase> = {}): CombatThreatPhase {
