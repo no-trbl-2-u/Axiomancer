@@ -476,32 +476,6 @@
   `/iterate`.
 - source: critique:drive (unattended)
 
-### [LOW] combat — the threat sequence's collapsed rows all read "PHASE n · ATTACKS", so the preview hides how the fight escalates
-- pass: 64 (commit c46565c3)
-- viewport: both (375x812 and 1280x800)
-- category: comprehension
-- observation: the "A FOE BARS THE WAY" preview lists the Brine Hag's five
-  phases. Only phase 1 opens by default. The other four collapse to
-  identical headers: "PHASE 2 · ATTACKS" through "PHASE 5 · ATTACKS". Since
-  R2 every live enemy card deals plain damage, so every header carries the
-  same icon and word. The one thing that differs between phases, the damage
-  (the budget rises 20% a phase), sits behind four taps. A first-time player
-  sees five copies of the same row and learns nothing about whether to take
-  the fight. Before R7d the open row's stance tell at least varied. Now the
-  headers are the whole telegraph, and they are all the same.
-- evidence: `.critique-artifacts/mobile/03-combat.{png,txt}` and
-  `desktop/03-combat.png`;
-  `axiomancer-mobile/components/combat/encounter/CombatEncounterPanel.tsx:750-771`
-  (the header renders only `PHASE {p.index} · {meta.label}`; the threat
-  text mounts only when open); `axiomancer-mechanics/src/Combat/combat.enemy-cards.ts:11-24`
-  (every card is plain damage, weighted up by phase).
-- suggested fix: put each phase's damage figure in its header ("PHASE 2 ·
-  ATTACKS · 13"), read from the structured threat payload rather than
-  parsed from the description. Keep the accordion for the action sentence.
-  Pin it with a presenter or render test that each collapsed header carries
-  its phase's damage. Presentation only, no new content.
-- source: critique:drive (unattended)
-
 ### [LOW] combat / mobile — on a 375-wide phone the corner medallions cover the effect rows of the fan's two end cards
 - pass: 63 (commit aea7593b)
 - viewport: mobile (375x812); desktop (1280x800) seats the fan between the corners and is clear
@@ -740,6 +714,33 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] combat — the threat sequence's collapsed rows all read "PHASE n · ATTACKS", so the preview hides how the fight escalates — RESOLVED 2026-10-07 (commit ccf6f7eb; `threatPhaseHeader` prints "PHASE 2 · ATTACKS · 13" from the structured threat effects, spoken as "Phase 2, ATTACKS, 13 damage"; branch phases omit the figure; pinned in threat-phase-header.test.ts and combat-encounter.screen.test.tsx)
+- issue: #455
+- pass: 64 (commit c46565c3)
+- viewport: both (375x812 and 1280x800)
+- category: comprehension
+- observation: the "A FOE BARS THE WAY" preview lists the Brine Hag's five
+  phases. Only phase 1 opens by default. The other four collapse to
+  identical headers: "PHASE 2 · ATTACKS" through "PHASE 5 · ATTACKS". Since
+  R2 every live enemy card deals plain damage, so every header carries the
+  same icon and word. The one thing that differs between phases, the damage
+  (the budget rises 20% a phase), sits behind four taps. A first-time player
+  sees five copies of the same row and learns nothing about whether to take
+  the fight. Before R7d the open row's stance tell at least varied. Now the
+  headers are the whole telegraph, and they are all the same.
+- evidence: `.critique-artifacts/mobile/03-combat.{png,txt}` and
+  `desktop/03-combat.png`;
+  `axiomancer-mobile/components/combat/encounter/CombatEncounterPanel.tsx:750-771`
+  (the header renders only `PHASE {p.index} · {meta.label}`; the threat
+  text mounts only when open); `axiomancer-mechanics/src/Combat/combat.enemy-cards.ts:11-24`
+  (every card is plain damage, weighted up by phase).
+- suggested fix: put each phase's damage figure in its header ("PHASE 2 ·
+  ATTACKS · 13"), read from the structured threat payload rather than
+  parsed from the description. Keep the accordion for the action sentence.
+  Pin it with a presenter or render test that each collapsed header carries
+  its phase's damage. Presentation only, no new content.
+- source: critique:drive (unattended)
 
 ### [x] [LOW] exploration hub — the map legend is 8px bone text laid straight over the engraving, and roads run through it — RESOLVED 2026-10-07 (commit ddb93536; the keys and count sit on a smoked plate capped at the strip's width, text raised to 9px, pinned in MapOverlays.test.tsx)
 - issue: #453
