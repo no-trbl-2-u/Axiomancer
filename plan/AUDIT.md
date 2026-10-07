@@ -52,6 +52,29 @@
 
 ## Pending
 
+### [tests] Root `npm test` is red on main: the comment guard false-positives on in-game "phase N of M" copy (digest, 2026-10-07)
+- category: tests
+- impact: 7
+- ease: 8
+- detail: `scripts/check-comments.mjs`'s `phase-number` rule
+  (`/\b[Pp]hases? (?:R?\d|[A-Z]\d)/`) exists to catch comments narrating
+  build-plan history ("Phase R7c deleted..."). It also matches plain
+  digits, so the doc comment landed by `67fc1541` (phase ledger fix,
+  2026-10-07) — "so a narrow phone shows 'phase 1 of 5' as a row, never a
+  column" in `axiomancer-mobile/components/combat/encounter/CombatBoard.tsx:244`
+  — trips it: that "phase 1 of 5" is the combat screen's own on-screen
+  copy, not a reference to a build-plan phase. Root `npm test` (one of
+  the RC release gates, `plan/revamp/checkpoint.md` §"Gate") has been red
+  on main since that commit; neither `axiomancer-mechanics` nor
+  `axiomancer-mobile`'s own `verify` runs this root-level suite, so the
+  shipping PR's gate stayed green and nobody caught it before merge.
+- next: either reword the comment to avoid the literal phrase ("so a
+  narrow phone shows the ledger as a row, never a column" reads the
+  same without tripping the rule), or tighten the regex to require a
+  phase-id shape (`R\d`, a bare capital-letter+digit, or a digit
+  immediately after a capitalized "Phase") rather than any digit after
+  "phase"/"Phase". Re-run `npm test` after either fix; it should also run the fix against the regex's own test file (`scripts/check-comments.test.mjs`) to confirm no existing case breaks.
+
 ### [perf] Map SVG fix is unproven on a device (perf audit, 2026-10-03)
 - category: bug
 - impact: 8
