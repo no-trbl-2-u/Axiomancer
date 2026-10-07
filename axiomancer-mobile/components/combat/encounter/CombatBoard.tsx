@@ -1417,7 +1417,7 @@ function artMirrored(cardId: string): boolean {
 /**
  * Compact the FREE value to what sits INSIDE the glyph — its intensity (the
  * effect owns the duration): "i1 d1" → "+1", "3 rounds" → "3r", "2" → "+2",
- * "×4 · 3t" → "×4".
+ * "×4 · 3t" → "×4", "+24% · 1t" → "+24%" (a percent keeps its unit).
  *
  * Input: the face's raw FREE value (or its hero line), or null.
  * Output: a WHOLE value, never a fragment — '' when nothing whole fits.
@@ -1436,8 +1436,8 @@ export function compactFree(v: string | null): string {
     // The presenter's applyEffect rail: '×4 · 3t', '×1 (enemy)', '×4 · 3t +'.
     const xm = s.match(/×\s*(\d+)/);
     if (xm) return `×${xm[1]}`;
-    const nm = s.match(/^\+?(\d+)/);
-    if (nm) return `+${nm[1]}`;
+    const nm = s.match(/^\+?(\d+)(%?)/);
+    if (nm) return `+${nm[1]}${nm[2]}`;
     const head = s.split(/\s+/)[0];
     return head.length <= 3 ? head : '';
 }

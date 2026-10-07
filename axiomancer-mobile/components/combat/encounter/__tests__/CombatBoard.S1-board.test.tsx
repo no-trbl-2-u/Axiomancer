@@ -187,6 +187,11 @@ describe('S1-board-C32 — compactFree never prints a chopped fragment', () => {
         expect(compactFree(null)).toBe('');
     });
 
+    it('keeps the unit on a percent intensity (A Plain Word’s VULNERABLE)', () => {
+        expect(compactFree('+24%')).toBe('+24%');
+        expect(compactFree('+24% · 1t')).toBe('+24%');
+    });
+
     it('prints nothing rather than half a word', () => {
         expect(compactFree('mercy')).toBe('');
         expect(compactFree('timed')).toBe('');
@@ -195,7 +200,7 @@ describe('S1-board-C32 — compactFree never prints a chopped fragment', () => {
         // the input — never a slice through one, never a trailing space.
         for (const v of ['×4 · 3t', 'mercy', 'timed', 'spare a foe', 'all DoTs', '3 rounds']) {
             const out = compactFree(v);
-            const derived = /^(?:[×+]\d+|\d+r)$/.test(out);
+            const derived = /^(?:[×+]\d+%?|\d+r)$/.test(out);
             const wholeWord = v.trim().split(/\s+/).includes(out);
             expect(out === '' || derived || wholeWord).toBe(true);
             expect(out).toBe(out.trim());
