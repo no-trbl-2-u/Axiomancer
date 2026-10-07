@@ -4,10 +4,11 @@
 
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 import { describe, expect, it, jest } from '@jest/globals';
 import { createNewGameState } from '@mechanics';
 
-import { MainMenu } from '../menu/MainMenu';
+import { MainMenu, MENU_COLUMN_MAX_WIDTH } from '../menu/MainMenu';
 import { createMemorySlotStore } from '@/state/persistence/memorySlotStore';
 import { MAIN_MENU_COPY } from '@/state/presenters/main-menu.engine';
 import { withAllProviders } from '@/test-utils/withAllProviders';
@@ -56,5 +57,16 @@ describe('MainMenu', () => {
             slots.save(createNewGameState());
         });
         expect(screen.getByTestId('main-menu-continue')).toBeTruthy();
+    });
+
+    it('holds the heading and rows in one centred column at a reading width', () => {
+        mount();
+        const column = StyleSheet.flatten(screen.getByTestId('main-menu-column').props.style);
+        expect(column.maxWidth).toBe(MENU_COLUMN_MAX_WIDTH);
+        expect(MENU_COLUMN_MAX_WIDTH).toBeGreaterThanOrEqual(480);
+        expect(MENU_COLUMN_MAX_WIDTH).toBeLessThanOrEqual(560);
+        expect(column.alignSelf).toBe('center');
+        expect(column.width).toBe('100%');
+        expect(screen.getByTestId('main-menu-column')).toContainElement(screen.getByTestId('main-menu-new-game'));
     });
 });

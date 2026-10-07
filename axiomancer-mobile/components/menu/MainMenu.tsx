@@ -35,44 +35,49 @@ export function MainMenu({ onContinue, onNewGame, onLoadGame, onSettings, now = 
 
     return (
         <View style={styles.root} testID="main-menu">
-            <View style={styles.header}>
-                <Text style={styles.eyebrow}>{MAIN_MENU_COPY.eyebrow}</Text>
-                <Text style={styles.title}>{MAIN_MENU_COPY.title}</Text>
-            </View>
-            <View style={styles.buttons}>
-                {vm.continue.enabled ? (
+            <View style={styles.column} testID="main-menu-column">
+                <View style={styles.header}>
+                    <Text style={styles.eyebrow}>{MAIN_MENU_COPY.eyebrow}</Text>
+                    <Text style={styles.title}>{MAIN_MENU_COPY.title}</Text>
+                </View>
+                <View style={styles.buttons}>
+                    {vm.continue.enabled ? (
+                        <MenuButton
+                            label={MAIN_MENU_COPY.continue}
+                            hint={vm.continue.hint}
+                            onPress={onContinue}
+                            primary
+                            testID="main-menu-continue"
+                        />
+                    ) : null}
                     <MenuButton
-                        label={MAIN_MENU_COPY.continue}
-                        hint={vm.continue.hint}
-                        onPress={onContinue}
-                        primary
-                        testID="main-menu-continue"
+                        label={MAIN_MENU_COPY.newGame}
+                        hint={vm.newGame.hint}
+                        onPress={onNewGame}
+                        primary={!vm.continue.enabled}
+                        testID="main-menu-new-game"
                     />
-                ) : null}
-                <MenuButton
-                    label={MAIN_MENU_COPY.newGame}
-                    hint={vm.newGame.hint}
-                    onPress={onNewGame}
-                    primary={!vm.continue.enabled}
-                    testID="main-menu-new-game"
-                />
-                <MenuButton
-                    label={MAIN_MENU_COPY.loadGame}
-                    hint={vm.loadGame.hint}
-                    onPress={onLoadGame}
-                    disabled={!vm.loadGame.enabled}
-                    testID="main-menu-load-game"
-                />
-                <MenuButton
-                    label={MAIN_MENU_COPY.settings}
-                    hint={vm.settings.hint}
-                    onPress={onSettings}
-                    testID="main-menu-settings"
-                />
+                    <MenuButton
+                        label={MAIN_MENU_COPY.loadGame}
+                        hint={vm.loadGame.hint}
+                        onPress={onLoadGame}
+                        disabled={!vm.loadGame.enabled}
+                        testID="main-menu-load-game"
+                    />
+                    <MenuButton
+                        label={MAIN_MENU_COPY.settings}
+                        hint={vm.settings.hint}
+                        onPress={onSettings}
+                        testID="main-menu-settings"
+                    />
+                </View>
             </View>
         </View>
     );
 }
+
+/** The menu column's widest extent, in points. */
+export const MENU_COLUMN_MAX_WIDTH = 520;
 
 const useStyles = makeStyles((AXM) => ({
     root: {
@@ -83,6 +88,10 @@ const useStyles = makeStyles((AXM) => ({
         paddingBottom: 48,
         paddingTop: 48,
     },
+    // A phone fills the column edge to edge; a wide window keeps the
+    // heading and rows together at a reading width instead of stretching
+    // each row across the screen.
+    column: { width: '100%', maxWidth: MENU_COLUMN_MAX_WIDTH, alignSelf: 'center' },
     header: { alignItems: 'center', marginBottom: 28 },
     eyebrow: {
         fontFamily: FONTS.mono,
