@@ -397,7 +397,7 @@
 - viewport: playwright default (desktop)
 - category: comprehension / polish
 - observation (each its own `/iterate` fix; none blocks RC):
-  1. The map footer says "the paths close as you go deeper", but frontier roaming keeps every node next to a resolved node open (`world.reducer.ts` `frontierNodes`). The copy should say what the map does. (`state/presenters/exploration.engine.ts:428`)
+  1. [x] (commit ae281b4d, issue #450; the drawer now says paths beside trodden ground stay open) The map footer says "the paths close as you go deeper", but frontier roaming keeps every node next to a resolved node open (`world.reducer.ts` `frontierNodes`). The copy should say what the map does. (`state/presenters/exploration.engine.ts:428`)
   2. Exit doors (bw-18, cw-20, bc-17, ld-18) are labelled "QUEST" with a scroll icon in the node panel and the accessibility label ("open, quest").
   3. bw-16 says "BLACKSMITH" in the node panel; the screen it opens is "THE ANVIL".
   4. The good die face is "SPECIAL face" in the combat primer and "BOON" at the Anvil; the Anvil's TEMPER refusal says a die at its cap "exceeds its special-face cap".
