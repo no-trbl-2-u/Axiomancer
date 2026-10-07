@@ -85,6 +85,9 @@ const RESOLVE_LOCK_MS = 1100;
  *  drag is never cut short. */
 const DRAG_WATCHDOG_MS = 4000;
 
+/** The pre-combat reveal's widest extent, in points. */
+export const REVEAL_COLUMN_MAX_WIDTH = 520;
+
 export interface CombatEncounterPanelProps {
     /** The foe to fight (live: the real map encounter enemy; dev: a mock). */
     enemy: Enemy;
@@ -671,7 +674,7 @@ export function CombatEncounterPanel({
             {/* CombatRevealOverlay — read the foe before you commit */}
             {showReveal && (
                 <View style={styles.reveal} testID="combat-reveal">
-                    <ScrollView contentContainerStyle={styles.revealScroll}>
+                    <ScrollView contentContainerStyle={styles.revealScroll} testID="combat-reveal-column">
                         <Text style={styles.revealEyebrow}>⚔ A FOE BARS THE WAY</Text>
                         <View style={[styles.revealPortrait, { borderColor: AXM.blood }]}>
                             <Image
@@ -1296,7 +1299,10 @@ const useStyles = makeStyles((AXM) => ({
     pilgrimRowDef: { fontFamily: FONTS.serif, fontSize: 12, lineHeight: 16, color: AXM.bone, marginTop: 2 },
 
     reveal: { flex: 1, backgroundColor: HUE.inkBg },
-    revealScroll: { alignItems: 'center', padding: 22, paddingBottom: 40 },
+    // A phone fills the column edge to edge; a wide window keeps the
+    // threat rows under the foe at a reading width instead of running each
+    // row (label at one edge, chevron at the other) across the screen.
+    revealScroll: { alignItems: 'center', padding: 22, paddingBottom: 40, width: '100%', maxWidth: REVEAL_COLUMN_MAX_WIDTH, alignSelf: 'center' },
     revealEyebrow: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 2, color: AXM.blood, marginBottom: 14, marginTop: 8 },
     revealPortrait: { borderWidth: 2, borderRadius: 6, padding: 6, backgroundColor: AXM.deepBg },
     revealName: { fontFamily: FONTS.gothic, fontSize: 24, color: AXM.parchment, marginTop: 12, textAlign: 'center' },

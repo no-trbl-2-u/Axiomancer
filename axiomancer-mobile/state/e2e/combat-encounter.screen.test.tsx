@@ -10,9 +10,11 @@
 
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 import CombatEncounterScreen from '@/app/combat-encounter/index';
+import { REVEAL_COLUMN_MAX_WIDTH } from '@/components/combat/encounter/CombatEncounterPanel';
 import type { AppStore } from '@/state/store';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
@@ -55,6 +57,17 @@ describe('combat-encounter screen — reveal then board', () => {
         const heads = screen.getAllByTestId(/^combat-reveal-phase-\d+$/);
         expect(heads.length).toBeGreaterThan(1);
         for (const h of heads) expect(h.props.accessibilityLabel).toMatch(/^Phase \d+, ATTACKS, \d+ damage$/);
+    });
+
+    it('holds the foe and its threat rows in one centred column at a reading width', () => {
+        mount();
+        const column = StyleSheet.flatten(screen.getByTestId('combat-reveal-column').props.contentContainerStyle);
+        expect(column.maxWidth).toBe(REVEAL_COLUMN_MAX_WIDTH);
+        expect(REVEAL_COLUMN_MAX_WIDTH).toBeGreaterThanOrEqual(480);
+        expect(REVEAL_COLUMN_MAX_WIDTH).toBeLessThanOrEqual(560);
+        expect(column.alignSelf).toBe('center');
+        expect(column.width).toBe('100%');
+        expect(screen.getByTestId('combat-reveal-column')).toContainElement(screen.getByTestId('combat-reveal-phase-1'));
     });
 
     it('ENTER reveals the full board surface (portraits, HP, dice, hand) — HP is the only enemy bar', () => {
