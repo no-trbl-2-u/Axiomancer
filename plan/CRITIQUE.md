@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-07 at commit 60d52715
-> Pass count: 69
+> Last pass: 2026-10-07 at commit 560de043
+> Pass count: 70
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -366,9 +366,71 @@
 > Checked and not filed: the mobile hub's black band above the sheet
 > (the documented no-clamp trade, pass 56).
 
+> **[critique pass 70, 2026-10-07, commit 560de043] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route still bounces to the title with no save). 13
+> commits after pass 69. Re-verified on screen: the desktop main menu
+> now holds its heading and rows in one centred 520px column, the map
+> legend sits on its smoked plate, and the threat headers read "PHASE 2
+> · ATTACKS · 16". Filed two LOW rows on the pre-fight preview: on
+> desktop its threat rows stretch edge to edge under a centred portrait,
+> and an opened phase repeats the header's figure as "(+11 damage)".
+> Reconfirmed and not re-filed: pass 68's hazard top strip and clipped
+> hand names, pass 65's Minor Healing Potion, pass 63's corner
+> medallions, pass 61's inn-rest wording, and the desktop "GUAR"/"12"
+> and "VUL" chip wraps (`plan/AUDIT.md`). Checked and not filed: the
+> mobile title's ~180px black band between the art and the tagline (the
+> documented `contain` trade in `TitleScreen.tsx`), and the fixture
+> dialogue/cutscene placeholder lines (fixture content, not shipped).
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `archive-pre-revamp:plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
+
+### [LOW] combat preview / desktop — the threat rows stretch 1236px edge to edge under a centred portrait column
+- pass: 70 (commit 560de043)
+- viewport: desktop (1280x800); mobile is fine
+- category: visual
+- observation: the "A FOE BARS THE WAY" preview centres the eyebrow,
+  portrait, name and both VITAE lines in a narrow column, then each
+  THREAT SEQUENCE row runs the full width: the "PHASE n · ATTACKS · N"
+  label sits at x≈60 and its chevron at x≈1245, with the expanded
+  phase text one short line along the left edge. The eye has to cross
+  the screen to tie a label to its chevron, and the list reads as a
+  separate layout from the foe above it. Same shape as pass 69's main
+  menu row, fixed in 9c435716.
+- evidence: `.critique-artifacts/desktop/03-combat.png`;
+  `axiomancer-mobile/components/combat/encounter/CombatEncounterPanel.tsx:1307`
+  (`revealPhase` is `alignSelf: 'stretch'`; `revealSection` at `:1306`
+  likewise) inside `revealScroll` (`:1299`, no width cap).
+- suggested fix: cap the preview's content at one column width (a
+  named constant, as `MENU_COLUMN_MAX_WIDTH` did for the menu) and
+  centre it, so the phone still fills the width; pin it in the combat
+  encounter screen test.
+- source: critique:drive (unattended)
+
+### [LOW] combat preview — an opened threat phase repeats the header's figure as "(+11 damage)", and the "+" reads as a bonus
+- pass: 70 (commit 560de043)
+- viewport: both (375x812 and 1280x800)
+- category: comprehension
+- observation: since ccf6f7eb the collapsed header reads "PHASE 1 ·
+  ATTACKS · 11". Opening it shows "The Wet Congregation — The drowned
+  congregation sings your mercy back into its pews (+11 damage)." The
+  same number now prints twice in one row, and "+11" is the sign the
+  game uses for gains (`+24` VULNERABLE chip, `+43 VITAE` at rest), so
+  the hit reads like something added rather than taken.
+- evidence: `.critique-artifacts/mobile/03-combat.png` and
+  `desktop/03-combat.png` (phase 1 opened);
+  `axiomancer-mechanics/src/Combat/combat.threat.ts:259` builds
+  `` `+${damage} damage` ``, rendered as `p.threatAction.description`
+  at `CombatEncounterPanel.tsx` (the `revealPhaseText` branch).
+- suggested fix: in the preview, show the flavour clause alone (the
+  header already carries the figure), or have the resolver print
+  "11 damage" without the sign; keep any effect/heal/cleanse parts.
+  Check the combat log and the board's intent text, which may read the
+  same description.
+- source: critique:drive (unattended)
 
 ### [LOW] hazard / mobile — the route-select top strip reads "◆ HAZARDNO RETREAT — CHOOSE TO PROCEED◆" with no gaps
 - pass: 68 (commit 534b93f6)
