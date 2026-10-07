@@ -47,7 +47,7 @@ import { EnemyActionCard } from '@/components/combat/encounter/EnemyActionCard';
 import { Image } from '@/lib/platform/image';
 import { getEncounterEnemyArt } from '@/assets/images/enemies';
 import {
-    INTENT_ICONS, buildCombatViewModel, rewardCardVMs, selectEnemyActionCard, STANCE_COLORS,
+    INTENT_ICONS, buildCombatViewModel, rewardCardVMs, selectEnemyActionCard, STANCE_COLORS, threatPhaseHeader,
     selectCombatLogHistory, COMBAT_LOG_TOGGLE_TEXT, COMBAT_LOG_TOGGLE_A11Y, COMBAT_LOG_CLOSE_A11Y,
     type CombatCardVM, type CombatEffectChipVM, type CombatSignatureVM, type EnemyActionCardVM,
 } from '@/state/presenters/combat-encounter.engine';
@@ -696,24 +696,25 @@ export function CombatEncounterPanel({
                             one screen whose whole job is to telegraph it. */}
                         {live.threatPhases.map((p, i) => {
                             const meta = INTENT_ICONS[p.intentType ?? 'pass'];
-                            // Accordion row: the header (icon + PHASE n · INTENT +
+                            // Accordion row: the header (icon + PHASE n · INTENT · damage +
                             // chevron) is always present and is the whole touch
                             // target; the threat text only mounts when open.
                             const open = openThreatPhases.has(p.index);
+                            const header = threatPhaseHeader(p);
                             return (
                                 <View key={i} style={styles.revealPhase}>
                                     <Pressable
                                         onPress={() => toggleThreatPhase(p.index)}
                                         accessibilityRole="button"
                                         accessibilityState={{ expanded: open }}
-                                        accessibilityLabel={`Phase ${p.index}, ${meta.label}`}
+                                        accessibilityLabel={header.a11y}
                                         accessibilityHint={open ? 'tap to collapse this phase' : 'tap to read this phase'}
                                         testID={`combat-reveal-phase-${p.index}`}
                                         style={styles.revealPhaseHead}
                                     >
                                         <Text style={[styles.revealPhaseIcon, { color: meta.color }]}>{meta.icon}</Text>
                                         <Text style={[styles.revealPhaseLabel, styles.revealPhaseHeadLabel]}>
-                                            PHASE {p.index} · {meta.label}
+                                            {header.text}
                                         </Text>
                                         <Text style={styles.revealPhaseChevron}>{open ? '▾' : '▸'}</Text>
                                     </Pressable>

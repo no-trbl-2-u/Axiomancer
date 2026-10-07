@@ -816,6 +816,21 @@ export function selectCombatLogHistory(state: CombatEncounterState): CombatLogHi
     return out.length > LOG_HISTORY_CAP ? out.slice(out.length - LOG_HISTORY_CAP) : out;
 }
 
+/** The reveal's collapsed phase header: "PHASE 2 · ATTACKS · 13". Since R2
+ *  most phases share one intent, so the damage is what tells them apart and
+ *  shows the fight escalating without opening each row. A branch phase omits
+ *  it: its face is only the baseline fork, and the open row reads both. */
+export function threatPhaseHeader(phase: CombatThreatPhase): { text: string; a11y: string } {
+    const label = INTENT_ICONS[phase.intentType ?? 'pass'].label;
+    const damage = phase.branch
+        ? 0
+        : phase.threatAction.effects.reduce((s, e) => s + (e.damage ?? 0), 0);
+    return {
+        text: `PHASE ${phase.index} · ${label}${damage > 0 ? ` · ${damage}` : ''}`,
+        a11y: `Phase ${phase.index}, ${label}${damage > 0 ? `, ${damage} damage` : ''}`,
+    };
+}
+
 function intentVM(state: CombatEncounterState): CombatIntentVM {
     const cur = currentPhase(state);
     const type = (cur?.intentType ?? 'pass') as CombatIntentType;

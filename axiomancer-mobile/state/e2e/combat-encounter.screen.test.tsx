@@ -50,6 +50,13 @@ describe('combat-encounter screen — reveal then board', () => {
         expect(screen.getByTestId('combat-enter')).toBeTruthy();
     });
 
+    it('each collapsed threat-sequence header names its phase damage', () => {
+        mount();
+        const heads = screen.getAllByTestId(/^combat-reveal-phase-\d+$/);
+        expect(heads.length).toBeGreaterThan(1);
+        for (const h of heads) expect(h.props.accessibilityLabel).toMatch(/^Phase \d+, ATTACKS, \d+ damage$/);
+    });
+
     it('ENTER reveals the full board surface (portraits, HP, dice, hand) — HP is the only enemy bar', () => {
         mount();
         enter();
