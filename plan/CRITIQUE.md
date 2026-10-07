@@ -370,28 +370,6 @@
 
 ## Pending
 
-### [LOW] exploration hub — the map legend is 8px bone text laid straight over the engraving, and roads run through it
-- pass: 69 (commit 60d52715)
-- viewport: both (375x812 and 1280x800)
-- category: a11y / legibility
-- observation: the legend in the chart's bottom-left corner
-  ("● TRODDEN ● OPEN · SEALED" over "18 nodes · 12 sealed") is the
-  smallest text in the game, and it has no backing. On the walked
-  Breakwater sheet it sits on light engraved rock with black road
-  strokes crossing it, so the three keys and the count are hard to
-  read at either viewport. It is the only key to what the node colours
-  mean.
-- evidence: `desktop/11-late-game-hub.png` and
-  `mobile/11-late-game-hub.png` (bottom-left of the chart);
-  `axiomancer-mobile/components/exploration/MapOverlays.tsx:94-110`
-  (`legend` is absolutely placed, no background; `legendText` is
-  `fontSize: 8`).
-- suggested fix: give the legend a translucent `AXM.bg` plate with a
-  little padding (as the recentre button has its own disc), and raise
-  the text to the 9-10px the other mono eyebrows use. Keep the
-  `RECENTRE_CLEARANCE` right inset.
-- source: critique:drive (unattended)
-
 ### [LOW] main menu / desktop — the rows stretch 1232px edge to edge under an empty upper half
 - pass: 69 (commit 60d52715)
 - viewport: desktop (1280x800); mobile reads well
@@ -762,6 +740,29 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] exploration hub — the map legend is 8px bone text laid straight over the engraving, and roads run through it — RESOLVED 2026-10-07 (commit ddb93536; the keys and count sit on a smoked plate capped at the strip's width, text raised to 9px, pinned in MapOverlays.test.tsx)
+- issue: #453
+- pass: 69 (commit 60d52715)
+- viewport: both (375x812 and 1280x800)
+- category: a11y / legibility
+- observation: the legend in the chart's bottom-left corner
+  ("● TRODDEN ● OPEN · SEALED" over "18 nodes · 12 sealed") is the
+  smallest text in the game, and it has no backing. On the walked
+  Breakwater sheet it sits on light engraved rock with black road
+  strokes crossing it, so the three keys and the count are hard to
+  read at either viewport. It is the only key to what the node colours
+  mean.
+- evidence: `desktop/11-late-game-hub.png` and
+  `mobile/11-late-game-hub.png` (bottom-left of the chart);
+  `axiomancer-mobile/components/exploration/MapOverlays.tsx:94-110`
+  (`legend` is absolutely placed, no background; `legendText` is
+  `fontSize: 8`).
+- suggested fix: give the legend a translucent `AXM.bg` plate with a
+  little padding (as the recentre button has its own disc), and raise
+  the text to the 9-10px the other mono eyebrows use. Keep the
+  `RECENTRE_CLEARANCE` right inset.
+- source: critique:drive (unattended)
 
 ### [x] [MED] combat / mobile — on a 375-wide phone the phase ledger stacks as a five-mark vertical column under the hand — RESOLVED 2026-10-07 (commit 67fc1541; railLedgerStacks puts the ledger on its own unwrapped line at the top of the rail when the row cannot hold it, pinned in CombatBoard.rail-ledger.test.tsx)
 - issue: #452
