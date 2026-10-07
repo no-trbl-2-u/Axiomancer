@@ -419,7 +419,7 @@ export const MAP_LEGEND_LEFT: string = MAP_LEGEND_KEYS
     .join('   ');
 
 const DRAWER_COPY = {
-    emptyMessage: 'the paths close as you go deeper — tap a glowing node to travel.',
+    emptyMessage: 'every path beside trodden ground stays open — tap a glowing node to travel.',
     title: '✠ WHITHER, PILGRIM?',
     leaguesLabel: 'LEAGUES',
 } as const;

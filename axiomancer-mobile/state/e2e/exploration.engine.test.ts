@@ -575,7 +575,7 @@ describe('selectExplorationViewModel: drawer copy', () => {
         const store = createAppStore({ adapter: createMemoryAdapter(), overrides: { world: createStartingWorld('breakwater') } });
         const vm = selectExplorationViewModel(store.getState());
 
-        expect(vm.drawerCopy.emptyMessage).toBe('the paths close as you go deeper — tap a glowing node to travel.');
+        expect(vm.drawerCopy.emptyMessage).toBe('every path beside trodden ground stays open — tap a glowing node to travel.');
         // CRITIQUE pass 8 MED drain: section title + LEAGUES column
         // label are presenter-sourced, not view-layer literals.
         expect(vm.drawerCopy.title).toBe('✠ WHITHER, PILGRIM?');

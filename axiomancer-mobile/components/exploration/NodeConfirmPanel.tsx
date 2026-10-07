@@ -10,7 +10,7 @@ interface NodeConfirmPanelProps {
     selected: ExplorationOption | null;
     onConfirm: () => void;
     onCancel: () => void;
-    /** Shown when no node is selected (e.g. "the paths close."). */
+    /** Shown when no node is selected (the drawer's empty-state line). */
     emptyMessage: string;
 }
 
