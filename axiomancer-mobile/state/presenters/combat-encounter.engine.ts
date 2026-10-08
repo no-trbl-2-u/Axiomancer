@@ -9,7 +9,7 @@
  */
 
 import {
-    handCards as engineHandCards, getCard, getCardById,
+    handCards as engineHandCards, getCard, getCardById, toCombatCard,
     getSignatureSkill,
     lookupEffect, colorMatchBonus,
     RESERVE_MAX,
@@ -125,6 +125,8 @@ function percentIntensity(effectId: string, intensity: number): string | null {
 
 /** The barrel doesn't export CardRider — derive it from Card. */
 type CardRider = NonNullable<Card['free']>;
+/** The player's base stats, as the hand reads them for scaling. */
+type PlayerStats = CombatEncounterState['player']['baseStats'] | undefined;
 
 /** Split rail — project the authored FREE rider into a KEYWORD · value
  *  pair for the face's ◇ column. Clause order mirrors the engine's riderText so
@@ -1529,11 +1531,17 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
         // Fleeing is offered at the encounter prelude (ENGAGE / FLEE), never
         // from the hand, so a retreat card is filtered out.
         .filter(({ card }: { card: CombatCard }) => card.id !== 'card-retreat' && card.verbClass !== 'retreat')
-        .map(({ uid, card }: { uid: string; card: CombatCard }) => {
-        // The hand prints FINAL numbers: the stat-scaled copy of the card
-        // (the engine's `handCards` already built `card` from the same copy).
+        .map(({ uid, card }: { uid: string; card: CombatCard }) => scaledCardVM(uid, card, state.player.baseStats));
+}
+
+/**
+ * One card's VM at FINAL numbers: the stat-scaled copy of the card (`card`
+ * must already be built from it, as the engine's `handCards` does), with the
+ * family colour marking each number the player's stats moved. The hand and the
+ * reward offer share it, so a card reads the same before and after it is taken.
+ */
+function scaledCardVM(uid: string, card: CombatCard, stats: PlayerStats): CombatCardVM {
         const libraryCard = getCardById(card.id);
-        const stats = state.player.baseStats;
         const sourceCard = libraryCard ? scaleCardForStats(libraryCard, stats) : libraryCard;
         const scaledFace = faceStats(card, sourceCard);
         const printedCard = getCard(card.id);
@@ -1553,7 +1561,6 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
             detail: detailStats(card, sourceCard),
             flavor: sourceCard?.description ?? null,
         };
-    });
 }
 
 const SIG_ICON: Record<SignatureSkill['kind'], string> = {
@@ -1586,34 +1593,24 @@ function signaturesVM(state: CombatEncounterState): CombatSignatureVM[] {
  *
  * A player committing a card to their deck for the rest of the run reads the
  * same face they will read in combat, so the reward screen never builds its
- * own slice of face logic.
+ * own slice of face logic. With the player's `stats` the numbers are scaled
+ * exactly as the hand scales them (A Plain Blow reads Deal 6 on both); without
+ * them the face prints the card's authored numbers.
  *
- * There is no encounter state here (the reward is post-combat), so the face is
- * built at the card's authored truth: no live enemy difficulty, no chosen-X clamp. Every number still comes from `faceStats` /
- * `detailStats` — the same engine selectors the hand uses.
+ * There is no encounter state here (the reward is post-combat), so there is no
+ * live enemy difficulty and no chosen-X clamp.
  */
-export function rewardCardVMs(ids: readonly string[]): CombatCardVM[] {
+export function rewardCardVMs(ids: readonly string[], stats?: PlayerStats): CombatCardVM[] {
+    const scaledLookup = (id: string): Card | undefined => {
+        const c = getCardById(id);
+        return c ? scaleCardForStats(c, stats) : c;
+    };
     const out: CombatCardVM[] = [];
     for (const id of ids) {
-        const card = getCard(id);
+        const card = toCombatCard(id, scaledLookup, lookupEffect);
         if (!card) continue;
-        const sourceCard = getCardById(id);
-        out.push({
-            // The offer is one card per id, so the id IS a stable uid.
-            uid: `reward-${id}`,
-            cardId: id, name: card.name, stance: card.stance,
-            stanceColor: STANCE_COLORS[card.stance] ?? HUE.fallbackGrey,
-            verbClass: card.verbClass, effectKind: card.effectKind,
-            rarity: card.rarity, rank: card.rank,
-            rankName: card.rank ? RANK_NAMES[card.rank] : null,
-            cardType: card.cardType,
-            tier: card.tier,
-            topActionText: vitaeCopy(card.topActionText), bottomActionText: vitaeCopy(card.bottomActionText),
-            bottomDamagePreview: card.bottomDamagePreview,
-            face: faceStats(card, sourceCard),
-            detail: detailStats(card, sourceCard),
-            flavor: sourceCard?.description ?? null,
-        });
+        // The offer is one card per id, so the id IS a stable uid.
+        out.push(scaledCardVM(`reward-${id}`, card, stats));
     }
     return out;
 }

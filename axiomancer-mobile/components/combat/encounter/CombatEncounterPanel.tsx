@@ -1126,7 +1126,7 @@ export function CombatEncounterPanel({
 
             {/* deckbuilder reward — claimed before the summary on a win */}
             {live.finalOutcome === 'victory' && !rewardsClaimed && rewardOffers.length > 0 && (
-                <CombatRewardsOverlay offers={rewardCardVMs(rewardOffers)} onPick={onRewardPick} />
+                <CombatRewardsOverlay offers={rewardCardVMs(rewardOffers, live.player.baseStats)} onPick={onRewardPick} />
             )}
 
             {summary && (rewardsClaimed || live.finalOutcome !== 'victory') && (
