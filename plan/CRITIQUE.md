@@ -412,27 +412,6 @@
 
 ## Pending
 
-### [LOW] rest / village / desktop — the offer and stall rows stretch 1250px edge to edge, so a price sits across the screen from its name
-- pass: 71 (commit 3c58c902)
-- viewport: desktop (1280x800)
-- category: visual
-- observation: at 1280 wide, the rest screen's REST and THE CUT rows
-  and the settlement's BUY/SELL toggle and stall rows each span the
-  full window. The Minor Healing Potion's name is at the left edge and
-  its "12s" price at the right, ~1200px apart. REST and its "FREE" tag
-  are just as far apart. The heading, purse and copy are left-aligned
-  above. On mobile these screens fill the phone and read well. Passes
-  69 and 70 found the same thing on the main menu and the combat
-  preview, and both were fixed with a centred 520px column
-  (`MENU_COLUMN_MAX_WIDTH`, `REVEAL_COLUMN_MAX_WIDTH`).
-- evidence: `.critique-artifacts/desktop/09-rest.png`,
-  `desktop/07-village.png`; compare `mobile/09-rest.png`,
-  `mobile/07-village.png`
-- suggested fix: put the rest and settlement content in the same capped,
-  centred column the menu and preview use (phone still fills it), and
-  pin the cap in each screen's test.
-- source: critique:drive (unattended)
-
 ### [LOW] RC walk 2026-10-02 — copy, label and console findings (one row per item, all presentation)
 - pass: RC checkpoint walk, four `playtester` legs (attended, T present), commits a493eaf7 → 169b6dbc
 - viewport: playwright default (desktop)
@@ -690,6 +669,28 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] rest / village / desktop — the offer and stall rows stretch 1250px edge to edge, so a price sits across the screen from its name — RESOLVED 2026-10-08 (commit 9bd8b26c; each screen's content sits in one column capped at `REST_COLUMN_MAX_WIDTH` / `VILLAGE_COLUMN_MAX_WIDTH` 520 and centred, the pinned TAKE THE ROAD shares the cap, phone fills it; pinned in rest-village-column.critique-71.test.tsx)
+- issue: #464
+- pass: 71 (commit 3c58c902)
+- viewport: desktop (1280x800)
+- category: visual
+- observation: at 1280 wide, the rest screen's REST and THE CUT rows
+  and the settlement's BUY/SELL toggle and stall rows each span the
+  full window. The Minor Healing Potion's name is at the left edge and
+  its "12s" price at the right, ~1200px apart. REST and its "FREE" tag
+  are just as far apart. The heading, purse and copy are left-aligned
+  above. On mobile these screens fill the phone and read well. Passes
+  69 and 70 found the same thing on the main menu and the combat
+  preview, and both were fixed with a centred 520px column
+  (`MENU_COLUMN_MAX_WIDTH`, `REVEAL_COLUMN_MAX_WIDTH`).
+- evidence: `.critique-artifacts/desktop/09-rest.png`,
+  `desktop/07-village.png`; compare `mobile/09-rest.png`,
+  `mobile/07-village.png`
+- suggested fix: put the rest and settlement content in the same capped,
+  centred column the menu and preview use (phone still fills it), and
+  pin the cap in each screen's test.
+- source: critique:drive (unattended)
 
 ### [x] [MED] hazard — the Creeping Rot's scenario line narrates the player as "his arm", the one gendered line left after pass 56 — RESOLVED 2026-10-08 (commit 81ab72b6; the line reads "the cut on your arm", and hazard.voice.engine.test.ts now checks every string a hazard def carries, not only intro)
 - issue: #463
