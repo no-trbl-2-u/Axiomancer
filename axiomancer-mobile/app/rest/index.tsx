@@ -117,93 +117,101 @@ export default function RestScreen() {
     return (
         <ScreenBg scrollable={false} art="rest">
             <ScrollView style={styles.scrollOuter} contentContainerStyle={styles.scroll}>
-                <Text style={styles.eyebrow}>{REST_CHOICE_EYEBROW}</Text>
-                <Text style={styles.title}>{REST_CHOICE_TITLE}</Text>
+                <View style={styles.column} testID="rest-column">
+                    <Text style={styles.eyebrow}>{REST_CHOICE_EYEBROW}</Text>
+                    <Text style={styles.title}>{REST_CHOICE_TITLE}</Text>
 
-                <View style={styles.purseRow} testID="rest-purse">
-                    <Text style={styles.purseLabel}>{REST_CHOICE_PURSE_LABEL}</Text>
-                    <Text style={styles.purseValue}>{vm.currency}</Text>
-                    <Text style={styles.purseLabel}>VITAE {vm.health}/{vm.maxHealth}</Text>
-                </View>
-
-                {vm.phase === 'offer' && (
-                    <View testID="rest-choice-offers">
-                        {/* The authored node line sits ABOVE the one-way warning;
-                          * the warning always shows, so the player is always told
-                          * the node is spent and there is no leaving without
-                          * choosing. */}
-                        {vm.description ? (
-                            <Text style={styles.body} testID="rest-choice-intro">
-                                {vm.description}
-                            </Text>
-                        ) : null}
-                        <Text style={styles.oneWayNote} testID="rest-choice-intro-one-way">
-                            {REST_CHOICE_INTRO}
-                        </Text>
-                        {vm.offers.map((offer) => (
-                            <OfferCard
-                                key={offer.id}
-                                offer={offer}
-                                onPress={() => actions.chooseRestChoiceOffer(offer.id)}
-                            />
-                        ))}
+                    <View style={styles.purseRow} testID="rest-purse">
+                        <Text style={styles.purseLabel}>{REST_CHOICE_PURSE_LABEL}</Text>
+                        <Text style={styles.purseValue}>{vm.currency}</Text>
+                        <Text style={styles.purseLabel}>VITAE {vm.health}/{vm.maxHealth}</Text>
                     </View>
-                )}
 
-                {vm.phase === 'cut-pick' && vm.cut !== null && (
-                    <View testID="rest-cut-sheet">
-                        <Text style={styles.eyebrow}>{REST_CUT_SHEET_TITLE}</Text>
-                        <Text style={styles.body}>{REST_CUT_SHEET_INTRO}</Text>
-                        <Text style={styles.priceHint} testID="rest-cut-price">
-                            THIS ONE: {vm.cut.price} SHILLINGS — {REST_CUT_NEXT_PRICE_PREFIX} {vm.cut.nextPrice}
-                        </Text>
-                        <View style={styles.cutList}>
-                            {vm.cut.cards.map((card) => (
-                                <CutRow
-                                    key={card.key}
-                                    card={card}
-                                    onPress={() => actions.pickRestChoiceCut(card.cardId)}
+                    {vm.phase === 'offer' && (
+                        <View testID="rest-choice-offers">
+                            {/* The authored node line sits ABOVE the one-way warning;
+                              * the warning always shows, so the player is always told
+                              * the node is spent and there is no leaving without
+                              * choosing. */}
+                            {vm.description ? (
+                                <Text style={styles.body} testID="rest-choice-intro">
+                                    {vm.description}
+                                </Text>
+                            ) : null}
+                            <Text style={styles.oneWayNote} testID="rest-choice-intro-one-way">
+                                {REST_CHOICE_INTRO}
+                            </Text>
+                            {vm.offers.map((offer) => (
+                                <OfferCard
+                                    key={offer.id}
+                                    offer={offer}
+                                    onPress={() => actions.chooseRestChoiceOffer(offer.id)}
                                 />
                             ))}
                         </View>
-                        <Text style={styles.cutHint}>{REST_CUT_CONFIRM_LABEL}: tap a card above.</Text>
-                    </View>
-                )}
+                    )}
 
-                {vm.phase === 'outcome' && vm.outcome !== null && (
-                    <View style={styles.card} testID="rest-outcome">
-                        <Text style={styles.eyebrow}>{REST_OUTCOME_EYEBROW}</Text>
-                        <Text style={[styles.cardTitle, { color: AXM.sulfur }]}>{vm.outcome.label}</Text>
-                        <View style={styles.chipRow}>
-                            {vm.outcome.healed > 0 && (
-                                <Text style={styles.chip}>{restOutcomeHealChip(vm.outcome.healed)}</Text>
-                            )}
-                            {vm.outcome.spent > 0 && (
-                                <Text style={styles.chip}>{restOutcomeSpendChip(vm.outcome.spent)}</Text>
-                            )}
-                            {vm.outcome.removedCardName !== null && (
-                                <Text style={styles.chip}>{restOutcomeRemovedChip(vm.outcome.removedCardName)}</Text>
-                            )}
+                    {vm.phase === 'cut-pick' && vm.cut !== null && (
+                        <View testID="rest-cut-sheet">
+                            <Text style={styles.eyebrow}>{REST_CUT_SHEET_TITLE}</Text>
+                            <Text style={styles.body}>{REST_CUT_SHEET_INTRO}</Text>
+                            <Text style={styles.priceHint} testID="rest-cut-price">
+                                THIS ONE: {vm.cut.price} SHILLINGS — {REST_CUT_NEXT_PRICE_PREFIX} {vm.cut.nextPrice}
+                            </Text>
+                            <View style={styles.cutList}>
+                                {vm.cut.cards.map((card) => (
+                                    <CutRow
+                                        key={card.key}
+                                        card={card}
+                                        onPress={() => actions.pickRestChoiceCut(card.cardId)}
+                                    />
+                                ))}
+                            </View>
+                            <Text style={styles.cutHint}>{REST_CUT_CONFIRM_LABEL}: tap a card above.</Text>
                         </View>
-                        <TouchableOpacity
-                            accessibilityRole="button"
-                            accessibilityLabel="Move on"
-                            onPress={actions.claimRestOutcome}
-                            style={styles.bigButton}
-                            testID="rest-claim"
-                        >
-                            <Text style={styles.bigButtonText}>{REST_OUTCOME_CLAIM_LABEL}</Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
+                    )}
+
+                    {vm.phase === 'outcome' && vm.outcome !== null && (
+                        <View style={styles.card} testID="rest-outcome">
+                            <Text style={styles.eyebrow}>{REST_OUTCOME_EYEBROW}</Text>
+                            <Text style={[styles.cardTitle, { color: AXM.sulfur }]}>{vm.outcome.label}</Text>
+                            <View style={styles.chipRow}>
+                                {vm.outcome.healed > 0 && (
+                                    <Text style={styles.chip}>{restOutcomeHealChip(vm.outcome.healed)}</Text>
+                                )}
+                                {vm.outcome.spent > 0 && (
+                                    <Text style={styles.chip}>{restOutcomeSpendChip(vm.outcome.spent)}</Text>
+                                )}
+                                {vm.outcome.removedCardName !== null && (
+                                    <Text style={styles.chip}>{restOutcomeRemovedChip(vm.outcome.removedCardName)}</Text>
+                                )}
+                            </View>
+                            <TouchableOpacity
+                                accessibilityRole="button"
+                                accessibilityLabel="Move on"
+                                onPress={actions.claimRestOutcome}
+                                style={styles.bigButton}
+                                testID="rest-claim"
+                            >
+                                <Text style={styles.bigButtonText}>{REST_OUTCOME_CLAIM_LABEL}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                </View>
             </ScrollView>
         </ScreenBg>
     );
 }
 
+/** The rest column's widest extent, in points (the main menu's width). */
+export const REST_COLUMN_MAX_WIDTH = 520;
+
 const useStyles = makeStyles((AXM) => ({
     scrollOuter: { flex: 1 },
     scroll: { padding: 14, paddingBottom: 24, flexGrow: 1, justifyContent: 'center' },
+    // A phone fills the column edge to edge; a wide window keeps each
+    // offer's name beside its price instead of across the screen.
+    column: { width: '100%', maxWidth: REST_COLUMN_MAX_WIDTH, alignSelf: 'center' },
     eyebrow: {
         fontFamily: FONTS.sans,
         fontSize: 12,

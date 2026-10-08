@@ -84,117 +84,119 @@ export default function VillageScreen() {
                 contentContainerStyle={styles.scroll}
                 testID="village-scroll"
             >
-                <View style={styles.eyebrowRow}>
-                    <AxmIcon name="action-village" size={18} />
-                    <Text style={styles.eyebrow}>SETTLEMENT</Text>
-                </View>
-                <Text style={styles.title}>{vm.villageName.toUpperCase()}</Text>
-                <Text style={styles.body}>{vm.body}</Text>
+                <View style={styles.column} testID="village-column">
+                    <View style={styles.eyebrowRow}>
+                        <AxmIcon name="action-village" size={18} />
+                        <Text style={styles.eyebrow}>SETTLEMENT</Text>
+                    </View>
+                    <Text style={styles.title}>{vm.villageName.toUpperCase()}</Text>
+                    <Text style={styles.body}>{vm.body}</Text>
 
-                {vm.merchants.length > 0 && (
-                    <>
-                        <Text style={styles.sectionLabel}>VOICES OF THE PLACE</Text>
-                        {vm.merchants.map(merchant => (
-                            <View key={merchant.name} style={styles.merchantCard} testID={`village-merchant-${merchant.name}`}>
-                                <Text style={styles.merchantName}>{merchant.name}</Text>
-                                {merchant.line.length > 0 && (
-                                    <Text style={styles.merchantLine}>“{merchant.line}”</Text>
-                                )}
+                    {vm.merchants.length > 0 && (
+                        <>
+                            <Text style={styles.sectionLabel}>VOICES OF THE PLACE</Text>
+                            {vm.merchants.map(merchant => (
+                                <View key={merchant.name} style={styles.merchantCard} testID={`village-merchant-${merchant.name}`}>
+                                    <Text style={styles.merchantName}>{merchant.name}</Text>
+                                    {merchant.line.length > 0 && (
+                                        <Text style={styles.merchantLine}>“{merchant.line}”</Text>
+                                    )}
+                                </View>
+                            ))}
+                        </>
+                    )}
+
+                    {vm.hasShop && (
+                        <>
+                            <View style={styles.shopHead}>
+                                <Text style={styles.sectionLabel}>THE STALLS</Text>
+                                <Text style={styles.purse} testID="village-purse">
+                                    {vm.currency} SHILLINGS
+                                </Text>
                             </View>
-                        ))}
-                    </>
-                )}
-
-                {vm.hasShop && (
-                    <>
-                        <View style={styles.shopHead}>
-                            <Text style={styles.sectionLabel}>THE STALLS</Text>
-                            <Text style={styles.purse} testID="village-purse">
-                                {vm.currency} SHILLINGS
-                            </Text>
-                        </View>
-                        <View style={styles.tabRow}>
-                            <TouchableOpacity
-                                accessibilityRole="button"
-                                accessibilityLabel="Buy from the stalls"
-                                accessibilityState={{ selected: shopTab === 'buy' }}
-                                onPress={() => setShopTab('buy')}
-                                style={[styles.tabButton, shopTab === 'buy' && styles.tabButtonActive]}
-                                testID="village-tab-buy"
-                            >
-                                <Text style={[styles.tabButtonText, shopTab === 'buy' && styles.tabButtonTextActive]}>BUY</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                accessibilityRole="button"
-                                accessibilityLabel="Sell to the stalls"
-                                accessibilityState={{ selected: shopTab === 'sell' }}
-                                onPress={() => setShopTab('sell')}
-                                style={[styles.tabButton, shopTab === 'sell' && styles.tabButtonActive]}
-                                testID="village-tab-sell"
-                            >
-                                <Text style={[styles.tabButtonText, shopTab === 'sell' && styles.tabButtonTextActive]}>SELL</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        {shopTab === 'buy' && (
-                            vm.wares.length > 0 ? vm.wares.map(ware => (
+                            <View style={styles.tabRow}>
                                 <TouchableOpacity
-                                    key={ware.itemId}
                                     accessibilityRole="button"
-                                    accessibilityLabel={
-                                        ware.effect.length > 0
-                                            ? `Buy ${ware.name} for ${ware.price} shillings. ${ware.effect}`
-                                            : `Buy ${ware.name} for ${ware.price} shillings`
-                                    }
-                                    accessibilityState={{ disabled: !ware.affordable }}
-                                    disabled={!ware.affordable}
-                                    onPress={() => actions.buyVillageWare(ware.itemId)}
-                                    style={[styles.wareRow, !ware.affordable && styles.wareRowUnaffordable]}
-                                    testID={`village-ware-${ware.itemId}`}
+                                    accessibilityLabel="Buy from the stalls"
+                                    accessibilityState={{ selected: shopTab === 'buy' }}
+                                    onPress={() => setShopTab('buy')}
+                                    style={[styles.tabButton, shopTab === 'buy' && styles.tabButtonActive]}
+                                    testID="village-tab-buy"
                                 >
-                                    <View style={styles.flexOne}>
-                                        <Text style={styles.wareName}>{ware.name}</Text>
-                                        {/* The mechanical read comes before the
-                                            flavour line — a stall that prices a thing has to
-                                            say what the thing does. */}
-                                        {ware.effect.length > 0 && (
-                                            <Text style={styles.wareEffect} testID={`village-ware-${ware.itemId}-effect`}>{ware.effect}</Text>
-                                        )}
-                                        {ware.description.length > 0 && (
-                                            <Text style={styles.wareDesc} testID={`village-ware-${ware.itemId}-desc`}>{ware.description}</Text>
-                                        )}
-                                    </View>
-                                    <Text style={[styles.warePrice, !ware.affordable && [styles.warePriceUnaffordable, styles.wareCtaDimmed]]}>{ware.price}s</Text>
+                                    <Text style={[styles.tabButtonText, shopTab === 'buy' && styles.tabButtonTextActive]}>BUY</Text>
                                 </TouchableOpacity>
-                            )) : (
-                                <Text style={styles.emptyNote} testID="village-buy-empty">Nothing for sale.</Text>
-                            )
-                        )}
-
-                        {shopTab === 'sell' && (
-                            vm.sellables.length > 0 ? vm.sellables.map(sellable => (
                                 <TouchableOpacity
-                                    key={`${sellable.itemId}-${sellable.index}`}
                                     accessibilityRole="button"
-                                    accessibilityLabel={`Sell ${sellable.name} for ${sellable.sellPrice} shillings`}
-                                    onPress={() => actions.sellVillageItem(sellable.index)}
-                                    style={styles.wareRow}
-                                    testID={`village-sell-${sellable.index}`}
+                                    accessibilityLabel="Sell to the stalls"
+                                    accessibilityState={{ selected: shopTab === 'sell' }}
+                                    onPress={() => setShopTab('sell')}
+                                    style={[styles.tabButton, shopTab === 'sell' && styles.tabButtonActive]}
+                                    testID="village-tab-sell"
                                 >
-                                    <View style={styles.flexOne}>
-                                        <Text style={styles.wareName}>{sellable.name}</Text>
-                                        {sellable.description.length > 0 && (
-                                            <Text style={styles.wareDesc}>{sellable.description}</Text>
-                                        )}
-                                    </View>
-                                    <Text style={styles.warePrice}>{sellable.sellPrice}s</Text>
+                                    <Text style={[styles.tabButtonText, shopTab === 'sell' && styles.tabButtonTextActive]}>SELL</Text>
                                 </TouchableOpacity>
-                            )) : (
-                                <Text style={styles.emptyNote} testID="village-sell-empty">Nothing to sell.</Text>
-                            )
-                        )}
-                    </>
-                )}
+                            </View>
+
+                            {shopTab === 'buy' && (
+                                vm.wares.length > 0 ? vm.wares.map(ware => (
+                                    <TouchableOpacity
+                                        key={ware.itemId}
+                                        accessibilityRole="button"
+                                        accessibilityLabel={
+                                            ware.effect.length > 0
+                                                ? `Buy ${ware.name} for ${ware.price} shillings. ${ware.effect}`
+                                                : `Buy ${ware.name} for ${ware.price} shillings`
+                                        }
+                                        accessibilityState={{ disabled: !ware.affordable }}
+                                        disabled={!ware.affordable}
+                                        onPress={() => actions.buyVillageWare(ware.itemId)}
+                                        style={[styles.wareRow, !ware.affordable && styles.wareRowUnaffordable]}
+                                        testID={`village-ware-${ware.itemId}`}
+                                    >
+                                        <View style={styles.flexOne}>
+                                            <Text style={styles.wareName}>{ware.name}</Text>
+                                            {/* The mechanical read comes before the
+                                                flavour line — a stall that prices a thing has to
+                                                say what the thing does. */}
+                                            {ware.effect.length > 0 && (
+                                                <Text style={styles.wareEffect} testID={`village-ware-${ware.itemId}-effect`}>{ware.effect}</Text>
+                                            )}
+                                            {ware.description.length > 0 && (
+                                                <Text style={styles.wareDesc} testID={`village-ware-${ware.itemId}-desc`}>{ware.description}</Text>
+                                            )}
+                                        </View>
+                                        <Text style={[styles.warePrice, !ware.affordable && [styles.warePriceUnaffordable, styles.wareCtaDimmed]]}>{ware.price}s</Text>
+                                    </TouchableOpacity>
+                                )) : (
+                                    <Text style={styles.emptyNote} testID="village-buy-empty">Nothing for sale.</Text>
+                                )
+                            )}
+
+                            {shopTab === 'sell' && (
+                                vm.sellables.length > 0 ? vm.sellables.map(sellable => (
+                                    <TouchableOpacity
+                                        key={`${sellable.itemId}-${sellable.index}`}
+                                        accessibilityRole="button"
+                                        accessibilityLabel={`Sell ${sellable.name} for ${sellable.sellPrice} shillings`}
+                                        onPress={() => actions.sellVillageItem(sellable.index)}
+                                        style={styles.wareRow}
+                                        testID={`village-sell-${sellable.index}`}
+                                    >
+                                        <View style={styles.flexOne}>
+                                            <Text style={styles.wareName}>{sellable.name}</Text>
+                                            {sellable.description.length > 0 && (
+                                                <Text style={styles.wareDesc}>{sellable.description}</Text>
+                                            )}
+                                        </View>
+                                        <Text style={styles.warePrice}>{sellable.sellPrice}s</Text>
+                                    </TouchableOpacity>
+                                )) : (
+                                    <Text style={styles.emptyNote} testID="village-sell-empty">Nothing to sell.</Text>
+                                )
+                            )}
+                        </>
+                    )}
+                </View>
             </ScrollView>
 
             {/* 14-village: the exit sits OUTSIDE the scroller. Four wares
@@ -203,25 +205,34 @@ export default function VillageScreen() {
                 the screen. Pinned here it is whole however long the
                 stalls run, at 375 and at 1280 alike. */}
             <View style={styles.exitBar}>
-                <TouchableOpacity
-                    accessibilityRole="button"
-                    accessibilityLabel="Leave the village"
-                    onPress={actions.dismissEvent}
-                    style={styles.bigButton}
-                    testID="village-leave"
-                >
-                    <Text style={styles.bigButtonText}>TAKE THE ROAD</Text>
-                </TouchableOpacity>
+                <View style={styles.column} testID="village-exit-column">
+                    <TouchableOpacity
+                        accessibilityRole="button"
+                        accessibilityLabel="Leave the village"
+                        onPress={actions.dismissEvent}
+                        style={styles.bigButton}
+                        testID="village-leave"
+                    >
+                        <Text style={styles.bigButtonText}>TAKE THE ROAD</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </ScreenBg>
     );
 }
+
+/** The settlement column's widest extent, in points (the main menu's width). */
+export const VILLAGE_COLUMN_MAX_WIDTH = 520;
 
 const useStyles = makeStyles((AXM) => ({
     // One scroller, sized to the space the pinned exit leaves it
     // (14-village) — the shape `/rest` and `/blacksmith` already use.
     scrollOuter: { flex: 1 },
     scroll: { padding: 14, paddingBottom: 24 },
+    // A phone fills the column edge to edge; a wide window keeps each
+    // ware's name beside its price, and the pinned exit under the stalls,
+    // instead of stretching both across the screen.
+    column: { width: '100%', maxWidth: VILLAGE_COLUMN_MAX_WIDTH, alignSelf: 'center' },
     eyebrowRow: {
         flexDirection: 'row',
         alignItems: 'center',
