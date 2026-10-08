@@ -256,7 +256,7 @@ function buildThreatAction(
     if (effectId) effects.push({ effectId, intensity: intensity ?? 1 });
     if (enemyHeal && enemyHeal > 0) effects.push({ enemyHeal });
     if (enemyCleanse && enemyCleanse > 0) effects.push({ enemyCleanse });
-    const parts = [`+${damage} damage`];
+    const parts = [`${damage} damage`];
     if (effectId) parts.push(effectLabel(effectId));
     if (enemyHeal && enemyHeal > 0) parts.push(`heals ${enemyHeal}`);
     if (enemyCleanse && enemyCleanse > 0) {

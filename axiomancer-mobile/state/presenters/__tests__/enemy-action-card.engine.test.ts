@@ -28,7 +28,7 @@ function stateWithPhases(): CombatEncounterState {
                 index: 1,
                 intentType: 'damage',
                 threatAction: {
-                    description: 'Cairn-rot presses the attack (+6 damage).',
+                    description: 'Cairn-rot presses the attack (6 damage).',
                     effects: [{ damage: 6 }],
                 },
                 isFinalPhase: false,
@@ -38,7 +38,7 @@ function stateWithPhases(): CombatEncounterState {
                 intentType: 'combo',
                 intentLabel: 'CHARGES UP',
                 threatAction: {
-                    description: 'Cairn-rot exhales rot (+4 damage, Poison).',
+                    description: 'Cairn-rot exhales rot (4 damage, Poison).',
                     effects: [{ damage: 4 }, { effectId: 'debuff_poison', intensity: 2 }],
                 },
                 isFinalPhase: true,
@@ -50,7 +50,7 @@ function stateWithPhases(): CombatEncounterState {
 const FIRED_PHASE_2: CombatEvent = {
     kind: 'threat-fired',
     phaseIndex: 2,
-    description: 'Cairn-rot exhales rot (+4 damage, Poison).',
+    description: 'Cairn-rot exhales rot (4 damage, Poison).',
     effects: [{ damage: 4 }, { effectId: 'debuff_poison', intensity: 2 }],
 };
 
@@ -100,7 +100,7 @@ describe('selectEnemyActionCard: what the card says', () => {
         const events: CombatEvent[] = [{
             kind: 'threat-fired',
             phaseIndex: 1,
-            description: 'Cairn-rot loses patience (+9 damage, heals 4).',
+            description: 'Cairn-rot loses patience (9 damage, heals 4).',
             effects: [{ damage: 9 }, { enemyHeal: 4 }, { enemyCleanse: 2 }],
         }];
         const card = selectEnemyActionCard(events, stateWithPhases());
@@ -116,7 +116,7 @@ describe('selectEnemyActionCard: what the card says', () => {
         const events: CombatEvent[] = [{
             kind: 'threat-fired',
             phaseIndex: 1,
-            description: 'Cairn-rot presses the attack (+6 damage).',
+            description: 'Cairn-rot presses the attack (6 damage).',
             effects: [{ damage: 6 }],
         }];
         const card = selectEnemyActionCard(events, stateWithPhases());
