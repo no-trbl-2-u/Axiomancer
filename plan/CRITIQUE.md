@@ -412,29 +412,6 @@
 
 ## Pending
 
-### [MED] hazard — the Creeping Rot's scenario line narrates the player as "his arm", the one gendered line left after pass 56
-- pass: 71 (commit 3c58c902)
-- viewport: both (375x812 and 1280x800)
-- category: voice
-- observation: the hazard screen for THE CREEPING ROT reads, under its
-  title, "The marsh air carries the fever. It has already found the cut
-  on his arm." The intro of the same hazard says "It is already past
-  your elbow", and every other narrated screen says "you". Pass 56
-  rewrote the six hazard `intro` fields in the second person (commit
-  9cf50a65), but the `scenario` field shown at the top of the
-  route-select screen was not in scope, and
-  `hazard.voice.engine.test.ts` checks `intro` only. This is the only
-  `scenario` in `HAZARD_LIBRARY` with a gendered pronoun.
-- evidence: `.critique-artifacts/desktop/10-hazard.{png,txt}` (fixture
-  `l30-bw-hazard-arrive` drew fever-rot on this pass);
-  `axiomancer-mechanics/src/World/Hazard/hazard.content.ts:219`;
-  `axiomancer-mechanics/src/World/Hazard/e2e/hazard.voice.engine.test.ts:17`
-- suggested fix: reword the line in the second person ("...found the
-  cut on your arm."), a one-word copy correction with no new content,
-  and widen the voice test to check every player-facing string field of
-  a hazard (`scenario`, `intro`, route descriptions), not only `intro`.
-- source: critique:drive (unattended)
-
 ### [LOW] rest / village / desktop — the offer and stall rows stretch 1250px edge to edge, so a price sits across the screen from its name
 - pass: 71 (commit 3c58c902)
 - viewport: desktop (1280x800)
@@ -713,6 +690,30 @@
 - source: loop
 
 ## Done
+
+### [x] [MED] hazard — the Creeping Rot's scenario line narrates the player as "his arm", the one gendered line left after pass 56 — RESOLVED 2026-10-08 (commit 81ab72b6; the line reads "the cut on your arm", and hazard.voice.engine.test.ts now checks every string a hazard def carries, not only intro)
+- issue: #463
+- pass: 71 (commit 3c58c902)
+- viewport: both (375x812 and 1280x800)
+- category: voice
+- observation: the hazard screen for THE CREEPING ROT reads, under its
+  title, "The marsh air carries the fever. It has already found the cut
+  on his arm." The intro of the same hazard says "It is already past
+  your elbow", and every other narrated screen says "you". Pass 56
+  rewrote the six hazard `intro` fields in the second person (commit
+  9cf50a65), but the `scenario` field shown at the top of the
+  route-select screen was not in scope, and
+  `hazard.voice.engine.test.ts` checks `intro` only. This is the only
+  `scenario` in `HAZARD_LIBRARY` with a gendered pronoun.
+- evidence: `.critique-artifacts/desktop/10-hazard.{png,txt}` (fixture
+  `l30-bw-hazard-arrive` drew fever-rot on this pass);
+  `axiomancer-mechanics/src/World/Hazard/hazard.content.ts:219`;
+  `axiomancer-mechanics/src/World/Hazard/e2e/hazard.voice.engine.test.ts:17`
+- suggested fix: reword the line in the second person ("...found the
+  cut on your arm."), a one-word copy correction with no new content,
+  and widen the voice test to check every player-facing string field of
+  a hazard (`scenario`, `intro`, route descriptions), not only `intro`.
+- source: critique:drive (unattended)
 
 ### [x] [LOW] hazard — the opening-hand fan clips card names again ("SURE FOOTIN", "BALANCE POL") — RESOLVED 2026-10-08 (commit 8d5aee2a; the fan overlaps only as much as the row needs, a 6px gap at desktop and up to 22 on a phone, a covered card's name wraps inside its visible strip, and every hand-mode name clears the rarity pip; guarded by RouteSelect.test.tsx)
 - issue: #461
