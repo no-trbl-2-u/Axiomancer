@@ -156,7 +156,7 @@ export function RouteSelect({
         <Animated.View entering={FadeIn.duration(220)} style={styles.root} testID="hazard-route-select">
             <View style={styles.topStrip}>
                 <Text style={styles.topStripSide}>◆ HAZARD</Text>
-                <Text style={styles.topStripMid}>NO RETREAT — CHOOSE TO PROCEED</Text>
+                <Text style={styles.topStripMid} numberOfLines={1}>NO RETREAT — CHOOSE TO PROCEED</Text>
                 <Text style={styles.topStripSide}>◆</Text>
             </View>
             <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
@@ -218,6 +218,10 @@ const useStyles = makeStyles((AXM) => ({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        // At 375 the three segments fill the row and space-between
+        // leaves no gap; the gap keeps them apart and the middle one
+        // shrinks (ellipsizes) instead of butting into the diamonds.
+        gap: 10,
         paddingVertical: 5,
         paddingHorizontal: 12,
         backgroundColor: HUE.black,
@@ -225,7 +229,7 @@ const useStyles = makeStyles((AXM) => ({
         borderBottomColor: AXM.ash,
     },
     topStripSide: { fontFamily: FONTS.mono, fontSize: 11, color: AXM.blood, letterSpacing: 2 },
-    topStripMid: { fontFamily: FONTS.mono, fontSize: 11, color: AXM.bone, letterSpacing: 2 },
+    topStripMid: { flexShrink: 1, textAlign: 'center', fontFamily: FONTS.mono, fontSize: 11, color: AXM.bone, letterSpacing: 2 },
     header: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: AXM.ash },
     headerEyebrow: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 2, color: AXM.blood },
     title: { fontFamily: FONTS.gothic, fontSize: 28, lineHeight: 29, color: AXM.parchment, letterSpacing: 0.5, marginTop: 6, textShadowColor: HUE.black, textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 0 },

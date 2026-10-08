@@ -133,4 +133,12 @@ describe('RouteSelect', () => {
         const { getByLabelText } = render(<RouteSelect {...mockProps} />);
         expect(() => fireEvent.press(getByLabelText(/Strike, red card in hand/))).not.toThrow();
     });
+
+    it('the top strip keeps its three segments apart and lets the middle one ellipsize', () => {
+        const { getByText } = render(<RouteSelect {...mockProps} />);
+        const mid = getByText('NO RETREAT — CHOOSE TO PROCEED');
+        expect(mid.props.numberOfLines).toBe(1);
+        expect(mid).toHaveStyle({ flexShrink: 1 });
+        expect(mid.parent?.parent).toHaveStyle({ gap: 10 });
+    });
 });
