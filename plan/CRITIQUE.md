@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-07 at commit 560de043
-> Pass count: 70
+> Last pass: 2026-10-08 at commit 3c58c902
+> Pass count: 71
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -384,9 +384,77 @@
 > documented `contain` trade in `TitleScreen.tsx`), and the fixture
 > dialogue/cutscene placeholder lines (fixture content, not shipped).
 
+> **[critique pass 71, 2026-10-08, commit 3c58c902] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route still bounces to the title with no save). 13
+> commits after pass 70. Re-verified on screen: the desktop combat
+> preview holds the foe and its threat rows in one centred column, an
+> opened phase reads "(11 damage)" unsigned, the inn's REST reads "A bed
+> for the night, on the house.", the hazard hand fan names every card
+> whole ("PILGRIM'S BLESSING", "SURE FOOTING"), and the mobile hazard top
+> strip keeps its segments apart. Filed a MED voice row (the Creeping Rot
+> hazard's `scenario` line still says "his arm"; the pass 56 fix and its
+> test cover `intro` only) and a LOW desktop row (the rest and shop rows
+> stretch edge to edge, so a price sits ~1200px from its name).
+> Reconfirmed and not re-filed: pass 65's Minor Healing Potion, pass 63's
+> corner medallions, and the desktop "GUAR"/"12" and "VUL" chip wraps.
+> Checked and not filed: the mobile hazard top strip now ellipsizes its
+> instruction to "CHOOSE TO PROC…" (the pass 68 fix's accepted trade);
+> the mobile hub's black band above the sheet (the no-clamp trade, pass
+> 56); the mobile title's black band (`contain` trade); and the fixture
+> placeholder lines in dialogue, cutscene and village (fixture content,
+> not shipped). The desktop hazard route panels are also full width but
+> carry a three-column threshold grid that uses the width, so they are
+> left out of the LOW row.
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `archive-pre-revamp:plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
+
+### [MED] hazard — the Creeping Rot's scenario line narrates the player as "his arm", the one gendered line left after pass 56
+- pass: 71 (commit 3c58c902)
+- viewport: both (375x812 and 1280x800)
+- category: voice
+- observation: the hazard screen for THE CREEPING ROT reads, under its
+  title, "The marsh air carries the fever. It has already found the cut
+  on his arm." The intro of the same hazard says "It is already past
+  your elbow", and every other narrated screen says "you". Pass 56
+  rewrote the six hazard `intro` fields in the second person (commit
+  9cf50a65), but the `scenario` field shown at the top of the
+  route-select screen was not in scope, and
+  `hazard.voice.engine.test.ts` checks `intro` only. This is the only
+  `scenario` in `HAZARD_LIBRARY` with a gendered pronoun.
+- evidence: `.critique-artifacts/desktop/10-hazard.{png,txt}` (fixture
+  `l30-bw-hazard-arrive` drew fever-rot on this pass);
+  `axiomancer-mechanics/src/World/Hazard/hazard.content.ts:219`;
+  `axiomancer-mechanics/src/World/Hazard/e2e/hazard.voice.engine.test.ts:17`
+- suggested fix: reword the line in the second person ("...found the
+  cut on your arm."), a one-word copy correction with no new content,
+  and widen the voice test to check every player-facing string field of
+  a hazard (`scenario`, `intro`, route descriptions), not only `intro`.
+- source: critique:drive (unattended)
+
+### [LOW] rest / village / desktop — the offer and stall rows stretch 1250px edge to edge, so a price sits across the screen from its name
+- pass: 71 (commit 3c58c902)
+- viewport: desktop (1280x800)
+- category: visual
+- observation: at 1280 wide, the rest screen's REST and THE CUT rows
+  and the settlement's BUY/SELL toggle and stall rows each span the
+  full window. The Minor Healing Potion's name is at the left edge and
+  its "12s" price at the right, ~1200px apart. REST and its "FREE" tag
+  are just as far apart. The heading, purse and copy are left-aligned
+  above. On mobile these screens fill the phone and read well. Passes
+  69 and 70 found the same thing on the main menu and the combat
+  preview, and both were fixed with a centred 520px column
+  (`MENU_COLUMN_MAX_WIDTH`, `REVEAL_COLUMN_MAX_WIDTH`).
+- evidence: `.critique-artifacts/desktop/09-rest.png`,
+  `desktop/07-village.png`; compare `mobile/09-rest.png`,
+  `mobile/07-village.png`
+- suggested fix: put the rest and settlement content in the same capped,
+  centred column the menu and preview use (phone still fills it), and
+  pin the cap in each screen's test.
+- source: critique:drive (unattended)
 
 ### [LOW] RC walk 2026-10-02 — copy, label and console findings (one row per item, all presentation)
 - pass: RC checkpoint walk, four `playtester` legs (attended, T present), commits a493eaf7 → 169b6dbc
