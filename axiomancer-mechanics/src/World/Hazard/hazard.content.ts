@@ -216,7 +216,7 @@ export const HAZARD_LIBRARY: HazardDef[] = [
     {
         id: 'fever-rot',
         title: 'THE CREEPING ROT',
-        scenario: 'The marsh air carries the fever. It has already found the cut on his arm.',
+        scenario: 'The marsh air carries the fever. It has already found the cut on your arm.',
         intro: 'The fever came in with the marsh water. It is already past your elbow, drawing black lines toward the heart. Bigger bodies than yours have died of half this. You have a day, perhaps less. Unless…',
         boardHeadline: 'THE FEVER CLIMBS',
         safeBoardNote: 'sweat it out at the hermit fires',
