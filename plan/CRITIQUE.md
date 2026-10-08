@@ -394,8 +394,8 @@
 - category: comprehension / polish
 - observation (each its own `/iterate` fix; none blocks RC):
   1. [x] (commit ae281b4d, issue #450; the drawer now says paths beside trodden ground stay open) The map footer says "the paths close as you go deeper", but frontier roaming keeps every node next to a resolved node open (`world.reducer.ts` `frontierNodes`). The copy should say what the map does. (`state/presenters/exploration.engine.ts:428`)
-  2. Exit doors (bw-18, cw-20, bc-17, ld-18) are labelled "QUEST" with a scroll icon in the node panel and the accessibility label ("open, quest").
-  3. bw-16 says "BLACKSMITH" in the node panel; the screen it opens is "THE ANVIL".
+  2. [x] (commit 444f5a38, issue #462; travel doors are a `door` node type reading PATH ONWARD in the panel and the accessibility label; the scroll glyph stays until a door icon is drawn, which is art; ld-18 is the sealed stair, a cutscene, not a door) Exit doors (bw-18, cw-20, bc-17, ld-18) are labelled "QUEST" with a scroll icon in the node panel and the accessibility label ("open, quest").
+  3. [x] (commit 444f5a38, issue #462; the panel reads THE ANVIL, matching its tooltip and screen) bw-16 says "BLACKSMITH" in the node panel; the screen it opens is "THE ANVIL".
   4. The good die face is "SPECIAL face" in the combat primer and "BOON" at the Anvil; the Anvil's TEMPER refusal says a die at its cap "exceeds its special-face cap".
   5. A Plain Word's VULNERABLE reads "+10" / "+25%" on the hand face, "vulnerable +10% · 1 turn" / "VULNERABLE ×25 · 2 turns" in detail and spoils, "+25% · 2 turns" on DECK. A Plain Blow reads "Deal 6" in hand but "Deal 5" on SPOILS (the spoils preview appears unscaled).
   6. The fight summary's rows read "92 dmg · 12ph" ("ph" unexplained), print "TOTAL DOT DAMAGE: 0" with no DoT in play, and omit A Plain Ward.
