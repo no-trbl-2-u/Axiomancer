@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
 
 import type { HazardCardVM, HazardRouteChoiceVM, HazardViewModel } from '@/state/presenters/hazard.engine';
@@ -142,6 +142,19 @@ function RoutePanel({
     );
 }
 
+const HAND_CARD_W = 90;
+const FAN_MAX_OVERLAP = 22;
+const FAN_MIN_GAP = 6;
+const FAN_SIDE_PAD = 24;
+
+/** How far each opening-hand card tucks under its left neighbour: a small gap when the
+ *  row has room, otherwise just enough overlap to fit, never more than 22. */
+export function routeFanOverlap(n: number, rowWidth: number): number {
+    if (n < 2) return 0;
+    const needed = Math.ceil((n * HAND_CARD_W - rowWidth) / (n - 1));
+    return Math.min(FAN_MAX_OVERLAP, Math.max(-FAN_MIN_GAP, needed));
+}
+
 export function RouteSelect({
     vm,
     onPick,
@@ -152,6 +165,8 @@ export function RouteSelect({
     onInspect?: (card: HazardCardVM) => void;
 }) {
     const styles = useStyles();
+    const { width } = useWindowDimensions();
+    const overlap = routeFanOverlap(vm.hand.length, width - FAN_SIDE_PAD);
     return (
         <Animated.View entering={FadeIn.duration(220)} style={styles.root} testID="hazard-route-select">
             <View style={styles.topStrip}>
@@ -178,7 +193,7 @@ export function RouteSelect({
                                     key={card.uid}
                                     entering={FadeInUp.delay(220 + i * 70).duration(280)}
                                     style={{
-                                        marginLeft: i === 0 ? 0 : -22,
+                                        marginLeft: i === 0 ? 0 : -overlap,
                                         zIndex: i,
                                         transform: [
                                             { translateY: Math.abs(i - mid) * 6 },
@@ -191,7 +206,11 @@ export function RouteSelect({
                                         accessibilityLabel={`${card.name}, ${card.kind} card in hand. Tap to read its full effect.`}
                                         onPress={() => onInspect?.(card)}
                                     >
-                                        <HazardCard card={card} mode="hand" />
+                                        <HazardCard
+                                            card={card}
+                                            mode="hand"
+                                            nameInset={i < n - 1 ? Math.max(0, overlap) : 0}
+                                        />
                                     </Pressable>
                                 </Animated.View>
                             );

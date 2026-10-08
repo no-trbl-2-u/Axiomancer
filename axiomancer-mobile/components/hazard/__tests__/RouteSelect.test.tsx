@@ -1,7 +1,8 @@
 import React from 'react';
+import { Dimensions } from 'react-native';
 import { fireEvent, render } from '@testing-library/react-native';
 
-import { RouteSelect } from '../RouteSelect';
+import { RouteSelect, routeFanOverlap } from '../RouteSelect';
 import type { HazardViewModel } from '@/state/presenters/hazard.engine';
 
 // Mock react-native-reanimated
@@ -140,5 +141,31 @@ describe('RouteSelect', () => {
         expect(mid.props.numberOfLines).toBe(1);
         expect(mid).toHaveStyle({ flexShrink: 1 });
         expect(mid.parent?.parent).toHaveStyle({ gap: 10 });
+    });
+
+    it('on a phone a card the next one overlaps wraps its name clear of the covered edge', () => {
+        const phone = { width: 375, height: 812, scale: 2, fontScale: 1 };
+        const spy = jest.spyOn(Dimensions, 'get').mockReturnValue(phone);
+        const hand = [0, 1, 2, 3, 4].map((i) => ({ ...mockViewModel.hand[i % 2], uid: `h-${i}`, name: `Card ${i}` }));
+        const { getByText } = render(<RouteSelect {...mockProps} vm={{ ...mockViewModel, hand }} />);
+        expect(getByText('Card 0')).toHaveStyle({ paddingRight: 22 });
+        expect(getByText('Card 3')).toHaveStyle({ paddingRight: 22 });
+        expect(getByText('Card 4')).toHaveStyle({ paddingRight: 9 });
+        spy.mockRestore();
+    });
+});
+
+describe('routeFanOverlap', () => {
+    it('opens the fan with a small gap when the row has room', () => {
+        expect(routeFanOverlap(5, 1256)).toBe(-6);
+    });
+
+    it('overlaps just enough to fit, capped at 22 so the visible strip stays wide', () => {
+        expect(routeFanOverlap(5, 430)).toBe(5);
+        expect(routeFanOverlap(5, 351)).toBe(22);
+    });
+
+    it('a single card needs no overlap', () => {
+        expect(routeFanOverlap(1, 100)).toBe(0);
     });
 });

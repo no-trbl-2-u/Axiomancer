@@ -172,14 +172,20 @@ function Row({
 // The card
 // ---------------------------------------------------------------------------
 
+/** Hand-mode name inset that keeps the last letter out from under the rarity pip. */
+const PIP_CLEAR = 9;
+
 export const HazardCard = React.memo(function HazardCard({
     card,
     mode = 'hand',
     dragging = false,
+    nameInset = 0,
 }: {
     card: HazardCardVM;
     mode?: HazardCardMode;
     dragging?: boolean;
+    /** Hand mode: px of the card's right edge a fanned neighbour covers; the name wraps clear of it. */
+    nameInset?: number;
 }) {
     const c = DIE[card.kind];
     const rar = RARITY_UI[card.rarity];
@@ -353,7 +359,7 @@ export const HazardCard = React.memo(function HazardCard({
     return (
         <View style={frame}>
             {overlays}
-            <Text numberOfLines={2} style={[styles.name, { fontSize: 13, minHeight: 28 }]}>{card.name}</Text>
+            <Text numberOfLines={2} style={[styles.name, { fontSize: 13, minHeight: 28, paddingHorizontal: PIP_CLEAR, paddingRight: Math.max(PIP_CLEAR, nameInset) }]}>{card.name}</Text>
             <View style={{ alignItems: 'center', marginVertical: 3 }}>
                 <CardArt kind={card.kind} size={30} />
             </View>
