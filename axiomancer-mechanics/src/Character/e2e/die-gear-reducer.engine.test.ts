@@ -134,8 +134,8 @@ describe('die-gear reducer — SWAP + validation', () => {
 
     it('validateDieGear is the single cap authority', () => {
         expect(validateDieGear({ dieColor: 'heart', specialFaces: 2, manaFaces: 3, specialConviction: 2 }, 'heart')).toBeNull();
-        expect(validateDieGear({ dieColor: 'heart', specialFaces: 3, manaFaces: 2, specialConviction: 2 }, 'heart')).toMatch(/cap/);
-        expect(validateDieGear({ dieColor: 'wild', specialFaces: 2, manaFaces: 1, specialConviction: 2 }, 'wild')).toMatch(/cap/);
+        expect(validateDieGear({ dieColor: 'heart', specialFaces: 3, manaFaces: 2, specialConviction: 2 }, 'heart')).toBe('the heart die is capped at 2 BOON faces');
+        expect(validateDieGear({ dieColor: 'wild', specialFaces: 2, manaFaces: 1, specialConviction: 2 }, 'wild')).toBe('the gold die is capped at 1 BOON face');
         expect(validateDieGear({ dieColor: 'heart', specialFaces: 2, manaFaces: 4, specialConviction: 2 }, 'heart')).toMatch(/miss/);
     });
 });

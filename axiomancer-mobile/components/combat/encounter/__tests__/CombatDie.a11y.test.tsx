@@ -35,12 +35,12 @@ describe('combatDieA11yLabel — spec 33 faces', () => {
         }
     });
 
-    it('SPECIAL: drag onto a staged card of its colour, powers it AND pays Conviction', () => {
+    it('BOON: drag onto a staged card of its colour, powers it AND pays Conviction', () => {
         const label = combatDieA11yLabel({ ...HEART, face: 'special' });
-        expect(label).toBe(`HEART die, SPECIAL face: drag onto a staged HEART card to power it and gain ${SPECIAL_CONVICTION_DEFAULT} Conviction`);
+        expect(label).toBe(`HEART die, BOON face: drag onto a staged HEART card to power it and gain ${SPECIAL_CONVICTION_DEFAULT} Conviction`);
     });
 
-    it('SPECIAL payload follows the gear slot, not the stock default', () => {
+    it('BOON payload follows the gear slot, not the stock default', () => {
         const label = combatDieA11yLabel({ ...HEART, face: 'special' }, { specialConviction: 3 });
         expect(label).toContain('gain 3 Conviction');
     });
@@ -91,7 +91,7 @@ describe('combatDieA11yLabel — spec 33 faces', () => {
 });
 
 describe('CombatDie — the rendered label is the pure label', () => {
-    it('speaks the SPECIAL line, honouring the gear payload', () => {
+    it('speaks the BOON line, honouring the gear payload', () => {
         const die: CombatDieVM = { ...HEART, face: 'special' };
         render(<CombatDie die={die} specialConviction={4} />);
         expect(screen.getByTestId(`combat-die-${die.id}`).props.accessibilityLabel)

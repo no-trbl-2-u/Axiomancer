@@ -29,7 +29,7 @@ const SETTLED_PLAN: DieRollPlan = {
 };
 
 describe('RollingDie — forwards a11y opts to the real CombatDie', () => {
-    it('speaks the gear-scaled SPECIAL Conviction payload, not the stock default', () => {
+    it('speaks the gear-scaled BOON Conviction payload, not the stock default', () => {
         render(<RollingDie die={HEART} mode="instant" plan={SETTLED_PLAN} specialConviction={5} />);
         expect(screen.getByTestId(`combat-die-${HEART.id}`).props.accessibilityLabel)
             .toBe(combatDieA11yLabel(HEART, { specialConviction: 5 }));

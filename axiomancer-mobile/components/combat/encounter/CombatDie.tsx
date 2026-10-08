@@ -66,7 +66,7 @@ export function combatDieA11yLabel(
     }
     if (die.cracked) return `${noun}, CRACKED face: dead this round, powers nothing`;
     if (die.face === 'miss') return `${noun}, MISS face: dead, powers nothing`;
-    const face = die.face === 'special' ? 'SPECIAL' : 'MANA';
+    const face = die.face === 'special' ? 'BOON' : 'MANA';
     const target = wild ? 'a staged card of any colour' : `a staged ${colour} card`;
     const payload = opts.specialConviction ?? SPECIAL_CONVICTION_DEFAULT;
     const power = die.face === 'special'

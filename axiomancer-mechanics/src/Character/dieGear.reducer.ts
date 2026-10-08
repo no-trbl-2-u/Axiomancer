@@ -92,7 +92,9 @@ export function validateDieGear(gear: UpgradeableDieGear, color: DieGearColor): 
         return 'a die must keep at least 1 miss face — whiff is never forgeable away';
     }
     if (gear.specialFaces > dieSpecialCap(color)) {
-        return `${color} exceeds its special-face cap of ${dieSpecialCap(color)}`;
+        const name = color === 'wild' ? 'gold' : color;
+        const cap = dieSpecialCap(color);
+        return `the ${name} die is capped at ${cap} BOON face${cap === 1 ? '' : 's'}`;
     }
     return null;
 }
