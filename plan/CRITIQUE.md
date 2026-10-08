@@ -388,27 +388,6 @@
 
 ## Pending
 
-### [LOW] hazard — the opening-hand fan clips card names again ("SURE FOOTIN", "BALANCE POL")
-- pass: 68 (commit 534b93f6)
-- viewport: both (375x812 and 1280x800)
-- category: visual / legibility
-- observation: the route-select hand preview shows each card name on
-  one line, and the next card in the fan covers its tail: "SURE
-  FOOTIN", "BALANCE POL" twice, at both viewports. The 2026-09-11 fix
-  (`8f3acef7`, Done row "the fanned route-choice hand truncates card
-  names illegibly") cut the overlap to -22 so names wrapped inside the
-  visible strip. The overlap is still -22, so the names now lay out
-  wider than the 68px the fan leaves visible. Tap-to-read still works,
-  so this is legibility only. Desktop has room to spare and still
-  overlaps.
-- evidence: `.critique-artifacts/{mobile,desktop}/10-hazard.png`;
-  `RouteSelect.tsx:181` (`marginLeft: -22`); `HazardCard` hand-mode
-  name at `components/hazard/*Card*.tsx` (`numberOfLines={2}`).
-- suggested fix: make the hand-mode name wrap inside the visible strip
-  (fixed width), or open the fan out when the row has room
-  (e.g. no overlap at desktop widths).
-- source: critique:drive (unattended)
-
 ### [LOW] RC walk 2026-10-02 — copy, label and console findings (one row per item, all presentation)
 - pass: RC checkpoint walk, four `playtester` legs (attended, T present), commits a493eaf7 → 169b6dbc
 - viewport: playwright default (desktop)
@@ -666,6 +645,28 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] hazard — the opening-hand fan clips card names again ("SURE FOOTIN", "BALANCE POL") — RESOLVED 2026-10-08 (commit 8d5aee2a; the fan overlaps only as much as the row needs, a 6px gap at desktop and up to 22 on a phone, a covered card's name wraps inside its visible strip, and every hand-mode name clears the rarity pip; guarded by RouteSelect.test.tsx)
+- issue: #461
+- pass: 68 (commit 534b93f6)
+- viewport: both (375x812 and 1280x800)
+- category: visual / legibility
+- observation: the route-select hand preview shows each card name on
+  one line, and the next card in the fan covers its tail: "SURE
+  FOOTIN", "BALANCE POL" twice, at both viewports. The 2026-09-11 fix
+  (`8f3acef7`, Done row "the fanned route-choice hand truncates card
+  names illegibly") cut the overlap to -22 so names wrapped inside the
+  visible strip. The overlap is still -22, so the names now lay out
+  wider than the 68px the fan leaves visible. Tap-to-read still works,
+  so this is legibility only. Desktop has room to spare and still
+  overlaps.
+- evidence: `.critique-artifacts/{mobile,desktop}/10-hazard.png`;
+  `RouteSelect.tsx:181` (`marginLeft: -22`); `HazardCard` hand-mode
+  name at `components/hazard/*Card*.tsx` (`numberOfLines={2}`).
+- suggested fix: make the hand-mode name wrap inside the visible strip
+  (fixed width), or open the fan out when the row has room
+  (e.g. no overlap at desktop widths).
+- source: critique:drive (unattended)
 
 ### [x] [LOW] hazard / mobile — the route-select top strip reads "◆ HAZARDNO RETREAT — CHOOSE TO PROCEED◆" with no gaps — RESOLVED 2026-10-08 (commit d63cf279; the strip row has a 10px gap and the middle segment shrinks to one ellipsized line; guarded by RouteSelect.test.tsx. The copy stays inline, as every UI label in the hazard components does)
 - issue: #460
