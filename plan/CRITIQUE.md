@@ -523,34 +523,6 @@
   rects must not intersect any card's effect row.
 - source: critique:drive (unattended)
 
-### [MED] rest — the Breakwater's inns are described as paid rooms, but REST reads "Sleep where you stand. Free."
-- pass: 61 (commit 0be3bb1c)
-- viewport: both (375x812 and 1280x800)
-- category: voice
-- observation: `bw-9` is the first rest node a new run reaches. Its line
-  reads "The customs house lets rooms by the night. The clerk takes
-  shillings, not names." Directly under it, the REST offer reads "SLEEP
-  WHERE YOU STAND. FREE. RESTORES 44 VITAE." `bw-13` has the same
-  contradiction ("An inn above the harbour. Warm, loud, and paid for in
-  advance."). The node promises a bed you pay for, and the button offers
-  bare ground at no cost. The player can't tell whether the inn charged
-  them, or whether there is a better paid option they missed. Both nodes
-  are built by `innRestPool` (`shelter: 'inn'`). The rest-choice copy
-  doesn't read `shelter`, so it words every rest as a camp. That matches
-  the heal (T, 2026-08-15: no shelter distinction in the heal) but not
-  the prose.
-- evidence: `.critique-artifacts/mobile/09-rest.txt` and
-  `desktop/09-rest.png` (fixture `apprentice-bw-rest`);
-  `axiomancer-mechanics/src/World/MapEvents/content.ts:698-701`;
-  `axiomancer-mobile/state/presenters/rest.copy.ts:20`.
-- suggested fix: make the REST description shelter-aware in
-  `rest.copy.ts` (keep "Sleep where you stand. Free." for camps; give inns
-  a line like "A bed for the night, on the house.") and pass `shelter`
-  through the rest-choice presenter. Or reword the two inn lines so they
-  don't name a price. Either way it is a copy change with no new content,
-  so pin it with a presenter test on an inn node.
-- source: critique:drive (unattended)
-
 ### [MED] combat — the only SUMMON carrier cannot reach wave 2, so half the spawn rule is dead on the roster
 - pass: burn-day audit 2026-09-19 (row 3.9)
 - viewport: n/a — engine reach, not layout
@@ -735,6 +707,35 @@
 - source: loop
 
 ## Done
+
+### [x] [MED] rest — the Breakwater's inns are described as paid rooms, but REST reads "Sleep where you stand. Free." — RESOLVED 2026-10-08 (commit 698f8ac2; `restOfferDesc` reads the session shelter, inns say "A bed for the night, on the house.", camps keep theirs; pinned in rest.copy.test and rest-offer-heal-cap.audit.test)
+- issue: #458
+- pass: 61 (commit 0be3bb1c)
+- viewport: both (375x812 and 1280x800)
+- category: voice
+- observation: `bw-9` is the first rest node a new run reaches. Its line
+  reads "The customs house lets rooms by the night. The clerk takes
+  shillings, not names." Directly under it, the REST offer reads "SLEEP
+  WHERE YOU STAND. FREE. RESTORES 44 VITAE." `bw-13` has the same
+  contradiction ("An inn above the harbour. Warm, loud, and paid for in
+  advance."). The node promises a bed you pay for, and the button offers
+  bare ground at no cost. The player can't tell whether the inn charged
+  them, or whether there is a better paid option they missed. Both nodes
+  are built by `innRestPool` (`shelter: 'inn'`). The rest-choice copy
+  doesn't read `shelter`, so it words every rest as a camp. That matches
+  the heal (T, 2026-08-15: no shelter distinction in the heal) but not
+  the prose.
+- evidence: `.critique-artifacts/mobile/09-rest.txt` and
+  `desktop/09-rest.png` (fixture `apprentice-bw-rest`);
+  `axiomancer-mechanics/src/World/MapEvents/content.ts:698-701`;
+  `axiomancer-mobile/state/presenters/rest.copy.ts:20`.
+- suggested fix: make the REST description shelter-aware in
+  `rest.copy.ts` (keep "Sleep where you stand. Free." for camps; give inns
+  a line like "A bed for the night, on the house.") and pass `shelter`
+  through the rest-choice presenter. Or reword the two inn lines so they
+  don't name a price. Either way it is a copy change with no new content,
+  so pin it with a presenter test on an inn node.
+- source: critique:drive (unattended)
 
 ### [x] [LOW] combat preview / desktop — the threat rows stretch 1236px edge to edge under a centred portrait column — RESOLVED 2026-10-07 (commit 31c785d8; the reveal's scroll content sits in one column capped at `REVEAL_COLUMN_MAX_WIDTH` 520 and centred, phone fills it; pinned in combat-encounter.screen.test.tsx)
 - issue: #457
