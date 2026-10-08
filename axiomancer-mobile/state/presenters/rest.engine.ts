@@ -127,7 +127,7 @@ export function selectRestVM(state: Pick<AppStoreState, 'rest'>): RestChoiceVM {
         // REST names the VITAE it restores, read from the engine's own
         // preview (cap included), never re-derived from the fraction.
         desc: o.id === 'rest'
-            ? restOfferDesc(previewRestChoiceHeal(s))
+            ? restOfferDesc(previewRestChoiceHeal(s), s.shelter)
             : REST_CHOICE_OFFER_DESC[o.id],
         price: o.cost,
         enabled: !o.disabledReason,

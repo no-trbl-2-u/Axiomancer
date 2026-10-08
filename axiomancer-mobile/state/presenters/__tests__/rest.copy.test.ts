@@ -7,7 +7,7 @@
  * engine suite and in `rest-offer-heal-cap.audit.test.ts`.
  */
 
-import { REST_CHOICE_OFFER_DESC, restOfferDesc } from '../rest.copy';
+import { REST_CHOICE_OFFER_DESC, REST_INN_OFFER_DESC, restOfferDesc } from '../rest.copy';
 
 describe('restOfferDesc', () => {
     it('appends the restored amount for the walked case', () => {
@@ -28,5 +28,12 @@ describe('restOfferDesc', () => {
         expect(restOfferDesc(0)).toBe(REST_CHOICE_OFFER_DESC.rest);
         expect(restOfferDesc(-5)).toBe(REST_CHOICE_OFFER_DESC.rest);
         expect(restOfferDesc(Number.NaN)).toBe(REST_CHOICE_OFFER_DESC.rest);
+    });
+
+    it('words an inn night as a bed, not sleeping where you stand (critique pass 61)', () => {
+        expect(restOfferDesc(44, 'inn')).toBe(`${REST_INN_OFFER_DESC} Restores 44 VITAE.`);
+        expect(restOfferDesc(44, 'inn')).not.toMatch(/where you stand/i);
+        expect(restOfferDesc(0, 'inn')).toBe(REST_INN_OFFER_DESC);
+        expect(restOfferDesc(44, 'camp')).toBe(`${REST_CHOICE_OFFER_DESC.rest} Restores 44 VITAE.`);
     });
 });

@@ -3,7 +3,8 @@
  * rethemed without touching `app/rest/index.tsx` or the presenter.
  */
 
-import type { RestChoiceOfferId } from '@mechanics';
+import { isInnShelter } from '@mechanics';
+import type { RestChoiceOfferId, RestShelter } from '@mechanics';
 
 export const REST_CHOICE_EYEBROW = 'A MOMENT TO STOP';
 export const REST_CHOICE_TITLE = 'TWO DOORS, ONE STEP THROUGH';
@@ -21,6 +22,13 @@ export const REST_CHOICE_OFFER_DESC: Record<RestChoiceOfferId, string> = Object.
 });
 
 /**
+ * The REST sentence at an inn. The node's own line describes a let room, so
+ * the camp sentence ("where you stand") would contradict it; the night still
+ * costs nothing, as the price column says.
+ */
+export const REST_INN_OFFER_DESC = 'A bed for the night, on the house.';
+
+/**
  * The REST offer's description, with the heal it actually pays.
  *
  * @param healed - the VITAE the engine says a REST would restore right now
@@ -29,12 +37,14 @@ export const REST_CHOICE_OFFER_DESC: Record<RestChoiceOfferId, string> = Object.
  * @returns the static sentence with the restored amount appended, or the
  *   static sentence alone when there is nothing to promise (0, negative,
  *   or not a number).
+ * @param shelter - the session's authored shelter; an inn words the night as
+ *   a bed, a camp (the default) as sleeping where you stand.
  *
  * Computes nothing: it words the engine's number, so the missing-VITAE cap
  * is always respected.
  */
-export function restOfferDesc(healed: number): string {
-    const base = REST_CHOICE_OFFER_DESC.rest;
+export function restOfferDesc(healed: number, shelter: RestShelter = 'camp'): string {
+    const base = isInnShelter(shelter) ? REST_INN_OFFER_DESC : REST_CHOICE_OFFER_DESC.rest;
     if (!Number.isFinite(healed) || healed <= 0) return base;
     return `${base} Restores ${Math.round(healed)} VITAE.`;
 }

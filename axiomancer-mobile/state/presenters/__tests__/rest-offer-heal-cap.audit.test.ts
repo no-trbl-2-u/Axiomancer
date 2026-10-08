@@ -12,14 +12,18 @@ import {
 } from '@mechanics';
 import type { RestChoiceSession } from '@mechanics';
 
-import { REST_CHOICE_OFFER_DESC } from '../rest.copy';
+import { REST_CHOICE_OFFER_DESC, REST_INN_OFFER_DESC } from '../rest.copy';
 import { selectRestVM } from '../rest.engine';
 
 const DECK = Array.from({ length: 13 }, (_, i) => `card-${i}`);
 
-function session(health: number, maxHealth: number): RestChoiceSession {
+function session(
+    health: number,
+    maxHealth: number,
+    shelter: RestChoiceSession['shelter'] = 'camp',
+): RestChoiceSession {
     return createRestChoiceSession(1, {
-        shelter: 'camp',
+        shelter,
         maxHealth,
         health,
         currency: 9999,
@@ -51,5 +55,12 @@ describe('REST offer copy pays what the engine pays (audit 2026-09-12)', () => {
 
     it('promises nothing at full VITAE', () => {
         expect(restDesc(session(175, 175))).toBe(REST_CHOICE_OFFER_DESC.rest);
+    });
+
+    it('reads the session shelter: an inn node offers a bed, at the same heal', () => {
+        const expected = Math.round(175 * RESTCHOICE_TUNING.restHealFraction);
+        expect(restDesc(session(20, 175, 'inn'))).toBe(
+            `${REST_INN_OFFER_DESC} Restores ${expected} VITAE.`,
+        );
     });
 });
