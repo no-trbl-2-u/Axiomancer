@@ -388,28 +388,6 @@
 
 ## Pending
 
-### [LOW] combat preview — an opened threat phase repeats the header's figure as "(+11 damage)", and the "+" reads as a bonus
-- pass: 70 (commit 560de043)
-- viewport: both (375x812 and 1280x800)
-- category: comprehension
-- observation: since ccf6f7eb the collapsed header reads "PHASE 1 ·
-  ATTACKS · 11". Opening it shows "The Wet Congregation — The drowned
-  congregation sings your mercy back into its pews (+11 damage)." The
-  same number now prints twice in one row, and "+11" is the sign the
-  game uses for gains (`+24` VULNERABLE chip, `+43 VITAE` at rest), so
-  the hit reads like something added rather than taken.
-- evidence: `.critique-artifacts/mobile/03-combat.png` and
-  `desktop/03-combat.png` (phase 1 opened);
-  `axiomancer-mechanics/src/Combat/combat.threat.ts:259` builds
-  `` `+${damage} damage` ``, rendered as `p.threatAction.description`
-  at `CombatEncounterPanel.tsx` (the `revealPhaseText` branch).
-- suggested fix: in the preview, show the flavour clause alone (the
-  header already carries the figure), or have the resolver print
-  "11 damage" without the sign; keep any effect/heal/cleanse parts.
-  Check the combat log and the board's intent text, which may read the
-  same description.
-- source: critique:drive (unattended)
-
 ### [LOW] hazard / mobile — the route-select top strip reads "◆ HAZARDNO RETREAT — CHOOSE TO PROCEED◆" with no gaps
 - pass: 68 (commit 534b93f6)
 - viewport: mobile (375x812); desktop is fine
@@ -707,6 +685,29 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] combat preview — an opened threat phase repeats the header's figure as "(+11 damage)", and the "+" reads as a bonus — RESOLVED 2026-10-08 (commit 544f9422; `buildThreatAction` prints "N damage" unsigned, so preview, intent, log and CLI all drop the "+"; guarded by combat.threat.test.ts)
+- issue: #459
+- pass: 70 (commit 560de043)
+- viewport: both (375x812 and 1280x800)
+- category: comprehension
+- observation: since ccf6f7eb the collapsed header reads "PHASE 1 ·
+  ATTACKS · 11". Opening it shows "The Wet Congregation — The drowned
+  congregation sings your mercy back into its pews (+11 damage)." The
+  same number now prints twice in one row, and "+11" is the sign the
+  game uses for gains (`+24` VULNERABLE chip, `+43 VITAE` at rest), so
+  the hit reads like something added rather than taken.
+- evidence: `.critique-artifacts/mobile/03-combat.png` and
+  `desktop/03-combat.png` (phase 1 opened);
+  `axiomancer-mechanics/src/Combat/combat.threat.ts:259` builds
+  `` `+${damage} damage` ``, rendered as `p.threatAction.description`
+  at `CombatEncounterPanel.tsx` (the `revealPhaseText` branch).
+- suggested fix: in the preview, show the flavour clause alone (the
+  header already carries the figure), or have the resolver print
+  "11 damage" without the sign; keep any effect/heal/cleanse parts.
+  Check the combat log and the board's intent text, which may read the
+  same description.
+- source: critique:drive (unattended)
 
 ### [x] [MED] rest — the Breakwater's inns are described as paid rooms, but REST reads "Sleep where you stand. Free." — RESOLVED 2026-10-08 (commit 698f8ac2; `restOfferDesc` reads the session shelter, inns say "A bed for the night, on the house.", camps keep theirs; pinned in rest.copy.test and rest-offer-heal-cap.audit.test)
 - issue: #458
