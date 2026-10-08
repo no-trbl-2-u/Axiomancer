@@ -1412,7 +1412,11 @@ function clauseValue(c: CardClause): string {
                 : ` · ${c.duration} turn${c.duration === 1 ? '' : 's'}`;
         return `${c.dot.perTick}${unit}${clock}${c.cross ?? ''}`;
     }
-    return deabbreviateShorthand(vitaeCopy(c.value));
+    // A damage-taken status reads in percent here too ('+25% · 2 turns'), the
+    // way the face, the FREE line and the DECK tab print it.
+    const value = deabbreviateShorthand(vitaeCopy(c.value));
+    const pct = c.source === 'effect' && c.intensity != null ? percentIntensity(c.id, c.intensity) : null;
+    return pct ? value.replace(`×${c.intensity}`, pct) : value;
 }
 
 /**
