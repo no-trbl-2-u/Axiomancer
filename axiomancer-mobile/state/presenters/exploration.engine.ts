@@ -29,7 +29,8 @@ export type NodeType =
     | 'quest'
     | 'hazard'
     | 'blacksmith'
-    | 'village';
+    | 'village'
+    | 'door';
 
 export interface ExplorationNode {
     /** Stable engine node ID. */
@@ -187,6 +188,8 @@ export const ACTION_ICON_BY_TYPE: Record<NodeType, string> = {
     hazard: 'hazard',
     blacksmith: 'anvil',
     village: 'village',
+    // No door glyph exists yet; the scroll stands in until the art does.
+    door: 'scroll',
 };
 
 const ACTION_TAG_BY_TYPE: Record<NodeType, string> = {
@@ -200,6 +203,26 @@ const ACTION_TAG_BY_TYPE: Record<NodeType, string> = {
     hazard: 'PERIL · BRAVE IT',
     blacksmith: 'FORGE · DIE GEAR',
     village: 'HAVEN · TRADE',
+    door: 'LEAVE · NEXT MAP',
+};
+
+/**
+ * The word a node's kind goes by on the map: the selection panel's tag and
+ * the node's accessibility label. A door reads as the way out, not a quest,
+ * and the Anvil carries the name its own screen uses.
+ */
+export const NODE_KIND_LABEL: Record<NodeType, string> = {
+    encounter: 'BATTLE',
+    boss: 'BOSS · BATTLE',
+    quest: 'QUEST',
+    rest: 'REST',
+    gather: 'GATHER',
+    treasure: 'TREASURE',
+    hazard: 'HAZARD',
+    blacksmith: 'THE ANVIL',
+    village: 'VILLAGE',
+    door: 'PATH ONWARD',
+    current: 'HERE',
 };
 
 const ENCOUNTER_NODE_TYPES = new Set<NodeType>(['encounter', 'boss']);
@@ -221,10 +244,10 @@ const KIND_TO_NODE_TYPE: Record<MapEventKind, NodeType> = {
     cutscene: 'quest',
     narration: 'quest',
     blacksmith: 'blacksmith',
-    // Inter-map travel doors. No door glyph; borrows the narrative icon.
-    travel: 'quest',
-    // The Labyrinth door (the Lantern Deep's vault door). Same icon as travel.
-    labyrinth: 'quest',
+    // Inter-map travel doors.
+    travel: 'door',
+    // The Labyrinth door (the Lantern Deep's vault door), a door like travel.
+    labyrinth: 'door',
 };
 
 /** Node display type, sourced from the engine's authored event pools. */

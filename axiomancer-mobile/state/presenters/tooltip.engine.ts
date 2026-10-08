@@ -141,7 +141,7 @@ const QUEST_OBJECTIVE_CONTENT: Record<string, TooltipContent> = {
 
 // Map-node content. Keys match the NodeType variants emitted by the
 // exploration presenter (`encounter | treasure | boss | quest | rest |
-// gather | hazard | blacksmith | village | current`). Each entry: uppercased title + short
+// gather | hazard | blacksmith | village | door | current`). Each entry: uppercased title + short
 // description of what happens when the node is engaged.
 const MAP_NODE_CONTENT: Record<string, TooltipContent> = {
     encounter: {
@@ -188,6 +188,11 @@ const MAP_NODE_CONTENT: Record<string, TooltipContent> = {
         title: 'VILLAGE',
         body: 'a haven of roofs and wares. trade, sell, and hear what the settled know; nothing here bites — yet.',
         footnote: 'no combat',
+    },
+    door: {
+        title: 'PATH ONWARD',
+        body: 'the way out of this region. cross it and the road carries you on to the next map.',
+        footnote: 'no combat · leaves this map',
     },
     current: {
         title: 'HERE',

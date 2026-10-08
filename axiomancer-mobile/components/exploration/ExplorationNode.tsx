@@ -9,6 +9,7 @@ import { useTooltip } from '@/hooks/useTooltip';
 import { MapSheetContext } from './mapSheetContext';
 import {
     ACTION_ICON_BY_TYPE,
+    NODE_KIND_LABEL,
     type ExplorationNode as ExplorationNodeType,
     type NodeType,
 } from '@/state/presenters/exploration.engine';
@@ -48,6 +49,7 @@ export function ExplorationNode({ node: n, onNodePress, isSelected }: Exploratio
         hazard: AXM.rust,
         blacksmith: AXM.rust,
         village: AXM.sulfur,
+        door: AXM.sulfur,
     };
     const tooltip = useTooltip();
     const sheet = useContext(MapSheetContext);
@@ -87,7 +89,7 @@ export function ExplorationNode({ node: n, onNodePress, isSelected }: Exploratio
                 n.kind === 'locked' ? 'sealed'
                     : n.kind === 'completed' ? 'walked'
                         : n.kind === 'current' ? 'here'
-                            : `open, ${n.type}`
+                            : `open, ${NODE_KIND_LABEL[n.type].toLowerCase()}`
             }`}
             accessibilityHint="hold to read node type description"
             // Every kind answers a tap — a sealed node says it is sealed, a

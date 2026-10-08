@@ -3,7 +3,7 @@ import { View, Text, Pressable } from 'react-native';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import { ActionIcon } from '@/components/ActionIcon';
-import { ACTION_ICON_BY_TYPE, type ExplorationOption } from '@/state/presenters/exploration.engine';
+import { ACTION_ICON_BY_TYPE, NODE_KIND_LABEL, type ExplorationOption } from '@/state/presenters/exploration.engine';
 
 interface NodeConfirmPanelProps {
     /** The node the player has selected, or null when nothing is selected. */
@@ -13,18 +13,6 @@ interface NodeConfirmPanelProps {
     /** Shown when no node is selected (the drawer's empty-state line). */
     emptyMessage: string;
 }
-
-/** Human-readable tag for each node kind, shown above the blurb. */
-const KIND_LABEL: Record<string, string> = {
-    encounter: 'BATTLE',
-    boss: 'BOSS · BATTLE',
-    quest: 'QUEST',
-    rest: 'REST',
-    gather: 'GATHER',
-    treasure: 'TREASURE',
-    hazard: 'HAZARD',
-    current: 'HERE',
-};
 
 /**
  * Bottom panel for the exploration screen: instead of listing every neighbour,
@@ -44,7 +32,7 @@ export function NodeConfirmPanel({ selected, onConfirm, onCancel, emptyMessage }
         );
     }
 
-    const kindLabel = KIND_LABEL[selected.type] ?? selected.type.toUpperCase();
+    const kindLabel = NODE_KIND_LABEL[selected.type];
     const iconKey = ACTION_ICON_BY_TYPE[selected.type] ?? 'sword';
 
     return (
