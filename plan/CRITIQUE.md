@@ -388,25 +388,6 @@
 
 ## Pending
 
-### [LOW] hazard / mobile — the route-select top strip reads "◆ HAZARDNO RETREAT — CHOOSE TO PROCEED◆" with no gaps
-- pass: 68 (commit 534b93f6)
-- viewport: mobile (375x812); desktop is fine
-- category: visual
-- observation: the strip above the hazard title is three `Text`
-  segments ("◆ HAZARD", "NO RETREAT — CHOOSE TO PROCEED", "◆") in a
-  `justifyContent: 'space-between'` row. At 1280 they sit far apart. At
-  375 the three, at 11px mono with 2px letter-spacing, fill the row, and
-  space-between leaves no gap, so they read as one run-on string.
-- evidence: `.critique-artifacts/mobile/10-hazard.png` (top strip);
-  `desktop/10-hazard.png` for the intended spacing;
-  `axiomancer-mobile/components/hazard/RouteSelect.tsx:157-160` and the
-  `topStrip` style at `:217`.
-- suggested fix: give the row a `gap` (or margins on the middle
-  segment) and let the middle segment shrink/ellipsize, or drop the
-  middle line below 400px. The strip's copy is also hardcoded in the
-  component; move it with the fix.
-- source: critique:drive (unattended)
-
 ### [LOW] hazard — the opening-hand fan clips card names again ("SURE FOOTIN", "BALANCE POL")
 - pass: 68 (commit 534b93f6)
 - viewport: both (375x812 and 1280x800)
@@ -685,6 +666,26 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] hazard / mobile — the route-select top strip reads "◆ HAZARDNO RETREAT — CHOOSE TO PROCEED◆" with no gaps — RESOLVED 2026-10-08 (commit d63cf279; the strip row has a 10px gap and the middle segment shrinks to one ellipsized line; guarded by RouteSelect.test.tsx. The copy stays inline, as every UI label in the hazard components does)
+- issue: #460
+- pass: 68 (commit 534b93f6)
+- viewport: mobile (375x812); desktop is fine
+- category: visual
+- observation: the strip above the hazard title is three `Text`
+  segments ("◆ HAZARD", "NO RETREAT — CHOOSE TO PROCEED", "◆") in a
+  `justifyContent: 'space-between'` row. At 1280 they sit far apart. At
+  375 the three, at 11px mono with 2px letter-spacing, fill the row, and
+  space-between leaves no gap, so they read as one run-on string.
+- evidence: `.critique-artifacts/mobile/10-hazard.png` (top strip);
+  `desktop/10-hazard.png` for the intended spacing;
+  `axiomancer-mobile/components/hazard/RouteSelect.tsx:157-160` and the
+  `topStrip` style at `:217`.
+- suggested fix: give the row a `gap` (or margins on the middle
+  segment) and let the middle segment shrink/ellipsize, or drop the
+  middle line below 400px. The strip's copy is also hardcoded in the
+  component; move it with the fix.
+- source: critique:drive (unattended)
 
 ### [x] [LOW] combat preview — an opened threat phase repeats the header's figure as "(+11 damage)", and the "+" reads as a bonus — RESOLVED 2026-10-08 (commit 544f9422; `buildThreatAction` prints "N damage" unsigned, so preview, intent, log and CLI all drop the "+"; guarded by combat.threat.test.ts)
 - issue: #459
