@@ -433,24 +433,6 @@
 
 ## Pending
 
-### [LOW] hazard / desktop — the route cards stretch 1240px edge to edge, so each threshold sits across the screen from its label
-- pass: 73 (commit 1f5e2896)
-- viewport: desktop (1280x800)
-- category: visual
-- observation: under a centred opening hand, both route cards (Cinder
-  Ridge, The Ash Run) run the full width. The three round cells
-  ("RI 22", "RII 23", "RIII 25") spread over ~1170px, the PASSAGE /
-  FORCE / ESCAPE badges sit at the far right edge, and TAKE SAFE
-  ROUTE is a 1220px bar. The menu, combat reveal, rest and village
-  screens were each capped at a centred 520 column (2026-10-07/08);
-  the hazard route select is the one state screen left at full
-  width.
-- evidence: `.critique-artifacts/desktop/10-hazard.png`
-- suggested fix: cap the route-select scroll content at a centred
-  column the way `REST_COLUMN_MAX_WIDTH` does (wider than 520 if the
-  three round cells need it); phone keeps full width.
-- source: critique:drive (unattended)
-
 ### [LOW] exploration / mobile — the map pane leaves a ~140px empty black band above the engraving
 - pass: 73 (commit 1f5e2896)
 - viewport: mobile (375x812)
@@ -740,6 +722,25 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] hazard / desktop — the route cards stretch 1240px edge to edge, so each threshold sits across the screen from its label — RESOLVED 2026-10-09 (commit 3c25eb28; the header, opening hand and route cards sit in a column capped at `ROUTE_COLUMN_MAX_WIDTH` (520), centred, full width below the cap; the fan sizes its overlap to the column; pinned in RouteSelect.test.tsx)
+- issue: #475
+- pass: 73 (commit 1f5e2896)
+- viewport: desktop (1280x800)
+- category: visual
+- observation: under a centred opening hand, both route cards (Cinder
+  Ridge, The Ash Run) run the full width. The three round cells
+  ("RI 22", "RII 23", "RIII 25") spread over ~1170px, the PASSAGE /
+  FORCE / ESCAPE badges sit at the far right edge, and TAKE SAFE
+  ROUTE is a 1220px bar. The menu, combat reveal, rest and village
+  screens were each capped at a centred 520 column (2026-10-07/08);
+  the hazard route select is the one state screen left at full
+  width.
+- evidence: `.critique-artifacts/desktop/10-hazard.png`
+- suggested fix: cap the route-select scroll content at a centred
+  column the way `REST_COLUMN_MAX_WIDTH` does (wider than 520 if the
+  three round cells need it); phone keeps full width.
+- source: critique:drive (unattended)
 
 ### [x] [MED] combat / desktop — the hand fan still overlaps at 1280 wide, so every covered card's paid column is hidden — RESOLVED 2026-10-09 (commit cc556113; `handFanLayout` lets `step` grow to `HAND_CARD_W + HAND_FAN_GAP` when the band has room, a fan with no overlap caps no names, phones unchanged; pinned in CombatBoard.fresh-eyes-repair.test.tsx)
 - issue: #474
