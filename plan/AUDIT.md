@@ -52,7 +52,8 @@
 
 ## Pending
 
-### [tooling] `tick-end` telemetry rows never land for any `/march`-dispatched tick (digest, 2026-10-09)
+### [x] [tooling] `tick-end` telemetry rows never land for any `/march`-dispatched tick (digest, 2026-10-09) — CLOSED 2026-10-09 (53a0c39b: `_claude-skill.yml` commits whatever the tick left in `telemetry/` in a best-effort step after Claude exits; the first CI tick after it should show a `telemetry: tick-end rows` commit)
+- issue: #476
 - category: debt
 - impact: 7
 - ease: 6
