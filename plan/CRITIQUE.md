@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-08 at commit 3c58c902
-> Pass count: 71
+> Last pass: 2026-10-09 at commit 19459d23
+> Pass count: 72
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -408,9 +408,59 @@
 > carry a three-column threshold grid that uses the width, so they are
 > left out of the LOW row.
 
+> **[critique pass 72, 2026-10-09, commit 19459d23] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route still bounces to the title with no save). 12
+> commits after pass 71. Re-verified on screen: the rest and settlement
+> screens hold their rows in one centred 520px column on desktop, with
+> the price beside its name. Filed one LOW visual row: the settlement
+> screen's kicker and its TAKE THE ROAD bar sit on the 28px vignette
+> frame, not inside it. Reconfirmed and not re-filed: pass 65's Minor
+> Healing Potion ("RESTORES 10 VITAE" against "RESTORES 43 VITAE" at
+> rest), pass 63's corner medallions ("Dea" under END on mobile), RC
+> walk item 9 (the mobile hazard fan's PILGRIM'S BLESSING "RE-CAST +D"
+> clipped), and the desktop "GUAR"/"12" and "VU"/"+" chip wraps
+> (`plan/AUDIT.md`). Checked and not filed: the main menu's empty upper
+> half at both viewports (`MainMenu.tsx` seats the column at the bottom
+> on purpose; filling the space would take art); the mobile title's
+> black band (`contain` trade) and the mobile hub's black band above the
+> sheet (no-clamp trade, pass 56); the cutscene's SKIP straddling the
+> frame corner (a corner control, readable); and the fixture placeholder
+> lines in dialogue, cutscene and village (fixture content, not shipped).
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `archive-pre-revamp:plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
+
+### [LOW] village — the settlement screen's header and exit bar sit on the vignette frame, not inside it
+- pass: 72 (commit 19459d23)
+- viewport: both (375x812 and 1280x800)
+- category: visual
+- observation: `ScreenBg` draws its plate inside a 28px vignette border.
+  The rest, cache and item-reward screens centre their column, so it
+  sits inside the frame. The settlement screen top-aligns its scroll with
+  14px padding, so the "SETTLEMENT" kicker (y~20) sits on the dark
+  border above the plate and the "FIXTURE SHOP" title starts on its
+  edge. At the bottom, the TAKE THE ROAD bar (14px padding) runs across
+  the lower border. On the same pass the rest screen, behind the same
+  frame, leaves a clear margin above its heading. A first-time player
+  sees the settlement's heading pushed against the top of the screen,
+  outside the frame every other stop screen respects.
+- evidence: `.critique-artifacts/desktop/07-village.png` (kicker at
+  y~20 above the plate's top edge at y=28; exit bar's bottom edge at
+  y~785 inside the band at 772-800), `mobile/07-village.png` (same
+  kicker at y~20), against `desktop/09-rest.png`;
+  `axiomancer-mobile/components/ScreenBg.tsx` (`vignette.borderWidth:
+  28`), `axiomancer-mobile/app/village/index.tsx:231` (`scroll: {
+  padding: 14 }`) and `:351` (`exitBar: { paddingHorizontal: 14,
+  paddingBottom: 14 }`).
+- suggested fix: pad the settlement scroll and exit bar by at least the
+  vignette width (export the 28 from `ScreenBg` as a named inset, rather
+  than repeat the literal), so the heading and the bar sit inside the
+  plate. Pin it with a test that the village scroll's top padding and
+  the exit bar's bottom padding are not less than that inset.
+- source: critique:drive (unattended)
 
 ### [LOW] RC walk 2026-10-02 — copy, label and console findings (one row per item, all presentation)
 - pass: RC checkpoint walk, four `playtester` legs (attended, T present), commits a493eaf7 → 169b6dbc
