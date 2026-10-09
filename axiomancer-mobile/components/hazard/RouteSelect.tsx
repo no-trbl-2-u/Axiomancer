@@ -147,6 +147,9 @@ const FAN_MAX_OVERLAP = 22;
 const FAN_MIN_GAP = 6;
 const FAN_SIDE_PAD = 24;
 
+/** The route-select column's widest extent, in points (the rest screen's width). */
+export const ROUTE_COLUMN_MAX_WIDTH = 520;
+
 /** How far each opening-hand card tucks under its left neighbour: a small gap when the
  *  row has room, otherwise just enough overlap to fit, never more than 22. */
 export function routeFanOverlap(n: number, rowWidth: number): number {
@@ -166,7 +169,7 @@ export function RouteSelect({
 }) {
     const styles = useStyles();
     const { width } = useWindowDimensions();
-    const overlap = routeFanOverlap(vm.hand.length, width - FAN_SIDE_PAD);
+    const overlap = routeFanOverlap(vm.hand.length, Math.min(width, ROUTE_COLUMN_MAX_WIDTH) - FAN_SIDE_PAD);
     return (
         <Animated.View entering={FadeIn.duration(220)} style={styles.root} testID="hazard-route-select">
             <View style={styles.topStrip}>
@@ -175,56 +178,58 @@ export function RouteSelect({
                 <Text style={styles.topStripSide}>◆</Text>
             </View>
             <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
-                <Animated.View entering={FadeInDown.delay(60).duration(300)} style={styles.header}>
-                    <Text style={styles.headerEyebrow}>✠ HAZARD · {vm.totalRounds} ROUNDS</Text>
-                    <Text style={styles.title}>{vm.title}</Text>
-                    <Text style={styles.scenario}>{vm.scenario}</Text>
-                </Animated.View>
+                <View style={styles.column} testID="hazard-route-column">
+                    <Animated.View entering={FadeInDown.delay(60).duration(300)} style={styles.header}>
+                        <Text style={styles.headerEyebrow}>✠ HAZARD · {vm.totalRounds} ROUNDS</Text>
+                        <Text style={styles.title}>{vm.title}</Text>
+                        <Text style={styles.scenario}>{vm.scenario}</Text>
+                    </Animated.View>
 
-                {/* opening hand preview — fanned, non-interactive */}
-                <Animated.View entering={FadeInUp.delay(160).duration(320)}>
-                    <Text style={styles.handLabel}>YOUR HAND — TAP A CARD TO READ IT, OR CHOOSE YOUR ROUTE BELOW</Text>
-                    <View style={styles.handPreview} testID="hazard-opening-hand">
-                        {vm.hand.map((card, i) => {
-                            const n = vm.hand.length;
-                            const mid = (n - 1) / 2;
-                            return (
-                                <Animated.View
-                                    key={card.uid}
-                                    entering={FadeInUp.delay(220 + i * 70).duration(280)}
-                                    style={{
-                                        marginLeft: i === 0 ? 0 : -overlap,
-                                        zIndex: i,
-                                        transform: [
-                                            { translateY: Math.abs(i - mid) * 6 },
-                                            { rotate: `${(i - mid) * 5}deg` },
-                                        ],
-                                    }}
-                                >
-                                    <Pressable
-                                        accessibilityRole="button"
-                                        accessibilityLabel={`${card.name}, ${card.kind} card in hand. Tap to read its full effect.`}
-                                        onPress={() => onInspect?.(card)}
+                    {/* opening hand preview — fanned, non-interactive */}
+                    <Animated.View entering={FadeInUp.delay(160).duration(320)}>
+                        <Text style={styles.handLabel}>YOUR HAND — TAP A CARD TO READ IT, OR CHOOSE YOUR ROUTE BELOW</Text>
+                        <View style={styles.handPreview} testID="hazard-opening-hand">
+                            {vm.hand.map((card, i) => {
+                                const n = vm.hand.length;
+                                const mid = (n - 1) / 2;
+                                return (
+                                    <Animated.View
+                                        key={card.uid}
+                                        entering={FadeInUp.delay(220 + i * 70).duration(280)}
+                                        style={{
+                                            marginLeft: i === 0 ? 0 : -overlap,
+                                            zIndex: i,
+                                            transform: [
+                                                { translateY: Math.abs(i - mid) * 6 },
+                                                { rotate: `${(i - mid) * 5}deg` },
+                                            ],
+                                        }}
                                     >
-                                        <HazardCard
-                                            card={card}
-                                            mode="hand"
-                                            nameInset={i < n - 1 ? Math.max(0, overlap) : 0}
-                                        />
-                                    </Pressable>
-                                </Animated.View>
-                            );
-                        })}
-                    </View>
-                </Animated.View>
+                                        <Pressable
+                                            accessibilityRole="button"
+                                            accessibilityLabel={`${card.name}, ${card.kind} card in hand. Tap to read its full effect.`}
+                                            onPress={() => onInspect?.(card)}
+                                        >
+                                            <HazardCard
+                                                card={card}
+                                                mode="hand"
+                                                nameInset={i < n - 1 ? Math.max(0, overlap) : 0}
+                                            />
+                                        </Pressable>
+                                    </Animated.View>
+                                );
+                            })}
+                        </View>
+                    </Animated.View>
 
-                <Text style={styles.chooseLabel}>✠ CHOOSE YOUR ROUTE</Text>
-                <View style={{ gap: 10, paddingHorizontal: 12 }}>
-                    {vm.routeChoices.map((route, i) => (
-                        <Animated.View key={route.key} entering={FadeInUp.delay(320 + i * 120).duration(320)}>
-                            <RoutePanel route={route} onPick={onPick} />
-                        </Animated.View>
-                    ))}
+                    <Text style={styles.chooseLabel}>✠ CHOOSE YOUR ROUTE</Text>
+                    <View style={{ gap: 10, paddingHorizontal: 12 }}>
+                        {vm.routeChoices.map((route, i) => (
+                            <Animated.View key={route.key} entering={FadeInUp.delay(320 + i * 120).duration(320)}>
+                                <RoutePanel route={route} onPick={onPick} />
+                            </Animated.View>
+                        ))}
+                    </View>
                 </View>
             </ScrollView>
         </Animated.View>
@@ -233,6 +238,9 @@ export function RouteSelect({
 
 const useStyles = makeStyles((AXM) => ({
     root: { ...StyleSheet.absoluteFillObject, backgroundColor: HUE.routeBg, zIndex: 50 },
+    // A phone fills the column edge to edge; a wide window keeps each
+    // route's thresholds and badges beside its name instead of across the screen.
+    column: { width: '100%', maxWidth: ROUTE_COLUMN_MAX_WIDTH, alignSelf: 'center' },
     topStrip: {
         flexDirection: 'row',
         alignItems: 'center',

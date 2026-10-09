@@ -1,8 +1,8 @@
 import React from 'react';
-import { Dimensions } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 import { fireEvent, render } from '@testing-library/react-native';
 
-import { RouteSelect, routeFanOverlap } from '../RouteSelect';
+import { ROUTE_COLUMN_MAX_WIDTH, RouteSelect, routeFanOverlap } from '../RouteSelect';
 import type { HazardViewModel } from '@/state/presenters/hazard.engine';
 
 // Mock react-native-reanimated
@@ -152,6 +152,20 @@ describe('RouteSelect', () => {
         expect(getByText('Card 3')).toHaveStyle({ paddingRight: 22 });
         expect(getByText('Card 4')).toHaveStyle({ paddingRight: 9 });
         spy.mockRestore();
+    });
+
+    // Critique pass 73: at 1280 the route cards ran edge to edge, a threshold
+    // ~1170px from its label. The rest, village and menu screens hold the same cap.
+    it('holds the header, hand and routes in one centred column, full width below the cap', () => {
+        const { getByTestId } = render(<RouteSelect {...mockProps} />);
+        const column = getByTestId('hazard-route-column');
+        const style = StyleSheet.flatten(column.props.style);
+        expect(style.maxWidth).toBe(ROUTE_COLUMN_MAX_WIDTH);
+        expect(ROUTE_COLUMN_MAX_WIDTH).toBeGreaterThanOrEqual(480);
+        expect(ROUTE_COLUMN_MAX_WIDTH).toBeLessThanOrEqual(560);
+        expect(style.alignSelf).toBe('center');
+        expect(style.width).toBe('100%');
+        expect(column).toContainElement(getByTestId('hazard-opening-hand'));
     });
 });
 
