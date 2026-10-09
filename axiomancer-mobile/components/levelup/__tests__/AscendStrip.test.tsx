@@ -19,12 +19,12 @@ describe('AscendStrip: render contract', () => {
         expect(tree.queryByTestId('ascend-strip')).not.toBeNull();
     });
 
-    it('renders the ASCEND title + subline with lowercase-roman level already reached', () => {
+    it('renders the ASCEND title + subline with the arabic level already reached, as SELF prints it', () => {
         const tree = render(
             <AscendStrip pendingPoints={3} level={7} onOpen={() => {}} />,
         );
         expect(tree.queryByText('✠ ASCEND')).not.toBeNull();
-        expect(tree.queryByText(/3 points unspent · risen to level vii/)).not.toBeNull();
+        expect(tree.queryByText(/3 points unspent · risen to level 7/)).not.toBeNull();
     });
 
     it('pluralizes "point" / "points" correctly', () => {

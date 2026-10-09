@@ -1,7 +1,7 @@
 /**
  * Hermetic component tests — LevelReadyStrip.
  *
- * Pins: mount, copy (level transition target in lowercase-roman),
+ * Pins: mount, copy (level transition target in arabic, as SELF prints it),
  * tap handler wiring, accessibility label.
  */
 
@@ -17,10 +17,10 @@ describe('LevelReadyStrip: render contract', () => {
         expect(tree.queryByTestId('level-ready-strip')).not.toBeNull();
     });
 
-    it('renders the ASCEND READY title + subline with lowercase-roman target level', () => {
+    it('renders the ASCEND READY title + subline with the arabic target level', () => {
         const tree = render(<LevelReadyStrip level={7} onLevelUp={() => {}} />);
         expect(tree.queryByText('✠ ASCEND READY')).not.toBeNull();
-        expect(tree.queryByText(/threshold crossed · step into level viii/)).not.toBeNull();
+        expect(tree.queryByText(/threshold crossed · step into level 8/)).not.toBeNull();
     });
 
     it('exposes an accessibility label naming the target level', () => {

@@ -21,7 +21,6 @@ import Svg, { Circle, Path as SvgPath } from 'react-native-svg';
 import { Splatter } from '@/components/Splatter';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
-import { toRomanLower } from '@/state/presenters/roman';
 
 export interface AscendStripProps {
     /** Unspent allocation points. Must be > 0; caller gates. */
@@ -39,9 +38,8 @@ export interface AscendStripProps {
 export function AscendStrip({ pendingPoints, level, onOpen }: AscendStripProps) {
     const styles = useStyles();
     const AXM = usePalette();
-    // Lowercase roman for the level only, per the bundle's
-    // numeral rule. Points count stays in arabic (stat-deltas).
-    const reachedLevel = toRomanLower(level);
+    // Arabic, as the SELF medallion and the combat line print the
+    // level ("LVL 4"); a roman "level iv" here read as a different number.
     const pointsWord = pendingPoints === 1 ? 'point' : 'points';
     return (
         <Pressable
@@ -64,7 +62,7 @@ export function AscendStrip({ pendingPoints, level, onOpen }: AscendStripProps) 
                 <View style={styles.centerCol}>
                     <Text style={styles.ascendTitle}>✠ ASCEND</Text>
                     <Text style={styles.ascendSubline} numberOfLines={1}>
-                        {pendingPoints} {pointsWord} unspent · risen to level {reachedLevel}
+                        {pendingPoints} {pointsWord} unspent · risen to level {level}
                     </Text>
                     {pendingPoints >= 2 && (
                         <Text style={styles.ignoredPings}>

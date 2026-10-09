@@ -34,11 +34,11 @@ describe('LevelUpModal: chrome render', () => {
         expect(tree.queryByTestId('levelup-modal')).not.toBeNull();
     });
 
-    it('renders the eyebrow + level transition with lowercase roman', () => {
+    it('renders the eyebrow + level transition in arabic, as SELF prints it', () => {
         const tree = render(<LevelUpModal {...BASE_PROPS} />);
         expect(tree.queryByText('✠ THE LEDGER OPENS')).not.toBeNull();
-        expect(tree.queryByText('level vi')).not.toBeNull();
-        expect(tree.queryByText('level vii')).not.toBeNull();
+        expect(tree.queryByText('level 6')).not.toBeNull();
+        expect(tree.queryByText('level 7')).not.toBeNull();
     });
 
     it('renders the character name uppercased', () => {

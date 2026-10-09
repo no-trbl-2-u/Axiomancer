@@ -21,7 +21,6 @@ import { StanceRow, type LevelStance } from '@/components/levelup/StanceRow';
 import { pickFlavor } from '@/components/levelup/levelUpFlavor';
 import { FONTS } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
-import { toRomanLower } from '@/state/presenters/roman';
 import { STANCES } from '@/state/presenters/stances';
 
 
@@ -125,11 +124,11 @@ export function LevelUpModal({
                 {/* Level transition */}
                 <View style={styles.levelRow}>
                     <Text style={styles.levelFromLabel}>
-                        level {toRomanLower(fromLevel)}
+                        level {fromLevel}
                     </Text>
                     <View style={styles.levelHairline} />
                     <Text style={styles.levelToLabel}>
-                        level {toRomanLower(toLevel)}
+                        level {toLevel}
                     </Text>
                 </View>
 

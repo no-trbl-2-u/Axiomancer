@@ -21,7 +21,6 @@ import Svg, { Circle, Path as SvgPath } from 'react-native-svg';
 import { Splatter } from '@/components/Splatter';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
-import { toRomanLower } from '@/state/presenters/roman';
 
 export interface LevelReadyStripProps {
     /** Current level (the strip renders "step into level <N+1>"). */
@@ -33,7 +32,7 @@ export interface LevelReadyStripProps {
 export function LevelReadyStrip({ level, onLevelUp }: LevelReadyStripProps) {
     const styles = useStyles();
     const AXM = usePalette();
-    const targetLevel = toRomanLower(level + 1);
+    const targetLevel = level + 1;
     return (
         <Pressable
             accessibilityRole="button"
