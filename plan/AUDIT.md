@@ -155,7 +155,8 @@
   `docs/game-model.md` § Dice, which still writes it lowercase) and make the
   label, its test and the game model agree.
 
-### [tooling] `combat-sim`'s default loadout names two deleted cards (R10c, 2026-10-02)
+### [x] [tooling] `combat-sim`'s default loadout names two deleted cards (R10c, 2026-10-02) — CLOSED 2026-10-09 (the default is `DEFAULT_LOADOUT`, the `GREY_OFFICE_CARDS` ids; a docs-examples test resolves it and every documented `--loadout` id through `getCardById`)
+- issue: #472
 - category: tooling
 - impact: 4
 - ease: 8
