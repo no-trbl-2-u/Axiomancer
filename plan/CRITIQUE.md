@@ -448,7 +448,7 @@
   8. The first-fight coach card ("FIRST FIGHT · 1/4") draws over the card-detail modal and hides the card's name.
   9. The Pilgrim's Blessing hazard reward preview: the "RE-CAST +DIE MANA" line overlaps a square glyph.
   10. Cache (cw-13) and Anvil (cw-18) screens in the Charcoal Wood draw over a city skyline backdrop.
-  11. The SELF header says "LVL 4"; the Ascend strip and screen say "level iv".
+  11. [x] (commit 8c8b1701, issue #473; the Ascend strip, the ASCEND READY strip and the level-up screen print the level in arabic, as SELF, the combat line and every accessibility label already did) The SELF header says "LVL 4"; the Ascend strip and screen say "level iv".
   12. [nested-button half x] (commit 46f7f3b8, issue #471; the socketed die is no longer its own button and the staged card's label names it; the item card's expand button and USE / DISCARD are siblings, which also puts them in a native screen reader's reach. The `element.ref` and `translateX`/`translateY` warnings remain) Console: React 19 "Accessing element.ref was removed"; nested `<button>` hydration errors from the staged combat card (`combat-staged-*` contains `combat-staged-die-face`) and the Satchel potion card (`item-*` contains `use-*`); `translateX`/`translateY` passed to a DOM element on the hazard route-select screen.
   13. Dev only: a hot reload white-screens the app (`useGameState/useGameActions must be used inside <GameStoreProvider>`, thrown from `SaveSlotsProvider`); a reload recovers.
 - not filed (by design or owned elsewhere): the Doorwarden's placeholder pictogram (art, B2/B8); no end-of-act screen after the deep stair (`MapEvents/content.ts`: no end-of-run state); the grey-deck Momentum chip (accepted until BT).

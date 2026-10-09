@@ -1535,6 +1535,22 @@ present. Row stays open until that session runs.
   cheap fix covers the observed failure, and a real lock is a bigger change to
   a flow that is otherwise working.
 
+### [loop-call] The level prints in arabic everywhere; roman numerals stay for chronicle counts only (2026-10-09)
+- category: divergence
+- impact: 2
+- ease: 9
+- detail: RC walk item 11 (`plan/CRITIQUE.md`) found the level printed two
+  ways: "LVL 4" on SELF, the combat pilgrim line, StatusCard and "XP TO LVL
+  N", but "level iv" on AscendStrip, LevelReadyStrip and LevelUpModal, whose
+  comments cited the design bundle's lowercase-roman numeral rule. The loop
+  chose arabic for the three level-up surfaces (commit 8c8b1701, issue #473):
+  the level is a number the player compares against "XP TO LVL N", four
+  surfaces and every accessibility label already print it in arabic, and
+  `state/presenters/roman.ts` stays the home for round and encounter-seal
+  counts.
+- next: `/oversight` ratifies or reverses. Reversing means making the SELF
+  medallion, "XP TO LVL N", the combat line and StatusCard roman instead.
+
 ## Done
 
 ### [x] [tests] Root `npm test` is red on main: the comment guard false-positives on in-game "phase N of M" copy (digest, 2026-10-07) — CLOSED 2026-10-07 (6a41768c)
