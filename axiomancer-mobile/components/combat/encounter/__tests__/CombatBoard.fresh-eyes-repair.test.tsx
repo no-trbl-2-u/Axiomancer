@@ -23,7 +23,7 @@ import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { initializeCombatEncounter, rollEncounterDice } from '@mechanics';
 import {
     CombatBoard, handFanLayout,
-    HAND_CARD_W, HAND_FAN_LEFT, HAND_FAN_RIGHT, HAND_FAN_MIN_STEP, HAND_FAN_BOARD_EDGE,
+    HAND_CARD_W, HAND_FAN_LEFT, HAND_FAN_RIGHT, HAND_FAN_MIN_STEP, HAND_FAN_BOARD_EDGE, HAND_FAN_GAP,
     CHIP_INFO_MARK_W, CHIP_INFO_MARK_GAP,
     type DragController,
 } from '@/components/combat/encounter/CombatBoard';
@@ -159,6 +159,16 @@ describe('C11-R — a hand the chrome-free band cannot seat takes the board band
             expect(fanWidth(n, step)).toBeLessThanOrEqual(band);
             expect(step).toBeGreaterThan(HAND_FAN_MIN_STEP);
         }
+    });
+
+    it('a desktop hand sits side by side, so no card hides its paid column under a neighbour', () => {
+        for (const n of [2, 3, 4, 5, 6]) {
+            const { step, overlap } = handFanLayout(DESKTOP_W, n);
+            expect(overlap).toBeLessThanOrEqual(0);
+            expect(step).toBe(HAND_CARD_W + HAND_FAN_GAP);
+        }
+        // A phone has no such room: the five-card hand still overlaps.
+        expect(handFanLayout(PHONE.width, 5).overlap).toBeGreaterThan(0);
     });
 });
 

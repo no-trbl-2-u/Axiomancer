@@ -263,6 +263,10 @@ export const HAND_FAN_MIN_STEP = 28;
 // The board's own edge inset — the widest band the fan may honestly use, and
 // the reference layout the corner medallions float above at a higher zIndex.
 export const HAND_FAN_BOARD_EDGE = 12;
+// The widest a step may grow: a whole card plus this gap. A band with room
+// lays the hand out side by side, so no card hides its right-hand (paid) column
+// under a neighbour; a phone never has that room and keeps its overlap.
+export const HAND_FAN_GAP = 8;
 
 /**
  * Lay the hand fan out in the widest band it can honestly use.
@@ -338,7 +342,7 @@ export function handFanLayout(screenW: number, n: number): { band: number; step:
         ? chromeBand
         : Math.max(chromeBand, screenW - HAND_FAN_BOARD_EDGE * 2);
     const step = n > 1
-        ? Math.min(HAND_CARD_W - 16, Math.max(HAND_FAN_MIN_STEP, (band - HAND_CARD_W) / (n - 1)))
+        ? Math.min(HAND_CARD_W + HAND_FAN_GAP, Math.max(HAND_FAN_MIN_STEP, (band - HAND_CARD_W) / (n - 1)))
         : HAND_CARD_W;
     return { band, step, overlap: HAND_CARD_W - step };
 }
@@ -1041,10 +1045,11 @@ export const CombatBoard = React.memo(function CombatBoard({
     // and falls back to the full board band for a hand too large to seat
     // there — readable cards the corners float over, never a row of slivers.
     const { step, overlap } = handFanLayout(screenW, n);
-    // Every fanned card EXCEPT the last is covered by its
-    // right-hand neighbour, so its name must lay out inside the surviving
-    // sliver. The last card is uncovered and keeps the full band (null).
-    const handNamePeek = nameColumnPeek(step);
+    // When the fan overlaps, every fanned card EXCEPT the last is covered by
+    // its right-hand neighbour, so its name must lay out inside the surviving
+    // sliver. The last card, and every card of a fan with room to sit side by
+    // side, is uncovered and keeps the full band (null).
+    const handNamePeek = overlap > 0 ? nameColumnPeek(step) : null;
     const draggingDieId = drag.active?.type === 'die' ? drag.active.dieId : null;
     // The full VM of the die in flight — the COLOR LAW dimming keys off its color.
     const draggingDie = drag.active?.type === 'die' ? drag.active.die : null;
@@ -1320,9 +1325,10 @@ export const CombatBoard = React.memo(function CombatBoard({
                         short. The escape hatch belongs HERE — on the fan, while the
                         clipped names are what the player is looking at — not in the
                         staged line, which only appears once a card has already been
-                        chosen. `fan.length > 1` is exactly the condition under which
-                        a `namePeek` cap is applied below, so the hint shows precisely
-                        when a name is being clipped. */}
+                        chosen. It shows whenever the fan holds more than one card: a
+                        `namePeek` cap applies below only when the fan overlaps (a
+                        phone), but a wide board's player still has to learn that a
+                        tap reads the card. */}
                     {fan.length > 1 && !cardDragLive ? (
                         <Text style={styles.fanHint} numberOfLines={1} testID="combat-tap-hint">
                             tap a card to read it
