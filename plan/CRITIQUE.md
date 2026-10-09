@@ -433,27 +433,6 @@
 
 ## Pending
 
-### [MED] combat / desktop — the hand fan still overlaps at 1280 wide, so every covered card's paid column is hidden
-- pass: 73 (commit 1f5e2896)
-- viewport: desktop (1280x800)
-- category: comprehension
-- observation: the five-card hand sits in a ~550px row in the middle
-  of an 1280px board, and each card tucks about 16px under its right
-  neighbour. That 16px is the card's paid column, so on A Plain Ward
-  and both A Plain Words the paid side reads "★ GUAR" / "♥ V" and the
-  figure is cut ("12", "+60%" are in the DOM but not on screen). Only
-  the last card in the row shows its paid value. There is ~350px of
-  empty board on each side. A first-time player on desktop sees the
-  FREE half of every card and not what paying the die buys.
-- evidence: `.critique-artifacts/desktop/04-combat-board.{png,txt}`
-  (txt carries "★ GUARD 12", "♥ VULNERABLE +60%" for the clipped
-  cards); `CombatBoard.tsx` `handFanLayout` caps `step` at
-  `HAND_CARD_W - 16`, so the fan overlaps by at least 16 at any width.
-- suggested fix: let `step` reach `HAND_CARD_W` plus a small gap when
-  the band has room, as the hazard fan's `routeFanOverlap` does
-  (commit 8d5aee2a); keep today's overlap on phones.
-- source: critique:drive (unattended)
-
 ### [LOW] hazard / desktop — the route cards stretch 1240px edge to edge, so each threshold sits across the screen from its label
 - pass: 73 (commit 1f5e2896)
 - viewport: desktop (1280x800)
@@ -761,6 +740,28 @@
 - source: loop
 
 ## Done
+
+### [x] [MED] combat / desktop — the hand fan still overlaps at 1280 wide, so every covered card's paid column is hidden — RESOLVED 2026-10-09 (commit cc556113; `handFanLayout` lets `step` grow to `HAND_CARD_W + HAND_FAN_GAP` when the band has room, a fan with no overlap caps no names, phones unchanged; pinned in CombatBoard.fresh-eyes-repair.test.tsx)
+- issue: #474
+- pass: 73 (commit 1f5e2896)
+- viewport: desktop (1280x800)
+- category: comprehension
+- observation: the five-card hand sits in a ~550px row in the middle
+  of an 1280px board, and each card tucks about 16px under its right
+  neighbour. That 16px is the card's paid column, so on A Plain Ward
+  and both A Plain Words the paid side reads "★ GUAR" / "♥ V" and the
+  figure is cut ("12", "+60%" are in the DOM but not on screen). Only
+  the last card in the row shows its paid value. There is ~350px of
+  empty board on each side. A first-time player on desktop sees the
+  FREE half of every card and not what paying the die buys.
+- evidence: `.critique-artifacts/desktop/04-combat-board.{png,txt}`
+  (txt carries "★ GUARD 12", "♥ VULNERABLE +60%" for the clipped
+  cards); `CombatBoard.tsx` `handFanLayout` caps `step` at
+  `HAND_CARD_W - 16`, so the fan overlaps by at least 16 at any width.
+- suggested fix: let `step` reach `HAND_CARD_W` plus a small gap when
+  the band has room, as the hazard fan's `routeFanOverlap` does
+  (commit 8d5aee2a); keep today's overlap on phones.
+- source: critique:drive (unattended)
 
 ### [x] [LOW] village — the settlement screen's header and exit bar sit on the vignette frame, not inside it — RESOLVED 2026-10-09 (commit 3284b582; `ScreenBg` exports the vignette width as `SCREEN_FRAME_INSET`, the settlement pads its scroller top and exit bar bottom by it; pinned in village-frame-inset.critique-72.test.tsx)
 - issue: #469
