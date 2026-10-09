@@ -52,6 +52,50 @@
 
 ## Pending
 
+### [tooling] `tick-end` telemetry rows never land for any `/march`-dispatched tick (digest, 2026-10-09)
+- category: debt
+- impact: 7
+- ease: 6
+- detail: `CLAUDE.md` and the hook's own header describe `tick-end` as
+  reliable modulo a rare edge case — "it only strands rows when a session
+  ends," landing in the next tick's commit otherwise. In practice, no
+  shard ever produced by a `/march` dispatch has a `tick-end` row, going
+  back at least to 2026-09-24 (every `slash-prompt | /march` shard checked
+  has exactly one row, the prompt itself). The 14 `tick-end` rows that do
+  exist in `telemetry/*.md` all sit after a `subagent`/`subagent-end` pair
+  from attended, interactive sessions — none follow a bare `/march`
+  dispatch.
+  Root cause: `.claude/settings.json`'s `Stop` hooks run `guard.mjs stop`
+  before `telemetry.mjs tick-end` (lines 218-231). `guard.mjs`'s
+  `stopCheck` (guard.mjs:245) only blocks the stop (forcing a continuation
+  turn that could commit a straggler row) when `NEXUS_STRICT_STOP=1`; that
+  env var is set nowhere in the repo (checked every `.yml`/`.md`), so in
+  CI `stopCheck` always just warns and returns 0. By the time
+  `telemetry.mjs tick-end` appends its row, the turn's last commit has
+  already happened and the GH Actions runner is torn down at job end with
+  no later step that commits stragglers (`_claude-skill.yml` has no
+  post-Claude git step). The row is written to a shard file that is never
+  pushed, on infrastructure that has been GH-Actions-per-tick since
+  `march.yml`'s introduction — this is not a recent regression, it is
+  true of every tick the workflow has ever run. `node
+  .claude/hooks/telemetry.test.mjs` is green throughout (16/16): it tests
+  the hook's local file-append logic in isolation and never models
+  whether that write reaches a commit, so it cannot see this gap.
+  Consequence: nobody can use `tick-end`/leaked-row detection to tell a
+  crashed `/march` tick from a clean one, and this digest's own "While you
+  were out" pulse (skills/digest.md §3.2) has to reconstruct tick outcomes
+  from `git log` and `gh run list` instead of reading the ledger it was
+  told to trust.
+- next: the Stop-hook ordering can't fix this alone (swapping it still
+  only warns, never blocks, without strict mode). The workable fix likely
+  lives in the skills themselves: have `/march` (and other verb-dispatch
+  points) write and commit their own `tick-end` row as part of their
+  existing final commit, rather than relying on a post-hoc Stop hook that
+  structurally always fires one commit too late on ephemeral CI runners.
+  Re-verify against both the CI cadence and an attended session before
+  shipping, since the latter's `tick-end` rows currently work by accident
+  of session continuity, not by design, and must not regress.
+
 ### [perf] Map SVG fix is unproven on a device (perf audit, 2026-10-03)
 - category: bug
 - impact: 8
