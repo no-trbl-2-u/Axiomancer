@@ -9,7 +9,7 @@
  *   npm run combat-sim                              # 'greedy' witness
  *   npm run combat-sim -- --blind                  # 'blind' witness (plays like greedy)
  *   npm run combat-sim -- --enemy=BrineHag         # one enemy only
- *   npm run combat-sim -- --loadout=slippery-slope,festering-argument,soft-word
+ *   npm run combat-sim -- --loadout=grey-strike,grey-ward
  *   npm run combat-sim -- --runs=300 --seed=1 --blind
  *
  * `--blind` selects the `blind` policy. It plays exactly like `greedy` and is
@@ -20,6 +20,7 @@ import { Player } from '../Character/characters.mock';
 import type { Character } from '../Character/types';
 import type { Enemy } from '../Enemy/types';
 import { FloatEye, BrineHag, TheDoorwarden } from '../Enemy/enemy.library';
+import { GREY_OFFICE_CARDS } from '../Cards/library/starters.cards';
 import { deepClone } from '../Utils';
 import { simulateHazardPatternCombat, type CombatSimPolicyId } from '../Combat/combat.encounter.sim';
 // Combat Quality Index — printed as a diagnostic beside the
@@ -27,6 +28,9 @@ import { simulateHazardPatternCombat, type CombatSimPolicyId } from '../Combat/c
 import { formatCombatQuality } from '../Combat/combat.objective';
 
 export const ENEMIES: Record<string, Enemy> = { FloatEye, BrineHag, TheDoorwarden };
+
+/** Default `--loadout`: the grey office, the whole player card library. */
+export const DEFAULT_LOADOUT: string[] = GREY_OFFICE_CARDS.map(c => c.id);
 
 if (require.main === module) {
     const flag = (k: string): string | undefined => {
@@ -38,9 +42,10 @@ if (require.main === module) {
     const policy: CombatSimPolicyId = has('blind') ? 'blind' : 'greedy';
     const runs = Number(flag('runs') ?? '200');
     const seed = Number(flag('seed') ?? '1');
-    // Default loadout: the starting deck (slippery-slope teaches DoT,
-    // brace-for-impact teaches GUARD).
-    const loadout = (flag('loadout') ?? 'slippery-slope,brace-for-impact').split(',').map(s => s.trim()).filter(Boolean);
+    const loadoutFlag = flag('loadout');
+    const loadout = loadoutFlag
+        ? loadoutFlag.split(',').map(s => s.trim()).filter(Boolean)
+        : DEFAULT_LOADOUT;
     const only = flag('enemy');
 
     const player = (cards: string[]): Character => {

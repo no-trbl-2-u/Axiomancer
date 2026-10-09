@@ -167,7 +167,7 @@ prints win rate, outcome counts, average rounds and diagnostic columns. Values m
 | Flag | Effect |
 | --- | --- |
 | `--enemy=<Name>` | Run against one enemy only (e.g. `BrineHag`, `TheDoorwarden`). Omit to run the full roster. |
-| `--loadout=<id,id,...>` | Card ids for the player's deck. The default, `slippery-slope,brace-for-impact`, names cards that are not in the card library, so pass a loadout. |
+| `--loadout=<id,id,...>` | Card ids for the player's deck. The default is the three grey cards, `grey-strike,grey-ward,grey-word`. |
 | `--runs=<n>` | Runs per enemy (default 200). |
 | `--seed=<n>` | Base seed (default 1). |
 | `--blind` | Use the `blind` sim policy instead of `greedy`. |

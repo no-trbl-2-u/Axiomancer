@@ -11,7 +11,8 @@ import fs from 'fs';
 import path from 'path';
 
 import { ENEMY_REGISTRY } from '../../Enemy/enemy.library';
-import { ENEMIES as COMBAT_SIM_ENEMIES } from '../combat-sim.cli';
+import { ENEMIES as COMBAT_SIM_ENEMIES, DEFAULT_LOADOUT } from '../combat-sim.cli';
+import { getCardById } from '../../Cards/cards.library';
 import { parseDeckSelectionArg } from '../../Combat/combat.playtest';
 import { HAZARD_LIBRARY } from '../../World/Hazard/hazard.content';
 
@@ -66,6 +67,27 @@ describe('docs/cli.md — --enemy examples stay in sync with the registries', ()
         expect(found.size).toBeGreaterThan(0);
         for (const name of found) {
             expect(simNames.has(name), `docs/cli.md references unknown combat-sim enemy "${name}"`).toBe(true);
+        }
+    });
+});
+
+describe('docs/cli.md — --loadout examples resolve in the card library', () => {
+    it('the combat-sim default loadout and every documented --loadout id are real cards', () => {
+        const docs = readDocs();
+        const ids = new Set<string>(DEFAULT_LOADOUT);
+        const flagPattern = /--loadout=([a-z0-9,-]+)/g;
+        let match: RegExpExecArray | null;
+        while ((match = flagPattern.exec(docs)) !== null) {
+            for (const id of match[1].split(',')) ids.add(id);
+        }
+        // The flag table's default: `a,b,c` after "The default is".
+        const tableDefault = /The default is[^`]*`([a-z0-9,-]+)`/.exec(docs);
+        expect(tableDefault, 'docs/cli.md names the combat-sim default loadout').not.toBeNull();
+        expect(tableDefault![1].split(',')).toEqual(DEFAULT_LOADOUT);
+
+        expect(DEFAULT_LOADOUT.length).toBeGreaterThan(0);
+        for (const id of ids) {
+            expect(getCardById(id), `unknown card id "${id}" in a combat-sim loadout`).toBeDefined();
         }
     });
 });
