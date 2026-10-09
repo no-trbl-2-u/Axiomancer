@@ -433,35 +433,6 @@
 
 ## Pending
 
-### [LOW] village — the settlement screen's header and exit bar sit on the vignette frame, not inside it
-- pass: 72 (commit 19459d23)
-- viewport: both (375x812 and 1280x800)
-- category: visual
-- observation: `ScreenBg` draws its plate inside a 28px vignette border.
-  The rest, cache and item-reward screens centre their column, so it
-  sits inside the frame. The settlement screen top-aligns its scroll with
-  14px padding, so the "SETTLEMENT" kicker (y~20) sits on the dark
-  border above the plate and the "FIXTURE SHOP" title starts on its
-  edge. At the bottom, the TAKE THE ROAD bar (14px padding) runs across
-  the lower border. On the same pass the rest screen, behind the same
-  frame, leaves a clear margin above its heading. A first-time player
-  sees the settlement's heading pushed against the top of the screen,
-  outside the frame every other stop screen respects.
-- evidence: `.critique-artifacts/desktop/07-village.png` (kicker at
-  y~20 above the plate's top edge at y=28; exit bar's bottom edge at
-  y~785 inside the band at 772-800), `mobile/07-village.png` (same
-  kicker at y~20), against `desktop/09-rest.png`;
-  `axiomancer-mobile/components/ScreenBg.tsx` (`vignette.borderWidth:
-  28`), `axiomancer-mobile/app/village/index.tsx:231` (`scroll: {
-  padding: 14 }`) and `:351` (`exitBar: { paddingHorizontal: 14,
-  paddingBottom: 14 }`).
-- suggested fix: pad the settlement scroll and exit bar by at least the
-  vignette width (export the 28 from `ScreenBg` as a named inset, rather
-  than repeat the literal), so the heading and the bar sit inside the
-  plate. Pin it with a test that the village scroll's top padding and
-  the exit bar's bottom padding are not less than that inset.
-- source: critique:drive (unattended)
-
 ### [LOW] RC walk 2026-10-02 — copy, label and console findings (one row per item, all presentation)
 - pass: RC checkpoint walk, four `playtester` legs (attended, T present), commits a493eaf7 → 169b6dbc
 - viewport: playwright default (desktop)
@@ -719,6 +690,36 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] village — the settlement screen's header and exit bar sit on the vignette frame, not inside it — RESOLVED 2026-10-09 (commit 3284b582; `ScreenBg` exports the vignette width as `SCREEN_FRAME_INSET`, the settlement pads its scroller top and exit bar bottom by it; pinned in village-frame-inset.critique-72.test.tsx)
+- issue: #469
+- pass: 72 (commit 19459d23)
+- viewport: both (375x812 and 1280x800)
+- category: visual
+- observation: `ScreenBg` draws its plate inside a 28px vignette border.
+  The rest, cache and item-reward screens centre their column, so it
+  sits inside the frame. The settlement screen top-aligns its scroll with
+  14px padding, so the "SETTLEMENT" kicker (y~20) sits on the dark
+  border above the plate and the "FIXTURE SHOP" title starts on its
+  edge. At the bottom, the TAKE THE ROAD bar (14px padding) runs across
+  the lower border. On the same pass the rest screen, behind the same
+  frame, leaves a clear margin above its heading. A first-time player
+  sees the settlement's heading pushed against the top of the screen,
+  outside the frame every other stop screen respects.
+- evidence: `.critique-artifacts/desktop/07-village.png` (kicker at
+  y~20 above the plate's top edge at y=28; exit bar's bottom edge at
+  y~785 inside the band at 772-800), `mobile/07-village.png` (same
+  kicker at y~20), against `desktop/09-rest.png`;
+  `axiomancer-mobile/components/ScreenBg.tsx` (`vignette.borderWidth:
+  28`), `axiomancer-mobile/app/village/index.tsx:231` (`scroll: {
+  padding: 14 }`) and `:351` (`exitBar: { paddingHorizontal: 14,
+  paddingBottom: 14 }`).
+- suggested fix: pad the settlement scroll and exit bar by at least the
+  vignette width (export the 28 from `ScreenBg` as a named inset, rather
+  than repeat the literal), so the heading and the bar sit inside the
+  plate. Pin it with a test that the village scroll's top padding and
+  the exit bar's bottom padding are not less than that inset.
+- source: critique:drive (unattended)
 
 ### [x] [LOW] rest / village / desktop — the offer and stall rows stretch 1250px edge to edge, so a price sits across the screen from its name — RESOLVED 2026-10-08 (commit 9bd8b26c; each screen's content sits in one column capped at `REST_COLUMN_MAX_WIDTH` / `VILLAGE_COLUMN_MAX_WIDTH` 520 and centred, the pinned TAKE THE ROAD shares the cap, phone fills it; pinned in rest-village-column.critique-71.test.tsx)
 - issue: #464
