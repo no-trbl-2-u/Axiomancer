@@ -12,7 +12,7 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { describe, expect, it, jest } from '@jest/globals';
 
 import type { CombatSummary } from '@mechanics';
-import { CombatSummaryModal } from '@/components/combat/encounter/CombatSummaryModal';
+import { CombatSummaryModal, playsLabel } from '@/components/combat/encounter/CombatSummaryModal';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
 const SUMMARY: CombatSummary = {
@@ -47,6 +47,28 @@ describe('CombatSummaryModal', () => {
         expect(screen.getByText(/6 dmg/)).toBeTruthy();
         expect(screen.getByText(String(SUMMARY.totalDotDamage))).toBeTruthy();
         expect(screen.getByText(String(SUMMARY.directDamage))).toBeTruthy();
+    });
+
+    it('spells the play count out instead of an unexplained "ph"', () => {
+        renderSummary(SUMMARY);
+        expect(screen.getByText(/4 plays/)).toBeTruthy();
+        expect(screen.queryByText(/\dph\b/)).toBeNull();
+        expect(playsLabel(1)).toBe('1 play');
+        expect(playsLabel(12)).toBe('12 plays');
+    });
+
+    it('heads the rows as damage by card, so a GUARD card is absent by design', () => {
+        renderSummary(SUMMARY);
+        expect(screen.getByText('DAMAGE BY CARD')).toBeTruthy();
+    });
+
+    it('prints the DoT total only when DoT dealt damage', () => {
+        renderSummary(SUMMARY);
+        expect(screen.getByTestId('combat-summary-dot-total')).toBeTruthy();
+        screen.unmount();
+        renderSummary({ ...SUMMARY, rows: [SUMMARY.rows[1]], totalDotDamage: 0 });
+        expect(screen.queryByTestId('combat-summary-dot-total')).toBeNull();
+        expect(screen.queryByText(/Total DoT damage/)).toBeNull();
     });
 
     it('names the best card when there is one', () => {

@@ -1,8 +1,8 @@
 /**
  * Post-combat attribution summary.
  *
- * Every fight (win OR loss) shows an explicit breakdown of which card cards
- * contributed the DoT / control pressure that decided it, naming the best card.
+ * Every fight (win OR loss) shows which cards dealt the enemy damage, naming
+ * the best card. Only damage is attributed, so a GUARD card never has a row.
  * Engine-built (`buildCombatSummary`); this is pure presentation.
  */
 
@@ -11,6 +11,11 @@ import { Pressable, Text, View } from 'react-native';
 import type { CombatSummary } from '@mechanics';
 import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
+
+/** "1 play", "12 plays". */
+export function playsLabel(n: number): string {
+    return `${n} ${n === 1 ? 'play' : 'plays'}`;
+}
 
 const OUTCOME_COLOR: Record<string, string> = {
     victory: HUE.boonGreen, mercy: HUE.tickPurple,
@@ -26,6 +31,7 @@ export function CombatSummaryModal({ summary, onClose }: { summary: CombatSummar
             <View style={[styles.panel, { borderColor: color }]}>
                 <Text style={[styles.headline, { color }]}>{summary.headline}</Text>
 
+                {summary.rows.length > 0 && <Text style={styles.rowsHead}>DAMAGE BY CARD</Text>}
                 <View style={styles.rows}>
                     {summary.rows.length === 0 && (
                         <>
@@ -38,14 +44,16 @@ export function CombatSummaryModal({ summary, onClose }: { summary: CombatSummar
                             <Text style={styles.rowName} numberOfLines={1}>{row.name}</Text>
                             <Text style={styles.rowVal}>
                                 {row.dotDamage > 0 ? `${row.dotDamage} dmg` : `${row.damageDealt} dmg`}
-                                <Text style={{ color: AXM.bone }}> · {row.phases}ph</Text>
+                                {row.phases > 0 && <Text style={{ color: AXM.bone }}> · {playsLabel(row.phases)}</Text>}
                             </Text>
                         </View>
                     ))}
                 </View>
 
                 <View style={styles.totals}>
-                    <Text style={styles.total}>Total DoT damage: <Text style={{ color: AXM.parchment }}>{summary.totalDotDamage}</Text></Text>
+                    {summary.totalDotDamage > 0 && (
+                        <Text style={styles.total} testID="combat-summary-dot-total">Total DoT damage: <Text style={{ color: AXM.parchment }}>{summary.totalDotDamage}</Text></Text>
+                    )}
                     <Text style={styles.total}>Direct damage: <Text style={{ color: AXM.parchment }}>{summary.directDamage}</Text></Text>
                 </View>
 
@@ -65,6 +73,7 @@ const useStyles = makeStyles((AXM) => ({
     backdrop: { ...({ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 } as const), backgroundColor: 'rgba(0,0,0,0.82)', alignItems: 'center', justifyContent: 'center', padding: 20, zIndex: 50 },
     panel: { width: '100%', maxWidth: 420, borderWidth: 2, backgroundColor: AXM.panelBg, padding: 16 },
     headline: { fontFamily: FONTS.gothic, fontSize: 20, letterSpacing: 0.5, textAlign: 'center', marginBottom: 12 },
+    rowsHead: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1, color: AXM.bone, marginBottom: 4 },
     rows: { gap: 5, marginBottom: 10 },
     row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', borderBottomWidth: 1, borderBottomColor: AXM.ash, paddingBottom: 3 },
     rowName: { flex: 1, fontFamily: FONTS.serif, fontSize: 14, color: AXM.parchment },
