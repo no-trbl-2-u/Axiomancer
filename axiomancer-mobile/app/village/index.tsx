@@ -23,7 +23,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from '@/lib/platform/router';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
-import { ScreenBg } from '@/components/ScreenBg';
+import { SCREEN_FRAME_INSET, ScreenBg } from '@/components/ScreenBg';
 import { AxmIcon } from '@/components/icons';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
 import { selectVillageVM } from '@/state/presenters/village.engine';
@@ -204,7 +204,7 @@ export default function VillageScreen() {
                 inside the list the button was bisected by the bottom of
                 the screen. Pinned here it is whole however long the
                 stalls run, at 375 and at 1280 alike. */}
-            <View style={styles.exitBar}>
+            <View style={styles.exitBar} testID="village-exit-bar">
                 <View style={styles.column} testID="village-exit-column">
                     <TouchableOpacity
                         accessibilityRole="button"
@@ -228,7 +228,9 @@ const useStyles = makeStyles((AXM) => ({
     // One scroller, sized to the space the pinned exit leaves it
     // (14-village) — the shape `/rest` and `/blacksmith` already use.
     scrollOuter: { flex: 1 },
-    scroll: { padding: 14, paddingBottom: 24 },
+    // The top clears the backdrop's vignette, so the kicker and title sit
+    // inside the plate rather than on its dark frame.
+    scroll: { padding: 14, paddingTop: SCREEN_FRAME_INSET, paddingBottom: 24 },
     // A phone fills the column edge to edge; a wide window keeps each
     // ware's name beside its price, and the pinned exit under the stalls,
     // instead of stretching both across the screen.
@@ -346,9 +348,10 @@ const useStyles = makeStyles((AXM) => ({
         backgroundColor: AXM.bg,
     },
     bigButtonText: { fontFamily: FONTS.gothic, fontSize: 18, letterSpacing: 2, color: AXM.parchment },
-    // The pinned exit keeps the page's 14pt gutter; the button's own
-    // marginTop is the gap above it, as it was inside the list.
-    exitBar: { paddingHorizontal: 14, paddingBottom: 14 },
+    // The pinned exit keeps the page's 14pt gutter and clears the
+    // vignette below it; the button's own marginTop is the gap above it,
+    // as it was inside the list.
+    exitBar: { paddingHorizontal: 14, paddingBottom: SCREEN_FRAME_INSET },
     flexOne: { flex: 1 },
     inactiveWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
     inactiveText: { ...TYPE.body, color: AXM.parchment, opacity: 0.55, textAlign: 'center' },

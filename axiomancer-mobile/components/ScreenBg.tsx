@@ -17,6 +17,13 @@ interface ScreenBgProps {
   art?: ScreenArtKey;
 }
 
+/**
+ * The vignette's border width, in points: the dark frame around the plate.
+ * A top-aligned screen pads its first and last rows by at least this much
+ * so they sit inside the plate rather than on the frame.
+ */
+export const SCREEN_FRAME_INSET = 28;
+
 export function ScreenBg({ children, scrollable = true, art }: ScreenBgProps) {
   const styles = useStyles();
   const plate = screenBackdropFor(art);
@@ -71,7 +78,7 @@ const useStyles = makeStyles((AXM) => ({
     borderColor: AXM.bg,
     // A thick inner border reads as a soft edge once the plate is at 0.2 and
     // costs nothing — no gradient dependency, no extra draw pass.
-    borderWidth: 28,
+    borderWidth: SCREEN_FRAME_INSET,
     borderRadius: 24,
   },
   scroll: {
