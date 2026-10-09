@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-09 at commit 19459d23
-> Pass count: 72
+> Last pass: 2026-10-09 at commit 1f5e2896
+> Pass count: 73
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -432,6 +432,77 @@
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `archive-pre-revamp:plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
+
+### [MED] combat / desktop — the hand fan still overlaps at 1280 wide, so every covered card's paid column is hidden
+- pass: 73 (commit 1f5e2896)
+- viewport: desktop (1280x800)
+- category: comprehension
+- observation: the five-card hand sits in a ~550px row in the middle
+  of an 1280px board, and each card tucks about 16px under its right
+  neighbour. That 16px is the card's paid column, so on A Plain Ward
+  and both A Plain Words the paid side reads "★ GUAR" / "♥ V" and the
+  figure is cut ("12", "+60%" are in the DOM but not on screen). Only
+  the last card in the row shows its paid value. There is ~350px of
+  empty board on each side. A first-time player on desktop sees the
+  FREE half of every card and not what paying the die buys.
+- evidence: `.critique-artifacts/desktop/04-combat-board.{png,txt}`
+  (txt carries "★ GUARD 12", "♥ VULNERABLE +60%" for the clipped
+  cards); `CombatBoard.tsx` `handFanLayout` caps `step` at
+  `HAND_CARD_W - 16`, so the fan overlaps by at least 16 at any width.
+- suggested fix: let `step` reach `HAND_CARD_W` plus a small gap when
+  the band has room, as the hazard fan's `routeFanOverlap` does
+  (commit 8d5aee2a); keep today's overlap on phones.
+- source: critique:drive (unattended)
+
+### [LOW] hazard / desktop — the route cards stretch 1240px edge to edge, so each threshold sits across the screen from its label
+- pass: 73 (commit 1f5e2896)
+- viewport: desktop (1280x800)
+- category: visual
+- observation: under a centred opening hand, both route cards (Cinder
+  Ridge, The Ash Run) run the full width. The three round cells
+  ("RI 22", "RII 23", "RIII 25") spread over ~1170px, the PASSAGE /
+  FORCE / ESCAPE badges sit at the far right edge, and TAKE SAFE
+  ROUTE is a 1220px bar. The menu, combat reveal, rest and village
+  screens were each capped at a centred 520 column (2026-10-07/08);
+  the hazard route select is the one state screen left at full
+  width.
+- evidence: `.critique-artifacts/desktop/10-hazard.png`
+- suggested fix: cap the route-select scroll content at a centred
+  column the way `REST_COLUMN_MAX_WIDTH` does (wider than 520 if the
+  three round cells need it); phone keeps full width.
+- source: critique:drive (unattended)
+
+### [LOW] exploration / mobile — the map pane leaves a ~140px empty black band above the engraving
+- pass: 73 (commit 1f5e2896)
+- viewport: mobile (375x812)
+- category: visual
+- observation: on the mid-campaign hub (fixture `sage-bw-door-gate`)
+  the map pane starts under "drag · pinch" at about y=175, but the
+  Breakwater engraving and its nodes begin at about y=325. The space
+  between is flat black, a fifth of the screen, with nothing to drag
+  to. On desktop the same pane is filled edge to edge.
+- evidence: `.critique-artifacts/mobile/11-late-game-hub.png`
+  against `desktop/11-late-game-hub.png`
+- suggested fix: start the phone camera so the plate fills the
+  pane's height (cover rather than fit-width), or centre the plate
+  vertically so the empty space is split and smaller.
+- source: critique:drive (unattended)
+
+### [LOW] hazard / mobile — the opening hand breaks CLIFFRUNNER mid-word as "CLIFFRUNN / ER"
+- pass: 73 (commit 1f5e2896)
+- viewport: mobile (375x812)
+- category: visual
+- observation: since commit 8d5aee2a a covered card's name wraps
+  inside its visible strip. Multi-word names wrap cleanly ("BALANCE /
+  POLE", "UNBROKEN / OATH"), but CLIFFRUNNER is one word, longer than
+  the strip, and breaks at a letter: "CLIFFRUNN" over "ER".
+- evidence: `.critique-artifacts/mobile/10-hazard.png`;
+  `hazard.content.ts:52` (name "CLIFFRUNNER")
+- suggested fix: shrink a single-word name to fit its strip
+  (`adjustsFontSizeToFit` / a min font scale on the hand-mode name)
+  instead of letting it break mid-word; keep the 2-line wrap for
+  multi-word names.
+- source: critique:drive (unattended)
 
 ### [LOW] RC walk 2026-10-02 — copy, label and console findings (one row per item, all presentation)
 - pass: RC checkpoint walk, four `playtester` legs (attended, T present), commits a493eaf7 → 169b6dbc
