@@ -39,7 +39,10 @@ written — the hook never guesses. Behaviour is covered by
 A tick's `tick-end` row is written *after* that tick's own commit — nothing
 can commit the record of its own ending — so it lands in the next tick's
 commit. That is expected; do not chase it. It only strands rows when a
-session ends, and stranded rows ride along with the next change.
+session ends, and stranded rows ride along with the next change. A CI
+tick's session always ends with the runner, so `_claude-skill.yml`
+commits whatever its tick left in `telemetry/` in a step after Claude
+exits.
 
 When doing a PR check-in or otherwise watching a PR (subscribed activity,
 scheduled re-checks), a discovered merge conflict is something to fix, not

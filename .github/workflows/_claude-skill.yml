@@ -159,6 +159,38 @@ jobs:
             --allowedTools "Bash,Edit,Write,Read,Glob,Grep,Task,TodoWrite,WebFetch,WebSearch,mcp__axio-query__axio_overview,mcp__axio-query__axio_cards,mcp__axio-query__axio_effects,mcp__axio-query__axio_keywords,mcp__kb-query__kb_overview,mcp__kb-query__kb_find_games,mcp__kb-query__kb_search,mcp__kb-query__kb_read_doc,mcp__kb-query__kb_cards,mcp__kb-query__kb_keyword${{ inputs.install_playwright && ',mcp__playwright__browser_navigate,mcp__playwright__browser_click,mcp__playwright__browser_snapshot,mcp__playwright__browser_take_screenshot,mcp__playwright__browser_console_messages,mcp__playwright__browser_close,mcp__playwright__browser_resize,mcp__playwright__browser_press_key,mcp__playwright__browser_hover,mcp__playwright__browser_evaluate,mcp__playwright__browser_wait_for,mcp__playwright__browser_tabs,mcp__playwright__browser_network_requests,mcp__playwright__browser_navigate_back' || '' }}"
             ${{ inputs.extra_claude_args }}
 
+      # The Stop hook writes the tick's `tick-end` row (and any row after
+      # the tick's last commit) to its telemetry shard once Claude has
+      # already committed and pushed. On an attended machine the next tick
+      # carries it; here the runner is torn down, so without this step no
+      # CI tick's shard ever reached main with its `tick-end` row (audit,
+      # 2026-10-09). Only `telemetry/` is staged: anything else a tick left
+      # uncommitted stays uncommitted. Best-effort, like the hook itself —
+      # a telemetry push must never fail a tick.
+      - name: Commit stranded telemetry rows
+        if: ${{ always() && steps.claude.outcome != 'skipped' }}
+        continue-on-error: true
+        shell: bash
+        env:
+          GIT_AUTHOR_NAME: claude[bot]
+          GIT_AUTHOR_EMAIL: 41898282+claude[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: claude[bot]
+          GIT_COMMITTER_EMAIL: 41898282+claude[bot]@users.noreply.github.com
+        run: |
+          git add -- telemetry/
+          if git diff --cached --quiet; then
+            echo "No stranded telemetry rows."
+            exit 0
+          fi
+          git commit -m "telemetry: tick-end rows for run ${GITHUB_RUN_ID}" -- telemetry/
+          branch="${GITHUB_REF_NAME}"
+          for attempt in 1 2 3; do
+            git pull --rebase --autostash origin "$branch" && git push origin "HEAD:$branch" && exit 0
+            git rebase --abort 2>/dev/null || true
+            sleep $((attempt * 5))
+          done
+          echo "::warning::Could not push stranded telemetry rows after 3 attempts."
+
       - name: Fail if Claude reported an execution error
         if: ${{ always() && steps.claude.outputs.execution_file != '' }}
         shell: bash
