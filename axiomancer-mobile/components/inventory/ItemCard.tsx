@@ -179,14 +179,13 @@ export function ItemCard({ item, expanded, onTap, onUseOrEquip, onDiscard }: Ite
         }
         : null;
 
+    // The card is a frame, not a button: the tap-to-expand header and the
+    // USE / DISCARD actions are sibling buttons. Nested inside one touchable,
+    // the actions rendered as a `<button>` in a `<button>` on web and were
+    // folded into the card's single a11y element on native, out of a screen
+    // reader's reach.
     return (
-        <TouchableOpacity
-            accessibilityRole="button"
-            accessibilityLabel={itemLabel}
-            accessibilityState={{ expanded }}
-            onPress={onTap}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
+        <View
             style={[
                 styles.itemCard,
                 expanded && styles.itemCardExpanded,
@@ -197,7 +196,7 @@ export function ItemCard({ item, expanded, onTap, onUseOrEquip, onDiscard }: Ite
                 },
                 shineStyle,
             ]}
-            testID={`item-${item.id}`}
+            testID={`item-card-${item.id}`}
         >
             {affordance.isShine && (
                 <View
@@ -213,24 +212,34 @@ export function ItemCard({ item, expanded, onTap, onUseOrEquip, onDiscard }: Ite
                     testID={`rarity-outline-${item.id}`}
                 />
             )}
-            <View style={styles.itemIcon}>
-                <ItemGlyph category={item.category} sub={item.sub} />
-            </View>
-            <Text style={styles.itemName} numberOfLines={expanded ? undefined : 2}>
-                {item.name}
-            </Text>
-            {item.category === 'equipment' && !expanded && item.sub !== null && (
-                <Text style={styles.itemSlotTag} testID={`slot-tag-${item.id}`}>
-                    SLOT {'·'} {item.sub.toUpperCase()}
+            <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel={itemLabel}
+                accessibilityState={{ expanded }}
+                onPress={onTap}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                testID={`item-${item.id}`}
+            >
+                <View style={styles.itemIcon}>
+                    <ItemGlyph category={item.category} sub={item.sub} />
+                </View>
+                <Text style={styles.itemName} numberOfLines={expanded ? undefined : 2}>
+                    {item.name}
                 </Text>
-            )}
+                {item.category === 'equipment' && !expanded && item.sub !== null && (
+                    <Text style={styles.itemSlotTag} testID={`slot-tag-${item.id}`}>
+                        SLOT {'·'} {item.sub.toUpperCase()}
+                    </Text>
+                )}
+            </TouchableOpacity>
             {item.quantity > 1 && (
-                <View style={styles.qtyBadge}>
+                <View style={styles.qtyBadge} pointerEvents="none">
                     <Text style={styles.qtyText}>{'×'}{item.quantity}</Text>
                 </View>
             )}
             {item.equipped && (
-                <View style={styles.wornBadge}>
+                <View style={styles.wornBadge} pointerEvents="none">
                     <Text style={styles.wornText}>WORN</Text>
                 </View>
             )}
@@ -316,7 +325,7 @@ export function ItemCard({ item, expanded, onTap, onUseOrEquip, onDiscard }: Ite
                     </View>
                 </View>
             )}
-        </TouchableOpacity>
+        </View>
     );
 }
 

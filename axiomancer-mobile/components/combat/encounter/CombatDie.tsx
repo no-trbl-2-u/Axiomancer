@@ -124,7 +124,7 @@ export function combatDieFootprint(size: number): { width: number; height: numbe
     return { width: size + o, height: size + o + size * 0.18 };
 }
 
-export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed = false, testID, assigned = false, specialConviction }: {
+export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed = false, testID, assigned = false, specialConviction, nested = false }: {
     die: CombatDieVM;
     size?: number;
     dimmed?: boolean;
@@ -140,6 +140,10 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
      *  parked ghost, which holds a PREVIOUS turn's die, and dragged from the
      *  wrong place). Same reason the ghost is hidden from accessibility. */
     testID?: string;
+    /** Drawn inside another button (the staged card's socket). The die is
+     *  then not its own a11y element: the parent's label speaks for it, and
+     *  on web a second role="button" would nest one `<button>` in another. */
+    nested?: boolean;
 }) {
     const accent = die.colorHex;
     const special = die.face === 'special';
@@ -174,9 +178,9 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
     return (
         <View
             testID={testID ?? `combat-die-${die.id}`}
-            accessible
-            accessibilityRole="button"
-            accessibilityLabel={a11yLabel}
+            accessible={!nested}
+            accessibilityRole={nested ? undefined : 'button'}
+            accessibilityLabel={nested ? undefined : a11yLabel}
             style={{ width: W, height: H + size * 0.18, opacity: dimmed ? 0.45 : spentTreatment.opacity }}
         >
             {glow && (

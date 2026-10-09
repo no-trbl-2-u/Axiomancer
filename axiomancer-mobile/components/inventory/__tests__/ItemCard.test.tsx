@@ -12,7 +12,7 @@
  */
 
 import { describe, expect, it, jest } from '@jest/globals';
-import { fireEvent, render } from '@testing-library/react-native';
+import { fireEvent, render, within } from '@testing-library/react-native';
 import React from 'react';
 
 import { ItemCard, ItemGlyph, groupByCategory, CATEGORY_ORDER } from '@/components/inventory/ItemCard';
@@ -381,6 +381,26 @@ describe('ItemCard: accessibility props', () => {
 
         const card = rendered.getByTestId('item-sword-basic');
         expect(card.props.accessibilityState.expanded).toBe(true);
+    });
+
+    it('keeps the USE and DISCARD buttons outside the expand button', () => {
+        // Nested, they rendered as a <button> in a <button> on web and were
+        // folded into the card's one a11y element on native.
+        const { tree } = withAllProviders(
+            <ItemCard
+                item={mockEquipmentWeapon}
+                expanded={true}
+                {...mockHandlers}
+            />
+        );
+        const rendered = render(tree);
+
+        const header = rendered.getByTestId('item-sword-basic');
+        expect(within(header).queryByTestId('use-sword-basic')).toBeNull();
+        expect(within(header).queryByTestId('discard-sword-basic')).toBeNull();
+        const frame = rendered.getByTestId('item-card-sword-basic');
+        expect(frame.props.accessibilityRole).toBeUndefined();
+        expect(within(frame).getByTestId('use-sword-basic')).toBeTruthy();
     });
 });
 

@@ -98,9 +98,14 @@ describe('CombatDie — the rendered label is the pure label', () => {
             .toBe(combatDieA11yLabel(die, { specialConviction: 4 }));
     });
 
-    it('the socket copy on a staged card reads assigned', () => {
+    it('the socket copy on a staged card is not its own button', () => {
+        // The staged card is the button and speaks for the die; a second
+        // role="button" inside it renders a nested <button> on web.
         const die: CombatDieVM = { ...HEART, face: 'mana' };
-        render(<CombatDie die={die} assigned testID="combat-staged-die-face" />);
-        expect(screen.getByTestId('combat-staged-die-face').props.accessibilityLabel).toContain('assigned');
+        render(<CombatDie die={die} assigned nested testID="combat-staged-die-face" />);
+        const face = screen.getByTestId('combat-staged-die-face');
+        expect(face.props.accessible).toBe(false);
+        expect(face.props.accessibilityRole).toBeUndefined();
+        expect(face.props.accessibilityLabel).toBeUndefined();
     });
 });

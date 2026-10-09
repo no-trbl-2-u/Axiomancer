@@ -53,7 +53,7 @@ import { rarityFor, RARITY_LABEL, RARITY_PIPS, RARITY_COLOR } from '@/state/pres
 import { TrashGlyph, LedgerMark } from '@/components/hazard/glyphs';
 import { glyphShapeFor } from '@/components/combat/glyphShapes';
 import { CombatCombatantPane, EffectChips, PlayerMedallion, COMBAT_HUD_HEIGHT, PLAYER_DOCK_FOOTPRINT_W, type CombatFx } from './CombatCombatantPane';
-import { CombatDie } from './CombatDie';
+import { CombatDie, combatDieA11yLabel } from './CombatDie';
 import { RollingDie } from './RollingDie';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import {
@@ -541,7 +541,9 @@ export const StagedCard = React.memo(function StagedCard({
                     accessibilityState={{ disabled: dropIneligible }}
                     accessibilityLabel={dropIneligible
                         ? `${card.name} staged — only a ${card.stance.toUpperCase()} or WILD die can power this card.`
-                        : `${card.name} staged — ${f.verbLine}. Tap to unstage.`}
+                        : assignedDie
+                            ? `${card.name} staged — ${f.verbLine}. ${combatDieA11yLabel(assignedDie, { assigned: true })}. Tap to unstage.`
+                            : `${card.name} staged — ${f.verbLine}. Tap to unstage.`}
                 >
                   {/* inner wrappers carry the drop-pop scale + reject shake so
                       neither fights the outer entering animation's transform —
@@ -569,7 +571,7 @@ export const StagedCard = React.memo(function StagedCard({
                                     warning above applies to the die face too, not just
                                     this wrapper: an armed card otherwise put a second
                                     `combat-die-<id>` node on the board. */}
-                                <CombatDie die={assignedDie} size={compact ? 26 : 32} testID="combat-staged-die-face" assigned />
+                                <CombatDie die={assignedDie} size={compact ? 26 : 32} testID="combat-staged-die-face" assigned nested />
                             </View>
                         ) : (
                             <View style={[styles.dieSocketEmpty, socketPulse ? { borderColor: AXM.sulfur, backgroundColor: 'rgba(212,192,38,0.18)' } : null]}>
