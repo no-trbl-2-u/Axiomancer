@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-09 at commit 1f5e2896
-> Pass count: 73
+> Last pass: 2026-10-10 at commit f91bc9e8
+> Pass count: 74
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -429,9 +429,74 @@
 > frame corner (a corner control, readable); and the fixture placeholder
 > lines in dialogue, cutscene and village (fixture content, not shipped).
 
+> **[critique pass 74, 2026-10-10, commit f91bc9e8] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route still bounces to the title with no save). 12
+> commits after pass 73. Re-verified on screen: the desktop hand lays its
+> five cards side by side with every paid column showing, and the desktop
+> hazard route select holds one centred column. Filed a MED row: that
+> same desktop fix now shows the long-standing paid-column wrap on every
+> A Plain Word, which reads "VU…" / "+6" / "0%" (the `plan/AUDIT.md`
+> post-purge row, raised here because the fan used to hide it). Filed a
+> LOW row: the desktop title's three-step scrim draws two hard horizontal
+> seams across the art, one through the king's crown and one through his
+> beard. Reconfirmed and not re-filed: pass 73's mobile hub black band,
+> pass 65's Minor Healing Potion, pass 63's corner medallions, and RC
+> walk item 9 (the mobile hazard fan's PILGRIM'S BLESSING "RE-CAST +D"
+> under IRON GRIP). Checked and not filed: the main menu's empty upper
+> half (bottom-seated on purpose), the mobile title's black band
+> (`contain` trade), and the fixture placeholder lines in dialogue,
+> cutscene and village (fixture content, not shipped).
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `archive-pre-revamp:plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
+
+### [MED] combat / desktop — A Plain Word's paid column reads "VU…" / "+6" / "0%" now that the desktop hand shows every column
+- pass: 74 (commit f91bc9e8)
+- viewport: desktop (1280x800)
+- category: comprehension
+- observation: since commit cc556113 the desktop hand sits side by side,
+  so both A Plain Word cards show their paid column in full. The column
+  is too narrow for its two lines: the keyword ellipsizes to "♥ VU…" and
+  the value "+60%" breaks inside the number, as "+6" over "0%". A player
+  reads a +6 and a 0%. The DOM text is right ("♥ VULNERABLE", "+60%"),
+  so this is layout only. A Plain Ward's "★ GUARD 12" fits.
+  `plan/AUDIT.md` has carried this since 2026-09-27 ("Post-purge: a
+  staged A Plain Word wraps +25% mid-token", impact 4), when the fan
+  covered most columns. Now every desktop opening hand shows it, so the
+  severity goes up here.
+- evidence: `.critique-artifacts/desktop/04-combat-board.png`, the
+  paid cells of the second and fourth cards (around x=540 and x=800,
+  y=700-750); `desktop/04-combat-board.txt` lines 18-19 and 24-25.
+- suggested fix: in `CombatBoard.tsx` (`paidTextWrap` / `paidValue`,
+  around line 1757), keep the value on one line (`numberOfLines={1}`
+  plus a computed font size, as `handNameFontSize` does for hazard
+  names, since react-native-web ignores `adjustsFontSizeToFit`). Give the
+  paid cell the width the free cell does not need, so the keyword shows
+  whole. Pin it in a CombatBoard test at 1280 wide, and close the AUDIT
+  row with it.
+- source: critique:drive (unattended)
+
+### [LOW] title / desktop — the three-step scrim draws two hard seams across the art, through the king's crown and his beard
+- pass: 74 (commit f91bc9e8)
+- viewport: desktop (1280x800)
+- category: visual
+- observation: the bottom scrim is three flat translucent bands (0.25 /
+  0.6 / 0.9, `TitleScreen.tsx` `scrimBand1-3`). On a 1280x800 window
+  their edges are straight lines across the full width, at about y=360,
+  y=510 and y=655. The y=510 seam crosses the king's crown and the y=655
+  seam crosses his beard, just above EMBARK. They read as UI stripes,
+  not shade. The source says a coarse step "reads as atmosphere" over
+  half a screen. That holds on a phone, where the art sits above the
+  bands, but not on desktop, where the bands lie over the figures.
+- evidence: `.critique-artifacts/desktop/01-title.png`, left half,
+  y=350-700.
+- suggested fix: give the scrim the same finer ramp as `artFoot` (about
+  seven bands with eased opacities), or a real gradient on web, so no
+  step shows. Keep the CTA panel's final darkness.
+- source: critique:drive (unattended)
 
 ### [LOW] exploration / mobile — the map pane leaves a ~140px empty black band above the engraving
 - pass: 73 (commit 1f5e2896)
