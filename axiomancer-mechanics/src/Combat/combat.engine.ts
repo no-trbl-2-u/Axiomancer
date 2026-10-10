@@ -938,7 +938,7 @@ function playBottomAction(
     }
     // Landed-status adjustments in one pass, all REAL units: RIPENED pips (+1
     // intensity per pip on a non-defend play), and the color-match +1
-    // duration on status cards. Card statuses land uncapped (D41), so the
+    // duration on status cards. Card statuses land uncapped, so the
     // pips add on top with no clamp.
     const isDefendPlay = card.verbClass === 'defend';
     const bonusIntensity = isDefendPlay ? 0 : poweringPips * PIP_INTENSITY_BONUS;

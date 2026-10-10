@@ -43,7 +43,7 @@ registerSandboxCards([
         combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 }],
     },
     {
-        // VULNERABLE is uncapped (D41): a printed 40 stacks past the old 30 cap.
+        // VULNERABLE is uncapped: a printed 40 lands as 40, with no clamp.
         id: 'qa-vuln-card', name: 'QA Vuln Card',
         color: 'body', description: 'uncapped status fixture', tier: 1,
         targetType: 'enemy', rank: 1, cardType: 'spell',
