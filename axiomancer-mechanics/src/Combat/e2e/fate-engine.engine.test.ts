@@ -27,6 +27,7 @@ import {
     PIP_INTENSITY_BONUS, PIP_GUARD_BONUS, COLOR_MATCH_STATUS_DURATION_BONUS,
 } from '../combat.engine';
 import { RESERVE_MAX, RESERVE_PIP_CAP } from '../combat.dice';
+import { MAX_EFFECT_INTENSITY } from '../../Game/game-mechanics.constants';
 import type { ActiveEffect } from '../../Effects/types';
 import type { CombatDieColor, CombatEncounterState } from '../combat.encounter.types';
 
@@ -40,6 +41,13 @@ registerSandboxCards([
         color: 'body', description: 'status fixture', tier: 1,
         targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 }],
+    },
+    {
+        // VULNERABLE is uncapped (D41): a printed 40 stacks past the old 30 cap.
+        id: 'qa-vuln-card', name: 'QA Vuln Card',
+        color: 'body', description: 'uncapped status fixture', tier: 1,
+        targetType: 'enemy', rank: 1, cardType: 'spell',
+        combatEffects: [{ effectId: 'debuff_vulnerable', appliedTo: 'opponent', intensity: 40, duration: 2 }],
     },
     {
         id: 'qa-guard-card', name: 'QA Guard Card',
@@ -119,6 +127,17 @@ describe('R2 RESERVE — bank, ripen, cash', () => {
         // The powering Reserve die is spent and leaves the Reserve with its
         // cashed pips.
         expect(res.state.reserve ?? []).toEqual([]);
+    });
+
+    it('pips add to an uncapped status above MAX_EFFECT_INTENSITY instead of clamping it down', () => {
+        let s = open(['qa-vuln-card'], 'heart');
+        s = setDice(s, ['heart', 'mind']);
+        s = { ...s, reserve: [{ id: 'bank-4', color: 'body', state: 'available', temporary: false, pips: 2 }] };
+        const entry = s.hand.find(h => h.cardId === 'qa-vuln-card')!;
+        const res = playCombatCard(s, { uid: entry.uid }, true, 'bank-4');
+        const vuln = res.state.enemy.effects.find(e => e.effectId === 'debuff_vulnerable')!;
+        expect(vuln.intensity).toBeGreaterThan(MAX_EFFECT_INTENSITY);
+        expect(vuln.intensity).toBe(40 + 2 * PIP_INTENSITY_BONUS);
     });
 
     it('pips cash as +PIP_GUARD_BONUS Guard per pip on a defend play', () => {

@@ -24,7 +24,6 @@
 import { deepClone } from '../Utils';
 import { getRng, setSeed } from '../Utils/rng';
 import { isLoggingEnabled, forwardCombatEventsToLog } from '../Log';
-import { MAX_EFFECT_INTENSITY } from '../Game/game-mechanics.constants';
 import { lookupEffect, applyEffect } from '../Effects';
 import type { Effect, ActiveEffect } from '../Effects/types';
 import type { Character } from '../Character/types';
@@ -939,7 +938,8 @@ function playBottomAction(
     }
     // Landed-status adjustments in one pass, all REAL units: RIPENED pips (+1
     // intensity per pip on a non-defend play), and the color-match +1
-    // duration on status cards.
+    // duration on status cards. Card statuses land uncapped (D41), so the
+    // pips add on top with no clamp.
     const isDefendPlay = card.verbClass === 'defend';
     const bonusIntensity = isDefendPlay ? 0 : poweringPips * PIP_INTENSITY_BONUS;
     const bonusDuration = colorMatch && card.effectKind !== 'none' ? COLOR_MATCH_STATUS_DURATION_BONUS : 0;
@@ -952,7 +952,7 @@ function playBottomAction(
                 touched = true;
                 return {
                     ...a,
-                    intensity: Math.min(MAX_EFFECT_INTENSITY, a.intensity + bonusIntensity),
+                    intensity: a.intensity + bonusIntensity,
                     remainingDuration: a.remainingDuration === -1 ? -1 : a.remainingDuration + bonusDuration,
                 };
             }),
