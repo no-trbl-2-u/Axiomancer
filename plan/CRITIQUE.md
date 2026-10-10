@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-10 at commit f91bc9e8
-> Pass count: 74
+> Last pass: 2026-10-10 at commit 720ca33d
+> Pass count: 75
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -449,6 +449,26 @@
 > (`contain` trade), and the fixture placeholder lines in dialogue,
 > cutscene and village (fixture content, not shipped).
 
+> **[critique pass 75, 2026-10-10, commit 720ca33d] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route still bounces to the title with no save). 18
+> commits after pass 74. Re-verified on screen: both desktop A Plain Word
+> cards print "VULNERABLE" and "+60%" whole, the desktop title's scrim
+> fades with no seam through the king, and the mobile map plate meets the
+> pane's top edge with no black band. Filed a MED row: the mobile hub
+> opens the Breakwater at the zoom-out floor (about 0.15x), so the 44px
+> node markers draw at about 6px and "tap a glowing node" has almost
+> nothing to tap. Filed a LOW row: a hazard hand card with a two-line name
+> clips its paid row's effect line ("RE-CAST +DIE", "DRAW 2") at its own
+> bottom edge, on desktop where no card overlaps it. Reconfirmed and not
+> re-filed: pass 65's Minor Healing Potion, pass 63's corner medallions,
+> and RC walk item 9. Checked and not filed: the main menu's empty upper
+> half (bottom-seated on purpose), the mobile title's black band
+> (`contain` trade), the mobile hazard strip's "CHOOSE TO PROC…" (pass 68
+> trade), and the fixture placeholder lines in dialogue, cutscene and
+> village (fixture content, not shipped).
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `archive-pre-revamp:plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
@@ -710,6 +730,48 @@
 - source: loop
 
 ## Done
+
+### [MED] exploration / mobile — the hub opens the map at about 0.15x, so the 44px node markers draw at about 6px
+- pass: 75 (commit 720ca33d)
+- viewport: mobile (375x812)
+- category: mobile / a11y
+- observation: the `sage-bw-door-gate` hub (late-game-hub capture) frames
+  the whole 2400px Breakwater plate inside a ~355px pane. Node markers
+  and their halos scale with the camera, so each node reads as a dot
+  about 6px across and its press target shrinks the same way. On desktop
+  (1280x800) the same nodes draw at about 20px. The footer says "tap a
+  glowing node to travel", but on a phone a first-time player has to
+  find and hit 6px dots or pinch in first.
+- evidence: `mobile/11-late-game-hub.png` (orange dots at roughly
+  (180,262), (147,293), (297,290), (228,350)); `MapCanvas.tsx`
+  `computeFocusTransform` clamps the fit to `minScaleFor` (=
+  `min(0.6, vw/2400, vh/2400)` ≈ 0.148 here) and `ExplorationNode.tsx`
+  `NODE_SIZE = 44` is drawn inside the scaled canvas.
+- suggested fix: counter-scale the node marker and its press target by
+  `1/scale` (with a floor near 24-28px drawn, 44px pressable) so they keep
+  a usable screen size at any zoom; the plate and roads keep scaling.
+  Alternatively raise the phone fit floor so it frames the open nodes
+  rather than the whole plate. Presentation only.
+- source: critique-drive (unattended)
+
+### [LOW] hazard — a hand card with a two-line name clips its paid row's effect line at its own bottom edge
+- pass: 75 (commit 720ca33d)
+- viewport: both (clearest on desktop 1280x800, where no card overlaps another)
+- category: visual
+- observation: in the route-select hand, BALANCE POLE and SURE FOOTING
+  (two-line names) push their two stat rows down far enough that the
+  paid row's effect line is cut by the card frame: "RE-CAST +DIE" and
+  "DRAW 2" show only the top half of their letters. SCRAMBLE (one-line
+  name) shows its paid row whole. This is the card's own height, not the
+  fan overlap of RC walk item 9.
+- evidence: `desktop/10-hazard.png`, cards 1-3 and 5 of the Flooded
+  Undercroft hand; `HazardCard.tsx` hand mode: `frame` has
+  `overflow: 'hidden'` and a fixed height, with the name's `minHeight: 28`
+  plus 30px art above `rowsBox`.
+- suggested fix: size the hand-mode frame (or tighten the name/art
+  margins) so name + art + both rows fit, and pin it with a test that
+  a two-line name leaves the bottom row's effect line inside the frame.
+- source: critique-drive (unattended)
 
 ### [x] [LOW] exploration / mobile — the map pane leaves a ~140px empty black band above the engraving — RESOLVED 2026-10-10 (commit c5d0dda6; `computeFocusTransform` settles each axis against the plate: a plate covering the pane slides to meet the frame edge, a smaller one is centred, focus nodes stay in frame; pinned in MapCanvas.test.tsx)
 - issue: #482
