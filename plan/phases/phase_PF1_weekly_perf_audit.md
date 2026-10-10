@@ -163,10 +163,10 @@ tooling: weekly performance audit — phase PF1
 
 ## DoD
 
-- [ ] All files in Scope exist; root `npm test` green.
-- [ ] `--dry-run` writes nothing.
-- [ ] Seed run on CI committed `budgets.json` and one history line.
-- [ ] Build-plan row PF1 ticked with the commit hash.
+- [x] All files in Scope exist; root `npm test` green.
+- [x] `--dry-run` writes nothing.
+- [x] Seed run on CI committed `budgets.json` and one history line.
+- [x] Build-plan row PF1 ticked with the commit hash.
 
 ## Follow-ups (out of scope)
 
