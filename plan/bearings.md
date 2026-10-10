@@ -208,7 +208,7 @@ Axiomancer/
 ├── telemetry/                  # append-only invocation log, one shard per session
 ├── Potential Assets/           # icons-TBR source pool (D11) · MCP-Axiomancer images
 ├── scripts/                    # deploy-check · notify · loop-issue · check-* lints · devlog/catalog builders
-├── .github/workflows/          # verify-* gates · march/night/triage crons · verb workflows
+├── .github/workflows/          # verify-* gates · march/night/triage crons · weekly perf audit · verb workflows
 ├── .claude/
 │   ├── commands/               # loop-verb pointers
 │   ├── agents/                 # scout · playtester

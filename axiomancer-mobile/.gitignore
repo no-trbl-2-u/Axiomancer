@@ -39,6 +39,7 @@ walk-*.png
 
 # Visual-smoke artefacts (baseline PNGs are committed; current + diff are not)
 .smoke-dist/
+.perf-dist/
 screenshots/current/
 screenshots/diff/
 

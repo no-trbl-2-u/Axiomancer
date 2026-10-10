@@ -27,6 +27,7 @@
     "combat-sim": "ts-node src/CLI/combat-sim.cli.ts",
     "act1-progression": "ts-node src/CLI/act1-progression.cli.ts",
     "combat-playtest": "ts-node src/CLI/combat-playtest.cli.ts",
+    "perf-bench": "ts-node src/CLI/perf-bench.cli.ts",
     "agent-e2e": "node automation/agent-e2e.mjs",
     "catalog:export": "ts-node --transpile-only scripts/export-catalog.ts",
     "dev": "echo Please use check 'package.json' or README.md for available commands...\n ",

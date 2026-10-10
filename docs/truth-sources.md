@@ -150,3 +150,11 @@ combat-playtest):
 3. Measuring is not tuning: a measurement is briefing; card and deck
    changes happen only in guided sessions with T (D37), and engine
    constants move only inside a ratified revamp phase (D58).
+
+**Performance is measured; balance is not.** The weekly performance audit
+(`.github/workflows/perf-audit.yml`, D77) keeps the performance record in
+`docs/reports/perf/history.jsonl` (one line per week: web bundle and load,
+runtime smoothness on a scripted combat round, engine ms per combat) with
+budgets in `docs/reports/perf/budgets.json`. It answers "is the game
+getting slower or heavier", never a balance question: balance still has no
+measured baseline (D57).
