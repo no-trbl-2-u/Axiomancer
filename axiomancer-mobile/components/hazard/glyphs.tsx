@@ -235,7 +235,7 @@ export function Cracks({ seed = 1, opacity = 0.5 }: { seed?: number; opacity?: n
                     <Path key={i} d={d} stroke={HUE.black} strokeWidth={0.5} fill="none" />
                 ))}
                 {lines.map((d, i) => (
-                    <Path key={`h${i}`} d={d} stroke="rgba(232,223,200,0.05)" strokeWidth={0.3} fill="none" translateX={0.4} translateY={0.4} />
+                    <Path key={`h${i}`} d={d} stroke="rgba(232,223,200,0.05)" strokeWidth={0.3} fill="none" transform="translate(0.4 0.4)" />
                 ))}
             </G>
         </Svg>

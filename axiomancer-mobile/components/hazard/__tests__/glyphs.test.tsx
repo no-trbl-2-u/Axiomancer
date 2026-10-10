@@ -1,5 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
+import { Path } from 'react-native-svg';
 
 import { DieGlyph, ProgGlyph, LedgerMark, BoonIcon, Cracks, CastShadow } from '../glyphs';
 
@@ -97,6 +98,19 @@ describe('Cracks', () => {
             const { root } = render(<Cracks seed={seed} />);
             expect(root).toBeTruthy();
         });
+    });
+
+    it('offsets the highlight strokes with a transform, never translateX/translateY props', () => {
+        // react-native-svg on web forwards translateX/translateY to the DOM
+        // node, where React warns about unknown props (RC walk item 12).
+        const { UNSAFE_root } = render(<Cracks seed={3} />);
+        const paths = UNSAFE_root.findAllByType(Path);
+        expect(paths.length).toBe(10);
+        for (const p of paths) {
+            expect(p.props.translateX).toBeUndefined();
+            expect(p.props.translateY).toBeUndefined();
+        }
+        expect(paths.filter((p: { props: { transform?: string } }) => p.props.transform === 'translate(0.4 0.4)')).toHaveLength(5);
     });
 });
 
