@@ -93,6 +93,14 @@ export interface BloodPriceCombatState {
     cursesPlayed: number;
     cursesAdded: number;
     curseUid: number;
+    /** TETHER is live through this round (inclusive); 0 = none. */
+    tetherUntil?: number;
+    tetherCardId?: string;
+    /** LEECH n on the foe (drops by 1 each foe turn). */
+    leech?: number;
+    leechCardId?: string;
+    /** VITAE the foe lost to LEECH this combat (sim telemetry). */
+    leechDrained?: number;
 }
 
 const freshMods = (): BpSacMods => ({
@@ -170,7 +178,6 @@ export function tuneAmount(n: number, factor: number): number {
 // ── Engine kit (passed in by the engine, so this module never imports it) ────
 
 export interface BpKit {
-    colorMatchBonus(base: number): number;
     convictionCap: number;
     /** The telegraphed hit, netted against live GUARD (projectIncomingThreat). */
     incomingNet(state: CombatEncounterState): number;
@@ -196,7 +203,6 @@ interface Work {
 
 interface Frame {
     cardId: string;
-    colorMatch: boolean;
     tuned: boolean;
     sacMode: SacMode;
 }
@@ -207,6 +213,8 @@ const SAC_COST_VALUE = 0.6;
 const CURSE_ADDED_VALUE = -4;
 const CURSE_CLEARED_VALUE = 5;
 const VULN_VALUE_PER_PCT_TURN = 0.08;
+const TETHER_VALUE_PER_TURN = 3;
+const LEECH_VALUE_PER_POINT = 1.6;
 
 function expectedGlobalFires(trigger: BpGlobalTrigger, paid: boolean): number {
     const base = trigger === 'turn' ? BP_GLOBAL_FREE_TURNS : trigger === 'sac' ? 2 : 1.5;
@@ -224,7 +232,6 @@ class LineCtx implements BpCtx {
     private stats() { return this.w.s.player.baseStats; }
     private effT(n: number): number { return this.f.tuned ? tuneAmount(n, tuning.effect) : n; }
     private sacT(n: number): number { return this.f.tuned ? tuneAmount(n, tuning.sac) : n; }
-    private colour(n: number): number { return this.f.colorMatch ? n + this.w.kit.colorMatchBonus(n) : n; }
     private incoming(): number { return this.w.kit.incomingNet(this.w.s); }
 
     // -- foe -----------------------------------------------------------------
@@ -233,7 +240,7 @@ class LineCtx implements BpCtx {
         if (base <= 0) return 0;
         const enemy = this.w.s.enemy;
         if (isDefeated(enemy)) return 0;
-        let dmg = this.colour(scaleFor(base, this.stats(), 'body', 'one-shot'));
+        let dmg = scaleFor(base, this.stats(), 'body', 'one-shot');
         const vuln = getDamageTakenMultiplier(enemy);
         if (vuln !== 1) dmg = Math.round(dmg * vuln);
         if (this.mode === 'cost') return dmg;
@@ -246,6 +253,7 @@ class LineCtx implements BpCtx {
         return dmg;
     }
 
+    /** The foe loses n VITAE: unscaled, not a DEAL (no VULNERABLE). */
     foeLoses(n: number): void {
         const amt = this.effT(n);
         if (amt <= 0 || isDefeated(this.w.s.enemy)) return;
@@ -255,6 +263,36 @@ class LineCtx implements BpCtx {
             return;
         }
         if (this.mode === 'apply') this.hitFoe(amt, false);
+    }
+
+    /** TETHER n: for n turns (this one included), each SACRIFICE instance
+     *  makes the foe take DEAL x, x = the VITAE that instance paid (unscaled;
+     *  VULNERABLE applies). A second TETHER extends the window, never doubles it. */
+    tether(turns: number): void {
+        if (turns <= 0) return;
+        if (this.mode === 'value') {
+            const left = Math.max(0, (this.w.bp.tetherUntil ?? 0) - this.w.s.round + 1);
+            this.w.value += Math.max(0, turns - left) * TETHER_VALUE_PER_TURN;
+            return;
+        }
+        if (this.mode !== 'apply') return;
+        this.w.bp.tetherUntil = Math.max(this.w.bp.tetherUntil ?? 0, this.w.s.round + turns - 1);
+        this.w.bp.tetherCardId = this.f.cardId;
+    }
+
+    /** LEECH n: heart-scaled (repeating) and added to the current LEECH. */
+    leech(n: number): void {
+        const amt = scaleFor(this.effT(n), this.stats(), 'heart', 'repeating');
+        if (amt <= 0) return;
+        if (this.mode === 'value') {
+            const cur = this.w.bp.leech ?? 0;
+            const total = (k: number): number => (k * (k + 1)) / 2;
+            this.w.value += (total(cur + amt) - total(cur)) * LEECH_VALUE_PER_POINT;
+            return;
+        }
+        if (this.mode !== 'apply') return;
+        this.w.bp.leech = (this.w.bp.leech ?? 0) + amt;
+        this.w.bp.leechCardId = this.f.cardId;
     }
 
     private drainValue(): number {
@@ -291,7 +329,7 @@ class LineCtx implements BpCtx {
         const amt = this.effT(pct);
         if (!def || amt <= 0) return;
         const intensity = scaleEffectIntensity(def, amt, false, this.stats());
-        const duration = turns + (this.f.colorMatch ? 1 : 0);
+        const duration = turns;
         if (this.mode === 'value') {
             const fresh = !this.w.s.enemy.effects.some(e => e.effectId === def.id);
             this.w.value += intensity * duration * VULN_VALUE_PER_PCT_TURN + (fresh ? 2 : 0);
@@ -315,7 +353,7 @@ class LineCtx implements BpCtx {
 
     // -- self ----------------------------------------------------------------
     guard(n: number, opts?: { exact?: boolean }): number {
-        const amt = opts?.exact ? n : this.colour(scaleFor(this.effT(n), this.stats(), 'mind', 'one-shot'));
+        const amt = opts?.exact ? n : scaleFor(this.effT(n), this.stats(), 'mind', 'one-shot');
         if (amt <= 0) return 0;
         if (this.mode === 'value') {
             const need = Math.max(0, this.incoming());
@@ -328,7 +366,7 @@ class LineCtx implements BpCtx {
     }
 
     heal(n: number, opts?: { exact?: boolean; overflowToGuard?: boolean }): number {
-        const amt = opts?.exact ? n : this.colour(scaleFor(this.effT(n), this.stats(), 'mind', 'one-shot'));
+        const amt = opts?.exact ? n : scaleFor(this.effT(n), this.stats(), 'mind', 'one-shot');
         if (amt <= 0) return 0;
         return this.healExact(amt, opts?.overflowToGuard === true);
     }
@@ -375,8 +413,7 @@ class LineCtx implements BpCtx {
     sacrificeX(max: number | null, opts?: { countPer?: number; usefulMax?: number }): number {
         const x = this.chooseX(max, opts?.usefulMax);
         if (x <= 0) return 0;
-        const times = opts?.countPer ? Math.floor(x / opts.countPer) : null;
-        this.sacrificeEvent(x, times);
+        this.sacrificeEvent(x, opts?.countPer ?? null);
         return x;
     }
 
@@ -397,29 +434,35 @@ class LineCtx implements BpCtx {
         return Math.max(1, Math.min(cap, Math.max(1, safe)));
     }
 
-    /** One SACRIFICE: the per-turn modifiers, the payment, the ledger, then the
-     *  🩸 Globals fire once per time it counts. `timesOverride` comes from an X
-     *  line that counts once per N paid. */
-    private sacrificeEvent(nominalIn: number, timesOverride: number | null): void {
+    /** One SACRIFICE: the per-turn modifiers, the payment, the ledger, then
+     *  each INSTANCE (A10) fires the 🩸 Globals and TETHER. `countPer` comes
+     *  from an X line that counts once per N paid: each instance is then a
+     *  SACRIFICE of N paying N. A WAIVED SACRIFICE pays 0 and still counts. */
+    private sacrificeEvent(nominalIn: number, countPer: number | null): void {
         if (nominalIn <= 0) return;
         const mode = this.f.sacMode;
-        if (mode === 'no-cost') return; // not paid and not counted
         let nominal = mode === 'half' ? Math.ceil(nominalIn / 2) : nominalIn;
         const m = this.w.bp.mods;
         if (m.nextDouble) { nominal *= 2; m.nextDouble = false; }
-        let times = timesOverride ?? 1;
+        let times = countPer ? Math.floor(nominal / countPer) : 1;
         if (m.nextCounts > 1) { times *= m.nextCounts; m.nextCounts = 1; }
         if (m.allCountTwice) times *= 2;
         let cost = nominal;
-        if (mode === 'no-cost-counts') cost = 0;
+        if (mode === 'waived') cost = 0;
         else if (m.allFree) cost = 0;
         else if (m.nextFree > 0) { cost = 0; m.nextFree -= 1; }
         else if (m.nextHalf) { cost = Math.ceil(nominal / 2); m.nextHalf = false; }
+        const perN = countPer ?? nominal;
+        const perX = (paid: number): number => (countPer ? (paid > 0 ? countPer : 0) : paid);
 
         if (this.mode === 'cost') { this.w.cost += cost; return; }
         if (this.mode === 'value') {
             this.w.value -= cost * SAC_COST_VALUE;
-            for (let k = 0; k < times; k++) this.fireTriggersValue('sac', nominal);
+            const tethered = (this.w.bp.tetherUntil ?? 0) >= this.w.s.round;
+            for (let k = 0; k < times; k++) {
+                this.fireTriggersValue('sac', perN);
+                if (tethered) this.w.value += perX(cost) * getDamageTakenMultiplier(this.w.s.enemy);
+            }
             return;
         }
         // apply
@@ -433,16 +476,28 @@ class LineCtx implements BpCtx {
             w.bp.sacrificePaid += paid;
             w.bp.lowestVitae = Math.min(w.bp.lowestVitae, w.s.player.health);
         }
-        w.bp.sacrificedVitae += nominal * times;
+        w.bp.sacrificedVitae += perN * times;
         w.bp.sacrificeCount += times;
-        for (let k = 0; k < times; k++) fireTriggers(w, 'sac', nominal);
+        for (let k = 0; k < times; k++) {
+            fireTriggers(w, 'sac', perN);
+            const x = perX(paid);
+            if (x > 0 && (w.bp.tetherUntil ?? 0) >= w.s.round && !isDefeated(w.s.enemy)) {
+                const dmg = Math.round(x * getDamageTakenMultiplier(w.s.enemy));
+                new LineCtx(w, 'apply', { cardId: w.bp.tetherCardId ?? this.f.cardId, tuned: false, sacMode: 'normal' }).hitFoeAs(dmg);
+            }
+        }
+    }
+
+    /** A TETHER hit: DEAL already computed (unscaled, VULNERABLE applied). */
+    hitFoeAs(dmg: number): void {
+        if (dmg > 0) this.hitFoe(dmg, true);
     }
 
     private fireTriggersValue(trigger: BpGlobalTrigger, n: number): void {
         for (const g of this.w.bp.globals) {
             const spec = bloodPriceSpec(g.cardId)?.global;
             if (!spec || spec.trigger !== trigger) continue;
-            const ctx = new LineCtx(this.w, 'value', { cardId: g.cardId, colorMatch: false, tuned: !bloodPriceSpec(g.cardId)?.untuned, sacMode: 'normal' });
+            const ctx = new LineCtx(this.w, 'value', { cardId: g.cardId, tuned: !bloodPriceSpec(g.cardId)?.untuned, sacMode: 'normal' });
             (g.paid ? spec.paid : spec.free)(ctx, n);
         }
     }
@@ -497,7 +552,7 @@ class LineCtx implements BpCtx {
         const spec = bloodPriceSpec(cardId);
         const l = line === 'paid' ? spec?.paid : spec?.free;
         if (!l) return;
-        const ctx = new LineCtx(this.w, this.mode, { cardId, colorMatch: false, tuned: false, sacMode: mode });
+        const ctx = new LineCtx(this.w, this.mode, { cardId, tuned: false, sacMode: mode });
         l.run(ctx);
         if (this.mode === 'value') {
             this.w.value += CURSE_CLEARED_VALUE;
@@ -663,7 +718,7 @@ function fireTriggers(w: Work, trigger: BpGlobalTrigger, n: number): void {
         if (!glob || glob.trigger !== trigger) continue;
         if (isDefeated(w.s.enemy)) return;
         const body = g.paid ? glob.paid : glob.free;
-        const frame: Frame = { cardId: g.cardId, colorMatch: false, tuned: !spec?.untuned, sacMode: 'normal' };
+        const frame: Frame = { cardId: g.cardId, tuned: !spec?.untuned, sacMode: 'normal' };
         const probe: Work = { ...w, bp: cloneBp(w.bp), cost: 0, value: 0, events: [] };
         body(new LineCtx(probe, 'cost', frame), n);
         if (probe.cost > 0 && w.s.player.health - probe.cost < 1) continue;
@@ -681,7 +736,7 @@ function probeLineCost(
     s: CombatEncounterState, bp: BloodPriceCombatState, cardId: string, line: BpLine, kit: BpKit,
 ): number {
     const w: Work = { s, bp: cloneBp(bp), events: [], kit, cost: 0, value: 0 };
-    line.run(new LineCtx(w, 'cost', { cardId, colorMatch: false, tuned: !bloodPriceSpec(cardId)?.untuned, sacMode: 'normal' }));
+    line.run(new LineCtx(w, 'cost', { cardId, tuned: !bloodPriceSpec(cardId)?.untuned, sacMode: 'normal' }));
     return w.cost;
 }
 
@@ -730,14 +785,14 @@ export function bloodPriceLineCost(
 
 /** The witness bot's estimate of a line (higher is better). */
 export function bloodPriceLineValue(
-    state: CombatEncounterState, uid: string, paid: boolean, kit: BpKit, colorMatch = false,
+    state: CombatEncounterState, uid: string, paid: boolean, kit: BpKit,
 ): number {
     const entry = state.hand.find(h => h.uid === uid);
     const spec = entry ? bloodPriceSpec(entry.cardId) : undefined;
     if (!entry || !spec || !state.bp) return 0;
     const s = withoutEntry(state, uid);
     const w: Work = { s, bp: cloneBp(state.bp), events: [], kit, cost: 0, value: 0 };
-    const frame: Frame = { cardId: entry.cardId, colorMatch, tuned: !spec.untuned, sacMode: 'normal' };
+    const frame: Frame = { cardId: entry.cardId, tuned: !spec.untuned, sacMode: 'normal' };
     if (spec.global) {
         const body = paid ? spec.global.paid : spec.global.free;
         const n = spec.global.trigger === 'sac' ? 4 : 0;
@@ -778,7 +833,6 @@ export function playBloodPriceCard(
     if (reason) return fizzle(reason);
 
     let s = state;
-    let colorMatch = false;
     let usedDie: CombatManaDie | null = null;
     if (useBottom) {
         if (dieId === undefined) return fizzle('choose a die to power this card');
@@ -790,7 +844,6 @@ export function playBloodPriceCard(
         if (!(card.color === 'any' || die.color === 'wild' || die.color === card.color)) {
             return fizzle(`a ${die.color} die cannot power a ${card.color} card — colors must match`);
         }
-        colorMatch = card.color !== 'any' && (die.color === 'wild' || die.color === card.color);
         usedDie = die;
         if (banked) s = { ...s, reserve: (s.reserve ?? []).filter(d => d.id !== die.id) };
         else if (floating) {
@@ -803,14 +856,14 @@ export function playBloodPriceCard(
     }
 
     const events: CombatEvent[] = [
-        { kind: 'card-played', cardId: card.id, useBottom, dieId: usedDie?.id ?? null, ...(useBottom ? { colorMatch } : {}) },
+        { kind: 'card-played', cardId: card.id, useBottom, dieId: usedDie?.id ?? null },
     ];
     if (usedDie) events.push({ kind: 'die-spent', dieId: usedDie.id, color: usedDie.color });
 
     const w: Work = {
         s: withoutEntry(s, uid), bp: cloneBp(state.bp), events, kit, cost: 0, value: 0,
     };
-    const frame: Frame = { cardId: card.id, colorMatch, tuned: !spec.untuned, sacMode: 'normal' };
+    const frame: Frame = { cardId: card.id, tuned: !spec.untuned, sacMode: 'normal' };
 
     if (spec.global) {
         w.bp.globals.push({ cardId: card.id, paid: useBottom, turnsLeft: useBottom ? null : BP_GLOBAL_FREE_TURNS });
@@ -855,6 +908,36 @@ export function bloodPriceTurnStart(state: CombatEncounterState, kit: BpKit): Bp
     w.bp.globals = stay;
     if (leaving.length) w.s = { ...w.s, discard: [...w.s.discard, ...leaving] };
     return { state: { ...w.s, bp: w.bp }, events: w.events };
+}
+
+/**
+ * Start of the foe's turn (before its telegraphed action): LEECH n makes the
+ * foe lose n VITAE (not a DEAL: unscaled, no VULNERABLE), the player HEALs the
+ * VITAE actually lost (unscaled, capped at max), then LEECH drops by 1.
+ */
+export function bloodPriceFoeTurnStart(state: CombatEncounterState): BpPlayResult {
+    const bp = state.bp;
+    const n = bp?.leech ?? 0;
+    if (!bp || n <= 0 || isDefeated(state.enemy)) return { state, events: [] };
+    const lost = Math.min(n, state.enemy.health);
+    const cardId = bp.leechCardId ?? 'leech';
+    const cardName = getCardById(cardId)?.name ?? cardId;
+    const before = state.enemy.health;
+    const enemy = applyDamage(state.enemy, lost);
+    const p = state.player;
+    const healed = Math.min(lost, Math.max(0, p.maxHealth - p.health));
+    const overflow = bp.overhealToGuard ? lost - healed : 0;
+    return {
+        state: {
+            ...state, enemy,
+            player: healCombatant(p, healed),
+            guard: (state.guard ?? 0) + overflow,
+            directDamageDealt: state.directDamageDealt + lost,
+            attribution: recordAttribution(state.attribution, cardId, cardName, null, lost, before),
+            bp: { ...bp, leech: n - 1, leechDrained: (bp.leechDrained ?? 0) + lost },
+        },
+        events: [{ kind: 'damage-dealt', cardId, target: 'enemy', amount: lost }],
+    };
 }
 
 /** Damage the player takes from the foe or a DoT: the death ward clamps it,

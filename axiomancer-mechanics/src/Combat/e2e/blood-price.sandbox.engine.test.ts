@@ -18,7 +18,7 @@ import { BLOOD_PRICE_CARDS, registerBloodPriceCards } from '../../Cards/sandbox/
 import { deepClone } from '../../Utils';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, discardCombatCard,
-    startTurn, colorMatchBonus, BLOOD_PRICE_KIT,
+    startTurn, resolveThreatPhase, BLOOD_PRICE_KIT,
 } from '../combat.engine';
 import { bloodPriceIllegalReason, BP_CURSE_ID } from '../combat.blood-price';
 import type { CombatEncounterState } from '../combat.encounter.types';
@@ -49,8 +49,8 @@ const play = (s: CombatEncounterState, uid: string, paid: boolean) =>
     playCombatCard(s, { uid }, paid, paid ? 'w' : undefined).state;
 
 describe('Blood Price sandbox runtime', () => {
-    it('registers 90 proposals plus the grey Curse; library fights carry no ledger', () => {
-        expect(BLOOD_PRICE_CARDS).toHaveLength(91);
+    it('registers 90 proposals, 8 purple drafts and the grey Curse; library fights carry no ledger', () => {
+        expect(BLOOD_PRICE_CARDS).toHaveLength(99);
         const plain = initializeCombatEncounter(deepClone(Player), deepClone(FloatEye), ['grey-strike', 'grey-ward'], 1);
         expect(plain.bp).toBeUndefined();
     });
@@ -121,12 +121,53 @@ describe('Blood Price sandbox runtime', () => {
         expect(t.bp!.exiled).toContain(BP_CURSE_ID);
     });
 
+    it('WAIVE: the next SACRIFICE pays nothing but still counts and fires 🩸 Globals', () => {
+        let s = play(fight(['bp-P-10a', 'bp-E-04a', 'bp-P-01a']), 't0', false);
+        s = play(s, 't1', false);
+        s = play(s, 't2', false);
+        expect(s.player.health).toBe(100);
+        expect(s.bp!.sacrificeCount).toBe(1);
+        expect(s.enemy.health).toBe(500 - 5 - 2);
+    });
+
+    it('A10: "SACRIFICE 1 for each card in your hand" is one instance per card', () => {
+        const s = play(fight(['bp-E-02c', FILLER, FILLER, FILLER]), 't0', true);
+        expect(s.bp!.sacrificeCount).toBe(3);
+        expect(s.player.health).toBe(97);
+    });
+
+    it('TETHER: each SACRIFICE instance deals what it paid, unscaled; a WAIVED one deals 0', () => {
+        const s = play(fight(['bp-E-02d']), 't0', true);
+        expect(s.player.health).toBe(97);
+        expect(s.enemy.health).toBe(497);
+        let t = play(fight(['bp-E-04a', 'bp-E-10d']), 't0', false);
+        t = play(t, 't1', false);
+        expect(t.enemy.health).toBe(500);
+        expect(t.bp!.sacrificeCount).toBe(1);
+    });
+
+    it('LEECH: at the foe\'s turn the foe loses n, you heal what it lost, n drops by 1; LEECH adds', () => {
+        let s = play(fight(['bp-M-01d', 'bp-M-01d']), 't0', true);
+        s = play({ ...s, dice: [{ id: 'w', color: 'wild', state: 'available', temporary: false, face: 'mana' }] }, 't1', true);
+        expect(s.bp!.leech).toBe(8);
+        const r = resolveThreatPhase(s).state;
+        expect(r.bp!.leech).toBe(7);
+        expect(r.bp!.leechDrained).toBe(8);
+        expect(500 - r.enemy.health).toBeGreaterThanOrEqual(8);
+    });
+
+    it('A23 setup: a Curse PAID line is legal (pay 10, EXILE)', () => {
+        const s = play(fight(['bp-E-01a']), 't0', false);
+        const c = s.hand.find(h => h.cardId === BP_CURSE_ID)!;
+        expect(bloodPriceIllegalReason(s, c.uid, true, BLOOD_PRICE_KIT)).toBeNull();
+    });
+
     it('a condition gates its line ("Only at one-third VITAE or less")', () => {
         expect(bloodPriceIllegalReason(fight(['bp-P-04a'], 100), 't0', false, BLOOD_PRICE_KIT)).toMatch(/condition/);
         expect(bloodPriceIllegalReason(fight(['bp-P-04a'], 50), 't0', false, BLOOD_PRICE_KIT)).toBeNull();
     });
 
-    it('every plain ballot line applies its printed numbers (PAID adds the colour-match bonus)', () => {
+    it('every plain ballot line applies its printed numbers, FREE and PAID alike (D79: no colour bonus)', () => {
         const PLAIN = /^(?:(?:SACRIFICE \d+|DEAL \d+|GUARD \d+|Heal \d+|gain \d+ Conviction|the foe loses \d+ VITAE|EXILE)[,.;]?\s*)+$/i;
         const mismatches: string[] = [];
         let checked = 0;
@@ -138,7 +179,7 @@ describe('Blood Price sandbox runtime', () => {
                 if (!PLAIN.test(line.text)) continue;
                 checked++;
                 const sum = (re: RegExp): number => [...line.text.matchAll(re)].reduce((a, m) => a + Number(m[1]), 0);
-                const bonus = (n: number): number => (paid && n > 0 && card.color !== 'any' ? n + colorMatchBonus(n) : n);
+                const bonus = (n: number): number => n;
                 const deals = [...line.text.matchAll(/DEAL (\d+)/g)].reduce((a, m) => a + bonus(Number(m[1])), 0);
                 const want = {
                     enemy: deals + sum(/loses (\d+) VITAE/g),

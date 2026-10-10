@@ -10,8 +10,8 @@
  *     Global already in play, or a SACRIFICE that would leave < 1 VITAE);
  *   - never pays a SACRIFICE that leaves VITAE at or below the telegraphed
  *     hit (the payment would make that hit lethal);
- *   - powers a PAID line only when its estimate is positive, and never
- *     spends a die on a Curse's PAID line;
+ *   - powers a PAID line only when its estimate is positive; a Curse's PAID
+ *     line (EXILE it) takes a die only when nothing better wants it (A23);
  *   - plays every legal, safe Curse and Global on its FREE line, and other
  *     FREE lines unless their estimate is below -3.
  *
@@ -24,7 +24,6 @@ import { BLOOD_PRICE_KIT, projectIncomingThreat } from './combat.engine';
 import {
     bloodPriceIllegalReason, bloodPriceLineCost, bloodPriceLineValue, bloodPriceSpec,
 } from './combat.blood-price';
-import { getCardById } from '../Cards/cards.library';
 
 /** Below this estimate the bot holds a FREE line rather than play it. */
 const FREE_LINE_FLOOR = -3;
@@ -39,16 +38,24 @@ function safeToPay(state: CombatEncounterState, cost: number): boolean {
 export function bpWantsPaid(state: CombatEncounterState, uid: string): boolean {
     const entry = state.hand.find(h => h.uid === uid);
     const spec = entry ? bloodPriceSpec(entry.cardId) : undefined;
-    if (!entry || !spec || spec.curse) return false;
+    if (!entry || !spec) return false;
     if (bloodPriceIllegalReason(state, uid, true, BLOOD_PRICE_KIT)) return false;
     if (!safeToPay(state, bloodPriceLineCost(state, uid, true, BLOOD_PRICE_KIT))) return false;
     return bpPaidValue(state, uid) > 0;
 }
 
+/** A23: a Curse's PAID line (pay 10, EXILE it) ranks just above zero, so a
+ *  die takes it only when no positive-value line wants that die, and a
+ *  little higher in the first three rounds (more fight left to clog). */
+const CURSE_EXILE_SCORE = 0.5;
+const CURSE_EXILE_EARLY_BONUS = 0.5;
+
 function bpPaidValue(state: CombatEncounterState, uid: string): number {
     const entry = state.hand.find(h => h.uid === uid);
-    const colorMatch = !!entry && getCardById(entry.cardId)?.color !== 'any';
-    return bloodPriceLineValue(state, uid, true, BLOOD_PRICE_KIT, colorMatch);
+    if (entry && bloodPriceSpec(entry.cardId)?.curse) {
+        return CURSE_EXILE_SCORE + (state.round <= 3 ? CURSE_EXILE_EARLY_BONUS : 0);
+    }
+    return bloodPriceLineValue(state, uid, true, BLOOD_PRICE_KIT);
 }
 
 /** The greedy rank of a Blood Price card's PAID line (first copy in hand). */

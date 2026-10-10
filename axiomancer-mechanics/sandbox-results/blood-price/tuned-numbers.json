@@ -28,30 +28,6 @@
   "6": {
    "effect": 0.531441,
    "sac": 1.7715610000000008
-  },
-  "-6": {
-   "effect": 1.7715610000000008,
-   "sac": 0.531441
-  },
-  "-5": {
-   "effect": 1.6105100000000006,
-   "sac": 0.5904900000000001
-  },
-  "-4": {
-   "effect": 1.4641000000000006,
-   "sac": 0.6561000000000001
-  },
-  "-3": {
-   "effect": 1.3310000000000004,
-   "sac": 0.7290000000000001
-  },
-  "-2": {
-   "effect": 1.2100000000000002,
-   "sac": 0.81
-  },
-  "-1": {
-   "effect": 1.1,
-   "sac": 0.9
   }
  },
  "numbers": {
@@ -128,6 +104,10 @@
     "free": "GUARD equal to VITAE you lost last turn (max 10).",
     "paid": "GUARD equal to VITAE you lost last turn (max 25)."
    },
+   "bp-P-06d": {
+    "free": "GUARD 3.",
+    "paid": "LEECH 1 per 10 VITAE missing (max 8)."
+   },
    "bp-P-07a": {
     "free": "DEAL 3.",
     "paid": "DEAL equal to the VITAE you SACRIFICED this combat (max 30)."
@@ -151,6 +131,10 @@
    "bp-P-08c": {
     "free": "SACRIFICE 2, gain 2 Conviction.",
     "paid": "SACRIFICE any amount; gain 1 Conviction per 4 paid (max 4)."
+   },
+   "bp-P-08d": {
+    "free": "SACRIFICE 2, gain 2 Conviction.",
+    "paid": "TETHER 3. SACRIFICE 4."
    },
    "bp-P-09a": {
     "free": "SACRIFICE 3; the foe loses 3 VITAE.",
@@ -199,6 +183,10 @@
     "free": "SACRIFICE 2.",
     "paid": "SACRIFICE 1 for each card in your hand (max 5)."
    },
+   "bp-E-02d": {
+    "free": "SACRIFICE 1, twice.",
+    "paid": "TETHER 2. SACRIFICE 1, three times."
+   },
    "bp-E-03a": {
     "free": "SACRIFICE 2."
    },
@@ -209,21 +197,25 @@
    "bp-E-03c": {
     "free": "SACRIFICE 3, GUARD 3."
    },
+   "bp-E-03d": {
+    "free": "SACRIFICE 2, LEECH 2.",
+    "paid": "LEECH 3 instead."
+   },
    "bp-E-04a": {
-    "free": "Your next SACRIFICE this turn costs no VITAE but still counts.",
-    "paid": "Your SACRIFICES this turn cost no VITAE but still count."
+    "free": "WAIVE your next SACRIFICE this turn.",
+    "paid": "WAIVE every SACRIFICE this turn."
    },
    "bp-E-04b": {
     "free": "Your next SACRIFICE this turn costs half.",
-    "paid": "Your next 2 SACRIFICES this turn cost no VITAE but still count."
+    "paid": "WAIVE your next 2 SACRIFICES this turn."
    },
    "bp-E-04c": {
     "free": "GUARD 3.",
-    "paid": "Your next SACRIFICE this turn costs no VITAE but still counts. Gain 1 Conviction."
+    "paid": "WAIVE your next SACRIFICE this turn. Gain 1 Conviction."
    },
    "bp-E-05a": {
-    "free": "Play a Curse from your hand on its FREE line at no VITAE cost.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost."
+    "free": "Play a Curse from your hand on its FREE line; WAIVE its SACRIFICE.",
+    "paid": "Play a Curse from your hand on its PAID line; WAIVE its SACRIFICE."
    },
    "bp-E-05b": {
     "free": "Play a Curse from your hand; its SACRIFICE is halved.",
@@ -231,7 +223,7 @@
    },
    "bp-E-05c": {
     "free": "DEAL 3.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost; it still counts as a SACRIFICE."
+    "paid": "Play a Curse from your hand on its PAID line; WAIVE its SACRIFICE."
    },
    "bp-E-06a": {
     "free": "DEAL 5, then SACRIFICE 2.",
@@ -267,7 +259,7 @@
    },
    "bp-E-08c": {
     "free": "Return a Curse from your discard to your hand.",
-    "paid": "Return a Curse from your discard and play it at no VITAE cost."
+    "paid": "Return a Curse from your discard and play it on its PAID line; WAIVE its SACRIFICE."
    },
    "bp-E-09a": {
     "free": "Gain 1 Conviction."
@@ -292,6 +284,10 @@
     "free": "SACRIFICE 3.",
     "paid": "SACRIFICE any amount (max 20); it counts as one SACRIFICE per 5 paid."
    },
+   "bp-E-10d": {
+    "free": "TETHER 1. SACRIFICE 2.",
+    "paid": "TETHER 1. SACRIFICE any amount (max 15)."
+   },
    "bp-M-01a": {
     "free": "Heal 3.",
     "paid": "Heal 10."
@@ -303,6 +299,10 @@
    "bp-M-01c": {
     "free": "Heal 4.",
     "paid": "Heal 12. EXILE."
+   },
+   "bp-M-01d": {
+    "free": "Heal 3.",
+    "paid": "LEECH 4."
    },
    "bp-M-02a": {
     "free": "DEAL 3; heal 1.",
@@ -327,6 +327,10 @@
    "bp-M-03c": {
     "free": "GUARD 3.",
     "paid": "GUARD 8; heal 3 at half VITAE or less."
+   },
+   "bp-M-03d": {
+    "free": "GUARD 3.",
+    "paid": "LEECH 3, or 6 at half VITAE or less."
    },
    "bp-M-04a": {
     "free": "EXILE a Curse from your hand.",
@@ -387,6 +391,10 @@
    "bp-M-08c": {
     "free": "Heal 1 per Curse in your hand.",
     "paid": "Heal 2 per Curse in your hand (max 6) instead."
+   },
+   "bp-M-08d": {
+    "free": "LEECH 1.",
+    "paid": "LEECH 2 instead."
    },
    "bp-M-09a": {
     "free": "Heal 4; healing past max VITAE becomes GUARD.",
@@ -486,6 +494,10 @@
     "free": "GUARD equal to VITAE you lost last turn (max 9).",
     "paid": "GUARD equal to VITAE you lost last turn (max 23)."
    },
+   "bp-P-06d": {
+    "free": "GUARD 3.",
+    "paid": "LEECH 1 per 10 VITAE missing (max 8)."
+   },
    "bp-P-07a": {
     "free": "DEAL 3.",
     "paid": "DEAL equal to the VITAE you SACRIFICED this combat (max 33)."
@@ -509,6 +521,10 @@
    "bp-P-08c": {
     "free": "SACRIFICE 2, gain 2 Conviction.",
     "paid": "SACRIFICE any amount; gain 1 Conviction per 4 paid (max 4)."
+   },
+   "bp-P-08d": {
+    "free": "SACRIFICE 2, gain 2 Conviction.",
+    "paid": "TETHER 3. SACRIFICE 4."
    },
    "bp-P-09a": {
     "free": "SACRIFICE 3; the foe loses 3 VITAE.",
@@ -557,6 +573,10 @@
     "free": "SACRIFICE 2.",
     "paid": "SACRIFICE 1 for each card in your hand (max 6)."
    },
+   "bp-E-02d": {
+    "free": "SACRIFICE 1, twice.",
+    "paid": "TETHER 2. SACRIFICE 1, three times."
+   },
    "bp-E-03a": {
     "free": "SACRIFICE 2."
    },
@@ -567,21 +587,25 @@
    "bp-E-03c": {
     "free": "SACRIFICE 3, GUARD 3."
    },
+   "bp-E-03d": {
+    "free": "SACRIFICE 2, LEECH 2.",
+    "paid": "LEECH 3 instead."
+   },
    "bp-E-04a": {
-    "free": "Your next SACRIFICE this turn costs no VITAE but still counts.",
-    "paid": "Your SACRIFICES this turn cost no VITAE but still count."
+    "free": "WAIVE your next SACRIFICE this turn.",
+    "paid": "WAIVE every SACRIFICE this turn."
    },
    "bp-E-04b": {
     "free": "Your next SACRIFICE this turn costs half.",
-    "paid": "Your next 2 SACRIFICES this turn cost no VITAE but still count."
+    "paid": "WAIVE your next 2 SACRIFICES this turn."
    },
    "bp-E-04c": {
     "free": "GUARD 3.",
-    "paid": "Your next SACRIFICE this turn costs no VITAE but still counts. Gain 1 Conviction."
+    "paid": "WAIVE your next SACRIFICE this turn. Gain 1 Conviction."
    },
    "bp-E-05a": {
-    "free": "Play a Curse from your hand on its FREE line at no VITAE cost.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost."
+    "free": "Play a Curse from your hand on its FREE line; WAIVE its SACRIFICE.",
+    "paid": "Play a Curse from your hand on its PAID line; WAIVE its SACRIFICE."
    },
    "bp-E-05b": {
     "free": "Play a Curse from your hand; its SACRIFICE is halved.",
@@ -589,7 +613,7 @@
    },
    "bp-E-05c": {
     "free": "DEAL 3.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost; it still counts as a SACRIFICE."
+    "paid": "Play a Curse from your hand on its PAID line; WAIVE its SACRIFICE."
    },
    "bp-E-06a": {
     "free": "DEAL 5, then SACRIFICE 2.",
@@ -625,7 +649,7 @@
    },
    "bp-E-08c": {
     "free": "Return a Curse from your discard to your hand.",
-    "paid": "Return a Curse from your discard and play it at no VITAE cost."
+    "paid": "Return a Curse from your discard and play it on its PAID line; WAIVE its SACRIFICE."
    },
    "bp-E-09a": {
     "free": "Gain 1 Conviction."
@@ -650,6 +674,10 @@
     "free": "SACRIFICE 3.",
     "paid": "SACRIFICE any amount (max 20); it counts as one SACRIFICE per 5 paid."
    },
+   "bp-E-10d": {
+    "free": "TETHER 1. SACRIFICE 2.",
+    "paid": "TETHER 1. SACRIFICE any amount (max 15)."
+   },
    "bp-M-01a": {
     "free": "Heal 3.",
     "paid": "Heal 9."
@@ -661,6 +689,10 @@
    "bp-M-01c": {
     "free": "Heal 4.",
     "paid": "Heal 11. EXILE."
+   },
+   "bp-M-01d": {
+    "free": "Heal 3.",
+    "paid": "LEECH 4."
    },
    "bp-M-02a": {
     "free": "DEAL 3; heal 1.",
@@ -685,6 +717,10 @@
    "bp-M-03c": {
     "free": "GUARD 3.",
     "paid": "GUARD 7; heal 3 at half VITAE or less."
+   },
+   "bp-M-03d": {
+    "free": "GUARD 3.",
+    "paid": "LEECH 3, or 6 at half VITAE or less."
    },
    "bp-M-04a": {
     "free": "EXILE a Curse from your hand.",
@@ -745,6 +781,10 @@
    "bp-M-08c": {
     "free": "Heal 1 per Curse in your hand.",
     "paid": "Heal 2 per Curse in your hand (max 5) instead."
+   },
+   "bp-M-08d": {
+    "free": "LEECH 1.",
+    "paid": "LEECH 2 instead."
    },
    "bp-M-09a": {
     "free": "Heal 4; healing past max VITAE becomes GUARD.",
@@ -844,6 +884,10 @@
     "free": "GUARD equal to VITAE you lost last turn (max 8).",
     "paid": "GUARD equal to VITAE you lost last turn (max 20)."
    },
+   "bp-P-06d": {
+    "free": "GUARD 2.",
+    "paid": "LEECH 1 per 10 VITAE missing (max 8)."
+   },
    "bp-P-07a": {
     "free": "DEAL 2.",
     "paid": "DEAL equal to the VITAE you SACRIFICED this combat (max 36)."
@@ -867,6 +911,10 @@
    "bp-P-08c": {
     "free": "SACRIFICE 2, gain 2 Conviction.",
     "paid": "SACRIFICE any amount; gain 1 Conviction per 4 paid (max 4)."
+   },
+   "bp-P-08d": {
+    "free": "SACRIFICE 2, gain 2 Conviction.",
+    "paid": "TETHER 3. SACRIFICE 5."
    },
    "bp-P-09a": {
     "free": "SACRIFICE 4; the foe loses 2 VITAE.",
@@ -915,6 +963,10 @@
     "free": "SACRIFICE 2.",
     "paid": "SACRIFICE 1 for each card in your hand (max 6)."
    },
+   "bp-E-02d": {
+    "free": "SACRIFICE 1, twice.",
+    "paid": "TETHER 2. SACRIFICE 1, three times."
+   },
    "bp-E-03a": {
     "free": "SACRIFICE 2."
    },
@@ -925,21 +977,25 @@
    "bp-E-03c": {
     "free": "SACRIFICE 4, GUARD 2."
    },
+   "bp-E-03d": {
+    "free": "SACRIFICE 2, LEECH 2.",
+    "paid": "LEECH 3 instead."
+   },
    "bp-E-04a": {
-    "free": "Your next SACRIFICE this turn costs no VITAE but still counts.",
-    "paid": "Your SACRIFICES this turn cost no VITAE but still count."
+    "free": "WAIVE your next SACRIFICE this turn.",
+    "paid": "WAIVE every SACRIFICE this turn."
    },
    "bp-E-04b": {
     "free": "Your next SACRIFICE this turn costs half.",
-    "paid": "Your next 2 SACRIFICES this turn cost no VITAE but still count."
+    "paid": "WAIVE your next 2 SACRIFICES this turn."
    },
    "bp-E-04c": {
     "free": "GUARD 2.",
-    "paid": "Your next SACRIFICE this turn costs no VITAE but still counts. Gain 1 Conviction."
+    "paid": "WAIVE your next SACRIFICE this turn. Gain 1 Conviction."
    },
    "bp-E-05a": {
-    "free": "Play a Curse from your hand on its FREE line at no VITAE cost.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost."
+    "free": "Play a Curse from your hand on its FREE line; WAIVE its SACRIFICE.",
+    "paid": "Play a Curse from your hand on its PAID line; WAIVE its SACRIFICE."
    },
    "bp-E-05b": {
     "free": "Play a Curse from your hand; its SACRIFICE is halved.",
@@ -947,7 +1003,7 @@
    },
    "bp-E-05c": {
     "free": "DEAL 2.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost; it still counts as a SACRIFICE."
+    "paid": "Play a Curse from your hand on its PAID line; WAIVE its SACRIFICE."
    },
    "bp-E-06a": {
     "free": "DEAL 4, then SACRIFICE 2.",
@@ -983,7 +1039,7 @@
    },
    "bp-E-08c": {
     "free": "Return a Curse from your discard to your hand.",
-    "paid": "Return a Curse from your discard and play it at no VITAE cost."
+    "paid": "Return a Curse from your discard and play it on its PAID line; WAIVE its SACRIFICE."
    },
    "bp-E-09a": {
     "free": "Gain 1 Conviction."
@@ -1008,6 +1064,10 @@
     "free": "SACRIFICE 4.",
     "paid": "SACRIFICE any amount (max 20); it counts as one SACRIFICE per 5 paid."
    },
+   "bp-E-10d": {
+    "free": "TETHER 1. SACRIFICE 2.",
+    "paid": "TETHER 1. SACRIFICE any amount (max 15)."
+   },
    "bp-M-01a": {
     "free": "Heal 2.",
     "paid": "Heal 8."
@@ -1019,6 +1079,10 @@
    "bp-M-01c": {
     "free": "Heal 3.",
     "paid": "Heal 10. EXILE."
+   },
+   "bp-M-01d": {
+    "free": "Heal 2.",
+    "paid": "LEECH 4."
    },
    "bp-M-02a": {
     "free": "DEAL 2; heal 1.",
@@ -1043,6 +1107,10 @@
    "bp-M-03c": {
     "free": "GUARD 2.",
     "paid": "GUARD 6; heal 2 at half VITAE or less."
+   },
+   "bp-M-03d": {
+    "free": "GUARD 2.",
+    "paid": "LEECH 3, or 6 at half VITAE or less."
    },
    "bp-M-04a": {
     "free": "EXILE a Curse from your hand.",
@@ -1103,6 +1171,10 @@
    "bp-M-08c": {
     "free": "Heal 1 per Curse in your hand.",
     "paid": "Heal 2 per Curse in your hand (max 5) instead."
+   },
+   "bp-M-08d": {
+    "free": "LEECH 1.",
+    "paid": "LEECH 2 instead."
    },
    "bp-M-09a": {
     "free": "Heal 3; healing past max VITAE becomes GUARD.",
@@ -1202,6 +1274,10 @@
     "free": "GUARD equal to VITAE you lost last turn (max 7).",
     "paid": "GUARD equal to VITAE you lost last turn (max 18)."
    },
+   "bp-P-06d": {
+    "free": "GUARD 2.",
+    "paid": "LEECH 1 per 10 VITAE missing (max 8)."
+   },
    "bp-P-07a": {
     "free": "DEAL 2.",
     "paid": "DEAL equal to the VITAE you SACRIFICED this combat (max 40)."
@@ -1225,6 +1301,10 @@
    "bp-P-08c": {
     "free": "SACRIFICE 3, gain 2 Conviction.",
     "paid": "SACRIFICE any amount; gain 1 Conviction per 4 paid (max 4)."
+   },
+   "bp-P-08d": {
+    "free": "SACRIFICE 3, gain 2 Conviction.",
+    "paid": "TETHER 3. SACRIFICE 5."
    },
    "bp-P-09a": {
     "free": "SACRIFICE 4; the foe loses 2 VITAE.",
@@ -1273,6 +1353,10 @@
     "free": "SACRIFICE 3.",
     "paid": "SACRIFICE 1 for each card in your hand (max 7)."
    },
+   "bp-E-02d": {
+    "free": "SACRIFICE 1, twice.",
+    "paid": "TETHER 2. SACRIFICE 1, three times."
+   },
    "bp-E-03a": {
     "free": "SACRIFICE 3."
    },
@@ -1283,21 +1367,25 @@
    "bp-E-03c": {
     "free": "SACRIFICE 4, GUARD 2."
    },
+   "bp-E-03d": {
+    "free": "SACRIFICE 3, LEECH 3.",
+    "paid": "LEECH 3 instead."
+   },
    "bp-E-04a": {
-    "free": "Your next SACRIFICE this turn costs no VITAE but still counts.",
-    "paid": "Your SACRIFICES this turn cost no VITAE but still count."
+    "free": "WAIVE your next SACRIFICE this turn.",
+    "paid": "WAIVE every SACRIFICE this turn."
    },
    "bp-E-04b": {
     "free": "Your next SACRIFICE this turn costs half.",
-    "paid": "Your next 2 SACRIFICES this turn cost no VITAE but still count."
+    "paid": "WAIVE your next 2 SACRIFICES this turn."
    },
    "bp-E-04c": {
     "free": "GUARD 2.",
-    "paid": "Your next SACRIFICE this turn costs no VITAE but still counts. Gain 1 Conviction."
+    "paid": "WAIVE your next SACRIFICE this turn. Gain 1 Conviction."
    },
    "bp-E-05a": {
-    "free": "Play a Curse from your hand on its FREE line at no VITAE cost.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost."
+    "free": "Play a Curse from your hand on its FREE line; WAIVE its SACRIFICE.",
+    "paid": "Play a Curse from your hand on its PAID line; WAIVE its SACRIFICE."
    },
    "bp-E-05b": {
     "free": "Play a Curse from your hand; its SACRIFICE is halved.",
@@ -1305,7 +1393,7 @@
    },
    "bp-E-05c": {
     "free": "DEAL 2.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost; it still counts as a SACRIFICE."
+    "paid": "Play a Curse from your hand on its PAID line; WAIVE its SACRIFICE."
    },
    "bp-E-06a": {
     "free": "DEAL 4, then SACRIFICE 3.",
@@ -1341,7 +1429,7 @@
    },
    "bp-E-08c": {
     "free": "Return a Curse from your discard to your hand.",
-    "paid": "Return a Curse from your discard and play it at no VITAE cost."
+    "paid": "Return a Curse from your discard and play it on its PAID line; WAIVE its SACRIFICE."
    },
    "bp-E-09a": {
     "free": "Gain 1 Conviction."
@@ -1366,6 +1454,10 @@
     "free": "SACRIFICE 4.",
     "paid": "SACRIFICE any amount (max 20); it counts as one SACRIFICE per 5 paid."
    },
+   "bp-E-10d": {
+    "free": "TETHER 1. SACRIFICE 3.",
+    "paid": "TETHER 1. SACRIFICE any amount (max 15)."
+   },
    "bp-M-01a": {
     "free": "Heal 2.",
     "paid": "Heal 7."
@@ -1377,6 +1469,10 @@
    "bp-M-01c": {
     "free": "Heal 3.",
     "paid": "Heal 9. EXILE."
+   },
+   "bp-M-01d": {
+    "free": "Heal 2.",
+    "paid": "LEECH 4."
    },
    "bp-M-02a": {
     "free": "DEAL 2; heal 1.",
@@ -1401,6 +1497,10 @@
    "bp-M-03c": {
     "free": "GUARD 2.",
     "paid": "GUARD 6; heal 2 at half VITAE or less."
+   },
+   "bp-M-03d": {
+    "free": "GUARD 2.",
+    "paid": "LEECH 3, or 6 at half VITAE or less."
    },
    "bp-M-04a": {
     "free": "EXILE a Curse from your hand.",
@@ -1461,6 +1561,10 @@
    "bp-M-08c": {
     "free": "Heal 1 per Curse in your hand.",
     "paid": "Heal 1 per Curse in your hand (max 4) instead."
+   },
+   "bp-M-08d": {
+    "free": "LEECH 1.",
+    "paid": "LEECH 2 instead."
    },
    "bp-M-09a": {
     "free": "Heal 3; healing past max VITAE becomes GUARD.",
@@ -1560,6 +1664,10 @@
     "free": "GUARD equal to VITAE you lost last turn (max 7).",
     "paid": "GUARD equal to VITAE you lost last turn (max 16)."
    },
+   "bp-P-06d": {
+    "free": "GUARD 2.",
+    "paid": "LEECH 1 per 10 VITAE missing (max 8)."
+   },
    "bp-P-07a": {
     "free": "DEAL 2.",
     "paid": "DEAL equal to the VITAE you SACRIFICED this combat (max 44)."
@@ -1583,6 +1691,10 @@
    "bp-P-08c": {
     "free": "SACRIFICE 3, gain 2 Conviction.",
     "paid": "SACRIFICE any amount; gain 1 Conviction per 4 paid (max 4)."
+   },
+   "bp-P-08d": {
+    "free": "SACRIFICE 3, gain 2 Conviction.",
+    "paid": "TETHER 3. SACRIFICE 6."
    },
    "bp-P-09a": {
     "free": "SACRIFICE 4; the foe loses 2 VITAE.",
@@ -1631,6 +1743,10 @@
     "free": "SACRIFICE 3.",
     "paid": "SACRIFICE 1 for each card in your hand (max 7)."
    },
+   "bp-E-02d": {
+    "free": "SACRIFICE 1, twice.",
+    "paid": "TETHER 2. SACRIFICE 1, three times."
+   },
    "bp-E-03a": {
     "free": "SACRIFICE 3."
    },
@@ -1641,21 +1757,25 @@
    "bp-E-03c": {
     "free": "SACRIFICE 4, GUARD 2."
    },
+   "bp-E-03d": {
+    "free": "SACRIFICE 3, LEECH 3.",
+    "paid": "LEECH 3 instead."
+   },
    "bp-E-04a": {
-    "free": "Your next SACRIFICE this turn costs no VITAE but still counts.",
-    "paid": "Your SACRIFICES this turn cost no VITAE but still count."
+    "free": "WAIVE your next SACRIFICE this turn.",
+    "paid": "WAIVE every SACRIFICE this turn."
    },
    "bp-E-04b": {
     "free": "Your next SACRIFICE this turn costs half.",
-    "paid": "Your next 2 SACRIFICES this turn cost no VITAE but still count."
+    "paid": "WAIVE your next 2 SACRIFICES this turn."
    },
    "bp-E-04c": {
     "free": "GUARD 2.",
-    "paid": "Your next SACRIFICE this turn costs no VITAE but still counts. Gain 1 Conviction."
+    "paid": "WAIVE your next SACRIFICE this turn. Gain 1 Conviction."
    },
    "bp-E-05a": {
-    "free": "Play a Curse from your hand on its FREE line at no VITAE cost.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost."
+    "free": "Play a Curse from your hand on its FREE line; WAIVE its SACRIFICE.",
+    "paid": "Play a Curse from your hand on its PAID line; WAIVE its SACRIFICE."
    },
    "bp-E-05b": {
     "free": "Play a Curse from your hand; its SACRIFICE is halved.",
@@ -1663,7 +1783,7 @@
    },
    "bp-E-05c": {
     "free": "DEAL 2.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost; it still counts as a SACRIFICE."
+    "paid": "Play a Curse from your hand on its PAID line; WAIVE its SACRIFICE."
    },
    "bp-E-06a": {
     "free": "DEAL 3, then SACRIFICE 3.",
@@ -1699,7 +1819,7 @@
    },
    "bp-E-08c": {
     "free": "Return a Curse from your discard to your hand.",
-    "paid": "Return a Curse from your discard and play it at no VITAE cost."
+    "paid": "Return a Curse from your discard and play it on its PAID line; WAIVE its SACRIFICE."
    },
    "bp-E-09a": {
     "free": "Gain 1 Conviction."
@@ -1724,6 +1844,10 @@
     "free": "SACRIFICE 4.",
     "paid": "SACRIFICE any amount (max 20); it counts as one SACRIFICE per 5 paid."
    },
+   "bp-E-10d": {
+    "free": "TETHER 1. SACRIFICE 3.",
+    "paid": "TETHER 1. SACRIFICE any amount (max 15)."
+   },
    "bp-M-01a": {
     "free": "Heal 2.",
     "paid": "Heal 7."
@@ -1735,6 +1859,10 @@
    "bp-M-01c": {
     "free": "Heal 3.",
     "paid": "Heal 8. EXILE."
+   },
+   "bp-M-01d": {
+    "free": "Heal 2.",
+    "paid": "LEECH 4."
    },
    "bp-M-02a": {
     "free": "DEAL 2; heal 1.",
@@ -1759,6 +1887,10 @@
    "bp-M-03c": {
     "free": "GUARD 2.",
     "paid": "GUARD 5; heal 2 at half VITAE or less."
+   },
+   "bp-M-03d": {
+    "free": "GUARD 2.",
+    "paid": "LEECH 3, or 6 at half VITAE or less."
    },
    "bp-M-04a": {
     "free": "EXILE a Curse from your hand.",
@@ -1819,6 +1951,10 @@
    "bp-M-08c": {
     "free": "Heal 1 per Curse in your hand.",
     "paid": "Heal 1 per Curse in your hand (max 4) instead."
+   },
+   "bp-M-08d": {
+    "free": "LEECH 1.",
+    "paid": "LEECH 2 instead."
    },
    "bp-M-09a": {
     "free": "Heal 3; healing past max VITAE becomes GUARD.",
@@ -1918,6 +2054,10 @@
     "free": "GUARD equal to VITAE you lost last turn (max 6).",
     "paid": "GUARD equal to VITAE you lost last turn (max 15)."
    },
+   "bp-P-06d": {
+    "free": "GUARD 2.",
+    "paid": "LEECH 1 per 10 VITAE missing (max 8)."
+   },
    "bp-P-07a": {
     "free": "DEAL 2.",
     "paid": "DEAL equal to the VITAE you SACRIFICED this combat (max 48)."
@@ -1941,6 +2081,10 @@
    "bp-P-08c": {
     "free": "SACRIFICE 3, gain 2 Conviction.",
     "paid": "SACRIFICE any amount; gain 1 Conviction per 4 paid (max 4)."
+   },
+   "bp-P-08d": {
+    "free": "SACRIFICE 3, gain 2 Conviction.",
+    "paid": "TETHER 3. SACRIFICE 6."
    },
    "bp-P-09a": {
     "free": "SACRIFICE 5; the foe loses 2 VITAE.",
@@ -1989,6 +2133,10 @@
     "free": "SACRIFICE 3.",
     "paid": "SACRIFICE 2 for each card in your hand (max 8)."
    },
+   "bp-E-02d": {
+    "free": "SACRIFICE 2, twice.",
+    "paid": "TETHER 2. SACRIFICE 2, three times."
+   },
    "bp-E-03a": {
     "free": "SACRIFICE 3."
    },
@@ -1999,21 +2147,25 @@
    "bp-E-03c": {
     "free": "SACRIFICE 5, GUARD 2."
    },
+   "bp-E-03d": {
+    "free": "SACRIFICE 3, LEECH 3.",
+    "paid": "LEECH 3 instead."
+   },
    "bp-E-04a": {
-    "free": "Your next SACRIFICE this turn costs no VITAE but still counts.",
-    "paid": "Your SACRIFICES this turn cost no VITAE but still count."
+    "free": "WAIVE your next SACRIFICE this turn.",
+    "paid": "WAIVE every SACRIFICE this turn."
    },
    "bp-E-04b": {
     "free": "Your next SACRIFICE this turn costs half.",
-    "paid": "Your next 2 SACRIFICES this turn cost no VITAE but still count."
+    "paid": "WAIVE your next 2 SACRIFICES this turn."
    },
    "bp-E-04c": {
     "free": "GUARD 2.",
-    "paid": "Your next SACRIFICE this turn costs no VITAE but still counts. Gain 1 Conviction."
+    "paid": "WAIVE your next SACRIFICE this turn. Gain 1 Conviction."
    },
    "bp-E-05a": {
-    "free": "Play a Curse from your hand on its FREE line at no VITAE cost.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost."
+    "free": "Play a Curse from your hand on its FREE line; WAIVE its SACRIFICE.",
+    "paid": "Play a Curse from your hand on its PAID line; WAIVE its SACRIFICE."
    },
    "bp-E-05b": {
     "free": "Play a Curse from your hand; its SACRIFICE is halved.",
@@ -2021,7 +2173,7 @@
    },
    "bp-E-05c": {
     "free": "DEAL 2.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost; it still counts as a SACRIFICE."
+    "paid": "Play a Curse from your hand on its PAID line; WAIVE its SACRIFICE."
    },
    "bp-E-06a": {
     "free": "DEAL 3, then SACRIFICE 3.",
@@ -2057,7 +2209,7 @@
    },
    "bp-E-08c": {
     "free": "Return a Curse from your discard to your hand.",
-    "paid": "Return a Curse from your discard and play it at no VITAE cost."
+    "paid": "Return a Curse from your discard and play it on its PAID line; WAIVE its SACRIFICE."
    },
    "bp-E-09a": {
     "free": "Gain 1 Conviction."
@@ -2082,6 +2234,10 @@
     "free": "SACRIFICE 5.",
     "paid": "SACRIFICE any amount (max 20); it counts as one SACRIFICE per 5 paid."
    },
+   "bp-E-10d": {
+    "free": "TETHER 1. SACRIFICE 3.",
+    "paid": "TETHER 1. SACRIFICE any amount (max 15)."
+   },
    "bp-M-01a": {
     "free": "Heal 2.",
     "paid": "Heal 6."
@@ -2093,6 +2249,10 @@
    "bp-M-01c": {
     "free": "Heal 2.",
     "paid": "Heal 7. EXILE."
+   },
+   "bp-M-01d": {
+    "free": "Heal 2.",
+    "paid": "LEECH 4."
    },
    "bp-M-02a": {
     "free": "DEAL 2; heal 1.",
@@ -2117,6 +2277,10 @@
    "bp-M-03c": {
     "free": "GUARD 2.",
     "paid": "GUARD 5; heal 2 at half VITAE or less."
+   },
+   "bp-M-03d": {
+    "free": "GUARD 2.",
+    "paid": "LEECH 3, or 6 at half VITAE or less."
    },
    "bp-M-04a": {
     "free": "EXILE a Curse from your hand.",
@@ -2177,6 +2341,10 @@
    "bp-M-08c": {
     "free": "Heal 1 per Curse in your hand.",
     "paid": "Heal 1 per Curse in your hand (max 4) instead."
+   },
+   "bp-M-08d": {
+    "free": "LEECH 1.",
+    "paid": "LEECH 2 instead."
    },
    "bp-M-09a": {
     "free": "Heal 2; healing past max VITAE becomes GUARD.",
@@ -2276,6 +2444,10 @@
     "free": "GUARD equal to VITAE you lost last turn (max 5).",
     "paid": "GUARD equal to VITAE you lost last turn (max 13)."
    },
+   "bp-P-06d": {
+    "free": "GUARD 2.",
+    "paid": "LEECH 1 per 10 VITAE missing (max 8)."
+   },
    "bp-P-07a": {
     "free": "DEAL 2.",
     "paid": "DEAL equal to the VITAE you SACRIFICED this combat (max 53)."
@@ -2299,6 +2471,10 @@
    "bp-P-08c": {
     "free": "SACRIFICE 4, gain 2 Conviction.",
     "paid": "SACRIFICE any amount; gain 1 Conviction per 4 paid (max 4)."
+   },
+   "bp-P-08d": {
+    "free": "SACRIFICE 4, gain 2 Conviction.",
+    "paid": "TETHER 3. SACRIFICE 7."
    },
    "bp-P-09a": {
     "free": "SACRIFICE 5; the foe loses 2 VITAE.",
@@ -2347,6 +2523,10 @@
     "free": "SACRIFICE 4.",
     "paid": "SACRIFICE 2 for each card in your hand (max 9)."
    },
+   "bp-E-02d": {
+    "free": "SACRIFICE 2, twice.",
+    "paid": "TETHER 2. SACRIFICE 2, three times."
+   },
    "bp-E-03a": {
     "free": "SACRIFICE 4."
    },
@@ -2357,21 +2537,25 @@
    "bp-E-03c": {
     "free": "SACRIFICE 5, GUARD 2."
    },
+   "bp-E-03d": {
+    "free": "SACRIFICE 4, LEECH 4.",
+    "paid": "LEECH 3 instead."
+   },
    "bp-E-04a": {
-    "free": "Your next SACRIFICE this turn costs no VITAE but still counts.",
-    "paid": "Your SACRIFICES this turn cost no VITAE but still count."
+    "free": "WAIVE your next SACRIFICE this turn.",
+    "paid": "WAIVE every SACRIFICE this turn."
    },
    "bp-E-04b": {
     "free": "Your next SACRIFICE this turn costs half.",
-    "paid": "Your next 2 SACRIFICES this turn cost no VITAE but still count."
+    "paid": "WAIVE your next 2 SACRIFICES this turn."
    },
    "bp-E-04c": {
     "free": "GUARD 2.",
-    "paid": "Your next SACRIFICE this turn costs no VITAE but still counts. Gain 1 Conviction."
+    "paid": "WAIVE your next SACRIFICE this turn. Gain 1 Conviction."
    },
    "bp-E-05a": {
-    "free": "Play a Curse from your hand on its FREE line at no VITAE cost.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost."
+    "free": "Play a Curse from your hand on its FREE line; WAIVE its SACRIFICE.",
+    "paid": "Play a Curse from your hand on its PAID line; WAIVE its SACRIFICE."
    },
    "bp-E-05b": {
     "free": "Play a Curse from your hand; its SACRIFICE is halved.",
@@ -2379,7 +2563,7 @@
    },
    "bp-E-05c": {
     "free": "DEAL 2.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost; it still counts as a SACRIFICE."
+    "paid": "Play a Curse from your hand on its PAID line; WAIVE its SACRIFICE."
    },
    "bp-E-06a": {
     "free": "DEAL 3, then SACRIFICE 4.",
@@ -2415,7 +2599,7 @@
    },
    "bp-E-08c": {
     "free": "Return a Curse from your discard to your hand.",
-    "paid": "Return a Curse from your discard and play it at no VITAE cost."
+    "paid": "Return a Curse from your discard and play it on its PAID line; WAIVE its SACRIFICE."
    },
    "bp-E-09a": {
     "free": "Gain 1 Conviction."
@@ -2440,6 +2624,10 @@
     "free": "SACRIFICE 5.",
     "paid": "SACRIFICE any amount (max 20); it counts as one SACRIFICE per 5 paid."
    },
+   "bp-E-10d": {
+    "free": "TETHER 1. SACRIFICE 4.",
+    "paid": "TETHER 1. SACRIFICE any amount (max 15)."
+   },
    "bp-M-01a": {
     "free": "Heal 2.",
     "paid": "Heal 5."
@@ -2451,6 +2639,10 @@
    "bp-M-01c": {
     "free": "Heal 2.",
     "paid": "Heal 6. EXILE."
+   },
+   "bp-M-01d": {
+    "free": "Heal 2.",
+    "paid": "LEECH 4."
    },
    "bp-M-02a": {
     "free": "DEAL 2; heal 1.",
@@ -2475,6 +2667,10 @@
    "bp-M-03c": {
     "free": "GUARD 2.",
     "paid": "GUARD 4; heal 2 at half VITAE or less."
+   },
+   "bp-M-03d": {
+    "free": "GUARD 2.",
+    "paid": "LEECH 3, or 6 at half VITAE or less."
    },
    "bp-M-04a": {
     "free": "EXILE a Curse from your hand.",
@@ -2536,6 +2732,10 @@
     "free": "Heal 1 per Curse in your hand.",
     "paid": "Heal 1 per Curse in your hand (max 3) instead."
    },
+   "bp-M-08d": {
+    "free": "LEECH 1.",
+    "paid": "LEECH 2 instead."
+   },
    "bp-M-09a": {
     "free": "Heal 2; healing past max VITAE becomes GUARD.",
     "paid": "Heal 5; healing past max VITAE becomes GUARD."
@@ -2559,2154 +2759,6 @@
    "bp-M-10c": {
     "free": "VULNERABLE +5% for 1 turn.",
     "paid": "The foe loses half the VITAE you lost this combat (max 8). EXILE."
-   }
-  },
-  "-6": {
-   "bp-P-01a": {
-    "free": "SACRIFICE 1, DEAL 9.",
-    "paid": "SACRIFICE 2, DEAL 21."
-   },
-   "bp-P-01b": {
-    "free": "DEAL 5.",
-    "paid": "SACRIFICE 3, DEAL 25."
-   },
-   "bp-P-01c": {
-    "free": "SACRIFICE 2, DEAL 14.",
-    "paid": "SACRIFICE 2, DEAL 14, twice."
-   },
-   "bp-P-02a": {
-    "free": "SACRIFICE 1, GUARD 9.",
-    "paid": "SACRIFICE 2, GUARD 21."
-   },
-   "bp-P-02b": {
-    "free": "GUARD 5.",
-    "paid": "SACRIFICE 3, GUARD 25."
-   },
-   "bp-P-02c": {
-    "free": "SACRIFICE 2, GUARD 12.",
-    "paid": "SACRIFICE 3, GUARD 18, DEAL 9."
-   },
-   "bp-P-03a": {
-    "free": "DEAL 5, or 11 at half VITAE or less.",
-    "paid": "DEAL 11, or 25 at half VITAE or less."
-   },
-   "bp-P-03b": {
-    "free": "DEAL 4.",
-    "paid": "DEAL 9, doubled at half VITAE or less."
-   },
-   "bp-P-03c": {
-    "free": "DEAL 5.",
-    "paid": "DEAL 9, +2 per 10 VITAE missing (max +18)."
-   },
-   "bp-P-04a": {
-    "free": "Only at one-third VITAE or less: DEAL 18.",
-    "paid": "Only at one-third VITAE or less: DEAL 44."
-   },
-   "bp-P-04b": {
-    "free": "DEAL 4.",
-    "paid": "Only at half VITAE or less: DEAL 35."
-   },
-   "bp-P-04c": {
-    "free": "Only at half VITAE or less: DEAL 14.",
-    "paid": "Only at half VITAE or less: DEAL 32. EXILE."
-   },
-   "bp-P-05a": {
-    "free": "VULNERABLE +18% for 1 turn.",
-    "paid": "VULNERABLE +2% per VITAE missing (max +89%) for 2 turns."
-   },
-   "bp-P-05b": {
-    "free": "SACRIFICE 2, VULNERABLE +27% for 1 turn.",
-    "paid": "SACRIFICE 3, VULNERABLE +71% for 2 turns."
-   },
-   "bp-P-05c": {
-    "free": "VULNERABLE +18% for 1 turn.",
-    "paid": "VULNERABLE +44% for 2 turns, or +89% at half VITAE or less."
-   },
-   "bp-P-06a": {
-    "free": "GUARD 5.",
-    "paid": "GUARD 2 per 5 VITAE missing (max 35)."
-   },
-   "bp-P-06b": {
-    "free": "GUARD 4.",
-    "paid": "GUARD 9, or 27 at half VITAE or less."
-   },
-   "bp-P-06c": {
-    "free": "GUARD equal to VITAE you lost last turn (max 18).",
-    "paid": "GUARD equal to VITAE you lost last turn (max 44)."
-   },
-   "bp-P-07a": {
-    "free": "DEAL 5.",
-    "paid": "DEAL equal to the VITAE you SACRIFICED this combat (max 16)."
-   },
-   "bp-P-07b": {
-    "free": "DEAL half the VITAE you lost this combat (max 18).",
-    "paid": "DEAL all the VITAE you lost this combat (max 53). EXILE."
-   },
-   "bp-P-07c": {
-    "free": "DEAL 4.",
-    "paid": "DEAL 9, +2 per SACRIFICE you made this combat (max +8)."
-   },
-   "bp-P-08a": {
-    "free": "SACRIFICE 2, gain 2 Conviction.",
-    "paid": "SACRIFICE 3, gain 3 Conviction."
-   },
-   "bp-P-08b": {
-    "free": "SACRIFICE 2, gain 2 Conviction.",
-    "paid": "SACRIFICE 2, gain 2 Conviction, GUARD 9."
-   },
-   "bp-P-08c": {
-    "free": "SACRIFICE 1, gain 2 Conviction.",
-    "paid": "SACRIFICE any amount; gain 1 Conviction per 4 paid (max 4)."
-   },
-   "bp-P-09a": {
-    "free": "SACRIFICE 2; the foe loses 5 VITAE.",
-    "paid": "SACRIFICE 3; the foe loses 21 VITAE."
-   },
-   "bp-P-09b": {
-    "free": "SACRIFICE 2; the foe loses 7 VITAE.",
-    "paid": "SACRIFICE 4; the foe loses 14 VITAE, VULNERABLE +44% for 1 turn."
-   },
-   "bp-P-09c": {
-    "free": "DEAL 5.",
-    "paid": "SACRIFICE 3; the foe loses 27 VITAE, ignoring GUARD."
-   },
-   "bp-P-10a": {
-    "free": "The foe loses n VITAE."
-   },
-   "bp-P-10b": {
-    "free": "DEAL n÷2.",
-    "paid": "DEAL n instead."
-   },
-   "bp-P-10c": {
-    "free": "GUARD n.",
-    "paid": "DEAL n instead."
-   },
-   "bp-E-01a": {
-    "free": "Add a grey Curse to your hand. Gain 2 Conviction.",
-    "paid": "Add 2 grey Curses to your hand. Gain 3 Conviction."
-   },
-   "bp-E-01b": {
-    "free": "Add a grey Curse to your hand. DEAL 7.",
-    "paid": "Add a grey Curse to your hand. Gain 2 Conviction, DEAL 14."
-   },
-   "bp-E-01c": {
-    "free": "GUARD 5.",
-    "paid": "Add a grey Curse to your hand. Gain 3 Conviction. EXILE."
-   },
-   "bp-E-02a": {
-    "free": "SACRIFICE 1, twice.",
-    "paid": "SACRIFICE 1, four times."
-   },
-   "bp-E-02b": {
-    "free": "SACRIFICE 1, twice. GUARD 4.",
-    "paid": "SACRIFICE 1, three times. GUARD 9."
-   },
-   "bp-E-02c": {
-    "free": "SACRIFICE 1.",
-    "paid": "SACRIFICE 1 for each card in your hand (max 3)."
-   },
-   "bp-E-03a": {
-    "free": "SACRIFICE 1."
-   },
-   "bp-E-03b": {
-    "free": "SACRIFICE 1, gain 1 Conviction.",
-    "paid": "SACRIFICE 2 instead."
-   },
-   "bp-E-03c": {
-    "free": "SACRIFICE 2, GUARD 5."
-   },
-   "bp-E-04a": {
-    "free": "Your next SACRIFICE this turn costs no VITAE but still counts.",
-    "paid": "Your SACRIFICES this turn cost no VITAE but still count."
-   },
-   "bp-E-04b": {
-    "free": "Your next SACRIFICE this turn costs half.",
-    "paid": "Your next 2 SACRIFICES this turn cost no VITAE but still count."
-   },
-   "bp-E-04c": {
-    "free": "GUARD 5.",
-    "paid": "Your next SACRIFICE this turn costs no VITAE but still counts. Gain 1 Conviction."
-   },
-   "bp-E-05a": {
-    "free": "Play a Curse from your hand on its FREE line at no VITAE cost.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost."
-   },
-   "bp-E-05b": {
-    "free": "Play a Curse from your hand; its SACRIFICE is halved.",
-    "paid": "Play every Curse in your hand; their SACRIFICE is halved."
-   },
-   "bp-E-05c": {
-    "free": "DEAL 5.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost; it still counts as a SACRIFICE."
-   },
-   "bp-E-06a": {
-    "free": "DEAL 9, then SACRIFICE 1.",
-    "paid": "DEAL 21, then SACRIFICE 2."
-   },
-   "bp-E-06b": {
-    "free": "DEAL 7, then SACRIFICE 1.",
-    "paid": "DEAL 12, twice; SACRIFICE 1 after each."
-   },
-   "bp-E-06c": {
-    "free": "DEAL 5.",
-    "paid": "SACRIFICE 2, DEAL 18, then SACRIFICE 2 again."
-   },
-   "bp-E-07a": {
-    "free": "Your next SACRIFICE this turn counts twice.",
-    "paid": "Your next SACRIFICE this turn counts three times."
-   },
-   "bp-E-07b": {
-    "free": "Your next SACRIFICE this turn is doubled (its cost and its payoffs).",
-    "paid": "Same, and gain 2 Conviction."
-   },
-   "bp-E-07c": {
-    "free": "GUARD 5.",
-    "paid": "Your SACRIFICES this turn count twice (you pay once)."
-   },
-   "bp-E-08a": {
-    "free": "Return a Curse from your discard to your hand.",
-    "paid": "Return every Curse from your discard to your hand. Gain 1 Conviction each."
-   },
-   "bp-E-08b": {
-    "free": "Return a Curse from your discard to your hand. GUARD 5.",
-    "paid": "Return a Curse from your discard to your hand. GUARD 14."
-   },
-   "bp-E-08c": {
-    "free": "Return a Curse from your discard to your hand.",
-    "paid": "Return a Curse from your discard and play it at no VITAE cost."
-   },
-   "bp-E-09a": {
-    "free": "Gain 1 Conviction."
-   },
-   "bp-E-09b": {
-    "free": "GUARD 7.",
-    "paid": "Also gain 1 Conviction."
-   },
-   "bp-E-09c": {
-    "free": "DEAL 7.",
-    "paid": "DEAL 11 instead."
-   },
-   "bp-E-10a": {
-    "free": "SACRIFICE any amount (max 5).",
-    "paid": "SACRIFICE any amount (max 15)."
-   },
-   "bp-E-10b": {
-    "free": "SACRIFICE any amount (max 6); GUARD that much.",
-    "paid": "SACRIFICE any amount (max 15); gain 1 Conviction per 5 paid."
-   },
-   "bp-E-10c": {
-    "free": "SACRIFICE 2.",
-    "paid": "SACRIFICE any amount (max 20); it counts as one SACRIFICE per 5 paid."
-   },
-   "bp-M-01a": {
-    "free": "Heal 5.",
-    "paid": "Heal 18."
-   },
-   "bp-M-01b": {
-    "free": "GUARD 4.",
-    "paid": "Heal 14. GUARD 7."
-   },
-   "bp-M-01c": {
-    "free": "Heal 7.",
-    "paid": "Heal 21. EXILE."
-   },
-   "bp-M-02a": {
-    "free": "DEAL 5; heal 2.",
-    "paid": "DEAL 14; heal half the damage dealt."
-   },
-   "bp-M-02b": {
-    "free": "DEAL 4.",
-    "paid": "DEAL 11; heal all the damage dealt (max 14)."
-   },
-   "bp-M-02c": {
-    "free": "DEAL 7.",
-    "paid": "DEAL 14; heal 7 if you are at half VITAE or less."
-   },
-   "bp-M-03a": {
-    "free": "GUARD 5, or 11 at half VITAE or less.",
-    "paid": "GUARD 11, or 25 at half VITAE or less."
-   },
-   "bp-M-03b": {
-    "free": "GUARD 4.",
-    "paid": "GUARD 9; at half VITAE or less, this GUARD also lasts into your next turn."
-   },
-   "bp-M-03c": {
-    "free": "GUARD 5.",
-    "paid": "GUARD 14; heal 5 at half VITAE or less."
-   },
-   "bp-M-04a": {
-    "free": "EXILE a Curse from your hand.",
-    "paid": "EXILE a Curse from your hand. Gain 2 Conviction."
-   },
-   "bp-M-04b": {
-    "free": "Discard a Curse from your hand at no cost.",
-    "paid": "EXILE every Curse in your hand; heal 5 for each."
-   },
-   "bp-M-04c": {
-    "free": "GUARD 5.",
-    "paid": "EXILE a Curse from your hand. DEAL 18."
-   },
-   "bp-M-05a": {
-    "free": "At half VITAE or less: gain 2 Conviction.",
-    "paid": "At half VITAE or less: gain 4 Conviction."
-   },
-   "bp-M-05b": {
-    "free": "GUARD 4.",
-    "paid": "Gain 2 Conviction, or 4 at half VITAE or less."
-   },
-   "bp-M-05c": {
-    "free": "GUARD 5.",
-    "paid": "At one-third VITAE or less: gain 4 Conviction. EXILE."
-   },
-   "bp-M-06a": {
-    "free": "GUARD 5.",
-    "paid": "This turn, your VITAE cannot drop below 1. EXILE."
-   },
-   "bp-M-06b": {
-    "free": "At half VITAE or less: GUARD 7.",
-    "paid": "Until your next turn, damage cannot take you below 1 VITAE."
-   },
-   "bp-M-06c": {
-    "free": "Heal 4.",
-    "paid": "This turn, damage cannot take you below 1 VITAE; heal 9 next turn. EXILE."
-   },
-   "bp-M-07a": {
-    "free": "VULNERABLE +18% for 1 turn.",
-    "paid": "VULNERABLE +44% for 2 turns; heal 4 each time you damage the foe while it lasts."
-   },
-   "bp-M-07b": {
-    "free": "For 1 turn, heal 2 whenever you damage the foe.",
-    "paid": "For 3 turns, heal 4 whenever you damage the foe."
-   },
-   "bp-M-07c": {
-    "free": "VULNERABLE +18% for 1 turn.",
-    "paid": "VULNERABLE +35% for 2 turns. Heal 9."
-   },
-   "bp-M-08a": {
-    "free": "Heal 4.",
-    "paid": "Heal 5 instead."
-   },
-   "bp-M-08b": {
-    "free": "Heal 5.",
-    "paid": "Heal 4 and GUARD 4 instead."
-   },
-   "bp-M-08c": {
-    "free": "Heal 2 per Curse in your hand.",
-    "paid": "Heal 4 per Curse in your hand (max 11) instead."
-   },
-   "bp-M-09a": {
-    "free": "Heal 7; healing past max VITAE becomes GUARD.",
-    "paid": "Heal 18; healing past max VITAE becomes GUARD."
-   },
-   "bp-M-09b": {
-    "free": "GUARD 5.",
-    "paid": "For the rest of combat, healing past max VITAE becomes GUARD. EXILE."
-   },
-   "bp-M-09c": {
-    "free": "Heal 5.",
-    "paid": "Heal 14; GUARD equal to the healing done."
-   },
-   "bp-M-10a": {
-    "free": "The foe loses VITAE equal to the damage you took last turn (max 9).",
-    "paid": "Same, max 15."
-   },
-   "bp-M-10b": {
-    "free": "DEAL 5.",
-    "paid": "DEAL equal to the damage you took last turn (max 35)."
-   },
-   "bp-M-10c": {
-    "free": "VULNERABLE +18% for 1 turn.",
-    "paid": "The foe loses half the VITAE you lost this combat (max 27). EXILE."
-   }
-  },
-  "-5": {
-   "bp-P-01a": {
-    "free": "SACRIFICE 1, DEAL 8.",
-    "paid": "SACRIFICE 2, DEAL 19."
-   },
-   "bp-P-01b": {
-    "free": "DEAL 5.",
-    "paid": "SACRIFICE 3, DEAL 23."
-   },
-   "bp-P-01c": {
-    "free": "SACRIFICE 2, DEAL 13.",
-    "paid": "SACRIFICE 2, DEAL 13, twice."
-   },
-   "bp-P-02a": {
-    "free": "SACRIFICE 1, GUARD 8.",
-    "paid": "SACRIFICE 2, GUARD 19."
-   },
-   "bp-P-02b": {
-    "free": "GUARD 5.",
-    "paid": "SACRIFICE 3, GUARD 23."
-   },
-   "bp-P-02c": {
-    "free": "SACRIFICE 2, GUARD 11.",
-    "paid": "SACRIFICE 4, GUARD 16, DEAL 8."
-   },
-   "bp-P-03a": {
-    "free": "DEAL 5, or 10 at half VITAE or less.",
-    "paid": "DEAL 10, or 23 at half VITAE or less."
-   },
-   "bp-P-03b": {
-    "free": "DEAL 3.",
-    "paid": "DEAL 8, doubled at half VITAE or less."
-   },
-   "bp-P-03c": {
-    "free": "DEAL 5.",
-    "paid": "DEAL 8, +2 per 10 VITAE missing (max +16)."
-   },
-   "bp-P-04a": {
-    "free": "Only at one-third VITAE or less: DEAL 16.",
-    "paid": "Only at one-third VITAE or less: DEAL 40."
-   },
-   "bp-P-04b": {
-    "free": "DEAL 3.",
-    "paid": "Only at half VITAE or less: DEAL 32."
-   },
-   "bp-P-04c": {
-    "free": "Only at half VITAE or less: DEAL 13.",
-    "paid": "Only at half VITAE or less: DEAL 29. EXILE."
-   },
-   "bp-P-05a": {
-    "free": "VULNERABLE +16% for 1 turn.",
-    "paid": "VULNERABLE +2% per VITAE missing (max +81%) for 2 turns."
-   },
-   "bp-P-05b": {
-    "free": "SACRIFICE 2, VULNERABLE +24% for 1 turn.",
-    "paid": "SACRIFICE 4, VULNERABLE +64% for 2 turns."
-   },
-   "bp-P-05c": {
-    "free": "VULNERABLE +16% for 1 turn.",
-    "paid": "VULNERABLE +40% for 2 turns, or +81% at half VITAE or less."
-   },
-   "bp-P-06a": {
-    "free": "GUARD 5.",
-    "paid": "GUARD 2 per 5 VITAE missing (max 32)."
-   },
-   "bp-P-06b": {
-    "free": "GUARD 3.",
-    "paid": "GUARD 8, or 24 at half VITAE or less."
-   },
-   "bp-P-06c": {
-    "free": "GUARD equal to VITAE you lost last turn (max 16).",
-    "paid": "GUARD equal to VITAE you lost last turn (max 40)."
-   },
-   "bp-P-07a": {
-    "free": "DEAL 5.",
-    "paid": "DEAL equal to the VITAE you SACRIFICED this combat (max 18)."
-   },
-   "bp-P-07b": {
-    "free": "DEAL half the VITAE you lost this combat (max 16).",
-    "paid": "DEAL all the VITAE you lost this combat (max 48). EXILE."
-   },
-   "bp-P-07c": {
-    "free": "DEAL 3.",
-    "paid": "DEAL 8, +2 per SACRIFICE you made this combat (max +9)."
-   },
-   "bp-P-08a": {
-    "free": "SACRIFICE 2, gain 2 Conviction.",
-    "paid": "SACRIFICE 3, gain 3 Conviction."
-   },
-   "bp-P-08b": {
-    "free": "SACRIFICE 2, gain 2 Conviction.",
-    "paid": "SACRIFICE 2, gain 2 Conviction, GUARD 8."
-   },
-   "bp-P-08c": {
-    "free": "SACRIFICE 1, gain 2 Conviction.",
-    "paid": "SACRIFICE any amount; gain 1 Conviction per 4 paid (max 4)."
-   },
-   "bp-P-09a": {
-    "free": "SACRIFICE 2; the foe loses 5 VITAE.",
-    "paid": "SACRIFICE 4; the foe loses 19 VITAE."
-   },
-   "bp-P-09b": {
-    "free": "SACRIFICE 2; the foe loses 6 VITAE.",
-    "paid": "SACRIFICE 5; the foe loses 13 VITAE, VULNERABLE +40% for 1 turn."
-   },
-   "bp-P-09c": {
-    "free": "DEAL 5.",
-    "paid": "SACRIFICE 3; the foe loses 24 VITAE, ignoring GUARD."
-   },
-   "bp-P-10a": {
-    "free": "The foe loses n VITAE."
-   },
-   "bp-P-10b": {
-    "free": "DEAL n÷2.",
-    "paid": "DEAL n instead."
-   },
-   "bp-P-10c": {
-    "free": "GUARD n.",
-    "paid": "DEAL n instead."
-   },
-   "bp-E-01a": {
-    "free": "Add a grey Curse to your hand. Gain 2 Conviction.",
-    "paid": "Add 2 grey Curses to your hand. Gain 3 Conviction."
-   },
-   "bp-E-01b": {
-    "free": "Add a grey Curse to your hand. DEAL 6.",
-    "paid": "Add a grey Curse to your hand. Gain 2 Conviction, DEAL 13."
-   },
-   "bp-E-01c": {
-    "free": "GUARD 5.",
-    "paid": "Add a grey Curse to your hand. Gain 3 Conviction. EXILE."
-   },
-   "bp-E-02a": {
-    "free": "SACRIFICE 1, twice.",
-    "paid": "SACRIFICE 1, four times."
-   },
-   "bp-E-02b": {
-    "free": "SACRIFICE 1, twice. GUARD 3.",
-    "paid": "SACRIFICE 1, three times. GUARD 8."
-   },
-   "bp-E-02c": {
-    "free": "SACRIFICE 1.",
-    "paid": "SACRIFICE 1 for each card in your hand (max 3)."
-   },
-   "bp-E-03a": {
-    "free": "SACRIFICE 1."
-   },
-   "bp-E-03b": {
-    "free": "SACRIFICE 1, gain 1 Conviction.",
-    "paid": "SACRIFICE 2 instead."
-   },
-   "bp-E-03c": {
-    "free": "SACRIFICE 2, GUARD 5."
-   },
-   "bp-E-04a": {
-    "free": "Your next SACRIFICE this turn costs no VITAE but still counts.",
-    "paid": "Your SACRIFICES this turn cost no VITAE but still count."
-   },
-   "bp-E-04b": {
-    "free": "Your next SACRIFICE this turn costs half.",
-    "paid": "Your next 2 SACRIFICES this turn cost no VITAE but still count."
-   },
-   "bp-E-04c": {
-    "free": "GUARD 5.",
-    "paid": "Your next SACRIFICE this turn costs no VITAE but still counts. Gain 1 Conviction."
-   },
-   "bp-E-05a": {
-    "free": "Play a Curse from your hand on its FREE line at no VITAE cost.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost."
-   },
-   "bp-E-05b": {
-    "free": "Play a Curse from your hand; its SACRIFICE is halved.",
-    "paid": "Play every Curse in your hand; their SACRIFICE is halved."
-   },
-   "bp-E-05c": {
-    "free": "DEAL 5.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost; it still counts as a SACRIFICE."
-   },
-   "bp-E-06a": {
-    "free": "DEAL 8, then SACRIFICE 1.",
-    "paid": "DEAL 19, then SACRIFICE 2."
-   },
-   "bp-E-06b": {
-    "free": "DEAL 6, then SACRIFICE 1.",
-    "paid": "DEAL 11, twice; SACRIFICE 1 after each."
-   },
-   "bp-E-06c": {
-    "free": "DEAL 5.",
-    "paid": "SACRIFICE 2, DEAL 16, then SACRIFICE 2 again."
-   },
-   "bp-E-07a": {
-    "free": "Your next SACRIFICE this turn counts twice.",
-    "paid": "Your next SACRIFICE this turn counts three times."
-   },
-   "bp-E-07b": {
-    "free": "Your next SACRIFICE this turn is doubled (its cost and its payoffs).",
-    "paid": "Same, and gain 2 Conviction."
-   },
-   "bp-E-07c": {
-    "free": "GUARD 5.",
-    "paid": "Your SACRIFICES this turn count twice (you pay once)."
-   },
-   "bp-E-08a": {
-    "free": "Return a Curse from your discard to your hand.",
-    "paid": "Return every Curse from your discard to your hand. Gain 1 Conviction each."
-   },
-   "bp-E-08b": {
-    "free": "Return a Curse from your discard to your hand. GUARD 5.",
-    "paid": "Return a Curse from your discard to your hand. GUARD 13."
-   },
-   "bp-E-08c": {
-    "free": "Return a Curse from your discard to your hand.",
-    "paid": "Return a Curse from your discard and play it at no VITAE cost."
-   },
-   "bp-E-09a": {
-    "free": "Gain 1 Conviction."
-   },
-   "bp-E-09b": {
-    "free": "GUARD 6.",
-    "paid": "Also gain 1 Conviction."
-   },
-   "bp-E-09c": {
-    "free": "DEAL 6.",
-    "paid": "DEAL 10 instead."
-   },
-   "bp-E-10a": {
-    "free": "SACRIFICE any amount (max 5).",
-    "paid": "SACRIFICE any amount (max 15)."
-   },
-   "bp-E-10b": {
-    "free": "SACRIFICE any amount (max 6); GUARD that much.",
-    "paid": "SACRIFICE any amount (max 15); gain 1 Conviction per 5 paid."
-   },
-   "bp-E-10c": {
-    "free": "SACRIFICE 2.",
-    "paid": "SACRIFICE any amount (max 20); it counts as one SACRIFICE per 5 paid."
-   },
-   "bp-M-01a": {
-    "free": "Heal 5.",
-    "paid": "Heal 16."
-   },
-   "bp-M-01b": {
-    "free": "GUARD 3.",
-    "paid": "Heal 13. GUARD 6."
-   },
-   "bp-M-01c": {
-    "free": "Heal 6.",
-    "paid": "Heal 19. EXILE."
-   },
-   "bp-M-02a": {
-    "free": "DEAL 5; heal 2.",
-    "paid": "DEAL 13; heal half the damage dealt."
-   },
-   "bp-M-02b": {
-    "free": "DEAL 3.",
-    "paid": "DEAL 10; heal all the damage dealt (max 13)."
-   },
-   "bp-M-02c": {
-    "free": "DEAL 6.",
-    "paid": "DEAL 13; heal 6 if you are at half VITAE or less."
-   },
-   "bp-M-03a": {
-    "free": "GUARD 5, or 10 at half VITAE or less.",
-    "paid": "GUARD 10, or 23 at half VITAE or less."
-   },
-   "bp-M-03b": {
-    "free": "GUARD 3.",
-    "paid": "GUARD 8; at half VITAE or less, this GUARD also lasts into your next turn."
-   },
-   "bp-M-03c": {
-    "free": "GUARD 5.",
-    "paid": "GUARD 13; heal 5 at half VITAE or less."
-   },
-   "bp-M-04a": {
-    "free": "EXILE a Curse from your hand.",
-    "paid": "EXILE a Curse from your hand. Gain 2 Conviction."
-   },
-   "bp-M-04b": {
-    "free": "Discard a Curse from your hand at no cost.",
-    "paid": "EXILE every Curse in your hand; heal 5 for each."
-   },
-   "bp-M-04c": {
-    "free": "GUARD 5.",
-    "paid": "EXILE a Curse from your hand. DEAL 16."
-   },
-   "bp-M-05a": {
-    "free": "At half VITAE or less: gain 2 Conviction.",
-    "paid": "At half VITAE or less: gain 4 Conviction."
-   },
-   "bp-M-05b": {
-    "free": "GUARD 3.",
-    "paid": "Gain 2 Conviction, or 4 at half VITAE or less."
-   },
-   "bp-M-05c": {
-    "free": "GUARD 5.",
-    "paid": "At one-third VITAE or less: gain 4 Conviction. EXILE."
-   },
-   "bp-M-06a": {
-    "free": "GUARD 5.",
-    "paid": "This turn, your VITAE cannot drop below 1. EXILE."
-   },
-   "bp-M-06b": {
-    "free": "At half VITAE or less: GUARD 6.",
-    "paid": "Until your next turn, damage cannot take you below 1 VITAE."
-   },
-   "bp-M-06c": {
-    "free": "Heal 3.",
-    "paid": "This turn, damage cannot take you below 1 VITAE; heal 8 next turn. EXILE."
-   },
-   "bp-M-07a": {
-    "free": "VULNERABLE +16% for 1 turn.",
-    "paid": "VULNERABLE +40% for 2 turns; heal 3 each time you damage the foe while it lasts."
-   },
-   "bp-M-07b": {
-    "free": "For 1 turn, heal 2 whenever you damage the foe.",
-    "paid": "For 3 turns, heal 3 whenever you damage the foe."
-   },
-   "bp-M-07c": {
-    "free": "VULNERABLE +16% for 1 turn.",
-    "paid": "VULNERABLE +32% for 2 turns. Heal 8."
-   },
-   "bp-M-08a": {
-    "free": "Heal 3.",
-    "paid": "Heal 5 instead."
-   },
-   "bp-M-08b": {
-    "free": "Heal 5.",
-    "paid": "Heal 3 and GUARD 3 instead."
-   },
-   "bp-M-08c": {
-    "free": "Heal 2 per Curse in your hand.",
-    "paid": "Heal 3 per Curse in your hand (max 10) instead."
-   },
-   "bp-M-09a": {
-    "free": "Heal 6; healing past max VITAE becomes GUARD.",
-    "paid": "Heal 16; healing past max VITAE becomes GUARD."
-   },
-   "bp-M-09b": {
-    "free": "GUARD 5.",
-    "paid": "For the rest of combat, healing past max VITAE becomes GUARD. EXILE."
-   },
-   "bp-M-09c": {
-    "free": "Heal 5.",
-    "paid": "Heal 13; GUARD equal to the healing done."
-   },
-   "bp-M-10a": {
-    "free": "The foe loses VITAE equal to the damage you took last turn (max 8).",
-    "paid": "Same, max 15."
-   },
-   "bp-M-10b": {
-    "free": "DEAL 5.",
-    "paid": "DEAL equal to the damage you took last turn (max 32)."
-   },
-   "bp-M-10c": {
-    "free": "VULNERABLE +16% for 1 turn.",
-    "paid": "The foe loses half the VITAE you lost this combat (max 24). EXILE."
-   }
-  },
-  "-4": {
-   "bp-P-01a": {
-    "free": "SACRIFICE 1, DEAL 7.",
-    "paid": "SACRIFICE 3, DEAL 18."
-   },
-   "bp-P-01b": {
-    "free": "DEAL 4.",
-    "paid": "SACRIFICE 3, DEAL 20."
-   },
-   "bp-P-01c": {
-    "free": "SACRIFICE 2, DEAL 12.",
-    "paid": "SACRIFICE 2, DEAL 12, twice."
-   },
-   "bp-P-02a": {
-    "free": "SACRIFICE 1, GUARD 7.",
-    "paid": "SACRIFICE 3, GUARD 18."
-   },
-   "bp-P-02b": {
-    "free": "GUARD 4.",
-    "paid": "SACRIFICE 3, GUARD 20."
-   },
-   "bp-P-02c": {
-    "free": "SACRIFICE 2, GUARD 10.",
-    "paid": "SACRIFICE 4, GUARD 15, DEAL 7."
-   },
-   "bp-P-03a": {
-    "free": "DEAL 4, or 9 at half VITAE or less.",
-    "paid": "DEAL 9, or 20 at half VITAE or less."
-   },
-   "bp-P-03b": {
-    "free": "DEAL 3.",
-    "paid": "DEAL 7, doubled at half VITAE or less."
-   },
-   "bp-P-03c": {
-    "free": "DEAL 4.",
-    "paid": "DEAL 7, +1 per 10 VITAE missing (max +15)."
-   },
-   "bp-P-04a": {
-    "free": "Only at one-third VITAE or less: DEAL 15.",
-    "paid": "Only at one-third VITAE or less: DEAL 37."
-   },
-   "bp-P-04b": {
-    "free": "DEAL 3.",
-    "paid": "Only at half VITAE or less: DEAL 29."
-   },
-   "bp-P-04c": {
-    "free": "Only at half VITAE or less: DEAL 12.",
-    "paid": "Only at half VITAE or less: DEAL 26. EXILE."
-   },
-   "bp-P-05a": {
-    "free": "VULNERABLE +15% for 1 turn.",
-    "paid": "VULNERABLE +1% per VITAE missing (max +73%) for 2 turns."
-   },
-   "bp-P-05b": {
-    "free": "SACRIFICE 2, VULNERABLE +22% for 1 turn.",
-    "paid": "SACRIFICE 4, VULNERABLE +59% for 2 turns."
-   },
-   "bp-P-05c": {
-    "free": "VULNERABLE +15% for 1 turn.",
-    "paid": "VULNERABLE +37% for 2 turns, or +73% at half VITAE or less."
-   },
-   "bp-P-06a": {
-    "free": "GUARD 4.",
-    "paid": "GUARD 1 per 5 VITAE missing (max 29)."
-   },
-   "bp-P-06b": {
-    "free": "GUARD 3.",
-    "paid": "GUARD 7, or 22 at half VITAE or less."
-   },
-   "bp-P-06c": {
-    "free": "GUARD equal to VITAE you lost last turn (max 15).",
-    "paid": "GUARD equal to VITAE you lost last turn (max 37)."
-   },
-   "bp-P-07a": {
-    "free": "DEAL 4.",
-    "paid": "DEAL equal to the VITAE you SACRIFICED this combat (max 20)."
-   },
-   "bp-P-07b": {
-    "free": "DEAL half the VITAE you lost this combat (max 15).",
-    "paid": "DEAL all the VITAE you lost this combat (max 44). EXILE."
-   },
-   "bp-P-07c": {
-    "free": "DEAL 3.",
-    "paid": "DEAL 7, +1 per SACRIFICE you made this combat (max +10)."
-   },
-   "bp-P-08a": {
-    "free": "SACRIFICE 2, gain 2 Conviction.",
-    "paid": "SACRIFICE 3, gain 3 Conviction."
-   },
-   "bp-P-08b": {
-    "free": "SACRIFICE 3, gain 2 Conviction.",
-    "paid": "SACRIFICE 3, gain 2 Conviction, GUARD 7."
-   },
-   "bp-P-08c": {
-    "free": "SACRIFICE 1, gain 2 Conviction.",
-    "paid": "SACRIFICE any amount; gain 1 Conviction per 4 paid (max 4)."
-   },
-   "bp-P-09a": {
-    "free": "SACRIFICE 2; the foe loses 4 VITAE.",
-    "paid": "SACRIFICE 4; the foe loses 18 VITAE."
-   },
-   "bp-P-09b": {
-    "free": "SACRIFICE 3; the foe loses 6 VITAE.",
-    "paid": "SACRIFICE 5; the foe loses 12 VITAE, VULNERABLE +37% for 1 turn."
-   },
-   "bp-P-09c": {
-    "free": "DEAL 4.",
-    "paid": "SACRIFICE 3; the foe loses 22 VITAE, ignoring GUARD."
-   },
-   "bp-P-10a": {
-    "free": "The foe loses n VITAE."
-   },
-   "bp-P-10b": {
-    "free": "DEAL n÷2.",
-    "paid": "DEAL n instead."
-   },
-   "bp-P-10c": {
-    "free": "GUARD n.",
-    "paid": "DEAL n instead."
-   },
-   "bp-E-01a": {
-    "free": "Add a grey Curse to your hand. Gain 2 Conviction.",
-    "paid": "Add 2 grey Curses to your hand. Gain 3 Conviction."
-   },
-   "bp-E-01b": {
-    "free": "Add a grey Curse to your hand. DEAL 6.",
-    "paid": "Add a grey Curse to your hand. Gain 2 Conviction, DEAL 12."
-   },
-   "bp-E-01c": {
-    "free": "GUARD 4.",
-    "paid": "Add a grey Curse to your hand. Gain 3 Conviction. EXILE."
-   },
-   "bp-E-02a": {
-    "free": "SACRIFICE 1, twice.",
-    "paid": "SACRIFICE 1, four times."
-   },
-   "bp-E-02b": {
-    "free": "SACRIFICE 1, twice. GUARD 3.",
-    "paid": "SACRIFICE 1, three times. GUARD 7."
-   },
-   "bp-E-02c": {
-    "free": "SACRIFICE 1.",
-    "paid": "SACRIFICE 1 for each card in your hand (max 3)."
-   },
-   "bp-E-03a": {
-    "free": "SACRIFICE 1."
-   },
-   "bp-E-03b": {
-    "free": "SACRIFICE 1, gain 1 Conviction.",
-    "paid": "SACRIFICE 2 instead."
-   },
-   "bp-E-03c": {
-    "free": "SACRIFICE 2, GUARD 4."
-   },
-   "bp-E-04a": {
-    "free": "Your next SACRIFICE this turn costs no VITAE but still counts.",
-    "paid": "Your SACRIFICES this turn cost no VITAE but still count."
-   },
-   "bp-E-04b": {
-    "free": "Your next SACRIFICE this turn costs half.",
-    "paid": "Your next 2 SACRIFICES this turn cost no VITAE but still count."
-   },
-   "bp-E-04c": {
-    "free": "GUARD 4.",
-    "paid": "Your next SACRIFICE this turn costs no VITAE but still counts. Gain 1 Conviction."
-   },
-   "bp-E-05a": {
-    "free": "Play a Curse from your hand on its FREE line at no VITAE cost.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost."
-   },
-   "bp-E-05b": {
-    "free": "Play a Curse from your hand; its SACRIFICE is halved.",
-    "paid": "Play every Curse in your hand; their SACRIFICE is halved."
-   },
-   "bp-E-05c": {
-    "free": "DEAL 4.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost; it still counts as a SACRIFICE."
-   },
-   "bp-E-06a": {
-    "free": "DEAL 7, then SACRIFICE 1.",
-    "paid": "DEAL 18, then SACRIFICE 2."
-   },
-   "bp-E-06b": {
-    "free": "DEAL 6, then SACRIFICE 1.",
-    "paid": "DEAL 10, twice; SACRIFICE 1 after each."
-   },
-   "bp-E-06c": {
-    "free": "DEAL 4.",
-    "paid": "SACRIFICE 2, DEAL 15, then SACRIFICE 2 again."
-   },
-   "bp-E-07a": {
-    "free": "Your next SACRIFICE this turn counts twice.",
-    "paid": "Your next SACRIFICE this turn counts three times."
-   },
-   "bp-E-07b": {
-    "free": "Your next SACRIFICE this turn is doubled (its cost and its payoffs).",
-    "paid": "Same, and gain 2 Conviction."
-   },
-   "bp-E-07c": {
-    "free": "GUARD 4.",
-    "paid": "Your SACRIFICES this turn count twice (you pay once)."
-   },
-   "bp-E-08a": {
-    "free": "Return a Curse from your discard to your hand.",
-    "paid": "Return every Curse from your discard to your hand. Gain 1 Conviction each."
-   },
-   "bp-E-08b": {
-    "free": "Return a Curse from your discard to your hand. GUARD 4.",
-    "paid": "Return a Curse from your discard to your hand. GUARD 12."
-   },
-   "bp-E-08c": {
-    "free": "Return a Curse from your discard to your hand.",
-    "paid": "Return a Curse from your discard and play it at no VITAE cost."
-   },
-   "bp-E-09a": {
-    "free": "Gain 1 Conviction."
-   },
-   "bp-E-09b": {
-    "free": "GUARD 6.",
-    "paid": "Also gain 1 Conviction."
-   },
-   "bp-E-09c": {
-    "free": "DEAL 6.",
-    "paid": "DEAL 9 instead."
-   },
-   "bp-E-10a": {
-    "free": "SACRIFICE any amount (max 5).",
-    "paid": "SACRIFICE any amount (max 15)."
-   },
-   "bp-E-10b": {
-    "free": "SACRIFICE any amount (max 6); GUARD that much.",
-    "paid": "SACRIFICE any amount (max 15); gain 1 Conviction per 5 paid."
-   },
-   "bp-E-10c": {
-    "free": "SACRIFICE 2.",
-    "paid": "SACRIFICE any amount (max 20); it counts as one SACRIFICE per 5 paid."
-   },
-   "bp-M-01a": {
-    "free": "Heal 4.",
-    "paid": "Heal 15."
-   },
-   "bp-M-01b": {
-    "free": "GUARD 3.",
-    "paid": "Heal 12. GUARD 6."
-   },
-   "bp-M-01c": {
-    "free": "Heal 6.",
-    "paid": "Heal 18. EXILE."
-   },
-   "bp-M-02a": {
-    "free": "DEAL 4; heal 1.",
-    "paid": "DEAL 12; heal half the damage dealt."
-   },
-   "bp-M-02b": {
-    "free": "DEAL 3.",
-    "paid": "DEAL 9; heal all the damage dealt (max 12)."
-   },
-   "bp-M-02c": {
-    "free": "DEAL 6.",
-    "paid": "DEAL 12; heal 6 if you are at half VITAE or less."
-   },
-   "bp-M-03a": {
-    "free": "GUARD 4, or 9 at half VITAE or less.",
-    "paid": "GUARD 9, or 20 at half VITAE or less."
-   },
-   "bp-M-03b": {
-    "free": "GUARD 3.",
-    "paid": "GUARD 7; at half VITAE or less, this GUARD also lasts into your next turn."
-   },
-   "bp-M-03c": {
-    "free": "GUARD 4.",
-    "paid": "GUARD 12; heal 4 at half VITAE or less."
-   },
-   "bp-M-04a": {
-    "free": "EXILE a Curse from your hand.",
-    "paid": "EXILE a Curse from your hand. Gain 2 Conviction."
-   },
-   "bp-M-04b": {
-    "free": "Discard a Curse from your hand at no cost.",
-    "paid": "EXILE every Curse in your hand; heal 4 for each."
-   },
-   "bp-M-04c": {
-    "free": "GUARD 4.",
-    "paid": "EXILE a Curse from your hand. DEAL 15."
-   },
-   "bp-M-05a": {
-    "free": "At half VITAE or less: gain 2 Conviction.",
-    "paid": "At half VITAE or less: gain 4 Conviction."
-   },
-   "bp-M-05b": {
-    "free": "GUARD 3.",
-    "paid": "Gain 2 Conviction, or 4 at half VITAE or less."
-   },
-   "bp-M-05c": {
-    "free": "GUARD 4.",
-    "paid": "At one-third VITAE or less: gain 4 Conviction. EXILE."
-   },
-   "bp-M-06a": {
-    "free": "GUARD 4.",
-    "paid": "This turn, your VITAE cannot drop below 1. EXILE."
-   },
-   "bp-M-06b": {
-    "free": "At half VITAE or less: GUARD 6.",
-    "paid": "Until your next turn, damage cannot take you below 1 VITAE."
-   },
-   "bp-M-06c": {
-    "free": "Heal 3.",
-    "paid": "This turn, damage cannot take you below 1 VITAE; heal 7 next turn. EXILE."
-   },
-   "bp-M-07a": {
-    "free": "VULNERABLE +15% for 1 turn.",
-    "paid": "VULNERABLE +37% for 2 turns; heal 3 each time you damage the foe while it lasts."
-   },
-   "bp-M-07b": {
-    "free": "For 1 turn, heal 1 whenever you damage the foe.",
-    "paid": "For 3 turns, heal 3 whenever you damage the foe."
-   },
-   "bp-M-07c": {
-    "free": "VULNERABLE +15% for 1 turn.",
-    "paid": "VULNERABLE +29% for 2 turns. Heal 7."
-   },
-   "bp-M-08a": {
-    "free": "Heal 3.",
-    "paid": "Heal 4 instead."
-   },
-   "bp-M-08b": {
-    "free": "Heal 4.",
-    "paid": "Heal 3 and GUARD 3 instead."
-   },
-   "bp-M-08c": {
-    "free": "Heal 1 per Curse in your hand.",
-    "paid": "Heal 3 per Curse in your hand (max 9) instead."
-   },
-   "bp-M-09a": {
-    "free": "Heal 6; healing past max VITAE becomes GUARD.",
-    "paid": "Heal 15; healing past max VITAE becomes GUARD."
-   },
-   "bp-M-09b": {
-    "free": "GUARD 4.",
-    "paid": "For the rest of combat, healing past max VITAE becomes GUARD. EXILE."
-   },
-   "bp-M-09c": {
-    "free": "Heal 4.",
-    "paid": "Heal 12; GUARD equal to the healing done."
-   },
-   "bp-M-10a": {
-    "free": "The foe loses VITAE equal to the damage you took last turn (max 7).",
-    "paid": "Same, max 15."
-   },
-   "bp-M-10b": {
-    "free": "DEAL 4.",
-    "paid": "DEAL equal to the damage you took last turn (max 29)."
-   },
-   "bp-M-10c": {
-    "free": "VULNERABLE +15% for 1 turn.",
-    "paid": "The foe loses half the VITAE you lost this combat (max 22). EXILE."
-   }
-  },
-  "-3": {
-   "bp-P-01a": {
-    "free": "SACRIFICE 1, DEAL 7.",
-    "paid": "SACRIFICE 3, DEAL 16."
-   },
-   "bp-P-01b": {
-    "free": "DEAL 4.",
-    "paid": "SACRIFICE 4, DEAL 19."
-   },
-   "bp-P-01c": {
-    "free": "SACRIFICE 2, DEAL 11.",
-    "paid": "SACRIFICE 2, DEAL 11, twice."
-   },
-   "bp-P-02a": {
-    "free": "SACRIFICE 1, GUARD 7.",
-    "paid": "SACRIFICE 3, GUARD 16."
-   },
-   "bp-P-02b": {
-    "free": "GUARD 4.",
-    "paid": "SACRIFICE 4, GUARD 19."
-   },
-   "bp-P-02c": {
-    "free": "SACRIFICE 2, GUARD 9.",
-    "paid": "SACRIFICE 4, GUARD 13, DEAL 7."
-   },
-   "bp-P-03a": {
-    "free": "DEAL 4, or 8 at half VITAE or less.",
-    "paid": "DEAL 8, or 19 at half VITAE or less."
-   },
-   "bp-P-03b": {
-    "free": "DEAL 3.",
-    "paid": "DEAL 7, doubled at half VITAE or less."
-   },
-   "bp-P-03c": {
-    "free": "DEAL 4.",
-    "paid": "DEAL 7, +1 per 10 VITAE missing (max +13)."
-   },
-   "bp-P-04a": {
-    "free": "Only at one-third VITAE or less: DEAL 13.",
-    "paid": "Only at one-third VITAE or less: DEAL 33."
-   },
-   "bp-P-04b": {
-    "free": "DEAL 3.",
-    "paid": "Only at half VITAE or less: DEAL 27."
-   },
-   "bp-P-04c": {
-    "free": "Only at half VITAE or less: DEAL 11.",
-    "paid": "Only at half VITAE or less: DEAL 24. EXILE."
-   },
-   "bp-P-05a": {
-    "free": "VULNERABLE +13% for 1 turn.",
-    "paid": "VULNERABLE +1% per VITAE missing (max +67%) for 2 turns."
-   },
-   "bp-P-05b": {
-    "free": "SACRIFICE 2, VULNERABLE +20% for 1 turn.",
-    "paid": "SACRIFICE 4, VULNERABLE +53% for 2 turns."
-   },
-   "bp-P-05c": {
-    "free": "VULNERABLE +13% for 1 turn.",
-    "paid": "VULNERABLE +33% for 2 turns, or +67% at half VITAE or less."
-   },
-   "bp-P-06a": {
-    "free": "GUARD 4.",
-    "paid": "GUARD 1 per 5 VITAE missing (max 27)."
-   },
-   "bp-P-06b": {
-    "free": "GUARD 3.",
-    "paid": "GUARD 7, or 20 at half VITAE or less."
-   },
-   "bp-P-06c": {
-    "free": "GUARD equal to VITAE you lost last turn (max 13).",
-    "paid": "GUARD equal to VITAE you lost last turn (max 33)."
-   },
-   "bp-P-07a": {
-    "free": "DEAL 4.",
-    "paid": "DEAL equal to the VITAE you SACRIFICED this combat (max 22)."
-   },
-   "bp-P-07b": {
-    "free": "DEAL half the VITAE you lost this combat (max 13).",
-    "paid": "DEAL all the VITAE you lost this combat (max 40). EXILE."
-   },
-   "bp-P-07c": {
-    "free": "DEAL 3.",
-    "paid": "DEAL 7, +1 per SACRIFICE you made this combat (max +11)."
-   },
-   "bp-P-08a": {
-    "free": "SACRIFICE 2, gain 2 Conviction.",
-    "paid": "SACRIFICE 4, gain 3 Conviction."
-   },
-   "bp-P-08b": {
-    "free": "SACRIFICE 3, gain 2 Conviction.",
-    "paid": "SACRIFICE 3, gain 2 Conviction, GUARD 7."
-   },
-   "bp-P-08c": {
-    "free": "SACRIFICE 1, gain 2 Conviction.",
-    "paid": "SACRIFICE any amount; gain 1 Conviction per 4 paid (max 4)."
-   },
-   "bp-P-09a": {
-    "free": "SACRIFICE 2; the foe loses 4 VITAE.",
-    "paid": "SACRIFICE 4; the foe loses 16 VITAE."
-   },
-   "bp-P-09b": {
-    "free": "SACRIFICE 3; the foe loses 5 VITAE.",
-    "paid": "SACRIFICE 6; the foe loses 11 VITAE, VULNERABLE +33% for 1 turn."
-   },
-   "bp-P-09c": {
-    "free": "DEAL 4.",
-    "paid": "SACRIFICE 4; the foe loses 20 VITAE, ignoring GUARD."
-   },
-   "bp-P-10a": {
-    "free": "The foe loses n VITAE."
-   },
-   "bp-P-10b": {
-    "free": "DEAL n÷2.",
-    "paid": "DEAL n instead."
-   },
-   "bp-P-10c": {
-    "free": "GUARD n.",
-    "paid": "DEAL n instead."
-   },
-   "bp-E-01a": {
-    "free": "Add a grey Curse to your hand. Gain 2 Conviction.",
-    "paid": "Add 2 grey Curses to your hand. Gain 3 Conviction."
-   },
-   "bp-E-01b": {
-    "free": "Add a grey Curse to your hand. DEAL 5.",
-    "paid": "Add a grey Curse to your hand. Gain 2 Conviction, DEAL 11."
-   },
-   "bp-E-01c": {
-    "free": "GUARD 4.",
-    "paid": "Add a grey Curse to your hand. Gain 3 Conviction. EXILE."
-   },
-   "bp-E-02a": {
-    "free": "SACRIFICE 1, twice.",
-    "paid": "SACRIFICE 1, four times."
-   },
-   "bp-E-02b": {
-    "free": "SACRIFICE 1, twice. GUARD 3.",
-    "paid": "SACRIFICE 1, three times. GUARD 7."
-   },
-   "bp-E-02c": {
-    "free": "SACRIFICE 1.",
-    "paid": "SACRIFICE 1 for each card in your hand (max 4)."
-   },
-   "bp-E-03a": {
-    "free": "SACRIFICE 1."
-   },
-   "bp-E-03b": {
-    "free": "SACRIFICE 1, gain 1 Conviction.",
-    "paid": "SACRIFICE 2 instead."
-   },
-   "bp-E-03c": {
-    "free": "SACRIFICE 2, GUARD 4."
-   },
-   "bp-E-04a": {
-    "free": "Your next SACRIFICE this turn costs no VITAE but still counts.",
-    "paid": "Your SACRIFICES this turn cost no VITAE but still count."
-   },
-   "bp-E-04b": {
-    "free": "Your next SACRIFICE this turn costs half.",
-    "paid": "Your next 2 SACRIFICES this turn cost no VITAE but still count."
-   },
-   "bp-E-04c": {
-    "free": "GUARD 4.",
-    "paid": "Your next SACRIFICE this turn costs no VITAE but still counts. Gain 1 Conviction."
-   },
-   "bp-E-05a": {
-    "free": "Play a Curse from your hand on its FREE line at no VITAE cost.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost."
-   },
-   "bp-E-05b": {
-    "free": "Play a Curse from your hand; its SACRIFICE is halved.",
-    "paid": "Play every Curse in your hand; their SACRIFICE is halved."
-   },
-   "bp-E-05c": {
-    "free": "DEAL 4.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost; it still counts as a SACRIFICE."
-   },
-   "bp-E-06a": {
-    "free": "DEAL 7, then SACRIFICE 1.",
-    "paid": "DEAL 16, then SACRIFICE 2."
-   },
-   "bp-E-06b": {
-    "free": "DEAL 5, then SACRIFICE 1.",
-    "paid": "DEAL 9, twice; SACRIFICE 1 after each."
-   },
-   "bp-E-06c": {
-    "free": "DEAL 4.",
-    "paid": "SACRIFICE 2, DEAL 13, then SACRIFICE 2 again."
-   },
-   "bp-E-07a": {
-    "free": "Your next SACRIFICE this turn counts twice.",
-    "paid": "Your next SACRIFICE this turn counts three times."
-   },
-   "bp-E-07b": {
-    "free": "Your next SACRIFICE this turn is doubled (its cost and its payoffs).",
-    "paid": "Same, and gain 2 Conviction."
-   },
-   "bp-E-07c": {
-    "free": "GUARD 4.",
-    "paid": "Your SACRIFICES this turn count twice (you pay once)."
-   },
-   "bp-E-08a": {
-    "free": "Return a Curse from your discard to your hand.",
-    "paid": "Return every Curse from your discard to your hand. Gain 1 Conviction each."
-   },
-   "bp-E-08b": {
-    "free": "Return a Curse from your discard to your hand. GUARD 4.",
-    "paid": "Return a Curse from your discard to your hand. GUARD 11."
-   },
-   "bp-E-08c": {
-    "free": "Return a Curse from your discard to your hand.",
-    "paid": "Return a Curse from your discard and play it at no VITAE cost."
-   },
-   "bp-E-09a": {
-    "free": "Gain 1 Conviction."
-   },
-   "bp-E-09b": {
-    "free": "GUARD 5.",
-    "paid": "Also gain 1 Conviction."
-   },
-   "bp-E-09c": {
-    "free": "DEAL 5.",
-    "paid": "DEAL 8 instead."
-   },
-   "bp-E-10a": {
-    "free": "SACRIFICE any amount (max 5).",
-    "paid": "SACRIFICE any amount (max 15)."
-   },
-   "bp-E-10b": {
-    "free": "SACRIFICE any amount (max 6); GUARD that much.",
-    "paid": "SACRIFICE any amount (max 15); gain 1 Conviction per 5 paid."
-   },
-   "bp-E-10c": {
-    "free": "SACRIFICE 2.",
-    "paid": "SACRIFICE any amount (max 20); it counts as one SACRIFICE per 5 paid."
-   },
-   "bp-M-01a": {
-    "free": "Heal 4.",
-    "paid": "Heal 13."
-   },
-   "bp-M-01b": {
-    "free": "GUARD 3.",
-    "paid": "Heal 11. GUARD 5."
-   },
-   "bp-M-01c": {
-    "free": "Heal 5.",
-    "paid": "Heal 16. EXILE."
-   },
-   "bp-M-02a": {
-    "free": "DEAL 4; heal 1.",
-    "paid": "DEAL 11; heal half the damage dealt."
-   },
-   "bp-M-02b": {
-    "free": "DEAL 3.",
-    "paid": "DEAL 8; heal all the damage dealt (max 11)."
-   },
-   "bp-M-02c": {
-    "free": "DEAL 5.",
-    "paid": "DEAL 11; heal 5 if you are at half VITAE or less."
-   },
-   "bp-M-03a": {
-    "free": "GUARD 4, or 8 at half VITAE or less.",
-    "paid": "GUARD 8, or 19 at half VITAE or less."
-   },
-   "bp-M-03b": {
-    "free": "GUARD 3.",
-    "paid": "GUARD 7; at half VITAE or less, this GUARD also lasts into your next turn."
-   },
-   "bp-M-03c": {
-    "free": "GUARD 4.",
-    "paid": "GUARD 11; heal 4 at half VITAE or less."
-   },
-   "bp-M-04a": {
-    "free": "EXILE a Curse from your hand.",
-    "paid": "EXILE a Curse from your hand. Gain 2 Conviction."
-   },
-   "bp-M-04b": {
-    "free": "Discard a Curse from your hand at no cost.",
-    "paid": "EXILE every Curse in your hand; heal 4 for each."
-   },
-   "bp-M-04c": {
-    "free": "GUARD 4.",
-    "paid": "EXILE a Curse from your hand. DEAL 13."
-   },
-   "bp-M-05a": {
-    "free": "At half VITAE or less: gain 2 Conviction.",
-    "paid": "At half VITAE or less: gain 4 Conviction."
-   },
-   "bp-M-05b": {
-    "free": "GUARD 3.",
-    "paid": "Gain 2 Conviction, or 4 at half VITAE or less."
-   },
-   "bp-M-05c": {
-    "free": "GUARD 4.",
-    "paid": "At one-third VITAE or less: gain 4 Conviction. EXILE."
-   },
-   "bp-M-06a": {
-    "free": "GUARD 4.",
-    "paid": "This turn, your VITAE cannot drop below 1. EXILE."
-   },
-   "bp-M-06b": {
-    "free": "At half VITAE or less: GUARD 5.",
-    "paid": "Until your next turn, damage cannot take you below 1 VITAE."
-   },
-   "bp-M-06c": {
-    "free": "Heal 3.",
-    "paid": "This turn, damage cannot take you below 1 VITAE; heal 7 next turn. EXILE."
-   },
-   "bp-M-07a": {
-    "free": "VULNERABLE +13% for 1 turn.",
-    "paid": "VULNERABLE +33% for 2 turns; heal 3 each time you damage the foe while it lasts."
-   },
-   "bp-M-07b": {
-    "free": "For 1 turn, heal 1 whenever you damage the foe.",
-    "paid": "For 3 turns, heal 3 whenever you damage the foe."
-   },
-   "bp-M-07c": {
-    "free": "VULNERABLE +13% for 1 turn.",
-    "paid": "VULNERABLE +27% for 2 turns. Heal 7."
-   },
-   "bp-M-08a": {
-    "free": "Heal 3.",
-    "paid": "Heal 4 instead."
-   },
-   "bp-M-08b": {
-    "free": "Heal 4.",
-    "paid": "Heal 3 and GUARD 3 instead."
-   },
-   "bp-M-08c": {
-    "free": "Heal 1 per Curse in your hand.",
-    "paid": "Heal 3 per Curse in your hand (max 8) instead."
-   },
-   "bp-M-09a": {
-    "free": "Heal 5; healing past max VITAE becomes GUARD.",
-    "paid": "Heal 13; healing past max VITAE becomes GUARD."
-   },
-   "bp-M-09b": {
-    "free": "GUARD 4.",
-    "paid": "For the rest of combat, healing past max VITAE becomes GUARD. EXILE."
-   },
-   "bp-M-09c": {
-    "free": "Heal 4.",
-    "paid": "Heal 11; GUARD equal to the healing done."
-   },
-   "bp-M-10a": {
-    "free": "The foe loses VITAE equal to the damage you took last turn (max 7).",
-    "paid": "Same, max 15."
-   },
-   "bp-M-10b": {
-    "free": "DEAL 4.",
-    "paid": "DEAL equal to the damage you took last turn (max 27)."
-   },
-   "bp-M-10c": {
-    "free": "VULNERABLE +13% for 1 turn.",
-    "paid": "The foe loses half the VITAE you lost this combat (max 20). EXILE."
-   }
-  },
-  "-2": {
-   "bp-P-01a": {
-    "free": "SACRIFICE 2, DEAL 6.",
-    "paid": "SACRIFICE 3, DEAL 15."
-   },
-   "bp-P-01b": {
-    "free": "DEAL 4.",
-    "paid": "SACRIFICE 4, DEAL 17."
-   },
-   "bp-P-01c": {
-    "free": "SACRIFICE 2, DEAL 10.",
-    "paid": "SACRIFICE 2, DEAL 10, twice."
-   },
-   "bp-P-02a": {
-    "free": "SACRIFICE 2, GUARD 6.",
-    "paid": "SACRIFICE 3, GUARD 15."
-   },
-   "bp-P-02b": {
-    "free": "GUARD 4.",
-    "paid": "SACRIFICE 4, GUARD 17."
-   },
-   "bp-P-02c": {
-    "free": "SACRIFICE 2, GUARD 8.",
-    "paid": "SACRIFICE 5, GUARD 12, DEAL 6."
-   },
-   "bp-P-03a": {
-    "free": "DEAL 4, or 7 at half VITAE or less.",
-    "paid": "DEAL 7, or 17 at half VITAE or less."
-   },
-   "bp-P-03b": {
-    "free": "DEAL 2.",
-    "paid": "DEAL 6, doubled at half VITAE or less."
-   },
-   "bp-P-03c": {
-    "free": "DEAL 4.",
-    "paid": "DEAL 6, +1 per 10 VITAE missing (max +12)."
-   },
-   "bp-P-04a": {
-    "free": "Only at one-third VITAE or less: DEAL 12.",
-    "paid": "Only at one-third VITAE or less: DEAL 30."
-   },
-   "bp-P-04b": {
-    "free": "DEAL 2.",
-    "paid": "Only at half VITAE or less: DEAL 24."
-   },
-   "bp-P-04c": {
-    "free": "Only at half VITAE or less: DEAL 10.",
-    "paid": "Only at half VITAE or less: DEAL 22. EXILE."
-   },
-   "bp-P-05a": {
-    "free": "VULNERABLE +12% for 1 turn.",
-    "paid": "VULNERABLE +1% per VITAE missing (max +61%) for 2 turns."
-   },
-   "bp-P-05b": {
-    "free": "SACRIFICE 2, VULNERABLE +18% for 1 turn.",
-    "paid": "SACRIFICE 5, VULNERABLE +48% for 2 turns."
-   },
-   "bp-P-05c": {
-    "free": "VULNERABLE +12% for 1 turn.",
-    "paid": "VULNERABLE +30% for 2 turns, or +61% at half VITAE or less."
-   },
-   "bp-P-06a": {
-    "free": "GUARD 4.",
-    "paid": "GUARD 1 per 5 VITAE missing (max 24)."
-   },
-   "bp-P-06b": {
-    "free": "GUARD 2.",
-    "paid": "GUARD 6, or 18 at half VITAE or less."
-   },
-   "bp-P-06c": {
-    "free": "GUARD equal to VITAE you lost last turn (max 12).",
-    "paid": "GUARD equal to VITAE you lost last turn (max 30)."
-   },
-   "bp-P-07a": {
-    "free": "DEAL 4.",
-    "paid": "DEAL equal to the VITAE you SACRIFICED this combat (max 24)."
-   },
-   "bp-P-07b": {
-    "free": "DEAL half the VITAE you lost this combat (max 12).",
-    "paid": "DEAL all the VITAE you lost this combat (max 36). EXILE."
-   },
-   "bp-P-07c": {
-    "free": "DEAL 2.",
-    "paid": "DEAL 6, +1 per SACRIFICE you made this combat (max +12)."
-   },
-   "bp-P-08a": {
-    "free": "SACRIFICE 2, gain 2 Conviction.",
-    "paid": "SACRIFICE 4, gain 3 Conviction."
-   },
-   "bp-P-08b": {
-    "free": "SACRIFICE 3, gain 2 Conviction.",
-    "paid": "SACRIFICE 3, gain 2 Conviction, GUARD 6."
-   },
-   "bp-P-08c": {
-    "free": "SACRIFICE 2, gain 2 Conviction.",
-    "paid": "SACRIFICE any amount; gain 1 Conviction per 4 paid (max 4)."
-   },
-   "bp-P-09a": {
-    "free": "SACRIFICE 2; the foe loses 4 VITAE.",
-    "paid": "SACRIFICE 5; the foe loses 15 VITAE."
-   },
-   "bp-P-09b": {
-    "free": "SACRIFICE 3; the foe loses 5 VITAE.",
-    "paid": "SACRIFICE 6; the foe loses 10 VITAE, VULNERABLE +30% for 1 turn."
-   },
-   "bp-P-09c": {
-    "free": "DEAL 4.",
-    "paid": "SACRIFICE 4; the foe loses 18 VITAE, ignoring GUARD."
-   },
-   "bp-P-10a": {
-    "free": "The foe loses n VITAE."
-   },
-   "bp-P-10b": {
-    "free": "DEAL n÷2.",
-    "paid": "DEAL n instead."
-   },
-   "bp-P-10c": {
-    "free": "GUARD n.",
-    "paid": "DEAL n instead."
-   },
-   "bp-E-01a": {
-    "free": "Add a grey Curse to your hand. Gain 2 Conviction.",
-    "paid": "Add 2 grey Curses to your hand. Gain 3 Conviction."
-   },
-   "bp-E-01b": {
-    "free": "Add a grey Curse to your hand. DEAL 5.",
-    "paid": "Add a grey Curse to your hand. Gain 2 Conviction, DEAL 10."
-   },
-   "bp-E-01c": {
-    "free": "GUARD 4.",
-    "paid": "Add a grey Curse to your hand. Gain 3 Conviction. EXILE."
-   },
-   "bp-E-02a": {
-    "free": "SACRIFICE 1, twice.",
-    "paid": "SACRIFICE 1, four times."
-   },
-   "bp-E-02b": {
-    "free": "SACRIFICE 1, twice. GUARD 2.",
-    "paid": "SACRIFICE 2, three times. GUARD 6."
-   },
-   "bp-E-02c": {
-    "free": "SACRIFICE 2.",
-    "paid": "SACRIFICE 1 for each card in your hand (max 4)."
-   },
-   "bp-E-03a": {
-    "free": "SACRIFICE 2."
-   },
-   "bp-E-03b": {
-    "free": "SACRIFICE 2, gain 1 Conviction.",
-    "paid": "SACRIFICE 2 instead."
-   },
-   "bp-E-03c": {
-    "free": "SACRIFICE 2, GUARD 4."
-   },
-   "bp-E-04a": {
-    "free": "Your next SACRIFICE this turn costs no VITAE but still counts.",
-    "paid": "Your SACRIFICES this turn cost no VITAE but still count."
-   },
-   "bp-E-04b": {
-    "free": "Your next SACRIFICE this turn costs half.",
-    "paid": "Your next 2 SACRIFICES this turn cost no VITAE but still count."
-   },
-   "bp-E-04c": {
-    "free": "GUARD 4.",
-    "paid": "Your next SACRIFICE this turn costs no VITAE but still counts. Gain 1 Conviction."
-   },
-   "bp-E-05a": {
-    "free": "Play a Curse from your hand on its FREE line at no VITAE cost.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost."
-   },
-   "bp-E-05b": {
-    "free": "Play a Curse from your hand; its SACRIFICE is halved.",
-    "paid": "Play every Curse in your hand; their SACRIFICE is halved."
-   },
-   "bp-E-05c": {
-    "free": "DEAL 4.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost; it still counts as a SACRIFICE."
-   },
-   "bp-E-06a": {
-    "free": "DEAL 6, then SACRIFICE 2.",
-    "paid": "DEAL 15, then SACRIFICE 2."
-   },
-   "bp-E-06b": {
-    "free": "DEAL 5, then SACRIFICE 2.",
-    "paid": "DEAL 8, twice; SACRIFICE 2 after each."
-   },
-   "bp-E-06c": {
-    "free": "DEAL 4.",
-    "paid": "SACRIFICE 2, DEAL 12, then SACRIFICE 2 again."
-   },
-   "bp-E-07a": {
-    "free": "Your next SACRIFICE this turn counts twice.",
-    "paid": "Your next SACRIFICE this turn counts three times."
-   },
-   "bp-E-07b": {
-    "free": "Your next SACRIFICE this turn is doubled (its cost and its payoffs).",
-    "paid": "Same, and gain 2 Conviction."
-   },
-   "bp-E-07c": {
-    "free": "GUARD 4.",
-    "paid": "Your SACRIFICES this turn count twice (you pay once)."
-   },
-   "bp-E-08a": {
-    "free": "Return a Curse from your discard to your hand.",
-    "paid": "Return every Curse from your discard to your hand. Gain 1 Conviction each."
-   },
-   "bp-E-08b": {
-    "free": "Return a Curse from your discard to your hand. GUARD 4.",
-    "paid": "Return a Curse from your discard to your hand. GUARD 10."
-   },
-   "bp-E-08c": {
-    "free": "Return a Curse from your discard to your hand.",
-    "paid": "Return a Curse from your discard and play it at no VITAE cost."
-   },
-   "bp-E-09a": {
-    "free": "Gain 1 Conviction."
-   },
-   "bp-E-09b": {
-    "free": "GUARD 5.",
-    "paid": "Also gain 1 Conviction."
-   },
-   "bp-E-09c": {
-    "free": "DEAL 5.",
-    "paid": "DEAL 7 instead."
-   },
-   "bp-E-10a": {
-    "free": "SACRIFICE any amount (max 5).",
-    "paid": "SACRIFICE any amount (max 15)."
-   },
-   "bp-E-10b": {
-    "free": "SACRIFICE any amount (max 6); GUARD that much.",
-    "paid": "SACRIFICE any amount (max 15); gain 1 Conviction per 5 paid."
-   },
-   "bp-E-10c": {
-    "free": "SACRIFICE 2.",
-    "paid": "SACRIFICE any amount (max 20); it counts as one SACRIFICE per 5 paid."
-   },
-   "bp-M-01a": {
-    "free": "Heal 4.",
-    "paid": "Heal 12."
-   },
-   "bp-M-01b": {
-    "free": "GUARD 2.",
-    "paid": "Heal 10. GUARD 5."
-   },
-   "bp-M-01c": {
-    "free": "Heal 5.",
-    "paid": "Heal 15. EXILE."
-   },
-   "bp-M-02a": {
-    "free": "DEAL 4; heal 1.",
-    "paid": "DEAL 10; heal half the damage dealt."
-   },
-   "bp-M-02b": {
-    "free": "DEAL 2.",
-    "paid": "DEAL 7; heal all the damage dealt (max 10)."
-   },
-   "bp-M-02c": {
-    "free": "DEAL 5.",
-    "paid": "DEAL 10; heal 5 if you are at half VITAE or less."
-   },
-   "bp-M-03a": {
-    "free": "GUARD 4, or 7 at half VITAE or less.",
-    "paid": "GUARD 7, or 17 at half VITAE or less."
-   },
-   "bp-M-03b": {
-    "free": "GUARD 2.",
-    "paid": "GUARD 6; at half VITAE or less, this GUARD also lasts into your next turn."
-   },
-   "bp-M-03c": {
-    "free": "GUARD 4.",
-    "paid": "GUARD 10; heal 4 at half VITAE or less."
-   },
-   "bp-M-04a": {
-    "free": "EXILE a Curse from your hand.",
-    "paid": "EXILE a Curse from your hand. Gain 2 Conviction."
-   },
-   "bp-M-04b": {
-    "free": "Discard a Curse from your hand at no cost.",
-    "paid": "EXILE every Curse in your hand; heal 4 for each."
-   },
-   "bp-M-04c": {
-    "free": "GUARD 4.",
-    "paid": "EXILE a Curse from your hand. DEAL 12."
-   },
-   "bp-M-05a": {
-    "free": "At half VITAE or less: gain 2 Conviction.",
-    "paid": "At half VITAE or less: gain 4 Conviction."
-   },
-   "bp-M-05b": {
-    "free": "GUARD 2.",
-    "paid": "Gain 2 Conviction, or 4 at half VITAE or less."
-   },
-   "bp-M-05c": {
-    "free": "GUARD 4.",
-    "paid": "At one-third VITAE or less: gain 4 Conviction. EXILE."
-   },
-   "bp-M-06a": {
-    "free": "GUARD 4.",
-    "paid": "This turn, your VITAE cannot drop below 1. EXILE."
-   },
-   "bp-M-06b": {
-    "free": "At half VITAE or less: GUARD 5.",
-    "paid": "Until your next turn, damage cannot take you below 1 VITAE."
-   },
-   "bp-M-06c": {
-    "free": "Heal 2.",
-    "paid": "This turn, damage cannot take you below 1 VITAE; heal 6 next turn. EXILE."
-   },
-   "bp-M-07a": {
-    "free": "VULNERABLE +12% for 1 turn.",
-    "paid": "VULNERABLE +30% for 2 turns; heal 2 each time you damage the foe while it lasts."
-   },
-   "bp-M-07b": {
-    "free": "For 1 turn, heal 1 whenever you damage the foe.",
-    "paid": "For 3 turns, heal 2 whenever you damage the foe."
-   },
-   "bp-M-07c": {
-    "free": "VULNERABLE +12% for 1 turn.",
-    "paid": "VULNERABLE +24% for 2 turns. Heal 6."
-   },
-   "bp-M-08a": {
-    "free": "Heal 2.",
-    "paid": "Heal 4 instead."
-   },
-   "bp-M-08b": {
-    "free": "Heal 4.",
-    "paid": "Heal 2 and GUARD 2 instead."
-   },
-   "bp-M-08c": {
-    "free": "Heal 1 per Curse in your hand.",
-    "paid": "Heal 2 per Curse in your hand (max 7) instead."
-   },
-   "bp-M-09a": {
-    "free": "Heal 5; healing past max VITAE becomes GUARD.",
-    "paid": "Heal 12; healing past max VITAE becomes GUARD."
-   },
-   "bp-M-09b": {
-    "free": "GUARD 4.",
-    "paid": "For the rest of combat, healing past max VITAE becomes GUARD. EXILE."
-   },
-   "bp-M-09c": {
-    "free": "Heal 4.",
-    "paid": "Heal 10; GUARD equal to the healing done."
-   },
-   "bp-M-10a": {
-    "free": "The foe loses VITAE equal to the damage you took last turn (max 6).",
-    "paid": "Same, max 15."
-   },
-   "bp-M-10b": {
-    "free": "DEAL 4.",
-    "paid": "DEAL equal to the damage you took last turn (max 24)."
-   },
-   "bp-M-10c": {
-    "free": "VULNERABLE +12% for 1 turn.",
-    "paid": "The foe loses half the VITAE you lost this combat (max 18). EXILE."
-   }
-  },
-  "-1": {
-   "bp-P-01a": {
-    "free": "SACRIFICE 2, DEAL 6.",
-    "paid": "SACRIFICE 4, DEAL 13."
-   },
-   "bp-P-01b": {
-    "free": "DEAL 3.",
-    "paid": "SACRIFICE 5, DEAL 15."
-   },
-   "bp-P-01c": {
-    "free": "SACRIFICE 3, DEAL 9.",
-    "paid": "SACRIFICE 3, DEAL 9, twice."
-   },
-   "bp-P-02a": {
-    "free": "SACRIFICE 2, GUARD 6.",
-    "paid": "SACRIFICE 4, GUARD 13."
-   },
-   "bp-P-02b": {
-    "free": "GUARD 3.",
-    "paid": "SACRIFICE 5, GUARD 15."
-   },
-   "bp-P-02c": {
-    "free": "SACRIFICE 3, GUARD 8.",
-    "paid": "SACRIFICE 5, GUARD 11, DEAL 6."
-   },
-   "bp-P-03a": {
-    "free": "DEAL 3, or 7 at half VITAE or less.",
-    "paid": "DEAL 7, or 15 at half VITAE or less."
-   },
-   "bp-P-03b": {
-    "free": "DEAL 2.",
-    "paid": "DEAL 6, doubled at half VITAE or less."
-   },
-   "bp-P-03c": {
-    "free": "DEAL 3.",
-    "paid": "DEAL 6, +1 per 10 VITAE missing (max +11)."
-   },
-   "bp-P-04a": {
-    "free": "Only at one-third VITAE or less: DEAL 11.",
-    "paid": "Only at one-third VITAE or less: DEAL 28."
-   },
-   "bp-P-04b": {
-    "free": "DEAL 2.",
-    "paid": "Only at half VITAE or less: DEAL 22."
-   },
-   "bp-P-04c": {
-    "free": "Only at half VITAE or less: DEAL 9.",
-    "paid": "Only at half VITAE or less: DEAL 20. EXILE."
-   },
-   "bp-P-05a": {
-    "free": "VULNERABLE +11% for 1 turn.",
-    "paid": "VULNERABLE +1% per VITAE missing (max +55%) for 2 turns."
-   },
-   "bp-P-05b": {
-    "free": "SACRIFICE 3, VULNERABLE +17% for 1 turn.",
-    "paid": "SACRIFICE 5, VULNERABLE +44% for 2 turns."
-   },
-   "bp-P-05c": {
-    "free": "VULNERABLE +11% for 1 turn.",
-    "paid": "VULNERABLE +28% for 2 turns, or +55% at half VITAE or less."
-   },
-   "bp-P-06a": {
-    "free": "GUARD 3.",
-    "paid": "GUARD 1 per 5 VITAE missing (max 22)."
-   },
-   "bp-P-06b": {
-    "free": "GUARD 2.",
-    "paid": "GUARD 6, or 17 at half VITAE or less."
-   },
-   "bp-P-06c": {
-    "free": "GUARD equal to VITAE you lost last turn (max 11).",
-    "paid": "GUARD equal to VITAE you lost last turn (max 28)."
-   },
-   "bp-P-07a": {
-    "free": "DEAL 3.",
-    "paid": "DEAL equal to the VITAE you SACRIFICED this combat (max 27)."
-   },
-   "bp-P-07b": {
-    "free": "DEAL half the VITAE you lost this combat (max 11).",
-    "paid": "DEAL all the VITAE you lost this combat (max 33). EXILE."
-   },
-   "bp-P-07c": {
-    "free": "DEAL 2.",
-    "paid": "DEAL 6, +1 per SACRIFICE you made this combat (max +14)."
-   },
-   "bp-P-08a": {
-    "free": "SACRIFICE 3, gain 2 Conviction.",
-    "paid": "SACRIFICE 5, gain 3 Conviction."
-   },
-   "bp-P-08b": {
-    "free": "SACRIFICE 4, gain 2 Conviction.",
-    "paid": "SACRIFICE 4, gain 2 Conviction, GUARD 6."
-   },
-   "bp-P-08c": {
-    "free": "SACRIFICE 2, gain 2 Conviction.",
-    "paid": "SACRIFICE any amount; gain 1 Conviction per 4 paid (max 4)."
-   },
-   "bp-P-09a": {
-    "free": "SACRIFICE 3; the foe loses 3 VITAE.",
-    "paid": "SACRIFICE 5; the foe loses 13 VITAE."
-   },
-   "bp-P-09b": {
-    "free": "SACRIFICE 4; the foe loses 4 VITAE.",
-    "paid": "SACRIFICE 7; the foe loses 9 VITAE, VULNERABLE +28% for 1 turn."
-   },
-   "bp-P-09c": {
-    "free": "DEAL 3.",
-    "paid": "SACRIFICE 5; the foe loses 17 VITAE, ignoring GUARD."
-   },
-   "bp-P-10a": {
-    "free": "The foe loses n VITAE."
-   },
-   "bp-P-10b": {
-    "free": "DEAL n÷2.",
-    "paid": "DEAL n instead."
-   },
-   "bp-P-10c": {
-    "free": "GUARD n.",
-    "paid": "DEAL n instead."
-   },
-   "bp-E-01a": {
-    "free": "Add a grey Curse to your hand. Gain 2 Conviction.",
-    "paid": "Add 2 grey Curses to your hand. Gain 3 Conviction."
-   },
-   "bp-E-01b": {
-    "free": "Add a grey Curse to your hand. DEAL 4.",
-    "paid": "Add a grey Curse to your hand. Gain 2 Conviction, DEAL 9."
-   },
-   "bp-E-01c": {
-    "free": "GUARD 3.",
-    "paid": "Add a grey Curse to your hand. Gain 3 Conviction. EXILE."
-   },
-   "bp-E-02a": {
-    "free": "SACRIFICE 1, twice.",
-    "paid": "SACRIFICE 1, four times."
-   },
-   "bp-E-02b": {
-    "free": "SACRIFICE 1, twice. GUARD 2.",
-    "paid": "SACRIFICE 2, three times. GUARD 6."
-   },
-   "bp-E-02c": {
-    "free": "SACRIFICE 2.",
-    "paid": "SACRIFICE 1 for each card in your hand (max 5)."
-   },
-   "bp-E-03a": {
-    "free": "SACRIFICE 2."
-   },
-   "bp-E-03b": {
-    "free": "SACRIFICE 2, gain 1 Conviction.",
-    "paid": "SACRIFICE 3 instead."
-   },
-   "bp-E-03c": {
-    "free": "SACRIFICE 3, GUARD 3."
-   },
-   "bp-E-04a": {
-    "free": "Your next SACRIFICE this turn costs no VITAE but still counts.",
-    "paid": "Your SACRIFICES this turn cost no VITAE but still count."
-   },
-   "bp-E-04b": {
-    "free": "Your next SACRIFICE this turn costs half.",
-    "paid": "Your next 2 SACRIFICES this turn cost no VITAE but still count."
-   },
-   "bp-E-04c": {
-    "free": "GUARD 3.",
-    "paid": "Your next SACRIFICE this turn costs no VITAE but still counts. Gain 1 Conviction."
-   },
-   "bp-E-05a": {
-    "free": "Play a Curse from your hand on its FREE line at no VITAE cost.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost."
-   },
-   "bp-E-05b": {
-    "free": "Play a Curse from your hand; its SACRIFICE is halved.",
-    "paid": "Play every Curse in your hand; their SACRIFICE is halved."
-   },
-   "bp-E-05c": {
-    "free": "DEAL 3.",
-    "paid": "Play a Curse from your hand on its PAID line at no VITAE cost; it still counts as a SACRIFICE."
-   },
-   "bp-E-06a": {
-    "free": "DEAL 6, then SACRIFICE 2.",
-    "paid": "DEAL 13, then SACRIFICE 3."
-   },
-   "bp-E-06b": {
-    "free": "DEAL 4, then SACRIFICE 2.",
-    "paid": "DEAL 8, twice; SACRIFICE 2 after each."
-   },
-   "bp-E-06c": {
-    "free": "DEAL 3.",
-    "paid": "SACRIFICE 3, DEAL 11, then SACRIFICE 3 again."
-   },
-   "bp-E-07a": {
-    "free": "Your next SACRIFICE this turn counts twice.",
-    "paid": "Your next SACRIFICE this turn counts three times."
-   },
-   "bp-E-07b": {
-    "free": "Your next SACRIFICE this turn is doubled (its cost and its payoffs).",
-    "paid": "Same, and gain 2 Conviction."
-   },
-   "bp-E-07c": {
-    "free": "GUARD 3.",
-    "paid": "Your SACRIFICES this turn count twice (you pay once)."
-   },
-   "bp-E-08a": {
-    "free": "Return a Curse from your discard to your hand.",
-    "paid": "Return every Curse from your discard to your hand. Gain 1 Conviction each."
-   },
-   "bp-E-08b": {
-    "free": "Return a Curse from your discard to your hand. GUARD 3.",
-    "paid": "Return a Curse from your discard to your hand. GUARD 9."
-   },
-   "bp-E-08c": {
-    "free": "Return a Curse from your discard to your hand.",
-    "paid": "Return a Curse from your discard and play it at no VITAE cost."
-   },
-   "bp-E-09a": {
-    "free": "Gain 1 Conviction."
-   },
-   "bp-E-09b": {
-    "free": "GUARD 4.",
-    "paid": "Also gain 1 Conviction."
-   },
-   "bp-E-09c": {
-    "free": "DEAL 4.",
-    "paid": "DEAL 7 instead."
-   },
-   "bp-E-10a": {
-    "free": "SACRIFICE any amount (max 5).",
-    "paid": "SACRIFICE any amount (max 15)."
-   },
-   "bp-E-10b": {
-    "free": "SACRIFICE any amount (max 6); GUARD that much.",
-    "paid": "SACRIFICE any amount (max 15); gain 1 Conviction per 5 paid."
-   },
-   "bp-E-10c": {
-    "free": "SACRIFICE 3.",
-    "paid": "SACRIFICE any amount (max 20); it counts as one SACRIFICE per 5 paid."
-   },
-   "bp-M-01a": {
-    "free": "Heal 3.",
-    "paid": "Heal 11."
-   },
-   "bp-M-01b": {
-    "free": "GUARD 2.",
-    "paid": "Heal 9. GUARD 4."
-   },
-   "bp-M-01c": {
-    "free": "Heal 4.",
-    "paid": "Heal 13. EXILE."
-   },
-   "bp-M-02a": {
-    "free": "DEAL 3; heal 1.",
-    "paid": "DEAL 9; heal half the damage dealt."
-   },
-   "bp-M-02b": {
-    "free": "DEAL 2.",
-    "paid": "DEAL 7; heal all the damage dealt (max 9)."
-   },
-   "bp-M-02c": {
-    "free": "DEAL 4.",
-    "paid": "DEAL 9; heal 4 if you are at half VITAE or less."
-   },
-   "bp-M-03a": {
-    "free": "GUARD 3, or 7 at half VITAE or less.",
-    "paid": "GUARD 7, or 15 at half VITAE or less."
-   },
-   "bp-M-03b": {
-    "free": "GUARD 2.",
-    "paid": "GUARD 6; at half VITAE or less, this GUARD also lasts into your next turn."
-   },
-   "bp-M-03c": {
-    "free": "GUARD 3.",
-    "paid": "GUARD 9; heal 3 at half VITAE or less."
-   },
-   "bp-M-04a": {
-    "free": "EXILE a Curse from your hand.",
-    "paid": "EXILE a Curse from your hand. Gain 2 Conviction."
-   },
-   "bp-M-04b": {
-    "free": "Discard a Curse from your hand at no cost.",
-    "paid": "EXILE every Curse in your hand; heal 3 for each."
-   },
-   "bp-M-04c": {
-    "free": "GUARD 3.",
-    "paid": "EXILE a Curse from your hand. DEAL 11."
-   },
-   "bp-M-05a": {
-    "free": "At half VITAE or less: gain 2 Conviction.",
-    "paid": "At half VITAE or less: gain 4 Conviction."
-   },
-   "bp-M-05b": {
-    "free": "GUARD 2.",
-    "paid": "Gain 2 Conviction, or 4 at half VITAE or less."
-   },
-   "bp-M-05c": {
-    "free": "GUARD 3.",
-    "paid": "At one-third VITAE or less: gain 4 Conviction. EXILE."
-   },
-   "bp-M-06a": {
-    "free": "GUARD 3.",
-    "paid": "This turn, your VITAE cannot drop below 1. EXILE."
-   },
-   "bp-M-06b": {
-    "free": "At half VITAE or less: GUARD 4.",
-    "paid": "Until your next turn, damage cannot take you below 1 VITAE."
-   },
-   "bp-M-06c": {
-    "free": "Heal 2.",
-    "paid": "This turn, damage cannot take you below 1 VITAE; heal 6 next turn. EXILE."
-   },
-   "bp-M-07a": {
-    "free": "VULNERABLE +11% for 1 turn.",
-    "paid": "VULNERABLE +28% for 2 turns; heal 2 each time you damage the foe while it lasts."
-   },
-   "bp-M-07b": {
-    "free": "For 1 turn, heal 1 whenever you damage the foe.",
-    "paid": "For 3 turns, heal 2 whenever you damage the foe."
-   },
-   "bp-M-07c": {
-    "free": "VULNERABLE +11% for 1 turn.",
-    "paid": "VULNERABLE +22% for 2 turns. Heal 6."
-   },
-   "bp-M-08a": {
-    "free": "Heal 2.",
-    "paid": "Heal 3 instead."
-   },
-   "bp-M-08b": {
-    "free": "Heal 3.",
-    "paid": "Heal 2 and GUARD 2 instead."
-   },
-   "bp-M-08c": {
-    "free": "Heal 1 per Curse in your hand.",
-    "paid": "Heal 2 per Curse in your hand (max 7) instead."
-   },
-   "bp-M-09a": {
-    "free": "Heal 4; healing past max VITAE becomes GUARD.",
-    "paid": "Heal 11; healing past max VITAE becomes GUARD."
-   },
-   "bp-M-09b": {
-    "free": "GUARD 3.",
-    "paid": "For the rest of combat, healing past max VITAE becomes GUARD. EXILE."
-   },
-   "bp-M-09c": {
-    "free": "Heal 3.",
-    "paid": "Heal 9; GUARD equal to the healing done."
-   },
-   "bp-M-10a": {
-    "free": "The foe loses VITAE equal to the damage you took last turn (max 6).",
-    "paid": "Same, max 15."
-   },
-   "bp-M-10b": {
-    "free": "DEAL 3.",
-    "paid": "DEAL equal to the damage you took last turn (max 22)."
-   },
-   "bp-M-10c": {
-    "free": "VULNERABLE +11% for 1 turn.",
-    "paid": "The foe loses half the VITAE you lost this combat (max 17). EXILE."
    }
   }
  }

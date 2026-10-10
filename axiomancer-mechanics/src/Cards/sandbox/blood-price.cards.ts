@@ -159,7 +159,7 @@ const P: Proposal[] = [
         paid: L('SACRIFICE 2, three times. GUARD 5.', c => { for (let i = 0; i < 3; i++) c.sacrifice(2); c.guard(5); }) },
     { id: 'E-02c', type: 'skill', color: BLUE, reason: 'SACRIFICE is on you',
         free: L('SACRIFICE 2.', c => { c.sacrifice(2); }),
-        paid: L('SACRIFICE 1 for each card in your hand (max 5).', c => { c.sacrifice(Math.min(5, c.q.handSize)); }) },
+        paid: L('SACRIFICE 1 for each card in your hand (max 5).', c => { for (let i = Math.min(5, c.q.handSize); i > 0; i--) c.sacrifice(1); }) },
     { id: 'E-03a', type: 'global', color: BLUE, reason: 'SACRIFICE is on you',
         global: { trigger: 'turn', text: 'SACRIFICE 2.',
             free: c => { c.sacrifice(2); }, paid: c => { c.sacrifice(2); } } },
@@ -170,23 +170,23 @@ const P: Proposal[] = [
         global: { trigger: 'turn', text: 'SACRIFICE 3, GUARD 3.',
             free: c => { c.sacrifice(3); c.guard(3); }, paid: c => { c.sacrifice(3); c.guard(3); } } },
     { id: 'E-04a', type: 'spell', color: BLUE, reason: 'a SACRIFICE modifier on you',
-        free: L('Your next SACRIFICE this turn costs no VITAE but still counts.', c => { c.sacModifier({ kind: 'next-free', count: 1 }); }),
-        paid: L('Your SACRIFICES this turn cost no VITAE but still count.', c => { c.sacModifier({ kind: 'all-free' }); }) },
+        free: L('WAIVE your next SACRIFICE this turn.', c => { c.sacModifier({ kind: 'next-free', count: 1 }); }),
+        paid: L('WAIVE every SACRIFICE this turn.', c => { c.sacModifier({ kind: 'all-free' }); }) },
     { id: 'E-04b', type: 'spell', color: BLUE, reason: 'a SACRIFICE modifier on you',
         free: L('Your next SACRIFICE this turn costs half.', c => { c.sacModifier({ kind: 'next-half' }); }),
-        paid: L('Your next 2 SACRIFICES this turn cost no VITAE but still count.', c => { c.sacModifier({ kind: 'next-free', count: 2 }); }) },
+        paid: L('WAIVE your next 2 SACRIFICES this turn.', c => { c.sacModifier({ kind: 'next-free', count: 2 }); }) },
     { id: 'E-04c', type: 'spell', color: BLUE, reason: 'a SACRIFICE modifier and Conviction on you',
         free: L('GUARD 3.', c => { c.guard(3); }),
-        paid: L('Your next SACRIFICE this turn costs no VITAE but still counts. Gain 1 Conviction.', c => { c.sacModifier({ kind: 'next-free', count: 1 }); c.conviction(1); }) },
+        paid: L('WAIVE your next SACRIFICE this turn. Gain 1 Conviction.', c => { c.sacModifier({ kind: 'next-free', count: 1 }); c.conviction(1); }) },
     { id: 'E-05a', type: 'skill', color: BLUE, reason: 'Curse handling is on you',
-        free: L('Play a Curse from your hand on its FREE line at no VITAE cost.', c => { c.playCurseFromHand('free', 'no-cost'); }, { requires: curseInHand }),
-        paid: L('Play a Curse from your hand on its PAID line at no VITAE cost.', c => { c.playCurseFromHand('paid', 'no-cost'); }, { requires: curseInHand }) },
+        free: L('Play a Curse from your hand on its FREE line; WAIVE its SACRIFICE.', c => { c.playCurseFromHand('free', 'waived'); }, { requires: curseInHand }),
+        paid: L('Play a Curse from your hand on its PAID line; WAIVE its SACRIFICE.', c => { c.playCurseFromHand('paid', 'waived'); }, { requires: curseInHand }) },
     { id: 'E-05b', type: 'skill', color: BLUE, reason: 'Curse handling is on you',
         free: L('Play a Curse from your hand; its SACRIFICE is halved.', c => { c.playCurseFromHand('free', 'half'); }, { requires: curseInHand }),
         paid: L('Play every Curse in your hand; their SACRIFICE is halved.', c => { c.playCurseFromHand('free', 'half', true); }, { requires: curseInHand }) },
     { id: 'E-05c', type: 'skill', color: BLUE, reason: 'tie DEAL 3 (FREE) vs Curse handling (PAID): the PAID line takes the die',
         free: L('DEAL 3.', c => { c.deal(3); }),
-        paid: L('Play a Curse from your hand on its PAID line at no VITAE cost; it still counts as a SACRIFICE.', c => { c.playCurseFromHand('paid', 'no-cost-counts'); }, { requires: curseInHand }) },
+        paid: L('Play a Curse from your hand on its PAID line; WAIVE its SACRIFICE.', c => { c.playCurseFromHand('paid', 'waived'); }, { requires: curseInHand }) },
     { id: 'E-06a', type: 'attack', color: RED, reason: 'DEAL on the foe',
         free: L('DEAL 5, then SACRIFICE 2.', c => { c.deal(5); c.sacrifice(2); }),
         paid: L('DEAL 12, then SACRIFICE 3.', c => { c.deal(12); c.sacrifice(3); }) },
@@ -213,7 +213,7 @@ const P: Proposal[] = [
         paid: L('Return a Curse from your discard to your hand. GUARD 8.', c => { c.returnCurseFromDiscard(false); c.guard(8); }) },
     { id: 'E-08c', type: 'skill', color: BLUE, reason: 'Curse recursion is on you',
         free: L('Return a Curse from your discard to your hand.', c => { c.returnCurseFromDiscard(false); }, { requires: curseInDiscard }),
-        paid: L('Return a Curse from your discard and play it at no VITAE cost.', c => { c.playCurseFromDiscard('free', 'no-cost'); }, { requires: curseInDiscard }) },
+        paid: L('Return a Curse from your discard and play it on its PAID line; WAIVE its SACRIFICE.', c => { c.playCurseFromDiscard('paid', 'waived'); }, { requires: curseInDiscard }) },
     { id: 'E-09a', type: 'global', color: BLUE, reason: 'Conviction is on you',
         global: { trigger: 'curse', text: 'Gain 1 Conviction.',
             free: c => { c.conviction(1); }, paid: c => { c.conviction(1); } } },
@@ -333,6 +333,39 @@ const P: Proposal[] = [
         paid: L('The foe loses half the VITAE you lost this combat (max 15). EXILE.', c => { c.foeLoses(Math.min(15, Math.floor(c.q.lostThisCombat / 2))); }, { exile: true }) },
 ];
 
+/**
+ * THE PURPLE DRAFTS (2026-10-10 re-run): eight new heart proposals, option
+ * "d" in eight blue-only slots, so a deck can reach 10/10/10. Built only from
+ * TETHER, LEECH, VULNERABLE and the existing keywords and types. Sandbox
+ * drafts for T's ballot, not ballot results.
+ */
+const PURPLE_DRAFTS: Proposal[] = [
+    { id: 'P-06d', type: 'skill', color: PURPLE, reason: 'LEECH on the foe: the wound becomes a drain',
+        free: L('GUARD 3.', c => { c.guard(3); }),
+        paid: L('LEECH 1 per 10 VITAE missing (max 8).', c => { c.leech(Math.min(8, Math.floor(c.q.missing / 10))); }) },
+    { id: 'P-08d', type: 'skill', color: PURPLE, reason: 'TETHER on the foe: the exchange pays out in damage',
+        free: L('SACRIFICE 2, gain 2 Conviction.', c => { c.sacrifice(2); c.conviction(2); }),
+        paid: L('TETHER 3. SACRIFICE 4.', c => { c.tether(3); c.sacrifice(4); }) },
+    { id: 'E-02d', type: 'skill', color: PURPLE, reason: 'TETHER on the foe: many small SACRIFICES, each a hit',
+        free: L('SACRIFICE 1, twice.', c => { c.sacrifice(1); c.sacrifice(1); }),
+        paid: L('TETHER 2. SACRIFICE 1, three times.', c => { c.tether(2); for (let i = 0; i < 3; i++) c.sacrifice(1); }) },
+    { id: 'E-03d', type: 'global', color: PURPLE, reason: 'LEECH on the foe each turn: the drip feeds you back',
+        global: { trigger: 'turn', text: 'SACRIFICE 2, LEECH 2.', paidDelta: 'LEECH 3 instead.',
+            free: c => { c.sacrifice(2); c.leech(2); }, paid: c => { c.sacrifice(2); c.leech(3); } } },
+    { id: 'E-10d', type: 'spell', color: PURPLE, reason: 'TETHER on the foe: the X SACRIFICE lands as damage',
+        free: L('TETHER 1. SACRIFICE 2.', c => { c.tether(1); c.sacrifice(2); }),
+        paid: L('TETHER 1. SACRIFICE any amount (max 15).', c => { c.tether(1); c.sacrificeX(15); }) },
+    { id: 'M-01d', type: 'skill', color: PURPLE, reason: 'LEECH on the foe: healing drawn from the foe',
+        free: L('Heal 3.', c => { c.heal(3); }),
+        paid: L('LEECH 4.', c => { c.leech(4); }) },
+    { id: 'M-03d', type: 'skill', color: PURPLE, reason: 'LEECH on the foe: a stronger drain when low',
+        free: L('GUARD 3.', c => { c.guard(3); }),
+        paid: L('LEECH 3, or 6 at half VITAE or less.', c => { c.leech(c.q.atHalf ? 6 : 3); }) },
+    { id: 'M-08d', type: 'global', color: PURPLE, reason: 'LEECH on the foe each turn: regen taken from the foe',
+        global: { trigger: 'turn', text: 'LEECH 1.', paidDelta: 'LEECH 2 instead.',
+            free: c => { c.leech(1); }, paid: c => { c.leech(2); } } },
+];
+
 /** The first Curse (D71, T's text): grey, any die. */
 const GREY_CURSE: Card = {
     id: 'bp-curse',
@@ -372,15 +405,18 @@ function toCard(p: Proposal): Card {
     };
 }
 
-/** All 90 proposals plus the grey Curse. */
-export const BLOOD_PRICE_CARDS: Card[] = [...P.map(toCard), GREY_CURSE];
+/** All 90 proposals, the 8 purple drafts and the grey Curse. */
+export const BLOOD_PRICE_CARDS: Card[] = [...P.map(toCard), ...PURPLE_DRAFTS.map(toCard), GREY_CURSE];
+
+/** Ids of the eight purple drafts (option d). */
+export const PURPLE_DRAFT_IDS: string[] = PURPLE_DRAFTS.map(p => `bp-${p.id}`);
 
 /** The 30 ballot slots, in ballot order. */
 export const BLOOD_PRICE_SLOTS: string[] = [...new Set(P.map(p => p.id.slice(0, 4)))];
 
 /** The three proposals of a slot, as card ids. */
 export function proposalsForSlot(slot: string): string[] {
-    return P.filter(p => p.id.startsWith(slot)).map(p => `bp-${p.id}`);
+    return [...P, ...PURPLE_DRAFTS].filter(p => p.id.startsWith(slot)).map(p => `bp-${p.id}`);
 }
 
 /** Registers the Blood Price sandbox cards (idempotent). */

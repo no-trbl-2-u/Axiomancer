@@ -68,7 +68,7 @@ import { getSignaturesForLoadout } from '../Items/relic.library';
 import {
     type BpKit, deckHasBloodPrice, initBloodPriceState, isBloodPriceCard, isCurseCard,
     playBloodPriceCard, bloodPriceTurnStart, bloodPriceClampDamage, bloodPriceRecordDamage,
-    bloodPriceRollRound, bloodPriceGuardAfterThreat,
+    bloodPriceRollRound, bloodPriceGuardAfterThreat, bloodPriceFoeTurnStart,
 } from './combat.blood-price';
 import type {
     CombatCard, CombatDieColor, CombatEncounterState, CombatEvent, CardPlay,
@@ -1121,8 +1121,16 @@ function soakFlatHit(
  * (`canAct` → skipTurn). This is how control "hinders the enemy" — it loses its
  * attack this phase. Then between-phases processing runs (DoT ticks, draw, advance).
  */
-export function resolveThreatPhase(state: CombatEncounterState, rng: () => number = defaultRng): CombatTransition {
-    if (state.phase === 'complete' || state.finalOutcome) return { state, events: [] };
+export function resolveThreatPhase(stateIn: CombatEncounterState, rng: () => number = defaultRng): CombatTransition {
+    if (stateIn.phase === 'complete' || stateIn.finalOutcome) return { state: stateIn, events: [] };
+    let state = stateIn;
+    // SANDBOX (Blood Price sims): LEECH drains the foe at the start of its
+    // turn, before it acts. Absent ledger or no LEECH = untouched.
+    if (state.bp && (state.bp.leech ?? 0) > 0) {
+        const leech = bloodPriceFoeTurnStart(state);
+        state = withLog(leech.state, leech.events);
+        if (isDefeated(state.enemy)) return endCombat(state, 'victory', leech.events);
+    }
 
     const idx = Math.min(state.currentPhaseIndex, state.threatPhases.length - 1);
     const phase = state.threatPhases[idx];
@@ -1909,7 +1917,6 @@ export function projectCombatOutcome(state: CombatEncounterState): CombatOutcome
 /** SANDBOX (Blood Price sims): the engine pieces combat.blood-price.ts needs,
  *  passed in so that module never imports the engine. */
 export const BLOOD_PRICE_KIT: BpKit = {
-    colorMatchBonus: (base: number) => colorMatchBonus(base),
     convictionCap: CONVICTION_CAP,
     incomingNet: (state: CombatEncounterState) => projectIncomingThreat(state).netDamage,
 };

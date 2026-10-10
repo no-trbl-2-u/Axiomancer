@@ -42,17 +42,15 @@ export interface BpQuery {
 
 /** How a Curse is played by another card. */
 export type BpCursePlayMode =
-    /** No VITAE paid and no SACRIFICE counted (E-05a, E-08c). */
-    | 'no-cost'
-    /** No VITAE paid but every SACRIFICE still counts (E-05c). */
-    | 'no-cost-counts'
-    /** The Curse's SACRIFICE is halved, rounded up (E-05b). */
+    /** WAIVED: no VITAE paid, every SACRIFICE still counts (E-05a, E-05c, E-08c). */
+    | 'waived'
+    /** The Curse's SACRIFICE is halved, rounded up; it pays and counts (E-05b). */
     | 'half';
 
 /** Per-turn SACRIFICE modifiers (E-04, E-07). */
 export type BpSacModifier =
-    | { kind: 'next-free'; count: number }      // next N SACRIFICES this turn cost 0 but count
-    | { kind: 'all-free' }                      // all SACRIFICES this turn cost 0 but count
+    | { kind: 'next-free'; count: number }      // WAIVE: next N SACRIFICES this turn cost 0 but count
+    | { kind: 'all-free' }                      // WAIVE every SACRIFICE this turn
     | { kind: 'next-half' }                     // next SACRIFICE this turn costs half (rounded up)
     | { kind: 'next-counts'; times: number }    // next SACRIFICE this turn counts N times
     | { kind: 'next-double' }                   // next SACRIFICE this turn is doubled (cost and payoffs)
@@ -74,6 +72,11 @@ export interface BpCtx {
     vulnerable(pct: number, turns: number): void;
     /** The foe loses n VITAE: unscaled, not a DEAL (no VULNERABLE). */
     foeLoses(n: number): void;
+    /** TETHER n: for n turns, each SACRIFICE instance makes the foe take
+     *  DEAL x, x = VITAE that instance paid (unscaled; VULNERABLE applies). */
+    tether(turns: number): void;
+    /** LEECH n (heart-scaled, repeating; adds to the current LEECH). */
+    leech(n: number): void;
     conviction(n: number): void;
     /** SACRIFICE n: lose n VITAE, unscaled. A cost. */
     sacrifice(n: number): void;

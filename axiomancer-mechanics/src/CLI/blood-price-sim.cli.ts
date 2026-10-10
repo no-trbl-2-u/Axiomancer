@@ -20,7 +20,9 @@ import { Player } from '../Character/characters.mock';
 import type { Character } from '../Character/types';
 import { calculateMaxHealth, deepClone } from '../Utils';
 import { stageStats } from '../Game/act1-progression';
-import { EnemyLibrary } from '../Enemy/enemy.library';
+import { EnemyLibrary, TheDoorwarden, FloatEye } from '../Enemy/enemy.library';
+import { enemyVitae } from '../Enemy';
+import { scaleEnemyToLevel } from '../World/encounter';
 import type { Enemy } from '../Enemy/types';
 import { getCardById } from '../Cards/cards.library';
 import {
@@ -137,20 +139,24 @@ export function buildDecks(count: number, seed: number): { decks: Deck[]; best: 
     const rng = mulberry32(seed);
     const decks: Deck[] = [];
     const seen = new Set<string>();
-    for (const target of splits) {
-        let tries = 0;
-        while (decks.length < count && tries < 5000) {
-            tries++;
-            const picks = sampleDeck(slots, target, rng);
-            if (!picks) break;
-            const key = picks.join('|');
-            if (seen.has(key)) continue;
-            seen.add(key);
-            decks.push({ id: `D${String(decks.length + 1).padStart(2, '0')}`, picks, split: { ...target } });
-        }
-        if (decks.length >= count) break;
+    // "~10/10/10": every reachable split with no colour under 5 and a spread
+    // of 2 or less; each deck draws its target from that set, so a slot's
+    // options are not all forced the same way in every deck. Falls back to
+    // the single best split when none qualify.
+    const near = splits.filter(t => splitScore(t)[0] === 0 && splitScore(t)[1] <= 2);
+    const targets = near.length ? near : splits.slice(0, 1);
+    let tries = 0;
+    while (decks.length < count && tries < 20000) {
+        tries++;
+        const target = targets[Math.floor(rng() * targets.length)];
+        const picks = sampleDeck(slots, target, rng);
+        if (!picks) continue;
+        const key = picks.join('|');
+        if (seen.has(key)) continue;
+        seen.add(key);
+        decks.push({ id: `D${String(decks.length + 1).padStart(2, '0')}`, picks, split: { ...target } });
     }
-    return { decks, best: splits.slice(0, 5) };
+    return { decks, best: targets };
 }
 
 // ── Player ───────────────────────────────────────────────────────────────────
@@ -168,12 +174,32 @@ export function playerAt(level: number, deck: string[]): Character {
     return p;
 }
 
+// ── Enemies ──────────────────────────────────────────────────────────────────
+
+/** The Doorwarden's Act 1 door level for a player level (pins are 1-4). */
+export const DOOR_LEVEL: Record<number, number> = { 1: 1, 3: 3, 5: 4 };
+
+/**
+ * The foe a cell fights. Float-Eye and Brine Hag as authored. The Doorwarden
+ * is scaled to its door level (`scaleEnemyToLevel`); its library entry FIXES
+ * vitae (220), so its VITAE is overridden to `enemyVitae(level, 'boss')`.
+ */
+export function enemyFor(base: Enemy, playerLevel: number): Enemy {
+    if (base.id !== TheDoorwarden.id) return base;
+    const level = DOOR_LEVEL[playerLevel] ?? playerLevel;
+    const e = scaleEnemyToLevel(base, level);
+    const vitae = enemyVitae(level, base.difficulty);
+    return { ...e, maxHealth: vitae, health: vitae };
+}
+
 // ── Cells ────────────────────────────────────────────────────────────────────
 
 export interface CellResult {
     deck: string;
     enemy: string;
     level: number;
+    enemyLevel: number;
+    enemyVitae: number;
     k: number;
     effectFactor: number;
     sacFactor: number;
@@ -186,6 +212,7 @@ export interface CellResult {
     meanSacrificePaid: number;
     meanCursesStuck: number;
     meanCursesAdded: number;
+    meanLeechDrained: number;
     playsPerFight: Record<string, number>;
     fizzlesPerFight: number;
 }
@@ -197,33 +224,15 @@ export function factorsFor(k: number): { effect: number; sac: number } {
         : { effect: 1.1 ** -k, sac: 0.9 ** -k };
 }
 
-/** Fisher-Yates on our own seeded stream (see `runCell`). */
-function shuffled<T>(items: readonly T[], rng: () => number): T[] {
-    const out = items.slice();
-    for (let i = out.length - 1; i > 0; i--) {
-        const j = Math.floor(rng() * (i + 1));
-        [out[i], out[j]] = [out[j], out[i]];
-    }
-    return out;
-}
-
 /**
  * One deck × enemy × level cell: `runs` seeded fights (engine seeds
  * seed..seed+runs-1) through `simulateHazardPatternCombatDetailed` (the
  * function `simulateHazardPatternCombat` wraps), greedy witness.
- *
- * Each run gets the deck list in its own seeded order. Workaround for an
- * engine RNG flaw: `Utils/rng.ts` is a Park-Miller LCG, so for consecutive
- * small seeds its FIRST draw is ~seed × 2.2e-5 (≈ 0), and the opening
- * `shuffleCombatDeck` uses that draw for its first swap — the deck list's
- * first card is dealt last in every seeded run. Pre-ordering the list per
- * run (mulberry32, independent of the engine stream) removes the bias
- * without touching the engine RNG.
  */
 export function runCell(deck: Deck, enemy: Enemy, level: number, k: number, runs: number, seed: number): CellResult {
     const f = factorsFor(k);
     setBloodPriceTuning(f);
-    let vitaeLeft = 0, lowest = 0, minLowest = Infinity, sacPaid = 0, stuck = 0, added = 0;
+    let vitaeLeft = 0, lowest = 0, minLowest = Infinity, sacPaid = 0, stuck = 0, added = 0, leeched = 0;
     const onRunEnd = (s: CombatEncounterState): void => {
         vitaeLeft += s.player.health;
         const low = Math.min(s.bp?.lowestVitae ?? s.player.health, s.player.health);
@@ -232,23 +241,17 @@ export function runCell(deck: Deck, enemy: Enemy, level: number, k: number, runs
         sacPaid += s.bp?.sacrificePaid ?? 0;
         stuck += cursesInHand(s);
         added += s.bp?.cursesAdded ?? 0;
+        leeched += s.bp?.leechDrained ?? 0;
     };
-    const orderRng = mulberry32(seed * 7919 + 17);
-    let wins = 0, rounds = 0;
+    const { stats, cardUsage } = simulateHazardPatternCombatDetailed({
+        player: playerAt(level, deck.picks), enemy, runs, startSeed: seed, policy: 'greedy',
+        deck: deck.picks, onRunEnd,
+    });
     const plays: Record<string, number> = {};
     let fizzles = 0;
-    for (let i = 0; i < runs; i++) {
-        const order = shuffled(deck.picks, orderRng);
-        const { stats, cardUsage } = simulateHazardPatternCombatDetailed({
-            player: playerAt(level, order), enemy, runs: 1, startSeed: seed + i, policy: 'greedy',
-            deck: order, onRunEnd,
-        });
-        wins += stats.winRate;
-        rounds += stats.avgRounds;
-        for (const u of Object.values(cardUsage)) {
-            plays[u.cardId] = (plays[u.cardId] ?? 0) + u.plays;
-            fizzles += u.fizzles ?? 0;
-        }
+    for (const u of Object.values(cardUsage)) {
+        plays[u.cardId] = (plays[u.cardId] ?? 0) + u.plays;
+        fizzles += u.fizzles ?? 0;
     }
     setBloodPriceTuning({ effect: 1, sac: 1 });
     const playsPerFight: Record<string, number> = {};
@@ -256,10 +259,12 @@ export function runCell(deck: Deck, enemy: Enemy, level: number, k: number, runs
     playsPerFight['bp-curse'] = (plays['bp-curse'] ?? 0) / runs;
     return {
         deck: deck.id, enemy: enemy.name, level, k, effectFactor: f.effect, sacFactor: f.sac, runs,
-        winRate: wins / runs, meanRounds: rounds / runs,
+        enemyLevel: enemy.level, enemyVitae: enemy.maxHealth,
+        winRate: stats.winRate, meanRounds: stats.avgRounds,
         meanVitaeLeft: vitaeLeft / runs, meanLowestVitae: lowest / runs,
         minLowestVitae: minLowest === Infinity ? 0 : minLowest,
         meanSacrificePaid: sacPaid / runs, meanCursesStuck: stuck / runs, meanCursesAdded: added / runs,
+        meanLeechDrained: leeched / runs,
         playsPerFight, fizzlesPerFight: fizzles / runs,
     };
 }
@@ -298,6 +303,20 @@ if (require.main === module) {
     fs.mkdirSync(outDir, { recursive: true });
 
     registerBloodPriceCards();
+    const custom = flag('deck', '');
+    if (custom) {
+        const label = flag('label', 'custom');
+        const picks = custom.split(',').map(x => x.trim()).filter(Boolean).map(x => (x.startsWith('bp-') ? x : `bp-${x}`));
+        const split = { body: 0, mind: 0, heart: 0 } as Record<Colour, number>;
+        for (const id of picks) split[colourOf(id)]++;
+        const deck: Deck = { id: label, picks, split };
+        const rows = [...EnemyLibrary].flatMap(e => LEVELS.map(l => runCell(deck, enemyFor(e, l), l, 0, runs, seed)));
+        fs.writeFileSync(path.join(outDir, `custom-${label}.json`), JSON.stringify({ deck, rows }, null, 1));
+        for (const r of rows) {
+            process.stdout.write(`${r.enemy} L${r.level} (foe L${r.enemyLevel}, ${r.enemyVitae} VITAE): win ${(r.winRate * 100).toFixed(1)}% rounds ${r.meanRounds.toFixed(1)} VITAE left ${r.meanVitaeLeft.toFixed(0)}\n`);
+        }
+        process.exit(0);
+    }
     const { decks, best } = buildDecks(nDecks, seed);
     fs.writeFileSync(path.join(outDir, 'decks.json'), JSON.stringify({ seed, bestSplits: best, decks }, null, 1));
     process.stdout.write(`decks: ${decks.length}; best reachable splits: ${best.map(b => `${b.body}/${b.mind}/${b.heart}`).join(', ')}\n`);
@@ -316,13 +335,14 @@ if (require.main === module) {
         const results: CellResult[] = [];
         for (const c of todo) {
             const id = key(c.deck.id, c.enemy.name, c.level);
-            const r = runCell(c.deck, c.enemy, c.level, kOf.get(id) ?? 0, runs, seed);
+            const r = runCell(c.deck, enemyFor(c.enemy, c.level), c.level, kOf.get(id) ?? 0, runs, seed);
             results.push(r);
             latest.set(id, r);
         }
         passes.push(results);
         fs.writeFileSync(path.join(outDir, `pass-${pass}.json`), JSON.stringify(results, null, 1));
-        const out = results.filter(r => r.winRate >= 0.9 || r.winRate <= 0.1);
+        // Float-Eye is simulated and reported but never tuned against.
+        const out = results.filter(r => r.enemy !== FloatEye.name && (r.winRate >= 0.9 || r.winRate <= 0.1));
         process.stdout.write(`pass ${pass}: ${results.length} cells in ${((Date.now() - t0) / 1000).toFixed(1)}s, out of band ${out.length}\n`);
         if (pass === maxPasses) break;
         todo = [];
