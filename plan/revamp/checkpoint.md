@@ -143,6 +143,31 @@ release; recorded in bearings and the decisions log; RC ticked.
 4. Tick RC. Next is the Blood Price trial set (D75, `cards.md` → "The
    trial set"); R11 stays the next attended loop phase.
 
+## RC2 — v0.2.0 release (attended)
+
+Added 2026-10-10 by T (D78). The loop never picks RC2: when PF1 is `[x]`
+and its first audit has landed, `/march` falls through as it did for RC
+until T opens the session.
+
+### Gate (all must hold before tagging)
+
+1. **Perf:** PF1 is `[x]` and the first performance audit ran on CI:
+   `docs/reports/perf/budgets.json` is seeded and `history.jsonl` has at
+   least one line on main. Open `[perf]` rows do not block the tag.
+2. **Checks:** RC gate item 2, on the commit to be tagged.
+3. **The walk:** RC gate item 3, re-run on the exported web build of that
+   commit. Where a phase shipped since RC changed a rule an item checks
+   (for example BT's cards), the item is checked against that phase's
+   rule, and the report says so.
+4. **Findings:** RC gate item 4.
+
+### Cut
+
+As RC's cut, with tag `v0.2.0` (annotated): T tags and pushes it,
+publishes a GitHub release (what changed since `v0.1.0-checkpoint`), builds
+an EAS preview APK from the tag and links it, records the tag in
+`plan/bearings.md` and the decisions log, and ticks RC2.
+
 ### Not in RC
 
 No content, cards, keywords, people, story, art or new skills. No loop

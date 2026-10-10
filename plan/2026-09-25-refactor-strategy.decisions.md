@@ -791,6 +791,16 @@ stay open, not rejected.
 - Phase PF1 (`plan/revamp/tooling.md`), ready now; tooling only, no
   content, so revamp mode (D58) lets the loop ship it.
 
+**D78 — v0.2.0 follows the first performance audit.** (T, attended, 2026-10-10.)
+
+- Phase RC2 cuts `v0.2.0` the way RC cut `v0.1.0-checkpoint` (D76): T tags
+  it in an attended session, publishes a GitHub release and builds an EAS
+  preview APK.
+- Gate: PF1 shipped and its first audit landed on main (budgets seeded,
+  one history line); open `[perf]` rows do not block. Plus RC's full gate:
+  every check green and the Act 1 walk.
+- `plan/revamp/checkpoint.md` → "RC2".
+
 ## Open follow-ups
 
 **D1 status at a glance (2026-09-28, after #408).** Card and keyword

@@ -160,6 +160,7 @@ event-pool and layout files).
 - [ ] Phase R11 — Loop content phases (attended): revisit the loop so content creation returns as planned build-plan phases, decide per surface what the loop may create, review the R0 archive and zero-invocation verbs, and remove the revamp-mode banner (ends revamp mode, D58). `plan/revamp/loop.md`. Requires RC.
 - [ ] Phase R12 — New combat-playtest (attended): design and write a new `/combat-playtest` command for the rebuilt game (the old one was archived in R0), around the real questions after the reset: does stat growth track the Act 1 curve, are the survivors winnable and dangerous, what the matrix should measure (lowest VITAE included). Keeps the engine matrix CLI. `plan/revamp/loop.md`. Requires RC, R11.
 - [ ] Phase PF1 — Weekly performance audit (D77): a Sunday workflow measures web load and bundle, runtime smoothness on a scripted combat round, and engine speed; keeps a committed history and budgets; a budget breach or week-over-week drift files a `[perf]` row in `plan/AUDIT.md`. Report-only, never a gate. Tooling only. `plan/revamp/tooling.md` → "PF1"; brief `plan/phases/phase_PF1_weekly_perf_audit.md`. Requires RC.
+- [ ] Phase RC2 — v0.2.0 release (attended, D78): T tags `v0.2.0`, publishes the GitHub release and builds the EAS preview APK, as RC did. Gate: PF1 `[x]` and its first audit on main (budgets seeded, one history line; open `[perf]` rows do not block), every check green, the Act 1 walk. `plan/revamp/checkpoint.md` → "RC2". Requires PF1.
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics (9180fa5d)
@@ -1283,6 +1284,7 @@ See the status rows above; generate briefs on demand.
   commit: this one.
 - **2026-10-02** — actor: **T, attended session** (same branch). Action: **added Phase R10d** (tutorial removal) and made RC require it. Confirmed T's request: yes ("add a phase to remove all the tutorial windows as well because they're miserable"; via AskUserQuestion: before the tag, all coaches plus the map hint). Reason: "they're miserable". Resulting commit: this one.
 - **2026-10-10** — actor: **T, attended session** (`/plan-a-phase`, branch `ccr-5df028d7-j2y1wv`). Action: **added Phase PF1** (weekly performance audit, D77) after R12, ready now. Confirmed T's request: yes ("I want a phase to cake in performance testing into a weekly audit"; scope, regression handling, thresholds, budgets and queue position chosen via AskUserQuestion). Reason: reason not stated. Resulting commit: this one; brief `plan/phases/phase_PF1_weekly_perf_audit.md`.
+- **2026-10-10** — actor: **T, attended session** (same branch). Action: **added Phase RC2** (v0.2.0 release, D78) after PF1. Confirmed T's request: yes ("I also want to schedule a v0.2.0 after the first performance audit"; release shape and gate chosen via AskUserQuestion). Reason: reason not stated. Resulting commit: this one.
 
 ## Phase log (commit hashes)
 
