@@ -449,22 +449,6 @@
   vertically so the empty space is split and smaller.
 - source: critique:drive (unattended)
 
-### [LOW] hazard / mobile — the opening hand breaks CLIFFRUNNER mid-word as "CLIFFRUNN / ER"
-- pass: 73 (commit 1f5e2896)
-- viewport: mobile (375x812)
-- category: visual
-- observation: since commit 8d5aee2a a covered card's name wraps
-  inside its visible strip. Multi-word names wrap cleanly ("BALANCE /
-  POLE", "UNBROKEN / OATH"), but CLIFFRUNNER is one word, longer than
-  the strip, and breaks at a letter: "CLIFFRUNN" over "ER".
-- evidence: `.critique-artifacts/mobile/10-hazard.png`;
-  `hazard.content.ts:52` (name "CLIFFRUNNER")
-- suggested fix: shrink a single-word name to fit its strip
-  (`adjustsFontSizeToFit` / a min font scale on the hand-mode name)
-  instead of letting it break mid-word; keep the 2-line wrap for
-  multi-word names.
-- source: critique:drive (unattended)
-
 ### [LOW] RC walk 2026-10-02 — copy, label and console findings (one row per item, all presentation)
 - pass: RC checkpoint walk, four `playtester` legs (attended, T present), commits a493eaf7 → 169b6dbc
 - viewport: playwright default (desktop)
@@ -722,6 +706,23 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] hazard / mobile — the opening hand breaks CLIFFRUNNER mid-word as "CLIFFRUNN / ER" — RESOLVED 2026-10-10 (commit f9d7c190; a single-word hand-mode name sizes itself to the room beside the pips and the fanned neighbour (`handNameFontSize`, computed because react-native-web ignores `adjustsFontSizeToFit`): CLIFFRUNNER renders at 10px, 44px wide in a 48px strip; multi-word names keep 13px and the wrap; pinned in HazardCard.test.tsx)
+- issue: #478
+- pass: 73 (commit 1f5e2896)
+- viewport: mobile (375x812)
+- category: visual
+- observation: since commit 8d5aee2a a covered card's name wraps
+  inside its visible strip. Multi-word names wrap cleanly ("BALANCE /
+  POLE", "UNBROKEN / OATH"), but CLIFFRUNNER is one word, longer than
+  the strip, and breaks at a letter: "CLIFFRUNN" over "ER".
+- evidence: `.critique-artifacts/mobile/10-hazard.png`;
+  `hazard.content.ts:52` (name "CLIFFRUNNER")
+- suggested fix: shrink a single-word name to fit its strip
+  (`adjustsFontSizeToFit` / a min font scale on the hand-mode name)
+  instead of letting it break mid-word; keep the 2-line wrap for
+  multi-word names.
+- source: critique:drive (unattended)
 
 ### [x] [LOW] hazard / desktop — the route cards stretch 1240px edge to edge, so each threshold sits across the screen from its label — RESOLVED 2026-10-09 (commit 3c25eb28; the header, opening hand and route cards sit in a column capped at `ROUTE_COLUMN_MAX_WIDTH` (520), centred, full width below the cap; the fan sizes its overlap to the column; pinned in RouteSelect.test.tsx)
 - issue: #475
