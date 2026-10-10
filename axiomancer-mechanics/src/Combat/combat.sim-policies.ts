@@ -24,6 +24,9 @@ import type {
     CombatCard, CombatEncounterState, SignatureSkill, SignatureSkillKind,
 } from './combat.encounter.types';
 import { getPendingDotTotal } from './effects';
+// SANDBOX (Blood Price sims): a Blood Price card ranks by its own estimate.
+import { isBloodPriceCard } from './combat.blood-price';
+import { bpPaidScore } from './combat.blood-price.policy';
 
 /** Every scripted witness the sim can drive. */
 export type CombatSimPolicyId =
@@ -94,6 +97,7 @@ function isUtilityClass(card: CombatCard): boolean {
  * damage preview.
  */
 function greedyRankCard(s: CombatEncounterState, card: CombatCard): number {
+    if (s.bp && isBloodPriceCard(card.id)) return bpPaidScore(s, card.id);
     let score = card.bottomDamagePreview;
     if (enemyLowHp(s) && card.verbClass === 'befriend') score += BAND_BEFRIEND_LOW_HP;
     if (isNewStatus(s, card)) score += BAND_NEW_STATUS;

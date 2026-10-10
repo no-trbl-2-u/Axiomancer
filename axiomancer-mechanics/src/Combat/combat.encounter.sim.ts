@@ -36,6 +36,10 @@ import {
     type CombatObjectiveTelemetry,
 } from './combat.objective.telemetry';
 import { scoreCombatObjective, type CombatQualityScore } from './combat.objective';
+// SANDBOX (Blood Price sims): the bot's legality / safety gates for Blood
+// Price lines. Inert for every library card (they never carry a spec).
+import { isBloodPriceCard } from './combat.blood-price';
+import { bpWantsPaid, bpWantsFree, bpDrainPriority } from './combat.blood-price.policy';
 
 /**
  * The policy roster (greedy, blind, dot-weaver, control-lock, aggro-brute,
@@ -179,6 +183,8 @@ export interface CombatSimRunOptions {
     /** Card ids boosted to the FRONT of every policy's ranking — used by the
      *  card-coverage e2e to guarantee a specific card gets exercised. */
     focusCardIds?: readonly string[];
+    /** SANDBOX (Blood Price sims): called with each run's final state. */
+    onRunEnd?: (state: CombatEncounterState) => void;
 }
 
 /** Dominates every policy score band so a focused card always ranks first. */
@@ -202,7 +208,10 @@ function selectCard(
     // color are playable (wild matches everything) — mismatches hard-fizzle.
     const cards = handCards(s)
         .filter(c => c.card.verbClass !== 'retreat' && !(notUids && notUids.has(c.uid)))
-        .filter(c => !matchColor || matchColor === 'wild' || c.card.stance === 'any' || c.card.stance === matchColor);
+        .filter(c => !matchColor || matchColor === 'wild' || c.card.stance === 'any' || c.card.stance === matchColor)
+        // SANDBOX (Blood Price sims): never power an illegal, unsafe or
+        // worthless Blood Price PAID line.
+        .filter(c => !s.bp || !isBloodPriceCard(c.card.id) || bpWantsPaid(s, c.uid));
     let best: { uid: string; card: CombatCard } | null = null;
     let bestScore = -Infinity;
     for (const c of cards) {
@@ -422,14 +431,22 @@ export function upgradeablePlayPhase(
 
     // Wind-down: drain the leftover hand through the FREE tops, then end the turn.
     let drain = 0;
+    // SANDBOX (Blood Price sims): Blood Price FREE lines the bot holds (or that
+    // fizzle) are skipped so the rest of the hand still drains.
+    const heldUids = new Set<string>();
     while (working.phase === 'phase-play' && !working.finalOutcome && !working.mercyChoiceActive && drain < 30) {
         drain++;
-        const resT = handCards(working).find(c => c.card.verbClass !== 'retreat');
+        const resT = working.bp
+            ? nextBloodPriceDrain(working, heldUids)
+            : handCards(working).find(c => c.card.verbClass !== 'retreat');
         if (!resT) break;
         const play = playCombatCard(working, { uid: resT.uid }, false);
         const row = lineRow(lines, resT.card.id);
         row.freeHpSwing += playHpSwing(working, play.state, play.events);
-        if (play.events.some(e => e.kind === 'effect-fizzled')) row.fizzles++;
+        if (play.events.some(e => e.kind === 'effect-fizzled')) {
+            row.fizzles++;
+            heldUids.add(resT.uid);
+        }
         working = play.state;
         plays++;
         bumpUsage(usage, resT.card, 'top');
@@ -438,6 +455,25 @@ export function upgradeablePlayPhase(
         working = endTurn(working).state;
     }
     return { state: working, plays, statusPlays, decisionPoints, liveOptions };
+}
+
+/** SANDBOX (Blood Price sims): the next hand card to drain on its FREE line —
+ *  Blood Price cards in drain-priority order (stable), each passing the bot's
+ *  FREE gate; a held card is skipped for the rest of the phase. */
+function nextBloodPriceDrain(
+    s: CombatEncounterState,
+    held: Set<string>,
+): { uid: string; card: CombatCard } | undefined {
+    const hand = handCards(s)
+        .filter(c => c.card.verbClass !== 'retreat' && !held.has(c.uid))
+        .map((c, i) => ({ c, i, p: isBloodPriceCard(c.card.id) ? bpDrainPriority(c.card.id) : 3 }))
+        .sort((a, b) => a.p - b.p || a.i - b.i)
+        .map(x => x.c);
+    for (const c of hand) {
+        if (!isBloodPriceCard(c.card.id) || bpWantsFree(s, c.uid)) return c;
+        held.add(c.uid);
+    }
+    return undefined;
 }
 
 /**
@@ -582,6 +618,7 @@ export function runOneEncounter(
     }
 
     const convictionSpent = Math.max(0, state.turn - state.conviction);
+    options?.onRunEnd?.(state);
 
     // Metrics slate — every draw after the opening deal rides a `hand-drawn`
     // event in the transcript (phase-boundary refills).
@@ -677,6 +714,8 @@ export interface CombatSimDetailedOptions {
     deck?: readonly string[];
     /** Cards boosted to the front of ranking in every run (coverage harness). */
     focusCardIds?: readonly string[];
+    /** SANDBOX (Blood Price sims): called with each run's final state. */
+    onRunEnd?: (state: CombatEncounterState) => void;
 }
 
 /** The AGGREGATED usage row for a card, created zeroed (line-telemetry
@@ -755,6 +794,7 @@ export function simulateHazardPatternCombatDetailed(
         const r = runOneEncounter(options.player, options.enemy, startSeed + i, policy, {
             deck: options.deck,
             focusCardIds: options.focusCardIds,
+            onRunEnd: options.onRunEnd,
         });
         winPathCounts[r.outcome]++;
         addObjectiveTelemetry(objectiveTelemetry, r.objective);

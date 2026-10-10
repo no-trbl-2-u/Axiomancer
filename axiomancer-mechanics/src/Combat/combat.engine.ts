@@ -65,6 +65,11 @@ import { canAct, getActiveEffectModifiers, getActiveDotTotal, ticksOnRoundClock 
 import { getThreatSequence, commitThreatBranch } from './combat.threat';
 import { getSignatureSkill, applySignatureSkill, signatureCastBlock, playerArchetype } from './combat.signature';
 import { getSignaturesForLoadout } from '../Items/relic.library';
+import {
+    type BpKit, deckHasBloodPrice, initBloodPriceState, isBloodPriceCard, isCurseCard,
+    playBloodPriceCard, bloodPriceTurnStart, bloodPriceClampDamage, bloodPriceRecordDamage,
+    bloodPriceRollRound, bloodPriceGuardAfterThreat,
+} from './combat.blood-price';
 import type {
     CombatCard, CombatDieColor, CombatEncounterState, CombatEvent, CardPlay,
     CombatManaDie, CombatPhaseResult, CombatTransition, LandedEffect,
@@ -302,6 +307,9 @@ export function initializeCombatEncounter(
         seed,
         // No coveted die claimed yet this combat.
         covetedDiceClaimed: [],
+        // SANDBOX (Blood Price sims): the ledger exists only for a deck that
+        // holds Blood Price cards, so every other fight's state is unchanged.
+        ...(deckHasBloodPrice(deck) ? { bp: initBloodPriceState(clonedPlayer.health) } : {}),
     };
 }
 
@@ -393,7 +401,16 @@ export function startTurn(
     };
     events.push({ kind: 'turn-dice-rolled', turn, dice });
     events.push({ kind: 'dice-rolled', dice });
-    return { state: withLog(next, events), events };
+    let started = withLog(next, events);
+    // SANDBOX (Blood Price sims): start-of-turn Globals, pending heals and
+    // the per-turn SACRIFICE modifiers. Absent ledger = untouched.
+    if (started.bp) {
+        const bp = bloodPriceTurnStart(started, BLOOD_PRICE_KIT);
+        started = withLog(bp.state, bp.events);
+        events.push(...bp.events);
+        if (isDefeated(started.enemy)) return endCombat(started, 'victory', events);
+    }
+    return { state: started, events };
 }
 
 /** Ends the turn: at end of round, ONE unspent mana/special tray
@@ -491,6 +508,15 @@ export function playCombatCard(
     const card = getCard(entry.cardId);
     if (!card) return { state, events: [] };
 
+    // SANDBOX (Blood Price sims): a card with a `bloodPrice` spec resolves in
+    // combat.blood-price.ts; BOON and momentum still run for its PAID play.
+    if (state.bp && isBloodPriceCard(card.id)) {
+        const bp = playBloodPriceCard(state, entry.uid, useBottom, dieId, BLOOD_PRICE_KIT);
+        if (bp.events.length === 0) return { state, events: [] };
+        const played = checkImmediateOutcome(withLog(bp.state, bp.events), bp.events);
+        return applyBoonAndMomentumV2(state, played, card.stance, useBottom);
+    }
+
     const transition = useBottom
         ? playBottomAction(state, entry.uid, card, dieId, rng)
         : playTopAction(state, entry.uid, card, rng);
@@ -581,6 +607,15 @@ export function discardCombatCard(state: CombatEncounterState, uid: string): Com
     if (state.phase !== 'phase-play') return { state, events: [] };
     const entry = state.hand.find(h => h.uid === uid);
     if (!entry) return { state, events: [] };
+    // SANDBOX (Blood Price sims): a Curse cannot be scrapped; playing it is
+    // the only way out (plan/revamp/cards.md).
+    if (isCurseCard(entry.cardId)) {
+        const events: CombatEvent[] = [{
+            kind: 'effect-fizzled', cardId: entry.cardId, effectId: '',
+            message: 'a Curse cannot be scrapped — play it to be rid of it',
+        }];
+        return { state: withLog(state, events), events };
+    }
     const scrapsThisTurn = state.scrapsThisTurn ?? 0;
     const pays = scrapsThisTurn < SCRAP_CONVICTION_CAP_PER_TURN;
     const conviction = pays ? Math.min(CONVICTION_CAP, state.conviction + 1) : state.conviction;
@@ -1215,8 +1250,11 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     events.push({ kind: 'barrier-absorbed', amount: barrierAbsorbed });
                 }
                 if (dmg > 0) {
-                    player = applyDamage(player, dmg);
-                    enemyDamageDealt += dmg;
+                    // SANDBOX (Blood Price sims): a death ward keeps the
+                    // player at 1 VITAE; identity when no ledger.
+                    const landed = bloodPriceClampDamage(state, player.health, dmg);
+                    player = applyDamage(player, landed);
+                    enemyDamageDealt += landed;
                     // The 'damage-instance' clock, player bearer — a threat
                     // hit that LANDS advances every damage-instance-clocked
                     // DoT the player carries (enemy threat riders land
@@ -1322,7 +1360,12 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         player,
         enemy,
         directDamageDealt: directDamage,
-        guard: 0,                       // brace is spent on this phase's threat; resets each phase
+        // brace is spent on this phase's threat; resets each phase (a
+        // Blood Price lasting GUARD carries its rest one more phase)
+        guard: state.bp ? bloodPriceGuardAfterThreat(state, guard) : 0,
+        ...(state.bp ? {
+            bp: { ...bloodPriceRecordDamage(state.bp, enemyDamageDealt, player.health), carryGuard: 0 },
+        } : {}),
         barrier,                        // persistent soak — carries the unspent remainder across phases
         riposte: undefined,             // cleared each phase (like guard)
         // The enemy-damage ledger (rolled over between phases)
@@ -1436,6 +1479,16 @@ export function processBetweenPhases(
     const playerStart = processRoundStartEffects(state.player, state.round);
     const playerEnd = processRoundEndEffects(playerStart.target, 'player');
     let player = playerEnd.target as Character;
+    // SANDBOX (Blood Price sims): the death ward covers this round's DoT too,
+    // and the loss ledgers roll over at the boundary.
+    let bpLedger = state.bp;
+    if (bpLedger) {
+        if (bpLedger.deathWardRound === state.round && player.health < 1 && state.player.health >= 1) {
+            player = { ...player, health: 1 };
+        }
+        const dotTaken = Math.max(0, state.player.health - player.health);
+        bpLedger = bloodPriceRollRound(bloodPriceRecordDamage(bpLedger, dotTaken, player.health));
+    }
     const playerDotTicks = clampDotTickBreakdown(projectedPlayerDotTicks, playerStart.dotDamage);
 
     for (const t of enemyDotTicks) events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
@@ -1570,6 +1623,7 @@ export function processBetweenPhases(
         // The STAGE ledgers.
         stagesEntered,
         stageThreatBonus,
+        ...(bpLedger ? { bp: bpLedger } : {}),
     };
     next = withLog(next, events);
     // The round is closed: zero the enemy-DoT accumulator AFTER logging
@@ -1888,6 +1942,14 @@ export function projectCombatOutcome(state: CombatEncounterState): CombatOutcome
     const roundsToKill = computeRoundsToKill(state.enemy, state.round);
     return { pendingDot, roundsToKill, isLethalInFlight: roundsToKill !== null };
 }
+
+/** SANDBOX (Blood Price sims): the engine pieces combat.blood-price.ts needs,
+ *  passed in so that module never imports the engine. */
+export const BLOOD_PRICE_KIT: BpKit = {
+    colorMatchBonus: (base: number) => colorMatchBonus(base),
+    convictionCap: CONVICTION_CAP,
+    incomingNet: (state: CombatEncounterState) => projectIncomingThreat(state).netDamage,
+};
 
 /** Re-export for presenters that need to check die affordability directly. */
 export { combatDieCanPower, availableDiceFor, effectImpact, cardStanceColor, riderText };

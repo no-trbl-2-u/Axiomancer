@@ -1,3 +1,5 @@
+import type { BloodPriceSpec } from './blood-price.types';
+
 /**
  * Cards System Types
  * Cards run on the resonance economy (heart / body / mind).
@@ -52,7 +54,11 @@ export function rankToRarity(rank: CardRank): CardRarity {
  * A card's type: Attack (the DEAL card), Skill (the GUARD card) and
  * Spell (the VULNERABLE card). Every type plays the same way: FREE or PAID, then discard.
  */
-export type CardType = 'attack' | 'skill' | 'spell';
+export type CardType = 'attack' | 'skill' | 'spell'
+    /** SANDBOX (Blood Price sims): stays in play; FREE 3 turns, PAID rest of combat. */
+    | 'global'
+    /** SANDBOX (Blood Price sims): a dead card that holds a hand slot until played. */
+    | 'curse';
 
 /**
  * Targeting scope for a card effect.
@@ -287,4 +293,11 @@ export interface Card {
      * Data only — the card engine ignores it; `upgradeCard` reads it.
      */
     upgrade?: CardUpgrade;
+    /**
+     * SANDBOX ONLY (branch sandbox/blood-price-sims): a Blood Price line
+     * program. A card that carries one is resolved by
+     * `Combat/combat.blood-price.ts` instead of `free` / `specialMechanics`.
+     * No library card sets it (THE CARD HOLD, D37).
+     */
+    bloodPrice?: BloodPriceSpec;
 }

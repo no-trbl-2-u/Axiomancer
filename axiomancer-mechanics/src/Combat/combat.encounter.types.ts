@@ -19,6 +19,7 @@ import type { Character } from '../Character/types';
 import type { Enemy } from '../Enemy/types';
 import type { Effect, ActiveEffect } from '../Effects/types';
 import type { CardAspect, CardType } from '../Cards/types';
+import type { BloodPriceCombatState } from './combat.blood-price';
 
 // ---------------------------------------------------------------------------
 // Dice — the stance-color economy
@@ -581,6 +582,9 @@ export interface CombatEncounterState {
      *  gear. */
     dieGear?: Partial<Record<'heart' | 'body' | 'mind' | 'wild', UpgradeableDieGear>>;
     seed?: number;                         // seed used to drive the encounter (sim/tests)
+    /** SANDBOX (Blood Price sims): the SACRIFICE / Global / Curse ledger.
+     *  Present only when the deck holds a Blood Price card. */
+    bp?: BloodPriceCombatState;
 }
 
 /**

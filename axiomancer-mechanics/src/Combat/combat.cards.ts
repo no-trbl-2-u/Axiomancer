@@ -269,7 +269,11 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
 
     // FREE line — the authored dieless rider.
     const riderOpts = { selfTargetCard: card.targetType === 'self' };
-    const topActionText = card.free
+    // SANDBOX (Blood Price sims): a Blood Price card prints its ballot text.
+    const bpFree = card.bloodPrice ? (card.bloodPrice.global?.text ?? card.bloodPrice.free?.text) : undefined;
+    const topActionText = bpFree
+        ? `FREE — ${bpFree} (${rankLabel(card)})`
+        : card.free
         ? `FREE — ${riderText(card.free, riderOpts)}. (${rankLabel(card)})`
         : `FREE — no effect. (${rankLabel(card)})`;
 
