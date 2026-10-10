@@ -1,0 +1,84 @@
+/**
+ * Hermetic component tests — the `/dev` CARDS section leaves.
+ *
+ * Pins:
+ *   - DEV gate: both leaves render null when __DEV__ is false.
+ *   - DebugLaneDeck: the drop-down opens, lists every lane, picks one, and
+ *     SET DECK deals that lane's test deck.
+ *   - DebugRewardPool: one checkbox per lane; checking a lane and pressing
+ *     SET REWARD POOL saves it; the grid starts from the saved override.
+ */
+
+import { describe, expect, it } from '@jest/globals';
+import { fireEvent, render } from '@testing-library/react-native';
+import { CARD_LANES, GREY_LANE } from '@mechanics';
+import React from 'react';
+
+import { DebugLaneDeck } from '@/components/DebugLaneDeck';
+import { DebugRewardPool } from '@/components/DebugRewardPool';
+import { setRewardPool } from '@/state/dev/cards';
+import { GameStoreProvider } from '@/state/GameStoreProvider';
+import { createAppStore, type AppStore } from '@/state/store';
+import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
+
+const makeStore = (): AppStore => createAppStore({ adapter: createMemoryAdapter() });
+const withProvider = (store: AppStore, child: React.ReactNode) => <GameStoreProvider store={store}>{child}</GameStoreProvider>;
+
+describe('CARDS leaves: DEV gate', () => {
+    it('render null when __DEV__ is false (production build simulation)', () => {
+        const g = global as unknown as { __DEV__: boolean };
+        const original = g.__DEV__;
+        g.__DEV__ = false;
+        try {
+            const deck = render(withProvider(makeStore(), <DebugLaneDeck />));
+            expect(deck.queryByTestId('debug-lane-deck')).toBeNull();
+            const pool = render(withProvider(makeStore(), <DebugRewardPool />));
+            expect(pool.queryByTestId('debug-reward-pool')).toBeNull();
+        } finally {
+            g.__DEV__ = original;
+        }
+    });
+});
+
+describe('DebugLaneDeck', () => {
+    it('picks a lane from the drop-down and SET DECK deals its deck', () => {
+        const store = makeStore();
+        const player = store.getState().player;
+        store.setState({ player: { ...player, knownCards: ['grey-word'], combatRewardCards: ['grey-strike'] } });
+        const tree = render(withProvider(store, <DebugLaneDeck />));
+
+        expect(tree.queryByTestId('debug-lane-deck-select-list')).toBeNull();
+        fireEvent.press(tree.getByTestId('debug-lane-deck-select'));
+        for (const lane of CARD_LANES) {
+            expect(tree.queryByTestId(`debug-lane-deck-select-option-${lane.id}`)).not.toBeNull();
+        }
+        fireEvent.press(tree.getByTestId('debug-lane-deck-select-option-grey'));
+        expect(tree.queryByTestId('debug-lane-deck-select-list')).toBeNull();
+
+        fireEvent.press(tree.getByTestId('debug-lane-deck-set'));
+        expect(store.getState().player.knownCards).toEqual([...GREY_LANE.testDeck]);
+        expect(store.getState().player.combatRewardCards).toEqual([]);
+        expect(tree.getByTestId('debug-lane-deck-sub').props.children).toContain(GREY_LANE.name);
+    });
+});
+
+describe('DebugRewardPool', () => {
+    it('renders one checkbox per lane and saves the checked lanes', () => {
+        const store = makeStore();
+        const tree = render(withProvider(store, <DebugRewardPool />));
+        for (const lane of CARD_LANES) {
+            expect(tree.getByTestId(`debug-reward-pool-lane-${lane.id}`).props.accessibilityState).toEqual({ checked: false });
+        }
+        fireEvent.press(tree.getByTestId('debug-reward-pool-lane-grey'));
+        expect(tree.getByTestId('debug-reward-pool-lane-grey').props.accessibilityState).toEqual({ checked: true });
+        fireEvent.press(tree.getByTestId('debug-reward-pool-set'));
+        expect(store.getState().player.devRewardLaneIds).toEqual(['grey']);
+    });
+
+    it('starts from the saved override', () => {
+        const store = makeStore();
+        setRewardPool(store, ['grey']);
+        const tree = render(withProvider(store, <DebugRewardPool />));
+        expect(tree.getByTestId('debug-reward-pool-lane-grey').props.accessibilityState).toEqual({ checked: true });
+    });
+});

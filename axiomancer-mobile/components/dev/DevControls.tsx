@@ -14,6 +14,10 @@
  *   <DevButton label onPress>     the primary action affordance.
  *   <DevChip label active onPress> a small toggle/pick affordance, meant
  *                                 to be rendered in a wrapping <DevChips>.
+ *   <DevSelect value options>     a drop-down: the current pick, which opens
+ *                                 an inline option list on press.
+ *   <DevCheck label checked>      a checkbox row; render many inside
+ *                                 <DevChips> for a grid.
  *
  * All primitives are pure functions of their props — no store access —
  * so the leaves stay the only place that touches state.
@@ -156,6 +160,107 @@ export function DevChips({ children, testID }: { children: React.ReactNode; test
     );
 }
 
+/** One option in a {@link DevSelect}. */
+export interface DevSelectOption {
+    /** Stable value handed back to `onChange`. */
+    value: string;
+    /** Text shown for the option. */
+    label: string;
+}
+
+/** Props for the drop-down. */
+export interface DevSelectProps {
+    /** The selected option's value; `null` shows `placeholder`. */
+    value: string | null;
+    options: readonly DevSelectOption[];
+    /** Called with the picked option's value; the list then closes. */
+    onChange: (value: string) => void;
+    /** Shown when nothing is selected. */
+    placeholder?: string;
+    /** Accessibility label for the closed control. */
+    a11y?: string;
+    /** The trigger gets `testID`; each option gets `${testID}-option-${value}`. */
+    testID?: string;
+}
+
+/**
+ * A drop-down built from Pressables, so it renders the same on web and
+ * native. Closed, it shows the current pick and a caret; pressed, it lists
+ * every option beneath itself. Open state is local; the value is the
+ * caller's.
+ */
+export function DevSelect({ value, options, onChange, placeholder = 'choose…', a11y, testID }: DevSelectProps) {
+    const styles = useStyles();
+    const [open, setOpen] = React.useState(false);
+    const current = options.find((o) => o.value === value);
+    return (
+        <View style={styles.select}>
+            <Pressable
+                style={styles.selectTrigger}
+                onPress={() => setOpen((o) => !o)}
+                accessibilityRole="button"
+                accessibilityLabel={a11y ?? 'Open the option list'}
+                accessibilityState={{ expanded: open }}
+                testID={testID}
+            >
+                <Text style={styles.selectLabel} numberOfLines={1}>
+                    {current?.label ?? placeholder}
+                </Text>
+                <Text style={styles.selectCaret}>{open ? '▴' : '▾'}</Text>
+            </Pressable>
+            {open ? (
+                <View style={styles.selectList} testID={testID ? `${testID}-list` : undefined}>
+                    {options.map((o) => (
+                        <Pressable
+                            key={o.value}
+                            style={[styles.selectOption, o.value === value && styles.selectOptionActive]}
+                            onPress={() => {
+                                onChange(o.value);
+                                setOpen(false);
+                            }}
+                            accessibilityRole="button"
+                            accessibilityLabel={o.label}
+                            accessibilityState={{ selected: o.value === value }}
+                            testID={testID ? `${testID}-option-${o.value}` : undefined}
+                        >
+                            <Text style={[styles.selectLabel, o.value === value && styles.chipLabelActive]}>{o.label}</Text>
+                        </Pressable>
+                    ))}
+                </View>
+            ) : null}
+        </View>
+    );
+}
+
+/** Props for a checkbox. */
+export interface DevCheckProps {
+    label: string;
+    checked: boolean;
+    onToggle: () => void;
+    a11y?: string;
+    testID?: string;
+}
+
+/** A checkbox: a box that fills when checked, and its label. */
+export function DevCheck({ label, checked, onToggle, a11y, testID }: DevCheckProps) {
+    const styles = useStyles();
+    return (
+        <Pressable
+            style={styles.check}
+            onPress={onToggle}
+            accessibilityRole="checkbox"
+            accessibilityLabel={a11y ?? label}
+            accessibilityState={{ checked }}
+            testID={testID}
+        >
+            <View style={[styles.checkBox, checked && styles.checkBoxOn]}>
+                {checked ? <Text style={styles.checkMark}>✓</Text> : null}
+            </View>
+            <Text style={styles.chipLabel}>{label}</Text>
+        </Pressable>
+    );
+}
+
 /** Horizontal button group. */
 export function DevButtons({ children }: { children: React.ReactNode }) {
     const styles = useStyles();
@@ -222,6 +327,43 @@ const useStyles = makeStyles((AXM) => ({
     chipLabel: { fontFamily: FONTS.mono, fontSize: 9, letterSpacing: 0.5, color: AXM.parchment },
     chipLabelActive: { color: AXM.bg },
     chipLabelAccent: { color: AXM.blood },
+    select: { flex: 1, minWidth: 140 },
+    selectTrigger: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 6,
+        paddingHorizontal: 8,
+        paddingVertical: 6,
+        borderWidth: 1,
+        borderColor: AXM.ash,
+        backgroundColor: AXM.deepBg,
+    },
+    selectLabel: { fontFamily: FONTS.mono, fontSize: 10, color: AXM.parchment, flexShrink: 1 },
+    selectCaret: { fontFamily: FONTS.mono, fontSize: 10, color: AXM.bone },
+    selectList: { borderWidth: 1, borderTopWidth: 0, borderColor: AXM.ash, backgroundColor: AXM.deepBg },
+    selectOption: { paddingHorizontal: 8, paddingVertical: 6 },
+    selectOptionActive: { backgroundColor: AXM.sulfur },
+    check: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        paddingHorizontal: 7,
+        paddingVertical: 4,
+        borderWidth: 1,
+        borderColor: AXM.ash,
+        backgroundColor: AXM.deepBg,
+    },
+    checkBox: {
+        width: 12,
+        height: 12,
+        borderWidth: 1,
+        borderColor: AXM.bone,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    checkBoxOn: { borderColor: AXM.sulfur, backgroundColor: AXM.sulfur },
+    checkMark: { fontFamily: FONTS.mono, fontSize: 9, lineHeight: 10, color: AXM.bg },
     kv: { flexDirection: 'row', gap: 8, paddingVertical: 1 },
     kvKey: { fontFamily: FONTS.mono, fontSize: 9, color: AXM.bone, width: 92 },
     kvVal: { fontFamily: FONTS.mono, fontSize: 9, color: AXM.parchment, flex: 1 },

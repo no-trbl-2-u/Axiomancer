@@ -16,6 +16,7 @@
 
 import type { Character } from '../Character/types';
 import { cardLibrary, getCardById } from '../Cards/cards.library';
+import { CARD_LANES, GREY_LANE, laneRewardPool, type CardLane } from '../Cards/card.lanes';
 
 /**
  * The card-reward pool: the whole library. The grey office IS the pool: a won fight offers A Plain Blow, Ward and Word,
@@ -36,25 +37,41 @@ export const COMBAT_REWARD_POOL: readonly string[] = Object.freeze(
  * deduplicated) into a fresh character's `knownCards`, and every sim and
  * playtest deck is this list.
  */
-export const STARTING_CARD_IDS: readonly string[] = Object.freeze([
-    'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike',
-    'grey-ward', 'grey-ward', 'grey-ward',
-    'grey-word', 'grey-word',
-]);
+export const STARTING_CARD_IDS: readonly string[] = GREY_LANE.testDeck;
+
+/**
+ * The pool one player's reward draft draws from: the card ids of the lanes
+ * in `player.devRewardLaneIds` (set from the dev menu), or the whole
+ * {@link COMBAT_REWARD_POOL} when that field is absent, empty, or names no
+ * registered lane. Only ids the library resolves are kept.
+ *
+ * @param player - The player whose draft is being rolled.
+ * @param lanes  - The lane registry; defaults to {@link CARD_LANES}.
+ * @returns The candidate card ids, library order within each lane.
+ * @example rewardPoolFor({ ...player, devRewardLaneIds: ['grey'] })
+ */
+export function rewardPoolFor(
+    player: Pick<Character, 'devRewardLaneIds'>,
+    lanes: readonly CardLane[] = CARD_LANES,
+): string[] {
+    const lanePool = laneRewardPool(player.devRewardLaneIds ?? [], lanes);
+    const pool = lanePool.length > 0 ? lanePool : COMBAT_REWARD_POOL;
+    return pool.filter(id => !!getCardById(id));
+}
 
 /**
  * Rolls `count` distinct card-reward offers after a won combat: a uniform
- * draw over {@link COMBAT_REWARD_POOL}. Pure: every decision is seeded by
+ * draw over {@link rewardPoolFor} the player. Pure: every decision is seeded by
  * `rng`, so the same seed always yields the same offers. There is no theme
  * pull, keyword guarantee or rarity weighting: all three grey cards share
  * one rank.
  */
 export function rollCombatCardRewards(
-    _player: Character,
+    player: Character,
     rng: () => number,
     count = 3,
 ): string[] {
-    const remaining = COMBAT_REWARD_POOL.filter(id => !!getCardById(id));
+    const remaining = rewardPoolFor(player);
     const offers: string[] = [];
     while (offers.length < count && remaining.length > 0) {
         const idx = Math.min(Math.floor(rng() * remaining.length), remaining.length - 1);
