@@ -453,32 +453,6 @@
 
 ## Pending
 
-### [MED] combat / desktop — A Plain Word's paid column reads "VU…" / "+6" / "0%" now that the desktop hand shows every column
-- pass: 74 (commit f91bc9e8)
-- viewport: desktop (1280x800)
-- category: comprehension
-- observation: since commit cc556113 the desktop hand sits side by side,
-  so both A Plain Word cards show their paid column in full. The column
-  is too narrow for its two lines: the keyword ellipsizes to "♥ VU…" and
-  the value "+60%" breaks inside the number, as "+6" over "0%". A player
-  reads a +6 and a 0%. The DOM text is right ("♥ VULNERABLE", "+60%"),
-  so this is layout only. A Plain Ward's "★ GUARD 12" fits.
-  `plan/AUDIT.md` has carried this since 2026-09-27 ("Post-purge: a
-  staged A Plain Word wraps +25% mid-token", impact 4), when the fan
-  covered most columns. Now every desktop opening hand shows it, so the
-  severity goes up here.
-- evidence: `.critique-artifacts/desktop/04-combat-board.png`, the
-  paid cells of the second and fourth cards (around x=540 and x=800,
-  y=700-750); `desktop/04-combat-board.txt` lines 18-19 and 24-25.
-- suggested fix: in `CombatBoard.tsx` (`paidTextWrap` / `paidValue`,
-  around line 1757), keep the value on one line (`numberOfLines={1}`
-  plus a computed font size, as `handNameFontSize` does for hazard
-  names, since react-native-web ignores `adjustsFontSizeToFit`). Give the
-  paid cell the width the free cell does not need, so the keyword shows
-  whole. Pin it in a CombatBoard test at 1280 wide, and close the AUDIT
-  row with it.
-- source: critique:drive (unattended)
-
 ### [LOW] title / desktop — the three-step scrim draws two hard seams across the art, through the king's crown and his beard
 - pass: 74 (commit f91bc9e8)
 - viewport: desktop (1280x800)
@@ -771,6 +745,33 @@
 - source: loop
 
 ## Done
+
+### [x] [MED] combat / desktop — A Plain Word's paid column reads "VU…" / "+6" / "0%" now that the desktop hand shows every column — RESOLVED 2026-10-10 (commit 8d579f67; `paidLedgerFit` stacks a small face's ledger when the side-by-side PAID column cannot hold the keyword's longest word or the value, and the value keeps one line at a computed size; both Word cards print VULNERABLE and +60% whole at 1280x800; pinned in CombatBoard.paid-column.test.tsx)
+- issue: #479
+- pass: 74 (commit f91bc9e8)
+- viewport: desktop (1280x800)
+- category: comprehension
+- observation: since commit cc556113 the desktop hand sits side by side,
+  so both A Plain Word cards show their paid column in full. The column
+  is too narrow for its two lines: the keyword ellipsizes to "♥ VU…" and
+  the value "+60%" breaks inside the number, as "+6" over "0%". A player
+  reads a +6 and a 0%. The DOM text is right ("♥ VULNERABLE", "+60%"),
+  so this is layout only. A Plain Ward's "★ GUARD 12" fits.
+  `plan/AUDIT.md` has carried this since 2026-09-27 ("Post-purge: a
+  staged A Plain Word wraps +25% mid-token", impact 4), when the fan
+  covered most columns. Now every desktop opening hand shows it, so the
+  severity goes up here.
+- evidence: `.critique-artifacts/desktop/04-combat-board.png`, the
+  paid cells of the second and fourth cards (around x=540 and x=800,
+  y=700-750); `desktop/04-combat-board.txt` lines 18-19 and 24-25.
+- suggested fix: in `CombatBoard.tsx` (`paidTextWrap` / `paidValue`,
+  around line 1757), keep the value on one line (`numberOfLines={1}`
+  plus a computed font size, as `handNameFontSize` does for hazard
+  names, since react-native-web ignores `adjustsFontSizeToFit`). Give the
+  paid cell the width the free cell does not need, so the keyword shows
+  whole. Pin it in a CombatBoard test at 1280 wide, and close the AUDIT
+  row with it.
+- source: critique:drive (unattended)
 
 ### [x] [LOW] hazard / mobile — the opening hand breaks CLIFFRUNNER mid-word as "CLIFFRUNN / ER" — RESOLVED 2026-10-10 (commit f9d7c190; a single-word hand-mode name sizes itself to the room beside the pips and the fanned neighbour (`handNameFontSize`, computed because react-native-web ignores `adjustsFontSizeToFit`): CLIFFRUNNER renders at 10px, 44px wide in a 48px strip; multi-word names keep 13px and the wrap; pinned in HazardCard.test.tsx)
 - issue: #478

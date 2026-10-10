@@ -52,6 +52,20 @@
 
 ## Pending
 
+### [ ] [tests] Root `npm test` is red on main: `check-comments` flags two "D41" decision-number comments (2026-10-10)
+- category: tests
+- impact: 5
+- ease: 9
+- detail: 9ccba038 added comments citing a decision number to
+  `axiomancer-mechanics/src/Combat/combat.engine.ts:941` ("Card statuses
+  land uncapped (D41)") and `src/Combat/e2e/fate-engine.engine.test.ts:46`
+  ("VULNERABLE is uncapped (D41)"). `node scripts/check-comments.mjs`
+  exits 1 on both, so the root `npm test` fails. CI's `verify-*` legs do
+  not run the guard, so `main` shows green.
+- next (`/iterate`): state the rule without the decision number (or move
+  the citation to `docs/game-model.md`), then run `node
+  scripts/check-comments.mjs` and the root `npm test`.
+
 ### [x] [tooling] `tick-end` telemetry rows never land for any `/march`-dispatched tick (digest, 2026-10-09) — CLOSED 2026-10-09 (53a0c39b: `_claude-skill.yml` commits whatever the tick left in `telemetry/` in a best-effort step after Claude exits; the first CI tick after it should show a `telemetry: tick-end rows` commit)
 - issue: #476
 - category: debt
@@ -282,7 +296,7 @@
 - next (guided card session): treat as part of re-admitting the keyword;
   no loop action while no card carries it.
 
-### [ui] Post-purge: a staged A Plain Word wraps "+25%" mid-token to "+2/5%" (2026-09-27)
+### [x] [ui] Post-purge: a staged A Plain Word wraps "+25%" mid-token to "+2/5%" (2026-09-27) — CLOSED 2026-10-10 (8d579f67: the PAID value keeps one line at a computed size on every small face, `paidLedgerFit`; CRITIQUE pass 74 MED, issue #479)
 - category: ui
 - impact: 4
 - ease: 6
