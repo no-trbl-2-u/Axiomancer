@@ -453,25 +453,6 @@
 
 ## Pending
 
-### [LOW] title / desktop — the three-step scrim draws two hard seams across the art, through the king's crown and his beard
-- pass: 74 (commit f91bc9e8)
-- viewport: desktop (1280x800)
-- category: visual
-- observation: the bottom scrim is three flat translucent bands (0.25 /
-  0.6 / 0.9, `TitleScreen.tsx` `scrimBand1-3`). On a 1280x800 window
-  their edges are straight lines across the full width, at about y=360,
-  y=510 and y=655. The y=510 seam crosses the king's crown and the y=655
-  seam crosses his beard, just above EMBARK. They read as UI stripes,
-  not shade. The source says a coarse step "reads as atmosphere" over
-  half a screen. That holds on a phone, where the art sits above the
-  bands, but not on desktop, where the bands lie over the figures.
-- evidence: `.critique-artifacts/desktop/01-title.png`, left half,
-  y=350-700.
-- suggested fix: give the scrim the same finer ramp as `artFoot` (about
-  seven bands with eased opacities), or a real gradient on web, so no
-  step shows. Keep the CTA panel's final darkness.
-- source: critique:drive (unattended)
-
 ### [LOW] exploration / mobile — the map pane leaves a ~140px empty black band above the engraving
 - pass: 73 (commit 1f5e2896)
 - viewport: mobile (375x812)
@@ -745,6 +726,26 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] title / desktop — the three-step scrim draws two hard seams across the art, through the king's crown and his beard — RESOLVED 2026-10-10 (commit 85672440; the scrim is one SVG LinearGradient, `titleScrimStops`, from clear to 0.9+ under the CTA; desktop capture shows no step, mobile unchanged; pinned in TitleScreen.test.tsx)
+- issue: #481
+- pass: 74 (commit f91bc9e8)
+- viewport: desktop (1280x800)
+- category: visual
+- observation: the bottom scrim is three flat translucent bands (0.25 /
+  0.6 / 0.9, `TitleScreen.tsx` `scrimBand1-3`). On a 1280x800 window
+  their edges are straight lines across the full width, at about y=360,
+  y=510 and y=655. The y=510 seam crosses the king's crown and the y=655
+  seam crosses his beard, just above EMBARK. They read as UI stripes,
+  not shade. The source says a coarse step "reads as atmosphere" over
+  half a screen. That holds on a phone, where the art sits above the
+  bands, but not on desktop, where the bands lie over the figures.
+- evidence: `.critique-artifacts/desktop/01-title.png`, left half,
+  y=350-700.
+- suggested fix: give the scrim the same finer ramp as `artFoot` (about
+  seven bands with eased opacities), or a real gradient on web, so no
+  step shows. Keep the CTA panel's final darkness.
+- source: critique:drive (unattended)
 
 ### [x] [MED] combat / desktop — A Plain Word's paid column reads "VU…" / "+6" / "0%" now that the desktop hand shows every column — RESOLVED 2026-10-10 (commit 8d579f67; `paidLedgerFit` stacks a small face's ledger when the side-by-side PAID column cannot hold the keyword's longest word or the value, and the value keeps one line at a computed size; both Word cards print VULNERABLE and +60% whole at 1280x800; pinned in CombatBoard.paid-column.test.tsx)
 - issue: #479
