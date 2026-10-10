@@ -425,12 +425,64 @@ describe('computeFocusTransform', () => {
 
     it('centres a single focus node at 1x — no zoom-out needed', () => {
         const nodes: ExplorationNode[] = [
+            { id: 'a', label: 'A', kind: 'current', type: 'encounter', x: 200, y: 200, triggersCombat: false },
+        ];
+        const fit = computeFocusTransform(nodes, { w: 400, h: 800 });
+        expect(fit.scale).toBe(1);
+        expect(fit.tx).toBeCloseTo(400 / 2 - 200 * SPREAD);
+        expect(fit.ty).toBeCloseTo(800 / 2 - 200 * SPREAD);
+    });
+
+    // CRITIQUE pass 73: a node set near the plate's top edge, centred, dropped
+    // the plate ~150px down a phone pane and left flat black above it.
+    it('slides the plate to the frame edge rather than leave an empty band', () => {
+        const nodes: ExplorationNode[] = [
             { id: 'a', label: 'A', kind: 'current', type: 'encounter', x: 100, y: 100, triggersCombat: false },
         ];
         const fit = computeFocusTransform(nodes, { w: 400, h: 800 });
         expect(fit.scale).toBe(1);
+        expect(fit.ty).toBe(0);
         expect(fit.tx).toBeCloseTo(400 / 2 - 100 * SPREAD);
-        expect(fit.ty).toBeCloseTo(800 / 2 - 100 * SPREAD);
+        const screenY = 100 * SPREAD + fit.ty;
+        expect(screenY).toBeGreaterThanOrEqual(0);
+        expect(screenY).toBeLessThanOrEqual(800);
+    });
+
+    it('never leaves a band on any edge of a plate that covers the pane', () => {
+        const sheet = { width: 2400, height: 2400, scale: 1 };
+        const viewport = { w: 355, h: 600 };
+        const corners: Array<[number, number]> = [[60, 60], [2340, 60], [60, 2340], [2340, 2340]];
+        for (const [x, y] of corners) {
+            const nodes: ExplorationNode[] = [
+                { id: 'a', label: 'A', kind: 'current', type: 'encounter', x, y, triggersCombat: false },
+            ];
+            const fit = computeFocusTransform(nodes, viewport, sheet);
+            const plateW = sheet.width * fit.scale;
+            const plateH = sheet.height * fit.scale;
+            expect(fit.tx).toBeLessThanOrEqual(0);
+            expect(fit.ty).toBeLessThanOrEqual(0);
+            expect(fit.tx + plateW).toBeGreaterThanOrEqual(viewport.w);
+            expect(fit.ty + plateH).toBeGreaterThanOrEqual(viewport.h);
+            const sx = x * fit.scale + fit.tx;
+            const sy = y * fit.scale + fit.ty;
+            expect(sx).toBeGreaterThanOrEqual(0);
+            expect(sx).toBeLessThanOrEqual(viewport.w);
+            expect(sy).toBeGreaterThanOrEqual(0);
+            expect(sy).toBeLessThanOrEqual(viewport.h);
+        }
+    });
+
+    it('centres a plate smaller than the pane, splitting the margin', () => {
+        const sheet = { width: 2400, height: 2400, scale: 1 };
+        const viewport = { w: 394, h: 557 };
+        const nodes: ExplorationNode[] = [
+            { id: 'a', label: 'A', kind: 'available', type: 'encounter', x: 0, y: 0, triggersCombat: false },
+            { id: 'b', label: 'B', kind: 'available', type: 'encounter', x: 2400, y: 2400, triggersCombat: false },
+        ];
+        const fit = computeFocusTransform(nodes, viewport, sheet);
+        const plateH = sheet.height * fit.scale;
+        expect(plateH).toBeLessThan(viewport.h);
+        expect(fit.ty).toBeCloseTo((viewport.h - plateH) / 2, 5);
     });
 
     it('falls back to canvas centre at 1x when no focus nodes exist', () => {

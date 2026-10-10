@@ -106,15 +106,32 @@ export function focusKeyOf(nodes: readonly ExplorationNode[]): string {
 
 interface FocusTransform { scale: number; tx: number; ty: number; }
 
+/**
+ * Settle one axis of the camera against the plate's edges.
+ *
+ * Centring on the focus nodes alone can pull the plate's edge into the frame:
+ * a node set near the top of a tall plate drops the plate a fifth of a phone
+ * down and leaves flat black above it, with nothing there to drag to. A plate
+ * that covers the axis at this scale is slid back until it meets the frame's
+ * edge; one that does not is centred, so its margin splits evenly.
+ *
+ * Never takes a focus node off-screen: every node lies on the plate, and the
+ * slide only moves plate that was already past the frame's edge.
+ */
+function settleAxis(t: number, viewportLen: number, canvasLen: number): number {
+    if (canvasLen <= viewportLen) return (viewportLen - canvasLen) / 2;
+    return Math.min(0, Math.max(viewportLen - canvasLen, t));
+}
+
 /** Exported for unit coverage — the pure math behind the initial camera fit. */
 export function computeFocusTransform(
     nodes: readonly ExplorationNode[],
     viewport: { w: number; h: number },
     size: SheetSize = LEGACY_SHEET_SIZE,
 ): FocusTransform {
+    const canvas = canvasSizeOf(size);
     const focus = nodes.filter((n) => n.kind === 'available' || n.kind === 'current');
     if (focus.length === 0) {
-        const canvas = canvasSizeOf(size);
         return { scale: 1, tx: (viewport.w - canvas.w) / 2, ty: (viewport.h - canvas.h) / 2 };
     }
 
@@ -133,7 +150,11 @@ export function computeFocusTransform(
     const fitScaleY = bboxH > 0 ? (viewport.h - FIT_PADDING * 2) / bboxH : MAX_SCALE;
     const scale = Math.max(minScaleFor(viewport, size), Math.min(1, fitScaleX, fitScaleY));
 
-    return { scale, tx: viewport.w / 2 - cx * scale, ty: viewport.h / 2 - cy * scale };
+    return {
+        scale,
+        tx: settleAxis(viewport.w / 2 - cx * scale, viewport.w, canvas.w * scale),
+        ty: settleAxis(viewport.h / 2 - cy * scale, viewport.h, canvas.h * scale),
+    };
 }
 
 /** How one edge is inked. Exported with `edgeStroke` for unit coverage. */
