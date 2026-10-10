@@ -1,0 +1,1 @@
+{"date":"2026-10-10","commit":"ca2e13d","runner":{"cpu":"AMD EPYC 9V74 80-Core Processor","cores":4},"metrics":{"bundleJsBytes":3508621,"bundleJsGzipBytes":937527,"firstScreenMs":252,"lcpMs":292,"tbtMs":83,"frameP95Ms":16.7,"slowFramePct":0.3,"longTaskMs":0,"engineMsPerCombat":{"FloatEye":0.642,"BrineHag":0.699,"TheDoorwarden":0.59,"all":0.638}}}

@@ -1,0 +1,11 @@
+{
+  "bundleJsBytes": 3860480,
+  "bundleJsGzipBytes": 1032192,
+  "firstScreenMs": 303,
+  "lcpMs": 351,
+  "tbtMs": 100,
+  "frameP95Ms": 21,
+  "slowFramePct": 1,
+  "longTaskMs": 50,
+  "engineMsPerCombat.all": 1
+}
