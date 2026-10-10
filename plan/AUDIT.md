@@ -52,8 +52,9 @@
 
 ## Pending
 
-### [ ] [tests] Root `npm test` is red on main: `check-comments` flags two "D41" decision-number comments (2026-10-10)
+### [x] [tests] Root `npm test` is red on main: `check-comments` flags two "D41" decision-number comments (2026-10-10) — CLOSED 2026-10-10 (cbe0fa47: both comments state the rule without the decision number; check-comments clean, root `npm test` 224/224)
 - category: tests
+- issue: #480
 - impact: 5
 - ease: 9
 - detail: 9ccba038 added comments citing a decision number to
