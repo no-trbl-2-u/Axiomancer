@@ -158,7 +158,7 @@
   confirm `npm ci && npm run verify -w axiomancer-mobile` is green in a
   fresh worktree.
 
-### [copy] Combat die a11y label still says "SPECIAL face" (R10c3, 2026-10-02)
+### [x] [copy] Combat die a11y label still says "SPECIAL face" (R10c3, 2026-10-02) — CLOSED 2026-10-10 (already fixed in bcb76681, issue #466: `combatDieA11yLabel` speaks "BOON face", matching the lexicon; found unticked this pass)
 - category: copy
 - impact: 2
 - ease: 9
