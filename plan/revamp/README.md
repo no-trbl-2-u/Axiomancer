@@ -91,7 +91,7 @@ starts it.
 | R7b | Engine purge 2/3: pricing, synergy, themes, draft, reward steering, card types → Attack/Skill/Spell | loop | R7a | engine.md |
 | R7c | Engine purge 3/3: the alt-win systems (PLEA, CHARGE, capitulation, region consequences) | loop | R7b | engine.md |
 | R7c2 | Engine purge 3b: friendship increments, carrier-less effects, the rung ladder, dead branches, closing carrier sweep (split from R7c, 2026-09-30) | loop | R7c | engine.md |
-| R7d | Stance removal: the rock/paper/scissors layer goes; card and dice colour, the Color Law and colour match stay (D65) | loop | R7c2 | engine.md |
+| R7d | Stance removal: the rock/paper/scissors layer goes; card and dice colour and the Color Law stay (D65); the colour-match bonus was later removed (D79) | loop | R7c2 | engine.md |
 | R7e | Content strip: parked world content deleted (maps, events, NPCs, quests, shops), plumbing kept with neutral fixtures; relics → the Suppliant's Ring only; the Labyrinth stays parked (D72) | loop | R7d | content-strip.md |
 | R8 | Mobile cleanup: dead flows and glosses, grey card art, app label, VITAE/shillings copy | loop | R7e | mobile.md |
 | R9 | Progression retune: XP curve for Act 1 on the 3 survivors | loop | R3, R7c2 | progression.md |

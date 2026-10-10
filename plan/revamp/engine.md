@@ -87,7 +87,9 @@ mechanic"):
 - **the Color Law** — a die powers only a card of its own colour, wild
   powers any, grey accepts any (`dieSatisfiesColorLaw`, `combat.engine.ts:269`,
   :1589-1595, `firstLegalPoweringDie`) and its mobile mirror;
-- **the colour-match bonus** (`colorMatch` / `colorMatchBonus`, :110-124);
+- ~~the colour-match bonus~~: kept by R7d, then removed by D79 (T,
+  2026-10-10). A die of the card's own colour adds nothing; PAID numbers
+  land as printed;
 - the stat glyphs and stat-family display (`StanceGlyph.tsx`,
   `presenters/stances.ts`). Where a surviving identifier says "stance" but
   means colour (`cardStanceColor`, `card.stance`, `STANCE_COLORS`,

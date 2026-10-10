@@ -514,15 +514,11 @@ export const StagedCard = React.memo(function StagedCard({
     // Staged faces track the hand-card proportion.
     const cardW = compact ? 92 : 112;
     const cardH = compact ? 135 : 164;
-    // The keyword line shows the POWER value; for guard it is recomputed live —
-    // printed plus the colour-match bonus the armed die earns — so the staged
-    // number is exact at commit.
+    // The keyword line shows the POWER value the play will land at commit —
+    // the printed number; the armed die adds nothing.
     let heroOverride: string | undefined;
     if (armed && f.armable) {
-        // A grey card's colour-match bonus is neutral, even off wild.
-        const colorMatch = card.stance !== 'any'
-            && (assignedDie!.color === card.stance || assignedDie!.color === 'wild');
-        const g = armedValue(f, colorMatch);
+        const g = armedValue(f);
         // Commit value: Guard NN / +NN% Vulnerable / NN DoT total.
         if (g != null) heroOverride = f.kind === 'guard' ? `Guard ${g}` : f.kind === 'vulnerable' ? `+${g}%` : `${g}`;
     }

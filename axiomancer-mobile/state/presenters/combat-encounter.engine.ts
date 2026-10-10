@@ -11,7 +11,7 @@
 import {
     handCards as engineHandCards, getCard, getCardById, toCombatCard,
     getSignatureSkill,
-    lookupEffect, colorMatchBonus,
+    lookupEffect,
     RESERVE_MAX,
     riderText,
     // The wall-math readout on the intent.
@@ -385,8 +385,9 @@ export interface CombatCardDetailVM {
      *  ('DEAL 20  +  MARK ×1 · 2 turns  +  HEAL 16'). Null only for a card that prints
      *  no payload at all. */
     diePaidLine: string | null;
-    /** The colour-match rule — rendered ONCE per modal (not per powerLine). */
-    colorMatchHint: string;
+    /** The Color Law — which dice can power this card — rendered ONCE per
+     *  modal (not per powerLine). */
+    colorLawHint: string;
     /** The per-card slice of the systems glossary: ONLY the system terms this
      *  card's printed lines reference (and that no keyword chip already
      *  explains). */
@@ -407,7 +408,7 @@ export interface CombatCardDetailVM {
 
 /** detailStats' switch builds everything BUT the pill fields; the wrapper appends them. */
 type DetailCore = Omit<CombatCardDetailVM,
-    'freePill' | 'diePaidLine' | 'colorMatchHint' | 'systemTerms'
+    'freePill' | 'diePaidLine' | 'colorLawHint' | 'systemTerms'
     | 'rarityLabel' | 'rarityPips' | 'rarityColor' | 'freeTag' | 'paidTag'>;
 
 export interface CombatCardVM {
@@ -1310,7 +1311,6 @@ export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM
 function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
     const c = cardCalc(card, sourceCard);
     const Title = c.keyword ?? '';
-    const STANCE = STANCE_LABELS[card.stance] ?? card.stance.toUpperCase();
     // The meta chip: stance, rank name (or tier), rarity band, card type —
     // e.g. 'BODY · ASH · COMMON · SPELL'. No engine-jargon verb class: the
     // keyword ledger and the ◆ +DIE row already say what the card does.
@@ -1352,7 +1352,7 @@ function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
         case 'stun': return { subtitle: `${Title} the enemy — it loses its turns.`, metaChip, outcomeLine: `Apply ${Title} ${c.skips} turn${c.skips === 1 ? '' : 's'}.`, outcomeStats: [{ label: 'SKIPS', value: `${c.skips} turns` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${Title} — the foe skips its next ${c.skips} actions.`, readNote: `Lands as printed: the foe skips ${c.skips} turn${c.skips === 1 ? '' : 's'}.`, mathLine: `skip ${c.skips}t = ${Title.toLowerCase()} duration ${c.skips} (each turn it would act is cancelled).`, keywords };
         case 'weaken': return { subtitle: `${Title} the enemy — its attacks hit softer.`, metaChip, outcomeLine: c.turns > 0 ? `Apply ${Title} · ${c.turns} turns.` : `Apply ${Title}.`, outcomeStats: c.turns > 0 ? [{ label: 'TURNS', value: `${c.turns}` }] : [], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — the foe's hits land softer while it holds.`, readNote: `${Title} weakens the enemy's blows.`, mathLine: `${Title} reduces the enemy's outgoing damage while active (real engine units).`, keywords };
         case 'mark': return { subtitle: `${Title} the enemy — the flaw is named.`, metaChip, outcomeLine: `Apply ${Title} +${c.markAmp}/tick · ${c.turns} turns.`, outcomeStats: [{ label: 'PER TICK', value: `+${c.markAmp}` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — every DoT tick and payoff hit on the foe deals +${c.markAmp} while it holds.`, readNote: `${Title} counts as an affliction — RUPTURE, SOUL, and REAP all feed on it.`, mathLine: `+${c.markAmp}/tick = tickAmplifyFlat × intensity, for ${c.turns} turns.`, keywords };
-        case 'guard': { const b = c.guardAmount ?? 0; return { subtitle: 'Guard yourself — soak the next hit.', metaChip, outcomeLine: `Gain ${Title} ${b}.`, outcomeStats: [{ label: 'GUARD', value: `${b}` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: Guard ${b}; +${colorMatchBonus(b)} if a ${STANCE} die matches.`, readNote: `Lands as printed; a colour-matched die adds +${colorMatchBonus(b)}.`, mathLine: `POWER = ${b} + ${colorMatchBonus(b)} on a colour match.`, keywords }; }
+        case 'guard': { const b = c.guardAmount ?? 0; return { subtitle: 'Guard yourself — soak the next hit.', metaChip, outcomeLine: `Gain ${Title} ${b}.`, outcomeStats: [{ label: 'GUARD', value: `${b}` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: Guard ${b}.`, readNote: `Lands as printed: Guard ${b}.`, mathLine: `POWER = ${b}, the printed Guard.`, keywords }; }
         case 'befriend': return { subtitle: 'Spare a near-dead foe.', metaChip, outcomeLine: 'Spare a near-dead foe — end combat peacefully.', outcomeStats: [], stacksText: null, freeLine, powerLine: '◆ WITH A DIE: if the enemy VITAE is low, end combat peacefully (befriend).', readNote: 'Watch the enemy VITAE bar — befriend lands only when it is low.', mathLine: 'No fixed number — a conditional outcome gated on low enemy VITAE.', keywords };
         case 'vulnerable': { return { subtitle: `${Title} the enemy — it takes more damage.`, metaChip, outcomeLine: `Apply ${Title} +${c.vulnPct}% · ${c.turns} turns.`, outcomeStats: [{ label: 'DMG TAKEN', value: `+${c.vulnPct}%` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: 'Stacks without limit.', freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — +${c.vulnPct}% damage taken for ${c.turns} turns.`, readNote: `Lands as printed: +${c.vulnPct}% damage taken for ${c.turns} turns.`, mathLine: `+${c.vulnPct}% = (damageTakenMult − 1) × 100 × intensity; combined Vulnerable is uncapped.`, keywords }; }
         case 'resolute': return { subtitle: `${Title} — you take less damage.`, metaChip, outcomeLine: `Gain ${Title} ${c.resolutePct}% · ${c.turns} turns.`, outcomeStats: [{ label: 'DMG TAKEN', value: `${c.resolutePct}%` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: gain ${Title} — ${c.resolutePct}% damage taken for ${c.turns} turns.`, readNote: `Lands as printed: ${Title} is a self-buff.`, mathLine: `${c.resolutePct}% = (damageTakenMult − 1) × 100${c.stacks ? '; stacks by intensity' : ''}.`, keywords };
@@ -1446,11 +1446,11 @@ export function detailStats(card: CombatCard, sourceCard?: Card): CombatCardDeta
     const diePaidLine = paidLine(sourceCard);
     // The colour law — rendered ONCE per modal.
     // A colourless (grey) card takes any die — never 'Only a ANY … die'.
-    const colorMatchHint = card.stance === 'any'
+    const colorLawHint = card.stance === 'any'
         ? 'Any die can power this card.'
         : `Only a ${STANCE} or WILD die can power this card.`;
     // The per-card systems-glossary slice: scan the card's OWN
-    // printed lines plus its overlay free/stacks lines (colorMatchHint excluded
+    // printed lines plus its overlay free/stacks lines (colorLawHint excluded
     // — its WILD is the global colour law, not a card reference) and drop
     // terms a keyword chip already covers.
     const systemTerms = systemTermsForCard(
@@ -1465,20 +1465,19 @@ export function detailStats(card: CombatCard, sourceCard?: Card): CombatCardDeta
     const freeTag = 'NO DIE';
     const paidTag = `+DIE · ${STANCE}/WILD`;
     return {
-        ...core, freePill, diePaidLine, colorMatchHint, systemTerms,
+        ...core, freePill, diePaidLine, colorLawHint, systemTerms,
         rarityLabel: RARITY_LABEL[band], rarityPips: RARITY_PIPS[band], rarityColor: RARITY_COLOR[band],
         freeTag, paidTag,
     };
 }
 
-/** The hero value at the moment of commit — StagedCard only. Guard adds the
- *  colour-match bonus; DoT total and Vulnerable % land as printed. null for
- *  kinds with no number to arm (stun's skip count is duration-driven). */
-export function armedValue(face: CombatCardFaceVM, colorMatch: boolean): number | null {
+/** The hero value at the moment of commit — StagedCard only. Guard, DoT
+ *  total and Vulnerable % all land as printed: the die that powers a card
+ *  adds nothing. null for kinds with no number to arm (stun's skip count is
+ *  duration-driven). */
+export function armedValue(face: CombatCardFaceVM): number | null {
     if (face.kind === 'guard' && face.guardBase != null) {
-        // The colour-match reward is a PERCENTAGE (+25%, min +2). `colorMatchBonus` IS the engine's rule, imported,
-        // not restated.
-        return face.guardBase + (colorMatch ? colorMatchBonus(face.guardBase) : 0);
+        return face.guardBase;
     }
     if ((face.kind === 'dot' || face.kind === 'vulnerable') && face.statusBase != null) {
         return face.statusBase;

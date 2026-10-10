@@ -1,5 +1,7 @@
 # Combat Screen Polish — 2026-07 (reference-driven)
 
+<!-- lexicon-ok: colour-match-bonus — a dated 2026-07 roadmap; it names the card-detail legend as it was then -->
+
 > Roadmap for the combat-screen UI/UX overhaul driven by three reference
 > screenshots (a best-in-class mobile deckbuilder: combat screen, status-effect
 > detail, card detail). Produced from a 5-lens multi-agent audit (layout,

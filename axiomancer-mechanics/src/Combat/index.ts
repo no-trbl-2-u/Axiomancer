@@ -54,10 +54,6 @@ export {
     startTurn, endTurn, discardCombatCard,
     playSignatureSkill,
     getSignatureSkill, signatureCastBlock, SIGNATURE_COST,
-    // The LIVE colour-match rule. Mobile's presenter
-    // must consume this, or the card face prints a bonus the engine does not
-    // apply.
-    colorMatchBonus,
     // The dice get a second read
     riderText,
     // Legibility: the incoming-threat projection

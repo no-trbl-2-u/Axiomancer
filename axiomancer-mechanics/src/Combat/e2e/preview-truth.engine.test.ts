@@ -4,8 +4,8 @@
  * Cards carry no strike (`basePower`/`chipHp` do not exist). The truth laws:
  *   1. `bottomDamagePreview` is the DoT's real lifetime HP on a neutral read,
  *      and 0 (no number) otherwise.
- *   2. A paid play lands the printed numbers EXACTLY; a color match adds
- *      exactly +1 duration (Fate Engine R7).
+ *   2. A paid play lands the printed numbers EXACTLY — a die of the card's
+ *      own colour adds nothing (powering a card is all a die does).
  *   3. `projectCardImpact` never advertises a strike number — there is none.
  *   4. QUARTER (the charm-vocabulary debuff) really dampens the enemy's
  *      outgoing threat damage.
@@ -211,8 +211,8 @@ describe('P0-truth — the card preview is the applied number', () => {
         expect(res.state.enemy.effects.length).toBe(0);
     });
 
-    it('a color-MATCHED status play lands +1 duration (Fate Engine R7 — printed on the card)', () => {
-        // body die powers the body card: printed numbers, color match → +1 turn.
+    it('a same-colour die lands the status exactly as printed — no extra turn', () => {
+        // body die powers the body card: printed intensity, printed duration.
         let s = initializeCombatEncounter(makePlayer([TRUTH_POISON]), makeEnemy(500, 'body'), [TRUTH_POISON], 7);
         s = rollEncounterDice(s).state;
         s = setDice(s, ['body']);
@@ -223,7 +223,7 @@ describe('P0-truth — the card preview is the applied number', () => {
         const landed = after.enemy.effects.find(e => e.effectId === authored.effectId)!;
         expect(landed.intensity).toBe(authored.intensity ?? 1);
         expect(landed.remainingDuration).toBe(
-            (authored.duration ?? lookupEffect(authored.effectId)!.duration) + 1);
+            authored.duration ?? lookupEffect(authored.effectId)!.duration);
     });
 
     it('projectCardImpact never advertises a strike number — the strike is dead (spec 32 v3 §1)', () => {

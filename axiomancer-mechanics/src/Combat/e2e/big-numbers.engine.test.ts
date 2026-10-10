@@ -78,16 +78,14 @@ function seat(state: CombatEncounterState, cardId: string): CombatEncounterState
 }
 
 describe('scalePlayerHit — the scaler pipeline is exactly as printed', () => {
-    it('applies colour match, then VULNERABLE', () => {
-        expect(scalePlayerHit({ base: 10, colorMatch: false })).toBe(10);
-        // Colour match: +25%, at least +2.
-        expect(scalePlayerHit({ base: 10, colorMatch: true })).toBe(13);
-        // VULNERABLE multiplies what the rest left.
-        expect(scalePlayerHit({ base: 10, colorMatch: true, vulnMult: 1.5 })).toBe(Math.round(13 * 1.5));
+    it('lands the base as printed, then applies VULNERABLE', () => {
+        expect(scalePlayerHit({ base: 10 })).toBe(10);
+        // VULNERABLE multiplies the printed number.
+        expect(scalePlayerHit({ base: 10, vulnMult: 1.5 })).toBe(15);
     });
 
     it('never invents damage from a zero base', () => {
-        expect(scalePlayerHit({ base: 0, colorMatch: true, vulnMult: 2 })).toBe(0);
+        expect(scalePlayerHit({ base: 0, vulnMult: 2 })).toBe(0);
     });
 
     it('a FREE-line hit is credited to its card in the attribution ledger', () => {
@@ -105,17 +103,19 @@ describe('DEAL lands the printed number', () => {
         expect(before - after.enemy.health).toBe(3);
     });
 
-    it('a PAID line deals its printed damage, colour match on top', () => {
+    it.each(['body', 'wild'] as const)('a PAID line powered by a %s die deals exactly its printed damage', (color) => {
         const s = open();
-        const seated = seat(s, 'qa-bn-deal');
-        const die = seated.dice.find(d => d.state === 'available' && (d.color === 'body' || d.color === 'wild'));
-        if (!die) return; // colour-legal die not in this tray; the unit test above covers the maths
+        // Pin the tray to one die of the given colour: the body card's own
+        // colour and the gold wild both power it, and neither adds anything.
+        const seated = {
+            ...seat(s, 'qa-bn-deal'),
+            dice: [{ id: 'bn-die', color, face: 'mana' as const, state: 'available' as const, temporary: false }],
+        };
         const entry = seated.hand.find(h => h.cardId === 'qa-bn-deal')!;
-        const before = seated.enemy.health;
-        const res = playCombatCard(seated, { uid: entry.uid }, true, die.id, rng);
+        const res = playCombatCard(seated, { uid: entry.uid }, true, 'bn-die', rng);
         const hits = res.events.filter(e => e.kind === 'damage-dealt' && e.target === 'enemy');
         expect(hits).toHaveLength(1);
-        expect(before - res.state.enemy.health).toBeGreaterThanOrEqual(scalePlayerHit({ base: 20, colorMatch: true }));
+        expect(hits[0]).toMatchObject({ amount: 20 });
     });
 });
 

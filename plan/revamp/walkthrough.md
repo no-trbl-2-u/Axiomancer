@@ -136,7 +136,8 @@ main, and every commit is its own checkpoint in git history.
 - **Tick:** deletes the rock/paper/scissors layer spec 33 left behind: the
   player's stance, the phase-end punish/yield check, enemy phase stances,
   and every stance-keyed mechanic, status, keyword and UI piece (D65). Card
-  colour, dice colour, the Color Law and colour match stay. The brief asks
+  colour, dice colour and the Color Law stay (the colour-match bonus R7d
+  kept was removed later, D79). The brief asks
   you whether the momentum chain goes with it.
 - **Accomplishes:** colour means one thing: which dice can pay for a card.
 

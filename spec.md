@@ -28,8 +28,8 @@ Undertale.
 ## Pillars
 
 - **Dice power cards.** Every card has a FREE line and a PAID line; the
-  PAID line costs one die, and the die's colour matters (the Color Law,
-  colour match).
+  PAID line costs one die, and the die's colour matters (the Color Law:
+  it must be the card's colour unless the card is grey or the die is gold).
 - **VITAE is the one bar.** Emptying the foe's VITAE wins. There is no
   second track and no objective function grading a fight from above.
 - **Mercy is earned.** Befriending a foe through The Open Hand opens the

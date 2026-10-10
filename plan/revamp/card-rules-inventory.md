@@ -110,7 +110,7 @@ No card rarity weighting or pity exists. The hazard minigame's rarity
 | Miss faces cannot power; X dice excluded | `combat.engine.ts:898-908` | — | live |
 | Exported `combatDieCanPower` / `availableDiceFor`: no `'any'` branch, plus an unreachable `cardColor === 'wild'` branch | `M/Combat/combat.dice.ts:69-77`; re-exported only, `combat.engine.ts:1920` | `M/Combat/e2e/hazard-pattern-combat-helpers.engine.test.ts:102`; `Mob/.../CombatBoard.colorlaw.test.tsx:81` (excludes `any`) | dead on the play path; disagrees with the live law for grey cards |
 | Mobile mirror `dieCanPowerCardVM` (handles `any`; dead `wild` card branch `:309`) | `Mob/state/presenters/combat-encounter.engine.ts:300-312`; used `CombatBoard.tsx:130`, `:847`, `:1054`, `:1101` | `CombatBoard.colorlaw.test.tsx` | live |
-| Colour match: +25%, minimum +2 on PAID numbers; +1 status duration | `colorMatchBonus` `combat.engine.ts:91-99`; `COLOR_MATCH_STATUS_DURATION_BONUS = 1` `:177`; never for `any` (`:929`) or on a FREE hit (`:741-745`) | `grey-office:94` (wild-powered play banks no bonus) | dormant |
+| No colour-match bonus: a die of the card's own colour adds nothing; PAID numbers and status turns land as printed | `scalePlayerHit` and `playBottomAction`, `combat.engine.ts` (the bonus, `colorMatchBonus` and `COLOR_MATCH_STATUS_DURATION_BONUS`, was deleted, D79) | `big-numbers` (a body or wild die deals exactly the printed DEAL); `fate-engine` R7 (printed duration); `preview-truth` (printed duration) | live |
 | Momentum (same-colour chain) | `combat.engine.ts:559`; `M/Combat/combat.upgradeable-dice.ts:295` | — | dormant (`any` never chains) |
 | Resonance: spending a die counts its colour | `combat.engine.ts:954-961` | — | live |
 

@@ -367,8 +367,7 @@ export type CombatEvent =
     | { kind: 'turn-law-blocked'; turn: number; phaseIndex: number }
     | { kind: 'conviction-gained'; amount: number; total: number; reason: 'effect' | 'scrap' }
     | { kind: 'signature-cast'; signatureId: SignatureSkillId; name: string; cost: number }
-    | { kind: 'card-played'; cardId: string; useBottom: boolean; dieId: string | null;
-        colorMatch?: boolean }
+    | { kind: 'card-played'; cardId: string; useBottom: boolean; dieId: string | null }
     | { kind: 'effect-landed'; cardId: string; effectId: string; target: 'self' | 'enemy';
         effectKind: CardEffectKind; intensity: number; effect: Effect }
     | { kind: 'effect-fizzled'; cardId: string; effectId: string; message: string }
