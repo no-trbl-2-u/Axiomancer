@@ -183,7 +183,8 @@
   filters both lists through `getCardById` (re-seed `STARTING_CARD_IDS` if
   `knownCards` empties), with a migration test.
 
-### [contract] The pip pass caps VULNERABLE at 30, cutting a stack above it (B4 F3, 2026-10-01)
+### [x] [contract] The pip pass caps VULNERABLE at 30, cutting a stack above it (B4 F3, 2026-10-01) — CLOSED 2026-10-10 (9ccba038: the pip pass adds with no clamp, card statuses land uncapped per D41; fate-engine.engine.test.ts pins a printed 40 + 2 pips at 42)
+- issue: #477
 - category: contract
 - impact: 5
 - ease: 7
