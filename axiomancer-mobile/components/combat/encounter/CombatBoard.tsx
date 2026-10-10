@@ -1552,6 +1552,64 @@ function paidValueFor(f: CombatCardVM['face'], override?: string): string {
  *  staged card (92) below. Exported for the face test. */
 export const NARROW_FACE_W = 112;
 
+/** Bebas Neue capital advance per px of font size, letter spacing excluded, with a little slack. */
+const SANS_CAP_EM = 0.42;
+/** JetBrains Mono advance per px of font size, with a little slack. */
+const MONO_EM = 0.62;
+const PAID_KEYWORD_SIZE = 12;
+const PAID_KEYWORD_SPACING = 0.8;
+const PAID_VALUE_SIZE = 11;
+const FREE_VALUE_SIZE = 12;
+/** Below these the side-by-side PAID column is too thin to read, so the ledger stacks. */
+const PAID_KEYWORD_MIN = 10;
+const PAID_VALUE_MIN = 9;
+/** Floors on a stacked face, so a freak-long word still prints at a legible size. */
+const PAID_KEYWORD_FLOOR = 8;
+const PAID_VALUE_FLOOR = 8;
+
+/**
+ * How a small face lays out its PAID column. The keyword's longest word and the
+ * whole value must each fit on one line: a word that cannot fit breaks mid-word
+ * ("VU…"), and a value that wraps breaks inside the number ("+6" over "0%").
+ * The side-by-side row leaves the PAID text whatever the FREE cell does not
+ * take, so a long keyword beside a percent FREE value (A Plain Word's
+ * VULNERABLE) stacks the ledger and takes the full width. Sizes are computed,
+ * not `adjustsFontSizeToFit`, which react-native-web ignores.
+ */
+export function paidLedgerFit({ width, keyword, value, freeInner, hasFree }: {
+    width: number;
+    keyword: string;
+    value: string;
+    freeInner: string;
+    hasFree: boolean;
+}): { stacked: boolean; keywordSize: number; valueSize: number } {
+    const narrow = width < NARROW_FACE_W;
+    const glyph = narrow ? 18 : 24;
+    const cube = narrow ? 12 : 14;
+    // Card border 1.5 each side, ledger padding 6 each side; cube + its 5pt gap.
+    const inner = width - 3 - 12 - cube - 5;
+    const freeW = glyph + 3 + freeInner.length * FREE_VALUE_SIZE * MONO_EM;
+    const sideRoom = hasFree ? inner - freeW - 13 : inner;
+    const longest = Math.max(0, ...keyword.split(/\s+/).map((w) => [...w].length));
+    const valueLen = [...value].length;
+    const fit = (room: number) => ({
+        keywordSize: longest === 0 ? PAID_KEYWORD_SIZE
+            : Math.min(PAID_KEYWORD_SIZE, Math.floor((room / longest - PAID_KEYWORD_SPACING) / SANS_CAP_EM)),
+        valueSize: valueLen === 0 ? PAID_VALUE_SIZE
+            : Math.min(PAID_VALUE_SIZE, Math.floor(room / (valueLen * MONO_EM))),
+    });
+    const side = fit(sideRoom);
+    if (!narrow && side.keywordSize >= PAID_KEYWORD_MIN && side.valueSize >= PAID_VALUE_MIN) {
+        return { stacked: false, ...side };
+    }
+    const stack = fit(inner);
+    return {
+        stacked: true,
+        keywordSize: Math.max(PAID_KEYWORD_FLOOR, stack.keywordSize),
+        valueSize: Math.max(PAID_VALUE_FLOOR, stack.valueSize),
+    };
+}
+
 /**
  * How many slots the rarity track always draws — the top of the band
  * (`RARITY_PIPS.rare`). Exported so a test reads the same number the face does
@@ -1647,8 +1705,18 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     // ellipsizes to "B..", "D.". `adjustsFontSizeToFit` is a silent no-op on
     // web, so the answer is layout:
     // the ledger STACKS (FREE row over PAID row, full width each) and the
-    // text wraps under an explicit lineHeight instead of clipping.
+    // text wraps under an explicit lineHeight instead of clipping. A hand
+    // card stacks too when its keyword is too long for the column the FREE
+    // cell leaves (`paidLedgerFit`).
     const narrow = !large && width < NARROW_FACE_W;
+    const fit = large ? null : paidLedgerFit({
+        width,
+        keyword: f.keyword ? `${f.familyGlyph ? `${f.familyGlyph} ` : ''}${f.keyword.toUpperCase()}` : '',
+        value: paidValue,
+        freeInner,
+        hasFree: !!f.freeGlyph,
+    });
+    const stacked = fit?.stacked ?? false;
     const bandH = large ? 36 : 26;
     const ledgerH = large ? 60 : 42;
     const glyphSize = large ? 38 : narrow ? 18 : 24;
@@ -1729,9 +1797,9 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                 {/* ③ LEDGER — solid ink ground: FREE cell | rule | PAID cell.
                     No prose; the overlay explains. */}
                 <View
-                    style={[styles.plateLedger, narrow ? styles.plateLedgerStacked : { minHeight: ledgerH }]}
+                    style={[styles.plateLedger, stacked ? styles.plateLedgerStacked : { minHeight: ledgerH }]}
                     pointerEvents="none"
-                    testID={narrow ? 'combat-card-face-ledger-stacked' : 'combat-card-face-ledger'}
+                    testID={stacked ? 'combat-card-face-ledger-stacked' : 'combat-card-face-ledger'}
                 >
                     {hasFree ? (
                         <View style={styles.plateFreeCell}>
@@ -1751,13 +1819,13 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                             ) : null}
                         </View>
                     ) : null}
-                    {hasFree ? <View style={narrow ? styles.plateRuleAcross : styles.plateRule} /> : null}
+                    {hasFree ? <View style={stacked ? styles.plateRuleAcross : styles.plateRule} /> : null}
                     <View style={styles.platePaidCell}>
                         <StanceCube color={band} size={large ? 20 : narrow ? 12 : 14} />
                         <View style={styles.paidTextWrap}>
                             {f.keyword ? (
                                 <Text
-                                    style={[styles.paidKeyword, large && styles.paidKeywordLarge, { color: kwColor }]}
+                                    style={[styles.paidKeyword, large && styles.paidKeywordLarge, fit && { fontSize: fit.keywordSize, lineHeight: fit.keywordSize + 2 }, { color: kwColor }]}
                                     numberOfLines={large ? 1 : 2}
                                     allowFontScaling={false}
                                     testID="combat-card-face-keyword"
@@ -1767,8 +1835,8 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                             ) : null}
                             {paidValue ? (
                                 <Text
-                                    style={[styles.paidValue, large && styles.paidValueLarge, scaledTint ? { color: scaledTint } : null]}
-                                    numberOfLines={large ? 1 : 2}
+                                    style={[styles.paidValue, large && styles.paidValueLarge, fit && { fontSize: fit.valueSize, lineHeight: fit.valueSize + 4 }, scaledTint ? { color: scaledTint } : null]}
+                                    numberOfLines={1}
                                     allowFontScaling={false}
                                     testID="combat-card-face-value"
                                 >
