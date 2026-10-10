@@ -86,7 +86,7 @@ export {
     // Floating dice save-back
     getFloatingDiceColors,
     // Card rewards and the starting deck
-    COMBAT_REWARD_POOL, STARTING_CARD_IDS, rollCombatCardRewards, addRewardCard,
+    COMBAT_REWARD_POOL, STARTING_CARD_IDS, rollCombatCardRewards, rewardPoolFor, addRewardCard,
     unlockCardViaDilemma,
     // Fate Engine — the dice get a second read
     riderText, RESERVE_MAX,
@@ -180,12 +180,15 @@ export type {
     CardCombatEffects, CardSpecialMechanic,
     // The rank ladder / rarity / card-type axes
     CardRank, CardRarity, CardType, CardRider,
+    CardLane,
 } from './Cards';
 export {
     // Rank/rarity helpers (mobile renders rank names off these)
     CARD_RANK_NAMES, rankToRarity,
     getAvailableCards, learnCard,
     cardLibrary, getCardById,
+    // Card lanes (the dev menu's CARDS section)
+    CARD_LANES, GREY_LANE, getCardLane, laneRewardPool,
     // Runtime enumeration of the CardSpecialMechanic union, bound to
     // the type by compile-time assertions. Mobile KW-2 walks this list.
     CARD_SPECIAL_MECHANIC_KINDS,

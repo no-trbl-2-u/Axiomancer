@@ -97,7 +97,7 @@ export {
 } from './combat.threat';
 
 export {
-    COMBAT_REWARD_POOL, STARTING_CARD_IDS, rollCombatCardRewards, addRewardCard,
+    COMBAT_REWARD_POOL, STARTING_CARD_IDS, rollCombatCardRewards, rewardPoolFor, addRewardCard,
     unlockCardViaDilemma,
 } from './combat.rewards';
 

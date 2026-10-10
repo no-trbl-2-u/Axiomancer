@@ -92,6 +92,14 @@ export interface Character {
      */
     combatRewardCards?: string[];
     /**
+     * Dev-menu override of the card-reward pool: the ids of the card lanes
+     * (`Cards/card.lanes.ts`) whose cards the post-combat draft may offer.
+     * Set by the dev menu's CARDS section only. Optional + sparse — absent or
+     * empty means the whole library, and an id no lane carries is ignored
+     * (`rewardPoolFor`, `Combat/combat.rewards.ts`).
+     */
+    devRewardLaneIds?: string[];
+    /**
      * The GHOST DIE pool (live-tray model). Forged in combat
      * by the FORGE verb; never rerolls; carried ACROSS combats until spent.
      * Written back from `CombatEncounterState.floatingDice` at combat end

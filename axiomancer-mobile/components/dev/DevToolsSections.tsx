@@ -1,7 +1,8 @@
 /**
  * Grouped dev-tools surface — the body of the `/dev` route.
  *
- * Holds a live STATE inspector, the L1–L50 player ladder, world travel
+ * Holds a live STATE inspector, the L1–L50 player ladder, the CARDS
+ * section (lane test decks and the reward-pool lanes), world travel
  * to any map / node with its authored event, the labyrinth acts, an
  * any-foe enemy picker, every reward channel, real NPC trees + real
  * quests, effect and item pickers, and run controls.
@@ -38,6 +39,9 @@ const DebugEffectApply = lazyNamed(() => import('@/components/DebugEffectApply')
 const DebugHazardDeckRandomize = lazyNamed(() => import('@/components/DebugHazardDeckRandomize'), 'DebugHazardDeckRandomize');
 const DebugPopulateAllItems = lazyNamed(() => import('@/components/DebugPopulateAllItems'), 'DebugPopulateAllItems');
 const DebugItemPicker = lazyNamed(() => import('@/components/DebugItemPicker'), 'DebugItemPicker');
+// ── CARDS ──
+const DebugLaneDeck = lazyNamed(() => import('@/components/DebugLaneDeck'), 'DebugLaneDeck');
+const DebugRewardPool = lazyNamed(() => import('@/components/DebugRewardPool'), 'DebugRewardPool');
 // ── WORLD ──
 const DebugWorldTravel = lazyNamed(() => import('@/components/DebugWorldTravel'), 'DebugWorldTravel');
 // ── ENCOUNTERS ──
@@ -105,6 +109,11 @@ export function DevToolsSections() {
                     <DebugHazardDeckRandomize />
                     <DebugPopulateAllItems />
                     <DebugItemPicker />
+                </DevSection>
+
+                <DevSection label="CARDS" hint="lane deck · reward pool" testID="dev-section-cards">
+                    <DebugLaneDeck />
+                    <DebugRewardPool />
                 </DevSection>
 
                 <DevSection label="WORLD" hint="any map · any node · the labyrinth" testID="dev-section-world">
