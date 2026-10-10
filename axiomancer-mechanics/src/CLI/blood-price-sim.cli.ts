@@ -197,6 +197,29 @@ export function factorsFor(k: number): { effect: number; sac: number } {
         : { effect: 1.1 ** -k, sac: 0.9 ** -k };
 }
 
+/** Fisher-Yates on our own seeded stream (see `runCell`). */
+function shuffled<T>(items: readonly T[], rng: () => number): T[] {
+    const out = items.slice();
+    for (let i = out.length - 1; i > 0; i--) {
+        const j = Math.floor(rng() * (i + 1));
+        [out[i], out[j]] = [out[j], out[i]];
+    }
+    return out;
+}
+
+/**
+ * One deck × enemy × level cell: `runs` seeded fights (engine seeds
+ * seed..seed+runs-1) through `simulateHazardPatternCombatDetailed` (the
+ * function `simulateHazardPatternCombat` wraps), greedy witness.
+ *
+ * Each run gets the deck list in its own seeded order. Workaround for an
+ * engine RNG flaw: `Utils/rng.ts` is a Park-Miller LCG, so for consecutive
+ * small seeds its FIRST draw is ~seed × 2.2e-5 (≈ 0), and the opening
+ * `shuffleCombatDeck` uses that draw for its first swap — the deck list's
+ * first card is dealt last in every seeded run. Pre-ordering the list per
+ * run (mulberry32, independent of the engine stream) removes the bias
+ * without touching the engine RNG.
+ */
 export function runCell(deck: Deck, enemy: Enemy, level: number, k: number, runs: number, seed: number): CellResult {
     const f = factorsFor(k);
     setBloodPriceTuning(f);
@@ -210,19 +233,30 @@ export function runCell(deck: Deck, enemy: Enemy, level: number, k: number, runs
         stuck += cursesInHand(s);
         added += s.bp?.cursesAdded ?? 0;
     };
-    const { stats, cardUsage } = simulateHazardPatternCombatDetailed({
-        player: playerAt(level, deck.picks), enemy, runs, startSeed: seed, policy: 'greedy',
-        deck: deck.picks, onRunEnd,
-    });
+    const orderRng = mulberry32(seed * 7919 + 17);
+    let wins = 0, rounds = 0;
+    const plays: Record<string, number> = {};
+    let fizzles = 0;
+    for (let i = 0; i < runs; i++) {
+        const order = shuffled(deck.picks, orderRng);
+        const { stats, cardUsage } = simulateHazardPatternCombatDetailed({
+            player: playerAt(level, order), enemy, runs: 1, startSeed: seed + i, policy: 'greedy',
+            deck: order, onRunEnd,
+        });
+        wins += stats.winRate;
+        rounds += stats.avgRounds;
+        for (const u of Object.values(cardUsage)) {
+            plays[u.cardId] = (plays[u.cardId] ?? 0) + u.plays;
+            fizzles += u.fizzles ?? 0;
+        }
+    }
     setBloodPriceTuning({ effect: 1, sac: 1 });
     const playsPerFight: Record<string, number> = {};
-    let fizzles = 0;
-    for (const id of deck.picks) playsPerFight[id] = (cardUsage[id]?.plays ?? 0) / runs;
-    playsPerFight['bp-curse'] = (cardUsage['bp-curse']?.plays ?? 0) / runs;
-    for (const u of Object.values(cardUsage)) fizzles += u.fizzles ?? 0;
+    for (const id of deck.picks) playsPerFight[id] = (plays[id] ?? 0) / runs;
+    playsPerFight['bp-curse'] = (plays['bp-curse'] ?? 0) / runs;
     return {
         deck: deck.id, enemy: enemy.name, level, k, effectFactor: f.effect, sacFactor: f.sac, runs,
-        winRate: stats.winRate, meanRounds: stats.avgRounds,
+        winRate: wins / runs, meanRounds: rounds / runs,
         meanVitaeLeft: vitaeLeft / runs, meanLowestVitae: lowest / runs,
         minLowestVitae: minLowest === Infinity ? 0 : minLowest,
         meanSacrificePaid: sacPaid / runs, meanCursesStuck: stuck / runs, meanCursesAdded: added / runs,
@@ -233,14 +267,19 @@ export function runCell(deck: Deck, enemy: Enemy, level: number, k: number, runs
 /** A card's printed numbers under a tuning step (for the per-pass record). */
 export function tunedNumbers(text: string, k: number): string {
     const f = factorsFor(k);
-    // SACRIFICE n scales by the cost factor, every other number by the effect
-    // factor; durations ("for N turns"), thresholds and caps-in-words are
-    // printed as is (the engine tunes the resolved amount).
-    return text.replace(/(SACRIFICE )?(\d+)(%?)( turns?| VITAE missing| paid| per)?/g, (m, sac, num, pct, tail) => {
-        if (tail && /turns?|VITAE missing|paid|per/.test(tail)) return m;
-        const n = Number(num);
-        const t = sac ? tuneAmount(n, f.sac) : tuneAmount(n, f.effect);
-        return `${sac ?? ''}${t}${pct}${tail ?? ''}`;
+    // A number takes the factor of the last keyword before it: SACRIFICE →
+    // the cost factor; DEAL / GUARD / heal / VULNERABLE / "loses" → the effect
+    // factor; Conviction → none. Never tuned: durations, "per N", divisors,
+    // Curse and SACRIFICE counts, Conviction, and an X cost ("any amount").
+    // The engine tunes the resolved amount, so a cap moves with its keyword.
+    return text.replace(/\d+/g, (num, offset: number) => {
+        const before = text.slice(0, offset);
+        const after = text.slice(offset + num.length);
+        if (/÷$|per $|Add $|next $|any amount \(max $/.test(before)) return num;
+        if (/^%? ?(turns?\b|VITAE missing|paid|Conviction|grey Curse|Curses|SACRIFICES)/.test(after)) return num;
+        const kw = [...before.matchAll(/SACRIFICE|DEAL|GUARD|[Hh]eal|VULNERABLE|loses|Conviction/g)].pop()?.[0];
+        if (!kw || kw === 'Conviction') return num;
+        return String(tuneAmount(Number(num), kw === 'SACRIFICE' ? f.sac : f.effect));
     });
 }
 
@@ -311,6 +350,9 @@ if (require.main === module) {
             }
         }
     }
-    fs.writeFileSync(path.join(outDir, 'tuned-numbers.json'), JSON.stringify({ factors: Object.fromEntries(steps.map(k => [k, factorsFor(k)])), numbers }, null, 1));
+    const rule = 'k > 0 = ceiling steps (DEAL/GUARD/HEAL/VULNERABLE/foe-loses x0.9^k, SACRIFICE x1.1^k), '
+        + 'k < 0 = floor steps (the reverse); the engine rounds the RESOLVED amount (min 1). X costs, Conviction, '
+        + 'durations, thresholds and the grey Curse are untuned. Texts below are rendered with that rule.';
+    fs.writeFileSync(path.join(outDir, 'tuned-numbers.json'), JSON.stringify({ rule, factors: Object.fromEntries(steps.map(k => [k, factorsFor(k)])), numbers }, null, 1));
     process.stdout.write(`wrote ${outDir}\n`);
 }

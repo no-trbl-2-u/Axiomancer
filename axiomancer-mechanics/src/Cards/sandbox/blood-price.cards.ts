@@ -20,6 +20,7 @@
 import type { Card, CardAspect, CardType } from '../types';
 import type { BloodPriceSpec, BpCtx, BpGlobalTrigger, BpLine, BpQuery } from '../blood-price.types';
 import { registerSandboxCards } from '../cards.sandbox';
+import { getCardById } from '../cards.library';
 
 const L = (text: string, run: (c: BpCtx) => void, extra?: Partial<BpLine>): BpLine => ({ text, run, ...extra });
 const atHalf = (q: BpQuery): boolean => q.atHalf;
@@ -382,11 +383,8 @@ export function proposalsForSlot(slot: string): string[] {
     return P.filter(p => p.id.startsWith(slot)).map(p => `bp-${p.id}`);
 }
 
-let registered = false;
-
 /** Registers the Blood Price sandbox cards (idempotent). */
 export function registerBloodPriceCards(): void {
-    if (registered) return;
+    if (getCardById(GREY_CURSE.id)) return;
     registerSandboxCards(BLOOD_PRICE_CARDS);
-    registered = true;
 }
