@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
 
-import { HazardCard, CardArt } from '../HazardCard';
+import { HazardCard, CardArt, handNameFontSize } from '../HazardCard';
 import type { HazardCardVM } from '@/state/presenters/hazard.engine';
 
 const mockCardVM: HazardCardVM = {
@@ -126,5 +126,23 @@ describe('CardArt', () => {
             const { root } = render(<CardArt kind={color} />);
             expect(root).toBeTruthy();
         });
+    });
+});
+describe('handNameFontSize', () => {
+    it('keeps multi-word names at full size; they wrap at their spaces', () => {
+        expect(handNameFontSize('UNBROKEN OATH', 22)).toBe(13);
+        expect(handNameFontSize('DEAD-MAN HAUL', 22)).toBe(13);
+    });
+
+    it('keeps a short single word at full size', () => {
+        expect(handNameFontSize('SCRAMBLE')).toBe(13);
+    });
+
+    it('shrinks a single word too long for a covered phone strip instead of breaking it', () => {
+        // 375 phone: the fan covers 22px of each card but the last.
+        const covered = handNameFontSize('CLIFFRUNNER', 22);
+        expect(covered).toBeLessThan(13);
+        expect(covered).toBeGreaterThanOrEqual(9);
+        expect(handNameFontSize('CLIFFRUNNER', 0)).toBeGreaterThan(covered);
     });
 });

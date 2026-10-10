@@ -175,6 +175,22 @@ function Row({
 /** Hand-mode name inset that keeps the last letter out from under the rarity pip. */
 const PIP_CLEAR = 9;
 
+const HAND_NAME_SIZE = 13;
+/** Hand-mode text width: the 90px card less its 1.5px borders and 4px padding. */
+const HAND_TEXT_W = 90 - 3 - 8;
+/** Pirata One capital width per px of font size, letter spacing included, with a little slack. */
+const GOTHIC_CAP_EM = 0.43;
+
+/** Hand-mode name size. A multi-word name wraps at its spaces; a single word cannot, so
+ *  one too long for the strip left beside the pips and a fanned neighbour shrinks to fit
+ *  on one line rather than breaking mid-word ("CLIFFRUNN / ER"). Computed, not
+ *  `adjustsFontSizeToFit`, which react-native-web ignores. */
+export function handNameFontSize(name: string, nameInset = 0): number {
+    if (/\s/.test(name.trim())) return HAND_NAME_SIZE;
+    const room = HAND_TEXT_W - PIP_CLEAR - Math.max(PIP_CLEAR, nameInset);
+    return Math.min(HAND_NAME_SIZE, Math.floor(room / (name.length * GOTHIC_CAP_EM)));
+}
+
 export const HazardCard = React.memo(function HazardCard({
     card,
     mode = 'hand',
@@ -359,7 +375,7 @@ export const HazardCard = React.memo(function HazardCard({
     return (
         <View style={frame}>
             {overlays}
-            <Text numberOfLines={2} style={[styles.name, { fontSize: 13, minHeight: 28, paddingHorizontal: PIP_CLEAR, paddingRight: Math.max(PIP_CLEAR, nameInset) }]}>{card.name}</Text>
+            <Text numberOfLines={2} style={[styles.name, { fontSize: handNameFontSize(card.name, nameInset), minHeight: 28, paddingHorizontal: PIP_CLEAR, paddingRight: Math.max(PIP_CLEAR, nameInset) }]}>{card.name}</Text>
             <View style={{ alignItems: 'center', marginVertical: 3 }}>
                 <CardArt kind={card.kind} size={30} />
             </View>
