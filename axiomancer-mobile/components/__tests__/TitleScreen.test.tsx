@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import { TitleScreen } from '../TitleScreen';
+import { TitleScreen, titleScrimStops } from '../TitleScreen';
 import { createAppStore } from '@/state/store';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
@@ -113,5 +113,34 @@ describe('TitleScreen', () => {
       fontSize: 20,
       color: expect.any(String),
     });
+  });
+
+  /**
+   * The scrim is a continuous ramp, not flat bands: three bands drew two
+   * hard seams across the art on desktop (CRITIQUE pass 74). It starts
+   * clear so its top edge has no seam, never lightens on the way down, and
+   * keeps the CTA panel at least as dark as the old bottom band (0.9).
+   */
+  it('ramps the bottom scrim from clear to the CTA darkness with no step', () => {
+    const stops = titleScrimStops();
+    expect(stops[0]).toEqual({ offset: 0, opacity: 0 });
+    expect(stops[stops.length - 1].offset).toBe(1);
+    for (let i = 1; i < stops.length; i++) {
+      expect(stops[i].offset).toBeGreaterThan(stops[i - 1].offset);
+      expect(stops[i].opacity).toBeGreaterThanOrEqual(stops[i - 1].opacity);
+    }
+    for (const st of stops.filter((s) => s.offset >= 0.8)) {
+      expect(st.opacity).toBeGreaterThanOrEqual(0.9);
+    }
+  });
+
+  it('draws the scrim as one gradient layer', () => {
+    const { getByTestId } = render(
+      <TestWrapper>
+        <TitleScreen onContinue={jest.fn()} />
+      </TestWrapper>
+    );
+
+    expect(getByTestId('title-scrim')).toBeTruthy();
   });
 });

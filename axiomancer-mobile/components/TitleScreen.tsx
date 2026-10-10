@@ -1,12 +1,38 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { Image } from '@/lib/platform/image';
 import { FONTS } from '@/theme/axm';
-import { makeStyles } from '@/theme/runtime';
+import { makeStyles, usePalette } from '@/theme/runtime';
 
 // The throne-room key art doubles as the launcher icon; here it anchors
 // the top of the title screen and the painted "AxiomanceR" wordmark
 // carries the brand.
 const TITLE_ART = require('@/assets/images/title-embark.jpg');
+
+export interface TitleScrimStop { offset: number; opacity: number; }
+
+/**
+ * The bottom scrim's gradient stop table, top of the scrim (0) to the
+ * screen's foot (1).
+ *
+ * Purpose: a continuous ramp, so no edge shows. The scrim was three flat
+ * bands; on a desktop window their edges ran straight across the king's
+ * crown and beard (CRITIQUE pass 74). It starts fully clear, so its top has
+ * no seam either, and holds the old bottom band's 0.9 darkness over the
+ * lower fifth, where the CTA sits.
+ *
+ * Output: the ordered stop table for the scrim's LinearGradient.
+ */
+export function titleScrimStops(): readonly TitleScrimStop[] {
+  return [
+    { offset: 0, opacity: 0 },
+    { offset: 0.25, opacity: 0.18 },
+    { offset: 0.5, opacity: 0.52 },
+    { offset: 0.67, opacity: 0.8 },
+    { offset: 0.8, opacity: 0.9 },
+    { offset: 1, opacity: 0.94 },
+  ];
+}
 
 interface TitleScreenProps {
   onContinue: () => void;
@@ -27,6 +53,7 @@ interface TitleScreenProps {
  */
 export function TitleScreen({ onContinue }: TitleScreenProps) {
   const styles = useStyles();
+  const AXM = usePalette();
 
   // EMBARK does not seed the character. It only hands off to the main
   // menu; a new game starts with
@@ -45,14 +72,13 @@ export function TitleScreen({ onContinue }: TitleScreenProps) {
           `contain` keeps the whole square (wordmark included)
           intact at full width instead; the container's own dark
           background fills the space below it, which the scrim
-          bands already darken toward for the CTA panel. */}
+          already darkens toward for the CTA panel. */}
       {/* `contain` ends the square plate in a ruled line
           straight across the figures, with flat ground beneath it — a
           seam, not an edge. The art sits in its own square wrapper
           so a short ramp of ground-coloured bands can be anchored to
           the ART's own foot (not the screen's), dissolving that line at
-          any viewport height. Same no-gradient-dependency trick as the
-          scrim below. */}
+          any viewport height. */}
       <View style={styles.artWrap} pointerEvents="none">
         <Image
           source={TITLE_ART}
@@ -73,10 +99,17 @@ export function TitleScreen({ onContinue }: TitleScreenProps) {
       </View>
 
       {/* Bottom scrim so the call-to-action reads over the art. */}
-      <View style={styles.scrim} pointerEvents="none">
-        <View style={styles.scrimBand1} />
-        <View style={styles.scrimBand2} />
-        <View style={styles.scrimBand3} />
+      <View style={styles.scrim} pointerEvents="none" testID="title-scrim">
+        <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
+          <Defs>
+            <LinearGradient id="axmTitleScrim" x1="0" y1="0" x2="0" y2="1">
+              {titleScrimStops().map((st) => (
+                <Stop key={st.offset} offset={st.offset} stopColor={AXM.bg} stopOpacity={st.opacity} />
+              ))}
+            </LinearGradient>
+          </Defs>
+          <Rect x="0" y="0" width="100%" height="100%" fill="url(#axmTitleScrim)" />
+        </Svg>
       </View>
 
       {/* Call to action */}
@@ -134,9 +167,7 @@ const useStyles = makeStyles((AXM) => ({
   // The feathered foot of the plate. Seven bands of the
   // page ground over the art's own lower quarter, the last fully opaque,
   // so the image has already become the field by the time it ends. Seven
-  // rather than the scrim's three: the scrim ramps over half a screen
-  // where a coarse step reads as atmosphere, this one ramps over ~90px
-  // where the same step would read as a stripe.
+  // so the step stays finer than the eye picks out over ~90px.
   artFoot: {
     position: 'absolute',
     left: 0,
@@ -156,27 +187,14 @@ const useStyles = makeStyles((AXM) => ({
   artFootBand5: { opacity: 0.71 },
   artFootBand6: { opacity: 0.89 },
   artFootBand7: { opacity: 1 },
-  // Stacked translucent bands fake a bottom-up gradient without an
-  // extra gradient dependency, fading the art into the dark CTA panel.
+  // A real gradient (SVG), fading the art into the dark CTA panel; see
+  // `titleScrimStops`.
   scrim: {
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
     height: '55%',
-    justifyContent: 'flex-end',
-  },
-  scrimBand1: {
-    height: '34%',
-    backgroundColor: 'rgba(10,10,10,0.25)',
-  },
-  scrimBand2: {
-    height: '33%',
-    backgroundColor: 'rgba(10,10,10,0.6)',
-  },
-  scrimBand3: {
-    height: '33%',
-    backgroundColor: 'rgba(10,10,10,0.9)',
   },
   content: {
     alignItems: 'center',
