@@ -50,3 +50,24 @@
 Requires R0 (the loop docs that name these tools are fixed first). The
 `.claude/**` edits above (`guard.mjs`, `launch.json`) ship in **R0**, not
 here: `.claude/**` is classifier-blocked for unattended runs (Phase G1).
+
+## PF1 — Weekly performance audit (loop)
+
+Added 2026-10-10 by T (D77). Tooling only; no content. Requires RC.
+
+1. **Measure three kinds of performance weekly**, three runs each, the
+   median kept:
+   - *web load and bundle*: the Expo web export's JS bytes (raw and gzip),
+     time to the first screen, LCP and total blocking time in headless
+     Chromium;
+   - *runtime smoothness*: frame-time p95, the share of frames over 33 ms
+     and total long-task time while a scripted combat round plays;
+   - *engine speed*: ms per seeded combat (`simulateHazardPatternCombat`).
+2. **Keep budgets and history in the repo**: `docs/reports/perf/budgets.json`
+   (first budgets: the median of three runs at ship plus 20%, bytes plus
+   10%) and `docs/reports/perf/history.jsonl` (one line per week).
+3. **Report, never gate.** A budget breach or week-over-week drift (bytes
+   over 5%, engine over 15%, load and runtime over 25%) files a `[perf]` row
+   in `plan/AUDIT.md` and opens its issue. The workflow never fails on a
+   number.
+4. Balance stays out (R12; D57).
