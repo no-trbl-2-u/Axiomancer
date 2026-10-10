@@ -46,9 +46,8 @@ the Expo app (`axiomancer-mobile`) presents it.
   Conviction when the die is used.
 - **The Color Law** (`dieSatisfiesColorLaw`): a die powers a card when the
   card is `any`, the die is gold, or the colours match. A mismatch fizzles.
-- **Colour match** (`colorMatchBonus`): a die of the card's own colour adds
-  25% (minimum +2) to PAID numbers and 1 turn to statuses. A grey card never
-  gets it.
+  Powering is all a die does: PAID numbers land as printed (scaled by stats)
+  and statuses keep their printed turns, whatever legal die pays (D79).
 - **Reserve:** at turn end one unspent die is banked (`RESERVE_MAX` = 2). A
   banked die gains a pip per phase, up to `RESERVE_PIP_CAP` = 2. Each pip
   adds `PIP_GUARD_BONUS` = 5 GUARD or `PIP_INTENSITY_BONUS` = 2 status
@@ -162,6 +161,8 @@ without a ruling from T.
 - No enemy keywords, afflictions, summons or riders.
 - No alternate wins beyond befriend: no RELENT, no CONDEMN, no capitulation.
 - No alignment, GRACE or faction reputation.
+- No bonus for paying with the card's own colour: the die powers the card
+  and adds nothing (D79). The gold die stays wild.
 - No card upgrades in play (D8) and no die growth beyond the Anvil (D20);
   both are parked.
 - No measured balance baseline (D57). A balance question gets "not
@@ -170,6 +171,6 @@ without a ruling from T.
 ## Where this comes from
 
 The revamp ([`plan/revamp/README.md`](../plan/revamp/README.md)) and its
-decisions (`plan/2026-09-25-refactor-strategy.decisions.md`, D46-D73).
+decisions (`plan/2026-09-25-refactor-strategy.decisions.md`, D46-D79).
 Where this page and the code disagree, the code is right and this page is
 a bug.

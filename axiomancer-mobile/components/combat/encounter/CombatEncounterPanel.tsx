@@ -925,7 +925,7 @@ export function CombatEncounterPanel({
                             {/* STACKS stays: whether a status stacks is exactly why a
                                 player replays a card mid-fight.
                                 The ▲/—/▼ legend rides the triplet itself and the
-                                colour-match hint rides the ◆ tag of the row it qualifies.
+                                Color Law hint rides the ◆ tag of the row it qualifies.
                                 The VM still carries both for the DECK screen, which is
                                 read out of combat and can afford full sentences. */}
                             {detailCard.detail.stacksText ? <Text style={styles.detailStacks}>{detailCard.detail.stacksText}</Text> : null}

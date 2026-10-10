@@ -2,7 +2,7 @@
 
 ## 1. What this screen is for
 
-An encounter node resolves to a `combat-prelude` event that renders **in place over the map**, not as a route: `<EncounterModalOverlay>` (`components/event/EncounterModalOverlay.tsx`) auto-engages the prelude, then mounts `<CombatEncounterPanel>` (`components/combat/encounter/CombatEncounterPanel.tsx`) running the hazard-pattern combat (Spec 26b: stage a card, power it with a colour-matched die, APPLY, END PHASE). Aftermath panels (`components/event/aftermath/*`) close the seal. Rules live in `@mechanics`; the panel keeps engine state in local React state, so `state.combat` stays `null` for the whole fight (`app/(tabs)/exploration/index.tsx` Phase 200 comments).
+An encounter node resolves to a `combat-prelude` event that renders **in place over the map**, not as a route: `<EncounterModalOverlay>` (`components/event/EncounterModalOverlay.tsx`) auto-engages the prelude, then mounts `<CombatEncounterPanel>` (`components/combat/encounter/CombatEncounterPanel.tsx`) running the hazard-pattern combat (Spec 26b: stage a card, power it with a die the Color Law allows, APPLY, END PHASE). Aftermath panels (`components/event/aftermath/*`) close the seal. Rules live in `@mechanics`; the panel keeps engine state in local React state, so `state.combat` stays `null` for the whole fight (`app/(tabs)/exploration/index.tsx` Phase 200 comments).
 
 ## 2. Enter it directly
 

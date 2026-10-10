@@ -171,7 +171,7 @@
       "id": "stance-check",
       "type": "identifier",
       "pattern": "\\b(?:[Ss]tance (?:check|read|chips?|choice|draft)|CHOOSE A STANCE|[Pp]unish/yield|[Hh]idden read)\\b",
-      "replacement": "nothing: stances, the hidden read and the punish/yield check were deleted in R7d (D65); the Color Law and colour match stay",
+      "replacement": "nothing: stances, the hidden read and the punish/yield check were deleted in R7d (D65); the Color Law stays",
       "since": "2026-10-02 (phase R10b2, D67)"
     },
     {
@@ -216,6 +216,14 @@
       "replacement": "nothing: the revamp deleted this keyword or alt-win (R2b, R6b, R7a-R7d); the cards are DEAL and GUARD, and befriend is the one non-lethal ending",
       "since": "2026-10-02 (phase R10b2, D67)",
       "note": "OATH is not listed: UNBROKEN OATH is a live hazard card name. GHOST and TOLL are not listed: the surge dice and the toll tally are live."
+    },
+    {
+      "id": "colour-match-bonus",
+      "type": "identifier",
+      "pattern": "\\b[Cc]olou?r[- ][Mm]atch(?:ed)?\\b|\\bcolorMatch(?:Bonus)?\\b|\\bCOLOR_MATCH_[A-Z_]+\\b|\\b[Mm]atch bonus\\b",
+      "replacement": "nothing: a die of the card's own colour adds nothing; the Color Law only says which dice can power a card (any die for a grey card, the gold die for every card, otherwise the card's own colour) and PAID numbers land as printed (D79)",
+      "since": "2026-10-10 (D79)",
+      "note": "'the colours match' and 'a die whose colour matches' describe the Color Law and are not flagged"
     }
   ]
 }

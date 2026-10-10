@@ -801,6 +801,24 @@ stay open, not rejected.
   every check green and the Act 1 walk.
 - `plan/revamp/checkpoint.md` → "RC2".
 
+**D79 — The colour-match bonus is removed; a die powers its colour, nothing
+more.** (T, attended, 2026-10-10: "Scrap everything that mentions a
+colour-match bonus. A die MUST match the card colour unless the card colour
+is grey, period. This is old game mechanics bleeding through and was
+supposed to be removed during the revamp.")
+
+- Overrides D65's "colour match stay[s]" (and the R7d row's "the
+  colour-match bonus ... STAY"). A die of the card's own colour no longer adds 25% (minimum +2) to
+  PAID numbers or +1 turn to statuses: PAID numbers land as printed, scaled
+  by stats, and statuses keep their printed turns, whatever legal die pays.
+- The Color Law is unchanged: a die powers a card when the card is grey
+  (`any`), the die is gold, or the colours match; a mismatch cannot be used.
+  The gold (wild) die stays wild (T confirmed).
+- The engine's `colorMatchBonus`, `COLOR_MATCH_BONUS_*` and
+  `COLOR_MATCH_STATUS_DURATION_BONUS` are deleted, with every preview and
+  card line that printed the bonus. The lexicon registry retires the term
+  (`colour-match-bonus`) so live docs cannot bring it back.
+
 ## Open follow-ups
 
 **D1 status at a glance (2026-09-28, after #408).** Card and keyword

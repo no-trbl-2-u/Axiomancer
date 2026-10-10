@@ -65,9 +65,8 @@ overflow into Conviction. A second roll in the same phase is refused with a
   or a die that fails the Color Law (`dieSatisfiesColorLaw`) fizzles with an
   `effect-fizzled` event and spends nothing. `firstLegalPoweringDie` finds a
   legal die for callers that do not name one.
-- Colour match is computed in `playBottomAction`: `colorMatchBonus` adds to
-  DEAL (via `scalePlayerHit`) and GUARD, and
-  `COLOR_MATCH_STATUS_DURATION_BONUS` adds to status turns. Banked pips add
+- A legal die adds nothing of its own: DEAL (via `scalePlayerHit`), GUARD
+  and status turns land as printed, whatever colour paid. Banked pips add
   `PIP_GUARD_BONUS` or `PIP_INTENSITY_BONUS`.
 - Player stats scale the printed numbers through `scaleFor` and
   `scaleEffectIntensity` (`Combat/stat-scaling.ts`). `scaleCardForStats` is

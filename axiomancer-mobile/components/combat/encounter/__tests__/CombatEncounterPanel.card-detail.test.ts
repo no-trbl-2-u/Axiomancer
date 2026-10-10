@@ -9,7 +9,7 @@
  *   exist here. The data keeps it: `CombatCardVM.flavor` carries
  *   `card.description`, and the DECK screen renders it.
  * - The keyword definitions render ABOVE the card face.
- * - The prose rows under the fork (the ▲/—/▼ legend and the colour-match
+ * - The prose rows under the fork (the ▲/—/▼ legend and the Color Law
  *   hint) do not render as rows. They are VM fields for the out-of-combat DECK
  *   screen; the combat overlay folds their content into the row each one
  *   qualifies.
@@ -62,7 +62,7 @@ describe('combat card detail — overlay shape', () => {
 
     it('spends no row on the folded prose footers (finding 3)', () => {
         const overlay = detailOverlaySource();
-        for (const field of ['detail.readLegend', 'detail.colorMatchHint']) {
+        for (const field of ['detail.readLegend', 'detail.colorLawHint']) {
             expect(overlay).not.toContain(`detailCard.${field}`);
         }
         // The facts themselves still show — they ride the rows they qualify.

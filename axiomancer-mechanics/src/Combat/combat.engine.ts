@@ -81,27 +81,6 @@ import type {
 /** Safety cap on total phases processed — prevents a degenerate stalemate loop. */
 const MAX_PHASES = 60;
 
-// ── Color-match tuning ───────────────────────────────────────────────────────
-
-/**
- * The colour-match reward is a PERCENTAGE, not a flat bonus. A flat bonus that mattered on a GUARD 6 card is
- * noise on a GUARD 40 one; a percentage keeps "power the card with its own
- * colour" worth doing at every rank. The floor keeps it felt on the smallest
- * Ash lines. Use {@link colorMatchBonus} — never the raw constants.
- */
-export const COLOR_MATCH_BONUS_PCT = 0.25;
-export const COLOR_MATCH_BONUS_MIN = 2;
-
-/**
- * The bonus a colour-matched (or Wild) die adds to a printed damage / guard /
- * barrier magnitude: 25% of the base, at least +2, rounded. Returns 0 for a
- * non-positive base so a zero-magnitude line never invents power.
- */
-export function colorMatchBonus(base: number): number {
-    if (base <= 0) return 0;
-    return Math.max(COLOR_MATCH_BONUS_MIN, Math.round(base * COLOR_MATCH_BONUS_PCT));
-}
-
 /**
  * Always 1: threat scaling lives in `threatDamageBudget` (`combat.threat.ts`),
  * so a telegraph's printed number IS the number the engine applies. Exported
@@ -167,9 +146,6 @@ export const PIP_INTENSITY_BONUS = 2;
 /** Each pip on a spent Reserve die adds this much Guard on a defend card,
  *  so a ripened die is worth banking against GUARD lines from 8 to 60. */
 export const PIP_GUARD_BONUS = 5;
-/** A color-matched (or Wild) die on a STATUS card extends the landed
- *  status by this many turns. */
-export const COLOR_MATCH_STATUS_DURATION_BONUS = 1;
 
 // ── The damage-scaler constants ──────────────────────────────────────────────
 
@@ -682,14 +658,13 @@ function applyEnemyDamage(
 /**
  * The scalers a single player hit picks up on its way to the foe, folded in
  * one place so every damage source (the `deal` mechanic, a FREE-line
- * `damage`) reads the same rules. Order is authored:
- *   1. the colour-match bonus, as a percentage of the base
- *   2. VULNERABLE — the foe's incoming-damage multiplier (last of the
- *      multipliers, uncapped). The caller scales `base` by body first.
+ * `damage`) reads the same rules. The caller scales `base` by body first;
+ * the only scaler applied here is VULNERABLE, the foe's incoming-damage
+ * multiplier (uncapped). The die that powered the play adds nothing: a die
+ * powers a card, it does not boost it.
  */
 export interface PlayerHitParams {
     base: number;
-    colorMatch: boolean;
     /** VULNERABLE on the foe (`getDamageTakenMultiplier`); 1 when absent. */
     vulnMult?: number;
 }
@@ -697,7 +672,6 @@ export interface PlayerHitParams {
 export function scalePlayerHit(params: PlayerHitParams): number {
     if (params.base <= 0) return 0;
     let dmg = Math.round(params.base);
-    if (params.colorMatch) dmg += colorMatchBonus(dmg);
     if (params.vulnMult !== undefined && params.vulnMult !== 1) dmg = Math.round(dmg * params.vulnMult);
     return Math.max(0, dmg);
 }
@@ -753,11 +727,9 @@ function applyRiderToState(
     let attribution = state.attribution;
     const cardName = lookupCard(cardId)?.name ?? cardId;
     if (r.damage) {
-        // A FREE-line hit takes no colour match: the printed number is the
-        // number, scaled by body and VULNERABLE.
+        // The printed number is the number, scaled by body and VULNERABLE.
         const dmg = scalePlayerHit({
             base: scaleFor(r.damage, stats, 'body', 'one-shot'),
-            colorMatch: false,
             vulnMult: getDamageTakenMultiplier(enemy),
         });
         if (dmg > 0) {
@@ -935,17 +907,15 @@ function playBottomAction(
         return { state: withLog(state, events), events };
     }
 
-    // 2. Color-match. Every play lands at its printed numbers.
-    // A grey card's colour-match bonus is NEUTRAL: never on-colour
-    // (even powered by wild), never off-colour.
-    const colorMatch = card.stance !== 'any' && (powering.color === 'wild' || powering.color === card.stance);
+    // 2. Every play lands at its printed numbers: the die that powers it
+    // adds nothing beyond its pips.
     const poweringPips = powering.pips ?? 0;
     // The player's stats scale this play's printed numbers
     // (`stat-scaling.ts`): DEAL by body, GUARD by mind, statuses by where
-    // they land. Colour match and VULNERABLE stack on top.
+    // they land. VULNERABLE stacks on top.
     const stats = state.player.baseStats;
 
-    const events: CombatEvent[] = [{ kind: 'card-played', cardId: card.id, useBottom: true, dieId: powering.id, colorMatch }];
+    const events: CombatEvent[] = [{ kind: 'card-played', cardId: card.id, useBottom: true, dieId: powering.id }];
 
     // 3. Execute the card (the shared effect machinery) against a shim.
     const before = intensityMap(state.enemy.effects);
@@ -971,28 +941,22 @@ function playBottomAction(
         resonance = { ...resonance, [resonanceColor]: resonance[resonanceColor] + 1 };
         events.push({ kind: 'resonance-gained', color: resonanceColor, total: resonance[resonanceColor] });
     }
-    // Landed-status adjustments in one pass, all REAL units: RIPENED pips (+1
-    // intensity per pip on a non-defend play), and the color-match +1
-    // duration on status cards. Card statuses land uncapped, so the
-    // pips add on top with no clamp.
+    // Landed-status adjustment, in REAL units: RIPENED pips add
+    // PIP_INTENSITY_BONUS intensity per pip on a non-defend play. Card
+    // statuses land uncapped, so the pips add on top with no clamp.
     const isDefendPlay = card.verbClass === 'defend';
     const bonusIntensity = isDefendPlay ? 0 : poweringPips * PIP_INTENSITY_BONUS;
-    const bonusDuration = colorMatch && card.effectKind !== 'none' ? COLOR_MATCH_STATUS_DURATION_BONUS : 0;
-    if (bonusIntensity > 0 || bonusDuration > 0) {
+    if (bonusIntensity > 0) {
         let touched = false;
         enemy = {
             ...enemy,
             effects: enemy.effects.map(a => {
                 if ((before[a.effectId] ?? 0) >= a.intensity) return a;
                 touched = true;
-                return {
-                    ...a,
-                    intensity: a.intensity + bonusIntensity,
-                    remainingDuration: a.remainingDuration === -1 ? -1 : a.remainingDuration + bonusDuration,
-                };
+                return { ...a, intensity: a.intensity + bonusIntensity };
             }),
         };
-        if (touched && poweringPips > 0 && !isDefendPlay) {
+        if (touched) {
             events.push({ kind: 'pips-cashed', cardId: card.id, pips: poweringPips, bonus: 'intensity', amount: poweringPips * PIP_INTENSITY_BONUS });
         }
     }
@@ -1012,7 +976,6 @@ function playBottomAction(
         const healthBefore = enemy.health;
         const dmg = scalePlayerHit({
             base: scaleFor(mech.amount, stats, 'body', 'one-shot'),
-            colorMatch,
             vulnMult,
         });
         if (dmg <= 0) continue;
@@ -1088,7 +1051,7 @@ function playBottomAction(
     }
     events.push({ kind: 'die-spent', dieId: powering.id, color: powering.color });
 
-    // Defense card → GUARD (printed + color-match + pips). Absorbed in
+    // Defense card → GUARD (printed + pips). Absorbed in
     // `resolveThreatPhase`.
     const guardMech = mechs.find(m => m.kind === 'guard');
     const pipGuard = isDefendPlay ? poweringPips * PIP_GUARD_BONUS : 0;
@@ -1096,7 +1059,7 @@ function playBottomAction(
         events.push({ kind: 'pips-cashed', cardId: card.id, pips: poweringPips, bonus: 'guard', amount: pipGuard });
     }
     const guardBase = guardMech ? scaleFor(Math.max(1, Math.round(guardMech.amount)), stats, 'mind', 'one-shot') : 0;
-    const guardGain = guardBase + (guardMech && colorMatch ? colorMatchBonus(guardBase) : 0) + pipGuard;
+    const guardGain = guardBase + pipGuard;
 
     let next: CombatEncounterState = {
         ...state, player, enemy, dice, reserve, resonance, attribution,

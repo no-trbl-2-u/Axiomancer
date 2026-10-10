@@ -7,7 +7,7 @@ import type { BloodPriceSpec } from './blood-price.types';
 
 /**
  * A stat colour (body / mind / heart). A card's `color` is one of these or
- * 'any' (see `CardAspect`); the dice and the colour-match bonus read it.
+ * 'any' (see `CardAspect`); the Color Law reads it.
  * - 'body': Physical/strength-based cards
  * - 'mind': Mental/intelligence-based cards
  * - 'heart': Emotional/charisma-based cards
@@ -17,7 +17,7 @@ export type StatType = 'body' | 'mind' | 'heart';
 /**
  * A CARD's colour identity. `StatType` plus `'any'`: the grey
  * office's colourless aspect, powered by every die colour (body/mind/heart,
- * AND wild) with a neutral (never on/off) colour-match bonus. `StatType`
+ * AND wild). `StatType`
  * itself stays three stats — only a card's aspect widens.
  */
 export type CardAspect = StatType | 'any';
@@ -100,10 +100,10 @@ export interface CardCombatEffects {
  */
 export type CardSpecialMechanic =
     /** GUARD — a shield that absorbs the enemy's next telegraphed threat.
-     *  `amount` is the base Guard before stat and colour-match scaling. */
+     *  `amount` is the base Guard before stat scaling. */
     | { kind: 'guard'; amount: number }
-    /** DEAL — direct VITAE damage. `amount` is the magnitude before stat,
-     *  colour-match and VULNERABLE scaling. */
+    /** DEAL — direct VITAE damage. `amount` is the magnitude before stat
+     *  and VULNERABLE scaling. */
     | { kind: 'deal'; amount: number };
 
 /**

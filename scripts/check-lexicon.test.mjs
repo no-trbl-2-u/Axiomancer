@@ -133,6 +133,18 @@ test('the revamp guard flags each deleted concept and spares its live neighbours
   assert.ok(!flags('retired-keyword', 'UNBROKEN OATH draws two; GHOST dice feed the TOLL'))
 })
 
+// D79: the colour-match bonus is gone; the Color Law it rode on is live, so
+// the row must spare plain "the colours match" law prose.
+test('the colour-match bonus is retired and the Color Law prose is spared', () => {
+  const flags = (text) => scanText(text, byId('colour-match-bonus')).length > 0
+  assert.ok(flags('a colour-match bonus adds 25%'))
+  assert.ok(flags('a color-matched die adds +1 turn'))
+  assert.ok(flags('Colour match (`colorMatchBonus`): +25%'))
+  assert.ok(flags('COLOR_MATCH_STATUS_DURATION_BONUS'))
+  assert.ok(!flags('a die powers a card when the card is any, the die is gold, or the colours match'))
+  assert.ok(!flags('drag a die whose colour matches the card'))
+})
+
 test('a removal mention passes under a justified pragma', () => {
   const text = '<!-- lexicon-ok: retired-keyword — names them to forbid them -->\nNever reintroduce RELENT.\n'
   assert.deepEqual(scanText(text, byId('retired-keyword')), [])

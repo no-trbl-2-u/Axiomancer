@@ -11,8 +11,8 @@
 import type { Card } from '../types';
 
 // ─── THE GREY OFFICE — the fresh-run seed ────────────────────────────────────
-// Colourless shapes (aspect 'any' — every die colour powers them, neutral
-// colour-match bonus). Deliberately plain: fight one teaches
+// Colourless shapes (aspect 'any' — every die colour powers them).
+// Deliberately plain: fight one teaches
 // STRIKE, WARD, FREE-vs-PAID, and the die-spend loop with zero colour
 // arithmetic. They are also the whole reward pool.
 

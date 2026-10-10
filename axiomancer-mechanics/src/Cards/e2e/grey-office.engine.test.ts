@@ -89,13 +89,6 @@ describe('Phase 104 — the grey office: THE COLOUR LAW exception', () => {
             });
         }
     }
-
-    it('colour-match is neutral — a wild-powered play banks no on-colour bonus', () => {
-        mockSequentialRng(0.5);
-        const { events } = playCombatCard(stateWithDie('grey-strike', 'wild'), { uid: 'under-test' }, true, GREY_DIE);
-        const played = events.find(e => e.kind === 'card-played');
-        expect(played && 'colorMatch' in played ? played.colorMatch : undefined).toBe(false);
-    });
 });
 
 describe('Phase 104 — the grey office: FREE/PAID ledgers read exactly as printed', () => {

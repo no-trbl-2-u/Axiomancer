@@ -78,7 +78,6 @@ export {
     startTurn, endTurn, discardCombatCard,
     playSignatureSkill,
     getSignatureSkill, signatureCastBlock, SIGNATURE_COST,
-    colorMatchBonus,
     // Incoming-threat readout
     projectIncomingThreat,
     // Projected-lethality readout

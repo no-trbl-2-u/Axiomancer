@@ -160,8 +160,8 @@ function isNeutral(stats: BaseStats | undefined): boolean {
 
 /**
  * The card as the player's stats print it: every scaled number replaced by
- * the number the engine will apply (before colour match, the read and the
- * foe's VULNERABLE). For DISPLAY only — the engine always executes the
+ * the number the engine will apply (before the read and the foe's
+ * VULNERABLE). For DISPLAY only — the engine always executes the
  * library card and scales at resolution, so never feed this back into play.
  * Returns the same object at neutral stats.
  */

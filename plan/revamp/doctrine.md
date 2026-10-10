@@ -40,7 +40,7 @@ against the final tree.
 
 1. **The game model.** Write `docs/game-model.md`: one page, the
    post-revamp game as it is (README §2's core table, rewritten as current
-   fact: the grey cards, the Color Law, colour match, the tray, FREE/PAID,
+   fact: the grey cards, the Color Law, the tray, FREE/PAID,
    VITAE, Conviction, S3 scaling, the three foes, Act 1, befriend → mercy,
    potions, relic placeholders). State plainly what the game does *not*
    have (stances, presets, pricing, themes). `AGENTS.md` points to it
@@ -85,7 +85,7 @@ Tick 1 is `axiomancer-mechanics`, tick 2 is `axiomancer-mobile`.
    that only records history is deleted (git blame is the history); a
    comment that states a rule keeps the rule and loses the story.
 3. **Every rule of play lives in a live doc.** Using B4's inventory, each
-   rule that governs play (the Color Law, colour match, the tray roll,
+   rule that governs play (the Color Law, the tray roll,
    FREE/PAID, S3 scaling, VITAE, Conviction, befriend) is stated in
    `docs/game-model.md` or a linked rules doc, with the constant it reads.
    Code comments may point to the doc; they are never the only statement.

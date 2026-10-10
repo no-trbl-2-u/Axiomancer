@@ -80,7 +80,7 @@ export function effectImpact(
 
 /** Stance color for a projected combat card — its philosophical aspect.
  *  'any' is the grey office's colourless aspect: every die colour
- *  powers it, with a neutral (never on/off) colour-match bonus. */
+ *  powers it. */
 export function cardStanceColor(card: Card): CardAspect {
     return card.color;
 }
