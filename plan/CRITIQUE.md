@@ -453,22 +453,6 @@
 
 ## Pending
 
-### [LOW] exploration / mobile — the map pane leaves a ~140px empty black band above the engraving
-- pass: 73 (commit 1f5e2896)
-- viewport: mobile (375x812)
-- category: visual
-- observation: on the mid-campaign hub (fixture `sage-bw-door-gate`)
-  the map pane starts under "drag · pinch" at about y=175, but the
-  Breakwater engraving and its nodes begin at about y=325. The space
-  between is flat black, a fifth of the screen, with nothing to drag
-  to. On desktop the same pane is filled edge to edge.
-- evidence: `.critique-artifacts/mobile/11-late-game-hub.png`
-  against `desktop/11-late-game-hub.png`
-- suggested fix: start the phone camera so the plate fills the
-  pane's height (cover rather than fit-width), or centre the plate
-  vertically so the empty space is split and smaller.
-- source: critique:drive (unattended)
-
 ### [LOW] RC walk 2026-10-02 — copy, label and console findings (one row per item, all presentation)
 - pass: RC checkpoint walk, four `playtester` legs (attended, T present), commits a493eaf7 → 169b6dbc
 - viewport: playwright default (desktop)
@@ -726,6 +710,23 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] exploration / mobile — the map pane leaves a ~140px empty black band above the engraving — RESOLVED 2026-10-10 (commit c5d0dda6; `computeFocusTransform` settles each axis against the plate: a plate covering the pane slides to meet the frame edge, a smaller one is centred, focus nodes stay in frame; pinned in MapCanvas.test.tsx)
+- issue: #482
+- pass: 73 (commit 1f5e2896)
+- viewport: mobile (375x812)
+- category: visual
+- observation: on the mid-campaign hub (fixture `sage-bw-door-gate`)
+  the map pane starts under "drag · pinch" at about y=175, but the
+  Breakwater engraving and its nodes begin at about y=325. The space
+  between is flat black, a fifth of the screen, with nothing to drag
+  to. On desktop the same pane is filled edge to edge.
+- evidence: `.critique-artifacts/mobile/11-late-game-hub.png`
+  against `desktop/11-late-game-hub.png`
+- suggested fix: start the phone camera so the plate fills the
+  pane's height (cover rather than fit-width), or centre the plate
+  vertically so the empty space is split and smaller.
+- source: critique:drive (unattended)
 
 ### [x] [LOW] title / desktop — the three-step scrim draws two hard seams across the art, through the king's crown and his beard — RESOLVED 2026-10-10 (commit 85672440; the scrim is one SVG LinearGradient, `titleScrimStops`, from clear to 0.9+ under the CTA; desktop capture shows no step, mobile unchanged; pinned in TitleScreen.test.tsx)
 - issue: #481
