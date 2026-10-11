@@ -190,10 +190,22 @@ async function playOutCutscene(page) {
  * Settle back on the map after a node's screen, playing only the screens a
  * node legitimately chains into (an arrival scene after a restart, the first
  * relic, a rest claim). Anything else still up after the budget is a failure.
+ *
+ * A defeat's run reset re-seats the player on a node that owes a fresh
+ * arrival, but the app resolves that arrival a tick late (exploration's
+ * screen defers it to a `setTimeout(0)` so a same-handler session-open isn't
+ * mistaken for idle) — so the map can render, satisfying `onMap()`, a moment
+ * before routing away to the replayed arrival cutscene. A single `onMap()`
+ * read can land inside that window, so a hit is confirmed stable across one
+ * more deferred-macrotask-sized wait before this returns.
  */
 async function settleOnMap(page, what) {
     for (let i = 0; i < 40; i++) {
-        if (await onMap(page)) return
+        if (await onMap(page)) {
+            await sleep(250)
+            if (await onMap(page)) return
+            continue
+        }
         await sleep(400)
         if (await tap(page, 'combat-summary-close')) continue
         if (await page.getByTestId('cutscene-advance').count()) { await playOutCutscene(page); continue }
