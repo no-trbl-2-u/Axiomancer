@@ -52,6 +52,30 @@
 
 ## Pending
 
+### [ ] [perf] firstScreenMs budget breach: 306 ms vs 303 ms (2026-10-11)
+- issue: #489
+- category: perf
+- impact: 5
+- ease: 5
+- detail: the weekly performance audit measured firstScreenMs at 306 ms against a budget of 303 ms. Commit 9ae519f; previous history line at ca2e13d (`docs/reports/perf/history.jsonl`).
+- next (`/iterate`): bisect the commits between the two history lines; fix or raise the budget with T.
+
+### [ ] [perf] lcpMs budget breach: 352 ms vs 351 ms (2026-10-11)
+- issue: #490
+- category: perf
+- impact: 5
+- ease: 5
+- detail: the weekly performance audit measured lcpMs at 352 ms against a budget of 351 ms. Commit 9ae519f; previous history line at ca2e13d (`docs/reports/perf/history.jsonl`).
+- next (`/iterate`): bisect the commits between the two history lines; fix or raise the budget with T.
+
+### [ ] [perf] tbtMs budget breach: 112 ms vs 100 ms (2026-10-11)
+- issue: #491
+- category: perf
+- impact: 5
+- ease: 5
+- detail: the weekly performance audit measured tbtMs at 112 ms against a budget of 100 ms. Commit 9ae519f; previous history line at ca2e13d (`docs/reports/perf/history.jsonl`).
+- next (`/iterate`): bisect the commits between the two history lines; fix or raise the budget with T.
+
 ### [x] [tests] Root `npm test` is red on main: `check-comments` flags two "D41" decision-number comments (2026-10-10) — CLOSED 2026-10-10 (cbe0fa47: both comments state the rule without the decision number; check-comments clean, root `npm test` 224/224)
 - category: tests
 - issue: #480
