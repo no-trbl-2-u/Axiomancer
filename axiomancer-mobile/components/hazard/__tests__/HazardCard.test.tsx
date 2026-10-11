@@ -1,7 +1,9 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
 
-import { HazardCard, CardArt, handArtSize, handNameFontSize } from '../HazardCard';
+import { HAZARD_DECK } from '@mechanics';
+import { HazardCard, CardArt, handArtSize, handEffectFontSize, handNameFontSize } from '../HazardCard';
+import { cardVMFromId } from '@/state/presenters/hazard.engine';
 import type { HazardCardVM } from '@/state/presenters/hazard.engine';
 
 const mockCardVM: HazardCardVM = {
@@ -162,5 +164,38 @@ describe('handArtSize', () => {
         const json = JSON.stringify(toJSON());
         expect(json).toContain('"width":20,"height":20');
         expect(json).not.toContain('"width":30,"height":30');
+    });
+});
+
+describe('handEffectFontSize', () => {
+    const utility = HAZARD_DECK.map(def => cardVMFromId(def.id)).filter(vm => vm.utility);
+
+    it('keeps short effect lines at full size', () => {
+        expect(handEffectFontSize('DRAW 1', 'DRAW 2')).toBe(11);
+        expect(handEffectFontSize('RE-CAST', 'RE-CAST +DIE')).toBe(11);
+    });
+
+    // Read the Wind's two lines were cut to "CONVERT 1 …" and "CONVERT …" on the
+    // 90px hand card. Measured in Chromium with Bebas Neue, "CONVERT ✕→◆ ALL" runs
+    // 59px at 8px against the row's 65px; the estimate must not pick a larger size.
+    it('shrinks a long convert line until the whole label fits the hand row', () => {
+        expect(handEffectFontSize('CONVERT 1 ✕→◆', 'CONVERT ✕→◆ ALL')).toBe(8);
+    });
+
+    it('sizes every library utility card legibly, one size for both rows', () => {
+        expect(utility.length).toBeGreaterThan(0);
+        for (const vm of utility) {
+            const size = handEffectFontSize(vm.freeEffectLabel, vm.poweredEffectLabel);
+            expect(size).toBeGreaterThanOrEqual(8);
+            expect(size).toBeLessThanOrEqual(handEffectFontSize(vm.freeEffectLabel));
+            expect(size).toBeLessThanOrEqual(handEffectFontSize(vm.poweredEffectLabel));
+        }
+    });
+
+    it('prints the whole label without the ⬡ mark in hand mode', () => {
+        const wind = cardVMFromId('windread');
+        const { getByText, queryByText } = render(<HazardCard card={wind} mode="hand" />);
+        expect(getByText('CONVERT ✕→◆ ALL')).toBeTruthy();
+        expect(queryByText(/⬡/)).toBeNull();
     });
 });

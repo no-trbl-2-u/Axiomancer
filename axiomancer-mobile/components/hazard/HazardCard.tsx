@@ -132,6 +132,7 @@ function Row({
     const powered = card.poweredByDieId !== null;
     const active = bottom ? powered : !powered;
     const effectLabel = bottom ? card.poweredEffectLabel : card.freeEffectLabel;
+    const effectSize = compact ? 10 : handEffectFontSize(card.freeEffectLabel, card.poweredEffectLabel);
     return (
         <View
             style={{
@@ -159,9 +160,9 @@ function Row({
             {card.utility && effectLabel !== null && (
                 <Text
                     numberOfLines={1}
-                    style={{ fontFamily: FONTS.sans, fontSize: compact ? 10 : 11, letterSpacing: 0.4, color: bottom ? c.dark : CARD_INK, marginTop: 1 }}
+                    style={{ fontFamily: FONTS.sans, fontSize: effectSize, letterSpacing: EFFECT_SPACING, color: bottom ? c.dark : CARD_INK, marginTop: 1 }}
                 >
-                    ⬡ {effectLabel}
+                    {compact ? `⬡ ${effectLabel}` : effectLabel}
                 </Text>
             )}
         </View>
@@ -189,6 +190,30 @@ export function handNameFontSize(name: string, nameInset = 0): number {
     if (/\s/.test(name.trim())) return HAND_NAME_SIZE;
     const room = HAND_TEXT_W - PIP_CLEAR - Math.max(PIP_CLEAR, nameInset);
     return Math.min(HAND_NAME_SIZE, Math.floor(room / (name.length * GOTHIC_CAP_EM)));
+}
+
+const HAND_EFFECT_SIZE = 11;
+const EFFECT_SPACING = 0.4;
+/** Hand-mode effect-line width: the text width less the rows box's 1px borders and the row's 6px padding. */
+const HAND_EFFECT_W = HAND_TEXT_W - 2 - 12;
+
+/** Bebas Neue advance per px of font size: capitals, digits and `-+` run 0.4, a space 0.25,
+ *  and the fallback-font symbols (✕ → ◆) up to 1.0, so 0.9 leaves a little slack. */
+function effectGlyphEm(ch: string): number {
+    if (ch === ' ') return 0.25;
+    return /[A-Z0-9+\-]/.test(ch) ? 0.4 : 0.9;
+}
+
+/** Hand-mode effect-line size, shared by a card's two rows so FREE and SURGE read at one
+ *  size. A line too long for the row shrinks to fit rather than cutting what it converts
+ *  ("CONVERT …"); the line drops the ⬡ mark in hand mode, where it is the widest glyph. */
+export function handEffectFontSize(...labels: (string | null)[]): number {
+    const sizes = labels.filter((l): l is string => l !== null && l !== '').map(label => {
+        const chars = [...label];
+        const em = chars.reduce((sum, ch) => sum + effectGlyphEm(ch), 0);
+        return Math.floor((HAND_EFFECT_W - chars.length * EFFECT_SPACING) / em);
+    });
+    return Math.min(HAND_EFFECT_SIZE, ...sizes);
 }
 
 /** Hand-mode medallion size. A utility card prints an effect line under each stat row,
