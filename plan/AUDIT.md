@@ -52,7 +52,7 @@
 
 ## Pending
 
-### [ ] [perf] firstScreenMs budget breach: 306 ms vs 303 ms (2026-10-11)
+### [x] [perf] firstScreenMs budget breach: 306 ms vs 303 ms (2026-10-11) — CLOSED 2026-10-11 (afcd727c: a runner artifact. The run was on an Intel Xeon 8573C and the budgets were seeded on an AMD EPYC 9V74. Re-measured on the AMD at 52fabfbf: firstScreenMs 248, lcpMs 288, tbtMs 81, all under budget. Timing budgets now apply only on the seeding CPU)
 - issue: #489
 - category: perf
 - impact: 5
@@ -60,7 +60,7 @@
 - detail: the weekly performance audit measured firstScreenMs at 306 ms against a budget of 303 ms. Commit 9ae519f; previous history line at ca2e13d (`docs/reports/perf/history.jsonl`).
 - next (`/iterate`): bisect the commits between the two history lines; fix or raise the budget with T.
 
-### [ ] [perf] lcpMs budget breach: 352 ms vs 351 ms (2026-10-11)
+### [x] [perf] lcpMs budget breach: 352 ms vs 351 ms (2026-10-11) — CLOSED 2026-10-11 (afcd727c: a runner artifact. The run was on an Intel Xeon 8573C and the budgets were seeded on an AMD EPYC 9V74. Re-measured on the AMD at 52fabfbf: firstScreenMs 248, lcpMs 288, tbtMs 81, all under budget. Timing budgets now apply only on the seeding CPU)
 - issue: #490
 - category: perf
 - impact: 5
@@ -68,7 +68,7 @@
 - detail: the weekly performance audit measured lcpMs at 352 ms against a budget of 351 ms. Commit 9ae519f; previous history line at ca2e13d (`docs/reports/perf/history.jsonl`).
 - next (`/iterate`): bisect the commits between the two history lines; fix or raise the budget with T.
 
-### [ ] [perf] tbtMs budget breach: 112 ms vs 100 ms (2026-10-11)
+### [x] [perf] tbtMs budget breach: 112 ms vs 100 ms (2026-10-11) — CLOSED 2026-10-11 (afcd727c: a runner artifact. The run was on an Intel Xeon 8573C and the budgets were seeded on an AMD EPYC 9V74. Re-measured on the AMD at 52fabfbf: firstScreenMs 248, lcpMs 288, tbtMs 81, all under budget. Timing budgets now apply only on the seeding CPU)
 - issue: #491
 - category: perf
 - impact: 5
@@ -1575,6 +1575,24 @@ present. Row stays open until that session runs.
   opened BEFORE the brief is written and treated as a lock. Left open: the
   cheap fix covers the observed failure, and a real lock is a bigger change to
   a flow that is otherwise working.
+
+### [loop-call] Timing perf budgets hold only on the CPU they were seeded on (2026-10-11)
+- category: perf
+- impact: 5
+- ease: 8
+- detail: the PF1 brief said "Budgets still apply" across a runner change.
+  The first weekly run landed on an Intel Xeon 8573C, about 20% slower on
+  every timing than the AMD EPYC 9V74 the budgets were seeded on. That is
+  the same as the budget headroom, so it filed three load breaches (#489,
+  #490, #491). An AMD re-measure at the same code was flat against the seed
+  line. The loop chose to have `budgets.json` record its seeding CPU, check
+  timing budgets only on that CPU and note the skip in the history line.
+  Byte budgets always apply (commit afcd727c; PF1 brief rule 6 amended). Cost:
+  an Intel week checks no timing at all, so a real regression shows only on
+  the next AMD week.
+- next: `/oversight` ratifies or reverses. Alternatives: per-CPU budget sets
+  (seed each CPU once), or keep budgets everywhere and raise the headroom to
+  cover the slower runner.
 
 ### [loop-call] The level prints in arabic everywhere; roman numerals stay for chronicle counts only (2026-10-09)
 - category: divergence
