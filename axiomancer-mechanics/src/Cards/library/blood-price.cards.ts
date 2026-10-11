@@ -99,8 +99,8 @@ const ENTRIES: Entry[] = [
         free: L('GUARD {guard:3}.', c => { c.guard(3); }),
         paid: L('WAIVE your next SACRIFICE this turn. Gain 1 Conviction.', c => { c.sacModifier({ kind: 'next-free', count: 1 }); c.conviction(1); }) } },
     { slot: 'e-05n', name: 'Open Vein', type: 'skill', color: PURPLE, program: {
-        free: L('SACRIFICE 2, TETHER 2.', c => { c.sacrifice(2); c.tether(2); }),
-        paid: L('SACRIFICE 4, TETHER 3, LEECH {leech:2}.', c => { c.sacrifice(4); c.tether(3); c.leech(2); }) } },
+        free: L('TETHER 2, SACRIFICE 2.', c => { c.tether(2); c.sacrifice(2); }),
+        paid: L('TETHER 3, SACRIFICE 4, LEECH {leech:2}.', c => { c.tether(3); c.sacrifice(4); c.leech(2); }) } },
     { slot: 'e-06b', type: 'attack', color: RED, program: {
         free: L('DEAL {deal:6}, then SACRIFICE 2.', c => { c.deal(6); c.sacrifice(2); }),
         paid: L('DEAL {deal:9}, twice; SACRIFICE 2 after each.', c => { c.deal(9); c.sacrifice(2); c.deal(9); c.sacrifice(2); }) } },

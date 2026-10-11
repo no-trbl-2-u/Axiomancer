@@ -280,13 +280,14 @@ describe('the revision 2 cards', () => {
         expect([paid.player.health, paid.conviction]).toEqual([94, 4]);
     });
 
-    it('Open Vein: its own SACRIFICE comes before its TETHER; PAID adds LEECH 2', () => {
+    it('Open Vein: TETHER comes first, so its own SACRIFICE lands on the foe; PAID adds LEECH 2', () => {
         const free = play(fight(['bp-e-05n']), 't0', false);
         expect(free.player.health).toBe(98);
-        expect(free.enemy.health).toBe(500);
+        expect(free.enemy.health).toBe(498);
         expect(free.program!.tetherUntil).toBe(free.round + 1);
         const paid = play(fight(['bp-e-05n']), 't0', true);
         expect(paid.player.health).toBe(96);
+        expect(paid.enemy.health).toBe(496);
         expect(paid.program!.tetherUntil).toBe(paid.round + 2);
         expect([paid.program!.leechTurns, paid.program!.leechPotency]).toEqual([3, 2]);
     });

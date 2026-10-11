@@ -142,7 +142,7 @@ no lane, deck or reward pool. Saves drop the cut ids on load
 | Id | Name | Type, colour | FREE | PAID |
 |---|---|---|---|---|
 | `bp-e-01n` | Bloodletting | Spell, blue | SACRIFICE 3, gain 2 Conviction | SACRIFICE 6, gain 4 Conviction |
-| `bp-e-05n` | Open Vein | Skill, purple | SACRIFICE 2, TETHER 2 | SACRIFICE 4, TETHER 3, LEECH 2 |
+| `bp-e-05n` | Open Vein | Skill, purple | TETHER 2, SACRIFICE 2 | TETHER 3, SACRIFICE 4, LEECH 2 (reworded 2026-10-11, T: TETHER first so its own SACRIFICE lands) |
 | `bp-e-08n` | Blood for Blood | Attack, red | SACRIFICE 3, DEAL 6 | SACRIFICE any amount X (max 12), DEAL 2X (body-scaled) |
 | `bp-e-09n` | Crimson Pact | Global, red | 🩸 When you SACRIFICE n: your next DEAL this turn deals +n. ⏳3 | the same, ∞ |
 | `bp-m-04n` | Transfusion | Skill, blue | SACRIFICE 3, HEAL 6 at the start of your next turn | SACRIFICE 5, HEAL 12 at the start of your next turn |
