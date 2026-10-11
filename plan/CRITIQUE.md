@@ -770,7 +770,29 @@
   swapping).
 - source: loop
 
-### [MED] exploration / mobile — the hub opens the map at about 0.15x, so the 44px node markers draw at about 6px
+### [LOW] hazard — a hand card with a two-line name clips its paid row's effect line at its own bottom edge
+- pass: 75 (commit 720ca33d)
+- viewport: both (clearest on desktop 1280x800, where no card overlaps another)
+- category: visual
+- observation: in the route-select hand, BALANCE POLE and SURE FOOTING
+  (two-line names) push their two stat rows down far enough that the
+  paid row's effect line is cut by the card frame: "RE-CAST +DIE" and
+  "DRAW 2" show only the top half of their letters. SCRAMBLE (one-line
+  name) shows its paid row whole. This is the card's own height, not the
+  fan overlap of RC walk item 9.
+- evidence: `desktop/10-hazard.png`, cards 1-3 and 5 of the Flooded
+  Undercroft hand; `HazardCard.tsx` hand mode: `frame` has
+  `overflow: 'hidden'` and a fixed height, with the name's `minHeight: 28`
+  plus 30px art above `rowsBox`.
+- suggested fix: size the hand-mode frame (or tighten the name/art
+  margins) so name + art + both rows fit, and pin it with a test that
+  a two-line name leaves the bottom row's effect line inside the frame.
+- source: critique-drive (unattended)
+
+## Done
+
+### [x] [MED] exploration / mobile — the hub opens the map at about 0.15x, so the 44px node markers draw at about 6px — RESOLVED 2026-10-11 (commit e6970c5c; node marks, their press targets and halos are counter-scaled by `nodeCounterScale` to a 28px screen floor at any zoom, the plate and roads keep scaling; 28 not 44 because the closest Act 1 nodes sit ~32px apart at the phone fit; pinned in ExplorationNode.test.tsx)
+- issue: #492
 - pass: 75 (commit 720ca33d)
 - viewport: mobile (375x812)
 - category: mobile / a11y
@@ -792,27 +814,6 @@
   Alternatively raise the phone fit floor so it frames the open nodes
   rather than the whole plate. Presentation only.
 - source: critique-drive (unattended)
-
-### [LOW] hazard — a hand card with a two-line name clips its paid row's effect line at its own bottom edge
-- pass: 75 (commit 720ca33d)
-- viewport: both (clearest on desktop 1280x800, where no card overlaps another)
-- category: visual
-- observation: in the route-select hand, BALANCE POLE and SURE FOOTING
-  (two-line names) push their two stat rows down far enough that the
-  paid row's effect line is cut by the card frame: "RE-CAST +DIE" and
-  "DRAW 2" show only the top half of their letters. SCRAMBLE (one-line
-  name) shows its paid row whole. This is the card's own height, not the
-  fan overlap of RC walk item 9.
-- evidence: `desktop/10-hazard.png`, cards 1-3 and 5 of the Flooded
-  Undercroft hand; `HazardCard.tsx` hand mode: `frame` has
-  `overflow: 'hidden'` and a fixed height, with the name's `minHeight: 28`
-  plus 30px art above `rowsBox`.
-- suggested fix: size the hand-mode frame (or tighten the name/art
-  margins) so name + art + both rows fit, and pin it with a test that
-  a two-line name leaves the bottom row's effect line inside the frame.
-- source: critique-drive (unattended)
-
-## Done
 
 ### [x] [LOW] exploration / mobile — the map pane leaves a ~140px empty black band above the engraving — RESOLVED 2026-10-10 (commit c5d0dda6; `computeFocusTransform` settles each axis against the plate: a plate covering the pane slides to meet the frame edge, a smaller one is centred, focus nodes stay in frame; pinned in MapCanvas.test.tsx)
 - issue: #482
