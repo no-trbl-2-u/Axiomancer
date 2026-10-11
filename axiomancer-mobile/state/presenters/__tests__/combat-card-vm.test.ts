@@ -17,7 +17,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import {
-    getCard, getCardById, colorMatchBonus,
+    getCard, getCardById,
     registerSandboxCards, clearSandboxCards, effectsLibrary,
 } from '@mechanics';
 import type { Card, Effect } from '@mechanics';
@@ -198,20 +198,14 @@ describe('resolvePrimary + armedValue', () => {
         expect(resolvePrimary(getCard('grey-word')!, getCardById('grey-word')).kind).toBe('vulnerable');
         expect(resolvePrimary(getCard('grey-strike')!, getCardById('grey-strike')).kind).toBe('mechanic');
     });
-    it('armedValue prints Guard as printed (+colour match)', () => {
+    it('armedValue prints Guard exactly as printed — the die adds nothing', () => {
         const guard = faceStats(getCard('grey-ward')!, getCardById('grey-ward'));
-        const base = guard.guardBase!;
-        expect(base).toBe(5);
-        expect(armedValue(guard, false)).toBe(base);
-        // The presenter consumes the ENGINE's rule, not a restatement of it:
-        // colorMatchBonus() = max(2, 25% of the base), which here (2) differs
-        // from the old flat +3 — the printed-not-applied bug this catches.
-        expect(armedValue(guard, true)).toBe(base + colorMatchBonus(base));
-        expect(colorMatchBonus(base)).not.toBe(3);
+        expect(guard.guardBase).toBe(5);
+        expect(armedValue(guard)).toBe(5);
     });
     it('armedValue reads a ROUND-CLOCK DoT as its ramp-aware lifetime (exact)', () => {
         // Sketch of a Thought: kindling ember dpr 1, i1, 3 turns, no ramp → 3.
         const dot = faceStats(getCard('fx-ember')!, getCardById('fx-ember'));
-        expect(armedValue(dot, false)).toBe(3);          // 1+1+1
+        expect(armedValue(dot)).toBe(3);          // 1+1+1
     });
 });

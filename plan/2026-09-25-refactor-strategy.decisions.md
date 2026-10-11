@@ -801,6 +801,139 @@ stay open, not rejected.
   every check green and the Act 1 walk.
 - `plan/revamp/checkpoint.md` → "RC2".
 
+**D79 — The colour-match bonus is removed; a die powers its colour, nothing
+more.** (T, attended, 2026-10-10: "Scrap everything that mentions a
+colour-match bonus. A die MUST match the card colour unless the card colour
+is grey, period. This is old game mechanics bleeding through and was
+supposed to be removed during the revamp.")
+
+- Overrides D65's "colour match stay[s]" (and the R7d row's "the
+  colour-match bonus ... STAY"). A die of the card's own colour no longer adds 25% (minimum +2) to
+  PAID numbers or +1 turn to statuses: PAID numbers land as printed, scaled
+  by stats, and statuses keep their printed turns, whatever legal die pays.
+- The Color Law is unchanged: a die powers a card when the card is grey
+  (`any`), the die is gold, or the colours match; a mismatch cannot be used.
+  The gold (wild) die stays wild (T confirmed).
+- The engine's `colorMatchBonus`, `COLOR_MATCH_BONUS_*` and
+  `COLOR_MATCH_STATUS_DURATION_BONUS` are deleted, with every preview and
+  card line that printed the bonus. The lexicon registry retires the term
+  (`colour-match-bonus`) so live docs cannot bring it back.
+
+**D80 — Blood Price is the live trial set: 30 cards, six keywords, printed
+numbers.** (T, attended, 2026-10-10 and 2026-10-11; Phase BT.)
+
+- **The cards (T, 2026-10-11).** Kept from the rehearsal ballot: P-01a
+  P-02a P-03a P-04c P-05b P-06d P-07b P-08d P-09b P-10c · E-01a E-02d E-03d
+  E-04c E-05c E-06b E-07b E-08b E-09c E-10d · M-01d M-02b M-03d M-04c M-05b
+  M-06c M-07a M-08d M-09a M-10a (11 red, 9 blue, 10 purple), plus the grey
+  Curse the E-01 cards add. All eight purple "d" drafts added on 2026-10-10
+  are among them; every other proposal is cut. Colour is the
+  card's aspect: body red, mind blue, heart purple.
+- **The test deck (T, 2026-10-11):** E-09c P-03a M-04c M-02b E-06b P-02a
+  E-04c E-05c M-09a M-06c P-05b M-07a E-03d M-01d M-08d E-08b M-05b E-07b
+  M-10a P-10c. It is the Blood Price lane's `testDeck`; the lane's cards
+  are the 30.
+- **The keywords:** SACRIFICE, WAIVE, EXILE, HEAL, TETHER and LEECH, with
+  the Global and Curse card types (D69–D71), all live with carriers (D45).
+- **Rulings (T, 2026-10-10).** "The foe loses n" is a plain, unscaled VITAE
+  loss, not a DEAL (VULNERABLE does not apply). HEAL is a card keyword,
+  mind-scaled and capped at max VITAE; "heal the damage dealt" heals the
+  amount actually dealt, unscaled. A SACRIFICE that fires n times counts as
+  n. WAIVE: your next SACRIFICE this turn costs no VITAE but still counts.
+  "Play a Curse at no VITAE cost" is a WAIVED SACRIFICE. E-08c's PAID line
+  played the Curse's PAID line (EXILED), waived; the kept E-05c PAID line
+  plays a Curse the same way. TETHER n: for n turns, each SACRIFICE x makes
+  the foe take DEAL x (x unscaled; VULNERABLE multiplies). LEECH n: at the
+  start of the foe's turn the foe loses n VITAE, you HEAL the amount lost,
+  then n drops by 1; n is heart-scaled when applied and a second LEECH
+  adds. The Color Law stands with no colour-match bonus (D79).
+- **Numbers:** the ballot's printed (pass-0) numbers. No tuning.
+- **Removable (D75):** one library file (`Cards/library/blood-price.cards.ts`),
+  one `TRIAL_SETS` line in `cards.library.ts`, no other code naming a
+  trial id (a test greps for it), saves drop removed ids on load, and a test
+  runs the game with the set emptied. The engine pieces (card programs:
+  Global, Curse, SACRIFICE, WAIVE, EXILE, HEAL, TETHER, LEECH) are general
+  systems that stay.
+
+*Not in BT:* the lane relic naming the family and the 2-random + 1-lane
+combat reward (D71). The post-fight draft still draws uniformly from the
+whole library (Curses excluded), narrowed only by the dev REWARD POOL.
+
+**D81 — Blood Price revision 2: the Curse cards out, five SACRIFICE cards
+in, LEECH stacks, the Bleeding Signet.** (T, attended, 2026-10-11; Phase
+BT1. T approved every card and relic change; THE CARD HOLD, D37, is
+satisfied for exactly these.)
+
+- **Cards.** Cut: E-01a, E-05c, E-08b, M-04c, E-09c (every card that needed
+  a Curse). Added in their slots, placeholder names: Bloodletting (E-01n),
+  Open Vein (E-05n), Blood for Blood (E-08n), Crimson Pact (E-09n, a 🩸
+  Global: your next DEAL this turn deals +n) and Transfusion (M-04n). Buffs:
+  P-01a, P-02a, P-09b, E-06b, P-05b (numbers only, costs unchanged). M-08d
+  becomes 🩸 LEECH 1; E-03d's LEECH drops to 1. The lane is 30 cards (11
+  red, 8 blue, 11 purple). The grey Curse stays defined for foes to add
+  later and sits in no lane, deck or reward pool. The full list, the new
+  test deck and each card's role are in
+  `plan/card-ledger/rehearsal-blood-price.md` → "Revision 2".
+- **LEECH is a stacking debuff (replaces D80's decaying LEECH).** Each LEECH
+  n adds 3 turns and adds n (heart-scaled when applied) to its potency, the
+  first included. Each foe turn the foe loses the potency (plain loss, not
+  a DEAL), you heal what it lost, and a turn ticks off; the potency never
+  decays and resets when the turns run out.
+- **Crimson Pact's +n** is unscaled, stacks across SACRIFICES, goes to the
+  next DEAL (TETHER's hit is a DEAL, D80, so it takes it) and expires at the
+  end of the turn.
+- **The Bleeding Signet** (placeholder): +20 max VITAE while worn, through
+  the relic `maxHp` line; it grants **Crimson Covenant** (4 Conviction:
+  TETHER 3, and your next SACRIFICE this turn counts twice: paid once, each
+  instance firing TETHER and the 🩸 Globals). No shop, loot or reward
+  carries it yet.
+- **A second signet.** Relics are accessories and a character already
+  wears three (`SLOT_CAPACITY.accessory`), so the Ring and the Signet are
+  worn together and the signature bar lists both. No new slot or save
+  migration was needed; existing saves keep two empty trinket positions.
+- **Dev menu:** GET ALL RELICS adds every relic the player does not own.
+- **Fight-length target (T):** Float-Eye about 3 player turns, Brine Hag
+  about 5, the Doorwarden about 7.
+- **Pacing finding.** The sim fought the authored foe VITAE while the app
+  doubles every live foe (`ENCOUNTER_ENEMY_HP_MULTIPLIER`), which is why it
+  said 3-4 turns for Float-Eye against T's 8-9: at live VITAE the old test
+  deck takes 5.9 turns in the sim. The rest is play rate: the witness
+  plays about 4.75 cards a turn, and T's pace matches a player who plays
+  about two. The knob now lives in the engine
+  (`LIVE_ENCOUNTER_ENEMY_HP_MULTIPLIER`), the app reads it, and the pacing
+  sim (`npm run lane-pacing`) applies it. The new test deck at live VITAE
+  (200 runs a cell): Float-Eye 2.8-3.3 turns, Brine Hag 4.8-5.7 (most wins
+  are mercy; 5.1-6.0 as kills), the Doorwarden 4.4-5.3 with 66-94% wins.
+- **Proposed, not applied (T approves later).** Float-Eye and Brine Hag
+  are on target. The Doorwarden fight ends on turn 5-6 either way, because
+  the boss's escalation clock kills the player by then; trimming the
+  SACRIFICE ramp (Open Vein PAID LEECH 2→1 and TETHER 3→2, E-02d PAID
+  TETHER 2→1 with two SACRIFICES, P-08d PAID TETHER 3→2, E-10d and Blood
+  for Blood max X 8) with more sustain (Transfusion HEAL 10/20, M-09a HEAL
+  6/18, P-02a GUARD 10/22) moved it only to 5.0-5.7 turns. A 7-turn
+  Doorwarden needs a ruling on the foe side (its escalation or VITAE), not
+  card numbers.
+
+**D82 — The Doorwarden's slower ramp: a ~7-turn boss fight.** (T, attended, 2026-10-11.)
+
+- Fight-length targets at T's pace (4+ cards a turn): Float-Eye about 3
+  turns, Brine Hag about 5, the Doorwarden about 7. Card numbers could not
+  reach 7 against the Doorwarden: its ramp (the boss escalation clock at x2
+  from round 4, tier 3 from round 6) ended fights by turn 5-6.
+- T chose to slow its ramp and raise its VITAE to match. Applied (only the
+  Doorwarden changes): `vitae` 220 -> 320; its deck's `tier2AtRound` 4 and
+  `tier3AtRound` 7; damage weights Litany of Thresholds 1.3 -> 1.1, The
+  Door You Kept Open 1.35 -> 0.95, The Bronze Frame 1.45 -> 0.9, The
+  Margin Note 1.15 -> 0.8, What Shuts 1.6 -> 1.05, The Proof 1.6 -> 1.15,
+  The Question 1.4 -> 0.95. Tier 3 still out-hits tier 1.
+- Measured with the Blood Price test deck at live VITAE (200 runs, bot and
+  human-like drivers, player L1/3/5 vs door 1/3/4): 6.5 / 7.5 / 7.6 turns,
+  wins 66-89%. The grey starter deck still never beats it.
+- The lane pacing CLI now builds every foe the way live play does (map
+  pin via `scaleEnemyToLevel`, then the live x2), and a test pins it to
+  `resolveEncounter`. At live pins Float-Eye runs about 3.6 turns and Brine
+  Hag about 4-4.5 (mostly spared); neither was retuned.
+
 ## Open follow-ups
 
 **D1 status at a glance (2026-09-28, after #408).** Card and keyword

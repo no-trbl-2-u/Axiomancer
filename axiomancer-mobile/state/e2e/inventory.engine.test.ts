@@ -1048,3 +1048,28 @@ describe('selectInventoryViewModel: equipDelta surface (Phase 133)', () => {
         expect(row.equipDelta!.signatures.lost).toEqual([]);
     });
 });
+
+// ---------------------------------------------------------------------------
+// The worn window and the engine loadout agree on equip
+// ---------------------------------------------------------------------------
+
+describe('equipItem — a relic shown worn but missing from the loadout', () => {
+    it('is worn for real on EQUIP: its +max VITAE folds in and it joins the loadout once', () => {
+        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const actions = createAppActions(store);
+        const signet = { ...getRelicById('relic-bleeding-signet')! };
+        const player = store.getState().player;
+        // Carried inside the worn window, but never equipped in the engine.
+        store.setState({ player: { ...player, inventory: [...player.inventory, signet] } });
+        expect(store.getState().player.equipment.accessories.some((a) => a.id === signet.id)).toBe(false);
+
+        actions.equipItem(signet.id);
+        const after = store.getState().player;
+        expect(after.equipment.accessories.filter((a) => a.id === signet.id)).toHaveLength(1);
+        expect(after.maxHealth).toBe(player.maxHealth + 20);
+
+        actions.equipItem(signet.id);
+        expect(store.getState().player.equipment.accessories.filter((a) => a.id === signet.id)).toHaveLength(1);
+        expect(store.getState().player.maxHealth).toBe(player.maxHealth + 20);
+    });
+});

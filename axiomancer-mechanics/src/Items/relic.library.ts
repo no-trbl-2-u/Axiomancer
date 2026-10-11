@@ -6,8 +6,14 @@
  * Relic identity = `grantsSignature !== undefined` (plus the `relic-` id
  * prefix). There is no new item category and no slot marker.
  *
- * There is one: the Suppliant's Ring, handed over at the run's first node
- * (`Character/first-node-grant.ts`).
+ * There are two. The Suppliant's Ring, handed over at the run's first node
+ * (`Character/first-node-grant.ts`), is the only starting relic. The Bleeding
+ * Signet (+20 max VITAE, Crimson Covenant) has no source yet: no shop, loot
+ * or reward carries it; the dev menu's GET ALL RELICS hands it over.
+ *
+ * Relics are accessories, and a character wears up to three
+ * (`SLOT_CAPACITY.accessory`), so the Ring and the Signet are worn together
+ * and both signatures are on the bar.
  */
 
 import type { Equipment } from './types';
@@ -30,6 +36,22 @@ const SUPPLIANTS_RING: Equipment = {
     grantsSignature: 'sig-disarming-plea',
 };
 
+/**
+ * The Bleeding Signet (placeholder name): +20 max VITAE while worn, folded
+ * onto `maxHealth` by the equip reducer like any `maxHp` line, and Crimson
+ * Covenant.
+ */
+const BLEEDING_SIGNET: Equipment = {
+    id: 'relic-bleeding-signet',
+    name: 'Bleeding Signet',
+    description: '+20 max VITAE while worn. TETHER 3, and your next SACRIFICE this turn counts twice.',
+    category: 'equipment',
+    slot: 'accessory',
+    accessoryKind: 'ring',
+    statModifiers: [{ stat: 'maxHp', value: 20 }],
+    grantsSignature: 'sig-crimson-covenant',
+};
+
 /** A fresh copy of a relic (never aliases the library singleton). */
 function cloneRelic(relic: Equipment): Equipment {
     return { ...relic, statModifiers: (relic.statModifiers ?? []).map(m => ({ ...m })) };
@@ -41,7 +63,10 @@ function cloneRelic(relic: Equipment): Equipment {
  * reducers deep-clone the wearer, but the library itself must never be aliased
  * into a mutable character.
  */
-export const relicLibrary: readonly Equipment[] = [SUPPLIANTS_RING];
+export const relicLibrary: readonly Equipment[] = [SUPPLIANTS_RING, BLEEDING_SIGNET];
+
+/** The relics a fresh character wears: the Suppliant's Ring alone. */
+const STARTING_RELICS: readonly Equipment[] = [SUPPLIANTS_RING];
 
 /** Resolve a relic by id (returns the canonical singleton, not a clone). */
 export function getRelicById(id: string): Equipment | undefined {
@@ -54,7 +79,7 @@ export function getRelicById(id: string): Equipment | undefined {
  * Every call returns brand-new objects so nothing aliases the library.
  */
 export function cloneStartingRelics(): Equipment[] {
-    return relicLibrary.map(cloneRelic);
+    return STARTING_RELICS.map(cloneRelic);
 }
 
 /**

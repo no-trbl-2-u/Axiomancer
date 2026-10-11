@@ -302,8 +302,14 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
         let threatFired = false;
         const ticks: number[] = [];
         const statuses: { text: string; color: string }[] = [];
+        // SACRIFICE costs and heals float on the medallion too, so a card's
+        // VITAE change reads where the bar is.
+        let paid = 0;
+        let healed = 0;
         for (const e of fx.events) {
-            if (e.kind === 'damage-dealt' && e.target === 'self') dmg += e.amount;
+            if (e.kind === 'vitae-sacrificed') paid += e.amount;
+            else if (e.kind === 'player-healed') healed += e.amount;
+            else if (e.kind === 'damage-dealt' && e.target === 'self') dmg += e.amount;
             else if (e.kind === 'dot-tick' && e.target === 'self') ticks.push(e.amount);
             else if (e.kind === 'threat-fired') threatFired = true;
             else if (e.kind === 'effect-landed' && e.target === 'self') {
@@ -329,6 +335,8 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
             impact.value = withDelay(IMPACT, withTiming(1, { duration: 1 }, (fin) => { if (fin) runOnJS(landHit)(dmg, blocked, threatFired); }));
         }
         ticks.forEach((t, k) => push(`-${t}`, HUE.tickPurple, (k % 2 === 0 ? -1 : 1) * (20 + Math.floor(k / 2) * 16)));
+        if (paid > 0) push(`-${paid}`, HUE.damageRed, -36);
+        if (healed > 0) push(`+${healed}`, HUE.boonGreen, 36);
         const hadFloat = dmg > 0 || ticks.length > 0;
         statuses.forEach((s, k) => { if (!hadFloat) push(s.text, s.color, (k % 2 === 0 ? 1 : -1) * 30); });
         if (statuses.length > 0) setStatusPulseKey((k) => k + 1);

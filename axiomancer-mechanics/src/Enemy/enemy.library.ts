@@ -148,7 +148,7 @@ export const TheDoorwarden = createEnemy({
     mapName: 'lantern-deep',
     difficulty: 'boss',
     logic: 'boss',
-    vitae: 220,
+    vitae: 320,
     stages: [
         {
             at: { vitaePct: 0.6 },

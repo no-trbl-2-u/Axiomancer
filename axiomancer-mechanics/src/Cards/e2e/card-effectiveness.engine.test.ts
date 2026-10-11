@@ -173,9 +173,14 @@ function assertCardEffective(cardId: string): void {
 
 // ── Suite ──────────────────────────────────────────────────────────────────────
 
+/** The data-line cards. A program card (`Card.program`) carries no rider or
+ *  mechanic for this lint to read; its printed-equals-applied guard is the
+ *  program suite (`Cards/e2e/blood-price.engine.test.ts`). */
+const dataCards = cardLibrary.filter(c => !c.program);
+
 describe('card effectiveness lint — every PAID face produces its promised observable delta', () => {
 
-    const strictCases = cardLibrary
+    const strictCases = dataCards
         .filter(c => !(c.id in KNOWN_INEFFECTIVE))
         .map(c => [c.id] as const);
 
@@ -185,7 +190,7 @@ describe('card effectiveness lint — every PAID face produces its promised obse
     );
 
     it('every card is accounted for exactly once (strict + known-ineffective == library, no silent drops)', () => {
-        expect(strictCases.length + Object.keys(KNOWN_INEFFECTIVE).length).toBe(cardLibrary.length);
+        expect(strictCases.length + Object.keys(KNOWN_INEFFECTIVE).length).toBe(dataCards.length);
     });
 });
 
@@ -231,10 +236,10 @@ function assertFreeCardEffective(cardId: string): void {
 }
 
 describe('card effectiveness lint — every authored FREE line produces its promised observable delta', () => {
-    const freeSpells = cardLibrary.filter(c => c.cardType === 'spell' && c.free);
+    const freeSpells = dataCards.filter(c => c.cardType === 'spell' && c.free);
 
     it('every spell authors a FREE rider (spec §2 FREE/PAID anatomy)', () => {
-        expect(freeSpells.length).toBe(cardLibrary.filter(c => c.cardType === 'spell').length);
+        expect(freeSpells.length).toBe(dataCards.filter(c => c.cardType === 'spell').length);
     });
 
     it.each(freeSpells.map(c => [c.id] as const))(

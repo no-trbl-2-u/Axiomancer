@@ -159,7 +159,8 @@ export function isCombatStageId(id: string): id is CombatStageId {
  * The card pool eligible at a stage: every library card (plus any
  * `extraCards` — e.g. registered sandbox cards, which may also OVERRIDE a
  * library card by sharing its id) filtered by `tier <= maxCardTier` and
- * `rankMaturityLevel(rank) <= playerLevel`. Excludes nothing else — the point
+ * `rankMaturityLevel(rank) <= playerLevel`, Curses left out (a card adds a
+ * Curse mid-combat). Excludes nothing else — the point
  * is the WHOLE maturity-gated library, so the playtest matrix can measure
  * coverage of it.
  */
@@ -174,6 +175,8 @@ export function stageEligibleCardIds(
     for (const card of pool.values()) {
         if (card.tier > stage.maxCardTier) continue;
         if (rankMaturityLevel(card.rank) > stage.playerLevel) continue;
+        // A Curse is never learned: a card adds it mid-combat.
+        if (card.cardType === 'curse') continue;
         // The grey office is also the reward pool, so a stage pool models the
         // reward-built deck with it.
         ids.push(card.id);

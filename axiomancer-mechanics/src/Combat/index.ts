@@ -54,10 +54,6 @@ export {
     startTurn, endTurn, discardCombatCard,
     playSignatureSkill,
     getSignatureSkill, signatureCastBlock, SIGNATURE_COST,
-    // The LIVE colour-match rule. Mobile's presenter
-    // must consume this, or the card face prints a bonus the engine does not
-    // apply.
-    colorMatchBonus,
     // The dice get a second read
     riderText,
     // Legibility: the incoming-threat projection
@@ -66,13 +62,23 @@ export {
     projectCombatOutcome,
     // Floating dice save-back
     getFloatingDiceColors,
+    // Card programs: why a line cannot be played, and an X line's range
+    programLineBlock, programXChoice,
 } from './combat.engine';
+// Card programs: the Global / Curse / SACRIFICE ledger and its reads.
+export {
+    isProgramCard, isCurseCard, GLOBAL_FREE_TURNS,
+} from './combat.card-program';
+export type { ProgramLedger, GlobalInPlay } from './combat.card-program';
+// The live-encounter VITAE knob the app applies (and the pacing sim reads).
+export { LIVE_ENCOUNTER_ENEMY_HP_MULTIPLIER } from './live-encounter';
 // Stat scaling: the formula, the keyword families, and the
 // display-only stat-scaled card the hand prints.
 export {
     scaleAmount, scaleFor, statFor, scaleRider, scaleCardForStats,
     scaleEffectIntensity, effectScaling, effectFamily,
     MECHANIC_SCALING, RIDER_SCALING, PAYLOAD_SCALING, NEUTRAL_STAT,
+    programText,
 } from './stat-scaling';
 export type { StatFamily, ScalingKind, KeywordScaling } from './stat-scaling';
 // The Upgradeable-Dice model: THE combat dice model.
@@ -91,6 +97,7 @@ export {
     toCombatCard,
 
     mechanicText,
+    programFaceText, GLOBAL_TRIGGER_TEXT,
 } from './combat.cards';
 export {
     getThreatSequence,

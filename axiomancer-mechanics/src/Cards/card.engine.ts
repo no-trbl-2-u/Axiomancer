@@ -20,14 +20,15 @@ import { cardLibrary, getCardById } from './cards.library';
 
 /**
  * Returns every entry in `cardLibrary` that the character has not already
- * learned. Order matches the library order so the UI can show a stable list
+ * learned, except the Curses (a card adds a Curse mid-combat). Order matches the library order so the UI can show a stable list
  * across calls. Cards are learnable unconditionally (no level / stat /
  * prerequisite / alignment gate).
  */
 export function getAvailableCards(
     character: Pick<Character, 'knownCards'>,
 ): Card[] {
-    return cardLibrary.filter(s => !character.knownCards.includes(s.id));
+    // A Curse is never learned: a card adds it mid-combat.
+    return cardLibrary.filter(s => s.cardType !== 'curse' && !character.knownCards.includes(s.id));
 }
 
 /**

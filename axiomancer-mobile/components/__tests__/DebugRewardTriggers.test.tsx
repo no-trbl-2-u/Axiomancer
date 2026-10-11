@@ -81,6 +81,9 @@ describe('DebugRewardTriggers: sessions + grants', () => {
         fireEvent.press(tree.getByTestId('debug-journal-unlock-button'));
         expect(store.getState().codex.unlockedEntries).toHaveLength(listJournalEntries().length);
         fireEvent.press(tree.getByTestId('debug-learn-all-cards-button'));
-        for (const c of cardLibrary) expect(store.getState().player.knownCards).toContain(c.id);
+        // Every card a player can learn: the library but the Curses.
+        for (const c of cardLibrary.filter((card) => card.cardType !== 'curse')) {
+            expect(store.getState().player.knownCards).toContain(c.id);
+        }
     });
 });

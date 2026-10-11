@@ -61,9 +61,16 @@ survivors, chosen by T.
 
 ## Where things stand
 
-- Library: the grey office only — A Plain Blow (DEAL), A Plain Ward (GUARD),
-  A Plain Word (VULNERABLE) — `Cards/library/starters.cards.ts`. Fresh deck
-  Blow 5 / Ward 3 / Word 2 (D43). The grey cards are the reward pool (D44).
+- Library: the grey office — A Plain Blow (DEAL), A Plain Ward (GUARD),
+  A Plain Word (VULNERABLE) — `Cards/library/starters.cards.ts`, plus the
+  Blood Price trial set (30 cards and the grey Curse,
+  `Cards/library/blood-price.cards.ts`, live since Phase BT, D80). Revision 2
+  (Phase BT1, D81, T 2026-10-11): the five Curse cards are cut and five
+  SACRIFICE cards take their slots (11 red, 8 blue, 11 purple); the grey
+  Curse stays defined for foes to add later but is in no lane, deck or
+  reward pool. Fresh
+  deck Blow 5 / Ward 3 / Word 2 (D43). The reward pool is the whole library
+  but the Curses (D44).
 - THE CARD HOLD (D37): no card or keyword is created outside a guided
   session with T.
 - Card types: purged to **Attack / Skill / Spell** (D51, shipped in R7).
@@ -73,6 +80,30 @@ survivors, chosen by T.
 - The card editor package is deleted in R1 (D56); B5 replaces it.
 - `card-expert` is archived in R0 (D58); a fresh card agent is written at
   the first card session.
+
+### Blood Price revision 2 rules (T, 2026-10-11, D81)
+
+- **LEECH is a stacking debuff with two numbers, turns and potency.** Each
+  LEECH n adds 3 turns and adds n (heart-scaled when applied) to the
+  potency, the first application included. At the start of each foe turn
+  the foe loses the potency in VITAE (plain loss, not a DEAL) and you HEAL
+  what it lost (capped at max VITAE); then a turn ticks off. At 0 turns
+  LEECH ends and the potency resets. The potency never decays. This
+  replaces the decaying LEECH of D80.
+- **Crimson Pact** (E-09n, Global, 🩸): your next DEAL this turn deals +n.
+  The +n is unscaled, stacks across SACRIFICES, is spent by the next DEAL
+  (TETHER's hit is a DEAL and takes it) and expires at the end of the turn.
+- **The Bleeding Signet** (placeholder name): +20 max VITAE while worn and
+  the signature **Crimson Covenant** (4 Conviction): TETHER 3, and your next
+  SACRIFICE this turn counts twice (paid once; each instance fires TETHER
+  and the 🩸 Globals). Not in shops, loot or rewards yet.
+- **Two signets at once.** Relics are accessories and a character wears up
+  to three, so the Suppliant's Ring and the Bleeding Signet are worn
+  together; the signature bar lists every signature the worn signets grant.
+- **Fight-length target (T):** Float-Eye about 3 player turns, Brine Hag
+  about 5, the Doorwarden about 7. Measured with `npm run lane-pacing`
+  (`Combat/combat.pacing.sim.ts`) at live foe VITAE; card numbers change
+  only when T approves.
 
 ## Rewards (D44, D50)
 

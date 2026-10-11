@@ -19,11 +19,12 @@ import { cardLibrary, getCardById } from '../Cards/cards.library';
 import { CARD_LANES, GREY_LANE, laneRewardPool, type CardLane } from '../Cards/card.lanes';
 
 /**
- * The card-reward pool: the whole library. The grey office IS the pool: a won fight offers A Plain Blow, Ward and Word,
- * and the pool grows as guided sessions add cards.
+ * The card-reward pool: the whole library except Curses (a Curse is never a
+ * reward; a card adds it mid-combat). The grey office and every registered
+ * trial set's cards.
  */
 export const COMBAT_REWARD_POOL: readonly string[] = Object.freeze(
-    cardLibrary.map(card => card.id),
+    cardLibrary.filter(card => card.cardType !== 'curse').map(card => card.id),
 );
 
 /**

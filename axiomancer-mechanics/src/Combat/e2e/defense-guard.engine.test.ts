@@ -117,8 +117,8 @@ describe('Spec 26b — defense cards classify as `defend`', () => {
 describe('Spec 26b — playing a defense card grants GUARD', () => {
     it('a POWERED brace grants its printed GUARD', () => {
         mockSequentialRng(0.05);
-        // Every play lands printed (1.0×). A Plain Ward is colourless, so no colour match applies: its
-        // printed GUARD 5 lands as printed at 5/5/5 stats.
+        // Every play lands printed (1.0×): a Plain Ward's printed GUARD 5
+        // lands as 5 at 5/5/5 stats, whatever die powers it.
         const state = openPhase(initializeCombatEncounter(makePlayer([BRACE]), makeEnemy(80, 'mind'), [BRACE, BRACE, BRACE, BRACE, BRACE], 7));
 
         const entry = state.hand.find(h => h.cardId === BRACE);

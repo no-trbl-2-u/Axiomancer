@@ -31,8 +31,10 @@ function greyPlayer(): Character {
 }
 
 describe('the reward pool', () => {
-    it('is the whole library, every id resolving', () => {
-        expect([...COMBAT_REWARD_POOL].sort()).toEqual(cardLibrary.map(c => c.id).sort());
+    it('is the whole library but the Curses, every id resolving', () => {
+        expect([...COMBAT_REWARD_POOL].sort()).toEqual(
+            cardLibrary.filter(c => c.cardType !== 'curse').map(c => c.id).sort(),
+        );
         for (const id of COMBAT_REWARD_POOL) expect(getCardById(id), id).toBeDefined();
     });
 });
@@ -54,8 +56,9 @@ describe('rollCombatCardRewards', () => {
 
     it('reaches every pool card as a single offer', () => {
         const seen = new Set<string>();
-        for (let i = 0; i < 20; i++) {
-            seen.add(rollCombatCardRewards(greyPlayer(), () => i / 20, 1)[0]);
+        const n = COMBAT_REWARD_POOL.length;
+        for (let i = 0; i < n; i++) {
+            seen.add(rollCombatCardRewards(greyPlayer(), () => (i + 0.5) / n, 1)[0]);
         }
         expect([...seen].sort()).toEqual([...COMBAT_REWARD_POOL].sort());
     });

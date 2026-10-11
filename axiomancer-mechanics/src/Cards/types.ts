@@ -1,3 +1,5 @@
+import type { CardProgram } from './card-program.types';
+
 /**
  * Cards System Types
  * Cards run on the resonance economy (heart / body / mind).
@@ -5,7 +7,7 @@
 
 /**
  * A stat colour (body / mind / heart). A card's `color` is one of these or
- * 'any' (see `CardAspect`); the dice and the colour-match bonus read it.
+ * 'any' (see `CardAspect`); the Color Law reads it.
  * - 'body': Physical/strength-based cards
  * - 'mind': Mental/intelligence-based cards
  * - 'heart': Emotional/charisma-based cards
@@ -15,7 +17,7 @@ export type StatType = 'body' | 'mind' | 'heart';
 /**
  * A CARD's colour identity. `StatType` plus `'any'`: the grey
  * office's colourless aspect, powered by every die colour (body/mind/heart,
- * AND wild) with a neutral (never on/off) colour-match bonus. `StatType`
+ * AND wild). `StatType`
  * itself stays three stats — only a card's aspect widens.
  */
 export type CardAspect = StatType | 'any';
@@ -49,10 +51,13 @@ export function rankToRarity(rank: CardRank): CardRarity {
 }
 
 /**
- * A card's type: Attack (the DEAL card), Skill (the GUARD card) and
- * Spell (the VULNERABLE card). Every type plays the same way: FREE or PAID, then discard.
+ * A card's type is a lifecycle rule. Attack, Skill and Spell play FREE or
+ * PAID, then discard. A Global stays in play and affects the combat: FREE
+ * for 3 turns, PAID for the rest of combat, one copy of each in play. A
+ * Curse is a dead card that holds a hand slot until played; it cannot be
+ * scrapped.
  */
-export type CardType = 'attack' | 'skill' | 'spell';
+export type CardType = 'attack' | 'skill' | 'spell' | 'global' | 'curse';
 
 /**
  * Targeting scope for a card effect.
@@ -94,10 +99,10 @@ export interface CardCombatEffects {
  */
 export type CardSpecialMechanic =
     /** GUARD — a shield that absorbs the enemy's next telegraphed threat.
-     *  `amount` is the base Guard before stat and colour-match scaling. */
+     *  `amount` is the base Guard before stat scaling. */
     | { kind: 'guard'; amount: number }
-    /** DEAL — direct VITAE damage. `amount` is the magnitude before stat,
-     *  colour-match and VULNERABLE scaling. */
+    /** DEAL — direct VITAE damage. `amount` is the magnitude before stat
+     *  and VULNERABLE scaling. */
     | { kind: 'deal'; amount: number };
 
 /**
@@ -287,4 +292,11 @@ export interface Card {
      * Data only — the card engine ignores it; `upgradeCard` reads it.
      */
     upgrade?: CardUpgrade;
+    /**
+     * A card whose lines read the fight, pay a SACRIFICE, handle Curses or
+     * stay in play as a Global carries its lines as a program instead of
+     * `free` / `specialMechanics`; `Combat/combat.card-program.ts` resolves
+     * it. See `card-program.types.ts`.
+     */
+    program?: CardProgram;
 }

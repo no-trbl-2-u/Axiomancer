@@ -83,7 +83,7 @@ describe('stage-eligible card pools', () => {
         }
     });
 
-    it('the pool excludes nothing else — every library card passing the gates is in', () => {
+    it('the pool excludes nothing else — every library card passing the gates is in, but the Curses', () => {
         for (const id of COMBAT_STAGE_ORDER) {
             const stage = COMBAT_STAGE_PROFILES[id];
             // THE PATH — a stage pool may hand back UPGRADED ids (`x+`) for the
@@ -94,7 +94,8 @@ describe('stage-eligible card pools', () => {
             // every stage pool.
             const expected = cardLibrary.filter(c =>
                 c.tier <= stage.maxCardTier
-                && rankMaturityLevel(c.rank) <= stage.playerLevel);
+                && rankMaturityLevel(c.rank) <= stage.playerLevel
+                && c.cardType !== 'curse');
             expect(pool.size, `${id} pool size`).toBe(expected.length);
             for (const card of expected) {
                 expect(pool.has(card.id), `${id} pool is missing ${card.id}`).toBe(true);

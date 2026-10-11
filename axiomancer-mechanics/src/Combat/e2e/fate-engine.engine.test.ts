@@ -6,7 +6,8 @@
  *   R2 RESERVE — one unspent tray die banks at end of round; banked dice RIPEN
  *      +1 pip per threat phase; pips cash as +1 intensity per pip (status) or
  *      +2 Guard per pip (defend)
- *   R7 COLOR MATCH — a matched die extends the landed status +1 turn
+ *   R7 NO MATCH BONUS — a die of the card's own colour lands the printed
+ *      duration exactly (powering a card is all a die does)
  *   R8 dieId HONORED — a Reserve die id powers the play; a bogus id fizzles
  *
  * Every play names its powering die. Riders carry no chipHp; fixtures carry
@@ -24,7 +25,7 @@ import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
     endTurn,
-    PIP_INTENSITY_BONUS, PIP_GUARD_BONUS, COLOR_MATCH_STATUS_DURATION_BONUS,
+    PIP_INTENSITY_BONUS, PIP_GUARD_BONUS,
 } from '../combat.engine';
 import { RESERVE_MAX, RESERVE_PIP_CAP } from '../combat.dice';
 import { MAX_EFFECT_INTENSITY } from '../../Game/game-mechanics.constants';
@@ -146,8 +147,9 @@ describe('R2 RESERVE — bank, ripen, cash', () => {
         s = { ...s, reserve: [{ id: 'bank-3', color: 'heart', state: 'available', temporary: false, pips: 2 }] };
         const entry = s.hand.find(h => h.cardId === 'qa-guard-card')!;
         const res = playCombatCard(s, { uid: entry.uid }, true, 'bank-3');
-        // guard 10 (neutral read ×1, heart die MATCHES the heart card → +3) + 2 pips × 2
-        expect(res.state.guard).toBe(10 + 3 + 2 * PIP_GUARD_BONUS);
+        // guard 10 as printed (neutral stats, read ×1; the heart die powering
+        // the heart card adds nothing) + 2 pips × PIP_GUARD_BONUS
+        expect(res.state.guard).toBe(10 + 2 * PIP_GUARD_BONUS);
     });
 
     it('ONE unspent tray die banks at endTurn while the Reserve has room, else it simply expires', () => {
@@ -169,14 +171,14 @@ describe('R2 RESERVE — bank, ripen, cash', () => {
     });
 });
 
-describe('R7 COLOR MATCH — +1 turn on status plays', () => {
-    it('a matched die extends the landed status by COLOR_MATCH_STATUS_DURATION_BONUS', () => {
+describe('R7 — a die of the card\'s own colour adds no turn', () => {
+    it('a body die on a body status card lands the printed duration exactly', () => {
         let s = open(['qa-bleed-card'], 'body'); // body card, body die, body-heavy foe
         s = setDice(s, ['body', 'heart']);
         const entry = s.hand.find(h => h.cardId === 'qa-bleed-card')!;
         const res = playCombatCard(s, { uid: entry.uid }, true, s.dice[0].id);
         const bleed = res.state.enemy.effects.find(e => e.effectId === 'debuff_bleed')!;
-        expect(bleed.remainingDuration).toBe(2 + COLOR_MATCH_STATUS_DURATION_BONUS);
+        expect(bleed.remainingDuration).toBe(2); // printed: BLEED for 2 turns
     });
 });
 

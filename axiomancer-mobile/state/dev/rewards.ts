@@ -72,11 +72,12 @@ export function forceLevelUp(store: AppStore): number {
     return store.getState().player.level;
 }
 
-/** Know every card in the library. Returns the number newly learned. */
+/** Know every card in the library but the Curses (a card adds a Curse
+ *  mid-combat). Returns the number newly learned. */
 export function learnAllCards(store: AppStore): number {
     const player = store.getState().player;
     const known = new Set(player.knownCards ?? []);
-    const fresh = cardLibrary.map((c) => c.id).filter((id) => !known.has(id));
+    const fresh = cardLibrary.filter((c) => c.cardType !== 'curse').map((c) => c.id).filter((id) => !known.has(id));
     if (fresh.length === 0) return 0;
     store.setState({ player: { ...player, knownCards: [...known, ...fresh] } });
     return fresh.length;

@@ -15,24 +15,61 @@ the Expo app (`axiomancer-mobile`) presents it.
 
 ## Cards
 
-- **The library is three grey cards** (`GREY_OFFICE_CARDS`,
-  `Cards/library/starters.cards.ts`): A Plain Blow (attack, DEAL), A Plain
-  Ward (skill, GUARD), A Plain Word (spell, VULNERABLE). All are colour
-  `any`, rank 1 (Ash), tier 1.
-- **Card types** are Attack, Skill and Spell (`CardType`). The engine never
-  branches on type; it is display only.
-- **Every card has two lines.** The FREE line (`Card.free`) plays with no
-  die. The PAID line (`specialMechanics` and `combatEffects`) costs exactly
-  one die. Blow: FREE 2 damage, PAID deal 5. Ward: FREE guard 2, PAID guard
-  5. Word: FREE VULNERABLE 10% for 1 turn, PAID VULNERABLE 25% for 2 turns.
-- **Card mechanics** are DEAL and GUARD (`CardSpecialMechanic`). The player's
-  keywords are DEAL, GUARD and VULNERABLE.
+- **The library is three grey cards and the Blood Price trial set.** The
+  grey office (`GREY_OFFICE_CARDS`, `Cards/library/starters.cards.ts`): A
+  Plain Blow (attack, DEAL), A Plain Ward (skill, GUARD), A Plain Word
+  (spell, VULNERABLE), all colour `any`, rank 1 (Ash), tier 1. The trial
+  set (`BLOOD_PRICE_SET`, `Cards/library/blood-price.cards.ts`, D80, D81):
+  30 cards (11 body, 8 mind, 11 heart, all rank 1): 25 kept from the Blood
+  Price ballot and five SACRIFICE cards T added in revision 2 (Bloodletting,
+  Open Vein, Blood for Blood, Crimson Pact, Transfusion). The grey Curse is
+  defined for foes to add later; no card adds it and it is in no lane, deck
+  or reward pool. It joins the library through one `TRIAL_SETS` line in
+  `Cards/cards.library.ts` and comes out by deleting that line and the file
+  (D75); saves drop removed card ids on load (`dropUnknownCardIds`).
+- **Card types** (`CardType`) are lifecycle rules. Attack, Skill and Spell
+  play FREE or PAID, then discard. A **Global** stays in play and fires on
+  its trigger (⟳ start of your turn, 🩸 when you SACRIFICE n, 📜 when you
+  play a Curse): FREE for `GLOBAL_FREE_TURNS` = 3 turn starts, PAID for the
+  rest of combat, one copy of each in play. A **Curse** holds a hand slot
+  until played and cannot be scrapped.
+- **Every card has two lines.** The FREE line plays with no die; the PAID
+  line costs exactly one die. A grey card's lines are data: `Card.free`, and
+  `specialMechanics` and `combatEffects`. Blow: FREE 2 damage, PAID deal 5.
+  Ward: FREE guard 2, PAID guard 5. Word: FREE VULNERABLE 10% for 1 turn,
+  PAID VULNERABLE 25% for 2 turns. A trial card's lines are a **program**
+  (`Card.program`, `Cards/card-program.types.ts`) that
+  `Combat/combat.card-program.ts` runs for the live board and the sim
+  alike: lines can read VITAE ("at half VITAE or less"), pay costs and move
+  Curses. A line whose condition fails or whose SACRIFICE it cannot pay
+  cannot be played, and the game says why (`programLineBlock`).
+- **Card mechanics** are DEAL and GUARD (`CardSpecialMechanic`) for the grey
+  cards. The player's keywords are DEAL, GUARD, VULNERABLE and the trial
+  set's six: **SACRIFICE** n (lose n VITAE, unscaled, a cost that never
+  takes you below 1; one that fires n times counts as n), **WAIVE** (your
+  next SACRIFICE this turn costs nothing but still counts), **EXILE** (the
+  card leaves combat instead of going to discard), **HEAL** n (mind-scaled,
+  capped at maximum VITAE; "heal the damage dealt" heals what landed,
+  unscaled), **TETHER** n (for n turns each SACRIFICE x makes the foe take
+  DEAL x, unscaled, VULNERABLE applies) and **LEECH** n, a debuff on the foe
+  with turns and potency: each LEECH n adds `LEECH_TURNS_PER_APPLICATION` =
+  3 turns and adds n (heart-scaled when applied) to the potency, the first
+  included; at the start of each foe turn the foe loses the potency in VITAE
+  (not a DEAL), you heal what it lost, and a turn ticks off; the potency
+  never decays and resets when the turns run out. "The foe loses n" is
+  plain VITAE loss, not a DEAL. Crimson Pact's "your next DEAL this turn
+  deals +n" adds n unscaled before VULNERABLE, stacks across SACRIFICES,
+  goes to the next DEAL (a card's, a Global's or TETHER's) and expires at
+  the end of the turn. A SACRIFICE that "counts twice" (Crimson Covenant)
+  is paid once and fires its triggers and TETHER twice.
 - **The starting deck is ten cards:** Blow ×5, Ward ×3, Word ×2
   (`STARTING_CARD_IDS`, `Combat/combat.rewards.ts`). The deck never drops
   below `MIN_COMBAT_DECK_SIZE` = 10.
 - **Rewards:** a won fight offers 3 cards (`COMBAT_REWARD_OFFER_COUNT`,
-  mobile) drawn uniformly from the whole library (`COMBAT_REWARD_POOL`). A
-  cache offers one.
+  mobile) drawn uniformly from the whole library but the Curses
+  (`COMBAT_REWARD_POOL`). A cache offers one. The dev menu's REWARD POOL
+  can narrow the draft to card lanes (`CARD_LANES`: the grey office and
+  Blood Price); there is no lane relic yet.
 
 ## Dice
 
@@ -46,9 +83,8 @@ the Expo app (`axiomancer-mobile`) presents it.
   Conviction when the die is used.
 - **The Color Law** (`dieSatisfiesColorLaw`): a die powers a card when the
   card is `any`, the die is gold, or the colours match. A mismatch fizzles.
-- **Colour match** (`colorMatchBonus`): a die of the card's own colour adds
-  25% (minimum +2) to PAID numbers and 1 turn to statuses. A grey card never
-  gets it.
+  Powering is all a die does: PAID numbers land as printed (scaled by stats)
+  and statuses keep their printed turns, whatever legal die pays (D79).
 - **Reserve:** at turn end one unspent die is banked (`RESERVE_MAX` = 2). A
   banked die gains a pip per phase, up to `RESERVE_PIP_CAP` = 2. Each pip
   adds `PIP_GUARD_BONUS` = 5 GUARD or `PIP_INTENSITY_BONUS` = 2 status
@@ -62,11 +98,18 @@ the Expo app (`axiomancer-mobile`) presents it.
 
 - **The hand** is `COMBAT_HAND_SIZE` = 5. Unplayed cards stay; the hand
   refills to 5 each phase. The discard reshuffles when the draw pile empties.
+  EXILED cards and Globals in play are out of the cycle.
 - **Scrap:** discarding a card pays +1 Conviction, for the first
-  `SCRAP_CONVICTION_CAP_PER_TURN` = 2 each turn.
-- **Conviction** is capped at `CONVICTION_CAP` = 12. It is spent only on the
-  signature, The Open Hand (`SIGNATURE_COST` = 4, `Combat/combat.signature.ts`).
+  `SCRAP_CONVICTION_CAP_PER_TURN` = 2 each turn. A Curse cannot be scrapped.
+- **Conviction** is capped at `CONVICTION_CAP` = 12. It is spent only on
+  signatures (`SIGNATURE_COST` = 4, `Combat/combat.signature.ts`): The Open
+  Hand and Crimson Covenant, one per worn signet relic.
 - **GUARD** resets to 0 after each threat phase.
+- **The program ledger** (`CombatEncounterState.program`) exists only when
+  the deck holds a trial card: Globals in play with their turns left,
+  EXILED cards, the turn's WAIVE and doubling, TETHER and LEECH on the foe,
+  a death ward and a delayed HEAL. The board lists the Globals and shows
+  LEECH and TETHER on the foe.
 - **The enemy** plays an ordered deck, one card per threat phase, the last
   card repeating (`ENEMY_DECKS`, `Combat/combat.enemy-decks.ts`). Tier 2 and
   3 cards unlock at rounds `TIER2_DEFAULT_ROUND` = 3 and 6. The telegraph
@@ -76,6 +119,12 @@ the Expo app (`axiomancer-mobile`) presents it.
   round after `THREAT_ESCALATION_GRACE` = 1 round, up to
   `THREAT_ESCALATION_MAX` = ×2, and `THREAT_ESCALATION_BOSS_MULT` = 1.6×
   faster against a boss.
+- **Live foes have double VITAE.** The app doubles every live encounter's
+  foe VITAE (`LIVE_ENCOUNTER_ENEMY_HP_MULTIPLIER` = 2,
+  `Combat/live-encounter.ts`), a testing knob; the engine's own fights use
+  the authored VITAE. The pacing sim (`Combat/combat.pacing.sim.ts`,
+  `npm run lane-pacing`) applies the same knob so its turn counts compare
+  with play.
 - **Ending:** the player wins when the foe's VITAE reaches 0, or by sparing
   a befriended foe. The player loses at 0 VITAE or after `MAX_PHASES` = 60.
 
@@ -108,16 +157,23 @@ keyword (`EnemyKeyword = never`).
   in every region.
 - **Brine Hag:** level 7, elite, 120 VITAE. Placed on certain nodes. The
   only foe that can be befriended.
-- **The Doorwarden:** boss, 220 VITAE at level 8, two stages (at 60% and
+- **The Doorwarden:** boss, 320 VITAE at level 8, two stages (at 60% and
   25% VITAE). It holds every region's door, pinned at level 1, 2, 3 and 4
   (`World/MapEvents/content.ts`); `scaleEnemyToLevel` scales its VITAE to
-  the pin.
+  the pin. Its deck opens tier 2 on round 4 and tier 3 on round 7 (the
+  default gates are 3 and 6) and its card weights sit at 0.8-1.15, so its
+  damage steps up at rounds 7-8 and the fight runs about seven turns.
 
 ## Befriend and mercy
 
-- **The one relic** is the Suppliant's Ring (`relicLibrary`,
-  `Items/relic.library.ts`), granted at the first node. Its signature is
-  The Open Hand.
+- **Two relics** (`relicLibrary`, `Items/relic.library.ts`). The Suppliant's
+  Ring, granted at the first node, is the only starting relic; its
+  signature is The Open Hand. The Bleeding Signet (+20 max VITAE while
+  worn, folded onto `maxHealth`; signature Crimson Covenant: TETHER 3, and
+  the next SACRIFICE this turn counts twice) has no source yet but the dev
+  menu's GET ALL RELICS. Relics are accessories and a character wears up
+  to three (`SLOT_CAPACITY.accessory`), so both are worn together and the
+  signature bar lists every signature the worn relics grant.
 - **The Open Hand** befriends a foe that has a `friendshipReward` and sits
   under its `hpGate` (the Brine Hag: below 30% VITAE; `Enemy/befriend.ts`).
 - **The mercy choice** (`selectMercyChoice`) follows. Spare ends the fight
@@ -157,11 +213,13 @@ without a ruling from T.
 - No stances, no hidden read, no rock-paper-scissors check.
 - No preset decks and no deck draft. Every run starts with the grey deck.
 - No card pricing or power budget. The only prices are the cut and the
-  Anvil.
+  Anvil. The trial cards keep their printed numbers, untuned.
 - No themes, synergy or reward steering.
 - No enemy keywords, afflictions, summons or riders.
 - No alternate wins beyond befriend: no RELENT, no CONDEMN, no capitulation.
 - No alignment, GRACE or faction reputation.
+- No bonus for paying with the card's own colour: the die powers the card
+  and adds nothing (D79). The gold die stays wild.
 - No card upgrades in play (D8) and no die growth beyond the Anvil (D20);
   both are parked.
 - No measured balance baseline (D57). A balance question gets "not
@@ -170,6 +228,6 @@ without a ruling from T.
 ## Where this comes from
 
 The revamp ([`plan/revamp/README.md`](../plan/revamp/README.md)) and its
-decisions (`plan/2026-09-25-refactor-strategy.decisions.md`, D46-D73).
+decisions (`plan/2026-09-25-refactor-strategy.decisions.md`, D46-D80).
 Where this page and the code disagree, the code is right and this page is
 a bug.

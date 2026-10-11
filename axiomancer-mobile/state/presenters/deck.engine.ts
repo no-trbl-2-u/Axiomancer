@@ -159,15 +159,17 @@ export interface DeckViewModel {
 
 /**
  * Group order. This is the engine `CardType` union's own declaration order
- * (`'attack' | 'skill' | 'spell'`, `axiomancer-mechanics/src/Cards/types.ts`),
- * mirrored rather than invented.
+ * (`'attack' | 'skill' | 'spell' | 'global' | 'curse'`,
+ * `axiomancer-mechanics/src/Cards/types.ts`), mirrored rather than invented.
  */
-const CARD_TYPE_ORDER: readonly CardType[] = ['attack', 'skill', 'spell'];
+const CARD_TYPE_ORDER: readonly CardType[] = ['attack', 'skill', 'spell', 'global', 'curse'];
 
 const CARD_TYPE_LABEL: Readonly<Record<CardType, string>> = Object.freeze({
     attack: 'ATTACKS',
     skill: 'SKILLS',
     spell: 'SPELLS',
+    global: 'GLOBALS',
+    curse: 'CURSES',
 });
 
 const STANCE_LABEL: Readonly<Record<string, string>> = Object.freeze({

@@ -6,7 +6,7 @@
  *   - `unlockAllJournal` writes through the engine dispatch and is
  *     idempotent.
  *   - `grantXp` is additive; `forceLevelUp` advances `player.level`.
- *   - `learnAllCards` knows every library card exactly once.
+ *   - `learnAllCards` knows every library card but the Curses exactly once.
  */
 
 import { cardLibrary } from '@mechanics';
@@ -52,12 +52,15 @@ describe('rewards dev helpers', () => {
         expect(forceLevelUp(store)).toBeGreaterThan(before);
     });
 
-    it('learnAllCards knows every library card exactly once', () => {
+    it('learnAllCards knows every library card but the Curses exactly once', () => {
         const store = createAppStore();
         learnAllCards(store);
         const known = store.getState().player.knownCards;
         expect(new Set(known).size).toBe(known.length);
-        for (const c of cardLibrary) expect(known).toContain(c.id);
+        for (const c of cardLibrary) {
+            if (c.cardType === 'curse') expect(known).not.toContain(c.id);
+            else expect(known).toContain(c.id);
+        }
         expect(learnAllCards(store)).toBe(0);
     });
 });

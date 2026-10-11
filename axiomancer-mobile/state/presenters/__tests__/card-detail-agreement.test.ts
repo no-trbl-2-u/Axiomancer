@@ -32,10 +32,15 @@
  * printed by the engine's own generated lines for that card (`topActionText` /
  * `bottomActionText`, both generated FROM the effect data by
  * `combat.cards.ts`). Anything else is a presenter invention.
+ *
+ * A program card (`Card.program`: a Global, a Curse, a SACRIFICE line) has
+ * no rider or payload objects: its lines ARE its printed text
+ * (`programFaceText`), so both rows must carry that text word for word. The
+ * mechanics suite pins that the text is the applied effect.
  */
 
 import { describe, it, expect } from '@jest/globals';
-import { getCard, cardLibrary, lookupEffect, mechanicText, riderText, MAX_EFFECT_INTENSITY } from '@mechanics';
+import { getCard, cardLibrary, lookupEffect, mechanicText, riderText, MAX_EFFECT_INTENSITY, programFaceText } from '@mechanics';
 import type { Card } from '@mechanics';
 import { detailStats } from '@/state/presenters/combat-encounter.engine';
 import { keywordForEffect, keywordForMechanic } from '@/state/combat/keywords';
@@ -127,9 +132,23 @@ function paidRowText(d: ReturnType<typeof detailStats>): string {
 }
 
 describe('card detail agreement (finding 4 — the detail must match the card)', () => {
+    it('a program card\'s rows carry its printed lines word for word', () => {
+        const drift: string[] = [];
+        for (const authored of cardLibrary.filter(c => c.program)) {
+            const projected = getCard(authored.id);
+            if (!projected) continue;
+            const d = detailStats(projected, authored);
+            const lines = programFaceText(authored);
+            const trim = (t: string): string => t.replace(/\.\s*$/, '');
+            if (d.freePill !== trim(lines.free)) drift.push(`${authored.id}: NO-DIE row "${d.freePill}" is not "${lines.free}"`);
+            if (paidRowText(d) !== trim(lines.paid)) drift.push(`${authored.id}: +DIE row "${paidRowText(d)}" is not "${lines.paid}"`);
+        }
+        expect(drift).toEqual([]);
+    });
+
     it('the ◇ NO DIE row is the authored free rider, never a substitute', () => {
         const drift: string[] = [];
-        for (const authored of cardLibrary) {
+        for (const authored of cardLibrary.filter(c => !c.program)) {
             const projected = getCard(authored.id);
             if (!projected) continue;
             const d = detailStats(projected, authored);
@@ -228,7 +247,7 @@ describe('card detail agreement (finding 4 — the detail must match the card)',
 
     it('the ◆ +DIE row invents no number the card cannot produce', () => {
         const drift: string[] = [];
-        for (const authored of cardLibrary) {
+        for (const authored of cardLibrary.filter(c => !c.program)) {
             const projected = getCard(authored.id);
             if (!projected) continue;
             const d = detailStats(projected, authored);

@@ -38,6 +38,7 @@ const DebugEffectApply = lazyNamed(() => import('@/components/DebugEffectApply')
 // ── DECKS & ITEMS ──
 const DebugHazardDeckRandomize = lazyNamed(() => import('@/components/DebugHazardDeckRandomize'), 'DebugHazardDeckRandomize');
 const DebugPopulateAllItems = lazyNamed(() => import('@/components/DebugPopulateAllItems'), 'DebugPopulateAllItems');
+const DebugGetAllRelics = lazyNamed(() => import('@/components/DebugGetAllRelics'), 'DebugGetAllRelics');
 const DebugItemPicker = lazyNamed(() => import('@/components/DebugItemPicker'), 'DebugItemPicker');
 // ── CARDS ──
 const DebugLaneDeck = lazyNamed(() => import('@/components/DebugLaneDeck'), 'DebugLaneDeck');
@@ -108,6 +109,7 @@ export function DevToolsSections() {
                 <DevSection label="DECKS & ITEMS" hint="hazard deck · satchel" testID="dev-section-decks">
                     <DebugHazardDeckRandomize />
                     <DebugPopulateAllItems />
+                    <DebugGetAllRelics />
                     <DebugItemPicker />
                 </DevSection>
 

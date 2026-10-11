@@ -1,5 +1,6 @@
 /**
- * Hermetic engine test — the relic library (one row: the Suppliant's Ring).
+ * Hermetic engine test — the relic library (the Suppliant's Ring and the
+ * Bleeding Signet).
  *
  * Locks the library invariants (roster, shape, no stat line), the
  * `cloneStartingRelics` seed and the `getSignaturesForLoadout` derivation
@@ -17,10 +18,14 @@ import { FIXTURE_WEAPON, FIXTURE_ARMOR, FIXTURE_TRINKETS } from '../../Game/fixt
 
 const ALL_SIGNATURE_IDS = Object.keys(SIGNATURE_SKILLS) as SignatureSkillId[];
 const RING_ID = 'relic-disarming-plea';
+const SIGNET_ID = 'relic-bleeding-signet';
 
 describe('relic library — roster', () => {
-    it('ships exactly one relic, the Suppliant\'s Ring', () => {
-        expect(relicLibrary.map(r => r.id)).toEqual([RING_ID]);
+    it('ships two relics: the Suppliant\'s Ring and the Bleeding Signet', () => {
+        expect(relicLibrary.map(r => r.id)).toEqual([RING_ID, SIGNET_ID]);
+        const signet = getRelicById(SIGNET_ID)!;
+        expect(signet.slot).toBe('accessory');
+        expect(signet.grantsSignature).toBe('sig-crimson-covenant');
         const ring = getRelicById(RING_ID)!;
         expect(ring.name).toBe("Suppliant's Ring");
         expect(ring.slot).toBe('accessory');
@@ -46,8 +51,9 @@ describe('relic library — roster', () => {
         }
     });
 
-    it('the ring carries no stat line — it grants only its signature', () => {
-        for (const r of relicLibrary) expect(r.statModifiers, r.id).toEqual([]);
+    it('the ring carries no stat line; the Signet carries +20 max VITAE', () => {
+        expect(getRelicById(RING_ID)!.statModifiers).toEqual([]);
+        expect(getRelicById(SIGNET_ID)!.statModifiers).toEqual([{ stat: 'maxHp', value: 20 }]);
     });
 
     it('resolves an unknown or deleted relic id to undefined', () => {
@@ -57,11 +63,11 @@ describe('relic library — roster', () => {
 });
 
 describe('cloneStartingRelics', () => {
-    it('returns the whole library as fresh, non-aliased clones', () => {
+    it('returns the starting relic (the Ring alone) as fresh, non-aliased clones', () => {
         const a = cloneStartingRelics();
         const b = cloneStartingRelics();
-        expect(a.map(r => r.id)).toEqual(relicLibrary.map(r => r.id));
-        expect(a).toEqual([...relicLibrary]);
+        expect(a.map(r => r.id)).toEqual([RING_ID]);
+        expect(a).toEqual([getRelicById(RING_ID)]);
         // Fresh objects each call (equipping must not mutate the singleton library).
         expect(a[0]).not.toBe(b[0]);
         expect(a[0]).not.toBe(getRelicById(a[0].id));
@@ -73,6 +79,11 @@ describe('getSignaturesForLoadout', () => {
     it('derives the ring\'s signature from a worn ring', () => {
         const loadout = { weapon: null, armor: null, accessories: cloneStartingRelics() };
         expect(getSignaturesForLoadout(loadout)).toEqual(['sig-disarming-plea']);
+    });
+
+    it('the Ring and the Signet worn together grant both signatures, in slot order', () => {
+        const loadout = { weapon: null, armor: null, accessories: [getRelicById(RING_ID)!, getRelicById(SIGNET_ID)!] };
+        expect(getSignaturesForLoadout(loadout)).toEqual(['sig-disarming-plea', 'sig-crimson-covenant']);
     });
 
     it('returns [] for an empty loadout (combat may legally begin signature-less)', () => {

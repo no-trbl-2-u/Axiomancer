@@ -1,6 +1,6 @@
 # Lexicon — canonical and retired Axiomancer terminology
 
-<!-- lexicon-ok: src-skills-path, base-power, chip-hp, pressure-tracks, doxa, lemma, thesis, theorem, axiom, enchantment, disenchant, thoughtform, strike-ban-doctrine, status-primacy-doctrine, win-rate-objective-doctrine -->
+<!-- lexicon-ok: src-skills-path, base-power, chip-hp, pressure-tracks, doxa, lemma, thesis, theorem, axiom, enchantment, disenchant, thoughtform, strike-ban-doctrine, status-primacy-doctrine, win-rate-objective-doctrine, colour-match-bonus -->
 
 > The machine-authoritative retired-terms registry is
 > [`lexicon.json`](./lexicon.json) — `node scripts/check-lexicon.mjs`
@@ -37,6 +37,9 @@
   / amulet / ring / charm). The 7-slot model and (per the phase 19-23
   epic, as it ships) the procedural modifier/rarity/affix machinery are
   legacy.
+- **The colour-match bonus is RETIRED** (D79, 2026-10-10): a die of the
+  card's own colour adds nothing. Only the Color Law survives: a die powers
+  a grey card, a card of its own colour, or (gold) any card.
 - Authority for meaning disputes: root `docs/truth-sources.md` § Source-of-truth hierarchy
   (specs and ADRs outrank docs; docs outrank memory).
 

@@ -28,7 +28,7 @@ describe('Card library structural invariants', () => {
             expect(['body', 'mind', 'heart', 'any']).toContain(card.color);
             // Every card carries a quality rank and a card type.
             expect([1, 2, 3, 4, 5, 6]).toContain(card.rank);
-            expect(['attack', 'skill', 'spell']).toContain(card.cardType);
+            expect(['attack', 'skill', 'spell', 'global', 'curse']).toContain(card.cardType);
         }
     });
 

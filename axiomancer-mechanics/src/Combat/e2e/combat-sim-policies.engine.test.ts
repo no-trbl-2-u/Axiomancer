@@ -106,7 +106,7 @@ describe('policy roster — every id resolves', () => {
     it('greedy/blind keep the exact legacy witness configuration', () => {
         for (const id of ['greedy', 'blind'] as const) {
             const policy = COMBAT_SIM_POLICIES[id];
-            expect(policy.signatureKinds).toEqual(['mercy']);
+            expect(policy.signatureKinds).toEqual(['mercy', 'covenant']);
             expect(policy.convictionThreshold).toBe(7);
             expect(policy.mercyChoice).toBe('spare');
             expect(policy.rankSignature).toBeUndefined();
@@ -156,9 +156,9 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     it('seed 11 vs FloatEye: a status victory', () => {
         const r = runOneEncounter(loadout(MIX), FloatEye, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 5, plays: 22, statusPlays: 5 });
+            .toEqual({ outcome: 'victory', rounds: 4, plays: 19, statusPlays: 3 });
         expect(r.cardUsage['grey-word']).toEqual({
-            cardId: 'grey-word', plays: 6, bottomPlays: 5, topPlays: 1, statusLands: 5, discards: 0,
+            cardId: 'grey-word', plays: 4, bottomPlays: 3, topPlays: 1, statusLands: 3, discards: 0,
         });
         // Telemetry stays internally consistent whatever the sequence is: the
         // per-card counters sum to the aggregates (the actual bug detector).
@@ -169,12 +169,12 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     });
 
     // A narrow fidelity pin on `greedy`'s decision sequence, not a balance
-    // gate: the grey MIX at 5/5/5 loses this line in four rounds (plays 20,
-    // statusPlays 4) — the grey office is the deck you outgrow.
+    // gate: the grey MIX at 5/5/5 loses this line in five rounds (plays 25,
+    // statusPlays 5) — the grey office is the deck you outgrow.
     it('seed 11 vs TheDoorwarden: the pinned sequence (Gate 0 law: one tray per phase)', () => {
         const r = runOneEncounter(loadout(MIX), TheDoorwarden, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'defeat', rounds: 4, plays: 20, statusPlays: 4 });
+            .toEqual({ outcome: 'defeat', rounds: 5, plays: 25, statusPlays: 5 });
         // Determinism, not balance: the same seed must reproduce the same
         // sequence byte-for-byte. (The exact figures above are a fidelity
         // measurement of the CURRENT library + engine and are expected to be

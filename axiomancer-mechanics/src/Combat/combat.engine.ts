@@ -65,6 +65,12 @@ import { canAct, getActiveEffectModifiers, getActiveDotTotal, ticksOnRoundClock 
 import { getThreatSequence, commitThreatBranch } from './combat.threat';
 import { getSignatureSkill, applySignatureSkill, signatureCastBlock, playerArchetype } from './combat.signature';
 import { getSignaturesForLoadout } from '../Items/relic.library';
+import {
+    type ProgramKit, deckHasProgramCards, initProgramLedger, isProgramCard, isCurseCard,
+    playProgramCard, programTurnStart, programFoeTurnStart, programClampDamage,
+    programRecordDamage, programRollRound, programDrawFallback,
+    programIllegalReason, programXRange,
+} from './combat.card-program';
 import type {
     CombatCard, CombatDieColor, CombatEncounterState, CombatEvent, CardPlay,
     CombatManaDie, CombatPhaseResult, CombatTransition, LandedEffect,
@@ -75,27 +81,6 @@ import type {
 
 /** Safety cap on total phases processed — prevents a degenerate stalemate loop. */
 const MAX_PHASES = 60;
-
-// ── Color-match tuning ───────────────────────────────────────────────────────
-
-/**
- * The colour-match reward is a PERCENTAGE, not a flat bonus. A flat bonus that mattered on a GUARD 6 card is
- * noise on a GUARD 40 one; a percentage keeps "power the card with its own
- * colour" worth doing at every rank. The floor keeps it felt on the smallest
- * Ash lines. Use {@link colorMatchBonus} — never the raw constants.
- */
-export const COLOR_MATCH_BONUS_PCT = 0.25;
-export const COLOR_MATCH_BONUS_MIN = 2;
-
-/**
- * The bonus a colour-matched (or Wild) die adds to a printed damage / guard /
- * barrier magnitude: 25% of the base, at least +2, rounded. Returns 0 for a
- * non-positive base so a zero-magnitude line never invents power.
- */
-export function colorMatchBonus(base: number): number {
-    if (base <= 0) return 0;
-    return Math.max(COLOR_MATCH_BONUS_MIN, Math.round(base * COLOR_MATCH_BONUS_PCT));
-}
 
 /**
  * Always 1: threat scaling lives in `threatDamageBudget` (`combat.threat.ts`),
@@ -162,9 +147,6 @@ export const PIP_INTENSITY_BONUS = 2;
 /** Each pip on a spent Reserve die adds this much Guard on a defend card,
  *  so a ripened die is worth banking against GUARD lines from 8 to 60. */
 export const PIP_GUARD_BONUS = 5;
-/** A color-matched (or Wild) die on a STATUS card extends the landed
- *  status by this many turns. */
-export const COLOR_MATCH_STATUS_DURATION_BONUS = 1;
 
 // ── The damage-scaler constants ──────────────────────────────────────────────
 
@@ -302,6 +284,9 @@ export function initializeCombatEncounter(
         seed,
         // No coveted die claimed yet this combat.
         covetedDiceClaimed: [],
+        // The program ledger exists only for a deck that holds a program
+        // card, so every other fight's state is unchanged.
+        ...(deckHasProgramCards(deck) ? { program: initProgramLedger() } : {}),
     };
 }
 
@@ -393,7 +378,16 @@ export function startTurn(
     };
     events.push({ kind: 'turn-dice-rolled', turn, dice });
     events.push({ kind: 'dice-rolled', dice });
-    return { state: withLog(next, events), events };
+    let started = withLog(next, events);
+    // Start-of-turn Globals, a delayed HEAL and the turn's SACRIFICE
+    // modifiers. No ledger, no change.
+    if (started.program) {
+        const pt = programTurnStart(started, PROGRAM_KIT);
+        started = withLog(pt.state, pt.events);
+        events.push(...pt.events);
+        if (isDefeated(started.enemy)) return endCombat(started, 'victory', events);
+    }
+    return { state: started, events };
 }
 
 /** Ends the turn: at end of round, ONE unspent mana/special tray
@@ -480,6 +474,7 @@ export function playCombatCard(
     useBottom: boolean,
     dieId?: string,
     rng: () => number = defaultRng,
+    x?: number,
 ): CombatTransition {
     if (state.phase !== 'phase-play') return { state, events: [] };
 
@@ -490,6 +485,19 @@ export function playCombatCard(
 
     const card = getCard(entry.cardId);
     if (!card) return { state, events: [] };
+
+    // A program card resolves in combat.card-program.ts; BOON and momentum
+    // still run for its PAID play. `x` is the amount chosen for a
+    // "SACRIFICE any amount" line.
+    if (isProgramCard(card.id)) {
+        const withLedger = state.program ? state : { ...state, program: initProgramLedger() };
+        const pp = playProgramCard(withLedger, entry.uid, useBottom, dieId, PROGRAM_KIT, x);
+        if (pp.events.length === 0) return { state, events: [] };
+        const fizzled = pp.events.length === 1 && pp.events[0].kind === 'effect-fizzled';
+        if (fizzled) return { state: withLog(state, pp.events), events: pp.events };
+        const played = checkImmediateOutcome(withLog(pp.state, pp.events), pp.events);
+        return applyBoonAndMomentumV2(state, played, card.stance, useBottom);
+    }
 
     const transition = useBottom
         ? playBottomAction(state, entry.uid, card, dieId, rng)
@@ -581,6 +589,14 @@ export function discardCombatCard(state: CombatEncounterState, uid: string): Com
     if (state.phase !== 'phase-play') return { state, events: [] };
     const entry = state.hand.find(h => h.uid === uid);
     if (!entry) return { state, events: [] };
+    // A Curse cannot be scrapped: playing it is the only way out.
+    if (isCurseCard(entry.cardId)) {
+        const events: CombatEvent[] = [{
+            kind: 'effect-fizzled', cardId: entry.cardId, effectId: '',
+            message: 'a Curse cannot be scrapped — play it to be rid of it',
+        }];
+        return { state: withLog(state, events), events };
+    }
     const scrapsThisTurn = state.scrapsThisTurn ?? 0;
     const pays = scrapsThisTurn < SCRAP_CONVICTION_CAP_PER_TURN;
     const conviction = pays ? Math.min(CONVICTION_CAP, state.conviction + 1) : state.conviction;
@@ -647,14 +663,13 @@ function applyEnemyDamage(
 /**
  * The scalers a single player hit picks up on its way to the foe, folded in
  * one place so every damage source (the `deal` mechanic, a FREE-line
- * `damage`) reads the same rules. Order is authored:
- *   1. the colour-match bonus, as a percentage of the base
- *   2. VULNERABLE — the foe's incoming-damage multiplier (last of the
- *      multipliers, uncapped). The caller scales `base` by body first.
+ * `damage`) reads the same rules. The caller scales `base` by body first;
+ * the only scaler applied here is VULNERABLE, the foe's incoming-damage
+ * multiplier (uncapped). The die that powered the play adds nothing: a die
+ * powers a card, it does not boost it.
  */
 export interface PlayerHitParams {
     base: number;
-    colorMatch: boolean;
     /** VULNERABLE on the foe (`getDamageTakenMultiplier`); 1 when absent. */
     vulnMult?: number;
 }
@@ -662,7 +677,6 @@ export interface PlayerHitParams {
 export function scalePlayerHit(params: PlayerHitParams): number {
     if (params.base <= 0) return 0;
     let dmg = Math.round(params.base);
-    if (params.colorMatch) dmg += colorMatchBonus(dmg);
     if (params.vulnMult !== undefined && params.vulnMult !== 1) dmg = Math.round(dmg * params.vulnMult);
     return Math.max(0, dmg);
 }
@@ -718,11 +732,9 @@ function applyRiderToState(
     let attribution = state.attribution;
     const cardName = lookupCard(cardId)?.name ?? cardId;
     if (r.damage) {
-        // A FREE-line hit takes no colour match: the printed number is the
-        // number, scaled by body and VULNERABLE.
+        // The printed number is the number, scaled by body and VULNERABLE.
         const dmg = scalePlayerHit({
             base: scaleFor(r.damage, stats, 'body', 'one-shot'),
-            colorMatch: false,
             vulnMult: getDamageTakenMultiplier(enemy),
         });
         if (dmg > 0) {
@@ -900,17 +912,15 @@ function playBottomAction(
         return { state: withLog(state, events), events };
     }
 
-    // 2. Color-match. Every play lands at its printed numbers.
-    // A grey card's colour-match bonus is NEUTRAL: never on-colour
-    // (even powered by wild), never off-colour.
-    const colorMatch = card.stance !== 'any' && (powering.color === 'wild' || powering.color === card.stance);
+    // 2. Every play lands at its printed numbers: the die that powers it
+    // adds nothing beyond its pips.
     const poweringPips = powering.pips ?? 0;
     // The player's stats scale this play's printed numbers
     // (`stat-scaling.ts`): DEAL by body, GUARD by mind, statuses by where
-    // they land. Colour match and VULNERABLE stack on top.
+    // they land. VULNERABLE stacks on top.
     const stats = state.player.baseStats;
 
-    const events: CombatEvent[] = [{ kind: 'card-played', cardId: card.id, useBottom: true, dieId: powering.id, colorMatch }];
+    const events: CombatEvent[] = [{ kind: 'card-played', cardId: card.id, useBottom: true, dieId: powering.id }];
 
     // 3. Execute the card (the shared effect machinery) against a shim.
     const before = intensityMap(state.enemy.effects);
@@ -936,28 +946,22 @@ function playBottomAction(
         resonance = { ...resonance, [resonanceColor]: resonance[resonanceColor] + 1 };
         events.push({ kind: 'resonance-gained', color: resonanceColor, total: resonance[resonanceColor] });
     }
-    // Landed-status adjustments in one pass, all REAL units: RIPENED pips (+1
-    // intensity per pip on a non-defend play), and the color-match +1
-    // duration on status cards. Card statuses land uncapped, so the
-    // pips add on top with no clamp.
+    // Landed-status adjustment, in REAL units: RIPENED pips add
+    // PIP_INTENSITY_BONUS intensity per pip on a non-defend play. Card
+    // statuses land uncapped, so the pips add on top with no clamp.
     const isDefendPlay = card.verbClass === 'defend';
     const bonusIntensity = isDefendPlay ? 0 : poweringPips * PIP_INTENSITY_BONUS;
-    const bonusDuration = colorMatch && card.effectKind !== 'none' ? COLOR_MATCH_STATUS_DURATION_BONUS : 0;
-    if (bonusIntensity > 0 || bonusDuration > 0) {
+    if (bonusIntensity > 0) {
         let touched = false;
         enemy = {
             ...enemy,
             effects: enemy.effects.map(a => {
                 if ((before[a.effectId] ?? 0) >= a.intensity) return a;
                 touched = true;
-                return {
-                    ...a,
-                    intensity: a.intensity + bonusIntensity,
-                    remainingDuration: a.remainingDuration === -1 ? -1 : a.remainingDuration + bonusDuration,
-                };
+                return { ...a, intensity: a.intensity + bonusIntensity };
             }),
         };
-        if (touched && poweringPips > 0 && !isDefendPlay) {
+        if (touched) {
             events.push({ kind: 'pips-cashed', cardId: card.id, pips: poweringPips, bonus: 'intensity', amount: poweringPips * PIP_INTENSITY_BONUS });
         }
     }
@@ -977,7 +981,6 @@ function playBottomAction(
         const healthBefore = enemy.health;
         const dmg = scalePlayerHit({
             base: scaleFor(mech.amount, stats, 'body', 'one-shot'),
-            colorMatch,
             vulnMult,
         });
         if (dmg <= 0) continue;
@@ -1053,7 +1056,7 @@ function playBottomAction(
     }
     events.push({ kind: 'die-spent', dieId: powering.id, color: powering.color });
 
-    // Defense card → GUARD (printed + color-match + pips). Absorbed in
+    // Defense card → GUARD (printed + pips). Absorbed in
     // `resolveThreatPhase`.
     const guardMech = mechs.find(m => m.kind === 'guard');
     const pipGuard = isDefendPlay ? poweringPips * PIP_GUARD_BONUS : 0;
@@ -1061,7 +1064,7 @@ function playBottomAction(
         events.push({ kind: 'pips-cashed', cardId: card.id, pips: poweringPips, bonus: 'guard', amount: pipGuard });
     }
     const guardBase = guardMech ? scaleFor(Math.max(1, Math.round(guardMech.amount)), stats, 'mind', 'one-shot') : 0;
-    const guardGain = guardBase + (guardMech && colorMatch ? colorMatchBonus(guardBase) : 0) + pipGuard;
+    const guardGain = guardBase + pipGuard;
 
     let next: CombatEncounterState = {
         ...state, player, enemy, dice, reserve, resonance, attribution,
@@ -1123,12 +1126,20 @@ function soakFlatHit(
  * (`canAct` → skipTurn). This is how control "hinders the enemy" — it loses its
  * attack this phase. Then between-phases processing runs (DoT ticks, draw, advance).
  */
-export function resolveThreatPhase(state: CombatEncounterState, rng: () => number = defaultRng): CombatTransition {
-    if (state.phase === 'complete' || state.finalOutcome) return { state, events: [] };
+export function resolveThreatPhase(stateIn: CombatEncounterState, rng: () => number = defaultRng): CombatTransition {
+    if (stateIn.phase === 'complete' || stateIn.finalOutcome) return { state: stateIn, events: [] };
+    let state = stateIn;
+    // LEECH drains the foe at the start of its turn, before it acts.
+    const leech = programFoeTurnStart(state);
+    const leechEvents = leech.events;
+    if (leechEvents.length > 0) {
+        state = leech.state;
+        if (isDefeated(state.enemy)) return endCombat(withLog(state, leechEvents), 'victory', leechEvents);
+    }
 
     const idx = Math.min(state.currentPhaseIndex, state.threatPhases.length - 1);
     const phase = state.threatPhases[idx];
-    const events: CombatEvent[] = [];
+    const events: CombatEvent[] = [...leechEvents];
 
     // Control on the enemy hinders its turn: HARD control (skipTurn) denies it
     // outright via canAct.
@@ -1215,6 +1226,8 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     events.push({ kind: 'barrier-absorbed', amount: barrierAbsorbed });
                 }
                 if (dmg > 0) {
+                    // A death ward keeps the player at 1 VITAE this turn.
+                    dmg = programClampDamage(state, player.health, dmg);
                     player = applyDamage(player, dmg);
                     enemyDamageDealt += dmg;
                     // The 'damage-instance' clock, player bearer — a threat
@@ -1226,6 +1239,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     const selfClock = fireDotTrigger(player, 'damage-instance', state.round);
                     if (selfClock.damage > 0) {
                         player = selfClock.target;
+                        if (state.program?.deathWardRound === state.round && player.health < 1) player = { ...player, health: 1 };
                         for (const t of selfClock.perEffect) {
                             events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'self' });
                         }
@@ -1329,6 +1343,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         // and the full-block verdict (persists until the NEXT threat resolves;
         // a hindered/denied threat was never blocked).
         enemyDamageThisTurn: (state.enemyDamageThisTurn ?? 0) + enemyDamageDealt,
+        ...(state.program ? { program: programRecordDamage(state.program, Math.max(0, state.player.health - player.health)) } : {}),
         lastThreatFullyBlocked: !hindered && attacksLanded > 0 && attacksFullyBlocked === attacksLanded,
         phase: 'phase-resolve',
         threatMarks,
@@ -1436,6 +1451,16 @@ export function processBetweenPhases(
     const playerStart = processRoundStartEffects(state.player, state.round);
     const playerEnd = processRoundEndEffects(playerStart.target, 'player');
     let player = playerEnd.target as Character;
+    // The death ward covers this round's DoT too, and the damage ledgers
+    // roll over at the boundary.
+    let ledger = state.program;
+    if (ledger) {
+        if (ledger.deathWardRound === state.round && player.health < 1 && state.player.health >= 1) {
+            player = { ...player, health: 1 };
+        }
+        const dotTaken = Math.max(0, state.player.health - player.health);
+        ledger = programRollRound(programRecordDamage(ledger, dotTaken));
+    }
     const playerDotTicks = clampDotTickBreakdown(projectedPlayerDotTicks, playerStart.dotDamage);
 
     for (const t of enemyDotTicks) events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
@@ -1542,7 +1567,7 @@ export function processBetweenPhases(
     const keptHand = omenState.hand;
     const refillTarget = COMBAT_HAND_SIZE + bonusDraw;
     const draw = drawCombatCards(
-        omenState.drawPile, omenState.discard, omenState.deck,
+        omenState.drawPile, omenState.discard, programDrawFallback(omenState),
         Math.max(0, refillTarget - keptHand.length), rng,
     );
     let uid = state.round * 100;
@@ -1570,6 +1595,7 @@ export function processBetweenPhases(
         // The STAGE ledgers.
         stagesEntered,
         stageThreatBonus,
+        ...(ledger ? { program: ledger } : {}),
     };
     next = withLog(next, events);
     // The round is closed: zero the enemy-DoT accumulator AFTER logging
@@ -1891,3 +1917,30 @@ export function projectCombatOutcome(state: CombatEncounterState): CombatOutcome
 
 /** Re-export for presenters that need to check die affordability directly. */
 export { combatDieCanPower, availableDiceFor, effectImpact, cardStanceColor, riderText };
+
+/** The engine pieces `combat.card-program.ts` needs, passed in so that
+ *  module never imports the engine. */
+export const PROGRAM_KIT: ProgramKit = {
+    convictionCap: CONVICTION_CAP,
+    incomingNet: (state: CombatEncounterState) => projectIncomingThreat(state).netDamage,
+};
+
+/**
+ * Why a program card's FREE (`paid` false) or PAID line cannot be played
+ * right now, in the words the game says it (null = it can). The die and the
+ * Color Law are not part of it. Null for a card without a program.
+ *
+ * @param x - The amount chosen for a "SACRIFICE any amount" line.
+ * @example programLineBlock(state, 'c3', false) // 'that SACRIFICE would leave you below 1 VITAE'
+ */
+export function programLineBlock(state: CombatEncounterState, uid: string, paid: boolean, x?: number): string | null {
+    const entry = state.hand.find(h => h.uid === uid);
+    if (!entry || !isProgramCard(entry.cardId)) return null;
+    return programIllegalReason(state, uid, paid, PROGRAM_KIT, x);
+}
+
+/** The amounts a program card's "SACRIFICE any amount" PAID line accepts
+ *  right now, or null when it has none. */
+export function programXChoice(state: CombatEncounterState, uid: string): { min: number; max: number } | null {
+    return programXRange(state, uid, true, PROGRAM_KIT);
+}
