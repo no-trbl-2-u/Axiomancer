@@ -1703,9 +1703,11 @@ function programChips(state: CombatEncounterState): CombatEffectChipVM[] {
     const l = state.program;
     if (!l) return [];
     const out: CombatEffectChipVM[] = [];
-    if (l.leech > 0) {
+    if (l.leechTurns > 0) {
+        // LEECH is a debuff with two numbers: its potency (VITAE drained each
+        // foe turn) and the foe turns it has left.
         out.push({
-            effectId: 'program-leech', intensity: l.leech, duration: l.leech,
+            effectId: 'program-leech', intensity: l.leechPotency, duration: l.leechTurns,
             glyph: { glyph: '∿', color: GLYPH_COLORS.dot, kind: 'dot', label: 'Leech' },
             gloss: keywordGloss('Leech'),
         });
@@ -1752,6 +1754,7 @@ function scaledCardVM(uid: string, card: CombatCard, stats: PlayerStats): Combat
 
 const SIG_ICON: Record<SignatureSkill['kind'], string> = {
     mercy: '🕊',
+    covenant: '🩸',
 };
 
 function signaturesVM(state: CombatEncounterState): CombatSignatureVM[] {

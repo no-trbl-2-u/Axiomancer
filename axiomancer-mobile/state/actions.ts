@@ -182,6 +182,15 @@ export interface DebugSeedResult {
  * a maximal load. Mirrors `DebugSeedResult`'s shape so callers can
  * toast a uniform summary.
  */
+/**
+ * Dev-only GET ALL RELICS result: the relic ids added to the inventory (every
+ * relic in the library the player did not already own) and the ids now worn.
+ */
+export interface GrantAllRelicsResult {
+    added: string[];
+    worn: string[];
+}
+
 export interface PopulateAllItemsResult {
     /** Total items pushed across all registries. */
     itemsAdded: number;
@@ -279,6 +288,16 @@ export interface AppActions {
      * mount is `__DEV__`-guarded; production never reaches this.
      */
     populateAllItems: () => PopulateAllItemsResult;
+    /**
+     * Dev-only GET ALL RELICS. Adds every relic in the engine's
+     * `relicLibrary` the player does not already own (carried or worn) to
+     * the inventory. Nothing worn is displaced. The engine loadout then
+     * follows the dock's worn window (`wornPerSlot`: the first three
+     * trinkets carried are the worn ones), so a relic that lands in a free
+     * trinket position is worn with its stat line and signature, and one
+     * past the third trinket stays in the satchel.
+     */
+    grantAllRelics: () => GrantAllRelicsResult;
     /**
      * Dev-only character preset adoption. Looks up the
      * engine `characterPresets` row by id and replaces the player
@@ -640,6 +659,7 @@ export function createAppActions(store: AppStore): AppActions {
         changeMap: (mapName) => changeMapAction(store, mapName),
         debugSeed: () => debugSeedAction(store),
         populateAllItems: () => populateAllItemsAction(store),
+        grantAllRelics: () => grantAllRelicsAction(store),
         applyCharacterPreset: (presetId) => applyCharacterPresetAction(store, presetId),
         applyPlayerTierPreset: (presetId) => applyPlayerTierPresetAction(store, presetId),
         addItemById: (id) => addItemByIdAction(store, id),
@@ -869,6 +889,7 @@ function equipItemAction(store: AppStore, itemId: string): void {
     if (targetSlot === 'accessory') {
         const wornAcc = wornPerSlot(inventory).get('accessory') ?? [];
         const alreadyWorn = wornAcc.some((a) => a.id === equip.id);
+        const inLoadout = state.player.equipment.accessories.some((a) => a.id === equip.id);
         if (!alreadyWorn) {
             if (wornAcc.length >= SLOT_CAPACITY.accessory) {
                 pushToast(store, 'Accessory slots full — remove one first.');
@@ -876,8 +897,12 @@ function equipItemAction(store: AppStore, itemId: string): void {
             }
             // EQUIPMENT STATS FIX: engine equipItem folds stat bonuses / passives.
             updatedPlayer = engineEquipItem(state.player, equip);
+        } else if (!inLoadout) {
+            // Shown worn (inside the worn window) but missing from the engine
+            // loadout: wear it for real so its stat line and signature apply.
+            updatedPlayer = engineEquipItem(state.player, equip);
         }
-        // alreadyWorn → reorder only (avoid a duplicate loadout entry).
+        // alreadyWorn and in the loadout → reorder only (no duplicate entry).
     } else {
         // weapon / armor replace in place.
         updatedPlayer = engineEquipItem(state.player, equip);
@@ -1271,6 +1296,44 @@ function populateAllItemsAction(store: AppStore): PopulateAllItemsResult {
 
     const itemsAdded = equipment + unique + consumable;
     return { itemsAdded, breakdown: { equipment, unique, consumable } };
+}
+
+/**
+ * Wears every accessory in the dock's worn window that the engine loadout
+ * lacks, so the loadout (stat lines, signatures) matches what the dock shows.
+ */
+function wearWornWindow(player: Character, inventory: readonly Item[]): Character {
+    let next = player;
+    for (const acc of wornPerSlot(inventory).get('accessory') ?? []) {
+        if (next.equipment.accessories.some((a) => a.id === acc.id)) continue;
+        if (next.equipment.accessories.length >= SLOT_CAPACITY.accessory) break;
+        next = engineEquipItem(next, acc);
+    }
+    return next;
+}
+
+function grantAllRelicsAction(store: AppStore): GrantAllRelicsResult {
+    const state = store.getState();
+    const player = state.player;
+    const owned = new Set<string>([
+        ...player.inventory.map((i: Item) => i.id),
+        ...player.equipment.accessories.map((a) => a.id),
+        ...(player.equipment.weapon ? [player.equipment.weapon.id] : []),
+        ...(player.equipment.armor ? [player.equipment.armor.id] : []),
+    ]);
+    const added: string[] = [];
+    let inventory: Item[] = [...player.inventory];
+    for (const relic of relicLibrary) {
+        if (owned.has(relic.id)) continue;
+        inventory = [...inventory, { ...relic, statModifiers: (relic.statModifiers ?? []).map((m) => ({ ...m })) }];
+        added.push(relic.id);
+    }
+    if (added.length === 0) {
+        return { added, worn: player.equipment.accessories.map((a) => a.id) };
+    }
+    const nextPlayer = wearWornWindow({ ...player, inventory }, inventory);
+    store.setState({ player: { ...nextPlayer, inventory } });
+    return { added, worn: nextPlayer.equipment.accessories.map((a) => a.id) };
 }
 
 function applyCharacterPresetAction(

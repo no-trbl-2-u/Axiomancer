@@ -162,10 +162,12 @@ export interface CardPlay {
 
 /** What a signature skill does (drives the engine dispatch + the UI icon). */
 export type SignatureSkillKind =
-    | 'mercy';         // The Open Hand: open the mercy choice on a befriendable foe
+    | 'mercy'          // The Open Hand: open the mercy choice on a befriendable foe
+    | 'covenant';      // Crimson Covenant: TETHER, and the next SACRIFICE counts twice
 
 export type SignatureSkillId =
-    | 'sig-disarming-plea';
+    | 'sig-disarming-plea'
+    | 'sig-crimson-covenant';
 
 /** Player archetype, derived from the dominant base stat. Drives (mobile) the
  *  portrait only. */
