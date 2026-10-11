@@ -529,29 +529,6 @@
 
 ## Pending
 
-### [LOW] hazard / mobile — a utility card's effect line truncates sideways in the hand, so Read the Wind's free and paid rows both read "CONVERT …"
-- pass: 78 (commit a944d1a3)
-- viewport: mobile (375x812); the desktop hand in this pass held no card
-  with a long effect line
-- category: mobile
-- observation: the hazard hand prints each utility card's effect line under
-  its stat rows with `numberOfLines={1}`. On the 90px hand card, Read the
-  Wind's free line "CONVERT 1 ✕→◆" and paid line "CONVERT ✕→◆ ALL" are
-  both cut to "CONVERT 1 …" and "CONVERT …". The cut removes what the card
-  converts and the ALL that makes the paid row worth its die, so the free
-  and paid rows look nearly the same until the player taps the card.
-  05665523 fixed the vertical clip of this line; this is the horizontal
-  one.
-- evidence: `.critique-artifacts/mobile/10-hazard.png` (the 2nd and 5th
-  hand cards); `10-hazard.txt` lines 21/25 hold the full strings;
-  `axiomancer-mobile/components/hazard/HazardCard.tsx:159-166`.
-- suggested fix: in hand mode let the effect line wrap to two lines or shrink
-  its font to fit the frame (react-native-web ignores
-  `adjustsFontSizeToFit`, so size it from the label's length as
-  `handNameFontSize` does for names). Pin it with a test that every
-  library utility label fits the 90px hand frame.
-- source: critique:drive (unattended)
-
 ### [LOW] RC walk 2026-10-02 — copy, label and console findings (one row per item, all presentation)
 - pass: RC checkpoint walk, four `playtester` legs (attended, T present), commits a493eaf7 → 169b6dbc
 - viewport: playwright default (desktop)
@@ -809,6 +786,30 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] hazard / mobile — a utility card's effect line truncates sideways in the hand, so Read the Wind's free and paid rows both read "CONVERT …" — RESOLVED 2026-10-11 (commit d406c027; in hand mode the line drops its ⬡ mark and `handEffectFontSize` sizes a card's two rows from the longer label, so Read the Wind prints at 8px and the other utility cards stay at 11; measured in the web build at 375, both convert lines print whole; pinned in HazardCard.test.tsx. Play mode still cuts the line on the 70px staged card)
+- issue: #494
+- pass: 78 (commit a944d1a3)
+- viewport: mobile (375x812); the desktop hand in this pass held no card
+  with a long effect line
+- category: mobile
+- observation: the hazard hand prints each utility card's effect line under
+  its stat rows with `numberOfLines={1}`. On the 90px hand card, Read the
+  Wind's free line "CONVERT 1 ✕→◆" and paid line "CONVERT ✕→◆ ALL" are
+  both cut to "CONVERT 1 …" and "CONVERT …". The cut removes what the card
+  converts and the ALL that makes the paid row worth its die, so the free
+  and paid rows look nearly the same until the player taps the card.
+  05665523 fixed the vertical clip of this line; this is the horizontal
+  one.
+- evidence: `.critique-artifacts/mobile/10-hazard.png` (the 2nd and 5th
+  hand cards); `10-hazard.txt` lines 21/25 hold the full strings;
+  `axiomancer-mobile/components/hazard/HazardCard.tsx:159-166`.
+- suggested fix: in hand mode let the effect line wrap to two lines or shrink
+  its font to fit the frame (react-native-web ignores
+  `adjustsFontSizeToFit`, so size it from the label's length as
+  `handNameFontSize` does for names). Pin it with a test that every
+  library utility label fits the 90px hand frame.
+- source: critique:drive (unattended)
 
 ### [x] [LOW] hazard — a hand card with a two-line name clips its paid row's effect line at its own bottom edge — RESOLVED 2026-10-11 (commit 05665523; the cause was the utility effect lines, not the name: every purple and gold card ran its paid line 5px past the frame. In hand mode a utility card draws the 20px medallion, `handArtSize`, and its last line sits 9px inside at 1280 and 375; pinned in HazardCard.test.tsx)
 - issue: #493
