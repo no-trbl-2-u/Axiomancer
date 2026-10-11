@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-11 at commit 69971f5c
-> Pass count: 76
+> Last pass: 2026-10-11 at commit cb1f6e41
+> Pass count: 77
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -488,6 +488,27 @@
 > trade), the mobile hazard strip's "CHOOSE TO PROC…" (pass 68 trade), and
 > the fixture placeholder lines in dialogue, cutscene and village (fixture
 > content, not shipped). Zero fresh findings this pass.
+
+> **[critique pass 77, 2026-10-11, commit cb1f6e41] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors. 22 commits
+> after pass 76. Most of them are off the screen set: Blood Price revision
+> 2 and its relics, card programs on the board (no program card in the
+> fixture hand), the pacing sim, the dev menu, Open Vein's TETHER order,
+> the Doorwarden's ramp, and the cache/Anvil plate fix (neither screen is
+> in the set). On screen, the Brine Hag board's hand still reads A Plain
+> Word "+24%" free / "VULNERABLE +60%" paid and A Plain Blow "Deal 12",
+> both whole on desktop. Reconfirmed and not re-filed: pass 75's mobile
+> hub zoom floor, pass 75's hazard hand-card effect-line clip (desktop
+> BALANCE POLE "RE-CAST +DIE", SURE FOOTING "DRAW 1"), pass 65's Minor
+> Healing Potion, pass 63's corner medallions, and RC walk item 9. Checked
+> and not filed: the free row naming its effect by glyph alone ("+24%"
+> beside the VULNERABLE glyph, "+4" beside the GUARD shield). That is the
+> card face's own grammar, the same on every card, not a regression. Also
+> checked and not filed: the customs-house line above a FREE rest, the main
+> menu's empty upper half, the mobile title's black band, the mobile hazard
+> strip's "CHOOSE TO PROC…", and the fixture placeholder lines. Zero fresh
+> findings this pass.
 
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `archive-pre-revamp:plan/archive/CRITIQUE_2026.md`.
 
