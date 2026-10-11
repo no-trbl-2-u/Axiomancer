@@ -3,8 +3,10 @@
  *
  * The contract this file pins:
  *   · every lane's cards and test-deck cards resolve in the library;
- *   · lane ids are unique, and every library card sits in some lane, so
- *     the reward-pool grid can reach every card;
+ *   · lane ids are unique, and every library card that can be a reward
+ *     sits in some lane, so the reward-pool grid can reach every one (a
+ *     Curse is never a reward: a card adds it mid-combat, so it sits in no
+ *     lane);
  *   · the grey lane's test deck is the fresh-run deck;
  *   · `laneRewardPool` merges lanes in order, once per card, skipping
  *     unknown ids;
@@ -35,11 +37,13 @@ describe('the lane registry', () => {
         }
     });
 
-    it('has unique lane ids and puts every library card in a lane', () => {
+    it('has unique lane ids and puts every library card but the Curses in a lane', () => {
         const ids = CARD_LANES.map(lane => lane.id);
         expect(new Set(ids).size).toBe(ids.length);
         const laned = new Set(CARD_LANES.flatMap(lane => lane.cardIds));
-        for (const card of cardLibrary) expect(laned.has(card.id), card.id).toBe(true);
+        for (const card of cardLibrary) {
+            expect(laned.has(card.id), card.id).toBe(card.cardType !== 'curse');
+        }
     });
 
     it('deals the fresh-run deck as the grey test deck', () => {

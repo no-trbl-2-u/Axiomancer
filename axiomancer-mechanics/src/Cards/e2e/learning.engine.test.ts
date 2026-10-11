@@ -13,6 +13,9 @@ import { createCharacter } from '../../Character';
 import { getAvailableCards, learnCard } from '../card.engine';
 import { cardLibrary } from '../cards.library';
 
+/** Every card a player can learn: the library but the Curses (a card adds a Curse mid-combat). */
+const learnable = cardLibrary.filter(c => c.cardType !== 'curse');
+
 const buildPlayer = (knownCards: string[] = []) => createCharacter({
     name: 'Learner',
     level: 1,
@@ -21,9 +24,9 @@ const buildPlayer = (knownCards: string[] = []) => createCharacter({
 });
 
 describe('getAvailableCards', () => {
-    it('returns every library card the character does not already know', () => {
+    it('returns every library card the character does not already know, but the Curses', () => {
         const available = getAvailableCards(buildPlayer());
-        expect(available.length).toBe(cardLibrary.length);
+        expect(available.length).toBe(learnable.length);
         expect(available.length).toBeGreaterThan(0);
     });
 
@@ -34,7 +37,7 @@ describe('getAvailableCards', () => {
 
     it('preserves library order so the UI list is stable', () => {
         const available = getAvailableCards(buildPlayer()).map(s => s.id);
-        expect(available).toEqual(cardLibrary.map(s => s.id));
+        expect(available).toEqual(learnable.map(s => s.id));
     });
 });
 

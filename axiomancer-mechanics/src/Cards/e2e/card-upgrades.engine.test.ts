@@ -31,8 +31,10 @@ import {
 } from '../card-upgrades';
 import type { Card } from '../types';
 
-/** READ-ONLY view of the curated library (other agents own those modules). */
-const LIBRARY: readonly Card[] = cardLibrary;
+/** READ-ONLY view of the curated library (other agents own those modules).
+ *  Program cards are left out: their numbers live in program lines, which
+ *  the upgrade rule does not read (no player surface upgrades a card). */
+const LIBRARY: readonly Card[] = cardLibrary.filter(c => !c.program);
 
 /** Flatten every numeric leaf of a card to `path -> value`. */
 function numericLeaves(value: unknown, path = '', out = new Map<string, number>()): Map<string, number> {

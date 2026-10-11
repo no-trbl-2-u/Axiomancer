@@ -57,8 +57,8 @@ describe('Phase 104 — the grey office: card shape', () => {
         expect(getCardById('grey-word')!.cardType).toBe('spell');
     });
 
-    it('the grey office is the whole reward pool (D44, the card purge)', () => {
-        expect([...COMBAT_REWARD_POOL].sort()).toEqual(['grey-strike', 'grey-ward', 'grey-word']);
+    it('the grey office is in the reward pool (D44)', () => {
+        for (const id of ['grey-strike', 'grey-ward', 'grey-word']) expect(COMBAT_REWARD_POOL).toContain(id);
     });
 });
 

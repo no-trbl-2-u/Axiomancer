@@ -34,6 +34,12 @@ describe('profane canon — shape contract', () => {
 describe('profane canon — FREE/PAID anatomy', () => {
     it('every card carries an authored FREE rider with substance', () => {
         for (const card of cardLibrary) {
+            // A program card's FREE line is a program line (a Global's FREE
+            // line puts it in play for 3 turns).
+            if (card.program) {
+                expect(card.program.free ?? card.program.global, `${card.id} must author a FREE line`).toBeDefined();
+                continue;
+            }
             expect(card.free, `${card.id} must author a FREE line`).toBeDefined();
             const total = Object.values(card.free!).reduce<number>((n, v) => {
                 if (typeof v === 'number') return n + v;
@@ -52,7 +58,7 @@ describe('profane canon — id hygiene and provenance', () => {
             expect(card.id).toMatch(/^[a-z][a-z0-9-]*$/);
             expect([1, 2, 3]).toContain(card.tier);
             expect([1, 2, 3, 4, 5, 6]).toContain(card.rank);
-            expect(['attack', 'skill', 'spell']).toContain(card.cardType);
+            expect(['attack', 'skill', 'spell', 'global', 'curse']).toContain(card.cardType);
             expect(['self', 'enemy']).toContain(card.targetType);
             expect(['body', 'mind', 'heart', 'any']).toContain(card.color);
             // Provenance stamp: a well-formed ISO date.

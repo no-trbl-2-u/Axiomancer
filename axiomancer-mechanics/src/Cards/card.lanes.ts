@@ -6,8 +6,9 @@
  * lists: its lane-deck picker deals a lane's `testDeck`, and its reward-pool
  * grid narrows the post-combat offer to the checked lanes' `cardIds`.
  *
- * The grey office is the only lane. A new lane is registered here, in the
- * same guided session with T that adds its cards to the library.
+ * The grey office is the permanent lane. A trial set (plan/revamp/cards.md →
+ * "The trial set") carries its own lanes, and they join the registry through
+ * the set's one registration line in `cards.library.ts` (`TRIAL_SETS`).
  *
  * Everything here is data or a pure function over plain values.
  *
@@ -17,7 +18,9 @@
  *   laneRewardPool(laneIds)    the card ids of the named lanes, de-duplicated
  */
 
+import type { Card } from './types';
 import { GREY_OFFICE_CARDS } from './library/starters.cards';
+import { TRIAL_SETS } from './cards.library';
 
 /**
  * One card lane.
@@ -37,6 +40,17 @@ export interface CardLane {
 }
 
 /**
+ * A removable trial set: its cards (lane cards and any Curse they add) and
+ * its lanes. Deleting the set is deleting its file and its line in
+ * `TRIAL_SETS`.
+ */
+export interface TrialSet {
+    readonly id: string;
+    readonly cards: readonly Card[];
+    readonly lanes: readonly CardLane[];
+}
+
+/**
  * The grey office: three colourless cards. Its test deck is the fresh-run
  * deck, Blow 5 / Ward 3 / Word 2 (`STARTING_CARD_IDS` reads it from here).
  */
@@ -51,8 +65,12 @@ export const GREY_LANE: CardLane = Object.freeze({
     ]),
 });
 
-/** Every registered lane, in the order the dev menu lists them. */
-export const CARD_LANES: readonly CardLane[] = Object.freeze([GREY_LANE]);
+/** Every registered lane, in the order the dev menu lists them: the grey
+ *  office, then each registered trial set's lanes. */
+export const CARD_LANES: readonly CardLane[] = Object.freeze([
+    GREY_LANE,
+    ...TRIAL_SETS.flatMap(set => set.lanes),
+]);
 
 /**
  * Looks a lane up by id.
