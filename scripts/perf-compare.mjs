@@ -99,14 +99,34 @@ export function runnerChange(current, previous) {
 }
 
 /**
+ * Was this run measured on a different CPU than the one the budgets were
+ * seeded on? Timing budgets only hold on the seeding CPU: GitHub's runners
+ * vary by about 20% in speed, the same as the budget headroom, so a slower
+ * CPU breaches load budgets with no code change at all.
+ *
+ * @param {{ runner?: { cpu?: string } }} current this run.
+ * @param {{ runner?: string }} budgets the budgets, carrying the seeding CPU.
+ * @returns {string|null} `timing budgets skipped: seeded on <cpu>`, or null when they apply.
+ * @example budgetRunnerMismatch({ runner: { cpu: 'B' } }, { runner: 'A' }) // 'timing budgets skipped: seeded on A'
+ */
+export function budgetRunnerMismatch(current, budgets) {
+  const seeded = budgets?.runner
+  const cpu = current?.runner?.cpu
+  if (typeof seeded !== 'string' || !cpu || seeded === cpu) return null
+  return `timing budgets skipped: seeded on ${seeded}`
+}
+
+/**
  * Checks this run against the budgets and against the previous history line.
  * One finding per metric: a budget breach outranks drift on the same metric.
- * Only increases count; a metric getting better is never a finding.
+ * Only increases count; a metric getting better is never a finding. Bytes
+ * always compare; timing budgets apply only on the CPU they were seeded on,
+ * and timing drift only when the CPU matches the previous line.
  *
  * @param {object} args
  * @param {{ metrics: object, runner?: object }} args.current this run's summary.
  * @param {{ metrics: object, runner?: object, commit?: string } | null} args.previous the last history line.
- * @param {Record<string, number>} args.budgets budget per metric key.
+ * @param {Record<string, number> & { runner?: string }} args.budgets budget per metric key, plus the seeding CPU.
  * @param {Record<string, number>} [args.drift] drift fraction per kind; defaults to DRIFT.
  * @returns {{ metric: string, kind: string, type: 'budget breach'|'drift', value: number, limit: number, previous?: number }[]}
  * @example compare({ current: { metrics: { lcpMs: 900 } }, previous: null, budgets: { lcpMs: 800 } })
@@ -114,11 +134,12 @@ export function runnerChange(current, previous) {
  */
 export function compare({ current, previous, budgets, drift = DRIFT }) {
   const timingDriftOff = runnerChange(current, previous) !== null
+  const timingBudgetOff = budgetRunnerMismatch(current, budgets) !== null
   const findings = []
   for (const [metric, kind] of Object.entries(METRIC_KINDS)) {
     const value = metricValue(current.metrics, metric)
     if (value === undefined) continue
-    const budget = budgets?.[metric]
+    const budget = timingBudgetOff && kind !== 'bytes' ? undefined : budgets?.[metric]
     if (typeof budget === 'number' && value > budget) {
       findings.push({ metric, kind, type: 'budget breach', value, limit: budget })
       continue

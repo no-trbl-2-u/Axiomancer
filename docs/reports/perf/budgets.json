@@ -1,4 +1,5 @@
 {
+  "runner": "AMD EPYC 9V74 80-Core Processor",
   "bundleJsBytes": 3860480,
   "bundleJsGzipBytes": 1032192,
   "firstScreenMs": 303,

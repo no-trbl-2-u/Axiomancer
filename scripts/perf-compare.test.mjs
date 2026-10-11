@@ -9,6 +9,7 @@ import test from 'node:test'
 
 import {
   addIssueLine,
+  budgetRunnerMismatch,
   compare,
   fileFindings,
   median,
@@ -90,6 +91,20 @@ test('compare: a runner change skips timing drift but keeps bytes and budgets', 
   const current = line({ bundleJsBytes: 1_100_000, lcpMs: 5000, engineMsPerCombat: { all: 9 } }, 'cpu-b')
   const f = compare({ current, previous: line(), budgets: { engineMsPerCombat: undefined, firstScreenMs: 500 } })
   assert.deepEqual(metricsOf(f).sort(), ['bundleJsBytes:drift', 'firstScreenMs:budget breach'])
+})
+
+test('compare: timing budgets hold only on the CPU they were seeded on; bytes always do', () => {
+  const current = line({ bundleJsBytes: 2_000_000, firstScreenMs: 5000, engineMsPerCombat: { all: 9 } }, 'cpu-b')
+  const budgets = { runner: 'cpu-a', bundleJsBytes: 1_500_000, firstScreenMs: 500, 'engineMsPerCombat.all': 2 }
+  assert.deepEqual(metricsOf(compare({ current, previous: null, budgets })), ['bundleJsBytes:budget breach'])
+  const same = line({ firstScreenMs: 5000 }, 'cpu-a')
+  assert.deepEqual(metricsOf(compare({ current: same, previous: null, budgets })), ['firstScreenMs:budget breach'])
+})
+
+test('budgetRunnerMismatch: names the seeding CPU only when this run differs', () => {
+  assert.equal(budgetRunnerMismatch(line({}, 'cpu-b'), { runner: 'cpu-a' }), 'timing budgets skipped: seeded on cpu-a')
+  assert.equal(budgetRunnerMismatch(line({}, 'cpu-a'), { runner: 'cpu-a' }), null)
+  assert.equal(budgetRunnerMismatch(line({}, 'cpu-b'), { lcpMs: 1 }), null)
 })
 
 test('compare: slowFramePct needs +25% and at least 2 points', () => {

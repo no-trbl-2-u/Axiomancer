@@ -96,7 +96,14 @@ Not applicable (adds tooling, removes nothing).
    use: current > previous × 1.25 **and** current − previous ≥ 2 points.
 6. **Runner change.** When `runner.cpu` differs from the previous line,
    skip drift for load, runtime and engine (bytes still compare) and note
-   `runner changed: <old> → <new>` in the history line. Budgets still apply.
+   `runner changed: <old> → <new>` in the history line. Byte budgets always
+   apply. Timing budgets apply only on the CPU they were seeded on
+   (`budgets.json` → `runner`, written by `--seed-budgets`); on any other
+   CPU they are skipped and the history line notes `timing budgets skipped:
+   seeded on <cpu>`. Amended 2026-10-11 (loop-call, `plan/AUDIT.md`): the
+   first weekly run landed on an Intel runner about 20% slower than the AMD
+   seed runner, the same as the budget headroom. It filed three load
+   breaches that the AMD runner did not reproduce at the same code.
 7. **Finding shape.** One `[perf]` row per breached metric, inserted at the
    top of `plan/AUDIT.md`'s `## Pending` section, matching the existing
    row shape:

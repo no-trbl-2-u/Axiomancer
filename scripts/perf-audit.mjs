@@ -22,7 +22,7 @@ import { cpus, tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { addIssueLine, compare, fileFindings, runnerChange, seedBudgets, summarize } from './perf-compare.mjs'
+import { addIssueLine, budgetRunnerMismatch, compare, fileFindings, runnerChange, seedBudgets, summarize } from './perf-compare.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const REPORT_DIR = join(ROOT, 'docs/reports/perf')
@@ -118,10 +118,10 @@ function main() {
   const runner = { cpu: cpus()[0]?.model?.trim() ?? 'unknown', cores: cpus().length }
   const current = { date, commit, runner, metrics }
   const previous = lastHistoryLine()
-  const changed = runnerChange(current, previous)
-  if (changed) current.note = changed
+  const budgets = SEED ? { runner: runner.cpu, ...seedBudgets(metrics) } : JSON.parse(readOr(BUDGETS, '{}'))
+  const notes = [runnerChange(current, previous), budgetRunnerMismatch(current, budgets)].filter(Boolean)
+  if (notes.length) current.note = notes.join('; ')
 
-  const budgets = SEED ? seedBudgets(metrics) : JSON.parse(readOr(BUDGETS, '{}'))
   const findings = compare({ current, previous, budgets })
   const ctx = { commit, previousCommit: previous?.commit }
   let { text: audit, added, evidenced } = fileFindings(readOr(AUDIT, ''), findings, date, ctx)
