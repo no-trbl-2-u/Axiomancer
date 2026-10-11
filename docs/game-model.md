@@ -15,24 +15,52 @@ the Expo app (`axiomancer-mobile`) presents it.
 
 ## Cards
 
-- **The library is three grey cards** (`GREY_OFFICE_CARDS`,
-  `Cards/library/starters.cards.ts`): A Plain Blow (attack, DEAL), A Plain
-  Ward (skill, GUARD), A Plain Word (spell, VULNERABLE). All are colour
-  `any`, rank 1 (Ash), tier 1.
-- **Card types** are Attack, Skill and Spell (`CardType`). The engine never
-  branches on type; it is display only.
-- **Every card has two lines.** The FREE line (`Card.free`) plays with no
-  die. The PAID line (`specialMechanics` and `combatEffects`) costs exactly
-  one die. Blow: FREE 2 damage, PAID deal 5. Ward: FREE guard 2, PAID guard
-  5. Word: FREE VULNERABLE 10% for 1 turn, PAID VULNERABLE 25% for 2 turns.
-- **Card mechanics** are DEAL and GUARD (`CardSpecialMechanic`). The player's
-  keywords are DEAL, GUARD and VULNERABLE.
+- **The library is three grey cards and the Blood Price trial set.** The
+  grey office (`GREY_OFFICE_CARDS`, `Cards/library/starters.cards.ts`): A
+  Plain Blow (attack, DEAL), A Plain Ward (skill, GUARD), A Plain Word
+  (spell, VULNERABLE), all colour `any`, rank 1 (Ash), tier 1. The trial
+  set (`BLOOD_PRICE_SET`, `Cards/library/blood-price.cards.ts`, D80): 30
+  cards T kept from the Blood Price ballot (11 body, 9 mind, 10 heart, all
+  rank 1) and the grey Curse their E-01 card adds, with the ballot's printed
+  numbers. It joins the library through one `TRIAL_SETS` line in
+  `Cards/cards.library.ts` and comes out by deleting that line and the file
+  (D75); saves drop removed card ids on load (`dropUnknownCardIds`).
+- **Card types** (`CardType`) are lifecycle rules. Attack, Skill and Spell
+  play FREE or PAID, then discard. A **Global** stays in play and fires on
+  its trigger (⟳ start of your turn, 🩸 when you SACRIFICE n, 📜 when you
+  play a Curse): FREE for `GLOBAL_FREE_TURNS` = 3 turn starts, PAID for the
+  rest of combat, one copy of each in play. A **Curse** holds a hand slot
+  until played and cannot be scrapped.
+- **Every card has two lines.** The FREE line plays with no die; the PAID
+  line costs exactly one die. A grey card's lines are data: `Card.free`, and
+  `specialMechanics` and `combatEffects`. Blow: FREE 2 damage, PAID deal 5.
+  Ward: FREE guard 2, PAID guard 5. Word: FREE VULNERABLE 10% for 1 turn,
+  PAID VULNERABLE 25% for 2 turns. A trial card's lines are a **program**
+  (`Card.program`, `Cards/card-program.types.ts`) that
+  `Combat/combat.card-program.ts` runs for the live board and the sim
+  alike: lines can read VITAE ("at half VITAE or less"), pay costs and move
+  Curses. A line whose condition fails or whose SACRIFICE it cannot pay
+  cannot be played, and the game says why (`programLineBlock`).
+- **Card mechanics** are DEAL and GUARD (`CardSpecialMechanic`) for the grey
+  cards. The player's keywords are DEAL, GUARD, VULNERABLE and the trial
+  set's six: **SACRIFICE** n (lose n VITAE, unscaled, a cost that never
+  takes you below 1; one that fires n times counts as n), **WAIVE** (your
+  next SACRIFICE this turn costs nothing but still counts), **EXILE** (the
+  card leaves combat instead of going to discard), **HEAL** n (mind-scaled,
+  capped at maximum VITAE; "heal the damage dealt" heals what landed,
+  unscaled), **TETHER** n (for n turns each SACRIFICE x makes the foe take
+  DEAL x, unscaled, VULNERABLE applies) and **LEECH** n (heart-scaled when
+  applied and adding up: at the start of the foe's turn it loses n VITAE,
+  you heal what it lost, then n drops by 1). "The foe loses n" is plain
+  VITAE loss, not a DEAL.
 - **The starting deck is ten cards:** Blow ×5, Ward ×3, Word ×2
   (`STARTING_CARD_IDS`, `Combat/combat.rewards.ts`). The deck never drops
   below `MIN_COMBAT_DECK_SIZE` = 10.
 - **Rewards:** a won fight offers 3 cards (`COMBAT_REWARD_OFFER_COUNT`,
-  mobile) drawn uniformly from the whole library (`COMBAT_REWARD_POOL`). A
-  cache offers one.
+  mobile) drawn uniformly from the whole library but the Curses
+  (`COMBAT_REWARD_POOL`). A cache offers one. The dev menu's REWARD POOL
+  can narrow the draft to card lanes (`CARD_LANES`: the grey office and
+  Blood Price); there is no lane relic yet.
 
 ## Dice
 
@@ -61,11 +89,17 @@ the Expo app (`axiomancer-mobile`) presents it.
 
 - **The hand** is `COMBAT_HAND_SIZE` = 5. Unplayed cards stay; the hand
   refills to 5 each phase. The discard reshuffles when the draw pile empties.
+  EXILED cards and Globals in play are out of the cycle.
 - **Scrap:** discarding a card pays +1 Conviction, for the first
-  `SCRAP_CONVICTION_CAP_PER_TURN` = 2 each turn.
+  `SCRAP_CONVICTION_CAP_PER_TURN` = 2 each turn. A Curse cannot be scrapped.
 - **Conviction** is capped at `CONVICTION_CAP` = 12. It is spent only on the
   signature, The Open Hand (`SIGNATURE_COST` = 4, `Combat/combat.signature.ts`).
 - **GUARD** resets to 0 after each threat phase.
+- **The program ledger** (`CombatEncounterState.program`) exists only when
+  the deck holds a trial card: Globals in play with their turns left,
+  EXILED cards, the turn's WAIVE and doubling, TETHER and LEECH on the foe,
+  a death ward and a delayed HEAL. The board lists the Globals and shows
+  LEECH and TETHER on the foe.
 - **The enemy** plays an ordered deck, one card per threat phase, the last
   card repeating (`ENEMY_DECKS`, `Combat/combat.enemy-decks.ts`). Tier 2 and
   3 cards unlock at rounds `TIER2_DEFAULT_ROUND` = 3 and 6. The telegraph
@@ -156,7 +190,7 @@ without a ruling from T.
 - No stances, no hidden read, no rock-paper-scissors check.
 - No preset decks and no deck draft. Every run starts with the grey deck.
 - No card pricing or power budget. The only prices are the cut and the
-  Anvil.
+  Anvil. The trial cards keep their printed numbers, untuned.
 - No themes, synergy or reward steering.
 - No enemy keywords, afflictions, summons or riders.
 - No alternate wins beyond befriend: no RELENT, no CONDEMN, no capitulation.
@@ -171,6 +205,6 @@ without a ruling from T.
 ## Where this comes from
 
 The revamp ([`plan/revamp/README.md`](../plan/revamp/README.md)) and its
-decisions (`plan/2026-09-25-refactor-strategy.decisions.md`, D46-D79).
+decisions (`plan/2026-09-25-refactor-strategy.decisions.md`, D46-D80).
 Where this page and the code disagree, the code is right and this page is
 a bug.

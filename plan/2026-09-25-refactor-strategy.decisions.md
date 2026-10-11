@@ -819,6 +819,46 @@ supposed to be removed during the revamp.")
   card line that printed the bonus. The lexicon registry retires the term
   (`colour-match-bonus`) so live docs cannot bring it back.
 
+**D80 — Blood Price is the live trial set: 30 cards, six keywords, printed
+numbers.** (T, attended, 2026-10-10 and 2026-10-11; Phase BT.)
+
+- **The cards (T, 2026-10-11).** Kept from the rehearsal ballot: P-01a
+  P-02a P-03a P-04c P-05b P-06d P-07b P-08d P-09b P-10c · E-01a E-02d E-03d
+  E-04c E-05c E-06b E-07b E-08b E-09c E-10d · M-01d M-02b M-03d M-04c M-05b
+  M-06c M-07a M-08d M-09a M-10a (11 red, 9 blue, 10 purple), plus the grey
+  Curse the E-01 cards add. All eight purple "d" drafts added on 2026-10-10
+  are among them; every other proposal is cut. Colour is the
+  card's aspect: body red, mind blue, heart purple.
+- **The test deck (T, 2026-10-11):** E-09c P-03a M-04c M-02b E-06b P-02a
+  E-04c E-05c M-09a M-06c P-05b M-07a E-03d M-01d M-08d E-08b M-05b E-07b
+  M-10a P-10c. It is the Blood Price lane's `testDeck`; the lane's cards
+  are the 30.
+- **The keywords:** SACRIFICE, WAIVE, EXILE, HEAL, TETHER and LEECH, with
+  the Global and Curse card types (D69–D71), all live with carriers (D45).
+- **Rulings (T, 2026-10-10).** "The foe loses n" is a plain, unscaled VITAE
+  loss, not a DEAL (VULNERABLE does not apply). HEAL is a card keyword,
+  mind-scaled and capped at max VITAE; "heal the damage dealt" heals the
+  amount actually dealt, unscaled. A SACRIFICE that fires n times counts as
+  n. WAIVE: your next SACRIFICE this turn costs no VITAE but still counts.
+  "Play a Curse at no VITAE cost" is a WAIVED SACRIFICE. E-08c's PAID line
+  played the Curse's PAID line (EXILED), waived; the kept E-05c PAID line
+  plays a Curse the same way. TETHER n: for n turns, each SACRIFICE x makes
+  the foe take DEAL x (x unscaled; VULNERABLE multiplies). LEECH n: at the
+  start of the foe's turn the foe loses n VITAE, you HEAL the amount lost,
+  then n drops by 1; n is heart-scaled when applied and a second LEECH
+  adds. The Color Law stands with no colour-match bonus (D79).
+- **Numbers:** the ballot's printed (pass-0) numbers. No tuning.
+- **Removable (D75):** one library file (`Cards/library/blood-price.cards.ts`),
+  one `TRIAL_SETS` line in `cards.library.ts`, no other code naming a
+  trial id (a test greps for it), saves drop removed ids on load, and a test
+  runs the game with the set emptied. The engine pieces (card programs:
+  Global, Curse, SACRIFICE, WAIVE, EXILE, HEAL, TETHER, LEECH) are general
+  systems that stay.
+
+*Not in BT:* the lane relic naming the family and the 2-random + 1-lane
+combat reward (D71). The post-fight draft still draws uniformly from the
+whole library (Curses excluded), narrowed only by the dev REWARD POOL.
+
 ## Open follow-ups
 
 **D1 status at a glance (2026-09-28, after #408).** Card and keyword

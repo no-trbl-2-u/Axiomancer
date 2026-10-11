@@ -61,9 +61,12 @@ survivors, chosen by T.
 
 ## Where things stand
 
-- Library: the grey office only — A Plain Blow (DEAL), A Plain Ward (GUARD),
-  A Plain Word (VULNERABLE) — `Cards/library/starters.cards.ts`. Fresh deck
-  Blow 5 / Ward 3 / Word 2 (D43). The grey cards are the reward pool (D44).
+- Library: the grey office — A Plain Blow (DEAL), A Plain Ward (GUARD),
+  A Plain Word (VULNERABLE) — `Cards/library/starters.cards.ts`, plus the
+  Blood Price trial set (30 cards and the grey Curse,
+  `Cards/library/blood-price.cards.ts`, live since Phase BT, D80). Fresh
+  deck Blow 5 / Ward 3 / Word 2 (D43). The reward pool is the whole library
+  but the Curses (D44).
 - THE CARD HOLD (D37): no card or keyword is created outside a guided
   session with T.
 - Card types: purged to **Attack / Skill / Spell** (D51, shipped in R7).

@@ -1,22 +1,18 @@
-# REHEARSAL — Card ledger, Blood Price (paper rehearsal, not a live card set)
+# Card ledger, Blood Price (the live trial set)
 
-> [!WARNING]
-> **REHEARSAL ONLY.** This file records a *practice run* of the Plan B card
-> process. No card here is approved for the library, and no agent or loop
-> verb may build, wire or cite these cards as live content. Real card
-> sessions (B6) start after RC and B5. They may reuse these drafts only
-> through a fresh ballot.
->
-> **Amended (D75, 2026-10-02):** after RC, this ballot's survivors are
-> wired in as a removable **trial set** (`plan/revamp/cards.md` → "The
-> trial set"). Until T records the verdicts and RC is cut, the warning
-> above stands.
+> [!NOTE]
+> **These 30 cards are the live trial set.** T recorded the verdicts on
+> 2026-10-11 (below) and Phase BT wired the kept cards in as a removable
+> trial set (D75, D80; `plan/revamp/cards.md` → "The trial set"):
+> `axiomancer-mechanics/src/Cards/library/blood-price.cards.ts`, registered
+> by one `TRIAL_SETS` line in `cards.library.ts`, with the Blood Price lane
+> and T's test deck. The cards are live content; this ledger is their
+> record. The rest of the ballot stays cut, and any change to a card goes
+> through a session with T (THE CARD HOLD, D37).
 
-> A paper rehearsal of Plan B (D73), run 2026-09-30 in an attended session
-> with T. **Nothing here is wired:** no card, keyword or type exists in
-> code because of this file. THE CARD HOLD (D37), the B4 gate and RC's
-> no-content rule all still hold. The rehearsal tests the process; it
-> does not ship cards.
+> Run as a paper rehearsal of Plan B (D73) on 2026-09-30 in an attended
+> session with T. The ballot, its sandbox sims (branch
+> `sandbox/blood-price-sims`) and T's verdicts led to the trial set.
 
 ## Session 0 — rulings (T, 2026-09-30)
 
@@ -89,12 +85,43 @@ Related utility that is neither payoff nor engine.
 - **Format change from T:** on 2026-09-30 T replaced the one-question-per-slot
   ballot with this sheet: a card image per candidate, a checkbox, and a
   Generate button that produces the verdict text.
-- **Verdicts:** pending. T's generated sheet will be recorded here, with
-  the kept, merged and cut cards and their reasons.
+- **Purple drafts (2026-10-10):** eight heart proposals, option "d" in eight
+  blue-only slots (P-06d, P-08d, E-02d, E-03d, E-10d, M-01d, M-03d, M-08d),
+  built from TETHER, LEECH, VULNERABLE and the existing keywords, so a deck
+  can reach 10 red / 10 blue / 10 purple. Added to the ballot for T.
+- **Rulings (T, 2026-10-10):** "the foe loses n" is unscaled and not a DEAL;
+  HEAL is a mind-scaled keyword capped at max VITAE, and "heal the damage
+  dealt" heals the actual amount; a SACRIFICE triggered n times counts as
+  n; WAIVE (next SACRIFICE this turn costs no VITAE, still counts); playing
+  a Curse at no VITAE cost is a WAIVED SACRIFICE; TETHER and LEECH as in
+  D80. Printed numbers stand (no tuning).
+
+## Verdicts (T, 2026-10-11)
+
+**Kept: 30 cards, one per slot** (11 red / 9 blue / 10 purple), plus the
+grey Curse the E-01 cards add:
+
+| Sub-lane | Kept |
+|---|---|
+| Payoff | P-01a, P-02a, P-03a, P-04c, P-05b, P-06d, P-07b, P-08d, P-09b, P-10c |
+| Engine | E-01a, E-02d, E-03d, E-04c, E-05c, E-06b, E-07b, E-08b, E-09c, E-10d |
+| Misc | M-01d, M-02b, M-03d, M-04c, M-05b, M-06c, M-07a, M-08d, M-09a, M-10a |
+
+All eight purple "d" drafts are kept. **Cut:** every other option, 68 in
+all (the 90 ballot proposals and 8 drafts, less the 30 kept). No merges.
+
+**Test deck (20 cards, T):** E-09c, P-03a, M-04c, M-02b, E-06b, P-02a,
+E-04c, E-05c, M-09a, M-06c, P-05b, M-07a, E-03d, M-01d, M-08d, E-08b,
+M-05b, E-07b, M-10a, P-10c. It is the lane's test deck in the dev menu
+(`/dev` → CARDS → TEST LANE DECK → Blood Price).
+
+Card ids are `bp-<slot><option>` in lower case (`bp-p-01a`); the Curse is
+`bp-curse`. Names are the placeholder "Blood Price P-01a" until T names
+the cards.
 
 ## Outtakes
 
-None yet.
+The 68 cut proposals (`rehearsal-blood-price.ballot.html`).
 
 ## Revisions
 
