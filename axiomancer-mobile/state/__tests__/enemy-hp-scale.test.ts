@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import type { Enemy } from '@mechanics';
+import { LIVE_ENCOUNTER_ENEMY_HP_MULTIPLIER, type Enemy } from '@mechanics';
 
 import { ENCOUNTER_ENEMY_HP_MULTIPLIER, withScaledEnemyHp } from '@/state/actions';
 
@@ -10,6 +10,10 @@ function fakeEnemy(health: number, maxHealth: number): Enemy {
 describe('withScaledEnemyHp — testing HP knob for live encounters', () => {
     it('the shipped knob doubles enemy HP', () => {
         expect(ENCOUNTER_ENEMY_HP_MULTIPLIER).toBe(2);
+    });
+
+    it('is the engine constant the pacing sim applies, so sim and live fights agree', () => {
+        expect(ENCOUNTER_ENEMY_HP_MULTIPLIER).toBe(LIVE_ENCOUNTER_ENEMY_HP_MULTIPLIER);
     });
 
     it('scales both health and maxHealth together so ratios are preserved', () => {

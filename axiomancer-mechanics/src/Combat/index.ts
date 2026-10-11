@@ -70,6 +70,8 @@ export {
     isProgramCard, isCurseCard, GLOBAL_FREE_TURNS,
 } from './combat.card-program';
 export type { ProgramLedger, GlobalInPlay } from './combat.card-program';
+// The live-encounter VITAE knob the app applies (and the pacing sim reads).
+export { LIVE_ENCOUNTER_ENEMY_HP_MULTIPLIER } from './live-encounter';
 // Stat scaling: the formula, the keyword families, and the
 // display-only stat-scaled card the hand prints.
 export {

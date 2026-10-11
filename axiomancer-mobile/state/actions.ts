@@ -20,6 +20,7 @@ import {
     completeNode as worldCompleteNode,
     consumableLibrary,
     relicLibrary,
+    LIVE_ENCOUNTER_ENEMY_HP_MULTIPLIER,
     createMapState,
     equipItem as engineEquipItem,
     unequipItem as engineUnequipItem,
@@ -577,9 +578,11 @@ function ensureStarterCards(store: AppStore): void {
  * only at the mobile `beginHazardEncounter` chokepoint (below), NOT in the
  * engine's `createEnemy` — the hermetic engine tests assert exact authored
  * `maxHealth` values (e.g. every survivor's `maxHealth` in `enemy.library.ts`) and must stay untouched.
- * Set to 1 to restore stock HP.
+ * The value is the engine's `LIVE_ENCOUNTER_ENEMY_HP_MULTIPLIER`, which the
+ * engine's pacing sim also applies, so sim turn counts match live fights.
+ * Set it to 1 there to restore stock HP.
  */
-export const ENCOUNTER_ENEMY_HP_MULTIPLIER = 2;
+export const ENCOUNTER_ENEMY_HP_MULTIPLIER = LIVE_ENCOUNTER_ENEMY_HP_MULTIPLIER;
 
 /**
  * Returns a copy of `enemy` with `health` and `maxHealth` scaled by `mult`

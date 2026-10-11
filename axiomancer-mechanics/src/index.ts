@@ -87,6 +87,7 @@ export {
     // Card programs (Global, Curse, SACRIFICE): the reads the board needs
     programLineBlock, programXChoice, isProgramCard, isCurseCard, GLOBAL_FREE_TURNS,
     programFaceText, GLOBAL_TRIGGER_TEXT,
+    LIVE_ENCOUNTER_ENEMY_HP_MULTIPLIER,
     // Card rewards and the starting deck
     COMBAT_REWARD_POOL, STARTING_CARD_IDS, rollCombatCardRewards, rewardPoolFor, addRewardCard,
     unlockCardViaDilemma,
