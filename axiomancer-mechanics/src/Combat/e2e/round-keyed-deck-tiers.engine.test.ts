@@ -165,7 +165,7 @@ describe('round-keyed deck tiers — an authored tiered deck opens its tiers by 
             const plan = planDeckTiers(id)!;
             expect(plan.authored).toBe(true);
             expect(plan.tierRounds[1]).toBe(1);
-            expect(plan.tierRounds[2]).toBe(TIER2_DEFAULT_ROUND);
+            expect(plan.tierRounds[2]).toBeGreaterThan(1);
             expect(plan.tierRounds[3]).toBeGreaterThanOrEqual(plan.tierRounds[2]);
             compileEnemyDeck(id).forEach((step, i) => {
                 const tier = plan.tiers[i];
@@ -175,21 +175,23 @@ describe('round-keyed deck tiers — an authored tiered deck opens its tiers by 
         }
     });
 
-    it('the Doorwarden shows only tier 1 in round 1, tier 2 at round 3, tier 3 at round 6', () => {
+    // The Doorwarden authors later gates than the defaults (4 and 7): its
+    // fight runs about seven turns, so its finale opens on round 7.
+    it('the Doorwarden shows only tier 1 until round 4, tier 2 at round 4, tier 3 at round 7', () => {
         const plan = planDeckTiers('enemy-the-doorwarden')!;
         expect(plan.tiers).toEqual([1, 1, 2, 2, 3, 3, 3]);
-        expect(plan.tierRounds[2]).toBe(TIER2_DEFAULT_ROUND);
-        expect(plan.tierRounds[3]).toBe(TIER3_DEFAULT_ROUND);
+        expect(plan.tierRounds[2]).toBe(4);
+        expect(plan.tierRounds[3]).toBe(7);
 
         const walk = pointerByRound(enemyById('enemy-the-doorwarden'), 9);
         const tierAtRound = walk.map(i => plan.tiers[i]);
         // Round 1 is tier 1 and nothing else…
         expect(tierAtRound[0]).toBe(1);
-        // …tier 2 is unreachable before round 3, tier 3 before round 6…
+        // …tier 2 is unreachable before round 4, tier 3 before round 7…
         const firstTier2 = tierAtRound.indexOf(2) + 1;
         const firstTier3 = tierAtRound.indexOf(3) + 1;
-        expect(firstTier2).toBe(TIER2_DEFAULT_ROUND);
-        expect(firstTier3).toBe(TIER3_DEFAULT_ROUND);
+        expect(firstTier2).toBe(4);
+        expect(firstTier3).toBe(7);
         // …and the fight does actually get there.
         expect(tierAtRound[8]).toBe(3);
     });

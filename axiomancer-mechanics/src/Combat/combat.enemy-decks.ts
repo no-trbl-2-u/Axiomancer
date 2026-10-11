@@ -102,6 +102,10 @@ export const ENEMY_DECKS: Record<string, EnemyDeckSpec> = {
         tier1: ['litany-of-thresholds', 'the-door-kept-open'],
         tier2: ['the-bronze-frame', 'ap-the-margin-note'],
         tier3: ['what-shuts-stays-shut', 'ap-the-proof-completed', 'ap-the-question-that-eats'],
+        // Later gates than the default 3/6: the boss fight runs about seven
+        // turns, so its pattern opens on round 4 and its finale on round 7.
+        tier2AtRound: 4,
+        tier3AtRound: 7,
     },
 };
 

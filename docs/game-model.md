@@ -157,10 +157,12 @@ keyword (`EnemyKeyword = never`).
   in every region.
 - **Brine Hag:** level 7, elite, 120 VITAE. Placed on certain nodes. The
   only foe that can be befriended.
-- **The Doorwarden:** boss, 220 VITAE at level 8, two stages (at 60% and
+- **The Doorwarden:** boss, 320 VITAE at level 8, two stages (at 60% and
   25% VITAE). It holds every region's door, pinned at level 1, 2, 3 and 4
   (`World/MapEvents/content.ts`); `scaleEnemyToLevel` scales its VITAE to
-  the pin.
+  the pin. Its deck opens tier 2 on round 4 and tier 3 on round 7 (the
+  default gates are 3 and 6) and its card weights sit at 0.8-1.15, so its
+  damage steps up at rounds 7-8 and the fight runs about seven turns.
 
 ## Befriend and mercy
 

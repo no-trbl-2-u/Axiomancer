@@ -10,11 +10,17 @@
  * `--cap=N` adds a human-like row capped at N cards a turn (a calibration
  * for a player who reads the hand slowly).
  *
- * The Doorwarden fights at its Act 1 door level for the player's level (L1
- * vs door 1, L3 vs door 3, L5 vs door 4), scaled with `scaleEnemyToLevel`
- * and its VITAE overridden to `enemyVitae(level, 'boss')` (its library row
- * fixes 220), as the Blood Price sandbox did. The player is the sim Player
- * at the level, stats spent evenly, wearing the starting relic.
+ * Each foe is built the way live play builds it (`resolveEncounter`): the
+ * library row scaled with `scaleEnemyToLevel` to its Act 1 map pin, then
+ * the live VITAE multiplier. Pins per player level (the region the player
+ * reaches at that level, `World/MapEvents/content.ts`):
+ *
+ *   player L1 → the Breakwater:     Float-Eye 2, Brine Hag 3, Doorwarden 1
+ *   player L3 → the Beacon Crags:   Float-Eye 3, Brine Hag 3, Doorwarden 3
+ *   player L5 → the Lantern Deep:   Float-Eye 4, Brine Hag 3, Doorwarden 4
+ *
+ * The player is the sim Player at the level, stats spent evenly, wearing the
+ * starting relic.
  */
 
 import { Player } from '../Character/characters.mock';
@@ -22,14 +28,18 @@ import type { Character } from '../Character/types';
 import { calculateMaxHealth, deepClone } from '../Utils';
 import { stageStats } from '../Game/act1-progression';
 import { FloatEye, BrineHag, TheDoorwarden } from '../Enemy/enemy.library';
-import { enemyVitae } from '../Enemy';
 import { scaleEnemyToLevel } from '../World/encounter';
 import type { Enemy } from '../Enemy/types';
 import { getCardLane } from '../Cards/card.lanes';
 import { simulatePacing, LIVE_ENCOUNTER_ENEMY_HP_MULTIPLIER, type PacingPolicy } from '../Combat/combat.pacing.sim';
 
 const LEVELS = [1, 3, 5] as const;
-const DOOR_LEVEL: Record<number, number> = { 1: 1, 3: 3, 5: 4 };
+/** Act 1 map pin per foe per player level (see the header). */
+const FOE_PIN: Record<string, Record<number, number>> = {
+    [FloatEye.id]: { 1: 2, 3: 3, 5: 4 },
+    [BrineHag.id]: { 1: 3, 3: 3, 5: 3 },
+    [TheDoorwarden.id]: { 1: 1, 3: 3, 5: 4 },
+};
 const POLICIES: { policy: PacingPolicy; cap?: number }[] = [{ policy: 'witness' }, { policy: 'human-like' }];
 
 function arg(name: string, fallback: string): string {
@@ -49,12 +59,10 @@ function playerAt(level: number, deck: readonly string[]): Character {
     return p;
 }
 
-function foeFor(base: Enemy, playerLevel: number): Enemy {
-    if (base.id !== TheDoorwarden.id) return deepClone(base);
-    const level = DOOR_LEVEL[playerLevel] ?? playerLevel;
-    const e = scaleEnemyToLevel(base, level);
-    const vitae = enemyVitae(level, base.difficulty);
-    return { ...e, maxHealth: vitae, health: vitae };
+/** The foe as live play builds it at its map pin for this player level. */
+export function foeFor(base: Enemy, playerLevel: number): Enemy {
+    const pin = FOE_PIN[base.id]?.[playerLevel] ?? base.level;
+    return deepClone(scaleEnemyToLevel(base, pin));
 }
 
 function main(): void {
@@ -97,4 +105,4 @@ function main(): void {
     console.table(rows);
 }
 
-main();
+if (require.main === module) main();

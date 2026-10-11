@@ -169,12 +169,12 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     });
 
     // A narrow fidelity pin on `greedy`'s decision sequence, not a balance
-    // gate: the grey MIX at 5/5/5 loses this line in four rounds (plays 20,
-    // statusPlays 3) — the grey office is the deck you outgrow.
+    // gate: the grey MIX at 5/5/5 loses this line in five rounds (plays 25,
+    // statusPlays 5) — the grey office is the deck you outgrow.
     it('seed 11 vs TheDoorwarden: the pinned sequence (Gate 0 law: one tray per phase)', () => {
         const r = runOneEncounter(loadout(MIX), TheDoorwarden, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'defeat', rounds: 4, plays: 20, statusPlays: 3 });
+            .toEqual({ outcome: 'defeat', rounds: 5, plays: 25, statusPlays: 5 });
         // Determinism, not balance: the same seed must reproduce the same
         // sequence byte-for-byte. (The exact figures above are a fidelity
         // measurement of the CURRENT library + engine and are expected to be

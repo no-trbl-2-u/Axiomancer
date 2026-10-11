@@ -914,6 +914,26 @@ satisfied for exactly these.)
   Doorwarden needs a ruling on the foe side (its escalation or VITAE), not
   card numbers.
 
+**D82 — The Doorwarden's slower ramp: a ~7-turn boss fight.** (T, attended, 2026-10-11.)
+
+- Fight-length targets at T's pace (4+ cards a turn): Float-Eye about 3
+  turns, Brine Hag about 5, the Doorwarden about 7. Card numbers could not
+  reach 7 against the Doorwarden: its ramp (the boss escalation clock at x2
+  from round 4, tier 3 from round 6) ended fights by turn 5-6.
+- T chose to slow its ramp and raise its VITAE to match. Applied (only the
+  Doorwarden changes): `vitae` 220 -> 320; its deck's `tier2AtRound` 4 and
+  `tier3AtRound` 7; damage weights Litany of Thresholds 1.3 -> 1.1, The
+  Door You Kept Open 1.35 -> 0.95, The Bronze Frame 1.45 -> 0.9, The
+  Margin Note 1.15 -> 0.8, What Shuts 1.6 -> 1.05, The Proof 1.6 -> 1.15,
+  The Question 1.4 -> 0.95. Tier 3 still out-hits tier 1.
+- Measured with the Blood Price test deck at live VITAE (200 runs, bot and
+  human-like drivers, player L1/3/5 vs door 1/3/4): 6.5 / 7.5 / 7.6 turns,
+  wins 66-89%. The grey starter deck still never beats it.
+- The lane pacing CLI now builds every foe the way live play does (map
+  pin via `scaleEnemyToLevel`, then the live x2), and a test pins it to
+  `resolveEncounter`. At live pins Float-Eye runs about 3.6 turns and Brine
+  Hag about 4-4.5 (mostly spared); neither was retuned.
+
 ## Open follow-ups
 
 **D1 status at a glance (2026-09-28, after #408).** Card and keyword

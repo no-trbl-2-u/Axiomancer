@@ -19,7 +19,10 @@
  *
  *   common 0.8-1.0 · escalation 1.0-1.3 · signature 1.3-1.6
  *
- * and a deck's later cards carry the heavier weights. `actionText` never
+ * and a deck's later cards carry the heavier weights. The Doorwarden's
+ * seven cards sit below these bands (0.8-1.15): its fight is paced by its
+ * late tier gates (`tier2AtRound` 4, `tier3AtRound` 7) and its VITAE, so
+ * its damage steps up at rounds 7-8 instead of peaking at rounds 4-5. `actionText` never
  * hardcodes the damage number (it is level-dependent and appended by
  * `buildThreatAction`).
  */
@@ -118,14 +121,14 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         name: 'Litany of Thresholds',
         archetype: 'the-aporia',
         grade: 'signature',
-        damageWeight: 1.3,
+        damageWeight: 1.1,
         actionText: 'The Doorwarden lays a threshold under your feet; it declines to be crossed, and takes the four steps you had left',
     },
     'the-door-kept-open': {
         name: 'The Door You Kept Open',
         archetype: 'the-aporia',
         grade: 'signature',
-        damageWeight: 1.35,
+        damageWeight: 0.95,
         stake: true,
         actionText: 'He closes a door you were keeping open in your head, and the four rooms behind it go dark with you inside',
     },
@@ -133,14 +136,14 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         name: 'The Bronze Frame, Swung',
         archetype: 'the-aporia',
         grade: 'signature',
-        damageWeight: 1.45,
+        damageWeight: 0.9,
         actionText: 'The bronze frame swings through you like a door through a draught and marks four hinges of you',
     },
     'what-shuts-stays-shut': {
         name: 'What Shuts, Stays Shut',
         archetype: 'the-aporia',
         grade: 'signature',
-        damageWeight: 1.6,
+        damageWeight: 1.05,
         actionText: 'Every door he remembers shuts at once and you are the room — six bolts, all of them yours',
     },
     'dp-vespers-under-water': {
@@ -154,21 +157,21 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         name: 'The Proof, Completed',
         archetype: 'the-aporia',
         grade: 'signature',
-        damageWeight: 1.6,
+        damageWeight: 1.15,
         actionText: 'It completes the proof it began when you walked in; the conclusion is six lines long and every line is about you',
     },
     'ap-the-question-that-eats': {
         name: 'The Question That Eats',
         archetype: 'the-aporia',
         grade: 'signature',
-        damageWeight: 1.4,
+        damageWeight: 0.95,
         actionText: 'It asks the one question you have walked around your whole life, and five parts of the answer begin to rot',
     },
     'ap-the-margin-note': {
         name: 'The Margin Note',
         archetype: 'the-aporia',
         grade: 'escalation',
-        damageWeight: 1.15,
+        damageWeight: 0.8,
         actionText: 'It writes four words in the margin of you and files the page among the cards in your hand',
     },
 };
