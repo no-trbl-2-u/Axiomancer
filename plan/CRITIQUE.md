@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-11 at commit cb1f6e41
-> Pass count: 77
+> Last pass: 2026-10-11 at commit a944d1a3
+> Pass count: 78
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -510,9 +510,47 @@
 > strip's "CHOOSE TO PROC…", and the fixture placeholder lines. Zero fresh
 > findings this pass.
 
+> **[critique pass 78, 2026-10-11, commit a944d1a3] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors. 14 commits
+> after pass 77; two touch the screen set. The hub's map node marks hold
+> their 28px floor (pass 75's zoom-floor row, fixed in e6970c5c) and read
+> clearly at both viewports. On desktop the hazard hand's utility cards now
+> print their whole effect line ("DRAW 1", "DRAW 2", fixed in 05665523).
+> That fix was vertical. On the mobile hazard (Hunted by Bandits), Read the
+> Wind's effect line is cut short sideways by an ellipsis, so one fresh
+> LOW is filed. Reconfirmed and not re-filed: pass 65's Minor Healing
+> Potion, pass 63's corner medallions ("Dea" under END), and RC walk item
+> 9. Checked and not filed: the cold `/(tabs)/exploration` capture landing
+> on the title (the drive opens it with no save, by design) and the
+> fixture placeholder lines. One fresh finding this pass.
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `archive-pre-revamp:plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
+
+### [LOW] hazard / mobile — a utility card's effect line truncates sideways in the hand, so Read the Wind's free and paid rows both read "CONVERT …"
+- pass: 78 (commit a944d1a3)
+- viewport: mobile (375x812); the desktop hand in this pass held no card
+  with a long effect line
+- category: mobile
+- observation: the hazard hand prints each utility card's effect line under
+  its stat rows with `numberOfLines={1}`. On the 90px hand card, Read the
+  Wind's free line "CONVERT 1 ✕→◆" and paid line "CONVERT ✕→◆ ALL" are
+  both cut to "CONVERT 1 …" and "CONVERT …". The cut removes what the card
+  converts and the ALL that makes the paid row worth its die, so the free
+  and paid rows look nearly the same until the player taps the card.
+  05665523 fixed the vertical clip of this line; this is the horizontal
+  one.
+- evidence: `.critique-artifacts/mobile/10-hazard.png` (the 2nd and 5th
+  hand cards); `10-hazard.txt` lines 21/25 hold the full strings;
+  `axiomancer-mobile/components/hazard/HazardCard.tsx:159-166`.
+- suggested fix: in hand mode let the effect line wrap to two lines or shrink
+  its font to fit the frame (react-native-web ignores
+  `adjustsFontSizeToFit`, so size it from the label's length as
+  `handNameFontSize` does for names). Pin it with a test that every
+  library utility label fits the 90px hand frame.
+- source: critique:drive (unattended)
 
 ### [LOW] RC walk 2026-10-02 — copy, label and console findings (one row per item, all presentation)
 - pass: RC checkpoint walk, four `playtester` legs (attended, T present), commits a493eaf7 → 169b6dbc
