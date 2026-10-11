@@ -191,6 +191,13 @@ export function handNameFontSize(name: string, nameInset = 0): number {
     return Math.min(HAND_NAME_SIZE, Math.floor(room / (name.length * GOTHIC_CAP_EM)));
 }
 
+/** Hand-mode medallion size. A utility card prints an effect line under each stat row,
+ *  two lines the 136px frame cannot fit beside a 30px medallion, so its medallion shrinks
+ *  to the play-mode size and the paid row's effect line stays inside the frame. */
+export function handArtSize(utility: boolean): number {
+    return utility ? 20 : 30;
+}
+
 export const HazardCard = React.memo(function HazardCard({
     card,
     mode = 'hand',
@@ -376,8 +383,8 @@ export const HazardCard = React.memo(function HazardCard({
         <View style={frame}>
             {overlays}
             <Text numberOfLines={2} style={[styles.name, { fontSize: handNameFontSize(card.name, nameInset), minHeight: 28, paddingHorizontal: PIP_CLEAR, paddingRight: Math.max(PIP_CLEAR, nameInset) }]}>{card.name}</Text>
-            <View style={{ alignItems: 'center', marginVertical: 3 }}>
-                <CardArt kind={card.kind} size={30} />
+            <View style={{ alignItems: 'center', marginVertical: card.utility ? 1 : 3 }}>
+                <CardArt kind={card.kind} size={handArtSize(card.utility)} />
             </View>
             <View style={styles.rowsBox}>
                 <Row card={card} />

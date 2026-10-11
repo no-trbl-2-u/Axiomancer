@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
 
-import { HazardCard, CardArt, handNameFontSize } from '../HazardCard';
+import { HazardCard, CardArt, handArtSize, handNameFontSize } from '../HazardCard';
 import type { HazardCardVM } from '@/state/presenters/hazard.engine';
 
 const mockCardVM: HazardCardVM = {
@@ -144,5 +144,23 @@ describe('handNameFontSize', () => {
         expect(covered).toBeLessThan(13);
         expect(covered).toBeGreaterThanOrEqual(9);
         expect(handNameFontSize('CLIFFRUNNER', 0)).toBeGreaterThan(covered);
+    });
+});
+
+describe('handArtSize', () => {
+    // A utility card prints an effect line under both stat rows. With the 30px
+    // medallion the paid row's line ran past the 136px frame and was cut in half
+    // (measured in the web build: 5px over; at 20px it sits 9px clear).
+    it('shrinks the medallion on a utility card so both effect lines fit the frame', () => {
+        expect(handArtSize(true)).toBeLessThanOrEqual(20);
+        expect(handArtSize(false)).toBe(30);
+    });
+
+    it('draws the smaller medallion on a utility card in hand mode', () => {
+        const utilityCard = { ...mockCardVM, utility: true, freeEffectLabel: 'DRAW 1', poweredEffectLabel: 'DRAW 2' };
+        const { toJSON } = render(<HazardCard card={utilityCard} mode="hand" />);
+        const json = JSON.stringify(toJSON());
+        expect(json).toContain('"width":20,"height":20');
+        expect(json).not.toContain('"width":30,"height":30');
     });
 });
