@@ -6,7 +6,7 @@ import { makeStyles, usePalette } from '@/theme/runtime';
 import { NodeMark } from '@/components/NodeMark';
 import { ActionIcon } from '@/components/ActionIcon';
 import { useTooltip } from '@/hooks/useTooltip';
-import { MapSheetContext } from './mapSheetContext';
+import { MapCameraContext, MapSheetContext } from './mapSheetContext';
 import {
     ACTION_ICON_BY_TYPE,
     NODE_KIND_LABEL,
@@ -35,6 +35,26 @@ interface ExplorationNodeProps {
 // map is spread across (see MapCanvas's per-sheet scale).
 export const NODE_SIZE = 44;
 
+/**
+ * The smallest a node mark draws on screen, in device px. A phone fits a whole
+ * 2400px plate at about 0.15x, which would shrink a 44px mark and its press
+ * target to about 6px. The closest two nodes on any Act 1 map sit about 32px
+ * apart at that zoom, so a 28px floor keeps neighbours from touching.
+ */
+export const NODE_MIN_SCREEN = 28;
+
+/**
+ * How much a node mark is scaled up inside the canvas so it draws at least
+ * `NODE_MIN_SCREEN` px at camera zoom `camera`. At 1 when the zoom alone keeps
+ * it that large; the plate and roads keep scaling with the camera.
+ */
+export function nodeCounterScale(camera: number): number {
+    'worklet';
+    return Math.max(1, NODE_MIN_SCREEN / (NODE_SIZE * camera));
+}
+
+const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
+
 export function ExplorationNode({ node: n, onNodePress, isSelected }: ExplorationNodeProps) {
     const styles = useStyles();
     const AXM = usePalette();
@@ -53,6 +73,7 @@ export function ExplorationNode({ node: n, onNodePress, isSelected }: Exploratio
     };
     const tooltip = useTooltip();
     const sheet = useContext(MapSheetContext);
+    const camera = useContext(MapCameraContext);
     const ref = useRef<View | null>(null);
     const color = EVENT_COLOR[n.type] ?? EVENT_COLOR.encounter;
 
@@ -73,6 +94,9 @@ export function ExplorationNode({ node: n, onNodePress, isSelected }: Exploratio
         }
     }, [n.kind, pulseOpacity]);
     const pulseStyle = useAnimatedStyle(() => ({ opacity: pulseOpacity.value }));
+    const counterScale = useAnimatedStyle(() => ({
+        transform: [{ scale: camera ? nodeCounterScale(camera.value) : 1 }],
+    }));
     const iconKey = ACTION_ICON_BY_TYPE[n.type] ?? 'sword';
     const left = (n.x / sheet.width) * 100;
     const top = (n.y / sheet.height) * 100;
@@ -82,7 +106,7 @@ export function ExplorationNode({ node: n, onNodePress, isSelected }: Exploratio
     const showKindIcon = n.kind === 'available' || n.kind === 'current';
 
     return (
-        <TouchableOpacity
+        <AnimatedTouchable
             ref={ref}
             accessibilityRole="button"
             accessibilityLabel={`${n.label}, ${
@@ -105,6 +129,7 @@ export function ExplorationNode({ node: n, onNodePress, isSelected }: Exploratio
                 styles.nodeWrap,
                 { left: `${left}%` as unknown as number, top: `${top}%` as unknown as number },
                 dim && styles.nodeWrapLocked,
+                counterScale,
             ]}
         >
             <Animated.View style={[styles.glyphWrap, isSelected && { borderColor: AXM.sulfur, borderWidth: 2 }, n.kind === 'available' && pulseStyle]}>
@@ -122,7 +147,7 @@ export function ExplorationNode({ node: n, onNodePress, isSelected }: Exploratio
                     </Text>
                 </View>
             )}
-        </TouchableOpacity>
+        </AnimatedTouchable>
     );
 }
 
@@ -134,6 +159,9 @@ const useStyles = makeStyles((AXM) => ({
         marginLeft: -NODE_SIZE / 2,
         marginTop: -NODE_SIZE / 2,
         alignItems: 'center',
+        // Scale about the glyph's centre, which is the node's point, so the
+        // selected label hanging below cannot pull the mark off it.
+        transformOrigin: `${NODE_SIZE / 2}px ${NODE_SIZE / 2}px`,
         zIndex: 3,
     },
     nodeWrapLocked: {

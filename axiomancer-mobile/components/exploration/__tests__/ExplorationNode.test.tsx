@@ -1,6 +1,10 @@
 import React from 'react';
+import { StyleSheet } from 'react-native';
 import { render, fireEvent } from '@testing-library/react-native';
-import { ExplorationNode } from '../ExplorationNode';
+import { ExplorationNode, NODE_MIN_SCREEN, NODE_SIZE, nodeCounterScale } from '../ExplorationNode';
+import { MapCameraContext } from '../mapSheetContext';
+import { minScaleFor } from '../MapCanvas';
+import { ALL_MAP_LAYOUTS } from '@/state/exploration-maps';
 
 const mockNode = {
     id: 'node-1',
@@ -66,5 +70,47 @@ describe('ExplorationNode', () => {
         );
 
         expect(queryByText('Test Node')).toBeNull();
+    });
+});
+
+describe('node marks at any zoom (critique pass 75)', () => {
+    it('keeps its own size wherever the zoom alone draws it at the floor or larger', () => {
+        expect(nodeCounterScale(1)).toBe(1);
+        expect(nodeCounterScale(0.7)).toBe(1);
+    });
+
+    it('scales up so the mark never draws under NODE_MIN_SCREEN px', () => {
+        for (const camera of [0.6, 0.3, 0.148]) {
+            expect(NODE_SIZE * camera * nodeCounterScale(camera)).toBeCloseTo(NODE_MIN_SCREEN);
+        }
+    });
+
+    it.each(ALL_MAP_LAYOUTS.map((l) => [l.mapId, l] as const))(
+        '%s: at a phone\'s widest fit, no two marks overlap',
+        (_id, layout) => {
+            const camera = minScaleFor({ w: 375, h: 600 }, layout.sheet);
+            const drawn = NODE_SIZE * camera * nodeCounterScale(camera);
+            let closest = Infinity;
+            for (let i = 0; i < layout.nodes.length; i++) {
+                for (let j = i + 1; j < layout.nodes.length; j++) {
+                    const a = layout.nodes[i];
+                    const b = layout.nodes[j];
+                    closest = Math.min(closest, Math.hypot(a.x - b.x, a.y - b.y));
+                }
+            }
+            expect(drawn).toBeCloseTo(NODE_MIN_SCREEN);
+            expect(closest * layout.sheet.scale * camera).toBeGreaterThanOrEqual(drawn);
+        },
+    );
+
+    it('carries the counter-scale on its press target inside a zoomed-out map', () => {
+        const camera = { value: 0.148 } as React.ContextType<typeof MapCameraContext>;
+        const { getByTestId } = render(
+            <MapCameraContext.Provider value={camera}>
+                <ExplorationNode node={mockNode} onNodePress={mockOnNodePress} isSelected={false} />
+            </MapCameraContext.Provider>,
+        );
+        const style = StyleSheet.flatten(getByTestId('node-node-1').props.style);
+        expect(style.transform).toEqual([{ scale: nodeCounterScale(0.148) }]);
     });
 });

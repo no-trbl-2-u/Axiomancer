@@ -12,8 +12,8 @@ import { makeStyles, usePalette } from '@/theme/runtime';
 import type { ExplorationNode, ExplorationEdge } from '@/state/presenters/exploration.engine';
 import type { MapSheet } from '@/state/exploration-maps';
 import { LEGACY_SHEET_SIZE } from '@/state/exploration-maps/sheet';
-import { MapSheetContext, type SheetSize } from './mapSheetContext';
-import { NODE_SIZE } from './ExplorationNode';
+import { MapCameraContext, MapSheetContext, type SheetSize } from './mapSheetContext';
+import { NODE_SIZE, nodeCounterScale } from './ExplorationNode';
 
 interface MapCanvasProps {
     nodes: readonly ExplorationNode[];
@@ -306,24 +306,34 @@ const CONTOUR_GROUPS: readonly string[][] = [
     ],
 ];
 
-/** One node's halo, in its own SVG no larger than the halo (see `edgeStripOf`). `cx`/`cy`/`r` are sheet units. */
-function NodeHalo({ cx, cy, r, scale, color }: { cx: number; cy: number; r: number; scale: number; color: string }) {
+/**
+ * One node's halo, in its own SVG no larger than the halo (see `edgeStripOf`).
+ * `cx`/`cy`/`r` are sheet units. `counterScale` grows it with the node mark it
+ * pools under (`nodeCounterScale`), about its centre.
+ */
+function NodeHalo({ cx, cy, r, scale, color, counterScale }: {
+    cx: number; cy: number; r: number; scale: number; color: string;
+    counterScale: React.ComponentProps<typeof Animated.View>['style'];
+}) {
     const side = r * 2 * scale;
     return (
-        <Svg
-            viewBox={`0 0 ${r * 2} ${r * 2}`}
-            width={side}
-            height={side}
-            style={{ position: 'absolute', left: (cx - r) * scale, top: (cy - r) * scale }}
+        <Animated.View
+            style={[{ position: 'absolute', left: (cx - r) * scale, top: (cy - r) * scale, width: side, height: side }, counterScale]}
         >
-            <Defs>
-                <RadialGradient id="axmNodeHalo" cx="50%" cy="50%" r="50%">
-                    <Stop offset="40%" stopColor={color} stopOpacity={0.85} />
-                    <Stop offset="100%" stopColor={color} stopOpacity={0} />
-                </RadialGradient>
-            </Defs>
-            <Circle cx={r} cy={r} r={r} fill="url(#axmNodeHalo)" />
-        </Svg>
+            <Svg
+                viewBox={`0 0 ${r * 2} ${r * 2}`}
+                width={side}
+                height={side}
+            >
+                <Defs>
+                    <RadialGradient id="axmNodeHalo" cx="50%" cy="50%" r="50%">
+                        <Stop offset="40%" stopColor={color} stopOpacity={0.85} />
+                        <Stop offset="100%" stopColor={color} stopOpacity={0} />
+                    </RadialGradient>
+                </Defs>
+                <Circle cx={r} cy={r} r={r} fill="url(#axmNodeHalo)" />
+            </Svg>
+        </Animated.View>
     );
 }
 
@@ -480,6 +490,10 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
             { scale: scale.value },
         ],
     }));
+    // Node marks (and their halos) hold a usable screen size at any zoom.
+    const markerCounterScale = useAnimatedStyle(() => ({
+        transform: [{ scale: nodeCounterScale(scale.value) }],
+    }));
 
     return (
         <View style={styles.graphWrap} onLayout={onWrapLayout} testID="map-canvas-wrapper">
@@ -598,12 +612,14 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
                     {nodeHalo && (
                         <View style={StyleSheet.absoluteFillObject} pointerEvents="none" testID="map-node-halos">
                             {nodes.map((n) => (
-                                <NodeHalo key={n.id} cx={n.x} cy={n.y} r={haloRadius} scale={size.scale} color={AXM.deepBg} />
+                                <NodeHalo key={n.id} cx={n.x} cy={n.y} r={haloRadius} scale={size.scale} color={AXM.deepBg} counterScale={markerCounterScale} />
                             ))}
                         </View>
                     )}
 
-                    <MapSheetContext.Provider value={size}>{children}</MapSheetContext.Provider>
+                    <MapSheetContext.Provider value={size}>
+                        <MapCameraContext.Provider value={scale}>{children}</MapCameraContext.Provider>
+                    </MapSheetContext.Provider>
                 </Animated.View>
             </GestureDetector>
 
