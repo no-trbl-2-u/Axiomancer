@@ -34,7 +34,7 @@ const paidText = (c: Card): string => c.program?.paid?.text ?? '';
 
 const SACRIFICE_FREE = find((c) => /^SACRIFICE \d+, DEAL/.test(freeText(c)));
 const CURSE = find((c) => c.cardType === 'curse');
-const TURN_GLOBAL = find((c) => c.program?.global?.trigger === 'turn' && /^LEECH/.test(c.program.global.text));
+const TURN_GLOBAL = find((c) => c.program?.global?.trigger === 'turn');
 const LEECH_CARD = find((c) => /^LEECH \{leech:\d+\}\.$/.test(paidText(c)));
 const TETHER_CARD = find((c) => /^TETHER \d+\. SACRIFICE 1/.test(paidText(c)));
 
@@ -104,12 +104,24 @@ describe('the board reads the program ledger', () => {
         expect(free.globals[0].turnsLabel).toBe('⏳3');
     });
 
-    it('shows LEECH and TETHER on the foe', () => {
-        let s = paid(encounter([LEECH_CARD.id, TETHER_CARD.id]), 'h0');
+    it('shows LEECH (potency and turns) and TETHER on the foe', () => {
+        let s = paid(encounter([LEECH_CARD.id, TETHER_CARD.id, LEECH_CARD.id]), 'h0');
         s = paid(s, 'h1');
-        const chips = buildCombatViewModel(s).enemy.effects.map((c) => c.glyph.label);
-        expect(chips).toContain('Leech');
-        expect(chips).toContain('Tether');
+        const chips = buildCombatViewModel(s).enemy.effects;
+        expect(chips.map((c) => c.glyph.label)).toContain('Leech');
+        expect(chips.map((c) => c.glyph.label)).toContain('Tether');
+        const one = chips.find((c) => c.glyph.label === 'Leech')!;
+        expect(one.duration).toBe(3);
+        // A second LEECH stacks: 3 more turns and its potency added.
+        s = paid(s, 'h2');
+        const two = buildCombatViewModel(s).enemy.effects.find((c) => c.glyph.label === 'Leech')!;
+        expect(two.duration).toBe(6);
+        expect(two.intensity).toBe(one.intensity * 2);
+    });
+
+    it('headlines the next-DEAL bonus and a 2X DEAL', () => {
+        expect(programHeadline('🩸 When you SACRIFICE n: your next DEAL this turn deals +n.')).toEqual({ keyword: null, value: 'Next Deal +n' });
+        expect(programHeadline('SACRIFICE any amount X (max 12), DEAL 2X.')).toEqual({ keyword: null, value: 'Deal 2X' });
     });
 
     it('narrates SACRIFICE and a Global entering play in the log', () => {

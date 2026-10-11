@@ -2,13 +2,15 @@
  * Hermetic E2E — the Blood Price trial set and the program runtime it rides.
  *
  * The set's own test (the only test that names its card ids). Pins:
- *   · the set: 30 lane cards (11 red / 9 blue / 10 purple), the grey Curse,
- *     the lane and T's 20-card test deck;
+ *   · the set: 30 lane cards (11 red / 8 blue / 11 purple), the grey Curse
+ *     kept out of every lane, deck and reward pool, the lane and its 20-card
+ *     test deck (built by role: SACRIFICE sources behind every payoff);
  *   · the rulings: SACRIFICE as an unscaled cost with a 1-VITAE floor, WAIVE,
  *     HEAL capped at max VITAE, "heal the damage dealt" unscaled, EXILE, the
  *     Global lifecycle (FREE 3 turn starts, PAID rest of combat, one copy in
- *     play), Global triggers, the Curse (cannot be scrapped, played WAIVED by
- *     another card), TETHER and LEECH, the death ward, the delayed HEAL;
+ *     play), Global triggers, the Curse (cannot be scrapped), TETHER, LEECH
+ *     as a stacking debuff (turns and potency), the next-DEAL bonus, the
+ *     death ward, the delayed HEAL;
  *   · printed equals applied: every plain line lands the numbers its face
  *     prints, at neutral stats and at raised stats;
  *   · every card has a line that can be played in some state.
@@ -20,12 +22,15 @@ import { Player } from '../../Character/characters.mock';
 import { Sandbag_01, FloatEye } from '../../Enemy/enemy.library';
 import type { Enemy } from '../../Enemy/types';
 import { getCardById } from '../cards.library';
-import { getCardLane } from '../card.lanes';
+import { getCardLane, CARD_LANES } from '../card.lanes';
 import { BLOOD_PRICE_SET } from '../library/blood-price.cards';
 import { deepClone } from '../../Utils';
+import { COMBAT_REWARD_POOL } from '../../Combat/combat.rewards';
+import { dropUnknownCardIds } from '../../Game/game.migrate';
+import type { GameState } from '../../Game/types';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, discardCombatCard,
-    startTurn, resolveThreatPhase, handCards, PROGRAM_KIT,
+    startTurn, resolveThreatPhase, handCards, PROGRAM_KIT, playSignatureSkill, SIGNATURE_COST,
 } from '../../Combat/combat.engine';
 import { programIllegalReason, programXRange } from '../../Combat/combat.card-program';
 import type { CombatEncounterState } from '../../Combat/combat.encounter.types';
@@ -57,15 +62,53 @@ function fight(hand: string[], vitae = 100, stats?: BaseStats, foe: Enemy = Sand
 const play = (s: CombatEncounterState, uid: string, paid: boolean, x?: number): CombatEncounterState =>
     playCombatCard({ ...s, dice: [{ ...WILD }] }, { uid }, paid, paid ? 'w' : undefined, undefined, x).state;
 
+/** The five Curse cards revision 2 cut. */
+const CUT = ['bp-e-01a', 'bp-e-05c', 'bp-e-08b', 'bp-m-04c', 'bp-e-09c'];
+
+/** Cards whose lines SACRIFICE (or whose Global does). */
+function sacrifices(id: string): boolean {
+    return /SACRIFICE (\d|any)/.test(JSON.stringify([
+        getCardById(id)?.program?.free?.text, getCardById(id)?.program?.paid?.text, getCardById(id)?.program?.global?.text,
+    ]));
+}
+
 describe('the Blood Price set', () => {
-    it('holds the 30 kept cards (11 red, 9 blue, 10 purple) and the grey Curse', () => {
+    it('holds 30 cards (11 red, 8 blue, 11 purple) and the grey Curse', () => {
         expect(LANE_CARDS).toHaveLength(30);
         const by = (c: string) => LANE_CARDS.filter(card => card.color === c).length;
-        expect([by('body'), by('mind'), by('heart')]).toEqual([11, 9, 10]);
+        expect([by('body'), by('mind'), by('heart')]).toEqual([11, 8, 11]);
         expect(getCardById(CURSE)?.cardType).toBe('curse');
         expect(getCardById(CURSE)?.color).toBe('any');
         expect(LANE_CARDS.filter(c => c.cardType === 'global').map(c => c.id).sort())
-            .toEqual(['bp-e-03d', 'bp-e-09c', 'bp-m-08d', 'bp-p-10c']);
+            .toEqual(['bp-e-03d', 'bp-e-09n', 'bp-m-08d', 'bp-p-10c']);
+    });
+
+    it('revision 2: the five Curse cards are gone, five named SACRIFICE cards take their slots', () => {
+        for (const id of CUT) expect(getCardById(id), id).toBeUndefined();
+        const added = ['bp-e-01n', 'bp-e-05n', 'bp-e-08n', 'bp-e-09n', 'bp-m-04n'];
+        expect(added.map(id => getCardById(id)?.name))
+            .toEqual(['Bloodletting', 'Open Vein', 'Blood for Blood', 'Crimson Pact', 'Transfusion']);
+        for (const id of added) expect(sacrifices(id) || getCardById(id)?.program?.global?.trigger === 'sac', id).toBe(true);
+        // No card left in the lane names a Curse.
+        for (const card of LANE_CARDS) expect(JSON.stringify(card.program), card.id).not.toMatch(/Curse/);
+    });
+
+    it('the grey Curse stays defined but sits in no lane, deck or reward pool', () => {
+        for (const lane of CARD_LANES) {
+            expect(lane.cardIds).not.toContain(CURSE);
+            expect(lane.testDeck).not.toContain(CURSE);
+        }
+        expect(COMBAT_REWARD_POOL).not.toContain(CURSE);
+    });
+
+    it('a save that still names a cut card drops it on load', () => {
+        const state = {
+            version: 0,
+            player: { ...deepClone(Player), knownCards: ['bp-e-01a', 'bp-p-01a', 'bp-m-04c'], combatRewardCards: ['bp-e-09c'] },
+        } as unknown as GameState;
+        const out = dropUnknownCardIds(state);
+        expect(out.player.knownCards).toEqual(['bp-p-01a']);
+        expect(out.player.combatRewardCards).toEqual([]);
     });
 
     it('registers the lane with the 30 cards and the 20-card test deck', () => {
@@ -75,6 +118,17 @@ describe('the Blood Price set', () => {
         expect(lane?.testDeck).toHaveLength(20);
         expect(new Set(lane?.testDeck).size).toBe(20);
         for (const id of lane!.testDeck) expect(lane!.cardIds).toContain(id);
+    });
+
+    it('the test deck is built by role: 9+ SACRIFICE cards behind every payoff, 5+ of each colour, no Curse or half-VITAE cards', () => {
+        const deck = getCardLane('blood-price')!.testDeck;
+        expect(deck.filter(sacrifices).length).toBeGreaterThanOrEqual(9);
+        const by = (c: string) => deck.filter(id => getCardById(id)?.color === c).length;
+        for (const c of ['body', 'mind', 'heart']) expect(by(c), c).toBeGreaterThanOrEqual(5);
+        for (const id of deck) {
+            const text = JSON.stringify(getCardById(id)?.program);
+            expect(text, id).not.toMatch(/Curse|half VITAE/);
+        }
     });
 
     it('a fight without program cards carries no ledger', () => {
@@ -87,7 +141,7 @@ describe('SACRIFICE, WAIVE, HEAL, EXILE', () => {
     it('SACRIFICE is an unscaled cost; DEAL lands its printed number', () => {
         const s = play(fight(['bp-p-01a']), 't0', false);
         expect(s.player.health).toBe(98);
-        expect(s.enemy.health).toBe(495);
+        expect(s.enemy.health).toBe(493);
         expect(s.program!.sacrificePaid).toBe(2);
         expect(s.discard).toContain('bp-p-01a');
     });
@@ -104,7 +158,6 @@ describe('SACRIFICE, WAIVE, HEAL, EXILE', () => {
     it('a condition gates its line with a reason', () => {
         expect(programIllegalReason(fight(['bp-p-04c'], 100), 't0', false, PROGRAM_KIT)).toBe('only at half VITAE or less');
         expect(programIllegalReason(fight(['bp-p-04c'], 85), 't0', false, PROGRAM_KIT)).toBeNull();
-        expect(programIllegalReason(fight(['bp-e-05c'], 100), 't0', true, PROGRAM_KIT)).toBe('needs a Curse in your hand');
     });
 
     it('HEAL is capped at max VITAE; healing past it becomes GUARD on M-09a', () => {
@@ -147,76 +200,145 @@ describe('SACRIFICE, WAIVE, HEAL, EXILE', () => {
 
 describe('Globals', () => {
     it('a FREE Global fires on 3 turn starts, then goes to discard; one copy in play', () => {
-        let s = play(fight(['bp-m-08d', 'bp-m-08d']), 't0', false);
-        expect(s.program!.globals).toEqual([{ cardId: 'bp-m-08d', paid: false, turnsLeft: 3 }]);
+        let s = play(fight(['bp-e-03d', 'bp-e-03d']), 't0', false);
+        expect(s.program!.globals).toEqual([{ cardId: 'bp-e-03d', paid: false, turnsLeft: 3 }]);
         expect(programIllegalReason(s, 't1', false, PROGRAM_KIT)).toMatch(/already in play/);
         for (let turn = 1; turn <= 3; turn++) {
             s = startTurn({ ...s, turnTakenThisPhase: false }).state;
-            expect(s.program!.leech).toBe(turn);
+            expect(s.program!.leechPotency).toBe(turn);
+            expect(s.player.health).toBe(100 - 2 * turn);
         }
         expect(s.program!.globals).toEqual([]);
-        expect(s.discard).toContain('bp-m-08d');
+        expect(s.discard).toContain('bp-e-03d');
     });
 
     it('a PAID Global stays for the rest of combat', () => {
-        let s = play(fight(['bp-m-08d']), 't0', true);
-        expect(s.program!.globals).toEqual([{ cardId: 'bp-m-08d', paid: true, turnsLeft: null }]);
+        let s = play(fight(['bp-e-03d']), 't0', true);
+        expect(s.program!.globals).toEqual([{ cardId: 'bp-e-03d', paid: true, turnsLeft: null }]);
         for (let turn = 1; turn <= 5; turn++) s = startTurn({ ...s, turnTakenThisPhase: false }).state;
         expect(s.program!.globals).toHaveLength(1);
-        expect(s.program!.leech).toBe(10);
+        expect(s.program!.leechPotency).toBe(5);
     });
 
     it('a SACRIFICE fires the 🩸 Globals: P-10c FREE is GUARD n, PAID is DEAL n', () => {
         const free = play(play(fight(['bp-p-10c', 'bp-p-01a']), 't0', false), 't1', false);
         expect(free.guard).toBe(2);
-        expect(free.enemy.health).toBe(495);
+        expect(free.enemy.health).toBe(493);
         const paid = play(play(fight(['bp-p-10c', 'bp-p-01a']), 't0', true), 't1', false);
-        expect(paid.enemy.health).toBe(500 - 5 - 2);
+        expect(paid.enemy.health).toBe(500 - 7 - 2);
+    });
+
+    it('M-08d: each SACRIFICE applies LEECH 1', () => {
+        let s = play(fight(['bp-m-08d', 'bp-e-02d']), 't0', false);
+        s = play(s, 't1', false);
+        expect(s.program!.leechPotency).toBe(2);
+        expect(s.program!.leechTurns).toBe(6);
     });
 
     it('a ⟳ Global whose SACRIFICE cannot be paid does not resolve', () => {
         let s = play(fight(['bp-e-03d'], 2), 't0', false);
         s = startTurn({ ...s, turnTakenThisPhase: false }).state;
         expect(s.player.health).toBe(2);
-        expect(s.program!.leech).toBe(0);
+        expect(s.program!.leechPotency).toBe(0);
+    });
+});
+
+describe('Crimson Pact: the next DEAL this turn deals +n', () => {
+    it('a SACRIFICE n adds +n to the next DEAL, unscaled; the card\'s own DEAL takes it', () => {
+        let s = play(fight(['bp-e-09n', 'bp-p-01a'], 100, { body: 10, mind: 5, heart: 5 }), 't0', false);
+        s = play(s, 't1', false);
+        // SACRIFICE 2 → +2; DEAL 7 at body 10 is 14, plus 2.
+        expect(500 - s.enemy.health).toBe(16);
+        expect(s.program!.nextDealBonus).toBe(0);
+    });
+
+    it('stacks across SACRIFICES, is spent by one DEAL, and what is left expires at the turn\'s end', () => {
+        let s = play(fight(['bp-e-09n', 'bp-e-02d', 'bp-e-06b']), 't0', false);
+        s = play(s, 't1', false);
+        expect(s.program!.nextDealBonus).toBe(2);
+        s = play(s, 't2', false);
+        // DEAL 6 + 2, then E-06b's own SACRIFICE 2 leaves +2 waiting.
+        expect(s.enemy.health).toBe(492);
+        expect(s.program!.nextDealBonus).toBe(2);
+        s = startTurn({ ...s, turnTakenThisPhase: false }).state;
+        expect(s.program!.nextDealBonus).toBe(0);
+    });
+
+    it('TETHER\'s hit is a DEAL: it takes the bonus', () => {
+        let s = play(fight(['bp-e-09n', 'bp-e-10d']), 't0', false);
+        s = play(s, 't1', false);
+        // TETHER 1, SACRIFICE 2: the bonus (+2) lands on TETHER's DEAL 2.
+        expect(s.enemy.health).toBe(496);
+    });
+});
+
+describe('the revision 2 cards', () => {
+    it('Bloodletting: SACRIFICE 3 for 2 Conviction, 6 for 4', () => {
+        const free = play(fight(['bp-e-01n']), 't0', false);
+        expect([free.player.health, free.conviction]).toEqual([97, 2]);
+        const paid = play(fight(['bp-e-01n']), 't0', true);
+        expect([paid.player.health, paid.conviction]).toEqual([94, 4]);
+    });
+
+    it('Open Vein: its own SACRIFICE comes before its TETHER; PAID adds LEECH 2', () => {
+        const free = play(fight(['bp-e-05n']), 't0', false);
+        expect(free.player.health).toBe(98);
+        expect(free.enemy.health).toBe(500);
+        expect(free.program!.tetherUntil).toBe(free.round + 1);
+        const paid = play(fight(['bp-e-05n']), 't0', true);
+        expect(paid.player.health).toBe(96);
+        expect(paid.program!.tetherUntil).toBe(paid.round + 2);
+        expect([paid.program!.leechTurns, paid.program!.leechPotency]).toEqual([3, 2]);
+    });
+
+    it('Blood for Blood: FREE SACRIFICE 3, DEAL 6; PAID SACRIFICE X (max 12), DEAL 2X body-scaled', () => {
+        const free = play(fight(['bp-e-08n']), 't0', false);
+        expect([free.player.health, free.enemy.health]).toEqual([97, 494]);
+        expect(programXRange(fight(['bp-e-08n']), 't0', true, PROGRAM_KIT)).toEqual({ min: 1, max: 12 });
+        const paid = play(fight(['bp-e-08n']), 't0', true, 5);
+        expect([paid.player.health, paid.enemy.health]).toEqual([95, 490]);
+        const strong = play(fight(['bp-e-08n'], 100, { body: 10, mind: 5, heart: 5 }), 't0', true, 5);
+        expect(strong.enemy.health).toBe(480);
+    });
+
+    it('Transfusion: SACRIFICE now, HEAL (mind-scaled) at the start of your next turn', () => {
+        let s = play(fight(['bp-m-04n'], 100, { body: 5, mind: 10, heart: 5 }), 't0', false);
+        expect(s.player.health).toBe(97);
+        s = startTurn({ ...s, turnTakenThisPhase: false }).state;
+        expect(s.player.health).toBe(97 + 12);
+        let p = play(fight(['bp-m-04n']), 't0', true);
+        expect(p.player.health).toBe(95);
+        p = startTurn({ ...p, turnTakenThisPhase: false }).state;
+        expect(p.player.health).toBe(107);
+    });
+});
+
+describe('Crimson Covenant on the trial cards', () => {
+    it('the next SACRIFICE counts twice: paid once, and each instance fires TETHER and the 🩸 Globals', () => {
+        let s = play(fight(['bp-m-08d', 'bp-p-01a']), 't0', false);
+        s = playSignatureSkill({ ...s, conviction: SIGNATURE_COST }, 'sig-crimson-covenant').state;
+        s = play(s, 't1', false);
+        expect(s.player.health).toBe(98);
+        expect(s.program!.sacrificeCount).toBe(2);
+        // TETHER 2 per instance, then DEAL 7.
+        expect(s.enemy.health).toBe(500 - 2 - 2 - 7);
+        expect([s.program!.leechTurns, s.program!.leechPotency]).toEqual([6, 2]);
+        expect(s.program!.nextTwice).toBe(false);
     });
 });
 
 describe('the grey Curse', () => {
-    it('is added by E-01a, cannot be scrapped, FREE costs 5, PAID costs 10 and EXILEs', () => {
-        let s = play(fight(['bp-e-01a']), 't0', false);
-        const curse = s.hand.find(h => h.cardId === CURSE)!;
-        expect(curse).toBeDefined();
-        expect(s.conviction).toBe(2);
-        const scrap = discardCombatCard(s, curse.uid);
+    it('cannot be scrapped; FREE costs 5, PAID costs 10 and EXILEs', () => {
+        const s = fight([CURSE]);
+        const scrap = discardCombatCard(s, 't0');
         expect(scrap.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
-        expect(scrap.state.hand).toContainEqual(curse);
-        s = play(s, curse.uid, false);
-        expect(s.player.health).toBe(95);
-        expect(s.discard).toContain(CURSE);
-        let t = play(fight(['bp-e-01a']), 't0', false);
-        t = play(t, t.hand.find(h => h.cardId === CURSE)!.uid, true);
-        expect(t.player.health).toBe(90);
-        expect(t.program!.exiled).toContain(CURSE);
-    });
-
-    it('E-05c PAID plays the Curse\'s PAID line WAIVED: it is EXILED, counts, and fires 📜 Globals', () => {
-        let s = play(fight(['bp-e-09c', 'bp-e-01a', 'bp-e-05c']), 't0', false);
-        s = play(s, 't1', false);
-        s = play(s, 't2', true);
-        expect(s.player.health).toBe(100);
-        expect(s.program!.exiled).toContain(CURSE);
-        expect(s.program!.sacrificeCount).toBe(1);
-        expect(s.enemy.health).toBe(496);
-    });
-
-    it('E-08b returns a Curse from the discard; M-04c EXILEs one from hand', () => {
-        const base = fight(['bp-e-08b', 'bp-m-04c']);
-        let s = play({ ...base, discard: [CURSE] }, 't0', false);
-        expect(s.hand.some(h => h.cardId === CURSE)).toBe(true);
-        s = play(s, 't1', true);
-        expect(s.hand.some(h => h.cardId === CURSE)).toBe(false);
-        expect(s.program!.exiled).toEqual([CURSE]);
+        expect(scrap.state.hand).toContainEqual({ uid: 't0', cardId: CURSE });
+        const free = play(s, 't0', false);
+        expect(free.player.health).toBe(95);
+        expect(free.discard).toContain(CURSE);
+        const paid = play(fight([CURSE]), 't0', true);
+        expect(paid.player.health).toBe(90);
+        expect(paid.program!.exiled).toContain(CURSE);
     });
 });
 
@@ -231,18 +353,35 @@ describe('TETHER, LEECH and the wards', () => {
         expect(t.program!.sacrificeCount).toBe(1);
     });
 
-    it('LEECH: at the foe\'s turn the foe loses n, you heal what it lost, n drops by 1; LEECH adds', () => {
+    it('LEECH: each application adds 3 turns and adds n to the potency, the first included', () => {
         let s = play(fight(['bp-m-01d', 'bp-m-01d']), 't0', true);
+        expect([s.program!.leechTurns, s.program!.leechPotency]).toEqual([3, 4]);
         s = play(s, 't1', true);
-        expect(s.program!.leech).toBe(8);
-        const r = resolveThreatPhase(s).state;
-        expect(r.program!.leech).toBe(7);
-        expect(500 - r.enemy.health).toBeGreaterThanOrEqual(8);
+        expect([s.program!.leechTurns, s.program!.leechPotency]).toEqual([6, 8]);
+    });
+
+    it('LEECH: each foe turn the foe loses the potency (no decay), you heal what it lost, a turn ticks off; at 0 it resets', () => {
+        let s = play(fight(['bp-m-01d'], 90), 't0', true);
+        const vitae0 = s.player.health;
+        let foe = s.enemy.health;
+        for (let turn = 1; turn <= 3; turn++) {
+            const r = resolveThreatPhase(s);
+            const leeched = r.events.find(e => e.kind === 'damage-dealt' && e.target === 'enemy');
+            expect(leeched && leeched.kind === 'damage-dealt' ? leeched.amount : 0).toBe(4);
+            expect(r.events.some(e => e.kind === 'player-healed' && e.amount === 4)).toBe(true);
+            s = r.state;
+            expect(foe - s.enemy.health).toBeGreaterThanOrEqual(4);
+            foe = s.enemy.health;
+            s = startTurn(s).state;
+        }
+        expect([s.program!.leechTurns, s.program!.leechPotency]).toEqual([0, 0]);
+        expect(s.program!.leechCardId).toBeNull();
+        expect(vitae0).toBe(90);
     });
 
     it('LEECH is heart-scaled when applied', () => {
         const s = play(fight(['bp-m-01d'], 100, { body: 5, mind: 5, heart: 10 }), 't0', true);
-        expect(s.program!.leech).toBe(6);
+        expect(s.program!.leechPotency).toBe(6);
     });
 
     it('the death ward keeps VITAE at 1 this turn; the delayed HEAL lands next turn', () => {
@@ -338,7 +477,6 @@ describe('printed equals applied', () => {
         const never: string[] = [];
         for (const card of LANE_CARDS) {
             const states = [fight([card.id], 170), fight([card.id], 40)];
-            states.push({ ...states[1], hand: [...states[1].hand, { uid: 'cz', cardId: CURSE }], discard: [CURSE] });
             const ok = states.some(s => [false, true].some(p => programIllegalReason(s, 't0', p, PROGRAM_KIT) === null));
             if (!ok) never.push(card.id);
         }

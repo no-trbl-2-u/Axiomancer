@@ -41,6 +41,8 @@ export function programLifecycle(card: Pick<Card, 'cardType'>): string {
  * A Plain Blow's "Deal 5" does.
  */
 const HEADLINES: readonly { re: RegExp; keyword: string | null; value: (m: RegExpMatchArray) => string }[] = [
+    { re: /\bnext DEAL this turn deals \+n\b/, keyword: null, value: () => 'Next Deal +n' },
+    { re: /\bDEAL 2X\b/, keyword: null, value: () => 'Deal 2X' },
     { re: /\bDEAL (\d+|n)\b/, keyword: null, value: (m) => `Deal ${m[1]}` },
     { re: /\bDEAL\b/, keyword: null, value: () => 'Deal X' },
     { re: /\bGUARD (\d+|n)\b/, keyword: 'GUARD', value: (m) => m[1] },

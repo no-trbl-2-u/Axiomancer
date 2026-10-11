@@ -88,7 +88,7 @@ const KEYWORD_GLOSS: Record<string, string> = {
     Vulnerable:
         'The foe takes that much more damage from every hit. Adding more stacks it and refreshes the turns.',
     Tether: 'For that many turns, each SACRIFICE makes the foe take damage equal to the VITAE it paid.',
-    Leech: 'At the start of its turn the foe loses that much VITAE and you heal what it lost. Then it drops by 1.',
+    Leech: 'Each LEECH adds 3 turns and its number to the potency. At the start of its turn the foe loses the potency in VITAE and you heal what it lost.',
     // ── Dice ──
     Pip:
         'Each threat phase a Reserve die survives, it gains one pip, capped at 2. '
@@ -172,7 +172,7 @@ export const SYSTEM_GLOSSARY: readonly { term: string; def: string }[] = [
     { term: 'CONVICTION ◆', def: 'A spend-anytime resource banked from unspent dice and overflow. It never decays.' },
     { term: 'RESERVE & PIPS', def: 'Up to 2 dice held between phases instead of played. Each gains +1 pip per phase it survives, spent for extra intensity or Guard.' },
     { term: 'WILD / X', def: 'A WILD die counts as any color. A dead X die powers nothing.' },
-    { term: 'GLOBAL', def: 'A card that stays in play and fires on its trigger: 3 turns played FREE, all combat played PAID. One copy of each at a time.' },
+    { term: 'GLOBAL', def: 'Stays in play and fires on its trigger (⟳ your turn starts, 🩸 you SACRIFICE): 3 turns played FREE, all combat PAID. One copy of each at a time.' },
     { term: 'CURSE', def: 'A dead card that holds a hand slot until played. It cannot be scrapped.' },
 ];
 

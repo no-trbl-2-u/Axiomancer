@@ -44,7 +44,10 @@ export type SacrificeModifier =
     /** WAIVE: the next `count` SACRIFICES this turn cost no VITAE but still count. */
     | { kind: 'next-free'; count: number }
     /** The next SACRIFICE this turn is doubled: its cost and what it counts as. */
-    | { kind: 'next-double' };
+    | { kind: 'next-double' }
+    /** The next SACRIFICE this turn counts twice: two instances, each firing
+     *  the 🩸 Globals and TETHER for the full amount; the cost is paid once. */
+    | { kind: 'next-twice' };
 
 /** The verbs a program line is written in. */
 export interface ProgramCtx {
@@ -66,8 +69,12 @@ export interface ProgramCtx {
      *  the foe take DEAL x, x = the VITAE that instance paid (unscaled;
      *  VULNERABLE applies). */
     tether(turns: number): void;
-    /** LEECH n, heart-scaled when applied; adds to the foe's current LEECH. */
+    /** LEECH n, a debuff on the foe with turns and potency: each application
+     *  adds 3 turns and adds n (heart-scaled when applied) to the potency. */
     leech(n: number): void;
+    /** Your next DEAL this turn deals +n (unscaled). Stacks; the next DEAL
+     *  takes all of it; what is left expires at the end of the turn. */
+    empowerNextDeal(n: number): void;
     /** Gain n Conviction (capped). */
     conviction(n: number): void;
     /** SACRIFICE n: lose n VITAE, unscaled. A cost: never below 1 VITAE. */

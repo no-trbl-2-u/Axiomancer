@@ -29,9 +29,15 @@
  *   EXILE         the card leaves combat instead of going to discard
  *   TETHER n      for n turns each SACRIFICE x makes the foe take DEAL x
  *                 (x = VITAE that instance paid, unscaled; VULNERABLE applies)
- *   LEECH n       at the start of the foe's turn the foe loses n VITAE, you
- *                 HEAL what it lost, then n drops by 1 (heart-scaled when
- *                 applied; a second LEECH adds)
+ *   LEECH n       a debuff on the foe with turns and potency: each LEECH n
+ *                 adds 3 turns and adds n (heart-scaled when applied) to the
+ *                 potency. At the start of each foe turn the foe loses the
+ *                 potency in VITAE (not a DEAL) and you HEAL what it lost;
+ *                 then a turn ticks off. At 0 turns LEECH ends and the
+ *                 potency resets. The potency never decays.
+ *   next DEAL +n  the next DEAL this turn (a card's, a Global's or TETHER's)
+ *                 deals n more, unscaled, before VULNERABLE; stacks, and
+ *                 expires at the end of the turn
  */
 
 import type {
@@ -53,6 +59,9 @@ import type {
 
 /** A FREE Global stays in play for this many turn starts. */
 export const GLOBAL_FREE_TURNS = 3;
+
+/** Each LEECH application adds this many foe turns. */
+export const LEECH_TURNS_PER_APPLICATION = 3;
 
 // ── State ───────────────────────────────────────────────────────────────────
 
@@ -80,6 +89,10 @@ export interface ProgramLedger {
     waives: number;
     /** The next SACRIFICE this turn is doubled. */
     nextDouble: boolean;
+    /** The next SACRIFICE this turn counts twice (cost paid once). */
+    nextTwice: boolean;
+    /** Added to the next DEAL this turn (unscaled); 0 = none. */
+    nextDealBonus: number;
     drains: { perHit: number; untilRound: number }[];
     deathWardRound: number | null;
     pendingHeal: number;
@@ -88,8 +101,12 @@ export interface ProgramLedger {
     /** TETHER is live through this round (inclusive); 0 = none. */
     tetherUntil: number;
     tetherCardId: string | null;
-    /** LEECH n on the foe (drops by 1 each foe turn). */
-    leech: number;
+    /** The display name of a TETHER source that is not a card (a signature). */
+    tetherSourceName: string | null;
+    /** LEECH on the foe: foe turns left (0 = no LEECH). */
+    leechTurns: number;
+    /** LEECH potency: the VITAE the foe loses each of its turns. */
+    leechPotency: number;
     leechCardId: string | null;
 }
 
@@ -98,9 +115,9 @@ export function initProgramLedger(): ProgramLedger {
         globals: [], exiled: [],
         lostThisCombat: 0, takenThisRound: 0, takenLastRound: 0,
         sacrificeCount: 0, sacrificePaid: 0,
-        waives: 0, nextDouble: false,
+        waives: 0, nextDouble: false, nextTwice: false, nextDealBonus: 0,
         drains: [], deathWardRound: null, pendingHeal: 0, curseUid: 0,
-        tetherUntil: 0, tetherCardId: null, leech: 0, leechCardId: null,
+        tetherUntil: 0, tetherCardId: null, tetherSourceName: null, leechTurns: 0, leechPotency: 0, leechCardId: null,
     };
 }
 
@@ -197,7 +214,7 @@ class LineCtx implements ProgramCtx {
         if (n <= 0) return 0;
         const enemy = this.w.s.enemy;
         if (isDefeated(enemy)) return 0;
-        let dmg = scaleFor(n, this.stats(), 'body', 'one-shot');
+        let dmg = scaleFor(n, this.stats(), 'body', 'one-shot') + this.w.l.nextDealBonus;
         const vuln = getDamageTakenMultiplier(enemy);
         if (vuln !== 1) dmg = Math.round(dmg * vuln);
         const landed = Math.min(dmg, enemy.health);
@@ -206,8 +223,15 @@ class LineCtx implements ProgramCtx {
             this.w.value += landed + (dmg >= enemy.health ? 20 : 0) + this.drainValue();
             return landed;
         }
+        this.w.l.nextDealBonus = 0;
         this.hitFoe(dmg, true);
         return landed;
+    }
+
+    empowerNextDeal(n: number): void {
+        if (n <= 0) return;
+        if (this.mode === 'value') { this.w.value += n * 0.8; return; }
+        if (this.mode === 'apply') this.w.l.nextDealBonus += n;
     }
 
     foeLoses(n: number): void {
@@ -232,19 +256,23 @@ class LineCtx implements ProgramCtx {
         if (this.mode !== 'apply') return;
         l.tetherUntil = Math.max(l.tetherUntil, this.w.s.round + turns - 1);
         l.tetherCardId = this.f.cardId;
+        l.tetherSourceName = null;
     }
 
     leech(n: number): void {
+        if (n <= 0) return;
         const amt = scaleFor(n, this.stats(), 'heart', 'repeating');
         if (amt <= 0) return;
         const l = this.w.l;
         if (this.mode === 'value') {
-            const total = (k: number): number => (k * (k + 1)) / 2;
-            this.w.value += (total(l.leech + amt) - total(l.leech)) * LEECH_VALUE_PER_POINT;
+            // The new potency over every turn left, plus three more turns of the old potency.
+            const turns = l.leechTurns + LEECH_TURNS_PER_APPLICATION;
+            this.w.value += (amt * turns + l.leechPotency * LEECH_TURNS_PER_APPLICATION) * LEECH_VALUE_PER_POINT;
             return;
         }
         if (this.mode !== 'apply') return;
-        l.leech += amt;
+        l.leechTurns += LEECH_TURNS_PER_APPLICATION;
+        l.leechPotency += amt;
         l.leechCardId = this.f.cardId;
     }
 
@@ -265,7 +293,9 @@ class LineCtx implements ProgramCtx {
             const clock = fireDotTrigger(enemy, 'damage-instance', w.s.round);
             if (clock.damage > 0) { enemy = clock.target; extra = clock.damage; }
         }
-        const cardName = getCardById(this.f.cardId)?.name ?? this.f.cardId;
+        const cardName = getCardById(this.f.cardId)?.name
+            ?? (this.f.cardId === w.l.tetherCardId ? w.l.tetherSourceName : null)
+            ?? this.f.cardId;
         w.s = {
             ...w.s, enemy,
             directDamageDealt: w.s.directDamageDealt + amount + extra,
@@ -389,13 +419,18 @@ class LineCtx implements ProgramCtx {
     private sacrificeEvent(nominalIn: number): void {
         if (nominalIn <= 0) return;
         const l = this.w.l;
-        let nominal = nominalIn;
-        let times = 1;
-        if (l.nextDouble) { nominal *= 2; times = 2; l.nextDouble = false; }
+        // Doubled: the cost and the count double. Counts twice: the count
+        // doubles and each instance carries the whole payment.
+        let costMult = 1;
+        let echo = 1;
+        if (l.nextDouble) { costMult = 2; l.nextDouble = false; }
+        if (l.nextTwice) { echo = 2; l.nextTwice = false; }
+        const nominal = nominalIn * costMult;
+        const times = costMult * echo;
         let cost = nominal;
         if (this.f.waived) cost = 0;
         else if (l.waives > 0) { cost = 0; l.waives -= 1; }
-        const perN = nominal / times;
+        const perN = nominalIn;
 
         if (this.mode === 'cost') { this.w.cost += cost; return; }
         if (this.mode === 'value') {
@@ -403,7 +438,7 @@ class LineCtx implements ProgramCtx {
             const tethered = l.tetherUntil >= this.w.s.round;
             for (let k = 0; k < times; k++) {
                 this.fireTriggersValue('sac', perN);
-                if (tethered) this.w.value += (cost / times) * getDamageTakenMultiplier(this.w.s.enemy);
+                if (tethered) this.w.value += (cost / costMult) * getDamageTakenMultiplier(this.w.s.enemy);
             }
             return;
         }
@@ -416,12 +451,14 @@ class LineCtx implements ProgramCtx {
             l.sacrificePaid += paid;
         }
         l.sacrificeCount += times;
-        w.events.push({ kind: 'vitae-sacrificed', cardId: this.f.cardId, amount: paid, counted: nominal });
-        const perPaid = Math.floor(paid / times);
+        w.events.push({ kind: 'vitae-sacrificed', cardId: this.f.cardId, amount: paid, counted: nominalIn * times });
+        const perPaid = Math.floor(paid / costMult);
         for (let k = 0; k < times; k++) {
             fireTriggers(w, 'sac', perN);
             if (perPaid > 0 && l.tetherUntil >= w.s.round && !isDefeated(w.s.enemy)) {
-                const dmg = Math.round(perPaid * getDamageTakenMultiplier(w.s.enemy));
+                // TETHER's hit is a DEAL: it takes the next-DEAL bonus.
+                const dmg = Math.round((perPaid + l.nextDealBonus) * getDamageTakenMultiplier(w.s.enemy));
+                l.nextDealBonus = 0;
                 new LineCtx(w, 'apply', { cardId: l.tetherCardId ?? this.f.cardId, waived: false }).hitFoe(dmg, true);
             }
         }
@@ -518,6 +555,7 @@ class LineCtx implements ProgramCtx {
         if (this.mode === 'value') { this.w.value += modifierValue(this.w, mod); return; }
         if (this.mode !== 'apply') return;
         if (mod.kind === 'next-free') this.w.l.waives += mod.count;
+        else if (mod.kind === 'next-twice') this.w.l.nextTwice = true;
         else this.w.l.nextDouble = true;
     }
 
@@ -563,6 +601,7 @@ function modifierValue(w: Work, mod: SacrificeModifier): number {
     const sacGlobal = w.l.globals.some(g => cardProgram(g.cardId)?.global?.trigger === 'sac');
     const biggest = costs.length ? Math.max(...costs) : 0;
     if (mod.kind === 'next-free') return SAC_COST_VALUE * biggest * Math.min(mod.count, costs.length);
+    if (mod.kind === 'next-twice') return costs.length ? (sacGlobal ? 4 : 1) : 0;
     return costs.length ? (sacGlobal ? 4 : -SAC_COST_VALUE * biggest) : 0;
 }
 
@@ -826,6 +865,8 @@ export function programTurnStart(state: CombatEncounterState, kit: ProgramKit): 
     const w: Work = { s: { ...state, program: l }, l, events: [], kit, cost: 0, value: 0 };
     l.waives = 0;
     l.nextDouble = false;
+    l.nextTwice = false;
+    l.nextDealBonus = 0;
     l.drains = l.drains.filter(d => d.untilRound >= state.round);
     if (l.pendingHeal > 0) {
         const p = w.s.player;
@@ -850,14 +891,33 @@ export function programTurnStart(state: CombatEncounterState, kit: ProgramKit): 
 }
 
 /**
- * Start of the foe's turn (before its telegraphed action): LEECH n makes the
- * foe lose n VITAE (not a DEAL: unscaled, no VULNERABLE), the player HEALs the
- * VITAE actually lost (capped at max), then LEECH drops by 1.
+ * A signature's TETHER and SACRIFICE modifier, applied outside any card line:
+ * TETHER `turns` (this turn included) and the next SACRIFICE this turn counts
+ * twice. Creates the ledger when the fight has none, so the rest of the
+ * program runtime (turn starts, foe turns) picks it up.
+ */
+export function programTetherAndTwice(
+    state: CombatEncounterState, source: { id: string; name: string }, turns: number,
+): CombatEncounterState {
+    const l = cloneLedger(state.program ?? initProgramLedger());
+    l.tetherUntil = Math.max(l.tetherUntil, state.round + turns - 1);
+    l.tetherCardId = source.id;
+    l.tetherSourceName = source.name;
+    l.nextTwice = true;
+    return { ...state, program: l };
+}
+
+/**
+ * Start of the foe's turn (before its telegraphed action): the foe loses its
+ * LEECH potency in VITAE (not a DEAL: unscaled, no VULNERABLE), the player
+ * HEALs the VITAE actually lost (capped at max), then a LEECH turn ticks off.
+ * At 0 turns LEECH ends and the potency resets.
  */
 export function programFoeTurnStart(state: CombatEncounterState): ProgramPlayResult {
     const l = state.program;
-    const n = l?.leech ?? 0;
+    const n = l && l.leechTurns > 0 ? l.leechPotency : 0;
     if (!l || n <= 0 || isDefeated(state.enemy)) return { state, events: [] };
+    const turns = l.leechTurns - 1;
     const lost = Math.min(n, state.enemy.health);
     const cardId = l.leechCardId ?? 'leech';
     const cardName = getCardById(cardId)?.name ?? cardId;
@@ -873,7 +933,9 @@ export function programFoeTurnStart(state: CombatEncounterState): ProgramPlayRes
             player: healCombatant(p, healed),
             directDamageDealt: state.directDamageDealt + lost,
             attribution: recordAttribution(state.attribution, cardId, cardName, null, lost, before),
-            program: { ...l, leech: n - 1, leechCardId: n - 1 > 0 ? l.leechCardId : null },
+            program: turns > 0
+                ? { ...l, leechTurns: turns }
+                : { ...l, leechTurns: 0, leechPotency: 0, leechCardId: null },
         },
         events,
     };
