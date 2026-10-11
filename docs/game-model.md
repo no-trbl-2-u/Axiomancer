@@ -19,10 +19,12 @@ the Expo app (`axiomancer-mobile`) presents it.
   grey office (`GREY_OFFICE_CARDS`, `Cards/library/starters.cards.ts`): A
   Plain Blow (attack, DEAL), A Plain Ward (skill, GUARD), A Plain Word
   (spell, VULNERABLE), all colour `any`, rank 1 (Ash), tier 1. The trial
-  set (`BLOOD_PRICE_SET`, `Cards/library/blood-price.cards.ts`, D80): 30
-  cards T kept from the Blood Price ballot (11 body, 9 mind, 10 heart, all
-  rank 1) and the grey Curse their E-01 card adds, with the ballot's printed
-  numbers. It joins the library through one `TRIAL_SETS` line in
+  set (`BLOOD_PRICE_SET`, `Cards/library/blood-price.cards.ts`, D80, D81):
+  30 cards (11 body, 8 mind, 11 heart, all rank 1): 25 kept from the Blood
+  Price ballot and five SACRIFICE cards T added in revision 2 (Bloodletting,
+  Open Vein, Blood for Blood, Crimson Pact, Transfusion). The grey Curse is
+  defined for foes to add later; no card adds it and it is in no lane, deck
+  or reward pool. It joins the library through one `TRIAL_SETS` line in
   `Cards/cards.library.ts` and comes out by deleting that line and the file
   (D75); saves drop removed card ids on load (`dropUnknownCardIds`).
 - **Card types** (`CardType`) are lifecycle rules. Attack, Skill and Spell
@@ -49,10 +51,17 @@ the Expo app (`axiomancer-mobile`) presents it.
   card leaves combat instead of going to discard), **HEAL** n (mind-scaled,
   capped at maximum VITAE; "heal the damage dealt" heals what landed,
   unscaled), **TETHER** n (for n turns each SACRIFICE x makes the foe take
-  DEAL x, unscaled, VULNERABLE applies) and **LEECH** n (heart-scaled when
-  applied and adding up: at the start of the foe's turn it loses n VITAE,
-  you heal what it lost, then n drops by 1). "The foe loses n" is plain
-  VITAE loss, not a DEAL.
+  DEAL x, unscaled, VULNERABLE applies) and **LEECH** n, a debuff on the foe
+  with turns and potency: each LEECH n adds `LEECH_TURNS_PER_APPLICATION` =
+  3 turns and adds n (heart-scaled when applied) to the potency, the first
+  included; at the start of each foe turn the foe loses the potency in VITAE
+  (not a DEAL), you heal what it lost, and a turn ticks off; the potency
+  never decays and resets when the turns run out. "The foe loses n" is
+  plain VITAE loss, not a DEAL. Crimson Pact's "your next DEAL this turn
+  deals +n" adds n unscaled before VULNERABLE, stacks across SACRIFICES,
+  goes to the next DEAL (a card's, a Global's or TETHER's) and expires at
+  the end of the turn. A SACRIFICE that "counts twice" (Crimson Covenant)
+  is paid once and fires its triggers and TETHER twice.
 - **The starting deck is ten cards:** Blow ×5, Ward ×3, Word ×2
   (`STARTING_CARD_IDS`, `Combat/combat.rewards.ts`). The deck never drops
   below `MIN_COMBAT_DECK_SIZE` = 10.
@@ -92,8 +101,9 @@ the Expo app (`axiomancer-mobile`) presents it.
   EXILED cards and Globals in play are out of the cycle.
 - **Scrap:** discarding a card pays +1 Conviction, for the first
   `SCRAP_CONVICTION_CAP_PER_TURN` = 2 each turn. A Curse cannot be scrapped.
-- **Conviction** is capped at `CONVICTION_CAP` = 12. It is spent only on the
-  signature, The Open Hand (`SIGNATURE_COST` = 4, `Combat/combat.signature.ts`).
+- **Conviction** is capped at `CONVICTION_CAP` = 12. It is spent only on
+  signatures (`SIGNATURE_COST` = 4, `Combat/combat.signature.ts`): The Open
+  Hand and Crimson Covenant, one per worn signet relic.
 - **GUARD** resets to 0 after each threat phase.
 - **The program ledger** (`CombatEncounterState.program`) exists only when
   the deck holds a trial card: Globals in play with their turns left,
@@ -109,6 +119,12 @@ the Expo app (`axiomancer-mobile`) presents it.
   round after `THREAT_ESCALATION_GRACE` = 1 round, up to
   `THREAT_ESCALATION_MAX` = ×2, and `THREAT_ESCALATION_BOSS_MULT` = 1.6×
   faster against a boss.
+- **Live foes have double VITAE.** The app doubles every live encounter's
+  foe VITAE (`LIVE_ENCOUNTER_ENEMY_HP_MULTIPLIER` = 2,
+  `Combat/live-encounter.ts`), a testing knob; the engine's own fights use
+  the authored VITAE. The pacing sim (`Combat/combat.pacing.sim.ts`,
+  `npm run lane-pacing`) applies the same knob so its turn counts compare
+  with play.
 - **Ending:** the player wins when the foe's VITAE reaches 0, or by sparing
   a befriended foe. The player loses at 0 VITAE or after `MAX_PHASES` = 60.
 
@@ -148,9 +164,14 @@ keyword (`EnemyKeyword = never`).
 
 ## Befriend and mercy
 
-- **The one relic** is the Suppliant's Ring (`relicLibrary`,
-  `Items/relic.library.ts`), granted at the first node. Its signature is
-  The Open Hand.
+- **Two relics** (`relicLibrary`, `Items/relic.library.ts`). The Suppliant's
+  Ring, granted at the first node, is the only starting relic; its
+  signature is The Open Hand. The Bleeding Signet (+20 max VITAE while
+  worn, folded onto `maxHealth`; signature Crimson Covenant: TETHER 3, and
+  the next SACRIFICE this turn counts twice) has no source yet but the dev
+  menu's GET ALL RELICS. Relics are accessories and a character wears up
+  to three (`SLOT_CAPACITY.accessory`), so both are worn together and the
+  signature bar lists every signature the worn relics grant.
 - **The Open Hand** befriends a foe that has a `friendshipReward` and sits
   under its `hpGate` (the Brine Hag: below 30% VITAE; `Enemy/befriend.ts`).
 - **The mercy choice** (`selectMercyChoice`) follows. Spare ends the fight
