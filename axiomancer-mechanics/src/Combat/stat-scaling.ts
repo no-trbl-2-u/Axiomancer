@@ -24,6 +24,7 @@
 
 import type { BaseStats } from '../Character/types';
 import type { Card, CardRider, CardSpecialMechanic } from '../Cards/types';
+import type { CardProgram } from '../Cards/card-program.types';
 import type { Effect, EffectPayload } from '../Effects/types';
 import { lookupEffect } from '../Effects';
 
@@ -187,5 +188,51 @@ export function scaleCardForStats(card: Card, stats: BaseStats | undefined): Car
         });
     }
     if (card.free) out.free = scaleRider(card.free, stats);
+    if (card.program) out.program = scaleProgramText(card.program, stats);
     return out;
+}
+
+const PROGRAM_TOKEN = /\{(deal|guard|heal|vuln|leech):(\d+)\}/g;
+
+/**
+ * A program line's printed text at the player's stats: every number token
+ * (`card-program.types.ts`) replaced by the number the engine applies,
+ * before the foe's VULNERABLE. `stats` undefined prints the base numbers.
+ *
+ * @example programText('SACRIFICE 2, DEAL {deal:5}.', { body: 6, mind: 5, heart: 5 })
+ *          // 'SACRIFICE 2, DEAL 6.'
+ */
+export function programText(text: string, stats: BaseStats | undefined): string {
+    return text.replace(PROGRAM_TOKEN, (_m, kind: string, raw: string) => `${programTokenValue(kind, Number(raw), stats)}`);
+}
+
+function programTokenValue(kind: string, n: number, stats: BaseStats | undefined): number {
+    switch (kind) {
+        case 'deal': return scaleFor(n, stats, 'body', 'one-shot');
+        case 'guard':
+        case 'heal': return scaleFor(n, stats, 'mind', 'one-shot');
+        case 'leech': return scaleFor(n, stats, 'heart', 'repeating');
+        case 'vuln': {
+            const def = lookupEffect('debuff_vulnerable');
+            return def ? scaleEffectIntensity(def, n, false, stats) : n;
+        }
+        default: return n;
+    }
+}
+
+/** A display copy of a program with every printed text at the player's stats. */
+function scaleProgramText(p: CardProgram, stats: BaseStats | undefined): CardProgram {
+    const line = <L extends { text: string }>(l: L | undefined): L | undefined => l && { ...l, text: programText(l.text, stats) };
+    return {
+        ...p,
+        ...(p.free ? { free: line(p.free) } : {}),
+        ...(p.paid ? { paid: line(p.paid) } : {}),
+        ...(p.global ? {
+            global: {
+                ...p.global,
+                text: programText(p.global.text, stats),
+                ...(p.global.paidDelta ? { paidDelta: programText(p.global.paidDelta, stats) } : {}),
+            },
+        } : {}),
+    };
 }

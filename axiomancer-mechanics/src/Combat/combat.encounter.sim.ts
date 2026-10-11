@@ -421,15 +421,21 @@ export function upgradeablePlayPhase(
     }
 
     // Wind-down: drain the leftover hand through the FREE tops, then end the turn.
+    // A FREE line that fizzles (its condition or its SACRIFICE cannot be met)
+    // is held for the rest of the phase, so the rest of the hand still drains.
     let drain = 0;
+    const heldUids = new Set<string>();
     while (working.phase === 'phase-play' && !working.finalOutcome && !working.mercyChoiceActive && drain < 30) {
         drain++;
-        const resT = handCards(working).find(c => c.card.verbClass !== 'retreat');
+        const resT = handCards(working).find(c => c.card.verbClass !== 'retreat' && !heldUids.has(c.uid));
         if (!resT) break;
         const play = playCombatCard(working, { uid: resT.uid }, false);
         const row = lineRow(lines, resT.card.id);
         row.freeHpSwing += playHpSwing(working, play.state, play.events);
-        if (play.events.some(e => e.kind === 'effect-fizzled')) row.fizzles++;
+        if (play.events.some(e => e.kind === 'effect-fizzled')) {
+            row.fizzles++;
+            heldUids.add(resT.uid);
+        }
         working = play.state;
         plays++;
         bumpUsage(usage, resT.card, 'top');

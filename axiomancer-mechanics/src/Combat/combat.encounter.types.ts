@@ -19,6 +19,7 @@ import type { Character } from '../Character/types';
 import type { Enemy } from '../Enemy/types';
 import type { Effect, ActiveEffect } from '../Effects/types';
 import type { CardAspect, CardType } from '../Cards/types';
+import type { ProgramLedger } from './combat.card-program';
 
 // ---------------------------------------------------------------------------
 // Dice — the stance-color economy
@@ -372,6 +373,16 @@ export type CombatEvent =
         effectKind: CardEffectKind; intensity: number; effect: Effect }
     | { kind: 'effect-fizzled'; cardId: string; effectId: string; message: string }
     | { kind: 'damage-dealt'; cardId: string; target: 'self' | 'enemy'; amount: number }
+    /** A SACRIFICE: `amount` VITAE paid (0 when WAIVED), `counted` the amount it counts as. */
+    | { kind: 'vitae-sacrificed'; cardId: string; amount: number; counted: number }
+    /** A card, Global, LEECH or delayed heal restored `amount` VITAE. */
+    | { kind: 'player-healed'; cardId: string; amount: number }
+    /** A Global entered play (`turnsLeft` null = rest of combat). */
+    | { kind: 'global-entered'; cardId: string; paid: boolean; turnsLeft: number | null }
+    | { kind: 'global-left'; cardId: string }
+    /** A card left combat for good (EXILE). */
+    | { kind: 'card-exiled'; cardId: string }
+    | { kind: 'curse-added'; cardId: string; count: number }
     | { kind: 'die-refreshed'; dieId: string; color: CombatDieColor }
     | { kind: 'die-spent'; dieId: string; color: CombatDieColor }
     | { kind: 'dot-tick'; effectId: string; label: string; amount: number; target: 'self' | 'enemy' }
@@ -580,6 +591,9 @@ export interface CombatEncounterState {
      *  gear. */
     dieGear?: Partial<Record<'heart' | 'body' | 'mind' | 'wild', UpgradeableDieGear>>;
     seed?: number;                         // seed used to drive the encounter (sim/tests)
+    /** The SACRIFICE / Global / Curse ledger. Present only when the deck
+     *  holds a program card (`combat.card-program.ts`). */
+    program?: ProgramLedger;
 }
 
 /**

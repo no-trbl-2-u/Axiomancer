@@ -65,6 +65,12 @@ import { canAct, getActiveEffectModifiers, getActiveDotTotal, ticksOnRoundClock 
 import { getThreatSequence, commitThreatBranch } from './combat.threat';
 import { getSignatureSkill, applySignatureSkill, signatureCastBlock, playerArchetype } from './combat.signature';
 import { getSignaturesForLoadout } from '../Items/relic.library';
+import {
+    type ProgramKit, deckHasProgramCards, initProgramLedger, isProgramCard, isCurseCard,
+    playProgramCard, programTurnStart, programFoeTurnStart, programClampDamage,
+    programRecordDamage, programRollRound, programDrawFallback,
+    programIllegalReason, programXRange,
+} from './combat.card-program';
 import type {
     CombatCard, CombatDieColor, CombatEncounterState, CombatEvent, CardPlay,
     CombatManaDie, CombatPhaseResult, CombatTransition, LandedEffect,
@@ -278,6 +284,9 @@ export function initializeCombatEncounter(
         seed,
         // No coveted die claimed yet this combat.
         covetedDiceClaimed: [],
+        // The program ledger exists only for a deck that holds a program
+        // card, so every other fight's state is unchanged.
+        ...(deckHasProgramCards(deck) ? { program: initProgramLedger() } : {}),
     };
 }
 
@@ -369,7 +378,16 @@ export function startTurn(
     };
     events.push({ kind: 'turn-dice-rolled', turn, dice });
     events.push({ kind: 'dice-rolled', dice });
-    return { state: withLog(next, events), events };
+    let started = withLog(next, events);
+    // Start-of-turn Globals, a delayed HEAL and the turn's SACRIFICE
+    // modifiers. No ledger, no change.
+    if (started.program) {
+        const pt = programTurnStart(started, PROGRAM_KIT);
+        started = withLog(pt.state, pt.events);
+        events.push(...pt.events);
+        if (isDefeated(started.enemy)) return endCombat(started, 'victory', events);
+    }
+    return { state: started, events };
 }
 
 /** Ends the turn: at end of round, ONE unspent mana/special tray
@@ -456,6 +474,7 @@ export function playCombatCard(
     useBottom: boolean,
     dieId?: string,
     rng: () => number = defaultRng,
+    x?: number,
 ): CombatTransition {
     if (state.phase !== 'phase-play') return { state, events: [] };
 
@@ -466,6 +485,19 @@ export function playCombatCard(
 
     const card = getCard(entry.cardId);
     if (!card) return { state, events: [] };
+
+    // A program card resolves in combat.card-program.ts; BOON and momentum
+    // still run for its PAID play. `x` is the amount chosen for a
+    // "SACRIFICE any amount" line.
+    if (isProgramCard(card.id)) {
+        const withLedger = state.program ? state : { ...state, program: initProgramLedger() };
+        const pp = playProgramCard(withLedger, entry.uid, useBottom, dieId, PROGRAM_KIT, x);
+        if (pp.events.length === 0) return { state, events: [] };
+        const fizzled = pp.events.length === 1 && pp.events[0].kind === 'effect-fizzled';
+        if (fizzled) return { state: withLog(state, pp.events), events: pp.events };
+        const played = checkImmediateOutcome(withLog(pp.state, pp.events), pp.events);
+        return applyBoonAndMomentumV2(state, played, card.stance, useBottom);
+    }
 
     const transition = useBottom
         ? playBottomAction(state, entry.uid, card, dieId, rng)
@@ -557,6 +589,14 @@ export function discardCombatCard(state: CombatEncounterState, uid: string): Com
     if (state.phase !== 'phase-play') return { state, events: [] };
     const entry = state.hand.find(h => h.uid === uid);
     if (!entry) return { state, events: [] };
+    // A Curse cannot be scrapped: playing it is the only way out.
+    if (isCurseCard(entry.cardId)) {
+        const events: CombatEvent[] = [{
+            kind: 'effect-fizzled', cardId: entry.cardId, effectId: '',
+            message: 'a Curse cannot be scrapped — play it to be rid of it',
+        }];
+        return { state: withLog(state, events), events };
+    }
     const scrapsThisTurn = state.scrapsThisTurn ?? 0;
     const pays = scrapsThisTurn < SCRAP_CONVICTION_CAP_PER_TURN;
     const conviction = pays ? Math.min(CONVICTION_CAP, state.conviction + 1) : state.conviction;
@@ -1086,12 +1126,20 @@ function soakFlatHit(
  * (`canAct` → skipTurn). This is how control "hinders the enemy" — it loses its
  * attack this phase. Then between-phases processing runs (DoT ticks, draw, advance).
  */
-export function resolveThreatPhase(state: CombatEncounterState, rng: () => number = defaultRng): CombatTransition {
-    if (state.phase === 'complete' || state.finalOutcome) return { state, events: [] };
+export function resolveThreatPhase(stateIn: CombatEncounterState, rng: () => number = defaultRng): CombatTransition {
+    if (stateIn.phase === 'complete' || stateIn.finalOutcome) return { state: stateIn, events: [] };
+    let state = stateIn;
+    // LEECH drains the foe at the start of its turn, before it acts.
+    const leech = programFoeTurnStart(state);
+    const leechEvents = leech.events;
+    if (leechEvents.length > 0) {
+        state = leech.state;
+        if (isDefeated(state.enemy)) return endCombat(withLog(state, leechEvents), 'victory', leechEvents);
+    }
 
     const idx = Math.min(state.currentPhaseIndex, state.threatPhases.length - 1);
     const phase = state.threatPhases[idx];
-    const events: CombatEvent[] = [];
+    const events: CombatEvent[] = [...leechEvents];
 
     // Control on the enemy hinders its turn: HARD control (skipTurn) denies it
     // outright via canAct.
@@ -1178,6 +1226,8 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     events.push({ kind: 'barrier-absorbed', amount: barrierAbsorbed });
                 }
                 if (dmg > 0) {
+                    // A death ward keeps the player at 1 VITAE this turn.
+                    dmg = programClampDamage(state, player.health, dmg);
                     player = applyDamage(player, dmg);
                     enemyDamageDealt += dmg;
                     // The 'damage-instance' clock, player bearer — a threat
@@ -1189,6 +1239,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     const selfClock = fireDotTrigger(player, 'damage-instance', state.round);
                     if (selfClock.damage > 0) {
                         player = selfClock.target;
+                        if (state.program?.deathWardRound === state.round && player.health < 1) player = { ...player, health: 1 };
                         for (const t of selfClock.perEffect) {
                             events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'self' });
                         }
@@ -1292,6 +1343,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         // and the full-block verdict (persists until the NEXT threat resolves;
         // a hindered/denied threat was never blocked).
         enemyDamageThisTurn: (state.enemyDamageThisTurn ?? 0) + enemyDamageDealt,
+        ...(state.program ? { program: programRecordDamage(state.program, Math.max(0, state.player.health - player.health)) } : {}),
         lastThreatFullyBlocked: !hindered && attacksLanded > 0 && attacksFullyBlocked === attacksLanded,
         phase: 'phase-resolve',
         threatMarks,
@@ -1399,6 +1451,16 @@ export function processBetweenPhases(
     const playerStart = processRoundStartEffects(state.player, state.round);
     const playerEnd = processRoundEndEffects(playerStart.target, 'player');
     let player = playerEnd.target as Character;
+    // The death ward covers this round's DoT too, and the damage ledgers
+    // roll over at the boundary.
+    let ledger = state.program;
+    if (ledger) {
+        if (ledger.deathWardRound === state.round && player.health < 1 && state.player.health >= 1) {
+            player = { ...player, health: 1 };
+        }
+        const dotTaken = Math.max(0, state.player.health - player.health);
+        ledger = programRollRound(programRecordDamage(ledger, dotTaken));
+    }
     const playerDotTicks = clampDotTickBreakdown(projectedPlayerDotTicks, playerStart.dotDamage);
 
     for (const t of enemyDotTicks) events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
@@ -1505,7 +1567,7 @@ export function processBetweenPhases(
     const keptHand = omenState.hand;
     const refillTarget = COMBAT_HAND_SIZE + bonusDraw;
     const draw = drawCombatCards(
-        omenState.drawPile, omenState.discard, omenState.deck,
+        omenState.drawPile, omenState.discard, programDrawFallback(omenState),
         Math.max(0, refillTarget - keptHand.length), rng,
     );
     let uid = state.round * 100;
@@ -1533,6 +1595,7 @@ export function processBetweenPhases(
         // The STAGE ledgers.
         stagesEntered,
         stageThreatBonus,
+        ...(ledger ? { program: ledger } : {}),
     };
     next = withLog(next, events);
     // The round is closed: zero the enemy-DoT accumulator AFTER logging
@@ -1854,3 +1917,30 @@ export function projectCombatOutcome(state: CombatEncounterState): CombatOutcome
 
 /** Re-export for presenters that need to check die affordability directly. */
 export { combatDieCanPower, availableDiceFor, effectImpact, cardStanceColor, riderText };
+
+/** The engine pieces `combat.card-program.ts` needs, passed in so that
+ *  module never imports the engine. */
+export const PROGRAM_KIT: ProgramKit = {
+    convictionCap: CONVICTION_CAP,
+    incomingNet: (state: CombatEncounterState) => projectIncomingThreat(state).netDamage,
+};
+
+/**
+ * Why a program card's FREE (`paid` false) or PAID line cannot be played
+ * right now, in the words the game says it (null = it can). The die and the
+ * Color Law are not part of it. Null for a card without a program.
+ *
+ * @param x - The amount chosen for a "SACRIFICE any amount" line.
+ * @example programLineBlock(state, 'c3', false) // 'that SACRIFICE would leave you below 1 VITAE'
+ */
+export function programLineBlock(state: CombatEncounterState, uid: string, paid: boolean, x?: number): string | null {
+    const entry = state.hand.find(h => h.uid === uid);
+    if (!entry || !isProgramCard(entry.cardId)) return null;
+    return programIllegalReason(state, uid, paid, PROGRAM_KIT, x);
+}
+
+/** The amounts a program card's "SACRIFICE any amount" PAID line accepts
+ *  right now, or null when it has none. */
+export function programXChoice(state: CombatEncounterState, uid: string): { min: number; max: number } | null {
+    return programXRange(state, uid, true, PROGRAM_KIT);
+}

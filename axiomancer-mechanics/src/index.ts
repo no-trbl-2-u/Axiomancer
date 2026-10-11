@@ -84,6 +84,9 @@ export {
     projectCombatOutcome,
     // Floating dice save-back
     getFloatingDiceColors,
+    // Card programs (Global, Curse, SACRIFICE): the reads the board needs
+    programLineBlock, programXChoice, isProgramCard, isCurseCard, GLOBAL_FREE_TURNS,
+    programFaceText, GLOBAL_TRIGGER_TEXT,
     // Card rewards and the starting deck
     COMBAT_REWARD_POOL, STARTING_CARD_IDS, rollCombatCardRewards, rewardPoolFor, addRewardCard,
     unlockCardViaDilemma,
@@ -100,6 +103,7 @@ export {
     scaleAmount, scaleFor, statFor, scaleRider, scaleCardForStats,
     scaleEffectIntensity, effectScaling, effectFamily,
     MECHANIC_SCALING, RIDER_SCALING, PAYLOAD_SCALING, NEUTRAL_STAT,
+    programText,
 } from './Combat';
 export type { StatFamily, ScalingKind, KeywordScaling } from './Combat';
 export type {
@@ -113,6 +117,8 @@ export type {
     SignatureSkill,
     // The three chain colours (momentum chain)
     WheelStance,
+    // Card programs: the Global / Curse / SACRIFICE ledger
+    ProgramLedger, GlobalInPlay,
 } from './Combat';
 
 // ─── Sandbox cards — the deck-forge experimentation surface ───────────────────

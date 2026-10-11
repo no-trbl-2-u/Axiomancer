@@ -62,13 +62,21 @@ export {
     projectCombatOutcome,
     // Floating dice save-back
     getFloatingDiceColors,
+    // Card programs: why a line cannot be played, and an X line's range
+    programLineBlock, programXChoice,
 } from './combat.engine';
+// Card programs: the Global / Curse / SACRIFICE ledger and its reads.
+export {
+    isProgramCard, isCurseCard, GLOBAL_FREE_TURNS,
+} from './combat.card-program';
+export type { ProgramLedger, GlobalInPlay } from './combat.card-program';
 // Stat scaling: the formula, the keyword families, and the
 // display-only stat-scaled card the hand prints.
 export {
     scaleAmount, scaleFor, statFor, scaleRider, scaleCardForStats,
     scaleEffectIntensity, effectScaling, effectFamily,
     MECHANIC_SCALING, RIDER_SCALING, PAYLOAD_SCALING, NEUTRAL_STAT,
+    programText,
 } from './stat-scaling';
 export type { StatFamily, ScalingKind, KeywordScaling } from './stat-scaling';
 // The Upgradeable-Dice model: THE combat dice model.
@@ -87,6 +95,7 @@ export {
     toCombatCard,
 
     mechanicText,
+    programFaceText, GLOBAL_TRIGGER_TEXT,
 } from './combat.cards';
 export {
     getThreatSequence,

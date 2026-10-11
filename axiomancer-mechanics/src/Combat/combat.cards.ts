@@ -17,6 +17,7 @@ import { rankToRarity, CARD_RANK_NAMES } from '../Cards/types';
 import type {
     CombatCard, CombatVerbClass, CardEffectKind,
 } from './combat.encounter.types';
+import { programText } from './stat-scaling';
 
 export type EffectLookup = (effectId: string) => Effect | undefined;
 export type CardLookup = (cardId: string) => Card | undefined;
@@ -267,9 +268,14 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
     const authored = card.paidSummary;
     const paid = authored ?? paidText(card, lookupEffect);
 
+    // A program card prints its own lines (`programFaceText`).
+    const programFace = card.program ? programFaceText(card) : null;
+
     // FREE line — the authored dieless rider.
     const riderOpts = { selfTargetCard: card.targetType === 'self' };
-    const topActionText = card.free
+    const topActionText = programFace
+        ? `FREE — ${programFace.free} (${rankLabel(card)})`
+        : card.free
         ? `FREE — ${riderText(card.free, riderOpts)}. (${rankLabel(card)})`
         : `FREE — no effect. (${rankLabel(card)})`;
 
@@ -283,7 +289,9 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
         return !!def?.payload.damageOverTime && !REGISTRY_DOT_IDS.has(def.id);
     });
     const dotSuffix = authored ? '' : dotFace ? ` (${dotFace})` : preview > 0 && !speciesGlossed ? ` (${preview} over its run)` : '';
-    const bottomActionText = authored
+    const bottomActionText = programFace
+        ? `PAID — ${programFace.paid} Costs 1 die.`
+        : authored
         ? `PAID — ${authored} Costs 1 die.`
         : `PAID — ${paid}${dotSuffix}. Costs 1 die.`;
 
@@ -301,6 +309,38 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
         bottomActionText,
         bottomDamagePreview: preview,
         primaryEffectId: primaryEnemyEffectId(card, lookupEffect),
+    };
+}
+
+/** The printed opener of each Global trigger (the closed set: ⟳ turn start,
+ *  🩸 SACRIFICE, 📜 Curse played). */
+export const GLOBAL_TRIGGER_TEXT: Readonly<Record<'turn' | 'sac' | 'curse', string>> = Object.freeze({
+    turn: '⟳ Start of your turn:',
+    sac: '🩸 When you SACRIFICE n:',
+    curse: '📜 When you play a Curse:',
+});
+
+/**
+ * A program card's FREE and PAID lines as printed. Number tokens print at
+ * the numbers already in the card (a stat-scaled copy carries its scaled
+ * numbers). A Global prints its trigger, its body and how long it stays in
+ * play; its PAID line prints only what changes.
+ */
+export function programFaceText(card: Card): { free: string; paid: string } {
+    const p = card.program;
+    if (!p) return { free: 'no effect.', paid: 'no effect.' };
+    if (p.global) {
+        const opener = GLOBAL_TRIGGER_TEXT[p.global.trigger];
+        const body = programText(p.global.text, undefined);
+        const delta = p.global.paidDelta ? programText(p.global.paidDelta, undefined) : body;
+        return {
+            free: `${opener} ${body} In play 3 turns.`,
+            paid: `${opener} ${delta} In play for the rest of combat.`,
+        };
+    }
+    return {
+        free: p.free ? programText(p.free.text, undefined) : 'no effect.',
+        paid: p.paid ? programText(p.paid.text, undefined) : 'no effect.',
     };
 }
 
