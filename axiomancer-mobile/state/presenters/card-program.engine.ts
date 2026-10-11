@@ -44,13 +44,13 @@ const HEADLINES: readonly { re: RegExp; keyword: string | null; value: (m: RegEx
     { re: /\bDEAL (\d+|n)\b/, keyword: null, value: (m) => `Deal ${m[1]}` },
     { re: /\bDEAL\b/, keyword: null, value: () => 'Deal X' },
     { re: /\bGUARD (\d+|n)\b/, keyword: 'GUARD', value: (m) => m[1] },
-    { re: /\bHEAL (\d+)\b/, keyword: 'HEAL', value: (m) => m[1] },
+    { re: /\bloses (\d+) VITAE\b/, keyword: null, value: (m) => `Foe −${m[1]}` },
+    { re: /\bfoe loses VITAE\b/, keyword: null, value: () => 'Foe −X' },
     { re: /\bVULNERABLE \+(\d+)%/, keyword: 'VULNERABLE', value: (m) => `+${m[1]}%` },
+    { re: /\bHEAL (\d+)\b/, keyword: 'HEAL', value: (m) => m[1] },
     { re: /\bLEECH (\d+)\b/, keyword: 'LEECH', value: (m) => m[1] },
     { re: /\bLEECH\b/, keyword: 'LEECH', value: () => 'X' },
     { re: /\bTETHER (\d+)\b/, keyword: 'TETHER', value: (m) => m[1] },
-    { re: /\bloses (\d+) VITAE\b/, keyword: null, value: (m) => `Foe −${m[1]}` },
-    { re: /\bfoe loses VITAE\b/, keyword: null, value: () => 'Foe −X' },
     { re: /\bWAIVE\b/, keyword: 'WAIVE', value: () => '' },
     { re: /\bEXILE a Curse\b/, keyword: 'EXILE', value: () => 'Curse' },
     { re: /\bgain (\d+) Conviction\b/i, keyword: null, value: (m) => `+${m[1]} ◆` },
@@ -83,7 +83,8 @@ const FREE_CELL: readonly { re: RegExp; keyword: string; value: (m: RegExpMatchA
     { re: /\bVULNERABLE \+(\d+)%/, keyword: 'VULNERABLE', value: (m) => `+${m[1]}%` },
     { re: /\bLEECH (\d+)\b/, keyword: 'LEECH', value: (m) => m[1] },
     { re: /\bTETHER (\d+)\b/, keyword: 'TETHER', value: (m) => m[1] },
-    { re: /\bSACRIFICE (\d+)\b/, keyword: 'SACRIFICE', value: (m) => m[1] },
+    // A cost reads as a loss, never as the "+N" the cell gives a gain.
+    { re: /\bSACRIFICE (\d+)\b/, keyword: 'SACRIFICE', value: (m) => `−${m[1]}` },
 ];
 
 /**

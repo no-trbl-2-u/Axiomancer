@@ -61,7 +61,7 @@ describe('program faces', () => {
         expect(programHeadline('SACRIFICE 4, GUARD 12.')).toEqual({ keyword: 'GUARD', value: '12' });
         expect(programHeadline('SACRIFICE 4, DEAL 12.')).toEqual({ keyword: null, value: 'Deal 12' });
         expect(programHeadline('TETHER 3. SACRIFICE 4.')).toEqual({ keyword: 'TETHER', value: '3' });
-        expect(programFreeCell('SACRIFICE 2, DEAL 5.')).toEqual({ keyword: 'SACRIFICE', value: '2' });
+        expect(programFreeCell('SACRIFICE 2, DEAL 5.')).toEqual({ keyword: 'SACRIFICE', value: '−2' });
         expect(programFreeCell('DEAL 3.')).toBeNull();
     });
 

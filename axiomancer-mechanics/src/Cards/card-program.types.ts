@@ -49,7 +49,8 @@ export type SacrificeModifier =
 /** The verbs a program line is written in. */
 export interface ProgramCtx {
     readonly q: ProgramQuery;
-    /** DEAL n: damage to the foe, body-scaled, VULNERABLE applies. Returns the damage dealt. */
+    /** DEAL n: damage to the foe, body-scaled, VULNERABLE applies. Returns the
+     *  VITAE the foe actually lost (what "the damage dealt" heals). */
     deal(n: number): number;
     /** GUARD n, mind-scaled. `exact` copies an already-resolved number. Returns the GUARD gained. */
     guard(n: number, opts?: { exact?: boolean }): number;

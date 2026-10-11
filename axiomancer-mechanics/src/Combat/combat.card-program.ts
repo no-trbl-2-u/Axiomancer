@@ -192,6 +192,7 @@ class LineCtx implements ProgramCtx {
     private incoming(): number { return this.w.kit.incomingNet(this.w.s); }
 
     // -- foe -----------------------------------------------------------------
+    /** Returns the VITAE the foe actually lost (a hit past 0 counts what was left). */
     deal(n: number): number {
         if (n <= 0) return 0;
         const enemy = this.w.s.enemy;
@@ -199,14 +200,14 @@ class LineCtx implements ProgramCtx {
         let dmg = scaleFor(n, this.stats(), 'body', 'one-shot');
         const vuln = getDamageTakenMultiplier(enemy);
         if (vuln !== 1) dmg = Math.round(dmg * vuln);
-        if (this.mode === 'cost') return dmg;
+        const landed = Math.min(dmg, enemy.health);
+        if (this.mode === 'cost') return landed;
         if (this.mode === 'value') {
-            const landed = Math.min(dmg, enemy.health);
             this.w.value += landed + (dmg >= enemy.health ? 20 : 0) + this.drainValue();
-            return dmg;
+            return landed;
         }
         this.hitFoe(dmg, true);
-        return dmg;
+        return landed;
     }
 
     foeLoses(n: number): void {

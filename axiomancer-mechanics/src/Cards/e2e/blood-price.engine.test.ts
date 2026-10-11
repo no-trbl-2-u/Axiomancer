@@ -120,6 +120,11 @@ describe('SACRIFICE, WAIVE, HEAL, EXILE', () => {
         // DEAL 6 at body 10 is 12; the heal copies it, capped at 8, and mind does not rescale it.
         expect(500 - s.enemy.health).toBe(12);
         expect(s.player.health).toBe(108);
+        // A hit past the foe's last VITAE heals only what it had left.
+        const low = fight(['bp-m-02b'], 100);
+        const finisher = play({ ...low, enemy: { ...low.enemy, health: 5 } }, 't0', true);
+        expect(finisher.enemy.health).toBe(0);
+        expect(finisher.player.health).toBe(105);
     });
 
     it('EXILE on a PAID line removes the card from combat', () => {
