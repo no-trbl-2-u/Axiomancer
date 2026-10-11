@@ -48,6 +48,10 @@ type CardSpecialMechanic = NonNullable<Card['specialMechanics']>[number];
 import { effectGlyph, GLYPH_COLORS, type StatusGlyph } from '@/components/combat/statusGlyphs';
 import { keywordForEffect, keywordForVerb, keywordForMechanic, keywordGloss, keywordsInText, systemTermsForCard } from '@/state/combat/keywords';
 import { AXM, HUE } from '@/theme/axm';
+import {
+    programFreeCell, programHeadline, programLinesFor, programLifecycle, programPlayVM, programTypeTag,
+    type ProgramPlayVM,
+} from '@/state/presenters/card-program.engine';
 
 // ── Stance palette (Heart/Body/Mind/Wild/X/Any) ──────────────────────────────
 
@@ -107,6 +111,7 @@ function deabbreviateShorthand(text: string): string {
 function freeLineText(card: CombatCard, sourceCard?: Card): string {
     // selfTargetCard: a rider crossing the card's printed target names its side
     // ('mark ×1 (enemy)' on a self-target card).
+    if (sourceCard?.program) return programLinesFor(sourceCard).free;
     if (!sourceCard?.free) return 'no effect';
     const text = deabbreviateShorthand(riderText(sourceCard.free, { selfTargetCard: sourceCard.targetType === 'self' }));
     const ae = sourceCard.free.applyEffect;
@@ -163,6 +168,7 @@ function freeRail(sourceCard?: Card): { freeKeyword: string | null; freeValue: s
 const FREE_KW_GLYPH: Record<string, string> = {
     GUARD: '❖', HEAL: '✚', DRAW: '⚑',
     CLEANSE: '✦', PIP: '⬡',
+    SACRIFICE: '†', LEECH: '∿', TETHER: '⊸', WAIVE: '○', DEAL: '⚔',
 };
 /** The FREE glyph plus the KEYWORD that drives it — the key lets the face swap
  *  the text rune for the effect's SILHOUETTE (glyphShapes.ts) when one exists. */
@@ -312,6 +318,8 @@ export type CombatCardKind =
     | 'mark'         // universal exposure: +N per DoT tick per stack
     | 'resolute'      // buff_resolute → real -N% damage-taken reduction (the inverse of vulnerable)
     // The generic MECHANIC-LED face:
+    | 'program'       // a card program (Global, Curse, SACRIFICE lines): the
+                      // headline is read off its printed PAID line
     | 'mechanic';     // a specialMechanics verb (DEAL / GUARD) or a
                       // rider-carried verb (DRAW / HEAL / …) is the card's paid identity;
                       // keyword + value come from the mechanic, never a fabricated fallback
@@ -356,6 +364,9 @@ export interface CombatCardFaceVM {
     freeValue: string | null;
     /** Type strip at the card foot — 'BODY · SPELL'. */
     typeStrip: string;
+    /** A Global's or a Curse's type tag over the art ('GLOBAL · ⏳3 / ∞',
+     *  'CURSE · NO SCRAP'); null for the plain types. */
+    typeTag?: string | null;
     verbLine: string;              // plain who/what
     powerRail: string;
     armable: boolean;              // the staged face reprints its number at commit (`armedValue`)
@@ -431,7 +442,32 @@ export interface CombatCardVM {
     /** Authored flavor prose (`Card.description`) — overlay BOTTOM only, never
      *  on the face (the face is purely functional). */
     flavor: string | null;
+    /** A program card in hand: whether each line can be played now and why
+     *  not, the Curse's scrap refusal and an X line's range. Absent elsewhere. */
+    play?: ProgramPlayVM;
 }
+
+/** A Global in play, for the board's IN PLAY row. */
+export interface CombatGlobalVM {
+    cardId: string;
+    name: string;
+    /** '⏳2' (turn starts left) or '∞' (rest of combat). */
+    turnsLabel: string;
+    stanceColor: string;
+    /** The card, for the inspect overlay. */
+    card: CombatCardVM | null;
+    a11y: string;
+}
+
+/** Board copy for program cards (no player-facing copy lives in a component). */
+export const PROGRAM_COPY = Object.freeze({
+    inPlay: 'IN PLAY',
+    cantPlay: "CAN'T PLAY",
+    noScrap: 'a Curse cannot be scrapped — play it to be rid of it',
+    xLabel: 'SACRIFICE',
+    xLess: 'Sacrifice less',
+    xMore: 'Sacrifice more',
+});
 export interface CombatSignatureVM {
     id: string; name: string; description: string; cost: number; affordable: boolean; icon: string;
     /** The refusal reason while the rune can't fire (null when castable):
@@ -513,6 +549,8 @@ export interface CombatViewModel {
     momentumV2: CombatMomentumV2VM;
     /** The die-gear rail. */
     dieGear: CombatDieGearRailVM;
+    /** Globals in play, with their turns left. */
+    globals: CombatGlobalVM[];
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -807,6 +845,33 @@ export function selectCombatLogHistory(state: CombatEncounterState): CombatLogHi
             case 'barrier-absorbed':
                 push('player', GUARD_COLOR, `Barrier absorbs ${e.amount}.`);
                 break;
+            // The program verbs (SACRIFICE, HEAL, Globals, EXILE, Curses).
+            case 'vitae-sacrificed': {
+                const named = getCardById(e.cardId)?.name ?? e.cardId;
+                push('player', INTENT_ICONS.damage.color, e.amount > 0
+                    ? `You SACRIFICE ${e.amount} VITAE (${named}).`
+                    : `Your SACRIFICE ${e.counted} is WAIVED (${named}).`);
+                break;
+            }
+            case 'player-healed': {
+                const named = getCardById(e.cardId)?.name;
+                push('player', GLYPH_COLORS.statup, `You HEAL ${e.amount}${named ? ` (${named})` : ''}.`);
+                break;
+            }
+            case 'global-entered': {
+                const named = getCardById(e.cardId)?.name ?? e.cardId;
+                push('player', GOLD_ACCENT, `${named} enters play ${e.turnsLeft === null ? 'for the rest of combat' : `for ${e.turnsLeft} turns`}.`);
+                break;
+            }
+            case 'global-left':
+                push('player', GUARD_COLOR, `${getCardById(e.cardId)?.name ?? e.cardId} leaves play.`);
+                break;
+            case 'card-exiled':
+                push('player', GUARD_COLOR, `${getCardById(e.cardId)?.name ?? e.cardId} is EXILED for this combat.`);
+                break;
+            case 'curse-added':
+                push('player', GLYPH_COLORS.control, `${e.count === 1 ? 'A Curse' : `${e.count} Curses`} enter your hand.`);
+                break;
             default: {
                 // Every kind `selectCombatLogLines` already narrates — one
                 // source of copy, never a forked duplicate.
@@ -871,7 +936,7 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
         isBoss,
         hp: Math.max(0, e.health), maxHp: e.maxHealth,
         hpPct: e.maxHealth > 0 ? Math.max(0, e.health) / e.maxHealth : 0,
-        effects: chips(e.effects),
+        effects: [...chips(e.effects), ...programChips(state)],
         intent: intentVM(state),
         stagesEntered: (state.stagesEntered ?? []).length,
         pendingDot: lethality.pendingDot,
@@ -1256,8 +1321,75 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc, sourceCard?: Card): 
     return out;
 }
 
+/** A program card's FACE: the headline of its PAID line (the FREE line's when
+ *  the PAID line has none), and the FREE line's silhouette keyword in the
+ *  FREE cell. */
+function programFaceStats(card: CombatCard, sourceCard: Card): CombatCardFaceVM {
+    const lines = programLinesFor(sourceCard);
+    const paidHead = programHeadline(lines.paid);
+    const head = paidHead.keyword || paidHead.value ? paidHead : programHeadline(lines.free);
+    const freeCell = programFreeCell(lines.free);
+    return {
+        kind: 'program',
+        keyword: head.keyword,
+        glyph: '◆',
+        freeGlyph: freeCell ? FREE_KW_GLYPH[freeCell.keyword] ?? '◆' : '',
+        freeGlyphKey: freeCell?.keyword ?? null,
+        categoryColor: PAYOFF_COLOR,
+        stanceColor: STANCE_COLORS[card.stance] ?? HUE.fallbackGrey,
+        heroText: head.value,
+        heroSub: null,
+        freeHeroText: lines.free,
+        freeHeroSub: null,
+        freeKeyword: freeCell?.keyword ?? null,
+        freeValue: freeCell?.value ?? null,
+        typeStrip: typeStripText(card),
+        typeTag: programTypeTag(sourceCard),
+        verbLine: lines.paid,
+        powerRail: head.keyword ?? (head.value || '—'),
+        armable: false,
+        inert: false,
+        guardBase: null,
+        statusBase: null,
+    };
+}
+
+/** A program card's inspect DETAIL: its type's lifecycle, both printed lines
+ *  and a keyword chip for every registry word they print. */
+function programDetailCore(card: CombatCard, sourceCard: Card): DetailCore {
+    const lines = programLinesFor(sourceCard);
+    const rankName = card.rank ? RANK_NAMES[card.rank] : null;
+    const metaChip = [
+        card.stance.toUpperCase(),
+        rankName ? rankName.toUpperCase() : `TIER ${card.tier}`,
+        RARITY_LABEL[rarityFor(card)].toUpperCase(),
+        ...(card.cardType ? [card.cardType.toUpperCase()] : []),
+    ].join(' · ');
+    const keywords = keywordsInText(`${lines.free} ${lines.paid}`)
+        .map((kw) => ({ name: kw.toUpperCase(), def: keywordGloss(kw) ?? '', minor: false }));
+    const global = sourceCard.cardType === 'global';
+    const sacrifices = /\bSACRIFICE\b/.test(`${lines.free} ${lines.paid}`);
+    return {
+        subtitle: programLifecycle(sourceCard),
+        metaChip,
+        outcomeLine: `${lines.paid}.`,
+        outcomeStats: global
+            ? [{ label: 'FREE', value: '⏳3 turns' }, { label: 'PAID', value: '∞ rest of combat' }]
+            : [],
+        stacksText: null,
+        freeLine: `◇ FREE (no die): ${lines.free}.`,
+        powerLine: `◆ WITH A DIE: ${lines.paid}.`,
+        readNote: 'Lands as printed: the numbers are final at your stats.',
+        mathLine: sacrifices
+            ? 'SACRIFICE is paid in VITAE and never takes you below 1: a line you cannot pay cannot be played.'
+            : 'The printed line is the applied effect.',
+        keywords,
+    };
+}
+
 /** Honest card FACE view-model (the 5-zone hand card). */
 export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM {
+    if (sourceCard?.program) return programFaceStats(card, sourceCard);
     const c = cardCalc(card, sourceCard);
     const stanceColor = STANCE_COLORS[card.stance] ?? HUE.fallbackGrey;
     const kw = c.keyword ? c.keyword.toUpperCase() : null;
@@ -1309,6 +1441,7 @@ export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM
 
 /** Honest card DETAIL view-model CORE (everything but the pill table). */
 function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
+    if (sourceCard?.program) return programDetailCore(card, sourceCard);
     const c = cardCalc(card, sourceCard);
     const Title = c.keyword ?? '';
     // The meta chip: stance, rank name (or tier), rarity band, card type —
@@ -1429,6 +1562,7 @@ function clauseValue(c: CardClause): string {
  */
 function paidLine(sourceCard?: Card): string | null {
     if (!sourceCard) return null;
+    if (sourceCard.program) return programLinesFor(sourceCard).paid;
     const parts = paidClauses(sourceCard, lookupEffect).map(formatPaidClause).filter(Boolean);
     return parts.length ? parts.join('  +  ') : null;
 }
@@ -1453,8 +1587,9 @@ export function detailStats(card: CombatCard, sourceCard?: Card): CombatCardDeta
     // printed lines plus its overlay free/stacks lines (colorLawHint excluded
     // — its WILD is the global colour law, not a card reference) and drop
     // terms a keyword chip already covers.
+    const typeWord = card.cardType === 'global' ? 'Global' : card.cardType === 'curse' ? 'Curse' : '';
     const systemTerms = systemTermsForCard(
-        [card.topActionText, card.bottomActionText, core.freeLine, core.stacksText ?? ''].join(' '),
+        [card.topActionText, card.bottomActionText, core.freeLine, core.stacksText ?? '', typeWord].join(' '),
         core.keywords.map(k => k.name),
     );
     // The rarity band, derived ONCE by `rarityFor`. Named label +
@@ -1494,7 +1629,7 @@ export function armedValue(face: CombatCardFaceVM): number | null {
 const KEYWORD_FAMILY: Record<string, StatFamily> = {
     DEAL: 'body',
     GUARD: 'mind', HEAL: 'mind',
-    BLEED: 'heart', VULNERABLE: 'heart',
+    BLEED: 'heart', VULNERABLE: 'heart', LEECH: 'heart',
 };
 
 /**
@@ -1534,7 +1669,56 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
         // Fleeing is offered at the encounter prelude (ENGAGE / FLEE), never
         // from the hand, so a retreat card is filtered out.
         .filter(({ card }: { card: CombatCard }) => card.id !== 'card-retreat' && card.verbClass !== 'retreat')
-        .map(({ uid, card }: { uid: string; card: CombatCard }) => scaledCardVM(uid, card, state.player.baseStats));
+        .map(({ uid, card }: { uid: string; card: CombatCard }) => {
+            const vm = scaledCardVM(uid, card, state.player.baseStats);
+            if (!getCardById(card.id)?.program) return vm;
+            const play = programPlayVM(state, uid, card.id);
+            const blocks = [
+                play.freeBlock ? `FREE can't be played now: ${play.freeBlock}.` : null,
+                play.paidBlock ? `PAID can't be played now: ${play.paidBlock}.` : null,
+            ].filter(Boolean).join(' ');
+            return { ...vm, play, detail: blocks ? { ...vm.detail, readNote: blocks } : vm.detail };
+        });
+}
+
+/** The Globals in play, each with its turns left and its card for the overlay. */
+function globalsVM(state: CombatEncounterState): CombatGlobalVM[] {
+    const stats = state.player.baseStats;
+    return (state.program?.globals ?? []).map((g) => {
+        const card = getCardById(g.cardId);
+        const name = card?.name ?? g.cardId;
+        const turnsLabel = g.turnsLeft === null ? '∞' : `⏳${g.turnsLeft}`;
+        const left = g.turnsLeft === null ? 'for the rest of combat' : `for ${g.turnsLeft} more turn start${g.turnsLeft === 1 ? '' : 's'}`;
+        return {
+            cardId: g.cardId, name, turnsLabel,
+            stanceColor: STANCE_COLORS[card?.color ?? 'any'] ?? HUE.fallbackGrey,
+            card: rewardCardVMs([g.cardId], stats)[0] ?? null,
+            a11y: `${name}, a Global in play ${left}. Tap to read it.`,
+        };
+    });
+}
+
+/** The foe's program statuses (LEECH, TETHER) as board chips. */
+function programChips(state: CombatEncounterState): CombatEffectChipVM[] {
+    const l = state.program;
+    if (!l) return [];
+    const out: CombatEffectChipVM[] = [];
+    if (l.leech > 0) {
+        out.push({
+            effectId: 'program-leech', intensity: l.leech, duration: l.leech,
+            glyph: { glyph: '∿', color: GLYPH_COLORS.dot, kind: 'dot', label: 'Leech' },
+            gloss: keywordGloss('Leech'),
+        });
+    }
+    const tetherLeft = l.tetherUntil - state.round + 1;
+    if (tetherLeft > 0) {
+        out.push({
+            effectId: 'program-tether', intensity: 1, duration: tetherLeft,
+            glyph: { glyph: '⊸', color: GLYPH_COLORS.control, kind: 'control', label: 'Tether' },
+            gloss: keywordGloss('Tether'),
+        });
+    }
+    return out;
 }
 
 /**
@@ -1719,5 +1903,6 @@ export function buildCombatViewModel(state: CombatEncounterState): CombatViewMod
         discardCards: state.discard.map((id) => ({ id, name: getCardById(id)?.name ?? id })),
         momentumV2: momentumV2VM(state),
         dieGear: dieGearRailVM(state),
+        globals: globalsVM(state),
     };
 }

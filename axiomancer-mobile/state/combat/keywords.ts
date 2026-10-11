@@ -63,8 +63,9 @@ const MECHANIC_KEYWORD: Record<string, string> = {
  * numbers live on the face/preview; this explains the keyword.
  *
  * The table holds only words something live prints: the grey office
- * (GUARD/VULNERABLE), the healing potions (HEAL), a map hazard (BLEED) and the
- * dice system (PIP, BOON, HONE, TEMPER).
+ * (GUARD/VULNERABLE), the Blood Price trial cards (SACRIFICE, WAIVE, EXILE,
+ * HEAL, TETHER, LEECH), the healing potions (HEAL), a map hazard (BLEED) and
+ * the dice system (PIP, BOON, HONE, TEMPER).
  *
  * TERSE GLOSSES: every gloss is ONE short
  * sentence in the Dawncaster register ("Cards with Lifedrain restore health
@@ -78,10 +79,16 @@ const KEYWORD_GLOSS: Record<string, string> = {
         'Blocks that much incoming attack damage during the next threat phase. '
         + 'Unused Guard is lost.',
     Heal: 'Restores that much VITAE, up to your maximum.',
+    // ── The cost and its handling ──
+    Sacrifice: 'Lose that much VITAE as a cost. It never takes you below 1, so a line you cannot pay cannot be played.',
+    Waive: 'Your next SACRIFICE this turn costs no VITAE but still counts.',
+    Exile: 'The card leaves combat instead of going to your discard.',
     // ── Affliction ──
     Bleed: 'Each hit the bearer takes deals 3 more VITAE per Bleed stack, then removes a stack.',
     Vulnerable:
         'The foe takes that much more damage from every hit. Adding more stacks it and refreshes the turns.',
+    Tether: 'For that many turns, each SACRIFICE makes the foe take damage equal to the VITAE it paid.',
+    Leech: 'At the start of its turn the foe loses that much VITAE and you heal what it lost. Then it drops by 1.',
     // ── Dice ──
     Pip:
         'Each threat phase a Reserve die survives, it gains one pip, capped at 2. '
@@ -165,6 +172,8 @@ export const SYSTEM_GLOSSARY: readonly { term: string; def: string }[] = [
     { term: 'CONVICTION ◆', def: 'A spend-anytime resource banked from unspent dice and overflow. It never decays.' },
     { term: 'RESERVE & PIPS', def: 'Up to 2 dice held between phases instead of played. Each gains +1 pip per phase it survives, spent for extra intensity or Guard.' },
     { term: 'WILD / X', def: 'A WILD die counts as any color. A dead X die powers nothing.' },
+    { term: 'GLOBAL', def: 'A card that stays in play and fires on its trigger: 3 turns played FREE, all combat played PAID. One copy of each at a time.' },
+    { term: 'CURSE', def: 'A dead card that holds a hand slot until played. It cannot be scrapped.' },
 ];
 
 /** How a card's PRINTED lines reference each system term. Matched against the
@@ -174,6 +183,8 @@ const SYSTEM_TERM_MATCH: Record<string, RegExp> = {
     'CONVICTION ◆': /\bconviction\b/i,
     'RESERVE & PIPS': /\breserve\b|\bpips?\b/i,
     'WILD / X': /\bwild\b|\bX die\b/,
+    'GLOBAL': /\bGlobal\b/,
+    'CURSE': /\bCurses?\b/,
 };
 
 /** Keyword chips whose own gloss already explains a system term — when such a

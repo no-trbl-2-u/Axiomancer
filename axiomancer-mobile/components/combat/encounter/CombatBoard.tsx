@@ -46,7 +46,7 @@ import type {
     CombatSignatureVM, CombatEffectChipVM,
     CombatMomentumV2VM,
 } from '@/state/presenters/combat-encounter.engine';
-import { armedValue, dieCanPowerCardVM, STANCE_COLORS } from '@/state/presenters/combat-encounter.engine';
+import { armedValue, dieCanPowerCardVM, STANCE_COLORS, PROGRAM_COPY } from '@/state/presenters/combat-encounter.engine';
 // The ONE mobile source for the rarity band. The face never
 // re-bands a rank and never re-types a rarity hue; see `card-rarity.engine.ts`.
 import { rarityFor, RARITY_LABEL, RARITY_PIPS, RARITY_COLOR } from '@/state/presenters/card-rarity.engine';
@@ -470,10 +470,14 @@ function DiceRow({
 
 export const StagedCard = React.memo(function StagedCard({
     card, assignedDie, onApply, gesture, register, compact = false, popKey = 0, socketPulse = false,
-    dropIneligible = false, rejectKey = 0, freeProminent = false,
+    dropIneligible = false, rejectKey = 0, freeProminent = false, x = null, onX,
 }: {
     card: CombatCardVM;
     assignedDie: CombatDieVM | null;
+    /** The amount chosen for an armed "SACRIFICE any amount" line (null = none). */
+    x?: number | null;
+    /** Steps that amount (uid, delta). */
+    onX?: (uid: string, delta: number) => void;
     /** Stable dispatcher — called with the card uid (memo-friendly). */
     onApply: (uid: string) => void;
     gesture: ReturnType<typeof Gesture.Exclusive>;
@@ -524,7 +528,13 @@ export const StagedCard = React.memo(function StagedCard({
     }
     // The APPLY suffix: a powered play names the die color; the dieless out
     // reads FREE.
-    const applyLabel = !armed
+    // A program line the engine says cannot be played now: the ribbon names
+    // the reason and refuses the tap (a die does not change a FREE refusal).
+    const blocked = card.play ? (armed ? card.play.paidBlock : card.play.freeBlock) : null;
+    const xRange = armed ? card.play?.xRange ?? null : null;
+    const applyLabel = blocked
+        ? `✕ ${blocked}`
+        : !armed
         ? 'APPLY · FREE'
         : assignedDie?.color
             ? `APPLY · ${assignedDie.color.toUpperCase()} DIE`
@@ -583,11 +593,27 @@ export const StagedCard = React.memo(function StagedCard({
                   </Animated.View>
                 </Animated.View>
             </GestureDetector>
+            {xRange && x !== null ? (
+                <View style={[styles.xRow, { width: cardW }]} testID={`combat-x-${card.uid}`}>
+                    <Pressable onPress={() => onX?.(card.uid, -1)} hitSlop={6} accessibilityRole="button" accessibilityLabel={PROGRAM_COPY.xLess} testID={`combat-x-less-${card.uid}`}>
+                        <Text style={styles.xStep}>−</Text>
+                    </Pressable>
+                    <Text style={styles.xValue} numberOfLines={1} testID={`combat-x-value-${card.uid}`}>{`${PROGRAM_COPY.xLabel} ${x}`}</Text>
+                    <Pressable onPress={() => onX?.(card.uid, 1)} hitSlop={6} accessibilityRole="button" accessibilityLabel={PROGRAM_COPY.xMore} testID={`combat-x-more-${card.uid}`}>
+                        <Text style={styles.xStep}>+</Text>
+                    </Pressable>
+                </View>
+            ) : null}
             <Pressable
-                onPress={() => { Haptics.impactAsync(armed ? Haptics.ImpactFeedbackStyle.Heavy : Haptics.ImpactFeedbackStyle.Medium).catch(() => undefined); onApply(card.uid); }}
+                onPress={() => {
+                    if (blocked) { juiceHaptics.notify(Haptics.NotificationFeedbackType.Error); return; }
+                    Haptics.impactAsync(armed ? Haptics.ImpactFeedbackStyle.Heavy : Haptics.ImpactFeedbackStyle.Medium).catch(() => undefined);
+                    onApply(card.uid);
+                }}
                 testID={`combat-apply-${card.uid}`}
                 accessibilityRole="button"
-                accessibilityLabel={armed ? `Apply powered: ${card.bottomActionText}` : `Apply free: ${card.topActionText}`}
+                accessibilityState={{ disabled: !!blocked }}
+                accessibilityLabel={blocked ? `Cannot apply: ${blocked}` : armed ? `Apply powered: ${card.bottomActionText}` : `Apply free: ${card.topActionText}`}
                 hitSlop={8}
                 style={[
                     styles.applyRibbon,
@@ -595,10 +621,11 @@ export const StagedCard = React.memo(function StagedCard({
                     // Dead-tray telegraph: the FREE line is the live out — the
                     // ribbon lights sulfur so it reads as THE button to press.
                     !armed && freeProminent && { borderColor: AXM.sulfur, backgroundColor: 'rgba(212,192,38,0.16)' },
+                    blocked ? { borderColor: AXM.blood, backgroundColor: AXM.bloodSubtle } : null,
                     compact && { paddingVertical: 3 },
                 ]}
             >
-                <Text style={[styles.applyText, { color: armed ? armedColor : freeProminent ? AXM.sulfur : AXM.parchment }, compact && { fontSize: 10 }]} numberOfLines={1} adjustsFontSizeToFit>
+                <Text style={[styles.applyText, { color: blocked ? AXM.blood : armed ? armedColor : freeProminent ? AXM.sulfur : AXM.parchment }, (compact || blocked) && { fontSize: 10, letterSpacing: 0.4 }]} numberOfLines={blocked ? 2 : 1} adjustsFontSizeToFit={!blocked}>
                     {applyLabel}
                 </Text>
             </Pressable>
@@ -755,7 +782,8 @@ export interface CombatBoardProps {
     /** Commit the staged card. `power` true → power it with `dieId` (the die the
      *  player dropped on it); `power` false → the FREE base action, no die
      *  (hazard model — the die is optional). */
-    onApply: (uid: string, dieId: string | null, power: boolean) => void;
+    /** `x` is the amount chosen for a "SACRIFICE any amount" line. */
+    onApply: (uid: string, dieId: string | null, power: boolean, x?: number) => void;
     onStage: (uid: string) => void;
     onUnstage: (uid: string) => void;
     onDiscard: (uid: string) => void;
@@ -815,6 +843,8 @@ export const CombatBoard = React.memo(function CombatBoard({
     // but not yet APPLYd. Local UI state — selecting/re-selecting is free; APPLY is
     // the commit. Each staged card shows exactly the die dragged onto it.
     const [pendingDieByUid, setPendingDieByUid] = useState<Record<string, string>>({});
+    // The amount chosen per staged card for a "SACRIFICE any amount" line.
+    const [xByUid, setXByUid] = useState<Record<string, number>>({});
     // Rising drop-confirmation nonce for the card a die just landed on (scale-pop).
     const [dropPop, setDropPop] = useState<{ uid: string; n: number }>({ uid: '', n: 0 });
     // Loud rejection: a rejected die drop shakes
@@ -905,6 +935,13 @@ export const CombatBoard = React.memo(function CombatBoard({
         if (payload.from === 'hand') {
             const trashRect = await measureRect(trashRef);
             if (rectContains(trashRect, x, y, 18)) {
+                // A Curse cannot be scrapped: refuse it loudly, the way an
+                // off-colour die is refused.
+                if (vm.hand.find((c) => c.uid === payload.uid)?.play?.unscrappable) {
+                    juiceHaptics.notify(Haptics.NotificationFeedbackType.Error);
+                    setDropReject((prev) => ({ uid: '', reason: PROGRAM_COPY.noScrap, n: prev.n + 1 }));
+                    return;
+                }
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => undefined);
                 onDiscard(payload.uid); return;
             }
@@ -1126,10 +1163,26 @@ export const CombatBoard = React.memo(function CombatBoard({
         const armedDie = assignedDieFor(uid);
         const dieId: string | null = armedDie ? armedDie.id : null;
         const power = armedDie !== null;
-        onApply(uid, dieId, power);
+        const x = power ? xFor(uid) : null;
+        if (x !== null) onApply(uid, dieId, power, x);
+        else onApply(uid, dieId, power);
         setPendingDieByUid((prev) => { const next = { ...prev }; delete next[uid]; return next; });
     };
     const handleApply = useCallback((uid: string) => handleApplyRef.current(uid), []);
+    // An armed X line's amount: the player's pick, clamped to the engine's
+    // range, starting at the minimum.
+    const xFor = (uid: string): number | null => {
+        const range = vm.hand.find((c) => c.uid === uid)?.play?.xRange;
+        if (!range || range.max < range.min) return null;
+        return Math.max(range.min, Math.min(range.max, xByUid[uid] ?? range.min));
+    };
+    const handleXRef = useRef<(uid: string, delta: number) => void>(() => undefined);
+    handleXRef.current = (uid: string, delta: number) => {
+        const cur = xFor(uid);
+        if (cur === null) return;
+        setXByUid((prev) => ({ ...prev, [uid]: cur + delta }));
+    };
+    const handleX = useCallback((uid: string, delta: number) => handleXRef.current(uid, delta), []);
     // Stable staged-frame registrar (drop-target measurement).
     const registerStaged = useCallback((uid: string, node: View | null) => {
         if (node) stagedRefs.current.set(uid, node); else stagedRefs.current.delete(uid);
@@ -1227,6 +1280,8 @@ export const CombatBoard = React.memo(function CombatBoard({
                                         socketPulse={dieDragLive && dropEligible}
                                         dropIneligible={dieDragLive && !dropEligible}
                                         freeProminent={deadTray}
+                                        x={adie ? xFor(card.uid) : null}
+                                        onX={handleX}
                                     />
                                 );
                             })}
@@ -1250,6 +1305,27 @@ export const CombatBoard = React.memo(function CombatBoard({
 
                 {/* momentum — the chain chip. */}
                 <MomentumChainChip vm={vm.momentumV2} onPress={onMomentumInfo} />
+
+                {/* Globals in play — each with its turns left; tap reads the card. */}
+                {vm.globals.length > 0 ? (
+                    <View style={styles.globalsRow} pointerEvents="box-none" testID="combat-globals">
+                        <Text style={styles.globalsLabel} allowFontScaling={false}>{PROGRAM_COPY.inPlay}</Text>
+                        {vm.globals.map((g) => (
+                            <Pressable
+                                key={g.cardId}
+                                onPress={() => { if (g.card) onInspect(g.card); }}
+                                style={[styles.globalChip, { borderColor: g.stanceColor }]}
+                                accessibilityRole="button"
+                                accessibilityLabel={g.a11y}
+                                testID={`combat-global-${g.cardId}`}
+                            >
+                                <Text style={styles.globalChipText} numberOfLines={1} allowFontScaling={false}>
+                                    {g.name} <Text style={styles.globalChipTurns}>{g.turnsLabel}</Text>
+                                </Text>
+                            </Pressable>
+                        ))}
+                    </View>
+                ) : null}
 
                 {/* player status strip — IN FLOW (not floated over the fan, where the
                     hand's gesture area swallowed the taps) so every tile stays tappable.
@@ -1788,6 +1864,11 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                             transition={0}
                         />
                         {f.inert ? <View style={styles.plateInertWash} /> : null}
+                        {f.typeTag ? (
+                            <View style={styles.typeTag} testID="combat-card-face-type-tag">
+                                <Text style={[styles.typeTagText, large && styles.typeTagTextLarge]} numberOfLines={1} allowFontScaling={false}>{f.typeTag}</Text>
+                            </View>
+                        ) : null}
                     </View>
                 </View>
                 {/* ③ LEDGER — solid ink ground: FREE cell | rule | PAID cell.
@@ -1854,9 +1935,23 @@ export const CombatCardFace = React.memo(function CombatCardFace({
 export const HAND_CARD_W = 120;
 export const HAND_CARD_H = 176;
 function HandCard({ card, namePeek = null }: { card: CombatCardVM; namePeek?: number | null }) {
+    const styles = useStyles();
     // `namePeek` is null for the topmost (rightmost) fanned card — nothing
     // covers it, so its name uses the full band. See `nameColumnPeek`.
-    return <CombatCardFace card={card} width={HAND_CARD_W} height={HAND_CARD_H} namePeek={namePeek} />;
+    // A program card neither of whose lines can be played now reads dimmed
+    // and says so; the overlay (tap) gives the reasons.
+    const stuck = !!card.play?.freeBlock && !!card.play?.paidBlock;
+    return (
+        <View style={stuck ? styles.handCardStuck : null}>
+            <CombatCardFace card={card} width={HAND_CARD_W} height={HAND_CARD_H} namePeek={namePeek}>
+                {stuck ? (
+                    <View style={styles.stuckBadge} pointerEvents="none" testID="combat-card-stuck">
+                        <Text style={styles.stuckBadgeText} allowFontScaling={false}>{PROGRAM_COPY.cantPlay}</Text>
+                    </View>
+                ) : null}
+            </CombatCardFace>
+        </View>
+    );
 }
 
 /**
@@ -2000,6 +2095,35 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
     },
     // The hand card whose drag ghost is in flight — dimmed in place.
     handCardLifted: { opacity: 0.3 },
+    handCardStuck: { opacity: 0.6 },
+    stuckBadge: {
+        position: 'absolute', left: 6, right: 6, top: '42%', alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.8)', borderWidth: 1, borderColor: AXM.blood, borderRadius: 3, paddingVertical: 2,
+    },
+    stuckBadgeText: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1, color: AXM.blood },
+    typeTag: {
+        position: 'absolute', left: 0, right: 0, bottom: 0, alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.72)', paddingVertical: 1,
+    },
+    typeTagText: { fontFamily: FONTS.sans, fontSize: 8, letterSpacing: 0.8, color: AXM.sulfur },
+    typeTagTextLarge: { fontSize: 12 },
+    xRow: {
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 2,
+        paddingHorizontal: 8, paddingVertical: 2, backgroundColor: 'rgba(0,0,0,0.65)', borderRadius: 4,
+    },
+    xStep: { fontFamily: FONTS.sans, fontSize: 16, lineHeight: 18, color: AXM.sulfur, paddingHorizontal: 4 },
+    xValue: { fontFamily: FONTS.mono, fontSize: 10, color: AXM.parchment },
+    globalsRow: {
+        flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'flex-end',
+        gap: 6, paddingHorizontal: 12, paddingBottom: 4,
+    },
+    globalsLabel: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1.2, color: AXM.bone },
+    globalChip: {
+        borderWidth: 1, borderRadius: 4, backgroundColor: 'rgba(0,0,0,0.7)', paddingHorizontal: 6, paddingVertical: 2,
+        maxWidth: 170,
+    },
+    globalChipText: { fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 0.4, color: AXM.parchment },
+    globalChipTurns: { color: AXM.sulfur },
 
     // ── bottom rail ── The row sits between the player medallion (left 10,
     //    92 wide) and the END medallion (right 10, 80 wide); the side paddings

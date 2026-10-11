@@ -498,7 +498,7 @@ export function CombatEncounterPanel({
     // APPLY one staged card (hazard model — the die is OPTIONAL). `power` true →
     // the dragged die powers the card (bottom action); `power` false → the FREE
     // base action (top action, no die). One commit; the card leaves staging.
-    const onApply = useCallback((uid: string, dieId: string | null, power: boolean) => {
+    const onApply = useCallback((uid: string, dieId: string | null, power: boolean, x?: number) => {
         if (resolvingRef.current) return; // a drag must not land mid-resolution
         apply((s) => {
             // Every dropped die (fresh tray face, Reserve, or GHOST) is its
@@ -506,7 +506,8 @@ export function CombatEncounterPanel({
             // engine's `playBottomAction` REQUIRES one (no dieId fizzles
             // "choose a die to power this card"). `playCombatCard` also
             // advances the momentum wheel and grants its die internally.
-            const t = playCombatCard(s, { uid }, power, dieId ?? undefined);
+            // `x`: the amount chosen for a "SACRIFICE any amount" line.
+            const t = playCombatCard(s, { uid }, power, dieId ?? undefined, undefined, x);
             fxRef.current = t.events;
             return t.state;
         });

@@ -23,13 +23,15 @@ the engine applies.
 
 | keyword | reminder text | carried by |
 |---|---|---|
-| **DEAL N** | Direct VITAE damage. Plain English on the face, so it has no gloss. | grey-strike (PAID) |
+| **DEAL N** | Direct VITAE damage. Plain English on the face, so it has no gloss. | grey-strike (PAID); the Blood Price trial set |
 
 ## Player keywords — afflictions
 
 | keyword | reminder text | carried by |
 |---|---|---|
-| **VULNERABLE +N% dM** | The foe takes that much more damage from every hit. Adding more stacks it and refreshes the turns. Heart scales N. | grey-word |
+| **VULNERABLE +N% dM** | The foe takes that much more damage from every hit. Adding more stacks it and refreshes the turns. Heart scales N. | grey-word; Blood Price P-05b, P-09b, M-07a |
+| **LEECH N** | At the start of its turn the foe loses that much VITAE and you heal what it lost. Then it drops by 1. Heart scales N when it is applied; a second LEECH adds. | Blood Price P-06d, E-03d, M-01d, M-03d, M-08d |
+| **TETHER N** | For that many turns, each SACRIFICE makes the foe take damage equal to the VITAE it paid (a DEAL: unscaled, VULNERABLE applies; a WAIVED SACRIFICE deals 0). | Blood Price P-08d, E-02d, E-10d |
 | **BLEED** | Each hit the bearer takes deals 3 more VITAE per Bleed stack, then removes a stack. | no live carrier: no card, foe, hazard or item applies `debuff_bleed`; the effect stays in `src/Effects/debuffs.library.json` and mobile still glosses it |
 
 ## Player keywords — walls
@@ -42,7 +44,15 @@ the engine applies.
 
 | keyword | reminder text | carried by |
 |---|---|---|
-| **HEAL N** | Restores that much VITAE, up to your maximum. | the three healing potions (`src/Items/consumable.library.ts`) |
+| **HEAL N** | Restores that much VITAE, up to your maximum. Mind scales N on a card; healing "the damage dealt" heals that amount, unscaled. | Blood Price M-01d, M-02b, M-06c, M-07a, M-09a; the three healing potions (`src/Items/consumable.library.ts`) |
+
+## Player keywords — the blood price
+
+| keyword | reminder text | carried by |
+|---|---|---|
+| **SACRIFICE N** | Lose that much VITAE as a cost. It never takes you below 1, so a line you cannot pay cannot be played. Unscaled. A SACRIFICE that fires n times counts as n. | Blood Price P-01a, P-02a, P-05b, P-08d, P-09b, E-02d, E-03d, E-06b, E-10d and the grey Curse |
+| **WAIVE** | Your next SACRIFICE this turn costs no VITAE but still counts. | Blood Price E-04c, E-05c (and the Curse E-05c plays) |
+| **EXILE** | The card leaves combat instead of going to your discard. | Blood Price P-04c, P-07b, M-04c, M-06c and the grey Curse (PAID lines) |
 
 ## Player keywords — the dice
 
@@ -72,6 +82,8 @@ in `SYSTEM_GLOSSARY`.
 | CONVICTION ◆ | A spend-anytime resource banked from unspent dice and overflow. It never decays. |
 | RESERVE & PIPS | Up to 2 dice held between phases instead of played. Each gains +1 pip per phase it survives, spent for extra intensity or Guard. |
 | WILD / X | A WILD die (the gold die) counts as any color. A dead X die (a miss face) powers nothing. |
+| GLOBAL | A card type: stays in play and fires on its trigger (⟳ start of your turn, 🩸 when you SACRIFICE n, 📜 when you play a Curse): 3 turns played FREE, all combat played PAID. One copy of each at a time. Carried by Blood Price P-10c, E-03d, E-09c, M-08d. |
+| CURSE | A card type: a dead card that holds a hand slot until played. It cannot be scrapped. Carried by the grey Curse, added by Blood Price E-01a. |
 
 ---
 

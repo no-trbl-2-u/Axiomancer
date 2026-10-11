@@ -1,0 +1,122 @@
+/**
+ * Program cards on the combat board — the presenter half.
+ *
+ * Pins, against the REAL engine and the live library (no card id is named:
+ * cards are found by what they are, so a trial set can come out without
+ * touching this file):
+ *   · a program face headlines its PAID line, wears its type tag, and draws a
+ *     FREE silhouette;
+ *   · a hand card whose SACRIFICE would leave the player below 1 VITAE reads
+ *     unplayable with the engine's reason, and the overlay says why;
+ *   · a Curse is unscrappable on the board's VM;
+ *   · a Global in play is listed with its turns left; LEECH and TETHER show on
+ *     the foe as chips;
+ *   · the log narrates SACRIFICE, HEAL, Globals and EXILE.
+ */
+
+import {
+    cardLibrary, createCharacter, initializeCombatEncounter, rollEncounterDice, playCombatCard,
+    type Card, type CombatEncounterState,
+} from '@mechanics';
+
+import { buildCombatViewModel, selectCombatLogHistory } from '../combat-encounter.engine';
+import { programHeadline, programFreeCell } from '../card-program.engine';
+import { createMockEncounterEnemy } from '../../mocks/combat.mock';
+
+const programCards = cardLibrary.filter((c) => c.program);
+const find = (pred: (c: Card) => boolean): Card => {
+    const card = programCards.find(pred);
+    if (!card) throw new Error('no library card matches');
+    return card;
+};
+const freeText = (c: Card): string => c.program?.free?.text ?? '';
+const paidText = (c: Card): string => c.program?.paid?.text ?? '';
+
+const SACRIFICE_FREE = find((c) => /^SACRIFICE \d+, DEAL/.test(freeText(c)));
+const CURSE = find((c) => c.cardType === 'curse');
+const TURN_GLOBAL = find((c) => c.program?.global?.trigger === 'turn' && /^LEECH/.test(c.program.global.text));
+const LEECH_CARD = find((c) => /^LEECH \{leech:\d+\}\.$/.test(paidText(c)));
+const TETHER_CARD = find((c) => /^TETHER \d+\. SACRIFICE 1/.test(paidText(c)));
+
+const WILD = { id: 'w', color: 'wild' as const, state: 'available' as const, temporary: false, face: 'mana' as const };
+
+function encounter(hand: string[], vitae = 100): CombatEncounterState {
+    const player = createCharacter({ name: 'Hero', level: 1, baseStats: { heart: 5, body: 5, mind: 5 } });
+    const deck = [...hand, 'grey-strike', 'grey-ward', 'grey-word', 'grey-strike', 'grey-ward'];
+    const enemy = { ...createMockEncounterEnemy(), health: 400, maxHealth: 400 };
+    const s = rollEncounterDice(initializeCombatEncounter(player, enemy, deck, 5)).state;
+    return {
+        ...s,
+        hand: hand.map((cardId, i) => ({ uid: `h${i}`, cardId })),
+        player: { ...s.player, health: vitae },
+        dice: [{ ...WILD }],
+    };
+}
+
+const paid = (s: CombatEncounterState, uid: string): CombatEncounterState =>
+    playCombatCard({ ...s, dice: [{ ...WILD }] }, { uid }, true, 'w').state;
+
+describe('program faces', () => {
+    it('headline a registry keyword as KEYWORD · value and DEAL as a plain hero line', () => {
+        expect(programHeadline('SACRIFICE 4, GUARD 12.')).toEqual({ keyword: 'GUARD', value: '12' });
+        expect(programHeadline('SACRIFICE 4, DEAL 12.')).toEqual({ keyword: null, value: 'Deal 12' });
+        expect(programHeadline('TETHER 3. SACRIFICE 4.')).toEqual({ keyword: 'TETHER', value: '3' });
+        expect(programFreeCell('SACRIFICE 2, DEAL 5.')).toEqual({ keyword: 'SACRIFICE', value: '2' });
+        expect(programFreeCell('DEAL 3.')).toBeNull();
+    });
+
+    it('a Global and a Curse wear their type tag; the hand card carries its play state', () => {
+        const vm = buildCombatViewModel(encounter([TURN_GLOBAL.id, CURSE.id]));
+        const [global, curse] = vm.hand;
+        expect(global.face.typeTag).toMatch(/^GLOBAL/);
+        expect(curse.face.typeTag).toMatch(/^CURSE/);
+        expect(curse.play?.unscrappable).toBe(true);
+        expect(global.play?.unscrappable).toBe(false);
+        expect(global.detail.subtitle).toMatch(/^Global:/);
+        expect(curse.detail.systemTerms.map((t) => t.term)).toContain('CURSE');
+    });
+});
+
+describe('a line that cannot be paid', () => {
+    it('reads blocked with the engine\'s reason, on the VM and in the overlay', () => {
+        const vm = buildCombatViewModel(encounter([SACRIFICE_FREE.id, CURSE.id], 2));
+        const [sac, curse] = vm.hand;
+        expect(sac.play?.freeBlock).toMatch(/below 1 VITAE/);
+        expect(sac.detail.readNote).toMatch(/FREE can't be played now/);
+        expect(curse.play?.freeBlock).toMatch(/below 1 VITAE/);
+        expect(curse.play?.paidBlock).toMatch(/below 1 VITAE/);
+    });
+
+    it('is playable at full VITAE', () => {
+        const vm = buildCombatViewModel(encounter([SACRIFICE_FREE.id], 100));
+        expect(vm.hand[0].play?.freeBlock).toBeNull();
+    });
+});
+
+describe('the board reads the program ledger', () => {
+    it('lists a PAID Global as in play for the rest of combat, a FREE one with its turns', () => {
+        const s = paid(encounter([TURN_GLOBAL.id]), 'h0');
+        const vm = buildCombatViewModel(s);
+        expect(vm.globals).toHaveLength(1);
+        expect(vm.globals[0].turnsLabel).toBe('∞');
+        expect(vm.globals[0].card?.cardId).toBe(TURN_GLOBAL.id);
+        const free = buildCombatViewModel(playCombatCard(encounter([TURN_GLOBAL.id]), { uid: 'h0' }, false).state);
+        expect(free.globals[0].turnsLabel).toBe('⏳3');
+    });
+
+    it('shows LEECH and TETHER on the foe', () => {
+        let s = paid(encounter([LEECH_CARD.id, TETHER_CARD.id]), 'h0');
+        s = paid(s, 'h1');
+        const chips = buildCombatViewModel(s).enemy.effects.map((c) => c.glyph.label);
+        expect(chips).toContain('Leech');
+        expect(chips).toContain('Tether');
+    });
+
+    it('narrates SACRIFICE and a Global entering play in the log', () => {
+        let s = playCombatCard(encounter([SACRIFICE_FREE.id, TURN_GLOBAL.id]), { uid: 'h0' }, false).state;
+        s = paid(s, 'h1');
+        const text = selectCombatLogHistory(s).map((l) => l.text).join('\n');
+        expect(text).toMatch(/You SACRIFICE \d+ VITAE/);
+        expect(text).toMatch(/enters play for the rest of combat/);
+    });
+});
