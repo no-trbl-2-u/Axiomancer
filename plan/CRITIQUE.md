@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-10 at commit 720ca33d
-> Pass count: 75
+> Last pass: 2026-10-11 at commit 69971f5c
+> Pass count: 76
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -468,6 +468,26 @@
 > (`contain` trade), the mobile hazard strip's "CHOOSE TO PROC…" (pass 68
 > trade), and the fixture placeholder lines in dialogue, cutscene and
 > village (fixture content, not shipped).
+
+> **[critique pass 76, 2026-10-11, commit 69971f5c] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors (the cold
+> `exploration-hub` route still bounces to the title with no save). 13
+> commits after pass 75, and none of them changes a screen in the set
+> apart from the hazard crack overlay's highlight offset (`7c256e72`). The
+> route cards' crack strokes draw as before, and the capture logs no
+> `translateX`/`translateY` warning. Reconfirmed and not re-filed: pass
+> 75's mobile hub zoom floor (the Breakwater's nodes still draw as specks
+> at 375 wide), pass 75's hazard hand-card effect-line clip (desktop
+> PILGRIM'S BLESSING "RE-CAST +DIE", SURE FOOTING "DRAW 1"), pass 65's
+> Minor Healing Potion, pass 63's corner medallions, and RC walk item 9.
+> Checked and not filed: the customs-house line "The clerk takes
+> shillings, not names" above a FREE rest (pass 61's fix chose "on the
+> house", which squares the two), the main menu's empty upper half
+> (bottom-seated on purpose), the mobile title's black band (`contain`
+> trade), the mobile hazard strip's "CHOOSE TO PROC…" (pass 68 trade), and
+> the fixture placeholder lines in dialogue, cutscene and village (fixture
+> content, not shipped). Zero fresh findings this pass.
 
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `archive-pre-revamp:plan/archive/CRITIQUE_2026.md`.
 
