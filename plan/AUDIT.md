@@ -34,22 +34,6 @@
 
 ## Top 5 findings (scored)
 
-### [5.9] combat — user crash on ACCEPTING post-combat card reward (unreproduced, issue #216)
-- category: external-critique
-- impact: 9
-- ease: 6
-- next: body says "LIKELY THE SAME BUG — RESOLVED 2026-09-04 (verify
-  before closing)" (the rune-column/worklet fix may already cover it) —
-  get the owner's device log (SELF -> dev tools -> DIAGNOSTICS -> PREV
-  SESSION, domain ERROR) to confirm before closing; can't be shipped
-  blind on web alone.
-- evidence 2026-09-27 (post-purge playtest): `combat-round-e2e.mjs`
-  `MODE=live PRESET=sage` won four fights (seeds 16 and 8). Each run tapped
-  an offer, then CHOOSE THIS, then TAKE CARD, with no page error, and the
-  Deck tab showed the pick (10 → 11 cards). The web accept path is clean on
-  the grey pool; the device log is still the only way to close this.
-
-
 ## Pending
 
 ### [x] [perf] firstScreenMs budget breach: 306 ms vs 303 ms (2026-10-11) — CLOSED 2026-10-11 (afcd727c: a runner artifact. The run was on an Intel Xeon 8573C and the budgets were seeded on an AMD EPYC 9V74. Re-measured on the AMD at 52fabfbf: firstScreenMs 248, lcpMs 288, tbtMs 81, all under budget. Timing budgets now apply only on the seeding CPU)
@@ -755,7 +739,6 @@
 - note 2026-09-25 (T4 compaction): items 3 (`Effects/world-tick.ts`) and 4
   (`TIER1_EFFECT_MAP`, `T1_DEFAULT`) no longer exist — deleted in T2a. Items 1, 2
   and 5 re-read live at `d615a35d`.
-
 
 ### [x] [loop-call] `plan/bearings.md` still says there is no hosted web surface, and a second Pages project is about to exist (2026-09-20) — RATIFIED via /oversight 2026-09-23
 - category: divergence
@@ -1594,7 +1577,25 @@ present. Row stays open until that session runs.
   (seed each CPU once), or keep budgets everywhere and raise the headroom to
   cover the slower runner.
 
-### [loop-call] The level prints in arabic everywhere; roman numerals stay for chronicle counts only (2026-10-09)
+## Done
+
+### [x] combat — user crash on ACCEPTING post-combat card reward (unreproduced, PR #216) — CLOSED 2026-10-11 via /oversight (blind)
+- category: external-critique
+- impact: 9
+- ease: 6
+- next: body says "LIKELY THE SAME BUG — RESOLVED 2026-09-04 (verify
+  before closing)" (the rune-column/worklet fix may already cover it) —
+  get the owner's device log (SELF -> dev tools -> DIAGNOSTICS -> PREV
+  SESSION, domain ERROR) to confirm before closing; can't be shipped
+  blind on web alone.
+- evidence 2026-09-27 (post-purge playtest): `combat-round-e2e.mjs`
+  `MODE=live PRESET=sage` won four fights (seeds 16 and 8). Each run tapped
+  an offer, then CHOOSE THIS, then TAKE CARD, with no page error, and the
+  Deck tab showed the pick (10 → 11 cards). The web accept path is clean on
+  the grey pool; the device log is still the only way to close this.
+- resolution: T closed it blind via `/oversight` 2026-10-11 as covered by the 2026-09-04 rune-column/worklet fix, without the device log. The 2026-09-27 web runs accepted rewards cleanly. If the crash recurs on a device, file a fresh row with the DIAGNOSTICS PREV SESSION log.
+
+### [x] [loop-call] The level prints in arabic everywhere; roman numerals stay for chronicle counts only (2026-10-09) — RATIFIED 2026-10-11 via /oversight
 - category: divergence
 - impact: 2
 - ease: 9
@@ -1609,8 +1610,7 @@ present. Row stays open until that session runs.
   counts.
 - next: `/oversight` ratifies or reverses. Reversing means making the SELF
   medallion, "XP TO LVL N", the combat line and StatusCard roman instead.
-
-## Done
+- resolution: T ratified the arabic level via `/oversight` 2026-10-11. Keep it; do not re-file.
 
 ### [x] [tests] Root `npm test` is red on main: the comment guard false-positives on in-game "phase N of M" copy (digest, 2026-10-07) — CLOSED 2026-10-07 (6a41768c)
 - category: tests
