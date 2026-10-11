@@ -729,8 +729,6 @@
   swapping).
 - source: loop
 
-## Done
-
 ### [MED] exploration / mobile — the hub opens the map at about 0.15x, so the 44px node markers draw at about 6px
 - pass: 75 (commit 720ca33d)
 - viewport: mobile (375x812)
@@ -772,6 +770,8 @@
   margins) so name + art + both rows fit, and pin it with a test that
   a two-line name leaves the bottom row's effect line inside the frame.
 - source: critique-drive (unattended)
+
+## Done
 
 ### [x] [LOW] exploration / mobile — the map pane leaves a ~140px empty black band above the engraving — RESOLVED 2026-10-10 (commit c5d0dda6; `computeFocusTransform` settles each axis against the plate: a plate covering the pane slides to meet the frame edge, a smaller one is centred, focus nodes stay in frame; pinned in MapCanvas.test.tsx)
 - issue: #482
