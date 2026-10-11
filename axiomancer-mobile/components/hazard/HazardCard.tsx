@@ -216,6 +216,10 @@ export function handEffectFontSize(...labels: (string | null)[]): number {
     return Math.min(HAND_EFFECT_SIZE, ...sizes);
 }
 
+/** Detail-mode height of a utility card's effect line (15px gothic, 2px gap). Each stat
+ *  section prints it on its own line, so the card grows by two of them. */
+export const DETAIL_EFFECT_LINE_H = 19;
+
 /** Hand-mode medallion size. A utility card prints an effect line under each stat row,
  *  two lines the 136px frame cannot fit beside a 30px medallion, so its medallion shrinks
  *  to the play-mode size and the paid row's effect line stays inside the frame. */
@@ -240,7 +244,7 @@ export const HazardCard = React.memo(function HazardCard({
     const powered = card.poweredByDieId !== null;
     const powerLabel = DIE[card.kind].label;
     const W = mode === 'detail' ? 234 : mode === 'play' ? 70 : mode === 'offer' ? 96 : 90;
-    const H = mode === 'detail' ? 330 : mode === 'play' ? 112 : mode === 'offer' ? 132 : 136;
+    const H = mode === 'detail' ? 330 + (card.utility ? 2 * DETAIL_EFFECT_LINE_H : 0) : mode === 'play' ? 112 : mode === 'offer' ? 132 : 136;
 
     const frame = [
         styles.frame,
@@ -303,18 +307,11 @@ export const HazardCard = React.memo(function HazardCard({
                 }}
             >
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                        <StatPair
-                            force={bottom ? card.powered.force : card.free.force}
-                            escape={bottom ? card.powered.escape : card.free.escape}
-                            size={14}
-                        />
-                        {card.utility && (
-                            <Text style={{ fontFamily: FONTS.gothic, fontSize: 15, color: bottom ? c.dark : CARD_INK }}>
-                                ⬡ {bottom ? card.poweredEffectLabel : card.freeEffectLabel}
-                            </Text>
-                        )}
-                    </View>
+                    <StatPair
+                        force={bottom ? card.powered.force : card.free.force}
+                        escape={bottom ? card.powered.escape : card.free.escape}
+                        size={14}
+                    />
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                         <Text style={{ fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 1.2, color: bottom ? c.dark : CARD_INK2 }}>
                             {bottom ? 'MANA' : 'FREE'}
@@ -322,6 +319,12 @@ export const HazardCard = React.memo(function HazardCard({
                         {bottom && <ManaSocket kind={card.kind} filled={powered} size={18} />}
                     </View>
                 </View>
+                {/* Its own line: beside the stats it ran under MANA and the socket ("RE-CAST +DIE"). */}
+                {card.utility && (
+                    <Text style={{ fontFamily: FONTS.gothic, fontSize: 15, color: bottom ? c.dark : CARD_INK, marginTop: 2 }}>
+                        ⬡ {bottom ? card.poweredEffectLabel : card.freeEffectLabel}
+                    </Text>
+                )}
                 <Text style={{ fontFamily: FONTS.serif, fontSize: 14, color: CARD_INK, lineHeight: 17, marginTop: 3 }}>
                     {card.dead
                         ? 'Dead weight. It does nothing, and nothing can power it.'

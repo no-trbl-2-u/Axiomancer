@@ -1,8 +1,8 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { render, within } from '@testing-library/react-native';
 
 import { HAZARD_DECK } from '@mechanics';
-import { HazardCard, CardArt, handArtSize, handEffectFontSize, handNameFontSize } from '../HazardCard';
+import { HazardCard, CardArt, DETAIL_EFFECT_LINE_H, handArtSize, handEffectFontSize, handNameFontSize } from '../HazardCard';
 import { cardVMFromId } from '@/state/presenters/hazard.engine';
 import type { HazardCardVM } from '@/state/presenters/hazard.engine';
 
@@ -197,5 +197,26 @@ describe('handEffectFontSize', () => {
         const { getByText, queryByText } = render(<HazardCard card={wind} mode="hand" />);
         expect(getByText('CONVERT ✕→◆ ALL')).toBeTruthy();
         expect(queryByText(/⬡/)).toBeNull();
+    });
+});
+
+describe('detail mode effect line', () => {
+    // Pilgrim's Blessing printed "⬡ RE-CAST +DIE" beside its stats, which pushed MANA
+    // and the socket square out of the 234px card (seen in the web build's reward
+    // preview, also on Read the Wind and Balance Pole). The effect takes its own line.
+    it('prints a utility card\'s effect under the stat row, not beside MANA', () => {
+        const blessing = cardVMFromId('blessing');
+        const { getByText, getAllByText } = render(<HazardCard card={blessing} mode="detail" />);
+        let headerRow = getByText('MANA');
+        while (headerRow.props.style?.justifyContent !== 'space-between') headerRow = headerRow.parent!;
+        expect(within(headerRow).queryByText(/RE-CAST/)).toBeNull();
+        expect(getAllByText(/⬡ RE-CAST \+DIE/)).toHaveLength(2);
+    });
+
+    it('grows a utility card by its two effect lines and leaves the rest at 330', () => {
+        const height = (card: HazardCardVM) =>
+            JSON.stringify(render(<HazardCard card={card} mode="detail" />).toJSON());
+        expect(height(cardVMFromId('blessing'))).toContain(`"height":${330 + 2 * DETAIL_EFFECT_LINE_H}`);
+        expect(height(mockCardVM)).toContain('"height":330');
     });
 });
