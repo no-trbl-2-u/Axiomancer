@@ -150,7 +150,8 @@
 - next: before any map ships with `chartTexture: true`, draw the texture as
   a tiled image or drop it; extend the raster test to the fallback sheet.
 
-### [tooling] `npm ci` in a fresh worktree leaves mobile typecheck red (perf audit, 2026-10-03)
+### [x] [tooling] `npm ci` in a fresh worktree leaves mobile typecheck red (perf audit, 2026-10-03) — CLOSED 2026-10-11 (911cacb4: `@types/react` 19.2.17 is a root devDependency, so npm 11 no longer skips it as an optional peer; a fresh worktree `npm ci` + mobile `tsc --noEmit` is green under npm 11.21.0, red before, and under npm 10.9.9)
+- issue: #495
 - category: debt
 - impact: 4
 - ease: 6
@@ -333,7 +334,7 @@
 - next: `/adjust-enemies`. Re-run the King's cell with `npm run
   baseline:check` fresh, then decide re-pin vs wait. Record the choice here.
 
-### [debt] Post-purge: WOUNDING has no payload — 13 foes carry it, its gloss promises a WOUND card that no longer exists (2026-09-27)
+### [x] [debt] Post-purge: WOUNDING has no payload — 13 foes carry it, its gloss promises a WOUND card that no longer exists (2026-09-27) — CLOSED 2026-10-11 (stale: the enemy keyword code went in R2b, 872de5a7; no `wounding` remains in `axiomancer-mechanics/src`; found unticked this pass)
 - category: debt
 - impact: 5
 - ease: 6
