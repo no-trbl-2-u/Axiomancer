@@ -770,7 +770,10 @@
   swapping).
 - source: loop
 
-### [LOW] hazard — a hand card with a two-line name clips its paid row's effect line at its own bottom edge
+## Done
+
+### [x] [LOW] hazard — a hand card with a two-line name clips its paid row's effect line at its own bottom edge — RESOLVED 2026-10-11 (commit 05665523; the cause was the utility effect lines, not the name: every purple and gold card ran its paid line 5px past the frame. In hand mode a utility card draws the 20px medallion, `handArtSize`, and its last line sits 9px inside at 1280 and 375; pinned in HazardCard.test.tsx)
+- issue: #493
 - pass: 75 (commit 720ca33d)
 - viewport: both (clearest on desktop 1280x800, where no card overlaps another)
 - category: visual
@@ -788,8 +791,6 @@
   margins) so name + art + both rows fit, and pin it with a test that
   a two-line name leaves the bottom row's effect line inside the frame.
 - source: critique-drive (unattended)
-
-## Done
 
 ### [x] [MED] exploration / mobile — the hub opens the map at about 0.15x, so the 44px node markers draw at about 6px — RESOLVED 2026-10-11 (commit e6970c5c; node marks, their press targets and halos are counter-scaled by `nodeCounterScale` to a 28px screen floor at any zoom, the plate and roads keep scaling; 28 not 44 because the closest Act 1 nodes sit ~32px apart at the phone fit; pinned in ExplorationNode.test.tsx)
 - issue: #492
