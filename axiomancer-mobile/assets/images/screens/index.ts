@@ -39,10 +39,11 @@ const PLATES: Record<ScreenArtKey, number> = {
     village: require('../maps/wentworth-street.webp'),
     // Rest happens off the road, under the trees.
     rest: require('../maps/forest-dark.webp'),
-    // A cache is stumbled on in the built-up dark: Ludgate Hill.
+    // The cache and the Anvil stand on their map's own plate
+    // (`regionPlate`, from `mapBackdropFor`); Ludgate Hill is only what they
+    // show off any mapped region. Plates are reused, never re-acquired (see
+    // the header note).
     cache: require('../maps/ludgate-hill.webp'),
-    // The Anvil shares the same worked-stone street as the cache — plates
-    // are reused, never re-acquired (see the header note).
     blacksmith: require('../maps/ludgate-hill.webp'),
     // Dialogue and cutscenes are meetings on the road, like map events.
     dialogue: require('../maps/charon-crossing.webp'),

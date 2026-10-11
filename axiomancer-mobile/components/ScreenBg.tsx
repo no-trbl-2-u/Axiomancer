@@ -15,6 +15,12 @@ interface ScreenBgProps {
    * ground.
    */
   art?: ScreenArtKey;
+  /**
+   * The plate of the place the screen stands in, from `mapBackdropFor`.
+   * Wins over `art` when given; `art` stays the plate for a screen opened
+   * off any mapped region (the dev menu, a test).
+   */
+  regionPlate?: number | null;
 }
 
 /**
@@ -24,9 +30,9 @@ interface ScreenBgProps {
  */
 export const SCREEN_FRAME_INSET = 28;
 
-export function ScreenBg({ children, scrollable = true, art }: ScreenBgProps) {
+export function ScreenBg({ children, scrollable = true, art, regionPlate }: ScreenBgProps) {
   const styles = useStyles();
-  const plate = screenBackdropFor(art);
+  const plate = regionPlate ?? screenBackdropFor(art);
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.bg}>

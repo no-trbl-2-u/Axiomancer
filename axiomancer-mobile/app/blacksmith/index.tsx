@@ -19,6 +19,7 @@ import { Haptics, ImpactFeedbackStyle } from '@/lib/platform/haptics';
 
 import { LeaveRow } from '@/components/LeaveRow';
 import { ScreenBg } from '@/components/ScreenBg';
+import { mapBackdropFor } from '@/state/exploration-maps';
 import { AxmIcon } from '@/components/icons';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
 import {
@@ -148,6 +149,7 @@ export default function BlacksmithScreen() {
     const styles = useStyles();
     const AXM = usePalette();
     const slice = useGameState((s) => s.blacksmith);
+    const regionPlate = useGameState((s) => mapBackdropFor(s.world?.currentMap?.name));
     const vm = useMemo(() => selectBlacksmithVM({ blacksmith: slice }), [slice]);
     const actions = useGameActions();
     const router = useRouter();
@@ -160,7 +162,7 @@ export default function BlacksmithScreen() {
     // blank screen.
     if (!vm.active) {
         return (
-            <ScreenBg scrollable={false} art="blacksmith">
+            <ScreenBg scrollable={false} art="blacksmith" regionPlate={regionPlate}>
                 <View style={styles.inactiveWrap} testID="blacksmith-inactive">
                     <Text style={styles.inactiveText}>The forge is cold. Nothing keeps you here.</Text>
                 </View>
@@ -169,7 +171,7 @@ export default function BlacksmithScreen() {
     }
 
     return (
-        <ScreenBg scrollable={false} art="blacksmith">
+        <ScreenBg scrollable={false} art="blacksmith" regionPlate={regionPlate}>
             <ScrollView
                 style={styles.scrollOuter}
                 contentContainerStyle={styles.scroll}

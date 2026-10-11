@@ -16,6 +16,7 @@ import { useRouter } from '@/lib/platform/router';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { ScreenBg } from '@/components/ScreenBg';
+import { mapBackdropFor } from '@/state/exploration-maps';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
 import {
     selectCacheVM,
@@ -56,6 +57,7 @@ export default function CacheScreen() {
     const styles = useStyles();
     const AXM = usePalette();
     const slice = useGameState((s) => s.cache);
+    const regionPlate = useGameState((s) => mapBackdropFor(s.world?.currentMap?.name));
     const vm = useMemo(() => selectCacheVM({ cache: slice }), [slice]);
     const actions = useGameActions();
     const router = useRouter();
@@ -68,7 +70,7 @@ export default function CacheScreen() {
     // blank screen.
     if (!vm.active) {
         return (
-            <ScreenBg scrollable={false} art="cache">
+            <ScreenBg scrollable={false} art="cache" regionPlate={regionPlate}>
                 <View style={styles.inactiveWrap} testID="cache-inactive">
                     <Text style={styles.inactiveText}>The hollow is empty. Whatever lay here is gone.</Text>
                 </View>
@@ -77,7 +79,7 @@ export default function CacheScreen() {
     }
 
     return (
-        <ScreenBg scrollable={false} art="cache">
+        <ScreenBg scrollable={false} art="cache" regionPlate={regionPlate}>
             <ScrollView style={styles.scrollOuter} contentContainerStyle={styles.scroll}>
                 <Text style={styles.eyebrow}>{CACHE_CHOICE_EYEBROW}</Text>
                 <Text style={styles.title}>{CACHE_CHOICE_TITLE}</Text>

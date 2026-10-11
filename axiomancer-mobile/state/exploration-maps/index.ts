@@ -22,6 +22,18 @@ export function getMapLayout(mapId: string): MapLayout | null {
 }
 
 /**
+ * The plate a map is drawn on, for a screen opened from one of its nodes
+ * (the cache, the Anvil), so the screen stands in the same place as the map.
+ *
+ * @param mapId - the current map's name (`world.currentMap.name`).
+ * @returns the layout's backdrop, or null for no map or an unmapped one.
+ */
+export function mapBackdropFor(mapId: string | null | undefined): number | null {
+    if (!mapId) return null;
+    return getMapLayout(mapId)?.sheet.backdrop ?? null;
+}
+
+/**
  * Every map layout the game ships, in registry order.
  *
  * Exists so a test can ask "which regions can the game actually put the player
