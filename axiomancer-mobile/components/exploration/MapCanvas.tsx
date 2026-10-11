@@ -492,7 +492,7 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
     }));
     // Node marks (and their halos) hold a usable screen size at any zoom.
     const markerCounterScale = useAnimatedStyle(() => ({
-        transform: [{ scale: nodeCounterScale(scale.value) }],
+        transform: [{ scale: nodeCounterScale(scale.value) }], // worklet-safe: nodeCounterScale is a worklet
     }));
 
     return (

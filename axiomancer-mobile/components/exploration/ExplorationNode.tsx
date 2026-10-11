@@ -95,7 +95,7 @@ export function ExplorationNode({ node: n, onNodePress, isSelected }: Exploratio
     }, [n.kind, pulseOpacity]);
     const pulseStyle = useAnimatedStyle(() => ({ opacity: pulseOpacity.value }));
     const counterScale = useAnimatedStyle(() => ({
-        transform: [{ scale: camera ? nodeCounterScale(camera.value) : 1 }],
+        transform: [{ scale: camera ? nodeCounterScale(camera.value) : 1 }], // worklet-safe: nodeCounterScale is a worklet
     }));
     const iconKey = ACTION_ICON_BY_TYPE[n.type] ?? 'sword';
     const left = (n.x / sheet.width) * 100;
