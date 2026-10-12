@@ -189,7 +189,7 @@ T walked the agent defaults one at a time the same day. None remain open.
 | 12c | **R10c** Comments and docs truth pass | Last: comments and docs describe the code that survived; the 2026-09-23 pass left mobile comments and six bannered docs undone (D67) |
 | 12d | **R10d** Tutorial removal | T, 2026-10-02: every coach, the hazard intro and the map hint go before the tag |
 | 12a | **RC** Act 1 checkpoint release (attended) | The reset point: mechanics in place, the map working, everything cleaned up. T tags it; nothing below starts before it |
-| 13 | **R11** Reopen the loop (attended) | Closes the revamp, which ended at RC: removes revamp mode (D58), moves the loop onto pull requests T merges, gives T an intake (`/plot`, `/messy`), adds a retro step, and sets the content rules per surface |
+| 13 | **R11** Reopen the loop (attended) — **shipped 2026-10-12, #503 (D84–D90)** | Closed the revamp, which ended at RC: removed revamp mode (D58), moved the loop onto pull requests T merges, gave T an intake (`/plot`, `/messy`), added a retro step, and set the content rules per surface |
 | 14 | **R12** New combat-playtest (attended) | Written once the survivors, Act 1 and the XP curve are final (R9) and the loop's content rules are set (R11), so it measures the game that exists |
 
 ### Rebuild track (T's sessions, after RC)
