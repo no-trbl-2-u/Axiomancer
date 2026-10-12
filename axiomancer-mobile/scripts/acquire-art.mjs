@@ -23,7 +23,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import { RECIPE, mergeProvenance } from './ingest-art.mjs'
 
@@ -153,10 +153,12 @@ function parseArgs(argv) {
  * @param maxEdge - longest edge of the output.
  * @param inset   - fraction of the detected block trimmed from every side, to
  *   drop the plate's own printed border rule. 0.01 by default.
+ * @param darkRatio - passed to `detectPlateBox`; raise it for a plate with a
+ *   large light passage (a dawn sky) that the default cut-off reads as page.
  * @returns the graded WebP buffer AND the box it used, so the caller can record it.
  */
-export async function buildPlatePage(sharp, raw, maxEdge, inset = 0.01) {
-  const box = await detectPlateBox(sharp, raw)
+export async function buildPlatePage(sharp, raw, maxEdge, inset = 0.01, darkRatio = 0.82) {
+  const box = await detectPlateBox(sharp, raw, { darkRatio })
   const m = await sharp(raw).metadata()
   const W = m.width ?? 0
   const H = m.height ?? 0
@@ -205,7 +207,7 @@ export async function buildPlatePage(sharp, raw, maxEdge, inset = 0.01) {
     .webp({ quality: RECIPE.quality })
     .toBuffer()
 
-  return { webp, crop: { left, top, width, height, sourceWidth: W, sourceHeight: H, inset }, frac }
+  return { webp, crop: { left, top, width, height, sourceWidth: W, sourceHeight: H, inset, darkRatio }, frac }
 }
 
 /**
@@ -226,6 +228,11 @@ export async function buildPlatePage(sharp, raw, maxEdge, inset = 0.01) {
  * at 0.05 the page background began to qualify and a page scan returned its full
  * width. 0.15 reads all three correctly.
  *
+ * `darkRatio` (0.82) is that cut-off as a fraction of the image's mean. A
+ * plate whose upper half is open sky can sit above it everywhere there: on the
+ * 1871 Purgatorio I page the sky reads 145 against a mean near 177, so the
+ * detector dropped the whole sky until the manifest entry raised it to 0.95.
+ *
  * The threshold is relative to the image's own mean rather than absolute:
  * these scans vary from cream to grey depending on the institution and the
  * paper's age, and an absolute cut-off tuned on one library's scans silently
@@ -242,7 +249,7 @@ export async function buildPlatePage(sharp, raw, maxEdge, inset = 0.01) {
  * a competing-run ratio measured against the live sources the way `darkPct`
  * was, not a guessed constant.
  */
-export async function detectPlateBox(sharp, raw, { darkPct = 0.15, sample = 1000 } = {}) {
+export async function detectPlateBox(sharp, raw, { darkPct = 0.15, sample = 1000, darkRatio = 0.82 } = {}) {
   const img = sharp(raw).removeAlpha().greyscale()
   const meta = await img.metadata()
   const { data, info } = await img
@@ -255,7 +262,7 @@ export async function detectPlateBox(sharp, raw, { darkPct = 0.15, sample = 1000
   let sum = 0
   for (let i = 0; i < data.length; i++) sum += data[i]
   const mean = sum / data.length
-  const thresh = mean * 0.82
+  const thresh = mean * darkRatio
 
   const colDark = new Array(W).fill(0)
   const rowDark = new Array(H).fill(0)
@@ -367,7 +374,7 @@ async function acquireOne(sharp, entry, opts) {
   if (platePage) {
     // The crop is DERIVED, then recorded — see buildPlatePage's docblock for why
     // a hand-cropped asset is the thing this script exists to prevent.
-    const built = await buildPlatePage(sharp, raw, maxEdge, entry.inset)
+    const built = await buildPlatePage(sharp, raw, maxEdge, entry.inset, entry.darkRatio)
     webp = built.webp
     cropRecord = built.crop
     postProcessNote = `plate detected on the scanned page and extracted to `
@@ -459,6 +466,8 @@ async function main() {
   console.log('Remember the registry: add the require() literal + region rule to index.ts.')
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// pathToFileURL, not a file:// prefix: on Windows argv[1] is C:\... and the
+// prefixed string never matches, so the script exited 0 having done nothing.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch((err) => { console.error(String(err.message ?? err)); process.exit(1) })
 }

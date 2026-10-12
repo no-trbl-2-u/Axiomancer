@@ -26,19 +26,25 @@ export interface MainMenuProps {
     onSettings: () => void;
     /** Clock for the CONTINUE stamp. Injectable for tests. */
     now?: () => number;
+    /**
+     * Hosted by the title screen, under its wordmark and over its dimmed
+     * plate: no header of its own and no ground, so the launch reads as one
+     * screen.
+     */
+    embedded?: boolean;
 }
 
-export function MainMenu({ onContinue, onNewGame, onLoadGame, onSettings, now = Date.now }: MainMenuProps) {
+export function MainMenu({ onContinue, onNewGame, onLoadGame, onSettings, now = Date.now, embedded = false }: MainMenuProps) {
     const styles = useStyles();
     const summaries = useSaveSlotSummaries();
     const vm = selectMainMenuViewModel(summaries, now());
 
     return (
-        <View style={styles.root} testID="main-menu">
+        <View style={[styles.root, embedded && styles.rootEmbedded]} testID="main-menu">
             <View style={styles.column} testID="main-menu-column">
                 <View style={styles.header}>
                     <Text style={styles.eyebrow}>{MAIN_MENU_COPY.eyebrow}</Text>
-                    <Text style={styles.title}>{MAIN_MENU_COPY.title}</Text>
+                    {embedded ? null : <Text style={styles.title}>{MAIN_MENU_COPY.title}</Text>}
                 </View>
                 <View style={styles.buttons}>
                     {vm.continue.enabled ? (
@@ -88,6 +94,7 @@ const useStyles = makeStyles((AXM) => ({
         paddingBottom: 48,
         paddingTop: 48,
     },
+    rootEmbedded: { backgroundColor: 'transparent' },
     // A phone fills the column edge to edge; a wide window keeps the
     // heading and rows together at a reading width instead of stretching
     // each row across the screen.

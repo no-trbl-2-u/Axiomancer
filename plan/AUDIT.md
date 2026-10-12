@@ -1517,25 +1517,6 @@ present. Row stays open until that session runs.
   the automation-file deletion and the README/specs rewrite as two
   separate scoped fixes, not one.
 
-### [content] The title screen still shows the painted "AxiomanceR" wordmark after the Phase 67 rename
-- category: content
-- impact: 6
-- ease: 2
-- detail: filed 2026-08-27 by Phase 67. The rename to "Miserere Mei, Deus"
-  shipped everywhere it could reach as a string — store/web metadata, CLI
-  banners, published site chrome, the doc set. The one surface it cannot
-  reach is the one a player actually sees first: the title screen's wordmark
-  is painted into `axiomancer-mobile/assets/images/title-embark.jpg`
-  (1024x1024 key art, wordmark near the top edge), and
-  `components/TitleScreen.tsx` renders that image with `contentFit="contain"`
-  specifically so the painted "A" and "R" are not cropped. There is no text
-  node to rename. Net effect today: the browser tab and store listing say
-  "Miserere Mei, Deus" while the first screen says "AxiomanceR".
-- next: new key art carrying the new wordmark, through the art pipeline
-  (build-plan Phases 71 / 73). A text-overlay stopgap is NOT the fix — it
-  would double the wordmark against the painted one. Until then this is a
-  known, deliberate inconsistency, not drift.
-
 ### [content] "Blank Indenture" violates NL-8 and is grandfathered, not renamed
 - category: content
 - impact: 2
@@ -1619,6 +1600,32 @@ present. Row stays open until that session runs.
   cover the slower runner.
 
 ## Done
+
+### [x] [content] The title screen still shows the painted "AxiomanceR" wordmark after the Phase 67 rename — CLOSED 2026-10-11 (T, attended)
+- category: content
+- impact: 6
+- ease: 2
+- detail: filed 2026-08-27 by Phase 67. The rename to "Miserere Mei, Deus"
+  shipped everywhere it could reach as a string — store/web metadata, CLI
+  banners, published site chrome, the doc set. The one surface it cannot
+  reach is the one a player actually sees first: the title screen's wordmark
+  is painted into `axiomancer-mobile/assets/images/title-embark.jpg`
+  (1024x1024 key art, wordmark near the top edge), and
+  `components/TitleScreen.tsx` renders that image with `contentFit="contain"`
+  specifically so the painted "A" and "R" are not cropped. There is no text
+  node to rename. Net effect today: the browser tab and store listing say
+  "Miserere Mei, Deus" while the first screen says "AxiomanceR".
+- next: new key art carrying the new wordmark, through the art pipeline
+  (build-plan Phases 71 / 73). A text-overlay stopgap is NOT the fix — it
+  would double the wordmark against the painted one. Until then this is a
+  known, deliberate inconsistency, not drift.
+- resolution: T asked for both fixes in an attended session. The splash now
+  reads "Miserere Mei, Deus" in the game's own Pirata One. The AI key art is
+  retired from the title screen and every launcher icon. In its place is a
+  public-domain Doré plate (Purgatorio I, acquired through
+  `scripts/acquire-art.mjs` with its licence read from Commons) under a typeset
+  wordmark that the splash, the title screen and the main menu share
+  (`state/presenters/title.engine.ts`).
 
 ### [x] combat — user crash on ACCEPTING post-combat card reward (unreproduced, PR #216) — CLOSED 2026-10-11 via /oversight (blind)
 - category: external-critique

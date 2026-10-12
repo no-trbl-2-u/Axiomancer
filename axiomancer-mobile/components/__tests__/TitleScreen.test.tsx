@@ -1,146 +1,85 @@
 /**
- * Hermetic tests for the TitleScreen component.
+ * Hermetic tests for the TitleScreen component: the launch sequence's copy,
+ * EMBARK's hand-off to the menu in place, and the `?menu=1` entry.
  */
 
 import React from 'react';
+import { Text } from 'react-native';
 import { render, fireEvent } from '@testing-library/react-native';
-import { TitleScreen, titleScrimStops } from '../TitleScreen';
+import { TitleScreen } from '../TitleScreen';
 import { createAppStore } from '@/state/store';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
+import { TITLE_COPY } from '@/state/presenters/title.engine';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 
-// Mock the debug seed action since we're not testing the actual seeding behavior
-jest.mock('@/state/actions', () => ({
-  ...jest.requireActual('@/state/actions'),
-  createAppActions: () => ({
-    debugSeed: jest.fn(),
-  }),
-}));
+const MENU = <Text testID="stub-menu">menu</Text>;
+
+function TestWrapper({ children }: { children: React.ReactNode }) {
+  const store = createAppStore({ adapter: createMemoryAdapter() });
+  return <GameStoreProvider store={store}>{children}</GameStoreProvider>;
+}
+
+function mount(props: Partial<React.ComponentProps<typeof TitleScreen>> = {}) {
+  return render(
+    <TestWrapper>
+      <TitleScreen menu={MENU} {...props} />
+    </TestWrapper>,
+  );
+}
 
 describe('TitleScreen', () => {
-  const TestWrapper = ({ children }: { children: React.ReactNode }) => {
-    const store = createAppStore({ adapter: createMemoryAdapter() });
-    return <GameStoreProvider store={store}>{children}</GameStoreProvider>;
-  };
-
-  it('renders the tagline and footer flavor text', () => {
-    const mockOnContinue = jest.fn();
-    const { getByText } = render(
-      <TestWrapper>
-        <TitleScreen onContinue={mockOnContinue} />
-      </TestWrapper>
-    );
-
-    expect(getByText(/The cursed lands await/)).toBeTruthy();
-    // A new game starts on the Breakwater, at the windmill.
-    expect(getByText(/windmill above the\s+breakwater/)).toBeTruthy();
+  it('prints the game\'s name as the wordmark, never the old title', () => {
+    const { getByTestId, queryByText } = mount();
+    expect(getByTestId('title-wordmark').props.children).toBe('Miserere Mei, Deus');
+    expect(queryByText(/axiomancer/i)).toBeNull();
   });
 
-  it('renders embark button with accessibility', () => {
-    const mockOnContinue = jest.fn();
-    const { getByRole, getByText } = render(
-      <TestWrapper>
-        <TitleScreen onContinue={mockOnContinue} />
-      </TestWrapper>
-    );
-
-    const button = getByRole('button');
-    expect(button).toBeTruthy();
-    expect(button.props.accessibilityLabel).toBe('Embark on your journey');
-    expect(getByText('EMBARK…')).toBeTruthy();
+  it('prints the psalm line, its source and the footer', () => {
+    const { getByText } = mount();
+    expect(getByText(TITLE_COPY.psalm)).toBeTruthy();
+    expect(getByText(TITLE_COPY.psalmSource)).toBeTruthy();
+    // A new game starts on the Breakwater, at the windmill.
+    expect(getByText(/windmill above the breakwater/)).toBeTruthy();
   });
 
   /**
    * The title screen has no map, so the sub-line under its only button has
    * to describe what EMBARK does, not give map instructions.
    */
-  it('sub-labels EMBARK with what EMBARK does, not with map instructions', () => {
-    const mockOnContinue = jest.fn();
-    const { getByText, queryByText } = render(
-      <TestWrapper>
-        <TitleScreen onContinue={mockOnContinue} />
-      </TestWrapper>
-    );
-
-    expect(getByText('begin the pilgrimage')).toBeTruthy();
+  it('labels EMBARK with what it does', () => {
+    const { getByRole, getByText, queryByText } = mount();
+    expect(getByRole('button').props.accessibilityLabel).toBe(TITLE_COPY.embarkLabel);
+    expect(getByText(TITLE_COPY.embark)).toBeTruthy();
+    expect(getByText(TITLE_COPY.embarkHint)).toBeTruthy();
     expect(queryByText(/glowing node/i)).toBeNull();
-    expect(queryByText(/map/i)).toBeNull();
   });
 
-  /**
-   * `leagues` is a unit of distance, not a proper noun, so the tagline
-   * writes it lower case like the map compass hint. Lower case in prose is
-   * the rule; the step-card column header keeps its
-   * all-caps LEAGUES because a header is not prose.
-   */
-  it('writes leagues as a lowercase unit in the tagline', () => {
-    const mockOnContinue = jest.fn();
-    const { getByText, queryByText } = render(
-      <TestWrapper>
-        <TitleScreen onContinue={mockOnContinue} />
-      </TestWrapper>
-    );
-
-    expect(getByText(/cold iron into the leagues beyond\./)).toBeTruthy();
-    expect(queryByText(/LEAGUES/)).toBeNull();
+  it('describes the plate for screen readers', () => {
+    const { getByLabelText } = mount();
+    expect(getByLabelText(TITLE_COPY.plateLabel)).toBeTruthy();
   });
 
-  it('calls onContinue when embark button is pressed', () => {
-    const mockOnContinue = jest.fn();
-    const { getByRole } = render(
-      <TestWrapper>
-        <TitleScreen onContinue={mockOnContinue} />
-      </TestWrapper>
-    );
-
-    const button = getByRole('button');
-    fireEvent.press(button);
-
-    expect(mockOnContinue).toHaveBeenCalledTimes(1);
+  it('brings the menu up in place when EMBARK is pressed, keeping the wordmark', () => {
+    const { getByRole, queryByTestId, getByTestId } = mount();
+    expect(queryByTestId('stub-menu')).toBeNull();
+    fireEvent.press(getByRole('button'));
+    expect(getByTestId('stub-menu')).toBeTruthy();
+    expect(getByTestId('title-wordmark')).toBeTruthy();
+    expect(getByTestId('title-plate')).toBeTruthy();
   });
 
-  it('applies the embark button styling and theme colors', () => {
-    const mockOnContinue = jest.fn();
-    const { getByText } = render(
-      <TestWrapper>
-        <TitleScreen onContinue={mockOnContinue} />
-      </TestWrapper>
-    );
+  it('opens on the menu when asked to (RETURN TO TITLE lands on ?menu=1)', () => {
+    const { getByTestId } = mount({ startAtMenu: true });
+    expect(getByTestId('stub-menu')).toBeTruthy();
+    expect(getByTestId('title-wordmark')).toBeTruthy();
+  });
 
-    const label = getByText('EMBARK…');
-    expect(label.props.style).toMatchObject({
+  it('keeps the EMBARK label in the button face style', () => {
+    const { getByText } = mount();
+    expect(getByText(TITLE_COPY.embark).props.style).toMatchObject({
       fontFamily: expect.any(String),
       fontSize: 20,
       color: expect.any(String),
     });
-  });
-
-  /**
-   * The scrim is a continuous ramp, not flat bands: three bands drew two
-   * hard seams across the art on desktop (CRITIQUE pass 74). It starts
-   * clear so its top edge has no seam, never lightens on the way down, and
-   * keeps the CTA panel at least as dark as the old bottom band (0.9).
-   */
-  it('ramps the bottom scrim from clear to the CTA darkness with no step', () => {
-    const stops = titleScrimStops();
-    expect(stops[0]).toEqual({ offset: 0, opacity: 0 });
-    expect(stops[stops.length - 1].offset).toBe(1);
-    for (let i = 1; i < stops.length; i++) {
-      expect(stops[i].offset).toBeGreaterThan(stops[i - 1].offset);
-      expect(stops[i].opacity).toBeGreaterThanOrEqual(stops[i - 1].opacity);
-    }
-    for (const st of stops.filter((s) => s.offset >= 0.8)) {
-      expect(st.opacity).toBeGreaterThanOrEqual(0.9);
-    }
-  });
-
-  it('draws the scrim as one gradient layer', () => {
-    const { getByTestId } = render(
-      <TestWrapper>
-        <TitleScreen onContinue={jest.fn()} />
-      </TestWrapper>
-    );
-
-    expect(getByTestId('title-scrim')).toBeTruthy();
   });
 });
