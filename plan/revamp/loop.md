@@ -284,6 +284,33 @@ Recorded as the next free D-numbers (D83 onward) in
 - `/jot` stays as the CRITIQUE quickfire; `/plot` is to the build plan what
   `/jot` is to CRITIQUE. Say so in bearings.
 - `/expand` posture per decision f.
+- **Owner-only, offered in conversation (T, 2026-10-11).** `/plot` and
+  `/messy` are never fired by the loop: no `/march` step, cron, workflow
+  or loop verb dispatches them, and `march.md` says so. They are fired
+  in a conversation with T:
+  - When T, speaking plainly to any agent (attended session, `@claude`
+    on GitHub, a brainstorm), says they want work the loop should pick
+    up ("let's add…", "the loop should build…", "make a phase for…",
+    "queue this"), the agent routes it through `/plot` (one known task)
+    or `/messy` (a loose or many-themed dump) instead of writing a
+    build-plan row, brief or candidate by hand. A direct request runs
+    the skill; an ambiguous one is asked first.
+  - At the end of a brainstorm or design conversation that produced
+    buildable direction, the agent offers, in one question: "Want to use
+    `/plot` to turn this into a phase?" or "Want to use `/messy` to file
+    this dump?" (`AskUserQuestion`, per `docs/asking-well.md`), and runs
+    the one T picks. No answer or a no means nothing is filed beyond
+    AGENTS.md rule 7's residue.
+  - Where it lives: a new AGENTS.md standing rule beside rule 7 ("File the
+    residue": buildable direction from T goes through `/plot` or
+    `/messy`, not a hand-written row), mirrored in `CLAUDE.md` so
+    attended sessions read it first; each skill's frontmatter
+    `description` names its triggers so the harness surfaces it; rule 7
+    points at the two skills for "buildable ideas" instead of writing
+    `PHASE_CANDIDATES` rows directly when T is present.
+  - A test in `scripts/loop-pr.test.mjs` (or its own) fails if any file
+    under `skills/` other than `plot.md`/`messy.md`, or any workflow,
+    invokes `/plot` or `/messy`.
 
 **5. The loop learns: retro and a counted lessons ladder.**
 - A **Retro** step closes `ship-a-phase`, `iterate`, `critique`, `fix-ci`
@@ -355,7 +382,7 @@ returns. `/march` picks the first unattended `[ ]` row with a brief and no
 open PR. Code lands only by `loop:pr` PRs; `pr-autofix` and `pr-resolve`
 exist, are tested, and have run at least once each (by `workflow_dispatch`
 on a throwaway branch if no real red or conflict occurred). `/plot`,
-`/messy` exist; `ship-a-phase` refuses a missing brief. Every closing verb
+`/messy` exist, no loop verb or workflow fires them, and AGENTS.md and CLAUDE.md tell agents to run or offer them when T asks for loop work or ends a brainstorm; `ship-a-phase` refuses a missing brief. Every closing verb
 has a Retro step; `check-lessons` is in the root test. D83+ recorded.
 bearings, AGENTS.md and the workflows README describe the loop as it now
 runs.
