@@ -11,6 +11,50 @@
 
 ## Pending
 
+> **Five `[owner]` loop-doctrine candidates (T, 2026-10-11), held until the
+> R11 watch ends (on or after 2026-11-11, `skills/oversight.md` §3 item 10).**
+> Filed from the hunt-loop comparison that produced the R11 rewrite (PR #498).
+> They are candidates, not phases: no brief exists yet, on purpose. R11's rule
+> is that the loop never authors a brief, so each one enters the build plan
+> only when T runs `/plot <title>` on it, one at a time, and the watch data
+> says it is needed. `/expand` and `/oversight` promote none of them before
+> the date; `/iterate` never picks them up.
+
+### [ ] [owner] [score 5.5] Claims for a second loop: a claims record so two loops or a batch never build the same row
+- proposed: 2026-10-11, T's session (hunt comparison); held until the R11 watch ends
+- trigger: a second cron, a contributor, or `/heads-down`-style batches appear. With one cron plus attended sessions, "an open `loop:pr` PR is the claim" (R11 item 3) is enough; don't build this speculatively.
+- source signals: hunt's `claims.json` on an orphan `claims` branch, compare-and-swap writes by git plumbing, owned per session, 24 h TTL, released by `/tidy`; Axiomancer's Phase 99/105 double-ship and lessons.md deploy #1 (a live loop swept a local edit).
+- proposed scope: 1 phase. A `claims` branch and `scripts/claims.mjs` (claim, renew, release, audit); `/march` and `ship-a-phase` claim before any read; a claim with a PR lives until the PR closes; a `/tidy`-style sweep. Tests on the CAS path.
+- conflicts: none; creates no content.
+
+### [ ] [owner] [score 4.5] A cheap local check and the whole suite in CI: run only what changed locally, shard the full run in GitHub
+- proposed: 2026-10-11, T's session (hunt comparison); held until the R11 watch ends
+- trigger: ticks timing out against the 75-minute cap, or `verify` runs being backgrounded and reaped. The per-workspace verify is already scoped; this only pays if the watch shows gate time eating ticks.
+- source signals: hunt's `scripts/check.mjs` (changed-since-`origin/main`, ~4 s for docs), `check:full` refusing to run outside Actions, `big-check` pushing a `check/<id>` branch to six shuffled shards (footgun `bg-check-reaped`, seen 6×).
+- proposed scope: 1 phase. `npm run check` scoped to changed workspaces and files; the full matrix stays in `verify-*` on the PR; a `check/**` branch trigger for an attended session that wants the full run without landing.
+- conflicts: AGENTS.md "verify gate is foreground" stays; this changes what the gate runs, not where.
+
+### [ ] [owner] [score 4.0] Decisions with a lifecycle: three-line D-entries, `(proposed) → confirmed`, a lint on numbering, in a durable identity layer
+- proposed: 2026-10-11, T's session (hunt comparison); held until the R11 watch ends
+- trigger: a decision gets contradicted because nobody found it, or two sessions take the same D-number (hunt footgun `decision-number-race`, 4×). Today's D1–D83 live in `plan/2026-09-25-refactor-strategy.decisions.md`, a dated file.
+- source signals: hunt's `identity/decisions/<year>.md` (append-only, ≤3 lines, `→ superseded/amended/confirmed` arrows only), `identity/principles.md` (hard constraints, budget 40), `identity-lint` in pre-commit.
+- proposed scope: 1 phase. `plan/decisions.md` (or `identity/`) as the one home; migrate D1–D83 to three-line entries with a pointer to their long form; `scripts/check-decisions.mjs` in the root test (unique increasing numbers, line cap, arrow grammar); `docs/truth-sources.md` points at it.
+- conflicts: `docs/truth-sources.md` ranks CDR/ADR; this would be the same tier, so the doc changes in the same phase.
+
+### [ ] [owner] [score 5.0] Remove, don't tick: a closed row leaves the plan, one archive line remains, a finished part plan is absorbed and deleted
+- proposed: 2026-10-11, T's session (hunt comparison); held until the R11 watch ends
+- trigger: `/consolidate` cannot keep AUDIT (~1,900 lines), CRITIQUE (pass 78+) and the build plan flat, or a tick's Step 0 read cost is visibly eating the 75 minutes.
+- source signals: hunt's close-out removes the chunk line, its acceptance bullets and `needs`, appends one line to `plan/ARCHIVE.md`, and `plan-history.test.mjs` fails if a closed id is still named anywhere (footgun `plan-grows`: a 5,160-line plan); a finished spec's lasting rules move to `identity/` and the spec is deleted.
+- proposed scope: 1 phase, doctrine-heavy, attended. Build-plan rows and AUDIT/CRITIQUE rows are removed on close with one archive line (a new `plan/ARCHIVE.md`, since `plan/archive/` was retired under D66 and this is a different thing: a log, not a corpus); a test that no closed id is still live; `plan/revamp/<area>.md` absorbed into `docs/game-model.md`/bearings when its last phase ships, then deleted.
+- conflicts: D66 removed `plan/archive/`; this phase must state why a one-line log is not that. `/consolidate` §3 shrinks accordingly.
+
+### [ ] [owner] [score 5.0] Shard the AUDIT and CRITIQUE queues per writer, the way telemetry was sharded, so PRs stop conflicting at the Pending header
+- proposed: 2026-10-11, T's session (hunt comparison); held until the R11 watch ends
+- trigger: `pr-resolve` runs on most merges, or a merge of PR #498's kind (both sides prepending to `## Pending`) recurs. Watch for it before pre-empting it.
+- source signals: the single `TELEMETRY.md` conflicted "on nearly every merge" until 2026-09-23's per-session shards; PR #498 conflicted today the same way on `plan/AUDIT.md`; hunt settles its append-only files with a `union` merge driver and a test against doubled lines (footgun `union-edit-doubles`, 3×).
+- proposed scope: 1 phase. Either a `.gitattributes` `merge=union` on the two queues plus a test that no row repeats (cheap, first), or per-month/per-writer shard files read as one by a small viewer like `npm run telemetry` (if union still bites). `/iterate` and `/critique` write to the shard; `/oversight` reads the merged view.
+- conflicts: the "Bias" and "Last pass" headers at the top of each queue are the conflict magnet; they move to a tiny separate file either way.
+
 
 ### [ ] [score 6.5] The keyword/card revamp phase: pick one of three process plans (attended, D37) — nothing starts until T picks
 - **PICKED 2026-09-30 (D73):** Plan B, amended. The card sessions run as

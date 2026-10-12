@@ -36,6 +36,7 @@
 
 import { execSync, spawn, spawnSync } from 'node:child_process'
 import fs from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 
 const DEFAULT_BRANCH = 'main'
@@ -183,12 +184,38 @@ function preWrite() {
 // (same instant-feedback pattern as the OKF repo's post-write validator).
 // check-lexicon applies its own zone/banner/pragma exemptions, so zoned
 // files come back clean here without special-casing.
+//
+// The hook is wired through $CLAUDE_PROJECT_DIR, so in a worktree session
+// this script and its cwd belong to the MAIN checkout while the written
+// file lives in the worktree. check-lexicon resolves zones against its own
+// repo root, so a worktree path came out as `../.claude/...`, matched no
+// dated-record zone, and every zoned file lit up on lines the edit never
+// touched (plan/AUDIT.md, 2026-10-11). The lint therefore runs from the
+// written file's own repository: its git toplevel, its copy of the script,
+// and the path relative to that root.
+function lexiconTargetFor(filePath) {
+  if (!filePath) return null
+  const abs = path.resolve(String(filePath))
+  if (!abs.endsWith('.md') || !fs.existsSync(abs)) return null
+  const top = spawnSync('git', ['-C', path.dirname(abs), 'rev-parse', '--show-toplevel'], {
+    encoding: 'utf-8',
+    timeout: 10_000,
+  })
+  if (top.error || top.status !== 0) return null
+  const root = path.resolve(top.stdout.trim())
+  const script = path.join(root, 'scripts', 'check-lexicon.mjs')
+  if (!fs.existsSync(script)) return null
+  const rel = path.relative(root, abs).replaceAll('\\', '/')
+  if (rel.startsWith('..')) return null
+  return { root, script, rel }
+}
+
 function postWrite() {
   const input = readStdinJson()
-  const rel = normalizeRel(input?.tool_input?.file_path)
-  if (!rel || !rel.endsWith('.md')) return 0
-  if (!fs.existsSync(rel) || !fs.existsSync('scripts/check-lexicon.mjs')) return 0
-  const res = spawnSync(process.execPath, ['scripts/check-lexicon.mjs', rel], {
+  const target = lexiconTargetFor(input?.tool_input?.file_path)
+  if (!target) return 0
+  const res = spawnSync(process.execPath, [target.script, target.rel], {
+    cwd: target.root,
     encoding: 'utf-8',
     timeout: 30_000,
   })
@@ -357,6 +384,34 @@ function selfTest() {
     process.stdout.write(
       `  ${ok ? 'ok  ' : 'FAIL'}  write ${JSON.stringify(p).slice(0, 52).padEnd(54)} → ${hit ?? 'allowed'}\n`,
     )
+  }
+  // post-write resolves the lint against the WRITTEN file's repository, not
+  // this script's: a worktree checkout must come back as its own root with
+  // a plain repo-relative path, never `../...` against the main checkout.
+  const here = path.resolve('plan/AUDIT.md')
+  const own = lexiconTargetFor(here)
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'guard-selftest-'))
+  let other = null
+  try {
+    spawnSync('git', ['-C', tmp, 'init', '-q'], { encoding: 'utf-8' })
+    fs.mkdirSync(path.join(tmp, 'scripts'))
+    fs.writeFileSync(path.join(tmp, 'scripts', 'check-lexicon.mjs'), '')
+    fs.mkdirSync(path.join(tmp, 'plan'))
+    const otherFile = path.join(tmp, 'plan', 'AUDIT.md')
+    fs.writeFileSync(otherFile, '# x\n')
+    other = lexiconTargetFor(otherFile)
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true })
+  }
+  const lexCases = [
+    ['own checkout → rel plan/AUDIT.md', own?.rel === 'plan/AUDIT.md'],
+    ['own checkout → root is this toplevel', !!own && path.resolve(own.root) === path.resolve(process.cwd())],
+    ['other repo → its own root, not ../', !!other && other.rel === 'plan/AUDIT.md' && other.root !== own?.root],
+    ['non-markdown → skipped', lexiconTargetFor('package.json') === null],
+  ]
+  for (const [label, ok] of lexCases) {
+    if (!ok) failed++
+    process.stdout.write(`  ${ok ? 'ok  ' : 'FAIL'}  lexicon ${label.padEnd(54)}\n`)
   }
   process.stdout.write(failed ? `\nself-test: ${failed} FAILED\n` : '\nself-test: green.\n')
   return failed ? 1 : 0
