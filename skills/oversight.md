@@ -76,6 +76,36 @@ In parallel where independent:
    way — with the loop's recommended answer attached. Oversight
    reads legacy rows; it never writes new ones.
 
+10. **TEMPORARY — the R11 watch (T, 2026-10-11; remove this item and
+    §5's "Standing question R11" on or after 2026-11-11).** R11 changed
+    three things at once (intake by `/plot`/`/messy`, landing by PR, a
+    retro on every verb), and T ruled nothing else changes until a month
+    of ticks says which of them worked. Until then every oversight gathers
+    these four counts, since the last oversight (its commit date), and
+    reports them in the briefing as a four-line table:
+
+    - **Ticks that picked nothing.** `npm run telemetry -- --since
+      <date>`: march ticks whose `slash-prompt` was followed by a
+      `tick-end` with no `ship-a-phase`, `iterate` or `critique` verb-read,
+      plus any tick output or AUDIT row saying "no pickable row" / "at the
+      PR cap". A majority means the problem is intake, not the loop.
+    - **PRs stuck.** `gh pr list --label loop:pr --state all --search
+      "created:>=<date>"` and the count with `loop:pr-stuck`, plus the
+      number of `pr-autofix.yml` runs (`gh run list --workflow
+      pr-autofix.yml`). Two attempts per PR is the ceiling by design.
+    - **Intake used.** `git log --since=<date> --grep='^phases: plot'` and
+      the count of `plan/messy/`-refined specs (commit subjects
+      `plan(<topic>):`). Zero after two weeks means the habit didn't take.
+    - **Retros that fired.** `git log --since=<date> --grep='^lessons: retro'`
+      against the number of closing ticks; and how many `lessons.md`
+      entries reached `seen 2×` and were automated the same tick
+      (`guarded by` set) rather than only bumped.
+
+    Before R11 ships, the labels, the `pr-autofix` workflow and the
+    `lessons: retro` subject don't exist yet: report each count as
+    "n/a (pre-R11)" rather than 0, so the first real number is not read
+    against a false zero.
+
 ## 4. The briefing (~25 lines max)
 
 ```
@@ -135,6 +165,30 @@ defer paths named, answers filed as policy, never re-ask). Rules:
 > Applying a decision = edit the item in place (mark `[x]` with
 > the decision + date, or promote it to a candidate/phase per
 > the answer), same as any other adjustment in Step 5.
+
+### Standing question R11 — TEMPORARY, remove on or after 2026-11-11
+
+Asked after question 0 and not counted against the 1–4, whenever
+§3 item 10 produced its table. It is one question, built from the
+count that is furthest from healthy:
+
+> R11 watch since <date>: <N> ticks picked nothing, <N> PRs stuck of
+> <M>, <N> plots/messies, <N> retros of <M> ticks. The weakest signal is
+> <which>. What now?
+>
+> - (recommended) Keep watching — change nothing until <2026-11-11>.
+> - Fix the weakest signal now — <the one-line fix the number implies:
+>   "run /plot on the two ideas in PHASE_CANDIDATES marked [owner]",
+>   "raise the PR cap to 5", "pr-autofix is misfiring: file an AUDIT
+>   row", "the retro step is being skipped: tighten the verb">.
+> - End the watch early — remove §3 item 10 and this question now; the
+>   five `[owner]` candidates in `plan/PHASE_CANDIDATES.md` become
+>   eligible for `/plot`.
+>
+> Applying "end the watch" or passing the date = delete §3 item 10 and
+> this section in the oversight commit, and note the final four counts
+> in `plan/AUDIT.md` as a `[loop-call]`-style record so the window's
+> result survives the deletion.
 
 ### Question templates
 
