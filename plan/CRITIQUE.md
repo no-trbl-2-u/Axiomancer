@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-11 at commit a944d1a3
-> Pass count: 78
+> Last pass: 2026-10-12 at commit f2065459
+> Pass count: 79
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -525,9 +525,50 @@
 > on the title (the drive opens it with no save, by design) and the
 > fixture placeholder lines. One fresh finding this pass.
 
+> **[critique pass 79, 2026-10-12, commit f2065459] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors. 21 commits
+> after pass 78; the one that touches the screen set is #499, the new
+> title sequence (the Doré shore plate, the "Miserere Mei, Deus" wordmark
+> carried from splash to menu). Three fresh LOWs, all on that screen: the
+> faded title copy stays in the accessibility tree under the menu, the
+> drive captures the title before its 2.65s intro reaches EMBARK, and the
+> desktop menu rows overhang the 464px plate. Checked and not filed: the
+> cold `/(tabs)/exploration` capture landing on the title (no save, by
+> design), the fixture placeholder lines, the hazard strip's "CHOOSE TO
+> PROC…" and the hub's "tap a glowing node" hint (RC2 walk item 13).
+> Three fresh findings this pass.
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `archive-pre-revamp:plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
+
+### [LOW] title / a11y — after EMBARK the faded psalm, EMBARK button and footer stay in the accessibility tree under the menu
+- pass: 79 (commit f2065459)
+- viewport: mobile + desktop
+- category: a11y
+- observation: EMBARK fades the title's call-to-action block to opacity 0 and sets its `pointerEvents` to none, but the block stays mounted (`components/TitleScreen.tsx`, the `ctaStyle` view). The menu's DOM text still reads "Have mercy upon me, O God… / PSALM 51 / EMBARK… / begin the pilgrimage / Your path begins on the coast…" after the four menu rows. A screen reader on the menu reaches an invisible psalm and a disabled "EMBARK" button.
+- evidence: `.critique-artifacts/{mobile,desktop}/02-onboarding.txt` (menu shown, title copy still listed after SETTINGS)
+- suggested fix: when `phase === 'menu'`, hide the block from assistive tech (`accessibilityElementsHidden` + `importantForAccessibility="no-hide-descendants"`, `aria-hidden` on web) or unmount it once the menu fade ends; pin with a TitleScreen test that the menu phase exposes no EMBARK.
+- source: critique-drive (unattended)
+
+### [LOW] title / tooling — the drive captures the title 0.7s into its 2.65s intro, so every pass sees only the wordmark; EMBARK is tappable before it is visible
+- pass: 79 (commit f2065459)
+- viewport: mobile + desktop
+- category: comprehension
+- observation: `scripts/critique-drive.mjs` settles 700ms after load. The title sequence holds 450ms, lifts the wordmark for 1500ms, then fades the psalm and EMBARK in over 700ms (`TITLE_TIMING`). So `01-title.png` shows the wordmark over a half-faded plate and an empty black lower half, while its `.txt` lists the psalm and EMBARK. The unattended lens never sees the first screen a player sees. During those 2.65s the invisible EMBARK is already pressable (`pointerEvents` "box-none", not disabled), so a tap on the empty lower half can skip to the menu before the button has appeared.
+- evidence: `.critique-artifacts/mobile/01-title.png` (no psalm, no EMBARK) against `01-title.txt` (both present); the `onboarding` capture's `getByRole('button').first()` click lands at ~0.7s.
+- suggested fix: in the drive, have the `title` screen wait for the EMBARK button to reach full opacity (or the sum of `TITLE_TIMING`) before capturing. Separately, ignore EMBARK presses until `cta` has begun (or make a tap during the lift finish the sequence rather than open the menu).
+- source: critique-drive (unattended)
+
+### [LOW] title / desktop — the menu rows (520px) overhang the 464px title plate, and the plate reads as a lit strip in a black field
+- pass: 79 (commit f2065459)
+- viewport: desktop (1280x800)
+- category: visual
+- observation: on a wide window `titleLayout` caps the plate at `height * 0.72 * PLATE_ASPECT` (464px at 800 tall), centred with feathered sides. The menu column under it is `MENU_COLUMN_MAX_WIDTH` 520, so NEW GAME, LOAD GAME and SETTINGS stick out about 28px past the art on each side, and the menu sits on flat black below the plate's foot. About two thirds of the screen is unbroken black around a narrow grey band.
+- evidence: `.critique-artifacts/desktop/02-onboarding.png` (rows 380-900, plate ~408-872); `01-title.png` (the band)
+- suggested fix: on a wide window, cap the embedded menu column at `min(MENU_COLUMN_MAX_WIDTH, layout.plate.width)` so the rows sit within the art (one value passed from TitleScreen to MainMenu's embedded mode); phone layout unchanged.
+- source: critique-drive (unattended)
 
 ### [LOW] RC2 walk 2026-10-11 — copy, feedback and consistency findings (one row per item, accepted for v0.2.0)
 - pass: RC2 walk, four `playtester` legs (attended, T present) on eb75f451 with the Blood Price test deck
