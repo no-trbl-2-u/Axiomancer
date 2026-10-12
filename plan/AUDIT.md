@@ -36,6 +36,26 @@
 
 ## Pending
 
+### [ ] [tooling] The guard's post-write lexicon check reports false findings in a worktree (2026-10-11)
+- category: tooling
+- impact: 4
+- ease: 7
+- detail: editing `plan/revamp/loop.md`, `plan/revamp/README.md` and
+  `plan/steps/01_build_plan.md` from a `.claude/worktrees/*` session made
+  the `post-write` hook (`.claude/hooks/guard.mjs` `postWrite`) block with
+  28 retired-term findings, all on lines the edit did not touch, printed as
+  `../.claude/Axiomancer/<worktree>/plan/...`. `node
+  scripts/check-lexicon.mjs` run inside the worktree on the same files is
+  clean. Likely cause: the hook runs from the main checkout
+  (`$CLAUDE_PROJECT_DIR`), so `check-lexicon`'s `ROOT` is the main
+  checkout and the worktree file's repo-relative path starts with `../`,
+  which no dated-record zone matches. Every worktree edit to a zoned file
+  trips it, and the noise trains sessions to ignore a real gate.
+- next: in `postWrite`, run `check-lexicon` with `cwd` set to the git
+  toplevel of the written file (`git -C <dir> rev-parse --show-toplevel`),
+  and pass the path relative to that root; add a `guard.mjs self-test`
+  case for a worktree path. R11's first retro is a natural home.
+
 ### [x] [perf] firstScreenMs budget breach: 306 ms vs 303 ms (2026-10-11) — CLOSED 2026-10-11 (afcd727c: a runner artifact. The run was on an Intel Xeon 8573C and the budgets were seeded on an AMD EPYC 9V74. Re-measured on the AMD at 52fabfbf: firstScreenMs 248, lcpMs 288, tbtMs 81, all under budget. Timing budgets now apply only on the seeding CPU)
 - issue: #489
 - category: perf
