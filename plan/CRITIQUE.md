@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-12 at commit f2065459
-> Pass count: 79
+> Last pass: 2026-10-12 at commit 01d3ce8d
+> Pass count: 80
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -538,6 +538,22 @@
 > design), the fixture placeholder lines, the hazard strip's "CHOOSE TO
 > PROC…" and the hub's "tap a glowing node" hint (RC2 walk item 13).
 > Three fresh findings this pass.
+
+> **[critique pass 80, 2026-10-12, commit 01d3ce8d] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors. 15 commits
+> after pass 79, all loop and plan work (R11 reopening the loop); none
+> touches app or engine code (only the mechanics lexicon and CLAUDE.md),
+> so every screen matches pass 79. Reconfirmed and not re-filed: pass
+> 79's three title LOWs (the drive still captures the wordmark alone at
+> 0.7s; the desktop menu rows still overhang the plate), pass 65's Minor
+> Healing Potion ("RESTORES 10 VITAE, 15 BELOW HALF"), and pass 63's
+> corner medallions over the mobile fan's end cards. Checked and not
+> filed: the cold `/(tabs)/exploration` capture landing on the title (no
+> save, by design), the fixture placeholder lines, the mobile hazard
+> strip's "CHOOSE TO PROC…" (pass 68 trade), and the desktop combat
+> board's card faces (no chip wraps mid-token). Zero fresh findings this
+> pass.
 
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `archive-pre-revamp:plan/archive/CRITIQUE_2026.md`.
 
