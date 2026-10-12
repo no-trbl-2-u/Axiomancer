@@ -518,10 +518,11 @@ deploy gate is unaffected — a skipped job does not fail the run.
 
 ## Operational notes
 
-- **The loop was PAUSED for R11 (2026-10-12).** `march` and `night` were
-  disabled on GitHub (`gh workflow disable`, R11 brief item 1 in
-  `plan/revamp/loop.md`). T re-enables both once the R11 PR merges (R11
-  item 9) and watches the first tick end to end; until then no tick fires.
+- **The loop was PAUSED for R11 (2026-10-12) and is live again.** `march`
+  and `night` were disabled for the R11 rewrite and re-enabled the same day
+  after #503 merged (R11 item 9). Still open from item 9: watch the first
+  tick end to end, and dispatch `pr-autofix` / `pr-resolve` once each if no
+  real red check or conflict triggers them.
 - **Loop code lands by PR; plan-only pushes `main`** (D84). T reviews
   each `loop:pr` PR before it lands; `/oversight` audits the rest after
   the fact. Runner minutes for the PR flow are free (public repo); the
