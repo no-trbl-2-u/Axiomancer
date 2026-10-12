@@ -55,6 +55,45 @@
   toplevel of the written file (`git -C <dir> rev-parse --show-toplevel`),
   and pass the path relative to that root; add a `guard.mjs self-test`
   case for a worktree path. R11's first retro is a natural home.
+### [bug] P-07b's printed "(max 30)" does not cap its paid line (RC2 walk, 2026-10-11)
+- source: RC2 walk 2026-10-11 (eb75f451, Blood Price test deck, attended; accepted for the v0.2.0 tag by T, D83)
+- category: bug
+- impact: 8
+- ease: 7
+- detail: Leg 4 logged P-07b ("DEAL all the VITAE you lost this combat (max 30). EXILE.") paid plays dealing 114 (seq 3063, a Float-Eye at ld-11, after far less than 114 VITAE lost), 114 again on the Doorwarden (seq 3428), 48 and 32. Printed numbers elsewhere scale with stats, but the cap does not scale and 114 is not a scaled 30 either. Printed must equal applied.
+- next (`/iterate`): find where the card program resolves "VITAE lost this combat" and its cap in `axiomancer-mechanics/src/Combat/` (P-07b in the Blood Price library); check whether the cap is skipped on the paid line or scaled after capping; pin it with an engine test at the printed cap. Card numbers are D37-held: fix the code to match the printed card, never the card text.
+
+### [bug] A die is spent on a staged card that cannot be played (RC2 walk, 2026-10-11)
+- source: RC2 walk 2026-10-11 (eb75f451, Blood Price test deck, attended; accepted for the v0.2.0 tag by T, D83)
+- category: bug
+- impact: 7
+- ease: 7
+- detail: Leg 3: above half VITAE, stage Blood Price P-04C (marked "ONLY AT HALF VITAE OR LESS") and drag the WILD die onto it. The die is accepted and goes "spent" with no rejection flash, APPLY does nothing, and the card stayed staged from turn 2 to turn 7 of the Doorwarden fight while every END logged "Refused - only at half VITAE or less." A wrong-colour drop is refused loudly; this one loses the die. Same root as a second copy of a Global staging.
+- next (`/iterate`): refuse the die drop (and the stage) when the card's play condition fails, with the same loud reject flash as the colour rule (owner UI doctrine: illegal actions prevented loudly); unstaged cards return to the hand. Mobile combat drop handlers in `axiomancer-mobile/components/combat/`; add a test.
+
+### [bug] Scarred ("until you next rest at an inn") never clears (RC2 walk, 2026-10-11)
+- source: RC2 walk 2026-10-11 (eb75f451, Blood Price test deck, attended; accepted for the v0.2.0 tag by T, D83)
+- category: bug
+- impact: 6
+- ease: 7
+- detail: Leg 4: a lost hazard (ld-4 North Aqueduct) applied Scarred (-5 max VITAE, 302 to 297). Act 1 has no inn. Two rest nodes (ld-10, ld-2) and a reload left max VITAE at 297. In practice the scar is permanent, and the gloss names a place the game does not have.
+- next (`/iterate`): decide in code what lifts a scar in Act 1 (any REST node is the reading closest to the gloss), make it so and update the gloss to match; test it. If lifting it needs a design call, file a `[loop-call]` with the choice made.
+
+### [bug] "SACRIFICE any amount" never asks the player for an amount (RC2 walk, 2026-10-11)
+- source: RC2 walk 2026-10-11 (eb75f451, Blood Price test deck, attended; accepted for the v0.2.0 tag by T, D83)
+- category: bug
+- impact: 6
+- ease: 5
+- detail: Leg 1: Blood Price E-10d ("SACRIFICE any amount (max 15)") played with a die sacrificed 1 with no prompt (log seq 78, `vitae-sacrificed amount:1`), and Blood for Blood chose its X itself. The card's main decision is taken from the player.
+- next (`/iterate`): add an amount picker (a stepper or slider, 1..max, capped by VITAE) when a card has a variable SACRIFICE, and feed the chosen amount to the engine; engine test that the amount is honoured, mobile test for the picker.
+
+### [balance] The Brine Hag keeps 152 VITAE in every region (RC2 walk, 2026-10-11)
+- source: RC2 walk 2026-10-11 (eb75f451, Blood Price test deck, attended; accepted for the v0.2.0 tag by T, D83)
+- category: balance
+- impact: 5
+- ease: 6
+- detail: All four walk Hags had 152 VITAE (Breakwater to Lantern Deep), while Float-Eye scaled 92 to 108 to 124 and the Doorwarden 258 to 312 to 368 to 422 as the pilgrim went from level 1 to 6. Honest Hag fights averaged 3.25 turns against D82's target of about 5; three of four ended through mercy at about 30%.
+- next (`/iterate`): check `scaleEnemyToLevel` and the map pins: is the elite missing its region scale (a bug: fix it and re-run the lane pacing sim), or is 152 pinned on purpose? Any retune of the Hag's numbers is T's call (attended, as D82 was); file a `[loop-call]` if it is ambiguous.
 
 ### [x] [perf] firstScreenMs budget breach: 306 ms vs 303 ms (2026-10-11) — CLOSED 2026-10-11 (afcd727c: a runner artifact. The run was on an Intel Xeon 8573C and the budgets were seeded on an AMD EPYC 9V74. Re-measured on the AMD at 52fabfbf: firstScreenMs 248, lcpMs 288, tbtMs 81, all under budget. Timing budgets now apply only on the seeding CPU)
 - issue: #489
@@ -1497,25 +1536,6 @@ present. Row stays open until that session runs.
   the automation-file deletion and the README/specs rewrite as two
   separate scoped fixes, not one.
 
-### [content] The title screen still shows the painted "AxiomanceR" wordmark after the Phase 67 rename
-- category: content
-- impact: 6
-- ease: 2
-- detail: filed 2026-08-27 by Phase 67. The rename to "Miserere Mei, Deus"
-  shipped everywhere it could reach as a string — store/web metadata, CLI
-  banners, published site chrome, the doc set. The one surface it cannot
-  reach is the one a player actually sees first: the title screen's wordmark
-  is painted into `axiomancer-mobile/assets/images/title-embark.jpg`
-  (1024x1024 key art, wordmark near the top edge), and
-  `components/TitleScreen.tsx` renders that image with `contentFit="contain"`
-  specifically so the painted "A" and "R" are not cropped. There is no text
-  node to rename. Net effect today: the browser tab and store listing say
-  "Miserere Mei, Deus" while the first screen says "AxiomanceR".
-- next: new key art carrying the new wordmark, through the art pipeline
-  (build-plan Phases 71 / 73). A text-overlay stopgap is NOT the fix — it
-  would double the wordmark against the painted one. Until then this is a
-  known, deliberate inconsistency, not drift.
-
 ### [content] "Blank Indenture" violates NL-8 and is grandfathered, not renamed
 - category: content
 - impact: 2
@@ -1599,6 +1619,32 @@ present. Row stays open until that session runs.
   cover the slower runner.
 
 ## Done
+
+### [x] [content] The title screen still shows the painted "AxiomanceR" wordmark after the Phase 67 rename — CLOSED 2026-10-11 (T, attended)
+- category: content
+- impact: 6
+- ease: 2
+- detail: filed 2026-08-27 by Phase 67. The rename to "Miserere Mei, Deus"
+  shipped everywhere it could reach as a string — store/web metadata, CLI
+  banners, published site chrome, the doc set. The one surface it cannot
+  reach is the one a player actually sees first: the title screen's wordmark
+  is painted into `axiomancer-mobile/assets/images/title-embark.jpg`
+  (1024x1024 key art, wordmark near the top edge), and
+  `components/TitleScreen.tsx` renders that image with `contentFit="contain"`
+  specifically so the painted "A" and "R" are not cropped. There is no text
+  node to rename. Net effect today: the browser tab and store listing say
+  "Miserere Mei, Deus" while the first screen says "AxiomanceR".
+- next: new key art carrying the new wordmark, through the art pipeline
+  (build-plan Phases 71 / 73). A text-overlay stopgap is NOT the fix — it
+  would double the wordmark against the painted one. Until then this is a
+  known, deliberate inconsistency, not drift.
+- resolution: T asked for both fixes in an attended session. The splash now
+  reads "Miserere Mei, Deus" in the game's own Pirata One. The AI key art is
+  retired from the title screen and every launcher icon. In its place is a
+  public-domain Doré plate (Purgatorio I, acquired through
+  `scripts/acquire-art.mjs` with its licence read from Commons) under a typeset
+  wordmark that the splash, the title screen and the main menu share
+  (`state/presenters/title.engine.ts`).
 
 ### [x] combat — user crash on ACCEPTING post-combat card reward (unreproduced, PR #216) — CLOSED 2026-10-11 via /oversight (blind)
 - category: external-critique

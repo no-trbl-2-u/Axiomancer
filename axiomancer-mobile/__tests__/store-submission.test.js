@@ -83,7 +83,7 @@ describe('Store Submission Requirements', () => {
       const [, splashConfig] = splashPlugin;
       
       expect(splashConfig.image).toBe('./assets/images/splash-icon.png');
-      expect(splashConfig.imageWidth).toBe(200);
+      expect(splashConfig.imageWidth).toBe(180);
       expect(splashConfig.resizeMode).toBe('contain');
       expect(splashConfig.backgroundColor).toBe('#0a0a0a');
       expect(splashConfig.dark?.backgroundColor).toBe('#0a0a0a');

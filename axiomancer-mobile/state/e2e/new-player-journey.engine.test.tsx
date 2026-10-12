@@ -24,7 +24,7 @@ afterEach(() => {
 
 describe('integration: new player journey — fresh state through first encounter', () => {
     it('fresh store shows title screen for new players', async () => {
-        const { tree } = withAllProviders(<TitleScreen onContinue={() => {}} />);
+        const { tree } = withAllProviders(<TitleScreen menu={null} />);
 
         // Title screen component should render for new players
         const rendered = render(tree);

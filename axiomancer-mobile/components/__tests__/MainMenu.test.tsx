@@ -69,4 +69,14 @@ describe('MainMenu', () => {
         expect(column.width).toBe('100%');
         expect(screen.getByTestId('main-menu-column')).toContainElement(screen.getByTestId('main-menu-new-game'));
     });
+
+    /** Under the title screen the wordmark is the title; the menu adds no second one and no ground. */
+    it('drops its own title and ground when embedded in the title screen', () => {
+        const handlers = { onContinue: jest.fn(), onNewGame: jest.fn(), onLoadGame: jest.fn(), onSettings: jest.fn() };
+        const { tree } = withAllProviders(<MainMenu {...handlers} embedded />, { slots: createMemorySlotStore() });
+        render(tree);
+        expect(screen.queryByText(MAIN_MENU_COPY.title)).toBeNull();
+        expect(screen.getByText(MAIN_MENU_COPY.eyebrow)).toBeTruthy();
+        expect(StyleSheet.flatten(screen.getByTestId('main-menu').props.style).backgroundColor).toBe('transparent');
+    });
 });

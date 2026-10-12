@@ -154,7 +154,7 @@ export function OutcomeText({ text, names, base, bold, numberOfLines }: { text: 
 
 // ── Signature rune column (left edge) ────────────────────────────────────────
 
-function SignatureColumn({ conviction, signatures, onCast, onInfo, top, onMeasureHeight }: {
+const SignatureColumn = React.memo(function SignatureColumn({ conviction, signatures, onCast, onInfo, top, onMeasureHeight }: {
     conviction: number;
     signatures: CombatSignatureVM[];
     onCast: (id: string) => void;
@@ -213,7 +213,7 @@ function SignatureColumn({ conviction, signatures, onCast, onInfo, top, onMeasur
             ))}
         </View>
     );
-}
+});
 
 // ── Dice row (free-floating gems above the hand) ─────────────────────────────
 
@@ -347,7 +347,9 @@ export function handFanLayout(screenW: number, n: number): { band: number; step:
     return { band, step, overlap: HAND_CARD_W - step };
 }
 
-function DiceRow({
+// Memoized: a card drag's pickup and drop re-render the board, and the tray's
+// GestureDetectors must not re-push their configs to the native module then.
+const DiceRow = React.memo(function DiceRow({
     vm, dieGesture, draggingDieId, assignedDieIds,
 }: {
     vm: CombatViewModel;
@@ -464,7 +466,7 @@ function DiceRow({
             ) : null}
         </View>
     );
-}
+});
 
 // ── Staged card (die socket · fused APPLY ribbon) ────────────────────────────
 
@@ -654,7 +656,7 @@ export const CHIP_INFO_MARK_GAP = 5;
  *  carries its own backing plate (it sits on the arena floor, not on the
  *  readout's plate) and a mirrored leading gutter, so marking the chip neither
  *  costs the mark its contrast nor costs the readout its centre line. */
-function MomentumChainChip({ vm, onPress }: { vm: CombatMomentumV2VM; onPress?: () => void }) {
+const MomentumChainChip = React.memo(function MomentumChainChip({ vm, onPress }: { vm: CombatMomentumV2VM; onPress?: () => void }) {
     const AXM = usePalette();
     const styles = useStyles();
     const { color, length, chain, surgeAt, next, broke, surged, a11y } = vm;
@@ -714,11 +716,11 @@ function MomentumChainChip({ vm, onPress }: { vm: CombatMomentumV2VM; onPress?: 
             <Text style={styles.chipInfoMark} allowFontScaling={false} testID="combat-momentum-info-mark">ⓘ</Text>
         </Pressable>
     );
-}
+});
 
 // ── END PHASE medallion ──────────────────────────────────────────────────────
 
-function EndPhaseMedallion({ onPress, consequence = null, disabled = false }: {
+const EndPhaseMedallion = React.memo(function EndPhaseMedallion({ onPress, consequence = null, disabled = false }: {
     onPress: () => void;
     /** No-softlock telegraph: the honest one-line
      *  consequence of ending now (verified engine behavior, never invented) —
@@ -771,7 +773,7 @@ function EndPhaseMedallion({ onPress, consequence = null, disabled = false }: {
             ) : null}
         </View>
     );
-}
+});
 
 // ── The board ────────────────────────────────────────────────────────────────
 
@@ -884,7 +886,7 @@ export const CombatBoard = React.memo(function CombatBoard({
         return d && !d.spent && !d.isX && stance && dieCanPowerCardVM(d, stance) ? d : null;
     };
     // Dim every die that's pending-assigned to some card.
-    const assignedDieIds = new Set<string>(Object.values(pendingDieByUid));
+    const assignedDieIds = useMemo(() => new Set<string>(Object.values(pendingDieByUid)), [pendingDieByUid]);
 
     const resolveDrop = useCallback(async (payload: DragPayload, x: number, y: number) => {
         if (x < 0 && y < 0) return;
@@ -1044,7 +1046,9 @@ export const CombatBoard = React.memo(function CombatBoard({
     };
     const handCardGesture = (card: CombatCardVM) => cardGestureFor('hand', card.uid);
     const stagedGesture = (card: CombatCardVM) => cardGestureFor('play', card.uid);
-    const dieGesture = (die: CombatDieVM) => {
+    // Identity-stable (everything it closes over is) so the memoized DiceRow
+    // never re-renders just because the board did.
+    const dieGesture = useCallback((die: CombatDieVM) => {
         const key = `die-${die.id}`;
         let g = gestureCacheRef.current.get(key);
         if (!g) {
@@ -1063,7 +1067,7 @@ export const CombatBoard = React.memo(function CombatBoard({
             gestureCacheRef.current.set(key, g);
         }
         return g;
-    };
+    }, [gx, gy, beginDieJS, endJS, tapDieJS]);
 
     const stagedSet = new Set(stagedUids);
     // Staged cards, in stage order (filtered to those still in hand).
@@ -1193,11 +1197,14 @@ export const CombatBoard = React.memo(function CombatBoard({
     // would: honoring a dropped die, else FREE), THEN resolve the phase. The
     // applies and the resolve all compose through the panel's functional setState, so
     // cards land before the enemy acts.
-    const handleEndPhase = () => {
+    const handleEndPhaseRef = useRef<() => void>(() => undefined);
+    handleEndPhaseRef.current = () => {
         if (resolving) return; // a phase is already resolving; ignore the tap
         for (const uid of stagedUids) handleApplyRef.current(uid);
         onEndPhase();
     };
+    // Stable, so the memoized medallion sits out the drag re-renders.
+    const handleEndPhase = useCallback(() => handleEndPhaseRef.current(), []);
 
     const metaLine = `${vm.phaseBadge} · ${vm.roundLabel} · ${vm.turnLabel}`
         .replace('ROUND ', 'R').replace('TURN ', 'T');
@@ -1210,11 +1217,11 @@ export const CombatBoard = React.memo(function CombatBoard({
     const railMinH = RAIL_LINE_H + bottomInset;
     const railH = Math.max(railMinH, railMeasuredH);
     const ledgerStacks = railLedgerStacks(screenW, vm.ledger.length);
-    const ledger = (
+    const ledger = useMemo(() => (
         <View style={[styles.railLedger, ledgerStacks && styles.railLedgerStacked]} testID="combat-ledger">
             {vm.ledger.map((m, i) => <LedgerMark key={i} kind={m === 'clear' ? 'O' : m === 'overwhelmed' ? 'X' : 'pending'} size={RAIL_LEDGER_MARK} />)}
         </View>
-    );
+    ), [vm.ledger, ledgerStacks, styles]);
 
     return (
         <View style={styles.root} testID="combat-board">
@@ -1408,37 +1415,16 @@ export const CombatBoard = React.memo(function CombatBoard({
                     ) : null}
                     <View style={styles.fan} testID="combat-hand" pointerEvents="box-none">
                         {fan.map((card, i) => (
-                            <GestureDetector key={card.uid} gesture={handCardGesture(card)}>
-                                <Animated.View
-                                    entering={FadeIn.duration(180)} layout={LinearTransition.duration(160)}
-                                    style={{
-                                        marginLeft: i === 0 ? 0 : -overlap,
-                                        zIndex: draggingCardUid === card.uid ? 30 : i,
-                                        transform: [{ translateY: 2 + Math.abs(i - mid) * 3 }, { rotate: `${(i - mid) * 3}deg` }],
-                                    }}
-                                    testID={`combat-hand-${card.uid}`}
-                                    accessible accessibilityRole="button"
-                                    // The fanned face has no room to PRINT the
-                                    // rarity word (see the face doc block above
-                                    // `CombatCardFace`), so the label is where a
-                                    // screen-reader player gets it. This pressable is
-                                    // `accessible`, which collapses the face's own
-                                    // track label, so the word has to be said here.
-                                    accessibilityLabel={`${card.name}, ${RARITY_LABEL[rarityFor(card)]}, ${card.stance} card. ${card.face.verbLine}.`}
-                                    accessibilityHint="Drag up to stage, or tap to read"
-                                >
-                                    {/* The in-flight dim lives on a plain inner view: FadeIn
-                                        drives `opacity` on the animated wrapper, and an
-                                        `opacity` style on that same node is what Reanimated
-                                        warns "may be overwritten by a layout animation". */}
-                                    <View style={draggingCardUid === card.uid ? styles.handCardLifted : null}>
-                                        <HandCard
-                                            card={card}
-                                            namePeek={i === fan.length - 1 ? null : handNamePeek}
-                                        />
-                                    </View>
-                                </Animated.View>
-                            </GestureDetector>
+                            <FanCard
+                                key={card.uid}
+                                card={card}
+                                gesture={handCardGesture(card)}
+                                marginLeft={i === 0 ? 0 : -overlap}
+                                tilt={i - mid}
+                                zIndex={i}
+                                lifted={draggingCardUid === card.uid}
+                                namePeek={i === fan.length - 1 ? null : handNamePeek}
+                            />
                         ))}
                     </View>
                 </View>
@@ -1934,6 +1920,60 @@ export const CombatCardFace = React.memo(function CombatCardFace({
 // same constants — keep them in sync. Exported for the drag ghost.
 export const HAND_CARD_W = 120;
 export const HAND_CARD_H = 176;
+/**
+ * One fanned hand card with its drag/tap gesture. Memoized on primitive
+ * props so a drag pickup or drop re-renders ONLY the card whose `lifted`
+ * flipped: a re-rendered GestureDetector pushes every one of its handlers'
+ * configs back to the native gesture module, and the drag ghost only shows
+ * once that pickup commit lands, so a whole-fan re-render was pickup lag.
+ */
+export const FanCard = React.memo(function FanCard({
+    card, gesture, marginLeft, tilt, zIndex, lifted, namePeek,
+}: {
+    card: CombatCardVM;
+    /** Cached per uid by the board — identity-stable for the card's life. */
+    gesture: ReturnType<typeof Gesture.Exclusive>;
+    marginLeft: number;
+    /** Signed distance from the fan's middle, in cards. */
+    tilt: number;
+    zIndex: number;
+    /** This card is the one in flight: dimmed and raised. */
+    lifted: boolean;
+    namePeek: number | null;
+}) {
+    const styles = useStyles();
+    return (
+        <GestureDetector gesture={gesture}>
+            <Animated.View
+                entering={FadeIn.duration(180)} layout={LinearTransition.duration(160)}
+                style={{
+                    marginLeft,
+                    zIndex: lifted ? 30 : zIndex,
+                    transform: [{ translateY: 2 + Math.abs(tilt) * 3 }, { rotate: `${tilt * 3}deg` }],
+                }}
+                testID={`combat-hand-${card.uid}`}
+                accessible accessibilityRole="button"
+                // The fanned face has no room to PRINT the
+                // rarity word (see the face doc block above
+                // `CombatCardFace`), so the label is where a
+                // screen-reader player gets it. This pressable is
+                // `accessible`, which collapses the face's own
+                // track label, so the word has to be said here.
+                accessibilityLabel={`${card.name}, ${RARITY_LABEL[rarityFor(card)]}, ${card.stance} card. ${card.face.verbLine}.`}
+                accessibilityHint="Drag up to stage, or tap to read"
+            >
+                {/* The in-flight dim lives on a plain inner view: FadeIn
+                    drives `opacity` on the animated wrapper, and an
+                    `opacity` style on that same node is what Reanimated
+                    warns "may be overwritten by a layout animation". */}
+                <View style={lifted ? styles.handCardLifted : null}>
+                    <HandCard card={card} namePeek={namePeek} />
+                </View>
+            </Animated.View>
+        </GestureDetector>
+    );
+});
+
 function HandCard({ card, namePeek = null }: { card: CombatCardVM; namePeek?: number | null }) {
     const styles = useStyles();
     // `namePeek` is null for the topmost (rightmost) fanned card — nothing

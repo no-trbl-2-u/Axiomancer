@@ -329,6 +329,23 @@ test('a plate with page margins is found where it is', async () => {
   assert.ok(built.frac > 0.2, `a real plate must clear the floor, frac was ${built.frac}`)
 })
 
+test('darkRatio lets a plate keep a sky lighter than the default cut-off', async () => {
+  const { default: sharp } = await import('sharp')
+  // Doré's Purgatorio I on its 1871 page (the title plate): the upper half of
+  // the plate is open dawn sky, lighter than 0.82 of the page mean, so the
+  // default detector cropped the plate at the horizon and dropped the sky.
+  // Here the sky (150) sits over ink (40): the page mean is ~179, so 0.82
+  // reads only the ink and 0.95 reads the whole plate.
+  const page = await platePage(sharp, 1000, 1200, [[200, 200, 600, 400, 150], [200, 600, 600, 400]])
+  const dflt = await detectPlateBox(sharp, page)
+  assert.ok(Math.abs(dflt.y0 - 0.5) < 0.01, `default y0 was ${dflt.y0}`)
+  const lifted = await detectPlateBox(sharp, page, { darkRatio: 0.95 })
+  assert.ok(Math.abs(lifted.y0 - 200 / 1200) < 0.01, `darkRatio 0.95 y0 was ${lifted.y0}`)
+  assert.ok(Math.abs(lifted.y1 - 1000 / 1200) < 0.01, `darkRatio 0.95 y1 was ${lifted.y1}`)
+  const built = await buildPlatePage(sharp, page, 512, 0.01, 0.95)
+  assert.equal(built.crop.darkRatio, 0.95, 'the ratio used is recorded with the crop')
+})
+
 test('a tight scan that fills its page is still accepted', async () => {
   const { default: sharp } = await import('sharp')
   // Phase 103 decision 4 put NO upper guard on the detected box on purpose: a

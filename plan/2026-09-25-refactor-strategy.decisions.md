@@ -934,6 +934,19 @@ satisfied for exactly these.)
   `resolveEncounter`. At live pins Float-Eye runs about 3.6 turns and Brine
   Hag about 4-4.5 (mostly spared); neither was retuned.
 
+**D83 — v0.2.0 is cut.** (T, attended, 2026-10-11.)
+
+- `v0.2.0` is an annotated tag on `eb75f451`, published as a GitHub release.
+  T skipped the EAS build from the tag ("I got one already from this
+  morning").
+- The gate passed: the root tests, both workspace verify gates, the content
+  lints and the verify-* workflows were green on that commit, and the
+  four-region walk (Blood Price test deck, honest fights, a dev quick-win only
+  when stuck) found no crash or dead end (`plan/revamp/checkpoint.md` → "RC2").
+- T accepted four rules/interaction bugs for the tag and filed them (P-07b's
+  cap, a die lost on an unplayable staged card, Scarred never clearing,
+  SACRIFICE "any amount" not prompting).
+
 ## Open follow-ups
 
 **D1 status at a glance (2026-09-28, after #408).** Card and keyword

@@ -161,7 +161,50 @@ until T opens the session.
    rule, and the report says so.
 4. **Findings:** RC gate item 4.
 
+### The walk, 2026-10-11 (attended)
+
+Four `playtester` legs on the expo-web dev build of `eb75f451`, one per
+region, continuing one save (slot I). At T's direction the walk used the
+**Blood Price test deck** (set from `/dev` → CARDS → TEST LANE DECK),
+fought every map fight honestly, and kept the dev quick-win
+(`globalThis.__AXM_SKIP_EVENT__`, the dev menu's SKIP EVENT) for a stuck
+fight or hazard only. **Every checklist item passed**, with no crash or dead
+end. The one skip was on a fight fired from the `/dev` enemy picker, not on
+a map fight. Items checked against later rules: relics are the Suppliant's
+Ring and the Bleeding Signet (BT1), and Momentum has live carriers (BT).
+
+| Region | Doorwarden (turns, VITAE) | Brine Hag | Level at exit |
+|---|---|---|---|
+| Breakwater | bw-17, 7 turns, 258 | spared (Open Hand at 29%) | 3 |
+| Charcoal Wood | cw-17, 8 turns, 312 | killed outright, 3 turns | 4 |
+| Beacon Crags | bc-15, 10 turns, 368 | spared, 2 turns | 5 |
+| Lantern Deep | ld-16, 6 turns, 422 | EXPLOIT, 4 turns | 6 |
+
+Honest fights against D82's targets: Float-Eye ×18, 3.9 turns on average
+(target about 3); Brine Hag ×4, 3.25 (target about 5); the Doorwarden ×4,
+7.75 (target about 7). Three of the four Hag fights ended through mercy at
+about 30% VITAE, and the one kill was a SACRIFICE burst under VULNERABLE.
+The Hag kept **152 VITAE in every region**, while Float-Eye (92 → 124) and
+the Doorwarden (258 → 422) scaled with the map. Not retuned; filed in
+`plan/AUDIT.md`.
+
+Also seen: a reload mid-fight re-offers the fight; both sealed omens (ld-15,
+ld-18) return to a usable map; the end-of-walk reload is clean; the only
+app console error is React 19's dev-only `element.ref` warning, from
+react-native-gesture-handler 2.28.0 on web, which production builds never
+print.
+
+**Accepted for the tag (T, 2026-10-11):** "Tag now, file all". Four
+rules/interaction bugs went to `plan/AUDIT.md` and do not block: P-07b's
+"(max 30)" does not cap, a die is spent on an unplayable staged card,
+Scarred never clears, and "SACRIFICE any amount" does not prompt. The copy
+and consistency rows are in `plan/CRITIQUE.md` ("RC2 walk 2026-10-11").
+
 ### Cut
+
+**Done 2026-10-11 (D83):** tagged `v0.2.0` on `eb75f451`, GitHub release
+published. No EAS build from the tag: T played a preview APK built that
+morning. Recorded in bearings and the decisions log; RC2 ticked.
 
 As RC's cut, with tag `v0.2.0` (annotated): T tags and pushes it,
 publishes a GitHub release (what changed since `v0.1.0-checkpoint`), builds

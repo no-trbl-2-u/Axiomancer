@@ -1,142 +1,196 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { View, Text, Pressable, StyleSheet, useWindowDimensions, type LayoutChangeEvent } from 'react-native';
+import Animated, {
+  Easing,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from 'react-native-reanimated';
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
+
+import { TITLE_PLATE } from '@/assets/images/title';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { resolveJuiceMode } from '@/lib/juice/instant';
 import { Image } from '@/lib/platform/image';
+import {
+  MENU_PLATE_OPACITY,
+  TITLE_COPY,
+  TITLE_TIMING,
+  WORDMARK_EM_WIDTH,
+  titleLayout,
+  titleWordmarkFrames,
+} from '@/state/presenters/title.engine';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
-// The throne-room key art doubles as the launcher icon; here it anchors
-// the top of the title screen and the painted "AxiomanceR" wordmark
-// carries the brand.
-const TITLE_ART = require('@/assets/images/title-embark.jpg');
-
-export interface TitleScrimStop { offset: number; opacity: number; }
-
-/**
- * The bottom scrim's gradient stop table, top of the scrim (0) to the
- * screen's foot (1).
- *
- * Purpose: a continuous ramp, so no edge shows. The scrim was three flat
- * bands; on a desktop window their edges ran straight across the king's
- * crown and beard (CRITIQUE pass 74). It starts fully clear, so its top has
- * no seam either, and holds the old bottom band's 0.9 darkness over the
- * lower fifth, where the CTA sits.
- *
- * Output: the ordered stop table for the scrim's LinearGradient.
- */
-export function titleScrimStops(): readonly TitleScrimStop[] {
-  return [
-    { offset: 0, opacity: 0 },
-    { offset: 0.25, opacity: 0.18 },
-    { offset: 0.5, opacity: 0.52 },
-    { offset: 0.67, opacity: 0.8 },
-    { offset: 0.8, opacity: 0.9 },
-    { offset: 1, opacity: 0.94 },
-  ];
-}
-
 interface TitleScreenProps {
-  onContinue: () => void;
+  /** The main menu, shown beneath the same wordmark once EMBARK is pressed. */
+  menu: React.ReactNode;
+  /** Open on the menu with the sequence already played (`/?menu=1`). */
+  startAtMenu?: boolean;
 }
 
 /**
- * TitleScreen — the launch screen presenter: key art, the tagline, the
- * EMBARK call-to-action and the closing flavour line.
+ * TitleScreen — the launch sequence: the splash's wordmark, lifted into the
+ * sky of Doré's shore at dawn, the psalm line and EMBARK, then the main menu
+ * under the same wordmark (`state/presenters/title.engine.ts` has the beats
+ * and the layout).
  *
- * Inputs: `onContinue` — invoked once the player commits to EMBARK (the
- * index route then shows the main menu).
- * Output: the title screen element tree (no state of its own).
+ * Inputs: `menu` — the menu element; `startAtMenu` — skip straight to it.
+ * Output: the whole launch screen. Its only state is which phase it is in;
+ * EMBARK hands off to `menu` in place, so the wordmark and the plate never
+ * unmount between the two.
  *
- * Resolves DECISION-5 (rows C-103, C-105): `leagues` is a unit of
- * distance, not a proper noun, so the tagline says "the leagues beyond"
- * in lower case. The step-card column
- * header keeps its all-caps LEAGUES; that is a header, not prose.
+ * Reduced motion and the e2e instant flag land every value at once.
  */
-export function TitleScreen({ onContinue }: TitleScreenProps) {
+export function TitleScreen({ menu, startAtMenu = false }: TitleScreenProps) {
   const styles = useStyles();
   const AXM = usePalette();
+  const { width, height } = useWindowDimensions();
+  const insets = useContext(SafeAreaInsetsContext);
+  const layout = titleLayout({ width, height, topInset: insets?.top ?? 0 });
+  const instant = resolveJuiceMode({ reducedMotion: useReducedMotion() }) === 'instant';
 
-  // EMBARK does not seed the character. It only hands off to the main
-  // menu; a new game starts with
-  // nothing in every build, and the `/dev` route seeds on demand.
-  const handleStartGame = () => {
-    onContinue();
+  const [phase, setPhase] = useState<'title' | 'menu'>(startAtMenu ? 'menu' : 'title');
+  const [measuredWidth, setMeasuredWidth] = useState(0);
+  const frames = titleWordmarkFrames(layout, measuredWidth);
+
+  const settled = startAtMenu || instant;
+  const lift = useSharedValue(settled ? 1 : 0);
+  const cta = useSharedValue(settled ? 1 : 0);
+  const toMenu = useSharedValue(startAtMenu ? 1 : 0);
+
+  useEffect(() => {
+    if (settled) {
+      lift.value = 1;
+      cta.value = 1;
+      return;
+    }
+    lift.value = withDelay(
+      TITLE_TIMING.holdMs,
+      withTiming(1, { duration: TITLE_TIMING.liftMs, easing: Easing.inOut(Easing.cubic) }),
+    );
+    cta.value = withDelay(
+      TITLE_TIMING.holdMs + TITLE_TIMING.liftMs,
+      withTiming(1, { duration: TITLE_TIMING.ctaMs }),
+    );
+    // Plays once per mount; the shared values carry it from there.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleEmbark = () => {
+    setPhase('menu');
+    toMenu.value = instant ? 1 : withTiming(1, { duration: TITLE_TIMING.menuMs });
   };
 
-  return (
-    <View style={styles.container}>
-      {/* The source art is a 1024x1024 square with the painted
-          "AxiomanceR" wordmark near its top edge. A full-bleed
-          `cover` fit on a narrow/tall phone viewport scales the
-          square up to match screen height, which crops both sides
-          — cutting the wordmark's leading "A" and trailing "R".
-          `contain` keeps the whole square (wordmark included)
-          intact at full width instead; the container's own dark
-          background fills the space below it, which the scrim
-          already darkens toward for the CTA panel. */}
-      {/* `contain` ends the square plate in a ruled line
-          straight across the figures, with flat ground beneath it — a
-          seam, not an edge. The art sits in its own square wrapper
-          so a short ramp of ground-coloured bands can be anchored to
-          the ART's own foot (not the screen's), dissolving that line at
-          any viewport height. */}
-      <View style={styles.artWrap} pointerEvents="none">
-        <Image
-          source={TITLE_ART}
-          style={styles.artImage}
-          contentFit="contain"
-          contentPosition="top center"
-          accessibilityLabel="A crowned king enthroned beside a horned axiomancer in a stained-glass hall"
-        />
-        <View style={styles.artFoot}>
-          <View style={[styles.artFootBand, styles.artFootBand1]} />
-          <View style={[styles.artFootBand, styles.artFootBand2]} />
-          <View style={[styles.artFootBand, styles.artFootBand3]} />
-          <View style={[styles.artFootBand, styles.artFootBand4]} />
-          <View style={[styles.artFootBand, styles.artFootBand5]} />
-          <View style={[styles.artFootBand, styles.artFootBand6]} />
-          <View style={[styles.artFootBand, styles.artFootBand7]} />
-        </View>
-      </View>
+  const splash = frames.splash;
+  const wordmarkStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: interpolate(lift.value, [0, 1], [splash.translateY, 0]) },
+      { scale: interpolate(lift.value, [0, 1], [splash.scale, 1]) },
+    ],
+  }), [splash.translateY, splash.scale]);
+  const plateStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(lift.value, [0.15, 1], [0, 1], 'clamp')
+      * interpolate(toMenu.value, [0, 1], [1, MENU_PLATE_OPACITY]),
+  }));
+  const ctaStyle = useAnimatedStyle(() => ({ opacity: cta.value * (1 - toMenu.value) }));
+  const menuStyle = useAnimatedStyle(() => ({ opacity: toMenu.value }));
 
-      {/* Bottom scrim so the call-to-action reads over the art. */}
-      <View style={styles.scrim} pointerEvents="none" testID="title-scrim">
+  const fontSize = layout.wordmark.width / WORDMARK_EM_WIDTH;
+  const lineHeight = Math.round(fontSize * 1.3);
+  const onWordmarkLayout = (e: LayoutChangeEvent) => {
+    const w = e.nativeEvent.layout.width;
+    if (w > 0 && Math.abs(w - measuredWidth) > 0.5) setMeasuredWidth(w);
+  };
+  const plate = layout.plate;
+  const sideFeather = plate.left > 0;
+
+  return (
+    <View style={styles.container} testID="title-screen">
+      <Animated.View
+        style={[styles.plate, { left: plate.left, width: plate.width, height: plate.height }, plateStyle]}
+        pointerEvents="none"
+        testID="title-plate"
+      >
+        <Image
+          source={TITLE_PLATE}
+          style={StyleSheet.absoluteFill}
+          contentFit="cover"
+          accessibilityLabel={TITLE_COPY.plateLabel}
+        />
+        {/* The plate dissolves into the ground at its foot, and at its sides
+            when a wide window leaves ground beside it, so it has no edge. */}
         <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
           <Defs>
-            <LinearGradient id="axmTitleScrim" x1="0" y1="0" x2="0" y2="1">
-              {titleScrimStops().map((st) => (
-                <Stop key={st.offset} offset={st.offset} stopColor={AXM.bg} stopOpacity={st.opacity} />
-              ))}
+            <LinearGradient id="axmTitleFoot" x1="0" y1="0" x2="0" y2="1">
+              <Stop offset={0.55} stopColor={AXM.bg} stopOpacity={0} />
+              <Stop offset={0.72} stopColor={AXM.bg} stopOpacity={0.35} />
+              <Stop offset={0.84} stopColor={AXM.bg} stopOpacity={0.78} />
+              <Stop offset={0.93} stopColor={AXM.bg} stopOpacity={1} />
+              <Stop offset={1} stopColor={AXM.bg} stopOpacity={1} />
+            </LinearGradient>
+            <LinearGradient id="axmTitleSides" x1="0" y1="0" x2="1" y2="0">
+              <Stop offset={0} stopColor={AXM.bg} stopOpacity={sideFeather ? 1 : 0} />
+              <Stop offset={0.12} stopColor={AXM.bg} stopOpacity={0} />
+              <Stop offset={0.88} stopColor={AXM.bg} stopOpacity={0} />
+              <Stop offset={1} stopColor={AXM.bg} stopOpacity={sideFeather ? 1 : 0} />
             </LinearGradient>
           </Defs>
-          <Rect x="0" y="0" width="100%" height="100%" fill="url(#axmTitleScrim)" />
+          <Rect x="0" y="0" width="100%" height="100%" fill="url(#axmTitleSides)" />
+          <Rect x="0" y="0" width="100%" height="100%" fill="url(#axmTitleFoot)" />
         </Svg>
-      </View>
+      </Animated.View>
 
-      {/* Call to action */}
-      <View style={styles.content}>
-        <Text style={styles.tagline}>
-          The cursed lands await. Carry your ancient knowledge and cold
-          iron into the leagues beyond.
-        </Text>
+      {phase === 'menu' ? (
+        <Animated.View style={[StyleSheet.absoluteFill, menuStyle]} testID="title-menu">
+          {menu}
+        </Animated.View>
+      ) : null}
+
+      <Animated.View
+        style={[styles.content, ctaStyle]}
+        pointerEvents={phase === 'title' ? 'box-none' : 'none'}
+      >
+        <View style={styles.psalm}>
+          <Text style={styles.psalmLine}>{TITLE_COPY.psalm}</Text>
+          <Text style={styles.psalmSource}>{TITLE_COPY.psalmSource}</Text>
+        </View>
 
         <Pressable
-          style={({ pressed }) => [
-            styles.embarkButton,
-            pressed && styles.embarkButtonPressed,
-          ]}
-          onPress={handleStartGame}
+          style={({ pressed }) => [styles.embarkButton, pressed && styles.embarkButtonPressed]}
+          onPress={handleEmbark}
+          disabled={phase !== 'title'}
           accessibilityRole="button"
-          accessibilityLabel="Embark on your journey"
+          accessibilityLabel={TITLE_COPY.embarkLabel}
         >
-          <Text style={styles.embarkButtonText}>EMBARK…</Text>
-          <Text style={styles.embarkHint}>begin the pilgrimage</Text>
+          <Text style={styles.embarkButtonText}>{TITLE_COPY.embark}</Text>
+          <Text style={styles.embarkHint}>{TITLE_COPY.embarkHint}</Text>
         </Pressable>
 
-        <Text style={styles.footerText}>
-          Your path begins on the coast, at a windmill above the
-          breakwater.
+        <Text style={styles.footerText}>{TITLE_COPY.footer}</Text>
+      </Animated.View>
+
+      {/* The wordmark, last so it draws over the menu's fade. Its resting
+          frame sits in the plate's sky; the lift starts it at the splash's
+          frame. */}
+      <Animated.View
+        style={[styles.wordmarkRow, { top: layout.wordmark.centerY - lineHeight / 2 }, wordmarkStyle]}
+        pointerEvents="none"
+      >
+        <Text
+          style={[styles.wordmark, { fontSize, lineHeight }]}
+          onLayout={onWordmarkLayout}
+          accessibilityRole="header"
+          numberOfLines={1}
+          testID="title-wordmark"
+        >
+          {TITLE_COPY.wordmark}
         </Text>
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -147,54 +201,23 @@ const useStyles = makeStyles((AXM) => ({
     backgroundColor: AXM.bg,
     justifyContent: 'flex-end',
   },
-  // Square art pinned to the top edge, full width — see the
-  // `contentFit="contain"` comment above for why this replaces
-  // absoluteFill+cover.
-  artWrap: {
+  plate: {
     position: 'absolute',
     top: 0,
-    left: 0,
-    right: 0,
-    aspectRatio: 1,
   },
-  artImage: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  // The feathered foot of the plate. Seven bands of the
-  // page ground over the art's own lower quarter, the last fully opaque,
-  // so the image has already become the field by the time it ends. Seven
-  // so the step stays finer than the eye picks out over ~90px.
-  artFoot: {
+  wordmarkRow: {
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 0,
-    height: '24%',
-    justifyContent: 'flex-end',
+    alignItems: 'center',
   },
-  artFootBand: {
-    height: '14.28%',
-    backgroundColor: AXM.bg,
-  },
-  artFootBand1: { opacity: 0.08 },
-  artFootBand2: { opacity: 0.2 },
-  artFootBand3: { opacity: 0.35 },
-  artFootBand4: { opacity: 0.52 },
-  artFootBand5: { opacity: 0.71 },
-  artFootBand6: { opacity: 0.89 },
-  artFootBand7: { opacity: 1 },
-  // A real gradient (SVG), fading the art into the dark CTA panel; see
-  // `titleScrimStops`.
-  scrim: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: '55%',
+  wordmark: {
+    fontFamily: FONTS.gothic,
+    color: AXM.parchment,
+    textAlign: 'center',
+    textShadowColor: 'rgba(0,0,0,0.85)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 10,
   },
   content: {
     alignItems: 'center',
@@ -202,17 +225,27 @@ const useStyles = makeStyles((AXM) => ({
     paddingBottom: 48,
     gap: 22,
   },
-  tagline: {
-    fontFamily: FONTS.serif,
-    fontSize: 16,
+  psalm: {
+    alignItems: 'center',
+    gap: 6,
+    maxWidth: 340,
+  },
+  psalmLine: {
+    fontFamily: FONTS.serifItalic,
+    fontSize: 17,
     color: AXM.parchment,
     textAlign: 'center',
-    lineHeight: 24,
-    maxWidth: 340,
-    // Keep the line legible where it crosses brighter art.
+    lineHeight: 25,
     textShadowColor: 'rgba(0,0,0,0.9)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 6,
+  },
+  psalmSource: {
+    fontFamily: FONTS.mono,
+    fontSize: 9,
+    letterSpacing: 3,
+    color: AXM.bone,
+    textTransform: 'uppercase',
   },
   embarkButton: {
     backgroundColor: AXM.sulfur,

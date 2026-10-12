@@ -36,13 +36,16 @@ jest.mock('@/lib/platform/router', () => ({
     },
 }));
 
-// Mock TitleScreen component
+// Mock TitleScreen: pressing it is EMBARK, which shows the menu it was handed
+// (the real one hands off in place, under its wordmark).
 jest.mock('@/components/TitleScreen', () => ({
-    TitleScreen: ({ onContinue }: { onContinue: () => void }) => {
+    TitleScreen: ({ menu, startAtMenu }: { menu: unknown; startAtMenu?: boolean }) => {
         const mockReact = require('react');
+        const [open, setOpen] = mockReact.useState(Boolean(startAtMenu));
+        if (open) return menu;
         return mockReact.createElement('view', {
             testID: 'title-screen',
-            onPress: onContinue
+            onPress: () => setOpen(true),
         }, 'Title Screen');
     },
 }));
