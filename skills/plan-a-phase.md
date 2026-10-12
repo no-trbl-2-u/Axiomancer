@@ -1,25 +1,21 @@
 # Skill: plan-a-phase
 
-> **REVAMP MODE (D58, since 2026-09-28; ends when Phase R11 ships).** The
-> loop's phase work is only the ratified revamp build plan
-> (`plan/steps/01_build_plan.md`; part plans in `plan/revamp/`). It creates
-> no content of any kind: cards, keywords, enemies, relics, maps, NPCs, events
-> or art. `/iterate` and `/expand` still run when no phase is ready, under the
-> same no-content rule. THE CARD HOLD (D37) stands: no card or keyword is made
-> outside a guided session with T. The content stewards, `/forge` and the
-> `card-expert`, `content-curator`, `mechanics-expert` and `reader` agents
-> were archived in R0; never route work to them. R11 revisits the loop to
-> bring content phases back.
-
 > **Thinking pass.** Refines or generates one phase brief.
 > Writes to `plan/phases/phase_<N>_<topic>.md`. Does NOT modify
 > code. The output is what `/ship-a-phase` reads next.
+>
+> **T's tool, not the loop's (R11).** It runs in an attended session
+> or when T dispatches the `plan-a-phase` workflow by hand; no
+> `/march` step or cron runs it, and `/ship-a-phase` no longer calls
+> it for a missing brief. `/plot` is the usual way T gets a new
+> phase; this skill writes or refreshes the brief for a row that
+> already exists. Its §4 is the one brief format `/plot` writes too.
 
 ## 1. Purpose
 
-`/ship-a-phase` works best when the brief is concrete. If the
-brief is missing or stale, the shipping loop has to think and
-ship in the same tick. `/plan-a-phase` is the dedicated thinking
+`/ship-a-phase` builds only briefed rows. If the brief is missing
+the row is not pickable; if it is stale the shipping loop has to
+think and ship in the same tick. `/plan-a-phase` is T's thinking
 pass that keeps shipping cheap.
 
 Use when:
@@ -75,9 +71,19 @@ Use when:
 Mirrors `skills/ship-a-phase.md` §6. Fixed structure:
 
 - **Sources** — the part plan (`plan/revamp/<area>.md`, section
-  cited) and every decision number the phase rests on (e.g.
-  D47, D58). A brief that cites neither is not done.
+  cited) or the `/plot` request, and every decision number the
+  phase rests on (e.g. D47, D88). A brief that cites neither is not
+  done.
 - **Outcome** — one line; what is true when the phase ships.
+- **Acceptance** — numbered IDs `A1`, `A2`, … each one checkable
+  statement ("`npm test` includes X and it passes", "the map screen
+  shows Y"). The PR body ticks the IDs it closes
+  (`skills/march.md` §3 "Landing a change"); a phase is done when
+  every ID is ticked.
+- **Measure:** — one line: the command, test or observation that
+  proves the Outcome (e.g. `Measure: npm run verify -w
+  axiomancer-mechanics; the new e2e journey passes`). A brief without
+  it is not done.
 - **Scope** — workspaces touched and the files / systems changed,
   deleted or parked (and why "park" where the part plan says so).
 - **Consumers to update** — engine exports, mobile screens,
@@ -92,10 +98,10 @@ Mirrors `skills/ship-a-phase.md` §6. Fixed structure:
   truth-source receipt.
 - **Tests matrix** — suites added, rewritten or deleted with
   their subjects.
-- **Verify gate** — the scoped workspace gates plus the revamp
-  gates (`plan/revamp/README.md` §5).
+- **Verify gate** — the scoped workspace gates, plus the reset
+  gates (`plan/revamp/README.md` §5) for an R-phase.
 - **Commit body template.**
-- **DoD.**
+- **DoD** — the Acceptance IDs, all ticked.
 - **Follow-ups (out of scope).**
 
 A brief that leaves Open Qs is a brief that fails its job.
@@ -167,6 +173,8 @@ EOF
 git push origin main
 ```
 
+A brief is plan-only, so it pushes `main` (D84).
+
 ### Step 5.5 — Mirror the phase to GitHub (best-effort)
 
 Once the brief is committed, open (or reuse) the phase mirror
@@ -200,7 +208,9 @@ same number is reused. Failures here are warnings, not blockers
 ### Step 6 — Done
 
 Return 2-line summary: "phase <N> brief committed — <one-line>.
-ready for /ship-a-phase."
+ready for /ship-a-phase." If a "needs a brief: `/plot <N>`" row
+exists in `plan/PHASE_CANDIDATES.md`, move it to Rejected as
+"briefed".
 
 ## 6. New phases (rare)
 
@@ -222,13 +232,14 @@ phase entirely:
    may add primitives to phase scope — but they ship via
    `/ship-a-phase`, not here.
 2. **Never leave Open Qs in a generated brief.**
-3. **No emojis, no `Co-Authored-By:`.**
+3. **No emojis, no attribution trailers** (AGENTS.md rule 2).
 4. **Contracts in `bearings.md` are law** — never propose
    shapes that contradict them.
-5. **No content, no owner rows.** A brief never plans the
-   creation of a card, keyword, enemy, relic, map, NPC, event or
-   art (D58, D37), and never plans an owner-led B-row — those are
-   T's sessions.
+5. **Content per surface (D88).** A brief plans an enemy, relic,
+   map, NPC or event only when T asked for it in this session (or
+   via `/plot`); never a card, keyword or art (D37), and never an
+   owner-led B-row — those are T's sessions.
+6. **Acceptance IDs and a `Measure:` line, always** (§4).
 
 ## 8. Failure modes
 

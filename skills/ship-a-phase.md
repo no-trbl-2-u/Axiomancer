@@ -1,21 +1,11 @@
 # Skill: ship-a-phase
 
-> **REVAMP MODE (D58, since 2026-09-28; ends when Phase R11 ships).** The
-> loop's phase work is only the ratified revamp build plan
-> (`plan/steps/01_build_plan.md`; part plans in `plan/revamp/`). It creates
-> no content of any kind: cards, keywords, enemies, relics, maps, NPCs, events
-> or art. `/iterate` and `/expand` still run when no phase is ready, under the
-> same no-content rule. THE CARD HOLD (D37) stands: no card or keyword is made
-> outside a guided session with T. The content stewards, `/forge` and the
-> `card-expert`, `content-curator`, `mechanics-expert` and `reader` agents
-> were archived in R0; never route work to them. R11 revisits the loop to
-> bring content phases back.
-
 > **Full autonomy.** When invoked (manually, via `/ship-a-phase`,
 > or under `/loop` / `/march`), you have authority to ship one
-> phase of the build plan end-to-end with **no review checkpoint**:
-> build, write tests, run the verify gate, commit, push, confirm
-> deploy. The user reads the diff after — not before.
+> phase of the build plan end-to-end with **no design checkpoint**:
+> build, write tests, run the verify gate, commit, open a PR, watch
+> its checks. T reviews and merges the PR (D84, D86); the loop never
+> merges its own work.
 >
 > **The bar for asking is high.** If you would have asked, decide
 > instead and document the call in the commit body. Stop only on
@@ -25,9 +15,10 @@
 
 `plan/steps/01_build_plan.md` carves the build into phases. Each
 phase is one self-contained slice that ships end-to-end: code +
-tests + commit + push (the CI gate follows). During the revamp the
-pickable rows are the R-phases and B4, each backed by a part plan
-in `plan/revamp/` (order: `plan/revamp/README.md` §4 and §7).
+tests + commit + a `loop:pr` PR onto `main` (the CI gate runs on
+the PR). Pickable rows are the briefed, unattended `[ ]` rows
+(`skills/march.md` §3 "Pickable phase"); briefs come from T through
+`/plot` or attended `/plan-a-phase`.
 
 This skill drives the build **autonomously, in a loop**, so a
 single overnight run can move the project forward by several
@@ -38,7 +29,7 @@ phases.
 ```
 /ship-a-phase                       # next [ ] phase
 /ship-a-phase phase 8               # specific phase by number
-/ship-a-phase phase 8 dry-run       # plan + emit brief, no code commit
+/ship-a-phase phase 8 dry-run       # read the brief, print the plan, no commit
 /loop 30m /ship-a-phase             # autonomous, every 30 min
 /loop /ship-a-phase                 # autonomous, self-paced
 /march                              # outer dispatcher (preferred)
@@ -46,7 +37,8 @@ phases.
 ```
 
 When invoked from `/loop` or `/march`, **do not pause for
-review**. After commit + push + deploy:check, return cleanly.
+review**. After the PR is open and its checks are watched, return
+cleanly.
 
 ## 3. Autonomy contract
 
@@ -61,13 +53,13 @@ me questions."** Internalize this:
   Document the call in the commit body under "Decisions". Never
   block.
 - **Empty / missing content → render the empty state and ship.**
-- **Missing brief → generate one** per `skills/plan-a-phase.md`
-  §5 (the brief format is shared). Commit the brief separately,
-  then proceed.
+- **Missing brief → do not build.** The loop never authors a
+  brief (R11). File one `plan/PHASE_CANDIDATES.md` row "needs a
+  brief: `/plot <N>`" (skip if it exists) and return.
 - **Verify failure → read the log + patch.** Iterate up to 3
   times on the same root cause.
-- **Deploy failure → same as verify.** Up to 3 same-root-cause
-  iterations.
+- **Red PR check → same as verify.** Up to 3 same-root-cause
+  iterations on the branch; past that, `pr-autofix` takes it.
 - **External research needed → spawn a sub-agent.** Don't pollute
   main context with citations and source pages.
 
@@ -115,25 +107,32 @@ helper in the package that owns it, tests colocated.
 ### Step 0 — Re-sync state
 
 ```bash
-git pull --ff-only
+git switch main 2>/dev/null; git pull --ff-only
 ```
 
-If divergence, stop per §10.
+If divergence, stop per §10. Then check the PR cap
+(`skills/march.md` §3 "PR cap"): at 3 open `loop:pr` PRs, report
+"waiting on T" and return without building.
 
 ### Step 1 — Pick the phase
 
 Read the "Status (at-a-glance)" block at the top of
-`plan/steps/01_build_plan.md`. The next phase is the **first
-`[ ]` row**. If the user passed `phase N`, ship that one
-regardless of order. Skip rows marked `[skipped]` (set by
-`/oversight`) and `[blocked: …]` rows — the owner-led B-rows are
-`[blocked: owner-led]` and the loop never starts them (D58).
+`plan/steps/01_build_plan.md`. The next phase is the first
+**pickable** row per `skills/march.md` §3 "Pickable phase": `[ ]`,
+not attended, `Requires` ticked, has a brief, and no open `loop:pr`
+PR names it. If the user passed `phase N`, ship that one regardless
+of order (an attended session may ship an attended row). Skip rows
+marked `[skipped]` (set by `/oversight`) and `[blocked: …]` rows —
+the owner-led B-rows are `[blocked: owner-led]` and the loop never
+starts them (D88).
 
 ### Step 2 — Read the brief
 
-`plan/phases/phase_<N>_<topic>.md`. If missing, follow
-`skills/plan-a-phase.md` §5 to generate (commit separately,
-then proceed).
+`plan/phases/phase_<N>_<topic>.md` (or the part-plan section the
+row points to). If missing, the row is not pickable: file "needs a
+brief: `/plot <N>`" and return (§3 above). Note the brief's
+acceptance IDs (`A1…`) and its `Measure:` line; the PR body ticks
+the IDs this phase closes.
 
 ### Step 2.4 — Claim check: is another tick already on this phase?
 
@@ -142,8 +141,11 @@ scheduled CI cron, an attended session. Two ticks that pick the same
 `[ ]` row build the same phase twice, and their edits collide in the
 files the phase owns.
 
-The mirror issue is the claim. Before starting work, check whether one
-is already open **and recent**:
+An open `loop:pr` PR whose title names `phase <N>` is the claim
+(`skills/march.md` §3 "Claims"): if one exists, skip the row. The
+mirror issue is the second, older claim for a tick that has not
+opened its PR yet. Before starting work, check whether one is
+already open **and recent**:
 
 ```bash
 claimed=$(gh issue list --repo "$GH_REPO" --state open \
@@ -186,7 +188,7 @@ cat > "$issue_body" <<EOF
 **Brief:** [\`plan/phases/phase_<N>_<topic>.md\`](https://github.com/no-trbl-2-u/Axiomancer/blob/main/plan/phases/phase_<N>_<topic>.md)
 
 ---
-_Tracked by the autonomous loop. The phase commit names this issue in a \`Closes #<this-issue>\` trailer and the \`close-trailers\` workflow closes it when the commit reaches main; deploy URL is posted as a follow-up comment._
+_Tracked by the autonomous loop. The phase PR names this issue in a \`Closes #<this-issue>\` trailer and the \`close-trailers\` workflow closes it when T merges the PR; deploy URL is posted as a follow-up comment._
 EOF
 
 # 2. Open / reuse / reopen.
@@ -243,6 +245,12 @@ absent, the prior art is UNGROUNDED and must be labeled so.
 
 ### Step 4 — Build
 
+Cut the branch first: `git fetch origin main && git switch -c
+loop/ship-<N>-<slug> origin/main` (Step 10, `skills/march.md` §3
+"Landing a change"). Every edit from here lands on it. Never build in
+a tree another loop is using; on a shared machine work from your own
+`git worktree` (lesson `shared-tree-sweep`).
+
 Follow the part plan and the canonical sibling's patterns. Game
 data and rules live in `axiomancer-mechanics/src/*`; mobile reads
 them through the `@mechanics` alias and never duplicates engine
@@ -298,101 +306,89 @@ A change to mechanics' public surface also runs the mobile gate
 `baseline:check` is retired (D57). All legs are hard. Iterate up
 to 3 times on the same root cause; otherwise stop per §10.
 
-### Step 10 — Commit + push (atomic)
+### Step 10 — Branch, commit, open the PR
+
+Land it per `skills/march.md` §3 "Landing a change". The branch
+`loop/ship-<N>-<slug>` is cut from a fresh `origin/main` before
+Step 4's first edit (do it there; it is described here once).
 
 Stage explicitly. Conventional subject; body in 4–8 bullets
-describing what shipped + what the user can now do. Add
+describing what shipped + what the user can now do, plus a
 "Decisions" section listing autonomous design calls.
-
-**If Step 2.5 captured a phase issue number** (`$PHASE_ISSUE`),
-add a `Closes #<N>` trailer to the commit body. The
-`close-trailers` workflow sweeps every push to `main` and closes
-the issues the commits name, so the phase mirror closes when the
-commit lands on main; that's the canonical ship signal on the
-public timeline. (GitHub's native parser is inert here, Phase 48;
-the sweep reads the trailer instead.)
 
 ```bash
 git add <explicit files>
-git commit -m "$(cat <<'EOF'
-<type>: <one-line summary> — phase <N>
-
-- <bullet 1>
-- <bullet 2>
-
-Decisions:
-- <design call 1 — picked X over Y because <reason>>
-
-Closes #<phase-issue-number>
-EOF
-)"
-git push origin main
+git commit -m "<type>: <one-line summary> — phase <N>" -m "<bullets + Decisions>"
 ```
 
-**No `Co-Authored-By:` trailer. No emojis.**
+**No attribution trailers. No emojis** (AGENTS.md rule 2).
 
-### Step 11 — Tick the DoD
+### Step 11 — Tick the DoD (inside the PR)
 
-Flip the shipped `[ ]` to `[x]` in
-`plan/steps/01_build_plan.md` and add the commit hash. Commit:
+The build-plan row stays `[ ]` with a `- pr: #<PR>` field (the
+`- issue:` field's shape) while the PR is open. The PR's **last
+commit** flips it to `[x] (#<PR>)` so T's merge ticks it:
 
 ```bash
 git add plan/steps/01_build_plan.md
-git commit -m "plan: phase <N> shipped — <one-line>"
-git push origin main
+git commit -m "plan: phase <N> shipped — <one-line>" -m "Closes #<phase-issue-number>"
+git push -u origin "loop/ship-<N>-<slug>"
+gh pr create --repo "$GH_REPO" --base main --head "loop/ship-<N>-<slug>" \
+  --label loop:pr --title "<type>: <summary> — phase <N>" --body-file "$body"
 ```
 
-If you generated a brief in step 2, that's a separate prior
-commit (subject `phases: brief for phase <N>`).
+The body follows the template in `skills/march.md` §3: What shipped,
+What T can now do, Decisions, Acceptance (the brief's `A1…` IDs this
+phase closes, ticked), Verify (the Step 9 commands and results), and
+`Closes #<phase-issue-number>` as the last line. Record the PR number
+on the row in the same commit if you know it, or leave `- pr:` for
+the next tick to fill.
 
-### Step 12 — Confirm deploy
+### Step 12 — Watch the PR's checks
 
 ```bash
-npm run deploy:check
+gh pr checks "loop/ship-<N>-<slug>" --repo "$GH_REPO" --watch --fail-fast
 ```
 
 Outcomes:
 
-- **Exit 0 (ready)** — CI green at the pushed commit.
-  Continue to Step 13.
-- **Exit 1 (error)** — read the log + admin URL. Patch root
-  cause. Re-run from Step 9. Up to 3 same-root-cause iterations;
-  otherwise stop per §10.
-- **Exit 2 (timeout)** — surface the timeout; continue.
-- **Exit 3 (config)** — `GH_TOKEN` missing or
-  unreachable. Stop per §10.
+- **Green (or no check applies to the paths)** — continue to Step
+  12.5. If the phase added a CI step, grep the job log for that
+  step's own output before calling it green (lesson
+  `green-is-not-ran`).
+- **Red on this phase's change** — read the log, fix on the branch
+  (push, never force), re-run from Step 9. Up to 3 same-root-cause
+  iterations; then leave it for `pr-autofix` (D87) and say so in the
+  tick's output.
+- **Timeout** — surface it and continue; `pr-autofix` handles a later
+  red.
+- **`gh` unreachable** — stop per §10.
 
-### Step 12.5 — Phase mirror close (comment + API close)
+### Step 12.5 — Phase mirror comment
 
-If Step 2.5 captured `$PHASE_ISSUE` and Step 12 was green:
+If Step 2.5 captured `$PHASE_ISSUE`, comment the PR URL on the
+mirror (best-effort):
 
 ```bash
-node scripts/loop-issue.mjs phase-close \
-  --phase "<N>" \
-  --commit "<commit-sha>" \
-  --deploy-url <ci-run-url>
+gh issue comment "$PHASE_ISSUE" --repo "$GH_REPO" --body "PR opened: <pr-url>"
 ```
 
-`phase-close` posts the deploy-URL comment **and actively closes the
-mirror via the GitHub API** (`state=closed`, `state_reason=completed`).
-The load-bearing close is the `close-trailers` sweep reading the
-`Closes #<N>` trailer in Step 10's commit; it runs on the push itself,
-including a merge that brings a `claude/*` branch onto `main`, because
-it scans every commit in the pushed range. This call adds the deploy
-comment. The close is idempotent (an already-closed mirror is a
-no-op). Failures here are warnings, not blockers.
+The mirror closes when T merges: `close-trailers` reads the
+`Closes #<N>` trailer from the merge push's commit range, and
+`deploy-comment.yml` posts the deploy URL once `main`'s `verify-*`
+runs go green. Do not call `loop-issue.mjs phase-close` before the
+merge.
 
-If this tick ends before Step 12's `deploy:check` goes green, this
-comment never posts — but `.github/workflows/deploy-comment.yml`
-(Phase 91) is the floor underneath it: it fires on the gated
-`verify-*` workflows' own completion, independent of this tick's
-lifetime, and posts the same comment once CI is actually green.
+### Step 12.9 — Retro
+
+Run `skills/march.md` §3 "Retro" for this tick. A lessons commit
+rides the PR (push it to the branch).
 
 ### Step 13 — Done
 
-Return cleanly. The loop's next tick picks up the next phase.
-If you ran outside the loop, summarize what shipped + what's
-next in 2–3 lines. Do not pick up another `[ ]` row in this same
+Return cleanly with the PR URL. The loop's next tick picks up the
+next unclaimed phase. If you ran outside the loop, summarize what
+shipped + what's next in 2–3 lines. Do not pick up another `[ ]` row in this same
 invocation — see §7 Hard Rule 12.
 
 ## 7. Hard rules
@@ -400,6 +396,7 @@ invocation — see §7 Hard Rule 12.
 1. **No `Co-Authored-By:` in commits.** Plain message bodies.
 2. **No emojis** anywhere in code, content, or commit messages.
 3. **No `--no-verify`, no force-push, no destructive resets.**
+   Never merge, close or enable auto-merge on a `loop:pr` PR (D86).
 4. **Don't drag in stray working-tree changes.** `git status
    --short` first; stage explicitly.
 5. **Don't restart the user's dev servers.** They keep dev up;
@@ -438,7 +435,7 @@ invocation — see §7 Hard Rule 12.
     re-researching. Same rule as `skills/digest.md` §3.6/§4.7,
     extended to research sub-agents (not just `verify`/`deploy`).
 12. **One phase per invocation — never chain.** Once Step 13's
-    commits are pushed, stop: do not re-open `01_build_plan.md`
+    PR is open, stop: do not re-open `01_build_plan.md`
     looking for the next `[ ]` row, and do not start a second
     phase's brief/build/commit cycle in the same tick — even
     when the next row is a lettered sibling of the one just
@@ -465,16 +462,18 @@ Canonical in `plan/revamp/README.md` §5; in short:
 4. **Save compatibility** — a migration plus a test for anything
    removed from a save (Step 5).
 5. **Gates** — Step 9.
-6. **No content creation.** An R-phase re-points and deletes; it
-   never authors a card, keyword, enemy, relic, map, NPC, event or
-   art (D58).
+6. **Content per surface (D88).** An R-phase re-points and deletes.
+   Any phase may author an enemy, relic, map, NPC or event only where
+   its brief (T-written or T-approved) says to; never a card, keyword
+   or art (D37).
 
-## 9. Brief generation (when missing)
+## 9. Missing brief
 
-If `plan/phases/phase_<N>_<topic>.md` doesn't exist, follow
-`skills/plan-a-phase.md` §5. The brief format is shared; the
-generation procedure is owned there. Generated briefs are
-committed separately from the code that follows.
+The loop does not generate briefs (R11). A row without one is not
+pickable; the tick files "needs a brief: `/plot <N>`" in
+`plan/PHASE_CANDIDATES.md` and returns. T writes briefs with `/plot`
+or attended `/plan-a-phase`; the format is `skills/plan-a-phase.md`
+§4.
 
 ## 10. Failure modes — when to actually stop
 
@@ -498,11 +497,11 @@ past the blocked row into still-shippable work, and
 Repo-shaped — stop the tick:
 
 1. **`npm run verify` fails ≥3 times on the same root cause.**
-2. **`npm run deploy:check` fails ≥3 times on the same root cause**
-   after `npm run verify` passes locally.
-3. **`GH_TOKEN` missing or rejected**
-   (deploy:check exit 3). Stop and ask the user to populate
-   `.env`.
+2. **The PR's checks fail ≥3 times on the same root cause**
+   after `npm run verify` passes locally. Leave the PR open for
+   `pr-autofix`; report it.
+3. **`GH_TOKEN` missing or rejected** (no PR can open). Stop and ask
+   the user to populate `.env`.
 4. **A `git pull` produces a divergence.** Don't `--rebase`
    blind; stop and report.
 5. **A deploy fails for an infrastructure reason** (env var
@@ -518,11 +517,13 @@ Phase-shaped — mark `[blocked: …]`, notify, return:
    ruled decision (D-number)** in a way you can't reconcile by
    trusting the contract or the ruling.
 8. **Phase scope is genuinely ambiguous after reading step 01 +
-   the brief + the part plan + bearings + spec.md.** Generate a
-   more decisive brief and proceed; block only if even that fails.
-9. **The phase can only ship by creating content** (D58) or by
-   card/keyword work the hold forbids (D37). Name the missing
-   owner session in the blocked reason.
+   the brief + the part plan + bearings + spec.md.** Decide inside
+   the brief's bounds and record the call under Decisions; block
+   (reason: "brief too thin: `/plot <N>` again") only if even that
+   fails. Never rewrite the brief.
+9. **The phase can only ship by creating content its brief does not
+   authorize** (D88) or by card/keyword/art work the hold forbids
+   (D37). Name the missing owner session in the blocked reason.
 
 For everything else: **decide, ship, document.**
 
@@ -547,10 +548,12 @@ Agent({ subagent_type: "playtester", prompt: "..." })
 # axio-query: axio_overview / axio_cards / axio_effects / axio_keywords
 # kb-query:   kb_overview / kb_find_games / kb_search / kb_read_doc / kb_cards / kb_keyword
 
-# Verify (scoped) + commit + push + deploy
+# Verify (scoped) + branch + commit + PR + checks (skills/march.md §3)
 npm run verify --workspace <pkg>
+git switch -c loop/ship-<N>-<slug> origin/main
 git add <explicit files>
 git commit -m "<subject>"
-git push origin main
-npm run deploy:check
+git push -u origin loop/ship-<N>-<slug>
+gh pr create --label loop:pr --base main ...
+gh pr checks loop/ship-<N>-<slug> --watch --fail-fast
 ```

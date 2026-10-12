@@ -69,6 +69,18 @@ on:
         description: 'Reasoning effort for models that support it (low|medium|high|xhigh|max). Empty = model default.'
         type: string
         default: ''
+      allowed_tools:
+        description: 'Override the --allowedTools list (comma-separated). Empty = the default loop grant. pr-resolve passes "Read,Edit" so its conflict run cannot run shell.'
+        type: string
+        default: ''
+      pre_run:
+        description: 'Shell run after setup and before Claude (pr-resolve checks out the PR branch and leaves conflict markers). Empty = none.'
+        type: string
+        default: ''
+      post_run:
+        description: 'Shell run after Claude succeeds (pr-resolve checks no marker remains, commits and pushes). Empty = none.'
+        type: string
+        default: ''
 
 jobs:
   run:
@@ -143,6 +155,30 @@ jobs:
             echo "::warning::kb-query tools/list returned $code (401 = bad/rotated token, 503 = Worker secret missing). Tools are granted but unusable this run."
           fi
 
+      - name: Resolve the tool grant
+        id: tools
+        shell: bash
+        env:
+          OVERRIDE: ${{ inputs.allowed_tools }}
+          PLAYWRIGHT: ${{ inputs.install_playwright }}
+        run: |
+          if [ -n "$OVERRIDE" ]; then
+            list="$OVERRIDE"
+          else
+            list="Bash,Edit,Write,Read,Glob,Grep,Task,TodoWrite,WebFetch,WebSearch,mcp__axio-query__axio_overview,mcp__axio-query__axio_cards,mcp__axio-query__axio_effects,mcp__axio-query__axio_keywords,mcp__kb-query__kb_overview,mcp__kb-query__kb_find_games,mcp__kb-query__kb_search,mcp__kb-query__kb_read_doc,mcp__kb-query__kb_cards,mcp__kb-query__kb_keyword"
+            if [ "$PLAYWRIGHT" = "true" ]; then
+              list="$list,mcp__playwright__browser_navigate,mcp__playwright__browser_click,mcp__playwright__browser_snapshot,mcp__playwright__browser_take_screenshot,mcp__playwright__browser_console_messages,mcp__playwright__browser_close,mcp__playwright__browser_resize,mcp__playwright__browser_press_key,mcp__playwright__browser_hover,mcp__playwright__browser_evaluate,mcp__playwright__browser_wait_for,mcp__playwright__browser_tabs,mcp__playwright__browser_network_requests,mcp__playwright__browser_navigate_back"
+            fi
+          fi
+          echo "list=$list" >> "$GITHUB_OUTPUT"
+
+      - name: Pre-run (caller-supplied)
+        if: ${{ inputs.pre_run != '' }}
+        shell: bash
+        env:
+          PRE_RUN: ${{ inputs.pre_run }}
+        run: bash -euo pipefail -c "$PRE_RUN"
+
       - name: Run Claude Code
         id: claude
         env:
@@ -156,8 +192,15 @@ jobs:
           claude_args: |
             --model ${{ inputs.model }}
             ${{ inputs.effort != '' && format('--effort {0}', inputs.effort) || '' }}
-            --allowedTools "Bash,Edit,Write,Read,Glob,Grep,Task,TodoWrite,WebFetch,WebSearch,mcp__axio-query__axio_overview,mcp__axio-query__axio_cards,mcp__axio-query__axio_effects,mcp__axio-query__axio_keywords,mcp__kb-query__kb_overview,mcp__kb-query__kb_find_games,mcp__kb-query__kb_search,mcp__kb-query__kb_read_doc,mcp__kb-query__kb_cards,mcp__kb-query__kb_keyword${{ inputs.install_playwright && ',mcp__playwright__browser_navigate,mcp__playwright__browser_click,mcp__playwright__browser_snapshot,mcp__playwright__browser_take_screenshot,mcp__playwright__browser_console_messages,mcp__playwright__browser_close,mcp__playwright__browser_resize,mcp__playwright__browser_press_key,mcp__playwright__browser_hover,mcp__playwright__browser_evaluate,mcp__playwright__browser_wait_for,mcp__playwright__browser_tabs,mcp__playwright__browser_network_requests,mcp__playwright__browser_navigate_back' || '' }}"
+            --allowedTools "${{ steps.tools.outputs.list }}"
             ${{ inputs.extra_claude_args }}
+
+      - name: Post-run (caller-supplied)
+        if: ${{ inputs.post_run != '' && steps.claude.outcome == 'success' }}
+        shell: bash
+        env:
+          POST_RUN: ${{ inputs.post_run }}
+        run: bash -euo pipefail -c "$POST_RUN"
 
       # The Stop hook writes the tick's `tick-end` row (and any row after
       # the tick's last commit) to its telemetry shard once Claude has
@@ -176,14 +219,31 @@ jobs:
           GIT_AUTHOR_EMAIL: 41898282+claude[bot]@users.noreply.github.com
           GIT_COMMITTER_NAME: claude[bot]
           GIT_COMMITTER_EMAIL: 41898282+claude[bot]@users.noreply.github.com
+          CLAUDE_EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
+          CLAUDE_PROJECT_DIR: ${{ github.workspace }}
         run: |
+          # The Stop hook sometimes loses the tick-end row (three march ticks
+          # on 2026-10-11 ended with none). tick-close writes it from the
+          # action's execution file, only when the shard lacks one.
+          if [ -n "$CLAUDE_EXECUTION_FILE" ] && [ -f "$CLAUDE_EXECUTION_FILE" ]; then
+            node .claude/hooks/telemetry.mjs tick-close "$CLAUDE_EXECUTION_FILE" || true
+          fi
           git add -- telemetry/
           if git diff --cached --quiet; then
             echo "No stranded telemetry rows."
             exit 0
           fi
+          # Push to the branch the tick ended on, never across branches
+          # (R11): a PR tick (`loop/*`) ends on its PR branch, and
+          # `pull --rebase origin main` from there would replay the PR's
+          # commits onto main and push them to main. The rows ride the
+          # PR instead; any other branch is left alone.
+          branch="$(git rev-parse --abbrev-ref HEAD)"
+          case "$branch" in
+            loop/*|"${GITHUB_REF_NAME}") ;;
+            *) echo "::warning::HEAD is '$branch', not ${GITHUB_REF_NAME} or loop/*; telemetry rows not pushed."; exit 0 ;;
+          esac
           git commit -m "telemetry: tick-end rows for run ${GITHUB_RUN_ID}" -- telemetry/
-          branch="${GITHUB_REF_NAME}"
           for attempt in 1 2 3; do
             git pull --rebase --autostash origin "$branch" && git push origin "HEAD:$branch" && exit 0
             git rebase --abort 2>/dev/null || true

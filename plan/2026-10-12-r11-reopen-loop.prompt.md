@@ -1,5 +1,9 @@
 # Prompt: Phase R11 — Reopen the loop (attended)
 
+> **Status:** EXECUTED 2026-10-12 (attended). Ballot D84–D90; what shipped and
+> where it departs from the brief: `plan/revamp/loop.md` → R11 "As shipped".
+> Do not re-run.
+
 > Written 2026-10-12 at T's direction ("it's time"), after the R11 brief
 > item 1 (pause `march` + `night`) merged in #501. This is the kickoff for
 > the **attended** session that implements R11. Paste it as the first
@@ -29,7 +33,7 @@
   every other workflow runs. The last march tick was run 38191422615.
 - Every open build-plan row is attended (R11, R12) or owner-led (B-rows).
 - `grep -rl 'REVAMP M[O]DE' --include=*.md .` now finds **21** files, not
-  the 20 the brief counts (the bracket keeps this file out of its own grep). Strip all of them; name the extra one in the PR.
+  the 20 the brief counts (the bracket keeps this file out of its own grep). The 21st is `plan/revamp/loop.md` itself, the zoned brief; strip the other 20.
 - No `plan/phases/` brief exists for R11; `loop.md` is the brief.
 
 ## 2. Step one: the ballot (before any edit)
@@ -92,7 +96,7 @@ No `actionlint` on the box → say so and run
 - **`.claude/**` is classifier-blocked for autonomous runs.** This session
   is attended: T approves those edits. Do not route them through a cron.
 - **Do not touch cards or keywords** (D37). Nothing in R11 needs to.
-- **Never auto-merge** (lessons.md deploy #4). Never `--force` in any
+- **Never auto-merge** (lesson `telemetry-add-add`; D86). Never `--force` in any
   workflow you write.
 - **`pr-autofix` concurrency is per PR, never the shared `nexus-loop`
   group** (the ci-autofix lesson).

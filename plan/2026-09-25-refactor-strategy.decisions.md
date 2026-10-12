@@ -947,6 +947,38 @@ satisfied for exactly these.)
   cap, a die lost on an unplayable staged card, Scarred never clearing,
   SACRIFICE "any amount" not prompting).
 
+**D84 — Loop PRs: scope.** (T, attended, 2026-10-12, R11 ballot a.)
+
+- A loop tick whose diff touches anything outside `plan/`, `telemetry/`, `docs/reports/` and `devlog/entries/` (the `/digest` entry; T, same session) lands through a PR onto `main`.
+- Plan-only and telemetry commits keep pushing `main` directly, so plan queues never conflict across PRs.
+
+**D85 — Loop PRs: at most 3 open.** (T, attended, 2026-10-12, R11 ballot b.)
+
+- At 3 open `loop:pr` PRs, `/march` runs triage and critique's audit pass only and reports "waiting on T: PRs #a, #b, #c".
+- An open `loop:pr` PR is the claim on its row or queue item.
+
+**D86 — T merges loop PRs by hand.** (T, attended, 2026-10-12, R11 ballot c.)
+
+- No auto-merge. A PR open 7 days is flagged in the tick's report, never closed by the loop.
+
+**D87 — A Haiku fixer keeps loop PRs green.** (T, attended, 2026-10-12, R11 ballot d.)
+
+- `pr-autofix` runs `/fix-ci --branch` on Haiku per red `verify-*` run, at most two runs per PR; then label `loop:pr-stuck`, reported each tick.
+- `pr-resolve` merges `main` into conflicting `loop:pr` PRs on every push to `main`; append-only files settle by union, the rest by a Haiku Read/Edit run.
+
+**D88 — Content per surface.** (T, attended, 2026-10-12, R11 ballot e; supersedes the content side of D58.)
+
+- Cards, keywords and art stay owner-only (D37, B8).
+- Enemies, relics, maps, NPCs and events: the loop may propose them (`/expand` candidates) and may build them only from a build-plan row whose brief T wrote or approved (`/plot`, attended `/plan-a-phase`, or `/oversight` promotion). A proposal is never built until promoted.
+
+**D89 — `/expand` stays bold.** (T, attended, 2026-10-12, R11 ballot f; overrides the brief's "strict" default.)
+
+- `/expand` keeps proposing from every signal source, design surfaces included. Its rows are candidates; only `/oversight` or `/plot` promote them, and D88 governs what may be built.
+
+**D90 — `/iterate` fixes in-tick defects.** (T, attended, 2026-10-12, R11 ballot g.)
+
+- `/iterate` still picks AUDIT/CRITIQUE rows by score. A defect found while shipping is fixed in the same tick in its own commit, never parked.
+
 ## Open follow-ups
 
 **D1 status at a glance (2026-09-28, after #408).** Card and keyword

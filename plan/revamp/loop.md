@@ -389,6 +389,42 @@ has a Retro step; `check-lessons` is in the root test. D83+ recorded.
 bearings, AGENTS.md and the workflows README describe the loop as it now
 runs.
 
+### As shipped (attended session, 2026-10-12)
+
+Ballot (D84–D90): a, b, c, d, g took the defaults. **e** (T): the loop may
+propose enemies, relics, maps, NPCs and events, and builds them only from a
+build-plan row whose brief T wrote or approved; cards, keywords and art stay
+owner-only (D88). **f** (T): `/expand` stays **bold**, not strict (D89).
+T also added `devlog/entries/` to the plan-only paths so `/digest` keeps
+pushing `main`.
+
+Departures from the text above, each for a reason:
+
+- Banner count: 21 files matched, but the 21st is this file (the brief),
+  zoned and exempt; the 20 live banners are gone.
+- `_claude-skill.yml`'s stranded-telemetry step did **not** "stay": from a
+  `loop/*` branch its `pull --rebase origin main` + `push HEAD:main` would
+  push the PR's commits to main. It now pushes to the branch HEAD is on
+  (lesson `cross-branch-telemetry-push`, pinned by `loop-pr.test.mjs`).
+- `_claude-skill.yml` gained `allowed_tools`, `pre_run` and `post_run`
+  inputs, so `pr-resolve`'s Haiku run gets Read and Edit only between a
+  scripted prepare and finish (`scripts/pr-resolve.mjs`).
+- PR claims are by title (`phase <N>`, `AUDIT <id>`), checked before the
+  branch is cut.
+- Item 6, telemetry: "zero-invocation verbs" was a logging gap, not unwired
+  verbs. CI ticks read skills with `cat`/`sed`, which the Read-only hook
+  missed (0 `verb-read` rows across 106 `/march` ticks since R0, while the
+  ticks shipped critiques and fixes); shell reads now count. The
+  2026-10-11 `tick-end` gap: the runner log shows the shard unchanged ("No
+  stranded telemetry rows"), so the Stop hook never wrote the row; the
+  runner now writes it from the action's execution file when missing
+  (`telemetry.mjs tick-close`). Both are covered by
+  `.claude/hooks/telemetry.test.mjs`.
+- Item 6, the R0 archive: nothing revived. The stewards' create/retire
+  halves contradict D88; their roster audits are filed as one `[owner]`
+  candidate ("Roster-health lenses for /iterate"). The design skills stay
+  archived (T has the brainstorm skill); `combat-playtest` is R12's.
+
 ## R12 — New combat-playtest (attended)
 
 Added in the R0 session (T, 2026-09-28), which archived the old

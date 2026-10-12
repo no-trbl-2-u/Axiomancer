@@ -10,19 +10,10 @@
 > delivered instead of fetched. The live unified-loop bearings are
 > `plan/bearings.md`; the retired pre-monorepo `nexus/` tree is not authority.
 
-> **REVAMP MODE (D58, since 2026-09-28; ends when Phase R11 ships).** The
-> loop's phase work is only the ratified revamp build plan
-> (`plan/steps/01_build_plan.md`; part plans in `plan/revamp/`). It creates
-> no content of any kind: cards, keywords, enemies, relics, maps, NPCs, events
-> or art. `/iterate` and `/expand` still run when no phase is ready, under the
-> same no-content rule. THE CARD HOLD (D37) stands: no card or keyword is made
-> outside a guided session with T. The content stewards, `/forge` and the
-> `card-expert`, `content-curator`, `mechanics-expert` and `reader` agents
-> were archived in R0; never route work to them. R11 revisits the loop to
-> bring content phases back.
-
-During the revamp the digest reports what the reset phases
-deleted and re-pointed; it never files new-content work.
+The digest reports what the loop shipped and what waits on T: open
+`loop:pr` PRs (and any `loop:pr-stuck`), rows waiting for a brief, and
+the owner-led B-rows. It never files new-content work. Its entry under
+`devlog/entries/` is plan-only and pushes `main` (D84).
 
 ## 1. Purpose
 
@@ -57,8 +48,9 @@ its own cadence.
    `plan/AUDIT.md` pending, `plan/CRITIQUE.md` pending + last
    pass age, `plan/PHASE_CANDIDATES.md` pending, open
    `loop:do` issues, deploy state (`npm run deploy:check`).
-   Name the revamp phase in flight and the next one
-   (`plan/revamp/README.md` §7).
+   Name the phase in flight (an open `loop:pr` PR) and the next
+   pickable row (`skills/march.md` §3), and list open `loop:pr` PRs
+   with their age.
 3. **Breadth checks** (the night-only browser legs):
 
    ```bash
@@ -124,9 +116,9 @@ its own cadence.
        capture.
    - **Panels** — un-bracketed `##` sections rendered as-is:
      `While you were out` (pulse table: tick, verb, outcome —
-     no-ops included), `Needs you` (owner-led revamp rows
-     waiting on T, open `loop:do` issues, anything the loop
-     stopped on), `Tuning proposals` (step 5, or "none"). Add
+     no-ops included), `Needs you` (open `loop:pr` PRs to merge,
+     `loop:pr-stuck` PRs, rows waiting for `/plot`, owner-led rows,
+     open `loop:do` issues, anything the loop stopped on), `Tuning proposals` (step 5, or "none"). Add
      `Queues now` / `Today's intent` as useful.
 
      **Panels are public by default. `Needs you` is the one

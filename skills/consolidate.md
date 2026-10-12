@@ -7,20 +7,10 @@
 > Curation only — meaning is never changed, decisions are never
 > re-litigated, and anything ambiguous stays put.
 
-> **REVAMP MODE (D58, since 2026-09-28; ends when Phase R11 ships).** The
-> loop's phase work is only the ratified revamp build plan
-> (`plan/steps/01_build_plan.md`; part plans in `plan/revamp/`). It creates
-> no content of any kind: cards, keywords, enemies, relics, maps, NPCs, events
-> or art. `/iterate` and `/expand` still run when no phase is ready, under the
-> same no-content rule. THE CARD HOLD (D37) stands: no card or keyword is made
-> outside a guided session with T. The content stewards, `/forge` and the
-> `card-expert`, `content-curator`, `mechanics-expert` and `reader` agents
-> were archived in R0; never route work to them. R11 revisits the loop to
-> bring content phases back.
-
 For this verb that means: compaction records the revamp's
-decisions (D46–D64) as standing, and never trims a passage in a
-way that revives a retired steward, agent or content route.
+decisions (D46–D83) and R11's (D84–D90) as standing, and never trims
+a passage in a way that revives a retired steward, agent or content
+route. Its commits are plan-only and push `main`.
 
 ## 1. Purpose
 
@@ -85,11 +75,13 @@ own loop shape with its own cadence.
 
    - Merge duplicate lessons within a domain (same behavioral
      change, different incidents → one entry citing both).
-   - Propose promotions: a lesson that changed behavior on
-     ~weekly cadence belongs in `reflexes.md` — but promotion
-     grows the always-read core, so file it as a
-     `plan/PHASE_CANDIDATES.md` candidate instead of applying
-     it (same rail as `/digest` tuning proposals).
+   - Promotion is no longer this pass's call (R11): the Retro step
+     promotes a lesson seen 3× across verbs and `/oversight` reviews
+     it after the fact. This pass checks the result: every lesson
+     still matches the `plan/lessons.md` format
+     (`node scripts/check-lessons.mjs`), no `seen 2×` lesson is still
+     `open` without a `PHASE_CANDIDATES` row naming its automation,
+     and the open count stays ≤40.
    - Flag drained reflexes: a reflex that has become an
      enforced rule (guard hook, CI job, deny wall) no longer
      needs to be read every tick — move it to the Drain log

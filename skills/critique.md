@@ -1,16 +1,5 @@
 # Skill: critique
 
-> **REVAMP MODE (D58, since 2026-09-28; ends when Phase R11 ships).** The
-> loop's phase work is only the ratified revamp build plan
-> (`plan/steps/01_build_plan.md`; part plans in `plan/revamp/`). It creates
-> no content of any kind: cards, keywords, enemies, relics, maps, NPCs, events
-> or art. `/iterate` and `/expand` still run when no phase is ready, under the
-> same no-content rule. THE CARD HOLD (D37) stands: no card or keyword is made
-> outside a guided session with T. The content stewards, `/forge` and the
-> `card-expert`, `content-curator`, `mechanics-expert` and `reader` agents
-> were archived in R0; never route work to them. R11 revisits the loop to
-> bring content phases back.
-
 > **External observer.** Play the local expo-web build as a
 > first-time player, take notes, self-assess, append durable findings to
 > `plan/CRITIQUE.md`. `/iterate` reads CRITIQUE.md as a finding
@@ -199,7 +188,7 @@ For each:
 1. **Valid?** Can evidence be re-verified? Drop session-specific
    artifacts.
 2. **Actionable?** Can a future `/iterate` tick fix with
-   resources at hand, without creating content (D58)? If not,
+   resources at hand, without creating content (D88)? If not,
    drop it and say why in the pass log.
 3. **Duplicate?** If CRITIQUE.md has an open row for this exact
    issue, drop new + bump older's severity.
@@ -237,6 +226,10 @@ Update metadata header.
 
 ### Step 5 — Commit + push
 
+A critique pass writes only `plan/CRITIQUE.md`, so it is plan-only
+and pushes `main` directly (D84; `skills/march.md` §3 "Landing a
+change"). It never opens a PR.
+
 ```bash
 git add plan/CRITIQUE.md
 git commit -m "$(cat <<'EOF'
@@ -260,6 +253,12 @@ If **zero** findings (rare): still update metadata, commit
 npm run deploy:check
 ```
 
+### Step 6.5 — Retro
+
+Run `skills/march.md` §3 "Retro" (a transport hiccup, a flaky
+fixture, a finding the self-assess had to drop twice are all
+lessons).
+
 ### Step 7 — Done
 
 Return 3-line summary.
@@ -276,7 +275,7 @@ Return 3-line summary.
    input cap; 6 is your output cap.
 5. **Never duplicate Pending or Done entries.**
 6. **One commit per pass.**
-7. **No emojis. No `Co-Authored-By:`.**
+7. **No emojis. No attribution trailers** (AGENTS.md rule 2).
 
 ## 7. Failure modes
 

@@ -149,13 +149,14 @@ MCP server, or external datastore.
 
 ## Pull requests
 
-(Applies repo-wide — the tuning/report skills deliver via PR; the loop
-verbs push to `main` directly.) Open PRs ready for review, not drafts.
-Enable auto-merge (repository default merge method) so they land once
-CI passes: in CI use `mcp__github__enable_pr_auto_merge`; in a local
-session use `gh pr merge <number> --auto`. If the call reports
-auto-merge disabled for the repo, surface that to the user rather than
-silently skipping.
+(Applies repo-wide.) The loop lands every code change as a PR labelled
+`loop:pr` onto `main` (D84; `skills/march.md` §3 "Landing a change");
+plan-only and telemetry commits still push `main`. Open PRs ready for
+review, not drafts. **T merges by hand** (D86): never enable auto-merge
+(it is disabled on this repo) and never merge, close or force-push a
+`loop:pr` PR. `pr-autofix` (Haiku, two runs per PR) keeps a red
+`loop:pr` PR green and `pr-resolve` keeps it mergeable (D87); at most 3
+are open at once (D85).
 
 ## Per-package guides
 
@@ -189,37 +190,43 @@ The unified **nexus** harness was re-onboarded onto the monorepo on
 
 - `skills/` — the loop verbs: `ship-a-phase`, `plan-a-phase`, `iterate`,
   `critique`, `triage`, `expand`, `march`, `oversight`, `jot`, `digest`,
-  `consolidate`, `fix-ci`. (Heavyweight source-of-truth files; the
-  `.claude/commands/<verb>.md` pointers are the doorways.) **Revamp mode**
-  (D58, since 2026-09-28, ends when Phase R11 ships): the loop's phase work is
-  only the ratified revamp build plan (`plan/steps/01_build_plan.md`,
-  `plan/revamp/`); `/march` keeps the upstream chain (triage → critique →
-  phase → expand → iterate). It creates no content of any kind: cards,
-  keywords, enemies, relics, maps, NPCs, events or art.
+  `consolidate`, `fix-ci`, and T's intake `plot` and `messy` (never
+  fired by the loop, rule 8). (Heavyweight source-of-truth files; the
+  `.claude/commands/<verb>.md` pointers are the doorways.) `/march` runs
+  the upstream chain (triage → critique → phase → expand → iterate) and
+  builds only briefed, unattended, unclaimed build-plan rows. **Content
+  per surface (D88):** cards, keywords and art are owner-only (THE CARD
+  HOLD, D37); enemies, relics, maps, NPCs and events are built only from
+  a row whose brief T wrote or approved, and `/expand` may propose them.
 - `plan/` — the loop's durable memory: `bearings.md` (standing context —
   **read this first**), `steps/01_build_plan.md` (the phase queue),
   `AUDIT.md` + `CRITIQUE.md` (the drain queues), `PHASE_CANDIDATES.md`,
-  `revamp/` (THE REVAMP part plans),
-  `reflexes.md`, `lessons.md` and `phases/` (open + recent briefs).
+  `revamp/` (THE REVAMP part plans, kept as the record),
+  `reflexes.md`, `lessons.md` (the counted retro ladder, linted by
+  `scripts/check-lessons.mjs`) and `phases/` (open + recent briefs).
   There is no archive directory (D66): pre-revamp history is read with
   `git show archive-pre-revamp:plan/archive/<path>`, and only when T asks
   about history. Never read it to learn how the game works.
 - `scripts/` — `deploy-check.mjs` (CI-green deploy gate),
-  `notify.mjs` (pager), `loop-issue.mjs` (GitHub issue mirror).
+  `notify.mjs` (pager), `loop-issue.mjs` (GitHub issue mirror),
+  `pr-resolve.mjs` (keeps `loop:pr` PRs mergeable).
 - `docs/game-model.md` — the game as the code stands; `spec.md` — the
   product spec the loop builds against.
 
 Two gates wrap every shipping tick: the **verify gate**
-(`npm run verify`, per-workspace, pre-commit) and the **deploy gate**
-(`npm run deploy:check` = GitHub Actions CI-green, post-push). The loop
-pushes to **`main`** directly. Start at intervention level 0
-(`/ship-a-phase` by hand); ratchet up via `/march` then `/loop /march`.
+(`npm run verify`, per-workspace, pre-commit) and the **CI gate** on the
+PR (`gh pr checks --watch`; `npm run deploy:check` for `main`). The loop
+**opens a PR** for code and pushes plan-only commits to `main`; T merges
+the PR. Every closing verb ends with a **Retro** (`skills/march.md` §3).
+Start at intervention level 0 (`/ship-a-phase` by hand, which opens its
+PR); ratchet up via `/march` then `/loop /march`.
 Full context lives in `plan/bearings.md` and the nexus kit
 (`../nexus/`).
 
 **GitHub Actions layer.** Every zero-input skill/command also runs in CI
 via `.github/workflows/` (scheduled `/march` ticks, `/digest` every other
 night, monthly `/consolidate`, weekly drift and lint checks, `/fix-ci` on red
+main, `pr-autofix` on a red `loop:pr` PR, `pr-resolve` on every push to
 main, `@claude` mentions). See `.github/workflows/README.md` for the full map, cadences,
 and required secrets (`CLAUDE_CODE_OAUTH_TOKEN`, recommended `GH_PAT`).
 
@@ -241,8 +248,12 @@ layer from the loop verbs. Do not merge the two.
 These apply to every loop skill and session. `plan/bearings.md` echoes
 them; update here first.
 
-1. **Commit and push as a single atomic act** to `main`. No unpushed
-   commits between ticks; no dirty tree left behind. The session's
+1. **Commit and push as a single atomic act.** Code goes to a
+   `loop/<verb>-<slug>` branch and a `loop:pr` PR that T merges;
+   plan-only (`plan/`, `telemetry/`, `docs/reports/`, `devlog/entries/`) commits and
+   `fix-ci` on red `main` push `main` directly (D84). Attended sessions
+   may push `main` at T's word. No unpushed commits between ticks; no
+   dirty tree left behind. The session's
    `telemetry/` shard is part of every commit that changes it: the tracked
    `.githooks/pre-commit` auto-stages `telemetry/`, and `.githooks/pre-push`
    blocks if newer rows remain uncommitted. One shard per session, so the
@@ -254,11 +265,13 @@ them; update here first.
    never backgrounded.
 4. **Tests alongside code** — hermetic e2e at the highest public entry
    point; never "add tests later".
-5. **The deploy gate runs after every push.** A red `verify-*` workflow
-   is a blocked tick: read the log, patch, push again (≤3
-   same-root-cause iterations, then stop cleanly).
-6. **`AskUserQuestion` only in `/oversight`.** Every other skill
-   decides, documents the call in the commit body, and ships. Since
+5. **The CI gate runs after every push.** A red `verify-*` run on the
+   tick's PR: read the log, patch on the branch, push again (≤3
+   same-root-cause iterations, then leave it to `pr-autofix`). Red on
+   `main` is `ci-autofix`'s.
+6. **`AskUserQuestion` only in `/oversight`, and in `/plot` or `/messy`
+   when T is present.** Every other skill decides, documents the call in
+   the commit body or PR, and ships. Since
    THE OPEN GATE (T direct, 2026-08-28 — see `plan/bearings.md`)
    there are no owner-blocked decisions: the loop answers every open
    question itself and files owner-flavored calls to `plan/AUDIT.md`
@@ -273,4 +286,20 @@ them; update here first.
    rows, observable defects to `plan/CRITIQUE.md` (jot-row format).
    Direction that lives only in a conversation is invisible to the
    loop. File only unshipped direction — not routine work the tick
-   already committed, and not chit-chat.
+   already committed, and not chit-chat. When T is present, buildable
+   ideas go through `/plot` or `/messy` (rule 8), not a hand-written
+   `PHASE_CANDIDATES` row.
+8. **T's buildable direction goes through `/plot` or `/messy`.** When T,
+   speaking plainly to any agent (an attended session, `@claude` on
+   GitHub, a brainstorm), says they want work the loop should pick up
+   ("let's add…", "the loop should build…", "make a phase for…", "queue
+   this"), route it through `/plot` (one known task) or `/messy` (a
+   loose or many-themed dump) instead of writing a build-plan row, brief
+   or candidate by hand. A direct request runs the skill; an ambiguous
+   one is asked first. At the end of a brainstorm or design conversation
+   that produced buildable direction, offer it in one question ("Want to
+   use `/plot` to turn this into a phase?" or "Want to use `/messy` to
+   file this dump?", `AskUserQuestion` per `docs/asking-well.md`) and run
+   the one T picks; a no files nothing beyond rule 7's residue. No
+   `/march` step, cron, workflow or loop verb ever fires them
+   (`scripts/loop-pr.test.mjs`).

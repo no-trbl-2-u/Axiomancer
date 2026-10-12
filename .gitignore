@@ -54,3 +54,6 @@ dist/
 
 # Telemetry hook sidecar (pairs *-end rows with their start rows)
 .claude/hooks/.telemetry-state.json
+
+# /messy dumps: T's scratch, never committed (skills/messy.md)
+plan/messy/
