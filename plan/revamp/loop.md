@@ -159,7 +159,7 @@ kept below as items 1, 2 and 6. R11 is attended because it edits
 
 ### Decisions for T (asked in the session, defaults in bold)
 
-Recorded as the next free D-numbers (D83 onward) in
+Recorded as the next free D-numbers (D84 onward; D83 went to RC2) in
 `plan/2026-09-25-refactor-strategy.decisions.md`, each in three lines.
 
 | # | Question | Default |
