@@ -29,8 +29,9 @@ function; simulations keep bug detectors only.
 it. Internal identifiers keep the former title: the npm workspaces
 (`axiomancer-mechanics`, `axiomancer-mobile`), the repo and folder name,
 `GH_REPO`, the `axiomancer` URL scheme and `com.axiomancer.mobile`. The
-title-screen wordmark is painted into `title-embark.jpg` and waits on new
-art (B8).
+splash, title screen and main menu share one typeset wordmark over Doré's
+Purgatorio I plate, and the launcher icon is cropped from that plate
+(2026-10-11; `state/presenters/title.engine.ts`).
 
 **One hosted web surface: the public DevLog.** The product ships as
 a mobile app via manual EAS builds; the app itself does not

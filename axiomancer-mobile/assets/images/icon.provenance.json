@@ -1,0 +1,19 @@
+{
+  "generated_by": "derived",
+  "date": "2026-10-11",
+  "tool": "scripts/build-title-assets.mjs (sharp)",
+  "license": "Public domain (icons); SIL Open Font License 1.1 (wordmark face)",
+  "covers": [
+    "icon.png",
+    "favicon.png",
+    "splash-icon.png",
+    "android/res/mipmap-xxxhdpi/ic_launcher_background.png",
+    "android/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
+    "android/res/mipmap-xxxhdpi/ic_launcher_monochrome.png"
+  ],
+  "source": "icon.png, favicon.png and the Android layers: a square crop of the title plate around its three figures (title/provenance.json, shore-at-dawn), taken from the full-resolution Commons original and mapped onto the game's ground-to-parchment duotone. splash-icon.png: the 'Miserere Mei, Deus' wordmark set in Pirata One (assets/fonts/PirataOne_400Regular.ttf, OFL; see assets/fonts/LICENSES).",
+  "replaces": "the owner-supplied 'AxiomanceR' throne-room key art (title-embark.jpg, licence UNRESOLVED), retired from the title screen and every launcher icon on 2026-10-11 at T's request",
+  "used_by": [
+    "app.json (icon, web favicon, android adaptiveIcon, expo-splash-screen image)"
+  ]
+}
