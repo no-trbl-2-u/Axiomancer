@@ -529,6 +529,30 @@
 
 ## Pending
 
+### [LOW] RC2 walk 2026-10-11 — copy, feedback and consistency findings (one row per item, accepted for v0.2.0)
+- pass: RC2 walk, four `playtester` legs (attended, T present) on eb75f451 with the Blood Price test deck
+- viewport: playwright default (desktop)
+- category: comprehension / polish
+- observation (each its own `/iterate` fix; none blocks v0.2.0; the four rules bugs are AUDIT rows):
+  1. [ ] No aftermath panel after a victory, spare or exploit: XP, loot and level-ups show only later on SELF/SATCHEL (carried from RC; accepted).
+  2. [ ] The Doorwarden's stage change ("WHAT SHUTS, STAYS SHUT") heals it 15% (47 at 312, 55 at 368) with no toast, banner or number pop; only the LOG overlay says so, and the reveal never mentions the stage.
+  3. [ ] The threat numbers disagree with what lands: the Hag's reveal lists phase 3 as 15, the HUD says "Deals 22"; a Float-Eye phase listed at 13 hit 19, 22 and 24.
+  4. [ ] The DECK tab prints base numbers while the hand prints scaled ones (P-01a: DECK "SACRIFICE 4, DEAL 16", hand "-2 / Deal 22", dealt 22; P-05b: DECK +50%, hand +28%/+70%).
+  5. [ ] Card faces mix the free and paid lines (P-09b "-4 / Foe -12"; Bloodletting "+4" gave 2 Conviction played free); hand cards show only the paid line, so a free play does something the face does not say (P-10c).
+  6. [ ] "Same, and gain 2 Conviction" (E-07b) and "Same, max 15." (M-10A) refer to a line shown only in the card detail.
+  7. [ ] SPARE and EXPLOIT carry no explanation; their accessibility labels are just "Spare" and "Exploit". (EXPLOIT: victory, a 76-damage finishing blow, +150 XP, a card pick.)
+  8. [ ] The combat summary credits every LEECH tick to the card that applied it and counts ticks as plays ("Open Vein 28 dmg, 7 plays" after 2 plays; "P-10c 123 dmg, 16 plays"); the EXPLOIT blow appears in no row.
+  9. [ ] The hazard reward sheet shows the route penalty ("-2 VITAE") and the dice reserve but the +6 VITAE reward only as a numberless icon, so the sheet does not add up; at full VITAE the net is capped and nothing changes. Show one net VITAE line.
+  10. [ ] An unpowered Global gets a 3-turn chip although the text says "in play for the rest of combat"; a second copy of a Global can never be played and clogs the hand (its reject is already loud).
+  11. [ ] Treasure "TAKE A CARD" adds a card with no preview or choice, while the goods option is itemised.
+  12. [ ] After a lost hazard round the card pick has no SKIP (the flawless one does), so a card is forced into the deck.
+  13. [ ] At the end of a region with every node walked, the hint still says "tap a glowing node to travel" and none glow; the counter says "18 nodes, 0 sealed" while two doors are told as sealed.
+  14. [ ] The Vault Door and the Deep Stair are labelled "quest" / "QUEST" before travel and resolve to one-line sealed omens.
+  15. [ ] "Momentum" names both the combat chain chip and the hazard surplus; "payload" (Anvil "Sanguine Fitting (+3 payload)") and "the jar holds 4 souls" (THE LEDGER) are unexplained.
+  16. [ ] WEAPON and ARMOR satchel slots always read "bare"; nothing in Act 1 fits them.
+  17. [ ] Dev only: the `/dev` ENEMY PICKER opened from SELF mounts two encounters (two `beginHazardEncounter` / `encounter-mounted`, every map node listed twice); loading `/dev` by URL avoids it.
+  18. [ ] Console (dev only): React 19 "Accessing element.ref was removed" once per load, from react-native-gesture-handler 2.28.0 `web/utils.js:218` (`node.ref?.rngh`) via GestureDetector; upgrading RNGH clears it. Reanimated "may be overwritten by a layout animation" bursts on /hazard.
+
 ### [LOW] RC walk 2026-10-02 — copy, label and console findings (one row per item, all presentation)
 - pass: RC checkpoint walk, four `playtester` legs (attended, T present), commits a493eaf7 → 169b6dbc
 - viewport: playwright default (desktop)
