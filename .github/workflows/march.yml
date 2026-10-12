@@ -8,6 +8,10 @@ name: march
 # the nexus-loop concurrency group, so a long tick makes the next one
 # queue (and GitHub keeps only the newest queued run) — the loop
 # self-throttles instead of stacking.
+#
+# PAUSED 2026-10-12 for Phase R11: disabled on GitHub (`gh workflow
+# disable march`), not by editing this file. R11's exit step (item 9 in
+# plan/revamp/loop.md) re-enables it. See plan/bearings.md § Operational notes.
 
 on:
   schedule:

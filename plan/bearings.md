@@ -487,6 +487,12 @@ deploy gate is unaffected — a skipped job does not fail the run.
 
 ## Operational notes
 
+- **The loop is PAUSED for R11 (2026-10-12).** `march` and `night` are
+  disabled on GitHub (`gh workflow disable`, R11 brief item 1 in
+  `plan/revamp/loop.md`), so no tick fires and manual dispatch is off too.
+  Nothing in the YAML changed; the switch lives on GitHub and R11's exit
+  (item 9) flips it back. The cadence notes below describe the resumed
+  loop, not the current state.
 - **Loop pushes to trunk (`main`) directly.** Audit after the
   fact via commit bodies + `/oversight`.
 - **Actions-minutes budget (2026-08-14 usage review, PR #205).**
