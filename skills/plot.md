@@ -84,6 +84,10 @@ git commit -m "phases: plot <N> — <title>" -m "<asap|anytime> because <reason>
 git push origin main
 ```
 
+From a worktree branch (the usual attended case), commit first and then
+`git fetch origin && git rebase origin/main && git push origin HEAD:main`
+as one act; main moves under you (lesson `plan-only-push-race`).
+
 `peek` stops before Step 4 and prints the brief instead.
 
 ### Step 6 — Retro
