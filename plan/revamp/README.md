@@ -103,7 +103,7 @@ starts it.
 | R10c2 | Comments and docs truth pass 2/3: history stripped from mechanics comments; a comment guard (D67) | loop | R10c | doctrine.md |
 | R10c3 | Comments and docs truth pass 3/3: mobile docs and comments; the guard covers mobile (D67) | loop | R10c2 | doctrine.md |
 | RC | Act 1 checkpoint release: full gate, a playtester walk of all four regions, then T tags `v0.1.0-checkpoint` | attended | R1–R10c, R7a–e (with R7c2), R9a, B4 | checkpoint.md |
-| R11 | Loop content phases: revisit the loop so content creation comes back as planned phases; ends revamp mode | attended | RC | loop.md |
+| R11 | Reopen the loop: ends revamp mode (the revamp ended at RC); the loop lands code by PRs T merges, kept green by a Haiku fixer; `/plot` and `/messy` intake; a retro and lessons ladder; content rules per surface (rewritten 2026-10-11) | attended | RC | loop.md |
 | R12 | New combat-playtest: write a fresh `/combat-playtest` command for the rebuilt game (the old one was archived in R0) | attended | RC, R11 | loop.md |
 | B1 | The relic pass: new relics and real signatures | owner | R4, RC | relics.md |
 | B2 | Enemy revamp: four tiers (normal, elite, region boss, **act boss**), roster regrowth, keywords with counters | owner | R9, RC | enemies.md |
@@ -179,7 +179,7 @@ T walked the agent defaults one at a time the same day. None remain open.
 | 12c | **R10c** Comments and docs truth pass | Last: comments and docs describe the code that survived; the 2026-09-23 pass left mobile comments and six bannered docs undone (D67) |
 | 12d | **R10d** Tutorial removal | T, 2026-10-02: every coach, the hazard intro and the map hint go before the tag |
 | 12a | **RC** Act 1 checkpoint release (attended) | The reset point: mechanics in place, the map working, everything cleaned up. T tags it; nothing below starts before it |
-| 13 | **R11** Loop content phases (attended) | Closes the revamp: decides how the loop creates content again, as phases, now that the core is rebuilt; ends revamp mode (D58) |
+| 13 | **R11** Reopen the loop (attended) | Closes the revamp, which ended at RC: removes revamp mode (D58), moves the loop onto pull requests T merges, gives T an intake (`/plot`, `/messy`), adds a retro step, and sets the content rules per surface |
 | 14 | **R12** New combat-playtest (attended) | Written once the survivors, Act 1 and the XP curve are final (R9) and the loop's content rules are set (R11), so it measures the game that exists |
 
 ### Rebuild track (T's sessions, after RC)

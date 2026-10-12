@@ -36,6 +36,25 @@
 
 ## Pending
 
+### [ ] [tooling] The guard's post-write lexicon check reports false findings in a worktree (2026-10-11)
+- category: tooling
+- impact: 4
+- ease: 7
+- detail: editing `plan/revamp/loop.md`, `plan/revamp/README.md` and
+  `plan/steps/01_build_plan.md` from a `.claude/worktrees/*` session made
+  the `post-write` hook (`.claude/hooks/guard.mjs` `postWrite`) block with
+  28 retired-term findings, all on lines the edit did not touch, printed as
+  `../.claude/Axiomancer/<worktree>/plan/...`. `node
+  scripts/check-lexicon.mjs` run inside the worktree on the same files is
+  clean. Likely cause: the hook runs from the main checkout
+  (`$CLAUDE_PROJECT_DIR`), so `check-lexicon`'s `ROOT` is the main
+  checkout and the worktree file's repo-relative path starts with `../`,
+  which no dated-record zone matches. Every worktree edit to a zoned file
+  trips it, and the noise trains sessions to ignore a real gate.
+- next: in `postWrite`, run `check-lexicon` with `cwd` set to the git
+  toplevel of the written file (`git -C <dir> rev-parse --show-toplevel`),
+  and pass the path relative to that root; add a `guard.mjs self-test`
+  case for a worktree path. R11's first retro is a natural home.
 ### [bug] P-07b's printed "(max 30)" does not cap its paid line (RC2 walk, 2026-10-11)
 - source: RC2 walk 2026-10-11 (eb75f451, Blood Price test deck, attended; accepted for the v0.2.0 tag by T, D83)
 - category: bug
