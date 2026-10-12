@@ -6,6 +6,10 @@ name: night
 # (see skills/digest.md — it names this workflow). Every other day
 # (odd days), off the march cadence so the two never queue — halved from
 # daily 2026-08 to cut Actions spend.
+#
+# PAUSED 2026-10-12 for Phase R11: disabled on GitHub (`gh workflow
+# disable night`), not by editing this file. R11's exit step (item 9 in
+# plan/revamp/loop.md) re-enables it. See plan/bearings.md § Operational notes.
 
 on:
   schedule:

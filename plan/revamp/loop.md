@@ -152,7 +152,9 @@ kept below as items 1, 2 and 6. R11 is attended because it edits
 
 1. Pause the `march` and `night` crons (disable the two workflows on
    GitHub). The loop edits the same doctrine files this phase rewrites.
-   Re-enable at exit (item 9).
+   Re-enable at exit (item 9). **Done 2026-10-12** (T, attended session):
+   both show `disabled_manually` in `gh workflow list --all`; the last
+   march tick before the pause was run 38191422615 (2026-10-12 01:19Z).
 2. Branch from `main`. R11 itself lands as a PR: it is the first PR the
    loop's new doctrine describes, and T reviews it the way every later one
    will be reviewed.
