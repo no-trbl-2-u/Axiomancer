@@ -2,14 +2,16 @@
 
 > The always-read core. ≤50 lines, total — this file is loaded
 > in full by every skill's Step 0, so it stays small on
-> purpose. A reflex is a lesson from `lessons.md` that changed
-> behavior on ~weekly cadence; promoting it here means every
-> skill sees it without a domain lookup. `lessons.md`'s header states the
+> purpose. A reflex is a lesson from `lessons.md` seen 3× across
+> verbs; the Retro step promotes it (`skills/march.md` §3 "Retro")
+> and `/oversight` reviews the promotion after the fact. Promoting it
+> here means every skill sees it without a domain lookup. `lessons.md`'s header states the
 > caps and the drain path (reflex → skill procedure edit).
 
 1. Commit and push are one atomic act. No unpushed commits
-   sit at the end of a turn — the next tick assumes
-   `origin/main` is the whole truth.
+   sit at the end of a turn — plan-only work is on
+   `origin/main`, code is on its pushed `loop/*` PR branch, and
+   the next tick reads both (open `loop:pr` PRs are the claims).
 2. Blocked is loud. Before a skill stops on a failure-mode
    condition, it surfaces an issue or a mirror comment first
    — silence is the failure, not the blocker itself.

@@ -21,7 +21,8 @@ than execute stale information.
 3. **Central SomberSoft ledger** (`~/Workspace/SOMBERSOFT_COMMAND_LEDGER.md`) —
    company-wide doctrine and operating law.
 4. **Active build plan** (`plan/steps/01_build_plan.md`) — current execution
-   queue and shipped phase ledger.
+   queue and shipped phase ledger. A phase brief's acceptance IDs (`A1…`)
+   are its definition of done.
 5. **Phase candidates** (`plan/PHASE_CANDIDATES.md`) — promotable work, not
    marching authority until accepted.
 6. **Critique/audit logs** (`plan/CRITIQUE.md`, `plan/AUDIT.md`) — findings
@@ -29,6 +30,11 @@ than execute stale information.
 7. **Historical reports** (`docs/reports/`, dated devlog entries; the
    pre-revamp archive under the `archive-pre-revamp` git tag, read only
    when T asks about history) — evidence, subordinate to current law.
+
+**A loop PR's body ranks below its commits** (R11). It summarizes what a
+`loop:pr` PR shipped, its decisions and its acceptance IDs, but the commits
+on `main` (and their messages) are the record; where the body and the
+merged diff disagree, the diff wins and the body is drift to surface.
 
 If a lower layer contradicts a higher one, a worker must:
 

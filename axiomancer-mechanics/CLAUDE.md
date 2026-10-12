@@ -31,10 +31,10 @@ The game as built is [`../docs/game-model.md`](../docs/game-model.md): three
 grey cards, four dice, three foes, Act 1, befriend and mercy. Read it before
 any mechanics work.
 
-- **Revamp mode (D58).** Nothing is authored: no card, keyword, enemy,
-  relic, map, NPC, event or art. Cards and keywords change only in guided
-  sessions with T (D37). Engine constants move only inside a ratified
-  revamp phase.
+- **Content per surface (D88).** Cards, keywords and art change only in
+  guided sessions with T (D37). Enemies, relics, maps, NPCs and events are
+  authored only inside a phase whose brief T wrote or approved. Engine
+  constants move only inside a briefed phase.
 - **Every card has a FREE line** (`Card.free`, `playTopAction`). A card
   must be playable without a die.
 - **One tray roll per threat phase.** `turnTakenThisPhase` closes the

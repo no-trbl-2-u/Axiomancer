@@ -1,0 +1,81 @@
+name: pr-resolve
+
+# Keeps loop PRs mergeable (Phase R11, D87). On every push to main, each
+# open same-repo `loop:pr` PR that GitHub reports CONFLICTING gets main
+# merged into its branch by `scripts/pr-resolve.mjs scan`: conflicts only in
+# append-only files (telemetry shards, plan queues, lessons) settle by a
+# union of rows; anything else goes to a Haiku run with Read and Edit only
+# (skills/fix-ci.md §3.6), between a scripted prepare and finish. Push,
+# never force. The loop never merges a PR (D86).
+#
+# Cost: free runners (public repo); Claude usage only when a conflict is
+# outside the union files.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: read
+  id-token: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    # Job-level and its own group (never nexus-loop): one scan at a time,
+    # and a later push's scan waits rather than displacing this one.
+    concurrency:
+      group: pr-resolve
+      cancel-in-progress: false
+    outputs:
+      claude: ${{ steps.scan.outputs.claude }}
+    env:
+      GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
+      GH_REPO: ${{ github.repository }}
+      GIT_AUTHOR_NAME: claude[bot]
+      GIT_AUTHOR_EMAIL: 41898282+claude[bot]@users.noreply.github.com
+      GIT_COMMITTER_NAME: claude[bot]
+      GIT_COMMITTER_EMAIL: 41898282+claude[bot]@users.noreply.github.com
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # GH_PAT so the merge push re-runs the PR's verify-* checks.
+          token: ${{ secrets.GH_PAT || github.token }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Merge main into conflicting loop PRs
+        id: scan
+        run: node scripts/pr-resolve.mjs scan
+
+  resolve:
+    needs: scan
+    if: needs.scan.outputs.claude != '' && needs.scan.outputs.claude != '[]'
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        item: ${{ fromJSON(needs.scan.outputs.claude) }}
+    uses: ./.github/workflows/_claude-skill.yml
+    secrets: inherit
+    with:
+      extra_claude_args: |
+        -p
+        --dangerously-skip-permissions
+      allowed_tools: 'Read,Edit'
+      pre_run: |
+        git config user.name 'claude[bot]'
+        git config user.email '41898282+claude[bot]@users.noreply.github.com'
+        node scripts/pr-resolve.mjs prepare --branch '${{ matrix.item.branch }}'
+      post_run: |
+        git config user.name 'claude[bot]'
+        git config user.email '41898282+claude[bot]@users.noreply.github.com'
+        node scripts/pr-resolve.mjs finish --branch '${{ matrix.item.branch }}'
+      prompt: '/fix-ci --resolve ${{ matrix.item.branch }} (PR #${{ matrix.item.pr }}). The conflicted files are listed one per line in .git/pr-resolve-files.txt.'
+      model: 'claude-haiku-5-5'
+      timeout_minutes: 30

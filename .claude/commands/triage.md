@@ -10,8 +10,10 @@ classifies, applies a `triage:*` label, posts a short comment,
 routes actionable issues into the right backlog (`plan/AUDIT.md`,
 a build-plan carry-over, or a `plan/PHASE_CANDIDATES.md` candidate).
 Already-labeled issues skipped — labels are the state. There is no
-`triage:needs-user` route (THE OPEN GATE), and new-content requests
-wait for T's revamp sessions (D58, §5 Step 2).
+`triage:needs-user` route (THE OPEN GATE). New-content requests route
+per surface (D88): cards, keywords and art wait for T's sessions;
+enemies, relics, maps, NPCs and events become `[content]` candidates T
+plots (§5 Step 2).
 
 Argument handling:
 - No argument → process all unlabeled open issues.

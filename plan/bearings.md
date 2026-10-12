@@ -1,6 +1,7 @@
 # Bearings — Miserere Mei, Deus
 
 <!-- lexicon-ok: retired-keyword — names RELENT and CONDEMN to forbid them -->
+<!-- lexicon-ok: revamp-mode — the one historical paragraph on THE REVAMP names it to record its end -->
 
 > Standing context for every command invocation. Read this
 > alongside the relevant skill file (`skills/<name>.md`) and the
@@ -198,8 +199,8 @@ Axiomancer/
 ├── plan/                       # nexus state files (this dir)
 │   ├── bearings.md             # this file
 │   ├── AUDIT.md · CRITIQUE.md · PHASE_CANDIDATES.md
-│   ├── revamp/                 # THE REVAMP part plans (D46–D64)
-│   ├── reflexes.md · lessons.md · north-star-mork-borg.md
+│   ├── revamp/                 # THE REVAMP record + part plans (D46–D83)
+│   ├── reflexes.md · lessons.md (counted retro ladder) · north-star-mork-borg.md
 │   ├── steps/01_build_plan.md
 │   ├── phases/                 # template, V masterplan, open/partial + recent briefs
 │   ├── ideas/ · labyrinth/     # art-pipeline options · Labyrinth design + acts
@@ -208,8 +209,8 @@ Axiomancer/
 ├── devlog/                     # DevLog entries (build input for the public site)
 ├── telemetry/                  # append-only invocation log, one shard per session
 ├── Potential Assets/           # icons-TBR source pool (D11) · MCP-Axiomancer images
-├── scripts/                    # deploy-check · notify · loop-issue · check-* lints · devlog/catalog builders
-├── .github/workflows/          # verify-* gates · march/night/triage crons · weekly perf audit · verb workflows
+├── scripts/                    # deploy-check · notify · loop-issue · pr-resolve · check-* lints (check-lessons) · devlog/catalog builders
+├── .github/workflows/          # verify-* gates · march/night/triage crons · pr-autofix · pr-resolve · weekly perf audit · verb workflows
 ├── .claude/
 │   ├── commands/               # loop-verb pointers
 │   ├── agents/                 # scout · playtester
@@ -218,8 +219,10 @@ Axiomancer/
 ```
 
 Loop verbs live in root `skills/`; `.claude/commands/` holds their doorways
-(the `combat-playtest` command was archived in R0; R12 rebuilds it). The content stewards, the
-design skills and four agents were archived in R0 (2026-09-28, D58).
+(the `combat-playtest` command was archived in R0; R12 rebuilds it). `plot`
+and `messy` live there too but are T's intake, never loop verbs. The content
+stewards, the design skills and four agents were archived in R0 (2026-09-28,
+D58); a content agent is written at the first owner-led content session.
 There is no `plan/archive/` (D66, R10b2): pre-revamp history is read with
 `git show archive-pre-revamp:plan/archive/<path>`, only when T asks.
 
@@ -233,8 +236,8 @@ Defined under `.claude/agents/`. Spawn aggressively.
 | `playtester` | Play the game via the running expo-web build (Playwright) — the real `/critique` observer for this project | Structured playtest report |
 
 `reader`, `mechanics-expert`, `content-curator` and `card-expert` were
-archived in R0 (D58): the loop creates no content during the revamp, and a
-fresh card agent is written at the first card session (B6).
+archived in R0 (D58); a fresh card agent is written at the first card
+session (B6).
 
 ## Plan expansion posture
 
@@ -246,15 +249,38 @@ fresh card agent is written at the first card session (B6).
 (So the loop never has to ask. Add to this list any recurring
 ambiguity.)
 
-- **THE REVAMP (T, attended session 2026-09-28, D46–D73) — revamp mode.**
-  `plan/revamp/README.md` is the main build plan; its §7 is the order. The
-  loop's phase work is only ratified revamp phases; `/march` keeps the
-  upstream chain (triage → critique → phase → expand → iterate), and
-  nothing in it **creates content of any kind**: cards, keywords, enemies,
-  relics, maps, NPCs, events or art (D58). Engine constants move only
-  inside a ratified revamp phase. Owner-led B-rows are T's sessions; the
-  loop never starts one. Revamp mode ends when Phase R11 ships; R11 decides
-  what content authority the loop gets back.
+- **THE REVAMP (history, T 2026-09-28 to 2026-10-12, D46–D83).** A reset
+  of the game to its Act 1 core: content purged, the engine and app
+  rebuilt around three grey cards, four dice, three foes and four regions.
+  While it ran, revamp mode (D58) limited the loop to ratified revamp
+  phases and forbade it to create content. It ended when RC cut
+  `v0.1.0-checkpoint`; Phase R11 (2026-10-12) removed revamp mode and set
+  the rules below. `plan/revamp/` is kept as the record and the part
+  plans the owner-led B-rows still point to.
+- **THE LOOP SINCE R11 (T, attended session 2026-10-12, D84–D90).**
+  - **Code lands by PR; T merges.** A tick whose diff touches anything
+    outside `plan/`, `telemetry/`, `docs/reports/` or `devlog/entries/` opens a `loop:pr` PR
+    onto `main` (D84); at most 3 are open, after which `/march` reports
+    "waiting on T" (D85); T merges by hand, never auto-merge, and a PR
+    open 7 days is flagged, never closed (D86). `pr-autofix` (Haiku, two
+    runs per PR, then `loop:pr-stuck`) keeps them green and `pr-resolve`
+    keeps them mergeable (D87). The flow: `skills/march.md` §3 "Landing a
+    change".
+  - **Content per surface (D88).** Cards, keywords and art: owner-only
+    (THE CARD HOLD below, B8). Enemies, relics, maps, NPCs and events: the
+    loop may propose them (`/expand`, bold, D89) and builds them only from
+    a build-plan row whose brief T wrote or approved. Owner-led B-rows
+    stay `[blocked: owner-led]`.
+  - **The loop builds only briefed rows and never writes a brief.** A
+    briefless row is filed "needs a brief: `/plot <N>`". T's intake is
+    `/plot` (one task → row + brief with acceptance IDs and a `Measure:`
+    line) and `/messy` (a dump → part plan + `[owner]` candidates); only
+    T fires them (AGENTS.md rule 8). `/plot` is to the build plan what
+    `/jot` is to `plan/CRITIQUE.md`.
+  - **`/iterate` fixes in-tick defects** in their own commit (D90).
+  - **Every closing verb ends with a Retro** into the counted
+    `plan/lessons.md` ladder: seen 2× → automated that tick; seen 3×
+    across verbs → `reflexes.md`, reviewed by `/oversight` after the fact.
   **The Act 1 checkpoint is tagged `v0.1.0-checkpoint`** (commit `9ddba0f8`,
   2026-10-02; GitHub release and EAS preview APK linked from it). To reset to
   it: `git switch -c <branch> v0.1.0-checkpoint`.
@@ -263,6 +289,7 @@ ambiguity.)
 - **THE CARD HOLD (T, attended session 2026-09-26, D37).** No player card
   and no player keyword is created outside a guided session with T. No
   `/expand`, phase or brief adds one, and none plans a phase that would.
+  R11 kept it unchanged (D88).
   The card-rules inventory B4 required is merged
   (`plan/revamp/card-rules-inventory.md`). **The card process is Plan B
   (D73):** one slice per lane, lanes grouped into families (a relic names a
@@ -331,19 +358,20 @@ ambiguity.)
   not hold, it says so and stops. `docs/narrative/` (style constitution,
   voice registers, lexicon, anti-imitation, the delivery register) is craft
   law and binds.
-- **Direct pushes to `main` are sanctioned from ANY session, including
-  remote/web ones** (T direct, 2026-08-08: *"Direct pushes to main are
-  fine, keep going."*). **No branch or PR is required.** Branch + PR is
-  still the better choice when a change wants review before landing.
-  The verify gate still runs pre-commit, the deploy gate post-push, and no
+- **Direct pushes to `main` (amended by R11, D84).** Sanctioned for
+  plan-only commits (`plan/`, `telemetry/`, `docs/reports/`, `devlog/entries/`), for
+  `/fix-ci` on red `main`, and for attended sessions at T's word (T
+  direct, 2026-08-08: *"Direct pushes to main are fine, keep going."*).
+  Every other loop change lands by a `loop:pr` PR that T merges. The
+  verify gate still runs pre-commit, the CI gate after the push, and no
   force-push or destructive git op is permitted.
 - **THE OPEN GATE: no open question waits on the owner (T direct,
   2026-08-28).**
   `[needs-user-call]` is retired as a blocking state. The loop answers a
   question the state can settle, files the decision and reasoning as
   residue, and tags a genuinely owner-flavoured call `[loop-call]` for
-  `/oversight` to review. This does not override the revamp-mode limits
-  above, which are T's later rulings. Cron cadences are the loop's to
+  `/oversight` to review. This does not override the R11 rules above
+  (PRs, content per surface, briefs), which are T's later rulings. Cron cadences are the loop's to
   manage; it weighs the Actions-minutes budget and documents changes.
 - **The loop is authorized to make big calls on its own** (adopted via
   /oversight 2026-08-08, T verbatim: *"you are free to make big decisions
@@ -359,8 +387,8 @@ ambiguity.)
   (`plan/ideas/AI_ART_PIPELINE_OPTIONS.md`). Generation needs an OpenAI key
   in `.env`. Every generated asset records generator, model, prompt and
   date in its `provenance.json` entry (also the Steam AI-disclosure
-  record). Midjourney stays out of the automated pipeline. No art is made
-  during the revamp (D58); card art returns in B8.
+  record). Midjourney stays out of the automated pipeline. Art is
+  owner-only (D88); card art returns in B8.
 - **`Potential Assets/MCP-Axiomancer/images/` — license per image not on
   record.** The loop may not wire an image it cannot write a truthful
   `provenance.json` entry for. An untraceable image is replaced or
@@ -398,14 +426,15 @@ here (tokens match `skills/iterate.md` §4 "Audit categories"):
 ## Hard rules
 
 Rules 1-5 are the nexus standing rules, **canonical in `AGENTS.md`
-§ "Nexus standing rules"** (which now numbers seven — including
-`AskUserQuestion` only in `/oversight`, and **file the residue**: a
-session that produces direction beyond what it ships files it into
-the plan/ queues before ending). Read them there; update them there
+§ "Nexus standing rules"** (which now numbers eight — including
+`AskUserQuestion` only in `/oversight` (and `/plot`/`/messy` with T
+present), **file the residue**, and **T's buildable direction goes
+through `/plot` or `/messy`**). Read them there; update them there
 first — this file no longer carries a copy. In short: atomic
-commit+push to `main`; no trailers/emojis; foreground verify gate,
-no `--no-verify`/force-push/destructive resets; tests alongside
-code; deploy gate after every push.
+commit+push (code to a `loop:pr` PR, plan-only to `main`); no
+trailers/emojis; foreground verify gate, no
+`--no-verify`/force-push/destructive resets; tests alongside code; CI
+gate after every push.
 
 Rules 6-9 are project-specific additions that live here (numbering
 preserved — phase briefs cite them by number):
@@ -448,9 +477,11 @@ legs, run as part of CI (`verify-mobile.yml`) rather than the
 per-commit local gate; the `verify:visual` smoke screens run only
 as an opt-in step of `preview-build.yml`.
 
-### Post-push: `npm run deploy:check`
+### Post-push: the PR's checks, or `npm run deploy:check` on `main`
 
-After `git push origin main`:
+A loop PR's gate is `gh pr checks <branch> --watch --fail-fast` (the
+`verify-*` workflows run on `pull_request`; `skills/march.md` §3). After
+a push to `main` (plan-only, `fix-ci`, an attended session):
 
 ```bash
 npm run deploy:check
@@ -487,14 +518,15 @@ deploy gate is unaffected — a skipped job does not fail the run.
 
 ## Operational notes
 
-- **The loop is PAUSED for R11 (2026-10-12).** `march` and `night` are
+- **The loop was PAUSED for R11 (2026-10-12).** `march` and `night` were
   disabled on GitHub (`gh workflow disable`, R11 brief item 1 in
-  `plan/revamp/loop.md`), so no tick fires and manual dispatch is off too.
-  Nothing in the YAML changed; the switch lives on GitHub and R11's exit
-  (item 9) flips it back. The cadence notes below describe the resumed
-  loop, not the current state.
-- **Loop pushes to trunk (`main`) directly.** Audit after the
-  fact via commit bodies + `/oversight`.
+  `plan/revamp/loop.md`). T re-enables both once the R11 PR merges (R11
+  item 9) and watches the first tick end to end; until then no tick fires.
+- **Loop code lands by PR; plan-only pushes `main`** (D84). T reviews
+  each `loop:pr` PR before it lands; `/oversight` audits the rest after
+  the fact. Runner minutes for the PR flow are free (public repo); the
+  paid part is Claude usage, a Haiku run per red check (≤2 per PR) or
+  per non-union conflict.
 - **Actions-minutes budget (2026-08-14 usage review, PR #205).**
   Half-month spend was ~2,955 min (march 42%, triage 17%, verify
   CI 21%, night 11%) against 3,000 included min/mo. Standing
@@ -515,8 +547,9 @@ deploy gate is unaffected — a skipped job does not fail the run.
   - The weekly tuning crons stay disabled for budget reasons; the
     loop may re-enable them when it judges the minutes budget
     supports it, documenting the change.
-- **A red `verify-*` workflow = a blocked tick.** Verify gate is
-  pre-flight; the CI-green deploy gate is post-flight.
+- **A red `verify-*` run on a loop PR is `pr-autofix`'s after the
+  tick's own 3 tries; on `main` it is `ci-autofix`'s.** Verify gate is
+  pre-flight; the CI gate is post-flight.
 - **Operational secrets** in `.env` (gitignored): `GH_TOKEN`
   (deploy gate + issue mirror + triage), optional
   `NOTIFY_NTFY_TOPIC`/`NOTIFY_WEBHOOK_URL` (pager), `EXPO_TOKEN`
@@ -528,7 +561,9 @@ deploy gate is unaffected — a skipped job does not fail the run.
 npm run verify --workspace axiomancer-mechanics   # engine gate
 npm run verify --workspace axiomancer-mobile      # app gate
 npm run verify                                    # whole monorepo
-npm run deploy:check                              # post-push CI-green gate
+npm run deploy:check                              # post-push CI-green gate (main)
+gh pr checks <branch> --watch --fail-fast         # a loop PR's CI gate
+node scripts/check-lessons.mjs                    # the lessons ladder lint
 npm run game -- combat                            # play Hazard-Pattern Combat (CLI)
 npm run mobile -- start                           # expo dev server
 ```

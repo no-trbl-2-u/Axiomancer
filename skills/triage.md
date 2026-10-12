@@ -5,17 +5,6 @@
 > **If there are no unlabeled issues, exit fast** — that's
 > "keep humming."
 
-> **REVAMP MODE (D58, since 2026-09-28; ends when Phase R11 ships).** The
-> loop's phase work is only the ratified revamp build plan
-> (`plan/steps/01_build_plan.md`; part plans in `plan/revamp/`). It creates
-> no content of any kind: cards, keywords, enemies, relics, maps, NPCs, events
-> or art. `/iterate` and `/expand` still run when no phase is ready, under the
-> same no-content rule. THE CARD HOLD (D37) stands: no card or keyword is made
-> outside a guided session with T. The content stewards, `/forge` and the
-> `card-expert`, `content-curator`, `mechanics-expert` and `reader` agents
-> were archived in R0; never route work to them. R11 revisits the loop to
-> bring content phases back.
-
 ## 1. Purpose
 
 GitHub issues are the user's primary inbox to the loop. Without
@@ -144,14 +133,16 @@ For each issue, decide:
    - large / off-strategy enhancement → a candidate in
      `plan/PHASE_CANDIDATES.md` citing the issue (`/expand`
      and `/oversight` weigh it there)
-4. **Revamp filter (D58, D37).** A request for new content (a
-   card, keyword, enemy, relic, map, NPC, event or art) is not
-   loop work. Label it `triage:reviewed` plus its category, and
-   comment that it waits for T's owner-led revamp session,
-   naming the B-phase it belongs to where one fits
-   (`plan/revamp/README.md` §4). File no backlog row for it.
-   A fix to existing content (a wrong gloss, a broken foe) is
-   a normal `content` bug and routes to `plan/AUDIT.md`.
+4. **Content filter (D88, D37).** A request for a new **card,
+   keyword or art** is not loop work: label it `triage:reviewed`
+   plus its category and comment that it waits for T's guided
+   session, naming the B-phase it belongs to where one fits
+   (`plan/revamp/README.md` §7). A request for a new **enemy,
+   relic, map, NPC or event** becomes a `[content]` candidate in
+   `plan/PHASE_CANDIDATES.md` citing the issue, labelled
+   `triage:loop-queued`, with a comment that it is built only once
+   T plots it. A fix to existing content (a wrong gloss, a broken
+   foe) is a normal `content` bug and routes to `plan/AUDIT.md`.
 
 ### Step 3 — Apply labels + comment + (close)
 
@@ -239,10 +230,11 @@ The richer deploy comment is `skills/iterate.md`'s job.
 6. **Don't over-classify.** When in doubt, pick the closest
    existing category and say so in the comment; never invent
    one.
-7. **No content routing.** New-content requests are
-   `triage:reviewed` for T's revamp sessions (Step 2 item 4),
-   never a backlog row.
-8. **No emojis. No `Co-Authored-By:`.**
+7. **Content routing per surface (D88).** Card, keyword and art
+   requests are `triage:reviewed` for T's sessions; enemy, relic,
+   map, NPC and event requests are `[content]` candidates (Step 2
+   item 4); never a build-plan row.
+8. **No emojis. No attribution trailers** (AGENTS.md rule 2).
 9. **`gh` calls only.** No raw curl unless `gh` is unavailable.
 
 ## 8. Failure modes

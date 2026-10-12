@@ -20,7 +20,9 @@
 // Modes:
 //   pre-bash      check a Bash tool call against the forbidden list
 //   pre-write     block hand-edits to measured baselines
-//   post-write    run the retired-terminology lint (check-lexicon) on
+//   post-write    run the lessons-ladder lint (check-lessons) when
+//                 plan/lessons.md or plan/reflexes.md is written, and
+//                 the retired-terminology lint (check-lexicon) on
 //                 the .md file just written; findings feed back as
 //                 exit 2 so the agent fixes them before CI does
 //   session-start print measurement context (baseline freshness) to
@@ -210,8 +212,33 @@ function lexiconTargetFor(filePath) {
   return { root, script, rel }
 }
 
+// After a write to plan/lessons.md or plan/reflexes.md, run the lessons
+// ladder lint (scripts/check-lessons.mjs, Phase R11) from the written file's
+// own repository, so a malformed retro is fixed before the commit.
+function lessonsTargetFor(filePath) {
+  const target = lexiconTargetFor(filePath)
+  if (!target || !['plan/lessons.md', 'plan/reflexes.md'].includes(target.rel)) return null
+  const script = path.join(target.root, 'scripts', 'check-lessons.mjs')
+  return fs.existsSync(script) ? { root: target.root, script } : null
+}
+
 function postWrite() {
   const input = readStdinJson()
+  const lessons = lessonsTargetFor(input?.tool_input?.file_path)
+  if (lessons) {
+    const res = spawnSync(process.execPath, [lessons.script], {
+      cwd: lessons.root,
+      encoding: 'utf-8',
+      timeout: 30_000,
+    })
+    if (!res.error && res.status !== null && res.status !== 0) {
+      process.stderr.write(
+        'guard: plan/lessons.md or plan/reflexes.md breaks the ladder format:\n' +
+        `${(res.stderr || res.stdout || '').trim()}\n`,
+      )
+      return 2
+    }
+  }
   const target = lexiconTargetFor(input?.tool_input?.file_path)
   if (!target) return 0
   const res = spawnSync(process.execPath, [target.script, target.rel], {
@@ -408,6 +435,8 @@ function selfTest() {
     ['own checkout → root is this toplevel', !!own && path.resolve(own.root) === path.resolve(process.cwd())],
     ['other repo → its own root, not ../', !!other && other.rel === 'plan/AUDIT.md' && other.root !== own?.root],
     ['non-markdown → skipped', lexiconTargetFor('package.json') === null],
+    ['lessons.md → check-lessons runs', lessonsTargetFor(path.resolve('plan/lessons.md')) !== null],
+    ['AUDIT.md → no lessons lint', lessonsTargetFor(here) === null],
   ]
   for (const [label, ok] of lexCases) {
     if (!ok) failed++

@@ -1,21 +1,11 @@
 # Skill: fix-ci
 
-> **The red-main first responder.** When a `verify-*` workflow
+> **The red-CI first responder.** When a `verify-*` workflow
 > goes red on `main`, read the failed run, reproduce it locally,
-> fix the root cause, and push the fix to `main`. One root cause
-> per run. If `main` is already green again, exit fast with no
-> commit.
-
-> **REVAMP MODE (D58, since 2026-09-28; ends when Phase R11 ships).** The
-> loop's phase work is only the ratified revamp build plan
-> (`plan/steps/01_build_plan.md`; part plans in `plan/revamp/`). It creates
-> no content of any kind: cards, keywords, enemies, relics, maps, NPCs, events
-> or art. `/iterate` and `/expand` still run when no phase is ready, under the
-> same no-content rule. THE CARD HOLD (D37) stands: no card or keyword is made
-> outside a guided session with T. The content stewards, `/forge` and the
-> `card-expert`, `content-curator`, `mechanics-expert` and `reader` agents
-> were archived in R0; never route work to them. R11 revisits the loop to
-> bring content phases back.
+> fix the root cause, and push the fix to `main`. With `--branch`
+> it does the same for a red `loop:pr` PR and pushes to the PR's
+> branch (D87). One root cause per run. If the target is already
+> green again, exit fast with no commit.
 
 ## 1. Purpose
 
@@ -29,22 +19,27 @@ That is why AGENTS.md carries the cross-package impact
 checklist. This skill closes the window between the red run
 and the fix.
 
-During the revamp most red runs will be fallout from a reset
-phase: a test or consumer still pinned to something the phase
-deleted. Fix it in the reset's direction. Re-point the test at a
-survivor or delete it with its subject (`plan/revamp/README.md`
-§5 rule 2). Never restore a deleted thing to get green.
+A red run that is fallout from a reset phase (a test or consumer
+still pinned to something the phase deleted) is fixed in the
+reset's direction: re-point the test at a survivor or delete it
+with its subject (`plan/revamp/README.md` §5 rule 2). Never
+restore a deleted thing to get green.
 
 ## 2. Invocation
 
 ```
-/fix-ci <run-id>      # diagnose that workflow run
-/fix-ci               # find the most recent failed verify-* run on main
+/fix-ci <run-id>                     # diagnose that workflow run on main
+/fix-ci                              # most recent failed verify-* run on main
+/fix-ci <run-id> --branch <branch>   # red loop:pr PR: fix on its branch (§3.5)
+/fix-ci --resolve <branch>           # finish a pr-resolve merge (§3.6)
 ```
 
 Runs from `.github/workflows/ci-autofix.yml` when a `verify-*`
 workflow completes with `failure` on `main` (it passes the run
-id), or by hand. With no argument:
+id), from `.github/workflows/pr-autofix.yml` (on Haiku) for a red
+`loop:pr` PR, from `.github/workflows/pr-resolve.yml` for a merge
+conflict the union rules could not settle, or by hand. With no
+argument:
 
 ```bash
 gh run list --branch main --status failure --limit 10 \
@@ -74,7 +69,9 @@ and take the newest run whose workflow name starts with
    For a package gate that is usually
    `npm run verify -w <workspace>`; for an e2e journey it is the
    named `npm run e2e:* -w axiomancer-mobile` script. Confirm you
-   see the same failure. A fresh worktree needs `npm install` at
+   see the same failure. A journey step lives in both
+   `verify-mechanics.yml` and `verify-mobile.yml`; a fix to one is a
+   fix to both (lesson `parallel-journey-lists`). A fresh worktree needs `npm install` at
    its root first (AGENTS.md → Verify).
 4. **Fix the root cause.** Make the minimal correct fix, not a
    suppression. Never skip or disable a test, loosen a type, or
@@ -88,7 +85,8 @@ and take the newest run whose workflow name starts with
    paths, also run each consumer gate that checklist names.
 6. **Ship:** one commit, `fix(ci): <root cause>`, with the
    diagnosis in the body (the failing run id, the step, why it
-   broke). Push to `main`, then `npm run deploy:check`.
+   broke). Push to `main` (a fix of red `main` is the sanctioned
+   direct push, D84), then `npm run deploy:check`.
 7. **Cap:** at most 3 iterations on the same root cause. Then
    stop cleanly and page:
 
@@ -96,21 +94,63 @@ and take the newest run whose workflow name starts with
    node scripts/notify.mjs --title "fix-ci: stuck" --priority high
    ```
 
+8. **Retro:** run `skills/march.md` §3 "Retro" (plan-only; push
+   `main`).
+
+## 3.5 `--branch`: a red `loop:pr` PR (D87)
+
+`pr-autofix` passes the failed run id and the PR's head branch. Same
+procedure as §3, with these differences:
+
+1. **Sync the branch, not main:** `git fetch origin && git switch
+   <branch> && git pull --ff-only`. Confirm the branch's PR is open
+   and labelled `loop:pr` (`gh pr list --head <branch> --label
+   loop:pr --state open`); if not, exit with no commit.
+2. **Still red?** If the branch's head has moved past the failing
+   commit and its checks are green, exit with no commit.
+3. **Fix the root cause on the branch.** The failure is this PR's
+   unless it reproduces identically on `origin/main`; a failure that
+   is `main`'s is not fixed here (exit and say so; `ci-autofix` owns
+   it). Keep the fix minimal and inside what the PR already touches
+   where possible.
+4. **Ship:** one commit `fix(ci): <root cause>` on the branch, `git
+   push origin <branch>`. **Never** force-push, rebase, merge `main`
+   in (that is `pr-resolve`'s job), merge the PR, or touch `main`.
+5. **One root cause per run.** The workflow allows two runs per PR;
+   it labels the PR `loop:pr-stuck` after that, so do not loop past
+   your one fix.
+
+## 3.6 `--resolve`: finish a conflicted merge
+
+`pr-resolve` has already checked out `<branch>`, run `git merge
+origin/main`, and left conflict markers in the files it could not
+settle by union. This run uses **Read and Edit only** (no shell):
+
+1. For each file `git` reported conflicted (the workflow lists them in
+   the prompt), read it and resolve every `<<<<<<<` / `=======` /
+   `>>>>>>>` block so both sides' intent survives. Where both sides
+   changed the same logic and one must lose, keep `main`'s side and
+   say which hunk in your final message.
+2. Leave no marker behind. Do not edit any file the prompt did not
+   list. The workflow commits and pushes after you exit, and fails
+   if a marker remains.
+
 ## 4. Hard rules
 
 1. **Root cause, never suppression.** No skipped tests, no
    `--no-verify`, no loosened types or thresholds.
-2. **Reset direction.** A failure caused by a revamp deletion is
+2. **Reset direction.** A failure caused by a reset deletion is
    fixed by finishing the deletion or re-pointing at the
-   survivors, never by restoring deleted content (D50, D58).
+   survivors, never by restoring deleted content (D50).
 3. **No new content.** A fix never authors a card, keyword,
-   enemy, relic, map, NPC, event or art to satisfy a test.
+   enemy, relic, map, NPC, event or art to satisfy a test (D88).
 4. **One root cause, one commit.** Unrelated red found on the
    way is a `plan/AUDIT.md` row, not a second fix.
 5. **Standing rules apply** (`AGENTS.md` → "Nexus standing
-   rules"): atomic commit+push to `main`, no force-push, no
-   destructive resets, verify gate in the foreground, no
-   `Co-Authored-By`, no emojis.
+   rules"): atomic commit+push to the target (`main`, or the PR
+   branch with `--branch`), no force-push, no destructive resets,
+   verify gate in the foreground, no attribution trailers, no
+   emojis.
 
 ## 5. Failure modes
 
@@ -131,10 +171,13 @@ and take the newest run whose workflow name starts with
 
 ```bash
 gh run list --branch main --status failure --limit 10     # find the red run
+gh pr list --head <branch> --label loop:pr --state open   # --branch: confirm the PR
 gh run view <run-id> --log-failed                          # read it
 npm run verify -w <workspace>                              # reproduce a package gate
 gh run rerun <run-id> --failed                             # flake check
 npm run deploy:check                                       # after the push
 node scripts/notify.mjs --title "fix-ci: stuck" --priority high
-.github/workflows/ci-autofix.yml                           # the trigger
+.github/workflows/ci-autofix.yml                           # trigger: red main
+.github/workflows/pr-autofix.yml                           # trigger: red loop:pr PR (Haiku)
+.github/workflows/pr-resolve.yml                           # trigger: conflicted loop:pr PR
 ```

@@ -1,0 +1,113 @@
+name: pr-autofix
+
+# Keeps loop PRs green (Phase R11, D87). When a verify-* run fails on a
+# pull request's branch, and that PR is open, labelled `loop:pr` and comes
+# from this repo (never a fork: a fork's head must never get the secrets
+# this runs with), a Haiku run of `/fix-ci <run-id> --branch <head>` fixes
+# the root cause on the PR's branch (skills/fix-ci.md §3.5). Each attempt
+# is recorded as a PR comment carrying the marker below; after two the PR
+# is labelled `loop:pr-stuck` and left for T, and `/march` lists it every
+# tick. The loop never merges, closes or force-pushes a PR (D86).
+#
+# Cost: GitHub-hosted runners are free for this public repo. The paid part
+# is Claude usage: one Haiku run per red check, at most two per PR.
+#
+# `scripts/loop-pr.test.mjs` pins the label filter, the `head_branch !=
+# 'main'` guard, the same-repo guard, the two-attempt cap and the per-PR
+# job-level concurrency group.
+
+on:
+  workflow_run:
+    workflows: [verify-mechanics, verify-mobile, verify-prose, verify-drift]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'Failed verify-* run id to fix'
+        required: true
+        type: string
+      branch:
+        description: 'Head branch of the loop:pr PR'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: read
+  id-token: write
+
+jobs:
+  # Cheap gate on a plain runner: every verify-* completion (green ones
+  # included) starts this workflow, so the filter runs before any Claude
+  # job and before any concurrency group is entered (the ci-autofix
+  # lesson: a workflow-level group let skipped runs displace real ones).
+  gate:
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'failure' &&
+       github.event.workflow_run.event == 'pull_request' &&
+       github.event.workflow_run.head_branch != 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    outputs:
+      go: ${{ steps.check.outputs.go }}
+      pr: ${{ steps.check.outputs.pr }}
+      branch: ${{ steps.check.outputs.branch }}
+      run_id: ${{ steps.check.outputs.run_id }}
+    env:
+      GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
+      GH_REPO: ${{ github.repository }}
+      BRANCH: ${{ github.event_name == 'workflow_dispatch' && inputs.branch || github.event.workflow_run.head_branch }}
+      RUN_ID: ${{ github.event_name == 'workflow_dispatch' && inputs.run_id || github.event.workflow_run.id }}
+    steps:
+      - name: Check the PR (label, same repo, attempts)
+        id: check
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "go=false" >> "$GITHUB_OUTPUT"
+          if [ "$BRANCH" = "main" ]; then echo "main is ci-autofix's"; exit 0; fi
+          pr=$(gh pr list --repo "$GH_REPO" --head "$BRANCH" --state open \
+            --json number,labels,isCrossRepository \
+            --jq '[.[] | select(.isCrossRepository == false) | select(any(.labels[]; .name == "loop:pr"))][0].number // empty')
+          if [ -z "$pr" ]; then echo "No open same-repo loop:pr PR for $BRANCH; nothing to do."; exit 0; fi
+          stuck=$(gh pr view "$pr" --repo "$GH_REPO" --json labels --jq 'any(.labels[]; .name == "loop:pr-stuck")')
+          if [ "$stuck" = "true" ]; then echo "PR #$pr is loop:pr-stuck; waiting on T."; exit 0; fi
+          attempts=$(gh pr view "$pr" --repo "$GH_REPO" --json comments \
+            --jq '[.comments[] | select(.body | contains("<!-- pr-autofix:attempt -->"))] | length')
+          if [ "$attempts" -ge 2 ]; then
+            gh label create loop:pr-stuck --repo "$GH_REPO" --color B60205 \
+              --description "pr-autofix gave up after two runs; T decides" 2>/dev/null || true
+            gh pr edit "$pr" --repo "$GH_REPO" --add-label loop:pr-stuck
+            gh pr comment "$pr" --repo "$GH_REPO" --body "pr-autofix: two runs did not turn this PR green (latest red run ${RUN_ID}). Labelled loop:pr-stuck; /march reports it each tick and nothing retries it until T removes the label."
+            exit 0
+          fi
+          n=$((attempts + 1))
+          gh pr comment "$pr" --repo "$GH_REPO" --body "<!-- pr-autofix:attempt -->
+          pr-autofix: attempt ${n}/2 on red run ${RUN_ID} (Haiku, \`/fix-ci ${RUN_ID} --branch ${BRANCH}\`)."
+          {
+            echo "go=true"
+            echo "pr=$pr"
+            echo "branch=$BRANCH"
+            echo "run_id=$RUN_ID"
+          } >> "$GITHUB_OUTPUT"
+
+  fix:
+    needs: gate
+    if: needs.gate.outputs.go == 'true'
+    # Job-level and per PR, never the shared nexus-loop group: two PRs fix
+    # in parallel, two red runs on one PR queue behind each other.
+    concurrency:
+      group: pr-autofix-${{ needs.gate.outputs.pr }}
+      cancel-in-progress: false
+    uses: ./.github/workflows/_claude-skill.yml
+    secrets: inherit
+    with:
+      extra_claude_args: |
+        -p
+        --dangerously-skip-permissions
+      prompt: '/fix-ci ${{ needs.gate.outputs.run_id }} --branch ${{ needs.gate.outputs.branch }}'
+      model: 'claude-haiku-5-5'
+      timeout_minutes: 30

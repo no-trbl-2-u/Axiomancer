@@ -1,5 +1,15 @@
 # THE REVAMP — main build plan
 
+> [!IMPORTANT]
+> ## ENDED: the revamp ended at RC; Phase R11 (2026-10-12) closed it
+>
+> This folder is now the **record** of the revamp and the home of the part
+> plans the owner-led B-rows still point to. The loop's rules since R11
+> (D84–D90): code lands by `loop:pr` PRs T merges; the loop builds only
+> briefed rows and never writes a brief; T's intake is `/plot` and
+> `/messy`; content per surface below (§7, "Content per surface").
+> Read `plan/bearings.md` → "THE LOOP SINCE R11" for the current rules.
+
 > [!NOTE]
 > ## STATUS: RATIFIED 2026-09-28 (D64)
 >
@@ -21,12 +31,12 @@ The revamp resets Miserere Mei, Deus to a small, honest core and rebuilds
 from there in owner-led sessions. This folder is the map of both halves:
 
 - **Reset (R-phases)** — delete or park everything the core does not use.
-  Loop-shippable once ratified, one phase per tick pushed to main, main
-  green between them.
+  Loop-shippable once ratified, one phase per tick, main green between
+  them (pushed to main at the time; since R11 the loop lands code by PR).
 - **Checkpoint (RC)** — the Act 1 release T tags when the reset is done:
   the point to reset to before anything grows again ([checkpoint.md](checkpoint.md)).
 - **Rebuild (B-phases)** — T's guided sessions. The loop never starts one
-  (D37, D58).
+  (D37, D88).
 
 Each major part has its own plan file. This README orders them.
 
@@ -179,13 +189,23 @@ T walked the agent defaults one at a time the same day. None remain open.
 | 12c | **R10c** Comments and docs truth pass | Last: comments and docs describe the code that survived; the 2026-09-23 pass left mobile comments and six bannered docs undone (D67) |
 | 12d | **R10d** Tutorial removal | T, 2026-10-02: every coach, the hazard intro and the map hint go before the tag |
 | 12a | **RC** Act 1 checkpoint release (attended) | The reset point: mechanics in place, the map working, everything cleaned up. T tags it; nothing below starts before it |
-| 13 | **R11** Reopen the loop (attended) | Closes the revamp, which ended at RC: removes revamp mode (D58), moves the loop onto pull requests T merges, gives T an intake (`/plot`, `/messy`), adds a retro step, and sets the content rules per surface |
+| 13 | **R11** Reopen the loop (attended) — **shipped 2026-10-12, #503 (D84–D90)** | Closed the revamp, which ended at RC: removed revamp mode (D58), moved the loop onto pull requests T merges, gave T an intake (`/plot`, `/messy`), added a retro step, and set the content rules per surface |
 | 14 | **R12** New combat-playtest (attended) | Written once the survivors, Act 1 and the XP curve are final (R9) and the loop's content rules are set (R11), so it measures the game that exists |
 
 ### Rebuild track (T's sessions, after RC)
 
 Every B-row requires RC (T, via `/oversight` 2026-09-28). Picking the card
 process plan (step a) is a decision, not a phase, and can happen any time.
+The B-rows stay `[blocked: owner-led]` in the build plan.
+
+**Content per surface (R11, D88).** What the loop may create:
+
+| Surface | Loop authority |
+|---|---|
+| Cards, keywords | None. THE CARD HOLD (D37): only a guided session with T creates one |
+| Art | None. Owner-only (B8) |
+| Enemies, relics, maps, NPCs, events | Propose as `/expand` candidates (D89); build only from a build-plan row whose brief T wrote or approved (`/plot`, attended `/plan-a-phase`, `/oversight` promotion) |
+| Code, tooling, tests, docs, fixes | Yes, as briefed phases or `/iterate` fixes, landed by `loop:pr` PRs T merges (D84–D87) |
 
 | Step | Phase / decision | Ready after | Why here |
 |---|---|---|---|

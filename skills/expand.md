@@ -1,16 +1,5 @@
 # Skill: expand
 
-> **REVAMP MODE (D58, since 2026-09-28; ends when Phase R11 ships).** The
-> loop's phase work is only the ratified revamp build plan
-> (`plan/steps/01_build_plan.md`; part plans in `plan/revamp/`). It creates
-> no content of any kind: cards, keywords, enemies, relics, maps, NPCs, events
-> or art. `/iterate` and `/expand` still run when no phase is ready, under the
-> same no-content rule. THE CARD HOLD (D37) stands: no card or keyword is made
-> outside a guided session with T. The content stewards, `/forge` and the
-> `card-expert`, `content-curator`, `mechanics-expert` and `reader` agents
-> were archived in R0; never route work to them. R11 revisits the loop to
-> bring content phases back.
-
 > **Plan-expansion pass.** Read accumulated signals and propose
 > new phase candidates to `plan/PHASE_CANDIDATES.md`. The build
 > plan ships well; this skill is how it *grows* well.
@@ -231,14 +220,15 @@ For each top candidate, ask:
 4. **Does the loop have the capacity to ship this?** A
    candidate that requires schema migration of 100 records
    deserves to be phase-promoted but only by `/oversight`.
-5. **Would it create content? (the D37/D58 filter)** A candidate
-   whose work is making cards, keywords, enemies, relics, maps,
-   NPCs, events or art is **not filed** as a candidate. If the
-   signal is real, note it in one line in the pass log (and the
-   commit body) as input for the owner-led rebuild track
-   (B1–B10, `plan/revamp/README.md` §7) — T picks it up in a
-   guided session. Card and keyword signals additionally wait on
-   THE CARD HOLD (D37) and the card-rules inventory (B4).
+5. **Which content surface? (the D88 filter)** A candidate whose
+   work is making **cards, keywords or art** is **not filed**: note
+   the signal in one line in the pass log (and the commit body) for
+   T's guided sessions (THE CARD HOLD, D37; B8). A candidate for an
+   **enemy, relic, map, NPC or event** may be filed (D89: bold
+   proposes from every source), marked `[content]`, with the line
+   "built only once T plots it (`/plot`) or `/oversight` promotes it
+   with a brief T approves". It is never built from the candidate
+   alone.
 
 After assessment, you should have **2–4 candidates**, not 3
 mechanically.
@@ -260,7 +250,7 @@ Top candidates:
 - [score X.Y] <one-line>
 
 Source signals: <brief — audit / critique / triage / spec / design / data / commits>.
-Held for the owner-led rebuild track (D58): <one-liners, or "none">.
+Held for T's sessions (cards, keywords, art; D37): <one-liners, or "none">.
 Posture: bold. Promotion gated by /oversight.
 EOF
 )"
@@ -306,13 +296,14 @@ oversight will review and promote.
 5. **Honest scope.** A 3-phase candidate is not a 1-phase
    candidate just because that fits more comfortably.
 6. **One commit per pass.**
-7. **No emojis. No `Co-Authored-By:`.**
+7. **No emojis. No attribution trailers** (AGENTS.md rule 2).
 8. **Strict posture is real.** If posture is `strict`, exit 0
    with no-op. Don't sneak candidates in.
-9. **No content candidates (D37, D58).** Never file a candidate
-   that creates cards, keywords, enemies, relics, maps, NPCs,
-   events or art. Note it for the owner-led rebuild track
-   instead (§6 Step 3, question 5).
+9. **Content candidates per surface (D88, D89).** Never file a
+   candidate that creates cards, keywords or art; an enemy, relic,
+   map, NPC or event candidate is filed `[content]` and waits for T
+   (§6 Step 3, question 5). `/expand` is plan-only: it pushes
+   `main` and never opens a PR.
 
 ## 8. Failure modes
 

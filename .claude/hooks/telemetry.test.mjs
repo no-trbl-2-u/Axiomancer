@@ -268,3 +268,65 @@ test('reads outside the root skills/ directory are not logged', () => {
     fire('tool', { ...base(), tool_name: 'Read', tool_input: { file_path } })
   assert.equal(verbRows().length, before)
 })
+
+test('a shell read of a root skills/<verb>.md counts as a verb-read (CI ticks)', () => {
+  clearTick()
+  fire('prompt', { ...base(), prompt: '/march' })
+  const before = verbRows().length
+  const bash = (command) => fire('tool', { ...base(), tool_name: 'Bash', tool_input: { command } })
+  bash('cat skills/march.md')
+  bash("sed -n '1,120p' /home/runner/work/Axiomancer/Axiomancer/skills/critique.md")
+  bash('head -50 skills/march.md') // same verb again: still one row
+  const added = verbRows().slice(before)
+  assert.equal(added.length, 2, added.join('\n'))
+  assert.match(added[0], /\| verb-read \| march \|/)
+  assert.match(added[1], /\| verb-read \| critique \|/)
+})
+
+test('other shell commands are not verb-reads', () => {
+  clearTick()
+  fire('prompt', { ...base(), prompt: '/march' })
+  const before = verbRows().length
+  for (const command of [
+    'git add skills/march.md',
+    'npm test',
+    'cat plan/archive/x/skills/forge.md',
+    'cat .claude/skills/kb-query/SKILL.md',
+    'grep -n Retro skills/march.md',
+  ])
+    fire('tool', { ...base(), tool_name: 'Bash', tool_input: { command } })
+  assert.equal(verbRows().length, before)
+})
+
+test('tick-close writes the missing tick-end row once, from the execution file', () => {
+  const sid = 'ci-run-1'
+  fire('prompt', { session_id: sid, transcript_path: transcript, prompt: '/march' })
+  // The Stop hook never fired: simulate by not calling tick-end.
+  const exec = path.join(root, 'exec.json')
+  fs.writeFileSync(
+    exec,
+    JSON.stringify([
+      { type: 'system', subtype: 'init', session_id: sid, model: 'claude-opus-5-5' },
+      { type: 'result', subtype: 'success', is_error: false, duration_ms: 439922, session_id: sid },
+    ]),
+  )
+  const closeRows = () => rows().filter((r) => r.includes('| tick-end |') && r.includes('runner'))
+  const before = closeRows().length
+  execFileSync('node', [HOOK, 'tick-close', exec], { env: { ...process.env, CLAUDE_PROJECT_DIR: root } })
+  execFileSync('node', [HOOK, 'tick-close', exec], { env: { ...process.env, CLAUDE_PROJECT_DIR: root } })
+  const added = closeRows().slice(before)
+  assert.equal(added.length, 1, 'written once, never twice')
+  assert.match(added[0], /\| tick-end \| - \| claude-opus-5-5 \| 7m20s \| ok \(runner: Stop hook row missing\) \|/)
+})
+
+test('tick-close writes nothing when the Stop hook already closed the tick', () => {
+  const sid = 'ci-run-2'
+  fire('prompt', { session_id: sid, transcript_path: transcript, prompt: '/march' })
+  fire('tick-end', { session_id: sid, transcript_path: transcript })
+  const exec = path.join(root, 'exec2.json')
+  fs.writeFileSync(exec, JSON.stringify([{ type: 'result', is_error: false, duration_ms: 1000, session_id: sid }]))
+  const count = () => rows().filter((r) => r.includes('| tick-end |')).length
+  const before = count()
+  execFileSync('node', [HOOK, 'tick-close', exec], { env: { ...process.env, CLAUDE_PROJECT_DIR: root } })
+  assert.equal(count(), before)
+})

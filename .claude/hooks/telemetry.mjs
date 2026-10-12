@@ -4,10 +4,16 @@
 //
 // Wired via .claude/settings.json:
 //
-//   PreToolUse  (Skill|SlashCommand|Task|Agent|Read) → telemetry.mjs tool
+//   PreToolUse  (Skill|SlashCommand|Task|Agent|Read|Bash) → telemetry.mjs tool
 //   PostToolUse (Skill|SlashCommand|Task|Agent) → telemetry.mjs tool-end
 //   UserPromptSubmit                            → telemetry.mjs prompt
 //   Stop                                        → telemetry.mjs tick-end
+//
+// And from the CI runner (.github/workflows/_claude-skill.yml), after
+// Claude exits:
+//
+//   telemetry.mjs tick-close <execution-file>   → the tick-end row the
+//                                                 Stop hook failed to write
 //
 // Observability only: this hook NEVER blocks (always exits 0) and never
 // throws — a telemetry bug must not cost a tick.
@@ -86,6 +92,23 @@
 //    one `verb-read` row per verb per tick. Only the repo's own loop-verb
 //    directory counts: `.claude/skills/`, `plan/archive/` and
 //    `node_modules/` paths are ignored.
+//
+// 5. VERBS READ THROUGH THE SHELL (R11, 2026-10-12). CI march ticks logged
+//    no `verb-read` row at all from 2026-09-28 to 2026-10-12, though they
+//    shipped critique passes and fixes: an unattended tick reads a long
+//    skill with `cat`/`sed -n`/`head` as often as with Read. A Bash call
+//    whose command reads a root `skills/<verb>.md` with one of those
+//    commands now counts as the same `verb-read`.
+//
+// 6. MISSING TICK-END ROWS (R11, 2026-10-12). Three CI march ticks on
+//    2026-10-11 (runs 38147566383, 38164633216, 38172680269) ended with
+//    no `tick-end` row: the runner's stranded-rows step found the shard
+//    unchanged ("No stranded telemetry rows"), so the Stop hook never
+//    wrote one. Ticks before and after did get theirs. The leading cause
+//    is the hook racing the `-p` process exit. `tick-close` is the floor:
+//    the runner calls it with the action's execution file, and it writes
+//    the tick-end row (duration and outcome from that file) only when the
+//    session's shard has a slash-prompt with no tick-end after it.
 //
 // Zero dependencies. Newest rows last.
 
@@ -240,6 +263,12 @@ function appendRow({ sessionId, event, name, model, dur, detail }) {
  * where the parent directory is the repo's top-level `skills/`, whatever
  * checkout or worktree it sits in.
  */
+function verbOfBash(command) {
+  const cmd = String(command ?? '').replace(/\\/g, '/')
+  const m = cmd.match(/\b(?:cat|sed|head|tail|less|more|awk|bat)\b[^|;&]*?((?:\S*\/)?skills\/[a-z0-9][a-z0-9-]*\.md)\b/i)
+  return m ? verbOfRead(m[1]) : null
+}
+
 function verbOfRead(filePath) {
   const p = String(filePath ?? '').replace(/\\/g, '/')
   const m = p.match(/(?:^|\/)skills\/([a-z0-9][a-z0-9-]*)\.md$/i)
@@ -270,8 +299,8 @@ function classify(input) {
       detail: ti.command,
       pinnedModel: null,
     }
-  if (tool === 'Read') {
-    const verb = verbOfRead(ti.file_path)
+  if (tool === 'Read' || tool === 'Bash') {
+    const verb = tool === 'Read' ? verbOfRead(ti.file_path) : verbOfBash(ti.command)
     if (!verb) return null
     return { event: 'verb-read', name: verb, detail: '', pinnedModel: null, noEnd: true }
   }
@@ -418,6 +447,44 @@ function tickEnd(input) {
   writeState({})
 }
 
+/**
+ * Runner floor for a lost tick-end row (see header note 6). Reads the
+ * claude-code-action execution file (a JSON array of stream events), finds
+ * the session id, the duration and whether the run errored, and appends a
+ * tick-end row to that session's newest shard only if its last
+ * slash-prompt has no tick-end after it. Never writes a second row.
+ */
+function tickClose(executionFile) {
+  let events
+  try {
+    const data = JSON.parse(fs.readFileSync(String(executionFile), 'utf-8'))
+    events = Array.isArray(data) ? data : [data]
+  } catch {
+    return
+  }
+  const sessionId = events.find((e) => e && typeof e.session_id === 'string')?.session_id
+  if (!sessionId) return
+  const id = String(sessionId).replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64)
+  if (!fs.existsSync(LOG_DIR)) return
+  const files = fs.readdirSync(LOG_DIR).filter((f) => f.endsWith(`_${id}.md`)).sort()
+  if (!files.length) return
+  const lines = files.flatMap((f) => fs.readFileSync(path.join(LOG_DIR, f), 'utf-8').split('\n'))
+  const events_ = lines.filter((l) => /^\| 20\d\d-/.test(l)).map((l) => l.split('|')[2].trim())
+  const lastPrompt = events_.lastIndexOf('slash-prompt')
+  if (lastPrompt === -1 || events_.slice(lastPrompt).includes('tick-end')) return
+  const result = [...events].reverse().find((e) => e && e.type === 'result') ?? {}
+  const model =
+    events.find((e) => e && e.type === 'system' && typeof e.model === 'string')?.model ?? '-'
+  appendRow({
+    sessionId,
+    event: 'tick-end',
+    name: '-',
+    model,
+    dur: humanDur(Number(result.duration_ms)),
+    detail: result.is_error ? `error: ${String(result.subtype ?? 'run failed').slice(0, 60)} (runner)` : 'ok (runner: Stop hook row missing)',
+  })
+}
+
 // --- entry ----------------------------------------------------------
 
 function readStdinJson() {
@@ -431,11 +498,13 @@ function readStdinJson() {
 
 try {
   const mode = process.argv[2]
-  const input = readStdinJson()
+  // tick-close is run by the CI runner, not the harness: no hook payload.
+  const input = mode === 'tick-close' ? {} : readStdinJson()
   if (mode === 'tool') toolStart(input)
   else if (mode === 'tool-end') toolEnd(input)
   else if (mode === 'prompt') promptMode(input)
   else if (mode === 'tick-end') tickEnd(input)
+  else if (mode === 'tick-close') tickClose(process.argv[3])
 } catch {
   /* observability must never block work */
 }
