@@ -119,29 +119,246 @@ stay as they are.
 - `plan/phases/`: archive shipped briefs 102, 103, 104, M4, M5, T6.
 - `plan/CONTENT_LEDGER.md`: drop steward rows (above).
 
-## R11 — Loop content phases (attended, last revamp phase)
+## R11 — Reopen the loop (attended, closes the revamp)
 
-Added in the R0 session (T, 2026-09-28). Revamp mode has no other exit, so
-without this phase the loop would stay content-free forever. R11 is attended
-because it edits `.claude/**` and sets doctrine.
+Rewritten 2026-10-11 from a comparison with the `hunt` repo's fork of the
+nexus kit (the owner's other loop). Added in the R0 session (T, 2026-09-28)
+as the revamp's only exit; the original item list (content rules per
+surface, the R0 archive review, zero-invocation verbs, the banner strip) is
+kept below as items 1, 2 and 6. R11 is attended because it edits
+`.claude/**` and sets doctrine. Requires RC.
 
-- Decide how content creation returns to the loop **as phases in the build
-  plan**, not as a standing steward rotation (the archived `adjust-*` /
-  `/forge` model created content outside any plan). For each surface
-  (cards, keywords, enemies, relics, maps, NPCs, events, art) decide:
-  loop-shippable phases, owner-led sessions, or still held.
-- Review the R0 archive (`git show archive-pre-revamp:plan/archive/2026-09-28-revamp-r0/...`) for anything
-  worth reviving in a new shape (a content agent, the wiring checklists
-  already folded into docs).
-- Check telemetry (`npm run telemetry`, including `verb-read` rows) and
-  the GitHub Actions run history for verbs with no invocations since R0;
-  fix how they are used or wired rather than cutting them.
-- Remove the revamp-mode banner from every verb and the doctrine files
-  (AGENTS.md, bearings, the build plan), and record the new standing
-  content rules in bearings.
+### Ruling (T, 2026-10-11)
 
-Requires R10 (the reset track done). Card work still follows THE CARD HOLD
-and whatever card plan T picked.
+- **The revamp ended when RC cut `v0.1.0-checkpoint`.** Revamp mode (D58)
+  was written to end "when R11 ships"; this phase records that it is over
+  and removes it. Nine days of `/march` falling through to critique and
+  iterate ("expand: pass 30 — no candidates") because every remaining `[ ]`
+  row is attended is the cost of not running R11 sooner.
+- **The loop opens pull requests.** T wants to see what gets built before
+  it lands. Every tick that changes code lands through a PR onto `main`
+  that T merges. The PRs are kept green and mergeable by a Haiku fixer, not
+  by T.
+- **The owner gets an intake.** `/plot` and `/messy`, modelled on hunt's,
+  put T's ideas into the plan as briefs with acceptance IDs. The loop stops
+  authoring its own briefs.
+- **The loop learns after every run.** A retro step and a counted lessons
+  ladder, modelled on hunt's footguns, replace "promote on ~weekly cadence,
+  judged monthly".
+- Cards and keywords stay owner-only (THE CARD HOLD, D37). Other surfaces
+  are decided in the session (item 2).
+
+### Before the session
+
+1. Pause the `march` and `night` crons (disable the two workflows on
+   GitHub). The loop edits the same doctrine files this phase rewrites.
+   Re-enable at exit (item 9).
+2. Branch from `main`. R11 itself lands as a PR: it is the first PR the
+   loop's new doctrine describes, and T reviews it the way every later one
+   will be reviewed.
+
+### Decisions for T (asked in the session, defaults in bold)
+
+Recorded as the next free D-numbers (D83 onward) in
+`plan/2026-09-25-refactor-strategy.decisions.md`, each in three lines.
+
+| # | Question | Default |
+|---|---|---|
+| a | Which ticks open a PR? | **Every tick whose diff touches anything outside `plan/`, `telemetry/`, `docs/reports/`.** Plan-only commits (queue rows, pass counters, build-plan ticks of a merged PR) and telemetry still push straight to `main`, or every PR conflicts on `AUDIT.md`/`CRITIQUE.md`. |
+| b | How many loop PRs may be open at once? | **3.** At the cap `/march` does triage and critique's audit pass (no fixes), reports "waiting on T: PRs #a, #b, #c", and ends. |
+| c | Who merges? | **T, by hand.** No auto-merge (the repo has it disabled; lessons.md deploy #4). A PR open 7 days is flagged in the tick's output, never closed by the loop. |
+| d | What keeps a PR green? | **A Haiku `pr-autofix` run per red check, two attempts per PR**, then the label `loop:pr-stuck` and a line in the next tick's report. Conflicts with `main` are resolved by `pr-resolve` on every push to `main`. |
+| e | Content per surface (cards, keywords, enemies, relics, maps, NPCs, events, art) | **Cards and keywords: owner-only (D37). Everything else: loop-shippable only as a plotted phase with a brief T wrote or approved**; nothing from `/expand`. Art stays owner-only (B8). |
+| f | `/expand`'s posture now that T has `/plot` | **strict**: `/expand` files candidates only from measured signals (AUDIT, CRITIQUE, perf, telemetry) and never from design surfaces. `/oversight` still promotes; `/plot` is the owner's promoter. |
+| g | What may `/iterate` fix? | Unchanged: AUDIT/CRITIQUE rows by score, but **a defect found while shipping is fixed in the same tick in its own commit** (hunt rule 9a), never parked. |
+
+### Work items
+
+**1. End revamp mode.**
+- Strip the REVAMP MODE banner from every file that carries it
+  (`grep -rl 'REVAMP MODE' --include=*.md .` → 20 files: 8 under
+  `.claude/commands/`, 12 under `skills/`). THE CARD HOLD line survives as
+  one sentence in `skills/march.md` §3 and `plan/bearings.md`, not a banner.
+- `skills/march.md` §3 "Pickable phase": the first `[ ]` row, not attended,
+  `Requires` ticked, **and not covered by an open loop PR** (item 3). Drop
+  rule 1 (THE REVAMP block). `ship-a-phase.md:125-130` says the same
+  (today it omits the attended exclusion; fix it).
+- `plan/bearings.md:248-262` THE REVAMP entry → one historical paragraph:
+  what it was, D46–D82, the tag, "ended at RC; R11 removed revamp mode".
+  `AGENTS.md`, `plan/revamp/README.md` §1 and §7, `plan/README.md`,
+  `.github/workflows/README.md`: same sweep.
+- Add `revamp mode` to `scripts/check-lexicon.mjs`'s retired-doctrine
+  claims so a banner cannot come back by copy-paste; the historical
+  paragraph in bearings and this file are the exemptions.
+
+**2. Content rules per surface** (decision e). Record them in bearings
+"Decisions standing for the autonomous loop" and in `plan/revamp/README.md`
+§Rebuild track. The B-rows stay `[blocked: owner-led]`.
+
+**3. The loop opens PRs** (decisions a–d).
+- `skills/ship-a-phase.md` Steps 10–12: branch `loop/<verb>-<slug>` cut
+  from a fresh `origin/main`; commit; `git push -u origin <branch>`;
+  `gh pr create` with a body template (what shipped, what T can now do,
+  Decisions, `Closes #<mirror>` trailer, the brief's acceptance IDs
+  ticked); label `loop:pr`; the build-plan row gets `- pr: #N` (the
+  `- issue:` field's shape) and stays `[ ]` until merge. The PR's last
+  commit flips the row to `[x] (#N)` so the merge ticks it. Then
+  `gh pr checks --watch` replaces `deploy:check` for the branch (the
+  `verify-*` workflows already run on `pull_request`). Step 12.5's mirror
+  comment posts the PR URL; `close-trailers` closes the mirror on the
+  merge push as it does today.
+- Same change in `skills/iterate.md` (`:325, :337, :431`),
+  `skills/critique.md` (`:250, :326`) and `skills/fix-ci.md` for fixes
+  that touch code; one PR per tick, never one per fix.
+- A row or AUDIT/CRITIQUE item with an open `loop:pr` PR counts as
+  claimed: `/march` and `/iterate` skip it. Open PRs are the claim table;
+  no `claims` branch (hunt's) is needed while one loop runs at a time.
+- `AGENTS.md` standing rule 1 and `plan/bearings.md:331-336` ("Direct
+  pushes to main are sanctioned") are amended: direct pushes stay
+  sanctioned for plan-only, telemetry and `fix-ci`-on-`main` commits;
+  code lands by PR. Attended sessions with T may still push `main` at T's
+  word.
+- Telemetry shards are per session, so a CI tick's PR carries only its own
+  shard and merges clean; the stranded-rows step in `_claude-skill.yml`
+  pushes to `GITHUB_REF_NAME`, which is `main` for a cron run, so it stays.
+- `.github/workflows/pr-autofix.yml`: `workflow_run` on
+  `verify-mechanics`, `verify-mobile`, `verify-prose`, `verify-drift`
+  `completed` with `conclusion == 'failure'` and `head_branch != 'main'`,
+  job-level concurrency per PR (the ci-autofix lesson above: never the
+  shared `nexus-loop` group); only for a PR labelled `loop:pr` whose head
+  is in this repo (never a fork). Calls `_claude-skill.yml` with
+  `model: claude-haiku-5-5`, prompt `/fix-ci <run-id> --branch <head>`,
+  `timeout_minutes: 30`. `skills/fix-ci.md` gains `--branch`: check out
+  the PR branch, reproduce, fix the root cause, push to the branch (never
+  force), one root cause per run. After two red runs on one PR it adds
+  `loop:pr-stuck` and stops; `/march` reports stuck PRs each tick.
+- `.github/workflows/pr-resolve.yml`: on `push` to `main`, for each open
+  `loop:pr` PR whose `mergeable` is `CONFLICTING`, merge `main` into the
+  branch on the runner; a conflict only in `telemetry/` or a plan queue
+  is settled by the union of rows (ordered by timestamp for telemetry);
+  anything else goes to a Haiku `_claude-skill.yml` run with Read and
+  Edit only (hunt's `scripts/pr/resolve.mjs` is the model). Push, never
+  force. Mirror hunt's `union-edit-doubles` lesson: after a union merge of
+  an append-only file, diff it against `origin/main` and drop doubled
+  rows.
+- `.github/workflows/claude.yml` (the `@claude` reviewer) stays, on
+  Opus; it is T's channel, not the loop's.
+- A new test, `scripts/loop-pr.test.mjs`, pins the pieces a PR flow can
+  silently lose: the label filter in `pr-autofix.yml`, the `head_branch
+  != main` guard, the job-level concurrency group, and the body template's
+  `Closes #` trailer shape that `close-trailers` reads.
+- **Cost.** The repo is public (`gh repo view --json isPrivate` →
+  `false`), so GitHub-hosted standard runners cost no minutes. The PR flow
+  doubles `verify-*` runs (once on the PR, once on the merge push); that
+  is free. The paid part is Claude usage: a Haiku fixer run only on a red
+  check (at most two per PR), and a Haiku resolve only on a conflict. The
+  march cadence itself does not change. Put a line in
+  `.github/workflows/README.md` saying so, and have `/oversight` print the
+  month's run counts (`gh run list --workflow pr-autofix.yml`) so the
+  assumption gets checked.
+
+**4. Owner intake: `/plot` and `/messy`.**
+- `skills/plot.md` + `.claude/commands/plot.md`, after hunt's
+  `.claude/commands/plot.md`: `/plot asap|anytime|peek "<task>"`. Orient
+  (bearings, reflexes, the build plan, AUDIT/CRITIQUE heads); research
+  (what exists in code and plan, which D-numbers it touches, which
+  surfaces per item 2); shape (a brief in `plan/phases/` in the §4 format
+  of `plan-a-phase.md`, **with acceptance IDs `A1…` and a `Measure:`
+  line**); slot (an `asap` row goes to the top of the build plan's "Next
+  up", `anytime` at its end, no word → the command picks and says why);
+  commit `phases: plot <N> — <title>` and push `main` (plan-only). Never
+  builds. Never dispatched by `/march`.
+- `skills/messy.md` + `.claude/commands/messy.md`: a raw dump to a
+  gitignored `plan/messy/YYYY-MM-DD-<slug>.md`; cluster; for each theme
+  check what exists; refine into a part plan under `plan/revamp/` or a
+  new `plan/<topic>.md` and `PHASE_CANDIDATES` rows marked
+  `[owner]`; fan out one agent per theme for 3+ themes. Never commits the
+  dump. Never builds.
+- `skills/plan-a-phase.md` §4: acceptance IDs and `Measure:` become part
+  of the brief format; `ship-a-phase.md` ticks the IDs it closes in the PR
+  body.
+- **The loop stops authoring briefs.** `ship-a-phase.md:132-136` and
+  `march.md` Step 3: a `[ ]` row with no brief is not pickable; the tick
+  files a `PHASE_CANDIDATES` row "needs a brief: `/plot <N>`" and moves
+  on. `/plan-a-phase` stays as the attended way to write or refresh one.
+- `/jot` stays as the CRITIQUE quickfire; `/plot` is to the build plan what
+  `/jot` is to CRITIQUE. Say so in bearings.
+- `/expand` posture per decision f.
+
+**5. The loop learns: retro and a counted lessons ladder.**
+- A **Retro** step closes `ship-a-phase`, `iterate`, `critique`, `fix-ci`
+  and `plot` (even a tick that shipped nothing): bump or add a lesson in
+  `plan/lessons.md`; a lesson **seen twice** is automated in the same tick
+  (a guard check, a test, a lint) or, if that is a phase of its own, a
+  `PHASE_CANDIDATES` row naming the automation; tighten the skill's own
+  file if one of its steps misled you (it may only get safer or clearer);
+  "retro: clean" is a valid outcome. Commit `lessons: retro <verb> <N>`.
+- `plan/lessons.md` format: one bullet per lesson,
+  `- **slug** · trap → rule · seen N× · last YYYY-MM-DD · open | guarded by <hook/test>`,
+  ≤500 bytes, under its `@domain:` anchor. Migrate the six existing
+  entries. The retro may promote to `plan/reflexes.md` directly when a
+  lesson has been seen three times across verbs; `/oversight` reviews
+  promotions after the fact (THE OPEN GATE: loop decides, owner reviews).
+  `/consolidate` keeps its hygiene pass but no longer gates promotion.
+- `scripts/check-lessons.mjs` in the root `npm test` and as a
+  `guard.mjs` post-write check: format, unique slugs, the byte cap,
+  `reflexes.md` ≤50 lines, ≤40 open lessons (a lesson becomes `guarded by`
+  or is merged; the budget forces graduation).
+- Skills cite lessons inline where they bite (`… (lesson
+  \`shared-tree-sweep\`)`), the way hunt's `next.md` names footguns.
+  Start with lessons.md deploy #1–#5 at the steps they came from.
+
+**6. R0 archive and zero-invocation verbs** (unchanged from the R0 text).
+Review `git show archive-pre-revamp:plan/archive/2026-09-28-revamp-r0/...`
+for anything worth reviving in a new shape under item 2's rules (a content
+agent is written at the first owner-led content session, not here). Check
+`npm run telemetry` (with `verb-read` rows) and the Actions run history
+for verbs with no invocations since R0; fix how they are wired rather
+than cutting them (R0: keep every core verb). Also close the telemetry
+`tick-end` gap still visible on 2026-10-11 (`/march` prompts at 14:33,
+18:39 and 20:34 with no `tick-end`) or file it to AUDIT with the cause.
+
+**7. Doctrine sweep.** `AGENTS.md` (rules 1, 6, 7 and the level-0 "by
+hand" text), `plan/bearings.md` (THE REVAMP entry, the push rule, the
+verbs table, "Where things are"), `docs/truth-sources.md` (a PR body is a
+truth source below the commit), `.github/workflows/README.md`,
+`plan/README.md`. Every line that says "pushes to main" for code now says
+"opens a PR".
+
+**8. Tests and gates.** `npm run verify` per touched workspace, root
+`npm test` (picks up `check-lessons` and `loop-pr.test.mjs`),
+`node scripts/check-lexicon.mjs`, `node .claude/hooks/guard.mjs self-test`,
+`node .claude/hooks/telemetry.test.mjs`. `actionlint` (or
+`gh workflow view`) on the two new workflows.
+
+**9. Exit.**
+- The R11 PR is merged by T.
+- Re-enable `march` and `night`. Watch the first cron tick end to end: it
+  opens a PR (or reports the cap or "no pickable row"), the PR's
+  `verify-*` runs are green or `pr-autofix` fires once, T merges, the
+  build-plan row flips, the mirror closes.
+- Tick R11 `[x]` in the build plan (the merge commit), update
+  `plan/revamp/README.md` §7 row 13, add the archive line.
+- Next: R12, and the first `/plot` by T.
+
+### Out of scope
+
+Content creation itself (the B-rows, owner-led); R12; a `claims` branch for
+several concurrent loops (one loop runs at a time; revisit if a second
+cron or a contributor appears); a Haiku PR-description writer (hunt's
+`pr-flow`); changing the march cadence.
+
+### DoD
+
+No file carries the REVAMP MODE banner; `check-lexicon` fails if one
+returns. `/march` picks the first unattended `[ ]` row with a brief and no
+open PR. Code lands only by `loop:pr` PRs; `pr-autofix` and `pr-resolve`
+exist, are tested, and have run at least once each (by `workflow_dispatch`
+on a throwaway branch if no real red or conflict occurred). `/plot`,
+`/messy` exist; `ship-a-phase` refuses a missing brief. Every closing verb
+has a Retro step; `check-lessons` is in the root test. D83+ recorded.
+bearings, AGENTS.md and the workflows README describe the loop as it now
+runs.
 
 ## R12 — New combat-playtest (attended)
 
