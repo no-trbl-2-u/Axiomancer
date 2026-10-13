@@ -24,6 +24,7 @@
 - T's phone screenshots (2026-10-13) that drove it: the hand fan squeezed
   between the portrait and END medallions, VITAE at 2/170 shown only as small
   rail text, the top-right corner crowded with intent, status chips and LOG.
+- D91 (one card face, everywhere; T 2026-10-13).
 - Owner UI doctrine (payload-only panels, terse glosses, illegal actions
   refused loudly); D37 (card hold), D65 (VITAE is canon copy), D80 (Blood
   Price trial set), D86 (T merges by hand).
@@ -71,37 +72,38 @@ one line.
   small gap), still clamped so the last rune clears the dice tray by
   `SIG_TRAY_CLEARANCE`. A pure function test proves 5 runes fit above the
   tray at 375x812, and that the clamp still wins on a shorter screen.
-- **A8 FREE corner pill.** Every non-large card face (hand, staged card, drag
-  ghost, reward offer) with a FREE line shows a pill on the card's top-left
+- **A8 FREE corner pill.** Every card face, small and large (hand, staged card,
+  drag ghost, reward offer, card detail, reward preview; D91) with a FREE line shows a pill on the card's top-left
   corner (straddling the frame, `combat-card-face-free-corner`): the FREE
   glyph (`glyphShapeFor(freeGlyphKey)`, text glyph fallback) filled in the
   card's colour (the stance colour; the armed accent when set) and the FREE
   value (`compactFree`) in white. The name band gains top padding only when
   the pill is present, so no name is covered. A card with no FREE line shows
   no pill and no padding.
-- **A9 Rarity pips off small faces.** The three-dot rarity track no longer
-  renders on non-large faces (a 5pt spacer keeps `NAME_BAND_LEFT_CHROME`
-  true). Large faces (card detail, reward preview) keep the label and pips;
-  the small face still names the rarity in its accessibility label.
-- **A9b Names on one line.** A card name never wraps on a non-large face
+- **A9 Rarity pips off every face.** The three-dot rarity track no longer
+  renders on any face (a 5pt spacer keeps `NAME_BAND_LEFT_CHROME` true). The
+  large face keeps the rarity word; every face names the rarity in its
+  accessibility label (D91).
+- **A9b Names on one line.** A card name never wraps on any face
   (`numberOfLines={1}`); a covered card's name runs on under its right-hand
   neighbour instead of wrapping inside the visible sliver. The `namePeek` /
   `nameColumnPeek` cap is removed from the small face (T 2026-10-13, reversing
   the earlier "wrap inside the sliver" fix).
-- **A10 Ledger is die : PAID.** On non-large faces the ledger drops the FREE
+- **A10 Ledger is die : PAID.** On every face the ledger drops the FREE
   cell and its rule. It is one row: the stance die cube, then
   `[family glyph] KEYWORD value` as a single line (`numberOfLines={1}`,
   12pt). A card whose PAID headline has no keyword prints the value alone
-  ("Deal 38"). The small-face ledger never stacks: `paidLedgerFit` no longer
+  ("Deal 38"). The ledger never stacks: `paidLedgerFit` no longer
   reserves room for a FREE cell that is not drawn, so every hand card's PAID
   line sits at the same height (the old fit stacked P-01a's "Deal 38" and
   dropped its line lower than its neighbours).
-- **A10b Seamless art.** On non-large faces the art plate has no grey mat
+- **A10b Seamless art.** On every face the art plate has no grey mat
   (`plateArtWrap` padding and `panelBg`) and no hairline frame or `deepBg`
   (`plateArtFrame`): the painting runs edge to edge between the name band and
   the ledger, and the hairline rules under the name band and over the
   ledger (`plateBand` / `plateLedger` borders) are gone too, so name, art and
-  PAID line read as one surface. Large faces keep their framed print.
+  PAID line read as one surface. The large face prints the full rules text
+  under its PAID line, as today.
 - **A11 Tap hint removed.** "tap a card to read it" (`combat-tap-hint`) no
   longer renders; tapping a card still opens its detail.
 - **A12 Native parity.** The same layout renders on Android (EAS preview or a
@@ -151,12 +153,12 @@ None.
    FREE-only, PAID-in-corner and a split pill: FREE in a card-coloured corner
    pill with a white value, the bottom only die : PAID on one line, and the
    art seamless (no mat, no frame), and names on one line under the next card.
-3. **The small face is one face everywhere** it renders (hand, staged, ghost,
-   reward offer), so the player learns one card.
-4. **The rarity track leaves small faces** (T: "I don't care about the 3
-   dots"). The rarity-D4 suite's small-face pip assertions are rewritten to
-   assert absence plus the accessibility label; its large-face assertions
-   stand.
+3. **One face everywhere (D91)**: small and large faces share the design, so
+   the player learns one card; the large face adds only the rarity word and
+   the full rules text.
+4. **The rarity track leaves every face** (T: "I don't care about the 3
+   dots"; D91). The rarity-D4 suite is rewritten to assert no pips on any
+   face, the word on the large face, and the accessibility label everywhere.
 5. **A multi-effect FREE line shows one glyph** (the presenter's existing
    `programFreeCell` pick, e.g. SACRIFICE for "SACRIFICE 2, DEAL 7"). The card
    detail still prints the full line. Changing which effect the pill shows is

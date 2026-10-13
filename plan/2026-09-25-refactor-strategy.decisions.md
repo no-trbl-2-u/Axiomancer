@@ -979,6 +979,16 @@ satisfied for exactly these.)
 
 - `/iterate` still picks AUDIT/CRITIQUE rows by score. A defect found while shipping is fixed in the same tick in its own commit, never parked.
 
+**D91 — One card face, everywhere.** (T, attended, 2026-10-13, from the BT2 prototypes.)
+
+- Every card face, small and large (hand, staged, drag ghost, reward offer, card detail, reward preview), wears the same design; reference `axiomancer-mobile/screenshots/bt2-prototype/1-board.jpg`.
+- Top-left corner: a pill on the card's corner with the FREE glyph in the card's colour and the FREE value in white; no pill when the card has no FREE line.
+- Name: one line, never wrapped; in the fan it runs on under the next card.
+- Art: seamless, edge to edge; no mat, no frame, no rules above or below it.
+- Bottom: one line, the die cube then the PAID effect (`[family glyph] KEYWORD value`); no FREE cell, never stacked, so every card's PAID line sits at the same height.
+- No rarity pip track on any face. A large face still prints the rarity word and the full rules text, since it has the room.
+- Implemented by Phase BT2 (`plan/phases/phase_BT2_combat_declutter.md`). A later card-face change needs T's say-so, like a card change (D37).
+
 ## Open follow-ups
 
 **D1 status at a glance (2026-09-28, after #408).** Card and keyword
