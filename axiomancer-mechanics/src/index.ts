@@ -334,6 +334,9 @@ export type {
     MapState, QuestObjective, QuestLog,
     SeedInput,
 } from './World';
+// Roster health (RH1): dangling references and orphans across the roster.
+export { auditRosterHealth } from './World/roster-health';
+export type { RosterHealthReport, RosterFinding } from './World/roster-health';
 
 // ─── NPCs (types + dialogue helpers) ──────────────────────────────────────────
 export type {

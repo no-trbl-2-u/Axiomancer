@@ -131,6 +131,24 @@ in CRITIQUE.md with `[x]` + commit hash.
 - Heavy image assets, bundle size regressions, slow engine or
   simulation paths, needless re-renders in the app.
 
+#### H. Roster health (`gap` for dangling, `content` for orphans)
+
+Run `npm run roster-health -w axiomancer-mechanics -- --json`
+(`World/roster-health.ts`, Phase RH1). Deduplicate against open
+AUDIT rows by (lens, id) before filing.
+
+- Each `dangling` finding (a reference to an id that does not
+  exist) is a `gap`: impact 6; ease 8 for a one-line delete, 5 for
+  a re-point that needs a test edit. The fix deletes or re-points
+  the dangling reference and nothing else (D90).
+- Each `orphans` finding (nothing in play reaches it) is a
+  `content` row, filed only (D88), with `next: needs a brief T
+  approves: stage it, grant it, or retire it`. Never picked.
+- **Hard rule:** this audit never edits a library, pool, roster or
+  dialogue tree. A `gap` fix touches only the dangling reference;
+  it never adds or removes a roster entity, and an orphan is never
+  staged, granted or retired by the loop.
+
 ### Scoring
 
 - Impact 0–10: how many players / screens / packages affected?
@@ -177,6 +195,12 @@ Audit block shape:
 - impact: <0-10>
 - ease: <0-10>
 - next: <action — invocation, sub-agent, or follow-up>
+
+### [2.0] roster: relic-bleeding-signet is granted by nothing (item-ungranted)
+- category: content
+- impact: 4
+- ease: -
+- next: needs a brief T approves: stage it, grant it, or retire it
 ```
 
 ### Step 2 — Pick the work
