@@ -169,6 +169,8 @@ git fetch origin main
 git switch -c "loop/<verb>-<slug>" origin/main     # before the first edit
 # edit, verify, commit (plain bodies, AGENTS.md rule 2)
 git push -u origin "loop/<verb>-<slug>"
+gh label create loop:pr --repo "$GH_REPO" --color 0E8A16 \
+  --description "Loop-opened PR; T merges (D84-D87)" 2>/dev/null || true
 gh pr create --repo "$GH_REPO" --base main --head "loop/<verb>-<slug>" \
   --label loop:pr --title "<subject naming the claim>" --body-file "$body"
 gh pr checks "loop/<verb>-<slug>" --repo "$GH_REPO" --watch --fail-fast
