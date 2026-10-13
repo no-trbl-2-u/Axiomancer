@@ -26,7 +26,7 @@
  */
 
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import type { StyleProp, TextStyle } from 'react-native';
 import { Image } from '@/lib/platform/image';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
@@ -81,6 +81,28 @@ import { getCardArt } from '@/assets/images/cards';
 // shares the convention so no builder on the board is allocated per render.
 export const FAN_CARD_ENTERING = FadeIn.duration(180);
 export const FAN_CARD_LAYOUT = LinearTransition.duration(160);
+
+/**
+ * The fan's slide-together transition, per platform.
+ *
+ * Why it exists (drag-perf hypothesis 4, measured on web): Reanimated's web
+ * layout transitions snapshot every updating node with a forced
+ * `getBoundingClientRect` in `getSnapshotBeforeUpdate` AND again in
+ * `componentDidUpdate` (`tryActivateLayoutTransition`), then generate and
+ * insert a CSS keyframe rule per node. A stage or unstage re-lays out every
+ * fanned card, so that commit forced a synchronous layout per card,
+ * interleaved with the drag ghost's style writes — the 200-370ms frame right
+ * after a release. Web drops the transition (cards close the gap in one
+ * frame); native keeps it until a device trace says otherwise (see
+ * docs/perf/combat-drag-baseline.md, "remaining").
+ *
+ * @param os - the platform (`Platform.OS`); a parameter so the choice is testable.
+ * @returns the layout builder for the fanned card, or undefined for none.
+ */
+export function fanCardLayoutFor(os: string): typeof FAN_CARD_LAYOUT | undefined {
+    return os === 'web' ? undefined : FAN_CARD_LAYOUT;
+}
+const FAN_CARD_LAYOUT_HERE = fanCardLayoutFor(Platform.OS);
 const STAGED_CARD_ENTERING = FadeInDown.duration(180);
 const PLAY_HINT_ENTERING = FadeIn.duration(150);
 const REJECT_LINE_ENTERING = FadeIn.duration(120);
@@ -2016,7 +2038,7 @@ export const FanCard = React.memo(function FanCard({
     return (
         <GestureDetector gesture={gesture}>
             <Animated.View
-                entering={FAN_CARD_ENTERING} layout={FAN_CARD_LAYOUT}
+                entering={FAN_CARD_ENTERING} layout={FAN_CARD_LAYOUT_HERE}
                 style={[{
                     marginLeft,
                     zIndex,

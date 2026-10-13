@@ -15,7 +15,7 @@ import { render } from '@testing-library/react-native';
 import { describe, expect, it, jest } from '@jest/globals';
 
 import { initializeCombatEncounter, rollEncounterDice } from '@mechanics';
-import { CombatBoard, FAN_CARD_LAYOUT, type DragController } from '@/components/combat/encounter/CombatBoard';
+import { CombatBoard, FAN_CARD_LAYOUT, fanCardLayoutFor, type DragController } from '@/components/combat/encounter/CombatBoard';
 import { buildCombatViewModel } from '@/state/presenters/combat-encounter.engine';
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
@@ -106,5 +106,14 @@ describe('CombatBoard — drag pickup re-render scope', () => {
         // Staging the first card re-lays out (and re-renders) every other one.
         view.rerender(board(dragWith(null), [card.uid]));
         expect(layoutsOf(view, uids.slice(1)).every((l) => l === FAN_CARD_LAYOUT)).toBe(true);
+    });
+
+    // Web's layout transition forces a synchronous layout per fanned card on
+    // every stage/unstage commit (measured: the 200-370ms post-release frame),
+    // so web runs the fan without it; native keeps the shared builder.
+    it('the fan slides together on native and snaps on web', () => {
+        expect(fanCardLayoutFor('android')).toBe(FAN_CARD_LAYOUT);
+        expect(fanCardLayoutFor('ios')).toBe(FAN_CARD_LAYOUT);
+        expect(fanCardLayoutFor('web')).toBeUndefined();
     });
 });
