@@ -13,7 +13,7 @@ index 732a4ecd..a69b1d06 100644
  }
  
 diff --git a/axiomancer-mobile/components/combat/encounter/CombatBoard.tsx b/axiomancer-mobile/components/combat/encounter/CombatBoard.tsx
-index 6852b4c5..3d1359df 100644
+index 6852b4c5..89c27f62 100644
 --- a/axiomancer-mobile/components/combat/encounter/CombatBoard.tsx
 +++ b/axiomancer-mobile/components/combat/encounter/CombatBoard.tsx
 @@ -66,6 +66,8 @@ import { juiceHaptics, useJuicePulse, useJuiceShake } from '@/lib/juice';
@@ -177,6 +177,15 @@ index 6852b4c5..3d1359df 100644
          </View>
      );
  });
+@@ -1774,7 +1833,7 @@ export const CombatCardFace = React.memo(function CombatCardFace({
+         freeInner,
+         hasFree: !!f.freeGlyph,
+     });
+-    const stacked = fit?.stacked ?? false;
++    const stacked = layoutProto() === 'B' && !large && badgeProto() === 'v5' ? false : (fit?.stacked ?? false);
+     const bandH = large ? 36 : 26;
+     const ledgerH = large ? 60 : 42;
+     const glyphSize = large ? 38 : narrow ? 18 : 24;
 @@ -1804,21 +1863,23 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                      the surviving sliver and the name wraps inside it — without
                      the cap the tail is laid out correctly and then painted over,

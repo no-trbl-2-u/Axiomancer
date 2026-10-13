@@ -92,7 +92,10 @@ one line.
   cell and its rule. It is one row: the stance die cube, then
   `[family glyph] KEYWORD value` as a single line (`numberOfLines={1}`,
   12pt). A card whose PAID headline has no keyword prints the value alone
-  ("Deal 38").
+  ("Deal 38"). The small-face ledger never stacks: `paidLedgerFit` no longer
+  reserves room for a FREE cell that is not drawn, so every hand card's PAID
+  line sits at the same height (the old fit stacked P-01a's "Deal 38" and
+  dropped its line lower than its neighbours).
 - **A10b Seamless art.** On non-large faces the art plate has no grey mat
   (`plateArtWrap` padding and `panelBg`) and no hairline frame or `deepBg`
   (`plateArtFrame`): the painting runs edge to edge between the name band and
