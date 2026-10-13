@@ -588,15 +588,6 @@
 
 ## Pending
 
-### [LOW] title / a11y — after EMBARK the faded psalm, EMBARK button and footer stay in the accessibility tree under the menu
-- pass: 79 (commit f2065459)
-- viewport: mobile + desktop
-- category: a11y
-- observation: EMBARK fades the title's call-to-action block to opacity 0 and sets its `pointerEvents` to none, but the block stays mounted (`components/TitleScreen.tsx`, the `ctaStyle` view). The menu's DOM text still reads "Have mercy upon me, O God… / PSALM 51 / EMBARK… / begin the pilgrimage / Your path begins on the coast…" after the four menu rows. A screen reader on the menu reaches an invisible psalm and a disabled "EMBARK" button.
-- evidence: `.critique-artifacts/{mobile,desktop}/02-onboarding.txt` (menu shown, title copy still listed after SETTINGS)
-- suggested fix: when `phase === 'menu'`, hide the block from assistive tech (`accessibilityElementsHidden` + `importantForAccessibility="no-hide-descendants"`, `aria-hidden` on web) or unmount it once the menu fade ends; pin with a TitleScreen test that the menu phase exposes no EMBARK.
-- source: critique-drive (unattended)
-
 ### [LOW] title / tooling — the drive captures the title 0.7s into its 2.65s intro, so every pass sees only the wordmark; EMBARK is tappable before it is visible
 - pass: 79 (commit f2065459)
 - viewport: mobile + desktop
@@ -896,6 +887,16 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] title / a11y — after EMBARK the faded psalm, EMBARK button and footer stay in the accessibility tree under the menu — RESOLVED 2026-10-13 (commit fafba096; the CTA block sets accessibilityElementsHidden, importantForAccessibility no-hide-descendants and aria-hidden once the phase leaves 'title'; pinned in TitleScreen.test.tsx)
+- issue: #511
+- pass: 79 (commit f2065459)
+- viewport: mobile + desktop
+- category: a11y
+- observation: EMBARK fades the title's call-to-action block to opacity 0 and sets its `pointerEvents` to none, but the block stays mounted (`components/TitleScreen.tsx`, the `ctaStyle` view). The menu's DOM text still reads "Have mercy upon me, O God… / PSALM 51 / EMBARK… / begin the pilgrimage / Your path begins on the coast…" after the four menu rows. A screen reader on the menu reaches an invisible psalm and a disabled "EMBARK" button.
+- evidence: `.critique-artifacts/{mobile,desktop}/02-onboarding.txt` (menu shown, title copy still listed after SETTINGS)
+- suggested fix: when `phase === 'menu'`, hide the block from assistive tech (`accessibilityElementsHidden` + `importantForAccessibility="no-hide-descendants"`, `aria-hidden` on web) or unmount it once the menu fade ends; pin with a TitleScreen test that the menu phase exposes no EMBARK.
+- source: critique-drive (unattended)
 
 ### [x] [LOW] hazard / mobile — a utility card's effect line truncates sideways in the hand, so Read the Wind's free and paid rows both read "CONVERT …" — RESOLVED 2026-10-11 (commit d406c027; in hand mode the line drops its ⬡ mark and `handEffectFontSize` sizes a card's two rows from the longer label, so Read the Wind prints at 8px and the other utility cards stay at 11; measured in the web build at 375, both convert lines print whole; pinned in HazardCard.test.tsx. Play mode still cuts the line on the 70px staged card)
 - issue: #494

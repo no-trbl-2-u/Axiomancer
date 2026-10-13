@@ -68,6 +68,19 @@ describe('TitleScreen', () => {
     expect(getByTestId('title-plate')).toBeTruthy();
   });
 
+  it('hides the faded psalm and EMBARK from screen readers once the menu is up', () => {
+    const { getByRole, getByTestId, queryByRole, queryByText } = mount();
+    expect(getByTestId('title-cta').props.accessibilityElementsHidden).toBe(false);
+    fireEvent.press(getByRole('button'));
+    // The default queries already skip it; reach it to read the props.
+    const cta = getByTestId('title-cta', { includeHiddenElements: true });
+    expect(cta.props.accessibilityElementsHidden).toBe(true);
+    expect(cta.props.importantForAccessibility).toBe('no-hide-descendants');
+    expect(cta.props['aria-hidden']).toBe(true);
+    expect(queryByRole('button', { name: TITLE_COPY.embarkLabel })).toBeNull();
+    expect(queryByText(TITLE_COPY.psalm)).toBeNull();
+  });
+
   it('opens on the menu when asked to (RETURN TO TITLE lands on ?menu=1)', () => {
     const { getByTestId } = mount({ startAtMenu: true });
     expect(getByTestId('stub-menu')).toBeTruthy();
