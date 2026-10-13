@@ -13,7 +13,7 @@ index 732a4ecd..a69b1d06 100644
  }
  
 diff --git a/axiomancer-mobile/components/combat/encounter/CombatBoard.tsx b/axiomancer-mobile/components/combat/encounter/CombatBoard.tsx
-index 6852b4c5..8ebc88ab 100644
+index 6852b4c5..3d1359df 100644
 --- a/axiomancer-mobile/components/combat/encounter/CombatBoard.tsx
 +++ b/axiomancer-mobile/components/combat/encounter/CombatBoard.tsx
 @@ -66,6 +66,8 @@ import { juiceHaptics, useJuicePulse, useJuiceShake } from '@/lib/juice';
@@ -182,7 +182,7 @@ index 6852b4c5..8ebc88ab 100644
                      the cap the tail is laid out correctly and then painted over,
                      which reads as a truncation ("CHILBLAI") but is occlusion. */}
 -                <View style={[styles.plateBand, { minHeight: bandH }]} pointerEvents="none" testID="combat-card-face-band">
-+                <View style={[styles.plateBand, { minHeight: bandH }, layoutProto() === 'B' && !large && badgeProto() === 'v5' && hasFree ? { paddingTop: 12 } : null]} pointerEvents="none" testID="combat-card-face-band">
++                <View style={[styles.plateBand, { minHeight: bandH }, layoutProto() === 'B' && !large && badgeProto() === 'v5' && hasFree ? { paddingTop: 12 } : null, layoutProto() === 'B' && !large && badgeProto() === 'v5' ? { borderBottomWidth: 0 } : null]} pointerEvents="none" testID="combat-card-face-band">
                      {/* The track carries the WORD for a screen reader, so a face
                          that is NOT wrapped in a labelled pressable (the staged
                          card, the drag ghost) still announces its rarity. Where
@@ -216,7 +216,12 @@ index 6852b4c5..8ebc88ab 100644
                          <Image
                              source={getCardArt(card.cardId)}
                              style={[StyleSheet.absoluteFill, artMirrored(card.cardId) && { transform: [{ scaleX: -1 }] }]}
-@@ -1864,9 +1925,9 @@ export const CombatCardFace = React.memo(function CombatCardFace({
+@@ -1860,13 +1921,13 @@ export const CombatCardFace = React.memo(function CombatCardFace({
+                 {/* ③ LEDGER — solid ink ground: FREE cell | rule | PAID cell.
+                     No prose; the overlay explains. */}
+                 <View
+-                    style={[styles.plateLedger, stacked ? styles.plateLedgerStacked : { minHeight: ledgerH }]}
++                    style={[styles.plateLedger, stacked ? styles.plateLedgerStacked : { minHeight: ledgerH }, layoutProto() === 'B' && !large && badgeProto() === 'v5' ? { borderTopWidth: 0 } : null]}
                      pointerEvents="none"
                      testID={stacked ? 'combat-card-face-ledger-stacked' : 'combat-card-face-ledger'}
                  >

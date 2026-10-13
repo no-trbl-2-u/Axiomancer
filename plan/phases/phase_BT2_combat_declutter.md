@@ -96,7 +96,9 @@ one line.
 - **A10b Seamless art.** On non-large faces the art plate has no grey mat
   (`plateArtWrap` padding and `panelBg`) and no hairline frame or `deepBg`
   (`plateArtFrame`): the painting runs edge to edge between the name band and
-  the ledger. Large faces keep their framed print.
+  the ledger, and the hairline rules under the name band and over the
+  ledger (`plateBand` / `plateLedger` borders) are gone too, so name, art and
+  PAID line read as one surface. Large faces keep their framed print.
 - **A11 Tap hint removed.** "tap a card to read it" (`combat-tap-hint`) no
   longer renders; tapping a card still opens its detail.
 - **A12 Native parity.** The same layout renders on Android (EAS preview or a
