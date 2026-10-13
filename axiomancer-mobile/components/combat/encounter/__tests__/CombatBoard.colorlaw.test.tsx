@@ -141,6 +141,15 @@ describe('resolveDieDropTarget — an illegal drop dispatches NOTHING', () => {
         // every staged card armed → the die snaps home.
         expect(resolveDieDropTarget(ghostDie('wild'), null, true, ['u-body', 'u-mind'], stanceOf, { 'u-body': 'die-1', 'u-mind': 'die-2' })).toBeNull();
     });
+
+    // A card whose PAID line cannot be played now ("Only at half VITAE or
+    // less" above half) never takes a die: the die would sit on it unspendable.
+    it('a card whose PAID line is blocked rejects a direct hit and is skipped by a loose drop', () => {
+        const blockOf = (uid: string) => (uid === 'u-body' ? 'only at half VITAE or less' : null);
+        expect(resolveDieDropTarget(ghostDie('wild'), 'u-body', true, ['u-body'], stanceOf, {}, blockOf)).toBeNull();
+        expect(resolveDieDropTarget(ghostDie('wild'), null, true, ['u-body', 'u-mind'], stanceOf, {}, blockOf)).toBe('u-mind');
+        expect(resolveDieDropTarget(ghostDie('body'), null, true, ['u-body', 'u-mind'], stanceOf, {}, blockOf)).toBeNull();
+    });
 });
 
 // ── Render: the drag-time affordance ─────────────────────────────────────────
@@ -184,6 +193,49 @@ describe('CombatBoard — staged cards under a die drag', () => {
             expect(screen.getByTestId(`combat-staged-${uid}`).props.accessibilityState)
                 .toEqual({ disabled: false });
         }
+    });
+});
+
+// ── A blocked PAID line: no die ever lands on it ─────────────────────────────
+
+describe('CombatBoard — a staged card whose PAID line cannot be played now', () => {
+    const WHY = 'only at half VITAE or less';
+    /** The fixture's first hand card, read as a program card whose PAID line
+     *  the engine refuses right now. */
+    function blockedVM(s: CombatEncounterState) {
+        const vm = buildCombatViewModel(s);
+        const card = { ...vm.hand[0], play: { freeBlock: null, paidBlock: WHY, unscrappable: false, xRange: null } };
+        return { vm: { ...vm, hand: [card, ...vm.hand.slice(1)] }, card };
+    }
+
+    it('reads disabled under a die drag, and its label names the reason', () => {
+        const { store, s } = freshEncounter();
+        const { vm, card } = blockedVM(s);
+        const { tree } = withAllProviders(
+            <CombatBoard vm={vm} drag={dieDrag(ghostDie('wild'))} stagedUids={[card.uid]} {...boardCallbacks()} />,
+            { store },
+        );
+        render(tree);
+        const staged = screen.getByTestId(`combat-staged-${card.uid}`);
+        expect(staged.props.accessibilityState).toEqual({ disabled: true });
+        expect(staged.props.accessibilityLabel).toContain(WHY);
+    });
+
+    it('a tapped die is not taken, so APPLY stays FREE', async () => {
+        const { store, s } = freshEncounter();
+        const { vm, card } = blockedVM(s);
+        const die = vm.dice.find((d) => d.draggable && !d.spent);
+        expect(die).toBeDefined();
+        const cbs = boardCallbacks();
+        const { tree } = withAllProviders(
+            <CombatBoard vm={vm} drag={noopDrag()} stagedUids={[card.uid]} {...cbs} />,
+            { store },
+        );
+        render(tree);
+        await tapCombatDie(die!.id);
+        expect(screen.queryByTestId('combat-staged-die')).toBeNull();
+        fireEvent.press(screen.getByTestId(`combat-apply-${card.uid}`));
+        expect(cbs.onApply).toHaveBeenCalledWith(card.uid, null, false);
     });
 });
 

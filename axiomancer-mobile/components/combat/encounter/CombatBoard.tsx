@@ -115,6 +115,9 @@ function measureRect(ref: React.RefObject<View | null>): Promise<Rect | null> {
  *     selected, no fizzle can ever reach the engine);
  *   · the loose-drop forgiveness only ever lands on a color-legal card that
  *     is not already armed.
+ * `blockOf` names why a card's PAID line cannot be played now (the engine's
+ * `paidBlock`, null = it can); a die never lands on such a card, so it is
+ * never held by a card whose APPLY would refuse it.
  */
 export function resolveDieDropTarget(
     die: { color: string; isX?: boolean },
@@ -123,10 +126,11 @@ export function resolveDieDropTarget(
     stagedUids: string[],
     stanceOf: (uid: string) => string | undefined,
     pendingByUid: Record<string, string>,
+    blockOf: (uid: string) => string | null = () => null,
 ): string | null {
     const legal = (uid: string) => {
         const stance = stanceOf(uid);
-        return !!stance && dieCanPowerCardVM(die, stance) && !pendingByUid[uid];
+        return !!stance && dieCanPowerCardVM(die, stance) && !pendingByUid[uid] && !blockOf(uid);
     };
     if (hitUid) return legal(hitUid) ? hitUid : null;
     if (!inPlayArea) return null;
@@ -552,7 +556,9 @@ export const StagedCard = React.memo(function StagedCard({
                     accessibilityRole="button"
                     accessibilityState={{ disabled: dropIneligible }}
                     accessibilityLabel={dropIneligible
-                        ? `${card.name} staged — only a ${card.stance.toUpperCase()} or WILD die can power this card.`
+                        ? card.play?.paidBlock
+                            ? `${card.name} staged — ${PROGRAM_COPY.blocked(card.name, card.play.paidBlock)}.`
+                            : `${card.name} staged — only a ${card.stance.toUpperCase()} or WILD die can power this card.`
                         : assignedDie
                             ? `${card.name} staged — ${f.verbLine}. ${combatDieA11yLabel(assignedDie, { assigned: true })}. Tap to unstage.`
                             : `${card.name} staged — ${f.verbLine}. Tap to unstage.`}
@@ -874,6 +880,9 @@ export const CombatBoard = React.memo(function CombatBoard({
     // Card stance by uid — the COLOR LAW checks key off this (uid → stance is
     // immutable for the life of the hand entry).
     const stanceOfUid = (uid: string): string | undefined => vm.hand.find((c) => c.uid === uid)?.stance;
+    // Why a card's PAID line cannot be played now (null = it can): a die is
+    // never dropped on such a card.
+    const paidBlockOfUid = (uid: string): string | null => vm.hand.find((c) => c.uid === uid)?.play?.paidBlock ?? null;
     // DISPLAY (decoupled from commit): a staged card shows the die dropped on
     // it, but only while that die is still usable AND color-legal (drops are
     // already gated — this is the belt to the drop's braces), else null → the
@@ -911,7 +920,7 @@ export const CombatBoard = React.memo(function CombatBoard({
             // selected, no fizzle ever reaches the engine); a loose drop lands
             // on a color-legal card only.
             const target = resolveDieDropTarget(
-                payload.die, hitUid, inPlayArea, stagedUids, stanceOfUid, pendingDieByUid,
+                payload.die, hitUid, inPlayArea, stagedUids, stanceOfUid, pendingDieByUid, paidBlockOfUid,
             );
             if (target) {
                 juiceHaptics.impact(Haptics.ImpactFeedbackStyle.Rigid);
@@ -927,7 +936,9 @@ export const CombatBoard = React.memo(function CombatBoard({
                 const reason = card
                     ? (pendingDieByUid[hitUid!]
                         ? `${card.name} already holds a die — tap it to unstage first`
-                        : `only a ${card.stance.toUpperCase()} or WILD die can power ${card.name}`)
+                        : !dieCanPowerCardVM(payload.die, card.stance)
+                            ? `only a ${card.stance.toUpperCase()} or WILD die can power ${card.name}`
+                            : PROGRAM_COPY.blocked(card.name, paidBlockOfUid(card.uid) ?? ''))
                     : 'no staged card can take this die';
                 juiceHaptics.notify(Haptics.NotificationFeedbackType.Error);
                 setDropReject((prev) => ({ uid: hitUid ?? '', reason, n: prev.n + 1 }));
@@ -949,6 +960,14 @@ export const CombatBoard = React.memo(function CombatBoard({
             }
             const playRect = await measureRect(playAreaRef);
             if (rectContains(playRect, x, y)) {
+                // A card neither of whose lines can be played now is refused
+                // loudly at the stage, so it cannot sit staged holding a die.
+                const play = vm.hand.find((c) => c.uid === payload.uid)?.play;
+                if (play?.freeBlock && play.paidBlock) {
+                    juiceHaptics.notify(Haptics.NotificationFeedbackType.Error);
+                    setDropReject((prev) => ({ uid: '', reason: PROGRAM_COPY.blocked(payload.card.name, play.freeBlock!), n: prev.n + 1 }));
+                    return;
+                }
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
                 onStage(payload.uid);
             }
@@ -1007,7 +1026,7 @@ export const CombatBoard = React.memo(function CombatBoard({
         if (stagedUids.length !== 1) return;
         const die = diceMapRef.current.get(dieId);
         if (!die || !die.draggable) return;
-        const target = resolveDieDropTarget(die, stagedUids[0], true, stagedUids, stanceOfUid, pendingDieByUid);
+        const target = resolveDieDropTarget(die, stagedUids[0], true, stagedUids, stanceOfUid, pendingDieByUid, paidBlockOfUid);
         if (!target) return;
         juiceHaptics.impact(Haptics.ImpactFeedbackStyle.Rigid);
         setPendingDieByUid((prev) => ({ ...prev, [target]: dieId }));
@@ -1095,11 +1114,11 @@ export const CombatBoard = React.memo(function CombatBoard({
     const dieDragLive = draggingDieId !== null;
 
     // A staged card is drop-INELIGIBLE for the die in flight when it is
-    // off-color (THE COLOR LAW) or already carries a dropped die (the staging
-    // law) — mirrors `resolveDieDropTarget` exactly, so the dim always
-    // predicts the rejection.
+    // off-color (THE COLOR LAW), already carries a dropped die (the staging
+    // law) or cannot play its PAID line now — mirrors `resolveDieDropTarget`
+    // exactly, so the dim always predicts the rejection.
     const dropIneligibleFor = (card: CombatCardVM): boolean =>
-        !!draggingDie && (!dieCanPowerCardVM(draggingDie, card.stance) || !!pendingDieByUid[card.uid]);
+        !!draggingDie && (!dieCanPowerCardVM(draggingDie, card.stance) || !!pendingDieByUid[card.uid] || !!card.play?.paidBlock);
 
     // Ghost ✕ cue: on die-drag begin, measure
     // every INELIGIBLE staged card once and hand the rects to the panel's
