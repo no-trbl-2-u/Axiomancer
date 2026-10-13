@@ -113,7 +113,8 @@
 - detail: Leg 4 logged P-07b ("DEAL all the VITAE you lost this combat (max 30). EXILE.") paid plays dealing 114 (seq 3063, a Float-Eye at ld-11, after far less than 114 VITAE lost), 114 again on the Doorwarden (seq 3428), 48 and 32. Printed numbers elsewhere scale with stats, but the cap does not scale and 114 is not a scaled 30 either. Printed must equal applied.
 - next (`/iterate`): find where the card program resolves "VITAE lost this combat" and its cap in `axiomancer-mechanics/src/Combat/` (P-07b in the Blood Price library); check whether the cap is skipped on the paid line or scaled after capping; pin it with an engine test at the printed cap. Card numbers are D37-held: fix the code to match the printed card, never the card text.
 
-### [bug] A die is spent on a staged card that cannot be played (RC2 walk, 2026-10-11)
+### [x] [bug] A die is spent on a staged card that cannot be played (RC2 walk, 2026-10-11) — CLOSED 2026-10-13 (8efb0375: the die drop, die tap and loose drop skip a card whose PAID line is blocked and refuse loudly with the engine's reason; a card neither of whose lines can be played now, a second copy of a Global included, is refused at the stage)
+- issue: #515
 - source: RC2 walk 2026-10-11 (eb75f451, Blood Price test deck, attended; accepted for the v0.2.0 tag by T, D83)
 - category: bug
 - impact: 7
