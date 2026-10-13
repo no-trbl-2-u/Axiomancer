@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-13 at commit 330ec3e2
-> Pass count: 82
+> Last pass: 2026-10-13 at commit 3225cc64
+> Pass count: 83
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -588,8 +588,9 @@
 
 ## Pending
 
-### [LOW] title / tooling — the drive captures the title 0.7s into its 2.65s intro, so every pass sees only the wordmark; EMBARK is tappable before it is visible
-- pass: 79 (commit f2065459)
+### [MED] title + combat / tooling — the drive captures the title 0.7s into its 2.65s intro, so every pass sees only the wordmark; EMBARK is tappable before it is visible
+- pass: 79 (commit f2065459); widened and bumped LOW to MED at pass 83 (commit 3225cc64)
+- pass 83 addendum: the same fixed 700ms settle (`axiomancer-mobile/scripts/critique-drive.mjs` ~:271) also cuts the `combat-board` capture short. The round-start roll ritual staggers four dice 130ms apart over a 480ms fall plus springs (`DICE_ROLL_TIMING`), so it runs about 1s. Both `04-combat-board.png` captures (mobile and desktop) show three dice in the tray and the fourth still tilted and in the air beside the foe. So the unattended lens has never seen a settled hand-and-dice board, which is the screen that matters most. Fix the same way: wait on a settle signal (no `RollingDie` mounted, or the summed ritual timing) rather than a flat 700ms.
 - viewport: mobile + desktop
 - category: comprehension
 - observation: `scripts/critique-drive.mjs` settles 700ms after load. The title sequence holds 450ms, lifts the wordmark for 1500ms, then fades the psalm and EMBARK in over 700ms (`TITLE_TIMING`). So `01-title.png` shows the wordmark over a half-faded plate and an empty black lower half, while its `.txt` lists the psalm and EMBARK. The unattended lens never sees the first screen a player sees. During those 2.65s the invisible EMBARK is already pressable (`pointerEvents` "box-none", not disabled), so a tap on the empty lower half can skip to the menu before the button has appeared.
