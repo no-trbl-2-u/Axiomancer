@@ -58,6 +58,12 @@
 - **brief-pointer-drift** · the CS1 brief named atlas budget bands R10c had deleted and a truth-sources table that never existed (ship CS1) → before building, grep every file anchor a brief names; when one is gone, restate it from the ruling it cites and record the call under Decisions · seen 1× · last 2026-10-13 · open
 - **mechanics-verify-misses-root-lints** · `npm run verify -w axiomancer-mechanics` passed, but root `npm test` failed `check-comments` on D-numbers in new code comments (ship CS1) → a phase that adds mechanics code runs root `npm test` before its first commit; code comments name no decision numbers · seen 1× · last 2026-10-13 · guarded by scripts/check-comments.mjs (root npm test)
 
+<!-- @domain:mobile -->
+
+## Mobile
+
+- **rntl-skips-hidden** · a test reading props off an a11y-hidden view failed: RNTL's default queries skip `accessibilityElementsHidden` / `aria-hidden` subtrees (iterate, title CTA #512) → pass `{ includeHiddenElements: true }` to reach a hidden node; a plain `queryBy*` returning null is itself the proof it is hidden · seen 1× · last 2026-10-13 · open
+
 ## Adding a domain
 
 Append a new `<!-- @domain:<name> -->` anchor + `##` heading
