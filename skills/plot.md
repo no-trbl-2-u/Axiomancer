@@ -87,6 +87,9 @@ git push origin main
 From a worktree branch (the usual attended case), commit first and then
 `git fetch origin && git rebase origin/main && git push origin HEAD:main`
 as one act; main moves under you (lesson `plan-only-push-race`).
+If the worktree holds uncommitted work you must not commit (a
+prototype), commit from a clean `git worktree add --detach <tmp>
+origin/main` instead (lesson `plot-from-dirty-worktree`).
 
 `peek` stops before Step 4 and prints the brief instead.
 
