@@ -1,0 +1,140 @@
+[
+  {
+    "rule": "carrier-rule",
+    "id": "BLEED",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "carrier-rule",
+    "id": "BOON",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "carrier-rule",
+    "id": "HONE",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "carrier-rule",
+    "id": "TEMPER",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "carrier-rule",
+    "id": "WAIVE",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "complexity-budget",
+    "id": "bp-e-02d",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "complexity-budget",
+    "id": "bp-e-03d",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "complexity-budget",
+    "id": "bp-e-04c",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "complexity-budget",
+    "id": "bp-e-05n",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "complexity-budget",
+    "id": "bp-e-09n",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "complexity-budget",
+    "id": "bp-e-10d",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "complexity-budget",
+    "id": "bp-m-01d",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "complexity-budget",
+    "id": "bp-m-03d",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "complexity-budget",
+    "id": "bp-m-04n",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "complexity-budget",
+    "id": "bp-m-05b",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "complexity-budget",
+    "id": "bp-m-07a",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "complexity-budget",
+    "id": "bp-m-08d",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "complexity-budget",
+    "id": "bp-p-03a",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "complexity-budget",
+    "id": "bp-p-04c",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "complexity-budget",
+    "id": "bp-p-05b",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "complexity-budget",
+    "id": "bp-p-08d",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "complexity-budget",
+    "id": "bp-p-09b",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  },
+  {
+    "rule": "complexity-budget",
+    "id": "bp-p-10c",
+    "reason": "pinned at CS1, awaits T's card session",
+    "filed": "2026-10-13"
+  }
+]

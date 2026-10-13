@@ -68,6 +68,15 @@ is right and the page is a bug to fix in the same change. It sits below
 the decision records in the hierarchy above because it describes, it does
 not decide.
 
+## The card spec — DRAFT (Phase CS1)
+
+| Source | Status | What it answers | Ranks |
+|---|---|---|---|
+| [`card-spec.md`](./card-spec.md) | **DRAFT**: T is filling it in; no section is a rule until T marks it RATIFIED | every card rule, one section each: what is live (with pointers), what T ratified but nobody built, T's ballot answer | below the code and `game-model.md` while DRAFT; a RATIFIED section is T's decision (layer 1 above) |
+
+Its §17 lists the test that enforces each rule; those tests read the code,
+not the spec.
+
 ## Game knowledge base — external prior art
 
 `no-trbl-2-u/game-knowledge-base` is the OKF corpus of board-game rules

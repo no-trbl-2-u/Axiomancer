@@ -13,7 +13,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
-  atlasKeywords, catalogGlyphTable,
+  atlasKeywordKinds, atlasKeywords, catalogGlyphTable, ledgerLaneIds, libraryLaneIds,
   systemGlossaryTerms,
   mobileGlyphTable, mobileRegistryKeywords, PATHS,
 } from './content-drift.mjs'
@@ -127,4 +127,41 @@ test('the keyword parsers found real tables', () => {
   // card types): registry 8, atlas 13.
   assert.ok(keys(mobileRegistryKeywords()).length >= 8)
   assert.ok(keys(atlasKeywords()).length >= 11)
+})
+
+// ── The atlas's Card / Rule split (Phase CS1, card-spec ballot §9) ───────────
+
+test('the atlas sorts every row into a Card, Rule or system section', () => {
+  const kinds = atlasKeywordKinds()
+  assert.deepEqual(keys(atlasKeywords()).filter((k) => !kinds.has(k)), [], 'atlas rows outside a kind section')
+  assert.equal(kinds.get('EXILE'), 'rule')
+  assert.equal(kinds.get('GLOBAL'), 'rule')
+  assert.equal(kinds.get('DEAL'), 'card')
+  assert.equal(kinds.get('CONVICTION'), 'system')
+})
+
+test('the kind extractor throws on an atlas with no kind sections', () => {
+  assert.throws(() => atlasKeywordKinds('# atlas\n| **DEAL** | x | y |'), /extracted nothing/)
+})
+
+// ── Ledger <-> library parity for the Blood Price lane (Phase CS1, A6) ───────
+//
+// The ledger is T's ruling on which slots the lane keeps; the library is what
+// ships. Parity is by slot id (`bp-<slot><option>`), not name, and leaves out
+// the Curse, which the ledger lists outside the slot table.
+
+test('the Blood Price lane ships exactly the slots the ledger keeps', () => {
+  const ledger = keys(ledgerLaneIds())
+  const library = keys(libraryLaneIds())
+  assert.deepEqual(ledger.filter((id) => !library.includes(id)), [], `kept in ${PATHS.bloodPriceLedger} but not in the library`)
+  assert.deepEqual(library.filter((id) => !ledger.includes(id)), [], `in ${PATHS.bloodPriceCards} but not kept by the ledger`)
+})
+
+test('the parity extractors applied Revision 2 and found the whole lane', () => {
+  const ledger = ledgerLaneIds()
+  assert.equal(keys(ledger).length, 30)
+  assert.ok(ledger['bp-e-01n'], 'Revision 2 added slots are read')
+  assert.ok(!ledger['bp-e-01a'], 'Revision 2 cut slots are removed')
+  assert.throws(() => ledgerLaneIds('## Verdicts\nnothing kept'), /extracted nothing/)
+  assert.throws(() => libraryLaneIds('const ENTRIES = []'), /extracted nothing/)
 })

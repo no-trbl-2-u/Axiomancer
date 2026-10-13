@@ -50,6 +50,11 @@ export const CONTENT_SURFACES = [
   'axiomancer-mechanics/src/World/quest.library.ts',
   'axiomancer-mechanics/src/Enemy/enemy.library.ts',
   'axiomancer-mechanics/src/Cards/cards.library.ts',
+  // The card text itself (B4 inventory F4, Phase CS1): rules lines sit under
+  // `free` / `paid` / `paidSummary`, so they get the voice and retired-term
+  // rules but not MB-1's narration limits.
+  'axiomancer-mechanics/src/Cards/library/starters.cards.ts',
+  'axiomancer-mechanics/src/Cards/library/blood-price.cards.ts',
   'axiomancer-mobile/state/presenters/rest.copy.ts',
   'axiomancer-mobile/state/presenters/cache.copy.ts',
 ]

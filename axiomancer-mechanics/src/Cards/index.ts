@@ -31,3 +31,12 @@ export { rankToRarity, CARD_RANK_NAMES } from './types';
 // the union by compile-time assertions in types.ts. Consumers that need to walk
 // every kind (mobile KW-2, drift lints) read THIS instead of keeping a copy.
 export { CARD_SPECIAL_MECHANIC_KINDS } from './types';
+
+// The ratified card text rules as pure checkers (Phase CS1); the fence is
+// `e2e/card-rules.engine.test.ts`, and B5's card-creator can call them too.
+export type { CardRuleId, CardRuleViolation, AtlasKeyword, AtlasKeywordKind, CarrierRuleInput } from './card-rules';
+export {
+    COMPLEXITY_BUDGET, ADMISSION_BAR,
+    cardLinesText, printedKeywords, cardConditions, parseAtlasKeywords,
+    checkComplexityBudget, checkScrapFloor, checkGlobalTemplate, checkCarrierRule,
+} from './card-rules';

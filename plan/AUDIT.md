@@ -36,6 +36,45 @@
 
 ## Pending
 
+### [content] Card-rules fence: 18 Blood Price cards pinned over the complexity budget (Phase CS1, 2026-10-13)
+- category: content
+- impact: 4
+- ease: 6
+- source: Phase CS1 (`axiomancer-mechanics/src/Cards/e2e/card-rules.engine.test.ts`, rule `complexity-budget`); pinned in `card-rules.exemptions.json`.
+- detail: every Blood Price card is rank 1 (Ash), and the budget T ratified (ballot §9) allows Ash 1 keyword beyond DEAL and GUARD and no condition; a Global's trigger counts as a condition. One item per pinned card:
+  - [ ] P-03a: 1 condition (at half VITAE), max 0.
+  - [ ] P-04c: 1 condition (at half VITAE), max 0.
+  - [ ] P-05b: 2 keywords (SACRIFICE, VULNERABLE), max 1.
+  - [ ] P-08d: 2 keywords (SACRIFICE, TETHER), max 1.
+  - [ ] P-09b: 2 keywords (SACRIFICE, VULNERABLE), max 1.
+  - [ ] P-10c: 1 condition (trigger: sac), max 0.
+  - [ ] E-02d: 2 keywords (SACRIFICE, TETHER), max 1.
+  - [ ] E-03d: 2 keywords (LEECH, SACRIFICE), max 1; 1 condition (trigger: turn), max 0.
+  - [ ] E-04c: 2 keywords (SACRIFICE, WAIVE), max 1.
+  - [ ] E-05n (Open Vein): 3 keywords (LEECH, SACRIFICE, TETHER), max 1.
+  - [ ] E-09n (Crimson Pact): 1 condition (trigger: sac), max 0.
+  - [ ] E-10d: 2 keywords (SACRIFICE, TETHER), max 1.
+  - [ ] M-01d: 2 keywords (HEAL, LEECH), max 1.
+  - [ ] M-03d: 1 condition (at half VITAE), max 0.
+  - [ ] M-04n (Transfusion): 2 keywords (HEAL, SACRIFICE), max 1.
+  - [ ] M-05b: 1 condition (at half VITAE), max 0.
+  - [ ] M-07a: 2 keywords (HEAL, VULNERABLE), max 1; 1 condition (each time), max 0.
+  - [ ] M-08d: 2 keywords (LEECH, SACRIFICE), max 1; 1 condition (trigger: sac), max 0.
+- next: T's next card session (D37). Ballot §3 ("rank follows complexity") points at re-ranking these cards rather than cutting keywords; either way the change is a card change. Re-seed the fixture after it (`docs/card-spec.md` §17). The loop does not touch these cards.
+
+### [content] Card-rules fence: 5 atlas words pinned under the carrier rule or the admission bar (Phase CS1, 2026-10-13)
+- category: content
+- impact: 3
+- ease: 7
+- source: Phase CS1 (`card-rules.engine.test.ts`, rule `carrier-rule`); pinned in `card-rules.exemptions.json`.
+- detail: one item per pinned word:
+  - [ ] BLEED: an atlas row with no carrier (B4 F1). T ruled it retired (ballot §8, Residue 3); the pin goes when that fix lands.
+  - [ ] WAIVE: 1 card (E-04c), the admission bar needs 2 cards or 2 enemies.
+  - [ ] BOON: 0 cards; carried only by the dice (every die's special face).
+  - [ ] HONE: 0 cards; carried only by the anvil.
+  - [ ] TEMPER: 0 cards; carried only by the anvil.
+- next: T's next card session (D37). BOON, HONE and TEMPER fail the bar because the atlas files them as Card keywords (the dice section) while no card prints them: T either moves them to Rule keywords or adds them to the bar's system exemptions (CONVICTION, RESERVE, WILD, PIP today). WAIVE needs a second carrier or a cut. Re-seed after.
+
 ### [ ] [tooling] The guard's post-write lexicon check reports false findings in a worktree (2026-10-11)
 - category: tooling
 - impact: 4

@@ -17,15 +17,29 @@ it and its reminder text says more than the word does. A one-card mechanic
 stays as plain rules text on that card. Every printed number is the number
 the engine applies.
 
+**Card and Rule keywords** (T, card-spec ballot §9, 2026-10-13). A Card
+keyword lives on a card face. A Rule keyword appears on cards but names a
+place on the board outside the deck: the EXILE pile, the GLOBAL space. The
+complexity budget counts only Card keywords, and never DEAL or GUARD.
+
+**The complexity budget by rank** (ratified as written, ballot §9).
+Ash/Tooth carry at most 1 keyword beyond DEAL and GUARD and no condition;
+Splinter/Rib at most 2 and one condition; Skull/Saint are unbudgeted. A
+Global's trigger is a condition. `COMPLEXITY_BUDGET` in
+`src/Cards/card-rules.ts` holds the bands and
+`src/Cards/e2e/card-rules.engine.test.ts` enforces them.
+
 ---
 
-## Player keywords — damage
+## Card keywords
+
+### Damage
 
 | keyword | reminder text | carried by |
 |---|---|---|
 | **DEAL N** | Direct VITAE damage. Plain English on the face, so it has no gloss. | grey-strike (PAID); the Blood Price trial set |
 
-## Player keywords — afflictions
+### Afflictions
 
 | keyword | reminder text | carried by |
 |---|---|---|
@@ -34,32 +48,31 @@ the engine applies.
 | **TETHER N** | For that many turns, each SACRIFICE makes the foe take damage equal to the VITAE it paid (a DEAL: unscaled, VULNERABLE applies; a WAIVED SACRIFICE deals 0). | Blood Price P-08d, E-02d, E-05n, E-10d; the Crimson Covenant signature (Bleeding Signet) |
 | **BLEED** | Each hit the bearer takes deals 3 more VITAE per Bleed stack, then removes a stack. | no live carrier: no card, foe, hazard or item applies `debuff_bleed`; the effect stays in `src/Effects/debuffs.library.json` and mobile still glosses it |
 
-## Player keywords — walls
+### Walls
 
 | keyword | reminder text | carried by |
 |---|---|---|
 | **GUARD N** | Blocks that much incoming attack damage during the next threat phase. Unused Guard is lost. | grey-ward |
 
-## Player keywords — mending
+### Mending
 
 | keyword | reminder text | carried by |
 |---|---|---|
 | **HEAL N** | Restores that much VITAE, up to your maximum. Mind scales N on a card; healing "the damage dealt" heals that amount, unscaled. | Blood Price M-01d, M-02b, M-04n, M-06c, M-07a, M-09a; the three healing potions (`src/Items/consumable.library.ts`) |
 
-## Player keywords — the blood price
+### The blood price
 
 | keyword | reminder text | carried by |
 |---|---|---|
 | **SACRIFICE N** | Lose that much VITAE as a cost. It never takes you below 1, so a line you cannot pay cannot be played. Unscaled. A SACRIFICE that fires n times counts as n; one that "counts twice" (Crimson Covenant) is paid once and fires twice. | Blood Price P-01a, P-02a, P-05b, P-08d, P-09b, E-01n, E-02d, E-03d, E-05n, E-06b, E-08n, E-10d, M-04n and the grey Curse |
 | **WAIVE** | Your next SACRIFICE this turn costs no VITAE but still counts. | Blood Price E-04c |
-| **EXILE** | The card leaves combat instead of going to your discard. | Blood Price P-04c, P-07b, M-06c and the grey Curse (PAID lines) |
 
 Crimson Pact (E-09n) prints its rule in full on the card ("🩸 When you
 SACRIFICE n: your next DEAL this turn deals +n."), so it has no row: the +n
 is unscaled, stacks across SACRIFICES, goes to the next DEAL (a card's, a
 Global's or TETHER's) before VULNERABLE, and expires at the end of the turn.
 
-## Player keywords — the dice
+### The dice
 
 | keyword | reminder text | carried by |
 |---|---|---|
@@ -67,6 +80,18 @@ Global's or TETHER's) before VULNERABLE, and expires at the end of the turn.
 | **BOON** | A die's BOON face powers a card of its color and grants Conviction. Its equipped gear sets how much (2 by default, `SPECIAL_CONVICTION_DEFAULT`). | the special face of every die (the engine calls it `'special'` and the die prints SPECIAL) |
 | **HONE** | A blacksmith upgrade: adds a mana face to a die's gear, so more of its rolls power a card. | the Anvil (turns a miss face to mana) |
 | **TEMPER** | A blacksmith upgrade: turns a mana face into a BOON face. A colored die caps at 2 boon and 1 miss, gold at 1. | the Anvil |
+
+---
+
+## Rule keywords
+
+Printed on cards, but each names a place on the board, not a card's own
+effect (ballot §9). The budget does not count them.
+
+| keyword | reminder text | carried by |
+|---|---|---|
+| **EXILE** | The card leaves combat instead of going to your discard. | Blood Price P-04c, P-07b, M-06c and the grey Curse (PAID lines) |
+| **GLOBAL** | A card type: stays in play and fires on its trigger (⟳ start of your turn, 🩸 when you SACRIFICE n, 📜 when you play a Curse): 3 turns played FREE, all combat played PAID. One copy of each at a time. | Blood Price P-10c, E-03d, E-09n, M-08d |
 
 ---
 
@@ -87,7 +112,6 @@ in `SYSTEM_GLOSSARY`.
 | CONVICTION ◆ | A spend-anytime resource banked from unspent dice and overflow. It never decays. |
 | RESERVE & PIPS | Up to 2 dice held between phases instead of played. Each gains +1 pip per phase it survives, spent for extra intensity or Guard. |
 | WILD / X | A WILD die (the gold die) counts as any color. A dead X die (a miss face) powers nothing. |
-| GLOBAL | A card type: stays in play and fires on its trigger (⟳ start of your turn, 🩸 when you SACRIFICE n, 📜 when you play a Curse): 3 turns played FREE, all combat played PAID. One copy of each at a time. Carried by Blood Price P-10c, E-03d, E-09n, M-08d. |
 | CURSE | A card type: a dead card that holds a hand slot until played. It cannot be scrapped. The grey Curse is defined, but no card adds it and it is in no lane, deck or reward pool (foes will add Curses later). |
 
 ---
