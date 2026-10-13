@@ -596,7 +596,7 @@ Earlier entries are archived verbatim in `archive-pre-revamp:plan/archive/PHASE_
 - **[score 6.0] No single owner for save/persistence policy — a mid-encounter reload still lands the player past the fight** — promoted via /oversight 2026-09-28 as Phase **R9a** (save checkpoint in fights), a gate item for RC. Brief: `plan/revamp/checkpoint.md` (decided: mobile stays the save owner, documented; a node is consumed when its encounter settles).
 
 
-- **[owner] [score 4.0] Roster-health lenses for /iterate** (proposed 2026-10-12, R11 item 6) — briefed via `/plot` 2026-10-12 as Phase **RH1**, slotted anytime after R12. Brief `plan/phases/phase_RH1_roster_health_lenses.md`. Dangling references become `gap` findings the loop fixes; orphans are pinned and filed `[content]` for T (D88).
+- **[owner] [score 4.0] Roster-health lenses for /iterate** (proposed 2026-10-12, R11 item 6) — briefed via `/plot` 2026-10-12 as Phase **RH1**, slotted anytime after R12. Brief `plan/phases/phase_RH1_roster_health_lenses.md`. Dangling references become `gap` findings the loop fixes; orphans are pinned and filed `[content]` for T (D88). Shipped 2026-10-13 in PR #507: 0 dangling, 1 orphan (`relic-bleeding-signet`).
 
 
 ## Rejected

@@ -300,7 +300,10 @@ npm run verify                                      # both, when in doubt
 ```
 
 A change to mechanics' public surface also runs the mobile gate
-— the `@mechanics` alias couples them. An R-phase additionally runs the revamp gates
+— the `@mechanics` alias couples them. Any change to source also
+runs root `npm test`: its `check-comments` lint rejects a decision
+number (`D88`) in a code comment, and the workspace gates never run it
+(lesson `brief-dnum-in-comments`). An R-phase additionally runs the revamp gates
 (`plan/revamp/README.md` §5): root `npm test`,
 `npm run lint:content` and `node scripts/check-lexicon.mjs`.
 `baseline:check` is retired (D57). All legs are hard. Iterate up

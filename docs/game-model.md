@@ -202,6 +202,9 @@ keyword (`EnemyKeyword = never`).
   gear (8). This is the only way dice grow.
 - **Items** are healing potions (`Items/consumable.library.ts`): Minor 10
   VITAE (15 below half), Healing 20 (30), Greater 50 (75).
+- **Is X reachable in play?** `npm run roster-health -w axiomancer-mechanics`
+  (`World/roster-health.ts`) lists dangling references and orphaned
+  enemies, items, NPCs, dialogue nodes and quests.
 - **The hazard minigame** (`World/Hazard/`): a ten-card deck (`HAZARD_DECK`)
   and four dice rolled once; the player fills the route's meters with FORCE
   and ESCAPE cards for shillings or VITAE. A failure scars: maximum VITAE

@@ -42,7 +42,8 @@
     "type-check:tests": "tsc -p tsconfig.tests.json",
     "type-check:cli": "tsc -p tsconfig.cli.json",
     "verify": "npm run type-check && npm run type-check:tests && npm run type-check:cli && npm run lint && npm test && npm run build",
-    "verify:agent": "npm run type-check && npm run type-check:tests && npm run type-check:cli && npm run lint && vitest run --reporter=default --reporter=./automation/agent-vitest-reporter.mjs && npm run build"
+    "verify:agent": "npm run type-check && npm run type-check:tests && npm run type-check:cli && npm run lint && vitest run --reporter=default --reporter=./automation/agent-vitest-reporter.mjs && npm run build",
+    "roster-health": "ts-node src/CLI/roster-health.cli.ts"
   },
   "keywords": [
     "rpg",
