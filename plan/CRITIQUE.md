@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-13 at commit 63c8a6f1
-> Pass count: 81
+> Last pass: 2026-10-13 at commit 330ec3e2
+> Pass count: 82
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -570,6 +570,19 @@
 > save, by design), the mobile hazard strip's "CHOOSE TO PROC…" (pass 68
 > trade) and the hub's "tap a glowing node" hint (RC2 walk item 13).
 > Zero fresh findings this pass.
+
+> **[critique pass 82, 2026-10-13, commit 330ec3e2] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors. 12 commits
+> after pass 81: RH1 (roster-health lenses, a mechanics CLI and its
+> engine test), the R12a truth run, expand pass 32 and telemetry. No
+> `axiomancer-mobile` change and no play-code edit, so every screen
+> matches pass 81. Reconfirmed and not re-filed: pass 79's title LOWs,
+> pass 63's corner medallions over the mobile fan's end cards. Checked
+> and not filed: the inn's "takes shillings" scene line beside REST's
+> "on the house" (pass 72's chosen copy), the dialogue fixture's
+> placeholder lines, and THE CUT dimmed at the 10-card floor (its reason
+> prints beneath it). Zero fresh findings this pass.
 
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `archive-pre-revamp:plan/archive/CRITIQUE_2026.md`.
 
