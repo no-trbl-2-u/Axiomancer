@@ -105,13 +105,28 @@
   toplevel of the written file (`git -C <dir> rev-parse --show-toplevel`),
   and pass the path relative to that root; add a `guard.mjs self-test`
   case for a worktree path. R11's first retro is a natural home.
-### [bug] P-07b's printed "(max 30)" does not cap its paid line (RC2 walk, 2026-10-11)
+### [x] [bug] P-07b's printed "(max 30)" does not cap its paid line (RC2 walk, 2026-10-11) — CLOSED 2026-10-13 (0cd35985: DEAL body-scaled the resolved VITAE lost, 30 became 114; both lines now DEAL it `exact`, unscaled, like "HEAL the damage dealt"; blood-price.engine.test.ts pins the caps at body 19)
+- issue: #513
 - source: RC2 walk 2026-10-11 (eb75f451, Blood Price test deck, attended; accepted for the v0.2.0 tag by T, D83)
 - category: bug
 - impact: 8
 - ease: 7
 - detail: Leg 4 logged P-07b ("DEAL all the VITAE you lost this combat (max 30). EXILE.") paid plays dealing 114 (seq 3063, a Float-Eye at ld-11, after far less than 114 VITAE lost), 114 again on the Doorwarden (seq 3428), 48 and 32. Printed numbers elsewhere scale with stats, but the cap does not scale and 114 is not a scaled 30 either. Printed must equal applied.
 - next (`/iterate`): find where the card program resolves "VITAE lost this combat" and its cap in `axiomancer-mechanics/src/Combat/` (P-07b in the Blood Price library); check whether the cap is skipped on the paid line or scaled after capping; pin it with an engine test at the printed cap. Card numbers are D37-held: fix the code to match the printed card, never the card text.
+
+### [loop-call] A DEAL of VITAE lost lands unscaled; other derived DEALs still body-scale (2026-10-13)
+- category: contract
+- impact: 4
+- ease: -
+- detail: fixing P-07b (0cd35985) the loop ruled that a DEAL whose amount is
+  VITAE already lost ("DEAL all the VITAE you lost") lands that number
+  unscaled, matching "HEAL the damage dealt" and TETHER's hit, so the
+  printed max holds. Two other derived DEALs still body-scale: Blood for
+  Blood's "DEAL 2X" (pinned "body-scaled" in blood-price.engine.test.ts)
+  and P-10c PAID's "DEAL n instead" (n = the VITAE sacrificed). Neither
+  prints a cap the scaling breaks, so they were left alone.
+- next: T confirms the ruling, or says derived DEALs should all scale (then
+  P-07b caps after scaling instead). A card-number question, so T's call (D37).
 
 ### [bug] A die is spent on a staged card that cannot be played (RC2 walk, 2026-10-11)
 - source: RC2 walk 2026-10-11 (eb75f451, Blood Price test deck, attended; accepted for the v0.2.0 tag by T, D83)

@@ -180,6 +180,18 @@ describe('SACRIFICE, WAIVE, HEAL, EXILE', () => {
         expect(finisher.player.health).toBe(105);
     });
 
+    it('P-07b deals the VITAE you lost, unscaled, up to its printed max', () => {
+        const raised = { body: 19, mind: 5, heart: 5 };
+        const lost = (n: number) => {
+            const s = fight(['bp-p-07b'], 100, raised);
+            return { ...s, program: { ...s.program!, lostThisCombat: n } };
+        };
+        expect(500 - play(lost(20), 't0', true).enemy.health).toBe(20);
+        expect(500 - play(lost(200), 't0', true).enemy.health).toBe(30);
+        expect(500 - play(lost(15), 't0', false).enemy.health).toBe(7);
+        expect(500 - play(lost(200), 't0', false).enemy.health).toBe(10);
+    });
+
     it('EXILE on a PAID line removes the card from combat', () => {
         const s = play(fight(['bp-m-06c']), 't0', true);
         expect(s.discard).not.toContain('bp-m-06c');

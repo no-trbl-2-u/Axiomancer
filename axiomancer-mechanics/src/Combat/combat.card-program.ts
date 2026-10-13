@@ -210,11 +210,12 @@ class LineCtx implements ProgramCtx {
 
     // -- foe -----------------------------------------------------------------
     /** Returns the VITAE the foe actually lost (a hit past 0 counts what was left). */
-    deal(n: number): number {
+    deal(n: number, opts?: { exact?: boolean }): number {
         if (n <= 0) return 0;
         const enemy = this.w.s.enemy;
         if (isDefeated(enemy)) return 0;
-        let dmg = scaleFor(n, this.stats(), 'body', 'one-shot') + this.w.l.nextDealBonus;
+        const base = opts?.exact ? n : scaleFor(n, this.stats(), 'body', 'one-shot');
+        let dmg = base + this.w.l.nextDealBonus;
         const vuln = getDamageTakenMultiplier(enemy);
         if (vuln !== 1) dmg = Math.round(dmg * vuln);
         const landed = Math.min(dmg, enemy.health);
