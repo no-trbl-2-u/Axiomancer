@@ -989,6 +989,14 @@ satisfied for exactly these.)
 - No rarity pip track on any face. A large face still prints the rarity word and the full rules text, since it has the room.
 - Implemented by Phase BT2 (`plan/phases/phase_BT2_combat_declutter.md`). A later card-face change needs T's say-so, like a card change (D37).
 
+**D92 — The combat board layout.** (T, attended, 2026-10-13, layout B from the BT2 prototypes.)
+
+- Bottom: a footer dock, left to right: a small round player avatar (tap opens the pilgrim modal); the VITAE column (value / max with the deck and discard piles beside it, a fill bar that turns blood below 25%, the phase ledger under it); a wide END button in thumb reach.
+- No corner medallions: the hand fans across the full board width.
+- Top: the foe's name and VITAE bar; its intent and its status chips sit top-left under the name; the conviction and signature column starts under the intent, with room for 5 signatures above the dice.
+- LOG is not on the board; it opens from the pilgrim modal and returns with BACK.
+- Reference: `axiomancer-mobile/screenshots/bt2-prototype/` (`1-board.jpg`, `2-pilgrim-modal.jpg`, `3-log-view.jpg`). Implemented by Phase BT2. A later layout change needs T's say-so.
+
 ## Open follow-ups
 
 **D1 status at a glance (2026-09-28, after #408).** Card and keyword

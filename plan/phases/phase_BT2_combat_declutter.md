@@ -24,7 +24,7 @@
 - T's phone screenshots (2026-10-13) that drove it: the hand fan squeezed
   between the portrait and END medallions, VITAE at 2/170 shown only as small
   rail text, the top-right corner crowded with intent, status chips and LOG.
-- D91 (one card face, everywhere; T 2026-10-13).
+- D91 (one card face, everywhere) and D92 (the combat board layout); T 2026-10-13.
 - Owner UI doctrine (payload-only panels, terse glosses, illegal actions
   refused loudly); D37 (card hold), D65 (VITAE is canon copy), D80 (Blood
   Price trial set), D86 (T merges by hand).
@@ -147,7 +147,7 @@ None.
 
 ## Decisions made upfront — DO NOT ASK
 
-1. **Layout B** (footer dock), T 2026-10-13, over A (portrait mid-left, END
+1. **Layout B** (footer dock; D92), T 2026-10-13, over A (portrait mid-left, END
    in the dice row) and the mix; recorded with screenshots above.
 2. **Card face = prototype variant 6**, T 2026-10-13, over FREE-in-both,
    FREE-only, PAID-in-corner and a split pill: FREE in a card-coloured corner
