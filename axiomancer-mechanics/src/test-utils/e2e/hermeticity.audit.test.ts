@@ -107,7 +107,9 @@ describe('hermeticity guard: isolation (no disk / network / subprocess)', () => 
      *  - the curated-library strike gate reads cards.library.ts to assert
      *    the banned strings basePower/chipHp never reappear;
      *  - the trial-set removal guard reads committed sources to assert no
-     *    code outside a trial set names its card ids.
+     *    code outside a trial set names its card ids;
+     *  - the card-rules fence reads the keyword atlas and reads (and, when
+     *    seeding, writes) its committed exemptions fixture.
      * Add to this list only when the FEATURE under test is the
      * disk/process seam itself.
      */
@@ -126,6 +128,7 @@ describe('hermeticity guard: isolation (no disk / network / subprocess)', () => 
         'Combat/e2e/terminology-boundary.engine.test.ts',
         'Cards/e2e/curated-library.engine.test.ts',
         'Cards/e2e/trial-set-removal.engine.test.ts',
+        'Cards/e2e/card-rules.engine.test.ts',
     ]);
 
     const IO_PATTERN =

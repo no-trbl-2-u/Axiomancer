@@ -24,6 +24,11 @@ test('every content surface listed actually exists and holds prose', () => {
   assert.ok(CONTENT_SURFACES.length > 10)
 })
 
+test('the card libraries are content surfaces (B4 inventory F4)', () => {
+  assert.ok(CONTENT_SURFACES.includes('axiomancer-mechanics/src/Cards/library/starters.cards.ts'))
+  assert.ok(CONTENT_SURFACES.includes('axiomancer-mechanics/src/Cards/library/blood-price.cards.ts'))
+})
+
 test('string literals are extracted with their line numbers', () => {
   const src = ["const a = 'hello there friend';", '', 'const b = "second line here";'].join('\n')
   const found = stringLiterals(src)
