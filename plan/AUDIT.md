@@ -36,6 +36,18 @@
 
 ## Pending
 
+### [content] roster: the Bleeding Signet is granted by nothing (item-ungranted, RH1, 2026-10-13)
+- category: content
+- impact: 4
+- ease: -
+- detail: `npm run roster-health -w axiomancer-mechanics` reports
+  `relic-bleeding-signet` (`Items/relic.library.ts`) as an orphan: no
+  cache, shop, loot table, starting loadout or reward carries it; only the
+  dev menu's GET ALL RELICS hands it over. Pinned in
+  `World/e2e/roster-health.engine.test.ts` (`PINNED_ORPHANS`).
+- next: needs a brief T approves: stage it, grant it, or retire it (D88).
+  The pin changes in the same change.
+
 ### [ ] [tooling] The guard's post-write lexicon check reports false findings in a worktree (2026-10-11)
 - category: tooling
 - impact: 4
