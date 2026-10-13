@@ -5,8 +5,9 @@
  * board. Every GestureDetector that re-renders pushes its handlers' configs
  * back to the native gesture module, and the drag ghost only shows once that
  * pickup commit lands — so a whole-fan, whole-tray re-render on every pickup
- * and drop was drag lag. This pins the memo boundaries: lifting one card
- * re-renders that card's detector and no other card's in the fan.
+ * and drop was drag lag. This pins the memo boundaries: lifting a card
+ * re-renders NO fanned card's detector — the lifted card's dim is a UI-thread
+ * shared value the pan worklet writes, not a prop.
  */
 
 import React from 'react';
@@ -45,7 +46,7 @@ const callbacks = {
 };
 
 describe('CombatBoard — drag pickup re-render scope', () => {
-    it('lifting one hand card re-renders only that card\'s gesture detector', () => {
+    it('lifting a hand card re-renders no fanned card\'s gesture detector', () => {
         const { store } = withAllProviders(<></>);
         const base = store.getState().player;
         const player = { ...base, knownCards: CARDS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 };
@@ -66,12 +67,12 @@ describe('CombatBoard — drag pickup re-render scope', () => {
         detectorRenders.length = 0;
         const card = vm.hand[0];
         view.rerender(board(dragWith({ type: 'card', from: 'hand', uid: card.uid, card })));
-        expect(detectorRenders).toEqual([`combat-hand-${card.uid}`]);
+        expect(detectorRenders).toEqual([]);
 
-        // The drop re-renders the same one card back.
+        // The drop re-renders none either.
         detectorRenders.length = 0;
         view.rerender(board(dragWith(null)));
-        expect(detectorRenders).toEqual([`combat-hand-${card.uid}`]);
+        expect(detectorRenders).toEqual([]);
     });
 
     // Reanimated re-configures a layout animation whenever the `layout` prop
