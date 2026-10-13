@@ -35,6 +35,11 @@
   first), **D88** (cards and keywords owner-only), **D84** (code by PR),
   **D90** (in-tick defects fixed in-tick).
 
+- **T's answers (2026-10-13):** `plan/card-ledger/card-spec-ballot-2026-10-13.md`,
+  the ballot's Markdown export pasted verbatim. A1's "T's call" blocks are
+  copied from it section by section. Its "Residue" table lists the calls
+  that change code beyond the spec; CS1 builds none of them.
+
 ## Outcome
 
 T opens `docs/card-spec.md` and finds every card rule the game has, one
@@ -152,7 +157,19 @@ removed.
 3. **Pin, then fail** (T's call). Today's offenders are exemptions with a
    reason and a filed AUDIT row; the fence is for new cards. A stale
    exemption fails too, so the fixture cannot rot.
-4. **The complexity budget bands** are the atlas's (Ash/Tooth ≤ 1 keyword
+4a. **What counts as a keyword** (T, ballot §9): any uppercase atlas word
+   other than DEAL and GUARD, and only **Card keywords**. The atlas gains a
+   Card / Rule split in this phase as a structural edit (no row added or
+   removed): EXILE and GLOBAL are Rule keywords (the EXILE pile and the
+   GLOBAL space live on the board, not on a card), and the budget lint
+   reads only the Card rows. `content-drift` follows the new shape.
+4b. **Admission bar** (T, ballot §8): the carrier test also fails an atlas
+   Card keyword carried by fewer than 2 cards or 2 enemies, with
+   CONVICTION, RESERVE, WILD and PIP exempt as system words. BLEED's
+   retirement is a separate small fix (ballot residue 3), so the fence
+   pins BLEED until that lands.
+4. **The complexity budget bands** are the atlas's, ratified as written by
+   T (ballot §9) (Ash/Tooth ≤ 1 keyword
    beyond damage/guard and no trigger; Splinter/Rib ≤ 2 with one
    condition; Skull/Saint unbudgeted), scored by the existing
    `cardComplexity`. If `cardComplexity`'s notion of "keyword" and the

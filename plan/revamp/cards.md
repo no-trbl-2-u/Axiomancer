@@ -237,6 +237,15 @@ the card-creation build plan. Replaces the deleted card editor. Designed
 with T after B4; scope (UI tool vs. agent-driven authoring vs. both) is
 T's call.
 
+**Shape ruled (T, card-spec ballot §17, 2026-10-13;
+`plan/card-ledger/card-spec-ballot-2026-10-13.md`).** B5 is a skill, not
+a UI: it takes a loose idea for a deck, asks questions until aligned,
+proposes several keyword and mechanic interactions, has T pick a few,
+renders an HTML artifact showing five example cards per sub-lane (Payoff,
+Engine, Misc), and, on T's sign-off, writes briefs for three phases: card
+creation, measuring, tuning. CS1 ships `Cards/card-rules.ts` as its
+validation layer. The skill itself is written in a session with T.
+
 ## B6 — Card sessions (owner)
 
 T runs Plan B's sessions as amended by D73, one lane per slice. A fresh card agent is written at the
