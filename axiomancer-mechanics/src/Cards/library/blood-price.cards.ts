@@ -73,8 +73,8 @@ const ENTRIES: Entry[] = [
         free: L('GUARD {guard:3}.', c => { c.guard(3); }),
         paid: L('LEECH 1 per 10 VITAE missing (max 8).', c => { c.leech(Math.min(8, Math.floor(c.q.missing / 10))); }) } },
     { slot: 'p-07b', type: 'attack', color: RED, program: {
-        free: L('DEAL half the VITAE you lost this combat (max 10).', c => { c.deal(Math.min(10, Math.floor(c.q.lostThisCombat / 2))); }),
-        paid: L('DEAL all the VITAE you lost this combat (max 30). EXILE.', c => { c.deal(Math.min(30, c.q.lostThisCombat)); }, { exile: true }) } },
+        free: L('DEAL half the VITAE you lost this combat (max 10).', c => { c.deal(Math.min(10, Math.floor(c.q.lostThisCombat / 2)), { exact: true }); }),
+        paid: L('DEAL all the VITAE you lost this combat (max 30). EXILE.', c => { c.deal(Math.min(30, c.q.lostThisCombat), { exact: true }); }, { exile: true }) } },
     { slot: 'p-08d', type: 'skill', color: PURPLE, program: {
         free: L('SACRIFICE 2, gain 2 Conviction.', c => { c.sacrifice(2); c.conviction(2); }),
         paid: L('TETHER 3. SACRIFICE 4.', c => { c.tether(3); c.sacrifice(4); }) } },
