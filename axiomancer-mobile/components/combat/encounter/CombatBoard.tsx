@@ -152,6 +152,33 @@ export function resolveDieDropTarget(
     return eligible[0] ?? null;
 }
 
+/**
+ * Keep only the pending die picks whose card is still staged — returning the
+ * SAME object when nothing was dropped.
+ *
+ * Why it exists (drag-perf hypothesis 1, re-renders on the drag path): the
+ * board prunes its picks in an effect on every staging change. Building a
+ * fresh `{}` each time made React schedule a second board commit on every
+ * stage and unstage (a drop's own commit, then this one), and the new object
+ * re-keyed `assignedDieIds`, re-rendering the dice tray for nothing. Same
+ * identity in, same identity out lets React bail out of the update.
+ */
+export function prunePending(prev: Record<string, string>, stagedUids: string[]): Record<string, string> {
+    const staged = new Set(stagedUids);
+    const keys = Object.keys(prev);
+    if (keys.every((uid) => staged.has(uid))) return prev;
+    const next: Record<string, string> = {};
+    for (const uid of keys) if (staged.has(uid)) next[uid] = prev[uid];
+    return next;
+}
+
+/** Clear every pending die pick — the same object when already empty, so the
+ *  turn-change reset (and the mount pass) costs no extra board commit (same
+ *  reason as {@link prunePending}). */
+export function clearPending(prev: Record<string, string>): Record<string, string> {
+    return Object.keys(prev).length === 0 ? prev : {};
+}
+
 /** The armed staged card's tint (keyword/value/border + the APPLY ribbon).
  *  Every play lands printed, so there is one armed tint. */
 const ARMED_ACCENT = HUE.stoneGrey;
@@ -878,14 +905,10 @@ export const CombatBoard = React.memo(function CombatBoard({
     }, [dropReject.n]);
     const stagedKey = stagedUids.join(',');
     // Clear pending selections when the turn's dice change…
-    useEffect(() => { setPendingDieByUid({}); }, [vm.turnLabel]);
+    useEffect(() => { setPendingDieByUid(clearPending); }, [vm.turnLabel]);
     // …and drop entries for cards that are no longer staged.
     useEffect(() => {
-        setPendingDieByUid((prev) => {
-            const next: Record<string, string> = {};
-            for (const uid of stagedUids) if (prev[uid]) next[uid] = prev[uid];
-            return next;
-        });
+        setPendingDieByUid((prev) => prunePending(prev, stagedUids));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [stagedKey]);
 
