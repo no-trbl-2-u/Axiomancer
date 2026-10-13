@@ -67,6 +67,24 @@ import { juiceHaptics, useJuicePulse, useJuiceShake } from '@/lib/juice';
 // circe placeholder for unmapped ids. Stance tint + glyph still ride on top.
 import { getCardArt } from '@/assets/images/cards';
 
+// ── Layout-animation builders (hoisted, identity-stable) ─────────────────────
+// Reanimated compares an Animated component's `layout` / `exiting` prop by
+// IDENTITY on every update (`AnimatedComponent.componentDidUpdate` →
+// `_configureLayoutAnimation`). `LinearTransition.duration(160)` written inline
+// is a NEW builder each render, so every re-render of a fanned card re-built
+// the layout worklet, serialised it to the UI runtime and pushed it through
+// `configureLayoutAnimationBatch` — once on a drag pickup (the lifted card) and
+// once per fanned card on every stage/unstage commit, all on the JS thread
+// while the finger is moving. Built once here, the comparison short-circuits.
+// (Drag-perf hypothesis 4, layout animations on the drag path; see
+// docs/perf/combat-drag-baseline.md.) `entering` is only read at mount, but
+// shares the convention so no builder on the board is allocated per render.
+export const FAN_CARD_ENTERING = FadeIn.duration(180);
+export const FAN_CARD_LAYOUT = LinearTransition.duration(160);
+const STAGED_CARD_ENTERING = FadeInDown.duration(180);
+const PLAY_HINT_ENTERING = FadeIn.duration(150);
+const REJECT_LINE_ENTERING = FadeIn.duration(120);
+
 // ── Drag plumbing (cards AND dice) ───────────────────────────────────────────
 
 export type DragPayload =
@@ -546,7 +564,7 @@ export const StagedCard = React.memo(function StagedCard({
             <GestureDetector gesture={gesture}>
                 <Animated.View
                     ref={(node) => register(card.uid, node as unknown as View | null)}
-                    entering={FadeInDown.duration(180)}
+                    entering={STAGED_CARD_ENTERING}
                     testID={`combat-staged-${card.uid}`}
                     accessible
                     accessibilityRole="button"
@@ -1261,7 +1279,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                         pointerEvents="box-none"
                     >
                         {cardDragLive && (
-                            <Animated.Text entering={FadeIn.duration(150)} style={styles.playHint}>
+                            <Animated.Text entering={PLAY_HINT_ENTERING} style={styles.playHint}>
                                 release to stage
                             </Animated.Text>
                         )}
@@ -1295,7 +1313,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                         </View>
                         {/* LOUD rejection reason — the a11y label made visible. */}
                         {dropReject.reason ? (
-                            <Animated.Text entering={FadeIn.duration(120)} style={styles.rejectLine} numberOfLines={2} testID="combat-drop-reject">
+                            <Animated.Text entering={REJECT_LINE_ENTERING} style={styles.rejectLine} numberOfLines={2} testID="combat-drop-reject">
                                 ✕ {dropReject.reason}
                             </Animated.Text>
                         ) : null}
@@ -1945,7 +1963,7 @@ export const FanCard = React.memo(function FanCard({
     return (
         <GestureDetector gesture={gesture}>
             <Animated.View
-                entering={FadeIn.duration(180)} layout={LinearTransition.duration(160)}
+                entering={FAN_CARD_ENTERING} layout={FAN_CARD_LAYOUT}
                 style={{
                     marginLeft,
                     zIndex: lifted ? 30 : zIndex,

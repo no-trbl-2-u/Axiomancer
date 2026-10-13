@@ -14,7 +14,7 @@ import { render } from '@testing-library/react-native';
 import { describe, expect, it, jest } from '@jest/globals';
 
 import { initializeCombatEncounter, rollEncounterDice } from '@mechanics';
-import { CombatBoard, type DragController } from '@/components/combat/encounter/CombatBoard';
+import { CombatBoard, FAN_CARD_LAYOUT, type DragController } from '@/components/combat/encounter/CombatBoard';
 import { buildCombatViewModel } from '@/state/presenters/combat-encounter.engine';
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
@@ -72,5 +72,38 @@ describe('CombatBoard — drag pickup re-render scope', () => {
         detectorRenders.length = 0;
         view.rerender(board(dragWith(null)));
         expect(detectorRenders).toEqual([`combat-hand-${card.uid}`]);
+    });
+
+    // Reanimated re-configures a layout animation whenever the `layout` prop
+    // changes IDENTITY (`_configureLayoutAnimation`): an inline
+    // `LinearTransition.duration(160)` re-built and re-serialised the worklet
+    // on every fanned-card re-render — on pickup, and once per card on every
+    // stage commit. The builder is hoisted; this pins that every fanned card
+    // carries the one shared instance, before and after the fan re-lays out.
+    it('every fanned card keeps the one hoisted layout builder across a pickup and a re-layout', () => {
+        const { store } = withAllProviders(<></>);
+        const base = store.getState().player;
+        const player = { ...base, knownCards: CARDS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 };
+        let s = initializeCombatEncounter(player, createMockEncounterEnemy(), undefined, 16);
+        s = rollEncounterDice(s).state;
+        const vm = buildCombatViewModel(s);
+        const board = (drag: DragController, staged: string[]) => withAllProviders(
+            <CombatBoard vm={vm} drag={drag} stagedUids={staged} {...callbacks} />,
+            { store },
+        ).tree;
+        const layoutsOf = (view: ReturnType<typeof render>, uids: string[]) =>
+            uids.map((uid) => view.getByTestId(`combat-hand-${uid}`).props.layout);
+
+        const view = render(board(dragWith(null), []));
+        const uids = vm.hand.map((c) => c.uid);
+        expect(layoutsOf(view, uids).every((l) => l === FAN_CARD_LAYOUT)).toBe(true);
+
+        const card = vm.hand[0];
+        view.rerender(board(dragWith({ type: 'card', from: 'hand', uid: card.uid, card }), []));
+        expect(layoutsOf(view, uids).every((l) => l === FAN_CARD_LAYOUT)).toBe(true);
+
+        // Staging the first card re-lays out (and re-renders) every other one.
+        view.rerender(board(dragWith(null), [card.uid]));
+        expect(layoutsOf(view, uids.slice(1)).every((l) => l === FAN_CARD_LAYOUT)).toBe(true);
     });
 });
