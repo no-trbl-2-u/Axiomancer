@@ -16,12 +16,14 @@ When a brainstorm or design conversation ends with buildable direction, offer
 it in one `AskUserQuestion`: "Want to use `/plot` to turn this into a phase?"
 or "Want to use `/messy` to file this dump?". The loop never fires either.
 
-Answering a **balance/measurement** question (win rates, engagement)? There
-is no current measured baseline: the deck-matrix baseline was retired in
-revamp phase R1 (D57) and returns when R9/B2 need numbers. Say so rather than
-cite the last one (it lives only under the `archive-pre-revamp` tag) — see
-`docs/truth-sources.md` → "Measured truth". Source-of-rules questions (cards,
-pricing, keywords) read the current tree.
+Answering a **balance/measurement** question (win rates, engagement)? Read
+`docs/reports/measured/latest.md` (phase R12a: the grey and Blood Price
+decks across the Act 1 ledger) and name the commit its stamp gives. It is a
+measurement, not a gated baseline (D57); a question it does not cover gets
+"not measured". Never cite the retired deck-matrix baseline (it lives only
+under the `archive-pre-revamp` tag) — see `docs/truth-sources.md` →
+"Measured truth". Source-of-rules questions (cards, pricing, keywords) read
+the current tree.
 
 `telemetry/` is an append-only invocation log written by
 `.claude/hooks/telemetry.mjs` (skills, slash commands, subagent spawns) —

@@ -442,6 +442,13 @@ wanted, a workflow) for the rebuilt game:
 The archived rewrite (`archive-pre-revamp:plan/archive/2026-09-28-revamp-r0/.claude/commands/combat-playtest.md`)
 is a starting draft, not a spec. Requires R9, R11.
 
+R12a built the engine half: `measuredTruthCells` (`src/Combat/combat.measured-truth.ts`)
+measures the grey deck and the Blood Price test deck across the Act 1 ledger
+at three stat spreads, with lowest VITAE, into `docs/reports/measured/`, on
+mechanics merges and Sundays (`measured-truth.yml`). R12 designs the command
+on top of it: the policy roster, the stage-profile re-point, and what a drift
+should trigger beyond a `[content]` AUDIT row.
+
 ### Exit
 
 R0 merges → T re-enables `march` and `night` → the loop picks R1.

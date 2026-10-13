@@ -60,12 +60,29 @@ its own cadence.
    Failures become HIGH `plan/AUDIT.md` rows — the digest
    files them; the next dispatcher tick fixes them.
 
-   There is no nightly balance re-measure. The deck-matrix
-   baseline is retired until the retune (D57; R1 removed its
-   scripts; the file survives only under the `archive-pre-revamp` tag). Balance
-   evidence during the revamp comes from R9's own measurement
-   (and, after R12, the new combat-playtest's reports); the digest only links a
-   report that landed in the window.
+   **Measured truth** (R12a). The digest does not re-measure;
+   `measured-truth.yml` does, on mechanics merges and Sundays. Read
+   the last two lines of `docs/reports/measured/history.jsonl` and
+   render the section with the pure renderer:
+
+   ```bash
+   node --input-type=module -e "
+   import { readFileSync } from 'node:fs'
+   import { compare, renderDigestSection } from './scripts/measured-compare.mjs'
+   const lines = readFileSync('docs/reports/measured/history.jsonl', 'utf8').split('\n').filter(Boolean).map(JSON.parse)
+   const [previous, current] = [lines.at(-2) ?? null, lines.at(-1) ?? null]
+   const thresholds = JSON.parse(readFileSync('docs/reports/measured/thresholds.json', 'utf8'))
+   const drifts = current ? compare({ current, previous, thresholds }) : []
+   process.stdout.write(renderDigestSection(current, previous, drifts, { sinceDate: process.argv[1] }))
+   " <date of the previous DIGEST entry>
+   ```
+
+   Paste its output into today's entry as is. With no run since the
+   last entry it prints one line, not an empty table; with no run at
+   all it says so. The numbers are a measurement, not a grade (D57):
+   say what moved, never that the game got better or worse. Drift
+   rows are already filed in `plan/AUDIT.md` by the run itself; do not
+   file them again.
 
 4. **Write today's DevLog entry** — create
    `devlog/entries/DIGEST_<YYYY-MM-DD>.md`. Never overwrite a
