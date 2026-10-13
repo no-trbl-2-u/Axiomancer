@@ -53,6 +53,7 @@
 ## Loop
 
 - **plan-only-push-race** · a plan-only `push HEAD:main` from a worktree branch was refused because a telemetry tick-end commit landed on main between the fetch and the push (plot R12a) → commit first, then `git fetch origin && git rebase origin/main && git push origin HEAD:main` as one act · seen 1× · last 2026-10-12 · open
+- **loop-pr-label-missing** · the first `loop:pr` PR after R11 failed at `gh pr create`: the repo had no `loop:pr` label, and the PR cap and claims read that label (ship R12a, #505) → ensure the label exists before `gh pr create`; `skills/march.md` §3 "Landing a change" now runs `gh label create … || true` first · seen 1× · last 2026-10-13 · open
 
 ## Adding a domain
 

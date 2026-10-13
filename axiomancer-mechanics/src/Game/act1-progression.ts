@@ -77,6 +77,8 @@ export interface Act1DoorReading {
 
 export interface Act1Walk {
     doors: Act1DoorReading[];
+    /** The player's level stepping up to each fight, parallel to the walked list. */
+    fightLevels: number[];
     finalLevel: number;
     finalExperience: number;
 }
@@ -89,14 +91,16 @@ export function walkAct1(fights: readonly Act1Fight[]): Act1Walk {
     let level = 1;
     let experience = 0;
     const doors: Act1DoorReading[] = [];
+    const fightLevels: number[] = [];
     for (const fight of fights) {
+        fightLevels.push(level);
         if (fight.isBoss) {
             doors.push({ map: fight.map, nodeId: fight.nodeId, playerLevel: level, doorLevel: fight.level, experience });
         }
         experience += act1FightXp(fight, level);
         while (experience >= experienceForLevel(level + 1)) level += 1;
     }
-    return { doors, finalLevel: level, finalExperience: experience };
+    return { doors, fightLevels, finalLevel: level, finalExperience: experience };
 }
 
 /** How a stage's stat points are spent: evenly, two-thirds body, or all body. */

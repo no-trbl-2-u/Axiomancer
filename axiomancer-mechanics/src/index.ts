@@ -121,6 +121,11 @@ export type {
     // Card programs: the Global / Curse / SACRIFICE ledger
     ProgramLedger, GlobalInPlay,
 } from './Combat';
+// Measured truth (R12a): the Act 1 ledger x spread x deck measurement.
+export { measuredTruthCells, MEASURED_DECK_LANES, MEASURED_SPREADS } from './Combat/combat.measured-truth';
+export type {
+    MeasuredTruthReport, MeasuredTruthCell, MeasuredTruthDeck, MeasuredTruthOptions,
+} from './Combat/combat.measured-truth';
 
 // ─── Sandbox cards — the deck-forge experimentation surface ───────────────────
 // New experimental cards + numeric overrides of library cards, live everywhere

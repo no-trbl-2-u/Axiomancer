@@ -126,7 +126,7 @@ here); `kb-query` is the genre's external prior art (community sourced,
 cite with `src-NNN` receipts) and has NO local fallback — the Worker is
 the corpus's only route into this repo.
 
-## Measured truth — retired during the revamp (D57)
+## Measured truth
 
 Two kinds of truth answer game questions, and they go stale
 differently:
@@ -137,30 +137,43 @@ differently:
   the guard tests pin every player-facing surface to the payloads. The
   catalog page carries a stamp (`from engine source <commit>`) so a
   stale render is visible on sight.
-- **Measured truth** (win-rate curves, status engagement) is only as
-  fresh as the last sim run. **There is none current.** The deck-matrix
-  baseline and its tooling (`baseline:check`, `baseline:regen`, the CI
-  freshness warning, the digest's nightly re-measure) were retired in
-  revamp phase R1 (D57): after the card purge every cell was the grey
-  deck, so the file measured nothing a decision could use. The last one
-  is at `archive-pre-revamp:plan/archive/baselines/deck-matrix-baseline.json`
-  (stamp `be808d2`) and describes a pre-revamp engine.
+- **Measured truth** (win rates, how close a fight gets) is only as
+  fresh as the last sim run. The current one is
+  **`docs/reports/measured/latest.md`** (phase R12a): the grey deck and
+  the Blood Price test deck in every Act 1 ledger fight, with the player
+  at the level a full clear brings there, at three stat spreads, played
+  by the greedy witness. Each cell gives the win rate and the lowest
+  VITAE reached (mean and p10). Every run appends one line to
+  `docs/reports/measured/history.jsonl`; `.github/workflows/measured-truth.yml`
+  runs it on every merge to `main` that touches `axiomancer-mechanics/src/`,
+  on Sundays, and by hand. Engine: `npm run measured-truth -w
+  axiomancer-mechanics` (`measuredTruthCells`).
 
-Rules until measurement returns (R9's own measurement, then R12's new
-combat-playtest):
+The old deck-matrix numbers were retired in revamp phase R1 (D57) and
+are not this record; they describe a pre-revamp engine
+(`archive-pre-revamp:plan/archive/baselines/deck-matrix-baseline.json`,
+stamp `be808d2`). Never cite them.
 
-1. A balance question gets "not measured" as its answer, not a number
-   from the archived baseline.
-2. When a measurement lands, every claim citing it NAMES the commit it
-   measured ("as of `<commit>`, `<date>`").
-3. Measuring is not tuning: a measurement is briefing; card and deck
-   changes happen only in guided sessions with T (D37), and engine
-   constants move only inside a ratified revamp phase (D58).
+Rules for citing a measurement:
+
+1. **Name the commit.** Every claim citing it says what it measured
+   ("as of `<commit>`, `<date>`", the stamp at the top of `latest.md`).
+   A question the table does not cover gets "not measured" as its
+   answer.
+2. **A measurement, not a gate (D57).** Nothing fails on a number. A
+   run-to-run move past `docs/reports/measured/thresholds.json` lands in
+   the `/digest` DevLog entry and as a `[content]` row in
+   `plan/AUDIT.md`. Whether it ever becomes a gated reference is R12's
+   call, made with T.
+3. **Measuring is not tuning (D37, D88).** A measurement is briefing:
+   card and deck changes happen only in guided sessions with T, and
+   enemies or engine constants move only inside a phase T briefed. A
+   `[content]` drift row waits for T; `/iterate` never fixes it.
 
 **Performance is measured; balance is not.** The weekly performance audit
 (`.github/workflows/perf-audit.yml`, D77) keeps the performance record in
 `docs/reports/perf/history.jsonl` (one line per week: web bundle and load,
 runtime smoothness on a scripted combat round, engine ms per combat) with
 budgets in `docs/reports/perf/budgets.json`. It answers "is the game
-getting slower or heavier", never a balance question: balance still has no
-measured baseline (D57).
+getting slower or heavier", never a balance question; balance lives in
+`docs/reports/measured/` (above).
