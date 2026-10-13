@@ -26,7 +26,7 @@
  */
 
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import type { StyleProp, TextStyle } from 'react-native';
 import { Image } from '@/lib/platform/image';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
@@ -66,6 +66,46 @@ import { juiceHaptics, useJuicePulse, useJuiceShake } from '@/lib/juice';
 // Per-card art registry (temp art pass) — keyed by cardId, falls back to the
 // circe placeholder for unmapped ids. Stance tint + glyph still ride on top.
 import { getCardArt } from '@/assets/images/cards';
+
+// ── Layout-animation builders (hoisted, identity-stable) ─────────────────────
+// Reanimated compares an Animated component's `layout` / `exiting` prop by
+// IDENTITY on every update (`AnimatedComponent.componentDidUpdate` →
+// `_configureLayoutAnimation`). `LinearTransition.duration(160)` written inline
+// is a NEW builder each render, so every re-render of a fanned card re-built
+// the layout worklet, serialised it to the UI runtime and pushed it through
+// `configureLayoutAnimationBatch` — once on a drag pickup (the lifted card) and
+// once per fanned card on every stage/unstage commit, all on the JS thread
+// while the finger is moving. Built once here, the comparison short-circuits.
+// (Drag-perf hypothesis 4, layout animations on the drag path; see
+// docs/perf/combat-drag-baseline.md.) `entering` is only read at mount, but
+// shares the convention so no builder on the board is allocated per render.
+export const FAN_CARD_ENTERING = FadeIn.duration(180);
+export const FAN_CARD_LAYOUT = LinearTransition.duration(160);
+
+/**
+ * The fan's slide-together transition, per platform.
+ *
+ * Why it exists (drag-perf hypothesis 4, measured on web): Reanimated's web
+ * layout transitions snapshot every updating node with a forced
+ * `getBoundingClientRect` in `getSnapshotBeforeUpdate` AND again in
+ * `componentDidUpdate` (`tryActivateLayoutTransition`), then generate and
+ * insert a CSS keyframe rule per node. A stage or unstage re-lays out every
+ * fanned card, so that commit forced a synchronous layout per card,
+ * interleaved with the drag ghost's style writes — the 200-370ms frame right
+ * after a release. Web drops the transition (cards close the gap in one
+ * frame); native keeps it until a device trace says otherwise (see
+ * docs/perf/combat-drag-baseline.md, "remaining").
+ *
+ * @param os - the platform (`Platform.OS`); a parameter so the choice is testable.
+ * @returns the layout builder for the fanned card, or undefined for none.
+ */
+export function fanCardLayoutFor(os: string): typeof FAN_CARD_LAYOUT | undefined {
+    return os === 'web' ? undefined : FAN_CARD_LAYOUT;
+}
+const FAN_CARD_LAYOUT_HERE = fanCardLayoutFor(Platform.OS);
+const STAGED_CARD_ENTERING = FadeInDown.duration(180);
+const PLAY_HINT_ENTERING = FadeIn.duration(150);
+const REJECT_LINE_ENTERING = FadeIn.duration(120);
 
 // ── Drag plumbing (cards AND dice) ───────────────────────────────────────────
 
@@ -132,6 +172,33 @@ export function resolveDieDropTarget(
     if (!inPlayArea) return null;
     const eligible = stagedUids.filter(legal);
     return eligible[0] ?? null;
+}
+
+/**
+ * Keep only the pending die picks whose card is still staged — returning the
+ * SAME object when nothing was dropped.
+ *
+ * Why it exists (drag-perf hypothesis 1, re-renders on the drag path): the
+ * board prunes its picks in an effect on every staging change. Building a
+ * fresh `{}` each time made React schedule a second board commit on every
+ * stage and unstage (a drop's own commit, then this one), and the new object
+ * re-keyed `assignedDieIds`, re-rendering the dice tray for nothing. Same
+ * identity in, same identity out lets React bail out of the update.
+ */
+export function prunePending(prev: Record<string, string>, stagedUids: string[]): Record<string, string> {
+    const staged = new Set(stagedUids);
+    const keys = Object.keys(prev);
+    if (keys.every((uid) => staged.has(uid))) return prev;
+    const next: Record<string, string> = {};
+    for (const uid of keys) if (staged.has(uid)) next[uid] = prev[uid];
+    return next;
+}
+
+/** Clear every pending die pick — the same object when already empty, so the
+ *  turn-change reset (and the mount pass) costs no extra board commit (same
+ *  reason as {@link prunePending}). */
+export function clearPending(prev: Record<string, string>): Record<string, string> {
+    return Object.keys(prev).length === 0 ? prev : {};
 }
 
 /** The armed staged card's tint (keyword/value/border + the APPLY ribbon).
@@ -546,7 +613,7 @@ export const StagedCard = React.memo(function StagedCard({
             <GestureDetector gesture={gesture}>
                 <Animated.View
                     ref={(node) => register(card.uid, node as unknown as View | null)}
-                    entering={FadeInDown.duration(180)}
+                    entering={STAGED_CARD_ENTERING}
                     testID={`combat-staged-${card.uid}`}
                     accessible
                     accessibilityRole="button"
@@ -860,14 +927,10 @@ export const CombatBoard = React.memo(function CombatBoard({
     }, [dropReject.n]);
     const stagedKey = stagedUids.join(',');
     // Clear pending selections when the turn's dice change…
-    useEffect(() => { setPendingDieByUid({}); }, [vm.turnLabel]);
+    useEffect(() => { setPendingDieByUid(clearPending); }, [vm.turnLabel]);
     // …and drop entries for cards that are no longer staged.
     useEffect(() => {
-        setPendingDieByUid((prev) => {
-            const next: Record<string, string> = {};
-            for (const uid of stagedUids) if (prev[uid]) next[uid] = prev[uid];
-            return next;
-        });
+        setPendingDieByUid((prev) => prunePending(prev, stagedUids));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [stagedKey]);
 
@@ -1020,15 +1083,28 @@ export const CombatBoard = React.memo(function CombatBoard({
     // in the panel), so gestures capturing them can be cached indefinitely.
     const gx = drag.x;
     const gy = drag.y;
+    // The fanned card in flight, written by the pan worklet itself on the UI
+    // thread, so the slot dims the frame the drag activates instead of after
+    // the pickup's JS commit, and no fanned card re-renders for it (see
+    // `FanCard`). Cleared on finalize, and again below when the controller
+    // reports no drag (an interrupted web pointer stream finalizes in JS).
+    const liftedUid = useSharedValue<string | null>(null);
+    useEffect(() => {
+        if (!drag.active) liftedUid.value = null;
+    }, [drag.active, liftedUid]);
     const cardGestureFor = (from: 'hand' | 'play', uid: string) => {
         const key = `${from}-${uid}`;
         let g = gestureCacheRef.current.get(key);
         if (!g) {
             const pan = Gesture.Pan().minDistance(10)
-                .onStart((e) => { gx.value = e.absoluteX; gy.value = e.absoluteY; runOnJS(beginCardJS)(from, uid, e.absoluteX, e.absoluteY); })
+                .onStart((e) => {
+                    gx.value = e.absoluteX; gy.value = e.absoluteY;
+                    if (from === 'hand') liftedUid.value = uid;
+                    runOnJS(beginCardJS)(from, uid, e.absoluteX, e.absoluteY);
+                })
                 .onUpdate((e) => { gx.value = e.absoluteX; gy.value = e.absoluteY; })
                 .onEnd((e) => { runOnJS(endJS)(e.absoluteX, e.absoluteY); })
-                .onFinalize((e, ok) => { if (!ok) runOnJS(endJS)(-1, -1); });
+                .onFinalize((e, ok) => { liftedUid.value = null; if (!ok) runOnJS(endJS)(-1, -1); });
             // `withTestId` is RNGH's own test affordance and is inert in
             // production — the registry only stores the id under Jest. It is
             // what lets a suite drive this real `Exclusive(pan, tap)` and
@@ -1261,7 +1337,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                         pointerEvents="box-none"
                     >
                         {cardDragLive && (
-                            <Animated.Text entering={FadeIn.duration(150)} style={styles.playHint}>
+                            <Animated.Text entering={PLAY_HINT_ENTERING} style={styles.playHint}>
                                 release to stage
                             </Animated.Text>
                         )}
@@ -1295,7 +1371,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                         </View>
                         {/* LOUD rejection reason — the a11y label made visible. */}
                         {dropReject.reason ? (
-                            <Animated.Text entering={FadeIn.duration(120)} style={styles.rejectLine} numberOfLines={2} testID="combat-drop-reject">
+                            <Animated.Text entering={REJECT_LINE_ENTERING} style={styles.rejectLine} numberOfLines={2} testID="combat-drop-reject">
                                 ✕ {dropReject.reason}
                             </Animated.Text>
                         ) : null}
@@ -1422,7 +1498,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                                 marginLeft={i === 0 ? 0 : -overlap}
                                 tilt={i - mid}
                                 zIndex={i}
-                                lifted={draggingCardUid === card.uid}
+                                liftedUid={liftedUid}
                                 namePeek={i === fan.length - 1 ? null : handNamePeek}
                             />
                         ))}
@@ -1920,15 +1996,24 @@ export const CombatCardFace = React.memo(function CombatCardFace({
 // same constants — keep them in sync. Exported for the drag ghost.
 export const HAND_CARD_W = 120;
 export const HAND_CARD_H = 176;
+/** Opacity of the fanned card whose drag is in flight (its ghost is the
+ *  readable copy; the slot it left reads as a faded placeholder). */
+export const LIFTED_CARD_OPACITY = 0.3;
+/** z-order of the lifted card, above every fanned neighbour. */
+const LIFTED_CARD_Z = 30;
+
 /**
  * One fanned hand card with its drag/tap gesture. Memoized on primitive
- * props so a drag pickup or drop re-renders ONLY the card whose `lifted`
- * flipped: a re-rendered GestureDetector pushes every one of its handlers'
- * configs back to the native gesture module, and the drag ghost only shows
- * once that pickup commit lands, so a whole-fan re-render was pickup lag.
+ * props, and the in-flight dim is NOT a prop: it is derived on the UI thread
+ * from the board's `liftedUid` shared value, which the pan worklet writes the
+ * moment the drag activates. So a pickup or drop re-renders NO fanned card:
+ * a re-rendered GestureDetector pushes every one of its handlers' configs
+ * back to the native gesture module, and on web the `layout` transition
+ * snapshots the node with a forced `getBoundingClientRect` on every update —
+ * both on the commit the drag ghost waits on. (Drag-perf hypothesis 1/4.)
  */
 export const FanCard = React.memo(function FanCard({
-    card, gesture, marginLeft, tilt, zIndex, lifted, namePeek,
+    card, gesture, marginLeft, tilt, zIndex, liftedUid, namePeek,
 }: {
     card: CombatCardVM;
     /** Cached per uid by the board — identity-stable for the card's life. */
@@ -1937,20 +2022,28 @@ export const FanCard = React.memo(function FanCard({
     /** Signed distance from the fan's middle, in cards. */
     tilt: number;
     zIndex: number;
-    /** This card is the one in flight: dimmed and raised. */
-    lifted: boolean;
+    /** Uid of the hand card in flight (null = none). Identity-stable; the
+     *  card dims and rises when it equals its own uid. */
+    liftedUid: SharedValue<string | null>;
     namePeek: number | null;
 }) {
-    const styles = useStyles();
+    const uid = card.uid;
+    // Raise above the neighbours while in flight — on the outer node, the one
+    // the fan's stacking compares.
+    const liftZStyle = useAnimatedStyle(() => ({ zIndex: liftedUid.value === uid ? LIFTED_CARD_Z : zIndex }));
+    // The dim rides an inner node: FadeIn drives `opacity` on the outer
+    // wrapper, and an `opacity` style on that same node is what Reanimated
+    // warns "may be overwritten by a layout animation".
+    const liftDimStyle = useAnimatedStyle(() => ({ opacity: liftedUid.value === uid ? LIFTED_CARD_OPACITY : 1 }));
     return (
         <GestureDetector gesture={gesture}>
             <Animated.View
-                entering={FadeIn.duration(180)} layout={LinearTransition.duration(160)}
-                style={{
+                entering={FAN_CARD_ENTERING} layout={FAN_CARD_LAYOUT_HERE}
+                style={[{
                     marginLeft,
-                    zIndex: lifted ? 30 : zIndex,
+                    zIndex,
                     transform: [{ translateY: 2 + Math.abs(tilt) * 3 }, { rotate: `${tilt * 3}deg` }],
-                }}
+                }, liftZStyle]}
                 testID={`combat-hand-${card.uid}`}
                 accessible accessibilityRole="button"
                 // The fanned face has no room to PRINT the
@@ -1962,13 +2055,9 @@ export const FanCard = React.memo(function FanCard({
                 accessibilityLabel={`${card.name}, ${RARITY_LABEL[rarityFor(card)]}, ${card.stance} card. ${card.face.verbLine}.`}
                 accessibilityHint="Drag up to stage, or tap to read"
             >
-                {/* The in-flight dim lives on a plain inner view: FadeIn
-                    drives `opacity` on the animated wrapper, and an
-                    `opacity` style on that same node is what Reanimated
-                    warns "may be overwritten by a layout animation". */}
-                <View style={lifted ? styles.handCardLifted : null}>
+                <Animated.View style={liftDimStyle}>
                     <HandCard card={card} namePeek={namePeek} />
-                </View>
+                </Animated.View>
             </Animated.View>
         </GestureDetector>
     );
@@ -2134,7 +2223,6 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
         color: AXM.bone, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3,
     },
     // The hand card whose drag ghost is in flight — dimmed in place.
-    handCardLifted: { opacity: 0.3 },
     handCardStuck: { opacity: 0.6 },
     stuckBadge: {
         position: 'absolute', left: 6, right: 6, top: '42%', alignItems: 'center',

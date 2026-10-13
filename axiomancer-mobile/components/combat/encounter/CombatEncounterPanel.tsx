@@ -23,7 +23,7 @@
  * run reset is the host's concern.
  */
 
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { startTransition, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import Svg, { Circle, Defs, Line, Polygon, RadialGradient, Stop } from 'react-native-svg';
@@ -429,6 +429,18 @@ export function CombatEncounterPanel({
     // ── screen-level drag controller (cards + dice) ──
     // dragX/dragY are written straight from the board's gesture worklets every
     // frame (see DragController.x/y) — the JS thread only sees begin and end.
+    // TWO views of the live drag, committed at different priorities
+    // (drag-perf hypothesis 1, pickup latency):
+    //   · `ghostDrag` — urgent. Only the panel and its ghost read it, so the
+    //     pickup commit that reveals the ghost is cheap (the memoized board
+    //     sits it out: its `drag` prop has not changed yet);
+    //   · `dragActive` — a transition. The board reads it (dims, sockets,
+    //     SCRAP bin, play-region outline); that heavier re-render follows
+    //     right behind instead of standing between the finger and the ghost.
+    // Both are set together and cleared together; React applies them in
+    // order, so a release that lands before the transition commits still
+    // ends at null.
+    const [ghostDrag, setGhostDrag] = useState<DragPayload | null>(null);
     const [dragActive, setDragActive] = useState<DragPayload | null>(null);
     const dragRef = useRef<DragPayload | null>(null);
     const dragX = useSharedValue(0);
@@ -444,14 +456,19 @@ export function CombatEncounterPanel({
         // flashed the last-dragged card's face for a frame when a DIE drag began
         // (the "die looks like a card" bug). The effect below reveals it on the
         // commit that carries the right payload.
-        dragRef.current = payload; dragX.value = x; dragY.value = y; setDragActive(payload);
+        dragRef.current = payload; dragX.value = x; dragY.value = y;
+        setGhostDrag(payload);
+        startTransition(() => { setDragActive(payload); });
     }, [dragX, dragY]);
-    useEffect(() => {
-        if (dragActive) dragShown.value = 1;
-    }, [dragActive, dragShown]);
+    // Reveal in a LAYOUT effect: it runs as the commit that carries the right
+    // payload lands, before paint, so the ghost shows on that frame rather
+    // than one passive-effect hop later.
+    useLayoutEffect(() => {
+        if (ghostDrag) dragShown.value = 1;
+    }, [ghostDrag, dragShown]);
     const drag: DragController = useMemo(() => ({ begin, end: () => undefined, active: dragActive, x: dragX, y: dragY, badRects }), [begin, dragActive, dragX, dragY, badRects]);
     const end = useCallback((x: number, y: number) => {
-        const payload = dragRef.current; dragRef.current = null; dragShown.value = 0; setDragActive(null);
+        const payload = dragRef.current; dragRef.current = null; dragShown.value = 0; setGhostDrag(null); setDragActive(null);
         if (!payload) return;
         const resolver = (drag as DragController & { resolveDrop?: DropResolver }).resolveDrop;
         if (resolver) void resolver(payload, x, y);
@@ -462,7 +479,7 @@ export function CombatEncounterPanel({
     // permanent ghost or wedge staging. The finalizer is the SAME snap-home path
     // the cancel branch uses (`end(-1,-1)`).
     const finalizeDrag = useCallback(() => end(-1, -1), [end]);
-    useDragInterruptRecovery(!!dragActive, finalizeDrag, DRAG_WATCHDOG_MS);
+    useDragInterruptRecovery(!!ghostDrag, finalizeDrag, DRAG_WATCHDOG_MS);
     // Centre the hand-card face under the finger (half of HAND_CARD_W/H)
     // and lift it above the fingertip so the card stays readable mid-drag.
     const cardGhostStyle = useAnimatedStyle(() => ({ opacity: dragShown.value, transform: [{ translateX: dragX.value - HAND_CARD_W / 2 }, { translateY: dragY.value - HAND_CARD_H / 2 - 24 }, { scale: 1.1 }] }));
@@ -632,8 +649,8 @@ export function CombatEncounterPanel({
     // remounting the face + image on every drag begin cost a mount + decode while
     // the finger was already moving — the start-of-drag stutter.
     const lastDragRef = useRef<DragPayload | null>(null);
-    if (dragActive) lastDragRef.current = dragActive;
-    const ghostPayload = dragActive ?? lastDragRef.current;
+    if (ghostDrag) lastDragRef.current = ghostDrag;
+    const ghostPayload = ghostDrag ?? lastDragRef.current;
 
     if (!vm) {
         return <View style={styles.root} testID="combat-encounter-empty" />;
