@@ -151,9 +151,16 @@ export function TitleScreen({ menu, startAtMenu = false }: TitleScreenProps) {
         </Animated.View>
       ) : null}
 
+      {/* Once the menu is up the faded block stays mounted for its fade
+          but is hidden from screen readers, so the menu does not read an
+          invisible psalm and a disabled EMBARK. */}
       <Animated.View
         style={[styles.content, ctaStyle]}
         pointerEvents={phase === 'title' ? 'box-none' : 'none'}
+        accessibilityElementsHidden={phase !== 'title'}
+        importantForAccessibility={phase === 'title' ? 'auto' : 'no-hide-descendants'}
+        aria-hidden={phase !== 'title'}
+        testID="title-cta"
       >
         <View style={styles.psalm}>
           <Text style={styles.psalmLine}>{TITLE_COPY.psalm}</Text>
