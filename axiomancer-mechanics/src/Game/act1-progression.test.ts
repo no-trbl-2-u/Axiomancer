@@ -22,6 +22,14 @@ describe('the Act 1 XP ledger (R9, D55)', () => {
         expect(walk.finalLevel).toBe(5);
     });
 
+    it('records the level stepping up to every fight, doors included', () => {
+        const walk = walkAct1(ledger);
+        expect(walk.fightLevels).toHaveLength(ledger.length);
+        expect(walk.fightLevels[0]).toBe(1);
+        const doorLevels = ledger.flatMap((f, i) => (f.isBoss ? [walk.fightLevels[i]] : []));
+        expect(doorLevels).toEqual(walk.doors.map(d => d.playerLevel));
+    });
+
     it('a door-only route meets the Breakwater door at level 1', () => {
         const walk = walkAct1(ledger.filter(f => f.isBoss));
         expect(walk.doors[0]!.playerLevel).toBe(1);

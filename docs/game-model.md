@@ -147,6 +147,8 @@ the Expo app (`axiomancer-mobile`) presents it.
   `STAT_POINTS_PER_LEVEL` = 3 stat points. A kill gives level ×
   `DEFAULT_XP_BY_DIFFICULTY` (normal 20, elite 50, boss 200). A full Act 1
   clear ends near level 5.
+  How each door and fight measures at the level a full clear brings:
+  `docs/reports/measured/latest.md` (a measurement, stamped with its commit).
 
 ## The foes
 

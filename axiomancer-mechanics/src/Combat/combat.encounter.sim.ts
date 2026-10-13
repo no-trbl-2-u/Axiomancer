@@ -110,6 +110,15 @@ export interface CombatSimStats {
     /** `dominantCardId`'s share of total attributed enemy-HP damage (0–1). The
      *  single-card-spam witness: deck-tuning §4 flags any card > 0.70. */
     dominantCardShare: number;
+    /** Mean over the runs of the lowest player VITAE reached, as a fraction of
+     *  max VITAE (sampled after every enemy action and at the fight's end). A
+     *  win at 1 VITAE reads ~0; a defeat reads 0. */
+    lowestVitaeFractionMean: number;
+    /** The 10th percentile of the same per-run lows: one fight in ten gets
+     *  at least this close to death. */
+    lowestVitaeFractionP10: number;
+    /** Mean VITAE the enemy's fired threats took off the player per run. */
+    playerHpTakenMean: number;
 }
 
 /** Per-card telemetry for one run (or aggregated over many), keyed by the
@@ -475,6 +484,9 @@ export function runOneEncounter(
     outcome: CombatOutcome; rounds: number; plays: number; statusPlays: number; convictionSpent: number;
     dotHpDamage: number; mechanicBurstDamage: number; directHpDamage: number;
     guardOnAttack: number; playerHpTaken: number;
+    /** The lowest player VITAE this run reached, as a fraction of max VITAE:
+     *  sampled after every enemy action and once more at the end. */
+    lowestVitaeFraction: number;
     /** Round-turn law — `turn-law-blocked` events in the run's
      *  transcript. A legal policy NEVER trips the law: pinned 0 by the
      *  turn-law e2e. */
@@ -532,6 +544,9 @@ export function runOneEncounter(
     let loopGuard = 0;
     let guardOnAttack = 0;
     let playerHpTaken = 0;
+    const vitaeFraction = (st: CombatEncounterState): number =>
+        st.player.maxHealth > 0 ? Math.max(0, st.player.health) / st.player.maxHealth : 0;
+    let lowestVitaeFraction = vitaeFraction(state);
     // The ARC sample: enemy HP at every round boundary (plus the
     // post-fight value pushed after the loop). `damageCentroid` turns the
     // series into "when in the fight did the HP actually fall?".
@@ -576,6 +591,7 @@ export function runOneEncounter(
                 const playerHpBefore = state.player.health;
                 const result = resolveThreatPhase(state);
                 state = result.state;
+                lowestVitaeFraction = Math.min(lowestVitaeFraction, vitaeFraction(state));
                 // If the threat actually fired, attribute guard availability + HP taken.
                 if (result.events.some(e => e.kind === 'threat-fired')) {
                     guardOnAttack += guardBefore;
@@ -588,6 +604,9 @@ export function runOneEncounter(
     }
 
     const convictionSpent = Math.max(0, state.turn - state.conviction);
+    // The end state too: a defeat (or a self-inflicted cost) that ends the
+    // fight before the next enemy action still counts as the trough.
+    lowestVitaeFraction = Math.min(lowestVitaeFraction, vitaeFraction(state));
 
     // Metrics slate — every draw after the opening deal rides a `hand-drawn`
     // event in the transcript (phase-boundary refills).
@@ -660,6 +679,7 @@ export function runOneEncounter(
         directHpDamage,
         guardOnAttack,
         playerHpTaken,
+        lowestVitaeFraction,
         activeEffectSamples,
         cardUsage,
         cardLineTelemetry,
@@ -714,6 +734,17 @@ function dominantCard(damageByCard: Record<string, number>): { dominantCardId: s
 }
 
 /**
+ * The `p` quantile (0–1) of `xs` by the nearest-rank method: the smallest
+ * value with at least `p` of the list at or below it. 0 for an empty list.
+ */
+export function percentile(xs: readonly number[], p: number): number {
+    if (xs.length === 0) return 0;
+    const sorted = [...xs].sort((a, b) => a - b);
+    const rank = Math.max(1, Math.ceil(p * sorted.length));
+    return sorted[rank - 1]!;
+}
+
+/**
  * Normalized Shannon entropy (0–1) of the per-card PLAYS distribution. 0 when
  * one card carried every play (one-note spam); 1 when plays are spread evenly
  * across the distinct cards that saw play. A single played card (or none)
@@ -748,6 +779,7 @@ export function simulateHazardPatternCombatDetailed(
     let totalDotHp = 0, totalMechanicBurst = 0, totalDirectHp = 0;
     let totalGuardOnAttack = 0, totalPlayerHpTaken = 0;
     let totalActiveEffectSamples = 0, totalPhaseSamples = 0;
+    const lowestVitae: number[] = [];
     const winPathCounts = emptyWinPathCounts();
     // Per-card enemy-HP damage across all runs (dominant-card witness).
     const damageByCard: Record<string, number> = {};
@@ -793,6 +825,7 @@ export function simulateHazardPatternCombatDetailed(
         totalDirectHp += r.directHpDamage;
         totalGuardOnAttack += r.guardOnAttack;
         totalPlayerHpTaken += r.playerHpTaken;
+        lowestVitae.push(r.lowestVitaeFraction);
         for (const s of r.activeEffectSamples) totalActiveEffectSamples += s;
         totalPhaseSamples += r.activeEffectSamples.length;
         for (const row of Object.values(r.cardUsage)) {
@@ -855,6 +888,10 @@ export function simulateHazardPatternCombatDetailed(
         usageEntropy: normalizedPlayEntropy(Object.values(cardUsage)),
         dominantCardId,
         dominantCardShare,
+        lowestVitaeFractionMean: lowestVitae.length > 0
+            ? lowestVitae.reduce((a, b) => a + b, 0) / lowestVitae.length : 0,
+        lowestVitaeFractionP10: percentile(lowestVitae, 0.1),
+        playerHpTakenMean: totalPlayerHpTaken / count,
     };
     return { stats, cardUsage };
 }

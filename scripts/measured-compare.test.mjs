@@ -1,0 +1,128 @@
+// scripts/measured-compare.test.mjs — the pure measured-truth compare and renderers (R12a A5).
+
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+
+import {
+  auditRowPrefix, compare, fileDrifts, historyLine, renderAuditRow, renderDigestSection, renderLatest,
+} from './measured-compare.mjs'
+
+function cell(over = {}) {
+  return {
+    fight: 'bw-17/the-doorwarden', isBoss: true, playerLevel: 2, enemyLevel: 1, spread: 'even', deck: 'grey',
+    winRate: 0.5, meanRounds: 6, lowestVitaeFractionMean: 0.3, lowestVitaeFractionP10: 0.1, playerHpTakenMean: 40,
+    ...over,
+  }
+}
+
+function line(cells, over = {}) {
+  return {
+    date: '2026-10-13', commit: 'bbbbbbb', runs: 300, seed: 1, cells,
+    decks: { grey: { deckCards: ['grey-strike'], deadCardRate: 0 } }, ...over,
+  }
+}
+
+const previous = line([cell()], { date: '2026-10-06', commit: 'aaaaaaa' })
+
+test('compare: the first line never drifts', () => {
+  assert.deepEqual(compare({ current: line([cell({ winRate: 0 })]), previous: null }), [])
+})
+
+test('compare: moves under every threshold are not drifts', () => {
+  const current = line([cell({ winRate: 0.59, lowestVitaeFractionP10: 0.24, meanRounds: 7.9 })])
+  assert.deepEqual(compare({ current, previous }), [])
+})
+
+test('compare: a move of exactly a threshold, either way, is a drift', () => {
+  const current = line([cell({ winRate: 0.4, lowestVitaeFractionP10: 0.25, meanRounds: 8 })])
+  const drifts = compare({ current, previous })
+  assert.deepEqual(drifts.map((d) => d.metric), ['winRate', 'lowestVitaeFractionP10', 'meanRounds'])
+  const win = drifts[0]
+  assert.equal(win.previous, 0.5)
+  assert.equal(win.current, 0.4)
+  assert.equal(win.commit, 'bbbbbbb')
+  assert.equal(win.previousCommit, 'aaaaaaa')
+  assert.equal(win.spread, 'even')
+})
+
+test('compare: thresholds are read from the argument', () => {
+  const current = line([cell({ winRate: 0.55 })])
+  assert.equal(compare({ current, previous, thresholds: { winRatePoints: 5 } }).length, 1)
+})
+
+test('compare: a cell with no counterpart is skipped', () => {
+  const current = line([cell({ spread: 'body', winRate: 0 })])
+  assert.deepEqual(compare({ current, previous }), [])
+})
+
+const drift = compare({ current: line([cell({ winRate: 0.2 })]), previous })[0]
+
+test('renderAuditRow: a [content] row naming fight, deck, metric, both values and both commits', () => {
+  const row = renderAuditRow(drift, '2026-10-13')
+  assert.match(row, /^### \[ \] \[content\] measured drift: bw-17\/the-doorwarden grey winRate 50% -> 20% \(even, 2026-10-13\)\n/)
+  assert.match(row, /- category: content\n/)
+  assert.match(row, /from 50% at aaaaaaa to 20% at bbbbbbb/)
+  assert.match(row, /D37, D88/)
+  assert.ok(row.endsWith('\n'))
+})
+
+test('fileDrifts: a new row goes under ## Pending', () => {
+  const { text, added } = fileDrifts('# Audit\n\n## Pending\n\n### [ ] [bug] old\n- category: bug\n', [drift], '2026-10-13')
+  assert.equal(added.length, 1)
+  const lines = text.split('\n')
+  assert.equal(lines[lines.indexOf('## Pending') + 2], added[0].title)
+  assert.ok(text.indexOf(added[0].title) < text.indexOf('### [ ] [bug] old'))
+})
+
+test('fileDrifts: an open row for the same (fight, deck, metric) gets evidence, not a twin', () => {
+  const first = fileDrifts('## Pending\n', [drift], '2026-10-13').text
+  const again = { ...drift, spread: 'body', current: 0.1, commit: 'ccccccc' }
+  const { text, added, evidenced } = fileDrifts(first, [again], '2026-10-20')
+  assert.equal(added.length, 0)
+  assert.equal(evidenced.length, 1)
+  assert.equal(text.split(auditRowPrefix(drift)).length - 1, 1)
+  assert.match(text, /- evidence 2026-10-20: body 50% -> 10% at ccccccc/)
+})
+
+test('fileDrifts: two spreads of one key in one run file one row', () => {
+  const body = { ...drift, spread: 'body' }
+  const { text, added } = fileDrifts('## Pending\n', [drift, body], '2026-10-13')
+  assert.equal(added.length, 1)
+  assert.match(text, /- evidence 2026-10-13: body/)
+})
+
+test('fileDrifts: no Pending heading is an error only when there is a row to add', () => {
+  assert.throws(() => fileDrifts('# Audit\n', [drift], '2026-10-13'), /Pending/)
+  assert.equal(fileDrifts('# Audit\n', [], '2026-10-13').text, '# Audit\n')
+})
+
+test('historyLine: stamps the report and slims each cell', () => {
+  const report = { runs: 300, seed: 1, cells: [{ ...cell(), map: 'breakwater', nodeId: 'bw-17', enemySlug: 'the-doorwarden', runs: 300, seed: 1 }], decks: {} }
+  const h = historyLine(report, { date: '2026-10-13', commit: 'bbbbbbb' })
+  assert.deepEqual(Object.keys(h), ['date', 'commit', 'runs', 'seed', 'cells', 'decks'])
+  assert.equal(h.cells[0].map, undefined)
+  assert.equal(h.cells[0].winRate, 0.5)
+})
+
+test('renderLatest: stamped header, generated note and a row per fight', () => {
+  const md = renderLatest(line([cell(), cell({ fight: 'bw-2/float-eye', isBoss: false, winRate: 1 })]))
+  assert.match(md, /measured at bbbbbbb, 2026-10-13, 300 runs, seed 1/)
+  assert.match(md, /do not edit/)
+  assert.match(md, /\| bw-17\/the-doorwarden \(door\) \| L2 v L1 \| 50% \/ 0\.10 \|/)
+  assert.match(md, /\| bw-2\/float-eye \| L2 v L1 \| 100% \/ 0\.10 \|/)
+  assert.doesNotMatch(md, /baseline/i)
+})
+
+test('renderDigestSection: no run, a stale run, a first run, no drift and drifts', () => {
+  assert.match(renderDigestSection(null, null, []), /No measured-truth run yet/)
+  const stale = renderDigestSection(previous, null, [], { sinceDate: '2026-10-10' })
+  assert.match(stale, /No run since the last entry/)
+  assert.doesNotMatch(stale, /\|/)
+  const current = line([cell({ winRate: 0.2 })])
+  assert.match(renderDigestSection(current, null, []), /First run/)
+  assert.match(renderDigestSection(line([cell()]), previous, []), /No drift past the thresholds/)
+  const withDrift = renderDigestSection(current, previous, [drift], { sinceDate: '2026-10-10' })
+  assert.match(withDrift, /1 drift\(s\)/)
+  assert.match(withDrift, /bw-17\/the-doorwarden, grey even: winRate 50% -> 20%/)
+  assert.match(withDrift, /compared with aaaaaaa/)
+})
