@@ -246,6 +246,8 @@ Engine, Misc), and, on T's sign-off, writes briefs for three phases: card
 creation, measuring, tuning. CS1 ships `Cards/card-rules.ts` as its
 validation layer. The skill itself is written in a session with T.
 
+CS1 shipped the spec skeleton (`docs/card-spec.md`) and the rules fence; B5's tool shape is still T's call.
+
 ## B6 — Card sessions (owner)
 
 T runs Plan B's sessions as amended by D73, one lane per slice. A fresh card agent is written at the

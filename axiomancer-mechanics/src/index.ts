@@ -192,6 +192,7 @@ export type {
     // The rank ladder / rarity / card-type axes
     CardRank, CardRarity, CardType, CardRider,
     CardLane,
+    CardRuleId, CardRuleViolation, AtlasKeyword, AtlasKeywordKind, CarrierRuleInput,
 } from './Cards';
 export {
     // Rank/rarity helpers (mobile renders rank names off these)
@@ -203,6 +204,10 @@ export {
     // Runtime enumeration of the CardSpecialMechanic union, bound to
     // the type by compile-time assertions. Mobile KW-2 walks this list.
     CARD_SPECIAL_MECHANIC_KINDS,
+    // The card-rules checkers (Phase CS1, `docs/card-spec.md` §17)
+    COMPLEXITY_BUDGET, ADMISSION_BAR,
+    cardLinesText, printedKeywords, cardConditions, parseAtlasKeywords,
+    checkComplexityBudget, checkScrapFloor, checkGlobalTemplate, checkCarrierRule,
 } from './Cards';
 
 // ─── Game (state, store, persistence, constants) ──────────────────────────────

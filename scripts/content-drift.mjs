@@ -25,6 +25,8 @@ export const PATHS = {
   catalogGlyphs: 'scripts/build-catalog.mjs',
   mobileKeywords: 'axiomancer-mobile/state/combat/keywords.ts',
   keywordAtlas: 'axiomancer-mechanics/docs/keyword-atlas.md',
+  bloodPriceLedger: 'plan/card-ledger/rehearsal-blood-price.md',
+  bloodPriceCards: 'axiomancer-mechanics/src/Cards/library/blood-price.cards.ts',
 }
 
 export const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf-8')
@@ -133,4 +135,71 @@ export function atlasKeywords() {
     if (name) names.add(name)
   }
   return nonEmpty(Object.fromEntries([...names].map((n) => [n, true])), 'keyword atlas rows')
+}
+
+/**
+ * Atlas rows by section kind (Phase CS1; T, card-spec ballot §9): `card` for
+ * the rows under "## Card keywords", `rule` under "## Rule keywords",
+ * `system` under "## System terms". The mechanics twin is
+ * `parseAtlasKeywords` in `src/Cards/card-rules.ts`, which the budget lint
+ * reads.
+ */
+export function atlasKeywordKinds(text = read(PATHS.keywordAtlas)) {
+  const kinds = new Map()
+  let kind = null
+  for (const line of text.split(/\r?\n/)) {
+    const h2 = /^## (.+)$/.exec(line)
+    if (h2) {
+      const t = h2[1].toLowerCase()
+      kind = t.startsWith('card keywords') ? 'card'
+        : t.startsWith('rule keywords') ? 'rule'
+        : t.startsWith('system terms') ? 'system'
+        : null
+      continue
+    }
+    if (!kind || !line.trim().startsWith('|')) continue
+    const first = line.split('|')[1]?.trim() ?? ''
+    if (!first || /^:?-+:?$/.test(first) || /^(keyword|term)$/i.test(first)) continue
+    const word = first.replace(/[`*]/g, '').split(/[^A-Za-z]+/).filter(Boolean)[0]?.toUpperCase()
+    if (word) kinds.set(word, kind)
+  }
+  return nonEmpty(kinds, 'atlas rows by kind')
+}
+
+/**
+ * The Blood Price lane as the ledger rules it (Phase CS1, ledger <-> library
+ * parity): the slots kept in "## Verdicts", less Revision 2's cut list, plus
+ * the ids in Revision 2's "Added" table, as `bp-<slot><option>` ids, sorted.
+ * Parity is by slot id, not name: names are placeholders until T names the
+ * cards. The Curse sits outside the slot table, so it is not here.
+ */
+export function ledgerLaneIds(text = read(PATHS.bloodPriceLedger)) {
+  const section = (title) => {
+    const start = text.indexOf(title)
+    if (start < 0) return ''
+    const next = text.slice(start + title.length).search(/\n#{2,3} /)
+    return next < 0 ? text.slice(start) : text.slice(start, start + title.length + next)
+  }
+  const slot = (s) => `bp-${s.toLowerCase()}`
+  const verdicts = section('## Verdicts')
+  const kept = new Set()
+  for (const line of verdicts.split(/\r?\n/)) {
+    if (!/^\| (Payoff|Engine|Misc) \|/.test(line)) continue
+    for (const m of line.matchAll(/\b([PEM]-\d{2}[a-z])\b/g)) kept.add(slot(m[1]))
+  }
+  const rev2 = section('### Revision 2')
+  const cutLine = /\*\*Cut[^*]*\*\*([^\n]*)/.exec(rev2)?.[1] ?? ''
+  for (const m of cutLine.matchAll(/\b([PEM]-\d{2}[a-z])\b/g)) kept.delete(slot(m[1]))
+  for (const m of rev2.matchAll(/^\| `(bp-[pem]-\d{2}[a-z])` \|/gm)) kept.add(m[1])
+  return nonEmpty(Object.fromEntries([...kept].sort().map((id) => [id, true])), 'ledger kept slots')
+}
+
+/**
+ * The Blood Price lane as the library builds it: every `slot:` in the set's
+ * `ENTRIES` table, as `bp-<slot>`, sorted. The lane's `cardIds` is
+ * `ENTRIES.map(toCard)`, so this is the lane less the Curse.
+ */
+export function libraryLaneIds(text = read(PATHS.bloodPriceCards)) {
+  const ids = [...text.matchAll(/\bslot: '([pem]-\d{2}[a-z])'/g)].map((m) => `bp-${m[1]}`)
+  return nonEmpty(Object.fromEntries(ids.sort().map((id) => [id, true])), 'Blood Price library slots')
 }
