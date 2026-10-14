@@ -15,10 +15,10 @@
  *     exactly that.
  *
  * Rarity is never colour-only: the draft is the one moment the player compares
- * three cards and keeps one for the rest of the run. Each tile carries three
- * signals — the rarity-tinted frame, the pip track the shared `CombatCardFace`
- * draws, and a printed rarity word beneath the face. The rarity hexes live
- * only in `card-rarity.engine.ts`.
+ * three cards and keeps one for the rest of the run. Each tile carries the
+ * rarity-tinted frame and a printed rarity word beneath the face, and the
+ * shared `CombatCardFace` says the band to a screen reader. The rarity hexes
+ * live only in `card-rarity.engine.ts`.
  */
 
 import React, { useState } from 'react';
@@ -63,10 +63,9 @@ export function CombatRewardsOverlay({
                 <View style={styles.offerRow}>
                     {offers.map((card) => {
                         const on = picked === card.cardId;
-                        // The three rarity signals on one tile: the FRAME COLOUR (this
+                        // The rarity signals on one tile: the FRAME COLOUR (this
                         // border, unless the tile is selected — selection owns
-                        // the gold), the PIP ROW (drawn by `CombatCardFace`'s
-                        // own track), and the NAMED LABEL (the caption below).
+                        // the gold) and the NAMED LABEL (the caption below).
                         const band = rarityFor(card);
                         const rarityColor = RARITY_COLOR[band];
                         return (

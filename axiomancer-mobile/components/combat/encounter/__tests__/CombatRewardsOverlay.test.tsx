@@ -22,8 +22,7 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { getCardById } from '@mechanics';
 import { CombatRewardsOverlay } from '@/components/combat/encounter/CombatRewardsOverlay';
 import { rewardCardVMs } from '@/state/presenters/combat-encounter.engine';
-import { RARITY_LABEL, RARITY_PIPS, rarityFor } from '@/state/presenters/card-rarity.engine';
-import { RARITY_TRACK_SLOTS } from '@/components/combat/encounter/CombatBoard';
+import { RARITY_LABEL, rarityFor } from '@/state/presenters/card-rarity.engine';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
 // The three real library cards the reward draft offers: the grey office.
@@ -143,9 +142,9 @@ describe('CombatRewardsOverlay', () => {
 /**
  * Rarity is never colour alone. The draft is the screen where a colour-only
  * rarity signal would cost the most: three cards side by side, one kept for
- * the rest of the run. All three rarity legs (named label, pip row, frame
- * colour) must be on the tile, and the two that survive greyscale must be
- * legible with the colour channel ignored.
+ * the rest of the run. The tile carries the named label under the face and
+ * the frame colour, and the face says the band to a screen reader; the word
+ * must be legible with the colour channel ignored.
  */
 describe('CombatRewardsOverlay — D4 rarity, never colour alone', () => {
     it('prints the band by NAME under every offer', () => {
@@ -156,17 +155,19 @@ describe('CombatRewardsOverlay — D4 rarity, never colour alone', () => {
         }
     });
 
-    it('the printed word agrees with the face’s pip count on the same tile', () => {
-        // Two legs, one truth: if the caption and the pips could disagree, the
-        // screen would be teaching the player a hue that means nothing.
+    it('the printed word agrees with what the face says to a screen reader on the same tile', () => {
+        // Two legs, one truth: if the caption and the face could disagree, the
+        // screen would be teaching the player a hue that means nothing. The
+        // face draws no pips (one card face, everywhere); it says the band.
         const { offers } = renderOverlay();
+        const spoken = screen.getAllByTestId('combat-card-face-rarity-a11y').map((n) => n.props.accessibilityLabel);
         for (const offer of offers) {
             const band = rarityFor(offer);
             expect(String(screen.getByTestId(`combat-reward-rarity-${offer.cardId}`).props.children))
                 .toBe(RARITY_LABEL[band].toUpperCase());
-            expect(RARITY_PIPS[band]).toBeGreaterThan(0);
-            expect(RARITY_PIPS[band]).toBeLessThanOrEqual(RARITY_TRACK_SLOTS);
+            expect(spoken).toContain(RARITY_LABEL[band]);
         }
+        expect(screen.queryByTestId('combat-card-face-rarity-pips')).toBeNull();
     });
 
     it('names the band in the tile’s accessibility label, in the player’s words', () => {
