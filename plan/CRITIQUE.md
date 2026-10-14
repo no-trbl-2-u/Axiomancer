@@ -601,6 +601,15 @@
 
 ## Pending
 
+### [LOW] anvil — HONE, TEMPER and SWAP prices read "40s" while the forge's budget says SHILLINGS
+- pass: residue of the pass-84 village fix (iterate 2026-10-14)
+- viewport: mobile (375x812)
+- category: comprehension
+- observation: the same bare "s" as the village stalls: `OfferButton` prints `{offer.price}s` and the card's cost chip `−{cost}s`, under a "<budget> SHILLINGS" header. Not changed with the village fix because HONE and TEMPER sit side by side (`offerRow`, each `flex: 1`, label left and price right), and at 375 wide "TEMPER" plus "40 SHILLINGS" in mono 12 likely overruns the ~144pt button.
+- evidence: `axiomancer-mobile/app/blacksmith/index.tsx:86-88` and `:266`; `styles.offerRow` / `offerButton`
+- suggested fix: put the price on its own line under the verb (or under the button with the effect line) as "40 SHILLINGS", so the forge names its unit the way the village and the rest screen do; pin it in the forge test.
+- source: iterate (residue)
+
 ### [LOW] ci / pr-resolve — a hand dispatch with a non-`loop/` branch exits green having done nothing
 - pass: antagonist on PR #526 (commit efc7f371)
 - viewport: n/a
@@ -626,15 +635,6 @@
 - observation: on the walked Breakwater sheet ("18 nodes · 12 sealed"), the six trodden and open nodes draw their discs, but none of the twelve sealed nodes can be seen. The black roads run to junctions on the engraving and stop, with no mark where they meet, so the map reads as a web of lines leading nowhere. The legend's ◌ SEALED key matches nothing on screen. The sealed mark is meant to recede (`NodeMark` draws an empty dashed ash ring at the smallest radius), but `ExplorationNode` also wraps it in `nodeWrapLocked` opacity 0.45, so the ring prints at about 0.38 and its backing disc at about 0.3. That vanishes on the light engraving.
 - evidence: `.critique-artifacts/mobile/11-late-game-hub.png` (junctions near 160,470, 95,540 and 255,505); `desktop/11-late-game-hub.png` (bare vertices at about 55,565 and 390,665); `axiomancer-mobile/components/NodeMark.tsx:86-103`; `components/exploration/ExplorationNode.tsx:167` (`nodeWrapLocked`)
 - suggested fix: drop the extra 0.45 wrapper opacity for sealed nodes, or raise the ring's stroke opacity, so the sealed ring is the faintest mark that still shows where each road ends. Keep it the faintest of the four kinds, and pin the sealed mark's effective opacity in `ExplorationNode.test.tsx`.
-- source: critique-drive (unattended)
-
-### [LOW] village — stall prices read "12s" while the purse, rest offers and sell labels say "SHILLINGS"
-- pass: 84 (commit dd61ec90)
-- viewport: both
-- category: comprehension
-- observation: the settlement's purse reads "240 SHILLINGS" and the rest screen prices THE CUT at "5 SHILLINGS", but each stall row prints its price as "12s" (buy and sell). The bare "s" is the only place the currency is abbreviated, and the player meets it before any key to it.
-- evidence: `.critique-artifacts/mobile/07-village.png`, `desktop/07-village.png`; `axiomancer-mobile/app/village/index.tsx:168` and `:191` (`{ware.price}s`, `{sellable.sellPrice}s`) against `:114` (`{vm.currency} SHILLINGS`) and `app/rest/index.tsx` (`${offer.price} SHILLINGS`)
-- suggested fix: print one form for every price. Either "12 SHILLINGS" on the stall rows, or "12s" everywhere with the purse header naming the unit once. The first matches the rest screen. Pin it in the village screen test.
 - source: critique-drive (unattended)
 
 ### [LOW] combat / IN PLAY row — two copies of one Global give two chips with the same accessibility label
@@ -956,6 +956,16 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] village — stall prices read "12s" while the purse, rest offers and sell labels say "SHILLINGS" — RESOLVED 2026-10-14 (branch loop/iterate-shilling-prices: buy and sell rows print "12 SHILLINGS"; pinned in stall-price-shillings.critique-84.test.tsx)
+- pass: 84 (commit dd61ec90)
+- viewport: both
+- category: comprehension
+- observation: the settlement's purse reads "240 SHILLINGS" and the rest screen prices THE CUT at "5 SHILLINGS", but each stall row prints its price as "12s" (buy and sell). The bare "s" is the only place the currency is abbreviated, and the player meets it before any key to it.
+- evidence: `.critique-artifacts/mobile/07-village.png`, `desktop/07-village.png`; `axiomancer-mobile/app/village/index.tsx:168` and `:191` (`{ware.price}s`, `{sellable.sellPrice}s`) against `:114` (`{vm.currency} SHILLINGS`) and `app/rest/index.tsx` (`${offer.price} SHILLINGS`)
+- suggested fix: print one form for every price. Either "12 SHILLINGS" on the stall rows, or "12s" everywhere with the purse header naming the unit once. The first matches the rest screen. Pin it in the village screen test.
+- source: critique-drive (unattended)
+- issue: #530
 
 ### [x] [MED] combat / hand fan — the D91 free corner pill covers the "tap a card to read it" hint — RESOLVED 2026-10-14 (PR #529, phase BT2b: the hint is dropped per D92 (A8), and the hand dock keeps the pill's overhang above the card tops inside its clip; pinned in CombatBoard.handfan.test.tsx)
 - pass: antagonist on PR #521 (BT2a, commit 042b4471)
