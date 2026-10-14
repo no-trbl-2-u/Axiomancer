@@ -79,6 +79,9 @@ export interface ProgramLedger {
     /** Card ids EXILED this combat (one entry per copy). */
     exiled: string[];
     lostThisCombat: number;
+    /** Every VITAE the player lost this round: damage and SACRIFICE (heals
+     *  ignored). Reset at the round boundary. */
+    lostThisRound: number;
     takenThisRound: number;
     takenLastRound: number;
     /** SACRIFICES made this combat, as counted. */
@@ -113,7 +116,7 @@ export interface ProgramLedger {
 export function initProgramLedger(): ProgramLedger {
     return {
         globals: [], exiled: [],
-        lostThisCombat: 0, takenThisRound: 0, takenLastRound: 0,
+        lostThisCombat: 0, lostThisRound: 0, takenThisRound: 0, takenLastRound: 0,
         sacrificeCount: 0, sacrificePaid: 0,
         waives: 0, nextDouble: false, nextTwice: false, nextDealBonus: 0,
         drains: [], deathWardRound: null, pendingHeal: 0, curseUid: 0,
@@ -449,6 +452,7 @@ class LineCtx implements ProgramCtx {
         if (paid > 0) {
             w.s = { ...w.s, player: { ...p, health: p.health - paid } };
             l.lostThisCombat += paid;
+            l.lostThisRound += paid;
             l.sacrificePaid += paid;
         }
         l.sacrificeCount += times;
@@ -616,6 +620,7 @@ function buildQuery(s: CombatEncounterState, spent: number): ProgramQuery {
         atHalf: vitae <= maxVitae / 2,
         takenLastTurn: l.takenLastRound,
         lostThisCombat: l.lostThisCombat,
+        lostThisRound: l.lostThisRound,
         cursesInHand: s.hand.filter(h => isCurseCard(h.cardId)).length,
         cursesInDiscard: s.discard.filter(isCurseCard).length,
     };
@@ -956,13 +961,15 @@ export function programRecordDamage(l: ProgramLedger, taken: number): ProgramLed
     return {
         ...l,
         lostThisCombat: l.lostThisCombat + taken,
+        lostThisRound: l.lostThisRound + taken,
         takenThisRound: l.takenThisRound + taken,
     };
 }
 
-/** The round boundary: this round's damage taken becomes last round's. */
+/** The round boundary: this round's damage taken becomes last round's, and
+ *  the VITAE lost this round starts again at 0. */
 export function programRollRound(l: ProgramLedger): ProgramLedger {
-    return { ...l, takenLastRound: l.takenThisRound, takenThisRound: 0 };
+    return { ...l, takenLastRound: l.takenThisRound, takenThisRound: 0, lostThisRound: 0 };
 }
 
 /**

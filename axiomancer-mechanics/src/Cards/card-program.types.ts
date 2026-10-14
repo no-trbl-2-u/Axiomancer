@@ -35,6 +35,9 @@ export interface ProgramQuery {
     takenLastTurn: number;
     /** Every VITAE the player lost this combat (cumulative, heals ignored). */
     lostThisCombat: number;
+    /** Every VITAE the player lost this round: damage and SACRIFICE (heals
+     *  ignored), a SACRIFICE earlier in the same line included. */
+    lostThisRound: number;
     cursesInHand: number;
     cursesInDiscard: number;
 }
