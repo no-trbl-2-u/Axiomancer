@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-// scripts/pr-resolve.mjs — keeps open `loop:pr` PRs mergeable (Phase R11, D87).
+// scripts/pr-resolve.mjs — keeps open `loop:pr` and `plot` PRs mergeable (Phase R11, D87).
 // Zero dependencies. Run by .github/workflows/pr-resolve.yml on every push to
 // `main`; modelled on the `hunt` repo's scripts/pr/resolve.mjs.
 //
 //   node scripts/pr-resolve.mjs scan
-//       For each open, same-repo `loop:pr` PR that GitHub reports CONFLICTING:
+//       For each open, same-repo `loop:pr` or `plot` PR GitHub reports CONFLICTING:
 //       merge origin/main into its branch. Conflicts only in append-only files
 //       (telemetry shards, the plan queues, lessons) are settled by a union of
 //       rows, then committed and pushed. Any other conflict is aborted and the
@@ -189,20 +189,30 @@ function sleep(ms) {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms)
 }
 
-/** Open same-repo loop:pr PRs with a settled mergeable state. */
+/** PR labels kept mergeable: the loop's code PRs and `/plot`'s plan PRs. */
+export const RESOLVE_LABELS = ['loop:pr', 'plot']
+
+/** Open same-repo PRs under any RESOLVE_LABELS label (gh ANDs repeated --label). */
+function listResolvable() {
+  const seen = new Map()
+  for (const label of RESOLVE_LABELS) {
+    const prs = JSON.parse(
+      gh(['pr', 'list', '--state', 'open', '--label', label,
+        '--json', 'number,headRefName,mergeable,isCrossRepository']),
+    )
+    for (const p of prs) if (!p.isCrossRepository) seen.set(p.number, p)
+  }
+  return [...seen.values()]
+}
+
+/** Open same-repo loop:pr and plot PRs with a settled mergeable state. */
 function openLoopPrs() {
   for (let attempt = 0; attempt < 6; attempt += 1) {
-    const prs = JSON.parse(
-      gh(['pr', 'list', '--state', 'open', '--label', 'loop:pr',
-        '--json', 'number,headRefName,mergeable,isCrossRepository']),
-    ).filter((p) => !p.isCrossRepository)
+    const prs = listResolvable()
     if (!prs.some((p) => p.mergeable === 'UNKNOWN')) return prs
     sleep(10_000) // GitHub computes mergeability lazily after a push
   }
-  return JSON.parse(
-    gh(['pr', 'list', '--state', 'open', '--label', 'loop:pr',
-      '--json', 'number,headRefName,mergeable,isCrossRepository']),
-  ).filter((p) => !p.isCrossRepository)
+  return listResolvable()
 }
 
 function stage(n, file) {

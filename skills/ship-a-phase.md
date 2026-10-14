@@ -134,6 +134,15 @@ brief: `/plot <N>`" and return (§3 above). Note the brief's
 acceptance IDs (`A1…`) and its `Measure:` line; the PR body ticks
 the IDs this phase closes.
 
+**A row pointing at `§ <id>` of a shared brief** (one of several
+phases `/plot` split a task into, D93) builds only that phase: read
+the brief's shared sections (Sources, Outcome, Acceptance, Decisions)
+and its own `### <id>` block under `## Phases`. Scope, Tests matrix
+and Verify gate come from that block; the acceptance IDs it
+`closes` are the only ones the PR ticks, and its own `Measure:`
+line is the one to prove. Another phase's block is out of scope even
+when the same files are open: it ships on its own tick (§7 rule 12).
+
 ### Step 2.4 — Claim check: is another tick already on this phase?
 
 `/march` runs from more than one place — this session's `/loop`, the

@@ -116,5 +116,6 @@ these markers.
 - `skills/march.md` — outer dispatcher (used with `/loop`).
 - `skills/oversight.md` — user-in-the-loop adjustment. Promotes
   phase candidates.
-- `skills/plot.md`, `skills/messy.md` — T's intake (one task → row +
-  brief; a dump → part plan + candidates). Never fired by the loop.
+- `skills/plot.md`, `skills/messy.md` — T's intake (one task → one
+  spec brief split into one-tick phases, a row each, opened as a `plot`
+  PR, D93; a dump → part plan + candidates). Never fired by the loop.

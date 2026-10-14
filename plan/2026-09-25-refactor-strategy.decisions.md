@@ -997,6 +997,11 @@ satisfied for exactly these.)
 - LOG is not on the board; it opens from the pilgrim modal and returns with BACK.
 - Reference: `axiomancer-mobile/screenshots/bt2-prototype/` (`1-board.jpg`, `2-pilgrim-modal.jpg`, `3-log-view.jpg`). Implemented by Phase BT2b (`plan/phases/phase_BT2b_board_layout.md`). A later layout change needs T's say-so.
 
+**D93 — `/plot` splits a task into phases and lands it by PR.** (T, attended, 2026-10-14; amends D84 for `/plot` only.)
+
+- `/plot` writes one spec brief per task and itself decides how many phases it takes: each phase must ship as one `/march` tick, so anything bigger is split into vertical slices (`<N>a`, `<N>b`, …), each with its own build-plan row pointing at `§ <id>` of the shared brief, its own acceptance IDs and `Requires` order. Modelled on the `hunt` repo's spec-and-chunks `/plot`.
+- `/plot` opens a PR labelled `plot` (never `loop:pr`: outside the D85 cap, not a claim) instead of pushing `main`, so T reads the recommendation first; the rows become pickable when T merges it. `pr-resolve` keeps `plot` PRs mergeable (D87).
+
 ## Open follow-ups
 
 **D1 status at a glance (2026-09-28, after #408).** Card and keyword

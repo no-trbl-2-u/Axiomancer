@@ -1,7 +1,7 @@
 name: pr-resolve
 
 # Keeps loop PRs mergeable (Phase R11, D87). On every push to main, each
-# open same-repo `loop:pr` PR that GitHub reports CONFLICTING gets main
+# open same-repo `loop:pr` or `plot` PR GitHub reports CONFLICTING gets main
 # merged into its branch by `scripts/pr-resolve.mjs scan`: conflicts only in
 # append-only files (telemetry shards, plan queues, lessons) settle by a
 # union of rows; anything else goes to a Haiku run with Read and Edit only

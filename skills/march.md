@@ -44,7 +44,8 @@ Standing rules the chain carries (Phase R11, 2026-10-12):
   candidates (D89).
 - **`/plot` and `/messy` are T's intake.** No march step, cron,
   workflow or loop verb fires them; they run only in a conversation
-  with T (AGENTS.md rule 8).
+  with T (AGENTS.md rule 8). `/plot` lands its rows and brief by a
+  `plot` PR (D93); they are pickable once T merges it.
 - **Every closing verb ends with a Retro** (§3 "Retro").
 
 ## 2. Invocation
@@ -123,8 +124,10 @@ that:
    session with T;
 2. has every phase named in its `Requires …` clause ticked `[x]`
    on `main`;
-3. **has a brief**: `plan/phases/phase_<N>_*.md`, or the part-plan
-   section its row points to. A row with none is not pickable: file
+3. **has a brief**: `plan/phases/phase_<N>_*.md`, the `### <N>`
+   block of the shared brief its row points to with `§ <N>` (a
+   phase `/plot` split out, D93), or the part-plan section its row
+   points to. A row with none is not pickable: file
    one `plan/PHASE_CANDIDATES.md` row "needs a brief: `/plot <N>`"
    (once; skip if it exists) and move on. The loop never authors a
    brief; `/plot` and attended `/plan-a-phase` do;
@@ -168,7 +171,11 @@ time (`plan/PHASE_CANDIDATES.md` holds that candidate).
 A diff is **plan-only** when every path is under `plan/`,
 `telemetry/`, `docs/reports/` or `devlog/entries/`. Plan-only commits (queue rows, pass
 counters, lessons, build-plan bookkeeping) commit and `git push
-origin main` as before. **Anything else lands by PR:**
+origin main` as before. The one plan-only exception is `/plot`: it
+opens a `plot` PR so T reviews its recommendation first (D93,
+`skills/plot.md` Step 5); a `plot` PR is not a `loop:pr` PR, so it
+neither counts toward the cap nor claims a row. **Anything else
+lands by PR:**
 
 ```bash
 git fetch origin main
