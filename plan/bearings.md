@@ -273,8 +273,10 @@ ambiguity.)
     stay `[blocked: owner-led]`.
   - **The loop builds only briefed rows and never writes a brief.** A
     briefless row is filed "needs a brief: `/plot <N>`". T's intake is
-    `/plot` (one task → row + brief with acceptance IDs and a `Measure:`
-    line) and `/messy` (a dump → part plan + `[owner]` candidates); only
+    `/plot` (one task → one spec brief with acceptance IDs and a
+    `Measure:` line, split into as many one-tick phases as it needs,
+    one row each, opened as a `plot` PR T merges to approve, D93) and
+    `/messy` (a dump → part plan + `[owner]` candidates); only
     T fires them (AGENTS.md rule 8). `/plot` is to the build plan what
     `/jot` is to `plan/CRITIQUE.md`.
   - **`/iterate` fixes in-tick defects** in their own commit (D90).
@@ -359,7 +361,8 @@ ambiguity.)
   voice registers, lexicon, anti-imitation, the delivery register) is craft
   law and binds.
 - **Direct pushes to `main` (amended by R11, D84).** Sanctioned for
-  plan-only commits (`plan/`, `telemetry/`, `docs/reports/`, `devlog/entries/`), for
+  plan-only commits (`plan/`, `telemetry/`, `docs/reports/`, `devlog/entries/`;
+  except `/plot`, which opens a `plot` PR, D93), for
   `/fix-ci` on red `main`, and for attended sessions at T's word (T
   direct, 2026-08-08: *"Direct pushes to main are fine, keep going."*).
   Every other loop change lands by a `loop:pr` PR that T merges. The

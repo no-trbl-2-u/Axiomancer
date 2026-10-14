@@ -4,7 +4,7 @@
 // template's `Closes #` trailer, in the shape close-trailers reads; the union
 // merge pr-resolve uses on append-only files; the telemetry step that must
 // never push a PR branch's commits to main; and the rule that only T fires
-// /plot and /messy.
+// /plot and /messy, and that /plot lands its phases by a `plot` PR (D93).
 //
 //   node --test scripts/loop-pr.test.mjs
 
@@ -173,6 +173,33 @@ test('the two intake skills say the loop never fires them', () => {
   for (const f of ['skills/plot.md', 'skills/messy.md']) {
     assert.match(read(f), /Never fired by the loop/, f)
   }
+})
+
+// --- /plot splits into phases and lands by a `plot` PR (D93) ----------------
+
+test('/plot opens a plot-labelled PR, never loop:pr, never a push to main', () => {
+  const plot = read('skills/plot.md')
+  assert.match(plot, /gh pr create[^\n]*\n[^\n]*--label plot\b/)
+  assert.match(plot, /git switch -c "loop\/plot-/)
+  assert.doesNotMatch(plot, /--label loop:pr/)
+  assert.doesNotMatch(plot, /git push origin main|push origin HEAD:main/)
+})
+
+test('/plot decides the phase split, one tick per phase, every A-ID closed once', () => {
+  const plot = read('skills/plot.md')
+  assert.match(plot, /each\s+phase must ship as one `\/march`\s+tick/)
+  assert.match(plot, /every acceptance ID is closed by\s+exactly one phase/)
+  assert.match(read('skills/plan-a-phase.md'), /## Phases/)
+})
+
+test('a row pointing at a shared brief section is pickable and built alone', () => {
+  assert.match(read('skills/march.md'), /`§ <N>`/)
+  assert.match(read('skills/ship-a-phase.md'), /A row pointing at `§ <id>` of a shared brief/)
+})
+
+test('pr-resolve keeps plot PRs mergeable too', async () => {
+  const { RESOLVE_LABELS } = await import('./pr-resolve.mjs')
+  assert.deepEqual([...RESOLVE_LABELS].sort(), ['loop:pr', 'plot'])
 })
 
 // --- pr-resolve's union merge ------------------------------------------------

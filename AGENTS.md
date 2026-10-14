@@ -151,7 +151,9 @@ MCP server, or external datastore.
 
 (Applies repo-wide.) The loop lands every code change as a PR labelled
 `loop:pr` onto `main` (D84; `skills/march.md` §3 "Landing a change");
-plan-only and telemetry commits still push `main`. Open PRs ready for
+plan-only and telemetry commits still push `main`, except `/plot`'s
+spec and rows, which open a PR labelled `plot` (never `loop:pr`; D93)
+so T approves the phase split by merging it. Open PRs ready for
 review, not drafts. **T merges by hand** (D86): never enable auto-merge
 (it is disabled on this repo) and never merge, close or force-push a
 `loop:pr` PR. `pr-autofix` (Haiku, two runs per PR) keeps a red
@@ -251,7 +253,8 @@ them; update here first.
 1. **Commit and push as a single atomic act.** Code goes to a
    `loop/<verb>-<slug>` branch and a `loop:pr` PR that T merges;
    plan-only (`plan/`, `telemetry/`, `docs/reports/`, `devlog/entries/`) commits and
-   `fix-ci` on red `main` push `main` directly (D84). Attended sessions
+   `fix-ci` on red `main` push `main` directly (D84), except `/plot`,
+   which opens a `plot` PR for T to merge (D93). Attended sessions
    may push `main` at T's word. No unpushed commits between ticks; no
    dirty tree left behind. The session's
    `telemetry/` shard is part of every commit that changes it: the tracked

@@ -10,6 +10,9 @@
 > it for a missing brief. `/plot` is the usual way T gets a new
 > phase; this skill writes or refreshes the brief for a row that
 > already exists. Its §4 is the one brief format `/plot` writes too.
+> Splitting a task into several phases is `/plot`'s call (its Step
+> 3); a refresh that finds a phase too big for one tick says so and
+> stops, and T re-plots it.
 
 ## 1. Purpose
 
@@ -103,6 +106,25 @@ Mirrors `skills/ship-a-phase.md` §6. Fixed structure:
 - **Commit body template.**
 - **DoD** — the Acceptance IDs, all ticked.
 - **Follow-ups (out of scope).**
+- **Phases** — only when the task takes more than one tick
+  (`skills/plot.md` Step 3 decides). One `###` block per phase:
+
+  ```markdown
+  ## Phases
+
+  ### <N>a — <title> · M · closes A1, A2 · requires nothing
+  Measure: <what proves this slice>
+  - Scope / Consumers / Save-schema / Tests matrix / Verify gate
+    for this slice only.
+
+  ### <N>b — <title> · S · closes A3 · requires <N>a
+  ...
+  ```
+
+  Every acceptance ID is closed by exactly one phase. The sections
+  above it are shared and bind every phase; a phase's own block
+  narrows Scope, Tests and Verify to its slice. Each phase has its
+  own build-plan row pointing at `§ <id>`.
 
 A brief that leaves Open Qs is a brief that fails its job.
 **Resolve every ambiguity.**
@@ -120,7 +142,10 @@ Read all inputs in §3.
 ### Step 1 — Pick the phase
 
 If no argument, the next `[ ]` row in `01_build_plan.md`. Else
-the phase number passed.
+the phase number passed. A row pointing at `§ <id>` of a shared
+brief refreshes that phase's block and any shared section it
+relies on; never another phase's block unless its ids or
+`requires` must change with it.
 
 ### Step 2 — Audit existing brief (if any)
 

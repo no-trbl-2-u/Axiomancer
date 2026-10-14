@@ -1,21 +1,25 @@
 # Skill: plot
 
-> **T's intake for one known task (R11).** Turns a request from T
-> into a build-plan row plus a brief with acceptance IDs, slotted
-> where T wants it. Never builds. Never fired by the loop: no
-> `/march` step, cron, workflow or loop verb dispatches it. It runs
-> when T types `/plot`, or when T, in conversation, asks for loop
-> work and the agent routes it here (AGENTS.md rule 8).
+> **T's intake for one known task (R11, D93).** Turns a request from
+> T into one spec brief, decides how many phases it takes, and opens
+> a PR with the brief and one build-plan row per phase, slotted where
+> T wants it. T reads the recommendation in the PR and merges it to
+> approve. Never builds. Never fired by the loop: no `/march` step,
+> cron, workflow or loop verb dispatches it. It runs when T types
+> `/plot`, or when T, in conversation, asks for loop work and the
+> agent routes it here (AGENTS.md rule 8).
 >
-> Modelled on the `hunt` repo's `.claude/commands/plot.md`. `/plot`
-> is to the build plan what `/jot` is to `plan/CRITIQUE.md`.
+> Modelled on the `hunt` repo's `.claude/commands/plot.md`: one spec,
+> chunked so each chunk is one tick. `/plot` is to the build plan what
+> `/jot` is to `plan/CRITIQUE.md`.
 
 ## 1. Invocation
 
 ```
 /plot asap "<task>"       # slot at the top of the open rows
 /plot anytime "<task>"    # slot after the last open row
-/plot peek "<task>"       # orient + research + shape, print the brief, commit nothing
+/plot peek "<task>"       # orient + research + shape, print the spec and its
+                          # phases, commit nothing, open no PR
 /plot "<task>"            # no word: the skill picks asap or anytime and says why
 /plot <N>                 # write the missing brief for existing row N
                           # (what a "needs a brief: /plot <N>" candidate asks for)
@@ -28,79 +32,175 @@
 Read, in order: `plan/bearings.md` (standing decisions, "Decisions
 standing for the autonomous loop"), `plan/reflexes.md`, the Status
 block of `plan/steps/01_build_plan.md`, the heads of `plan/AUDIT.md`
-and `plan/CRITIQUE.md` Pending, and `plan/PHASE_CANDIDATES.md` for a
-row that already covers the task.
+and `plan/CRITIQUE.md` Pending, `plan/PHASE_CANDIDATES.md` for a row
+that already covers the task, and the open `plot` PRs
+(`gh pr list --label plot`) so two plots never take the same phase id.
 
 ### Step 2 — Research
 
 - What already exists in code and plan for this task (grep the
   packages; read the nearest part plan in `plan/revamp/` or
-  `plan/<topic>.md`).
+  `plan/<topic>.md`). Mark each part of the task *already built*,
+  *already planned* (row, brief or candidate) or *new*. Don't plan
+  what is built; extend what is planned instead of duplicating it,
+  and say so.
 - Which D-numbers it touches
   (`plan/2026-09-25-refactor-strategy.decisions.md`).
 - Which content surfaces it touches, and what D88 allows: cards,
   keywords and art are owner-only (D37) and are never planned for
   the loop; enemies, relics, maps, NPCs and events are allowed
   because T is asking now.
-- Whether an existing row, candidate or AUDIT item already covers
-  it. If one does, extend that instead of adding a duplicate, and
-  say so.
+- **Map the mechanisms.** Read the code each acceptance statement
+  will lean on. A primitive the code lacks is either put in a
+  phase's scope or named under Follow-ups (`skills/plan-a-phase.md`
+  §5 Step 4); never assumed.
 
-### Step 3 — Shape
+### Step 3 — Shape the spec and decide the phases
 
-Write the brief at `plan/phases/phase_<N>_<topic>.md` in the format
-of `skills/plan-a-phase.md` §4, **including acceptance IDs `A1…` and
-a `Measure:` line**. `<N>` is the next free phase id (a letter
-suffix for a sibling of an existing phase). Resolve every ambiguity
-under "Decisions made upfront — DO NOT ASK"; if a call is genuinely
-T's and the session is attended, ask it (`AskUserQuestion`, at most
-4 questions, recommendation first, `docs/asking-well.md`). If T is
-not present to answer, record the leading option as a decision and
-mark it `[T to confirm]`.
+Write **one** brief, `plan/phases/phase_<N>_<topic>.md`, in the
+format of `skills/plan-a-phase.md` §4. `<N>` is the next free phase
+id, checked against `01_build_plan.md` and the open `plot` PRs. It
+always carries acceptance IDs `A1…` for the whole task and one
+`Measure:` line for its Outcome.
+
+Then decide how many phases it takes. The test is the tick: **each
+phase must ship as one `/march` tick, one PR** (`skills/ship-a-phase.md`
+§7 rule 12; bearings: "a tick that genuinely needs more should be
+split, not have its cap raised silently"). Size each candidate
+phase:
+
+- **S** — under an hour of agent work, one workspace.
+- **M** — one focused tick: one surface, a handful of suites.
+- **L** — a full tick at the edge of the job budget.
+- Anything bigger is split into **vertical slices**, each of which
+  ships something runnable and testable on its own. Never a slice
+  that leaves `main` broken or a promise of another spec half kept
+  until a later slice lands.
+
+Split also when the pieces differ in kind: a piece that needs T at
+the wheel (an Android check, an owner-only decision) is its own
+`(attended)` phase so the rest can still run unattended; a contract
+(shared types, a save migration) that later pieces build on is its
+own phase, first.
+
+Then write it down:
+
+- **One phase** (the usual small task): the brief is an ordinary
+  §4 brief and the row is `Phase <N>`. No `## Phases` section.
+- **Several phases**: the brief adds a `## Phases` section
+  (`skills/plan-a-phase.md` §4, "Phases"). Ids are `<N>a`, `<N>b`, …
+  (`<N>1`, `<N>2`, … when `<N>` already ends in a letter, as
+  `R10b2`). Rules:
+  - every acceptance ID is closed by exactly one phase (`closes
+    A1, A3`); a split statement is split into two IDs, never shared;
+  - order is carried by `requires`, naming exact phase ids, never by
+    prose; the first phase that delivers visible value comes as
+    early as its contracts allow;
+  - each phase carries its own Scope, Consumers, Save/schema, Tests
+    and Verify gate; the shared sections (Sources, Outcome,
+    Acceptance, Measure, Decisions, DoD, Follow-ups) stay at the
+    top and bind every phase;
+  - each phase has its own one-line `Measure:` naming what proves
+    *its* slice.
+
+Resolve every ambiguity under "Decisions made upfront — DO NOT ASK";
+if a call is genuinely T's and the session is attended, ask it
+(`AskUserQuestion`, at most 4 questions, recommendation first,
+`docs/asking-well.md`). If T is not present to answer, record the
+leading option as a decision and mark it `[T to confirm]`; the PR
+body lists each one.
 
 ### Step 4 — Slot
 
-Add the row to the Status block of `plan/steps/01_build_plan.md`:
+Add one row per phase to the Status block of
+`plan/steps/01_build_plan.md`, together and in `requires` order:
 
 - `asap` → directly above the first open (`[ ]`) row.
 - `anytime` → after the last open (`[ ]` or `[blocked: …]`) row.
-- no word → pick one and state the reason in the commit body
+- no word → pick one and state the reason in the PR body
   (blocking a pending row or fixing a live defect → asap; otherwise
   anytime).
 
-Row shape: `- [ ] Phase <N> — <title> (plotted by T, <date>): <one
-line>. Brief \`plan/phases/phase_<N>_<topic>.md\`. Requires <ids or
-nothing>.` Mark it `(attended)` only if T says it must be shipped
-with T present. If a "needs a brief: `/plot <N>`" candidate existed,
-move it to Rejected as "briefed".
+Row shape: `- [ ] Phase <id> — <title> (plotted by T, <date>): <one
+line>. Brief \`plan/phases/phase_<N>_<topic>.md\`` then, for one of
+several phases, ` § <id>`, then `. Requires <ids or nothing>.` Mark
+a row `(attended)` only if T says so or Step 3 made it an attended
+phase. Add one Queue change log entry (same commit) naming every
+phase id the plot added. If a "needs a brief: `/plot <N>`" candidate
+existed, move it to Rejected as "briefed".
 
-### Step 5 — Commit
+### Step 5 — Open the PR (D93)
 
-Plan-only, so it pushes `main` (D84):
+A plot is plan-only, but it lands by PR so T can read the
+recommendation before the loop can pick it: `/march` reads `main`,
+so the rows are not pickable until T merges. Check out a fresh
+branch before the first edit (Steps 3–4 write on it):
 
 ```bash
+git fetch origin main
+git switch -c "loop/plot-<N>-<slug>" origin/main
+# Steps 3-4 edit here
 git add plan/phases/phase_<N>_<topic>.md plan/steps/01_build_plan.md plan/PHASE_CANDIDATES.md
-git commit -m "phases: plot <N> — <title>" -m "<asap|anytime> because <reason>. Acceptance A1-A<k>."
-git push origin main
+git commit -m "phases: plot <N> — <title>" -m "<k> phase(s): <ids>. <asap|anytime> because <reason>."
+git push -u origin "loop/plot-<N>-<slug>"
+gh label create plot --repo "$GH_REPO" --color 5319E7 \
+  --description "/plot recommendation; T merges to approve (D93)" 2>/dev/null || true
+gh pr create --repo "$GH_REPO" --base main --head "loop/plot-<N>-<slug>" \
+  --label plot --title "plot: <N> — <title>" --body-file "$body"
 ```
 
-From a worktree branch (the usual attended case), commit first and then
-`git fetch origin && git rebase origin/main && git push origin HEAD:main`
-as one act; main moves under you (lesson `plan-only-push-race`).
-If the worktree holds uncommitted work you must not commit (a
-prototype), commit from a clean `git worktree add --detach <tmp>
-origin/main` instead (lesson `plot-from-dirty-worktree`).
+From a worktree that holds uncommitted work you must not commit (a
+prototype), cut the branch in a clean `git worktree add -b
+loop/plot-<N>-<slug> <tmp> origin/main` instead (lesson
+`plot-from-dirty-worktree`).
 
-`peek` stops before Step 4 and prints the brief instead.
+The PR carries the `plot` label, **never `loop:pr`**: it does not
+count toward the PR cap (D85) and is not a claim. `pr-resolve` keeps
+it mergeable like a `loop:pr` PR (D87). Body:
+
+```markdown
+## The task
+<1-3 lines, in T's terms>
+
+## What exists
+- <already built / already planned, with paths; or "nothing">
+
+## Recommendation
+<one phase, or k phases and why it splits: the tick test, the
+attended piece, the contract first>
+
+| Phase | Size | Closes | Requires | Attended |
+|---|---|---|---|---|
+| <id> — <title> | M | A1, A2 | nothing | no |
+
+## Slot
+<asap|anytime>: <where in the Status block, which rows come before
+it, and why>
+
+## To confirm
+- [T to confirm] <each such decision, or "nothing">
+
+## After merge
+The next `/march` tick can pick <first id> (or why it cannot:
+attended, `Requires` unmet).
+```
+
+To change the recommendation, T comments on the PR or asks in the
+session; the session edits the same branch (push, never force). T
+closing the PR unmerged drops the plot; nothing else needs undoing.
+
+`peek` stops before Step 4 and prints the brief and the phase table
+instead.
 
 ### Step 6 — Retro
 
-Run `skills/march.md` §3 "Retro".
+Run `skills/march.md` §3 "Retro". A lessons commit rides the PR.
 
 ### Step 7 — Done
 
-Two lines: the row, where it was slotted, and "the next `/march`
-tick can pick it" (or why it cannot: attended, `Requires` unmet).
+Two lines: the PR URL with its phase table, where the rows sit, and
+"merge to approve; the next `/march` tick can then pick <id>" (or
+why it cannot: attended, `Requires` unmet).
 
 ## 3. Hard rules
 
@@ -109,5 +209,8 @@ tick can pick it" (or why it cannot: attended, `Requires` unmet).
    one and `skills/messy.md` that dispatches `/plot` fails
    `scripts/loop-pr.test.mjs`.
 3. **Never plans card, keyword or art work for the loop** (D37).
-4. **Acceptance IDs and `Measure:` are mandatory.**
-5. **No emojis, no attribution trailers** (AGENTS.md rule 2).
+4. **Acceptance IDs and `Measure:` are mandatory**, and with several
+   phases every acceptance ID is closed by exactly one of them.
+5. **Lands by a `plot` PR, never a push to `main`, never `loop:pr`
+   (D93).** Never merges, closes or force-pushes its PR; T merges.
+6. **No emojis, no attribution trailers** (AGENTS.md rule 2).
