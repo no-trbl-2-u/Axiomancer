@@ -601,6 +601,24 @@
 
 ## Pending
 
+### [LOW] ci / pr-resolve — a hand dispatch with a non-`loop/` branch exits green having done nothing
+- pass: antagonist on PR #526 (commit efc7f371)
+- viewport: n/a
+- category: infra
+- observation: with `branch` set to anything outside `loop/` (a typo, `main`), `scan` is skipped (`inputs.branch != ''`) and `resolve` is skipped (`startsWith(inputs.branch, 'loop/')` fails), so the run shows green with no jobs run. Separately, `inputs.branch` is spliced into the `pre_run`/`post_run` shell inside single quotes; a refname may contain `'`. Only writers can dispatch, so this is hygiene, not exposure.
+- evidence: `.github/workflows/pr-resolve.yml` `scan.if` and `resolve.if`, `pre_run`.
+- suggested fix: a tiny guard job that fails loudly when `branch` is set but does not start with `loop/`; pass the branch through `env:` rather than inline `${{ }}` in the script.
+- source: antagonist, PR #526
+
+### [LOW] combat / footer dock — VITAE is announced twice, by the readout and by the bar
+- pass: antagonist on PR #529 (commit ce44dd8f)
+- viewport: n/a (screen reader)
+- category: accessibility
+- observation: `combat-rail-vitae` and the `progressbar` `combat-rail-vitae-bar` both carry `VITAE <hp> of <max>`, so swiping the dock reads the same line twice in a row.
+- evidence: `axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx` (`VitaeBar`, the `vitaeText` label).
+- suggested fix: keep the label on the progressbar (it also carries `accessibilityValue`) and hide the text readout from the reader (`importantForAccessibility="no"` / `accessibilityElementsHidden`), or the reverse.
+- source: antagonist, PR #529
+
 ### [MED] exploration hub — sealed nodes draw no visible mark, so most roads end at bare vertices
 - pass: 84 (commit dd61ec90)
 - viewport: both (375x812 and 1280x800)
