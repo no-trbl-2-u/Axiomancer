@@ -601,6 +601,8 @@
 
 ## Pending
 
+### [LOW] ci / pr-resolve — a hand dispatch with a non-`loop/` branch exits green having done nothing
+- pass: antagonist on PR #526 (commit efc7f371)
 ### [LOW] village — stall prices read "12s" while the purse, rest offers and sell labels say "SHILLINGS"
 - pass: 84 (commit dd61ec90)
 - viewport: both
@@ -924,6 +926,10 @@
 - pass: 1 (commit 6e23724a)
 - viewport: n/a
 - category: infra
+- observation: with `branch` set to anything outside `loop/` (a typo, `main`), `scan` is skipped (`inputs.branch != ''`) and `resolve` is skipped (`startsWith(inputs.branch, 'loop/')` fails), so the run shows green with no jobs run. Separately, `inputs.branch` is spliced into the `pre_run`/`post_run` shell inside single quotes; a refname may contain `'`. Only writers can dispatch, so this is hygiene, not exposure.
+- evidence: `.github/workflows/pr-resolve.yml` `scan.if` and `resolve.if`, `pre_run`.
+- suggested fix: a tiny guard job that fails loudly when `branch` is set but does not start with `loop/`; pass the branch through `env:` rather than inline `${{ }}` in the script.
+- source: antagonist, PR #526
 - observation: `axiomancer-mobile/scripts/dev-server-container.sh`
   (`npm run web:container`) pulls Expo via `npx --yes expo start`
   inside a throwaway `node:20-alpine` container, which resolves a
@@ -943,6 +949,14 @@
   path in favor of the host-run command until fixed.
 - source: critique pass 1
 
+### [LOW] combat / footer dock — VITAE is announced twice, by the readout and by the bar
+- pass: antagonist on PR #529 (commit ce44dd8f)
+- viewport: n/a (screen reader)
+- category: accessibility
+- observation: `combat-rail-vitae` and the `progressbar` `combat-rail-vitae-bar` both carry `VITAE <hp> of <max>`, so swiping the dock reads the same line twice in a row.
+- evidence: `axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx` (`VitaeBar`, the `vitaeText` label).
+- suggested fix: keep the label on the progressbar (it also carries `accessibilityValue`) and hide the text readout from the reader (`importantForAccessibility="no"` / `accessibilityElementsHidden`), or the reverse.
+- source: antagonist, PR #529
 > Seeded 2026-07-03 from the retired `/archive` critique history —
 > only the recurring *patterns* were carried; stale one-off rows
 > were dropped. Each maps to category `external-critique`.
@@ -3103,6 +3117,7 @@
   files/4085 tests green; `axiomancer-mobile` 268 files/2716 tests
   green.
 
+- viewport: n/a
 ### [x] [LOW] catalog keyword bolder still speaks dead vocabulary — RESOLVED 2026-08-06 (commit 489819a6, issue #171)
 - pass: session 2026-07-17 (card-text work)
 - viewport: devlog/catalog.html
@@ -3252,4 +3267,89 @@
   disrupt-meter legibility work from Phase 28) before or alongside
   Phase 33's SWAY-cleanse enemy work.
 - source: playtester (owner-directed break-test session)
+
+- category: infra
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
