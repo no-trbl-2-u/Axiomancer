@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-14 at commit 93f05dfe
-> Pass count: 85
+> Last pass: 2026-10-14 at commit eb4b804b
+> Pass count: 86
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -614,6 +614,19 @@
 > findings.
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `archive-pre-revamp:plan/archive/CRITIQUE_2026.md`.
 
+> **[critique pass 86, 2026-10-14, commit eb4b804b] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors. 12 commits
+> after pass 85: the sealed node mark (#528) and the village SHILLINGS
+> prices (#531) merged, plus expand pass 34. Verified on screen: the
+> stalls read "12 SHILLINGS" at both viewports, and every road on the
+> walked sheet now ends on a mark. Reconfirmed and not re-filed: pass
+> 83's capture-settle row (fourth die still airborne), pass 85's Blow
+> FREE pill and dock VITAE width (claimed by #534 and #535), the
+> unfixtured exploration hub bouncing to the title. Banner placed below
+> the archive note, not after pass 85, so it does not touch the lines
+> #534 and #535 rewrite. One fresh finding.
+
 ## Pending
 
 ### [LOW] anvil — HONE, TEMPER and SWAP prices read "40s" while the forge's budget says SHILLINGS
@@ -777,6 +790,15 @@
 - not filed (by design or owned elsewhere): the Doorwarden's placeholder pictogram (art, B2/B8); no end-of-act screen after the deep stair (`MapEvents/content.ts`: no end-of-run state); the grey-deck Momentum chip (accepted until BT).
 - evidence: the four leg reports in the RC session; `plan/revamp/checkpoint.md` → "The walk, 2026-10-02".
 - source: playtester (attended)
+
+### [LOW] exploration / map — the sealed node now prints as a dark dot, so the legend's ◌ SEALED key still matches nothing drawn
+- pass: 86 (commit eb4b804b)
+- viewport: both (375x812 and 1280x800)
+- category: comprehension
+- observation: #528 made the twelve sealed nodes of the walked Breakwater sheet visible again, and the roads now end on a mark. But the mark reads as a small solid dark dot, the same tone as the black road casing it sits on. The dashed ash ring inside the disc is not legible at either viewport, so the sealed node looks like a filled dot, while the legend keys SEALED as an empty broken ring (◌) and TRODDEN as the solid one (●). On the desktop sheet's darkest stretch (the wreck, about 55,565) the dot melts into the engraving.
+- evidence: `.critique-artifacts/mobile/11-late-game-hub.png` (dots at about 160,470, 95,540, 255,505); `desktop/11-late-game-hub.png` (about 55,565); `axiomancer-mobile/components/NodeMark.tsx` locked branch (deepBg disc at `SEALED_MARK_OPACITY.disc` 0.7 under an ash, `strokeWidth` 1.4 dashed ring); the legend's glyph contract in `state/presenters/exploration.engine.ts` (~:424, "◌ SEALED — an EMPTY broken ring").
+- suggested fix: let the ring carry the mark: draw it in bone (or a lighter ash) at a slightly heavier stroke over a fainter disc, so a sealed node reads as a hollow broken ring the way the legend draws it, still the smallest and faintest of the kinds. Pin the ring's stroke colour and weight in `ExplorationNode.test.tsx`.
+- source: critique-drive (unattended)
 
 ### [LOW] village / rest — the Minor Healing Potion restores 10 VITAE against a 160-170 pool, a quarter of the free rest
 - pass: 65 (commit a6ee8167)
