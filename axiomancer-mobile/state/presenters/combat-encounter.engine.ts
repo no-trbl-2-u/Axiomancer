@@ -781,6 +781,9 @@ export interface CombatLogHistoryEntryVM {
 export const COMBAT_LOG_TOGGLE_TEXT = 'LOG';
 export const COMBAT_LOG_TOGGLE_A11Y = 'Open the combat log';
 export const COMBAT_LOG_CLOSE_A11Y = 'Close the combat log';
+/** The log view's way back to the pilgrim's stats (the log lives in the
+ *  pilgrim modal). */
+export const COMBAT_LOG_BACK_TEXT = '‹ BACK';
 
 /** Long fights scroll early turns off rather than growing the sheet forever. */
 const LOG_HISTORY_CAP = 200;

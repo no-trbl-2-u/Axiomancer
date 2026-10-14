@@ -37,9 +37,11 @@ An encounter node resolves to a `combat-prelude` event that renders **in place o
 | `combat-trash` | Discard target |
 | `combat-drop-reject` | Flash when a die is dropped on a wrong-colour card |
 | `combat-signature-<id>` | Signature buttons |
-| `combat-end-phase` | END PHASE — closes your turn, enemy acts, tray re-rolls |
-| `combat-end-consequence` | Consequence line shown at end phase |
-| `combat-log-toggle` / `combat-log` / `combat-log-close` | Ledger overlay |
+| `combat-end-phase` | END PHASE (the wide button at the right of the footer dock) — closes your turn, enemy acts, tray re-rolls |
+| `combat-end-consequence` | Consequence line shown above END on a dead tray |
+| `combat-rail` / `combat-rail-vitae` / `combat-rail-vitae-bar` / `combat-ledger` | Footer dock: VITAE value, fill bar and phase ledger |
+| `combat-player-medallion` | The player avatar at the left of the footer dock; tap opens `combat-pilgrim-modal` |
+| `combat-pilgrim-log` / `combat-log` / `combat-pilgrim-log-back` / `combat-pilgrim-close` | Combat log, inside the pilgrim modal: LOG opens it, BACK returns to the stats |
 | `combat-card-detail` / `combat-card-detail-close` | Card detail modal (deliberate; has a dismiss) |
 | `combat-mercy` / `combat-mercy-spare` / `combat-mercy-exploit` | Mercy choice when the foe breaks |
 | `combat-rewards` / `combat-reward-<cardId>` / `combat-reward-preview` / `combat-reward-preview-select` / `combat-reward-preview-close` / `combat-reward-confirm` / `combat-reward-skip` | SPOILS card pick |
@@ -52,7 +54,7 @@ An encounter node resolves to a `combat-prelude` event that renders **in place o
 ## 4. A correct play, step by step
 
 1. Wait for `encounter-modal-overlay` then `combat-reveal`, then press `combat-enter`.
-2. **Drag** a `combat-hand-<uid>` into `combat-play-area` → it becomes `combat-staged-<uid>`. A plain tap only opens `combat-card-detail` (the board says "tap a card to read it") — close it with `combat-card-detail-close`.
+2. **Drag** a `combat-hand-<uid>` into `combat-play-area` → it becomes `combat-staged-<uid>`. A plain tap only opens `combat-card-detail` — close it with `combat-card-detail-close`.
 3. **Drag** a `combat-die-<id>` whose colour matches the card onto `combat-staged-<uid>`; success shows `combat-staged-die`. A die whose aria-label says `MISS face` powers nothing — pick another. A wrong colour flashes `combat-drop-reject`. Use real pointer moves (down → several moves → up); `scripts/combat-round-e2e.mjs` `dragTo` is the reference.
 4. Press `combat-apply-<uid>`. Repeat 2–4 while dice remain, or discard via `combat-trash`.
 5. Press `combat-end-phase`; the enemy acts (`combat-enemy-action-card`), the tray re-rolls.

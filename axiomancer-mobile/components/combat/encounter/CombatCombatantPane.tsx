@@ -88,11 +88,9 @@ export const COMBAT_HUD_HEIGHT = 148;
  *  measured height of the HUD's full-width block. */
 export const COMBAT_HUD_PAD_TOP = 8;
 
-/** Screen-left footprint of the player medallion's dock: its 10pt left offset
- *  plus the 92pt medallion. The board reserves this much of the bottom band so
- *  the hand fan lays out BESIDE the medallion instead of under it.
- *  Keep in step with `playerDock` / `medallion`. */
-export const PLAYER_DOCK_FOOTPRINT_W = 102;
+/** The player avatar's diameter in the board's footer dock. The rim is drawn
+ *  in a 92-unit box scaled to this size. */
+export const PLAYER_AVATAR_SIZE = 48;
 
 type Float = { id: number; text: string; color: string; dx: number };
 
@@ -205,15 +203,16 @@ function FloatNum({ text, color, dx, onDone }: { text: string; color: string; dx
 
 /** Glowing square status tiles with a count badge (reference: icon+number,
  *  no ×/turn text — duration lives in the tooltip + a11y label). */
-export function EffectChips({ effects, onChip, align = 'flex-start' }: {
+export function EffectChips({ effects, onChip, align = 'flex-start', testID }: {
     effects: CombatEffectChipVM[];
     onChip?: (e: CombatEffectChipVM) => void;
     align?: 'flex-start' | 'flex-end' | 'center';
+    testID?: string;
 }) {
     const styles = useStyles();
     if (effects.length === 0) return null;
     return (
-        <View style={[styles.chipRow, { justifyContent: align }]} pointerEvents="box-none">
+        <View style={[styles.chipRow, { justifyContent: align }]} pointerEvents="box-none" testID={testID}>
             {effects.map((e) => (
                 <Pressable
                     key={e.effectId}
@@ -243,26 +242,26 @@ export function EffectChips({ effects, onChip, align = 'flex-start' }: {
     );
 }
 
-// ── Player medallion (bottom-left corner chrome) ─────────────────────────────
+// ── Player avatar (footer dock) ──────────────────────────────────────────────
 
 /**
- * The player's circular portrait medallion with an HP arc ring, guard chip and
- * status tiles. Mounted by the BOARD *above* the interactive column (the pane
- * itself is a transform stacking-context BELOW it, so anything drawn there
- * would hide under the hand). Handles the player-side resolution FX — recoil,
- * hit-flash, hitstop squash, contact slash, floats, haptic — off the same `fx`
- * stream the pane reads for the enemy side.
+ * The player's small round portrait in the board's footer dock, under a sulfur
+ * rim. The dock's VITAE bar carries the number; the avatar carries the
+ * player-side resolution FX — recoil, hit-flash, hitstop squash, contact
+ * slash, floats, haptic — off the same `fx` stream the pane reads for the
+ * enemy side. Mounted by the BOARD inside its interactive column (the pane
+ * itself is a transform stacking context BELOW it, so anything drawn there
+ * would hide under the hand).
  */
 export const PlayerMedallion = React.memo(function PlayerMedallion({
-    player, enemyIntentDamage, onPress, fx, bottomInset = 0, sacrificeCallout = null,
+    player, enemyIntentDamage, onPress, fx, sacrificeCallout = null,
 }: {
     player: CombatPlayerPaneVM;
     enemyIntentDamage: number;
-    /** Tap the medallion → inspect the pilgrim (stats/effects/cards modal). */
+    /** Tap the avatar → inspect the pilgrim (stats, effects, combat log). */
     onPress?: () => void;
     fx?: CombatFx;
-    bottomInset?: number;
-    /** A refused line's unpaid SACRIFICE: the ring flags it while set
+    /** A refused line's unpaid SACRIFICE: the avatar flags it while set
      *  (`n` restarts the callout on a repeat refusal). */
     sacrificeCallout?: { cost: number; vitae: number; n: number } | null;
 }) {
@@ -350,16 +349,8 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
     const flashAnim = useAnimatedStyle(() => ({ opacity: flash.value }));
     const contactStyle = useAnimatedStyle(() => ({ opacity: contact.value }));
 
-    // Player HP arc ring (r=40 → C≈251.3).
-    const ARC_C = 2 * Math.PI * 40;
-    const arcOn = ARC_C * Math.max(0, Math.min(1, player.hpPct));
-
     return (
-        // bottom 34→26 (CRITIQUE: fan-end occlusion) — flush with the rail
-        // top, so the medallion's touch box tops out BELOW the leftmost hand
-        // card's bounding-box centre and a drag started there hits the card,
-        // not this chrome. Pairs with the corner-facing hitSlop below.
-        <View style={[styles.playerDock, { bottom: bottomInset + 26 }]} pointerEvents="box-none">
+        <View style={styles.playerDock} pointerEvents="box-none">
             {/* status-proc pulse nests OUTSIDE the hit-reaction `anim` transform —
                 a style array can't merge two `transform` arrays, so each juice
                 primitive gets its own Animated.View and they compose via nesting. */}
@@ -373,29 +364,16 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
                     accessibilityLabel={sacrificeCallout
                         ? PROGRAM_COPY.floorA11y(sacrificeCallout.vitae, player.maxHp, sacrificeCallout.cost)
                         : `${player.name}, VITAE ${player.hp} of ${player.maxHp}. Inspect your pilgrim — stats, status effects and cards.`}
-                    // Slop only toward the screen corner: the top/right edges are
-                    // where the leftmost hand card fans under this medallion, and
-                    // slopping into them stole the card's touch centre (CRITIQUE:
-                    // "combat corner medallions occlude fan-end hand-card touch
-                    // centers", PR #135 probe).
+                    // Slop only toward the screen edge and the bottom, never up
+                    // into the hand above the dock.
                     hitSlop={{ left: 6, bottom: 6 }}
                 >
                     <View style={styles.medallionClip}>
-                        <PlayerPortraitImage width={72} height={86} fit="cover" />
+                        <PlayerPortraitImage width={44} height={52} fit="cover" />
                         <Animated.View style={[styles.medallionFlash, flashAnim]} pointerEvents="none" />
                     </View>
-                    <Svg width={92} height={92} viewBox="0 0 92 92" style={StyleSheet.absoluteFill} pointerEvents="none">
-                        <Circle cx={46} cy={46} r={40} stroke="rgba(0,0,0,0.65)" strokeWidth={6} fill="none" />
-                        <Circle
-                            cx={46} cy={46} r={40}
-                            stroke={AXM.heal}
-                            strokeWidth={5}
-                            strokeLinecap="round"
-                            fill="none"
-                            strokeDasharray={`${arcOn} ${ARC_C}`}
-                            transform="rotate(-90 46 46)"
-                        />
-                        <Circle cx={46} cy={46} r={44.5} stroke={AXM.sulfur} strokeWidth={1.8} fill="none" opacity={0.9} />
+                    <Svg width={PLAYER_AVATAR_SIZE} height={PLAYER_AVATAR_SIZE} viewBox="0 0 92 92" style={StyleSheet.absoluteFill} pointerEvents="none">
+                        <Circle cx={46} cy={46} r={44.5} stroke={AXM.sulfur} strokeWidth={3.6} fill="none" opacity={0.9} />
                     </Svg>
                     {sacrificeCallout ? (
                         <VitaeSacrificeCallout
@@ -403,6 +381,7 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
                             cost={sacrificeCallout.cost}
                             vitae={sacrificeCallout.vitae}
                             max={player.maxHp}
+                            size={PLAYER_AVATAR_SIZE}
                         />
                     ) : null}
                     {/* one-frame contact slash at the moment of impact */}
@@ -708,8 +687,8 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                 {/* The HUD's FULL-WIDTH block — name row, VITAE bar, alt-win
                     meters. Measured on its own because the enemy figure anchors
                     under it: these are the rows that lie edge to edge across the
-                    painting, while `hudUnderBar` below is a narrow right-hand chip
-                    column that the top scrim already
+                    painting, while `hudUnderBar` below is a narrow top-left chip
+                    column (the foe's intent and status) that the top scrim already
                     carries. Anchoring the figure to the WHOLE HUD instead would
                     drag its top down past that column and collapse the foe to a
                     thumbnail. `onHudLayout` above still reports the whole HUD —
@@ -743,10 +722,13 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                         />
                     ) : null}
                 </View>
-                <View style={styles.hudUnderBar} pointerEvents="box-none">
-                    <View style={styles.hudRight} pointerEvents="box-none">
+                {/* The foe's intent and status chips read top-left, under its
+                    name; the chips wrap left to right. The conviction and
+                    signature column starts under this block. */}
+                <View style={styles.hudUnderBar} pointerEvents="box-none" testID="combat-hud-under-bar">
+                    <View style={styles.hudIntent} pointerEvents="box-none" testID="combat-hud-intent">
                         <IntentIcon intent={enemy.intent} />
-                        <EffectChips effects={enemy.effects} onChip={onChip} align="flex-end" />
+                        <EffectChips effects={enemy.effects} onChip={onChip} align="flex-start" testID="combat-enemy-effects" />
                     </View>
                 </View>
                 {/* enemy floats rise from under the crest, over the figure */}
@@ -818,8 +800,8 @@ const useStyles = makeStyles((AXM) => ({
         borderWidth: 1, borderColor: 'rgba(0,0,0,0.9)', overflow: 'hidden',
     },
     altMeterFill: { height: '100%', position: 'absolute', left: 0, top: 0, bottom: 0, borderRadius: 3 },
-    hudUnderBar: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-end', marginTop: 2 },
-    hudRight: { alignItems: 'flex-end', gap: 6, flexShrink: 1 },
+    hudUnderBar: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start', marginTop: 2 },
+    hudIntent: { alignItems: 'flex-start', gap: 6, flexShrink: 1 },
 
     // Status tiles.
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 5 },
@@ -851,11 +833,12 @@ const useStyles = makeStyles((AXM) => ({
         textShadowColor: HUE.black, textShadowRadius: 5, textShadowOffset: { width: 0, height: 1 },
     },
 
-    // Player medallion.
-    playerDock: { position: 'absolute', left: 10, alignItems: 'flex-start', gap: 6, zIndex: 35 },
-    medallion: { width: 92, height: 92, alignItems: 'center', justifyContent: 'center' },
+    // Player avatar (footer dock).
+    playerDock: { width: PLAYER_AVATAR_SIZE, height: PLAYER_AVATAR_SIZE },
+    medallion: { width: PLAYER_AVATAR_SIZE, height: PLAYER_AVATAR_SIZE, alignItems: 'center', justifyContent: 'center' },
     medallionClip: {
-        width: 80, height: 80, borderRadius: 40, overflow: 'hidden', backgroundColor: AXM.deepBg,
+        width: PLAYER_AVATAR_SIZE - 4, height: PLAYER_AVATAR_SIZE - 4, borderRadius: (PLAYER_AVATAR_SIZE - 4) / 2,
+        overflow: 'hidden', backgroundColor: AXM.deepBg,
         alignItems: 'center', justifyContent: 'center',
     },
     medallionFlash: { ...StyleSheet.absoluteFillObject, backgroundColor: HUE.damageRed },

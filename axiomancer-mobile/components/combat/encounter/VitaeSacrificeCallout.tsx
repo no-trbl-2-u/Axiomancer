@@ -1,15 +1,16 @@
 /**
- * The SACRIFICE-floor callout on the player's VITAE ring.
+ * The SACRIFICE-floor callout on the player's avatar.
  *
  * When the board refuses a card line because its SACRIFICE would leave the
- * player below 1 VITAE, the ring answers "why": its outline pulses red twice
- * and a ghost segment of the unpaid SACRIFICE is drawn from the current fill
- * back past the floor, tagged `SACRIFICE <cost>`. With reduced motion the
- * outline and ghost hold still for the same span.
+ * player below 1 VITAE, the avatar answers "why": its outline pulses red
+ * twice and a ghost ring of the unpaid SACRIFICE is drawn from the current
+ * fill back past the floor, tagged `SACRIFICE <cost>`. With reduced motion
+ * the outline and ghost hold still for the same span.
  *
  * The engine owns the numbers (`programLineShortfall`); this file only draws
- * them. The ring geometry matches `PlayerMedallion` (92 box, r 40 fill ring,
- * r 44.5 outline).
+ * them. The rings are drawn in a 92-unit box (r 40 fill ring, r 44.5
+ * outline), the box `PlayerMedallion` draws its rim in, scaled to `size`.
+ * The tag is not scaled.
  */
 
 import React, { useEffect } from 'react';
@@ -54,7 +55,11 @@ export function sacrificeGhostArcs(vitae: number, max: number, cost: number, cir
     return arcs;
 }
 
-export function VitaeSacrificeCallout({ cost, vitae, max }: { cost: number; vitae: number; max: number }) {
+export function VitaeSacrificeCallout({ cost, vitae, max, size = BOX }: {
+    cost: number; vitae: number; max: number;
+    /** The drawn size of the 92-unit ring box (the avatar's diameter). */
+    size?: number;
+}) {
     const AXM = usePalette();
     const styles = useStyles();
     const reduced = useReducedMotion();
@@ -72,12 +77,12 @@ export function VitaeSacrificeCallout({ cost, vitae, max }: { cost: number; vita
     const arcs = sacrificeGhostArcs(vitae, max, cost);
     return (
         <View
-            style={styles.root}
+            style={[styles.root, { width: size, height: size }]}
             pointerEvents="none"
             testID="combat-vitae-callout"
             accessibilityLabel={PROGRAM_COPY.floorA11y(vitae, max, cost)}
         >
-            <Svg width={BOX} height={BOX} viewBox={`0 0 ${BOX} ${BOX}`} style={StyleSheet.absoluteFill}>
+            <Svg width={size} height={size} viewBox={`0 0 ${BOX} ${BOX}`} style={StyleSheet.absoluteFill}>
                 {arcs.map((a, i) => (
                     <Circle
                         key={i}
@@ -97,7 +102,7 @@ export function VitaeSacrificeCallout({ cost, vitae, max }: { cost: number; vita
                 style={[StyleSheet.absoluteFill, outlineStyle]}
                 testID={reduced ? 'combat-vitae-outline-static' : 'combat-vitae-outline-pulse'}
             >
-                <Svg width={BOX} height={BOX} viewBox={`0 0 ${BOX} ${BOX}`}>
+                <Svg width={size} height={size} viewBox={`0 0 ${BOX} ${BOX}`}>
                     <Circle cx={CENTER} cy={CENTER} r={OUTLINE_R} stroke={AXM.blood} strokeWidth={3} fill="none" />
                 </Svg>
             </Animated.View>
@@ -109,9 +114,11 @@ export function VitaeSacrificeCallout({ cost, vitae, max }: { cost: number; vita
 }
 
 const useStyles = makeStyles((AXM) => ({
-    root: { position: 'absolute', left: 0, top: 0, width: BOX, height: BOX, zIndex: 8 },
+    root: { position: 'absolute', left: 0, top: 0, zIndex: 8 },
+    // Anchored to the avatar's left edge, so it reads rightward onto the
+    // board instead of past the screen's left edge.
     tag: {
-        position: 'absolute', top: -20, left: -4, right: -4, alignItems: 'center',
+        position: 'absolute', top: -22, left: -4, width: 140, alignItems: 'flex-start',
     },
     tagText: {
         fontFamily: FONTS.gothic, fontSize: 12, letterSpacing: 0.6, color: AXM.blood,

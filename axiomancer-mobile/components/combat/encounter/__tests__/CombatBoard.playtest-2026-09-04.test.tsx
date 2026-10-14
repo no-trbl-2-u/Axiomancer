@@ -6,9 +6,10 @@
  *     `NARROW_FACE_W` the ledger STACKS (keyword over value, full width) and
  *     every text line wraps to two lines with an explicit lineHeight, so the
  *     NAME and paid line read in full rather than as stubs ("C.. +.").
- *  2. The player VITAE readout stays on screen: the bottom rail grows
- *     (minHeight = line + bottom inset, paddingBottom = inset) rather than
- *     sitting at a fixed height, and the readout never wraps.
+ *  2. The player VITAE readout stays on screen: the footer dock grows
+ *     (minHeight = row + padding + bottom inset, paddingBottom = inset +
+ *     padding) rather than sitting at a fixed height, and the readout never
+ *     wraps.
  *  3. No `opacity` on a layout-animated node: FadeIn drives `opacity` on the
  *     animated hand-card wrapper, so the in-flight dim lives on a plain inner
  *     View (sharing the node makes Reanimated warn `[opacity] may be
@@ -23,8 +24,9 @@ import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 
 import { initializeCombatEncounter, rollEncounterDice } from '@mechanics';
 import {
-    CombatBoard, CombatCardFace, NARROW_FACE_W, RAIL_LINE_H, type DragController,
+    CombatBoard, CombatCardFace, NARROW_FACE_W, type DragController,
 } from '@/components/combat/encounter/CombatBoard';
+import { DOCK_PAD_V, dockMinHeight } from '@/components/combat/encounter/CombatFooterDock';
 import { buildCombatViewModel, type CombatViewModel } from '@/state/presenters/combat-encounter.engine';
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
@@ -84,8 +86,8 @@ describe('CombatBoard rail — player VITAE is fully visible at 390x844', () => 
     it('the rail grows with the bottom inset instead of clipping to a fixed line', () => {
         renderBoard();
         const rail = flat('combat-rail');
-        expect(rail.minHeight).toBe(RAIL_LINE_H + INSETS.bottom);
-        expect(rail.paddingBottom).toBe(INSETS.bottom);
+        expect(rail.minHeight).toBe(dockMinHeight(INSETS.bottom));
+        expect(rail.paddingBottom).toBe(INSETS.bottom + DOCK_PAD_V);
         // No fixed height: the row may take a second line when the ledger wraps.
         expect(rail.height).toBeUndefined();
     });

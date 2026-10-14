@@ -637,15 +637,6 @@
 - suggested fix: print one form for every price. Either "12 SHILLINGS" on the stall rows, or "12s" everywhere with the purse header naming the unit once. The first matches the rest screen. Pin it in the village screen test.
 - source: critique-drive (unattended)
 
-### [MED] combat / hand fan — the D91 free corner pill covers the "tap a card to read it" hint
-- pass: antagonist on PR #521 (BT2a, commit 042b4471)
-- viewport: mobile (375x812)
-- category: visual
-- observation: the pill straddles 15pt above each card's top edge (`freePill` top -15), into the strip where `styles.fanHint` sits (`top: 1` in the fan). With a five-card phone fan, a middle card's pill sits over the start of the hint, so it reads "· · card to read it". BT2a's brief keeps the fan band out of scope (BT2b), so the PR did not move the hint.
-- evidence: `axiomancer-mobile/screenshots/bt2a/1-grey-hand.jpg` and `2-blood-price-hand.jpg` (hint under the "+4" / "-2" pills); the prototype shot `bt2-prototype/1-board.jpg` has no hint in that strip.
-- suggested fix: in BT2b, place the hint clear of the pills' overhang (above the pill row, or drop it once the BT2b fan reads names whole), and pin it with a layout test.
-- source: antagonist, PR #521
-
 ### [LOW] combat / IN PLAY row — two copies of one Global give two chips with the same accessibility label
 - pass: antagonist on PR #520 (GS1, commit fc4aa159)
 - viewport: n/a (screen reader)
@@ -779,32 +770,6 @@
   change on existing items only, no new content. If heal magnitudes
   belong to B2's balance pass, route it there rather than tune it in
   `/iterate`.
-- source: critique:drive (unattended)
-
-### [LOW] combat / mobile — on a 375-wide phone the corner medallions cover the effect rows of the fan's two end cards
-- pass: 63 (commit aea7593b)
-- viewport: mobile (375x812); desktop (1280x800) seats the fan between the corners and is clear
-- category: mobile
-- observation: a five-card opening hand does not fit the band between the
-  corners, so `handFanLayout` lays it across the whole board (12 to 363)
-  and lets the corner chrome float over it. The two end cards are the only
-  ones no neighbour covers, yet the END disc sits over the rightmost card's
-  effect row ("Deal 12" reads "Dea") and the player medallion sits over the
-  leftmost card's chip row. The first-time player sees whole cards but not
-  what the two end ones do until they tap one. The fan comment already
-  accepts "the last card landed half under the END disc" as the price of a
-  readable fan. The cost is the one line that tells the player what the
-  card does.
-- evidence: `.critique-artifacts/mobile/04-combat-board.png` (bottom right,
-  "Dea" under END; bottom left, the Ward's chip under the portrait);
-  `axiomancer-mobile/components/combat/encounter/CombatBoard.tsx:238-334`
-  (`END_CORNER_FOOTPRINT_W`, `handFanLayout` board-band fallback) and
-  `:2066` (`endWrap` 80x80).
-- suggested fix: keep the full-board fan, but when it takes the board band
-  lift the two corner stacks above the card tops (or shrink them to a
-  compact size), so no end card's effect row sits under chrome. Pin it with
-  a layout test at 375 with five cards: the END and player-medallion
-  rects must not intersect any card's effect row.
 - source: critique:drive (unattended)
 
 ### [MED] combat — the only SUMMON carrier cannot reach wave 2, so half the spawn rule is dead on the roster
@@ -991,6 +956,41 @@
 - source: loop
 
 ## Done
+
+### [x] [MED] combat / hand fan — the D91 free corner pill covers the "tap a card to read it" hint — RESOLVED 2026-10-14 (PR #529, phase BT2b: the hint is dropped per D92 (A8), and the hand dock keeps the pill's overhang above the card tops inside its clip; pinned in CombatBoard.handfan.test.tsx)
+- pass: antagonist on PR #521 (BT2a, commit 042b4471)
+- viewport: mobile (375x812)
+- category: visual
+- observation: the pill straddles 15pt above each card's top edge (`freePill` top -15), into the strip where `styles.fanHint` sits (`top: 1` in the fan). With a five-card phone fan, a middle card's pill sits over the start of the hint, so it reads "· · card to read it". BT2a's brief keeps the fan band out of scope (BT2b), so the PR did not move the hint.
+- evidence: `axiomancer-mobile/screenshots/bt2a/1-grey-hand.jpg` and `2-blood-price-hand.jpg` (hint under the "+4" / "-2" pills); the prototype shot `bt2-prototype/1-board.jpg` has no hint in that strip.
+- suggested fix: in BT2b, place the hint clear of the pills' overhang (above the pill row, or drop it once the BT2b fan reads names whole), and pin it with a layout test.
+- source: antagonist, PR #521
+
+### [x] [LOW] combat / mobile — on a 375-wide phone the corner medallions cover the effect rows of the fan's two end cards — RESOLVED 2026-10-14 (PR #529, phase BT2b: no corner chrome remains; the avatar and END live in the footer dock under the hand (A3), pinned in CombatBoard.footer-dock.test.tsx)
+- pass: 63 (commit aea7593b)
+- viewport: mobile (375x812); desktop (1280x800) seats the fan between the corners and is clear
+- category: mobile
+- observation: a five-card opening hand does not fit the band between the
+  corners, so `handFanLayout` lays it across the whole board (12 to 363)
+  and lets the corner chrome float over it. The two end cards are the only
+  ones no neighbour covers, yet the END disc sits over the rightmost card's
+  effect row ("Deal 12" reads "Dea") and the player medallion sits over the
+  leftmost card's chip row. The first-time player sees whole cards but not
+  what the two end ones do until they tap one. The fan comment already
+  accepts "the last card landed half under the END disc" as the price of a
+  readable fan. The cost is the one line that tells the player what the
+  card does.
+- evidence: `.critique-artifacts/mobile/04-combat-board.png` (bottom right,
+  "Dea" under END; bottom left, the Ward's chip under the portrait);
+  `axiomancer-mobile/components/combat/encounter/CombatBoard.tsx:238-334`
+  (`END_CORNER_FOOTPRINT_W`, `handFanLayout` board-band fallback) and
+  `:2066` (`endWrap` 80x80).
+- suggested fix: keep the full-board fan, but when it takes the board band
+  lift the two corner stacks above the card tops (or shrink them to a
+  compact size), so no end card's effect row sits under chrome. Pin it with
+  a layout test at 375 with five cards: the END and player-medallion
+  rects must not intersect any card's effect row.
+- source: critique:drive (unattended)
 
 ### [x] [LOW] title / a11y — after EMBARK the faded psalm, EMBARK button and footer stay in the accessibility tree under the menu — RESOLVED 2026-10-13 (commit fafba096; the CTA block sets accessibilityElementsHidden, importantForAccessibility no-hide-descendants and aria-hidden once the phase leaves 'title'; pinned in TitleScreen.test.tsx)
 - issue: #511

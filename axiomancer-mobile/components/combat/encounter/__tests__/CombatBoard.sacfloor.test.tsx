@@ -15,12 +15,14 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
+import { act, fireEvent, render, screen, within } from '@testing-library/react-native';
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 
 import { initializeCombatEncounter, rollEncounterDice, type CombatEncounterState } from '@mechanics';
 import { CombatBoard, refusedDieShortfall, type DragController } from '@/components/combat/encounter/CombatBoard';
 import { SACRIFICE_CALLOUT_MS, sacrificeGhostArcs } from '@/components/combat/encounter/VitaeSacrificeCallout';
+import { PLAYER_AVATAR_SIZE } from '@/components/combat/encounter/CombatCombatantPane';
 import { buildCombatViewModel, PROGRAM_COPY } from '@/state/presenters/combat-encounter.engine';
 import { createSettingsStore } from '@/state/settings';
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
@@ -98,6 +100,15 @@ describe('CombatBoard — a refusal at the SACRIFICE floor flags the VITAE ring'
         expect(screen.getByText(PROGRAM_COPY.floorTag(4))).toBeTruthy();
         expect(screen.getAllByTestId('combat-vitae-ghost').length).toBeGreaterThan(0);
         expect(screen.getByTestId('combat-vitae-outline-pulse')).toBeTruthy();
+    });
+
+    it('draws on the footer dock\'s avatar, at the avatar\'s size (BT2b)', async () => {
+        const { die } = boardWith({ freeBlock: null, paidBlock: FLOOR, freeShortfall: null, paidShortfall: SHORT });
+        await tapCombatDie(die.id);
+        expect(within(screen.getByTestId('combat-rail')).getByTestId('combat-vitae-callout')).toBeTruthy();
+        const box = StyleSheet.flatten(screen.getByTestId('combat-vitae-callout').props.style) as Record<string, unknown>;
+        expect(box.width).toBe(PLAYER_AVATAR_SIZE);
+        expect(box.height).toBe(PLAYER_AVATAR_SIZE);
     });
 
     it('the VITAE ring\'s label names the numbers during the callout', async () => {

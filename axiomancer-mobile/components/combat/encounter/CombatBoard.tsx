@@ -16,25 +16,27 @@
  *   battlefield + top HUD      → CombatCombatantPane (absolute-fill overlay)
  *   play region                → invisible drop target; dashed affordance only
  *                                while a card drag is live; staged cards float
- *   signature rune column      → left edge (conviction chip + circular runes)
+ *   signature rune column      → left edge, under the foe's intent
+ *                                (conviction chip + circular runes)
  *   dice row                   → free-floating gem dice above the hand
- *   hand fan                   → edge-to-edge arc, bottoms cropped off-screen
- *   corner medallions          → player portrait (tap = pilgrim modal) · END PHASE
- *   bottom rail                → ♥ HP · phase ledger · deck/discard counts
+ *   hand fan                   → full board width, no corner chrome
+ *   footer dock                → avatar (tap = pilgrim modal) · VITAE column
+ *                                (value, piles, fill bar, phase ledger) · END
+ *                                (`CombatFooterDock`)
  *
  * The drag ghost renders at screen level in `CombatEncounterPanel`.
  */
 
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import type { StyleProp, TextStyle } from 'react-native';
+import type { LayoutChangeEvent, StyleProp, TextStyle } from 'react-native';
 import { Image } from '@/lib/platform/image';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { Haptics } from '@/lib/platform/haptics';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
     FadeIn, FadeInDown, LinearTransition, runOnJS,
-    useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming,
+    useAnimatedStyle, useSharedValue,
     type SharedValue,
 } from 'react-native-reanimated';
 import Svg, { Circle, Defs, Path, RadialGradient, Stop } from 'react-native-svg';
@@ -50,9 +52,10 @@ import { armedValue, dieCanPowerCardVM, STANCE_COLORS, PROGRAM_COPY } from '@/st
 // The ONE mobile source for the rarity band. The face never
 // re-bands a rank and never re-types a rarity hue; see `card-rarity.engine.ts`.
 import { rarityFor, RARITY_LABEL, RARITY_COLOR } from '@/state/presenters/card-rarity.engine';
-import { TrashGlyph, LedgerMark } from '@/components/hazard/glyphs';
+import { TrashGlyph } from '@/components/hazard/glyphs';
 import { glyphShapeFor } from '@/components/combat/glyphShapes';
-import { CombatCombatantPane, EffectChips, PlayerMedallion, COMBAT_HUD_HEIGHT, PLAYER_DOCK_FOOTPRINT_W, type CombatFx } from './CombatCombatantPane';
+import { CombatCombatantPane, EffectChips, PlayerMedallion, COMBAT_HUD_HEIGHT, type CombatFx } from './CombatCombatantPane';
+import { CombatFooterDock, dockMinHeight } from './CombatFooterDock';
 import { SACRIFICE_CALLOUT_MS } from './VitaeSacrificeCallout';
 import { CombatDie, combatDieA11yLabel } from './CombatDie';
 import { RollingDie } from './RollingDie';
@@ -310,71 +313,65 @@ const SignatureColumn = React.memo(function SignatureColumn({ conviction, signat
 
 const TRAY_DIE_SIZE = 47;
 
-// The rune column's resting anchor, and the gap it keeps above the dice tray
-// when a long signature list would otherwise push it onto the dice.
-const SIG_COLUMN_TOP_RATIO = 0.34;
-const SIG_COLUMN_TOP = `${SIG_COLUMN_TOP_RATIO * 100}%` as const;
-const SIG_TRAY_CLEARANCE = 10;
+// The rune column's anchor: it starts just under the foe's intent block (the
+// HUD's measured bottom plus a small gap), and keeps a clearance above the
+// dice tray when a long signature list would otherwise push it onto the dice.
+// The stylesheet's `top` stands in only until the first layout pass.
+const SIG_COLUMN_TOP_FALLBACK = '34%' as const;
+export const SIG_HUD_GAP = 8;
+export const SIG_TRAY_CLEARANCE = 10;
+// The column's own geometry (`sigColumn`, `convictionChip`, `sigRune` below),
+// named so its height for N runes can be computed without a layout pass. The
+// chip is its 1pt border twice, 3pt padding twice, the 18pt value line and
+// the caption's 1pt margin plus 7pt line. A rune is 44pt (the touch-target
+// floor) at a 6pt gap, so five fit between the intent block and the tray on a
+// 375x812 screen (`CombatBoard.sig-column.test.tsx`).
+export const SIG_RUNE_SIZE = 44;
+export const SIG_COLUMN_GAP = 6;
+export const SIG_CONVICTION_CHIP_H = 34;
 
-// One line of the bottom rail (VITAE · ledger · piles) before the safe-area
-// inset. Exported for the rail test — the readout must sit inside this.
-export const RAIL_LINE_H = 26;
-
-// The rail's widths, for deciding whether the phase ledger fits its row. The
-// side paddings are the two medallion footprints; the fixed cells are the
-// widest VITAE readout ("♥ 999 / 999") and the two piles, which never shrink.
-export const RAIL_PAD_LEFT = 104;
-export const RAIL_PAD_RIGHT = 92;
-const RAIL_GAP = 6;
-const RAIL_FIXED_CELLS_W = 150;
-export const RAIL_LEDGER_MARK = 14;
-const RAIL_LEDGER_GAP = 3;
-
-/** True when the phase ledger cannot sit on one row between the VITAE readout
- *  and the piles. It then takes its own centred line at the top of the rail,
- *  so a narrow phone still reads the ledger as a row, never a column. */
-export function railLedgerStacks(screenW: number, marks: number): boolean {
-    if (marks < 1) return false;
-    const ledgerW = marks * RAIL_LEDGER_MARK + (marks - 1) * RAIL_LEDGER_GAP;
-    const room = screenW - RAIL_PAD_LEFT - RAIL_PAD_RIGHT - RAIL_FIXED_CELLS_W - RAIL_GAP * 2;
-    return ledgerW > room;
+/** The rune column's height for `runes` signatures: the conviction chip, then
+ *  one rune per signature, `SIG_COLUMN_GAP` apart. */
+export function signatureColumnHeight(runes: number): number {
+    return SIG_CONVICTION_CHIP_H + runes * (SIG_RUNE_SIZE + SIG_COLUMN_GAP);
 }
 
-// ── The hand fan's chrome-free band ──────────────────────────────────────────
-// The two bottom corners are chrome, not board: the player medallion sits at
-// left 10 and is PLAYER_DOCK_FOOTPRINT_W wide, the END stack at right 10 with
-// an 80pt disc. The fan prefers the band BETWEEN them — but only a hand that
-// actually seats there takes it (see `handFanLayout`); the board's own edge
-// inset is the fallback, because five 120pt cards do not fit 183pt of phone.
-export const END_CORNER_FOOTPRINT_W = 90;
-export const HAND_FAN_LEFT = PLAYER_DOCK_FOOTPRINT_W;
-export const HAND_FAN_RIGHT = END_CORNER_FOOTPRINT_W;
+/**
+ * Where the rune column starts, in the board's content coordinates.
+ *
+ * Inputs: the HUD's measured bottom (`hudBottom`, the foe's intent block
+ * included), the dice tray's measured top (`trayTop`) and the column's
+ * measured height (`sigH`). Undefined until all three have landed.
+ *
+ * The column sits `SIG_HUD_GAP` under the intent block; when that would run
+ * its last rune into the tray, the tray clamp wins and the column rises (never
+ * above the board's top).
+ */
+export function signatureColumnTop(hudBottom: number, trayTop: number, sigH: number): number | undefined {
+    if (hudBottom <= 0 || trayTop <= 0 || sigH <= 0) return undefined;
+    return Math.max(0, Math.min(hudBottom + SIG_HUD_GAP, trayTop - sigH - SIG_TRAY_CLEARANCE));
+}
+
+// ── The hand fan's band ──────────────────────────────────────────────────────
+// No corner chrome sits beside the hand: the avatar and END live in the
+// footer dock under it, so the fan lays out across the full board width less
+// the board's own edge inset.
 // Never tighter than a readable sliver, however large the hand.
 export const HAND_FAN_MIN_STEP = 28;
-// The board's own edge inset — the widest band the fan may honestly use, and
-// the reference layout the corner medallions float above at a higher zIndex.
-export const HAND_FAN_BOARD_EDGE = 12;
+// The board's own edge inset on either side of the fan. It must hold the
+// outermost card's FREE pill (6pt past the face's left edge) plus the ~9pt its
+// top-left corner swings out under a five-card fan's 6deg tilt, or the pill
+// is cut at the screen edge.
+export const HAND_FAN_BOARD_EDGE = 18;
 // The widest a step may grow: a whole card plus this gap. A band with room
 // lays the hand out side by side, so no card hides its right-hand (paid) column
 // under a neighbour; a phone never has that room and keeps its overlap.
 export const HAND_FAN_GAP = 8;
+// The fan's bottom padding inside the hand dock, and the room the dock keeps
+// above the cards' top edge for the FREE corner pill, which straddles it.
+export const HAND_FAN_PAD_BOTTOM = 20;
+export const HAND_PILL_OVERHANG = 16;
 
-/**
- * Lay the hand fan out in the widest band it can honestly use.
- *
- * Inputs: `screenW` (viewport width) and `n` (number of fanned cards).
- * Outputs: `band` — the width the fan lays out in; `step` — the visible width
- * of each non-last card; `overlap` — the negative margin that produces it.
- *
- * Pure: the board calls it once per render. The chrome-free band between the
- * corner medallions is preferred, and a hand that seats there above the sliver
- * floor takes it — such a fan clears both corners entirely. A hand that does
- * NOT seat there takes the full board band instead: forcing it into the narrow
- * band would shave every card to the 28pt floor (names cut to two letters,
- * art and cost chips hidden, each a 28pt drag target) AND still overflow the
- * band, landing the last card half under the END disc. A readable fan the corner chrome floats over
- * beats an unreadable one crushed beside it.
- */
 /**
  * The name band's own left chrome, in points — everything between a card face's
  * left edge and the first pixel of its NAME text.
@@ -398,12 +395,21 @@ export const HAND_FAN_GAP = 8;
  */
 export const NAME_BAND_LEFT_CHROME = 17.5;
 
+/**
+ * Lay the hand fan out across the full board width.
+ *
+ * Inputs: `screenW` (viewport width) and `n` (number of fanned cards).
+ * Outputs: `band` — the width the fan lays out in (the screen less
+ * `HAND_FAN_BOARD_EDGE` each side, never narrower than one card); `step` — the
+ * visible width of each non-last card; `overlap` — the negative margin that
+ * produces it.
+ *
+ * Pure: the board calls it once per render. A hand with room sits side by
+ * side `HAND_FAN_GAP` apart; a phone hand overlaps, never below the
+ * `HAND_FAN_MIN_STEP` sliver.
+ */
 export function handFanLayout(screenW: number, n: number): { band: number; step: number; overlap: number } {
-    const chromeBand = Math.max(HAND_CARD_W, screenW - HAND_FAN_LEFT - HAND_FAN_RIGHT);
-    const seatsBesideChrome = n <= 1 || (chromeBand - HAND_CARD_W) / (n - 1) >= HAND_FAN_MIN_STEP;
-    const band = seatsBesideChrome
-        ? chromeBand
-        : Math.max(chromeBand, screenW - HAND_FAN_BOARD_EDGE * 2);
+    const band = Math.max(HAND_CARD_W, screenW - HAND_FAN_BOARD_EDGE * 2);
     const step = n > 1
         ? Math.min(HAND_CARD_W + HAND_FAN_GAP, Math.max(HAND_FAN_MIN_STEP, (band - HAND_CARD_W) / (n - 1)))
         : HAND_CARD_W;
@@ -790,63 +796,6 @@ const MomentumChainChip = React.memo(function MomentumChainChip({ vm, onPress }:
     );
 });
 
-// ── END PHASE medallion ──────────────────────────────────────────────────────
-
-const EndPhaseMedallion = React.memo(function EndPhaseMedallion({ onPress, consequence = null, disabled = false }: {
-    onPress: () => void;
-    /** No-softlock telegraph: the honest one-line
-     *  consequence of ending now (verified engine behavior, never invented) —
-     *  rendered under the medallion and folded into the a11y label. */
-    consequence?: string | null;
-    /** Dimmed + press-inert while a phase is resolving (double-tap guard). */
-    disabled?: boolean;
-}) {
-    const AXM = usePalette();
-    const styles = useStyles();
-    const pulse = useSharedValue(0);
-    React.useEffect(() => {
-        pulse.value = withRepeat(withSequence(withTiming(1, { duration: 1100 }), withTiming(0, { duration: 1100 })), -1);
-    }, [pulse]);
-    const glow = useAnimatedStyle(() => ({ opacity: 0.35 + pulse.value * 0.45 }));
-    return (
-        <View style={styles.endWrap} pointerEvents="box-none">
-            {/* pulsing radial backing glow */}
-            <Animated.View style={[StyleSheet.absoluteFill, glow]} pointerEvents="none">
-                <Svg width={112} height={112} viewBox="0 0 100 100" style={{ position: 'absolute', top: -16, left: -16 }}>
-                    <Defs>
-                        <RadialGradient id="axmEndGlow" cx="50%" cy="50%" r="50%">
-                            <Stop offset="0%" stopColor={AXM.sulfur} stopOpacity={0.5} />
-                            <Stop offset="70%" stopColor={AXM.sulfur} stopOpacity={0.12} />
-                            <Stop offset="100%" stopColor={AXM.sulfur} stopOpacity={0} />
-                        </RadialGradient>
-                    </Defs>
-                    <Circle cx={50} cy={50} r={50} fill="url(#axmEndGlow)" />
-                </Svg>
-            </Animated.View>
-            <Pressable
-                onPress={disabled ? undefined : onPress}
-                disabled={disabled}
-                testID="combat-end-phase"
-                accessibilityRole="button"
-                accessibilityState={{ disabled }}
-                accessibilityLabel={`End phase — the enemy acts, then the next phase begins.${consequence ? ` ${consequence}.` : ''}`}
-                style={[styles.endBtn, { borderColor: AXM.sulfur }, disabled && styles.endBtnDisabled]}
-            >
-                <View style={[styles.endBtnInnerRim]} pointerEvents="none" />
-                <Text style={[styles.endGlyph, { color: AXM.sulfur }]} allowFontScaling={false}>⧗</Text>
-                <Text style={[styles.endLabel, { color: AXM.sulfur }]} allowFontScaling={false}>END</Text>
-            </Pressable>
-            {consequence ? (
-                <View style={styles.endConsequenceWrap} pointerEvents="none" testID="combat-end-consequence-wrap">
-                    <Text style={styles.endConsequence} testID="combat-end-consequence" numberOfLines={2}>
-                        {consequence}
-                    </Text>
-                </View>
-            ) : null}
-        </View>
-    );
-});
-
 // ── The board ────────────────────────────────────────────────────────────────
 
 export interface CombatBoardProps {
@@ -871,16 +820,16 @@ export interface CombatBoardProps {
     onChip?: (e: CombatEffectChipVM) => void;
     /** Long-press (or tap while unaffordable) on a signature rune → info popup. */
     onSignatureInfo?: (s: CombatSignatureVM) => void;
-    /** Tap the player medallion → pilgrim stats/effects modal. */
+    /** Tap the player avatar → the pilgrim modal (stats, effects, combat log). */
     onPlayerInspect?: () => void;
     /** Tap the momentum chip → how-momentum-works popup. */
     onMomentumInfo?: () => void;
     /** Latest resolved engine events (drives enemy/player resolution feedback). */
     fx?: CombatFx;
     /** Reports the enemy HUD's measured bottom edge (screen-top-relative) on
-     *  every layout pass, so panel-level siblings anchored under the same HUD
-     *  (the LOG toggle) can track its real height instead
-     *  of the static `COMBAT_HUD_HEIGHT` estimate. */
+     *  every layout pass, so a panel-level sibling anchored under the same HUD
+     *  can track its real height instead of the static `COMBAT_HUD_HEIGHT`
+     *  estimate. */
     onHudLayout?: (height: number) => void;
     /** The live map region (`vm.region` from the exploration screen), keying
      *  the arena backdrop plate. Omitted by the dev-only sandbox
@@ -1234,19 +1183,17 @@ export const CombatBoard = React.memo(function CombatBoard({
     }, [draggingDieId, badRectsSV]);
 
     // ── the rune column must never sit on the tray ──────────────────────────
-    // `sigColumn` is absolutely positioned and grows DOWNWARD with the
-    // signature count; with a full loadout it can reach into the dice row,
-    // where a rune button would swallow a die's drag and a tap aimed at the
-    // die would cast a signature instead. Anchor the column off the MEASURED tray
-    // top so its last rune always clears the tray, however many signatures the
-    // loadout grants and however many rows the tray wraps to. Falls back to the
-    // stylesheet's proportional `top` until the first layout pass lands.
-    const [contentH, setContentH] = useState(0);
+    // `sigColumn` is absolutely positioned under the foe's intent block (the
+    // HUD's measured bottom) and grows DOWNWARD with the signature count; with
+    // a long loadout it can reach into the dice row, where a rune button would
+    // swallow a die's drag and a tap aimed at the die would cast a signature
+    // instead. The MEASURED tray top clamps it, so its last rune always clears
+    // the tray however many signatures the loadout grants and however many rows
+    // the tray wraps to (`signatureColumnTop`). Falls back to the stylesheet's
+    // proportional `top` until the first layout pass lands.
     const [trayTop, setTrayTop] = useState(0);
     const [sigH, setSigH] = useState(0);
-    const sigTop = contentH > 0 && trayTop > 0 && sigH > 0
-        ? Math.max(0, Math.min(contentH * SIG_COLUMN_TOP_RATIO, trayTop - sigH - SIG_TRAY_CLEARANCE))
-        : undefined;
+    const sigTop = signatureColumnTop(hudMeasuredH, trayTop, sigH);
 
     // NO-SOFTLOCK telegraph — the DEAD TRAY: at
     // least one die is still playable but NONE of them can power ANY card in
@@ -1319,20 +1266,12 @@ export const CombatBoard = React.memo(function CombatBoard({
 
     const metaLine = `${vm.phaseBadge} · ${vm.roundLabel} · ${vm.turnLabel}`
         .replace('ROUND ', 'R').replace('TURN ', 'T');
-    // The rail is at least one 26pt line plus the home-indicator inset, and it
-    // GROWS if its row wraps (a long phase ledger on a narrow phone) — it never
-    // clips; a fixed height would push a wrapped VITAE line off the bottom of
-    // the screen. The floating chrome (SCRAP,
-    // END) keys off the MEASURED height so it always sits above the rail.
+    // The footer dock is at least one row plus its padding and the
+    // home-indicator inset, and it GROWS rather than clips. The floating SCRAP
+    // bin keys off the MEASURED height so it always sits above the dock.
     const [railMeasuredH, setRailMeasuredH] = useState(0);
-    const railMinH = RAIL_LINE_H + bottomInset;
-    const railH = Math.max(railMinH, railMeasuredH);
-    const ledgerStacks = railLedgerStacks(screenW, vm.ledger.length);
-    const ledger = useMemo(() => (
-        <View style={[styles.railLedger, ledgerStacks && styles.railLedgerStacked]} testID="combat-ledger">
-            {vm.ledger.map((m, i) => <LedgerMark key={i} kind={m === 'clear' ? 'O' : m === 'overwhelmed' ? 'X' : 'pending'} size={RAIL_LEDGER_MARK} />)}
-        </View>
-    ), [vm.ledger, ledgerStacks, styles]);
+    const railH = Math.max(dockMinHeight(bottomInset), railMeasuredH);
+    const handleDockLayout = useCallback((e: LayoutChangeEvent) => setRailMeasuredH(e.nativeEvent.layout.height), []);
 
     return (
         <View style={styles.root} testID="combat-board">
@@ -1349,11 +1288,7 @@ export const CombatBoard = React.memo(function CombatBoard({
             />
 
             {/* interactive column */}
-            <View
-                style={styles.content}
-                pointerEvents="box-none"
-                onLayout={(e) => setContentH(e.nativeEvent.layout.height)}
-            >
+            <View style={styles.content} pointerEvents="box-none">
                 {/* clearance under the floating top HUD — the measured height
                     once it lands, so a tall HUD (telegraphs, alt-win meters)
                     never overlaps the play region below it */}
@@ -1413,9 +1348,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                         ) : null}
                         {stagedCards.length > 0 && !stagedCards.some((c) => assignedDieFor(c.uid)) && !cardDragLive && !dropReject.reason ? (
                             <Text style={styles.stageHint} numberOfLines={1} testID="combat-stage-hint">
-                                {/* This line is for the card already lifted out of the fan.
-                                    The tap-to-read hatch lives on the fan (`styles.fanHint`
-                                    below), where the player chooses which card to lift. */}
+                                {/* This line is for the card already lifted out of the fan. */}
                                 {deadTray ? 'no die matches your hand — APPLY · FREE still works' : 'drag a die onto your card · APPLY to commit'}
                             </Text>
                         ) : null}
@@ -1467,7 +1400,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                 ) : null}
                 {/* The tray outranks the rune column in z-order. `sigTop` keeps the column clear of the
                     tray whenever there is room, but it is derived from THREE
-                    measured values (`contentH`, `trayTop`, `sigH`) held in
+                    measured values (`hudMeasuredH`, `trayTop`, `sigH`) held in
                     state: for the frame between a re-layout and the re-render
                     that follows it, the column is still at its previous anchor
                     and can sit over the tray. In that frame `elementFromPoint`
@@ -1486,6 +1419,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                     onLayout={(e) => setTrayTop(e.nativeEvent.layout.y)}
                     pointerEvents="box-none"
                     style={styles.trayLayer}
+                    testID="combat-tray-layer"
                 >
                     <DiceRow vm={vm} dieGesture={dieGesture} draggingDieId={draggingDieId} assignedDieIds={assignedDieIds} />
                 </View>
@@ -1499,7 +1433,10 @@ export const CombatBoard = React.memo(function CombatBoard({
                     top={sigTop} onMeasureHeight={setSigH}
                 />
 
-                {/* the hand dock — edge-to-edge fan, bottoms cropped off-screen */}
+                {/* the hand dock — the fan across the full board width, with room
+                    above the cards for the FREE corner pill. No tap hint: the
+                    fan's one-line names show their start on every covered
+                    card, and a tap still reads the card whole. */}
                 <View style={styles.dock}>
                     {/* sulfur shelf glow behind the fan */}
                     <Svg width="100%" height={90} viewBox="0 0 100 30" preserveAspectRatio="none" style={styles.fanGlow} pointerEvents="none">
@@ -1511,19 +1448,6 @@ export const CombatBoard = React.memo(function CombatBoard({
                         </Defs>
                         <Circle cx={50} cy={30} r={55} fill="url(#axmFanGlow)" />
                     </Svg>
-                    {/* Every fanned card but the last is
-                        covered, so its one-line name runs on under its neighbour.
-                        The escape hatch belongs HERE — on the fan, while the
-                        covered names are what the player is looking at — not in the
-                        staged line, which only appears once a card has already been
-                        chosen. It shows whenever the fan holds more than one card:
-                        a wide board's player still has to learn that a tap reads
-                        the card. */}
-                    {fan.length > 1 && !cardDragLive ? (
-                        <Text style={styles.fanHint} numberOfLines={1} testID="combat-tap-hint">
-                            tap a card to read it
-                        </Text>
-                    ) : null}
                     <View style={styles.fan} testID="combat-hand" pointerEvents="box-none">
                         {fan.map((card, i) => (
                             <FanCard
@@ -1539,48 +1463,26 @@ export const CombatBoard = React.memo(function CombatBoard({
                     </View>
                 </View>
 
-                {/* bottom rail — ♥ HP · phase ledger · deck/discard */}
-                <View
-                    style={[styles.rail, ledgerStacks && styles.railStacked, { minHeight: railMinH, paddingBottom: bottomInset }]}
-                    testID="combat-rail"
-                    onLayout={(e) => setRailMeasuredH(e.nativeEvent.layout.height)}
-                >
-                    {ledgerStacks ? ledger : null}
-                    {/* Print the maximum, as the enemy's bar does, so the player
-                      * can tell how much of their VITAE is left. */}
-                    <Text
-                        style={styles.railHp}
-                        numberOfLines={1}
-                        allowFontScaling={false}
-                        testID="combat-rail-vitae"
-                        accessibilityLabel={`VITAE ${vm.player.hp} of ${vm.player.maxHp}`}
-                    >
-                        ♥ {vm.player.hp}<Text style={styles.railHpMax}> / {vm.player.maxHp}</Text>
-                    </Text>
-                    {ledgerStacks ? null : ledger}
-                    <View
-                        style={styles.railPiles}
-                        accessible
-                        accessibilityRole="text"
-                        accessibilityLabel={`Deck ${vm.deckCount} cards, discard ${vm.discardCount}`}
-                    >
-                        <View style={styles.pileGlyph}><Text style={styles.pileGlyphText} allowFontScaling={false}>▮</Text></View>
-                        <Text style={styles.pileCount} allowFontScaling={false}>{vm.deckCount}</Text>
-                        <View style={[styles.pileGlyph, { transform: [{ rotate: '8deg' }] }]}><Text style={styles.pileGlyphText} allowFontScaling={false}>▯</Text></View>
-                        <Text style={styles.pileCount} allowFontScaling={false}>{vm.discardCount}</Text>
-                    </View>
-                </View>
+                {/* footer dock — avatar · VITAE column · END. Dice are the
+                    turn's hand: you play what you rolled. */}
+                <CombatFooterDock
+                    vm={vm}
+                    avatar={(
+                        <PlayerMedallion
+                            player={vm.player}
+                            enemyIntentDamage={vm.enemy.intent.damage}
+                            onPress={onPlayerInspect}
+                            fx={fx}
+                            sacrificeCallout={vitaeCallout}
+                        />
+                    )}
+                    bottomInset={bottomInset}
+                    onEndPhase={handleEndPhase}
+                    endConsequence={endConsequence}
+                    resolving={resolving}
+                    onLayout={handleDockLayout}
+                />
             </View>
-
-            {/* player medallion — bottom-left, ABOVE the hand (reference corner chrome) */}
-            <PlayerMedallion
-                player={vm.player}
-                enemyIntentDamage={vm.enemy.intent.damage}
-                onPress={onPlayerInspect}
-                fx={fx}
-                bottomInset={bottomInset}
-                sacrificeCallout={vitaeCallout}
-            />
 
             {/* SCRAP — only present while a card is being dragged (no permanent
                 footprint). Kept mounted/hidden rather than unmounted so the drop
@@ -1595,12 +1497,6 @@ export const CombatBoard = React.memo(function CombatBoard({
             >
                 <TrashGlyph size={20} color={draggingCardUid ? AXM.blood : AXM.bone} />
                 <Text style={[styles.trashLabel, draggingCardUid ? { color: AXM.blood } : null]}>SCRAP</Text>
-            </View>
-
-            {/* corner medallion — END PHASE. Dice are the turn's hand: you
-                play what you rolled. */}
-            <View style={[styles.cornerStack, { bottom: railH + 6 }]} pointerEvents="box-none">
-                <EndPhaseMedallion onPress={handleEndPhase} consequence={endConsequence} disabled={resolving} />
             </View>
         </View>
     );
@@ -2129,20 +2025,20 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
     applyText: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 1.5 },
 
     // ── signature rune column ──
-    sigColumn: { position: 'absolute', left: 6, top: SIG_COLUMN_TOP, alignItems: 'center', gap: 8, zIndex: 30 },
+    sigColumn: { position: 'absolute', left: 6, top: SIG_COLUMN_TOP_FALLBACK, alignItems: 'center', gap: SIG_COLUMN_GAP, zIndex: 30 },
     // One rung above `sigColumn`'s 30, so a die is never swallowed by a rune
-    // (see the comment at the tray's call site). Still below the corner
-    // medallions at 40, which are deliberately the topmost board chrome.
+    // (see the comment at the tray's call site). Still below the SCRAP bin at
+    // 40, the topmost board chrome while a card drag is live.
     trayLayer: { zIndex: 31 },
     convictionChip: {
         borderWidth: 1, borderColor: AXM.sulfur, borderRadius: 6, backgroundColor: 'rgba(0,0,0,0.6)',
         paddingHorizontal: 7, paddingVertical: 3,
     },
-    convictionText: { fontFamily: FONTS.gothic, fontSize: 15, letterSpacing: 0.5, textAlign: 'center' },
+    convictionText: { fontFamily: FONTS.gothic, fontSize: 15, lineHeight: 18, letterSpacing: 0.5, textAlign: 'center' },
     // The CONVICTION caption — small enough to stay chrome, large enough to read.
-    convictionCaption: { fontFamily: FONTS.sans, fontSize: 6, letterSpacing: 0.6, color: AXM.bone, textAlign: 'center', marginTop: 1 },
+    convictionCaption: { fontFamily: FONTS.sans, fontSize: 6, lineHeight: 7, letterSpacing: 0.6, color: AXM.bone, textAlign: 'center', marginTop: 1 },
     sigRune: {
-        width: 46, height: 46, borderRadius: 23, borderWidth: 1.5, backgroundColor: 'rgba(0,0,0,0.6)',
+        width: SIG_RUNE_SIZE, height: SIG_RUNE_SIZE, borderRadius: SIG_RUNE_SIZE / 2, borderWidth: 1.5, backgroundColor: 'rgba(0,0,0,0.6)',
         alignItems: 'center', justifyContent: 'center',
     },
     sigRuneIcon: { fontSize: 18, lineHeight: 22 },
@@ -2163,8 +2059,9 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
     dieConv: { fontFamily: FONTS.sans, fontSize: 9, color: AXM.bone, textAlign: 'center', marginTop: 2, letterSpacing: 0.5, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },
 
     // ── the hand dock ── (fits the 176pt hand card above the fan's 20pt bottom
-    // padding, leaving 20pt at the top for the tap-to-read hint)
-    dock: { height: 216, overflow: 'hidden' },
+    // padding, and keeps the FREE corner pill's overhang above the card tops
+    // inside the dock, which clips)
+    dock: { height: HAND_CARD_H + HAND_FAN_PAD_BOTTOM + HAND_PILL_OVERHANG, overflow: 'hidden' },
 
     // ── momentum chip row (shared by the chain chip's nodes + SURGED tag) ──
     wheelRow: { alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 3, paddingHorizontal: 10, marginBottom: 2 },
@@ -2198,21 +2095,11 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
     // The mark's mirror on the leading edge of the chip row.
     chipInfoGutter: { width: CHIP_INFO_MARK_W + CHIP_INFO_MARK_GAP },
     fanGlow: { position: 'absolute', bottom: 0, left: 0 },
-    // The side paddings are the corner-medallion footprints, not decoration:
-    // the fan is centred in what is left between them. A hand too large for
-    // that band (see `handFanLayout`) overflows it symmetrically and the
-    // corners float over the outermost cards.
+    // The fan is centred in the full board band (see `handFanLayout`): no
+    // corner chrome sits beside it.
     fan: {
         ...StyleSheet.absoluteFillObject, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center',
-        paddingLeft: HAND_FAN_LEFT, paddingRight: HAND_FAN_RIGHT, paddingBottom: 20,
-    },
-    // The fan's tap-to-read hatch. Absolutely positioned across the top of the
-    // dock so it costs the fan no layout: the 176pt cards sit flush to the
-    // dock's 20pt bottom padding, leaving the top 20pt of the 216pt dock free.
-    fanHint: {
-        position: 'absolute', top: 1, left: 0, right: 0, textAlign: 'center', pointerEvents: 'none',
-        fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 12,
-        color: AXM.bone, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3,
+        paddingHorizontal: HAND_FAN_BOARD_EDGE, paddingBottom: HAND_FAN_PAD_BOTTOM,
     },
     // The hand card whose drag ghost is in flight — dimmed in place.
     handCardStuck: { opacity: 0.6 },
@@ -2245,27 +2132,6 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
     globalChipText: { fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 0.4, color: AXM.parchment },
     globalChipTurns: { color: AXM.sulfur },
 
-    // ── bottom rail ── The row sits between the player medallion (left 10,
-    //    92 wide) and the END medallion (right 10, 80 wide); the side paddings
-    //    are those footprints, not spare room. The VITAE readout and the piles
-    //    never wrap or shrink. When the ledger cannot fit between them
-    //    (`railLedgerStacks`) it takes the first line whole and the rail grows.
-    rail: {
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: RAIL_GAP,
-        paddingLeft: RAIL_PAD_LEFT, paddingRight: RAIL_PAD_RIGHT, backgroundColor: 'rgba(7,5,9,0.9)',
-        borderTopWidth: 1, borderTopColor: AXM.divider,
-    },
-    railStacked: { flexWrap: 'wrap', rowGap: 2, paddingTop: 4 },
-    railHp: { fontFamily: FONTS.mono, fontSize: 13, lineHeight: 17, color: AXM.parchment, letterSpacing: 0.5, flexShrink: 0 },
-    // The maximum rides quieter than the live value.
-    railHpMax: { color: AXM.bone, fontSize: 11 },
-    railLedger: { flexDirection: 'row', flexShrink: 1, gap: RAIL_LEDGER_GAP, alignItems: 'center', justifyContent: 'center' },
-    railLedgerStacked: { width: '100%', flexShrink: 0 },
-    railPiles: { flexDirection: 'row', alignItems: 'center', gap: 3, flexShrink: 0 },
-    pileGlyph: { width: 13, height: 17, borderRadius: 2, borderWidth: 1, borderColor: AXM.ash, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center' },
-    pileGlyphText: { fontFamily: FONTS.sans, fontSize: 7, color: AXM.ash, lineHeight: 9 },
-    pileCount: { fontFamily: FONTS.mono, fontSize: 11, color: AXM.bone, marginRight: 4 },
-
     // ── SCRAP medallion (drag-time only) ──
     trashBin: {
         position: 'absolute', left: 10, zIndex: 40, width: 60, height: 60, borderRadius: 30,
@@ -2283,33 +2149,6 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
         fontFamily: FONTS.sans, fontSize: 11, color: HUE.guardBlue, letterSpacing: 0.5,
         backgroundColor: 'rgba(0,0,0,0.7)', borderWidth: 1, borderColor: HUE.guardBlueEdge, borderRadius: 4,
         paddingHorizontal: 5, paddingVertical: 2, overflow: 'hidden',
-    },
-
-    // ── corner medallions ──
-    cornerStack: { position: 'absolute', right: 10, alignItems: 'center', gap: 8, zIndex: 40 },
-    endWrap: { width: 80, height: 80 },
-    endBtn: {
-        width: 80, height: 80, borderRadius: 40, borderWidth: 3, backgroundColor: HUE.medallionBg,
-        alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
-    },
-    // Dimmed while a phase resolves (double-tap guard); every other
-    // disabled control in this board uses the same ~0.4 opacity treatment.
-    endBtnDisabled: { opacity: 0.4 },
-    endBtnInnerRim: {
-        ...StyleSheet.absoluteFillObject, margin: 4, borderRadius: 36, borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.3)', backgroundColor: 'rgba(212,192,38,0.10)',
-    },
-    endGlyph: { fontFamily: FONTS.gothic, fontSize: 30, lineHeight: 33 },
-    endLabel: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 2, marginTop: -1 },
-    // The honest one-line END consequence — floats ABOVE the medallion (below
-    // would collide with the bottom rail). Anchored to the medallion's RIGHT
-    // edge, so the 140pt line runs inward across the board rather than past
-    // the screen's right edge, where `root` would clip the words.
-    endConsequenceWrap: { position: 'absolute', top: -34, right: 0, width: 140, alignItems: 'center' },
-    endConsequence: {
-        fontFamily: FONTS.sans, fontSize: 8.5,
-        letterSpacing: 0.4, color: AXM.sulfur, textAlign: 'center',
-        textShadowColor: 'rgba(0,0,0,0.95)', textShadowRadius: 3,
     },
 
     // ── Shared card FACE — ONE FACE, EVERYWHERE ──────────────────────────────
