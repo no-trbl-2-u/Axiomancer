@@ -630,7 +630,6 @@
 
 ## Pending
 
-### [MED] combat / hand — A Plain Blow draws no FREE pill, so one of the three grey cards looks like it has no free play
 - pass: 85 (commit 93f05dfe)
 - viewport: both (375x812 and 1280x800)
 - category: comprehension
@@ -3346,4 +3345,93 @@
   disrupt-meter legibility work from Phase 28) before or alongside
   Phase 33's SWAY-cleanse enemy work.
 - source: playtester (owner-directed break-test session)
+
+
+
+### [x] [MED] combat / hand — A Plain Blow draws no FREE pill, so one of the three grey cards looks like it has no free play — RESOLVED 2026-10-14 (commit 4080f4a0; riderPairs leads with a DEAL pair for the damage rider, programFreeCell reads DEAL and spells unprinted amounts n/+n/X/×2, a DEAL sword silhouette joins glyphShapes; pinned in combat-card-vm.test.ts by the Blow pill and a lane sweep: FREE line iff pill)
+- issue: #532
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
