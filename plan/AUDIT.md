@@ -36,7 +36,8 @@
 
 ## Pending
 
-### [infra] pr-resolve never resolves a non-union conflict: its Claude job fails "Unsupported event type: push" every time (expand pass 33, 2026-10-14)
+### [x] [infra] pr-resolve never resolves a non-union conflict: its Claude job fails "Unsupported event type: push" every time (expand pass 33, 2026-10-14) — CLOSED 2026-10-14 (761da24c: the push run's scan starts one workflow_dispatch run of pr-resolve.yml per conflicted PR, and the Claude resolve runs only there; loop-pr.test.mjs pins it. First live proof is the next non-union conflict)
+- issue: #524
 - category: infra
 - impact: 7
 - ease: 7

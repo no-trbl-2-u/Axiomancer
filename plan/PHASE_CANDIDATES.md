@@ -615,6 +615,15 @@
 - estimated phases: 1
 - conflicts: none with the spec. Touches the title screen's press gating (small), not its look. If `/oversight` judges the drive half a single `/iterate` tick, the CRITIQUE MED row can be drained that way and this candidate rejected. Creates no content.
 
+### [ ] [score 3.5] Repo scripts fall back to keyring `gh` auth when the `.env` token is stale (lesson `env-token-stale`, seen 2×)
+- proposed: 2026-10-14, retro iterate (AUDIT [infra] pr-resolve)
+- source signals:
+  - `plan/lessons.md` `env-token-stale`, seen 2× (ship GS1, ship BT2a): the `.env` `GH_TOKEN` returns 401 while `gh auth token` works, and `scripts/loop-issue.mjs` loads `.env` first, so every local issue mirror and phase-open needs `GH_TOKEN=$(gh auth token)` by hand. `scripts/deploy-check.mjs` stops with "GH_TOKEN is not set" in a worktree, which has no `.env`.
+- rationale: the ladder says a lesson seen 2× is automated. One shared token loader (`.env`, then the shell, then `gh auth token`, retried once on a 401) ends the hand workaround on every attended tick and in every worktree.
+- proposed scope: 1 small phase or one `/iterate` tick. A `scripts/lib/gh-token.mjs` helper used by `loop-issue.mjs` and `deploy-check.mjs`; a unit test for the order and the 401 retry. CI is unchanged (its `.env` is written fresh each run).
+- estimated phases: 1
+- conflicts: none. Creates no content.
+
 ## Promoted
 
 Earlier entries are archived verbatim in `archive-pre-revamp:plan/archive/PHASE_CANDIDATES_2026.md`.
