@@ -630,14 +630,6 @@
 
 ## Pending
 
-- pass: 85 (commit 93f05dfe)
-- viewport: n/a (screen reader)
-- category: accessibility
-- observation: the dock's ledger (`combat-ledger`) maps `vm.ledger` to `LedgerMark` glyphs with no `accessibilityLabel` on the row or the marks. The header's "PHASE 1/5" names the current phase, but the record of earlier phases (clear O, overwhelmed X) is visual only. This predates BT2b; the dock move kept it.
-- evidence: `axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx` (the `combat-ledger` row); `components/hazard/glyphs.tsx` `LedgerMark` (no accessibility props); `.critique-artifacts/mobile/04-combat-board.txt` (no ledger text).
-- suggested fix: make the ledger row one accessible element labelled from `vm.ledger` (for example "Phases: 1 cleared, 2 overwhelmed, 3 to 5 ahead"), presenter-built and terse.
-- source: critique-drive (unattended)
-
 ### [LOW] ci / pr-resolve — a hand dispatch with a non-`loop/` branch exits green having done nothing
 - pass: antagonist on PR #526 (commit efc7f371)
 - viewport: n/a
@@ -700,15 +692,6 @@
 - evidence: `axiomancer-mobile/state/presenters/card-program.engine.ts` `programPlayVM`; `axiomancer-mechanics/src/Combat/combat.card-program.ts` `programShortfall`.
 - suggested fix: one engine read returning `{ block, shortfall }` per line, so the VM probes each line once.
 - source: antagonist, PR #523
-
-- pass: 79 (commit f2065459); widened and bumped LOW to MED at pass 83 (commit 3225cc64)
-- pass 83 addendum: the same fixed 700ms settle (`axiomancer-mobile/scripts/critique-drive.mjs` ~:271) also cuts the `combat-board` capture short. The round-start roll ritual staggers four dice 130ms apart over a 480ms fall plus springs (`DICE_ROLL_TIMING`), so it runs about 1s. Both `04-combat-board.png` captures (mobile and desktop) show three dice in the tray and the fourth still tilted and in the air beside the foe. So the unattended lens has never seen a settled hand-and-dice board, which is the screen that matters most. Fix the same way: wait on a settle signal (no `RollingDie` mounted, or the summed ritual timing) rather than a flat 700ms.
-- viewport: mobile + desktop
-- category: comprehension
-- observation: `scripts/critique-drive.mjs` settles 700ms after load. The title sequence holds 450ms, lifts the wordmark for 1500ms, then fades the psalm and EMBARK in over 700ms (`TITLE_TIMING`). So `01-title.png` shows the wordmark over a half-faded plate and an empty black lower half, while its `.txt` lists the psalm and EMBARK. The unattended lens never sees the first screen a player sees. During those 2.65s the invisible EMBARK is already pressable (`pointerEvents` "box-none", not disabled), so a tap on the empty lower half can skip to the menu before the button has appeared.
-- evidence: `.critique-artifacts/mobile/01-title.png` (no psalm, no EMBARK) against `01-title.txt` (both present); the `onboarding` capture's `getByRole('button').first()` click lands at ~0.7s.
-- suggested fix: in the drive, have the `title` screen wait for the EMBARK button to reach full opacity (or the sum of `TITLE_TIMING`) before capturing. Separately, ignore EMBARK presses until `cta` has begun (or make a tap during the lift finish the sequence rather than open the menu).
-- source: critique-drive (unattended)
 
 ### [LOW] title / desktop — the menu rows (520px) overhang the 464px title plate, and the plate reads as a lit strip in a black field
 - pass: 79 (commit f2065459)
@@ -993,6 +976,27 @@
 - evidence: `axiomancer-mobile/app/blacksmith/index.tsx:86-88` and `:266`; `styles.offerRow` / `offerButton`
 - suggested fix: put the price on its own line under the verb (or under the button with the effect line) as "40 SHILLINGS", so the forge names its unit the way the village and the rest screen do; pin it in the forge test.
 - source: iterate (residue)
+
+### [x] [LOW] combat / a11y — the phase ledger under VITAE is five unlabelled marks, so a screen reader never hears which phases were cleared or overwhelmed — RESOLVED 2026-10-14 (commit 8ecc2871; the `combat-ledger` row is one accessible element labelled by the presenter's `ledgerA11y`, run by run: "Phases: 1 cleared, 2 overwhelmed, 3 to 5 ahead"; pinned in CombatBoard.footer-dock.test.tsx)
+- issue: #538
+- pass: 85 (commit 93f05dfe)
+- viewport: n/a (screen reader)
+- category: accessibility
+- observation: the dock's ledger (`combat-ledger`) maps `vm.ledger` to `LedgerMark` glyphs with no `accessibilityLabel` on the row or the marks. The header's "PHASE 1/5" names the current phase, but the record of earlier phases (clear O, overwhelmed X) is visual only. This predates BT2b; the dock move kept it.
+- evidence: `axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx` (the `combat-ledger` row); `components/hazard/glyphs.tsx` `LedgerMark` (no accessibility props); `.critique-artifacts/mobile/04-combat-board.txt` (no ledger text).
+- suggested fix: make the ledger row one accessible element labelled from `vm.ledger` (for example "Phases: 1 cleared, 2 overwhelmed, 3 to 5 ahead"), presenter-built and terse.
+- source: critique-drive (unattended)
+
+### [x] [MED] title + combat / tooling — the drive captures the title 0.7s into its 2.65s intro, so every pass sees only the wordmark; EMBARK is tappable before it is visible — RESOLVED 2026-10-14 (branch loop/iterate-drive-settle: the drive waits for title-cta at full opacity and for combat-dice-skip to detach; EMBARK is disabled until its fade-in begins. Proving the dice signal found the round-start springs never came to rest under Reanimated 4, so the skip layer ate the first tap; fixed in the same PR, 672b38d6)
+- issue: #536
+- pass: 79 (commit f2065459); widened and bumped LOW to MED at pass 83 (commit 3225cc64)
+- pass 83 addendum: the same fixed 700ms settle (`axiomancer-mobile/scripts/critique-drive.mjs` ~:271) also cuts the `combat-board` capture short. The round-start roll ritual staggers four dice 130ms apart over a 480ms fall plus springs (`DICE_ROLL_TIMING`), so it runs about 1s. Both `04-combat-board.png` captures (mobile and desktop) show three dice in the tray and the fourth still tilted and in the air beside the foe. So the unattended lens has never seen a settled hand-and-dice board, which is the screen that matters most. Fix the same way: wait on a settle signal (no `RollingDie` mounted, or the summed ritual timing) rather than a flat 700ms.
+- viewport: mobile + desktop
+- category: comprehension
+- observation: `scripts/critique-drive.mjs` settles 700ms after load. The title sequence holds 450ms, lifts the wordmark for 1500ms, then fades the psalm and EMBARK in over 700ms (`TITLE_TIMING`). So `01-title.png` shows the wordmark over a half-faded plate and an empty black lower half, while its `.txt` lists the psalm and EMBARK. The unattended lens never sees the first screen a player sees. During those 2.65s the invisible EMBARK is already pressable (`pointerEvents` "box-none", not disabled), so a tap on the empty lower half can skip to the menu before the button has appeared.
+- evidence: `.critique-artifacts/mobile/01-title.png` (no psalm, no EMBARK) against `01-title.txt` (both present); the `onboarding` capture's `getByRole('button').first()` click lands at ~0.7s.
+- suggested fix: in the drive, have the `title` screen wait for the EMBARK button to reach full opacity (or the sum of `TITLE_TIMING`) before capturing. Separately, ignore EMBARK presses until `cta` has begun (or make a tap during the lift finish the sequence rather than open the menu).
+- source: critique-drive (unattended)
 
 ### [x] [MED] combat / hand — A Plain Blow draws no FREE pill, so one of the three grey cards looks like it has no free play — RESOLVED 2026-10-14 (commit 4080f4a0; riderPairs leads with a DEAL pair for the damage rider, programFreeCell reads DEAL and spells unprinted amounts n/+n/X/×2, a DEAL sword silhouette joins glyphShapes; pinned in combat-card-vm.test.ts by the Blow pill and a lane sweep: FREE line iff pill)
 - issue: #532
@@ -3346,287 +3350,3 @@
   disrupt-meter legibility work from Phase 28) before or alongside
   Phase 33's SWAY-cleanse enemy work.
 - source: playtester (owner-directed break-test session)
-
-
-
-
-
-
-
-
-
-
-### [x] [MED] title + combat / tooling — the drive captures the title 0.7s into its 2.65s intro, so every pass sees only the wordmark; EMBARK is tappable before it is visible — RESOLVED 2026-10-14 (branch loop/iterate-drive-settle: the drive waits for title-cta at full opacity and for combat-dice-skip to detach; EMBARK is disabled until its fade-in begins. Proving the dice signal found the round-start springs never came to rest under Reanimated 4, so the skip layer ate the first tap; fixed in the same PR, 672b38d6)
-- issue: #536
-
-### [x] [LOW] combat / a11y — the phase ledger under VITAE is five unlabelled marks, so a screen reader never hears which phases were cleared or overwhelmed — RESOLVED 2026-10-14 (commit 8ecc2871; the `combat-ledger` row is one accessible element labelled by the presenter's `ledgerA11y`, run by run: "Phases: 1 cleared, 2 overwhelmed, 3 to 5 ahead"; pinned in CombatBoard.footer-dock.test.tsx)
-- issue: #538
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
