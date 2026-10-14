@@ -371,7 +371,7 @@ git add plan/AUDIT.md plan/CRITIQUE.md
 git commit -m "audit: finding [<id>] addressed" -m "Closes #<N>"
 git push -u origin loop/iterate-<slug>
 gh pr create --repo "$GH_REPO" --base main --head loop/iterate-<slug> \
-  --label loop:pr --title "<category>: <subject> (AUDIT <id>)" --body-file "$body"
+  --label loop:pr --label "size:<S|M|L>" --title "<category>: <subject> (AUDIT <id>)" --body-file "$body"
 ```
 
 The tick commit rides the PR, so T's merge ticks the row. The body
@@ -465,7 +465,7 @@ git switch -c loop/iterate-<slug> origin/main
 git add <explicit files>
 git commit -m "<category>: <subject>"
 git push -u origin loop/iterate-<slug>
-gh pr create --label loop:pr --base main ...
+gh pr create --label loop:pr --label "size:<S|M|L>" --base main ...
 gh pr checks loop/iterate-<slug> --watch --fail-fast
 
 # Issue mirror

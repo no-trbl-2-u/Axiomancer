@@ -86,7 +86,8 @@ own phase, first.
 Then write it down:
 
 - **One phase** (the usual small task): the brief is an ordinary
-  §4 brief and the row is `Phase <N>`. No `## Phases` section.
+  §4 brief with a `Size: <S|M|L>` line under Outcome, and the row
+  is `Phase <N>`. No `## Phases` section.
 - **Several phases**: the brief adds a `## Phases` section
   (`skills/plan-a-phase.md` §4, "Phases"). Ids are `<N>a`, `<N>b`, …
   (`<N>1`, `<N>2`, … when `<N>` already ends in a letter, as
@@ -145,9 +146,18 @@ git commit -m "phases: plot <N> — <title>" -m "<k> phase(s): <ids>. <asap|anyt
 git push -u origin "loop/plot-<N>-<slug>"
 gh label create plot --repo "$GH_REPO" --color 5319E7 \
   --description "/plot recommendation; T merges to approve (D93)" 2>/dev/null || true
+# one phase: size:S|M|L (its Size line); several phases: size:multi-phase
 gh pr create --repo "$GH_REPO" --base main --head "loop/plot-<N>-<slug>" \
-  --label plot --title "plot: <N> — <title>" --body-file "$body"
+  --label plot --label "<size:S|size:M|size:L|size:multi-phase>" \
+  --title "plot: <N> — <title>" --body-file "$body"
 ```
+
+**Size label (T, 2026-10-14).** Every `plot` PR carries exactly one
+size label so T can spot the estimate in the PR list: `size:S`,
+`size:M` or `size:L` for a one-phase plot (the brief's `Size:` line),
+`size:multi-phase` for a plot that splits (the per-phase sizes are in
+the PR's phase table). The labels are created by `skills/march.md` →
+"Landing a change" if missing.
 
 From a worktree that holds uncommitted work you must not commit (a
 prototype), cut the branch in a clean `git worktree add -b
@@ -211,6 +221,6 @@ why it cannot: attended, `Requires` unmet).
 3. **Never plans card, keyword or art work for the loop** (D37).
 4. **Acceptance IDs and `Measure:` are mandatory**, and with several
    phases every acceptance ID is closed by exactly one of them.
-5. **Lands by a `plot` PR, never a push to `main`, never `loop:pr`
-   (D93).** Never merges, closes or force-pushes its PR; T merges.
+5. **Lands by a `plot` PR with one size label, never a push to
+   `main`, never `loop:pr` (D93).** Never merges, closes or force-pushes its PR; T merges.
 6. **No emojis, no attribution trailers** (AGENTS.md rule 2).

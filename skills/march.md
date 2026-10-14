@@ -186,11 +186,24 @@ git switch -c "loop/<verb>-<slug>" origin/main     # before the first edit
 git push -u origin "loop/<verb>-<slug>"
 gh label create loop:pr --repo "$GH_REPO" --color 0E8A16 \
   --description "Loop-opened PR; T merges (D84-D87)" 2>/dev/null || true
+for s in S:C2E0C6:"under an hour, one workspace" M:FBCA04:"one focused tick" \
+         L:D93F0B:"a full tick" multi-phase:5319E7:"a plot that splits into phases"; do
+  gh label create "size:${s%%:*}" --repo "$GH_REPO" --color "$(echo "$s" | cut -d: -f2)" \
+    --description "$(echo "$s" | cut -d: -f3-)" 2>/dev/null || true
+done
 gh pr create --repo "$GH_REPO" --base main --head "loop/<verb>-<slug>" \
-  --label loop:pr --title "<subject naming the claim>" --body-file "$body"
+  --label loop:pr --label "size:<S|M|L>" \
+  --title "<subject naming the claim>" --body-file "$body"
 gh pr checks "loop/<verb>-<slug>" --repo "$GH_REPO" --watch --fail-fast
 ```
 
+- **One size label per PR** (T, 2026-10-14), so T can spot the
+  estimate in the PR list: `size:S`, `size:M` or `size:L`, read from
+  the brief the tick ships (its `Size:` line, or the `###` header of
+  the `§ <id>` phase). A fix with no brief, or a brief from before
+  this rule, is sized by the tick on the same scale
+  (`skills/plot.md` Step 3) when it opens the PR. `size:multi-phase`
+  belongs to `plot` PRs only.
 - **One PR per tick**, never one per fix. Each PR carries only this
   session's telemetry shard, so two PRs never add the same file
   (lesson `telemetry-add-add`). The plan-only commits that
