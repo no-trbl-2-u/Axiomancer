@@ -346,7 +346,11 @@ git add plan/steps/01_build_plan.md
 git commit -m "plan: phase <N> shipped — <one-line>" -m "Closes #<phase-issue-number>"
 git push -u origin "loop/ship-<N>-<slug>"
 gh pr create --repo "$GH_REPO" --base main --head "loop/ship-<N>-<slug>" \
-  --label loop:pr --label "size:<S|M|L>" --title "<type>: <summary> — phase <N>" --body-file "$body"
+  --label loop:pr --label "size:<S|M|L>" --label "area:<area>" \
+  --title "<type>: <summary> — phase <N>" --body-file "$body"
+# area:* from the files touched (several if the phase spans areas); add
+# --label review:rules-change when the phase changes cards, rules, prices
+# or tuning values (skills/march.md §3 "Area and review labels")
 ```
 
 The body follows the template in `skills/march.md` §3: What shipped,
@@ -566,6 +570,6 @@ git switch -c loop/ship-<N>-<slug> origin/main
 git add <explicit files>
 git commit -m "<subject>"
 git push -u origin loop/ship-<N>-<slug>
-gh pr create --label loop:pr --label "size:<S|M|L>" --base main ...
+gh pr create --label loop:pr --label "size:<S|M|L>" --label "area:<area>" --base main ...
 gh pr checks loop/ship-<N>-<slug> --watch --fail-fast
 ```

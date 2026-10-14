@@ -191,8 +191,21 @@ for s in S:C2E0C6:"under an hour, one workspace" M:FBCA04:"one focused tick" \
   gh label create "size:${s%%:*}" --repo "$GH_REPO" --color "$(echo "$s" | cut -d: -f2)" \
     --description "$(echo "$s" | cut -d: -f3-)" 2>/dev/null || true
 done
+# area:* (one or more) and review:* (zero or more): the rule below
+for l in area:combat:1D76DB:"Combat engine, dice, stances, hazards" \
+         area:cards:0052CC:"Card data, pricing, keywords, card-spec" \
+         area:ui:006B75:"Screens, dock, map, title, styling" \
+         area:mobile:5319E7:"Expo/mobile perf, gestures, native builds" \
+         area:ci:B60205:"Workflows, pr-autofix, verify-*, hooks" \
+         area:loop:0E8A16:"Loop skills, plan/ memory, telemetry, nexus docs" \
+         review:rules-change:E99695:"Changes game rules or balance; needs T's design eye" \
+         review:plan-only:EDEDED:"Only plan/, docs/, telemetry/ change; no code" \
+         review:needs-T:FBCA04:"Blocked on a decision only T can make"; do
+  gh label create "$(echo "$l" | cut -d: -f1-2)" --repo "$GH_REPO" \
+    --color "$(echo "$l" | cut -d: -f3)" --description "$(echo "$l" | cut -d: -f4-)" 2>/dev/null || true
+done
 gh pr create --repo "$GH_REPO" --base main --head "loop/<verb>-<slug>" \
-  --label loop:pr --label "size:<S|M|L>" \
+  --label loop:pr --label "size:<S|M|L>" --label "area:<area>" \
   --title "<subject naming the claim>" --body-file "$body"
 gh pr checks "loop/<verb>-<slug>" --repo "$GH_REPO" --watch --fail-fast
 ```
@@ -204,6 +217,24 @@ gh pr checks "loop/<verb>-<slug>" --repo "$GH_REPO" --watch --fail-fast
   this rule, is sized by the tick on the same scale
   (`skills/plot.md` Step 3) when it opens the PR. `size:multi-phase`
   belongs to `plot` PRs only.
+- **Area and review labels (T, 2026-10-14)**, so T can tell at a
+  glance in the PR list what a PR touches and how to read it. Every
+  `loop:pr` and `plot` PR carries **at least one `area:*`** label,
+  chosen from the files the diff touches (several when it spans
+  areas): `area:combat` (`axiomancer-mechanics/src/Combat`, `Effects`,
+  `Enemy`, hazards, dice), `area:cards` (`Cards`, `Items`, pricing,
+  keywords, card-spec), `area:ui` (`axiomancer-mobile` screens, dock,
+  map, title, styling), `area:mobile` (Expo config, perf, gestures,
+  native builds), `area:ci` (`.github/`, `.claude/hooks`, `scripts/`
+  verify tooling), `area:loop` (`skills/`, `plan/`, `telemetry/`,
+  nexus docs). `review:*` labels are added only when they apply, any
+  number: `review:rules-change` when the diff changes a card, rule,
+  price, keyword or tuning value (T reads it with a design eye);
+  `review:plan-only` when nothing outside `plan/`, `docs/`,
+  `telemetry/` changes (a `plot` PR always carries it);
+  `review:needs-T` when the PR body asks T a question the merge
+  depends on. Add a label to an open PR with
+  `gh pr edit <n> --repo "$GH_REPO" --add-label <label>`.
 - **One PR per tick**, never one per fix. Each PR carries only this
   session's telemetry shard, so two PRs never add the same file
   (lesson `telemetry-add-add`). The plan-only commits that

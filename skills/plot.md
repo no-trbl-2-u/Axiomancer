@@ -149,6 +149,7 @@ gh label create plot --repo "$GH_REPO" --color 5319E7 \
 # one phase: size:S|M|L (its Size line); several phases: size:multi-phase
 gh pr create --repo "$GH_REPO" --base main --head "loop/plot-<N>-<slug>" \
   --label plot --label "<size:S|size:M|size:L|size:multi-phase>" \
+  --label review:plan-only --label "area:<area the phases will touch>" \
   --title "plot: <N> — <title>" --body-file "$body"
 ```
 
@@ -156,8 +157,11 @@ gh pr create --repo "$GH_REPO" --base main --head "loop/plot-<N>-<slug>" \
 size label so T can spot the estimate in the PR list: `size:S`,
 `size:M` or `size:L` for a one-phase plot (the brief's `Size:` line),
 `size:multi-phase` for a plot that splits (the per-phase sizes are in
-the PR's phase table). The labels are created by `skills/march.md` →
-"Landing a change" if missing.
+the PR's phase table). Every `plot` PR also carries `review:plan-only`
+(it never changes code) and at least one `area:*` label naming what
+the phases will touch (`skills/march.md` §3 "Area and review labels").
+The labels are created by `skills/march.md` → "Landing a change" if
+missing.
 
 From a worktree that holds uncommitted work you must not commit (a
 prototype), cut the branch in a clean `git worktree add -b

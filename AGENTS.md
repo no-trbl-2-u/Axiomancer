@@ -151,6 +151,8 @@ MCP server, or external datastore.
 
 (Applies repo-wide.) The loop lands every code change as a PR labelled
 `loop:pr` onto `main` (D84; `skills/march.md` §3 "Landing a change");
+plus one `size:*`, at least one `area:*` and any applying `review:*`
+label (`skills/march.md` §3 "Area and review labels");
 plan-only and telemetry commits still push `main`, except `/plot`'s
 spec and rows, which open a PR labelled `plot` (never `loop:pr`; D93)
 so T approves the phase split by merging it. Open PRs ready for

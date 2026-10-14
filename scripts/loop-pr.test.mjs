@@ -160,10 +160,22 @@ test('every loop:pr carries one size label (T, 2026-10-14)', () => {
   assert.match(read('skills/plan-a-phase.md'), /`Size: S`, `Size: M` or `Size: L`/)
 })
 
+test('every loop:pr carries an area label; march defines the area/review scheme (T, 2026-10-14)', () => {
+  for (const f of ['skills/march.md', 'skills/ship-a-phase.md', 'skills/iterate.md']) {
+    assert.match(read(f), /--label "size:<S\|M\|L>" --label "area:<area>"/, f)
+  }
+  const march = read('skills/march.md')
+  for (const l of ['area:combat', 'area:cards', 'area:ui', 'area:mobile', 'area:ci', 'area:loop',
+    'review:rules-change', 'review:plan-only', 'review:needs-T']) {
+    assert.match(march, new RegExp(`gh label create[\\s\\S]*${l}:`), l)
+  }
+})
+
 test('a plot PR carries a size label, size:multi-phase when it splits', () => {
   const plot = read('skills/plot.md')
   assert.match(plot, /--label plot --label "<size:S\|size:M\|size:L\|size:multi-phase>"/)
   assert.match(plot, /`size:multi-phase` for a plot that splits/)
+  assert.match(plot, /--label review:plan-only --label "area:/)
 })
 
 // --- /plot and /messy are only ever fired by T ------------------------------
