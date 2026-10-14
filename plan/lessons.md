@@ -43,6 +43,7 @@
 ## Data
 
 - **court-validates-laws** · an A/B court that swapped cards ratified a seat that broke the 5/5/5 colour law (Phase D8, 10ec4fe8) → validate the structural laws inside the harness before measuring · seen 1× · last 2026-07-18 · open
+- **iff-rule-needs-sweep** · D91 says a FREE pill iff a FREE line, but BT2a pinned it with one card per kind and a test pinned `programFreeCell('DEAL 3.')` to null, so A Plain Blow and six Blood Price faces shipped with no pill (critique 85) → pin an "iff" rule with a sweep over every lane card, not single examples · seen 1× · last 2026-10-14 · guarded by the lane sweep in combat-card-vm.test.ts
 
 <!-- @domain:review -->
 
@@ -63,7 +64,7 @@
 - **worktree-no-env** · `loop-issue.mjs phase-open` could not run in an isolated agent worktree: it has no `.env`, and the isolation guard refuses `export GH_TOKEN=$(gh auth token)` (ship SF1); `deploy-check.mjs` stopped the same way (critique 86) → loop-issue borrows the keyring token (fillGhEnv); for deploy-check, run it via `node -e` setting `process.env.GH_TOKEN` from a file; its fix is in the keyring-fallback `PHASE_CANDIDATES` row · seen 2× · last 2026-10-14 · open
 - **sed-flattens-crlf** · `sed -i` on a CRLF test file rewrote every line, so a 1-line edit showed as 620 changed lines (ship SF1) → edit CRLF files byte-wise or with the Edit tool, and read `git diff --stat` before staging · seen 1× · last 2026-10-13 · open
 - **lessons-merge-dup-slug** · GS1 and BT2a each added `env-token-stale`; the merge kept both rows, so `check-lessons` went red on `main`, unseen because root `npm test` runs in no workflow (ship BT2b) → before a lessons commit, grep the slug on fresh `origin/main` and bump the existing row instead of adding one · seen 1× · last 2026-10-14 · open
-- **isolated-worktree-shell** · the worktree-isolation guard refused heredocs, `cmd //c mklink`, `$VAR` script arguments and `git commit -F` (ship BT2b) → write scripts and bodies with the Write tool and run them by literal path, junction `node_modules` with node `fs.symlinkSync(src, dst, 'junction')`, and commit with `-m` · seen 1× · last 2026-10-14 · open
+- **isolated-worktree-shell** · the worktree-isolation guard refused heredocs, `cmd //c mklink`, `$VAR` script arguments and `git commit -F` (ship BT2b); again `git commit -F`, `git add … && git commit` chains and git inside `$(…)` (iterate Blow pill) → write scripts with the Write tool, run each git command alone, junction `node_modules` with node `fs.symlinkSync`, commit with `-m` · seen 2× · last 2026-10-14 · guarded by .claude/hooks/guard.mjs (refuses `git commit -F`, names `-m`)
 - **brief-geometry-unmeasured** · BT2b's A7 asked for five runes above the tray at 375x812, but the shipped geometry needed 304pt where 292 were free; only a measurement of the web export showed it (ship BT2b) → measure a layout acceptance in the web export before writing its test, and record any size change under Decisions · seen 1× · last 2026-10-14 · open
 
 ## Adding a domain
