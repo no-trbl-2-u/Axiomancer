@@ -60,6 +60,25 @@ export function ownArtifactPaths(artifactRoot) {
     return [...Object.keys(VIEWPORTS), 'manifest.json'].map((name) => join(artifactRoot, name))
 }
 
+// Settle signals. A flat 700ms pause caught the title 0.7s into its 2.65s
+// intro and the combat board mid dice-roll (CRITIQUE pass 79, widened at 83),
+// so a screen with a timed entrance waits for the DOM to say it is over. A
+// signal that never comes is noted on the entry; the capture still happens.
+export async function titleSettled(page) {
+    // EMBARK and the psalm fade in last; the intro is over when they are opaque.
+    await page.waitForFunction(() => {
+        const cta = document.querySelector('[data-testid="title-cta"]')
+        return cta != null && getComputedStyle(cta).opacity === '1'
+    }, null, { timeout: 8000 })
+}
+
+export async function diceSettled(page) {
+    // The tray's tap-to-skip layer is mounted only while a die is tumbling.
+    const skip = page.getByTestId('combat-dice-skip')
+    await skip.waitFor({ state: 'attached', timeout: 2000 }).catch(() => {})
+    await skip.waitFor({ state: 'detached', timeout: 8000 })
+}
+
 // The critique screen set (skill §3). Each entry navigates a route and captures
 // what renders. `prepare` is a best-effort interaction to reach a downstream
 // state; if it throws, we capture whatever is on screen and move on.
@@ -84,20 +103,21 @@ export function ownArtifactPaths(artifactRoot) {
 //
 // Add a route only through one of those two doors — a bare state-gated URL
 // captures a blank bounce, which is a transport artifact, not a finding.
-const SCREENS = [
+export const SCREENS = [
     {
         name: 'title',
         path: '/',
         why: 'First impression. The fold matters.',
+        settle: titleSettled,
     },
     {
         name: 'onboarding',
         path: '/',
         why: 'Where a first-time player forms their model of the game.',
-        // New player: dismiss the title.
+        // New player: watch the intro, then press EMBARK once it is shown.
         prepare: async (page) => {
-            const cont = page.getByRole('button').first()
-            if (await cont.count()) await cont.click({ timeout: 4000, force: true }).catch(() => {})
+            await titleSettled(page)
+            await page.getByLabel('Embark on your journey').click({ timeout: 4000 })
         },
     },
     {
@@ -115,6 +135,7 @@ const SCREENS = [
             await page.getByTestId('combat-enter').click({ timeout: 8000, force: true }).catch(() => {})
             await page.getByTestId('combat-board').waitFor({ state: 'visible', timeout: 15000 }).catch(() => {})
         },
+        settle: diceSettled,
     },
     {
         name: 'exploration-hub',
@@ -247,7 +268,7 @@ async function captureScreen(context, baseUrl, screen, viewport, outDir, index) 
         name: screen.name, path: screen.path, why: screen.why, viewport,
         fixture: screen.fixture ?? null,
         screenshot: `${base}.png`, domText: `${base}.txt`,
-        finalUrl: null, navError: null, consoleErrors, pageErrors,
+        finalUrl: null, navError: null, settleError: null, consoleErrors, pageErrors,
     }
     try {
         if (screen.seed != null) {
@@ -268,6 +289,7 @@ async function captureScreen(context, baseUrl, screen, viewport, outDir, index) 
                 .catch(() => { entry.navError = `fixture '${screen.fixture}' never reached ${screen.waitForPath} (at ${page.url()})` })
         }
         if (screen.prepare) await screen.prepare(page).catch((e) => { entry.navError = `prepare: ${e.message}` })
+        if (screen.settle) await screen.settle(page).catch((e) => { entry.settleError = `settle: ${e.message}` })
         await page.waitForTimeout(700)
         entry.finalUrl = page.url()
         await page.screenshot({ path: join(outDir, entry.screenshot), fullPage: false })
