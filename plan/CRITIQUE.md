@@ -630,7 +630,6 @@
 
 ## Pending
 
-### [LOW] combat / a11y — the phase ledger under VITAE is five unlabelled marks, so a screen reader never hears which phases were cleared or overwhelmed
 - pass: 85 (commit 93f05dfe)
 - viewport: n/a (screen reader)
 - category: accessibility
@@ -3359,6 +3358,105 @@
 
 ### [x] [MED] title + combat / tooling — the drive captures the title 0.7s into its 2.65s intro, so every pass sees only the wordmark; EMBARK is tappable before it is visible — RESOLVED 2026-10-14 (branch loop/iterate-drive-settle: the drive waits for title-cta at full opacity and for combat-dice-skip to detach; EMBARK is disabled until its fade-in begins. Proving the dice signal found the round-start springs never came to rest under Reanimated 4, so the skip layer ate the first tap; fixed in the same PR, 672b38d6)
 - issue: #536
+
+### [x] [LOW] combat / a11y — the phase ledger under VITAE is five unlabelled marks, so a screen reader never hears which phases were cleared or overwhelmed — RESOLVED 2026-10-14 (commit 8ecc2871; the `combat-ledger` row is one accessible element labelled by the presenter's `ledgerA11y`, run by run: "Phases: 1 cleared, 2 overwhelmed, 3 to 5 ahead"; pinned in CombatBoard.footer-dock.test.tsx)
+- issue: #538
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
