@@ -5,6 +5,8 @@ import { ExplorationNode, NODE_MIN_SCREEN, NODE_SIZE, nodeCounterScale } from '.
 import { MapCameraContext } from '../mapSheetContext';
 import { minScaleFor } from '../MapCanvas';
 import { ALL_MAP_LAYOUTS } from '@/state/exploration-maps';
+import { Circle } from 'react-native-svg';
+import { SEALED_MARK_OPACITY } from '@/components/NodeMark';
 
 const mockNode = {
     id: 'node-1',
@@ -70,6 +72,33 @@ describe('ExplorationNode', () => {
         );
 
         expect(queryByText('Test Node')).toBeNull();
+    });
+});
+
+describe('the sealed mark shows where a road ends (critique pass 84)', () => {
+    const sealedNode = { ...mockNode, id: 'sealed-1', kind: 'locked' as const };
+
+    it('draws a sealed node at full wrapper opacity, so only NodeMark dims it', () => {
+        const { getByTestId } = render(
+            <ExplorationNode node={sealedNode} onNodePress={mockOnNodePress} isSelected={false} />,
+        );
+        const style = StyleSheet.flatten(getByTestId('node-sealed-1').props.style);
+        expect(style.opacity ?? 1).toBe(1);
+    });
+
+    it('prints the sealed ring and disc at an effective opacity that still reads, but below a full mark', () => {
+        const { UNSAFE_getAllByType } = render(
+            <ExplorationNode node={sealedNode} onNodePress={mockOnNodePress} isSelected={false} />,
+        );
+        const circles = UNSAFE_getAllByType(Circle);
+        const ring = circles.find((c) => c.props.strokeDasharray !== undefined)!;
+        const disc = circles.find((c) => c.props.strokeDasharray === undefined)!;
+        expect(ring.props.opacity).toBe(SEALED_MARK_OPACITY.ring);
+        expect(disc.props.opacity).toBe(SEALED_MARK_OPACITY.disc);
+        for (const o of [SEALED_MARK_OPACITY.ring, SEALED_MARK_OPACITY.disc]) {
+            expect(o).toBeGreaterThanOrEqual(0.6);
+            expect(o).toBeLessThan(1);
+        }
     });
 });
 

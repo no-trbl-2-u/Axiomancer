@@ -29,6 +29,18 @@ export const NODE_MARK_RADIUS: Record<NodeMarkKind, number> = {
 };
 
 /**
+ * How strongly the SEALED mark prints: its backing disc and its dashed ring.
+ *
+ * These are the sealed mark's whole dimming. The node wrapper draws it at
+ * full opacity (critique pass 84): an extra 0.45 on the wrapper left the
+ * ring at about 0.38 and the disc at about 0.3, so on a light engraving the
+ * twelve sealed nodes of a walked sheet vanished and roads ran to bare
+ * vertices. The mark recedes by being small, hollow and ash, not by being
+ * invisible; it must still show where a road ends.
+ */
+export const SEALED_MARK_OPACITY = { disc: 0.7, ring: 0.85 } as const;
+
+/**
  * NodeMark — the map-node glyph. Each kind sits on a filled backing
  * disc so the node reads as a distinct *stop*
  * over the connecting paths drawn behind it, with bolder strokes and a
@@ -91,7 +103,7 @@ export function NodeMark({ kind = 'available', size = 28 }: NodeMarkProps) {
     const r = NODE_MARK_RADIUS.locked;
     return (
       <Svg viewBox="0 0 32 32" width={size} height={size} accessibilityRole="image" accessibilityLabel="Sealed map node">
-        <Circle cx={16} cy={16} r={r + 2} fill={AXM.deepBg} opacity={0.7} />
+        <Circle cx={16} cy={16} r={r + 2} fill={AXM.deepBg} opacity={SEALED_MARK_OPACITY.disc} />
         <Circle
           cx={16}
           cy={16}
@@ -100,7 +112,7 @@ export function NodeMark({ kind = 'available', size = 28 }: NodeMarkProps) {
           stroke={AXM.ash}
           strokeWidth={1.4}
           strokeDasharray="2 3"
-          opacity={0.85}
+          opacity={SEALED_MARK_OPACITY.ring}
         />
       </Svg>
     );

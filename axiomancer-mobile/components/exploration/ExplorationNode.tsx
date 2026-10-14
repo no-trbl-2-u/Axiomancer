@@ -100,7 +100,6 @@ export function ExplorationNode({ node: n, onNodePress, isSelected }: Exploratio
     const iconKey = ACTION_ICON_BY_TYPE[n.type] ?? 'sword';
     const left = (n.x / sheet.width) * 100;
     const top = (n.y / sheet.height) * 100;
-    const dim = n.kind === 'locked';
     // Adjacent (reachable) nodes show a kind glyph so the player can see what
     // each one is before choosing it.
     const showKindIcon = n.kind === 'available' || n.kind === 'current';
@@ -128,7 +127,6 @@ export function ExplorationNode({ node: n, onNodePress, isSelected }: Exploratio
             style={[
                 styles.nodeWrap,
                 { left: `${left}%` as unknown as number, top: `${top}%` as unknown as number },
-                dim && styles.nodeWrapLocked,
                 counterScale,
             ]}
         >
@@ -163,9 +161,6 @@ const useStyles = makeStyles((AXM) => ({
         // selected label hanging below cannot pull the mark off it.
         transformOrigin: `${NODE_SIZE / 2}px ${NODE_SIZE / 2}px`,
         zIndex: 3,
-    },
-    nodeWrapLocked: {
-        opacity: 0.45,
     },
     glyphWrap: {
         width: NODE_SIZE,
