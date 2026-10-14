@@ -617,15 +617,6 @@
 
 ## Pending
 
-### [MED] combat / hand — A Plain Blow draws no FREE pill, so one of the three grey cards looks like it has no free play
-- pass: 85 (commit 93f05dfe)
-- viewport: both (375x812 and 1280x800)
-- category: comprehension
-- observation: on the Brine Hag board, A Plain Ward shows its FREE pill ("+4") and A Plain Word shows "+24%", but both A Plain Blow cards show no pill at all, only the paid "Deal 12". The card has a free line (`free: { damage: 2 }`), and the engine resolves it, so a dieless Blow deals damage while its face says nothing. The grey office is the card set that teaches FREE against PAID in fight one, and one of its three cards hides the FREE half.
-- evidence: `.critique-artifacts/mobile/04-combat-board.png` and `desktop/04-combat-board.png` (pills on the Ward and Word cards only); `04-combat-board.txt` lists "+4" and "+24%" but nothing for either Blow. Cause: `riderPairs` in `axiomancer-mobile/state/presenters/combat-encounter.engine.ts` (~:141) maps `guard` and `applyEffect` only, so a `damage` rider gives no `freeKeyword`/`freeValue`, `freeGlyphMeta` returns `''`, and the face's `hasFree` is false. `card-rules.ts:99` already prints `DEAL <n>` for the same rider.
-- suggested fix: add a `DEAL` pair for `r.damage` in `riderPairs` (stat-scaled the way the Ward's guard is; `FREE_KW_GLYPH` already maps `DEAL` to ⚔), and pin a Blow face with its FREE pill in the presenter test.
-- source: critique-drive (unattended)
-
 ### [LOW] combat / desktop — the footer dock stretches the VITAE bar 1075px, so the VITAE figure sits a screen's width from the pile counts
 - pass: 85 (commit 93f05dfe)
 - viewport: desktop (1280x800)
@@ -1019,6 +1010,16 @@
 - source: loop
 
 ## Done
+
+### [x] [MED] combat / hand — A Plain Blow draws no FREE pill, so one of the three grey cards looks like it has no free play — RESOLVED 2026-10-14 (commit 4080f4a0; riderPairs leads with a DEAL pair for the damage rider, programFreeCell reads DEAL and spells unprinted amounts n/+n/X/×2, a DEAL sword silhouette joins glyphShapes; pinned in combat-card-vm.test.ts by the Blow pill and a lane sweep: FREE line iff pill)
+- issue: #532
+- pass: 85 (commit 93f05dfe)
+- viewport: both (375x812 and 1280x800)
+- category: comprehension
+- observation: on the Brine Hag board, A Plain Ward shows its FREE pill ("+4") and A Plain Word shows "+24%", but both A Plain Blow cards show no pill at all, only the paid "Deal 12". The card has a free line (`free: { damage: 2 }`), and the engine resolves it, so a dieless Blow deals damage while its face says nothing. The grey office is the card set that teaches FREE against PAID in fight one, and one of its three cards hides the FREE half.
+- evidence: `.critique-artifacts/mobile/04-combat-board.png` and `desktop/04-combat-board.png` (pills on the Ward and Word cards only); `04-combat-board.txt` lists "+4" and "+24%" but nothing for either Blow. Cause: `riderPairs` in `axiomancer-mobile/state/presenters/combat-encounter.engine.ts` (~:141) maps `guard` and `applyEffect` only, so a `damage` rider gives no `freeKeyword`/`freeValue`, `freeGlyphMeta` returns `''`, and the face's `hasFree` is false. `card-rules.ts:99` already prints `DEAL <n>` for the same rider.
+- suggested fix: add a `DEAL` pair for `r.damage` in `riderPairs` (stat-scaled the way the Ward's guard is; `FREE_KW_GLYPH` already maps `DEAL` to ⚔), and pin a Blow face with its FREE pill in the presenter test.
+- source: critique-drive (unattended)
 
 ### [x] [MED] exploration hub — sealed nodes draw no visible mark, so most roads end at bare vertices — RESOLVED 2026-10-14 (commit cf095d5a; the node wrapper no longer dims sealed nodes by 0.45 on top of NodeMark, so SEALED_MARK_OPACITY (ring 0.85, disc 0.7) is the whole dimming; pinned in ExplorationNode.test.tsx)
 - issue: #527
