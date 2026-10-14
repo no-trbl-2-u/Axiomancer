@@ -6,8 +6,9 @@
  *                 resolution FX stay in `PlayerMedallion`.
  *   VITAE column  ♥ value / max with the deck and discard piles at its right,
  *                 a fill bar under it (blood below a quarter), and the phase
- *                 ledger under the bar.
- *   END           a wide thumb button: hourglass + END, the dead-tray
+ *                 ledger under the bar. Capped at `DOCK_VITAE_MAX_WIDTH`, so
+ *                 a wide window keeps the piles beside the VITAE figure.
+ *   END          a wide thumb button: hourglass + END, the dead-tray
  *                 consequence line above it, dimmed while a phase resolves.
  *
  * The dock respects the bottom safe-area inset and grows rather than clips.
@@ -37,6 +38,13 @@ export const VITAE_BAR_H = 8;
 /** Below this share of max VITAE the bar turns blood (presentation only). */
 export const VITAE_LOW_RATIO = 0.25;
 export const DOCK_LEDGER_MARK = 14;
+/**
+ * The VITAE column's widest extent. A phone never reaches it (the column gets
+ * what the avatar and END leave, about 160pt at 375 wide). On a desktop or
+ * tablet window it stops the bar running the window's width and keeps the deck
+ * and discard counts beside the VITAE figure; END stays at the right edge.
+ */
+export const DOCK_VITAE_MAX_WIDTH = 360;
 const DOCK_LEDGER_GAP = 3;
 
 /** The dock's minimum height for a given bottom inset. */
@@ -174,8 +182,9 @@ const useStyles = makeStyles((AXM) => ({
         paddingHorizontal: DOCK_PAD_H, paddingTop: DOCK_PAD_V,
         backgroundColor: 'rgba(7,5,9,0.9)', borderTopWidth: 1, borderTopColor: AXM.divider,
     },
-    // The VITAE column takes what the avatar and END leave; its cells never wrap.
-    vitaeCol: { flex: 1, minWidth: 0, gap: 4 },
+    // The VITAE column takes what the avatar and END leave, up to a cap on wide
+    // windows; its cells never wrap.
+    vitaeCol: { flex: 1, minWidth: 0, maxWidth: DOCK_VITAE_MAX_WIDTH, gap: 4 },
     vitaeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 6 },
     vitaeText: { fontFamily: FONTS.mono, fontSize: 14, lineHeight: 18, color: AXM.parchment, letterSpacing: 0.5, flexShrink: 0 },
     // The maximum rides quieter than the live value.

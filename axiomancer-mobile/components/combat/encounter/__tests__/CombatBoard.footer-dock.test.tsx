@@ -17,7 +17,7 @@ import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { initializeCombatEncounter, rollEncounterDice } from '@mechanics';
 import { CombatBoard, type DragController } from '@/components/combat/encounter/CombatBoard';
 import {
-    DOCK_PAD_V, END_BTN_W, END_BTN_H, VITAE_BAR_H, VITAE_LOW_RATIO, dockMinHeight, vitaeBarFill,
+    DOCK_GAP, DOCK_PAD_H, DOCK_PAD_V, DOCK_VITAE_MAX_WIDTH, END_BTN_W, END_BTN_H, VITAE_BAR_H, VITAE_LOW_RATIO, dockMinHeight, vitaeBarFill,
 } from '@/components/combat/encounter/CombatFooterDock';
 import { PLAYER_AVATAR_SIZE } from '@/components/combat/encounter/CombatCombatantPane';
 import { buildCombatViewModel, type CombatViewModel } from '@/state/presenters/combat-encounter.engine';
@@ -120,6 +120,22 @@ describe('A4 — the footer dock', () => {
         expect(flat('combat-ledger').flexWrap).toBeUndefined();
         // The piles sit on the VITAE line, at its right.
         expect(col.getByLabelText(/^Deck \d+ cards, discard \d+$/)).toBeTruthy();
+    });
+
+    it('caps the VITAE column on a wide window, never on a phone (CRITIQUE pass 85)', () => {
+        renderBoard();
+        const col = flat('combat-rail-vitae-col');
+        // The column still fills what the avatar and END leave...
+        expect(col.flex).toBe(1);
+        // ...up to the cap, so at 1280 wide the bar no longer runs ~1075px and
+        // the piles stay beside the VITAE figure.
+        expect(col.maxWidth).toBe(DOCK_VITAE_MAX_WIDTH);
+        // On phones (375 and a 430 large phone) the column is narrower than the
+        // cap, so the phone dock is unchanged.
+        const phoneColumn = (width: number) =>
+            width - DOCK_PAD_H * 2 - DOCK_GAP * 2 - PLAYER_AVATAR_SIZE - END_BTN_W;
+        expect(phoneColumn(PHONE.width)).toBeLessThan(DOCK_VITAE_MAX_WIDTH);
+        expect(phoneColumn(430)).toBeLessThan(DOCK_VITAE_MAX_WIDTH);
     });
 
     it('the avatar is a 48pt round button that opens the pilgrim modal', () => {
