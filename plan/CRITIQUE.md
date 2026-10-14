@@ -612,57 +612,52 @@
 > cutting their names and effect rows (each card is whole when lifted)
 > and the top-left intent reading "−11" (D92 placement). Three fresh
 > findings.
-
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `archive-pre-revamp:plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
 
+### [LOW] anvil — HONE, TEMPER and SWAP prices read "40s" while the forge's budget says SHILLINGS
+- pass: residue of the pass-84 village fix (iterate 2026-10-14)
+- viewport: mobile (375x812)
+- category: comprehension
+- observation: the same bare "s" as the village stalls: `OfferButton` prints `{offer.price}s` and the card's cost chip `−{cost}s`, under a "<budget> SHILLINGS" header. Not changed with the village fix because HONE and TEMPER sit side by side (`offerRow`, each `flex: 1`, label left and price right), and at 375 wide "TEMPER" plus "40 SHILLINGS" in mono 12 likely overruns the ~144pt button.
+- evidence: `axiomancer-mobile/app/blacksmith/index.tsx:86-88` and `:266`; `styles.offerRow` / `offerButton`
+- suggested fix: put the price on its own line under the verb (or under the button with the effect line) as "40 SHILLINGS", so the forge names its unit the way the village and the rest screen do; pin it in the forge test.
+- source: iterate (residue)
+
 ### [MED] combat / hand — A Plain Blow draws no FREE pill, so one of the three grey cards looks like it has no free play
 - pass: 85 (commit 93f05dfe)
+### [LOW] ci / pr-resolve — a hand dispatch with a non-`loop/` branch exits green having done nothing
+- pass: antagonist on PR #526 (commit efc7f371)
+- viewport: n/a
+- category: infra
+- observation: with `branch` set to anything outside `loop/` (a typo, `main`), `scan` is skipped (`inputs.branch != ''`) and `resolve` is skipped (`startsWith(inputs.branch, 'loop/')` fails), so the run shows green with no jobs run. Separately, `inputs.branch` is spliced into the `pre_run`/`post_run` shell inside single quotes; a refname may contain `'`. Only writers can dispatch, so this is hygiene, not exposure.
+- evidence: `.github/workflows/pr-resolve.yml` `scan.if` and `resolve.if`, `pre_run`.
+- suggested fix: a tiny guard job that fails loudly when `branch` is set but does not start with `loop/`; pass the branch through `env:` rather than inline `${{ }}` in the script.
+- source: antagonist, PR #526
+
+### [LOW] combat / footer dock — VITAE is announced twice, by the readout and by the bar
+- pass: antagonist on PR #529 (commit ce44dd8f)
+- viewport: n/a (screen reader)
+- category: accessibility
+- observation: `combat-rail-vitae` and the `progressbar` `combat-rail-vitae-bar` both carry `VITAE <hp> of <max>`, so swiping the dock reads the same line twice in a row.
+- evidence: `axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx` (`VitaeBar`, the `vitaeText` label).
+- suggested fix: keep the label on the progressbar (it also carries `accessibilityValue`) and hide the text readout from the reader (`importantForAccessibility="no"` / `accessibilityElementsHidden`), or the reverse.
+- source: antagonist, PR #529
+
+- pass: 84 (commit dd61ec90)
 - viewport: both (375x812 and 1280x800)
 - category: comprehension
 - observation: on the Brine Hag board, A Plain Ward shows its FREE pill ("+4") and A Plain Word shows "+24%", but both A Plain Blow cards show no pill at all, only the paid "Deal 12". The card has a free line (`free: { damage: 2 }`), and the engine resolves it, so a dieless Blow deals damage while its face says nothing. The grey office is the card set that teaches FREE against PAID in fight one, and one of its three cards hides the FREE half.
 - evidence: `.critique-artifacts/mobile/04-combat-board.png` and `desktop/04-combat-board.png` (pills on the Ward and Word cards only); `04-combat-board.txt` lists "+4" and "+24%" but nothing for either Blow. Cause: `riderPairs` in `axiomancer-mobile/state/presenters/combat-encounter.engine.ts` (~:141) maps `guard` and `applyEffect` only, so a `damage` rider gives no `freeKeyword`/`freeValue`, `freeGlyphMeta` returns `''`, and the face's `hasFree` is false. `card-rules.ts:99` already prints `DEAL <n>` for the same rider.
 - suggested fix: add a `DEAL` pair for `r.damage` in `riderPairs` (stat-scaled the way the Ward's guard is; `FREE_KW_GLYPH` already maps `DEAL` to ⚔), and pin a Blow face with its FREE pill in the presenter test.
+- observation: on the walked Breakwater sheet ("18 nodes · 12 sealed"), the six trodden and open nodes draw their discs, but none of the twelve sealed nodes can be seen. The black roads run to junctions on the engraving and stop, with no mark where they meet, so the map reads as a web of lines leading nowhere. The legend's ◌ SEALED key matches nothing on screen. The sealed mark is meant to recede (`NodeMark` draws an empty dashed ash ring at the smallest radius), but `ExplorationNode` also wraps it in `nodeWrapLocked` opacity 0.45, so the ring prints at about 0.38 and its backing disc at about 0.3. That vanishes on the light engraving.
+- evidence: `.critique-artifacts/mobile/11-late-game-hub.png` (junctions near 160,470, 95,540 and 255,505); `desktop/11-late-game-hub.png` (bare vertices at about 55,565 and 390,665); `axiomancer-mobile/components/NodeMark.tsx:86-103`; `components/exploration/ExplorationNode.tsx:167` (`nodeWrapLocked`)
+- suggested fix: drop the extra 0.45 wrapper opacity for sealed nodes, or raise the ring's stroke opacity, so the sealed ring is the faintest mark that still shows where each road ends. Keep it the faintest of the four kinds, and pin the sealed mark's effective opacity in `ExplorationNode.test.tsx`.
 - source: critique-drive (unattended)
 
 ### [LOW] combat / desktop — the footer dock stretches the VITAE bar 1075px, so the VITAE figure sits a screen's width from the pile counts
 - pass: 85 (commit 93f05dfe)
-- viewport: desktop (1280x800)
-- category: visual
-- observation: BT2b's footer dock spans the whole window. Its VITAE column is `flex: 1`, so at 1280 wide "♥ 160 / 160" sits at the far left, the deck and discard counts at the far right next to END, and one thin green bar runs about 1075px between them, under a hand that occupies the middle 650px. The menu, rest, village and preview screens all cap their content at a 520 column for this reason.
-- evidence: `.critique-artifacts/desktop/04-combat-board.png` (dock row y 740-790: VITAE at x 68, piles at x 1090-1140, bar x 68-1143); `axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx` `vitaeCol: { flex: 1 }`.
-- suggested fix: cap the dock's VITAE column (for example at the hand's width, or a `DOCK_VITAE_MAX_WIDTH`) on wide windows and keep the piles beside the figure; phones unchanged. Pin the cap in `CombatBoard.footer-dock.test.tsx`.
-- source: critique-drive (unattended)
-
-### [LOW] combat / a11y — the phase ledger under VITAE is five unlabelled marks, so a screen reader never hears which phases were cleared or overwhelmed
-- pass: 85 (commit 93f05dfe)
-- viewport: n/a (screen reader)
-- category: accessibility
-- observation: the dock's ledger (`combat-ledger`) maps `vm.ledger` to `LedgerMark` glyphs with no `accessibilityLabel` on the row or the marks. The header's "PHASE 1/5" names the current phase, but the record of earlier phases (clear O, overwhelmed X) is visual only. This predates BT2b; the dock move kept it.
-- evidence: `axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx` (the `combat-ledger` row); `components/hazard/glyphs.tsx` `LedgerMark` (no accessibility props); `.critique-artifacts/mobile/04-combat-board.txt` (no ledger text).
-- suggested fix: make the ledger row one accessible element labelled from `vm.ledger` (for example "Phases: 1 cleared, 2 overwhelmed, 3 to 5 ahead"), presenter-built and terse.
-- source: critique-drive (unattended)
-
-### [LOW] ci / pr-resolve — a hand dispatch with a non-`loop/` branch exits green having done nothing
-- pass: antagonist on PR #526 (commit efc7f371)
-### [LOW] village — stall prices read "12s" while the purse, rest offers and sell labels say "SHILLINGS"
-- pass: 84 (commit dd61ec90)
-- viewport: both
-- category: comprehension
-- observation: the settlement's purse reads "240 SHILLINGS" and the rest screen prices THE CUT at "5 SHILLINGS", but each stall row prints its price as "12s" (buy and sell). The bare "s" is the only place the currency is abbreviated, and the player meets it before any key to it.
-- evidence: `.critique-artifacts/mobile/07-village.png`, `desktop/07-village.png`; `axiomancer-mobile/app/village/index.tsx:168` and `:191` (`{ware.price}s`, `{sellable.sellPrice}s`) against `:114` (`{vm.currency} SHILLINGS`) and `app/rest/index.tsx` (`${offer.price} SHILLINGS`)
-- suggested fix: print one form for every price. Either "12 SHILLINGS" on the stall rows, or "12s" everywhere with the purse header naming the unit once. The first matches the rest screen. Pin it in the village screen test.
-- source: critique-drive (unattended)
-
-- pass: antagonist on PR #521 (BT2a, commit 042b4471)
-- viewport: mobile (375x812)
-- category: visual
-- observation: the pill straddles 15pt above each card's top edge (`freePill` top -15), into the strip where `styles.fanHint` sits (`top: 1` in the fan). With a five-card phone fan, a middle card's pill sits over the start of the hint, so it reads "· · card to read it". BT2a's brief keeps the fan band out of scope (BT2b), so the PR did not move the hint.
-- evidence: `axiomancer-mobile/screenshots/bt2a/1-grey-hand.jpg` and `2-blood-price-hand.jpg` (hint under the "+4" / "-2" pills); the prototype shot `bt2-prototype/1-board.jpg` has no hint in that strip.
-- suggested fix: in BT2b, place the hint clear of the pills' overhang (above the pill row, or drop it once the BT2b fan reads names whole), and pin it with a layout test.
-- source: antagonist, PR #521
-
 ### [LOW] combat / IN PLAY row — two copies of one Global give two chips with the same accessibility label
 - pass: antagonist on PR #520 (GS1, commit fc4aa159)
 - viewport: n/a (screen reader)
@@ -722,11 +717,21 @@
 - pass: 79 (commit f2065459)
 - viewport: desktop (1280x800)
 - category: visual
+- observation: BT2b's footer dock spans the whole window. Its VITAE column is `flex: 1`, so at 1280 wide "♥ 160 / 160" sits at the far left, the deck and discard counts at the far right next to END, and one thin green bar runs about 1075px between them, under a hand that occupies the middle 650px. The menu, rest, village and preview screens all cap their content at a 520 column for this reason.
+- evidence: `.critique-artifacts/desktop/04-combat-board.png` (dock row y 740-790: VITAE at x 68, piles at x 1090-1140, bar x 68-1143); `axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx` `vitaeCol: { flex: 1 }`.
+- suggested fix: cap the dock's VITAE column (for example at the hand's width, or a `DOCK_VITAE_MAX_WIDTH`) on wide windows and keep the piles beside the figure; phones unchanged. Pin the cap in `CombatBoard.footer-dock.test.tsx`.
 - observation: on a wide window `titleLayout` caps the plate at `height * 0.72 * PLATE_ASPECT` (464px at 800 tall), centred with feathered sides. The menu column under it is `MENU_COLUMN_MAX_WIDTH` 520, so NEW GAME, LOAD GAME and SETTINGS stick out about 28px past the art on each side, and the menu sits on flat black below the plate's foot. About two thirds of the screen is unbroken black around a narrow grey band.
 - evidence: `.critique-artifacts/desktop/02-onboarding.png` (rows 380-900, plate ~408-872); `01-title.png` (the band)
 - suggested fix: on a wide window, cap the embedded menu column at `min(MENU_COLUMN_MAX_WIDTH, layout.plate.width)` so the rows sit within the art (one value passed from TitleScreen to MainMenu's embedded mode); phone layout unchanged.
 - source: critique-drive (unattended)
 
+### [LOW] combat / a11y — the phase ledger under VITAE is five unlabelled marks, so a screen reader never hears which phases were cleared or overwhelmed
+- pass: 85 (commit 93f05dfe)
+- viewport: n/a (screen reader)
+- category: accessibility
+- observation: the dock's ledger (`combat-ledger`) maps `vm.ledger` to `LedgerMark` glyphs with no `accessibilityLabel` on the row or the marks. The header's "PHASE 1/5" names the current phase, but the record of earlier phases (clear O, overwhelmed X) is visual only. This predates BT2b; the dock move kept it.
+- evidence: `axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx` (the `combat-ledger` row); `components/hazard/glyphs.tsx` `LedgerMark` (no accessibility props); `.critique-artifacts/mobile/04-combat-board.txt` (no ledger text).
+- suggested fix: make the ledger row one accessible element labelled from `vm.ledger` (for example "Phases: 1 cleared, 2 overwhelmed, 3 to 5 ahead"), presenter-built and terse.
 ### [LOW] RC2 walk 2026-10-11 — copy, feedback and consistency findings (one row per item, accepted for v0.2.0)
 - pass: RC2 walk, four `playtester` legs (attended, T present) on eb75f451 with the Blood Price test deck
 - viewport: playwright default (desktop)
@@ -796,31 +801,6 @@
   change on existing items only, no new content. If heal magnitudes
   belong to B2's balance pass, route it there rather than tune it in
   `/iterate`.
-- source: critique:drive (unattended)
-
-- pass: 63 (commit aea7593b)
-- viewport: mobile (375x812); desktop (1280x800) seats the fan between the corners and is clear
-- category: mobile
-- observation: a five-card opening hand does not fit the band between the
-  corners, so `handFanLayout` lays it across the whole board (12 to 363)
-  and lets the corner chrome float over it. The two end cards are the only
-  ones no neighbour covers, yet the END disc sits over the rightmost card's
-  effect row ("Deal 12" reads "Dea") and the player medallion sits over the
-  leftmost card's chip row. The first-time player sees whole cards but not
-  what the two end ones do until they tap one. The fan comment already
-  accepts "the last card landed half under the END disc" as the price of a
-  readable fan. The cost is the one line that tells the player what the
-  card does.
-- evidence: `.critique-artifacts/mobile/04-combat-board.png` (bottom right,
-  "Dea" under END; bottom left, the Ward's chip under the portrait);
-  `axiomancer-mobile/components/combat/encounter/CombatBoard.tsx:238-334`
-  (`END_CORNER_FOOTPRINT_W`, `handFanLayout` board-band fallback) and
-  `:2066` (`endWrap` 80x80).
-- suggested fix: keep the full-board fan, but when it takes the board band
-  lift the two corner stacks above the card tops (or shrink them to a
-  compact size), so no end card's effect row sits under chrome. Pin it with
-  a layout test at 375 with five cards: the END and player-medallion
-  rects must not intersect any card's effect row.
 - source: critique:drive (unattended)
 
 ### [MED] combat — the only SUMMON carrier cannot reach wave 2, so half the spawn rule is dead on the roster
@@ -967,10 +947,6 @@
 - pass: 1 (commit 6e23724a)
 - viewport: n/a
 - category: infra
-- observation: with `branch` set to anything outside `loop/` (a typo, `main`), `scan` is skipped (`inputs.branch != ''`) and `resolve` is skipped (`startsWith(inputs.branch, 'loop/')` fails), so the run shows green with no jobs run. Separately, `inputs.branch` is spliced into the `pre_run`/`post_run` shell inside single quotes; a refname may contain `'`. Only writers can dispatch, so this is hygiene, not exposure.
-- evidence: `.github/workflows/pr-resolve.yml` `scan.if` and `resolve.if`, `pre_run`.
-- suggested fix: a tiny guard job that fails loudly when `branch` is set but does not start with `loop/`; pass the branch through `env:` rather than inline `${{ }}` in the script.
-- source: antagonist, PR #526
 - observation: `axiomancer-mobile/scripts/dev-server-container.sh`
   (`npm run web:container`) pulls Expo via `npx --yes expo start`
   inside a throwaway `node:20-alpine` container, which resolves a
@@ -990,14 +966,6 @@
   path in favor of the host-run command until fixed.
 - source: critique pass 1
 
-### [LOW] combat / footer dock — VITAE is announced twice, by the readout and by the bar
-- pass: antagonist on PR #529 (commit ce44dd8f)
-- viewport: n/a (screen reader)
-- category: accessibility
-- observation: `combat-rail-vitae` and the `progressbar` `combat-rail-vitae-bar` both carry `VITAE <hp> of <max>`, so swiping the dock reads the same line twice in a row.
-- evidence: `axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx` (`VitaeBar`, the `vitaeText` label).
-- suggested fix: keep the label on the progressbar (it also carries `accessibilityValue`) and hide the text readout from the reader (`importantForAccessibility="no"` / `accessibilityElementsHidden`), or the reverse.
-- source: antagonist, PR #529
 > Seeded 2026-07-03 from the retired `/archive` critique history —
 > only the recurring *patterns* were carried; stale one-off rows
 > were dropped. Each maps to category `external-critique`.
@@ -1020,15 +988,50 @@
 
 ## Done
 
-### [x] [MED] exploration hub — sealed nodes draw no visible mark, so most roads end at bare vertices — RESOLVED 2026-10-14 (commit cf095d5a; the node wrapper no longer dims sealed nodes by 0.45 on top of NodeMark, so SEALED_MARK_OPACITY (ring 0.85, disc 0.7) is the whole dimming; pinned in ExplorationNode.test.tsx)
-- issue: #527
+### [x] [LOW] village — stall prices read "12s" while the purse, rest offers and sell labels say "SHILLINGS" — RESOLVED 2026-10-14 (branch loop/iterate-shilling-prices: buy and sell rows print "12 SHILLINGS"; pinned in stall-price-shillings.critique-84.test.tsx)
 - pass: 84 (commit dd61ec90)
-- viewport: both (375x812 and 1280x800)
+- viewport: both
 - category: comprehension
-- observation: on the walked Breakwater sheet ("18 nodes · 12 sealed"), the six trodden and open nodes draw their discs, but none of the twelve sealed nodes can be seen. The black roads run to junctions on the engraving and stop, with no mark where they meet, so the map reads as a web of lines leading nowhere. The legend's ◌ SEALED key matches nothing on screen. The sealed mark is meant to recede (`NodeMark` draws an empty dashed ash ring at the smallest radius), but `ExplorationNode` also wraps it in `nodeWrapLocked` opacity 0.45, so the ring prints at about 0.38 and its backing disc at about 0.3. That vanishes on the light engraving.
-- evidence: `.critique-artifacts/mobile/11-late-game-hub.png` (junctions near 160,470, 95,540 and 255,505); `desktop/11-late-game-hub.png` (bare vertices at about 55,565 and 390,665); `axiomancer-mobile/components/NodeMark.tsx:86-103`; `components/exploration/ExplorationNode.tsx:167` (`nodeWrapLocked`)
-- suggested fix: drop the extra 0.45 wrapper opacity for sealed nodes, or raise the ring's stroke opacity, so the sealed ring is the faintest mark that still shows where each road ends. Keep it the faintest of the four kinds, and pin the sealed mark's effective opacity in `ExplorationNode.test.tsx`.
+- observation: the settlement's purse reads "240 SHILLINGS" and the rest screen prices THE CUT at "5 SHILLINGS", but each stall row prints its price as "12s" (buy and sell). The bare "s" is the only place the currency is abbreviated, and the player meets it before any key to it.
+- evidence: `.critique-artifacts/mobile/07-village.png`, `desktop/07-village.png`; `axiomancer-mobile/app/village/index.tsx:168` and `:191` (`{ware.price}s`, `{sellable.sellPrice}s`) against `:114` (`{vm.currency} SHILLINGS`) and `app/rest/index.tsx` (`${offer.price} SHILLINGS`)
+- suggested fix: print one form for every price. Either "12 SHILLINGS" on the stall rows, or "12s" everywhere with the purse header naming the unit once. The first matches the rest screen. Pin it in the village screen test.
 - source: critique-drive (unattended)
+- issue: #530
+
+### [x] [MED] combat / hand fan — the D91 free corner pill covers the "tap a card to read it" hint — RESOLVED 2026-10-14 (PR #529, phase BT2b: the hint is dropped per D92 (A8), and the hand dock keeps the pill's overhang above the card tops inside its clip; pinned in CombatBoard.handfan.test.tsx)
+- pass: antagonist on PR #521 (BT2a, commit 042b4471)
+- viewport: mobile (375x812)
+- category: visual
+- observation: the pill straddles 15pt above each card's top edge (`freePill` top -15), into the strip where `styles.fanHint` sits (`top: 1` in the fan). With a five-card phone fan, a middle card's pill sits over the start of the hint, so it reads "· · card to read it". BT2a's brief keeps the fan band out of scope (BT2b), so the PR did not move the hint.
+- evidence: `axiomancer-mobile/screenshots/bt2a/1-grey-hand.jpg` and `2-blood-price-hand.jpg` (hint under the "+4" / "-2" pills); the prototype shot `bt2-prototype/1-board.jpg` has no hint in that strip.
+- suggested fix: in BT2b, place the hint clear of the pills' overhang (above the pill row, or drop it once the BT2b fan reads names whole), and pin it with a layout test.
+- source: antagonist, PR #521
+
+### [x] [LOW] combat / mobile — on a 375-wide phone the corner medallions cover the effect rows of the fan's two end cards — RESOLVED 2026-10-14 (PR #529, phase BT2b: no corner chrome remains; the avatar and END live in the footer dock under the hand (A3), pinned in CombatBoard.footer-dock.test.tsx)
+- pass: 63 (commit aea7593b)
+- viewport: mobile (375x812); desktop (1280x800) seats the fan between the corners and is clear
+- category: mobile
+- observation: a five-card opening hand does not fit the band between the
+  corners, so `handFanLayout` lays it across the whole board (12 to 363)
+  and lets the corner chrome float over it. The two end cards are the only
+  ones no neighbour covers, yet the END disc sits over the rightmost card's
+  effect row ("Deal 12" reads "Dea") and the player medallion sits over the
+  leftmost card's chip row. The first-time player sees whole cards but not
+  what the two end ones do until they tap one. The fan comment already
+  accepts "the last card landed half under the END disc" as the price of a
+  readable fan. The cost is the one line that tells the player what the
+  card does.
+- evidence: `.critique-artifacts/mobile/04-combat-board.png` (bottom right,
+  "Dea" under END; bottom left, the Ward's chip under the portrait);
+  `axiomancer-mobile/components/combat/encounter/CombatBoard.tsx:238-334`
+  (`END_CORNER_FOOTPRINT_W`, `handFanLayout` board-band fallback) and
+  `:2066` (`endWrap` 80x80).
+- suggested fix: keep the full-board fan, but when it takes the board band
+  lift the two corner stacks above the card tops (or shrink them to a
+  compact size), so no end card's effect row sits under chrome. Pin it with
+  a layout test at 375 with five cards: the END and player-medallion
+  rects must not intersect any card's effect row.
+- source: critique:drive (unattended)
 
 ### [x] [LOW] title / a11y — after EMBARK the faded psalm, EMBARK button and footer stay in the accessibility tree under the menu — RESOLVED 2026-10-13 (commit fafba096; the CTA block sets accessibilityElementsHidden, importantForAccessibility no-hide-descendants and aria-hidden once the phase leaves 'title'; pinned in TitleScreen.test.tsx)
 - issue: #511
@@ -1662,6 +1665,7 @@
 - source: adversarial code review (2026-07-12)
 - closed: moot (R10b2, 2026-10-02): its carrier (Tri-Eyes) was deleted in R2a and no player card stacks an affliction after the purge; nothing can be over-cleansed.
 
+- viewport: both (375x812 and 1280x800)
 ### [x] [MED] tooling / critique — after R3a, every state fixture boots off Act 1, so critique's gated screens show places no player can reach — RESOLVED 2026-10-01 (R7e, commit 1017c8d5; verified on screen pass 64)
 - pass: 60 (commit 2d918845)
 - viewport: both (coverage, not layout)
@@ -1711,6 +1715,7 @@
 - pass: 55 (commit bd517cf9)
 - viewport: both (content, not layout)
 - category: comprehension
+- source: critique-drive (unattended)
 - observation: since M3a a new game starts on the Act 1 map named "The
   Breakwater", and fishing-village is reached only after crossing all of
   Act 1. D33 (T, 2026-09-26) kept the map's name and ruled that
@@ -1748,6 +1753,7 @@
 - pass: 54 (commit 5d6eca56)
 - viewport: both (375×812 and 1280×800)
 - category: comprehension
+- source: critique-drive (unattended)
 - observation: on the "A FOE BARS THE WAY" preview, the Brine Hag's
   quote under its portrait ("They have heard kinder sermons than yours,
   and drowned anyway.") is repeated verbatim in the expanded PHASE 1 row
@@ -3060,6 +3066,7 @@
   (`fishing-village.layout.test.ts`).
 - viewport: mobile + desktop (both)
 - category: comprehension
+- source: critique-drive (unattended)
 - observation: the Fishing Village exploration screen shows "Map i of
   ii · 24 paths open" as a header directly above a node graph whose
   own legend reads "25 nodes · 22 sealed". A first-time player reads
@@ -3080,6 +3087,8 @@
   screen can't disagree.
 - source: critique pass 19 (unattended, critique:drive artifacts)
 
+- viewport: desktop (1280x800)
+- category: visual
 ### [x] [LOW] mobile — combat corner medallions occlude the fan-end hand cards' touch centers — RESOLVED 2026-08-28 (ui-cleanup pass)
 - pass: combat declutter residue (PR #135, 2026-07-19)
 - resolution: the player medallion's touch box no longer reaches the leftmost
@@ -3158,7 +3167,6 @@
   files/4085 tests green; `axiomancer-mobile` 268 files/2716 tests
   green.
 
-- viewport: n/a
 ### [x] [LOW] catalog keyword bolder still speaks dead vocabulary — RESOLVED 2026-08-06 (commit 489819a6, issue #171)
 - pass: session 2026-07-17 (card-text work)
 - viewport: devlog/catalog.html
@@ -3309,14 +3317,104 @@
   Phase 33's SWAY-cleanse enemy work.
 - source: playtester (owner-directed break-test session)
 
-- category: infra
 
 
 
 
-### [x] [MED] combat / hand fan — the D91 free corner pill covers the "tap a card to read it" hint — RESOLVED 2026-10-14 (PR #529, phase BT2b: the hint is dropped per D92 (A8), and the hand dock keeps the pill's overhang above the card tops inside its clip; pinned in CombatBoard.handfan.test.tsx)
 
-### [x] [LOW] combat / mobile — on a 375-wide phone the corner medallions cover the effect rows of the fan's two end cards — RESOLVED 2026-10-14 (PR #529, phase BT2b: no corner chrome remains; the avatar and END live in the footer dock under the hand (A3), pinned in CombatBoard.footer-dock.test.tsx)
+
+
+
+
+
+### [x] [MED] exploration hub — sealed nodes draw no visible mark, so most roads end at bare vertices — RESOLVED 2026-10-14 (commit cf095d5a; the node wrapper no longer dims sealed nodes by 0.45 on top of NodeMark, so SEALED_MARK_OPACITY (ring 0.85, disc 0.7) is the whole dimming; pinned in ExplorationNode.test.tsx)
+- issue: #527
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
