@@ -37,6 +37,7 @@
 - **workflow-level-concurrency** · ci-autofix's workflow-level group let skipped green runs displace the real queued red one: 2 ran, 32 cancelled (R0) → put concurrency on the job, after the `if`, in its own group, never `nexus-loop` · seen 1× · last 2026-09-28 · guarded by scripts/loop-pr.test.mjs
 - **cross-branch-telemetry-push** · `_claude-skill.yml`'s stranded-rows step pulled `--rebase origin main` and pushed `HEAD:main`; on a PR branch that would push the PR's commits to main (R11 review) → push only to the branch HEAD is on (`loop/*` or the run's ref) · seen 1× · last 2026-10-12 · guarded by scripts/loop-pr.test.mjs
 - **union-edit-doubles** · a union merge of an append-only file keeps both the old and edited form of a row both sides touched (hunt) → count lines three ways (base, ours, theirs) and keep each only as often as the merge implies · seen 1× · last 2026-10-12 · guarded by scripts/loop-pr.test.mjs (unionMerge)
+- **union-anchor-split** · pr-resolve placed theirs' lines by a forward anchor walk, so generic shared lines (blank, "- viewport: n/a") jumped it ahead: rows moved Pending to Done split and each merge added ~85 blank lines (CRITIQUE.md, #542) → take line order from a real diff3 (`git merge-file --union`) and only trim counts after · seen 1× · last 2026-10-14 · guarded by scripts/loop-pr.test.mjs (unionMerge)
 
 <!-- @domain:data -->
 
