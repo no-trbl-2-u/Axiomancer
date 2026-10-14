@@ -630,15 +630,6 @@
 
 ## Pending
 
-### [LOW] anvil — HONE, TEMPER and SWAP prices read "40s" while the forge's budget says SHILLINGS
-- pass: residue of the pass-84 village fix (iterate 2026-10-14)
-- viewport: mobile (375x812)
-- category: comprehension
-- observation: the same bare "s" as the village stalls: `OfferButton` prints `{offer.price}s` and the card's cost chip `−{cost}s`, under a "<budget> SHILLINGS" header. Not changed with the village fix because HONE and TEMPER sit side by side (`offerRow`, each `flex: 1`, label left and price right), and at 375 wide "TEMPER" plus "40 SHILLINGS" in mono 12 likely overruns the ~144pt button.
-- evidence: `axiomancer-mobile/app/blacksmith/index.tsx:86-88` and `:266`; `styles.offerRow` / `offerButton`
-- suggested fix: put the price on its own line under the verb (or under the button with the effect line) as "40 SHILLINGS", so the forge names its unit the way the village and the rest screen do; pin it in the forge test.
-- source: iterate (residue)
-
 ### [LOW] combat / a11y — the phase ledger under VITAE is five unlabelled marks, so a screen reader never hears which phases were cleared or overwhelmed
 - pass: 85 (commit 93f05dfe)
 - viewport: n/a (screen reader)
@@ -994,6 +985,16 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] anvil — HONE, TEMPER and SWAP prices read "40s" while the forge's budget says SHILLINGS — RESOLVED 2026-10-14 (branch loop/iterate-forge-shillings: each offer prints "40 SHILLINGS" on its own line under the verb, and the card chip, the cannot-cover reason and the outcome chip spell the unit too; pinned in forge-vocabulary.S5-talk-C12.test.tsx)
+- issue: #540
+- pass: residue of the pass-84 village fix (iterate 2026-10-14)
+- viewport: mobile (375x812)
+- category: comprehension
+- observation: the same bare "s" as the village stalls: `OfferButton` prints `{offer.price}s` and the card's cost chip `−{cost}s`, under a "<budget> SHILLINGS" header. Not changed with the village fix because HONE and TEMPER sit side by side (`offerRow`, each `flex: 1`, label left and price right), and at 375 wide "TEMPER" plus "40 SHILLINGS" in mono 12 likely overruns the ~144pt button.
+- evidence: `axiomancer-mobile/app/blacksmith/index.tsx:86-88` and `:266`; `styles.offerRow` / `offerButton`
+- suggested fix: put the price on its own line under the verb (or under the button with the effect line) as "40 SHILLINGS", so the forge names its unit the way the village and the rest screen do; pin it in the forge test.
+- source: iterate (residue)
 
 ### [x] [MED] combat / hand — A Plain Blow draws no FREE pill, so one of the three grey cards looks like it has no free play — RESOLVED 2026-10-14 (commit 4080f4a0; riderPairs leads with a DEAL pair for the damage rider, programFreeCell reads DEAL and spells unprinted amounts n/+n/X/×2, a DEAL sword silhouette joins glyphShapes; pinned in combat-card-vm.test.ts by the Blow pill and a lane sweep: FREE line iff pill)
 - issue: #532
