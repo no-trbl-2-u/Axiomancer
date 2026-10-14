@@ -65,8 +65,14 @@ export const LEECH_TURNS_PER_APPLICATION = 3;
 
 // ── State ───────────────────────────────────────────────────────────────────
 
-/** One Global in play. */
+/**
+ * One Global in play. Copies stack as independent instances (experimental,
+ * T 2026-10-14): each copy is its own entry, fires its own trigger and
+ * leaves on its own expiry.
+ */
 export interface GlobalInPlay {
+    /** This instance, unique within the combat ('g1', 'g2', ...). */
+    uid: string;
     cardId: string;
     paid: boolean;
     /** Turn starts left before a FREE Global leaves play; null = rest of combat. */
@@ -101,6 +107,8 @@ export interface ProgramLedger {
     pendingHeal: number;
     /** Counter for the hand uids of Curses added or returned mid-combat. */
     curseUid: number;
+    /** Counter for the instance uids of Globals entering play. */
+    globalUid: number;
     /** TETHER is live through this round (inclusive); 0 = none. */
     tetherUntil: number;
     tetherCardId: string | null;
@@ -119,7 +127,7 @@ export function initProgramLedger(): ProgramLedger {
         lostThisCombat: 0, lostThisRound: 0, takenThisRound: 0, takenLastRound: 0,
         sacrificeCount: 0, sacrificePaid: 0,
         waives: 0, nextDouble: false, nextTwice: false, nextDealBonus: 0,
-        drains: [], deathWardRound: null, pendingHeal: 0, curseUid: 0,
+        drains: [], deathWardRound: null, pendingHeal: 0, curseUid: 0, globalUid: 0,
         tetherUntil: 0, tetherCardId: null, tetherSourceName: null, leechTurns: 0, leechPotency: 0, leechCardId: null,
     };
 }
@@ -662,10 +670,11 @@ function withoutEntry(state: CombatEncounterState, uid: string): CombatEncounter
 }
 
 /**
- * Why a line cannot be played right now (null = it can). Covers the Global
- * uniqueness rule, printed conditions, Curse targets, and the SACRIFICE floor
- * (a line whose SACRIFICE would leave less than 1 VITAE cannot be played).
- * The die and the Color Law are checked by the play itself.
+ * Why a line cannot be played right now (null = it can). Covers printed
+ * conditions, Curse targets, and the SACRIFICE floor (a line whose SACRIFICE
+ * would leave less than 1 VITAE cannot be played). A Global is always
+ * playable: copies stack (experimental). The die and the Color Law are
+ * checked by the play itself.
  *
  * @param x - The amount chosen for a "SACRIFICE any amount" line.
  */
@@ -678,10 +687,7 @@ export function programIllegalReason(
     const ledger = state.program ?? initProgramLedger();
     if (!program) return 'not a program card';
     const s = withoutEntry(state, uid);
-    if (program.global) {
-        if (ledger.globals.some(g => g.cardId === entry.cardId)) return 'that Global is already in play';
-        return null;
-    }
+    if (program.global) return null;
     const line = lineFor(program, paid);
     if (!line) return 'this card has no such line';
     if (line.requires && !line.requires.test(buildQuery({ ...s, program: ledger }, 0))) return line.requires.why;
@@ -843,7 +849,8 @@ export function playProgramCard(
 
     if (program.global) {
         const turnsLeft = useBottom ? null : GLOBAL_FREE_TURNS;
-        w.l.globals.push({ cardId: card.id, paid: useBottom, turnsLeft });
+        w.l.globalUid = (w.l.globalUid ?? 0) + 1;
+        w.l.globals.push({ uid: `g${w.l.globalUid}`, cardId: card.id, paid: useBottom, turnsLeft });
         w.events.push({ kind: 'global-entered', cardId: card.id, paid: useBottom, turnsLeft });
     } else {
         const line = lineFor(program, useBottom) as ProgramLine;
@@ -975,7 +982,8 @@ export function programRollRound(l: ProgramLedger): ProgramLedger {
 /**
  * The deck a refill may reshuffle when both the draw pile and the discard
  * are empty: the deck minus the cards out of the cycle (EXILED, Globals in
- * play, cards in hand), one copy each.
+ * play, cards in hand), one deck copy per entry (two instances of a Global
+ * in play take two copies out).
  */
 export function programDrawFallback(state: CombatEncounterState): readonly string[] {
     const l = state.program;

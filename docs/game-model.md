@@ -31,7 +31,8 @@ the Expo app (`axiomancer-mobile`) presents it.
   play FREE or PAID, then discard. A **Global** stays in play and fires on
   its trigger (⟳ start of your turn, 🩸 when you SACRIFICE n, 📜 when you
   play a Curse): FREE for `GLOBAL_FREE_TURNS` = 3 turn starts, PAID for the
-  rest of combat, one copy of each in play. A **Curse** holds a hand slot
+  rest of combat. Copies stack as independent instances, each firing and
+  expiring on its own (T, 2026-10-14: experimental, may change). A **Curse** holds a hand slot
   until played and cannot be scrapped.
 - **Every card has two lines.** The FREE line plays with no die; the PAID
   line costs exactly one die. A grey card's lines are data: `Card.free`, and
