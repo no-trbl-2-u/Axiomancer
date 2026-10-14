@@ -121,13 +121,37 @@ describe('paidLedgerFit', () => {
         expect(freak.size).toBe(PAID_LINE_FLOOR);
     });
 
-    it('does not depend on the FREE line — the same PAID line fits the same on every card', () => {
-        // The old fit reserved room for a FREE cell; the pill moved off the
-        // ledger, so the fit takes only the PAID text.
-        expect(paidLedgerFit.length).toBe(1);
-        const a = paidLedgerFit({ width: 120, keyword: '⚡ DEAL', value: '38' });
-        const b = paidLedgerFit({ width: 120, keyword: '⚡ DEAL', value: '38' });
-        expect(a).toEqual(b);
+    it('does not depend on the FREE line — the same PAID line renders the same with or without one', () => {
+        // The old fit reserved room for a FREE cell, so A Plain Word's long
+        // PAID line sized differently beside its "+24%" FREE value. The pill
+        // moved off the ledger: strip the FREE line and the PAID line, its
+        // size and the ledger must not move.
+        const word = handCard('grey-word');
+        expect(word.face.freeGlyph).toBeTruthy();
+        const bare: CombatCardVM = {
+            ...word,
+            face: { ...word.face, freeGlyph: '', freeGlyphKey: null, freeValue: null, freeHeroText: '' },
+        };
+        const read = (card: CombatCardVM) => {
+            const { unmount } = renderFace(card);
+            const out = {
+                pill: screen.queryByTestId('combat-card-face-free-corner') !== null,
+                ledger: flat(screen.getByTestId('combat-card-face-ledger')),
+                size: flat(screen.getByTestId('combat-card-face-value')).fontSize,
+                keywordSize: flat(screen.getByTestId('combat-card-face-keyword')).fontSize,
+            };
+            unmount();
+            return out;
+        };
+        const withFree = read(word);
+        const without = read(bare);
+        expect(withFree.pill).toBe(true);
+        expect(without.pill).toBe(false);
+        // Non-vacuity: this PAID line is long enough to shrink below 12pt.
+        expect(withFree.size as number).toBeLessThan(PAID_LINE_SIZE);
+        expect(without.size).toBe(withFree.size);
+        expect(without.keywordSize).toBe(withFree.keywordSize);
+        expect(without.ledger).toEqual(withFree.ledger);
     });
 });
 
