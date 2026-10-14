@@ -91,7 +91,7 @@ effect (ballot §9). The budget does not count them.
 | keyword | reminder text | carried by |
 |---|---|---|
 | **EXILE** | The card leaves combat instead of going to your discard. | Blood Price P-04c, P-07b, M-06c and the grey Curse (PAID lines) |
-| **GLOBAL** | A card type: stays in play and fires on its trigger (⟳ start of your turn, 🩸 when you SACRIFICE n, 📜 when you play a Curse): 3 turns played FREE, all combat played PAID. One copy of each at a time. | Blood Price P-10c, E-03d, E-09n, M-08d |
+| **GLOBAL** | A card type: stays in play and fires on its trigger (⟳ start of your turn, 🩸 when you SACRIFICE n, 📜 when you play a Curse): 3 turns played FREE, all combat played PAID. Copies stack as independent instances, each firing and expiring on its own (experimental, T 2026-10-14). | Blood Price P-10c, E-03d, E-09n, M-08d |
 
 ---
 

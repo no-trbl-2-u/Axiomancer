@@ -35,8 +35,9 @@ Pointers: `M/Cards/types.ts:58`, `M/Combat/combat.cards.ts:308`,
 
 **Ratified, not built.**
 
-- Global and Curse card types (Global: FREE 3 turns, PAID rest of combat,
-  unique in play; Curse: a dead card that holds a slot and cannot be
+- Global and Curse card types (Global: FREE 3 turns, PAID rest of combat;
+  copies stack as independent instances, each firing and expiring on its
+  own (T, 2026-10-14: experimental, may change); Curse: a dead card that holds a slot and cannot be
   scrapped). D69, `plan/revamp/cards.md`. Built by BT for the trial set.
 
 **T's call.**

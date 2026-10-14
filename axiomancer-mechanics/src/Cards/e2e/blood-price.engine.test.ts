@@ -7,8 +7,8 @@
  *     test deck (built by role: SACRIFICE sources behind every payoff);
  *   · the rulings: SACRIFICE as an unscaled cost with a 1-VITAE floor, WAIVE,
  *     HEAL capped at max VITAE, "heal the damage dealt" unscaled, EXILE, the
- *     Global lifecycle (FREE 3 turn starts, PAID rest of combat, one copy in
- *     play), Global triggers, the Curse (cannot be scrapped), TETHER, LEECH
+ *     Global lifecycle (FREE 3 turn starts, PAID rest of combat; copies
+ *     stack as independent instances, experimental), Global triggers, the Curse (cannot be scrapped), TETHER, LEECH
  *     as a stacking debuff (turns and potency), the next-DEAL bonus, the
  *     death ward, the delayed HEAL;
  *   · printed equals applied: every plain line lands the numbers its face
@@ -32,7 +32,10 @@ import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, discardCombatCard,
     startTurn, resolveThreatPhase, handCards, PROGRAM_KIT, playSignatureSkill, SIGNATURE_COST,
 } from '../../Combat/combat.engine';
-import { programIllegalReason, programXRange } from '../../Combat/combat.card-program';
+import {
+    programIllegalReason, programXRange, programDrawFallback, programLineValue,
+} from '../../Combat/combat.card-program';
+import { runOneEncounter } from '../../Combat/combat.encounter.sim';
 import type { CombatEncounterState } from '../../Combat/combat.encounter.types';
 import type { BaseStats } from '../../Character/types';
 
@@ -211,10 +214,9 @@ describe('SACRIFICE, WAIVE, HEAL, EXILE', () => {
 });
 
 describe('Globals', () => {
-    it('a FREE Global fires on 3 turn starts, then goes to discard; one copy in play', () => {
-        let s = play(fight(['bp-e-03d', 'bp-e-03d']), 't0', false);
-        expect(s.program!.globals).toEqual([{ cardId: 'bp-e-03d', paid: false, turnsLeft: 3 }]);
-        expect(programIllegalReason(s, 't1', false, PROGRAM_KIT)).toMatch(/already in play/);
+    it('a FREE Global fires on 3 turn starts, then goes to discard', () => {
+        let s = play(fight(['bp-e-03d']), 't0', false);
+        expect(s.program!.globals).toEqual([{ uid: 'g1', cardId: 'bp-e-03d', paid: false, turnsLeft: 3 }]);
         for (let turn = 1; turn <= 3; turn++) {
             s = startTurn({ ...s, turnTakenThisPhase: false }).state;
             expect(s.program!.leechPotency).toBe(turn);
@@ -226,7 +228,7 @@ describe('Globals', () => {
 
     it('a PAID Global stays for the rest of combat', () => {
         let s = play(fight(['bp-e-03d']), 't0', true);
-        expect(s.program!.globals).toEqual([{ cardId: 'bp-e-03d', paid: true, turnsLeft: null }]);
+        expect(s.program!.globals).toEqual([{ uid: 'g1', cardId: 'bp-e-03d', paid: true, turnsLeft: null }]);
         for (let turn = 1; turn <= 5; turn++) s = startTurn({ ...s, turnTakenThisPhase: false }).state;
         expect(s.program!.globals).toHaveLength(1);
         expect(s.program!.leechPotency).toBe(5);
@@ -252,6 +254,75 @@ describe('Globals', () => {
         s = startTurn({ ...s, turnTakenThisPhase: false }).state;
         expect(s.player.health).toBe(2);
         expect(s.program!.leechPotency).toBe(0);
+    });
+});
+
+describe('Globals stack as independent instances (experimental, T 2026-10-14)', () => {
+    it('a second copy is playable and enters as its own instance', () => {
+        let s = play(fight(['bp-p-10c', 'bp-p-10c']), 't0', false);
+        expect(programIllegalReason(s, 't1', false, PROGRAM_KIT)).toBeNull();
+        expect(programIllegalReason(s, 't1', true, PROGRAM_KIT)).toBeNull();
+        s = play(s, 't1', false);
+        expect(s.program!.globals).toEqual([
+            { uid: 'g1', cardId: 'bp-p-10c', paid: false, turnsLeft: 3 },
+            { uid: 'g2', cardId: 'bp-p-10c', paid: false, turnsLeft: 3 },
+        ]);
+    });
+
+    it('each copy fires its own trigger: one SACRIFICE, two P-10c, GUARD n twice', () => {
+        let s = play(fight(['bp-p-10c', 'bp-p-10c', 'bp-p-01a']), 't0', false);
+        s = play(s, 't1', false);
+        s = play(s, 't2', false);
+        expect(s.guard).toBe(4);
+        expect(s.enemy.health).toBe(493);
+    });
+
+    it('two ⟳ copies apply their SACRIFICE 2 and LEECH 1 twice per turn', () => {
+        let s = play(fight(['bp-e-03d', 'bp-e-03d']), 't0', false);
+        s = play(s, 't1', false);
+        for (let turn = 1; turn <= 3; turn++) {
+            s = startTurn({ ...s, turnTakenThisPhase: false }).state;
+            expect(s.program!.leechPotency).toBe(2 * turn);
+            expect(s.player.health).toBe(100 - 4 * turn);
+        }
+        expect(s.program!.globals).toEqual([]);
+        expect(s.discard.filter(id => id === 'bp-e-03d')).toHaveLength(2);
+    });
+
+    it('each copy leaves on its own expiry: the FREE copy goes, the later PAID copy stays', () => {
+        let s = play(fight(['bp-e-03d', 'bp-e-03d']), 't0', false);
+        s = startTurn({ ...s, turnTakenThisPhase: false }).state;
+        s = play(s, 't1', true);
+        expect(s.program!.globals.map(g => [g.uid, g.turnsLeft])).toEqual([['g1', 2], ['g2', null]]);
+        s = startTurn({ ...s, turnTakenThisPhase: false }).state;
+        s = startTurn({ ...s, turnTakenThisPhase: false }).state;
+        expect(s.program!.globals).toEqual([{ uid: 'g2', cardId: 'bp-e-03d', paid: true, turnsLeft: null }]);
+        expect(s.discard.filter(id => id === 'bp-e-03d')).toHaveLength(1);
+    });
+
+    it('the draw fallback takes one deck copy out per instance in play', () => {
+        let s = play(fight(['bp-p-10c', 'bp-p-10c']), 't0', false);
+        s = play(s, 't1', false);
+        expect(s.deck.filter(id => id === 'bp-p-10c')).toHaveLength(2);
+        expect(programDrawFallback(s).filter(id => id === 'bp-p-10c')).toHaveLength(0);
+        const one = { ...s, program: { ...s.program!, globals: s.program!.globals.slice(1) } };
+        expect(programDrawFallback(one).filter(id => id === 'bp-p-10c')).toHaveLength(1);
+    });
+
+    it('the witness values a copy with one already in play, and a stacked deck sims to an outcome', () => {
+        const s = play(fight(['bp-p-10c', 'bp-p-10c', 'bp-e-03d', 'bp-e-03d']), 't0', false);
+        const v = programLineValue(s, 't1', false, PROGRAM_KIT);
+        expect(Number.isFinite(v)).toBe(true);
+        expect(v).toBeGreaterThan(0);
+        const deck = [
+            'bp-p-10c', 'bp-p-10c', 'bp-p-10c', 'bp-e-03d', 'bp-e-03d', 'bp-e-03d',
+            'bp-p-01a', 'bp-p-01a', 'bp-e-02d', 'bp-e-02d', ...Array(6).fill(FILLER),
+        ];
+        const player = { ...deepClone(Player), knownCards: [...new Set(deck)] };
+        for (const seed of [1, 2, 3]) {
+            const run = runOneEncounter(deepClone(player), deepClone(FloatEye), seed, 'greedy', { deck });
+            expect(['victory', 'mercy', 'defeat']).toContain(run.outcome);
+        }
     });
 });
 

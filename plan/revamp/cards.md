@@ -164,7 +164,7 @@ A type is a lifecycle rule. Five types:
 | **Attack** | Play, then discard |
 | **Skill** | Play, then discard |
 | **Spell** | Play, then discard |
-| **Global** | Stays in play and affects the combat (either side; there is no separate on-you / on-foe type). FREE: in play for 3 turns. PAID: in play for the rest of combat. No cap, but each Global in play must be unique (T: an experiment, may change). Removed only by a card effect |
+| **Global** | Stays in play and affects the combat (either side; there is no separate on-you / on-foe type). FREE: in play for 3 turns. PAID: in play for the rest of combat. No cap. Copies stack as independent instances; each fires and expires on its own (T, 2026-10-14: experimental, may change). Removed only by a card effect |
 | **Curse** | A dead card that holds a hand slot until played. It cannot be scrapped. No extra discard cost and no "While in your hand:" effect for now; later Curses may add them. The first Curse (D71) is below |
 
 **EXILE** is a shared keyword on a card line: the card does not go to the
