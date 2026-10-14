@@ -5,7 +5,8 @@ import {
     DiceRollOverlay, 
     ResolveFlashOverlay, 
     OutcomeOverlay, 
-    CardDetailOverlay 
+    CardDetailOverlay,
+    STAMP_SPRING,
 } from '../HazardOverlays';
 import type { 
     HazardCardVM, 
@@ -82,6 +83,16 @@ const mockOutcome: HazardOutcomeVM = {
     ctaLabel: 'Continue',
     marks: [],
 };
+
+describe('STAMP_SPRING', () => {
+    // Same bound as the dice tray's springs (dice-roll-ritual.test.ts): an
+    // underdamped spring finishes at mass * ln(1 / energyThreshold) / damping
+    // seconds, so naming mass and threshold keeps the slam under a second.
+    it('comes to rest inside a second', () => {
+        const s = STAMP_SPRING;
+        expect((s.mass * Math.log(1 / s.energyThreshold)) / s.damping).toBeLessThan(1);
+    });
+});
 
 describe('DiceRollOverlay', () => {
     it('renders dice roll animation', () => {
