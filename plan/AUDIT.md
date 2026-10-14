@@ -55,6 +55,21 @@
   `workflow_run` workflow keyed on pr-resolve), then prove it on a staged
   conflict. Infra only; nothing about merging, closing or force-pushing
   changes (D86).
+### [ ] [bug] The hazard dice cast's springs inherit Reanimated 4's mass 4, so they swing for many seconds (2026-10-14)
+- category: bug
+- impact: 4
+- ease: 8
+- source: iterate (found while fixing the combat tray's dice springs, branch loop/iterate-drive-settle)
+- detail: `components/hazard/HazardOverlays.tsx` `TumblingDie` (~:49-50, :113)
+  calls `withSpring` with only damping and stiffness, the same configs the
+  combat tray used. Reanimated 4.1 fills an unset `mass` with 4 and
+  `energyThreshold` with 6e-9, so a damping-6 spring takes about 12s to
+  finish. On the combat tray this hung each die tilted above the tray and
+  kept the tap-to-skip layer over the dice for about 20s (fixed by naming
+  `mass: 1, energyThreshold: 0.01` in `DICE_ROLL_TIMING`). Whether the
+  hazard cast's interstitial waits on these callbacks is unchecked.
+- next: name mass and energyThreshold on the three hazard springs (or share
+  `DiceSpring` values), then check the cast's timing on the built app.
 ### [content] roster: the Bleeding Signet is granted by nothing (item-ungranted, RH1, 2026-10-13)
 - category: content
 - impact: 4

@@ -729,16 +729,6 @@
 - suggested fix: one engine read returning `{ block, shortfall }` per line, so the VM probes each line once.
 - source: antagonist, PR #523
 
-### [MED] title + combat / tooling — the drive captures the title 0.7s into its 2.65s intro, so every pass sees only the wordmark; EMBARK is tappable before it is visible
-- pass: 79 (commit f2065459); widened and bumped LOW to MED at pass 83 (commit 3225cc64)
-- pass 83 addendum: the same fixed 700ms settle (`axiomancer-mobile/scripts/critique-drive.mjs` ~:271) also cuts the `combat-board` capture short. The round-start roll ritual staggers four dice 130ms apart over a 480ms fall plus springs (`DICE_ROLL_TIMING`), so it runs about 1s. Both `04-combat-board.png` captures (mobile and desktop) show three dice in the tray and the fourth still tilted and in the air beside the foe. So the unattended lens has never seen a settled hand-and-dice board, which is the screen that matters most. Fix the same way: wait on a settle signal (no `RollingDie` mounted, or the summed ritual timing) rather than a flat 700ms.
-- viewport: mobile + desktop
-- category: comprehension
-- observation: `scripts/critique-drive.mjs` settles 700ms after load. The title sequence holds 450ms, lifts the wordmark for 1500ms, then fades the psalm and EMBARK in over 700ms (`TITLE_TIMING`). So `01-title.png` shows the wordmark over a half-faded plate and an empty black lower half, while its `.txt` lists the psalm and EMBARK. The unattended lens never sees the first screen a player sees. During those 2.65s the invisible EMBARK is already pressable (`pointerEvents` "box-none", not disabled), so a tap on the empty lower half can skip to the menu before the button has appeared.
-- evidence: `.critique-artifacts/mobile/01-title.png` (no psalm, no EMBARK) against `01-title.txt` (both present); the `onboarding` capture's `getByRole('button').first()` click lands at ~0.7s.
-- suggested fix: in the drive, have the `title` screen wait for the EMBARK button to reach full opacity (or the sum of `TITLE_TIMING`) before capturing. Separately, ignore EMBARK presses until `cta` has begun (or make a tap during the lift finish the sequence rather than open the menu).
-- source: critique-drive (unattended)
-
 ### [LOW] title / desktop — the menu rows (520px) overhang the 464px title plate, and the plate reads as a lit strip in a black field
 - pass: 79 (commit f2065459)
 - viewport: desktop (1280x800)
@@ -1012,6 +1002,17 @@
 - source: loop
 
 ## Done
+
+### [x] [MED] title + combat / tooling — the drive captures the title 0.7s into its 2.65s intro, so every pass sees only the wordmark; EMBARK is tappable before it is visible — RESOLVED 2026-10-14 (branch loop/iterate-drive-settle: the drive waits for title-cta at full opacity and for combat-dice-skip to detach; EMBARK is disabled until its fade-in begins. Proving the dice signal found the round-start springs never came to rest under Reanimated 4, so the skip layer ate the first tap; fixed in the same PR, 672b38d6)
+- issue: #536
+- pass: 79 (commit f2065459); widened and bumped LOW to MED at pass 83 (commit 3225cc64)
+- pass 83 addendum: the same fixed 700ms settle (`axiomancer-mobile/scripts/critique-drive.mjs` ~:271) also cuts the `combat-board` capture short. The round-start roll ritual staggers four dice 130ms apart over a 480ms fall plus springs (`DICE_ROLL_TIMING`), so it runs about 1s. Both `04-combat-board.png` captures (mobile and desktop) show three dice in the tray and the fourth still tilted and in the air beside the foe. So the unattended lens has never seen a settled hand-and-dice board, which is the screen that matters most. Fix the same way: wait on a settle signal (no `RollingDie` mounted, or the summed ritual timing) rather than a flat 700ms.
+- viewport: mobile + desktop
+- category: comprehension
+- observation: `scripts/critique-drive.mjs` settles 700ms after load. The title sequence holds 450ms, lifts the wordmark for 1500ms, then fades the psalm and EMBARK in over 700ms (`TITLE_TIMING`). So `01-title.png` shows the wordmark over a half-faded plate and an empty black lower half, while its `.txt` lists the psalm and EMBARK. The unattended lens never sees the first screen a player sees. During those 2.65s the invisible EMBARK is already pressable (`pointerEvents` "box-none", not disabled), so a tap on the empty lower half can skip to the menu before the button has appeared.
+- evidence: `.critique-artifacts/mobile/01-title.png` (no psalm, no EMBARK) against `01-title.txt` (both present); the `onboarding` capture's `getByRole('button').first()` click lands at ~0.7s.
+- suggested fix: in the drive, have the `title` screen wait for the EMBARK button to reach full opacity (or the sum of `TITLE_TIMING`) before capturing. Separately, ignore EMBARK presses until `cta` has begun (or make a tap during the lift finish the sequence rather than open the menu).
+- source: critique-drive (unattended)
 
 ### [x] [LOW] village — stall prices read "12s" while the purse, rest offers and sell labels say "SHILLINGS" — RESOLVED 2026-10-14 (branch loop/iterate-shilling-prices: buy and sell rows print "12 SHILLINGS"; pinned in stall-price-shillings.critique-84.test.tsx)
 - pass: 84 (commit dd61ec90)
