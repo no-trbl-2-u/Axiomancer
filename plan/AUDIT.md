@@ -36,6 +36,24 @@
 
 ## Pending
 
+### [infra] pr-resolve never resolves a non-union conflict: its Claude job fails "Unsupported event type: push" every time (expand pass 33, 2026-10-14)
+- category: infra
+- impact: 7
+- ease: 7
+- detail: `pr-resolve.yml` runs on `push` to `main`. Its `scan` job merges
+  main into conflicting `loop:pr` branches and hands any non-union conflict
+  to the `resolve` job, which calls `_claude-skill.yml`
+  (`anthropics/claude-code-action@v1` with a `prompt`). That step exits in
+  about 0.3s with `Action failed with error: Unsupported event type: push`.
+  All 6 failed runs in the last 45 are this (runs 38494524908 and
+  38502443273 checked: PRs #520 and #523), so no conflict has ever been
+  resolved by the Claude step; #520's was settled by hand (`fc4aa159`).
+  `ci-autofix` and `pr-autofix` work because they run on `workflow_run`.
+- next: give the resolve step an event the action accepts (have `scan`
+  start one `workflow_dispatch` run per item, or move `resolve` into a
+  `workflow_run` workflow keyed on pr-resolve), then prove it on a staged
+  conflict. Infra only; nothing about merging, closing or force-pushing
+  changes (D86).
 ### [content] roster: the Bleeding Signet is granted by nothing (item-ungranted, RH1, 2026-10-13)
 - category: content
 - impact: 4

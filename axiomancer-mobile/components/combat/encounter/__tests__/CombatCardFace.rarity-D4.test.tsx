@@ -1,32 +1,23 @@
 /**
- * Rarity at a glance, and specifically NEVER BY COLOUR ALONE: the face shows
- * a named label + pip row + frame colour.
+ * Rarity on the ONE card face: no pips on any face, the WORD on the large
+ * face, and the band said to a screen reader everywhere.
  *
- * This suite is the greyscale test written as code. Every assertion below is
- * phrased so that it would still pass if `RARITY_COLOR` returned the same hue
- * for all three bands — because that is exactly the failure mode this exists
- * to prevent, and a test that reads the pip's `backgroundColor` to tell the bands
- * apart would be re-testing the colour instead of the signal.
+ * The pip track is gone from every face (one card face, everywhere). The
+ * rarity signal the face keeps is the named word on the large face (the
+ * inspect overlay and the reward preview), and the band in words for a screen
+ * reader on every face, small or large. Assertions read the WORD, never a hue,
+ * so they would still pass if `RARITY_COLOR` returned one colour for every
+ * band.
  *
  * What is pinned:
- *   1. the face draws a fixed THREE-slot pip track, with `RARITY_PIPS[band]`
- *      of them filled — so the count reads as "n of three" on a single card,
- *      not only when two cards sit side by side;
- *   2. the filled count is exactly `RARITY_PIPS[band]`, read with the colour
- *      channel ignored entirely;
- *   3. the `large` face prints the named label; the small face does NOT (it
- *      would cost the fanned name column — see `NAME_BAND_LEFT_CHROME`);
- *   4. the small face still announces the band in WORDS to a screen reader,
- *      so the leg it cannot print is not simply lost;
- *   5. the band is derived by the shared module, never re-banded here: the
- *      face agrees with `rarityFor` for every real library card.
- *
- * The library is the grey office — every card rank 1, one band — so the
- * fixture spans only the bands the library carries.
+ *   1. no face, small or large, draws a rarity pip track or a pip;
+ *   2. the `large` face prints the named label; the small face does NOT;
+ *   3. every face announces the band in WORDS to a screen reader;
+ *   4. the band is derived by the shared module, never re-banded here: the
+ *      face agrees with `rankToRarity` for every real library card.
  */
 
 import React from 'react';
-import { StyleSheet } from 'react-native';
 import { render, screen } from '@testing-library/react-native';
 import { describe, expect, it } from '@jest/globals';
 
@@ -34,9 +25,9 @@ import {
     cardLibrary, initializeCombatEncounter, rankToRarity, rollEncounterDice, type CardRank,
 } from '@mechanics';
 
-import { CombatCardFace, RARITY_TRACK_SLOTS } from '@/components/combat/encounter/CombatBoard';
+import { CombatCardFace } from '@/components/combat/encounter/CombatBoard';
 import { buildCombatViewModel, type CombatCardVM } from '@/state/presenters/combat-encounter.engine';
-import { RARITY_LABEL, RARITY_PIPS, rarityFor } from '@/state/presenters/card-rarity.engine';
+import { RARITY_LABEL, rarityFor } from '@/state/presenters/card-rarity.engine';
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
@@ -68,118 +59,85 @@ function handVMs(ids: string[]): CombatCardVM[] {
     return buildCombatViewModel(s).hand;
 }
 
-/** Render one face and hand back the queries for it, plus an unmount. */
-function renderFace(card: CombatCardVM, large: boolean) {
-    const { unmount } = render(
-        withAllProviders(
-            <CombatCardFace card={card} width={large ? 208 : 120} height={large ? 305 : 176} large={large} />,
-        ).tree,
+/** Every face size the game draws: staged, reward offer, hand, detail. */
+const FACES: { width: number; height: number; large: boolean }[] = [
+    { width: 92, height: 135, large: false },
+    { width: 100, height: 147, large: false },
+    { width: 120, height: 176, large: false },
+    { width: 208, height: 305, large: true },
+];
+
+function renderFace(card: CombatCardVM, face: { width: number; height: number; large: boolean }) {
+    return render(
+        withAllProviders(<CombatCardFace card={card} width={face.width} height={face.height} large={face.large} />).tree,
     );
-    return { unmount };
 }
 
-/**
- * The pip track's slots, as a list of "is this one filled?" booleans.
- *
- * Filled is read as "this slot was given a background colour", and empty as
- * "this slot took the hollow style". Deliberately NOT read as a specific hue:
- * see the header — the whole point is that the signal survives with the colour
- * channel thrown away.
- */
-function trackSlots(): boolean[] {
-    // The track exists at all — a face that dropped it would otherwise report
-    // "zero slots, zero filled" and quietly satisfy several loops below.
-    expect(screen.getByTestId('combat-card-face-rarity-pips')).toBeTruthy();
-    return Array.from({ length: RARITY_TRACK_SLOTS }, (_, i) => {
-        const pip = screen.getByTestId(`combat-card-face-rarity-pip-${i}`);
-        const flat = (StyleSheet.flatten(pip.props.style as never) ?? {}) as { backgroundColor?: string };
-        return flat.backgroundColor !== undefined && flat.backgroundColor !== 'transparent';
-    });
-}
-
-describe('CombatCardFace — D4 rarity pip track', () => {
-    const ids = idsSpanningTheLadder();
-    const cards = handVMs(ids);
+describe('CombatCardFace — no rarity pips on any face', () => {
+    const cards = handVMs(idsSpanningTheLadder());
 
     it('the fixture is non-empty (non-vacuity)', () => {
         expect(cards.length).toBeGreaterThan(0);
     });
 
-    it('always draws the full track, however common the card', () => {
-        // A `common` card draws one filled pip and TWO hollow ones. Without the
-        // hollow slots a lone pip means nothing on its own — the reference
-        // track is what turns the count into "one of three".
+    it('draws no pip track and no pip, small or large', () => {
         for (const card of cards) {
-            const { unmount } = renderFace(card, false);
-            for (let i = 0; i < RARITY_TRACK_SLOTS; i += 1) {
-                expect(screen.queryByTestId(`combat-card-face-rarity-pip-${i}`)).toBeTruthy();
+            for (const face of FACES) {
+                const { unmount } = renderFace(card, face);
+                // The face rendered (non-vacuity for the null checks below).
+                expect(screen.getByTestId('combat-card-face-name')).toBeTruthy();
+                expect(screen.queryByTestId('combat-card-face-rarity-pips')).toBeNull();
+                expect(screen.queryByTestId('combat-card-face-rarity-pip-0')).toBeNull();
+                unmount();
             }
-            expect(screen.queryByTestId(`combat-card-face-rarity-pip-${RARITY_TRACK_SLOTS}`)).toBeNull();
-            unmount();
-        }
-    });
-
-    it('fills exactly RARITY_PIPS[band] slots, and fills them from the top', () => {
-        for (const card of cards) {
-            const band = rarityFor(card);
-            const { unmount } = renderFace(card, false);
-            const slots = trackSlots();
-            expect(slots.filter(Boolean)).toHaveLength(RARITY_PIPS[band]);
-            // Filled slots lead: [on, on, off], never [on, off, on].
-            expect(slots).toEqual(
-                Array.from({ length: RARITY_TRACK_SLOTS }, (_, i) => i < RARITY_PIPS[band]),
-            );
-            unmount();
-        }
-    });
-
-    it('tracks the ENGINE rank, not a mobile-side re-band', () => {
-        // Deliberately asserted against `rankToRarity` from mechanics rather
-        // than against `rarityFor`: if the board ever inlines `rank <= 2 ? …`,
-        // a test phrased in terms of the mobile module could drift along
-        // with it, where this one cannot.
-        for (const card of cards) {
-            expect(card.rank).toBeDefined();
-            const { unmount } = renderFace(card, false);
-            const filled = trackSlots().filter(Boolean).length;
-            unmount();
-            expect(filled).toBe(RARITY_PIPS[rankToRarity(card.rank as CardRank)]);
         }
     });
 });
 
-describe('CombatCardFace — D4 named label', () => {
+describe('CombatCardFace — the rarity word', () => {
     const cards = handVMs(idsSpanningTheLadder());
 
     it('prints the band by NAME on the large face', () => {
         for (const card of cards) {
-            const { unmount } = renderFace(card, true);
+            const { unmount } = renderFace(card, FACES[3]!);
             const tag = screen.getByTestId('combat-card-face-rarity');
             expect(String(tag.props.children)).toBe(RARITY_LABEL[rarityFor(card)].toUpperCase());
             unmount();
         }
     });
 
-    it('does NOT print it on the small face — the fanned name column is not for sale', () => {
-        // The word costs ~34pt of a 120pt band, and the fan already clips names
-        // down to a ~40pt sliver (`CombatBoard.handfan.test.tsx`). The small face pays for
-        // the signal in pips, which cost nothing horizontally.
+    it('does NOT print it on a small face — the name band is the name’s', () => {
         for (const card of cards) {
-            const { unmount } = renderFace(card, false);
-            expect(screen.queryByTestId('combat-card-face-rarity')).toBeNull();
-            unmount();
+            for (const face of FACES.filter((x) => !x.large)) {
+                const { unmount } = renderFace(card, face);
+                expect(screen.queryByTestId('combat-card-face-rarity')).toBeNull();
+                unmount();
+            }
         }
     });
 
-    it('still SAYS the band on the small face, for a screen reader', () => {
-        // The leg the small face cannot print is not dropped: it moves to the
-        // pip track's accessibility label, so a non-sighted player gets the
-        // word the sighted player gets from the count.
+    it('SAYS the band to a screen reader on every face', () => {
         for (const card of cards) {
-            const { unmount } = renderFace(card, false);
-            const track = screen.getByTestId('combat-card-face-rarity-pips');
-            expect(track.props.accessibilityLabel).toBe(RARITY_LABEL[rarityFor(card)]);
+            for (const face of FACES) {
+                const { unmount } = renderFace(card, face);
+                const spacer = screen.getByTestId('combat-card-face-rarity-a11y');
+                expect(spacer.props.accessible).toBe(true);
+                expect(spacer.props.accessibilityLabel).toBe(RARITY_LABEL[rarityFor(card)]);
+                unmount();
+            }
+        }
+    });
+
+    it('tracks the ENGINE rank, not a mobile-side re-band', () => {
+        // Asserted against `rankToRarity` from mechanics rather than against
+        // `rarityFor`: if the board ever inlines `rank <= 2 ? …`, a test
+        // phrased in terms of the mobile module could drift along with it.
+        for (const card of cards) {
+            expect(card.rank).toBeDefined();
+            const { unmount } = renderFace(card, FACES[2]!);
+            const label = screen.getByTestId('combat-card-face-rarity-a11y').props.accessibilityLabel;
             unmount();
+            expect(label).toBe(RARITY_LABEL[rankToRarity(card.rank as CardRank)]);
         }
     });
 });

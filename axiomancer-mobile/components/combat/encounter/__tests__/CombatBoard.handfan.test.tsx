@@ -1,28 +1,21 @@
 /**
- * CombatBoard — the hand fan must not cover its own card names.
+ * CombatBoard — card names in the hand fan.
  *
- * At 375x812 a five-card hand risks OCCLUSION, not truncation: a name laid
- * out across the face's full 95pt column (`plateName` is
- * `numberOfLines={2}`) is painted over, all but ~40pt, by the card above.
- *
- * The answer is the NAME BOX, not the geometry. The fan must satisfy
- * `HAND_CARD_W + (n-1) * step <= screenW`, which at 375pt with 5 cards caps
- * `step` at 63.75 against the live 57.75 — widening the overlap buys about
- * one character before the outermost cards run off the phone. So `step` is
- * left to the fan invariants in `CombatBoard.fresh-eyes-repair.test.tsx` and
- * each covered card's name text is laid out inside the sliver it can
- * actually occupy.
+ * At 375x812 a five-card hand overlaps: every card but the last is covered by
+ * its right-hand neighbour. One card face, everywhere: a name keeps ONE line
+ * and is never capped to the visible sliver; a covered card's name runs on
+ * under its neighbour, and a tap reads the card whole. (This reverses the
+ * earlier "wrap inside the sliver" cap, by T's call, 2026-10-13.)
  *
  * What this suite pins:
  *   1. `NAME_BAND_LEFT_CHROME` equals the four styles it claims to sum, read
  *      off the SHIPPED stylesheet (`useCombatBoardStyles`) — not re-typed here.
- *   2. `nameColumnPeek` is the peek, floored, and never exceeds the step.
- *   3. Every covered hand card carries a name box no wider than the peek.
- *   4. The LAST (uncovered) card keeps the full band — no cap.
- *   5. Non-hand faces (staged, reward offer, detail overlay) are uncapped.
- *   6. The tap-to-read hatch is on screen while the fan is still occluded, and
+ *   2. Every hand card's name is one line with no width cap.
+ *   3. Non-hand faces (staged, reward offer, detail overlay) are one line and
+ *      uncapped too.
+ *   4. The tap-to-read hatch is on screen while the fan is still occluded, and
  *      both hint lines fit the single line they are given.
- *   7. Tapping a hand card reaches `onInspect`.
+ *   5. Tapping a hand card reaches `onInspect`.
  */
 
 import React from 'react';
@@ -35,8 +28,8 @@ import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-han
 
 import { initializeCombatEncounter, rollEncounterDice } from '@mechanics';
 import {
-    CombatBoard, CombatCardFace, handFanLayout, nameColumnPeek,
-    NAME_BAND_LEFT_CHROME, HAND_CARD_W, useCombatBoardStyles,
+    CombatBoard, CombatCardFace, handFanLayout,
+    NAME_BAND_LEFT_CHROME, useCombatBoardStyles,
     type DragController,
 } from '@/components/combat/encounter/CombatBoard';
 import { buildCombatViewModel, type CombatViewModel } from '@/state/presenters/combat-encounter.engine';
@@ -116,8 +109,8 @@ describe('NAME_BAND_LEFT_CHROME is derived, not guessed', () => {
         const parts = [
             s.faceCard.borderWidth,          // card face's own left edge
             s.plateBand.paddingHorizontal,   // the band's left half
-            s.plateRarityPip.width,          // the wax rarity pip
-            s.plateBand.gap,                 // pip -> text
+            s.plateRaritySpacer.width,       // the 5pt rarity spacer
+            s.plateBand.gap,                 // spacer -> text
         ];
         // A renamed or dropped key must fail loudly here rather than turn the
         // sum into NaN and take the assertion below down with an unreadable
@@ -127,85 +120,41 @@ describe('NAME_BAND_LEFT_CHROME is derived, not guessed', () => {
     });
 });
 
-// ── 2. The peek function ────────────────────────────────────────────────────
+// ── 2. The rendered fan ─────────────────────────────────────────────────────
 
-describe('nameColumnPeek', () => {
-    it('is the step minus the band chrome', () => {
-        expect(nameColumnPeek(57.75)).toBeCloseTo(57.75 - NAME_BAND_LEFT_CHROME, 5);
+describe('the hand fan prints every name on one uncapped line', () => {
+    it('the fixture fan overlaps at the phone width (non-vacuity)', () => {
+        const { vm } = renderBoard();
+        expect(handFanLayout(PHONE.width, vm.hand.length).overlap).toBeGreaterThan(0);
     });
 
-    it('never returns a non-positive width', () => {
-        // A degenerate step must not produce a zero/negative layout box, which
-        // React Native would treat as "lay out at zero" and hide the name
-        // entirely — strictly worse than an occluded name.
-        expect(nameColumnPeek(0)).toBeGreaterThan(0);
-        expect(nameColumnPeek(NAME_BAND_LEFT_CHROME)).toBeGreaterThan(0);
-        expect(nameColumnPeek(-50)).toBeGreaterThan(0);
-    });
-
-    it('is never wider than the sliver it describes', () => {
-        for (const step of [28, 40, 57.75, 63.75, 104]) {
-            expect(nameColumnPeek(step)).toBeLessThanOrEqual(step);
-        }
-    });
-
-    it('leaves a real, multi-character peek at the captured viewport', () => {
-        // The live geometry at 375x812 with five cards; if the fan geometry
-        // ever moves, this is the assertion that says whether names still fit.
-        const { step } = handFanLayout(PHONE.width, 5);
-        expect(step).toBeCloseTo(57.75, 5);
-        expect(nameColumnPeek(step)).toBeCloseTo(40.25, 5);
-    });
-});
-
-// ── 3 + 4. The rendered fan ─────────────────────────────────────────────────
-
-describe('the hand fan caps every COVERED card name to its visible sliver', () => {
-    it('caps all but the last card, and leaves the last uncapped', () => {
+    it('every hand card, covered or not, keeps one line and no width cap', () => {
         const { vm } = renderBoard();
         const names = screen.getAllByTestId('combat-card-face-name');
-        // The board renders the fan plus, potentially, other faces; the fan is
-        // the hand, so assert against the hand's own count.
-        expect(names.length).toBeGreaterThan(1);
-
-        const { step } = handFanLayout(PHONE.width, vm.hand.length);
-        const peek = nameColumnPeek(step);
-
-        const caps = names.map((n) => flatten(n.props.style).maxWidth);
-        const capped = caps.filter((c) => typeof c === 'number');
-
-        // Every cap that exists is exactly the peek — never a rounded or
-        // hand-tuned second number.
-        for (const c of capped) expect(c).toBeCloseTo(peek, 5);
-
-        // At least one card is covered and therefore capped.
-        expect(capped.length).toBeGreaterThan(0);
-        // And at least one (the topmost) is NOT capped — it is uncovered, so
-        // narrowing it would cost legibility for nothing.
-        expect(caps.some((c) => c === undefined)).toBe(true);
-    });
-
-    it('the cap is strictly narrower than the full name column', () => {
-        renderBoard();
-        const { step } = handFanLayout(PHONE.width, 5);
-        // Full column = card width - border*2 - band padding*2 - pip - gap.
-        const fullColumn = HAND_CARD_W - 3 - 12 - 10;
-        expect(nameColumnPeek(step)).toBeLessThan(fullColumn);
+        expect(names.length).toBe(vm.hand.length);
+        for (const n of names) {
+            expect(n.props.numberOfLines).toBe(1);
+            expect(flatten(n.props.style).maxWidth).toBeUndefined();
+            expect(textOf(n).length).toBeGreaterThan(0);
+        }
     });
 });
 
-// ── 5. The other four face sizes ────────────────────────────────────────────
+// ── 3. The other face sizes ─────────────────────────────────────────────────
 
-describe('CombatCardFace leaves every non-fanned face uncapped', () => {
-    it('omits maxWidth when namePeek is not passed', () => {
+describe('CombatCardFace prints one uncapped name line on every face', () => {
+    it('staged, reward offer and detail faces alike', () => {
         const { vm } = freshVM();
         const card = vm.hand[0]!;
-        const { tree } = withAllProviders(
-            <CombatCardFace card={card} width={100} height={150} />,
-        );
-        render(tree);
-        const name = screen.getByTestId('combat-card-face-name');
-        expect(flatten(name.props.style).maxWidth).toBeUndefined();
+        for (const [w, h, large] of [[92, 135, false], [100, 150, false], [208, 305, true]] as const) {
+            const { unmount } = render(withAllProviders(
+                <CombatCardFace card={card} width={w} height={h} large={large} />,
+            ).tree);
+            const name = screen.getByTestId('combat-card-face-name');
+            expect(name.props.numberOfLines).toBe(1);
+            expect(flatten(name.props.style).maxWidth).toBeUndefined();
+            unmount();
+        }
     });
 });
 

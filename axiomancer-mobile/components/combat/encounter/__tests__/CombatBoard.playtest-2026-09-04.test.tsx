@@ -130,15 +130,14 @@ describe('CombatCardFace — the reward-draft mini face (100x147) is readable', 
         expect(NARROW_FACE_W).toBeLessThanOrEqual(120);
     });
 
-    it('under NARROW_FACE_W the ledger stacks and every word line may wrap, no font-fit', () => {
+    it('under NARROW_FACE_W the ledger is still one die : PAID line, sized not font-fit', () => {
         render(withAllProviders(<CombatCardFace card={withPaid!} width={100} height={147} />).tree);
-        expect(screen.getByTestId('combat-card-face-ledger-stacked')).toBeTruthy();
-        expect(screen.queryByTestId('combat-card-face-ledger')).toBeNull();
-        // The value is a number: it keeps one line, so it never breaks inside itself.
-        expect(screen.getByTestId('combat-card-face-value').props.numberOfLines).toBe(1);
+        expect(screen.getByTestId('combat-card-face-ledger')).toBeTruthy();
+        expect(screen.queryByTestId('combat-card-face-ledger-stacked')).toBeNull();
+        expect(screen.getByTestId('combat-card-face-paid-line').props.numberOfLines).toBe(1);
+        expect(screen.getByTestId('combat-card-face-name').props.numberOfLines).toBe(1);
         for (const id of ['combat-card-face-name', 'combat-card-face-keyword', 'combat-card-face-value']) {
             const t = screen.getByTestId(id);
-            if (id !== 'combat-card-face-value') expect(t.props.numberOfLines).toBe(2);
             expect(t.props.adjustsFontSizeToFit).toBeUndefined();
             const style = StyleSheet.flatten(t.props.style) as Record<string, unknown>;
             expect(typeof style.lineHeight).toBe('number');
@@ -147,7 +146,7 @@ describe('CombatCardFace — the reward-draft mini face (100x147) is readable', 
         expect(screen.getByTestId('combat-card-face-name').props.children).toBe(withPaid!.name.toUpperCase());
     });
 
-    it('at the hand width (120) a short-keyword ledger keeps its side-by-side row', () => {
+    it('at the hand width (120) the ledger is the same single row', () => {
         const strike = cards.find((c) => c.cardId === 'grey-strike');
         expect(strike).toBeDefined();
         render(withAllProviders(<CombatCardFace card={strike!} width={120} height={176} />).tree);
