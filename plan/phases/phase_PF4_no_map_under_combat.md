@@ -33,6 +33,8 @@ panel, badge or header. The prelude and aftermath panels keep the map
 behind them as designed, and the map comes back fitted on the player when
 the encounter closes.
 
+Size: S
+
 ## Acceptance
 
 - **A1** `EncounterModalOverlay` reports its mode to its host through a
