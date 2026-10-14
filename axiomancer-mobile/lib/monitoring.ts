@@ -24,6 +24,12 @@
  * parallel breadcrumb API, no new call sites — the trail is whatever the
  * session logged.
  *
+ * PERFORMANCE, PREVIEW ONLY. On an EAS `preview` build the client also
+ * samples traces: native slow/frozen frames, app start, one transaction per
+ * screen (React Navigation), and one span per combat drag (`startDragSpan`).
+ * Production keeps its quota for crashes; web never starts a client at all.
+ * `docs/logging.md` → "Performance (Sentry)" says where to read it.
+ *
  * The DSN is public by design (it is embedded in every shipped client and
  * only permits event ingest); it lives in `app.config.ts` extra. The AUTH
  * TOKEN is a different thing entirely — a secret, used only at build time to
@@ -40,6 +46,20 @@ import { getLogger, type AxmLogEntry } from '@mechanics';
 import { getSentryDsn, getBuildProfile } from './buildProfile';
 
 let started = false;
+let tracing = false;
+
+/** Trace sample rate on a `preview` build. Only T and testers run preview
+ *  APKs, so every drag is worth keeping; lower this if the span quota bites. */
+export const PREVIEW_TRACES_SAMPLE_RATE = 1.0;
+
+/** The rate for a build profile: non-zero on `preview` only. */
+export function tracesSampleRateFor(profile: string | null): number {
+    return profile === 'preview' ? PREVIEW_TRACES_SAMPLE_RATE : 0;
+}
+
+/** Per-screen transactions. Registered on the root container by
+ *  `registerNavigationTracing` once it is ready. */
+const navigationTracing = Sentry.reactNavigationIntegration();
 
 /** Log levels worth carrying as breadcrumbs, mapped to Sentry's own
  *  vocabulary (`warn` is `warning` there). `debug`/`trace` are deliberately
@@ -60,12 +80,20 @@ export function initCrashReporting(): void {
     const dsn = getSentryDsn();
     if (!dsn) return;
     try {
+        const profile = getBuildProfile();
+        const tracesSampleRate = tracesSampleRateFor(profile);
+        const traced = tracesSampleRate > 0;
         Sentry.init({
             dsn,
-            environment: getBuildProfile() ?? 'unknown',
-            // Crashes only. Tracing/replay would eat the free tier's budget
-            // for the one signal we actually need.
-            tracesSampleRate: 0,
+            environment: profile ?? 'unknown',
+            // Crashes only, except on preview: tracing elsewhere would eat
+            // the free tier's budget for the one signal production needs.
+            tracesSampleRate,
+            // Frames and app start ride on tracing, so they are switched on
+            // with it and off without it, never left to the SDK's defaults.
+            enableNativeFramesTracking: traced,
+            enableAppStartTracking: traced,
+            integrations: traced ? [navigationTracing] : [],
             // The reported crash is native; this is the whole point.
             enableNative: true,
             attachStacktrace: true,
@@ -73,6 +101,7 @@ export function initCrashReporting(): void {
             // would duplicate every line, since sink 1 mirrors to console.
             enableCaptureFailedRequests: false,
         });
+        tracing = traced;
         started = true;
     } catch {
         /* crash reporting must never be the thing that breaks play */
@@ -82,6 +111,55 @@ export function initCrashReporting(): void {
 /** True once `initCrashReporting` has actually started a client. */
 export function isCrashReportingActive(): boolean {
     return started;
+}
+
+/** True when this client samples performance data (a preview build). */
+export function isPerformanceTracingActive(): boolean {
+    return tracing;
+}
+
+/**
+ * Hand the root navigation container to Sentry so each screen gets its own
+ * transaction, carrying that screen's slow/frozen frames. Call from the
+ * container's `onReady`. A no-op when tracing is off.
+ */
+export function registerNavigationTracing(containerRef: unknown): void {
+    if (!tracing) return;
+    try {
+        navigationTracing.registerNavigationContainer(containerRef);
+    } catch { /* never break play */ }
+}
+
+/** The three combat drags, named by where the drag starts. */
+export type DragSpanKind = 'hand-to-play' | 'die-to-card' | 'play-to-hand';
+/** How a drag ended: released, cancelled by the gesture, or force-finalized
+ *  by the interrupt recovery. */
+export type DragSpanOutcome = 'dropped' | 'cancelled' | 'interrupted';
+export type DragSpanEnd = (outcome: DragSpanOutcome) => void;
+
+const NO_SPAN: DragSpanEnd = () => undefined;
+
+/**
+ * Open a `combat.drag.<kind>` span (op `ui.drag`) and return the function
+ * that closes it with its outcome. Carries no game state, card ids or player
+ * data. Returns a no-op when tracing is off; never throws.
+ */
+export function startDragSpan(kind: DragSpanKind): DragSpanEnd {
+    if (!tracing) return NO_SPAN;
+    try {
+        const span = Sentry.startInactiveSpan({ name: `combat.drag.${kind}`, op: 'ui.drag', forceTransaction: true });
+        let open = true;
+        return (outcome) => {
+            if (!open) return;
+            open = false;
+            try {
+                span.setAttribute('outcome', outcome);
+                span.end();
+            } catch { /* never break play */ }
+        };
+    } catch {
+        return NO_SPAN;
+    }
 }
 
 /**

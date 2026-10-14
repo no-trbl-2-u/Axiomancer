@@ -38,3 +38,31 @@ export function attachCrashBreadcrumbs(): void {
 export function withCrashReporting(Root: ComponentType): ComponentType {
     return Root;
 }
+
+/** Same rate table as native, so a caller reading it sees one truth; web
+ *  never starts a client to apply it. */
+export const PREVIEW_TRACES_SAMPLE_RATE = 1.0;
+
+/** Same table as native. Web never applies it. */
+export function tracesSampleRateFor(profile: string | null): number {
+    return profile === 'preview' ? PREVIEW_TRACES_SAMPLE_RATE : 0;
+}
+
+/** Always false on web: no client samples anything. */
+export function isPerformanceTracingActive(): boolean {
+    return false;
+}
+
+/** No client, so no navigation tracing. No-op. */
+export function registerNavigationTracing(_containerRef: unknown): void {
+    /* web: no client */
+}
+
+export type DragSpanKind = 'hand-to-play' | 'die-to-card' | 'play-to-hand';
+export type DragSpanOutcome = 'dropped' | 'cancelled' | 'interrupted';
+export type DragSpanEnd = (outcome: DragSpanOutcome) => void;
+
+/** No client, so no span: the returned end is a no-op. */
+export function startDragSpan(_kind: DragSpanKind): DragSpanEnd {
+    return () => undefined;
+}
