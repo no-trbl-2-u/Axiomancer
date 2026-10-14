@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-14 at commit eb4b804b
-> Pass count: 86
+> Last pass: 2026-10-14 at commit a397d3a0
+> Pass count: 87
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -628,7 +628,32 @@
 > the archive note, not after pass 85, so it does not touch the lines
 > #534 and #535 rewrite. One fresh finding.
 
+> **[critique pass 87, 2026-10-14, commit a397d3a0] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors. 17 commits
+> after pass 86: the Blow FREE pill (#534), the dock VITAE cap (#535),
+> the drive settle (#537), the ledger label (#539), forge SHILLINGS
+> (#541), union merge moves (#543) and the hazard springs (#545).
+> Verified on screen: the title is captured at full opacity with EMBARK
+> lit, all four dice sit flat in both `04-combat-board.png`, and both
+> A Plain Blow cards carry a "+4" sword pill. Pass 83's capture-settle
+> row is closed by #537. Reconfirmed and not re-filed: the unfixtured
+> exploration hub bouncing to the title, the legend's SEALED key (pass
+> 86 row), the Minor Healing Potion (pass 65), the covered fan cards
+> cutting their names on a phone (each is whole when lifted). One fresh
+> finding: on desktop the capped VITAE column leaves END beside it, not
+> at the right.
+
 ## Pending
+
+### [MED] combat / desktop — the capped VITAE column leaves END at x~440-550 with ~720px of empty dock to its right
+- pass: 87 (commit a397d3a0)
+- viewport: desktop
+- category: visual
+- observation: since #535 caps the VITAE column at `DOCK_VITAE_MAX_WIDTH` (360), nothing pushes END to the dock's right edge: the row is avatar, VITAE, END packed left with `gap` only. At 1280 the turn-ending button sits left of the centred hand (x~440-550) and the right 60% of the dock is empty. The #535 Done row says "END stays at the right"; on screen it does not.
+- evidence: `axiomancer-mobile/.critique-artifacts/desktop/04-combat-board.png` (END box at x~440-553, y~737-791); `CombatFooterDock.tsx` `dock` has no `justifyContent` and `endWrap` no `marginLeft: 'auto'`.
+- suggested fix: give `endWrap` `marginLeft: 'auto'` (or put a flex spacer before it) so END stays on the right edge on wide windows; a phone is unchanged because the VITAE column already fills there. Pin END's right edge in CombatBoard.footer-dock.test.tsx at a wide width.
+- source: critique-drive (main agent)
 
 ### [LOW] ci / pr-resolve — a hand dispatch with a non-`loop/` branch exits green having done nothing
 - pass: antagonist on PR #526 (commit efc7f371)
