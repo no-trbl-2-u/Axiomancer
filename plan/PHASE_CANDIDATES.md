@@ -297,12 +297,6 @@
   doctrine. RC itself stays attended, and the tag, release and APK stay
   T's.
 
-### [ ] [score 4.0] Repo scripts fall back to `gh`'s keyring token when the `.env` token is rejected (lesson `env-token-stale`, seen 2×)
-- proposed: 2026-10-14, retro of ship BT2b (#529)
-- source signals: lesson `env-token-stale` (ship GS1, ship BT2a): the `.env` `GH_TOKEN` returns 401 while keyring `gh` works, and `loop-issue.mjs` prefers the `.env` value. SF1's `fillGhEnv` covers a missing token, not a rejected one.
-- proposed scope: 1 small phase. In `scripts/loop-issue.mjs`, retry once with `gh auth token` when a call returns 401, and log which token won; a `loop-issue.test.mjs` case with an injected 401. Then mark the lesson `guarded by`.
-- conflicts: none; no content.
-
 ### [ ] [score 3.0] Keep sibling lanes out of each other's scratch files (lesson `parallel-lane-scratchpad`, seen 2×)
 - proposed: 2026-10-14, retro of ship BT2b (#529)
 - source signals: lesson `parallel-lane-scratchpad` (ship BT2a, ship BT2b): parallel march lanes share one session scratchpad, and a sibling rewrote a file at its root.
@@ -635,12 +629,13 @@
 - estimated phases: 1
 - conflicts: none with the spec. Touches the title screen's press gating (small), not its look. If `/oversight` judges the drive half a single `/iterate` tick, the CRITIQUE MED row can be drained that way and this candidate rejected. Creates no content.
 
-### [ ] [score 3.5] Repo scripts fall back to keyring `gh` auth when the `.env` token is stale (lesson `env-token-stale`, seen 2×)
-- proposed: 2026-10-14, retro iterate (AUDIT [infra] pr-resolve)
+### [ ] [score 3.5] Repo scripts borrow keyring `gh` auth when a worktree has no `.env` (lesson `worktree-no-env`, seen 2×)
+- proposed: 2026-10-14, retro iterate (AUDIT [infra] pr-resolve); narrowed 2026-10-14 (D94)
 - source signals:
-  - `plan/lessons.md` `env-token-stale`, seen 2× (ship GS1, ship BT2a): the `.env` `GH_TOKEN` returns 401 while `gh auth token` works, and `scripts/loop-issue.mjs` loads `.env` first, so every local issue mirror and phase-open needs `GH_TOKEN=$(gh auth token)` by hand. `scripts/deploy-check.mjs` stops with "GH_TOKEN is not set" in a worktree, which has no `.env`.
-- rationale: the ladder says a lesson seen 2× is automated. One shared token loader (`.env`, then the shell, then `gh auth token`, retried once on a 401) ends the hand workaround on every attended tick and in every worktree.
-- proposed scope: 1 small phase or one `/iterate` tick. A `scripts/lib/gh-token.mjs` helper used by `loop-issue.mjs` and `deploy-check.mjs`; a unit test for the order and the 401 retry. CI is unchanged (its `.env` is written fresh each run).
+  - `plan/lessons.md` `worktree-no-env`, seen 2× (ship SF1, critique 86): an isolated agent worktree has no `.env`, so `scripts/deploy-check.mjs` stops with "GH_TOKEN is not set"; `loop-issue.mjs` already borrows the keyring token there (`fillGhEnv`).
+- rationale: the ladder says a lesson seen 2× is automated. One shared token loader (`.env`, then the shell, then `gh auth token`) used by `loop-issue.mjs` and `deploy-check.mjs` ends the hand workaround in every worktree.
+- out of scope (D94): a `.env` token that is present but rejected (401) is T's to rotate (`plan/NEEDS_T.md` `env-token-stale`); the loader does not retry past it.
+- proposed scope: one `/iterate` tick. A `scripts/lib/gh-token.mjs` helper; a unit test for the order. CI is unchanged (its `.env` is written fresh each run).
 - estimated phases: 1
 - conflicts: none. Creates no content.
 

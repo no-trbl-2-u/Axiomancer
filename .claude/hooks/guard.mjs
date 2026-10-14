@@ -21,7 +21,7 @@
 //   pre-bash      check a Bash tool call against the forbidden list
 //   pre-write     block hand-edits to measured baselines
 //   post-write    run the lessons-ladder lint (check-lessons) when
-//                 plan/lessons.md or plan/reflexes.md is written, and
+//                 plan/lessons.md, reflexes.md or NEEDS_T.md is written, and
 //                 the retired-terminology lint (check-lexicon) on
 //                 the .md file just written; findings feed back as
 //                 exit 2 so the agent fixes them before CI does
@@ -217,7 +217,7 @@ function lexiconTargetFor(filePath) {
 // own repository, so a malformed retro is fixed before the commit.
 function lessonsTargetFor(filePath) {
   const target = lexiconTargetFor(filePath)
-  if (!target || !['plan/lessons.md', 'plan/reflexes.md'].includes(target.rel)) return null
+  if (!target || !['plan/lessons.md', 'plan/reflexes.md', 'plan/NEEDS_T.md'].includes(target.rel)) return null
   const script = path.join(target.root, 'scripts', 'check-lessons.mjs')
   return fs.existsSync(script) ? { root: target.root, script } : null
 }
@@ -436,6 +436,7 @@ function selfTest() {
     ['other repo → its own root, not ../', !!other && other.rel === 'plan/AUDIT.md' && other.root !== own?.root],
     ['non-markdown → skipped', lexiconTargetFor('package.json') === null],
     ['lessons.md → check-lessons runs', lessonsTargetFor(path.resolve('plan/lessons.md')) !== null],
+    ['NEEDS_T.md → check-lessons runs', lessonsTargetFor(path.resolve('plan/NEEDS_T.md')) !== null],
     ['AUDIT.md → no lessons lint', lessonsTargetFor(here) === null],
   ]
   for (const [label, ok] of lexCases) {

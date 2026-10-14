@@ -1002,6 +1002,12 @@ satisfied for exactly these.)
 - `/plot` writes one spec brief per task and itself decides how many phases it takes: each phase must ship as one `/march` tick, so anything bigger is split into vertical slices (`<N>a`, `<N>b`, …), each with its own build-plan row pointing at `§ <id>` of the shared brief, its own acceptance IDs and `Requires` order. Modelled on the `hunt` repo's spec-and-chunks `/plot`.
 - `/plot` opens a PR labelled `plot` (never `loop:pr`: outside the D85 cap, not a claim) instead of pushing `main`, so T reads the recommendation first; the rows become pickable when T merges it. `pr-resolve` keeps `plot` PRs mergeable (D87).
 
+**D94 — T's moves are never lessons.** (T, attended, 2026-10-14; amends R11's retro, made during the R11 watch at T's word.)
+
+- The retro first asks whose move the fix is. One only T can make (rotate or renew a token or secret, finish an OAuth, a console click, a tool on T's machine) goes to `plan/NEEDS_T.md`, not `plan/lessons.md`: it never climbs the 2× ladder, never becomes a `PHASE_CANDIDATES` automation row, and the loop ships no code to work around it. Ticks bump its `seen` and use its workaround; every `/march` tick lists the open rows; `/oversight` asks about them first; T clears a row by deleting it.
+- `scripts/check-lessons.mjs` lints the new file and refuses a lesson whose rule hands the fix to T ("T to …") or a slug in both files.
+- First move: `env-token-stale` (the `.env` `GH_TOKEN` returning 401) leaves `lessons.md`; its 401-retry candidate is dropped and the keyring-loader candidate narrowed to the worktree case (`worktree-no-env`), which is the loop's.
+
 ## Open follow-ups
 
 **D1 status at a glance (2026-09-28, after #408).** Card and keyword
