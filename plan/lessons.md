@@ -24,6 +24,13 @@
 > `/oversight` reviews promotions after the fact. **At most 40 open
 > lessons**: past that, graduate one (guard it) or merge two before
 > adding another.
+>
+> **Only the loop's own moves are lessons (D94).** A trap whose fix
+> is T's move (rotate or renew a token or secret, finish an OAuth,
+> a console click, a tool on T's machine) is filed in
+> `plan/NEEDS_T.md` instead: it never climbs this ladder and never
+> becomes a `PHASE_CANDIDATES` automation row. The lint refuses a
+> lesson whose rule says "T to …" and a slug in both files.
 
 <!-- @domain:deploy -->
 
@@ -61,7 +68,6 @@
 - **brief-pointer-drift** · the CS1 brief named atlas budget bands R10c had deleted and a truth-sources table that never existed (ship CS1) → before building, grep every file anchor a brief names; when one is gone, restate it from the ruling it cites and record the call under Decisions · seen 1× · last 2026-10-13 · open
 - **mechanics-verify-misses-root-lints** · `npm run verify -w axiomancer-mechanics` passed, but root `npm test` failed `check-comments` on D-numbers in new code comments (ship CS1) → a phase that adds mechanics code runs root `npm test` before its first commit; code comments name no decision numbers · seen 1× · last 2026-10-13 · guarded by scripts/check-comments.mjs (root npm test)
 - **gate-commit-count** · the expand gate's "20 commits after Last pass" read 37 by `git rev-list --count` an hour after pass 33, because merged PR branches carry their own commits, but 12 on main's first-parent line (march → iterate, 2026-10-14) → count gate distances with `git rev-list --count --first-parent <sha>..HEAD`; `skills/march.md` §3 now says so · seen 1× · last 2026-10-14 · open
-- **env-token-stale** · the `.env` `GH_TOKEN` returns 401 while `gh`'s keyring login works, and `loop-issue.mjs` prefers the `.env` value (ship GS1, ship BT2a) → run `gh` without exporting `GH_TOKEN` and pass `GH_TOKEN=$(gh auth token)` to repo scripts; T to rotate the `.env` token; automation filed in `PHASE_CANDIDATES.md` · seen 2× · last 2026-10-14 · open
 - **plot-from-dirty-worktree** · `/plot` Step 5's rebase cannot run in a worktree holding uncommitted prototype code, and stashing it risks the shared stash stack (plot BT2) → commit the plan files from `git worktree add --detach <tmp> origin/main`, junction `node_modules` there before root `npm test`, push, remove the temp worktree · seen 1× · last 2026-10-13 · open
 - **parallel-lane-scratchpad** · sibling march lanes share one session scratchpad; a sibling rewrote this lane's `g.sh` to point at its own worktree (ship BT2a) → each lane keeps temp files in its own `scratchpad/<lane>/` subfolder; a sibling also rewrote this lane's scratchpad-root `issue.md` (ship BT2b); automation filed in `PHASE_CANDIDATES.md` · seen 2× · last 2026-10-14 · open
 - **worktree-no-env** · `loop-issue.mjs phase-open` could not run in an isolated agent worktree: it has no `.env`, and the isolation guard refuses `export GH_TOKEN=$(gh auth token)` (ship SF1); `deploy-check.mjs` stopped the same way (critique 86) → loop-issue borrows the keyring token (fillGhEnv); for deploy-check, run it via `node -e` setting `process.env.GH_TOKEN` from a file; its fix is in the keyring-fallback `PHASE_CANDIDATES` row · seen 2× · last 2026-10-14 · open

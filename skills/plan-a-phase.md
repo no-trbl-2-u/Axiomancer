@@ -78,6 +78,11 @@ Mirrors `skills/ship-a-phase.md` §6. Fixed structure:
   phase rests on (e.g. D47, D88). A brief that cites neither is not
   done.
 - **Outcome** — one line; what is true when the phase ships.
+- **Size:** — one line, `Size: S`, `Size: M` or `Size: L` on the
+  `skills/plot.md` Step 3 scale, for a one-phase brief. A brief with
+  `## Phases` sizes each phase in its `###` header instead. The PR
+  that ships the phase carries the matching `size:` label
+  (`skills/march.md` → "Landing a change").
 - **Acceptance** — numbered IDs `A1`, `A2`, … each one checkable
   statement ("`npm test` includes X and it passes", "the map screen
   shows Y"). The PR body ticks the IDs it closes

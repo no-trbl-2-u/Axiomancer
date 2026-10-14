@@ -155,7 +155,9 @@ also lists in its output:
 - each open `loop:pr` PR older than **7 days** ("open 7d+, waiting
   on T"); the loop never closes one (D86);
 - each PR labelled `loop:pr-stuck` (`pr-autofix` gave up after two
-  runs, D87), with its number and failing check.
+  runs, D87), with its number and failing check;
+- each open row in `plan/NEEDS_T.md` (T's own moves, D94), one line
+  each: its slug, what T does, and `seen N×`.
 
 ### Claims
 
@@ -184,11 +186,24 @@ git switch -c "loop/<verb>-<slug>" origin/main     # before the first edit
 git push -u origin "loop/<verb>-<slug>"
 gh label create loop:pr --repo "$GH_REPO" --color 0E8A16 \
   --description "Loop-opened PR; T merges (D84-D87)" 2>/dev/null || true
+for s in S:C2E0C6:"under an hour, one workspace" M:FBCA04:"one focused tick" \
+         L:D93F0B:"a full tick" multi-phase:5319E7:"a plot that splits into phases"; do
+  gh label create "size:${s%%:*}" --repo "$GH_REPO" --color "$(echo "$s" | cut -d: -f2)" \
+    --description "$(echo "$s" | cut -d: -f3-)" 2>/dev/null || true
+done
 gh pr create --repo "$GH_REPO" --base main --head "loop/<verb>-<slug>" \
-  --label loop:pr --title "<subject naming the claim>" --body-file "$body"
+  --label loop:pr --label "size:<S|M|L>" \
+  --title "<subject naming the claim>" --body-file "$body"
 gh pr checks "loop/<verb>-<slug>" --repo "$GH_REPO" --watch --fail-fast
 ```
 
+- **One size label per PR** (T, 2026-10-14), so T can spot the
+  estimate in the PR list: `size:S`, `size:M` or `size:L`, read from
+  the brief the tick ships (its `Size:` line, or the `###` header of
+  the `§ <id>` phase). A fix with no brief, or a brief from before
+  this rule, is sized by the tick on the same scale
+  (`skills/plot.md` Step 3) when it opens the PR. `size:multi-phase`
+  belongs to `plot` PRs only.
 - **One PR per tick**, never one per fix. Each PR carries only this
   session's telemetry shard, so two PRs never add the same file
   (lesson `telemetry-add-add`). The plan-only commits that
@@ -236,6 +251,16 @@ Closes `ship-a-phase`, `iterate`, `critique`, `fix-ci` and `plot`,
 even a tick that shipped nothing. Lesson format and the ladder live
 in the `plan/lessons.md` header; `scripts/check-lessons.mjs` lints it.
 
+0. **Whose move is the fix? (D94)** For each thing that bit, ask who
+   can fix it. If only T can (rotate or renew a token or secret,
+   finish an OAuth, a console click, a tool on T's machine), it is
+   **not a lesson**: bump or add its row in `plan/NEEDS_T.md` (format
+   in that file's header), use its workaround, and say so in the
+   tick's output. It never climbs the ladder below, never becomes a
+   `PHASE_CANDIDATES` automation row, and the loop ships no code to
+   work around it. What the loop itself can change (a step, a script,
+   a test) goes on to step 1. A mixed case splits: T's half to
+   `NEEDS_T.md`, the loop's half (if any stands on its own) a lesson.
 1. Did anything in this tick bite (a wrong assumption, a step that
    misled, a red check, a retry)? If it matches a lesson, bump its
    `seen N×` and `last` date; if not, add one under its `@domain:`.
@@ -363,6 +388,7 @@ plan/revamp/README.md                # the revamp record; part plans beside it
 plan/CRITIQUE.md                     # critique queue + last-pass metadata
 plan/PHASE_CANDIDATES.md             # expand last-pass metadata (§3 expand gate)
 plan/lessons.md                      # retro ladder (§3 "Retro")
+plan/NEEDS_T.md                      # T's own moves; never lessons (D94)
 
 # External signals
 gh issue list ...                    # unlabeled / loop:do count
