@@ -987,7 +987,7 @@ satisfied for exactly these.)
 - Art: seamless, edge to edge; no mat, no frame, no rules above or below it.
 - Bottom: one line, the die cube then the PAID effect (`[family glyph] KEYWORD value`); no FREE cell, never stacked, so every card's PAID line sits at the same height.
 - No rarity pip track on any face. A large face still prints the rarity word and the full rules text, since it has the room.
-- Implemented by Phase BT2 (`plan/phases/phase_BT2_combat_declutter.md`). A later card-face change needs T's say-so, like a card change (D37).
+- Implemented by Phase BT2a (`plan/phases/phase_BT2a_card_face.md`). A later card-face change needs T's say-so, like a card change (D37).
 
 **D92 — The combat board layout.** (T, attended, 2026-10-13, layout B from the BT2 prototypes.)
 
@@ -995,7 +995,7 @@ satisfied for exactly these.)
 - No corner medallions: the hand fans across the full board width.
 - Top: the foe's name and VITAE bar; its intent and its status chips sit top-left under the name; the conviction and signature column starts under the intent, with room for 5 signatures above the dice.
 - LOG is not on the board; it opens from the pilgrim modal and returns with BACK.
-- Reference: `axiomancer-mobile/screenshots/bt2-prototype/` (`1-board.jpg`, `2-pilgrim-modal.jpg`, `3-log-view.jpg`). Implemented by Phase BT2. A later layout change needs T's say-so.
+- Reference: `axiomancer-mobile/screenshots/bt2-prototype/` (`1-board.jpg`, `2-pilgrim-modal.jpg`, `3-log-view.jpg`). Implemented by Phase BT2b (`plan/phases/phase_BT2b_board_layout.md`). A later layout change needs T's say-so.
 
 ## Open follow-ups
 
