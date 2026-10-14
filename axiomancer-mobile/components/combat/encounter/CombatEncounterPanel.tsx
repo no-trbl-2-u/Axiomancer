@@ -23,11 +23,10 @@
  * run reset is the host's concern.
  */
 
-import React, { startTransition, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { startTransition, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import Svg, { Circle, Defs, Line, Polygon, RadialGradient, Stop } from 'react-native-svg';
-import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
     startTurn, endTurn, discardCombatCard, playSignatureSkill,
@@ -39,7 +38,7 @@ import {
 
 import { CombatBoard, CombatCardFace, OutcomeText, HAND_CARD_W, HAND_CARD_H, type DragController, type DragPayload, type Rect } from '@/components/combat/encounter/CombatBoard';
 import { useDragInterruptRecovery } from '@/components/combat/encounter/useDragInterruptRecovery';
-import { COMBAT_HUD_HEIGHT, type CombatFx } from '@/components/combat/encounter/CombatCombatantPane';
+import { type CombatFx } from '@/components/combat/encounter/CombatCombatantPane';
 import { CombatDie, combatDieFootprint } from '@/components/combat/encounter/CombatDie';
 import { CombatSummaryModal } from '@/components/combat/encounter/CombatSummaryModal';
 import { CombatRewardsOverlay } from '@/components/combat/encounter/CombatRewardsOverlay';
@@ -48,7 +47,7 @@ import { Image } from '@/lib/platform/image';
 import { getEncounterEnemyArt } from '@/assets/images/enemies';
 import {
     INTENT_ICONS, buildCombatViewModel, rewardCardVMs, selectEnemyActionCard, STANCE_COLORS, threatPhaseHeader,
-    selectCombatLogHistory, COMBAT_LOG_TOGGLE_TEXT, COMBAT_LOG_TOGGLE_A11Y, COMBAT_LOG_CLOSE_A11Y,
+    selectCombatLogHistory, COMBAT_LOG_TOGGLE_TEXT, COMBAT_LOG_TOGGLE_A11Y, COMBAT_LOG_CLOSE_A11Y, COMBAT_LOG_BACK_TEXT,
     type CombatCardVM, type CombatEffectChipVM, type CombatSignatureVM, type EnemyActionCardVM,
 } from '@/state/presenters/combat-encounter.engine';
 import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
@@ -408,23 +407,14 @@ export function CombatEncounterPanel({
     // straight off engine state; the panel owns only the how-it-works popup. ──
     const [momentumInfoOpen, setMomentumInfoOpen] = useState(false);
 
-    // The persistent combat log. `topInset` mirrors
-    // CombatBoard's own null-safe read of the same context (no SafeAreaProvider
-    // in tests) so the toggle sits directly under the HUD. The history is
-    // cheap (capped at 200 lines) and only walked off `live`, so recomputing
-    // every render is fine.
-    const insets = useContext(SafeAreaInsetsContext);
-    const topInset = insets?.top ?? 0;
-    // The LOG toggle anchors off the HUD's real measured
-    // height (`CombatBoard`'s `onHudLayout`, reported on every layout pass),
-    // falling back to the static `COMBAT_HUD_HEIGHT` estimate until it lands.
-    // The estimate alone is too short when a full stance-check telegraph and
-    // an active alt-win meter grow the HUD.
-    const [hudBottom, setHudBottom] = useState(0);
-    const hudAnchor = hudBottom > 0 ? hudBottom : topInset + COMBAT_HUD_HEIGHT;
-    const [logOpen, setLogOpen] = useState(false);
+    // The persistent combat log. It opens inside the pilgrim modal (LOG in
+    // its XP row) and returns to the stats view with BACK; closing the modal
+    // resets it. The history is cheap (capped at 200 lines) and only walked
+    // off `live`, so recomputing every render is fine.
+    const [pilgrimLog, setPilgrimLog] = useState(false);
     const logHistory = useMemo(() => selectCombatLogHistory(live), [live]);
     const logScrollRef = useRef<ScrollView | null>(null);
+    const closePilgrim = useCallback(() => { setPilgrimOpen(false); setPilgrimLog(false); }, []);
 
     // ── screen-level drag controller (cards + dice) ──
     // dragX/dragY are written straight from the board's gesture worklets every
@@ -684,7 +674,6 @@ export function CombatEncounterPanel({
                     onPlayerInspect={onPlayerInspect}
                     onMomentumInfo={onMomentumInfo}
                     fx={fx}
-                    onHudLayout={setHudBottom}
                     region={region}
                 />
             )}
@@ -777,45 +766,6 @@ export function CombatEncounterPanel({
                             </Pressable>
                         )}
                     </ScrollView>
-                </View>
-            )}
-
-            {/* The persistent combat log: this toggle opens a scrollable,
-                newest-at-the-bottom history of the whole fight. Pinned top-right, directly under the HUD
-                (anchored off the measured `hudAnchor`, see above). */}
-            {logAvailable && (
-                <Pressable
-                    onPress={() => setLogOpen(true)}
-                    testID="combat-log-toggle"
-                    accessibilityRole="button"
-                    accessibilityLabel={COMBAT_LOG_TOGGLE_A11Y}
-                    style={[styles.logToggle, { top: hudAnchor + 8 }]}
-                >
-                    <Text style={styles.logToggleText}>{COMBAT_LOG_TOGGLE_TEXT}</Text>
-                </Pressable>
-            )}
-            {logAvailable && logOpen && (
-                <View style={styles.logSheet} testID="combat-log">
-                    <ScrollView
-                        ref={logScrollRef}
-                        style={styles.logScroll}
-                        contentContainerStyle={styles.logScrollContent}
-                        onContentSizeChange={() => logScrollRef.current?.scrollToEnd({ animated: false })}
-                    >
-                        {logHistory.map((entry) => (
-                            <Text key={entry.id} style={[styles.logLine, { color: entry.color }]}>{entry.text}</Text>
-                        ))}
-                    </ScrollView>
-                    <Pressable
-                        onPress={() => setLogOpen(false)}
-                        testID="combat-log-close"
-                        accessibilityRole="button"
-                        accessibilityLabel={COMBAT_LOG_CLOSE_A11Y}
-                        hitSlop={10}
-                        style={styles.logClose}
-                    >
-                        <Text style={styles.logCloseText}>✕</Text>
-                    </Pressable>
                 </View>
             )}
 
@@ -1086,13 +1036,39 @@ export function CombatEncounterPanel({
                 </Pressable>
             )}
 
-            {/* pilgrim modal — tap the player medallion: base stats, XP + status effects */}
+            {/* pilgrim modal — tap the player avatar: base stats, XP, status
+                effects, and the combat log behind LOG */}
             {pilgrimOpen && (() => {
                 const p = live.player;
                 const stats = p.baseStats ?? { heart: 0, body: 0, mind: 0 };
                 return (
-                    <Pressable style={styles.backdrop} testID="combat-pilgrim-modal" onPress={() => setPilgrimOpen(false)}>
+                    <Pressable style={styles.backdrop} testID="combat-pilgrim-modal" onPress={closePilgrim}>
                         <View style={styles.pilgrimWrap} onStartShouldSetResponder={() => true}>
+                            {pilgrimLog && logAvailable ? (
+                                // The persistent combat log: the whole fight, newest at the bottom.
+                                <View style={styles.pilgrimLogView} testID="combat-log">
+                                    <Pressable
+                                        onPress={() => setPilgrimLog(false)}
+                                        testID="combat-pilgrim-log-back"
+                                        accessibilityRole="button"
+                                        accessibilityLabel={COMBAT_LOG_CLOSE_A11Y}
+                                        hitSlop={8}
+                                        style={styles.logButton}
+                                    >
+                                        <Text style={styles.logButtonText}>{COMBAT_LOG_BACK_TEXT}</Text>
+                                    </Pressable>
+                                    <ScrollView
+                                        ref={logScrollRef}
+                                        style={styles.logScroll}
+                                        contentContainerStyle={styles.logScrollContent}
+                                        onContentSizeChange={() => logScrollRef.current?.scrollToEnd({ animated: false })}
+                                    >
+                                        {logHistory.map((entry) => (
+                                            <Text key={entry.id} style={[styles.logLine, { color: entry.color }]}>{entry.text}</Text>
+                                        ))}
+                                    </ScrollView>
+                                </View>
+                            ) : (
                             <ScrollView contentContainerStyle={styles.pilgrimStack} showsVerticalScrollIndicator={false}>
                                 <View style={styles.pilgrimHead}>
                                     <View style={styles.pilgrimPortrait}><PlayerPortraitImage width={56} height={68} fit="cover" /></View>
@@ -1113,6 +1089,18 @@ export function CombatEncounterPanel({
 
                                 <View style={styles.pilgrimMetaRow}>
                                     <Text style={styles.pilgrimMetaChip} allowFontScaling={false}>XP {p.experience ?? 0} / {p.experienceToNextLevel ?? 0}</Text>
+                                    {logAvailable ? (
+                                        <Pressable
+                                            onPress={() => setPilgrimLog(true)}
+                                            testID="combat-pilgrim-log"
+                                            accessibilityRole="button"
+                                            accessibilityLabel={COMBAT_LOG_TOGGLE_A11Y}
+                                            hitSlop={8}
+                                            style={[styles.logButton, styles.logButtonEnd]}
+                                        >
+                                            <Text style={styles.logButtonText}>{COMBAT_LOG_TOGGLE_TEXT}</Text>
+                                        </Pressable>
+                                    ) : null}
                                 </View>
 
                                 <Text style={styles.pilgrimSection}>STATUS EFFECTS</Text>
@@ -1127,9 +1115,10 @@ export function CombatEncounterPanel({
                                     </View>
                                 ))}
                             </ScrollView>
+                            )}
                         </View>
                         <Pressable
-                            onPress={() => setPilgrimOpen(false)}
+                            onPress={closePilgrim}
                             testID="combat-pilgrim-close"
                             accessibilityRole="button"
                             accessibilityLabel="Close pilgrim details"
@@ -1185,26 +1174,18 @@ export function CombatEncounterPanel({
 
 const useStyles = makeStyles((AXM) => ({
     root: { flex: 1, width: '100%', height: '100%' },
-    // The persistent combat log toggle + sheet.
-    logToggle: {
-        position: 'absolute', right: 10, zIndex: 20,
+    // The combat log's two buttons (LOG in the pilgrim modal's XP row, BACK
+    // in its log view) and the log view itself.
+    logButton: {
         borderWidth: 1.5, borderColor: AXM.sulfur, backgroundColor: 'rgba(10,8,6,0.82)',
-        paddingHorizontal: 12, paddingVertical: 6, borderRadius: 4,
+        paddingHorizontal: 12, paddingVertical: 5, borderRadius: 4, alignSelf: 'flex-start',
     },
-    logToggleText: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.6, color: AXM.sulfur },
-    logSheet: {
-        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 30,
-        backgroundColor: 'rgba(4,3,6,0.93)', paddingTop: 60, paddingHorizontal: 16, paddingBottom: 24,
-    },
+    logButtonEnd: { marginLeft: 'auto' },
+    logButtonText: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.6, color: AXM.sulfur },
+    pilgrimLogView: { padding: 16, gap: 10, height: 520, maxHeight: '100%' },
     logScroll: { flex: 1, borderWidth: 1, borderColor: AXM.ash, backgroundColor: AXM.panelBg },
     logScrollContent: { padding: 12, gap: 4 },
     logLine: { fontFamily: FONTS.serif, fontSize: 12, lineHeight: 17 },
-    logClose: {
-        alignSelf: 'center', marginTop: 14, width: 44, height: 44, borderRadius: 22,
-        borderWidth: 2, borderColor: AXM.sulfur, backgroundColor: AXM.panelBg,
-        alignItems: 'center', justifyContent: 'center',
-    },
-    logCloseText: { fontFamily: FONTS.sans, fontSize: 15, color: AXM.sulfur },
     backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(4,3,6,0.93)', alignItems: 'center', justifyContent: 'center', padding: 20, zIndex: 50 },
     modal: { width: '100%', maxWidth: 380, borderWidth: 2, backgroundColor: AXM.panelBg, padding: 18, alignItems: 'center' },
     modalTitle: { fontFamily: FONTS.gothic, fontSize: 18, color: AXM.parchment, textAlign: 'center' },

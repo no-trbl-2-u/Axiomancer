@@ -612,7 +612,6 @@
 - suggested fix: print one form for every price. Either "12 SHILLINGS" on the stall rows, or "12s" everywhere with the purse header naming the unit once. The first matches the rest screen. Pin it in the village screen test.
 - source: critique-drive (unattended)
 
-### [MED] combat / hand fan — the D91 free corner pill covers the "tap a card to read it" hint
 - pass: antagonist on PR #521 (BT2a, commit 042b4471)
 - viewport: mobile (375x812)
 - category: visual
@@ -756,7 +755,6 @@
   `/iterate`.
 - source: critique:drive (unattended)
 
-### [LOW] combat / mobile — on a 375-wide phone the corner medallions cover the effect rows of the fan's two end cards
 - pass: 63 (commit aea7593b)
 - viewport: mobile (375x812); desktop (1280x800) seats the fan between the corners and is clear
 - category: mobile
@@ -3272,6 +3270,10 @@
 
 
 
+
+### [x] [MED] combat / hand fan — the D91 free corner pill covers the "tap a card to read it" hint — RESOLVED 2026-10-14 (PR #529, phase BT2b: the hint is dropped per D92 (A8), and the hand dock keeps the pill's overhang above the card tops inside its clip; pinned in CombatBoard.handfan.test.tsx)
+
+### [x] [LOW] combat / mobile — on a 375-wide phone the corner medallions cover the effect rows of the fan's two end cards — RESOLVED 2026-10-14 (PR #529, phase BT2b: no corner chrome remains; the avatar and END live in the footer dock under the hand (A3), pinned in CombatBoard.footer-dock.test.tsx)
 
 
 

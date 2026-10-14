@@ -2,13 +2,11 @@
  * CombatBoard — hand-fan and momentum-readout geometry at the phone and
  * desktop viewports.
  *
- *  - The chrome-free band (375 − 102 − 90 = 183pt) cannot seat five 120pt
- *    cards: clamped into it, every non-last card would collapse to the 28pt
- *    sliver floor and the 232pt fan would still overflow. The fan falls back
- *    to the full board band whenever the chrome band cannot seat the hand.
- *  - With the board band, the END disc meets the last card no further into
- *    its face than the reference layout does, so the card's keyword chip is
- *    never cut by the disc.
+ *  - No corner chrome sits beside the hand (the avatar and END live in the
+ *    footer dock), so the fan always lays out in the full board band and
+ *    a five-card phone hand keeps a name-wide peek, never the 28pt sliver.
+ *  - The rendered fan lands where the reference board-band layout puts it,
+ *    inside the viewport.
  *  - The ⓘ tap mark sits on the readout's dark backing plate (bare, it reads
  *    ~1.5:1 on bright arena floor art), and a mirrored gutter keeps the
  *    'no momentum' readout centred.
@@ -23,7 +21,7 @@ import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { initializeCombatEncounter, rollEncounterDice } from '@mechanics';
 import {
     CombatBoard, handFanLayout,
-    HAND_CARD_W, HAND_FAN_LEFT, HAND_FAN_RIGHT, HAND_FAN_MIN_STEP, HAND_FAN_BOARD_EDGE, HAND_FAN_GAP,
+    HAND_CARD_W, HAND_FAN_MIN_STEP, HAND_FAN_BOARD_EDGE, HAND_FAN_GAP,
     CHIP_INFO_MARK_W, CHIP_INFO_MARK_GAP,
     type DragController,
 } from '@/components/combat/encounter/CombatBoard';
@@ -119,13 +117,13 @@ function referenceFanEdges(screenW: number, n: number): { step: number; left: nu
     return { step, left, lastLeft: left + step * (n - 1), right: left + fanWidth(n, step) };
 }
 
-// ── The fan reads at the phone viewport ────────────────────────
+/// ── The fan reads at the phone viewport ────────────────────────
 
-describe('C11-R — a hand the chrome-free band cannot seat takes the board band', () => {
+describe('C11-R — the hand lays out across the full board band (D92)', () => {
     it('a five-card hand at 375 keeps a name-wide peek, not the sliver floor', () => {
         const { band, step } = handFanLayout(PHONE.width, 5);
-        // The chrome-free band is 183pt; five 120pt cards do not fit it at any
-        // readable step, so the fan lays out in the board band instead.
+        // No corner chrome sits beside the hand any more, so the fan always
+        // takes the board band.
         expect(band).toBe(PHONE.width - HAND_FAN_BOARD_EDGE * 2);
         expect(step).toBeCloseTo(referenceFanEdges(PHONE.width, 5).step, 5);
         // At the floor a card shows two letters of its name, no art, and is a
@@ -144,20 +142,10 @@ describe('C11-R — a hand the chrome-free band cannot seat takes the board band
         }
     });
 
-    it('a hand that DOES seat beside the chrome still lays out clear of both corners', () => {
-        for (const n of [1, 2, 3]) {
-            const { band, step } = handFanLayout(PHONE.width, n);
-            expect(band).toBe(PHONE.width - HAND_FAN_LEFT - HAND_FAN_RIGHT);
-            expect(fanWidth(n, step)).toBeLessThanOrEqual(band);
-        }
-    });
-
-    it('the desktop viewport is untouched: the fan still seats beside both corners', () => {
-        for (const n of [3, 4, 5, 6]) {
-            const { band, step } = handFanLayout(DESKTOP_W, n);
-            expect(band).toBe(DESKTOP_W - HAND_FAN_LEFT - HAND_FAN_RIGHT);
-            expect(fanWidth(n, step)).toBeLessThanOrEqual(band);
-            expect(step).toBeGreaterThan(HAND_FAN_MIN_STEP);
+    it('every hand size takes the same full band, phone and desktop alike', () => {
+        for (const n of [1, 2, 3, 5, 8]) {
+            expect(handFanLayout(PHONE.width, n).band).toBe(PHONE.width - HAND_FAN_BOARD_EDGE * 2);
+            expect(handFanLayout(DESKTOP_W, n).band).toBe(DESKTOP_W - HAND_FAN_BOARD_EDGE * 2);
         }
     });
 
@@ -172,25 +160,18 @@ describe('C11-R — a hand the chrome-free band cannot seat takes the board band
     });
 });
 
-// ── The last card's chip is not cut by the END disc ────────────────
+// ── The fan stays on the board ─────────────────────────────────────
 
-describe('C11-R2 — the END disc does not slice the last card mid-chip', () => {
-    it('lays the fan out no further left than the reference layout, and on-board', () => {
+describe('C11-R2 — the rendered fan lands inside the viewport', () => {
+    it('lays the fan out as the reference board-band layout does, and on-board', () => {
         const vm = renderBoard();
         const n = vm.hand.length;
         expect(n).toBeGreaterThan(1);
         const fan = flat('combat-hand');
-        const laid = fanEdges(PHONE.width, n, fan.paddingLeft as number, fan.paddingRight as number);
+        expect(fan.paddingHorizontal).toBe(HAND_FAN_BOARD_EDGE);
+        const laid = fanEdges(PHONE.width, n, HAND_FAN_BOARD_EDGE, HAND_FAN_BOARD_EDGE);
         const ref = referenceFanEdges(PHONE.width, n);
-        // The END corner starts here; a fan ending just inside it cuts the
-        // last card's keyword chip in half instead of hiding it.
-        const endCornerLeft = PHONE.width - HAND_FAN_RIGHT;
-        // Either the fan clears the corner outright (a small hand seats beside
-        // it), or it tucks at least as deep under the disc as the reference
-        // layout does — never grazing it, which would cut the chip in half.
-        const clearsCorner = laid.right <= endCornerLeft;
-        expect(clearsCorner || laid.lastLeft >= ref.lastLeft).toBe(true);
-        // And the board still clips nothing: the fan ends inside the viewport.
+        expect(laid.left).toBeCloseTo(ref.left, 5);
         expect(laid.right).toBeLessThanOrEqual(PHONE.width);
         expect(laid.left).toBeGreaterThanOrEqual(0);
     });
