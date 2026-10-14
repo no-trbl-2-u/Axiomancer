@@ -5,11 +5,11 @@
 
 import React from 'react';
 import { Text } from 'react-native';
-import { render, fireEvent } from '@testing-library/react-native';
+import { render, fireEvent, act } from '@testing-library/react-native';
 import { TitleScreen } from '../TitleScreen';
 import { createAppStore } from '@/state/store';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
-import { TITLE_COPY } from '@/state/presenters/title.engine';
+import { TITLE_COPY, TITLE_TIMING } from '@/state/presenters/title.engine';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 
 const MENU = <Text testID="stub-menu">menu</Text>;
@@ -27,7 +27,17 @@ function mount(props: Partial<React.ComponentProps<typeof TitleScreen>> = {}) {
   );
 }
 
+/** Plays the sequence up to the moment EMBARK starts fading in. */
+function playIntro() {
+  act(() => {
+    jest.advanceTimersByTime(TITLE_TIMING.holdMs + TITLE_TIMING.liftMs);
+  });
+}
+
 describe('TitleScreen', () => {
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
   it('prints the game\'s name as the wordmark, never the old title', () => {
     const { getByTestId, queryByText } = mount();
     expect(getByTestId('title-wordmark').props.children).toBe('Miserere Mei, Deus');
@@ -62,15 +72,33 @@ describe('TitleScreen', () => {
   it('brings the menu up in place when EMBARK is pressed, keeping the wordmark', () => {
     const { getByRole, queryByTestId, getByTestId } = mount();
     expect(queryByTestId('stub-menu')).toBeNull();
+    playIntro();
     fireEvent.press(getByRole('button'));
     expect(getByTestId('stub-menu')).toBeTruthy();
     expect(getByTestId('title-wordmark')).toBeTruthy();
     expect(getByTestId('title-plate')).toBeTruthy();
   });
 
+  it('ignores EMBARK until it starts to fade in, so a tap during the lift opens nothing', () => {
+    const { getByRole, queryByTestId } = mount();
+    fireEvent.press(getByRole('button'));
+    expect(queryByTestId('stub-menu')).toBeNull();
+    act(() => {
+      jest.advanceTimersByTime(TITLE_TIMING.holdMs + TITLE_TIMING.liftMs - 1);
+    });
+    fireEvent.press(getByRole('button'));
+    expect(queryByTestId('stub-menu')).toBeNull();
+    act(() => {
+      jest.advanceTimersByTime(1);
+    });
+    fireEvent.press(getByRole('button'));
+    expect(queryByTestId('stub-menu')).toBeTruthy();
+  });
+
   it('hides the faded psalm and EMBARK from screen readers once the menu is up', () => {
     const { getByRole, getByTestId, queryByRole, queryByText } = mount();
     expect(getByTestId('title-cta').props.accessibilityElementsHidden).toBe(false);
+    playIntro();
     fireEvent.press(getByRole('button'));
     // The default queries already skip it; reach it to read the props.
     const cta = getByTestId('title-cta', { includeHiddenElements: true });
