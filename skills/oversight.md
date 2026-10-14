@@ -63,7 +63,9 @@ In parallel where independent:
    "RESOLVED"/"RATIFIED", or moved to a resolved section). Any
    legacy `[needs-user-call]` still open is presented the same
    way — with the loop's recommended answer attached. Oversight
-   reads legacy rows; it never writes new ones.
+   reads legacy rows; it never writes new ones. The same sweep reads
+   `plan/NEEDS_T.md` (T's own moves, D94): every row there is open
+   until T deletes it.
 
 10. **TEMPORARY — the R11 watch (T, 2026-10-11; remove this item and
     §5's "Standing question R11" on or after 2026-11-11).** R11 changed
@@ -133,8 +135,9 @@ Generate 1–4 questions via `AskUserQuestion`, shaped per
 defer paths named, answers filed as policy, never re-ask). Rules:
 
 - **Standing question 0 (mandatory):** if the §3 sweep found any
-  unreviewed `[loop-call]` (or legacy `[needs-user-call]`) rows,
-  the FIRST question presents them for ratify-or-reverse review —
+  unreviewed `[loop-call]` (or legacy `[needs-user-call]`) rows or
+  any open `plan/NEEDS_T.md` row (D94),
+  the FIRST question presents them for review —
   on top of (not counted against) the 1–4 computed questions.
   Skipped only when the sweep is clean.
 - **Computed from observed flags**, not pre-canned.
@@ -156,6 +159,12 @@ defer paths named, answers filed as policy, never re-ask). Rules:
 > Applying a decision = edit the item in place (mark `[x]` with
 > the decision + date, or promote it to a candidate/phase per
 > the answer), same as any other adjustment in Step 5.
+>
+> Open `plan/NEEDS_T.md` rows (D94) lead this question, before the
+> loop-calls, highest `seen` first: "<slug>: <what T does> (seen
+> N×)". They are T's to-dos, not calls to ratify: the options are
+> "done, delete the row", "still to do" and "not needed, delete the
+> row". Never promote one to a candidate or phase.
 
 ### Standing question R11 — TEMPORARY, remove on or after 2026-11-11
 
