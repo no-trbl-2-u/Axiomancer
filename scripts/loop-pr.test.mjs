@@ -152,6 +152,20 @@ test('every loop:pr is opened with the label and against main', () => {
   }
 })
 
+test('every loop:pr carries one size label (T, 2026-10-14)', () => {
+  for (const f of ['skills/march.md', 'skills/ship-a-phase.md', 'skills/iterate.md']) {
+    assert.match(read(f), /--label loop:pr --label "size:<S\|M\|L>"/, f)
+  }
+  assert.match(read('skills/march.md'), /gh label create "size:/)
+  assert.match(read('skills/plan-a-phase.md'), /`Size: S`, `Size: M` or `Size: L`/)
+})
+
+test('a plot PR carries a size label, size:multi-phase when it splits', () => {
+  const plot = read('skills/plot.md')
+  assert.match(plot, /--label plot --label "<size:S\|size:M\|size:L\|size:multi-phase>"/)
+  assert.match(plot, /`size:multi-phase` for a plot that splits/)
+})
+
 // --- /plot and /messy are only ever fired by T ------------------------------
 
 test('no workflow fires /plot or /messy', () => {
