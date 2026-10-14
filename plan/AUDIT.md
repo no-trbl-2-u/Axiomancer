@@ -62,7 +62,8 @@
   `workflow_run` workflow keyed on pr-resolve), then prove it on a staged
   conflict. Infra only; nothing about merging, closing or force-pushing
   changes (D86).
-### [ ] [bug] The hazard dice cast's springs inherit Reanimated 4's mass 4, so they swing for many seconds (2026-10-14)
+### [x] [bug] The hazard dice cast's springs inherit Reanimated 4's mass 4, so they swing for many seconds (2026-10-14) — CLOSED 2026-10-14 (784d6a1e: TumblingDie uses DICE_ROLL_TIMING's springs; the stamp gets STAMP_SPRING, mass 1, threshold 0.01; HazardOverlays.test.tsx pins it under a second. The cast's 1700ms timer never waited on the springs)
+- issue: #544
 - category: bug
 - impact: 4
 - ease: 8

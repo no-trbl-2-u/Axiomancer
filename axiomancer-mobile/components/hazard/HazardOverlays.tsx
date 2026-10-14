@@ -26,6 +26,7 @@ import type {
     HazardResolveFlashVM,
     HazardOutcomeVM,
 } from '@/state/presenters/hazard.engine';
+import { DICE_ROLL_TIMING, type DiceSpring } from '@/state/combat/dice-roll-ritual.timing';
 import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
@@ -46,8 +47,8 @@ function TumblingDie({ die, index }: { die: HazardDieVM; index: number }) {
             index * 130,
             withSequence(
                 withTiming(1, { duration: 480, easing: Easing.in(Easing.quad) }),
-                withSpring(1.18, { damping: 6, stiffness: 220 }),
-                withSpring(1.3, { damping: 9, stiffness: 180 }),
+                withSpring(1.18, DICE_ROLL_TIMING.landSpring),
+                withSpring(1.3, DICE_ROLL_TIMING.settleSpring),
             ),
         );
     }, [fall, index]);
@@ -105,12 +106,16 @@ export function DiceRollOverlay({
 // Per-round resolve stamp
 // ---------------------------------------------------------------------------
 
+/** The stamp's slam. Mass and threshold are named: Reanimated 4 fills them
+ * with 4 and 6e-9, which keeps the stamp wobbling for about 9 seconds. */
+export const STAMP_SPRING: DiceSpring = { damping: 8, stiffness: 240, mass: 1, energyThreshold: 0.01 };
+
 function Stamp({ cleared }: { cleared: boolean }) {
     const t = useSharedValue(0);
     useEffect(() => {
         t.value = withSequence(
             withTiming(0.55, { duration: 240, easing: Easing.in(Easing.quad) }),
-            withSpring(1, { damping: 8, stiffness: 240 }),
+            withSpring(1, STAMP_SPRING),
         );
         Haptics.impactAsync(
             cleared ? Haptics.ImpactFeedbackStyle.Light : Haptics.ImpactFeedbackStyle.Heavy,
