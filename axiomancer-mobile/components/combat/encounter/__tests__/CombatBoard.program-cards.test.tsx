@@ -98,16 +98,21 @@ describe('CombatBoard — program cards', () => {
 
     it('two copies of a Global in play render as two chips, keyed by instance', () => {
         const { store } = withAllProviders(<></>);
-        const errors = jest.spyOn(console, 'error').mockImplementation(() => undefined);
         let s = playCombatCard(open(store, [GLOBAL.id, GLOBAL.id], 100), { uid: 'h0' }, false).state;
         s = playCombatCard(s, { uid: 'h1' }, false).state;
         const uids = s.program!.globals.map((g) => g.uid);
         expect(uids).toHaveLength(2);
         expect(new Set(uids).size).toBe(2);
-        mount(buildCombatViewModel(s), [], store);
-        for (const uid of uids) expect(screen.getByTestId(`combat-global-${uid}`)).toBeTruthy();
-        const keyWarnings = errors.mock.calls.filter((c) => /same key|unique "key"/.test(String(c[0])));
-        expect(keyWarnings).toEqual([]);
-        errors.mockRestore();
+        // Restored in `finally`, so a failure here cannot leave console.error
+        // muted for the rest of the file.
+        const errors = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+        try {
+            mount(buildCombatViewModel(s), [], store);
+            for (const uid of uids) expect(screen.getByTestId(`combat-global-${uid}`)).toBeTruthy();
+            const keyWarnings = errors.mock.calls.filter((c) => /same key|unique "key"/.test(String(c[0])));
+            expect(keyWarnings).toEqual([]);
+        } finally {
+            errors.mockRestore();
+        }
     });
 });
