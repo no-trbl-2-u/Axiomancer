@@ -20,6 +20,7 @@ import type { LayoutChangeEvent } from 'react-native';
 
 import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
+import { ledgerA11y } from '@/state/presenters/combat-encounter.engine';
 import type { CombatViewModel } from '@/state/presenters/combat-encounter.engine';
 import { LedgerMark } from '@/components/hazard/glyphs';
 
@@ -167,7 +168,13 @@ export const CombatFooterDock = React.memo(function CombatFooterDock({
                     </View>
                 </View>
                 <VitaeBar hp={vm.player.hp} maxHp={vm.player.maxHp} />
-                <View style={styles.ledger} testID="combat-ledger">
+                <View
+                    style={styles.ledger}
+                    testID="combat-ledger"
+                    accessible
+                    accessibilityRole="text"
+                    accessibilityLabel={ledgerA11y(vm.ledger)}
+                >
                     {vm.ledger.map((m, i) => <LedgerMark key={i} kind={m === 'clear' ? 'O' : m === 'overwhelmed' ? 'X' : 'pending'} size={DOCK_LEDGER_MARK} />)}
                 </View>
             </View>

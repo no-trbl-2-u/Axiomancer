@@ -20,7 +20,7 @@ import {
     DOCK_GAP, DOCK_PAD_H, DOCK_PAD_V, DOCK_VITAE_MAX_WIDTH, END_BTN_W, END_BTN_H, VITAE_BAR_H, VITAE_LOW_RATIO, dockMinHeight, vitaeBarFill,
 } from '@/components/combat/encounter/CombatFooterDock';
 import { PLAYER_AVATAR_SIZE } from '@/components/combat/encounter/CombatCombatantPane';
-import { buildCombatViewModel, type CombatViewModel } from '@/state/presenters/combat-encounter.engine';
+import { buildCombatViewModel, ledgerA11y, type CombatViewModel } from '@/state/presenters/combat-encounter.engine';
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { currentPalette } from '@/theme/runtime';
 import { withAllProviders } from '@/test-utils/withAllProviders';
@@ -120,6 +120,16 @@ describe('A4 — the footer dock', () => {
         expect(flat('combat-ledger').flexWrap).toBeUndefined();
         // The piles sit on the VITAE line, at its right.
         expect(col.getByLabelText(/^Deck \d+ cards, discard \d+$/)).toBeTruthy();
+    });
+
+    it('speaks the phase ledger as one line, run by run (CRITIQUE pass 85)', () => {
+        renderBoard({ shape: (vm) => ({ ...vm, ledger: ['clear', 'overwhelmed', 'pending', 'pending', 'pending'] }) });
+        const ledger = screen.getByTestId('combat-ledger');
+        expect(ledger.props.accessible).toBe(true);
+        expect(ledger.props.accessibilityLabel).toBe('Phases: 1 cleared, 2 overwhelmed, 3 to 5 ahead');
+        // A pair joins with "and"; a lone phase stands alone; none is said so.
+        expect(ledgerA11y(['clear', 'clear', 'overwhelmed', 'clear', 'pending'])).toBe('Phases: 1 and 2 cleared, 3 overwhelmed, 4 cleared, 5 ahead');
+        expect(ledgerA11y([])).toBe('Phases: none');
     });
 
     it('caps the VITAE column on a wide window, never on a phone (CRITIQUE pass 85)', () => {
