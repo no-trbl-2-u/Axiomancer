@@ -601,15 +601,6 @@
 
 ## Pending
 
-### [MED] exploration hub — sealed nodes draw no visible mark, so most roads end at bare vertices
-- pass: 84 (commit dd61ec90)
-- viewport: both (375x812 and 1280x800)
-- category: comprehension
-- observation: on the walked Breakwater sheet ("18 nodes · 12 sealed"), the six trodden and open nodes draw their discs, but none of the twelve sealed nodes can be seen. The black roads run to junctions on the engraving and stop, with no mark where they meet, so the map reads as a web of lines leading nowhere. The legend's ◌ SEALED key matches nothing on screen. The sealed mark is meant to recede (`NodeMark` draws an empty dashed ash ring at the smallest radius), but `ExplorationNode` also wraps it in `nodeWrapLocked` opacity 0.45, so the ring prints at about 0.38 and its backing disc at about 0.3. That vanishes on the light engraving.
-- evidence: `.critique-artifacts/mobile/11-late-game-hub.png` (junctions near 160,470, 95,540 and 255,505); `desktop/11-late-game-hub.png` (bare vertices at about 55,565 and 390,665); `axiomancer-mobile/components/NodeMark.tsx:86-103`; `components/exploration/ExplorationNode.tsx:167` (`nodeWrapLocked`)
-- suggested fix: drop the extra 0.45 wrapper opacity for sealed nodes, or raise the ring's stroke opacity, so the sealed ring is the faintest mark that still shows where each road ends. Keep it the faintest of the four kinds, and pin the sealed mark's effective opacity in `ExplorationNode.test.tsx`.
-- source: critique-drive (unattended)
-
 ### [LOW] village — stall prices read "12s" while the purse, rest offers and sell labels say "SHILLINGS"
 - pass: 84 (commit dd61ec90)
 - viewport: both
@@ -973,6 +964,16 @@
 - source: loop
 
 ## Done
+
+### [x] [MED] exploration hub — sealed nodes draw no visible mark, so most roads end at bare vertices — RESOLVED 2026-10-14 (commit cf095d5a; the node wrapper no longer dims sealed nodes by 0.45 on top of NodeMark, so SEALED_MARK_OPACITY (ring 0.85, disc 0.7) is the whole dimming; pinned in ExplorationNode.test.tsx)
+- issue: #527
+- pass: 84 (commit dd61ec90)
+- viewport: both (375x812 and 1280x800)
+- category: comprehension
+- observation: on the walked Breakwater sheet ("18 nodes · 12 sealed"), the six trodden and open nodes draw their discs, but none of the twelve sealed nodes can be seen. The black roads run to junctions on the engraving and stop, with no mark where they meet, so the map reads as a web of lines leading nowhere. The legend's ◌ SEALED key matches nothing on screen. The sealed mark is meant to recede (`NodeMark` draws an empty dashed ash ring at the smallest radius), but `ExplorationNode` also wraps it in `nodeWrapLocked` opacity 0.45, so the ring prints at about 0.38 and its backing disc at about 0.3. That vanishes on the light engraving.
+- evidence: `.critique-artifacts/mobile/11-late-game-hub.png` (junctions near 160,470, 95,540 and 255,505); `desktop/11-late-game-hub.png` (bare vertices at about 55,565 and 390,665); `axiomancer-mobile/components/NodeMark.tsx:86-103`; `components/exploration/ExplorationNode.tsx:167` (`nodeWrapLocked`)
+- suggested fix: drop the extra 0.45 wrapper opacity for sealed nodes, or raise the ring's stroke opacity, so the sealed ring is the faintest mark that still shows where each road ends. Keep it the faintest of the four kinds, and pin the sealed mark's effective opacity in `ExplorationNode.test.tsx`.
+- source: critique-drive (unattended)
 
 ### [x] [LOW] title / a11y — after EMBARK the faded psalm, EMBARK button and footer stay in the accessibility tree under the menu — RESOLVED 2026-10-13 (commit fafba096; the CTA block sets accessibilityElementsHidden, importantForAccessibility no-hide-descendants and aria-hidden once the phase leaves 'title'; pinned in TitleScreen.test.tsx)
 - issue: #511
