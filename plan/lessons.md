@@ -66,6 +66,12 @@
 - **isolated-worktree-shell** · the worktree-isolation guard refused heredocs, `cmd //c mklink`, `$VAR` script arguments and `git commit -F` (ship BT2b) → write scripts and bodies with the Write tool and run them by literal path, junction `node_modules` with node `fs.symlinkSync(src, dst, 'junction')`, and commit with `-m` · seen 1× · last 2026-10-14 · open
 - **brief-geometry-unmeasured** · BT2b's A7 asked for five runes above the tray at 375x812, but the shipped geometry needed 304pt where 292 were free; only a measurement of the web export showed it (ship BT2b) → measure a layout acceptance in the web export before writing its test, and record any size change under Decisions · seen 1× · last 2026-10-14 · open
 
+<!-- @domain:mobile -->
+
+## Mobile
+
+- **reanimated4-spring-defaults** · `withSpring` given only damping and stiffness inherits Reanimated 4's mass 4 and energyThreshold 6e-9, so the tray dice swung about 20s and the skip layer ate the first tap; only a live wait on the built app showed it (iterate drive-settle) → name mass and energyThreshold on every spring; prove a UI wait signal on the web export before trusting it · seen 1× · last 2026-10-14 · open
+
 ## Adding a domain
 
 Append a new `<!-- @domain:<name> -->` anchor + `##` heading
