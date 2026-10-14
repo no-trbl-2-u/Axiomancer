@@ -2,7 +2,7 @@
  * CombatBoard — board chrome at the phone viewport.
  *
  *  - The hand fan lays out across the full board band (`handFanLayout`):
- *    the avatar and END live in the footer dock, not in the corners (D92).
+ *    the avatar and END live in the footer dock, not in the corners.
  *  - The board fits the viewport: the END consequence line is anchored inward
  *    (anchored LEFT of the button, its 140pt box would end off-screen) and the
  *    board clips at its own edge.

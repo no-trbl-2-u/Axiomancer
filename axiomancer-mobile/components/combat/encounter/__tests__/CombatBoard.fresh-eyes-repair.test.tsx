@@ -2,8 +2,8 @@
  * CombatBoard — hand-fan and momentum-readout geometry at the phone and
  * desktop viewports.
  *
- *  - No corner chrome sits beside the hand (D92: the avatar and END live in
- *    the footer dock), so the fan always lays out in the full board band and
+ *  - No corner chrome sits beside the hand (the avatar and END live in the
+ *    footer dock), so the fan always lays out in the full board band and
  *    a five-card phone hand keeps a name-wide peek, never the 28pt sliver.
  *  - The rendered fan lands where the reference board-band layout puts it,
  *    inside the viewport.

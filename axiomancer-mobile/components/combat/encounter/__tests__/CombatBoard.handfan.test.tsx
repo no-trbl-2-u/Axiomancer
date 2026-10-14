@@ -13,7 +13,7 @@
  *   2. Every hand card's name is one line with no width cap.
  *   3. Non-hand faces (staged, reward offer, detail overlay) are one line and
  *      uncapped too.
- *   4. The fan carries no tap hint (D92), so nothing sits in the strip the
+ *   4. The fan carries no tap hint, so nothing sits in the strip the
  *      FREE corner pills overhang; the dock keeps room for that overhang
  *      above the cards; the staged hint fits its one line.
  *   5. Tapping a hand card reaches `onInspect`.

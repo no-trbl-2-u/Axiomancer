@@ -1,5 +1,5 @@
 /**
- * CombatBoard — the top-left column (D92, BT2b A1 and A7).
+ * CombatBoard — the top-left column (BT2b A1 and A7).
  *
  *  A1. The foe's intent badge and status chips sit left-aligned under its
  *      name; the chips wrap left to right.

@@ -1,5 +1,5 @@
 /**
- * CombatBoard — the footer dock (D92, BT2b A3–A5).
+ * CombatBoard — the footer dock (BT2b A3–A5).
  *
  * The bottom rail is the dock, left to right: the 48pt player avatar (tap
  * opens the pilgrim modal), the VITAE column (value / max with the piles at

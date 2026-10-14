@@ -1,6 +1,6 @@
 /**
  * Hermetic component test — the persistent combat log, inside the pilgrim
- * modal (D92).
+ * modal.
  *
  * Every combat beat is a floating token that vanishes in ~1s, so the log is
  * how the player reconstructs what just happened. The board carries no LOG
