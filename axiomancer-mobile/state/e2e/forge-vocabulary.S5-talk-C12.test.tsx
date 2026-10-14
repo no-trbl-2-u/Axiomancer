@@ -8,8 +8,8 @@
  *
  * Contract asserted here: the opening speech names the three faces and what
  * each pays; the die list carries a key for the face read; each service offer
- * states the trade it makes; the purse spells SHILLINGS once so the `12s` on
- * every offer has something to decode against; and no control offers to
+ * states the trade it makes; the purse and every offer spell SHILLINGS out
+ * (CRITIQUE LOW, the pass-84 village fix's residue); and no control offers to
  * charge a player "diamonds" — the combat board's CONVICTION glyph.
  */
 
@@ -87,11 +87,20 @@ describe('the forging table decodes its own readouts (S5-talk-C12)', () => {
             .toBe('MANA face → BOON');
     });
 
-    it('spells the purse out in SHILLINGS, the unit the `s` prices are in', () => {
+    it('spells the purse out in SHILLINGS, the unit the prices are in', () => {
         const purse = textOf(forge('forging').getByTestId('blacksmith-budget'));
 
         expect(purse).toContain('SHILLINGS');
         expect(purse).toContain(`${FAT_PURSE}`);
+    });
+
+    it('prints each offer\'s price in SHILLINGS, not a bare `s`', () => {
+        const r = forge('forging');
+
+        for (const id of ['hone:heart', 'temper:heart']) {
+            const price = textOf(r.getByTestId(`blacksmith-offer-${id}-price`));
+            expect(price).toMatch(/^\d+ SHILLINGS$/);
+        }
     });
 
     it('never offers to charge a screen reader in diamonds', () => {

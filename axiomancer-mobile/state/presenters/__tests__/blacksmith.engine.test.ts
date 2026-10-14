@@ -109,7 +109,7 @@ describe('FE-023: forge prices carry the shilling suffix, never the conviction g
         const vm = selectBlacksmithVM({ blacksmith: { session: forging(1) } });
         const heart = vm.dice.find((d) => d.color === 'heart')!;
         expect(heart.hone.enabled).toBe(false);
-        expect(heart.hone.reason).toMatch(/costs \d+s\b/);
+        expect(heart.hone.reason).toMatch(/costs \d+ SHILLINGS\b/);
         expect(heart.hone.reason).not.toContain('\u25C6');
     });
 
