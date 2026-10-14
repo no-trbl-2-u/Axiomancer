@@ -36,6 +36,13 @@
 
 ## Pending
 
+### [x] [debt] pr-resolve's union merge splits a row one side moved Pending to Done and bloats CRITIQUE.md (iterate 2026-10-14) — CLOSED 2026-10-14 (80ea6f44: line order from `git merge-file --union`, the three-way count trim drops a trimmed heading's body first, blank runs capped; loop-pr.test.mjs pins it; CRITIQUE.md repaired)
+- issue: #542
+- category: debt
+- impact: 8
+- ease: 8
+- detail: `unionMerge` placed theirs' lines by an anchor walk, so shared generic lines jumped the anchor ahead. Every pr-resolve merge with clean inputs left a headerless body in Pending, appended its header near the end of the file and added about 85 blank lines; one AUDIT.md merge (5790525d) spliced a `[loop-call]` row into another row. Reproduced byte for byte on beac7799.
+
 ### [x] [infra] pr-resolve never resolves a non-union conflict: its Claude job fails "Unsupported event type: push" every time (expand pass 33, 2026-10-14) — CLOSED 2026-10-14 (761da24c: the push run's scan starts one workflow_dispatch run of pr-resolve.yml per conflicted PR, and the Claude resolve runs only there; loop-pr.test.mjs pins it. First live proof is the next non-union conflict)
 - issue: #524
 - category: infra
