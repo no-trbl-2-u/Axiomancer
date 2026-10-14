@@ -29,6 +29,7 @@ import {
     buildTrailerCloseCommentBody,
     buildDeployCommentBody,
     sweepDeployComments,
+    fillGhEnv,
 } from './loop-issue.mjs'
 
 const REPO = 'no-trbl-2-u/Axiomancer'
@@ -509,4 +510,21 @@ test('a commit with no closing references touches nothing', () => {
     assert.deepEqual(result.targets, [])
     assert.deepEqual(io.calls.has, [])
     assert.deepEqual(io.calls.comment, [])
+})
+
+test('fillGhEnv: no token borrows the gh keyring login; GH_REPO defaults to this repo', () => {
+    const env = fillGhEnv({}, () => ({ status: 0, stdout: 'gho_keyring ' }))
+    assert.equal(env.GH_TOKEN, 'gho_keyring')
+    assert.equal(env.GH_REPO, REPO)
+})
+
+test('fillGhEnv: a token or repo already set is kept, and gh is not asked', () => {
+    let asked = false
+    const env = fillGhEnv({ GH_TOKEN: 'from-env', GH_REPO: 'a/b' }, () => { asked = true; return { status: 0, stdout: 'x' } })
+    assert.deepEqual(env, { GH_TOKEN: 'from-env', GH_REPO: 'a/b' })
+    assert.equal(asked, false)
+})
+
+test('fillGhEnv: a failed keyring read leaves GH_TOKEN unset', () => {
+    assert.equal(fillGhEnv({}, () => ({ status: 1, stdout: '' })).GH_TOKEN, undefined)
 })
