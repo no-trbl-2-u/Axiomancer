@@ -61,6 +61,12 @@ Every rate limit and eligibility test the loop uses is defined
 here. `skills/critique.md`, `skills/expand.md` and
 `skills/iterate.md` cite this section instead of carrying copies.
 
+"N commits after `Last pass`" counts `main`'s own line:
+`git rev-list --count --first-parent <sha>..origin/main`. A merged
+PR's branch commits are not counted one by one, so a burst of merges
+does not make a pass due an hour after the last one (lesson
+`gate-commit-count`).
+
 `GH_TOKEN` / `GH_REPO` are loaded in §4 Step 0. If `gh` isn't
 installed or `GH_TOKEN` is missing, a `gh`-based gate reads as
 "not met": log a warning and fall through. **Don't fail the
