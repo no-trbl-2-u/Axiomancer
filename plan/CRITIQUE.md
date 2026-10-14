@@ -645,7 +645,6 @@
 - suggested fix: keep the label on the progressbar (it also carries `accessibilityValue`) and hide the text readout from the reader (`importantForAccessibility="no"` / `accessibilityElementsHidden`), or the reverse.
 - source: antagonist, PR #529
 
-### [MED] exploration hub — sealed nodes draw no visible mark, so most roads end at bare vertices
 - pass: 84 (commit dd61ec90)
 - viewport: both (375x812 and 1280x800)
 - category: comprehension
@@ -3317,6 +3316,94 @@
   disrupt-meter legibility work from Phase 28) before or alongside
   Phase 33's SWAY-cleanse enemy work.
 - source: playtester (owner-directed break-test session)
+
+
+
+
+
+
+
+
+
+
+
+### [x] [MED] exploration hub — sealed nodes draw no visible mark, so most roads end at bare vertices — RESOLVED 2026-10-14 (commit cf095d5a; the node wrapper no longer dims sealed nodes by 0.45 on top of NodeMark, so SEALED_MARK_OPACITY (ring 0.85, disc 0.7) is the whole dimming; pinned in ExplorationNode.test.tsx)
+- issue: #527
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
