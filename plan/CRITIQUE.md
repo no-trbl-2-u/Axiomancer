@@ -588,6 +588,60 @@
 
 ## Pending
 
+### [MED] combat / hand fan — the D91 free corner pill covers the "tap a card to read it" hint
+- pass: antagonist on PR #521 (BT2a, commit 042b4471)
+- viewport: mobile (375x812)
+- category: visual
+- observation: the pill straddles 15pt above each card's top edge (`freePill` top -15), into the strip where `styles.fanHint` sits (`top: 1` in the fan). With a five-card phone fan, a middle card's pill sits over the start of the hint, so it reads "· · card to read it". BT2a's brief keeps the fan band out of scope (BT2b), so the PR did not move the hint.
+- evidence: `axiomancer-mobile/screenshots/bt2a/1-grey-hand.jpg` and `2-blood-price-hand.jpg` (hint under the "+4" / "-2" pills); the prototype shot `bt2-prototype/1-board.jpg` has no hint in that strip.
+- suggested fix: in BT2b, place the hint clear of the pills' overhang (above the pill row, or drop it once the BT2b fan reads names whole), and pin it with a layout test.
+- source: antagonist, PR #521
+
+### [LOW] combat / IN PLAY row — two copies of one Global give two chips with the same accessibility label
+- pass: antagonist on PR #520 (GS1, commit fc4aa159)
+- viewport: n/a (screen reader)
+- category: accessibility
+- observation: GS1 lets copies of a Global stack, and the chips are keyed by instance. Each chip's label is still `<name>, a Global in play for N more turn starts. Tap to read it.`, so two FREE copies played the same turn are announced the same way and a screen-reader user cannot tell there are two.
+- evidence: `globalsVM` in `axiomancer-mobile/state/presenters/combat-encounter.engine.ts`; the GS1 jest case renders two chips with the same `a11y`.
+- suggested fix: when more than one instance of a card is in play, name the count in the label (for example "copy 2 of 2"); terse, presenter-only.
+- source: antagonist, PR #520
+
+### [LOW] docs — `plan/revamp/card-rules-inventory.md` §17 still says a Global is "unique in play"
+- pass: antagonist on PR #520 (GS1, commit fc4aa159)
+- viewport: n/a
+- category: comprehension
+- observation: GS1 marks the stacking rule experimental in `cards.md`, `card-spec.md`, `game-model.md`, the atlas and the gloss. The B4 inventory's "Ratified, not built" table still lists "Global: FREE 3 turns, PAID rest of combat, unique in play". The inventory is a dated snapshot, so this may be intended, but it is the one remaining line that states the old rule.
+- evidence: `plan/revamp/card-rules-inventory.md:343`
+- suggested fix: either annotate the row "(superseded by GS1, experimental)" or leave it as history and say so in the file header.
+- source: antagonist, PR #520
+
+### [LOW] combat / die tap — a die tapped onto a card refused at the SACRIFICE floor flags the VITAE ring, but gets no haptic or reject line
+- pass: antagonist on PR #523 (SF1, commit 04e5ebb6)
+- viewport: mobile
+- category: feedback
+- observation: the die-tap path (`dieTapRef` in `CombatBoard.tsx`) still refuses an illegal pairing silently, by design ("a tap has no card to shake"). SF1 adds the VITAE-ring callout on that path for the floor only. So a floor refusal on tap shows the ring callout with no error haptic and no reject line, while the same refusal by drag shows all three, and a tap refused for any other reason (off-colour, printed condition) stays silent.
+- evidence: `CombatBoard.tsx` `dieTapRef.current` (`if (!target) { ... flagShortfall(...); return; }`) against the drop path's `setDropReject` and `juiceHaptics.notify`.
+- suggested fix: give a refused tap the same reject line and error haptic as a refused drop (owner doctrine: illegal actions prevented loudly).
+- source: antagonist, PR #523
+
+### [LOW] combat / a11y — the SACRIFICE-floor callout changes the ring's label but announces nothing
+- pass: antagonist on PR #523 (SF1, commit 04e5ebb6)
+- viewport: n/a (screen reader)
+- category: accessibility
+- observation: during the 900ms callout the medallion's `accessibilityLabel` becomes `VITAE <v> of <max>. SACRIFICE <cost> would leave you below 1.` (A5). A label change is only heard when focus is already on the medallion, and the callout clears before a user could move there, so a screen-reader user who drops a die on a card is not told why it was refused.
+- evidence: `CombatCombatantPane.tsx` `PlayerMedallion` label; no `AccessibilityInfo.announceForAccessibility` or live region on the callout.
+- suggested fix: announce the floor line once per refusal (`announceForAccessibility(PROGRAM_COPY.floorA11y(...))`), keeping the label change for focus.
+- source: antagonist, PR #523
+
+### [LOW] combat / perf — `programPlayVM` now probes every hand card's lines twice more per view-model build
+- pass: antagonist on PR #523 (SF1, commit 04e5ebb6)
+- viewport: n/a
+- category: performance
+- observation: `programShortfall` re-runs `programIllegalReason` and then `programLineCost` for each line, on top of the two `programLineBlock` calls, so each program card in hand costs about four extra line probes per `buildCombatViewModel`. Small at today's hand sizes, but it is on the board's render path.
+- evidence: `axiomancer-mobile/state/presenters/card-program.engine.ts` `programPlayVM`; `axiomancer-mechanics/src/Combat/combat.card-program.ts` `programShortfall`.
+- suggested fix: one engine read returning `{ block, shortfall }` per line, so the VM probes each line once.
+- source: antagonist, PR #523
+
 ### [MED] title + combat / tooling — the drive captures the title 0.7s into its 2.65s intro, so every pass sees only the wordmark; EMBARK is tappable before it is visible
 - pass: 79 (commit f2065459); widened and bumped LOW to MED at pass 83 (commit 3225cc64)
 - pass 83 addendum: the same fixed 700ms settle (`axiomancer-mobile/scripts/critique-drive.mjs` ~:271) also cuts the `combat-board` capture short. The round-start roll ritual staggers four dice 130ms apart over a 480ms fall plus springs (`DICE_ROLL_TIMING`), so it runs about 1s. Both `04-combat-board.png` captures (mobile and desktop) show three dice in the tray and the fourth still tilted and in the air beside the foe. So the unattended lens has never seen a settled hand-and-dice board, which is the screen that matters most. Fix the same way: wait on a settle signal (no `RollingDie` mounted, or the summed ritual timing) rather than a flat 700ms.

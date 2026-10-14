@@ -26,7 +26,7 @@ export function programTypeTag(card: Pick<Card, 'cardType'>): string | null {
 export function programLifecycle(card: Pick<Card, 'cardType'>): string {
     switch (card.cardType) {
         case 'global':
-            return `Global: stays in play and fires on its trigger. FREE: ${GLOBAL_FREE_TURNS} turns. PAID: the rest of combat. One copy of each in play.`;
+            return `Global: stays in play and fires on its trigger. FREE: ${GLOBAL_FREE_TURNS} turns. PAID: the rest of combat. Copies stack (experimental).`;
         case 'curse':
             return 'Curse: holds a hand slot until played. It cannot be scrapped.';
         default:

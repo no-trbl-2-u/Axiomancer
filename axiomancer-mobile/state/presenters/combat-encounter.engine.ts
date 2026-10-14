@@ -449,6 +449,8 @@ export interface CombatCardVM {
 
 /** A Global in play, for the board's IN PLAY row. */
 export interface CombatGlobalVM {
+    /** The instance in play (copies stack, so two chips may share a cardId). */
+    uid: string;
     cardId: string;
     name: string;
     /** '⏳2' (turn starts left) or '∞' (rest of combat). */
@@ -1697,7 +1699,7 @@ function globalsVM(state: CombatEncounterState): CombatGlobalVM[] {
         const turnsLabel = g.turnsLeft === null ? '∞' : `⏳${g.turnsLeft}`;
         const left = g.turnsLeft === null ? 'for the rest of combat' : `for ${g.turnsLeft} more turn start${g.turnsLeft === 1 ? '' : 's'}`;
         return {
-            cardId: g.cardId, name, turnsLabel,
+            uid: g.uid, cardId: g.cardId, name, turnsLabel,
             stanceColor: STANCE_COLORS[card?.color ?? 'any'] ?? HUE.fallbackGrey,
             card: rewardCardVMs([g.cardId], stats)[0] ?? null,
             a11y: `${name}, a Global in play ${left}. Tap to read it.`,

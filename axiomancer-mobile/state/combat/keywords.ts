@@ -172,7 +172,7 @@ export const SYSTEM_GLOSSARY: readonly { term: string; def: string }[] = [
     { term: 'CONVICTION ◆', def: 'A spend-anytime resource banked from unspent dice and overflow. It never decays.' },
     { term: 'RESERVE & PIPS', def: 'Up to 2 dice held between phases instead of played. Each gains +1 pip per phase it survives, spent for extra intensity or Guard.' },
     { term: 'WILD / X', def: 'A WILD die counts as any color. A dead X die powers nothing.' },
-    { term: 'GLOBAL', def: 'Stays in play and fires on its trigger (⟳ your turn starts, 🩸 you SACRIFICE): 3 turns played FREE, all combat PAID. One copy of each at a time.' },
+    { term: 'GLOBAL', def: 'Stays in play and fires on its trigger (⟳ your turn starts, 🩸 you SACRIFICE): 3 turns played FREE, all combat PAID. Copies stack (experimental).' },
     { term: 'CURSE', def: 'A dead card that holds a hand slot until played. It cannot be scrapped.' },
 ];
 

@@ -1464,12 +1464,12 @@ export const CombatBoard = React.memo(function CombatBoard({
                         <Text style={styles.globalsLabel} allowFontScaling={false}>{PROGRAM_COPY.inPlay}</Text>
                         {vm.globals.map((g) => (
                             <Pressable
-                                key={g.cardId}
+                                key={g.uid}
                                 onPress={() => { if (g.card) onInspect(g.card); }}
                                 style={[styles.globalChip, { borderColor: g.stanceColor }]}
                                 accessibilityRole="button"
                                 accessibilityLabel={g.a11y}
-                                testID={`combat-global-${g.cardId}`}
+                                testID={`combat-global-${g.uid}`}
                             >
                                 <Text style={styles.globalChipText} numberOfLines={1} allowFontScaling={false}>
                                     {g.name} <Text style={styles.globalChipTurns}>{g.turnsLabel}</Text>
