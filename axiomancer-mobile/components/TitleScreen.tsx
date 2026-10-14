@@ -62,6 +62,9 @@ export function TitleScreen({ menu, startAtMenu = false }: TitleScreenProps) {
   const lift = useSharedValue(settled ? 1 : 0);
   const cta = useSharedValue(settled ? 1 : 0);
   const toMenu = useSharedValue(startAtMenu ? 1 : 0);
+  // EMBARK takes no press until its fade-in begins, so a tap on the still
+  // empty lower half during the lift cannot open the menu unseen.
+  const [ctaLive, setCtaLive] = useState(settled);
 
   useEffect(() => {
     if (settled) {
@@ -69,6 +72,7 @@ export function TitleScreen({ menu, startAtMenu = false }: TitleScreenProps) {
       cta.value = 1;
       return;
     }
+    const live = setTimeout(() => setCtaLive(true), TITLE_TIMING.holdMs + TITLE_TIMING.liftMs);
     lift.value = withDelay(
       TITLE_TIMING.holdMs,
       withTiming(1, { duration: TITLE_TIMING.liftMs, easing: Easing.inOut(Easing.cubic) }),
@@ -77,6 +81,7 @@ export function TitleScreen({ menu, startAtMenu = false }: TitleScreenProps) {
       TITLE_TIMING.holdMs + TITLE_TIMING.liftMs,
       withTiming(1, { duration: TITLE_TIMING.ctaMs }),
     );
+    return () => clearTimeout(live);
     // Plays once per mount; the shared values carry it from there.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -170,7 +175,7 @@ export function TitleScreen({ menu, startAtMenu = false }: TitleScreenProps) {
         <Pressable
           style={({ pressed }) => [styles.embarkButton, pressed && styles.embarkButtonPressed]}
           onPress={handleEmbark}
-          disabled={phase !== 'title'}
+          disabled={phase !== 'title' || !ctaLive}
           accessibilityRole="button"
           accessibilityLabel={TITLE_COPY.embarkLabel}
         >
