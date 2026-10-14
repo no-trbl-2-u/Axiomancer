@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-14 at commit dd61ec90
-> Pass count: 84
+> Last pass: 2026-10-14 at commit 93f05dfe
+> Pass count: 85
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -597,9 +597,52 @@
 > 82's inn-line and THE CUT floor calls, the unfixtured exploration hub
 > bouncing to the title (no state, by design). Two fresh findings.
 
+> **[critique pass 85, 2026-10-14, commit 93f05dfe] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors. 16 commits
+> after pass 84: BT2b (combat board layout, D92: footer dock, full-width
+> hand, intent top-left) merged as #529, plus the pr-resolve fix (#526).
+> The only play-code change is the combat board, so the pass read the
+> live board closely; every other screen matches pass 84. Pass 63's
+> corner-medallion and the fan-hint rows are gone (closed by #529).
+> Reconfirmed and not re-filed: pass 83's capture-settle row (fourth die
+> still tilted in both `04-combat-board.png`), pass 84's sealed node mark
+> (claimed by #528) and village "12s" price, the antagonist's VITAE
+> double-announce row. Checked and not filed: the covered fan cards
+> cutting their names and effect rows (each card is whole when lifted)
+> and the top-left intent reading "−11" (D92 placement). Three fresh
+> findings.
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `archive-pre-revamp:plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
+
+### [MED] combat / hand — A Plain Blow draws no FREE pill, so one of the three grey cards looks like it has no free play
+- pass: 85 (commit 93f05dfe)
+- viewport: both (375x812 and 1280x800)
+- category: comprehension
+- observation: on the Brine Hag board, A Plain Ward shows its FREE pill ("+4") and A Plain Word shows "+24%", but both A Plain Blow cards show no pill at all, only the paid "Deal 12". The card has a free line (`free: { damage: 2 }`), and the engine resolves it, so a dieless Blow deals damage while its face says nothing. The grey office is the card set that teaches FREE against PAID in fight one, and one of its three cards hides the FREE half.
+- evidence: `.critique-artifacts/mobile/04-combat-board.png` and `desktop/04-combat-board.png` (pills on the Ward and Word cards only); `04-combat-board.txt` lists "+4" and "+24%" but nothing for either Blow. Cause: `riderPairs` in `axiomancer-mobile/state/presenters/combat-encounter.engine.ts` (~:141) maps `guard` and `applyEffect` only, so a `damage` rider gives no `freeKeyword`/`freeValue`, `freeGlyphMeta` returns `''`, and the face's `hasFree` is false. `card-rules.ts:99` already prints `DEAL <n>` for the same rider.
+- suggested fix: add a `DEAL` pair for `r.damage` in `riderPairs` (stat-scaled the way the Ward's guard is; `FREE_KW_GLYPH` already maps `DEAL` to ⚔), and pin a Blow face with its FREE pill in the presenter test.
+- source: critique-drive (unattended)
+
+### [LOW] combat / desktop — the footer dock stretches the VITAE bar 1075px, so the VITAE figure sits a screen's width from the pile counts
+- pass: 85 (commit 93f05dfe)
+- viewport: desktop (1280x800)
+- category: visual
+- observation: BT2b's footer dock spans the whole window. Its VITAE column is `flex: 1`, so at 1280 wide "♥ 160 / 160" sits at the far left, the deck and discard counts at the far right next to END, and one thin green bar runs about 1075px between them, under a hand that occupies the middle 650px. The menu, rest, village and preview screens all cap their content at a 520 column for this reason.
+- evidence: `.critique-artifacts/desktop/04-combat-board.png` (dock row y 740-790: VITAE at x 68, piles at x 1090-1140, bar x 68-1143); `axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx` `vitaeCol: { flex: 1 }`.
+- suggested fix: cap the dock's VITAE column (for example at the hand's width, or a `DOCK_VITAE_MAX_WIDTH`) on wide windows and keep the piles beside the figure; phones unchanged. Pin the cap in `CombatBoard.footer-dock.test.tsx`.
+- source: critique-drive (unattended)
+
+### [LOW] combat / a11y — the phase ledger under VITAE is five unlabelled marks, so a screen reader never hears which phases were cleared or overwhelmed
+- pass: 85 (commit 93f05dfe)
+- viewport: n/a (screen reader)
+- category: accessibility
+- observation: the dock's ledger (`combat-ledger`) maps `vm.ledger` to `LedgerMark` glyphs with no `accessibilityLabel` on the row or the marks. The header's "PHASE 1/5" names the current phase, but the record of earlier phases (clear O, overwhelmed X) is visual only. This predates BT2b; the dock move kept it.
+- evidence: `axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx` (the `combat-ledger` row); `components/hazard/glyphs.tsx` `LedgerMark` (no accessibility props); `.critique-artifacts/mobile/04-combat-board.txt` (no ledger text).
+- suggested fix: make the ledger row one accessible element labelled from `vm.ledger` (for example "Phases: 1 cleared, 2 overwhelmed, 3 to 5 ahead"), presenter-built and terse.
+- source: critique-drive (unattended)
 
 ### [LOW] ci / pr-resolve — a hand dispatch with a non-`loop/` branch exits green having done nothing
 - pass: antagonist on PR #526 (commit efc7f371)
