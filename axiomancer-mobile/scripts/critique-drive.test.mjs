@@ -31,3 +31,14 @@ test('ownArtifactPaths never returns the root itself or an unrelated subtree', (
     assert.ok(!paths.includes(root))
     assert.ok(!paths.some((p) => p.endsWith('fresh-eyes')))
 })
+
+// CRITIQUE pass 79/83: a flat 700ms pause caught the title mid-intro and the
+// combat board mid dice-roll. The screens with a timed entrance wait on a
+// settle signal before the pause.
+test('the title, onboarding and combat-board screens wait for their entrance to finish', async () => {
+    const { SCREENS, titleSettled, diceSettled } = await import('./critique-drive.mjs')
+    const byName = Object.fromEntries(SCREENS.map((s) => [s.name, s]))
+    assert.equal(byName.title.settle, titleSettled)
+    assert.equal(byName['combat-board'].settle, diceSettled)
+    assert.match(String(byName.onboarding.prepare), /titleSettled\(page\)/)
+})
