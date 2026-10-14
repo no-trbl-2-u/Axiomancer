@@ -15,6 +15,21 @@
  * change what a settled die shows (the dice-honesty law).
  */
 
+/**
+ * A spring with every term that decides how long it runs. Reanimated 4's
+ * `withSpring` fills an unset `mass` with 4 and an unset `energyThreshold`
+ * with 6e-9, so a spring that names only damping and stiffness swings for
+ * about 20 seconds. The tray's tap-to-skip layer stays over the dice until
+ * the settle spring finishes, so it would take the player's first tap.
+ */
+export interface DiceSpring {
+    readonly damping: number;
+    readonly stiffness: number;
+    readonly mass: number;
+    /** The spring finishes once its energy falls to this share of the start. */
+    readonly energyThreshold: number;
+}
+
 export interface DiceRollTiming {
     /** Per-die start offset so the eye can track four dice landing in sequence. */
     readonly staggerMs: number;
@@ -29,9 +44,9 @@ export interface DiceRollTiming {
     /** Peak micro-bounce wobble (deg) after the landing. */
     readonly bounceRotateDeg: number;
     /** Landing spring — the first bounce off the tray line. */
-    readonly landSpring: { readonly damping: number; readonly stiffness: number };
+    readonly landSpring: DiceSpring;
     /** Settle spring — the final rest onto the engine-rolled face. */
-    readonly settleSpring: { readonly damping: number; readonly stiffness: number };
+    readonly settleSpring: DiceSpring;
 }
 
 /**
@@ -46,6 +61,6 @@ export const DICE_ROLL_TIMING: DiceRollTiming = {
     entryRotateDeg: -40,
     bounceLiftPx: 18,
     bounceRotateDeg: 14,
-    landSpring: { damping: 6, stiffness: 220 },
-    settleSpring: { damping: 9, stiffness: 180 },
+    landSpring: { damping: 6, stiffness: 220, mass: 1, energyThreshold: 0.01 },
+    settleSpring: { damping: 9, stiffness: 180, mass: 1, energyThreshold: 0.01 },
 };

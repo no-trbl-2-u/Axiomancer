@@ -12,6 +12,7 @@ import {
     nextRollState, planDiceRoll, rollDurationMs,
     type DieRollTarget,
 } from '../dice-roll-ritual';
+import { DICE_ROLL_TIMING, type DiceSpring } from '../dice-roll-ritual.timing';
 
 const TIMING = { staggerMs: 90, tumbleDurationMs: 600 };
 
@@ -175,5 +176,17 @@ describe('rollDurationMs', () => {
     });
     it('is zero when nothing tumbles (instant)', () => {
         expect(rollDurationMs(planDiceRoll(ROUND, null, 'instant', TIMING))).toBe(0);
+    });
+});
+
+describe('DICE_ROLL_TIMING springs', () => {
+    // An underdamped spring's energy falls as e^(-damping * t / mass), so it
+    // finishes at mass * ln(1 / energyThreshold) / damping seconds. Unset,
+    // Reanimated 4 reads mass 4 and threshold 6e-9 (about 12s + 8s here),
+    // and the tap-to-skip layer covered the dice all that time.
+    const finishSeconds = (s: DiceSpring) => (s.mass * Math.log(1 / s.energyThreshold)) / s.damping;
+
+    it.each(['landSpring', 'settleSpring'] as const)('%s comes to rest inside a second', (key) => {
+        expect(finishSeconds(DICE_ROLL_TIMING[key])).toBeLessThan(1);
     });
 });
