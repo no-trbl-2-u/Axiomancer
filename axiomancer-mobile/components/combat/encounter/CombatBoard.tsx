@@ -49,7 +49,7 @@ import type {
 import { armedValue, dieCanPowerCardVM, STANCE_COLORS, PROGRAM_COPY } from '@/state/presenters/combat-encounter.engine';
 // The ONE mobile source for the rarity band. The face never
 // re-bands a rank and never re-types a rarity hue; see `card-rarity.engine.ts`.
-import { rarityFor, RARITY_LABEL, RARITY_PIPS, RARITY_COLOR } from '@/state/presenters/card-rarity.engine';
+import { rarityFor, RARITY_LABEL, RARITY_COLOR } from '@/state/presenters/card-rarity.engine';
 import { TrashGlyph, LedgerMark } from '@/components/hazard/glyphs';
 import { glyphShapeFor } from '@/components/combat/glyphShapes';
 import { CombatCombatantPane, EffectChips, PlayerMedallion, COMBAT_HUD_HEIGHT, PLAYER_DOCK_FOOTPRINT_W, type CombatFx } from './CombatCombatantPane';
@@ -362,49 +362,21 @@ export const HAND_FAN_GAP = 8;
  * Derived, never guessed, from the styles it sums (all in `useStyles` below):
  *   1.5  `faceCard.borderWidth`
  * + 6    `plateBand.paddingHorizontal` (the left half)
- * + 5    `plateRarityPip.width` (the wax rarity pip)
- * + 5    `plateBand.gap` (pip → text)
+ * + 5    `plateRaritySpacer.width` (the rarity spacer, read by a screen reader)
+ * + 5    `plateBand.gap` (spacer → text)
  * = 17.5
  *
- * The rarity pip is a three-slot TRACK that stacks vertically, so its width
- * is still exactly one `plateRarityPip.width`. A horizontal row would make
- * this 31.5 and cost every fanned card ~14pt of name.
+ * In the fan, card `i` is covered by card `i+1`, so only `step` points of a
+ * covered card show, and this chrome eats the first 17.5 of them. The name
+ * keeps one line and runs on under its neighbour; a tap reads it whole.
  *
- * Exported so the fan and its tests read ONE number, and gated for real:
- * `CombatBoard.handfan.test.tsx` renders {@link useCombatBoardStyles} and sums
- * `faceCard.borderWidth + plateBand.paddingHorizontal + plateRarityPip.width +
- * plateBand.gap` off the SHIPPED sheet, so moving any one of those four styles
- * turns this constant red instead of quietly re-clipping every name.
+ * Gated for real: `CombatBoard.handfan.test.tsx` renders
+ * {@link useCombatBoardStyles} and sums `faceCard.borderWidth +
+ * plateBand.paddingHorizontal + plateRaritySpacer.width + plateBand.gap` off
+ * the SHIPPED sheet, so moving any one of those four styles turns this
+ * constant red.
  */
 export const NAME_BAND_LEFT_CHROME = 17.5;
-
-/**
- * How much of a FANNED card's name column the player can actually see.
- *
- * In the fan, card `i`
- * is covered by card `i+1`, which is opaque (`faceCard.backgroundColor`) and
- * paints on top (`zIndex: i` ascending), so only `step` points of each covered
- * card survive. The name band's own chrome eats the first
- * {@link NAME_BAND_LEFT_CHROME} of that.
- *
- * Why this and not a wider overlap: the fan must satisfy
- * `HAND_CARD_W + (n-1) * step <= screenW`, which at 375pt with 5 cards caps
- * `step` at 63.75 against today's 57.75 — widening the overlap buys ~6pt, about
- * one character, and then the outermost cards run off the phone. The geometry
- * lever is exhausted; the name BOX is not. Sizing the box to the peek makes the
- * name wrap inside the sliver the player can see (the band already grows and
- * `numberOfLines={2}` already allows the second line — see the name-band
- * comment in `CombatCardFace`), instead of laying the text out at the full
- * 95pt column where its tail renders underneath the neighbouring card.
- *
- * @param step - the visible width of a non-last fanned card, from
- *   {@link handFanLayout}.
- * @returns the width the name text may honestly use, floored at 1 so a
- *   degenerate step can never produce a negative or zero-width layout box.
- */
-export function nameColumnPeek(step: number): number {
-    return Math.max(1, step - NAME_BAND_LEFT_CHROME);
-}
 
 export function handFanLayout(screenW: number, n: number): { band: number; step: number; overlap: number } {
     const chromeBand = Math.max(HAND_CARD_W, screenW - HAND_FAN_LEFT - HAND_FAN_RIGHT);
@@ -1176,12 +1148,7 @@ export const CombatBoard = React.memo(function CombatBoard({
     // chrome-free band BETWEEN the corner medallions (see `handFanLayout`),
     // and falls back to the full board band for a hand too large to seat
     // there — readable cards the corners float over, never a row of slivers.
-    const { step, overlap } = handFanLayout(screenW, n);
-    // When the fan overlaps, every fanned card EXCEPT the last is covered by
-    // its right-hand neighbour, so its name must lay out inside the surviving
-    // sliver. The last card, and every card of a fan with room to sit side by
-    // side, is uncovered and keeps the full band (null).
-    const handNamePeek = overlap > 0 ? nameColumnPeek(step) : null;
+    const { overlap } = handFanLayout(screenW, n);
     const draggingDieId = drag.active?.type === 'die' ? drag.active.dieId : null;
     // The full VM of the die in flight — the COLOR LAW dimming keys off its color.
     const draggingDie = drag.active?.type === 'die' ? drag.active.die : null;
@@ -1495,14 +1462,13 @@ export const CombatBoard = React.memo(function CombatBoard({
                         <Circle cx={50} cy={30} r={55} fill="url(#axmFanGlow)" />
                     </Svg>
                     {/* Every fanned card but the last is
-                        covered, so its name is capped to `handNamePeek` and reads
-                        short. The escape hatch belongs HERE — on the fan, while the
-                        clipped names are what the player is looking at — not in the
+                        covered, so its one-line name runs on under its neighbour.
+                        The escape hatch belongs HERE — on the fan, while the
+                        covered names are what the player is looking at — not in the
                         staged line, which only appears once a card has already been
-                        chosen. It shows whenever the fan holds more than one card: a
-                        `namePeek` cap applies below only when the fan overlaps (a
-                        phone), but a wide board's player still has to learn that a
-                        tap reads the card. */}
+                        chosen. It shows whenever the fan holds more than one card:
+                        a wide board's player still has to learn that a tap reads
+                        the card. */}
                     {fan.length > 1 && !cardDragLive ? (
                         <Text style={styles.fanHint} numberOfLines={1} testID="combat-tap-hint">
                             tap a card to read it
@@ -1518,7 +1484,6 @@ export const CombatBoard = React.memo(function CombatBoard({
                                 tilt={i - mid}
                                 zIndex={i}
                                 liftedUid={liftedUid}
-                                namePeek={i === fan.length - 1 ? null : handNamePeek}
                             />
                         ))}
                     </View>
@@ -1663,167 +1628,140 @@ function paidValueFor(f: CombatCardVM['face'], override?: string): string {
 }
 
 /**
- * The shared card FACE — THE PRINTED PLATE. Cards read as pages of the codex,
- * in line with the Woodcut Codex direction:
- *   · ① NAME BAND, top, HORIZONTAL, blackletter on solid ink — the fan shows
- *     each card's left edge, so the name reads without turning your head;
- *     rarity is a wax pip TRACK at the band's head, plus a named tag on the
- *     large face.
+ * The shared card FACE — ONE FACE, EVERYWHERE. Cards read as pages of the
+ * codex, in line with the Woodcut Codex direction:
+ *   · the FREE CORNER PILL — the FREE line's glyph in the card's colour (the
+ *     stance colour; the armed accent when set) with its value in white, on a
+ *     pill straddling the card's top-left corner. A card with no FREE line has
+ *     no pill. It is drawn as a sibling of the frame, so the frame's
+ *     `overflow: hidden` cannot clip it;
+ *   · ① NAME BAND, top, HORIZONTAL, blackletter on solid ink, ONE line. A
+ *     fanned card's name runs on under its right-hand neighbour; a tap reads
+ *     it whole. The band takes top padding only when the pill sits over it.
+ *     The large face adds the rarity WORD at the band's tail;
+ *   · ② ART PLATE — seamless: no mat, no frame, no rules above or below it,
+ *     so name, art and PAID line read as one surface;
+ *   · ③ PAID LINE, bottom, one row — the stance die cube, then
+ *     `[family glyph] KEYWORD value` as a single line.
  *
- *     Rarity is a three-legged signal — NAMED LABEL + PIP ROW + FRAME COLOUR,
- *     never colour alone: a lone hue is illegible in greyscale, to a
- *     colourblind player, and to anyone who has not learned that purple means
- *     rare.
+ * Rarity is not drawn on the face. The large face prints the WORD, and every
+ * face says it to a screen reader through a 5pt spacer at the band's head
+ * (which also keeps {@link NAME_BAND_LEFT_CHROME} true).
  *
- *     The trade the face takes: the pip track is a fixed THREE-SLOT column (filled = the band's pip count, hollow = the
- *     rest), stacked VERTICALLY rather than laid out in a row. A horizontal
- *     three-pip row would widen {@link NAME_BAND_LEFT_CHROME} by ~14pt, and in
- *     the hand fan that chrome is subtracted from the ~57pt sliver of each
- *     covered card — about a third of every fanned card's name. Vertical
- *     keeps the band's left chrome at its shipped width, so the count is legible
- *     and no name loses a character. The NAMED tag rides the `large` face only
- *     (inspect overlay, reward preview) for the same reason: at 120pt the word
- *     "UNCOMMON" and the card's own name cannot both have the band;
- *   · ② ART PLATE — a framed print with a hairline rule and dark margins, not
- *     a full-bleed background. No stance wash, no scrim: the plate is clean
- *     and the text never fights the art for contrast;
- *   · ③ LEDGER, bottom, solid ink ground — FREE cell (glyph + intensity,
- *     category colour) | hairline rule | PAID cell (stance die cube +
- *     KEYWORD + value). In the fan the visible sliver is name-start + FREE
- *     effect: the two fastest reads.
- * Stance colours the frame + die cube; category colours the glyph + keyword.
- * Instanced small in the hand and LARGE in the inspect modal so the two can
- * never drift.
+ * Stance colours the frame, the pill and the die cube; the stat family (or
+ * category) colours the keyword. Instanced small in the hand and LARGE in the
+ * inspect modal so the two can never drift.
  *
- * The face carries NO prose. The
- * authored PAID sentence, the type strip, and the printed die lines live in
- * the inspect overlay. The face is the glance read (name · free glyph ·
- * keyword · value); the overlay is the explanation.
+ * The face carries NO prose. The authored PAID sentence, the type strip, and
+ * the printed die lines live in the inspect overlay. The face is the glance
+ * read (name · free pill · keyword · value); the overlay is the explanation.
  */
-/** Below this face width the ledger stacks (see `narrow` in `CombatCardFace`).
- *  The hand card (120) sits above it; the reward offer (100) and the compact
- *  staged card (92) below. Exported for the face test. */
+/** Below this face width the face is NARROW: the reward offer (100) and the
+ *  compact staged card (92) sit under it, the hand card (120) above. A narrow
+ *  face draws a smaller die cube. Exported for the face test. */
 export const NARROW_FACE_W = 112;
 
 /** Bebas Neue capital advance per px of font size, letter spacing excluded, with a little slack. */
 const SANS_CAP_EM = 0.42;
 /** JetBrains Mono advance per px of font size, with a little slack. */
 const MONO_EM = 0.62;
-const PAID_KEYWORD_SIZE = 12;
+/** The space between the keyword and its value, per px of font size. */
+const SPACE_EM = 0.3;
 const PAID_KEYWORD_SPACING = 0.8;
-const PAID_VALUE_SIZE = 11;
-const FREE_VALUE_SIZE = 12;
-/** Below these the side-by-side PAID column is too thin to read, so the ledger stacks. */
-const PAID_KEYWORD_MIN = 10;
-const PAID_VALUE_MIN = 9;
-/** Floors on a stacked face, so a freak-long word still prints at a legible size. */
-const PAID_KEYWORD_FLOOR = 8;
-const PAID_VALUE_FLOOR = 8;
+/** The PAID line's size on a small face. */
+export const PAID_LINE_SIZE = 12;
+/** The floor a too-long PAID line shrinks to. */
+export const PAID_LINE_FLOOR = 8;
 
 /**
- * How a small face lays out its PAID column. The keyword's longest word and the
- * whole value must each fit on one line: a word that cannot fit breaks mid-word
- * ("VU…"), and a value that wraps breaks inside the number ("+6" over "0%").
- * The side-by-side row leaves the PAID text whatever the FREE cell does not
- * take, so a long keyword beside a percent FREE value (A Plain Word's
- * VULNERABLE) stacks the ledger and takes the full width. Sizes are computed,
- * not `adjustsFontSizeToFit`, which react-native-web ignores.
+ * The font size of a small face's PAID line: `[family glyph] KEYWORD value`
+ * on ONE row beside the die cube. The whole width past the cube is the line's;
+ * nothing else shares the ledger, so every card's line sits at the same height
+ * and the ledger never stacks. A line too long for {@link PAID_LINE_SIZE}
+ * shrinks (floored at {@link PAID_LINE_FLOOR}) rather than wrapping. Sizes are
+ * computed, not `adjustsFontSizeToFit`, which react-native-web ignores.
  */
-export function paidLedgerFit({ width, keyword, value, freeInner, hasFree }: {
+export function paidLedgerFit({ width, keyword, value }: {
     width: number;
     keyword: string;
     value: string;
-    freeInner: string;
-    hasFree: boolean;
-}): { stacked: boolean; keywordSize: number; valueSize: number } {
-    const narrow = width < NARROW_FACE_W;
-    const glyph = narrow ? 18 : 24;
-    const cube = narrow ? 12 : 14;
+}): { size: number } {
+    const cube = width < NARROW_FACE_W ? 12 : 14;
     // Card border 1.5 each side, ledger padding 6 each side; cube + its 5pt gap.
-    const inner = width - 3 - 12 - cube - 5;
-    const freeW = glyph + 3 + freeInner.length * FREE_VALUE_SIZE * MONO_EM;
-    const sideRoom = hasFree ? inner - freeW - 13 : inner;
-    const longest = Math.max(0, ...keyword.split(/\s+/).map((w) => [...w].length));
-    const valueLen = [...value].length;
-    const fit = (room: number) => ({
-        keywordSize: longest === 0 ? PAID_KEYWORD_SIZE
-            : Math.min(PAID_KEYWORD_SIZE, Math.floor((room / longest - PAID_KEYWORD_SPACING) / SANS_CAP_EM)),
-        valueSize: valueLen === 0 ? PAID_VALUE_SIZE
-            : Math.min(PAID_VALUE_SIZE, Math.floor(room / (valueLen * MONO_EM))),
-    });
-    const side = fit(sideRoom);
-    if (!narrow && side.keywordSize >= PAID_KEYWORD_MIN && side.valueSize >= PAID_VALUE_MIN) {
-        return { stacked: false, ...side };
-    }
-    const stack = fit(inner);
-    return {
-        stacked: true,
-        keywordSize: Math.max(PAID_KEYWORD_FLOOR, stack.keywordSize),
-        valueSize: Math.max(PAID_VALUE_FLOOR, stack.valueSize),
-    };
+    const room = width - 3 - 12 - cube - 5;
+    const kw = [...keyword].length;
+    const val = [...value].length;
+    const perPt = kw * SANS_CAP_EM + (kw > 0 && val > 0 ? SPACE_EM : 0) + val * MONO_EM;
+    if (perPt === 0) return { size: PAID_LINE_SIZE };
+    const fit = Math.floor((room - kw * PAID_KEYWORD_SPACING) / perPt);
+    return { size: Math.max(PAID_LINE_FLOOR, Math.min(PAID_LINE_SIZE, fit)) };
 }
 
 /**
- * How many slots the rarity track always draws — the top of the band
- * (`RARITY_PIPS.rare`). Exported so a test reads the same number the face does
- * instead of re-typing a 3.
+ * The free corner pill: the FREE line's glyph in the card's colour and its
+ * value in white, straddling the face's top-left corner. Rendered by
+ * `CombatCardFace` as a sibling of the frame, never inside it.
  */
-export const RARITY_TRACK_SLOTS = RARITY_PIPS.rare;
-
-/**
- * The PIP ROW leg — the greyscale-safe half of the rarity signal.
- *
- * Always {@link RARITY_TRACK_SLOTS} slots: the first `pips` are filled in the
- * band's hue, the rest are hollow rings. Drawing the empty slots is the point —
- * "two filled of three" is readable on a single card, where a bare pair of pips
- * only means something once you have another card beside it to compare against.
- * Filled-vs-hollow is a SHAPE difference, so it survives greyscale and colour
- * blindness with {@link RARITY_COLOR} switched off entirely; the hue is the
- * decoration on top, never the message.
- *
- * Stacked vertically on purpose — see the face doc block above
- * `CombatCardFace`: a horizontal row would widen {@link NAME_BAND_LEFT_CHROME} and
- * re-break the fanned-name read.
- */
-function RarityTrack({ pips, color, large, label }: { pips: number; color: string; large: boolean; label: string }) {
+function FreeCornerPill({ shape, glyph, value, ink, large }: {
+    shape: ReturnType<typeof glyphShapeFor>;
+    glyph: string;
+    value: string;
+    ink: string;
+    large: boolean;
+}) {
     const styles = useStyles();
+    const size = large ? FREE_PILL_GLYPH_LARGE : FREE_PILL_GLYPH;
     return (
         <View
-            style={large ? styles.plateRarityTrackLarge : styles.plateRarityTrack}
-            accessible
-            accessibilityRole="text"
-            accessibilityLabel={label}
-            testID="combat-card-face-rarity-pips"
+            pointerEvents="none"
+            testID="combat-card-face-free-corner"
+            style={[
+                styles.freePill,
+                large && styles.freePillLarge,
+                value ? (large ? styles.freePillValuedLarge : styles.freePillValued) : null,
+                { borderColor: ink },
+            ]}
         >
-            {Array.from({ length: RARITY_TRACK_SLOTS }, (_, i) => (
-                <View
-                    key={i}
-                    testID={`combat-card-face-rarity-pip-${i}`}
-                    style={[
-                        styles.plateRarityPip,
-                        large && styles.plateRarityPipLarge,
-                        i < pips ? { backgroundColor: color } : styles.plateRarityPipEmpty,
-                    ]}
-                />
-            ))}
+            {shape ? (
+                <Svg width={size} height={size} viewBox="0 0 24 24" testID="combat-card-face-free-glyph">
+                    <Path d={shape.d} fill={ink} fillRule={shape.evenodd ? 'evenodd' : 'nonzero'} />
+                </Svg>
+            ) : (
+                <Text
+                    style={[styles.freePillGlyph, { fontSize: size * 0.8, lineHeight: size, color: ink }]}
+                    allowFontScaling={false}
+                    testID="combat-card-face-free-glyph"
+                >
+                    {glyph}
+                </Text>
+            )}
+            {value ? (
+                <Text
+                    style={[styles.freePillValue, large && styles.freePillValueLarge]}
+                    allowFontScaling={false}
+                    testID="combat-card-face-free-value"
+                >
+                    {value}
+                </Text>
+            ) : null}
         </View>
     );
 }
 
+/** The free pill's glyph size, small and large face. */
+const FREE_PILL_GLYPH = 15;
+const FREE_PILL_GLYPH_LARGE = 20;
+/** Extra top padding the name band takes when the pill sits over it. */
+const FREE_PILL_BAND_PAD = 12;
+const FREE_PILL_BAND_PAD_LARGE = 16;
+
 export const CombatCardFace = React.memo(function CombatCardFace({
-    card, width, height, large = false, accent = null, heroOverride, namePeek = null, children,
+    card, width, height, large = false, accent = null, heroOverride, children,
 }: {
     card: CombatCardVM;
     width: number;
     height: number;
     large?: boolean;
-    /**
-     * Cap the NAME text's layout width (points) because something opaque
-     * covers the rest of this face. Only the hand fan passes it; every other
-     * instance (staged 92, reward offer 100, drag ghost, detail overlay) leaves
-     * it null and lays the name out across the full band.
-     */
-    namePeek?: number | null;
     /** Override the keyword/value/border colour (the armed staged-card read tint). */
     accent?: string | null;
     /** Override the hero value text (e.g. the live-recomputed Guard number). */
@@ -1833,8 +1771,8 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     const AXM = usePalette();
     const styles = useStyles();
     const f = card.face;
-    // PRINTED PLATE: STANCE colours the frame + the die cube; CATEGORY colours
-    // the FREE glyph + the keyword. Inert cards grey both honestly.
+    // STANCE colours the frame, the free pill and the die cube; the stat
+    // family (or CATEGORY) colours the keyword. Inert cards grey both honestly.
     const band = f.stanceColor;
     // A keyword wears its STAT FAMILY's dice colour and glyph
     // (body ⚡, mind ★, heart ♥) on the live hand; elsewhere, its category.
@@ -1845,75 +1783,65 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     const tintFor = (dir: 'up' | 'down' | null | undefined) => f.inert || !dir ? null
         : dir === 'up' ? (f.familyColor ?? AXM.sulfur) : AXM.ash;
     const scaledTint = tintFor(f.statScaled);
-    const freeTint = tintFor(f.freeStatScaled);
     const paidValue = paidValueFor(f, heroOverride);
     const freeInner = compactFree(f.freeValue ?? (f.freeHeroText || null));
     const hasFree = !!f.freeGlyph;
     // Effect-shaped silhouette for the FREE glyph;
     // keywords without a shape keep the text rune.
     const freeShape = glyphShapeFor(f.freeGlyphKey);
-    // A NARROW face (the reward-draft offer at 100pt, a compact staged card at
-    // 92pt) cannot seat FREE | PAID side by side: the fixed FREE cell and the
-    // stance cube leave the keyword and value ~8pt, which react-native-web
-    // ellipsizes to "B..", "D.". `adjustsFontSizeToFit` is a silent no-op on
-    // web, so the answer is layout:
-    // the ledger STACKS (FREE row over PAID row, full width each) and the
-    // text wraps under an explicit lineHeight instead of clipping. A hand
-    // card stacks too when its keyword is too long for the column the FREE
-    // cell leaves (`paidLedgerFit`).
+    // The card's own colour: the pill's ring and glyph match the frame.
+    const cardInk = f.inert ? AXM.ash : (accent ?? band);
     const narrow = !large && width < NARROW_FACE_W;
-    const fit = large ? null : paidLedgerFit({
-        width,
-        keyword: f.keyword ? `${f.familyGlyph ? `${f.familyGlyph} ` : ''}${f.keyword.toUpperCase()}` : '',
-        value: paidValue,
-        freeInner,
-        hasFree: !!f.freeGlyph,
-    });
-    const stacked = fit?.stacked ?? false;
+    const keywordText = f.keyword ? `${f.familyGlyph ? `${f.familyGlyph} ` : ''}${f.keyword.toUpperCase()}` : '';
+    // One line, one size: a small face sizes its PAID line to the width past
+    // the die cube (`paidLedgerFit`); the large face keeps its own sizes.
+    const lineSize = large ? null : paidLedgerFit({ width, keyword: keywordText, value: paidValue }).size;
     const bandH = large ? 36 : 26;
     const ledgerH = large ? 60 : 42;
-    const glyphSize = large ? 38 : narrow ? 18 : 24;
     // The drop shadow is STANCE-coloured. It is
     // applied inline on `faceOuter` rather than in the static style, because
     // the colour is per-card data; `accent` (the armed staged-card read tint)
     // wins where set, so the shadow always matches the frame above it.
 
     // The rarity band, derived ONCE by `card-rarity.engine` from the card's
-    // own rank; hues come from `RARITY_COLOR`. (`band`, just above, is the
-    // STANCE colour — these two are different systems on one face.)
+    // own rank. No face draws it; the large face prints the word and every
+    // face says it to a screen reader.
     const rarBand = rarityFor(card);
     const rarColor = RARITY_COLOR[rarBand];
     const rarLabel = RARITY_LABEL[rarBand];
     return (
         <View style={[styles.faceOuter, { width, height, shadowColor: accent ?? band }]}>
             <View style={[styles.faceCard, { borderColor: accent ?? band }]}>
-                {/* ① NAME BAND — horizontal blackletter on solid ink; the wax
-                    pip TRACK carries rarity. The fan's visible sliver
-                    starts here.
-                    A long name wraps to a second line (the band grows, the art
-                    plate gives) rather than truncating to a stub.
-
-                    That wrap only helps if the text is LAID OUT in
-                    the width the player can see. A fanned card is covered by
-                    its right-hand neighbour, so `namePeek` caps the text box to
-                    the surviving sliver and the name wraps inside it — without
-                    the cap the tail is laid out correctly and then painted over,
-                    which reads as a truncation ("CHILBLAI") but is occlusion. */}
-                <View style={[styles.plateBand, { minHeight: bandH }]} pointerEvents="none" testID="combat-card-face-band">
-                    {/* The track carries the WORD for a screen reader, so a face
-                        that is NOT wrapped in a labelled pressable (the staged
-                        card, the drag ghost) still announces its rarity. Where
+                {/* ① NAME BAND — horizontal blackletter on solid ink, one line.
+                    A fanned card's name runs on under its right-hand neighbour;
+                    the tap reads it whole. When the free pill sits over the
+                    band's corner, the band takes top padding so the pill never
+                    covers the name. */}
+                <View
+                    style={[
+                        styles.plateBand,
+                        { minHeight: bandH },
+                        hasFree ? { paddingTop: large ? FREE_PILL_BAND_PAD_LARGE : FREE_PILL_BAND_PAD } : null,
+                    ]}
+                    pointerEvents="none"
+                    testID="combat-card-face-band"
+                >
+                    {/* The spacer carries the rarity WORD for a screen reader, so
+                        a face that is NOT wrapped in a labelled pressable (the
+                        staged card, the drag ghost) still announces it. Where
                         the face IS inside one — the hand card and the reward
                         tile — that parent label wins, and both of those name the
                         rarity themselves. */}
-                    <RarityTrack pips={RARITY_PIPS[rarBand]} color={rarColor} large={large} label={rarLabel} />
+                    <View
+                        style={styles.plateRaritySpacer}
+                        accessible
+                        accessibilityRole="text"
+                        accessibilityLabel={rarLabel}
+                        testID="combat-card-face-rarity-a11y"
+                    />
                     <Text
-                        style={[
-                            styles.plateName,
-                            large && styles.plateNameLarge,
-                            namePeek != null && { maxWidth: namePeek },
-                        ]}
-                        numberOfLines={2}
+                        style={[styles.plateName, large && styles.plateNameLarge]}
+                        numberOfLines={1}
                         allowFontScaling={false}
                         testID="combat-card-face-name"
                     >
@@ -1934,10 +1862,10 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                         </Text>
                     ) : null}
                 </View>
-                {/* ② ART PLATE — a framed print behind a hairline rule; dark
-                    margins, no wash, no scrim. Inert cards grey the plate. */}
-                <View style={styles.plateArtWrap} pointerEvents="none">
-                    <View style={styles.plateArtFrame}>
+                {/* ② ART PLATE — seamless: no mat, no frame, no rules; no wash,
+                    no scrim. Inert cards grey the plate. */}
+                <View style={styles.plateArtWrap} pointerEvents="none" testID="combat-card-face-art">
+                    <View style={styles.plateArtFrame} testID="combat-card-face-art-frame">
                         <Image
                             source={getCardArt(card.cardId)}
                             style={[StyleSheet.absoluteFill, artMirrored(card.cardId) && { transform: [{ scaleX: -1 }] }]}
@@ -1952,60 +1880,57 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                         ) : null}
                     </View>
                 </View>
-                {/* ③ LEDGER — solid ink ground: FREE cell | rule | PAID cell.
-                    No prose; the overlay explains. */}
+                {/* ③ PAID LINE — one row on solid ink: the stance die cube,
+                    then `[family glyph] KEYWORD value` as a single line. A PAID
+                    headline with no keyword prints its value alone. No prose;
+                    the overlay explains. */}
                 <View
-                    style={[styles.plateLedger, stacked ? styles.plateLedgerStacked : { minHeight: ledgerH }]}
+                    style={[styles.plateLedger, { minHeight: ledgerH }]}
                     pointerEvents="none"
-                    testID={stacked ? 'combat-card-face-ledger-stacked' : 'combat-card-face-ledger'}
+                    testID="combat-card-face-ledger"
                 >
-                    {hasFree ? (
-                        <View style={styles.plateFreeCell}>
-                            {freeShape ? (
-                                <Svg width={glyphSize} height={glyphSize} viewBox="0 0 24 24">
-                                    <Path
-                                        d={freeShape.d}
-                                        fill={f.inert ? AXM.ash : kwColor}
-                                        fillRule={freeShape.evenodd ? 'evenodd' : 'nonzero'}
-                                    />
-                                </Svg>
-                            ) : (
-                                <Text style={[styles.plateFreeGlyph, { fontSize: glyphSize * 0.85, lineHeight: glyphSize, color: f.inert ? AXM.ash : kwColor }]} allowFontScaling={false}>{f.freeGlyph}</Text>
-                            )}
-                            {freeInner ? (
-                                <Text style={[styles.plateFreeValue, large && styles.plateFreeValueLarge, freeTint ? { color: freeTint } : null]} allowFontScaling={false}>{freeInner}</Text>
-                            ) : null}
-                        </View>
-                    ) : null}
-                    {hasFree ? <View style={stacked ? styles.plateRuleAcross : styles.plateRule} /> : null}
-                    <View style={styles.platePaidCell}>
-                        <StanceCube color={band} size={large ? 20 : narrow ? 12 : 14} />
-                        <View style={styles.paidTextWrap}>
-                            {f.keyword ? (
-                                <Text
-                                    style={[styles.paidKeyword, large && styles.paidKeywordLarge, fit && { fontSize: fit.keywordSize, lineHeight: fit.keywordSize + 2 }, { color: kwColor }]}
-                                    numberOfLines={large ? 1 : 2}
-                                    allowFontScaling={false}
-                                    testID="combat-card-face-keyword"
-                                >
-                                    {f.familyGlyph ? `${f.familyGlyph} ` : ''}{f.keyword.toUpperCase()}
-                                </Text>
-                            ) : null}
-                            {paidValue ? (
-                                <Text
-                                    style={[styles.paidValue, large && styles.paidValueLarge, fit && { fontSize: fit.valueSize, lineHeight: fit.valueSize + 4 }, scaledTint ? { color: scaledTint } : null]}
-                                    numberOfLines={1}
-                                    allowFontScaling={false}
-                                    testID="combat-card-face-value"
-                                >
-                                    {paidValue}
-                                </Text>
-                            ) : null}
-                        </View>
-                    </View>
+                    <StanceCube color={band} size={large ? 20 : narrow ? 12 : 14} />
+                    <Text
+                        style={styles.paidLine}
+                        numberOfLines={1}
+                        allowFontScaling={false}
+                        testID="combat-card-face-paid-line"
+                    >
+                        {keywordText ? (
+                            <Text
+                                style={[
+                                    styles.paidKeyword,
+                                    large && styles.paidKeywordLarge,
+                                    lineSize != null && { fontSize: lineSize, lineHeight: lineSize + 3 },
+                                    { color: kwColor },
+                                ]}
+                                testID="combat-card-face-keyword"
+                            >
+                                {keywordText}{paidValue ? ' ' : ''}
+                            </Text>
+                        ) : null}
+                        {paidValue ? (
+                            <Text
+                                style={[
+                                    styles.paidValue,
+                                    large && styles.paidValueLarge,
+                                    lineSize != null && { fontSize: lineSize, lineHeight: lineSize + 3 },
+                                    scaledTint ? { color: scaledTint } : null,
+                                ]}
+                                testID="combat-card-face-value"
+                            >
+                                {paidValue}
+                            </Text>
+                        ) : null}
+                    </Text>
                 </View>
                 {children}
             </View>
+            {/* The free corner pill — a sibling of the frame, so the frame's
+                `overflow: hidden` cannot clip the half that straddles it. */}
+            {hasFree ? (
+                <FreeCornerPill shape={freeShape} glyph={f.freeGlyph} value={freeInner} ink={cardInk} large={large} />
+            ) : null}
         </View>
     );
 });
@@ -2032,7 +1957,7 @@ const LIFTED_CARD_Z = 30;
  * both on the commit the drag ghost waits on. (Drag-perf hypothesis 1/4.)
  */
 export const FanCard = React.memo(function FanCard({
-    card, gesture, marginLeft, tilt, zIndex, liftedUid, namePeek,
+    card, gesture, marginLeft, tilt, zIndex, liftedUid,
 }: {
     card: CombatCardVM;
     /** Cached per uid by the board — identity-stable for the card's life. */
@@ -2044,7 +1969,6 @@ export const FanCard = React.memo(function FanCard({
     /** Uid of the hand card in flight (null = none). Identity-stable; the
      *  card dims and rises when it equals its own uid. */
     liftedUid: SharedValue<string | null>;
-    namePeek: number | null;
 }) {
     const uid = card.uid;
     // Raise above the neighbours while in flight — on the outer node, the one
@@ -2075,23 +1999,21 @@ export const FanCard = React.memo(function FanCard({
                 accessibilityHint="Drag up to stage, or tap to read"
             >
                 <Animated.View style={liftDimStyle}>
-                    <HandCard card={card} namePeek={namePeek} />
+                    <HandCard card={card} />
                 </Animated.View>
             </Animated.View>
         </GestureDetector>
     );
 });
 
-function HandCard({ card, namePeek = null }: { card: CombatCardVM; namePeek?: number | null }) {
+function HandCard({ card }: { card: CombatCardVM }) {
     const styles = useStyles();
-    // `namePeek` is null for the topmost (rightmost) fanned card — nothing
-    // covers it, so its name uses the full band. See `nameColumnPeek`.
     // A program card neither of whose lines can be played now reads dimmed
     // and says so; the overlay (tap) gives the reasons.
     const stuck = !!card.play?.freeBlock && !!card.play?.paidBlock;
     return (
         <View style={stuck ? styles.handCardStuck : null}>
-            <CombatCardFace card={card} width={HAND_CARD_W} height={HAND_CARD_H} namePeek={namePeek}>
+            <CombatCardFace card={card} width={HAND_CARD_W} height={HAND_CARD_H}>
                 {stuck ? (
                     <View style={styles.stuckBadge} pointerEvents="none" testID="combat-card-stuck">
                         <Text style={styles.stuckBadgeText} allowFontScaling={false}>{PROGRAM_COPY.cantPlay}</Text>
@@ -2339,10 +2261,11 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
         textShadowColor: 'rgba(0,0,0,0.95)', textShadowRadius: 3,
     },
 
-    // ── Shared card FACE — THE PRINTED PLATE ─────────────────────────────────
-    // A page of the codex: name band on ink, framed art plate behind a
-    // hairline rule, solid-ground ledger. Stance colours the frame; category
-    // colours glyph + keyword. AXM tokens throughout — no scrim, no washes.
+    // ── Shared card FACE — ONE FACE, EVERYWHERE ──────────────────────────────
+    // A page of the codex: name band on ink, seamless art, one PAID line, and
+    // the free pill on the corner. Stance colours the frame and the pill;
+    // family or category colours the keyword. AXM tokens throughout — no
+    // scrim, no washes.
     // A card carries exactly ONE border, the stance colour on `faceCard`. The
     // drop shadow is a depth cue in the card's own stance colour, supplied
     // inline by `CombatCardFace` (`shadowColor` is per-card data, so it cannot
@@ -2352,28 +2275,29 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
         shadowOpacity: 0.5, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: 6,
     },
     faceCard: { flex: 1, borderWidth: 1.5, borderRadius: 4, backgroundColor: AXM.deepBg, overflow: 'hidden' },
-    // ① The name band — horizontal blackletter; the wax pip TRACK is the rarity
-    // (see the face doc block above `CombatCardFace`).
+    // ① The name band — horizontal blackletter, one line, no rule under it.
     plateBand: {
         flexDirection: 'row', alignItems: 'center', paddingHorizontal: 6, gap: 5,
         backgroundColor: AXM.deepBg,
-        borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: AXM.divider,
     },
-    // The track is a COLUMN (RN's default `flexDirection`), so its width is one
-    // pip's width and `NAME_BAND_LEFT_CHROME` counts one pip. Laying the
-    // three slots out in a row instead would widen the band's left chrome by
-    // ~14pt and shave that off every fanned card's visible name.
-    plateRarityTrack: { alignItems: 'center', justifyContent: 'center', gap: 2 },
-    plateRarityTrackLarge: { alignItems: 'center', justifyContent: 'center', gap: 3 },
-    // `plateRarityPip.width` is summed into NAME_BAND_LEFT_CHROME off the
-    // shipped sheet by `CombatBoard.handfan.test.tsx` — changing it moves the
-    // fan's name box, so change it knowing that.
-    plateRarityPip: { width: 5, height: 5, borderRadius: 3 },
-    plateRarityPipLarge: { width: 7, height: 7, borderRadius: 4 },
-    // An UNEARNED slot: hollow, not merely dimmer. Filled-vs-hollow is a shape
-    // difference, which is what keeps "one of three" readable in greyscale and
-    // to a colourblind player — "never colour alone".
-    plateRarityPipEmpty: { backgroundColor: 'transparent', borderWidth: 1, borderColor: AXM.ash },
+    // The rarity spacer: draws nothing, says the rarity to a screen reader.
+    // Its width is summed into NAME_BAND_LEFT_CHROME off the shipped sheet by
+    // `CombatBoard.handfan.test.tsx`.
+    plateRaritySpacer: { width: 5, alignSelf: 'stretch' },
+    // The free corner pill — straddles the face's top-left corner. Positioned
+    // on `faceOuter` (which does not clip), never inside `faceCard` (which does).
+    freePill: {
+        position: 'absolute', top: -15, left: -6, zIndex: 5,
+        height: 26, minWidth: 26, borderRadius: 13, borderWidth: 1.5,
+        backgroundColor: HUE.medallionBg,
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 3,
+    },
+    freePillLarge: { top: -18, left: -8, height: 34, minWidth: 34, borderRadius: 17, gap: 4 },
+    freePillValued: { paddingHorizontal: 6 },
+    freePillValuedLarge: { paddingHorizontal: 9 },
+    freePillGlyph: { textAlign: 'center' },
+    freePillValue: { fontFamily: FONTS.mono, fontSize: 11, lineHeight: 13, fontWeight: '700', color: HUE.white },
+    freePillValueLarge: { fontSize: 15, lineHeight: 18 },
     // The named rarity tag — `large` faces only. Sits at the band's tail, after the
     // name's `flex: 1`, so it can never squeeze the name on a small face
     // (it is not rendered there at all).
@@ -2381,37 +2305,24 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
         fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 1.6,
         marginLeft: 6, flexShrink: 0,
     },
-    // Explicit lineHeights: the name / keyword / value may WRAP (never clip)
-    // on a small face, so their two-line height is a known quantity.
+    // The name keeps ONE line on every face; its explicit lineHeight makes the
+    // band's height a known quantity.
     plateName: { flex: 1, fontFamily: FONTS.gothic, fontSize: 13, lineHeight: 15, letterSpacing: 0.4, color: AXM.parchment, paddingVertical: 2 },
     plateNameLarge: { fontSize: 20, lineHeight: 24, letterSpacing: 0.8 },
-    // ② The framed art plate — dark margins, hairline rule.
-    plateArtWrap: { flex: 1, padding: 4, backgroundColor: AXM.panelBg },
-    plateArtFrame: {
-        flex: 1, borderWidth: StyleSheet.hairlineWidth, borderColor: AXM.ash,
-        overflow: 'hidden', backgroundColor: AXM.deepBg,
-    },
+    // ② The art plate — seamless: no mat, no frame.
+    plateArtWrap: { flex: 1 },
+    plateArtFrame: { flex: 1, overflow: 'hidden' },
     plateInertWash: { ...StyleSheet.absoluteFillObject, backgroundColor: AXM.backdrop },
-    // ③ The ledger — FREE cell | hairline rule | PAID cell, solid ground.
+    // ③ The PAID line — die cube then one line of text, solid ground, no rule.
     plateLedger: {
-        flexDirection: 'row', alignItems: 'center', paddingHorizontal: 6, gap: 6,
+        flexDirection: 'row', alignItems: 'center', paddingHorizontal: 6, gap: 5,
         backgroundColor: AXM.deepBg,
-        borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: AXM.divider,
     },
-    // Narrow face: FREE row over PAID row, each the full ledger width.
-    plateLedgerStacked: { flexDirection: 'column', alignItems: 'stretch', paddingVertical: 4, gap: 3 },
-    plateFreeCell: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-    plateFreeGlyph: { textAlign: 'center' },
-    plateFreeValue: { fontFamily: FONTS.mono, fontSize: 12, fontWeight: '700', color: AXM.parchment },
-    plateFreeValueLarge: { fontSize: 17 },
-    plateRule: { width: StyleSheet.hairlineWidth, alignSelf: 'stretch', marginVertical: 6, backgroundColor: AXM.divider },
-    plateRuleAcross: { height: StyleSheet.hairlineWidth, alignSelf: 'stretch', backgroundColor: AXM.divider },
-    platePaidCell: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 5 },
-    paidTextWrap: { flex: 1 },
+    paidLine: { flex: 1 },
     // The keyword is the loudest word on the face — it is the whole read.
-    paidKeyword: { fontFamily: FONTS.sans, fontSize: 12, lineHeight: 14, letterSpacing: 0.8 },
+    paidKeyword: { fontFamily: FONTS.sans, fontSize: 12, lineHeight: 15, letterSpacing: 0.8 },
     paidKeywordLarge: { fontSize: 17, lineHeight: 20, letterSpacing: 1.2 },
-    paidValue: { fontFamily: FONTS.mono, fontSize: 11, lineHeight: 15, color: AXM.parchment },
+    paidValue: { fontFamily: FONTS.mono, fontSize: 12, lineHeight: 15, color: AXM.parchment },
     paidValueLarge: { fontSize: 15, lineHeight: 20 },
 }));
 

@@ -59,6 +59,8 @@
 - **mechanics-verify-misses-root-lints** · `npm run verify -w axiomancer-mechanics` passed, but root `npm test` failed `check-comments` on D-numbers in new code comments (ship CS1) → a phase that adds mechanics code runs root `npm test` before its first commit; code comments name no decision numbers · seen 1× · last 2026-10-13 · guarded by scripts/check-comments.mjs (root npm test)
 - **env-token-stale** · the main checkout's `.env` `GH_TOKEN` returned 401 and `.env` has no `GH_REPO`, so `loop-issue.mjs phase-open` failed while keyring `gh` worked (ship GS1) → when a `.env`-token call 401s, run `gh` without exporting `GH_TOKEN` (keyring auth) and pass `--repo` explicitly; T to refresh the `.env` token · seen 1× · last 2026-10-14 · open
 - **plot-from-dirty-worktree** · `/plot` Step 5's rebase cannot run in a worktree holding uncommitted prototype code, and stashing it risks the shared stash stack (plot BT2) → commit the plan files from `git worktree add --detach <tmp> origin/main`, junction `node_modules` there before root `npm test`, push, remove the temp worktree · seen 1× · last 2026-10-13 · open
+- **env-token-stale** · the `.env` GH_TOKEN returned 401 while `gh`'s keyring login worked, and `loop-issue.mjs` prefers the `.env` value (ship BT2a) → on a 401, run `gh` without GH_TOKEN and pass `GH_TOKEN=$(gh auth token)` to repo scripts; tell T the `.env` token needs rotating · seen 1× · last 2026-10-13 · open
+- **parallel-lane-scratchpad** · sibling march lanes share one session scratchpad; a sibling rewrote this lane's `g.sh` to point at its own worktree (ship BT2a) → each lane keeps temp files in its own `scratchpad/<lane>/` subfolder · seen 1× · last 2026-10-13 · open
 
 ## Adding a domain
 
