@@ -297,6 +297,18 @@
   doctrine. RC itself stays attended, and the tag, release and APK stay
   T's.
 
+### [ ] [score 4.0] Repo scripts fall back to `gh`'s keyring token when the `.env` token is rejected (lesson `env-token-stale`, seen 2×)
+- proposed: 2026-10-14, retro of ship BT2b (#529)
+- source signals: lesson `env-token-stale` (ship GS1, ship BT2a): the `.env` `GH_TOKEN` returns 401 while keyring `gh` works, and `loop-issue.mjs` prefers the `.env` value. SF1's `fillGhEnv` covers a missing token, not a rejected one.
+- proposed scope: 1 small phase. In `scripts/loop-issue.mjs`, retry once with `gh auth token` when a call returns 401, and log which token won; a `loop-issue.test.mjs` case with an injected 401. Then mark the lesson `guarded by`.
+- conflicts: none; no content.
+
+### [ ] [score 3.0] Keep sibling lanes out of each other's scratch files (lesson `parallel-lane-scratchpad`, seen 2×)
+- proposed: 2026-10-14, retro of ship BT2b (#529)
+- source signals: lesson `parallel-lane-scratchpad` (ship BT2a, ship BT2b): parallel march lanes share one session scratchpad, and a sibling rewrote a file at its root.
+- proposed scope: 1 small phase. A `guard.mjs` pre-write check that warns when a Write targets the scratchpad root instead of a `<lane>/` subfolder, with a hook test. Then mark the lesson `guarded by`.
+- conflicts: none; no content.
+
 ### [ ] [score 6.5] Combat board first-hand legibility at 375: the FREE chip unit, the phase ledger, the end cards under corner chrome, the threat preview headers
 - **Pass 27 note (2026-10-09):** critique pass 73 filed a desktop twin
   (`[MED]` the hand fan still overlaps at 1280, hiding every covered card's
