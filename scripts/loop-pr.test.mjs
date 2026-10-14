@@ -83,6 +83,19 @@ test('pr-resolve hands Claude only Read and Edit, on Haiku', () => {
   assert.match(resolve, /model: 'claude-haiku-5-5'/)
 })
 
+// claude-code-action rejects a `push` event ("Unsupported event type:
+// push"), so the Claude resolve must never ride the push run: the scan
+// dispatches one workflow_dispatch run per conflicted PR (issue #524).
+test('pr-resolve runs Claude only on a dispatched run, never on push', () => {
+  const resolveJob = resolve.split(/\n {2}resolve:\n/)[1]
+  assert.ok(resolveJob, 'resolve job present')
+  assert.match(resolveJob, /^ {4}if: github\.event_name == 'workflow_dispatch' && startsWith\(inputs\.branch, 'loop\/'\)$/m)
+  assert.match(resolve, /workflow_dispatch:\n {4}inputs:\n {6}branch:/)
+  assert.match(resolve, /gh workflow run pr-resolve\.yml[^\n]*\n[^\n]*-f branch="\$branch" -f pr="\$pr"/)
+  assert.match(resolve, /^ {2}actions: write$/m)
+  assert.doesNotMatch(resolveJob, /needs:/)
+})
+
 // --- nothing in the loop merges, auto-merges or force-pushes a PR -----------
 
 test('no workflow merges, auto-merges or force-pushes', () => {

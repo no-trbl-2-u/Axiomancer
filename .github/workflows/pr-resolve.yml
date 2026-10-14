@@ -8,6 +8,15 @@ name: pr-resolve
 # (skills/fix-ci.md §3.6), between a scripted prepare and finish. Push,
 # never force. The loop never merges a PR (D86).
 #
+# Two event shapes, one file:
+#   - push / bare workflow_dispatch -> `scan`. For each PR it cannot settle
+#     by union it starts one `workflow_dispatch` run of this file with
+#     `branch` and `pr` set.
+#   - workflow_dispatch with `branch` -> `resolve` (the Claude step).
+# The split exists because anthropics/claude-code-action rejects a `push`
+# event ("Unsupported event type: push"); every Claude resolve on the push
+# run failed in 0.3s until 2026-10-14 (AUDIT [infra], issue #524).
+#
 # Cost: free runners (public repo); Claude usage only when a conflict is
 # outside the union files.
 
@@ -15,24 +24,34 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 'loop/* branch to resolve with Claude. Empty = run the scan.'
+        required: false
+        type: string
+        default: ''
+      pr:
+        description: 'PR number for that branch (prompt only)'
+        required: false
+        type: string
+        default: ''
 
 permissions:
   contents: write
   pull-requests: write
   issues: write
-  actions: read
+  actions: write
   id-token: write
 
 jobs:
   scan:
+    if: github.event_name == 'push' || inputs.branch == ''
     runs-on: ubuntu-latest
     # Job-level and its own group (never nexus-loop): one scan at a time,
     # and a later push's scan waits rather than displacing this one.
     concurrency:
       group: pr-resolve
       cancel-in-progress: false
-    outputs:
-      claude: ${{ steps.scan.outputs.claude }}
     env:
       GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
       GH_REPO: ${{ github.repository }}
@@ -52,15 +71,29 @@ jobs:
       - name: Merge main into conflicting loop PRs
         id: scan
         run: node scripts/pr-resolve.mjs scan
+      # One dispatched run per conflicted PR: workflow_dispatch is an event
+      # claude-code-action accepts, and a dispatch made with GITHUB_TOKEN
+      # still starts a run (it is exempt from the no-recursion rule).
+      - name: Dispatch a Claude resolve per conflicted PR
+        if: steps.scan.outputs.claude != '' && steps.scan.outputs.claude != '[]'
+        env:
+          ITEMS: ${{ steps.scan.outputs.claude }}
+        run: |
+          echo "$ITEMS" | jq -c '.[]' | while read -r item; do
+            branch=$(echo "$item" | jq -r '.branch')
+            pr=$(echo "$item" | jq -r '.pr')
+            echo "dispatching a resolve for #$pr ($branch)"
+            gh workflow run pr-resolve.yml --repo "$GH_REPO" --ref main \
+              -f branch="$branch" -f pr="$pr"
+          done
 
   resolve:
-    needs: scan
-    if: needs.scan.outputs.claude != '' && needs.scan.outputs.claude != '[]'
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        item: ${{ fromJSON(needs.scan.outputs.claude) }}
+    if: github.event_name == 'workflow_dispatch' && startsWith(inputs.branch, 'loop/')
+    # One resolve per branch at a time; a second dispatch for the same
+    # branch waits for the first.
+    concurrency:
+      group: pr-resolve-${{ inputs.branch }}
+      cancel-in-progress: false
     uses: ./.github/workflows/_claude-skill.yml
     secrets: inherit
     with:
@@ -71,11 +104,11 @@ jobs:
       pre_run: |
         git config user.name 'claude[bot]'
         git config user.email '41898282+claude[bot]@users.noreply.github.com'
-        node scripts/pr-resolve.mjs prepare --branch '${{ matrix.item.branch }}'
+        node scripts/pr-resolve.mjs prepare --branch '${{ inputs.branch }}'
       post_run: |
         git config user.name 'claude[bot]'
         git config user.email '41898282+claude[bot]@users.noreply.github.com'
-        node scripts/pr-resolve.mjs finish --branch '${{ matrix.item.branch }}'
-      prompt: '/fix-ci --resolve ${{ matrix.item.branch }} (PR #${{ matrix.item.pr }}). The conflicted files are listed one per line in .git/pr-resolve-files.txt.'
+        node scripts/pr-resolve.mjs finish --branch '${{ inputs.branch }}'
+      prompt: '/fix-ci --resolve ${{ inputs.branch }} (PR #${{ inputs.pr }}). The conflicted files are listed one per line in .git/pr-resolve-files.txt.'
       model: 'claude-haiku-5-5'
       timeout_minutes: 30
