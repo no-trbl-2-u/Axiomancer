@@ -626,15 +626,6 @@
 - suggested fix: add a `DEAL` pair for `r.damage` in `riderPairs` (stat-scaled the way the Ward's guard is; `FREE_KW_GLYPH` already maps `DEAL` to ⚔), and pin a Blow face with its FREE pill in the presenter test.
 - source: critique-drive (unattended)
 
-### [LOW] combat / desktop — the footer dock stretches the VITAE bar 1075px, so the VITAE figure sits a screen's width from the pile counts
-- pass: 85 (commit 93f05dfe)
-- viewport: desktop (1280x800)
-- category: visual
-- observation: BT2b's footer dock spans the whole window. Its VITAE column is `flex: 1`, so at 1280 wide "♥ 160 / 160" sits at the far left, the deck and discard counts at the far right next to END, and one thin green bar runs about 1075px between them, under a hand that occupies the middle 650px. The menu, rest, village and preview screens all cap their content at a 520 column for this reason.
-- evidence: `.critique-artifacts/desktop/04-combat-board.png` (dock row y 740-790: VITAE at x 68, piles at x 1090-1140, bar x 68-1143); `axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx` `vitaeCol: { flex: 1 }`.
-- suggested fix: cap the dock's VITAE column (for example at the hand's width, or a `DOCK_VITAE_MAX_WIDTH`) on wide windows and keep the piles beside the figure; phones unchanged. Pin the cap in `CombatBoard.footer-dock.test.tsx`.
-- source: critique-drive (unattended)
-
 ### [LOW] combat / a11y — the phase ledger under VITAE is five unlabelled marks, so a screen reader never hears which phases were cleared or overwhelmed
 - pass: 85 (commit 93f05dfe)
 - viewport: n/a (screen reader)
@@ -1019,6 +1010,16 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] combat / desktop — the footer dock stretches the VITAE bar 1075px, so the VITAE figure sits a screen's width from the pile counts — RESOLVED 2026-10-14 (commit 0879fb60; the VITAE column stops at DOCK_VITAE_MAX_WIDTH 360, so a wide window keeps the piles beside the figure and END stays at the right; a phone column never reaches the cap; pinned in CombatBoard.footer-dock.test.tsx)
+- issue: #533
+- pass: 85 (commit 93f05dfe)
+- viewport: desktop (1280x800)
+- category: visual
+- observation: BT2b's footer dock spans the whole window. Its VITAE column is `flex: 1`, so at 1280 wide "♥ 160 / 160" sits at the far left, the deck and discard counts at the far right next to END, and one thin green bar runs about 1075px between them, under a hand that occupies the middle 650px. The menu, rest, village and preview screens all cap their content at a 520 column for this reason.
+- evidence: `.critique-artifacts/desktop/04-combat-board.png` (dock row y 740-790: VITAE at x 68, piles at x 1090-1140, bar x 68-1143); `axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx` `vitaeCol: { flex: 1 }`.
+- suggested fix: cap the dock's VITAE column (for example at the hand's width, or a `DOCK_VITAE_MAX_WIDTH`) on wide windows and keep the piles beside the figure; phones unchanged. Pin the cap in `CombatBoard.footer-dock.test.tsx`.
+- source: critique-drive (unattended)
 
 ### [x] [MED] exploration hub — sealed nodes draw no visible mark, so most roads end at bare vertices — RESOLVED 2026-10-14 (commit cf095d5a; the node wrapper no longer dims sealed nodes by 0.45 on top of NodeMark, so SEALED_MARK_OPACITY (ring 0.85, disc 0.7) is the whole dimming; pinned in ExplorationNode.test.tsx)
 - issue: #527
