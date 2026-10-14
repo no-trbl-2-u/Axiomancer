@@ -13,9 +13,12 @@
  *   2. Every hand card's name is one line with no width cap.
  *   3. Non-hand faces (staged, reward offer, detail overlay) are one line and
  *      uncapped too.
- *   4. The tap-to-read hatch is on screen while the fan is still occluded, and
- *      both hint lines fit the single line they are given.
+ *   4. The fan carries no tap hint (D92), so nothing sits in the strip the
+ *      FREE corner pills overhang; the dock keeps room for that overhang
+ *      above the cards; the staged hint fits its one line.
  *   5. Tapping a hand card reaches `onInspect`.
+ *   6. At 375 a five-card fan shows the start of every covered card's name
+ *      (the full-width band, BT2b A6).
  */
 
 import React from 'react';
@@ -30,6 +33,7 @@ import { initializeCombatEncounter, rollEncounterDice } from '@mechanics';
 import {
     CombatBoard, CombatCardFace, handFanLayout,
     NAME_BAND_LEFT_CHROME, useCombatBoardStyles,
+    HAND_CARD_H, HAND_FAN_PAD_BOTTOM, HAND_PILL_OVERHANG,
     type DragController,
 } from '@/components/combat/encounter/CombatBoard';
 import { buildCombatViewModel, type CombatViewModel } from '@/state/presenters/combat-encounter.engine';
@@ -128,6 +132,14 @@ describe('the hand fan prints every name on one uncapped line', () => {
         expect(handFanLayout(PHONE.width, vm.hand.length).overlap).toBeGreaterThan(0);
     });
 
+    it('a five-card fan at 375 shows the start of every covered name (A6)', () => {
+        // A covered card shows `step` points; its name band's chrome eats the
+        // first NAME_BAND_LEFT_CHROME of them. What is left must hold the
+        // start of a name: about three of the band's 13pt gothic capitals.
+        const { step } = handFanLayout(PHONE.width, 5);
+        expect(step - NAME_BAND_LEFT_CHROME).toBeGreaterThanOrEqual(30);
+    });
+
     it('every hand card, covered or not, keeps one line and no width cap', () => {
         const { vm } = renderBoard();
         const names = screen.getAllByTestId('combat-card-face-name');
@@ -181,23 +193,29 @@ const textOf = (node: { props: { children?: unknown } }): string => {
  */
 const ONE_LINE_BUDGET = 56;
 
-describe('tap-to-read — the affordance the board now advertises', () => {
-    it('states the tap hatch on the fan itself, while the names are still occluded', () => {
-        // A hint shown only after a card is staged comes too late: the player
-        // needs it to choose which covered card to lift.
+describe('tap-to-read — the fan carries no hint, and a tap still reads the card', () => {
+    it('renders no tap hint over the fan (BT2b A8)', () => {
         const { vm } = renderBoard();
-        // A covered card exists, so at least one name is being clipped right
-        // now: this is precisely when the hatch has to be on screen.
+        // Non-vacuity: a covered card exists, which is when the old hint showed.
         expect(vm.hand.length).toBeGreaterThan(1);
-        expect(screen.getByTestId('combat-tap-hint')).toBeTruthy();
-        expect(screen.getByText(/tap .*card.* to read/i)).toBeTruthy();
+        expect(screen.queryByTestId('combat-tap-hint')).toBeNull();
+        expect(screen.queryByText(/tap .*card.* to read/i)).toBeNull();
     });
 
-    it('the fan hatch fits the one line it is given', () => {
-        renderBoard();
-        const node = screen.getByTestId('combat-tap-hint');
-        expect(node.props.numberOfLines).toBe(1);
-        expect(textOf(node).length).toBeLessThanOrEqual(ONE_LINE_BUDGET);
+    it('the hand dock keeps the FREE pill overhang above the card tops, inside its clip', () => {
+        // The pill straddles each card's top edge; the dock clips. The room
+        // above the cards is the dock less the card and the fan's bottom pad,
+        // and it must hold the pill's whole overhang, read off the SHIPPED
+        // sheet. Nothing else is drawn in that strip.
+        const { result } = renderHook(() => useCombatBoardStyles());
+        const sheet = result.current;
+        const overhang = -(sheet.freePill.top as number);
+        expect(overhang).toBeGreaterThan(0);
+        expect(HAND_PILL_OVERHANG).toBeGreaterThanOrEqual(overhang);
+        expect(sheet.dock.overflow).toBe('hidden');
+        expect(sheet.fan.paddingBottom).toBe(HAND_FAN_PAD_BOTTOM);
+        const roomAbove = (sheet.dock.height as number) - HAND_FAN_PAD_BOTTOM - HAND_CARD_H;
+        expect(roomAbove).toBeGreaterThanOrEqual(overhang);
     });
 
     it('the staged hint fits the one line it is given', () => {

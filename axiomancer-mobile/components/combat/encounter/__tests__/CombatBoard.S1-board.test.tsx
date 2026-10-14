@@ -1,11 +1,10 @@
 /**
  * CombatBoard — board chrome at the phone viewport.
  *
- *  - The hand fan lays out in the chrome-free band between the player
- *    medallion (bottom-left) and the END stack (bottom-right)
- *    (`handFanLayout`), not edge-to-edge under both.
+ *  - The hand fan lays out across the full board band (`handFanLayout`):
+ *    the avatar and END live in the footer dock, not in the corners (D92).
  *  - The board fits the viewport: the END consequence line is anchored inward
- *    (anchored LEFT of the disc, its 140pt box would end off-screen) and the
+ *    (anchored LEFT of the button, its 140pt box would end off-screen) and the
  *    board clips at its own edge.
  *  - `MomentumChainChip` is tappable and carries a ⓘ mark.
  *  - `compactFree` prints a whole value, never a chopped slice such as '×4 '
@@ -21,7 +20,7 @@ import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { initializeCombatEncounter, rollEncounterDice } from '@mechanics';
 import {
     CombatBoard, compactFree, handFanLayout,
-    HAND_CARD_W, HAND_FAN_LEFT, HAND_FAN_RIGHT, HAND_FAN_MIN_STEP,
+    HAND_CARD_W, HAND_FAN_BOARD_EDGE, HAND_FAN_MIN_STEP,
     type DragController,
 } from '@/components/combat/encounter/CombatBoard';
 import { buildCombatViewModel, type CombatViewModel } from '@/state/presenters/combat-encounter.engine';
@@ -91,45 +90,26 @@ const flat = (testID: string) => StyleSheet.flatten(screen.getByTestId(testID).p
 /** The fan's total laid-out width for `n` cards at the given step. */
 const fanWidth = (n: number, step: number) => (n < 1 ? 0 : HAND_CARD_W + step * (n - 1));
 
-// ── The fan sits BESIDE the corner medallions ──────────────────────────
+// ── The fan takes the full board band ──────────────────────────────
 
-describe('S1-board-C11 — the hand fan lays out beside the corner chrome', () => {
-    it('reserves both corner footprints instead of running edge-to-edge', () => {
+describe('S1-board-C11 — the hand fan lays out across the full board width (D92)', () => {
+    it('insets the fan by the board edge only, the same on both sides', () => {
         renderBoard();
         const fan = flat('combat-hand');
-        expect(fan.paddingLeft).toBe(HAND_FAN_LEFT);
-        expect(fan.paddingRight).toBe(HAND_FAN_RIGHT);
-        // No edge-to-edge inset on either side.
-        expect(fan.paddingHorizontal).toBeUndefined();
+        expect(fan.paddingHorizontal).toBe(HAND_FAN_BOARD_EDGE);
+        expect(fan.paddingLeft).toBeUndefined();
+        expect(fan.paddingRight).toBeUndefined();
     });
 
-    it('a hand that fits stays entirely clear of both medallions', () => {
-        for (const n of [1, 2, 3]) {
+    it('a hand that fits the band stays inside it', () => {
+        for (const n of [1, 2, 3, 4, 5, 6]) {
             const { band, step } = handFanLayout(PHONE.width, n);
-            expect(band).toBe(PHONE.width - HAND_FAN_LEFT - HAND_FAN_RIGHT);
-            expect(fanWidth(n, step)).toBeLessThanOrEqual(band);
-        }
-    });
-
-    it('an oversized hand overflows the band by points, not by whole cards', () => {
-        // The reference edge-to-edge band is the full screen less 12pt insets,
-        // which runs the fan right under the 102pt medallion and the 90pt END disc.
-        const OLD_BAND = PHONE.width - 24;
-        for (const n of [4, 5, 6]) {
-            const { band, step } = handFanLayout(PHONE.width, n);
-            const spill = (fanWidth(n, step) - band) / 2;   // symmetric: justify center
-            const oldStep = Math.min(HAND_CARD_W - 16, Math.max(HAND_FAN_MIN_STEP, (OLD_BAND - HAND_CARD_W) / (n - 1)));
-            const oldSpillLeft = HAND_FAN_LEFT - (PHONE.width - fanWidth(n, oldStep)) / 2;
-            expect(spill).toBeLessThan(oldSpillLeft);
-            // Whatever the hand size, the outermost card keeps its touch centre
-            // clear of the corner chrome.
-            expect(spill).toBeLessThan(HAND_CARD_W / 2);
+            expect(band).toBe(PHONE.width - HAND_FAN_BOARD_EDGE * 2);
+            expect(fanWidth(n, step)).toBeLessThanOrEqual(band + 1e-9);
         }
     });
 
     it('never tightens a card below the readable sliver, and never on a single card', () => {
-        // A hand the chrome band cannot seat takes the BOARD band, so the
-        // floor binds only for a very large hand.
         expect(handFanLayout(PHONE.width, 12).step).toBe(HAND_FAN_MIN_STEP);
         expect(handFanLayout(PHONE.width, 1).step).toBe(HAND_CARD_W);
         expect(handFanLayout(PHONE.width, 1).overlap).toBe(0);
@@ -150,10 +130,10 @@ describe('S1-board-C12 — nothing on the board runs past the viewport', () => {
         renderBoard(withDeadTray);
         expect(screen.getByTestId('combat-end-consequence')).toBeTruthy();
         const wrap = flat('combat-end-consequence-wrap');
-        // Anchored to the medallion's right edge: the box runs INTO the board.
+        // Anchored to the END button's right edge: the box runs INTO the board.
         expect(wrap.right).toBe(0);
         expect(wrap.left).toBeUndefined();
-        // Its own footprint (right inset 10 + width) still lands on-screen.
+        // Its own footprint (the dock's right inset 10 + width) still lands on-screen.
         expect(10 + (wrap.width as number)).toBeLessThanOrEqual(PHONE.width);
     });
 });
