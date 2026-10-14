@@ -89,7 +89,7 @@ export interface BlacksmithOutcomeVM {
     honed: number;
     tempered: number;
     swapped: number;
-    /** Compact tally chips, e.g. "2 HONED", "−7s". */
+    /** Compact tally chips, e.g. "2 HONED", "−7 SHILLINGS". */
     chips: readonly string[];
 }
 
@@ -119,11 +119,11 @@ const COLOR_LABELS: Record<DieGearColor, string> = Object.freeze({
  * Shilling suffix for forge prices.
  *
  * The forge prices everything in SHILLINGS (`ANVIL_VERB_PRICING`). `◆` is
- * the combat board's CONVICTION mark, so it is not used here. `s` is the
- * suffix the village uses on its own ware prices (`12s`), so the two shops
- * agree.
+ * the combat board's CONVICTION mark, so it is not used here. The unit is
+ * spelled out, as the village stalls print their prices (`12 SHILLINGS`), so
+ * the two shops agree.
  */
-const CURRENCY_SUFFIX = 's';
+const CURRENCY_SUFFIX = ' SHILLINGS';
 
 /**
  * The smith's opening speech.

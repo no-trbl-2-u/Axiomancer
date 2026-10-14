@@ -50,7 +50,7 @@ function hapticImpact(style: ImpactFeedbackStyle): void {
 }
 
 /**
- * A single service offer as a button: its label, its shilling price, the trade
+ * A single service offer as a button: its label over its price in SHILLINGS, the trade
  * it makes (`MISS face → MANA`), and, when the offer is
  * greyed, the LOUD reason. Reads one `BlacksmithOfferVM` off the presenter;
  * mounted by `DieRow` (HONE + TEMPER) and `SwapRow` (SWAP) below.
@@ -82,9 +82,14 @@ function OfferButton({ offer, onPress }: { offer: BlacksmithOfferVM; onPress: ()
                 <Text style={[styles.offerLabel, !offer.enabled && { color: AXM.bone }]}>
                     {offer.label}
                 </Text>
-                {/* Shillings, not ◆ — that glyph is combat's CONVICTION. */}
-                <Text style={[styles.offerPrice, !offer.enabled && { color: AXM.bone }]}>
-                    {offer.price}s
+                {/* Shillings, not ◆ — that glyph is combat's CONVICTION. The
+                    unit is spelled out on its own line under the verb, so
+                    HONE and TEMPER side by side still fit a phone. */}
+                <Text
+                    style={[styles.offerPrice, !offer.enabled && { color: AXM.bone }]}
+                    testID={`blacksmith-offer-${offer.id}-price`}
+                >
+                    {offer.price} SHILLINGS
                 </Text>
             </TouchableOpacity>
             {/* HONE and TEMPER are the smith's words, not the
@@ -263,7 +268,7 @@ export default function BlacksmithScreen() {
                         <Text style={styles.body}>{vm.card.body}</Text>
                         {!vm.card.refused && vm.card.cost > 0 && (
                             <View style={styles.chipRow}>
-                                <Text style={styles.chip}>−{vm.card.cost}s</Text>
+                                <Text style={styles.chip} testID="blacksmith-card-cost">−{vm.card.cost} SHILLINGS</Text>
                                 <Text style={styles.chip}>{vm.card.verb.toUpperCase()} · {vm.card.color.toUpperCase()}</Text>
                             </View>
                         )}
@@ -405,9 +410,7 @@ const useStyles = makeStyles((AXM) => ({
         borderColor: AXM.sulfur,
         paddingVertical: 8,
         paddingHorizontal: 8,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+        gap: 2,
         backgroundColor: AXM.bg,
     },
     offerDisabled: { borderColor: AXM.ash, opacity: 0.5 },

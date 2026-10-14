@@ -630,14 +630,13 @@
 
 ## Pending
 
-### [LOW] anvil — HONE, TEMPER and SWAP prices read "40s" while the forge's budget says SHILLINGS
-- pass: residue of the pass-84 village fix (iterate 2026-10-14)
-- viewport: mobile (375x812)
-- category: comprehension
-- observation: the same bare "s" as the village stalls: `OfferButton` prints `{offer.price}s` and the card's cost chip `−{cost}s`, under a "<budget> SHILLINGS" header. Not changed with the village fix because HONE and TEMPER sit side by side (`offerRow`, each `flex: 1`, label left and price right), and at 375 wide "TEMPER" plus "40 SHILLINGS" in mono 12 likely overruns the ~144pt button.
-- evidence: `axiomancer-mobile/app/blacksmith/index.tsx:86-88` and `:266`; `styles.offerRow` / `offerButton`
-- suggested fix: put the price on its own line under the verb (or under the button with the effect line) as "40 SHILLINGS", so the forge names its unit the way the village and the rest screen do; pin it in the forge test.
-- source: iterate (residue)
+- pass: 85 (commit 93f05dfe)
+- viewport: n/a (screen reader)
+- category: accessibility
+- observation: the dock's ledger (`combat-ledger`) maps `vm.ledger` to `LedgerMark` glyphs with no `accessibilityLabel` on the row or the marks. The header's "PHASE 1/5" names the current phase, but the record of earlier phases (clear O, overwhelmed X) is visual only. This predates BT2b; the dock move kept it.
+- evidence: `axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx` (the `combat-ledger` row); `components/hazard/glyphs.tsx` `LedgerMark` (no accessibility props); `.critique-artifacts/mobile/04-combat-board.txt` (no ledger text).
+- suggested fix: make the ledger row one accessible element labelled from `vm.ledger` (for example "Phases: 1 cleared, 2 overwhelmed, 3 to 5 ahead"), presenter-built and terse.
+- source: critique-drive (unattended)
 
 ### [LOW] ci / pr-resolve — a hand dispatch with a non-`loop/` branch exits green having done nothing
 - pass: antagonist on PR #526 (commit efc7f371)
@@ -985,15 +984,15 @@
 
 ## Done
 
-### [x] [LOW] combat / a11y — the phase ledger under VITAE is five unlabelled marks, so a screen reader never hears which phases were cleared or overwhelmed — RESOLVED 2026-10-14 (commit 8ecc2871; the `combat-ledger` row is one accessible element labelled by the presenter's `ledgerA11y`, run by run: "Phases: 1 cleared, 2 overwhelmed, 3 to 5 ahead"; pinned in CombatBoard.footer-dock.test.tsx)
-- issue: #538
-- pass: 85 (commit 93f05dfe)
-- viewport: n/a (screen reader)
-- category: accessibility
-- observation: the dock's ledger (`combat-ledger`) maps `vm.ledger` to `LedgerMark` glyphs with no `accessibilityLabel` on the row or the marks. The header's "PHASE 1/5" names the current phase, but the record of earlier phases (clear O, overwhelmed X) is visual only. This predates BT2b; the dock move kept it.
-- evidence: `axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx` (the `combat-ledger` row); `components/hazard/glyphs.tsx` `LedgerMark` (no accessibility props); `.critique-artifacts/mobile/04-combat-board.txt` (no ledger text).
-- suggested fix: make the ledger row one accessible element labelled from `vm.ledger` (for example "Phases: 1 cleared, 2 overwhelmed, 3 to 5 ahead"), presenter-built and terse.
-- source: critique-drive (unattended)
+### [x] [LOW] anvil — HONE, TEMPER and SWAP prices read "40s" while the forge's budget says SHILLINGS — RESOLVED 2026-10-14 (branch loop/iterate-forge-shillings: each offer prints "40 SHILLINGS" on its own line under the verb, and the card chip, the cannot-cover reason and the outcome chip spell the unit too; pinned in forge-vocabulary.S5-talk-C12.test.tsx)
+- issue: #540
+- pass: residue of the pass-84 village fix (iterate 2026-10-14)
+- viewport: mobile (375x812)
+- category: comprehension
+- observation: the same bare "s" as the village stalls: `OfferButton` prints `{offer.price}s` and the card's cost chip `−{cost}s`, under a "<budget> SHILLINGS" header. Not changed with the village fix because HONE and TEMPER sit side by side (`offerRow`, each `flex: 1`, label left and price right), and at 375 wide "TEMPER" plus "40 SHILLINGS" in mono 12 likely overruns the ~144pt button.
+- evidence: `axiomancer-mobile/app/blacksmith/index.tsx:86-88` and `:266`; `styles.offerRow` / `offerButton`
+- suggested fix: put the price on its own line under the verb (or under the button with the effect line) as "40 SHILLINGS", so the forge names its unit the way the village and the rest screen do; pin it in the forge test.
+- source: iterate (residue)
 
 ### [x] [MED] combat / hand — A Plain Blow draws no FREE pill, so one of the three grey cards looks like it has no free play — RESOLVED 2026-10-14 (commit 4080f4a0; riderPairs leads with a DEAL pair for the damage rider, programFreeCell reads DEAL and spells unprinted amounts n/+n/X/×2, a DEAL sword silhouette joins glyphShapes; pinned in combat-card-vm.test.ts by the Blow pill and a lane sweep: FREE line iff pill)
 - issue: #532
@@ -3359,6 +3358,105 @@
 
 ### [x] [MED] title + combat / tooling — the drive captures the title 0.7s into its 2.65s intro, so every pass sees only the wordmark; EMBARK is tappable before it is visible — RESOLVED 2026-10-14 (branch loop/iterate-drive-settle: the drive waits for title-cta at full opacity and for combat-dice-skip to detach; EMBARK is disabled until its fade-in begins. Proving the dice signal found the round-start springs never came to rest under Reanimated 4, so the skip layer ate the first tap; fixed in the same PR, 672b38d6)
 - issue: #536
+
+### [x] [LOW] combat / a11y — the phase ledger under VITAE is five unlabelled marks, so a screen reader never hears which phases were cleared or overwhelmed — RESOLVED 2026-10-14 (commit 8ecc2871; the `combat-ledger` row is one accessible element labelled by the presenter's `ledgerA11y`, run by run: "Phases: 1 cleared, 2 overwhelmed, 3 to 5 ahead"; pinned in CombatBoard.footer-dock.test.tsx)
+- issue: #538
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
