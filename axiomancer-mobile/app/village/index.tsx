@@ -165,7 +165,7 @@ export default function VillageScreen() {
                                                 <Text style={styles.wareDesc} testID={`village-ware-${ware.itemId}-desc`}>{ware.description}</Text>
                                             )}
                                         </View>
-                                        <Text style={[styles.warePrice, !ware.affordable && [styles.warePriceUnaffordable, styles.wareCtaDimmed]]}>{ware.price}s</Text>
+                                        <Text style={[styles.warePrice, !ware.affordable && [styles.warePriceUnaffordable, styles.wareCtaDimmed]]} testID={`village-ware-${ware.itemId}-price`}>{ware.price} SHILLINGS</Text>
                                     </TouchableOpacity>
                                 )) : (
                                     <Text style={styles.emptyNote} testID="village-buy-empty">Nothing for sale.</Text>
@@ -188,7 +188,7 @@ export default function VillageScreen() {
                                                 <Text style={styles.wareDesc}>{sellable.description}</Text>
                                             )}
                                         </View>
-                                        <Text style={styles.warePrice}>{sellable.sellPrice}s</Text>
+                                        <Text style={styles.warePrice} testID={`village-sell-${sellable.index}-price`}>{sellable.sellPrice} SHILLINGS</Text>
                                     </TouchableOpacity>
                                 )) : (
                                     <Text style={styles.emptyNote} testID="village-sell-empty">Nothing to sell.</Text>

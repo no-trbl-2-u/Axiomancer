@@ -617,6 +617,8 @@
 
 ## Pending
 
+### [LOW] anvil — HONE, TEMPER and SWAP prices read "40s" while the forge's budget says SHILLINGS
+- pass: residue of the pass-84 village fix (iterate 2026-10-14)
 ### [LOW] combat / desktop — the footer dock stretches the VITAE bar 1075px, so the VITAE figure sits a screen's width from the pile counts
 - pass: 85 (commit 93f05dfe)
 - viewport: desktop (1280x800)
@@ -637,7 +639,6 @@
 
 ### [LOW] ci / pr-resolve — a hand dispatch with a non-`loop/` branch exits green having done nothing
 - pass: antagonist on PR #526 (commit efc7f371)
-### [LOW] village — stall prices read "12s" while the purse, rest offers and sell labels say "SHILLINGS"
 - pass: 84 (commit dd61ec90)
 - viewport: both
 - category: comprehension
@@ -667,6 +668,10 @@
 - pass: antagonist on PR #520 (GS1, commit fc4aa159)
 - viewport: n/a
 - category: comprehension
+- observation: the same bare "s" as the village stalls: `OfferButton` prints `{offer.price}s` and the card's cost chip `−{cost}s`, under a "<budget> SHILLINGS" header. Not changed with the village fix because HONE and TEMPER sit side by side (`offerRow`, each `flex: 1`, label left and price right), and at 375 wide "TEMPER" plus "40 SHILLINGS" in mono 12 likely overruns the ~144pt button.
+- evidence: `axiomancer-mobile/app/blacksmith/index.tsx:86-88` and `:266`; `styles.offerRow` / `offerButton`
+- suggested fix: put the price on its own line under the verb (or under the button with the effect line) as "40 SHILLINGS", so the forge names its unit the way the village and the rest screen do; pin it in the forge test.
+- source: iterate (residue)
 - observation: GS1 marks the stacking rule experimental in `cards.md`, `card-spec.md`, `game-model.md`, the atlas and the gloss. The B4 inventory's "Ratified, not built" table still lists "Global: FREE 3 turns, PAID rest of combat, unique in play". The inventory is a dated snapshot, so this may be intended, but it is the one remaining line that states the old rule.
 - evidence: `plan/revamp/card-rules-inventory.md:343`
 - suggested fix: either annotate the row "(superseded by GS1, experimental)" or leave it as history and say so in the file header.
@@ -3318,6 +3323,207 @@
 ### [x] [MED] combat / hand fan — the D91 free corner pill covers the "tap a card to read it" hint — RESOLVED 2026-10-14 (PR #529, phase BT2b: the hint is dropped per D92 (A8), and the hand dock keeps the pill's overhang above the card tops inside its clip; pinned in CombatBoard.handfan.test.tsx)
 
 ### [x] [LOW] combat / mobile — on a 375-wide phone the corner medallions cover the effect rows of the fan's two end cards — RESOLVED 2026-10-14 (PR #529, phase BT2b: no corner chrome remains; the avatar and END live in the footer dock under the hand (A3), pinned in CombatBoard.footer-dock.test.tsx)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### [x] [LOW] village — stall prices read "12s" while the purse, rest offers and sell labels say "SHILLINGS" — RESOLVED 2026-10-14 (branch loop/iterate-shilling-prices: buy and sell rows print "12 SHILLINGS"; pinned in stall-price-shillings.critique-84.test.tsx)
+- issue: #530
+
+- viewport: mobile (375x812)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
