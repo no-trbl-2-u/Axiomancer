@@ -91,6 +91,15 @@ describe('a line that cannot be paid', () => {
         const vm = buildCombatViewModel(encounter([SACRIFICE_FREE.id], 100));
         expect(vm.hand[0].play?.freeBlock).toBeNull();
     });
+
+    it('carries the engine shortfall on the VM: the cost and the VITAE held, null when payable', () => {
+        const cost = Number(/^SACRIFICE (\d+)/.exec(freeText(SACRIFICE_FREE))![1]);
+        const low = buildCombatViewModel(encounter([SACRIFICE_FREE.id], 1)).hand[0];
+        expect(low.play?.freeShortfall).toEqual({ cost, vitae: 1 });
+        const full = buildCombatViewModel(encounter([SACRIFICE_FREE.id], 100)).hand[0];
+        expect(full.play?.freeShortfall).toBeNull();
+        expect(full.play?.paidShortfall).toBeNull();
+    });
 });
 
 describe('the board reads the program ledger', () => {

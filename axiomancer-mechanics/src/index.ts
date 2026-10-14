@@ -85,7 +85,7 @@ export {
     // Floating dice save-back
     getFloatingDiceColors,
     // Card programs (Global, Curse, SACRIFICE): the reads the board needs
-    programLineBlock, programXChoice, isProgramCard, isCurseCard, GLOBAL_FREE_TURNS,
+    programLineBlock, programLineShortfall, programXChoice, isProgramCard, isCurseCard, GLOBAL_FREE_TURNS,
     programFaceText, GLOBAL_TRIGGER_TEXT,
     LIVE_ENCOUNTER_ENEMY_HP_MULTIPLIER,
     // Card rewards and the starting deck
@@ -119,7 +119,7 @@ export type {
     // The three chain colours (momentum chain)
     WheelStance,
     // Card programs: the Global / Curse / SACRIFICE ledger
-    ProgramLedger, GlobalInPlay,
+    ProgramLedger, GlobalInPlay, ProgramShortfall,
 } from './Combat';
 // Measured truth (R12a): the Act 1 ledger x spread x deck measurement.
 export { measuredTruthCells, MEASURED_DECK_LANES, MEASURED_SPREADS } from './Combat/combat.measured-truth';

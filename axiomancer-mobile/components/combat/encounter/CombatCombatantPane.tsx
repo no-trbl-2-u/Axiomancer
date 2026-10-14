@@ -35,11 +35,12 @@ import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
     CombatEnemyPaneVM, CombatPlayerPaneVM, CombatEffectChipVM,
 } from '@/state/presenters/combat-encounter.engine';
-import { selectCombatLogLines } from '@/state/presenters/combat-encounter.engine';
+import { PROGRAM_COPY, selectCombatLogLines } from '@/state/presenters/combat-encounter.engine';
 import { type CombatEvent } from '@mechanics';
 import { effectGlyph } from '@/components/combat/statusGlyphs';
 import { keywordForEffect } from '@/state/combat/keywords';
 import { IntentIcon } from './IntentIcon';
+import { VitaeSacrificeCallout } from './VitaeSacrificeCallout';
 import { useJuiceFlash, useJuiceIdleBreath, useJuiceNumberPop, useJuicePulse, useJuiceShake } from '@/lib/juice';
 
 /** Full-bleed battlefield backdrop — region-keyed, falling back to a neutral
@@ -253,13 +254,16 @@ export function EffectChips({ effects, onChip, align = 'flex-start', testID }: {
  * would hide under the hand).
  */
 export const PlayerMedallion = React.memo(function PlayerMedallion({
-    player, enemyIntentDamage, onPress, fx,
+    player, enemyIntentDamage, onPress, fx, sacrificeCallout = null,
 }: {
     player: CombatPlayerPaneVM;
     enemyIntentDamage: number;
     /** Tap the avatar → inspect the pilgrim (stats, effects, combat log). */
     onPress?: () => void;
     fx?: CombatFx;
+    /** A refused line's unpaid SACRIFICE: the avatar flags it while set
+     *  (`n` restarts the callout on a repeat refusal). */
+    sacrificeCallout?: { cost: number; vitae: number; n: number } | null;
 }) {
     const AXM = usePalette();
     const styles = useStyles();
@@ -357,7 +361,9 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
                     style={styles.medallion}
                     testID="combat-player-medallion"
                     accessibilityRole="button"
-                    accessibilityLabel={`${player.name}, VITAE ${player.hp} of ${player.maxHp}. Inspect your pilgrim — stats, status effects and cards.`}
+                    accessibilityLabel={sacrificeCallout
+                        ? PROGRAM_COPY.floorA11y(sacrificeCallout.vitae, player.maxHp, sacrificeCallout.cost)
+                        : `${player.name}, VITAE ${player.hp} of ${player.maxHp}. Inspect your pilgrim — stats, status effects and cards.`}
                     // Slop only toward the screen edge and the bottom, never up
                     // into the hand above the dock.
                     hitSlop={{ left: 6, bottom: 6 }}
@@ -369,6 +375,15 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
                     <Svg width={PLAYER_AVATAR_SIZE} height={PLAYER_AVATAR_SIZE} viewBox="0 0 92 92" style={StyleSheet.absoluteFill} pointerEvents="none">
                         <Circle cx={46} cy={46} r={44.5} stroke={AXM.sulfur} strokeWidth={3.6} fill="none" opacity={0.9} />
                     </Svg>
+                    {sacrificeCallout ? (
+                        <VitaeSacrificeCallout
+                            key={sacrificeCallout.n}
+                            cost={sacrificeCallout.cost}
+                            vitae={sacrificeCallout.vitae}
+                            max={player.maxHp}
+                            size={PLAYER_AVATAR_SIZE}
+                        />
+                    ) : null}
                     {/* one-frame contact slash at the moment of impact */}
                     <Animated.View style={[styles.contactSlash, contactStyle]} pointerEvents="none">
                         <Text style={styles.contactSlashText}>✦</Text>

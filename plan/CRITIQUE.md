@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-13 at commit 3225cc64
-> Pass count: 83
+> Last pass: 2026-10-14 at commit dd61ec90
+> Pass count: 84
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -584,9 +584,40 @@
 > placeholder lines, and THE CUT dimmed at the 10-card floor (its reason
 > prints beneath it). Zero fresh findings this pass.
 
+> **[critique pass 84, 2026-10-14, commit dd61ec90] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors. 39 commits
+> after pass 83: GS1 (Globals stack), BT2a (one card face, D91) and SF1
+> (SACRIFICE floor) merged. The live combat board was read but nothing
+> filed on it: BT2b (board layout, D92) is rewriting the fan, footer,
+> portrait and END, so the mobile hand cards running under the portrait
+> and END medallions belong to that PR (same root as pass 63's corner
+> medallions row). Reconfirmed and not re-filed: pass 83's capture-settle
+> row (fourth die still airborne in both `04-combat-board.png`), pass
+> 82's inn-line and THE CUT floor calls, the unfixtured exploration hub
+> bouncing to the title (no state, by design). Two fresh findings.
+
 > Earlier pass banners (passes 13-50) and two 2026-07-18 residue notes are archived verbatim in `archive-pre-revamp:plan/archive/CRITIQUE_2026.md`.
 
 ## Pending
+
+### [MED] exploration hub — sealed nodes draw no visible mark, so most roads end at bare vertices
+- pass: 84 (commit dd61ec90)
+- viewport: both (375x812 and 1280x800)
+- category: comprehension
+- observation: on the walked Breakwater sheet ("18 nodes · 12 sealed"), the six trodden and open nodes draw their discs, but none of the twelve sealed nodes can be seen. The black roads run to junctions on the engraving and stop, with no mark where they meet, so the map reads as a web of lines leading nowhere. The legend's ◌ SEALED key matches nothing on screen. The sealed mark is meant to recede (`NodeMark` draws an empty dashed ash ring at the smallest radius), but `ExplorationNode` also wraps it in `nodeWrapLocked` opacity 0.45, so the ring prints at about 0.38 and its backing disc at about 0.3. That vanishes on the light engraving.
+- evidence: `.critique-artifacts/mobile/11-late-game-hub.png` (junctions near 160,470, 95,540 and 255,505); `desktop/11-late-game-hub.png` (bare vertices at about 55,565 and 390,665); `axiomancer-mobile/components/NodeMark.tsx:86-103`; `components/exploration/ExplorationNode.tsx:167` (`nodeWrapLocked`)
+- suggested fix: drop the extra 0.45 wrapper opacity for sealed nodes, or raise the ring's stroke opacity, so the sealed ring is the faintest mark that still shows where each road ends. Keep it the faintest of the four kinds, and pin the sealed mark's effective opacity in `ExplorationNode.test.tsx`.
+- source: critique-drive (unattended)
+
+### [LOW] village — stall prices read "12s" while the purse, rest offers and sell labels say "SHILLINGS"
+- pass: 84 (commit dd61ec90)
+- viewport: both
+- category: comprehension
+- observation: the settlement's purse reads "240 SHILLINGS" and the rest screen prices THE CUT at "5 SHILLINGS", but each stall row prints its price as "12s" (buy and sell). The bare "s" is the only place the currency is abbreviated, and the player meets it before any key to it.
+- evidence: `.critique-artifacts/mobile/07-village.png`, `desktop/07-village.png`; `axiomancer-mobile/app/village/index.tsx:168` and `:191` (`{ware.price}s`, `{sellable.sellPrice}s`) against `:114` (`{vm.currency} SHILLINGS`) and `app/rest/index.tsx` (`${offer.price} SHILLINGS`)
+- suggested fix: print one form for every price. Either "12 SHILLINGS" on the stall rows, or "12s" everywhere with the purse header naming the unit once. The first matches the rest screen. Pin it in the village screen test.
+- source: critique-drive (unattended)
 
 ### [MED] combat / hand fan — the D91 free corner pill covers the "tap a card to read it" hint
 - pass: antagonist on PR #521 (BT2a, commit 042b4471)

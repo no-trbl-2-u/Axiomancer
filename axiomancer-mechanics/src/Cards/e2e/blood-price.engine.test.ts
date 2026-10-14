@@ -22,6 +22,7 @@ import { Player } from '../../Character/characters.mock';
 import { Sandbag_01, FloatEye } from '../../Enemy/enemy.library';
 import type { Enemy } from '../../Enemy/types';
 import { getCardById } from '../cards.library';
+import { programLineBlock, programLineShortfall } from '../../Combat/combat.engine';
 import { getCardLane, CARD_LANES } from '../card.lanes';
 import { BLOOD_PRICE_SET } from '../library/blood-price.cards';
 import { deepClone } from '../../Utils';
@@ -584,5 +585,40 @@ describe('printed equals applied', () => {
             if (!ok) never.push(card.id);
         }
         expect(never).toEqual([]);
+    });
+});
+
+describe('the SACRIFICE floor, as a number', () => {
+    it('P-01a PAID at 4 VITAE cannot pay its SACRIFICE 4; at 5 it can', () => {
+        const low = fight(['bp-p-01a'], 4);
+        expect(programLineShortfall(low, 't0', true)).toEqual({ cost: 4, vitae: 4 });
+        expect(programLineShortfall(low, 't0', false)).toBeNull();
+        expect(programLineShortfall(fight(['bp-p-01a'], 5), 't0', true)).toBeNull();
+    });
+
+    it('a "SACRIFICE any amount" line falls short only past the floor', () => {
+        const s = fight(['bp-e-10d'], 10);
+        expect(programLineShortfall(s, 't0', true, 9)).toBeNull();
+        expect(programLineShortfall(s, 't0', true, 10)).toEqual({ cost: 10, vitae: 10 });
+    });
+
+    it('is null for a card that is not in hand or has no program', () => {
+        const s = fight([FILLER], 1);
+        expect(programLineShortfall(s, 't0', true)).toBeNull();
+        expect(programLineShortfall(s, 'nope', true)).toBeNull();
+    });
+
+    it('is non-null exactly when the line is refused at the floor', () => {
+        const mismatch: string[] = [];
+        for (const card of LANE_CARDS) {
+            for (const vitae of [1, 3, 6, 12, 40]) {
+                const s = fight([card.id], vitae);
+                for (const paid of [false, true]) {
+                    const atFloor = /below 1 VITAE/.test(programLineBlock(s, 't0', paid) ?? '');
+                    if (atFloor !== (programLineShortfall(s, 't0', paid) !== null)) mismatch.push(`${card.id}@${vitae}/${paid}`);
+                }
+            }
+        }
+        expect(mismatch).toEqual([]);
     });
 });

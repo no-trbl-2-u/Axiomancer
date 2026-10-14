@@ -1103,6 +1103,21 @@ export const __test = {
   VALID_SOURCE,
 }
 
+/**
+ * Fill the GitHub env a run needs. With no GH_TOKEN (a worktree has no
+ * .env) the run borrows `gh`'s keyring login; GH_REPO defaults to this repo.
+ * Mutates and returns `env`; `run` is injectable for tests.
+ */
+export function fillGhEnv(env, run = () => spawnSync('gh', ['auth', 'token'], { encoding: 'utf-8' })) {
+  if (!env.GH_TOKEN) {
+    const r = run()
+    const token = r && r.status === 0 ? String(r.stdout ?? '').trim() : ''
+    if (token) env.GH_TOKEN = token
+  }
+  if (!env.GH_REPO) env.GH_REPO = 'no-trbl-2-u/Axiomancer'
+  return env
+}
+
 // Run main only when invoked as a script, not when imported by tests.
 const isMain = (() => {
   try {
@@ -1113,5 +1128,6 @@ const isMain = (() => {
   }
 })()
 if (isMain) {
+  fillGhEnv(process.env)
   main(process.argv.slice(2))
 }
