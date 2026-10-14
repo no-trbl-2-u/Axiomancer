@@ -63,13 +63,13 @@ export {
     // Floating dice save-back
     getFloatingDiceColors,
     // Card programs: why a line cannot be played, and an X line's range
-    programLineBlock, programXChoice,
+    programLineBlock, programLineShortfall, programXChoice,
 } from './combat.engine';
 // Card programs: the Global / Curse / SACRIFICE ledger and its reads.
 export {
     isProgramCard, isCurseCard, GLOBAL_FREE_TURNS,
 } from './combat.card-program';
-export type { ProgramLedger, GlobalInPlay } from './combat.card-program';
+export type { ProgramLedger, GlobalInPlay, ProgramShortfall } from './combat.card-program';
 // The live-encounter VITAE knob the app applies (and the pacing sim reads).
 export { LIVE_ENCOUNTER_ENEMY_HP_MULTIPLIER } from './live-encounter';
 // Stat scaling: the formula, the keyword families, and the

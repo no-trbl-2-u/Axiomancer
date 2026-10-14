@@ -11,8 +11,8 @@
  */
 
 import {
-    programFaceText, programLineBlock, programXChoice, isCurseCard, GLOBAL_FREE_TURNS,
-    type Card, type CombatEncounterState,
+    programFaceText, programLineBlock, programLineShortfall, programXChoice, isCurseCard, GLOBAL_FREE_TURNS,
+    type Card, type CombatEncounterState, type ProgramShortfall,
 } from '@mechanics';
 
 /** The type tag a program card wears on its face, or null for a plain type. */
@@ -115,6 +115,11 @@ export interface ProgramPlayVM {
     freeBlock: string | null;
     /** Why the PAID line cannot be played now, die aside (null = it can). */
     paidBlock: string | null;
+    /** The SACRIFICE the FREE line cannot pay (`cost`, the player's `vitae`),
+     *  non-null exactly when `freeBlock` is the SACRIFICE floor. */
+    freeShortfall: ProgramShortfall | null;
+    /** The same for the PAID line. */
+    paidShortfall: ProgramShortfall | null;
     /** A Curse: the scrap bin refuses it. */
     unscrappable: boolean;
     /** The amounts a "SACRIFICE any amount" PAID line accepts, or null. */
@@ -126,6 +131,8 @@ export function programPlayVM(state: CombatEncounterState, uid: string, cardId: 
     return {
         freeBlock: programLineBlock(state, uid, false),
         paidBlock: programLineBlock(state, uid, true),
+        freeShortfall: programLineShortfall(state, uid, false),
+        paidShortfall: programLineShortfall(state, uid, true),
         unscrappable: isCurseCard(cardId),
         xRange: programXChoice(state, uid),
     };

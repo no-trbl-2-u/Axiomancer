@@ -53,6 +53,7 @@ import { rarityFor, RARITY_LABEL, RARITY_PIPS, RARITY_COLOR } from '@/state/pres
 import { TrashGlyph, LedgerMark } from '@/components/hazard/glyphs';
 import { glyphShapeFor } from '@/components/combat/glyphShapes';
 import { CombatCombatantPane, EffectChips, PlayerMedallion, COMBAT_HUD_HEIGHT, PLAYER_DOCK_FOOTPRINT_W, type CombatFx } from './CombatCombatantPane';
+import { SACRIFICE_CALLOUT_MS } from './VitaeSacrificeCallout';
 import { CombatDie, combatDieA11yLabel } from './CombatDie';
 import { RollingDie } from './RollingDie';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -543,9 +544,12 @@ const DiceRow = React.memo(function DiceRow({
 
 export const StagedCard = React.memo(function StagedCard({
     card, assignedDie, onApply, gesture, register, compact = false, popKey = 0, socketPulse = false,
-    dropIneligible = false, rejectKey = 0, freeProminent = false, x = null, onX,
+    dropIneligible = false, rejectKey = 0, freeProminent = false, x = null, onX, onRefuse,
 }: {
     card: CombatCardVM;
+    /** A refused APPLY hands up the line's unpaid SACRIFICE (null when the
+     *  refusal is not the SACRIFICE floor) for the VITAE ring callout. */
+    onRefuse?: (shortfall: { cost: number; vitae: number } | null) => void;
     assignedDie: CombatDieVM | null;
     /** The amount chosen for an armed "SACRIFICE any amount" line (null = none). */
     x?: number | null;
@@ -681,7 +685,11 @@ export const StagedCard = React.memo(function StagedCard({
             ) : null}
             <Pressable
                 onPress={() => {
-                    if (blocked) { juiceHaptics.notify(Haptics.NotificationFeedbackType.Error); return; }
+                    if (blocked) {
+                        juiceHaptics.notify(Haptics.NotificationFeedbackType.Error);
+                        onRefuse?.((armed ? card.play?.paidShortfall : card.play?.freeShortfall) ?? null);
+                        return;
+                    }
                     Haptics.impactAsync(armed ? Haptics.ImpactFeedbackStyle.Heavy : Haptics.ImpactFeedbackStyle.Medium).catch(() => undefined);
                     onApply(card.uid);
                 }}
@@ -931,6 +939,21 @@ export const CombatBoard = React.memo(function CombatBoard({
         const t = setTimeout(() => setDropReject((prev) => (prev.n === dropReject.n ? { uid: '', reason: '', n: prev.n } : prev)), 2200);
         return () => clearTimeout(t);
     }, [dropReject.n]);
+    // The SACRIFICE floor callout: a line refused because its SACRIFICE would
+    // leave the player below 1 VITAE flags the VITAE ring with the engine's
+    // numbers (the card VM's shortfall); any other refusal passes null.
+    const [vitaeCallout, setVitaeCallout] = useState<{ cost: number; vitae: number; n: number } | null>(null);
+    const calloutN = useRef(0);
+    const flagShortfall = useCallback((sf: { cost: number; vitae: number } | null | undefined) => {
+        if (!sf) return;
+        calloutN.current += 1;
+        setVitaeCallout({ cost: sf.cost, vitae: sf.vitae, n: calloutN.current });
+    }, []);
+    useEffect(() => {
+        if (!vitaeCallout) return;
+        const t = setTimeout(() => setVitaeCallout(null), SACRIFICE_CALLOUT_MS);
+        return () => clearTimeout(t);
+    }, [vitaeCallout]);
     const stagedKey = stagedUids.join(',');
     // Clear pending selections when the turn's dice change…
     useEffect(() => { setPendingDieByUid(clearPending); }, [vm.turnLabel]);
@@ -1005,6 +1028,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                     : 'no staged card can take this die';
                 juiceHaptics.notify(Haptics.NotificationFeedbackType.Error);
                 setDropReject((prev) => ({ uid: hitUid ?? '', reason, n: prev.n + 1 }));
+                if (card && !pendingDieByUid[card.uid] && dieCanPowerCardVM(payload.die, card.stance)) flagShortfall(card.play?.paidShortfall);
             }
             return;
         }
@@ -1029,6 +1053,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                 if (play?.freeBlock && play.paidBlock) {
                     juiceHaptics.notify(Haptics.NotificationFeedbackType.Error);
                     setDropReject((prev) => ({ uid: '', reason: PROGRAM_COPY.blocked(payload.card.name, play.freeBlock!), n: prev.n + 1 }));
+                    flagShortfall(play.freeShortfall);
                     return;
                 }
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
@@ -1090,7 +1115,13 @@ export const CombatBoard = React.memo(function CombatBoard({
         const die = diceMapRef.current.get(dieId);
         if (!die || !die.draggable) return;
         const target = resolveDieDropTarget(die, stagedUids[0], true, stagedUids, stanceOfUid, pendingDieByUid, paidBlockOfUid);
-        if (!target) return;
+        if (!target) {
+            // A colour-legal die refused by the card's PAID line: point at the
+            // VITAE ring when that refusal is the SACRIFICE floor.
+            const c = handMapRef.current.get(stagedUids[0]);
+            if (c && !pendingDieByUid[c.uid] && dieCanPowerCardVM(die, c.stance)) flagShortfall(c.play?.paidShortfall);
+            return;
+        }
         juiceHaptics.impact(Haptics.ImpactFeedbackStyle.Rigid);
         setPendingDieByUid((prev) => ({ ...prev, [target]: dieId }));
         setDropPop((prev) => ({ uid: target, n: prev.n + 1 }));
@@ -1384,6 +1415,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                                         freeProminent={deadTray}
                                         x={adie ? xFor(card.uid) : null}
                                         onX={handleX}
+                                        onRefuse={flagShortfall}
                                     />
                                 );
                             })}
@@ -1564,6 +1596,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                 onPress={onPlayerInspect}
                 fx={fx}
                 bottomInset={bottomInset}
+                sacrificeCallout={vitaeCallout}
             />
 
             {/* SCRAP — only present while a card is being dragged (no permanent

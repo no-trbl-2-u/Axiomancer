@@ -469,6 +469,11 @@ export const PROGRAM_COPY = Object.freeze({
     xMore: 'Sacrifice more',
     /** A refused stage or die drop on a card whose line cannot be played now. */
     blocked: (name: string, why: string) => `${name} can't be played now: ${why}`,
+    /** The tag on the VITAE ring when a refused line's SACRIFICE cannot be paid. */
+    floorTag: (cost: number) => `SACRIFICE ${cost}`,
+    /** The VITAE ring's label during that callout. */
+    floorA11y: (vitae: number, max: number, cost: number) =>
+        `VITAE ${vitae} of ${max}. SACRIFICE ${cost} would leave you below 1.`,
 });
 export interface CombatSignatureVM {
     id: string; name: string; description: string; cost: number; affordable: boolean; icon: string;

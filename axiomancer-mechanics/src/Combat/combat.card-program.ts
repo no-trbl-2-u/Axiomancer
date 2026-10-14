@@ -661,6 +661,20 @@ function withoutEntry(state: CombatEncounterState, uid: string): CombatEncounter
     return { ...state, hand: state.hand.filter(h => h.uid !== uid) };
 }
 
+/** The reason a line is refused at the SACRIFICE floor. */
+export const SACRIFICE_FLOOR_REASON = 'that SACRIFICE would leave you below 1 VITAE';
+
+/** A SACRIFICE the player cannot pay: what it costs and the VITAE they hold. */
+export interface ProgramShortfall {
+    cost: number;
+    vitae: number;
+}
+
+/** The SACRIFICE floor: a cost that would leave less than 1 VITAE (null = payable). */
+function floorShortfall(vitae: number, cost: number): ProgramShortfall | null {
+    return cost > 0 && vitae - cost < 1 ? { cost, vitae } : null;
+}
+
 /**
  * Why a line cannot be played right now (null = it can). Covers the Global
  * uniqueness rule, printed conditions, Curse targets, and the SACRIFICE floor
@@ -686,7 +700,7 @@ export function programIllegalReason(
     if (!line) return 'this card has no such line';
     if (line.requires && !line.requires.test(buildQuery({ ...s, program: ledger }, 0))) return line.requires.why;
     const cost = probeLineCost(s, ledger, entry.cardId, line, kit, x);
-    if (cost > 0 && s.player.health - cost < 1) return 'that SACRIFICE would leave you below 1 VITAE';
+    if (floorShortfall(s.player.health, cost)) return SACRIFICE_FLOOR_REASON;
     return null;
 }
 
@@ -700,6 +714,20 @@ export function programLineCost(
     const line = lineFor(program, paid);
     const ledger = state.program ?? initProgramLedger();
     return line ? probeLineCost(withoutEntry(state, uid), ledger, entry.cardId, line, kit, x) : 0;
+}
+
+/**
+ * The SACRIFICE a line cannot pay, or null. Non-null exactly when
+ * `programIllegalReason` refuses the line at the SACRIFICE floor; any other
+ * refusal (a printed condition, a Curse target) or a payable line is null.
+ *
+ * @param x - The amount chosen for a "SACRIFICE any amount" line.
+ */
+export function programShortfall(
+    state: CombatEncounterState, uid: string, paid: boolean, kit: ProgramKit, x?: number,
+): ProgramShortfall | null {
+    if (programIllegalReason(state, uid, paid, kit, x) !== SACRIFICE_FLOOR_REASON) return null;
+    return floorShortfall(state.player.health, programLineCost(state, uid, paid, kit, x));
 }
 
 /**

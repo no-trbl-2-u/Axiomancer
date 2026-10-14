@@ -69,7 +69,7 @@ import {
     type ProgramKit, deckHasProgramCards, initProgramLedger, isProgramCard, isCurseCard,
     playProgramCard, programTurnStart, programFoeTurnStart, programClampDamage,
     programRecordDamage, programRollRound, programDrawFallback,
-    programIllegalReason, programXRange,
+    programIllegalReason, programShortfall, programXRange, type ProgramShortfall,
 } from './combat.card-program';
 import type {
     CombatCard, CombatDieColor, CombatEncounterState, CombatEvent, CardPlay,
@@ -1937,6 +1937,22 @@ export function programLineBlock(state: CombatEncounterState, uid: string, paid:
     const entry = state.hand.find(h => h.uid === uid);
     if (!entry || !isProgramCard(entry.cardId)) return null;
     return programIllegalReason(state, uid, paid, PROGRAM_KIT, x);
+}
+
+/**
+ * The SACRIFICE a program card's FREE (`paid` false) or PAID line cannot pay
+ * right now: `{ cost, vitae }`, non-null exactly when `programLineBlock`
+ * refuses the line at the SACRIFICE floor. Null for a card without a program.
+ *
+ * @param x - The amount chosen for a "SACRIFICE any amount" line.
+ * @example programLineShortfall(state, 'c3', true) // { cost: 4, vitae: 4 }
+ */
+export function programLineShortfall(
+    state: CombatEncounterState, uid: string, paid: boolean, x?: number,
+): ProgramShortfall | null {
+    const entry = state.hand.find(h => h.uid === uid);
+    if (!entry || !isProgramCard(entry.cardId)) return null;
+    return programShortfall(state, uid, paid, PROGRAM_KIT, x);
 }
 
 /** The amounts a program card's "SACRIFICE any amount" PAID line accepts
