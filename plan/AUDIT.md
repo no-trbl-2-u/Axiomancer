@@ -115,6 +115,19 @@
 - next (`/iterate`): find where the card program resolves "VITAE lost this combat" and its cap in `axiomancer-mechanics/src/Combat/` (P-07b in the Blood Price library); check whether the cap is skipped on the paid line or scaled after capping; pin it with an engine test at the printed cap. Card numbers are D37-held: fix the code to match the printed card, never the card text.
 
 ### [loop-call] A DEAL of VITAE lost lands unscaled; other derived DEALs still body-scale (2026-10-13)
+- category: contract
+- impact: 4
+- ease: -
+- detail: fixing P-07b (0cd35985) the loop ruled that a DEAL whose amount is
+  VITAE already lost ("DEAL all the VITAE you lost") lands that number
+  unscaled, matching "HEAL the damage dealt" and TETHER's hit, so the
+  printed max holds. Two other derived DEALs still body-scale: Blood for
+  Blood's "DEAL 2X" (pinned "body-scaled" in blood-price.engine.test.ts)
+  and P-10c PAID's "DEAL n instead" (n = the VITAE sacrificed). Neither
+  prints a cap the scaling breaks, so they were left alone.
+- next: T confirms the ruling, or says derived DEALs should all scale (then
+  P-07b caps after scaling instead). A card-number question, so T's call (D37).
+
 ### [x] [bug] A die is spent on a staged card that cannot be played (RC2 walk, 2026-10-11) — CLOSED 2026-10-13 (8efb0375: the die drop, die tap and loose drop skip a card whose PAID line is blocked and refuse loudly with the engine's reason; a card neither of whose lines can be played now, a second copy of a Global included, is refused at the stage)
 - issue: #515
 - source: RC2 walk 2026-10-11 (eb75f451, Blood Price test deck, attended; accepted for the v0.2.0 tag by T, D83)
@@ -372,16 +385,6 @@
 ### [x] [tests] Root `npm test` is red on main: the DevLog marginalia assertion (2026-09-28) — CLOSED 2026-09-29 (confirmed by this digest)
 - category: tests
 - impact: 4
-- ease: -
-- detail: fixing P-07b (0cd35985) the loop ruled that a DEAL whose amount is
-  VITAE already lost ("DEAL all the VITAE you lost") lands that number
-  unscaled, matching "HEAL the damage dealt" and TETHER's hit, so the
-  printed max holds. Two other derived DEALs still body-scale: Blood for
-  Blood's "DEAL 2X" (pinned "body-scaled" in blood-price.engine.test.ts)
-  and P-10c PAID's "DEAL n instead" (n = the VITAE sacrificed). Neither
-  prints a cap the scaling breaks, so they were left alone.
-- next: T confirms the ruling, or says derived DEALs should all scale (then
-  P-07b caps after scaling instead). A card-number question, so T's call (D37).
 - ease: 6
 - detail: `scripts/build-devlog-public.test.mjs:117` ("nothing that
   carries meaning sits behind a script") fails on a clean `main` worktree
@@ -2154,99 +2157,3 @@ present. Row stays open until that session runs.
   earlier. No live `combatMana` reference remained; Phase 7 deleted
   the one dead type (`CombatManaState`) and fixed four stale
   comments still narrating the retired slice.
-
-
-- impact: 4
-
-
-
-- category: contract
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
