@@ -128,7 +128,8 @@
 - next: T confirms the ruling, or says derived DEALs should all scale (then
   P-07b caps after scaling instead). A card-number question, so T's call (D37).
 
-### [bug] A die is spent on a staged card that cannot be played (RC2 walk, 2026-10-11)
+### [x] [bug] A die is spent on a staged card that cannot be played (RC2 walk, 2026-10-11) — CLOSED 2026-10-13 (8efb0375: the die drop, die tap and loose drop skip a card whose PAID line is blocked and refuse loudly with the engine's reason; a card neither of whose lines can be played now, a second copy of a Global included, is refused at the stage)
+- issue: #515
 - source: RC2 walk 2026-10-11 (eb75f451, Blood Price test deck, attended; accepted for the v0.2.0 tag by T, D83)
 - category: bug
 - impact: 7

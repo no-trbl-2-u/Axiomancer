@@ -25,7 +25,7 @@
  */
 
 import type { Card, CardAspect, CardType } from '../types';
-import type { CardProgram, ProgramCtx, ProgramLine, ProgramQuery } from '../card-program.types';
+import type { CardProgram, ProgramCtx, ProgramLine } from '../card-program.types';
 import type { CardLane, TrialSet } from '../card.lanes';
 
 const ADDED = '2026-10-11';
@@ -38,8 +38,6 @@ const BLUE: CardAspect = 'mind';
 const PURPLE: CardAspect = 'heart';
 
 const L = (text: string, run: (c: ProgramCtx) => void, extra?: Partial<ProgramLine>): ProgramLine => ({ text, run, ...extra });
-
-const AT_HALF = { test: (q: ProgramQuery): boolean => q.atHalf, why: 'only at half VITAE or less' };
 
 interface Entry {
     slot: string;
@@ -63,9 +61,15 @@ const ENTRIES: Entry[] = [
     { slot: 'p-03a', type: 'attack', color: RED, program: {
         free: L('DEAL {deal:3}, or {deal:6} at half VITAE or less.', c => { c.deal(c.q.atHalf ? 6 : 3); }),
         paid: L('DEAL {deal:6}, or {deal:14} at half VITAE or less.', c => { c.deal(c.q.atHalf ? 14 : 6); }) } },
-    { slot: 'p-04c', type: 'attack', color: RED, program: {
-        free: L('Only at half VITAE or less: DEAL {deal:8}.', c => { c.deal(8); }, { requires: AT_HALF }),
-        paid: L('Only at half VITAE or less: DEAL {deal:18}. EXILE.', c => { c.deal(18); }, { requires: AT_HALF, exile: true }) } },
+    // Reworked by T 2026-10-14: the half-VITAE gate left it dead above half.
+    // The PAID line's own SACRIFICE counts toward the VITAE lost this round,
+    // and the heal is unscaled (an already-resolved number, like P-07b).
+    { slot: 'p-04c', type: 'spell', color: BLUE, program: {
+        free: L('HEAL {heal:10}.', c => { c.heal(10); }),
+        paid: L('SACRIFICE 10, HEAL twice the VITAE you lost this round. EXILE.', c => {
+            c.sacrifice(10);
+            c.heal(2 * c.q.lostThisRound, { exact: true });
+        }, { exile: true }) } },
     { slot: 'p-05b', type: 'spell', color: PURPLE, program: {
         free: L('SACRIFICE 3, VULNERABLE +{vuln:20}% for 1 turn.', c => { c.sacrifice(3); c.vulnerable(20, 1); }),
         paid: L('SACRIFICE 6, VULNERABLE +{vuln:50}% for 2 turns.', c => { c.sacrifice(6); c.vulnerable(50, 2); }) } },

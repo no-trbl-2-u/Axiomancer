@@ -34,6 +34,7 @@ import {
 } from '../../Combat/combat.engine';
 import {
     programIllegalReason, programXRange, programDrawFallback, programLineValue,
+    programRecordDamage, programRollRound, initProgramLedger,
 } from '../../Combat/combat.card-program';
 import { runOneEncounter } from '../../Combat/combat.encounter.sim';
 import type { CombatEncounterState } from '../../Combat/combat.encounter.types';
@@ -76,10 +77,10 @@ function sacrifices(id: string): boolean {
 }
 
 describe('the Blood Price set', () => {
-    it('holds 30 cards (11 red, 8 blue, 11 purple) and the grey Curse', () => {
+    it('holds 30 cards (10 red, 9 blue, 11 purple) and the grey Curse', () => {
         expect(LANE_CARDS).toHaveLength(30);
         const by = (c: string) => LANE_CARDS.filter(card => card.color === c).length;
-        expect([by('body'), by('mind'), by('heart')]).toEqual([11, 8, 11]);
+        expect([by('body'), by('mind'), by('heart')]).toEqual([10, 9, 11]);
         expect(getCardById(CURSE)?.cardType).toBe('curse');
         expect(getCardById(CURSE)?.color).toBe('any');
         expect(LANE_CARDS.filter(c => c.cardType === 'global').map(c => c.id).sort())
@@ -158,9 +159,27 @@ describe('SACRIFICE, WAIVE, HEAL, EXILE', () => {
         expect(after.state.hand).toHaveLength(1);
     });
 
-    it('a condition gates its line with a reason', () => {
-        expect(programIllegalReason(fight(['bp-p-04c'], 100), 't0', false, PROGRAM_KIT)).toBe('only at half VITAE or less');
-        expect(programIllegalReason(fight(['bp-p-04c'], 85), 't0', false, PROGRAM_KIT)).toBeNull();
+    it('P-04c plays at any VITAE: FREE heals, PAID heals twice the VITAE lost this round, its own SACRIFICE included', () => {
+        // No half-VITAE gate on either line any more.
+        expect(programIllegalReason(fight(['bp-p-04c'], 100), 't0', false, PROGRAM_KIT)).toBeNull();
+        expect(programIllegalReason(fight(['bp-p-04c'], 100), 't0', true, PROGRAM_KIT)).toBeNull();
+        expect(play(fight(['bp-p-04c'], 50), 't0', false).player.health).toBe(60);
+        // Nothing lost earlier this round: SACRIFICE 10, then HEAL 2 x 10.
+        expect(play(fight(['bp-p-04c'], 50), 't0', true).player.health).toBe(60);
+        // 15 lost earlier this round: SACRIFICE 10, then HEAL 2 x 25.
+        const hit = fight(['bp-p-04c'], 50);
+        const s = play({ ...hit, program: { ...hit.program!, lostThisRound: 15 } }, 't0', true);
+        expect(s.player.health).toBe(90);
+        expect(s.program!.exiled).toContain('bp-p-04c');
+        // The SACRIFICE floor still applies: at 10 VITAE the PAID line cannot be paid.
+        expect(programIllegalReason(fight(['bp-p-04c'], 10), 't0', true, PROGRAM_KIT)).toMatch(/below 1 VITAE/);
+    });
+
+    it('VITAE lost this round counts damage and SACRIFICE, and resets at the round boundary', () => {
+        const l = programRecordDamage(initProgramLedger(), 7);
+        expect(l.lostThisRound).toBe(7);
+        expect(programRollRound(l).lostThisRound).toBe(0);
+        expect(play(fight(['bp-p-01a'], 50), 't0', false).program!.lostThisRound).toBe(2);
     });
 
     it('HEAL is capped at max VITAE; healing past it becomes GUARD on M-09a', () => {

@@ -469,6 +469,8 @@ export const PROGRAM_COPY = Object.freeze({
     xLabel: 'SACRIFICE',
     xLess: 'Sacrifice less',
     xMore: 'Sacrifice more',
+    /** A refused stage or die drop on a card whose line cannot be played now. */
+    blocked: (name: string, why: string) => `${name} can't be played now: ${why}`,
 });
 export interface CombatSignatureVM {
     id: string; name: string; description: string; cost: number; affordable: boolean; icon: string;
