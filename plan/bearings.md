@@ -283,6 +283,10 @@ ambiguity.)
   - **Every closing verb ends with a Retro** into the counted
     `plan/lessons.md` ladder: seen 2× → automated that tick; seen 3×
     across verbs → `reflexes.md`, reviewed by `/oversight` after the fact.
+    Only the loop's own moves are lessons: a fix only T can make (a
+    token, a secret, an OAuth, a console click) goes to
+    `plan/NEEDS_T.md`, listed every tick and asked first by
+    `/oversight`, never automated around (D94).
   **The Act 1 checkpoint is tagged `v0.1.0-checkpoint`** (commit `9ddba0f8`,
   2026-10-02; GitHub release and EAS preview APK linked from it). To reset to
   it: `git switch -c <branch> v0.1.0-checkpoint`.

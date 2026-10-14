@@ -12,7 +12,7 @@ import path from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 
-import { lintLessons, lintReflexes, MAX_OPEN } from './check-lessons.mjs'
+import { lintLessons, lintNeedsT, lintReflexes, MAX_OPEN } from './check-lessons.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const ok = (slug, tail = 'open') =>
@@ -68,11 +68,46 @@ test('reflexes over 50 lines is a finding', () => {
   assert.match(lintReflexes('x\n'.repeat(51))[0], /51 lines/)
 })
 
-test('the live plan/lessons.md and plan/reflexes.md are clean', () => {
+test("a lesson whose rule hands the fix to T is a finding", () => {
+  const r = lintLessons(doc('- **stale** · a token 401s → T to rotate it · seen 1× · last 2026-10-14 · open'))
+  assert.match(r.findings[0], /hands the fix to T: file it in plan\/NEEDS_T\.md/)
+  // control: T named in the trap, not the rule, is still the loop's lesson
+  assert.deepEqual(lintLessons(doc('- **ok** · T to merge left a PR open → the loop waits · seen 1× · last 2026-10-14 · open')).findings, [])
+})
+
+const needs = (...lines) => ['# Needs T', '', '> - **header** · not linted', '', '## Open', '', ...lines, ''].join('\n')
+const item = (slug) =>
+  `- **${slug}** · rotate the token · blocks: issue mirrors · workaround: none · seen 1× · last 2026-10-14`
+
+test('a well-formed NEEDS_T item passes; header prose is not linted', () => {
+  const r = lintNeedsT(needs(item('one')))
+  assert.deepEqual(r.findings, [])
+  assert.equal(r.items, 1)
+})
+
+test('a NEEDS_T item missing blocks or workaround is a finding', () => {
+  const r = lintNeedsT(needs('- **x** · rotate it · seen 1× · last 2026-10-14'))
+  assert.match(r.findings[0], /does not match/)
+})
+
+test('a NEEDS_T slug that is also a lesson is a finding', () => {
+  const r = lintNeedsT(needs(item('dup')), ['dup'])
+  assert.match(r.findings[0], /'dup' is also a lesson/)
+  assert.deepEqual(lintNeedsT(needs(item('dup')), ['other']).findings, [])
+})
+
+test('duplicate NEEDS_T slugs are a finding', () => {
+  const r = lintNeedsT(needs(item('same'), item('same')))
+  assert.match(r.findings[0], /duplicate slug 'same'/)
+})
+
+test('the live plan/lessons.md, plan/reflexes.md and plan/NEEDS_T.md are clean', () => {
   const lessons = lintLessons(fs.readFileSync(path.join(ROOT, 'plan', 'lessons.md'), 'utf8'))
   assert.deepEqual(lessons.findings, [])
   assert.ok(lessons.lessons > 0, 'the migration kept the existing lessons')
   assert.deepEqual(lintReflexes(fs.readFileSync(path.join(ROOT, 'plan', 'reflexes.md'), 'utf8')), [])
+  const needsT = lintNeedsT(fs.readFileSync(path.join(ROOT, 'plan', 'NEEDS_T.md'), 'utf8'), lessons.slugs)
+  assert.deepEqual(needsT.findings, [])
 })
 
 test('the CLI exits 0 on the live files', () => {

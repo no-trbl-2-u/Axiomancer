@@ -155,7 +155,9 @@ also lists in its output:
 - each open `loop:pr` PR older than **7 days** ("open 7d+, waiting
   on T"); the loop never closes one (D86);
 - each PR labelled `loop:pr-stuck` (`pr-autofix` gave up after two
-  runs, D87), with its number and failing check.
+  runs, D87), with its number and failing check;
+- each open row in `plan/NEEDS_T.md` (T's own moves, D94), one line
+  each: its slug, what T does, and `seen N×`.
 
 ### Claims
 
@@ -184,11 +186,55 @@ git switch -c "loop/<verb>-<slug>" origin/main     # before the first edit
 git push -u origin "loop/<verb>-<slug>"
 gh label create loop:pr --repo "$GH_REPO" --color 0E8A16 \
   --description "Loop-opened PR; T merges (D84-D87)" 2>/dev/null || true
+for s in S:C2E0C6:"under an hour, one workspace" M:FBCA04:"one focused tick" \
+         L:D93F0B:"a full tick" multi-phase:5319E7:"a plot that splits into phases"; do
+  gh label create "size:${s%%:*}" --repo "$GH_REPO" --color "$(echo "$s" | cut -d: -f2)" \
+    --description "$(echo "$s" | cut -d: -f3-)" 2>/dev/null || true
+done
+# area:* (one or more) and review:* (zero or more): the rule below
+for l in area:combat:1D76DB:"Combat engine, dice, stances, hazards" \
+         area:cards:0052CC:"Card data, pricing, keywords, card-spec" \
+         area:ui:006B75:"Screens, dock, map, title, styling" \
+         area:mobile:5319E7:"Expo/mobile perf, gestures, native builds" \
+         area:ci:B60205:"Workflows, pr-autofix, verify-*, hooks" \
+         area:loop:0E8A16:"Loop skills, plan/ memory, telemetry, nexus docs" \
+         review:rules-change:E99695:"Changes game rules or balance; needs T's design eye" \
+         review:plan-only:EDEDED:"Only plan/, docs/, telemetry/ change; no code" \
+         review:needs-T:FBCA04:"Blocked on a decision only T can make"; do
+  gh label create "$(echo "$l" | cut -d: -f1-2)" --repo "$GH_REPO" \
+    --color "$(echo "$l" | cut -d: -f3)" --description "$(echo "$l" | cut -d: -f4-)" 2>/dev/null || true
+done
 gh pr create --repo "$GH_REPO" --base main --head "loop/<verb>-<slug>" \
-  --label loop:pr --title "<subject naming the claim>" --body-file "$body"
+  --label loop:pr --label "size:<S|M|L>" --label "area:<area>" \
+  --title "<subject naming the claim>" --body-file "$body"
 gh pr checks "loop/<verb>-<slug>" --repo "$GH_REPO" --watch --fail-fast
 ```
 
+- **One size label per PR** (T, 2026-10-14), so T can spot the
+  estimate in the PR list: `size:S`, `size:M` or `size:L`, read from
+  the brief the tick ships (its `Size:` line, or the `###` header of
+  the `§ <id>` phase). A fix with no brief, or a brief from before
+  this rule, is sized by the tick on the same scale
+  (`skills/plot.md` Step 3) when it opens the PR. `size:multi-phase`
+  belongs to `plot` PRs only.
+- **Area and review labels (T, 2026-10-14)**, so T can tell at a
+  glance in the PR list what a PR touches and how to read it. Every
+  `loop:pr` and `plot` PR carries **at least one `area:*`** label,
+  chosen from the files the diff touches (several when it spans
+  areas): `area:combat` (`axiomancer-mechanics/src/Combat`, `Effects`,
+  `Enemy`, hazards, dice), `area:cards` (`Cards`, `Items`, pricing,
+  keywords, card-spec), `area:ui` (`axiomancer-mobile` screens, dock,
+  map, title, styling), `area:mobile` (Expo config, perf, gestures,
+  native builds), `area:ci` (`.github/`, `.claude/hooks`, `scripts/`
+  verify tooling), `area:loop` (`skills/`, `plan/`, `telemetry/`,
+  nexus docs). `review:*` labels are added only when they apply, any
+  number: `review:rules-change` when the diff changes a card, rule,
+  price, keyword or tuning value (T reads it with a design eye);
+  `review:plan-only` when nothing outside `plan/`, `docs/`,
+  `telemetry/` changes (a `plot` PR always carries it);
+  `review:needs-T` when the PR body asks T a question the merge
+  depends on. Add a label to an open PR with
+  `gh pr edit <n> --repo "$GH_REPO" --add-label <label>`.
 - **One PR per tick**, never one per fix. Each PR carries only this
   session's telemetry shard, so two PRs never add the same file
   (lesson `telemetry-add-add`). The plan-only commits that
@@ -236,6 +282,16 @@ Closes `ship-a-phase`, `iterate`, `critique`, `fix-ci` and `plot`,
 even a tick that shipped nothing. Lesson format and the ladder live
 in the `plan/lessons.md` header; `scripts/check-lessons.mjs` lints it.
 
+0. **Whose move is the fix? (D94)** For each thing that bit, ask who
+   can fix it. If only T can (rotate or renew a token or secret,
+   finish an OAuth, a console click, a tool on T's machine), it is
+   **not a lesson**: bump or add its row in `plan/NEEDS_T.md` (format
+   in that file's header), use its workaround, and say so in the
+   tick's output. It never climbs the ladder below, never becomes a
+   `PHASE_CANDIDATES` automation row, and the loop ships no code to
+   work around it. What the loop itself can change (a step, a script,
+   a test) goes on to step 1. A mixed case splits: T's half to
+   `NEEDS_T.md`, the loop's half (if any stands on its own) a lesson.
 1. Did anything in this tick bite (a wrong assumption, a step that
    misled, a red check, a retry)? If it matches a lesson, bump its
    `seen N×` and `last` date; if not, add one under its `@domain:`.
@@ -363,6 +419,7 @@ plan/revamp/README.md                # the revamp record; part plans beside it
 plan/CRITIQUE.md                     # critique queue + last-pass metadata
 plan/PHASE_CANDIDATES.md             # expand last-pass metadata (§3 expand gate)
 plan/lessons.md                      # retro ladder (§3 "Retro")
+plan/NEEDS_T.md                      # T's own moves; never lessons (D94)
 
 # External signals
 gh issue list ...                    # unlabeled / loop:do count
