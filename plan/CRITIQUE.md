@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-15 at commit 1df5499e
-> Pass count: 88
+> Last pass: 2026-10-15 at commit 2927472f
+> Pass count: 89
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -659,7 +659,34 @@
 > phase line is 9px, does not scale, and spells ROUND and TURN as "R"
 > and "T".
 
+> **[critique pass 89, 2026-10-15, commit 2927472f] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors. 14 commits
+> after pass 88: the dock END row (#555), the HUD phase line (#557),
+> the SACRIFICE-floor announce (#559) and the any-rest scar mend
+> (#562). Verified on screen: desktop END sits at the far right, and
+> the phase line reads "PHASE 1/5 · ROUND 1 · TURN 1" in both
+> viewports, so pass 87's and pass 88's rows are closed. The scar mend
+> is not on screen (the rest fixture carries no scar); its rest-shelter
+> comment and the Scarred desc ("until you next rest") agree with it.
+> Reconfirmed and not re-filed: the unfixtured exploration hub bouncing
+> to the title, the mobile hazard strip's "CHOOSE TO PROC…" (pass 68
+> trade), the legend's SEALED key (pass 86 row), the covered fan cards
+> cutting their names on a phone. One fresh finding: the rest and cache
+> screens' line "The node is spent the moment you stopped here" mixes
+> tenses.
+
 ## Pending
+
+
+### [LOW] rest / cache — "The node is spent the moment you stopped here" mixes present and past tense
+- pass: 89 (commit 2927472f)
+- viewport: both (375x812 and 1280x800)
+- category: voice
+- observation: the italic line above the two rest offers reads "The node is spent the moment you stopped here. Pick one — there is no walking back out." "is spent" and "Pick one" are present tense, but "you stopped" is past, so the sentence reads as a slip in an otherwise careful voice. The treasure cache carries the same line.
+- evidence: `.critique-artifacts/mobile/09-rest.txt`, `desktop/09-rest.png` (fixture `apprentice-bw-rest`); `axiomancer-mobile/state/presenters/rest.copy.ts:12`, `cache.copy.ts:10`.
+- suggested fix: "The node is spent the moment you stop here." in both copy files (and any test that pins the string); copy only, no rule change.
+- source: critique:drive (unattended)
 
 
 ### [LOW] ci / pr-resolve — a hand dispatch with a non-`loop/` branch exits green having done nothing
