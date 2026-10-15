@@ -38,7 +38,7 @@ import { NavLogger } from '@/components/NavLogger';
 import { ToastHost } from '@/components/ToastHost';
 import { getLogger } from '@mechanics';
 import { initAppLogging } from '@/state/logging';
-import { attachCrashBreadcrumbs, initCrashReporting, withCrashReporting } from '@/lib/monitoring';
+import { attachCrashBreadcrumbs, initCrashReporting, registerNavigationTracing, withCrashReporting } from '@/lib/monitoring';
 import IndexScreen from './index';
 import SaveSlotsScreen from './saves/index';
 import SettingsScreen from './settings/index';
@@ -75,6 +75,13 @@ SplashScreen.preventAutoHideAsync();
 // Crash reporting (lib/monitoring.ts) — FIRST, so a crash during the boot
 // below is still reported. Native-only and DSN-gated; a no-op on web.
 initCrashReporting();
+
+// The root container is ready: replay a queued navigation request, then hand
+// the container to Sentry for per-screen transactions (preview builds only).
+function onNavigationReady(): void {
+  flushPendingNavigation();
+  registerNavigationTracing(navigationRef);
+}
 
 // AXM Log (docs/logging.md) — enable the structured logger before any
 // store/provider touches the engine so boot-time events are captured.
@@ -242,7 +249,7 @@ function RootLayout() {
             <NavigationContainer
           ref={navigationRef}
           linking={linking}
-          onReady={flushPendingNavigation}
+          onReady={onNavigationReady}
             >
           <StatusBar barStyle="light-content" />
           <HardwareBackHandler />

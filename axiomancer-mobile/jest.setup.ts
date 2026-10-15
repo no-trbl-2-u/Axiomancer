@@ -30,6 +30,18 @@ jest.mock('react-native-haptic-feedback', () => ({
     },
 }));
 
+// `@sentry/react-native` ships untranspiled ESM that Jest cannot parse, and
+// `lib/monitoring.ts` now reaches the combat panel (drag spans). Nothing
+// under Jest starts a client, so an inert stub is the whole contract;
+// `lib/__tests__/monitoring.test.ts` replaces it with its own spies.
+jest.mock('@sentry/react-native', () => ({
+    init: jest.fn(),
+    wrap: (root: unknown) => root,
+    addBreadcrumb: jest.fn(),
+    startInactiveSpan: jest.fn(() => ({ setAttribute: jest.fn(), end: jest.fn() })),
+    reactNavigationIntegration: jest.fn(() => ({ name: 'ReactNavigation', registerNavigationContainer: jest.fn() })),
+}));
+
 require('react-native-reanimated/mock');
 
 // AsyncStorage's native module isn't available in a Jest-Node

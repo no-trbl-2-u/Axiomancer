@@ -196,3 +196,32 @@ When the process dies mid-sequence, the **last one recorded names the step
 that died**, which localizes a native crash without a symbolicated stack.
 Keep them ordered and keep them cheap; they are the reason this path is
 diagnosable at all.
+
+## Performance (Sentry)
+
+Preview builds only. `initCrashReporting` sets `tracesSampleRate` to
+`PREVIEW_TRACES_SAMPLE_RATE` (1.0, `lib/monitoring.ts`) when the EAS build
+profile is `preview`, and to 0 for production, any other profile, a missing
+profile, and web. Production keeps its quota for crashes.
+
+What a preview APK sends:
+
+| Data | Source | Read it in Sentry |
+| --- | --- | --- |
+| Slow and frozen frames, per screen | `enableNativeFramesTracking` + `reactNavigationIntegration` (registered on the root container's `onReady` in `app/_layout.tsx`) | Insights → Mobile → Screen Rendering (or Performance → the route-named transaction) |
+| App start (cold/warm) | `enableAppStartTracking` | Insights → Mobile → App Starts |
+| One span per combat drag | `startDragSpan(kind)` in `CombatEncounterPanel`'s `begin`, ended on every exit | Performance → Transactions, search `combat.drag` |
+
+Drag spans are named `combat.drag.<kind>` with op `ui.drag`, where kind is
+where the drag started: `hand-to-play` (card from the hand), `play-to-hand`
+(card from play) or `die-to-card` (a die). The one attribute, `outcome`, is
+`dropped` (released anywhere), `cancelled` (the gesture cancelled) or
+`interrupted` (the drag-interrupt recovery finalized it, or combat unmounted
+mid-drag). No game state, card ids or player data ride on a span. Each span
+carries its own frame counts, so the slow drags are the ones with frozen or
+slow frames on them.
+
+Spans start and end in the panel's JS `begin`/`end` callbacks, never in the
+gesture worklets, so the per-frame drag cost is unchanged. Filter the
+`environment` to `preview`. If the span quota runs short, lower
+`PREVIEW_TRACES_SAMPLE_RATE`; that is the one knob.

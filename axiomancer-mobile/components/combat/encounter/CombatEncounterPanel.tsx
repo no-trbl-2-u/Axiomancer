@@ -38,6 +38,7 @@ import {
 
 import { CombatBoard, CombatCardFace, OutcomeText, HAND_CARD_W, HAND_CARD_H, type DragController, type DragPayload, type Rect } from '@/components/combat/encounter/CombatBoard';
 import { useDragInterruptRecovery } from '@/components/combat/encounter/useDragInterruptRecovery';
+import { startDragSpan, type DragSpanEnd, type DragSpanKind, type DragSpanOutcome } from '@/lib/monitoring';
 import { type CombatFx } from '@/components/combat/encounter/CombatCombatantPane';
 import { CombatDie, combatDieFootprint } from '@/components/combat/encounter/CombatDie';
 import { CombatSummaryModal } from '@/components/combat/encounter/CombatSummaryModal';
@@ -59,6 +60,12 @@ import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
 type DropResolver = (payload: DragPayload, x: number, y: number) => void | Promise<void>;
+
+/** The perf span a drag reports under, named by where the drag started. */
+function dragSpanKind(payload: DragPayload): DragSpanKind {
+    if (payload.type === 'die') return 'die-to-card';
+    return payload.from === 'hand' ? 'hand-to-play' : 'play-to-hand';
+}
 
 /** Stable empty-offers reference — a fresh `[]` in the selector would make the
  *  store subscription report a change on every render. */
@@ -433,6 +440,7 @@ export function CombatEncounterPanel({
     const [ghostDrag, setGhostDrag] = useState<DragPayload | null>(null);
     const [dragActive, setDragActive] = useState<DragPayload | null>(null);
     const dragRef = useRef<DragPayload | null>(null);
+    const dragSpanEndRef = useRef<DragSpanEnd | null>(null);
     const dragX = useSharedValue(0);
     const dragY = useSharedValue(0);
     const dragShown = useSharedValue(0);
@@ -447,6 +455,10 @@ export function CombatEncounterPanel({
         // (the "die looks like a card" bug). The effect below reveals it on the
         // commit that carries the right payload.
         dragRef.current = payload; dragX.value = x; dragY.value = y;
+        // One Sentry span per drag (preview builds only; a no-op elsewhere).
+        // A span still open here lost its end, so it closes as interrupted.
+        dragSpanEndRef.current?.('interrupted');
+        dragSpanEndRef.current = startDragSpan(dragSpanKind(payload));
         setGhostDrag(payload);
         startTransition(() => { setDragActive(payload); });
     }, [dragX, dragY]);
@@ -457,18 +469,26 @@ export function CombatEncounterPanel({
         if (ghostDrag) dragShown.value = 1;
     }, [ghostDrag, dragShown]);
     const drag: DragController = useMemo(() => ({ begin, end: () => undefined, active: dragActive, x: dragX, y: dragY, badRects }), [begin, dragActive, dragX, dragY, badRects]);
-    const end = useCallback((x: number, y: number) => {
+    // Every exit funnels here, so the drag's span closes exactly once:
+    // `(-1,-1)` from the gesture is a cancel, any other point a drop, and the
+    // interrupt recovery below says so itself.
+    const finish = useCallback((x: number, y: number, outcome: DragSpanOutcome) => {
         const payload = dragRef.current; dragRef.current = null; dragShown.value = 0; setGhostDrag(null); setDragActive(null);
+        const endSpan = dragSpanEndRef.current; dragSpanEndRef.current = null;
+        endSpan?.(outcome);
         if (!payload) return;
         const resolver = (drag as DragController & { resolveDrop?: DropResolver }).resolveDrop;
         if (resolver) void resolver(payload, x, y);
     }, [drag, dragShown]);
+    const end = useCallback((x: number, y: number) => finish(x, y, x < 0 && y < 0 ? 'cancelled' : 'dropped'), [finish]);
     drag.end = end;
     // Force-finalize a live drag whose pointer stream was interrupted
     // (pointercancel / blur / tab hidden / dead stream) so it can't leave a
     // permanent ghost or wedge staging. The finalizer is the SAME snap-home path
     // the cancel branch uses (`end(-1,-1)`).
-    const finalizeDrag = useCallback(() => end(-1, -1), [end]);
+    const finalizeDrag = useCallback(() => finish(-1, -1, 'interrupted'), [finish]);
+    // Leaving combat mid-drag closes its span too.
+    useEffect(() => () => { dragSpanEndRef.current?.('interrupted'); dragSpanEndRef.current = null; }, []);
     useDragInterruptRecovery(!!ghostDrag, finalizeDrag, DRAG_WATCHDOG_MS);
     // Centre the hand-card face under the finger (half of HAND_CARD_W/H)
     // and lift it above the fingertip so the card stays readable mid-drag.
