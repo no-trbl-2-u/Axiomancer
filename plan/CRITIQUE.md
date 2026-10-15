@@ -707,15 +707,6 @@
 - suggested fix: give a refused tap the same reject line and error haptic as a refused drop (owner doctrine: illegal actions prevented loudly).
 - source: antagonist, PR #523
 
-### [LOW] combat / a11y — the SACRIFICE-floor callout changes the ring's label but announces nothing
-- pass: antagonist on PR #523 (SF1, commit 04e5ebb6)
-- viewport: n/a (screen reader)
-- category: accessibility
-- observation: during the 900ms callout the medallion's `accessibilityLabel` becomes `VITAE <v> of <max>. SACRIFICE <cost> would leave you below 1.` (A5). A label change is only heard when focus is already on the medallion, and the callout clears before a user could move there, so a screen-reader user who drops a die on a card is not told why it was refused.
-- evidence: `CombatCombatantPane.tsx` `PlayerMedallion` label; no `AccessibilityInfo.announceForAccessibility` or live region on the callout.
-- suggested fix: announce the floor line once per refusal (`announceForAccessibility(PROGRAM_COPY.floorA11y(...))`), keeping the label change for focus.
-- source: antagonist, PR #523
-
 ### [LOW] combat / perf — `programPlayVM` now probes every hand card's lines twice more per view-model build
 - pass: antagonist on PR #523 (SF1, commit 04e5ebb6)
 - viewport: n/a
@@ -999,6 +990,15 @@
 
 ## Done
 
+### [x] [LOW] combat / a11y — the SACRIFICE-floor callout changes the ring's label but announces nothing — RESOLVED 2026-10-15 (branch loop/iterate-sacfloor-announce, 6974aa46: `flagShortfall` announces `PROGRAM_COPY.floorA11y` once per refusal; the label change stays for focus; pinned in CombatBoard.sacfloor.test.tsx)
+- pass: antagonist on PR #523 (SF1, commit 04e5ebb6)
+- viewport: n/a (screen reader)
+- category: accessibility
+- observation: during the 900ms callout the medallion's `accessibilityLabel` becomes `VITAE <v> of <max>. SACRIFICE <cost> would leave you below 1.` (A5). A label change is only heard when focus is already on the medallion, and the callout clears before a user could move there, so a screen-reader user who drops a die on a card is not told why it was refused.
+- evidence: `CombatCombatantPane.tsx` `PlayerMedallion` label; no `AccessibilityInfo.announceForAccessibility` or live region on the callout.
+- suggested fix: announce the floor line once per refusal (`announceForAccessibility(PROGRAM_COPY.floorA11y(...))`), keeping the label change for focus.
+- source: antagonist, PR #523
+- issue: #558
 ### [x] [LOW] combat / HUD — "PHASE 1/5 · R1 · T1" is 9px text that ignores the system font size, and "R1 · T1" is never explained — RESOLVED 2026-10-15 (branch loop/iterate-hud-meta-line: the presenter builds the whole line, "PHASE 1/5 · ROUND 1 · TURN 1", as `metaLine`; the board prints it as given at 11px with font scaling on, and the name row wraps; pinned in legibility-sweep.engine.test.ts)
 - issue: #556
 - pass: 88 (commit 1df5499e)

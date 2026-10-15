@@ -85,6 +85,7 @@
 - **reanimated4-spring-defaults** · `withSpring` given only damping and stiffness inherits Reanimated 4's mass 4 and energyThreshold 6e-9, so the tray dice swung about 20s and the skip layer ate the first tap; only a live wait on the built app showed it (iterate drive-settle) → name mass and energyThreshold on every spring; prove a UI wait signal on the web export before trusting it · seen 1× · last 2026-10-14 · open
 - **jest-mock-factory-scope** · a `jest.mock` factory written with JSX or `jest.requireActual<typeof import(...)>` failed babel's out-of-scope check (ship PF4) → build the stub with `require('react')` and `createElement` inside the factory, as `EquipmentDock.test.tsx` does · seen 1× · last 2026-10-14 · open
 - **brief-e2e-script-paths** · the PF4 brief's verify gate named `node scripts/<x>-e2e.mjs` from the root, but the journeys live in `axiomancer-mobile/scripts/` (ship PF4) → run journeys as `npm run e2e:<name> -w axiomancer-mobile` (the package.json names) whatever path a brief gives · seen 1× · last 2026-10-14 · open
+- **spy-on-preset-mock** · `jest.spyOn(AccessibilityInfo, 'announceForAccessibility')` returned react-native's preset `jest.fn`, so `restoreAllMocks` (which the hermeticity audit demands) neither restored nor cleared it, and calls leaked across tests (iterate sacfloor announce) → in a file that spies on a react-native preset mock, tear down with `jest.clearAllMocks(); jest.restoreAllMocks();` · seen 1× · last 2026-10-15 · open
 
 ## Adding a domain
 

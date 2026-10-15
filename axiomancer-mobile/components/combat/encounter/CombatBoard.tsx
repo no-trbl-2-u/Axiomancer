@@ -28,7 +28,7 @@
  */
 
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { AccessibilityInfo, Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import type { LayoutChangeEvent, StyleProp, TextStyle } from 'react-native';
 import { Image } from '@/lib/platform/image';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
@@ -881,14 +881,18 @@ export const CombatBoard = React.memo(function CombatBoard({
     }, [dropReject.n]);
     // The SACRIFICE floor callout: a line refused because its SACRIFICE would
     // leave the player below 1 VITAE flags the VITAE ring with the engine's
-    // numbers (the card VM's shortfall); any other refusal passes null.
+    // numbers (the card VM's shortfall); any other refusal passes null. The
+    // ring's label change is only heard with focus already on it, so each
+    // refusal also announces the floor line once to a screen reader.
     const [vitaeCallout, setVitaeCallout] = useState<{ cost: number; vitae: number; n: number } | null>(null);
     const calloutN = useRef(0);
+    const maxVitae = vm.player.maxHp;
     const flagShortfall = useCallback((sf: { cost: number; vitae: number } | null | undefined) => {
         if (!sf) return;
         calloutN.current += 1;
         setVitaeCallout({ cost: sf.cost, vitae: sf.vitae, n: calloutN.current });
-    }, []);
+        AccessibilityInfo.announceForAccessibility(PROGRAM_COPY.floorA11y(sf.vitae, maxVitae, sf.cost));
+    }, [maxVitae]);
     useEffect(() => {
         if (!vitaeCallout) return;
         const t = setTimeout(() => setVitaeCallout(null), SACRIFICE_CALLOUT_MS);
