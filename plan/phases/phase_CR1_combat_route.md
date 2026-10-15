@@ -191,7 +191,7 @@ feat(mobile): live combat on its own route — phase <id>
 
 ## DoD
 
-A1 to A10 ticked, each by its phase below.
+A1 to A9 ticked, each by its phase below. A10 was dropped with CR1c (T, 2026-10-15): Sentry had no performance data from before the route to compare against.
 
 ## Follow-ups (out of scope)
 
