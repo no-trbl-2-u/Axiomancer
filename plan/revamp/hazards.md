@@ -49,3 +49,5 @@ Independent of the combat resets; requires only R0.
 
 T's session. The reset hands it a minimal deck, honest rewards and a
 glossary with only live words.
+
+Briefed 2026-10-15 by `/plot` as Phases B3a–B3f: `plan/phases/phase_B3_hazard_puzzle.md` (a fixed one-round puzzle, solver band check, demos before any Act 1 puzzle).
