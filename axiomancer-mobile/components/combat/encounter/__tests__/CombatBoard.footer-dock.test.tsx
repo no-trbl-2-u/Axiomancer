@@ -146,6 +146,9 @@ describe('A4 — the footer dock', () => {
             width - DOCK_PAD_H * 2 - DOCK_GAP * 2 - PLAYER_AVATAR_SIZE - END_BTN_W;
         expect(phoneColumn(PHONE.width)).toBeLessThan(DOCK_VITAE_MAX_WIDTH);
         expect(phoneColumn(430)).toBeLessThan(DOCK_VITAE_MAX_WIDTH);
+        // END takes the room the capped column leaves, so it stays at the
+        // dock's right edge on a wide window (CRITIQUE pass 87).
+        expect(flat('combat-end-wrap').marginLeft).toBe('auto');
     });
 
     it('the avatar is a 48pt round button that opens the pilgrim modal', () => {
