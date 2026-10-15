@@ -13,11 +13,9 @@ Combat is a card-and-dice surface hosted by
 mounted from two places:
 
 - [`app/combat-encounter/index.tsx`](../app/combat-encounter/index.tsx) —
-  dev-only launcher route. Bootstraps a mock foe + demo deck and passes
-  `persistOutcome={false}`, so playing here never mutates the real
-  player's progression (a sandbox).
-- `EncounterModalOverlay` (live map flow) — feeds the panel the real
-  enemy + player and sets `persistOutcome={true}`.
+  the live fight's route. `<CombatGate>` engages every map and labyrinth
+  encounter and pushes it; it feeds the panel the staged foe and the real
+  player and sets `persistOutcome={true}`.
 
 ## Data flow
 

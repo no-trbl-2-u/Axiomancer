@@ -176,8 +176,8 @@ describe('selectHasActiveEvent', () => {
 
     // Event-shell distinction. EventGate must NOT
     // push the player into the full-screen /event route when the
-    // pending event is a combat-prelude (which renders in-place over
-    // the map via <EncounterModalOverlay>).
+    // pending event is a combat-prelude (which <CombatGate> engages
+    // onto the /combat-encounter route).
     it('selectHasActivePacedEvent: false on a fresh store', () => {
         const store = makeStore();
         expect(selectHasActivePacedEvent(store.getState())).toBe(false);
@@ -189,7 +189,7 @@ describe('selectHasActiveEvent', () => {
         // selectHasActiveEvent is true here…
         expect(selectHasActiveEvent(store.getState())).toBe(true);
         // …but the paced selector excludes combat-prelude so the
-        // EventGate doesn't double-mount with EncounterModalOverlay.
+        // EventGate doesn't race <CombatGate> for the same event.
         expect(selectHasActivePacedEvent(store.getState())).toBe(false);
     });
 
@@ -199,9 +199,7 @@ describe('selectHasActiveEvent', () => {
         expect(selectHasActivePacedEvent(store.getState())).toBe(true);
     });
 
-    // Combat-tab mutex. The tab layout flips
-    // to STRIFE early (while encounter modal is up) so visual
-    // continuity holds across the encounter-modal seam.
+    // The combat-prelude selector: true for a pending encounter only.
     it('selectHasActiveCombatPrelude: false on a fresh store', () => {
         const store = makeStore();
         expect(selectHasActiveCombatPrelude(store.getState())).toBe(false);

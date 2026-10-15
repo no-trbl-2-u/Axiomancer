@@ -51,14 +51,14 @@ assertions. Suites that need the player seated somewhere boot from a
 |---|---|---|---:|---:|
 | `state-fixture.engine.test.ts` | P2 | State-fixture boot (2026-09-08): request channels (`__AXM_FIXTURE__` vs `?fixture=`), the dev-tools gate, invalid-request fallback, ephemeral `fixtureBootAdapter`, and one row per arrival fixture pinning that `arrive` lands the state its gate routes on (`/dialogue`, `/village`, `/cutscene`, rest / cache / blacksmith / hazard sessions); `test-utils/fixtureStore.ts` helper | 5 | 20 |
 | `character.engine.test.ts` | P1 | Character VM shape + stat-row composition + saves/tests block + 7 equipment slots in display order; no GRACE / alignment fields (D39) | 9 | 34 |
-| `combat-mode.engine.test.tsx` | P3 | `useCombatMode` context: `lastOutcome` one-shot signal, `exitCombatWith` (with optional aftermath snapshot payload), `clearLastOutcome`, `inEncounterModal` session flag (Phase 63c), `aftermathData` + `dismissAftermath` (Phase 70 Tick A), run-stats counters `encountersFaced` / `deepestNodeId` / `recordDeepestNode` / `resetRunStats` (Phase 70 Tick C) | 4 | 21 |
+| `combat-mode.engine.test.tsx` | P3 | `useCombatMode` context: `lastOutcome` one-shot signal, `exitCombatWith` (with optional aftermath snapshot payload), `clearLastOutcome`, `aftermathData` + `dismissAftermath` (Phase 70 Tick A), run-stats counters `encountersFaced` / `deepestNodeId` / `recordDeepestNode` / `resetRunStats` (Phase 70 Tick C) | 4 | 21 |
 | `combat-route.screen.test.tsx` | P4 | The live `/combat-encounter` route (phase CR1a), panel stubbed: the staged foe reaches the panel; victory / mercy / defeat / WITHDRAW exits (defeat resets the run, WITHDRAW ends the staged fight); a boss seals WITHDRAW; an empty route leaves (back, else `/exploration`); Android back held; registered `fullScreenModal` with `gestureEnabled: false` | 1 | 11 |
 | `engine-events.engine.test.ts` | P2 | `_recentEvents` ring buffer is populated by real engine dispatches (`combat:started`, `combat:ended`); newest-first ordering; capacity at `RECENT_EVENTS_CAPACITY`; un-wired store returns `null` emitter | 2 | 7 |
 | `engine-events.hook.test.tsx` | P3 | `useGameEvents` subscribes on mount, fires in dispatch order, unsubscribes on unmount, tolerates a non-stable handler reference (internal ref) | 1 | 3 |
 | `event-assets.test.ts` | P1 (pure) | Exhaustively maps `ResolvedEvent.kind` → `EventArtSlug` (no store; pure unit-shape) | 2 | 14 |
 | `event.engine.test.ts` | P1 | Event VM + `selectHasActiveEvent` / `selectHasActivePacedEvent` / `selectHasActiveCombatPrelude` across all event kinds (encounter, rest, gathering, loot-cache, interaction, village); combat-prelude STRIKE/KNEEL relabel; action subtitles | 10 | 52 |
 | `event.screen.test.tsx` | P4 | `app/event/index.tsx` renders right VM-driven content per kind; pick dispatches the right action; `canSkip` gating | 3 | 13 |
-| `exploration.engine.test.ts` | P1+P2 | Exploration VM shape; `moveTo` / `changeMap` action layer; event-callout shape; deep-freeze invariant; **encounter-modal seam** pin | 13 | 31 |
+| `exploration.engine.test.ts` | P1+P2 | Exploration VM shape; `moveTo` / `changeMap` action layer; event-callout shape; deep-freeze invariant; **encounter seam** pin | 13 | 31 |
 | `inventory.engine.test.ts` | P1+P2 | Inventory VM (5 canonical tabs in order); `useItem` / `equipItem` / `dropItem` end-to-end; equipment dock; replace-preview; `parseHealAmount` | 18 | 46 |
 | `inventory-feedback.engine.test.ts` | P1 (pure) | `selectInventoryToast` — synthetic `inventory:changed` events produce correct toasts; unrelated event kinds yield `null` (no false toasts) | 1 | 8 |
 | `inventory.modal.engine.test.ts` | P1 | Item-modal VM: USE preview HP delta; EQUIP / EQUIP·REPLACE label branches; null on unknown item id | 4 | 9 |
@@ -76,7 +76,6 @@ assertions. Suites that need the player seated somewhere boot from a
 | `event-pools.engine.test.ts` | P2 | Per-node-type pool overrides + isBoss + unregistered-node fallback + idempotent re-registration. **Phase 55:** multi-entry encounter pools. **Phase 56:** per-quest-node NPC pools. **Phase 57:** per-map treasure + gather payloads with locale-themed items, distinct fv vs nf rosters, currency thread, material-category check. **Phase 58:** chaos-mode toggle | 5 | 28 |
 | `cross-screen-integration.engine.test.tsx` | **P6** | `ExplorationScreen` + `(tabs)/_layout` + `<CombatGate>` + the `/combat-encounter` route mounted together on one store: a combat-prelude is engaged and routed once, the map never hosts the fight and needs no tab lock, WITHDRAW narrates the retreat (D39), ends the staged fight and leaves without re-routing (phase CR1a) | 1 | 4 |
 | `state/presenters/__tests__/aftermath.engine.test.ts` | P1 (pure) | Aftermath VM presenter (Phase 70): victory branch (uppercased enemy name, epithet derivation + truncation, finalBlow passthrough + fallbacks, per-tier flavor phrase selection, reward field threading); parley branch (per-level pact phrase, journal-entry passthrough); defeat branch (killer block + cause-phrase by damage tier + run-summary trio passthrough) | 3 | 29 |
-| `state/presenters/__tests__/encounter-seal.engine.test.ts` | P1 (pure) | `selectEncounterSealChrome(mode, round?)` (Phase 71): prelude / combat / aftermath chain-bar labels + accent colors, lowercase-roman round labels (i / ii / iii), round-independence of non-combat modes, defensive `·` sentinel for round 0 | 1 | 9 |
 | **Totals (`state/e2e/` + `state/presenters/__tests__/`)** | | | **129** | **482** |
 
 ## 4. Inventory — `state/persistence/e2e/`
@@ -92,7 +91,6 @@ assertions. Suites that need the player seated somewhere boot from a
 
 | File | Pattern | Pins | desc | it |
 |---|---|---|---:|---:|
-| `components/event/__tests__/EncounterModalOverlay.test.tsx` | P4 | Modal-over-map seam: mount conditions, FLEE-disabled-for-boss branch, non-dismissible backdrop (chat1 invariant), prelude→combat mode transition (Phase 63b), combat-mode-survives-vm-kind-change (Phase 63c), combat→aftermath swap for victory / parley / defeat (Phase 70 A/B/C), phase-aware seal chrome (Phase 71 — chain bar labels swap with mode + round) | 9 | 24 |
 | `components/event/aftermath/__tests__/CombatVictoryPanel.test.tsx` | P4 | Victory panel render contract (Phase 70 Tick A): enemy name + epithet (with null collapse), final-blow phrase verbatim, reward strip + xp em-dash branch, loot list empty + populated branches, CARRY ON button wiring | 2 | 10 |
 | `components/event/aftermath/__tests__/CombatFriendshipPanel.test.tsx` | P4 | Friendship panel render contract (Phase 70 Tick B): panel + pixel-emblem mount, enemy / epithet / pact phrase / AN ACCORD label, reward strip, journal-entry collapse + populated branches, PART AS FRIENDS button wiring | 2 | 11 |
 | `components/event/aftermath/__tests__/CombatDefeatPanel.test.tsx` | P4 | Defeat panel render contract (Phase 70 Tick C): panel mount, eyebrow + character name + killer block (with null collapse) + damage ledger + cause phrase + run-summary ledger rows + em-dash for null deepest node, BEGIN AGAIN + let-the-page-close handler wiring | 2 | 13 |
@@ -211,5 +209,9 @@ mount can pin the *props* `TabLayout` computes, but only a real
 browser proves those props actually repaint the tab bar (react-navigation's
 web tab bar can leave stale/duplicate DOM nodes with the same
 accessibility label mid-transition, which a real `:visible` check
-catches and a prop assertion cannot). Cross-screen coverage
-elsewhere in the app (beyond this one seam) remains an open gap.
+catches and a prop assertion cannot). Since phase CR1a it drives a
+fight onto its own `/combat-encounter` route and back, and reloads
+mid-fight; `scripts/labyrinth-combat-roundtrip-e2e.mjs` (`npm run
+e2e:labyrinth-roundtrip`, phase CR1b) does the same from a labyrinth
+room and asserts the player lands back in that room. Cross-screen
+coverage elsewhere in the app (beyond these seams) remains an open gap.

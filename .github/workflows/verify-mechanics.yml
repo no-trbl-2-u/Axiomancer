@@ -186,8 +186,14 @@ jobs:
         if: steps.impact.outputs.run_integration == 'true'
         run: npm run e2e:theme --workspace axiomancer-mobile
 
-      - name: Exploration <-> combat-prelude round trip
+      - name: Exploration <-> combat round trip (and mid-fight reload)
         if: steps.impact.outputs.encounters == 'true'
         run: npm run e2e:exploration-roundtrip --workspace axiomancer-mobile
         env:
           ROUNDTRIP_E2E_REUSE_EXPORT: '1'
+
+      - name: Labyrinth <-> combat round trip
+        if: steps.impact.outputs.encounters == 'true'
+        run: npm run e2e:labyrinth-roundtrip --workspace axiomancer-mobile
+        env:
+          LABYRINTH_E2E_REUSE_EXPORT: '1'

@@ -188,7 +188,7 @@ app/                       expo-router routes
     memoir/                quests, chronicle, remains
     inventory/             inventory + equipment
     deck/                  the combat deck, read-only
-  combat-encounter/        dev-only sandbox launcher for Hazard-Pattern combat (live combat mounts in EncounterModalOverlay)
+  combat-encounter/        the live fight (CombatGate pushes it for every map and labyrinth encounter)
   hazard/                  hazard minigame
   hazard-deck/             hazard deck builder
   rest/                    rest-choice encounter (Phase 52d)

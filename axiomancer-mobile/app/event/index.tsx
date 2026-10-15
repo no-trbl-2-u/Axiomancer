@@ -4,8 +4,8 @@
  * Most event kinds have a dedicated surface: interaction / narration →
  * /dialogue, village → /village, cutscene → /cutscene; rest /
  * loot-cache / hazard are intercepted in `resolveCurrentMapEventAction`
- * and launch minigame sessions; encounters render via
- * `<EncounterModalOverlay>` over the map. In production this screen is
+ * and launch minigame sessions; encounters are engaged by
+ * `<CombatGate>` onto `/combat-encounter`. In production this screen is
  * the GATHERING acknowledgement: a gather node grants its items and
  * `selectPacedEventRoute` mounts this card so the player is told what
  * they picked up (`state/e2e/gathering-acknowledgement.engine.test.ts`).

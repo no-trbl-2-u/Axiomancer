@@ -24,7 +24,7 @@
 | `node-confirm-go` | TRAVEL HERE |
 | `node-confirm-cancel` | Close the sheet |
 | `exploration-node-toast` | 2 s toast ("This path is sealed." / "walked already" / "you stand here") |
-| `encounter-modal-overlay` | Combat seal (see combat.md) |
+| `combat-encounter-live` | A fight, on its own `/combat-encounter` route over the map (see combat.md) |
 | `self-dev-tools-link` | On the SELF tab — the way to `/dev` |
 
 ## 4. A correct play, step by step

@@ -4,7 +4,6 @@ import { View, Text } from 'react-native';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import { AxmIcon, type AxmIconName } from '@/components/icons';
-import { useCombatMode } from '@/state/combat-mode';
 import {
   TAB_BAR_LABEL_FONT_SIZE,
   TAB_BAR_LABEL_LETTER_SPACING,
@@ -79,9 +78,9 @@ function TabIconWithBadge({
 export default function TabLayout() {
   const AXM = usePalette();
   const styles = useStyles();
-  const { inEncounterModal } = useCombatMode();
-  // Tab configuration: combat runs in the encounter modal, so there is
-  // no combat tab; the five tabs are registered below.
+  // Tab configuration: a fight runs on its own full-screen route
+  // (/combat-encounter) that covers this bar, so there is no combat tab and
+  // no tab lock; the five tabs are registered below.
   // Subscribe to the slim slices `selectTabBadges` reads, then memo
   // the badges object. The presenter returns a stable `EMPTY_BADGES`
   // reference in the no-event / no-levelup steady state but a fresh
@@ -103,21 +102,11 @@ export default function TabLayout() {
     [player, eventSlice, notifications],
   );
 
-  // Hard-stop the tab bar while the encounter modal is open: a visible
-  // WILDS tab during the modal breaks the hard-stop feel. Hide the
-  // tab bar entirely via `display: 'none'` AND lock every
-  // non-exploration tab's href to null (defense in depth). This relies
-  // on the modal staying mounted across the combat-active boundary.
-  const lockOtherTabs = inEncounterModal;
-  const tabBarStyle = inEncounterModal
-    ? styles.tabBarHidden
-    : styles.tabBar;
-
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle,
+        tabBarStyle: styles.tabBar,
         tabBarActiveTintColor: AXM.sulfur,
         tabBarInactiveTintColor: AXM.bone,
         tabBarLabelStyle: styles.tabLabel,
@@ -139,13 +128,6 @@ export default function TabLayout() {
             />
           ),
           // Exploration is the unconditional leftmost tab.
-          // It never locks even during the encounter modal so the route
-          // remains current and the modal stays mounted. Other tabs lock
-          // via `tabBarButton`/`tabPress` below (react-navigation has no
-          // `href: null` link-disable; hiding the tab button plus blocking a
-          // residual `tabPress` gives the "can't navigate here" contract).
-          // Exploration itself must not lock, or navigation is forced away
-          // from the modal-bearing screen.
         }}
       />
       <Tabs.Screen
@@ -163,12 +145,6 @@ export default function TabLayout() {
               badge={badges.character}
             />
           ),
-          tabBarButton: lockOtherTabs ? () => null : undefined,
-        }}
-        listeners={{
-          tabPress: (e) => {
-            if (lockOtherTabs) e.preventDefault();
-          },
         }}
       />
       <Tabs.Screen
@@ -186,12 +162,6 @@ export default function TabLayout() {
               badge={badges.memoir}
             />
           ),
-          tabBarButton: lockOtherTabs ? () => null : undefined,
-        }}
-        listeners={{
-          tabPress: (e) => {
-            if (lockOtherTabs) e.preventDefault();
-          },
         }}
       />
       <Tabs.Screen
@@ -209,20 +179,11 @@ export default function TabLayout() {
               badge={badges.inventory}
             />
           ),
-          tabBarButton: lockOtherTabs ? () => null : undefined,
-        }}
-        listeners={{
-          tabPress: (e) => {
-            if (lockOtherTabs) e.preventDefault();
-          },
         }}
       />
       {/* DECK is registered LAST so no existing tab changes position — the
           four tabs players already have muscle memory for keep their slots,
-          and DECK lands beside SATCHEL, the other "what you carry" surface.
-          It locks with the rest during the encounter modal: the deck is
-          reference material, and reading it mid-fight is exactly the
-          hard-stop the modal exists to enforce. */}
+          and DECK lands beside SATCHEL, the other "what you carry" surface. */}
       <Tabs.Screen
         name="deck/index"
         component={DeckScreen}
@@ -238,12 +199,6 @@ export default function TabLayout() {
               badge={badges.deck}
             />
           ),
-          tabBarButton: lockOtherTabs ? () => null : undefined,
-        }}
-        listeners={{
-          tabPress: (e) => {
-            if (lockOtherTabs) e.preventDefault();
-          },
         }}
       />
     </Tabs>
@@ -257,14 +212,6 @@ const useStyles = makeStyles((AXM) => ({
     borderTopWidth: 1,
     height: 60,
     paddingBottom: 8,
-  },
-  tabBarHidden: {
-    backgroundColor: AXM.panelBg,
-    borderTopColor: AXM.ash,
-    borderTopWidth: 1,
-    height: 60,
-    paddingBottom: 8,
-    display: 'none' as const,
   },
   // Type size and tracking come from the presenter so the tab-bar FIT
   // contract in `state/e2e/tabs.engine.test.ts` measures the label the bar

@@ -5,7 +5,7 @@
  * button jumps to the WILDS (exploration) tab and fires that
  * encounter immediately — no walking onto the right node required:
  *
- *   - COMBAT   → combat-prelude over the map (`<EncounterModalOverlay>`),
+ *   - COMBAT   → combat-prelude, fought on `/combat-encounter` (`<CombatGate>`),
  *               seeded with the LOWEST-level standard foe on the
  *               current map so the fight is the gentlest available.
  *   - BOSS     → combat-prelude with the lowest-level boss foe on

@@ -4,8 +4,7 @@
  * EventGate is a side-effect-only component (returns null) that
  * pushes the user into the paced event's full-screen route
  * (`selectPacedEventRoute`). Combat-prelude events stay out of the
- * router (they render via EncounterModalOverlay over the
- * exploration map).
+ * gate (`<CombatGate>` engages them onto `/combat-encounter`).
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';

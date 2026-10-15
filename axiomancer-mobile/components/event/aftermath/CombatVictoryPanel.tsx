@@ -1,11 +1,9 @@
 /**
- * CombatVictoryPanel — the "the foe falls" panel rendered inside
- * the encounter modal seal once `lastOutcome === 'victory'`.
+ * CombatVictoryPanel — the "the foe falls" panel for a won fight.
  *
  * The component is a pure render of the VM produced
- * by `selectAftermathViewModel`; the dismiss handler is wired
- * upstream by `<EncounterModalOverlay>` so the same modal seal that
- * opened on the encounter trigger closes on CARRY ON.
+ * by `selectAftermathViewModel`; the host wires the dismiss handler
+ * (today only the `/devaftermath` gallery mounts it).
  *
  * Non-dismissible by tap-outside — the only release is the CARRY ON
  * button below.

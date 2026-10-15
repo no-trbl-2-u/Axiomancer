@@ -26,8 +26,8 @@ const mockRouter = {
 let mockPathname = '/(tabs)/exploration/index';
 
 jest.mock('@/lib/platform/router', () => ({
-    // A stable reference, as in production, so the effect's deps hold still.
-    useRouter: () => mockRouter,
+    // A fresh object per call, as in production.
+    useRouter: () => ({ ...mockRouter }),
     usePathname: () => mockPathname,
 }));
 
@@ -89,6 +89,26 @@ describe('LabyrinthGate: an open visit routes to /labyrinth', () => {
         mockPush.mockClear();
         act(() => store.setState({ labyrinthUi: EMPTY_LABYRINTH_SLICE }));
         expect(mockPush).not.toHaveBeenCalled();
+    });
+
+    it('does not push again when another route covers the labyrinth mid-visit (a fight)', () => {
+        mockPathname = '/labyrinth/index';
+        const store = makeStore();
+        openVisit(store);
+        const tree = render(withProvider(store));
+        mockPathname = '/combat-encounter/index';
+        act(() => { store.setState({ _devSkipSeq: 1 } as never); });
+        tree.rerender(withProvider(store));
+        expect(mockPush).not.toHaveBeenCalled();
+    });
+
+    it('pushes again for the next visit', () => {
+        const store = makeStore();
+        openVisit(store);
+        render(withProvider(store));
+        act(() => store.setState({ labyrinthUi: EMPTY_LABYRINTH_SLICE }));
+        act(() => openVisit(store));
+        expect(mockPush).toHaveBeenCalledTimes(2);
     });
 
     it('renders nothing (side-effect-only)', () => {

@@ -36,7 +36,7 @@ const ROMAN_LOWER: ReadonlyArray<readonly [string, number]> = [
  *                  integer. Defaults to `'i'` for compatibility
  *                  with the array-lookup callers
  *                  (`combat.engine.ts::toRoman` etc.); the
- *                  encounter-seal + CombatDefeatPanel callers pass
+ *                  CombatDefeatPanel caller passes
  *                  `'·'` (middle-dot) as the "no round yet"
  *                  sentinel.
  */

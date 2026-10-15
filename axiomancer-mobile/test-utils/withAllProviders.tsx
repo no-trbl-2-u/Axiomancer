@@ -4,14 +4,14 @@
  * Every integration test that mounts a screen-level component
  * needs the same contexts in the right nesting order:
  *
- *   <CombatModeProvider>             // inCombat + lastOutcome + inEncounterModal
+ *   <CombatModeProvider>             // inCombat + lastOutcome + run stats
  *     <GameStoreProvider store>      // engine + mobile slices
  *       <SaveSlotsProvider>          // the three save slots (in-memory here)
  *         <SettingsProvider>         // player settings (never touches storage here)
  *           <NavigationContainer> ... </NavigationContainer>  // (callers add if needed)
  *
  * Inline copies of this scaffold appeared in
- * `EncounterModalOverlay.test.tsx`, `DebugCombatButton.test.tsx`,
+ * `DebugCombatButton.test.tsx`
  * and other component tests. Consolidating them here means future
  * provider additions (e.g. a future settings context) touch one
  * helper, not every test.

@@ -146,34 +146,12 @@ export interface CombatModeApi {
      */
     aftermathData: AftermathData | null;
     /**
-     * The encounter-modal aftermath panel's
-     * CARRY ON button calls this to atomically clear the outcome
-     * signal, drop the snapshot, and close the encounter modal. The
-     * combat slice itself is cleared earlier (by `actions.endCombat()`
-     * at the moment the exit fired); this is just the modal-side
-     * teardown.
+     * An aftermath panel's CARRY ON button calls this to atomically
+     * clear the outcome signal and drop the snapshot. The combat slice
+     * itself is cleared earlier (by `actions.endCombat()` at the moment
+     * the exit fired).
      */
     dismissAftermath: () => void;
-    /**
-     * True while the encounter modal is mounted (prelude,
-     * in-modal combat, or aftermath). Drives two contracts:
-     *
-     *   1. Exploration keeps `<EncounterModalOverlay>` mounted across
-     *      the entire prelude → combat → aftermath lifecycle, even
-     *      after `state.combat` goes non-null (which would otherwise
-     *      flip `selectHasActiveEvent` to false and unmount the modal
-     *      mid-encounter).
-     *   2. The tab bar hides while a modal session is active, enforcing
-     *      the "hard stop" — user can't switch tabs until the encounter
-     *      resolves.
-     *
-     * Set true via `openEncounterModal()` when the encounter prelude
-     * mounts; cleared via `closeEncounterModal()` when the aftermath
-     * dismisses (or the player flees / dies).
-     */
-    inEncounterModal: boolean;
-    openEncounterModal: () => void;
-    closeEncounterModal: () => void;
     /**
      * Mobile-side run-summary counters. The
      * engine doesn't surface run-level progression
@@ -208,7 +186,6 @@ export function CombatModeProvider({ children }: { children: React.ReactNode }) 
     const [inCombat, setInCombat] = useState<boolean>(false);
     const [lastOutcome, setLastOutcome] = useState<CombatOutcome | null>(null);
     const [aftermathData, setAftermathData] = useState<AftermathData | null>(null);
-    const [inEncounterModal, setInEncounterModal] = useState<boolean>(false);
     const [encountersFaced, setEncountersFaced] = useState<number>(0);
     const [deepestNodeId, setDeepestNodeId] = useState<string | null>(null);
 
@@ -235,12 +212,9 @@ export function CombatModeProvider({ children }: { children: React.ReactNode }) 
         setLastOutcome(null);
         setAftermathData(null);
     }, []);
-    const openEncounterModal = useCallback(() => setInEncounterModal(true), []);
-    const closeEncounterModal = useCallback(() => setInEncounterModal(false), []);
     const dismissAftermath = useCallback(() => {
         setLastOutcome(null);
         setAftermathData(null);
-        setInEncounterModal(false);
     }, []);
 
     const value = useMemo<CombatModeApi>(
@@ -253,9 +227,6 @@ export function CombatModeProvider({ children }: { children: React.ReactNode }) 
             clearLastOutcome,
             aftermathData,
             dismissAftermath,
-            inEncounterModal,
-            openEncounterModal,
-            closeEncounterModal,
             encountersFaced,
             deepestNodeId,
             recordDeepestNode,
@@ -270,9 +241,6 @@ export function CombatModeProvider({ children }: { children: React.ReactNode }) 
             clearLastOutcome,
             aftermathData,
             dismissAftermath,
-            inEncounterModal,
-            openEncounterModal,
-            closeEncounterModal,
             encountersFaced,
             deepestNodeId,
             recordDeepestNode,
