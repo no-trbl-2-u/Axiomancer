@@ -701,7 +701,7 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                 >
                     <View style={styles.hudNameRow} pointerEvents="box-none">
                         <Text style={styles.enemyName} numberOfLines={1}>{enemy.name}</Text>
-                        {metaLine ? <Text style={styles.hudMeta} allowFontScaling={false}>{metaLine}</Text> : null}
+                        {metaLine ? <Text style={styles.hudMeta}>{metaLine}</Text> : null}
                     </View>
                     <EnemyHpBar pct={enemy.hpPct} value={enemy.hp} max={enemy.maxHp} />
                     {/* The status kill-path foresight. Makes the DoT win path
@@ -764,12 +764,14 @@ const useStyles = makeStyles((AXM) => ({
 
     // ── top HUD ──
     hud: { position: 'absolute', top: 0, left: 0, right: 0, paddingHorizontal: 12 },
-    hudNameRow: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
+    // Wraps so a long name and the full clock line both stay whole on a
+    // phone; the clock keeps to the right edge on either line.
+    hudNameRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', columnGap: 8 },
     enemyName: {
-        flex: 1, fontFamily: FONTS.gothic, fontSize: 18, color: AXM.sulfur, letterSpacing: 0.6,
+        flexGrow: 1, flexShrink: 1, fontFamily: FONTS.gothic, fontSize: 18, color: AXM.sulfur, letterSpacing: 0.6,
         textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 },
     },
-    hudMeta: { fontFamily: FONTS.sans, fontSize: 9, color: AXM.bone, letterSpacing: 0.8 },
+    hudMeta: { marginLeft: 'auto', fontFamily: FONTS.sans, fontSize: 11, color: AXM.bone, letterSpacing: 0.8 },
 
     // Emblem-anchored HP bar.
     hpBlock: { marginTop: 4, height: 58, justifyContent: 'flex-start' },
