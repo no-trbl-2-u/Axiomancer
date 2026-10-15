@@ -25,6 +25,7 @@ three demo puzzles are playable from the dev menu. Act 1's live hazards are unch
 
 - **A1** A layout type `HazardPuzzleLayout` exists in `axiomancer-mechanics/src/World/Hazard/puzzle/`, with:
   - id and title;
+  - its act, which must be 1 (see Decisions: every puzzle is Act 1 only);
   - the hand (card ids, in order);
   - the reserve (predetermined DRAW cards, in order);
   - the dice faces;
@@ -37,7 +38,7 @@ three demo puzzles are playable from the dev menu. Act 1's live hazards are unch
 - **A3** A DRAW card in a puzzle draws the next cards of the layout's reserve, in order, at today's amounts
   (`drawBase` / `drawPowered`). Its test plays a layout whose only solution draws a reserve card.
 - **A4** A layout holding a RE-CAST card (`effect: 'recast'`) is rejected by `validateHazardPuzzleLayout` with
-  a reason. RE-CAST cards stay in `HAZARD_DECK` for the live minigame (see Decisions).
+  a reason, and so is a layout whose act is not 1. RE-CAST cards stay in `HAZARD_DECK` for the live minigame (see Decisions).
 - **A5** `confirmHazardPuzzle` (the player's confirm, or the clock running out) resolves the round once and
   returns `{ force, escape, goal, p, cleared }`, where p is the value reached divided by the goal (the weaker
   meter on risk), clamped to [0, 1].
@@ -162,7 +163,14 @@ fields that already exist: XP, inventory, the scar flag and VITAE. No migration.
   on other things"). It takes a context object so later inputs (region, level, scars already banked) are
   additive.
 - **XP amount:** `HAZARD_PUZZLE_REWARDS.xp` = 10 × player level on any resolve, +50% on full completion.
-  T asked for "a little experience". [T to confirm]
+  T asked for "a little experience" and confirmed this amount on 2026-10-15. T plans to lower the 1,000 XP
+  level-up ceiling separately; that change is not part of B3.
+- **Every hazard puzzle is scoped to Act 1** (T, 2026-10-15: "ALL hazard puzzles are scoped to ACT 1 until I say
+  so and am able to do valid testing"):
+  - each layout carries `act: 1` and its demo theme draws on an Act 1 region;
+  - `validateHazardPuzzleLayout` rejects any other act;
+  - nothing in B3 or any later phase builds a puzzle for another act or continent until T lifts this in an
+    attended session.
 - **Material source:** the region's gathering materials already in `World/MapEvents/content.ts`; no new material
   is authored. A region with none gives no material.
 - **Demos are content the loop authors** under D88, because T approved this plot. They use existing cards only
