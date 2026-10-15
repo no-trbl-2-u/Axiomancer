@@ -31,7 +31,7 @@ Shared facts (every guide assumes them):
   (unified: `{hazard:{seed,hazardId}, rest:{seed}, cache:{seed}, blacksmith:{seed}}`),
   legacy `__AXM_HAZARD_SEED__`, `__AXM_HAZARD_ID__`, `__AXM_REST_SEED__`,
   `__AXM_CACHE_SEED__`, `__AXM_BLACKSMITH_SEED__`, plus `__AXM_COMBAT_SEED__`,
-  `__AXM_COMBAT_DECK__`, `__AXM_JUICE_INSTANT__`, `__AXM_DICE_INSTANT_SETTLE__`,
+  `__AXM_JUICE_INSTANT__`, `__AXM_DICE_INSTANT_SETTLE__`,
   `__AXM_LOG_LEVEL__`, `__AXM_FIXTURE__`, `__AXM_THEME__`
   (`scripts/minigame-seed-injector.mjs`, `state/minigame-seeds.ts`,
   `app/combat-encounter/index.tsx`, `lib/juice/instant.ts`,

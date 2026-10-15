@@ -31,6 +31,7 @@ import { BlacksmithGate } from '@/components/BlacksmithGate';
 import { CacheGate } from '@/components/CacheGate';
 import { EventGate } from '@/components/EventGate';
 import { HazardGate } from '@/components/HazardGate';
+import { CombatGate } from '@/components/CombatGate';
 import { LabyrinthGate } from '@/components/LabyrinthGate';
 import { ItemRewardGate } from '@/components/item-reward/ItemRewardGate';
 import { RestGate } from '@/components/RestGate';
@@ -256,6 +257,7 @@ function RootLayout() {
           <NavLogger />
           <EventGate />
           <HazardGate />
+          <CombatGate />
           <RestGate />
           <CacheGate />
           <ItemRewardGate />

@@ -48,7 +48,6 @@ const DebugWorldTravel = lazyNamed(() => import('@/components/DebugWorldTravel')
 // ── ENCOUNTERS ──
 const DebugTriggerEncounter = lazyNamed(() => import('@/components/DebugTriggerEncounter'), 'DebugTriggerEncounter');
 const DebugEnemyPicker = lazyNamed(() => import('@/components/DebugEnemyPicker'), 'DebugEnemyPicker');
-const DebugCombatSandbox = lazyNamed(() => import('@/components/DebugCombatSandbox'), 'DebugCombatSandbox');
 const DebugSkipEvent = lazyNamed(() => import('@/components/DebugSkipEvent'), 'DebugSkipEvent');
 // ── MINIGAMES & REWARDS ──
 const DebugHazardButton = lazyNamed(() => import('@/components/DebugHazardButton'), 'DebugHazardButton');
@@ -122,10 +121,9 @@ export function DevToolsSections() {
                     <DebugWorldTravel />
                 </DevSection>
 
-                <DevSection label="ENCOUNTERS" hint="quick triggers · any foe · sandbox · skip" testID="dev-section-encounters">
+                <DevSection label="ENCOUNTERS" hint="quick triggers · any foe · skip" testID="dev-section-encounters">
                     <DebugTriggerEncounter />
                     <DebugEnemyPicker />
-                    <DebugCombatSandbox />
                     <DebugSkipEvent />
                 </DevSection>
 

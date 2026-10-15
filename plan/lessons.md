@@ -87,6 +87,7 @@
 - **jest-mock-factory-scope** · a `jest.mock` factory written with JSX or `jest.requireActual<typeof import(...)>` failed babel's out-of-scope check (ship PF4) → build the stub with `require('react')` and `createElement` inside the factory, as `EquipmentDock.test.tsx` does · seen 1× · last 2026-10-14 · open
 - **brief-e2e-script-paths** · the PF4 brief's verify gate named `node scripts/<x>-e2e.mjs` from the root, but the journeys live in `axiomancer-mobile/scripts/` (ship PF4) → run journeys as `npm run e2e:<name> -w axiomancer-mobile` (the package.json names) whatever path a brief gives · seen 1× · last 2026-10-14 · open
 - **spy-on-preset-mock** · `jest.spyOn(AccessibilityInfo, 'announceForAccessibility')` returned react-native's preset `jest.fn`, so `restoreAllMocks` (which the hermeticity audit demands) neither restored nor cleared it, and calls leaked across tests (iterate sacfloor announce) → in a file that spies on a react-native preset mock, tear down with `jest.clearAllMocks(); jest.restoreAllMocks();` · seen 1× · last 2026-10-15 · open
+- **e2e-export-windows** · the Playwright journeys spawn `npx expo export` with `spawnSync` and no shell, which fails on Windows (`npx` is `npx.cmd`) and exits 3 as a boot failure (ship CR1a) → on Windows run `npx expo export --platform web --output-dir .smoke-dist` by hand, then the journey with its `*_REUSE_EXPORT=1` · seen 1× · last 2026-10-15 · open
 
 ## Adding a domain
 

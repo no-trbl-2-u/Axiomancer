@@ -36,6 +36,7 @@ import { readFile, stat, mkdir, writeFile, rm } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { resolve, dirname, join, extname } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { enterLiveFight } from './live-fight-entry.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..')
@@ -83,11 +84,16 @@ export async function diceSettled(page) {
 // what renders. `prepare` is a best-effort interaction to reach a downstream
 // state; if it throws, we capture whatever is on screen and move on.
 //
-// Two ways a screen gets reached:
+// Three ways a screen gets reached:
 //
-//   1. COLD-ENTERABLE routes — `/` (title→onboarding), `/combat-encounter`
-//      (self-bootstraps a demo deck), `/(tabs)/exploration` (the default
-//      landing tab). Navigating to them by URL renders real content.
+//   1. COLD-ENTERABLE routes — `/` (title→onboarding), `/(tabs)/exploration`
+//      (the default landing tab). Navigating to them by URL renders real
+//      content.
+//
+//   1b. THE LIVE FIGHT — `/combat-encounter` holds only a fight the store
+//      has staged and leaves when there is none, so a `liveFight` entry is
+//      reached through /dev's encounter trigger (`live-fight-entry.mjs`),
+//      the seed pinned.
 //
 //   2. FIXTURE-BOOTED screens (2026-09-08, docs/state-fixtures.md) — many
 //      routes are STATE-GATED: `/village`, `/cutscene`, `/dialogue`, `/rest`,
@@ -125,12 +131,14 @@ export const SCREENS = [
         path: '/combat-encounter',
         why: "The game's core loop as actually played.",
         seed: COMBAT_SEED,
+        liveFight: true,
     },
     {
         name: 'combat-board',
         path: '/combat-encounter',
         why: 'The live board mid-fight — card hand + face copy (VITAE/DoT text) only render after ENTER COMBAT; the pre-fight preview alone cannot re-validate them unattended.',
         seed: COMBAT_SEED,
+        liveFight: true,
         prepare: async (page) => {
             await page.getByTestId('combat-enter').click({ timeout: 8000, force: true }).catch(() => {})
             await page.getByTestId('combat-board').waitFor({ state: 'visible', timeout: 15000 }).catch(() => {})
@@ -271,7 +279,7 @@ async function captureScreen(context, baseUrl, screen, viewport, outDir, index) 
         finalUrl: null, navError: null, settleError: null, consoleErrors, pageErrors,
     }
     try {
-        if (screen.seed != null) {
+        if (screen.seed != null && !screen.liveFight) {
             await page.addInitScript((s) => { globalThis.__AXM_COMBAT_SEED__ = s }, screen.seed)
         }
         if (screen.fixture != null) {
@@ -283,7 +291,8 @@ async function captureScreen(context, baseUrl, screen, viewport, outDir, index) 
                 globalThis.__AXM_FORCE_DEV_TOOLS__ = true
             }, screen.fixture)
         }
-        await page.goto(`${baseUrl}${screen.path}`, { waitUntil: 'networkidle', timeout: 20000 })
+        if (screen.liveFight) await enterLiveFight(page, baseUrl, { seed: screen.seed })
+        else await page.goto(`${baseUrl}${screen.path}`, { waitUntil: 'networkidle', timeout: 20000 })
         if (screen.waitForPath) {
             await page.waitForURL((u) => u.pathname.endsWith(screen.waitForPath), { timeout: 15000 })
                 .catch(() => { entry.navError = `fixture '${screen.fixture}' never reached ${screen.waitForPath} (at ${page.url()})` })

@@ -28,8 +28,8 @@
  * `ResolvedEvent` onto the event slice, which would dead-end at the
  * `/event` "NO EVENT" card because `composeNarrative` returns the empty
  * VM for these kinds. Combat / boss construct a
- * combat-prelude `ResolvedEvent` and drop it on the slice (those DO
- * render in-place via `<EncounterModalOverlay>`); village / cutscene
+ * combat-prelude `ResolvedEvent` and drop it on the slice (`<CombatGate>`
+ * engages it onto `/combat-encounter`); village / cutscene
  * seed their paced events for `<EventGate>` to route. Every
  * button is deterministic regardless of where the player is standing.
  *
@@ -37,7 +37,7 @@
  * top of the WILDS tab rather than the other way round.
  *
  * Renders null outside dev builds. Mounted in the `/dev` ENCOUNTERS
- * section beside `DebugEnemyPicker` (any foe) and `DebugCombatSandbox`.
+ * section beside `DebugEnemyPicker` (any foe).
  */
 
 import React from 'react';

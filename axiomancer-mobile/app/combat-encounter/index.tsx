@@ -1,91 +1,133 @@
 /**
- * Combat encounter screen (DEV route).
+ * The live fight — its own full-screen route.
  *
- * The combat surface itself lives in the reusable
- * `<CombatEncounterPanel>` so the LIVE map flow can host it in-place inside
- * the encounter modal. This route is the dev-only launcher: it bootstraps a
- * mock foe + demo deck and does NOT persist the outcome (a sandbox), so
- * playing here never mutates the real player's progression. The live map
- * path (EncounterModalOverlay) feeds the panel the real enemy + player and
- * sets `persistOutcome`.
+ * `<CombatGate>` engages every map and labyrinth encounter and pushes this
+ * route while the store holds the fight (`currentEncounter`). The screen
+ * reads that foe once, on mount, and hands it to `<CombatEncounterPanel>`,
+ * which keeps the fight's own state locally and writes the outcome back
+ * through `endCombat` (`persistOutcome`). The store clears the encounter
+ * the moment the fight ends, while the panel is still showing its summary,
+ * so the foe is captured rather than re-read.
  *
- * Turn flow: reveal → roll 2 → DRAFT one (the other → ◆) → POWER a
- * card with your stance die → END TURN to re-roll → END PHASE to resolve.
+ * Registered `fullScreenModal` with `gestureEnabled: false`, and the
+ * combat flag it raises locks Android hardware back
+ * (`<HardwareBackHandler>`): the only ways out are the fight's own ends.
+ *
+ * Opened with no fight staged (a cold web load, a deep link, a reload
+ * that dropped the fight) it leaves at once. A reload mid-fight lands on
+ * the map, where the owed arrival replays the encounter and the gate
+ * brings the player back here.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
-import { useLocalSearchParams, useRouter } from '@/lib/platform/router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from '@/lib/platform/router';
 
-import { ScreenBg } from '@/components/ScreenBg';
 import { CombatEncounterPanel } from '@/components/combat/encounter/CombatEncounterPanel';
-import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
-import { useGameState } from '@/state/GameStoreProvider';
+import { isDevToolsEnabled } from '@/lib/buildProfile';
+import { useCombatMode } from '@/state/combat-mode';
+import { useGameActions, useGameState, useGameStore } from '@/state/GameStoreProvider';
+import { selectExplorationViewModel } from '@/state/presenters/exploration.engine';
+import { selectResumableFight } from '@/state/presenters/navigation.engine';
+import type { AppStoreState } from '@/state/store';
 import { makeStyles } from '@/theme/runtime';
+import type { CombatOutcome } from '@mechanics';
 
-function readSeed(explicit?: string): number {
+/** Browser drivers pin the engine seed with this global; dev builds only. */
+function readDevSeed(): number | undefined {
+    if (!isDevToolsEnabled()) return undefined;
     const g = (globalThis as { __AXM_COMBAT_SEED__?: number }).__AXM_COMBAT_SEED__;
-    if (typeof g === 'number') return g;
-    const n = explicit ? Number(explicit) : NaN;
-    return Number.isFinite(n) ? n : 12025;
+    return typeof g === 'number' ? g : undefined;
 }
 
-// Dev/e2e-only deck override. Mirrors `readSeed`'s `__AXM_COMBAT_SEED__`
-// test-global pattern: a browser harness can pin the demo deck (e.g. to
-// surface a defend/GUARD card or a gold card) by setting
-// `globalThis.__AXM_COMBAT_DECK__` before this sandbox route boots. Inert
-// in production — nothing sets the global there, and this route is dev-only.
-function readDeckOverride(): string[] | undefined {
-    const g = (globalThis as { __AXM_COMBAT_DECK__?: unknown }).__AXM_COMBAT_DECK__;
-    return Array.isArray(g) && g.every((x) => typeof x === 'string') ? (g as string[]) : undefined;
-}
-
-// The grey office — the whole player library.
-const DEMO_CARDS = ['grey-strike', 'grey-ward', 'grey-word'];
-function withDemoDeck<T extends { knownCards?: string[]; baseStats?: { heart: number; body: number; mind: number }; health?: number; maxHealth?: number }>(player: T): T {
-    const known = player.knownCards ?? [];
-    if (known.length >= 3) return player;
-    return { ...player, knownCards: Array.from(new Set([...known, ...DEMO_CARDS])), baseStats: { heart: 12, body: 12, mind: 12 }, health: 160, maxHealth: 160 };
+/** The arena plate's region: the map's, unless the fight is in the labyrinth. */
+function regionOf(state: AppStoreState): string | undefined {
+    if (state.labyrinthUi?.session) return undefined;
+    return selectExplorationViewModel(state).region;
 }
 
 export default function CombatEncounterScreen() {
     const styles = useStyles();
     const router = useRouter();
-    const params = useLocalSearchParams<{ seed?: string }>();
+    const store = useGameStore();
+    const actions = useGameActions();
+    const { inCombat, enterCombat, exitCombat, resetRunStats } = useCombatMode();
     const player = useGameState((s) => s.player);
+    const flags = useGameState((s) => (s as unknown as { flags?: string[] }).flags);
 
-    if (!player) {
-        return <ScreenBg><View style={styles.root} testID="combat-encounter-empty" /></ScreenBg>;
+    const [fight] = useState(() => selectResumableFight(store.getState()));
+    const [region] = useState(() => regionOf(store.getState()));
+    const [seed] = useState(readDevSeed);
+
+    const leave = useCallback(() => {
+        if (router.canGoBack()) router.back();
+        else router.replace('/exploration' as never);
+    }, [router]);
+
+    // Mount only: no fight leaves; a fight staged without the gate's engage
+    // (continued in memory) raises the combat flag here.
+    useEffect(() => {
+        if (!fight) {
+            leave();
+            return;
+        }
+        if (!inCombat) enterCombat();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // The panel already persisted the outcome. Defeat also resets the run,
+    // keeping the character (full heal, fresh world), before leaving.
+    const onExit = useCallback((outcome: CombatOutcome | null) => {
+        if (outcome === 'defeat') {
+            actions.resetRun({ keepCharacter: true });
+            resetRunStats();
+        }
+        exitCombat();
+        leave();
+    }, [actions, resetRunStats, exitCombat, leave]);
+
+    // WITHDRAW, from the reveal: pay the retreat and settle the node, then end
+    // the staged encounter so the gate does not route straight back into it.
+    const onWithdraw = useCallback(() => {
+        actions.fleeEncounter();
+        actions.endCombat('flee');
+        exitCombat();
+        leave();
+    }, [actions, exitCombat, leave]);
+
+    // Dev-only SKIP EVENT settles the fight in the store and bumps this
+    // counter; the panel's local fight has no other way to hear it.
+    const devSkipSeq = useGameState((s) => s._devSkipSeq ?? 0);
+    const seenSkipSeq = useRef(devSkipSeq);
+    useEffect(() => {
+        if (devSkipSeq === seenSkipSeq.current) return;
+        seenSkipSeq.current = devSkipSeq;
+        exitCombat();
+        leave();
+    }, [devSkipSeq, exitCombat, leave]);
+
+    if (!fight || !player) {
+        return <View style={styles.root} testID="combat-encounter-empty" />;
     }
 
-    // Dev/e2e deck override (see `readDeckOverride`): when pinned, the overridden
-    // ids are also marked known so the player's archetype/signatures resolve
-    // against them. Inert without the global.
-    const deckOverride = readDeckOverride();
-    const base = withDemoDeck(player);
-    const bootstrapPlayer = deckOverride
-        ? { ...base, knownCards: Array.from(new Set([...(base.knownCards ?? []), ...deckOverride])) }
-        : base;
-
     return (
-        // scrollable={false}: the combat board is a full-bleed game surface —
-        // inside the default ScrollView its flex regions collapse to intrinsic
-        // height and the battlefield squashes into the top half of the screen.
-        <ScreenBg scrollable={false} art="combat">
-            <View style={styles.root}>
-                <CombatEncounterPanel
-                    enemy={createMockEncounterEnemy()}
-                    bootstrapPlayer={bootstrapPlayer}
-                    deck={deckOverride}
-                    seed={readSeed(params.seed)}
-                    persistOutcome={false}
-                    onExit={() => { if (router.canGoBack()) router.back(); }}
-                />
-            </View>
-        </ScreenBg>
+        <SafeAreaView style={styles.root} edges={['top']} testID="combat-encounter-live">
+            <CombatEncounterPanel
+                key={fight.enemy.id}
+                enemy={fight.enemy}
+                bootstrapPlayer={player}
+                flags={flags}
+                seed={seed}
+                persistOutcome
+                onWithdraw={fight.fleeAllowed ? onWithdraw : undefined}
+                onExit={onExit}
+                region={region}
+            />
+        </SafeAreaView>
     );
 }
 
-const useStyles = makeStyles(() => ({
-    root: { flex: 1 },
+const useStyles = makeStyles((AXM) => ({
+    root: { flex: 1, backgroundColor: AXM.deepBg },
 }));

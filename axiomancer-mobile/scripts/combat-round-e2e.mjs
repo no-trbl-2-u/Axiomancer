@@ -3,9 +3,7 @@
 //
 // FULL-ROUND combat playthrough in the real UI — the crash-strict harness.
 //
-// What this adds over `combat-encounter-e2e.mjs` (which asserts the board's
-// *shape* then spams END PHASE until the player dies without ever playing a
-// card): this one actually PLAYS. Every round it stages a card, powers it with
+// It actually PLAYS. Every round it stages a card, powers it with
 // a legal tray die, APPLYs, spends what Conviction it can on a signature, ends
 // the phase, and rides the enemy turn — round after round until the combat
 // resolves. That is the code path a real player is on when the game crashes,
@@ -24,29 +22,21 @@
 //
 // Sweeps seeds so a seed-specific crash cannot hide behind one lucky pin.
 //
-// TWO MODES, because they are not the same code path:
-//
-//   MODE=sandbox (default) — the `/combat-encounter` dev route: mock foe,
-//     4-card demo deck, `persistOutcome={false}`. Fast and hermetic, but it is
-//     a sandbox. Every pre-existing combat e2e in this repo only ever drove
-//     this route, which is why "combat is covered" was never true of live play.
-//
-//   MODE=live — the REAL encounter: the `debug-trigger-encounter-encounter`
-//     dev button arms `<EncounterModalOverlay>` over the WILDS map with the
-//     real player deck, the real enemy roster and `persistOutcome`, so the
-//     victory/aftermath write-back runs too. This is the path a player is on
-//     when the game crashes mid-combat.
-//
-//   MODE=both — sandbox then live.
+// THE LIVE FIGHT. The `debug-trigger-encounter-encounter` dev button arms a
+// real map encounter; `<CombatGate>` engages it and pushes the
+// `/combat-encounter` route with the real player deck, the real enemy roster
+// and `persistOutcome`, so the victory write-back runs too. This is the path
+// a player is on when the game crashes mid-combat. (The pre-v1 mock-foe
+// sandbox that once held the route, and this script's `MODE=sandbox`, were
+// deleted in phase CR1a.)
 //
 // Usage:
 //   node scripts/combat-round-e2e.mjs
-//   MODE=live node scripts/combat-round-e2e.mjs
-//   MODE=both COMBAT_ROUND_E2E_SEEDS=16,8,3,101 ROUNDS=12 node scripts/combat-round-e2e.mjs
+//   COMBAT_ROUND_E2E_SEEDS=16,8,3,101 ROUNDS=12 node scripts/combat-round-e2e.mjs
 //   COMBAT_ROUND_E2E_REUSE_EXPORT=1 node scripts/combat-round-e2e.mjs
 //   COMBAT_ROUND_E2E_CHROME=/path/to/chrome ...
 //
-// LIVE-only knobs, both added to close the "untested axes" gap CRITIQUE.md
+// Knobs, both added to close the "untested axes" gap CRITIQUE.md
 // flagged against the 2026-08-19 unreproduced mid-combat crash report (30
 // prior runs only ever drove the standard-foe encounter, spare-mercy, and
 // the fresh 4-card starter deck):
@@ -55,12 +45,12 @@
 //   ENCOUNTER_KIND=boss node scripts/combat-round-e2e.mjs   — arm the lowest
 //     boss foe on the map instead of a standard encounter (`debug-trigger-
 //     encounter-boss`). Bosses seal retreat, so WITHDRAW never renders here.
-//   WITHDRAW=1 MODE=live node scripts/combat-round-e2e.mjs  — take the
+//   WITHDRAW=1 node scripts/combat-round-e2e.mjs  — take the
 //     reveal screen's WITHDRAW control instead of entering combat, so the
-//     retreat path (`combat-withdraw` → the encounter modal tearing down
+//     retreat path (`combat-withdraw` → the route leaving
 //     with no summary/mercy/reward panel) is crash-watched too. Absent
 //     control (e.g. paired with ENCOUNTER_KIND=boss) falls back to playing.
-//   LEVEL_UP=1 MODE=live PRESET=sage node scripts/combat-round-e2e.mjs  —
+//   LEVEL_UP=1 PRESET=sage node scripts/combat-round-e2e.mjs  —
 //     the fourth and last axis CRITIQUE.md named ("XP granted pre-fight,
 //     cascaded post-victory"): grants XP (via the /dev XP controls) up to
 //     exactly `EXPERIENCE_PER_LEVEL` (1000) short of the freshly-built
@@ -92,8 +82,7 @@ const SEEDS = (process.env.COMBAT_ROUND_E2E_SEEDS ?? '16,8,3,42,101')
 const MAX_ROUNDS = Number(process.env.ROUNDS ?? 12)
 const PLAYS_PER_ROUND = Number(process.env.PLAYS_PER_ROUND ?? 1)
 const FIRE_SIGNATURES = process.env.FIRE_SIGNATURES !== '0'
-const MODE = (process.env.MODE ?? 'sandbox').toLowerCase()
-const MODES = MODE === 'both' ? ['sandbox', 'live'] : [MODE]
+const MODES = ['live']
 const ENCOUNTER_KIND = (process.env.ENCOUNTER_KIND ?? 'encounter').toLowerCase()
 const WITHDRAW = process.env.WITHDRAW === '1'
 const LEVEL_UP = process.env.LEVEL_UP === '1'
@@ -467,17 +456,11 @@ async function playRound(page, sink, seed, round) {
 
 // ── one seed, played to a terminal outcome ──────────────────────────────────
 
-/** Sandbox entry: straight to the dev route with the seed pinned. */
-async function enterSandbox(page, baseUrl, seed) {
-    await page.addInitScript((s) => { globalThis.__AXM_COMBAT_SEED__ = s }, seed)
-    await page.goto(`${baseUrl}/combat-encounter`, { waitUntil: 'networkidle' })
-}
-
 /**
- * Live entry: boot the app, open /dev, and arm a real map encounter. The
- * overlay auto-engages (the ENGAGE/FLEE prelude was retired 2026-08-10), so
- * the armed state to wait on is the same combat reveal — but everything
- * behind it is the live player, the live deck and `persistOutcome`.
+ * Live entry: boot the app, open /dev, and arm a real map encounter.
+ * `<CombatGate>` engages it at once and pushes `/combat-encounter`, so the
+ * armed state to wait on is that route and its combat reveal, with the live
+ * player, the live deck and `persistOutcome` behind it.
  */
 async function enterLive(page, baseUrl, seed) {
     await page.addInitScript((s) => { globalThis.__AXM_COMBAT_SEED__ = s }, seed)
@@ -517,8 +500,7 @@ async function enterLive(page, baseUrl, seed) {
     const trigger = page.getByTestId(`debug-trigger-encounter-${ENCOUNTER_KIND}`)
     await trigger.waitFor({ state: 'visible', timeout: 15000 })
     await trigger.click({ force: true })
-    await page.waitForURL((url) => url.pathname.endsWith('/exploration'), { timeout: 15000 })
-        .catch(() => {})
+    await page.waitForURL((url) => url.pathname.endsWith('/combat-encounter'), { timeout: 15000 })
 }
 
 async function playSeed(browser, baseUrl, seed, mode) {
@@ -543,8 +525,7 @@ async function playSeed(browser, baseUrl, seed, mode) {
                 }, 100)
             })
         }
-        if (mode === 'live') await enterLive(page, baseUrl, seed)
-        else await enterSandbox(page, baseUrl, seed)
+        await enterLive(page, baseUrl, seed)
 
         await page.getByTestId('combat-reveal').waitFor({ state: 'visible', timeout: 25000 }).catch(() => {})
         await assertAlive(page, sink, `${tag}, the reveal`)
@@ -555,7 +536,7 @@ async function playSeed(browser, baseUrl, seed, mode) {
         // encounter modal tears down with no summary/mercy/reward panel,
         // which the round loop's "silent unmount" check would otherwise
         // mistake for a crash.
-        if (mode === 'live' && WITHDRAW) {
+        if (WITHDRAW) {
             const withdrawBtn = page.getByTestId('combat-withdraw')
             if (await has(withdrawBtn)) {
                 await withdrawBtn.click({ force: true, timeout: 3000 }).catch(() => {})
@@ -595,9 +576,8 @@ async function playSeed(browser, baseUrl, seed, mode) {
             await assertAlive(page, sink, `${tag}, taking the mercy branch`)
         }
 
-        // Live play only: ride the outcome all the way out. The aftermath
-        // panels write the run back to the player (loot, XP) — the
-        // sandbox skips all of it, so a crash here has never been reachable.
+        // Ride the outcome all the way out. The aftermath panels write the
+        // run back to the player (loot, XP).
         // Capture this BEFORE the aftermath walk — dismissing the summary would
         // otherwise make a resolved fight report as "still live".
         const resolved = (await terminal(page)) || (await has(page.getByTestId('combat-summary')))

@@ -72,8 +72,8 @@ app-example
 /android
 screenshots/hazard-e2e/
 # e2e run output (the retired upgradeable-dice-e2e, deleted with the flag in D7,
-# and scripts/combat-encounter-e2e.mjs); removed from git 2026-09-25 (TRIM THE
-# FAT T1, D6).
+# and the retired combat-encounter-e2e, deleted in phase CR1a); removed from git
+# 2026-09-25 (TRIM THE FAT T1, D6).
 screenshots/upgradeable-dice-e2e/
 screenshots/combat-redesign/
 # combat-round-e2e run artefacts — per-seed final/CRASH shots + result.json,

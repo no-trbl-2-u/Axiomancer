@@ -24,6 +24,7 @@ import { chromium } from 'playwright'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { resolve, dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { enterLiveFight } from './live-fight-entry.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO = resolve(__dirname, '..')
@@ -56,9 +57,10 @@ const SCREENS = [
   { name: 'inventory-midgame', path: '/inventory', fixture: 'sage-bw-door-gate' },
   { name: 'memoir-fresh', path: '/memoir', fixture: 'fresh-start' },
   { name: 'memoir-midgame', path: '/memoir', fixture: 'sage-bw-door-gate' },
-  { name: 'combat-preview', path: '/combat-encounter', seed: 16 },
+  // The live fight: entered through /dev's encounter trigger (live-fight-entry.mjs).
+  { name: 'combat-preview', path: '/combat-encounter', seed: 16, liveFight: true },
   {
-    name: 'combat-board', path: '/combat-encounter', seed: 16,
+    name: 'combat-board', path: '/combat-encounter', seed: 16, liveFight: true,
     prepare: async (p) => {
       await p.getByTestId('combat-enter').click({ timeout: 8000, force: true }).catch(() => {})
       await p.getByTestId('combat-board').waitFor({ state: 'visible', timeout: 15000 }).catch(() => {})
@@ -113,7 +115,8 @@ async function capture(browser, screen, vpName, index) {
 
   try {
     const url = `${BASE}${screen.path}${screen.fixture ? `?fixture=${screen.fixture}` : ''}`
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 })
+    if (screen.liveFight) await enterLiveFight(page, BASE, { seed: screen.seed })
+    else await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 })
     await page.waitForTimeout(2200)
     if (screen.waitFor) {
       await page.waitForURL((u) => u.pathname.includes(screen.waitFor), { timeout: 12000 }).catch(() => {})

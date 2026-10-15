@@ -186,3 +186,12 @@ describe('layout registration: every linking entry names a registered screen', (
         expect(unregistered).toEqual([]);
     });
 });
+
+describe('layout registration: the live fight cannot be swiped or backed out of', () => {
+    it('registers combat-encounter/index full-screen with the iOS swipe off', async () => {
+        const source = await fs.readFile(ROOT_LAYOUT, 'utf8');
+        const block = source.match(/name="combat-encounter\/index"[\s\S]*?\/>/)?.[0] ?? '';
+        expect(block).toContain("presentation: 'fullScreenModal'");
+        expect(block).toContain('gestureEnabled: false');
+    });
+});

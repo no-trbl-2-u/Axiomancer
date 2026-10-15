@@ -26,6 +26,7 @@ import { resolve, dirname, join, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { injectMinigameSeeds } from './minigame-seed-injector.mjs'
 import { forceDevTools } from './fixture-injector.mjs'
+import { enterLiveFight } from './live-fight-entry.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..')
@@ -39,7 +40,9 @@ export const ROUTES = [
     { name: 'character', path: '/character' },
     { name: 'inventory', path: '/inventory' },
     { name: 'exploration', path: '/exploration' },
-    { name: 'combat-encounter', path: '/combat-encounter' },
+    // The live fight holds only a staged fight, so it is entered through
+    // /dev's encounter trigger with the engine seed pinned.
+    { name: 'combat-encounter', path: '/combat-encounter', liveFight: true },
     { name: 'memoir', path: '/memoir' },
     // THE APORIA act select (no session on a fresh boot).
     { name: 'labyrinth', path: '/labyrinth' },
@@ -69,6 +72,8 @@ export const PIXELMATCH_THRESHOLD = 0.1
 export const VIEWPORT = { width: 390, height: 844 }
 
 export const BASELINE_DIR = resolve(REPO_ROOT, 'screenshots/baseline')
+/** Engine seed for the live-fight capture, so its baseline is stable. */
+const LIVE_FIGHT_SEED = 16
 export const CURRENT_DIR = resolve(REPO_ROOT, 'screenshots/current')
 export const DIFF_DIR = resolve(REPO_ROOT, 'screenshots/diff')
 
@@ -290,9 +295,12 @@ async function captureAndDiff({ playwright, PNG, pixelmatch }, baseUrl) {
 
     for (const route of ROUTES) {
         const url = `${baseUrl}${route.path}`
-        const target = route.fixture ? await fixturePage(route.fixture) : page
+        const target = route.fixture ? await fixturePage(route.fixture)
+            : route.liveFight ? await (await browser.newContext(contextOptions)).newPage()
+            : page
         try {
-            await target.goto(url, { waitUntil: 'networkidle', timeout: 30_000 })
+            if (route.liveFight) await enterLiveFight(target, baseUrl, { seed: LIVE_FIGHT_SEED })
+            else await target.goto(url, { waitUntil: 'networkidle', timeout: 30_000 })
             if (route.waitForPath) {
                 await target.waitForURL((u) => u.pathname.endsWith(route.waitForPath), { timeout: 15_000 })
             }

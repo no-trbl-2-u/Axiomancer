@@ -45,6 +45,7 @@ import { selectExplorationViewModel } from '@/state/presenters/exploration.engin
 import { selectHasAnyActiveSession } from '@/state/presenters/navigation.engine';
 import { createAppActions } from '@/state/actions';
 import ExplorationScreen from '@/app/(tabs)/exploration';
+import { CombatGate } from '@/components/CombatGate';
 
 beforeEach(() => {
     jest.useFakeTimers();
@@ -64,6 +65,7 @@ function mountExploration(store: AppStore) {
         <CombatModeProvider>
             <GameStoreProvider store={store}>
                 <ExplorationScreen />
+                <CombatGate />
             </GameStoreProvider>
         </CombatModeProvider>,
     );
@@ -181,16 +183,18 @@ describe('an arrival the player never answered survives a reload', () => {
 
         const tree = mountExploration(reloaded);
 
-        // The fight the player was owed is actually on screen. Its node stays
-        // owed until that fight settles, so it is not consumed yet. Do NOT
-        // assert `event.pending` here: `EncounterModalOverlay` auto-engages on
-        // mount and `beginHazardEncounter` clears the event slice on the way
-        // in, so `pending` is null by the time this line runs — before AND
-        // after the fix. The sibling start-node case can assert `pending`
-        // only because bw-1 is a CUTSCENE, which has no auto-engage.
+        // The fight the player was owed is engaged (`<CombatGate>` stages it
+        // and routes it to /combat-encounter). Its node stays owed until that
+        // fight settles, so it is not consumed yet. Do NOT assert
+        // `event.pending` here: the gate engages at once and
+        // `beginHazardEncounter` clears the event slice on the way in, so
+        // `pending` is null by the time this line runs — before AND after the
+        // fix. The sibling start-node case can assert `pending` only because
+        // bw-1 is a CUTSCENE, which has no engage.
         expect(reloaded.getState().world.currentMap.consumedNodes).not.toContain('bw-2');
         expect(reloaded.getState().currentEncounter).toBeDefined();
-        expect(tree.queryByTestId('encounter-modal-hazard-combat')).not.toBeNull();
+        // The map never hosts the fight: it stays on screen under the route.
+        expect(tree.queryByTestId('map-canvas-wrapper')).not.toBeNull();
     });
 });
 
@@ -211,7 +215,7 @@ describe('a save taken mid-fight survives a reload', () => {
         const actions = createAppActions(store);
         actions.moveTo('bw-2'); // engine kind `encounter`
         mountExploration(store).unmount();
-        // The modal auto-engaged: the fight is under way.
+        // The gate engaged: the fight is under way.
         expect(store.getState().currentEncounter).toBeDefined();
 
         // The app is closed mid-fight; `SaveOnExit` takes the final save.
@@ -226,10 +230,9 @@ describe('a save taken mid-fight survives a reload', () => {
             expect(map.availableNodes).not.toContain(onward);
         }
 
-        const tree = mountExploration(reloaded);
+        mountExploration(reloaded);
 
         expect(reloaded.getState().currentEncounter).toBeDefined();
-        expect(tree.queryByTestId('encounter-modal-hazard-combat')).not.toBeNull();
     });
 
     it('a fight walked away from settles its node and opens the way on', () => {
