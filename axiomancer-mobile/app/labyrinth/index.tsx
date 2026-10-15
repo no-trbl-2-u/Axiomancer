@@ -5,8 +5,8 @@
  * accordion; gates, fog map, finale.
  *
  * Event plumbing mirrors the exploration screen: arrival (and baited-
- * clue) encounters rise as the in-place `<EncounterModalOverlay>`
- * combat-prelude; hazard / rest / loot / gathering / quest / narration
+ * clue) encounters are engaged by `<CombatGate>` and fought on the
+ * `/combat-encounter` route; hazard / rest / loot / gathering / quest / narration
  * events route to their existing full-screen minigames via the
  * globally-mounted gates. Boss rooms defer their arrival until the
  * finale panel's FIGHT (the naming rite precedes the fight — CLI
@@ -18,7 +18,6 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from '@/lib/platform/router';
 
 import { ScreenBg } from '@/components/ScreenBg';
-import { EncounterModalOverlay } from '@/components/event/EncounterModalOverlay';
 import { FinalePanel } from '@/components/labyrinth/FinalePanel';
 import { FogMap } from '@/components/labyrinth/FogMap';
 import { GateSockets } from '@/components/labyrinth/GateSockets';
@@ -26,7 +25,6 @@ import { LabyrinthAccordion } from '@/components/labyrinth/LabyrinthAccordion';
 import { RoomScene } from '@/components/labyrinth/RoomScene';
 import { useCombatMode } from '@/state/combat-mode';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
-import { selectEventViewModel, selectHasActiveEvent } from '@/state/presenters/event.engine';
 import {
     LABYRINTH_COPY,
     selectLabyrinthFinaleViewModel,
@@ -34,7 +32,6 @@ import {
 } from '@/state/presenters/labyrinth.engine';
 import { FONTS } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
-import type { Enemy } from '@mechanics';
 
 /**
  * The /labyrinth route. Purpose: render THE APORIA's three states — act
@@ -52,49 +49,15 @@ export default function LabyrinthScreen() {
 
     const vm = useGameState(selectLabyrinthViewModel);
     const finaleVm = useGameState(selectLabyrinthFinaleViewModel);
-    const eventVm = useGameState(selectEventViewModel);
-    const hasEvent = useGameState(selectHasActiveEvent);
     const hasSession = useGameState((s) => s.labyrinthUi?.session != null);
 
     const [selectedDoor, setSelectedDoor] = useState<{ to: string; display: string; gated: boolean } | null>(null);
     const [showMap, setShowMap] = useState(false);
     const [hintLine, setHintLine] = useState<string | null>(null);
     const [gateLine, setGateLine] = useState<string | null>(null);
-    const [activeEnemy, setActiveEnemy] = useState<Enemy | null>(null);
 
-    // ── Encounter modal lifecycle (exploration-screen parity) ──
-    const {
-        inEncounterModal,
-        openEncounterModal,
-        closeEncounterModal,
-        inCombat,
-        enterCombat,
-        lastOutcome,
-    } = useCombatMode();
-
-    const preludeReady = hasEvent && eventVm.kind === 'combat-prelude';
-    const showEncounterModal = inEncounterModal || preludeReady;
-
-    useEffect(() => {
-        if (preludeReady && !inEncounterModal) openEncounterModal();
-    }, [preludeReady, inEncounterModal, openEncounterModal]);
-    useEffect(() => {
-        if (inEncounterModal && !preludeReady && lastOutcome === null && !inCombat) {
-            closeEncounterModal();
-        }
-    }, [inEncounterModal, preludeReady, lastOutcome, inCombat, closeEncounterModal]);
-    // Drop the captured foe on the CLOSING edge only — exploration-screen
-    // parity (see its comment): the modal auto-engages, so the foe is captured
-    // by a child effect in the same commit that opens the session, and a plain
-    // `if (!inEncounterModal)` would wipe it the instant it arrived.
-    const modalWasOpen = useRef(false);
-    useEffect(() => {
-        if (inEncounterModal) { modalWasOpen.current = true; return; }
-        if (modalWasOpen.current) {
-            modalWasOpen.current = false;
-            setActiveEnemy(null);
-        }
-    }, [inEncounterModal]);
+    // Combat-mode's `lastOutcome` feeds the boss outcome below.
+    const { lastOutcome } = useCombatMode();
 
     // ── Boss outcome recording (one per modal session) ──
     const bossOutcomeRecorded = useRef(false);
@@ -145,19 +108,6 @@ export default function LabyrinthScreen() {
             if (router.canGoBack()) router.back();
         }
     }, [hasSession, router]);
-
-    const onEncounterFight = () => {
-        const enemy = actions.beginHazardEncounter();
-        if (!enemy) return;
-        setActiveEnemy(enemy);
-        enterCombat();
-    };
-    // Retreat is the combat reveal's WITHDRAW (exploration-screen parity):
-    // it fires after the encounter was entered, so the cost is paid through
-    // `fleeEncounter`, not the (already-cleared) event choice.
-    const onEncounterFlee = () => {
-        actions.fleeEncounter();
-    };
 
     // ── Act select ──
     if (vm.kind === 'act-select') {
@@ -380,14 +330,6 @@ export default function LabyrinthScreen() {
                     </View>
                 </View>
 
-                {showEncounterModal && (
-                    <EncounterModalOverlay
-                        vm={eventVm}
-                        encounterEnemy={activeEnemy}
-                        onFight={onEncounterFight}
-                        onFlee={onEncounterFlee}
-                    />
-                )}
             </View>
         </ScreenBg>
     );

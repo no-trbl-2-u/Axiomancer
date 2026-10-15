@@ -59,11 +59,11 @@ function classifyMobilePath(path, result) {
     const combat = [
         /^axiomancer-mobile\/app\/combat-encounter\//,
         /^axiomancer-mobile\/components\/combat\//,
-        /^axiomancer-mobile\/components\/DebugCombat/,
+        /^axiomancer-mobile\/components\/CombatGate/,
         /^axiomancer-mobile\/components\/event\/aftermath\/Combat/,
         /^axiomancer-mobile\/state\/combat(?:\/|-mode\.tsx$)/,
         /^axiomancer-mobile\/state\/(?:e2e|presenters)\/.*combat/i,
-        /^axiomancer-mobile\/scripts\/combat-encounter-e2e\.mjs$/,
+        /^axiomancer-mobile\/scripts\/combat-round-e2e\.mjs$/,
     ]
     const encounters = [
         /^axiomancer-mobile\/app\/(?:cache|quest|rest|event|hazard|combat-encounter|labyrinth)\//,

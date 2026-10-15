@@ -149,12 +149,6 @@ jobs:
         env:
           ENCOUNTER_E2E_REUSE_EXPORT: '1'
 
-      - name: Combat playthrough (Hazard-Pattern Combat)
-        if: steps.scope.outputs.combat == 'true'
-        run: npm run e2e:combat --workspace axiomancer-mobile
-        env:
-          COMBAT_E2E_REUSE_EXPORT: '1'
-
       # State-fixture boot (docs/state-fixtures.md): `?fixture=<id>` deep link,
       # `__AXM_FIXTURE__` inline fixture with `arrive`, unknown-id fallback.
       # Cheap (three cold boots, no playthrough) and touches app/_layout.tsx,
@@ -172,21 +166,17 @@ jobs:
       # exact shape that introduced the harness — ran a green build that never
       # executed it.)
       #
-      # The step above asserts the board's SHAPE and never commits a card, and
-      # only drives the /combat-encounter dev sandbox (mock foe, demo deck,
-      # persistOutcome={false}). This one plays real rounds — stage, power with
-      # a die, APPLY, END PHASE, to a terminal outcome — on the sandbox AND on
-      # the live map encounter (real deck, real enemy, the persistOutcome
-      # write-back), and fails on an uncaught exception or the <ErrorBoundary>
-      # screen, which no other journey does.
-      # Three seeds x two modes keeps this near four minutes; the local
+      # Plays real rounds of the live fight on the /combat-encounter route
+      # (real deck, real enemy, the persistOutcome write-back) — stage, power
+      # with a die, APPLY, END PHASE, to a terminal outcome — and fails on an
+      # uncaught exception or the <ErrorBoundary> screen, which no other
+      # journey does. Three seeds keep this near two minutes; the local
       # `e2e:combat-round` default sweeps wider.
-      - name: Combat full rounds (sandbox + live, crash-strict)
+      - name: Combat full rounds (live, crash-strict)
         if: steps.scope.outputs.combat == 'true'
         run: npm run e2e:combat-round --workspace axiomancer-mobile
         env:
           COMBAT_ROUND_E2E_REUSE_EXPORT: '1'
-          MODE: both
           COMBAT_ROUND_E2E_SEEDS: '16,8,3'
 
       # CRITIQUE.md [HIGH] 2026-08-19: 30 prior runs of the step above never

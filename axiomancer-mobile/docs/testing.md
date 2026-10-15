@@ -52,7 +52,7 @@ Examples of e2e entry points by module:
 
 | Module                      | Hermetic e2e entry point                                                              |
 | --------------------------- | -------------------------------------------------------------------------------------- |
-| `app/combat-encounter/`     | `buildCombatViewModel(state)` in `state/presenters/combat-encounter.engine.ts`; screen render via `state/e2e/combat-encounter.screen.test.tsx` (`@testing-library/react-native`) |
+| `app/combat-encounter/`     | `buildCombatViewModel(state)` in `state/presenters/combat-encounter.engine.ts`; the live route via `state/e2e/combat-route.screen.test.tsx` (`@testing-library/react-native`) |
 | `app/(tabs)/character/`     | `selectCharacterViewModel(state)` in `state/presenters/character.engine.ts`            |
 | `app/(tabs)/inventory/`     | `selectInventoryViewModel(state, localUi?)` in `state/presenters/inventory.engine.ts`  |
 | `app/(tabs)/exploration/`   | `selectExplorationViewModel(state)` in `state/presenters/exploration.engine.ts`        |
@@ -208,8 +208,8 @@ minimum:
 The canonical reference tests are
 [`state/e2e/character.engine.test.ts`](../state/e2e/character.engine.test.ts)
 (Spec 05 — one focused presenter, real engine reads) and
-[`state/e2e/combat-encounter.screen.test.tsx`](../state/e2e/combat-encounter.screen.test.tsx)
-(Spec 26/26b — the full combat-encounter screen driven end-to-end).
+[`state/e2e/cross-screen-integration.engine.test.tsx`](../state/e2e/cross-screen-integration.engine.test.tsx)
+(a live fight engaged from the map and fought on its own route).
 Together they demonstrate the top-of-file comment, deterministic
 seeding, the suite split (happy path / invariants / store-lifecycle),
 and asserting on observable state the presenter contract requires.

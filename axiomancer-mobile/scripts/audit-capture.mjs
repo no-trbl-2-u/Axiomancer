@@ -229,8 +229,9 @@ async function triggerEncounter(page, kind) {
     const btn = page.getByTestId(`debug-trigger-encounter-${kind}`)
     await btn.waitFor({ state: 'visible', timeout: 15000 })
     await btn.click()
-    // Overlay mounts over the WILDS map.
-    await page.getByTestId('encounter-modal-overlay').waitFor({ state: 'visible', timeout: 15000 })
+    // <CombatGate> pushes the live fight onto its own route.
+    await page.waitForURL((url) => url.pathname.endsWith('/combat-encounter'), { timeout: 15000 })
+    await page.getByTestId('combat-reveal').waitFor({ state: 'visible', timeout: 15000 })
     await settle(page, 1000)
 }
 

@@ -39,10 +39,10 @@ export interface NavigationViewModel {
  *
  * A chronicle saved mid-fight (`selectIsInCombat`) also lands on the map:
  * the live fight's dice, hand and HP lived in the panel's local state and
- * did not survive the restart, so the exploration screen re-opens that
- * saved foe as a fresh fight (`selectResumableFight`). It must not return
- * `'combat-encounter'`: that is the dev sandbox route (mock foe, nothing
- * persisted).
+ * did not survive the restart, so `<CombatGate>` routes that saved foe to
+ * `/combat-encounter` as a fresh fight (`selectResumableFight`). It must
+ * not return `'combat-encounter'` itself: that route holds only a fight the
+ * store has staged, and the map is where the player stands.
  *
  * Events fire as a full-screen modal (see `app/event/index.tsx` +
  * `selectHasActiveEvent`), not a tab, so they do not participate in
@@ -53,7 +53,7 @@ export function selectActiveTab(_state: GameStore): ActiveRoute {
     return 'exploration';
 }
 
-/** A fight to restart on the map: the saved foe, and whether it may be
+/** A fight to (re)start on the combat route: the staged foe, and whether it may be
  *  walked away from (bosses seal WITHDRAW, as their prelude's `flee` does). */
 export interface ResumableFight {
     enemy: Enemy;

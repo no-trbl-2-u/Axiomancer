@@ -112,7 +112,7 @@ doc.
 
 | What | Where |
 |---|---|
-| Component render — the combat-encounter screen mounts and plays through phases | [`state/e2e/combat-encounter.screen.test.tsx`](../state/e2e/combat-encounter.screen.test.tsx) |
+| Route — the live `/combat-encounter` route hands the staged foe to the panel and leaves on every exit | [`state/e2e/combat-route.screen.test.tsx`](../state/e2e/combat-route.screen.test.tsx) |
 | Multi-stage board interaction (drag/END PHASE guards) | [`components/combat/encounter/__tests__/CombatBoard.multistage.test.tsx`](../components/combat/encounter/__tests__/CombatBoard.multistage.test.tsx) |
 
 `npm test` must pass twice in a row and `npx tsc --noEmit` must be clean

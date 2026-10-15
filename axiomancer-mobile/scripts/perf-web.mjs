@@ -8,7 +8,8 @@
 //   * bundle — the JS in the web export, raw and gzipped;
 //   * load — time to the title screen, LCP and total blocking time on `/`;
 //   * runtime — frame times and long tasks while three combat rounds play
-//     on the `/combat-encounter` sandbox route.
+//     in a live fight on the `/combat-encounter` route (entered through
+//     /dev, `live-fight-entry.mjs`).
 //
 // Prints ONE JSON object to stdout; every log line goes to stderr so the
 // orchestrator can parse stdout as-is. Exits non-zero only when it cannot
@@ -26,6 +27,7 @@ import { existsSync } from 'node:fs'
 import { gzipSync } from 'node:zlib'
 import { resolve, dirname, join, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { enterLiveFight } from './live-fight-entry.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..')
@@ -267,7 +269,7 @@ function startRuntimeRecording() {
 }
 
 /**
- * Plays three combat rounds on the sandbox route and reads frame-time p95,
+ * Plays three combat rounds in a live fight and reads frame-time p95,
  * the share of frames over 33 ms and total long-task time while they play.
  *
  * @param {import('playwright').Browser} browser
@@ -278,9 +280,7 @@ export async function measureRuntime(browser, baseUrl) {
     const context = await browser.newContext({ viewport: VIEWPORT, hasTouch: false })
     try {
         const page = await context.newPage()
-        await page.addInitScript((s) => { globalThis.__AXM_COMBAT_SEED__ = s }, COMBAT_SEED)
-        await page.goto(`${baseUrl}/combat-encounter`, { waitUntil: 'networkidle' })
-        await page.getByTestId('combat-reveal').waitFor({ state: 'visible', timeout: 25000 }).catch(() => {})
+        await enterLiveFight(page, baseUrl, { seed: COMBAT_SEED })
         await page.getByTestId('combat-enter').click({ timeout: 8000, force: true }).catch(() => {})
         await page.getByTestId('combat-board').waitFor({ state: 'visible', timeout: 25000 })
 

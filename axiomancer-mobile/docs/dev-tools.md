@@ -119,7 +119,6 @@ read the log.** Section container ids are `dev-section-<key>`.
 |---|---|---|
 | `DebugTriggerEncounter` | Quick triggers on the WILDS tab: COMBAT (gentlest foe), BOSS, HAZARD, REST, GATHER, TREASURE, VILLAGE, CUTSCENE | `debug-trigger-encounter-<kind>` |
 | `DebugEnemyPicker` | Any foe from any roster (`EnemiesByMap`), bosses in red; stages a real combat prelude so rewards pay out (`state/dev/enemy-picker.ts`) | `debug-enemy-map-<map>`, `debug-enemy-<enemyId>` |
-| `DebugCombatSandbox` | `/combat-encounter` sandbox (mock foe, nothing persists): ASSEMBLE | `debug-combat-encounter-button` |
 | `DebugSkipEvent` | SKIP EVENT — resolve whatever the player is in (or the arrival owed on the node under them) with a plausible outcome and jump to WILDS; see "Skip the current event" below (`state/dev/skip-event.ts`) | `debug-skip-event-button` |
 
 ### MINIGAMES & REWARDS — `dev-section-rewards`
@@ -159,7 +158,7 @@ read the log.** Section container ids are `dev-section-<key>`.
 | `DebugPlaythroughPresets` (FRESH / ENDGAME) | Raw `setState` with a hand-rolled card list; superseded by the L1–L50 ladder. |
 | `DebugSeedButton` | Composite of POPULATE + RESET MAP; the `debugSeed` action is dev-only and on demand — nothing auto-seeds at launch since 2026-09-23 (a new game starts empty in every build). |
 | `DebugAporiaButton`, `DebugMapResetButton` | Folded into `DebugWorldTravel`. |
-| `DebugCombatEncounterButton`, `DebugCombatTutorialButton` | Merged into `DebugCombatSandbox`. |
+| `DebugCombatEncounterButton`, `DebugCombatTutorialButton`, `DebugCombatSandbox` | The pre-v1 `/combat-encounter` sandbox (mock foe, demo deck, nothing persisted); deleted in phase CR1a when the route became the live fight. A fight is entered through the quick triggers or the enemy picker. |
 | `DebugAddItemById` | Free-text input replaced by `DebugItemPicker` chips. |
 | HIDE MANA / HIDE STANCE toggles | The HUD presenter never read them. |
 | `DebugHudOverrides`, the `devOverrides` store slice, `state/presenters/combat-hud.engine.ts` | HIDE EFFECTS fed a presenter no screen rendered, so the toggle was a no-op (TRIM THE FAT T3, 2026-09-25). |
@@ -171,8 +170,9 @@ read the log.** Section container ids are `dev-section-<key>`.
 `scripts/ci-e2e-scope.mjs` (monorepo root) maps `Debug*` files to the Playwright journey
 they can launch (`DebugEnemy|DebugQuest|DebugRest|DebugReward|
 DebugTriggerEncounter|DebugWorld` → encounters; `DebugHazard*` → hazard;
-`DebugCombat*` → combat). Browser scripts depend on these ids staying
-stable: `self-dev-tools-link`, `debug-trigger-encounter-*`,
-`debug-preset-*`, `debug-hazard-button`, `debug-combat-encounter-button`,
+`CombatGate` → combat). Browser scripts depend on these ids staying
+stable: `self-dev-tools-link`, `debug-trigger-encounter-*`
+(`scripts/live-fight-entry.mjs` enters every scripted fight through it),
+`debug-preset-*`, `debug-hazard-button`,
 `debug-currency-large-grant`, `debug-blacksmith-button`,
 `debug-rest-button`, `debug-cache-button`, `debug-player-tier-*`.

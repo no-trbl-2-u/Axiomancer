@@ -152,7 +152,7 @@ describe('app/index.tsx: title and menu', () => {
         expect(mockReplace).toHaveBeenCalledWith('/exploration');
     });
 
-    it('CONTINUE into a chronicle saved mid-fight lands on the map (which restarts the fight), not the dev sandbox', () => {
+    it('CONTINUE into a chronicle saved mid-fight lands on the map (whose gate then routes the fight), not straight on the combat route', () => {
         const midFight = { ...savedState('Fighter', 3), currentEncounter: { enemies: [] } as never };
         const slots = createMemorySlotStore({ initial: { 2: { state: midFight, savedAt: 5 } } });
         const { getByTestId } = mountIndex({ slots });

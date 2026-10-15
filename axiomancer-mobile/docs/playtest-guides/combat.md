@@ -7,10 +7,10 @@ An encounter node resolves to a `combat-prelude` event that renders **in place o
 ## 2. Enter it directly
 
 - Fixture: `/exploration?fixture=sage-bw-door-gate` — Sage L15 on bw-15, door fight **bw-17** one step away. No `arrive`, so you land on the map; tap `node-bw-17` → `node-confirm-go`. `fresh-start` gives the first fight (tap the first glowing node).
-- `/dev` → `debug-trigger-encounter-encounter` (gentlest foe) or `debug-trigger-encounter-boss`; `debug-enemy-map-<map>` then `debug-enemy-<enemyId>` for a specific foe. Both push `/(tabs)/exploration` and fire the prelude.
-- Sandbox: `/combat-encounter?seed=N` (mock foe, nothing persists; `debug-combat-encounter-button`). Renders `combat-encounter-empty` if the sandbox cannot build.
+- `/dev` → `debug-trigger-encounter-encounter` (gentlest foe) or `debug-trigger-encounter-boss`; `debug-enemy-map-<map>` then `debug-enemy-<enemyId>` for a specific foe. Both push `/(tabs)/exploration` and fire the prelude; `<CombatGate>` engages it and pushes `/combat-encounter`.
+- `/combat-encounter` is the live fight and holds only a staged fight: opened cold it leaves for the map (`combat-encounter-empty` for that frame). Scripts enter a fight through `scripts/live-fight-entry.mjs`.
 - Aftermath panels alone: `/devaftermath?panel=defeat|parley` (`devaftermath-panel`).
-- Globals: `__AXM_COMBAT_SEED__` (sandbox seed, `readSeed`), `__AXM_COMBAT_DECK__` (sandbox deck override), `__AXM_DICE_INSTANT_SETTLE__` and `__AXM_JUICE_INSTANT__` (skip roll/juice animations).
+- Globals: `__AXM_COMBAT_SEED__` (the live fight's engine seed, dev builds only), `__AXM_DICE_INSTANT_SETTLE__` and `__AXM_JUICE_INSTANT__` (skip roll/juice animations).
 
 ## 3. Test IDs
 

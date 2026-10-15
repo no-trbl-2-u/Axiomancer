@@ -43,6 +43,7 @@ import { readFile, stat, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { resolve, dirname, join, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { enterLiveFight } from './live-fight-entry.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..')
@@ -254,9 +255,8 @@ async function main() {
         const page = await ctx.newPage()
         const errors = []
         page.on('pageerror', (e) => errors.push(e.message))
-        await page.addInitScript((s) => { globalThis.__AXM_COMBAT_SEED__ = s }, SEED)
         await page.addInitScript(installProbe)
-        await page.goto(`${baseUrl}/combat-encounter`, { waitUntil: 'networkidle' })
+        await enterLiveFight(page, baseUrl, { seed: SEED })
         await page.getByTestId('combat-enter').click({ timeout: 15000, force: true })
         await page.getByTestId('combat-board').waitFor({ state: 'visible', timeout: 25000 })
         const skip = page.getByTestId('combat-dice-skip')

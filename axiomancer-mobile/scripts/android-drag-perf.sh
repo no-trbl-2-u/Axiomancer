@@ -16,8 +16,8 @@
 #
 # Prerequisites:
 #   * USB debugging on, one device attached (`adb devices`)
-#   * the preview APK installed, a combat board on screen (the dev route
-#     /combat-encounter, or a live map encounter), dice rolled and settled
+#   * the preview APK installed, a live fight's combat board on screen
+#     (/dev → ENCOUNTERS → a quick trigger), dice rolled and settled
 #   * Developer options → "Profile HWUI rendering: In adb shell dumpsys gfxinfo"
 #
 # Usage:
