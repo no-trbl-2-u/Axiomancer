@@ -715,15 +715,6 @@
 - suggested fix: give a refused tap the same reject line and error haptic as a refused drop (owner doctrine: illegal actions prevented loudly).
 - source: antagonist, PR #523
 
-### [LOW] combat / a11y — the SACRIFICE-floor callout changes the ring's label but announces nothing
-- pass: antagonist on PR #523 (SF1, commit 04e5ebb6)
-- viewport: n/a (screen reader)
-- category: accessibility
-- observation: during the 900ms callout the medallion's `accessibilityLabel` becomes `VITAE <v> of <max>. SACRIFICE <cost> would leave you below 1.` (A5). A label change is only heard when focus is already on the medallion, and the callout clears before a user could move there, so a screen-reader user who drops a die on a card is not told why it was refused.
-- evidence: `CombatCombatantPane.tsx` `PlayerMedallion` label; no `AccessibilityInfo.announceForAccessibility` or live region on the callout.
-- suggested fix: announce the floor line once per refusal (`announceForAccessibility(PROGRAM_COPY.floorA11y(...))`), keeping the label change for focus.
-- source: antagonist, PR #523
-
 ### [LOW] combat / perf — `programPlayVM` now probes every hand card's lines twice more per view-model build
 - pass: antagonist on PR #523 (SF1, commit 04e5ebb6)
 - viewport: n/a
@@ -1006,6 +997,16 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] combat / a11y — the SACRIFICE-floor callout changes the ring's label but announces nothing — RESOLVED 2026-10-15 (branch loop/iterate-sacfloor-announce, 6974aa46: `flagShortfall` announces `PROGRAM_COPY.floorA11y` once per refusal; the label change stays for focus; pinned in CombatBoard.sacfloor.test.tsx)
+- pass: antagonist on PR #523 (SF1, commit 04e5ebb6)
+- viewport: n/a (screen reader)
+- category: accessibility
+- observation: during the 900ms callout the medallion's `accessibilityLabel` becomes `VITAE <v> of <max>. SACRIFICE <cost> would leave you below 1.` (A5). A label change is only heard when focus is already on the medallion, and the callout clears before a user could move there, so a screen-reader user who drops a die on a card is not told why it was refused.
+- evidence: `CombatCombatantPane.tsx` `PlayerMedallion` label; no `AccessibilityInfo.announceForAccessibility` or live region on the callout.
+- suggested fix: announce the floor line once per refusal (`announceForAccessibility(PROGRAM_COPY.floorA11y(...))`), keeping the label change for focus.
+- source: antagonist, PR #523
+- issue: #558
 
 ### [x] [MED] combat / desktop — the capped VITAE column leaves END at x~440-550 with ~720px of empty dock to its right — RESOLVED 2026-10-15 (branch loop/iterate-dock-end-right: `endWrap` takes `marginLeft: 'auto'`, so END sits at the dock's right edge on a wide window and a phone is unchanged; pinned in CombatBoard.footer-dock.test.tsx)
 - issue: #554
