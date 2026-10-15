@@ -317,7 +317,7 @@ git switch main 2>/dev/null; git pull --ff-only
 
 export GH_TOKEN=$(awk -F= '/^GH_TOKEN=/ {sub(/^GH_TOKEN=/, ""); print; exit}' .env)
 export GH_REPO=$(awk -F= '/^GH_REPO=/ {sub(/^GH_REPO=/, ""); print; exit}' .env)
-GH_REPO=${GH_REPO:-no-trbl-2-u/Axiomancer}
+GH_REPO=${GH_REPO:-no-trbl-2-u/Miserere-mei-deus}
 ```
 
 If divergence, stop per §6.

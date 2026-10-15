@@ -19,8 +19,8 @@ monorepo (npm workspaces). Clone the monorepo and install from its root:
 
 ```bash
 # Clone the monorepo
-git clone https://github.com/no-trbl-2-u/Axiomancer.git
-cd Axiomancer
+git clone https://github.com/no-trbl-2-u/Miserere-mei-deus.git
+cd Miserere-mei-deus
 
 # Install all workspace dependencies (root lockfile owns deps)
 npm install
@@ -39,7 +39,7 @@ Edit `.env` and configure these variables:
 | Variable | Purpose | Required | Where to get it |
 |----------|---------|----------|-----------------|
 | `GH_TOKEN` | GitHub API access for issue management | Development only | `gh auth token` (scopes: repo, read:org, gist, workflow) |
-| `GH_REPO` | GitHub repository identifier | Development only | Usually `no-trbl-2-u/Axiomancer` |
+| `GH_REPO` | GitHub repository identifier | Development only | Usually `no-trbl-2-u/Miserere-mei-deus` |
 | `EXPO_TOKEN` | EAS Build API access | Deployment only | https://expo.dev/settings/access-tokens |
 | `EAS_PROJECT_ID` | Expo project identifier | Deployment only | Auto-detected from app.json |
 

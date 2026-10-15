@@ -105,7 +105,7 @@
 //
 // Required env (from .env or shell):
 //   GH_TOKEN    repo-scoped PAT
-//   GH_REPO     owner/repo, e.g. no-trbl-2-u/Axiomancer
+//   GH_REPO     owner/repo, e.g. no-trbl-2-u/Miserere-mei-deus
 //
 // Reads .env using a simple loader; matches the shape used by
 // scripts/deploy-check.mjs and skills/triage.md.
@@ -1114,7 +1114,7 @@ export function fillGhEnv(env, run = () => spawnSync('gh', ['auth', 'token'], { 
     const token = r && r.status === 0 ? String(r.stdout ?? '').trim() : ''
     if (token) env.GH_TOKEN = token
   }
-  if (!env.GH_REPO) env.GH_REPO = 'no-trbl-2-u/Axiomancer'
+  if (!env.GH_REPO) env.GH_REPO = 'no-trbl-2-u/Miserere-mei-deus'
   return env
 }
 

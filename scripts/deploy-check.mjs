@@ -152,7 +152,7 @@ else if (PROVIDER === 'vercel') {
 // =====================================================================
 else if (PROVIDER === 'github-actions') {
   const TOKEN = process.env.GH_TOKEN
-  const REPO = process.env.GH_REPO ?? 'no-trbl-2-u/Axiomancer'
+  const REPO = process.env.GH_REPO ?? 'no-trbl-2-u/Miserere-mei-deus'
   const WORKFLOWS = (
     process.env.DEPLOY_WORKFLOWS ??
     'verify-mechanics.yml,verify-mobile.yml'

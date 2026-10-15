@@ -51,7 +51,7 @@ there is no API token in the tree and no `wrangler.toml`, which phase 57 also
 recorded. Do this once, in one sitting:
 
 1. **Cloudflare dashboard -> Workers & Pages -> Create -> Pages -> Connect to
-   Git.** Pick the `no-trbl-2-u/Axiomancer` repository. (The same repository as
+   Git.** Pick the `no-trbl-2-u/Miserere-mei-deus` repository. (The same repository as
    the game project; a Pages project is a build configuration, not a
    repository, so two projects over one repository is the intended shape.)
 2. **Project name:** `axiomancer-devlog`. This decides the URL —

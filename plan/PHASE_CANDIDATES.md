@@ -138,7 +138,7 @@
   open issues (#337, #338, #339) that shipped phases already closed. Score
   unchanged. The row is still `/oversight`'s to promote.
 - rescored 2026-10-06, expand pass 24. New signals, all open on
-  `no-trbl-2-u/Axiomancer` today:
+  `no-trbl-2-u/Miserere-mei-deus` today:
   - #337 and #338 (both `severity:high`) were fixed by Phase 99
     (`fd83aa0b`, plan row `b9acf401`) and are still open, so the tracker
     shows two HIGH bugs that the game no longer has.

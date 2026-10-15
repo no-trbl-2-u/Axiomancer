@@ -416,7 +416,7 @@ async function renderItem(section, entry, media, out, ctx) {
         const links = fields.commits
             .map((c) => {
                 const sha = c.replace(/[^0-9a-f]/gi, '')
-                return sha ? `<a href="https://github.com/no-trbl-2-u/Axiomancer/commit/${sha}">${escapeHtml(sha.slice(0, 8))}</a>` : escapeHtml(c)
+                return sha ? `<a href="https://github.com/no-trbl-2-u/Miserere-mei-deus/commit/${sha}">${escapeHtml(sha.slice(0, 8))}</a>` : escapeHtml(c)
             })
             .join(` ${MARKS.dot} `)
         parts.push(`<p class="commits">${fields.commits.length === 1 ? 'commit' : 'commits'} ${links}</p>`)
@@ -760,7 +760,7 @@ function renderAbout(attributions, out) {
   <ul class="mono">${marks.join('\n') || '<li>No attribution-licensed art is published on this site.</li>'}</ul>
 
   <h2>How to follow it</h2>
-  <p><a href="${root}feed.xml">The feed</a> ${MARKS.dot} <a href="${root}log/">The log</a> ${MARKS.dot} <a href="https://github.com/no-trbl-2-u/Axiomancer">The source</a></p>
+  <p><a href="${root}feed.xml">The feed</a> ${MARKS.dot} <a href="${root}log/">The log</a> ${MARKS.dot} <a href="https://github.com/no-trbl-2-u/Miserere-mei-deus">The source</a></p>
 </div>`
     const bytes = write(join(out, 'about', 'index.html'), page({
         title: 'About — Miserere Mei, Deus',
