@@ -670,15 +670,6 @@
 - suggested fix: let the presenter build the whole line (for example "PHASE 1/5 · ROUND 1 · TURN 1", or drop TURN where it repeats ROUND), stop rewriting it in the component, raise `hudMeta` to at least 11px, and allow font scaling, letting the name row wrap if it has to. Pin the line's text in a presenter test.
 - source: critique-drive (main agent)
 
-### [MED] combat / desktop — the capped VITAE column leaves END at x~440-550 with ~720px of empty dock to its right
-- pass: 87 (commit a397d3a0)
-- viewport: desktop
-- category: visual
-- observation: since #535 caps the VITAE column at `DOCK_VITAE_MAX_WIDTH` (360), nothing pushes END to the dock's right edge: the row is avatar, VITAE, END packed left with `gap` only. At 1280 the turn-ending button sits left of the centred hand (x~440-550) and the right 60% of the dock is empty. The #535 Done row says "END stays at the right"; on screen it does not.
-- evidence: `axiomancer-mobile/.critique-artifacts/desktop/04-combat-board.png` (END box at x~440-553, y~737-791); `CombatFooterDock.tsx` `dock` has no `justifyContent` and `endWrap` no `marginLeft: 'auto'`.
-- suggested fix: give `endWrap` `marginLeft: 'auto'` (or put a flex spacer before it) so END stays on the right edge on wide windows; a phone is unchanged because the VITAE column already fills there. Pin END's right edge in CombatBoard.footer-dock.test.tsx at a wide width.
-- source: critique-drive (main agent)
-
 ### [LOW] ci / pr-resolve — a hand dispatch with a non-`loop/` branch exits green having done nothing
 - pass: antagonist on PR #526 (commit efc7f371)
 - viewport: n/a
@@ -1015,6 +1006,17 @@
 - source: loop
 
 ## Done
+
+### [x] [MED] combat / desktop — the capped VITAE column leaves END at x~440-550 with ~720px of empty dock to its right — RESOLVED 2026-10-15 (branch loop/iterate-dock-end-right: `endWrap` takes `marginLeft: 'auto'`, so END sits at the dock's right edge on a wide window and a phone is unchanged; pinned in CombatBoard.footer-dock.test.tsx)
+- issue: #554
+- pass: 87 (commit a397d3a0)
+- viewport: desktop
+- category: visual
+- observation: since #535 caps the VITAE column at `DOCK_VITAE_MAX_WIDTH` (360), nothing pushes END to the dock's right edge: the row is avatar, VITAE, END packed left with `gap` only. At 1280 the turn-ending button sits left of the centred hand (x~440-550) and the right 60% of the dock is empty. The #535 Done row says "END stays at the right"; on screen it does not.
+- evidence: `axiomancer-mobile/.critique-artifacts/desktop/04-combat-board.png` (END box at x~440-553, y~737-791); `CombatFooterDock.tsx` `dock` has no `justifyContent` and `endWrap` no `marginLeft: 'auto'`.
+- suggested fix: give `endWrap` `marginLeft: 'auto'` (or put a flex spacer before it) so END stays on the right edge on wide windows; a phone is unchanged because the VITAE column already fills there. Pin END's right edge in CombatBoard.footer-dock.test.tsx at a wide width.
+- source: critique-drive (main agent)
+
 
 ### [x] [LOW] anvil — HONE, TEMPER and SWAP prices read "40s" while the forge's budget says SHILLINGS — RESOLVED 2026-10-14 (branch loop/iterate-forge-shillings: each offer prints "40 SHILLINGS" on its own line under the verb, and the card chip, the cannot-cover reason and the outcome chip spell the unit too; pinned in forge-vocabulary.S5-talk-C12.test.tsx)
 - issue: #540
