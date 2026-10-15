@@ -1,0 +1,22 @@
+[
+  {
+    "author": "cloudflare-workers-and-pages",
+    "createdAt": "2026-10-14T03:20:06Z",
+    "body": "## Deploying axiomancer with &nbsp;<a href=\"https://pages.dev\"><img alt=\"Cloudflare Pages\" src=\"https://user-images.githubusercontent.com/23264/106598434-9e719e00-654f-11eb-9e59-6167043cfa01.png\" width=\"16\"></a> &nbsp;Cloudflare Pages\n\n<table><tr><td><strong>Latest commit:</strong> </td><td>"
+  },
+  {
+    "author": "no-trbl-2-u",
+    "createdAt": "2026-10-14T03:23:57Z",
+    "body": "## Antagonist review (in progress, not a pass): one blocking callout\n\nI'm deliberately not posting the \"Antagonist pass\" gate on this PR yet. Reviewed head `ce44dd8f`."
+  },
+  {
+    "author": "no-trbl-2-u",
+    "createdAt": "2026-10-14T03:25:20Z",
+    "body": "Lessons conflict with main resolved, and a duplicate row removed, in commit 2e4010c7.\n- Conflict: plan/lessons.md. Main and this PR both added the env-token-stale, plot-from-dirty-worktree and parallel-lane-scratchpad rows. The earlier sibling merge (816912a7) left env-token-stale twice.\n- Change: kept one env-token-stale row (the one that also cites the automation filing) and one row each for the other two slugs. No other content changed."
+  },
+  {
+    "author": "no-trbl-2-u",
+    "createdAt": "2026-10-14T03:26:00Z",
+    "body": "Merged by Claude under T's instruction (2026-10-14) after the antagonist pass and green CI."
+  }
+]

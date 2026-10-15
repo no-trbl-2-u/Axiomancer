@@ -1,0 +1,12 @@
+[
+  {
+    "author": "no-trbl-2-u",
+    "createdAt": "2026-10-14T03:23:22Z",
+    "body": "## Antagonist pass\n\nReviewed head `efc7f371` against issue #524 and the AUDIT `[infra]` row. The split holds up. `workflow_dispatch` is exempt from the GITHUB_TOKEN no-recursion rule, so the scan's `gh workflow run` does start a run. `actions: write` covers the dispatch. Job-level `concurrency` is allowed on a reusable-workflow caller. `scan.if` stays true on `push`, where `inputs` is empty."
+  },
+  {
+    "author": "no-trbl-2-u",
+    "createdAt": "2026-10-14T03:24:20Z",
+    "body": "Merged by Claude under T's instruction (2026-10-14) after the antagonist pass and green CI."
+  }
+]
