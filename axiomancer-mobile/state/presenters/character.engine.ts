@@ -10,7 +10,9 @@
  */
 
 import {
+    levelForExperience,
     lookupEffect,
+    STAT_POINTS_PER_LEVEL,
     type ActiveEffect,
     type Character,
     type GameStore,
@@ -119,6 +121,20 @@ export interface CharacterViewModel {
      * earning more).
      */
     levelUpReady: boolean;
+    /**
+     * The level the player's XP reaches. Above `level` when
+     * `levelUpReady`: one fight can be worth several levels, and the
+     * `<LevelReadyStrip>` names the level the tap lands on.
+     */
+    readyLevel: number;
+    /**
+     * The level the unspent points were earned from: `level` less the
+     * levels the pending points stand for, never below 1. The
+     * `<LevelUpModal>` reads "level <from> → level <level>".
+     */
+    levelUpFrom: number;
+    /** e.g. `'3 levels gained · 3 points banked'`; names a multi-level grant. */
+    levelUpSummary: string;
     base: readonly BaseStatRow[];
     effects: readonly CharacterEffectRow[];
     /**
@@ -223,6 +239,13 @@ function buildEquipment(player: Character): readonly EquipmentSlotRow[] {
     return rows;
 }
 
+/** "3 levels gained · 3 points banked"; singular for one. */
+function levelUpSummary(levels: number, points: number): string {
+    const levelPart = `${levels} ${levels === 1 ? 'level' : 'levels'} gained`;
+    const pointPart = `${points} ${points === 1 ? 'point' : 'points'} banked`;
+    return `${levelPart} · ${pointPart}`;
+}
+
 /**
  * Derives the character view-model from game state.
  * All fields are driven by the engine's `state.player`. Cards are
@@ -231,6 +254,11 @@ function buildEquipment(player: Character): readonly EquipmentSlotRow[] {
 export function selectCharacterViewModel(state: GameStore): CharacterViewModel {
     const player = state.player;
     const effects = buildEffects(player);
+    const level = player.level ?? 1;
+    const pendingPoints = player.availableStatPoints ?? 0;
+    // Points banked before the one-point level (three a level) can stand for
+    // more levels than were taken; the clamp keeps "from" at level 1 or above.
+    const levelsGained = Math.min(level - 1, Math.floor(pendingPoints / STAT_POINTS_PER_LEVEL));
 
     return freezeViewModel({
         displayName: player.name,
@@ -239,9 +267,12 @@ export function selectCharacterViewModel(state: GameStore): CharacterViewModel {
         xp: player.experience,
         xpMax: player.experienceToNextLevel,
         xpLabel: `XP TO LVL ${(player.level ?? 0) + 1}`,
-        pendingPoints: player.availableStatPoints ?? 0,
+        pendingPoints,
         levelUpReady:
             (player.experience ?? 0) >= (player.experienceToNextLevel ?? Infinity),
+        readyLevel: Math.max(level, levelForExperience(player.experience ?? 0)),
+        levelUpFrom: Math.max(1, level - levelsGained),
+        levelUpSummary: levelUpSummary(levelsGained, pendingPoints),
         base: buildBase(player),
         effects,
         emptyEffectsMessage: 'none at hand.',

@@ -125,7 +125,7 @@ import { generateRunId } from './run-loop';
  * - v36: levels cost a rising `L × 250` XP; a save's progress is
  *   re-expressed on that curve.
  */
-export const GAME_STATE_VERSION = 36;
+export const GAME_STATE_VERSION = 37;
 
 /**
  * Builds a brand-new GameState with default player and world.
@@ -183,8 +183,9 @@ function isEncounter(target: Enemy | Encounter): target is Encounter {
 /**
  * Level-up step. While the player has accumulated enough XP for the next
  * level, increment `level`, recompute `maxHealth` (base-stat pool plus the worn
- * armor relics' bonus), raise the threshold, refill
- * HP, and bank stat points (spent later via `ALLOCATE_STAT_POINT`).
+ * armor relics' bonus), raise the threshold, and bank stat points (spent later
+ * via `ALLOCATE_STAT_POINT`). A level-up does not heal: `health` keeps its
+ * value, clamped to the new `maxHealth`. Healing comes from rest and items.
  */
 function applyLevelUps(player: Character): Character {
     let next = player;
@@ -196,7 +197,7 @@ function applyLevelUps(player: Character): Character {
             ...next,
             level,
             maxHealth,
-            health: maxHealth,
+            health: Math.min(next.health, maxHealth),
             experienceToNextLevel: experienceForLevel(level + 1),
             // Grant STAT_POINTS_PER_LEVEL on every promotion.
             // Multi-level cascades accumulate without merging.
