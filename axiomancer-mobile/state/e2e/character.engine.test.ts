@@ -10,6 +10,7 @@ import { afterEach, describe, it, expect, jest } from '@jest/globals';
 import {
     createGameStore,
     createCharacter,
+    experienceForLevel,
     createNewGameState,
     applyEffect,
     effectsLibrary,
@@ -470,3 +471,27 @@ describe('FE-004: xp label names the NEXT level', () => {
     });
 });
 
+
+describe('selectCharacterViewModel: a fight worth three levels (LV1 A7)', () => {
+    it('names the landing level before the tap, then the span and the points after it', () => {
+        const store = makeStore({ experience: experienceForLevel(4) });
+        const before = selectCharacterViewModel(store.getState());
+        expect(before.levelUpReady).toBe(true);
+        expect(before.readyLevel).toBe(4);
+
+        store.getState().levelUp();
+        const after = selectCharacterViewModel(store.getState());
+        expect(after.level).toBe(4);
+        expect(after.pendingPoints).toBe(3);
+        expect(after.levelUpFrom).toBe(1);
+        expect(after.levelUpSummary).toBe('3 levels gained · 3 points banked');
+        expect(after.levelUpSummary).not.toMatch(/heal|restor|refill|mend/i);
+    });
+
+    it('keeps "from" at level 1 when old banked points outnumber the levels', () => {
+        const store = makeStore({ level: 2, availableStatPoints: 6 });
+        const vm = selectCharacterViewModel(store.getState());
+        expect(vm.levelUpFrom).toBe(1);
+        expect(vm.levelUpSummary).toBe('1 level gained · 6 points banked');
+    });
+});

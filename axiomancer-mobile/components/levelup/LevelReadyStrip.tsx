@@ -23,20 +23,25 @@ import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
 export interface LevelReadyStripProps {
-    /** Current level (the strip renders "step into level <N+1>"). */
+    /** Current level. */
     level: number;
+    /**
+     * The level the XP reaches (the strip renders "step into level <N>").
+     * One fight can be worth several levels; defaults to `level + 1`.
+     */
+    toLevel?: number;
     /** Tap handler — dispatches `actions.levelUp()`. */
     onLevelUp: () => void;
 }
 
-export function LevelReadyStrip({ level, onLevelUp }: LevelReadyStripProps) {
+export function LevelReadyStrip({ level, toLevel, onLevelUp }: LevelReadyStripProps) {
     const styles = useStyles();
     const AXM = usePalette();
-    const targetLevel = level + 1;
+    const targetLevel = Math.max(level + 1, toLevel ?? level + 1);
     return (
         <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`Level up — enough experience accumulated, advance to level ${level + 1}`}
+            accessibilityLabel={`Level up — enough experience accumulated, advance to level ${targetLevel}`}
             testID="level-ready-strip"
             onPress={onLevelUp}
             style={({ pressed }) => [styles.strip, pressed && styles.stripPressed]}

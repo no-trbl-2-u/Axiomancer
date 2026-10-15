@@ -28,6 +28,7 @@ export type {
 
 export {
     MAX_EFFECT_INTENSITY,
+    STAT_POINTS_PER_LEVEL,
 } from './game-mechanics.constants';
 
 export type { PersistenceAdapter } from './persistence/types';

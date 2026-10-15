@@ -41,6 +41,21 @@ describe('LevelUpModal: chrome render', () => {
         expect(tree.queryByText('level 7')).not.toBeNull();
     });
 
+    it('names a three-level grant once: the span and the points banked (LV1 A7)', () => {
+        const tree = render(
+            <LevelUpModal
+                {...BASE_PROPS}
+                fromLevel={1}
+                toLevel={4}
+                summary="3 levels gained · 3 points banked"
+            />,
+        );
+        expect(tree.queryByText('level 1')).not.toBeNull();
+        expect(tree.queryByText('level 4')).not.toBeNull();
+        expect(tree.getByTestId('levelup-modal-summary').props.children).toBe('3 levels gained · 3 points banked');
+        expect(tree.queryByText(/heal|restor|refill|mend/i)).toBeNull();
+    });
+
     it('renders the character name uppercased', () => {
         const tree = render(<LevelUpModal {...BASE_PROPS} />);
         expect(tree.queryByText('GRIEF-FOR-NO-ONE')).not.toBeNull();

@@ -178,8 +178,8 @@ describe('migrations.engine', () => {
             // v33: the region-consequences slice hop;
             // v34: the parked world's content hop;
             // v35: the deleted relic hop;
-            // v36: the XP curve hop.
-            expect(GAME_STATE_VERSION).toBe(36);
+            // v36: the XP curve hop; v37: the level-20 curve hop.
+            expect(GAME_STATE_VERSION).toBe(37);
             expect(result.version).toBe(GAME_STATE_VERSION);
         });
     });

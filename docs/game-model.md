@@ -143,11 +143,18 @@ the Expo app (`axiomancer-mobile`) presents it.
   repeating amount is base × (stat + 5) ÷ 10. Durations do not scale. The
   result floors, minimum 1, no cap. `NEUTRAL_STAT` = 5. The card face
   prints the scaled number.
-- **Levels:** reaching level L + 1 costs L × `EXPERIENCE_STEP` (250) XP, so
-  levels 2-5 sit at 250, 750, 1,500 and 2,500 total. A level gives
-  `STAT_POINTS_PER_LEVEL` = 3 stat points. A kill gives level ×
-  `DEFAULT_XP_BY_DIFFICULTY` (normal 20, elite 50, boss 200). A full Act 1
-  clear ends near level 5.
+- **Levels:** level 1 to 2 costs `EXPERIENCE_BASE` = 70 XP. Each later step
+  costs the one before it times its band's growth (`EXPERIENCE_GROWTH`):
+  10% more for the steps out of levels 2-20, 15% more out of 21-40, 20%
+  more after 40, each rounded to a whole XP (`experienceToNext`,
+  `Character/experience.ts`). Levels 5, 10 and 20 sit at 325, 950 and
+  3,582 total; level 40 at 47,440. A level gives `STAT_POINTS_PER_LEVEL`
+  = 1 stat point and does not refill VITAE (healing comes from rest and
+  items). A kill gives level × `DEFAULT_XP_BY_DIFFICULTY` (normal 20, elite
+  50, boss 200). A full Act 1 clear ends at level 20, meeting the four
+  doors at levels 4, 9, 14 and 18 (`npm run act1-progression`). Level 50
+  costs 229,326 XP in total, about 63 times Act 1's income: a projection
+  for Acts 2 and 3, which do not exist yet.
   How each door and fight measures at the level a full clear brings:
   `docs/reports/measured/latest.md` (a measurement, stamped with its commit).
 

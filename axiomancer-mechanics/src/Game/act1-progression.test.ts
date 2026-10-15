@@ -6,7 +6,7 @@ import { scaleEnemyToLevel } from '../World/encounter';
 import { simulateHazardPatternCombat } from '../Combat/combat.encounter.sim';
 import { STARTING_CARD_IDS } from '../Combat/combat.rewards';
 
-describe('the Act 1 XP ledger (R9, D55)', () => {
+describe('the Act 1 XP ledger (LV1)', () => {
     const ledger = act1FightLedger();
 
     it('stages 26 fights, one door per map, every one pinned', () => {
@@ -15,11 +15,11 @@ describe('the Act 1 XP ledger (R9, D55)', () => {
         expect(ledger.every(f => f.level !== undefined)).toBe(true);
     });
 
-    it('a full clear meets each door one level above it and ends at level 5', () => {
+    it('a full clear meets the doors at levels 4, 9, 14 and 18 and ends at level 20', () => {
         const walk = walkAct1(ledger);
-        expect(walk.doors.map(d => d.playerLevel)).toEqual([2, 3, 4, 5]);
+        expect(walk.doors.map(d => d.playerLevel)).toEqual([4, 9, 14, 18]);
         expect(walk.doors.map(d => d.doorLevel)).toEqual([1, 2, 3, 4]);
-        expect(walk.finalLevel).toBe(5);
+        expect(walk.finalLevel).toBe(20);
     });
 
     it('records the level stepping up to every fight, doors included', () => {
@@ -33,7 +33,7 @@ describe('the Act 1 XP ledger (R9, D55)', () => {
     it('a door-only route meets the Breakwater door at level 1', () => {
         const walk = walkAct1(ledger.filter(f => f.isBoss));
         expect(walk.doors[0]!.playerLevel).toBe(1);
-        expect(walk.finalLevel).toBeLessThan(5);
+        expect(walk.finalLevel).toBeLessThan(20);
     });
 
     it('each door is winnable, not free, at its expected stage (even spread, greedy witness)', () => {

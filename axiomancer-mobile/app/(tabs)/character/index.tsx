@@ -159,6 +159,7 @@ export default function CharacterScreen() {
       {vm.pendingPoints === 0 && vm.levelUpReady && (
         <LevelReadyStrip
           level={vm.level}
+          toLevel={vm.readyLevel}
           onLevelUp={onLevelUp}
         />
       )}
@@ -170,9 +171,10 @@ export default function CharacterScreen() {
       {levelUpOpen && (
         <LevelUpModal
           characterName={vm.displayName}
-          fromLevel={Math.max(1, vm.level - 1)}
+          fromLevel={vm.levelUpFrom}
           toLevel={vm.level}
           totalPoints={vm.pendingPoints}
+          summary={vm.levelUpSummary}
           current={(() => {
             const heart = vm.base.find((r) => r.stanceKey === 'heart')?.value ?? 0;
             const body = vm.base.find((r) => r.stanceKey === 'body')?.value ?? 0;

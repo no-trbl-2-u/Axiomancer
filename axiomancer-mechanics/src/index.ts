@@ -26,6 +26,8 @@ export {
     levelLadderPresets,
     previewStatAllocation,
     experienceForLevel,
+    experienceToNext,
+    levelForExperience,
 } from './Character';
 export type {
     Character, BaseStats,
@@ -218,6 +220,7 @@ export {
     selectVersion,
     nullAdapter,
     MAX_EFFECT_INTENSITY,
+    STAT_POINTS_PER_LEVEL,
     // State fixtures — one declarative state for CLI / Jest / web.
     buildStateFromFixture,
     validateStateFixture,
