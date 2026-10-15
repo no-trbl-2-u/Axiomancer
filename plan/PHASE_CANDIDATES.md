@@ -20,6 +20,12 @@
 > says it is needed. `/expand` and `/oversight` promote none of them before
 > the date; `/iterate` never picks them up.
 
+
+### [ ] [score 4.0] Guard every root gate against the fresh-router re-push (lesson `gate-router-identity`, seen 2x)
+- Filed by the CR1b retro (2026-10-15). `useRouter()` returns a fresh object every render, so a gate effect keyed on `router` re-runs on any re-render; `EventGate` (stacked its screen twice) and `LabyrinthGate` (re-pushed `/labyrinth` over a labyrinth fight, fixed in #573) both needed a once-per-session latch.
+- The automation: a hermetic test that mounts each `components/*Gate.tsx` with a router mock returning a fresh object per call, opens its session, re-renders with the pathname moved off its route, and asserts exactly one push. `HazardGate`, `RestGate`, `CacheGate`, `ItemRewardGate`, `BlacksmithGate`, `CombatGate`, `EventGate`, `LabyrinthGate`.
+- Size S, area:mobile. Needs a brief: `/plot`.
+
 ### [ ] [owner] [score 5.5] Claims for a second loop: a claims record so two loops or a batch never build the same row
 - proposed: 2026-10-11, T's session (hunt comparison); held until the R11 watch ends
 - trigger: a second cron, a contributor, or `/heads-down`-style batches appear. With one cron plus attended sessions, "an open `loop:pr` PR is the claim" (R11 item 3) is enough; don't build this speculatively.
