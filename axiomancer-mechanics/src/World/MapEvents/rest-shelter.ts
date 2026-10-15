@@ -5,17 +5,14 @@
  * inn or a camp; this module is the single place the default and the inn
  * test live.
  *
- * The scar mend is an INN-ONLY privilege. It is the strongest argument
- * for keeping inns distinct at all, so it hangs off `shelter === 'inn'`
- * and nothing else.
+ * The shelter changes only how the rest screen words the night; every
+ * rest, inn or camp, mends hazard-scarred max-VITAE (Act 1's only inns
+ * are in the Breakwater, so an inn-only mend left later scars permanent).
  */
 
 import type { RestPayload, RestShelter } from './types';
 
-/**
- * A rest node that does not declare a shelter is wilderness. Silence is
- * never a paid bed — mislabelling hands out free max-VITAE repair.
- */
+/** A rest node that does not declare a shelter is wilderness. */
 export const DEFAULT_REST_SHELTER: RestShelter = 'camp';
 
 /**
@@ -23,7 +20,7 @@ export const DEFAULT_REST_SHELTER: RestShelter = 'camp';
  *
  * The player-facing rest is `World/RestChoice`, whose `rest` offer heals a
  * flat fraction of max VITAE (`RESTCHOICE_TUNING.restHealFraction`, no
- * shelter distinction); the inn scar mend still hangs off `shelter`. Any
+ * shelter distinction). Any
  * tuning belongs there.
  */
 export const REST_PASSIVE_HEAL_FRACTION = 1.0;
@@ -33,10 +30,7 @@ export function restShelterOf(payload: RestPayload): RestShelter {
     return payload.shelter ?? DEFAULT_REST_SHELTER;
 }
 
-/**
- * True for a paid, tended shelter. The hazard-scar max-VITAE mend is
- * gated on exactly this — never on a heal magnitude.
- */
+/** True for a paid, tended shelter. */
 export function isInnShelter(shelter: RestShelter): boolean {
     return shelter === 'inn';
 }

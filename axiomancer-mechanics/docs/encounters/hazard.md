@@ -156,7 +156,7 @@ Every reward pays exactly what its chip says.
 | ID | Name | Description |
 |---|---|---|
 | `deadcard` | Dead Weight | CRACK card shuffled into the persistent deck |
-| `maxhp` | Scarred | −5 Maximum VITAE until next inn rest |
+| `maxhp` | Scarred | −5 Maximum VITAE until the next rest |
 | `minhp` | Bleeding | −8 VITAE immediately |
 
 By rounds lost: one loss costs only the route penalty; two add Scarred and

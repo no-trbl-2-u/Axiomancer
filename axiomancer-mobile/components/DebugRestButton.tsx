@@ -25,8 +25,7 @@ export function DebugRestButton() {
     };
 
     const onInn = () => {
-        // The inn shelter mends hazard-scarred max-VITAE at claim — the
-        // one branch a camp node never reaches.
+        // An inn words the night as a bed; the claim is the same as a camp's.
         actions.beginRest({ shelter: 'inn' });
     };
 

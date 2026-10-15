@@ -26,8 +26,7 @@ import { BLACKSMITH_WITNESS_VARIANTS } from '../Blacksmith/blacksmith.content';
 // The builders the Act 1 maps share.
 
 /**
- * Inn rests: tended, paid shelter inside a settlement, and the
- * only rests that mend hazard-scarred max-VITAE.
+ * Inn rests: tended, paid shelter inside a settlement.
  */
 function innRestPool(nodeId: string, description: string): MapEventPool {
     return {
@@ -111,7 +110,7 @@ function campRestPool(nodeId: string, description: string): MapEventPool {
     return {
         id: `${nodeId}.rest`,
         entries: [{
-            // A cavern camp is never an inn — nothing down here mends scars.
+            // A cavern camp is never an inn.
             kind: 'rest', weight: 1,
             payload: { kind: 'rest', shelter: 'camp', description },
         }],

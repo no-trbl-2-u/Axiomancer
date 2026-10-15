@@ -179,13 +179,29 @@
 - detail: Leg 3: above half VITAE, stage Blood Price P-04C (marked "ONLY AT HALF VITAE OR LESS") and drag the WILD die onto it. The die is accepted and goes "spent" with no rejection flash, APPLY does nothing, and the card stayed staged from turn 2 to turn 7 of the Doorwarden fight while every END logged "Refused - only at half VITAE or less." A wrong-colour drop is refused loudly; this one loses the die. Same root as a second copy of a Global staging.
 - next (`/iterate`): refuse the die drop (and the stage) when the card's play condition fails, with the same loud reject flash as the colour rule (owner UI doctrine: illegal actions prevented loudly); unstaged cards return to the hand. Mobile combat drop handlers in `axiomancer-mobile/components/combat/`; add a test.
 
-### [bug] Scarred ("until you next rest at an inn") never clears (RC2 walk, 2026-10-11)
+### [x] [bug] Scarred ("until you next rest at an inn") never clears (RC2 walk, 2026-10-11) — CLOSED 2026-10-15 (3d953081: every rest, inn or camp, mends banked scars; the gloss reads "until you next rest"; hazard-scar-rest-recovery.engine.test.ts pins camp and unmarked rests mending. See the [loop-call] below)
+- issue: #561
 - source: RC2 walk 2026-10-11 (eb75f451, Blood Price test deck, attended; accepted for the v0.2.0 tag by T, D83)
 - category: bug
 - impact: 6
 - ease: 7
 - detail: Leg 4: a lost hazard (ld-4 North Aqueduct) applied Scarred (-5 max VITAE, 302 to 297). Act 1 has no inn. Two rest nodes (ld-10, ld-2) and a reload left max VITAE at 297. In practice the scar is permanent, and the gloss names a place the game does not have.
 - next (`/iterate`): decide in code what lifts a scar in Act 1 (any REST node is the reading closest to the gloss), make it so and update the gloss to match; test it. If lifting it needs a design call, file a `[loop-call]` with the choice made.
+
+### [loop-call] A hazard scar mends at any rest; the inn keeps only its wording (2026-10-15)
+- category: contract
+- impact: 4
+- ease: -
+- detail: fixing "Scarred never clears" (issue #561) the loop ruled that
+  every rest, inn or camp, mends banked hazard scars. The options were
+  (a) any rest mends, (b) keep the mend inn-only and word the gloss as
+  permanent past the Breakwater, (c) author inns in later regions
+  (content, D88). Picked (a): `docs/game-model.md` already says "until the
+  next rest", Act 1's only inns are the Breakwater's, and a -5 scar on a
+  ~300 pool is small. It retires Phase 52b's "inn-only privilege"; the
+  `shelter` marker stays and still words an inn night as a bed.
+- next: T confirms, or rules scars inn-only (then the gloss must say a
+  scar outlives every camp, or later regions get an inn by brief).
 
 ### [bug] "SACRIFICE any amount" never asks the player for an amount (RC2 walk, 2026-10-11)
 - source: RC2 walk 2026-10-11 (eb75f451, Blood Price test deck, attended; accepted for the v0.2.0 tag by T, D83)

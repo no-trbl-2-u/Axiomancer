@@ -128,8 +128,7 @@ export function resolveRest(
     return {
         state: withPlayer(state, player),
         // `shelter` rides along so hosts that replace the passive heal with
-        // their own rest flow keep the authored inn/camp signal — and so the
-        // hazard-scar mend has an honest trigger.
+        // their own rest flow keep the authored inn/camp signal.
         event: { kind: 'rest', healed, shelter, description: payload.description },
     };
 }

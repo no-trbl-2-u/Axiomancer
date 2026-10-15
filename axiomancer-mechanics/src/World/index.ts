@@ -125,7 +125,7 @@ export type {
     MapEventKind,
     MapEventPayload, ResolvedEvent, ResolveMapEventResult,
 } from './MapEvents/types';
-// Rest shelter classification. Mobile gates the hazard-scar mend on `shelter === 'inn'`.
+// Rest shelter classification. Mobile words an inn night as a bed.
 export type { RestShelter } from './MapEvents/types';
 export {
     DEFAULT_REST_SHELTER, isInnShelter,

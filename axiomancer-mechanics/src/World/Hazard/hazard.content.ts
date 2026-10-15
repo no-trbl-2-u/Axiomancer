@@ -94,7 +94,7 @@ export const HAZARD_REWARDS: Record<HazardRewardId, { name: string; icon: string
 
 export const HAZARD_CONSEQUENCES: Record<HazardConsequenceId, { name: string; icon: string; desc: string }> = {
     deadcard: { name: 'Dead Weight', icon: 'deadcard', desc: 'A useless CRACK card is shuffled into your deck.' },
-    maxhp: { name: 'Scarred', icon: 'maxhp', desc: `−${HAZARD_TUNING.rewards.maxhpScar} Maximum Vitae until you next rest at an inn.` },
+    maxhp: { name: 'Scarred', icon: 'maxhp', desc: `−${HAZARD_TUNING.rewards.maxhpScar} Maximum Vitae until you next rest.` },
     minhp: { name: 'Bleeding', icon: 'minhp', desc: `Lose ${HAZARD_TUNING.rewards.minhpLoss} Vitae immediately.` },
 };
 
