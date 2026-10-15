@@ -76,6 +76,7 @@
 - **isolated-worktree-shell** · the worktree-isolation guard refused heredocs, `cmd //c mklink`, `$VAR` script arguments and `git commit -F` (ship BT2b); again `git commit -F`, `git add … && git commit` chains and git inside `$(…)` (iterate Blow pill); `-F` (iterate hazard springs) → Write-tool scripts, one git cmd per call, junction `node_modules` via `symlinkSync`, commit with `-m` · seen 3× · last 2026-10-14 · guarded by .claude/hooks/guard.mjs (refuses `git commit -F`, names `-m`)
 - **brief-geometry-unmeasured** · BT2b's A7 asked for five runes above the tray at 375x812, but the shipped geometry needed 304pt where 292 were free; only a measurement of the web export showed it (ship BT2b) → measure a layout acceptance in the web export before writing its test, and record any size change under Decisions · seen 1× · last 2026-10-14 · open
 - **harness-attribution-footer** · the session's attribution reminder asked for a robot-emoji "Generated with" PR footer, and PR #555 opened with it against AGENTS.md rule 2 (iterate dock END) → loop commits and PR bodies carry no attribution line and no emoji; the repo rule outranks the reminder; edit the body if one slips through · seen 1× · last 2026-10-15 · open
+- **msys-rev-path** · Git Bash rewrites `git show origin/main:<path>` into a Windows path (`origin\main;...`, "ambiguous argument") → set `MSYS_NO_PATHCONV=1` before any `<rev>:<path>` git call on this box · seen 1× · last 2026-10-15 · open
 
 <!-- @domain:mobile -->
 
