@@ -73,6 +73,10 @@ interface EncounterModalOverlayProps {
      *  fresh fight against `encounterEnemy` (no prelude VM exists to engage
      *  from). `fleeAllowed` stands in for the prelude's `flee` choice. */
     resumeFight?: { fleeAllowed: boolean };
+    /** Told the modal's mode on mount and on every change, so a host can stop
+     *  drawing what the full-screen fight covers. Optional: hosts that leave
+     *  it out behave as before. */
+    onModeChange?: (mode: EncounterModalMode) => void;
 }
 
 export function EncounterModalOverlay({
@@ -82,6 +86,7 @@ export function EncounterModalOverlay({
     onFlee,
     region,
     resumeFight,
+    onModeChange,
 }: EncounterModalOverlayProps) {
     // Internal mode. Engaging advances prelude → combat and calls
     // `onFight` (which starts combat in the engine without routing away).
@@ -91,6 +96,9 @@ export function EncounterModalOverlay({
     const AXM = usePalette();
     const styles = useStyles();
     const [mode, setMode] = useState<EncounterModalMode>(resumeFight ? 'combat' : 'prelude');
+    useEffect(() => {
+        onModeChange?.(mode);
+    }, [mode, onModeChange]);
     // Whether this foe may be walked away from — read off the prelude VM's
     // own `flee` choice (bosses seal it) at the moment we engage, because
     // `beginHazardEncounter` clears the event slice on the way in and the VM
@@ -239,8 +247,8 @@ export function EncounterModalOverlay({
     // captured the foe, render the card-and-dice
     // combat as a FULL-SCREEN layer over the dimmed map: the board's drag uses
     // window coords, so it must mount from the window origin rather than inside
-    // the inset seal panel. The map stays mounted underneath — modal-contained,
-    // not a route push. The NO FOE CAPTURED placeholder (below) is the
+    // the inset seal panel. Modal-contained, not a route push; a host that
+    // passes `onModeChange` unmounts its map while this branch is up. The NO FOE CAPTURED placeholder (below) is the
     // fallback for any path that reaches combat mode without a captured foe.
     if (mode === 'combat' && encounterEnemy && player) {
         return (
