@@ -37,7 +37,7 @@ Triage needs `gh` CLI authenticated. The PAT lives in `.env`:
 
 ```
 GH_TOKEN=github_pat_...
-GH_REPO=no-trbl-2-u/Axiomancer           # optional; defaults to no-trbl-2-u/Axiomancer
+GH_REPO=no-trbl-2-u/Miserere-mei-deus           # optional; defaults to no-trbl-2-u/Miserere-mei-deus
 ```
 
 `gh` auto-reads `GH_TOKEN`. Before any `gh` call, ensure env is
@@ -46,7 +46,7 @@ loaded:
 ```bash
 export GH_TOKEN=$(awk -F= '/^GH_TOKEN=/ {sub(/^GH_TOKEN=/, ""); print; exit}' .env)
 export GH_REPO=$(awk -F= '/^GH_REPO=/ {sub(/^GH_REPO=/, ""); print; exit}' .env)
-GH_REPO=${GH_REPO:-no-trbl-2-u/Axiomancer}
+GH_REPO=${GH_REPO:-no-trbl-2-u/Miserere-mei-deus}
 gh auth status >/dev/null || { echo "GH_TOKEN missing/invalid"; exit 3; }
 ```
 
@@ -151,7 +151,7 @@ gh issue edit "$NUM" --repo "$GH_REPO" --add-label "triage:loop-queued,bug"
 
 gh issue comment "$NUM" --repo "$GH_REPO" --body "$(cat <<'EOF'
 Triaged → bug. The loop will address this; tracked in
-[plan/AUDIT.md](https://github.com/no-trbl-2-u/Axiomancer/blob/main/plan/AUDIT.md)
+[plan/AUDIT.md](https://github.com/no-trbl-2-u/Miserere-mei-deus/blob/main/plan/AUDIT.md)
 under external-issue category. A future /iterate tick will ship
 the fix and reference this issue's number in the commit body.
 EOF
@@ -278,7 +278,7 @@ warning and fall through. Triage is non-blocking by design.
 # Auth
 export GH_TOKEN=$(awk -F= '/^GH_TOKEN=/ {sub(/^GH_TOKEN=/, ""); print; exit}' .env)
 export GH_REPO=$(awk -F= '/^GH_REPO=/ {sub(/^GH_REPO=/, ""); print; exit}' .env)
-GH_REPO=${GH_REPO:-no-trbl-2-u/Axiomancer}
+GH_REPO=${GH_REPO:-no-trbl-2-u/Miserere-mei-deus}
 
 # Operations
 gh issue list --repo "$GH_REPO" --state open --search "..."

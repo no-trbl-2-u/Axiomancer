@@ -37,7 +37,7 @@ const API = 'https://commons.wikimedia.org/w/api.php'
  * Wikimedia asks automated clients to identify themselves. Fetching in bulk
  * and anonymously from a donated service is not something to do quietly.
  */
-const USER_AGENT = 'Axiomancer-art-acquire/1.0 (https://github.com/no-trbl-2-u/Axiomancer)'
+const USER_AGENT = 'Axiomancer-art-acquire/1.0 (https://github.com/no-trbl-2-u/Miserere-mei-deus)'
 
 /**
  * Licence strings this pipeline accepts, matched case-insensitively against

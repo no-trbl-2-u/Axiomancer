@@ -27,6 +27,7 @@
 import { afterEach, describe, it, expect, jest } from '@jest/globals';
 import { fireEvent, render } from '@testing-library/react-native';
 import React from 'react';
+import { Text } from 'react-native';
 
 import { EncounterModalOverlay } from '../EncounterModalOverlay';
 import { CombatModeProvider, useCombatMode } from '@/state/combat-mode';
@@ -827,5 +828,84 @@ describe('EncounterModalOverlay: in-place hazard combat (Phase 200)', () => {
             ),
         );
         expect(tree.queryByTestId('encounter-modal-overlay')).toBeNull();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// The host hears the mode: prelude, combat, aftermath.
+// ---------------------------------------------------------------------------
+
+describe('EncounterModalOverlay: onModeChange', () => {
+    function withOutcomeTrigger(child: React.ReactNode) {
+        const store = createAppStore({ adapter: createMemoryAdapter() });
+        // Fires the victory outcome only when pressed, so the combat mode is
+        // observed before the aftermath swap.
+        function VictoryButton() {
+            const { exitCombatWith } = useCombatMode();
+            return (
+                <Text
+                    testID="test-win"
+                    onPress={() => exitCombatWith('victory', {
+                        variant: 'victory',
+                        enemy: { name: 'Larch-Stalker', description: 'A figure long since gnawed.', level: 3 },
+                        finalBlow: { cardName: 'STRIKE', damage: 24, descriptor: 'cleaves the rib' },
+                        xpReward: 18,
+                    })}
+                >
+                    win
+                </Text>
+            );
+        }
+        return (
+            <CombatModeProvider>
+                <GameStoreProvider store={store}>
+                    {child}
+                    <VictoryButton />
+                </GameStoreProvider>
+            </CombatModeProvider>
+        );
+    }
+
+    it('reports prelude on mount, then combat on the engage, then aftermath', () => {
+        const onModeChange = jest.fn();
+        const tree = render(
+            withOutcomeTrigger(
+                <EncounterModalOverlay
+                    vm={makeCombatPreludeVm()}
+                    onFight={() => {}}
+                    onFlee={() => {}}
+                    onModeChange={onModeChange}
+                />,
+            ),
+        );
+        expect(onModeChange.mock.calls.map((c) => c[0])).toEqual(['prelude', 'combat']);
+        fireEvent.press(tree.getByTestId('test-win'));
+        expect(onModeChange.mock.calls.map((c) => c[0])).toEqual(['prelude', 'combat', 'aftermath']);
+    });
+
+    it('a resumed fight reports combat on mount, never prelude', () => {
+        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const onModeChange = jest.fn();
+        render(
+            <CombatModeProvider>
+                <GameStoreProvider store={store}>
+                    <EncounterModalOverlay
+                        vm={{ ...makeCombatPreludeVm(), kind: 'narrative-choice', preludeChrome: null }}
+                        onFight={() => {}}
+                        onFlee={() => {}}
+                        resumeFight={{ fleeAllowed: true }}
+                        onModeChange={onModeChange}
+                    />
+                </GameStoreProvider>
+            </CombatModeProvider>,
+        );
+        expect(onModeChange.mock.calls.map((c) => c[0])).toEqual(['combat']);
+    });
+
+    it('leaving it out changes nothing', () => {
+        const tree = render(
+            withProviders(<EncounterModalOverlay vm={makeCombatPreludeVm()} onFight={() => {}} onFlee={() => {}} />),
+        );
+        expect(tree.queryByTestId('encounter-modal-combat-mode')).not.toBeNull();
     });
 });

@@ -32,7 +32,7 @@ import {
     fillGhEnv,
 } from './loop-issue.mjs'
 
-const REPO = 'no-trbl-2-u/Axiomancer'
+const REPO = 'no-trbl-2-u/Miserere-mei-deus'
 const parse = (message) => parseCloseTrailers(message, { repo: REPO })
 
 // The two real commit messages this phase was opened to explain. Trimmed to
@@ -408,7 +408,7 @@ test('the sweep comment states that our sweep, not GitHub, did the closing', () 
 // closes anything, and is idempotent on a SHA-scoped marker in the
 // comment body rather than issue state.
 
-const DEPLOY_URL = 'https://github.com/no-trbl-2-u/Axiomancer/actions/runs/1'
+const DEPLOY_URL = 'https://github.com/no-trbl-2-u/Miserere-mei-deus/actions/runs/1'
 
 /** Build a fake deploy-comment IO over a { number: [commentBody, ...] } map. */
 function fakeDeployIo(commentsByNumber, { commentFails = new Set() } = {}) {

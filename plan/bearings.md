@@ -509,7 +509,7 @@ polls the Actions API for HEAD's runs:
 - exit 3 — config/auth (`GH_TOKEN` missing/rejected)
 
 Needs `GH_TOKEN` (repo-scoped PAT, Actions:read) in `.env`;
-`GH_REPO` defaults to `no-trbl-2-u/Axiomancer`. EAS release
+`GH_REPO` defaults to `no-trbl-2-u/Miserere-mei-deus`. EAS release
 builds (`preview-build.yml`, `npm run deploy:preview/production`)
 stay a deliberate manual step — **not** part of the per-tick
 gate.
