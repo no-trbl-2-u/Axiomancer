@@ -28,6 +28,7 @@ import { createEventEmitter, GameEvent, GameEventType } from '../events';
 import { createNewGameState, gameReducer } from '../game.reducer';
 import { migrate } from '../game.migrate';
 import { GAME_STATE_VERSION } from '../game.reducer';
+import { STAT_POINTS_PER_LEVEL } from '../game-mechanics.constants';
 import { GameState } from '../types';
 import { PersistenceAdapter } from '../persistence/types';
 import { mockAlternatingRng } from '../../test-utils/rng';
@@ -82,7 +83,7 @@ describe('Game loop — full transcript through gameReducer', () => {
         const levelAfter = store.getState().player.level;
         expect(levelAfter).toBeGreaterThan(levelBefore);
         // Every level promotion grants STAT_POINTS_PER_LEVEL.
-        const expectedGrant = (levelAfter - levelBefore) * 3;
+        const expectedGrant = (levelAfter - levelBefore) * STAT_POINTS_PER_LEVEL;
         expect(store.getState().player.availableStatPoints)
             .toBe(pointsBefore + expectedGrant);
 

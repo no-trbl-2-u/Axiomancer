@@ -29,6 +29,8 @@ export interface LevelUpModalProps {
     fromLevel: number;
     toLevel: number;
     totalPoints: number;
+    /** e.g. "3 levels gained · 3 points banked" (the character presenter's `levelUpSummary`). */
+    summary?: string;
     /** Base-stat values BEFORE the allocation session. */
     current: { heart: number; body: number; mind: number };
     /**
@@ -46,6 +48,7 @@ export function LevelUpModal({
     fromLevel,
     toLevel,
     totalPoints,
+    summary,
     current,
     onCommit,
     onCancel,
@@ -131,6 +134,12 @@ export function LevelUpModal({
                         level {toLevel}
                     </Text>
                 </View>
+
+                {summary ? (
+                    <Text style={styles.summary} testID="levelup-modal-summary">
+                        {summary}
+                    </Text>
+                ) : null}
 
                 {/* Title */}
                 <Text style={styles.title}>{characterName.toUpperCase()}</Text>
@@ -323,6 +332,14 @@ const useStyles = makeStyles((AXM) => ({
         fontSize: 10,
         letterSpacing: 1.6,
         color: AXM.bone,
+    },
+    summary: {
+        fontFamily: FONTS.mono,
+        fontSize: 10,
+        letterSpacing: 1.2,
+        color: AXM.bone,
+        textAlign: 'center',
+        marginTop: 4,
     },
     levelHairline: {
         width: 32,

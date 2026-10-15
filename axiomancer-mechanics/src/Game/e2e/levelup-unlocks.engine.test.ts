@@ -22,6 +22,7 @@ import type { TypedLevelUpEvent } from '../events.types';
 function buildStore(level: number, opts: {
     experience?: number;
     knownCards?: string[];
+    health?: number;
 } = {}) {
     const events = createEventEmitter();
     const player = createCharacter({
@@ -32,6 +33,7 @@ function buildStore(level: number, opts: {
     });
     const state = { ...createNewGameState(), player };
     if (opts.experience !== undefined) state.player.experience = opts.experience;
+    if (opts.health !== undefined) state.player.health = opts.health;
     const captured: TypedLevelUpEvent[] = [];
     events.on('character:levelup', e => captured.push(e as TypedLevelUpEvent));
     const store = createGameStore(nullAdapter, state, events);
@@ -71,5 +73,19 @@ describe('character:levelup payload — cards are no longer level-gated (2026-07
         store.getState().levelUp();
         const unlocked = captured[0].payload.unlockedCards ?? [];
         expect(unlocked).toEqual([]);
+    });
+});
+
+describe('a level-up banks a point and does not heal (LV1 A5)', () => {
+    it('one grant worth three levels gives three levels, three points and leaves VITAE where it was', () => {
+        const wounded = 30;
+        const { store } = buildStore(1, { experience: experienceForLevel(4), health: wounded });
+        expect(store.getState().player.availableStatPoints).toBe(0);
+        store.getState().levelUp();
+        const { player } = store.getState();
+        expect(player.level).toBe(4);
+        expect(player.availableStatPoints).toBe(3);
+        expect(player.health).toBe(wounded);
+        expect(player.health).toBeLessThanOrEqual(player.maxHealth);
     });
 });

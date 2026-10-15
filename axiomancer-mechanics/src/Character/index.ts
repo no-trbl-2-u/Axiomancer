@@ -174,7 +174,7 @@ export {
     FIRST_NODE_RELIC_ID, FIRST_NODE_RELIC_FLAG,
 } from './first-node-grant';
 export { computeEquipDelta } from './equip-delta';
-export { experienceForLevel } from './experience';
+export { experienceForLevel, experienceToNext, levelForExperience } from './experience';
 export type {
     EquipDelta,
     SignatureDeltaEntry,

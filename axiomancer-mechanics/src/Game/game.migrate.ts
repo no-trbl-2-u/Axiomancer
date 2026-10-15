@@ -23,9 +23,10 @@
  * hex flags dropped), v31 → v32 (hazard deck cards outside the core ten
  * dropped), v32 → v33 (the write-only `regionConsequences` slice dropped),
  * v33 → v34 (the parked world's maps, quests and flags dropped), v34 → v35
- * (every relic but the Suppliant's Ring dropped) and v35 → v36 (XP
- * re-expressed on the rising level curve). The hops chain, so a v11 save
- * lands at v36 in one `migrate` call. Every other version mismatch rejects.
+ * (every relic but the Suppliant's Ring dropped), v35 → v36 (XP
+ * re-expressed on the rising level curve) and v36 → v37 (XP re-expressed on
+ * the level-20 curve). The hops chain, so a v11 save lands at v37 in one
+ * `migrate` call. Every other version mismatch rejects.
  */
 
 import { GameState } from './types';
@@ -36,7 +37,6 @@ import { getEquippedItems, wornMaxHpBonus } from '../Character/equipment.reducer
 import { cloneStartingRelics, getRelicById } from '../Items/relic.library';
 import { calculateMaxHealth } from '../Utils';
 import { experienceForLevel } from '../Character/experience';
-import { EXPERIENCE_STEP } from './game-mechanics.constants';
 import { getCardById } from '../Cards/cards.library';
 import { STARTING_CARD_IDS } from '../Combat/combat.rewards';
 import { reslotLegacyLoadout, reslotLegacyEquipment, type LegacySlot } from './legacy-slots';
@@ -886,9 +886,17 @@ function migrateV34ToV35(raw: Record<string, unknown>): Record<string, unknown> 
 /** The flat level cost every save before v36 was written against. */
 const V35_EXPERIENCE_PER_LEVEL = 1000;
 
+/** The v36 curve's step: reaching level L+1 cost `L × 250` more XP. */
+const V36_EXPERIENCE_STEP = 250;
+
+/** Total XP at which a character became `level` on the v36 curve. */
+function v36ExperienceForLevel(level: number): number {
+    return (V36_EXPERIENCE_STEP * (level - 1) * level) / 2;
+}
+
 /**
  * v35 → v36: a v35 save was written against a flat 1,000 XP per level; a
- * level costs `level × EXPERIENCE_STEP`. The hop keeps the
+ * v36 level costs `level × 250`. The hop keeps the
  * player's `level` and their progress through it: progress below 0 (a
  * malformed save) clamps to 0, and progress past 1 (a level-up the player
  * has not taken yet) carries over so it stays pending. Pure over a raw v35
@@ -902,11 +910,37 @@ function migrateV35ToV36(raw: Record<string, unknown>): Record<string, unknown> 
     const level = Math.max(1, Math.floor(player.level));
     const oldExperience = typeof player.experience === 'number' ? player.experience : 0;
     const progress = Math.max(0, (oldExperience - (level - 1) * V35_EXPERIENCE_PER_LEVEL) / V35_EXPERIENCE_PER_LEVEL);
-    const experience = Math.round(experienceForLevel(level) + progress * level * EXPERIENCE_STEP);
+    const experience = Math.round(v36ExperienceForLevel(level) + progress * level * V36_EXPERIENCE_STEP);
+    return {
+        ...raw,
+        player: { ...player, experience, experienceToNextLevel: v36ExperienceForLevel(level + 1) },
+        version: 36,
+    };
+}
+
+/**
+ * v36 → v37: the level curve moves to base 70 rising 10% a level to 20 (the
+ * level a full Act 1 clear ends at), 15% to 40 and 20% after. The hop keeps
+ * the player's `level` and banked stat points, and their progress through
+ * the level as a fraction of its step: below 0 (a malformed save) clamps to
+ * 0, past 1 (a level-up the player has not taken yet) carries over so it
+ * stays pending. Pure over a raw v36 save payload.
+ */
+function migrateV36ToV37(raw: Record<string, unknown>): Record<string, unknown> {
+    const player = raw.player as Partial<Character> | undefined;
+    if (!player || typeof player !== 'object' || typeof player.level !== 'number') {
+        return { ...raw, version: 37 };
+    }
+    const level = Math.max(1, Math.floor(player.level));
+    const oldExperience = typeof player.experience === 'number' ? player.experience : 0;
+    const oldStep = level * V36_EXPERIENCE_STEP;
+    const progress = Math.max(0, (oldExperience - v36ExperienceForLevel(level)) / oldStep);
+    const newStep = experienceForLevel(level + 1) - experienceForLevel(level);
+    const experience = Math.round(experienceForLevel(level) + progress * newStep);
     return {
         ...raw,
         player: { ...player, experience, experienceToNextLevel: experienceForLevel(level + 1) },
-        version: 36,
+        version: 37,
     };
 }
 
@@ -953,8 +987,8 @@ export function migrate(
     // v32 → v33 drops the write-only region-consequences slice; v33 → v34
     // drops the parked world's maps, quests and flags; v34 → v35 drops every
     // relic but the Suppliant's Ring; v35 → v36 re-expresses XP on the
-    // rising level curve.
-    // Chained so a v11 save lands at v36 in one call.
+    // rising level curve; v36 → v37 re-expresses it on the level-20 curve.
+    // Chained so a v11 save lands at v37 in one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
@@ -1054,6 +1088,10 @@ export function migrate(
     if (version === 35 && toVersion >= 36) {
         working = migrateV35ToV36(working);
         version = 36;
+    }
+    if (version === 36 && toVersion >= 37) {
+        working = migrateV36ToV37(working);
+        version = 37;
     }
 
     if (version !== toVersion) {

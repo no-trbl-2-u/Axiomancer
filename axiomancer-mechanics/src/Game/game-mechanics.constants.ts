@@ -29,15 +29,24 @@ export const PLAYER_VITAE_BASE = 50;
 // PROGRESSION — EXPERIENCE & LEVELING
 // ============================================================================
 
-// Reaching level L+1 costs L × EXPERIENCE_STEP more XP
-// (`Character/experience.ts`). A full Act 1 clear ends at level 5.
-export const EXPERIENCE_STEP = 250;
+// The XP to go from level 1 to level 2 (`Character/experience.ts`).
+export const EXPERIENCE_BASE = 70;
+
+// Each later step costs the previous one × `rate`, read from the first band
+// whose `fromLevel` is at or above the level the step leaves: the steps out of
+// levels 2–20 grow 10%, out of 21–40 15%, and 20% after. A full Act 1 clear
+// ends at level 20; the curve slows after it, and again after 40.
+export const EXPERIENCE_GROWTH: readonly { readonly fromLevel: number; readonly rate: number }[] = [
+    { fromLevel: 20, rate: 1.1 },
+    { fromLevel: 40, rate: 1.15 },
+    { fromLevel: Infinity, rate: 1.2 },
+];
 
 // Stat points granted per level promotion. Spent via
 // `allocateStatPoint` to raise heart / body / mind. There is
 // no level cap, so the points stream is uncapped — content authors
 // decide where progression naturally stops.
-export const STAT_POINTS_PER_LEVEL = 3;
+export const STAT_POINTS_PER_LEVEL = 1;
 
 // ============================================================================
 // EFFECTS — STACKING CAPS

@@ -28,6 +28,12 @@ describe('LevelReadyStrip: render contract', () => {
         expect(tree.queryByLabelText(/advance to level 5/i)).not.toBeNull();
     });
 
+    it('names the level a multi-level grant lands on (LV1 A7)', () => {
+        const tree = render(<LevelReadyStrip level={1} toLevel={4} onLevelUp={() => {}} />);
+        expect(tree.queryByText(/step into level 4/)).not.toBeNull();
+        expect(tree.queryByLabelText(/advance to level 4/i)).not.toBeNull();
+    });
+
     it('fires onLevelUp exactly once when pressed', () => {
         const onLevelUp = jest.fn();
         const tree = render(<LevelReadyStrip level={4} onLevelUp={onLevelUp} />);
