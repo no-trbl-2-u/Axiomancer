@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-14 at commit a397d3a0
-> Pass count: 87
+> Last pass: 2026-10-15 at commit 1df5499e
+> Pass count: 88
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -644,16 +644,23 @@
 > finding: on desktop the capped VITAE column leaves END beside it, not
 > at the right.
 
+> **[critique pass 88, 2026-10-15, commit 1df5499e] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors. 13 commits
+> after pass 87: PF4 (no exploration map under live combat, #553), the
+> size and area/review PR labels, the repo rename and expand pass 35.
+> PF4 is not on screen here: the drive opens `/combat-encounter` on its
+> own, not through the hub's overlay. Every other screen matches pass 87.
+> Reconfirmed and not re-filed: pass 87's desktop END row (END still at
+> x~440-550), the unfixtured exploration hub bouncing to the title, the
+> top-left intent column far from the foe on desktop (D92 placement,
+> pass 85), the covered fan cards cutting their names and effect rows
+> on a phone (each is whole when lifted). One fresh finding: the board's
+> phase line is 9px, does not scale, and spells ROUND and TURN as "R"
+> and "T".
+
 ## Pending
 
-### [MED] combat / desktop — the capped VITAE column leaves END at x~440-550 with ~720px of empty dock to its right
-- pass: 87 (commit a397d3a0)
-- viewport: desktop
-- category: visual
-- observation: since #535 caps the VITAE column at `DOCK_VITAE_MAX_WIDTH` (360), nothing pushes END to the dock's right edge: the row is avatar, VITAE, END packed left with `gap` only. At 1280 the turn-ending button sits left of the centred hand (x~440-550) and the right 60% of the dock is empty. The #535 Done row says "END stays at the right"; on screen it does not.
-- evidence: `axiomancer-mobile/.critique-artifacts/desktop/04-combat-board.png` (END box at x~440-553, y~737-791); `CombatFooterDock.tsx` `dock` has no `justifyContent` and `endWrap` no `marginLeft: 'auto'`.
-- suggested fix: give `endWrap` `marginLeft: 'auto'` (or put a flex spacer before it) so END stays on the right edge on wide windows; a phone is unchanged because the VITAE column already fills there. Pin END's right edge in CombatBoard.footer-dock.test.tsx at a wide width.
-- source: critique-drive (main agent)
 
 ### [LOW] ci / pr-resolve — a hand dispatch with a non-`loop/` branch exits green having done nothing
 - pass: antagonist on PR #526 (commit efc7f371)
@@ -698,15 +705,6 @@
 - observation: the die-tap path (`dieTapRef` in `CombatBoard.tsx`) still refuses an illegal pairing silently, by design ("a tap has no card to shake"). SF1 adds the VITAE-ring callout on that path for the floor only. So a floor refusal on tap shows the ring callout with no error haptic and no reject line, while the same refusal by drag shows all three, and a tap refused for any other reason (off-colour, printed condition) stays silent.
 - evidence: `CombatBoard.tsx` `dieTapRef.current` (`if (!target) { ... flagShortfall(...); return; }`) against the drop path's `setDropReject` and `juiceHaptics.notify`.
 - suggested fix: give a refused tap the same reject line and error haptic as a refused drop (owner doctrine: illegal actions prevented loudly).
-- source: antagonist, PR #523
-
-### [LOW] combat / a11y — the SACRIFICE-floor callout changes the ring's label but announces nothing
-- pass: antagonist on PR #523 (SF1, commit 04e5ebb6)
-- viewport: n/a (screen reader)
-- category: accessibility
-- observation: during the 900ms callout the medallion's `accessibilityLabel` becomes `VITAE <v> of <max>. SACRIFICE <cost> would leave you below 1.` (A5). A label change is only heard when focus is already on the medallion, and the callout clears before a user could move there, so a screen-reader user who drops a die on a card is not told why it was refused.
-- evidence: `CombatCombatantPane.tsx` `PlayerMedallion` label; no `AccessibilityInfo.announceForAccessibility` or live region on the callout.
-- suggested fix: announce the floor line once per refusal (`announceForAccessibility(PROGRAM_COPY.floorA11y(...))`), keeping the label change for focus.
 - source: antagonist, PR #523
 
 ### [LOW] combat / perf — `programPlayVM` now probes every hand card's lines twice more per view-model build
@@ -991,6 +989,36 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] combat / a11y — the SACRIFICE-floor callout changes the ring's label but announces nothing — RESOLVED 2026-10-15 (branch loop/iterate-sacfloor-announce, 6974aa46: `flagShortfall` announces `PROGRAM_COPY.floorA11y` once per refusal; the label change stays for focus; pinned in CombatBoard.sacfloor.test.tsx)
+- pass: antagonist on PR #523 (SF1, commit 04e5ebb6)
+- viewport: n/a (screen reader)
+- category: accessibility
+- observation: during the 900ms callout the medallion's `accessibilityLabel` becomes `VITAE <v> of <max>. SACRIFICE <cost> would leave you below 1.` (A5). A label change is only heard when focus is already on the medallion, and the callout clears before a user could move there, so a screen-reader user who drops a die on a card is not told why it was refused.
+- evidence: `CombatCombatantPane.tsx` `PlayerMedallion` label; no `AccessibilityInfo.announceForAccessibility` or live region on the callout.
+- suggested fix: announce the floor line once per refusal (`announceForAccessibility(PROGRAM_COPY.floorA11y(...))`), keeping the label change for focus.
+- source: antagonist, PR #523
+- issue: #558
+### [x] [LOW] combat / HUD — "PHASE 1/5 · R1 · T1" is 9px text that ignores the system font size, and "R1 · T1" is never explained — RESOLVED 2026-10-15 (branch loop/iterate-hud-meta-line: the presenter builds the whole line, "PHASE 1/5 · ROUND 1 · TURN 1", as `metaLine`; the board prints it as given at 11px with font scaling on, and the name row wraps; pinned in legibility-sweep.engine.test.ts)
+- issue: #556
+- pass: 88 (commit 1df5499e)
+- viewport: mobile + desktop
+- category: comprehension
+- observation: the line beside the foe's name is the only place the board says which phase, round and turn it is, and it is the smallest text on the screen (top-right, about 7px tall in both captures). The presenter hands over "ROUND 1" and "TURN 1"; `CombatBoard` cuts them to "R1" and "T1" with `.replace`, so a first-time player reads two bare codes. `allowFontScaling={false}` also keeps it 9px for a player who has raised their text size.
+- evidence: `.critique-artifacts/mobile/04-combat-board.png` and `desktop/04-combat-board.png` (top-right, "PHASE 1/5 · R1 · T1"); `CombatBoard.tsx` `metaLine` (`.replace('ROUND ', 'R').replace('TURN ', 'T')`); `CombatCombatantPane.tsx` `hudMeta` (`fontSize: 9`) and its `allowFontScaling={false}`.
+- suggested fix: let the presenter build the whole line (for example "PHASE 1/5 · ROUND 1 · TURN 1", or drop TURN where it repeats ROUND), stop rewriting it in the component, raise `hudMeta` to at least 11px, and allow font scaling, letting the name row wrap if it has to. Pin the line's text in a presenter test.
+- source: critique-drive (main agent)
+
+### [x] [MED] combat / desktop — the capped VITAE column leaves END at x~440-550 with ~720px of empty dock to its right — RESOLVED 2026-10-15 (branch loop/iterate-dock-end-right: `endWrap` takes `marginLeft: 'auto'`, so END sits at the dock's right edge on a wide window and a phone is unchanged; pinned in CombatBoard.footer-dock.test.tsx)
+- issue: #554
+- pass: 87 (commit a397d3a0)
+- viewport: desktop
+- category: visual
+- observation: since #535 caps the VITAE column at `DOCK_VITAE_MAX_WIDTH` (360), nothing pushes END to the dock's right edge: the row is avatar, VITAE, END packed left with `gap` only. At 1280 the turn-ending button sits left of the centred hand (x~440-550) and the right 60% of the dock is empty. The #535 Done row says "END stays at the right"; on screen it does not.
+- evidence: `axiomancer-mobile/.critique-artifacts/desktop/04-combat-board.png` (END box at x~440-553, y~737-791); `CombatFooterDock.tsx` `dock` has no `justifyContent` and `endWrap` no `marginLeft: 'auto'`.
+- suggested fix: give `endWrap` `marginLeft: 'auto'` (or put a flex spacer before it) so END stays on the right edge on wide windows; a phone is unchanged because the VITAE column already fills there. Pin END's right edge in CombatBoard.footer-dock.test.tsx at a wide width.
+- source: critique-drive (main agent)
+
 
 ### [x] [LOW] anvil — HONE, TEMPER and SWAP prices read "40s" while the forge's budget says SHILLINGS — RESOLVED 2026-10-14 (branch loop/iterate-forge-shillings: each offer prints "40 SHILLINGS" on its own line under the verb, and the card chip, the cannot-cover reason and the outcome chip spell the unit too; pinned in forge-vocabulary.S5-talk-C12.test.tsx)
 - issue: #540

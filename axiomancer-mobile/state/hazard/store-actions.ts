@@ -49,7 +49,7 @@ export const EMPTY_HAZARD_SLICE: MobileHazardSlice = Object.freeze({ session: nu
  * Flag prefix recording an unhealed max-VITAE scar from the `maxhp`
  * consequence. The suffix is the magnitude of max-VITAE lost. The scar
  * is also baked into `player.maxHealth` at claim (the live effect); the
- * flag is the durable record an inn rest reads to restore the loss
+ * flag is the durable record a rest reads to restore the loss
  * toward baseline. Mobile-only adapter — `axiomancer-mechanics` owns no
  * scar-recovery truth.
  */
@@ -365,7 +365,7 @@ export function claimHazardRewardsAction(store: AppStore, cardId: string | null)
     const newMax = Math.max(5, player.maxHealth + maxVitaeDelta);
     const newHealth = Math.min(newMax, Math.max(1, player.health + vitaeDelta));
     // Record the scar that was actually applied (the floor-5 clamp may
-    // soften the nominal HAZARD_MAXHP_SCAR) so an inn rest can restore
+    // soften the nominal HAZARD_MAXHP_SCAR) so a rest can restore
     // exactly the max-VITAE lost — never more.
     const appliedScar = player.maxHealth - newMax;
     if (appliedScar > 0) {

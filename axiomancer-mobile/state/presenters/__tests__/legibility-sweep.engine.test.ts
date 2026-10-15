@@ -86,3 +86,14 @@ describe('CombatIntentVM.wallMath — the telegraph readout (phase 28)', () => {
         expect(vm.enemy.intent.wallMath.netDamage).toBeLessThanOrEqual(vm.enemy.intent.wallMath.projectedDamage);
     });
 });
+
+// CRITIQUE pass 88: the board printed "PHASE 1/5 · R1 · T1", cutting the
+// presenter's words to bare codes. The presenter now builds the whole line.
+describe('CombatViewModel.metaLine — the HUD clock beside the foe name', () => {
+    it('spells out phase, round and turn in full', () => {
+        const s = openState();
+        const vm = buildCombatViewModel(s);
+        expect(vm.metaLine).toBe(`${vm.phaseBadge} · ROUND ${s.round} · TURN ${s.turn}`);
+        expect(vm.metaLine).toMatch(/^PHASE \d+\/\d+ · ROUND \d+ · TURN \d+$/);
+    });
+});

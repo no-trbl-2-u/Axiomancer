@@ -4,7 +4,8 @@
  * A line refused because its SACRIFICE would leave the player below 1 VITAE
  * flags the player's VITAE ring: a red outline pulse and a ghost segment of
  * the unpaid SACRIFICE, tagged `SACRIFICE <cost>`, with the ring's label
- * naming the numbers. Any other refusal (a printed condition, a Global in
+ * naming the numbers and the same line announced once to a screen reader
+ * (the label alone is heard only with focus on the ring). Any other refusal (a printed condition, a Global in
  * play, an off-colour die) leaves the ring alone.
  *
  * The board reads the numbers from the card VM's `freeShortfall` /
@@ -15,7 +16,7 @@
  */
 
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { AccessibilityInfo, StyleSheet } from 'react-native';
 import { act, fireEvent, render, screen, within } from '@testing-library/react-native';
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 
@@ -77,7 +78,7 @@ function boardWith(play: Play, opts: { reduced?: boolean; allDraggable?: boolean
     return { vm, card, cbs, die };
 }
 
-afterEach(() => { jest.useRealTimers(); jest.clearAllMocks(); });
+afterEach(() => { jest.useRealTimers(); jest.clearAllMocks(); jest.restoreAllMocks(); });
 
 describe('the ghost segment geometry', () => {
     it('covers the whole fill, then the overflow back from 12 o\'clock', () => {
@@ -118,6 +119,14 @@ describe('CombatBoard — a refusal at the SACRIFICE floor flags the VITAE ring'
             .toBe('VITAE 4 of 200. SACRIFICE 4 would leave you below 1.');
     });
 
+    it('announces the floor line once to a screen reader', async () => {
+        const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility');
+        const { die } = boardWith({ freeBlock: null, paidBlock: FLOOR, freeShortfall: null, paidShortfall: SHORT });
+        await tapCombatDie(die.id);
+        expect(announce).toHaveBeenCalledTimes(1);
+        expect(announce).toHaveBeenCalledWith('VITAE 4 of 200. SACRIFICE 4 would leave you below 1.');
+    });
+
     it('a refused APPLY on a FREE line that cannot be paid runs it, and plays nothing', () => {
         const { card, cbs } = boardWith({ freeBlock: FLOOR, paidBlock: FLOOR, freeShortfall: { cost: 6, vitae: 4 }, paidShortfall: SHORT });
         fireEvent.press(screen.getByTestId(`combat-apply-${card.uid}`));
@@ -146,8 +155,10 @@ describe('CombatBoard — a refusal at the SACRIFICE floor flags the VITAE ring'
 describe('CombatBoard — any other refusal leaves the VITAE ring alone', () => {
     it('a PAID line refused by a printed condition', async () => {
         const { die } = boardWith({ freeBlock: null, paidBlock: 'only at half VITAE or less', freeShortfall: null, paidShortfall: null });
+        const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility');
         await tapCombatDie(die.id);
         expect(screen.queryByTestId('combat-vitae-callout')).toBeNull();
+        expect(announce).not.toHaveBeenCalled();
     });
 
     it('a Global already in play, refused at APPLY', () => {

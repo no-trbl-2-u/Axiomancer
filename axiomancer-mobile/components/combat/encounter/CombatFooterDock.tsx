@@ -10,6 +10,7 @@
  *                 a wide window keeps the piles beside the VITAE figure.
  *   END          a wide thumb button: hourglass + END, the dead-tray
  *                 consequence line above it, dimmed while a phase resolves.
+ *                 Pushed to the right edge however wide the window is.
  *
  * The dock respects the bottom safe-area inset and grows rather than clips.
  */
@@ -98,7 +99,7 @@ export const EndPhaseButton = React.memo(function EndPhaseButton({ onPress, cons
     const AXM = usePalette();
     const styles = useStyles();
     return (
-        <View style={styles.endWrap} pointerEvents="box-none">
+        <View style={styles.endWrap} pointerEvents="box-none" testID="combat-end-wrap">
             <Pressable
                 onPress={disabled ? undefined : onPress}
                 disabled={disabled}
@@ -207,7 +208,10 @@ const useStyles = makeStyles((AXM) => ({
     pileGlyphText: { fontFamily: FONTS.sans, fontSize: 7, color: AXM.ash, lineHeight: 9 },
     pileCount: { fontFamily: FONTS.mono, fontSize: 11, color: AXM.bone, marginRight: 4 },
 
-    endWrap: { width: END_BTN_W, height: END_BTN_H },
+    // `marginLeft: 'auto'` takes the room the capped VITAE column leaves, so
+    // END sits at the dock's right edge on a wide window. A phone's column
+    // already fills that room, so nothing moves there.
+    endWrap: { width: END_BTN_W, height: END_BTN_H, marginLeft: 'auto' },
     endBtn: {
         width: END_BTN_W, height: END_BTN_H, borderRadius: 10, borderWidth: 2.5, backgroundColor: HUE.medallionBg,
         flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,

@@ -5,7 +5,7 @@
  * wrappers thread a rest node's one irreversible choice — `rest` (free,
  * flat 25% heal) / `cut` (paid deck removal) — through the mobile `rest`
  * slice and, at claim, apply the settled ledger to the real `GameState`:
- * heal, shillings spent, `cardRemovals` incremented, and the inn scar-mend.
+ * heal, shillings spent, `cardRemovals` incremented, and the scar mend.
  */
 
 import type { GameState } from '@mechanics';
@@ -17,7 +17,6 @@ import {
     claimRestChoiceOutcome as engineClaim,
     createRestChoiceSession,
     DEFAULT_REST_SHELTER,
-    isInnShelter,
     pickRestChoiceCut as engineCut,
     removeCardFromCombatDeck,
 } from '@mechanics';
@@ -55,8 +54,7 @@ export interface BeginRestOptions {
     seed?: number;
     /**
      * Authored shelter class from the map-event payload.
-     * Defaults to `'camp'` — silence is never a paid bed. Only an
-     * `'inn'` night mends hazard-scarred max-VITAE.
+     * Defaults to `'camp'`; an `'inn'` words the night as a bed.
      */
     shelter?: RestShelter;
     /** The authored MapEvent one-liner (`ResolvedEvent.description`). */
@@ -102,7 +100,7 @@ export interface ClaimRestChoiceResult {
     healed: number;
     spent: number;
     removedCardId: string | null;
-    /** Max-VITAE mended back from hazard scars (`shelter === 'inn'` only). */
+    /** Max-VITAE mended back from hazard scars (any rest, inn or camp). */
     scarMended: number;
 }
 
@@ -123,10 +121,10 @@ const NOOP_CLAIM: ClaimRestChoiceResult = Object.freeze({
  * header) — the real `removeCardFromCombatDeck` call, and the loadout
  * reconciliation it may do, happens here.
  *
- * A night at an INN (`shelter === 'inn'`, authored on the map event's
- * `RestPayload`) mends hazard-scarred max-VITAE regardless of which offer
- * was taken — the shelter is the trigger, not the choice — unrelated to
- * the flat 25% `rest` heal fraction. The engine
+ * Any rest, inn or camp, mends hazard-scarred max-VITAE regardless of
+ * which offer was taken (the night is the trigger, not the choice; the
+ * Scarred gloss reads "until you next rest"), unrelated to the flat 25%
+ * `rest` heal fraction. The engine
  * computes `rest`'s heal against the PRE-mend maxHealth (it never reads
  * `GameState`), so the clamp below re-caps it against the post-mend max
  * rather than under-healing by the mended amount.
@@ -150,7 +148,7 @@ export function claimRestChoiceOutcomeAction(store: AppStore): ClaimRestChoiceRe
         }
     }
 
-    const scarMended = isInnShelter(s.shelter) ? bankedScarMagnitude(flags) : 0;
+    const scarMended = bankedScarMagnitude(flags);
     if (scarMended > 0) {
         flags = flags.filter((f) => !f.startsWith(HAZARD_SCAR_FLAG_PREFIX));
     }

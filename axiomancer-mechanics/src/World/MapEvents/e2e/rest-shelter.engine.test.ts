@@ -1,8 +1,9 @@
 /**
  * Hermetic e2e — the inn is a first-class thing.
  *
- * `RestPayload.shelter` says whether a rest is an inn or a camp; only an
- * inn mends hazard-scarred max-VITAE.
+ * `RestPayload.shelter` says whether a rest is an inn or a camp; an inn
+ * words its night as a bed. Every rest, inn or camp, mends hazard-scarred
+ * max-VITAE.
  *
  * This suite is the regression pin: EVERY authored rest pool in the game
  * is enumerated from the live registry and its shelter asserted by name.
