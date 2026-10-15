@@ -661,14 +661,6 @@
 
 ## Pending
 
-### [LOW] combat / HUD — "PHASE 1/5 · R1 · T1" is 9px text that ignores the system font size, and "R1 · T1" is never explained
-- pass: 88 (commit 1df5499e)
-- viewport: mobile + desktop
-- category: comprehension
-- observation: the line beside the foe's name is the only place the board says which phase, round and turn it is, and it is the smallest text on the screen (top-right, about 7px tall in both captures). The presenter hands over "ROUND 1" and "TURN 1"; `CombatBoard` cuts them to "R1" and "T1" with `.replace`, so a first-time player reads two bare codes. `allowFontScaling={false}` also keeps it 9px for a player who has raised their text size.
-- evidence: `.critique-artifacts/mobile/04-combat-board.png` and `desktop/04-combat-board.png` (top-right, "PHASE 1/5 · R1 · T1"); `CombatBoard.tsx` `metaLine` (`.replace('ROUND ', 'R').replace('TURN ', 'T')`); `CombatCombatantPane.tsx` `hudMeta` (`fontSize: 9`) and its `allowFontScaling={false}`.
-- suggested fix: let the presenter build the whole line (for example "PHASE 1/5 · ROUND 1 · TURN 1", or drop TURN where it repeats ROUND), stop rewriting it in the component, raise `hudMeta` to at least 11px, and allow font scaling, letting the name row wrap if it has to. Pin the line's text in a presenter test.
-- source: critique-drive (main agent)
 
 ### [LOW] ci / pr-resolve — a hand dispatch with a non-`loop/` branch exits green having done nothing
 - pass: antagonist on PR #526 (commit efc7f371)
@@ -1006,6 +998,16 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] combat / HUD — "PHASE 1/5 · R1 · T1" is 9px text that ignores the system font size, and "R1 · T1" is never explained — RESOLVED 2026-10-15 (branch loop/iterate-hud-meta-line: the presenter builds the whole line, "PHASE 1/5 · ROUND 1 · TURN 1", as `metaLine`; the board prints it as given at 11px with font scaling on, and the name row wraps; pinned in legibility-sweep.engine.test.ts)
+- issue: #556
+- pass: 88 (commit 1df5499e)
+- viewport: mobile + desktop
+- category: comprehension
+- observation: the line beside the foe's name is the only place the board says which phase, round and turn it is, and it is the smallest text on the screen (top-right, about 7px tall in both captures). The presenter hands over "ROUND 1" and "TURN 1"; `CombatBoard` cuts them to "R1" and "T1" with `.replace`, so a first-time player reads two bare codes. `allowFontScaling={false}` also keeps it 9px for a player who has raised their text size.
+- evidence: `.critique-artifacts/mobile/04-combat-board.png` and `desktop/04-combat-board.png` (top-right, "PHASE 1/5 · R1 · T1"); `CombatBoard.tsx` `metaLine` (`.replace('ROUND ', 'R').replace('TURN ', 'T')`); `CombatCombatantPane.tsx` `hudMeta` (`fontSize: 9`) and its `allowFontScaling={false}`.
+- suggested fix: let the presenter build the whole line (for example "PHASE 1/5 · ROUND 1 · TURN 1", or drop TURN where it repeats ROUND), stop rewriting it in the component, raise `hudMeta` to at least 11px, and allow font scaling, letting the name row wrap if it has to. Pin the line's text in a presenter test.
+- source: critique-drive (main agent)
 
 ### [x] [MED] combat / desktop — the capped VITAE column leaves END at x~440-550 with ~720px of empty dock to its right — RESOLVED 2026-10-15 (branch loop/iterate-dock-end-right: `endWrap` takes `marginLeft: 'auto'`, so END sits at the dock's right edge on a wide window and a phone is unchanged; pinned in CombatBoard.footer-dock.test.tsx)
 - issue: #554

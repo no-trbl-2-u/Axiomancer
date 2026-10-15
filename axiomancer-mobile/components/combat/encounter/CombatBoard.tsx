@@ -1264,8 +1264,6 @@ export const CombatBoard = React.memo(function CombatBoard({
     // Stable, so the memoized medallion sits out the drag re-renders.
     const handleEndPhase = useCallback(() => handleEndPhaseRef.current(), []);
 
-    const metaLine = `${vm.phaseBadge} · ${vm.roundLabel} · ${vm.turnLabel}`
-        .replace('ROUND ', 'R').replace('TURN ', 'T');
     // The footer dock is at least one row plus its padding and the
     // home-indicator inset, and it GROWS rather than clips. The floating SCRAP
     // bin keys off the MEASURED height so it always sits above the dock.
@@ -1282,7 +1280,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                 onChip={onChip}
                 fx={fx}
                 topInset={topInset}
-                metaLine={metaLine}
+                metaLine={vm.metaLine}
                 onHudLayout={handleHudLayout}
                 region={region}
             />
