@@ -1,0 +1,109 @@
+[
+  {
+    "sha": "93f05dfe",
+    "date": "2026-10-13T23:25:57-04:00",
+    "subject": "feat(mobile): combat footer dock, full-width hand, intent top-left — phase BT2b",
+    "files": [
+      "axiomancer-mobile/components/combat/encounter/CombatBoard.tsx",
+      "axiomancer-mobile/components/combat/encounter/CombatCombatantPane.tsx",
+      "axiomancer-mobile/components/combat/encounter/CombatEncounterPanel.tsx",
+      "axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx",
+      "axiomancer-mobile/components/combat/encounter/VitaeSacrificeCallout.tsx",
+      "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.S1-board.test.tsx",
+      "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.footer-dock.test.tsx",
+      "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.fresh-eyes-repair.test.tsx",
+      "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.handfan.test.tsx",
+      "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.playtest-2026-09-04.test.tsx",
+      "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.rail-ledger.test.tsx",
+      "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.sacfloor.test.tsx",
+      "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.sig-column.test.tsx",
+      "axiomancer-mobile/components/combat/encounter/__tests__/CombatEncounterPanel.log.test.tsx",
+      "axiomancer-mobile/docs/playtest-guides/combat.md",
+      "axiomancer-mobile/screenshots/bt2b/1-grey-board.jpg",
+      "axiomancer-mobile/screenshots/bt2b/2-blood-price-board.jpg",
+      "axiomancer-mobile/screenshots/bt2b/3-pilgrim-modal.jpg",
+      "axiomancer-mobile/screenshots/bt2b/4-log-view.jpg",
+      "axiomancer-mobile/state/presenters/combat-encounter.engine.ts",
+      "plan/CRITIQUE.md",
+      "plan/PHASE_CANDIDATES.md",
+      "plan/lessons.md",
+      "plan/steps/01_build_plan.md"
+    ]
+  },
+  {
+    "sha": "f0b58df3",
+    "date": "2026-10-14T04:21:46-04:00",
+    "subject": "fix: A Plain Blow wears its FREE pill (CRITIQUE pass 85 Blow FREE pill)",
+    "files": [
+      "axiomancer-mobile/components/combat/glyphShapes.ts",
+      "axiomancer-mobile/state/presenters/__tests__/card-program.engine.test.ts",
+      "axiomancer-mobile/state/presenters/__tests__/combat-card-vm.test.ts",
+      "axiomancer-mobile/state/presenters/card-program.engine.ts",
+      "axiomancer-mobile/state/presenters/combat-encounter.engine.ts",
+      "plan/CRITIQUE.md",
+      "plan/lessons.md",
+      "scripts/build-catalog.mjs"
+    ]
+  },
+  {
+    "sha": "f6bc4f19",
+    "date": "2026-10-14T04:22:30-04:00",
+    "subject": "fix: cap the combat dock's VITAE column on wide windows (CRITIQUE pass 85 footer dock)",
+    "files": [
+      "axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx",
+      "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.footer-dock.test.tsx",
+      "plan/CRITIQUE.md",
+      "plan/lessons.md",
+      "skills/march.md"
+    ]
+  },
+  {
+    "sha": "b5b395ad",
+    "date": "2026-10-15T01:55:08-04:00",
+    "subject": "fix(combat): END keeps the dock's right edge on a wide window (CRITIQUE pass 87)",
+    "files": [
+      "axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx",
+      "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.footer-dock.test.tsx",
+      "plan/CRITIQUE.md",
+      "plan/lessons.md",
+      "telemetry/2026-10-15_c055a6a6-7bb4-448c-be6b-b4e4406f0af1.md"
+    ]
+  },
+  {
+    "sha": "5150c634",
+    "date": "2026-10-14T12:07:15-04:00",
+    "subject": "fix: pr-resolve union merge splits moved queue rows (AUDIT pr-resolve union merge)",
+    "files": [
+      "axiomancer-mobile/state/presenters/__tests__/card-program.engine.test.ts",
+      "axiomancer-mobile/state/presenters/card-program.engine.ts",
+      "axiomancer-mobile/state/presenters/combat-encounter.engine.ts",
+      "plan/AUDIT.md",
+      "plan/CRITIQUE.md",
+      "plan/lessons.md",
+      "scripts/loop-pr.test.mjs",
+      "scripts/pr-resolve.mjs",
+      "telemetry/2026-10-14_08e28c75-d55e-4847-bb4d-5ebf20acbd68.md"
+    ]
+  },
+  {
+    "sha": "d82f5365",
+    "date": "2026-10-15T10:33:22-04:00",
+    "subject": "fix(combat): HUD clock line in full at 11px (CRITIQUE pass 88)",
+    "files": [
+      "axiomancer-mobile/components/combat/encounter/CombatBoard.tsx",
+      "axiomancer-mobile/components/combat/encounter/CombatCombatantPane.tsx",
+      "axiomancer-mobile/state/presenters/__tests__/legibility-sweep.engine.test.ts",
+      "axiomancer-mobile/state/presenters/combat-encounter.engine.ts",
+      "plan/CRITIQUE.md",
+      "telemetry/2026-10-15_7bc66093-9801-4133-bdc3-ad951dbd684d.md"
+    ]
+  },
+  {
+    "sha": "23f06828",
+    "date": "2026-10-14T00:23:20-04:00",
+    "subject": "critique: repair rows the pr-resolve merges cut apart",
+    "files": [
+      "plan/CRITIQUE.md"
+    ]
+  }
+]

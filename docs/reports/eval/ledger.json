@@ -1,0 +1,1882 @@
+{
+  "stamp": {
+    "commit": "86eea99d",
+    "date": "2026-10-15T18:47:23Z"
+  },
+  "window": {
+    "from": "2026-10-12",
+    "to": "2026-10-15"
+  },
+  "workflows": [
+    {
+      "file": "verify-drift.yml",
+      "name": "verify-drift",
+      "paths": [
+        "axiomancer-mobile/components/combat/glyphShapes.ts",
+        "axiomancer-mobile/state/combat/keywords.ts",
+        "axiomancer-mechanics/docs/keyword-atlas.md",
+        "axiomancer-mechanics/src/Enemy/enemy-keywords.ts",
+        "scripts/build-catalog.mjs",
+        "scripts/content-drift.mjs",
+        "scripts/content-drift.test.mjs",
+        ".claude/settings.json",
+        ".claude/agents/**",
+        ".mcp.json",
+        "scripts/check-harness-grants.mjs",
+        ".github/workflows/verify-drift.yml",
+        ".github/workflows/_claude-skill.yml"
+      ]
+    },
+    {
+      "file": "verify-mechanics.yml",
+      "name": "verify-mechanics",
+      "paths": [
+        "axiomancer-mechanics/**",
+        "scripts/ci-e2e-scope.mjs",
+        "scripts/ci-e2e-scope.test.mjs",
+        ".github/workflows/verify-mechanics.yml",
+        "package-lock.json"
+      ]
+    },
+    {
+      "file": "verify-mobile.yml",
+      "name": "verify-mobile",
+      "paths": [
+        "axiomancer-mobile/**",
+        ".github/workflows/verify-mobile.yml",
+        "scripts/check-worklets.mjs",
+        "scripts/check-worklets.test.mjs",
+        "docs/art-catalog.json"
+      ]
+    },
+    {
+      "file": "verify-prose.yml",
+      "name": "verify-prose",
+      "paths": [
+        "axiomancer-mechanics/src/World/**",
+        "axiomancer-mechanics/src/Enemy/enemy.library.ts",
+        "axiomancer-mechanics/src/Cards/cards.library.ts",
+        "axiomancer-mechanics/docs/narrative/**",
+        "axiomancer-mobile/state/presenters/*.copy.ts",
+        "scripts/check-prose.mjs",
+        "scripts/check-prose.test.mjs",
+        ".github/workflows/verify-prose.yml"
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "number": 505,
+      "title": "loop: measured-truth baseline — phase R12a",
+      "mergedAt": "2026-10-13T10:26:56Z",
+      "head": "cdba0b85fd24af175764f3f77dcb8a59dbc9409f",
+      "mergeCommit": "be6e827dc1f24df106a780030904c91b4d75624c",
+      "files": [
+        ".github/workflows/measured-truth.yml",
+        "CLAUDE.md",
+        "axiomancer-mechanics/package.json",
+        "axiomancer-mechanics/src/CLI/measured-truth.cli.ts",
+        "axiomancer-mechanics/src/Combat/combat.encounter.sim.ts",
+        "axiomancer-mechanics/src/Combat/combat.measured-truth.test.ts",
+        "axiomancer-mechanics/src/Combat/combat.measured-truth.ts",
+        "axiomancer-mechanics/src/Game/act1-progression.test.ts",
+        "axiomancer-mechanics/src/Game/act1-progression.ts",
+        "axiomancer-mechanics/src/index.ts",
+        "docs/game-model.md",
+        "docs/reports/measured/history.jsonl",
+        "docs/reports/measured/latest.md",
+        "docs/reports/measured/thresholds.json",
+        "docs/truth-sources.md",
+        "package.json",
+        "plan/lessons.md",
+        "plan/revamp/loop.md",
+        "plan/steps/01_build_plan.md",
+        "scripts/measured-compare.mjs",
+        "scripts/measured-compare.test.mjs",
+        "scripts/measured-truth.mjs",
+        "skills/digest.md",
+        "skills/march.md",
+        "telemetry/2026-10-13_49e2cb22-235f-4c66-bc28-2f383aef2c9b.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-13T01:42:12Z",
+          "finishedAt": "2026-10-13T01:42:12Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mechanics",
+          "path": ".github/workflows/verify-mechanics.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-13T01:41:58Z",
+          "finishedAt": "2026-10-13T01:55:59Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mechanics.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mobile.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [
+        ".github/workflows/measured-truth.yml",
+        "CLAUDE.md",
+        "docs/game-model.md",
+        "docs/truth-sources.md",
+        "package.json",
+        "scripts/measured-compare.mjs",
+        "scripts/measured-compare.test.mjs",
+        "scripts/measured-truth.mjs",
+        "skills/digest.md",
+        "skills/march.md"
+      ],
+      "followUps": [
+        {
+          "sha": "f6bc4f1963f0ecc3ff5f8fcbeee175491ae81813",
+          "date": "2026-10-14T04:22:30-04:00",
+          "subject": "fix: cap the combat dock's VITAE column on wide windows (CRITIQUE pass 85 footer dock)",
+          "files": [
+            "skills/march.md"
+          ]
+        }
+      ],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      }
+    },
+    {
+      "number": 507,
+      "title": "loop: roster-health lenses — phase RH1",
+      "mergedAt": "2026-10-13T11:42:14Z",
+      "head": "caee9f0bccc1e3f08bd61353d6c12c7d13ec0951",
+      "mergeCommit": "ae21c03f31cfc230c9056e112ab851f77b6143a0",
+      "files": [
+        "axiomancer-mechanics/package.json",
+        "axiomancer-mechanics/src/CLI/roster-health.cli.ts",
+        "axiomancer-mechanics/src/World/e2e/roster-health.engine.test.ts",
+        "axiomancer-mechanics/src/World/roster-health.ts",
+        "axiomancer-mechanics/src/index.ts",
+        "docs/game-model.md",
+        "plan/AUDIT.md",
+        "plan/PHASE_CANDIDATES.md",
+        "plan/lessons.md",
+        "plan/steps/01_build_plan.md",
+        "skills/iterate.md",
+        "skills/ship-a-phase.md",
+        "telemetry/2026-10-13_34562966-c820-4e66-b55c-0a8a26946cdf.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-13T10:31:43Z",
+          "finishedAt": "2026-10-13T10:31:43Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mechanics",
+          "path": ".github/workflows/verify-mechanics.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-13T10:31:32Z",
+          "finishedAt": "2026-10-13T10:44:52Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-prose",
+          "path": ".github/workflows/verify-prose.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-13T10:31:32Z",
+          "finishedAt": "2026-10-13T10:31:41Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mobile.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [
+        "docs/game-model.md",
+        "skills/iterate.md",
+        "skills/ship-a-phase.md"
+      ],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      }
+    },
+    {
+      "number": 509,
+      "title": "loop: card-spec scaffold and card-rules lint — phase CS1",
+      "mergedAt": "2026-10-13T10:27:39Z",
+      "head": "cd8a8453b4453ec025af34f82c3f0ab8c86a333c",
+      "mergeCommit": "3f9b44e5fbb369fd93a04d29ca72dfe38023d258",
+      "files": [
+        "axiomancer-mechanics/docs/keyword-atlas.md",
+        "axiomancer-mechanics/src/Cards/card-rules.test.ts",
+        "axiomancer-mechanics/src/Cards/card-rules.ts",
+        "axiomancer-mechanics/src/Cards/e2e/card-rules.engine.test.ts",
+        "axiomancer-mechanics/src/Cards/e2e/card-rules.exemptions.json",
+        "axiomancer-mechanics/src/Cards/index.ts",
+        "axiomancer-mechanics/src/index.ts",
+        "axiomancer-mechanics/src/test-utils/e2e/hermeticity.audit.test.ts",
+        "docs/card-spec.md",
+        "docs/truth-sources.md",
+        "plan/AUDIT.md",
+        "plan/lessons.md",
+        "plan/revamp/cards.md",
+        "plan/steps/01_build_plan.md",
+        "scripts/check-prose.mjs",
+        "scripts/check-prose.test.mjs",
+        "scripts/content-drift.mjs",
+        "scripts/content-drift.test.mjs",
+        "telemetry/2026-10-13_950a60a5-5d06-41f5-8594-845a5f517c78.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-13T10:27:40Z",
+          "finishedAt": "2026-10-13T10:27:40Z",
+          "finishedAfterMerge": true
+        },
+        {
+          "name": "verify-drift",
+          "path": ".github/workflows/verify-drift.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-13T10:27:29Z",
+          "finishedAt": "2026-10-13T10:27:42Z",
+          "finishedAfterMerge": true
+        },
+        {
+          "name": "verify-mechanics",
+          "path": ".github/workflows/verify-mechanics.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-13T10:27:29Z",
+          "finishedAt": "2026-10-13T10:28:48Z",
+          "finishedAfterMerge": true
+        },
+        {
+          "name": "verify-prose",
+          "path": ".github/workflows/verify-prose.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-13T10:27:29Z",
+          "finishedAt": "2026-10-13T10:27:41Z",
+          "finishedAfterMerge": true
+        }
+      ],
+      "triggered": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "skipped": [
+        "verify-mobile.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [
+        "docs/card-spec.md",
+        "docs/truth-sources.md"
+      ],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      }
+    },
+    {
+      "number": 512,
+      "title": "a11y: hide the faded title CTA under the menu (CRITIQUE pass 79 title a11y)",
+      "mergedAt": "2026-10-13T16:57:41Z",
+      "head": "577060dd2b2c5d7021a64e0e4a99606979e56651",
+      "mergeCommit": "9f733f199f4ef6fac63172ad4e1cca0d61035f3a",
+      "files": [
+        "axiomancer-mobile/components/TitleScreen.tsx",
+        "axiomancer-mobile/components/__tests__/TitleScreen.test.tsx",
+        "plan/CRITIQUE.md",
+        "telemetry/2026-10-13_b56c2d20-7239-4bc4-837b-ea704c9bd3a5.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-13T16:44:58Z",
+          "finishedAt": "2026-10-13T16:44:58Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-13T16:44:40Z",
+          "finishedAt": "2026-10-13T16:57:26Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [
+        {
+          "sha": "4c2a08bf2e78330d383e2c9b4ff989a88dffd3b7",
+          "date": "2026-10-14T07:50:25-04:00",
+          "subject": "fix: critique drive waits for the title and dice to settle; EMBARK guard; dice springs rest (CRITIQUE pass 79 drive settle)",
+          "files": [
+            "axiomancer-mobile/components/TitleScreen.tsx",
+            "axiomancer-mobile/components/__tests__/TitleScreen.test.tsx"
+          ]
+        }
+      ],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      }
+    },
+    {
+      "number": 514,
+      "title": "fix: P-07b's printed max holds (AUDIT bug P-07b)",
+      "mergedAt": "2026-10-13T21:36:32Z",
+      "head": "18f0165394e9e9ddf475a95302a17f3717f1ca68",
+      "mergeCommit": "b249f815be78dce6ad3cb870adfd3acdf00ccb33",
+      "files": [
+        "axiomancer-mechanics/src/Cards/card-program.types.ts",
+        "axiomancer-mechanics/src/Cards/e2e/blood-price.engine.test.ts",
+        "axiomancer-mechanics/src/Cards/library/blood-price.cards.ts",
+        "axiomancer-mechanics/src/Combat/combat.card-program.ts",
+        "plan/AUDIT.md",
+        "telemetry/2026-10-13_362ffb4e-38d3-4603-b422-60e66575a8ce.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-13T19:03:34Z",
+          "finishedAt": "2026-10-13T19:03:34Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mechanics",
+          "path": ".github/workflows/verify-mechanics.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-13T19:03:11Z",
+          "finishedAt": "2026-10-13T19:12:44Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mechanics.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mobile.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      }
+    },
+    {
+      "number": 516,
+      "title": "fix: refuse a die on a card that cannot be played now (AUDIT RC2 die spent on blocked card)",
+      "mergedAt": "2026-10-14T01:13:21Z",
+      "head": "25480107d16795ae18079400593985f8f87e48d6",
+      "mergeCommit": "33145b7583df39c14b1c7e327cd04253485d1241",
+      "files": [
+        "axiomancer-mobile/components/combat/encounter/CombatBoard.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.colorlaw.test.tsx",
+        "axiomancer-mobile/state/presenters/combat-encounter.engine.ts",
+        "plan/AUDIT.md",
+        "telemetry/2026-10-13_7f6996b2-d3b6-4470-a8cc-559cb42288d8.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-14T01:02:33Z",
+          "finishedAt": "2026-10-14T01:02:33Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-14T01:02:20Z",
+          "finishedAt": "2026-10-14T01:12:47Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [
+        {
+          "sha": "f0b58df3486cd4f9a4484c1327816bd581758f02",
+          "date": "2026-10-14T04:21:46-04:00",
+          "subject": "fix: A Plain Blow wears its FREE pill (CRITIQUE pass 85 Blow FREE pill)",
+          "files": [
+            "axiomancer-mobile/state/presenters/combat-encounter.engine.ts"
+          ]
+        },
+        {
+          "sha": "5150c63410d1717083618a3967106a98a3c73cf3",
+          "date": "2026-10-14T12:07:15-04:00",
+          "subject": "fix: pr-resolve union merge splits moved queue rows (AUDIT pr-resolve union merge)",
+          "files": [
+            "axiomancer-mobile/state/presenters/combat-encounter.engine.ts"
+          ]
+        },
+        {
+          "sha": "d82f536557b40bfeb8d297728231a87b2ea25cbc",
+          "date": "2026-10-15T10:33:22-04:00",
+          "subject": "fix(combat): HUD clock line in full at 11px (CRITIQUE pass 88)",
+          "files": [
+            "axiomancer-mobile/components/combat/encounter/CombatBoard.tsx",
+            "axiomancer-mobile/state/presenters/combat-encounter.engine.ts"
+          ]
+        }
+      ],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      }
+    },
+    {
+      "number": 520,
+      "title": "feat: Globals stack as independent instances (experimental) — phase GS1",
+      "mergedAt": "2026-10-14T02:42:31Z",
+      "head": "4b1ee463869c6669abc19c591042eb50bb7b46a2",
+      "mergeCommit": "23899c907a69962487c44f5c41fc9680cf28a801",
+      "files": [
+        "axiomancer-mechanics/docs/keyword-atlas.md",
+        "axiomancer-mechanics/src/Cards/e2e/blood-price.engine.test.ts",
+        "axiomancer-mechanics/src/Combat/combat.card-program.ts",
+        "axiomancer-mobile/components/combat/encounter/CombatBoard.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.program-cards.test.tsx",
+        "axiomancer-mobile/state/combat/keywords.ts",
+        "axiomancer-mobile/state/presenters/card-program.engine.ts",
+        "axiomancer-mobile/state/presenters/combat-encounter.engine.ts",
+        "docs/card-spec.md",
+        "docs/game-model.md",
+        "plan/lessons.md",
+        "plan/revamp/cards.md",
+        "plan/steps/01_build_plan.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-14T02:17:30Z",
+          "finishedAt": "2026-10-14T02:17:30Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-drift",
+          "path": ".github/workflows/verify-drift.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-14T02:17:16Z",
+          "finishedAt": "2026-10-14T02:17:27Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mechanics",
+          "path": ".github/workflows/verify-mechanics.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-14T02:17:16Z",
+          "finishedAt": "2026-10-14T02:30:27Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-14T02:17:16Z",
+          "finishedAt": "2026-10-14T02:29:56Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [
+        "docs/card-spec.md",
+        "docs/game-model.md"
+      ],
+      "followUps": [
+        {
+          "sha": "f0b58df3486cd4f9a4484c1327816bd581758f02",
+          "date": "2026-10-14T04:21:46-04:00",
+          "subject": "fix: A Plain Blow wears its FREE pill (CRITIQUE pass 85 Blow FREE pill)",
+          "files": [
+            "axiomancer-mobile/state/presenters/card-program.engine.ts",
+            "axiomancer-mobile/state/presenters/combat-encounter.engine.ts"
+          ]
+        },
+        {
+          "sha": "5150c63410d1717083618a3967106a98a3c73cf3",
+          "date": "2026-10-14T12:07:15-04:00",
+          "subject": "fix: pr-resolve union merge splits moved queue rows (AUDIT pr-resolve union merge)",
+          "files": [
+            "axiomancer-mobile/state/presenters/card-program.engine.ts",
+            "axiomancer-mobile/state/presenters/combat-encounter.engine.ts"
+          ]
+        },
+        {
+          "sha": "d82f536557b40bfeb8d297728231a87b2ea25cbc",
+          "date": "2026-10-15T10:33:22-04:00",
+          "subject": "fix(combat): HUD clock line in full at 11px (CRITIQUE pass 88)",
+          "files": [
+            "axiomancer-mobile/components/combat/encounter/CombatBoard.tsx",
+            "axiomancer-mobile/state/presenters/combat-encounter.engine.ts"
+          ]
+        }
+      ],
+      "antagonist": {
+        "verdict": "pass",
+        "at": "2026-10-14T02:20:51Z",
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      }
+    },
+    {
+      "number": 521,
+      "title": "feat(mobile): one card face (D91) — phase BT2a",
+      "mergedAt": "2026-10-14T02:47:25Z",
+      "head": "d4812993fc841c74debf7e5e5c8614cddd8f852a",
+      "mergeCommit": "3b0fcfb1e9cd27ab90cc80f71bbc6e31b47a0f3d",
+      "files": [
+        "axiomancer-mobile/components/combat/encounter/CombatBoard.tsx",
+        "axiomancer-mobile/components/combat/encounter/CombatRewardsOverlay.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.handfan.test.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.paid-column.test.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.playtest-2026-09-04.test.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatCardFace.rarity-D4.test.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatCardFace.seamless.test.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatRewardsOverlay.test.tsx",
+        "axiomancer-mobile/screenshots/bt2a/1-grey-hand.jpg",
+        "axiomancer-mobile/screenshots/bt2a/2-blood-price-hand.jpg",
+        "axiomancer-mobile/screenshots/bt2a/3-card-detail.jpg",
+        "plan/lessons.md",
+        "plan/steps/01_build_plan.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-14T02:20:11Z",
+          "finishedAt": "2026-10-14T02:20:11Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-14T02:20:01Z",
+          "finishedAt": "2026-10-14T02:30:52Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [
+        {
+          "sha": "d82f536557b40bfeb8d297728231a87b2ea25cbc",
+          "date": "2026-10-15T10:33:22-04:00",
+          "subject": "fix(combat): HUD clock line in full at 11px (CRITIQUE pass 88)",
+          "files": [
+            "axiomancer-mobile/components/combat/encounter/CombatBoard.tsx"
+          ]
+        }
+      ],
+      "antagonist": {
+        "verdict": "pass",
+        "at": "2026-10-14T02:20:52Z",
+        "mergedOnNotPass": false,
+        "mergeScriptComment": true
+      }
+    },
+    {
+      "number": 523,
+      "title": "feat: the SACRIFICE floor points at the VITAE ring — phase SF1",
+      "mergedAt": "2026-10-14T03:02:55Z",
+      "head": "5d5fac9b3272958f8240bf3a628811a2155f945a",
+      "mergeCommit": "9b661291d730bb61ef8a5d8093a45e379347f03e",
+      "files": [
+        "axiomancer-mechanics/src/Cards/e2e/blood-price.engine.test.ts",
+        "axiomancer-mechanics/src/Combat/combat.card-program.ts",
+        "axiomancer-mechanics/src/Combat/combat.engine.ts",
+        "axiomancer-mechanics/src/Combat/index.ts",
+        "axiomancer-mechanics/src/index.ts",
+        "axiomancer-mobile/components/combat/encounter/CombatBoard.tsx",
+        "axiomancer-mobile/components/combat/encounter/CombatCombatantPane.tsx",
+        "axiomancer-mobile/components/combat/encounter/VitaeSacrificeCallout.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.colorlaw.test.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.sacfloor.test.tsx",
+        "axiomancer-mobile/state/presenters/__tests__/card-program.engine.test.ts",
+        "axiomancer-mobile/state/presenters/card-program.engine.ts",
+        "axiomancer-mobile/state/presenters/combat-encounter.engine.ts",
+        "plan/lessons.md",
+        "plan/steps/01_build_plan.md",
+        "scripts/loop-issue.mjs",
+        "scripts/loop-issue.test.mjs"
+      ],
+      "ran": [
+        {
+          "name": "close-trailers",
+          "path": ".github/workflows/close-trailers.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-14T02:47:56Z",
+          "finishedAt": "2026-10-14T02:48:14Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-14T02:48:06Z",
+          "finishedAt": "2026-10-14T02:48:06Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mechanics",
+          "path": ".github/workflows/verify-mechanics.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-14T02:47:55Z",
+          "finishedAt": "2026-10-14T03:02:04Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-14T02:47:55Z",
+          "finishedAt": "2026-10-14T03:01:27Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mechanics.yml",
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [
+        "scripts/loop-issue.mjs",
+        "scripts/loop-issue.test.mjs"
+      ],
+      "followUps": [
+        {
+          "sha": "f0b58df3486cd4f9a4484c1327816bd581758f02",
+          "date": "2026-10-14T04:21:46-04:00",
+          "subject": "fix: A Plain Blow wears its FREE pill (CRITIQUE pass 85 Blow FREE pill)",
+          "files": [
+            "axiomancer-mobile/state/presenters/__tests__/card-program.engine.test.ts",
+            "axiomancer-mobile/state/presenters/card-program.engine.ts",
+            "axiomancer-mobile/state/presenters/combat-encounter.engine.ts"
+          ]
+        },
+        {
+          "sha": "5150c63410d1717083618a3967106a98a3c73cf3",
+          "date": "2026-10-14T12:07:15-04:00",
+          "subject": "fix: pr-resolve union merge splits moved queue rows (AUDIT pr-resolve union merge)",
+          "files": [
+            "axiomancer-mobile/state/presenters/__tests__/card-program.engine.test.ts",
+            "axiomancer-mobile/state/presenters/card-program.engine.ts",
+            "axiomancer-mobile/state/presenters/combat-encounter.engine.ts"
+          ]
+        },
+        {
+          "sha": "d82f536557b40bfeb8d297728231a87b2ea25cbc",
+          "date": "2026-10-15T10:33:22-04:00",
+          "subject": "fix(combat): HUD clock line in full at 11px (CRITIQUE pass 88)",
+          "files": [
+            "axiomancer-mobile/components/combat/encounter/CombatBoard.tsx",
+            "axiomancer-mobile/components/combat/encounter/CombatCombatantPane.tsx",
+            "axiomancer-mobile/state/presenters/combat-encounter.engine.ts"
+          ]
+        }
+      ],
+      "antagonist": {
+        "verdict": "pass",
+        "at": "2026-10-14T02:20:53Z",
+        "mergedOnNotPass": false,
+        "mergeScriptComment": true
+      }
+    },
+    {
+      "number": 526,
+      "title": "fix(ci): pr-resolve resolves on a dispatched run, not on push (AUDIT infra pr-resolve)",
+      "mergedAt": "2026-10-14T03:24:19Z",
+      "head": "efc7f371c2ef7cc774c1c3a8cfeaf3f525838938",
+      "mergeCommit": "e6e98cbb4367f154d54b7f5a166b99a2f918f154",
+      "files": [
+        ".github/workflows/README.md",
+        ".github/workflows/pr-resolve.yml",
+        "plan/AUDIT.md",
+        "plan/PHASE_CANDIDATES.md",
+        "plan/lessons.md",
+        "scripts/loop-pr.test.mjs"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-14T02:52:49Z",
+          "finishedAt": "2026-10-14T02:52:49Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-mobile.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [
+        ".github/workflows/README.md",
+        ".github/workflows/pr-resolve.yml",
+        "scripts/loop-pr.test.mjs"
+      ],
+      "followUps": [
+        {
+          "sha": "5150c63410d1717083618a3967106a98a3c73cf3",
+          "date": "2026-10-14T12:07:15-04:00",
+          "subject": "fix: pr-resolve union merge splits moved queue rows (AUDIT pr-resolve union merge)",
+          "files": [
+            "scripts/loop-pr.test.mjs"
+          ]
+        }
+      ],
+      "antagonist": {
+        "verdict": "pass",
+        "at": "2026-10-14T03:23:22Z",
+        "mergedOnNotPass": false,
+        "mergeScriptComment": true
+      }
+    },
+    {
+      "number": 528,
+      "title": "fix: sealed map nodes draw their mark (CRITIQUE pass 84 sealed node mark)",
+      "mergedAt": "2026-10-14T03:40:11Z",
+      "head": "af2c11e52844203cdfdd1dad3bdc94a47fd6a1d0",
+      "mergeCommit": "916e236cd1a22f2cd440b229726d476a1b4c92b5",
+      "files": [
+        "axiomancer-mobile/components/NodeMark.tsx",
+        "axiomancer-mobile/components/exploration/ExplorationNode.tsx",
+        "axiomancer-mobile/components/exploration/__tests__/ExplorationNode.test.tsx",
+        "plan/CRITIQUE.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-14T03:26:44Z",
+          "finishedAt": "2026-10-14T03:26:44Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-14T03:26:30Z",
+          "finishedAt": "2026-10-14T03:38:55Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "pass",
+        "at": "2026-10-14T03:23:23Z",
+        "mergedOnNotPass": false,
+        "mergeScriptComment": true
+      }
+    },
+    {
+      "number": 529,
+      "title": "feat(mobile): combat footer dock, full-width hand, intent top-left — phase BT2b",
+      "mergedAt": "2026-10-14T03:25:57Z",
+      "head": "9d44ca5e130f1b3e396bbf8b0383c8e7729f1366",
+      "mergeCommit": "93f05dfe2ecefc04c7a56a4366be70e83efb38ff",
+      "files": [
+        "axiomancer-mobile/components/combat/encounter/CombatBoard.tsx",
+        "axiomancer-mobile/components/combat/encounter/CombatCombatantPane.tsx",
+        "axiomancer-mobile/components/combat/encounter/CombatEncounterPanel.tsx",
+        "axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx",
+        "axiomancer-mobile/components/combat/encounter/VitaeSacrificeCallout.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.S1-board.test.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.footer-dock.test.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.fresh-eyes-repair.test.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.handfan.test.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.playtest-2026-09-04.test.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.rail-ledger.test.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.sacfloor.test.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.sig-column.test.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatEncounterPanel.log.test.tsx",
+        "axiomancer-mobile/docs/playtest-guides/combat.md",
+        "axiomancer-mobile/screenshots/bt2b/1-grey-board.jpg",
+        "axiomancer-mobile/screenshots/bt2b/2-blood-price-board.jpg",
+        "axiomancer-mobile/screenshots/bt2b/3-pilgrim-modal.jpg",
+        "axiomancer-mobile/screenshots/bt2b/4-log-view.jpg",
+        "axiomancer-mobile/state/presenters/combat-encounter.engine.ts",
+        "plan/CRITIQUE.md",
+        "plan/PHASE_CANDIDATES.md",
+        "plan/lessons.md",
+        "plan/steps/01_build_plan.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-14T03:25:47Z",
+          "finishedAt": "2026-10-14T03:25:47Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-14T03:25:36Z",
+          "finishedAt": "2026-10-14T03:29:28Z",
+          "finishedAfterMerge": true
+        }
+      ],
+      "triggered": [
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [
+        {
+          "sha": "f0b58df3486cd4f9a4484c1327816bd581758f02",
+          "date": "2026-10-14T04:21:46-04:00",
+          "subject": "fix: A Plain Blow wears its FREE pill (CRITIQUE pass 85 Blow FREE pill)",
+          "files": [
+            "axiomancer-mobile/state/presenters/combat-encounter.engine.ts"
+          ]
+        },
+        {
+          "sha": "f6bc4f1963f0ecc3ff5f8fcbeee175491ae81813",
+          "date": "2026-10-14T04:22:30-04:00",
+          "subject": "fix: cap the combat dock's VITAE column on wide windows (CRITIQUE pass 85 footer dock)",
+          "files": [
+            "axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.footer-dock.test.tsx"
+          ]
+        },
+        {
+          "sha": "5150c63410d1717083618a3967106a98a3c73cf3",
+          "date": "2026-10-14T12:07:15-04:00",
+          "subject": "fix: pr-resolve union merge splits moved queue rows (AUDIT pr-resolve union merge)",
+          "files": [
+            "axiomancer-mobile/state/presenters/combat-encounter.engine.ts"
+          ]
+        },
+        {
+          "sha": "b5b395ad2688bdbeacdba751c917c444524a04b9",
+          "date": "2026-10-15T01:55:08-04:00",
+          "subject": "fix(combat): END keeps the dock's right edge on a wide window (CRITIQUE pass 87)",
+          "files": [
+            "axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.footer-dock.test.tsx"
+          ]
+        },
+        {
+          "sha": "d82f536557b40bfeb8d297728231a87b2ea25cbc",
+          "date": "2026-10-15T10:33:22-04:00",
+          "subject": "fix(combat): HUD clock line in full at 11px (CRITIQUE pass 88)",
+          "files": [
+            "axiomancer-mobile/components/combat/encounter/CombatBoard.tsx",
+            "axiomancer-mobile/components/combat/encounter/CombatCombatantPane.tsx",
+            "axiomancer-mobile/state/presenters/combat-encounter.engine.ts"
+          ]
+        }
+      ],
+      "antagonist": {
+        "verdict": "not-pass",
+        "at": "2026-10-14T03:23:57Z",
+        "mergedOnNotPass": true,
+        "mergeScriptComment": true
+      }
+    },
+    {
+      "number": 531,
+      "title": "fix: village stall prices read SHILLINGS (CRITIQUE pass 84 village shillings)",
+      "mergedAt": "2026-10-14T04:11:19Z",
+      "head": "498299883979791f3cd3931e8e0e51746dd462cc",
+      "mergeCommit": "0b769a30fdd0af6bbd008621d63472c4a52be941",
+      "files": [
+        "axiomancer-mobile/app/village/index.tsx",
+        "axiomancer-mobile/state/e2e/stall-price-shillings.critique-84.test.tsx",
+        "plan/CRITIQUE.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-14T03:40:45Z",
+          "finishedAt": "2026-10-14T03:40:45Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-14T03:40:33Z",
+          "finishedAt": "2026-10-14T03:52:48Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      }
+    },
+    {
+      "number": 534,
+      "title": "fix: A Plain Blow wears its FREE pill (CRITIQUE pass 85 Blow FREE pill)",
+      "mergedAt": "2026-10-14T08:21:47Z",
+      "head": "cd785c1745473f25791f151f55923e24e5de79f1",
+      "mergeCommit": "f0b58df3486cd4f9a4484c1327816bd581758f02",
+      "files": [
+        "axiomancer-mobile/components/combat/glyphShapes.ts",
+        "axiomancer-mobile/state/presenters/__tests__/card-program.engine.test.ts",
+        "axiomancer-mobile/state/presenters/__tests__/combat-card-vm.test.ts",
+        "axiomancer-mobile/state/presenters/card-program.engine.ts",
+        "axiomancer-mobile/state/presenters/combat-encounter.engine.ts",
+        "plan/CRITIQUE.md",
+        "plan/lessons.md",
+        "scripts/build-catalog.mjs"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-14T04:24:23Z",
+          "finishedAt": "2026-10-14T04:24:23Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-drift",
+          "path": ".github/workflows/verify-drift.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-14T04:23:53Z",
+          "finishedAt": "2026-10-14T04:24:03Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-14T04:23:53Z",
+          "finishedAt": "2026-10-14T04:36:12Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-drift.yml",
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [
+        {
+          "sha": "5150c63410d1717083618a3967106a98a3c73cf3",
+          "date": "2026-10-14T12:07:15-04:00",
+          "subject": "fix: pr-resolve union merge splits moved queue rows (AUDIT pr-resolve union merge)",
+          "files": [
+            "axiomancer-mobile/state/presenters/__tests__/card-program.engine.test.ts",
+            "axiomancer-mobile/state/presenters/card-program.engine.ts",
+            "axiomancer-mobile/state/presenters/combat-encounter.engine.ts"
+          ]
+        },
+        {
+          "sha": "d82f536557b40bfeb8d297728231a87b2ea25cbc",
+          "date": "2026-10-15T10:33:22-04:00",
+          "subject": "fix(combat): HUD clock line in full at 11px (CRITIQUE pass 88)",
+          "files": [
+            "axiomancer-mobile/state/presenters/combat-encounter.engine.ts"
+          ]
+        }
+      ],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      }
+    },
+    {
+      "number": 535,
+      "title": "fix: cap the combat dock's VITAE column on wide windows (CRITIQUE pass 85 footer dock)",
+      "mergedAt": "2026-10-14T08:22:31Z",
+      "head": "731f08fe38c8a16a662ac5460143e10125f65a8f",
+      "mergeCommit": "f6bc4f1963f0ecc3ff5f8fcbeee175491ae81813",
+      "files": [
+        "axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.footer-dock.test.tsx",
+        "plan/CRITIQUE.md",
+        "plan/lessons.md",
+        "skills/march.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-14T04:24:38Z",
+          "finishedAt": "2026-10-14T04:24:38Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-14T04:23:56Z",
+          "finishedAt": "2026-10-14T04:33:36Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [
+        "skills/march.md"
+      ],
+      "followUps": [
+        {
+          "sha": "b5b395ad2688bdbeacdba751c917c444524a04b9",
+          "date": "2026-10-15T01:55:08-04:00",
+          "subject": "fix(combat): END keeps the dock's right edge on a wide window (CRITIQUE pass 87)",
+          "files": [
+            "axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.footer-dock.test.tsx"
+          ]
+        }
+      ],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      }
+    },
+    {
+      "number": 537,
+      "title": "fix: critique drive waits for the title and dice to settle; EMBARK guard; dice springs rest (CRITIQUE pass 79 drive settle)",
+      "mergedAt": "2026-10-14T11:50:26Z",
+      "head": "7e216a558f216aad1a7965da11ccfab18ad02802",
+      "mergeCommit": "4c2a08bf2e78330d383e2c9b4ff989a88dffd3b7",
+      "files": [
+        "axiomancer-mobile/components/TitleScreen.tsx",
+        "axiomancer-mobile/components/__tests__/TitleScreen.test.tsx",
+        "axiomancer-mobile/scripts/critique-drive.mjs",
+        "axiomancer-mobile/scripts/critique-drive.test.mjs",
+        "axiomancer-mobile/state/combat/__tests__/dice-roll-ritual.test.ts",
+        "axiomancer-mobile/state/combat/dice-roll-ritual.timing.ts",
+        "plan/AUDIT.md",
+        "plan/CRITIQUE.md",
+        "plan/lessons.md",
+        "telemetry/2026-10-14_fb7bb4f6-e94c-4f12-b7fd-928d59096b84.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-14T08:22:33Z",
+          "finishedAt": "2026-10-14T08:22:33Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-14T08:22:22Z",
+          "finishedAt": "2026-10-14T08:34:59Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      }
+    },
+    {
+      "number": 539,
+      "title": "a11y: the dock's phase ledger speaks as one line (CRITIQUE pass 85 ledger a11y)",
+      "mergedAt": "2026-10-14T12:39:26Z",
+      "head": "beac77993929fc5d063a7bcf3e1441c380736070",
+      "mergeCommit": "f05f1759e4aed0fca2e4ee06ed3fc7fc9d1489c2",
+      "files": [
+        "axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.footer-dock.test.tsx",
+        "axiomancer-mobile/state/presenters/combat-encounter.engine.ts",
+        "plan/CRITIQUE.md",
+        "telemetry/2026-10-14_48e0f9e6-c70e-4d1e-bc96-894c83b7ffbe.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-14T11:51:26Z",
+          "finishedAt": "2026-10-14T11:51:26Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-14T11:51:07Z",
+          "finishedAt": "2026-10-14T12:00:41Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [
+        {
+          "sha": "5150c63410d1717083618a3967106a98a3c73cf3",
+          "date": "2026-10-14T12:07:15-04:00",
+          "subject": "fix: pr-resolve union merge splits moved queue rows (AUDIT pr-resolve union merge)",
+          "files": [
+            "axiomancer-mobile/state/presenters/combat-encounter.engine.ts"
+          ]
+        },
+        {
+          "sha": "b5b395ad2688bdbeacdba751c917c444524a04b9",
+          "date": "2026-10-15T01:55:08-04:00",
+          "subject": "fix(combat): END keeps the dock's right edge on a wide window (CRITIQUE pass 87)",
+          "files": [
+            "axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.footer-dock.test.tsx"
+          ]
+        },
+        {
+          "sha": "d82f536557b40bfeb8d297728231a87b2ea25cbc",
+          "date": "2026-10-15T10:33:22-04:00",
+          "subject": "fix(combat): HUD clock line in full at 11px (CRITIQUE pass 88)",
+          "files": [
+            "axiomancer-mobile/state/presenters/combat-encounter.engine.ts"
+          ]
+        }
+      ],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      }
+    },
+    {
+      "number": 541,
+      "title": "fix: forge prices read SHILLINGS (CRITIQUE anvil shillings)",
+      "mergedAt": "2026-10-14T12:40:24Z",
+      "head": "7a9478f57250ad9832c75e946e7dbf6a09a77534",
+      "mergeCommit": "ed2e61a8da7c031442fec4b79465226d7119447f",
+      "files": [
+        "axiomancer-mobile/app/blacksmith/index.tsx",
+        "axiomancer-mobile/state/e2e/forge-vocabulary.S5-talk-C12.test.tsx",
+        "axiomancer-mobile/state/presenters/__tests__/blacksmith.engine.test.ts",
+        "axiomancer-mobile/state/presenters/blacksmith.engine.ts",
+        "plan/CRITIQUE.md",
+        "telemetry/2026-10-14_1990b61c-0e4c-4385-9b39-1e246407cab9.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-14T12:40:10Z",
+          "finishedAt": "2026-10-14T12:40:10Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-14T12:39:53Z",
+          "finishedAt": "2026-10-14T12:52:14Z",
+          "finishedAfterMerge": true
+        }
+      ],
+      "triggered": [
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      }
+    },
+    {
+      "number": 543,
+      "title": "fix: pr-resolve union merge splits moved queue rows (AUDIT pr-resolve union merge)",
+      "mergedAt": "2026-10-14T16:07:16Z",
+      "head": "a88a5f5ca0d71b35ab25b40f493c635fb1533d18",
+      "mergeCommit": "5150c63410d1717083618a3967106a98a3c73cf3",
+      "files": [
+        "axiomancer-mobile/state/presenters/__tests__/card-program.engine.test.ts",
+        "axiomancer-mobile/state/presenters/card-program.engine.ts",
+        "axiomancer-mobile/state/presenters/combat-encounter.engine.ts",
+        "plan/AUDIT.md",
+        "plan/CRITIQUE.md",
+        "plan/lessons.md",
+        "scripts/loop-pr.test.mjs",
+        "scripts/pr-resolve.mjs",
+        "telemetry/2026-10-14_08e28c75-d55e-4847-bb4d-5ebf20acbd68.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-14T13:08:35Z",
+          "finishedAt": "2026-10-14T13:08:35Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-14T13:08:22Z",
+          "finishedAt": "2026-10-14T13:18:51Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [
+        "scripts/loop-pr.test.mjs",
+        "scripts/pr-resolve.mjs"
+      ],
+      "followUps": [
+        {
+          "sha": "d82f536557b40bfeb8d297728231a87b2ea25cbc",
+          "date": "2026-10-15T10:33:22-04:00",
+          "subject": "fix(combat): HUD clock line in full at 11px (CRITIQUE pass 88)",
+          "files": [
+            "axiomancer-mobile/state/presenters/combat-encounter.engine.ts"
+          ]
+        }
+      ],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      }
+    },
+    {
+      "number": 545,
+      "title": "fix: hazard cast and stamp springs name mass and energyThreshold (AUDIT hazard springs mass 4)",
+      "mergedAt": "2026-10-14T16:08:01Z",
+      "head": "f548516f8f91a228ac8ef95f55eacdb52f7aea17",
+      "mergeCommit": "ba23efa710767dd5b48c9d052cedd297575f5834",
+      "files": [
+        "axiomancer-mobile/components/hazard/HazardOverlays.tsx",
+        "axiomancer-mobile/components/hazard/__tests__/HazardOverlays.test.tsx",
+        "plan/AUDIT.md",
+        "plan/lessons.md",
+        "telemetry/2026-10-14_11333d24-ce33-49f0-aadd-e16b0768c364.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-14T14:45:40Z",
+          "finishedAt": "2026-10-14T14:45:40Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-14T14:45:19Z",
+          "finishedAt": "2026-10-14T14:51:01Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      }
+    },
+    {
+      "number": 549,
+      "title": "perf(mobile): Sentry performance on preview builds, combat drag spans — phase PF3",
+      "mergedAt": "2026-10-15T18:23:06Z",
+      "head": "0fc16b28bfa9e6fed44a72cf411b1b7547af383e",
+      "mergeCommit": "48aa808f2b60bae4cb556f5fab0dc66145ce26cc",
+      "files": [
+        "axiomancer-mobile/app/_layout.tsx",
+        "axiomancer-mobile/components/combat/encounter/CombatEncounterPanel.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatEncounterPanel.drag-spans.test.tsx",
+        "axiomancer-mobile/jest.setup.ts",
+        "axiomancer-mobile/lib/__tests__/monitoring.test.ts",
+        "axiomancer-mobile/lib/monitoring.ts",
+        "axiomancer-mobile/lib/monitoring.web.ts",
+        "docs/logging.md",
+        "plan/lessons.md",
+        "plan/steps/01_build_plan.md",
+        "telemetry/2026-10-14_115f4096-06e2-4c4d-99d0-b76f051a21de.md",
+        "telemetry/2026-10-14_78bdd139-7ed2-4d42-a6ee-f2857b6eb822.md",
+        "telemetry/2026-10-15_a8a2f712-1aa7-4ed1-bae7-3973cf7c5b97.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-15T15:06:33Z",
+          "finishedAt": "2026-10-15T15:06:33Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-15T15:06:14Z",
+          "finishedAt": "2026-10-15T15:18:12Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [
+        "docs/logging.md"
+      ],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      }
+    },
+    {
+      "number": 553,
+      "title": "perf(mobile): no exploration map under live combat — phase PF4",
+      "mergedAt": "2026-10-15T00:19:14Z",
+      "head": "988640ae0c3726b488cb414e34089feb15b2a098",
+      "mergeCommit": "1df5499ed37a860c135215d114c8fb07cccf897c",
+      "files": [
+        "axiomancer-mobile/app/(tabs)/exploration/index.tsx",
+        "axiomancer-mobile/components/event/EncounterModalOverlay.tsx",
+        "axiomancer-mobile/components/event/__tests__/EncounterModalOverlay.test.tsx",
+        "axiomancer-mobile/state/e2e/map-under-combat-modes.engine.test.tsx",
+        "axiomancer-mobile/state/e2e/map-under-combat.engine.test.tsx",
+        "plan/lessons.md",
+        "plan/steps/01_build_plan.md",
+        "telemetry/2026-10-14_875292b3-912e-4dec-b723-0fd0721eb69c.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-14T20:57:50Z",
+          "finishedAt": "2026-10-14T20:57:50Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-14T20:57:35Z",
+          "finishedAt": "2026-10-14T21:07:51Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      }
+    },
+    {
+      "number": 555,
+      "title": "fix(combat): END keeps the dock's right edge on a wide window (CRITIQUE pass 87)",
+      "mergedAt": "2026-10-15T05:55:08Z",
+      "head": "cf090553246f403adb48f9143800ce0174865d8b",
+      "mergeCommit": "b5b395ad2688bdbeacdba751c917c444524a04b9",
+      "files": [
+        "axiomancer-mobile/components/combat/encounter/CombatFooterDock.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.footer-dock.test.tsx",
+        "plan/CRITIQUE.md",
+        "plan/lessons.md",
+        "telemetry/2026-10-15_c055a6a6-7bb4-448c-be6b-b4e4406f0af1.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-15T02:56:14Z",
+          "finishedAt": "2026-10-15T02:56:14Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-15T02:55:58Z",
+          "finishedAt": "2026-10-15T03:05:26Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      }
+    },
+    {
+      "number": 557,
+      "title": "fix(combat): HUD clock line in full at 11px (CRITIQUE pass 88)",
+      "mergedAt": "2026-10-15T14:33:22Z",
+      "head": "1729a428e4d711589d200673d0a9dfdc0ab944c8",
+      "mergeCommit": "d82f536557b40bfeb8d297728231a87b2ea25cbc",
+      "files": [
+        "axiomancer-mobile/components/combat/encounter/CombatBoard.tsx",
+        "axiomancer-mobile/components/combat/encounter/CombatCombatantPane.tsx",
+        "axiomancer-mobile/state/presenters/__tests__/legibility-sweep.engine.test.ts",
+        "axiomancer-mobile/state/presenters/combat-encounter.engine.ts",
+        "plan/CRITIQUE.md",
+        "telemetry/2026-10-15_7bc66093-9801-4133-bdc3-ad951dbd684d.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-15T05:55:52Z",
+          "finishedAt": "2026-10-15T05:55:52Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-15T05:55:41Z",
+          "finishedAt": "2026-10-15T06:05:43Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      }
+    },
+    {
+      "number": 559,
+      "title": "a11y: announce the SACRIFICE floor line on each refusal (CRITIQUE antagonist PR #523)",
+      "mergedAt": "2026-10-15T14:59:38Z",
+      "head": "0ac5ededcf5a7a7f94f320aabf9b7f7aa4cf0f5a",
+      "mergeCommit": "691ec550e3e2b0fc675298e13be847d9567d4b73",
+      "files": [
+        "axiomancer-mobile/components/combat/encounter/CombatBoard.tsx",
+        "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.sacfloor.test.tsx",
+        "plan/CRITIQUE.md",
+        "plan/lessons.md",
+        "telemetry/2026-10-15_b9c0b0af-38f1-47d6-ace7-66179f919f92.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-15T14:34:15Z",
+          "finishedAt": "2026-10-15T14:34:15Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-15T14:34:00Z",
+          "finishedAt": "2026-10-15T14:45:05Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      }
+    },
+    {
+      "number": 562,
+      "title": "fix: a hazard scar mends at any rest, not only at an inn (AUDIT Scarred never clears)",
+      "mergedAt": "2026-10-15T15:05:36Z",
+      "head": "4ed594e96714106ab06add080869225982d8f1b2",
+      "mergeCommit": "44719db2fafbe6ae1e1eb35983750bd0b3bb0e1c",
+      "files": [
+        "axiomancer-mechanics/docs/encounters/hazard.md",
+        "axiomancer-mechanics/docs/world.md",
+        "axiomancer-mechanics/src/World/Hazard/hazard.content.ts",
+        "axiomancer-mechanics/src/World/MapEvents/content.ts",
+        "axiomancer-mechanics/src/World/MapEvents/e2e/rest-shelter.engine.test.ts",
+        "axiomancer-mechanics/src/World/MapEvents/handlers.ts",
+        "axiomancer-mechanics/src/World/MapEvents/rest-shelter.ts",
+        "axiomancer-mechanics/src/World/MapEvents/types.ts",
+        "axiomancer-mechanics/src/World/RestChoice/restchoice.types.ts",
+        "axiomancer-mechanics/src/World/index.ts",
+        "axiomancer-mobile/components/DebugRestButton.tsx",
+        "axiomancer-mobile/state/dev/skip-event.ts",
+        "axiomancer-mobile/state/e2e/hazard-scar-rest-recovery.engine.test.ts",
+        "axiomancer-mobile/state/hazard/store-actions.ts",
+        "axiomancer-mobile/state/rest/store-actions.ts",
+        "plan/AUDIT.md",
+        "plan/lessons.md",
+        "telemetry/2026-10-15_7f4ea09b-9776-476a-a6e7-3324bbfffa0b.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-15T14:53:08Z",
+          "finishedAt": "2026-10-15T14:53:08Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mechanics",
+          "path": ".github/workflows/verify-mechanics.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-15T14:52:51Z",
+          "finishedAt": "2026-10-15T14:59:01Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-15T14:52:51Z",
+          "finishedAt": "2026-10-15T15:04:49Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-prose",
+          "path": ".github/workflows/verify-prose.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-15T14:52:51Z",
+          "finishedAt": "2026-10-15T14:53:18Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mechanics.yml",
+        "verify-mobile.yml",
+        "verify-prose.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      }
+    }
+  ],
+  "seeds": [
+    {
+      "id": "S1",
+      "title": "#529 merged before CI finished on its final head",
+      "evidence": [
+        "PR #529",
+        "head 9d44ca5e",
+        "merge 93f05dfe"
+      ],
+      "gate": "merge gate (branch protection with required checks, not comment matching)",
+      "detail": "A session-local merge script matched \"Antagonist pass\" inside a \"not a pass\" comment.",
+      "status": "confirmed",
+      "note": "finished after merge: verify-mobile; antagonist at merge: not-pass"
+    },
+    {
+      "id": "S2",
+      "title": "`pr-resolve` merges cut `plan/CRITIQUE.md` rows apart on `main`",
+      "evidence": [
+        "merge c95114a2",
+        "merge 49829988",
+        "repair 23f06828",
+        "repair 662aa10b"
+      ],
+      "gate": "a structural lint for the plan queue files",
+      "detail": "Repaired by hand on `main`; #543 then fixed the union merge.",
+      "status": "confirmed",
+      "note": "all four commits touch plan/CRITIQUE.md"
+    },
+    {
+      "id": "S3",
+      "title": "Three tests that could not fail, their acceptance ticked `[x]`",
+      "evidence": [
+        "PR #521 A4",
+        "PR #523 A6",
+        "PR #520 leaked `console.error` spy (near-miss)"
+      ],
+      "gate": "a fail-on-parent check for new tests; an acceptance-ID-to-test map",
+      "detail": "EV1b runs each test on the parent commit to prove or clear this.",
+      "status": "seeded",
+      "note": "2 of 2 named ticks found in the PR bodies; \"could not fail\" is for EV1b to prove"
+    },
+    {
+      "id": "S4",
+      "title": "#526 merged with only Cloudflare Pages run",
+      "evidence": [
+        "PR #526",
+        "head efc7f371"
+      ],
+      "gate": "CI path filters (a path-coverage audit so no diff merges unverified)",
+      "detail": "No `verify-*` filter covers `.github/workflows/` or root `scripts/`.",
+      "status": "confirmed",
+      "note": "ran: Cloudflare Pages: axiomancer; uncovered: 3 file(s)"
+    },
+    {
+      "id": "S5",
+      "title": "SF1's brief asked for a `verify:visual` shot of the callout; none was taken",
+      "evidence": [
+        "PR #523",
+        "plan/phases/phase_SF1_sacrifice_floor_callout.md"
+      ],
+      "gate": "the builder's own `[x]` (an acceptance-ID-to-test map)",
+      "detail": "The PR body says `verify:visual` was not run locally.",
+      "status": "confirmed",
+      "note": "PR #523 body states verify:visual was not run"
+    },
+    {
+      "id": "S6",
+      "title": "No gate runs on Android",
+      "evidence": [
+        ".github/workflows/verify-*.yml"
+      ],
+      "gate": "none exists (an Android smoke test on the preview APK)",
+      "detail": "A structural gap: no miss rate, since nothing is there to miss.",
+      "status": "confirmed",
+      "note": "no verify-* workflow mentions Android"
+    }
+  ]
+}
