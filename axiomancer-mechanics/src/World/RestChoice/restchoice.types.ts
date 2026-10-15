@@ -50,7 +50,7 @@ export interface RestChoiceOutcome {
 
 export interface RestChoiceSession {
     phase: RestChoicePhase;
-    /** Authored shelter class — kept for the inn scar-mend (unrelated to the flat rest heal). */
+    /** Authored shelter class: an inn words the night as a bed (unrelated to the flat rest heal). */
     shelter: RestShelter;
     maxHealth: number;
     health: number;

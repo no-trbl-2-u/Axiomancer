@@ -27,7 +27,7 @@
  *               cleared on the chosen (default safe) route — computed by the
  *               engine's own `continueHazardAfterResolve` outcome path and
  *               claimed with the first offered card.
- *   rest        the free REST offer, claimed (flat heal; inn mends scars).
+ *   rest        the free REST offer, claimed (flat heal; mends scars).
  *   loot-cache  the ITEM offer, claimed (rolled items + the node's coin).
  *   blacksmith  leave the anvil unchanged, claimed (nothing spent).
  *   interaction / narration / village / cutscene / gathering

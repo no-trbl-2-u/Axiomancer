@@ -1,14 +1,14 @@
 /**
- * Hermetic E2E Tests — Hazard max-VITAE scar recovery at inn rest.
+ * Hermetic E2E Tests — Hazard max-VITAE scar recovery at rest.
  *
- * Pins the contract through the store action layer, keyed on the authored
- * `RestPayload.shelter` marker:
+ * Pins the contract through the store action layer. Scarred reads "until
+ * you next rest", and Act 1's only inns are in the Breakwater, so the mend
+ * is not keyed on the authored `RestPayload.shelter` marker (RC2 walk,
+ * 2026-10-11: a Lantern Deep scar outlived two camps):
  *  - a `maxhp` hazard scar bakes the loss into maxHealth AND records a
  *    durable `hazard-scar:` flag;
- *  - a rest at an INN (`shelter: 'inn'`) mends the scarred max-VITAE
- *    back toward baseline and clears the scar flags;
- *  - a CAMP watch (`shelter: 'camp'`, and the default when a node is
- *    silent) does NOT mend the scar and leaves the flags intact;
+ *  - any rest, an INN, a CAMP or a node with no authored shelter, mends
+ *    the scarred max-VITAE back toward baseline and clears the scar flags;
  *  - recovered max-VITAE never exceeds the pre-scar baseline.
  *
  * Seeded; no timers, no network.
@@ -92,7 +92,7 @@ function playRestToDawn(store: AppStore, actions: AppActions): void {
     }
 }
 
-describe('hazard scar recovery at inn rest', () => {
+describe('hazard scar recovery at rest', () => {
     it('a maxhp scar bakes into maxHealth and records a durable scar flag', () => {
         const { store, actions } = makeStoreAndActions();
         const scar = scarThePlayer(store, actions);
@@ -125,43 +125,38 @@ describe('hazard scar recovery at inn rest', () => {
         expect(after.player.health).toBeLessThanOrEqual(after.player.maxHealth);
     });
 
-    it('a camp watch does NOT mend the scar and leaves the flag intact', () => {
+    it('a camp watch mends the scar too and clears the flag', () => {
         const { store, actions } = makeStoreAndActions();
         const baseline = (store.getState() as unknown as GameState).player.maxHealth;
         const scar = scarThePlayer(store, actions);
         const scarredMax = (store.getState() as unknown as GameState).player.maxHealth;
         expect(scarredMax).toBe(baseline - scar);
 
-        // Camp: every authored wilderness rest node.
+        // Camp: every authored wilderness rest node, and every rest past the Breakwater.
         expect(actions.beginRest({ seed: 7, shelter: 'camp' })).toBe(true);
         playRestToDawn(store, actions);
         const result = actions.claimRestOutcome();
 
         expect(result.applied).toBe(true);
-        expect(result.scarMended).toBe(0);
+        expect(result.scarMended).toBe(scar);
 
         const after = store.getState() as unknown as GameState;
-        expect(after.player.maxHealth).toBe(scarredMax); // still scarred
-        expect(bankedScarMagnitude(after.flags ?? [])).toBe(scar); // flag intact
+        expect(after.player.maxHealth).toBe(baseline);
+        expect((after.flags ?? []).some((f) => f.startsWith(HAZARD_SCAR_FLAG_PREFIX))).toBe(false);
     });
 
-    it('a rest with NO authored shelter defaults to camp and does NOT mend', () => {
-        // Silence is never a paid bed: a full-heal wilderness spring (like
-        // `nf-4` / `nf-24`) must not mend scars for free.
+    it('a rest with NO authored shelter mends the scar', () => {
         const { store, actions } = makeStoreAndActions();
+        const baseline = (store.getState() as unknown as GameState).player.maxHealth;
         const scar = scarThePlayer(store, actions);
-        const scarredMax = (store.getState() as unknown as GameState).player.maxHealth;
 
         expect(actions.beginRest({ seed: 7 })).toBe(true);
         playRestToDawn(store, actions);
         const result = actions.claimRestOutcome();
 
         expect(result.applied).toBe(true);
-        expect(result.scarMended).toBe(0);
-
-        const after = store.getState() as unknown as GameState;
-        expect(after.player.maxHealth).toBe(scarredMax);
-        expect(bankedScarMagnitude(after.flags ?? [])).toBe(scar);
+        expect(result.scarMended).toBe(scar);
+        expect((store.getState() as unknown as GameState).player.maxHealth).toBe(baseline);
     });
 
     it('a scarless inn rest leaves maxHealth unchanged', () => {
@@ -201,11 +196,11 @@ describe('hazard scar recovery at inn rest', () => {
         expect(actions.claimRestOutcome().scarMended).toBe(scar);
     });
 
-    it('a Charcoal Wood camp routes a CAMP rest through the live interceptor', () => {
-        // cw-9 (the hunting lodge's porch) is wilderness: it must not mend scars.
+    it('a Charcoal Wood camp routes a CAMP rest through the live interceptor, and it mends', () => {
+        // cw-9 (the hunting lodge's porch) is wilderness, past the last inn.
         const { store, actions } = makeStoreAndActions();
+        const baseline = (store.getState() as unknown as GameState).player.maxHealth;
         const scar = scarThePlayer(store, actions);
-        const scarredMax = (store.getState() as unknown as GameState).player.maxHealth;
 
         const before = store.getState() as unknown as GameState;
         store.setState({
@@ -224,8 +219,8 @@ describe('hazard scar recovery at inn rest', () => {
         expect(restChoiceSession(store).shelter).toBe('camp');
 
         playRestToDawn(store, actions);
-        expect(actions.claimRestOutcome().scarMended).toBe(0);
-        expect((store.getState() as unknown as GameState).player.maxHealth).toBe(scarredMax);
-        expect(bankedScarMagnitude((store.getState() as unknown as GameState).flags ?? [])).toBe(scar);
+        expect(actions.claimRestOutcome().scarMended).toBe(scar);
+        expect((store.getState() as unknown as GameState).player.maxHealth).toBe(baseline);
+        expect(bankedScarMagnitude((store.getState() as unknown as GameState).flags ?? [])).toBe(0);
     });
 });

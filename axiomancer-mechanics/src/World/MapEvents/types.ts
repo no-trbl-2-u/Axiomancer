@@ -69,8 +69,8 @@ export interface GatheringPayload {
 /**
  * Shelter class of a rest node.
  *
- * `'inn'` is a PAID, tended shelter — full-recovery semantics, and the
- * only place hazard-scarred max-VITAE is mended back toward baseline.
+ * `'inn'` is a PAID, tended shelter; the rest screen words its night as
+ * a bed.
  * `'camp'` is anything in the wild: a spring, a mossy log, a corner of
  * the labyrinth the house forgot to make uncomfortable.
  *
