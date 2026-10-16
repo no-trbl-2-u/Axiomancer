@@ -1,0 +1,48 @@
+{
+  "stamp": {
+    "commit": "b0ac22f8",
+    "date": "2026-10-16T02:49:04Z"
+  },
+  "targets": [
+    {
+      "name": "mechanics: combat resolution",
+      "cwd": "axiomancer-mechanics",
+      "mutate": [
+        "src/Combat/effects.ts",
+        "src/Combat/effect-modifiers.ts",
+        "src/Combat/health.ts",
+        "src/Combat/resist.ts",
+        "src/Combat/stat-scaling.ts",
+        "src/Combat/combat.dice.ts"
+      ],
+      "seconds": 1380,
+      "outcome": "over budget (1380s): 694 of 820 tested, 121 survived",
+      "partial": {
+        "tested": 694,
+        "total": 820,
+        "survived": 121,
+        "timedOut": 4
+      },
+      "files": [],
+      "survivors": []
+    },
+    {
+      "name": "mobile: combat presenters",
+      "cwd": "axiomancer-mobile",
+      "mutate": [
+        "state/presenters/combat-encounter.engine.ts",
+        "state/presenters/card-program.engine.ts"
+      ],
+      "seconds": 1380,
+      "outcome": "over budget (1380s): 564 of 2276 tested, 6 survived",
+      "partial": {
+        "tested": 564,
+        "total": 2276,
+        "survived": 6,
+        "timedOut": 2
+      },
+      "files": [],
+      "survivors": []
+    }
+  ]
+}

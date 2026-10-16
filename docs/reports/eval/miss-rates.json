@@ -1,0 +1,79 @@
+{
+  "stamp": {
+    "commit": "15a2fa76",
+    "date": "2026-10-16T07:25:59Z"
+  },
+  "inputs": {
+    "ledger": "86eea99d",
+    "parent replay": "5085b096",
+    "planted defects": "b0ac22f8",
+    "mutation": "b0ac22f8"
+  },
+  "rows": [
+    {
+      "judge": "CI and its path filters",
+      "misses": [
+        "D1 (#534)",
+        "D2 (#523)",
+        "D3 (#529)",
+        "D4 (#543)"
+      ],
+      "of": 4,
+      "rate": 100,
+      "note": "1 of 4 planted defects trigger no `verify-*` workflow (D4). Path coverage: 9 of 26 ledger PRs changed code no filter covers (#505, #507, #509, #520, #523, #526, #535, #543, #549)."
+    },
+    {
+      "judge": "`verify`",
+      "misses": [
+        "D1 (#534)",
+        "D2 (#523)",
+        "D3 (#529)",
+        "D4 (#543)"
+      ],
+      "of": 4,
+      "rate": 100,
+      "note": "Tests as they stood at each fix's parent. Each fix's own tests catch its defect: 4 of 4. Mutation: mechanics: combat resolution: over budget (1380s): 694 of 820 tested, 121 survived; mobile: combat presenters: over budget (1380s): 564 of 2276 tested, 6 survived."
+    },
+    {
+      "judge": "The antagonist",
+      "misses": [
+        "#520 (S3)",
+        "#521 (S3)",
+        "#523 (S3, S5)",
+        "#526 (S4)"
+      ],
+      "of": 5,
+      "rate": 80,
+      "note": "Denominator: PRs carrying a seeded escape that the antagonist reviewed before merge. It reviewed 6 of 26 ledger PRs; 1 drew a \"not a pass\"."
+    },
+    {
+      "judge": "`/critique`",
+      "misses": null,
+      "of": null,
+      "rate": null,
+      "note": "it plays the deployed web build after merge and no ledger row records what a pass saw against what had escaped, so it has no denominator. Context: 5 follow-up fix(es) in the ledger cite a critique pass."
+    },
+    {
+      "judge": "The merge gate",
+      "misses": [
+        "#509",
+        "#529",
+        "#541"
+      ],
+      "of": 26,
+      "rate": 11.5,
+      "note": "A miss is a merge before every check on the final head finished, or over an antagonist \"not a pass\" (S1)."
+    },
+    {
+      "judge": "The builder's own `[x]`",
+      "misses": [
+        "#521 A4 (S3)",
+        "#523 A6 (S3)",
+        "#523 verify:visual (S5)"
+      ],
+      "of": 65,
+      "rate": 4.6,
+      "note": "Misses: ticks the parent replay found unproven (0), the seeded S3 ticks and S5's missing shot. 49 of 65 ticks name no test, so the replay can neither prove nor clear them."
+    }
+  ]
+}
