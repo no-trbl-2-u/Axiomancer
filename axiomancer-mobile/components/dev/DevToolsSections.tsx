@@ -1,11 +1,11 @@
 /**
  * Grouped dev-tools surface — the body of the `/dev` route.
  *
- * Holds a live STATE inspector, the L1–L50 player ladder, the CARDS
+ * Holds a live STATE inspector, XP / wallet / effect controls, the CARDS
  * section (lane test decks and the reward-pool lanes), world travel
  * to any map / node with its authored event, the labyrinth acts, an
- * any-foe enemy picker, every reward channel, real NPC trees + real
- * quests, effect and item pickers, and run controls.
+ * any-foe enemy picker, every reward channel, real NPC trees, an item
+ * picker, and run controls.
  *
  * Sections read top-down in the order a tester thinks: see state →
  * shape the player → shape the deck → stand somewhere → fight / play a
@@ -35,13 +35,10 @@ const lazyNamed = <T extends React.ComponentType>(load: () => Promise<Record<str
 // ── STATE ──
 const DebugStateInspector = lazyNamed(() => import('@/components/DebugStateInspector'), 'DebugStateInspector');
 // ── PLAYER ──
-const DebugPresetPicker = lazyNamed(() => import('@/components/DebugPresetPicker'), 'DebugPresetPicker');
-const DebugPlayerTierPresets = lazyNamed(() => import('@/components/DebugPlayerTierPresets'), 'DebugPlayerTierPresets');
 const DebugXpGrant = lazyNamed(() => import('@/components/DebugXpGrant'), 'DebugXpGrant');
 const DebugCurrencyControl = lazyNamed(() => import('@/components/DebugCurrencyControl'), 'DebugCurrencyControl');
 const DebugEffectApply = lazyNamed(() => import('@/components/DebugEffectApply'), 'DebugEffectApply');
 // ── DECKS & ITEMS ──
-const DebugHazardDeckRandomize = lazyNamed(() => import('@/components/DebugHazardDeckRandomize'), 'DebugHazardDeckRandomize');
 const DebugGetAllRelics = lazyNamed(() => import('@/components/DebugGetAllRelics'), 'DebugGetAllRelics');
 const DebugItemPicker = lazyNamed(() => import('@/components/DebugItemPicker'), 'DebugItemPicker');
 // ── CARDS ──
@@ -120,16 +117,13 @@ export function DevToolsSections() {
                 <DebugStateInspector />
             </DevSection>
 
-            <DevSection label="PLAYER" hint="archetype · level · wallet · effects" testID="dev-section-player">
-                <DebugPresetPicker />
-                <DebugPlayerTierPresets />
+            <DevSection label="PLAYER" hint="xp · wallet · effects" testID="dev-section-player">
                 <DebugXpGrant />
                 <DebugCurrencyControl />
                 <DebugEffectApply />
             </DevSection>
 
-            <DevSection label="DECKS & ITEMS" hint="hazard deck · satchel" testID="dev-section-decks">
-                <DebugHazardDeckRandomize />
+            <DevSection label="DECKS & ITEMS" hint="satchel" testID="dev-section-decks">
                 <DebugGetAllRelics />
                 <DebugItemPicker />
             </DevSection>

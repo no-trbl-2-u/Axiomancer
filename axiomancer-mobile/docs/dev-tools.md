@@ -98,8 +98,6 @@ open after one session of poking).
 
 | Leaf | What it does | Test ids |
 |---|---|---|
-| `DebugPresetPicker` | Rebuild the player from an engine archetype (apprentice / wanderer / sage) | `debug-preset-<id>` |
-| `DebugPlayerTierPresets` | Rebuild at L1 / L15 / L30 / L50 via `levelLadderPresets` | `debug-player-tier-<id>` |
 | `DebugXpGrant` | +100 XP, +1000 XP, or force a LEVELUP through the engine dispatch (`state/dev/rewards.ts`) | `debug-xp-grant-button`, `debug-xp-grant-large-button`, `debug-xp-levelup-button` |
 | `DebugCurrencyControl` | +50S, +500S, BROKE (wallet to zero) | `debug-currency-{small-grant,large-grant,broke}` |
 | `DebugEffectApply` | One chip per buff/debuff in `effectsLibrary` (engine `applyEffect`); CLEAR | `debug-effect-<id>`, `debug-effect-clear` |
@@ -108,7 +106,6 @@ open after one session of poking).
 
 | Leaf | What it does | Test ids |
 |---|---|---|
-| `DebugHazardDeckRandomize` | Hazard deck presets and a random deck | `debug-hazard-deck-preset-<id>`, `debug-hazard-deck-randomize` |
 | `DebugItemPicker` | One chip per relic (red) and consumable → `actions.addItemById` | `debug-item-<id>` |
 
 ### WORLD — `dev-section-world`
@@ -132,7 +129,7 @@ open after one session of poking).
 | `DebugHazardButton` | Start a hazard (BRAVE IT) | `debug-hazard-button` |
 | `DebugRestButton` | Start the night watch at a camp or an inn | `debug-rest-button`, `debug-rest-inn-button` |
 | `DebugBlacksmithButton` | Open the Anvil with the witness variant | `debug-blacksmith-button` |
-| `DebugRewardTriggers` | RELIQUARY MODEST / RICH (loot-cache tiers), ANVIL ×500 (fixed budget), UNLOCK JOURNAL (every foe codex entry), KNOW ALL CARDS, and one chip per authored hazard id (`state/dev/rewards.ts`) | `debug-cache-button`, `debug-cache-rich-button`, `debug-anvil-budget-button`, `debug-journal-unlock-button`, `debug-learn-all-cards-button`, `debug-hazard-id-<id>` |
+| `DebugRewardTriggers` | RELIQUARY MODEST / RICH (loot-cache tiers), ANVIL ×500 (fixed budget), UNLOCK JOURNAL (every foe codex entry), and one chip per authored hazard id (`state/dev/rewards.ts`) | `debug-cache-button`, `debug-cache-rich-button`, `debug-anvil-budget-button`, `debug-journal-unlock-button`, `debug-hazard-id-<id>` |
 
 ### STORY — `dev-section-story`
 
@@ -165,6 +162,9 @@ open after one session of poking).
 | `DebugAddItemById` | Free-text input replaced by `DebugItemPicker` chips. |
 | `DebugPopulateAllItems` | POPULATE overlapped `DebugItemPicker` (any one item) + `DebugGetAllRelics` (every relic); the only unique reach was "every consumable at once". |
 | `DebugQuestState` | No `MapDefinition` authors a quest, so `listQuests()` was empty and the leaf rendered nothing. Restore it with the quest content, not before. |
+| `DebugPresetPicker`, `DebugPlayerTierPresets` | Owner call 2026-10-16. Both built players off the real stat curve (CRITIQUE.md: sage carries 75 stat points where a L15 pilgrim reaches 29; `kid-l50` 126 vs 64). The preset *data* stays — `STATE_FIXTURES` and `state/actions.ts` build from it — so a fixture boot (`?fixture=sage-bw-door-gate`) reaches the same player without a button. `e2e:combat-round:boss` / `:levelup` were repointed at fixtures first. |
+| `DebugHazardDeckRandomize` | Owner call 2026-10-16. `HAZARD_DECK_PRESETS` and `actions.randomizeHazardDeck()` stay; only the dev-menu leaf is gone. |
+| KNOW ALL CARDS (in `DebugRewardTriggers`) | Owner call 2026-10-16. `learnAllCards` (`state/dev/rewards.ts`) stays and is now unreferenced by any surface. |
 | HIDE MANA / HIDE STANCE toggles | The HUD presenter never read them. |
 | `DebugHudOverrides`, the `devOverrides` store slice, `state/presenters/combat-hud.engine.ts` | HIDE EFFECTS fed a presenter no screen rendered, so the toggle was a no-op (TRIM THE FAT T3, 2026-09-25). |
 | `DebugCombatDeck`, `applyCombatDeckPreset` / `randomizeCombatDeck` actions | Superseded by the Deck tab (TRIM THE FAT T3, 2026-09-25). |
