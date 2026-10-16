@@ -21,6 +21,7 @@ import { mkdir } from 'node:fs/promises'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { injectMinigameSeeds } from './minigame-seed-injector.mjs'
+import { openAllDevSections } from './dev-sections.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO = resolve(__dirname, '..')
@@ -250,6 +251,7 @@ async function openDevMenu(page) {
     await link.waitFor({ state: 'visible', timeout: 15000 })
     await link.click()
     await page.waitForURL((url) => url.pathname.endsWith('/dev'), { timeout: 10000 })
+    await openAllDevSections(page, 10000)
 }
 
 async function settle(page, ms) {

@@ -15,6 +15,8 @@
 // Replaces the pre-v1 `/combat-encounter` dev sandbox (mock foe, demo deck),
 // which tools used to cold-load directly; it was deleted in phase CR1a.
 
+import { openAllDevSections } from './dev-sections.mjs'
+
 /**
  * @param {import('playwright').Page} page
  * @param {string} baseUrl the static server's origin.
@@ -31,6 +33,7 @@ export async function enterLiveFight(page, baseUrl, options = {}) {
     await link.waitFor({ state: 'visible', timeout })
     await link.click()
     await page.waitForURL((url) => url.pathname.endsWith('/dev'), { timeout })
+    await openAllDevSections(page, timeout)
     const trigger = page.getByTestId(`debug-trigger-encounter-${kind}`)
     await trigger.waitFor({ state: 'visible', timeout })
     await trigger.click({ force: true })

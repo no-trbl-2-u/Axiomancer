@@ -94,7 +94,7 @@ function DevSection({ label, hint, testID, children }: { label: string; hint: st
         <View style={styles.section} testID={testID}>
             <Pressable
                 accessibilityRole="button"
-                accessibilityState={{ expanded: open }}
+                aria-expanded={open}
                 onPress={toggle}
                 style={[styles.sectionHeader, open && styles.sectionHeaderOpen]}
                 testID={`${testID}-toggle`}

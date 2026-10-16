@@ -70,6 +70,7 @@ import { readFile, stat, mkdir, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { resolve, dirname, join, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { openAllDevSections } from './dev-sections.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..')
@@ -473,6 +474,7 @@ async function enterLive(page, baseUrl, seed) {
     await page.getByTestId('self-dev-tools-link').waitFor({ state: 'visible', timeout: 25000 })
     await page.getByTestId('self-dev-tools-link').click()
     await page.waitForURL((url) => url.pathname.endsWith('/dev'), { timeout: 15000 })
+    await openAllDevSections(page, 15000)
     // Optional player preset (PRESET=endgame|sage|wanderer|apprentice|fresh):
     // a fresh e2e save is a level-1 pilgrim who usually LOSES, so the victory
     // aftermath — the reward draft and its ACCEPT path — went unexercised on

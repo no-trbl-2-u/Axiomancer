@@ -37,6 +37,7 @@ import { readFile, stat } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { resolve, dirname, join, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { openAllDevSections } from './dev-sections.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..')
@@ -169,6 +170,7 @@ async function openDevTools(page) {
     await page.getByTestId('self-dev-tools-link').waitFor({ state: 'visible', timeout: 15000 })
     await page.getByTestId('self-dev-tools-link').click()
     await page.waitForURL((url) => url.pathname.endsWith('/dev'), { timeout: 10000 })
+    await openAllDevSections(page, 10000)
 }
 
 async function checkButton(page, baseUrl, c) {
