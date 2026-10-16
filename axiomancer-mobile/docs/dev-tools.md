@@ -81,7 +81,10 @@ the player → shape the deck → stand somewhere → fight / play a minigame �
 collect rewards → drive the story → tweak the UI → manage the run and
 read the log.** Section container ids are `dev-section-<key>`; each
 section starts closed and its header (`dev-section-<key>-toggle`) opens it.
-Open sections stay open across visits to `/dev` until the app restarts.
+Open state is route-local: leaving `/dev` closes every section, so each
+visit starts on the nine headers alone (changed 2026-10-16 — the open set
+used to outlive the route for the life of the app, which left every header
+open after one session of poking).
 
 ## Sections and controls
 
@@ -95,18 +98,17 @@ Open sections stay open across visits to `/dev` until the app restarts.
 
 | Leaf | What it does | Test ids |
 |---|---|---|
-| `DebugPresetPicker` | Rebuild the player from an engine archetype (apprentice / wanderer / sage) | `debug-preset-<id>` |
-| `DebugPlayerTierPresets` | Rebuild at L1 / L15 / L30 / L50 via `levelLadderPresets` | `debug-player-tier-<id>` |
 | `DebugXpGrant` | +100 XP, +1000 XP, or force a LEVELUP through the engine dispatch (`state/dev/rewards.ts`) | `debug-xp-grant-button`, `debug-xp-grant-large-button`, `debug-xp-levelup-button` |
-| `DebugCurrencyControl` | +50S, +500S, BROKE (wallet to zero) | `debug-currency-{small-grant,large-grant,broke}` |
 | `DebugEffectApply` | One chip per buff/debuff in `effectsLibrary` (engine `applyEffect`); CLEAR | `debug-effect-<id>`, `debug-effect-clear` |
+
+The wallet moved out of this section to RUN & DIAGNOSTICS on 2026-10-16:
+granting shillings is a harness chore like SAVE or RESET, not a way of
+shaping who the player is.
 
 ### DECKS & ITEMS — `dev-section-decks`
 
 | Leaf | What it does | Test ids |
 |---|---|---|
-| `DebugHazardDeckRandomize` | Hazard deck presets and a random deck | `debug-hazard-deck-preset-<id>`, `debug-hazard-deck-randomize` |
-| `DebugPopulateAllItems` | One of every relic + consumable into the satchel | `debug-populate-all-items` |
 | `DebugItemPicker` | One chip per relic (red) and consumable → `actions.addItemById` | `debug-item-<id>` |
 
 ### WORLD — `dev-section-world`
@@ -130,15 +132,13 @@ Open sections stay open across visits to `/dev` until the app restarts.
 | `DebugHazardButton` | Start a hazard (BRAVE IT) | `debug-hazard-button` |
 | `DebugHazardPuzzlesButton` | Open the HAZARD PUZZLES board (`/devpuzzle`): three fixed demo puzzles, a route pick, the board under its clock, and the outcome panel (`?id=<demo>&route=safe\|risk` deep-links a demo; `&confirm=1` confirms at once, `&paused=1` holds the clock) | `debug-hazard-puzzles-button` |
 | `DebugRestButton` | Start the night watch at a camp or an inn | `debug-rest-button`, `debug-rest-inn-button` |
-| `DebugBlacksmithButton` | Open the Anvil with the witness variant | `debug-blacksmith-button` |
-| `DebugRewardTriggers` | RELIQUARY MODEST / RICH (loot-cache tiers), ANVIL ×500 (fixed budget), UNLOCK JOURNAL (every foe codex entry), KNOW ALL CARDS, and one chip per authored hazard id (`state/dev/rewards.ts`) | `debug-cache-button`, `debug-cache-rich-button`, `debug-anvil-budget-button`, `debug-journal-unlock-button`, `debug-learn-all-cards-button`, `debug-hazard-id-<id>` |
+| `DebugRewardTriggers` | RELIQUARY MODEST / RICH (loot-cache tiers), ANVIL ×500 (fixed budget), UNLOCK JOURNAL (every foe codex entry), and one chip per authored hazard id (`state/dev/rewards.ts`) | `debug-cache-button`, `debug-cache-rich-button`, `debug-anvil-budget-button`, `debug-journal-unlock-button`, `debug-hazard-id-<id>` |
 
 ### STORY — `dev-section-story`
 
 | Leaf | Helper | What it does | Test ids |
 |---|---|---|---|
 | `DebugDialogueJump` | `state/dev/story-catalog.ts` → `listNpcs` | One chip per staged NPC with a tree (all maps); opens `/dialogue` with the real tree | `debug-dialogue-<map>-<npc-slug>` |
-| `DebugQuestState` | `listQuests` | One chip per authored quest with live status; START / ADVANCE / COMPLETE the selected one through the engine reducers | `debug-quest-<name>`, `debug-quest-{start,advance,complete}` |
 
 ### UI — `dev-section-ui`
 
@@ -149,6 +149,7 @@ Open sections stay open across visits to `/dev` until the app restarts.
 
 | Leaf | What it does | Test ids |
 |---|---|---|
+| `DebugCurrencyControl` | +50S, +500S, BROKE (wallet to zero). Lived under PLAYER until 2026-10-16 | `debug-currency-{small-grant,large-grant,broke}` |
 | `DebugRunControls` | SAVE, RESET RUN (keep character), NEW RUN; gallery links to `/devart`, `/devart/rooms`, `/devaftermath?panel=defeat|parley` | `debug-run-{save,reset,new}`, `debug-gallery-{enemy-art,rooms,defeat,parley}` |
 | `DebugLogViewer` | AXM Log ring buffer with level / domain filters and the previous-session tail | `debug-log-viewer`, … |
 
@@ -163,6 +164,13 @@ Open sections stay open across visits to `/dev` until the app restarts.
 | `DebugAporiaButton`, `DebugMapResetButton` | Folded into `DebugWorldTravel`. |
 | `DebugCombatEncounterButton`, `DebugCombatTutorialButton`, `DebugCombatSandbox` | The pre-v1 `/combat-encounter` sandbox (mock foe, demo deck, nothing persisted); deleted in phase CR1a when the route became the live fight. A fight is entered through the quick triggers or the enemy picker. |
 | `DebugAddItemById` | Free-text input replaced by `DebugItemPicker` chips. |
+| `DebugPopulateAllItems` | POPULATE overlapped `DebugItemPicker` (any one item) + `DebugGetAllRelics` (every relic); the only unique reach was "every consumable at once". |
+| `DebugQuestState` | No `MapDefinition` authors a quest, so `listQuests()` was empty and the leaf rendered nothing. Restore it with the quest content, not before. |
+| `DebugPresetPicker`, `DebugPlayerTierPresets` | Owner call 2026-10-16. Both built players off the real stat curve (CRITIQUE.md: sage carries 75 stat points where a L15 pilgrim reaches 29; `kid-l50` 126 vs 64). The preset *data* stays — `STATE_FIXTURES` and `state/actions.ts` build from it — so a fixture boot (`?fixture=sage-bw-door-gate`) reaches the same player without a button. `e2e:combat-round:boss` / `:levelup` were repointed at fixtures first. |
+| `DebugHazardDeckRandomize` | Owner call 2026-10-16. `HAZARD_DECK_PRESETS` and `actions.randomizeHazardDeck()` stay; only the dev-menu leaf is gone. |
+| KNOW ALL CARDS (in `DebugRewardTriggers`) | Owner call 2026-10-16. `learnAllCards` (`state/dev/rewards.ts`) stays and is now unreferenced by any surface. |
+| `DebugBlacksmithButton` | Owner call 2026-10-16. ANVIL ×500 in `DebugRewardTriggers` strictly dominated it: `BLACKSMITH_WITNESS_VARIANTS` *is* `[HEART_RICH_PAYLOAD_VARIANT]`, the single variant this button offered, and ANVIL adds a 500-shilling budget. The only reach lost is the Anvil on the player's real wallet, which the `wanderer-bw-blacksmith` fixture gives (180 shillings). It carried no test and no harness drove it. |
+| `DebugGetAllRelics` | Owner call 2026-10-16. `DebugItemPicker` chips every id in `relicLibrary` — the same library `grantAllRelics` walks — so the only unique reach was every relic in one tap. The action stays on the store surface; its behaviour (once each, nothing displaced, a free trinket position worn for real) moved from the deleted component test to `state/e2e/dev-presets.engine.test.ts`. |
 | HIDE MANA / HIDE STANCE toggles | The HUD presenter never read them. |
 | `DebugHudOverrides`, the `devOverrides` store slice, `state/presenters/combat-hud.engine.ts` | HIDE EFFECTS fed a presenter no screen rendered, so the toggle was a no-op (TRIM THE FAT T3, 2026-09-25). |
 | `DebugCombatDeck`, `applyCombatDeckPreset` / `randomizeCombatDeck` actions | Superseded by the Deck tab (TRIM THE FAT T3, 2026-09-25). |
@@ -176,6 +184,14 @@ DebugTriggerEncounter|DebugWorld` → encounters; `DebugHazard*` → hazard;
 `CombatGate` → combat). Browser scripts depend on these ids staying
 stable: `self-dev-tools-link`, `debug-trigger-encounter-*`
 (`scripts/live-fight-entry.mjs` enters every scripted fight through it),
-`debug-preset-*`, `debug-hazard-button`,
-`debug-currency-large-grant`, `debug-blacksmith-button`,
-`debug-rest-button`, `debug-cache-button`, `debug-player-tier-*`.
+`debug-hazard-button`, `debug-currency-large-grant`, `debug-rest-button`,
+`debug-cache-button`, `debug-xp-grant-button`.
+
+`debug-currency-*` answers to `dev-section-run`, not `dev-section-player`,
+since 2026-10-16: a harness reaching it through `openDevSection`
+(`scripts/dev-section.mjs`) passes `run` as the section key.
+
+The preset ids (`debug-preset-*`, `debug-player-tier-*`) are gone with
+their leaves (2026-10-16). A harness that needs a built-out player boots
+a committed state fixture instead — `combat-round-e2e.mjs` maps its
+`PRESET` env values to fixture ids in `PRESET_FIXTURES`.

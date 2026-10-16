@@ -1,20 +1,25 @@
 /**
  * Grouped dev-tools surface — the body of the `/dev` route.
  *
- * Holds a live STATE inspector, the L1–L50 player ladder, the CARDS
- * section (lane test decks and the reward-pool lanes), world travel
- * to any map / node with its authored event, the labyrinth acts, an
- * any-foe enemy picker, every reward channel, real NPC trees + real
- * quests, effect and item pickers, and run controls.
+ * Holds a live STATE inspector, XP / effect controls, the CARDS section
+ * (lane test decks and the reward-pool lanes), world travel to any map /
+ * node with its authored event, the labyrinth acts, an any-foe enemy
+ * picker, every reward channel, real NPC trees, an item picker, and run
+ * controls.
  *
  * Sections read top-down in the order a tester thinks: see state →
  * shape the player → shape the deck → stand somewhere → fight / play a
  * minigame → collect rewards → drive the story → tweak the UI → manage
  * the run and read the log. `testID`s: `dev-section-<key>`.
  *
+ * The wallet (`DebugCurrencyControl`) sits in RUN & DIAGNOSTICS, not
+ * PLAYER: granting shillings is a harness chore like SAVE or RESET, not
+ * a way of shaping who the player is (owner call 2026-10-16).
+ *
  * Every section collapses: closed by default, its header toggles it, and
- * which sections are open survives leaving and re-entering `/dev` for the
- * life of the app. A closed section does not mount its leaves.
+ * nothing is remembered — every entry to `/dev` opens on nine closed
+ * headers, however the last visit was left. A closed section does not
+ * mount its leaves.
  *
  * Every leaf is `React.lazy` so production bundles never import the
  * Debug* modules; the container also self-gates on `isDevToolsEnabled`.
@@ -34,15 +39,9 @@ const lazyNamed = <T extends React.ComponentType>(load: () => Promise<Record<str
 // ── STATE ──
 const DebugStateInspector = lazyNamed(() => import('@/components/DebugStateInspector'), 'DebugStateInspector');
 // ── PLAYER ──
-const DebugPresetPicker = lazyNamed(() => import('@/components/DebugPresetPicker'), 'DebugPresetPicker');
-const DebugPlayerTierPresets = lazyNamed(() => import('@/components/DebugPlayerTierPresets'), 'DebugPlayerTierPresets');
 const DebugXpGrant = lazyNamed(() => import('@/components/DebugXpGrant'), 'DebugXpGrant');
-const DebugCurrencyControl = lazyNamed(() => import('@/components/DebugCurrencyControl'), 'DebugCurrencyControl');
 const DebugEffectApply = lazyNamed(() => import('@/components/DebugEffectApply'), 'DebugEffectApply');
 // ── DECKS & ITEMS ──
-const DebugHazardDeckRandomize = lazyNamed(() => import('@/components/DebugHazardDeckRandomize'), 'DebugHazardDeckRandomize');
-const DebugPopulateAllItems = lazyNamed(() => import('@/components/DebugPopulateAllItems'), 'DebugPopulateAllItems');
-const DebugGetAllRelics = lazyNamed(() => import('@/components/DebugGetAllRelics'), 'DebugGetAllRelics');
 const DebugItemPicker = lazyNamed(() => import('@/components/DebugItemPicker'), 'DebugItemPicker');
 // ── CARDS ──
 const DebugLaneDeck = lazyNamed(() => import('@/components/DebugLaneDeck'), 'DebugLaneDeck');
@@ -60,13 +59,12 @@ const DebugHazardPuzzlesButton = lazyNamed(
     'DebugHazardPuzzlesButton',
 );
 const DebugRestButton = lazyNamed(() => import('@/components/DebugRestButton'), 'DebugRestButton');
-const DebugBlacksmithButton = lazyNamed(() => import('@/components/DebugBlacksmithButton'), 'DebugBlacksmithButton');
 const DebugRewardTriggers = lazyNamed(() => import('@/components/DebugRewardTriggers'), 'DebugRewardTriggers');
 // ── STORY ──
 const DebugDialogueJump = lazyNamed(() => import('@/components/DebugDialogueJump'), 'DebugDialogueJump');
-const DebugQuestState = lazyNamed(() => import('@/components/DebugQuestState'), 'DebugQuestState');
 // ── UI ──
 // ── RUN & DIAGNOSTICS ──
+const DebugCurrencyControl = lazyNamed(() => import('@/components/DebugCurrencyControl'), 'DebugCurrencyControl');
 const DebugRunControls = lazyNamed(() => import('@/components/DebugRunControls'), 'DebugRunControls');
 const DebugLogViewer = lazyNamed(() => import('@/components/DebugLogViewer'), 'DebugLogViewer');
 const DebugCrashTest = lazyNamed(() => import('@/components/DebugCrashTest'), 'DebugCrashTest');
@@ -80,20 +78,18 @@ function LoadingFallback() {
     );
 }
 
-/** Which sections are open, by testID — module scope so it outlives the route. */
-const openSections = new Set<string>();
-
-/** One titled, dashed-border group of leaves; its header opens and closes it. */
+/**
+ * One titled, dashed-border group of leaves; its header opens and closes it.
+ *
+ * `open` is plain route-local state: leaving `/dev` unmounts it, so the next
+ * visit starts closed. Nothing is hoisted to module scope on purpose — an
+ * open set that outlived the route meant one session of poking left every
+ * header open for the life of the app, which is the whole of the clutter.
+ */
 function DevSection({ label, hint, testID, children }: { label: string; hint: string; testID: string; children: React.ReactNode }) {
     const styles = useStyles();
-    const [open, setOpen] = React.useState(() => openSections.has(testID));
-    const toggle = () => {
-        setOpen((was) => {
-            if (was) openSections.delete(testID);
-            else openSections.add(testID);
-            return !was;
-        });
-    };
+    const [open, setOpen] = React.useState(false);
+    const toggle = () => setOpen((was) => !was);
     return (
         <View style={styles.section} testID={testID}>
             <Pressable
@@ -127,18 +123,12 @@ export function DevToolsSections() {
                 <DebugStateInspector />
             </DevSection>
 
-            <DevSection label="PLAYER" hint="archetype · level · wallet · effects" testID="dev-section-player">
-                <DebugPresetPicker />
-                <DebugPlayerTierPresets />
+            <DevSection label="PLAYER" hint="xp · effects" testID="dev-section-player">
                 <DebugXpGrant />
-                <DebugCurrencyControl />
                 <DebugEffectApply />
             </DevSection>
 
-            <DevSection label="DECKS & ITEMS" hint="hazard deck · satchel" testID="dev-section-decks">
-                <DebugHazardDeckRandomize />
-                <DebugPopulateAllItems />
-                <DebugGetAllRelics />
+            <DevSection label="DECKS & ITEMS" hint="satchel" testID="dev-section-decks">
                 <DebugItemPicker />
             </DevSection>
 
@@ -157,20 +147,19 @@ export function DevToolsSections() {
                 <DebugSkipEvent />
             </DevSection>
 
-            <DevSection label="MINIGAMES & REWARDS" hint="hazard · hazard puzzles · rest · anvil · reliquary · journal · cards" testID="dev-section-rewards">
+            <DevSection label="MINIGAMES & REWARDS" hint="hazard · hazard puzzles · rest · anvil · reliquary · journal" testID="dev-section-rewards">
                 <DebugHazardButton />
                 <DebugHazardPuzzlesButton />
                 <DebugRestButton />
-                <DebugBlacksmithButton />
                 <DebugRewardTriggers />
             </DevSection>
 
-            <DevSection label="STORY" hint="real NPC trees · real quests" testID="dev-section-story">
+            <DevSection label="STORY" hint="real NPC trees" testID="dev-section-story">
                 <DebugDialogueJump />
-                <DebugQuestState />
             </DevSection>
 
-            <DevSection label="RUN & DIAGNOSTICS" hint="save · reset · galleries · log · crash test" testID="dev-section-run">
+            <DevSection label="RUN & DIAGNOSTICS" hint="wallet · save · reset · galleries · log · crash test" testID="dev-section-run">
+                <DebugCurrencyControl />
                 <DebugRunControls />
                 <DebugLogViewer />
                 <DebugCrashTest />

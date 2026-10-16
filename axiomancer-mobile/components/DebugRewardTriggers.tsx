@@ -12,8 +12,6 @@
  *   ANVIL      — the blacksmith with a fixed budget so die-gear upgrades
  *                are affordable regardless of the wallet.
  *   JOURNAL    — unlock every foe's codex entry (`unlockAllJournal`).
- *   CARDS      — know every library card (`learnAllCards`) to stress the
- *                deck-builder and the post-combat draft weights.
  *
  * Renders null outside dev builds.
  */
@@ -24,7 +22,7 @@ import { BLACKSMITH_WITNESS_VARIANTS } from '@mechanics';
 import { DevButton, DevButtons, DevChip, DevChips, DevRow } from '@/components/dev/DevControls';
 import { isDevToolsEnabled } from '@/lib/buildProfile';
 import { useGameActions, useGameStore } from '@/state/GameStoreProvider';
-import { CACHE_TIERS, learnAllCards, listHazards, listJournalEntries, unlockAllJournal } from '@/state/dev/rewards';
+import { CACHE_TIERS, listHazards, listJournalEntries, unlockAllJournal } from '@/state/dev/rewards';
 
 const HAZARDS = listHazards();
 const JOURNAL_COUNT = listJournalEntries().length;
@@ -54,11 +52,10 @@ export function DebugRewardTriggers() {
     };
 
     const onJournal = () => setFeedback(`journal · ${unlockAllJournal(store)} new of ${JOURNAL_COUNT}`);
-    const onCards = () => setFeedback(`cards · ${learnAllCards(store)} newly known`);
 
     return (
         <>
-            <DevRow label="DEBUG · REWARDS" sub={feedback ?? 'reliquary tiers · anvil · journal · every card'} testID="debug-rewards">
+            <DevRow label="DEBUG · REWARDS" sub={feedback ?? 'reliquary tiers · anvil · journal'} testID="debug-rewards">
                 <DevButtons>
                     {CACHE_TIERS.map((t) => (
                         <DevButton
@@ -71,7 +68,6 @@ export function DebugRewardTriggers() {
                     ))}
                     <DevButton label="ANVIL ×500" onPress={onAnvil} a11y={`Open the blacksmith with a ${ANVIL_BUDGET} shilling budget`} testID="debug-anvil-budget-button" />
                     <DevButton label="UNLOCK JOURNAL" onPress={onJournal} a11y="Unlock every journal entry" testID="debug-journal-unlock-button" />
-                    <DevButton label="KNOW ALL CARDS" onPress={onCards} a11y="Learn every card in the library" testID="debug-learn-all-cards-button" />
                 </DevButtons>
             </DevRow>
             <DevRow label="DEBUG · HAZARD BY ID" sub="start a specific authored hazard" stacked>
