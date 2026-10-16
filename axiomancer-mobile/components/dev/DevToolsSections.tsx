@@ -52,6 +52,10 @@ const DebugEnemyPicker = lazyNamed(() => import('@/components/DebugEnemyPicker')
 const DebugSkipEvent = lazyNamed(() => import('@/components/DebugSkipEvent'), 'DebugSkipEvent');
 // ── MINIGAMES & REWARDS ──
 const DebugHazardButton = lazyNamed(() => import('@/components/DebugHazardButton'), 'DebugHazardButton');
+const DebugHazardPuzzlesButton = lazyNamed(
+    () => import('@/components/DebugHazardPuzzlesButton'),
+    'DebugHazardPuzzlesButton',
+);
 const DebugRestButton = lazyNamed(() => import('@/components/DebugRestButton'), 'DebugRestButton');
 const DebugBlacksmithButton = lazyNamed(() => import('@/components/DebugBlacksmithButton'), 'DebugBlacksmithButton');
 const DebugRewardTriggers = lazyNamed(() => import('@/components/DebugRewardTriggers'), 'DebugRewardTriggers');
@@ -143,8 +147,9 @@ export function DevToolsSections() {
                 <DebugSkipEvent />
             </DevSection>
 
-            <DevSection label="MINIGAMES & REWARDS" hint="hazard · rest · anvil · reliquary · journal" testID="dev-section-rewards">
+            <DevSection label="MINIGAMES & REWARDS" hint="hazard · hazard puzzles · rest · anvil · reliquary · journal · cards" testID="dev-section-rewards">
                 <DebugHazardButton />
+                <DebugHazardPuzzlesButton />
                 <DebugRestButton />
                 <DebugBlacksmithButton />
                 <DebugRewardTriggers />

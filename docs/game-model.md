@@ -217,6 +217,16 @@ keyword (`EnemyKeyword = never`).
   and four dice rolled once; the player fills the route's meters with FORCE
   and ESCAPE cards for shillings or VITAE. A failure scars: maximum VITAE
   drops (`HAZARD_MAXHP_SCAR`) until the next rest.
+- **The hazard puzzle demos** (`World/Hazard/puzzle/`, dev menu only): a
+  hazard played as one fixed round with no roll, on the same cards and dice.
+  A layout sets the hand, a reserve the DRAW cards pull from, the dice, a goal
+  per route and optional stat unlocks. A solver counts the distinct ways
+  through, and the library test holds each of the three demos
+  (`HAZARD_PUZZLE_LIBRARY`) in its band (easy, medium, hard). The dev menu's
+  HAZARD PUZZLES board plays them under a per-band clock. The outcome pays XP,
+  a modest consumable and a region material; full completion adds the purse,
+  and falling short costs VITAE. Act 1's live hazards are unchanged; the
+  puzzles reach the map only after T approves the demos.
 
 ## What the game does not have
 
