@@ -237,21 +237,34 @@ export interface HazardPuzzleOutcomeVM {
     penalties: string[];
 }
 
+/** What the claim actually took, after the VITAE floor of 1 and the max-VITAE floor of 5. */
+export interface HazardPuzzleApplied {
+    vitaeLost: number;
+    scarApplied: number;
+}
+
+/**
+ * The outcome panel. `applied` is what the claim took from the player; the
+ * penalty lines print it rather than the outcome's nominal numbers, which
+ * the floors can soften (a 4-VITAE player losing "12" loses 3).
+ */
 export function selectHazardPuzzleOutcomeVM(
     result: HazardPuzzleResult,
     outcome: HazardPuzzleOutcome,
     timedOut: boolean,
+    applied: HazardPuzzleApplied = { vitaeLost: outcome.vitaeLoss, scarApplied: outcome.scar },
 ): HazardPuzzleOutcomeVM {
     const headline = result.cleared ? HAZARD_PUZZLE_CLEARED : timedOut ? HAZARD_PUZZLE_TIME_UP : HAZARD_PUZZLE_SHORT;
     const rewards = [hazardPuzzleXpChip(outcome.xp), ...outcome.items.map((i) => hazardPuzzleItemChip(i.name))];
     if (outcome.shillings > 0) rewards.push(hazardPuzzleShillingsChip(outcome.shillings));
     const penalties: string[] = [];
-    if (outcome.vitaeLoss > 0) penalties.push(hazardPuzzleVitaeChip(outcome.vitaeLoss));
-    if (outcome.scar > 0) penalties.push(hazardPuzzleScarChip(outcome.scar));
+    if (applied.vitaeLost > 0) penalties.push(hazardPuzzleVitaeChip(applied.vitaeLost));
+    if (applied.scarApplied > 0) penalties.push(hazardPuzzleScarChip(applied.scarApplied));
     if (penalties.length === 0) penalties.push(HAZARD_PUZZLE_NO_PENALTY);
     return {
         headline,
-        reachedLabel: hazardPuzzleReached(Math.round(result.p * 100)),
+        // Floored, so a short resolve never reads "100%" (p = 199/200 rounds up).
+        reachedLabel: hazardPuzzleReached(Math.floor(result.p * 100)),
         rewards,
         penalties,
     };

@@ -134,6 +134,20 @@ describe('the outcome panel', () => {
         expect(vm.penalties).toEqual(['-12 VITAE', 'SCARRED: -5 MAX VITAE UNTIL YOU REST']);
     });
 
+    it('prints the penalty the claim applied, not the nominal one the floors softened', () => {
+        // A 4/7 VITAE player failing risk at p = 0: nominally -12 VITAE and -5 max, applied -3 and -2.
+        const result = { force: 0, escape: 0, goal: [13, 14] as [number, number], p: 0, cleared: false };
+        const outcome = hazardPuzzleOutcome({ route: 'risk', result, playerLevel: 1, region: 'lantern-deep', seed: 3 });
+        const vm = selectHazardPuzzleOutcomeVM(result, outcome, false, { vitaeLost: 3, scarApplied: 2 });
+        expect(vm.penalties).toEqual(['-3 VITAE', 'SCARRED: -2 MAX VITAE UNTIL YOU REST']);
+    });
+
+    it('never reads 100% on a short resolve', () => {
+        const result = { force: 199, escape: 0, goal: 200, p: 199 / 200, cleared: false };
+        const outcome = hazardPuzzleOutcome({ route: 'safe', result, playerLevel: 1, region: 'lantern-deep', seed: 3 });
+        expect(selectHazardPuzzleOutcomeVM(result, outcome, false).reachedLabel).toBe('99% OF THE GOAL');
+    });
+
     it('a clear pays the purse and loses nothing', () => {
         const result = { force: 13, escape: 14, goal: [13, 14] as [number, number], p: 1, cleared: true };
         const outcome = hazardPuzzleOutcome({ route: 'risk', result, playerLevel: 2, region: 'lantern-deep', seed: 3 });

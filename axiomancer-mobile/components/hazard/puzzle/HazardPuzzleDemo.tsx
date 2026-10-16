@@ -107,7 +107,7 @@ export function HazardPuzzleDemo({ initialId, initialRoute, autoConfirm, clockPa
             if (!result) return;
             const claim = actions.claimHazardPuzzle(play.layout, resolved.route, result.p);
             setPlay({ ...play, session: resolved });
-            setOutcome(selectHazardPuzzleOutcomeVM(result, claim.outcome, timedOut));
+            setOutcome(selectHazardPuzzleOutcomeVM(result, claim.outcome, timedOut, claim));
         },
         [actions, play],
     );
