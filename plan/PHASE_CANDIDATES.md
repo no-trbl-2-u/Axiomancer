@@ -651,6 +651,15 @@
 - estimated phases: 1
 - conflicts: none. Creates no content.
 
+### [ ] [score 3.0] `deploy:check` exits at once on a plan-only HEAD instead of waiting out its 120s grace (lesson `deploy-check-grace`, seen 2×)
+- proposed: 2026-10-16, retro critique 90
+- source signals:
+  - `plan/lessons.md` `deploy-check-grace`, seen 2× (critique 87, critique 90): on a plan-only HEAD `npm run deploy:check` sits in its `INGEST_GRACE_MS` (120s) window before printing "Nothing to check", so a foreground call under the default 120s tool timeout is killed and reads as a hang. Both times the gate was green.
+- rationale: the ladder says a lesson seen 2× is automated. The script already knows which workflows it gates; when HEAD's diff from its first parent touches only paths every gated `verify-*` workflow ignores (`plan/`, `telemetry/`, `docs/reports/`, `devlog/entries/` per `skills/march.md` §3), no run will appear, so the grace buys nothing.
+- proposed scope: one `/iterate` tick. In `scripts/deploy-check.mjs`, before polling, list HEAD's changed paths and exit 0 with the same "Nothing to check" line when all are plan-only; keep the grace for every other HEAD (a merge commit diffs against its first parent). A unit test for the path test.
+- estimated phases: 1
+- conflicts: none. Creates no content.
+
 ### [ ] [score 5.0] The combat board reads once, in order, to a screen reader: a walk test over the dock, the intent and the hand, and fixes for what it finds
 - proposed: 2026-10-14, expand pass 34
 - source signals:
