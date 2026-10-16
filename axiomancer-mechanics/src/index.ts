@@ -283,6 +283,15 @@ export type {
     HazardPuzzleStat, HazardPuzzleUnlock, HazardPuzzleUnlockGrant,
     HazardPuzzleValidation,
 } from './World/Hazard';
+// Hazard puzzle solver and band check.
+export {
+    HAZARD_PUZZLE_TUNING, HAZARD_PUZZLE_BANDS, HAZARD_PUZZLE_SOLVER_BUDGET,
+    solveHazardPuzzle, solveHazardPuzzleSession, hazardPuzzleSurplus,
+    hazardPuzzleBandOf, auditHazardPuzzleRoute, auditHazardPuzzleLayout,
+} from './World/Hazard';
+export type {
+    HazardPuzzleSolution, HazardPuzzleSolveOptions, HazardPuzzleRouteAudit,
+} from './World/Hazard';
 
 // Blacksmith encounter ("The Anvil" — die-gear upgrades: HONE / TEMPER /
 // gear swap).
