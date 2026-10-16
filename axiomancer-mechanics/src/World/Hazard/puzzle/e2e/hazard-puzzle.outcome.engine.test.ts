@@ -70,6 +70,13 @@ describe('hazardPuzzleOutcome (A11)', () => {
         }
     }
 
+    it('rounds an exact half up even when value / goal leaves float noise', () => {
+        // 12 × (1 − 23/24) is 0.5, but in floats 0.49999999999999956.
+        expect(outcome('risk', 23 / 24).vitaeLoss).toBe(1);
+        // 6 × (1 − 5/12) is 3.5, but in floats 3.4999999999999996.
+        expect(outcome('safe', 5 / 12).vitaeLoss).toBe(4);
+    });
+
     it('XP is 10 per level, +50% on a full completion', () => {
         expect(outcome('safe', 0.3, 4).xp).toBe(40);
         expect(outcome('risk', 1, 4).xp).toBe(60);

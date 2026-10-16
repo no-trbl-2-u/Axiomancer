@@ -80,7 +80,11 @@ export function hazardPuzzleOutcome(ctx: HazardPuzzleOutcomeContext): HazardPuzz
     if (material) items.push(material);
 
     const shillings = completed ? HAZARD_PUZZLE_REWARDS.purse[ctx.route] : 0;
-    const vitaeLoss = completed ? 0 : Math.round(HAZARD_PUZZLE_FAILURE.maxVitaeLoss[ctx.route] * (1 - p));
+    // Trim float noise before rounding: p is value / goal, so 1 − p is often a
+    // hair under an exact half (12 × (1 − 23/24) = 0.49999999999999956), which
+    // would round down where round(max × (1 − p)) means up.
+    const shortfall = Number((HAZARD_PUZZLE_FAILURE.maxVitaeLoss[ctx.route] * (1 - p)).toFixed(9));
+    const vitaeLoss = completed ? 0 : Math.round(shortfall);
     const scar = p < HAZARD_PUZZLE_FAILURE.scarBelow ? HAZARD_PUZZLE_FAILURE.scar : 0;
 
     return { route: ctx.route, p, completed, xp, items, shillings, vitaeLoss, scar };
