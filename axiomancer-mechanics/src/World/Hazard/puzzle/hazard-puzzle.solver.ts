@@ -33,6 +33,7 @@ import type {
     HazardPuzzleMove,
     HazardPuzzleResult,
     HazardPuzzleSession,
+    HazardPuzzleUnlock,
 } from './hazard-puzzle.types';
 
 export interface HazardPuzzleSolveOptions {
@@ -187,11 +188,16 @@ export function solveHazardPuzzleSession(
     };
 }
 
-/** Solves a layout on one route from its opening board. */
+/**
+ * Solves a layout on one route from its opening board, with `unlocks`
+ * granted at session start (none by default). The winning line replays on
+ * a session created with the same unlocks.
+ */
 export function solveHazardPuzzle(
     layout: HazardPuzzleLayout,
     route: HazardRouteKey,
+    unlocks: readonly HazardPuzzleUnlock[] = [],
     options: HazardPuzzleSolveOptions = {},
 ): HazardPuzzleSolution {
-    return solveHazardPuzzleSession(createHazardPuzzleSession(layout, route), options);
+    return solveHazardPuzzleSession(createHazardPuzzleSession(layout, route, unlocks), options);
 }

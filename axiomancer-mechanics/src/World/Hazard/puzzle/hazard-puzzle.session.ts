@@ -28,27 +28,40 @@ import type {
     HazardPuzzleMove,
     HazardPuzzleResult,
     HazardPuzzleSession,
+    HazardPuzzleUnlock,
 } from './hazard-puzzle.types';
+import { applyHazardPuzzleUnlocks, hazardPuzzleDeclaresUnlocks } from './hazard-puzzle.unlocks';
 import { validateHazardPuzzleLayout } from './hazard-puzzle.validate';
 
 /** The puzzle board's draw refill bag: empty, so a draw never shuffles. */
 const NO_REFILL: readonly string[] = [];
 
 /**
- * Builds a fresh session on `route`. Hand cards get uids `c1…cN` in hand
- * order and dice `d<N+1>…` in layout order. Throws on an invalid layout.
+ * Builds a fresh session on `route`, with `unlocks` granted once (pick them
+ * with `activeHazardPuzzleUnlocks` from the player's base stats). Hand cards
+ * get uids `c1…cN` in hand order, an unlocked card last, and dice `d<N+1>…`
+ * in layout order, an unlocked die last. Throws on an invalid layout or an
+ * unlock the layout does not declare.
  */
-export function createHazardPuzzleSession(layout: HazardPuzzleLayout, route: HazardRouteKey): HazardPuzzleSession {
+export function createHazardPuzzleSession(
+    layout: HazardPuzzleLayout,
+    route: HazardRouteKey,
+    unlocks: readonly HazardPuzzleUnlock[] = [],
+): HazardPuzzleSession {
     const check = validateHazardPuzzleLayout(layout);
     if (!check.ok) {
         throw new Error(`Invalid hazard puzzle "${layout.id}": ${check.reasons.join('; ')}`);
     }
+    if (!hazardPuzzleDeclaresUnlocks(layout, unlocks)) {
+        throw new Error(`Hazard puzzle "${layout.id}": an unlock was passed that the layout does not declare`);
+    }
+    const granted = applyHazardPuzzleUnlocks(layout, unlocks);
     let uid = 0;
-    const hand = layout.hand.map((cardId) => {
+    const hand = granted.hand.map((cardId) => {
         uid += 1;
         return { uid: `c${uid}`, cardId, dieId: null };
     });
-    const dice = layout.dice.map((kind) => {
+    const dice = granted.dice.map((kind) => {
         uid += 1;
         return { id: `d${uid}`, kind, state: 'available' as const };
     });

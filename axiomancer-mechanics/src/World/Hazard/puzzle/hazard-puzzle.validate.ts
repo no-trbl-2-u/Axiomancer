@@ -46,6 +46,9 @@ export function validateHazardPuzzleLayout(layout: HazardPuzzleLayout): HazardPu
     layout.hand.forEach((id, i) => checkCard(id, `hand[${i}]`, reasons));
     layout.reserve.forEach((id, i) => checkCard(id, `reserve[${i}]`, reasons));
     layout.unlocks.forEach((u, i) => {
+        if (!Number.isInteger(u.min) || u.min < 0) {
+            reasons.push(`unlocks[${i}]: min ${u.min} is not a whole number of at least 0`);
+        }
         if (u.kind === 'extraCard') checkCard(u.cardId, `unlocks[${i}]`, reasons);
     });
     if (!isPositiveInt(layout.goals.safe)) {

@@ -126,7 +126,7 @@ describe('the solver budget', () => {
     });
 
     it('stops at the budget and says the count is partial', () => {
-        const solution = solveHazardPuzzle(MIXED_LAYOUT, 'safe', { budget: 50 });
+        const solution = solveHazardPuzzle(MIXED_LAYOUT, 'safe', [], { budget: 50 });
         expect(solution.overBudget).toBe(true);
         expect(solution.boardsExplored).toBe(50);
         const audit = auditHazardPuzzleRoute(MIXED_LAYOUT, 'safe', { budget: 50 });
